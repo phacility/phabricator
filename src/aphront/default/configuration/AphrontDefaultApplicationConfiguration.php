@@ -1,0 +1,100 @@
+<?php
+
+/*
+ * Copyright 2011 Facebook, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @group aphront
+ */
+class AphrontDefaultApplicationConfiguration
+  extends AphrontApplicationConfiguration {
+
+  public function getApplicationName() {
+    return 'aphront-default';
+  }
+
+  public function getURIMap() {
+    return array(
+      '/repository/' => array(
+        '$'                     => 'RepositoryListController',
+        'new/$'                 => 'RepositoryEditController',
+        'edit/(?<id>\d+)/$'     => 'RepositoryEditController',
+        'delete/(?<id>\d+)/$'   => 'RepositoryDeleteController',
+      ),
+      '/' => array(
+        '$'                     => 'AphrontDirectoryMainController',
+      ),
+      '/directory/' => array(
+        'item/$'                      => 'AphrontDirectoryItemListController',
+        'item/edit/(?:(?<id>\d+)/)?$' => 'AphrontDirectoryItemEditController',
+        'item/delete/(?<id>\d+)/'     => 'AphrontDirectoryItemDeleteController',
+        'category/$'
+          => 'AphrontDirectoryCategoryListController',
+        'category/edit/(?:(?<id>\d+)/)?$'
+          => 'AphrontDirectoryCategoryEditController',
+        'category/delete/(?<id>\d+)/'
+          => 'AphrontDirectoryCategoryDeleteController',
+      ),
+      '.*' => 'AphrontDefaultApplicationController',
+    );
+  }
+
+  public function buildRequest() {
+    $request = new AphrontRequest($this->getHost(), $this->getPath());
+    $request->setRequestData($_GET + $_POST);
+    return $request;
+  }
+
+  public function handleException(Exception $ex) {
+
+    $class    = phutil_escape_html(get_class($ex));
+    $message  = phutil_escape_html($ex->getMessage());
+
+    $content =
+      '<div class="aphront-unhandled-exception">'.
+        '<h1>Unhandled Exception "'.$class.'": '.$message.'</h1>'.
+        '<code>'.phutil_escape_html((string)$ex).'</code>'.
+      '</div>';
+
+    $view = new AphrontStandardPageView();
+    $view->appendChild($content);
+
+    $response = new AphrontWebpageResponse();
+    $response->setContent($view->render());
+
+    return $response;
+  }
+
+  public function willSendResponse(AphrontResponse $response) {
+    $request = $this->getRequest();
+    if ($response instanceof AphrontDialogResponse) {
+      if (!$request->isAjax()) {
+        $view = new AphrontStandardPageView();
+        $view->appendChild(
+          '<div style="padding: 2em 0;">'.
+            $response->buildResponseString().
+          '</div>');
+        $response = new AphrontWebpageResponse();
+        $response->setContent($view->render());
+        return $response;
+      }
+    }
+
+    return $response;
+  }
+
+
+}
