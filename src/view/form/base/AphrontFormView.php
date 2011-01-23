@@ -22,6 +22,7 @@ final class AphrontFormView extends AphrontView {
   private $method = 'POST';
   private $header;
   private $data = array();
+  private $encType;
 
   public function setAction($action) {
     $this->action = $action;
@@ -33,13 +34,19 @@ final class AphrontFormView extends AphrontView {
     return $this;
   }
 
+  public function setEncType($enc_type) {
+    $this->encType = $enc_type;
+    return $this;
+  }
+
   public function render() {
     return phutil_render_tag(
       'form',
       array(
-        'action' => $this->action,
-        'method' => $this->method,
-        'class'  => 'aphront-form-view',
+        'action'  => $this->action,
+        'method'  => $this->method,
+        'class'   => 'aphront-form-view',
+        'enctype' => $this->encType,
       ),
       $this->renderDataInputs().
       $this->renderChildren());

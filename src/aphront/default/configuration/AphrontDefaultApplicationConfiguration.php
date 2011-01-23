@@ -51,6 +51,13 @@ class AphrontDefaultApplicationConfiguration
         'category/delete/(?<id>\d+)/'
           => 'PhabricatorDirectoryCategoryDeleteController',
       ),
+      '/file/' => array(
+        '$' => 'PhabricatorFileListController',
+        'upload/$' => 'PhabricatorFileUploadController',
+        '(?<view>info)/(?<phid>[^/]+)/' => 'PhabricatorFileViewController',
+        '(?<view>view)/(?<phid>[^/]+)/' => 'PhabricatorFileViewController',
+        '(?<view>download)/(?<phid>[^/]+)/' => 'PhabricatorFileViewController',
+      ),
       '/phid/' => array(
         '$' => 'PhabricatorPHIDListController',
         'type/$' => 'PhabricatorPHIDTypeListController',

@@ -36,14 +36,17 @@ class AphrontFormSubmitControl extends AphrontFormControl {
   }
 
   protected function renderInput() {
-    return phutil_render_tag(
-      'button',
-      array(
-        'name'      => '__submit__',
-        'disabled'  => $this->getDisabled() ? 'disabled' : null,
-      ),
-      phutil_escape_html($this->getValue())).
-      $this->cancelButton;
+    $submit_button = null;
+    if ($this->getValue()) {
+      $submit_button = phutil_render_tag(
+        'button',
+        array(
+          'name'      => '__submit__',
+          'disabled'  => $this->getDisabled() ? 'disabled' : null,
+        ),
+        phutil_escape_html($this->getValue()));
+    }
+    return $submit_button.$this->cancelButton;
   }
 
 }

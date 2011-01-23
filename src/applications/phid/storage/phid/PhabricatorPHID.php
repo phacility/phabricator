@@ -35,13 +35,14 @@ class PhabricatorPHID extends PhabricatorPHIDDAO {
     if (!$urandom) {
       throw new Exception("Failed to open /dev/urandom!");
     }
-    $entropy = fread($urandom, 16);
-    if (strlen($entropy) != 16) {
+    $entropy = fread($urandom, 20);
+    if (strlen($entropy) != 20) {
       throw new Exception("Failed to read from /dev/urandom!");
     }
 
     $uniq = sha1($entropy);
-    $phid = 'PHID-'.$type.'-X-'.$uniq;
+    $uniq = substr($uniq, 0, 20);
+    $phid = 'PHID-'.$type.'-'.$uniq;
 
     $phid_rec = new PhabricatorPHID();
     $phid_rec->setPHIDType($type);
