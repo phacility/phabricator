@@ -16,23 +16,9 @@
  * limitations under the License.
  */
 
-/**
- * @group aphront
- */
-class AphrontDefaultApplicationController extends AphrontController {
+class PhabricatorDirectoryCategory extends PhabricatorDirectoryDAO {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-
-    $path = phutil_escape_html($request->getPath());
-    $host = phutil_escape_html($request->getHost());
-    $controller_name = phutil_escape_html(get_class($this));
-
-    $page = new PhabricatorStandardPageView();
-
-    $response = new AphrontWebpageResponse();
-    $response->setContent($page->render());
-    return $response;
-  }
+  protected $name;
+  protected $sequence;
 
 }

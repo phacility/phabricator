@@ -17,7 +17,7 @@
  */
 
 
-abstract class AphrontLiskDAO extends LiskDAO {
+abstract class PhabricatorLiskDAO extends LiskDAO {
 
   public function establishConnection($mode) {
     return new AphrontMySQLDatabaseConnection(
@@ -25,15 +25,18 @@ abstract class AphrontLiskDAO extends LiskDAO {
         'user'      => 'root',
         'pass'      => '',
         'host'      => 'localhost',
-        'database'  => 'aphront_'.$this->getApplicationName(),
+        'database'  => 'phabricator_'.$this->getApplicationName(),
       ));
 
   }
 
   public function getTableName() {
+    $str = 'phabricator';
+    $len = strlen($str);
+
     $class = strtolower(get_class($this));
-    if (!strncmp($class, 'aphront', 7)) {
-      $class = substr($class, 7);
+    if (!strncmp($class, $str, $len)) {
+      $class = substr($class, $len);
     }
     $app = $this->getApplicationName();
     if (!strncmp($class, $app, strlen($app))) {

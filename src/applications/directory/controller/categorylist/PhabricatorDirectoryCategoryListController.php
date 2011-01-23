@@ -16,30 +16,27 @@
  * limitations under the License.
  */
 
-class AphrontDirectoryItemListController extends AphrontDirectoryController {
+class PhabricatorDirectoryCategoryListController
+  extends PhabricatorDirectoryController {
 
   public function processRequest() {
-    $items = id(new AphrontDirectoryItem())->loadAll();
-    $items = msort($items, 'getSortKey');
-
-    $categories = id(new AphrontDirectoryCategory())->loadAll();
-    $category_names = mpull($categories, 'getName', 'getID');
+    $categories = id(new PhabricatorDirectoryCategory())->loadAll();
+    $categories = msort($categories, 'getSequence');
 
     $rows = array();
-    foreach ($items as $item) {
+    foreach ($categories as $category) {
       $rows[] = array(
-        $item->getID(),
-        phutil_escape_html(idx($category_names, $item->getCategoryID())),
+        $category->getID(),
         phutil_render_tag(
           'a',
           array(
-            'href' => '/directory/item/edit/'.$item->getID().'/',
+            'href' => '/directory/category/edit/'.$category->getID().'/',
           ),
-          phutil_escape_html($item->getName())),
+          phutil_escape_html($category->getName())),
         phutil_render_tag(
           'a',
           array(
-            'href' => '/directory/item/delete/'.$item->getID().'/',
+            'href' => '/directory/category/delete/'.$category->getID().'/',
             'class' => 'button grey small',
           ),
           'Delete'),
@@ -51,13 +48,11 @@ class AphrontDirectoryItemListController extends AphrontDirectoryController {
     $table->setHeaders(
       array(
         'ID',
-        'Category',
         'Name',
         '',
       ));
     $table->setColumnClasses(
       array(
-        null,
         null,
         'wide',
         'action',
@@ -65,12 +60,12 @@ class AphrontDirectoryItemListController extends AphrontDirectoryController {
 
     $panel = new AphrontPanelView();
     $panel->appendChild($table);
-    $panel->setHeader('Directory Items');
-    $panel->setCreateButton('New Item', '/directory/item/edit/');
+    $panel->setHeader('Directory Categories');
+    $panel->setCreateButton('New Category', '/directory/category/edit/');
 
     return $this->buildStandardPageResponse($panel, array(
-      'title' => 'Directory Items',
-      'tab'   => 'items',
+      'title' => 'Directory Category List',
+      'tab'   => 'categories',
       ));
   }
 

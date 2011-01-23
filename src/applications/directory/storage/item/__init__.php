@@ -9,4 +9,4 @@
 phutil_require_module('phabricator', 'applications/directory/storage/base');
 
 
-phutil_require_source('AphrontDirectoryItem.php');
+phutil_require_source('PhabricatorDirectoryItem.php');

@@ -69,7 +69,7 @@ class AphrontDefaultApplicationConfiguration
         '<code>'.phutil_escape_html((string)$ex).'</code>'.
       '</div>';
 
-    $view = new AphrontStandardPageView();
+    $view = new PhabricatorStandardPageView();
     $view->appendChild($content);
 
     $response = new AphrontWebpageResponse();
@@ -82,7 +82,7 @@ class AphrontDefaultApplicationConfiguration
     $request = $this->getRequest();
     if ($response instanceof AphrontDialogResponse) {
       if (!$request->isAjax()) {
-        $view = new AphrontStandardPageView();
+        $view = new PhabricatorStandardPageView();
         $view->appendChild(
           '<div style="padding: 2em 0;">'.
             $response->buildResponseString().

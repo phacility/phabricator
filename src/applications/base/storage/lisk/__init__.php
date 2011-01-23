@@ -10,4 +10,4 @@ phutil_require_module('phabricator', 'storage/connection/mysql');
 phutil_require_module('phabricator', 'storage/lisk/dao');
 
 
-phutil_require_source('AphrontLiskDAO.php');
+phutil_require_source('PhabricatorLiskDAO.php');

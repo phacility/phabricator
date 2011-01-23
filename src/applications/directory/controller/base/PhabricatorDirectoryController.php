@@ -16,10 +16,10 @@
  * limitations under the License.
  */
 
-abstract class AphrontDirectoryController extends AphrontController {
+abstract class PhabricatorDirectoryController extends PhabricatorController {
 
   public function buildStandardPageResponse($view, array $data) {
-    $page = new AphrontStandardPageView();
+    $page = new PhabricatorStandardPageView();
 
     $page->setApplicationName('Directory');
     $page->setBaseURI('/');

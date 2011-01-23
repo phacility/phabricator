@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-class AphrontDirectoryCategoryDeleteController
-  extends AphrontDirectoryController {
+class PhabricatorDirectoryItemDeleteController
+  extends PhabricatorDirectoryController {
 
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
@@ -25,24 +25,24 @@ class AphrontDirectoryCategoryDeleteController
 
   public function processRequest() {
 
-    $category = id(new AphrontDirectoryCategory())->load($this->id);
-    if (!$category) {
+    $item = id(new PhabricatorDirectoryItem())->load($this->id);
+    if (!$item) {
       return new Aphront404Response();
     }
 
     $request = $this->getRequest();
 
     if ($request->isFormPost()) {
-      $category->delete();
+      $item->delete();
       return id(new AphrontRedirectResponse())
-        ->setURI('/directory/category/');
+        ->setURI('/directory/item/');
     }
 
     $dialog = new AphrontDialogView();
-    $dialog->setTitle('Really delete this category?');
-    $dialog->appendChild("Are you sure you want to delete this category?");
+    $dialog->setTitle('Really delete this item?');
+    $dialog->appendChild("Are you sure you want to delete this item?");
     $dialog->addSubmitButton('Delete');
-    $dialog->addCancelButton('/directory/category/');
+    $dialog->addCancelButton('/directory/item/');
     $dialog->setSubmitURI($request->getPath());
 
     return id(new AphrontDialogResponse())->setDialog($dialog);

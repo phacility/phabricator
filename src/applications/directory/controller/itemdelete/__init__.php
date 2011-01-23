@@ -16,4 +16,4 @@ phutil_require_module('phabricator', 'view/dialog');
 phutil_require_module('phutil', 'utils');
 
 
-phutil_require_source('AphrontDirectoryItemDeleteController.php');
+phutil_require_source('PhabricatorDirectoryItemDeleteController.php');

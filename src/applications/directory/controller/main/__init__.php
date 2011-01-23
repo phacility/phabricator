@@ -14,4 +14,4 @@ phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
 
 
-phutil_require_source('AphrontDirectoryMainController.php');
+phutil_require_source('PhabricatorDirectoryMainController.php');

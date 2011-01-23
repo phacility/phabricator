@@ -18,4 +18,4 @@ phutil_require_module('phabricator', 'view/layout/panel');
 phutil_require_module('phutil', 'utils');
 
 
-phutil_require_source('AphrontDirectoryCategoryEditController.php');
+phutil_require_source('PhabricatorDirectoryCategoryEditController.php');

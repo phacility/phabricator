@@ -37,12 +37,4 @@ abstract class AphrontController {
     return $this->request;
   }
 
-  public function buildStandardPageResponse($view) {
-    $page = new AphrontStandardPageView();
-    $page->appendChild($view);
-    $response = new AphrontWebpageResponse();
-    $response->setContent($page->render());
-    return $response;
-  }
-
 }

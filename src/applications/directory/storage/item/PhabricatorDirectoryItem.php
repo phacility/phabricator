@@ -16,9 +16,21 @@
  * limitations under the License.
  */
 
-class AphrontDirectoryCategory extends AphrontDirectoryDAO {
+class PhabricatorDirectoryItem extends PhabricatorDirectoryDAO {
 
   protected $name;
+  protected $description;
+  protected $href;
+  protected $categoryID;
   protected $sequence;
+  protected $imageGUID;
+
+  public function getSortKey() {
+    return sprintf(
+      '%08d:%08d:%s',
+      $this->getCategoryID(),
+      $this->getSequence(),
+      $this->getName());
+  }
 
 }

@@ -16,10 +16,14 @@
  * limitations under the License.
  */
 
-abstract class AphrontDirectoryDAO extends AphrontLiskDAO {
+abstract class PhabricatorController extends AphrontController {
 
-  public function getApplicationName() {
-    return 'directory';
+  public function buildStandardPageResponse($view) {
+    $page = new PhabricatorStandardPageView();
+    $page->appendChild($view);
+    $response = new AphrontWebpageResponse();
+    $response->setContent($page->render());
+    return $response;
   }
 
 }

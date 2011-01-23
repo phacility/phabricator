@@ -12,4 +12,4 @@ phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
 
 
-phutil_require_source('AphrontStandardPageView.php');
+phutil_require_source('PhabricatorStandardPageView.php');

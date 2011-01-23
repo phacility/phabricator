@@ -16,13 +16,14 @@
  * limitations under the License.
  */
 
-class AphrontDirectoryMainController extends AphrontDirectoryController {
+class PhabricatorDirectoryMainController
+  extends PhabricatorDirectoryController {
 
   public function processRequest() {
-    $items = id(new AphrontDirectoryItem())->loadAll();
+    $items = id(new PhabricatorDirectoryItem())->loadAll();
     $items = msort($items, 'getSortKey');
 
-    $categories = id(new AphrontDirectoryCategory())->loadAll();
+    $categories = id(new PhabricatorDirectoryCategory())->loadAll();
     $categories = msort($categories, 'getSequence');
 
     $category_map = mpull($categories, 'getName', 'getID');

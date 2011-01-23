@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-class AphrontDirectoryCategoryEditController
-  extends AphrontDirectoryController {
+class PhabricatorDirectoryCategoryEditController
+  extends PhabricatorDirectoryController {
 
   private $id;
 
@@ -28,12 +28,12 @@ class AphrontDirectoryCategoryEditController
   public function processRequest() {
 
     if ($this->id) {
-      $category = id(new AphrontDirectoryCategory())->load($this->id);
+      $category = id(new PhabricatorDirectoryCategory())->load($this->id);
       if (!$category) {
         return new Aphront404Response();
       }
     } else {
-      $category = new AphrontDirectoryCategory();
+      $category = new PhabricatorDirectoryCategory();
     }
 
     $e_name = true;
@@ -70,7 +70,7 @@ class AphrontDirectoryCategoryEditController
       $form->setAction('/directory/category/edit/');
     }
 
-    $categories = id(new AphrontDirectoryCategory())->loadAll();
+    $categories = id(new PhabricatorDirectoryCategory())->loadAll();
     $category_map = mpull($categories, 'getName', 'getID');
 
     $form
