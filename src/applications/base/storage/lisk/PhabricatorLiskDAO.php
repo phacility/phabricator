@@ -42,7 +42,12 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
     if (!strncmp($class, $app, strlen($app))) {
       $class = substr($class, strlen($app));
     }
-    return $app.'_'.$class;
+
+    if (strlen($class)) {
+      return $app.'_'.$class;
+    } else {
+      return $app;
+    }
   }
 
   abstract public function getApplicationName();

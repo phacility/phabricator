@@ -26,9 +26,10 @@ class AphrontFormTextControl extends AphrontFormControl {
     return phutil_render_tag(
       'input',
       array(
-        'type'    => 'text',
-        'name'    => $this->getName(),
-        'value'   => $this->getValue(),
+        'type'      => 'text',
+        'name'      => $this->getName(),
+        'value'     => $this->getValue(),
+        'disabled'  => $this->getDisabled() ? 'disabled' : null,
       ));
   }
 

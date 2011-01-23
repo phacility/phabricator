@@ -39,7 +39,8 @@ class AphrontFormSubmitControl extends AphrontFormControl {
     return phutil_render_tag(
       'button',
       array(
-        'name' => '__submit__',
+        'name'      => '__submit__',
+        'disabled'  => $this->getDisabled() ? 'disabled' : null,
       ),
       phutil_escape_html($this->getValue())).
       $this->cancelButton;

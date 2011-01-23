@@ -35,18 +35,27 @@ class AphrontDefaultApplicationConfiguration
         'delete/(?<id>\d+)/$'   => 'RepositoryDeleteController',
       ),
       '/' => array(
-        '$'                     => 'AphrontDirectoryMainController',
+        '$'                     => 'PhabricatorDirectoryMainController',
       ),
       '/directory/' => array(
-        'item/$'                      => 'AphrontDirectoryItemListController',
-        'item/edit/(?:(?<id>\d+)/)?$' => 'AphrontDirectoryItemEditController',
-        'item/delete/(?<id>\d+)/'     => 'AphrontDirectoryItemDeleteController',
+        'item/$'
+          => 'PhabricatorDirectoryItemListController',
+        'item/edit/(?:(?<id>\d+)/)?$'
+          => 'PhabricatorDirectoryItemEditController',
+        'item/delete/(?<id>\d+)/'
+          => 'PhabricatorDirectoryItemDeleteController',
         'category/$'
-          => 'AphrontDirectoryCategoryListController',
+          => 'PhabricatorDirectoryCategoryListController',
         'category/edit/(?:(?<id>\d+)/)?$'
-          => 'AphrontDirectoryCategoryEditController',
+          => 'PhabricatorDirectoryCategoryEditController',
         'category/delete/(?<id>\d+)/'
-          => 'AphrontDirectoryCategoryDeleteController',
+          => 'PhabricatorDirectoryCategoryDeleteController',
+      ),
+      '/phid/' => array(
+        '$' => 'PhabricatorPHIDListController',
+        'type/$' => 'PhabricatorPHIDTypeListController',
+        'type/edit/(?:(?<id>\d+)/)?$' => 'PhabricatorPHIDTypeEditController',
+        'new/$' => 'PhabricatorPHIDAllocateController',
       ),
       '.*' => 'AphrontDefaultApplicationController',
     );

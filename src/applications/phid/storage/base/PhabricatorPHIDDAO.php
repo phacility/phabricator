@@ -16,20 +16,10 @@
  * limitations under the License.
  */
 
-class AphrontFormTextAreaControl extends AphrontFormControl {
+class PhabricatorPHIDDAO extends PhabricatorLiskDAO {
 
-  protected function getCustomControlClass() {
-    return 'aphront-form-control-textarea';
-  }
-
-  protected function renderInput() {
-    return phutil_render_tag(
-      'textarea',
-      array(
-        'name'      => $this->getName(),
-        'disabled'  => $this->getDisabled() ? 'disabled' : null,
-      ),
-      phutil_escape_html($this->getValue()));
+  public function getApplicationName() {
+    return 'phid';
   }
 
 }

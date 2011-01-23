@@ -476,6 +476,8 @@ a.small:visited {
   clear: both;
   margin-right: 25%;
   margin-left: 15%;
+  margin-top: 3px;
+  margin-bottom: 6px;
 }
 
 .aphront-error-view {

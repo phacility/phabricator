@@ -23,7 +23,7 @@ class PhabricatorDirectoryItem extends PhabricatorDirectoryDAO {
   protected $href;
   protected $categoryID;
   protected $sequence;
-  protected $imageGUID;
+  protected $imagePHID;
 
   public function getSortKey() {
     return sprintf(

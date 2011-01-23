@@ -32,4 +32,10 @@ class AphrontWebpageResponse extends AphrontResponse {
     return $this->content;
   }
 
+  public function getHeaders() {
+    return array(
+      array('Content-Type', 'text/html; charset=UTF-8'),
+    );
+  }
+
 }

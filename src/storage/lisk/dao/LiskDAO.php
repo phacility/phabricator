@@ -148,7 +148,7 @@ abstract class LiskDAO {
   const CONFIG_OPTIMISTIC_LOCKS     = 'enable-locks';
   const CONFIG_IDS                  = 'id-mechanism';
   const CONFIG_TIMESTAMPS           = 'timestamps';
-  const CONFIG_AUX_GUID             = 'auxiliary-guid';
+  const CONFIG_AUX_PHID             = 'auxiliary-phid';
   const CONFIG_SERIALIZATION        = 'col-serialization';
 
   const SERIALIZATION_NONE          = 'id';
@@ -156,7 +156,7 @@ abstract class LiskDAO {
   const SERIALIZATION_PHP           = 'php';
 
   const IDS_AUTOINCREMENT           = 'ids-auto';
-  const IDS_GUID                    = 'ids-guid';
+  const IDS_PHID                    = 'ids-phid';
   const IDS_MANUAL                  = 'ids-manual';
 
   /**
@@ -208,8 +208,8 @@ abstract class LiskDAO {
    * CONFIG_IDS
    * Lisk objects need to have a unique identifying ID. The three mechanisms
    * available for generating this ID are IDS_AUTOINCREMENT (default, assumes
-   * the ID column is an autoincrement primary key), IDS_GUID (to generate a
-   * unique GUID for each object) or IDS_MANUAL (you are taking full
+   * the ID column is an autoincrement primary key), IDS_PHID (to generate a
+   * unique PHID for each object) or IDS_MANUAL (you are taking full
    * responsibility for ID management).
    *
    * CONFIG_TIMESTAMPS
@@ -218,12 +218,12 @@ abstract class LiskDAO {
    * an object. If you don't want to do this, you may disable this option.
    * By default, this option is ON.
    *
-   * CONFIG_AUX_GUID
+   * CONFIG_AUX_PHID
    * This option can be enabled by being set to some truthy value. The meaning
-   * of this value is defined by your guid generation mechanism. If this option
-   * is enabled, a `guid' property will be populated with a unique GUID when an
+   * of this value is defined by your PHID generation mechanism. If this option
+   * is enabled, a `phid' property will be populated with a unique PHID when an
    * object is created (or if it is saved and does not currently have one). You
-   * need to override generateGUID() and hook it into your GUID generation
+   * need to override generatePHID() and hook it into your PHID generation
    * mechanism for this to work. By default, this option is OFF.
    *
    * CONFIG_SERIALIZATION
@@ -554,9 +554,9 @@ abstract class LiskDAO {
         $properties['datemodified'] = 'dateModified';
       }
 
-      if (!$this->isGUIDPrimaryID() &&
-          $this->getConfigOption(self::CONFIG_AUX_GUID)) {
-        $properties['guid'] = 'guid';
+      if (!$this->isPHIDPrimaryID() &&
+          $this->getConfigOption(self::CONFIG_AUX_PHID)) {
+        $properties['phid'] = 'phid';
       }
     }
     return $properties;
@@ -792,11 +792,11 @@ abstract class LiskDAO {
       case self::IDS_AUTOINCREMENT:
         unset($data[$this->getIDKeyForUse()]);
         break;
-      case self::IDS_GUID:
+      case self::IDS_PHID:
         if (empty($data[$this->getIDKeyForUse()])) {
-          $guid = $this->generateGUID();
-          $this->setID($guid);
-          $data[$this->getIDKeyForUse()] = $guid;
+          $phid = $this->generatePHID();
+          $this->setID($phid);
+          $data[$this->getIDKeyForUse()] = $phid;
         }
         break;
       case self::IDS_MANUAL:
@@ -888,11 +888,11 @@ abstract class LiskDAO {
 
 
   /**
-   * Helper: Whether this class is configured to use GUIDs as the primary ID.
+   * Helper: Whether this class is configured to use PHIDs as the primary ID.
    * @task internal
    */
-  private function isGUIDPrimaryID() {
-    return ($this->getConfigOption(self::CONFIG_IDS) === self::IDS_GUID);
+  private function isPHIDPrimaryID() {
+    return ($this->getConfigOption(self::CONFIG_IDS) === self::IDS_PHID);
   }
 
 
@@ -906,8 +906,8 @@ abstract class LiskDAO {
    */
   public function getIDKey() {
     return
-      $this->isGUIDPrimaryID() ?
-      'guid' :
+      $this->isPHIDPrimaryID() ?
+      'phid' :
       'id';
   }
 
@@ -924,16 +924,16 @@ abstract class LiskDAO {
 
 
   /**
-   * Generate a new GUID, used by CONFIG_AUX_GUID and IDS_GUID.
+   * Generate a new PHID, used by CONFIG_AUX_PHID and IDS_PHID.
    *
-   * @return guid    Unique, newly allocated GUID.
+   * @return phid    Unique, newly allocated PHID.
    *
    * @task   hook
    */
-  protected function generateGUID() {
+  protected function generatePHID() {
     throw new Exception(
-      "To use CONFIG_AUX_GUID or IDS_GUID, you need to overload ".
-      "generateGUID() to perform GUID generation.");
+      "To use CONFIG_AUX_PHID or IDS_PHID, you need to overload ".
+      "generatePHID() to perform PHID generation.");
   }
 
 
@@ -987,14 +987,14 @@ abstract class LiskDAO {
       $this->setDateModified(time());
     }
 
-    if (($this->isGUIDPrimaryID() && !$this->getID())) {
-      // If GUIDs are the primary ID, the subclass could have overridden the
+    if (($this->isPHIDPrimaryID() && !$this->getID())) {
+      // If PHIDs are the primary ID, the subclass could have overridden the
       // name of the ID column.
-      $this->setID($this->generateGUID());
-    } else if ($this->getConfigOption(self::CONFIG_AUX_GUID) &&
-               !$this->getGUID()) {
-      // The subclass could still want GUIDs.
-      $this->setGUID($this->generateGUID());
+      $this->setID($this->generatePHID());
+    } else if ($this->getConfigOption(self::CONFIG_AUX_PHID) &&
+               !$this->getPHID()) {
+      // The subclass could still want PHIDs.
+      $this->setPHID($this->generatePHID());
     }
   }
 

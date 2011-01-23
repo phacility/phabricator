@@ -23,6 +23,7 @@ abstract class AphrontFormControl extends AphrontView {
   private $error;
   private $name;
   private $value;
+  private $disabled;
 
   public function setLabel($label) {
     $this->label = $label;
@@ -67,6 +68,15 @@ abstract class AphrontFormControl extends AphrontView {
 
   public function getValue() {
     return $this->value;
+  }
+
+  public function setDisabled($disabled) {
+    $this->disabled = $disabled;
+    return $this;
+  }
+
+  public function getDisabled() {
+    return $this->disabled;
   }
 
   abstract protected function renderInput();

@@ -48,7 +48,8 @@ class AphrontFormSelectControl extends AphrontFormControl {
     return phutil_render_tag(
       'select',
       array(
-        'name'    => $this->getName(),
+        'name'      => $this->getName(),
+        'disabled'  => $this->getDisabled() ? 'disabled' : null,
       ),
       implode("\n", $options));
   }
