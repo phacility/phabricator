@@ -6,12 +6,12 @@
 
 
 
-phutil_require_module('aphront', 'aphront/response/404');
-phutil_require_module('aphront', 'aphront/response/dialog');
-phutil_require_module('aphront', 'aphront/response/redirect');
-phutil_require_module('aphront', 'applications/directory/controller/base');
-phutil_require_module('aphront', 'applications/directory/storage/item');
-phutil_require_module('aphront', 'view/dialog');
+phutil_require_module('phabricator', 'aphront/response/404');
+phutil_require_module('phabricator', 'aphront/response/dialog');
+phutil_require_module('phabricator', 'aphront/response/redirect');
+phutil_require_module('phabricator', 'applications/directory/controller/base');
+phutil_require_module('phabricator', 'applications/directory/storage/item');
+phutil_require_module('phabricator', 'view/dialog');
 
 phutil_require_module('phutil', 'utils');
 

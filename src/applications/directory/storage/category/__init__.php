@@ -6,7 +6,7 @@
 
 
 
-phutil_require_module('aphront', 'applications/directory/storage/base');
+phutil_require_module('phabricator', 'applications/directory/storage/base');
 
 
 phutil_require_source('AphrontDirectoryCategory.php');

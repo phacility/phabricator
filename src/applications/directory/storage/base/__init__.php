@@ -6,7 +6,7 @@
 
 
 
-phutil_require_module('aphront', 'aphront/storage/lisk');
+phutil_require_module('phabricator', 'aphront/storage/lisk');
 
 
 phutil_require_source('AphrontDirectoryDAO.php');

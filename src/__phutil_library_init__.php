@@ -16,4 +16,4 @@
  * limitations under the License.
  */
 
-phutil_register_library('aphront', __FILE__);
+phutil_register_library('phabricator', __FILE__);

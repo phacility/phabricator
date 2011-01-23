@@ -6,9 +6,9 @@
 
 
 
-phutil_require_module('aphront', 'applications/directory/controller/base');
-phutil_require_module('aphront', 'applications/directory/storage/category');
-phutil_require_module('aphront', 'applications/directory/storage/item');
+phutil_require_module('phabricator', 'applications/directory/controller/base');
+phutil_require_module('phabricator', 'applications/directory/storage/category');
+phutil_require_module('phabricator', 'applications/directory/storage/item');
 
 phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');

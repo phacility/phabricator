@@ -6,7 +6,7 @@
 
 
 
-phutil_require_module('aphront', 'view/base');
+phutil_require_module('phabricator', 'view/base');
 
 phutil_require_module('phutil', 'markup');
 

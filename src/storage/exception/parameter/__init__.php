@@ -6,7 +6,7 @@
 
 
 
-phutil_require_module('aphront', 'storage/exception/base');
+phutil_require_module('phabricator', 'storage/exception/base');
 
 
 phutil_require_source('AphrontQueryParameterException.php');

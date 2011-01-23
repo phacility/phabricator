@@ -6,10 +6,10 @@
 
 
 
-phutil_require_module('aphront', 'aphront/applicationconfiguration');
-phutil_require_module('aphront', 'aphront/request');
-phutil_require_module('aphront', 'aphront/response/webpage');
-phutil_require_module('aphront', 'view/page/standard');
+phutil_require_module('phabricator', 'aphront/applicationconfiguration');
+phutil_require_module('phabricator', 'aphront/request');
+phutil_require_module('phabricator', 'aphront/response/webpage');
+phutil_require_module('phabricator', 'view/page/standard');
 
 phutil_require_module('phutil', 'markup');
 

@@ -1,10 +1,10 @@
 {
-  "project_id" : "aphront",
+  "project_id" : "phabricator",
   "conduit_uri" : "http://tools.epriestley-conduit.dev1557.facebook.com/api/",
   "lint_engine" : "PhutilLintEngine",
   "unit_engine" : "PhutilUnitTestEngine",
   "copyright_holder" : "Facebook, Inc.",
   "phutil_libraries" : {
-    "aphront" : "src/"
+    "phabricator" : "src/"
   }
 }

@@ -6,7 +6,7 @@
 
 
 
-phutil_require_module('aphront', 'aphront/response/base');
+phutil_require_module('phabricator', 'aphront/response/base');
 
 
 phutil_require_source('AphrontRedirectResponse.php');

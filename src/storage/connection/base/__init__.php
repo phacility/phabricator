@@ -6,7 +6,7 @@
 
 
 
-phutil_require_module('aphront', 'storage/queryfx');
+phutil_require_module('phabricator', 'storage/queryfx');
 
 
 phutil_require_source('AphrontDatabaseConnection.php');

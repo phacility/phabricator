@@ -6,9 +6,9 @@
 
 
 
-phutil_require_module('aphront', 'storage/exception/count');
-phutil_require_module('aphront', 'storage/exception/objectmissing');
-phutil_require_module('aphront', 'storage/qsprintf');
+phutil_require_module('phabricator', 'storage/exception/count');
+phutil_require_module('phabricator', 'storage/exception/objectmissing');
+phutil_require_module('phabricator', 'storage/qsprintf');
 
 phutil_require_module('phutil', 'utils');
 

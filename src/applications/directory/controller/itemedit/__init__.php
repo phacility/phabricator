@@ -6,15 +6,15 @@
 
 
 
-phutil_require_module('aphront', 'aphront/response/404');
-phutil_require_module('aphront', 'aphront/response/redirect');
-phutil_require_module('aphront', 'applications/directory/controller/base');
-phutil_require_module('aphront', 'applications/directory/storage/category');
-phutil_require_module('aphront', 'applications/directory/storage/item');
-phutil_require_module('aphront', 'view/form/base');
-phutil_require_module('aphront', 'view/form/control/submit');
-phutil_require_module('aphront', 'view/form/error');
-phutil_require_module('aphront', 'view/layout/panel');
+phutil_require_module('phabricator', 'aphront/response/404');
+phutil_require_module('phabricator', 'aphront/response/redirect');
+phutil_require_module('phabricator', 'applications/directory/controller/base');
+phutil_require_module('phabricator', 'applications/directory/storage/category');
+phutil_require_module('phabricator', 'applications/directory/storage/item');
+phutil_require_module('phabricator', 'view/form/base');
+phutil_require_module('phabricator', 'view/form/control/submit');
+phutil_require_module('phabricator', 'view/form/error');
+phutil_require_module('phabricator', 'view/layout/panel');
 
 phutil_require_module('phutil', 'utils');
 

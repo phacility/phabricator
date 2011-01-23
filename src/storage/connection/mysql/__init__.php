@@ -6,11 +6,11 @@
 
 
 
-phutil_require_module('aphront', 'storage/connection/base');
-phutil_require_module('aphront', 'storage/exception/base');
-phutil_require_module('aphront', 'storage/exception/connection');
-phutil_require_module('aphront', 'storage/exception/connectionlost');
-phutil_require_module('aphront', 'storage/exception/recoverable');
+phutil_require_module('phabricator', 'storage/connection/base');
+phutil_require_module('phabricator', 'storage/exception/base');
+phutil_require_module('phabricator', 'storage/exception/connection');
+phutil_require_module('phabricator', 'storage/exception/connectionlost');
+phutil_require_module('phabricator', 'storage/exception/recoverable');
 
 phutil_require_module('phutil', 'utils');
 

@@ -6,7 +6,7 @@
 
 
 
-phutil_require_module('aphront', 'storage/exception/parameter');
+phutil_require_module('phabricator', 'storage/exception/parameter');
 
 phutil_require_module('phutil', 'xsprintf');
 

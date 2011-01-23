@@ -88,7 +88,7 @@ class AphrontStandardPageView extends AphrontPageView {
     return
       '<div class="aphront-standard-page">'.
         '<div class="aphront-standard-header">'.
-          '<a href="/">Aphront</a> '.
+          '<a href="/">Phabricator</a> '.
           phutil_render_tag(
             'a',
             array(
