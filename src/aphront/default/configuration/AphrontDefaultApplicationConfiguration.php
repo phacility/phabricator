@@ -75,6 +75,11 @@ class AphrontDefaultApplicationConfiguration
         'log/$' => 'PhabricatorConduitLogController',
       ),
       '/api/(?<method>[^/]+)$' => 'PhabricatorConduitAPIController',
+
+      '/differential/' => array(
+        'diff/(?<id>\d+)/$' => 'DifferentialDiffViewController',
+      ),
+
       '.*' => 'AphrontDefaultApplicationController',
     );
   }

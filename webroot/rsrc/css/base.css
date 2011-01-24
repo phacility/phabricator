@@ -593,3 +593,46 @@ th.aphront-side-nav-navigation a.aphront-side-nav-selected:hover {
 }
 
   
+  
+/******************************************************************************/
+
+/* differential toc */
+
+/******************************************************************************/
+
+.differential-toc {
+  margin:       25px 0;
+  max-width:    1118px;
+  border:       1px solid #666622;
+  background:   #efefdf;
+  padding:      15px 20px;
+  font-size:    13px;
+}
+
+.differential-toc-meta {
+  color:        #666666;
+  padding-left: 1em;
+}
+
+.differential-toc-char,
+.differential-toc-prop {
+  width: 1.25em;
+  text-align: center;
+  font-weight: bold;
+}
+
+.differential-toc-ftype {
+  padding: 0 .5em;
+  text-align: center;
+  color: #666666;
+}
+
+.differential-toc-file {
+  color: #444444;
+}
+
+.differential-toc h1 {
+  border-bottom: 1px solid #aaaa99;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}

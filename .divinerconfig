@@ -1,7 +1,9 @@
 {
-  "name" : "differential",
-  "src_base" : "https://github.com/facebook/differential/blob/master",
+  "name" : "Phabricator",
+  "src_base" : "https://github.com/facebook/phabricator/blob/master",
   "groups" : {
+    "aphront" : "Aphront (Web Stack)",
+    "storage" : "Storage"
   }
 }
 
