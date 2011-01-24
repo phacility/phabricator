@@ -64,6 +64,11 @@ class AphrontDefaultApplicationConfiguration
         'type/edit/(?:(?<id>\d+)/)?$' => 'PhabricatorPHIDTypeEditController',
         'new/$' => 'PhabricatorPHIDAllocateController',
       ),
+      '/people/' => array(
+        '$' => 'PhabricatorPeopleListController',
+        'edit/(?:(?<username>\w+)/)?$' => 'PhabricatorPeopleEditController',
+      ),
+      '/p/(?<username>\w+)/$' => 'PhabricatorPeopleProfileController',
       '.*' => 'AphrontDefaultApplicationController',
     );
   }

@@ -78,7 +78,13 @@ phutil_register_library_map(array(
     'PhabricatorPHIDType' => 'applications/phid/storage/type',
     'PhabricatorPHIDTypeEditController' => 'applications/phid/controller/typeedit',
     'PhabricatorPHIDTypeListController' => 'applications/phid/controller/typelist',
+    'PhabricatorPeopleController' => 'applications/people/controller/base',
+    'PhabricatorPeopleEditController' => 'applications/people/controller/edit',
+    'PhabricatorPeopleListController' => 'applications/people/controller/list',
+    'PhabricatorPeopleProfileController' => 'applications/people/controller/profile',
     'PhabricatorStandardPageView' => 'view/page/standard',
+    'PhabricatorUser' => 'applications/people/storage/user',
+    'PhabricatorUserDAO' => 'applications/people/storage/base',
   ),
   'function' =>
   array(
@@ -150,7 +156,13 @@ phutil_register_library_map(array(
     'PhabricatorPHIDType' => 'PhabricatorPHIDDAO',
     'PhabricatorPHIDTypeEditController' => 'PhabricatorPHIDController',
     'PhabricatorPHIDTypeListController' => 'PhabricatorPHIDController',
+    'PhabricatorPeopleController' => 'PhabricatorController',
+    'PhabricatorPeopleEditController' => 'PhabricatorPeopleController',
+    'PhabricatorPeopleListController' => 'PhabricatorPeopleController',
+    'PhabricatorPeopleProfileController' => 'PhabricatorPeopleController',
     'PhabricatorStandardPageView' => 'AphrontPageView',
+    'PhabricatorUser' => 'PhabricatorUserDAO',
+    'PhabricatorUserDAO' => 'PhabricatorLiskDAO',
   ),
   'requires_interface' =>
   array(
