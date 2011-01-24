@@ -59,15 +59,13 @@ class PhabricatorConduitConsoleController
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel('Description')
-          ->setValue(
-            phutil_escape_html($method_object->getMethodDescription())))
+          ->setValue($method_object->getMethodDescription()))
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel('Returns')
-          ->setValue(
-            phutil_escape_html($method_object->defineReturnType())))
+          ->setValue($method_object->defineReturnType()))
       ->appendChild(
-        id(new AphrontFormStaticControl())
+        id(new AphrontFormMarkupControl())
           ->setLabel('Errors')
           ->setValue($error_description))
       ->appendChild(

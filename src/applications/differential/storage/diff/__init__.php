@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'applications/differential/storage/base');
 phutil_require_module('phabricator', 'applications/differential/storage/changeset');
+phutil_require_module('phabricator', 'applications/differential/storage/hunk');
 
 phutil_require_module('phutil', 'utils');
 

@@ -534,7 +534,7 @@ abstract class LiskDAO {
     if (!isset($properties)) {
       $class = new ReflectionClass(get_class($this));
       $properties = array();
-      foreach ($class->getProperties() as $p) {
+      foreach ($class->getProperties(ReflectionProperty::IS_PROTECTED) as $p) {
         $properties[strtolower($p->getName())] = $p->getName();
       }
 

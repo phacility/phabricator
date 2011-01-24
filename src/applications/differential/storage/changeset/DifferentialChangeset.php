@@ -30,6 +30,8 @@ class DifferentialChangeset extends DifferentialDAO {
   protected $addLines;
   protected $delLines;
 
+  private $unsavedHunks = array();
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
@@ -60,25 +62,9 @@ class DifferentialChangeset extends DifferentialDAO {
     return $name;
   }
 
-  public function addHunk(DifferentialHunk $hunk) {
-    if (!isset($this->_hunks)) {
-      $this->_hunks = array();
-    }
-    $this->_hunks[] = $hunk;
-
+  public function addUnsavedHunk(DifferentialHunk $hunk) {
+    $this->unsavedHunks[] = $hunk;
     return $this;
-  }
-
-  public function attachHunks(array $hunks) {
-    $this->_hunks = $hunks;
-    return $this;
-  }
-
-  public function getHunks() {
-    if (!isset($this->_hunks)) {
-      throw new Exception("You must load hunks before accessing them.");
-    }
-    return $this->_hunks;
   }
 
   public function loadHunks() {
@@ -90,15 +76,26 @@ class DifferentialChangeset extends DifferentialDAO {
       $this->getID());
   }
 
+  public function save() {
+// TODO: Sort out transactions
+//    $this->openTransaction();
+      $ret = parent::save();
+      foreach ($this->unsavedHunks as $hunk) {
+        $hunk->setChangesetID($this->getID());
+        $hunk->save();
+      }
+//    $this->saveTransaction();
+    return $ret;
+  }
 
   public function delete() {
-    $this->openTransaction();
+//    $this->openTransaction();
       foreach ($this->loadHunks() as $hunk) {
         $hunk->delete();
       }
       $this->_hunks = array();
     $ret = parent::delete();
-    $this->saveTransaction();
+//    $this->saveTransaction();
     return $ret;
   }
 

@@ -39,6 +39,13 @@ class DifferentialDiff extends DifferentialDAO {
   protected $arcanistProject;
   protected $creationMethod;
 
+  private $unsavedChangesets = array();
+
+  public function addUnsavedChangeset(DifferentialChangeset $changeset) {
+    $this->unsavedChangesets[] = $changeset;
+    return $this;
+  }
+
   public function loadChangesets() {
     if (!$this->getID()) {
       return array();
@@ -48,13 +55,25 @@ class DifferentialDiff extends DifferentialDAO {
       $this->getID());
   }
 
+  public function save() {
+// TODO: sort out transactions
+//    $this->openTransaction();
+      $ret = parent::save();
+      foreach ($this->unsavedChangesets as $changeset) {
+//        $changeset->setDiffID($this->getID());
+//        $changeset->save();
+      }
+//    $this->saveTransaction();
+    return $ret;
+  }
+
   public function delete() {
-    $this->openTransaction();
+//    $this->openTransaction();
       foreach ($this->loadChangesets() as $changeset) {
         $changeset->delete();
       }
       $ret = parent::delete();
-    $this->saveTransaction();
+//    $this->saveTransaction();
     return $ret;
   }
 
@@ -67,21 +86,19 @@ class DifferentialDiff extends DifferentialDAO {
       $add_lines = 0;
       $del_lines = 0;
       foreach ($change->getHunks() as $hunk) {
-        $dhunk = new Hunk();
+        $dhunk = new DifferentialHunk();
         $dhunk->setOldOffset($hunk->getOldOffset());
         $dhunk->setOldLen($hunk->getOldLength());
         $dhunk->setNewOffset($hunk->getNewOffset());
         $dhunk->setNewLen($hunk->getNewLength());
         $dhunk->setChanges($hunk->getCorpus());
-        $changeset->addHunk($dhunk);
+        $changeset->addUnsavedHunk($dhunk);
         $add_lines += $hunk->getAddLines();
         $del_lines += $hunk->getDelLines();
         $lines += $add_lines + $del_lines;
       }
-      $changeset->setHunkCount(count($change->getHunks()));
 
       $changeset->setOldFile($change->getOldPath());
-      $changeset->setNewFile($change->getCurrentPath());
       $changeset->setFilename($change->getCurrentPath());
       $changeset->setChangeType($change->getType());
 
@@ -93,7 +110,7 @@ class DifferentialDiff extends DifferentialDAO {
       $changeset->setAddLines($add_lines);
       $changeset->setDelLines($del_lines);
 
-      $diff->addChangeset($changeset);
+      $diff->addUnsavedChangeset($changeset);
     }
     $diff->setLineCount($lines);
 
