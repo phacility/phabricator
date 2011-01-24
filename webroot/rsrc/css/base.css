@@ -636,3 +636,114 @@ th.aphront-side-nav-navigation a.aphront-side-nav-selected:hover {
   padding-bottom: 8px;
   margin-bottom: 8px;
 }
+
+
+/******************************************************************************/
+
+/* changeset view */
+
+/******************************************************************************/
+
+.differential-diff {
+  background:         #ffffff;
+  font-family:        "Menlo", "Consolas", "Monaco", monospace;
+  font-size:          10px;
+  width:              100%;
+}
+
+.differential-diff td {
+  /* using monospace fonts makes ex/em most useful:
+   *
+   * Unfortunately, firefox 3.6 renders diffs columns for added and removed
+   * files "way-too-wide" when given em as the dimension measurement, so we
+   * use an eyeballed ex equivalent and reset it to the ch character width
+   * measurement for browsers that support that css3 measurement.
+   */
+  width:              88ex;
+  width:              81ch;
+  /*
+    Disable ligatures in Firefox. Firefox 3 has fancypants ligature support, but
+    it gets applied to monospaced fonts, which sucks because it means that the
+    "fi" ligature only takes up one character, e.g. It's probably the font's
+    fault that it even specifies ligatures (seriously, what the hell?) but
+    that's hard to fix and this is "easy" to "fix": custom letter spacing 
+    disables ligatures, as long as it's at least 0.008333-repeating pixels of 
+    custom letter spacing. I have no idea where this number comes from, but note
+    that .83333.. = 5/6. -epriestley
+  */
+  letter-spacing:     0.0083334px;
+  vertical-align:     top;
+  white-space:        pre;
+  padding:            0 8px 1px;
+  line-height:        16px;
+  overflow:           hidden;
+}
+
+.differential-diff th {
+  text-align:         right;
+  padding:            2px 6px;
+  width:              44px;
+  vertical-align:     top;
+  background:         #eeeeee;
+  color:              #888888;
+  cursor:             pointer;
+  border-style:       solid;
+  border-width:       0px 1px;
+  border-color:       #eeeeee #999999 #eeeeee #dddddd;
+  font-weight:        bold;
+  font-family:        "Verdana";
+  font-size:          11px;
+  overflow:           hidden;
+}
+
+.differential-diff td.old {
+  background:   #ffd0d0;
+  color:        #161111;
+}
+
+.differential-diff td.new {
+  background:   #d0ffd0;
+  color:        #111611;
+}
+
+.differential-diff td.old-full,
+.differential-diff td.old span.bright {
+  background: #ffaaaa;
+  color:      #221111;
+}
+
+.differential-diff td.new-full,
+.differential-diff td.new span.bright {
+  background: #aaffaa;
+  color:      #112211;
+}
+
+.differential-diff td.show-more,
+.differential-diff td.differential-shield {
+  background: #ffffee;
+  padding: 1em;
+  text-align: center;
+  font-family: "Verdana";
+  font-size:   11px;
+  border: 1px solid #ccccaa;
+  white-space: normal;
+}
+
+.differential-diff td.show-more {
+  color:  #999966;
+}
+
+.differential-diff td.differential-shield {
+  text-align: center;
+  max-width: 1160px;
+}
+
+.differential-diff td.differential-shield a {
+  font-weight: bold;
+}
+
+
+.differential-primary-pane {
+  margin:           0 40px;
+  max-width:        1162px;
+}

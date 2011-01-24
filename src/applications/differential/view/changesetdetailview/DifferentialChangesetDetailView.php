@@ -63,12 +63,13 @@ class DifferentialChangesetDetailView extends AphrontView {
           'whitespace'  => $whitespace,
         ));
 */
-      $detail_uri = '!';
+      $detail_uri = '/differential/changeset/'.$changeset->getID().'/';
 
       $detail = phutil_render_tag(
         'a',
         array(
           'style'   => 'float: right',
+          'class'   => 'button small grey',
           'href'    => $detail_uri,
           'target'  => '_blank',
         ),
@@ -79,7 +80,7 @@ class DifferentialChangesetDetailView extends AphrontView {
       $display_filename = $changeset->getDisplayFilename();
       $output[] =
         '<div>'.
-          '<h1>'.phutil_escape_html($display_filename).'</h1>'.
+          '<h1>'.$detail.phutil_escape_html($display_filename).'</h1>'.
           '<div>Loading...</div>'.
         '</div>';
 

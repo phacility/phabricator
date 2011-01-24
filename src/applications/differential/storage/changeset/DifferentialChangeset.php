@@ -31,6 +31,7 @@ class DifferentialChangeset extends DifferentialDAO {
   protected $delLines;
 
   private $unsavedHunks = array();
+  private $hunks;
 
   protected function getConfiguration() {
     return array(
@@ -54,6 +55,18 @@ class DifferentialChangeset extends DifferentialDAO {
     return $this->changeType;
   }
 
+  public function attachHunks(array $hunks) {
+    $this->hunks = $hunks;
+    return $this;
+  }
+
+  public function getHunks() {
+    if ($this->hunks === null) {
+      throw new Exception("Must load and attach hunks first!");
+    }
+    return $this->hunks;
+  }
+
   public function getDisplayFilename() {
     $name = $this->getFilename();
     if ($this->getFileType() == DifferentialChangeType::FILE_DIRECTORY) {
@@ -63,6 +76,10 @@ class DifferentialChangeset extends DifferentialDAO {
   }
 
   public function addUnsavedHunk(DifferentialHunk $hunk) {
+    if ($this->hunks === null) {
+      $this->hunks = array();
+    }
+    $this->hunks[] = $hunk;
     $this->unsavedHunks[] = $hunk;
     return $this;
   }

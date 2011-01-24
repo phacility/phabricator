@@ -40,10 +40,27 @@ class DifferentialDiff extends DifferentialDAO {
   protected $creationMethod;
 
   private $unsavedChangesets = array();
+  private $changesets;
 
   public function addUnsavedChangeset(DifferentialChangeset $changeset) {
+    if ($this->changesets === null) {
+      $this->changesets = array();
+    }
     $this->unsavedChangesets[] = $changeset;
+    $this->changesets[] = $changeset;
     return $this;
+  }
+
+  public function attachChangesets(array $changesets) {
+    $this->changesets = $changesets;
+    return $this;
+  }
+
+  public function getChangesets() {
+    if ($this->changesets === null) {
+      throw new Exception("Must load and attach changesets first!");
+    }
+    return $this->changesets;
   }
 
   public function loadChangesets() {
