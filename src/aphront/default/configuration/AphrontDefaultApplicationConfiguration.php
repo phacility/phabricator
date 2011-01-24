@@ -69,6 +69,12 @@ class AphrontDefaultApplicationConfiguration
         'edit/(?:(?<username>\w+)/)?$' => 'PhabricatorPeopleEditController',
       ),
       '/p/(?<username>\w+)/$' => 'PhabricatorPeopleProfileController',
+      '/conduit/' => array(
+        '$' => 'PhabricatorConduitConsoleController',
+        'method/(?<method>[^/]+)$' => 'PhabricatorConduitConsoleController',
+        'log/$' => 'PhabricatorConduitLogController',
+      ),
+      '/api/(?<method>[^/]+)$' => 'PhabricatorConduitAPIController',
       '.*' => 'AphrontDefaultApplicationController',
     );
   }

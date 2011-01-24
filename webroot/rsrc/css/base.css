@@ -343,6 +343,12 @@ a.small:visited {
   margin-left: auto;
 }
 
+.aphront-panel-width-wide {
+  width: 1080px;
+  margin-right: auto;
+  margin-left: auto;
+}  
+
 .aphront-table-view {
   width:            100%;
   border-collapse:  collapse;
@@ -486,7 +492,14 @@ a.small:visited {
   background: #f9b9bc;
 }
 
+.aphront-form-instructions {
+  margin: 2em 3%;
+}
 
+.aphront-form-control-static .aphront-form-input {
+  padding-top: 4px;
+  font-size: 13px;
+}
 
 /******************************************************************************/
 
@@ -532,3 +545,51 @@ a.small:visited {
 }
 
 
+
+/******************************************************************************/
+
+/* side nav */
+
+/******************************************************************************/
+
+
+table.aphront-side-nav-view {
+  width: 100%;
+}
+
+td.aphront-side-nav-content {
+  width: 100%;
+}
+
+th.aphront-side-nav-navigation {
+  border-right: 1px solid #bbbbbb;
+}
+
+th.aphront-side-nav-navigation a {
+  display: block;
+  margin: 0 0 2px;
+  min-width: 150px;
+  padding: 3px 8px 3px 24px;
+  font-weight: bold;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+th.aphront-side-nav-navigation a:hover {
+  text-decoration: none;
+  background:     #f3f3f9;
+}
+
+th.aphront-side-nav-navigation hr {
+  height:         1px;
+  background:     #eeeeee;
+  border:         0px;
+  margin:         12px 0px;
+}
+
+th.aphront-side-nav-navigation a.aphront-side-nav-selected,
+th.aphront-side-nav-navigation a.aphront-side-nav-selected:hover {
+  background:     #d8dfea;
+}
+
+  

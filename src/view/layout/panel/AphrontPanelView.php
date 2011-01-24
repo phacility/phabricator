@@ -20,6 +20,7 @@ final class AphrontPanelView extends AphrontView {
 
   const WIDTH_FULL = 'full';
   const WIDTH_FORM = 'form';
+  const WIDTH_WIDE = 'wide';
 
   private $createButton;
   private $header;
