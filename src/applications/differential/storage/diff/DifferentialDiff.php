@@ -60,8 +60,8 @@ class DifferentialDiff extends DifferentialDAO {
 //    $this->openTransaction();
       $ret = parent::save();
       foreach ($this->unsavedChangesets as $changeset) {
-//        $changeset->setDiffID($this->getID());
-//        $changeset->save();
+        $changeset->setDiffID($this->getID());
+        $changeset->save();
       }
 //    $this->saveTransaction();
     return $ret;
