@@ -16,12 +16,9 @@
  * limitations under the License.
  */
 
-final class DifferentialLintStatus {
+final class DifferentialRevisionControlSystem {
 
-  const LINT_NONE             = 0;
-  const LINT_OKAY             = 1;
-  const LINT_WARN             = 2;
-  const LINT_FAIL             = 3;
-  const LINT_SKIP             = 4;
+  const SVN = 'svn';
+  const GIT = 'git';
 
 }

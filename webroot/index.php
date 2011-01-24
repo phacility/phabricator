@@ -78,6 +78,7 @@ function setup_aphront_basics() {
     date_default_timezone_set('America/Los_Angeles');
   }
 
+  phutil_load_library($libraries_root.'/arcanist/src');
   phutil_load_library($aphront_root.'/src');
 }
 

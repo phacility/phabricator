@@ -18,10 +18,10 @@
 
 final class DifferentialUnitStatus {
 
-  const UNIT_NO               = 0;
-  const UNIT_FAIL             = 1;
-  const UNIT_OKAY             = 2;
-  const UNIT_NO_TESTS         = 3;
-  const UNIT_NOT_APPLICABLE   = 4;
+  const UNIT_NONE             = 0;
+  const UNIT_OKAY             = 1;
+  const UNIT_WARN             = 2;
+  const UNIT_FAIL             = 3;
+  const UNIT_SKIP             = 4;
 
 }
