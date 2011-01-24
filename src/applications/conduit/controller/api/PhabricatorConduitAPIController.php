@@ -55,7 +55,7 @@ class PhabricatorConduitAPIController
       if (isset($_REQUEST['params']) && is_array($_REQUEST['params'])) {
         $params_post = $request->getArr('params');
         foreach ($params_post as $key => $value) {
-          $params_post[$key] = json_decode($value);
+          $params_post[$key] = json_decode($value, true);
         }
         $params = $params_post;
       } else {
@@ -63,7 +63,7 @@ class PhabricatorConduitAPIController
         if (!strlen($params_json)) {
           $params = array();
         } else {
-          $params = json_decode($params_json);
+          $params = json_decode($params_json, true);
           if (!is_array($params)) {
             throw new Exception(
               "Invalid parameter information was passed to method ".
