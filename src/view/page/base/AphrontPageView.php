@@ -40,8 +40,14 @@ class AphrontPageView extends AphrontView {
   protected function getTail() {
     return '';
   }
+  
+  protected function willRenderPage() {
+    return;
+  }
 
   public function render() {
+    
+    $this->willRenderPage();
 
     $title = $this->getTitle();
     $head  = $this->getHead();

@@ -1,3 +1,7 @@
+/**
+ * @provides phabricator-core-css
+ */
+
 html {
   overflow-y: scroll;
 }

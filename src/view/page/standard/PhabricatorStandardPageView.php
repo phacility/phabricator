@@ -23,6 +23,7 @@ class PhabricatorStandardPageView extends AphrontPageView {
   private $tabs = array();
   private $selectedTab;
   private $glyph;
+  private $bodyContent;
 
   public function setApplicationName($application_name) {
     $this->applicationName = $application_name;
@@ -52,10 +53,18 @@ class PhabricatorStandardPageView extends AphrontPageView {
     return $this->getGlyph().' '.parent::getTitle();
   }
 
+  
+  protected function willRenderPage() {
+    require_celerity_resource('phabricator-core-css');
+    
+    $this->bodyContent = $this->renderChildren();
+  }
+
+
   protected function getHead() {
+    $response = CelerityAPI::getStaticResourceResponse();
     return
-      '<link rel="stylesheet" type="text/css" href="/rsrc/css/base.css" />'.
-      '<link rel="stylesheet" type="text/css" href="/rsrc/css/syntax.css" />'.
+      $response->renderResourcesOfType('css').
       '<script type="text/javascript">window.__DEV__=1;</script>'.
       '<script type="text/javascript" src="/rsrc/js/javelin/init.dev.js">'.
       '</script>';
@@ -102,20 +111,18 @@ class PhabricatorStandardPageView extends AphrontPageView {
             phutil_escape_html($this->getApplicationName())).
           $tabs.
         '</div>'.
-        $this->renderChildren().
+        $this->bodyContent.
         '<div style="clear: both;"></div>'.
       '</div>';
   }
 
   protected function getTail() {
-    return 
-      '<script type="text/javascript" src="/rsrc/js/javelin/javelin.dev.js">'.
-      '</script>'.
+    $response = CelerityAPI::getStaticResourceResponse();
+    return
+      $response->renderResourcesOfType('js').
       '<script type="text/javascript">'.
         'JX.Stratcom.mergeData(0, {});'.
       '</script>';
-    
-    ;
   }
 
 }

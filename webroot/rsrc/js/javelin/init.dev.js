@@ -1,3 +1,4 @@
+/** @provides javelin-init-dev */
 /**
  * Javelin core; installs Javelin and Stratcom event delegation.
  *

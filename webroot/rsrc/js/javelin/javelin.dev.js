@@ -1,3 +1,5 @@
+/** @provides javelin-lib-dev */
+
 /**
  * Javelin utility functions.
  *

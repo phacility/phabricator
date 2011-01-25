@@ -81,6 +81,11 @@ class AphrontDefaultApplicationConfiguration
         'changeset/(?<id>\d+)/$'  => 'DifferentialChangesetViewController',
       ),
 
+      '/res/' => array(
+        '(?<hash>[a-f0-9]{8})/(?<path>[^.]+\.(?:css|js))$'
+          => 'CelerityResourceController',
+      ),
+
       '.*' => 'AphrontDefaultApplicationController',
     );
   }

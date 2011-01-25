@@ -1,3 +1,7 @@
+/**
+ * @provides phabricator-syntax-css
+ */
+
 .remarkup-code .uu { /* Forbidden Unicode */
   color: #aa0066;
 }

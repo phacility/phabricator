@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'infratructure/celerity/api');
 phutil_require_module('phabricator', 'view/page/base');
 
 phutil_require_module('phutil', 'markup');

@@ -96,7 +96,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
 
       $rows[] =
         '<tr>'.
-          '<td class="differential-toc-char" title={$chartitle}>'.$char.'</td>'.
+          '<td class="differential-toc-char" title='.$chartitle.'>'.$char.'</td>'.
           '<td class="differential-toc-prop">'.$pchar.'</td>'.
           '<td class="differential-toc-ftype">'.$desc.'</td>'.
           '<td class="differential-toc-file">'.$link.$lines.'</td>'.
