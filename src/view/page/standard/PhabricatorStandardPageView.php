@@ -55,7 +55,10 @@ class PhabricatorStandardPageView extends AphrontPageView {
   protected function getHead() {
     return
       '<link rel="stylesheet" type="text/css" href="/rsrc/css/base.css" />'.
-      '<link rel="stylesheet" type="text/css" href="/rsrc/css/syntax.css" />';
+      '<link rel="stylesheet" type="text/css" href="/rsrc/css/syntax.css" />'.
+      '<script type="text/javascript">window.__DEV__=1;</script>'.
+      '<script type="text/javascript" src="/rsrc/js/javelin/init.dev.js">'.
+      '</script>';
   }
 
   public function setGlyph($glyph) {
@@ -105,7 +108,14 @@ class PhabricatorStandardPageView extends AphrontPageView {
   }
 
   protected function getTail() {
-    return '';
+    return 
+      '<script type="text/javascript" src="/rsrc/js/javelin/javelin.dev.js">'.
+      '</script>'.
+      '<script type="text/javascript">'.
+        'JX.Stratcom.mergeData(0, {});'.
+      '</script>';
+    
+    ;
   }
 
 }
