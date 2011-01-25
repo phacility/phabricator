@@ -79,14 +79,14 @@ class AphrontDefaultApplicationConfiguration
       '/differential/' => array(
         'diff/(?<id>\d+)/$'       => 'DifferentialDiffViewController',
         'changeset/(?<id>\d+)/$'  => 'DifferentialChangesetViewController',
+        'revision/edit/(?:(?<id>\d+)/)?$'
+          => 'DifferentialRevisionEditController',
       ),
 
       '/res/' => array(
         '(?<hash>[a-f0-9]{8})/(?<path>.+\.(?:css|js))$'
           => 'CelerityResourceController',
       ),
-
-      '.*' => 'AphrontDefaultApplicationController',
     );
   }
 

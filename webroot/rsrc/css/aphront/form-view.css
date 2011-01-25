@@ -10,7 +10,7 @@
 
 .aphront-form-view label {
   padding-top: 4px;
-  width: 14%;
+  width: 19%;
   float: left;
   text-align: right;
   font-weight: bold;
@@ -19,9 +19,9 @@
 }
 
 .aphront-form-input {
-  margin-left: 15%;
+  margin-left: 20%;
   margin-right: 25%;
-  width: 60%;
+  width: 55%;
 }
 
 .aphront-form-error {

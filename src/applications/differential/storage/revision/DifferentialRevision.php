@@ -23,7 +23,8 @@ class DifferentialRevision extends DifferentialDAO {
 
   protected $summary;
   protected $testPlan;
-  protected $revert;
+  protected $revertPlan;
+  protected $blameRevision;
 
   protected $phid;
   protected $ownerPHID;
