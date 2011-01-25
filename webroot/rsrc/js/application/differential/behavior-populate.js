@@ -1,5 +1,6 @@
 /**
  * @provides javelin-behavior-differential-populate
+ * @requires javelin-lib-dev
  */
 
 JX.behavior('differential-populate', function(config) {

@@ -38,6 +38,7 @@
   width: 100%;
 }
 
+
 .aphront-form-input textarea {
   height: 12em;
 }
@@ -49,8 +50,13 @@
 .aphront-form-control-submit button,
 .aphront-form-control-submit a.button {
   float: right;
-  margin: 1em 0 0em 2%;
+  margin: 0.5em 0 0em 2%;
 }
+
+.aphront-form-control-select .aphront-form-input {
+  padding-top: 2px;
+}
+
 
 .aphront-form-view .aphront-form-caption {
   font-size: 11px;

@@ -16,22 +16,25 @@
  * limitations under the License.
  */
 
-abstract class DifferentialController extends PhabricatorController {
+class DifferentialRevisionListController extends DifferentialController {
 
-  public function buildStandardPageResponse($view, array $data) {
+  public function processRequest() {
 
-    require_celerity_resource('differential-core-view-css');
+    $side_nav = new AphrontSideNavView();
+    $side_nav->addNavItem(
+      phutil_render_tag(
+        'a',
+        array(
+          'href' => '/differential/',
+        ),
+        'Active Revisions'));
 
-    $page = new PhabricatorStandardPageView();
 
-    $page->setApplicationName('Differential');
-    $page->setBaseURI('/differential/');
-    $page->setTitle(idx($data, 'title'));
-    $page->setGlyph("\xE2\x9A\x99");
-    $page->appendChild($view);
-
-    $response = new AphrontWebpageResponse();
-    return $response->setContent($page->render());
+    return $this->buildStandardPageResponse(
+      $side_nav,
+      array(
+        'title' => 'Differential Home',
+      ));
   }
 
 }

@@ -21,6 +21,11 @@
   float: right;
 }
 
+.aphront-panel-view p.aphront-panel-instructions {
+  margin: .5em 2em .75em;
+  font-size: 13px;
+}
+
 .aphront-panel-width-form {
   width: 720px;
   margin-right: auto;

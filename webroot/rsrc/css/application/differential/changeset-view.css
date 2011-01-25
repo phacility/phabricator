@@ -108,3 +108,14 @@
   padding:          1em;
   margin:           0 0 6px 0;
 }
+
+.differential-changeset h1 {
+  font-size:          14px;
+  font-weight:        bold;
+  padding:            2px 0 8px;
+}
+
+.differential-changeset {
+  margin:             0.5em 0;
+  padding:            10px 0px 20px;
+}

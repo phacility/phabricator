@@ -1,5 +1,6 @@
 /**
  * @provides javelin-behavior-aphront-basic-tokenizer
+ * @requires javelin-lib-dev
  */
 
 JX.behavior('aphront-basic-tokenizer', function(config) {

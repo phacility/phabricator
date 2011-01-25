@@ -47,13 +47,10 @@ class DifferentialChangesetViewController extends DifferentialController {
     $detail->setChangeset($changeset);
     $detail->appendChild($output);
 
-    // TODO: This is a bit of a hacky mess.
     $output =
-      '<div style="padding: 2em 1em;">'.
-        '<div class="differential-primary-pane">'.
-          '<div class="differential-review-stage">'.
-            $detail->render().
-          '</div>'.
+      '<div class="differential-primary-pane">'.
+        '<div class="differential-review-stage">'.
+          $detail->render().
         '</div>'.
       '</div>';
 

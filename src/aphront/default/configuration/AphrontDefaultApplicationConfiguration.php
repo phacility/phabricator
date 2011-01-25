@@ -77,6 +77,7 @@ class AphrontDefaultApplicationConfiguration
       '/api/(?<method>[^/]+)$' => 'PhabricatorConduitAPIController',
 
       '/differential/' => array(
+        '$' => 'DifferentialRevisionListController',
         'diff/(?<id>\d+)/$'       => 'DifferentialDiffViewController',
         'changeset/(?<id>\d+)/$'  => 'DifferentialChangesetViewController',
         'revision/edit/(?:(?<id>\d+)/)?$'

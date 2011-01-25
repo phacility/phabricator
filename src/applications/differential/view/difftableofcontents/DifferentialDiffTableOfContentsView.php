@@ -105,7 +105,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
       if ($meta) {
         $rows[] =
           '<tr>'.
-            '<td colspan="3" />'.
+            '<td colspan="3"></td>'.
             '<td class="differential-toc-meta">'.$meta.'</td>'.
           '</tr>';
       }

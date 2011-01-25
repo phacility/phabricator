@@ -30,6 +30,33 @@ class DifferentialDiffViewController extends DifferentialController {
       return new Aphront404Response();
     }
 
+    $action_panel = new AphrontPanelView();
+    $action_panel->setHeader('Preview Diff');
+    $action_panel->setWidth(AphrontPanelView::WIDTH_WIDE);
+    $action_panel->appendChild(
+      '<p class="aphront-panel-instructions">Review the diff for correctness. '.
+      'When you are satisfied, either <strong>create a new revision</strong> '.
+      'or <strong>update an existing revision</strong>.');
+
+    $action_form = new AphrontFormView();
+    $action_form
+      ->setAction('/differential/revision/edit/')
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel('Attach To')
+          ->setName('revisionID')
+          ->setValue('')
+          ->setOptions(array(
+            '' => "Create a new Revision...",
+          )))
+      ->appendChild(
+        id(new AphrontFormSubmitControl())
+          ->setValue('Continue'));
+
+    $action_panel->appendChild($action_form);
+
+
+
     $changesets = $diff->loadChangesets();
     $changesets = msort($changesets, 'getSortKey');
 
@@ -40,10 +67,15 @@ class DifferentialDiffViewController extends DifferentialController {
       ->setChangesets($changesets);
 
     return $this->buildStandardPageResponse(
-      array(
-        $table_of_contents,
-        $details,
-      ),
+      '<div class="differential-primary-pane">'.
+        implode(
+          "\n",
+          array(
+            $action_panel->render(),
+            $table_of_contents->render(),
+            $details->render(),
+          )).
+      '</div>',
       array(
         'title' => 'Diff View',
       ));

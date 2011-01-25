@@ -130,18 +130,20 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-aphront-basic-tokenizer' =>
   array(
-    'path' => '/res/12de8502/rsrc/js/application/core/behavior-tokenizer.js',
+    'path' => '/res/8317d761/rsrc/js/application/core/behavior-tokenizer.js',
     'type' => 'js',
     'requires' =>
     array(
+      0 => 'javelin-lib-dev',
     ),
   ),
   'javelin-behavior-differential-populate' =>
   array(
-    'path' => '/res/b419291a/rsrc/js/application/differential/behavior-populate.js',
+    'path' => '/res/9982573c/rsrc/js/application/differential/behavior-populate.js',
     'type' => 'js',
     'requires' =>
     array(
+      0 => 'javelin-lib-dev',
     ),
   ),
   'javelin-init-dev' =>
@@ -186,7 +188,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-typeahead-prod' =>
   array(
-    'path' => '/res/871c9b0f/rsrc/js/javelin/typeahead.min.js',
+    'path' => '/res/1da2d984/rsrc/js/javelin/typeahead.min.js',
     'type' => 'js',
     'requires' =>
     array(
