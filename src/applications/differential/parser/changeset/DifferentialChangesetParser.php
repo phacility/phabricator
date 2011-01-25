@@ -311,8 +311,16 @@ class DifferentialChangesetParser {
     $min_length = min(count($this->old), count($this->new));
     for ($ii = 0; $ii < $min_length; $ii++) {
       if ($this->old[$ii] || $this->new[$ii]) {
-        $otext = idx($this->old[$ii], 'text', '');
-        $ntext = idx($this->new[$ii], 'text', '');
+        if (isset($this->old[$ii]['text'])) {
+          $otext = $this->old[$ii]['text'];
+        } else {
+          $otext = '';
+        }
+        if (isset($this->new[$ii]['text'])) {
+          $ntext = $this->new[$ii]['text'];
+        } else {
+          $ntext = '';
+        }
         if ($otext != $ntext && empty($skip_intra[$ii])) {
           $this->intra[$ii] = ArcanistDiffUtils::generateIntralineDiff(
             $otext,
@@ -560,9 +568,10 @@ class DifferentialChangesetParser {
   }
 
   protected function sourceHighlight($data, $corpus) {
-//    $result = highlight_code($corpus, $this->filetype);
-    $result = phutil_escape_html($corpus);
-
+    $result = $this->highlightEngine->highlightSource(
+      $this->filetype,
+      $corpus);
+      
     $result_lines = explode("\n", $result);
     foreach ($data as $key => $info) {
       if (!$info) {
@@ -654,6 +663,8 @@ EOSYNTHETIC;
     $range_start  = null,
     $range_len    = null,
     $mask_force   = array()) {
+
+    $this->highlightEngine = new PhutilDefaultSyntaxHighlighterEngine();
 
     $this->tryCacheStuff();
 
@@ -1157,7 +1168,7 @@ EOSYNTHETIC;
     $table = null;
     if ($contents) {
       $table =
-        '<table class="differential-diff">'.
+        '<table class="differential-diff remarkup-code">'.
           $contents.
         '</table>';
     }

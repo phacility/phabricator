@@ -747,3 +747,14 @@ th.aphront-side-nav-navigation a.aphront-side-nav-selected:hover {
   margin:           0 40px;
   max-width:        1162px;
 }
+
+/************* meta notice ************************************************ */
+
+.differential-meta-notice {
+  border:           1px solid #ffdd99;
+  background:       #ffeeaa;
+  font-family:      "Verdana";
+  font-size:        11px;
+  padding:          1em;
+  margin:           0 0 6px 0;
+}

@@ -54,7 +54,8 @@ class PhabricatorStandardPageView extends AphrontPageView {
 
   protected function getHead() {
     return
-      '<link rel="stylesheet" type="text/css" href="/rsrc/css/base.css" />';
+      '<link rel="stylesheet" type="text/css" href="/rsrc/css/base.css" />'.
+      '<link rel="stylesheet" type="text/css" href="/rsrc/css/syntax.css" />';
   }
 
   public function setGlyph($glyph) {
