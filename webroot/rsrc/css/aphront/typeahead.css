@@ -1,0 +1,44 @@
+/**
+ * @provides aphront-typeahead-control-css
+ */
+
+div.jx-typeahead-hardpoint {
+  position: relative;
+  _zoom: 1; /* Some kind of IE6 fix? */
+}
+
+div.jx-typeahead-results {
+  z-index: 8;
+  position: absolute;
+  border-bottom: 1px solid #203b75;
+  padding: 0;
+  background: #ffffff;
+  width: 100%;
+}
+
+div.jx-typeahead-results a.jx-result {
+  color: #222;
+  display: block;
+  padding: .4em .5em .45em;
+  font-size: 11px;
+  border-width: 0px 1px 1px;
+  border-style: solid;
+  border-color: #dddddd #203b75;
+}
+
+div.jx-typeahead-results a.jx-result:hover,
+div.jx-typeahead-results a.focused {
+  display: block;
+  background: #3b5998;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+table.jx-typeahead button {
+  margin-left: 3px;
+}
+
+table.jx-typeahead input {
+  font-size: 13px;
+  padding: 2px;
+}

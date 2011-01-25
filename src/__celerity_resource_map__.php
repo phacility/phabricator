@@ -17,7 +17,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-form-view-css' =>
   array(
-    'path' => '/res/20ebc99b/rsrc/css/aphront/form-view.css',
+    'path' => '/res/17285e65/rsrc/css/aphront/form-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -42,6 +42,23 @@ celerity_register_resource_map(array(
   'aphront-table-view-css' =>
   array(
     'path' => '/res/52b0191f/rsrc/css/aphront/table-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+  ),
+  'aphront-tokenizer-control-css' =>
+  array(
+    'path' => '/res/a3d23074/rsrc/css/aphront/tokenizer.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+      0 => 'aphront-typeahead-control-css',
+    ),
+  ),
+  'aphront-typeahead-control-css' =>
+  array(
+    'path' => '/res/928df9f0/rsrc/css/aphront/typeahead.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -111,6 +128,14 @@ celerity_register_resource_map(array(
     array(
     ),
   ),
+  'javelin-behavior-aphront-basic-tokenizer' =>
+  array(
+    'path' => '/res/12de8502/rsrc/js/application/core/behavior-tokenizer.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+    ),
+  ),
   'javelin-behavior-differential-populate' =>
   array(
     'path' => '/res/b419291a/rsrc/js/application/differential/behavior-populate.js',
@@ -146,6 +171,22 @@ celerity_register_resource_map(array(
   'javelin-lib-prod' =>
   array(
     'path' => '/res/9438670e/rsrc/js/javelin/javelin.min.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+    ),
+  ),
+  'javelin-typeahead-dev' =>
+  array(
+    'path' => '/res/c81c0f01/rsrc/js/javelin/typeahead.dev.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+    ),
+  ),
+  'javelin-typeahead-prod' =>
+  array(
+    'path' => '/res/871c9b0f/rsrc/js/javelin/typeahead.min.js',
     'type' => 'js',
     'requires' =>
     array(

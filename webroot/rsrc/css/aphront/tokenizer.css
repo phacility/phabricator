@@ -1,0 +1,64 @@
+/**
+ * @provides aphront-tokenizer-control-css
+ * @requires aphront-typeahead-control-css
+ */
+
+div.jx-tokenizer {
+  background: transparent;
+  position:   relative;
+  display:    block;
+  width:      100%;
+}
+
+div.jx-tokenizer-container {
+  background: #fff;
+  border: 1px solid #96A6C5;
+  position: relative;
+}
+
+var.jx-tokenizer-metrics {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+}
+
+input.jx-tokenizer-input {
+  border: 1px solid transparent;
+  border-width: 1px 0px;
+  padding: 4px 4px 4px 3px;
+  outline: none;
+  float: left;
+}
+
+span.jx-tokenizer-x-placeholder {
+  padding: 0 2px;
+}
+
+a.jx-tokenizer-token {
+  padding: 1px 0 1px 4px;
+  border:  1px solid #a4bdec;
+  margin: 3px 2px 0 4px;
+  background: #dee7f8;
+  float: left;
+  cursor: text;
+  font-size: 12px;
+}
+
+a.jx-tokenizer-token:hover {
+  text-decoration: none;
+  background: #bbcef1;
+  cursor: text;
+}
+
+a.jx-tokenizer-token a.jx-tokenizer-x {
+  color: #627aad;
+  font-family: Arial, sans-serif;
+  font-weight: normal;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+a.jx-tokenizer-token a.jx-tokenizer-x:hover {
+  text-decoration: none;
+}
+

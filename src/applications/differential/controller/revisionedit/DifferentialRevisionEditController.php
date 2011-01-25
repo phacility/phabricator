@@ -63,13 +63,19 @@ class DifferentialRevisionEditController extends DifferentialController {
     }
 */
     $e_name = true;
+    $e_testplan = true;
 
     $form = new AphrontFormView();
     if ($revision->getID()) {
-      $form->setAction('/differential/revision/edit/'.$category->getID().'/');
+      $form->setAction('/differential/revision/edit/'.$revision->getID().'/');
     } else {
       $form->setAction('/differential/revision/edit/');
     }
+
+    $reviewer_map = array(
+      1 => 'A Zebra',
+      2 => 'Pie Messenger',
+    );
 
     $form
       ->appendChild(
@@ -90,13 +96,17 @@ class DifferentialRevisionEditController extends DifferentialController {
           ->setValue($revision->getTestPlan())
           ->setError($e_testplan))
       ->appendChild(
-        id(new AphrontFormTextAreaControl())
+        id(new AphrontFormTokenizerControl())
           ->setLabel('Reviewers')
-          ->setName('reviewers'))
+          ->setName('reviewers')
+          ->setDatasource('/typeahead/common/user/')
+          ->setValue($reviewer_map))
       ->appendChild(
-        id(new AphrontFormTextAreaControl())
+        id(new AphrontFormTokenizerControl())
           ->setLabel('CC')
-          ->setName('cc'))
+          ->setName('cc')
+          ->setDatasource('/typeahead/common/user/')
+          ->setValue($reviewer_map))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Blame Revision')
