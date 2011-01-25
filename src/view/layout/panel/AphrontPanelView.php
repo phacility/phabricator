@@ -64,6 +64,8 @@ final class AphrontPanelView extends AphrontView {
 
     $table = $this->renderChildren();
 
+    require_celerity_resource('aphront-panel-view-css');
+
     $class = array('aphront-panel-view');
     if ($this->width) {
       $class[] = 'aphront-panel-width-'.$this->width;

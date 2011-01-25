@@ -1,0 +1,42 @@
+/**
+ * @provides aphront-dialog-view-css
+ */
+
+
+
+.aphront-dialog-view {
+  width: 480px;
+  padding: 8px;
+  background: #666;
+  margin: auto;
+}
+
+.aphront-dialog-head {
+  background:   #003366;
+  border:       none;
+  font-size:    15px;
+  padding:      5px 12px 6px;
+  color:        #ffffff;
+}
+
+
+.aphront-dialog-body {
+  background: #ffffff;
+  padding: 16px 12px;
+  border: none;
+  overflow: hidden;
+}
+
+.aphront-dialog-tail {
+  border: none;
+  background: #ededed;
+  padding: 0.5em;
+  text-align: right;
+}
+
+.aphront-dialog-tail button,
+.aphront-dialog-tail a.button {
+  float: right;
+  margin-left: .5em;
+}
+

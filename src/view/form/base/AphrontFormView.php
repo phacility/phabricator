@@ -40,6 +40,7 @@ final class AphrontFormView extends AphrontView {
   }
 
   public function render() {
+    require_celerity_resource('aphront-form-view-css');
     return phutil_render_tag(
       'form',
       array(

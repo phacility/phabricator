@@ -61,6 +61,8 @@ class AphrontTableView extends AphrontView {
   }
 
   public function render() {
+    require_celerity_resource('aphront-table-view-css');
+
     $class = $this->className;
     if ($class !== null) {
       $class = ' class="aphront-table-view '.$class.'"';

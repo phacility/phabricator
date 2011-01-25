@@ -53,10 +53,12 @@ class PhabricatorStandardPageView extends AphrontPageView {
     return $this->getGlyph().' '.parent::getTitle();
   }
 
-  
+
   protected function willRenderPage() {
     require_celerity_resource('phabricator-core-css');
-    
+    require_celerity_resource('phabricator-core-buttons-css');
+    require_celerity_resource('phabricator-standard-page-view');
+
     $this->bodyContent = $this->renderChildren();
   }
 
@@ -88,25 +90,25 @@ class PhabricatorStandardPageView extends AphrontPageView {
         array(
           'href'  => idx($tab, 'href'),
           'class' => ($name == $this->selectedTab)
-            ? 'aphront-selected-tab'
+            ? 'phabricator-selected-tab'
             : null,
         ),
         phutil_escape_html(idx($tab, 'name')));
     }
     $tabs = implode('', $tabs);
     if ($tabs) {
-      $tabs = '<span class="aphront-head-tabs">'.$tabs.'</span>';
+      $tabs = '<span class="phabricator-head-tabs">'.$tabs.'</span>';
     }
 
     return
-      '<div class="aphront-standard-page">'.
-        '<div class="aphront-standard-header">'.
+      '<div class="phabricator-standard-page">'.
+        '<div class="phabricator-standard-header">'.
           '<a href="/">Phabricator</a> '.
           phutil_render_tag(
             'a',
             array(
               'href'  => $this->getBaseURI(),
-              'class' => 'aphront-head-appname',
+              'class' => 'phabricator-head-appname',
             ),
             phutil_escape_html($this->getApplicationName())).
           $tabs.

@@ -1,0 +1,101 @@
+/**
+ * @provides phabricator-core-css
+ */
+
+
+html {
+  overflow-y: scroll;
+}
+
+body, div, dl, dt, dd, ul, ol, li,
+h1, h2, h3, h4, h5, h6,
+pre, form, fieldset,
+p, blockquote, th, td, button {
+  margin: 0;
+  padding: 0;
+  outline: 0;
+  border: 0;
+}
+
+html {
+  padding-bottom: 16em;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+fieldset, img {
+  border: 0;
+}
+
+address, caption, cite, code, dfn, th, var {
+  font-style: normal;
+  font-weight: normal;
+}
+
+ol, ul {
+  list-style: none;
+}
+
+caption, th {
+  text-align: left;
+}
+
+td, th {
+  vertical-align: top;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-size: 100%;
+  font-weight: bold;
+}
+
+body {
+  font: 13px/1.231 'lucida grande', tahoma, verdana, arial, sans-serif;
+  background:   #ACACAC;
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: embed;
+  *font-size: small;
+}
+
+select, input, button, textarea, button {
+  font: 99% 'lucida grande', tahoma, verdana, arial, clean, sans-serif;
+}
+
+table {
+  font-size: inherit;
+  font: 100%;
+}
+
+h1 {
+  font-size: 16px;
+}
+
+h2 {
+  font-size: 14px;
+}
+
+a {
+  -moz-outline-style: none;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+a:visited {
+  color: #3b5998;
+}
+
+a:link {
+  color: #3b5998;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+img {
+  display: block;
+}

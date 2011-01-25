@@ -1,0 +1,38 @@
+/**
+ * @provides phabricator-directory-css
+ */
+
+
+
+.aphront-directory-list {
+  margin: 1em 3% 8em;
+}
+
+.aphront-directory-category h1 {
+  border-bottom: 1px solid #cccccc;
+  margin-bottom: .5em;
+  padding-bottom: .1em;
+}
+
+.aphront-directory-list h2 {
+  font-size: 14px;
+  font-weight: bold;
+  padding: 0;
+  margin: 0;
+}
+
+.aphront-directory-list p {
+  color: #444444;
+  font-size: 12px;
+  padding: .05em .5em .5em;
+}
+
+.aphront-directory-category {
+  padding: 10px;
+  width: 300px;
+  float: left;
+}
+
+.aphront-directory-group {
+  padding: 0 .5em 3em;
+}

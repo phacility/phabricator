@@ -29,6 +29,8 @@ final class AphrontSideNavView extends AphrontView {
     $view = new AphrontNullView();
     $view->appendChild($this->items);
 
+    require_celerity_resource('aphront-side-nav-view-css');
+
     return
       '<table class="aphront-side-nav-view">'.
         '<tr>'.

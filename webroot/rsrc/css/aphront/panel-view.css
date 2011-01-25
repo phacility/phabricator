@@ -1,0 +1,35 @@
+/**
+ * @provides aphront-panel-view-css
+ */
+
+
+.aphront-panel-view {
+  background: #f3f3f3;
+  border: 1px solid #c0c0c0;
+  border-width: 1px 0 0;
+  padding: 1em 2em;
+  margin: 1em 2em;
+}
+
+.aphront-panel-view h1 {
+  font-size:        14px;
+  font-weight:      bold;
+  padding:          2px 0 8px;
+}
+
+.aphront-panel-view a.create-button {
+  float: right;
+}
+
+.aphront-panel-width-form {
+  width: 720px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.aphront-panel-width-wide {
+  width: 1080px;
+  margin-right: auto;
+  margin-left: auto;
+}
+

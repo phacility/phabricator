@@ -1,0 +1,79 @@
+/**
+ * @provides aphront-form-view-css
+ */
+
+.aphront-form-view {
+  background: #e7e7e7;
+  border: 1px solid #c4c4c4;
+  padding: 1em;
+}
+
+.aphront-form-view label {
+  padding-top: 4px;
+  width: 14%;
+  float: left;
+  text-align: right;
+  font-weight: bold;
+  font-size: 13px;
+  color: #666666;
+}
+
+.aphront-form-input {
+  margin-left: 15%;
+  margin-right: 25%;
+  width: 60%;
+}
+
+.aphront-form-error {
+  width: 23%;
+  float: right;
+  color: #aa0000;
+  font-weight: bold;
+  padding-top: 4px;
+}
+
+.aphront-form-input input,
+.aphront-form-input textarea {
+  font-size: 12px;
+  width: 100%;
+}
+
+.aphront-form-input textarea {
+  height: 12em;
+}
+
+.aphront-form-control {
+  padding: 4px;
+}
+
+.aphront-form-control-submit button,
+.aphront-form-control-submit a.button {
+  float: right;
+  margin: 1em 0 0em 2%;
+}
+
+.aphront-form-view .aphront-form-caption {
+  font-size: 11px;
+  color: #444444;
+  text-align: right;
+  clear: both;
+  margin-right: 25%;
+  margin-left: 15%;
+}
+
+.aphront-error-view {
+  width: 720px;
+  margin: 1em auto;
+  border: 1px solid #aa0000;
+  padding: 1em;
+  background: #f9b9bc;
+}
+
+.aphront-form-instructions {
+  margin: 2em 3%;
+}
+
+.aphront-form-control-static .aphront-form-input {
+  padding-top: 4px;
+  font-size: 13px;
+}

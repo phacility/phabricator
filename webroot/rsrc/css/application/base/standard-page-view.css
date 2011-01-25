@@ -1,0 +1,48 @@
+/**
+ * @provides phabricator-standard-page-view
+ */
+
+
+.phabricator-standard-page {
+  background: #ffffff;
+  border-bottom: 1px solid #888888;
+  font-size: 14px;
+
+  -webkit-box-shadow: 0 0 6px #000;
+  -mox-box-shadow:    0 0 6px #000;
+  box-shadow:         0 0 6px #000;
+}
+
+.phabricator-standard-header {
+  background: #003366;
+  color: white;
+  padding: 1em 1em 0.5em 1em;
+  overflow: hidden;
+  position: relative;
+}
+
+.phabricator-standard-header a {
+  color: white;
+}
+
+.phabricator-standard-header .phabricator-head-tabs {
+  padding: 0 1em;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.phabricator-standard-header .phabricator-head-tabs a {
+  border-bottom: 3px solid transparent;
+  padding: 0.5em 0.75em;
+  position: relative;
+  bottom: 2px;
+}
+
+.phabricator-standard-header .phabricator-head-tabs a.phabricator-selected-tab {
+  border-bottom-color: #cccccc;
+}
+
+.phabricator-standard-header .phabricator-head-appname {
+  padding: 0 1em;
+  text-transform: uppercase;
+}

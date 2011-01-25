@@ -20,6 +20,8 @@ class PhabricatorDirectoryMainController
   extends PhabricatorDirectoryController {
 
   public function processRequest() {
+
+
     $items = id(new PhabricatorDirectoryItem())->loadAll();
     $items = msort($items, 'getSortKey');
 
@@ -29,6 +31,8 @@ class PhabricatorDirectoryMainController
     $category_map = mpull($categories, 'getName', 'getID');
     $category_map[0] = 'Free Radicals';
     $items = mgroup($items, 'getCategoryID');
+
+    require_celerity_resource('phabricator-directory-css');
 
     $content = array();
     foreach ($category_map as $id => $category_name) {

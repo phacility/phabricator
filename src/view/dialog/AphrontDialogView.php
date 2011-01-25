@@ -48,6 +48,7 @@ class AphrontDialogView extends AphrontView {
   }
 
   final public function render() {
+    require_celerity_resource('aphront-dialog-view-css');
 
     $buttons = array();
     if ($this->submitButton) {

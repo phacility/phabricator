@@ -1,0 +1,9 @@
+/**
+ * @provides differential-core-view-css
+ */
+
+.differential-primary-pane {
+  margin:           0 40px;
+  max-width:        1162px;
+}
+

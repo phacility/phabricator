@@ -1,0 +1,72 @@
+/**
+ * @provides aphront-table-view-css
+ */
+
+.aphront-table-view {
+  width:            100%;
+  border-collapse:  collapse;
+  background:       #fdfdfd;
+  border:           1px solid #003366;
+}
+
+.aphront-table-view tr.alt {
+  background:       #efefef;
+}
+
+.aphront-table-view th {
+  font-size: 12px;
+  font-weight: bold;
+  padding: 4px 8px;
+  background: #003366;
+  color: white;
+  white-space: nowrap;
+}
+
+.aphront-table-view td.header {
+  padding:          4px 8px;
+  background:       #3b5998;
+  color:            white;
+  white-space:      nowrap;
+  text-align:       right;
+}
+
+.aphront-table-view td {
+  vertical-align:   top;
+  padding:          4px 8px;
+  font-size:        11px;
+  white-space:      nowrap;
+}
+
+.aphront-table-view td.action {
+  padding-top: 1px;
+  padding-bottom: 1px;
+}
+
+.aphront-table-view td.larger {
+  font-size:        14px;
+}
+
+.aphront-table-view td.pri {
+  font-weight:      bold;
+}
+
+.aphront-table-view td.wide {
+  white-space:      normal;
+  width:            100%;
+}
+
+.aphront-table-view td.right {
+  text-align:       right;
+}
+
+.aphront-table-view td.mono {
+  font-family:      "Monaco", monospace;
+  font-size:        10px;
+}
+
+.aphront-table-view tr.no-data td {
+  padding:    1em;
+  text-align: center;
+  color:      #888888;
+  font-style: italic;
+}
