@@ -9,6 +9,7 @@ phutil_register_library_map(array(
   'class' =>
   array(
     'Aphront404Response' => 'aphront/response/404',
+    'AphrontAjaxResponse' => 'aphront/response/ajax',
     'AphrontApplicationConfiguration' => 'aphront/applicationconfiguration',
     'AphrontController' => 'aphront/controller',
     'AphrontDatabaseConnection' => 'storage/connection/base',
@@ -62,6 +63,7 @@ phutil_register_library_map(array(
     'DifferentialChangeType' => 'applications/differential/constants/changetype',
     'DifferentialChangeset' => 'applications/differential/storage/changeset',
     'DifferentialChangesetDetailView' => 'applications/differential/view/changesetdetailview',
+    'DifferentialChangesetListView' => 'applications/differential/view/changesetlistview',
     'DifferentialChangesetParser' => 'applications/differential/parser/changeset',
     'DifferentialChangesetViewController' => 'applications/differential/controller/changesetview',
     'DifferentialController' => 'applications/differential/controller/base',
@@ -76,6 +78,7 @@ phutil_register_library_map(array(
     'DifferentialRevisionControlSystem' => 'applications/differential/constants/revisioncontrolsystem',
     'DifferentialRevisionStatus' => 'applications/differential/constants/revisionstatus',
     'DifferentialUnitStatus' => 'applications/differential/constants/unitstatus',
+    'Javelin' => 'infratructure/javelin/api',
     'LiskDAO' => 'storage/lisk/dao',
     'PhabricatorConduitAPIController' => 'applications/conduit/controller/api',
     'PhabricatorConduitConnectionLog' => 'applications/conduit/storage/connectionlog',
@@ -125,7 +128,9 @@ phutil_register_library_map(array(
   array(
     '_qsprintf_check_scalar_type' => 'storage/qsprintf',
     '_qsprintf_check_type' => 'storage/qsprintf',
+    'celerity_gen_unique_node_id' => 'infratructure/celerity/api',
     'celerity_register_resource_map' => 'infratructure/celerity/map',
+    'javelin_render_tag' => 'infratructure/javelin/markup',
     'qsprintf' => 'storage/qsprintf',
     'queryfx' => 'storage/queryfx',
     'queryfx_all' => 'storage/queryfx',
@@ -138,6 +143,7 @@ phutil_register_library_map(array(
   'requires_class' =>
   array(
     'Aphront404Response' => 'AphrontResponse',
+    'AphrontAjaxResponse' => 'AphrontResponse',
     'AphrontDefaultApplicationConfiguration' => 'AphrontApplicationConfiguration',
     'AphrontDefaultApplicationController' => 'AphrontController',
     'AphrontDialogResponse' => 'AphrontResponse',
@@ -175,6 +181,7 @@ phutil_register_library_map(array(
     'ConduitAPI_user_find_Method' => 'ConduitAPIMethod',
     'DifferentialChangeset' => 'DifferentialDAO',
     'DifferentialChangesetDetailView' => 'AphrontView',
+    'DifferentialChangesetListView' => 'AphrontView',
     'DifferentialChangesetViewController' => 'DifferentialController',
     'DifferentialController' => 'PhabricatorController',
     'DifferentialDAO' => 'PhabricatorLiskDAO',

@@ -36,7 +36,7 @@ class DifferentialDiffViewController extends DifferentialController {
     $table_of_contents = id(new DifferentialDiffTableOfContentsView())
       ->setChangesets($changesets);
 
-    $details = id(new DifferentialChangesetDetailView())
+    $details = id(new DifferentialChangesetListView())
       ->setChangesets($changesets);
 
     return $this->buildStandardPageResponse(

@@ -26,6 +26,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
   }
 
   public function render() {
+    require_celerity_resource('differential-table-of-contents-css');
 
     $rows = array();
 

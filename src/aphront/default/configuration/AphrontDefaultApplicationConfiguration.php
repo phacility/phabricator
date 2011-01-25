@@ -82,7 +82,7 @@ class AphrontDefaultApplicationConfiguration
       ),
 
       '/res/' => array(
-        '(?<hash>[a-f0-9]{8})/(?<path>[^.]+\.(?:css|js))$'
+        '(?<hash>[a-f0-9]{8})/(?<path>.+\.(?:css|js))$'
           => 'CelerityResourceController',
       ),
 

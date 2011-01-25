@@ -18,115 +18,45 @@
 
 class DifferentialChangesetDetailView extends AphrontView {
 
-  private $changesets = array();
+  private $changeset;
+  private $buttons = array();
 
-  public function setChangesets($changesets) {
-    $this->changesets = $changesets;
+  public function setChangeset($changeset) {
+    $this->changeset = $changeset;
+    return $this;
+  }
+
+  public function addButton($button) {
+    $this->buttons[] = $button;
     return $this;
   }
 
   public function render() {
-    $against = array(); // TODO
-    $edit    = false;
+    require_celerity_resource('differential-changeset-view-css');
+    require_celerity_resource('syntax-highlighting-css');
 
-    $changesets = $this->changesets;
-    foreach ($changesets as $key => $changeset) {
-      if (empty($against[$changeset->getID()])) {
-        $type = $changeset->getChangeType();
-        if ($type == DifferentialChangeType::TYPE_MOVE_AWAY ||
-            $type == DifferentialChangeType::TYPE_MULTICOPY) {
-          unset($changesets[$key]);
-        }
-      }
+    $edit = false; // TODO
+
+    $changeset = $this->changeset;
+    $class = 'differential-changeset';
+    if (!$edit) {
+      $class .= ' differential-changeset-immutable';
     }
 
-    $output = array();
-    $mapping = array();
-    foreach ($changesets as $key => $changeset) {
-      $file = $changeset->getFilename();
-      $class = 'differential-changeset';
-      if (!$edit) {
-        $class .= ' differential-changeset-noneditable';
-      }
-      $id = $changeset->getID();
-      if ($id) {
-        $against_id = idx($against, $id);
-      } else {
-        $against_id = null;
-      }
+    $display_filename = $changeset->getDisplayFilename();
+    $output = javelin_render_tag(
+      'div',
+      array(
+        'sigil' => 'differential-changeset',
+        'class' => $class,
+      ),
+      '<a name="#'."TODO".'"></a>'.
+      implode('', $this->buttons).
+      '<h1>'.phutil_escape_html($display_filename).'</h1>'.
+      '<div style="clear: both;"></div>'.
+      $this->renderChildren());
 
-/*
-      $detail_uri = URI($render_uri)
-        ->addQueryData(array(
-          'changeset'   => $id,
-          'against'     => $against_id,
-          'whitespace'  => $whitespace,
-        ));
-*/
-      $detail_uri = '/differential/changeset/'.$changeset->getID().'/';
-
-      $detail = phutil_render_tag(
-        'a',
-        array(
-          'style'   => 'float: right',
-          'class'   => 'button small grey',
-          'href'    => $detail_uri,
-          'target'  => '_blank',
-        ),
-        'Standalone View');
-
-//      $div = <div class="differential-loading">Loading&hellip;</div>;
-
-      $display_filename = $changeset->getDisplayFilename();
-      $output[] =
-        '<div>'.
-          '<h1>'.$detail.phutil_escape_html($display_filename).'</h1>'.
-          '<div>Loading...</div>'.
-        '</div>';
-
-/*
-        <div class={$class}
-             sigil="differential-changeset"
-              meta={$changeset->getID()}>
-          {$detail}
-          <a name={alite_urlize($file)} /><h1>{$file}</h1>
-          {$div}
-        </div>;
-*/
-/*
-      $mapping[$div->requireUniqueId()] = array_filter(
-        array(
-          $changeset->getID(),
-          idx($against, $changeset->getID()),
-        ));
-
-*/
-    }
-/*
-    require_static('differential-diff-css');
-    require_static('differential-syntax-css');
-
-    Javelin::initBehavior('differential-populate', array(
-      'registry'    => $mapping,
-      'whitespace'  => $whitespace,
-      'uri'         => $render_uri,
-    ));
-
-    Javelin::initBehavior('differential-context', array(
-      'uri' => $render_uri,
-    ));
-
-    if ($edit) {
-      require_static('remarkup-css');
-      Javelin::initBehavior('differential-inline', array(
-        'uri'       => '/differential/feedback/'.$revision->getID().'/',
-      ));
-    }
-*/
-    return
-      '<div class="differential-review-stage">'.
-        implode("\n", $output).
-      '</div>';
+    return $output;
   }
 
 }

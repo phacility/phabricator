@@ -37,14 +37,22 @@ class DifferentialChangesetViewController extends DifferentialController {
 
     $output = $parser->render();
 
+    $request = $this->getRequest();
+    if ($request->isAjax()) {
+      return id(new AphrontAjaxResponse())
+        ->setContent($output);
+    }
+
+    $detail = new DifferentialChangesetDetailView();
+    $detail->setChangeset($changeset);
+    $detail->appendChild($output);
+
     // TODO: This is a bit of a hacky mess.
     $output =
       '<div style="padding: 2em 1em;">'.
         '<div class="differential-primary-pane">'.
           '<div class="differential-review-stage">'.
-            '<h1>'.phutil_escape_html($changeset->getDisplayFilename()).'</h1>'.
-            '<br />'.
-            $output.
+            $detail->render().
           '</div>'.
         '</div>'.
       '</div>';

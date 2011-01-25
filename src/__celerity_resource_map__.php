@@ -9,7 +9,7 @@
 celerity_register_resource_map(array(
   'aphront-dialog-view-css' =>
   array(
-    'path' => '/res/2ef90210/rsrc/css/aphront/dialog-view.css',
+    'path' => '/res/771b987d/rsrc/css/aphront/dialog-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -17,7 +17,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-form-view-css' =>
   array(
-    'path' => '/res/517031e5/rsrc/css/aphront/form-view.css',
+    'path' => '/res/20ebc99b/rsrc/css/aphront/form-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -25,7 +25,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-panel-view-css' =>
   array(
-    'path' => '/res/d96d5826/rsrc/css/aphront/panel-view.css',
+    'path' => '/res/d1ce0c3d/rsrc/css/aphront/panel-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -33,7 +33,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-side-nav-view-css' =>
   array(
-    'path' => '/res/89b99d7d/rsrc/css/aphront/side-nav-view.css',
+    'path' => '/res/1a16f19a/rsrc/css/aphront/side-nav-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -41,7 +41,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-table-view-css' =>
   array(
-    'path' => '/res/639b3af2/rsrc/css/aphront/table-view.css',
+    'path' => '/res/52b0191f/rsrc/css/aphront/table-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -49,7 +49,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-standard-page-view' =>
   array(
-    'path' => '/res/f1a74aa4/rsrc/css/application/base/standard-page-view.css',
+    'path' => '/res/0eef6905/rsrc/css/application/base/standard-page-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -57,7 +57,7 @@ celerity_register_resource_map(array(
   ),
   'differential-changeset-view-css' =>
   array(
-    'path' => '/res/08a5c816/rsrc/css/application/differential/changeset-view.css',
+    'path' => '/res/921d3a0c/rsrc/css/application/differential/changeset-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -73,7 +73,7 @@ celerity_register_resource_map(array(
   ),
   'differential-table-of-contents-css' =>
   array(
-    'path' => '/res/cd5c966d/rsrc/css/application/differential/table-of-contents.css',
+    'path' => '/res/ebf6641c/rsrc/css/application/differential/table-of-contents.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -81,7 +81,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-directory-css' =>
   array(
-    'path' => '/res/795c7b4e/rsrc/css/application/directory/phabricator-directory.css',
+    'path' => '/res/6a000601/rsrc/css/application/directory/phabricator-directory.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -89,7 +89,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-core-buttons-css' =>
   array(
-    'path' => '/res/5f44fe89/rsrc/css/core/buttons.css',
+    'path' => '/res/6e348ba4/rsrc/css/core/buttons.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -99,6 +99,22 @@ celerity_register_resource_map(array(
   array(
     'path' => '/res/39ce37c2/rsrc/css/core/core.css',
     'type' => 'css',
+    'requires' =>
+    array(
+    ),
+  ),
+  'syntax-highlighting-css' =>
+  array(
+    'path' => '/res/fb673ece/rsrc/css/core/syntax.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+  ),
+  'javelin-behavior-differential-populate' =>
+  array(
+    'path' => '/res/b419291a/rsrc/js/application/differential/behavior-populate.js',
+    'type' => 'js',
     'requires' =>
     array(
     ),

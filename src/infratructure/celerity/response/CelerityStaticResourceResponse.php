@@ -21,6 +21,31 @@ final class CelerityStaticResourceResponse {
   private $symbols = array();
   private $needsResolve = true;
   private $resolved;
+  private $metadata = array();
+  private $metadataBlock = 0;
+  private $behaviors = array();
+
+  public function __construct() {
+    if (isset($_REQUEST['__metablock__'])) {
+      $this->metadataBlock = (int)$_REQUEST['__metablock__'];
+    }
+  }
+
+  public function addMetadata($metadata) {
+    $id = count($this->metadata);
+    $this->metadata[$id] = $metadata;
+    return $this->metadataBlock.'_'.$id;
+  }
+
+  public function getMetadataBlock() {
+    return $this->metadataBlock;
+  }
+
+  public function initBehavior($behavior, array $config = array()) {
+    $this->requireResource('javelin-behavior-'.$behavior);
+    $this->behaviors[$behavior][] = $config;
+    return $this;
+  }
 
   public function requireResource($symbol) {
     $this->symbols[$symbol] = true;
@@ -55,9 +80,66 @@ final class CelerityStaticResourceResponse {
         return '<link rel="stylesheet" type="text/css" href="'.$path.'" />';
       case 'js':
         $path = phutil_escape_html($resource['path']);
-        return '<script type="text/javascript" src="'.$path.'" />';
+        return '<script type="text/javascript" src="'.$path.'">'.
+               '</script>';
     }
     throw new Exception("Unable to render resource.");
   }
+
+  public function renderHTMLFooter() {
+    $data = array();
+    if ($this->metadata) {
+      $json_metadata = json_encode($this->metadata);
+      $this->metadata = array();
+    } else {
+      $json_metadata = '{}';
+    }
+    // Even if there is no metadata on the page, Javelin uses the mergeData()
+    // call to start dispatching the event queue.
+    $data[] = 'JX.Stratcom.mergeData('.$this->metadataBlock.', '.
+                                       $json_metadata.');';
+
+    $onload = array();
+    if ($this->behaviors) {
+      $behavior = json_encode($this->behaviors);
+      $onload[] = 'JX.initBehaviors('.$behavior.')';
+      $this->behaviors = array();
+    }
+
+    if ($onload) {
+      foreach ($onload as $func) {
+        $data[] = 'JX.onload(function(){'.$func.'});';
+      }
+    }
+
+    if ($data) {
+      $data = implode("\n", $data);
+      return '<script type="text/javascript">//<![CDATA['."\n".
+             $data.'//]]></script>';
+    } else {
+      return '';
+    }
+  }
+
+  public function renderAjaxResponse($payload, $error = null) {
+    $response = array(
+      'error'   => $error,
+      'payload' => $payload,
+    );
+
+    if ($this->metadata) {
+      $response['javelin_metadata'] = $this->metadata;
+      $this->metadata = array();
+    }
+
+    if ($this->behaviors) {
+      $response['javelin_behaviors'] = $this->behaviors;
+      $this->behaviors = array();
+    }
+
+    $response = 'for (;;);'.json_encode($response);
+    return $response;
+  }
+
 
 }

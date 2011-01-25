@@ -7,10 +7,13 @@
 
 
 phutil_require_module('phabricator', 'applications/differential/constants/changetype');
+phutil_require_module('phabricator', 'applications/differential/view/changesetdetailview');
 phutil_require_module('phabricator', 'infratructure/celerity/api');
+phutil_require_module('phabricator', 'infratructure/javelin/api');
 phutil_require_module('phabricator', 'view/base');
 
 phutil_require_module('phutil', 'markup');
+phutil_require_module('phutil', 'utils');
 
 
-phutil_require_source('DifferentialDiffTableOfContentsView.php');
+phutil_require_source('DifferentialChangesetListView.php');

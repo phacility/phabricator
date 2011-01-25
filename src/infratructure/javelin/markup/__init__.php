@@ -7,10 +7,8 @@
 
 
 phutil_require_module('phabricator', 'infratructure/celerity/api');
-phutil_require_module('phabricator', 'infratructure/javelin/markup');
-phutil_require_module('phabricator', 'view/base');
 
 phutil_require_module('phutil', 'markup');
 
 
-phutil_require_source('DifferentialChangesetDetailView.php');
+phutil_require_source('markup.php');

@@ -1,0 +1,22 @@
+/**
+ * @provides javelin-behavior-differential-populate
+ */
+
+JX.behavior('differential-populate', function(config) {
+
+  function onresponse(target, response) {
+    JX.DOM.replace(JX.$(target), JX.HTML(response));
+  }
+
+  var uri;
+  for (var k in config.registry) {
+    uri = config.uri + config.registry[k][0] + '/';
+    new JX.Request(uri, JX.bind(null, onresponse, k))
+      .setData({
+        against: config.registry[k][1],
+        whitespace: config.whitespace
+      })
+      .send();
+  }
+
+});

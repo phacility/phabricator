@@ -16,29 +16,9 @@
  * limitations under the License.
  */
 
-final class CelerityAPI {
-
-  private static $response;
-
-  public static function getStaticResourceResponse() {
-    if (empty(self::$response)) {
-      self::$response = new CelerityStaticResourceResponse();
-    }
-    return self::$response;
+final class Javelin {
+  public static function initBehavior($behavior, array $config = array()) {
+    $response = CelerityAPI::getStaticResourceResponse();
+    $response->initBehavior($behavior, $config);
   }
-
 }
-
-function require_celerity_resource($symbol) {
-  $response = CelerityAPI::getStaticResourceResponse();
-  $response->requireResource($symbol);
-}
-
-function celerity_generate_unique_node_id() {
-  static $uniq = 0;
-  $response = CelerityAPI::getStaticResourceResponse();
-  $block = $response->getMetadataBlock();
-
-  return 'UQ'.$block.'_'.($uniq++);
-}
-

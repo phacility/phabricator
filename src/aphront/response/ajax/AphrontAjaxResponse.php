@@ -16,29 +16,30 @@
  * limitations under the License.
  */
 
-final class CelerityAPI {
+/**
+ * @group aphront
+ */
+class AphrontAjaxResponse extends AphrontResponse {
 
-  private static $response;
+  private $content;
+  private $error;
 
-  public static function getStaticResourceResponse() {
-    if (empty(self::$response)) {
-      self::$response = new CelerityStaticResourceResponse();
-    }
-    return self::$response;
+  public function setContent($content) {
+    $this->content = $content;
+    return $this;
+  }
+
+  public function buildResponseString() {
+    $response = CelerityAPI::getStaticResourceResponse();
+    return $response->renderAjaxResponse(
+      $this->content,
+      $this->error);
+  }
+
+  public function getHeaders() {
+    return array(
+      array('Content-Type', 'text/plain; charset=UTF-8'),
+    );
   }
 
 }
-
-function require_celerity_resource($symbol) {
-  $response = CelerityAPI::getStaticResourceResponse();
-  $response->requireResource($symbol);
-}
-
-function celerity_generate_unique_node_id() {
-  static $uniq = 0;
-  $response = CelerityAPI::getStaticResourceResponse();
-  $block = $response->getMetadataBlock();
-
-  return 'UQ'.$block.'_'.($uniq++);
-}
-

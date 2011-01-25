@@ -59,6 +59,8 @@ class PhabricatorStandardPageView extends AphrontPageView {
     require_celerity_resource('phabricator-core-buttons-css');
     require_celerity_resource('phabricator-standard-page-view');
 
+    require_celerity_resource('javelin-lib-dev');
+
     $this->bodyContent = $this->renderChildren();
   }
 
@@ -122,9 +124,7 @@ class PhabricatorStandardPageView extends AphrontPageView {
     $response = CelerityAPI::getStaticResourceResponse();
     return
       $response->renderResourcesOfType('js').
-      '<script type="text/javascript">'.
-        'JX.Stratcom.mergeData(0, {});'.
-      '</script>';
+      $response->renderHTMLFooter();
   }
 
 }
