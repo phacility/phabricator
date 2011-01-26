@@ -53,6 +53,10 @@
   margin: 0.5em 0 0em 2%;
 }
 
+.aphront-form-control-textarea textarea.aphront-textarea-very-short {
+  height: 3em;
+}
+
 .aphront-form-control-select .aphront-form-input {
   padding-top: 2px;
 }

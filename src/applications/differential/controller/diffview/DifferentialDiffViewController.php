@@ -41,6 +41,8 @@ class DifferentialDiffViewController extends DifferentialController {
     $action_form = new AphrontFormView();
     $action_form
       ->setAction('/differential/revision/edit/')
+      ->addHiddenInput('diffID', $diff->getID())
+      ->addHiddenInput('viaDiffView', 1)
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel('Attach To')

@@ -39,6 +39,11 @@ final class AphrontFormView extends AphrontView {
     return $this;
   }
 
+  public function addHiddenInput($key, $value) {
+    $this->data[$key] = $value;
+    return $this;
+  }
+
   public function render() {
     require_celerity_resource('aphront-form-view-css');
     return phutil_render_tag(
@@ -59,6 +64,9 @@ final class AphrontFormView extends AphrontView {
     );
     $inputs = array();
     foreach ($data as $key => $value) {
+      if ($value === null) {
+        continue;
+      }
       $inputs[] = phutil_render_tag(
         'input',
         array(

@@ -18,16 +18,36 @@
 
 class AphrontFormTextAreaControl extends AphrontFormControl {
 
+  const HEIGHT_VERY_SHORT = 'very-short';
+  const HEIGHT_SHORT      = 'short';
+  
+  private $height;
+
+  public function setHeight($height) {
+    $this->height = $height;
+    return $this;
+  }
+
   protected function getCustomControlClass() {
     return 'aphront-form-control-textarea';
   }
 
   protected function renderInput() {
+
+    $height_class = null;
+    switch ($this->height) {
+      case self::HEIGHT_VERY_SHORT:
+      case self::HEIGHT_SHORT:
+        $height_class = 'aphront-textarea-'.$this->height;
+        break;
+    }
+
     return phutil_render_tag(
       'textarea',
       array(
         'name'      => $this->getName(),
         'disabled'  => $this->getDisabled() ? 'disabled' : null,
+        'class'     => $height_class,
       ),
       phutil_escape_html($this->getValue()));
   }

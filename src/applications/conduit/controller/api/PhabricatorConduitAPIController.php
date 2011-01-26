@@ -19,6 +19,10 @@
 class PhabricatorConduitAPIController
   extends PhabricatorConduitController {
 
+  public function shouldRequireLogin() {
+    return false;
+  }
+
   private $method;
 
   public function willProcessRequest(array $data) {

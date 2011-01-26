@@ -18,7 +18,7 @@
 
 class DifferentialRevision extends DifferentialDAO {
 
-  protected $name;
+  protected $title;
   protected $status;
 
   protected $summary;
@@ -32,5 +32,27 @@ class DifferentialRevision extends DifferentialDAO {
   protected $dateCommitted;
 
   protected $lineCount;
+  
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_AUX_PHID => true,
+    ) + parent::getConfiguration();
+  }
+
+  public function generatePHID() {
+    return PhabricatorPHID::generateNewPHID('DREV');
+  }
+  
+  public function loadRelationships() {
+    
+  }
+  
+  public function getReviewers() {
+    return array();
+  }
+  
+  public function getCCPHIDs() {
+    return array();
+  }
 
 }

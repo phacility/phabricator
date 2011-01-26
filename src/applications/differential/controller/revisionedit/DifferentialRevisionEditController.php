@@ -34,25 +34,80 @@ class DifferentialRevisionEditController extends DifferentialController {
     } else {
       $revision = new DifferentialRevision();
     }
-/*
-    $e_name = true;
-    $errors = array();
 
     $request = $this->getRequest();
-    if ($request->isFormPost()) {
-      $category->setName($request->getStr('name'));
-      $category->setSequence($request->getStr('sequence'));
+    $diff_id = $request->getInt('diffID');
+    if ($diff_id) {
+      $diff = id(new DifferentialDiff())->load($diff_id);
+      if (!$diff) {
+        return new Aphront404Response();
+      }
+      if ($diff->getRevisionID()) {
+        // TODO: Redirect?
+        throw new Exception("This diff is already attached to a revision!");
+      }
+    } else {
+      $diff = null;
+    }
 
-      if (!strlen($category->getName())) {
-        $errors[] = 'Category name is required.';
-        $e_name = 'Required';
+    $e_title = true;
+    $e_testplan = true;
+    $errors = array();
+
+    if ($request->isFormPost() && !$request->getStr('viaDiffView')) {
+      $revision->setTitle($request->getStr('title'));
+      $revision->setSummary($request->getStr('summary'));
+      $revision->setTestPlan($request->getStr('testplan'));
+      $revision->setBlameRevision($request->getStr('blame'));
+      $revision->setRevertPlan($request->getStr('revert'));
+
+      if (!strlen(trim($revision->getTitle()))) {
+        $errors[] = 'You must provide a title.';
+        $e_title = 'Required';
+      }
+
+      if (!strlen(trim($revision->getTestPlan()))) {
+        $errors[] = 'You must provide a test plan.';
+        $e_testplan = 'Required';
+      }
+
+      $user_phid = $request->getUser()->getPHID();
+
+      if (in_array($user_phid, $request->getArr('reviewers'))) {
+        $errors[] = 'You may not review your own revision.';
       }
 
       if (!$errors) {
-        $category->save();
-        return id(new AphrontRedirectResponse())
-          ->setURI('/directory/category/');
+        $editor = new DifferentialRevisionEditor($revision, $user_phid);
+        if ($diff) {
+          $editor->addDiff($diff, $request->getStr('comments'));
+        }
+        $editor->setCCPHIDs($request->getArr('cc'));
+        $editor->setReviewers($request->getArr('reviewers'));
+        $editor->save();
+
+        $response = id(new AphrontRedirectResponse())
+          ->setURI('/D'.$revision->getID());
       }
+
+      $reviewer_phids = $request->getArr('reviewers');
+      $cc_phids = $request->getArr('cc');
+    } else {
+//      $reviewer_phids = $revision->getReviewers();
+//      $cc_phids = $revision->getCCPHIDs();
+      $reviewer_phids = array();
+      $cc_phids = array();
+    }
+
+    $form = new AphrontFormView();
+    if ($diff) {
+      $form->addHiddenInput('diffID', $diff->getID());
+    }
+
+    if ($revision->getID()) {
+      $form->setAction('/differential/revision/edit/'.$revision->getID().'/');
+    } else {
+      $form->setAction('/differential/revision/edit/');
     }
 
     $error_view = null;
@@ -61,29 +116,15 @@ class DifferentialRevisionEditController extends DifferentialController {
         ->setTitle('Form Errors')
         ->setErrors($errors);
     }
-*/
-    $e_name = true;
-    $e_testplan = true;
-
-    $form = new AphrontFormView();
-    if ($revision->getID()) {
-      $form->setAction('/differential/revision/edit/'.$revision->getID().'/');
-    } else {
-      $form->setAction('/differential/revision/edit/');
-    }
-
-    $reviewer_map = array(
-      1 => 'A Zebra',
-      2 => 'Pie Messenger',
-    );
 
     $form
       ->appendChild(
         id(new AphrontFormTextAreaControl())
-          ->setLabel('Name')
-          ->setName('name')
-          ->setValue($revision->getName())
-          ->setError($e_name))
+          ->setLabel('Title')
+          ->setName('title')
+          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT)
+          ->setValue($revision->getTitle())
+          ->setError($e_title))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel('Summary')
@@ -99,13 +140,13 @@ class DifferentialRevisionEditController extends DifferentialController {
         id(new AphrontFormTokenizerControl())
           ->setLabel('Reviewers')
           ->setName('reviewers')
-          ->setDatasource('/typeahead/common/user/')
+          ->setDatasource('/typeahead/common/users/')
           ->setValue($reviewer_map))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setLabel('CC')
           ->setName('cc')
-          ->setDatasource('/typeahead/common/user/')
+          ->setDatasource('/typeahead/common/mailable/')
           ->setValue($reviewer_map))
       ->appendChild(
         id(new AphrontFormTextControl())
@@ -116,13 +157,20 @@ class DifferentialRevisionEditController extends DifferentialController {
                        'change fixes.'))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
-          ->setLabel('Revert')
+          ->setLabel('Revert Plan')
           ->setName('revert')
           ->setValue($revision->getRevertPlan())
-          ->setCaption('Special steps required to safely revert this change.'))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue('Save'));
+          ->setCaption('Special steps required to safely revert this change.'));
+
+    $submit = id(new AphrontFormSubmitControl())
+      ->setValue('Save');
+    if ($diff) {
+      $submit->addCancelButton('/differential/diff/'.$diff->getID().'/');
+    } else {
+      $submit->addCancelButton('/D'.$revision->getID());
+    }
+
+    $form->appendChild($submit);
 
     $panel = new AphrontPanelView();
     if ($revision->getID()) {
@@ -134,7 +182,6 @@ class DifferentialRevisionEditController extends DifferentialController {
     $panel->appendChild($form);
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
 
-    $error_view = null;
     return $this->buildStandardPageResponse(
       array($error_view, $panel),
       array(

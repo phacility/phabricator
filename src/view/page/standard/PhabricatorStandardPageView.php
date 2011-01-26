@@ -114,10 +114,11 @@ class PhabricatorStandardPageView extends AphrontPageView {
 
     $login_stuff = null;
     $request = $this->getRequest();
-    $user = $request->getUser();
-
-    if ($user->getPHID()) {
-      $login_stuff = 'Logged in as '.phutil_escape_html($user->getUsername());
+    if ($request) {
+      $user = $request->getUser();
+      if ($user->getPHID()) {
+        $login_stuff = 'Logged in as '.phutil_escape_html($user->getUsername());
+      }
     }
 
     return
