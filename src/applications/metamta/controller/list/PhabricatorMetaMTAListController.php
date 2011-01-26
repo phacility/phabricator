@@ -25,18 +25,42 @@ class PhabricatorMetaMTAListController extends PhabricatorMetaMTAController {
     $rows = array();
     foreach ($mails as $mail) {
       $rows[] = array(
-        $mail->getID(),
+        PhabricatorMetaMTAMail::getReadableStatus($mail->getStatus()),
+        $mail->getRetryCount(),
+        ($mail->getNextRetry() - time()).' s',
+        date('Y-m-d g:i:s A', $mail->getDateCreated()),
+        (time() - $mail->getDateModified()).' s',
+        phutil_escape_html($mail->getSubject()),
+        phutil_render_tag(
+          'a',
+          array(
+            'class' => 'button small grey',
+            'href'  => '/mail/'.$mail->getID().'/',
+          ),
+          'View'),
       );
     }
 
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'ID',
+        'Status',
+        'Retry',
+        'Next',
+        'Created',
+        'Updated',
+        'Subject',
+        '',
       ));
     $table->setColumnClasses(
       array(
         null,
+        null,
+        null,
+        null,
+        null,
+        'wide',
+        'action',
       ));
 
     $panel = new AphrontPanelView();

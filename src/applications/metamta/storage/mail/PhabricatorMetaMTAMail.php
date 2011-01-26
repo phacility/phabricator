@@ -86,8 +86,8 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this;
   }
 
-  public function setReplyTo($phid) {
-    $this->setParam('reply-to', $phid);
+  public function setReplyTo($reply_to) {
+    $this->setParam('reply-to', $reply_to);
     return $this;
   }
 
@@ -115,9 +115,10 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this;
   }
 
-  public function sendNow($force_send = false) {
+  public function sendNow(
+    $force_send = false,
+    PhabricatorMailImplementationAdapater $mailer) {
 
-/*
     if (!$force_send) {
       if ($this->getStatus() != self::STATUS_QUEUE) {
         throw new Exception("Trying to send an already-sent mail!");
@@ -128,7 +129,6 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       }
     }
 
-    require_module_lazy('intern/mailer');
     try {
       $mailer = new InternMailer();
       foreach ($this->parameters as $key => $value) {
@@ -185,7 +185,7 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       $ok = $mailer->send();
       $error = $mailer->getError();
     }
-*/
+
     $error = null;
     $ok = true;
 

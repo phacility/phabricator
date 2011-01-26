@@ -101,45 +101,6 @@ class PhabricatorMetaMTASendController extends PhabricatorMetaMTAController {
       array(
         'title' => 'Send Mail',
       ));
-/*
-    return
-      <metamta:standard-page title="Send Email">
-        <tools:form width="wide" method="post" action={URI::getRequestURI()}>
-          <h1>Send Email</h1>
-          <tools:fieldset>
-            <tools:instructions>This form will send a normal email using MetaMTA
-            as a transport mechanism.</tools:instructions>
-            <tools:control type="text" label="To">
-              <tools:tokenizer name="to" datasource="mailable" />
-            </tools:control>
-            <tools:control type="text" label="CC">
-              <tools:tokenizer name="cc" datasource="mailable" />
-            </tools:control>
-            <tools:control type="text" label="Subject">
-              <input type="text" name="subject" />
-            </tools:control>
-            <tools:control type="textarea" label="Body">
-              <textarea name="body"></textarea>
-            </tools:control>
-            <tools:control type="text" label="Simulate Failures"
-              caption={$failure_caption}>
-              <input type="text" name="failures" />
-            </tools:control>
-            <tools:control type="checkbox" label="HTML">
-              <input type="checkbox" name="html" value="1" />
-              Send as HTML email.
-            </tools:control>
-            <tools:control type="checkbox" label="Send Now">
-              <input type="checkbox" name="immediately" value="1" />
-              Send immediately, not via MetaMTA daemon.
-            </tools:control>
-            <tools:control type="submit">
-              <button>Send Email</button>
-            </tools:control>
-          </tools:fieldset>
-        </tools:form>
-      </metamta:standard-page>;
-*/
   }
 
 }
