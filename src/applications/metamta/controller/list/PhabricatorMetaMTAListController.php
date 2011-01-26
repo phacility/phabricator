@@ -35,7 +35,7 @@ class PhabricatorMetaMTAListController extends PhabricatorMetaMTAController {
           'a',
           array(
             'class' => 'button small grey',
-            'href'  => '/mail/'.$mail->getID().'/',
+            'href'  => '/mail/view/'.$mail->getID().'/',
           ),
           'View'),
       );

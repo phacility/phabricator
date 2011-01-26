@@ -30,6 +30,8 @@ class PhabricatorMetaMTAViewController extends PhabricatorMetaMTAController {
     if (!$mail) {
       return new Aphront404Response();
     }
+    
+    $status = PhabricatorMetaMTAMail::getReadableStatus($mail->getStatus());
 
     $form = new AphrontFormView();
     $form->setAction('/mail/send/');
@@ -44,6 +46,14 @@ class PhabricatorMetaMTAViewController extends PhabricatorMetaMTAController {
           ->setValue(date('F jS, Y g:i:s A', $mail->getDateCreated())))
       ->appendChild(
         id(new AphrontFormStaticControl())
+          ->setLabel('Status')
+          ->setValue($status))
+      ->appendChild(
+        id(new AphrontFormStaticControl())
+          ->setLabel('Message')
+          ->setValue($mail->getMessage()))
+      ->appendChild(
+        id(new AphrontFormStaticControl())
           ->setLabel('Related PHID')
           ->setValue($mail->getRelatedPHID()))
       ->appendChild(
@@ -52,7 +62,7 @@ class PhabricatorMetaMTAViewController extends PhabricatorMetaMTAController {
           ->setValue(json_encode($mail->getParameters())))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->addCancelButton('/mail/'));
+          ->addCancelButton('/mail/', 'Done'));
 
     $panel = new AphrontPanelView();
     $panel->setHeader('View Email');

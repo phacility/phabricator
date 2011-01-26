@@ -117,7 +117,7 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
   public function sendNow(
     $force_send = false,
-    PhabricatorMailImplementationAdapater $mailer) {
+    PhabricatorMailImplementationAdapter $mailer) {
 
     if (!$force_send) {
       if ($this->getStatus() != self::STATUS_QUEUE) {
@@ -128,22 +128,49 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         throw new Exception("Trying to send an email before next retry!");
       }
     }
-
+    
     try {
-      $mailer = new InternMailer();
+      $parameters = $this->parameters;
+      $phids = array();
+      foreach ($parameters as $key => $value) {
+        switch ($key) {
+          case 'from':
+          case 'to':
+          case 'cc':
+            if (!is_array($value)) {
+              $value = array($value);
+            }
+            foreach (array_filter($value) as $phid) {
+              $phids[] = $phid;
+            }
+            break;
+        }
+      }
+      
+      $handles = id(new PhabricatorObjectHandleData($phids))
+        ->loadHandles();
+      
       foreach ($this->parameters as $key => $value) {
         switch ($key) {
           case 'from':
-            $mailer->setFrom($value);
+            $mailer->setFrom($handles[$value]->getEmail());
             break;
           case 'reply-to':
             $mailer->addReplyTo($value);
             break;
           case 'to':
-            $mailer->addTos($value);
+            $emails = array();
+            foreach ($value as $phid) {
+              $emails[] = $handles[$phid]->getEmail();
+            }
+            $mailer->addTos($emails);
             break;
           case 'cc':
-            $mailer->addCCs($value);
+            $emails = array();
+            foreach ($value as $phid) {
+              $emails[] = $handles[$phid]->getEmail();
+            }
+            $mailer->addCCs($emails);
             break;
           case 'headers':
             foreach ($value as $header_key => $header_value) {
@@ -168,9 +195,6 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
       $mailer->addHeader('X-Mail-Transport-Agent', 'MetaMTA');
 
-      if (!$mailer->hasValidRecipients()) {
-        throw new Exception("Permanent failure: no valid recipients.");
-      }
     } catch (Exception $ex) {
       $this->setStatus(self::STATUS_FAIL);
       $this->setMessage($ex->getMessage());
@@ -182,12 +206,13 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       $ok = false;
       $error = 'Simulated failure.';
     } else {
-      $ok = $mailer->send();
-      $error = $mailer->getError();
+      try {
+        $ok = $mailer->send();
+      } catch (Exception $ex) {
+        $ok = false;
+        $error = $ex->getMessage();
+      }
     }
-
-    $error = null;
-    $ok = true;
 
     if (!$ok) {
       $this->setMessage($error);
