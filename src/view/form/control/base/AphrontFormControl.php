@@ -87,7 +87,7 @@ abstract class AphrontFormControl extends AphrontView {
 
     if (strlen($this->getLabel())) {
       $label =
-        '<label>'.
+        '<label class="aphront-form-label">'.
           phutil_escape_html($this->getLabel()).
           ':'.
         '</label>';

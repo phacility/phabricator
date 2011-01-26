@@ -17,7 +17,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-form-view-css' =>
   array(
-    'path' => '/res/17285e65/rsrc/css/aphront/form-view.css',
+    'path' => '/res/51ec6383/rsrc/css/aphront/form-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -25,7 +25,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-panel-view-css' =>
   array(
-    'path' => '/res/d1ce0c3d/rsrc/css/aphront/panel-view.css',
+    'path' => '/res/fe62e634/rsrc/css/aphront/panel-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -74,7 +74,7 @@ celerity_register_resource_map(array(
   ),
   'differential-changeset-view-css' =>
   array(
-    'path' => '/res/921d3a0c/rsrc/css/application/differential/changeset-view.css',
+    'path' => '/res/658d181a/rsrc/css/application/differential/changeset-view.css',
     'type' => 'css',
     'requires' =>
     array(

@@ -93,6 +93,12 @@ class AphrontDefaultApplicationConfiguration
         'common/(?<type>\w+)/$'
           => 'PhabricatorTypeaheadCommonDatasourceController',
       ),
+
+      '/mail/' => array(
+        '$' => 'PhabricatorMetaMTAListController',
+        'send/$' => 'PhabricatorMetaMTASendController',
+        'view/(?<id>\d+)/$' => 'PhabricatorMetaMTAViewController',
+      )
     );
   }
 

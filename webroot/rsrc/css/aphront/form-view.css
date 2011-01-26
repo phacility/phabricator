@@ -8,7 +8,7 @@
   padding: 1em;
 }
 
-.aphront-form-view label {
+.aphront-form-view label.aphront-form-label {
   padding-top: 4px;
   width: 19%;
   float: left;
@@ -64,7 +64,7 @@
   text-align: right;
   clear: both;
   margin-right: 25%;
-  margin-left: 15%;
+  margin-left: 20%;
 }
 
 .aphront-error-view {
@@ -76,10 +76,24 @@
 }
 
 .aphront-form-instructions {
-  margin: 2em 3%;
+  margin: 0.75em 3% 1.25em;
 }
 
 .aphront-form-control-static .aphront-form-input {
   padding-top: 4px;
   font-size: 13px;
+}
+
+table.aphront-form-control-checkbox-layout {
+  margin-top: 3px;
+  font-size: 13px;
+}
+
+table.aphront-form-control-checkbox-layout th {
+  padding-top: 2px;
+  padding-left: 0.35em;
+}
+
+.aphront-form-control-checkbox-layout td input {
+  width: auto;
 }
