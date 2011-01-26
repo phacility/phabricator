@@ -24,6 +24,16 @@ class PhabricatorStandardPageView extends AphrontPageView {
   private $selectedTab;
   private $glyph;
   private $bodyContent;
+  private $request;
+
+  public function setRequest($request) {
+    $this->request = $request;
+    return $this;
+  }
+
+  public function getRequest() {
+    return $this->request;
+  }
 
   public function setApplicationName($application_name) {
     $this->applicationName = $application_name;
@@ -102,9 +112,20 @@ class PhabricatorStandardPageView extends AphrontPageView {
       $tabs = '<span class="phabricator-head-tabs">'.$tabs.'</span>';
     }
 
+    $login_stuff = null;
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    if ($user->getPHID()) {
+      $login_stuff = 'Logged in as '.phutil_escape_html($user->getUsername());
+    }
+
     return
       '<div class="phabricator-standard-page">'.
         '<div class="phabricator-standard-header">'.
+          '<div class="phabricator-login-details">'.
+            $login_stuff.
+          '</div>'.
           '<a href="/">Phabricator</a> '.
           phutil_render_tag(
             'a',

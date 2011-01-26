@@ -16,29 +16,6 @@
  * limitations under the License.
  */
 
-/**
- * @group aphront
- */
-abstract class AphrontController {
-
-  private $request;
-
-  public function willBeginExecution() {
-    return;
-  }
-
-  public function willProcessRequest(array $uri_data) {
-    return;
-  }
-
-  abstract public function processRequest();
-
-  final public function __construct(AphrontRequest $request) {
-    $this->request = $request;
-  }
-
-  final public function getRequest() {
-    return $this->request;
-  }
+class AphrontException extends Exception {
 
 }

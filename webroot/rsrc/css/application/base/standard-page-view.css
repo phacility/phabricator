@@ -46,3 +46,7 @@
   padding: 0 1em;
   text-transform: uppercase;
 }
+
+.phabricator-login-details {
+  float: right;
+}

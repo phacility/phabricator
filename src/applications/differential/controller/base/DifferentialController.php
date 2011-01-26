@@ -22,7 +22,7 @@ abstract class DifferentialController extends PhabricatorController {
 
     require_celerity_resource('differential-core-view-css');
 
-    $page = new PhabricatorStandardPageView();
+    $page = $this->buildStandardPageView();
 
     $page->setApplicationName('Differential');
     $page->setBaseURI('/differential/');

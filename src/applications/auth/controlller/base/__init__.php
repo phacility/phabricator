@@ -12,4 +12,4 @@ phutil_require_module('phabricator', 'applications/base/controller/base');
 phutil_require_module('phutil', 'utils');
 
 
-phutil_require_source('PhabricatorPHIDController.php');
+phutil_require_source('PhabricatorAuthController.php');

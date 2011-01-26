@@ -16,29 +16,16 @@
  * limitations under the License.
  */
 
-/**
- * @group aphront
- */
-abstract class AphrontController {
+class AphrontRedirectException extends AphrontException {
 
-  private $request;
+  private $uri;
 
-  public function willBeginExecution() {
-    return;
+  public function __construct($uri) {
+    $this->uri = $uri;
   }
 
-  public function willProcessRequest(array $uri_data) {
-    return;
-  }
-
-  abstract public function processRequest();
-
-  final public function __construct(AphrontRequest $request) {
-    $this->request = $request;
-  }
-
-  final public function getRequest() {
-    return $this->request;
+  public function getURI() {
+    return $this->uri;
   }
 
 }

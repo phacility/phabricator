@@ -19,7 +19,7 @@
 abstract class PhabricatorMetaMTAController extends PhabricatorController {
 
   public function buildStandardPageResponse($view, array $data) {
-    $page = new PhabricatorStandardPageView();
+    $page = $this->buildStandardPageView();
 
     $page->setApplicationName('MetaMTA');
     $page->setBaseURI('/mail/');

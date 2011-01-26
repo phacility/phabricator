@@ -16,29 +16,18 @@
  * limitations under the License.
  */
 
-/**
- * @group aphront
- */
-abstract class AphrontController {
+abstract class PhabricatorAuthController extends PhabricatorController {
 
-  private $request;
+  public function buildStandardPageResponse($view, array $data) {
+    $page = $this->buildStandardPageView();
 
-  public function willBeginExecution() {
-    return;
-  }
+    $page->setApplicationName('Login');
+    $page->setBaseURI('/login/');
+    $page->setTitle(idx($data, 'title'));
+    $page->appendChild($view);
 
-  public function willProcessRequest(array $uri_data) {
-    return;
-  }
-
-  abstract public function processRequest();
-
-  final public function __construct(AphrontRequest $request) {
-    $this->request = $request;
-  }
-
-  final public function getRequest() {
-    return $this->request;
+    $response = new AphrontWebpageResponse();
+    return $response->setContent($page->render());
   }
 
 }

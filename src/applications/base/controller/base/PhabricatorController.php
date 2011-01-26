@@ -18,8 +18,48 @@
 
 abstract class PhabricatorController extends AphrontController {
 
+  public function shouldRequireLogin() {
+    return true;
+  }
+
+  final public function willBeginExecution() {
+
+    $request = $this->getRequest();
+
+    $user = new PhabricatorUser();
+
+    $phusr = $request->getCookie('phusr');
+    $phsid = $request->getCookie('phsid');
+
+    if ($phusr && $phsid) {
+      $info = queryfx_one(
+        $user->establishConnection('r'),
+        'SELECT u.* FROM %T u JOIN %T s ON u.phid = s.userPHID
+          AND s.type = %s AND s.sessionKey = %s',
+        $user->getTableName(),
+        'phabricator_session',
+        'web',
+        $phsid);
+      if ($info) {
+        $user->loadFromArray($info);
+      }
+    }
+
+    $request->setUser($user);
+
+    if ($this->shouldRequireLogin() && !$user->getPHID()) {
+      throw new AphrontRedirectException('/login/');
+    }
+  }
+
+  public function buildStandardPageView() {
+    $view = new PhabricatorStandardPageView();
+    $view->setRequest($this->getRequest());
+    return $view;
+  }
+
   public function buildStandardPageResponse($view) {
-    $page = new PhabricatorStandardPageView();
+    $page = $this->buildStandardPageView();
     $page->appendChild($view);
     $response = new AphrontWebpageResponse();
     $response->setContent($page->render());

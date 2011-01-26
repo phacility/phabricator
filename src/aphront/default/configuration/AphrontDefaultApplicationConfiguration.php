@@ -103,6 +103,8 @@ class AphrontDefaultApplicationConfiguration
         'lists/edit/(?:(?<id>\d+)/)?$'
           => 'PhabricatorMetaMTAMailingListEditController',
       ),
+
+      '/login/' => 'PhabricatorLoginController',
     );
   }
 

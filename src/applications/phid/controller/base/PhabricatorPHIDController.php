@@ -19,7 +19,7 @@
 abstract class PhabricatorPHIDController extends PhabricatorController {
 
   public function buildStandardPageResponse($view, array $data) {
-    $page = new PhabricatorStandardPageView();
+    $page = $this->buildStandardPageView();
 
     $page->setApplicationName('PHID');
     $page->setBaseURI('/phid/');

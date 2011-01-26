@@ -6,7 +6,5 @@
 
 
 
-phutil_require_module('phutil', 'utils');
 
-
-phutil_require_source('AphrontRequest.php');
+phutil_require_source('AphrontException.php');

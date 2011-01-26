@@ -38,9 +38,14 @@ $application->setPath($path);
 $request = $application->buildRequest();
 $application->setRequest($request);
 list($controller, $uri_data) = $application->buildController();
-$controller->willProcessRequest($uri_data);
 try {
+  $controller->willBeginExecution();
+
+  $controller->willProcessRequest($uri_data);
   $response = $controller->processRequest();
+} catch (AphrontRedirectException $ex) {
+  $response = id(new AphrontRedirectResponse())
+    ->setURI($ex->getURI());
 } catch (Exception $ex) {
   $response = $application->handleException($ex);
 }

@@ -24,6 +24,8 @@ class PhabricatorUser extends PhabricatorUserDAO {
   protected $userName;
   protected $realName;
   protected $email;
+  protected $passwordSalt;
+  protected $passwordHash;
 
   public function getConfiguration() {
     return array(
@@ -33,6 +35,29 @@ class PhabricatorUser extends PhabricatorUserDAO {
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(self::PHID_TYPE);
+  }
+
+  public function setPassword($password) {
+    $this->setPasswordSalt(md5(mt_rand()));
+    $hash = $this->hashPassword($password);
+    $this->setPasswordHash($hash);
+    return $this;
+  }
+
+  public function comparePassword($password) {
+    $password = $this->hashPassword($password);
+    return ($password === $this->getPasswordHash());
+  }
+
+  private function hashPassword($password) {
+    $password = $this->getUsername().
+                $password.
+                $this->getPHID().
+                $this->getPasswordSalt();
+    for ($ii = 0; $ii < 1000; $ii++) {
+      $password = md5($password);
+    }
+    return $password;
   }
 
 }

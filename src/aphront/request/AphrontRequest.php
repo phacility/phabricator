@@ -28,6 +28,7 @@ class AphrontRequest {
   private $host;
   private $path;
   private $requestData;
+  private $user;
 
   final public function __construct($host, $path) {
     $this->host = $host;
@@ -87,5 +88,38 @@ class AphrontRequest {
   final public function isFormPost() {
     return $this->getExists(self::TYPE_FORM) && $this->isHTTPPost();
   }
+
+  final public function getCookie($name, $default = null) {
+    return idx($_COOKIE, $name, $default);
+  }
+
+  final public function clearCookie($name) {
+    $this->setCookie($name, '', time() - (60 * 60 * 24 * 30));
+  }
+
+  final public function setCookie($name, $value, $expire = null) {
+    if ($expire === null) {
+      $expire = time() + (60 * 60 * 24 * 365 * 5);
+    }
+    setcookie(
+      $name,
+      $value,
+      $expire,
+      $path = '/',
+      $domain = '',
+      $secure = false,
+      $http_only = true);
+  }
+
+  final public function setUser($user) {
+    $this->user = $user;
+    return $this;
+  }
+
+  final public function getUser() {
+    return $this->user;
+  }
+
+
 
 }
