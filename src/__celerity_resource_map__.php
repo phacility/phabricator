@@ -17,7 +17,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-form-view-css' =>
   array(
-    'path' => '/res/51ec6383/rsrc/css/aphront/form-view.css',
+    'path' => '/res/75636a53/rsrc/css/aphront/form-view.css',
     'type' => 'css',
     'requires' =>
     array(

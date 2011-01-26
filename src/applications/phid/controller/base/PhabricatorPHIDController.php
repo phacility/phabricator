@@ -26,9 +26,13 @@ abstract class PhabricatorPHIDController extends PhabricatorController {
     $page->setTitle(idx($data, 'title'));
     $page->setTabs(
       array(
-        'phids' => array(
+        'lookup' => array(
           'href' => '/phid/',
-          'name' => 'PHIDs',
+          'name' => 'PHID Lookup',
+        ),
+        'phids' => array(
+          'href' => '/phid/list/',
+          'name' => 'PHID List',
         ),
         'types' => array(
           'href' => '/phid/type/',

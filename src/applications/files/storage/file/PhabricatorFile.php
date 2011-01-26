@@ -167,4 +167,8 @@ class PhabricatorFile extends PhabricatorFileDAO {
     return $data;
   }
 
+  public function getViewURI() {
+    return PhabricatorFileURI::getViewURIForPHID($this->getPHID());
+  }
+
 }

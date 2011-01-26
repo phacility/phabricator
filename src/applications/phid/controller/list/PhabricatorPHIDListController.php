@@ -47,9 +47,13 @@ class PhabricatorPHIDListController
     $panel->setHeader('PHIDs');
     $panel->setCreateButton('Allocate New PHID', '/phid/new/');
 
-    return $this->buildStandardPageResponse($panel, array(
-      'title' => 'PHIDs',
-      'tab'   => 'phids',
+    return $this->buildStandardPageResponse(
+      array(
+        $panel,
+      ),
+      array(
+        'title' => 'PHIDs',
+        'tab'   => 'phids',
       ));
   }
 

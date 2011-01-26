@@ -59,7 +59,8 @@ class AphrontDefaultApplicationConfiguration
         '(?<view>download)/(?<phid>[^/]+)/' => 'PhabricatorFileViewController',
       ),
       '/phid/' => array(
-        '$' => 'PhabricatorPHIDListController',
+        '$' => 'PhabricatorPHIDLookupController',
+        'list/$' => 'PhabricatorPHIDListController',
         'type/$' => 'PhabricatorPHIDTypeListController',
         'type/edit/(?:(?<id>\d+)/)?$' => 'PhabricatorPHIDTypeEditController',
         'new/$' => 'PhabricatorPHIDAllocateController',
