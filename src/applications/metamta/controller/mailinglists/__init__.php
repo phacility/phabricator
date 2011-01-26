@@ -7,7 +7,7 @@
 
 
 phutil_require_module('phabricator', 'applications/metamta/controller/base');
-phutil_require_module('phabricator', 'applications/metamta/storage/mail');
+phutil_require_module('phabricator', 'applications/metamta/storage/mailinglist');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/layout/panel');
 
@@ -15,4 +15,4 @@ phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
 
 
-phutil_require_source('PhabricatorMetaMTAListController.php');
+phutil_require_source('PhabricatorMetaMTAMailingListsController.php');

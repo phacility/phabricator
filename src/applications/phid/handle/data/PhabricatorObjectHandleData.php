@@ -62,6 +62,31 @@ class PhabricatorObjectHandleData {
             $handles[$phid] = $handle;
           }
           break;
+        case 'MLST':
+          $class = 'PhabricatorMetaMTAMailingList';
+
+          PhutilSymbolLoader::loadClass($class);
+          $object = newv($class, array());
+
+          $lists = $object->loadAllWhere('phid IN (%Ls)', $phids);
+          $lists = mpull($lists, null, 'getPHID');
+
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            if (empty($lists[$phid])) {
+              $handle->setType(self::TYPE_UNKNOWN);
+              $handle->setName('Unknown Mailing List');
+            } else {
+              $list = $lists[$phid];
+              $handle->setType($type);
+              $handle->setEmail($list->getEmail());
+              $handle->setName($list->getName());
+              $handle->setURI($list->getURI());
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
         case 'FILE':
           $class = 'PhabricatorFile';
           PhutilSymbolLoader::loadClass($class);

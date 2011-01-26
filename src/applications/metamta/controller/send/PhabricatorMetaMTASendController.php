@@ -59,12 +59,12 @@ class PhabricatorMetaMTASendController extends PhabricatorMetaMTAController {
         id(new AphrontFormTokenizerControl())
           ->setLabel('To')
           ->setName('to')
-          ->setDatasource('/typeahead/common/user/'))
+          ->setDatasource('/typeahead/common/mailable/'))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setLabel('CC')
           ->setName('cc')
-          ->setDatasource('/typeahead/common/user/'))
+          ->setDatasource('/typeahead/common/mailable/'))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Subject')

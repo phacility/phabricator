@@ -16,47 +16,39 @@
  * limitations under the License.
  */
 
-class PhabricatorMetaMTAListController extends PhabricatorMetaMTAController {
+class PhabricatorMetaMTAMailingListsController
+  extends PhabricatorMetaMTAController {
 
   public function processRequest() {
-    $mails = id(new PhabricatorMetaMTAMail())->loadAllWhere(
+    $lists = id(new PhabricatorMetaMTAMailingList())->loadAllWhere(
       '1 = 1 ORDER BY id DESC LIMIT 100');
 
     $rows = array();
-    foreach ($mails as $mail) {
+    foreach ($lists as $list) {
       $rows[] = array(
-        PhabricatorMetaMTAMail::getReadableStatus($mail->getStatus()),
-        $mail->getRetryCount(),
-        ($mail->getNextRetry() - time()).' s',
-        date('Y-m-d g:i:s A', $mail->getDateCreated()),
-        (time() - $mail->getDateModified()).' s',
-        phutil_escape_html($mail->getSubject()),
+        phutil_escape_html($list->getPHID()),
+        phutil_escape_html($list->getEmail()),
+        phutil_escape_html($list->getName()),
         phutil_render_tag(
           'a',
           array(
-            'class' => 'button small grey',
-            'href'  => '/mail/view/'.$mail->getID().'/',
+            'class' => 'button grey small',
+            'href'  => '/mail/lists/edit/'.$list->getID().'/',
           ),
-          'View'),
+          'Edit'),
       );
     }
 
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Status',
-        'Retry',
-        'Next',
-        'Created',
-        'Updated',
-        'Subject',
+        'PHID',
+        'Email',
+        'Name',
         '',
       ));
     $table->setColumnClasses(
       array(
-        null,
-        null,
-        null,
         null,
         null,
         'wide',
@@ -65,14 +57,14 @@ class PhabricatorMetaMTAListController extends PhabricatorMetaMTAController {
 
     $panel = new AphrontPanelView();
     $panel->appendChild($table);
-    $panel->setHeader('MetaMTA Messages');
-    $panel->setCreateButton('Send New Message', '/mail/send/');
+    $panel->setHeader('Mailing Lists');
+    $panel->setCreateButton('Add New List', '/mail/lists/edit/');
 
     return $this->buildStandardPageResponse(
       $panel,
       array(
-        'title' => 'MetaMTA',
-        'tab'   => 'queue',
+        'title' => 'Mailing Lists',
+        'tab'   => 'lists',
       ));
   }
 }

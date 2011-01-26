@@ -24,6 +24,18 @@ abstract class PhabricatorMetaMTAController extends PhabricatorController {
     $page->setApplicationName('MetaMTA');
     $page->setBaseURI('/mail/');
     $page->setTitle(idx($data, 'title'));
+    $page->setTabs(
+      array(
+        'queue' => array(
+          'name' => 'Mail Queue',
+          'href' => '/mail/',
+        ),
+        'lists' => array(
+          'name' => 'Mailing Lists',
+          'href' => '/mail/lists/',
+        ),
+      ),
+      idx($data, 'tab'));
     $page->setGlyph("@");
     $page->appendChild($view);
 

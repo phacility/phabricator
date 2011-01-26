@@ -25,17 +25,41 @@ class PhabricatorTypeaheadCommonDatasourceController
 
   public function processRequest() {
 
+    $need_users = false;
+    $need_lists = false;
+    switch ($this->type) {
+      case 'users':
+        $need_users = true;
+        break;
+      case 'mailable':
+        $need_users = true;
+        $need_lists = true;
+        break;
+    }
+
     $data = array();
 
-    $users = id(new PhabricatorUser())->loadAll();
 
-    $data = array();
-    foreach ($users as $user) {
-      $data[] = array(
-        $user->getUsername().' ('.$user->getRealName().')',
-        '/p/'.$user->getUsername(),
-        $user->getPHID(),
-      );
+    if ($need_users) {
+      $users = id(new PhabricatorUser())->loadAll();
+      foreach ($users as $user) {
+        $data[] = array(
+          $user->getUsername().' ('.$user->getRealName().')',
+          '/p/'.$user->getUsername(),
+          $user->getPHID(),
+        );
+      }
+    }
+
+    if ($need_lists) {
+      $lists = id(new PhabricatorMetaMTAMailingList())->loadAll();
+      foreach ($lists as $list) {
+        $data[] = array(
+          $list->getEmail(),
+          $list->getURI(),
+          $list->getPHID(),
+        );
+      }
     }
 
     return id(new AphrontAjaxResponse())

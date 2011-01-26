@@ -6,15 +6,16 @@
 
 
 
+phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'aphront/response/redirect');
-phutil_require_module('phabricator', 'applications/metamta/adapter/phpmailerlite');
 phutil_require_module('phabricator', 'applications/metamta/controller/base');
-phutil_require_module('phabricator', 'applications/metamta/storage/mail');
+phutil_require_module('phabricator', 'applications/metamta/storage/mailinglist');
 phutil_require_module('phabricator', 'view/form/base');
 phutil_require_module('phabricator', 'view/form/control/submit');
+phutil_require_module('phabricator', 'view/form/error');
 phutil_require_module('phabricator', 'view/layout/panel');
 
 phutil_require_module('phutil', 'utils');
 
 
-phutil_require_source('PhabricatorMetaMTASendController.php');
+phutil_require_source('PhabricatorMetaMTAMailingListEditController.php');

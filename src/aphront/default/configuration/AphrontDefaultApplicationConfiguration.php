@@ -99,7 +99,10 @@ class AphrontDefaultApplicationConfiguration
         '$' => 'PhabricatorMetaMTAListController',
         'send/$' => 'PhabricatorMetaMTASendController',
         'view/(?<id>\d+)/$' => 'PhabricatorMetaMTAViewController',
-      )
+        'lists/$' => 'PhabricatorMetaMTAMailingListsController',
+        'lists/edit/(?:(?<id>\d+)/)?$'
+          => 'PhabricatorMetaMTAMailingListEditController',
+      ),
     );
   }
 
