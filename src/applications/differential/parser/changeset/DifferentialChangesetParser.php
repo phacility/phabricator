@@ -404,12 +404,14 @@ class DifferentialChangesetParser {
     }
 
     $data = null;
-/*
+
+    $changeset = new DifferentialChangeset();
+    $conn_r = $changeset->establishConnection('r');
     $data = queryfx_one(
-      smc_get_db('cdb.differential', 'r'),
-      'SELECT * FROM changeset_parse_cache WHERE id = %d',
+      $conn_r,
+      'SELECT * FROM %T WHERE id = %d',
+      $changeset->getTableName().'_parse_cache',
       $this->changesetID);
-*/
 
     if (!$data) {
       return false;
@@ -479,14 +481,15 @@ class DifferentialChangesetParser {
     $cache = json_encode($cache);
 
     try {
-/*
+      $changeset = new DifferentialChangeset();
+      $conn_w = $changeset->establishConnection('w');
       queryfx(
-        smc_get_db('cdb.differential', 'w'),
-        'INSERT INTO changeset_parse_cache (id, cache) VALUES (%d, %s)
+        $conn_w,
+        'INSERT INTO %T (id, cache) VALUES (%d, %s)
           ON DUPLICATE KEY UPDATE cache = VALUES(cache)',
+        $changeset->getTableName().'_parse_cache',
         $this->changesetID,
         $cache);
-*/
     } catch (QueryException $ex) {
       // TODO: uhoh
     }
@@ -571,7 +574,7 @@ class DifferentialChangesetParser {
     $result = $this->highlightEngine->highlightSource(
       $this->filetype,
       $corpus);
-      
+
     $result_lines = explode("\n", $result);
     foreach ($data as $key => $info) {
       if (!$info) {
