@@ -107,7 +107,7 @@ abstract class AphrontDatabaseConnection {
       self::$transactionShutdownRegistered = true;
       register_shutdown_function(
         array(
-          'LiskConnection',
+          'AphrontDatabaseConnection',
           'shutdownTransactionStacks',
         ));
     }

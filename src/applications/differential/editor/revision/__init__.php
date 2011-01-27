@@ -10,6 +10,9 @@ phutil_require_module('phabricator', 'applications/differential/constants/revisi
 phutil_require_module('phabricator', 'applications/differential/mail/ccwelcome');
 phutil_require_module('phabricator', 'applications/differential/mail/newdiff');
 phutil_require_module('phabricator', 'applications/differential/storage/changeset');
+phutil_require_module('phabricator', 'applications/differential/storage/revision');
+phutil_require_module('phabricator', 'storage/qsprintf');
+phutil_require_module('phabricator', 'storage/queryfx');
 
 phutil_require_module('phutil', 'utils');
 

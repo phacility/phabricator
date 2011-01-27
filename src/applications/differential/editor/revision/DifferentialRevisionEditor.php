@@ -308,12 +308,10 @@ class DifferentialRevisionEditor {
       $stable[$key] = array_diff_key($old[$key], $add[$key] + $rem[$key]);
     }
 
-    self::removeReviewers(
+    self::alterReviewers(
       $revision,
+      $this->reviewers,
       array_keys($rem['rev']),
-      $this->actorPHID);
-    self::addReviewers(
-      $revision,
       array_keys($add['rev']),
       $this->actorPHID);
 
@@ -493,42 +491,93 @@ class DifferentialRevisionEditor {
   }
 
 
-  public static function addReviewers(
+  public static function alterReviewers(
     DifferentialRevision $revision,
-    array $reviewer_ids,
+    array $stable_phids,
+    array $rem_phids,
+    array $add_phids,
     $reason_phid) {
-/*
-    foreach ($reviewer_ids as $reviewer_id) {
-      $relationship = new DifferentialRelationship();
-      $relationship->setRevisionID($revision->getID());
-      $relationship->setRelatedPHID($reviewer_id);
-      $relationship->setForbidden(false);
-      $relationship->setReasonPHID($reason_phid);
-      $relationship->setRelation(DifferentialRelationship::RELATION_REVIEWER);
-      $relationship->replace();
-    }
-*/
-  }
 
-  public static function removeReviewers(
-    DifferentialRevision $revision,
-    array $reviewer_ids,
-    $reason_phid) {
-/*
-    if (!$reviewer_ids) {
-      return;
+    $rem_map = array_fill_keys($rem_phids, true);
+    $add_map = array_fill_keys($add_phids, true);
+
+    $seq_map = array_values($stable_phids);
+    $seq_map = array_flip($seq_map);
+    foreach ($rem_map as $phid => $ignored) {
+      if (!isset($seq_map[$phid])) {
+        $seq_map[$phid] = count($seq_map);
+      }
+    }
+    foreach ($add_map as $phid => $ignored) {
+      if (!isset($seq_map[$phid])) {
+        $seq_map[$phid] = count($seq_map);
+      }
     }
 
-    foreach ($reviewer_ids as $reviewer_id) {
-      $relationship = new DifferentialRelationship();
-      $relationship->setRevisionID($revision->getID());
-      $relationship->setRelatedPHID($reviewer_id);
-      $relationship->setForbidden(true);
-      $relationship->setReasonPHID($reason_phid);
-      $relationship->setRelation(DifferentialRelationship::RELATION_REVIEWER);
-      $relationship->replace();
+    $raw = $revision->getRawRelations(DifferentialRevision::RELATION_REVIEWER);
+    $raw = ipull($raw, 'objectPHID');
+
+    $sequence = count($seq_map);
+    foreach ($raw as $phid => $relation) {
+      if (isset($seq_map[$phid])) {
+        $raw[$phid]['sequence'] = $seq_map[$phid];
+      } else {
+        $raw[$phid]['sequence'] = $sequence++;
+      }
     }
-*/
+    $raw = isort($raw, 'sequence');
+
+    foreach ($raw as $phid => $relation) {
+      if (isset($rem_map[$phid])) {
+        $relation['forbidden'] = true;
+        $relation['reasonPHID'] = $reason_phid;
+      } else if (isset($add_map[$phid])) {
+        $relation['forbidden'] = false;
+        $relation['reasonPHID'] = $reason_phid;
+      }
+    }
+
+    foreach ($add_phids as $add) {
+      $raw[] = array(
+        'objectPHID'  => $add,
+        'forbidden'   => false,
+        'sequence'    => idx($seq_map, $add, $sequence++),
+        'reasonPHID'  => $reason_phid,
+      );
+    }
+
+    $conn_w = $revision->establishConnection('w');
+
+    $sql = array();
+    foreach ($raw as $relation) {
+      $sql[] = qsprintf(
+        $conn_w,
+        '(%d, %s, %s, %d, %d, %s)',
+        $revision->getID(),
+        DifferentialRevision::RELATION_REVIEWER,
+        $relation['objectPHID'],
+        $relation['forbidden'],
+        $relation['sequence'],
+        $relation['reasonPHID']);
+    }
+
+    $conn_w->openTransaction();
+      queryfx(
+        $conn_w,
+        'DELETE FROM %T WHERE revisionID = %d AND relation = %s',
+        DifferentialRevision::RELATIONSHIP_TABLE,
+        $revision->getID(),
+        DifferentialRevision::RELATION_REVIEWER);
+      if ($sql) {
+        queryfx(
+          $conn_w,
+          'INSERT INTO %T
+            (revisionID, relation, objectPHID, forbidden, sequence, reasonPHID)
+          VALUES %Q',
+          DifferentialRevision::RELATIONSHIP_TABLE,
+          implode(', ', $sql));
+      }
+    $conn_w->saveTransaction();
   }
 
 /*
