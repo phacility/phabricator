@@ -89,6 +89,7 @@ phutil_register_library_map(array(
     'DifferentialRevisionEditController' => 'applications/differential/controller/revisionedit',
     'DifferentialRevisionEditor' => 'applications/differential/editor/revision',
     'DifferentialRevisionListController' => 'applications/differential/controller/revisionlist',
+    'DifferentialRevisionListData' => 'applications/differential/data/revisionlist',
     'DifferentialRevisionStatus' => 'applications/differential/constants/revisionstatus',
     'DifferentialUnitStatus' => 'applications/differential/constants/unitstatus',
     'Javelin' => 'infratructure/javelin/api',
@@ -169,6 +170,7 @@ phutil_register_library_map(array(
     'require_celerity_resource' => 'infratructure/celerity/api',
     'vqsprintf' => 'storage/qsprintf',
     'vqueryfx' => 'storage/queryfx',
+    'vqueryfx_all' => 'storage/queryfx',
     'xsprintf_query' => 'storage/qsprintf',
   ),
   'requires_class' =>

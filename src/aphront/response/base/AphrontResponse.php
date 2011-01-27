@@ -22,6 +22,7 @@
 abstract class AphrontResponse {
 
   private $request;
+  private $cacheable = false;
 
   public function setRequest($request) {
     $this->request = $request;
@@ -35,12 +36,24 @@ abstract class AphrontResponse {
   public function getHeaders() {
     return array();
   }
+  
+  public function setCacheDurationInSeconds($duration) {
+    $this->cacheable = $duration;
+    return $this;
+  }
 
   public function getCacheHeaders() {
-    return array(
-      array('Cache-Control', 'private, no-cache, no-store, must-revalidate'),
-      array('Expires',       'Sat, 01 Jan 2000 00:00:00 GMT'),
-    );
+    if ($this->cacheable) {
+      $epoch = time() + $this->cacheable;
+      return array(
+        array('Expires',       gmdate('D, d M Y H:i:s', $epoch) . ' GMT'),
+      );
+    } else {
+      return array(
+        array('Cache-Control', 'private, no-cache, no-store, must-revalidate'),
+        array('Expires',       'Sat, 01 Jan 2000 00:00:00 GMT'),
+      );
+    }
   }
 
   abstract public function buildResponseString();

@@ -17,7 +17,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-form-view-css' =>
   array(
-    'path' => '/res/75636a53/rsrc/css/aphront/form-view.css',
+    'path' => '/res/785ac1c6/rsrc/css/aphront/form-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -33,7 +33,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-side-nav-view-css' =>
   array(
-    'path' => '/res/1a16f19a/rsrc/css/aphront/side-nav-view.css',
+    'path' => '/res/0fc0545c/rsrc/css/aphront/side-nav-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -66,7 +66,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-standard-page-view' =>
   array(
-    'path' => '/res/0eef6905/rsrc/css/application/base/standard-page-view.css',
+    'path' => '/res/1f93ada7/rsrc/css/application/base/standard-page-view.css',
     'type' => 'css',
     'requires' =>
     array(

@@ -56,3 +56,9 @@ function queryfx_one($conn, $sql/*, ... */) {
   }
   return null;
 }
+
+function vqueryfx_all($conn, $sql, array $argv) {
+  array_unshift($argv, $conn, $sql);
+  $ret = call_user_func_array('queryfx', $argv);
+  return $conn->selectAllResults($ret);
+}

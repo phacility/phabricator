@@ -18,23 +18,173 @@
 
 class DifferentialRevisionListController extends DifferentialController {
 
+  private $filter;
+
+  public function willProcessRequest(array $data) {
+    $this->filter = idx($data, 'filter');
+  }
+
   public function processRequest() {
 
-    $side_nav = new AphrontSideNavView();
-    $side_nav->addNavItem(
-      phutil_render_tag(
-        'a',
-        array(
-          'href' => '/differential/',
+    $filters = array(
+      'active' => array(
+        'name'  => 'Active Revisions',
+        'queries' => array(
+          array(
+            'query'
+              => DifferentialRevisionListData::QUERY_NEED_ACTION_FROM_SELF,
+            'header' => 'Action Required',
+            'nodata' => 'You have no revisions requiring action.',
+          ),
+          array(
+            'query'
+              => DifferentialRevisionListData::QUERY_NEED_ACTION_FROM_OTHERS,
+            'header' => 'Waiting on Others',
+            'nodata' => 'You have no revisions waiting on others',
+          ),
         ),
-        'Active Revisions'));
+      ),
+      'open' => array(
+        'name' => 'Open Revisions',
+        'queries' => array(
+          array(
+            'query' => DifferentialRevisionListData::QUERY_OPEN_OWNED,
+            'header' => 'Open Revisions',
+          ),
+        ),
+      ),
+      'reviews' => array(
+        'name' => 'Open Reviews',
+        'queries' => array(
+          array(
+            'query' => DifferentialRevisionListData::QUERY_OPEN_REVIEWER,
+            'header' => 'Open Reviews',
+          ),
+        ),
+      ),
+      'all' => array(
+        'name' => 'All Revisions',
+        'queries' => array(
+          array(
+            'query' => DifferentialRevisionListData::QUERY_OWNED,
+            'header' => 'All Revisions',
+          ),
+        ),
+      ),
+      'related' => array(
+        'name' => 'All Revisions and Reviews',
+        'queries' => array(
+          array(
+            'query' => DifferentialRevisionListData::QUERY_OWNED_OR_REVIEWER,
+            'header' => 'All Revisions and Reviews',
+          ),
+        ),
+      ),
+    );
 
+    if (empty($filters[$this->filter])) {
+      $this->filter = key($filters);
+    }
+
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $queries = array();
+    $filter = $filters[$this->filter];
+    foreach ($filter['queries'] as $query) {
+      $query_object = new DifferentialRevisionListData(
+        $query['query'],
+        array($user->getPHID()));
+      $queries[] = array(
+        'object' => $query_object,
+      ) + $query;
+    }
+
+    $side_nav = new AphrontSideNavView();
+    foreach ($filters as $filter_name => $filter_desc) {
+      $selected = ($filter_name == $this->filter);
+      $side_nav->addNavItem(
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => '/differential/filter/'.$filter_name.'/',
+            'class' => $selected ? 'aphront-side-nav-selected' : null,
+          ),
+          phutil_escape_html($filter_desc['name'])));
+    }
+
+    foreach ($queries as $query) {
+      $table = $this->renderRevisionTable(
+        $query['object']->loadRevisions(),
+        $query['header'],
+        idx($query, 'nodata'));
+      $side_nav->appendChild($table);
+    }
 
     return $this->buildStandardPageResponse(
       $side_nav,
       array(
         'title' => 'Differential Home',
       ));
+  }
+
+  private function renderRevisionTable(array $revisions, $header, $nodata) {
+
+    $rows = array();
+    foreach ($revisions as $revision) {
+      $status = DifferentialRevisionStatus::getNameForRevisionStatus(
+        $revision->getStatus());
+
+      $rows[] = array(
+        'D'.$revision->getID(),
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => '/D'.$revision->getID(),
+          ),
+          phutil_escape_html($revision->getTitle())),
+        phutil_escape_html($status),
+        number_format($revision->getLineCount()),
+        $revision->getOwnerPHID(),
+        'TODO',
+        $revision->getDateModified(),
+        $revision->getDateCreated(),
+      );
+    }
+
+    $table = new AphrontTableView($rows);
+    $table->setHeaders(
+      array(
+        'ID',
+        'Revision',
+        'Status',
+        'Lines',
+        'Author',
+        'Reviewers',
+        'Updated',
+        'Created',
+      ));
+    $table->setColumnClasses(
+      array(
+        null,
+        'wide',
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+      ));
+    if ($nodata !== null) {
+      $table->setNoDataString($nodata);
+    }
+
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader($header);
+    $panel->appendChild($table);
+
+    return $panel;
   }
 
 }

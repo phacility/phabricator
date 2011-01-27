@@ -1,0 +1,296 @@
+<?php
+
+/*
+ * Copyright 2011 Facebook, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+class DifferentialRevisionListData {
+
+  const QUERY_OPEN_OWNED               = 'open';
+  const QUERY_OPEN_REVIEWER            = 'reviewer';
+  const QUERY_OWNED                    = 'owned';
+  const QUERY_OWNED_OR_REVIEWER        = 'related';
+  const QUERY_NEED_ACTION_FROM_OTHERS  = 'need-other-action';
+  const QUERY_NEED_ACTION_FROM_SELF    = 'need-self-action';
+  const QUERY_COMMITTABLE              = 'committable';
+  const QUERY_REVISION_IDS             = 'revision-ids';
+  const QUERY_PHIDS                    = 'phids';
+  const QUERY_CC                       = 'cc';
+  const QUERY_ALL_OPEN                 = 'all-open';
+
+  private $ids;
+  private $filter;
+  private $handles;
+  private $revisions;
+  private $order;
+
+  public function __construct($filter, array $ids) {
+    $this->filter = $filter;
+    $this->ids = $ids;
+  }
+
+  public function getRevisions() {
+    return $this->revisions;
+  }
+
+  public function setOrder($order) {
+    $this->order = $order;
+    return $this;
+  }
+
+  public function loadRevisions() {
+    switch ($this->filter) {
+      case self::QUERY_CC:
+        $this->revisions = $this->loadAllOpenWithCCs($this->ids);
+        break;
+      case self::QUERY_ALL_OPEN:
+        $this->revisions = $this->loadAllOpen();
+        break;
+      case self::QUERY_OPEN_OWNED:
+        $this->revisions = $this->loadAllWhere(
+          'revision.status in (%Ld) AND revision.ownerPHID in (%Ls)',
+          $this->getOpenStatuses(),
+          $this->ids);
+        break;
+      case self::QUERY_COMMITTABLE:
+        $this->revisions = $this->loadAllWhere(
+          'revision.status in (%Ld) AND revision.ownerPHID in (%Ls)',
+          array(
+            DifferentialRevisionStatus::ACCEPTED,
+          ),
+          $this->ids);
+        break;
+      case self::QUERY_REVISION_IDS:
+        $this->revisions = $this->loadAllWhere(
+          'id in (%Ld)',
+          $this->ids);
+        break;
+      case self::QUERY_OPEN_REVIEWER:
+        $this->revisions = $this->loadAllWhereJoinReview(
+          'revision.status in (%Ld) AND relationship.objectPHID in (%Ls)',
+          $this->getOpenStatuses(),
+          $this->ids);
+        break;
+      case self::QUERY_OWNED:
+        $this->revisions = $this->loadAllWhere(
+          'revision.ownerPHID in (%Ls)',
+          $this->ids);
+        break;
+      case self::QUERY_OWNED_OR_REVIEWER:
+        $this->revisions = $this->loadAllWhereJoinReview(
+          'revision.ownerPHID in (%Ls) OR relationship.objectPHID in (%Ls)',
+          $this->ids,
+          $this->ids);
+        break;
+      case self::QUERY_NEED_ACTION_FROM_SELF:
+        $rev = new DifferentialRevision();
+        $data = queryfx_all(
+          $rev->establishConnection('r'),
+          'SELECT revision.* FROM %T revision
+            WHERE revision.ownerPHID in (%Ls)
+            AND revision.status in (%Ld)
+
+           UNION ALL
+
+           SELECT revision.* FROM %T revision JOIN %T relationship
+            ON relationship.revisionID = revision.id
+              AND relationship.relation = %s
+              AND relationship.forbidden = 0
+            WHERE relationship.objectPHID IN (%Ls)
+              AND revision.status in (%Ld)
+
+          %Q',
+          $rev->getTableName(),
+          $this->ids,
+          array(
+            DifferentialRevisionStatus::NEEDS_REVISION,
+            DifferentialRevisionStatus::ACCEPTED,
+          ),
+          $rev->getTableName(),
+          DifferentialRevision::RELATIONSHIP_TABLE,
+          DifferentialRevision::RELATION_REVIEWER,
+          $this->ids,
+          array(
+            DifferentialRevisionStatus::NEEDS_REVIEW,
+          ),
+          $this->getOrderClause());
+
+        $data = ipull($data, null, 'id');
+        $this->revisions = $rev->loadAllFromArray($data);
+        break;
+      case self::QUERY_NEED_ACTION_FROM_OTHERS:
+        $rev = new DifferentialRevision();
+        $data = queryfx_all(
+          $rev->establishConnection('r'),
+          'SELECT revision.* FROM %T revision
+            WHERE revision.ownerPHID in (%Ls)
+            AND revision.status IN (%Ld)
+
+          UNION ALL
+
+          SELECT revision.* FROM %T revision JOIN %T relationship
+           ON relationship.revisionID = revision.id
+            AND relationship.relation = %s
+            AND relationship.forbidden = 0
+          WHERE relationship.objectPHID IN (%Ls)
+            AND revision.status in (%Ld)
+
+          %Q',
+          $rev->getTableName(),
+          $this->ids,
+          array(
+            DifferentialRevisionStatus::NEEDS_REVIEW,
+          ),
+          $rev->getTableName(),
+          DifferentialRevision::RELATIONSHIP_TABLE,
+          DifferentialRevision::RELATION_REVIEWER,
+          $this->ids,
+          array(
+            DifferentialRevisionStatus::NEEDS_REVISION,
+            DifferentialRevisionStatus::ACCEPTED,
+          ),
+          $this->getOrderClause());
+
+        $data = ipull($data, null, 'id');
+
+        $this->revisions = $rev->loadAllFromArray($data);
+        break;
+      case self::QUERY_BY_PHID:
+        $this->revisions = $this->loadAllWhere(
+          'revision.phid in (%Ls)',
+          $this->ids);
+        break;
+    }
+
+    return $this->revisions;
+  }
+
+  private function getOpenStatuses() {
+    return array(
+      DifferentialRevisionStatus::NEEDS_REVIEW,
+      DifferentialRevisionStatus::NEEDS_REVISION,
+      DifferentialRevisionStatus::ACCEPTED,
+    );
+  }
+
+  private function loadAllOpen() {
+    return $this->loadAllWhere('status in (%Ld)', $this->getOpenStatuses());
+  }
+
+  private function loadAllWhereJoinReview($pattern) {
+    $reviewer = DifferentialRevision::RELATION_REVIEWER;
+
+    $argv = func_get_args();
+
+    $rev = new DifferentialRevision();
+
+    $pattern = array_shift($argv);
+    $pattern =
+      'SELECT revision.*
+        FROM %T revision LEFT JOIN %T relationship
+        ON revision.id = relationship.revisionID
+        AND relationship.relation = %s
+        AND relationship.forbidden = 0
+        WHERE '.$pattern.'
+        GROUP BY revision.id '.$this->getOrderClause();
+
+    array_unshift(
+      $argv,
+      $rev->getTableName(),
+      DifferentialRevision::RELATIONSHIP_TABLE,
+      DifferentialRevision::RELATION_REVIEWER);
+
+    $data = vqueryfx_all(
+      $rev->establishConnection('r'),
+      $pattern,
+      $argv);
+
+    return $rev->loadAllFromArray($data);
+  }
+
+  private function loadAllWhere($pattern) {
+    $rev = new DifferentialRevision();
+
+    $argv = func_get_args();
+    array_shift($argv);
+    array_unshift($argv, $rev->getTableName());
+
+    $data = vqueryfx_all(
+      $rev->establishConnection('r'),
+      'SELECT * FROM %T revision WHERE '.$pattern,
+      $argv);
+
+    return $rev->loadAllFromArray($data);
+  }
+
+  private function loadAllOpenWithCCs(array $ccphids) {
+    $revision = new DifferentialRevision();
+    $data = queryfx_all(
+      'SELECT revision.* FROM %T revision
+        JOIN %T relationship ON relationship.revisionID = revision.id
+          AND relationship.relation = %s
+          AND relationship.forbidden = 0
+          AND relationship.objectPHID in (%Ls)
+        WHERE revision.status in (%Ld) %Q',
+      $revision->getTableName(),
+      DifferentialRevision::RELATIONSHIP_TABLE,
+      DifferentialRevision::RELATION_SUBSCRIBED,
+      $ccphids,
+      $this->getOpenStatuses(),
+      $this->getOrderClause());
+    return $revision->loadAllFromArray($data);
+  }
+
+  private function getOrderClause() {
+    $reverse = false;
+    $order = $this->order;
+
+    if (strlen($order) && $order[0] == '-') {
+      $reverse = true;
+      $order = substr($order, 1);
+    }
+
+    $asc = $reverse ? 'DESC' : 'ASC';
+
+    switch ($order) {
+      case 'ID':
+        $clause = 'id';
+        break;
+      case 'Revision':
+        $clause = 'name';
+        break;
+      case 'Status':
+        $clause = 'status';
+        break;
+      case 'Lines':
+        $clause = 'lineCount';
+        break;
+      case 'Created':
+        $clause = 'dateCreated';
+        $asc = $reverse ? 'ASC' : 'DESC';
+        break;
+      case '':
+      case 'Modified':
+        $clause = 'dateModified';
+        $asc = $reverse ? 'ASC' : 'DESC';
+        break;
+      default:
+        throw new Exception("Invalid order '{$order}'.");
+    }
+
+    return "ORDER BY {$clause} {$asc}";
+  }
+
+}

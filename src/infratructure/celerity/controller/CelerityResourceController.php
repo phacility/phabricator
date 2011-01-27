@@ -57,6 +57,8 @@ class CelerityResourceController extends AphrontController {
         $response->setMimeType("text/javascript; charset=utf-8");
         break;
     }
+    
+    $response->setCacheDurationInSeconds(60 * 60 * 24 * 30);
 
     return $response;
   }
