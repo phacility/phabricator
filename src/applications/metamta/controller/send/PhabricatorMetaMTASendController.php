@@ -29,8 +29,7 @@ class PhabricatorMetaMTASendController extends PhabricatorMetaMTAController {
       $mail->setSubject($request->getStr('subject'));
       $mail->setBody($request->getStr('body'));
 
-      // TODO!
-//      $mail->setFrom($request->getViewerContext()->getUserID());
+      $mail->setFrom($request->getUser()->getPHID());
       $mail->setSimulatedFailureCount($request->getInt('failures'));
       $mail->setIsHTML($request->getInt('html'));
       $mail->save();
