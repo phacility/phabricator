@@ -6,5 +6,7 @@
 
 
 
+phutil_require_module('phutil', 'markup');
+
 
 phutil_require_source('PhabricatorObjectHandle.php');

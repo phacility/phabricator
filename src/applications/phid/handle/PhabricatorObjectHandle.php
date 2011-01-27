@@ -69,6 +69,13 @@ class PhabricatorObjectHandle {
     return $this->email;
   }
 
-
+  public function renderLink() {
+    return phutil_render_tag(
+      'a',
+      array(
+        'href' => $this->getURI(),
+      ),
+      phutil_escape_html($this->getName()));
+  }
 
 }

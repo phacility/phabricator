@@ -51,6 +51,15 @@ class DifferentialRevision extends DifferentialDAO {
     return PhabricatorPHID::generateNewPHID('DREV');
   }
 
+  public function loadDiffs() {
+    if (!$this->getID()) {
+      return array();
+    }
+    return id(new DifferentialDiff())->loadAllWhere(
+      'revisionID = %d',
+      $this->getID());
+  }
+
   public function loadRelationships() {
     if (!$this->getID()) {
       $this->relationships = array();

@@ -82,7 +82,23 @@ celerity_register_resource_map(array(
   ),
   'differential-core-view-css' =>
   array(
-    'path' => '/res/f750b85d/rsrc/css/application/differential/core.css',
+    'path' => '/res/525d1a12/rsrc/css/application/differential/core.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+  ),
+  'differential-revision-detail-css' =>
+  array(
+    'path' => '/res/11a36dad/rsrc/css/application/differential/revision-detail.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+  ),
+  'differential-revision-history-css' =>
+  array(
+    'path' => '/res/755f3da3/rsrc/css/application/differential/revision-history.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -90,7 +106,7 @@ celerity_register_resource_map(array(
   ),
   'differential-table-of-contents-css' =>
   array(
-    'path' => '/res/ebf6641c/rsrc/css/application/differential/table-of-contents.css',
+    'path' => '/res/a4a7b2b5/rsrc/css/application/differential/table-of-contents.css',
     'type' => 'css',
     'requires' =>
     array(

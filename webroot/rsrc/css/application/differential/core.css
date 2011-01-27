@@ -7,3 +7,17 @@
   max-width:        1162px;
 }
 
+.differential-panel {
+  margin:       25px 0;
+  max-width:    1118px;
+  border:       1px solid #666622;
+  background:   #efefdf;
+  padding:      15px 20px;
+  font-size:    13px;
+}
+
+.differential-panel h1 {
+  border-bottom: 1px solid #aaaa99;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}

@@ -1,0 +1,68 @@
+/**
+ * @provides differential-revision-detail-css
+ */
+
+.differential-revision-properties {
+  font-size: 12px;
+  width:    100%;
+}
+
+.differential-revision-properties tt {
+  letter-spacing: 1.1px;
+}
+
+.differential-revision-properties th {
+  font-weight:    bold;
+  width:          100px;
+  text-align:     right;
+  padding:        3px 4px 3px 3px;
+  color:          #333333;
+  white-space:    nowrap;
+}
+
+.differential-revision-properties td {
+  padding: 3px 2px;
+}
+
+.differential-revision-actions {
+  float:        right;
+  width:        250px;
+  background:   #cfcfbf;
+  border:       1px solid #666622;
+  border-width: 0px 0px 1px 1px;
+  margin:       -15px -20px 1em 0;
+  font-size:    11px;
+}
+
+.differential-revision-detail-core {
+  margin-right: 265px;
+}
+
+.differential-revision-actions a,
+.differential-revision-actions span {
+  background-position: 8px center;
+  background-repeat:   no-repeat;
+  display:             block;
+  padding:             4px 4px 4px 32px;
+}
+
+.differential-revision-actions span.unavailable {
+  color:      #666666;
+  font-style: italic;
+}
+
+.differential-revision-actions .subscribe-rem {
+  background-image: url(/rsrc/image/icon/unsubscribe.png);
+}
+
+.differential-revision-actions .revision-edit {
+  background-image: url(/rsrc/image/icon/tango/edit.png);
+}
+
+.differential-revision-actions .revision-edit {
+  background-image: url(/rsrc/image/icon/tango/edit.png);
+}
+
+.differential-revision-actions .transcripts-metamta {
+  background-image: url(/rsrc/image/icon/tango/log.png);
+}

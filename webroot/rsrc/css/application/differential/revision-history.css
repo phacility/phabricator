@@ -1,0 +1,87 @@
+/**
+ * @provides differential-revision-history-css
+ */
+
+.differential-revision-history-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 1px;
+}
+
+.differential-revision-history-table th {
+  padding: 0 .5em;
+  color: #666666;
+}
+
+.differential-revision-history-table td {
+  padding: 4px;
+}
+
+.differential-revision-history-table td {
+  white-space: nowrap;
+}
+
+.differential-revision-history-table tr.alt {
+  background: #ddddcc;
+}
+
+
+.differential-revision-history-table td.revhistory-desc {
+  width: 100%;
+  white-space: normal;
+  padding-left: .5em;
+}
+
+.differential-revision-history-table td.revhistory-name {
+  font-weight: bold;
+  padding-right: .5em;
+  padding-left: .5em;
+}
+
+.differential-revision-history-table td.revhistory-age {
+  text-align: right;
+}
+
+.differential-revision-history-table td.revhistory-old,
+.differential-revision-history-table td.revhistory-new {
+  padding: 0em 1.5em;
+  text-align: center;
+}
+
+.differential-revision-history-table td.revhistory-old {
+  background: #f9d0d0;
+}
+
+.differential-revision-history-table td.revhistory-old-now {
+  background: #ffaaaa;
+}
+
+.differential-revision-history-table td.revhistory-new {
+  background: #d0ffd0;
+}
+
+.differential-revision-history-table td.revhistory-new-now {
+  background: #aaffaa;
+}
+
+.differential-revision-history-table td.revhistory-star {
+  text-align: center;
+}
+
+
+
+
+.differential-revision-history-table td.diff-differ-submit {
+  text-align: right;
+  border-bottom: none;
+}
+
+.differential-revision-history-table td.diff-differ-submit button {
+  margin-left: 1em;
+}
+
+.differential-revision-history-table td.diff-differ-submit label {
+  font-weight: bold;
+  padding-right: .25em;
+  color: #444444;
+}
