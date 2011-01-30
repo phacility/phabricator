@@ -23,6 +23,7 @@ abstract class AphrontResponse {
 
   private $request;
   private $cacheable = false;
+  private $responseCode = 200;
 
   public function setRequest($request) {
     $this->request = $request;
@@ -40,6 +41,15 @@ abstract class AphrontResponse {
   public function setCacheDurationInSeconds($duration) {
     $this->cacheable = $duration;
     return $this;
+  }
+  
+  public function setHTTPResponseCode($code) {
+    $this->responseCode = $code;
+    return $this;
+  }
+  
+  public function getHTTPResponseCode() {
+    return $this->responseCode;
   }
 
   public function getCacheHeaders() {

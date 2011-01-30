@@ -150,13 +150,22 @@ class AphrontDefaultApplicationConfiguration
         $response->setContent($view->render());
         return $response;
       }
+    } else if ($response instanceof Aphront404Response) {
+      $view = new PhabricatorStandardPageView();
+      $view->appendChild('404 Not Found');
+      $view->setTitle('404 Not Found');
+      
+      $response = new AphrontWebpageResponse();
+      $response->setContent($view->render());
+      $response->setHTTPResponseCode(404);
+      return $response;
     }
 
     return $response;
   }
 
   public function build404Controller() {
-    return new Phabricator404Controller($request);
+    return array(new Phabricator404Controller($this->getRequest()), array());
   }
 
 

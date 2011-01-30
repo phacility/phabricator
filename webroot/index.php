@@ -55,6 +55,12 @@ $response = $application->willSendResponse($response);
 $response->setRequest($request);
 
 $response_string = $response->buildResponseString();
+
+$code = $response->getHTTPResponseCode();
+if ($code != 200) {
+  header("HTTP/1.0 {$code}");
+}
+
 $headers = $response->getCacheHeaders();
 $headers = array_merge($headers, $response->getHeaders());
 foreach ($headers as $header) {
