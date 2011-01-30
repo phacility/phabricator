@@ -69,6 +69,12 @@ class DifferentialRevision extends DifferentialDAO {
       $this->getID());
   }
 
+  public function loadActiveDiff() {
+    return id(new DifferentialDiff())->loadOneWhere(
+      'revisionID = %d ORDER BY id DESC LIMIT 1',
+      $this->getID());
+  }
+
   public function loadRelationships() {
     if (!$this->getID()) {
       $this->relationships = array();

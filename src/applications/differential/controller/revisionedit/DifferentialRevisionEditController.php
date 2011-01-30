@@ -86,7 +86,7 @@ class DifferentialRevisionEditController extends DifferentialController {
         $editor->setReviewers($request->getArr('reviewers'));
         $editor->save();
 
-        $response = id(new AphrontRedirectResponse())
+        return id(new AphrontRedirectResponse())
           ->setURI('/D'.$revision->getID());
       }
 

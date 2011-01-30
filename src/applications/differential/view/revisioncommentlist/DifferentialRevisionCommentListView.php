@@ -35,11 +35,15 @@ final class DifferentialRevisionCommentListView extends AphrontView {
 
     require_celerity_resource('differential-revision-comment-list-css');
 
+    $factory = new DifferentialMarkupEngineFactory();
+    $engine = $factory->newDifferentialCommentMarkupEngine();
+
     $comments = array();
     foreach ($this->comments as $comment) {
       $view = new DifferentialRevisionCommentView();
       $view->setComment($comment);
       $view->setHandles($this->handles);
+      $view->setMarkupEngine($engine);
 
       $comments[] = $view->render();
     }

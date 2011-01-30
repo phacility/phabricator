@@ -1,0 +1,30 @@
+/**
+ * @provides phabricator-remarkup-css
+ */
+
+.phabricator-remarkup p {
+  margin: 1em 0;
+}
+
+.phabricator-remarkup code {
+  background: #fdfae7;
+  border: 1px solid #f5e178;
+  display: block;
+  white-space: pre;
+  font-family: "Monaco", monospace;
+  font-size: 10px;
+  color: #000000;
+  margin: 1em 2em;
+  padding: .5em 1.5em;
+}
+
+.phabricator-remarkup code.remarkup-counterexample {
+  border: 1px solid #aa0000;
+  background-color: #ffaaaa;
+}
+
+.phabricator-remarkup ul {
+  list-style: disc;
+  margin: 1em 0 1em 3em;
+}
+

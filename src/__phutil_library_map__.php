@@ -88,6 +88,7 @@ phutil_register_library_map(array(
     'DifferentialHunk' => 'applications/differential/storage/hunk',
     'DifferentialLintStatus' => 'applications/differential/constants/lintstatus',
     'DifferentialMail' => 'applications/differential/mail/base',
+    'DifferentialMarkupEngineFactory' => 'applications/differential/parser/markup',
     'DifferentialNewDiffMail' => 'applications/differential/mail/newdiff',
     'DifferentialReviewRequestMail' => 'applications/differential/mail/reviewrequest',
     'DifferentialRevision' => 'applications/differential/storage/revision',

@@ -365,9 +365,9 @@ class DifferentialRevisionEditor {
       }
 
     } else {
-      $diff = $revision->getActiveDiff();
+      $diff = $revision->loadActiveDiff();
       if ($diff) {
-        $changesets = id(new DifferentialChangeset())->loadAllWithDiff($diff);
+        $changesets = $diff->loadChangesets();
       } else {
         $changesets = array();
       }

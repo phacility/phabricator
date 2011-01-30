@@ -118,7 +118,7 @@ celerity_register_resource_map(array(
   ),
   'differential-revision-comment-css' =>
   array(
-    'uri' => '/res/d9924857/rsrc/css/application/differential/revision-comment.css',
+    'uri' => '/res/21572195/rsrc/css/application/differential/revision-comment.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -178,6 +178,15 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/core/core.css',
+  ),
+  'phabricator-remarkup-css' =>
+  array(
+    'uri' => '/res/786989c3/rsrc/css/core/remarkup.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/core/remarkup.css',
   ),
   'syntax-highlighting-css' =>
   array(

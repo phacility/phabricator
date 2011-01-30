@@ -20,6 +20,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
 
   private $comment;
   private $handles;
+  private $markupEngine;
 
   public function setComment($comment) {
     $this->comment = $comment;
@@ -31,8 +32,14 @@ final class DifferentialRevisionCommentView extends AphrontView {
     return $this;
   }
 
+  public function setMarkupEngine($markup_engine) {
+    $this->markupEngine = $markup_engine;
+    return $this;
+  }
+
   public function render() {
 
+    require_celerity_resource('phabricator-remarkup-css');
     require_celerity_resource('differential-revision-comment-css');
 
     $comment = $this->comment;
@@ -52,7 +59,10 @@ final class DifferentialRevisionCommentView extends AphrontView {
     $content = $comment->getContent();
     if (strlen(rtrim($content))) {
       $title = "{$author} {$verb} this revision:";
-      $content = phutil_escape_html($content);
+      $content =
+        '<div class="phabricator-remarkup">'.
+          $this->markupEngine->markupText($content).
+        '</div>';
     } else {
       $title = null;
       $content =
