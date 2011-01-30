@@ -34,6 +34,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/aphront/panel-view.css',
   ),
+  'aphront-request-failure-view-css' =>
+  array(
+    'uri' => '/res/d7df3b42/rsrc/css/aphront/request-failure-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/aphront/request-failure-view.css',
+  ),
   'aphront-side-nav-view-css' =>
   array(
     'uri' => '/res/0fc0545c/rsrc/css/aphront/side-nav-view.css',

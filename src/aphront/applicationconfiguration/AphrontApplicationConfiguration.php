@@ -28,6 +28,7 @@ abstract class AphrontApplicationConfiguration {
   abstract public function getApplicationName();
   abstract public function getURIMap();
   abstract public function buildRequest();
+  abstract public function build404Controller();
 
   final public function setRequest(AphrontRequest $request) {
     $this->request = $request;
@@ -44,6 +45,10 @@ abstract class AphrontApplicationConfiguration {
     $request = $this->getRequest();
     $path = $request->getPath();
     list($controller_class, $uri_data) = $mapper->mapPath($path);
+
+    if (!$controller_class) {
+      return $this->build404Controller();
+    }
 
     PhutilSymbolLoader::loadClass($controller_class);
     $controller = newv($controller_class, array($request));
