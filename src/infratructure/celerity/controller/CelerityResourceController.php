@@ -20,10 +20,12 @@ class CelerityResourceController extends AphrontController {
   
   private $path;
   private $hash;
+  private $package;
   
   public function willProcessRequest(array $data) {
     $this->path = $data['path'];
     $this->hash = $data['hash'];
+    $this->package = !empty($data['package']);
   }
 
   public function processRequest() {
@@ -35,16 +37,33 @@ class CelerityResourceController extends AphrontController {
     if (!preg_match('/\.(css|js)$/', $path, $matches)) {
       throw new Exception("Only CSS and JS resources may be served.");
     }
-
+    
     $type = $matches[1];
-
 
     $root = dirname(phutil_get_library_root('phabricator'));
 
-    try {
-      $data = Filesystem::readFile($root.'/webroot/'.$path);
-    } catch (Exception $ex) {
-      return new Aphront404Response();
+    if ($this->package) {
+      $map = CelerityResourceMap::getInstance();
+      $paths = $map->resolvePackage($this->hash);
+      if (!$paths) {
+        return new Aphront404Response();
+      }
+    
+      try {
+        $data = array();
+        foreach ($paths as $path) {
+          $data[] = Filesystem::readFile($root.'/webroot/'.$path);
+        }
+        $data = implode("\n\n", $data);
+      } catch (Exception $ex) {
+        return new Aphront404Response();
+      }
+    } else {
+      try {
+        $data = Filesystem::readFile($root.'/webroot/'.$path);
+      } catch (Exception $ex) {
+        return new Aphront404Response();
+      }
     }
 
     $response = new AphrontFileResponse();

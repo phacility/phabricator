@@ -21,6 +21,7 @@ final class CelerityStaticResourceResponse {
   private $symbols = array();
   private $needsResolve = true;
   private $resolved;
+  private $packaged;
   private $metadata = array();
   private $metadataBlock = 0;
   private $behaviors = array();
@@ -57,6 +58,7 @@ final class CelerityStaticResourceResponse {
     if ($this->needsResolve) {
       $map = CelerityResourceMap::getInstance();
       $this->resolved = $map->resolveResources(array_keys($this->symbols));
+      $this->packaged = $map->packageResources($this->resolved);
       $this->needsResolve = false;
     }
     return $this;
@@ -65,7 +67,7 @@ final class CelerityStaticResourceResponse {
   public function renderResourcesOfType($type) {
     $this->resolveResources();
     $output = array();
-    foreach ($this->resolved as $resource) {
+    foreach ($this->packaged as $resource) {
       if ($resource['type'] == $type) {
         $output[] = $this->renderResource($resource);
       }
@@ -76,10 +78,10 @@ final class CelerityStaticResourceResponse {
   private function renderResource(array $resource) {
     switch ($resource['type']) {
       case 'css':
-        $path = phutil_escape_html($resource['path']);
+        $path = phutil_escape_html($resource['uri']);
         return '<link rel="stylesheet" type="text/css" href="'.$path.'" />';
       case 'js':
-        $path = phutil_escape_html($resource['path']);
+        $path = phutil_escape_html($resource['uri']);
         return '<script type="text/javascript" src="'.$path.'">'.
                '</script>';
     }

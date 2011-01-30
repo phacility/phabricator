@@ -20,6 +20,7 @@ final class CelerityResourceMap {
 
   private static $instance;
   private $resourceMap;
+  private $packageMap;
 
   public static function getInstance() {
     if (empty(self::$instance)) {
@@ -66,10 +67,50 @@ final class CelerityResourceMap {
 
     $map[$symbol] = $info;
   }
+  
+  public function setPackageMap($package_map) {
+    $this->packageMap = $package_map;
+  }
+  
+  public function packageResources(array $resolved_map) {
+    $packaged = array();
+    $handled = array();
+    foreach ($resolved_map as $symbol => $info) {
+      if (isset($handled[$symbol])) {
+        continue;
+      }
+      if (empty($this->packageMap['reverse'][$symbol])) {
+        $packaged[$symbol] = $info;
+      } else {
+        $package = $this->packageMap['reverse'][$symbol];
+        $package_info = $this->packageMap['packages'][$package];
+        $packaged[$package_info['name']] = $package_info;
+        foreach ($package_info['symbols'] as $symbol) {
+          $handled[$symbol] = true;
+        }
+      }
+    }
+    return $packaged;
+  }
+  
+  public function resolvePackage($package_hash) {
+    $package = idx($this->packageMap['packages'], $package_hash);
+    if (!$package) {
+      return null;
+    }
+    
+    $paths = array();
+    foreach ($package['symbols'] as $symbol) {
+      $paths[] = $this->resourceMap[$symbol]['disk'];
+    }
+    
+    return $paths;
+  }
 
 }
 
-function celerity_register_resource_map(array $map) {
+function celerity_register_resource_map(array $map, array $package_map) {
   $instance = CelerityResourceMap::getInstance();
   $instance->setResourceMap($map);
+  $instance->setPackageMap($package_map);
 }

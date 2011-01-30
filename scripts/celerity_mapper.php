@@ -1,6 +1,31 @@
 #!/usr/bin/env php
 <?php
 
+$package_spec = array(
+  'core.pkg.css' => array(
+    'phabricator-core-css',
+    'phabricator-core-buttons-css',
+    'phabricator-standard-page-view',
+    'aphront-dialog-view-css',
+    'aphront-form-view-css',
+    'aphront-panel-view-css',
+    'aphront-side-nav-view-css',
+    'aphront-table-view-css',
+    'aphront-tokenizer-control-css',
+    'aphront-typeahead-control-css',
+
+    'phabricator-directory-css',
+  ),
+  'differential.pkg.css' => array(
+    'differential-core-view-css',
+    'differential-changeset-view-css',
+    'differential-revision-detail-css',
+    'differential-revision-history-css',
+    'differential-table-of-contents-css',
+  ),
+);
+
+
 require_once dirname(__FILE__).'/__init_script__.php';
 
 if ($argc != 2) {
@@ -39,6 +64,8 @@ echo "\n";
 
 $runtime_map = array();
 
+$hash_map = array();
+
 $parser = new PhutilDocblockParser();
 foreach ($file_map as $path => $info) {
   $data = Filesystem::readFile($info['disk']);
@@ -69,18 +96,49 @@ foreach ($file_map as $path => $info) {
     $type = 'css';
   }
   
-  $path = '/res/'.substr($info['hash'], 0, 8).$path;
+  $uri = '/res/'.substr($info['hash'], 0, 8).$path;
+  
+  $hash_map[$provides] = $info['hash'];
   
   $runtime_map[$provides] = array(
-    'path'      => $path,
+    'uri'       => $uri,
     'type'      => $type,
     'requires'  => $requires,
+    'disk'      => $path,
   );
 }
+
+$package_map = array();
+foreach ($package_spec as $name => $package) {
+  $hashes = array();
+  foreach ($package as $symbol) {
+    if (empty($hash_map[$symbol])) {
+      throw new Exception(
+        "Package specification for '{$name}' includes '{$symbol}', but that ".
+        "symbol is not defined anywhere.");
+    }
+    $hashes[] = $symbol.':'.$hash_map[$symbol];
+  }
+  $key = substr(md5(implode("\n", $hashes)), 0, 8);
+  $package_map['packages'][$key] = array(
+    'name'    => $name,
+    'symbols' => $package,
+    'uri'     => '/res/pkg/'.$key.'/'.$name,
+    'type'    => 'css', // TODO LOL
+  );
+  foreach ($package as $symbol) {
+    $package_map['reverse'][$symbol] = $key;
+  }
+}
+    
 
 $runtime_map = var_export($runtime_map, true);
 $runtime_map = preg_replace('/\s+$/m', '', $runtime_map);
 $runtime_map = preg_replace('/array \(/', 'array(', $runtime_map);
+
+$package_map = var_export($package_map, true);
+$pacakge_map = preg_replace('/\s+$/m', '', $package_map);
+$package_map = preg_replace('/array \(/', 'array(', $package_map);
 
 $resource_map = <<<EOFILE
 <?php
@@ -91,7 +149,7 @@ $resource_map = <<<EOFILE
  * @generated
  */
 
-celerity_register_resource_map({$runtime_map});
+celerity_register_resource_map({$runtime_map}, {$pacakge_map});
 
 EOFILE;
 
