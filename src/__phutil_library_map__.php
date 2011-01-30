@@ -8,6 +8,7 @@
 phutil_register_library_map(array(
   'class' =>
   array(
+    'Aphront400Response' => 'aphront/response/400',
     'Aphront404Response' => 'aphront/response/404',
     'AphrontAjaxResponse' => 'aphront/response/ajax',
     'AphrontApplicationConfiguration' => 'aphront/applicationconfiguration',
@@ -74,6 +75,9 @@ phutil_register_library_map(array(
     'DifferentialChangesetParser' => 'applications/differential/parser/changeset',
     'DifferentialChangesetViewController' => 'applications/differential/controller/changesetview',
     'DifferentialComment' => 'applications/differential/storage/comment',
+    'DifferentialCommentEditor' => 'applications/differential/editor/comment',
+    'DifferentialCommentMail' => 'applications/differential/mail/comment',
+    'DifferentialCommentSaveController' => 'applications/differential/controller/commentsave',
     'DifferentialController' => 'applications/differential/controller/base',
     'DifferentialDAO' => 'applications/differential/storage/base',
     'DifferentialDiff' => 'applications/differential/storage/diff',
@@ -81,7 +85,6 @@ phutil_register_library_map(array(
     'DifferentialDiffProperty' => 'applications/differential/storage/diffproperty',
     'DifferentialDiffTableOfContentsView' => 'applications/differential/view/difftableofcontents',
     'DifferentialDiffViewController' => 'applications/differential/controller/diffview',
-    'DifferentialFeedbackMail' => 'applications/differential/mail/feedback',
     'DifferentialHunk' => 'applications/differential/storage/hunk',
     'DifferentialLintStatus' => 'applications/differential/constants/lintstatus',
     'DifferentialMail' => 'applications/differential/mail/base',
@@ -184,6 +187,7 @@ phutil_register_library_map(array(
   ),
   'requires_class' =>
   array(
+    'Aphront400Response' => 'AphrontResponse',
     'Aphront404Response' => 'AphrontResponse',
     'AphrontAjaxResponse' => 'AphrontResponse',
     'AphrontDefaultApplicationConfiguration' => 'AphrontApplicationConfiguration',
@@ -232,6 +236,8 @@ phutil_register_library_map(array(
     'DifferentialChangesetListView' => 'AphrontView',
     'DifferentialChangesetViewController' => 'DifferentialController',
     'DifferentialComment' => 'DifferentialDAO',
+    'DifferentialCommentMail' => 'DifferentialMail',
+    'DifferentialCommentSaveController' => 'DifferentialController',
     'DifferentialController' => 'PhabricatorController',
     'DifferentialDAO' => 'PhabricatorLiskDAO',
     'DifferentialDiff' => 'DifferentialDAO',
@@ -239,7 +245,6 @@ phutil_register_library_map(array(
     'DifferentialDiffProperty' => 'DifferentialDAO',
     'DifferentialDiffTableOfContentsView' => 'AphrontView',
     'DifferentialDiffViewController' => 'DifferentialController',
-    'DifferentialFeedbackMail' => 'DifferentialMail',
     'DifferentialHunk' => 'DifferentialDAO',
     'DifferentialNewDiffMail' => 'DifferentialReviewRequestMail',
     'DifferentialReviewRequestMail' => 'DifferentialMail',

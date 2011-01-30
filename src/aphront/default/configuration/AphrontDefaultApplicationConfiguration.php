@@ -86,6 +86,14 @@ class AphrontDefaultApplicationConfiguration
         'changeset/(?<id>\d+)/$'  => 'DifferentialChangesetViewController',
         'revision/edit/(?:(?<id>\d+)/)?$'
           => 'DifferentialRevisionEditController',
+        'comment/' => array(
+          'preview/$' => 'DifferentialCommentPreviewController',
+          'save/$' => 'DifferentialCommentSaveController',
+          'inline/' => array(
+            'preview/$' => 'DifferentialInlineCommentPreviewController',
+            'edit/$' => 'DifferentialInlineCommentEditController',
+          ),
+        ),
       ),
 
       '/res/' => array(

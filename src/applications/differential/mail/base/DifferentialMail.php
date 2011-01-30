@@ -27,7 +27,7 @@ abstract class DifferentialMail {
   protected $actorID;
 
   protected $revision;
-  protected $feedback;
+  protected $comment;
   protected $changesets;
   protected $inlineComments;
   protected $isFirstMailAboutRevision;
@@ -214,13 +214,13 @@ EOTEXT;
     return "<differential-rev-{$phid}-req@TODO.com>";
   }
 
-  public function setFeedback($feedback) {
-    $this->feedback = $feedback;
+  public function setComment($comment) {
+    $this->comment = $comment;
     return $this;
   }
 
-  public function getFeedback() {
-    return $this->feedback;
+  public function getComment() {
+    return $this->comment;
   }
 
   public function setChangesets($changesets) {

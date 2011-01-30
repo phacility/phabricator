@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DifferentialFeedbackMail extends DifferentialMail {
+class DifferentialCommentMail extends DifferentialMail {
 
   protected $changedByCommit;
 
@@ -32,13 +32,13 @@ class DifferentialFeedbackMail extends DifferentialMail {
   public function __construct(
     DifferentialRevision $revision,
     $actor_id,
-    DifferentialFeedback $feedback,
+    DifferentialComment $comment,
     array $changesets,
     array $inline_comments) {
 
     $this->setRevision($revision);
     $this->setActorID($actor_id);
-    $this->setFeedback($feedback);
+    $this->setComment($comment);
     $this->setChangesets($changesets);
     $this->setInlineComments($inline_comments);
 
@@ -47,22 +47,22 @@ class DifferentialFeedbackMail extends DifferentialMail {
   protected function renderSubject() {
     $revision = $this->getRevision();
     $verb = $this->getVerb();
-    return ucwords($verb).': '.$revision->getName();
+    return ucwords($verb).': '.$revision->getTitle();
   }
 
   protected function getVerb() {
-    $feedback = $this->getFeedback();
-    $action = $feedback->getAction();
-    $verb = DifferentialAction::getActionVerb($action);
+    $comment = $this->getComment();
+    $action = $comment->getAction();
+    $verb = DifferentialAction::getActionPastTenseVerb($action);
     return $verb;
   }
 
   protected function renderBody() {
 
-    $feedback = $this->getFeedback();
+    $comment = $this->getComment();
 
     $actor = $this->getActorName();
-    $name  = $this->getRevision()->getName();
+    $name  = $this->getRevision()->getTitle();
     $verb  = $this->getVerb();
 
     $body  = array();
@@ -70,7 +70,7 @@ class DifferentialFeedbackMail extends DifferentialMail {
     $body[] = "{$actor} has {$verb} the revision \"{$name}\".";
     $body[] = null;
 
-    $content = $feedback->getContent();
+    $content = $comment->getContent();
     if (strlen($content)) {
       $body[] = $this->formatText($content);
       $body[] = null;

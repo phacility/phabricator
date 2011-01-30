@@ -11,4 +11,4 @@ phutil_require_module('phabricator', 'applications/differential/constants/revisi
 phutil_require_module('phabricator', 'applications/differential/mail/base');
 
 
-phutil_require_source('DifferentialFeedbackMail.php');
+phutil_require_source('DifferentialCommentMail.php');
