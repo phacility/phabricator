@@ -155,5 +155,9 @@ class AphrontDefaultApplicationConfiguration
     return $response;
   }
 
+  public function build404Controller() {
+    return new Phabricator404Controller($request);
+  }
+
 
 }

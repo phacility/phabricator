@@ -111,11 +111,23 @@ foreach ($file_map as $path => $info) {
 $package_map = array();
 foreach ($package_spec as $name => $package) {
   $hashes = array();
+  $type = null;
   foreach ($package as $symbol) {
     if (empty($hash_map[$symbol])) {
       throw new Exception(
         "Package specification for '{$name}' includes '{$symbol}', but that ".
         "symbol is not defined anywhere.");
+    }
+    if ($type === null) {
+      $type = $runtime_map[$symbol]['type'];
+    } else {
+      $ntype = $runtime_map[$symbol]['type'];
+      if ($type !== $ntype) {
+        throw new Exception(
+          "Package specification for '{$name}' mixes resources of type ".
+          "'{$type}' with resources of type '{$ntype}'. Each package may only ".
+          "contain one type of resource.");
+      }
     }
     $hashes[] = $symbol.':'.$hash_map[$symbol];
   }
@@ -124,7 +136,7 @@ foreach ($package_spec as $name => $package) {
     'name'    => $name,
     'symbols' => $package,
     'uri'     => '/res/pkg/'.$key.'/'.$name,
-    'type'    => 'css', // TODO LOL
+    'type'    => $type,
   );
   foreach ($package as $symbol) {
     $package_map['reverse'][$symbol] = $key;
