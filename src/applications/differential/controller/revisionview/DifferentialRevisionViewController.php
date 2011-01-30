@@ -80,6 +80,10 @@ class DifferentialRevisionViewController extends DifferentialController {
     $changeset_view = new DifferentialChangesetListView();
     $changeset_view->setChangesets($changesets);
 
+    $comment_form = new DifferentialAddCommentView();
+    $comment_form->setRevision($revision);
+    $comment_form->setActions($this->getRevisionCommentActions($revision));
+
     return $this->buildStandardPageResponse(
       '<div class="differential-primary-pane">'.
         $revision_detail->render().
@@ -87,6 +91,7 @@ class DifferentialRevisionViewController extends DifferentialController {
         $diff_history->render().
         $toc_view->render().
         $changeset_view->render().
+        $comment_form->render().
       '</div>',
       array(
         'title' => $revision->getTitle(),
@@ -210,9 +215,59 @@ class DifferentialRevisionViewController extends DifferentialController {
     return implode(', ', mpull($list, 'renderLink'));
   }
 
+  private function getRevisionCommentActions(DifferentialRevision $revision) {
+
+    $actions = array(
+      DifferentialAction::ACTION_COMMENT => true,
+    );
+
+    $viewer_phid = $this->getRequest()->getUser()->getPHID();
+    $viewer_is_owner = ($viewer_phid == $revision->getAuthorPHID());
+
+    if ($viewer_is_owner) {
+      switch ($revision->getStatus()) {
+        case DifferentialRevisionStatus::NEEDS_REVIEW:
+          $actions[DifferentialAction::ACTION_ABANDON] = true;
+          break;
+        case DifferentialRevisionStatus::NEEDS_REVISION:
+        case DifferentialRevisionStatus::ACCEPTED:
+          $actions[DifferentialAction::ACTION_ABANDON] = true;
+          $actions[DifferentialAction::ACTION_REQUEST] = true;
+          break;
+        case DifferentialRevisionStatus::COMMITTED:
+          break;
+        case DifferentialRevisionStatus::ABANDONED:
+          $actions[DifferentialAction::ACTION_RECLAIM] = true;
+          break;
+      }
+    } else {
+      switch ($revision->getStatus()) {
+        case DifferentialRevisionStatus::NEEDS_REVIEW:
+          $actions[DifferentialAction::ACTION_ACCEPT] = true;
+          $actions[DifferentialAction::ACTION_REJECT] = true;
+          break;
+        case DifferentialRevisionStatus::NEEDS_REVISION:
+          $actions[DifferentialAction::ACTION_ACCEPT] = true;
+          break;
+        case DifferentialRevisionStatus::ACCEPTED:
+          $actions[DifferentialAction::ACTION_REJECT] = true;
+          break;
+        case DifferentialRevisionStatus::COMMITTED:
+        case DifferentialRevisionStatus::ABANDONED:
+          break;
+      }
+    }
+
+    $actions[DifferentialAction::ACTION_ADDREVIEWERS] = true;
+
+    return array_keys($actions);
+  }
+
 }
 /*
 
+
+  protected function getRevisionActions(DifferentialRevision $revision) {
 
     $viewer_id = $this->getRequest()->getViewerContext()->getUserID();
     $viewer_is_owner = ($viewer_id == $revision->getOwnerID());
@@ -1334,81 +1389,7 @@ class DifferentialRevisionViewController extends DifferentialController {
     return $inline_comments;
   }
 
-  protected function getRevisionActions(DifferentialRevision $revision) {
-    $actions = array(
-      'none' => true,
-    );
 
-    $viewer = $this->getRequest()->getViewerContext();
-
-    $viewer_is_owner = ($viewer->getUserID() == $revision->getOwnerID());
-    if ($viewer_is_owner) {
-      switch ($revision->getStatus()) {
-        case DifferentialConstants::NEEDS_REVIEW:
-          $actions['abandon'] = true;
-          break;
-        case DifferentialConstants::NEEDS_REVISION:
-          $actions['abandon'] = true;
-          $actions['request_review'] = true;
-          break;
-        case DifferentialConstants::ACCEPTED:
-          $actions['abandon'] = true;
-          $actions['request_review'] = true;
-          break;
-        case DifferentialConstants::COMMITTED:
-          break;
-        case DifferentialConstants::ABANDONED:
-          $actions['reclaim'] = true;
-          break;
-        default:
-          throw new Exception('Unknown DifferentialRevision status.');
-      }
-    } else {
-      switch ($revision->getStatus()) {
-        case DifferentialConstants::NEEDS_REVIEW:
-          $actions['accept'] = true;
-          $actions['reject'] = true;
-          break;
-        case DifferentialConstants::NEEDS_REVISION:
-          $actions['accept'] = true;
-          break;
-        case DifferentialConstants::ACCEPTED:
-          $actions['reject'] = true;
-          break;
-        case DifferentialConstants::COMMITTED:
-          break;
-        case DifferentialConstants::ABANDONED:
-          break;
-        default:
-          throw new Exception('Unknown DifferentialRevision status.');
-      }
-
-      if (in_array($viewer->getUserID(), $revision->getReviewers())) {
-        $actions['resign'] = true;
-      }
-    }
-
-    // Put add reviewers at the bottom since it's rare relative to other
-    // actions, notably accept and reject
-    $actions['add_reviewers'] = true;
-
-    static $action_names = array(
-      'none'            => 'Comment',
-      'abandon'         => 'Abandon Revision',
-      'request_review'  => 'Request Review',
-      'reclaim'         => 'Reclaim Revision',
-      'accept'          => "Accept Revision \xE2\x9C\x94",
-      'reject'          => "Request Changes \xE2\x9C\x98",
-      'resign'          => "Resign as Reviewer",
-      'add_reviewers'   => "Add Reviewers",
-    );
-
-    foreach ($actions as $key => $value) {
-      $actions[$key] = $action_names[$key];
-    }
-
-    return $actions;
-  }
 
   protected function getRevisionStatusDisplay(DifferentialRevision $revision) {
     $viewer_id = $this->getRequest()->getViewerContext()->getUserID();

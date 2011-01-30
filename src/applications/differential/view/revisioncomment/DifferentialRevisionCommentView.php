@@ -46,7 +46,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
     $author = $comment->getAuthorPHID();
     $author = $this->handles[$author]->renderLink();
 
-    $verb = DifferentialAction::getActionVerb($comment->getAction());
+    $verb = DifferentialAction::getActionPastTenseVerb($comment->getAction());
     $verb = phutil_escape_html($verb);
 
     $content = $comment->getContent();

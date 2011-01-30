@@ -32,7 +32,7 @@ final class DifferentialAction {
   const ACTION_CREATE         = 'create';
   const ACTION_ADDREVIEWERS   = 'add_reviewers';
 
-  public static function getActionVerb($action) {
+  public static function getActionPastTenseVerb($action) {
     static $verbs = array(
       self::ACTION_COMMENT        => 'commented on',
       self::ACTION_ACCEPT         => 'accepted',
@@ -53,6 +53,25 @@ final class DifferentialAction {
       return $verbs[$action];
     } else {
       return 'brazenly "'.$action.'ed"';
+    }
+  }
+
+  public static function getActionVerb($action) {
+    static $verbs = array(
+      self::ACTION_COMMENT        => 'Comment',
+      self::ACTION_ACCEPT         => "Accept Revision \xE2\x9C\x94",
+      self::ACTION_REJECT         => "Request Changes \xE2\x9C\x98",
+      self::ACTION_ABANDON        => 'Abandon Revision',
+      self::ACTION_REQUEST        => 'Request Review',
+      self::ACTION_RECLAIM        => 'Reclaim Revision',
+      self::ACTION_RESIGN         => 'Resign as Reviewer',
+      self::ACTION_ADDREVIEWERS   => 'Add Reviewers',
+    );
+
+    if (!empty($verbs[$action])) {
+      return $verbs[$action];
+    } else {
+      return 'brazenly '.$action;
     }
   }
 
