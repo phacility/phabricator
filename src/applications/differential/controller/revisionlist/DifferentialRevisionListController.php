@@ -145,7 +145,7 @@ class DifferentialRevisionListController extends DifferentialController {
           phutil_escape_html($revision->getTitle())),
         phutil_escape_html($status),
         number_format($revision->getLineCount()),
-        $revision->getOwnerPHID(),
+        $revision->getAuthorPHID(),
         'TODO',
         $revision->getDateModified(),
         $revision->getDateCreated(),

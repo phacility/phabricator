@@ -6,10 +6,11 @@
 
 
 
+phutil_require_module('phabricator', 'applications/differential/constants/action');
 phutil_require_module('phabricator', 'infratructure/celerity/api');
 phutil_require_module('phabricator', 'view/base');
 
 phutil_require_module('phutil', 'markup');
 
 
-phutil_require_source('AphrontRequestFailureView.php');
+phutil_require_source('DifferentialRevisionCommentView.php');

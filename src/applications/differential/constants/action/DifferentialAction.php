@@ -49,7 +49,7 @@ final class DifferentialAction {
       self::ACTION_ADDREVIEWERS   => 'added reviewers to',
     );
 
-    if (empty($verbs[$action])) {
+    if (!empty($verbs[$action])) {
       return $verbs[$action];
     } else {
       return 'brazenly "'.$action.'ed"';

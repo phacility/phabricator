@@ -33,7 +33,7 @@ class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
       'sourceControlBaseRevision' => 'required string',
       'parentRevisionID'          => 'optional revisionid',
       'creationMethod'            => 'optional string',
-      'ownerPHID'                 => 'optional phid',
+      'authorPHID'                => 'optional phid',
       'arcanistProject'           => 'optional string',
       'lintStatus'                =>
         'required enum<none, skip, okay, warn, fail>',
@@ -65,7 +65,7 @@ class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
 
     $diff->setBranch($request->getValue('branch'));
     $diff->setCreationMethod($request->getValue('creationMethod'));
-    $diff->setOwnerPHID($request->getValue('ownerPHID'));
+    $diff->setAuthorPHID($request->getValue('authorPHID'));
 
     $parent_id = $request->getValue('parentRevisionID');
     if ($parent_id) {

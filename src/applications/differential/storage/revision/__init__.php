@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'applications/differential/storage/base');
+phutil_require_module('phabricator', 'applications/differential/storage/comment');
 phutil_require_module('phabricator', 'applications/differential/storage/diff');
 phutil_require_module('phabricator', 'applications/phid/storage/phid');
 phutil_require_module('phabricator', 'storage/qsprintf');

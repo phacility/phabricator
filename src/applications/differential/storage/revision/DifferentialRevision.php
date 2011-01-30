@@ -27,7 +27,7 @@ class DifferentialRevision extends DifferentialDAO {
   protected $blameRevision;
 
   protected $phid;
-  protected $ownerPHID;
+  protected $authorPHID;
 
   protected $dateCommitted;
 
@@ -56,6 +56,15 @@ class DifferentialRevision extends DifferentialDAO {
       return array();
     }
     return id(new DifferentialDiff())->loadAllWhere(
+      'revisionID = %d',
+      $this->getID());
+  }
+
+  public function loadComments() {
+    if (!$this->getID()) {
+      return array();
+    }
+    return id(new DifferentialComment())->loadAllWhere(
       'revisionID = %d',
       $this->getID());
   }

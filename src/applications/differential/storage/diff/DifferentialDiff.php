@@ -19,7 +19,7 @@
 class DifferentialDiff extends DifferentialDAO {
 
   protected $revisionID;
-  protected $ownerPHID;
+  protected $authorPHID;
 
   protected $sourceMachine;
   protected $sourcePath;

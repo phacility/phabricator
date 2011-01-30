@@ -7,11 +7,14 @@
 
 
 phutil_require_module('phabricator', 'aphront/response/404');
+phutil_require_module('phabricator', 'applications/differential/constants/action');
 phutil_require_module('phabricator', 'applications/differential/constants/revisionstatus');
 phutil_require_module('phabricator', 'applications/differential/controller/base');
+phutil_require_module('phabricator', 'applications/differential/storage/comment');
 phutil_require_module('phabricator', 'applications/differential/storage/revision');
 phutil_require_module('phabricator', 'applications/differential/view/changesetlistview');
 phutil_require_module('phabricator', 'applications/differential/view/difftableofcontents');
+phutil_require_module('phabricator', 'applications/differential/view/revisioncommentlist');
 phutil_require_module('phabricator', 'applications/differential/view/revisiondetail');
 phutil_require_module('phabricator', 'applications/differential/view/revisionupdatehistory');
 phutil_require_module('phabricator', 'applications/phid/handle/data');

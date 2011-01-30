@@ -60,13 +60,13 @@ class DifferentialRevisionListData {
         break;
       case self::QUERY_OPEN_OWNED:
         $this->revisions = $this->loadAllWhere(
-          'revision.status in (%Ld) AND revision.ownerPHID in (%Ls)',
+          'revision.status in (%Ld) AND revision.authorPHID in (%Ls)',
           $this->getOpenStatuses(),
           $this->ids);
         break;
       case self::QUERY_COMMITTABLE:
         $this->revisions = $this->loadAllWhere(
-          'revision.status in (%Ld) AND revision.ownerPHID in (%Ls)',
+          'revision.status in (%Ld) AND revision.authorPHID in (%Ls)',
           array(
             DifferentialRevisionStatus::ACCEPTED,
           ),
@@ -85,12 +85,12 @@ class DifferentialRevisionListData {
         break;
       case self::QUERY_OWNED:
         $this->revisions = $this->loadAllWhere(
-          'revision.ownerPHID in (%Ls)',
+          'revision.authorPHID in (%Ls)',
           $this->ids);
         break;
       case self::QUERY_OWNED_OR_REVIEWER:
         $this->revisions = $this->loadAllWhereJoinReview(
-          'revision.ownerPHID in (%Ls) OR relationship.objectPHID in (%Ls)',
+          'revision.authorPHID in (%Ls) OR relationship.objectPHID in (%Ls)',
           $this->ids,
           $this->ids);
         break;
@@ -99,7 +99,7 @@ class DifferentialRevisionListData {
         $data = queryfx_all(
           $rev->establishConnection('r'),
           'SELECT revision.* FROM %T revision
-            WHERE revision.ownerPHID in (%Ls)
+            WHERE revision.authorPHID in (%Ls)
             AND revision.status in (%Ld)
 
            UNION ALL
@@ -135,7 +135,7 @@ class DifferentialRevisionListData {
         $data = queryfx_all(
           $rev->establishConnection('r'),
           'SELECT revision.* FROM %T revision
-            WHERE revision.ownerPHID in (%Ls)
+            WHERE revision.authorPHID in (%Ls)
             AND revision.status IN (%Ld)
 
           UNION ALL

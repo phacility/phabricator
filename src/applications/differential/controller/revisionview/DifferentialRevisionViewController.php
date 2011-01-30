@@ -41,25 +41,22 @@ class DifferentialRevisionViewController extends DifferentialController {
 
     $changesets = $target->loadChangesets();
 
+    $comments = $revision->loadComments();
+    $comments = array_merge(
+      $this->getImplicitComments($revision),
+      $comments);
+
     $object_phids = array_merge(
       $revision->getReviewers(),
       $revision->getCCPHIDs(),
       array(
-        $revision->getOwnerPHID(),
+        $revision->getAuthorPHID(),
         $request->getUser()->getPHID(),
-      ));
+      ),
+      mpull($comments, 'getAuthorPHID'));
 
     $handles = id(new PhabricatorObjectHandleData($object_phids))
       ->loadHandles();
-
-    $diff_history = new DifferentialRevisionUpdateHistoryView();
-    $diff_history->setDiffs($diffs);
-
-    $toc_view = new DifferentialDiffTableOfContentsView();
-    $toc_view->setChangesets($changesets);
-
-    $changeset_view = new DifferentialChangesetListView();
-    $changeset_view->setChangesets($changesets);
 
     $revision_detail = new DifferentialRevisionDetailView();
     $revision_detail->setRevision($revision);
@@ -70,9 +67,23 @@ class DifferentialRevisionViewController extends DifferentialController {
     $actions = $this->getRevisionActions($revision);
     $revision_detail->setActions($actions);
 
+    $comment_view = new DifferentialRevisionCommentListView();
+    $comment_view->setComments($comments);
+    $comment_view->setHandles($handles);
+
+    $diff_history = new DifferentialRevisionUpdateHistoryView();
+    $diff_history->setDiffs($diffs);
+
+    $toc_view = new DifferentialDiffTableOfContentsView();
+    $toc_view->setChangesets($changesets);
+
+    $changeset_view = new DifferentialChangesetListView();
+    $changeset_view->setChangesets($changesets);
+
     return $this->buildStandardPageResponse(
       '<div class="differential-primary-pane">'.
         $revision_detail->render().
+        $comment_view->render().
         $diff_history->render().
         $toc_view->render().
         $changeset_view->render().
@@ -80,6 +91,32 @@ class DifferentialRevisionViewController extends DifferentialController {
       array(
         'title' => $revision->getTitle(),
       ));
+  }
+
+  private function getImplicitComments(DifferentialRevision $revision) {
+
+    $template = new DifferentialComment();
+    $template->setAuthorPHID($revision->getAuthorPHID());
+    $template->setRevisionID($revision->getID());
+    $template->setDateCreated($revision->getDateCreated());
+
+    $comments = array();
+
+    if (strlen($revision->getSummary())) {
+      $summary_comment = clone $template;
+      $summary_comment->setContent($revision->getSummary());
+      $summary_comment->setAction(DifferentialAction::ACTION_SUMMARIZE);
+      $comments[] = $summary_comment;
+    }
+
+    if (strlen($revision->getTestPlan())) {
+      $testplan_comment = clone $template;
+      $testplan_comment->setContent($revision->getTestPlan());
+      $testplan_comment->setAction(DifferentialAction::ACTION_TESTPLAN);
+      $comments[] = $testplan_comment;
+    }
+
+    return $comments;
   }
 
   private function getRevisionProperties(
@@ -93,7 +130,7 @@ class DifferentialRevisionViewController extends DifferentialController {
     $status = DifferentialRevisionStatus::getNameForRevisionStatus($status);
     $properties['Revision Status'] = '<strong>'.$status.'</strong>';
 
-    $author = $handles[$revision->getOwnerPHID()];
+    $author = $handles[$revision->getAuthorPHID()];
     $properties['Author'] = $author->renderLink();
 
     $properties['Reviewers'] = $this->renderHandleLinkList(
@@ -125,7 +162,7 @@ class DifferentialRevisionViewController extends DifferentialController {
 
   private function getRevisionActions(DifferentialRevision $revision) {
     $viewer_phid = $this->getRequest()->getUser()->getPHID();
-    $viewer_is_owner = ($revision->getOwnerPHID() == $viewer_phid);
+    $viewer_is_owner = ($revision->getAuthorPHID() == $viewer_phid);
     $viewer_is_reviewer = in_array($viewer_phid, $revision->getReviewers());
     $viewer_is_cc = in_array($viewer_phid, $revision->getCCPHIDs());
     $status = $revision->getStatus();

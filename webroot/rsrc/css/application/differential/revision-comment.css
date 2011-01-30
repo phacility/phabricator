@@ -1,0 +1,39 @@
+/**
+ * @provides differential-revision-comment-css
+ */
+
+
+.differential-comment-date {
+  color:       #666666;
+  float:       right;
+  font-size:   11px;
+  margin:      0em;
+  padding-top: 6px;
+}
+
+.differential-comment-title {
+  font-weight:         bold;
+  height:              16px;
+  margin:              4px 0em 0em 0em;
+  padding:             4px 0em;
+  position:            relative;
+}
+
+.differential-comment-body {
+  min-height:           56px;
+  padding-left:         62px;
+  background-repeat:    no-repeat;
+  background-position:  6px 0px;
+  margin-bottom:        14px;
+}
+
+.differential-comment-content {
+  background:          #fbfbfb;
+  border-color:        #c3c3c3;
+  border-style:        solid;
+  border-width:        1px 10px 1px 10px;
+  clear:               both;
+  line-height:         1.4em;
+  margin:              0em;
+  padding:             .3em 5px .4em 1.25em;
+}

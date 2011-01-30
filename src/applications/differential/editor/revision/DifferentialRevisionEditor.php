@@ -204,8 +204,8 @@ class DifferentialRevisionEditor {
       if ($revision->getTitle() === null) {
         $revision->setTitle('Untitled Revision');
       }
-      if ($revision->getOwnerPHID() === null) {
-        $revision->setOwnerPHID($this->getActorPHID());
+      if ($revision->getAuthorPHID() === null) {
+        $revision->setAuthorPHID($this->getActorPHID());
       }
 
       $revision->save();
@@ -315,7 +315,7 @@ class DifferentialRevisionEditor {
       array_keys($add['rev']),
       $this->actorPHID);
 
-    // Add the owner to the relevant set of users so they get a copy of the
+    // Add the author to the relevant set of users so they get a copy of the
     // email.
     if (!$this->silentUpdate) {
       if ($is_new) {
