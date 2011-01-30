@@ -37,17 +37,17 @@ abstract class AphrontResponse {
   public function getHeaders() {
     return array();
   }
-  
+
   public function setCacheDurationInSeconds($duration) {
     $this->cacheable = $duration;
     return $this;
   }
-  
+
   public function setHTTPResponseCode($code) {
     $this->responseCode = $code;
     return $this;
   }
-  
+
   public function getHTTPResponseCode() {
     return $this->responseCode;
   }
