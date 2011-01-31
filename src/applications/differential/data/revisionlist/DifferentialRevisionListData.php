@@ -229,7 +229,7 @@ class DifferentialRevisionListData {
 
     $data = vqueryfx_all(
       $rev->establishConnection('r'),
-      'SELECT * FROM %T revision WHERE '.$pattern,
+      'SELECT * FROM %T revision WHERE '.$pattern.' '.$this->getOrderClause(),
       $argv);
 
     return $rev->loadAllFromArray($data);

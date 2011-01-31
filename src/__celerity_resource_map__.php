@@ -118,7 +118,7 @@ celerity_register_resource_map(array(
   ),
   'differential-revision-comment-css' =>
   array(
-    'uri' => '/res/21572195/rsrc/css/application/differential/revision-comment.css',
+    'uri' => '/res/bf6369c6/rsrc/css/application/differential/revision-comment.css',
     'type' => 'css',
     'requires' =>
     array(
