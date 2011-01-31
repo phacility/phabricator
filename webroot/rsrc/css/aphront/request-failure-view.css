@@ -19,9 +19,23 @@
 }
 
 .aphront-request-failure-view .aphront-request-failure-body {
-  padding: 1em 2em;
+  padding: 1em 2em 1.5em;
 }
 
 .aphront-request-failure-view .aphront-request-failure-body p {
-  margin: .5em 0 1.25em;
+  margin: .5em 0;
+}
+
+.aphront-failure-continue {
+  margin-top: 1.5em;
+  text-align: right;
+}
+
+.aphront-failure-continue a.button {
+  margin-left: 1em;
+}
+
+.aphront-request-failure-view ul {
+  list-style: disc;
+  margin-left: 3em;
 }

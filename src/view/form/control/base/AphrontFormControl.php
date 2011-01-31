@@ -82,7 +82,15 @@ abstract class AphrontFormControl extends AphrontView {
   abstract protected function renderInput();
   abstract protected function getCustomControlClass();
 
+  protected function shouldRender() {
+    return true;
+  }
+
   final public function render() {
+    if (!$this->shouldRender()) {
+      return null;
+    }
+
     $custom_class = $this->getCustomControlClass();
 
     if (strlen($this->getLabel())) {
@@ -119,7 +127,7 @@ abstract class AphrontFormControl extends AphrontView {
     if (strlen($this->getCaption())) {
       $caption =
         '<div class="aphront-form-caption">'.
-          phutil_escape_html($this->getCaption()).
+          $this->getCaption().
         '</div>';
     } else {
       $caption = null;

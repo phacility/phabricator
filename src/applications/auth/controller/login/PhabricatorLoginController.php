@@ -34,9 +34,6 @@ class PhabricatorLoginController extends PhabricatorAuthController {
         'username = %s',
         $username);
 
-      $user->setPassword('asdf');
-      $user->save();
-
       $okay = false;
       if ($user) {
         if ($user->comparePassword($request->getStr('password'))) {
@@ -71,13 +68,15 @@ class PhabricatorLoginController extends PhabricatorAuthController {
       ->setAction('/login/')
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Username')
+          ->setLabel('Username/Email')
           ->setName('username')
           ->setValue($username))
       ->appendChild(
-        id(new AphrontFormTextControl())
+        id(new AphrontFormPasswordControl())
           ->setLabel('Password')
-          ->setName('password'))
+          ->setName('password')
+          ->setCaption(
+            '<a href="/login/email/">Forgot your password? / Email Login</a>'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Login'));
@@ -88,27 +87,39 @@ class PhabricatorLoginController extends PhabricatorAuthController {
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
     $panel->appendChild($form);
 
+    $fbauth_enabled = PhabricatorEnv::getEnvConfig('facebook.auth-enabled');
+    if ($fbauth_enabled) {
+      $auth_uri = new PhutilURI("https://www.facebook.com/dialog/oauth");
 
-    // TODO: Hardcoded junk
-    $connect_uri = "https://www.facebook.com/dialog/oauth";
+      $user = $request->getUser();
 
-    $user = $request->getUser();
+      $redirect_uri = PhabricatorEnv::getURI('/facebook-auth/');
+      $app_id = PhabricatorEnv::getEnvConfig('facebook.application-id');
 
-    $facebook_connect = new AphrontFormView();
-    $facebook_connect
-      ->setAction($connect_uri)
-      ->addHiddenInput('client_id', 184510521580034)
-      ->addHiddenInput('redirect_uri', 'http://local.aphront.com/facebook-connect/')
-      ->addHiddenInput('scope', 'email')
-      ->addHiddenInput('state', $user->getCSRFToken())
-      ->setUser($request->getUser())
-      ->setMethod('GET')
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue("Login with Facebook Connect \xC2\xBB"));
+      // TODO: In theory we should use 'state' to prevent CSRF, but the total
+      // effect of the CSRF attack is that an attacker can cause a user to login
+      // to Phabricator if they're already logged into Facebook. This does not
+      // seem like the most severe threat in the world, and generating CSRF for
+      // logged-out users is vaugely tricky.
 
-    $panel->appendChild('<br /><h1>Login with Facebook</h1>');
-    $panel->appendChild($facebook_connect);
+      $facebook_auth = new AphrontFormView();
+      $facebook_auth
+        ->setAction($auth_uri)
+        ->addHiddenInput('client_id', $app_id)
+        ->addHiddenInput('redirect_uri', $redirect_uri)
+        ->addHiddenInput('scope', 'email')
+        ->setUser($request->getUser())
+        ->setMethod('GET')
+        ->appendChild(
+          '<p class="aphront-form-instructions">Login or register for '.
+          'Phabricator using your Facebook account.</p>')
+        ->appendChild(
+          id(new AphrontFormSubmitControl())
+            ->setValue("Login with Facebook \xC2\xBB"));
+
+      $panel->appendChild('<br /><h1>Login with Facebook</h1>');
+      $panel->appendChild($facebook_auth);
+    }
 
     return $this->buildStandardPageResponse(
       array(

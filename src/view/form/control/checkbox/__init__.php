@@ -6,7 +6,7 @@
 
 
 
-phutil_require_module('phabricator', 'infratructure/celerity/api');
+phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'view/form/control/base');
 
 phutil_require_module('phutil', 'markup');

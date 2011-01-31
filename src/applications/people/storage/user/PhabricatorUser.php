@@ -64,16 +64,23 @@ class PhabricatorUser extends PhabricatorUserDAO {
     return $password;
   }
 
-  const CSRF_CYCLE_FREQUENCY = 3600;
+  const CSRF_CYCLE_FREQUENCY  = 3600;
+  const CSRF_TOKEN_LENGTH     = 16;
 
-  public function getCSRFToken() {
-    return $this->generateCSRFToken(time());
+  const EMAIL_CYCLE_FREQUENCY = 86400;
+  const EMAIL_TOKEN_LENGTH    = 24;
+
+  public function getCSRFToken($offset = 0) {
+    return $this->generateToken(
+      time() + (self::CSRF_CYCLE_FREQUENCY * $offset),
+      self::CSRF_CYCLE_FREQUENCY,
+      PhabricatorEnv::getEnvConfig('phabricator.csrf-key'),
+      self::CSRF_TOKEN_LENGTH);
   }
 
   public function validateCSRFToken($token) {
     for ($ii = -1; $ii <= 1; $ii++) {
-      $time = time() + (self::CSRF_CYCLE_FREQUENCY * $ii);
-      $valid = $this->generateCSRFToken($time);
+      $valid = $this->getCSRFToken($ii);
       if ($token == $valid) {
         return true;
       }
@@ -81,12 +88,10 @@ class PhabricatorUser extends PhabricatorUserDAO {
     return false;
   }
 
-  private function generateCSRFToken($epoch) {
-    $time_block = floor($epoch / (60 * 60));
-    // TODO: this should be a secret lolol
-    $key = '0b7ec0592e0a2829d8b71df2fa269b2c6172eca3';
+  private function generateToken($epoch, $frequency, $key, $len) {
+    $time_block = floor($epoch / $frequency);
     $vec = $this->getPHID().$this->passwordHash.$key.$time_block;
-    return substr(md5($vec), 0, 16);
+    return substr(sha1($vec), 0, $len);
   }
 
   public function establishSession($session_type) {
@@ -96,6 +101,7 @@ class PhabricatorUser extends PhabricatorUserDAO {
     if (!$urandom) {
       throw new Exception("Failed to open /dev/urandom!");
     }
+
     $entropy = fread($urandom, 20);
     if (strlen($entropy) != 20) {
       throw new Exception("Failed to read /dev/urandom!");
@@ -116,6 +122,24 @@ class PhabricatorUser extends PhabricatorUserDAO {
       $session_key);
 
     return $session_key;
+  }
+
+  public function generateEmailToken($offset = 0) {
+    return $this->generateToken(
+      time() + ($offset * self::EMAIL_CYCLE_FREQUENCY),
+      self::EMAIL_CYCLE_FREQUENCY,
+      PhabricatorEnv::getEnvConfig('phabricator.csrf-key').$this->getEmail(),
+      self::EMAIL_TOKEN_LENGTH);
+  }
+
+  public function validateEmailToken($token) {
+    for ($ii = -1; $ii <= 1; $ii++) {
+      $valid = $this->generateEmailToken($ii);
+      if ($token == $valid) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }

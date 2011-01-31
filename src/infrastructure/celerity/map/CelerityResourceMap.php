@@ -67,11 +67,11 @@ final class CelerityResourceMap {
 
     $map[$symbol] = $info;
   }
-  
+
   public function setPackageMap($package_map) {
     $this->packageMap = $package_map;
   }
-  
+
   public function packageResources(array $resolved_map) {
     $packaged = array();
     $handled = array();
@@ -92,18 +92,18 @@ final class CelerityResourceMap {
     }
     return $packaged;
   }
-  
+
   public function resolvePackage($package_hash) {
     $package = idx($this->packageMap['packages'], $package_hash);
     if (!$package) {
       return null;
     }
-    
+
     $paths = array();
     foreach ($package['symbols'] as $symbol) {
       $paths[] = $this->resourceMap[$symbol]['disk'];
     }
-    
+
     return $paths;
   }
 

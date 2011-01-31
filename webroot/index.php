@@ -16,7 +16,23 @@
  * limitations under the License.
  */
 
+$env = getenv('PHABRICATOR_ENV');
+if (!$env) {
+  header('Content-Type: text/plain');
+  die(
+    "CONFIG ERROR: ".
+    "The 'PHABRICATOR_ENV' environmental variable is not defined. Modify ".
+    "your httpd.conf to include 'SetEnv PHABRICATOR_ENV <env>', where '<env>' ".
+    "is one of 'development', 'production', or a custom environment.");
+}
+
+$conf = phabricator_read_config_file($env);
+$conf['phabricator.env'] = $env;
+
 setup_aphront_basics();
+
+phutil_require_module('phabricator', 'infrastructure/env');
+PhabricatorEnv::setEnvConfig($conf);
 
 $host = $_SERVER['HTTP_HOST'];
 $path = $_REQUEST['__path__'];
@@ -96,3 +112,14 @@ function setup_aphront_basics() {
 function __autoload($class_name) {
   PhutilSymbolLoader::loadClass($class_name);
 }
+
+
+function phabricator_read_config_file($config) {
+  $root = dirname(dirname(__FILE__));
+  $conf = include $root.'/conf/'.$config.'.conf.php';
+  if ($conf === false) {
+    throw new Exception("Failed to read config file '{$config}'.");
+  }
+  return $conf;
+}
+

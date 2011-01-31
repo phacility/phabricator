@@ -6,9 +6,9 @@
 
 
 
-phutil_require_module('phabricator', 'infratructure/celerity/api');
+phutil_require_module('phabricator', 'view/form/control/base');
 
 phutil_require_module('phutil', 'markup');
 
 
-phutil_require_source('markup.php');
+phutil_require_source('AphrontFormPasswordControl.php');

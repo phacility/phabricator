@@ -6,7 +6,7 @@
 
 
 
-phutil_require_module('phabricator', 'infratructure/celerity/response');
+phutil_require_module('phabricator', 'infrastructure/celerity/response');
 
 
 phutil_require_source('CelerityAPI.php');

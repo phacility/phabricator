@@ -115,9 +115,16 @@ class AphrontDefaultApplicationConfiguration
           => 'PhabricatorMetaMTAMailingListEditController',
       ),
 
-      '/login/$' => 'PhabricatorLoginController',
+      '/login/' => array(
+        '$' => 'PhabricatorLoginController',
+        'email/$' => 'PhabricatorEmailLoginController',
+        'etoken/(?<token>\w+)/$' => 'PhabricatorEmailTokenController',
+      ),
       '/logout/$' => 'PhabricatorLogoutController',
-      '/facebook-connect/$' => 'PhabricatorFacebookConnectController',
+      '/facebook-auth/' => array(
+        '$' => 'PhabricatorFacebookAuthController',
+        'diagnose/$' => 'PhabricatorFacebookAuthDiagnosticsController',
+      ),
     );
   }
 

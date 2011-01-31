@@ -17,11 +17,11 @@
  */
 
 class CelerityResourceController extends AphrontController {
-  
+
   private $path;
   private $hash;
   private $package;
-  
+
   public function willProcessRequest(array $data) {
     $this->path = $data['path'];
     $this->hash = $data['hash'];
@@ -37,7 +37,7 @@ class CelerityResourceController extends AphrontController {
     if (!preg_match('/\.(css|js)$/', $path, $matches)) {
       throw new Exception("Only CSS and JS resources may be served.");
     }
-    
+
     $type = $matches[1];
 
     $root = dirname(phutil_get_library_root('phabricator'));
@@ -48,7 +48,7 @@ class CelerityResourceController extends AphrontController {
       if (!$paths) {
         return new Aphront404Response();
       }
-    
+
       try {
         $data = array();
         foreach ($paths as $path) {
@@ -76,7 +76,7 @@ class CelerityResourceController extends AphrontController {
         $response->setMimeType("text/javascript; charset=utf-8");
         break;
     }
-    
+
     $response->setCacheDurationInSeconds(60 * 60 * 24 * 30);
 
     return $response;

@@ -29,6 +29,16 @@ class AphrontRequest {
   private $path;
   private $requestData;
   private $user;
+  private $env;
+
+  final public function setEnvConfig(array $conf) {
+    $this->env = $conf;
+    return $this;
+  }
+
+  final public function getEnvConfig($key, $default = null) {
+    return idx($this->env, $key, $default);
+  }
 
   final public function __construct($host, $path) {
     $this->host = $host;
@@ -121,7 +131,5 @@ class AphrontRequest {
   final public function getUser() {
     return $this->user;
   }
-
-
 
 }

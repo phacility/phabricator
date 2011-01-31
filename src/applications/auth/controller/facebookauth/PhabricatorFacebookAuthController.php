@@ -16,31 +16,99 @@
  * limitations under the License.
  */
 
-class PhabricatorFacebookConnectController extends PhabricatorAuthController {
+class PhabricatorFacebookAuthController extends PhabricatorAuthController {
 
   public function shouldRequireLogin() {
     return false;
   }
 
   public function processRequest() {
+    $auth_enabled = PhabricatorEnv::getEnvConfig('facebook.auth-enabled');
+    if (!$auth_enabled) {
+      return new Aphront400Response();
+    }
+
+    $diagnose_auth =
+      '<a href="/facebook-auth/diagnose/" class="button green">'.
+        'Diagnose Facebook Auth Problems'.
+      '</a>';
+
     $request = $this->getRequest();
 
     if ($request->getStr('error')) {
-      die("OMG ERROR");
+      $view = new AphrontRequestFailureView();
+      $view->setHeader('Facebook Auth Failed');
+      $view->appendChild(
+        '<p>'.
+          '<strong>Description:</strong> '.
+          phutil_escape_html($request->getStr('error_description')).
+        '</p>');
+      $view->appendChild(
+        '<p>'.
+          '<strong>Error:</strong> '.
+          phutil_escape_html($request->getStr('error')).
+        '</p>');
+      $view->appendChild(
+        '<p>'.
+          '<strong>Error Reason:</strong> '.
+          phutil_escape_html($request->getStr('error_reason')).
+        '</p>');
+      $view->appendChild(
+        '<div class="aphront-failure-continue">'.
+          '<a href="/login/" class="button">Continue</a>'.
+        '</div>');
+
+      return $this->buildStandardPageResponse(
+        $view,
+        array(
+          'title' => 'Facebook Auth Failed',
+        ));
     }
 
     $token = $request->getStr('token');
     if (!$token) {
+      $app_id = PhabricatorEnv::getEnvConfig('facebook.application-id');
+      $app_secret = PhabricatorEnv::getEnvConfig('facebook.application-secret');
+      $redirect_uri = PhabricatorEnv::getURI('/facebook-auth/');
+
       $code = $request->getStr('code');
-      $auth_uri = 'https://graph.facebook.com/oauth/access_token'.
-                  '?client_id=184510521580034'.
-                  '&redirect_uri=http://local.aphront.com/facebook-connect/'.
-                  '&client_secret=OMGSECRETS'.
-                  '&code='.$code;
+      $auth_uri = new PhutilURI(
+        "https://graph.facebook.com/oauth/access_token");
+      $auth_uri->setQueryParams(
+        array(
+          'client_id'     => $app_id,
+          'redirect_uri'  => $redirect_uri,
+          'client_secret' => $app_secret,
+          'code'          => $code,
+        ));
 
       $response = @file_get_contents($auth_uri);
       if ($response === false) {
-        throw new Exception('failed to open oauth thing');
+        $view = new AphrontRequestFailureView();
+        $view->setHeader('Facebook Auth Failed');
+        $view->appendChild(
+          '<p>Unable to authenticate with Facebook. There are several reasons '.
+          'this might happen:</p>'.
+            '<ul>'.
+              '<li>Phabricator may be configured with the wrong Application '.
+              'Secret; or</li>'.
+              '<li>the Facebook OAuth access token may have expired; or</li>'.
+              '<li>Facebook may have revoked authorization for the '.
+              'Application; or</li>'.
+              '<li>Facebook may be having technical problems.</li>'.
+            '</ul>'.
+          '<p>You can try again, or login using another method.</p>');
+        $view->appendChild(
+          '<div class="aphront-failure-continue">'.
+            $diagnose_auth.
+            '<a href="/login/" class="button">Continue</a>'.
+          '</div>');
+
+        return $this->buildStandardPageResponse(
+          $view,
+          array(
+            'title' => 'Facebook Auth Failed',
+          ));
       }
 
       $data = array();
@@ -89,12 +157,12 @@ class PhabricatorFacebookConnectController extends PhabricatorAuthController {
       $form
         ->addHiddenInput('token', $token)
         ->setUser($request->getUser())
-        ->setAction('/facebook-connect/')
+        ->setAction('/facebook-auth/')
         ->appendChild(
           '<p class="aphront-form-view-instructions">Do you want to link your '.
           "existing Phabricator account (<strong>{$ph_account}</strong>) ".
           "with your Facebook account (<strong>{$fb_account}</strong>) so ".
-          "you can login with Facebook Connect?")
+          "you can login with Facebook?")
         ->appendChild(
           id(new AphrontFormSubmitControl())
             ->setValue('Link Accounts')
@@ -170,7 +238,7 @@ class PhabricatorFacebookConnectController extends PhabricatorAuthController {
     $error_view = null;
     if ($errors) {
       $error_view = new AphrontErrorView();
-      $error_view->setTitle('Facebook Connect Failed');
+      $error_view->setTitle('Facebook Auth Failed');
       $error_view->setErrors($errors);
     }
 
@@ -178,7 +246,7 @@ class PhabricatorFacebookConnectController extends PhabricatorAuthController {
     $form
       ->addHiddenInput('token', $token)
       ->setUser($request->getUser())
-      ->setAction('/facebook-connect/')
+      ->setAction('/facebook-auth/')
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Username')
