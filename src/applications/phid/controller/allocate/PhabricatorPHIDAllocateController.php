@@ -31,7 +31,7 @@ class PhabricatorPHIDAllocateController
     }
 
     $types = id(new PhabricatorPHIDType())->loadAll();
-    
+
     $options = array();
     foreach ($types as $type) {
       $options[$type->getType()] = $type->getType().': '.$type->getName();
@@ -39,6 +39,7 @@ class PhabricatorPHIDAllocateController
     asort($options);
 
     $form = new AphrontFormView();
+    $form->setUser($request->getUser());
     $form->setAction('/phid/new/');
 
     $form

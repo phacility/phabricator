@@ -64,6 +64,7 @@ class PhabricatorDirectoryCategoryEditController
     }
 
     $form = new AphrontFormView();
+    $form->setUser($request->getUser());
     if ($category->getID()) {
       $form->setAction('/directory/category/edit/'.$category->getID().'/');
     } else {

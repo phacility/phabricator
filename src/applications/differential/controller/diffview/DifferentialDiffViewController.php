@@ -25,6 +25,8 @@ class DifferentialDiffViewController extends DifferentialController {
   }
 
   public function processRequest() {
+    $request = $this->getRequest();
+
     $diff = id(new DifferentialDiff())->load($this->id);
     if (!$diff) {
       return new Aphront404Response();
@@ -40,6 +42,7 @@ class DifferentialDiffViewController extends DifferentialController {
 
     $action_form = new AphrontFormView();
     $action_form
+      ->setUser($request->getUser())
       ->setAction('/differential/revision/edit/')
       ->addHiddenInput('diffID', $diff->getID())
       ->addHiddenInput('viaDiffView', 1)

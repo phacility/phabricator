@@ -84,6 +84,7 @@ class DifferentialRevisionViewController extends DifferentialController {
     $comment_form->setRevision($revision);
     $comment_form->setActions($this->getRevisionCommentActions($revision));
     $comment_form->setActionURI('/differential/comment/save/');
+    $comment_form->setUser($request->getUser());
 
     return $this->buildStandardPageResponse(
       '<div class="differential-primary-pane">'.

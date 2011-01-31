@@ -49,6 +49,7 @@ class PhabricatorMetaMTASendController extends PhabricatorMetaMTAController {
 
 
     $form = new AphrontFormView();
+    $form->setUser($request->getUser());
     $form->setAction('/mail/send/');
     $form
       ->appendChild(

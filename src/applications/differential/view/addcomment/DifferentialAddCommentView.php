@@ -21,6 +21,7 @@ final class DifferentialAddCommentView extends AphrontView {
   private $revision;
   private $actions;
   private $actionURI;
+  private $user;
 
   public function setRevision($revision) {
     $this->revision = $revision;
@@ -36,8 +37,11 @@ final class DifferentialAddCommentView extends AphrontView {
     $this->actionURI = $uri;
   }
 
-  public function render() {
+  public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
+  }
 
+  public function render() {
     $revision = $this->revision;
 
     $actions = array();
@@ -47,6 +51,7 @@ final class DifferentialAddCommentView extends AphrontView {
 
     $form = new AphrontFormView();
     $form
+      ->setUser($this->user)
       ->setAction($this->actionURI)
       ->addHiddenInput('revision_id', $revision->getID())
       ->appendChild(

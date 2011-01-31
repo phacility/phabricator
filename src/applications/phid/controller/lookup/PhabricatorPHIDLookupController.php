@@ -82,6 +82,7 @@ class PhabricatorPHIDLookupController
     }
 
     $lookup_form = new AphrontFormView();
+    $lookup_form->setUser($request->getUser());
     $lookup_form
       ->setAction('/phid/')
       ->appendChild(

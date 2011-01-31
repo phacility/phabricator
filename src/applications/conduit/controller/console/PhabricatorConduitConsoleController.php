@@ -26,6 +26,9 @@ class PhabricatorConduitConsoleController
   }
 
   public function processRequest() {
+
+    $request = $this->getRequest();
+
     $methods = $this->getAllMethods();
     if (empty($methods[$this->method])) {
       $this->method = key($methods);
@@ -55,6 +58,7 @@ class PhabricatorConduitConsoleController
 
     $form = new AphrontFormView();
     $form
+      ->setUser($request->getUser())
       ->setAction('/api/'.$this->method)
       ->appendChild(
         id(new AphrontFormStaticControl())

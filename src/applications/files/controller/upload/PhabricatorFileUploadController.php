@@ -34,6 +34,7 @@ class PhabricatorFileUploadController extends PhabricatorFileController {
 
     $form = new AphrontFormView();
     $form->setAction('/file/upload/');
+    $form->setUser($request->getUser());
 
     $form
       ->setEncType('multipart/form-data')

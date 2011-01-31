@@ -117,7 +117,26 @@ class PhabricatorStandardPageView extends AphrontPageView {
     if ($request) {
       $user = $request->getUser();
       if ($user->getPHID()) {
-        $login_stuff = 'Logged in as '.phutil_escape_html($user->getUsername());
+        $login_stuff =
+          'Logged in as '.phutil_escape_html($user->getUsername()).
+          ' &middot; '.
+          '<form action="/logout/" method="post" style="display: inline;">'.
+            phutil_render_tag(
+              'input',
+              array(
+                'type' => 'hidden',
+                'name' => '__csrf__',
+                'value' => $user->getCSRFToken(),
+              )).
+            phutil_render_tag(
+              'input',
+              array(
+                'type' => 'hidden',
+                'name' => '__form__',
+                'value' => true,
+              )).
+            '<button class="small grey">Logout</button>'.
+          '</form>';
       }
     }
 

@@ -23,6 +23,12 @@ final class AphrontFormView extends AphrontView {
   private $header;
   private $data = array();
   private $encType;
+  private $user;
+
+  public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
+    return $this;
+  }
 
   public function setAction($action) {
     $this->action = $action;
@@ -59,8 +65,13 @@ final class AphrontFormView extends AphrontView {
   }
 
   private function renderDataInputs() {
+    if (!$this->user) {
+      throw new Exception('You must pass the user to AphrontFormView.');
+    }
+
     $data = $this->data + array(
       '__form__' => 1,
+      '__csrf__' => $this->user->getCSRFToken(),
     );
     $inputs = array();
     foreach ($data as $key => $value) {

@@ -116,6 +116,7 @@ class AphrontDefaultApplicationConfiguration
       ),
 
       '/login/' => 'PhabricatorLoginController',
+      '/logout/' => 'PhabricatorLogoutController',
     );
   }
 

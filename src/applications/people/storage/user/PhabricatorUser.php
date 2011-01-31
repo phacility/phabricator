@@ -27,6 +27,8 @@ class PhabricatorUser extends PhabricatorUserDAO {
   protected $passwordSalt;
   protected $passwordHash;
 
+  private $sessionKey;
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -58,6 +60,31 @@ class PhabricatorUser extends PhabricatorUserDAO {
       $password = md5($password);
     }
     return $password;
+  }
+
+  const CSRF_CYCLE_FREQUENCY = 3600;
+
+  public function getCSRFToken() {
+    return $this->generateCSRFToken(time());
+  }
+
+  public function validateCSRFToken($token) {
+    for ($ii = -1; $ii <= 1; $ii++) {
+      $time = time() + (self::CSRF_CYCLE_FREQUENCY * $ii);
+      $valid = $this->generateCSRFToken($time);
+      if ($token == $valid) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private function generateCSRFToken($epoch) {
+    $time_block = floor($epoch / (60 * 60));
+    // TODO: this should be a secret lolol
+    $key = '0b7ec0592e0a2829d8b71df2fa269b2c6172eca3';
+    $vec = $this->getPHID().$this->passwordHash.$key.$time_block;
+    return substr(md5($vec), 0, 16);
   }
 
 }

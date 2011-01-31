@@ -26,7 +26,7 @@ function phabricator_format_relative_time($duration) {
 
 function phabricator_format_timestamp($epoch) {
   $difference = (time() - $epoch);
-  
+
   if ($difference < 60 * 60) {
     return phabricator_format_relative_time($difference).' ago';
   } else if (date('Y') == date('Y', $epoch)) {

@@ -65,6 +65,7 @@ class PhabricatorMetaMTAMailingListEditController
     }
 
     $form = new AphrontFormView();
+    $form->setUser($request->getUser());
     if ($list->getID()) {
       $form->setAction('/mail/lists/edit/'.$list->getID().'/');
     } else {

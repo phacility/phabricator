@@ -84,6 +84,7 @@ class PhabricatorPeopleEditController extends PhabricatorPeopleController {
     }
 
     $form = new AphrontFormView();
+    $form->setUser($request->getUser());
     if ($user->getUsername()) {
       $form->setAction('/people/edit/'.$user->getUsername().'/');
     } else {

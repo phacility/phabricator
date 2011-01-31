@@ -73,6 +73,8 @@ class PhabricatorDirectoryItemEditController
     }
 
     $form = new AphrontFormView();
+    $form->setUser($request->getUser());
+
     if ($item->getID()) {
       $form->setAction('/directory/item/edit/'.$item->getID().'/');
     } else {

@@ -73,6 +73,8 @@ class PhabricatorPHIDTypeEditController
     }
 
     $form = new AphrontFormView();
+    $form->setUser($request->getUser());
+
     if ($type->getID()) {
       $form->setAction('/phid/type/edit/'.$type->getID().'/');
     } else {
@@ -84,6 +86,7 @@ class PhabricatorPHIDTypeEditController
     } else {
       $type_immutable = false;
     }
+
 
     $form
       ->appendChild(

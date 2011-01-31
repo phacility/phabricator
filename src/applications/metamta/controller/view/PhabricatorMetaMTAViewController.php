@@ -26,14 +26,17 @@ class PhabricatorMetaMTAViewController extends PhabricatorMetaMTAController {
 
   public function processRequest() {
 
+    $request = $this->getRequest();
+
     $mail = id(new PhabricatorMetaMTAMail())->load($this->id);
     if (!$mail) {
       return new Aphront404Response();
     }
-    
+
     $status = PhabricatorMetaMTAMail::getReadableStatus($mail->getStatus());
 
     $form = new AphrontFormView();
+    $form->setUser($request->getUser());
     $form->setAction('/mail/send/');
     $form
       ->appendChild(

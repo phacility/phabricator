@@ -26,7 +26,7 @@ class PhabricatorLoginController extends PhabricatorAuthController {
     $request = $this->getRequest();
 
     $error = false;
-    $login_name = $request->getCookie('phu');
+    $login_name = $request->getCookie('phusr');
     if ($request->isFormPost()) {
       $login_name = $request->getStr('login');
 
@@ -89,6 +89,7 @@ class PhabricatorLoginController extends PhabricatorAuthController {
 
     $form = new AphrontFormView();
     $form
+      ->setUser($request->getUser())
       ->setAction('/login/')
       ->appendChild(
         id(new AphrontFormTextControl())

@@ -86,7 +86,9 @@ class AphrontRequest {
   }
 
   final public function isFormPost() {
-    return $this->getExists(self::TYPE_FORM) && $this->isHTTPPost();
+    return $this->getExists(self::TYPE_FORM) &&
+           $this->isHTTPPost() &&
+           $this->getUser()->validateCSRFToken($this->getStr('__csrf__'));
   }
 
   final public function getCookie($name, $default = null) {
