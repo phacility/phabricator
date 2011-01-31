@@ -7,7 +7,7 @@
 
 
 phutil_require_module('phabricator', 'aphront/response/redirect');
-phutil_require_module('phabricator', 'applications/auth/controlller/base');
+phutil_require_module('phabricator', 'applications/auth/controller/base');
 
 phutil_require_module('phutil', 'utils');
 

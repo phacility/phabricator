@@ -26,13 +26,13 @@ class PhabricatorLoginController extends PhabricatorAuthController {
     $request = $this->getRequest();
 
     $error = false;
-    $login_name = $request->getCookie('phusr');
+    $username = $request->getCookie('phusr');
     if ($request->isFormPost()) {
-      $login_name = $request->getStr('login');
+      $username = $request->getStr('username');
 
       $user = id(new PhabricatorUser())->loadOneWhere(
         'username = %s',
-        $login_name);
+        $username);
 
       $user->setPassword('asdf');
       $user->save();
@@ -40,30 +40,8 @@ class PhabricatorLoginController extends PhabricatorAuthController {
       $okay = false;
       if ($user) {
         if ($user->comparePassword($request->getStr('password'))) {
-          $conn_w = $user->establishConnection('w');
 
-          $urandom = fopen('/dev/urandom', 'r');
-          if (!$urandom) {
-            throw new Exception("Failed to open /dev/urandom!");
-          }
-          $entropy = fread($urandom, 20);
-          if (strlen($entropy) != 20) {
-            throw new Exception("Failed to read /dev/urandom!");
-          }
-
-          $session_key = sha1($entropy);
-          queryfx(
-            $conn_w,
-            'INSERT INTO phabricator_session '.
-              '(userPHID, type, sessionKey, sessionStart)'.
-            ' VALUES '.
-              '(%s, %s, %s, UNIX_TIMESTAMP()) '.
-            'ON DUPLICATE KEY UPDATE '.
-              'sessionKey = VALUES(sessionKey), '.
-              'sessionStart = VALUES(sessionStart)',
-            $user->getPHID(),
-            'web',
-            $session_key);
+          $session_key = $user->establishSession('web');
 
           $request->setCookie('phusr', $user->getUsername());
           $request->setCookie('phsid', $session_key);
@@ -93,9 +71,9 @@ class PhabricatorLoginController extends PhabricatorAuthController {
       ->setAction('/login/')
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Login')
-          ->setName('login')
-          ->setValue($login_name))
+          ->setLabel('Username')
+          ->setName('username')
+          ->setValue($username))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Password')
@@ -109,6 +87,28 @@ class PhabricatorLoginController extends PhabricatorAuthController {
     $panel->setHeader('Phabricator Login');
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
     $panel->appendChild($form);
+
+
+    // TODO: Hardcoded junk
+    $connect_uri = "https://www.facebook.com/dialog/oauth";
+
+    $user = $request->getUser();
+
+    $facebook_connect = new AphrontFormView();
+    $facebook_connect
+      ->setAction($connect_uri)
+      ->addHiddenInput('client_id', 184510521580034)
+      ->addHiddenInput('redirect_uri', 'http://local.aphront.com/facebook-connect/')
+      ->addHiddenInput('scope', 'email')
+      ->addHiddenInput('state', $user->getCSRFToken())
+      ->setUser($request->getUser())
+      ->setMethod('GET')
+      ->appendChild(
+        id(new AphrontFormSubmitControl())
+          ->setValue("Login with Facebook Connect \xC2\xBB"));
+
+    $panel->appendChild('<br /><h1>Login with Facebook</h1>');
+    $panel->appendChild($facebook_connect);
 
     return $this->buildStandardPageResponse(
       array(

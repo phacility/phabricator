@@ -115,8 +115,9 @@ class AphrontDefaultApplicationConfiguration
           => 'PhabricatorMetaMTAMailingListEditController',
       ),
 
-      '/login/' => 'PhabricatorLoginController',
-      '/logout/' => 'PhabricatorLogoutController',
+      '/login/$' => 'PhabricatorLoginController',
+      '/logout/$' => 'PhabricatorLogoutController',
+      '/facebook-connect/$' => 'PhabricatorFacebookConnectController',
     );
   }
 

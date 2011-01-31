@@ -26,6 +26,8 @@ class PhabricatorUser extends PhabricatorUserDAO {
   protected $email;
   protected $passwordSalt;
   protected $passwordHash;
+  protected $facebookUID;
+  protected $profileImagePHID;
 
   private $sessionKey;
 
@@ -85,6 +87,35 @@ class PhabricatorUser extends PhabricatorUserDAO {
     $key = '0b7ec0592e0a2829d8b71df2fa269b2c6172eca3';
     $vec = $this->getPHID().$this->passwordHash.$key.$time_block;
     return substr(md5($vec), 0, 16);
+  }
+
+  public function establishSession($session_type) {
+    $conn_w = $this->establishConnection('w');
+
+    $urandom = fopen('/dev/urandom', 'r');
+    if (!$urandom) {
+      throw new Exception("Failed to open /dev/urandom!");
+    }
+    $entropy = fread($urandom, 20);
+    if (strlen($entropy) != 20) {
+      throw new Exception("Failed to read /dev/urandom!");
+    }
+
+    $session_key = sha1($entropy);
+    queryfx(
+      $conn_w,
+      'INSERT INTO phabricator_session '.
+        '(userPHID, type, sessionKey, sessionStart)'.
+      ' VALUES '.
+        '(%s, %s, %s, UNIX_TIMESTAMP()) '.
+      'ON DUPLICATE KEY UPDATE '.
+        'sessionKey = VALUES(sessionKey), '.
+        'sessionStart = VALUES(sessionStart)',
+      $this->getPHID(),
+      $session_type,
+      $session_key);
+
+    return $session_key;
   }
 
 }

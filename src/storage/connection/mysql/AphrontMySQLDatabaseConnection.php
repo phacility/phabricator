@@ -184,13 +184,18 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
       case 2013: // Connection Dropped
       case 2006: // Gone Away
         throw new AphrontQueryConnectionLostException("#{$errno}: {$error}");
-        break;
       case 1213: // Deadlock
       case 1205: // Lock wait timeout exceeded
         throw new AphrontQueryRecoverableException("#{$errno}: {$error}");
-        break;
+      case 1062: // Duplicate Key
+        $matches = null;
+        $key = null;
+        if (preg_match('/for key \'(.*)\'$/', $error, $matches)) {
+          $key = $matches[1];
+        }
+        throw new AphrontQueryDuplicateKeyException($key, "{$errno}: {$error}");
       default:
-        // TODO: 1062 is syntax error, and quite terrible in production.
+        // TODO: 1064 is syntax error, and quite terrible in production.
         throw new AphrontQueryException("#{$errno}: {$error}");
     }
   }
