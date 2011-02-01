@@ -22,9 +22,9 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
   public function establishConnection($mode) {
     return new AphrontMySQLDatabaseConnection(
       array(
-        'user'      => 'root',
-        'pass'      => '',
-        'host'      => 'localhost',
+        'user'      => PhabricatorEnv::getEnvConfig('mysql.user'),
+        'pass'      => PhabricatorEnv::getEnvConfig('mysql.pass'),
+        'host'      => PhabricatorEnv::getEnvConfig('mysql.host'),
         'database'  => 'phabricator_'.$this->getApplicationName(),
       ));
 

@@ -23,11 +23,23 @@ return array(
   'phabricator.base-uri'        => null,
 
 
-  //
   'phabricator.csrf-key'        => '0b7ec0592e0a2829d8b71df2fa269b2c6172eca3',
 
 
-// --  Facebook  ---------------------------------------------------------------
+
+// --  MySQL  --------------------------------------------------------------- //
+
+  // The username to use when connecting to MySQL.
+  'mysql.user' => 'root',
+  
+  // The password to use when connecting to MySQL.
+  'mysql.pass' => '',
+  
+  // The MySQL server to connect to.
+  'mysql.host' => 'localhost',
+
+
+// --  Facebook  ------------------------------------------------------------ //
 
   // Can users use Facebook credentials to login to Phabricator?
   'facebook.auth-enabled'       => false,
@@ -38,11 +50,22 @@ return array(
   // The Facebook "Application Secret" to use for Facebook API access.
   'facebook.application-secret' => null,
 
+
+
+// -- Recaptcha ------------------------------------------------------------- //
+
+  // Is Recaptcha enabled? If disabled, captchas will not appear.
+  'recaptcha.enabled'           => false,
+  
+  // Your Recaptcha public key, obtained from Recaptcha.
   'recaptcha.public-key'        => null,
+  
+  // Your Recaptcha private key, obtained from Recaptcha.
   'recaptcha.private-key'       => null,
 
 
   'user.default-profile-image-phid' => 'PHID-FILE-f57aaefce707fc4060ef',
+  
 
 
 );
