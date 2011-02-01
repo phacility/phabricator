@@ -845,23 +845,27 @@ EOSYNTHETIC;
     if ($more) {
       $more =
         ' '.
-        phutil_render_tag(
+        javelin_render_tag(
           'a',
           array(
             'mustcapture' => true,
             'sigil'       => 'show-more',
             'class'       => 'complete',
-            'meta'        => 'TODO',
+            'href'        => '#',
+            'meta'        => array(
+              'id'    => $changeset_id,
+              'range' => "0-{$end}",
+            ),
           ),
           'Show File Contents');
     } else {
       $more = null;
     }
 
-    return phutil_render_tag(
+    return javelin_render_tag(
       'tr',
       array(
-        'sigil' => 'contex-target',
+        'sigil' => 'context-target',
       ),
       '<td class="differential-shield" colspan="4">'.
         phutil_escape_html($message).
@@ -881,7 +885,7 @@ EOSYNTHETIC;
 
     $context_not_available = null;
     if ($this->missingOld || $this->missingNew) {
-      $context_not_available = phutil_render_tag(
+      $context_not_available = javelin_render_tag(
         'tr',
         array(
           'sigil' => 'context-target',
@@ -949,40 +953,49 @@ EOSYNTHETIC;
         $contents = array();
 
         if ($len > 40) {
-          $contents[] = phutil_render_tag(
+          $contents[] = javelin_render_tag(
             'a',
             array(
               'href' => '#',
               'mustcapture' => true,
               'sigil'       => 'show-more',
-              'meta'        => '', // TODO
+              'meta'        => array(
+                'id'    => $changeset,
+                'range' => "{$top}-{$len}/{$top}-20",
+              ),
             ),
             "\xE2\x96\xB2 Show 20 Lines");
         }
 
-        $contents[] = phutil_render_tag(
+        $contents[] = javelin_render_tag(
           'a',
           array(
             'href' => '#',
             'mustcapture' => true,
             'sigil'       => 'show-more',
-            'meta'        => '', // TODO
+            'meta'        => array(
+              'id'    => $changeset,
+              'range' => "{$top}-{$len}/{$top}-{$len}",
+            ),
           ),
           'Show All '.$len.' Lines');
 
         if ($len > 40) {
-          $contents[] = phutil_render_tag(
+          $contents[] = javelin_render_tag(
             'a',
             array(
               'href' => '#',
               'mustcapture' => true,
               'sigil'       => 'show-more',
-              'meta'        => '', // TODO
+              'meta'        => array(
+                'id'    => $changeset,
+                'range' => "{$top}-{$len}/{$end}-20",
+              ),
             ),
             "\xE2\x96\xBC Show 20 Lines");
         };
 
-        $container = phutil_render_tag(
+        $container = javelin_render_tag(
           'tr',
           array(
             'sigil' => 'context-target',

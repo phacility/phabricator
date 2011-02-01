@@ -228,13 +228,23 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-differential-populate' =>
   array(
-    'uri' => '/res/9982573c/rsrc/js/application/differential/behavior-populate.js',
+    'uri' => '/res/f7efbf62/rsrc/js/application/differential/behavior-populate.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-lib-dev',
     ),
     'disk' => '/rsrc/js/application/differential/behavior-populate.js',
+  ),
+  'javelin-behavior-differential-show-more' =>
+  array(
+    'uri' => '/res/d26ebcae/rsrc/js/application/differential/behavior-show-more.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-lib-dev',
+    ),
+    'disk' => '/rsrc/js/application/differential/behavior-show-more.js',
   ),
   'javelin-init-dev' =>
   array(

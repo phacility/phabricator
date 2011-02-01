@@ -13,6 +13,7 @@ phutil_require_module('phabricator', 'applications/differential/constants/change
 phutil_require_module('phabricator', 'applications/differential/storage/changeset');
 phutil_require_module('phabricator', 'applications/differential/storage/diff');
 phutil_require_module('phabricator', 'applications/files/uri');
+phutil_require_module('phabricator', 'infrastructure/javelin/markup');
 phutil_require_module('phabricator', 'storage/queryfx');
 
 phutil_require_module('phutil', 'filesystem');

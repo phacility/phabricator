@@ -18,30 +18,52 @@
 
 class DifferentialChangesetViewController extends DifferentialController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
 
   public function processRequest() {
-    $changeset = id(new DifferentialChangeset())->load($this->id);
+    $request = $this->getRequest();
+
+    $id = $request->getStr('id');
+
+    $changeset = id(new DifferentialChangeset())->load($id);
     if (!$changeset) {
       return new Aphront404Response();
     }
 
     $changeset->attachHunks($changeset->loadHunks());
 
+    $range_s = null;
+    $range_e = null;
+    $mask = array();
+
+    $range = $request->getStr('range');
+    if ($range) {
+      $match = null;
+      if (preg_match('@^(\d+)-(\d+)(?:/(\d+)-(\d+))?$@', $range, $match)) {
+        $range_s = (int)$match[1];
+        $range_e = (int)$match[2];
+        if (count($match) > 3) {
+          $start = (int)$match[3];
+          $len = (int)$match[4];
+          for ($ii = $start; $ii < $start + $len; $ii++) {
+            $mask[$ii] = true;
+          }
+        }
+      }
+    }
+
     $parser = new DifferentialChangesetParser();
     $parser->setChangeset($changeset);
 
-    $output = $parser->render();
+    $output = $parser->render(null, $range_s, $range_e, $mask);
 
-    $request = $this->getRequest();
     if ($request->isAjax()) {
       return id(new AphrontAjaxResponse())
         ->setContent($output);
     }
+
+    Javelin::initBehavior('differential-show-more', array(
+      'uri' => '/differential/changeset/',
+    ));
 
     $detail = new DifferentialChangesetDetailView();
     $detail->setChangeset($changeset);

@@ -66,7 +66,7 @@ class DifferentialChangesetListView extends AphrontView {
           'whitespace'  => $whitespace,
         ));
 */
-      $detail_uri = '/differential/changeset/'.$changeset->getID().'/';
+      $detail_uri = '/differential/changeset/?id='.$changeset->getID();
 
       $detail_button = phutil_render_tag(
         'a',
@@ -99,10 +99,12 @@ class DifferentialChangesetListView extends AphrontView {
     Javelin::initBehavior('differential-populate', array(
       'registry'    => $mapping,
       'whitespace'  => $whitespace,
-      'uri'         => '/differential/changeset/',//$render_uri,
+      'uri'         => '/differential/changeset/',
     ));
 
-
+    Javelin::initBehavior('differential-show-more', array(
+      'uri' => '/differential/changeset/',
+    ));
 /*
 
 

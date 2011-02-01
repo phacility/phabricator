@@ -9,11 +9,10 @@ JX.behavior('differential-populate', function(config) {
     JX.DOM.replace(JX.$(target), JX.HTML(response));
   }
 
-  var uri;
   for (var k in config.registry) {
-    uri = config.uri + config.registry[k][0] + '/';
-    new JX.Request(uri, JX.bind(null, onresponse, k))
+    new JX.Request(config.uri, JX.bind(null, onresponse, k))
       .setData({
+        id: config.registry[k][0],
         against: config.registry[k][1],
         whitespace: config.whitespace
       })
