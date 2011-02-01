@@ -32,7 +32,7 @@ class DifferentialCommentSaveController extends DifferentialController {
 
     $comment    = $request->getStr('comment');
     $action     = $request->getStr('action');
-    $reviewers  = $request->getStr('reviewers');
+    $reviewers  = $request->getArr('reviewers');
 
     $editor = new DifferentialCommentEditor(
       $revision,
