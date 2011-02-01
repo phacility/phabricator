@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'applications/metamta/storage/mail');
+phutil_require_module('phabricator', 'infrastructure/env');
 
 
 phutil_require_source('DifferentialMail.php');

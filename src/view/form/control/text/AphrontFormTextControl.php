@@ -30,6 +30,7 @@ class AphrontFormTextControl extends AphrontFormControl {
         'name'      => $this->getName(),
         'value'     => $this->getValue(),
         'disabled'  => $this->getDisabled() ? 'disabled' : null,
+        'id'        => $this->getID(),
       ));
   }
 

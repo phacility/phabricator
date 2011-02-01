@@ -50,6 +50,7 @@ class AphrontFormSelectControl extends AphrontFormControl {
       array(
         'name'      => $this->getName(),
         'disabled'  => $this->getDisabled() ? 'disabled' : null,
+        'id'        => $this->getID(),
       ),
       implode("\n", $options));
   }

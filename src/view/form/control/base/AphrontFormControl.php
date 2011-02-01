@@ -24,6 +24,16 @@ abstract class AphrontFormControl extends AphrontView {
   private $name;
   private $value;
   private $disabled;
+  private $id;
+
+  public function setID($id) {
+    $this->id = $id;
+    return $this;
+  }
+
+  public function getID() {
+    return $this->id;
+  }
 
   public function setLabel($label) {
     $this->label = $label;

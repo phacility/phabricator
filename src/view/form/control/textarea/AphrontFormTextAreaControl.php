@@ -20,7 +20,7 @@ class AphrontFormTextAreaControl extends AphrontFormControl {
 
   const HEIGHT_VERY_SHORT = 'very-short';
   const HEIGHT_SHORT      = 'short';
-  
+
   private $height;
 
   public function setHeight($height) {
@@ -48,6 +48,7 @@ class AphrontFormTextAreaControl extends AphrontFormControl {
         'name'      => $this->getName(),
         'disabled'  => $this->getDisabled() ? 'disabled' : null,
         'class'     => $height_class,
+        'id'        => $this->getID(),
       ),
       phutil_escape_html($this->getValue()));
   }

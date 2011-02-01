@@ -21,6 +21,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
   private $comment;
   private $handles;
   private $markupEngine;
+  private $preview;
 
   public function setComment($comment) {
     $this->comment = $comment;
@@ -37,6 +38,11 @@ final class DifferentialRevisionCommentView extends AphrontView {
     return $this;
   }
 
+  public function setPreview($preview) {
+    $this->preview = $preview;
+    return $this;
+  }
+
   public function render() {
 
     require_celerity_resource('phabricator-remarkup-css');
@@ -48,7 +54,11 @@ final class DifferentialRevisionCommentView extends AphrontView {
 
     $action_class = 'differential-comment-action-'.phutil_escape_html($action);
 
-    $date = date('F jS, Y g:i:s A', $comment->getDateCreated());
+    if ($this->preview) {
+      $date = 'COMMENT PREVIEW';
+    } else {
+      $date = date('F jS, Y g:i:s A', $comment->getDateCreated());
+    }
 
     $author = $this->handles[$comment->getAuthorPHID()];
     $author_link = $author->renderLink();
@@ -70,12 +80,12 @@ final class DifferentialRevisionCommentView extends AphrontView {
           "<p>{$author_link} {$verb} this revision.</p>".
         '</div>';
     }
-    
+
     $background = null;
     $uri = $author->getImageURI();
     if ($uri) {
       $background = "background-image: url('{$uri}');";
-    } 
+    }
 
     return
       '<div class="differential-comment '.$action_class.'">'.

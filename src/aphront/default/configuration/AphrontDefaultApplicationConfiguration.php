@@ -87,7 +87,7 @@ class AphrontDefaultApplicationConfiguration
         'revision/edit/(?:(?<id>\d+)/)?$'
           => 'DifferentialRevisionEditController',
         'comment/' => array(
-          'preview/$' => 'DifferentialCommentPreviewController',
+          'preview/(?<id>\d+)/$' => 'DifferentialCommentPreviewController',
           'save/$' => 'DifferentialCommentSaveController',
           'inline/' => array(
             'preview/$' => 'DifferentialInlineCommentPreviewController',

@@ -30,6 +30,7 @@ class AphrontFormPasswordControl extends AphrontFormControl {
         'name'      => $this->getName(),
         'value'     => $this->getValue(),
         'disabled'  => $this->getDisabled() ? 'disabled' : null,
+        'id'        => $this->getID(),
       ));
   }
 

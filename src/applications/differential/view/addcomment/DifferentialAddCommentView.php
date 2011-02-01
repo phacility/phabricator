@@ -42,6 +42,9 @@ final class DifferentialAddCommentView extends AphrontView {
   }
 
   public function render() {
+
+    require_celerity_resource('differential-revision-add-comment-css');
+
     $revision = $this->revision;
 
     $actions = array();
@@ -58,19 +61,39 @@ final class DifferentialAddCommentView extends AphrontView {
         id(new AphrontFormSelectControl())
           ->setLabel('Action')
           ->setName('action')
+          ->setID('comment-action')
           ->setOptions($actions))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setName('comment')
+          ->setID('comment-content')
           ->setLabel('Comment'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Comment'));
 
+    Javelin::initBehavior(
+      'differential-feedback-preview',
+      array(
+        'uri'     => '/differential/comment/preview/'.$revision->getID().'/',
+        'preview' => 'comment-preview',
+        'action'  => 'comment-action',
+        'content' => 'comment-content',
+      ));
+
     return
-      '<div class="differential-panel">'.
-        '<h1>Add Comment</h1>'.
-        $form->render().
+      '<div class="differential-add-comment-panel">'.
+        '<div class="differential-panel">'.
+          '<h1>Add Comment</h1>'.
+          $form->render().
+        '</div>'.
+        '<div class="differential-comment-preview">'.
+          '<div id="comment-preview">'.
+            '<span class="differential-loading-text">'.
+              'Loading comment preview...'.
+            '</span>'.
+          '</div>'.
+        '</div>'.
       '</div>';
   }
 }
