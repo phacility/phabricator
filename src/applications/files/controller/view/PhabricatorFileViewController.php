@@ -52,6 +52,7 @@ class PhabricatorFileViewController extends PhabricatorFileController {
 
     $form = new AphrontFormView();
     $form->setAction('/file/view/'.$file->getPHID().'/');
+    $form->setUser($this->getRequest()->getUser());
     $form
       ->appendChild(
         id(new AphrontFormStaticControl())

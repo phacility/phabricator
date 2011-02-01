@@ -30,6 +30,12 @@ class PhabricatorUser extends PhabricatorUserDAO {
   protected $profileImagePHID;
 
   private $sessionKey;
+  
+  public function getProfileImagePHID() {
+    return nonempty(
+      $this->profileImagePHID,
+      PhabricatorEnv::getEnvConfig('user.default-profile-image-phid'));
+  }
 
   public function getConfiguration() {
     return array(

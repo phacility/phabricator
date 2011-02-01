@@ -85,6 +85,7 @@ class PhabricatorLoginController extends PhabricatorAuthController {
     $panel = new AphrontPanelView();
     $panel->setHeader('Phabricator Login');
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+//    $panel->setCreateButton('Register New Account', '/login/register/');
     $panel->appendChild($form);
 
     $fbauth_enabled = PhabricatorEnv::getEnvConfig('facebook.auth-enabled');
@@ -117,7 +118,7 @@ class PhabricatorLoginController extends PhabricatorAuthController {
           id(new AphrontFormSubmitControl())
             ->setValue("Login with Facebook \xC2\xBB"));
 
-      $panel->appendChild('<br /><h1>Login with Facebook</h1>');
+      $panel->appendChild('<br /><h1>Login or Register with Facebook</h1>');
       $panel->appendChild($facebook_auth);
     }
 

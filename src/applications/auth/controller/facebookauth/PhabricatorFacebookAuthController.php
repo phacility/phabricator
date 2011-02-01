@@ -131,6 +131,24 @@ class PhabricatorFacebookAuthController extends PhabricatorAuthController {
       return id(new AphrontRedirectResponse())
         ->setURI('/');
     }
+    
+    $known_email = id(new PhabricatorUser())
+      ->loadOneWhere('email = %s', $user_data['email']);
+    if ($known_email) {
+      if ($known_email->getFacebookUID()) {
+        throw new Exception(
+          "The email associated with the Facebook account you just logged in ".
+          "with is already associated with another Phabricator account which ".
+          "is, in turn, associated with a Facebook account different from ".
+          "the one you just logged in with.");
+      }
+      $known_email->setFacebookUID($user_id);
+      $session_key = $known_email->establishSession('web');
+      $request->setCookie('phusr', $known_email->getUsername());
+      $request->setCookie('phsid', $session_key);
+      return id(new AphrontRedirectResponse())
+        ->setURI('/');
+    }
 
     $current_user = $this->getRequest()->getUser();
     if ($current_user->getPHID()) {

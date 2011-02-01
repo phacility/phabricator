@@ -50,15 +50,15 @@ final class DifferentialRevisionCommentView extends AphrontView {
 
     $date = date('F jS, Y g:i:s A', $comment->getDateCreated());
 
-    $author = $comment->getAuthorPHID();
-    $author = $this->handles[$author]->renderLink();
+    $author = $this->handles[$comment->getAuthorPHID()];
+    $author_link = $author->renderLink();
 
     $verb = DifferentialAction::getActionPastTenseVerb($comment->getAction());
     $verb = phutil_escape_html($verb);
 
     $content = $comment->getContent();
     if (strlen(rtrim($content))) {
-      $title = "{$author} {$verb} this revision:";
+      $title = "{$author_link} {$verb} this revision:";
       $content =
         '<div class="phabricator-remarkup">'.
           $this->markupEngine->markupText($content).
@@ -67,9 +67,15 @@ final class DifferentialRevisionCommentView extends AphrontView {
       $title = null;
       $content =
         '<div class="differential-comment-nocontent">'.
-          "<p>{$author} {$verb} this revision.</p>".
+          "<p>{$author_link} {$verb} this revision.</p>".
         '</div>';
     }
+    
+    $background = null;
+    $uri = $author->getImageURI();
+    if ($uri) {
+      $background = "background-image: url('{$uri}');";
+    } 
 
     return
       '<div class="differential-comment '.$action_class.'">'.
@@ -77,7 +83,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
           '<div class="differential-comment-date">'.$date.'</div>'.
           '<div class="differential-comment-title">'.$title.'</div>'.
         '</div>'.
-        '<div class="differential-comment-body">'.
+        '<div class="differential-comment-body" style="'.$background.'">'.
           '<div class="differential-comment-core">'.
             '<div class="differential-comment-content">'.
               $content.

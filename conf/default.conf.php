@@ -42,5 +42,7 @@ return array(
   'recaptcha.private-key'       => null,
 
 
+  'user.default-profile-image-phid' => 'PHID-FILE-f57aaefce707fc4060ef',
+
 
 );

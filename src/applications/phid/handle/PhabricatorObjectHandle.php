@@ -23,6 +23,7 @@ class PhabricatorObjectHandle {
   private $type;
   private $name;
   private $email;
+  private $imageURI;
 
   public function setURI($uri) {
     $this->uri = $uri;
@@ -67,6 +68,15 @@ class PhabricatorObjectHandle {
 
   public function getEmail() {
     return $this->email;
+  }
+  
+  public function setImageURI($uri) {
+    $this->imageURI = $uri;
+    return $this;
+  }
+  
+  public function getImageURI() {
+    return $this->imageURI;
   }
 
   public function renderLink() {

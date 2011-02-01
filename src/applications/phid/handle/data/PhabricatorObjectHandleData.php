@@ -58,6 +58,12 @@ class PhabricatorObjectHandleData {
               $handle->setName($user->getUsername());
               $handle->setURI('/p/'.$user->getUsername().'/');
               $handle->setEmail($user->getEmail());
+              
+              $img_phid = $user->getProfileImagePHID();
+              if ($img_phid) {
+                $handle->setImageURI(
+                  PhabricatorFileURI::getViewURIForPHID($img_phid));
+              }
             }
             $handles[$phid] = $handle;
           }
