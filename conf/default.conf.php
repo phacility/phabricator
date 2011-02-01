@@ -66,6 +66,12 @@ return array(
 
   'user.default-profile-image-phid' => 'PHID-FILE-f57aaefce707fc4060ef',
   
+  // When email is sent, try to hand it off to the MTA immediately. The only
+  // reason to disable this is if your MTA infrastructure is completely
+  // terrible. If you disable this option, you must run the 'metamta_mta.php'
+  // daemon or mail won't be handed off to the MTA.
+  'metamta.send-immediately'    => true,
+  
 
 
 );

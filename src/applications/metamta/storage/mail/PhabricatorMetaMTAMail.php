@@ -114,6 +114,21 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     $this->setParam('simulated-failures', $count);
     return $this;
   }
+  
+  public function save() {
+    $try_send = (PhabricatorEnv::getEnvConfig('metamta.send-immediately')) &&
+                (!$this->getID());
+    
+    $ret = parent::save();
+    
+    if ($try_send) {
+      $mailer = new PhabricatorMailImplementationPHPMailerLiteAdapter();
+      $this->sendNow($force_send = false, $mailer);
+    }
+    
+    return $ret;
+  }
+      
 
   public function sendNow(
     $force_send = false,
