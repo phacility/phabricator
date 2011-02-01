@@ -119,3 +119,14 @@
   margin:             0.5em 0;
   padding:            10px 0px 20px;
 }
+
+.differential-reticle {
+  background: #ffeeaa;
+  border:     1px solid #ffcc00;
+  position:   absolute;
+  z-index:    2;
+  opacity:    0.5;
+  top:        0px;
+  left:       0px;
+}
+

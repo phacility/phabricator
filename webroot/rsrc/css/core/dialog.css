@@ -1,0 +1,55 @@
+/**
+ * @provides phabricator-core-dialog-css
+ */
+
+.jx-dialog {
+  display:    block;
+  width:      480px;
+  padding:    8px;
+  background: #666;
+  margin:     auto;
+}
+
+.jx-client-dialog {
+  position:   absolute;
+  z-index:    6;
+}
+
+.jx-dialog .dialog-title {
+  background:   #6d84b4;
+  border:       none;
+  font-size:    15px;
+  font-weight:  bold;
+  padding:      5px 12px 6px;
+  color:        #ffffff;
+}
+.jx-dialog .dialog-body {
+  background:           #ffffff;
+  padding:              16px 12px;
+  border:               none;
+  overflow:             hidden;
+}
+
+.jx-dialog .dialog-foot {
+  border:       none;
+  background:   #ededed;
+  padding:      .5em;
+  text-align:   right;
+}
+
+.jx-dialog button {
+  margin-left:  6px;
+}
+
+.jx-dialog input {
+  padding: 4px;
+}
+
+.jx-dialog .fields {
+  margin-top: 10px;
+}
+
+.jx-dialog input.block {
+  display: block;
+  margin: 3px 0 0 0;
+}

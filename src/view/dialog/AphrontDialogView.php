@@ -68,12 +68,13 @@ class AphrontDialogView extends AphrontView {
         'Cancel');
     }
 
-    return phutil_render_tag(
+    return javelin_render_tag(
       'form',
       array(
         'class'   => 'aphront-dialog-view',
         'action'  => $this->submitURI,
         'method'  => 'post',
+        'sigil'   => 'jx-dialog',
       ),
       '<input type="hidden" name="__form__" value="1" />'.
       '<div class="aphront-dialog-head">'.

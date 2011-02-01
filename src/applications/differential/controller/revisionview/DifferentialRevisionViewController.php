@@ -79,6 +79,8 @@ class DifferentialRevisionViewController extends DifferentialController {
 
     $changeset_view = new DifferentialChangesetListView();
     $changeset_view->setChangesets($changesets);
+    $changeset_view->setEditable(true);
+    $changeset_view->setRevision($revision);
 
     $comment_form = new DifferentialAddCommentView();
     $comment_form->setRevision($revision);

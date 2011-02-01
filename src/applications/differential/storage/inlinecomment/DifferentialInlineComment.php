@@ -16,4 +16,18 @@
  * limitations under the License.
  */
 
-// Placeholder so I don't forget about this, hopefully.
+class DifferentialInlineComment extends DifferentialDAO {
+
+  protected $revisionID;
+  protected $commentID;
+  protected $authorPHID;
+
+  protected $changesetID;
+  protected $isNewFile;
+
+  protected $lineNumber;
+  protected $lineLength;
+
+  protected $content;
+
+}

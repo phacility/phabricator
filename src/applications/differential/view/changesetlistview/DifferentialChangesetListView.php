@@ -19,9 +19,21 @@
 class DifferentialChangesetListView extends AphrontView {
 
   private $changesets = array();
+  private $editable;
+  private $revision;
 
   public function setChangesets($changesets) {
     $this->changesets = $changesets;
+    return $this;
+  }
+
+  public function setEditable($editable) {
+    $this->editable = $editable;
+    return $this;
+  }
+
+  public function setRevision(DifferentialRevision $revision) {
+    $this->revision = $revision;
     return $this;
   }
 
@@ -105,20 +117,14 @@ class DifferentialChangesetListView extends AphrontView {
     Javelin::initBehavior('differential-show-more', array(
       'uri' => '/differential/changeset/',
     ));
-/*
 
-
-    Javelin::initBehavior('differential-context', array(
-      'uri' => $render_uri,
-    ));
-
-    if ($edit) {
-      require_static('remarkup-css');
-      Javelin::initBehavior('differential-inline', array(
-        'uri'       => '/differential/feedback/'.$revision->getID().'/',
+    if ($this->editable) {
+      $revision = $this->revision;
+      Javelin::initBehavior('differential-edit-inline-comments', array(
+        'uri' => '/differential/inline/edit/'.$revision->getID().'/',
       ));
     }
-*/
+
     return
       '<div class="differential-review-stage">'.
         implode("\n", $output).

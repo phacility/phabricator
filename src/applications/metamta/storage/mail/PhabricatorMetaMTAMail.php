@@ -114,21 +114,21 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     $this->setParam('simulated-failures', $count);
     return $this;
   }
-  
+
   public function save() {
     $try_send = (PhabricatorEnv::getEnvConfig('metamta.send-immediately')) &&
                 (!$this->getID());
-    
+
     $ret = parent::save();
-    
+
     if ($try_send) {
       $mailer = new PhabricatorMailImplementationPHPMailerLiteAdapter();
       $this->sendNow($force_send = false, $mailer);
     }
-    
+
     return $ret;
   }
-      
+
 
   public function sendNow(
     $force_send = false,
@@ -143,7 +143,7 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         throw new Exception("Trying to send an email before next retry!");
       }
     }
-    
+
     try {
       $parameters = $this->parameters;
       $phids = array();
@@ -161,10 +161,10 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
             break;
         }
       }
-      
+
       $handles = id(new PhabricatorObjectHandleData($phids))
         ->loadHandles();
-      
+
       foreach ($this->parameters as $key => $value) {
         switch ($key) {
           case 'from':

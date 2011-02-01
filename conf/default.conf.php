@@ -31,10 +31,10 @@ return array(
 
   // The username to use when connecting to MySQL.
   'mysql.user' => 'root',
-  
+
   // The password to use when connecting to MySQL.
   'mysql.pass' => '',
-  
+
   // The MySQL server to connect to.
   'mysql.host' => 'localhost',
 
@@ -56,22 +56,22 @@ return array(
 
   // Is Recaptcha enabled? If disabled, captchas will not appear.
   'recaptcha.enabled'           => false,
-  
+
   // Your Recaptcha public key, obtained from Recaptcha.
   'recaptcha.public-key'        => null,
-  
+
   // Your Recaptcha private key, obtained from Recaptcha.
   'recaptcha.private-key'       => null,
 
 
   'user.default-profile-image-phid' => 'PHID-FILE-f57aaefce707fc4060ef',
-  
+
   // When email is sent, try to hand it off to the MTA immediately. The only
   // reason to disable this is if your MTA infrastructure is completely
   // terrible. If you disable this option, you must run the 'metamta_mta.php'
   // daemon or mail won't be handed off to the MTA.
   'metamta.send-immediately'    => true,
-  
+
 
 
 );

@@ -9,7 +9,7 @@
 celerity_register_resource_map(array(
   'aphront-dialog-view-css' =>
   array(
-    'uri' => '/res/771b987d/rsrc/css/aphront/dialog-view.css',
+    'uri' => '/res/d98e6292/rsrc/css/aphront/dialog-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -188,6 +188,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/core/core.css',
   ),
+  'phabricator-core-dialog-css' =>
+  array(
+    'uri' => '/res/d9580553/rsrc/css/core/dialog.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/core/dialog.css',
+  ),
   'phabricator-remarkup-css' =>
   array(
     'uri' => '/res/786989c3/rsrc/css/core/remarkup.css',
@@ -226,6 +235,16 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/differential/behavior-comment-preview.js',
   ),
+  'javelin-behavior-differential-edit-inline-comments' =>
+  array(
+    'uri' => '/res/51d7da98/rsrc/js/application/differential/behavior-edit-inline-comments.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-lib-dev',
+    ),
+    'disk' => '/rsrc/js/application/differential/behavior-edit-inline-comments.js',
+  ),
   'javelin-behavior-differential-populate' =>
   array(
     'uri' => '/res/f7efbf62/rsrc/js/application/differential/behavior-populate.js',
@@ -246,9 +265,9 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/differential/behavior-show-more.js',
   ),
-  'javelin-init-dev' =>
+  'javelin-magical-init' =>
   array(
-    'uri' => '/res/c57a9e89/rsrc/js/javelin/init.dev.js',
+    'uri' => '/res/76614f84/rsrc/js/javelin/init.dev.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -257,7 +276,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-init-prod' =>
   array(
-    'uri' => '/res/f0172c54/rsrc/js/javelin/init.min.js',
+    'uri' => '/res/ce6bff38/rsrc/js/javelin/init.min.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -266,7 +285,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-lib-dev' =>
   array(
-    'uri' => '/res/3e747182/rsrc/js/javelin/javelin.dev.js',
+    'uri' => '/res/29c9b6b4/rsrc/js/javelin/javelin.dev.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -275,7 +294,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-lib-prod' =>
   array(
-    'uri' => '/res/9438670e/rsrc/js/javelin/javelin.min.js',
+    'uri' => '/res/ef13c830/rsrc/js/javelin/javelin.min.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -284,7 +303,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-typeahead-dev' =>
   array(
-    'uri' => '/res/c81c0f01/rsrc/js/javelin/typeahead.dev.js',
+    'uri' => '/res/6de6ae59/rsrc/js/javelin/typeahead.dev.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -293,17 +312,35 @@ celerity_register_resource_map(array(
   ),
   'javelin-typeahead-prod' =>
   array(
-    'uri' => '/res/1da2d984/rsrc/js/javelin/typeahead.min.js',
+    'uri' => '/res/593d9bb8/rsrc/js/javelin/typeahead.min.js',
     'type' => 'js',
     'requires' =>
     array(
     ),
     'disk' => '/rsrc/js/javelin/typeahead.min.js',
   ),
+  'javelin-workflow-dev' =>
+  array(
+    'uri' => '/res/2d740661/rsrc/js/javelin/workflow.dev.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/js/javelin/workflow.dev.js',
+  ),
+  'javelin-workflow-prod' =>
+  array(
+    'uri' => '/res/b758e0a0/rsrc/js/javelin/workflow.min.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/js/javelin/workflow.min.js',
+  ),
 ), array (
   'packages' =>
   array (
-    'd348c79d' =>
+    'dc2390af' =>
     array (
       'name' => 'core.pkg.css',
       'symbols' =>
@@ -320,7 +357,7 @@ celerity_register_resource_map(array(
         9 => 'aphront-typeahead-control-css',
         10 => 'phabricator-directory-css',
       ),
-      'uri' => '/res/pkg/d348c79d/core.pkg.css',
+      'uri' => '/res/pkg/dc2390af/core.pkg.css',
       'type' => 'css',
     ),
     '69b11588' =>
@@ -340,17 +377,17 @@ celerity_register_resource_map(array(
   ),
   'reverse' =>
   array (
-    'phabricator-core-css' => 'd348c79d',
-    'phabricator-core-buttons-css' => 'd348c79d',
-    'phabricator-standard-page-view' => 'd348c79d',
-    'aphront-dialog-view-css' => 'd348c79d',
-    'aphront-form-view-css' => 'd348c79d',
-    'aphront-panel-view-css' => 'd348c79d',
-    'aphront-side-nav-view-css' => 'd348c79d',
-    'aphront-table-view-css' => 'd348c79d',
-    'aphront-tokenizer-control-css' => 'd348c79d',
-    'aphront-typeahead-control-css' => 'd348c79d',
-    'phabricator-directory-css' => 'd348c79d',
+    'phabricator-core-css' => 'dc2390af',
+    'phabricator-core-buttons-css' => 'dc2390af',
+    'phabricator-standard-page-view' => 'dc2390af',
+    'aphront-dialog-view-css' => 'dc2390af',
+    'aphront-form-view-css' => 'dc2390af',
+    'aphront-panel-view-css' => 'dc2390af',
+    'aphront-side-nav-view-css' => 'dc2390af',
+    'aphront-table-view-css' => 'dc2390af',
+    'aphront-tokenizer-control-css' => 'dc2390af',
+    'aphront-typeahead-control-css' => 'dc2390af',
+    'phabricator-directory-css' => 'dc2390af',
     'differential-core-view-css' => '69b11588',
     'differential-changeset-view-css' => '69b11588',
     'differential-revision-detail-css' => '69b11588',

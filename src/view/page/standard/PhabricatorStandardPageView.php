@@ -70,6 +70,7 @@ class PhabricatorStandardPageView extends AphrontPageView {
     require_celerity_resource('phabricator-standard-page-view');
 
     require_celerity_resource('javelin-lib-dev');
+    require_celerity_resource('javelin-workflow-dev');
 
     $this->bodyContent = $this->renderChildren();
   }

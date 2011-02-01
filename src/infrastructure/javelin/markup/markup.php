@@ -24,31 +24,24 @@ function javelin_render_tag(
   if (isset($attributes['sigil']) ||
       isset($attributes['meta'])  ||
       isset($attributes['mustcapture'])) {
-    $classes = array();
     foreach ($attributes as $k => $v) {
       switch ($k) {
         case 'sigil':
-          $classes[] = 'FN_'.$v;
+          $attributes['data-sigil'] = $v;
           unset($attributes[$k]);
           break;
         case 'meta':
           $response = CelerityAPI::getStaticResourceResponse();
           $id = $response->addMetadata($v);
-          $classes[] = 'FD_'.$id;
+          $attributes['data-meta'] = $id;
           unset($attributes[$k]);
           break;
         case 'mustcapture':
-          $classes[] = 'FI_CAPTURE';
+          $attributes['data-mustcapture'] = '1';
           unset($attributes[$k]);
           break;
       }
     }
-
-    if (isset($attributes['class'])) {
-      $classes[] = $attributes['class'];
-    }
-
-    $attributes['class'] = implode(' ', $classes);
   }
 
   return phutil_render_tag($tag, $attributes, $content);
