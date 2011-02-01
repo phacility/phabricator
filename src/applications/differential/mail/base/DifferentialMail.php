@@ -247,8 +247,7 @@ EOTEXT;
   }
 
   public function getRevisionURI() {
-    // TODO
-    return 'http://local.aphront.com/D'.$this->getRevision()->getID();
+    return PhabricatorEnv::getURI('/D'.$this->getRevision()->getID());
   }
 
   public function setIsFirstMailToRecipients($first) {

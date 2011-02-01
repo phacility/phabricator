@@ -125,9 +125,12 @@ class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
 
     $diff->save();
 
+    $path = '/differential/diff/'.$diff->getID().'/';
+    $uri = PhabricatorEnv::getURI($path);
+
     return array(
       'diffid' => $diff->getID(),
-      'uri'    => 'http://local.aphront.com/differential/diff/'.$diff->getID().'/',
+      'uri'    => $uri,
     );
   }
 
