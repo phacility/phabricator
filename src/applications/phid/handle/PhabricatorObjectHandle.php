@@ -69,12 +69,12 @@ class PhabricatorObjectHandle {
   public function getEmail() {
     return $this->email;
   }
-  
+
   public function setImageURI($uri) {
     $this->imageURI = $uri;
     return $this;
   }
-  
+
   public function getImageURI() {
     return $this->imageURI;
   }

@@ -131,7 +131,7 @@ class PhabricatorFacebookAuthController extends PhabricatorAuthController {
       return id(new AphrontRedirectResponse())
         ->setURI('/');
     }
-    
+
     $known_email = id(new PhabricatorUser())
       ->loadOneWhere('email = %s', $user_data['email']);
     if ($known_email) {

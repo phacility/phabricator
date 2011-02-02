@@ -30,7 +30,7 @@ class PhabricatorUser extends PhabricatorUserDAO {
   protected $profileImagePHID;
 
   private $sessionKey;
-  
+
   public function getProfileImagePHID() {
     return nonempty(
       $this->profileImagePHID,
