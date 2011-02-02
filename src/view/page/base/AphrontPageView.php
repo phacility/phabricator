@@ -40,13 +40,17 @@ class AphrontPageView extends AphrontView {
   protected function getTail() {
     return '';
   }
-  
+
   protected function willRenderPage() {
     return;
   }
 
+  protected function willSendResponse($response) {
+    return $response;
+  }
+
   public function render() {
-    
+
     $this->willRenderPage();
 
     $title = $this->getTitle();
@@ -54,7 +58,7 @@ class AphrontPageView extends AphrontView {
     $body  = $this->getBody();
     $tail  = $this->getTail();
 
-    return <<<EOHTML
+    $response = <<<EOHTML
 <!DOCTYPE html>
 <html>
   <head>
@@ -68,6 +72,10 @@ class AphrontPageView extends AphrontView {
 </html>
 
 EOHTML;
+
+    $response = $this->willSendResponse($response);
+    return $response;
+
   }
 
 }

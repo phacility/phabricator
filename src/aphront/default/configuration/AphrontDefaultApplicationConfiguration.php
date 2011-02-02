@@ -125,12 +125,17 @@ class AphrontDefaultApplicationConfiguration
         '$' => 'PhabricatorFacebookAuthController',
         'diagnose/$' => 'PhabricatorFacebookAuthDiagnosticsController',
       ),
+
+      '/xhprof/' => array(
+        'profile/(?<phid>[^/]+)/$' => 'PhabricatorXHProfProfileController',
+      ),
     );
   }
 
   public function buildRequest() {
     $request = new AphrontRequest($this->getHost(), $this->getPath());
     $request->setRequestData($_GET + $_POST);
+    $request->setApplicationConfiguration($this);
     return $request;
   }
 
@@ -146,6 +151,7 @@ class AphrontDefaultApplicationConfiguration
       '</div>';
 
     $view = new PhabricatorStandardPageView();
+    $view->setRequest($this->getRequest());
     $view->appendChild($content);
 
     $response = new AphrontWebpageResponse();
@@ -181,6 +187,7 @@ class AphrontDefaultApplicationConfiguration
 
       $view = new PhabricatorStandardPageView();
       $view->setTitle('404 Not Found');
+      $view->setRequest($this->getRequest());
       $view->appendChild($failure);
 
       $response = new AphrontWebpageResponse();

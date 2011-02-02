@@ -56,7 +56,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
   function isOnRight(node) {
     return node.parentNode.firstChild != node;
   }
-  
+
   function isNewFile(node) {
     var data = JX.Stratcom.getData(root);
     return isOnRight(node) || (data.left != data.right);
@@ -142,7 +142,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
         number: o,
         length: len,
         is_new: isNewFile(target) ? 1 : 0,
-        on_right: isOnRight(target) ? 1 : 0 
+        on_right: isOnRight(target) ? 1 : 0
       };
 
       workflow = true;

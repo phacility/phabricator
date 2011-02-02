@@ -30,19 +30,21 @@ class AphrontRequest {
   private $requestData;
   private $user;
   private $env;
-
-  final public function setEnvConfig(array $conf) {
-    $this->env = $conf;
-    return $this;
-  }
-
-  final public function getEnvConfig($key, $default = null) {
-    return idx($this->env, $key, $default);
-  }
+  private $applicationConfiguration;
 
   final public function __construct($host, $path) {
     $this->host = $host;
     $this->path = $path;
+  }
+
+  final public function setApplicationConfiguration(
+    $application_configuration) {
+    $this->applicationConfiguration = $application_configuration;
+    return $this;
+  }
+
+  final public function getApplicationConfiguration() {
+    return $this->applicationConfiguration;
   }
 
   final public function setRequestData(array $request_data) {

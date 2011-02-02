@@ -1,0 +1,46 @@
+/**
+ * @provides aphront-dark-console-css
+ */
+
+.dark-console {
+  background:     #555555;
+  color:          #eeeeee;
+  width:          100%;
+  font-family:    "Verdana";
+  font-size:      11px;
+  border-bottom:  2px solid #000000;
+  position:       relative;
+  z-index:        1;
+}
+
+.dark-console-tabs {
+  width:        180px;
+  background:   #222222;
+  border-right: 1px solid #888888;
+  padding:      2.5em 0em;
+}
+
+
+a.dark-console-tab {
+  padding:      .75em 12px;
+  text-align:   right;
+  background:   #444444;
+  position:     relative;
+  border:       1px solid #666666;
+  border-width: 1px 0;
+  border-right-color: #888888;
+  margin-bottom: 2px;
+  display:        block;
+  color:          #cccccc;
+}
+
+a.dark-console-tab-selected {
+  margin-right:       -1px;
+  padding-right:      13px;
+  background:         #555555;
+  border-color:       #888888;
+  border-right-color: #555555;
+  color:              #eeeeee;
+}
+
+

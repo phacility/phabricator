@@ -718,7 +718,7 @@ abstract class LiskDAO {
       $map[$key] = qsprintf($conn, '%C = %ns', $key, $value);
     }
     $map = implode(', ', $map);
-    
+
     if ($use_locks) {
       $conn->query(
         'UPDATE %T SET %Q, version = version + 1 WHERE %C = %d AND %C = %d',
@@ -814,7 +814,7 @@ abstract class LiskDAO {
     $conn = $this->getConnection('w');
 
     $columns = array_keys($data);
-    
+
     foreach ($data as $key => $value) {
       $data[$key] = qsprintf($conn, '%ns', $value);
     }

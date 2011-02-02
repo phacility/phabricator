@@ -104,13 +104,17 @@ class PhabricatorFile extends PhabricatorFileDAO {
     $file->setStorageFormat(self::STORAGE_FORMAT_RAW);
     $file->setStorageHandle($blob->getID());
 
-    try {
-      $tmp = new TempFile();
-      Filesystem::writeFile($tmp, $data);
-      list($stdout) = execx('file -b --mime %s', $tmp);
-      $file->setMimeType($stdout);
-    } catch (Exception $ex) {
-      // Be robust here since we don't really care that much about mime types.
+    if (isset($params['mime-type'])) {
+      $file->setMimeType($params['mime-type']);
+    } else {
+      try {
+        $tmp = new TempFile();
+        Filesystem::writeFile($tmp, $data);
+        list($stdout) = execx('file -b --mime %s', $tmp);
+        $file->setMimeType($stdout);
+      } catch (Exception $ex) {
+        // Be robust here since we don't really care that much about mime types.
+      }
     }
 
     $file->save();

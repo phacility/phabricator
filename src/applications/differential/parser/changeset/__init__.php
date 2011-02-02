@@ -12,6 +12,7 @@ phutil_require_module('arcanist', 'parser/diff');
 phutil_require_module('phabricator', 'applications/differential/constants/changetype');
 phutil_require_module('phabricator', 'applications/differential/storage/changeset');
 phutil_require_module('phabricator', 'applications/differential/storage/diff');
+phutil_require_module('phabricator', 'applications/differential/view/inlinecomment');
 phutil_require_module('phabricator', 'applications/files/uri');
 phutil_require_module('phabricator', 'infrastructure/javelin/markup');
 phutil_require_module('phabricator', 'storage/queryfx');

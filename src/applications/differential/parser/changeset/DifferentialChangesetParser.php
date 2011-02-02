@@ -41,7 +41,7 @@ class DifferentialChangesetParser {
   protected $subparser;
   protected $oldChangesetID = null;
   protected $noHighlight;
-  
+
   private $handles;
 
   const CACHE_VERSION = 4;
@@ -92,12 +92,12 @@ class DifferentialChangesetParser {
       $this->filetype = end(explode('.', $filename));
     }
   }
-  
+
   public function setHandles(array $handles) {
     $this->handles = $handles;
     return $this;
   }
-  
+
   public function setMarkupEngine(PhutilMarkupEngine $engine) {
     $this->markupEngine = $engine;
     return $this;

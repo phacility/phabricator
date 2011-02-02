@@ -64,6 +64,12 @@
   font-size:        10px;
 }
 
+.aphront-table-view td.n {
+  font-family:      "Monaco", monospace;
+  font-size:        10px;
+  text-align:       right;
+}
+
 .aphront-table-view tr.no-data td {
   padding:    1em;
   text-align: center;

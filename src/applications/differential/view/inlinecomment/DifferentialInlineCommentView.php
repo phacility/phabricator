@@ -38,21 +38,21 @@ final class DifferentialInlineCommentView extends AphrontView {
     $this->buildScaffolding = $scaffold;
     return $this;
   }
-  
+
   public function setHandles(array $handles) {
     $this->handles = $handles;
     return $this;
   }
-  
+
   public function setMarkupEngine(PhutilMarkupEngine $engine) {
     $this->markupEngine = $engine;
     return $this;
   }
 
   public function render() {
-    
+
     $inline = $this->inlineComment;
-    
+
     $start = $inline->getLineNumber();
     $length = $inline->getLineLength();
     if ($length) {
@@ -61,28 +61,28 @@ final class DifferentialInlineCommentView extends AphrontView {
     } else {
       $line = 'Line '.number_format($start);
     }
-    
+
     $metadata = array(
       'number' => $inline->getLineNumber(),
       'length' => $inline->getLineLength(),
       'on_right' => $this->onRight, // TODO
     );
-    
+
     $sigil = 'differential-inline-comment';
-    
+
     $links = 'xxx';
     $content = $inline->getContent();
     $handles = $this->handles;
-    
+
     if ($links) {
-      $links = 
+      $links =
         '<span class="differential-inline-comment-links">'.
           $links.
         '</span>';
     }
-    
+
     $content = $this->markupEngine->markupText($content);
-    
+
     $markup = javelin_render_tag(
       'div',
       array(
@@ -96,7 +96,7 @@ final class DifferentialInlineCommentView extends AphrontView {
         $handles[$inline->getAuthorPHID()]->renderLink().
       '</div>'.
       $content);
-    
+
     return $this->scaffoldMarkup($markup);
   }
 
@@ -104,7 +104,7 @@ final class DifferentialInlineCommentView extends AphrontView {
     if (!$this->buildScaffolding) {
       return $markup;
     }
-    
+
     if ($this->onRight) {
       return
         '<table>'.
@@ -127,5 +127,5 @@ final class DifferentialInlineCommentView extends AphrontView {
         '</table>';
     }
   }
-  
+
 }

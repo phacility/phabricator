@@ -62,9 +62,9 @@ class DifferentialInlineCommentEditController extends DifferentialController {
 
         $factory = new DifferentialMarkupEngineFactory();
         $engine = $factory->newDifferentialCommentMarkupEngine();
-        
+
         $phids = array($user->getPHID());
-        
+
         $handles = id(new PhabricatorObjectHandleData($phids))
           ->loadHandles();
 

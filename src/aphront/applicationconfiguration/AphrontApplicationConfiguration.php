@@ -24,6 +24,7 @@ abstract class AphrontApplicationConfiguration {
   private $request;
   private $host;
   private $path;
+  private $console;
 
   abstract public function getApplicationName();
   abstract public function getURIMap();
@@ -37,6 +38,10 @@ abstract class AphrontApplicationConfiguration {
 
   final public function getRequest() {
     return $this->request;
+  }
+
+  final public function getConsole() {
+    return $this->console;
   }
 
   final public function buildController() {
@@ -72,6 +77,10 @@ abstract class AphrontApplicationConfiguration {
 
   final public function getPath() {
     return $this->path;
+  }
+
+  final public function willBuildRequest() {
+    $this->console = new DarkConsoleCore();
   }
 
 }

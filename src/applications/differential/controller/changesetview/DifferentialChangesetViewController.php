@@ -54,7 +54,7 @@ class DifferentialChangesetViewController extends DifferentialController {
 
     $parser = new DifferentialChangesetParser();
     $parser->setChangeset($changeset);
-    
+
     $phids = array();
     $inlines = $this->loadInlineComments($id, $author_phid);
     foreach ($inlines as $inline) {
@@ -62,11 +62,11 @@ class DifferentialChangesetViewController extends DifferentialController {
       $phids[$inline->getAuthorPHID()] = true;
     }
     $phids = array_keys($phids);
-    
+
     $handles = id(new PhabricatorObjectHandleData($phids))
       ->loadHandles();
     $parser->setHandles($handles);
-    
+
     $factory = new DifferentialMarkupEngineFactory();
     $engine = $factory->newDifferentialCommentMarkupEngine();
     $parser->setMarkupEngine($engine);

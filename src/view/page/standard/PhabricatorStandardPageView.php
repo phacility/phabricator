@@ -65,12 +65,29 @@ class PhabricatorStandardPageView extends AphrontPageView {
 
 
   protected function willRenderPage() {
+
+    if (!$this->getRequest()) {
+      throw new Exception(
+        "You must set the Request to render a PhabricatorStandardPageView.");
+    }
+
+    $console = $this->getRequest()->getApplicationConfiguration()->getConsole();
+
     require_celerity_resource('phabricator-core-css');
     require_celerity_resource('phabricator-core-buttons-css');
     require_celerity_resource('phabricator-standard-page-view');
 
     require_celerity_resource('javelin-lib-dev');
     require_celerity_resource('javelin-workflow-dev');
+
+    if ($console) {
+      require_celerity_resource('aphront-dark-console-css');
+      Javelin::initBehavior(
+        'dark-console',
+        array(
+          'uri' => '/~/',
+        ));
+    }
 
     $this->bodyContent = $this->renderChildren();
   }
@@ -94,7 +111,19 @@ class PhabricatorStandardPageView extends AphrontPageView {
     return $this->glyph;
   }
 
+  protected function willSendResponse($response) {
+    $console = $this->getRequest()->getApplicationConfiguration()->getConsole();
+    if ($console) {
+      $response = str_replace(
+        '<darkconsole />',
+        $console->render($this->getRequest()),
+        $response);
+    }
+    return $response;
+  }
+
   protected function getBody() {
+    $console = $this->getRequest()->getApplicationConfiguration()->getConsole();
 
     $tabs = array();
     foreach ($this->tabs as $name => $tab) {
@@ -142,6 +171,7 @@ class PhabricatorStandardPageView extends AphrontPageView {
     }
 
     return
+      ($console ? '<darkconsole />' : null).
       '<div class="phabricator-standard-page">'.
         '<div class="phabricator-standard-header">'.
           '<div class="phabricator-login-details">'.

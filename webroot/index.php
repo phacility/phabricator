@@ -34,6 +34,9 @@ setup_aphront_basics();
 phutil_require_module('phabricator', 'infrastructure/env');
 PhabricatorEnv::setEnvConfig($conf);
 
+phutil_require_module('phabricator', 'aphront/console/plugin/xhprof/api');
+DarkConsoleXHProfPluginAPI::hookProfiler('all');
+
 $host = $_SERVER['HTTP_HOST'];
 $path = $_REQUEST['__path__'];
 
@@ -51,6 +54,7 @@ switch ($host) {
 
 $application->setHost($host);
 $application->setPath($path);
+$application->willBuildRequest();
 $request = $application->buildRequest();
 $application->setRequest($request);
 list($controller, $uri_data) = $application->buildController();
@@ -83,6 +87,19 @@ foreach ($headers as $header) {
   list($header, $value) = $header;
   header("{$header}: {$value}");
 }
+
+if (isset($_REQUEST['__profile__']) &&
+    ($_REQUEST['__profile__'] == 'all')) {
+  $profile = DarkConsoleXHProfPluginAPI::stopProfiler();
+  $profile = print_r($profile, true);
+  if (strpos($response_string, '<body>') !== false) {
+    $response_string = str_replace(
+      '<body>',
+      '<body>'.$profile,
+      $response_string);
+  }
+}
+
 echo $response_string;
 
 

@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'aphront/console/core');
 phutil_require_module('phabricator', 'aphront/mapper');
 
 phutil_require_module('phutil', 'symbols');
