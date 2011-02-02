@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'aphront/response/400');
 phutil_require_module('phabricator', 'aphront/response/ajax');
 phutil_require_module('phabricator', 'aphront/response/dialog');
 phutil_require_module('phabricator', 'applications/differential/controller/base');
@@ -15,6 +16,7 @@ phutil_require_module('phabricator', 'applications/differential/view/inlinecomme
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'view/dialog');
 
+phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
 
 

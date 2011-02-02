@@ -210,12 +210,13 @@ JX.behavior('differential-edit-inline-comments', function(config) {
 
   JX.Stratcom.listen(
     'click',
-    [['differential-inline-comment', 'delete'],
-     ['differential-inline-comment', 'edit']],
+    [['differential-inline-comment', 'differential-inline-delete'],
+     ['differential-inline-comment', 'differential-inline-edit']],
     function(e) {
       var data = {
-        op: e.getNode('edit') ? 'edit' : 'delete',
-        id: e.getNodeData('differential-inline-comment').id
+        op: e.getNode('differential-inline-edit') ? 'edit' : 'delete',
+        id: e.getNodeData('differential-inline-comment').id,
+        on_right: e.getNodeData('differential-inline-comment').on_right,
       };
       new JX.Workflow(config.uri, data)
         .setHandler(function(r) {

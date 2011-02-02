@@ -34,39 +34,85 @@ class DifferentialInlineCommentEditController extends DifferentialController {
     $length = $request->getInt('length');
     $text = $request->getStr('text');
     $op = $request->getStr('op');
+    $inline_id = $request->getInt('id');
 
     $user = $request->getUser();
 
     $submit_uri = '/differential/comment/inline/edit/'.$this->revisionID.'/';
 
+    $edit_dialog = new AphrontDialogView();
+    $edit_dialog->setUser($user);
+    $edit_dialog->setSubmitURI($submit_uri);
+
+    $edit_dialog->addHiddenInput('on_right', $on_right);
+
+    $edit_dialog->addSubmitButton();
+    $edit_dialog->addCancelButton('#');
+
+    $inline = null;
+    if ($inline_id) {
+      $inline = id(new DifferentialInlineComment())
+        ->load($inline_id);
+
+      if (!$inline ||
+          $inline->getAuthorPHID() != $user->getPHID() ||
+          $inline->getCommentID() ||
+          $inline->getRevisionID() != $this->revisionID) {
+        throw new Exception("That comment is not editable!");
+      }
+    }
+
     switch ($op) {
       case 'delete':
-        if ($request->isFormPost()) {
-          // do the delete;
-          return new AphrontAjaxResponse();
+        if (!$inline) {
+          return new Aphront400Response();
         }
 
-        $dialog = new AphrontDialogView();
-        $dialog->setTitle('Really delete this comment?');
+        if ($request->isFormPost()) {
+          $inline->delete();
+          return $this->buildDeletedResponse();
+        }
 
-        return id(new AphrontDialogResponse())->setDialog($dialog);
+        $edit_dialog->setTitle('Really delete this comment?');
+        $edit_dialog->addHiddenInput('id', $inline_id);
+        $edit_dialog->addHiddenInput('op', 'delete');
+        $edit_dialog->appendChild(
+          '<p>Delete this inline comment?</p>');
+
+        return id(new AphrontDialogResponse())->setDialog($edit_dialog);
       case 'edit':
-        $dialog = new AphrontDialogView();
+        if (!$inline) {
+          return new Aphront400Response();
+        }
 
-        return id(new AphrontDialogResponse())->setDialog($dialog);
+        if ($request->isFormPost()) {
+          if (strlen($text)) {
+            $inline->setContent($text);
+            $inline->save();
+            return $this->buildRenderedCommentResponse(
+              $inline,
+              $on_right);
+          } else {
+            $inline->delete();
+            return $this->buildDeletedResponse();
+          }
+        }
+
+        $edit_dialog->setTitle('Edit Inline Comment');
+
+        $edit_dialog->addHiddenInput('id', $inline_id);
+        $edit_dialog->addHiddenInput('op', 'edit');
+
+        $edit_dialog->appendChild(
+          $this->renderTextArea(
+            $inline->getContent()));
+
+        return id(new AphrontDialogResponse())->setDialog($edit_dialog);
       case 'create':
 
         if (!$request->isFormPost() || !strlen($text)) {
           return new AphrontAjaxResponse();
         }
-
-        $factory = new DifferentialMarkupEngineFactory();
-        $engine = $factory->newDifferentialCommentMarkupEngine();
-
-        $phids = array($user->getPHID());
-
-        $handles = id(new PhabricatorObjectHandleData($phids))
-          ->loadHandles();
 
         $inline = id(new DifferentialInlineComment())
           ->setRevisionID($this->revisionID)
@@ -79,38 +125,68 @@ class DifferentialInlineCommentEditController extends DifferentialController {
           ->setContent($text)
           ->save();
 
-        $view = new DifferentialInlineCommentView();
-        $view->setInlineComment($inline);
-        $view->setOnRight($on_right);
-        $view->setBuildScaffolding(true);
-        $view->setMarkupEngine($engine);
-        $view->setHandles($handles);
-
-        return id(new AphrontAjaxResponse())
-          ->setContent(
-            array(
-              'inlineCommentID' => $inline->getID(),
-              'markup'          => $view->render(),
-            ));
+        return $this->buildRenderedCommentResponse($inline, $on_right);
       default:
-        $dialog = new AphrontDialogView();
-        $dialog->setUser($user);
-        $dialog->setTitle('New Inline Comment');
-        $dialog->setSubmitURI($submit_uri);
+        $edit_dialog->setTitle('New Inline Comment');
 
-        $dialog->addHiddenInput('op', 'create');
-        $dialog->addHiddenInput('changeset', $changeset);
-        $dialog->addHiddenInput('is_new', $is_new);
-        $dialog->addHiddenInput('on_right', $on_right);
-        $dialog->addHiddenInput('number', $number);
-        $dialog->addHiddenInput('length', $length);
+        $edit_dialog->addHiddenInput('op', 'create');
+        $edit_dialog->addHiddenInput('changeset', $changeset);
+        $edit_dialog->addHiddenInput('is_new', $is_new);
+        $edit_dialog->addHiddenInput('number', $number);
+        $edit_dialog->addHiddenInput('length', $length);
 
-        $dialog->addSubmitButton();
-        $dialog->addCancelButton('#');
-        $dialog->appendChild('<textarea name="text"></textarea>');
+        $edit_dialog->appendChild($this->renderTextArea(''));
 
-        return id(new AphrontDialogResponse())->setDialog($dialog);
+        return id(new AphrontDialogResponse())->setDialog($edit_dialog);
     }
+  }
+
+  private function buildRenderedCommentResponse(
+    DifferentialInlineComment $inline,
+    $on_right) {
+
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $factory = new DifferentialMarkupEngineFactory();
+    $engine = $factory->newDifferentialCommentMarkupEngine();
+
+    $phids = array($user->getPHID());
+
+    $handles = id(new PhabricatorObjectHandleData($phids))
+      ->loadHandles();
+
+    $view = new DifferentialInlineCommentView();
+    $view->setInlineComment($inline);
+    $view->setOnRight($on_right);
+    $view->setBuildScaffolding(true);
+    $view->setMarkupEngine($engine);
+    $view->setHandles($handles);
+    $view->setEditable(true);
+
+    return id(new AphrontAjaxResponse())
+      ->setContent(
+        array(
+          'inlineCommentID' => $inline->getID(),
+          'markup'          => $view->render(),
+        ));
+  }
+
+  private function buildDeletedResponse() {
+    return id(new AphrontAjaxResponse())
+      ->setContent(
+        array(
+          'markup'          => '',
+        ));
+  }
+
+  private function renderTextArea($text) {
+    return phutil_render_tag(
+      'textarea',
+      array(
+        'name' => 'text',
+      ),
+      $text);
   }
 
 }

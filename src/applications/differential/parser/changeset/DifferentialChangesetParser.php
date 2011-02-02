@@ -43,6 +43,7 @@ class DifferentialChangesetParser {
   protected $noHighlight;
 
   private $handles;
+  private $user;
 
   const CACHE_VERSION = 4;
 
@@ -100,6 +101,11 @@ class DifferentialChangesetParser {
 
   public function setMarkupEngine(PhutilMarkupEngine $engine) {
     $this->markupEngine = $engine;
+    return $this;
+  }
+
+  public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
     return $this;
   }
 
@@ -674,7 +680,6 @@ EOSYNTHETIC;
   }
 
   public function render(
-    ViewerContext $viewer_context = null,
     $range_start  = null,
     $range_len    = null,
     $mask_force   = array()) {
@@ -829,7 +834,6 @@ EOSYNTHETIC;
       $range_len,
       $mask_force,
       $feedback_mask,
-      $viewer_context,
       $old_comments,
       $new_comments);
 
@@ -884,7 +888,6 @@ EOSYNTHETIC;
     $range_len,
     $mask_force,
     $feedback_mask,
-    $viewer_context,
     array $old_comments,
     array $new_comments) {
 
@@ -1083,9 +1086,7 @@ EOSYNTHETIC;
 
       if ($o_num && isset($old_comments[$o_num])) {
         foreach ($old_comments[$o_num] as $comment) {
-          $xhp = $this->renderInlineComment(
-            $comment,
-            $viewer_context);
+          $xhp = $this->renderInlineComment($comment);
           $html[] =
             '<tr class="inline"><th /><td>'.
               $xhp.
@@ -1094,9 +1095,7 @@ EOSYNTHETIC;
       }
       if ($n_num && isset($new_comments[$n_num])) {
         foreach ($new_comments[$n_num] as $comment) {
-          $xhp = $this->renderInlineComment(
-            $comment,
-            $viewer_context);
+          $xhp = $this->renderInlineComment($comment);
           $html[] =
             '<tr class="inline"><th /><td /><th /><td>'.
               $xhp.
@@ -1108,21 +1107,21 @@ EOSYNTHETIC;
     return implode('', $html);
   }
 
-  private function renderInlineComment(
-    DifferentialInlineComment $comment,
-    $viewer_context) {
+  private function renderInlineComment(DifferentialInlineComment $comment) {
 
-    $edit = $viewer_context &&
-            ($comment->getAuthorPHID() == $viewer_context->getUserID()) &&
-            (!$comment->getFeedbackID());
+    $user = $this->user;
+    $edit = $user &&
+            ($comment->getAuthorPHID() == $user->getPHID()) &&
+            (!$comment->getCommentID());
 
-    $is_new = $this->isCommentInNewFile($comment);
+    $on_right = $this->isCommentInNewFile($comment);
 
     return id(new DifferentialInlineCommentView())
       ->setInlineComment($comment)
-      ->setOnRight($is_new)
+      ->setOnRight($on_right)
       ->setHandles($this->handles)
       ->setMarkupEngine($this->markupEngine)
+      ->setEditable($edit)
       ->render();
   }
 

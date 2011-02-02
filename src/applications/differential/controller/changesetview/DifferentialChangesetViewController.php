@@ -71,7 +71,13 @@ class DifferentialChangesetViewController extends DifferentialController {
     $engine = $factory->newDifferentialCommentMarkupEngine();
     $parser->setMarkupEngine($engine);
 
-    $output = $parser->render(null, $range_s, $range_e, $mask);
+    if ($request->isAjax()) {
+      // TODO: This is sort of lazy, the effect is just to not render "Edit"
+      // links on the "standalone view".
+      $parser->setUser($request->getUser());
+    }
+
+    $output = $parser->render($range_s, $range_e, $mask);
 
     if ($request->isAjax()) {
       return id(new AphrontAjaxResponse())

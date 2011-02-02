@@ -21,7 +21,7 @@ JX.behavior('differential-show-more', function(config) {
       var container = JX.DOM.find(context, 'td');
       JX.DOM.setContent(container, 'Loading...');
       JX.DOM.alterClass(context, 'differential-show-more-loading', true);
-      var data = e.getData()['show-more'];
+      var data = e.getNodeData('show-more');
       new JX.Request(config.uri, JX.bind(null, onresponse, e))
         .setData(data)
         .send();

@@ -23,6 +23,7 @@ final class DifferentialInlineCommentView extends AphrontView {
   private $buildScaffolding;
   private $handles;
   private $markupEngine;
+  private $editable;
 
   public function setInlineComment(DifferentialInlineComment $comment) {
     $this->inlineComment = $comment;
@@ -49,6 +50,11 @@ final class DifferentialInlineCommentView extends AphrontView {
     return $this;
   }
 
+  public function setEditable($editable) {
+    $this->editable = $editable;
+    return $this;
+  }
+
   public function render() {
 
     $inline = $this->inlineComment;
@@ -63,22 +69,44 @@ final class DifferentialInlineCommentView extends AphrontView {
     }
 
     $metadata = array(
+      'id' => $inline->getID(),
       'number' => $inline->getLineNumber(),
       'length' => $inline->getLineLength(),
-      'on_right' => $this->onRight, // TODO
+      'on_right' => $this->onRight,
     );
 
     $sigil = 'differential-inline-comment';
 
-    $links = 'xxx';
     $content = $inline->getContent();
     $handles = $this->handles;
+
+    $links = array();
+    if ($this->editable) {
+      $links[] = javelin_render_tag(
+        'a',
+        array(
+          'href'        => '#',
+          'mustcapture' => true,
+          'sigil'       => 'differential-inline-edit',
+        ),
+        'Edit');
+      $links[] = javelin_render_tag(
+        'a',
+        array(
+          'href'        => '#',
+          'mustcapture' => true,
+          'sigil'       => 'differential-inline-delete',
+        ),
+        'Delete');
+    }
 
     if ($links) {
       $links =
         '<span class="differential-inline-comment-links">'.
-          $links.
+          implode(' &middot; ', $links).
         '</span>';
+    } else {
+      $links = null;
     }
 
     $content = $this->markupEngine->markupText($content);
@@ -93,7 +121,7 @@ final class DifferentialInlineCommentView extends AphrontView {
       '<div class="differential-inline-comment-head">'.
         $links.
         '<span class="differential-inline-comment-line">'.$line.'</span>'.
-        $handles[$inline->getAuthorPHID()]->renderLink().
+        phutil_escape_html($handles[$inline->getAuthorPHID()]->getName()).
       '</div>'.
       $content);
 
