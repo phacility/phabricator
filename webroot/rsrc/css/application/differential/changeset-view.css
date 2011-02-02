@@ -130,3 +130,37 @@
   left:       0px;
 }
 
+.differential-inline-comment {
+  background:         #f9f9f1;
+  border:             1px solid #aaaa88;
+  font-family:        Verdana;
+  font-size:          11px;
+  margin:             4px 0px;
+  max-width:          81ch;
+  padding:            8px 10px;
+  width:              100%;
+  -moz-box-sizing:    border-box;
+  -webkit-box-sizing: border-box;
+}
+
+.differential-inline-comment-head {
+  font-weight:  bold;
+  color:        #333333;
+  border-bottom:  1px solid #ccccaa;
+  padding-bottom: 6px;
+  margin-bottom:  4px;
+}
+
+.differential-inline-comment-links,
+.differential-inline-comment-line {
+  font-weight:  normal;
+  font-style:   italic;
+  color:        #666666;
+  float:        right;
+  white-space:  nowrap;
+}
+
+.differential-inline-comment-edit {
+  padding-left: 8px;
+  font-style:   normal;
+}

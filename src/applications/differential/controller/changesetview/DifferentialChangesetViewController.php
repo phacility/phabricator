@@ -23,6 +23,7 @@ class DifferentialChangesetViewController extends DifferentialController {
     $request = $this->getRequest();
 
     $id = $request->getStr('id');
+    $author_phid = $request->getUser()->getPHID();
 
     $changeset = id(new DifferentialChangeset())->load($id);
     if (!$changeset) {
@@ -53,6 +54,22 @@ class DifferentialChangesetViewController extends DifferentialController {
 
     $parser = new DifferentialChangesetParser();
     $parser->setChangeset($changeset);
+    
+    $phids = array();
+    $inlines = $this->loadInlineComments($id, $author_phid);
+    foreach ($inlines as $inline) {
+      $parser->parseInlineComment($inline);
+      $phids[$inline->getAuthorPHID()] = true;
+    }
+    $phids = array_keys($phids);
+    
+    $handles = id(new PhabricatorObjectHandleData($phids))
+      ->loadHandles();
+    $parser->setHandles($handles);
+    
+    $factory = new DifferentialMarkupEngineFactory();
+    $engine = $factory->newDifferentialCommentMarkupEngine();
+    $parser->setMarkupEngine($engine);
 
     $output = $parser->render(null, $range_s, $range_e, $mask);
 
@@ -84,5 +101,13 @@ class DifferentialChangesetViewController extends DifferentialController {
         'title' => 'Changeset View',
       ));
   }
+
+  private function loadInlineComments($changeset_id, $author_phid) {
+    return id(new DifferentialInlineComment())->loadAllWhere(
+      'changesetID = %d AND (commentID IS NOT NULL OR authorPHID = %s)',
+      $changeset_id,
+      $author_phid);
+  }
+
 
 }

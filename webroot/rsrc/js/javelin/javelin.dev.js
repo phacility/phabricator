@@ -2684,17 +2684,19 @@ JX.install('DOM', {
      * @task stratcom
      * @param Node        The node to listen for events underneath.
      * @param string|list One or more event types to listen for.
-     * @param list?       A path to listen on.
+     * @param list?       A path to listen on, or a list of paths.
      * @param function    Callback to invoke when a matching event occurs.
      * @return object     A reference to the installed listener. You can later
      *                    remove the listener by calling this object's remove()
      *                    method.
      */
     listen : function(node, type, path, callback) {
-      return JX.Stratcom.listen(
-        type,
-        ['id:'+JX.DOM.uniqID(node)].concat(JX.$AX(path || [])),
-        callback);
+      var id = ['id:' + JX.DOM.uniqID(node)];
+      path = JX.$AX(path || []);
+      for (var ii = 0; ii < path.length; ii++) {
+        path[ii] = id.concat(JX.$AX(path[ii]));
+      }
+      return JX.Stratcom.listen(type, path, callback);
     },
 
     uniqID : function(node) {

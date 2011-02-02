@@ -48,6 +48,10 @@ class DifferentialChangesetDetailView extends AphrontView {
       'div',
       array(
         'sigil' => 'differential-changeset',
+        'meta'  => array(
+          'left'  => $this->changeset->getID(),
+          'right' => $this->changeset->getID(),
+        ),
         'class' => $class,
       ),
       '<a name="#'."TODO".'"></a>'.

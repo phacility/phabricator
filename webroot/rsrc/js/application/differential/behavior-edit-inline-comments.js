@@ -53,8 +53,13 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     finishSelect();
   }
 
-  function isNewFile(node) {
+  function isOnRight(node) {
     return node.parentNode.firstChild != node;
+  }
+  
+  function isNewFile(node) {
+    var data = JX.Stratcom.getData(root);
+    return isOnRight(node) || (data.left != data.right);
   }
 
   function getRowNumber(th_node) {
@@ -81,10 +86,10 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       origin = target = e.getTarget();
 
       var data = e.getNodeData('differential-changeset');
-      if (isNewFile(target)) {
-        changeset = data.oid;
+      if (isOnRight(target)) {
+        changeset = data.left;
       } else {
-        changeset = data.nid;
+        changeset = data.right;
       }
 
       updateReticle();
@@ -99,7 +104,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       if (!selecting ||
           workflow ||
           (getRowNumber(e.getTarget()) === undefined) ||
-          (isNewFile(e.getTarget()) != isNewFile(origin)) ||
+          (isOnRight(e.getTarget()) != isOnRight(origin)) ||
           (e.getNode('differential-changeset') !== root)) {
         return;
       }
@@ -136,7 +141,8 @@ JX.behavior('differential-edit-inline-comments', function(config) {
         changeset: changeset,
         number: o,
         length: len,
-        is_new: isNewFile(target) ? 1 : 0
+        is_new: isNewFile(target) ? 1 : 0,
+        on_right: isOnRight(target) ? 1 : 0 
       };
 
       workflow = true;
@@ -155,9 +161,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
           }
           drawInlineComment(insert.parentNode, target, r);
           finishSelect();
-          JX.Stratcom.invoke('inline-comment-update',
-                             null,
-                             {id : r.inlineCommentID});
+          JX.Stratcom.invoke('differential-inline-comment-update');
         })
         .setCloseHandler(finishSelect);
 
@@ -175,7 +179,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
 
   JX.Stratcom.listen(
     ['mouseover', 'mouseout'],
-    'inline-comment',
+    'differential-inline-comment',
     function(e) {
       if (selecting || workflow) {
         return;
@@ -184,21 +188,21 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       if (e.getType() == 'mouseout') {
         hideReticle();
       } else {
-        var data = e.getNodeData('inline-comment');
-        var change = e.getNodeData('differential-changeset');
-
         root = e.getNode('differential-changeset');
 
-        var prefix = 'C' + change;
+        var data = e.getNodeData('differential-inline-comment');
+        var change = e.getNodeData('differential-changeset');
 
-        if (data.is_new) {
-          prefix += 'NL';
+        var prefix;
+        if (data.on_right) {
+          prefix = 'C' + (change.left) + 'NL';
         } else {
-          prefix += 'OL';
+          prefix = 'C' + (change.right) + 'OL';
         }
 
         origin = JX.$(prefix + data.number);
-        target = JX.$(prefix + (data.number + data.length));
+        target = JX.$(prefix + (parseInt(data.number, 10) +
+                                parseInt(data.length, 10)));
 
         updateReticle();
       }
@@ -206,16 +210,18 @@ JX.behavior('differential-edit-inline-comments', function(config) {
 
   JX.Stratcom.listen(
     'click',
-    [['inline-comment', 'delete'],
-     ['inline-comment', 'edit']],
+    [['differential-inline-comment', 'delete'],
+     ['differential-inline-comment', 'edit']],
     function(e) {
       var data = {
         op: e.getNode('edit') ? 'edit' : 'delete',
-        id: e.getNodeData('inline-comment').id
+        id: e.getNodeData('differential-inline-comment').id
       };
       new JX.Workflow(config.uri, data)
         .setHandler(function(r) {
-          var base_row = e.getNode('inline-comment').parentNode.parentNode;
+          var base_row = e.getNode('differential-inline-comment')
+            .parentNode
+            .parentNode;
           if (data.op == 'edit' && r.markup) {
             drawInlineComment(base_row.parentNode, base_row, r);
           }

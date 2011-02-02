@@ -91,7 +91,7 @@ class AphrontDefaultApplicationConfiguration
           'save/$' => 'DifferentialCommentSaveController',
           'inline/' => array(
             'preview/$' => 'DifferentialInlineCommentPreviewController',
-            'edit/$' => 'DifferentialInlineCommentEditController',
+            'edit/(?<id>\d+)/$' => 'DifferentialInlineCommentEditController',
           ),
         ),
       ),
@@ -166,6 +166,11 @@ class AphrontDefaultApplicationConfiguration
         $response = new AphrontWebpageResponse();
         $response->setContent($view->render());
         return $response;
+      } else {
+        return id(new AphrontAjaxResponse())
+          ->setContent(array(
+            'dialog' => $response->buildResponseString(),
+          ));
       }
     } else if ($response instanceof Aphront404Response) {
 

@@ -121,7 +121,7 @@ class DifferentialChangesetListView extends AphrontView {
     if ($this->editable) {
       $revision = $this->revision;
       Javelin::initBehavior('differential-edit-inline-comments', array(
-        'uri' => '/differential/inline/edit/'.$revision->getID().'/',
+        'uri' => '/differential/comment/inline/edit/'.$revision->getID().'/',
       ));
     }
 

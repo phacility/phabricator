@@ -41,6 +41,8 @@ class DifferentialChangesetParser {
   protected $subparser;
   protected $oldChangesetID = null;
   protected $noHighlight;
+  
+  private $handles;
 
   const CACHE_VERSION = 4;
 
@@ -89,6 +91,16 @@ class DifferentialChangesetParser {
     if (strpos($filename, '.', 1) !== false) {
       $this->filetype = end(explode('.', $filename));
     }
+  }
+  
+  public function setHandles(array $handles) {
+    $this->handles = $handles;
+    return $this;
+  }
+  
+  public function setMarkupEngine(PhutilMarkupEngine $engine) {
+    $this->markupEngine = $engine;
+    return $this;
   }
 
   public function parseHunk(DifferentialHunk $hunk) {
@@ -773,11 +785,12 @@ EOSYNTHETIC;
     $new_mask = array();
     $feedback_mask = array();
 
-    $handles = array();
     if ($this->comments) {
       foreach ($this->comments as $comment) {
         $start = max($comment->getLineNumber() - self::LINES_CONTEXT, 0);
-        $end = $comment->getFinalLine() + self::LINES_CONTEXT;
+        $end = $comment->getLineNumber() +
+               $comment->getLineLength() +
+               self::LINES_CONTEXT;
         $new = $this->isCommentInNewFile($comment);
         for ($ii = $start; $ii <= $end; $ii++) {
           if ($new) {
@@ -799,22 +812,16 @@ EOSYNTHETIC;
           $feedback_mask[$ii] = true;
         }
       }
-/*
-      $handle_ids = mpull($this->comments, 'getUserPHID');
-      $handles = array();
-      $handle_data = new ToolsHandleData($handle_ids, $handles);
-      $handle_data->needNames();
-      prep($handle_data);
-
       $this->comments = msort($this->comments, 'getID');
       foreach ($this->comments as $comment) {
+        $final = $comment->getLineNumber() +
+                 $comment->getLineLength();
         if ($this->isCommentInNewFile($comment)) {
-          $new_comments[$comment->getFinalLine()][] = $comment;
+          $new_comments[$final][] = $comment;
         } else {
-          $old_comments[$comment->getFinalLine()][] = $comment;
+          $old_comments[$final][] = $comment;
         }
       }
-*/
     }
 
     $html = $this->renderTextChange(
@@ -823,7 +830,6 @@ EOSYNTHETIC;
       $mask_force,
       $feedback_mask,
       $viewer_context,
-      $handles,
       $old_comments,
       $new_comments);
 
@@ -879,7 +885,6 @@ EOSYNTHETIC;
     $mask_force,
     $feedback_mask,
     $viewer_context,
-    $handles,
     array $old_comments,
     array $new_comments) {
 
@@ -1080,8 +1085,7 @@ EOSYNTHETIC;
         foreach ($old_comments[$o_num] as $comment) {
           $xhp = $this->renderInlineComment(
             $comment,
-            $viewer_context,
-            $handles);
+            $viewer_context);
           $html[] =
             '<tr class="inline"><th /><td>'.
               $xhp.
@@ -1092,8 +1096,7 @@ EOSYNTHETIC;
         foreach ($new_comments[$n_num] as $comment) {
           $xhp = $this->renderInlineComment(
             $comment,
-            $viewer_context,
-            $handles);
+            $viewer_context);
           $html[] =
             '<tr class="inline"><th /><td /><th /><td>'.
               $xhp.
@@ -1107,23 +1110,20 @@ EOSYNTHETIC;
 
   private function renderInlineComment(
     DifferentialInlineComment $comment,
-    $viewer_context,
-    $handles) {
+    $viewer_context) {
 
     $edit = $viewer_context &&
-            ($comment->getUserPHID() == $viewer_context->getUserID()) &&
+            ($comment->getAuthorPHID() == $viewer_context->getUserID()) &&
             (!$comment->getFeedbackID());
 
     $is_new = $this->isCommentInNewFile($comment);
 
-    return '';
-/*
-    return <differential:inline-comment
-              inline={$comment}
-                edit={$edit}
-               isnew={$is_new}
-              handle={$handles[$comment->getUserPHID()]} />;
-*/
+    return id(new DifferentialInlineCommentView())
+      ->setInlineComment($comment)
+      ->setOnRight($is_new)
+      ->setHandles($this->handles)
+      ->setMarkupEngine($this->markupEngine)
+      ->render();
   }
 
   protected function renderPropertyChangeHeader($changeset) {
@@ -1146,6 +1146,8 @@ EOSYNTHETIC;
 
     return null;
 /*
+  TODO
+
     $table = <table class="differential-property-table" />;
     $table->appendChild(
       <tr class="property-table-header">

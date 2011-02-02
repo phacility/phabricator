@@ -111,6 +111,7 @@ JX.install('Workflow', {
       if (JX.Workflow._disabled) {
         return;
       }
+
       var t = event.getTarget();
       if (t.name == '__cancel__' || t.name == '__close__') {
         JX.Workflow._pop();
@@ -152,7 +153,7 @@ JX.install('Workflow', {
         JX.DOM.listen(
           this._root,
           'click',
-          'tag:button',
+          [['jx-workflow-button'], ['tag:button']],
           JX.Workflow._onbutton);
         document.body.appendChild(this._root);
         var d = JX.$V.getDim(this._root);
