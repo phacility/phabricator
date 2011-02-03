@@ -58,6 +58,8 @@ class PhabricatorObjectHandleData {
               $handle->setName($user->getUsername());
               $handle->setURI('/p/'.$user->getUsername().'/');
               $handle->setEmail($user->getEmail());
+              $handle->setFullName(
+                $user->getUsername().' ('.$user->getRealName().')');
 
               $img_phid = $user->getProfileImagePHID();
               if ($img_phid) {
@@ -89,6 +91,7 @@ class PhabricatorObjectHandleData {
               $handle->setEmail($list->getEmail());
               $handle->setName($list->getName());
               $handle->setURI($list->getURI());
+              $handle->setFullName($list->getName());
             }
             $handles[$phid] = $handle;
           }

@@ -33,13 +33,13 @@ class DifferentialRevision extends DifferentialDAO {
 
   protected $lineCount;
 
-  private $related;
-  private $forbidden;
+  private $relationships;
 
   const RELATIONSHIP_TABLE    = 'differential_relationship';
 
   const RELATION_REVIEWER     = 'revw';
   const RELATION_SUBSCRIBED   = 'subd';
+  const RELATION_UNSUBSCRIBED = 'usub';
 
   public function getConfiguration() {
     return array(
@@ -78,8 +78,6 @@ class DifferentialRevision extends DifferentialDAO {
   public function loadRelationships() {
     if (!$this->getID()) {
       $this->relationships = array();
-      $this->related = array();
-      $this->forbidden = array();
       return;
     }
 
@@ -89,19 +87,6 @@ class DifferentialRevision extends DifferentialDAO {
       self::RELATIONSHIP_TABLE,
       $this->getID());
 
-    $related = array();
-    $forbidden = array();
-
-    foreach ($data as $row) {
-      if ($row['forbidden']) {
-        $forbidden[] = $row;
-      } else {
-        $related[] = $row;
-      }
-    }
-
-    $this->related = igroup($related, 'relation');
-    $this->forbidden = igroup($related, 'relation');
     $this->relationships = igroup($data, 'relation');
 
     return $this;
@@ -116,60 +101,14 @@ class DifferentialRevision extends DifferentialDAO {
   }
 
   private function getRelatedPHIDs($relation) {
-    if ($this->related === null) {
+    if ($this->relationships === null) {
       throw new Exception("Must load relationships!");
     }
-
-    $related = idx($this->related, $relation, array());
-
-    return ipull($related, 'objectPHID');
+    
+    return ipull($this->getRawRelations($relation), 'objectPHID');
   }
 
   public function getRawRelations($relation) {
     return idx($this->relationships, $relation, array());
   }
-
-  public function writeRelatedPHIDs(
-    $relation,
-    $phids,
-    $reason_phid,
-    $forbidden) {
-
-    $conn_w = $this->establishConnection('w');
-
-    $sql = array();
-    $phids = array_values($phids);
-    foreach ($phids as $key => $phid) {
-      $sql[] = qsprintf(
-        $conn_w,
-        '(%d, %s, %d, %s, %d)',
-        $this->getRevisionID(),
-        $phid,
-        $key,
-        $reason_phid,
-        $forbidden);
-    }
-
-    $conn_w->openTransaction();
-      queryfx(
-        $conn_w,
-        'DELETE FROM %T WHERE revisionID = %d AND relation = %s
-          AND forbidden = %d
-          AND relatedPHID NOT IN (%Ls)',
-        self::RELATIONSHIP_TABLE,
-        $this->getID(),
-        $relation,
-        $forbidden,
-        $phids);
-      queryfx(
-        $conn_w,
-        'INSERT INTO %T
-          (revisionID, relatedPHID, sequence, reason_phid, forbidden)
-        VALUES %Q
-          ON DUPLICATE KEY UPDATE sequence = VALUES(sequence)',
-        self::RELATIONSHIP_TABLE,
-        implode(', ', $sql));
-    $conn_w->saveTransaction();
-  }
-
 }

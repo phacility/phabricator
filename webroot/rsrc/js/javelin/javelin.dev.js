@@ -2693,8 +2693,12 @@ JX.install('DOM', {
     listen : function(node, type, path, callback) {
       var id = ['id:' + JX.DOM.uniqID(node)];
       path = JX.$AX(path || []);
-      for (var ii = 0; ii < path.length; ii++) {
-        path[ii] = id.concat(JX.$AX(path[ii]));
+      if (!path.length) {
+        path = id;
+      } else {
+        for (var ii = 0; ii < path.length; ii++) {
+          path[ii] = id.concat(JX.$AX(path[ii]));
+        }
       }
       return JX.Stratcom.listen(type, path, callback);
     },

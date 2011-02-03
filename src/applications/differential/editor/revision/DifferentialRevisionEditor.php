@@ -497,7 +497,7 @@ class DifferentialRevisionEditor {
     array $rem_phids,
     array $add_phids,
     $reason_phid) {
-
+      
     $rem_map = array_fill_keys($rem_phids, true);
     $add_map = array_fill_keys($add_phids, true);
 
@@ -515,8 +515,8 @@ class DifferentialRevisionEditor {
     }
 
     $raw = $revision->getRawRelations(DifferentialRevision::RELATION_REVIEWER);
-    $raw = ipull($raw, 'objectPHID');
-
+    $raw = ipull($raw, null, 'objectPHID');
+    
     $sequence = count($seq_map);
     foreach ($raw as $phid => $relation) {
       if (isset($seq_map[$phid])) {
@@ -529,34 +529,28 @@ class DifferentialRevisionEditor {
 
     foreach ($raw as $phid => $relation) {
       if (isset($rem_map[$phid])) {
-        $relation['forbidden'] = true;
-        $relation['reasonPHID'] = $reason_phid;
-      } else if (isset($add_map[$phid])) {
-        $relation['forbidden'] = false;
-        $relation['reasonPHID'] = $reason_phid;
+        unset($raw[$phid]);
       }
     }
 
     foreach ($add_phids as $add) {
-      $raw[] = array(
+      $raw[$add] = array(
         'objectPHID'  => $add,
-        'forbidden'   => false,
         'sequence'    => idx($seq_map, $add, $sequence++),
         'reasonPHID'  => $reason_phid,
       );
     }
-
+    
     $conn_w = $revision->establishConnection('w');
 
     $sql = array();
     foreach ($raw as $relation) {
       $sql[] = qsprintf(
         $conn_w,
-        '(%d, %s, %s, %d, %d, %s)',
+        '(%d, %s, %s, %d, %s)',
         $revision->getID(),
         DifferentialRevision::RELATION_REVIEWER,
         $relation['objectPHID'],
-        $relation['forbidden'],
         $relation['sequence'],
         $relation['reasonPHID']);
     }
@@ -572,7 +566,7 @@ class DifferentialRevisionEditor {
         queryfx(
           $conn_w,
           'INSERT INTO %T
-            (revisionID, relation, objectPHID, forbidden, sequence, reasonPHID)
+            (revisionID, relation, objectPHID, sequence, reasonPHID)
           VALUES %Q',
           DifferentialRevision::RELATIONSHIP_TABLE,
           implode(', ', $sql));

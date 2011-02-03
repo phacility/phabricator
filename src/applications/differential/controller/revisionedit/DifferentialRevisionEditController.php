@@ -53,8 +53,10 @@ class DifferentialRevisionEditController extends DifferentialController {
     $e_title = true;
     $e_testplan = true;
     $errors = array();
+    
+    $revision->loadRelationships();
 
-    if ($request->isFormPost() && !$request->getStr('viaDiffView')) {
+    if ($request->isFormPost() && !$request->getStr('viaDiffView')) {      
       $revision->setTitle($request->getStr('title'));
       $revision->setSummary($request->getStr('summary'));
       $revision->setTestPlan($request->getStr('testplan'));
@@ -93,11 +95,19 @@ class DifferentialRevisionEditController extends DifferentialController {
       $reviewer_phids = $request->getArr('reviewers');
       $cc_phids = $request->getArr('cc');
     } else {
-//      $reviewer_phids = $revision->getReviewers();
-//      $cc_phids = $revision->getCCPHIDs();
-      $reviewer_phids = array();
-      $cc_phids = array();
+      $reviewer_phids = $revision->getReviewers();
+      $cc_phids = $revision->getCCPHIDs();
     }
+    
+    $phids = array_merge($reviewer_phids, $cc_phids);
+    $phids = array_unique($phids);
+    
+    $handles = id(new PhabricatorObjectHandleData($phids))
+      ->loadHandles();
+    $handles = mpull($handles, 'getFullName', 'getPHID');
+    
+    $reviewer_map = array_select_keys($handles, $reviewer_phids);
+    $cc_map = array_select_keys($handles, $cc_phids);
 
     $form = new AphrontFormView();
     $form->setUser($request->getUser());
@@ -148,7 +158,7 @@ class DifferentialRevisionEditController extends DifferentialController {
           ->setLabel('CC')
           ->setName('cc')
           ->setDatasource('/typeahead/common/mailable/')
-          ->setValue($reviewer_map))
+          ->setValue($cc_map))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Blame Revision')

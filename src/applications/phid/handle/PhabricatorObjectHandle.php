@@ -23,6 +23,7 @@ class PhabricatorObjectHandle {
   private $type;
   private $name;
   private $email;
+  private $fullName;
   private $imageURI;
 
   public function setURI($uri) {
@@ -50,6 +51,15 @@ class PhabricatorObjectHandle {
 
   public function getName() {
     return $this->name;
+  }
+
+  public function setFullName($full_name) {
+    $this->fullName = $full_name;
+    return $this;
+  }
+  
+  public function getFullName() {
+    return $this->fullName;
   }
 
   public function setType($type) {
