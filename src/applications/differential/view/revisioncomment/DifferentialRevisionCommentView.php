@@ -69,9 +69,19 @@ final class DifferentialRevisionCommentView extends AphrontView {
     $content = $comment->getContent();
     if (strlen(rtrim($content))) {
       $title = "{$author_link} {$verb} this revision:";
+      $cache = $comment->getCache();
+      if (strlen($cache)) {
+        $content = $cache;
+      } else {
+        $content = $this->markupEngine->markupText($content);
+        if ($comment->getID()) {
+          $comment->setCache($content);
+          $comment->save();
+        }
+      }
       $content =
         '<div class="phabricator-remarkup">'.
-          $this->markupEngine->markupText($content).
+          $content.
         '</div>';
     } else {
       $title = null;

@@ -573,11 +573,16 @@ abstract class LiskDAO {
    */
   protected function checkProperty($property) {
     static $properties = null;
-    if (!isset($properties)) {
+    if ($properties === null) {
       $properties = $this->getProperties();
     }
+    
+    $property = strtolower($property);
+    if (empty($properties[$property])) {
+      return null;
+    }
 
-    return idx($properties, strtolower($property));
+    return $properties[$property];
   }
 
 

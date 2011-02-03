@@ -22,5 +22,6 @@ class DifferentialComment extends DifferentialDAO {
   protected $revisionID;
   protected $action;
   protected $content;
+  protected $cache;
 
 }

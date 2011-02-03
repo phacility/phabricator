@@ -29,5 +29,6 @@ class DifferentialInlineComment extends DifferentialDAO {
   protected $lineLength;
 
   protected $content;
+  protected $cache;
 
 }

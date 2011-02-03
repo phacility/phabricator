@@ -72,8 +72,6 @@ class PhabricatorXHProfProfileSymbolView extends AphrontView {
       '',
       '',
       '',
-      '',
-      '',
     );
     $rows[] = array(
       phutil_render_tag(
@@ -84,15 +82,11 @@ class PhabricatorXHProfProfileSymbolView extends AphrontView {
         phutil_escape_html($symbol)),
       $flat[$symbol]['ct'],
       $flat[$symbol]['wt'],
-      '',
-      $flat[$symbol]['excl_wt'],
-      '',
+      '100%',
     );
 
     $rows[] = array(
       'Parent Calls',
-      '',
-      '',
       '',
       '',
       '',
@@ -108,8 +102,6 @@ class PhabricatorXHProfProfileSymbolView extends AphrontView {
         $data[$key]['ct'],
         $data[$key]['wt'],
         '',
-        $data[$key]['wt'],
-        '',
       );
     }
 
@@ -119,40 +111,31 @@ class PhabricatorXHProfProfileSymbolView extends AphrontView {
       '',
       '',
       '',
-      '',
-      '',
     );
+    $child_rows = array();
     foreach ($children as $key => $name) {
-      $rows[] = array(
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => $base_uri.'?symbol='.$name,
-          ),
-          phutil_escape_html($name)),
+      $child_rows[] = array(
+        $name,
         $data[$key]['ct'],
         $data[$key]['wt'],
-        '',
-        $data[$key]['wt'],
-        '',
+        $data[$key]['wt'] / $flat[$symbol]['wt'],
       );
     }
+    $child_rows = isort($child_rows, 2);
+    $child_rows = array_reverse($child_rows);
+    $rows = array_merge($rows, $this->formatRows($child_rows));
 
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
         'Symbol',
         'Count',
-        'Incl Wall Time',
-        '%',
-        'Excl Wall Time',
+        'Wall Time',
         '%',
       ));
     $table->setColumnClasses(
       array(
         'wide pri',
-        'n',
-        'n',
         'n',
         'n',
         'n',
@@ -164,4 +147,25 @@ class PhabricatorXHProfProfileSymbolView extends AphrontView {
 
     return $panel->render();
   }
+  
+  private function formatRows($rows) {
+    $base_uri = $this->baseURI;
+    
+    $result = array();
+    foreach ($rows as $row) {
+      $result[] = array(
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => $base_uri.'?symbol='.$row[0],
+          ),
+          phutil_escape_html($row[0])),
+        number_format($row[1]),
+        number_format($row[2]).' us',
+        sprintf('%.1f%%', 100 * $row[3]),
+      );
+    }
+    return $result;
+  }
+  
 }
