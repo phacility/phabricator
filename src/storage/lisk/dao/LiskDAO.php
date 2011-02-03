@@ -576,7 +576,7 @@ abstract class LiskDAO {
     if ($properties === null) {
       $properties = $this->getProperties();
     }
-    
+
     $property = strtolower($property);
     if (empty($properties[$property])) {
       return null;
@@ -1092,7 +1092,10 @@ abstract class LiskDAO {
       if (count($args) !== 0) {
         throw new Exception("Getter call should have zero args: {$method}");
       }
-      return @$this->$property;
+      if (isset($this->$property)) {
+        return $this->$property;
+      }
+      return null;
     }
 
     if (!strncmp($method, 'set', 3)) {

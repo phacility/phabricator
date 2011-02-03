@@ -37,6 +37,7 @@ class DifferentialRevisionViewController extends DifferentialController {
 
     $diffs = $revision->loadDiffs();
 
+    $diff_vs = null;
     $target = end($diffs);
 
     $changesets = $target->loadChangesets();
@@ -78,6 +79,8 @@ class DifferentialRevisionViewController extends DifferentialController {
 
     $diff_history = new DifferentialRevisionUpdateHistoryView();
     $diff_history->setDiffs($diffs);
+    $diff_history->setSelectedVersusDiffID($diff_vs);
+    $diff_history->setSelectedDiffID($target->getID());
 
     $toc_view = new DifferentialDiffTableOfContentsView();
     $toc_view->setChangesets($changesets);

@@ -637,7 +637,7 @@ class DifferentialChangesetParser {
           Filesystem::writeFile($old_tmp, $changeset->makeOldFile());
           Filesystem::writeFile($new_tmp, $changeset->makeNewFile());
           list($err, $diff) = exec_manual(
-            'diff -bw -U9999 %s %s',
+            'diff -bw -U65535 %s %s',
             $old_tmp,
             $new_tmp);
 
@@ -663,7 +663,8 @@ EOSYNTHETIC;
           $changes = id(new ArcanistDiffParser())->parseDiff($diff);
 
           $diff = DifferentialDiff::newFromRawChanges($changes);
-          $alt_changeset = reset($diff->getChangesets());
+          $changesets = $diff->getChangesets();
+          $alt_changeset = reset($changesets);
 
           $this->subparser = new DifferentialChangesetParser();
           $this->subparser->setChangeset($alt_changeset);
