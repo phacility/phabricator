@@ -19,7 +19,6 @@
 class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
 
   protected $xhprofID;
-  protected $xhprofData;
 
   public function getName() {
     $run = $this->getData();
@@ -49,8 +48,40 @@ class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
         '<p>The "xhprof" PHP extension is not available. Install xhprof '.
         'to enable the XHProf plugin.';
     }
+    
+    $run = $this->getXHProfRunID();
+    if ($run) {
+      return '<a href="/xhprof/profile/'.$run.'/">View Run</a>';
+    } else {
+      $hidden = array();
+      $data = array('__profile__' => 'page') + $_GET;
+      
+      foreach ($data as $k => $v) {
+        $hidden[] = phutil_render_tag(
+          'input',
+          array(
+            'type' => 'hidden',
+            'name' => $k,
+            'value' => $v,
+          ));
+      }
+      $hidden = implode("\n", $hidden);
+      
+      
+      return
+        '<form method="get">'.
+          $hidden.
+          '<button>Enable XHProf</button>'.
+        '</form>';
+    }
+  }
 
-    return '...';
+
+  public function willShutdown() {
+    if (isset($_REQUEST['__profile__']) &&
+        $_REQUEST['__profile__'] != 'all') {
+      $this->xhprofID = DarkConsoleXHProfPluginAPI::stopProfiler();
+    }
   }
 
 }
@@ -91,14 +122,6 @@ class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
           </fieldset>
         </form>
       </x:frag>;
-  }
-
-  public function willShutdown() {
-    if (empty($_REQUEST['_profile_']) ||
-        $_REQUEST['_profile_'] != 'complete') {
-      require_module('profiling/phprof/bootstrap');
-      $this->xhprofData = FB_HotProfiler::stop_hotprofiler();
-    }
   }
 
   public function didShutdown() {

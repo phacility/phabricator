@@ -52,7 +52,11 @@ class PhabricatorXHProfProfileSymbolView extends AphrontView {
     $children = array();
     $parents = array();
     foreach ($this->profileData as $key => $counters) {
-      list($parent, $child) = explode('==>', $key, 2);
+      if (strpos($key, '==>') !== false) {
+        list($parent, $child) = explode('==>', $key, 2);
+      } else {
+        continue;
+      }
       if ($parent == $symbol) {
         $children[$key] = $child;
       } else if ($child == $symbol) {

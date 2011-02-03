@@ -35,7 +35,7 @@ phutil_require_module('phabricator', 'infrastructure/env');
 PhabricatorEnv::setEnvConfig($conf);
 
 phutil_require_module('phabricator', 'aphront/console/plugin/xhprof/api');
-DarkConsoleXHProfPluginAPI::hookProfiler('all');
+DarkConsoleXHProfPluginAPI::hookProfiler();
 
 $host = $_SERVER['HTTP_HOST'];
 $path = $_REQUEST['__path__'];
@@ -91,12 +91,20 @@ foreach ($headers as $header) {
 if (isset($_REQUEST['__profile__']) &&
     ($_REQUEST['__profile__'] == 'all')) {
   $profile = DarkConsoleXHProfPluginAPI::stopProfiler();
-  $profile = print_r($profile, true);
+  $profile = 
+    '<div style="text-align: center; background: #ff00ff; padding: 1em;
+                 font-size: 24px; font-weight: bold;">'.
+      '<a href="/xhprof/profile/'.$profile.'/">'.
+        '&gt;&gt;&gt; View Profile &lt;&lt;&lt;'.
+      '</a>'.
+    '</div>';
   if (strpos($response_string, '<body>') !== false) {
     $response_string = str_replace(
       '<body>',
       '<body>'.$profile,
       $response_string);
+  } else {
+    echo $profile;
   }
 }
 

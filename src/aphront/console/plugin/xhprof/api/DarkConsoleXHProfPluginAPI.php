@@ -36,12 +36,8 @@ final class DarkConsoleXHProfPluginAPI {
     require_once $root.'/externals/xhprof/xhprof_lib.php';
   }
 
-  public static function hookProfiler($section) {
+  public static function hookProfiler() {
     if (empty($_REQUEST['__profile__'])) {
-      return;
-    }
-
-    if ($section != $_REQUEST['__profile__']) {
       return;
     }
 
