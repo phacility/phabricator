@@ -855,33 +855,6 @@ class DifferentialRevisionViewController extends DifferentialController {
       }
     }
 
-    $detail_view =
-      <differential:changeset-detail-view
-        changesets={$changesets}
-          revision={$revision}
-           against={$against_map}
-              edit={empty($against_map)}
-        whitespace={$request->getStr('whitespace')} />;
-
-    $table_of_contents =
-      <differential:changeset-table-of-contents
-        changesets={$all_changesets} />;
-
-    $implied_feedback = array();
-    foreach (array(
-      'summarize'   => $revision->getSummary(),
-      'testplan'    => $revision->getTestPlan(),
-      'annotate'    => $revision->getNotes(),
-    ) as $type => $text) {
-      if (!strlen($text)) {
-        continue;
-      }
-      $implied_feedback[] = id(new DifferentialFeedback())
-        ->setUserID($revision->getOwnerID())
-        ->setAction($type)
-        ->setDateCreated($revision->getDateCreated())
-        ->setContent($text);
-    }
 
     $feedback = id(new DifferentialFeedback())->loadAllWithRevision($revision);
     $feedback = array_merge($implied_feedback, $feedback);
@@ -971,14 +944,6 @@ class DifferentialRevisionViewController extends DifferentialController {
 
     $quick_links = $this->getQuickLinks($revision);
 
-    $edit_link = null;
-    if ($revision->getOwnerID() == $viewer_id) {
-      $edit_link = '/differential/revision/edit/'.$revision->getID().'/';
-      $edit_link =
-        <x:frag>
-          {' '}(<a href={$edit_link}>Edit Revision</a>)
-        </x:frag>;
-    }
 
     $info =
       <div class="differential-revision-information">
@@ -994,47 +959,11 @@ class DifferentialRevisionViewController extends DifferentialController {
     $actions = $this->getRevisionActions($revision);
     $revision_id = $revision->getID();
 
-    Javelin::initBehavior(
-      'differential-feedback-preview',
-      array(
-        'uri'     => '/differential/preview/'.$revision->getFBID().'/',
-        'preview' => 'overall-feedback-preview',
-        'action'  => 'feedback-action',
-        'content' => 'feedback-content',
-      ));
-
-    Javelin::initBehavior(
-      'differential-inline-comment-preview',
-      array(
-        'uri' => '/differential/inline-preview/'.$revision_id.'/'.$new.'/',
-        'preview' => 'inline-comment-preview',
-      ));
-
     $content = SavedCopy::loadData(
       $viewer_id,
       SavedCopy::Type_DifferentialRevisionFeedback,
       $revision->getFBID());
 
-
-    $inline_comment_container =
-        <div id="inline-comment-preview"><p>Loading...</p></div>;
-
-    $feedback = id(new DifferentialFeedback())
-      ->setAction('none')
-      ->setUserID($viewer_id)
-      ->setContent($content);
-
-    $preview =
-      <div class="differential-feedback differential-feedback-preview">
-        <div id="overall-feedback-preview">
-          <differential:feedback
-            feedback={$feedback}
-              engine={$engine}
-             preview={true}
-              handle={$handles[$viewer_id]} />
-        </div>
-        {$inline_comment_container}
-      </div>;
 
     $syntax_link =
       <a href={'http://www.intern.facebook.com/intern/wiki/index.php' .
@@ -1051,42 +980,6 @@ class DifferentialRevisionViewController extends DifferentialController {
         'row'       => 'reviewer-tokenizer-row',
       ));
 
-    $feedback_form =
-      <x:frag>
-        <div class="differential-feedback-form">
-          <tools:form
-            method="post"
-            action={"/differential/revision/feedback/{$revision_id}/"}>
-            <h1>Provide Feedback</h1>
-            <tools:fieldset>
-              <tools:control type="select" label="Action">
-                {id(<select name="action" id="feedback-action"
-                      tabindex="1" />)
-                  ->setOptions($actions)}
-              </tools:control>
-              <tools:control type="text" label="Reviewers"
-                style="display: none;"
-                id="reviewer-tokenizer-row">
-                <javelin:tokenizer-template
-                  id="reviewer-tokenizer"
-                  name="reviewers" />
-              </tools:control>
-              <tools:control type="textarea" label="Feedback"
-                caption={$syntax_link}>
-                <tools:droppable-textarea id="feedback-content" name="feedback"
-                  tabindex="2">
-                  {$content}
-                </tools:droppable-textarea>
-              </tools:control>
-              <tools:control type="submit">
-                <button type="submit"
-                  tabindex="3">Clowncopterize</button>
-              </tools:control>
-            </tools:fieldset>
-          </tools:form>
-        </div>
-        {$preview}
-      </x:frag>;
 
     $notice = null;
     if ($this->getRequest()->getBool('diff_changed')) {
@@ -1398,44 +1291,6 @@ class DifferentialRevisionViewController extends DifferentialController {
                   meta={$meta}>Show Details</a>
       </span>;
     return <x:frag>{$more}{$target}</x:frag>;
-  }
-
-
-
-  protected function loadInlineComments(array $feedback, array &$changesets) {
-
-    $inline_comments = array();
-    $feedback_ids = array_filter(array_pull($feedback, 'getID'));
-    if (!$feedback_ids) {
-      return $inline_comments;
-    }
-
-    $inline_comments = id(new DifferentialInlineComment())
-      ->loadAllWhere('feedbackID in (%Ld)', $feedback_ids);
-
-    $load_changesets = array();
-    $load_hunks = array();
-    foreach ($inline_comments as $inline) {
-      $changeset_id = $inline->getChangesetID();
-      if (isset($changesets[$changeset_id])) {
-        continue;
-      }
-      $load_changesets[$changeset_id] = true;
-    }
-
-    $more_changesets = array();
-    if ($load_changesets) {
-      $changeset_ids = array_keys($load_changesets);
-      $more_changesets += id(new DifferentialChangeset())
-        ->loadAllWithIDs($changeset_ids);
-    }
-
-    if ($more_changesets) {
-      $changesets += $more_changesets;
-      $changesets = array_psort($changesets, 'getSortKey');
-    }
-
-    return $inline_comments;
   }
 
 
