@@ -2,7 +2,7 @@
  * @provides javelin-behavior-dark-console
  */
 
-JX.behavior('dark-console', function() {
+JX.behavior('dark-console', function(config) {
   JX.Stratcom.listen(
     'click',
     ['dark-console', 'dark-console-tab'],
@@ -18,11 +18,10 @@ JX.behavior('dark-console', function() {
           tabs[ii] == target);
         (tabs[ii] != target ? JX.DOM.hide : JX.DOM.show)(panels[ii]);
       }
-/*
-      new JX.Request(e.getNodeData('dark-console').uri, JX.bag)
-        .setData({tab: e.getNodeData('dark-console-tab').key})
+
+      new JX.Request(config.uri, JX.bag)
+        .setData({tab: target.id.replace('dark-console-tab-', '')})
         .send();
-*/
     });
 
   JX.Stratcom.listen(
@@ -39,17 +38,17 @@ JX.behavior('dark-console', function() {
         }
 
         var console = JX.DOM.find(document.body, 'table', 'dark-console');
-        var data = JX.Stratcom.getData(console);
-        data.visible = !data.visible;
-        if (data.visible) {
+
+        config.visible = !config.visible;
+        if (config.visible) {
           JX.DOM.show(console);
         } else {
           JX.DOM.hide(console);
         }
 
-//        new JX.Request(data.uri, JX.bag)
-//            .setData({visible: data.visible})
-//            .send();
+        new JX.Request(config.uri, JX.bag)
+          .setData({visible: config.visible ? 1 : 0})
+          .send();
       }
     });
 });

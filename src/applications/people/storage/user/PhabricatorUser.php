@@ -29,7 +29,9 @@ class PhabricatorUser extends PhabricatorUserDAO {
   protected $facebookUID;
   protected $profileImagePHID;
 
-  private $sessionKey;
+  protected $consoleEnabled = 0;
+  protected $consoleVisible = 0;
+  protected $consoleTab = '';
 
   public function getProfileImagePHID() {
     return nonempty(
@@ -126,6 +128,8 @@ class PhabricatorUser extends PhabricatorUserDAO {
       $this->getPHID(),
       $session_type,
       $session_key);
+
+    $this->sessionKey = $session_key;
 
     return $session_key;
   }

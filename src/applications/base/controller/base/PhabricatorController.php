@@ -58,7 +58,7 @@ abstract class PhabricatorController extends AphrontController {
     return $view;
   }
 
-  public function buildStandardPageResponse($view) {
+  public function buildStandardPageResponse($view, array $data) {
     $page = $this->buildStandardPageView();
     $page->appendChild($view);
     $response = new AphrontWebpageResponse();

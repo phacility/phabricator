@@ -36,41 +36,11 @@ final class DarkConsoleCore {
   private $settings;
   private $coredata;
 
-  public function setConsoleSetting($key, $value) {
-/*
-    $guard = new WriteOnHttpGet();
-      $okay = user_set_pref(
-        $this->getCoreData()->getViewerContext()->getUserID(),
-        self::APPLICATION_ID,
-        $key,
-        $value);
-    $guard->release();
-    if (!$okay) {
-      throw new Exception('Failed to set preference setting.');
-    }
-*/
-  }
-
-  public function getConsoleSetting($key) {
-//    $viewer_id = $this->getCoreData()->getViewerContext()->getUserID();
-//    return idx(idx($this->settings[$viewer_id], $key), 'value');
-    return true;
-  }
-
   public function getPlugin($plugin_name) {
     return idx($this->plugins, $plugin_name);
   }
 
   public function __construct() {
-
-/*
-    $this->settings = users_multiget_prefs_info(
-      array($coredata->getViewerContext()->getUserID()),
-      self::APPLICATION_ID);
-
-    $disabled = $this->getConsoleSetting(self::SETTING_PLUGINS);
-    $disabled = array_flip(explode(',', $disabled));
-*/
     foreach (self::getPlugins() as $plugin_name) {
       $plugin = self::newPlugin($plugin_name);
       if ($plugin->isPermanent() || !isset($disabled[$plugin_name])) {
@@ -95,6 +65,8 @@ final class DarkConsoleCore {
 
   public function render(AphrontRequest $request) {
 
+    $user = $request->getUser();
+
     $plugins = $this->getEnabledPlugins();
 
     foreach ($plugins as $plugin) {
@@ -110,8 +82,8 @@ final class DarkConsoleCore {
       $plugin->setData($plugin->generateData());
     }
 
-    $selected = 'XHProf';//true;//$this->getConsoleSetting(DarkConsoleCore::SETTING_TAB);
-    $visible  = true;//$this->getConsoleSetting(DarkConsoleCore::SETTING_VISIBLE);
+    $selected = $user->getConsoleTab();
+    $visible  = $user->getConsoleVisible();
 
     if (!isset($plugins[$selected])) {
       $selected = key($plugins);
@@ -142,9 +114,7 @@ final class DarkConsoleCore {
         array(
           'class' => "dark-console-tab {$tabclass}",
           'sigil' => 'dark-console-tab',
-          'meta'  => array(
-            'key' => $key,
-          ),
+          'id'    => 'dark-console-tab-'.$key,
         ),
         (string)$data['name']);
 
@@ -154,9 +124,6 @@ final class DarkConsoleCore {
           'class' => 'dark-console-panel',
           'style' => $style,
           'sigil' => 'dark-console-panel',
-          'meta'  => array(
-            'key' => $key,
-          ),
         ),
         (string)$data['panel']);
     }
@@ -166,10 +133,7 @@ final class DarkConsoleCore {
       array(
         'class' => 'dark-console',
         'sigil' => 'dark-console',
-        'meta' => array(
-          'visible' => true,
-        ),
-        'style' => '',
+        'style' => $visible ? '' : 'display: none;',
       ),
       '<tr>'.
         '<th class="dark-console-tabs">'.
@@ -178,7 +142,12 @@ final class DarkConsoleCore {
         '<td>'.implode("\n", $panel_markup).'</td>'.
       '</tr>');
 
-    Javelin::initBehavior('dark-console');
+    if (!empty($_COOKIE['phsid'])) {
+      $console = str_replace(
+        $_COOKIE['phsid'],
+        phutil_escape_html('<session-key>'),
+        $console);
+    }
 
     return "\n\n\n\n".$console."\n\n\n\n";
   }

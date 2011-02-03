@@ -41,32 +41,36 @@ class DarkConsoleRequestPlugin extends DarkConsolePlugin {
       'Basics' => array(
         'Host'      => $data['Server']['SERVER_ADDR'],
         'Hostname'  => gethostbyaddr($data['Server']['SERVER_ADDR']),
+        'Machine'   => php_uname('n'),
       ),
     );
 
     $sections = array_merge($sections, $data);
 
-/*
-    $out = <x:frag />;
+    $out = array();
     foreach ($sections as $header => $map) {
-      $list = <table class="LConsoleRequestDict" />;
+      $rows = array();
       foreach ($map as $key => $value) {
-        if (!is_scalar($value)) {
-          $value = fb_json_encode($value);
-        }
-        $value = <text wrap="80">{$value}</text>;
-        $list->appendChild(
-          <tr><th>{$key}</th><td>{$value}</td></tr>);
+        $rows[] = array(
+          phutil_escape_html($key),
+          phutil_escape_html($value),
+        );
       }
-      $out->appendChild(
-        <x:frag>
-          <h1>{$header}</h1>
-          {$list}
-        </x:frag>);
+
+      $table = new AphrontTableView($rows);
+      $table->setHeaders(
+        array(
+          $header,
+          null,
+        ));
+      $table->setColumnClasses(
+        array(
+          'header',
+          'wide wrap',
+        ));
+      $out[] = $table->render();
     }
 
-    return $out;
-*/
-    return "REQUEST";
+    return implode("\n", $out);
   }
 }

@@ -16,29 +16,20 @@
  * limitations under the License.
  */
 
-class DarkConsoleController extends PhabricatorController {
+class DarkConsoleServicesPluginAPI {
 
-  protected $op;
-  protected $data;
+  const EVENT_QUERY   = 'query';
+  const EVENT_CONNECT = 'connect';
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  private static $events = array();
 
-    $visible = $request->getStr('visible');
-    if (strlen($visible)) {
-      $user->setConsoleVisible((int)$visible);
-      $user->save();
-      return new AphrontAjaxResponse();
-    }
+  public static function addEvent(array $event) {
+    self::$events[] = $event;
+  }
 
-    $tab = $request->getStr('tab');
-    if (strlen($tab)) {
-      $user->setConsoleTab($tab);
-      $user->save();
-      return new AphrontAjaxResponse();
-    }
-
+  public static function getEvents() {
+    return self::$events;
   }
 
 }
+

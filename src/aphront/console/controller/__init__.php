@@ -6,7 +6,8 @@
 
 
 
-phutil_require_module('phabricator', 'aphront/console/core');
+phutil_require_module('phabricator', 'aphront/response/ajax');
+phutil_require_module('phabricator', 'applications/base/controller/base');
 
 
 phutil_require_source('DarkConsoleController.php');

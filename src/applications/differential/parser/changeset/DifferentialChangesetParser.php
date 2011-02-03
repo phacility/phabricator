@@ -90,7 +90,8 @@ class DifferentialChangesetParser {
   public function setFilename($filename) {
     $this->filename = $filename;
     if (strpos($filename, '.', 1) !== false) {
-      $this->filetype = end(explode('.', $filename));
+      $parts = explode('.', $filename);
+      $this->filetype = end($parts);
     }
   }
 

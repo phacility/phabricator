@@ -44,3 +44,29 @@ a.dark-console-tab-selected {
 }
 
 
+.dark-console .aphront-table-view {
+  background: #888888;
+  color: #eeeeee;
+  margin: 1em 1%;
+  width: 98%;
+  border-color: #333333;
+}
+
+.dark-console .aphront-table-view th {
+  background: #333333;
+  color: #ffffff;
+}
+
+.dark-console .aphront-table-view td.header {
+  background: #444444;
+  color: #ffffff;
+  min-width: 200px;
+}
+
+.dark-console .aphront-table-view tr.alt {
+  background: #666666;
+}
+
+.dark-console .aphront-table-view tr.no-data td {
+  color: #dddddd;
+}

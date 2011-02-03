@@ -130,6 +130,8 @@ class AphrontDefaultApplicationConfiguration
       '/xhprof/' => array(
         'profile/(?<phid>[^/]+)/$' => 'PhabricatorXHProfProfileController',
       ),
+
+      '/~/' => 'DarkConsoleController',
     );
   }
 

@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 
+error_reporting(E_ALL | E_STRICT);
+
 $env = getenv('PHABRICATOR_ENV');
 if (!$env) {
   header('Content-Type: text/plain');
@@ -36,6 +38,10 @@ PhabricatorEnv::setEnvConfig($conf);
 
 phutil_require_module('phabricator', 'aphront/console/plugin/xhprof/api');
 DarkConsoleXHProfPluginAPI::hookProfiler();
+
+phutil_require_module('phabricator', 'aphront/console/plugin/errorlog/api');
+set_error_handler(array('DarkConsoleErrorLogPluginAPI', 'handleError'));
+set_exception_handler(array('DarkConsoleErrorLogPluginAPI', 'handleException'));
 
 $host = $_SERVER['HTTP_HOST'];
 $path = $_REQUEST['__path__'];
@@ -91,7 +97,7 @@ foreach ($headers as $header) {
 if (isset($_REQUEST['__profile__']) &&
     ($_REQUEST['__profile__'] == 'all')) {
   $profile = DarkConsoleXHProfPluginAPI::stopProfiler();
-  $profile = 
+  $profile =
     '<div style="text-align: center; background: #ff00ff; padding: 1em;
                  font-size: 24px; font-weight: bold;">'.
       '<a href="/xhprof/profile/'.$profile.'/">'.

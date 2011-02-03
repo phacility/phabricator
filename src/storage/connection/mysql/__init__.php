@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'aphront/console/plugin/services/api');
 phutil_require_module('phabricator', 'storage/connection/base');
 phutil_require_module('phabricator', 'storage/exception/base');
 phutil_require_module('phabricator', 'storage/exception/connection');

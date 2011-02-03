@@ -24,14 +24,14 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
   private $config;
   private $connection;
 
+  private static $connectionCache = array();
+
   public function __construct(array $configuration) {
     $this->configuration  = $configuration;
   }
 
   public function escapeString($string) {
-    if (!$this->connection) {
-      $this->establishConnection();
-    }
+    $this->requireConnection();
     return mysql_real_escape_string($string, $this->connection);
   }
 
@@ -92,6 +92,15 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
 
     $user = $this->getConfiguration('user');
     $host = $this->getConfiguration('host');
+    $database = $this->getConfiguration('database');
+
+    $key = "{$user}:{$host}:{$database}";
+    if (isset(self::$connectionCache[$key])) {
+      $this->connection = self::$connectionCache[$key];
+      return;
+    }
+
+    $start = microtime(true);
 
     $conn = @mysql_connect(
       $host,
@@ -108,11 +117,23 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
         "{$error}.");
     }
 
-    $ret = @mysql_select_db($this->getConfiguration('database'), $conn);
+    $ret = @mysql_select_db($database, $conn);
     if (!$ret) {
       $this->throwQueryException($conn);
     }
 
+    $end = microtime(true);
+
+    DarkConsoleServicesPluginAPI::addEvent(
+      array(
+        'event'     => DarkConsoleServicesPluginAPI::EVENT_CONNECT,
+        'host'      => $host,
+        'database'  => $database,
+        'start'     => $start,
+        'end'       => $end,
+      ));
+
+    self::$connectionCache[$key] = $conn;
     $this->connection = $conn;
   }
 
@@ -152,11 +173,19 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
     $retries = 3;
     while ($retries--) {
       try {
-        if (!$this->connection) {
-          $this->establishConnection();
-        }
+        $this->requireConnection();
 
+        $start = microtime(true);
         $result = mysql_query($raw_query, $this->connection);
+        $end = microtime(true);
+
+        DarkConsoleServicesPluginAPI::addEvent(
+          array(
+            'event' => DarkConsoleServicesPluginAPI::EVENT_QUERY,
+            'query' => $raw_query,
+            'start' => $start,
+            'end'   => $end,
+          ));
 
         if ($result) {
           $this->lastResult = $result;

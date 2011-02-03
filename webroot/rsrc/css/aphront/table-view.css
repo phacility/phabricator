@@ -70,6 +70,11 @@
   text-align:       right;
 }
 
+.aprhont-table-view td.wrap {
+  white-space:      normal;
+}
+
+
 .aphront-table-view tr.no-data td {
   padding:    1em;
   text-align: center;

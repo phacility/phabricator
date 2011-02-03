@@ -100,7 +100,7 @@ celerity_register_resource_map(array(
   ),
   'differential-revision-add-comment-css' =>
   array(
-    'uri' => '/res/d7f8719e/rsrc/css/application/differential/add-comment.css',
+    'uri' => '/res/9be761de/rsrc/css/application/differential/add-comment.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -136,7 +136,7 @@ celerity_register_resource_map(array(
   ),
   'differential-revision-comment-css' =>
   array(
-    'uri' => '/res/368bd612/rsrc/css/application/differential/revision-comment.css',
+    'uri' => '/res/274eb3f1/rsrc/css/application/differential/revision-comment.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -226,7 +226,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-dark-console' =>
   array(
-    'uri' => '/res/453503f4/rsrc/js/application/core/behavior-dark-console.js',
+    'uri' => '/res/35907b6e/rsrc/js/application/core/behavior-dark-console.js',
     'type' => 'js',
     'requires' =>
     array(

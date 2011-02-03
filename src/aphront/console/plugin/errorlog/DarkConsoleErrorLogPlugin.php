@@ -21,15 +21,12 @@ class DarkConsoleErrorLogPlugin extends DarkConsolePlugin {
   public function getName() {
     $count = count($this->getData());
 
-/*
     if ($count) {
       return
-        <x:frag>
-          <span style="color: #ff0000;">&bull;</span> Error Log ({$count})
-        </x:frag>;
+        '<span style="color: #ff0000;">&bull;</span> '.
+        "Error Log ({$count})";
     }
 
-*/
     return 'Error Log';
   }
 
@@ -40,36 +37,51 @@ class DarkConsoleErrorLogPlugin extends DarkConsolePlugin {
 
 
   public function generateData() {
-/*
-    $stub = tabconsole();
-    if (!$stub) {
-      return array();
-    }
-
-    $errors = $stub->getErrors();
-
-    $data = array();
-    foreach ($errors as $error) {
-      if (is_array($error)) {
-        list($err, $trace) = $error;
-        $trace = implode("\n", $trace);
-      } else {
-        $err = $error->getMessage();
-        $trace = $error->getTraceAsString();
-      }
-      $data[] = array(
-        'error' => $err,
-        'trace' => $trace,
-      );
-    }
-    return $data;
-*/
+    return DarkConsoleErrorLogPluginAPI::getErrors();
   }
 
 
   public function render() {
 
-    return '!!';
+    $data = $this->getData();
+
+    $rows = array();
+    foreach ($data as $row) {
+      switch ($row['event']) {
+        case 'error':
+          $file = $row['file'];
+          $line = $row['line'];
+          break;
+        case 'exception':
+          $file = $row['exception']->getFile();
+          $line = $row['exception']->getLine();
+          break;
+      }
+
+
+      $rows[] = array(
+        basename($file).':'.$line,
+        $row['str'],
+      );
+    }
+
+    $table = new AphrontTableView($rows);
+    $table->setColumnClasses(
+      array(
+        null,
+        'wide wrap',
+      ));
+    $table->setHeaders(
+      array(
+        'File',
+        'Error',
+      ));
+    $table->setNoDataString('No errors.');
+
+    return $table->render();
+  }
+}
+
 /*
     $data = $this->getData();
     if (!$data) {
@@ -124,6 +136,3 @@ class DarkConsoleErrorLogPlugin extends DarkConsolePlugin {
         <div class="LConsoleErrors">{$markup}</div>
       </x:frag>;
 */
-  }
-
-}

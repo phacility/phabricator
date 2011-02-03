@@ -28,12 +28,53 @@ class DarkConsoleServicesPlugin extends DarkConsolePlugin {
     return 'Information about services.';
   }
 
-  public function willShutdown() {
-//    $this->observations = cacheobserver();
+  public function generateData() {
+    return DarkConsoleServicesPluginAPI::getEvents();
   }
 
   public function render() {
-    return '!';
+    $data = $this->getData();
+
+    $rows = array();
+    foreach ($data as $row) {
+
+      switch ($row['event']) {
+        case DarkConsoleServicesPluginAPI::EVENT_QUERY:
+          $info = $row['query'];
+          $info = phutil_escape_html($info);
+          break;
+        case DarkConsoleServicesPluginAPI::EVENT_CONNECT:
+          $info = $row['host'].':'.$row['database'];
+          $info = phutil_escape_html($info);
+
+          break;
+        default:
+          $info = '-';
+          break;
+      }
+
+      $rows[] = array(
+        $row['event'],
+        number_format(1000000 * ($row['end'] - $row['start'])).' us',
+        $info,
+      );
+    }
+
+    $table = new AphrontTableView($rows);
+    $table->setColumnClasses(
+      array(
+        null,
+        'n',
+        'wide wrap',
+      ));
+    $table->setHeaders(
+      array(
+        'Event',
+        'Duration',
+        'Details',
+      ));
+
+    return $table->render();
   }
 }
 
