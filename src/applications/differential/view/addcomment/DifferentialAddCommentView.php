@@ -72,13 +72,18 @@ final class DifferentialAddCommentView extends AphrontView {
         id(new AphrontFormSubmitControl())
           ->setValue('Comment'));
 
+    $rev_id = $revision->getID();
+
     Javelin::initBehavior(
       'differential-feedback-preview',
       array(
-        'uri'     => '/differential/comment/preview/'.$revision->getID().'/',
-        'preview' => 'comment-preview',
-        'action'  => 'comment-action',
-        'content' => 'comment-content',
+        'uri'       => '/differential/comment/preview/'.$rev_id.'/',
+        'preview'   => 'comment-preview',
+        'action'    => 'comment-action',
+        'content'   => 'comment-content',
+
+        'inlineuri' => '/differential/comment/inline/preview/'.$rev_id.'/',
+        'inline'    => 'inline-comment-preview',
       ));
 
     return
@@ -92,6 +97,8 @@ final class DifferentialAddCommentView extends AphrontView {
             '<span class="differential-loading-text">'.
               'Loading comment preview...'.
             '</span>'.
+          '</div>'.
+          '<div id="inline-comment-preview">'.
           '</div>'.
         '</div>'.
       '</div>';

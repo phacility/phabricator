@@ -46,6 +46,8 @@ class DifferentialRevisionViewController extends DifferentialController {
       $this->getImplicitComments($revision),
       $comments);
 
+    $inlines = $this->loadInlineComments($comments, $changesets);
+
     $object_phids = array_merge(
       $revision->getReviewers(),
       $revision->getCCPHIDs(),
@@ -54,6 +56,7 @@ class DifferentialRevisionViewController extends DifferentialController {
         $request->getUser()->getPHID(),
       ),
       mpull($comments, 'getAuthorPHID'));
+    $object_phids = array_unique($object_phids);
 
     $handles = id(new PhabricatorObjectHandleData($object_phids))
       ->loadHandles();
@@ -70,6 +73,8 @@ class DifferentialRevisionViewController extends DifferentialController {
     $comment_view = new DifferentialRevisionCommentListView();
     $comment_view->setComments($comments);
     $comment_view->setHandles($handles);
+    $comment_view->setInlineComments($inlines);
+    $comment_view->setChangesets($changesets);
 
     $diff_history = new DifferentialRevisionUpdateHistoryView();
     $diff_history->setDiffs($diffs);
@@ -265,6 +270,46 @@ class DifferentialRevisionViewController extends DifferentialController {
     $actions[DifferentialAction::ACTION_ADDREVIEWERS] = true;
 
     return array_keys($actions);
+  }
+
+  private function loadInlineComments(array $comments, array &$changesets) {
+
+    $inline_comments = array();
+
+    $comment_ids = array_filter(mpull($comments, 'getID'));
+    if (!$comment_ids) {
+      return $inline_comments;
+    }
+
+    $inline_comments = id(new DifferentialInlineComment())
+      ->loadAllWhere(
+        'commentID in (%Ld)',
+        $comment_ids);
+
+    $load_changesets = array();
+    foreach ($inline_comments as $inline) {
+      $changeset_id = $inline->getChangesetID();
+      if (isset($changesets[$changeset_id])) {
+        continue;
+      }
+      $load_changesets[$changeset_id] = true;
+    }
+
+    $more_changesets = array();
+    if ($load_changesets) {
+      $changeset_ids = array_keys($load_changesets);
+      $more_changesets += id(new DifferentialChangeset())
+        ->loadAllWhere(
+          'id IN (%Ld)',
+          $changeset_ids);
+    }
+
+    if ($more_changesets) {
+      $changesets += $more_changesets;
+      $changesets = msort($changesets, 'getSortKey');
+    }
+
+    return $inline_comments;
   }
 
 }

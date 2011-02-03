@@ -22,6 +22,8 @@ final class DifferentialRevisionCommentView extends AphrontView {
   private $handles;
   private $markupEngine;
   private $preview;
+  private $inlines;
+  private $changesets;
 
   public function setComment($comment) {
     $this->comment = $comment;
@@ -40,6 +42,17 @@ final class DifferentialRevisionCommentView extends AphrontView {
 
   public function setPreview($preview) {
     $this->preview = $preview;
+    return $this;
+  }
+
+  public function setInlineComments(array $inline_comments) {
+    $this->inlines = $inline_comments;
+    return $this;
+  }
+
+  public function setChangesets(array $changesets) {
+    // Ship these in sorted by getSortKey() and keyed by ID... or else!
+    $this->changesets = $changesets;
     return $this;
   }
 
@@ -91,6 +104,67 @@ final class DifferentialRevisionCommentView extends AphrontView {
         '</div>';
     }
 
+    if ($this->inlines) {
+      $inline_render = array();
+      $inlines = $this->inlines;
+      $changesets = $this->changesets;
+      $inlines_by_changeset = mgroup($inlines, 'getChangesetID');
+      $inlines_by_changeset = array_select_keys(
+        $inlines_by_changeset,
+        array_keys($this->changesets));
+      $inline_render[] = '<table class="differential-inline-summary">';
+      foreach ($inlines_by_changeset as $changeset_id => $inlines) {
+        $changeset = $changesets[$changeset_id];
+        $inlines = msort($inlines, 'getLineNumber');
+        $inline_render[] =
+          '<tr>'.
+            '<th colspan="2">'.
+              $changeset->getFileName().
+            '</th>'.
+          '</tr>';
+        foreach ($inlines as $inline) {
+          if (!$inline->getLineLength()) {
+            $lines = $inline->getLineNumber();
+          } else {
+            $lines = $inline->getLineNumber()."\xE2\x80\x93".
+                     ($inline->getLineNumber() + $inline->getLineLength());
+          }
+
+          $lines = phutil_render_tag(
+            'a',
+            array(
+              'href' => '#',
+              'class' => 'num',
+            ),
+            $lines);
+
+          $content = $inline->getCache();
+          if (!strlen($content)) {
+            $content = $this->markupEngine->markupText($content);
+            if ($inline->getID()) {
+              $inline->setCache($content);
+              $inline->save();
+            }
+          }
+
+          $inline_render[] =
+            '<tr>'.
+              '<td class="inline-line-number">'.$lines.'</td>'.
+              '<td>'.$content.'</td>'.
+            '</tr>';
+        }
+      }
+      $inline_render[] = '</table>';
+      $inline_render = implode("\n", $inline_render);
+      $inline_render =
+        '<div class="differential-inline-summary-section">'.
+          'Inline Comments'.
+        '</div>'.
+        $inline_render;
+    } else {
+      $inline_render = null;
+    }
+
     $background = null;
     $uri = $author->getImageURI();
     if ($uri) {
@@ -104,10 +178,11 @@ final class DifferentialRevisionCommentView extends AphrontView {
           '<div class="differential-comment-title">'.$title.'</div>'.
         '</div>'.
         '<div class="differential-comment-body" style="'.$background.'">'.
-          '<div class="differential-comment-core">'.
-            '<div class="differential-comment-content">'.
+          '<div class="differential-comment-content">'.
+            '<div class="differential-comment-core">'.
               $content.
             '</div>'.
+            $inline_render.
           '</div>'.
         '</div>'.
       '</div>';

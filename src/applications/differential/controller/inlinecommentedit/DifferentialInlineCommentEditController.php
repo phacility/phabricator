@@ -88,6 +88,7 @@ class DifferentialInlineCommentEditController extends DifferentialController {
         if ($request->isFormPost()) {
           if (strlen($text)) {
             $inline->setContent($text);
+            $inline->setCache(null);
             $inline->save();
             return $this->buildRenderedCommentResponse(
               $inline,

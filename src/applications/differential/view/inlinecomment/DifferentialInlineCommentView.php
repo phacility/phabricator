@@ -109,7 +109,16 @@ final class DifferentialInlineCommentView extends AphrontView {
       $links = null;
     }
 
-    $content = $this->markupEngine->markupText($content);
+    $cache = $inline->getCache();
+    if (strlen($cache)) {
+      $content = $cache;
+    } else {
+      $content = $this->markupEngine->markupText($content);
+      if ($inline->getID()) {
+        $inline->setCache($content);
+        $inline->save();
+      }
+    }
 
     $markup = javelin_render_tag(
       'div',

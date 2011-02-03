@@ -90,7 +90,8 @@ class AphrontDefaultApplicationConfiguration
           'preview/(?<id>\d+)/$' => 'DifferentialCommentPreviewController',
           'save/$' => 'DifferentialCommentSaveController',
           'inline/' => array(
-            'preview/$' => 'DifferentialInlineCommentPreviewController',
+            'preview/(?<id>\d+)/$' =>
+              'DifferentialInlineCommentPreviewController',
             'edit/(?<id>\d+)/$' => 'DifferentialInlineCommentEditController',
           ),
         ),

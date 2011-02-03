@@ -497,7 +497,7 @@ class DifferentialRevisionEditor {
     array $rem_phids,
     array $add_phids,
     $reason_phid) {
-      
+
     $rem_map = array_fill_keys($rem_phids, true);
     $add_map = array_fill_keys($add_phids, true);
 
@@ -516,7 +516,7 @@ class DifferentialRevisionEditor {
 
     $raw = $revision->getRawRelations(DifferentialRevision::RELATION_REVIEWER);
     $raw = ipull($raw, null, 'objectPHID');
-    
+
     $sequence = count($seq_map);
     foreach ($raw as $phid => $relation) {
       if (isset($seq_map[$phid])) {
@@ -540,7 +540,7 @@ class DifferentialRevisionEditor {
         'reasonPHID'  => $reason_phid,
       );
     }
-    
+
     $conn_w = $revision->establishConnection('w');
 
     $sql = array();

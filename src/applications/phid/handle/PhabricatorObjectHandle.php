@@ -57,7 +57,7 @@ class PhabricatorObjectHandle {
     $this->fullName = $full_name;
     return $this;
   }
-  
+
   public function getFullName() {
     return $this->fullName;
   }

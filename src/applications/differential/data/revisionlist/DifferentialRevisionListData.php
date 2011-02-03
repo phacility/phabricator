@@ -107,7 +107,6 @@ class DifferentialRevisionListData {
            SELECT revision.* FROM %T revision JOIN %T relationship
             ON relationship.revisionID = revision.id
               AND relationship.relation = %s
-              AND relationship.forbidden = 0
             WHERE relationship.objectPHID IN (%Ls)
               AND revision.status in (%Ld)
 
@@ -143,7 +142,6 @@ class DifferentialRevisionListData {
           SELECT revision.* FROM %T revision JOIN %T relationship
            ON relationship.revisionID = revision.id
             AND relationship.relation = %s
-            AND relationship.forbidden = 0
           WHERE relationship.objectPHID IN (%Ls)
             AND revision.status in (%Ld)
 
@@ -202,7 +200,6 @@ class DifferentialRevisionListData {
         FROM %T revision LEFT JOIN %T relationship
         ON revision.id = relationship.revisionID
         AND relationship.relation = %s
-        AND relationship.forbidden = 0
         WHERE '.$pattern.'
         GROUP BY revision.id '.$this->getOrderClause();
 
@@ -241,7 +238,6 @@ class DifferentialRevisionListData {
       'SELECT revision.* FROM %T revision
         JOIN %T relationship ON relationship.revisionID = revision.id
           AND relationship.relation = %s
-          AND relationship.forbidden = 0
           AND relationship.objectPHID in (%Ls)
         WHERE revision.status in (%Ld) %Q',
       $revision->getTableName(),

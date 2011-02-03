@@ -241,15 +241,13 @@ class DifferentialCommentEditor {
     // Reload relationships to pick up any reviewer changes.
     $revision->loadRelationships();
 
-/*
-  TODO
-
     $inline_comments = array();
     if ($this->attachInlineComments) {
-      $inline_comments = id(new DifferentialInlineComment())
-        ->loadAllUnsaved($revision, $this->actorPHID);
+      $inline_comments = id(new DifferentialInlineComment())->loadAllWhere(
+        'authorPHID = %s AND revisionID = %d AND commentID IS NULL',
+        $this->actorPHID,
+        $revision->getID());
     }
-*/
 
     $comment = id(new DifferentialComment())
       ->setAuthorPHID($this->actorPHID)
@@ -258,11 +256,11 @@ class DifferentialCommentEditor {
       ->setContent((string)$this->message)
       ->save();
 
-/*
-    $diff = id(new Diff())->loadActiveWithRevision($revision);
-    $changesets = id(new DifferentialChangeset())->loadAllWithDiff($diff);
+//    $diff = id(new Diff())->loadActiveWithRevision($revision);
+//    $changesets = id(new DifferentialChangeset())->loadAllWithDiff($diff);
 
     if ($inline_comments) {
+/*
       // We may have feedback on non-current changesets. Rather than orphaning
       // it, just submit it. This is non-ideal but not horrible.
       $inline_changeset_ids = array_pull($inline_comments, 'getChangesetID');
@@ -275,12 +273,12 @@ class DifferentialCommentEditor {
       if ($load) {
         $changesets += id(new DifferentialChangeset())->loadAllWithIDs($load);
       }
+*/
       foreach ($inline_comments as $inline) {
-        $inline->setFeedbackID($feedback->getID());
+        $inline->setCommentID($comment->getID());
         $inline->save();
       }
     }
-*/
 
     id(new DifferentialCommentMail(
       $revision,

@@ -21,3 +21,10 @@
 .differential-comment-preview .differential-loading-text {
   color: #aaaaaa;
 }
+
+#inline-comment-preview {
+  margin-left: 60px;
+
+  width: 88ex;
+  width: 81ch;
+}

@@ -133,7 +133,6 @@ class DifferentialRevisionListController extends DifferentialController {
           ON revision.id = relationship.revisionID
           WHERE revision.id IN (%Ld)
             AND relationship.relation = %s
-            AND relationship.forbidden = 0
           ORDER BY sequence',
         $rev->getTableName(),
         DifferentialRevision::RELATIONSHIP_TABLE,

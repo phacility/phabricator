@@ -47,4 +47,20 @@ JX.behavior('differential-feedback-preview', function(config) {
   JX.DOM.listen(action,  'change',  null, check);
 
   check();
+
+
+  function refreshInlinePreview() {
+    new JX.Request(config.inlineuri, function(r) {
+        JX.DOM.setContent(JX.$(config.inline), JX.HTML(r));
+      })
+      .setTimeout(5000)
+      .send();
+  }
+
+  JX.Stratcom.listen(
+    'differential-inline-comment-update',
+    null,
+    refreshInlinePreview);
+
+  refreshInlinePreview();
 });

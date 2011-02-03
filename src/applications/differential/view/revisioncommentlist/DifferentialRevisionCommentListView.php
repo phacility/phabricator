@@ -20,14 +20,26 @@ final class DifferentialRevisionCommentListView extends AphrontView {
 
   private $comments;
   private $handles;
+  private $inlines;
+  private $changesets;
 
-  public function setComments($comments) {
+  public function setComments(array $comments) {
     $this->comments = $comments;
+    return $this;
+  }
+
+  public function setInlineComments(array $inline_comments) {
+    $this->inlines = $inline_comments;
     return $this;
   }
 
   public function setHandles(array $handles) {
     $this->handles = $handles;
+    return $this;
+  }
+
+  public function setChangesets(array $changesets) {
+    $this->changesets = $changesets;
     return $this;
   }
 
@@ -38,12 +50,17 @@ final class DifferentialRevisionCommentListView extends AphrontView {
     $factory = new DifferentialMarkupEngineFactory();
     $engine = $factory->newDifferentialCommentMarkupEngine();
 
+    $inlines = mgroup($this->inlines, 'getCommentID');
+
+
     $comments = array();
     foreach ($this->comments as $comment) {
       $view = new DifferentialRevisionCommentView();
       $view->setComment($comment);
       $view->setHandles($this->handles);
       $view->setMarkupEngine($engine);
+      $view->setInlineComments(idx($inlines, $comment->getID(), array()));
+      $view->setChangesets($this->changesets);
 
       $comments[] = $view->render();
     }

@@ -104,7 +104,7 @@ class DifferentialRevision extends DifferentialDAO {
     if ($this->relationships === null) {
       throw new Exception("Must load relationships!");
     }
-    
+
     return ipull($this->getRawRelations($relation), 'objectPHID');
   }
 
