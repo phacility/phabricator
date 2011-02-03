@@ -58,6 +58,13 @@ class DifferentialChangesetParser {
   const WHITESPACE_IGNORE_TRAILING  = 'ignore-trailing';
   const WHITESPACE_IGNORE_ALL       = 'ignore-all';
 
+  public function setRightSideCommentMapping($id, $is_new) {
+
+  }
+
+  public function setLeftSideCommentMapping($id, $is_new) {
+
+  }
 
   public function setChangeset($changeset) {
     $this->changeset = $changeset;

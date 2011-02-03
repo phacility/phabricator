@@ -37,10 +37,16 @@ class DifferentialRevisionViewController extends DifferentialController {
 
     $diffs = $revision->loadDiffs();
 
-    $diff_vs = null;
+    $diff_vs = $request->getInt('vs');
     $target = end($diffs);
 
-    $changesets = $target->loadChangesets();
+    $diffs = mpull($diffs, null, 'getID');
+    if (empty($diffs[$diff_vs])) {
+      $diff_vs = null;
+    }
+
+    list($changesets, $vs_map) =
+      $this->loadChangesetsAndVsMap($diffs, $diff_vs, $target);
 
     $comments = $revision->loadComments();
     $comments = array_merge(
@@ -89,6 +95,7 @@ class DifferentialRevisionViewController extends DifferentialController {
     $changeset_view->setChangesets($changesets);
     $changeset_view->setEditable(true);
     $changeset_view->setRevision($revision);
+    $changeset_view->setVsMap($vs_map);
 
     $comment_form = new DifferentialAddCommentView();
     $comment_form->setRevision($revision);
@@ -315,6 +322,44 @@ class DifferentialRevisionViewController extends DifferentialController {
     return $inline_comments;
   }
 
+  private function loadChangesetsAndVsMap(array $diffs, $diff_vs, $target) {
+    $load_ids = array();
+    if ($diff_vs) {
+      $load_ids[] = $diff_vs;
+    }
+    $load_ids[] = $target->getID();
+
+    $raw_changesets = id(new DifferentialChangeset())
+      ->loadAllWhere(
+        'diffID IN (%Ld)',
+        $load_ids);
+    $changeset_groups = mgroup($raw_changesets, 'getDiffID');
+
+    $changesets = idx($changeset_groups, $target->getID(), array());
+    $changesets = mpull($changesets, null, 'getID');
+
+    $vs_map = array();
+    if ($diff_vs) {
+      $vs_changesets = idx($changeset_groups, $diff_vs, array());
+      $vs_changesets = mpull($vs_changesets, null, 'getFilename');
+      foreach ($changesets as $key => $changeset) {
+        $file = $changeset->getFilename();
+        if (isset($vs_changesets[$file])) {
+          $vs_map[$changeset->getID()] = $vs_changesets[$file]->getID();
+          unset($vs_changesets[$file]);
+        }
+      }
+      foreach ($vs_changesets as $changeset) {
+        $changesets[$changeset->getID()] = $changeset;
+        $vs_map[$changeset->getID()] = -1;
+      }
+    }
+
+    $changesets = msort($changesets, 'getSortKey');
+
+    return array($changesets, $vs_map);
+  }
+
 }
 /*
 
@@ -417,16 +462,6 @@ class DifferentialRevisionViewController extends DifferentialController {
       }
     }
 
-    $reviewer_links = array();
-    foreach ($revision->getReviewers() as $reviewer) {
-      $reviewer_links[] = <tools:handle handle={$handles[$reviewer]}
-                                          link={true} />;
-    }
-    if ($reviewer_links) {
-      $fields['Reviewers'] = array_implode(', ', $reviewer_links);
-    } else {
-      $fields['Reviewers'] = <em>None</em>;
-    }
 
     $ccs = $revision->getCCFBIDs();
     if ($ccs) {
@@ -777,68 +812,8 @@ class DifferentialRevisionViewController extends DifferentialController {
       $changesets = id(new DifferentialChangeset())->loadAllFromArray($objects);
     }
 
-    $against_warn = null;
-    $against_map = array();
-    $visible_changesets = array();
-    if ($old) {
-      $old_diff = $diffs[$old];
-      $new_diff = $diff;
-      $old_path = $old_diff->getSourcePath();
-      $new_path = $new_diff->getSourcePath();
-
-      $old_prefix = null;
-      $new_prefix = null;
-      if ((strlen($old_path) < strlen($new_path)) &&
-          (!strncmp($old_path, $new_path, strlen($old_path)))) {
-        $old_prefix = substr($new_path, strlen($old_path));
-      }
-      if ((strlen($new_path) < strlen($old_path)) &&
-          (!strncmp($old_path, $new_path, strlen($new_path)))) {
-        $new_prefix = substr($old_path, strlen($new_path));
-      }
-
-      $old_changesets = id(new DifferentialChangeset())
-        ->loadAllFromArray($raw_objects[$old]);
-      $old_changesets = array_pull($old_changesets, null, 'getFilename');
-      if ($new_prefix) {
-        $rekeyed_map = array();
-        foreach ($old_changesets as $key => $value) {
-          $rekeyed_map[$new_prefix.$key] = $value;
-        }
-        $old_changesets = $rekeyed_map;
-      }
-
-      foreach ($changesets as $key => $changeset) {
-        $file = $old_prefix.$changeset->getFilename();
-        if (isset($old_changesets[$file])) {
-          $checksum = $changeset->getChecksum();
-          if ($checksum !== null &&
-              $checksum == $old_changesets[$file]->getChecksum()) {
-            unset($changesets[$key]);
-            unset($old_changesets[$file]);
-          } else {
-            $against_map[$changeset->getID()] = $old_changesets[$file]->getID();
-            unset($old_changesets[$file]);
-          }
-        }
-      }
-
-      foreach ($old_changesets as $changeset) {
-        $changesets[$changeset->getID()] = $changeset;
-        $against_map[$changeset->getID()] = -1;
-      }
-
-      $against_warn =
-        <tools:notice title="NOTE - Diff of Diffs">
-          You are viewing a synthetic diff between two previous diffs in this
-          revision. You can not add new inline comments (for now).
-        </tools:notice>;
-    } else {
-      $visible_changesets = array_pull($changesets, 'getID');
-    }
 
     $changesets = array_psort($changesets, 'getSortKey');
-    $all_changesets = $changesets;
 
     $warning = null;
     $limit = 100;

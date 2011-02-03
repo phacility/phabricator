@@ -21,6 +21,7 @@ class DifferentialChangesetListView extends AphrontView {
   private $changesets = array();
   private $editable;
   private $revision;
+  private $vsMap;
 
   public function setChangesets($changesets) {
     $this->changesets = $changesets;
@@ -37,48 +38,39 @@ class DifferentialChangesetListView extends AphrontView {
     return $this;
   }
 
+  public function setVsMap(array $vs_map) {
+    $this->vsMap = $vs_map;
+    return $this;
+  }
+
   public function render() {
     require_celerity_resource('differential-changeset-view-css');
 
-    $against = array(); // TODO
-    $edit    = false;
-
+    $vs_map = $this->vsMap;
     $changesets = $this->changesets;
-    foreach ($changesets as $key => $changeset) {
-      if (empty($against[$changeset->getID()])) {
-        $type = $changeset->getChangeType();
-        if ($type == DifferentialChangeType::TYPE_MOVE_AWAY ||
-            $type == DifferentialChangeType::TYPE_MULTICOPY) {
-          unset($changesets[$key]);
-        }
-      }
-    }
 
     $output = array();
     $mapping = array();
     foreach ($changesets as $key => $changeset) {
       $file = $changeset->getFilename();
       $class = 'differential-changeset';
-      if (!$edit) {
+      if (!$this->editable) {
         $class .= ' differential-changeset-noneditable';
       }
       $id = $changeset->getID();
       if ($id) {
-        $against_id = idx($against, $id);
+        $vs_id = idx($vs_map, $id);
       } else {
-        $against_id = null;
+        $vs_id = null;
       }
 
-/*
-      TODO
-      $detail_uri = URI($render_uri)
-        ->addQueryData(array(
-          'changeset'   => $id,
-          'against'     => $against_id,
-          'whitespace'  => $whitespace,
+      $detail_uri = new PhutilURI('/differential/changeset/');
+      $detail_uri->setQueryParams(
+        array(
+          'id'          => $id,
+          'vs'          => $vs_id,
+          'whitespace'  => 'TODO',
         ));
-*/
-      $detail_uri = '/differential/changeset/?id='.$changeset->getID();
 
       $detail_button = phutil_render_tag(
         'a',
@@ -104,7 +96,9 @@ class DifferentialChangesetListView extends AphrontView {
           '<div class="differential-loading">Loading...</div>'));
       $output[] = $detail->render();
 
-      $mapping[$uniq_id] = array($changeset->getID());
+      $mapping[$uniq_id] = array(
+        $changeset->getID(),
+        $vs_id);
     }
 
     $whitespace = null;

@@ -22,15 +22,91 @@ class DifferentialChangesetViewController extends DifferentialController {
   public function processRequest() {
     $request = $this->getRequest();
 
-    $id = $request->getStr('id');
     $author_phid = $request->getUser()->getPHID();
+
+    $id = $request->getStr('id');
+    $vs = $request->getInt('vs');
+
 
     $changeset = id(new DifferentialChangeset())->load($id);
     if (!$changeset) {
       return new Aphront404Response();
     }
 
-    $changeset->attachHunks($changeset->loadHunks());
+    if ($vs && ($vs != -1)) {
+      $vs_changeset = id(new DifferentialChangeset())->load($vs);
+      if (!$vs_changeset) {
+        return new Aphront404Response();
+      }
+    }
+
+    if (!$vs) {
+      $right = $changeset;
+      $left  = null;
+
+      $right_source = $right->getID();
+      $right_new = true;
+      $left_source = $right->getID();
+      $left_new = false;
+    } else if ($vs == -1) {
+      $right = null;
+      $left = $changeset;
+
+      $right_source = $left->getID();
+      $right_new = false;
+      $left_source = $left->getID();
+      $left_new = true;
+    } else {
+      $right = $changeset;
+      $left = $vs_changeset;
+
+      $right_source = $right->getID();
+      $right_new = true;
+      $left_source = $left->getID();
+      $left_new = true;
+    }
+
+    if ($left) {
+      $left->attachHunks($left->loadHunks());
+    }
+
+    if ($right) {
+      $right->attachHunks($right->loadHunks());
+    }
+
+    if ($left) {
+
+      $left_data = $left->makeNewFile();
+      if ($right) {
+        $right_data = $right->makeNewFile();
+      } else {
+        $right_data = $left->makeOldFile();
+      }
+
+      $left_tmp = new TempFile();
+      $right_tmp = new TempFile();
+      Filesystem::writeFile($left_tmp, $left_data);
+      Filesystem::writeFile($right_tmp, $right_data);
+      list($err, $stdout) = exec_manual(
+        '/usr/bin/diff -U65535 %s %s',
+        $left_tmp,
+        $right_tmp);
+
+      $choice = nonempty($left, $right);
+      if ($stdout) {
+        $parser = new ArcanistDiffParser();
+        $changes = $parser->parseDiff($stdout);
+        $diff = DifferentialDiff::newFromRawChanges($changes);
+        $changesets = $diff->getChangesets();
+        $first = reset($changesets);
+        $choice->attachHunks($first->getHunks());
+      } else {
+        $choice->attachHunks(array());
+      }
+
+      $changeset = $choice;
+      $changeset->setID(null);
+    }
 
     $range_s = null;
     $range_e = null;
@@ -54,6 +130,8 @@ class DifferentialChangesetViewController extends DifferentialController {
 
     $parser = new DifferentialChangesetParser();
     $parser->setChangeset($changeset);
+    $parser->setRightSideCommentMapping($right_source, $right_new);
+    $parser->setLeftSideCommentMapping($left_source, $left_new);
 
     $phids = array();
     $inlines = $this->loadInlineComments($id, $author_phid);

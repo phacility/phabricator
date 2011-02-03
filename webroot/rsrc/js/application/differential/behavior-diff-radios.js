@@ -6,7 +6,7 @@
 JX.behavior('differential-diff-radios', function(config) {
   JX.Stratcom.listen(
     'click',
-    'new-radio',
+    'differential-new-radio',
     function(e) {
       var target = e.getTarget();
       var adjust;
@@ -14,7 +14,7 @@ JX.behavior('differential-diff-radios', function(config) {
       var reset = false;
       for (var ii = 0; ii < config.radios.length; ii++) {
         node = JX.$(config.radios[ii]);
-        if (node.value >= target.value) {
+        if (parseInt(node.value, 10) >= parseInt(target.value, 10)) {
           if (node.checked) {
             node.checked = false;
             reset = true;

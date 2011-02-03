@@ -26,6 +26,12 @@ class DifferentialRevisionEditController extends DifferentialController {
 
   public function processRequest() {
 
+    $request = $this->getRequest();
+
+    if (!$this->id) {
+      $this->id = $request->getInt('revisionID');
+    }
+
     if ($this->id) {
       $revision = id(new DifferentialRevision())->load($this->id);
       if (!$revision) {
@@ -35,7 +41,6 @@ class DifferentialRevisionEditController extends DifferentialController {
       $revision = new DifferentialRevision();
     }
 
-    $request = $this->getRequest();
     $diff_id = $request->getInt('diffID');
     if ($diff_id) {
       $diff = id(new DifferentialDiff())->load($diff_id);

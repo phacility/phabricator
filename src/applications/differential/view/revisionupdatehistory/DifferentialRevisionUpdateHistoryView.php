@@ -69,17 +69,37 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
 
     $idx = 0;
     $rows = array();
+    $disable = false;
+    $radios = array();
     foreach ($data as $row) {
 
       $name = phutil_escape_html($row['name']);
       $id   = phutil_escape_html($row['id']);
 
-      $radios = array();
       $lint = '*';
       $unit = '*';
 
       $old_class = null;
       $new_class = null;
+
+      if ($id) {
+        $new_checked = ($this->selectedDiffID == $id);
+        $new = javelin_render_tag(
+          'input',
+          array(
+            'type' => 'radio',
+            'name' => 'id',
+            'value' => $id,
+            'checked' => $new_checked ? 'checked' : null,
+            'sigil' => 'differential-new-radio',
+          ));
+        if ($new_checked) {
+          $new_class = " revhistory-new-now";
+          $disable = true;
+        }
+      } else {
+        $new = null;
+      }
 
       if ($max_id != $id) {
         $uniq = celerity_generate_unique_node_id();
@@ -89,9 +109,10 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
           array(
             'type' => 'radio',
             'name' => 'vs',
-            'value' => '0',
+            'value' => $id,
             'id' => $uniq,
             'checked' => $old_checked ? 'checked' : null,
+            'disabled' => $disable ? 'disabled' : null,
           ));
         $radios[] = $uniq;
         if ($old_checked) {
@@ -100,30 +121,6 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       } else {
         $old = null;
       }
-
-      if ($id) {
-        $new_checked = ($this->selectedDiffID == $id);
-        $new = phutil_render_tag(
-          'input',
-          array(
-            'type' => 'radio',
-            'name' => 'id',
-            'value' => $id,
-            'checked' => $new_checked ? 'checked' : null,
-          ));
-        if ($new_checked) {
-          $new_class = " revhistory-new-now";
-        }
-      } else {
-        $new = null;
-      }
-
-      Javelin::initBehavior(
-        'differential-diff-radios',
-        array(
-          'radios' => $radios,
-        ));
-
 
       $desc = 'TODO';
       $age = '-';
@@ -146,6 +143,12 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
           '<td class="revhistory-new'.$new_class.'">'.$new.'</td>'.
         '</tr>';
     }
+
+      Javelin::initBehavior(
+        'differential-diff-radios',
+        array(
+          'radios' => $radios,
+        ));
 
     $select = '<select><option>Ignore All</option></select>';
 

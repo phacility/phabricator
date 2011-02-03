@@ -65,6 +65,12 @@ select, input, button, textarea, button {
   font: 99% 'lucida grande', tahoma, verdana, arial, clean, sans-serif;
 }
 
+select {
+  /* NOTE: In Safari, specifying a border color makes the browser respect
+     "font-size" settings. */
+  border: 1px solid #999999;
+}
+
 table {
   font-size: inherit;
   font: 100%;
