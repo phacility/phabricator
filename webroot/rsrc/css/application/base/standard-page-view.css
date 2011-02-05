@@ -49,3 +49,10 @@
 .phabricator-login-details {
   float: right;
 }
+
+.phabricator-page-foot {
+  text-align: right;
+  padding: .5em 1em;
+  font-size: 11px; 
+  color: #f3f3f3;
+}

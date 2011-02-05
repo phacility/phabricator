@@ -43,6 +43,10 @@ abstract class AphrontApplicationConfiguration {
   final public function getConsole() {
     return $this->console;
   }
+  
+  final public function setConsole($console) {
+    $this->console = $console;
+  }
 
   final public function buildController() {
     $map = $this->getURIMap();
@@ -80,7 +84,6 @@ abstract class AphrontApplicationConfiguration {
   }
 
   final public function willBuildRequest() {
-    $this->console = new DarkConsoleCore();
   }
 
 }

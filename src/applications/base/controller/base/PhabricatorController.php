@@ -46,6 +46,14 @@ abstract class PhabricatorController extends AphrontController {
     }
 
     $request->setUser($user);
+    
+    if (PhabricatorEnv::getEnvConfig('darkconsole.enabled')) {
+      if ($user->getConsoleEnabled() ||
+          PhabricatorEnv::getEnvConfig('darkconsole.always-on')) {
+        $console = new DarkConsoleCore();
+        $request->getApplicationConfiguration()->setConsole($console);
+      }
+    }
 
     if ($this->shouldRequireLogin() && !$user->getPHID()) {
       throw new AphrontRedirectException('/login/');

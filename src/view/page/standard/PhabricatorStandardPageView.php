@@ -80,6 +80,8 @@ class PhabricatorStandardPageView extends AphrontPageView {
     require_celerity_resource('javelin-lib-dev');
     require_celerity_resource('javelin-workflow-dev');
 
+    Javelin::initBehavior('workflow', array());
+
     if ($console) {
       require_celerity_resource('aphront-dark-console-css');
       Javelin::initBehavior(
@@ -171,6 +173,35 @@ class PhabricatorStandardPageView extends AphrontPageView {
           '</form>';
       }
     }
+    
+    $foot_links = array();
+    
+    $version = PhabricatorEnv::getEnvConfig('phabricator.version');
+    $foot_links[] = phutil_escape_html('Phabricator '.$version);
+    
+    if (PhabricatorEnv::getEnvConfig('darkconsole.enabled') &&
+       !PhabricatorEnv::getEnvConfig('darkconsole.always-on')) {
+      if ($console) {
+        $link = javelin_render_tag(
+          'a',
+          array(
+            'href' => '/~/',
+            'sigil' => 'workflow',
+          ),
+          'Disable DarkConsole');
+      } else {
+        $link = javelin_render_tag(
+          'a',
+          array(
+            'href' => '/~/',
+            'sigil' => 'workflow',
+          ),
+          'Enable DarkConsole');
+      }
+      $foot_links[] = $link;
+    }
+    $foot_links = implode(' &middot; ', $foot_links);
+      
 
     return
       ($console ? '<darkconsole />' : null).
@@ -191,6 +222,9 @@ class PhabricatorStandardPageView extends AphrontPageView {
         '</div>'.
         $this->bodyContent.
         '<div style="clear: both;"></div>'.
+      '</div>'.
+      '<div class="phabricator-page-foot">'.
+        $foot_links.
       '</div>';
   }
 

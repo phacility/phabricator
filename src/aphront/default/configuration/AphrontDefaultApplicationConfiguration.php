@@ -182,6 +182,14 @@ class AphrontDefaultApplicationConfiguration
             'dialog' => $response->buildResponseString(),
           ));
       }
+    } else if ($response instanceof AphrontRedirectResponse) {
+      if ($request->isAjax()) {
+        return id(new AphrontAjaxResponse())
+          ->setContent(
+            array(
+              'redirect' => $response->getURI(),
+            ));
+      }
     } else if ($response instanceof Aphront404Response) {
 
       $failure = new AphrontRequestFailureView();
