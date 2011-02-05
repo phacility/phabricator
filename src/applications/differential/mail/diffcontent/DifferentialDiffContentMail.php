@@ -26,7 +26,7 @@ class DifferentialDiffContentMail extends DifferentialMail {
   }
 
   protected function renderSubject() {
-    return "Content: ".$this->getRevision()->getName();
+    return "Content: ".$this->getRevision()->getTitle();
   }
 
   protected function renderBody() {

@@ -20,13 +20,13 @@ class DifferentialCCWelcomeMail extends DifferentialReviewRequestMail {
 
   protected function renderSubject() {
     $revision = $this->getRevision();
-    return 'Added to CC: '.$revision->getName();
+    return 'Added to CC: '.$revision->getTitle();
   }
 
   protected function renderBody() {
 
     $actor = $this->getActorName();
-    $name  = $this->getRevision()->getName();
+    $name  = $this->getRevision()->getTitle();
     $body = array();
 
     $body[] = "{$actor} added you to the CC list for the revision \"{$name}\".";

@@ -315,6 +315,35 @@ class DifferentialRevisionEditor {
       array_keys($add['rev']),
       $this->actorPHID);
 
+/*
+
+    // TODO: When Herald is brought over, run through this stuff to figure
+    // out which adds are Herald's fault.
+
+    if ($add['ccs'] || $rem['ccs']) {
+      foreach (array_keys($add['ccs']) as $id) {
+        if (empty($new['ccs'][$id])) {
+          $reason_phid = 'TODO';//$xscript_phid;
+        } else {
+          $reason_phid = $this->getActorPHID();
+        }
+      }
+      foreach (array_keys($rem['ccs']) as $id) {
+        if (empty($new['ccs'][$id])) {
+          $reason_phid = $this->getActorPHID();
+        } else {
+          $reason_phid = 'TODO';//$xscript_phid;
+        }
+      }
+    }
+*/
+    self::alterCCs(
+      $revision,
+      $this->cc,
+      array_keys($rem['ccs']),
+      array_keys($add['ccs']),
+      $this->actorPHID);
+
     // Add the author to the relevant set of users so they get a copy of the
     // email.
     if (!$this->silentUpdate) {
@@ -390,28 +419,7 @@ class DifferentialRevisionEditor {
       return;
     }
 
-// TODO
-//    $revision->attachReviewers(array_keys($new['rev']));
-//    $revision->attachCCPHIDs(array_keys($new['ccs']));
-
-    if ($add['ccs'] || $rem['ccs']) {
-      foreach (array_keys($add['ccs']) as $id) {
-        if (empty($new['ccs'][$id])) {
-          $reason_phid = 'TODO';//$xscript_phid;
-        } else {
-          $reason_phid = $this->getActorPHID();
-        }
-        self::addCCPHID($revision, $id, $reason_phid);
-      }
-      foreach (array_keys($rem['ccs']) as $id) {
-        if (empty($new['ccs'][$id])) {
-          $reason_phid = $this->getActorPHID();
-        } else {
-          $reason_phid = 'TODO';//$xscript_phid;
-        }
-        self::removeCCPHID($revision, $id, $reason_phid);
-      }
-    }
+    $revision->loadRelationships();
 
     if ($add['rev']) {
       $message = id(new DifferentialNewDiffMail(
@@ -458,34 +466,20 @@ class DifferentialRevisionEditor {
     }
   }
 
-  public function addCCPHID(
+  protected static function alterCCs(
     DifferentialRevision $revision,
-    $phid,
+    array $stable_phids,
+    array $rem_phids,
+    array $add_phids,
     $reason_phid) {
-    self::alterCCPHID($revision, $phid, true, $reason_phid);
-  }
 
-  public function removeCCPHID(
-    DifferentialRevision $revision,
-    $phid,
-    $reason_phid) {
-    self::alterCCPHID($revision, $phid, false, $reason_phid);
-  }
-
-  protected static function alterCCPHID(
-    DifferentialRevision $revision,
-    $phid,
-    $add,
-    $reason_phid) {
-/*
-    $relationship = new DifferentialRelationship();
-    $relationship->setRevisionID($revision->getID());
-    $relationship->setRelation(DifferentialRelationship::RELATION_SUBSCRIBED);
-    $relationship->setRelatedPHID($phid);
-    $relationship->setForbidden(!$add);
-    $relationship->setReasonPHID($reason_phid);
-    $relationship->replace();
-*/
+    return self::alterRelationships(
+      $revision,
+      $stable_phids,
+      $rem_phids,
+      $add_phids,
+      $reason_phid,
+      DifferentialRevision::RELATION_SUBSCRIBED);
   }
 
 
@@ -495,6 +489,23 @@ class DifferentialRevisionEditor {
     array $rem_phids,
     array $add_phids,
     $reason_phid) {
+
+    return self::alterRelationships(
+      $revision,
+      $stable_phids,
+      $rem_phids,
+      $add_phids,
+      $reason_phid,
+      DifferentialRevision::RELATION_REVIEWER);
+  }
+
+  private static function alterRelationships(
+    DifferentialRevision $revision,
+    array $stable_phids,
+    array $rem_phids,
+    array $add_phids,
+    $reason_phid,
+    $relation_type) {
 
     $rem_map = array_fill_keys($rem_phids, true);
     $add_map = array_fill_keys($add_phids, true);
@@ -512,11 +523,11 @@ class DifferentialRevisionEditor {
       }
     }
 
-    $raw = $revision->getRawRelations(DifferentialRevision::RELATION_REVIEWER);
+    $raw = $revision->getRawRelations($relation_type);
     $raw = ipull($raw, null, 'objectPHID');
 
     $sequence = count($seq_map);
-    foreach ($raw as $phid => $relation) {
+    foreach ($raw as $phid => $ignored) {
       if (isset($seq_map[$phid])) {
         $raw[$phid]['sequence'] = $seq_map[$phid];
       } else {
@@ -525,7 +536,7 @@ class DifferentialRevisionEditor {
     }
     $raw = isort($raw, 'sequence');
 
-    foreach ($raw as $phid => $relation) {
+    foreach ($raw as $phid => $ignored) {
       if (isset($rem_map[$phid])) {
         unset($raw[$phid]);
       }
@@ -547,7 +558,7 @@ class DifferentialRevisionEditor {
         $conn_w,
         '(%d, %s, %s, %d, %s)',
         $revision->getID(),
-        DifferentialRevision::RELATION_REVIEWER,
+        $relation_type,
         $relation['objectPHID'],
         $relation['sequence'],
         $relation['reasonPHID']);
@@ -559,7 +570,7 @@ class DifferentialRevisionEditor {
         'DELETE FROM %T WHERE revisionID = %d AND relation = %s',
         DifferentialRevision::RELATIONSHIP_TABLE,
         $revision->getID(),
-        DifferentialRevision::RELATION_REVIEWER);
+        $relation_type);
       if ($sql) {
         queryfx(
           $conn_w,
