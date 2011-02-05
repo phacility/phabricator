@@ -12,6 +12,7 @@ phutil_require_module('phabricator', 'applications/differential/editor/revision'
 phutil_require_module('phabricator', 'applications/differential/mail/comment');
 phutil_require_module('phabricator', 'applications/differential/storage/comment');
 phutil_require_module('phabricator', 'applications/differential/storage/inlinecomment');
+phutil_require_module('phabricator', 'applications/phid/handle/data');
 
 phutil_require_module('phutil', 'utils');
 

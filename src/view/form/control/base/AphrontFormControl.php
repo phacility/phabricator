@@ -25,6 +25,8 @@ abstract class AphrontFormControl extends AphrontView {
   private $value;
   private $disabled;
   private $id;
+  private $controlID;
+  private $controlStyle;
 
   public function setID($id) {
     $this->id = $id;
@@ -33,6 +35,24 @@ abstract class AphrontFormControl extends AphrontView {
 
   public function getID() {
     return $this->id;
+  }
+
+  public function setControlID($control_id) {
+    $this->controlID = $control_id;
+    return $this;
+  }
+
+  public function getControlID() {
+    return $this->controlID;
+  }
+
+  public function setControlStyle($control_style) {
+    $this->controlStyle = $control_style;
+    return $this;
+  }
+
+  public function getControlStyle() {
+    return $this->controlStyle;
   }
 
   public function setLabel($label) {
@@ -143,13 +163,17 @@ abstract class AphrontFormControl extends AphrontView {
       $caption = null;
     }
 
-    return
-      '<div class="aphront-form-control '.$custom_class.'">'.
-        $error.
-        $label.
-        $input.
-        $caption.
-        '<div style="clear: both;"></div>'.
-      '</div>';
+    return phutil_render_tag(
+      'div',
+      array(
+        'class' => "aphront-form-control {$custom_class}",
+        'id' => $this->controlID,
+        'style' => $this->controlStyle,
+      ),
+      $error.
+      $label.
+      $input.
+      $caption.
+      '<div style="clear: both;"></div>');
   }
 }

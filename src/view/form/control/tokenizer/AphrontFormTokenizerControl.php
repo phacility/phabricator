@@ -19,9 +19,15 @@
 class AphrontFormTokenizerControl extends AphrontFormControl {
 
   private $datasource;
+  private $disableBehvaior;
 
   public function setDatasource($datasource) {
     $this->datasource = $datasource;
+    return $this;
+  }
+
+  public function setDisableBehavior($disable) {
+    $this->disableBehavior = $disable;
     return $this;
   }
 
@@ -53,13 +59,19 @@ class AphrontFormTokenizerControl extends AphrontFormControl {
         'type'        => 'text',
       ));
 
-    $id = celerity_generate_unique_node_id();
+    if ($this->getID()) {
+      $id = $this->getID();
+    } else {
+      $id = celerity_generate_unique_node_id();
+    }
 
-    Javelin::initBehavior('aphront-basic-tokenizer', array(
-      'id'    => $id,
-      'src'   => $this->datasource,
-      'value' => $values,
-    ));
+    if (!$this->disableBehavior) {
+      Javelin::initBehavior('aphront-basic-tokenizer', array(
+        'id'    => $id,
+        'src'   => $this->datasource,
+        'value' => $values,
+      ));
+    }
 
     return phutil_render_tag(
       'div',

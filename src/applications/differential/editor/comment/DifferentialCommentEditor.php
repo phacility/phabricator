@@ -134,7 +134,7 @@ class DifferentialCommentEditor {
           ->save();
 
         if (!isset($reviewer_phids[$actor_phid])) {
-          DifferentialRevisionEditor::addReviewers(
+          DifferentialRevisionEditor::alterReviewers(
             $revision,
             $reviewer_phids,
             $rem = array(),
@@ -170,7 +170,7 @@ class DifferentialCommentEditor {
         }
 
         if (!isset($reviewer_phids[$actor_phid])) {
-          DifferentialRevisionEditor::addReviewers(
+          DifferentialRevisionEditor::alterReviewers(
             $revision,
             $reviewer_phids,
             $rem = array(),
@@ -214,16 +214,16 @@ class DifferentialCommentEditor {
         $added_reviewers = array_unique($added_reviewers);
 
         if ($added_reviewers) {
-          DifferentialRevisionEditor::addReviewers(
+          DifferentialRevisionEditor::alterReviewers(
             $revision,
             $reviewer_phids,
             $rem = array(),
             $add = $added_reviewers,
             $actor_phid);
 
-// TODO
-//          $unixnames = unixname_multi($added_reviewers);
-          $usernames = $added_reviewers;
+          $handles = id(new PhabricatorObjectHandleData($added_reviewers))
+            ->loadHandles();
+          $usernames = mpull($handles, 'getName');
 
           $this->message =
             'Added reviewers: '.implode(', ', $usernames)."\n\n".

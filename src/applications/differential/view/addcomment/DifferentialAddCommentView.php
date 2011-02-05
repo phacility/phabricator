@@ -64,6 +64,14 @@ final class DifferentialAddCommentView extends AphrontView {
           ->setID('comment-action')
           ->setOptions($actions))
       ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel('Add Reviewers')
+          ->setName('reviewers')
+          ->setControlID('add-reviewers')
+          ->setControlStyle('display: none')
+          ->setID('add-reviewers-tokenizer')
+          ->setDisableBehavior(true))
+      ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setName('comment')
           ->setID('comment-content')
@@ -71,6 +79,15 @@ final class DifferentialAddCommentView extends AphrontView {
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Comment'));
+
+    Javelin::initBehavior(
+      'differential-add-reviewers',
+      array(
+        'src' => '/typeahead/common/users/',
+        'tokenizer' => 'add-reviewers-tokenizer',
+        'select' => 'comment-action',
+        'row' => 'add-reviewers',
+      ));
 
     $rev_id = $revision->getID();
 
