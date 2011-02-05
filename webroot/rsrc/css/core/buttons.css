@@ -135,5 +135,16 @@ a.small:visited {
   line-height: 16px;
 }
 
+button.link {
+  display: inline;
+  border: none;
+  background: transparent;
+  font-weight: normal;
+  padding: 0;
+  margin: 0;
+  font-size: inherit;
+}
 
-
+button.link:hover {
+  text-decoration: underline;
+}

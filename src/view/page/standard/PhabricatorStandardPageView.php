@@ -150,6 +150,8 @@ class PhabricatorStandardPageView extends AphrontPageView {
         $login_stuff =
           'Logged in as '.phutil_escape_html($user->getUsername()).
           ' &middot; '.
+          '<a href="/settings/">Settings</a>'.
+          ' &middot; '.
           '<form action="/logout/" method="post" style="display: inline;">'.
             phutil_render_tag(
               'input',
@@ -165,7 +167,7 @@ class PhabricatorStandardPageView extends AphrontPageView {
                 'name' => '__form__',
                 'value' => true,
               )).
-            '<button class="small grey">Logout</button>'.
+            '<button class="link">Logout</button>'.
           '</form>';
       }
     }
