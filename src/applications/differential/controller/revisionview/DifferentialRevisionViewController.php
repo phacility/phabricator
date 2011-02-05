@@ -167,19 +167,24 @@ class DifferentialRevisionViewController extends DifferentialController {
         $handles,
         $revision->getCCPHIDs()));
 
-    $path = $diff->getSourcePath();
-    if ($path) {
-      $branch = $diff->getBranch() ? ' (' . $diff->getBranch() . ')' : '';
-      $host = $diff->getSourceMachine();
-      if ($host) {
-        $host .= ':';
-      }
-      $properties['Path'] = phutil_escape_html("{$host}{$path} {$branch}");
+    $host = $diff->getSourceMachine();
+    if ($host) {
+      $properties['Host'] = phutil_escape_html($host);
     }
 
+    $path = $diff->getSourcePath();
+    if ($path) {
+      $branch = $diff->getBranch() ? ' ('.$diff->getBranch().')' : '';
+      $properties['Path'] = phutil_escape_html("{$path} {$branch}");
+    }
 
-    $properties['Lint'] = 'TODO';
-    $properties['Unit'] = 'TODO';
+    $lstar = DifferentialRevisionUpdateHistoryView::renderDiffLintStar($diff);
+    $lmsg = DifferentialRevisionUpdateHistoryView::getDiffLintMessage($diff);
+    $properties['Lint'] = $lstar.' '.$lmsg;
+
+    $ustar = DifferentialRevisionUpdateHistoryView::renderDiffUnitStar($diff);
+    $umsg = DifferentialRevisionUpdateHistoryView::getDiffUnitMessage($diff);
+    $properties['Unit'] = $ustar.' '.$umsg;
 
     return $properties;
   }

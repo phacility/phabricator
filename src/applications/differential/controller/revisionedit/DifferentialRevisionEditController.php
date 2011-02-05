@@ -133,6 +133,21 @@ class DifferentialRevisionEditController extends DifferentialController {
         ->setErrors($errors);
     }
 
+    if ($diff && $revision->getID()) {
+      $form
+        ->appendChild(
+          id(new AphrontFormTextAreaControl())
+            ->setLabel('Comments')
+            ->setName('comments')
+            ->setCaption("Explain what's new in this diff.")
+            ->setValue($request->getStr('comments')))
+        ->appendChild(
+          id(new AphrontFormSubmitControl())
+            ->setValue('Save'))
+        ->appendChild(
+          id(new AphrontFormDividerControl()));
+    }
+
     $form
       ->appendChild(
         id(new AphrontFormTextAreaControl())
@@ -190,7 +205,11 @@ class DifferentialRevisionEditController extends DifferentialController {
 
     $panel = new AphrontPanelView();
     if ($revision->getID()) {
-      $panel->setHeader('Edit Differential Revision');
+      if ($diff) {
+        $panel->setHeader('Update Differential Revision');
+      } else {
+        $panel->setHeader('Edit Differential Revision');
+      }
     } else {
       $panel->setHeader('Create New Differential Revision');
     }

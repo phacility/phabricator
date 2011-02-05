@@ -21,7 +21,7 @@ class DifferentialChangesetListView extends AphrontView {
   private $changesets = array();
   private $editable;
   private $revision;
-  private $vsMap;
+  private $vsMap = array();
 
   public function setChangesets($changesets) {
     $this->changesets = $changesets;

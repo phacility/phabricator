@@ -47,7 +47,8 @@ class PhabricatorXHProfProfileTopLevelView extends AphrontView {
 
     $aggregated = array();
     foreach ($flat as $call => $counters) {
-      $agg_call = reset(explode('@', $call, 2));
+      $parts = explode('@', $call, 2);
+      $agg_call = reset($parts);
       if (empty($aggregated[$agg_call])) {
         $aggregated[$agg_call] = $counters;
       } else {

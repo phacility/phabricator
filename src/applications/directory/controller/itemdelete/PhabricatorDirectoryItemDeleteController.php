@@ -39,6 +39,7 @@ class PhabricatorDirectoryItemDeleteController
     }
 
     $dialog = new AphrontDialogView();
+    $dialog->setUser($request->getUser());
     $dialog->setTitle('Really delete this item?');
     $dialog->appendChild("Are you sure you want to delete this item?");
     $dialog->addSubmitButton('Delete');

@@ -164,3 +164,9 @@
   margin-left:  8px;
   font-style:   normal;
 }
+
+
+.differential-inline-comment-edit-textarea {
+  width: 100%;
+  height: 12em;
+}

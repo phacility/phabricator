@@ -168,6 +168,7 @@ class AphrontDefaultApplicationConfiguration
     if ($response instanceof AphrontDialogResponse) {
       if (!$request->isAjax()) {
         $view = new PhabricatorStandardPageView();
+        $view->setRequest($request);
         $view->appendChild(
           '<div style="padding: 2em 0;">'.
             $response->buildResponseString().

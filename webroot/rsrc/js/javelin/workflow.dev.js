@@ -161,7 +161,9 @@ JX.install('Workflow', {
         var s = JX.$V.getScroll();
         JX.$V((v.x - d.x) / 2, s.y + 100).setPos(this._root);
         try {
-          JX.DOM.focus(JX.DOM.find(this._root, 'button', '__default__'));
+          try {
+            JX.DOM.focus(JX.DOM.find(this._root, 'button', '__default__'));
+          } catch (_ignored) {}
           var inputs = JX.DOM.scry(this._root, 'input')
                          .concat(JX.DOM.scry(this._root, 'textarea'));
           var miny = Number.POSITIVE_INFINITY;

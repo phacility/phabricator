@@ -331,10 +331,9 @@ class DifferentialRevisionEditor {
     $feedback = null;
     if ($diff) {
       $changesets = $diff->loadChangesets();
-      // TODO: move to DifferentialFeedbackEditor
+      // TODO: This should probably be in DifferentialFeedbackEditor?
       if (!$is_new) {
-        // TODO
-//        $feedback = $this->createFeedback();
+        $comment = $this->createComment();
       }
       if ($feedback) {
         $mail[] = id(new DifferentialNewDiffMail(
@@ -350,8 +349,7 @@ class DifferentialRevisionEditor {
 
       // Save the changes we made above.
 
-// TODO
-//      $diff->setDescription(substr($this->getComments(), 0, 80));
+      $diff->setDescription(substr($this->getComments(), 0, 80));
       $diff->save();
 
       // An updated diff should require review, as long as it's not committed
@@ -574,20 +572,18 @@ class DifferentialRevisionEditor {
     $conn_w->saveTransaction();
   }
 
-/*
-  protected function createFeedback() {
-    $revision = $this->getRevision();
-    $feedback = id(new DifferentialFeedback())
-      ->setUserID($this->getActorPHID())
-      ->setRevision($revision)
+
+  private function createComment() {
+    $revision_id = $this->revision->getID();
+    $comment = id(new DifferentialComment())
+      ->setAuthorPHID($this->getActorPHID())
+      ->setRevisionID($revision_id)
       ->setContent($this->getComments())
       ->setAction('update');
+    $comment->save();
 
-    $feedback->save();
-
-    return $feedback;
+    return $comment;
   }
-*/
 
 }
 

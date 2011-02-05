@@ -14,6 +14,7 @@ phutil_require_module('phabricator', 'applications/differential/storage/diff');
 phutil_require_module('phabricator', 'applications/differential/storage/revision');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'view/form/base');
+phutil_require_module('phabricator', 'view/form/control/divider');
 phutil_require_module('phabricator', 'view/form/control/submit');
 phutil_require_module('phabricator', 'view/form/control/textarea');
 phutil_require_module('phabricator', 'view/form/error');

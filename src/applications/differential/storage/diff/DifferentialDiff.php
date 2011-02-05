@@ -39,6 +39,8 @@ class DifferentialDiff extends DifferentialDAO {
   protected $arcanistProject;
   protected $creationMethod;
 
+  protected $description;
+
   private $unsavedChangesets = array();
   private $changesets;
 

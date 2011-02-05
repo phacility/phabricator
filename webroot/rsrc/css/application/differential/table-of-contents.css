@@ -23,3 +23,25 @@
 .differential-toc-file {
   color: #444444;
 }
+
+.diff-star-none {
+  color: #666666;
+}
+
+.diff-star-okay {
+  color: #ff9700;
+}
+
+/* TODO: 'warn' and 'fail' are both red, but we can't make 'warn' yellow since
+   'okay' is a "gold star". */
+.diff-star-warn {
+  color: #aa0000;
+}
+
+.diff-star-fail {
+  color: #aa0000;
+}
+
+.diff-star-skip {
+  color: #ff00aa;
+}

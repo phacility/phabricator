@@ -39,6 +39,7 @@ class PhabricatorDirectoryCategoryDeleteController
     }
 
     $dialog = new AphrontDialogView();
+    $dialog->setUser($request->getUser());
     $dialog->setTitle('Really delete this category?');
     $dialog->appendChild("Are you sure you want to delete this category?");
     $dialog->addSubmitButton('Delete');

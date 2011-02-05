@@ -27,10 +27,10 @@ function phabricator_format_relative_time($duration) {
 function phabricator_format_timestamp($epoch) {
   $difference = (time() - $epoch);
 
-  if ($difference < 60 * 60) {
+  if ($difference < 60 * 60 * 24) {
     return phabricator_format_relative_time($difference).' ago';
   } else if (date('Y') == date('Y', $epoch)) {
-    return date('M jS, g:i A', $epoch);
+    return date('M j, g:i A', $epoch);
   } else {
     return date('F jS, Y', $epoch);
   }

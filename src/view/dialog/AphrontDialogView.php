@@ -64,10 +64,13 @@ class AphrontDialogView extends AphrontView {
 
     $buttons = array();
     if ($this->submitButton) {
-      $buttons[] =
-        '<button name="__submit__">'.
-          phutil_escape_html($this->submitButton).
-        '</button>';
+      $buttons[] = phutil_render_tag(
+        'button',
+        array(
+          'name' => '__submit__',
+          'sigil' => '__default__',
+        ),
+        phutil_escape_html($this->submitButton));
     }
 
     if ($this->cancelURI) {

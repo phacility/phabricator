@@ -48,8 +48,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
         'id'   => null,
         'desc' => 'Base',
         'age'  => null,
-        'lint' => null,
-        'unit' => null,
+        'obj'  => null,
       ),
     );
 
@@ -58,10 +57,9 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       $data[] = array(
         'name' => 'Diff '.(++$seq),
         'id'   => $diff->getID(),
-        'desc' => 'TODO',//$diff->getDescription(),
+        'desc' => $diff->getDescription(),
         'age'  => $diff->getDateCreated(),
-        'lint' => $diff->getLintStatus(),
-        'unit' => $diff->getUnitStatus(),
+        'obj'  => $diff,
       );
     }
 
@@ -75,9 +73,6 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
 
       $name = phutil_escape_html($row['name']);
       $id   = phutil_escape_html($row['id']);
-
-      $lint = '*';
-      $unit = '*';
 
       $old_class = null;
       $new_class = null;
@@ -122,13 +117,25 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
         $old = null;
       }
 
-      $desc = 'TODO';
-      $age = '-';
+      $desc = phutil_escape_html($row['desc']);
+      if ($row['age']) {
+        $age = phabricator_format_timestamp($row['age']);
+      } else {
+        $age = null;
+      }
 
       if (++$idx % 2) {
         $class = ' class="alt"';
       } else {
         $class = null;
+      }
+
+      if ($row['obj']) {
+        $lint = self::renderDiffLintStar($row['obj']);
+        $unit = self::renderDiffUnitStar($row['obj']);
+      } else {
+        $lint = null;
+        $unit = null;
       }
 
       $rows[] =
@@ -161,7 +168,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
               '<th>Diff</th>'.
               '<th>ID</th>'.
               '<th>Description</th>'.
-              '<th>Age</th>'.
+              '<th>Created</th>'.
               '<th>Lint</th>'.
               '<th>Unit</th>'.
             '</tr>'.
@@ -176,4 +183,79 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
         '</form>'.
       '</div>';
   }
+
+  const STAR_NONE = 'none';
+  const STAR_OKAY = 'okay';
+  const STAR_WARN = 'warn';
+  const STAR_FAIL = 'fail';
+  const STAR_SKIP = 'skip';
+
+  public static function renderDiffLintStar(DifferentialDiff $diff) {
+    static $map = array(
+      DifferentialLintStatus::LINT_NONE => self::STAR_NONE,
+      DifferentialLintStatus::LINT_OKAY => self::STAR_OKAY,
+      DifferentialLintStatus::LINT_WARN => self::STAR_WARN,
+      DifferentialLintStatus::LINT_FAIL => self::STAR_FAIL,
+      DifferentialLintStatus::LINT_SKIP => self::STAR_SKIP,
+    );
+
+    $star = idx($map, $diff->getLintStatus(), self::STAR_FAIL);
+
+    return self::renderDiffStar($star);
+  }
+
+  public static function renderDiffUnitStar(DifferentialDiff $diff) {
+    static $map = array(
+      DifferentialUnitStatus::UNIT_NONE => self::STAR_NONE,
+      DifferentialUnitStatus::UNIT_OKAY => self::STAR_OKAY,
+      DifferentialUnitStatus::UNIT_WARN => self::STAR_WARN,
+      DifferentialUnitStatus::UNIT_FAIL => self::STAR_FAIL,
+      DifferentialUnitStatus::UNIT_SKIP => self::STAR_SKIP,
+    );
+
+    $star = idx($map, $diff->getUnitStatus(), self::STAR_FAIL);
+
+    return self::renderDiffStar($star);
+  }
+
+  public static function getDiffLintMessage(DifferentialDiff $diff) {
+    switch ($diff->getLintStatus()) {
+      case DifferentialLintStatus::LINT_NONE:
+        return 'No Linters Available';
+      case DifferentialLintStatus::LINT_OKAY:
+        return 'Lint OK';
+      case DifferentialLintStatus::LINT_WARN:
+        return 'Lint Warnings';
+      case DifferentialLintStatus::LINT_FAIL:
+        return 'Lint Errors';
+      case DifferentialLintStatus::LINT_SKIP:
+        return 'Lint Skipped';
+    }
+    return '???';
+  }
+
+  public static function getDiffUnitMessage(DifferentialDiff $diff) {
+    switch ($diff->getUnitStatus()) {
+      case DifferentialUnitStatus::UNIT_NONE:
+        return 'No Unit Test Coverage';
+      case DifferentialUnitStatus::UNIT_OKAY:
+        return 'Unit Tests OK';
+      case DifferentialUnitStatus::UNIT_WARN:
+        return 'Unit Test Warnings';
+      case DifferentialUnitStatus::UNIT_FAIL:
+        return 'Unit Test Errors';
+      case DifferentialUnitStatus::UNIT_SKIP:
+        return 'Unit Tests Skipped';
+    }
+    return '???';
+  }
+
+  private static function renderDiffStar($star) {
+    $class = 'diff-star-'.$star;
+    return
+      '<span class="'.$class.'">'.
+        "\xE2\x98\x85".
+      '</span>';
+  }
+
 }

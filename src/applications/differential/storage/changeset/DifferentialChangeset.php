@@ -139,7 +139,7 @@ class DifferentialChangeset extends DifferentialDAO {
     }
     return implode("\n", $file);
   }
-  
+
   public function getAnchorName() {
     return substr(md5($this->getFilename()), 0, 8);
   }

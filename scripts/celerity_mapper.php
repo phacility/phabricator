@@ -15,6 +15,9 @@ $package_spec = array(
     'aphront-typeahead-control-css',
 
     'phabricator-directory-css',
+
+    'phabricator-remarkup-css',
+    'syntax-highlighting-css',
   ),
   'differential.pkg.css' => array(
     'differential-core-view-css',
@@ -22,6 +25,16 @@ $package_spec = array(
     'differential-revision-detail-css',
     'differential-revision-history-css',
     'differential-table-of-contents-css',
+    'differential-revision-comment-css',
+    'differential-revision-add-comment-css',
+    'differential-revision-comment-list-css',
+  ),
+  'differential.pkg.js' => array(
+    'javelin-behavior-differential-feedback-preview',
+    'javelin-behavior-differential-edit-inline-comments',
+    'javelin-behavior-differential-populate',
+    'javelin-behavior-differential-show-more',
+    'javelin-behavior-differential-diff-radios',
   ),
 );
 

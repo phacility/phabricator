@@ -1029,7 +1029,7 @@ EOSYNTHETIC;
 
       if (isset($this->old[$ii])) {
         $o_num  = $this->old[$ii]['line'];
-        $o_text = $this->oldRender[$ii];
+        $o_text = isset($this->oldRender[$ii]) ? $this->oldRender[$ii] : null;
         $o_attr = null;
         if ($this->old[$ii]['type']) {
           if (empty($this->new[$ii])) {
@@ -1046,7 +1046,7 @@ EOSYNTHETIC;
 
       if (isset($this->new[$ii])) {
         $n_num  = $this->new[$ii]['line'];
-        $n_text = $this->newRender[$ii];
+        $n_text = isset($this->newRender[$ii]) ? $this->newRender[$ii] : null;
         $n_attr = null;
         if ($this->new[$ii]['type']) {
           if (empty($this->old[$ii])) {

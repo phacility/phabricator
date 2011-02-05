@@ -185,6 +185,7 @@ class DifferentialInlineCommentEditController extends DifferentialController {
     return phutil_render_tag(
       'textarea',
       array(
+        'class' => 'differential-inline-comment-edit-textarea',
         'name' => 'text',
       ),
       $text);
