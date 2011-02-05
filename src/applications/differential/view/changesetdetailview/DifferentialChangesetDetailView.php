@@ -54,7 +54,12 @@ class DifferentialChangesetDetailView extends AphrontView {
         ),
         'class' => $class,
       ),
-      '<a name="#'."TODO".'"></a>'.
+      phutil_render_tag(
+        'a',
+        array(
+          'name' => $changeset->getAnchorName(),
+        ),
+        '').
       implode('', $this->buttons).
       '<h1>'.phutil_escape_html($display_filename).'</h1>'.
       '<div style="clear: both;"></div>'.

@@ -65,7 +65,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
         $link = phutil_render_tag(
           'a',
           array(
-            'href' => '#', // TODO: filename normalizer
+            'href' => '#'.$changeset->getAnchorName(),
           ),
           phutil_escape_html($display_file));
         if ($type == DifferentialChangeType::TYPE_MOVE_HERE) {
