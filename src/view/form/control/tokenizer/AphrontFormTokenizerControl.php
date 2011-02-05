@@ -19,7 +19,7 @@
 class AphrontFormTokenizerControl extends AphrontFormControl {
 
   private $datasource;
-  private $disableBehvaior;
+  private $disableBehavior;
 
   public function setDatasource($datasource) {
     $this->datasource = $datasource;

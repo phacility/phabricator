@@ -357,14 +357,14 @@ class DifferentialRevisionEditor {
     $mail = array();
 
     $changesets = null;
-    $feedback = null;
+    $comment = null;
     if ($diff) {
       $changesets = $diff->loadChangesets();
       // TODO: This should probably be in DifferentialFeedbackEditor?
       if (!$is_new) {
         $comment = $this->createComment();
       }
-      if ($feedback) {
+      if ($comment) {
         $mail[] = id(new DifferentialNewDiffMail(
             $revision,
             $this->getActorPHID(),

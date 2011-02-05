@@ -190,7 +190,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-core-css' =>
   array(
-    'uri' => '/res/80cbabe4/rsrc/css/core/core.css',
+    'uri' => '/res/6eebb99b/rsrc/css/core/core.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -398,7 +398,7 @@ celerity_register_resource_map(array(
 ), array (
   'packages' =>
   array (
-    '89ccb170' =>
+    'e8e774f6' =>
     array (
       'name' => 'core.pkg.css',
       'symbols' =>
@@ -417,7 +417,7 @@ celerity_register_resource_map(array(
         11 => 'phabricator-remarkup-css',
         12 => 'syntax-highlighting-css',
       ),
-      'uri' => '/res/pkg/89ccb170/core.pkg.css',
+      'uri' => '/res/pkg/e8e774f6/core.pkg.css',
       'type' => 'css',
     ),
     '4b8af7b5' =>
@@ -454,19 +454,19 @@ celerity_register_resource_map(array(
   ),
   'reverse' =>
   array (
-    'phabricator-core-css' => '89ccb170',
-    'phabricator-core-buttons-css' => '89ccb170',
-    'phabricator-standard-page-view' => '89ccb170',
-    'aphront-dialog-view-css' => '89ccb170',
-    'aphront-form-view-css' => '89ccb170',
-    'aphront-panel-view-css' => '89ccb170',
-    'aphront-side-nav-view-css' => '89ccb170',
-    'aphront-table-view-css' => '89ccb170',
-    'aphront-tokenizer-control-css' => '89ccb170',
-    'aphront-typeahead-control-css' => '89ccb170',
-    'phabricator-directory-css' => '89ccb170',
-    'phabricator-remarkup-css' => '89ccb170',
-    'syntax-highlighting-css' => '89ccb170',
+    'phabricator-core-css' => 'e8e774f6',
+    'phabricator-core-buttons-css' => 'e8e774f6',
+    'phabricator-standard-page-view' => 'e8e774f6',
+    'aphront-dialog-view-css' => 'e8e774f6',
+    'aphront-form-view-css' => 'e8e774f6',
+    'aphront-panel-view-css' => 'e8e774f6',
+    'aphront-side-nav-view-css' => 'e8e774f6',
+    'aphront-table-view-css' => 'e8e774f6',
+    'aphront-tokenizer-control-css' => 'e8e774f6',
+    'aphront-typeahead-control-css' => 'e8e774f6',
+    'phabricator-directory-css' => 'e8e774f6',
+    'phabricator-remarkup-css' => 'e8e774f6',
+    'syntax-highlighting-css' => 'e8e774f6',
     'differential-core-view-css' => '4b8af7b5',
     'differential-changeset-view-css' => '4b8af7b5',
     'differential-revision-detail-css' => '4b8af7b5',
