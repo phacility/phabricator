@@ -38,11 +38,11 @@
   padding:             .3em 5px .4em 1.25em;
 }
 
-.differential-comment-core p {
+.differential-comment-core .phabricator-remarkup p {
   margin: 0.35em 0;
 }
 
-.differential-comment-core code {
+.differential-comment-core .phabricator-remarkup code {
    width: 88ex;
    width: 81ch;
 }
