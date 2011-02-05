@@ -2,3 +2,10 @@
  * @provides differential-revision-comment-list-css
  */
 
+.differential-older-comments-are-hidden {
+  background: #f0f0f0;
+  border: 1px solid #d6d6d6;
+  text-align: center;
+  padding: 1em;
+  color: #666666;
+}
