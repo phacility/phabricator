@@ -126,9 +126,10 @@ class PhabricatorConduitConsoleController
     foreach ($classes as $method_class) {
       $method_name = ConduitAPIMethod::getAPIMethodNameFromClassName(
         $method_class);
+      $parts = explode('.', $method_name);
       $method_names[] = array(
         'full_name'   => $method_name,
-        'group_name'  => reset(explode('.', $method_name)),
+        'group_name'  => reset($parts),
       );
     }
     $method_names = igroup($method_names, 'group_name');
