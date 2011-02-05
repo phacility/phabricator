@@ -43,7 +43,7 @@ abstract class AphrontApplicationConfiguration {
   final public function getConsole() {
     return $this->console;
   }
-  
+
   final public function setConsole($console) {
     $this->console = $console;
   }

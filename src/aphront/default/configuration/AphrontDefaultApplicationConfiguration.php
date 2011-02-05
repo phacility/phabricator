@@ -82,7 +82,10 @@ class AphrontDefaultApplicationConfiguration
       '/differential/' => array(
         '$' => 'DifferentialRevisionListController',
         'filter/(?<filter>\w+)/$' => 'DifferentialRevisionListController',
-        'diff/(?<id>\d+)/$'       => 'DifferentialDiffViewController',
+        'diff/' => array(
+          '(?<id>\d+)/$' => 'DifferentialDiffViewController',
+          'create/$' => 'DifferentialDiffCreateController',
+        ),
         'changeset/$'  => 'DifferentialChangesetViewController',
         'revision/edit/(?:(?<id>\d+)/)?$'
           => 'DifferentialRevisionEditController',

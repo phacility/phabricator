@@ -27,7 +27,7 @@ class AphrontRedirectResponse extends AphrontResponse {
     $this->uri = $uri;
     return $this;
   }
-  
+
   public function getURI() {
     return $this->uri;
   }

@@ -173,12 +173,12 @@ class PhabricatorStandardPageView extends AphrontPageView {
           '</form>';
       }
     }
-    
+
     $foot_links = array();
-    
+
     $version = PhabricatorEnv::getEnvConfig('phabricator.version');
     $foot_links[] = phutil_escape_html('Phabricator '.$version);
-    
+
     if (PhabricatorEnv::getEnvConfig('darkconsole.enabled') &&
        !PhabricatorEnv::getEnvConfig('darkconsole.always-on')) {
       if ($console) {
@@ -201,7 +201,7 @@ class PhabricatorStandardPageView extends AphrontPageView {
       $foot_links[] = $link;
     }
     $foot_links = implode(' &middot; ', $foot_links);
-      
+
 
     return
       ($console ? '<darkconsole />' : null).

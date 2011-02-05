@@ -29,6 +29,18 @@ abstract class DifferentialController extends PhabricatorController {
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x9A\x99");
     $page->appendChild($view);
+    $page->setTabs(
+      array(
+        'revisions' => array(
+          'name' => 'Revisions',
+          'href' => '/differential/',
+        ),
+        'create' => array(
+          'name' => 'Create Diff',
+          'href' => '/differential/diff/create/',
+        ),
+      ),
+      idx($data, 'tab'));
 
     $response = new AphrontWebpageResponse();
     return $response->setContent($page->render());

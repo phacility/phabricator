@@ -20,6 +20,7 @@ class AphrontFormTextAreaControl extends AphrontFormControl {
 
   const HEIGHT_VERY_SHORT = 'very-short';
   const HEIGHT_SHORT      = 'short';
+  const HEIGHT_VERY_TALL  = 'very-tall';
 
   private $height;
 
@@ -38,6 +39,7 @@ class AphrontFormTextAreaControl extends AphrontFormControl {
     switch ($this->height) {
       case self::HEIGHT_VERY_SHORT:
       case self::HEIGHT_SHORT:
+      case self::HEIGHT_VERY_TALL:
         $height_class = 'aphront-textarea-'.$this->height;
         break;
     }

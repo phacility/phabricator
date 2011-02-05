@@ -38,7 +38,7 @@ class DarkConsoleController extends PhabricatorController {
       $user->save();
       return new AphrontAjaxResponse();
     }
-    
+
     if (PhabricatorEnv::getEnvConfig('darkconsole.enabled')) {
       $user->setConsoleEnabled(!$user->getConsoleEnabled());
       $user->save();
@@ -48,7 +48,7 @@ class DarkConsoleController extends PhabricatorController {
         return id(new AphrontRedirectResponse())->setURI('/');
       }
     }
-      
+
   }
 
 }

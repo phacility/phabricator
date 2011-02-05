@@ -70,7 +70,13 @@ class AphrontRequest {
 
   final public function getStr($name, $default = null) {
     if (isset($this->requestData[$name])) {
-      return (string)$this->requestData[$name];
+      $str = (string)$this->requestData[$name];
+      // Normalize newline craziness.
+      $str = str_replace(
+        array("\r\n", "\r"),
+        array("\n", "\n"),
+        $str);
+      return $str;
     } else {
       return $default;
     }

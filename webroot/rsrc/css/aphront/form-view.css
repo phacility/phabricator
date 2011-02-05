@@ -57,6 +57,10 @@
   height: 3em;
 }
 
+.aphront-form-control-textarea textarea.aphront-textarea-very-tall {
+  height: 24em;
+}
+
 .aphront-form-control-select .aphront-form-input {
   padding-top: 2px;
 }
