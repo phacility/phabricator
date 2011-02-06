@@ -30,7 +30,7 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
     $user = $request->getUser();
 
     $pages = array(
-//      'personal'    => 'Profile',
+      'account'    => 'Account',
 //      'password'    => 'Password',
 //      'facebook'    => 'Facebook Account',
       'arcanist'    => 'Arcanist Certificate',
@@ -71,12 +71,24 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
           $user->save();
           return id(new AphrontRedirectResponse())
             ->setURI('/settings/page/arcanist/?regenerated=true');
+        case 'account':
+          if (!empty($_FILES['profile'])) {
+            $file = PhabricatorFile::newFromPHPUpload($_FILES['profile']);
+            $user->setProfileImagePHID($file->getPHID());
+          }
+          
+          $user->save();
+          return id(new AphrontRedirectResponse())
+            ->setURI('/settings/page/account/');
       }
     }
 
     switch ($this->page) {
       case 'arcanist':
         $content = $this->renderArcanistCertificateForm();
+        break;
+      case 'account':
+        $content = $this->renderAccountForm();
         break;
       default:
         $content = 'derp derp';
@@ -163,6 +175,61 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
     $regen->setWidth(AphrontPanelView::WIDTH_FORM);
 
     return $notice.$cert->render().$regen->render();
+  }
+  
+  private function renderAccountForm() {
+    $request = $this->getRequest();
+    $user = $request->getUser();
+    
+    $img_src = PhabricatorFileURI::getViewURIForPHID(
+      $user->getProfileImagePHID());
+    
+    $form = new AphrontFormView();
+    $form
+      ->setUser($user)
+      ->setEncType('multipart/form-data')
+      ->appendChild(
+        id(new AphrontFormStaticControl())
+          ->setLabel('Username')
+          ->setValue($user->getUsername()))
+      ->appendChild(
+        id(new AphrontFormStaticControl())
+          ->setLabel('Email')
+          ->setValue($user->getEmail()))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel('Real Name')
+          ->setValue($user->getRealName()))
+      ->appendChild(
+          id(new AphrontFormMarkupControl())
+            ->setValue('<hr />'))
+      ->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel('Profile Image')
+          ->setValue(
+            phutil_render_tag(
+              'img',
+              array(
+                'src' => $img_src,
+              ))))
+      ->appendChild(
+        id(new AphrontFormFileControl())
+          ->setLabel('Change Image')
+          ->setName('profile')
+          ->setCaption('Upload a 50x50px image.'))
+      ->appendChild(
+          id(new AphrontFormMarkupControl())
+            ->setValue('<hr />'))
+      ->appendChild(
+        id(new AphrontFormSubmitControl())
+          ->setValue('Save'));
+    
+    $panel = new AphrontPanelView();
+    $panel->setHeader('Profile Settings');
+    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->appendChild($form);
+   
+    return $panel->render();
   }
 
 }

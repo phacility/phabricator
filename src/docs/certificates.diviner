@@ -1,0 +1,26 @@
+@title Installing Authentication Certificates
+@group config
+
+Arcanist uses certificates to authenticate to Phabricator. Usernames and
+certificates for each host you have credentials on are stored in your
+##~/.arcrc## file under the "hosts" key. The configuration should look something
+like this:
+
+  {
+    # ...
+    "hosts" : {
+      "http://phabricator.example.com/api/" : {
+        "user" : "alincoln",
+        "cert" : "Y2FTilanoONuPzAtXayoctmX6FmIt7QjxXhWVAv2EoWpeik1Deecl3jRo"
+      }
+      # If you have accounts on more than one host, add them here.
+    }
+  }
+
+To retrieve the certificate for a Phabricator host:
+
+  - Login to Phabricator.
+  - Go to Settings > Arcanist Certificate.
+
+Copy the certificate into the "cert" field, and specify your username in the
+"user" field.

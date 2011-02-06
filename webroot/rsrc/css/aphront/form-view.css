@@ -97,3 +97,10 @@ table.aphront-form-control-checkbox-layout th {
 .aphront-form-control-checkbox-layout td input {
   width: auto;
 }
+
+.aphront-form-input hr {
+  border: none;
+  background: #bbbbbb;
+  height: 1px;
+  position: relative;
+}
