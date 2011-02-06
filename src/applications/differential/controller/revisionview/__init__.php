@@ -21,6 +21,7 @@ phutil_require_module('phabricator', 'applications/differential/view/revisioncom
 phutil_require_module('phabricator', 'applications/differential/view/revisiondetail');
 phutil_require_module('phabricator', 'applications/differential/view/revisionupdatehistory');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
+phutil_require_module('phabricator', 'view/form/error');
 
 phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');

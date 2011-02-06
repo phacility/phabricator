@@ -18,11 +18,25 @@
 
 final class AphrontErrorView extends AphrontView {
 
+  const SEVERITY_ERROR = 'error';
+  const SEVERITY_WARNING = 'warning';
+  const SEVERITY_NOTE = 'note';
+
+  const WIDTH_DEFAULT = 'default';
+  const WIDTH_WIDE = 'wide';
+
   private $title;
   private $errors;
+  private $severity;
+  private $width;
 
   public function setTitle($title) {
     $this->title = $title;
+    return $this;
+  }
+
+  public function setSeverity($severity) {
+    $this->severity = $severity;
     return $this;
   }
 
@@ -31,7 +45,14 @@ final class AphrontErrorView extends AphrontView {
     return $this;
   }
 
+  public function setWidth($width) {
+    $this->width = $width;
+    return $this;
+  }
+
   final public function render() {
+
+    require_celerity_resource('aphront-error-view-css');
 
     $errors = $this->errors;
     if ($errors) {
@@ -54,9 +75,18 @@ final class AphrontErrorView extends AphrontView {
       $title = null;
     }
 
+    $this->severity = nonempty($this->severity, self::SEVERITY_ERROR);
+    $this->width = nonempty($this->width, self::WIDTH_DEFAULT);
+
+    $more_classes = array();
+    $more_classes[] = 'aphront-error-severity-'.$this->severity;
+    $more_classes[] = 'aphront-error-width-'.$this->width;
+    $more_classes = implode(' ', $more_classes);
+
     return
-      '<div class="aphront-error-view">'.
+      '<div class="aphront-error-view '.$more_classes.'">'.
         $title.
+        $this->renderChildren().
         $list.
       '</div>';
 

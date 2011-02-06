@@ -75,14 +75,6 @@
   margin-left: 20%;
 }
 
-.aphront-error-view {
-  width: 720px;
-  margin: 1em auto;
-  border: 1px solid #aa0000;
-  padding: 1em;
-  background: #f9b9bc;
-}
-
 .aphront-form-instructions {
   margin: 0.75em 3% 1.25em;
 }

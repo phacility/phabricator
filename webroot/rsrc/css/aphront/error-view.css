@@ -1,0 +1,30 @@
+/**
+ * @provides aphront-error-view-css
+ */
+
+.aphront-error-view {
+  margin: 1em auto;
+  padding: 1em;
+
+  -webkit-box-shadow: 2px 2px 2px #999;
+  -mox-box-shadow:    2px 2px 2px #999;
+  box-shadow:         2px 2px 2px #999;
+}
+
+.aphront-error-width-default {
+  width: 720px;
+}
+
+.aphront-error-width-wide {
+  width: 95%;
+}
+
+.aphront-error-severity-error {
+  border: 1px solid #aa0000;
+  background: #f9b9bc;
+}
+
+.aphront-error-severity-warning {
+  border: 1px solid #888800;
+  background: #ffffdd;
+}

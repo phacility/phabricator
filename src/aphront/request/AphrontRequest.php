@@ -140,4 +140,10 @@ class AphrontRequest {
     return $this->user;
   }
 
+  final public function getRequestURI() {
+    $get = $_GET;
+    unset($get['__path__']);
+    return id(new PhutilURI($this->getPath()))->setQueryParams($get);
+  }
+
 }

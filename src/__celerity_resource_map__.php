@@ -25,9 +25,18 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/aphront/dialog-view.css',
   ),
+  'aphront-error-view-css' =>
+  array(
+    'uri' => '/res/43b5ae86/rsrc/css/aphront/error-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/aphront/error-view.css',
+  ),
   'aphront-form-view-css' =>
   array(
-    'uri' => '/res/0ea02f2f/rsrc/css/aphront/form-view.css',
+    'uri' => '/res/d88ebe30/rsrc/css/aphront/form-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -398,7 +407,7 @@ celerity_register_resource_map(array(
 ), array (
   'packages' =>
   array (
-    'e8e774f6' =>
+    '65be8bf1' =>
     array (
       'name' => 'core.pkg.css',
       'symbols' =>
@@ -417,7 +426,7 @@ celerity_register_resource_map(array(
         11 => 'phabricator-remarkup-css',
         12 => 'syntax-highlighting-css',
       ),
-      'uri' => '/res/pkg/e8e774f6/core.pkg.css',
+      'uri' => '/res/pkg/65be8bf1/core.pkg.css',
       'type' => 'css',
     ),
     '4b8af7b5' =>
@@ -454,19 +463,19 @@ celerity_register_resource_map(array(
   ),
   'reverse' =>
   array (
-    'phabricator-core-css' => 'e8e774f6',
-    'phabricator-core-buttons-css' => 'e8e774f6',
-    'phabricator-standard-page-view' => 'e8e774f6',
-    'aphront-dialog-view-css' => 'e8e774f6',
-    'aphront-form-view-css' => 'e8e774f6',
-    'aphront-panel-view-css' => 'e8e774f6',
-    'aphront-side-nav-view-css' => 'e8e774f6',
-    'aphront-table-view-css' => 'e8e774f6',
-    'aphront-tokenizer-control-css' => 'e8e774f6',
-    'aphront-typeahead-control-css' => 'e8e774f6',
-    'phabricator-directory-css' => 'e8e774f6',
-    'phabricator-remarkup-css' => 'e8e774f6',
-    'syntax-highlighting-css' => 'e8e774f6',
+    'phabricator-core-css' => '65be8bf1',
+    'phabricator-core-buttons-css' => '65be8bf1',
+    'phabricator-standard-page-view' => '65be8bf1',
+    'aphront-dialog-view-css' => '65be8bf1',
+    'aphront-form-view-css' => '65be8bf1',
+    'aphront-panel-view-css' => '65be8bf1',
+    'aphront-side-nav-view-css' => '65be8bf1',
+    'aphront-table-view-css' => '65be8bf1',
+    'aphront-tokenizer-control-css' => '65be8bf1',
+    'aphront-typeahead-control-css' => '65be8bf1',
+    'phabricator-directory-css' => '65be8bf1',
+    'phabricator-remarkup-css' => '65be8bf1',
+    'syntax-highlighting-css' => '65be8bf1',
     'differential-core-view-css' => '4b8af7b5',
     'differential-changeset-view-css' => '4b8af7b5',
     'differential-revision-detail-css' => '4b8af7b5',

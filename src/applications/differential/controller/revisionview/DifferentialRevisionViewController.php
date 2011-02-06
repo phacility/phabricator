@@ -68,6 +68,35 @@ class DifferentialRevisionViewController extends DifferentialController {
     $handles = id(new PhabricatorObjectHandleData($object_phids))
       ->loadHandles();
 
+    $request_uri = $request->getRequestURI();
+
+    $limit = 100;
+    $large = $request->getStr('large');
+    if (count($changesets) > $limit && !$large) {
+      $count = number_format(count($changesets));
+      $warning = new AphrontErrorView();
+      $warning->setTitle('Very Large Diff');
+      $warning->setSeverity(AphrontErrorView::SEVERITY_WARNING);
+      $warning->setWidth(AphrontErrorView::WIDTH_WIDE);
+      $warning->appendChild(
+        "<p>This diff is very large and affects {$count} files. Only ".
+        "the first {$limit} files are shown. ".
+        "<strong>".
+          phutil_render_tag(
+            'a',
+            array(
+              'href' => $request_uri->alter('large', 'true'),
+            ),
+            'Show All Files').
+        "</strong>");
+      $warning = $warning->render();
+
+      $visible_changesets = array_slice($changesets, 0, $limit, true);
+    } else {
+      $warning = null;
+      $visible_changesets = $changesets;
+    }
+
     $revision_detail = new DifferentialRevisionDetailView();
     $revision_detail->setRevision($revision);
 
@@ -93,7 +122,7 @@ class DifferentialRevisionViewController extends DifferentialController {
     $toc_view->setChangesets($changesets);
 
     $changeset_view = new DifferentialChangesetListView();
-    $changeset_view->setChangesets($changesets);
+    $changeset_view->setChangesets($visible_changesets);
     $changeset_view->setEditable(true);
     $changeset_view->setRevision($revision);
     $changeset_view->setVsMap($vs_map);
@@ -110,6 +139,7 @@ class DifferentialRevisionViewController extends DifferentialController {
         $comment_view->render().
         $diff_history->render().
         $toc_view->render().
+        $warning.
         $changeset_view->render().
         $comment_form->render().
       '</div>',
@@ -442,169 +472,6 @@ class DifferentialRevisionViewController extends DifferentialController {
 
 
 
-/*
-// TODO
-//    $sandcastle = $this->getSandcastleURI($diff);
-//    if ($sandcastle) {
-//      $fields['Sandcastle'] = <a href={$sandcastle}>{$sandcastle}</a>;
-//    }
-
-    $path = $diff->getSourcePath();
-    if ($path) {
-      $host = $diff->getSourceMachine();
-      $branch = $diff->getGitBranch() ? ' (' . $diff->getGitBranch() . ')' : '';
-
-      if ($host) {
-// TODO
-//        $user = $handles[$this->getRequest()->getViewerContext()->getUserID()]
-//          ->getName();
-        $user = 'TODO';
-        $fields['Path'] =
-          <x:frag>
-            <a href={"ssh://{$user}@{$host}"}>{$host}</a>:{$path}{$branch}
-          </x:frag>;
-      } else {
-        $fields['Path'] = $path;
-      }
-    }
-
-
-    $ccs = $revision->getCCFBIDs();
-    if ($ccs) {
-      $links = array();
-      foreach ($ccs as $cc) {
-        $links[] = <tools:handle handle={$handles[$cc]}
-                                   link={true} />;
-      }
-      $fields['CCs'] = array_implode(', ', $links);
-    }
-
-    $blame_rev = $revision->getSvnBlameRevision();
-    if ($blame_rev) {
-      if ($revision->getRepositoryRef() && is_numeric($blame_rev)) {
-        $ref = new RevisionRef($revision->getRepositoryRef(), $blame_rev);
-        $fields['Blame Revision'] =
-          <a href={URI($ref->getDetailURL())}>
-            {$ref->getName()}
-          </a>;
-      } else {
-        $fields['Blame Revision'] = $blame_rev;
-      }
-    }
-
-    $tasks = $revision->getTaskHandles();
-
-    if ($tasks) {
-      $links = array();
-      foreach ($tasks as $task) {
-        $links[] = <tools:handle handle={$task} link={true} />;
-      }
-      $fields['Tasks'] = array_implode(<br />, $links);
-    }
-
-    $bugzilla_id = $revision->getBugzillaID();
-    if ($bugzilla_id) {
-      $href = 'http://bugs.developers.facebook.com/show_bug.cgi?id='.
-        $bugzilla_id;
-      $fields['Bugzilla'] = <a href={$href}>{'#'.$bugzilla_id}</a>;
-    }
-
-    $fields['Apply Patch'] = <tt>arc patch --revision {$revision->getID()}</tt>;
-
-    if ($diff->getParentRevisionID()) {
-      $parent = id(new DifferentialRevision())->load(
-        $diff->getParentRevisionID());
-      if ($parent) {
-        $fields['Depends On'] =
-          <a href={$parent->getURI()}>
-            D{$parent->getID()}: {$parent->getName()}
-          </a>;
-      }
-    }
-
-    $star = <span class="star">{"\xE2\x98\x85"}</span>;
-
-    Javelin::initBehavior('differential-star-more');
-
-    switch ($diff->getLinted()) {
-      case Diff::LINT_FAIL:
-        $more = $this->renderDiffPropertyMoreLink($diff, 'lint');
-        $fields['Lint'] =
-          <x:frag>
-            <span class="star-warn">{$star} Lint Failures</span>
-            {$more}
-          </x:frag>;
-        break;
-      case Diff::LINT_WARNINGS:
-        $more = $this->renderDiffPropertyMoreLink($diff, 'lint');
-        $fields['Lint'] =
-          <x:frag>
-            <span class="star-warn">{$star} Lint Warnings</span>
-            {$more}
-          </x:frag>;
-        break;
-      case Diff::LINT_OKAY:
-        $fields['Lint'] =
-          <span class="star-okay">{$star} Lint Free</span>;
-        break;
-      default:
-      case Diff::LINT_NO:
-        $fields['Lint'] =
-          <span class="star-none">{$star} Not Linted</span>;
-        break;
-    }
-
-    $unit_details = false;
-    switch ($diff->getUnitTested()) {
-      case Diff::UNIT_FAIL:
-        $fields['Unit Tests'] =
-            <span class="star-warn">{$star} Unit Test Failures</span>;
-        $unit_details = true;
-        break;
-      case Diff::UNIT_WARN:
-        $fields['Unit Tests'] =
-            <span class="star-warn">{$star} Unit Test Warnings</span>;
-        $unit_details = true;
-        break;
-      case Diff::UNIT_OKAY:
-        $fields['Unit Tests'] =
-          <span class="star-okay">{$star} Unit Tests Passed</span>;
-        $unit_details = true;
-        break;
-      case Diff::UNIT_NO_TESTS:
-        $fields['Unit Tests'] =
-          <span class="star-none">{$star} No Test Coverage</span>;
-        break;
-      case Diff::UNIT_NO:
-      default:
-        $fields['Unit Tests'] =
-          <span class="star-none">{$star} Not Unit Tested</span>;
-        break;
-    }
-
-    if ($unit_details) {
-      $fields['Unit Tests'] =
-        <x:frag>
-          {$fields['Unit Tests']}
-          {$this->renderDiffPropertyMoreLink($diff, 'unit')}
-        </x:frag>;
-    }
-
-    $platform_impact = $revision->getPlatformImpact();
-    if ($platform_impact) {
-      $fields['Platform Impact'] =
-        <text linebreaks="true">{$platform_impact}</text>;
-    }
-
-    return $fields;
-  }
-
-
-}
-
-/*
-
-
 
   protected function getSandcastleURI(Diff $diff) {
     $uri = $this->getDiffProperty($diff, 'facebook:sandcastle_uri');
@@ -625,158 +492,6 @@ class DifferentialRevisionViewController extends DifferentialController {
     return idx($this->diffProperties[$diff_id], $property, $default);
   }
 
-  public function process() {
-    $uri = $this->getRequest()->getPath();
-    if (starts_with($uri, '/d')) {
-      return <alite:redirect uri={strtoupper($uri)}/>;
-    }
-
-    $revision = id(new DifferentialRevision())->load($this->revisionID);
-    if (!$revision) {
-      throw new Exception("Bad revision ID.");
-    }
-
-    $diffs = id(new Diff())->loadAllWhere(
-      'revisionID = %d',
-      $revision->getID());
-    $diffs = array_psort($diffs, 'getID');
-
-    $request = $this->getRequest();
-    $new = $request->getInt('new');
-    $old = $request->getInt('old');
-
-    if (($new || $old) && $new <= $old) {
-      throw new Exception(
-        "You can only view the diff of an older update relative to a newer ".
-        "update.");
-    }
-
-    if ($new && empty($diffs[$new])) {
-      throw new Exception(
-        "The 'new' diff does not exist.");
-    } else if ($new) {
-      $diff = $diffs[$new];
-    } else {
-      $diff = end($diffs);
-      if (!$diff) {
-        throw new Exception("No diff attached to this revision?");
-      }
-      $new = $diff->getID();
-    }
-
-    $target_diff = $diff;
-
-    if ($old && empty($diffs[$old])) {
-      throw new Exception(
-        "The 'old' diff does not exist.");
-    }
-
-    $rows = array(array('Base', '', true, false, null,
-      $diff->getSourceControlBaseRevision()
-        ? $diff->getSourceControlBaseRevision()
-        : <em>Master</em>));
-    $idx = 0;
-    foreach ($diffs as $cdiff) {
-      $rows[] = array(
-        'Diff '.(++$idx),
-        $cdiff->getID(),
-        $cdiff->getID() != max(array_pull($diffs, 'getID')),
-        true,
-        $cdiff->getDateCreated(),
-        $cdiff->getDescription()
-          ? $cdiff->getDescription()
-          : <em>No description available.</em>,
-        $cdiff->getUnitTested(),
-        $cdiff->getLinted());
-    }
-
-    $diff_table =
-      <table class="differential-diff-differ">
-        <tr>
-          <th>Diff</th>
-          <th>Diff ID</th>
-          <th>Description</th>
-          <th>Age</th>
-          <th>Lint</th>
-          <th>Unit</th>
-        </tr>
-      </table>;
-    $ii = 0;
-
-    $old_ids = array();
-    foreach ($rows as $row) {
-      $xold = null;
-      if ($row[2]) {
-        $lradio = <input name="old" value={$row[1]} type="radio"
-          disabled={$row[1] >= $new}
-          checked={$old == $row[1]} />;
-        if ($old == $row[1]) {
-          $xold = 'old-now';
-        }
-        $old_ids[] = $lradio->requireUniqueID();
-      } else {
-        $lradio = null;
-      }
-      $xnew = null;
-      if ($row[3]) {
-        $rradio = <input name="new" value={$row[1]} type="radio"
-          sigil="new-radio"
-          checked={$new == $row[1]} />;
-        if ($new == $row[1]) {
-          $xnew = 'new-now';
-        }
-      } else {
-        $rradio = null;
-      }
-
-      if ($row[3]) {
-        $unit_star = 'star-none';
-        switch ($row[6]) {
-          case Diff::UNIT_FAIL:
-          case Diff::UNIT_WARN: $unit_star = 'star-warn'; break;
-          case Diff::UNIT_OKAY: $unit_star = 'star-okay'; break;
-        }
-
-        $lint_star = 'star-none';
-        switch ($row[7]) {
-          case Diff::LINT_FAIL:
-          case Diff::LINT_WARNINGS: $lint_star = 'star-warn'; break;
-          case Diff::LINT_OKAY:     $lint_star = 'star-okay'; break;
-        }
-
-        $star = "\xE2\x98\x85";
-
-        $unit_star =
-          <span class={$unit_star}>
-            <span class="star">{$star}</span>
-          </span>;
-
-        $lint_star =
-          <span class={$lint_star}>
-            <span class="star">{$star}</span>
-          </span>;
-      } else {
-        $unit_star = null;
-        $lint_star = null;
-      }
-
-      $diff_table->appendChild(
-        <tr class={++$ii % 2 ? 'alt' : null}>
-          <td class="name">{$row[0]}</td>
-          <td class="diffid">{$row[1]}</td>
-          <td class="desc">{$row[5]}</td>
-          <td class="age">{$row[4] ? ago(time() - $row[4]) : null}</td>
-          <td class="star">{$lint_star}</td>
-          <td class="star">{$unit_star}</td>
-          <td class={"old {$xold}"}>{$lradio}</td>
-          <td class={"new {$xnew}"}>{$rradio}</td>
-        </tr>);
-    }
-
-    Javelin::initBehavior('differential-diff-radios', array(
-      'radios' => $old_ids,
-    ));
-
     $diff_table->appendChild(
       <tr>
         <td colspan="8" class="diff-differ-submit">
@@ -790,15 +505,6 @@ class DifferentialRevisionViewController extends DifferentialController {
           <button type="submit">Show Diff</button>
         </td>
       </tr>);
-
-    $diff_table =
-      <div class="differential-table-of-contents">
-        <h1>Revision Update History</h1>
-        <form action={URI::getRequestURI()} method="get">
-          {$diff_table}
-        </form>
-      </div>;
-
 
     $load_ids = array_filter(array($old, $diff->getID()));
 
@@ -820,24 +526,6 @@ class DifferentialRevisionViewController extends DifferentialController {
 
 
     $changesets = array_psort($changesets, 'getSortKey');
-
-    $warning = null;
-    $limit = 100;
-    if (count($changesets) > $limit && !$this->getRequest()->getStr('large')) {
-      $count = number_format(count($changesets));
-      $warning =
-        <tools:notice title="Very Large Diff">
-          This diff is extremely large and affects {$count} files. Only the
-          first {number_format($limit)} files are shown.
-          <strong>
-            <a href={$revision->getURI().'?large=true'}>Show All Files</a>
-          </strong>
-        </tools:notice>;
-      $changesets = array_slice($changesets, 0, $limit);
-      if (!$old) {
-        $visible_changesets = array_pull($changesets, 'getID');
-      }
-    }
 
 
     $feedback = id(new DifferentialFeedback())->loadAllWithRevision($revision);
@@ -955,15 +643,6 @@ class DifferentialRevisionViewController extends DifferentialController {
          target="_blank"
          tabindex="4">Remarkup Reference</a>;
 
-    Javelin::initBehavior(
-      'differential-add-reviewers',
-      array(
-        'src'       => redirect_str('/datasource/employee/', 'tools'),
-        'tokenizer' => 'reviewer-tokenizer',
-        'select'    => 'feedback-action',
-        'row'       => 'reviewer-tokenizer-row',
-      ));
-
 
     $notice = null;
     if ($this->getRequest()->getBool('diff_changed')) {
@@ -974,24 +653,6 @@ class DifferentialRevisionViewController extends DifferentialController {
           <strong>old diff</strong>.
         </tools:notice>;
     }
-
-    return
-      <differential:standard-page title={$revision->getName()}>
-        <div class="differential-primary-pane">
-          {$warning}
-          {$notice}
-          {$info}
-          <div class="differential-feedback">
-            {$feed}
-          </div>
-          {$diff_table}
-          {$table_of_contents}
-          {$against_warn}
-          {$detail_view}
-          {$feedback_form}
-        </div>
-      </differential:standard-page>;
-  }
 
   protected function getQuickLinks(DifferentialRevision $revision) {
 
@@ -1082,180 +743,6 @@ class DifferentialRevisionViewController extends DifferentialController {
     return $list;
   }
 
-  protected function getDetailFields(
-    DifferentialRevision $revision,
-    Diff $diff,
-    array $handles) {
-
-    $fields = array();
-    $fields['Revision Status'] = $this->getRevisionStatusDisplay($revision);
-
-    $author = $revision->getOwnerID();
-    $fields['Author'] = <tools:handle handle={$handles[$author]}
-                                        link={true} />;
-
-    $sandcastle = $this->getSandcastleURI($diff);
-    if ($sandcastle) {
-      $fields['Sandcastle'] = <a href={$sandcastle}>{$sandcastle}</a>;
-    }
-
-    $path = $diff->getSourcePath();
-    if ($path) {
-      $host = $diff->getSourceMachine();
-      $branch = $diff->getGitBranch() ? ' (' . $diff->getGitBranch() . ')' : '';
-
-      if ($host) {
-        $user = $handles[$this->getRequest()->getViewerContext()->getUserID()]
-          ->getName();
-        $fields['Path'] =
-          <x:frag>
-            <a href={"ssh://{$user}@{$host}"}>{$host}</a>:{$path}{$branch}
-          </x:frag>;
-      } else {
-        $fields['Path'] = $path;
-      }
-    }
-
-    $reviewer_links = array();
-    foreach ($revision->getReviewers() as $reviewer) {
-      $reviewer_links[] = <tools:handle handle={$handles[$reviewer]}
-                                          link={true} />;
-    }
-    if ($reviewer_links) {
-      $fields['Reviewers'] = array_implode(', ', $reviewer_links);
-    } else {
-      $fields['Reviewers'] = <em>None</em>;
-    }
-
-    $ccs = $revision->getCCFBIDs();
-    if ($ccs) {
-      $links = array();
-      foreach ($ccs as $cc) {
-        $links[] = <tools:handle handle={$handles[$cc]}
-                                   link={true} />;
-      }
-      $fields['CCs'] = array_implode(', ', $links);
-    }
-
-    $blame_rev = $revision->getSvnBlameRevision();
-    if ($blame_rev) {
-      if ($revision->getRepositoryRef() && is_numeric($blame_rev)) {
-        $ref = new RevisionRef($revision->getRepositoryRef(), $blame_rev);
-        $fields['Blame Revision'] =
-          <a href={URI($ref->getDetailURL())}>
-            {$ref->getName()}
-          </a>;
-      } else {
-        $fields['Blame Revision'] = $blame_rev;
-      }
-    }
-
-    $tasks = $revision->getTaskHandles();
-
-    if ($tasks) {
-      $links = array();
-      foreach ($tasks as $task) {
-        $links[] = <tools:handle handle={$task} link={true} />;
-      }
-      $fields['Tasks'] = array_implode(<br />, $links);
-    }
-
-    $bugzilla_id = $revision->getBugzillaID();
-    if ($bugzilla_id) {
-      $href = 'http://bugs.developers.facebook.com/show_bug.cgi?id='.
-        $bugzilla_id;
-      $fields['Bugzilla'] = <a href={$href}>{'#'.$bugzilla_id}</a>;
-    }
-
-    $fields['Apply Patch'] = <tt>arc patch --revision {$revision->getID()}</tt>;
-
-    if ($diff->getParentRevisionID()) {
-      $parent = id(new DifferentialRevision())->load(
-        $diff->getParentRevisionID());
-      if ($parent) {
-        $fields['Depends On'] =
-          <a href={$parent->getURI()}>
-            D{$parent->getID()}: {$parent->getName()}
-          </a>;
-      }
-    }
-
-    $star = <span class="star">{"\xE2\x98\x85"}</span>;
-
-    Javelin::initBehavior('differential-star-more');
-
-    switch ($diff->getLinted()) {
-      case Diff::LINT_FAIL:
-        $more = $this->renderDiffPropertyMoreLink($diff, 'lint');
-        $fields['Lint'] =
-          <x:frag>
-            <span class="star-warn">{$star} Lint Failures</span>
-            {$more}
-          </x:frag>;
-        break;
-      case Diff::LINT_WARNINGS:
-        $more = $this->renderDiffPropertyMoreLink($diff, 'lint');
-        $fields['Lint'] =
-          <x:frag>
-            <span class="star-warn">{$star} Lint Warnings</span>
-            {$more}
-          </x:frag>;
-        break;
-      case Diff::LINT_OKAY:
-        $fields['Lint'] =
-          <span class="star-okay">{$star} Lint Free</span>;
-        break;
-      default:
-      case Diff::LINT_NO:
-        $fields['Lint'] =
-          <span class="star-none">{$star} Not Linted</span>;
-        break;
-    }
-
-    $unit_details = false;
-    switch ($diff->getUnitTested()) {
-      case Diff::UNIT_FAIL:
-        $fields['Unit Tests'] =
-            <span class="star-warn">{$star} Unit Test Failures</span>;
-        $unit_details = true;
-        break;
-      case Diff::UNIT_WARN:
-        $fields['Unit Tests'] =
-            <span class="star-warn">{$star} Unit Test Warnings</span>;
-        $unit_details = true;
-        break;
-      case Diff::UNIT_OKAY:
-        $fields['Unit Tests'] =
-          <span class="star-okay">{$star} Unit Tests Passed</span>;
-        $unit_details = true;
-        break;
-      case Diff::UNIT_NO_TESTS:
-        $fields['Unit Tests'] =
-          <span class="star-none">{$star} No Test Coverage</span>;
-        break;
-      case Diff::UNIT_NO:
-      default:
-        $fields['Unit Tests'] =
-          <span class="star-none">{$star} Not Unit Tested</span>;
-        break;
-    }
-
-    if ($unit_details) {
-      $fields['Unit Tests'] =
-        <x:frag>
-          {$fields['Unit Tests']}
-          {$this->renderDiffPropertyMoreLink($diff, 'unit')}
-        </x:frag>;
-    }
-
-    $platform_impact = $revision->getPlatformImpact();
-    if ($platform_impact) {
-      $fields['Platform Impact'] =
-        <text linebreaks="true">{$platform_impact}</text>;
-    }
-
-    return $fields;
-  }
 
   protected function renderDiffPropertyMoreLink(Diff $diff, $name) {
     $target = <div class="star-more"
@@ -1346,95 +833,6 @@ class DifferentialRevisionViewController extends DifferentialController {
     return $message;
   }
 
-  protected function renderFeedbackList(array $xhp, array $obj, $viewer_id) {
-
-    // Use magical heuristics to try to hide older comments.
-
-    $obj = array_reverse($obj);
-    $obj = array_values($obj);
-    $xhp = array_reverse($xhp);
-    $xhp = array_values($xhp);
-
-    $last_comment = null;
-    foreach ($obj as $position => $feedback) {
-      if ($feedback->getUserID() == $viewer_id) {
-        if ($last_comment === null) {
-          $last_comment = $position;
-        } else if ($last_comment == $position - 1) {
-          // If you made consecuitive comments, show them all. This is a spaz
-          // rule for epriestley comments.
-          $last_comment = $position;
-        }
-      }
-    }
-
-    $header = array();
-
-    $hide = array();
-    if ($last_comment !== null) {
-      foreach ($obj as $position => $feedback) {
-        $action = $feedback->getAction();
-        if ($action == 'testplan' || $action == 'summarize') {
-          // Always show summary and test plan.
-          $header[] = $xhp[$position];
-          unset($xhp[$position]);
-          continue;
-        }
-
-        if ($position <= $last_comment) {
-          // Always show comments after your last comment.
-          continue;
-        }
-
-        if ($position < 3) {
-          // Always show the most recent 3 comments.
-          continue;
-        }
-
-        // Hide everything else.
-        $hide[] = $position;
-      }
-    }
-
-    if (count($hide) <= 3) {
-      // Don't hide if there's not much to hide.
-      $hide = array();
-    }
-
-    $header = array_reverse($header);
-
-    $hidden = array_select_keys($xhp, $hide);
-    $visible = array_diff_key($xhp, $hidden);
-
-    $visible = array_reverse($visible);
-    $hidden  = array_reverse($hidden);
-
-    if ($hidden) {
-      Javelin::initBehavior(
-        'differential-show-all-feedback',
-        array(
-          'markup' => id(<x:frag>{$hidden}</x:frag>)->toString(),
-        ));
-      $hidden =
-        <div sigil="all-feedback-container">
-          <div class="older-replies-are-hidden">
-            {number_format(count($hidden))} older replies are hidden.
-            <a href="#" sigil="show-all-feedback"
-              mustcapture="true">Show all feedback.</a>
-          </div>
-        </div>;
-    } else {
-      $hidden = null;
-    }
-
-    return
-      <x:frag>
-        {$header}
-        {$hidden}
-        {$visible}
-      </x:frag>;
-  }
-
 }
   protected function getDetailFields(
     DifferentialRevision $revision,
@@ -1444,52 +842,12 @@ class DifferentialRevisionViewController extends DifferentialController {
     $fields = array();
     $fields['Revision Status'] = $this->getRevisionStatusDisplay($revision);
 
-    $author = $revision->getOwnerID();
-    $fields['Author'] = <tools:handle handle={$handles[$author]}
-                                        link={true} />;
 
     $sandcastle = $this->getSandcastleURI($diff);
     if ($sandcastle) {
       $fields['Sandcastle'] = <a href={$sandcastle}>{$sandcastle}</a>;
     }
 
-    $path = $diff->getSourcePath();
-    if ($path) {
-      $host = $diff->getSourceMachine();
-      $branch = $diff->getGitBranch() ? ' (' . $diff->getGitBranch() . ')' : '';
-
-      if ($host) {
-        $user = $handles[$this->getRequest()->getViewerContext()->getUserID()]
-          ->getName();
-        $fields['Path'] =
-          <x:frag>
-            <a href={"ssh://{$user}@{$host}"}>{$host}</a>:{$path}{$branch}
-          </x:frag>;
-      } else {
-        $fields['Path'] = $path;
-      }
-    }
-
-    $reviewer_links = array();
-    foreach ($revision->getReviewers() as $reviewer) {
-      $reviewer_links[] = <tools:handle handle={$handles[$reviewer]}
-                                          link={true} />;
-    }
-    if ($reviewer_links) {
-      $fields['Reviewers'] = array_implode(', ', $reviewer_links);
-    } else {
-      $fields['Reviewers'] = <em>None</em>;
-    }
-
-    $ccs = $revision->getCCFBIDs();
-    if ($ccs) {
-      $links = array();
-      foreach ($ccs as $cc) {
-        $links[] = <tools:handle handle={$handles[$cc]}
-                                   link={true} />;
-      }
-      $fields['CCs'] = array_implode(', ', $links);
-    }
 
     $blame_rev = $revision->getSvnBlameRevision();
     if ($blame_rev) {
@@ -1534,66 +892,7 @@ class DifferentialRevisionViewController extends DifferentialController {
       }
     }
 
-    $star = <span class="star">{"\xE2\x98\x85"}</span>;
-
     Javelin::initBehavior('differential-star-more');
-
-    switch ($diff->getLinted()) {
-      case Diff::LINT_FAIL:
-        $more = $this->renderDiffPropertyMoreLink($diff, 'lint');
-        $fields['Lint'] =
-          <x:frag>
-            <span class="star-warn">{$star} Lint Failures</span>
-            {$more}
-          </x:frag>;
-        break;
-      case Diff::LINT_WARNINGS:
-        $more = $this->renderDiffPropertyMoreLink($diff, 'lint');
-        $fields['Lint'] =
-          <x:frag>
-            <span class="star-warn">{$star} Lint Warnings</span>
-            {$more}
-          </x:frag>;
-        break;
-      case Diff::LINT_OKAY:
-        $fields['Lint'] =
-          <span class="star-okay">{$star} Lint Free</span>;
-        break;
-      default:
-      case Diff::LINT_NO:
-        $fields['Lint'] =
-          <span class="star-none">{$star} Not Linted</span>;
-        break;
-    }
-
-    $unit_details = false;
-    switch ($diff->getUnitTested()) {
-      case Diff::UNIT_FAIL:
-        $fields['Unit Tests'] =
-            <span class="star-warn">{$star} Unit Test Failures</span>;
-        $unit_details = true;
-        break;
-      case Diff::UNIT_WARN:
-        $fields['Unit Tests'] =
-            <span class="star-warn">{$star} Unit Test Warnings</span>;
-        $unit_details = true;
-        break;
-      case Diff::UNIT_OKAY:
-        $fields['Unit Tests'] =
-          <span class="star-okay">{$star} Unit Tests Passed</span>;
-        $unit_details = true;
-        break;
-      case Diff::UNIT_NO_TESTS:
-        $fields['Unit Tests'] =
-          <span class="star-none">{$star} No Test Coverage</span>;
-        break;
-      case Diff::UNIT_NO:
-      default:
-        $fields['Unit Tests'] =
-          <span class="star-none">{$star} Not Unit Tested</span>;
-        break;
-    }
-
     if ($unit_details) {
       $fields['Unit Tests'] =
         <x:frag>
