@@ -47,7 +47,14 @@ class DifferentialCommentSaveController extends DifferentialController {
       ->save();
 
     // TODO: Diff change detection?
-    // TODO: Clear draft
+
+    $draft = id(new PhabricatorDraft())->loadOneWhere(
+      'authorPHID = %s AND draftKey = %s',
+      $request->getUser()->getPHID(),
+      'differential-comment-'.$revision->getID());
+    if ($draft) {
+      $draft->delete();
+    }
 
     return id(new AphrontRedirectResponse())
       ->setURI('/D'.$revision->getID());

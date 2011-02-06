@@ -27,6 +27,7 @@ class DifferentialRevisionViewController extends DifferentialController {
   public function processRequest() {
 
     $request = $this->getRequest();
+    $user = $request->getUser();
 
     $revision = id(new DifferentialRevision())->load($this->revisionID);
     if (!$revision) {
@@ -60,7 +61,7 @@ class DifferentialRevisionViewController extends DifferentialController {
       $revision->getCCPHIDs(),
       array(
         $revision->getAuthorPHID(),
-        $request->getUser()->getPHID(),
+        $user->getPHID(),
       ),
       mpull($comments, 'getAuthorPHID'));
     $object_phids = array_unique($object_phids);
@@ -111,7 +112,7 @@ class DifferentialRevisionViewController extends DifferentialController {
     $comment_view->setHandles($handles);
     $comment_view->setInlineComments($inlines);
     $comment_view->setChangesets($changesets);
-    $comment_view->setUser($request->getUser());
+    $comment_view->setUser($user);
 
     $diff_history = new DifferentialRevisionUpdateHistoryView();
     $diff_history->setDiffs($diffs);
@@ -127,11 +128,22 @@ class DifferentialRevisionViewController extends DifferentialController {
     $changeset_view->setRevision($revision);
     $changeset_view->setVsMap($vs_map);
 
+    $draft = id(new PhabricatorDraft())->loadOneWhere(
+      'authorPHID = %s AND draftKey = %s',
+      $user->getPHID(),
+      'differential-comment-'.$revision->getID());
+    if ($draft) {
+      $draft = $draft->getDraft();
+    } else {
+      $draft = null;
+    }
+
     $comment_form = new DifferentialAddCommentView();
     $comment_form->setRevision($revision);
     $comment_form->setActions($this->getRevisionCommentActions($revision));
     $comment_form->setActionURI('/differential/comment/save/');
-    $comment_form->setUser($request->getUser());
+    $comment_form->setUser($user);
+    $comment_form->setDraft($draft);
 
     return $this->buildStandardPageResponse(
       '<div class="differential-primary-pane">'.

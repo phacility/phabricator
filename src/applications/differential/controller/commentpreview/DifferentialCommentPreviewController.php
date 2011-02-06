@@ -47,6 +47,13 @@ class DifferentialCommentPreviewController extends DifferentialController {
     $view->setMarkupEngine($engine);
     $view->setPreview(true);
 
+    $draft = new PhabricatorDraft();
+    $draft
+      ->setAuthorPHID($author_phid)
+      ->setDraftKey('differential-comment-'.$this->id)
+      ->setDraft($comment->getContent())
+      ->replace();
+
     return id(new AphrontAjaxResponse())
       ->setContent($view->render());
   }

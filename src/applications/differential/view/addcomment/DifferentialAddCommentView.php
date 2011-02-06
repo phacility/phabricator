@@ -22,6 +22,7 @@ final class DifferentialAddCommentView extends AphrontView {
   private $actions;
   private $actionURI;
   private $user;
+  private $draft;
 
   public function setRevision($revision) {
     $this->revision = $revision;
@@ -39,6 +40,11 @@ final class DifferentialAddCommentView extends AphrontView {
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
+  }
+
+  public function setDraft($draft) {
+    $this->draft = $draft;
+    return $this;
   }
 
   public function render() {
@@ -75,7 +81,8 @@ final class DifferentialAddCommentView extends AphrontView {
         id(new AphrontFormTextAreaControl())
           ->setName('comment')
           ->setID('comment-content')
-          ->setLabel('Comment'))
+          ->setLabel('Comment')
+          ->setValue($this->draft))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Comment'));

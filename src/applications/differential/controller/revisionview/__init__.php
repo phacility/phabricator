@@ -20,6 +20,7 @@ phutil_require_module('phabricator', 'applications/differential/view/difftableof
 phutil_require_module('phabricator', 'applications/differential/view/revisioncommentlist');
 phutil_require_module('phabricator', 'applications/differential/view/revisiondetail');
 phutil_require_module('phabricator', 'applications/differential/view/revisionupdatehistory');
+phutil_require_module('phabricator', 'applications/draft/storage/draft');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'view/form/error');
 

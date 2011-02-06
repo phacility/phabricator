@@ -27,7 +27,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-error-view-css' =>
   array(
-    'uri' => '/res/43b5ae86/rsrc/css/aphront/error-view.css',
+    'uri' => '/res/5ea93eb4/rsrc/css/aphront/error-view.css',
     'type' => 'css',
     'requires' =>
     array(
