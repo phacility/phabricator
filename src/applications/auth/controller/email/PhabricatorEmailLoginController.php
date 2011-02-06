@@ -63,11 +63,13 @@ class PhabricatorEmailLoginController extends PhabricatorAuthController {
           $etoken = $target_user->generateEmailToken();
 
           $mail = new PhabricatorMetaMTAMail();
-          $mail->setSubject('Phabricator Email Authentication');
+          $mail->setSubject('[Phabricator] Password Reset');
+          $mail->setFrom($target_user->getPHID());
           $mail->addTos(
             array(
-              $target_user->getEmail(),
+              $target_user->getPHID(),
             ));
+          $mail->setReplyTo(PhabricatorEnv::getEnvConfig('metamta.noreply'));
           $mail->setBody(
             "blah blah blah ".
               PhabricatorEnv::getURI('/login/etoken/'.$etoken.'/').'?email='.phutil_escape_uri($target_user->getEmail()));
