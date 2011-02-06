@@ -37,6 +37,42 @@ class DifferentialRevisionEditor {
     $this->actorPHID = $actor_phid;
   }
 
+  public static function newRevisionFromConduitWithDiff(
+    array $fields,
+    DifferentialDiff $diff,
+    $user_phid) {
+
+    $revision = new DifferentialRevision();
+    $revision->setPHID($revision->generatePHID());
+
+    $revision->setAuthorPHID($user_phid);
+    $revision->setStatus(DifferentialRevisionStatus::NEEDS_REVIEW);
+
+    $editor = new DifferentialRevisionEditor($revision, $user_phid);
+
+    $editor->copyFieldsFromConduit($fields);
+
+    $editor->addDiff($diff, null);
+    $editor->save();
+
+    return $revision;
+  }
+
+  public function copyFieldsFromConduit(array $fields) {
+
+    $revision = $this->revision;
+
+    $revision->setTitle((string)$fields['title']);
+    $revision->setSummary((string)$fields['summary']);
+    $revision->setTestPlan((string)$fields['testPlan']);
+    $revision->setBlameRevision((string)$fields['blameRevision']);
+    $revision->setRevertPlan((string)$fields['revertPlan']);
+
+    $this->setReviewers($fields['reviewerPHIDs']);
+    $this->setCCPHIDs($fields['ccPHIDs']);
+  }
+
+
 /*
   public static function newRevisionFromRawMessageWithDiff(
     DifferentialRawMessage $message,
@@ -72,29 +108,6 @@ class DifferentialRevisionEditor {
     return $revision;
   }
 
-  public static function newRevisionFromConduitWithDiff(
-    array $fields,
-    Diff $diff,
-    $user) {
-
-    $revision = new DifferentialRevision();
-    $revision->setPHID($revision->generatePHID());
-
-    $revision->setOwnerID($user);
-    $revision->setStatus(DifferentialRevisionStatus::NEEDS_REVIEW);
-    $revision->attachReviewers(array());
-    $revision->attachCCPHIDs(array());
-
-    $editor = new DifferentialRevisionEditor($revision, $user);
-
-    $editor->copyFieldFromConduit($fields);
-
-    $editor->addDiff($diff, null);
-    $editor->save();
-
-    return $revision;
-  }
-
 
   public static function copyFields(
     DifferentialRevisionEditor $editor,
@@ -114,22 +127,6 @@ class DifferentialRevisionEditor {
     $editor->setCCPHIDs($message->getCCPHIDs());
   }
 
-  public function copyFieldFromConduit(array $fields) {
-
-    $user = $this->actorPHID;
-    $revision = $this->revision;
-
-    $revision->setName($fields['title']);
-    $revision->setSummary($fields['summary']);
-    $revision->setTestPlan($fields['testPlan']);
-    $revision->setSVNBlameRevision($fields['blameRevision']);
-    $revision->setRevert($fields['revertPlan']);
-    $revision->setPlatformImpact($fields['platformImpact']);
-    $revision->setBugzillaID($fields['bugzillaID']);
-
-    $this->setReviewers($fields['reviewerGUIDs']);
-    $this->setCCPHIDs($fields['ccGUIDs']);
-  }
 */
 
   public function getRevision() {

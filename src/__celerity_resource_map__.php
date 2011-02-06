@@ -27,7 +27,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-error-view-css' =>
   array(
-    'uri' => '/res/5ea93eb4/rsrc/css/aphront/error-view.css',
+    'uri' => '/res/19b27527/rsrc/css/aphront/error-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -36,7 +36,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-form-view-css' =>
   array(
-    'uri' => '/res/d88ebe30/rsrc/css/aphront/form-view.css',
+    'uri' => '/res/8aaef437/rsrc/css/aphront/form-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -407,7 +407,7 @@ celerity_register_resource_map(array(
 ), array (
   'packages' =>
   array (
-    '65be8bf1' =>
+    '8cbb3650' =>
     array (
       'name' => 'core.pkg.css',
       'symbols' =>
@@ -426,7 +426,7 @@ celerity_register_resource_map(array(
         11 => 'phabricator-remarkup-css',
         12 => 'syntax-highlighting-css',
       ),
-      'uri' => '/res/pkg/65be8bf1/core.pkg.css',
+      'uri' => '/res/pkg/8cbb3650/core.pkg.css',
       'type' => 'css',
     ),
     '4b8af7b5' =>
@@ -463,19 +463,19 @@ celerity_register_resource_map(array(
   ),
   'reverse' =>
   array (
-    'phabricator-core-css' => '65be8bf1',
-    'phabricator-core-buttons-css' => '65be8bf1',
-    'phabricator-standard-page-view' => '65be8bf1',
-    'aphront-dialog-view-css' => '65be8bf1',
-    'aphront-form-view-css' => '65be8bf1',
-    'aphront-panel-view-css' => '65be8bf1',
-    'aphront-side-nav-view-css' => '65be8bf1',
-    'aphront-table-view-css' => '65be8bf1',
-    'aphront-tokenizer-control-css' => '65be8bf1',
-    'aphront-typeahead-control-css' => '65be8bf1',
-    'phabricator-directory-css' => '65be8bf1',
-    'phabricator-remarkup-css' => '65be8bf1',
-    'syntax-highlighting-css' => '65be8bf1',
+    'phabricator-core-css' => '8cbb3650',
+    'phabricator-core-buttons-css' => '8cbb3650',
+    'phabricator-standard-page-view' => '8cbb3650',
+    'aphront-dialog-view-css' => '8cbb3650',
+    'aphront-form-view-css' => '8cbb3650',
+    'aphront-panel-view-css' => '8cbb3650',
+    'aphront-side-nav-view-css' => '8cbb3650',
+    'aphront-table-view-css' => '8cbb3650',
+    'aphront-tokenizer-control-css' => '8cbb3650',
+    'aphront-typeahead-control-css' => '8cbb3650',
+    'phabricator-directory-css' => '8cbb3650',
+    'phabricator-remarkup-css' => '8cbb3650',
+    'syntax-highlighting-css' => '8cbb3650',
     'differential-core-view-css' => '4b8af7b5',
     'differential-changeset-view-css' => '4b8af7b5',
     'differential-revision-detail-css' => '4b8af7b5',
