@@ -147,10 +147,10 @@ class PhabricatorXHProfProfileSymbolView extends AphrontView {
 
     return $panel->render();
   }
-  
+
   private function formatRows($rows) {
     $base_uri = $this->baseURI;
-    
+
     $result = array();
     foreach ($rows as $row) {
       $result[] = array(
@@ -167,5 +167,5 @@ class PhabricatorXHProfProfileSymbolView extends AphrontView {
     }
     return $result;
   }
-  
+
 }

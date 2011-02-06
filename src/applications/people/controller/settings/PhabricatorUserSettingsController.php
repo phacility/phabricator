@@ -76,7 +76,7 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
             $file = PhabricatorFile::newFromPHPUpload($_FILES['profile']);
             $user->setProfileImagePHID($file->getPHID());
           }
-          
+
           $user->save();
           return id(new AphrontRedirectResponse())
             ->setURI('/settings/page/account/');
@@ -176,14 +176,14 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
 
     return $notice.$cert->render().$regen->render();
   }
-  
+
   private function renderAccountForm() {
     $request = $this->getRequest();
     $user = $request->getUser();
-    
+
     $img_src = PhabricatorFileURI::getViewURIForPHID(
       $user->getProfileImagePHID());
-    
+
     $form = new AphrontFormView();
     $form
       ->setUser($user)
@@ -223,12 +223,12 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Save'));
-    
+
     $panel = new AphrontPanelView();
     $panel->setHeader('Profile Settings');
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
     $panel->appendChild($form);
-   
+
     return $panel->render();
   }
 

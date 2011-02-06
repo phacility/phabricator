@@ -48,14 +48,14 @@ class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
         '<p>The "xhprof" PHP extension is not available. Install xhprof '.
         'to enable the XHProf plugin.';
     }
-    
+
     $run = $this->getXHProfRunID();
     if ($run) {
       return '<a href="/xhprof/profile/'.$run.'/">View Run</a>';
     } else {
       $hidden = array();
       $data = array('__profile__' => 'page') + $_GET;
-      
+
       foreach ($data as $k => $v) {
         $hidden[] = phutil_render_tag(
           'input',
@@ -66,8 +66,8 @@ class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
           ));
       }
       $hidden = implode("\n", $hidden);
-      
-      
+
+
       return
         '<form method="get">'.
           $hidden.
