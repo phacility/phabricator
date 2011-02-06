@@ -131,7 +131,7 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
       ->setUser($user)
       ->appendChild(
         '<p class="aphront-form-instructions">Copy and paste this certificate '.
-        'into your <tt>~/.arcconfig</tt> in the "hosts" section to enable '.
+        'into your <tt>~/.arcrc</tt> in the "hosts" section to enable '.
         'Arcanist to authenticate against this host.</p>')
       ->appendChild(
         id(new AphrontFormTextAreaControl())
