@@ -81,14 +81,44 @@ class PhabricatorConduitAPIController
 
       $api_request = new ConduitAPIRequest($params);
 
-      try {
-        $result = $method_handler->executeMethod($api_request);
-        $error_code = null;
-        $error_info = null;
-      } catch (ConduitException $ex) {
-        $result = null;
-        $error_code = $ex->getMessage();
-        $error_info = $method_handler->getErrorDescription($error_code);
+      if ($method_handler->shouldRequireAuthentication()) {
+        $session_key = idx($metadata, 'sessionKey');
+        if (!$session_key) {
+          $auth_okay = false;
+          $error_code = 'ERR-NO-CERTIFICATE';
+          $error_info = "This server requires authentication but your client ".
+                        "is not configured with an authentication certificate.";
+        } else {
+          $user = new PhabricatorUser();
+          $session = queryfx_one(
+            $user->establishConnection('r'),
+            'SELECT * FROM %T WHERE sessionKey = %s',
+            PhabricatorUser::SESSION_TABLE,
+            $session_key);
+          if (!$session) {
+            $auth_okay = false;
+            $error_code = 'ERR-INVALID-SESSION';
+            $error_info = 'Session key is invalid.';
+          } else {
+            // TODO: Make sessions timeout.
+            $auth_okay = true;
+          }
+        }
+        // TODO: When we session, read connectionID from the session table.
+      } else {
+        $auth_okay = true;
+      }
+
+      if ($auth_okay) {
+        try {
+          $result = $method_handler->executeMethod($api_request);
+          $error_code = null;
+          $error_info = null;
+        } catch (ConduitException $ex) {
+          $result = null;
+          $error_code = $ex->getMessage();
+          $error_info = $method_handler->getErrorDescription($error_code);
+        }
       }
     } catch (Exception $ex) {
       $result = null;

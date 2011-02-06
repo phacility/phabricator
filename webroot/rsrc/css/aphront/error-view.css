@@ -28,3 +28,9 @@
   border: 1px solid #888800;
   background: #ffffdd;
 }
+
+.aphront-error-severity-notice {
+  border: 1px solid #000088;
+  background: #e3e3ff;
+}
+

@@ -113,6 +113,7 @@ class AphrontDialogView extends AphrontView {
       ),
       '<input type="hidden" name="__form__" value="1" />'.
       '<input type="hidden" name="__csrf__" value="'.$csrf.'" />'.
+      '<input type="hidden" name="__dialog__" value="1" />'.
       $hidden_inputs.
       '<div class="aphront-dialog-head">'.
         phutil_escape_html($this->title).

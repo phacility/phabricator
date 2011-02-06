@@ -20,7 +20,7 @@ final class AphrontErrorView extends AphrontView {
 
   const SEVERITY_ERROR = 'error';
   const SEVERITY_WARNING = 'warning';
-  const SEVERITY_NOTE = 'note';
+  const SEVERITY_NOTICE = 'notice';
 
   const WIDTH_DEFAULT = 'default';
   const WIDTH_WIDE = 'wide';

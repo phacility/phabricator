@@ -24,6 +24,7 @@ final class AphrontFormView extends AphrontView {
   private $data = array();
   private $encType;
   private $user;
+  private $workflow;
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
@@ -50,15 +51,21 @@ final class AphrontFormView extends AphrontView {
     return $this;
   }
 
+  public function setWorkflow($workflow) {
+    $this->workflow = $workflow;
+    return $this;
+  }
+
   public function render() {
     require_celerity_resource('aphront-form-view-css');
-    return phutil_render_tag(
+    return javelin_render_tag(
       'form',
       array(
         'action'  => $this->action,
         'method'  => $this->method,
         'class'   => 'aphront-form-view',
         'enctype' => $this->encType,
+        'sigil'   => $this->workflow ? 'workflow' : null,
       ),
       $this->renderDataInputs().
       $this->renderChildren());

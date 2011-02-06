@@ -45,6 +45,10 @@ abstract class ConduitAPIMethod {
     return 'ConduitAPI_'.$method_fragment.'_Method';
   }
 
+  public function shouldRequireAuthentication() {
+    return true;
+  }
+
   public static function getAPIMethodNameFromClassName($class_name) {
     $match = null;
     $is_valid = preg_match(

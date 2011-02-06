@@ -146,4 +146,8 @@ class AphrontRequest {
     return id(new PhutilURI($this->getPath()))->setQueryParams($get);
   }
 
+  final public function isDialogFormPost() {
+    return $this->isFormPost() && $this->getStr('__dialog__');
+  }
+
 }

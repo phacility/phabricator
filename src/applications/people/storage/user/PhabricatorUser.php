@@ -20,6 +20,8 @@ class PhabricatorUser extends PhabricatorUserDAO {
 
   const PHID_TYPE = 'USER';
 
+  const SESSION_TABLE = 'phabricator_session';
+
   protected $phid;
   protected $userName;
   protected $realName;
@@ -32,6 +34,8 @@ class PhabricatorUser extends PhabricatorUserDAO {
   protected $consoleEnabled = 0;
   protected $consoleVisible = 0;
   protected $consoleTab = '';
+
+  protected $conduitCertificate;
 
   public function getProfileImagePHID() {
     return nonempty(
@@ -54,6 +58,34 @@ class PhabricatorUser extends PhabricatorUserDAO {
     $hash = $this->hashPassword($password);
     $this->setPasswordHash($hash);
     return $this;
+  }
+
+  public function save() {
+    if (!$this->conduitCertificate) {
+      $this->conduitCertificate = $this->generateConduitCertificate();
+    }
+    return parent::save();
+  }
+
+  private function generateConduitCertificate() {
+    $entropy = $this->generateEntropy($bytes = 256);
+    $entropy = base64_encode($entropy);
+    $entropy = substr($entropy, 0, 255);
+    return $entropy;
+  }
+
+  private function generateEntropy($bytes) {
+    $urandom = fopen('/dev/urandom', 'r');
+    if (!$urandom) {
+      throw new Exception("Failed to open /dev/urandom!");
+    }
+
+    $entropy = fread($urandom, $bytes);
+    if (strlen($entropy) != $bytes) {
+      throw new Exception("Failed to read /dev/urandom!");
+    }
+
+    return $entropy;
   }
 
   public function comparePassword($password) {
@@ -105,26 +137,19 @@ class PhabricatorUser extends PhabricatorUserDAO {
   public function establishSession($session_type) {
     $conn_w = $this->establishConnection('w');
 
-    $urandom = fopen('/dev/urandom', 'r');
-    if (!$urandom) {
-      throw new Exception("Failed to open /dev/urandom!");
-    }
-
-    $entropy = fread($urandom, 20);
-    if (strlen($entropy) != 20) {
-      throw new Exception("Failed to read /dev/urandom!");
-    }
+    $entropy = $this->generateEntropy($bytes = 20);
 
     $session_key = sha1($entropy);
     queryfx(
       $conn_w,
-      'INSERT INTO phabricator_session '.
+      'INSERT INTO %T '.
         '(userPHID, type, sessionKey, sessionStart)'.
       ' VALUES '.
         '(%s, %s, %s, UNIX_TIMESTAMP()) '.
       'ON DUPLICATE KEY UPDATE '.
         'sessionKey = VALUES(sessionKey), '.
         'sessionStart = VALUES(sessionStart)',
+      self::SESSION_TABLE,
       $this->getPHID(),
       $session_type,
       $session_key);

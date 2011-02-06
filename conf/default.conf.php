@@ -22,6 +22,10 @@ return array(
   // Example: "http://phabricator.example.com/"
   'phabricator.base-uri'        => null,
 
+  // The Conduit URI for API access to this install. Normally this is just
+  // the 'base-uri' plus "/api/" (e.g. "http://phabricator.example.com/api/"),
+  // but make sure you specify 'https' if you have HTTPS configured.
+  'phabricator.conduit-uri'     => null,
 
   'phabricator.csrf-key'        => '0b7ec0592e0a2829d8b71df2fa269b2c6172eca3',
 

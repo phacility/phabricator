@@ -11,6 +11,8 @@ phutil_require_module('phabricator', 'applications/conduit/controller/base');
 phutil_require_module('phabricator', 'applications/conduit/method/base');
 phutil_require_module('phabricator', 'applications/conduit/protocol/request');
 phutil_require_module('phabricator', 'applications/conduit/storage/methodcalllog');
+phutil_require_module('phabricator', 'applications/people/storage/user');
+phutil_require_module('phabricator', 'storage/queryfx');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/layout/panel');
 

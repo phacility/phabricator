@@ -135,6 +135,10 @@ class AphrontDefaultApplicationConfiguration
       ),
 
       '/~/' => 'DarkConsoleController',
+
+      '/settings/' => array(
+        '(?:page/(?<page>[^/]+)/)?$' => 'PhabricatorUserSettingsController',
+      ),
     );
   }
 
