@@ -57,11 +57,14 @@ class ConduitAPI_differential_find_Method extends ConduitAPIMethod {
       ->loadRevisions();
 
     $results = array();
-    foreach ($data->getRevisions() as $revision) {
+    foreach ($revisions as $revision) {
       $diff = $revision->loadActiveDiff();
+      if (!$diff) {
+        continue;
+      }
       $results[] = array(
         'id'          => $revision->getID(),
-        'name'        => $revision->getName(),
+        'name'        => $revision->getTitle(),
         'statusName'  => DifferentialRevisionStatus::getNameForRevisionStatus(
           $revision->getStatus()),
         'sourcePath'  => $diff->getSourcePath(),
