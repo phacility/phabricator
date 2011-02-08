@@ -20,6 +20,7 @@ class AphrontFormTokenizerControl extends AphrontFormControl {
 
   private $datasource;
   private $disableBehavior;
+  private $limit;
 
   public function setDatasource($datasource) {
     $this->datasource = $datasource;
@@ -33,6 +34,11 @@ class AphrontFormTokenizerControl extends AphrontFormControl {
 
   protected function getCustomControlClass() {
     return 'aphront-form-control-tokenizer';
+  }
+
+  public function setLimit($limit) {
+    $this->limit = $limit;
+    return $this;
   }
 
   protected function renderInput() {
@@ -70,6 +76,7 @@ class AphrontFormTokenizerControl extends AphrontFormControl {
         'id'    => $id,
         'src'   => $this->datasource,
         'value' => $values,
+        'limit' => $this->limit,
       ));
     }
 
@@ -88,7 +95,6 @@ class AphrontFormTokenizerControl extends AphrontFormControl {
       array(
         'type'      => 'text',
         'name'      => $this->getName(),
-        'value'     => $this->getValue(),
         'disabled'  => $this->getDisabled() ? 'disabled' : null,
       ));
   }

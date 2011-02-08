@@ -1,0 +1,43 @@
+/**
+ * @provides maniphest-task-summary-css
+ */
+
+.maniphest-task-summary {
+  border: 1px solid #aaaaaa;
+  width: 100%;
+  margin: 2px 0;
+  border-collapse: separate;
+  border-spacing: 1px;
+}
+
+.maniphest-task-summary td {
+  padding: 4px 1%;
+  background: #dfdfdf;
+  white-space: nowrap;
+}
+
+.maniphest-task-summary td.maniphest-task-number {
+  font-weight: bold;
+  color: #444444;
+  width: 8%;
+}
+
+.maniphest-task-summary td.maniphest-task-owner {
+  width: 11%;
+}
+
+.maniphest-task-summary td.maniphest-task-name {
+  overflow: hidden;
+  font-weight: bold;
+  width: 49%;
+}
+
+.maniphest-task-summary td.maniphest-task-priority {
+  text-align: center;
+  width: 11%;
+}
+
+.maniphest-task-summary td.maniphest-task-updated {
+  text-align: center;
+  width: 11%;
+}

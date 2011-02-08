@@ -1,0 +1,23 @@
+/**
+ * @provides maniphest-transaction-detail-css
+ */
+
+.maniphest-transaction-detail-container {
+  margin: 2px 1em 3px;
+  background: 0px 0px no-repeat;
+  min-height: 50px;
+}
+
+.maniphest-transaction-detail-view {
+  margin-left: 54px;
+  padding: 4px 1em;
+  border: 1px solid #dddddd;
+  background: #f6f6f6;
+  min-height: 40px;
+}
+
+.maniphest-transaction-timestamp {
+  float: right;
+  font-size: 11px;
+  color: #666666;
+}

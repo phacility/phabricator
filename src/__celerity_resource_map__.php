@@ -188,6 +188,33 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/directory/phabricator-directory.css',
   ),
+  'mainphest-task-detail-css' =>
+  array(
+    'uri' => '/res/e5f3beca/rsrc/css/application/maniphest/task-detail.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/maniphest/task-detail.css',
+  ),
+  'maniphest-task-summary-css' =>
+  array(
+    'uri' => '/res/bed1edf0/rsrc/css/application/maniphest/task-summary.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/maniphest/task-summary.css',
+  ),
+  'maniphest-transaction-detail-css' =>
+  array(
+    'uri' => '/res/436b83d7/rsrc/css/application/maniphest/transaction-detail.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/maniphest/transaction-detail.css',
+  ),
   'phabricator-core-buttons-css' =>
   array(
     'uri' => '/res/fe74ba44/rsrc/css/core/buttons.css',
@@ -331,6 +358,16 @@ celerity_register_resource_map(array(
       0 => 'javelin-lib-dev',
     ),
     'disk' => '/rsrc/js/application/differential/behavior-show-more.js',
+  ),
+  'javelin-behavior-maniphest-transaction-controls' =>
+  array(
+    'uri' => '/res/fc6a8722/rsrc/js/application/maniphest/behavior-transaction-controls.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-lib-dev',
+    ),
+    'disk' => '/rsrc/js/application/maniphest/behavior-transaction-controls.js',
   ),
   'javelin-magical-init' =>
   array(

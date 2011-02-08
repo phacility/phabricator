@@ -202,7 +202,6 @@ class PhabricatorStandardPageView extends AphrontPageView {
     }
     $foot_links = implode(' &middot; ', $foot_links);
 
-
     return
       ($console ? '<darkconsole />' : null).
       '<div class="phabricator-standard-page">'.

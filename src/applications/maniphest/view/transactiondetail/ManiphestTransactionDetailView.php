@@ -1,0 +1,230 @@
+<?php
+
+/*
+ * Copyright 2011 Facebook, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+class ManiphestTransactionDetailView extends AphrontView {
+
+  private $transaction;
+  private $handles;
+  private $markupEngine;
+  private $forEmail;
+
+  public function setTransaction(ManiphestTransaction $transaction) {
+    $this->transaction = $transaction;
+    return $this;
+  }
+
+  public function setHandles(array $handles) {
+    $this->handles = $handles;
+    return $this;
+  }
+
+  public function setMarkupEngine(PhutilMarkupEngine $engine) {
+    $this->markupEngine = $engine;
+    return $this;
+  }
+
+  public function renderForEmail($with_date) {
+    $this->forEmail = true;
+    list ($verb, $desc, $classes) = $this->describeAction();
+
+    $transaction = $this->transaction;
+    $author = $this->renderHandles(array($transaction->getAuthorPHID()));
+
+    $desc = $author.' '.$desc;
+    if ($with_date) {
+      $desc = 'On '.date('M jS \a\t g:i A', $transaction->getDateCreated()).
+              ', '.$desc;
+    }
+
+    $comments = $transaction->getComments();
+    if (strlen(trim($comments))) {
+      $desc = $desc.":\n".$comments;
+    } else {
+      $desc = $desc.".";
+    }
+
+    $this->forEmail = false;
+    return array($verb, $desc);
+  }
+
+  public function render() {
+    $transaction = $this->transaction;
+    $handles = $this->handles;
+
+    require_celerity_resource('maniphest-transaction-detail-css');
+
+    $author = $this->handles[$transaction->getAuthorPHID()];
+
+    $comments = $transaction->getCache();
+    if (!strlen($comments)) {
+      $comments = $transaction->getComments();
+      if (strlen($comments)) {
+        $comments = $this->markupEngine->markupText($comments);
+        $transaction->setCache($comments);
+        $transaction->save();
+      }
+    }
+
+    list($verb, $desc, $classes) = $this->describeAction(
+      $transaction->getComments());
+
+    $more_classes = implode(' ', $classes);
+
+    if (strlen(trim($transaction->getComments()))) {
+      $punc = ':';
+    } else {
+      $punc = '.';
+    }
+
+    return phutil_render_tag(
+      'div',
+      array(
+        'class' =>  "maniphest-transaction-detail-container",
+        'style' => "background-image: url('".$author->getImageURI()."')",
+      ),
+      '<div class="maniphest-transaction-detail-view '.$more_classes.'">'.
+        '<div class="maniphest-transaction-header">'.
+          '<div class="maniphest-transaction-timestamp">'.
+            phabricator_format_timestamp($transaction->getDateCreated()).
+          '</div>'.
+          '<strong>'.
+            $author->renderLink().
+            ' '.
+            $desc.
+            $punc.
+          '</strong>'.
+        '</div>'.
+        '<div class="maniphest-transaction-comments">'.
+          $comments.
+        '</div>'.
+      '</div>');
+  }
+
+  private function describeAction() {
+    $verb = null;
+    $desc = null;
+    $classes = array();
+
+    $handles = $this->handles;
+
+    $transaction = $this->transaction;
+    $type = $transaction->getTransactionType();
+    $author_phid = $transaction->getAuthorPHID();
+    $new = $transaction->getNewValue();
+    $old = $transaction->getOldValue();
+    switch ($type) {
+      case ManiphestTransactionType::TYPE_NONE:
+        $verb = 'Commented On';
+        $desc = 'added a comment';
+        break;
+      case ManiphestTransactionType::TYPE_OWNER:
+        if ($transaction->getAuthorPHID() == $new) {
+          $verb = 'Claimed';
+          $desc = 'claimed this task';
+        } else if (!$new) {
+          $verb = 'Up For Grabs';
+          $desc = 'placed this task up for grabs';
+        } else if (!$old) {
+          $verb = 'Assigned';
+          $desc = 'assigned this task to '.$this->renderHandles(array($new));
+        } else {
+          $verb = 'Reassigned';
+          $desc = 'reassigned this task from '.
+                  $this->renderHandles(array($old)).
+                  ' to '.
+                  $this->renderHandles(array($new));
+        }
+        break;
+      case ManiphestTransactionType::TYPE_CCS:
+        $added = array_diff($new, $old);
+        $removed = array_diff($old, $new);
+        if ($added && !$removed) {
+          $verb = 'Added CC';
+          if (count($added) == 1) {
+            $desc = 'added '.$this->renderHandles($added).' to CC';
+          } else {
+            $desc = 'added CCs: '.$this->renderHandles($added);
+          }
+        } else if ($removed && !$added) {
+          $verb = 'Removed CC';
+          if (count($removed) == 1) {
+            $desc = 'removed '.$this->renderHandles($removed).' from CC';
+          } else {
+            $desc = 'removed CCs: '.$this->renderHandles($removed);
+          }
+        } else {
+          $verb = 'Changed CC';
+          $desc = 'changed CCs, added: '.$this->renderHandles($added).'; '.
+                             'removed: '.$this->renderHandles($removed);
+        }
+        break;
+      case ManiphestTransactionType::TYPE_STATUS:
+        if ($new == ManiphestTaskStatus::STATUS_OPEN) {
+          if ($old) {
+            $verb = 'Reopened';
+            $desc = 'reopened this task';
+          } else {
+            $verb = 'Created';
+            $desc = 'created this task';
+          }
+        } else if ($new == ManiphestTaskStatus::STATUS_CLOSED_SPITE) {
+          $verb = 'Spited';
+          $desc = 'closed this task out of spite';
+        } else {
+          $verb = 'Closed';
+          $full = idx(ManiphestTaskStatus::getTaskStatusMap(), $new, '???');
+          $desc = 'closed this task as "'.$full.'"';
+        }
+        break;
+      case ManiphestTransactionType::TYPE_PRIORITY:
+        $old_name = ManiphestTaskPriority::getTaskPriorityName($old);
+        $new_name = ManiphestTaskPriority::getTaskPriorityName($new);
+
+        if ($old == ManiphestTaskPriority::PRIORITY_TRIAGE) {
+          $verb = 'Triaged';
+          $desc = 'triaged this task as "'.$new_name.'" priority';
+        } else if ($old > $new) {
+          $verb = 'Lowered Priority';
+          $desc = 'lowered the priority of this task from "'.$old_name.'" to '.
+                  '"'.$new_name.'"';
+        } else {
+          $verb = 'Raised Priority';
+          $desc = 'raised the priority of this task from "'.$old_name.'" to '.
+                  '"'.$new_name.'"';
+        }
+        break;
+      default:
+        return ' brazenly '.$type."'d";
+    }
+
+    return array($verb, $desc, $classes);
+  }
+
+  private function renderHandles($phids) {
+    $links = array();
+    foreach ($phids as $phid) {
+      if ($this->forEmail) {
+        $links[] = $this->handles[$phid]->getName();
+      } else {
+        $links[] = $this->handles[$phid]->renderLink();
+      }
+    }
+    return implode(', ', $links);
+  }
+
+}

@@ -139,6 +139,19 @@ class AphrontDefaultApplicationConfiguration
       '/settings/' => array(
         '(?:page/(?P<page>[^/]+)/)?$' => 'PhabricatorUserSettingsController',
       ),
+
+      '/maniphest/' => array(
+        '$' => 'ManiphestTaskListController',
+        'view/(?P<view>\w+)/$' => 'ManiphestTaskListController',
+        'task/' => array(
+          'create/' => 'ManiphestTaskCreateController',
+        ),
+        'transaction/' => array(
+          'save/' => 'ManiphestTransactionSaveController',
+        ),
+      ),
+
+      '/T(?P<id>\d+)$' => 'ManiphestTaskDetailController',
     );
   }
 
