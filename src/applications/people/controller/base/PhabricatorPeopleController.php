@@ -24,7 +24,7 @@ abstract class PhabricatorPeopleController extends PhabricatorController {
     $page->setApplicationName('People');
     $page->setBaseURI('/people/');
     $page->setTitle(idx($data, 'title'));
-    $page->setGlyph("\xE2\x99\xA5");
+    $page->setGlyph("\xE2\x99\x9F");
     $page->appendChild($view);
 
     $response = new AphrontWebpageResponse();
