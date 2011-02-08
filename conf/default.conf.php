@@ -40,9 +40,15 @@ return array(
   // terrible. If you disable this option, you must run the 'metamta_mta.php'
   // daemon or mail won't be handed off to the MTA.
   'metamta.send-immediately'    => true,
-  
+
   // "Reply-To" email address to use for no-reply emails.
   'metamta.noreply'             => 'noreply@example.com',
+
+  'metamta.mail-adapter'        =>
+    'PhabricatorMailImplementationPHPMailerLiteAdapter',
+
+  'amazon-ses.access-key'       =>  null,
+  'amazon-ses.secret-key'       =>  null,
 
 
 // -- Access Control -------------------------------------------------------- //

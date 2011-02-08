@@ -122,7 +122,9 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     $ret = parent::save();
 
     if ($try_send) {
-      $mailer = new PhabricatorMailImplementationPHPMailerLiteAdapter();
+      $class_name = PhabricatorEnv::getEnvConfig('metamta.mail-adapter');
+      PhutilSymbolLoader::loadClass($class_name);
+      $mailer = newv($class_name, array());
       $this->sendNow($force_send = false, $mailer);
     }
 
@@ -223,6 +225,7 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     } else {
       try {
         $ok = $mailer->send();
+        $error = null;
       } catch (Exception $ex) {
         $ok = false;
         $error = $ex->getMessage();
