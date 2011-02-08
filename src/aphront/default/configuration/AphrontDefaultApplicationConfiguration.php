@@ -31,8 +31,8 @@ class AphrontDefaultApplicationConfiguration
       '/repository/' => array(
         '$'                     => 'RepositoryListController',
         'new/$'                 => 'RepositoryEditController',
-        'edit/(?<id>\d+)/$'     => 'RepositoryEditController',
-        'delete/(?<id>\d+)/$'   => 'RepositoryDeleteController',
+        'edit/(?P<id>\d+)/$'     => 'RepositoryEditController',
+        'delete/(?P<id>\d+)/$'   => 'RepositoryDeleteController',
       ),
       '/' => array(
         '$'                     => 'PhabricatorDirectoryMainController',
@@ -40,89 +40,89 @@ class AphrontDefaultApplicationConfiguration
       '/directory/' => array(
         'item/$'
           => 'PhabricatorDirectoryItemListController',
-        'item/edit/(?:(?<id>\d+)/)?$'
+        'item/edit/(?:(?P<id>\d+)/)?$'
           => 'PhabricatorDirectoryItemEditController',
-        'item/delete/(?<id>\d+)/'
+        'item/delete/(?P<id>\d+)/'
           => 'PhabricatorDirectoryItemDeleteController',
         'category/$'
           => 'PhabricatorDirectoryCategoryListController',
-        'category/edit/(?:(?<id>\d+)/)?$'
+        'category/edit/(?:(?P<id>\d+)/)?$'
           => 'PhabricatorDirectoryCategoryEditController',
-        'category/delete/(?<id>\d+)/'
+        'category/delete/(?P<id>\d+)/'
           => 'PhabricatorDirectoryCategoryDeleteController',
       ),
       '/file/' => array(
         '$' => 'PhabricatorFileListController',
         'upload/$' => 'PhabricatorFileUploadController',
-        '(?<view>info)/(?<phid>[^/]+)/' => 'PhabricatorFileViewController',
-        '(?<view>view)/(?<phid>[^/]+)/' => 'PhabricatorFileViewController',
-        '(?<view>download)/(?<phid>[^/]+)/' => 'PhabricatorFileViewController',
+        '(?P<view>info)/(?P<phid>[^/]+)/' => 'PhabricatorFileViewController',
+        '(?P<view>view)/(?P<phid>[^/]+)/' => 'PhabricatorFileViewController',
+        '(?P<view>download)/(?P<phid>[^/]+)/' => 'PhabricatorFileViewController',
       ),
       '/phid/' => array(
         '$' => 'PhabricatorPHIDLookupController',
         'list/$' => 'PhabricatorPHIDListController',
         'type/$' => 'PhabricatorPHIDTypeListController',
-        'type/edit/(?:(?<id>\d+)/)?$' => 'PhabricatorPHIDTypeEditController',
+        'type/edit/(?:(?P<id>\d+)/)?$' => 'PhabricatorPHIDTypeEditController',
         'new/$' => 'PhabricatorPHIDAllocateController',
       ),
       '/people/' => array(
         '$' => 'PhabricatorPeopleListController',
-        'edit/(?:(?<username>\w+)/)?$' => 'PhabricatorPeopleEditController',
+        'edit/(?:(?P<username>\w+)/)?$' => 'PhabricatorPeopleEditController',
       ),
-      '/p/(?<username>\w+)/$' => 'PhabricatorPeopleProfileController',
+      '/p/(?P<username>\w+)/$' => 'PhabricatorPeopleProfileController',
       '/conduit/' => array(
         '$' => 'PhabricatorConduitConsoleController',
-        'method/(?<method>[^/]+)$' => 'PhabricatorConduitConsoleController',
+        'method/(?P<method>[^/]+)$' => 'PhabricatorConduitConsoleController',
         'log/$' => 'PhabricatorConduitLogController',
       ),
-      '/api/(?<method>[^/]+)$' => 'PhabricatorConduitAPIController',
+      '/api/(?P<method>[^/]+)$' => 'PhabricatorConduitAPIController',
 
 
-      '/D(?<id>\d+)' => 'DifferentialRevisionViewController',
+      '/D(?P<id>\d+)' => 'DifferentialRevisionViewController',
       '/differential/' => array(
         '$' => 'DifferentialRevisionListController',
-        'filter/(?<filter>\w+)/$' => 'DifferentialRevisionListController',
+        'filter/(?P<filter>\w+)/$' => 'DifferentialRevisionListController',
         'diff/' => array(
-          '(?<id>\d+)/$' => 'DifferentialDiffViewController',
+          '(?P<id>\d+)/$' => 'DifferentialDiffViewController',
           'create/$' => 'DifferentialDiffCreateController',
         ),
         'changeset/$'  => 'DifferentialChangesetViewController',
-        'revision/edit/(?:(?<id>\d+)/)?$'
+        'revision/edit/(?:(?P<id>\d+)/)?$'
           => 'DifferentialRevisionEditController',
         'comment/' => array(
-          'preview/(?<id>\d+)/$' => 'DifferentialCommentPreviewController',
+          'preview/(?P<id>\d+)/$' => 'DifferentialCommentPreviewController',
           'save/$' => 'DifferentialCommentSaveController',
           'inline/' => array(
-            'preview/(?<id>\d+)/$' =>
+            'preview/(?P<id>\d+)/$' =>
               'DifferentialInlineCommentPreviewController',
-            'edit/(?<id>\d+)/$' => 'DifferentialInlineCommentEditController',
+            'edit/(?P<id>\d+)/$' => 'DifferentialInlineCommentEditController',
           ),
         ),
       ),
 
       '/res/' => array(
-        '(?<package>pkg/)?(?<hash>[a-f0-9]{8})/(?<path>.+\.(?:css|js))$'
+        '(?P<package>pkg/)?(?P<hash>[a-f0-9]{8})/(?P<path>.+\.(?:css|js))$'
           => 'CelerityResourceController',
       ),
 
       '/typeahead/' => array(
-        'common/(?<type>\w+)/$'
+        'common/(?P<type>\w+)/$'
           => 'PhabricatorTypeaheadCommonDatasourceController',
       ),
 
       '/mail/' => array(
         '$' => 'PhabricatorMetaMTAListController',
         'send/$' => 'PhabricatorMetaMTASendController',
-        'view/(?<id>\d+)/$' => 'PhabricatorMetaMTAViewController',
+        'view/(?P<id>\d+)/$' => 'PhabricatorMetaMTAViewController',
         'lists/$' => 'PhabricatorMetaMTAMailingListsController',
-        'lists/edit/(?:(?<id>\d+)/)?$'
+        'lists/edit/(?:(?P<id>\d+)/)?$'
           => 'PhabricatorMetaMTAMailingListEditController',
       ),
 
       '/login/' => array(
         '$' => 'PhabricatorLoginController',
         'email/$' => 'PhabricatorEmailLoginController',
-        'etoken/(?<token>\w+)/$' => 'PhabricatorEmailTokenController',
+        'etoken/(?P<token>\w+)/$' => 'PhabricatorEmailTokenController',
       ),
       '/logout/$' => 'PhabricatorLogoutController',
       '/facebook-auth/' => array(
@@ -131,13 +131,13 @@ class AphrontDefaultApplicationConfiguration
       ),
 
       '/xhprof/' => array(
-        'profile/(?<phid>[^/]+)/$' => 'PhabricatorXHProfProfileController',
+        'profile/(?P<phid>[^/]+)/$' => 'PhabricatorXHProfProfileController',
       ),
 
       '/~/' => 'DarkConsoleController',
 
       '/settings/' => array(
-        '(?:page/(?<page>[^/]+)/)?$' => 'PhabricatorUserSettingsController',
+        '(?:page/(?P<page>[^/]+)/)?$' => 'PhabricatorUserSettingsController',
       ),
     );
   }
