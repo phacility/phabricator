@@ -28,6 +28,13 @@ if (!$env) {
     "is one of 'development', 'production', or a custom environment.");
 }
 
+if (!function_exists('mysql_connect')) {
+  header('Content-Type: text/plain');
+  die(
+    "CONFIG ERROR: ".
+    "the PHP MySQL extension is not installed. This extension is required.");
+}
+
 $conf = phabricator_read_config_file($env);
 $conf['phabricator.env'] = $env;
 
