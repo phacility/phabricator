@@ -41,6 +41,9 @@ class DarkConsoleController extends PhabricatorController {
 
     if (PhabricatorEnv::getEnvConfig('darkconsole.enabled')) {
       $user->setConsoleEnabled(!$user->getConsoleEnabled());
+      if ($user->getConsoleEnabled()) {
+        $user->setConsoleVisible(true);
+      }
       $user->save();
       if ($request->isAjax()) {
         return new AphrontRedirectResponse();
