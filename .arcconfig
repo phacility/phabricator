@@ -1,6 +1,6 @@
 {
   "project_id" : "phabricator",
-  "conduit_uri" : "http://local.aphront.com/api/",
+  "conduit_uri" : "https://secure.phabricator.com/api/",
   "lint_engine" : "PhutilLintEngine",
   "unit_engine" : "PhutilUnitTestEngine",
   "copyright_holder" : "Facebook, Inc.",
