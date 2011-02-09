@@ -78,23 +78,16 @@ class ManiphestTransactionDetailView extends AphrontView {
 
     require_celerity_resource('maniphest-transaction-detail-css');
 
+    $comment_transaction = null;
     foreach ($this->transactions as $transaction) {
       if ($transaction->hasComments()) {
+        $comment_transaction = $transaction;
         break;
       }
     }
+    $any_transaction = reset($transactions);
 
-    $author = $this->handles[$transaction->getAuthorPHID()];
-
-    $comments = $transaction->getCache();
-    if (!strlen($comments)) {
-      $comments = $transaction->getComments();
-      if (strlen($comments)) {
-        $comments = $this->markupEngine->markupText($comments);
-        $transaction->setCache($comments);
-        $transaction->save();
-      }
-    }
+    $author = $this->handles[$any_transaction->getAuthorPHID()];
 
     $more_classes = array();
     $descs = array();
@@ -107,7 +100,14 @@ class ManiphestTransactionDetailView extends AphrontView {
 
     $more_classes = implode(' ', $classes);
 
-    if ($transaction->hasComments()) {
+    if ($comment_transaction && $comment_transaction->hasComments()) {
+      $comments = $comment_transaction->getCache();
+      if (!strlen($comments)) {
+        $comments = $comment_transaction->getComments();
+        $comments = $this->markupEngine->markupText($comments);
+        $transaction->setCache($comments);
+        $transaction->save();
+      }
       $comment_block =
         '<div class="maniphest-transaction-comments phabricator-remarkup">'.
           $comments.
