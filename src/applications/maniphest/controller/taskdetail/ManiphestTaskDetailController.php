@@ -67,8 +67,8 @@ class ManiphestTaskDetailController extends ManiphestController {
       '</strong>';
 
     $dict['Assigned To'] = $task->getOwnerPHID()
-      ? '<em>None</em>'
-      : $handles[$task->getOwnerPHID()]->renderLink();
+      ? $handles[$task->getOwnerPHID()]->renderLink()
+      : '<em>None</em>';
 
     $dict['Priority'] = ManiphestTaskPriority::getTaskPriorityName(
       $task->getPriority());
