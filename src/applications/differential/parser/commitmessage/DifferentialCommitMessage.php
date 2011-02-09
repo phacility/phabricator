@@ -215,8 +215,11 @@ class DifferentialCommitMessage {
 
     if ($need_users) {
       $users = id(new PhabricatorUser())->loadAllWhere(
-        'username IN (%Ls) OR email IN (%Ls)',
+        '(username IN (%Ls)) OR (email IN (%Ls))',
+        $need_users,
         $need_users);
+      $users = mpull($users, 'getPHID', 'getUsername') +
+               mpull($users, 'getPHID', 'getEmail');
     } else {
       $users = array();
     }
@@ -225,6 +228,7 @@ class DifferentialCommitMessage {
       $mail = id(new PhabricatorMetaMTAMailingList())->loadAllWhere(
         'email in (%Ls)',
         $need_mail);
+      $mail = mpull($mail, 'getPHID', 'getEmail');
     } else {
       $mail = array();
     }
