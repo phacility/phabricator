@@ -103,9 +103,9 @@ class DifferentialCommentMail extends DifferentialMail {
     $revision = $this->getRevision();
     if ($revision->getStatus() == DifferentialRevisionStatus::COMMITTED) {
       /*
-      
+
       TODO
-      
+
       $rev_ref = $revision->getRevisionRef();
       if ($rev_ref) {
         $body[] = "  Detail URL: ".$rev_ref->getDetailURL();

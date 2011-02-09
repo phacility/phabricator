@@ -25,7 +25,7 @@ class ManiphestTransactionEditor {
     $email_to = array();
     $email_to[] = $task->getOwnerPHID();
 
-    foreach ($transactions as $transaction) {
+    foreach ($transactions as $key => $transaction) {
       $type = $transaction->getTransactionType();
       $new = $transaction->getNewValue();
       $email_to[] = $transaction->getAuthorPHID();
@@ -51,9 +51,17 @@ class ManiphestTransactionEditor {
       }
 
       if (($old !== null) && ($old == $new)) {
-        $transaction->setOldValue(null);
-        $transaction->setNewValue(null);
-        $transaction->setTransactionType(ManiphestTransactionType::TYPE_NONE);
+        if (count($transactions) > 1 && !$transaction->hasComments()) {
+          // If we have at least one other transaction and this one isn't
+          // doing anything and doesn't have any comments, just throw it
+          // away.
+          unset($transactions[$key]);
+          continue;
+        } else {
+          $transaction->setOldValue(null);
+          $transaction->setNewValue(null);
+          $transaction->setTransactionType(ManiphestTransactionType::TYPE_NONE);
+        }
       } else {
         switch ($type) {
           case ManiphestTransactionType::TYPE_NONE:

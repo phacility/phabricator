@@ -49,6 +49,7 @@ class ManiphestTransactionSaveController extends ManiphestController {
       case ManiphestTransactionType::TYPE_CCS:
         $ccs = $request->getArr('ccs');
         $ccs = array_merge($ccs, $task->getCCPHIDs());
+        $ccs = array_filter($ccs);
         $ccs = array_unique($ccs);
         $transaction->setNewValue($ccs);
         break;
@@ -59,8 +60,31 @@ class ManiphestTransactionSaveController extends ManiphestController {
         throw new Exception('unknown action');
     }
 
+    $transactions = array($transaction);
+
+    switch ($action) {
+      case ManiphestTransactionType::TYPE_OWNER:
+        if ($task->getOwnerPHID() == $transaction->getNewValue()) {
+          // If this is actually no-op, don't generate the side effect.
+          break;
+        }
+        // When a task is reassigned, move the previous owner to CC.
+        $old = $task->getCCPHIDs();
+        $new = array_merge(
+          $old,
+          array($task->getOwnerPHID()));
+        $new = array_unique(array_filter($new));
+        if ($old != $new) {
+          $cc = clone $transaction;
+          $cc->setTransactionType(ManiphestTransactionType::TYPE_CCS);
+          $cc->setNewValue($new);
+          $transactions[] = $cc;
+        }
+        break;
+    }
+
     $editor = new ManiphestTransactionEditor();
-    $editor->applyTransactions($task, array($transaction));
+    $editor->applyTransactions($task, $transactions);
 
     return id(new AphrontRedirectResponse())
       ->setURI('/T'.$task->getID());
