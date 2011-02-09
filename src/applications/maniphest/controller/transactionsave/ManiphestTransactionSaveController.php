@@ -48,6 +48,8 @@ class ManiphestTransactionSaveController extends ManiphestController {
         break;
       case ManiphestTransactionType::TYPE_CCS:
         $ccs = $request->getArr('ccs');
+        $ccs = array_merge($ccs, $task->getCCPHIDs());
+        $ccs = array_unique($ccs);
         $transaction->setNewValue($ccs);
         break;
       case ManiphestTransactionType::TYPE_PRIORITY:
@@ -58,7 +60,7 @@ class ManiphestTransactionSaveController extends ManiphestController {
     }
 
     $editor = new ManiphestTransactionEditor();
-    $editor->applyTransaction($task, $transaction);
+    $editor->applyTransactions($task, array($transaction));
 
     return id(new AphrontRedirectResponse())
       ->setURI('/T'.$task->getID());

@@ -45,4 +45,8 @@ class ManiphestTask extends ManiphestDAO {
     return PhabricatorPHID::generateNewPHID('TASK');
   }
 
+  public function getCCPHIDs() {
+    return nonempty($this->ccPHIDs, array());
+  }
+
 }

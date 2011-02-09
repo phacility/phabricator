@@ -18,13 +18,13 @@
 
 class ManiphestTransactionDetailView extends AphrontView {
 
-  private $transaction;
+  private $transactions;
   private $handles;
   private $markupEngine;
   private $forEmail;
 
-  public function setTransaction(ManiphestTransaction $transaction) {
-    $this->transaction = $transaction;
+  public function setTransactionGroup(array $transactions) {
+    $this->transactions = $transactions;
     return $this;
   }
 
@@ -40,33 +40,49 @@ class ManiphestTransactionDetailView extends AphrontView {
 
   public function renderForEmail($with_date) {
     $this->forEmail = true;
-    list ($verb, $desc, $classes) = $this->describeAction();
 
-    $transaction = $this->transaction;
+    $transaction = reset($this->transactions);
     $author = $this->renderHandles(array($transaction->getAuthorPHID()));
 
-    $desc = $author.' '.$desc;
-    if ($with_date) {
-      $desc = 'On '.date('M jS \a\t g:i A', $transaction->getDateCreated()).
-              ', '.$desc;
+    $action = null;
+    $descs = array();
+    $comments = null;
+    foreach ($this->transactions as $transaction) {
+      list($verb, $desc, $classes) = $this->describeAction($transaction);
+      if ($action === null) {
+        $action = $verb;
+      }
+      $desc = $author.' '.$desc.'.';
+      if ($with_date) {
+        $desc = 'On '.date('M jS \a\t g:i A', $transaction->getDateCreated()).
+                ', '.$desc;
+      }
+      $descs[] = $desc;
+      if ($transaction->hasComments()) {
+        $comments = $transaction->getComments();
+      }
     }
 
-    $comments = $transaction->getComments();
-    if (strlen(trim($comments))) {
-      $desc = $desc.":\n".$comments;
-    } else {
-      $desc = $desc.".";
+    $descs = implode("\n", $descs);
+    if ($comments) {
+      $descs .= "\n".$comments;
     }
 
     $this->forEmail = false;
-    return array($verb, $desc);
+    return array($action, $descs);
   }
 
   public function render() {
-    $transaction = $this->transaction;
     $handles = $this->handles;
+    $transactions = $this->transactions;
 
     require_celerity_resource('maniphest-transaction-detail-css');
+
+    foreach ($this->transactions as $transaction) {
+      if ($transaction->hasComments()) {
+        break;
+      }
+    }
 
     $author = $this->handles[$transaction->getAuthorPHID()];
 
@@ -80,18 +96,18 @@ class ManiphestTransactionDetailView extends AphrontView {
       }
     }
 
-    list($verb, $desc, $classes) = $this->describeAction(
-      $transaction->getComments());
+    $more_classes = array();
+    $descs = array();
+    foreach ($transactions as $transaction) {
+      list($verb, $desc, $classes) = $this->describeAction($transaction);
+      $more_classes = array_merge($more_classes, $classes);
+      $descs[] = $author->renderLink().' '.$desc.'.';
+    }
+    $descs = implode('<br />', $descs);
 
     $more_classes = implode(' ', $classes);
 
-    if (strlen(trim($transaction->getComments()))) {
-      $punc = ':';
-    } else {
-      $punc = '.';
-    }
-
-    if (strlen(trim($transaction->getComments()))) {
+    if ($transaction->hasComments()) {
       $comment_block =
         '<div class="maniphest-transaction-comments phabricator-remarkup">'.
           $comments.
@@ -112,24 +128,20 @@ class ManiphestTransactionDetailView extends AphrontView {
             phabricator_format_timestamp($transaction->getDateCreated()).
           '</div>'.
           '<strong>'.
-            $author->renderLink().
-            ' '.
-            $desc.
-            $punc.
+            $descs.
           '</strong>'.
         '</div>'.
         $comment_block.
       '</div>');
   }
 
-  private function describeAction() {
+  private function describeAction($transaction) {
     $verb = null;
     $desc = null;
     $classes = array();
 
     $handles = $this->handles;
 
-    $transaction = $this->transaction;
     $type = $transaction->getTransactionType();
     $author_phid = $transaction->getAuthorPHID();
     $new = $transaction->getNewValue();

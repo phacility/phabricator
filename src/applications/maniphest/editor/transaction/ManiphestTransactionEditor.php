@@ -18,82 +18,85 @@
 
 class ManiphestTransactionEditor {
 
-  public function applyTransaction($task, $transaction) {
-
-    $type = $transaction->getTransactionType();
-
-    $new = $transaction->getNewValue();
+  public function applyTransactions($task, array $transactions) {
 
     $email_cc = $task->getCCPHIDs();
 
     $email_to = array();
     $email_to[] = $task->getOwnerPHID();
-    $email_to[] = $transaction->getAuthorPHID();
 
-    switch ($type) {
-      case ManiphestTransactionType::TYPE_NONE:
-        $old = null;
-        break;
-      case ManiphestTransactionType::TYPE_STATUS:
-        $old = $task->getStatus();
-        break;
-      case ManiphestTransactionType::TYPE_OWNER:
-        $old = $task->getOwnerPHID();
-        break;
-      case ManiphestTransactionType::TYPE_CCS:
-        $old = $task->getCCPHIDs();
-        $new = array_unique(array_merge($old, $new));
-        break;
-      case ManiphestTransactionType::TYPE_PRIORITY:
-        $old = $task->getPriority();
-        break;
-      default:
-        throw new Exception('Unknown action type.');
-    }
+    foreach ($transactions as $transaction) {
+      $type = $transaction->getTransactionType();
+      $new = $transaction->getNewValue();
+      $email_to[] = $transaction->getAuthorPHID();
 
-    if (($old !== null) && ($old == $new)) {
-      $transaction->setOldValue(null);
-      $transaction->setNewValue(null);
-      $transaction->setTransactionType(ManiphestTransactionType::TYPE_NONE);
-    } else {
       switch ($type) {
         case ManiphestTransactionType::TYPE_NONE:
+          $old = null;
           break;
         case ManiphestTransactionType::TYPE_STATUS:
-          $task->setStatus($new);
+          $old = $task->getStatus();
           break;
         case ManiphestTransactionType::TYPE_OWNER:
-          $task->setOwnerPHID($new);
+          $old = $task->getOwnerPHID();
           break;
         case ManiphestTransactionType::TYPE_CCS:
-          $task->setCCPHIDs($new);
+          $old = $task->getCCPHIDs();
           break;
         case ManiphestTransactionType::TYPE_PRIORITY:
-          $task->setPriority($new);
+          $old = $task->getPriority();
           break;
         default:
           throw new Exception('Unknown action type.');
       }
 
-      $transaction->setOldValue($old);
-      $transaction->setNewValue($new);
+      if (($old !== null) && ($old == $new)) {
+        $transaction->setOldValue(null);
+        $transaction->setNewValue(null);
+        $transaction->setTransactionType(ManiphestTransactionType::TYPE_NONE);
+      } else {
+        switch ($type) {
+          case ManiphestTransactionType::TYPE_NONE:
+            break;
+          case ManiphestTransactionType::TYPE_STATUS:
+            $task->setStatus($new);
+            break;
+          case ManiphestTransactionType::TYPE_OWNER:
+            $task->setOwnerPHID($new);
+            break;
+          case ManiphestTransactionType::TYPE_CCS:
+            $task->setCCPHIDs($new);
+            break;
+          case ManiphestTransactionType::TYPE_PRIORITY:
+            $task->setPriority($new);
+            break;
+          default:
+            throw new Exception('Unknown action type.');
+        }
+
+        $transaction->setOldValue($old);
+        $transaction->setNewValue($new);
+      }
+
     }
 
     $task->save();
-    $transaction->setTaskID($task->getID());
-    $transaction->save();
+    foreach ($transactions as $transaction) {
+      $transaction->setTaskID($task->getID());
+      $transaction->save();
+    }
 
     $email_to[] = $task->getOwnerPHID();
-    $email_cc = array_merge($email_cc, $task->getCCPHIDs());
+    $email_cc = array_merge(
+      $email_cc,
+      $task->getCCPHIDs());
 
-    $this->sendEmail($task, $transaction, $email_to, $email_cc);
+    $this->sendEmail($task, $transactions, $email_to, $email_cc);
   }
 
-  private function sendEmail($task, $transaction, $email_to, $email_cc) {
+  private function sendEmail($task, $transactions, $email_to, $email_cc) {
     $email_to = array_filter(array_unique($email_to));
     $email_cc = array_filter(array_unique($email_cc));
-
-    $transactions = array($transaction);
 
     $phids = array();
     foreach ($transactions as $transaction) {
@@ -108,12 +111,28 @@ class ManiphestTransactionEditor {
 
 
     $view = new ManiphestTransactionDetailView();
-    $view->setTransaction($transaction);
+    $view->setTransactionGroup($transactions);
     $view->setHandles($handles);
-
     list($action, $body) = $view->renderForEmail($with_date = false);
 
+    $is_create = false;
+    foreach ($transactions as $transaction) {
+      $type = $transaction->getTransactionType();
+      if (($type == ManiphestTransactionType::TYPE_STATUS) &&
+          ($transaction->getOldValue() === null) &&
+          ($transaction->getNewValue() == ManiphestTaskStatus::STATUS_OPEN)) {
+        $is_create = true;
+      }
+    }
+
     $task_uri = PhabricatorEnv::getURI('/T'.$task->getID());
+
+    if ($is_create) {
+      $body .=
+        "\n\n".
+        "TASK DESCRIPTION\n".
+        "  ".$task->getDescription();
+    }
 
     $body .=
       "\n\n".

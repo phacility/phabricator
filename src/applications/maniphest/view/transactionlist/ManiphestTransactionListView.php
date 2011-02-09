@@ -46,9 +46,34 @@ class ManiphestTransactionListView extends AphrontView {
   public function render() {
 
     $views = array();
+
+
+    $last = null;
+    $group = array();
+    $groups = array();
     foreach ($this->transactions as $transaction) {
+      if ($last === null) {
+        $last = $transaction;
+        $group[] = $transaction;
+        continue;
+      } else if ($last->canGroupWith($transaction)) {
+        $group[] = $transaction;
+        if ($transaction->hasComments()) {
+          $last = $transaction;
+        }
+      } else {
+        $groups[] = $group;
+        $last = $transaction;
+        $group = array($transaction);
+      }
+    }
+    if ($group) {
+      $groups[] = $group;
+    }
+
+    foreach ($groups as $group) {
       $view = new ManiphestTransactionDetailView($transaction);
-      $view->setTransaction($transaction);
+      $view->setTransactionGroup($group);
       $view->setHandles($this->handles);
       $view->setMarkupEngine($this->markupEngine);
       $views[] = $view->render();

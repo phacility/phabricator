@@ -58,4 +58,29 @@ class ManiphestTransaction extends ManiphestDAO {
     return $phids;
   }
 
+  public function canGroupWith($target) {
+    if ($target->getAuthorPHID() != $this->getAuthorPHID()) {
+      return false;
+    }
+    if ($target->hasComments() && $this->hasComments()) {
+      return false;
+    }
+    $ttime = $target->getDateCreated();
+    $stime = $target->getDateCreated();
+    if (abs($stime - $ttime) > 60) {
+      return false;
+    }
+
+    if ($target->getTransactionType() == $this->getTransactionType()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public function hasComments() {
+    return (bool)strlen(trim($this->getComments()));
+  }
+
+
 }

@@ -33,11 +33,10 @@ class ManiphestTaskCreateController extends ManiphestController {
     if ($request->isFormPost()) {
       $task->setTitle($request->getStr('title'));
       $task->setAuthorPHID($user->getPHID());
-      $owner_tokenizer = $request->getArr('assigned_to');
-      $task->setOwnerPHID(reset($owner_tokenizer));
-      $task->setCCPHIDs($request->getArr('cc'));
-      $task->setPriority($request->getInt('priority'));
       $task->setDescription($request->getStr('description'));
+
+      $owner_tokenizer = $request->getArr('assigned_to');
+      $owner_phid = reset($owner_tokenizer);
 
       if (!strlen($task->getTitle())) {
         $e_title = 'Required';
@@ -45,22 +44,50 @@ class ManiphestTaskCreateController extends ManiphestController {
       }
 
       if (!$errors) {
-        $transaction = new ManiphestTransaction();
-        $transaction->setAuthorPHID($user->getPHID());
-        $transaction->setTransactionType(ManiphestTransactionType::TYPE_STATUS);
-        $transaction->setNewValue(ManiphestTaskStatus::STATUS_OPEN);
+        $changes = array();
+
+        $changes[ManiphestTransactionType::TYPE_STATUS] =
+          ManiphestTaskStatus::STATUS_OPEN;
+
+        if ($request->getInt('priority') != $task->getPriority()) {
+          $changes[ManiphestTransactionType::TYPE_PRIORITY] =
+            $request->getInt('priority');
+        }
+
+        if ($owner_phid) {
+          $changes[ManiphestTransactionType::TYPE_OWNER] = $owner_phid;
+        }
+
+        if ($request->getArr('cc')) {
+          $changes[ManiphestTransactionType::TYPE_CCS] = $request->getArr('cc');
+        }
+
+        $template = new ManiphestTransaction();
+        $template->setAuthorPHID($user->getPHID());
+        $transactions = array();
+
+        foreach ($changes as $type => $value) {
+          $transaction = clone $template;
+          $transaction->setTransactionType($type);
+          $transaction->setNewValue($value);
+          $transactions[] = $transaction;
+        }
 
         $editor = new ManiphestTransactionEditor();
-        $editor->applyTransaction($task, $transaction);
+        $editor->applyTransactions($task, $transactions);
 
         return id(new AphrontRedirectResponse())
           ->setURI('/T'.$task->getID());
       }
+    } else {
+      $task->setCCPHIDs(array(
+        $user->getPHID(),
+      ));
     }
 
     $phids = array_merge(
       array($task->getOwnerPHID()),
-      nonempty($task->getCCPHIDs(), array()));
+      $task->getCCPHIDs());
     $phids = array_filter($phids);
     $phids = array_unique($phids);
 
