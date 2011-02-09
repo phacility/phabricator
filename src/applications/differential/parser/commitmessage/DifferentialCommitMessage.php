@@ -303,7 +303,7 @@ class DifferentialCommitMessage {
       $field_names[$key] = preg_quote($name, '/');
     }
     $field_names = implode('|', $field_names);
-    $field_pattern = '/^(?<field>'.$field_names.'):(?<text>.*)$/i';
+    $field_pattern = '/^(?P<field>'.$field_names.'):(?P<text>.*)$/i';
 
     foreach ($field_spec as $key => $value) {
       $field_spec[strtolower($key)] = $value;
