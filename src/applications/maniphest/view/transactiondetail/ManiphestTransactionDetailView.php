@@ -127,9 +127,7 @@ class ManiphestTransactionDetailView extends AphrontView {
           '<div class="maniphest-transaction-timestamp">'.
             phabricator_format_timestamp($transaction->getDateCreated()).
           '</div>'.
-          '<strong>'.
-            $descs.
-          '</strong>'.
+          $descs.
         '</div>'.
         $comment_block.
       '</div>');

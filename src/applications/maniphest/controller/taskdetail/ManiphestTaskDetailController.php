@@ -86,7 +86,12 @@ class ManiphestTaskDetailController extends ManiphestController {
 
     $dict['Author'] = $handles[$task->getAuthorPHID()]->renderLink();
 
-    $dict['Description'] = $engine->markupText($task->getDescription());
+    $dict['Description'] =
+      '<div class="maniphest-task-description">'.
+        '<div class="phabricator-remarkup">'.
+          $engine->markupText($task->getDescription()).
+        '</div>'.
+      '</div>';
 
     require_celerity_resource('mainphest-task-detail-css');
 

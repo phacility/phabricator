@@ -9,8 +9,12 @@
 }
 
 .maniphest-transaction-header {
-  background: #e0e0e0;
+  background: #e6e6e6;
   padding: 4px 1em;
+}
+
+.maniphest-transaction-header a {
+  font-weight: bold;
 }
 
 .maniphest-transaction-detail-view {
@@ -31,6 +35,8 @@
   background: #f3f3f3;
 }
 
+
+.maniphest-task-description p,
 .maniphest-transaction-comments p {
   margin: .25em 0 .5em;
 }
