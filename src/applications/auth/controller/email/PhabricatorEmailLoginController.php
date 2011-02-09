@@ -69,7 +69,6 @@ class PhabricatorEmailLoginController extends PhabricatorAuthController {
             array(
               $target_user->getPHID(),
             ));
-          $mail->setReplyTo(PhabricatorEnv::getEnvConfig('metamta.noreply'));
           $mail->setBody(
             "blah blah blah ".
               PhabricatorEnv::getURI('/login/etoken/'.$etoken.'/').'?email='.phutil_escape_uri($target_user->getEmail()));

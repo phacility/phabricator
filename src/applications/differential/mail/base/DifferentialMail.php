@@ -73,11 +73,16 @@ abstract class DifferentialMail {
 
     $mail = new PhabricatorMetaMTAMail();
     $handle = $this->getActorHandle();
+    $reply = $this->getReplyHandlerEmailAddress();
     if ($handle) {
       $mail->setFrom($handle->getPHID());
-      $mail->setReplyTo($this->getReplyHandlerEmailAddress());
+      if ($reply) {
+        $mail->setReplyTo($this->getReplyHandlerEmailAddress());
+      }
     } else {
-      $mail->setFrom($this->getReplyHandlerEmailAddress());
+      if ($reply) {
+        $mail->setFrom($this->getReplyHandlerEmailAddress());
+      }
     }
 
     $mail
@@ -144,6 +149,7 @@ EOTEXT;
   }
 
   protected function getReplyHandlerEmailAddress() {
+    return null;
     // TODO
     $phid = $this->getRevision()->getPHID();
     $server = 'todo.example.com';

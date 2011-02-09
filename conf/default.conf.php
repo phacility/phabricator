@@ -35,22 +35,6 @@ return array(
   // be 50x50px.
   'user.default-profile-image-phid' => 'PHID-FILE-f57aaefce707fc4060ef',
 
-  // When email is sent, try to hand it off to the MTA immediately. The only
-  // reason to disable this is if your MTA infrastructure is completely
-  // terrible. If you disable this option, you must run the 'metamta_mta.php'
-  // daemon or mail won't be handed off to the MTA.
-  'metamta.send-immediately'    => true,
-
-  // "Reply-To" email address to use for no-reply emails.
-  'metamta.noreply'             => 'noreply@example.com',
-
-  'metamta.mail-adapter'        =>
-    'PhabricatorMailImplementationPHPMailerLiteAdapter',
-
-  'amazon-ses.access-key'       =>  null,
-  'amazon-ses.secret-key'       =>  null,
-
-
 // -- Access Control -------------------------------------------------------- //
 
   // Phabricator users have one of three access levels: "anyone", "verified",
@@ -119,6 +103,69 @@ return array(
 
   // The MySQL server to connect to.
   'mysql.host' => 'localhost',
+  
+
+// -- Email ----------------------------------------------------------------- //
+
+  // Some Phabricator tools send email notifications, e.g. when Differential
+  // revisions are updated or Maniphest tasks are changed. These options allow
+  // you to configure how email is delivered.
+  
+  // You can test your mail setup by going to "MetaMTA" in the web interface,
+  // clicking "Send New Message", and then composing a message.  
+
+  // Default address to send mail "From".
+  'metamta.default-address'     => 'noreply@example.com',
+  
+  // When a user takes an action which generates an email notification (like
+  // commenting on a Differential revision), Phabricator can either send that
+  // mail "From" the user's email address (like "alincoln@logcabin.com") or
+  // "From" the 'metamta.default-address' address. The user experience is
+  // generally better if Phabricator uses the user's real address as the "From"
+  // since the messages are easier to organize when they appear in mail clients,
+  // but this will only work if the server is authorized to send email on behalf
+  // of the "From" domain. Practically, this means:
+  //    - If you are doing an install for Example Corp and all the users will
+  //      have corporate @corp.example.com addresses and any hosts Phabricator
+  //      is running on are authorized to send email from corp.example.com,
+  //      you can enable this to make the user experience a little better.
+  //    - If you are doing an install for an open source project and your
+  //      users will be registering via Facebook and using personal email
+  //      addresses, you MUST NOT enable this or virtually all of your outgoing
+  //      email will vanish into SFP blackholes.
+  //    - If your install is anything else, you're much safer leaving this
+  //      off since the risk in turning it on is that your outgoing mail will
+  //      mostly never arrive.
+  'metamta.can-send-as-user'    => false,
+
+  // Adapter class to use to transmit mail to the MTA. The default uses
+  // PHPMailerLite, which will invoke PHP's mail() function. This is appropriate
+  // if mail() actually works on your host, but if you haven't configured mail
+  // it may not be so great. You can also use Amazon SES, by changing this to
+  // 'PhabricatorMailImplementationAmazonSESAdapter', signing up for SES, and
+  // filling in your 'amazon-ses.access-key' and 'amazon-ses.secret-key' below.
+  'metamta.mail-adapter'        =>
+    'PhabricatorMailImplementationPHPMailerLiteAdapter',
+
+  // When email is sent, try to hand it off to the MTA immediately. This may
+  // be worth disabling if your MTA infrastructure is slow or unreliable. If you
+  // disable this option, you must run the 'metamta_mta.php' daemon or mail
+  // won't be handed off to the MTA. If you're using Amazon SES it can be a
+  // little slugish sometimes so it may be worth disabling this and moving to
+  // the daemon after you've got your install up and running. If you have a
+  // properly configured local MTA it should not be necessary to disable this.
+  'metamta.send-immediately'    => true,
+
+  // If you're using Amazon SES to send email, provide your AWS access key
+  // and AWS secret key here. To set up Amazon SES with Phabricator, you need
+  // to:
+  //  - Make sure 'metamta.mail-adapter' is set to:
+  //    "PhabricatorMailImplementationAmazonSESAdapter"
+  //  - Make sure 'metamta.can-send-as-user' is false.
+  //  - Make sure 'metamta.default-address' is configured to something sensible.
+  //  - Make sure 'metamta.default-address' is a validated SES "From" address.
+  'amazon-ses.access-key'       =>  null,
+  'amazon-ses.secret-key'       =>  null,
 
 
 // --  Facebook  ------------------------------------------------------------ //

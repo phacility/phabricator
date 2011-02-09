@@ -166,8 +166,21 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
       $handles = id(new PhabricatorObjectHandleData($phids))
         ->loadHandles();
+        
+      $params = $this->parameters;
+      $default = PhabricatorEnv::getEnvConfig('metamta.default-address');
+      if (empty($params['from'])) {
+        $mailer->setFrom($default);
+      } else if (!PhabricatorEnv::getEnvConfig('metamta.can-send-as-user')) {
+        $from = $params['from'];
+        if (empty($params['reply-to'])) {
+          $params['reply-to'] = $handles[$from]->getEmail();
+        }
+        $mailer->setFrom($default);
+        unset($params['from']);
+      }
 
-      foreach ($this->parameters as $key => $value) {
+      foreach ($params as $key => $value) {
         switch ($key) {
           case 'from':
             $mailer->setFrom($handles[$value]->getEmail());
