@@ -91,6 +91,15 @@ class ManiphestTransactionDetailView extends AphrontView {
       $punc = '.';
     }
 
+    if (strlen(trim($transaction->getComments()))) {
+      $comment_block =
+        '<div class="maniphest-transaction-comments phabricator-remarkup">'.
+          $comments.
+        '</div>';
+    } else {
+      $comment_block = null;
+    }
+
     return phutil_render_tag(
       'div',
       array(
@@ -109,9 +118,7 @@ class ManiphestTransactionDetailView extends AphrontView {
             $punc.
           '</strong>'.
         '</div>'.
-        '<div class="maniphest-transaction-comments">'.
-          $comments.
-        '</div>'.
+        $comment_block.
       '</div>');
   }
 

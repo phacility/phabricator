@@ -208,7 +208,7 @@ celerity_register_resource_map(array(
   ),
   'maniphest-transaction-detail-css' =>
   array(
-    'uri' => '/res/436b83d7/rsrc/css/application/maniphest/transaction-detail.css',
+    'uri' => '/res/443acf25/rsrc/css/application/maniphest/transaction-detail.css',
     'type' => 'css',
     'requires' =>
     array(

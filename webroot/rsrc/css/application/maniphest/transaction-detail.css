@@ -8,11 +8,15 @@
   min-height: 50px;
 }
 
+.maniphest-transaction-header {
+  background: #e0e0e0;
+  padding: 4px 1em;
+}
+
 .maniphest-transaction-detail-view {
   margin-left: 54px;
-  padding: 4px 1em;
-  border: 1px solid #dddddd;
-  background: #f6f6f6;
+  border: 1px solid #bbbbbb;
+  border-width: 1px 0 0;
   min-height: 40px;
 }
 
@@ -20,4 +24,13 @@
   float: right;
   font-size: 11px;
   color: #666666;
+}
+
+.maniphest-transaction-comments {
+  padding: 4px 1em;
+  background: #f3f3f3;
+}
+
+.maniphest-transaction-comments p {
+  margin: .25em 0 .5em;
 }
