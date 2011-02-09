@@ -31,11 +31,11 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
 
   public function __construct(
     DifferentialRevision $revision,
-    $actor_id,
+    PhabricatorObjectHandle $actor,
     array $changesets) {
 
     $this->setRevision($revision);
-    $this->setActorID($actor_id);
+    $this->setActorHandle($actor);
     $this->setChangesets($changesets);
   }
 

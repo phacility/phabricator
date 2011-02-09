@@ -23,8 +23,7 @@ abstract class DifferentialMail {
   protected $to = array();
   protected $cc = array();
 
-  protected $actorName;
-  protected $actorID;
+  protected $actorHandle;
 
   protected $revision;
   protected $comment;
@@ -35,17 +34,25 @@ abstract class DifferentialMail {
   protected $heraldTranscriptURI;
   protected $heraldRulesHeader;
 
-  public function getActorName() {
-    return $this->actorName;
-  }
+  abstract protected function renderSubject();
+  abstract protected function renderBody();
 
-  public function setActorName($actor_name) {
-    $this->actorName = $actor_name;
+  public function setActorHandle($actor_handle) {
+    $this->actorHandle = $actor_handle;
     return $this;
   }
 
-  abstract protected function renderSubject();
-  abstract protected function renderBody();
+  public function getActorHandle() {
+    return $this->actorHandle;
+  }
+
+  protected function getActorName() {
+    $handle = $this->getActorHandle();
+    if ($handle) {
+      return $handle->getName();
+    }
+    return '???';
+  }
 
   public function setXHeraldRulesHeader($header) {
     $this->heraldRulesHeader = $header;
@@ -65,8 +72,9 @@ abstract class DifferentialMail {
     $body     = $this->buildBody();
 
     $mail = new PhabricatorMetaMTAMail();
-    if ($this->getActorID()) {
-      $mail->setFrom($this->getActorID());
+    $handle = $this->getActorHandle();
+    if ($handle) {
+      $mail->setFrom($handle->getPHID());
       $mail->setReplyTo($this->getReplyHandlerEmailAddress());
     } else {
       $mail->setFrom($this->getReplyHandlerEmailAddress());
@@ -188,15 +196,6 @@ EOTEXT;
 
   protected function getCCPHIDs() {
     return $this->cc;
-  }
-
-  public function setActorID($actor_id) {
-    $this->actorID = $actor_id;
-    return $this;
-  }
-
-  public function getActorID() {
-    return $this->actorID;
   }
 
   public function setRevision($revision) {

@@ -31,13 +31,13 @@ class DifferentialCommentMail extends DifferentialMail {
 
   public function __construct(
     DifferentialRevision $revision,
-    $actor_id,
+    PhabricatorObjectHandle $actor,
     DifferentialComment $comment,
     array $changesets,
     array $inline_comments) {
 
     $this->setRevision($revision);
-    $this->setActorID($actor_id);
+    $this->setActorHandle($actor);
     $this->setComment($comment);
     $this->setChangesets($changesets);
     $this->setInlineComments($inline_comments);

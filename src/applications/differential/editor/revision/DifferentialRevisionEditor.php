@@ -418,10 +418,16 @@ class DifferentialRevisionEditor {
 
     $revision->loadRelationships();
 
+    $phids = array($this->getActorPHID());
+
+    $handles = id(new PhabricatorObjectHandleData($phids))
+      ->loadHandles();
+    $actor_handle = $handles[$this->getActorPHID()];
+
     if ($add['rev']) {
       $message = id(new DifferentialNewDiffMail(
           $revision,
-          $this->getActorPHID(),
+          $actor_handle,
           $changesets))
         ->setIsFirstMailAboutRevision($is_new)
         ->setIsFirstMailToRecipients(true)
@@ -449,7 +455,7 @@ class DifferentialRevisionEditor {
     if (!$is_new && $add['ccs']) {
       $mail[] = id(new DifferentialCCWelcomeMail(
           $revision,
-          $this->getActorPHID(),
+          $actor_handle,
           $changesets))
         ->setIsFirstMailToRecipients(true)
         ->setToPHIDs(array_keys($add['ccs']));

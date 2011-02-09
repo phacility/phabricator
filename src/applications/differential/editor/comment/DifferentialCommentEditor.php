@@ -280,9 +280,14 @@ class DifferentialCommentEditor {
       }
     }
 
+    $phids = array($this->actorPHID);
+    $handles = id(new PhabricatorObjectHandleData($phids))
+      ->loadHandles();
+    $actor_handle = $handles[$this->actorPHID];
+
     id(new DifferentialCommentMail(
       $revision,
-      $this->actorPHID,
+      $actor_handle,
       $comment,
       /* $changesets TODO */ array(),
       /* $inline_comments TODO */ array()))
