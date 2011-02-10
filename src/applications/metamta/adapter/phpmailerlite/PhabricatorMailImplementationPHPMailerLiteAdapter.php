@@ -51,7 +51,11 @@ class PhabricatorMailImplementationPHPMailerLiteAdapter
   }
 
   public function addHeader($header_name, $header_value) {
-    $this->mailer->AddCustomHeader($header_name.': '.$header_value);
+    if (strtolower($header_name) == 'message-id') {
+      $this->mailer->MessageID = $header_value;
+    } else {
+      $this->mailer->AddCustomHeader($header_name.': '.$header_value);
+    }
     return $this;
   }
 
