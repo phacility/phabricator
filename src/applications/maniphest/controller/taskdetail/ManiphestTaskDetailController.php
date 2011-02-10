@@ -234,7 +234,7 @@ class ManiphestTaskDetailController extends ManiphestController {
         $comment_panel,
       ),
       array(
-        'title' => 'Create Task',
+        'title' => 'T'.$task->getID().' '.$task->getTitle(),
       ));
   }
 }

@@ -38,7 +38,6 @@ class ManiphestTaskListController extends ManiphestController {
       'alltriage'   => 'Need Triage',
       'unassigned'  => 'Unassigned',
       'allopen'     => 'All Open',
-      
     );
 
     if (empty($views[$this->view])) {

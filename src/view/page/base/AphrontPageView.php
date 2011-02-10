@@ -53,7 +53,7 @@ class AphrontPageView extends AphrontView {
 
     $this->willRenderPage();
 
-    $title = $this->getTitle();
+    $title = phutil_escape_html($this->getTitle());
     $head  = $this->getHead();
     $body  = $this->getBody();
     $tail  = $this->getTail();
