@@ -73,8 +73,11 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
             ->setURI('/settings/page/arcanist/?regenerated=true');
         case 'account':
           if (!empty($_FILES['profile'])) {
-            $file = PhabricatorFile::newFromPHPUpload($_FILES['profile']);
-            $user->setProfileImagePHID($file->getPHID());
+            $err = idx($_FILES['profile'], 'error');
+            if ($err != UPLOAD_ERR_NO_FILE) {
+              $file = PhabricatorFile::newFromPHPUpload($_FILES['profile']);
+              $user->setProfileImagePHID($file->getPHID());
+            }
           }
 
           $user->save();
