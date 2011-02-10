@@ -27,31 +27,46 @@ class ManiphestTaskListController extends ManiphestController {
   public function processRequest() {
 
     $views = array(
+      'Your Tasks',
       'action'    => 'Action Required',
 //      'activity'  => 'Recently Active',
 //      'closed'    => 'Recently Closed',
       'created'   => 'Created',
       'triage'    => 'Need Triage',
+      '<hr />',
+      'All Open Tasks',
+      'alltriage'   => 'Need Triage',
+      'unassigned'  => 'Unassigned',
+      'allopen'     => 'All Open',
+      
     );
 
     if (empty($views[$this->view])) {
-      $this->view = key($views);
+      $this->view = 'action';
     }
 
     $tasks = $this->loadTasks();
 
     $nav = new AphrontSideNavView();
     foreach ($views as $view => $name) {
-      $nav->addNavItem(
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => '/maniphest/view/'.$view.'/',
-            'class' => ($this->view == $view)
-              ? 'aphront-side-nav-selected'
-              : null,
-          ),
-          phutil_escape_html($name)));
+      if (is_integer($view)) {
+        $nav->addNavItem(
+          phutil_render_tag(
+            'span',
+            array(),
+            $name));
+      } else {
+        $nav->addNavItem(
+          phutil_render_tag(
+            'a',
+            array(
+              'href' => '/maniphest/view/'.$view.'/',
+              'class' => ($this->view == $view)
+                ? 'aphront-side-nav-selected'
+                : null,
+            ),
+            phutil_escape_html($name)));
+      }
     }
 
     $handle_phids = mpull($tasks, 'getOwnerPHID');
@@ -94,8 +109,19 @@ class ManiphestTaskListController extends ManiphestController {
           $phids);
       case 'triage':
         return id(new ManiphestTask())->loadAllWhere(
+          'ownerPHID in (%Ls) and status = %d',
+          $phids,
+          ManiphestTaskPriority::PRIORITY_TRIAGE);
+      case 'alltriage':
+        return id(new ManiphestTask())->loadAllWhere(
           'status = %d',
           ManiphestTaskPriority::PRIORITY_TRIAGE);
+      case 'unassigned':
+        return id(new ManiphestTask())->loadAllWhere(
+          'ownerPHID IS NULL');
+      case 'allopen':
+        return id(new ManiphestTask())->loadAllWhere(
+          'status = 0');
     }
 
     return array();

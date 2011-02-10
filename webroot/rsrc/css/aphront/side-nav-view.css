@@ -15,7 +15,8 @@ th.aphront-side-nav-navigation {
   border-right: 1px solid #bbbbbb;
 }
 
-th.aphront-side-nav-navigation a {
+th.aphront-side-nav-navigation a,
+th.aphront-side-nav-navigation span {
   display: block;
   margin: 0 0 2px;
   min-width: 150px;

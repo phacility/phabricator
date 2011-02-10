@@ -147,7 +147,6 @@ class ManiphestTransactionEditor {
       "TASK DETAIL\n".
       "  ".$task_uri."\n";
 
-
     $base = substr(md5($task->getPHID()), 0, 27).' '.pack("N", time());
     $thread_index = base64_encode($base);
 
