@@ -253,6 +253,25 @@ class SimpleEmailService
   }
 
 
+  public function sendRawEmail($raw) {
+    $rest = new SimpleEmailServiceRequest($this, 'POST');
+    $rest->setParameter('Action', 'SendRawEmail');
+    $rest->setParameter('RawMessage.Data', base64_encode($raw));
+
+    $rest = $rest->getResponse();
+    if($rest->error === false && $rest->code !== 200) {
+      $rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
+    }
+    if($rest->error !== false) {
+      $this->__triggerError('sendRawEmail', $rest->error);
+      return false;
+    }
+
+    $response['MessageId'] = (string)$rest->body->SendEmailResult->MessageId;
+    $response['RequestId'] = (string)$rest->body->ResponseMetadata->RequestId;
+    return $response;
+  }
+
   /**
   * Given a SimpleEmailServiceMessage object, submits the message to the service for sending.
   *

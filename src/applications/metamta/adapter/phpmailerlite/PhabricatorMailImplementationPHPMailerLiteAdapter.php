@@ -27,7 +27,7 @@ class PhabricatorMailImplementationPHPMailerLiteAdapter
   }
 
   public function setFrom($email) {
-    $this->mailer->SetFrom($email);
+    $this->mailer->SetFrom($email, '', $crazy_side_effects = false);
     return $this;
   }
 

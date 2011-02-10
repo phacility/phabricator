@@ -489,6 +489,18 @@ class PHPMailerLite {
 
       // Choose the mailer and send through it
       switch($this->Mailer) {
+        
+        case 'amazon-ses':
+          $toArr = array();
+          foreach($this->to as $t) {
+            $toArr[] = $this->AddrFormat($t);
+          }
+          $to = implode(', ', $toArr);
+          return $this->customMailer->executeSend(
+            "To: ".$to."\n".
+            $header.
+            $body);
+
         case 'sendmail':
           $sendAction = $this->SendmailSend($header, $body);
           return $sendAction;
@@ -891,7 +903,6 @@ class PHPMailerLite {
       $result .= sprintf("Message-ID: <%s@%s>%s", $uniq_id, $this->ServerHostname(), $this->LE);
     }
     $result .= $this->HeaderLine('X-Priority', $this->Priority);
-    $result .= $this->HeaderLine('X-Mailer', 'PHPMailer '.$this->Version.' (phpmailer.codeworxtech.com)');
 
     if($this->ConfirmReadingTo != '') {
       $result .= $this->HeaderLine('Disposition-Notification-To', '<' . trim($this->ConfirmReadingTo) . '>');
