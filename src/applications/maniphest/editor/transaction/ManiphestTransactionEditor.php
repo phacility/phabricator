@@ -154,7 +154,7 @@ class ManiphestTransactionEditor {
 
     id(new PhabricatorMetaMTAMail())
       ->setSubject(
-        '[Maniphest] '.$action.': T'.$task->getID().' '.$task->getTitle())
+        '[Maniphest] T'.$task->getID().' '.$action.':  '.$task->getTitle())
       ->setFrom($transaction->getAuthorPHID())
       ->addTos($email_to)
       ->addCCs($email_cc)

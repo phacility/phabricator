@@ -66,7 +66,7 @@ class ManiphestTransaction extends ManiphestDAO {
       return false;
     }
     $ttime = $target->getDateCreated();
-    $stime = $target->getDateCreated();
+    $stime = $this->getDateCreated();
     if (abs($stime - $ttime) > 60) {
       return false;
     }
