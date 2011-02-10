@@ -75,7 +75,8 @@ class ManiphestTransactionSaveController extends ManiphestController {
           array($task->getOwnerPHID()));
         $new = array_unique(array_filter($new));
         if ($old != $new) {
-          $cc = clone $transaction;
+          $cc = new ManiphestTransaction();
+          $cc->setAuthorPHID($user->getPHID());
           $cc->setTransactionType(ManiphestTransactionType::TYPE_CCS);
           $cc->setNewValue($new);
           $transactions[] = $cc;
