@@ -147,12 +147,23 @@ class ManiphestTransactionEditor {
       "TASK DETAIL\n".
       "  ".$task_uri."\n";
 
+
+    $base = substr(md5($task->getPHID()), 0, 27).' '.pack("N", time());
+    $thread_index = base64_encode($base);
+
+    $message_id = '<maniphest-task-'.$task->getPHID().'>';
+
     id(new PhabricatorMetaMTAMail())
       ->setSubject(
         '[Maniphest] '.$action.': T'.$task->getID().' '.$task->getTitle())
       ->setFrom($transaction->getAuthorPHID())
       ->addTos($email_to)
       ->addCCs($email_cc)
+      ->addHeader('Thread-Index', $thread_index)
+      ->addHeader('Thread-Topic', 'Maniphest Task '.$task->getID())
+      ->addHeader('In-Reply-To',  $message_id)
+      ->addHeader('References',   $message_id)
+      ->setRelatedPHID($task->getPHID())
       ->setBody($body)
       ->save();
   }
