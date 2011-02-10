@@ -353,6 +353,12 @@ class DifferentialRevisionEditor {
 
     $mail = array();
 
+    $phids = array($this->getActorPHID());
+
+    $handles = id(new PhabricatorObjectHandleData($phids))
+      ->loadHandles();
+    $actor_handle = $handles[$this->getActorPHID()];
+
     $changesets = null;
     $comment = null;
     if ($diff) {
@@ -364,7 +370,7 @@ class DifferentialRevisionEditor {
       if ($comment) {
         $mail[] = id(new DifferentialNewDiffMail(
             $revision,
-            $this->getActorPHID(),
+            $actor_handle,
             $changesets))
           ->setIsFirstMailAboutRevision($is_new)
           ->setIsFirstMailToRecipients($is_new)
@@ -417,12 +423,6 @@ class DifferentialRevisionEditor {
     }
 
     $revision->loadRelationships();
-
-    $phids = array($this->getActorPHID());
-
-    $handles = id(new PhabricatorObjectHandleData($phids))
-      ->loadHandles();
-    $actor_handle = $handles[$this->getActorPHID()];
 
     if ($add['rev']) {
       $message = id(new DifferentialNewDiffMail(
