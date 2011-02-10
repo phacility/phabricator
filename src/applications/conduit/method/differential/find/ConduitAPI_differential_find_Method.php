@@ -27,7 +27,7 @@ class ConduitAPI_differential_find_Method extends ConduitAPIMethod {
       DifferentialRevisionListData::QUERY_OPEN_OWNED,
       DifferentialRevisionListData::QUERY_COMMITTABLE,
       DifferentialRevisionListData::QUERY_REVISION_IDS,
-      DifferentialRevisionListData::QUERY_BY_PHID,
+      DifferentialRevisionListData::QUERY_PHIDS,
     );
 
     $types = implode(', ', $types);

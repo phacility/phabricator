@@ -81,7 +81,11 @@ class PhabricatorConduitAPIController
 
       $api_request = new ConduitAPIRequest($params);
 
-      if ($method_handler->shouldRequireAuthentication()) {
+      if ($request->getUser()->getPHID()) {
+        $auth_okay = true;
+      } else if (!$method_handler->shouldRequireAuthentication()) {
+        $auth_okay = true;
+      } else {
         $session_key = idx($metadata, 'sessionKey');
         if (!$session_key) {
           $auth_okay = false;
@@ -97,6 +101,7 @@ class PhabricatorConduitAPIController
             $session_key);
           if (!$session) {
             $auth_okay = false;
+            $result = null;
             $error_code = 'ERR-INVALID-SESSION';
             $error_info = 'Session key is invalid.';
           } else {
@@ -105,8 +110,6 @@ class PhabricatorConduitAPIController
           }
         }
         // TODO: When we session, read connectionID from the session table.
-      } else {
-        $auth_okay = true;
       }
 
       if ($auth_okay) {
