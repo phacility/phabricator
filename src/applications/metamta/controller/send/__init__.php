@@ -7,7 +7,6 @@
 
 
 phutil_require_module('phabricator', 'aphront/response/redirect');
-phutil_require_module('phabricator', 'applications/metamta/adapter/phpmailerlite');
 phutil_require_module('phabricator', 'applications/metamta/controller/base');
 phutil_require_module('phabricator', 'applications/metamta/storage/mail');
 phutil_require_module('phabricator', 'view/form/base');

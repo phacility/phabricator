@@ -28,7 +28,7 @@ class PhabricatorMailImplementationAmazonSESAdapter
     $this->mailer->customMailer = $this;
   }
 
-  public function executeSend($body) {    
+  public function executeSend($body) {
     $key = PhabricatorEnv::getEnvConfig('amazon-ses.access-key');
     $secret = PhabricatorEnv::getEnvConfig('amazon-ses.secret-key');
 

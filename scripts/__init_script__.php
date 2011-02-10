@@ -30,3 +30,12 @@ if (!ini_get('date.timezone')) {
 }
 
 phutil_load_library(dirname(__FILE__).'/../src/');
+
+function phabricator_read_config_file($config) {
+  $root = dirname(dirname(__FILE__));
+  $conf = include $root.'/conf/'.$config.'.conf.php';
+  if ($conf === false) {
+    throw new Exception("Failed to read config file '{$config}'.");
+  }
+  return $conf;
+}

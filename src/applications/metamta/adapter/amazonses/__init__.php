@@ -6,11 +6,10 @@
 
 
 
-phutil_require_module('phabricator', 'applications/metamta/adapter/base');
+phutil_require_module('phabricator', 'applications/metamta/adapter/phpmailerlite');
 phutil_require_module('phabricator', 'infrastructure/env');
 
 phutil_require_module('phutil', 'moduleutils');
-phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('PhabricatorMailImplementationAmazonSESAdapter.php');

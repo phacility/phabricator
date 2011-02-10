@@ -16,4 +16,21 @@
  * limitations under the License.
  */
 
-// Placeholder so I don't forget about this, hopefully.
+class PhabricatorMetaMTADaemon {
+
+  public function run() {
+    echo "OK. Sending mail";
+    do {
+      $mail = id(new PhabricatorMetaMTAMail())->loadAllWhere(
+        'status = %s AND nextRetry <= %d LIMIT 10',
+        PhabricatorMetaMTAMail::STATUS_QUEUE,
+        time());
+      foreach ($mail as $message) {
+        $message->sendNow();
+        echo ".";
+      }
+      sleep(1);
+    } while (true);
+  }
+
+}

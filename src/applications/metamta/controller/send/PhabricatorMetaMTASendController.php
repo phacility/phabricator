@@ -34,9 +34,7 @@ class PhabricatorMetaMTASendController extends PhabricatorMetaMTAController {
       $mail->setIsHTML($request->getInt('html'));
       $mail->save();
       if ($request->getInt('immediately')) {
-        $mail->sendNow(
-          $force_send = true,
-          new PhabricatorMailImplementationPHPMailerLiteAdapter());
+        $mail->sendNow($force_send = true);
       }
 
       return id(new AphrontRedirectResponse())

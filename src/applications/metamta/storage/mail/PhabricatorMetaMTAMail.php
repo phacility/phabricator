@@ -122,19 +122,25 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     $ret = parent::save();
 
     if ($try_send) {
-      $class_name = PhabricatorEnv::getEnvConfig('metamta.mail-adapter');
-      PhutilSymbolLoader::loadClass($class_name);
-      $mailer = newv($class_name, array());
-      $this->sendNow($force_send = false, $mailer);
+      $this->sendNow();
     }
 
     return $ret;
   }
 
+  private function buildDefaultMailer() {
+    $class_name = PhabricatorEnv::getEnvConfig('metamta.mail-adapter');
+    PhutilSymbolLoader::loadClass($class_name);
+    return newv($class_name, array());
+  }
 
   public function sendNow(
     $force_send = false,
-    PhabricatorMailImplementationAdapter $mailer) {
+    PhabricatorMailImplementationAdapter $mailer = null) {
+
+    if ($mailer === null) {
+      $mailer = $this->buildDefaultMailer();
+    }
 
     if (!$force_send) {
       if ($this->getStatus() != self::STATUS_QUEUE) {
@@ -166,7 +172,7 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
       $handles = id(new PhabricatorObjectHandleData($phids))
         ->loadHandles();
-        
+
       $params = $this->parameters;
       $default = PhabricatorEnv::getEnvConfig('metamta.default-address');
       if (empty($params['from'])) {
