@@ -7,10 +7,12 @@
 
 
 phutil_require_module('phabricator', 'applications/maniphest/constants/priority');
+phutil_require_module('phabricator', 'applications/maniphest/constants/status');
 phutil_require_module('phabricator', 'applications/maniphest/controller/base');
 phutil_require_module('phabricator', 'applications/maniphest/storage/task');
 phutil_require_module('phabricator', 'applications/maniphest/view/tasklist');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
+phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'view/layout/sidenav');
 
 phutil_require_module('phutil', 'markup');

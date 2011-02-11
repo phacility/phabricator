@@ -42,8 +42,15 @@ class ManiphestTaskSummaryView extends AphrontView {
         '<td class="maniphest-task-number">'.
           'T'.$task->getID().
         '</td>'.
+        '<td class="maniphest-task-status">'.
+          ($task->getStatus() == ManiphestTaskStatus::STATUS_OPEN
+            ? 'Open'
+            : 'Closed').
+        '</td>'.
         '<td class="maniphest-task-owner">'.
-          $handles[$task->getOwnerPHID()]->renderLink().
+          ($task->getOwnerPHID()
+            ? $handles[$task->getOwnerPHID()]->renderLink()
+            : '<em>None</em>').
         '</td>'.
         '<td class="maniphest-task-name">'.
           phutil_render_tag(

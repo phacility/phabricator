@@ -63,7 +63,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-side-nav-view-css' =>
   array(
-    'uri' => '/res/0fc0545c/rsrc/css/aphront/side-nav-view.css',
+    'uri' => '/res/09b7eb85/rsrc/css/aphront/side-nav-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -199,7 +199,7 @@ celerity_register_resource_map(array(
   ),
   'maniphest-task-summary-css' =>
   array(
-    'uri' => '/res/bed1edf0/rsrc/css/application/maniphest/task-summary.css',
+    'uri' => '/res/19a3c543/rsrc/css/application/maniphest/task-summary.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -208,7 +208,7 @@ celerity_register_resource_map(array(
   ),
   'maniphest-transaction-detail-css' =>
   array(
-    'uri' => '/res/443acf25/rsrc/css/application/maniphest/transaction-detail.css',
+    'uri' => '/res/658912c5/rsrc/css/application/maniphest/transaction-detail.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -217,7 +217,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-core-buttons-css' =>
   array(
-    'uri' => '/res/fe74ba44/rsrc/css/core/buttons.css',
+    'uri' => '/res/ee35ffe1/rsrc/css/core/buttons.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -444,7 +444,7 @@ celerity_register_resource_map(array(
 ), array (
   'packages' =>
   array (
-    '8cbb3650' =>
+    '4f907a28' =>
     array (
       'name' => 'core.pkg.css',
       'symbols' =>
@@ -463,7 +463,7 @@ celerity_register_resource_map(array(
         11 => 'phabricator-remarkup-css',
         12 => 'syntax-highlighting-css',
       ),
-      'uri' => '/res/pkg/8cbb3650/core.pkg.css',
+      'uri' => '/res/pkg/4f907a28/core.pkg.css',
       'type' => 'css',
     ),
     '4b8af7b5' =>
@@ -500,19 +500,19 @@ celerity_register_resource_map(array(
   ),
   'reverse' =>
   array (
-    'phabricator-core-css' => '8cbb3650',
-    'phabricator-core-buttons-css' => '8cbb3650',
-    'phabricator-standard-page-view' => '8cbb3650',
-    'aphront-dialog-view-css' => '8cbb3650',
-    'aphront-form-view-css' => '8cbb3650',
-    'aphront-panel-view-css' => '8cbb3650',
-    'aphront-side-nav-view-css' => '8cbb3650',
-    'aphront-table-view-css' => '8cbb3650',
-    'aphront-tokenizer-control-css' => '8cbb3650',
-    'aphront-typeahead-control-css' => '8cbb3650',
-    'phabricator-directory-css' => '8cbb3650',
-    'phabricator-remarkup-css' => '8cbb3650',
-    'syntax-highlighting-css' => '8cbb3650',
+    'phabricator-core-css' => '4f907a28',
+    'phabricator-core-buttons-css' => '4f907a28',
+    'phabricator-standard-page-view' => '4f907a28',
+    'aphront-dialog-view-css' => '4f907a28',
+    'aphront-form-view-css' => '4f907a28',
+    'aphront-panel-view-css' => '4f907a28',
+    'aphront-side-nav-view-css' => '4f907a28',
+    'aphront-table-view-css' => '4f907a28',
+    'aphront-tokenizer-control-css' => '4f907a28',
+    'aphront-typeahead-control-css' => '4f907a28',
+    'phabricator-directory-css' => '4f907a28',
+    'phabricator-remarkup-css' => '4f907a28',
+    'syntax-highlighting-css' => '4f907a28',
     'differential-core-view-css' => '4b8af7b5',
     'differential-changeset-view-css' => '4b8af7b5',
     'differential-revision-detail-css' => '4b8af7b5',

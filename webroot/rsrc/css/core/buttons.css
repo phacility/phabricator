@@ -148,3 +148,34 @@ button.link {
 button.link:hover {
   text-decoration: underline;
 }
+
+
+a.toggle {
+  background: #d3d3d3;
+  padding: 2px 6px 3px;
+  font-weight: bold;
+  margin-right: 4px;
+  color: #333333;
+  border-radius: 8px;
+  -moz-border-radius: 8px;
+  -webkit-border-radius: 8px;
+  text-decoration: none;
+}
+
+a.toggle:hover {
+  background: #b0b0b0;
+  color: white;
+}
+
+a.toggle-selected {
+  background: #909090;
+  color: white;
+}
+
+a.toggle-fixed {
+  cursor: default;
+}
+
+a.toggle-fixed:hover {
+  background: #909090;
+}
