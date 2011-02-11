@@ -35,6 +35,8 @@ if (!function_exists('mysql_connect')) {
     "the PHP MySQL extension is not installed. This extension is required.");
 }
 
+require_once dirname(dirname(__FILE__)).'/conf/__init_conf__.php';
+
 $conf = phabricator_read_config_file($env);
 $conf['phabricator.env'] = $env;
 
@@ -150,14 +152,3 @@ function setup_aphront_basics() {
 function __autoload($class_name) {
   PhutilSymbolLoader::loadClass($class_name);
 }
-
-
-function phabricator_read_config_file($config) {
-  $root = dirname(dirname(__FILE__));
-  $conf = include $root.'/conf/'.$config.'.conf.php';
-  if ($conf === false) {
-    throw new Exception("Failed to read config file '{$config}'.");
-  }
-  return $conf;
-}
-
