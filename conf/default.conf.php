@@ -27,10 +27,7 @@ return array(
   // but make sure you specify 'https' if you have HTTPS configured.
   'phabricator.conduit-uri'     => null,
 
-  'phabricator.csrf-key'        => '0b7ec0592e0a2829d8b71df2fa269b2c6172eca3',
-
-  'phabricator.version'         => 'UNSTABLE',
-
+    
   // The default PHID for users who haven't uploaded a profile image. It should
   // be 50x50px.
   'user.default-profile-image-phid' => 'PHID-FILE-f57aaefce707fc4060ef',
@@ -192,5 +189,17 @@ return array(
   'recaptcha.private-key'       => null,
 
 
+// -- Misc ------------------------------------------------------------------ //
+
+  // This is hashed with other inputs to generate CSRF tokens. If you want, you
+  // can change it to some other string which is unique to your install. This
+  // will make your install more secure in a vague, mostly theoretical way. But
+  // it will take you like 3 seconds of mashing on your keyboard to set it up so
+  // you might as well.
+  'phabricator.csrf-key'        => '0b7ec0592e0a2829d8b71df2fa269b2c6172eca3',
+
+  // Version string displayed in the footer. You probably should leave this
+  // alone.
+  'phabricator.version'         => 'UNSTABLE',
 
 );

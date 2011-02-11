@@ -1,0 +1,90 @@
+@title Installation Guide
+@group install
+
+This document contains basic install instructions to get Phabricator up and
+running.
+
+= Installation Requirements =
+
+Phabricator is a LAMP application suite, so you basically need LAMP:
+
+  - **Linux**: Some flavor of Linux is required. MacOS is an acceptable flavor
+    of Linux. Windows is not an acceptable flavor of Linux. Phabricator will not
+    install or work properly on Windows. (If you want it to, send patches.)
+    Phabricator is actively developed on OSX and Amazon's Linux; if you run
+    into issues on other flavors, send patches or complaints.
+  - **Apache**: You need Apache. You might be able to use something else, but
+    you're on your own.
+  - **MySQL**: You need MySQL.
+  - **PHP**: You need PHP 5.2 or newer.
+
+You'll probably also need a **domain name** and you'll certainly need
+**a computer** with a connection to **the internet**.
+
+= Installing Required Components =
+
+This document assumes you have "yum". If you don't, substitute whatever package
+manager you do have, or go hunt down all this stuff and build it from source
+if you want.
+
+Install things we need:
+
+  sudo yum install git httpd php mysql-server php-mysql php-devel
+  
+If you already have LAMP setup, you've already got everything you need.
+  
+Now that you have git installed, grab Phabricator and its dependencies:
+
+  $ cd somewhere/ # pick some install directory
+  somewhere/ $ git clone git://github.com/facebook/libphutil.git
+  somewhere/ $ git clone git://github.com/facebook/arcanist.git
+  somewhere/ $ git clone git://github.com/facebook/phabricator.git
+  
+= Installing Optional Components =
+
+== APC ==
+
+Like everything else written in PHP, Phabricator will run much faster with APC
+installed. You likely need to install "pcre-devel" first:
+  
+  sudo yum install pcre-devel
+  
+Then you can either install via PECL:
+
+  sudo yum install php-pear
+  sudo pecl install apc
+  
+...or grab the package from PECL directly and follow the build instructions
+there:
+
+  http://pecl.php.net/package/APC
+  
+Installing APC is optional but **strongly recommended**, especially on
+production hosts.
+
+Once APC is installed, test that it is available by running:
+
+  php -i | grep apc
+  
+If it doesn't show up, add:
+
+  extension=apc.so
+  
+..to "/etc/php.d/apc.ini" or the "php.ini" file indicated by "php -i".
+
+== Flex 2.5.35 / Bison ==
+
+If you want to build XHPAST (an XHP parser, which is required for developing
+libphutil or Arcanist), you also need flex 2.5.35, which is a NEWER version
+than flex 2.5.4. At the time of writing, most packaging systems don't have flex
+2.5.35 available. You can get it from here and compile it manually:
+
+  http://flex.sourceforge.net/
+  
+Then install bison normally:
+
+  sudo yum install bison
+
+= Next Steps =
+
+If everything is installed, move on to @{article:Configuration Guide}.

@@ -2,7 +2,17 @@
   "name" : "Phabricator",
   "src_base" : "https://github.com/facebook/phabricator/blob/master",
   "groups" : {
+    "overview" : "Overview",
+    "install" : "Installing",
+    "config" : "Configuration",
+    "userguide" : "Application User Guides",
+
+    "differential" : "Differential (Code Review)",
+    "diffusion" : "Diffusion (Repository Browser)",
+    "maniphest" : "Maniphest (Task Tracking)",
+    "celerity" : "Celerity (CSS/JS Management)",
     "aphront" : "Aphront (Web Stack)",
+    "console" : "DarkConsole (Debugging Console)",
     "storage" : "Storage"
   }
 }

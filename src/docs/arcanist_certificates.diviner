@@ -1,4 +1,4 @@
-@title Installing Authentication Certificates
+@title Installing Arcanist Certificates
 @group config
 
 Arcanist uses certificates to authenticate to Phabricator. Usernames and
