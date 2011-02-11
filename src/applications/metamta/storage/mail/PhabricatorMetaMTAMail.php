@@ -247,7 +247,7 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         $error = null;
       } catch (Exception $ex) {
         $ok = false;
-        $error = $ex->getMessage();
+        $error = $ex->getMessage()."\n".$ex->getTraceAsString();
       }
     }
 
