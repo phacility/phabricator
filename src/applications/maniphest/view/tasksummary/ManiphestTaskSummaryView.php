@@ -36,6 +36,17 @@ class ManiphestTaskSummaryView extends AphrontView {
     $handles = $this->handles;
 
     require_celerity_resource('maniphest-task-summary-css');
+    
+    $classes = array(
+      ManiphestTaskPriority::PRIORITY_UNBREAK_NOW => 'pri-unbreak',
+      ManiphestTaskPriority::PRIORITY_TRIAGE => 'pri-triage',
+      ManiphestTaskPriority::PRIORITY_HIGH => 'pri-high',
+      ManiphestTaskPriority::PRIORITY_NORMAL => 'pri-normal',
+      ManiphestTaskPriority::PRIORITY_LOW => 'pri-low',
+      ManiphestTaskPriority::PRIORITY_WISH => 'pri-wish',
+    );
+    
+    $pri_class = idx($classes, $task->getPriority());
 
     return
       '<table class="maniphest-task-summary">'.
@@ -61,6 +72,7 @@ class ManiphestTaskSummaryView extends AphrontView {
             phutil_escape_html($task->getTitle())).
         '</td>'.
         '<td class="maniphest-task-priority">'.
+          '<span class="pri-bullet '.$pri_class.'">'."\xE2\x96\xB6".'</span> '.
           ManiphestTaskPriority::getTaskPriorityName($task->getPriority()).
         '</td>'.
         '<td class="maniphest-task-updated">'.

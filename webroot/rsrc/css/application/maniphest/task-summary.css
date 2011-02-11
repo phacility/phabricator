@@ -12,7 +12,7 @@
 
 .maniphest-task-summary td {
   padding: 4px 0.5%;
-  background: #dfdfdf;
+  background: #f0f0f0;
   white-space: nowrap;
 }
 
@@ -39,7 +39,6 @@
 }
 
 .maniphest-task-summary td.maniphest-task-priority {
-  text-align: center;
   width: 11%;
   min-width: 120px;
 }
@@ -49,6 +48,30 @@
   width: 11%;
   min-width: 120px;
 }
+
+.maniphest-task-summary .pri-bullet {
+}
+
+.maniphest-task-summary .pri-unbreak {
+  color: #aa0000;
+}
+
+.maniphest-task-summary .pri-triage {
+  color: #dd00dd;
+}
+.maniphest-task-summary .pri-high {
+  color: #ff6666;
+}
+.maniphest-task-summary .pri-normal {
+  color: #ffaa66;
+}
+.maniphest-task-summary .pri-low {
+  color: #ffcc66;
+}
+.maniphest-task-summary .pri-wish {
+  color: #0099ff;
+}
+
 
 
 .maniphest-basic-search-view {
