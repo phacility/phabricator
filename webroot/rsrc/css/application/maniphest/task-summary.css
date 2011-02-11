@@ -3,11 +3,12 @@
  */
 
 .maniphest-task-summary {
-  border: 1px solid #aaaaaa;
+  border: solid #aaaaaa;
+  border-width: 1px 0;
   width: 100%;
   margin: 2px 0;
   border-collapse: separate;
-  border-spacing: 1px;
+  border-spacing: 0 0px;
 }
 
 .maniphest-task-summary td {
@@ -21,6 +22,8 @@
   color: #444444;
   width: 1%;
   min-width: 80px;
+  border-left-width: 3px;
+  border-left-style: solid;
 }
 
 .maniphest-task-summary td.maniphest-task-status {
@@ -53,23 +56,27 @@
 }
 
 .maniphest-task-summary .pri-unbreak {
-  color: #aa0000;
+  border-color: #ff0000;
 }
 
 .maniphest-task-summary .pri-triage {
-  color: #dd00dd;
+  border-color: #ee00ee;
 }
+
 .maniphest-task-summary .pri-high {
-  color: #ff6666;
+  border-color: #ff6666;
 }
+
 .maniphest-task-summary .pri-normal {
-  color: #ffaa66;
+  border-color: #ffaa66;
 }
+
 .maniphest-task-summary .pri-low {
-  color: #ffcc66;
+  border-color: #eecc66;
 }
+
 .maniphest-task-summary .pri-wish {
-  color: #0099ff;
+  border-color: #0099ff;
 }
 
 

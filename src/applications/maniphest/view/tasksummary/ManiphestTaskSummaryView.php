@@ -50,7 +50,7 @@ class ManiphestTaskSummaryView extends AphrontView {
 
     return
       '<table class="maniphest-task-summary">'.
-        '<td class="maniphest-task-number">'.
+        '<td class="maniphest-task-number '.$pri_class.'">'.
           'T'.$task->getID().
         '</td>'.
         '<td class="maniphest-task-status">'.
@@ -72,7 +72,6 @@ class ManiphestTaskSummaryView extends AphrontView {
             phutil_escape_html($task->getTitle())).
         '</td>'.
         '<td class="maniphest-task-priority">'.
-          '<span class="pri-bullet '.$pri_class.'">'."\xE2\x96\xB6".'</span> '.
           ManiphestTaskPriority::getTaskPriorityName($task->getPriority()).
         '</td>'.
         '<td class="maniphest-task-updated">'.
