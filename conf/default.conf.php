@@ -90,6 +90,16 @@ return array(
   'darkconsole.always-on'       => false,
 
 
+  // Allows you to mask certain configuration values from appearing in the
+  // "Config" tab of DarkConsole.
+  'darkconsole.config-mask'     => array(
+    'mysql.pass',
+    'amazon-ses.secret-key',
+    'recaptcha.private-key',
+    'phabricator.csrf-key',
+    'facebook.application-secret',
+  ),
+
 // --  MySQL  --------------------------------------------------------------- //
 
   // The username to use when connecting to MySQL.

@@ -22,6 +22,7 @@ final class DarkConsoleCore {
   const PLUGIN_SERVICES     = 'Services';
   const PLUGIN_XHPROF       = 'XHProf';
   const PLUGIN_REQUEST      = 'Request';
+  const PLUGIN_CONFIG       = 'Config';
 
   public static function getPlugins() {
     return array(
@@ -29,6 +30,7 @@ final class DarkConsoleCore {
       self::PLUGIN_REQUEST,
       self::PLUGIN_SERVICES,
       self::PLUGIN_XHPROF,
+      self::PLUGIN_CONFIG,
     );
   }
 
