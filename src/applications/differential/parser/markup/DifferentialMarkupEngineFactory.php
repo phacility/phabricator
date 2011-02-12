@@ -24,6 +24,10 @@ class DifferentialMarkupEngineFactory {
     $rules = array();
     $rules[] = new PhutilRemarkupRuleEscapeRemarkup();
     $rules[] = new PhutilRemarkupRuleHyperlink();
+
+    $rules[] = new PhabricatorRemarkupRuleDifferential();
+    $rules[] = new PhabricatorRemarkupRuleManiphest();
+
     $rules[] = new PhutilRemarkupRuleEscapeHTML();
     $rules[] = new PhutilRemarkupRuleMonospace();
     $rules[] = new PhutilRemarkupRuleBold();

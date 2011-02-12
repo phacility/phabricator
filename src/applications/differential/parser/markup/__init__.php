@@ -6,6 +6,9 @@
 
 
 
+phutil_require_module('phabricator', 'infrastructure/markup/remarkup/markuprule/differential');
+phutil_require_module('phabricator', 'infrastructure/markup/remarkup/markuprule/maniphest');
+
 phutil_require_module('phutil', 'markup/engine/remarkup');
 phutil_require_module('phutil', 'markup/engine/remarkup/blockrule/remarkupcode');
 phutil_require_module('phutil', 'markup/engine/remarkup/blockrule/remarkupdefault');
