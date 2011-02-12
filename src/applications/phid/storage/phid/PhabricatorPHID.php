@@ -31,14 +31,7 @@ class PhabricatorPHID extends PhabricatorPHIDDAO {
       throw new Exception("Can not generate PHID with no type.");
     }
 
-    $urandom = @fopen('/dev/urandom', 'r');
-    if (!$urandom) {
-      throw new Exception("Failed to open /dev/urandom!");
-    }
-    $entropy = fread($urandom, 20);
-    if (strlen($entropy) != 20) {
-      throw new Exception("Failed to read from /dev/urandom!");
-    }
+    $entropy = Filesystem::readRandomBytes(20);
 
     $uniq = sha1($entropy);
     $uniq = substr($uniq, 0, 20);

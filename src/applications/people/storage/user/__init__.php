@@ -11,6 +11,7 @@ phutil_require_module('phabricator', 'applications/phid/storage/phid');
 phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'storage/queryfx');
 
+phutil_require_module('phutil', 'filesystem');
 phutil_require_module('phutil', 'utils');
 
 

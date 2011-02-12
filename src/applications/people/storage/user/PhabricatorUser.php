@@ -68,23 +68,9 @@ class PhabricatorUser extends PhabricatorUserDAO {
   }
 
   private function generateConduitCertificate() {
-    $entropy = $this->generateEntropy($bytes = 256);
+    $entropy = Filesystem::readRandomBytes(256);
     $entropy = base64_encode($entropy);
     $entropy = substr($entropy, 0, 255);
-    return $entropy;
-  }
-
-  private function generateEntropy($bytes) {
-    $urandom = fopen('/dev/urandom', 'r');
-    if (!$urandom) {
-      throw new Exception("Failed to open /dev/urandom!");
-    }
-
-    $entropy = fread($urandom, $bytes);
-    if (strlen($entropy) != $bytes) {
-      throw new Exception("Failed to read /dev/urandom!");
-    }
-
     return $entropy;
   }
 
@@ -137,7 +123,7 @@ class PhabricatorUser extends PhabricatorUserDAO {
   public function establishSession($session_type) {
     $conn_w = $this->establishConnection('w');
 
-    $entropy = $this->generateEntropy($bytes = 20);
+    $entropy = Filesystem::readRandomBytes(20);
 
     $session_key = sha1($entropy);
     queryfx(
