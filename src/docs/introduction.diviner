@@ -1,0 +1,41 @@
+@title Introduction
+@group intro
+
+This document provides a high-level overview of the Phabricator project.
+
+= What is Phabricator? =
+
+**Phabricator** (pronounced like the word //fabricator//) is a suite of web
+applications which make it easier to build software, particularly when working
+with teams. Phabricator is largely based on Facebook's internal tools.
+
+The major components of Phabricator are:
+
+  - **Differential**, a code review tool; and
+  - **Diffusion**, a repository browser.
+  
+Phabricator also includes a number of smaller tools.
+
+= Why use Phabricator? =
+
+Phabricator gives you a box of reasonably decent tools for a comparatively small
+setup cost. Plus:
+
+  - It has some good project names.
+  - Facebook integration makes it very hip indeed.
+  - It's fairly snappy.
+  - You only have to install and configure one thing instead of setting up
+    and customizing a bunch of tools you don't really care about.
+  - A couple of the core tools are actually pretty good.
+  - Maniphest allows you to close tasks "out of spite".
+
+However, Phabricator may also not be a good solution for you:
+
+  - If you develop primarily on Windows, you are likely to find integration
+    with the toolsets you use lacking.
+  - If you don't use SVN or Git, you'll have to add support for your VCS before
+    you can get anywhere.
+  - If you loathe PHP, well, it's written in PHP.
+
+
+  

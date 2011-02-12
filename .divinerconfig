@@ -2,7 +2,7 @@
   "name" : "Phabricator",
   "src_base" : "https://github.com/facebook/phabricator/blob/master",
   "groups" : {
-    "overview" : "Overview",
+    "intro" : "Introduction",
     "install" : "Installing",
     "config" : "Configuration",
     "userguide" : "Application User Guides",
