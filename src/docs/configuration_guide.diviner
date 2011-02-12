@@ -59,7 +59,6 @@ useful error message telling you what else you need to fix (for instance, you
 may need to set up MySQL credentials). If you see something else, you did
 something very wrong and/or this document lied to you.
 
-
 = Configuring Phabricator =
 
 Now that basic setup is complete, you should configure Phabricator. Phabricator
@@ -69,19 +68,19 @@ configuration options which control how the applications behave are stored here:
   
 There are several configuration templates:
 
-  - default.conf.php: root configuration, lists every configuration option and
-    sets some default for it. Look in this file to figure out what you can
+  - ##default.conf.php##: root configuration, lists every configuration option
+    and sets some default for it. Look in this file to figure out what you can
     configure.
-  - development.conf.php: pulls in default.conf.php, but overrides some
+  - ##development.conf.php##: pulls in ##default.conf.php##, but overrides some
     configuration options to better values for doing development on Phabricator.
     You probably don't need to even look at this file unless you're making
     changes to Phabricator itself.
-  - production.conf.php: pulls in default.conf.php, but overrides some
+  - ##production.conf.php##: pulls in ##default.conf.php##, but overrides some
     configuration options to provide better values for a production install.
     Once you've completed setup, you should switch to this configuration or
     one based upon it.
-  - setup.conf.php: pulls in default.conf.php, but sets some flags that make
-    it easier to set up a Phabricator install. Switch away from this before
+  - ##setup.conf.php##: pulls in ##default.conf.php##, but sets some flags that
+    make it easier to set up a Phabricator install. Switch away from this before
     deploying a production install.
   
 While you can use these templates as-is, you'll probably want to set up custom
