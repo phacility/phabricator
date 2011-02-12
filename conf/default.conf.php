@@ -27,7 +27,7 @@ return array(
   // but make sure you specify 'https' if you have HTTPS configured.
   'phabricator.conduit-uri'     => null,
 
-    
+
   // The default PHID for users who haven't uploaded a profile image. It should
   // be 50x50px.
   'user.default-profile-image-phid' => 'PHID-FILE-f57aaefce707fc4060ef',
@@ -100,20 +100,20 @@ return array(
 
   // The MySQL server to connect to.
   'mysql.host' => 'localhost',
-  
+
 
 // -- Email ----------------------------------------------------------------- //
 
   // Some Phabricator tools send email notifications, e.g. when Differential
   // revisions are updated or Maniphest tasks are changed. These options allow
   // you to configure how email is delivered.
-  
+
   // You can test your mail setup by going to "MetaMTA" in the web interface,
-  // clicking "Send New Message", and then composing a message.  
+  // clicking "Send New Message", and then composing a message.
 
   // Default address to send mail "From".
   'metamta.default-address'     => 'noreply@example.com',
-  
+
   // When a user takes an action which generates an email notification (like
   // commenting on a Differential revision), Phabricator can either send that
   // mail "From" the user's email address (like "alincoln@logcabin.com") or
