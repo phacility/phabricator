@@ -1,0 +1,142 @@
+<?php
+
+/*
+ * Copyright 2011 Facebook, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+class PhabricatorRepositoryCreateController extends PhabricatorController {
+
+  public function processRequest() {
+
+
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $e_name = true;
+    $e_callsign = true;
+
+    $repository = new PhabricatorRepository();
+
+    $type_map = array(
+      'svn' => 'Subversion',
+      'git' => 'Git',
+    );
+    $errors = array();
+
+    if ($request->isFormPost()) {
+
+      $repository->setName($request->getStr('name'));
+      $repository->setCallsign($request->getStr('callsign'));
+      $repository->setVersionControlSystem($request->getStr('type'));
+
+      if (!strlen($repository->getName())) {
+        $e_name = 'Required';
+        $errors[] = 'Repository name is required.';
+      } else {
+        $e_name = null;
+      }
+
+      if (!strlen($repository->getCallsign())) {
+        $e_callsign = 'Required';
+        $errors[] = 'Callsign is required.';
+      } else if (!preg_match('/^[A-Z]+$/', $repository->getCallsign())) {
+        $e_callsign = 'Invalid';
+        $errors[] = 'Callsign must be ALL UPPERCASE LETTERS.';
+      } else {
+        $e_callsign = null;
+      }
+
+      if (empty($type_map[$repository->getVersionControlSystem()])) {
+        $errors[] = 'Invalid version control system.';
+      }
+
+      if (!$errors) {
+        try {
+          $repository->save();
+
+          return id(new AphrontRedirectResponse())
+            ->setURI('/repository/edit/'.$repository->getID().'/');
+
+        } catch (PhabricatorQueryDuplicateKeyException $ex) {
+          if ($ex->getDuplicateKey() == 'callsign') {
+            $e_callsign = 'Duplicate';
+            $errors[] = 'Callsign must be unique. Another repository already '.
+                        'uses that callsign.';
+          } else {
+            throw $ex;
+          }
+        }
+      }
+    }
+
+    $error_view = null;
+    if ($errors) {
+      $error_view = new AphrontErrorView();
+      $error_view->setErrors($errors);
+      $error_view->setTitle('Form Errors');
+    }
+
+
+    $form = new AphrontFormView();
+    $form
+      ->setUser($user)
+      ->setAction('/repository/create/')
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel('Name')
+          ->setName('name')
+          ->setValue($repository->getName())
+          ->setError($e_name)
+          ->setCaption('Human-readable repository name.'))
+      ->appendChild(
+        '<p class="aphront-form-instructions">Select a "Callsign" &mdash; a '.
+        'short, uppercase string to identify revisions in this repository. If '.
+        'you choose "EX", revisions in this repository will be identified '.
+        'with the prefix "rEX".</p>')
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel('Callsign')
+          ->setName('callsign')
+          ->setValue($repository->getCallsign())
+          ->setError($e_callsign)
+          ->setCaption(
+            'Short, UPPERCASE identifier. Once set, it can not be changed.'))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel('Type')
+          ->setName('type')
+          ->setOptions($type_map)
+          ->setValue($repository->getVersionControlSystem()))
+      ->appendChild(
+        id(new AphrontFormSubmitControl())
+          ->setValue('Create Repository')
+          ->addCancelButton('/repository/'));
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader('Create Repository');
+    $panel->appendChild($form);
+    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+
+    return $this->buildStandardPageResponse(
+      array(
+        $error_view,
+        $panel,
+      ),
+      array(
+        'title' => 'Create Repository',
+      ));
+  }
+
+}

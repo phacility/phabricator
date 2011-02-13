@@ -28,12 +28,6 @@ class AphrontDefaultApplicationConfiguration
 
   public function getURIMap() {
     return array(
-      '/repository/' => array(
-        '$'                     => 'RepositoryListController',
-        'new/$'                 => 'RepositoryEditController',
-        'edit/(?P<id>\d+)/$'     => 'RepositoryEditController',
-        'delete/(?P<id>\d+)/$'   => 'RepositoryDeleteController',
-      ),
       '/' => array(
         '$'                     => 'PhabricatorDirectoryMainController',
       ),
@@ -152,6 +146,15 @@ class AphrontDefaultApplicationConfiguration
       ),
 
       '/T(?P<id>\d+)$' => 'ManiphestTaskDetailController',
+
+      '/github-post-receive/(?P<id>\d+)/(?P<token>[^/]+)/$'
+        => 'PhabricatorRepositoryGitHubPostReceiveController',
+      '/repository/' => array(
+        '$'                     => 'PhabricatorRepositoryListController',
+        'create/$'              => 'PhabricatorRepositoryCreateController',
+        'edit/(?P<id>\d+)/$'    => 'PhabricatorRepositoryEditController',
+        'delete/(?P<id>\d+)/$'  => 'PhabricatorRepositoryDeleteController',
+      ),
     );
   }
 
