@@ -20,7 +20,7 @@
 class PhabricatorRepositoryGitHubPostReceiveController
   extends PhabricatorRepositoryController {
 
-  public function shouldRequireAuthentication() {
+  public function shouldRequireLogin() {
     return false;
   }
 
