@@ -30,5 +30,3 @@ if (!ini_get('date.timezone')) {
 }
 
 phutil_load_library(dirname(__FILE__).'/../src/');
-
-require_once dirname(dirname(__FILE__)).'/conf/__init_conf__.php';

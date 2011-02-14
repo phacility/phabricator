@@ -46,3 +46,25 @@ function javelin_render_tag(
 
   return phutil_render_tag($tag, $attributes, $content);
 }
+
+
+function phabricator_render_form(PhabricatorUser $user, $attributes, $content) {
+  return javelin_render_tag(
+    'form',
+    $attributes,
+    phutil_render_tag(
+      'input',
+      array(
+        'type' => 'hidden',
+        'name' => '__csrf__',
+        'value' => $user->getCSRFToken(),
+      )).
+    phutil_render_tag(
+      'input',
+      array(
+        'type' => 'hidden',
+        'name' => '__form__',
+        'value' => true,
+      )).$content);
+}
+

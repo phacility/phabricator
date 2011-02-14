@@ -96,6 +96,52 @@ class PhabricatorObjectHandleData {
             $handles[$phid] = $handle;
           }
           break;
+        case 'DREV':
+          $class = 'DifferentialRevision';
+          PhutilSymbolLoader::loadClass($class);
+          $object = newv($class, array());
+
+          $revs = $object->loadAllWhere('phid in (%Ls)', $phids);
+          $revs = mpull($revs, null, 'getPHID');
+
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            if (empty($revs[$phid])) {
+              $handle->setType(self::TYPE_UNKNOWN);
+              $handle->setName('Unknown Revision');
+            } else {
+              $rev = $revs[$phid];
+              $handle->setType($type);
+              $handle->setName($rev->getTitle());
+              $handle->setURI('/D'.$rev->getID());
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
+        case 'TASK':
+          $class = 'ManiphestTask';
+          PhutilSymbolLoader::loadClass($class);
+          $object = newv($class, array());
+
+          $tasks = $object->loadAllWhere('phid in (%Ls)', $phids);
+          $tasks = mpull($tasks, null, 'getPHID');
+
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            if (empty($tasks[$phid])) {
+              $handle->setType(self::TYPE_UNKNOWN);
+              $handle->setName('Unknown Revision');
+            } else {
+              $task = $tasks[$phid];
+              $handle->setType($type);
+              $handle->setName($task->getTitle());
+              $handle->setURI('/T'.$task->getID());
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
         case 'FILE':
           $class = 'PhabricatorFile';
           PhutilSymbolLoader::loadClass($class);

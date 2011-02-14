@@ -415,6 +415,8 @@ class DifferentialRevisionEditor {
       'actor'       => $this->getActorPHID(),
     );
 
+//  TODO: When timelines get implemented, move indexing to them.
+    PhabricatorSearchDifferentialIndexer::indexRevision($revision);
 //  TODO
 //    id(new ToolsTimelineEvent('difx', fb_json_encode($event)))->record();
 

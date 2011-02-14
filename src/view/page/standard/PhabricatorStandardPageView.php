@@ -154,23 +154,15 @@ class PhabricatorStandardPageView extends AphrontPageView {
           ' &middot; '.
           '<a href="/settings/">Settings</a>'.
           ' &middot; '.
-          '<form action="/logout/" method="post" style="display: inline;">'.
-            phutil_render_tag(
-              'input',
-              array(
-                'type' => 'hidden',
-                'name' => '__csrf__',
-                'value' => $user->getCSRFToken(),
-              )).
-            phutil_render_tag(
-              'input',
-              array(
-                'type' => 'hidden',
-                'name' => '__form__',
-                'value' => true,
-              )).
-            '<button class="link">Logout</button>'.
-          '</form>';
+          phabricator_render_form(
+            $user,
+            array(
+              'action' => '/search/',
+              'method' => 'post',
+              'style'  => 'display: inline',
+            ),
+            '<input type="text" name="query" />'.
+            '<button>Search</button>');
       }
     }
 
@@ -200,6 +192,17 @@ class PhabricatorStandardPageView extends AphrontPageView {
       }
       $foot_links[] = $link;
     }
+    // This ends up very early in tab order at the top of the page and there's
+    // a bunch of junk up there anyway, just shove it down here.
+    $foot_links[] = phabricator_render_form(
+      $user,
+      array(
+        'action' => '/logout/',
+        'method' => 'post',
+        'style'  => 'display: inline',
+      ),
+      '<button class="link">Logout</button>');
+
     $foot_links = implode(' &middot; ', $foot_links);
 
     return

@@ -1,4 +1,3 @@
-#!/usr/bin/env php
 <?php
 
 /*
@@ -17,12 +16,27 @@
  * limitations under the License.
  */
 
-$root = dirname(dirname(dirname(__FILE__)));
-require_once $root.'/scripts/__init_script__.php';
-require_once $root.'/scripts/__init_env__.php';
+class PhabricatorSearchQuery extends PhabricatorSearchDAO {
 
-phutil_require_module('phutil', 'symbols');
+  protected $authorPHID;
+  protected $query;
+  protected $parameters = array();
 
-PhutilSymbolLoader::loadClass('PhabricatorMetaMTADaemon');
-$daemon = new PhabricatorMetaMTADaemon();
-$daemon->run();
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_SERIALIZATION => array(
+        'parameters' => self::SERIALIZATION_JSON,
+      ),
+    ) + parent::getConfiguration();
+  }
+
+  public function setParameter($parameter, $value) {
+    $this->parameters[$parameter] = $value;
+    return $this;
+  }
+
+  public function getParameter($parameter, $default = null) {
+    return idx($this->parameters, $parameter, $default);
+  }
+
+}

@@ -1,4 +1,3 @@
-#!/usr/bin/env php
 <?php
 
 /*
@@ -17,12 +16,10 @@
  * limitations under the License.
  */
 
-$root = dirname(dirname(dirname(__FILE__)));
-require_once $root.'/scripts/__init_script__.php';
-require_once $root.'/scripts/__init_env__.php';
+abstract class PhabricatorSearchDAO extends PhabricatorLiskDAO {
 
-phutil_require_module('phutil', 'symbols');
+  public function getApplicationName() {
+    return 'search';
+  }
 
-PhutilSymbolLoader::loadClass('PhabricatorMetaMTADaemon');
-$daemon = new PhabricatorMetaMTADaemon();
-$daemon->run();
+}

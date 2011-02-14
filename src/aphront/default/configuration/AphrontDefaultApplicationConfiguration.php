@@ -155,6 +155,11 @@ class AphrontDefaultApplicationConfiguration
         'edit/(?P<id>\d+)/$'    => 'PhabricatorRepositoryEditController',
         'delete/(?P<id>\d+)/$'  => 'PhabricatorRepositoryDeleteController',
       ),
+
+      '/search/' => array(
+        '$' => 'PhabricatorSearchController',
+        '(?P<id>\d+)/$' => 'PhabricatorSearchController',
+      ),
     );
   }
 

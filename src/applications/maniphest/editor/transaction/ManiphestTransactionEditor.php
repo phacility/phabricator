@@ -99,6 +99,9 @@ class ManiphestTransactionEditor {
       $email_cc,
       $task->getCCPHIDs());
 
+    // TODO: Do this offline via timeline
+    PhabricatorSearchManiphestIndexer::indexTask($task);
+
     $this->sendEmail($task, $transactions, $email_to, $email_cc);
   }
 

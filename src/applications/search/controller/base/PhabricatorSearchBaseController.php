@@ -1,4 +1,3 @@
-#!/usr/bin/env php
 <?php
 
 /*
@@ -17,12 +16,19 @@
  * limitations under the License.
  */
 
-$root = dirname(dirname(dirname(__FILE__)));
-require_once $root.'/scripts/__init_script__.php';
-require_once $root.'/scripts/__init_env__.php';
+abstract class PhabricatorSearchBaseController extends PhabricatorController {
 
-phutil_require_module('phutil', 'symbols');
+  public function buildStandardPageResponse($view, array $data) {
+    $page = $this->buildStandardPageView();
 
-PhutilSymbolLoader::loadClass('PhabricatorMetaMTADaemon');
-$daemon = new PhabricatorMetaMTADaemon();
-$daemon->run();
+    $page->setApplicationName('Search');
+    $page->setBaseURI('/search/');
+    $page->setTitle(idx($data, 'title'));
+    $page->setGlyph("(?)");
+    $page->appendChild($view);
+
+    $response = new AphrontWebpageResponse();
+    return $response->setContent($page->render());
+  }
+
+}

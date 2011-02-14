@@ -1,4 +1,3 @@
-#!/usr/bin/env php
 <?php
 
 /*
@@ -17,12 +16,16 @@
  * limitations under the License.
  */
 
-$root = dirname(dirname(dirname(__FILE__)));
-require_once $root.'/scripts/__init_script__.php';
-require_once $root.'/scripts/__init_env__.php';
+require_once dirname(dirname(__FILE__)).'/conf/__init_conf__.php';
 
-phutil_require_module('phutil', 'symbols');
+$env = getenv('PHABRICATOR_ENV');
+if (!$env) {
+  echo "Define PHABRICATOR_ENV before running this script.\n";
+  exit(1);
+}
 
-PhutilSymbolLoader::loadClass('PhabricatorMetaMTADaemon');
-$daemon = new PhabricatorMetaMTADaemon();
-$daemon->run();
+$conf = phabricator_read_config_file($env);
+$conf['phabricator.env'] = $env;
+
+phutil_require_module('phabricator', 'infrastructure/env');
+PhabricatorEnv::setEnvConfig($conf);
