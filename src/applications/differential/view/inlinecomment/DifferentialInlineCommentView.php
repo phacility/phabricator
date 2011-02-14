@@ -120,6 +120,13 @@ final class DifferentialInlineCommentView extends AphrontView {
       }
     }
 
+    $anchor = phutil_render_tag(
+      'a',
+      array(
+        'name' => 'inline-'.$inline->getID(),
+      ),
+      '');
+
     $markup = javelin_render_tag(
       'div',
       array(
@@ -128,6 +135,7 @@ final class DifferentialInlineCommentView extends AphrontView {
         'meta'  => $metadata,
       ),
       '<div class="differential-inline-comment-head">'.
+        $anchor.
         $links.
         '<span class="differential-inline-comment-line">'.$line.'</span>'.
         phutil_escape_html($handles[$inline->getAuthorPHID()]->getName()).

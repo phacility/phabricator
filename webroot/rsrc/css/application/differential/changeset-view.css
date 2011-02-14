@@ -136,11 +136,13 @@
   font-family:        Verdana;
   font-size:          11px;
   margin:             4px 0px;
-  max-width:          81ch;
   padding:            8px 10px;
   width:              100%;
   -moz-box-sizing:    border-box;
   -webkit-box-sizing: border-box;
+  overflow:           hidden;
+  max-width:          520px;
+  white-space:        normal;
 }
 
 .differential-inline-comment-head {

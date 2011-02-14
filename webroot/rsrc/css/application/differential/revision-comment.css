@@ -38,6 +38,10 @@
   padding:             .3em 5px .4em 1.25em;
 }
 
+.differential-comment-content {
+  overflow: hidden;
+}
+
 .differential-comment-core .phabricator-remarkup p {
   margin: 0.35em 0;
 }
@@ -96,8 +100,6 @@
   border-color:     #cc9966;
   background:       #fff9f3;
 }
-
-
 
 .differential-inline-summary th,
 .differential-inline-summary td {

@@ -133,7 +133,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
           $lines = phutil_render_tag(
             'a',
             array(
-              'href' => '#',
+              'href' => '#inline-'.$inline->getID(),
               'class' => 'num',
             ),
             $lines);
