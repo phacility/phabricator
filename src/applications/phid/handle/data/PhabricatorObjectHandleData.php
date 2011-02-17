@@ -115,6 +115,7 @@ class PhabricatorObjectHandleData {
               $handle->setType($type);
               $handle->setName($rev->getTitle());
               $handle->setURI('/D'.$rev->getID());
+              $handle->setFullName('D'.$rev->getID().': '.$rev->getTitle());
             }
             $handles[$phid] = $handle;
           }
@@ -138,6 +139,7 @@ class PhabricatorObjectHandleData {
               $handle->setType($type);
               $handle->setName($task->getTitle());
               $handle->setURI('/T'.$task->getID());
+              $handle->setFullName('T'.$task->getID().': '.$task->getTitle());
             }
             $handles[$phid] = $handle;
           }

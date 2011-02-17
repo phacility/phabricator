@@ -3,11 +3,11 @@
  * @requires aphront-dialog-view-css
  */
 
-form.phabricator-object-selector-dialog {
-  width: 800px;
+.phabricator-object-selector-dialog {
+  width: 960px;
 }
 
-form.phabricator-object-selector-dialog .aphront-dialog-body {
+.phabricator-object-selector-dialog .aphront-dialog-body {
   padding: 0;
 }
 
@@ -30,7 +30,7 @@ td.phabricator-object-selector-search-text {
 
 .phabricator-object-selector-results {
   position: relative;
-  height: 16em;
+  height: 24em;
   border: solid #bbbbbb;
   border-width: 1px 0px;
   overflow-y: scroll;
@@ -78,4 +78,11 @@ td.phabricator-object-selector-search-text {
 .phabricator-object-selector-current {
   background: #ededed;
   padding: 8px 8px;
+}
+
+
+.object-selector-nothing {
+  padding: 1em;
+  color: #888888;
+  text-align: center;
 }

@@ -92,6 +92,7 @@ class AphrontDefaultApplicationConfiguration
             'edit/(?P<id>\d+)/$' => 'DifferentialInlineCommentEditController',
           ),
         ),
+        'attach/(?P<id>\d+)/(?P<type>\w+)/$' => 'DifferentialAttachController',
       ),
 
       '/res/' => array(
@@ -182,6 +183,21 @@ class AphrontDefaultApplicationConfiguration
         '<h1>Unhandled Exception "'.$class.'": '.$message.'</h1>'.
         '<code>'.phutil_escape_html((string)$ex).'</code>'.
       '</div>';
+
+    if ($this->getRequest()->isAjax()) {
+      $dialog = new AphrontDialogView();
+      $dialog
+        ->setTitle('Exception!')
+        ->setClass('aphront-exception-dialog')
+        ->setUser($this->getRequest()->getUser())
+        ->appendChild($content)
+        ->addCancelButton('/');
+
+      $response = new AphrontDialogResponse();
+      $response->setDialog($dialog);
+
+      return $response;
+    }
 
     $view = new PhabricatorStandardPageView();
     $view->setRequest($this->getRequest());

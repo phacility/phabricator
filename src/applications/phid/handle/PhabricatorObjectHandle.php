@@ -90,12 +90,21 @@ class PhabricatorObjectHandle {
   }
 
   public function renderLink() {
+
+    switch ($this->getType()) {
+      case 'USER':
+        $name = $this->getName();
+        break;
+      default:
+        $name = $this->getFullName();
+    }
+
     return phutil_render_tag(
       'a',
       array(
         'href' => $this->getURI(),
       ),
-      phutil_escape_html($this->getName()));
+      phutil_escape_html($name));
   }
 
 }

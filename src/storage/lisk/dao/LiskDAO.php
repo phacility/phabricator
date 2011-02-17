@@ -733,6 +733,10 @@ abstract class LiskDAO {
         $this->getID(),
         'version',
         $this->getVersion());
+      if ($conn->getAffectedRows() !== 1) {
+        throw new AphrontQueryObjectMissingException($use_locks);
+      }
+      $this->setVersion($this->getVersion() + 1);
     } else {
       $conn->query(
         'UPDATE %T SET %Q WHERE %C = %d',
@@ -740,14 +744,9 @@ abstract class LiskDAO {
         $map,
         $this->getIDKeyForUse(),
         $this->getID());
-    }
-
-    if ($conn->getAffectedRows() !== 1) {
-      throw new AphrontQueryObjectMissingException($use_locks);
-    }
-
-    if ($use_locks) {
-      $this->setVersion($this->getVersion() + 1);
+      // We can't detect a missing object because updating an object without
+      // changing any values doesn't affect rows. We could jiggle timestamps
+      // to catch this for objects which track them if we wanted.
     }
 
     $this->didWriteData();

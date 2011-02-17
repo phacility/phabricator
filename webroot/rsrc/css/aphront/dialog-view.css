@@ -58,3 +58,11 @@
   height:     100%;
   min-height: 100%;
 }
+
+.aphront-exception-dialog {
+  width: 95%;
+}
+
+.aphront-exception-dialog .aphront-dialog-head {
+  background: #aa0000;
+}

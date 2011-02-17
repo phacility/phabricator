@@ -25,6 +25,8 @@ class AphrontDialogView extends AphrontView {
   private $user;
   private $hidden = array();
   private $class;
+  private $renderAsForm = true;
+  private $formID;
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
@@ -56,12 +58,23 @@ class AphrontDialogView extends AphrontView {
   }
 
   public function addHiddenInput($key, $value) {
-    $this->hidden[$key] = $value;
+    $this->hidden[] = array($key, $value);
     return $this;
   }
 
   public function setClass($class) {
     $this->class = $class;
+    return $this;
+  }
+
+  public function setRenderDialogAsDiv() {
+    // TODO: This API is awkward.
+    $this->renderAsForm = false;
+    return $this;
+  }
+
+  public function setFormID($id) {
+    $this->formID = $id;
     return $this;
   }
 
@@ -90,39 +103,52 @@ class AphrontDialogView extends AphrontView {
         ),
         'Cancel');
     }
+    $buttons = implode('', $buttons);
 
     if (!$this->user) {
       throw new Exception(
         "You must call setUser() when rendering an AphrontDialogView.");
     }
-    $csrf = $this->user->getCSRFToken();
+
+    $more = $this->class;
+
+    $attributes = array(
+      'class'   => 'aphront-dialog-view '.$more,
+      'sigil'   => 'jx-dialog',
+    );
+
+    $form_attributes = array(
+      'action'  => $this->submitURI,
+      'method'  => 'post',
+      'id'      => $this->formID,
+    );
 
     $hidden_inputs = array();
-    foreach ($this->hidden as $key => $value) {
-      $hidden_inputs[] = phutil_render_tag(
+    foreach ($this->hidden as $desc) {
+      list($key, $value) = $desc;
+      $hidden_inputs[] = javelin_render_tag(
         'input',
         array(
           'type' => 'hidden',
           'name' => $key,
           'value' => $value,
+          'sigil' => 'aphront-dialog-application-input'
         ));
     }
     $hidden_inputs = implode("\n", $hidden_inputs);
-
-    $more = $this->class;
-
-    return javelin_render_tag(
-      'form',
-      array(
-        'class'   => 'aphront-dialog-view '.$more,
-        'action'  => $this->submitURI,
-        'method'  => 'post',
-        'sigil'   => 'jx-dialog',
-      ),
-      '<input type="hidden" name="__form__" value="1" />'.
-      '<input type="hidden" name="__csrf__" value="'.$csrf.'" />'.
+    $hidden_inputs =
       '<input type="hidden" name="__dialog__" value="1" />'.
-      $hidden_inputs.
+      $hidden_inputs;
+
+
+    if (!$this->renderAsForm) {
+      $buttons = phabricator_render_form(
+        $this->user,
+        $form_attributes,
+        $hidden_inputs.$buttons);
+    }
+
+    $content =
       '<div class="aphront-dialog-head">'.
         phutil_escape_html($this->title).
       '</div>'.
@@ -130,9 +156,22 @@ class AphrontDialogView extends AphrontView {
         $this->renderChildren().
       '</div>'.
       '<div class="aphront-dialog-tail">'.
-        implode('', $buttons).
+        $buttons.
         '<div style="clear: both;"></div>'.
-      '</div>');
+      '</div>';
+
+    if ($this->renderAsForm) {
+      return phabricator_render_form(
+        $this->user,
+        $form_attributes + $attributes,
+        $hidden_inputs.
+        $content);
+    } else {
+      return javelin_render_tag(
+        'div',
+        $attributes,
+        $content);
+    }
   }
 
 }

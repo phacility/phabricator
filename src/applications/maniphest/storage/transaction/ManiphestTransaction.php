@@ -51,6 +51,22 @@ class ManiphestTransaction extends ManiphestDAO {
         $phids[] = $this->getOldValue();
         $phids[] = $this->getNewValue();
         break;
+      case ManiphestTransactionType::TYPE_ATTACH:
+        $old = $this->getOldValue();
+        $new = $this->getNewValue();
+        if (!is_array($old)) {
+          $old = array();
+        }
+        if (!is_array($new)) {
+          $new = array();
+        }
+        $val = array_merge(array_values($old), array_values($new));
+        foreach ($val as $stuff) {
+          foreach ($stuff as $phid => $ignored) {
+            $phids[] = $phid;
+          }
+        }
+        break;
     }
 
     $phids[] = $this->getAuthorPHID();

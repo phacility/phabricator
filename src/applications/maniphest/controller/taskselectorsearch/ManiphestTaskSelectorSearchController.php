@@ -28,14 +28,15 @@ class ManiphestTaskSelectorSearchController extends ManiphestController {
 
     $exec = new PhabricatorSearchMySQLExecutor();
     $results = $exec->executeSearch($query);
+    $results = ipull($results, 'phid');
+
+    $handles = id(new PhabricatorObjectHandleData($results))
+      ->loadHandles();
 
     $data = array();
-    foreach ($results as $result) {
-      $data[] = array(
-        'phid' => $result['phid'],
-        'name' => $result['documentTitle'],
-        'href' => '#',
-      );
+    foreach ($handles as $handle) {
+      $view = new PhabricatorHandleObjectSelectorDataView($handle);
+      $data[] = $view->renderData();
     }
 
     return id(new AphrontAjaxResponse())->setContent($data);

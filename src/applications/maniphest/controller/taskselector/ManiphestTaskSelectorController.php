@@ -22,142 +22,29 @@ class ManiphestTaskSelectorController extends ManiphestController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $filter_id = celerity_generate_unique_node_id();
-    $query_id = celerity_generate_unique_node_id();
-    $search_id = celerity_generate_unique_node_id();
-    $results_id = celerity_generate_unique_node_id();
-    $current_id = celerity_generate_unique_node_id();
+    $phids = $request->getArr('phids');
 
-    $search_box =
-      '<table class="phabricator-object-selector-search">
-        <tr>
-          <td class="phabricator-object-selector-search-filter">
-            <select id="'.$filter_id.'">
-              <option>Assigned To Me</option>
-              <option>Created By Me</option>
-              <option>All Open Tasks</option>
-              <option>All Tasks</option>
-            </select>
-          </td>
-          <td class="phabricator-object-selector-search-text">
-            <input type="text" id="'.$query_id.'" />
-          </td>
-          <td class="phabricator-object-selector-search-button">
-            <a href="#" class="button" id="'.$search_id.'">Search</a>
-          </td>
-        </tr>
-      </table>';
-    $result_box =
-      '<div class="phabricator-object-selector-results" id="'.$results_id.'">'.
+    $handles = id(new PhabricatorObjectHandleData($phids))
+      ->loadHandles();
 
-      '</div>';
-    $attached_box =
-      '<div class="phabricator-object-selector-current">'.
-        '<div class="phabricator-object-selector-currently-attached">'.
-          '<div class="phabricator-object-selector-header">'.
-            'Currently Attached Tasks'.
-          '</div>'.
-          '<div id="'.$current_id.'">'.
-          '</div>'.
-        '</div>'.
-      '</div>';
-
-    require_celerity_resource('phabricator-object-selector-css');
-
-    Javelin::initBehavior(
-      'phabricator-object-selector',
-      array(
-        'filter'  => $filter_id,
-        'query'   => $query_id,
-        'search'  => $search_id,
-        'results' => $results_id,
-        'current' => $current_id,
-        'uri'     => '/maniphest/select/search/',
-      ));
-
-    $dialog = new PhabricatorObjectSelectorDialog();
-    $dialog
+    $obj_dialog = new PhabricatorObjectSelectorDialog();
+    $obj_dialog
       ->setUser($user)
-      ->setTitle('Manage Attached Tasks')
-      ->setClass('phabricator-object-selector-dialog')
-      ->appendChild($search_box)
-      ->appendChild($result_box)
-      ->appendChild($attached_box)
-      ->addCancelButton('#')
-      ->addSubmitButton('Save Tasks');
+      ->setHandles($handles)
+      ->setFilters(array(
+        'assigned' => 'Assigned to Me',
+        'created'  => 'Created By Me',
+        'open'     => 'All Open Tasks',
+        'all'      => 'All Tasks',
+      ))
+      ->setCancelURI('#')
+      ->setSearchURI('/maniphest/select/search/')
+      ->setNoun('Tasks');
+
+    $dialog = $obj_dialog->buildDialog();
+
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
 }
-
-/*
-
-        '<table class="phabricator-object-selector-handle">
-          <tr>
-            <th>
-              <input type="checkbox" />
-            </th>
-            <td>
-              <a href="#">T20: Internet Attack Internets</a>
-            </td>
-          </tr>
-        </table>'.
-        '<table class="phabricator-object-selector-handle">
-          <tr>
-            <th>
-              <input type="checkbox" />
-            </th>
-            <td>
-              <a href="#">T21: Internet Attack Internets</a>
-            </td>
-          </tr>
-        </table>'.
-        '<table class="phabricator-object-selector-handle">
-          <tr>
-            <th>
-              <input type="checkbox" />
-            </th>
-            <td>
-              <a href="#">T22: Internet Attack Internets</a>
-            </td>
-          </tr>
-        </table>'.
-        'more results<br />'.
-        'more results<br />'.
-        'more results<br />'.
-        'more results<br />'.
-        'more results<br />'.
-        'more results<br />'.
-        'more results<br />'.
-        'more results<br />'.
-        'more results<br />'.
-        'more results<br />'.
-
-*/
-
-
-/*
-
-          '<table class="phabricator-object-selector-handle">
-            <tr>
-              <th>
-                <input type="checkbox" />
-              </th>
-              <td>
-                <a href="#">T22: Internet Attack Internets</a>
-              </td>
-            </tr>
-          </table>'.
-          '<table class="phabricator-object-selector-handle">
-            <tr>
-              <th>
-                <input type="checkbox" />
-              </th>
-              <td>
-                <a href="#">T22: Internet Attack Internets</a>
-              </td>
-            </tr>
-          </table>'.
-
-*/

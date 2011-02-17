@@ -104,9 +104,13 @@ class ManiphestTransactionDetailView extends AphrontView {
       $comments = $comment_transaction->getCache();
       if (!strlen($comments)) {
         $comments = $comment_transaction->getComments();
-        $comments = $this->markupEngine->markupText($comments);
-        $transaction->setCache($comments);
-        $transaction->save();
+        if (strlen($comments)) {
+          $comments = $this->markupEngine->markupText($comments);
+          $comment_transaction->setCache($comments);
+          if ($comment_transaction->getID()) {
+            $comment_transaction->save();
+          }
+        }
       }
       $comment_block =
         '<div class="maniphest-transaction-comments phabricator-remarkup">'.
@@ -225,8 +229,39 @@ class ManiphestTransactionDetailView extends AphrontView {
                   '"'.$new_name.'"';
         }
         break;
+      case ManiphestTransactionType::TYPE_ATTACH:
+        $old = nonempty($old, array());
+        $new = nonempty($new, array());
+
+        $old = array_keys(idx($old, 'DREV', array()));
+        $new = array_keys(idx($new, 'DREV', array()));
+        $added = array_diff($new, $old);
+        $removed = array_diff($old, $new);
+
+        $add_desc = $this->renderHandles($added);
+        $rem_desc = $this->renderHandles($removed);
+
+        if ($added && !$removed) {
+          $verb = 'Attached';
+          if (count($added) == 1) {
+            $desc = 'attached Differential Revision: '.$add_desc;
+          } else {
+            $desc = 'attached Differential Revisions: '.$add_desc;
+          }
+        } else if ($removed && !$added) {
+          $verb = 'Detached';
+          if (count($removed) == 1) {
+            $desc = 'detached Differential Revision: '.$rem_desc;
+          } else {
+            $desc = 'detached Differential Revisions: '.$rem_desc;
+          }
+        } else {
+          $desc = 'changed attached Differential Revisions, added: '.$add_desc.
+                                                         'removed: '.$rem_desc;
+        }
+        break;
       default:
-        return ' brazenly '.$type."'d";
+        return array($type, ' brazenly '.$type."'d", $classes);
     }
 
     return array($verb, $desc, $classes);

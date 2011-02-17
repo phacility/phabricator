@@ -29,16 +29,20 @@ class ManiphestTask extends ManiphestDAO {
   protected $title;
   protected $description;
 
-  protected $relatedPHIDs;
+  protected $attached = array();
 
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
         'ccPHIDs' => self::SERIALIZATION_JSON,
-        'relatedPHIDs' => self::SERIALIZATION_JSON,
+        'attached' => self::SERIALIZATION_JSON,
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function getAttachedPHIDs($type) {
+    return array_keys(idx($this->attached, $type, array()));
   }
 
   public function generatePHID() {

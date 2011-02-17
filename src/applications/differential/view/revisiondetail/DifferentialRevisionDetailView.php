@@ -65,13 +65,12 @@ final class DifferentialRevisionDetailView extends AphrontView {
       } else {
         $tag = 'a';
       }
-      $actions[] = phutil_render_tag(
+      $name = $action['name'];
+      unset($action['name']);
+      $actions[] = javelin_render_tag(
         $tag,
-        array(
-          'href'  => idx($action, 'href'),
-          'class' => idx($action, 'class'),
-        ),
-        phutil_escape_html($action['name']));
+        $action,
+        phutil_escape_html($name));
     }
     $actions = implode("\n", $actions);
 

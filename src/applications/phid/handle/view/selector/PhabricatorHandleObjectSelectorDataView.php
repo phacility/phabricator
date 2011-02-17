@@ -16,24 +16,20 @@
  * limitations under the License.
  */
 
-final class ManiphestTransactionType {
+class PhabricatorHandleObjectSelectorDataView {
 
-  const TYPE_NONE         = 'comment';
-  const TYPE_STATUS       = 'status';
-  const TYPE_OWNER        = 'reassign';
-  const TYPE_CCS          = 'ccs';
-  const TYPE_PRIORITY     = 'priority';
+  private $handle;
 
-  const TYPE_ATTACH       = 'attach';
-
-  public static function getTransactionTypeMap() {
-    return array(
-      self::TYPE_NONE       => 'Comment',
-      self::TYPE_STATUS     => 'Close Task',
-      self::TYPE_OWNER      => 'Reassign / Claim',
-      self::TYPE_CCS        => 'Add CCs',
-      self::TYPE_PRIORITY   => 'Change Priority',
-    );
+  public function __construct($handle) {
+    $this->handle = $handle;
   }
 
+  public function renderData() {
+    $handle = $this->handle;
+    return array(
+      'phid' => $handle->getPHID(),
+      'name' => $handle->getFullName(),
+      'href' => $handle->getURI(),
+    );
+  }
 }

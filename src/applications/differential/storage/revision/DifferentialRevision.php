@@ -32,6 +32,7 @@ class DifferentialRevision extends DifferentialDAO {
   protected $dateCommitted;
 
   protected $lineCount;
+  protected $attached = array();
 
   private $relationships;
 
@@ -44,7 +45,19 @@ class DifferentialRevision extends DifferentialDAO {
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_SERIALIZATION => array(
+        'attached' => self::SERIALIZATION_JSON,
+      ),
     ) + parent::getConfiguration();
+  }
+
+  public function getAttachedPHIDs($type) {
+    return array_keys(idx($this->attached, $type, array()));
+  }
+
+  public function setAttachedPHIDs($type, array $phids) {
+    $this->attached[$type] = array_fill_keys($phids, array());
+    return $this;
   }
 
   public function generatePHID() {

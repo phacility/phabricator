@@ -7,8 +7,16 @@ JX.behavior('phabricator-object-selector', function(config) {
   var n = 0;
 
   var phids = {};
-  var handles = {};
+  var handles = config.handles;
+  for (var k in handles) {
+    phids[k] = true;
+  }
   var attach_list = {};
+
+  var phid_input = JX.DOM.find(
+    JX.$(config.form),
+    'input',
+    'aphront-dialog-application-input');
 
   function onreceive(seq, r) {
     if (seq != n) {
@@ -41,18 +49,26 @@ JX.behavior('phabricator-object-selector', function(config) {
     }
 
     JX.DOM.setContent(JX.$(config.current), display);
+    phid_input.value = JX.keys(phids).join(';');
   }
 
   function renderHandle(h, attach) {
 
+    var link = JX.$N(
+      'a',
+      {href : h.uri, target : '_blank'},
+      h.name);
+
     var td = JX.$N('td');
+
     var table = JX.$N(
       'table',
       {className: 'phabricator-object-selector-handle'},
       JX.$N(
         'tbody',
         {},
-        [JX.$N('th', {}, h.name), td]));
+        [JX.$N('th', {}, link), td]));
+
     var btn = JX.$N(
       'a',
       {className: 'button small grey'},
@@ -62,6 +78,10 @@ JX.behavior('phabricator-object-selector', function(config) {
     JX.Stratcom.addData(btn, {handle : h, table : table});
     if (attach) {
       attach_list[h.phid] = btn;
+      if (h.phid in phids) {
+        JX.DOM.alterClass(btn, 'disabled', true);
+        btn.disabled = true;
+      }
     }
 
     JX.DOM.setContent(td, btn);
@@ -70,7 +90,7 @@ JX.behavior('phabricator-object-selector', function(config) {
   }
 
   function renderNote(note) {
-    return JX.$N('div', {}, note);
+    return JX.$N('div', {className : 'object-selector-nothing'}, note);
   }
 
   function sendQuery() {
@@ -85,7 +105,7 @@ JX.behavior('phabricator-object-selector', function(config) {
 
   JX.DOM.listen(
     JX.$(config.search),
-    'click',
+    'submit',
     null,
     function(e) {
       e.kill();

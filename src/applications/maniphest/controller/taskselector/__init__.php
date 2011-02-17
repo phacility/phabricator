@@ -8,8 +8,7 @@
 
 phutil_require_module('phabricator', 'aphront/response/dialog');
 phutil_require_module('phabricator', 'applications/maniphest/controller/base');
-phutil_require_module('phabricator', 'infrastructure/celerity/api');
-phutil_require_module('phabricator', 'infrastructure/javelin/api');
+phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'view/control/objectselector');
 
 phutil_require_module('phutil', 'utils');

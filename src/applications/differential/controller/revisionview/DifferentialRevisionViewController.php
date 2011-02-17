@@ -64,6 +64,11 @@ class DifferentialRevisionViewController extends DifferentialController {
         $user->getPHID(),
       ),
       mpull($comments, 'getAuthorPHID'));
+    foreach ($revision->getAttached() as $type => $phids) {
+      foreach ($phids as $phid => $info) {
+        $object_phids[] = $phid;
+      }
+    }
     $object_phids = array_unique($object_phids);
 
     $handles = id(new PhabricatorObjectHandleData($object_phids))
@@ -229,6 +234,15 @@ class DifferentialRevisionViewController extends DifferentialController {
     $umsg = DifferentialRevisionUpdateHistoryView::getDiffUnitMessage($diff);
     $properties['Unit'] = $ustar.' '.$umsg;
 
+    $tasks = $revision->getAttachedPHIDs('TASK');
+    if ($tasks) {
+      $links = array();
+      foreach ($tasks as $task_phid) {
+        $links[] = $handles[$task_phid]->renderLink();
+      }
+      $properties['Maniphest Tasks'] = implode('<br />', $links);
+    }
+
     return $properties;
   }
 
@@ -264,6 +278,16 @@ class DifferentialRevisionViewController extends DifferentialController {
         'name'  => 'Automatically Subscribed',
       );
     }
+
+    require_celerity_resource('phabricator-object-selector-css');
+    require_celerity_resource('javelin-behavior-phabricator-object-selector');
+
+    $links[] = array(
+      'class' => 'attach-maniphest',
+      'name'  => 'Edit Maniphest Tasks',
+      'href'  => "/differential/attach/{$revision_id}/TASK/",
+      'sigil' => 'workflow',
+    );
 
     $links[] = array(
       'class' => 'transcripts-metamta',

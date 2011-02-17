@@ -54,6 +54,13 @@ class ManiphestTaskDetailController extends ManiphestController {
     $phids[$task->getAuthorPHID()] = true;
     $phids = array_keys($phids);
 
+    $attached = $task->getAttached();
+    foreach ($attached as $type => $list) {
+      foreach ($list as $phid => $info) {
+        $phids[$phid] = true;
+      }
+    }
+
     $handles = id(new PhabricatorObjectHandleData($phids))
       ->loadHandles();
 
@@ -85,6 +92,16 @@ class ManiphestTaskDetailController extends ManiphestController {
     }
 
     $dict['Author'] = $handles[$task->getAuthorPHID()]->renderLink();
+
+    if (idx($attached, 'DREV')) {
+      $revs = idx($attached, 'DREV');
+      $rev_links = array();
+      foreach ($revs as $rev => $info) {
+        $rev_links[] = $handles[$rev]->renderLink();
+      }
+      $rev_links = implode(', ', $rev_links);
+      $dict['Revisions'] = $rev_links;
+    }
 
     $dict['Description'] =
       '<div class="maniphest-task-description">'.

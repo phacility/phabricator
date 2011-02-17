@@ -46,6 +46,9 @@ class ManiphestTransactionEditor {
         case ManiphestTransactionType::TYPE_PRIORITY:
           $old = $task->getPriority();
           break;
+        case ManiphestTransactionType::TYPE_ATTACH:
+          $old = $task->getAttached();
+          break;
         default:
           throw new Exception('Unknown action type.');
       }
@@ -77,6 +80,9 @@ class ManiphestTransactionEditor {
             break;
           case ManiphestTransactionType::TYPE_PRIORITY:
             $task->setPriority($new);
+            break;
+          case ManiphestTransactionType::TYPE_ATTACH:
+            $task->setAttached($new);
             break;
           default:
             throw new Exception('Unknown action type.');
@@ -119,7 +125,6 @@ class ManiphestTransactionEditor {
 
     $handles = id(new PhabricatorObjectHandleData($phids))
       ->loadHandles();
-
 
     $view = new ManiphestTransactionDetailView();
     $view->setTransactionGroup($transactions);
