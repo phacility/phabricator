@@ -215,6 +215,16 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/maniphest/transaction-detail.css',
   ),
+  'phabricator-object-selector-css' =>
+  array(
+    'uri' => '/res/270ce107/rsrc/css/application/objectselector/object-selector.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+      0 => 'aphront-dialog-view-css',
+    ),
+    'disk' => '/rsrc/css/application/objectselector/object-selector.css',
+  ),
   'phabricator-core-buttons-css' =>
   array(
     'uri' => '/res/ee35ffe1/rsrc/css/core/buttons.css',
@@ -232,15 +242,6 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/core/core.css',
-  ),
-  'phabricator-core-dialog-css' =>
-  array(
-    'uri' => '/res/f66cec41/rsrc/css/core/dialog.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/core/dialog.css',
   ),
   'phabricator-remarkup-css' =>
   array(
@@ -268,6 +269,16 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/js/application/core/behavior-dark-console.js',
+  ),
+  'javelin-behavior-phabricator-object-selector' =>
+  array(
+    'uri' => '/res/7f7eda6a/rsrc/js/application/core/behavior-object-selector.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-lib-dev',
+    ),
+    'disk' => '/rsrc/js/application/core/behavior-object-selector.js',
   ),
   'javelin-behavior-aphront-basic-tokenizer' =>
   array(

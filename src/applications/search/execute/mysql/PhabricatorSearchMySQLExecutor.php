@@ -106,6 +106,7 @@ class PhabricatorSearchMySQLExecutor extends PhabricatorSearchExecutor {
       'SELECT DISTINCT
           document.phid,
           document.documentType,
+          document.documentTitle,
           document.documentCreated FROM %T document %Q %Q %Q
         LIMIT 50',
       $t_doc,

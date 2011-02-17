@@ -24,6 +24,7 @@ class AphrontDialogView extends AphrontView {
   private $submitURI;
   private $user;
   private $hidden = array();
+  private $class;
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
@@ -56,6 +57,11 @@ class AphrontDialogView extends AphrontView {
 
   public function addHiddenInput($key, $value) {
     $this->hidden[$key] = $value;
+    return $this;
+  }
+
+  public function setClass($class) {
+    $this->class = $class;
     return $this;
   }
 
@@ -103,10 +109,12 @@ class AphrontDialogView extends AphrontView {
     }
     $hidden_inputs = implode("\n", $hidden_inputs);
 
+    $more = $this->class;
+
     return javelin_render_tag(
       'form',
       array(
-        'class'   => 'aphront-dialog-view',
+        'class'   => 'aphront-dialog-view '.$more,
         'action'  => $this->submitURI,
         'method'  => 'post',
         'sigil'   => 'jx-dialog',

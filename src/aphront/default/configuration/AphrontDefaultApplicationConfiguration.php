@@ -143,6 +143,8 @@ class AphrontDefaultApplicationConfiguration
         'transaction/' => array(
           'save/' => 'ManiphestTransactionSaveController',
         ),
+        'select/$' => 'ManiphestTaskSelectorController',
+        'select/search/$' => 'ManiphestTaskSelectorSearchController',
       ),
 
       '/T(?P<id>\d+)$' => 'ManiphestTaskDetailController',
