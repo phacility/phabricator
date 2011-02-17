@@ -34,7 +34,8 @@ class AphrontWebpageResponse extends AphrontResponse {
 
   public function getHeaders() {
     return array(
-      array('Content-Type', 'text/html; charset=UTF-8'),
+      array('Content-Type',    'text/html; charset=UTF-8'),
+      array('X-Frame-Options', 'Deny'),
     );
   }
 

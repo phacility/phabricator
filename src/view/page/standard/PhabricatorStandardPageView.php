@@ -98,8 +98,11 @@ class PhabricatorStandardPageView extends AphrontPageView {
   protected function getHead() {
     $response = CelerityAPI::getStaticResourceResponse();
     return
+      '<script type="text/javascript">'.
+        '(top != self) && top.location.replace(self.location.href);'.
+        'window.__DEV__=1;'.
+      '</script>'.
       $response->renderResourcesOfType('css').
-      '<script type="text/javascript">window.__DEV__=1;</script>'.
       '<script type="text/javascript" src="/rsrc/js/javelin/init.dev.js">'.
       '</script>';
   }
