@@ -337,14 +337,14 @@ class ManiphestTaskListController extends ManiphestController {
       'p' => 'priority',
     );
     if (empty($orders[$order])) {
-      $order = 'u';
+      $order = 'p';
     }
     $order_by = $orders[$order];
 
     $order_names = array(
+      'Priority'  => 'p',
       'Updated'   => 'u',
       'Created'   => 'c',
-      'Priority'  => 'p',
     );
 
     $uri = $request->getRequestURI();
@@ -382,15 +382,15 @@ class ManiphestTaskListController extends ManiphestController {
       'o' => 'owner',
     );
     if (empty($groups[$group])) {
-      $group = 'n';
+      $group = 'p';
     }
     $group_by = $groups[$group];
 
     $group_names = array(
-      'None'      => 'n',
       'Priority'  => 'p',
       'Owner'     => 'o',
       'Status'    => 's',
+      'None'      => 'n',
     );
 
     $uri = $request->getRequestURI();
