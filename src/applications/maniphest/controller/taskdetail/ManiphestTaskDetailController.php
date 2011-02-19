@@ -254,4 +254,5 @@ class ManiphestTaskDetailController extends ManiphestController {
         'title' => 'T'.$task->getID().' '.$task->getTitle(),
       ));
   }
+
 }
