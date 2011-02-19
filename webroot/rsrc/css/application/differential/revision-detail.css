@@ -59,8 +59,8 @@
   background-image: url(/rsrc/image/icon/tango/edit.png);
 }
 
-.differential-revision-actions .revision-edit {
-  background-image: url(/rsrc/image/icon/tango/edit.png);
+.differential-revision-actions .attach-maniphest {
+  background-image: url(/rsrc/image/icon/tango/attachment.png);
 }
 
 .differential-revision-actions .transcripts-metamta {
