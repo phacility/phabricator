@@ -271,6 +271,7 @@ class DifferentialRevisionViewController extends DifferentialController {
         'class' => $viewer_is_cc ? 'subscribe-rem' : 'subscribe-add',
         'href'  => "/differential/subscribe/{$action}/{$revision_id}/",
         'name'  => $viewer_is_cc ? 'Unsubscribe' : 'Subscribe',
+        'sigil' => 'workflow',
       );
     } else {
       $links[] = array(
@@ -436,79 +437,6 @@ class DifferentialRevisionViewController extends DifferentialController {
 /*
 
 
-  protected function getRevisionActions(DifferentialRevision $revision) {
-
-    $viewer_id = $this->getRequest()->getViewerContext()->getUserID();
-    $viewer_is_owner = ($viewer_id == $revision->getOwnerID());
-    $viewer_is_reviewer =
-      ((array_search($viewer_id, $revision->getReviewers())) !== false);
-    $viewer_is_cc =
-      ((array_search($viewer_id, $revision->getCCFBIDs())) !== false);
-    $status = $revision->getStatus();
-
-    $links = array();
-
-    if (!$viewer_is_owner && !$viewer_is_reviewer) {
-      $action = $viewer_is_cc
-        ? 'rem'
-        : 'add';
-      $revision_id = $revision->getID();
-      $href = "/differential/subscribe/{$action}/{$revision_id}";
-      $links[] = array(
-        $viewer_is_cc ? 'subscribe-disabled' : 'subscribe-enabled',
-        <a href={$href}>{$viewer_is_cc ? 'Unsubscribe' : 'Subscribe'}</a>,
-      );
-    } else {
-      $links[] = array(
-        'subscribe-disabled unavailable',
-        <a>Automatically Subscribed</a>,
-      );
-    }
-
-    $blast_uri = RedirectURI(
-      '/intern/differential/?action=tasks&fbid='.$revision->getFBID())
-      ->setTier('intern');
-    $links[] = array(
-      'tasks',
-      <a href={$blast_uri}>Edit Tasks</a>,
-    );
-
-    $engineering_repository_id = RepositoryRef::getByCallsign('E')->getID();
-    $svn_revision = $revision->getSVNRevision();
-    if ($status == DifferentialConstants::COMMITTED &&
-        $svn_revision &&
-        $revision->getRepositoryID() == $engineering_repository_id) {
-      $href = '/intern/push/request.php?rev='.$svn_revision;
-      $href = RedirectURI($href)->setTier('intern');
-      $links[] = array(
-        'merge',
-        <a href={$href} id="ask_for_merge_link">Ask for Merge</a>,
-      );
-    }
-
-    $links[] = array(
-      'herald-transcript',
-      <a href={"/herald/transcript/?fbid=".$revision->getFBID()}
-        >Herald Transcripts</a>,
-    );
-    $links[] = array(
-      'metamta-transcript',
-      <a href={"/mail/?view=all&fbid=".$revision->getFBID()}
-        >MetaMTA Transcripts</a>,
-    );
-
-
-    $list = <ul class="differential-actions" />;
-    foreach ($links as $link) {
-      list($class, $tag) = $link;
-      $list->appendChild(<li class={$class}>{$tag}</li>);
-    }
-
-    return $list;
-
-
-
-
   protected function getSandcastleURI(Diff $diff) {
     $uri = $this->getDiffProperty($diff, 'facebook:sandcastle_uri');
     if (!$uri) {
@@ -561,8 +489,6 @@ class DifferentialRevisionViewController extends DifferentialController {
     }
 
 
-    $changesets = array_psort($changesets, 'getSortKey');
-
 
     $feedback = id(new DifferentialFeedback())->loadAllWithRevision($revision);
     $feedback = array_merge($implied_feedback, $feedback);
@@ -584,94 +510,11 @@ class DifferentialRevisionViewController extends DifferentialController {
       $hidden_changesets[$id] = $diff_map[$changeset->getDiffID()];
     }
 
-    $revision->loadRelationships();
-    $ccs = $revision->getCCFBIDs();
-    $reviewers = $revision->getReviewers();
-
-    $actors = array_pull($feedback, 'getUserID');
-    $actors[] = $revision->getOwnerID();
-
-    $tasks = array();
-    assoc_get_by_type(
-      $revision->getFBID(),
-      22284182462, // TODO: include issue, DIFFCAMP_TASK_ASSOC
-      $start = null,
-      $limit = null,
-      $pending = true,
-      $tasks);
-    memcache_dispatch();
-    $tasks = array_keys($tasks);
-
-    $preparer = new Preparer();
-      $fbids = array_merge_fast(
-        array($actors, array($viewer_id), $reviewers, $ccs, $tasks),
-        true);
-      $handles = array();
-      $handle_data = id(new ToolsHandleData($fbids, $handles))
-        ->needNames()
-        ->needAlternateNames()
-        ->needAlternateIDs()
-        ->needThumbnails();
-      $preparer->waitFor($handle_data);
-    $preparer->go();
-
-    $revision->attachTaskHandles(array_select_keys($handles, $tasks));
-
-    $inline_comments = array_group($inline_comments, 'getFeedbackID');
 
     $engine = new RemarkupEngine();
     $engine->enableFeature(RemarkupEngine::FEATURE_GUESS_IMAGES);
     $engine->enableFeature(RemarkupEngine::FEATURE_YOUTUBE);
     $engine->setCurrentSandcastle($this->getSandcastleURI($target_diff));
-    $feed = array();
-    foreach ($feedback as $comment) {
-      $inlines = null;
-      if (isset($inline_comments[$comment->getID()])) {
-        $inlines = $inline_comments[$comment->getID()];
-      }
-      $feed[] =
-        <differential:feedback
-            feedback={$comment}
-              handle={$handles[$comment->getUserID()]}
-              engine={$engine}
-              inline={$inlines}
-          changesets={$changesets}
-              hidden={$hidden_changesets} />;
-    }
-
-    $feed = $this->renderFeedbackList($feed, $feedback, $viewer_id);
-
-    $fields = $this->getDetailFields($revision, $diff, $handles);
-    $table = <table class="differential-revision-properties" />;
-    foreach ($fields as $key => $value) {
-      $table->appendChild(
-        <tr>
-          <th>{$key}:</th><td>{$value}</td>
-        </tr>);
-    }
-
-    $quick_links = $this->getQuickLinks($revision);
-
-
-    $info =
-      <div class="differential-revision-information">
-        <div class="differential-revision-actions">
-          {$quick_links}
-        </div>
-        <div class="differential-revision-detail">
-          <h1>{$revision->getName()}{$edit_link}</h1>
-          {$table}
-        </div>
-      </div>;
-
-    $actions = $this->getRevisionActions($revision);
-    $revision_id = $revision->getID();
-
-    $content = SavedCopy::loadData(
-      $viewer_id,
-      SavedCopy::Type_DifferentialRevisionFeedback,
-      $revision->getFBID());
-
 
     $syntax_link =
       <a href={'http://www.intern.facebook.com/intern/wiki/index.php' .
@@ -690,34 +533,6 @@ class DifferentialRevisionViewController extends DifferentialController {
         </tools:notice>;
     }
 
-  protected function getQuickLinks(DifferentialRevision $revision) {
-
-    $viewer_id = $this->getRequest()->getViewerContext()->getUserID();
-    $viewer_is_owner = ($viewer_id == $revision->getOwnerID());
-    $viewer_is_reviewer =
-      ((array_search($viewer_id, $revision->getReviewers())) !== false);
-    $viewer_is_cc =
-      ((array_search($viewer_id, $revision->getCCFBIDs())) !== false);
-    $status = $revision->getStatus();
-
-    $links = array();
-
-    if (!$viewer_is_owner && !$viewer_is_reviewer) {
-      $action = $viewer_is_cc
-        ? 'rem'
-        : 'add';
-      $revision_id = $revision->getID();
-      $href = "/differential/subscribe/{$action}/{$revision_id}";
-      $links[] = array(
-        $viewer_is_cc ? 'subscribe-disabled' : 'subscribe-enabled',
-        <a href={$href}>{$viewer_is_cc ? 'Unsubscribe' : 'Subscribe'}</a>,
-      );
-    } else {
-      $links[] = array(
-        'subscribe-disabled unavailable',
-        <a>Automatically Subscribed</a>,
-      );
-    }
 
     $blast_uri = RedirectURI(
       '/intern/differential/?action=blast&fbid='.$revision->getFBID())
@@ -727,23 +542,7 @@ class DifferentialRevisionViewController extends DifferentialController {
       <a href={$blast_uri}>Blast Revision</a>,
     );
 
-    $blast_uri = RedirectURI(
-      '/intern/differential/?action=tasks&fbid='.$revision->getFBID())
-      ->setTier('intern');
-    $links[] = array(
-      'tasks',
-      <a href={$blast_uri}>Edit Tasks</a>,
-    );
 
-    if ($viewer_is_owner && false) {
-      $perflab_uri = RedirectURI(
-        '/intern/differential/?action=perflab&fbid='.$revision->getFBID())
-        ->setTier('intern');
-      $links[] = array(
-        'perflab',
-        <a href={$perflab_uri}>Run in Perflab</a>,
-      );
-    }
 
     $engineering_repository_id = RepositoryRef::getByCallsign('E')->getID();
     $svn_revision = $revision->getSVNRevision();
@@ -763,20 +562,7 @@ class DifferentialRevisionViewController extends DifferentialController {
       <a href={"/herald/transcript/?fbid=".$revision->getFBID()}
         >Herald Transcripts</a>,
     );
-    $links[] = array(
-      'metamta-transcript',
-      <a href={"/mail/?view=all&fbid=".$revision->getFBID()}
-        >MetaMTA Transcripts</a>,
-    );
 
-
-    $list = <ul class="differential-actions" />;
-    foreach ($links as $link) {
-      list($class, $tag) = $link;
-      $list->appendChild(<li class={$class}>{$tag}</li>);
-    }
-
-    return $list;
   }
 
 
@@ -875,10 +661,6 @@ class DifferentialRevisionViewController extends DifferentialController {
     Diff $diff,
     array $handles) {
 
-    $fields = array();
-    $fields['Revision Status'] = $this->getRevisionStatusDisplay($revision);
-
-
     $sandcastle = $this->getSandcastleURI($diff);
     if ($sandcastle) {
       $fields['Sandcastle'] = <a href={$sandcastle}>{$sandcastle}</a>;
@@ -898,15 +680,6 @@ class DifferentialRevisionViewController extends DifferentialController {
       }
     }
 
-    $tasks = $revision->getTaskHandles();
-
-    if ($tasks) {
-      $links = array();
-      foreach ($tasks as $task) {
-        $links[] = <tools:handle handle={$task} link={true} />;
-      }
-      $fields['Tasks'] = array_implode(<br />, $links);
-    }
 
     $bugzilla_id = $revision->getBugzillaID();
     if ($bugzilla_id) {

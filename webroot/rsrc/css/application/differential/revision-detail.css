@@ -55,6 +55,10 @@
   background-image: url(/rsrc/image/icon/unsubscribe.png);
 }
 
+.differential-revision-actions .subscribe-add {
+  background-image: url(/rsrc/image/icon/subscribe.png);
+}
+
 .differential-revision-actions .revision-edit {
   background-image: url(/rsrc/image/icon/tango/edit.png);
 }

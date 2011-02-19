@@ -471,6 +471,30 @@ class DifferentialRevisionEditor {
     }
   }
 
+  public static function addCC(
+    DifferentialRevision $revision,
+    $phid,
+    $reason) {
+    return self::alterCCs(
+      $revision,
+      $revision->getCCPHIDs(),
+      $rem = array(),
+      $add = array($phid),
+      $reason);
+  }
+
+  public static function removeCC(
+    DifferentialRevision $revision,
+    $phid,
+    $reason) {
+    return self::alterCCs(
+      $revision,
+      $revision->getCCPHIDs(),
+      $rem = array($phid),
+      $add = array(),
+      $reason);
+  }
+
   protected static function alterCCs(
     DifferentialRevision $revision,
     array $stable_phids,

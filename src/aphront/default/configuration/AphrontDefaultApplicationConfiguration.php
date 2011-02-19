@@ -93,6 +93,8 @@ class AphrontDefaultApplicationConfiguration
           ),
         ),
         'attach/(?P<id>\d+)/(?P<type>\w+)/$' => 'DifferentialAttachController',
+        'subscribe/(?P<action>add|rem)/(?P<id>\d+)/$'
+          => 'DifferentialSubscribeController',
       ),
 
       '/res/' => array(
@@ -144,7 +146,6 @@ class AphrontDefaultApplicationConfiguration
         'transaction/' => array(
           'save/' => 'ManiphestTransactionSaveController',
         ),
-        'select/$' => 'ManiphestTaskSelectorController',
         'select/search/$' => 'ManiphestTaskSelectorSearchController',
       ),
 
@@ -152,6 +153,7 @@ class AphrontDefaultApplicationConfiguration
 
       '/github-post-receive/(?P<id>\d+)/(?P<token>[^/]+)/$'
         => 'PhabricatorRepositoryGitHubPostReceiveController',
+
       '/repository/' => array(
         '$'                     => 'PhabricatorRepositoryListController',
         'create/$'              => 'PhabricatorRepositoryCreateController',

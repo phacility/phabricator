@@ -143,6 +143,12 @@ button.link {
   padding: 0;
   margin: 0;
   font-size: inherit;
+  border-bottom: none;
+  text-decoration: none;
+  color: #3b5998;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
 }
 
 button.link:hover {

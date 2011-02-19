@@ -33,6 +33,7 @@ class DifferentialRevision extends DifferentialDAO {
 
   protected $lineCount;
   protected $attached = array();
+  protected $unsubscribed = array();
 
   private $relationships;
 
@@ -40,13 +41,13 @@ class DifferentialRevision extends DifferentialDAO {
 
   const RELATION_REVIEWER     = 'revw';
   const RELATION_SUBSCRIBED   = 'subd';
-  const RELATION_UNSUBSCRIBED = 'usub';
 
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
-        'attached' => self::SERIALIZATION_JSON,
+        'attached'      => self::SERIALIZATION_JSON,
+        'unsubscribed'  => self::SERIALIZATION_JSON,
       ),
     ) + parent::getConfiguration();
   }
