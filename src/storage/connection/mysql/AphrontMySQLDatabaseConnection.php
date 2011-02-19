@@ -87,14 +87,31 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
     return idx($this->configuration, $key, $default);
   }
 
+  private function closeConnection() {
+    if ($this->connection) {
+      $this->connection = null;
+      $key = $this->getConnectionCacheKey();
+      unset(self::$connectionCache[$key]);
+    }
+  }
+
+  private function getConnectionCacheKey() {
+    $user = $this->getConfiguration('user');
+    $host = $this->getConfiguration('host');
+    $database = $this->getConfiguration('database');
+
+    return "{$user}:{$host}:{$database}";
+  }
+
+
   private function establishConnection() {
-    $this->connection = null;
+    $this->closeConnection();
 
     $user = $this->getConfiguration('user');
     $host = $this->getConfiguration('host');
     $database = $this->getConfiguration('database');
 
-    $key = "{$user}:{$host}:{$database}";
+    $key = $this->getConnectionCacheKey();
     if (isset(self::$connectionCache[$key])) {
       $this->connection = self::$connectionCache[$key];
       return;
@@ -176,7 +193,7 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
         $this->requireConnection();
 
         $start = microtime(true);
-        $result = mysql_query($raw_query, $this->connection);
+        $result = @mysql_query($raw_query, $this->connection);
         $end = microtime(true);
 
         DarkConsoleServicesPluginAPI::addEvent(
@@ -200,7 +217,7 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
         if ($this->isInsideTransaction()) {
           throw $ex;
         }
-        $this->connection = null;
+        $this->closeConnection();
       }
     }
   }

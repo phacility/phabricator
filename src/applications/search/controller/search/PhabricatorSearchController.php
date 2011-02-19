@@ -84,7 +84,7 @@ class PhabricatorSearchController extends PhabricatorSearchBaseController {
       $handles,
       $query->getParameter('author', array()));
     $author_value = mpull($author_value, 'getFullName', 'getPHID');
-    
+
     $owner_value = array_select_keys(
       $handles,
       $query->getParameter('owner', array()));
