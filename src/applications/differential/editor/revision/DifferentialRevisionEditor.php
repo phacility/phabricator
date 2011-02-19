@@ -72,63 +72,6 @@ class DifferentialRevisionEditor {
     $this->setCCPHIDs($fields['ccPHIDs']);
   }
 
-
-/*
-  public static function newRevisionFromRawMessageWithDiff(
-    DifferentialRawMessage $message,
-    Diff $diff,
-    $user) {
-
-    if ($message->getRevisionID()) {
-      throw new Exception(
-        "The provided commit message is already associated with a ".
-        "Differential revision.");
-    }
-
-    if ($message->getReviewedByNames()) {
-      throw new Exception(
-        "The provided commit message contains a 'Reviewed By:' field.");
-    }
-
-    $revision = new DifferentialRevision();
-    $revision->setPHID($revision->generatePHID());
-
-    $revision->setOwnerID($user);
-    $revision->setStatus(DifferentialRevisionStatus::NEEDS_REVIEW);
-    $revision->attachReviewers(array());
-    $revision->attachCCPHIDs(array());
-
-    $editor = new DifferentialRevisionEditor($revision, $user);
-
-    self::copyFields($editor, $revision, $message, $user);
-
-    $editor->addDiff($diff, null);
-    $editor->save();
-
-    return $revision;
-  }
-
-
-  public static function copyFields(
-    DifferentialRevisionEditor $editor,
-    DifferentialRevision $revision,
-    DifferentialRawMessage $message,
-    $user) {
-
-    $revision->setName($message->getTitle());
-    $revision->setSummary($message->getSummary());
-    $revision->setTestPlan($message->getTestPlan());
-    $revision->setSVNBlameRevision($message->getBlameRevision());
-    $revision->setRevert($message->getRevertPlan());
-    $revision->setPlatformImpact($message->getPlatformImpact());
-    $revision->setBugzillaID($message->getBugzillaID());
-
-    $editor->setReviewers($message->getReviewerPHIDs());
-    $editor->setCCPHIDs($message->getCCPHIDs());
-  }
-
-*/
-
   public function getRevision() {
     return $this->revision;
   }

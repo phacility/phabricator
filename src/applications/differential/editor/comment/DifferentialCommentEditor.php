@@ -238,7 +238,14 @@ class DifferentialCommentEditor {
         throw new Exception('Unsupported action.');
     }
 
-    // Reload relationships to pick up any reviewer changes.
+    if ($this->addCC) {
+      DifferentialRevisionEditor::addCC(
+        $revision,
+        $this->actorPHID,
+        $this->actorPHID);
+    }
+
+    // Reload relationships to pick up any reviewer/CC changes.
     $revision->loadRelationships();
 
     $inline_comments = array();
@@ -256,24 +263,15 @@ class DifferentialCommentEditor {
       ->setContent((string)$this->message)
       ->save();
 
-//    $diff = id(new Diff())->loadActiveWithRevision($revision);
-//    $changesets = id(new DifferentialChangeset())->loadAllWithDiff($diff);
-
+    $changesets = array();
     if ($inline_comments) {
-/*
-      // We may have feedback on non-current changesets. Rather than orphaning
-      // it, just submit it. This is non-ideal but not horrible.
-      $inline_changeset_ids = array_pull($inline_comments, 'getChangesetID');
-      $load = array();
-      foreach ($inline_changeset_ids as $id) {
-        if (empty($changesets[$id])) {
-          $load[] = $id;
-        }
+      $load_ids = mpull($inline_comments, 'getChangesetID');
+      if ($load_ids) {
+        $load_ids = array_unique($load_ids);
+        $changesets = id(new DifferentialChangeset())->loadAllWhere(
+          'id in (%Ld)',
+          $load_ids);
       }
-      if ($load) {
-        $changesets += id(new DifferentialChangeset())->loadAllWithIDs($load);
-      }
-*/
       foreach ($inline_comments as $inline) {
         $inline->setCommentID($comment->getID());
         $inline->save();
@@ -289,8 +287,8 @@ class DifferentialCommentEditor {
       $revision,
       $actor_handle,
       $comment,
-      /* $changesets TODO */ array(),
-      /* $inline_comments TODO */ array()))
+      $changesets,
+      $inline_comments))
       ->setToPHIDs(
         array_merge(
           $revision->getReviewers(),
@@ -298,19 +296,6 @@ class DifferentialCommentEditor {
       ->setCCPHIDs($revision->getCCPHIDs())
       ->setChangedByCommit($this->getChangedByCommit())
       ->send();
-
-/*
-
-  tODO
-
-    if ($this->addCC) {
-      require_module_lazy('site/tools/differential/lib/editor/revision');
-      DifferentialRevisionEditor::addCCFBID(
-        $revision,
-        $this->actorPHID,
-        $this->actorPHID);
-    }
-*/
 
 /*
 

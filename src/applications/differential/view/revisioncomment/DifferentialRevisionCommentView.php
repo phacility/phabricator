@@ -138,19 +138,24 @@ final class DifferentialRevisionCommentView extends AphrontView {
             ),
             $lines);
 
-          $content = $inline->getCache();
-          if (!strlen($content)) {
-            $content = $this->markupEngine->markupText($content);
-            if ($inline->getID()) {
-              $inline->setCache($content);
-              $inline->save();
+          $inline_content = $inline->getContent();
+          if (strlen($inline_content)) {
+            $inline_cache = $inline->getCache();
+            if ($inline_cache) {
+              $inline_content = $inline_cache;
+            } else {
+              $inline_content = $this->markupEngine->markupText($content);
+              if ($inline->getID()) {
+                $inline->setCache($inline_content);
+                $inline->save();
+              }
             }
           }
 
           $inline_render[] =
             '<tr>'.
               '<td class="inline-line-number">'.$lines.'</td>'.
-              '<td>'.$content.'</td>'.
+              '<td>'.$inline_content.'</td>'.
             '</tr>';
         }
       }

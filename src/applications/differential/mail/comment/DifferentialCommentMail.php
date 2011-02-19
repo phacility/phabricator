@@ -92,9 +92,15 @@ class DifferentialCommentMail extends DifferentialMail {
           throw new Exception('Changeset missing!');
         }
         $file = $changeset->getFilename();
-        $line = $inline->renderLineRange();
+        $start = $inline->getLineNumber();
+        $len = $inline->getLineLength();
+        if ($len) {
+          $range = $start.'-'.($start + $len);
+        } else {
+          $range = $start;
+        }
         $content = $inline->getContent();
-        $body[] = $this->formatText("{$file}:{$line} {$content}");
+        $body[] = $this->formatText("{$file}:{$range} {$content}");
       }
       $body[] = null;
     }
