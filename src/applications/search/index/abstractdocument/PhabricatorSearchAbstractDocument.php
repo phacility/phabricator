@@ -47,8 +47,8 @@ final class PhabricatorSearchAbstractDocument {
     return $this;
   }
 
-  public function addRelationship($type, $related_phid) {
-    $this->relationships[] = array($type, $related_phid);
+  public function addRelationship($type, $related_phid, $rtype, $time) {
+    $this->relationships[] = array($type, $related_phid, $rtype, $time);
     return $this;
   }
 

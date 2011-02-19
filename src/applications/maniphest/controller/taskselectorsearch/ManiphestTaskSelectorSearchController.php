@@ -26,6 +26,20 @@ class ManiphestTaskSelectorSearchController extends ManiphestController {
     $query->setQuery($request->getStr('query'));
     $query->setParameter('type', 'TASK');
 
+    switch ($request->getStr('filter')) {
+      case 'assigned':
+        $query->setParameter('owner', array($user->getPHID()));
+        $query->setParameter('open', 1);
+        break;
+      case 'created';
+        $query->setParameter('author', array($user->getPHID()));
+        $query->setParameter('open', 1);
+        break;
+      case 'open':
+        $query->setParameter('open', 1);
+        break;
+    }
+
     $exec = new PhabricatorSearchMySQLExecutor();
     $results = $exec->executeSearch($query);
     $results = ipull($results, 'phid');

@@ -29,7 +29,7 @@ class PhabricatorHandleObjectSelectorDataView {
     return array(
       'phid' => $handle->getPHID(),
       'name' => $handle->getFullName(),
-      'href' => $handle->getURI(),
+      'uri'  => $handle->getURI(),
     );
   }
 }

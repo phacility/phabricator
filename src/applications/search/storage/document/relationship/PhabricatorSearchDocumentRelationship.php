@@ -21,6 +21,8 @@ class PhabricatorSearchDocumentRelationship extends PhabricatorSearchDAO {
   protected $phid;
   protected $relatedPHID;
   protected $relation;
+  protected $relatedType;
+  protected $relatedTime;
 
   public function getConfiguration() {
     return array(

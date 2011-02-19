@@ -36,7 +36,9 @@ class PhabricatorSearchDifferentialIndexer
 
     $doc->addRelationship(
       PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR,
-      $rev->getAuthorPHID());
+      $rev->getAuthorPHID(),
+      'USER',
+      $rev->getDateCreated());
 
     PhabricatorSearchDocument::reindexAbstractDocument($doc);
   }

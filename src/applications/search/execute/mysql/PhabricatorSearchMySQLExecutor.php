@@ -60,18 +60,33 @@ class PhabricatorSearchMySQLExecutor extends PhabricatorSearchExecutor {
     }
 
     if ($query->getParameter('type')) {
+      if (strlen($q)) {
+        // TODO: verify that this column actually does something useful in query
+        // plans once we have nontrivial amounts of data.
+        $where[] = qsprintf(
+          $conn_r,
+          'field.phidType = %s',
+          $query->getParameter('type'));
+      }
       $where[] = qsprintf(
         $conn_r,
         'document.documentType = %s',
         $query->getParameter('type'));
     }
 
-/*
     $join[] = $this->joinRelationship(
       $conn_r,
       $query,
       'author',
-      AdjutantRelationship::RELATIONSHIP_AUTHOR);
+      PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR);
+
+    $join[] = $this->joinRelationship(
+      $conn_r,
+      $query,
+      'open',
+      PhabricatorSearchRelationship::RELATIONSHIP_OPEN);
+
+/*
     $join[] = $this->joinRelationship(
       $conn_r,
       $query,
@@ -118,20 +133,36 @@ class PhabricatorSearchMySQLExecutor extends PhabricatorSearchExecutor {
   }
 
   protected function joinRelationship($conn, $query, $field, $type) {
-    $fbids = $query->getParameter($field, array());
-    if (!$fbids) {
+    $phids = $query->getParameter($field, array());
+    if (!$phids) {
       return null;
     }
-    return qsprintf(
+
+    $is_existence = false;
+    switch ($type) {
+      case PhabricatorSearchRelationship::RELATIONSHIP_OPEN:
+        $is_existence = true;
+        break;
+    }
+
+    $sql = qsprintf(
       $conn,
-      'relationship AS %C ON %C.fbid = data.fbid AND %C.relation = %s
-        AND %C.relatedFBID in (%Ld)',
+      '%T AS %C ON %C.phid = document.phid AND %C.relation = %s',
+      id(new PhabricatorSearchDocumentRelationship())->getTableName(),
       $field,
       $field,
       $field,
-      $type,
-      $field,
-      $fbids);
+      $type);
+
+    if (!$is_existence) {
+      $sql .= qsprintf(
+        $conn,
+        ' AND %C.relatedPHID in (%Ls)',
+        $field,
+        $phids);
+    }
+
+    return $sql;
   }
 
 

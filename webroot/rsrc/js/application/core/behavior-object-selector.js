@@ -111,6 +111,15 @@ JX.behavior('phabricator-object-selector', function(config) {
       e.kill();
       sendQuery();
     });
+  JX.DOM.listen(
+    JX.$(config.search),
+    'click',
+    'tag:button',
+    function(e) {
+      e.kill();
+      sendQuery();
+    });
+
 
   JX.DOM.listen(
     JX.$(config.results),

@@ -63,10 +63,11 @@ class PhabricatorSearchDocument extends PhabricatorSearchDAO {
       list($ftype, $corpus, $aux_phid) = $field;
       queryfx(
         $conn_w,
-        'INSERT INTO %T (phid, field, auxPHId, corpus) '.
-        ' VALUES (%s, %s, %ns, %s)',
+        'INSERT INTO %T (phid, phidType, field, auxPHID, corpus) '.
+        ' VALUES (%s, %s, %s, %ns, %s)',
         $field_dao->getTableName(),
         $phid,
+        $doc->getDocumentType(),
         $ftype,
         $aux_phid,
         $corpus);
@@ -75,13 +76,15 @@ class PhabricatorSearchDocument extends PhabricatorSearchDAO {
 
     $sql = array();
     foreach ($doc->getRelationshipData() as $relationship) {
-      list($rtype, $toPHID) = $relationship;
+      list($rtype, $to_phid, $to_type, $time) = $relationship;
       $sql[] = qsprintf(
         $conn_w,
-        '(%s, %s, %s)',
+        '(%s, %s, %s, %s, %d)',
         $phid,
-        $toPHID,
-        $rtype);
+        $to_phid,
+        $rtype,
+        $to_type,
+        $time);
     }
 
     $rship_dao = new PhabricatorSearchDocumentRelationship();
@@ -93,7 +96,8 @@ class PhabricatorSearchDocument extends PhabricatorSearchDAO {
     if ($sql) {
       queryfx(
         $conn_w,
-        'INSERT INTO %T (phid, relatedPHID, relation) '.
+        'INSERT INTO %T'.
+        ' (phid, relatedPHID, relation, relatedType, relatedTime) '.
         ' VALUES %Q',
         $rship_dao->getTableName(),
         implode(', ', $sql));

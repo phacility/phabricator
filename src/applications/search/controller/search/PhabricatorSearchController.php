@@ -38,12 +38,47 @@ class PhabricatorSearchController extends PhabricatorSearchBaseController {
 
       if ($request->isFormPost()) {
         $query->setQuery($request->getStr('query'));
+
+        if (strlen($request->getStr('type'))) {
+          $query->setParameter('type', $request->getStr('type'));
+        }
+
+        if ($request->getArr('author')) {
+          $query->setParameter('author', $request->getArr('author'));
+        }
+
+        if ($request->getInt('open')) {
+          $query->setParameter('open', $request->getInt('open'));
+        }
+
         $query->save();
         return id(new AphrontRedirectResponse())
           ->setURI('/search/'.$query->getID().'/');
       }
     }
 
+    $options = array(
+      '' => 'All Documents',
+      'DREV' => 'Differential Revisions',
+      'TASK' => 'Maniphest Tasks',
+    );
+
+    $status_options = array(
+      0 => 'Open and Closed Documents',
+      1 => 'Open Documents',
+    );
+
+    $phids = array_merge(
+      $query->getParameter('author', array())
+    );
+
+    $handles = id(new PhabricatorObjectHandleData($phids))
+      ->loadHandles();
+
+    $author_value = array_select_keys(
+      $handles,
+      $query->getParameter('author', array()));
+    $author_value = mpull($author_value, 'getFullName', 'getPHID');
 
     $search_form = new AphrontFormView();
     $search_form
@@ -54,6 +89,24 @@ class PhabricatorSearchController extends PhabricatorSearchBaseController {
           ->setLabel('Search')
           ->setName('query')
           ->setValue($query->getQuery()))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel('Document Type')
+          ->setName('type')
+          ->setOptions($options)
+          ->setValue($query->getParameter('type')))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setName('author')
+          ->setLabel('Author')
+          ->setDatasource('/typeahead/common/users/')
+          ->setValue($author_value))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel('Document Status')
+          ->setName('open')
+          ->setOptions($status_options)
+          ->setValue($query->getParameter('open')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Search'));
