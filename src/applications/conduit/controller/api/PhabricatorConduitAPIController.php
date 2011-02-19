@@ -159,7 +159,7 @@ class PhabricatorConduitAPIController
       default:
         return id(new AphrontFileResponse())
           ->setMimeType('application/json')
-          ->setContent(json_encode($result));
+          ->setContent('for(;;);'.json_encode($result));
     }
   }
 
