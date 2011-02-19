@@ -86,6 +86,12 @@ class PhabricatorSearchMySQLExecutor extends PhabricatorSearchExecutor {
       'open',
       PhabricatorSearchRelationship::RELATIONSHIP_OPEN);
 
+    $join[] = $this->joinRelationship(
+      $conn_r,
+      $query,
+      'owner',
+      PhabricatorSearchRelationship::RELATIONSHIP_OWNER);
+
 /*
     $join[] = $this->joinRelationship(
       $conn_r,
