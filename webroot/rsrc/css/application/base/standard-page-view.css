@@ -13,7 +13,7 @@
 }
 
 .phabricator-standard-header {
-  background: #006699;
+  background: #005588;
   color: white;
   overflow: hidden;
   position: relative;
@@ -51,7 +51,7 @@
 
 .phabricator-primary-navigation td.phabricator-selected-tab {
   border-bottom-color: #ffffff;
-  background: #3377aa;
+  background: #336699;
 }
 
 .phabricator-standard-header .phabricator-head-appname {
