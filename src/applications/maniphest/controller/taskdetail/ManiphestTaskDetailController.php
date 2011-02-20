@@ -125,12 +125,12 @@ class ManiphestTaskDetailController extends ManiphestController {
         implode("\n", $table).
       '</table>';
 
-    
+
     $actions = array();
-    
+
     $action = new AphrontHeadsupActionView();
     $action->setName('Edit Task');
-    $action->setURI('/maniphest/edit/'.$task->getID().'/');
+    $action->setURI('/maniphest/task/edit/'.$task->getID().'/');
     $action->setClass('action-edit');
     $actions[] = $action;
 
@@ -143,7 +143,7 @@ class ManiphestTaskDetailController extends ManiphestController {
     $action->setName('Edit Differential Revisions');
     $action->setClass('action-attach unavailable');
     $actions[] = $action;
-    
+
     $action_list = new AphrontHeadsupActionListView();
     $action_list->setActions($actions);
 

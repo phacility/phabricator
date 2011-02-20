@@ -144,7 +144,8 @@ class AphrontDefaultApplicationConfiguration
         '$' => 'ManiphestTaskListController',
         'view/(?P<view>\w+)/$' => 'ManiphestTaskListController',
         'task/' => array(
-          'create/' => 'ManiphestTaskCreateController',
+          'create/$' => 'ManiphestTaskEditController',
+          'edit/(?P<id>\d+)/$' => 'ManiphestTaskEditController',
         ),
         'transaction/' => array(
           'save/' => 'ManiphestTransactionSaveController',

@@ -19,6 +19,8 @@ phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'infrastructure/javelin/api');
 phutil_require_module('phabricator', 'view/form/base');
 phutil_require_module('phabricator', 'view/form/control/submit');
+phutil_require_module('phabricator', 'view/layout/headsup/action');
+phutil_require_module('phabricator', 'view/layout/headsup/actionlist');
 phutil_require_module('phabricator', 'view/layout/panel');
 
 phutil_require_module('phutil', 'markup');

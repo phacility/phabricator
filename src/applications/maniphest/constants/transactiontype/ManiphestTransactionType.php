@@ -26,6 +26,9 @@ final class ManiphestTransactionType {
 
   const TYPE_ATTACH       = 'attach';
 
+  const TYPE_TITLE        = 'title';
+  const TYPE_DESCRIPTION  = 'description';
+
   public static function getTransactionTypeMap() {
     return array(
       self::TYPE_NONE       => 'Comment',

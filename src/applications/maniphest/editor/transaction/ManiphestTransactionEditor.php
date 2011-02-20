@@ -49,6 +49,12 @@ class ManiphestTransactionEditor {
         case ManiphestTransactionType::TYPE_ATTACH:
           $old = $task->getAttached();
           break;
+        case ManiphestTransactionType::TYPE_TITLE:
+          $old = $task->getTitle();
+          break;
+        case ManiphestTransactionType::TYPE_DESCRIPTION:
+          $old = $task->getDescription();
+          break;
         default:
           throw new Exception('Unknown action type.');
       }
@@ -83,6 +89,12 @@ class ManiphestTransactionEditor {
             break;
           case ManiphestTransactionType::TYPE_ATTACH:
             $task->setAttached($new);
+            break;
+          case ManiphestTransactionType::TYPE_TITLE:
+            $task->setTitle($new);
+            break;
+          case ManiphestTransactionType::TYPE_DESCRIPTION:
+            $task->setDescription($new);
             break;
           default:
             throw new Exception('Unknown action type.');

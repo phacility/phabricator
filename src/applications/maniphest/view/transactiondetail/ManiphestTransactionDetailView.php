@@ -149,6 +149,16 @@ class ManiphestTransactionDetailView extends AphrontView {
     $new = $transaction->getNewValue();
     $old = $transaction->getOldValue();
     switch ($type) {
+      case ManiphestTransactionType::TYPE_TITLE:
+        $verb = 'Retitled';
+        $desc = 'changed the title from '.$this->renderString($old).
+                                   ' to '.$this->renderString($new);
+        break;
+      case ManiphestTransactionType::TYPE_DESCRIPTION:
+        // TODO: show the changes somehow.
+        $verb = 'Edited';
+        $desc = 'updated the task description';
+        break;
       case ManiphestTransactionType::TYPE_NONE:
         $verb = 'Commented On';
         $desc = 'added a comment';
@@ -277,6 +287,14 @@ class ManiphestTransactionDetailView extends AphrontView {
       }
     }
     return implode(', ', $links);
+  }
+
+  private function renderString($string) {
+    if ($this->forEmail) {
+      return '"'.$string.'"';
+    } else {
+      return '"'.phutil_escape_html($string).'"';
+    }
   }
 
 }

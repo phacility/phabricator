@@ -16,35 +16,61 @@
  * limitations under the License.
  */
 
-class ManiphestTaskCreateController extends ManiphestController {
+class ManiphestTaskEditController extends ManiphestController {
+
+  private $id;
+
+  public function willProcessRequest(array $data) {
+    $this->id = idx($data, 'id');
+  }
 
   public function processRequest() {
 
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $task = new ManiphestTask();
-
-    $task->setPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
+    if ($this->id) {
+      $task = id(new ManiphestTask())->load($this->id);
+      if (!$task) {
+        return new Aphront404Response();
+      }
+    } else {
+      $task = new ManiphestTask();
+      $task->setPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
+      $task->setAuthorPHID($user->getPHID());
+    }
 
     $errors = array();
     $e_title = true;
 
     if ($request->isFormPost()) {
-      $task->setTitle($request->getStr('title'));
-      $task->setAuthorPHID($user->getPHID());
-      $task->setDescription($request->getStr('description'));
+
+      $changes = array();
+
+      $new_title = $request->getStr('title');
+      $new_desc = $request->getStr('description');
+
+      if ($task->getID()) {
+        if ($new_title != $task->getTitle()) {
+          $changes[ManiphestTransactionType::TYPE_TITLE] = $new_title;
+        }
+        if ($new_desc != $task->getDescription()) {
+          $changes[ManiphestTransactionType::TYPE_DESCRIPTION] = $new_desc;
+        }
+      } else {
+        $task->setTitle($new_title);
+        $task->setDescription($new_desc);
+      }
 
       $owner_tokenizer = $request->getArr('assigned_to');
       $owner_phid = reset($owner_tokenizer);
 
-      if (!strlen($task->getTitle())) {
+      if (!strlen($new_title)) {
         $e_title = 'Required';
         $errors[] = 'Title is required.';
       }
 
       if (!$errors) {
-        $changes = array();
 
         $changes[ManiphestTransactionType::TYPE_STATUS] =
           ManiphestTaskStatus::STATUS_OPEN;
@@ -80,9 +106,11 @@ class ManiphestTaskCreateController extends ManiphestController {
           ->setURI('/T'.$task->getID());
       }
     } else {
-      $task->setCCPHIDs(array(
-        $user->getPHID(),
-      ));
+      if (!$task->getID()) {
+        $task->setCCPHIDs(array(
+          $user->getPHID(),
+        ));
+      }
     }
 
     $phids = array_merge(
@@ -117,6 +145,16 @@ class ManiphestTaskCreateController extends ManiphestController {
       $cc_value = array_select_keys($tvalues, $task->getCCPHIDs());
     } else {
       $cc_value = array();
+    }
+
+    if ($task->getID()) {
+      $cancel_uri = '/T'.$task->getID();
+      $button_name = 'Save Task';
+      $header_name = 'Edit Task';
+    } else {
+      $cancel_uri = '/maniphest/';
+      $button_name = 'Create Task';
+      $header_name = 'Create New Task';
     }
 
     $form = new AphrontFormView();
@@ -155,11 +193,12 @@ class ManiphestTaskCreateController extends ManiphestController {
           ->setValue($task->getDescription()))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Create Task'));
+          ->addCancelButton($cancel_uri)
+          ->setValue($button_name));
 
     $panel = new AphrontPanelView();
     $panel->setWidth(AphrontPanelView::WIDTH_FULL);
-    $panel->setHeader('Create New Task');
+    $panel->setHeader($header_name);
     $panel->appendChild($form);
 
     return $this->buildStandardPageResponse(

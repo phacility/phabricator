@@ -45,7 +45,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-headsup-action-list-view-css' =>
   array(
-    'uri' => '/res/099b7588/rsrc/css/aphront/headsup-action-list-view.css',
+    'uri' => '/res/8fd91c1d/rsrc/css/aphront/headsup-action-list-view.css',
     'type' => 'css',
     'requires' =>
     array(

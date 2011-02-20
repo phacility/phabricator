@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/maniphest/constants/priority');
 phutil_require_module('phabricator', 'applications/maniphest/constants/status');
@@ -23,4 +24,4 @@ phutil_require_module('phabricator', 'view/layout/panel');
 phutil_require_module('phutil', 'utils');
 
 
-phutil_require_source('ManiphestTaskCreateController.php');
+phutil_require_source('ManiphestTaskEditController.php');
