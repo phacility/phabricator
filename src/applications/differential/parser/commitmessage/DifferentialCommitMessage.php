@@ -388,8 +388,6 @@ class DifferentialCommitMessage {
           $data = (int)preg_replace('/[^\d]/', '', $data);
           break;
         case 'CC':
-          $data = preg_replace('/\s+/', ' ', $data);
-          break;
         case 'Reviewers':
         case 'Reviewed By':
           $data = array_filter(preg_split('/[\s,]+/', $data));

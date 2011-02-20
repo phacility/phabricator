@@ -93,7 +93,7 @@ class DifferentialCommitMessageData {
     }
 
     $handles = id(new PhabricatorObjectHandleData($phids))
-      ->loadHandles($handles);
+      ->loadHandles();
 
     if ($this->mode == self::MODE_AMEND) {
       if ($reviewer) {

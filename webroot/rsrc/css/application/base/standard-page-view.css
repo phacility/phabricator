@@ -13,32 +13,45 @@
 }
 
 .phabricator-standard-header {
-  background: #003366;
+  background: #006699;
   color: white;
-  padding: 1em 1em 0.5em 1em;
   overflow: hidden;
   position: relative;
+}
+
+.phabricator-primary-navigation {
+  padding-top: 12px;
+  padding-bottom: 8px;
+  padding-left: 24px;
 }
 
 .phabricator-standard-header a {
   color: white;
 }
 
-.phabricator-standard-header .phabricator-head-tabs {
-  padding: 0 1em;
+.phabricator-primary-navigation th,
+.phabricator-primary-navigation td {
+  vertical-align: bottom;
   font-size: 13px;
-  font-weight: bold;
+  border-bottom: 6px solid transparent;
+  padding-bottom: 4px;
 }
 
-.phabricator-standard-header .phabricator-head-tabs a {
-  border-bottom: 3px solid transparent;
-  padding: 0.5em 0.75em;
-  position: relative;
-  bottom: 2px;
+.phabricator-primary-navigation th.phabricator-logo {
+  font-size: 16px;
+  padding-top: 8px;
+  padding-left: 24px;
+  padding-right: 6px;
 }
 
-.phabricator-standard-header .phabricator-head-tabs a.phabricator-selected-tab {
-  border-bottom-color: #cccccc;
+.phabricator-primary-navigation td {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.phabricator-primary-navigation td.phabricator-selected-tab {
+  border-bottom-color: #ffffff;
+  background: #3377aa;
 }
 
 .phabricator-standard-header .phabricator-head-appname {
@@ -48,6 +61,8 @@
 
 .phabricator-login-details {
   float: right;
+  padding: 6px 24px 0;
+  font-size: 12px;
 }
 
 .phabricator-page-foot {

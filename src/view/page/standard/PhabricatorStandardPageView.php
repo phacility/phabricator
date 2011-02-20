@@ -132,20 +132,23 @@ class PhabricatorStandardPageView extends AphrontPageView {
 
     $tabs = array();
     foreach ($this->tabs as $name => $tab) {
-      $tabs[] = phutil_render_tag(
+      $tab_markup = phutil_render_tag(
         'a',
         array(
           'href'  => idx($tab, 'href'),
+        ),
+        phutil_escape_html(idx($tab, 'name')));
+      $tab_markup = phutil_render_tag(
+        'td',
+        array(
           'class' => ($name == $this->selectedTab)
             ? 'phabricator-selected-tab'
             : null,
         ),
-        phutil_escape_html(idx($tab, 'name')));
+        $tab_markup);
+      $tabs[] = $tab_markup;
     }
     $tabs = implode('', $tabs);
-    if ($tabs) {
-      $tabs = '<span class="phabricator-head-tabs">'.$tabs.'</span>';
-    }
 
     $login_stuff = null;
     $request = $this->getRequest();
@@ -215,15 +218,25 @@ class PhabricatorStandardPageView extends AphrontPageView {
           '<div class="phabricator-login-details">'.
             $login_stuff.
           '</div>'.
-          '<a href="/">Phabricator</a> '.
-          phutil_render_tag(
-            'a',
-            array(
-              'href'  => $this->getBaseURI(),
-              'class' => 'phabricator-head-appname',
-            ),
-            phutil_escape_html($this->getApplicationName())).
-          $tabs.
+          '<table class="phabricator-primary-navigation">'.
+            '<tr>'.
+              '<th class="phabricator-logo">'.
+                '<a href="/">'.
+                  "Phabricat\xE2\x9A\x99r".
+                '</a> '.
+              '</th>'.
+              '<th>'.
+                phutil_render_tag(
+                  'a',
+                  array(
+                    'href'  => $this->getBaseURI(),
+                    'class' => 'phabricator-head-appname',
+                  ),
+                  phutil_escape_html($this->getApplicationName())).
+              '</th>'.
+              $tabs.
+            '</tr>'.
+          '</table>'.
         '</div>'.
         $this->bodyContent.
         '<div style="clear: both;"></div>'.
