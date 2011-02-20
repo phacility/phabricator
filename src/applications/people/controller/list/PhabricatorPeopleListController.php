@@ -35,6 +35,7 @@ class PhabricatorPeopleListController extends PhabricatorPeopleController {
             'href'  => '/p/'.$user->getUsername().'/',
           ),
           'View Profile'),
+/*
         phutil_render_tag(
           'a',
           array(
@@ -42,6 +43,7 @@ class PhabricatorPeopleListController extends PhabricatorPeopleController {
             'href'  => '/people/edit/'.$user->getUsername().'/',
           ),
           'Edit'),
+*/
       );
     }
 
@@ -52,7 +54,7 @@ class PhabricatorPeopleListController extends PhabricatorPeopleController {
         'Username',
         'Real Name',
         '',
-        '',
+//        '',
       ));
     $table->setColumnClasses(
       array(
@@ -60,13 +62,13 @@ class PhabricatorPeopleListController extends PhabricatorPeopleController {
         null,
         'wide',
         'action',
-        'action',
+//        'action',
       ));
 
     $panel = new AphrontPanelView();
     $panel->appendChild($table);
     $panel->setHeader('People');
-    $panel->setCreateButton('Create New User', '/people/edit/');
+//    $panel->setCreateButton('Create New User', '/people/edit/');
 
     return $this->buildStandardPageResponse($panel, array(
       'title' => 'People',

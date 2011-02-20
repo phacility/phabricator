@@ -26,6 +26,8 @@ class PhabricatorPeopleEditController extends PhabricatorPeopleController {
 
   public function processRequest() {
 
+    return new Aphront404Response();
+
     if ($this->username) {
       $user = id(new PhabricatorUser())->loadOneWhere(
         'userName = %s',

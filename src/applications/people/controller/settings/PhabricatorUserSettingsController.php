@@ -30,7 +30,8 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
     $user = $request->getUser();
 
     $pages = array(
-      'account'    => 'Account',
+      'account'     => 'Account',
+      'email'       => 'Email',
 //      'password'    => 'Password',
 //      'facebook'    => 'Facebook Account',
       'arcanist'    => 'Arcanist Certificate',
@@ -42,6 +43,11 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
 
     if ($request->isFormPost()) {
       switch ($this->page) {
+        case 'email':
+          $user->setEmail($request->getStr('email'));
+          $user->save();
+          return id(new AphrontRedirectResponse())
+            ->setURI('/settings/page/email/?saved=true');
         case 'arcanist':
 
           if (!$request->isDialogFormPost()) {
@@ -92,6 +98,9 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
         break;
       case 'account':
         $content = $this->renderAccountForm();
+        break;
+      case 'email':
+        $content = $this->renderEmailForm();
         break;
       default:
         $content = 'derp derp';
@@ -196,10 +205,6 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
           ->setLabel('Username')
           ->setValue($user->getUsername()))
       ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel('Email')
-          ->setValue($user->getEmail()))
-      ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Real Name')
           ->setValue($user->getRealName()))
@@ -233,6 +238,44 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
     $panel->appendChild($form);
 
     return $panel->render();
+  }
+
+  private function renderEmailForm() {
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+
+    if ($request->getStr('saved')) {
+      $notice = new AphrontErrorView();
+      $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+      $notice->setTitle('Changed Saved');
+      $notice->appendChild('<p>Your changes have been saved.</p>');
+      $notice = $notice->render();
+    } else {
+      $notice = null;
+    }
+
+    $form = new AphrontFormView();
+    $form
+      ->setUser($user)
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel('Email')
+          ->setName('email')
+          ->setCaption(
+            'Note: there is no email validation yet; double-check your '.
+            'typing.')
+          ->setValue($user->getEmail()))
+      ->appendChild(
+        id(new AphrontFormSubmitControl())
+          ->setValue('Save'));
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader('Email Settings');
+    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->appendChild($form);
+
+    return $notice.$panel->render();
   }
 
 }
