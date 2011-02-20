@@ -227,7 +227,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-profile-css' =>
   array(
-    'uri' => '/res/c3c5c82e/rsrc/css/application/people/profile.css',
+    'uri' => '/res/259ad37f/rsrc/css/application/people/profile.css',
     'type' => 'css',
     'requires' =>
     array(

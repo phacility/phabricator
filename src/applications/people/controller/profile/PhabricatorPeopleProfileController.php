@@ -35,13 +35,20 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
       return new Aphront404Response();
     }
 
+    $profile = id(new PhabricatorUserProfile())->loadOneWhere(
+      'userPHID = %s',
+      $user->getPHID());
+    if (!$profile) {
+      $profile = new PhabricatorUserProfile();
+    }
+
     $links = array();
 
     if ($user->getPHID() == $viewer->getPHID()) {
       $links[] = phutil_render_tag(
         'a',
         array(
-          'href' => '/p/'.$user->getUsername().'/edit/',
+          'href' => '/profile/edit/',
         ),
         'Edit Profile');
     }
@@ -64,6 +71,8 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
         implode("\n", $links).
       '</ul>';
 
+    $title = nonempty($profile->getTitle(), 'Untitled Document');
+
     $username_tag =
       '<h1 class="profile-username">'.
         phutil_escape_html($user->getUserName()).
@@ -74,10 +83,13 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
       '</h2>';
     $title_tag =
       '<h2 class="profile-usertitle">'.
-        'Cool Title'.
+        phutil_escape_html($title).
       '</h2>';
 
-    $src_phid = $user->getProfileImagePHID();
+    $src_phid = $profile->getProfileImagePHID();
+    if (!$src_phid) {
+      $src_phid = $user->getProfileImagePHID();
+    }
     $src = PhabricatorFileURI::getViewURIForPHID($src_phid);
 
     $picture = phutil_render_tag(
@@ -89,7 +101,14 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
 
     require_celerity_resource('phabricator-profile-css');
 
-    $blurb = 'just build marawdars dood';
+    $blurb = nonempty(
+      $profile->getBlurb(),
+      '//Nothing is known about this rare specimen.//');
+
+    $factory = new DifferentialMarkupEngineFactory();
+    $engine = $factory->newDifferentialCommentMarkupEngine();
+
+    $blurb = $engine->markupText($blurb);
 
     $content =
       '<div class="phabricator-profile-info-group">
