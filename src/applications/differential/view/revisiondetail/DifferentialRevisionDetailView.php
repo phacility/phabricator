@@ -60,25 +60,20 @@ final class DifferentialRevisionDetailView extends AphrontView {
 
     $actions = array();
     foreach ($this->actions as $action) {
-      if (empty($action['href'])) {
-        $tag = 'span';
-      } else {
-        $tag = 'a';
-      }
-      $name = $action['name'];
-      unset($action['name']);
-      $actions[] = javelin_render_tag(
-        $tag,
-        $action,
-        phutil_escape_html($name));
+      $obj = new AphrontHeadsupActionView();
+      $obj->setName($action['name']);
+      $obj->setURI(idx($action, 'href'));
+      $obj->setWorkflow(idx($action, 'sigil') == 'workflow');
+      $obj->setClass(idx($action, 'class'));
+      $actions[] = $obj;
     }
-    $actions = implode("\n", $actions);
+
+    $action_list = new AphrontHeadsupActionListView();
+    $action_list->setActions($actions);
 
     return
       '<div class="differential-revision-detail differential-panel">'.
-        '<div class="differential-revision-actions">'.
-          $actions.
-        '</div>'.
+        $action_list->render().
         '<div class="differential-revision-detail-core">'.
           '<h1>'.phutil_escape_html($revision->getTitle()).'</h1>'.
           $properties.

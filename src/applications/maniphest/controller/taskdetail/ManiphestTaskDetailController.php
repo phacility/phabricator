@@ -125,8 +125,31 @@ class ManiphestTaskDetailController extends ManiphestController {
         implode("\n", $table).
       '</table>';
 
+    
+    $actions = array();
+    
+    $action = new AphrontHeadsupActionView();
+    $action->setName('Edit Task');
+    $action->setURI('/maniphest/edit/'.$task->getID().'/');
+    $action->setClass('action-edit');
+    $actions[] = $action;
+
+    $action = new AphrontHeadsupActionView();
+    $action->setName('Upload File');
+    $action->setClass('action-upload unavailable');
+    $actions[] = $action;
+
+    $action = new AphrontHeadsupActionView();
+    $action->setName('Edit Differential Revisions');
+    $action->setClass('action-attach unavailable');
+    $actions[] = $action;
+    
+    $action_list = new AphrontHeadsupActionListView();
+    $action_list->setActions($actions);
+
     $panel =
       '<div class="maniphest-panel">'.
+        $action_list->render().
         '<div class="maniphest-task-detail-core">'.
           '<h1>'.
             phutil_escape_html('T'.$task->getID().' '.$task->getTitle()).
