@@ -39,7 +39,7 @@ CREATE TABLE `conduit_connectionlog` (
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=172 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -58,7 +58,7 @@ CREATE TABLE `conduit_methodcalllog` (
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=454 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -92,7 +92,7 @@ CREATE TABLE `differential_changeset` (
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=603 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -126,7 +126,7 @@ CREATE TABLE `differential_comment` (
   `dateModified` int(10) unsigned NOT NULL,
   `cache` longblob,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -156,7 +156,7 @@ CREATE TABLE `differential_diff` (
   `dateModified` int(10) unsigned NOT NULL,
   `description` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=89 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -174,7 +174,7 @@ CREATE TABLE `differential_diffproperty` (
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -195,7 +195,7 @@ CREATE TABLE `differential_hunk` (
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=603 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -219,7 +219,7 @@ CREATE TABLE `differential_inlinecomment` (
   `dateModified` int(10) unsigned NOT NULL,
   `cache` longblob,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -261,8 +261,10 @@ CREATE TABLE `differential_revision` (
   `lineCount` int(10) unsigned DEFAULT NULL,
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
+  `attached` longtext NOT NULL,
+  `unsubscribed` longblob NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -289,7 +291,7 @@ CREATE TABLE `draft` (
   `dateModified` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `authorPHID` (`authorPHID`,`draftKey`)
-) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -319,7 +321,7 @@ CREATE TABLE `file` (
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=98 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -335,7 +337,7 @@ CREATE TABLE `file_storageblob` (
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=98 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -364,7 +366,7 @@ CREATE TABLE `metamta_mail` (
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=216 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -383,7 +385,7 @@ CREATE TABLE `metamta_mailinglist` (
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -411,7 +413,7 @@ CREATE TABLE `phid` (
   `dateModified` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `phid` (`phid`)
-) ENGINE=InnoDB AUTO_INCREMENT=182 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -430,7 +432,7 @@ CREATE TABLE `phid_type` (
   `dateModified` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `type` (`type`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -484,7 +486,27 @@ CREATE TABLE `user` (
   UNIQUE KEY `userName` (`userName`),
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `facebookUID` (`facebookUID`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `user_profile`
+--
+
+DROP TABLE IF EXISTS `user_profile`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_profile` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `userPHID` varchar(64) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `blurb` text NOT NULL,
+  `profileImagePHID` varchar(64) CHARACTER SET latin1 COLLATE latin1_bin DEFAULT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `userPHID` (`userPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -514,7 +536,7 @@ CREATE TABLE `file` (
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=98 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -530,7 +552,204 @@ CREATE TABLE `file_storageblob` (
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=98 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Current Database: `phabricator_repository`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_repository` /*!40100 DEFAULT CHARACTER SET latin1 */;
+
+USE `phabricator_repository`;
+
+--
+-- Table structure for table `repository`
+--
+
+DROP TABLE IF EXISTS `repository`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `repository` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `callsign` varchar(32) NOT NULL,
+  `description` text,
+  `versionControlSystem` varchar(32) NOT NULL,
+  `details` longblob NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `callsign` (`callsign`),
+  UNIQUE KEY `phid` (`phid`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `repository_githubnotification`
+--
+
+DROP TABLE IF EXISTS `repository_githubnotification`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `repository_githubnotification` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `repositoryPHID` varchar(64) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
+  `remoteAddress` varchar(32) NOT NULL,
+  `payload` longblob NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `repositoryPHID` (`repositoryPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Current Database: `phabricator_search`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_search` /*!40100 DEFAULT CHARACTER SET latin1 */;
+
+USE `phabricator_search`;
+
+--
+-- Table structure for table `search_document`
+--
+
+DROP TABLE IF EXISTS `search_document`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `search_document` (
+  `phid` varchar(64) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
+  `documentType` varchar(4) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
+  `documentTitle` varchar(255) NOT NULL,
+  `documentCreated` int(10) unsigned NOT NULL,
+  `documentModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`phid`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `search_documentfield`
+--
+
+DROP TABLE IF EXISTS `search_documentfield`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `search_documentfield` (
+  `phid` varchar(64) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
+  `phidType` varchar(4) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
+  `field` varchar(4) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
+  `auxPHID` varchar(64) CHARACTER SET latin1 COLLATE latin1_bin DEFAULT NULL,
+  `corpus` text,
+  KEY `phid` (`phid`),
+  FULLTEXT KEY `corpus` (`corpus`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `search_documentrelationship`
+--
+
+DROP TABLE IF EXISTS `search_documentrelationship`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `search_documentrelationship` (
+  `phid` varchar(64) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
+  `relatedPHID` varchar(64) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
+  `relation` varchar(4) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
+  `relatedType` varchar(4) NOT NULL,
+  `relatedTime` int(10) unsigned NOT NULL,
+  KEY `phid` (`phid`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `search_query`
+--
+
+DROP TABLE IF EXISTS `search_query`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `search_query` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `authorPHID` varchar(64) CHARACTER SET latin1 COLLATE latin1_bin DEFAULT NULL,
+  `query` varchar(255) NOT NULL,
+  `parameters` text NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Current Database: `phabricator_maniphest`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_maniphest` /*!40100 DEFAULT CHARACTER SET latin1 */;
+
+USE `phabricator_maniphest`;
+
+--
+-- Table structure for table `maniphest_task`
+--
+
+DROP TABLE IF EXISTS `maniphest_task`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `maniphest_task` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
+  `ownerPHID` varchar(64) CHARACTER SET latin1 COLLATE latin1_bin DEFAULT NULL,
+  `ccPHIDs` text,
+  `attached` longtext NOT NULL,
+  `status` int(10) unsigned NOT NULL,
+  `priority` int(10) unsigned NOT NULL,
+  `title` text NOT NULL,
+  `description` longtext NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `maniphest_touch`
+--
+
+DROP TABLE IF EXISTS `maniphest_touch`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `maniphest_touch` (
+  `userPHID` varchar(64) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
+  `taskID` int(10) unsigned NOT NULL,
+  `touchedAt` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`userPHID`,`taskID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `maniphest_transaction`
+--
+
+DROP TABLE IF EXISTS `maniphest_transaction`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `maniphest_transaction` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `taskID` int(10) unsigned NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
+  `transactionType` varchar(16) NOT NULL,
+  `oldValue` longblob,
+  `newValue` longblob,
+  `comments` longblob,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `cache` longblob,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -542,7 +761,7 @@ CREATE TABLE `file_storageblob` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2011-02-11 13:54:33
+-- Dump completed on 2011-02-20 13:25:52
 -- MySQL dump 10.13  Distrib 5.5.8, for osx10.6 (i386)
 --
 -- Host: localhost    Database: phabricator_directory
@@ -582,7 +801,7 @@ CREATE TABLE `directory_category` (
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -613,7 +832,7 @@ CREATE TABLE `directory_item` (
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=21 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -635,4 +854,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2011-02-11 13:54:33
+-- Dump completed on 2011-02-20 13:25:52
