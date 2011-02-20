@@ -100,7 +100,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-standard-page-view' =>
   array(
-    'uri' => '/res/4ebe4b10/rsrc/css/application/base/standard-page-view.css',
+    'uri' => '/res/b41e2dfe/rsrc/css/application/base/standard-page-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -464,7 +464,7 @@ celerity_register_resource_map(array(
 ), array (
   'packages' =>
   array (
-    '93a93aee' =>
+    'f0b7f753' =>
     array (
       'name' => 'core.pkg.css',
       'symbols' =>
@@ -483,7 +483,7 @@ celerity_register_resource_map(array(
         11 => 'phabricator-remarkup-css',
         12 => 'syntax-highlighting-css',
       ),
-      'uri' => '/res/pkg/93a93aee/core.pkg.css',
+      'uri' => '/res/pkg/f0b7f753/core.pkg.css',
       'type' => 'css',
     ),
     'fcf7ec68' =>
@@ -520,19 +520,19 @@ celerity_register_resource_map(array(
   ),
   'reverse' =>
   array (
-    'phabricator-core-css' => '93a93aee',
-    'phabricator-core-buttons-css' => '93a93aee',
-    'phabricator-standard-page-view' => '93a93aee',
-    'aphront-dialog-view-css' => '93a93aee',
-    'aphront-form-view-css' => '93a93aee',
-    'aphront-panel-view-css' => '93a93aee',
-    'aphront-side-nav-view-css' => '93a93aee',
-    'aphront-table-view-css' => '93a93aee',
-    'aphront-tokenizer-control-css' => '93a93aee',
-    'aphront-typeahead-control-css' => '93a93aee',
-    'phabricator-directory-css' => '93a93aee',
-    'phabricator-remarkup-css' => '93a93aee',
-    'syntax-highlighting-css' => '93a93aee',
+    'phabricator-core-css' => 'f0b7f753',
+    'phabricator-core-buttons-css' => 'f0b7f753',
+    'phabricator-standard-page-view' => 'f0b7f753',
+    'aphront-dialog-view-css' => 'f0b7f753',
+    'aphront-form-view-css' => 'f0b7f753',
+    'aphront-panel-view-css' => 'f0b7f753',
+    'aphront-side-nav-view-css' => 'f0b7f753',
+    'aphront-table-view-css' => 'f0b7f753',
+    'aphront-tokenizer-control-css' => 'f0b7f753',
+    'aphront-typeahead-control-css' => 'f0b7f753',
+    'phabricator-directory-css' => 'f0b7f753',
+    'phabricator-remarkup-css' => 'f0b7f753',
+    'syntax-highlighting-css' => 'f0b7f753',
     'differential-core-view-css' => 'fcf7ec68',
     'differential-changeset-view-css' => 'fcf7ec68',
     'differential-revision-detail-css' => 'fcf7ec68',
