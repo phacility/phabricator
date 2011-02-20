@@ -40,6 +40,63 @@ class PhabricatorSearchDifferentialIndexer
       'USER',
       $rev->getDateCreated());
 
+    if ($rev->getStatus() != DifferentialRevisionStatus::COMMITTED &&
+        $rev->getStatus() != DifferentialRevisionStatus::ABANDONED) {
+      $doc->addRelationship(
+        PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
+        $rev->getPHID(),
+        'DREV',
+        time());
+    }
+
+    $comments = id(new DifferentialInlineComment())->loadAllWhere(
+      'revisionID = %d AND commentID is not null',
+      $rev->getID());
+
+    $touches = array();
+
+    foreach ($comments as $comment) {
+      if (strlen($comment->getContent())) {
+        // TODO: we should also index inline comments.
+        $doc->addField(
+          PhabricatorSearchField::FIELD_COMMENT,
+          $comment->getContent());
+      }
+
+      $author = $comment->getAuthorPHID();
+      $touches[$author] = $comment->getDateCreated();
+    }
+
+    foreach ($touches as $touch => $time) {
+      $doc->addRelationship(
+        PhabricatorSearchRelationship::RELATIONSHIP_TOUCH,
+        $touch,
+        'USER',
+        $time);
+    }
+
+    $rev->loadRelationships();
+
+    foreach ($rev->getReviewers() as $phid) {
+      $doc->addRelationship(
+        PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
+        $phid,
+        'USER',
+        $rev->getDateModified()); // Bogus timestamp.
+    }
+
+    $ccphids = $rev->getCCPHIDs();
+    $handles = id(new PhabricatorObjectHandleData($ccphids))
+      ->loadHandles();
+
+    foreach ($handles as $phid => $handle) {
+      $doc->addRelationship(
+        PhabricatorSearchRelationship::RELATIONSHIP_SUBSCRIBER,
+        $phid,
+        $handle->getType(),
+        $rev->getDateModified()); // Bogus timestamp.
+    }
+
     PhabricatorSearchDocument::reindexAbstractDocument($doc);
   }
 }

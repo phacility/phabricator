@@ -76,10 +76,6 @@ class PhabricatorSearchManiphestIndexer
             if (in_array($added_cc, $current_ccs)) {
               if (empty($ccs[$added_cc])) {
                 $ccs[$added_cc] = $transaction->getDateCreated();
-
-                // CCs count as touches, even if you didn't technically
-                // interact with the object directly.
-                $touches[$added_cc] = $transaction->getDateCreated();
               }
             }
           }

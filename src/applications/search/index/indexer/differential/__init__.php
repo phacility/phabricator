@@ -6,11 +6,16 @@
 
 
 
+phutil_require_module('phabricator', 'applications/differential/constants/revisionstatus');
+phutil_require_module('phabricator', 'applications/differential/storage/inlinecomment');
+phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'applications/search/constants/field');
 phutil_require_module('phabricator', 'applications/search/constants/relationship');
 phutil_require_module('phabricator', 'applications/search/index/abstractdocument');
 phutil_require_module('phabricator', 'applications/search/index/indexer/base');
 phutil_require_module('phabricator', 'applications/search/storage/document/document');
+
+phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('PhabricatorSearchDifferentialIndexer.php');
