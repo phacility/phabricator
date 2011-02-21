@@ -107,7 +107,6 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
 
     $factory = new DifferentialMarkupEngineFactory();
     $engine = $factory->newDifferentialCommentMarkupEngine();
-
     $blurb = $engine->markupText($blurb);
 
     $content =

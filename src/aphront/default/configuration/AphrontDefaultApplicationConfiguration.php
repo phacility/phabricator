@@ -169,6 +169,14 @@ class AphrontDefaultApplicationConfiguration
         '$' => 'PhabricatorSearchController',
         '(?P<id>\d+)/$' => 'PhabricatorSearchController',
       ),
+
+      '/project/' => array(
+        '$' => 'PhabricatorProjectListController',
+        'edit/(?:(?P<id>\d+)/)?$' => 'PhabricatorProjectEditController',
+        'view/(?P<id>\d+)/$' => 'PhabricatorProjectProfileController',
+        'affiliation/(?P<id>\d+)/$'
+          => 'PhabricatorProjectAffiliationEditController',
+      )
     );
   }
 
