@@ -38,6 +38,23 @@ class PhabricatorObjectHandleData {
 
     foreach ($types as $type => $phids) {
       switch ($type) {
+        case '!!!!':
+          // Black magic!
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            $handle->setType($type);
+            switch ($phid) {
+              case 'PHID-!!!!-UP-FOR-GRABS':
+                $handle->setName('Up For Grabs');
+                break;
+              default:
+                $handle->setName('Foul Magicks');
+                break;
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
         case 'USER':
           $class = 'PhabricatorUser';
           PhutilSymbolLoader::loadClass($class);
@@ -49,12 +66,11 @@ class PhabricatorObjectHandleData {
           foreach ($phids as $phid) {
             $handle = new PhabricatorObjectHandle();
             $handle->setPHID($phid);
+            $handle->setType($type);
             if (empty($users[$phid])) {
-              $handle->setType(self::TYPE_UNKNOWN);
               $handle->setName('Unknown User');
             } else {
               $user = $users[$phid];
-              $handle->setType($type);
               $handle->setName($user->getUsername());
               $handle->setURI('/p/'.$user->getUsername().'/');
               $handle->setEmail($user->getEmail());
@@ -82,12 +98,11 @@ class PhabricatorObjectHandleData {
           foreach ($phids as $phid) {
             $handle = new PhabricatorObjectHandle();
             $handle->setPHID($phid);
+            $handle->setType($type);
             if (empty($lists[$phid])) {
-              $handle->setType(self::TYPE_UNKNOWN);
               $handle->setName('Unknown Mailing List');
             } else {
               $list = $lists[$phid];
-              $handle->setType($type);
               $handle->setEmail($list->getEmail());
               $handle->setName($list->getName());
               $handle->setURI($list->getURI());
@@ -107,12 +122,11 @@ class PhabricatorObjectHandleData {
           foreach ($phids as $phid) {
             $handle = new PhabricatorObjectHandle();
             $handle->setPHID($phid);
+            $handle->setType($type);
             if (empty($revs[$phid])) {
-              $handle->setType(self::TYPE_UNKNOWN);
               $handle->setName('Unknown Revision');
             } else {
               $rev = $revs[$phid];
-              $handle->setType($type);
               $handle->setName($rev->getTitle());
               $handle->setURI('/D'.$rev->getID());
               $handle->setFullName('D'.$rev->getID().': '.$rev->getTitle());
@@ -131,12 +145,11 @@ class PhabricatorObjectHandleData {
           foreach ($phids as $phid) {
             $handle = new PhabricatorObjectHandle();
             $handle->setPHID($phid);
+            $handle->setType($type);
             if (empty($tasks[$phid])) {
-              $handle->setType(self::TYPE_UNKNOWN);
               $handle->setName('Unknown Revision');
             } else {
               $task = $tasks[$phid];
-              $handle->setType($type);
               $handle->setName($task->getTitle());
               $handle->setURI('/T'.$task->getID());
               $handle->setFullName('T'.$task->getID().': '.$task->getTitle());
@@ -155,12 +168,11 @@ class PhabricatorObjectHandleData {
           foreach ($phids as $phid) {
             $handle = new PhabricatorObjectHandle();
             $handle->setPHID($phid);
+            $handle->setType($type);
             if (empty($files[$phid])) {
-              $handle->setType(self::TYPE_UNKNOWN);
               $handle->setName('Unknown File');
             } else {
               $file = $files[$phid];
-              $handle->setType($type);
               $handle->setName($file->getName());
               $handle->setURI($file->getViewURI());
             }
@@ -178,12 +190,11 @@ class PhabricatorObjectHandleData {
           foreach ($phids as $phid) {
             $handle = new PhabricatorObjectHandle();
             $handle->setPHID($phid);
+            $handle->setType($type);
             if (empty($projects[$phid])) {
-              $handle->setType(self::TYPE_UNKNOWN);
               $handle->setName('Unknown Project');
             } else {
               $project = $projects[$phid];
-              $handle->setType($type);
               $handle->setName($project->getName());
               $handle->setURI('/project/view/'.$project->getID().'/');
             }

@@ -28,7 +28,11 @@ class PhabricatorTypeaheadCommonDatasourceController
     $need_users = false;
     $need_lists = false;
     $need_projs = false;
+    $need_upforgrabs = false;
     switch ($this->type) {
+      case 'searchowner':
+        $need_users = true;
+        $need_upforgrabs = true;
       case 'users':
         $need_users = true;
         break;
@@ -43,6 +47,13 @@ class PhabricatorTypeaheadCommonDatasourceController
 
     $data = array();
 
+    if ($need_upforgrabs) {
+      $data[] = array(
+        'Up For Grabs',
+        null,
+        'PHID-!!!!-UP-FOR-GRABS',
+      );
+    }
 
     if ($need_users) {
       $users = id(new PhabricatorUser())->loadAll();

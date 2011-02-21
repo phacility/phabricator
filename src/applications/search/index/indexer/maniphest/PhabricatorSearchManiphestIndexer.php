@@ -83,12 +83,28 @@ class PhabricatorSearchManiphestIndexer
       }
     }
 
+    foreach ($task->getProjectPHIDs() as $phid) {
+      $doc->addRelationship(
+        PhabricatorSearchRelationship::RELATIONSHIP_PROJECT,
+        $phid,
+        'PROJ',
+        $task->getDateModified()); // Bogus.
+    }
+
     if ($owner && $owner->getNewValue()) {
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
         $owner->getNewValue(),
         'USER',
         $owner->getDateCreated());
+    } else {
+      $doc->addRelationship(
+        PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
+        'PHID-!!!!-UP-FOR-GRABS',
+        '!!!!',
+        $owner
+          ? $owner->getDateCreated()
+          : $task->getDateCreated());
     }
 
     foreach ($touches as $touch => $time) {

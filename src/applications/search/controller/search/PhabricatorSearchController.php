@@ -55,6 +55,10 @@ class PhabricatorSearchController extends PhabricatorSearchBaseController {
           $query->setParameter('open', $request->getInt('open'));
         }
 
+        if ($request->getArr('project')) {
+          $query->setParameter('project', $request->getArr('project'));
+        }
+
         $query->save();
         return id(new AphrontRedirectResponse())
           ->setURI('/search/'.$query->getID().'/');
@@ -74,7 +78,8 @@ class PhabricatorSearchController extends PhabricatorSearchBaseController {
 
     $phids = array_merge(
       $query->getParameter('author', array()),
-      $query->getParameter('owner', array())
+      $query->getParameter('owner', array()),
+      $query->getParameter('project', array())
     );
 
     $handles = id(new PhabricatorObjectHandleData($phids))
@@ -89,6 +94,11 @@ class PhabricatorSearchController extends PhabricatorSearchBaseController {
       $handles,
       $query->getParameter('owner', array()));
     $owner_value = mpull($owner_value, 'getFullName', 'getPHID');
+
+    $project_value = array_select_keys(
+      $handles,
+      $query->getParameter('project', array()));
+    $project_value = mpull($project_value, 'getFullName', 'getPHID');
 
     $search_form = new AphrontFormView();
     $search_form
@@ -121,8 +131,16 @@ class PhabricatorSearchController extends PhabricatorSearchBaseController {
         id(new AphrontFormTokenizerControl())
           ->setName('owner')
           ->setLabel('Owner')
-          ->setDatasource('/typeahead/common/users/')
-          ->setValue($owner_value))
+          ->setDatasource('/typeahead/common/searchowner/')
+          ->setValue($owner_value)
+          ->setCaption(
+            'Tip: search for "Up For Grabs" to find unowned documents.'))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setName('project')
+          ->setLabel('Project')
+          ->setDatasource('/typeahead/common/projects/')
+          ->setValue($project_value))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Search'));
