@@ -40,6 +40,7 @@ class ManiphestTransaction extends ManiphestDAO {
 
     switch ($this->getTransactionType()) {
       case ManiphestTransactionType::TYPE_CCS:
+      case ManiphestTransactionType::TYPE_PROJECTS:
         foreach ($this->getOldValue() as $phid) {
           $phids[] = $phid;
         }

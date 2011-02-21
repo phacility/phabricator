@@ -60,6 +60,8 @@ class ManiphestTaskEditController extends ManiphestController {
       } else {
         $task->setTitle($new_title);
         $task->setDescription($new_desc);
+        $changes[ManiphestTransactionType::TYPE_STATUS] =
+          ManiphestTaskStatus::STATUS_OPEN;
       }
 
       $owner_tokenizer = $request->getArr('assigned_to');
@@ -72,20 +74,23 @@ class ManiphestTaskEditController extends ManiphestController {
 
       if (!$errors) {
 
-        $changes[ManiphestTransactionType::TYPE_STATUS] =
-          ManiphestTaskStatus::STATUS_OPEN;
 
         if ($request->getInt('priority') != $task->getPriority()) {
           $changes[ManiphestTransactionType::TYPE_PRIORITY] =
             $request->getInt('priority');
         }
 
-        if ($owner_phid) {
+        if ($owner_phid != $task->getOwnerPHID()) {
           $changes[ManiphestTransactionType::TYPE_OWNER] = $owner_phid;
         }
 
-        if ($request->getArr('cc')) {
+        if ($request->getArr('cc') != $task->getCCPHIDs()) {
           $changes[ManiphestTransactionType::TYPE_CCS] = $request->getArr('cc');
+        }
+
+        if ($request->getArr('projects') != $task->getProjectPHIDs()) {
+          $changes[ManiphestTransactionType::TYPE_PROJECTS]
+            = $request->getArr('projects');
         }
 
         $template = new ManiphestTransaction();
@@ -115,7 +120,8 @@ class ManiphestTaskEditController extends ManiphestController {
 
     $phids = array_merge(
       array($task->getOwnerPHID()),
-      $task->getCCPHIDs());
+      $task->getCCPHIDs(),
+      $task->getProjectPHIDs());
     $phids = array_filter($phids);
     $phids = array_unique($phids);
 
@@ -145,6 +151,12 @@ class ManiphestTaskEditController extends ManiphestController {
       $cc_value = array_select_keys($tvalues, $task->getCCPHIDs());
     } else {
       $cc_value = array();
+    }
+
+    if ($task->getProjectPHIDs()) {
+      $projects_value = array_select_keys($tvalues, $task->getProjectPHIDs());
+    } else {
+      $projects_value = array();
     }
 
     if ($task->getID()) {
@@ -186,6 +198,12 @@ class ManiphestTaskEditController extends ManiphestController {
           ->setName('priority')
           ->setOptions($priority_map)
           ->setValue($task->getPriority()))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel('Projects')
+          ->setName('projects')
+          ->setValue($projects_value)
+          ->setDatasource('/typeahead/common/projects/'))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel('Description')

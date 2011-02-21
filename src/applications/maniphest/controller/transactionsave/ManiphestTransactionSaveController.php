@@ -46,6 +46,13 @@ class ManiphestTransactionSaveController extends ManiphestController {
         $assign_to = reset($assign_to);
         $transaction->setNewValue($assign_to);
         break;
+      case ManiphestTransactionType::TYPE_PROJECTS:
+        $projects = $request->getArr('projects');
+        $projects = array_merge($projects, $task->getProjectPHIDs());
+        $projects = array_filter($projects);
+        $projects = array_unique($projects);
+        $transaction->setNewValue($projects);
+        break;
       case ManiphestTransactionType::TYPE_CCS:
         $ccs = $request->getArr('ccs');
         $ccs = array_merge($ccs, $task->getCCPHIDs());
@@ -55,6 +62,30 @@ class ManiphestTransactionSaveController extends ManiphestController {
         break;
       case ManiphestTransactionType::TYPE_PRIORITY:
         $transaction->setNewValue($request->getInt('priority'));
+        break;
+      case ManiphestTransactionType::TYPE_ATTACH:
+        // This means "attach a file" even though we store other types of data
+        // as 'attached'.
+        $phid = null;
+        if (!empty($_FILES['file'])) {
+          $err = idx($_FILES['file'], 'error');
+          if ($err != UPLOAD_ERR_NO_FILE) {
+            $file = PhabricatorFile::newFromPHPUpload($_FILES['file']);
+            $phid = $file->getPHID();
+          }
+        }
+        if ($phid) {
+          $new = $task->getAttached();
+          if (empty($new['FILE'])) {
+            $new['FILE'] = array();
+          }
+          $new['FILE'][$phid] = array();
+        }
+
+        var_dump($new);
+        die();
+
+        $transaction->setNewValue($new);
         break;
       default:
         throw new Exception('unknown action');

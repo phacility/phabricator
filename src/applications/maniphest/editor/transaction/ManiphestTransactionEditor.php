@@ -55,6 +55,9 @@ class ManiphestTransactionEditor {
         case ManiphestTransactionType::TYPE_DESCRIPTION:
           $old = $task->getDescription();
           break;
+        case ManiphestTransactionType::TYPE_PROJECTS:
+          $old = $task->getProjectPHIDs();
+          break;
         default:
           throw new Exception('Unknown action type.');
       }
@@ -95,6 +98,9 @@ class ManiphestTransactionEditor {
             break;
           case ManiphestTransactionType::TYPE_DESCRIPTION:
             $task->setDescription($new);
+            break;
+          case ManiphestTransactionType::TYPE_PROJECTS:
+            $task->setProjectPHIDs($new);
             break;
           default:
             throw new Exception('Unknown action type.');

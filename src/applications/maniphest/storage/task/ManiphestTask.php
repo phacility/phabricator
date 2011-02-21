@@ -21,7 +21,7 @@ class ManiphestTask extends ManiphestDAO {
   protected $phid;
   protected $authorPHID;
   protected $ownerPHID;
-  protected $ccPHIDs;
+  protected $ccPHIDs = array();
 
   protected $status;
   protected $priority;
@@ -30,6 +30,7 @@ class ManiphestTask extends ManiphestDAO {
   protected $description;
 
   protected $attached = array();
+  protected $projectPHIDs = array();
 
   public function getConfiguration() {
     return array(
@@ -37,6 +38,7 @@ class ManiphestTask extends ManiphestDAO {
       self::CONFIG_SERIALIZATION => array(
         'ccPHIDs' => self::SERIALIZATION_JSON,
         'attached' => self::SERIALIZATION_JSON,
+        'projectPHIDs' => self::SERIALIZATION_JSON,
       ),
     ) + parent::getConfiguration();
   }

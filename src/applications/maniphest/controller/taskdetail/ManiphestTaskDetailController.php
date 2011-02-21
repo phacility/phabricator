@@ -48,6 +48,9 @@ class ManiphestTaskDetailController extends ManiphestController {
     foreach ($task->getCCPHIDs() as $phid) {
       $phids[$phid] = true;
     }
+    foreach ($task->getProjectPHIDs() as $phid) {
+      $phids[$phid] = true;
+    }
     if ($task->getOwnerPHID()) {
       $phids[$task->getOwnerPHID()] = true;
     }
@@ -93,6 +96,17 @@ class ManiphestTaskDetailController extends ManiphestController {
 
     $dict['Author'] = $handles[$task->getAuthorPHID()]->renderLink();
 
+    $projects = $task->getProjectPHIDs();
+    if ($projects) {
+      $project_links = array();
+      foreach ($projects as $phid) {
+        $project_links[] = $handles[$phid]->renderLink();
+      }
+      $dict['Projects'] = implode(', ', $project_links);
+    } else {
+      $dict['Projects'] = '<em>None</em>';
+    }
+
     if (idx($attached, 'DREV')) {
       $revs = idx($attached, 'DREV');
       $rev_links = array();
@@ -102,6 +116,17 @@ class ManiphestTaskDetailController extends ManiphestController {
       $rev_links = implode(', ', $rev_links);
       $dict['Revisions'] = $rev_links;
     }
+
+    if (idx($attached, 'FILE')) {
+      $revs = idx($attached, 'FILE');
+      $rev_links = array();
+      foreach ($revs as $rev => $info) {
+        $rev_links[] = $handles[$rev]->renderLink();
+      }
+      $rev_links = implode(', ', $rev_links);
+      $dict['Files'] = $rev_links;
+    }
+
 
     $dict['Description'] =
       '<div class="maniphest-task-description">'.
@@ -132,11 +157,6 @@ class ManiphestTaskDetailController extends ManiphestController {
     $action->setName('Edit Task');
     $action->setURI('/maniphest/task/edit/'.$task->getID().'/');
     $action->setClass('action-edit');
-    $actions[] = $action;
-
-    $action = new AphrontHeadsupActionView();
-    $action->setName('Upload File');
-    $action->setClass('action-upload unavailable');
     $actions[] = $action;
 
     $action = new AphrontHeadsupActionView();
@@ -188,6 +208,7 @@ class ManiphestTaskDetailController extends ManiphestController {
     $comment_form
       ->setUser($user)
       ->setAction('/maniphest/transaction/save/')
+      ->setEncType('multipart/form-data')
       ->addHiddenInput('taskID', $task->getID())
       ->appendChild(
         id(new AphrontFormSelectControl())
@@ -227,6 +248,20 @@ class ManiphestTaskDetailController extends ManiphestController {
           ->setControlStyle('display: none')
           ->setValue($task->getPriority()))
       ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel('Projects')
+          ->setName('projects')
+          ->setControlID('projects')
+          ->setControlStyle('display: none')
+          ->setID('projects-tokenizer')
+          ->setDisableBehavior(true))
+      ->appendChild(
+        id(new AphrontFormFileControl())
+          ->setLabel('File')
+          ->setName('file')
+          ->setControlID('file')
+          ->setControlStyle('display: none'))
+      ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel('Comments')
           ->setName('comments')
@@ -242,8 +277,14 @@ class ManiphestTaskDetailController extends ManiphestController {
         ManiphestTransactionType::TYPE_OWNER    => 'assign_to',
         ManiphestTransactionType::TYPE_CCS      => 'ccs',
         ManiphestTransactionType::TYPE_PRIORITY => 'priority',
+        ManiphestTransactionType::TYPE_PROJECTS => 'projects',
+        ManiphestTransactionType::TYPE_ATTACH   => 'file',
       ),
       'tokenizers' => array(
+        ManiphestTransactionType::TYPE_PROJECTS => array(
+          'id'    => 'projects-tokenizer',
+          'src'   => '/typeahead/common/projects/',
+        ),
         ManiphestTransactionType::TYPE_OWNER => array(
           'id'    => 'assign-tokenizer',
           'src'   => '/typeahead/common/users/',

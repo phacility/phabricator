@@ -34,7 +34,7 @@ class PhabricatorProjectListController
             'class' => 'small grey button',
             'href' => '/project/view/'.$project->getID().'/',
           ),
-          'View Profile'),
+          'View Project Project Profile'),
       );
     }
 

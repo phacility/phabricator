@@ -59,7 +59,10 @@ class PhabricatorObjectHandle {
   }
 
   public function getFullName() {
-    return $this->fullName;
+    if ($this->fullName !== null) {
+      return $this->fullName;
+    }
+    return $this->getName();
   }
 
   public function setType($type) {

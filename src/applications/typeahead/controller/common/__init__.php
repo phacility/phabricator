@@ -9,6 +9,7 @@
 phutil_require_module('phabricator', 'aphront/response/ajax');
 phutil_require_module('phabricator', 'applications/metamta/storage/mailinglist');
 phutil_require_module('phabricator', 'applications/people/storage/user');
+phutil_require_module('phabricator', 'applications/project/storage/project');
 phutil_require_module('phabricator', 'applications/typeahead/controller/base');
 
 phutil_require_module('phutil', 'utils');

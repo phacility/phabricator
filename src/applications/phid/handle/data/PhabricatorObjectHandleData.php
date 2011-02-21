@@ -167,12 +167,36 @@ class PhabricatorObjectHandleData {
             $handles[$phid] = $handle;
           }
           break;
+        case 'PROJ':
+          $class = 'PhabricatorProject';
+          PhutilSymbolLoader::loadClass($class);
+          $object = newv($class, array());
+
+          $projects = $object->loadAllWhere('phid IN (%Ls)', $phids);
+          $projects = mpull($projects, null, 'getPHID');
+
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            if (empty($projects[$phid])) {
+              $handle->setType(self::TYPE_UNKNOWN);
+              $handle->setName('Unknown Project');
+            } else {
+              $project = $projects[$phid];
+              $handle->setType($type);
+              $handle->setName($project->getName());
+              $handle->setURI('/project/view/'.$project->getID().'/');
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
         default:
           foreach ($phids as $phid) {
             $handle = new PhabricatorObjectHandle();
             $handle->setType($type);
             $handle->setPHID($phid);
             $handle->setName('Unknown Object');
+            $handle->setFullName('An Unknown Object');
             $handles[$phid] = $handle;
           }
           break;

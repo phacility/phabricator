@@ -204,6 +204,29 @@ class ManiphestTransactionDetailView extends AphrontView {
                              'removed: '.$this->renderHandles($removed);
         }
         break;
+      case ManiphestTransactionType::TYPE_PROJECTS:
+        $added = array_diff($new, $old);
+        $removed = array_diff($old, $new);
+        if ($added && !$removed) {
+          $verb = 'Added Project';
+          if (count($added) == 1) {
+            $desc = 'added project '.$this->renderHandles($added);
+          } else {
+            $desc = 'added projects: '.$this->renderHandles($added);
+          }
+        } else if ($removed && !$added) {
+          $verb = 'Removed Project';
+          if (count($removed) == 1) {
+            $desc = 'removed project '.$this->renderHandles($removed);
+          } else {
+            $desc = 'removed projectss: '.$this->renderHandles($removed);
+          }
+        } else {
+          $verb = 'Changed Projects';
+          $desc = 'changed projects, added: '.$this->renderHandles($added).'; '.
+                                  'removed: '.$this->renderHandles($removed);
+        }
+        break;
       case ManiphestTransactionType::TYPE_STATUS:
         if ($new == ManiphestTaskStatus::STATUS_OPEN) {
           if ($old) {
@@ -240,34 +263,51 @@ class ManiphestTransactionDetailView extends AphrontView {
         }
         break;
       case ManiphestTransactionType::TYPE_ATTACH:
-        $old = nonempty($old, array());
-        $new = nonempty($new, array());
+        $old_raw = nonempty($old, array());
+        $new_raw = nonempty($new, array());
 
-        $old = array_keys(idx($old, 'DREV', array()));
-        $new = array_keys(idx($new, 'DREV', array()));
+        foreach (array('DREV', 'FILE') as $type) {
+          $old = array_keys(idx($old_raw, $type, array()));
+          $new = array_keys(idx($new_raw, $type, array()));
+          if ($old != $new) {
+            break;
+          }
+        }
+
         $added = array_diff($new, $old);
         $removed = array_diff($old, $new);
 
         $add_desc = $this->renderHandles($added);
         $rem_desc = $this->renderHandles($removed);
 
+        switch ($type) {
+          case 'DREV':
+            $singular = 'Differential Revision';
+            $plural = 'Differential Revisions';
+            break;
+          case 'FILE':
+            $singular = 'file';
+            $plural = 'files';
+            break;
+        }
+
         if ($added && !$removed) {
           $verb = 'Attached';
           if (count($added) == 1) {
-            $desc = 'attached Differential Revision: '.$add_desc;
+            $desc = 'attached '.$singular.': '.$add_desc;
           } else {
-            $desc = 'attached Differential Revisions: '.$add_desc;
+            $desc = 'attached '.$plural.': '.$add_desc;
           }
         } else if ($removed && !$added) {
           $verb = 'Detached';
           if (count($removed) == 1) {
-            $desc = 'detached Differential Revision: '.$rem_desc;
+            $desc = 'detached '.$singular.': '.$rem_desc;
           } else {
-            $desc = 'detached Differential Revisions: '.$rem_desc;
+            $desc = 'detached '.$plural.': '.$rem_desc;
           }
         } else {
-          $desc = 'changed attached Differential Revisions, added: '.$add_desc.
-                                                         'removed: '.$rem_desc;
+          $desc = 'changed attached '.$plural.', added: '.$add_desc.
+                                              'removed: '.$rem_desc;
         }
         break;
       default:

@@ -27,6 +27,7 @@ class PhabricatorTypeaheadCommonDatasourceController
 
     $need_users = false;
     $need_lists = false;
+    $need_projs = false;
     switch ($this->type) {
       case 'users':
         $need_users = true;
@@ -34,6 +35,9 @@ class PhabricatorTypeaheadCommonDatasourceController
       case 'mailable':
         $need_users = true;
         $need_lists = true;
+        break;
+      case 'projects':
+        $need_projs = true;
         break;
     }
 
@@ -58,6 +62,17 @@ class PhabricatorTypeaheadCommonDatasourceController
           $list->getEmail(),
           $list->getURI(),
           $list->getPHID(),
+        );
+      }
+    }
+
+    if ($need_projs) {
+      $projs = id(new PhabricatorProject())->loadAll();
+      foreach ($projs as $proj) {
+        $data[] = array(
+          $proj->getName(),
+          '/project/view/'.$proj->getID().'/',
+          $proj->getPHID(),
         );
       }
     }
