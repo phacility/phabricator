@@ -130,6 +130,13 @@ class AphrontDefaultApplicationConfiguration
         'diagnose/$' => 'PhabricatorFacebookAuthDiagnosticsController',
       ),
 
+      '/oauth/' => array(
+        '(?P<provider>github|facebook)/' => array(
+          'login/$'     => 'PhabricatorOAuthLoginController',
+          'diagnose/$'  => 'PhabricatorOAuthDiagnosticsController',
+        ),
+      ),
+
       '/xhprof/' => array(
         'profile/(?P<phid>[^/]+)/$' => 'PhabricatorXHProfProfileController',
       ),

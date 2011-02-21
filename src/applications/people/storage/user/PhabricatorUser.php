@@ -28,7 +28,6 @@ class PhabricatorUser extends PhabricatorUserDAO {
   protected $email;
   protected $passwordSalt;
   protected $passwordHash;
-  protected $facebookUID;
   protected $profileImagePHID;
 
   protected $consoleEnabled = 0;

@@ -16,18 +16,26 @@
  * limitations under the License.
  */
 
-class PhabricatorFacebookAuthDiagnosticsController
+class PhabricatorOAuthDiagnosticsController
   extends PhabricatorAuthController {
 
   public function shouldRequireLogin() {
     return false;
   }
 
+  public function willProcessRequest(array $data) {
+    $this->provider = PhabricatorOAuthProvider::newProvider($data['provider']);
+  }
+
   public function processRequest() {
 
-    $auth_enabled = PhabricatorEnv::getEnvConfig('facebook.auth-enabled');
-    $app_id = PhabricatorEnv::getEnvConfig('facebook.application-id');
-    $app_secret = PhabricatorEnv::getEnvConfig('facebook.application-secret');
+    $provider = $this->provider;
+
+
+
+    $auth_enabled   = $provider->isProviderEnabled();
+    $client_id      = $provider->getClientID();
+    $client_secret  = $provider->getClientSecret();
 
     $res_ok = '<strong style="color: #00aa00;">OK</strong>';
     $res_no = '<strong style="color: #aa0000;">NO</strong>';
@@ -48,7 +56,7 @@ class PhabricatorFacebookAuthDiagnosticsController
         'Facebook authentication is enabled.');
     }
 
-    if (!$app_id) {
+    if (!$client_id) {
       $results['facebook.application-id'] = array(
         $res_no,
         null,
@@ -60,11 +68,11 @@ class PhabricatorFacebookAuthDiagnosticsController
     } else {
       $results['facebook.application-id'] = array(
         $res_ok,
-        $app_id,
+        $client_id,
         'Application ID is set.');
     }
 
-    if (!$app_secret) {
+    if (!$client_secret) {
       $results['facebook.application-secret'] = array(
         $res_no,
         null,
@@ -141,8 +149,8 @@ class PhabricatorFacebookAuthDiagnosticsController
     $test_uri = new PhutilURI('https://graph.facebook.com/oauth/access_token');
     $test_uri->setQueryParams(
       array(
-        'client_id'       => $app_id,
-        'client_secret'   => $app_secret,
+        'client_id'       => $client_id,
+        'client_secret'   => $client_secret,
         'grant_type'      => 'client_credentials',
       ));
 

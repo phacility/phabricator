@@ -98,6 +98,7 @@ return array(
     'recaptcha.private-key',
     'phabricator.csrf-key',
     'facebook.application-secret',
+    'github.secret',
   ),
 
 // --  MySQL  --------------------------------------------------------------- //
@@ -185,6 +186,27 @@ return array(
 
   // The Facebook "Application Secret" to use for Facebook API access.
   'facebook.application-secret' => null,
+
+
+// -- Github ---------------------------------------------------------------- //
+
+  // Can users use Github credentials to login to Phabricator?
+  'github.auth-enabled'         => false,
+
+  // The Github "Client ID" to use for Github API access.
+  'github.application-id'       => null,
+
+  // The Github "Secret" to use for Github API access.
+  'github.application-secret'   => null,
+
+
+  // Github Authorize URI. You don't need to change this unless Github changes
+  // its API in the future (this is unlikely).
+  'github.authorize-uri'        => 'https://github.com/login/oauth/authorize',
+
+  // Github Access Token URI. You don't need to change this unless Github
+  // changes its API in the future (this is unlikely).
+  'github.access-token-uri' => 'https://github.com/login/oauth/access_token',
 
 
 // -- Recaptcha ------------------------------------------------------------- //

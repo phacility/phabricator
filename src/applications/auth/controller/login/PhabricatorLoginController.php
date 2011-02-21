@@ -88,38 +88,47 @@ class PhabricatorLoginController extends PhabricatorAuthController {
 //    $panel->setCreateButton('Register New Account', '/login/register/');
     $panel->appendChild($form);
 
-    $fbauth_enabled = PhabricatorEnv::getEnvConfig('facebook.auth-enabled');
-    if ($fbauth_enabled) {
-      $auth_uri = new PhutilURI("https://www.facebook.com/dialog/oauth");
+    $providers = array(
+      PhabricatorOAuthProvider::PROVIDER_FACEBOOK,
+      PhabricatorOAuthProvider::PROVIDER_GITHUB,
+    );
+    foreach ($providers as $provider_key) {
+      $provider = PhabricatorOAuthProvider::newProvider($provider_key);
 
-      $user = $request->getUser();
+      $enabled = $provider->isProviderEnabled();
+      if (!$enabled) {
+        continue;
+      }
 
-      $redirect_uri = PhabricatorEnv::getURI('/facebook-auth/');
-      $app_id = PhabricatorEnv::getEnvConfig('facebook.application-id');
+      $auth_uri       = $provider->getAuthURI();
+      $redirect_uri   = $provider->getRedirectURI();
+      $client_id      = $provider->getClientID();
+      $provider_name  = $provider->getProviderName();
 
       // TODO: In theory we should use 'state' to prevent CSRF, but the total
       // effect of the CSRF attack is that an attacker can cause a user to login
-      // to Phabricator if they're already logged into Facebook. This does not
-      // seem like the most severe threat in the world, and generating CSRF for
-      // logged-out users is vaugely tricky.
+      // to Phabricator if they're already logged into some OAuth provider. This
+      // does not seem like the most severe threat in the world, and generating
+      // CSRF for logged-out users is vaugely tricky.
 
-      $facebook_auth = new AphrontFormView();
-      $facebook_auth
+      $auth_form = new AphrontFormView();
+      $auth_form
         ->setAction($auth_uri)
-        ->addHiddenInput('client_id', $app_id)
+        ->addHiddenInput('client_id', $client_id)
         ->addHiddenInput('redirect_uri', $redirect_uri)
-        ->addHiddenInput('scope', 'email')
         ->setUser($request->getUser())
         ->setMethod('GET')
         ->appendChild(
           '<p class="aphront-form-instructions">Login or register for '.
-          'Phabricator using your Facebook account.</p>')
+          'Phabricator using your '.$provider_name.' account.</p>')
         ->appendChild(
           id(new AphrontFormSubmitControl())
-            ->setValue("Login with Facebook \xC2\xBB"));
+            ->setValue("Login with {$provider_name} \xC2\xBB"));
 
-      $panel->appendChild('<br /><h1>Login or Register with Facebook</h1>');
-      $panel->appendChild($facebook_auth);
+      $panel->appendChild(
+          '<br /><h1>Login or Register with '.$provider_name.'</h1>');
+
+      $panel->appendChild($auth_form);
     }
 
     return $this->buildStandardPageResponse(
