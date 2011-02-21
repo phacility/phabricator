@@ -82,9 +82,6 @@ class ManiphestTransactionSaveController extends ManiphestController {
           $new['FILE'][$phid] = array();
         }
 
-        var_dump($new);
-        die();
-
         $transaction->setNewValue($new);
         break;
       default:
