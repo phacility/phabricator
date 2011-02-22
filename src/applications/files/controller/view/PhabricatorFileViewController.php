@@ -34,14 +34,14 @@ class PhabricatorFileViewController extends PhabricatorFileController {
     if (!$file) {
       return new Aphront404Response();
     }
-    
+
     switch ($this->view) {
       case 'download':
       case 'view':
         $data = $file->loadFileData();
         $response = new AphrontFileResponse();
         $response->setContent($data);
-        
+
         if ($this->view == 'view') {
           if (!$file->isViewableInBrowser()) {
             return new Aphront400Response();
@@ -50,7 +50,7 @@ class PhabricatorFileViewController extends PhabricatorFileController {
         } else {
           $download = true;
         }
-        
+
         if ($download) {
           $mime_type = $file->getMimeType();
         } else {
@@ -58,7 +58,7 @@ class PhabricatorFileViewController extends PhabricatorFileController {
         }
 
         $response->setMimeType($mime_type);
-        
+
         if ($download) {
           $response->setDownload($file->getName());
         }
@@ -68,7 +68,7 @@ class PhabricatorFileViewController extends PhabricatorFileController {
     }
 
     $form = new AphrontFormView();
-    
+
     if ($file->isViewableInBrowser()) {
       $form->setAction('/file/view/'.$file->getPHID().'/');
       $button_name = 'View File';

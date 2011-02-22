@@ -233,7 +233,7 @@ return array(
   // Version string displayed in the footer. You probably should leave this
   // alone.
   'phabricator.version'         => 'UNSTABLE',
-  
+
 
 // -- Files ----------------------------------------------------------------- //
 

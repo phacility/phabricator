@@ -68,7 +68,7 @@ class AphrontFileResponse extends AphrontResponse {
 
     if (strlen($this->getDownload())) {
       $headers[] = array('X-Download-Options', 'noopen');
-      
+
       $filename = $this->getDownload();
       $headers[] = array(
         'Content-Disposition',

@@ -53,7 +53,7 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
         'Edit Profile');
     }
 
-    $fbuid = $user->getFacebookUID();
+    $fbuid = null; // TODO: pull from OAuth stuff
     if ($fbuid) {
       $links[] = phutil_render_tag(
         'a',

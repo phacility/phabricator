@@ -34,7 +34,7 @@ class PhabricatorFileListController extends PhabricatorFileController {
           'View');
       } else {
         $view_button = null;
-      } 
+      }
       $rows[] = array(
         phutil_escape_html($file->getPHID()),
         phutil_escape_html($file->getName()),
