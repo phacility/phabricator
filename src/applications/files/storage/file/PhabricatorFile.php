@@ -174,5 +174,19 @@ class PhabricatorFile extends PhabricatorFileDAO {
   public function getViewURI() {
     return PhabricatorFileURI::getViewURIForPHID($this->getPHID());
   }
+  
+  public function isViewableInBrowser() {
+    return ($this->getViewableMimeType() !== null);
+  }
+    
+  public function getViewableMimeType() {
+    $mime_map = PhabricatorEnv::getEnvConfig('files.viewable-mime-types');
+
+    $mime_type = $this->getMimeType();
+    $mime_parts = explode(';', $mime_type);
+    $mime_type = reset($mime_parts);
+  
+    return idx($mime_map, $mime_type);
+  }
 
 }

@@ -34,15 +34,32 @@ class PhabricatorFileViewController extends PhabricatorFileController {
     if (!$file) {
       return new Aphront404Response();
     }
-
+    
     switch ($this->view) {
       case 'download':
       case 'view':
         $data = $file->loadFileData();
         $response = new AphrontFileResponse();
         $response->setContent($data);
-        $response->setMimeType($file->getMimeType());
-        if ($this->view == 'download') {
+        
+        if ($this->view == 'view') {
+          if (!$file->isViewableInBrowser()) {
+            return new Aphront400Response();
+          }
+          $download = false;
+        } else {
+          $download = true;
+        }
+        
+        if ($download) {
+          $mime_type = $file->getMimeType();
+        } else {
+          $mime_type = $file->getViewableMimeType();
+        }
+
+        $response->setMimeType($mime_type);
+        
+        if ($download) {
           $response->setDownload($file->getName());
         }
         return $response;
@@ -51,7 +68,14 @@ class PhabricatorFileViewController extends PhabricatorFileController {
     }
 
     $form = new AphrontFormView();
-    $form->setAction('/file/view/'.$file->getPHID().'/');
+    
+    if ($file->isViewableInBrowser()) {
+      $form->setAction('/file/view/'.$file->getPHID().'/');
+      $button_name = 'View File';
+    } else {
+      $form->setAction('/file/download/'.$file->getPHID().'/');
+      $button_name = 'Download File';
+    }
     $form->setUser($this->getRequest()->getUser());
     $form
       ->appendChild(
@@ -96,7 +120,7 @@ class PhabricatorFileViewController extends PhabricatorFileController {
           ->setValue($file->getStorageHandle()))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('View File'));
+          ->setValue($button_name));
 
     $panel = new AphrontPanelView();
     $panel->setHeader('File Info - '.$file->getName());

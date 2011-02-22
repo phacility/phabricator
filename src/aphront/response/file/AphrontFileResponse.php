@@ -26,6 +26,10 @@ class AphrontFileResponse extends AphrontResponse {
   private $download;
 
   public function setDownload($download) {
+    $download = preg_replace('/[^A-Za-z0-9_.-]/', '_', $download);
+    if (!strlen($download)) {
+      $download = 'untitled_document.txt';
+    }
     $this->download = $download;
     return $this;
   }
@@ -55,12 +59,20 @@ class AphrontFileResponse extends AphrontResponse {
   public function getHeaders() {
     $headers = array(
       array('Content-Type', $this->getMimeType()),
+      // Without this, IE can decide that we surely meant "text/html" when
+      // delivering another content type since, you know, it looks like it's
+      // probably an HTML document. This closes the security hole that policy
+      // creates.
+      array('X-Content-Type-Options', 'nosniff'),
     );
 
-    if ($this->getDownload()) {
+    if (strlen($this->getDownload())) {
+      $headers[] = array('X-Download-Options', 'noopen');
+      
+      $filename = $this->getDownload();
       $headers[] = array(
         'Content-Disposition',
-        'attachment; filename='.$this->getDownload(),
+        'attachment; filename='.$filename,
       );
     }
 

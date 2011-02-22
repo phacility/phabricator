@@ -233,5 +233,25 @@ return array(
   // Version string displayed in the footer. You probably should leave this
   // alone.
   'phabricator.version'         => 'UNSTABLE',
+  
+
+// -- Files ----------------------------------------------------------------- //
+
+  // Lists which uploaded file types may be viewed in the browser. If a file
+  // has a mime type which does not appear in this list, it will always be
+  // downloaded instead of displayed. This is a security consideration: if a
+  // user uploads a file of type "text/html" and it is displayed as
+  // "text/html", they can eaily execute XSS attacks. This is also a usability
+  // consideration, since browsers tend to freak out when viewing enormous
+  // binary files.
+  //
+  // The keys in this array are viewable mime types; the values are the mime
+  // types they will be delivered as when they are viewed in the browser.
+  'files.viewable-mime-types'   => array(
+    'image/jpeg'  => 'image/jpeg',
+    'image/jpg'   => 'image/jpg',
+    'image/png'   => 'image/png',
+    'text/plain'  => 'text/plain; charset=utf-8',
+  ),
 
 );

@@ -24,6 +24,17 @@ class PhabricatorFileListController extends PhabricatorFileController {
 
     $rows = array();
     foreach ($files as $file) {
+      if ($file->isViewableInBrowser()) {
+        $view_button = phutil_render_tag(
+          'a',
+          array(
+            'class' => 'small button grey',
+            'href'  => '/file/view/'.$file->getPHID().'/',
+          ),
+          'View');
+      } else {
+        $view_button = null;
+      } 
       $rows[] = array(
         phutil_escape_html($file->getPHID()),
         phutil_escape_html($file->getName()),
@@ -35,13 +46,7 @@ class PhabricatorFileListController extends PhabricatorFileController {
             'href'  => '/file/info/'.$file->getPHID().'/',
           ),
           'Info'),
-        phutil_render_tag(
-          'a',
-          array(
-            'class' => 'small button grey',
-            'href'  => '/file/view/'.$file->getPHID().'/',
-          ),
-          'View'),
+        $view_button,
         phutil_render_tag(
           'a',
           array(
