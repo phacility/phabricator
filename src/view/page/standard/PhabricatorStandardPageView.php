@@ -156,7 +156,12 @@ class PhabricatorStandardPageView extends AphrontPageView {
       $user = $request->getUser();
       if ($user->getPHID()) {
         $login_stuff =
-          'Logged in as '.phutil_escape_html($user->getUsername()).
+          'Logged in as '.phutil_render_tag(
+            'a',
+            array(
+              'href' => '/p/'.$user->getUsername().'/',
+            ),
+            phutil_escape_html($user->getUsername())).
           ' &middot; '.
           '<a href="/settings/">Settings</a>'.
           ' &middot; '.

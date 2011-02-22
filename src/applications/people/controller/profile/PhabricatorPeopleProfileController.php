@@ -53,14 +53,34 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
         'Edit Profile');
     }
 
-    $fbuid = null; // TODO: pull from OAuth stuff
-    if ($fbuid) {
-      $links[] = phutil_render_tag(
-        'a',
-        array(
-          'href' => 'http://www.facebook.com/profile.php?id='.$fbuid,
-        ),
-        'Facebook Profile');
+    $oauths = id(new PhabricatorUserOAuthInfo())->loadAllWhere(
+      'userID = %d',
+      $user->getID());
+    $oauths = mpull($oauths, null, 'getOAuthProvider');
+
+    $providers = PhabricatorOAuthProvider::getAllProviders();
+    foreach ($providers as $provider) {
+      if (!$provider->isProviderEnabled()) {
+        continue;
+      }
+
+      $provider_key = $provider->getProviderKey();
+
+      if (!isset($oauths[$provider_key])) {
+        continue;
+      }
+
+      $name = $provider->getProviderName().' Profile';
+      $href = $oauths[$provider_key]->getAccountURI();
+
+      if ($href) {
+        $links[] = phutil_render_tag(
+          'a',
+          array(
+            'href' => $href,
+          ),
+          phutil_escape_html($name));
+      }
     }
 
     foreach ($links as $k => $link) {
