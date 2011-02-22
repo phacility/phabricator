@@ -27,8 +27,15 @@ function phabricator_format_relative_time($duration) {
 function phabricator_format_timestamp($epoch) {
   $difference = (time() - $epoch);
 
+  if ($difference < 0) {
+    $difference = -$difference;
+    $relative = 'from now';
+  } else {
+    $relative = 'ago';
+  }
+
   if ($difference < 60 * 60 * 24) {
-    return phabricator_format_relative_time($difference).' ago';
+    return phabricator_format_relative_time($difference).' '.$relative;
   } else if (date('Y') == date('Y', $epoch)) {
     return date('M j, g:i A', $epoch);
   } else {
@@ -43,7 +50,7 @@ function phabricator_format_units_generic(
   $precision  = 0,
   &$remainder = null) {
 
-    $is_negative = false;
+  $is_negative = false;
   if ($n < 0) {
     $is_negative = true;
     $n = abs($n);

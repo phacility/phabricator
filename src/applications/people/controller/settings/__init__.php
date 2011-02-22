@@ -25,6 +25,7 @@ phutil_require_module('phabricator', 'view/form/control/textarea');
 phutil_require_module('phabricator', 'view/form/error');
 phutil_require_module('phabricator', 'view/layout/panel');
 phutil_require_module('phabricator', 'view/layout/sidenav');
+phutil_require_module('phabricator', 'view/utils');
 
 phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');

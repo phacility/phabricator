@@ -348,8 +348,15 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
         ->appendChild(
           id(new AphrontFormStaticControl())
             ->setLabel($provider_name.' ID')
-            ->setValue($oauth_info->getOAuthUID()));
-
+            ->setValue($oauth_info->getOAuthUID()))
+        ->appendChild(
+          id(new AphrontFormStaticControl())
+            ->setLabel($provider_name.' Name')
+            ->setValue($oauth_info->getAccountName()))
+        ->appendChild(
+          id(new AphrontFormStaticControl())
+            ->setLabel($provider_name.' URI')
+            ->setValue($oauth_info->getAccountURI()));
 
       $unlink = 'Unlink '.$provider_name.' Account';
       $unlink_form = new AphrontFormView();
@@ -363,6 +370,45 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
           id(new AphrontFormSubmitControl())
             ->addCancelButton('/oauth/'.$provider_key.'/unlink/', $unlink));
       $forms['Unlink Account'] = $unlink_form;
+
+      $expires = $oauth_info->getTokenExpires();
+      if ($expires) {
+        if ($expires <= time()) {
+          $expires = "Expired";
+        } else {
+          $expires = phabricator_format_timestamp($expires);
+        }
+      } else {
+        $expires = 'No Information Available';
+      }
+
+      $scope = $oauth_info->getTokenScope();
+      if (!$scope) {
+        $scope = 'No Information Available';
+      }
+
+      $status = $oauth_info->getTokenStatus();
+      $status = PhabricatorUserOAuthInfo::getReadableTokenStatus($status);
+
+      $token_form = new AphrontFormView();
+      $token_form
+        ->setUser($user)
+        ->appendChild(
+          '<p class="aphront-from-instructions">insert rap about tokens</p>')
+        ->appendChild(
+          id(new AphrontFormStaticControl())
+            ->setLabel('Token Status')
+            ->setValue($status))
+        ->appendChild(
+          id(new AphrontFormStaticControl())
+            ->setLabel('Expires')
+            ->setValue($expires))
+        ->appendChild(
+          id(new AphrontFormStaticControl())
+            ->setLabel('Scope')
+            ->setValue($scope));
+
+      $forms['Account Token Information'] = $token_form;
     }
 
     $panel = new AphrontPanelView();

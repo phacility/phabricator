@@ -21,6 +21,7 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
   private $provider;
   private $userID;
   private $accessToken;
+  private $tokenExpires;
 
   public function shouldRequireLogin() {
     return false;
@@ -91,6 +92,13 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
       if (!$token) {
         return $this->buildErrorResponse(new PhabricatorOAuthFailureView());
       }
+
+      if (idx($data, 'expires')) {
+        $this->tokenExpires = time() + $data['expires'];
+      }
+
+    } else {
+      $this->tokenExpires = $request->getInt('expires');
     }
 
     $userinfo_uri = new PhutilURI($provider->getUserInfoURI());
@@ -148,6 +156,7 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
           '<p>Link your '.$provider_name.' account to your Phabricator '.
           'account?</p>');
         $dialog->addHiddenInput('token', $token);
+        $dialog->addHiddenInput('expires', $this->tokenExpires);
         $dialog->addSubmitButton('Link Accounts');
         $dialog->addCancelButton('/settings/page/'.$provider_key.'/');
 
@@ -156,8 +165,7 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
 
       $oauth_info = new PhabricatorUserOAuthInfo();
       $oauth_info->setUserID($current_user->getID());
-      $oauth_info->setOAuthProvider($provider_key);
-      $oauth_info->setOAuthUID($user_id);
+      $this->configureOAuthInfo($oauth_info);
       $oauth_info->save();
 
       return id(new AphrontRedirectResponse())
@@ -170,6 +178,10 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
     if ($known_oauth) {
       $known_user = id(new PhabricatorUser())->load($known_oauth->getUserID());
       $session_key = $known_user->establishSession('web');
+
+      $this->configureOAuthInfo($known_oauth);
+      $known_oauth->save();
+
       $request->setCookie('phusr', $known_user->getUsername());
       $request->setCookie('phsid', $session_key);
       return id(new AphrontRedirectResponse())
@@ -184,31 +196,17 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
       $known_email = id(new PhabricatorUser())
         ->loadOneWhere('email = %s', $oauth_email);
       if ($known_email) {
-        $known_oauth = id(new PhabricatorUserOAuthInfo())->loadOneWhere(
-          'userID = %d AND oauthProvider = %s',
-          $known_email->getID(),
-          $provider->getProviderKey());
-        if ($known_oauth) {
-          $provider_name = $provider->getName();
-          throw new Exception(
-            "The email associated with the ".$provider_name." account you ".
-            "just logged in with is already associated with another ".
-            "Phabricator account which is, in turn, associated with a ".
-            $provider_name." account different from the one you just logged ".
-            "in with.");
-        }
+        $dialog = new AphrontDialogView();
+        $dialog->setUser($current_user);
+        $dialog->setTitle('Already Linked to Another Account');
+        $dialog->appendChild(
+          '<p>The '.$provider_name.' account you just authorized has an '.
+          'email address which is already in use by another Phabricator '.
+          'account. To link the accounts, log in to your Phabricator '.
+          'account and then go to Settings.</p>');
+        $dialog->addCancelButton('/login/');
 
-        $oauth_info = new PhabricatorUserOAuthInfo();
-        $oauth_info->setUserID($known_email->getID());
-        $oauth_info->setOAuthProvider($provider->getProviderKey());
-        $oauth_info->setOAuthUID($user_id);
-        $oauth_info->save();
-
-        $session_key = $known_email->establishSession('web');
-        $request->setCookie('phusr', $known_email->getUsername());
-        $request->setCookie('phsid', $session_key);
-        return id(new AphrontRedirectResponse())
-          ->setURI('/');
+        return id(new AphrontDialogResponse())->setDialog($dialog);
       }
     }
 
@@ -279,8 +277,7 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
 
           $oauth_info = new PhabricatorUserOAuthInfo();
           $oauth_info->setUserID($user->getID());
-          $oauth_info->setOAuthProvider($provider->getProviderKey());
-          $oauth_info->setOAuthUID($user_id);
+          $this->configureOAuthInfo($oauth_info);
           $oauth_info->save();
 
           $session_key = $user->establishSession('web');
@@ -312,6 +309,7 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
     $form = new AphrontFormView();
     $form
       ->addHiddenInput('token', $token)
+      ->addHiddenInput('expires', $this->tokenExpires)
       ->setUser($request->getUser())
       ->setAction($provider->getRedirectURI())
       ->appendChild(
@@ -410,8 +408,45 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
     return null;
   }
 
+  private function retrieveAccountURI() {
+    switch ($this->provider->getProviderKey()) {
+      case PhabricatorOAuthProvider::PROVIDER_FACEBOOK:
+        return $this->userData['link'];
+      case PhabricatorOAuthProvider::PROVIDER_GITHUB:
+        $username = $this->retrieveUsernameSuggestion();
+        if ($username) {
+          return 'https://github.com/'.$username;
+        }
+        return null;
+    }
+    return null;
+  }
+
   private function retreiveRealNameSuggestion() {
     return $this->userData['name'];
+  }
+
+  private function configureOAuthInfo(PhabricatorUserOAuthInfo $oauth_info) {
+    $provider = $this->provider;
+
+    $oauth_info->setOAuthProvider($provider->getProviderKey());
+    $oauth_info->setOAuthUID($this->retrieveUserID());
+    $oauth_info->setAccountURI($this->retrieveAccountURI());
+    $oauth_info->setAccountName($this->retrieveUserNameSuggestion());
+
+    $oauth_info->setToken($this->accessToken);
+    $oauth_info->setTokenStatus(PhabricatorUserOAuthInfo::TOKEN_STATUS_GOOD);
+
+    // If we have out-of-date expiration info, just clear it out. Then replace
+    // it with good info if the provider gave it to us.
+    $expires = $oauth_info->getTokenExpires();
+    if ($expires <= time()) {
+      $expires = null;
+    }
+    if ($this->tokenExpires) {
+      $expires = $this->tokenExpires;
+    }
+    $oauth_info->setTokenExpires($expires);
   }
 
 }
