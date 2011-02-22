@@ -33,9 +33,18 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
       'account'     => 'Account',
       'email'       => 'Email',
 //      'password'    => 'Password',
-//      'facebook'    => 'Facebook Account',
       'arcanist'    => 'Arcanist Certificate',
     );
+
+    $oauth_providers = PhabricatorOAuthProvider::getAllProviders();
+    foreach ($oauth_providers as $provider) {
+      if (!$provider->isProviderEnabled()) {
+        continue;
+      }
+      $key = $provider->getProviderKey();
+      $name = $provider->getProviderName();
+      $pages[$key] = $name.' Account';
+    }
 
     if (empty($pages[$this->page])) {
       $this->page = key($pages);
@@ -103,7 +112,10 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
         $content = $this->renderEmailForm();
         break;
       default:
-        $content = 'derp derp';
+        if (empty($pages[$this->page])) {
+          return new Aphront404Response();
+        }
+        $content = $this->renderOAuthForm($oauth_providers[$this->page]);
         break;
     }
 
@@ -244,7 +256,6 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-
     if ($request->getStr('saved')) {
       $notice = new AphrontErrorView();
       $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
@@ -276,6 +287,97 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
     $panel->appendChild($form);
 
     return $notice.$panel->render();
+  }
+
+  private function renderOAuthForm(PhabricatorOAuthProvider $provider) {
+
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $notice = null;
+
+    $provider_name = $provider->getProviderName();
+    $provider_key = $provider->getProviderKey();
+
+    $oauth_info = id(new PhabricatorUserOAuthInfo())->loadOneWhere(
+      'userID = %d AND oauthProvider = %s',
+      $user->getID(),
+      $provider->getProviderKey());
+
+    $form = new AphrontFormView();
+    $form
+      ->setUser($user);
+
+    $forms = array();
+    $forms[] = $form;
+    if (!$oauth_info) {
+      $form
+        ->appendChild(
+          '<p class="aphront-form-instructions">There is currently no '.
+          $provider_name.' account linked to your Phabricator account. You '.
+          'can link an account, which will allow you to use it to log into '.
+          'Phabricator.</p>');
+
+      switch ($provider_key) {
+        case PhabricatorOAuthProvider::PROVIDER_GITHUB:
+          $form->appendChild(
+            '<p class="aphront-form-instructions">Additionally, you must '.
+            'link your Github account before Phabricator can access any '.
+            'information about hosted repositories.</p>');
+          break;
+      }
+
+      $auth_uri = $provider->getAuthURI();
+      $client_id = $provider->getClientID();
+      $redirect_uri = $provider->getRedirectURI();
+
+      $form
+        ->setAction($auth_uri)
+        ->setMethod('GET')
+        ->addHiddenInput('redirect_uri', $redirect_uri)
+        ->addHiddenInput('client_id', $client_id)
+        ->appendChild(
+          id(new AphrontFormSubmitControl())
+            ->setValue('Link '.$provider_name." Account \xC2\xBB"));
+    } else {
+      $form
+        ->appendChild(
+          '<p class="aphront-form-instructions">Your account is linked with '.
+          'a '.$provider_name.' account. You may use your '.$provider_name.' '.
+          'credentials to log into Phabricator.</p>')
+        ->appendChild(
+          id(new AphrontFormStaticControl())
+            ->setLabel($provider_name.' ID')
+            ->setValue($oauth_info->getOAuthUID()));
+
+
+      $unlink = 'Unlink '.$provider_name.' Account';
+      $unlink_form = new AphrontFormView();
+      $unlink_form
+        ->setUser($user)
+        ->appendChild(
+          '<p class="aphront-form-instructions">You may unlink this account '.
+          'from your '.$provider_name.' account. This will prevent you from '.
+          'logging in with your '.$provider_name.' credentials.</p>')
+        ->appendChild(
+          id(new AphrontFormSubmitControl())
+            ->addCancelButton('/oauth/'.$provider_key.'/unlink/', $unlink));
+      $forms['Unlink Account'] = $unlink_form;
+    }
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader($provider_name.' Account Settings');
+    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    foreach ($forms as $name => $form) {
+      if ($name) {
+        $panel->appendChild('<br /><br /><h1>'.$name.'</h1>');
+      }
+      $panel->appendChild($form);
+    }
+
+    return $notice.$panel->render();
+
+
   }
 
 }

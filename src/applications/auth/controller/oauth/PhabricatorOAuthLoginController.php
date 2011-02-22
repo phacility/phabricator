@@ -32,16 +32,14 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
 
   public function processRequest() {
     $current_user = $this->getRequest()->getUser();
-    if ($current_user->getPHID()) {
-      // If we're already logged in, ignore everything going on here. TODO:
-      // restore account linking.
-      return id(new AphrontRedirectResponse())->setURI('/');
-    }
 
     $provider = $this->provider;
     if (!$provider->isProviderEnabled()) {
       return new Aphront400Response();
     }
+
+    $provider_name = $provider->getProviderName();
+    $provider_key = $provider->getProviderKey();
 
     $request = $this->getRequest();
 
@@ -115,12 +113,60 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
 
     $user_id = $this->retrieveUserID();
 
-    // Login with known auth.
-
     $known_oauth = id(new PhabricatorUserOAuthInfo())->loadOneWhere(
       'oauthProvider = %s and oauthUID = %s',
       $provider->getProviderKey(),
       $user_id);
+
+    if ($current_user->getPHID()) {
+
+      if ($known_oauth) {
+        if ($known_oauth->getUserID() != $current_user->getID()) {
+          $dialog = new AphrontDialogView();
+          $dialog->setUser($current_user);
+          $dialog->setTitle('Already Linked to Another Account');
+          $dialog->appendChild(
+            '<p>The '.$provider_name.' account you just authorized '.
+            'is already linked to another Phabricator account. Before you can '.
+            'associate your '.$provider_name.' account with this Phabriactor '.
+            'account, you must unlink it from the Phabricator account it is '.
+            'currently linked to.</p>');
+          $dialog->addCancelButton('/settings/page/'.$provider_key.'/');
+
+          return id(new AphrontDialogResponse())->setDialog($dialog);
+        } else {
+          return id(new AphrontRedirectResponse())
+            ->setURI('/settings/page/'.$provider_key.'/');
+        }
+      }
+
+      if (!$request->isDialogFormPost()) {
+        $dialog = new AphrontDialogView();
+        $dialog->setUser($current_user);
+        $dialog->setTitle('Link '.$provider_name.' Account');
+        $dialog->appendChild(
+          '<p>Link your '.$provider_name.' account to your Phabricator '.
+          'account?</p>');
+        $dialog->addHiddenInput('token', $token);
+        $dialog->addSubmitButton('Link Accounts');
+        $dialog->addCancelButton('/settings/page/'.$provider_key.'/');
+
+        return id(new AphrontDialogResponse())->setDialog($dialog);
+      }
+
+      $oauth_info = new PhabricatorUserOAuthInfo();
+      $oauth_info->setUserID($current_user->getID());
+      $oauth_info->setOAuthProvider($provider_key);
+      $oauth_info->setOAuthUID($user_id);
+      $oauth_info->save();
+
+      return id(new AphrontRedirectResponse())
+        ->setURI('/settings/page/'.$provider_key.'/');
+    }
+
+
+    // Login with known auth.
+
     if ($known_oauth) {
       $known_user = id(new PhabricatorUser())->load($known_oauth->getUserID());
       $session_key = $known_user->establishSession('web');

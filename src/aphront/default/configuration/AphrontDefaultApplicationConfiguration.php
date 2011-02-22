@@ -134,6 +134,7 @@ class AphrontDefaultApplicationConfiguration
         '(?P<provider>github|facebook)/' => array(
           'login/$'     => 'PhabricatorOAuthLoginController',
           'diagnose/$'  => 'PhabricatorOAuthDiagnosticsController',
+          'unlink/$'    => 'PhabricatorOAuthUnlinkController',
         ),
       ),
 

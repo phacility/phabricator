@@ -6,16 +6,20 @@
 
 
 
+phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'aphront/response/dialog');
 phutil_require_module('phabricator', 'aphront/response/redirect');
+phutil_require_module('phabricator', 'applications/auth/oauth/provider/base');
 phutil_require_module('phabricator', 'applications/files/storage/file');
 phutil_require_module('phabricator', 'applications/files/uri');
 phutil_require_module('phabricator', 'applications/people/controller/base');
 phutil_require_module('phabricator', 'applications/people/storage/user');
+phutil_require_module('phabricator', 'applications/people/storage/useroauthinfo');
 phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'storage/queryfx');
 phutil_require_module('phabricator', 'view/dialog');
 phutil_require_module('phabricator', 'view/form/base');
+phutil_require_module('phabricator', 'view/form/control/static');
 phutil_require_module('phabricator', 'view/form/control/submit');
 phutil_require_module('phabricator', 'view/form/control/textarea');
 phutil_require_module('phabricator', 'view/form/error');

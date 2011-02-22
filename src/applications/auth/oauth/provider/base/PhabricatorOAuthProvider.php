@@ -57,7 +57,7 @@ abstract class PhabricatorOAuthProvider {
     );
     $providers = array();
     foreach ($all as $provider) {
-      $providers[] = self::newProvider($provider);
+      $providers[$provider] = self::newProvider($provider);
     }
     return $providers;
   }

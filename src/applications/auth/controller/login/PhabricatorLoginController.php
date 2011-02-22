@@ -25,6 +25,11 @@ class PhabricatorLoginController extends PhabricatorAuthController {
   public function processRequest() {
     $request = $this->getRequest();
 
+    if ($request->getUser()->getPHID()) {
+      // Kick the user out if they're already logged in.
+      return id(new AphrontRedirectResponse())->setURI('/');
+    }
+
     $error = false;
     $username = $request->getCookie('phusr');
     if ($request->isFormPost()) {
