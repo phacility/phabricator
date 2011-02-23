@@ -54,4 +54,8 @@ class PhabricatorOAuthProviderGithub extends PhabricatorOAuthProvider {
     return 'https://github.com/api/v2/json/user/show';
   }
 
+  public function getMinimumScope() {
+    return null;
+  }
+
 }

@@ -109,6 +109,7 @@ class PhabricatorLoginController extends PhabricatorAuthController {
       $redirect_uri   = $provider->getRedirectURI();
       $client_id      = $provider->getClientID();
       $provider_name  = $provider->getProviderName();
+      $minimum_scope  = $provider->getMinimumScope();
 
       // TODO: In theory we should use 'state' to prevent CSRF, but the total
       // effect of the CSRF attack is that an attacker can cause a user to login
@@ -121,6 +122,7 @@ class PhabricatorLoginController extends PhabricatorAuthController {
         ->setAction($auth_uri)
         ->addHiddenInput('client_id', $client_id)
         ->addHiddenInput('redirect_uri', $redirect_uri)
+        ->addHiddenInput('scope', $minimum_scope)
         ->setUser($request->getUser())
         ->setMethod('GET')
         ->appendChild(

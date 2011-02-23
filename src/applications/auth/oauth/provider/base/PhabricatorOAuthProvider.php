@@ -30,6 +30,7 @@ abstract class PhabricatorOAuthProvider {
   abstract public function getAuthURI();
   abstract public function getTokenURI();
   abstract public function getUserInfoURI();
+  abstract public function getMinimumScope();
 
   public function __construct() {
 

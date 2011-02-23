@@ -54,4 +54,8 @@ class PhabricatorOAuthProviderFacebook extends PhabricatorOAuthProvider {
     return 'https://graph.facebook.com/me';
   }
 
+  public function getMinimumScope() {
+    return 'email';
+  }
+
 }
