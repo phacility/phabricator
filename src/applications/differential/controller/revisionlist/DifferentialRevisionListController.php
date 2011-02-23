@@ -27,6 +27,7 @@ class DifferentialRevisionListController extends DifferentialController {
   public function processRequest() {
 
     $filters = array(
+      'Your Revisions',
       'active' => array(
         'name'  => 'Active Revisions',
         'queries' => array(
@@ -49,7 +50,7 @@ class DifferentialRevisionListController extends DifferentialController {
         'queries' => array(
           array(
             'query' => DifferentialRevisionListData::QUERY_OPEN_OWNED,
-            'header' => 'Open Revisions',
+            'header' => 'Your Open Revisions',
           ),
         ),
       ),
@@ -58,7 +59,7 @@ class DifferentialRevisionListController extends DifferentialController {
         'queries' => array(
           array(
             'query' => DifferentialRevisionListData::QUERY_OPEN_REVIEWER,
-            'header' => 'Open Reviews',
+            'header' => 'Your Open Reviews',
           ),
         ),
       ),
@@ -67,7 +68,7 @@ class DifferentialRevisionListController extends DifferentialController {
         'queries' => array(
           array(
             'query' => DifferentialRevisionListData::QUERY_OWNED,
-            'header' => 'All Revisions',
+            'header' => 'Your Revisions',
           ),
         ),
       ),
@@ -76,7 +77,18 @@ class DifferentialRevisionListController extends DifferentialController {
         'queries' => array(
           array(
             'query' => DifferentialRevisionListData::QUERY_OWNED_OR_REVIEWER,
-            'header' => 'All Revisions and Reviews',
+            'header' => 'Your Revisions and Reviews',
+          ),
+        ),
+      ),
+      '<hr />',
+      'All Revisions',
+      'allopen' => array(
+        'name' => 'Open',
+        'queries' => array(
+          array(
+            'query' => DifferentialRevisionListData::QUERY_ALL_OPEN,
+            'header' => 'All Open Revisions',
           ),
         ),
       ),
@@ -101,7 +113,17 @@ class DifferentialRevisionListController extends DifferentialController {
     }
 
     $side_nav = new AphrontSideNavView();
+
+
     foreach ($filters as $filter_name => $filter_desc) {
+      if (is_int($filter_name)) {
+        $side_nav->addNavItem(
+          phutil_render_tag(
+            'span',
+            array(),
+            $filter_desc));
+        continue;
+      }
       $selected = ($filter_name == $this->filter);
       $side_nav->addNavItem(
         phutil_render_tag(
