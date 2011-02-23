@@ -95,7 +95,7 @@ class DifferentialRevisionListController extends DifferentialController {
     );
 
     if (empty($filters[$this->filter])) {
-      $this->filter = key($filters);
+      $this->filter = 'active';
     }
 
     $request = $this->getRequest();
