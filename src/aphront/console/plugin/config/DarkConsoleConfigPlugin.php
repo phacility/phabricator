@@ -27,19 +27,50 @@ class DarkConsoleConfigPlugin extends DarkConsolePlugin {
   }
 
   public function generateData() {
-    return PhabricatorEnv::getAllConfigKeys();
+    $lib_data = array();
+    foreach (PhutilBootloader::getInstance()->getAllLibraries() as $lib) {
+      $lib_data[$lib] = phutil_get_library_root($lib);
+    }
+    return array(
+      'config' => PhabricatorEnv::getAllConfigKeys(),
+      'libraries' => $lib_data,
+    );
   }
 
   public function render() {
 
     $data = $this->getData();
-    ksort($data);
-    
+
+    $lib_data = $data['libraries'];
+
+    $lib_rows = array();
+    foreach ($lib_data as $key => $value) {
+      $lib_rows[] = array(
+        phutil_escape_html($key),
+        phutil_escape_html($value),
+      );
+    }
+
+    $lib_table = new AphrontTableView($lib_rows);
+    $lib_table->setHeaders(
+      array(
+        'Library',
+        'Loaded From',
+      ));
+    $lib_table->setColumnClasses(
+      array(
+        'header',
+        'wide wrap',
+      ));
+
+    $config_data = $data['config'];
+    ksort($config_data);
+
     $mask = PhabricatorEnv::getEnvConfig('darkconsole.config-mask');
     $mask = array_fill_keys($mask, true);
-    
+
     $rows = array();
-    foreach ($data as $key => $value) {
+    foreach ($config_data as $key => $value) {
       if (empty($mask[$key])) {
         $display_value = is_array($value) ? json_encode($value) : $value;
         $display_value = phutil_escape_html($display_value);
@@ -64,6 +95,6 @@ class DarkConsoleConfigPlugin extends DarkConsolePlugin {
         'wide wrap',
       ));
 
-    return $table->render();
+    return $lib_table->render().$table->render();
   }
 }

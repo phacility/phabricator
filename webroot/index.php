@@ -18,21 +18,28 @@
 
 error_reporting(E_ALL | E_STRICT);
 
-$env = getenv('PHABRICATOR_ENV');
+$env = getenv('PHABRICATOR_ENV'); // Apache
 if (!$env) {
-  header('Content-Type: text/plain');
-  die(
-    "CONFIG ERROR: ".
+  if (isset($_SERVER['PHABRICATOR_ENV'])) {
+    $env = $_SERVER['PHABRICATOR_ENV']; // HipHop
+  }
+}
+
+if (!$env) {
+  phabricator_fatal_config_error(
     "The 'PHABRICATOR_ENV' environmental variable is not defined. Modify ".
     "your httpd.conf to include 'SetEnv PHABRICATOR_ENV <env>', where '<env>' ".
     "is one of 'development', 'production', or a custom environment.");
 }
 
 if (!function_exists('mysql_connect')) {
-  header('Content-Type: text/plain');
-  die(
-    "CONFIG ERROR: ".
-    "the PHP MySQL extension is not installed. This extension is required.");
+  phabricator_fatal_config_error(
+    "The PHP MySQL extension is not installed. This extension is required.");
+}
+
+if (!isset($_REQUEST['__path__'])) {
+  phabricator_fatal_config_error(
+    "__path__ is not set. Your rewrite rules are not configured correctly.");
 }
 
 require_once dirname(dirname(__FILE__)).'/conf/__init_conf__.php';
@@ -52,18 +59,20 @@ phutil_require_module('phabricator', 'aphront/console/plugin/errorlog/api');
 set_error_handler(array('DarkConsoleErrorLogPluginAPI', 'handleError'));
 set_exception_handler(array('DarkConsoleErrorLogPluginAPI', 'handleException'));
 
+foreach (PhabricatorEnv::getEnvConfig('load-libraries') as $library) {
+  phutil_load_library($library);
+}
+
+
 $host = $_SERVER['HTTP_HOST'];
 $path = $_REQUEST['__path__'];
 
-// Based on the host and path, choose which application should serve the
-// request. The default is the Aphront demo, but you'll want to replace this
-// with whichever other applications you're running.
-
 switch ($host) {
   default:
-    phutil_require_module('phutil', 'autoload');
-    phutil_autoload_class('AphrontDefaultApplicationConfiguration');
-    $application = new AphrontDefaultApplicationConfiguration();
+    $config_key = 'aphront.default-application-configuration-class';
+    $config_class = PhabricatorEnv::getEnvConfig($config_key);
+    PhutilSymbolLoader::loadClass($config_class);
+    $application = newv($config_class, array());
     break;
 }
 
@@ -103,6 +112,7 @@ foreach ($headers as $header) {
   header("{$header}: {$value}");
 }
 
+// TODO: This shouldn't be possible in a production-configured environment.
 if (isset($_REQUEST['__profile__']) &&
     ($_REQUEST['__profile__'] == 'all')) {
   $profile = DarkConsoleXHProfPluginAPI::stopProfiler();
@@ -133,7 +143,7 @@ function setup_aphront_basics() {
   $aphront_root   = dirname(dirname(__FILE__));
   $libraries_root = dirname($aphront_root);
 
-  ini_set('include_path', ini_get('include_path').':'.$libraries_root.'/');
+  ini_set('include_path', $libraries_root.':'.ini_get('include_path'));
   @include_once 'libphutil/src/__phutil_library_init__.php';
   if (!@constant('__LIBPHUTIL__')) {
     echo "ERROR: Unable to load libphutil. Update your PHP 'include_path' to ".
@@ -141,14 +151,24 @@ function setup_aphront_basics() {
     exit(1);
   }
 
-  if (!ini_get('date.timezone')) {
-    date_default_timezone_set('America/Los_Angeles');
-  }
-
-  phutil_load_library($libraries_root.'/arcanist/src');
+  // Load Phabricator itself using the absolute path, so we never end up doing
+  // anything surprising (loading index.php and libraries from different
+  // directories).
   phutil_load_library($aphront_root.'/src');
+  phutil_load_library('arcanist/src');
 }
 
 function __autoload($class_name) {
   PhutilSymbolLoader::loadClass($class_name);
 }
+
+function phabricator_fatal_config_error($msg) {
+  header('Content-Type: text/plain', $replace = true, $http_error = 500);
+  $error = "CONFIG ERROR: ".$msg."\n";
+
+  error_log($error);
+  echo $error;
+
+  die();
+}
+

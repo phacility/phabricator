@@ -200,15 +200,6 @@ return array(
   'github.application-secret'   => null,
 
 
-  // Github Authorize URI. You don't need to change this unless Github changes
-  // its API in the future (this is unlikely).
-  'github.authorize-uri'        => 'https://github.com/login/oauth/authorize',
-
-  // Github Access Token URI. You don't need to change this unless Github
-  // changes its API in the future (this is unlikely).
-  'github.access-token-uri' => 'https://github.com/login/oauth/access_token',
-
-
 // -- Recaptcha ------------------------------------------------------------- //
 
   // Is Recaptcha enabled? If disabled, captchas will not appear.
@@ -247,11 +238,18 @@ return array(
   //
   // The keys in this array are viewable mime types; the values are the mime
   // types they will be delivered as when they are viewed in the browser.
-  'files.viewable-mime-types'   => array(
+  'files.viewable-mime-types' => array(
     'image/jpeg'  => 'image/jpeg',
     'image/jpg'   => 'image/jpg',
     'image/png'   => 'image/png',
     'text/plain'  => 'text/plain; charset=utf-8',
   ),
 
+// -- Customization --------------------------------------------------------- //
+
+  // Paths to additional phutil libraries to load.
+  'load-libraries' => array(),
+
+  'aphront.default-application-configuration-class' =>
+    'AphrontDefaultApplicationConfiguration',
 );
