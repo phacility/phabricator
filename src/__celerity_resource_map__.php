@@ -208,7 +208,7 @@ celerity_register_resource_map(array(
   ),
   'maniphest-task-summary-css' =>
   array(
-    'uri' => '/res/10d5ec2e/rsrc/css/application/maniphest/task-summary.css',
+    'uri' => '/res/94d01e6f/rsrc/css/application/maniphest/task-summary.css',
     'type' => 'css',
     'requires' =>
     array(
