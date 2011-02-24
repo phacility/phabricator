@@ -39,6 +39,7 @@
 .maniphest-task-summary td.maniphest-task-name {
   overflow: hidden;
   font-weight: bold;
+  white-space: normal;
 }
 
 .maniphest-task-summary td.maniphest-task-priority {
