@@ -165,12 +165,12 @@ class ManiphestTaskListController extends ManiphestController {
         $argv[] = $phids;
         break;
       case 'triage':
-        $extra_clause = 'ownerPHID in (%Ls) AND status = %d';
+        $extra_clause = 'ownerPHID in (%Ls) AND priority = %d';
         $argv[] = $phids;
         $argv[] = ManiphestTaskPriority::PRIORITY_TRIAGE;
         break;
       case 'alltriage':
-        $extra_clause = 'status = %d';
+        $extra_clause = 'priority = %d';
         $argv[] = ManiphestTaskPriority::PRIORITY_TRIAGE;
         break;
       case 'unassigned':
