@@ -11,6 +11,7 @@ phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'view/control/table');
 
 phutil_require_module('phutil', 'markup');
+phutil_require_module('phutil', 'moduleutils');
 
 
 phutil_require_source('DarkConsoleConfigPlugin.php');
