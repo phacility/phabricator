@@ -22,12 +22,16 @@
 class AphrontDefaultApplicationConfiguration
   extends AphrontApplicationConfiguration {
 
+  public function __construct() {
+
+  }
+
   public function getApplicationName() {
     return 'aphront-default';
   }
 
   public function getURIMap() {
-    return array(
+    return $this->getResourceURIMapRules() + array(
       '/' => array(
         '$'                     => 'PhabricatorDirectoryMainController',
       ),
@@ -100,11 +104,6 @@ class AphrontDefaultApplicationConfiguration
           => 'DifferentialSubscribeController',
       ),
 
-      '/res/' => array(
-        '(?P<package>pkg/)?(?P<hash>[a-f0-9]{8})/(?P<path>.+\.(?:css|js))$'
-          => 'CelerityResourceController',
-      ),
-
       '/typeahead/' => array(
         'common/(?P<type>\w+)/$'
           => 'PhabricatorTypeaheadCommonDatasourceController',
@@ -124,11 +123,8 @@ class AphrontDefaultApplicationConfiguration
         'email/$' => 'PhabricatorEmailLoginController',
         'etoken/(?P<token>\w+)/$' => 'PhabricatorEmailTokenController',
       ),
+
       '/logout/$' => 'PhabricatorLogoutController',
-      '/facebook-auth/' => array(
-        '$' => 'PhabricatorFacebookAuthController',
-        'diagnose/$' => 'PhabricatorFacebookAuthDiagnosticsController',
-      ),
 
       '/oauth/' => array(
         '(?P<provider>github|facebook)/' => array(
@@ -184,7 +180,17 @@ class AphrontDefaultApplicationConfiguration
         'view/(?P<id>\d+)/$' => 'PhabricatorProjectProfileController',
         'affiliation/(?P<id>\d+)/$'
           => 'PhabricatorProjectAffiliationEditController',
-      )
+      ),
+
+    );
+  }
+
+  protected function getResourceURIMapRules() {
+    return array(
+      '/res/' => array(
+        '(?P<package>pkg/)?(?P<hash>[a-f0-9]{8})/(?P<path>.+\.(?:css|js))$'
+          => 'CelerityResourceController',
+      ),
     );
   }
 
