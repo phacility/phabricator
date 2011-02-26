@@ -19,11 +19,6 @@
 error_reporting(E_ALL | E_STRICT);
 
 $env = getenv('PHABRICATOR_ENV'); // Apache
-if (!$env) {
-  if (isset($_SERVER['PHABRICATOR_ENV'])) {
-    $env = $_SERVER['PHABRICATOR_ENV']; // HipHop
-  }
-}
 
 if (!$env) {
   phabricator_fatal_config_error(
@@ -143,8 +138,13 @@ function setup_aphront_basics() {
   $aphront_root   = dirname(dirname(__FILE__));
   $libraries_root = dirname($aphront_root);
 
+  $root = null;
+  if (!empty($_SERVER['PHUTIL_LIBRARY_ROOT'])) {
+    $root = $_SERVER['PHUTIL_LIBRARY_ROOT'];
+  }
+
   ini_set('include_path', $libraries_root.':'.ini_get('include_path'));
-  @include_once 'libphutil/src/__phutil_library_init__.php';
+  @include_once $root.'libphutil/src/__phutil_library_init__.php';
   if (!@constant('__LIBPHUTIL__')) {
     echo "ERROR: Unable to load libphutil. Update your PHP 'include_path' to ".
          "include the parent directory of libphutil/.\n";
