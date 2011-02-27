@@ -19,6 +19,11 @@
 error_reporting(E_ALL | E_STRICT);
 
 $env = getenv('PHABRICATOR_ENV'); // Apache
+if (!$env) {
+  if (isset($_ENV['PHABRICATOR_ENV'])) {
+    $env = $_ENV['PHABRICATOR_ENV'];
+  }
+}
 
 if (!$env) {
   phabricator_fatal_config_error(
@@ -170,5 +175,13 @@ function phabricator_fatal_config_error($msg) {
   echo $error;
 
   die();
+}
+
+/**
+ * Workaround for HipHop bug, see Facebook Task #503624.
+ */
+function hphp_workaround_call_user_func_array($func, array $array) {
+  $f = new ReflectionFunction($func);
+  return $f->invokeArgs($array);
 }
 

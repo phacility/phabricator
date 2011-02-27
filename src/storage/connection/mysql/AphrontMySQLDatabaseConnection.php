@@ -234,12 +234,11 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
       case 1205: // Lock wait timeout exceeded
         throw new AphrontQueryRecoverableException("#{$errno}: {$error}");
       case 1062: // Duplicate Key
-        $matches = null;
-        $key = null;
-        if (preg_match('/for key \'(.*)\'$/', $error, $matches)) {
-          $key = $matches[1];
-        }
-        throw new AphrontQueryDuplicateKeyException($key, "{$errno}: {$error}");
+        // NOTE: In some versions of MySQL we get a key name back here, but
+        // older versions just give us a key index ("key 2") so it's not
+        // portable to parse the key out of the error and attach it to the
+        // exception.
+        throw new AphrontQueryDuplicateKeyException("{$errno}: {$error}");
       default:
         // TODO: 1064 is syntax error, and quite terrible in production.
         throw new AphrontQueryException("#{$errno}: {$error}");

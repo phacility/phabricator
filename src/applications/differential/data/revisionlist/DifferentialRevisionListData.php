@@ -165,7 +165,7 @@ class DifferentialRevisionListData {
 
         $this->revisions = $rev->loadAllFromArray($data);
         break;
-      case self::QUERY_BY_PHID:
+      case self::QUERY_PHIDS:
         $this->revisions = $this->loadAllWhere(
           'revision.phid in (%Ls)',
           $this->ids);
@@ -233,8 +233,11 @@ class DifferentialRevisionListData {
   }
 
   private function loadAllOpenWithCCs(array $ccphids) {
+    $rev = new DifferentialRevision();
+
     $revision = new DifferentialRevision();
     $data = queryfx_all(
+      $rev->establishConnection('r'),
       'SELECT revision.* FROM %T revision
         JOIN %T relationship ON relationship.revisionID = revision.id
           AND relationship.relation = %s

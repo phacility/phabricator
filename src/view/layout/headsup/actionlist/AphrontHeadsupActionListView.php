@@ -25,7 +25,7 @@ final class AphrontHeadsupActionListView extends AphrontView {
   }
 
   public function render() {
-    
+
     require_celerity_resource('aphront-headsup-action-list-view-css');
 
     $actions = array();

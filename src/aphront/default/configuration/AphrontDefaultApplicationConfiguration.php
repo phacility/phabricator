@@ -212,27 +212,22 @@ class AphrontDefaultApplicationConfiguration
         '<code>'.phutil_escape_html((string)$ex).'</code>'.
       '</div>';
 
-    if ($this->getRequest()->isAjax()) {
-      $dialog = new AphrontDialogView();
-      $dialog
-        ->setTitle('Exception!')
-        ->setClass('aphront-exception-dialog')
-        ->setUser($this->getRequest()->getUser())
-        ->appendChild($content)
-        ->addCancelButton('/');
-
-      $response = new AphrontDialogResponse();
-      $response->setDialog($dialog);
-
-      return $response;
+    $user = $this->getRequest()->getUser();
+    if (!$user) {
+      // If we hit an exception very early, we won't have a user.
+      $user = new PhabricatorUser();
     }
 
-    $view = new PhabricatorStandardPageView();
-    $view->setRequest($this->getRequest());
-    $view->appendChild($content);
+    $dialog = new AphrontDialogView();
+    $dialog
+      ->setTitle('Exception!')
+      ->setClass('aphront-exception-dialog')
+      ->setUser($user)
+      ->appendChild($content)
+      ->addCancelButton('/');
 
-    $response = new AphrontWebpageResponse();
-    $response->setContent($view->render());
+    $response = new AphrontDialogResponse();
+    $response->setDialog($dialog);
 
     return $response;
   }

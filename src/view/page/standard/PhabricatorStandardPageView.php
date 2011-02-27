@@ -152,9 +152,12 @@ class PhabricatorStandardPageView extends AphrontPageView {
 
     $login_stuff = null;
     $request = $this->getRequest();
+    $user = null;
     if ($request) {
       $user = $request->getUser();
-      if ($user->getPHID()) {
+      // NOTE: user may not be set here if we caught an exception early
+      // in the execution workflow.
+      if ($user && $user->getPHID()) {
         $login_stuff =
           'Logged in as '.phutil_render_tag(
             'a',
@@ -203,16 +206,19 @@ class PhabricatorStandardPageView extends AphrontPageView {
       }
       $foot_links[] = $link;
     }
-    // This ends up very early in tab order at the top of the page and there's
-    // a bunch of junk up there anyway, just shove it down here.
-    $foot_links[] = phabricator_render_form(
-      $user,
-      array(
-        'action' => '/logout/',
-        'method' => 'post',
-        'style'  => 'display: inline',
-      ),
-      '<button class="link">Logout</button>');
+
+    if ($user && $user->getPHID()) {
+      // This ends up very early in tab order at the top of the page and there's
+      // a bunch of junk up there anyway, just shove it down here.
+      $foot_links[] = phabricator_render_form(
+        $user,
+        array(
+          'action' => '/logout/',
+          'method' => 'post',
+          'style'  => 'display: inline',
+        ),
+        '<button class="link">Logout</button>');
+    }
 
     $foot_links = implode(' &middot; ', $foot_links);
 

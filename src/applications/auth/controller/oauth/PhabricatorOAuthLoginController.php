@@ -65,21 +65,30 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
         'code'          => $code,
       );
 
+      $post_data = http_build_query($query_data);
+      $post_length = strlen($post_data);
+
       $stream_context = stream_context_create(
         array(
           'http' => array(
             'method'  => 'POST',
-            'header'  => 'Content-type: application/x-www-form-urlencoded',
-            'content' => http_build_query($query_data),
+            'header'  =>
+              "Content-Type: application/x-www-form-urlencoded\r\n".
+              "Content-Length: {$post_length}\r\n",
+            'content' => $post_data,
           ),
         ));
 
       $stream = fopen($auth_uri, 'r', false, $stream_context);
 
-      $meta = stream_get_meta_data($stream);
-      $response = stream_get_contents($stream);
+      $response = false;
+      $meta = null;
+      if ($stream) {
+        $meta = stream_get_meta_data($stream);
+        $response = stream_get_contents($stream);
+        fclose($stream);
+      }
 
-      fclose($stream);
 
       if ($response === false) {
         return $this->buildErrorResponse(new PhabricatorOAuthFailureView());
@@ -127,7 +136,6 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
       $user_id);
 
     if ($current_user->getPHID()) {
-
       if ($known_oauth) {
         if ($known_oauth->getUserID() != $current_user->getID()) {
           $dialog = new AphrontDialogView();
@@ -285,11 +293,19 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
           $request->setCookie('phsid', $session_key);
           return id(new AphrontRedirectResponse())->setURI('/');
         } catch (AphrontQueryDuplicateKeyException $exception) {
-          $key = $exception->getDuplicateKey();
-          if ($key == 'userName') {
+
+          $same_username = id(new PhabricatorUser())->loadOneWhere(
+            'userName = %s',
+            $user->getUserName());
+
+          $same_email = id(new PhabricatorUser())->loadOneWhere(
+            'email = %s',
+            $user->getEmail());
+
+          if ($same_username) {
             $e_username = 'Duplicate';
-            $errors[] = 'That username is not unique.';
-          } else if ($key == 'email') {
+            $errors[] = 'That username or email is not unique.';
+          } else if ($same_email) {
             $e_email = 'Duplicate';
             $errors[] = 'That email is not unique.';
           } else {

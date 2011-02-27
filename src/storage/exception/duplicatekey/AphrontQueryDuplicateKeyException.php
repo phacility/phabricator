@@ -21,14 +21,4 @@
  */
 class AphrontQueryDuplicateKeyException extends AphrontQueryException {
 
-  private $duplicateKey;
-
-  public function getDuplicateKey() {
-    return $this->duplicateKey;
-  }
-
-  public function __construct($duplicate_key, $message) {
-    $this->duplicateKey = $duplicate_key;
-    parent::__construct($message);
-  }
 }

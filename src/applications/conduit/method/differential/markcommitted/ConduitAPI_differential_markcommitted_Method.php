@@ -60,8 +60,7 @@ class ConduitAPI_differential_markcommitted_Method extends ConduitAPIMethod {
     $editor = new DifferentialCommentEditor(
       $revision,
       $revision->getAuthorPHID(),
-      DifferentialAction::ACTION_COMMIT,
-      $inline_comments = array());
+      DifferentialAction::ACTION_COMMIT);
     $editor->save();
 
     $revision->setStatus(DifferentialRevisionStatus::COMMITTED);

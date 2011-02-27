@@ -35,7 +35,7 @@ class ManiphestTaskListView extends AphrontView {
 
     $views = array();
     foreach ($this->tasks as $task) {
-      $view = new ManiphestTaskSummaryView($task);
+      $view = new ManiphestTaskSummaryView();
       $view->setTask($task);
       $view->setHandles($this->handles);
       $views[] = $view->render();

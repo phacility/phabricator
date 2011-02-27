@@ -69,14 +69,10 @@ class PhabricatorRepositoryCreateController extends PhabricatorController {
           return id(new AphrontRedirectResponse())
             ->setURI('/repository/edit/'.$repository->getID().'/');
 
-        } catch (PhabricatorQueryDuplicateKeyException $ex) {
-          if ($ex->getDuplicateKey() == 'callsign') {
-            $e_callsign = 'Duplicate';
-            $errors[] = 'Callsign must be unique. Another repository already '.
-                        'uses that callsign.';
-          } else {
-            throw $ex;
-          }
+        } catch (AphrontQueryDuplicateKeyException $ex) {
+          $e_callsign = 'Duplicate';
+          $errors[] = 'Callsign must be unique. Another repository already '.
+                      'uses that callsign.';
         }
       }
     }

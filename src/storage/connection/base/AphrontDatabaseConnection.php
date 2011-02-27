@@ -36,15 +36,21 @@ abstract class AphrontDatabaseConnection {
   abstract public function escapeStringForLikeClause($string);
 
   public function queryData($pattern/*, $arg, $arg, ... */) {
+    if (false) {
+      // Workaround for the HPHP workaround: ensure we include this module
+      // since we really are using the function.
+      queryfx($this, $pattern);
+    }
+
     $args = func_get_args();
     array_unshift($args, $this);
-    return call_user_func_array('queryfx_all', $args);
+    return hphp_workaround_call_user_func_array('queryfx_all', $args);
   }
 
   public function query($pattern/*, $arg, $arg, ... */) {
     $args = func_get_args();
     array_unshift($args, $this);
-    return call_user_func_array('queryfx', $args);
+    return hphp_workaround_call_user_func_array('queryfx', $args);
   }
 
   // TODO: Probably need to reset these when we catch a connection exception

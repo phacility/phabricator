@@ -516,7 +516,7 @@ class DifferentialChangesetParser {
         $changeset->getTableName().'_parse_cache',
         $this->changesetID,
         $cache);
-    } catch (QueryException $ex) {
+    } catch (AphrontQueryException $ex) {
       // TODO: uhoh
     }
   }

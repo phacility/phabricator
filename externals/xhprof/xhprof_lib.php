@@ -261,7 +261,7 @@ function xhprof_aggregate_runs($xhprof_runs_impl, $runs,
   $bad_runs = array();
   foreach($runs as $idx => $run_id) {
 
-    $raw_data = $xhprof_runs_impl->get_run($run_id, $source, $description);
+    $raw_data = $xhprof_runs_impl->get_run($run_id, $source, '?');
 
     // use the first run to derive what metrics to aggregate on.
     if ($idx == 0) {
@@ -283,7 +283,7 @@ function xhprof_aggregate_runs($xhprof_runs_impl, $runs,
     }
 
     if ($use_script_name) {
-      $page = $description;
+      $page = '?';
 
       // create a fake function '__script::$page', and have and edge from
       // main() to '__script::$page'. We will also need edges to transfer
@@ -589,7 +589,7 @@ function xhprof_prune_run($raw_data, $prune_percent) {
 
   $prune_threshold = (($main_info[$prune_metric] * $prune_percent) / 100.0);
 
-  init_metrics($raw_data, null, null, false);
+//  init_metrics($raw_data, null, null, false);
   $flat_info = xhprof_compute_inclusive_times($raw_data);
 
   foreach ($raw_data as $parent_child => $info) {
