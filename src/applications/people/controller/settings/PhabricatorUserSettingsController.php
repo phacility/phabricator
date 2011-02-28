@@ -358,18 +358,20 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
             ->setLabel($provider_name.' URI')
             ->setValue($oauth_info->getAccountURI()));
 
-      $unlink = 'Unlink '.$provider_name.' Account';
-      $unlink_form = new AphrontFormView();
-      $unlink_form
-        ->setUser($user)
-        ->appendChild(
-          '<p class="aphront-form-instructions">You may unlink this account '.
-          'from your '.$provider_name.' account. This will prevent you from '.
-          'logging in with your '.$provider_name.' credentials.</p>')
-        ->appendChild(
-          id(new AphrontFormSubmitControl())
-            ->addCancelButton('/oauth/'.$provider_key.'/unlink/', $unlink));
-      $forms['Unlink Account'] = $unlink_form;
+      if (!$provider->isProviderLinkPermanent()) {
+        $unlink = 'Unlink '.$provider_name.' Account';
+        $unlink_form = new AphrontFormView();
+        $unlink_form
+          ->setUser($user)
+          ->appendChild(
+            '<p class="aphront-form-instructions">You may unlink this account '.
+            'from your '.$provider_name.' account. This will prevent you from '.
+            'logging in with your '.$provider_name.' credentials.</p>')
+          ->appendChild(
+            id(new AphrontFormSubmitControl())
+              ->addCancelButton('/oauth/'.$provider_key.'/unlink/', $unlink));
+        $forms['Unlink Account'] = $unlink_form;
+      }
 
       $expires = $oauth_info->getTokenExpires();
       if ($expires) {

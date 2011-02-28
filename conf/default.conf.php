@@ -176,10 +176,24 @@ return array(
   'amazon-ses.secret-key'       =>  null,
 
 
+// -- Auth ------------------------------------------------------------------ //
+
+  // Can users login with a username/password, or by following the link from
+  // a password reset email? You can disable this and configure one or more
+  // OAuth providers instead.
+  'auth.password-auth-enabled' => true,
+
 // --  Facebook  ------------------------------------------------------------ //
 
   // Can users use Facebook credentials to login to Phabricator?
   'facebook.auth-enabled'       => false,
+
+  // Can users use Facebook credentials to create new Phabricator accounts?
+  'facebook.registration-enabled' => true,
+
+  // Are Facebook accounts permanently linked to Phabricator accounts, or can
+  // the user unlink them?
+  'facebook.auth-permanent'     => false,
 
   // The Facebook "Application ID" to use for Facebook API access.
   'facebook.application-id'     => null,
@@ -192,6 +206,13 @@ return array(
 
   // Can users use Github credentials to login to Phabricator?
   'github.auth-enabled'         => false,
+
+  // Can users use Github credentials to create new Phabricator accounts?
+  'github.registration-enabled' => true,
+
+  // Are Github accounts permanently linked to Phabricator accounts, or can
+  // the user unlink them?
+  'github.auth-permanent'       => false,
 
   // The Github "Client ID" to use for Github API access.
   'github.application-id'       => null,
@@ -252,4 +273,7 @@ return array(
 
   'aphront.default-application-configuration-class' =>
     'AphrontDefaultApplicationConfiguration',
+
+  'controller.oauth-registration' =>
+    'PhabricatorOAuthDefaultRegistrationController',
 );

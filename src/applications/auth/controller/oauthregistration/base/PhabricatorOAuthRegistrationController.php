@@ -16,33 +16,28 @@
  * limitations under the License.
  */
 
-/**
- * @group aphront
- */
-abstract class AphrontController {
+abstract class PhabricatorOAuthRegistrationController
+  extends PhabricatorAuthController {
 
-  private $request;
+  private $oauthProvider;
+  private $oauthInfo;
 
-  public function willBeginExecution() {
-    return;
+  final public function setOAuthInfo($info) {
+    $this->oauthInfo = $info;
+    return $this;
   }
 
-  public function willProcessRequest(array $uri_data) {
-    return;
+  final public function getOAuthInfo() {
+    return $this->oauthInfo;
   }
 
-  abstract public function processRequest();
-
-  final public function __construct(AphrontRequest $request) {
-    $this->request = $request;
+  final public function setOAuthProvider($provider) {
+    $this->oauthProvider = $provider;
+    return $this;
   }
 
-  final public function getRequest() {
-    return $this->request;
-  }
-
-  final public function delegateToController(AphrontController $controller) {
-    return $controller->processRequest();
+  final public function getOAuthProvider() {
+    return $this->oauthProvider;
   }
 
 }

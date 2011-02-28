@@ -25,6 +25,10 @@ class PhabricatorEmailLoginController extends PhabricatorAuthController {
   public function processRequest() {
     $request = $this->getRequest();
 
+    if (!PhabricatorEnv::getEnvConfig('auth.password-auth-enabled')) {
+      return new Aphront400Response();
+    }
+
     $e_email = true;
     $e_captcha = true;
     $errors = array();

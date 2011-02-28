@@ -88,6 +88,7 @@ final class DarkConsoleCore {
     $visible  = $user->getConsoleVisible();
 
     if (!isset($plugins[$selected])) {
+      reset($plugins);
       $selected = key($plugins);
     }
 

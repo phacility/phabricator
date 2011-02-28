@@ -21,9 +21,13 @@ abstract class PhabricatorOAuthProvider {
   const PROVIDER_FACEBOOK = 'facebook';
   const PROVIDER_GITHUB   = 'github';
 
+  private $accessToken;
+
   abstract public function getProviderKey();
   abstract public function getProviderName();
   abstract public function isProviderEnabled();
+  abstract public function isProviderLinkPermanent();
+  abstract public function isProviderRegistrationEnabled();
   abstract public function getRedirectURI();
   abstract public function getClientID();
   abstract public function getClientSecret();
@@ -32,8 +36,25 @@ abstract class PhabricatorOAuthProvider {
   abstract public function getUserInfoURI();
   abstract public function getMinimumScope();
 
+  abstract public function setUserData($data);
+  abstract public function retrieveUserID();
+  abstract public function retrieveUserEmail();
+  abstract public function retrieveUserAccountName();
+  abstract public function retrieveUserProfileImage();
+  abstract public function retrieveUserAccountURI();
+  abstract public function retrieveUserRealName();
+
   public function __construct() {
 
+  }
+
+  final public function setAccessToken($access_token) {
+    $this->accessToken = $access_token;
+    return $this;
+  }
+
+  final public function getAccessToken() {
+    return $this->accessToken;
   }
 
   public static function newProvider($which) {

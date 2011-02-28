@@ -29,6 +29,12 @@ class PhabricatorOAuthUnlinkController extends PhabricatorAuthController {
     $user = $request->getUser();
 
     $provider = $this->provider;
+
+    if ($provider->isProviderLinkPermanent()) {
+      throw new Exception(
+        "You may not unlink accounts from this OAuth provider.");
+    }
+
     $provider_name = $provider->getProviderName();
     $provider_key = $provider->getProviderKey();
 

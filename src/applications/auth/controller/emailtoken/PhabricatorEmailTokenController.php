@@ -31,6 +31,10 @@ class PhabricatorEmailTokenController extends PhabricatorAuthController {
   public function processRequest() {
     $request = $this->getRequest();
 
+    if (!PhabricatorEnv::getEnvConfig('auth.password-auth-enabled')) {
+      return new Aphront400Response();
+    }
+
     $token = $this->token;
     $email = $request->getStr('email');
 

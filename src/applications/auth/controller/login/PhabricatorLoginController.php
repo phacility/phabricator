@@ -30,68 +30,72 @@ class PhabricatorLoginController extends PhabricatorAuthController {
       return id(new AphrontRedirectResponse())->setURI('/');
     }
 
-    $error = false;
-    $username = $request->getCookie('phusr');
-    if ($request->isFormPost()) {
-      $username = $request->getStr('username');
+    $password_auth = PhabricatorEnv::getEnvConfig('auth.password-auth-enabled');
 
-      $user = id(new PhabricatorUser())->loadOneWhere(
-        'username = %s',
-        $username);
-
-      $okay = false;
-      if ($user) {
-        if ($user->comparePassword($request->getStr('password'))) {
-
-          $session_key = $user->establishSession('web');
-
-          $request->setCookie('phusr', $user->getUsername());
-          $request->setCookie('phsid', $session_key);
-
-          return id(new AphrontRedirectResponse())
-            ->setURI('/');
-        }
-      }
-
-      if (!$okay) {
-        $request->clearCookie('phusr');
-        $request->clearCookie('phsid');
-      }
-
-      $error = true;
-    }
+    $forms = array();
 
     $error_view = null;
-    if ($error) {
-      $error_view = new AphrontErrorView();
-      $error_view->setTitle('Bad username/password.');
+    if ($password_auth) {
+      $error = false;
+      $username = $request->getCookie('phusr');
+      if ($request->isFormPost()) {
+        $username = $request->getStr('username');
+
+        $user = id(new PhabricatorUser())->loadOneWhere(
+          'username = %s',
+          $username);
+
+        $okay = false;
+        if ($user) {
+          if ($user->comparePassword($request->getStr('password'))) {
+
+            $session_key = $user->establishSession('web');
+
+            $request->setCookie('phusr', $user->getUsername());
+            $request->setCookie('phsid', $session_key);
+
+            return id(new AphrontRedirectResponse())
+              ->setURI('/');
+          }
+        }
+
+        if (!$okay) {
+          $request->clearCookie('phusr');
+          $request->clearCookie('phsid');
+        }
+
+        $error = true;
+      }
+
+      if ($error) {
+        $error_view = new AphrontErrorView();
+        $error_view->setTitle('Bad username/password.');
+      }
+
+      $form = new AphrontFormView();
+      $form
+        ->setUser($request->getUser())
+        ->setAction('/login/')
+        ->appendChild(
+          id(new AphrontFormTextControl())
+            ->setLabel('Username/Email')
+            ->setName('username')
+            ->setValue($username))
+        ->appendChild(
+          id(new AphrontFormPasswordControl())
+            ->setLabel('Password')
+            ->setName('password')
+            ->setCaption(
+              '<a href="/login/email/">'.
+                'Forgot your password? / Email Login</a>'))
+        ->appendChild(
+          id(new AphrontFormSubmitControl())
+            ->setValue('Login'));
+
+
+  //    $panel->setCreateButton('Register New Account', '/login/register/');
+      $forms['Phabricator Login'] = $form;
     }
-
-    $form = new AphrontFormView();
-    $form
-      ->setUser($request->getUser())
-      ->setAction('/login/')
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel('Username/Email')
-          ->setName('username')
-          ->setValue($username))
-      ->appendChild(
-        id(new AphrontFormPasswordControl())
-          ->setLabel('Password')
-          ->setName('password')
-          ->setCaption(
-            '<a href="/login/email/">Forgot your password? / Email Login</a>'))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue('Login'));
-
-
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Phabricator Login');
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-//    $panel->setCreateButton('Register New Account', '/login/register/');
-    $panel->appendChild($form);
 
     $providers = array(
       PhabricatorOAuthProvider::PROVIDER_FACEBOOK,
@@ -117,6 +121,19 @@ class PhabricatorLoginController extends PhabricatorAuthController {
       // does not seem like the most severe threat in the world, and generating
       // CSRF for logged-out users is vaugely tricky.
 
+      if ($provider->isProviderRegistrationEnabled()) {
+        $title = "Login or Register with {$provider_name}";
+        $body = "Login or register for Phabricator using your ".
+                "{$provider_name} account.";
+        $button = "Login or Register with {$provider_name}";
+      } else {
+        $title = "Login with {$provider_name}";
+        $body = "Login to your existing Phabricator account using your ".
+                "{$provider_name} account.<br /><br /><strong>You can not use ".
+                "{$provider_name} to register a new account.</strong>";
+        $button = "Login with {$provider_name}";
+      }
+
       $auth_form = new AphrontFormView();
       $auth_form
         ->setAction($auth_uri)
@@ -126,16 +143,20 @@ class PhabricatorLoginController extends PhabricatorAuthController {
         ->setUser($request->getUser())
         ->setMethod('GET')
         ->appendChild(
-          '<p class="aphront-form-instructions">Login or register for '.
-          'Phabricator using your '.$provider_name.' account.</p>')
+          '<p class="aphront-form-instructions">'.$body.'</p>')
         ->appendChild(
           id(new AphrontFormSubmitControl())
-            ->setValue("Login with {$provider_name} \xC2\xBB"));
+            ->setValue("{$button} \xC2\xBB"));
 
-      $panel->appendChild(
-          '<br /><h1>Login or Register with '.$provider_name.'</h1>');
+      $forms[$title] = $auth_form;
+    }
 
-      $panel->appendChild($auth_form);
+    $panel = new AphrontPanelView();
+    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    foreach ($forms as $name => $form) {
+      $panel->appendChild('<h1>'.$name.'</h1>');
+      $panel->appendChild($form);
+      $panel->appendChild('<br />');
     }
 
     return $this->buildStandardPageResponse(

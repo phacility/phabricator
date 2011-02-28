@@ -18,6 +18,8 @@
 
 class PhabricatorOAuthProviderFacebook extends PhabricatorOAuthProvider {
 
+  private $userData;
+
   public function getProviderKey() {
     return self::PROVIDER_FACEBOOK;
   }
@@ -28,6 +30,14 @@ class PhabricatorOAuthProviderFacebook extends PhabricatorOAuthProvider {
 
   public function isProviderEnabled() {
     return PhabricatorEnv::getEnvConfig('facebook.auth-enabled');
+  }
+
+  public function isProviderLinkPermanent() {
+    return PhabricatorEnv::getEnvConfig('facebook.auth-permanent');
+  }
+
+  public function isProviderRegistrationEnabled() {
+    return PhabricatorEnv::getEnvConfig('facebook.registration-enabled');
   }
 
   public function getRedirectURI() {
@@ -56,6 +66,41 @@ class PhabricatorOAuthProviderFacebook extends PhabricatorOAuthProvider {
 
   public function getMinimumScope() {
     return 'email';
+  }
+
+  public function setUserData($data) {
+    $this->userData = $data;
+    return $this;
+  }
+
+  public function retrieveUserID() {
+    return $this->userData['id'];
+  }
+
+  public function retrieveUserEmail() {
+    return $this->userData['email'];
+  }
+
+  public function retrieveUserAccountName() {
+    $matches = null;
+    $link = $this->userData['link'];
+    if (preg_match('@/([a-zA-Z0-9]+)$@', $link, $matches)) {
+      return $matches[1];
+    }
+    return null;
+  }
+
+  public function retrieveUserProfileImage() {
+    $uri = 'https://graph.facebook.com/me/picture?access_token=';
+    return @file_get_contents($uri.$this->getAccessToken());
+  }
+
+  public function retrieveUserAccountURI() {
+    return $this->userData['link'];
+  }
+
+  public function retrieveUserRealName() {
+    return $this->userData['name'];
   }
 
 }

@@ -20,6 +20,7 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
 
   private $provider;
   private $userID;
+
   private $accessToken;
   private $tokenExpires;
 
@@ -50,94 +51,31 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
       return $this->buildErrorResponse($error_view);
     }
 
-    $token = $request->getStr('token');
-    if (!$token) {
-      $client_id        = $provider->getClientID();
-      $client_secret    = $provider->getClientSecret();
-      $redirect_uri     = $provider->getRedirectURI();
-      $auth_uri         = $provider->getTokenURI();
-
-      $code = $request->getStr('code');
-      $query_data = array(
-        'client_id'     => $client_id,
-        'client_secret' => $client_secret,
-        'redirect_uri'  => $redirect_uri,
-        'code'          => $code,
-      );
-
-      $post_data = http_build_query($query_data);
-      $post_length = strlen($post_data);
-
-      $stream_context = stream_context_create(
-        array(
-          'http' => array(
-            'method'  => 'POST',
-            'header'  =>
-              "Content-Type: application/x-www-form-urlencoded\r\n".
-              "Content-Length: {$post_length}\r\n",
-            'content' => $post_data,
-          ),
-        ));
-
-      $stream = fopen($auth_uri, 'r', false, $stream_context);
-
-      $response = false;
-      $meta = null;
-      if ($stream) {
-        $meta = stream_get_meta_data($stream);
-        $response = stream_get_contents($stream);
-        fclose($stream);
-      }
-
-
-      if ($response === false) {
-        return $this->buildErrorResponse(new PhabricatorOAuthFailureView());
-      }
-
-      $data = array();
-      parse_str($response, $data);
-
-      $token = idx($data, 'access_token');
-      if (!$token) {
-        return $this->buildErrorResponse(new PhabricatorOAuthFailureView());
-      }
-
-      if (idx($data, 'expires')) {
-        $this->tokenExpires = time() + $data['expires'];
-      }
-
-    } else {
-      $this->tokenExpires = $request->getInt('expires');
+    $error_response = $this->retrieveAccessToken($provider);
+    if ($error_response) {
+      return $error_response;
     }
 
     $userinfo_uri = new PhutilURI($provider->getUserInfoURI());
     $userinfo_uri->setQueryParams(
       array(
-        'access_token' => $token,
+        'access_token' => $this->accessToken,
       ));
 
     $user_json = @file_get_contents($userinfo_uri);
     $user_data = json_decode($user_json, true);
 
-    $this->accessToken = $token;
+    $provider->setUserData($user_data);
+    $provider->setAccessToken($this->accessToken);
 
-    switch ($provider->getProviderKey()) {
-      case PhabricatorOAuthProvider::PROVIDER_GITHUB:
-        $user_data = $user_data['user'];
-        break;
-    }
-    $this->userData = $user_data;
+    $user_id = $provider->retrieveUserID();
+    $provider_key = $provider->getProviderKey();
 
-    $user_id = $this->retrieveUserID();
-
-    $known_oauth = id(new PhabricatorUserOAuthInfo())->loadOneWhere(
-      'oauthProvider = %s and oauthUID = %s',
-      $provider->getProviderKey(),
-      $user_id);
+    $oauth_info = $this->retrieveOAuthInfo($provider);
 
     if ($current_user->getPHID()) {
-      if ($known_oauth) {
-        if ($known_oauth->getUserID() != $current_user->getID()) {
+      if ($oauth_info->getID()) {
+        if ($oauth_info->getUserID() != $current_user->getID()) {
           $dialog = new AphrontDialogView();
           $dialog->setUser($current_user);
           $dialog->setTitle('Already Linked to Another Account');
@@ -156,6 +94,23 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
         }
       }
 
+      $existing_oauth = id(new PhabricatorUserOAuthInfo())->loadOneWhere(
+        'userID = %d AND oauthProvider = %s',
+        $current_user->getID(),
+        $provider_key);
+
+      if ($existing_oauth) {
+        $dialog = new AphrontDialogView();
+        $dialog->setUser($current_user);
+        $dialog->setTitle('Already Linked to an Account From This Provider');
+        $dialog->appendChild(
+          '<p>The account you are logged in with is already linked to a '.
+          $provider_name.' account. Before you can link it to a different '.
+          $provider_name.' account, you must unlink the old account.</p>');
+        $dialog->addCancelButton('/settings/page/'.$provider_key.'/');
+        return id(new AphrontDialogResponse())->setDialog($dialog);
+      }
+
       if (!$request->isDialogFormPost()) {
         $dialog = new AphrontDialogView();
         $dialog->setUser($current_user);
@@ -163,17 +118,15 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
         $dialog->appendChild(
           '<p>Link your '.$provider_name.' account to your Phabricator '.
           'account?</p>');
-        $dialog->addHiddenInput('token', $token);
-        $dialog->addHiddenInput('expires', $this->tokenExpires);
+        $dialog->addHiddenInput('token', $provider->getAccessToken());
+        $dialog->addHiddenInput('expires', $oauth_info->getTokenExpires());
         $dialog->addSubmitButton('Link Accounts');
         $dialog->addCancelButton('/settings/page/'.$provider_key.'/');
 
         return id(new AphrontDialogResponse())->setDialog($dialog);
       }
 
-      $oauth_info = new PhabricatorUserOAuthInfo();
       $oauth_info->setUserID($current_user->getID());
-      $this->configureOAuthInfo($oauth_info);
       $oauth_info->save();
 
       return id(new AphrontRedirectResponse())
@@ -183,12 +136,11 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
 
     // Login with known auth.
 
-    if ($known_oauth) {
-      $known_user = id(new PhabricatorUser())->load($known_oauth->getUserID());
+    if ($oauth_info->getID()) {
+      $known_user = id(new PhabricatorUser())->load($oauth_info->getUserID());
       $session_key = $known_user->establishSession('web');
 
-      $this->configureOAuthInfo($known_oauth);
-      $known_oauth->save();
+      $oauth_info->save();
 
       $request->setCookie('phusr', $known_user->getUsername());
       $request->setCookie('phsid', $session_key);
@@ -196,10 +148,7 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
         ->setURI('/');
     }
 
-    // Merge accounts based on shared email. TODO: should probably get rid of
-    // this.
-
-    $oauth_email = $this->retrieveUserEmail();
+    $oauth_email = $provider->retrieveUserEmail();
     if ($oauth_email) {
       $known_email = id(new PhabricatorUser())
         ->loadOneWhere('email = %s', $oauth_email);
@@ -218,159 +167,28 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
       }
     }
 
-    $errors = array();
-    $e_username = true;
-    $e_email = true;
-    $e_realname = true;
+    if (!$provider->isProviderRegistrationEnabled()) {
+      $dialog = new AphrontDialogView();
+      $dialog->setUser($current_user);
+      $dialog->setTitle('No Account Registration With '.$provider_name);
+      $dialog->appendChild(
+        '<p>You can not register a new account using '.$provider_name.'; '.
+        'you can only use your '.$provider_name.' account to log into an '.
+        'existing Phabricator account which you have registered through '.
+        'other means.</p>');
+      $dialog->addCancelButton('/login/');
 
-    $user = new PhabricatorUser();
-
-    $suggestion = $this->retrieveUsernameSuggestion();
-    $user->setUsername($suggestion);
-
-    $oauth_realname = $this->retreiveRealNameSuggestion();
-
-    if ($request->isFormPost()) {
-
-      $user->setUsername($request->getStr('username'));
-      $username = $user->getUsername();
-      $matches = null;
-      if (!strlen($user->getUsername())) {
-        $e_username = 'Required';
-        $errors[] = 'Username is required.';
-      } else if (!preg_match('/^[a-zA-Z0-9]+$/', $username, $matches)) {
-        $e_username = 'Invalid';
-        $errors[] = 'Username may only contain letters and numbers.';
-      } else {
-        $e_username = null;
-      }
-
-      if ($oauth_email) {
-        $user->setEmail($oauth_email);
-      } else {
-        $user->setEmail($request->getStr('email'));
-        if (!strlen($user->getEmail())) {
-          $e_email = 'Required';
-          $errors[] = 'Email is required.';
-        } else {
-          $e_email = null;
-        }
-      }
-
-      if ($oauth_realname) {
-        $user->setRealName($oauth_realname);
-      } else {
-        $user->setRealName($request->getStr('realname'));
-        if (!strlen($user->getStr('realname'))) {
-          $e_realname = 'Required';
-          $errors[] = 'Real name is required.';
-        } else {
-          $e_realname = null;
-        }
-      }
-
-      if (!$errors) {
-        $image = $this->retreiveProfileImageSuggestion();
-        if ($image) {
-          $file = PhabricatorFile::newFromFileData(
-            $image,
-            array(
-              'name' => $provider->getProviderKey().'-profile.jpg'
-            ));
-          $user->setProfileImagePHID($file->getPHID());
-        }
-
-        try {
-          $user->save();
-
-          $oauth_info = new PhabricatorUserOAuthInfo();
-          $oauth_info->setUserID($user->getID());
-          $this->configureOAuthInfo($oauth_info);
-          $oauth_info->save();
-
-          $session_key = $user->establishSession('web');
-          $request->setCookie('phusr', $user->getUsername());
-          $request->setCookie('phsid', $session_key);
-          return id(new AphrontRedirectResponse())->setURI('/');
-        } catch (AphrontQueryDuplicateKeyException $exception) {
-
-          $same_username = id(new PhabricatorUser())->loadOneWhere(
-            'userName = %s',
-            $user->getUserName());
-
-          $same_email = id(new PhabricatorUser())->loadOneWhere(
-            'email = %s',
-            $user->getEmail());
-
-          if ($same_username) {
-            $e_username = 'Duplicate';
-            $errors[] = 'That username or email is not unique.';
-          } else if ($same_email) {
-            $e_email = 'Duplicate';
-            $errors[] = 'That email is not unique.';
-          } else {
-            throw $exception;
-          }
-        }
-      }
+      return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
-    $error_view = null;
-    if ($errors) {
-      $error_view = new AphrontErrorView();
-      $error_view->setTitle('Registration Failed');
-      $error_view->setErrors($errors);
-    }
+    $class = PhabricatorEnv::getEnvConfig('controller.oauth-registration');
+    PhutilSymbolLoader::loadClass($class);
+    $controller = newv($class, array($this->getRequest()));
 
-    $form = new AphrontFormView();
-    $form
-      ->addHiddenInput('token', $token)
-      ->addHiddenInput('expires', $this->tokenExpires)
-      ->setUser($request->getUser())
-      ->setAction($provider->getRedirectURI())
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel('Username')
-          ->setName('username')
-          ->setValue($user->getUsername())
-          ->setError($e_username));
+    $controller->setOAuthProvider($provider);
+    $controller->setOAuthInfo($oauth_info);
 
-    if (!$oauth_email) {
-      $form->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel('Email')
-          ->setName('email')
-          ->setValue($request->getStr('email'))
-          ->setError($e_email));
-    }
-
-    if (!$oauth_realname) {
-      $form->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel('Real Name')
-          ->setName('realname')
-          ->setValue($request->getStr('realname'))
-          ->setError($e_realname));
-    }
-
-    $form
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue('Create Account'));
-
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Create New Account');
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->appendChild($form);
-
-    return $this->buildStandardPageResponse(
-      array(
-        $error_view,
-        $panel,
-      ),
-      array(
-        'title' => 'Create New Account',
-      ));
+    return $this->delegateToController($controller);
   }
 
   private function buildErrorResponse(PhabricatorOAuthFailureView $view) {
@@ -386,71 +204,90 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
       ));
   }
 
-  private function retrieveUserID() {
-    return $this->userData['id'];
-  }
+  private function retrieveAccessToken(PhabricatorOAuthProvider $provider) {
+    $request = $this->getRequest();
 
-  private function retrieveUserEmail() {
-    return $this->userData['email'];
-  }
-
-  private function retrieveUsernameSuggestion() {
-    switch ($this->provider->getProviderKey()) {
-      case PhabricatorOAuthProvider::PROVIDER_FACEBOOK:
-        $matches = null;
-        $link = $this->userData['link'];
-        if (preg_match('@/([a-zA-Z0-9]+)$@', $link, $matches)) {
-          return $matches[1];
-        }
-        break;
-      case PhabricatorOAuthProvider::PROVIDER_GITHUB:
-        return $this->userData['login'];
+    $token = $request->getStr('token');
+    if ($token) {
+      $this->tokenExpires = $request->getInt('expires');
+      $this->accessToken = $token;
+      return null;
     }
+
+    $client_id        = $provider->getClientID();
+    $client_secret    = $provider->getClientSecret();
+    $redirect_uri     = $provider->getRedirectURI();
+    $auth_uri         = $provider->getTokenURI();
+
+    $code = $request->getStr('code');
+    $query_data = array(
+      'client_id'     => $client_id,
+      'client_secret' => $client_secret,
+      'redirect_uri'  => $redirect_uri,
+      'code'          => $code,
+    );
+
+    $post_data = http_build_query($query_data);
+    $post_length = strlen($post_data);
+
+    $stream_context = stream_context_create(
+      array(
+        'http' => array(
+          'method'  => 'POST',
+          'header'  =>
+            "Content-Type: application/x-www-form-urlencoded\r\n".
+            "Content-Length: {$post_length}\r\n",
+          'content' => $post_data,
+        ),
+      ));
+
+    $stream = fopen($auth_uri, 'r', false, $stream_context);
+
+    $response = false;
+    $meta = null;
+    if ($stream) {
+      $meta = stream_get_meta_data($stream);
+      $response = stream_get_contents($stream);
+      fclose($stream);
+    }
+
+    if ($response === false) {
+      return $this->buildErrorResponse(new PhabricatorOAuthFailureView());
+    }
+
+    $data = array();
+    parse_str($response, $data);
+
+    $token = idx($data, 'access_token');
+    if (!$token) {
+      return $this->buildErrorResponse(new PhabricatorOAuthFailureView());
+    }
+
+    if (idx($data, 'expires')) {
+      $this->tokenExpires = time() + $data['expires'];
+    }
+
+    $this->accessToken = $token;
+
     return null;
   }
 
-  private function retreiveProfileImageSuggestion() {
-    switch ($this->provider->getProviderKey()) {
-      case PhabricatorOAuthProvider::PROVIDER_FACEBOOK:
-        $uri = 'https://graph.facebook.com/me/picture?access_token=';
-        return @file_get_contents($uri.$this->accessToken);
-      case PhabricatorOAuthProvider::PROVIDER_GITHUB:
-        $id = $this->userData['gravatar_id'];
-        if ($id) {
-          $uri = 'http://www.gravatar.com/avatar/'.$id.'?s=50';
-          return @file_get_contents($uri);
-        }
+  private function retrieveOAuthInfo(PhabricatorOAuthProvider $provider) {
+
+    $oauth_info = id(new PhabricatorUserOAuthInfo())->loadOneWhere(
+      'oauthProvider = %s and oauthUID = %s',
+      $provider->getProviderKey(),
+      $provider->retrieveUserID());
+
+    if (!$oauth_info) {
+      $oauth_info = new PhabricatorUserOAuthInfo();
+      $oauth_info->setOAuthProvider($provider->getProviderKey());
+      $oauth_info->setOAuthUID($provider->retrieveUserID());
     }
-    return null;
-  }
 
-  private function retrieveAccountURI() {
-    switch ($this->provider->getProviderKey()) {
-      case PhabricatorOAuthProvider::PROVIDER_FACEBOOK:
-        return $this->userData['link'];
-      case PhabricatorOAuthProvider::PROVIDER_GITHUB:
-        $username = $this->retrieveUsernameSuggestion();
-        if ($username) {
-          return 'https://github.com/'.$username;
-        }
-        return null;
-    }
-    return null;
-  }
-
-  private function retreiveRealNameSuggestion() {
-    return $this->userData['name'];
-  }
-
-  private function configureOAuthInfo(PhabricatorUserOAuthInfo $oauth_info) {
-    $provider = $this->provider;
-
-    $oauth_info->setOAuthProvider($provider->getProviderKey());
-    $oauth_info->setOAuthUID($this->retrieveUserID());
-    $oauth_info->setAccountURI($this->retrieveAccountURI());
-    $oauth_info->setAccountName($this->retrieveUserNameSuggestion());
-
-    $oauth_info->setToken($this->accessToken);
+    $oauth_info->setAccountURI($provider->retrieveUserAccountURI());
+    $oauth_info->setAccountName($provider->retrieveUserAccountName());
+    $oauth_info->setToken($provider->getAccessToken());
     $oauth_info->setTokenStatus(PhabricatorUserOAuthInfo::TOKEN_STATUS_GOOD);
 
     // If we have out-of-date expiration info, just clear it out. Then replace
@@ -463,6 +300,8 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
       $expires = $this->tokenExpires;
     }
     $oauth_info->setTokenExpires($expires);
+
+    return $oauth_info;
   }
 
 }

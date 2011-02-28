@@ -18,6 +18,8 @@
 
 class PhabricatorOAuthProviderGithub extends PhabricatorOAuthProvider {
 
+  private $userData;
+
   public function getProviderKey() {
     return self::PROVIDER_GITHUB;
   }
@@ -28,6 +30,14 @@ class PhabricatorOAuthProviderGithub extends PhabricatorOAuthProvider {
 
   public function isProviderEnabled() {
     return PhabricatorEnv::getEnvConfig('github.auth-enabled');
+  }
+
+  public function isProviderLinkPermanent() {
+    return PhabricatorEnv::getEnvConfig('github.auth-permanent');
+  }
+
+  public function isProviderRegistrationEnabled() {
+    return PhabricatorEnv::getEnvConfig('github.registration-enabled');
   }
 
   public function getRedirectURI() {
@@ -56,6 +66,44 @@ class PhabricatorOAuthProviderGithub extends PhabricatorOAuthProvider {
 
   public function getMinimumScope() {
     return null;
+  }
+
+  public function setUserData($data) {
+    $this->userData = $data['user'];
+    return $this;
+  }
+
+  public function retrieveUserID() {
+    return $this->userData['id'];
+  }
+
+  public function retrieveUserEmail() {
+    return $this->userData['email'];
+  }
+
+  public function retrieveUserAccountName() {
+    return $this->userData['login'];
+  }
+
+  public function retrieveUserProfileImage() {
+    $id = $this->userData['gravatar_id'];
+    if ($id) {
+      $uri = 'http://www.gravatar.com/avatar/'.$id.'?s=50';
+      return @file_get_contents($uri);
+    }
+    return null;
+  }
+
+  public function retrieveUserAccountURI() {
+    $username = $this->retrieveUserAccountName();
+    if ($username) {
+      return 'https://github.com/'.$username;
+    }
+    return null;
+  }
+
+  public function retrieveUserRealName() {
+    return $this->userData['name'];
   }
 
 }

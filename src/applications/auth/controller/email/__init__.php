@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'aphront/response/400');
 phutil_require_module('phabricator', 'applications/auth/controller/base');
 phutil_require_module('phabricator', 'applications/metamta/storage/mail');
 phutil_require_module('phabricator', 'applications/people/storage/user');
