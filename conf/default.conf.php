@@ -181,7 +181,17 @@ return array(
   // Can users login with a username/password, or by following the link from
   // a password reset email? You can disable this and configure one or more
   // OAuth providers instead.
-  'auth.password-auth-enabled' => true,
+  'auth.password-auth-enabled'  => true,
+
+
+// -- Accounts -------------------------------------------------------------- //
+
+  // Is basic account information (email, real name, profile picture) editable?
+  // If you set up Phabricator to automatically synchronize account information
+  // from some other authoritative system, you can disable this to ensure
+  // information remains consistent across both systems.
+  'account.editable'            => true,
+
 
 // --  Facebook  ------------------------------------------------------------ //
 

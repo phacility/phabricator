@@ -19,6 +19,7 @@
 class PhabricatorUserSettingsController extends PhabricatorPeopleController {
 
   private $page;
+  private $accountEditable;
 
   public function willProcessRequest(array $data) {
     $this->page = idx($data, 'page');
@@ -50,9 +51,15 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
       $this->page = key($pages);
     }
 
+    $account_editable = PhabricatorEnv::getEnvConfig('account.editable');
+    $this->accountEditable = $account_editable;
+
     if ($request->isFormPost()) {
       switch ($this->page) {
         case 'email':
+          if (!$account_editable) {
+            return new Aphront400Response();
+          }
           $user->setEmail($request->getStr('email'));
           $user->save();
           return id(new AphrontRedirectResponse())
@@ -87,6 +94,10 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
           return id(new AphrontRedirectResponse())
             ->setURI('/settings/page/arcanist/?regenerated=true');
         case 'account':
+          if (!$account_editable) {
+            return new Aphront400Response();
+          }
+
           if (!empty($_FILES['profile'])) {
             $err = idx($_FILES['profile'], 'error');
             if ($err != UPLOAD_ERR_NO_FILE) {
@@ -208,6 +219,8 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
     $img_src = PhabricatorFileURI::getViewURIForPHID(
       $user->getProfileImagePHID());
 
+    $editable = $this->accountEditable;
+
     $form = new AphrontFormView();
     $form
       ->setUser($user)
@@ -219,7 +232,8 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Real Name')
-          ->setValue($user->getRealName()))
+          ->setValue($user->getRealName())
+          ->setDisabled(!$editable))
       ->appendChild(
           id(new AphrontFormMarkupControl())
             ->setValue('<hr />'))
@@ -231,18 +245,22 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
               'img',
               array(
                 'src' => $img_src,
-              ))))
-      ->appendChild(
-        id(new AphrontFormFileControl())
-          ->setLabel('Change Image')
-          ->setName('profile')
-          ->setCaption('Upload a 50x50px image.'))
-      ->appendChild(
-          id(new AphrontFormMarkupControl())
-            ->setValue('<hr />'))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue('Save'));
+              ))));
+
+    if ($editable) {
+      $form
+        ->appendChild(
+          id(new AphrontFormFileControl())
+            ->setLabel('Change Image')
+            ->setName('profile')
+            ->setCaption('Upload a 50x50px image.'))
+        ->appendChild(
+            id(new AphrontFormMarkupControl())
+              ->setValue('<hr />'))
+        ->appendChild(
+          id(new AphrontFormSubmitControl())
+            ->setValue('Save'));
+    }
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Profile Settings');
@@ -255,6 +273,8 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
   private function renderEmailForm() {
     $request = $this->getRequest();
     $user = $request->getUser();
+
+    $editable = $this->accountEditable;
 
     if ($request->getStr('saved')) {
       $notice = new AphrontErrorView();
@@ -273,13 +293,18 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
         id(new AphrontFormTextControl())
           ->setLabel('Email')
           ->setName('email')
+          ->setDisabled(!$editable)
           ->setCaption(
             'Note: there is no email validation yet; double-check your '.
             'typing.')
-          ->setValue($user->getEmail()))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue('Save'));
+          ->setValue($user->getEmail()));
+
+    if ($editable) {
+      $form
+        ->appendChild(
+          id(new AphrontFormSubmitControl())
+            ->setValue('Save'));
+    }
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Email Settings');

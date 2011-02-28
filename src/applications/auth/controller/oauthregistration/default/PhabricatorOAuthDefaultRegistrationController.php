@@ -71,7 +71,7 @@ class PhabricatorOAuthDefaultRegistrationController
       }
 
       if (!$errors) {
-        $image = $provider->retreiveUserProfileImage();
+        $image = $provider->retrieveUserProfileImage();
         if ($image) {
           $file = PhabricatorFile::newFromFileData(
             $image,

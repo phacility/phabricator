@@ -138,6 +138,12 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
 
     if ($oauth_info->getID()) {
       $known_user = id(new PhabricatorUser())->load($oauth_info->getUserID());
+
+      $request->getApplicationConfiguration()->willAuthenticateUserWithOAuth(
+        $known_user,
+        $oauth_info,
+        $provider);
+
       $session_key = $known_user->establishSession('web');
 
       $oauth_info->save();

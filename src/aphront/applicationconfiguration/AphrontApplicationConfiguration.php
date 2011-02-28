@@ -86,4 +86,16 @@ abstract class AphrontApplicationConfiguration {
   final public function willBuildRequest() {
   }
 
+  /**
+   * Hook for synchronizing account information from OAuth workflows.
+   *
+   * @task hook
+   */
+  public function willAuthenticateUserWithOAuth(
+    PhabricatorUser $user,
+    PhabricatorUserOAuthInfo $oauth_info,
+    PhabricatorOAuthProvider $provider) {
+    return;
+  }
+
 }

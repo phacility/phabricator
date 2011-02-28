@@ -184,7 +184,7 @@ class PhabricatorFile extends PhabricatorFileDAO {
 
     $mime_type = $this->getMimeType();
     $mime_parts = explode(';', $mime_type);
-    $mime_type = reset($mime_parts);
+    $mime_type = trim(reset($mime_parts));
 
     return idx($mime_map, $mime_type);
   }
