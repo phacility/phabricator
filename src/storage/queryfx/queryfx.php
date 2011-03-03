@@ -20,14 +20,8 @@
  * @group storage
  */
 function queryfx(AphrontDatabaseConnection $conn, $sql/*, ... */) {
-  if (false) {
-    // Workaround for the HPHP workaround: ensure we include this module
-    // since we really are using the function.
-    qsprintf($conn, $sql);
-  }
-
   $argv = func_get_args();
-  $query = hphp_workaround_call_user_func_array('qsprintf', $argv);
+  $query = call_user_func_array('qsprintf', $argv);
   $conn->executeRawQuery($query);
 }
 
@@ -36,7 +30,7 @@ function queryfx(AphrontDatabaseConnection $conn, $sql/*, ... */) {
  */
 function vqueryfx($conn, $sql, $argv) {
   array_unshift($argv, $conn, $sql);
-  hphp_workaround_call_user_func_array('queryfx', $argv);
+  call_user_func_array('queryfx', $argv);
 }
 
 /**
@@ -44,7 +38,7 @@ function vqueryfx($conn, $sql, $argv) {
  */
 function queryfx_all($conn, $sql/*, ... */) {
   $argv = func_get_args();
-  hphp_workaround_call_user_func_array('queryfx', $argv);
+  call_user_func_array('queryfx', $argv);
   return $conn->selectAllResults();
 }
 
@@ -53,7 +47,7 @@ function queryfx_all($conn, $sql/*, ... */) {
  */
 function queryfx_one($conn, $sql/*, ... */) {
   $argv = func_get_args();
-  $ret = hphp_workaround_call_user_func_array('queryfx_all', $argv);
+  $ret = call_user_func_array('queryfx_all', $argv);
   if (count($ret) > 1) {
     throw new AphrontQueryCountException(
       'Query returned more than one row.');
@@ -65,6 +59,6 @@ function queryfx_one($conn, $sql/*, ... */) {
 
 function vqueryfx_all($conn, $sql, array $argv) {
   array_unshift($argv, $conn, $sql);
-  hphp_workaround_call_user_func_array('queryfx', $argv);
+  call_user_func_array('queryfx', $argv);
   return $conn->selectAllResults();
 }

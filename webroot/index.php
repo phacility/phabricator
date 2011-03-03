@@ -176,12 +176,3 @@ function phabricator_fatal_config_error($msg) {
 
   die();
 }
-
-/**
- * Workaround for HipHop bug, see Facebook Task #503624.
- */
-function hphp_workaround_call_user_func_array($func, array $array) {
-  $f = new ReflectionFunction($func);
-  return $f->invokeArgs($array);
-}
-
