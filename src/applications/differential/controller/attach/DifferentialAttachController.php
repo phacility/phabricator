@@ -38,7 +38,8 @@ class DifferentialAttachController extends DifferentialController {
 
     if ($request->isFormPost()) {
       $phids = explode(';', $request->getStr('phids'));
-      $old_phids = $revision->getAttachedPHIDs('TASK');
+      $old_phids = $revision->getAttachedPHIDs(
+        PhabricatorPHIDConstants::PHID_TYPE_TASK);
 
       if (($phids || $old_phids) && ($phids != $old_phids)) {
         $tasks = id(new ManiphestTask())->loadAllWhere(
@@ -59,22 +60,24 @@ class DifferentialAttachController extends DifferentialController {
           $transaction->setAuthorPHID($user->getPHID());
           $transaction->setTransactionType($type);
           $new = $task->getAttached();
-          if (empty($new['DREV'])) {
-            $new['DREV'] = array();
+          if (empty($new[PhabricatorPHIDConstants::PHID_TYPE_DREV])) {
+            $new[PhabricatorPHIDConstants::PHID_TYPE_DREV] = array();
           }
           $rev_phid = $revision->getPHID();
           if (in_array($task->getPHID(), $phids)) {
-            if (in_array($rev_phid, $task->getAttachedPHIDs('DREV'))) {
+            if (in_array($rev_phid, $task->getAttachedPHIDs(
+              PhabricatorPHIDConstants::PHID_TYPE_DREV))) {
               // TODO: maybe the transaction editor should be responsible for
               // this?
               continue;
             }
-            $new['DREV'][$rev_phid] = array();
+            $new[PhabricatorPHIDConstants::PHID_TYPE_DREV][$rev_phid] = array();
           } else {
-            if (!in_array($rev_phid, $task->getAttachedPHIDs('DREV'))) {
+            if (!in_array($rev_phid, $task->getAttachedPHIDs(
+              PhabricatorPHIDConstants::PHID_TYPE_DREV))) {
               continue;
             }
-            unset($new['DREV'][$rev_phid]);
+            unset($new[PhabricatorPHIDConstants::PHID_TYPE_DREV][$rev_phid]);
           }
           $transaction->setNewValue($new);
           $editor->applyTransactions($task, array($transaction));

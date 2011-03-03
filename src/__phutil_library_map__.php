@@ -226,6 +226,7 @@ phutil_register_library_map(array(
     'PhabricatorObjectSelectorDialog' => 'view/control/objectselector',
     'PhabricatorPHID' => 'applications/phid/storage/phid',
     'PhabricatorPHIDAllocateController' => 'applications/phid/controller/allocate',
+    'PhabricatorPHIDConstants' => 'applications/phid/constants',
     'PhabricatorPHIDController' => 'applications/phid/controller/base',
     'PhabricatorPHIDDAO' => 'applications/phid/storage/base',
     'PhabricatorPHIDListController' => 'applications/phid/controller/list',

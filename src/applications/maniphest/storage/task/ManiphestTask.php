@@ -48,7 +48,8 @@ class ManiphestTask extends ManiphestDAO {
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID('TASK');
+    return PhabricatorPHID::generateNewPHID(
+      PhabricatorPHIDConstants::PHID_TYPE_TASK);
   }
 
   public function getCCPHIDs() {

@@ -22,8 +22,6 @@ class PhabricatorFile extends PhabricatorFileDAO {
 
   const STORAGE_FORMAT_RAW  = 'raw';
 
-  const PHID_TYPE = 'FILE';
-
   // TODO: We need to reconcile this with MySQL packet size.
   const FILE_SIZE_BYTE_LIMIT = 12582912;
 
@@ -43,7 +41,8 @@ class PhabricatorFile extends PhabricatorFileDAO {
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(self::PHID_TYPE);
+    return PhabricatorPHID::generateNewPHID(
+      PhabricatorPHIDConstants::PHID_TYPE_FILE);
   }
 
   public static function newFromPHPUpload($spec, array $params = array()) {

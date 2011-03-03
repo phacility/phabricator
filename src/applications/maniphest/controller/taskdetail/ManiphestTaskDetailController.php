@@ -107,8 +107,8 @@ class ManiphestTaskDetailController extends ManiphestController {
       $dict['Projects'] = '<em>None</em>';
     }
 
-    if (idx($attached, 'DREV')) {
-      $revs = idx($attached, 'DREV');
+    if (idx($attached, PhabricatorPHIDConstants::PHID_TYPE_DREV)) {
+      $revs = idx($attached, PhabricatorPHIDConstants::PHID_TYPE_DREV);
       $rev_links = array();
       foreach ($revs as $rev => $info) {
         $rev_links[] = $handles[$rev]->renderLink();
@@ -117,8 +117,8 @@ class ManiphestTaskDetailController extends ManiphestController {
       $dict['Revisions'] = $rev_links;
     }
 
-    if (idx($attached, 'FILE')) {
-      $revs = idx($attached, 'FILE');
+    if (idx($attached, PhabricatorPHIDConstants::PHID_TYPE_FILE)) {
+      $revs = idx($attached, PhabricatorPHIDConstants::PHID_TYPE_FILE);
       $rev_links = array();
       foreach ($revs as $rev => $info) {
         $rev_links[] = $handles[$rev]->renderLink();

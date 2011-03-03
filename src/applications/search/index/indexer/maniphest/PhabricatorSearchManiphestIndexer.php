@@ -22,7 +22,7 @@ class PhabricatorSearchManiphestIndexer
   public static function indexTask(ManiphestTask $task) {
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($task->getPHID());
-    $doc->setDocumentType('TASK');
+    $doc->setDocumentType(PhabricatorPHIDConstants::PHID_TYPE_TASK);
     $doc->setDocumentTitle($task->getTitle());
     $doc->setDocumentCreated($task->getDateCreated());
     $doc->setDocumentModified($task->getDateModified());
@@ -34,14 +34,14 @@ class PhabricatorSearchManiphestIndexer
     $doc->addRelationship(
       PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR,
       $task->getAuthorPHID(),
-      'USER',
+      PhabricatorPHIDConstants::PHID_TYPE_USER,
       $task->getDateCreated());
 
     if ($task->getStatus() == ManiphestTaskStatus::STATUS_OPEN) {
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
         $task->getPHID(),
-        'TASK',
+        PhabricatorPHIDConstants::PHID_TYPE_TASK,
         time());
     }
 
@@ -87,7 +87,7 @@ class PhabricatorSearchManiphestIndexer
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_PROJECT,
         $phid,
-        'PROJ',
+        PhabricatorPHIDConstants::PHID_TYPE_PROJ,
         $task->getDateModified()); // Bogus.
     }
 
@@ -95,13 +95,13 @@ class PhabricatorSearchManiphestIndexer
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
         $owner->getNewValue(),
-        'USER',
+        PhabricatorPHIDConstants::PHID_TYPE_USER,
         $owner->getDateCreated());
     } else {
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
         'PHID-!!!!-UP-FOR-GRABS',
-        '!!!!',
+        PhabricatorPHIDConstants::PHID_TYPE_MAGIC,
         $owner
           ? $owner->getDateCreated()
           : $task->getDateCreated());
@@ -111,7 +111,7 @@ class PhabricatorSearchManiphestIndexer
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_TOUCH,
         $touch,
-        'USER',
+        PhabricatorPHIDConstants::PHID_TYPE_USER,
         $time);
     }
 

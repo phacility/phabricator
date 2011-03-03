@@ -22,7 +22,7 @@ class PhabricatorSearchDifferentialIndexer
   public static function indexRevision(DifferentialRevision $rev) {
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($rev->getPHID());
-    $doc->setDocumentType('DREV');
+    $doc->setDocumentType(PhabricatorPHIDConstants::PHID_TYPE_DREV);
     $doc->setDocumentTitle($rev->getTitle());
     $doc->setDocumentCreated($rev->getDateCreated());
     $doc->setDocumentModified($rev->getDateModified());
@@ -37,7 +37,7 @@ class PhabricatorSearchDifferentialIndexer
     $doc->addRelationship(
       PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR,
       $rev->getAuthorPHID(),
-      'USER',
+      PhabricatorPHIDConstants::PHID_TYPE_USER,
       $rev->getDateCreated());
 
     if ($rev->getStatus() != DifferentialRevisionStatus::COMMITTED &&
@@ -45,7 +45,7 @@ class PhabricatorSearchDifferentialIndexer
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
         $rev->getPHID(),
-        'DREV',
+        PhabricatorPHIDConstants::PHID_TYPE_DREV,
         time());
     }
 
@@ -71,7 +71,7 @@ class PhabricatorSearchDifferentialIndexer
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_TOUCH,
         $touch,
-        'USER',
+        PhabricatorPHIDConstants::PHID_TYPE_USER,
         $time);
     }
 
@@ -81,7 +81,7 @@ class PhabricatorSearchDifferentialIndexer
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
         $phid,
-        'USER',
+        PhabricatorPHIDConstants::PHID_TYPE_USER,
         $rev->getDateModified()); // Bogus timestamp.
     }
 

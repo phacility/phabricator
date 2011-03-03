@@ -95,7 +95,7 @@ class PhabricatorObjectHandle {
   public function renderLink() {
 
     switch ($this->getType()) {
-      case 'USER':
+      case PhabricatorPHIDConstants::PHID_TYPE_USER:
         $name = $this->getName();
         break;
       default:

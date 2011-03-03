@@ -16,21 +16,15 @@
  * limitations under the License.
  */
 
-class PhabricatorProject extends PhabricatorProjectDAO {
+final class PhabricatorPHIDConstants {
 
-  protected $name;
-  protected $phid;
-  protected $authorPHID;
-
-  public function getConfiguration() {
-    return array(
-      self::CONFIG_AUX_PHID => true,
-    ) + parent::getConfiguration();
-  }
-
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_PROJ);
-  }
+  const PHID_TYPE_USER    = 'USER';
+  const PHID_TYPE_MLST    = 'MLST';
+  const PHID_TYPE_DREV    = 'DREV';
+  const PHID_TYPE_TASK    = 'TASK';
+  const PHID_TYPE_FILE    = 'FILE';
+  const PHID_TYPE_PROJ    = 'PROJ';
+  const PHID_TYPE_UNKNOWN = '????';
+  const PHID_TYPE_MAGIC   = '!!!!';
 
 }

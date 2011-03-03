@@ -6,6 +6,8 @@
 
 
 
+phutil_require_module('phabricator', 'applications/phid/constants');
+
 phutil_require_module('phutil', 'markup');
 
 
