@@ -24,7 +24,7 @@ class ManiphestTaskSelectorSearchController extends ManiphestController {
 
     $query = new PhabricatorSearchQuery();
     $query->setQuery($request->getStr('query'));
-    $query->setParameter('type', 'TASK');
+    $query->setParameter('type', PhabricatorPHIDConstants::PHID_TYPE_TASK);
 
     switch ($request->getStr('filter')) {
       case 'assigned':

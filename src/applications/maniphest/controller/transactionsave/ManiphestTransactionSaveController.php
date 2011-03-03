@@ -76,10 +76,10 @@ class ManiphestTransactionSaveController extends ManiphestController {
         }
         if ($phid) {
           $new = $task->getAttached();
-          if (empty($new['FILE'])) {
-            $new['FILE'] = array();
+          if (empty($new[PhabricatorPHIDConstants::PHID_TYPE_FILE])) {
+            $new[PhabricatorPHIDConstants::PHID_TYPE_FILE] = array();
           }
-          $new['FILE'][$phid] = array();
+          $new[PhabricatorPHIDConstants::PHID_TYPE_FILE][$phid] = array();
         }
 
         $transaction->setNewValue($new);

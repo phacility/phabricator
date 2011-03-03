@@ -18,15 +18,14 @@
 
 class PhabricatorMetaMTAMailingList extends PhabricatorMetaMTADAO {
 
-  const TYPE_MAILING_LIST = 'MLST';
-
   protected $name;
   protected $phid;
   protected $email;
   protected $uri;
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(self::TYPE_MAILING_LIST);
+    return PhabricatorPHID::generateNewPHID(
+      PhabricatorPHIDConstants::PHID_TYPE_MLST);
   }
 
   public function getConfiguration() {

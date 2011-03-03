@@ -18,8 +18,6 @@
 
 class PhabricatorUser extends PhabricatorUserDAO {
 
-  const PHID_TYPE = 'USER';
-
   const SESSION_TABLE = 'phabricator_session';
 
   protected $phid;
@@ -49,7 +47,8 @@ class PhabricatorUser extends PhabricatorUserDAO {
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(self::PHID_TYPE);
+    return PhabricatorPHID::generateNewPHID(
+      PhabricatorPHIDConstants::PHID_TYPE_USER);
   }
 
   public function setPassword($password) {

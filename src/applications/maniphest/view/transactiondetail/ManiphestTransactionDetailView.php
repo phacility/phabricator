@@ -266,7 +266,8 @@ class ManiphestTransactionDetailView extends AphrontView {
         $old_raw = nonempty($old, array());
         $new_raw = nonempty($new, array());
 
-        foreach (array('DREV', 'FILE') as $type) {
+        foreach (array(PhabricatorPHIDConstants::PHID_TYPE_DREV,
+          PhabricatorPHIDConstants::PHID_TYPE_FILE) as $type) {
           $old = array_keys(idx($old_raw, $type, array()));
           $new = array_keys(idx($new_raw, $type, array()));
           if ($old != $new) {
@@ -281,11 +282,11 @@ class ManiphestTransactionDetailView extends AphrontView {
         $rem_desc = $this->renderHandles($removed);
 
         switch ($type) {
-          case 'DREV':
+          case PhabricatorPHIDConstants::PHID_TYPE_DREV:
             $singular = 'Differential Revision';
             $plural = 'Differential Revisions';
             break;
-          case 'FILE':
+          case PhabricatorPHIDConstants::PHID_TYPE_FILE:
             $singular = 'file';
             $plural = 'files';
             break;

@@ -18,8 +18,6 @@
 
 class PhabricatorObjectHandleData {
 
-  const TYPE_UNKNOWN = '????';
-
   private $phids;
 
   public function __construct(array $phids) {
@@ -38,7 +36,7 @@ class PhabricatorObjectHandleData {
 
     foreach ($types as $type => $phids) {
       switch ($type) {
-        case '!!!!':
+        case PhabricatorPHIDConstants::PHID_TYPE_MAGIC:
           // Black magic!
           foreach ($phids as $phid) {
             $handle = new PhabricatorObjectHandle();
@@ -55,7 +53,7 @@ class PhabricatorObjectHandleData {
             $handles[$phid] = $handle;
           }
           break;
-        case 'USER':
+        case PhabricatorPHIDConstants::PHID_TYPE_USER:
           $class = 'PhabricatorUser';
           PhutilSymbolLoader::loadClass($class);
           $object = newv($class, array());
@@ -86,7 +84,7 @@ class PhabricatorObjectHandleData {
             $handles[$phid] = $handle;
           }
           break;
-        case 'MLST':
+        case PhabricatorPHIDConstants::PHID_TYPE_MLST:
           $class = 'PhabricatorMetaMTAMailingList';
 
           PhutilSymbolLoader::loadClass($class);
@@ -111,7 +109,7 @@ class PhabricatorObjectHandleData {
             $handles[$phid] = $handle;
           }
           break;
-        case 'DREV':
+        case PhabricatorPHIDConstants::PHID_TYPE_DREV:
           $class = 'DifferentialRevision';
           PhutilSymbolLoader::loadClass($class);
           $object = newv($class, array());
@@ -134,7 +132,7 @@ class PhabricatorObjectHandleData {
             $handles[$phid] = $handle;
           }
           break;
-        case 'TASK':
+        case PhabricatorPHIDConstants::PHID_TYPE_TASK:
           $class = 'ManiphestTask';
           PhutilSymbolLoader::loadClass($class);
           $object = newv($class, array());
@@ -157,7 +155,7 @@ class PhabricatorObjectHandleData {
             $handles[$phid] = $handle;
           }
           break;
-        case 'FILE':
+        case PhabricatorPHIDConstants::PHID_TYPE_FILE:
           $class = 'PhabricatorFile';
           PhutilSymbolLoader::loadClass($class);
           $object = newv($class, array());
@@ -179,7 +177,7 @@ class PhabricatorObjectHandleData {
             $handles[$phid] = $handle;
           }
           break;
-        case 'PROJ':
+        case PhabricatorPHIDConstants::PHID_TYPE_PROJ:
           $class = 'PhabricatorProject';
           PhutilSymbolLoader::loadClass($class);
           $object = newv($class, array());
@@ -222,7 +220,7 @@ class PhabricatorObjectHandleData {
     if (preg_match('/^PHID-([^-]{4})-/', $phid, $matches)) {
       return $matches[1];
     }
-    return self::TYPE_UNKNOWN;
+    return PhabricatorPHIDConstants::PHID_TYPE_UNKNOWN;
   }
 
 }

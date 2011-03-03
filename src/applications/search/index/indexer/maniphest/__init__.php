@@ -9,6 +9,7 @@
 phutil_require_module('phabricator', 'applications/maniphest/constants/status');
 phutil_require_module('phabricator', 'applications/maniphest/constants/transactiontype');
 phutil_require_module('phabricator', 'applications/maniphest/storage/transaction');
+phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'applications/search/constants/field');
 phutil_require_module('phabricator', 'applications/search/constants/relationship');

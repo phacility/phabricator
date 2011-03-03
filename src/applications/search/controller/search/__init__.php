@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'aphront/response/redirect');
+phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'applications/search/controller/base');
 phutil_require_module('phabricator', 'applications/search/execute/mysql');

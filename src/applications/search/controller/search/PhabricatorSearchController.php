@@ -67,8 +67,8 @@ class PhabricatorSearchController extends PhabricatorSearchBaseController {
 
     $options = array(
       '' => 'All Documents',
-      'DREV' => 'Differential Revisions',
-      'TASK' => 'Maniphest Tasks',
+      PhabricatorPHIDConstants::PHID_TYPE_DREV => 'Differential Revisions',
+      PhabricatorPHIDConstants::PHID_TYPE_TASK => 'Maniphest Tasks',
     );
 
     $status_options = array(

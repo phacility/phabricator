@@ -234,7 +234,8 @@ class DifferentialRevisionViewController extends DifferentialController {
     $umsg = DifferentialRevisionUpdateHistoryView::getDiffUnitMessage($diff);
     $properties['Unit'] = $ustar.' '.$umsg;
 
-    $tasks = $revision->getAttachedPHIDs('TASK');
+    $tasks = $revision->getAttachedPHIDs(
+      PhabricatorPHIDConstants::PHID_TYPE_TASK);
     if ($tasks) {
       $links = array();
       foreach ($tasks as $task_phid) {
