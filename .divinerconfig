@@ -6,7 +6,7 @@
     "install" : "Installing",
     "config" : "Configuration",
     "userguide" : "Application User Guides",
-
+    "developer" : "Phabricator Developer Guides",
     "differential" : "Differential (Code Review)",
     "diffusion" : "Diffusion (Repository Browser)",
     "maniphest" : "Maniphest (Task Tracking)",
