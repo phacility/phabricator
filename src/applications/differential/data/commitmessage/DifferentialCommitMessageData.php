@@ -73,8 +73,6 @@ class DifferentialCommitMessageData {
 
     $dict['Test Plan'] = $revision->getTestPlan();
 
-    $dict['Differential Revision'] = $revision->getID();
-
     $reviewer = null;
     $commenters = array();
     $revision->loadRelationships();
@@ -144,6 +142,8 @@ class DifferentialCommitMessageData {
     }
 
     $dict['Title'] = $revision->getTitle();
+
+    $dict['Differential Revision'] = $revision->getID();
 
     $this->dict = $dict;
   }

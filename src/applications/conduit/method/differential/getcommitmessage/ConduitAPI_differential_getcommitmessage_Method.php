@@ -25,6 +25,8 @@ class ConduitAPI_differential_getcommitmessage_Method extends ConduitAPIMethod {
   public function defineParamTypes() {
     return array(
       'revision_id' => 'required revision_id',
+      'fields' => 'optional dict<string, wild>',
+      'edit' => 'optional bool',
     );
   }
 
@@ -46,10 +48,58 @@ class ConduitAPI_differential_getcommitmessage_Method extends ConduitAPIMethod {
       throw new ConduitException('ERR_NOT_FOUND');
     }
 
-    $message_data = new DifferentialCommitMessageData(
-      $revision,
-      DifferentialCommitMessageData::MODE_AMEND);
+    $edit = $request->getValue('edit');
+    $mode = $edit
+      ? DifferentialCommitMessageData::MODE_EDIT
+      : DifferentialCommitMessageData::MODE_AMEND;
+
+    $message_data = new DifferentialCommitMessageData($revision, $mode);
     $message_data->prepare();
+
+    if ($mode == DifferentialCommitMessageData::MODE_EDIT) {
+      $fields = $request->getValue('fields');
+      if ($fields) {
+
+        static $simple_fields = array(
+          'title'           => 'Title',
+          'summary'         => 'Summary',
+          'testPlan'        => 'Test Plan',
+          'blameRevision'   => 'Blame Revision',
+          'revertPlan'      => 'Revert Plan',
+        );
+
+        foreach ($fields as $field => $value) {
+          if (isset($simple_fields[$field])) {
+            $message_data->overwriteFieldValue(
+              $simple_fields[$field],
+              $value);
+          } else {
+            $overwrite = true;
+            static $overwrite_map = array(
+              'reviewerPHIDs' => 'Reviewers',
+              'ccPHIDs' => 'CC',
+              'taskPHIDs' => 'Tasks',
+            );
+            switch ($field) {
+              case 'reviewerPHIDs':
+              case 'ccPHIDs':
+                $handles = id(new PhabricatorObjectHandleData($value))
+                  ->loadHandles($handles);
+                $value = implode(', ', mpull($handles, 'getName'));
+                break;
+              default:
+                $overwrite = false;
+                break;
+            }
+            if ($overwrite) {
+              $message_data->overwriteFieldValue(
+                $overwrite_map[$field],
+                $value);
+            }
+          }
+        }
+      }
+    }
 
     $commit_message = $message_data->getCommitMessage();
 
