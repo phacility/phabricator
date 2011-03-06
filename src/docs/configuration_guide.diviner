@@ -11,10 +11,17 @@ If you haven't, see @{article:Installation Guide}.
 = Configuring MySQL =
 
 Get MySQL running and verify you can connect to it. Consult the MySQL
-documentation for help. When MySQL works, you just need to load the Phabricator
-schemata into it:
+documentation for help. When MySQL works, you need to load the Phabricator
+schemata into it. First, load the initial database schema.
 
   mysql -uroot < path/to/phabricator/resources/sql/init/initialize.sql
+
+Next, load each of the database patches in order. (One day this will be
+better.)
+
+  mysql -uroot < path/to/phabricator/resources/sql/patches/000.project.sql
+  mysql -uroot < path/to/phabricator/resources/sql/patches/001...
+  ...
 
 = Configuring Apache =
 
@@ -36,11 +43,11 @@ this:
   <VirtualHost *>
     # Change this to the domain which points to your host.
     ServerName phabricator.example.com
-    
+
     # Change this to the path where you put 'phabricator' when you checked it
     # out from github when following the Installation Guide.
     DocumentRoot /path/to/phabricator/webroot
-    
+
     RewriteEngine on
     RewriteRule ^/rsrc/(.*)     -                       [L,QSA]
     RewriteRule ^/favicon.ico   -                       [L,QSA]
@@ -52,7 +59,7 @@ this:
     # the next section for details.
     SetEnv PHABRICATOR_ENV setup
   </VirtualHost>
-  
+
 Now, restart apache and navigate to whichever subdomain you set up. You should
 either see the Phabricator login screen, which means you're all set, or some
 useful error message telling you what else you need to fix (for instance, you
@@ -65,7 +72,7 @@ Now that basic setup is complete, you should configure Phabricator. Phabricator
 configuration options which control how the applications behave are stored here:
 
   /path/to/phabricator/conf/
-  
+
 There are several configuration templates:
 
   - ##default.conf.php##: root configuration, lists every configuration option
@@ -82,18 +89,18 @@ There are several configuration templates:
   - ##setup.conf.php##: pulls in ##default.conf.php##, but sets some flags that
     make it easier to set up a Phabricator install. Switch away from this before
     deploying a production install.
-  
+
 While you can use these templates as-is, you'll probably want to set up custom
 configuration. To do this, create a new file:
 
   /path/to/phabricator/conf/custom/myconfig.conf.php
-  
+
 Put this in the file:
 
   <?php
 
   return array(
-  
+
     // This is just an example.
     'some.config' => 'some_value',
 
@@ -109,6 +116,6 @@ configuring Apache:
     SetEnv PHABRICATOR_ENV custom/myconfig
     # ...
   </VirtualHost>
-  
+
 Now, look through ##default.conf.php## and override any options you want to
 change by providing overrides in ##myconfig.conf.php##.
