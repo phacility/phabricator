@@ -63,7 +63,9 @@ class ConduitAPI_conduit_connect_Method extends ConduitAPIMethod {
         "you're executing a replay attack.",
       "ERR-NO-CERTIFICATE" =>
         "This server requires authentication but your client is not ".
-        "configured with an authentication certificate."
+        "configured with an authentication certificate. Please refer to page ".
+        "http://www.phabricator.com/docs/phabricator/article/".
+        "Installing_Arcanist_Certificates.html for more info."
     );
   }
 

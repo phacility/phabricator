@@ -91,7 +91,11 @@ class PhabricatorConduitAPIController
           $auth_okay = false;
           $error_code = 'ERR-NO-CERTIFICATE';
           $error_info = "This server requires authentication but your client ".
-                        "is not configured with an authentication certificate.";
+                        "is not configured with an authentication ".
+                        "certificate. Please refer to ".
+                        "page http://www.phabricator.com/docs/".
+                        "phabricator/article/".
+                        "Installing_Arcanist_Certificates.html for more info.";
         } else {
           $user = new PhabricatorUser();
           $session = queryfx_one(
