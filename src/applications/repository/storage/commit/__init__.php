@@ -10,7 +10,5 @@ phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/phid/storage/phid');
 phutil_require_module('phabricator', 'applications/repository/storage/base');
 
-phutil_require_module('phutil', 'utils');
 
-
-phutil_require_source('PhabricatorRepository.php');
+phutil_require_source('PhabricatorRepositoryCommit.php');

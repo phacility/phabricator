@@ -26,5 +26,7 @@ final class PhabricatorPHIDConstants {
   const PHID_TYPE_PROJ    = 'PROJ';
   const PHID_TYPE_UNKNOWN = '????';
   const PHID_TYPE_MAGIC   = '!!!!';
+  const PHID_TYPE_REPO    = 'REPO';
+  const PHID_TYPE_CMIT    = 'CMIT';
 
 }

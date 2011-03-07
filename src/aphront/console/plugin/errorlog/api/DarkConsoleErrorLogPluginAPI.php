@@ -20,28 +20,38 @@ class DarkConsoleErrorLogPluginAPI {
 
   private static $errors = array();
 
+  private static $discardMode = false;
+
+  public static function enableDiscardMode() {
+    self::$discardMode = true;
+  }
+
   public static function getErrors() {
     return self::$errors;
   }
 
   public static function handleError($num, $str, $file, $line, $cxt) {
-    self::$errors[] = array(
-      'event'   => 'error',
-      'num'     => $num,
-      'str'     => $str,
-      'file'    => $file,
-      'line'    => $line,
-      'cxt'     => $cxt,
-      'trace'   => debug_backtrace(),
-    );
+    if (!self::$discardMode) {
+      self::$errors[] = array(
+        'event'   => 'error',
+        'num'     => $num,
+        'str'     => $str,
+        'file'    => $file,
+        'line'    => $line,
+        'cxt'     => $cxt,
+        'trace'   => debug_backtrace(),
+      );
+    }
     error_log("{$file}:{$line} {$str}");
   }
 
   public static function handleException($ex) {
-    self::$errors[] = array(
-      'event'     => 'exception',
-      'exception' => $ex,
-    );
+    if (!self::$discardMode) {
+      self::$errors[] = array(
+        'event'     => 'exception',
+        'exception' => $ex,
+      );
+    }
     error_log($ex);
   }
 

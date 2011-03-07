@@ -165,7 +165,8 @@ class AphrontDefaultApplicationConfiguration
       '/repository/' => array(
         '$'                     => 'PhabricatorRepositoryListController',
         'create/$'              => 'PhabricatorRepositoryCreateController',
-        'edit/(?P<id>\d+)/$'    => 'PhabricatorRepositoryEditController',
+        'edit/(?P<id>\d+)/(?:(?P<view>\w+)?/)?$' =>
+          'PhabricatorRepositoryEditController',
         'delete/(?P<id>\d+)/$'  => 'PhabricatorRepositoryDeleteController',
       ),
 

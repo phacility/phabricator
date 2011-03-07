@@ -16,28 +16,18 @@
  * limitations under the License.
  */
 
-class DarkConsoleServicesPluginAPI {
+abstract class PhabricatorDaemon extends PhutilDaemon {
 
-  const EVENT_QUERY   = 'query';
-  const EVENT_CONNECT = 'connect';
+  protected function willRun() {
+    parent::willRun();
 
-  private static $events = array();
+    // Both of these store unbounded amounts of log data; make them discard it
+    // instead so that daemons do not require unbounded amounts of memory.
+    DarkConsoleServicesPluginAPI::enableDiscardMode();
+    DarkConsoleErrorLogPluginAPI::enableDiscardMode();
 
-  private static $discardMode = false;
-
-  public static function enableDiscardMode() {
-    self::$discardMode = true;
+    $phabricator = phutil_get_library_root('phabricator');
+    $root = dirname($phabricator);
+    require_once $root.'/scripts/__init_env__.php';
   }
-
-  public static function addEvent(array $event) {
-    if (!self::$discardMode) {
-      self::$events[] = $event;
-    }
-  }
-
-  public static function getEvents() {
-    return self::$events;
-  }
-
 }
-

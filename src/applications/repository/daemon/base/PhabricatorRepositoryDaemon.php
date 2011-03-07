@@ -16,28 +16,23 @@
  * limitations under the License.
  */
 
-class DarkConsoleServicesPluginAPI {
+abstract class PhabricatorRepositoryDaemon extends PhabricatorDaemon {
 
-  const EVENT_QUERY   = 'query';
-  const EVENT_CONNECT = 'connect';
-
-  private static $events = array();
-
-  private static $discardMode = false;
-
-  public static function enableDiscardMode() {
-    self::$discardMode = true;
-  }
-
-  public static function addEvent(array $event) {
-    if (!self::$discardMode) {
-      self::$events[] = $event;
+  protected function loadRepository() {
+    $argv = $this->getArgv();
+    if (count($argv) !== 1) {
+      throw new Exception("No repository PHID provided!");
     }
-  }
 
-  public static function getEvents() {
-    return self::$events;
+    $repository = id(new PhabricatorRepository())->loadOneWhere(
+      'phid = %s',
+      $argv[0]);
+
+    if (!$repository) {
+      throw new Exception("No such repository exists!");
+    }
+
+    return $repository;
   }
 
 }
-

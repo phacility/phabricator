@@ -16,28 +16,10 @@
  * limitations under the License.
  */
 
-class DarkConsoleServicesPluginAPI {
+class PhabricatorTimelineDAO extends PhabricatorLiskDAO {
 
-  const EVENT_QUERY   = 'query';
-  const EVENT_CONNECT = 'connect';
-
-  private static $events = array();
-
-  private static $discardMode = false;
-
-  public static function enableDiscardMode() {
-    self::$discardMode = true;
-  }
-
-  public static function addEvent(array $event) {
-    if (!self::$discardMode) {
-      self::$events[] = $event;
-    }
-  }
-
-  public static function getEvents() {
-    return self::$events;
+  public function getApplicationName() {
+    return 'timeline';
   }
 
 }
-

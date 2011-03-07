@@ -16,28 +16,30 @@
  * limitations under the License.
  */
 
-class DarkConsoleServicesPluginAPI {
+abstract class PhabricatorRepositoryCommitDiscoveryDaemon
+  extends PhabricatorRepositoryDaemon {
 
-  const EVENT_QUERY   = 'query';
-  const EVENT_CONNECT = 'connect';
+  private $repository;
 
-  private static $events = array();
-
-  private static $discardMode = false;
-
-  public static function enableDiscardMode() {
-    self::$discardMode = true;
+  final protected function getRepository() {
+    return $this->repository;
   }
 
-  public static function addEvent(array $event) {
-    if (!self::$discardMode) {
-      self::$events[] = $event;
+  final public function run() {
+    $this->repository = $this->loadRepository();
+
+    $sleep = 15;
+    while (true) {
+      $found = $this->discoverCommits();
+      if ($found) {
+        $sleep = 15;
+      } else {
+        $sleep = min($sleep + 15, 60 * 15);
+      }
+      $this->sleep($sleep);
     }
   }
 
-  public static function getEvents() {
-    return self::$events;
-  }
+  abstract protected function discoverCommits();
 
 }
-

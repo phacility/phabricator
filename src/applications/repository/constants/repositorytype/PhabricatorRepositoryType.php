@@ -16,28 +16,9 @@
  * limitations under the License.
  */
 
-class DarkConsoleServicesPluginAPI {
+final class PhabricatorRepositoryType {
 
-  const EVENT_QUERY   = 'query';
-  const EVENT_CONNECT = 'connect';
-
-  private static $events = array();
-
-  private static $discardMode = false;
-
-  public static function enableDiscardMode() {
-    self::$discardMode = true;
-  }
-
-  public static function addEvent(array $event) {
-    if (!self::$discardMode) {
-      self::$events[] = $event;
-    }
-  }
-
-  public static function getEvents() {
-    return self::$events;
-  }
+  const REPOSITORY_TYPE_GIT = 'git';
+  const REPOSITORY_TYPE_SVN = 'svn';
 
 }
-

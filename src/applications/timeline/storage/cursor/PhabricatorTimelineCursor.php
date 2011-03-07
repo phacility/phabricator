@@ -16,36 +16,16 @@
  * limitations under the License.
  */
 
-class PhabricatorRepository extends PhabricatorRepositoryDAO {
+class PhabricatorTimelineCursor extends PhabricatorTimelineDAO {
 
-  protected $phid;
   protected $name;
-  protected $callsign;
-
-  protected $versionControlSystem;
-  protected $details = array();
+  protected $position;
 
   public function getConfiguration() {
     return array(
-      self::CONFIG_AUX_PHID => true,
-      self::CONFIG_SERIALIZATION => array(
-        'details' => self::SERIALIZATION_JSON,
-      ),
+      self::CONFIG_IDS => self::IDS_MANUAL,
+      self::CONFIG_TIMESTAMPS => false,
     ) + parent::getConfiguration();
-  }
-
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_REPO);
-  }
-
-  public function getDetail($key, $default = null) {
-    return idx($this->details, $key, $default);
-  }
-
-  public function setDetail($key, $value) {
-    $this->details[$key] = $value;
-    return $this;
   }
 
 }

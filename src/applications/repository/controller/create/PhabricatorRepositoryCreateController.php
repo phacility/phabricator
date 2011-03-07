@@ -30,8 +30,8 @@ class PhabricatorRepositoryCreateController extends PhabricatorController {
     $repository = new PhabricatorRepository();
 
     $type_map = array(
-      'svn' => 'Subversion',
       'git' => 'Git',
+      'svn' => 'Subversion',
     );
     $errors = array();
 

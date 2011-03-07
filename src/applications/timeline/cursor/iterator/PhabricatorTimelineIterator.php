@@ -1,0 +1,115 @@
+<?php
+
+/*
+ * Copyright 2011 Facebook, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+class PhabricatorTimelineIterator implements Iterator {
+
+  protected $cursorName;
+  protected $eventTypes;
+
+  protected $cursor;
+
+  protected $index  = -1;
+  protected $events = array();
+
+  const LOAD_CHUNK_SIZE = 128;
+
+  public function __construct($cursor_name, array $event_types) {
+    $this->cursorName = $cursor_name;
+    $this->eventTypes = $event_types;
+  }
+
+  protected function loadEvents() {
+    if (!$this->cursor) {
+      $this->cursor = id(new PhabricatorTimelineCursor())->loadOneWhere(
+        'name = %s',
+        $this->cursorName);
+      if (!$this->cursor) {
+        $cursor = new PhabricatorTimelineCursor();
+        $cursor->setName($this->cursorName);
+        $cursor->setPosition(0);
+        $cursor->save();
+
+        $this->cursor = $cursor;
+      }
+    }
+
+    $event = new PhabricatorTimelineEvent();
+    $event_data = new PhabricatorTimelineEventData();
+    $raw_data = queryfx_all(
+      $event->establishConnection('r'),
+      'SELECT event.*, event_data.eventData eventData
+        FROM %T event WHERE event.id > %d AND event.type in (%Ls)
+        LEFT JOIN %T event_data ON event_data.eventID = event.id
+        ORDER BY event.id ASC LIMIT %d',
+      $event->getTableName(),
+      $this->cursor->getPosition(),
+      $this->eventTypes,
+      $event_data->getTableName(),
+      self::LOAD_CHUNK_SIZE);
+
+    $events = $event->loadAllFromArray($raw_data);
+    $events = mpull($events, null, 'getID');
+    $raw_data = ipull($raw_data, 'eventData', 'id');
+    foreach ($raw_data as $id => $data) {
+      if ($data) {
+        $decoded = json_decode($data, true);
+        $events[$id]->setData($decoded);
+      }
+    }
+
+    $this->events = $events;
+
+    if ($this->events) {
+      $this->events = array_values($this->events);
+      $this->index = 0;
+    } else {
+      $this->cursor = null;
+    }
+  }
+
+  public function current() {
+    return $this->events[$this->index];
+  }
+
+  public function key() {
+    return $this->events[$this->index]->getID();
+  }
+
+  public function next() {
+    if ($this->valid()) {
+      $this->cursor->setPosition($this->key());
+      $this->cursor->save();
+    }
+
+    $this->index++;
+    if (!$this->valid()) {
+      $this->loadEvents();
+    }
+  }
+
+  public function valid() {
+    return isset($this->events[$this->index]);
+  }
+
+  public function rewind() {
+    if (!$this->valid()) {
+      $this->loadEvents();
+    }
+  }
+
+}

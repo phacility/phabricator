@@ -119,6 +119,16 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
 
     $start = microtime(true);
 
+    if (!function_exists('mysql_connect')) {
+      // We have to '@' the actual call since it can spew all sorts of silly
+      // noise, but it will also silence fatals caused by not having MySQL
+      // installed, which has bitten me on three separate occasions. Make sure
+      // such failures are explicit and loud.
+      throw new Exception(
+        "About to call mysql_connect(), but the PHP MySQL extension is not ".
+        "available!");
+    }
+
     $conn = @mysql_connect(
       $host,
       $user,
