@@ -8,6 +8,42 @@
   min-height: 50px;
 }
 
+.maniphest-transaction-detail-container .upforgrab {
+  border-color: #cc9966;
+}
+
+.maniphest-transaction-detail-container .reassigned {
+  border-color: #0099aa;
+}
+
+.maniphest-transaction-detail-container .assigned {
+  border-color: #0099aa;
+}
+
+.maniphest-transaction-detail-container .claimed {
+  border-color: #0099aa;
+}
+
+.maniphest-transaction-detail-container .created {
+  border-color: #660099;
+}
+
+.maniphest-transaction-detail-container .closed {
+  border-color: #006699;
+}
+
+.maniphest-transaction-detail-container .spited {
+  border-color: #006699;
+}
+
+.maniphest-transaction-detail-container .reopened {
+  border-color: #660099;
+}
+
+.maniphest-transaction-detail-container .unbreaknow {
+  border-color: #aa0000;
+}
+
 .maniphest-transaction-header {
   background: #e6e6e6;
   padding: 4px 1em;
@@ -19,8 +55,9 @@
 
 .maniphest-transaction-detail-view {
   margin-left: 54px;
-  border: 1px solid #bbbbbb;
-  border-width: 1px 0 0;
+  border-color: #bbbbbb;
+  border-width: 1px 10px;
+  border-style: solid;
   min-height: 40px;
 }
 

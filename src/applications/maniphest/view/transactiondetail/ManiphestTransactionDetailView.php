@@ -98,7 +98,7 @@ class ManiphestTransactionDetailView extends AphrontView {
     }
     $descs = implode('<br />', $descs);
 
-    $more_classes = implode(' ', $classes);
+    $more_classes = implode(' ', $more_classes);
 
     if ($comment_transaction && $comment_transaction->hasComments()) {
       $comments = $comment_transaction->getCache();
@@ -167,18 +167,22 @@ class ManiphestTransactionDetailView extends AphrontView {
         if ($transaction->getAuthorPHID() == $new) {
           $verb = 'Claimed';
           $desc = 'claimed this task';
+          $classes[] = 'claimed';
         } else if (!$new) {
           $verb = 'Up For Grabs';
           $desc = 'placed this task up for grabs';
+          $classes[] = 'upforgrab';
         } else if (!$old) {
           $verb = 'Assigned';
           $desc = 'assigned this task to '.$this->renderHandles(array($new));
+          $classes[] = 'assigned';
         } else {
           $verb = 'Reassigned';
           $desc = 'reassigned this task from '.
                   $this->renderHandles(array($old)).
                   ' to '.
                   $this->renderHandles(array($new));
+          $classes[] = 'reassigned';
         }
         break;
       case ManiphestTransactionType::TYPE_CCS:
@@ -232,17 +236,21 @@ class ManiphestTransactionDetailView extends AphrontView {
           if ($old) {
             $verb = 'Reopened';
             $desc = 'reopened this task';
+            $classes[] = 'reopened';
           } else {
             $verb = 'Created';
             $desc = 'created this task';
+            $classes[] = 'created';
           }
         } else if ($new == ManiphestTaskStatus::STATUS_CLOSED_SPITE) {
           $verb = 'Spited';
           $desc = 'closed this task out of spite';
+          $classes[] = 'spited';
         } else {
           $verb = 'Closed';
           $full = idx(ManiphestTaskStatus::getTaskStatusMap(), $new, '???');
           $desc = 'closed this task as "'.$full.'"';
+          $classes[] = 'closed';
         }
         break;
       case ManiphestTransactionType::TYPE_PRIORITY:
@@ -260,6 +268,9 @@ class ManiphestTransactionDetailView extends AphrontView {
           $verb = 'Raised Priority';
           $desc = 'raised the priority of this task from "'.$old_name.'" to '.
                   '"'.$new_name.'"';
+        }
+        if ($new == ManiphestTaskPriority::PRIORITY_UNBREAK_NOW) {
+          $classes[] = 'unbreaknow';
         }
         break;
       case ManiphestTransactionType::TYPE_ATTACH:
