@@ -183,6 +183,10 @@ class AphrontDefaultApplicationConfiguration
           => 'PhabricatorProjectAffiliationEditController',
       ),
 
+      '/diffusion/' => array(
+        '$' => 'DiffusionHomeController',
+      ),
+
     );
   }
 
