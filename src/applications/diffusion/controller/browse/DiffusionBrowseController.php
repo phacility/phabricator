@@ -42,10 +42,43 @@ class DiffusionBrowseController extends DiffusionController {
       $this->commit);
     $results = $browse_data->loadPaths();
 
+    $content = array();
+
     if (!$results) {
-      // TODO: useful output (path does not exist / never existed), or file
-      // data.
-      throw new Exception("No browse results.");
+
+      switch ($browse_data->getReasonForEmptyResultSet()) {
+        case DiffusionBrowseQuery::REASON_IS_NONEXISTENT:
+          $title = 'Path Does Not Exist';
+          // TODO: Under git, this error message should be more specific. It
+          // may exist on some other branch.
+          $body  = "This path does not exist anywhere.";
+          $severity = AphrontErrorView::SEVERITY_ERROR;
+          break;
+        case DiffusionBrowseQuery::REASON_IS_DELETED:
+          // TODO: Format all these commits into nice VCS-agnostic links.
+          $commit = $this->commit;
+          $deleted = $browse_data->getDeletedAtCommit();
+          $existed = $browse_data->getExistedAtCommit();
+
+          $title = 'Path Was Deleted';
+          $body = "This path does not exist at {$commit}. It was deleted in ".
+                  "{$deleted} and last existed at {$existed}.";
+          $severity = AphrontErrorView::SEVERITY_WARNING;
+          break;
+        case DiffusionBrowseQuery::REASON_IS_FILE:
+          throw new Exception("TODO: implement this");
+          break;
+        default:
+          throw new Exception("Unknown failure reason!");
+      }
+
+      $error_view = new AphrontErrorView();
+      $error_view->setSeverity($severity);
+      $error_view->setTitle($title);
+      $error_view->appendChild('<p>'.$body.'</p>');
+
+      $content[] = $error_view;
+
     } else {
       $browse_table = new DiffusionBrowseTableView();
       $browse_table->setRepository($repository);
@@ -57,6 +90,8 @@ class DiffusionBrowseController extends DiffusionController {
       $browse_panel->setHeader($this->path);
       $browse_panel->appendChild($browse_table);
 
+      $content[] = $browse_panel;
+
       // TODO: Branch table
     }
 
@@ -64,7 +99,7 @@ class DiffusionBrowseController extends DiffusionController {
     // TODO: Side nav
 
     return $this->buildStandardPageResponse(
-      $browse_panel,
+      $content,
       array(
         'title' => basename($this->path),
       ));
