@@ -66,7 +66,11 @@ class DiffusionBrowseController extends DiffusionController {
           $severity = AphrontErrorView::SEVERITY_WARNING;
           break;
         case DiffusionBrowseQuery::REASON_IS_FILE:
-          throw new Exception("TODO: implement this");
+          $controller = new DiffusionBrowseFileController($this->getRequest());
+          $controller->setRepository($repository);
+          $controller->setPath($this->path);
+          $controller->setCommit($this->commit);
+          return $this->delegateToController($controller);
           break;
         default:
           throw new Exception("Unknown failure reason!");
