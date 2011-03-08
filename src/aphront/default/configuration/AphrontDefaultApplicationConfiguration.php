@@ -185,6 +185,11 @@ class AphrontDefaultApplicationConfiguration
 
       '/diffusion/' => array(
         '$' => 'DiffusionHomeController',
+        '(?P<callsign>[A-Z]+)/browse/'.
+          '(?P<path>.*?)'.
+          '(?:[;](?P<commit>[a-z0-9]+))?'.
+          '(?:[$](?P<line>\d+))?$'
+            => 'DiffusionBrowseController',
       ),
 
     );

@@ -32,4 +32,14 @@ abstract class DiffusionController extends PhabricatorController {
     return $response->setContent($page->render());
   }
 
+  protected function loadRepositoryByCallsign($callsign) {
+    $repository = id(new PhabricatorRepository())->loadOneWhere(
+      'callsign = %s',
+      $callsign);
+    if (!$repository) {
+      throw new Exception("No such repository '{$callsign}'.");
+    }
+    return $repository;
+  }
+
 }

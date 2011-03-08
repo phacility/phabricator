@@ -286,4 +286,10 @@ return array(
 
   'controller.oauth-registration' =>
     'PhabricatorOAuthDefaultRegistrationController',
+
+
+  // Path to the 'git' binary to execute when running git commands. By default
+  // this should work fine, but if you have a weird environment you may need
+  // to set it explicitly (e.g., apache may not have it in its PATH).
+  'git.path' => 'git',
 );
