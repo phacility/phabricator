@@ -56,7 +56,7 @@ abstract class PhabricatorController extends AphrontController {
     }
 
     if ($this->shouldRequireLogin() && !$user->getPHID()) {
-      $login_controller = new PhabricatorLoginController($request);
+      $login_controller = newv('PhabricatorLoginController', array($request));
       return $this->delegateToController($login_controller);
     }
   }

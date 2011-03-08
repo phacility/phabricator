@@ -54,7 +54,8 @@ class DifferentialRevisionViewController extends DifferentialController {
       $this->getImplicitComments($revision),
       $comments);
 
-    $inlines = $this->loadInlineComments($comments, $changesets);
+    $all_changesets = $changesets;
+    $inlines = $this->loadInlineComments($comments, $all_changesets);
 
     $object_phids = array_merge(
       $revision->getReviewers(),
@@ -116,7 +117,7 @@ class DifferentialRevisionViewController extends DifferentialController {
     $comment_view->setComments($comments);
     $comment_view->setHandles($handles);
     $comment_view->setInlineComments($inlines);
-    $comment_view->setChangesets($changesets);
+    $comment_view->setChangesets($all_changesets);
     $comment_view->setUser($user);
 
     $diff_history = new DifferentialRevisionUpdateHistoryView();
