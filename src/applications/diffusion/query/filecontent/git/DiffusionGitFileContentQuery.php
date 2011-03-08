@@ -19,12 +19,14 @@
 final class DiffusionGitFileContentQuery extends DiffusionFileContentQuery {
 
   protected function executeQuery() {
-    $repository = $this->getRepository();
-    $path = $this->getPath();
-    $commit = nonempty($this->getCommit(), 'HEAD');
+    $drequest = $this->getRequest();
+
+    $repository = $drequest->getRepository();
+    $path = $drequest->getPath();
+    $commit = $drequest->getCommit();
 
     $local_path = $repository->getDetail('local-path');
-    $git = PhabricatorEnv::getEnvConfig('git.path');
+    $git = $drequest->getPathToGitBinary();
 
     list($corpus) = execx(
       '(cd %s && %s cat-file blob %s:%s)',

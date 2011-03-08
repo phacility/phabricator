@@ -18,35 +18,22 @@
 
 class DiffusionBrowseController extends DiffusionController {
 
-  private $callsign;
-  private $path;
-  private $line;
-  private $commit;
-
-  private $repository;
-
   public function willProcessRequest(array $data) {
-    $this->callsign = $data['callsign'];
-    $this->path     = rtrim($data['path'], '/');
-
-    $this->line     = idx($data, 'line');
-    $this->commit   = idx($data, 'commit');
+    $this->diffusionRequest = DiffusionRequest::newFromAphrontRequestDictionary(
+      $data);
   }
 
   public function processRequest() {
-    $repository = $this->loadRepositoryByCallsign($this->callsign);
+    $drequest = $this->diffusionRequest;
 
-    $browse_data = DiffusionBrowseQuery::newFromRepository(
-      $repository,
-      $this->path,
-      $this->commit);
-    $results = $browse_data->loadPaths();
+    $browse_query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);
+    $results = $browse_query->loadPaths();
 
     $content = array();
 
     if (!$results) {
 
-      switch ($browse_data->getReasonForEmptyResultSet()) {
+      switch ($browse_query->getReasonForEmptyResultSet()) {
         case DiffusionBrowseQuery::REASON_IS_NONEXISTENT:
           $title = 'Path Does Not Exist';
           // TODO: Under git, this error message should be more specific. It
@@ -56,9 +43,9 @@ class DiffusionBrowseController extends DiffusionController {
           break;
         case DiffusionBrowseQuery::REASON_IS_DELETED:
           // TODO: Format all these commits into nice VCS-agnostic links.
-          $commit = $this->commit;
-          $deleted = $browse_data->getDeletedAtCommit();
-          $existed = $browse_data->getExistedAtCommit();
+          $commit = $drequest->getCommit();
+          $deleted = $browse_query->getDeletedAtCommit();
+          $existed = $browse_query->getExistedAtCommit();
 
           $title = 'Path Was Deleted';
           $body = "This path does not exist at {$commit}. It was deleted in ".
@@ -67,9 +54,7 @@ class DiffusionBrowseController extends DiffusionController {
           break;
         case DiffusionBrowseQuery::REASON_IS_FILE:
           $controller = new DiffusionBrowseFileController($this->getRequest());
-          $controller->setRepository($repository);
-          $controller->setPath($this->path);
-          $controller->setCommit($this->commit);
+          $controller->setDiffusionRequest($drequest);
           return $this->delegateToController($controller);
           break;
         default:
@@ -85,13 +70,11 @@ class DiffusionBrowseController extends DiffusionController {
 
     } else {
       $browse_table = new DiffusionBrowseTableView();
-      $browse_table->setRepository($repository);
+      $browse_table->setDiffusionRequest($drequest);
       $browse_table->setPaths($results);
-      $browse_table->setRoot($this->path);
-      $browse_table->setCommit($this->commit);
 
       $browse_panel = new AphrontPanelView();
-      $browse_panel->setHeader($this->path);
+      $browse_panel->setHeader($drequest->getPath());
       $browse_panel->appendChild($browse_table);
 
       $content[] = $browse_panel;
@@ -105,7 +88,7 @@ class DiffusionBrowseController extends DiffusionController {
     return $this->buildStandardPageResponse(
       $content,
       array(
-        'title' => basename($this->path),
+        'title' => basename($drequest->getPath()),
       ));
   }
 

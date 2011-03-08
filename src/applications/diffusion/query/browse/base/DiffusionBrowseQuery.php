@@ -18,9 +18,7 @@
 
 abstract class DiffusionBrowseQuery {
 
-  private $repository;
-  private $path;
-  private $commit;
+  private $request;
 
   protected $reason;
   protected $existedAtCommit;
@@ -29,15 +27,16 @@ abstract class DiffusionBrowseQuery {
   const REASON_IS_FILE            = 'is-file';
   const REASON_IS_DELETED         = 'is-deleted';
   const REASON_IS_NONEXISTENT     = 'nonexistent';
+  const REASON_BAD_COMMIT         = 'bad-commit';
 
   final private function __construct() {
     // <private>
   }
 
-  final public static function newFromRepository(
-    PhabricatorRepository $repository,
-    $path = '/',
-    $commit = null) {
+  final public static function newFromDiffusionRequest(
+    DiffusionRequest $request) {
+
+    $repository = $request->getRepository();
 
     switch ($repository->getVersionControlSystem()) {
       case 'git':
@@ -51,23 +50,13 @@ abstract class DiffusionBrowseQuery {
     PhutilSymbolLoader::loadClass($class);
     $query = new $class();
 
-    $query->repository = $repository;
-    $query->path = $path;
-    $query->commit = $commit;
+    $query->request = $request;
 
     return $query;
   }
 
-  final protected function getRepository() {
-    return $this->repository;
-  }
-
-  final protected function getPath() {
-    return $this->path;
-  }
-
-  final protected function getCommit() {
-    return $this->commit;
+  final protected function getRequest() {
+    return $this->request;
   }
 
   final public function getReasonForEmptyResultSet() {

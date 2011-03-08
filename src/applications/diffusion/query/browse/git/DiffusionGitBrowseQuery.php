@@ -19,12 +19,13 @@
 final class DiffusionGitBrowseQuery extends DiffusionBrowseQuery {
 
   protected function executeQuery() {
-    $repository = $this->getRepository();
-    $path = $this->getPath();
-    $commit = nonempty($this->getCommit(), 'HEAD');
+    $drequest = $this->getRequest();
+    $repository = $drequest->getRepository();
+
+    $path = $drequest->getPath();
+    $commit = $drequest->getCommit();
 
     $local_path = $repository->getDetail('local-path');
-
     $git = PhabricatorEnv::getEnvConfig('git.path');
 
     try {
@@ -35,7 +36,8 @@ final class DiffusionGitBrowseQuery extends DiffusionBrowseQuery {
         $commit,
         $path);
     } catch (CommandException $e) {
-      if (preg_match('/^fatal: Not a valid object name/', $e->getStderr())) {
+      $stderr = $e->getStdErr();
+      if (preg_match('/^fatal: Not a valid object name/', $stderr)) {
         // Grab two logs, since the first one is when the object was deleted.
         list($stdout) = execx(
           '(cd %s && %s log -n2 --format="%%H" %s -- %s)',

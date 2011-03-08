@@ -18,18 +18,16 @@
 
 abstract class DiffusionFileContentQuery {
 
-  private $repository;
-  private $path;
-  private $commit;
+  private $request;
 
   final private function __construct() {
     // <private>
   }
 
-  final public static function newFromRepository(
-    PhabricatorRepository $repository,
-    $path = '/',
-    $commit = null) {
+  final public static function newFromDiffusionRequest(
+    DiffusionRequest $request) {
+
+    $repository = $request->getRepository();
 
     switch ($repository->getVersionControlSystem()) {
       case 'git':
@@ -42,25 +40,14 @@ abstract class DiffusionFileContentQuery {
     PhutilSymbolLoader::loadClass($class);
     $query = new $class();
 
-    $query->repository = $repository;
-    $query->path = $path;
-    $query->commit = $commit;
+    $query->request = $request;
 
     return $query;
   }
 
-  final protected function getRepository() {
-    return $this->repository;
+  final protected function getRequest() {
+    return $this->request;
   }
-
-  final protected function getPath() {
-    return $this->path;
-  }
-
-  final protected function getCommit() {
-    return $this->commit;
-  }
-
 
   final public function loadFileContent() {
     return $this->executeQuery();

@@ -18,33 +18,16 @@
 
 class DiffusionBrowseFileController extends DiffusionController {
 
-  private $callsign;
-  private $path;
-  private $line;
-  private $commit;
-  private $view;
+  private $diffusionRequest;
 
-  private $repository;
-
-  public function setRepository(DiffusionRepository $repository) {
-    $this->repository = $repository;
-  }
-
-  public function setCommit($commit) {
-    $this->commit = $commit;
-    return $this;
-  }
-
-  public function setPath($path) {
-    $this->path = $path;
+  public function setDiffusionRequest(DiffusionRequest $request) {
+    $this->diffusionRequest = $request;
     return $this;
   }
 
   public function processRequest() {
-    $file_query = DiffusionFileContentQuery::newFromRepository(
-      $this->repository,
-      $this->path,
-      $this->commit);
+    $file_query = DiffusionFileContentQuery::newFromDiffusionRequest(
+      $this->diffusionRequest);
     $file_content = $file_query->loadFileContent();
 
     $corpus = phutil_render_tag(

@@ -18,28 +18,15 @@
 
 final class DiffusionBrowseTableView extends AphrontView {
 
-  private $repository;
-  private $paths;
-  private $root;
-  private $commit;
+  private $request;
 
-  public function setRepository($repository) {
-    $this->repository = $repository;
+  public function setDiffusionRequest(DiffusionRequest $request) {
+    $this->request = $request;
     return $this;
   }
 
   public function setPaths(array $paths) {
     $this->paths = $paths;
-    return $this;
-  }
-
-  public function setRoot($root) {
-    $this->root = $root;
-    return $this;
-  }
-
-  public function setCommit($commit) {
-    $this->commit = $commit;
     return $this;
   }
 
