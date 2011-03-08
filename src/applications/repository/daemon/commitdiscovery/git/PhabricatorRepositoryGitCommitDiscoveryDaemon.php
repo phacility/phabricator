@@ -71,7 +71,6 @@ class PhabricatorRepositoryGitCommitDiscoveryDaemon
       $parents = array_filter(explode(' ', trim($parents)));
       foreach ($parents as $parent) {
         if (!$this->isKnownCommit($parent)) {
-          echo "{$target} has parent {$parent}\n";
           $discover[] = $parent;
           $insert[] = $parent;
         }
@@ -79,6 +78,7 @@ class PhabricatorRepositoryGitCommitDiscoveryDaemon
       if (empty($discover)) {
         break;
       }
+      $this->stillWorking();
     }
 
     while (true) {
@@ -110,6 +110,7 @@ class PhabricatorRepositoryGitCommitDiscoveryDaemon
       if (empty($insert)) {
         break;
       }
+      $this->stillWorking();
     }
   }
 
