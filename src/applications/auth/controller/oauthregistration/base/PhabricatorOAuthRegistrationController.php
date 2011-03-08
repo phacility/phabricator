@@ -21,6 +21,7 @@ abstract class PhabricatorOAuthRegistrationController
 
   private $oauthProvider;
   private $oauthInfo;
+  private $oauthState;
 
   final public function setOAuthInfo($info) {
     $this->oauthInfo = $info;
@@ -38,6 +39,15 @@ abstract class PhabricatorOAuthRegistrationController
 
   final public function getOAuthProvider() {
     return $this->oauthProvider;
+  }
+
+  final public function setOAuthState($state) {
+    $this->oauthState = $state;
+    return $this;
+  }
+
+  final public function getOAuthState() {
+    return $this->oauthState;
   }
 
 }

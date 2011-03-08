@@ -30,6 +30,11 @@ class PhabricatorLoginController extends PhabricatorAuthController {
       return id(new AphrontRedirectResponse())->setURI('/');
     }
 
+    $next_uri = $this->getRequest()->getPath();
+    if ($next_uri == '/login/') {
+      $next_uri = null;
+    }
+
     $password_auth = PhabricatorEnv::getEnvConfig('auth.password-auth-enabled');
 
     $forms = array();
@@ -76,6 +81,7 @@ class PhabricatorLoginController extends PhabricatorAuthController {
       $form
         ->setUser($request->getUser())
         ->setAction('/login/')
+        ->addHiddenInput('next', $next_uri)
         ->appendChild(
           id(new AphrontFormTextControl())
             ->setLabel('Username/Email')
@@ -96,6 +102,8 @@ class PhabricatorLoginController extends PhabricatorAuthController {
   //    $panel->setCreateButton('Register New Account', '/login/register/');
       $forms['Phabricator Login'] = $form;
     }
+
+    $oauth_state = $next_uri;
 
     $providers = array(
       PhabricatorOAuthProvider::PROVIDER_FACEBOOK,
@@ -140,6 +148,7 @@ class PhabricatorLoginController extends PhabricatorAuthController {
         ->addHiddenInput('client_id', $client_id)
         ->addHiddenInput('redirect_uri', $redirect_uri)
         ->addHiddenInput('scope', $minimum_scope)
+        ->addHiddenInput('state', $oauth_state)
         ->setUser($request->getUser())
         ->setMethod('GET')
         ->appendChild(

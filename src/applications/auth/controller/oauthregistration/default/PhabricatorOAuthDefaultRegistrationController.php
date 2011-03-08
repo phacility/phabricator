@@ -125,6 +125,7 @@ class PhabricatorOAuthDefaultRegistrationController
     $form
       ->addHiddenInput('token', $provider->getAccessToken())
       ->addHiddenInput('expires', $oauth_info->getTokenExpires())
+      ->addHiddenInput('state', $this->getOAuthState())
       ->setUser($request->getUser())
       ->setAction($provider->getRedirectURI())
       ->appendChild(

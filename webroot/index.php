@@ -83,10 +83,11 @@ $request = $application->buildRequest();
 $application->setRequest($request);
 list($controller, $uri_data) = $application->buildController();
 try {
-  $controller->willBeginExecution();
-
-  $controller->willProcessRequest($uri_data);
-  $response = $controller->processRequest();
+  $response = $controller->willBeginExecution();
+  if (!$response) {
+    $controller->willProcessRequest($uri_data);
+    $response = $controller->processRequest();
+  }
 } catch (AphrontRedirectException $ex) {
   $response = id(new AphrontRedirectResponse())
     ->setURI($ex->getURI());

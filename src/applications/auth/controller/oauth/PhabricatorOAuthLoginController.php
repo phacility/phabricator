@@ -23,6 +23,7 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
 
   private $accessToken;
   private $tokenExpires;
+  private $oauthState;
 
   public function shouldRequireLogin() {
     return false;
@@ -120,6 +121,7 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
           'account?</p>');
         $dialog->addHiddenInput('token', $provider->getAccessToken());
         $dialog->addHiddenInput('expires', $oauth_info->getTokenExpires());
+        $dialog->addHiddenInput('state', $this->oauthState);
         $dialog->addSubmitButton('Link Accounts');
         $dialog->addCancelButton('/settings/page/'.$provider_key.'/');
 
@@ -133,6 +135,12 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
         ->setURI('/settings/page/'.$provider_key.'/');
     }
 
+    $next_uri = '/';
+    if ($this->oauthState) {
+      // Make sure a blind redirect to evil.com is impossible.
+      $uri = new PhutilURI($this->oauthState);
+      $next_uri = $uri->getPath();
+    }
 
     // Login with known auth.
 
@@ -151,7 +159,7 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
       $request->setCookie('phusr', $known_user->getUsername());
       $request->setCookie('phsid', $session_key);
       return id(new AphrontRedirectResponse())
-        ->setURI('/');
+        ->setURI($next_uri);
     }
 
     $oauth_email = $provider->retrieveUserEmail();
@@ -193,6 +201,7 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
 
     $controller->setOAuthProvider($provider);
     $controller->setOAuthInfo($oauth_info);
+    $controller->setOAuthState($this->oauthState);
 
     return $this->delegateToController($controller);
   }
@@ -217,6 +226,7 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
     if ($token) {
       $this->tokenExpires = $request->getInt('expires');
       $this->accessToken = $token;
+      $this->oauthState = $request->getStr('state');
       return null;
     }
 
@@ -274,6 +284,7 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
     }
 
     $this->accessToken = $token;
+    $this->oauthState = $request->getStr('state');
 
     return null;
   }
