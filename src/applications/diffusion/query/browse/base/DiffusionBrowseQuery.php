@@ -23,9 +23,12 @@ abstract class DiffusionBrowseQuery {
   private $commit;
 
   protected $reason;
+  protected $existedAtCommit;
+  protected $deletedAtCommit;
 
-  const REASON_IS_FILE          = 'is-file';
-  const REASON_IS_NONEXISTENT   = 'nonexistent';
+  const REASON_IS_FILE            = 'is-file';
+  const REASON_IS_DELETED         = 'is-deleted';
+  const REASON_IS_NONEXISTENT     = 'nonexistent';
 
   final private function __construct() {
     // <private>
@@ -69,6 +72,14 @@ abstract class DiffusionBrowseQuery {
 
   final public function getReasonForEmptyResultSet() {
     return $this->reason;
+  }
+
+  final public function getExistedAtCommit() {
+    return $this->existedAtCommit;
+  }
+
+  final public function getDeletedAtCommit() {
+    return $this->deletedAtCommit;
   }
 
   final public function loadPaths() {

@@ -36,6 +36,22 @@ final class DiffusionGitBrowseQuery extends DiffusionBrowseQuery {
         $path);
     } catch (CommandException $e) {
       if (preg_match('/^fatal: Not a valid object name/', $e->getStderr())) {
+        // Grab two logs, since the first one is when the object was deleted.
+        list($stdout) = execx(
+          '(cd %s && %s log -n2 --format="%%H" %s -- %s)',
+          $local_path,
+          $git,
+          $commit,
+          $path);
+        $stdout = trim($stdout);
+        if ($stdout) {
+          $commits = explode("\n", $stdout);
+          $this->reason = self::REASON_IS_DELETED;
+          $this->deletedAtCommit = idx($commits, 0);
+          $this->existedAtCommit = idx($commits, 1);
+          return array();
+        }
+
         $this->reason = self::REASON_IS_NONEXISTENT;
         return array();
       } else {
