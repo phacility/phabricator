@@ -18,11 +18,6 @@
 
 class DiffusionBrowseController extends DiffusionController {
 
-  public function willProcessRequest(array $data) {
-    $this->diffusionRequest = DiffusionRequest::newFromAphrontRequestDictionary(
-      $data);
-  }
-
   public function processRequest() {
     $drequest = $this->diffusionRequest;
 

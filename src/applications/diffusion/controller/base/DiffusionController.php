@@ -18,6 +18,18 @@
 
 abstract class DiffusionController extends PhabricatorController {
 
+  protected $diffusionRequest;
+
+  public function willProcessRequest(array $data) {
+    $this->diffusionRequest = DiffusionRequest::newFromAphrontRequestDictionary(
+      $data);
+  }
+
+  public function setDiffusionRequest(DiffusionRequest $request) {
+    $this->diffusionRequest = $request;
+    return $this;
+  }
+
   public function buildStandardPageResponse($view, array $data) {
 
     $page = $this->buildStandardPageView();

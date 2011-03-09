@@ -16,25 +16,36 @@
  * limitations under the License.
  */
 
-class DiffusionBrowseFileController extends DiffusionController {
+class DiffusionHistoryController extends DiffusionController {
 
   public function processRequest() {
-    $file_query = DiffusionFileContentQuery::newFromDiffusionRequest(
-      $this->diffusionRequest);
-    $file_content = $file_query->loadFileContent();
+    $drequest = $this->diffusionRequest;
 
-    $corpus = phutil_render_tag(
-      'textarea',
-      array(
-      ),
-      phutil_escape_html($file_content->getCorpus()));
+    $history_query = DiffusionHistoryQuery::newFromDiffusionRequest(
+      $drequest);
 
-    // TODO: blame, color, line numbers, highlighting, etc etc
+    $history = $history_query->loadHistory();
+
+    $content = array();
+
+    $history_table = new DiffusionHistoryTableView();
+    $history_table->setDiffusionRequest($drequest);
+    $history_table->setHistory($history);
+
+    $history_panel = new AphrontPanelView();
+    $history_panel->setHeader($drequest->getPath());
+    $history_panel->appendChild($history_table);
+
+    $content[] = $history_panel;
+
+    // TODO: Crumbs
+    // TODO: Side nav
 
     return $this->buildStandardPageResponse(
-      $corpus,
+      $content,
       array(
-        'title' => 'Browse',
+        'title' => 'history',
       ));
   }
+
 }

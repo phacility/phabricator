@@ -38,6 +38,7 @@ class DiffusionGitRequest extends DiffusionRequest {
       // here than to try to do it in every query.
 
       $branch = $this->getBranch();
+
       execx(
         '(cd %s && %s rev-parse --verify %s)',
         $local_path,

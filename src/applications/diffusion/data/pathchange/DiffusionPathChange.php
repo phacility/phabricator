@@ -16,36 +16,18 @@
  * limitations under the License.
  */
 
-final class DiffusionBrowseTableView extends AphrontView {
+final class DiffusionPathChange {
 
-  private $request;
-  private $paths;
+  private $commit;
 
-  public function setDiffusionRequest(DiffusionRequest $request) {
-    $this->request = $request;
+  final public function setCommit($commit) {
+    $this->commit = $commit;
     return $this;
   }
 
-  public function setPaths(array $paths) {
-    $this->paths = $paths;
-    return $this;
+  final public function getCommit() {
+    return $this->commit;
   }
 
-  public function render() {
-    $rows = array();
-    foreach ($this->paths as $path) {
-      $rows[] = array(
-        phutil_escape_html($path->getPath()), // TODO: link
-        // TODO: etc etc
-      );
-    }
-
-    $view = new AphrontTableView($rows);
-    $view->setHeaders(
-      array(
-        'Path',
-      ));
-    return $view->render();
-  }
 
 }
