@@ -6,7 +6,7 @@
 
 
 
-phutil_require_module('phabricator', 'applications/timeline/storage/base');
+phutil_require_module('phabricator', 'infrastructure/daemon/timeline/storage/base');
 
 
 phutil_require_source('PhabricatorTimelineEventData.php');

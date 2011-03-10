@@ -442,6 +442,9 @@ abstract class LiskDAO {
    * @task   load
    */
   public function loadFromArray(array $row) {
+
+    // TODO: We should load only valid properties.
+
     $map = array();
     foreach ($row as $k => $v) {
       $map[$k] = $v;

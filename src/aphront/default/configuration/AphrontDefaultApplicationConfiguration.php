@@ -200,6 +200,10 @@ class AphrontDefaultApplicationConfiguration
         ),
       ),
 
+      '/daemon/' => array(
+        '$' => 'PhabricatorDaemonConsoleController',
+      ),
+
     );
   }
 

@@ -6,9 +6,9 @@
 
 
 
-phutil_require_module('phabricator', 'applications/timeline/storage/cursor');
-phutil_require_module('phabricator', 'applications/timeline/storage/event');
-phutil_require_module('phabricator', 'applications/timeline/storage/eventdata');
+phutil_require_module('phabricator', 'infrastructure/daemon/timeline/storage/cursor');
+phutil_require_module('phabricator', 'infrastructure/daemon/timeline/storage/event');
+phutil_require_module('phabricator', 'infrastructure/daemon/timeline/storage/eventdata');
 phutil_require_module('phabricator', 'storage/queryfx');
 
 phutil_require_module('phutil', 'utils');
