@@ -171,18 +171,43 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
       $notice = null;
     }
 
+    $host = PhabricatorEnv::getEnvConfig('phabricator.base-uri') . 'api/';
+    $conduit_setting = sprintf(
+      '    %s: {'."\n".
+      '      "user" : %s,'."\n".
+      '      "cert" : %s'."\n".
+      '    }'."\n",
+      json_encode($host),
+      json_encode($user->getUserName()),
+      json_encode($user->getConduitCertificate()));
+
     $cert_form = new AphrontFormView();
     $cert_form
       ->setUser($user)
       ->appendChild(
-        '<p class="aphront-form-instructions">Copy and paste this certificate '.
-        'into your <tt>~/.arcrc</tt> in the "hosts" section to enable '.
-        'Arcanist to authenticate against this host.</p>')
+        '<p class="aphront-form-instructions">Copy and paste the host info '.
+        'including the certificate into your <tt>~/.arcrc</tt> in the "hosts" '.
+        'session to enable Arcanist to authenticate against this host.</p>')
+      ->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setControlStyle('white-space: pre; font-family: monospace')
+          ->setValue(
+            '{'."\n".
+            '  ...'."\n".
+            '  "hosts" : {'."\n"))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
-          ->setLabel('Certificate')
+          ->setLabel('Credentials')
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_SHORT)
-          ->setValue($user->getConduitCertificate()));
+          ->setControlStyle('font-family: monospace')
+          ->setValue($conduit_setting))
+      ->appendChild(
+        id(new AphrontFormStaticControl())
+          ->setControlStyle('white-space: pre; font-family: monospace')
+          ->setValue(
+            '  }'."\n".
+            '  ...'."\n".
+            '}'));
 
     $cert = new AphrontPanelView();
     $cert->setHeader('Arcanist Certificate');

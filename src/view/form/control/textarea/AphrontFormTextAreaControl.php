@@ -50,6 +50,7 @@ class AphrontFormTextAreaControl extends AphrontFormControl {
         'name'      => $this->getName(),
         'disabled'  => $this->getDisabled() ? 'disabled' : null,
         'class'     => $height_class,
+        'style'     => $this->getControlStyle(),
         'id'        => $this->getID(),
       ),
       phutil_escape_html($this->getValue()));
