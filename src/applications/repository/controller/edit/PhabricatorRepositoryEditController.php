@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-class PhabricatorRepositoryEditController extends PhabricatorController {
+class PhabricatorRepositoryEditController
+  extends PhabricatorRepositoryController {
 
   private $id;
   private $view;

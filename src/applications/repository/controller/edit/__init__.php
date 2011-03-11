@@ -8,8 +8,8 @@
 
 phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'aphront/response/redirect');
-phutil_require_module('phabricator', 'applications/base/controller/base');
 phutil_require_module('phabricator', 'applications/differential/constants/revisioncontrolsystem');
+phutil_require_module('phabricator', 'applications/repository/controller/base');
 phutil_require_module('phabricator', 'applications/repository/storage/githubnotification');
 phutil_require_module('phabricator', 'applications/repository/storage/repository');
 phutil_require_module('phabricator', 'infrastructure/env');

@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-class PhabricatorRepositoryListController extends PhabricatorController {
+class PhabricatorRepositoryListController
+  extends PhabricatorRepositoryController {
 
 
   public function processRequest() {
