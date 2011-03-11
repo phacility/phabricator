@@ -30,13 +30,20 @@ class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
       queryfx(
         $conn_w,
         'UPDATE %T SET leaseOwner = %s, leaseExpires = UNIX_TIMESTAMP() + 15
-          WHERE leaseOwner IS NULL
-            OR leaseExpires < UNIX_TIMESTAMP()
-          ORDER BY leaseOwner IS NULL, failureCount, priority
-          LIMIT 1',
+          WHERE leaseOwner IS NULL LIMIT 1',
           $task_table->getTableName(),
           $lease_ownership_name);
       $rows = $conn_w->getAffectedRows();
+
+      if (!$rows) {
+        $rows = queryfx(
+          $conn_w,
+          'UPDATE %T SET leaseOwner = %s, leaseExpires = UNIX_TIMESTAMP() + 15
+            WHERE leaseExpires < UNIX_TIMESTAMP() LIMIT 1',
+            $task_table->getTableName(),
+            $lease_ownership_name);
+        $rows = $conn_w->getAffectedRows();
+      }
 
       if ($rows) {
         $data = queryfx_all(
@@ -91,7 +98,7 @@ class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
               queryfx(
                 $conn_w,
                 'DELETE FROM %T WHERE taskID = %d',
-                $taskdata_table,
+                $taskdata_table->getTableName(),
                 $task->getID());
             }
           } catch (Exception $ex) {

@@ -16,7 +16,16 @@
  * limitations under the License.
  */
 
-class PhabricatorRepositoryCommitParserDaemon
-  extends PhabricatorRepositoryDaemon {
+class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
+
+  protected $commitID;
+  protected $authorName;
+  protected $commitMessage;
+
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_TIMESTAMPS => false,
+    ) + parent::getConfiguration();
+  }
 
 }

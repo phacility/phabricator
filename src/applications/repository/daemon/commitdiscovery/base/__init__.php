@@ -7,6 +7,10 @@
 
 
 phutil_require_module('phabricator', 'applications/repository/daemon/base');
+phutil_require_module('phabricator', 'applications/repository/storage/commit');
+phutil_require_module('phabricator', 'infrastructure/daemon/timeline/storage/event');
+
+phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('PhabricatorRepositoryCommitDiscoveryDaemon.php');

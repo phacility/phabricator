@@ -12,4 +12,4 @@ phutil_require_module('phabricator', 'applications/repository/daemon/commitdisco
 phutil_require_module('phutil', 'future/exec');
 
 
-phutil_require_source('PhabricatorRepositoryGitCommitDiscoveryDaemon.php');
+phutil_require_source('PhabricatorRepositorySvnCommitDiscoveryDaemon.php');

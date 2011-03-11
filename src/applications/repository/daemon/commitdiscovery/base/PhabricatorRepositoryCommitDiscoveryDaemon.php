@@ -20,6 +20,7 @@ abstract class PhabricatorRepositoryCommitDiscoveryDaemon
   extends PhabricatorRepositoryDaemon {
 
   private $repository;
+  private $commitCache = array();
 
   final protected function getRepository() {
     return $this->repository;
@@ -38,6 +39,56 @@ abstract class PhabricatorRepositoryCommitDiscoveryDaemon
       }
       $this->sleep($sleep);
     }
+  }
+
+  protected function isKnownCommit($target) {
+    if (isset($this->commitCache[$target])) {
+      return true;
+    }
+
+    $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
+      'repositoryPHID = %s AND commitIdentifier = %s',
+      $this->getRepository()->getPHID(),
+      $target);
+
+    if (!$commit) {
+      return false;
+    }
+
+    $this->commitCache[$target] = true;
+    while (count($this->commitCache) > 16) {
+      array_shift($this->commitCache);
+    }
+
+    return true;
+  }
+
+  protected function recordCommit($commit_identifier, $epoch) {
+    $repository = $this->getRepository();
+
+    $commit = new PhabricatorRepositoryCommit();
+    $commit->setRepositoryPHID($repository->getPHID());
+    $commit->setCommitIdentifier($commit_identifier);
+    $commit->setEpoch($epoch);
+
+    try {
+      $commit->save();
+      $event = new PhabricatorTimelineEvent(
+        'cmit',
+        array(
+          'id' => $commit->getID(),
+        ));
+      $event->recordEvent();
+
+      $this->commitCache[$commit_identifier] = true;
+    } catch (AphrontQueryDuplicateKeyException $ex) {
+      // Ignore. This can happen because we discover the same new commit
+      // more than once when looking at history, or because of races or
+      // data inconsistency or cosmic radiation; in any case, we're still
+      // in a good state if we ignore the failure.
+    }
+
+    $this->stillWorking();
   }
 
   abstract protected function discoverCommits();

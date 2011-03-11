@@ -48,18 +48,19 @@ class PhabricatorTimelineIterator implements Iterator {
       }
     }
 
-    $event = new PhabricatorTimelineEvent();
+    $event = new PhabricatorTimelineEvent('NULL');
     $event_data = new PhabricatorTimelineEventData();
     $raw_data = queryfx_all(
       $event->establishConnection('r'),
       'SELECT event.*, event_data.eventData eventData
-        FROM %T event WHERE event.id > %d AND event.type in (%Ls)
+        FROM %T event
         LEFT JOIN %T event_data ON event_data.eventID = event.id
+        WHERE event.id > %d AND event.type in (%Ls)
         ORDER BY event.id ASC LIMIT %d',
       $event->getTableName(),
+      $event_data->getTableName(),
       $this->cursor->getPosition(),
       $this->eventTypes,
-      $event_data->getTableName(),
       self::LOAD_CHUNK_SIZE);
 
     $events = $event->loadAllFromArray($raw_data);

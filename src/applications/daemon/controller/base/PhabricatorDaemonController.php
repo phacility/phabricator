@@ -22,13 +22,17 @@ abstract class PhabricatorDaemonController extends PhabricatorController {
     $page = $this->buildStandardPageView();
 
     $page->setApplicationName('Daemon Console');
-    $page->setBaseURI('/');
+    $page->setBaseURI('/daemon/');
     $page->setTitle(idx($data, 'title'));
     $page->setTabs(
       array(
         'console' => array(
           'href' => '/daemon/',
           'name' => 'Console',
+        ),
+        'timeline' => array(
+          'href' => '/daemon/timeline/',
+          'name' => 'Timeline',
         ),
       ),
       idx($data, 'tab'));

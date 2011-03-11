@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'infrastructure/daemon/workers/storage/base');
+phutil_require_module('phabricator', 'infrastructure/daemon/workers/storage/taskdata');
 
 
 phutil_require_source('PhabricatorWorkerTask.php');

@@ -16,27 +16,22 @@
  * limitations under the License.
  */
 
-class PhabricatorTimelineCursor extends PhabricatorTimelineDAO {
+abstract class PhabricatorRepositoryCommitMessageParserWorker
+  extends PhabricatorRepositoryCommitParserWorker {
 
-  protected $name;
-  protected $position;
+  final protected function updateCommitData($author, $message) {
+    $commit = $this->commit;
 
-  public function getIDKey() {
-    return 'name';
-  }
-
-  public function getConfiguration() {
-    return array(
-      self::CONFIG_IDS => self::IDS_MANUAL,
-      self::CONFIG_TIMESTAMPS => false,
-    ) + parent::getConfiguration();
-  }
-
-  public function shouldInsertWhenSaved() {
-    if ($this->position == 0) {
-      return true;
+    $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
+      'commitID = %d',
+      $commit->getID());
+    if (!$data) {
+      $data = new PhabricatorRepositoryCommitData();
     }
-    return false;
+    $data->setCommitID($commit->getID());
+    $data->setAuthorName($author);
+    $data->setCommitMessage($message);
+    $data->save();
   }
 
 }

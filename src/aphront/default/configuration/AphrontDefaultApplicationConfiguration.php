@@ -183,6 +183,8 @@ class AphrontDefaultApplicationConfiguration
           => 'PhabricatorProjectAffiliationEditController',
       ),
 
+      '/r(?P<callsign>[A-Z]+)(?P<commit>[a-z0-9]+)$'
+        => 'DiffusionCommitController',
       '/diffusion/' => array(
         '$' => 'DiffusionHomeController',
         '(?P<callsign>[A-Z]+)' => array(
@@ -201,6 +203,8 @@ class AphrontDefaultApplicationConfiguration
       ),
 
       '/daemon/' => array(
+        'timeline/$' => 'PhabricatorDaemonTimelineConsoleController',
+        'timeline/(?P<id>\d+)/$' => 'PhabricatorDaemonTimelineEventController',
         '$' => 'PhabricatorDaemonConsoleController',
       ),
 
