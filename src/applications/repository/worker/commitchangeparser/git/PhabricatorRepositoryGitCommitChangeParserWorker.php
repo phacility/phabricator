@@ -48,6 +48,12 @@ class PhabricatorRepositoryGitCommitChangeParserWorker
         explode("\t", $more_stuff),
         array(null));
 
+      // Normalize the paths for consistency with the SVN workflow.
+      $src_path = '/'.$src_path;
+      if ($dst_path) {
+        $dst_path = '/'.$dst_path;
+      }
+
       $old_mode = intval($old_mode, 8);
       $new_mode = intval($new_mode, 8);
 

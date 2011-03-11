@@ -13,7 +13,7 @@ ALTER TABLE phabricator_worker.worker_task drop key (leaseOwner(16));
 
 create table phabricator_repository.repository_path (
   id int unsigned not null auto_increment primary key,
-  path varchar(512) not null,
+  path varchar(512) binary not null,
   unique key (path)
 );
 

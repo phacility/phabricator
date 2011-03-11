@@ -30,7 +30,7 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
     $missing_paths = array_keys($missing_paths);
 
     if ($missing_paths) {
-      foreach (array_chunk($missing_paths, 512) as $path_chunk) {
+      foreach (array_chunk($missing_paths, 128) as $path_chunk) {
         $sql = array();
         foreach ($path_chunk as $path) {
           $sql[] = qsprintf($conn_w, '(%s)', $path);
@@ -52,7 +52,7 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
     $conn_w = $repository->establishConnection('w');
 
     $result_map = array();
-    foreach (array_chunk($paths, 512) as $path_chunk) {
+    foreach (array_chunk($paths, 128) as $path_chunk) {
       $chunk_map = queryfx_all(
         $conn_w,
         'SELECT path, id FROM %T WHERE path IN (%Ls)',
