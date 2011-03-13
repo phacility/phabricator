@@ -27,6 +27,14 @@ class DiffusionGitRequest extends DiffusionRequest {
     $branch = array_shift($parts);
     $this->branch = $this->decodeBranchName($branch);
 
+    foreach ($parts as $key => $part) {
+      // Prevent any hyjinx since we're ultimately shipping this to the
+      // filesystem under a lot of git workflows.
+      if ($part == '..') {
+        unset($parts[$key]);
+      }
+    }
+
     $this->path = implode('/', $parts);
 
     if ($this->repository) {
@@ -94,6 +102,10 @@ class DiffusionGitRequest extends DiffusionRequest {
       return $this->commit;
     }
     return $this->getBranch();
+  }
+
+  public function getBranchURIComponent($branch) {
+    return $this->encodeBranchName($branch).'/';
   }
 
   private function decodeBranchName($branch) {

@@ -6,7 +6,7 @@
 
 
 
-phutil_require_module('phabricator', 'view/base');
+phutil_require_module('phabricator', 'applications/diffusion/view/base');
 phutil_require_module('phabricator', 'view/control/table');
 
 

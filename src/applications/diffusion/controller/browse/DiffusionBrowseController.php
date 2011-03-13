@@ -26,6 +26,13 @@ class DiffusionBrowseController extends DiffusionController {
 
     $content = array();
 
+    $content[] = $this->buildCrumbs(
+      array(
+        'branch' => true,
+        'path'   => true,
+        'view'   => 'browse',
+      ));
+
     if (!$results) {
 
       switch ($browse_query->getReasonForEmptyResultSet()) {
@@ -69,19 +76,16 @@ class DiffusionBrowseController extends DiffusionController {
       $browse_table->setPaths($results);
 
       $browse_panel = new AphrontPanelView();
-      $browse_panel->setHeader($drequest->getPath());
       $browse_panel->appendChild($browse_table);
 
       $content[] = $browse_panel;
-
-      // TODO: Branch table
     }
 
-    // TODO: Crumbs
-    // TODO: Side nav
+    $nav = $this->buildSideNav('browse', false);
+    $nav->appendChild($content);
 
     return $this->buildStandardPageResponse(
-      $content,
+      $nav,
       array(
         'title' => basename($drequest->getPath()),
       ));

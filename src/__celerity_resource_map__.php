@@ -7,6 +7,15 @@
  */
 
 celerity_register_resource_map(array(
+  'aphront-crumbs-view-css' =>
+  array(
+    'uri' => '/res/4408ef5f/rsrc/css/aphront/crumbs-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/aphront/crumbs-view.css',
+  ),
   'aphront-dark-console-css' =>
   array(
     'uri' => '/res/056b0c12/rsrc/css/aphront/dark-console.css',
@@ -217,7 +226,7 @@ celerity_register_resource_map(array(
   ),
   'maniphest-transaction-detail-css' =>
   array(
-    'uri' => '/res/658912c5/rsrc/css/application/maniphest/transaction-detail.css',
+    'uri' => '/res/9418efc9/rsrc/css/application/maniphest/transaction-detail.css',
     'type' => 'css',
     'requires' =>
     array(

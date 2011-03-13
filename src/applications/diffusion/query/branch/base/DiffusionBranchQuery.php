@@ -16,10 +16,9 @@
  * limitations under the License.
  */
 
-abstract class DiffusionHistoryQuery {
+abstract class DiffusionBranchQuery {
 
   private $request;
-  private $limit = 100;
 
   final private function __construct() {
     // <private>
@@ -32,10 +31,7 @@ abstract class DiffusionHistoryQuery {
 
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        $class = 'DiffusionGitHistoryQuery';
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        $class = 'DiffusionSvnHistoryQuery';
+        $class = 'DiffusionGitBranchQuery';
         break;
       default:
         throw new Exception("Unsupported VCS!");
@@ -53,17 +49,8 @@ abstract class DiffusionHistoryQuery {
     return $this->request;
   }
 
-  final public function loadHistory() {
+  final public function loadBranches() {
     return $this->executeQuery();
-  }
-
-  final public function setLimit($limit) {
-    $this->limit = $limit;
-    return $this;
-  }
-
-  final public function getLimit() {
-    return $this->limit;
   }
 
   abstract protected function executeQuery();

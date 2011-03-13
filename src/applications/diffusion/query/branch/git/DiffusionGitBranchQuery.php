@@ -16,51 +16,37 @@
  * limitations under the License.
  */
 
-final class DiffusionGitHistoryQuery extends DiffusionHistoryQuery {
+final class DiffusionGitBranchQuery extends DiffusionBranchQuery {
 
   protected function executeQuery() {
     $drequest = $this->getRequest();
-
     $repository = $drequest->getRepository();
+
     $path = $drequest->getPath();
     $commit = $drequest->getCommit();
 
     $local_path = $repository->getDetail('local-path');
-    $git = $drequest->getPathToGitBinary();
 
     list($stdout) = execx(
-      '(cd %s && %s log '.
-        '--skip=%d '.
-        '-n %d '.
-        '-M '.
-        '-C '.
-        '-B '.
-        '--find-copies-harder '.
-        '--raw '.
-        '-t '.
-        '--abbrev=40 '.
-        '--pretty=format:%%x1c%%H%%x1d '.
-        '%s -- %s)',
-      $local_path,
-      $git,
-      $offset = 0,
-      $this->getLimit(),
-      $commit,
-      $path);
+      '(cd %s && git branch --verbose --no-abbrev)',
+      $local_path);
 
-    $commits = explode("\x1c", $stdout);
-    array_shift($commits); // \x1c character is first, remove empty record
+    $branches = array();
 
-    $history = array();
-    foreach ($commits as $commit) {
-      list($hash, $raw) = explode("\x1d", $commit);
+    $lines = array_filter(explode("\n", $stdout));
+    foreach ($lines as $line) {
+      $matches = null;
+      if (!preg_match('/^[ *] (\S+)\s+([a-z0-9]{40}) /', $line, $matches)) {
+        throw new Exception("Failed to parse {$line}!");
+      }
+      $branch = new DiffusionBranchInformation();
+      $branch->setName($matches[1]);
+      $branch->setHeadCommitIdentifier($matches[2]);
 
-      $item = new DiffusionPathChange();
-      $item->setCommitIdentifier($hash);
-      $history[] = $item;
+      $branches[] = $branch;
     }
 
-    return $history;
+    return $branches;
   }
 
 }

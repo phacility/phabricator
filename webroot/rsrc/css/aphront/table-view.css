@@ -74,6 +74,10 @@
   white-space:      normal;
 }
 
+.aphront-table-view tr.highlighted {
+  background: #ffff66;
+}
+
 
 .aphront-table-view tr.no-data td {
   padding:    1em;

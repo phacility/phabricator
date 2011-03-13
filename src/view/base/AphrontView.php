@@ -28,18 +28,18 @@ abstract class AphrontView {
   final protected function renderChildren() {
     $out = array();
     foreach ($this->children as $child) {
-      $out[] = $this->renderChild($child);
+      $out[] = $this->renderSingleView($child);
     }
     return implode('', $out);
   }
 
-  private function renderChild($child) {
+  final protected function renderSingleView($child) {
     if ($child instanceof AphrontView) {
       return $child->render();
     } else if (is_array($child)) {
       $out = array();
       foreach ($child as $element) {
-        $out[] = $this->renderChild($element);
+        $out[] = $this->renderSingleView($element);
       }
       return implode('', $out);
     } else {

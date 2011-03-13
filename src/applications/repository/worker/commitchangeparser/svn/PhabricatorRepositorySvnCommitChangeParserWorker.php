@@ -429,6 +429,12 @@ class PhabricatorRepositorySvnCommitChangeParserWorker
         }
       }
 
+      if ($effect['rawPath'] == '/') {
+        // Don't bother writing the CHILD events on '/' to the filesystem
+        // table; in particular, it doesn't have a meaningful parentID.
+        continue;
+      }
+
       $existed = !DifferentialChangeType::isDeleteChangeType($type);
 
       $sql[] = qsprintf(
@@ -607,9 +613,8 @@ class PhabricatorRepositorySvnCommitChangeParserWorker
   }
 
   private function getParentPath($path) {
-    $path = rtrim('/', $path);
+    $path = rtrim($path, '/');
     $path = dirname($path);
-    $path = rtrim('/', $path);
     if (!$path) {
       $path = '/';
     }

@@ -99,4 +99,16 @@ class DiffusionRequest {
     return $this->branch;
   }
 
+  final public function getRawCommit() {
+    return $this->commit;
+  }
+
+  public function getCommitURIComponent($commit) {
+    return $commit;
+  }
+
+  public function getBranchURIComponent($branch) {
+    return $branch;
+  }
+
 }

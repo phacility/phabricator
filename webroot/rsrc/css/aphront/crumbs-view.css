@@ -1,0 +1,18 @@
+/**
+ * @provides aphront-crumbs-view-css
+ */
+
+.aphront-crumbs-view {
+  margin: 1em 2em;
+}
+
+.aphront-crumbs-content {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+.aphront-crumbs-spacer {
+  padding: 0 .35em;
+  color: #888888;
+}

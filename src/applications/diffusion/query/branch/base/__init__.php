@@ -11,4 +11,4 @@ phutil_require_module('phabricator', 'applications/repository/constants/reposito
 phutil_require_module('phutil', 'symbols');
 
 
-phutil_require_source('DiffusionHistoryQuery.php');
+phutil_require_source('DiffusionBranchQuery.php');

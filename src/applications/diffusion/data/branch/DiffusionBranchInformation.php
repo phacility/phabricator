@@ -16,18 +16,27 @@
  * limitations under the License.
  */
 
-final class DiffusionPathChange {
+final class DiffusionBranchInformation {
 
-  private $commitIdentifier;
+  private $name;
+  private $headCommitIdentifier;
 
-  final public function setCommitIdentifier($commit) {
-    $this->commitIdentifier = $commit;
+  public function setName($name) {
+    $this->name = $name;
     return $this;
   }
 
-  final public function getCommitIdentifier() {
-    return $this->commitIdentifier;
+  public function getName() {
+    return $this->name;
   }
 
+  public function setHeadCommitIdentifier($head_commit_identifier) {
+    $this->headCommitIdentifier = $head_commit_identifier;
+    return $this;
+  }
+
+  public function getHeadCommitIdentifier() {
+    return $this->headCommitIdentifier;
+  }
 
 }

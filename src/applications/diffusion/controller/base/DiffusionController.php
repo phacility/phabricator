@@ -30,6 +30,10 @@ abstract class DiffusionController extends PhabricatorController {
     return $this;
   }
 
+  protected function getDiffusionRequest() {
+    return $this->diffusionRequest;
+  }
+
   public function buildStandardPageResponse($view, array $data) {
 
     $page = $this->buildStandardPageView();
@@ -42,6 +46,185 @@ abstract class DiffusionController extends PhabricatorController {
 
     $response = new AphrontWebpageResponse();
     return $response->setContent($page->render());
+  }
+
+  final protected function buildSideNav($selected, $has_change_view) {
+    $nav = new AphrontSideNavView();
+
+    $navs = array(
+      'history' => 'History View',
+      'browse'  => 'Browse View',
+      'change'  => 'Change View',
+    );
+
+    if (!$has_change_view) {
+      unset($navs['change']);
+    }
+
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
+    $callsign = $repository->getCallsign();
+
+    $branch_uri = $drequest->getBranchURIComponent($drequest->getBranch());
+    $path_uri = $branch_uri.$drequest->getPath();
+
+    $commit_uri = null;
+    $raw_commit = $drequest->getRawCommit();
+    if ($raw_commit) {
+      $commit_uri = ';'.$drequest->getCommitURIComponent($raw_commit);
+    }
+
+    foreach ($navs as $uri => $name) {
+      $nav->addNavItem(
+        phutil_render_tag(
+          'a',
+          array(
+            'href'  => "/diffusion/{$callsign}/{$uri}/{$path_uri}{$commit_uri}",
+            'class' =>
+              ($uri == $selected
+                ? 'aphront-side-nav-selected'
+                : null),
+          ),
+          $name));
+    }
+
+    return $nav;
+  }
+
+  public function buildCrumbs(array $spec = array()) {
+    $drequest = $this->diffusionRequest;
+
+    $crumbs = new AphrontCrumbsView();
+
+    $crumb_list = array();
+
+    $repository = $drequest->getRepository();
+    if ($repository) {
+      $crumb_list[] = phutil_render_tag(
+        'a',
+        array(
+          'href' => '/diffusion/',
+        ),
+        'Diffusion');
+    } else {
+      $crumb_list[] = 'Diffusion';
+      $crumbs->setCrumbs($crumb_list);
+      return $crumbs;
+    }
+
+    $callsign = $repository->getCallsign();
+    $repository_name = phutil_escape_html($repository->getName()).' Repository';
+
+    $branch_name = $drequest->getBranch();
+    if ($branch_name) {
+      $repository_name .= ' ('.phutil_escape_html($branch_name).')';
+    }
+
+    $branch_uri = $drequest->getBranchURIComponent($drequest->getBranch());
+
+    if (empty($spec['view'])) {
+      $crumb_list[] = $repository_name;
+      $crumbs->setCrumbs($crumb_list);
+      return $crumbs;
+    }
+
+    $crumb_list[] = phutil_render_tag(
+      'a',
+      array(
+        'href' => "/diffusion/{$callsign}/",
+      ),
+      $repository_name);
+
+
+    if (empty($spec['view'])) {
+      $crumbs->setCrumbs($crumb_list);
+      return $crumbs;
+    }
+
+    $view = $spec['view'];
+
+    switch ($view) {
+      case 'history':
+        $view_name = 'History';
+        break;
+      case 'browse':
+        $view_name = 'Browse';
+        break;
+    }
+
+    $path = null;
+    if (isset($spec['path'])) {
+      $path = $drequest->getPath();
+    }
+
+    $view_root_uri = "/diffusion/{$callsign}/{$view}/{$branch_uri}";
+    $jump_href = $view_root_uri;
+
+    $view_tail_uri = null;
+    $raw_commit = $drequest->getRawCommit();
+    if ($raw_commit) {
+      $view_tail_uri = ';'.$drequest->getCommitURIComponent($raw_commit);
+    }
+
+    if (!strlen($path)) {
+      $crumb_list[] = $view_name;
+    } else {
+
+      $crumb_list[] = phutil_render_tag(
+        'a',
+        array(
+          'href' => $view_root_uri.$view_tail_uri,
+        ),
+        $view_name);
+
+      $path_parts = explode('/', $path);
+      do {
+        $last = array_pop($path_parts);
+      } while ($last == '');
+
+      $path_sections = array();
+      $thus_far = '';
+      foreach ($path_parts as $path_part) {
+        $thus_far .= $path_part.'/';
+        $path_sections[] = phutil_render_tag(
+          'a',
+          array(
+            'href' => $view_root_uri.$thus_far.$view_tail_uri,
+          ),
+          phutil_escape_html($path_part));
+      }
+
+      $path_sections[] = phutil_escape_html($last);
+      $path_sections = '/'.implode('/', $path_sections);
+
+      $jump_href = $view_root_uri.$thus_far.$last;
+
+      $crumb_list[] = $path_sections;
+    }
+
+    $last_crumb = array_pop($crumb_list);
+
+    if ($raw_commit) {
+      $commit_link = DiffusionView::linkCommit(
+        $repository,
+        $raw_commit);
+      $jump_link = phutil_render_tag(
+        'a',
+        array(
+          'href' => $jump_href,
+        ),
+        'Jump to HEAD');
+      $last_crumb .= " @ {$commit_link} ({$jump_link})";
+    } else {
+      $last_crumb .= " @ HEAD";
+    }
+
+    $crumb_list[] = $last_crumb;
+
+
+    $crumbs->setCrumbs($crumb_list);
+
+    return $crumbs;
   }
 
 }

@@ -39,9 +39,12 @@ abstract class DiffusionBrowseQuery {
     $repository = $request->getRepository();
 
     switch ($repository->getVersionControlSystem()) {
-      case 'git':
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         // TODO: Verify local-path?
         $class = 'DiffusionGitBrowseQuery';
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $class = 'DiffusionSvnBrowseQuery';
         break;
       default:
         throw new Exception("Unsupported VCS!");

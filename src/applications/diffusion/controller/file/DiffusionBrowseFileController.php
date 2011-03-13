@@ -19,6 +19,15 @@
 class DiffusionBrowseFileController extends DiffusionController {
 
   public function processRequest() {
+
+    $content = array();
+    $content[] = $this->buildCrumbs(
+      array(
+        'branch' => true,
+        'path'   => true,
+        'view'   => 'browse',
+      ));
+
     $file_query = DiffusionFileContentQuery::newFromDiffusionRequest(
       $this->diffusionRequest);
     $file_content = $file_query->loadFileContent();
@@ -26,13 +35,19 @@ class DiffusionBrowseFileController extends DiffusionController {
     $corpus = phutil_render_tag(
       'textarea',
       array(
+        'style' => 'margin: 1em 2em; width: 90%; height: 80em;',
       ),
       phutil_escape_html($file_content->getCorpus()));
 
+    $content[] = $corpus;
+
     // TODO: blame, color, line numbers, highlighting, etc etc
 
+    $nav = $this->buildSideNav('browse', true);
+    $nav->appendChild($content);
+
     return $this->buildStandardPageResponse(
-      $corpus,
+      $nav,
       array(
         'title' => 'Browse',
       ));

@@ -187,13 +187,14 @@ class AphrontDefaultApplicationConfiguration
         => 'DiffusionCommitController',
       '/diffusion/' => array(
         '$' => 'DiffusionHomeController',
-        '(?P<callsign>[A-Z]+)' => array(
-          '/history/'.
+        '(?P<callsign>[A-Z]+)/' => array(
+          '$' => 'DiffusionRepositoryController',
+          'history/'.
             '(?P<path>.*?)'.
             '(?:[;](?P<commit>[a-z0-9]+))?'.
             '$'
               => 'DiffusionHistoryController',
-          '/browse/'.
+          'browse/'.
             '(?P<path>.*?)'.
             '(?:[;](?P<commit>[a-z0-9]+))?'.
             '(?:[$](?P<line>\d+))?'.

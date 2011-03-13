@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-final class DiffusionGitHistoryQuery extends DiffusionHistoryQuery {
+final class DiffusionSvnHistoryQuery extends DiffusionHistoryQuery {
 
   protected function executeQuery() {
     $drequest = $this->getRequest();
@@ -25,38 +25,32 @@ final class DiffusionGitHistoryQuery extends DiffusionHistoryQuery {
     $path = $drequest->getPath();
     $commit = $drequest->getCommit();
 
-    $local_path = $repository->getDetail('local-path');
-    $git = $drequest->getPathToGitBinary();
+    $conn_r = $repository->establishConnection('r');
 
-    list($stdout) = execx(
-      '(cd %s && %s log '.
-        '--skip=%d '.
-        '-n %d '.
-        '-M '.
-        '-C '.
-        '-B '.
-        '--find-copies-harder '.
-        '--raw '.
-        '-t '.
-        '--abbrev=40 '.
-        '--pretty=format:%%x1c%%H%%x1d '.
-        '%s -- %s)',
-      $local_path,
-      $git,
-      $offset = 0,
-      $this->getLimit(),
-      $commit,
-      $path);
+    $paths = queryfx_all(
+      $conn_r,
+      'SELECT id, path FROM %T WHERE path IN (%Ls)',
+      PhabricatorRepository::TABLE_PATH,
+      array('/'.trim($path, '/')));
+    $paths = ipull($paths, 'id', 'path');
+    $path_id = $paths['/'.trim($path, '/')];
 
-    $commits = explode("\x1c", $stdout);
-    array_shift($commits); // \x1c character is first, remove empty record
+    $history_data = queryfx_all(
+      $conn_r,
+      'SELECT * FROM %T WHERE repositoryID = %d AND pathID = %d
+        AND commitSequence <= %d
+        ORDER BY commitSequence DESC
+        LIMIT %d',
+      PhabricatorRepository::TABLE_PATHCHANGE,
+      $repository->getID(),
+      $path_id,
+      $commit ? $commit : 0x7FFFFFFF,
+      $this->getLimit());
 
     $history = array();
-    foreach ($commits as $commit) {
-      list($hash, $raw) = explode("\x1d", $commit);
-
+    foreach ($history_data as $row) {
       $item = new DiffusionPathChange();
-      $item->setCommitIdentifier($hash);
+      $item->setCommitIdentifier($row['commitID']);
       $history[] = $item;
     }
 

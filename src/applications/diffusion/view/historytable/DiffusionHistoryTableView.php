@@ -16,15 +16,9 @@
  * limitations under the License.
  */
 
-final class DiffusionHistoryTableView extends AphrontView {
+final class DiffusionHistoryTableView extends DiffusionView {
 
-  private $request;
   private $history;
-
-  public function setDiffusionRequest(DiffusionRequest $request) {
-    $this->request = $request;
-    return $this;
-  }
 
   public function setHistory(array $history) {
     $this->history = $history;
@@ -32,10 +26,23 @@ final class DiffusionHistoryTableView extends AphrontView {
   }
 
   public function render() {
+    $drequest = $this->getDiffusionRequest();
+
     $rows = array();
     foreach ($this->history as $history) {
       $rows[] = array(
-        phutil_escape_html($history->getCommit()), // TODO: link
+        $this->linkBrowse(
+          $drequest->getPath(),
+          array(
+            'commit' => $history->getCommitIdentifier(),
+          )),
+        self::linkCommit(
+          $drequest->getRepository(),
+          $history->getCommitIdentifier()),
+        '?',
+        '?',
+        '',
+        '',
         // TODO: etc etc
       );
     }
@@ -43,7 +50,21 @@ final class DiffusionHistoryTableView extends AphrontView {
     $view = new AphrontTableView($rows);
     $view->setHeaders(
       array(
+        'Browse',
         'Commit',
+        'Change',
+        'Date',
+        'Author',
+        'Details',
+      ));
+    $view->setColumnClasses(
+      array(
+        '',
+        'n',
+        '',
+        '',
+        '',
+        'wide wrap',
       ));
     return $view->render();
   }

@@ -16,55 +16,47 @@
  * limitations under the License.
  */
 
-final class DiffusionBrowseTableView extends DiffusionView {
+final class DiffusionBranchTableView extends DiffusionView {
 
-  private $paths;
+  private $branches;
 
-  public function setPaths(array $paths) {
-    $this->paths = $paths;
+  public function setBranches(array $branches) {
+    $this->branches = $branches;
     return $this;
   }
 
   public function render() {
-    $request = $this->getDiffusionRequest();
-
-    $base_path = trim($request->getPath(), '/');
-    if ($base_path) {
-      $base_path = $base_path.'/';
-    }
+    $drequest = $this->getDiffusionRequest();
+    $current_branch = $drequest->getBranch();
 
     $rows = array();
-    foreach ($this->paths as $path) {
-
-      if ($path->getFileType() == DifferentialChangeType::FILE_DIRECTORY) {
-        $browse_text = $path->getPath().'/';
-        $dir_slash = '/';
-      } else {
-        $browse_text = $path->getPath();
-        $dir_slash = null;
-      }
-
+    $rowc = array();
+    foreach ($this->branches as $branch) {
       $rows[] = array(
-        $this->linkHistory($base_path.$path->getPath().$dir_slash),
-        $this->linkBrowse(
-          $base_path.$path->getPath().$dir_slash,
-          array(
-            'text' => $browse_text,
-          )),
+        phutil_escape_html($branch->getName()), // TODO: link
+        self::linkCommit(
+          $drequest->getRepository(),
+          $branch->getHeadCommitIdentifier()),
+        // TODO: etc etc
       );
+      if ($branch->getName() == $current_branch) {
+        $rowc[] = 'highlighted';
+      } else {
+        $rowc[] = null;
+      }
     }
 
     $view = new AphrontTableView($rows);
     $view->setHeaders(
       array(
-        'History',
-        'Path',
+        'Branch',
+        'Head',
       ));
     $view->setColumnClasses(
       array(
-        '',
-        'wide pri',
+        'wide',
       ));
+    $view->setRowClasses($rowc);
     return $view->render();
   }
 

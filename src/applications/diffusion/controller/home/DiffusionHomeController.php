@@ -49,7 +49,7 @@ class DiffusionHomeController extends DiffusionController {
         phutil_render_tag(
           'a',
           array(
-            'href' => '#', // TODO: Link
+            'href' => '/diffusion/'.$repository->getCallsign().'/',
           ),
           phutil_escape_html($repository->getName())),
         $repository->getVersionControlSystem(),
@@ -81,8 +81,13 @@ class DiffusionHomeController extends DiffusionController {
     $panel->setHeader('Browse Repositories');
     $panel->appendChild($table);
 
+    $crumbs = $this->buildCrumbs();
+
     return $this->buildStandardPageResponse(
-      $panel,
+      array(
+        $crumbs,
+        $panel,
+      ),
       array(
         'title' => 'Diffusion',
       ));

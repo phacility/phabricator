@@ -40,3 +40,5 @@ create table phabricator_repository.repository_filesystem (
   fileType int unsigned not null,
   primary key (repositoryID, parentID, svnCommit, pathID)
 );
+
+alter table repository_filesystem add key (repositoryID, svnCommit);

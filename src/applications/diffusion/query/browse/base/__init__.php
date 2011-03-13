@@ -6,6 +6,8 @@
 
 
 
+phutil_require_module('phabricator', 'applications/repository/constants/repositorytype');
+
 phutil_require_module('phutil', 'symbols');
 
 

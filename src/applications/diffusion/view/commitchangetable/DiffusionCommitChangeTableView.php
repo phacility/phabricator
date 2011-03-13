@@ -16,15 +16,9 @@
  * limitations under the License.
  */
 
-final class DiffusionCommitChangeTableView extends AphrontView {
+final class DiffusionCommitChangeTableView extends DiffusionView {
 
-  private $request;
   private $pathChanges;
-
-  public function setDiffusionRequest(DiffusionRequest $request) {
-    $this->request = $request;
-    return $this;
-  }
 
   public function setPathChanges(array $path_changes) {
     $this->pathChanges = $path_changes;

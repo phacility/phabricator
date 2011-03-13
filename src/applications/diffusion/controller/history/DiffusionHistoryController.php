@@ -28,21 +28,30 @@ class DiffusionHistoryController extends DiffusionController {
 
     $content = array();
 
+    $content[] = $this->buildCrumbs(
+      array(
+        'branch' => true,
+        'path'   => true,
+        'view'   => 'history',
+      ));
+
     $history_table = new DiffusionHistoryTableView();
     $history_table->setDiffusionRequest($drequest);
     $history_table->setHistory($history);
 
     $history_panel = new AphrontPanelView();
-    $history_panel->setHeader($drequest->getPath());
     $history_panel->appendChild($history_table);
 
     $content[] = $history_panel;
 
-    // TODO: Crumbs
-    // TODO: Side nav
+    // TODO: Sometimes we do have a change view, we need to look at the most
+    // recent history entry to figure it out.
+
+    $nav = $this->buildSideNav('history', false);
+    $nav->appendChild($content);
 
     return $this->buildStandardPageResponse(
-      $content,
+      $nav,
       array(
         'title' => 'history',
       ));
