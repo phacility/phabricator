@@ -25,8 +25,10 @@ if (!@constant('__LIBPHUTIL__')) {
   exit(1);
 }
 
-if (!ini_get('date.timezone')) {
-  date_default_timezone_set('America/Los_Angeles');
-}
-
 phutil_load_library(dirname(__FILE__).'/../src/');
+
+phutil_require_module('phutil', 'symbols');
+
+function __autoload($class) {
+  PhutilSymbolLoader::loadClass($class);
+}

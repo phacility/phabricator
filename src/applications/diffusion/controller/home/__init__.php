@@ -7,12 +7,12 @@
 
 
 phutil_require_module('phabricator', 'applications/diffusion/controller/base');
+phutil_require_module('phabricator', 'applications/diffusion/view/base');
 phutil_require_module('phabricator', 'applications/repository/storage/commit');
 phutil_require_module('phabricator', 'applications/repository/storage/repository');
 phutil_require_module('phabricator', 'storage/queryfx');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/layout/panel');
-phutil_require_module('phabricator', 'view/utils');
 
 phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');

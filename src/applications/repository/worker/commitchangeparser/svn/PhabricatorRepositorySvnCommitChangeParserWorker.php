@@ -516,7 +516,7 @@ class PhabricatorRepositorySvnCommitChangeParserWorker
       $parent = $repository_uri.$parent.'@'.$lookup['rawCommit'];
       $parent = escapeshellarg($parent);
       $parents[$parent] = true;
-      $path_mapping[$parent][] = $path;
+      $path_mapping[$parent][] = dirname($path);
     }
 
     $result_map = array();
@@ -592,21 +592,104 @@ class PhabricatorRepositorySvnCommitChangeParserWorker
     $rev  = $info['rawCommit'];
     $path = $this->encodeSVNPath($path);
 
-    // TODO: This is a scalability nightmare.
+    $hashkey = md5($repository->getDetail('remote-uri').$path.'@'.$rev);
 
-    list($raw_xml) = execx(
-      'svn --non-interactive --xml ls -R %s%s@%d',
-      $repository->getDetail('remote-uri'),
-      $path,
-      $rev);
+    // This method is quite horrible. The underlying challenge is that some
+    // commits in the Facebook repository are enormous, taking multiple hours
+    // to 'ls -R' out of the repository and producing XML files >1GB in size.
 
+    // If we try to SimpleXML them, the object exhausts available memory on a
+    // 64G machine. Instead, cache the XML output and then parse it line by line
+    // to limit space requirements.
+
+    $cache_loc = sys_get_temp_dir().'/diffusion.'.$hashkey.'.svnls';
+    if (!Filesystem::pathExists($cache_loc)) {
+      $tmp = new TempFile();
+      execx(
+        'svn --non-interactive --xml ls -R %s%s@%d > %s',
+        $repository->getDetail('remote-uri'),
+        $path,
+        $rev,
+        $tmp);
+      execx(
+        'mv %s %s',
+        $tmp,
+        $cache_loc);
+    }
+
+    $map = $this->parseRecursiveListFileData($cache_loc);
+    Filesystem::remove($cache_loc);
+
+    return $map;
+  }
+
+  private function parseRecursiveListFileData($file_path) {
     $map = array();
 
-    $xml = new SimpleXMLElement($raw_xml);
-    foreach ($xml->list[0] as $entry) {
-      $key = (string)$entry->name;
-      $file_type = $this->getFileTypeFromSVNKind($entry['kind']);
-      $map[$key] = $file_type;
+    $mode = 'xml';
+    $done = false;
+    $entry = null;
+    foreach (new LinesOfALargeFile($file_path) as $lno => $line) {
+      switch ($mode) {
+        case 'entry':
+          if ($line == '</entry>') {
+            $entry = implode('', $entry);
+            $pattern = '@^\s+kind="(file|dir)">'.
+                       '<name>(.*?)</name>'.
+                       '(<size>(.*?)</size>)?@';
+            $matches = null;
+            if (!preg_match($pattern, $entry, $matches)) {
+              throw new Exception("Unable to parse entry!");
+            }
+            $map[html_entity_decode($matches[2])] =
+              $this->getFileTypeFromSVNKind($matches[1]);
+            $mode = 'entry-or-end';
+          } else {
+            $entry[] = $line;
+          }
+          break;
+        case 'entry-or-end':
+          if ($line == '</list>') {
+            $done = true;
+            break 2;
+          } else if ($line == '<entry') {
+            $mode = 'entry';
+            $entry = array();
+          } else {
+            throw new Exception("Expected </list> or <entry, got {$line}.");
+          }
+          break;
+        case 'xml':
+          $expect = '<?xml version="1.0"?>';
+          if ($line !== $expect) {
+            throw new Exception("Expected '{$expect}', got {$line}.");
+          }
+          $mode = 'list';
+          break;
+        case 'list':
+          $expect = '<lists>';
+          if ($line !== $expect) {
+            throw new Exception("Expected '{$expect}', got {$line}.");
+          }
+          $mode = 'list1';
+          break;
+        case 'list1':
+          $expect = '<list';
+          if ($line !== $expect) {
+            throw new Exception("Expected '{$expect}', got {$line}.");
+          }
+          $mode = 'list2';
+          break;
+        case 'list2':
+          if (!preg_match('/^\s+path="/', $line)) {
+            throw new Exception("Expected '   path=...', got {$line}.");
+          }
+          $mode = 'entry-or-end';
+          break;
+      }
+    }
+    if (!$done) {
+      throw new Exception("Unexpected end of file.");
     }
 
     return $map;
@@ -635,10 +718,3 @@ class PhabricatorRepositorySvnCommitChangeParserWorker
   }
 
 }
-
-
-
-
-
-
-
