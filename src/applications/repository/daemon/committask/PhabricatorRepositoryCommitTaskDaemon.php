@@ -38,9 +38,8 @@ class PhabricatorRepositoryCommitTaskDaemon
         }
 
         // TODO: Cache these.
-        $repository = id(new PhabricatorRepository())->loadOneWhere(
-          'phid = %s',
-          $commit->getRepositoryPHID());
+        $repository = id(new PhabricatorRepository())->load(
+          $commit->getRepositoryID());
 
         $vcs = $repository->getVersionControlSystem();
         switch ($vcs) {

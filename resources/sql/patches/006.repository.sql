@@ -42,3 +42,13 @@ create table phabricator_repository.repository_filesystem (
 );
 
 alter table repository_filesystem add key (repositoryID, svnCommit);
+
+truncate phabricator_repository.repository_commit;
+alter table phabricator_repository.repository_commit
+  change repositoryPHID repositoryID int unsigned not null;
+alter table phabricator_repository.repository_commit drop key repositoryPHID;
+alter table phabricator_repository.repository_commit add unique key
+  (repositoryID, commitIdentifier(16));
+alter table phabricator_repository.repository_commit add key
+  (repositoryID, epoch);
+

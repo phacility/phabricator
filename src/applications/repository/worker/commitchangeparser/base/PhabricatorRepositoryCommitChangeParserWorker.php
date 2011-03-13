@@ -19,6 +19,12 @@
 abstract class PhabricatorRepositoryCommitChangeParserWorker
   extends PhabricatorRepositoryCommitParserWorker {
 
+  public function getRequiredLeaseTime() {
+    // It can take a very long time to parse commits; some commits in the
+    // Facebook repository affect many millions of paths. Acquire 24h leases.
+    return 60 * 60 * 24;
+  }
+
   protected function lookupOrCreatePaths(array $paths) {
     $repository = new PhabricatorRepository();
     $conn_w = $repository->establishConnection('w');
@@ -37,7 +43,7 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
         }
         queryfx(
           $conn_w,
-          'INSERT INTO %T (path) VALUES %Q',
+          'INSERT IGNORE INTO %T (path) VALUES %Q',
           PhabricatorRepository::TABLE_PATH,
           implode(', ', $sql));
       }

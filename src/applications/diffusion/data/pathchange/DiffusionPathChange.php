@@ -19,6 +19,8 @@
 final class DiffusionPathChange {
 
   private $commitIdentifier;
+  private $commit;
+  private $commitData;
 
   final public function setCommitIdentifier($commit) {
     $this->commitIdentifier = $commit;
@@ -28,6 +30,50 @@ final class DiffusionPathChange {
   final public function getCommitIdentifier() {
     return $this->commitIdentifier;
   }
+
+  final public function setCommit($commit) {
+    $this->commit = $commit;
+    return $this;
+  }
+
+  final public function getCommit() {
+    return $this->commit;
+  }
+
+  final public function setCommitData($commit_data) {
+    $this->commitData = $commit_data;
+    return $this;
+  }
+
+  final public function getCommitData() {
+    return $this->commitData;
+  }
+
+
+  final public function getEpoch() {
+    if ($this->getCommit()) {
+      return $this->getCommit()->getEpoch();
+    }
+    return null;
+  }
+
+  final public function getAuthorName() {
+    if ($this->getCommitData()) {
+      return $this->getCommitData()->getAuthorName();
+    }
+    return null;
+  }
+
+  final public function getSummary() {
+    if (!$this->getCommitData()) {
+      return null;
+    }
+    $message = $this->getCommitData()->getCommitMessage();
+    $first = idx(explode("\n", $message), 0);
+    return substr($first, 0, 80);
+  }
+
+
 
 
 }

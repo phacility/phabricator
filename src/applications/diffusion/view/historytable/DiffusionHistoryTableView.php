@@ -30,6 +30,16 @@ final class DiffusionHistoryTableView extends DiffusionView {
 
     $rows = array();
     foreach ($this->history as $history) {
+      $epoch = $history->getEpoch();
+
+      if ($epoch) {
+        $date = date('M j, Y', $epoch);
+        $time = date('g:i A', $epoch);
+      } else {
+        $date = null;
+        $time = null;
+      }
+
       $rows[] = array(
         $this->linkBrowse(
           $drequest->getPath(),
@@ -39,10 +49,11 @@ final class DiffusionHistoryTableView extends DiffusionView {
         self::linkCommit(
           $drequest->getRepository(),
           $history->getCommitIdentifier()),
-        '?',
-        '?',
-        '',
-        '',
+        '-',
+        $date,
+        $time,
+        phutil_escape_html($history->getAuthorName()),
+        phutil_escape_html($history->getSummary()),
         // TODO: etc etc
       );
     }
@@ -54,6 +65,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
         'Commit',
         'Change',
         'Date',
+        'Time',
         'Author',
         'Details',
       ));
@@ -63,6 +75,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
         'n',
         '',
         '',
+        'right',
         '',
         'wide wrap',
       ));

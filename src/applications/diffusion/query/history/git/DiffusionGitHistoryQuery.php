@@ -23,7 +23,7 @@ final class DiffusionGitHistoryQuery extends DiffusionHistoryQuery {
 
     $repository = $drequest->getRepository();
     $path = $drequest->getPath();
-    $commit = $drequest->getCommit();
+    $commit_hash = $drequest->getCommit();
 
     $local_path = $repository->getDetail('local-path');
     $git = $drequest->getPathToGitBinary();
@@ -32,31 +32,49 @@ final class DiffusionGitHistoryQuery extends DiffusionHistoryQuery {
       '(cd %s && %s log '.
         '--skip=%d '.
         '-n %d '.
-        '-M '.
-        '-C '.
-        '-B '.
-        '--find-copies-harder '.
-        '--raw '.
         '-t '.
         '--abbrev=40 '.
-        '--pretty=format:%%x1c%%H%%x1d '.
+        '--pretty=format:%%H '.
         '%s -- %s)',
       $local_path,
       $git,
-      $offset = 0,
+      $this->getOffset(),
       $this->getLimit(),
-      $commit,
+      $commit_hash,
       $path);
 
-    $commits = explode("\x1c", $stdout);
-    array_shift($commits); // \x1c character is first, remove empty record
+    $hashes = explode("\n", $stdout);
+    $hashes = array_filter($hashes);
+
+    $commits = array();
+    $commit_data = array();
+
+    if ($hashes) {
+      $commits = id(new PhabricatorRepositoryCommit())->loadAllWhere(
+        'repositoryID = %d AND commitIdentifier IN (%Ls)',
+          $repository->getID(),
+        $hashes);
+      $commits = mpull($commits, null, 'getCommitIdentifier');
+      if ($commits) {
+        $commit_data = id(new PhabricatorRepositoryCommitData())->loadAllWhere(
+          'commitID in (%Ld)',
+          mpull($commits, 'getID'));
+        $commit_data = mpull($commit_data, null, 'getCommitID');
+      }
+    }
 
     $history = array();
-    foreach ($commits as $commit) {
-      list($hash, $raw) = explode("\x1d", $commit);
-
+    foreach ($hashes as $hash) {
       $item = new DiffusionPathChange();
       $item->setCommitIdentifier($hash);
+      $commit = idx($commits, $hash);
+      if ($commit) {
+        $item->setCommit($commit);
+        $data = idx($commit_data, $commit->getID());
+        if ($data) {
+          $item->setCommitData($data);
+        }
+      }
       $history[] = $item;
     }
 

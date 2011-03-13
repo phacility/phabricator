@@ -35,8 +35,16 @@ class DiffusionRepositoryController extends DiffusionController {
     $history_table->setDiffusionRequest($drequest);
     $history_table->setHistory($history);
 
+    $callsign = $drequest->getRepository()->getCallsign();
+    $all = phutil_render_tag(
+      'a',
+      array(
+        'href' => "/diffusion/{$callsign}/history/",
+      ),
+      'View Full Commit History');
+
     $panel = new AphrontPanelView();
-    $panel->setHeader('Recent Commits');
+    $panel->setHeader("Recent Commits &middot; {$all}");
     $panel->appendChild($history_table);
 
     $content[] = $panel;

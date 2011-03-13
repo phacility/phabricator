@@ -18,7 +18,7 @@
 
 class PhabricatorRepositoryCommit extends PhabricatorRepositoryDAO {
 
-  protected $repositoryPHID;
+  protected $repositoryID;
   protected $phid;
   protected $commitIdentifier;
   protected $epoch;

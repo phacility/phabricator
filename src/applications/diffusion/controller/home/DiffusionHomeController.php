@@ -27,24 +27,49 @@ class DiffusionHomeController extends DiffusionController {
     $commit = new PhabricatorRepositoryCommit();
     $conn_r = $commit->establishConnection('r');
 
-    // TODO: Both these queries are basically bogus and have total trash for
-    // query plans, and don't return the right results. Build a cache instead.
-    // These are just pulling data with approximately the right look to it.
-    $commits = $commit->loadAllWhere(
-      '1 = 1 GROUP BY repositoryPHID');
-    $commits = mpull($commits, null, 'getRepositoryPHID');
+    // TODO: These queries are pretty bogus.
 
-    $commit_counts = queryfx_all(
-      $conn_r,
-      'SELECT repositoryPHID, count(*) N FROM %T
-        GROUP BY repositoryPHID',
+    $commits = array();
+    $commit_counts = array();
+
+    $max_epoch = queryfx_all(
+      $commit->establishConnection('r'),
+      'SELECT repositoryID, MAX(epoch) maxEpoch FROM %T GROUP BY repositoryID',
       $commit->getTableName());
-    $commit_counts = ipull($commit_counts, 'N', 'repositoryPHID');
+
+    if ($max_epoch) {
+      $sql = array();
+      foreach ($max_epoch as $head) {
+        $sql[] = '('.(int)$head['repositoryID'].', '.(int)$head['maxEpoch'].')';
+      }
+
+      // NOTE: It's possible we'll pull multiple commits for some repository
+      // here but it reduces query cost around 3x to unique them in PHP rather
+      // than apply GROUP BY in MySQL.
+      $commits = $commit->loadAllWhere(
+        '(repositoryID, epoch) IN (%Q)',
+        implode(', ', $sql));
+      $commits = mpull($commits, null, 'getRepositoryID');
+
+      $commit_counts = queryfx_all(
+        $conn_r,
+        'SELECT repositoryID, count(*) N FROM %T
+          GROUP BY repositoryID',
+        $commit->getTableName());
+      $commit_counts = ipull($commit_counts, 'N', 'repositoryID');
+    }
 
     $rows = array();
     foreach ($repositories as $repository) {
-      $phid = $repository->getPHID();
-      $commit = idx($commits, $phid);
+      $id = $repository->getID();
+      $commit = idx($commits, $id);
+      $date = null;
+      $time = null;
+      if ($commit) {
+        $date = date('M j, Y', $commit->getEpoch());
+        $time = date('g:i A', $commit->getEpoch());
+      }
+
       $rows[] = array(
         phutil_render_tag(
           'a',
@@ -53,13 +78,14 @@ class DiffusionHomeController extends DiffusionController {
           ),
           phutil_escape_html($repository->getName())),
         $repository->getVersionControlSystem(),
-        idx($commit_counts, $phid, 0),
+        idx($commit_counts, $id, 0),
         $commit
-          ? $commit->getCommitIdentifier()
-          : null, // TODO: Link/format
-        $commit
-          ? phabricator_format_timestamp($commit->getEpoch())
+          ? DiffusionView::linkCommit(
+              $repository,
+              $commit->getCommitIdentifier())
           : null,
+        $date,
+        $time,
       );
     }
 
@@ -70,11 +96,17 @@ class DiffusionHomeController extends DiffusionController {
         'VCS',
         'Size',
         'Last',
-        'Committed',
+        'Date',
+        'Time',
       ));
     $table->setColumnClasses(
       array(
         'wide',
+        '',
+        'n',
+        'n',
+        '',
+        'right',
       ));
 
     $panel = new AphrontPanelView();

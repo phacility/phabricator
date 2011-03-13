@@ -47,8 +47,8 @@ abstract class PhabricatorRepositoryCommitDiscoveryDaemon
     }
 
     $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-      'repositoryPHID = %s AND commitIdentifier = %s',
-      $this->getRepository()->getPHID(),
+      'repositoryID = %s AND commitIdentifier = %s',
+      $this->getRepository()->getID(),
       $target);
 
     if (!$commit) {
@@ -67,7 +67,7 @@ abstract class PhabricatorRepositoryCommitDiscoveryDaemon
     $repository = $this->getRepository();
 
     $commit = new PhabricatorRepositoryCommit();
-    $commit->setRepositoryPHID($repository->getPHID());
+    $commit->setRepositoryID($repository->getID());
     $commit->setCommitIdentifier($commit_identifier);
     $commit->setEpoch($epoch);
 

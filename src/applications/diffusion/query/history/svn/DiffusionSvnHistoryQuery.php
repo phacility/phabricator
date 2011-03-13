@@ -47,10 +47,36 @@ final class DiffusionSvnHistoryQuery extends DiffusionHistoryQuery {
       $commit ? $commit : 0x7FFFFFFF,
       $this->getLimit());
 
+    $commits = array();
+    $commit_data = array();
+
+    $commit_ids = ipull($history_data, 'commitID');
+    if ($commit_ids) {
+      $commits = id(new PhabricatorRepositoryCommit())->loadAllWhere(
+        'id IN (%Ld)',
+        $commit_ids);
+      if ($commits) {
+        $commit_data = id(new PhabricatorRepositoryCommitData())->loadAllWhere(
+          'commitID in (%Ld)',
+          $commit_ids);
+        $commit_data = mpull($commit_data, null, 'getCommitID');
+      }
+    }
+
+
+
     $history = array();
     foreach ($history_data as $row) {
       $item = new DiffusionPathChange();
-      $item->setCommitIdentifier($row['commitID']);
+      $commit = idx($commits, $row['commitID']);
+      if ($commit) {
+        $item->setCommit($commit);
+        $item->setCommitIdentifier($commit->getCommitIdentifier());
+        $data = idx($commit_data, $commit->getID());
+        if ($data) {
+          $item->setCommitData($data);
+        }
+      }
       $history[] = $item;
     }
 

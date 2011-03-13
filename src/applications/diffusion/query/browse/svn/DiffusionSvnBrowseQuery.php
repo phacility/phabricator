@@ -37,6 +37,12 @@ final class DiffusionSvnBrowseQuery extends DiffusionBrowseQuery {
     $paths = ipull($paths, 'id', 'path');
     $path_id = $paths[$path_normal];
 
+    if ($commit) {
+      $slice_clause = 'AND svnCommit <= '.(int)$commit;
+    } else {
+      $slice_clause = '';
+    }
+
     $index = queryfx_all(
       $conn_r,
       'SELECT pathID, max(svnCommit) maxCommit FROM %T WHERE
@@ -45,7 +51,7 @@ final class DiffusionSvnBrowseQuery extends DiffusionBrowseQuery {
       PhabricatorRepository::TABLE_FILESYSTEM,
       $repository->getID(),
       $path_id,
-      '');
+      $slice_clause);
 
     if (!$index) {
       // TODO: !

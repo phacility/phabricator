@@ -20,6 +20,7 @@ abstract class DiffusionHistoryQuery {
 
   private $request;
   private $limit = 100;
+  private $offset = 0;
 
   final private function __construct() {
     // <private>
@@ -64,6 +65,15 @@ abstract class DiffusionHistoryQuery {
 
   final public function getLimit() {
     return $this->limit;
+  }
+
+  final public function setOffset($offset) {
+    $this->offset = $offset;
+    return $this;
+  }
+
+  final public function getOffset() {
+    return $this->offset;
   }
 
   abstract protected function executeQuery();
