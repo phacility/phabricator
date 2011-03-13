@@ -29,10 +29,10 @@ final class DiffusionCommitChangeTableView extends DiffusionView {
     $rows = array();
     foreach ($this->pathChanges as $change) {
       $rows[] = array(
-        'browse',
-        'whatever',
-        $change->getPath(), // TODO: link
-        // TODO: etc etc
+        $this->linkHistory($change->getPath()),
+        $this->linkBrowse($change->getPath()),
+        '-',
+        phutil_escape_html($change->getPath()),
       );
     }
 
@@ -40,11 +40,13 @@ final class DiffusionCommitChangeTableView extends DiffusionView {
     $view->setHeaders(
       array(
         'History',
+        'Browse',
         'Change',
         'Path',
       ));
     $view->setColumnClasses(
       array(
+        '',
         '',
         '',
         'wide',

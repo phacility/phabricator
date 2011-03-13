@@ -19,34 +19,43 @@
 class DiffusionCommitController extends DiffusionController {
 
   public function processRequest() {
-    $drequest = $this->diffusionRequest;
+    $drequest = $this->getDiffusionRequest();
 
-
-
+    $content = array();
+    $content[] = $this->buildCrumbs(array(
+      'commit' => true,
+    ));
 
     $detail_panel = new AphrontPanelView();
     $detail_panel->setHeader('Revision Detail');
     $detail_panel->appendChild('<div>'.$drequest->getCommit().'</div>');
 
+    $content[] = $detail_panel;
+
+    $change_query = DiffusionPathChangeQuery::newFromDiffusionRequest(
+      $drequest);
+    $changes = $change_query->loadChanges();
+
     $change_table = new DiffusionCommitChangeTableView();
     $change_table->setDiffusionRequest($drequest);
-    $change_table->setPathChanges(array());
+    $change_table->setPathChanges($changes);
 
     $change_panel = new AphrontPanelView();
     $change_panel->setHeader('Changes');
     $change_panel->appendChild($change_table);
+
+    $content[] = $change_panel;
+
 
     $change_list =
       '<div style="margin: 2em; color: #666; padding: 1em; background: #eee;">'.
         '(list of changes goes here)'.
       '</div>';
 
+    $content[] = $change_list;
+
     return $this->buildStandardPageResponse(
-      array(
-        $detail_panel,
-        $change_panel,
-        $change_list,
-      ),
+      $content,
       array(
         'title' => 'Diffusion',
       ));

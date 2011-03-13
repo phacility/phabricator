@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'applications/diffusion/controller/base');
+phutil_require_module('phabricator', 'applications/diffusion/query/pathchange/base');
 phutil_require_module('phabricator', 'applications/diffusion/view/commitchangetable');
 phutil_require_module('phabricator', 'view/layout/panel');
 

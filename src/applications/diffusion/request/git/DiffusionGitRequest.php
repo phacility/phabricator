@@ -54,11 +54,16 @@ class DiffusionGitRequest extends DiffusionRequest {
         $branch);
 
       if ($this->commit) {
-        execx(
+        list($commit) = execx(
           '(cd %s && %s rev-parse --verify %s)',
           $local_path,
           $git,
           $this->commit);
+
+        // Beyond verifying them, expand commit short forms to full 40-character
+        // sha1s.
+        $this->commit = trim($commit);
+
         list($contains) = execx(
           '(cd %s && %s branch --contains %s)',
           $local_path,

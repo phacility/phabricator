@@ -122,7 +122,7 @@ abstract class DiffusionController extends PhabricatorController {
 
     $branch_uri = $drequest->getBranchURIComponent($drequest->getBranch());
 
-    if (empty($spec['view'])) {
+    if (empty($spec['view']) && empty($spec['commit'])) {
       $crumb_list[] = $repository_name;
       $crumbs->setCrumbs($crumb_list);
       return $crumbs;
@@ -135,8 +135,9 @@ abstract class DiffusionController extends PhabricatorController {
       ),
       $repository_name);
 
-
-    if (empty($spec['view'])) {
+    $raw_commit = $drequest->getRawCommit();
+    if (isset($spec['commit'])) {
+      $crumb_list[] = "r{$callsign}{$raw_commit}";
       $crumbs->setCrumbs($crumb_list);
       return $crumbs;
     }
@@ -161,7 +162,6 @@ abstract class DiffusionController extends PhabricatorController {
     $jump_href = $view_root_uri;
 
     $view_tail_uri = null;
-    $raw_commit = $drequest->getRawCommit();
     if ($raw_commit) {
       $view_tail_uri = ';'.$drequest->getCommitURIComponent($raw_commit);
     }

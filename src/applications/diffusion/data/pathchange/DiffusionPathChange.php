@@ -18,9 +18,50 @@
 
 final class DiffusionPathChange {
 
+  private $path;
   private $commitIdentifier;
   private $commit;
   private $commitData;
+
+  private $changeType;
+  private $fileType;
+  private $targetPath;
+
+  final public function setPath($path) {
+    $this->path = $path;
+    return $this;
+  }
+
+  final public function getPath() {
+    return $this->path;
+  }
+
+  public function setChangeType($change_type) {
+    $this->changeType = $change_type;
+    return $this;
+  }
+
+  public function getChangeType() {
+    return $this->changeType;
+  }
+
+  public function setFileType($file_type) {
+    $this->fileType = $file_type;
+    return $this;
+  }
+
+  public function getFileType() {
+    return $this->fileType;
+  }
+
+  public function setTargetPath($target_path) {
+    $this->targetPath = $target_path;
+    return $this;
+  }
+
+  public function getTargetPath() {
+    return $this->targetPath;
+  }
 
   final public function setCommitIdentifier($commit) {
     $this->commitIdentifier = $commit;
