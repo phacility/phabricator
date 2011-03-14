@@ -11,6 +11,7 @@ $package_spec = array(
     'aphront-panel-view-css',
     'aphront-side-nav-view-css',
     'aphront-table-view-css',
+    'aphront-crumbs-view-css',
     'aphront-tokenizer-control-css',
     'aphront-typeahead-control-css',
 
@@ -35,6 +36,9 @@ $package_spec = array(
     'javelin-behavior-differential-populate',
     'javelin-behavior-differential-show-more',
     'javelin-behavior-differential-diff-radios',
+  ),
+  'diffusion.pkg.css' => array(
+    'diffusion-commit-view-css',
   ),
 );
 
@@ -89,30 +93,30 @@ foreach ($file_map as $path => $info) {
       "File {$path} does not have a header doc comment. Encode dependency ".
       "data in a header docblock.");
   }
-  
+
   list($description, $metadata) = $parser->parse($matches[0]);
-  
+
   $provides = preg_split('/\s+/', trim(idx($metadata, 'provides')));
   $requires = preg_split('/\s+/', trim(idx($metadata, 'requires')));
   $provides = array_filter($provides);
   $requires = array_filter($requires);
-  
+
   if (count($provides) !== 1) {
     throw new Exception(
       "File {$path} must @provide exactly one Celerity target.");
   }
-  
+
   $provides = reset($provides);
 
   $type = 'js';
   if (preg_match('/\.css$/', $path)) {
     $type = 'css';
   }
-  
+
   $uri = '/res/'.substr($info['hash'], 0, 8).$path;
-  
+
   $hash_map[$provides] = $info['hash'];
-  
+
   $runtime_map[$provides] = array(
     'uri'       => $uri,
     'type'      => $type,
@@ -155,7 +159,7 @@ foreach ($package_spec as $name => $package) {
     $package_map['reverse'][$symbol] = $key;
   }
 }
-    
+
 
 $runtime_map = var_export($runtime_map, true);
 $runtime_map = preg_replace('/\s+$/m', '', $runtime_map);
@@ -182,4 +186,4 @@ echo "Writing map...\n";
 Filesystem::writeFile(
   $root.'/../src/__celerity_resource_map__.php',
   $resource_map);
-echo "Done.\n";  
+echo "Done.\n";
