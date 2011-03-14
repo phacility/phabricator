@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/differential/constants/changetype');
 phutil_require_module('phabricator', 'applications/repository/constants/repositorytype');
 phutil_require_module('phabricator', 'view/base');
 
