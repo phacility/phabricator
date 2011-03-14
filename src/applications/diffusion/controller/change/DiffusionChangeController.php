@@ -16,13 +16,13 @@
  * limitations under the License.
  */
 
-class DiffusionBrowseController extends DiffusionController {
+class DiffusionChangeController extends DiffusionController {
 
   public function processRequest() {
     $drequest = $this->diffusionRequest;
 
-    $browse_query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);
-    $results = $browse_query->loadPaths();
+//    $browse_query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);
+//    $results = $browse_query->loadPaths();
 
     $content = array();
 
@@ -30,9 +30,10 @@ class DiffusionBrowseController extends DiffusionController {
       array(
         'branch' => true,
         'path'   => true,
-        'view'   => 'browse',
+        'view'   => 'change',
       ));
 
+/*
     if (!$results) {
 
       switch ($browse_query->getReasonForEmptyResultSet()) {
@@ -48,16 +49,6 @@ class DiffusionBrowseController extends DiffusionController {
           $commit = $drequest->getCommit();
           $deleted = $browse_query->getDeletedAtCommit();
           $existed = $browse_query->getExistedAtCommit();
-
-          $callsign = $drequest->getRepository()->getCallsign();
-
-          if ($commit) {
-            $commit = "r{$callsign}{$commit}";
-          } else {
-            $commit = 'HEAD';
-          }
-          $deleted = "r{$callsign}{$deleted}";
-          $existed = "r{$callsign}{$existed}";
 
           $title = 'Path Was Deleted';
           $body = "This path does not exist at {$commit}. It was deleted in ".
@@ -90,14 +81,15 @@ class DiffusionBrowseController extends DiffusionController {
 
       $content[] = $browse_panel;
     }
+*/
 
-    $nav = $this->buildSideNav('browse', false);
+    $nav = $this->buildSideNav('change', true);
     $nav->appendChild($content);
 
     return $this->buildStandardPageResponse(
       $nav,
       array(
-        'title' => basename($drequest->getPath()),
+        'title' => 'Change',
       ));
   }
 

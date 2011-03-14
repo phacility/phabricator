@@ -73,6 +73,7 @@ class PhabricatorRepositoryGitCommitChangeParserWorker
       $change_type = null;
       $change_path = $src_path;
       $change_target = null;
+      $is_direct = true;
 
       switch ($action[0]) {
         case 'A':
@@ -94,7 +95,12 @@ class PhabricatorRepositoryGitCommitChangeParserWorker
           $move_away[$change_target][] = $change_path;
           break;
         case 'M':
-          $change_type = DifferentialChangeType::TYPE_CHANGE;
+          if ($file_type == DifferentialChangeType::FILE_DIRECTORY) {
+            $change_type = DifferentialChangeType::TYPE_CHILD;
+            $is_direct = false;
+          } else {
+            $change_type = DifferentialChangeType::TYPE_CHANGE;
+          }
           break;
         default:
           throw new Exception("Failed to parse line '{$line}'.");
@@ -107,13 +113,28 @@ class PhabricatorRepositoryGitCommitChangeParserWorker
         'path'              => $change_path,
         'changeType'        => $change_type,
         'fileType'          => $file_type,
-        'isDirect'          => true,
+        'isDirect'          => $is_direct,
         'commitSequence'    => $commit->getEpoch(),
 
         'targetPath'        => $change_target,
         'targetCommitID'    => $change_target ? $commit->getID() : null,
       );
     }
+
+    // Add a change to '/' since git doesn't mention it.
+    $changes['/'] = array(
+      'repositoryID'      => $repository->getID(),
+      'commitID'          => $commit->getID(),
+
+      'path'              => '/',
+      'changeType'        => DifferentialChangeType::TYPE_CHILD,
+      'fileType'          => DifferentialChangeType::FILE_DIRECTORY,
+      'isDirect'          => false,
+      'commitSequence'    => $commit->getEpoch(),
+
+      'targetPath'        => null,
+      'targetCommitID'    => null,
+    );
 
     foreach ($copy_away as $change_path => $destinations) {
       if (isset($move_away[$change_path])) {

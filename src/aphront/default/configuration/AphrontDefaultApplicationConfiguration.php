@@ -189,6 +189,11 @@ class AphrontDefaultApplicationConfiguration
         '$' => 'DiffusionHomeController',
         '(?P<callsign>[A-Z]+)/' => array(
           '$' => 'DiffusionRepositoryController',
+          'change/'.
+            '(?P<path>.*?)'.
+            '(?:[;](?P<commit>[a-z0-9]+))?'.
+            '$'
+              => 'DiffusionChangeController',
           'history/'.
             '(?P<path>.*?)'.
             '(?:[;](?P<commit>[a-z0-9]+))?'.

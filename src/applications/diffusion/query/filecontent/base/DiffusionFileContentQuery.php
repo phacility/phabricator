@@ -30,8 +30,11 @@ abstract class DiffusionFileContentQuery {
     $repository = $request->getRepository();
 
     switch ($repository->getVersionControlSystem()) {
-      case 'git':
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $class = 'DiffusionGitFileContentQuery';
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $class = 'DiffusionSvnFileContentQuery';
         break;
       default:
         throw new Exception("Unsupported VCS!");

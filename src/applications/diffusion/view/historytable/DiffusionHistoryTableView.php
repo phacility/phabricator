@@ -49,7 +49,9 @@ final class DiffusionHistoryTableView extends DiffusionView {
         self::linkCommit(
           $drequest->getRepository(),
           $history->getCommitIdentifier()),
-        '-',
+        $this->linkChange(
+          $history->getChangeType(),
+          $history->getFileType()),
         $date,
         $time,
         phutil_escape_html($history->getAuthorName()),

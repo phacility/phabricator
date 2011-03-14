@@ -24,8 +24,7 @@
   color: #444444;
   text-align: right;
   white-space: nowrap;
-  padding: 2px 4px;
-  width: 100px;
+  padding: 2px 4px 2px 24px;
 }
 
 .diffusion-commit-properties td {

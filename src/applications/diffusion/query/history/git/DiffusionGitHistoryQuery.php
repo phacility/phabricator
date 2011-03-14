@@ -26,18 +26,15 @@ final class DiffusionGitHistoryQuery extends DiffusionHistoryQuery {
     $commit_hash = $drequest->getCommit();
 
     $local_path = $repository->getDetail('local-path');
-    $git = $drequest->getPathToGitBinary();
 
     list($stdout) = execx(
-      '(cd %s && %s log '.
+      '(cd %s && git log '.
         '--skip=%d '.
         '-n %d '.
-        '-t '.
         '--abbrev=40 '.
         '--pretty=format:%%H '.
         '%s -- %s)',
       $local_path,
-      $git,
       $this->getOffset(),
       $this->getLimit(),
       $commit_hash,
@@ -48,6 +45,9 @@ final class DiffusionGitHistoryQuery extends DiffusionHistoryQuery {
 
     $commits = array();
     $commit_data = array();
+    $path_changes = array();
+
+    $conn_r = $repository->establishConnection('r');
 
     if ($hashes) {
       $commits = id(new PhabricatorRepositoryCommit())->loadAllWhere(
@@ -61,7 +61,27 @@ final class DiffusionGitHistoryQuery extends DiffusionHistoryQuery {
           mpull($commits, 'getID'));
         $commit_data = mpull($commit_data, null, 'getCommitID');
       }
+
+      if ($commits) {
+        $path_normal = '/'.trim($path, '/');
+        $paths = queryfx_all(
+          $conn_r,
+          'SELECT id, path FROM %T WHERE path IN (%Ls)',
+          PhabricatorRepository::TABLE_PATH,
+          array($path_normal));
+        $paths = ipull($paths, 'id', 'path');
+        $path_id = idx($paths, $path_normal);
+
+        $path_changes = queryfx_all(
+          $conn_r,
+          'SELECT * FROM %T WHERE commitID IN (%Ld) AND pathID = %d',
+          PhabricatorRepository::TABLE_PATHCHANGE,
+          mpull($commits, 'getID'),
+          $path_id);
+        $path_changes = ipull($path_changes, null, 'commitID');
+      }
     }
+
 
     $history = array();
     foreach ($hashes as $hash) {
@@ -73,6 +93,11 @@ final class DiffusionGitHistoryQuery extends DiffusionHistoryQuery {
         $data = idx($commit_data, $commit->getID());
         if ($data) {
           $item->setCommitData($data);
+        }
+        $change = idx($path_changes, $commit->getID());
+        if ($change) {
+          $item->setChangeType($change['changeType']);
+          $item->setFileType($change['fileType']);
         }
       }
       $history[] = $item;

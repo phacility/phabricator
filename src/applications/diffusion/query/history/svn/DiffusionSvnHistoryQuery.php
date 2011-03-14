@@ -35,6 +35,8 @@ final class DiffusionSvnHistoryQuery extends DiffusionHistoryQuery {
     $paths = ipull($paths, 'id', 'path');
     $path_id = $paths['/'.trim($path, '/')];
 
+    // TODO: isDirect junk
+
     $history_data = queryfx_all(
       $conn_r,
       'SELECT * FROM %T WHERE repositoryID = %d AND pathID = %d
@@ -63,8 +65,6 @@ final class DiffusionSvnHistoryQuery extends DiffusionHistoryQuery {
       }
     }
 
-
-
     $history = array();
     foreach ($history_data as $row) {
       $item = new DiffusionPathChange();
@@ -77,6 +77,11 @@ final class DiffusionSvnHistoryQuery extends DiffusionHistoryQuery {
           $item->setCommitData($data);
         }
       }
+
+      $item->setChangeType($row['changeType']);
+      $item->setFileType($row['fileType']);
+
+
       $history[] = $item;
     }
 

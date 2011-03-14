@@ -29,6 +29,39 @@ abstract class DiffusionView extends AphrontView {
     return $this->diffusionRequest;
   }
 
+  final public function linkChange($change_type, $file_type) {
+
+    $text = DifferentialChangeType::getFullNameForChangeType($change_type);
+    if ($change_type == DifferentialChangeType::TYPE_CHILD) {
+      // TODO: Don't link COPY_AWAY without a direct change.
+      return $text;
+    }
+    if ($file_type == DifferentialChangeType::FILE_DIRECTORY) {
+      return $text;
+    }
+
+    $drequest = $this->getDiffusionRequest();
+
+    if ($drequest->getRawCommit()) {
+      $commit = ';'.$drequest->getCommitURIComponent($drequest->getRawCommit());
+    } else {
+      $commit = null;
+    }
+
+    $repository = $drequest->getRepository();
+    $callsign = $repository->getCallsign();
+
+    $branch = $drequest->getBranchURIComponent($drequest->getBranch());
+    $path = $branch.$drequest->getPath();
+
+    return phutil_render_tag(
+      'a',
+      array(
+        'href' => "/diffusion/{$callsign}/change/{$path}{$commit}",
+      ),
+      $text);
+  }
+
   final public function linkHistory($path) {
     $drequest = $this->getDiffusionRequest();
 

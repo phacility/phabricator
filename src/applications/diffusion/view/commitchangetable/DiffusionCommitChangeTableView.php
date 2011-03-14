@@ -28,10 +28,17 @@ final class DiffusionCommitChangeTableView extends DiffusionView {
   public function render() {
     $rows = array();
     foreach ($this->pathChanges as $change) {
+      $change_verb = DifferentialChangeType::getFullNameForChangeType(
+        $change->getChangeType());
+
       $rows[] = array(
         $this->linkHistory($change->getPath()),
         $this->linkBrowse($change->getPath()),
-        '-',
+        $this->linkChange(
+          $change->getPath(),
+          array(
+            'text' => $change_verb,
+          )),
         phutil_escape_html($change->getPath()),
       );
     }

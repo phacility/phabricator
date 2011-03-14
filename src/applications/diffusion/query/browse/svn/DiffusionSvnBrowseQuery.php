@@ -35,7 +35,12 @@ final class DiffusionSvnBrowseQuery extends DiffusionBrowseQuery {
       PhabricatorRepository::TABLE_PATH,
       array($path_normal));
     $paths = ipull($paths, 'id', 'path');
-    $path_id = $paths[$path_normal];
+    $path_id = idx($paths, $path_normal);
+
+    if (empty($path_id)) {
+      $this->reason = self::REASON_IS_NONEXISTENT;
+      return array();
+    }
 
     if ($commit) {
       $slice_clause = 'AND svnCommit <= '.(int)$commit;
@@ -54,8 +59,38 @@ final class DiffusionSvnBrowseQuery extends DiffusionBrowseQuery {
       $slice_clause);
 
     if (!$index) {
-      // TODO: !
-      return false;
+      if ($this->path == '/') {
+        $this->reason = self::REASON_IS_EMPTY;
+      } else {
+        $reasons = queryfx_all(
+          $conn_r,
+          'SELECT * FROM %T WHERE repositoryID = %d AND pathID = %d
+            %Q ORDER BY svnCommit DESC LIMIT 2',
+          PhabricatorRepository::TABLE_FILESYSTEM,
+          $repository->getID(),
+          $path_id,
+          $slice_clause);
+
+        $reason = reset($reasons);
+
+        if (!$reason) {
+          $this->reason = self::REASON_IS_NONEXISTENT;
+        } else {
+          $file_type = $reason['fileType'];
+          if (empty($reason['existed'])) {
+            $this->reason = self::REASON_IS_DELETED;
+            $this->deletedAtCommit = $reason['svnCommit'];
+            if (!empty($reasons[1])) {
+              $this->existedAtCommit = $reasons[1]['svnCommit'];
+            }
+          } else if ($file_type == DifferentialChangeType::FILE_DIRECTORY) {
+            $this->reason = self::REASON_IS_EMPTY;
+          } else {
+            $this->reason = self::REASON_IS_FILE;
+          }
+        }
+      }
+      return array();
     }
 
     $sql = array();

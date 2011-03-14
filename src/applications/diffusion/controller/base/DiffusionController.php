@@ -151,6 +151,10 @@ abstract class DiffusionController extends PhabricatorController {
       case 'browse':
         $view_name = 'Browse';
         break;
+      case 'change':
+        $crumb_list[] = 'TODO CHANGE';
+        $crumbs->setCrumbs($crumb_list);
+        return $crumbs;
     }
 
     $path = null;
