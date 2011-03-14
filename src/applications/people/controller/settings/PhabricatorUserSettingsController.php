@@ -171,8 +171,6 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
       $notice = null;
     }
 
-    $host = PhabricatorEnv::getEnvConfig('phabricator.conduit-uri');
-
     $cert_form = new AphrontFormView();
     $cert_form
       ->setUser($user)

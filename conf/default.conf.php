@@ -22,12 +22,6 @@ return array(
   // Example: "http://phabricator.example.com/"
   'phabricator.base-uri'        => null,
 
-  // The Conduit URI for API access to this install. Normally this is just
-  // the 'base-uri' plus "/api/" (e.g. "http://phabricator.example.com/api/"),
-  // but make sure you specify 'https' if you have HTTPS configured.
-  'phabricator.conduit-uri'     => null,
-
-
   // The default PHID for users who haven't uploaded a profile image. It should
   // be 50x50px.
   'user.default-profile-image-phid' => 'PHID-FILE-f57aaefce707fc4060ef',
