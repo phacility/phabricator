@@ -45,10 +45,7 @@ class DiffusionPathChangeQuery {
     $drequest = $this->getRequest();
     $repository = $drequest->getRepository();
 
-    $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-      'repositoryID = %d AND commitIdentifier = %s',
-      $repository->getID(),
-      $drequest->getCommit());
+    $commit = $drequest->loadCommit();
 
     $raw_changes = queryfx_all(
       $repository->establishConnection('r'),

@@ -27,8 +27,34 @@ class DiffusionCommitController extends DiffusionController {
     ));
 
     $detail_panel = new AphrontPanelView();
-    $detail_panel->setHeader('Revision Detail');
-    $detail_panel->appendChild('<div>'.$drequest->getCommit().'</div>');
+
+    $repository = $drequest->getRepository();
+    $commit = $drequest->loadCommit();
+    $commit_data = $drequest->loadCommitData();
+
+    require_celerity_resource('diffusion-commit-view-css');
+
+    $detail_panel->appendChild(
+      '<div class="diffusion-commit-view">'.
+        '<div class="diffusion-commit-dateline">'.
+          'r'.$repository->getCallsign().$commit->getCommitIdentifier().
+          ' &middot; '.
+          date('F jS, Y g:i A', $commit->getEpoch()).
+        '</div>'.
+        '<h1>Revision Detail</h1>'.
+        '<div class="diffusion-commit-details">'.
+          '<table class="diffusion-commit-properties">'.
+            '<tr>'.
+              '<th>Author:</th>'.
+              '<td>'.phutil_escape_html($commit_data->getAuthorName()).'</td>'.
+            '</tr>'.
+          '</table>'.
+          '<hr />'.
+          '<div class="diffusion-commit-message">'.
+            phutil_escape_html($commit_data->getCommitMessage()).
+          '</div>'.
+        '</div>'.
+      '</div>');
 
     $content[] = $detail_panel;
 

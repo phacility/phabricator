@@ -1,0 +1,37 @@
+/**
+ * @provides diffusion-commit-view-css
+ */
+
+.diffusion-commit-details {
+  padding: 0.5em;
+  background: #f9f9f9;
+  border: 1px solid #dddddd;
+}
+
+.diffusion-commit-details hr {
+  height: 1px;
+  border: none;
+  background: #dddddd;
+}
+
+.diffusion-commit-dateline {
+  float: right;
+  color: #555555;
+}
+
+.diffusion-commit-properties th {
+  font-weight: bold;
+  color: #444444;
+  text-align: right;
+  white-space: nowrap;
+  padding: 2px 4px;
+  width: 100px;
+}
+
+.diffusion-commit-properties td {
+  padding: 2px 4px;
+}
+
+.diffusion-commit-message {
+  padding: 8px;
+}

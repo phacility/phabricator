@@ -25,6 +25,8 @@ class DiffusionRequest {
   protected $branch;
 
   protected $repository;
+  protected $repositoryCommit;
+  protected $repositoryCommitData;
 
   final private function __construct() {
     // <private>
@@ -97,6 +99,30 @@ class DiffusionRequest {
 
   public function getBranch() {
     return $this->branch;
+  }
+
+  public function loadCommit() {
+    if (empty($this->repositoryCommit)) {
+      $repository = $this->getRepository();
+
+      $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
+        'repositoryID = %d AND commitIdentifier = %s',
+        $repository->getID(),
+        $this->getCommit());
+      $this->repositoryCommit = $commit;
+    }
+    return $this->repositoryCommit;
+  }
+
+  public function loadCommitData() {
+    if (empty($this->repositoryCommitData)) {
+      $commit = $this->loadCommit();
+      $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
+        'commitID = %d',
+        $commit->getID());
+      $this->repositoryCommitData = $data;
+    }
+    return $this->repositoryCommitData;
   }
 
   final public function getRawCommit() {
