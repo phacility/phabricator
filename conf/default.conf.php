@@ -287,4 +287,9 @@ return array(
   'controller.oauth-registration' =>
     'PhabricatorOAuthDefaultRegistrationController',
 
+
+  // Directory that phd (the Phabricator daemon control script) should use to
+  // track running daemons.
+  'phd.pid-directory' => '/var/tmp/phd',
+
 );
