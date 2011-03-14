@@ -52,3 +52,5 @@ alter table phabricator_repository.repository_commit add unique key
 alter table phabricator_repository.repository_commit add key
   (repositoryID, epoch);
 
+alter table phabricator_repository.repository_filesystem
+  add key (repositoryID, pathID, svnCommit);

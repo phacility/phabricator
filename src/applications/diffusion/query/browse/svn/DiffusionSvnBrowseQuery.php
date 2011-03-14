@@ -59,7 +59,7 @@ final class DiffusionSvnBrowseQuery extends DiffusionBrowseQuery {
       $slice_clause);
 
     if (!$index) {
-      if ($this->path == '/') {
+      if ($path == '/') {
         $this->reason = self::REASON_IS_EMPTY;
       } else {
         $reasons = queryfx_all(
