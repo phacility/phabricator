@@ -39,7 +39,6 @@ class DiffusionGitRequest extends DiffusionRequest {
 
     if ($this->repository) {
       $local_path = $this->repository->getDetail('local-path');
-      $git = $this->getPathToGitBinary();
 
       // TODO: This is not terribly efficient and does not produce terribly
       // good error messages, but it seems better to put error handling code
@@ -48,16 +47,14 @@ class DiffusionGitRequest extends DiffusionRequest {
       $branch = $this->getBranch();
 
       execx(
-        '(cd %s && %s rev-parse --verify %s)',
+        '(cd %s && git rev-parse --verify %s)',
         $local_path,
-        $git,
         $branch);
 
       if ($this->commit) {
         list($commit) = execx(
-          '(cd %s && %s rev-parse --verify %s)',
+          '(cd %s && git rev-parse --verify %s)',
           $local_path,
-          $git,
           $this->commit);
 
         // Beyond verifying them, expand commit short forms to full 40-character
@@ -65,9 +62,8 @@ class DiffusionGitRequest extends DiffusionRequest {
         $this->commit = trim($commit);
 
         list($contains) = execx(
-          '(cd %s && %s branch --contains %s)',
+          '(cd %s && git branch --contains %s)',
           $local_path,
-          $git,
           $this->commit);
         $contains = array_filter(explode("\n", $contains));
         $found = false;
@@ -86,10 +82,6 @@ class DiffusionGitRequest extends DiffusionRequest {
     }
 
 
-  }
-
-  public function getPathToGitBinary() {
-    return PhabricatorEnv::getEnvConfig('git.path');
   }
 
   public function getBranch() {

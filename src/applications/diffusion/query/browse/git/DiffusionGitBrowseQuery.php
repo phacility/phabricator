@@ -26,13 +26,11 @@ final class DiffusionGitBrowseQuery extends DiffusionBrowseQuery {
     $commit = $drequest->getCommit();
 
     $local_path = $repository->getDetail('local-path');
-    $git = PhabricatorEnv::getEnvConfig('git.path');
 
     try {
       list($stdout) = execx(
-        "(cd %s && %s cat-file -t %s:%s)",
+        "(cd %s && git cat-file -t %s:%s)",
         $local_path,
-        $git,
         $commit,
         $path);
     } catch (CommandException $e) {
@@ -40,9 +38,8 @@ final class DiffusionGitBrowseQuery extends DiffusionBrowseQuery {
       if (preg_match('/^fatal: Not a valid object name/', $stderr)) {
         // Grab two logs, since the first one is when the object was deleted.
         list($stdout) = execx(
-          '(cd %s && %s log -n2 --format="%%H" %s -- %s)',
+          '(cd %s && git log -n2 --format="%%H" %s -- %s)',
           $local_path,
-          $git,
           $commit,
           $path);
         $stdout = trim($stdout);
@@ -67,9 +64,8 @@ final class DiffusionGitBrowseQuery extends DiffusionBrowseQuery {
     }
 
     list($stdout) = execx(
-      "(cd %s && %s ls-tree -l %s:%s)",
+      "(cd %s && git ls-tree -l %s:%s)",
       $local_path,
-      $git,
       $commit,
       $path);
 

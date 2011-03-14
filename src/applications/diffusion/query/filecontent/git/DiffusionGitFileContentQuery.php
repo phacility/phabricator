@@ -26,12 +26,10 @@ final class DiffusionGitFileContentQuery extends DiffusionFileContentQuery {
     $commit = $drequest->getCommit();
 
     $local_path = $repository->getDetail('local-path');
-    $git = $drequest->getPathToGitBinary();
 
     list($corpus) = execx(
-      '(cd %s && %s cat-file blob %s:%s)',
+      '(cd %s && git cat-file blob %s:%s)',
       $local_path,
-      $git,
       $commit,
       $path);
 
