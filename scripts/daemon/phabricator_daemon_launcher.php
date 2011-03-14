@@ -21,58 +21,24 @@ $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 require_once $root.'/scripts/__init_env__.php';
 
+phutil_require_module('phabricator', 'infrastructure/daemon/control');
+$control = new PhabricatorDaemonControl();
+
 $phd_dir = PhabricatorEnv::getEnvConfig('phd.pid-directory');
 $pid_dir = $phd_dir.'/pid';
 
 switch (isset($argv[1]) ? $argv[1] : 'help') {
   case 'list':
-    phutil_require_module('phutil', 'console');
-
-    $loader = new PhutilSymbolLoader();
-    $symbols = $loader
-      ->setAncestorClass('PhutilDaemon')
-      ->selectSymbolsWithoutLoading();
-
-    $symbols = igroup($symbols, 'library');
-    foreach ($symbols as $library => $symbol_list) {
-      echo phutil_console_format("Daemons in library __%s__:\n", $library);
-      foreach ($symbol_list as $symbol) {
-        echo "  ".$symbol['name']."\n";
-      }
-      echo "\n";
-    }
-
-    break;
+    $err = $control->executeListCommand();
+    exit($err);
 
   case 'status':
-    $pid_descs = Filesystem::listDirectory($pid_dir);
-    if (!$pid_descs) {
-      echo "There are no running Phabricator daemons.\n";
-    } else {
-      printf(
-        "%-5s\t%-24s\t%s\n",
-        "PID",
-        "Started",
-        "Daemon");
-      foreach ($pid_descs as $pid_file) {
-        $data = Filesystem::readFile($pid_dir.'/'.$pid_file);
-        $data = json_decode($data, true);
+    $err = $control->executeStatusCommand();
+    exit($err);
 
-        $pid = idx($data, 'pid', '?');
-        $name = idx($data, 'name', '?');
-        $since = idx($data, 'start')
-          ? date('M j Y, g:i:s A', $data['start'])
-          : '?';
-
-        printf(
-          "%5s\t%-24s\t%s\n",
-          $pid,
-          $since,
-          $name);
-      }
-    }
-
-    break;
+  case 'stop':
+    $err = $control->executeStopCommand();
+    exit($err);
 
   case 'launch':
     phutil_require_module('phutil', 'moduleutils');
@@ -81,6 +47,8 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
     if (!$daemon) {
       throw new Exception("Daemon name required!");
     }
+
+    $pass = array_slice($argv, 3);
 
     $n = 1;
     if (is_numeric($daemon)) {
@@ -92,6 +60,7 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
       if (!$daemon) {
         throw new Exception("Daemon name required!");
       }
+      $pass = array_slice($argv, 4);
     }
 
     $loader = new PhutilSymbolLoader();
@@ -131,12 +100,23 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
     Filesystem::assertIsDirectory($pid_dir);
     Filesystem::assertWritable($pid_dir);
 
+    foreach ($pass as $key => $arg) {
+      $pass[$key] = escapeshellarg($arg);
+    }
+
     echo "Starting {$n} x {$daemon}";
+
+    chdir($launch_daemon);
     for ($ii = 0; $ii < $n; $ii++) {
       list($stdout, $stderr) = execx(
-        "(cd %s && ./launch_daemon.php %s --daemonize --phd=%s)",
-        $launch_daemon,
+        "./launch_daemon.php ".
+          "%s ".
+          "--load-phutil-library=%s ".
+          "--daemonize ".
+          "--phd=%s ".
+          implode(' ', $pass),
         $daemon,
+        phutil_get_library_root('phabricator'),
         $pid_dir);
       echo ".";
     }
@@ -191,27 +171,6 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
   case '--help':
   case 'help':
   default:
-    echo <<<EOHELP
-phd - phabricator daemon launcher
-
-launch <daemon>
-  Start a daemon.
-
-list
-  List available daemons.
-
-stop
-  Stop all daemons.
-
-status
-  List running daemons.
-
-stop
-  Stop all running daemons.
-
-parse-commit <rXnnnn>
-  Parse a single commit.
-
-EOHELP;
-    exit(1);
+    $err = $control->executeHelpCommand();
+    exit($err);
 }
