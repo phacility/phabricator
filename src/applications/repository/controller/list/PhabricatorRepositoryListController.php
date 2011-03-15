@@ -26,10 +26,24 @@ class PhabricatorRepositoryListController
 
     $rows = array();
     foreach ($repos as $repo) {
+
+      if ($repo->getDetail('tracking-enabled')) {
+        $diffusion_link = phutil_render_tag(
+          'a',
+          array(
+            'href' => '/diffusion/'.$repo->getCallsign().'/',
+          ),
+          'View in Diffusion');
+      } else {
+        $diffusion_link = '<em>Not Tracked</em>';
+      }
+
       $rows[] = array(
         phutil_escape_html($repo->getCallsign()),
         phutil_escape_html($repo->getName()),
-        $repo->getVersionControlSystem(),
+        PhabricatorRepositoryType::getNameForRepositoryType(
+          $repo->getVersionControlSystem()),
+        $diffusion_link,
         phutil_render_tag(
           'a',
           array(
@@ -53,6 +67,7 @@ class PhabricatorRepositoryListController
         'Callsign',
         'Repository',
         'Type',
+        'Diffusion',
         '',
         ''
       ));
@@ -60,6 +75,7 @@ class PhabricatorRepositoryListController
       array(
         null,
         'wide',
+        null,
         null,
         'action',
         'action',

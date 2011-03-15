@@ -209,6 +209,9 @@ class AphrontDefaultApplicationConfiguration
       ),
 
       '/daemon/' => array(
+        'log/' => array(
+          '(?P<id>\d+)/$' => 'PhabricatorDaemonLogViewController',
+        ),
         'timeline/$' => 'PhabricatorDaemonTimelineConsoleController',
         'timeline/(?P<id>\d+)/$' => 'PhabricatorDaemonTimelineEventController',
         '$' => 'PhabricatorDaemonConsoleController',

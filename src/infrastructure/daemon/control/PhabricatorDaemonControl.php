@@ -141,12 +141,58 @@ final class PhabricatorDaemonControl {
         **parse-commit** __rXnnnn__
             Parse a single commit.
 
+        **repository-launch-master**
+            Launches daemons to update and parse all tracked repositories. You
+            must also launch Taskmaster daemons, either on the same machine or
+            elsewhere. You should launch a master only one machine. For other
+            machines, launch a 'readonly'.
+
+        **repository-launch-readonly**
+            Launches daemons to 'git pull' tracked git repositories so they
+            stay up to date.
 
 EOHELP
     );
     return 1;
   }
 
+  public function launchDaemon($daemon, array $argv) {
+    $symbols = $this->loadAvailableDaemonClasses();
+    $symbols = ipull($symbols, 'name', 'name');
+    if (empty($symbols[$daemon])) {
+      throw new Exception("Daemon '{$daemon}' is not known.");
+    }
+
+    $pid_dir = $this->getControlDirectory('pid');
+
+    $libphutil_root = dirname(phutil_get_library_root('phutil'));
+    $launch_daemon = $libphutil_root.'/scripts/daemon/';
+
+    // TODO: This should be a much better user experience.
+    Filesystem::assertExists($pid_dir);
+    Filesystem::assertIsDirectory($pid_dir);
+    Filesystem::assertWritable($pid_dir);
+
+    foreach ($argv as $key => $arg) {
+      $argv[$key] = escapeshellarg($arg);
+    }
+
+    // Side effect. :/ We're playing games here to keep 'ps' looking reasonable.
+    chdir($launch_daemon);
+
+    execx(
+      "./launch_daemon.php ".
+        "%s ".
+        "--load-phutil-library=%s ".
+        "--conduit-uri=%s ".
+        "--daemonize ".
+        "--phd=%s ".
+        implode(' ', $argv),
+      $daemon,
+      phutil_get_library_root('phabricator'),
+      PhabricatorEnv::getURI('/api/'),
+      $pid_dir);
+  }
 
   protected function getControlDirectory($dir) {
     return PhabricatorEnv::getEnvConfig('phd.pid-directory').'/'.$dir;

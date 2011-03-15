@@ -11,6 +11,8 @@ phutil_require_module('phabricator', 'infrastructure/env');
 
 phutil_require_module('phutil', 'console');
 phutil_require_module('phutil', 'filesystem');
+phutil_require_module('phutil', 'future/exec');
+phutil_require_module('phutil', 'moduleutils');
 phutil_require_module('phutil', 'symbols');
 phutil_require_module('phutil', 'utils');
 

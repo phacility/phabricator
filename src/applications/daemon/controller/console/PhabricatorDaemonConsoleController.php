@@ -19,6 +19,60 @@
 class PhabricatorDaemonConsoleController extends PhabricatorDaemonController {
 
   public function processRequest() {
+    $logs = id(new PhabricatorDaemonLog())->loadAllWhere(
+      '1 = 1 ORDER BY id DESC LIMIT 15');
+
+    $rows = array();
+    foreach ($logs as $log) {
+      $epoch = $log->getDateCreated();
+
+      $argv = $log->getArgv();
+      $argv = array_map('phutil_escape_html', $argv);
+      $argv = implode('<br />', $argv);
+
+      $rows[] = array(
+        phutil_escape_html($log->getDaemon()),
+        phutil_escape_html($log->getHost()),
+        $log->getPID(),
+        $argv,
+        date('M j, Y', $epoch),
+        date('g:i A', $epoch),
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => '/daemon/log/'.$log->getID().'/',
+            'class' => 'button small grey',
+          ),
+          'View Log'),
+      );
+    }
+
+    $daemon_table = new AphrontTableView($rows);
+    $daemon_table->setHeaders(
+      array(
+        'Daemon',
+        'Host',
+        'PID',
+        'Argv',
+        'Date',
+        'Time',
+        'View',
+      ));
+    $daemon_table->setColumnClasses(
+      array(
+        '',
+        '',
+        '',
+        'wide wrap',
+        '',
+        'right',
+        'action',
+      ));
+
+    $daemon_panel = new AphrontPanelView();
+    $daemon_panel->setHeader('Recently Launched Daemons');
+    $daemon_panel->appendChild($daemon_table);
+
     $tasks = id(new PhabricatorWorkerTask())->loadAllWhere(
       'leaseOwner IS NOT NULL');
 
@@ -118,6 +172,7 @@ class PhabricatorDaemonConsoleController extends PhabricatorDaemonController {
 
     return $this->buildStandardPageResponse(
       array(
+        $daemon_panel,
         $leased_panel,
         $queued_panel,
         $cursor_panel,

@@ -16,18 +16,10 @@
  * limitations under the License.
  */
 
-final class PhabricatorRepositoryType {
+abstract class PhabricatorDaemonDAO extends PhabricatorLiskDAO {
 
-  const REPOSITORY_TYPE_GIT = 'git';
-  const REPOSITORY_TYPE_SVN = 'svn';
-
-  public static function getNameForRepositoryType($type) {
-    static $map = array(
-      self::REPOSITORY_TYPE_GIT => 'Git',
-      self::REPOSITORY_TYPE_SVN => 'Subversion',
-    );
-
-    return idx($map, $type, 'Unknown');
+  public function getApplicationName() {
+    return 'daemon';
   }
 
 }

@@ -40,15 +40,80 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
     $err = $control->executeStopCommand();
     exit($err);
 
-  case 'launch':
-    phutil_require_module('phutil', 'moduleutils');
+  case 'repository-launch-readonly':
+    $need_launch = phd_load_tracked_repositories_of_type('git');
+    if (!$need_launch) {
+      echo "There are no repositories with tracking enabled.\n";
+    } else {
+      foreach ($need_launch as $repository) {
+        $name = $repository->getName();
+        $callsign = $repository->getCallsign();
+        $desc = "'{$name}' ({$callsign})";
+        $phid = $repository->getPHID();
 
+        echo "Launching 'git pull' daemon on the {$desc} repository...\n";
+        $control->launchDaemon(
+          'PhabricatorRepositoryGitPullDaemon',
+          array(
+            $phid,
+          ));
+      }
+    }
+    break;
+
+  case 'repository-launch-master':
+    $need_launch = phd_load_tracked_repositories();
+    if (!$need_launch) {
+      echo "There are no repositories with tracking enabled.\n";
+    } else {
+      foreach ($need_launch as $repository) {
+        $name = $repository->getName();
+        $callsign = $repository->getCallsign();
+        $desc = "'{$name}' ({$callsign})";
+        $phid = $repository->getPHID();
+
+        switch ($repository->getVersionControlSystem()) {
+          case 'git':
+            echo "Launching 'git pull' daemon on the {$desc} repository...\n";
+            $control->launchDaemon(
+              'PhabricatorRepositoryGitPullDaemon',
+              array(
+                $phid,
+              ));
+            echo "Launching discovery daemon on the {$desc} repository...\n";
+            $control->launchDaemon(
+              'PhabricatorRepositoryGitCommitDiscoveryDaemon',
+              array(
+                $phid,
+              ));
+            break;
+          case 'svn':
+            echo "Launching discovery daemon on the {$desc} repository...\n";
+            $control->launchDaemon(
+              'PhabricatorRepositorySvnCommitDiscoveryDaemon',
+              array(
+                $phid,
+              ));
+            break;
+        }
+      }
+
+      echo "Launching CommitTask daemon...\n";
+      $control->launchDaemon(
+        'PhabricatorRepositoryCommitTaskDaemon',
+        array());
+
+      echo "Done.\n";
+    }
+    break;
+
+  case 'launch':
     $daemon = idx($argv, 2);
     if (!$daemon) {
       throw new Exception("Daemon name required!");
     }
 
-    $pass = array_slice($argv, 3);
+    $pass_argv = array_slice($argv, 3);
 
     $n = 1;
     if (is_numeric($daemon)) {
@@ -60,7 +125,7 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
       if (!$daemon) {
         throw new Exception("Daemon name required!");
       }
-      $pass = array_slice($argv, 4);
+      $pass_argv = array_slice($argv, 4);
     }
 
     $loader = new PhutilSymbolLoader();
@@ -92,34 +157,13 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
       $daemon = reset($match);
     }
 
-    $libphutil_root = dirname(phutil_get_library_root('phutil'));
-    $launch_daemon = $libphutil_root.'/scripts/daemon/';
+    echo "Launching {$n} x {$daemon}";
 
-    // TODO: This should be a much better user experience.
-    Filesystem::assertExists($pid_dir);
-    Filesystem::assertIsDirectory($pid_dir);
-    Filesystem::assertWritable($pid_dir);
-
-    foreach ($pass as $key => $arg) {
-      $pass[$key] = escapeshellarg($arg);
-    }
-
-    echo "Starting {$n} x {$daemon}";
-
-    chdir($launch_daemon);
     for ($ii = 0; $ii < $n; $ii++) {
-      list($stdout, $stderr) = execx(
-        "./launch_daemon.php ".
-          "%s ".
-          "--load-phutil-library=%s ".
-          "--daemonize ".
-          "--phd=%s ".
-          implode(' ', $pass),
-        $daemon,
-        phutil_get_library_root('phabricator'),
-        $pid_dir);
+      $control->launchDaemon($daemon, $pass_argv);
       echo ".";
     }
+
     echo "\n";
     echo "Done.\n";
 
@@ -174,3 +218,33 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
     $err = $control->executeHelpCommand();
     exit($err);
 }
+
+function phd_load_tracked_repositories_of_type($type) {
+  $repositories = phd_load_tracked_repositories();
+
+  foreach ($repositories as $key => $repository) {
+    if ($repository->getVersionControlSystem() != $type) {
+      unset($repositories[$key]);
+    }
+  }
+
+  return $repositories;
+}
+
+function phd_load_tracked_repositories() {
+  phutil_require_module(
+    'phabricator',
+    'applications/repository/storage/repository');
+
+  $repositories = id(new PhabricatorRepository())->loadAll();
+  foreach ($repositories as $key => $repository) {
+    if (!$repository->getDetail('tracking-enabled')) {
+      unset($repositories[$key]);
+    }
+  }
+
+  return $repositories;
+}
+
+
+

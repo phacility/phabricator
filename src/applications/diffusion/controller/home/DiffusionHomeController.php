@@ -23,6 +23,11 @@ class DiffusionHomeController extends DiffusionController {
     // TODO: Restore "shortcuts" feature.
 
     $repositories = id(new PhabricatorRepository())->loadAll();
+    foreach ($repositories as $key => $repository) {
+      if (!$repository->getDetail('tracking-enabled')) {
+        unset($repositories[$key]);
+      }
+    }
 
     $commit = new PhabricatorRepositoryCommit();
     $conn_r = $commit->establishConnection('r');
@@ -77,7 +82,8 @@ class DiffusionHomeController extends DiffusionController {
             'href' => '/diffusion/'.$repository->getCallsign().'/',
           ),
           phutil_escape_html($repository->getName())),
-        $repository->getVersionControlSystem(),
+        PhabricatorRepositoryType::getNameForRepositoryType(
+          $repository->getVersionControlSystem()),
         idx($commit_counts, $id, 0),
         $commit
           ? DiffusionView::linkCommit(

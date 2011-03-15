@@ -16,18 +16,19 @@
  * limitations under the License.
  */
 
-final class PhabricatorRepositoryType {
+class PhabricatorDaemonLog extends PhabricatorDaemonDAO {
 
-  const REPOSITORY_TYPE_GIT = 'git';
-  const REPOSITORY_TYPE_SVN = 'svn';
+  protected $daemon;
+  protected $host;
+  protected $pid;
+  protected $argv;
 
-  public static function getNameForRepositoryType($type) {
-    static $map = array(
-      self::REPOSITORY_TYPE_GIT => 'Git',
-      self::REPOSITORY_TYPE_SVN => 'Subversion',
-    );
-
-    return idx($map, $type, 'Unknown');
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_SERIALIZATION => array(
+        'argv' => self::SERIALIZATION_JSON,
+      ),
+    ) + parent::getConfiguration();
   }
 
 }
