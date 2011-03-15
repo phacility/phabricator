@@ -86,6 +86,7 @@ abstract class PhabricatorRepositoryCommitDiscoveryDaemon
       // more than once when looking at history, or because of races or
       // data inconsistency or cosmic radiation; in any case, we're still
       // in a good state if we ignore the failure.
+      $this->commitCache[$commit_identifier] = true;
     }
 
     $this->stillWorking();
