@@ -57,6 +57,8 @@ class PhabricatorRepositoryGitCommitDiscoveryDaemon
     $discover[] = $commit;
     $insert[] = $commit;
 
+    $seen_parent = array();
+
     while (true) {
       $target = array_pop($discover);
       list($parents) = execx(
@@ -65,6 +67,14 @@ class PhabricatorRepositoryGitCommitDiscoveryDaemon
         $target);
       $parents = array_filter(explode(' ', trim($parents)));
       foreach ($parents as $parent) {
+        if (isset($seen_parent[$parent])) {
+          // We end up in a loop here somehow when we parse Arcanist if we
+          // don't do this. TODO: Figure out why and draw a pretty diagram
+          // since it's not evident how parsing a DAG with this causes the
+          // loop to stop terminating.
+          continue;
+        }
+        $seen_parent[$parent] = true;
         if (!$this->isKnownCommit($parent)) {
           $discover[] = $parent;
           $insert[] = $parent;
