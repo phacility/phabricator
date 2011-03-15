@@ -9,7 +9,7 @@ create table phabricator_repository.repository_commitdata (
 
 ALTER TABLE phabricator_worker.worker_task drop priority;
 ALTER TABLE phabricator_worker.worker_task drop key leaseOwner;
-ALTER TABLE phabricator_worker.worker_task drop key (leaseOwner(16));
+ALTER TABLE phabricator_worker.worker_task add key (leaseOwner(16));
 
 create table phabricator_repository.repository_path (
   id int unsigned not null auto_increment primary key,
@@ -41,7 +41,7 @@ create table phabricator_repository.repository_filesystem (
   primary key (repositoryID, parentID, svnCommit, pathID)
 );
 
-alter table repository_filesystem add key (repositoryID, svnCommit);
+alter table phabricator_repository.repository_filesystem add key (repositoryID, svnCommit);
 
 truncate phabricator_repository.repository_commit;
 alter table phabricator_repository.repository_commit
