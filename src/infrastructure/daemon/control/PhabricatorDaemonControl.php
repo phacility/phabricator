@@ -177,10 +177,7 @@ EOHELP
       $argv[$key] = escapeshellarg($arg);
     }
 
-    // Side effect. :/ We're playing games here to keep 'ps' looking reasonable.
-    chdir($launch_daemon);
-
-    execx(
+    $future = new ExecFuture(
       "./launch_daemon.php ".
         "%s ".
         "--load-phutil-library=%s ".
@@ -192,6 +189,11 @@ EOHELP
       phutil_get_library_root('phabricator'),
       PhabricatorEnv::getURI('/api/'),
       $pid_dir);
+
+    // Play games to keep 'ps' looking reasonable.
+    $future->setCWD($launch_daemon);
+
+    $future->resolvex();
   }
 
   protected function getControlDirectory($dir) {
