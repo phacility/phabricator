@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorMetaMTADaemon {
+class PhabricatorMetaMTADaemon extends PhabricatorDaemon {
 
   public function run() {
     echo "OK. Sending mail";
@@ -29,7 +29,7 @@ class PhabricatorMetaMTADaemon {
         $message->sendNow();
         echo ".";
       }
-      sleep(1);
+      $this->sleep(1);
     } while (true);
   }
 

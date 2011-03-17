@@ -565,6 +565,7 @@ phutil_register_library_map(array(
     'PhabricatorMailImplementationPHPMailerLiteAdapter' => 'PhabricatorMailImplementationAdapter',
     'PhabricatorMetaMTAController' => 'PhabricatorController',
     'PhabricatorMetaMTADAO' => 'PhabricatorLiskDAO',
+    'PhabricatorMetaMTADaemon' => 'PhabricatorDaemon',
     'PhabricatorMetaMTAListController' => 'PhabricatorMetaMTAController',
     'PhabricatorMetaMTAMail' => 'PhabricatorMetaMTADAO',
     'PhabricatorMetaMTAMailingList' => 'PhabricatorMetaMTADAO',
