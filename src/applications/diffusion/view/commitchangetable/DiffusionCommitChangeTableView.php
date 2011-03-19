@@ -27,19 +27,35 @@ final class DiffusionCommitChangeTableView extends DiffusionView {
 
   public function render() {
     $rows = array();
+
+    // TODO: Experiment with path stack rendering.
+
+    // TODO: Copy Away and Move Away are rendered junkily still.
+
     foreach ($this->pathChanges as $change) {
       $change_verb = DifferentialChangeType::getFullNameForChangeType(
         $change->getChangeType());
+
+      $suffix = null;
+      if ($change->getFileType() == DifferentialChangeType::FILE_DIRECTORY) {
+        $suffix = '/';
+      }
+
+      $path = $change->getPath();
+      $hash = substr(sha1($path), 0, 7);
 
       $rows[] = array(
         $this->linkHistory($change->getPath()),
         $this->linkBrowse($change->getPath()),
         $this->linkChange(
-          $change->getPath(),
+          $change->getChangeType(),
+          $change->getFileType()),
+        phutil_render_tag(
+          'a',
           array(
-            'text' => $change_verb,
-          )),
-        phutil_escape_html($change->getPath()),
+            'href' => '#'.$hash,
+          ),
+          phutil_escape_html($path).$suffix),
       );
     }
 

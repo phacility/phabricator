@@ -66,8 +66,12 @@ class DiffusionCommitController extends DiffusionController {
     $change_table->setDiffusionRequest($drequest);
     $change_table->setPathChanges($changes);
 
+    // TODO: Large number of modified files check.
+
+    $count = number_format(count($changes));
+
     $change_panel = new AphrontPanelView();
-    $change_panel->setHeader('Changes');
+    $change_panel->setHeader("Changes ({$count})");
     $change_panel->appendChild($change_table);
 
     $content[] = $change_panel;

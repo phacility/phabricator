@@ -203,11 +203,16 @@ class PhabricatorRepositorySvnCommitChangeParserWorker
 
               $source_file_type = $this->lookupPathFileType(
                 $repository,
-                $path,
+                $copy_from,
                 array(
                   'rawPath'   => $copy_from,
                   'rawCommit' => $copy_rev,
                 ));
+
+              if ($source_file_type == DifferentialChangeType::FILE_DELETED) {
+                throw new Exception(
+                  "Something is wrong; source of a copy must exist.");
+              }
 
               if ($source_file_type != DifferentialChangeType::FILE_DIRECTORY) {
                 if (isset($raw_paths[$copy_from])) {
@@ -243,7 +248,7 @@ class PhabricatorRepositorySvnCommitChangeParserWorker
                       'rawPath'         => $full_to,
                       'rawTargetPath'   => $full_from,
                       'rawTargetCommit' => $copy_rev,
-                      'rawDirect'       => true,
+                      'rawDirect'       => false,
 
                       'changeType'      => $type,
                       'fileType'        => $from_file_type,
@@ -421,17 +426,24 @@ class PhabricatorRepositorySvnCommitChangeParserWorker
     foreach ($effects as $effect) {
       $type = $effect['changeType'];
 
-      // Don't write COPY_AWAY to the filesystem table if it isn't a direct
-      // event. We do write CHILD.
       if (!$effect['rawDirect']) {
         if ($type == DifferentialChangeType::TYPE_COPY_AWAY) {
+          // Don't write COPY_AWAY to the filesystem table if it isn't a direct
+          // event.
+          continue;
+        }
+        if ($type == DifferentialChangeType::TYPE_CHILD) {
+          // Don't write CHILD to the filesystem table. Although doing these
+          // writes has the nice property of letting you see when a directory's
+          // contents were last changed, it explodes the table tremendously
+          // and makes Diffusion far slower.
           continue;
         }
       }
 
       if ($effect['rawPath'] == '/') {
-        // Don't bother writing the CHILD events on '/' to the filesystem
-        // table; in particular, it doesn't have a meaningful parentID.
+        // Don't write any events on '/' to the filesystem table; in
+        // particular, it doesn't have a meaningful parentID.
         continue;
       }
 

@@ -53,13 +53,14 @@ class DiffusionPathChangeQuery {
         FROM %T c
           LEFT JOIN %T p ON c.pathID = p.id
           LEFT JOIN %T t on c.targetPathID = t.id
-        WHERE c.commitID = %d',
+        WHERE c.commitID = %d AND isDirect = 1',
       PhabricatorRepository::TABLE_PATHCHANGE,
       PhabricatorRepository::TABLE_PATH,
       PhabricatorRepository::TABLE_PATH,
       $commit->getID());
 
     $changes = array();
+
 
     $raw_changes = isort($raw_changes, 'pathName');
     foreach ($raw_changes as $raw_change) {

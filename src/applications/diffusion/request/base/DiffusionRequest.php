@@ -120,6 +120,10 @@ class DiffusionRequest {
       $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
         'commitID = %d',
         $commit->getID());
+      if (!$data) {
+        $data = new PhabricatorRepositoryCommitData();
+        $data->setCommitMessage('(This commit has not fully parsed yet.)');
+      }
       $this->repositoryCommitData = $data;
     }
     return $this->repositoryCommitData;

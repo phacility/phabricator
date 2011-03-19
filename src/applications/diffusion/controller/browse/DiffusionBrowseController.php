@@ -35,6 +35,16 @@ class DiffusionBrowseController extends DiffusionController {
 
     if (!$results) {
 
+      // TODO: Format all these commits into nice VCS-agnostic links, and
+      // below.
+      $commit = $drequest->getCommit();
+      $callsign = $drequest->getRepository()->getCallsign();
+      if ($commit) {
+        $commit = "r{$callsign}{$commit}";
+      } else {
+        $commit = 'HEAD';
+      }
+
       switch ($browse_query->getReasonForEmptyResultSet()) {
         case DiffusionBrowseQuery::REASON_IS_NONEXISTENT:
           $title = 'Path Does Not Exist';
@@ -43,19 +53,15 @@ class DiffusionBrowseController extends DiffusionController {
           $body  = "This path does not exist anywhere.";
           $severity = AphrontErrorView::SEVERITY_ERROR;
           break;
+        case DiffusionBrowseQuery::REASON_IS_EMPTY:
+          $title = 'Empty Directory';
+          $body = "This path was an empty directory at {$commit}.\n";
+          $severity = AphrontErrorView::SEVERITY_NOTICE;
+          break;
         case DiffusionBrowseQuery::REASON_IS_DELETED:
-          // TODO: Format all these commits into nice VCS-agnostic links.
-          $commit = $drequest->getCommit();
           $deleted = $browse_query->getDeletedAtCommit();
           $existed = $browse_query->getExistedAtCommit();
 
-          $callsign = $drequest->getRepository()->getCallsign();
-
-          if ($commit) {
-            $commit = "r{$callsign}{$commit}";
-          } else {
-            $commit = 'HEAD';
-          }
           $deleted = "r{$callsign}{$deleted}";
           $existed = "r{$callsign}{$existed}";
 

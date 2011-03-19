@@ -28,6 +28,7 @@ abstract class DiffusionBrowseQuery {
   const REASON_IS_DELETED         = 'is-deleted';
   const REASON_IS_NONEXISTENT     = 'nonexistent';
   const REASON_BAD_COMMIT         = 'bad-commit';
+  const REASON_IS_EMPTY           = 'empty';
 
   final private function __construct() {
     // <private>
