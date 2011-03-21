@@ -56,7 +56,7 @@ abstract class PhabricatorRepositoryCommitDiscoveryDaemon
     }
 
     $this->commitCache[$target] = true;
-    while (count($this->commitCache) > 16) {
+    while (count($this->commitCache) > 64) {
       array_shift($this->commitCache);
     }
 
@@ -79,6 +79,20 @@ abstract class PhabricatorRepositoryCommitDiscoveryDaemon
           'id' => $commit->getID(),
         ));
       $event->recordEvent();
+
+      queryfx(
+        $repository->establishConnection('r'),
+        'INSERT INTO %T (repositoryID, size, lastCommitID, epoch)
+          VALUES (%d, 1, %d, %d)
+          ON DUPLICATE KEY UPDATE
+            size = size + 1,
+            lastCommitID =
+              IF(VALUES(epoch) > epoch, VALUES(lastCommitID), lastCommitID),
+            epoch = IF(VALUES(epoch) > epoch, VALUES(epoch), epoch)',
+        PhabricatorRepository::TABLE_SUMMARY,
+        $repository->getID(),
+        $commit->getID(),
+        $epoch);
 
       $this->commitCache[$commit_identifier] = true;
     } catch (AphrontQueryDuplicateKeyException $ex) {

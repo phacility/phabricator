@@ -25,17 +25,18 @@ final class DiffusionSvnBrowseQuery extends DiffusionBrowseQuery {
     $path = $drequest->getPath();
     $commit = $drequest->getCommit();
 
-    $path_normal = '/'.trim($path, '/');
-
     $conn_r = $repository->establishConnection('r');
 
-    $paths = queryfx_all(
-      $conn_r,
-      'SELECT id, path FROM %T WHERE path IN (%Ls)',
-      PhabricatorRepository::TABLE_PATH,
-      array($path_normal));
-    $paths = ipull($paths, 'id', 'path');
-    $path_id = idx($paths, $path_normal);
+    $parent_path = dirname($path);
+    $path_query = new DiffusionGitPathIDQuery(
+      array(
+        $path,
+        $parent_path,
+      ));
+    $path_map = $path_query->loadPathIDs();
+
+    $path_id = $path_map[$path];
+    $parent_path_id = $path_map[$parent_path];
 
     if (empty($path_id)) {
       $this->reason = self::REASON_IS_NONEXISTENT;
@@ -62,12 +63,21 @@ final class DiffusionSvnBrowseQuery extends DiffusionBrowseQuery {
       if ($path == '/') {
         $this->reason = self::REASON_IS_EMPTY;
       } else {
+
+        // NOTE: The parent path ID is included so this query can take
+        // advantage of the table's primary key; it is uniquely determined by
+        // the pathID but if we don't do the lookup ourselves MySQL doesn't have
+        // the information it needs to avoid a table scan.
+
         $reasons = queryfx_all(
           $conn_r,
-          'SELECT * FROM %T WHERE repositoryID = %d AND pathID = %d
+          'SELECT * FROM %T WHERE repositoryID = %d
+              AND parentID = %d
+              AND pathID = %d
             %Q ORDER BY svnCommit DESC LIMIT 2',
           PhabricatorRepository::TABLE_FILESYSTEM,
           $repository->getID(),
+          $parent_path_id,
           $path_id,
           $slice_clause);
 
@@ -112,6 +122,8 @@ final class DiffusionSvnBrowseQuery extends DiffusionBrowseQuery {
       $repository->getID(),
       $path_id,
       implode(', ', $sql));
+
+    $path_normal = DiffusionGitPathIDQuery::normalizePath($path);
 
     $results = array();
     foreach ($browse as $file) {

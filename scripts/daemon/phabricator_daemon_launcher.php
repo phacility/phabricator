@@ -53,7 +53,7 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
 
         echo "Launching 'git pull' daemon on the {$desc} repository...\n";
         $control->launchDaemon(
-          'PhabricatorRepositoryGitPullDaemon',
+          'PhabricatorRepositoryGitFetchDaemon',
           array(
             $phid,
           ));
@@ -74,7 +74,7 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
 
         switch ($repository->getVersionControlSystem()) {
           case 'git':
-            echo "Launching 'git pull' daemon on the {$desc} repository...\n";
+            echo "Launching 'git fetch' daemon on the {$desc} repository...\n";
             $control->launchDaemon(
               'PhabricatorRepositoryGitPullDaemon',
               array(

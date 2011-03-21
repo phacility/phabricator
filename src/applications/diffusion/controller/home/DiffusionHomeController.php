@@ -22,54 +22,43 @@ class DiffusionHomeController extends DiffusionController {
 
     // TODO: Restore "shortcuts" feature.
 
-    $repositories = id(new PhabricatorRepository())->loadAll();
+    $repository = new PhabricatorRepository();
+
+    $repositories = $repository->loadAll();
     foreach ($repositories as $key => $repository) {
       if (!$repository->getDetail('tracking-enabled')) {
         unset($repositories[$key]);
       }
     }
 
-    $commit = new PhabricatorRepositoryCommit();
-    $conn_r = $commit->establishConnection('r');
-
-    // TODO: These queries are pretty bogus.
-
+    $repository_ids = mpull($repositories, 'getID');
+    $summaries = array();
     $commits = array();
-    $commit_counts = array();
+    if ($repository_ids) {
+      $summaries = queryfx_all(
+        $repository->establishConnection('r'),
+        'SELECT * FROM %T WHERE repositoryID IN (%Ld)',
+        PhabricatorRepository::TABLE_SUMMARY,
+        $repository_ids);
+      $summaries = ipull($summaries, null, 'repositoryID');
 
-    $max_epoch = queryfx_all(
-      $commit->establishConnection('r'),
-      'SELECT repositoryID, MAX(epoch) maxEpoch FROM %T GROUP BY repositoryID',
-      $commit->getTableName());
-
-    if ($max_epoch) {
-      $sql = array();
-      foreach ($max_epoch as $head) {
-        $sql[] = '('.(int)$head['repositoryID'].', '.(int)$head['maxEpoch'].')';
+      $commit_ids = array_filter(ipull($summaries, 'lastCommitID'));
+      if ($commit_ids) {
+        $commit = new PhabricatorRepositoryCommit();
+        $commits = $commit->loadAllWhere('id IN (%Ld)', $commit_ids);
+        $commits = mpull($commits, null, 'getRepositoryID');
       }
-
-      // NOTE: It's possible we'll pull multiple commits for some repository
-      // here but it reduces query cost around 3x to unique them in PHP rather
-      // than apply GROUP BY in MySQL.
-      $commits = $commit->loadAllWhere(
-        '(repositoryID, epoch) IN (%Q)',
-        implode(', ', $sql));
-      $commits = mpull($commits, null, 'getRepositoryID');
-
-      $commit_counts = queryfx_all(
-        $conn_r,
-        'SELECT repositoryID, count(*) N FROM %T
-          GROUP BY repositoryID',
-        $commit->getTableName());
-      $commit_counts = ipull($commit_counts, 'N', 'repositoryID');
     }
 
     $rows = array();
     foreach ($repositories as $repository) {
       $id = $repository->getID();
       $commit = idx($commits, $id);
-      $date = null;
-      $time = null;
+
+      $size = idx(idx($summaries, $id, array()), 'size', 0);
+
+      $date = '-';
+      $time = '-';
       if ($commit) {
         $date = date('M j, Y', $commit->getEpoch());
         $time = date('g:i A', $commit->getEpoch());
@@ -84,12 +73,12 @@ class DiffusionHomeController extends DiffusionController {
           phutil_escape_html($repository->getName())),
         PhabricatorRepositoryType::getNameForRepositoryType(
           $repository->getVersionControlSystem()),
-        idx($commit_counts, $id, 0),
+        $size ? number_format($size) : '-',
         $commit
           ? DiffusionView::linkCommit(
               $repository,
               $commit->getCommitIdentifier())
-          : null,
+          : '-',
         $date,
         $time,
       );

@@ -12,4 +12,4 @@ phutil_require_module('phutil', 'filesystem');
 phutil_require_module('phutil', 'future/exec');
 
 
-phutil_require_source('PhabricatorRepositoryGitPullDaemon.php');
+phutil_require_source('PhabricatorRepositoryGitFetchDaemon.php');

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorRepositoryGitPullDaemon
+class PhabricatorRepositoryGitFetchDaemon
   extends PhabricatorRepositoryDaemon {
 
   public function run() {
@@ -46,7 +46,7 @@ class PhabricatorRepositoryGitPullDaemon
         execx('mkdir -p %s', dirname($local_path));
         execx('git clone %s %s', $remote_uri, rtrim($local_path, '/'));
       } else {
-        execx('(cd %s && git pull)', $local_path);
+        execx('(cd %s && git fetch --all)', $local_path);
       }
       $this->sleep($repository->getDetail('pull-frequency', 15));
     }

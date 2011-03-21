@@ -20,7 +20,7 @@ class PhabricatorRepositoryGitCommitDiscoveryDaemon
   extends PhabricatorRepositoryCommitDiscoveryDaemon {
 
   protected function discoverCommits() {
-    // NOTE: PhabricatorRepositoryGitPullDaemon does the actual pulls, this
+    // NOTE: PhabricatorRepositoryGitFetchDaemon does the actual pulls, this
     // just parses HEAD.
 
     $repository = $this->getRepository();
@@ -33,18 +33,23 @@ class PhabricatorRepositoryGitCommitDiscoveryDaemon
     $repository_phid = $repository->getPHID();
 
     $repo_base = $repository->getDetail('local-path');
-    list($commit) = execx(
-      '(cd %s && git log -n1 --pretty="%%H")',
+    list($stdout) = execx(
+      '(cd %s && git branch -r --verbose --no-abbrev)',
       $repo_base);
-    $commit = trim($commit);
 
-    if ($this->isKnownCommit($commit)) {
-      return false;
+    $branches = DiffusionGitBranchQuery::parseGitRemoteBranchOutput($stdout);
+
+    $got_something = false;
+    foreach ($branches as $name => $commit) {
+      if ($this->isKnownCommit($commit)) {
+        continue;
+      } else {
+        $this->discoverCommit($commit);
+        $got_something = true;
+      }
     }
 
-    $this->discoverCommit($commit);
-
-    return true;
+    return $got_something;
   }
 
   private function discoverCommit($commit) {

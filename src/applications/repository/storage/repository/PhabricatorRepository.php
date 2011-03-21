@@ -21,6 +21,7 @@ class PhabricatorRepository extends PhabricatorRepositoryDAO {
   const TABLE_PATH = 'repository_path';
   const TABLE_PATHCHANGE = 'repository_pathchange';
   const TABLE_FILESYSTEM = 'repository_filesystem';
+  const TABLE_SUMMARY = 'repository_summary';
 
   protected $phid;
   protected $name;

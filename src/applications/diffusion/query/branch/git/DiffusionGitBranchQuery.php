@@ -22,31 +22,46 @@ final class DiffusionGitBranchQuery extends DiffusionBranchQuery {
     $drequest = $this->getRequest();
     $repository = $drequest->getRepository();
 
-    $path = $drequest->getPath();
-    $commit = $drequest->getCommit();
-
     $local_path = $repository->getDetail('local-path');
 
     list($stdout) = execx(
-      '(cd %s && git branch --verbose --no-abbrev)',
+      '(cd %s && git branch -r --verbose --no-abbrev)',
       $local_path);
 
     $branches = array();
-
-    $lines = array_filter(explode("\n", $stdout));
-    foreach ($lines as $line) {
-      $matches = null;
-      if (!preg_match('/^[ *] (\S+)\s+([a-z0-9]{40}) /', $line, $matches)) {
-        throw new Exception("Failed to parse {$line}!");
-      }
+    foreach (self::parseGitRemoteBranchOutput($stdout) as $name => $head) {
       $branch = new DiffusionBranchInformation();
-      $branch->setName($matches[1]);
-      $branch->setHeadCommitIdentifier($matches[2]);
-
+      $branch->setName($name);
+      $branch->setHeadCommitIdentifier($head);
       $branches[] = $branch;
     }
 
     return $branches;
+  }
+
+  public static function parseGitRemoteBranchOutput($stdout) {
+    $map = array();
+
+    $lines = array_filter(explode("\n", $stdout));
+    foreach ($lines as $line) {
+      $matches = null;
+      if (preg_match('/^  (\S+)\s+-> (\S+)$/', $line, $matches)) {
+        // This is a line like:
+        //
+        //   origin/HEAD          -> origin/master
+        //
+        // ...which we don't currently do anything interesting with, although
+        // in theory we could use it to automatically choose the default
+        // branch.
+        continue;
+      }
+      if (!preg_match('/^[ *] (\S+)\s+([a-z0-9]{40}) /', $line, $matches)) {
+        throw new Exception("Failed to parse {$line}!");
+      }
+      $map[$matches[1]] = $matches[2];
+    }
+
+    return $map;
   }
 
 }
