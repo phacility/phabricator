@@ -34,6 +34,8 @@ class PhabricatorObjectHandleData {
 
     $handles = array();
 
+    $external_loaders = PhabricatorEnv::getEnvConfig('phid.external-loaders');
+
     foreach ($types as $type => $phids) {
       switch ($type) {
         case PhabricatorPHIDConstants::PHID_TYPE_MAGIC:
@@ -200,6 +202,20 @@ class PhabricatorObjectHandleData {
           }
           break;
         default:
+          $loader = null;
+          if (isset($external_loaders[$type])) {
+            $loader = $external_loaders[$type];
+          } else if (isset($external_loaders['*'])) {
+            $loader = $external_loaders['*'];
+          }
+
+          if ($loader) {
+            PhutilSymbolLoader::loadClass($loader);
+            $object = newv($loader, array());
+            $handles += $object->loadHandles($phids);
+            break;
+          }
+
           foreach ($phids as $phid) {
             $handle = new PhabricatorObjectHandle();
             $handle->setType($type);

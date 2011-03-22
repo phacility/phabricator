@@ -65,11 +65,13 @@ class PhabricatorSearchController extends PhabricatorSearchBaseController {
       }
     }
 
+    $more = PhabricatorEnv::getEnvConfig('search.more-document-types', array());
+
     $options = array(
       '' => 'All Documents',
       PhabricatorPHIDConstants::PHID_TYPE_DREV => 'Differential Revisions',
       PhabricatorPHIDConstants::PHID_TYPE_TASK => 'Maniphest Tasks',
-    );
+    ) + $more;
 
     $status_options = array(
       0 => 'Open and Closed Documents',
