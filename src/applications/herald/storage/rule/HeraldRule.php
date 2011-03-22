@@ -19,7 +19,7 @@
 class HeraldRule extends HeraldDAO {
 
   protected $name;
-  protected $ownerID;
+  protected $authorPHID;
 
   protected $contentType;
   protected $mustMatchAll;
