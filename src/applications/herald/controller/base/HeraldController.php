@@ -16,22 +16,19 @@
  * limitations under the License.
  */
 
-class HeraldContentTypeConfig {
+abstract class HeraldController extends PhabricatorController {
 
-  const CONTENT_TYPE_DIFFERENTIAL = 'differential';
-  const CONTENT_TYPE_COMMIT       = 'commit';
-  const CONTENT_TYPE_MERGE        = 'merge';
-  const CONTENT_TYPE_OWNERS       = 'owners';
+  public function buildStandardPageResponse($view, array $data) {
+    $page = $this->buildStandardPageView();
 
-  public static function getContentTypeMap() {
-    static $map = array(
-      self::CONTENT_TYPE_DIFFERENTIAL   => 'Differential Revisions',
-      self::CONTENT_TYPE_COMMIT         => 'Commits',
-/* TODO: Deal with this
-      self::CONTENT_TYPE_MERGE          => 'Merge Requests',
-      self::CONTENT_TYPE_OWNERS         => 'Owners Changes',
-*/
-    );
-    return $map;
+    $page->setApplicationName('Herald');
+    $page->setBaseURI('/herald/');
+    $page->setTitle(idx($data, 'title'));
+    $page->setGlyph("\xE2\x98\xBF");
+    $page->appendChild($view);
+
+    $response = new AphrontWebpageResponse();
+    return $response->setContent($page->render());
+
   }
 }

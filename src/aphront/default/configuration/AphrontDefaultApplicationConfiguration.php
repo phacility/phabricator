@@ -217,6 +217,11 @@ class AphrontDefaultApplicationConfiguration
         '$' => 'PhabricatorDaemonConsoleController',
       ),
 
+      '/herald/' => array(
+        '$' => 'HeraldHomeController',
+        'view/(?P<view>[^/]+)/$' => 'HeraldHomeController',
+      ),
+
     );
   }
 
