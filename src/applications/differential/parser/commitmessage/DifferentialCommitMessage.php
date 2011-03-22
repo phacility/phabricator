@@ -403,13 +403,6 @@ class DifferentialCommitMessage {
       }
     }
 
-    if (isset($fields['Reviewers']) && isset($fields['Reviewed By'])) {
-      $this->fail(
-        null,
-        "Commit message contains both 'Reviewers:' and 'Reviewed By:' ".
-        "fields.");
-    }
-
     return $fields;
   }
 
