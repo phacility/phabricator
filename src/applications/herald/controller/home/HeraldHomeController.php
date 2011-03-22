@@ -78,10 +78,11 @@ class HeraldHomeController extends HeraldController {
       );
     }
 
+    $rules_for = phutil_escape_html($map[$this->view]);
+
     $table = new AphrontTableView($rows);
     $table->setNoDataString(
-      "No matching subscription rules for ".
-      phutil_escape_html($map[$this->view]).".");
+      "No matching subscription rules for {$rules_for}.");
 
     $table->setHeaders(
       array(
@@ -98,23 +99,16 @@ class HeraldHomeController extends HeraldController {
         'action'
       ));
 
-    $items = array();
-    foreach ($map as $key => $value) {
-      $uri = '/herald/view/'.$key.'/';
-      $items[] = 'item';
-/*        <tools:nav-item href={$uri} selected={$key == $this->view}>
-          {$value}
-        </tools:nav-item>;
-*/
-    }
-
-
-//    require_static('herald-css');
-
-    // If you're viewing as an admin, this string renders in the table header.
-//    $map['admin'] = 'Omniscience';
+    $panel = new AphrontPanelView();
+    $panel->setHeader("Herald Rules for {$rules_for}");
+    $panel->setCreateButton(
+      'Create New Herald Rule',
+      '/herald/new/'.$this->view.'/');
+    $panel->appendChild($table);
 
     $sidenav = new AphrontSideNavView();
+    $sidenav->appendChild($panel);
+
     foreach ($map as $key => $value) {
       $sidenav->addNavItem(
         phutil_render_tag(
@@ -128,34 +122,11 @@ class HeraldHomeController extends HeraldController {
           phutil_escape_html($value)));
     }
 
-
-    $content = array();
-    $content[] = 'oh hi';
-
     return $this->buildStandardPageResponse(
       $sidenav,
       array(
         'title' => 'Herald',
       ));
-
-/*
-      <herald:standard-page title="Herald"
-        selectednav={:herald:standard-page::NAV_RULES}>
-        <div style="padding: 1em;">
-          <tools:side-nav items={$items}>
-            <div class="tools-table">
-              <a href={"/herald/rule/?type=".$this->view}
-                class="button green"
-                style="float: right;">Create New Rule</a>
-              <h1>Herald Subscription Rules
-                for {txt2html($map[$this->view])}</h1>
-              {HTML($table->render())}
-            </div>
-          </tools:side-nav>
-        </div>
-      </herald:standard-page>;
-*/
-
   }
 
 }

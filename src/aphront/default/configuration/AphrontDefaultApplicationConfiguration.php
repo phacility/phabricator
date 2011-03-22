@@ -220,6 +220,8 @@ class AphrontDefaultApplicationConfiguration
       '/herald/' => array(
         '$' => 'HeraldHomeController',
         'view/(?P<view>[^/]+)/$' => 'HeraldHomeController',
+        'new/(?:(?P<type>[^/]+)/)?$' => 'HeraldNewController',
+        'rule/(?:(?<id>\d+)/)?$' => 'HeraldRuleController',
       ),
 
     );
