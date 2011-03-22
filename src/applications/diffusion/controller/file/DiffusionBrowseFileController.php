@@ -28,6 +28,48 @@ class DiffusionBrowseFileController extends DiffusionController {
         'view'   => 'browse',
       ));
 
+    $select_map = array(
+      //'highlighted' => 'View as Highlighted Text',
+      //'blame' => 'View as Highlighted Text with Blame',
+      'plain' => 'View as Plain Text',
+      //'plainblame' => 'View as Plain Text with Blame',
+    );
+    $selected = $this->getRequest()->getStr('view');
+    $select = '<select name="view">';
+    foreach ($select_map as $k => $v) {
+      $option = phutil_render_tag(
+        'option',
+        array(
+          'value' => $k,
+          'selected' => ($k == $selected) ? 'selected' : null,
+        ),
+        phutil_escape_html($v));
+
+      $select .= $option;
+    }
+    $select .= '</select>';
+
+    if ($selected == 'plain') {
+      $style =
+        "margin: 1em 2em; width: 90%; height: 80em; font-family: monospace";
+    } else {
+      // default style.
+      $style =
+        "margin: 1em 2em; width: 90%; height: 80em; font-family: monospace";
+    }
+
+    // TODO: blame, color, line numbers, highlighting, etc etc
+
+    $view_form = phutil_render_tag(
+      'form',
+      array(
+        'action' => $this->getRequest()->getRequestURI(),
+        'method' => 'get',
+        'style'  => 'display: inline',
+      ),
+      $select.
+      '<button>view</button>');
+
     $file_query = DiffusionFileContentQuery::newFromDiffusionRequest(
       $this->diffusionRequest);
     $file_content = $file_query->loadFileContent();
@@ -35,13 +77,12 @@ class DiffusionBrowseFileController extends DiffusionController {
     $corpus = phutil_render_tag(
       'textarea',
       array(
-        'style' => 'margin: 1em 2em; width: 90%; height: 80em;',
+        'style' => $style,
       ),
       phutil_escape_html($file_content->getCorpus()));
 
+    $content[] = $view_form;
     $content[] = $corpus;
-
-    // TODO: blame, color, line numbers, highlighting, etc etc
 
     $nav = $this->buildSideNav('browse', true);
     $nav->appendChild($content);
