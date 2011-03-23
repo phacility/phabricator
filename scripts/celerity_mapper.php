@@ -101,6 +101,8 @@ foreach ($file_map as $path => $info) {
   $provides = array_filter($provides);
   $requires = array_filter($requires);
 
+  var_dump($requires);
+
   if (count($provides) !== 1) {
     throw new Exception(
       "File {$path} must @provide exactly one Celerity target.");

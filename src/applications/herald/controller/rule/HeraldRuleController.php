@@ -251,6 +251,7 @@ class HeraldRuleController extends HeraldController {
 
     $form = id(new AphrontFormView())
       ->setUser($user)
+      ->setID('herald-rule-edit-form')
       ->addHiddenInput('type', $rule->getContentType())
       ->addHiddenInput('save', true)
       ->addHiddenInput('rule', '')
@@ -270,16 +271,33 @@ class HeraldRuleController extends HeraldController {
       ->appendChild(
         '<h1>Conditions</h1>'.
         '<div style="margin: .5em 0 1em; padding: .5em; background: #aaa;">'.
-          '<a href="#" class="button green">Create New Condition</a>'.
+          javelin_render_tag(
+            'a',
+            array(
+              'href' => '#',
+              'class' => 'button green',
+              'sigil' => 'create-action',
+            ),
+            'Create New Condition').
           '<p>When '.$must_match.' these conditions are met:</p>'.
-          '<table></table>'.
+          javelin_render_tag(
+            'table',
+            array(
+              'sigil' => 'rule-conditions',
+            ),
+            '').
         '</div>')
       ->appendChild(
         '<h1>Action</h1>'.
         '<div style="margin: .5em 0 1em; padding: .5em; background: #aaa;">'.
           '<a href="#" class="button green">Create New Action</a>'.
           '<p>Take these actions:</p>'.
-          '<table></table>'.
+          javelin_render_tag(
+            'table',
+            array(
+              'sigil' => 'rule-actions',
+            ),
+            '').
         '</div>')
       ->appendChild(
         id(new AphrontFormSubmitControl())
@@ -439,11 +457,10 @@ class HeraldRuleController extends HeraldController {
         HeraldValueTypeConfig::getValueTypeForAction($action);
     }
 
-/*
     Javelin::initBehavior(
       'herald-rule-editor',
       array(
-        'root' => 'qq',//$form->requireUniqueId(),
+        'root' => 'herald-rule-edit-form',
         'conditions' => (object) $serial_conditions,
         'actions' => (object) $serial_actions,
         'template' => $this->buildTokenizerTemplates() + array(
@@ -451,8 +468,6 @@ class HeraldRuleController extends HeraldController {
         ),
         'info' => $config_info,
       ));
-
-*/
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Edit Herald Rule');

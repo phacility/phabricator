@@ -25,6 +25,12 @@ final class AphrontFormView extends AphrontView {
   private $encType;
   private $user;
   private $workflow;
+  private $id;
+
+  public function setID($id) {
+    $this->id = $id;
+    return $this;
+  }
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
@@ -66,6 +72,7 @@ final class AphrontFormView extends AphrontView {
         'class'   => 'aphront-form-view',
         'enctype' => $this->encType,
         'sigil'   => $this->workflow ? 'workflow' : null,
+        'id'      => $this->id,
       ),
       $this->renderDataInputs().
       $this->renderChildren());
