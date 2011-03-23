@@ -42,16 +42,10 @@ class AphrontFormTokenizerControl extends AphrontFormControl {
   }
 
   protected function renderInput() {
-    require_celerity_resource('aphront-tokenizer-control-css');
     require_celerity_resource('javelin-typeahead-dev');
 
-    $tokens = array();
-    $values = nonempty($this->getValue(), array());
-    foreach ($values as $key => $value) {
-      $tokens[] = $this->renderToken($key, $value);
-    }
-
     $name = $this->getName();
+    $values = nonempty($this->getValue(), array());
 
     $input = javelin_render_tag(
       'input',
@@ -71,6 +65,11 @@ class AphrontFormTokenizerControl extends AphrontFormControl {
       $id = celerity_generate_unique_node_id();
     }
 
+    $template = new AphrontTokenizerTemplateView();
+    $template->setName($name);
+    $template->setID($id);
+    $template->setValue($values);
+
     if (!$this->disableBehavior) {
       Javelin::initBehavior('aphront-basic-tokenizer', array(
         'id'    => $id,
@@ -80,44 +79,7 @@ class AphrontFormTokenizerControl extends AphrontFormControl {
       ));
     }
 
-    return phutil_render_tag(
-      'div',
-      array(
-        'id' => $id,
-        'class' => 'jx-tokenizer-container',
-      ),
-      implode('', $tokens).
-      $input.
-      '<div style="clear: both;"></div>');
-
-    return phutil_render_tag(
-      'input',
-      array(
-        'type'      => 'text',
-        'name'      => $this->getName(),
-        'disabled'  => $this->getDisabled() ? 'disabled' : null,
-      ));
-  }
-
-  private function renderToken($key, $value) {
-    $input_name = $this->getName();
-    if ($input_name) {
-      $input_name .= '[]';
-    }
-    return phutil_render_tag(
-      'a',
-      array(
-        'class' => 'jx-tokenizer-token',
-      ),
-      phutil_escape_html($value).
-      phutil_render_tag(
-        'input',
-        array(
-          'type'  => 'hidden',
-          'name'  => $input_name,
-          'value' => $key,
-        )).
-      '<span class="jx-tokenizer-x-placeholder"></span>');
+    return $template->render();
   }
 
 

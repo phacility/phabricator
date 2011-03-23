@@ -276,7 +276,8 @@ class HeraldRuleController extends HeraldController {
             array(
               'href' => '#',
               'class' => 'button green',
-              'sigil' => 'create-action',
+              'sigil' => 'create-condition',
+              'mustcapture' => true,
             ),
             'Create New Condition').
           '<p>When '.$must_match.' these conditions are met:</p>'.
@@ -290,7 +291,15 @@ class HeraldRuleController extends HeraldController {
       ->appendChild(
         '<h1>Action</h1>'.
         '<div style="margin: .5em 0 1em; padding: .5em; background: #aaa;">'.
-          '<a href="#" class="button green">Create New Action</a>'.
+          javelin_render_tag(
+            'a',
+            array(
+              'href' => '#',
+              'class' => 'button green',
+              'sigil' => 'create-action',
+              'mustcapture' => true,
+            ),
+            'Create New Action').
           '<p>Take these actions:</p>'.
           javelin_render_tag(
             'table',
@@ -301,7 +310,7 @@ class HeraldRuleController extends HeraldController {
         '</div>')
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Save')
+          ->setValue('Save Rule')
           ->addCancelButton('/herald/view/'.$rule->getContentType().'/'));
 /*
     $form =
@@ -482,15 +491,20 @@ class HeraldRuleController extends HeraldController {
   }
 
   protected function buildTokenizerTemplates() {
+    $template = new AphrontTokenizerTemplateView();
+    $template = $template->render();
+
     return array(
       'source' => array(
-        'email'       => '/datasource/mailable/',
-        'user'        => '/datasource/user/',
-        'repository'  => '/datasource/repository/',
+        'email'       => '/typeahead/common/mailable/',
+        'user'        => '/typeahead/common/user/',
+        'repository'  => '/typeahead/common/repository/',
+/*
         'tag'         => '/datasource/tag/',
         'package'     => '/datasource/package/',
+*/
       ),
-      'markup' => 'derp derp',//id(<javelin:tokenizer-template />)->toString(),
+      'markup' => $template,
     );
   }
 }

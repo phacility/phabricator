@@ -418,21 +418,24 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-herald-rule-editor' =>
   array(
-    'uri' => '/res/f18bcd5e/rsrc/js/application/herald/herald-rule-editor.js',
+    'uri' => '/res/48108130/rsrc/js/application/herald/herald-rule-editor.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'herald-rule-editor',
+      1 => 'javelin-lib-dev',
     ),
     'disk' => '/rsrc/js/application/herald/herald-rule-editor.js',
   ),
   'herald-rule-editor' =>
   array(
-    'uri' => '/res/e71d1d0e/rsrc/js/application/herald/HeraldRuleEditor.js',
+    'uri' => '/res/8b5e9d5e/rsrc/js/application/herald/HeraldRuleEditor.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'multirow-row-manager',
+      1 => 'javelin-lib-dev',
+      2 => 'javelin-typeahead-dev',
     ),
     'disk' => '/rsrc/js/application/herald/HeraldRuleEditor.js',
   ),

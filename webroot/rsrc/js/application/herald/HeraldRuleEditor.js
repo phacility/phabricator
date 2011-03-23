@@ -205,7 +205,7 @@ JX.install('HeraldRuleEditor', {
           set_fn = function(v) { input.value = v; };
           break;
         case 'email':
-        case 'employee':
+        case 'user':
         case 'repository':
         case 'tag':
         case 'package':
