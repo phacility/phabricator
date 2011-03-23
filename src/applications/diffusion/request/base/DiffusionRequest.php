@@ -51,6 +51,9 @@ class DiffusionRequest {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $class = 'DiffusionGitRequest';
         break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $class = 'DiffusionSvnRequest';
+        break;
       default:
         $class = 'DiffusionRequest';
         break;
