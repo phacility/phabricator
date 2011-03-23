@@ -159,10 +159,18 @@ class PhabricatorSearchController extends PhabricatorSearchBaseController {
         ->loadHandles();
       $results = array();
       foreach ($handles as $handle) {
-        $results[] = '<h1>'.$handle->renderLink().'</h1>';
+        $results[] =
+          '<h1 style="font-size: 14px; font-weight: normal; margin: 4px 0 8px;">'.
+            phutil_render_tag(
+              'a',
+              array(
+                'href' => $handle->getURI(),
+              ),
+              $this->emboldenQuery($handle->getName(), $query->getQuery())).
+          '</h1>';
       }
       $results =
-        '<div style="padding: 1em 2em 2em;">'.
+        '<div style="padding: 1em 3em 2em;">'.
           implode("\n", $results).
         '</div>';
     } else {
@@ -179,6 +187,20 @@ class PhabricatorSearchController extends PhabricatorSearchBaseController {
       array(
         'title' => 'Results: what',
       ));
+  }
+
+  private function emboldenQuery($str, $query) {
+    $query = preg_split("/\s+/", $query);
+    $query = array_filter($query);
+    $str = phutil_escape_html($str);
+    foreach ($query as $word) {
+      $word = phutil_escape_html($word);
+      $str = preg_replace(
+        '/('.preg_quote($word, '/').')/i',
+        '<strong>\1</strong>',
+        $str);
+    }
+    return $str;
   }
 
 }
