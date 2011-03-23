@@ -18,6 +18,7 @@ phutil_require_module('phabricator', 'applications/herald/storage/action');
 phutil_require_module('phabricator', 'applications/herald/storage/condition');
 phutil_require_module('phabricator', 'applications/herald/storage/rule');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
+phutil_require_module('phabricator', 'infrastructure/javelin/api');
 phutil_require_module('phabricator', 'view/form/base');
 phutil_require_module('phabricator', 'view/form/control/submit');
 phutil_require_module('phabricator', 'view/layout/panel');

@@ -42,14 +42,14 @@ class PhabricatorSearchMySQLExecutor extends PhabricatorSearchExecutor {
         $conn_r,
         'MATCH(corpus) AGAINST (%s)',
         $q);
-/*
-      if ($query->getParameter('order') == AdjutantQuery::ORDER_RELEVANCE) {
+
+//      if ($query->getParameter('order') == AdjutantQuery::ORDER_RELEVANCE) {
         $order = qsprintf(
           $conn_r,
-          'ORDER BY MATCH(corpus) AGAINST (%s) DESC',
+          'ORDER BY MAX(MATCH(corpus) AGAINST (%s)) DESC',
           $q);
-      }
-*/
+//      }
+
       $field = $query->getParameter('field');
       if ($field/* && $field != AdjutantQuery::FIELD_ALL*/) {
         $where[] = qsprintf(
@@ -130,11 +130,16 @@ class PhabricatorSearchMySQLExecutor extends PhabricatorSearchExecutor {
 
     $hits = queryfx_all(
       $conn_r,
-      'SELECT DISTINCT
+      'SELECT
           document.phid,
           document.documentType,
           document.documentTitle,
-          document.documentCreated FROM %T document %Q %Q %Q
+          document.documentCreated
+        FROM %T document
+          %Q
+          %Q
+        GROUP BY document.phid
+          %Q
         LIMIT 50',
       $t_doc,
       $join,
