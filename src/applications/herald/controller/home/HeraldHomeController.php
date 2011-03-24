@@ -123,6 +123,7 @@ class HeraldHomeController extends HeraldController {
       $sidenav,
       array(
         'title' => 'Herald',
+        'tab' => 'rules',
       ));
   }
 

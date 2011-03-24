@@ -7,4 +7,4 @@
 
 
 
-phutil_require_source('IHeraldable.php');
+phutil_require_source('HeraldObjectAdapter.php');

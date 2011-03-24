@@ -16,13 +16,13 @@
  * limitations under the License.
  */
 
-interface IHeraldable {
+abstract class HeraldObjectAdapter {
 
-  public function getFBID();
-  public function getHeraldName();
-  public function getHeraldTypeName();
-  public function getHeraldField($field_name);
-  public function applyHeraldEffects(array $effects);
+  abstract public function getPHID();
+  abstract public function getHeraldName();
+  abstract public function getHeraldTypeName();
+  abstract public function getHeraldField($field_name);
+  abstract public function applyHeraldEffects(array $effects);
 
 }
 

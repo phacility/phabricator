@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 
-class DryRunHeraldable implements IHeraldable {
+class HeraldDryRunAdapter extends HeraldObjectAdapter {
 
-  public function getFBID() {
+  public function getPHID() {
     return 0;
   }
 

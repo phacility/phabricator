@@ -6,8 +6,8 @@
 
 
 
-phutil_require_module('phabricator', 'applications/herald/heraldable/base');
+phutil_require_module('phabricator', 'applications/herald/adapter/base');
 phutil_require_module('phabricator', 'applications/herald/storage/transcript/apply');
 
 
-phutil_require_source('DryRunHeraldable.php');
+phutil_require_source('HeraldDryRunAdapter.php');

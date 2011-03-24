@@ -27,6 +27,23 @@ abstract class HeraldController extends PhabricatorController {
     $page->setGlyph("\xE2\x98\xBF");
     $page->appendChild($view);
 
+    $page->setTabs(
+      array(
+        'rules' => array(
+          'href' => '/herald/',
+          'name' => 'Rules',
+        ),
+        'test' => array(
+          'href' => '/herald/test/',
+          'name' => 'Test Console',
+        ),
+        'transcripts' => array(
+          'href' => '/herald/transcript/',
+          'name' => 'Transcripts',
+        ),
+      ),
+      idx($data, 'tab'));
+
     $response = new AphrontWebpageResponse();
     return $response->setContent($page->render());
 

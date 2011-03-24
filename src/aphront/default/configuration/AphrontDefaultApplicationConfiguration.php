@@ -223,6 +223,9 @@ class AphrontDefaultApplicationConfiguration
         'new/(?:(?P<type>[^/]+)/)?$' => 'HeraldNewController',
         'rule/(?:(?<id>\d+)/)?$' => 'HeraldRuleController',
         'delete/(?P<id>\d+)/$' => 'HeraldDeleteController',
+        'test/$' => 'HeraldTestConsoleController',
+        'transcript/$' => 'HeraldTranscriptListController',
+        'transcript/(?P<id>\d+)/$' => 'HeraldTranscriptController',
       ),
 
     );
