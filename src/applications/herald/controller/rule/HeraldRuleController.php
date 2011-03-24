@@ -68,16 +68,14 @@ class HeraldRuleController extends HeraldController {
     $rule->attachConditions($rule_conditions);
     $rule->attachActions($rule_actions);
 
-    $arr = "\xC2\xAB";
     $e_name = true;
     $errors = array();
     if ($request->isFormPost() && $request->getStr('save')) {
-
       $rule->setName($request->getStr('name'));
       $rule->setMustMatchAll(($request->getStr('must_match') == 'all'));
 
       if (!strlen($rule->getName())) {
-        $e_name = "{$arr} Required";
+        $e_name = "Required";
         $errors[] = "Rule must have a name.";
       }
 
@@ -92,7 +90,7 @@ class HeraldRuleController extends HeraldController {
       foreach ($data['conditions'] as $condition) {
         $obj = new HeraldCondition();
         $obj->setFieldName($condition[0]);
-        $obj->setCondition($condition[1]);
+        $obj->setFieldCondition($condition[1]);
 
         if (is_array($condition[2])) {
           $obj->setValue(array_keys($condition[2]));
@@ -100,7 +98,7 @@ class HeraldRuleController extends HeraldController {
           $obj->setValue($condition[2]);
         }
 
-        $cond_type = $obj->getCondition();
+        $cond_type = $obj->getFieldCondition();
 
         if ($cond_type == HeraldConditionConfig::CONDITION_REGEXP) {
           if (@preg_match($obj->getValue(), '') === false) {
@@ -170,18 +168,19 @@ class HeraldRuleController extends HeraldController {
       if (!$errors) {
         try {
 
-          $rule->openTransaction();
+// TODO
+//          $rule->openTransaction();
             $rule->save();
             $rule->saveConditions($conditions);
             $rule->saveActions($actions);
-          $rule->saveTransaction();
+//          $rule->saveTransaction();
 
           $uri = '/herald/view/'.$rule->getContentType().'/';
 
           return id(new AphrontRedirectResponse())
             ->setURI($uri);
-        } catch (QueryDuplicateKeyException $ex) {
-          $e_name = "{$arr} Not Unique";
+        } catch (AphrontQueryDuplicateKeyException $ex) {
+          $e_name = "Not Unique";
           $errors[] = "Rule name is not unique. Choose a unique name.";
         }
       }
@@ -213,12 +212,12 @@ class HeraldRuleController extends HeraldController {
       ->loadHandles();
 
     if ($errors) {
-      $errors = '!!';//<tools:error title="Form Errors" errors={$errors} />;
+      $error_view = new AphrontErrorView();
+      $error_view->setTitle('Form Errors');
+      $error_view->setErrors($errors);
+    } else {
+      $error_view = null;
     }
-
-
-//    require_static('herald-css');
-
 
     $options = array(
       'all' => 'all of',
@@ -233,6 +232,7 @@ class HeraldRuleController extends HeraldController {
         'option',
         array(
           'selected' => ($selected == $key) ? 'selected' : null,
+          'value' => $key,
         ),
         phutil_escape_html($option));
     }
@@ -247,17 +247,28 @@ class HeraldRuleController extends HeraldController {
       $action = '/herald/rule/'.$rule->getID().'/';
     }
 
+    require_celerity_resource('herald-css');
+
     $type_name = $content_type_map[$rule->getContentType()];
 
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setID('herald-rule-edit-form')
       ->addHiddenInput('type', $rule->getContentType())
-      ->addHiddenInput('save', true)
-      ->addHiddenInput('rule', '')
+      ->addHiddenInput('save', 1)
+      ->appendChild(
+        // Build this explicitly so we can add a sigil to it.
+        javelin_render_tag(
+          'input',
+          array(
+            'type'  => 'hidden',
+            'name'  => 'rule',
+            'sigil' => 'rule',
+          )))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Rule Name')
+          ->setName('name')
           ->setError($e_name)
           ->setValue($rule->getName()))
       ->appendChild(
@@ -270,27 +281,32 @@ class HeraldRuleController extends HeraldController {
             "This rule triggers for <strong>{$type_name}</strong>."))
       ->appendChild(
         '<h1>Conditions</h1>'.
-        '<div style="margin: .5em 0 1em; padding: .5em; background: #aaa;">'.
-          javelin_render_tag(
-            'a',
-            array(
-              'href' => '#',
-              'class' => 'button green',
-              'sigil' => 'create-condition',
-              'mustcapture' => true,
-            ),
-            'Create New Condition').
+        '<div class="aphront-form-inset">'.
+          '<div style="float: right;">'.
+            javelin_render_tag(
+              'a',
+              array(
+                'href' => '#',
+                'class' => 'button green',
+                'sigil' => 'create-condition',
+                'mustcapture' => true,
+              ),
+              'Create New Condition').
+          '</div>'.
           '<p>When '.$must_match.' these conditions are met:</p>'.
+          '<div style="clear: both;"></div>'.
           javelin_render_tag(
             'table',
             array(
               'sigil' => 'rule-conditions',
+              'class' => 'herald-condition-table',
             ),
             '').
         '</div>')
       ->appendChild(
         '<h1>Action</h1>'.
-        '<div style="margin: .5em 0 1em; padding: .5em; background: #aaa;">'.
+        '<div class="aphront-form-inset">'.
+          '<div style="float: right;">'.
           javelin_render_tag(
             'a',
             array(
@@ -300,11 +316,14 @@ class HeraldRuleController extends HeraldController {
               'mustcapture' => true,
             ),
             'Create New Action').
+          '</div>'.
           '<p>Take these actions:</p>'.
+          '<div style="clear: both;"></div>'.
           javelin_render_tag(
             'table',
             array(
               'sigil' => 'rule-actions',
+              'class' => 'herald-action-table',
             ),
             '').
         '</div>')
@@ -312,86 +331,11 @@ class HeraldRuleController extends HeraldController {
         id(new AphrontFormSubmitControl())
           ->setValue('Save Rule')
           ->addCancelButton('/herald/view/'.$rule->getContentType().'/'));
-/*
-    $form =
-      <div>
-        <tools:form action={URI::getRequestURI()} method="post" width="wide">
 
-          <input type="hidden" name="save" value="true" />
-          <input type="hidden" name="rule" value="" sigil="rule" />
-          <input type="hidden" name="type" value={$request->getStr('type')} />
-
-          {$errors}
-
-          <h1>Edit Rule</h1>
-          <tools:fieldset>
-
-            <tools:control
-              type="text"
-              label="Rule Name"
-              error={$e_name}>
-              <input type="text" name="name" value={$rule->getName()} />
-            </tools:control>
-
-            <tools:control type="static" label="Owner">
-              {$handles[$rule->getAuthorPHID()]->getName()}
-            </tools:control>
-
-            <tools:control type="static">
-              This rule triggers for
-                <strong>{$content_type_map[$rule->getContentType()]}</strong>.
-            </tools:control>
-
-          </tools:fieldset>
-
-          <h1 style="margin-top: 1.5em;">Conditions</h1>
-
-          <tools:fieldset>
-            <div style="padding: .25em 0 1em 60px;">
-              <div style="float: right;">
-                <a href="#"
-                   sigil="create-condition"
-                   class="button green"
-                   mustcapture={true}>Create New Condition</a>
-              </div>
-
-              When {$must_match} these conditions are met:
-
-            </div>
-            <div class="flush" />
-            <table class="condition-table" sigil="rule-conditions" />
-          </tools:fieldset>
-
-
-          <h1 style="margin-top: 1.5em;">Actions</h1>
-          <tools:fieldset>
-            <div style="padding: .25em 0 1.5em 60px;">
-              <div style="float: right;">
-                <a href="#"
-                   sigil="create-action"
-                   class="button green"
-                   mustcapture={true}>Create New Action</a>
-              </div>
-              Take these actions:
-            </div>
-            <div class="flush" />
-            <table sigil="rule-actions" class="action-table" />
-          </tools:fieldset>
-
-          <div style="margin-top: 0.5em;">
-            <tools:control type="submit">
-              <button>Save Rule</button>
-              <a href="/herald/" class="button grey">Cancel</a>
-            </tools:control>
-          </div>
-
-        </tools:form>
-      </div>;
-
-*/
     $serial_conditions = array(
       array('default', 'default', ''),
     );
+
     if ($rule->getConditions()) {
       $serial_conditions = array();
       foreach ($rule->getConditions() as $condition) {
@@ -400,14 +344,14 @@ class HeraldRuleController extends HeraldController {
         if (is_array($value)) {
           $value_map = array();
           foreach ($value as $k => $fbid) {
-            $value_map[$fbid] = $handles[$fbid]->getExtendedDisplayName();
+            $value_map[$fbid] = $handles[$fbid]->getName();
           }
           $value = $value_map;
         }
 
         $serial_conditions[] = array(
           $condition->getFieldName(),
-          $condition->getCondition(),
+          $condition->getFieldCondition(),
           $value,
         );
       }
@@ -422,7 +366,7 @@ class HeraldRuleController extends HeraldController {
 
         $target_map = array();
         foreach ((array)$action->getTarget() as $fbid) {
-          $target_map[$fbid] = $handles[$fbid]->getExtendedDisplayName();
+          $target_map[$fbid] = $handles[$fbid]->getName();
         }
 
         $serial_actions[] = array(
@@ -484,7 +428,10 @@ class HeraldRuleController extends HeraldController {
     $panel->appendChild($form);
 
     return $this->buildStandardPageResponse(
-      $panel,
+      array(
+        $error_view,
+        $panel,
+      ),
       array(
         'title' => 'Edit Rule',
       ));

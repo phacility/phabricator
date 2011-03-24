@@ -104,3 +104,10 @@ table.aphront-form-control-checkbox-layout th {
   height: 1px;
   position: relative;
 }
+
+.aphront-form-inset {
+  margin: 0 0 1em;
+  padding: .75em;
+  background: #f3f3f3;
+  border: 1px solid #afafaf;
+}

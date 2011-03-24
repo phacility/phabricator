@@ -112,7 +112,8 @@ class HeraldRule extends HeraldDAO {
 
 // TODO:
 //    $this->openTransaction();
-      $this->getLink('w')->query(
+      queryfx(
+        $this->establishConnection('w'),
         'DELETE FROM %T WHERE ruleID = %d',
         $table_name,
         $this->getID());
@@ -126,11 +127,13 @@ class HeraldRule extends HeraldDAO {
 
 // TODO:
 //    $this->openTransaction();
-      $this->getLink('w')->query(
+      queryfx(
+        $this->establishConnection('w'),
         'DELETE FROM %T WHERE ruleID = %d',
         id(new HeraldCondition())->getTableName(),
         $this->getID());
-      $this->getLink('w')->query(
+      queryfx(
+        $this->establishConnection('w'),
         'DELETE FROM %T WHERE ruleID = %d',
         id(new HeraldAction())->getTableName(),
         $this->getID());

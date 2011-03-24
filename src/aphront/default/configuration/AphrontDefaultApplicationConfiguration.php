@@ -222,6 +222,7 @@ class AphrontDefaultApplicationConfiguration
         'view/(?P<view>[^/]+)/$' => 'HeraldHomeController',
         'new/(?:(?P<type>[^/]+)/)?$' => 'HeraldNewController',
         'rule/(?:(?<id>\d+)/)?$' => 'HeraldRuleController',
+        'delete/(?P<id>\d+)/$' => 'HeraldDeleteController',
       ),
 
     );

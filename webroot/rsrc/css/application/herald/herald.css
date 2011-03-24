@@ -1,0 +1,31 @@
+/**
+ * @provides herald-css
+ */
+
+.herald-action-table,
+.herald-condition-table {
+  margin-top: 8px;
+}
+
+.herald-condition-table select {
+  width: 250px;
+}
+
+.herald-action-table td,
+.herald-condition-table td {
+  padding: 2px 4px;
+  vertical-align: middle;
+}
+
+.herald-condition-table td.value {
+  width: 100%;
+}
+
+.herald-action-table td input,
+.herald-condition-table td input {
+  width: 460px;
+}
+
+.herald-action-table td.target {
+  width: 100%;
+}

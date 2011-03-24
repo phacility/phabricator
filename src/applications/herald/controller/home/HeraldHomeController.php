@@ -40,41 +40,38 @@ class HeraldHomeController extends HeraldController {
       $this->view,
       $user->getPHID());
 
-    $handles = array();
     $need_phids = mpull($rules, 'getAuthorPHID');
+    $handles = id(new PhabricatorObjectHandleData($need_phids))
+      ->loadHandles();
 
-/*
-    $data = new ToolsHandleData($need_fbids, $handles);
-    $data->needNames();
-    $data->needAlternateNames();
-    prep($data);
-*/
     $type = 'differential';
 
     $rows = array();
     foreach ($rules as $rule) {
+      $owner = $handles[$rule->getAuthorPHID()]->renderLink();
 
-      $owner = 'owner';
-/*        <a href={$handles[$rule->getOwnerID()]->getURI()}>
-          {$handles[$rule->getOwnerID()]->getName()}
-        </a>;
-*/
-      $name = 'name';
-/*        <a href={"/herald/rule/".$rule->getID()."/"}>
-          {$rule->getName()}
-        </a>;
-*/
+      $name = phutil_render_tag(
+        'a',
+        array(
+          'href' => '/herald/rule/'.$rule->getID().'/',
+        ),
+        phutil_escape_html($rule->getName()));
+
       $delete = 'delete';
+      $delete = javelin_render_tag(
+        'a',
+        array(
+          'href' => '/herald/delete/'.$rule->getID().'/',
+          'sigil' => 'workflow',
+          'class' => 'button small grey',
+        ),
+        'Delete');
 
-/*        <a href={"/herald/delete/".$rule->getID()."/"} workflow={true}>
-          Delete
-        </a>;
-*/
       $rows[] = array(
         $map[$rule->getContentType()],
-        $owner->toString(),
-        $name->toString(),
-        $delete->toString(),
+        $owner,
+        $name,
+        $delete,
       );
     }
 
@@ -89,13 +86,13 @@ class HeraldHomeController extends HeraldController {
         'Type',
         'Owner',
         'Rule Name',
-        'Delete',
+        '',
       ));
     $table->setColumnClasses(
       array(
         '',
         '',
-        'wide wrap',
+        'wide wrap pri',
         'action'
       ));
 

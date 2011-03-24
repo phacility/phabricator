@@ -27,7 +27,8 @@ class HeraldAction extends HeraldDAO {
     return array(
       self::CONFIG_SERIALIZATION => array(
         'target' => self::SERIALIZATION_JSON,
-      )
+      ),
+      self::CONFIG_TIMESTAMPS => false,
     ) + parent::getConfiguration();
   }
 
