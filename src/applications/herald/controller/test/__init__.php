@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/differential/storage/revision');
+phutil_require_module('phabricator', 'applications/herald/adapter/differential');
 phutil_require_module('phabricator', 'applications/herald/adapter/dryrun');
 phutil_require_module('phabricator', 'applications/herald/controller/base');
 phutil_require_module('phabricator', 'applications/herald/engine/engine');

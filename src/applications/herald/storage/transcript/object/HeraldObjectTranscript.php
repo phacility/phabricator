@@ -18,18 +18,18 @@
 
 class HeraldObjectTranscript {
 
-  protected $fbid;
+  protected $phid;
   protected $type;
   protected $name;
   protected $fields;
 
-  public function setFBID($fbid) {
-    $this->fbid = $fbid;
+  public function setPHID($phid) {
+    $this->phid = $phid;
     return $this;
   }
 
-  public function getFBID() {
-    return $this->fbid;
+  public function getPHID() {
+    return $this->phid;
   }
 
   public function setType($type) {

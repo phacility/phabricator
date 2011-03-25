@@ -38,6 +38,11 @@ class DifferentialRevisionViewController extends DifferentialController {
 
     $diffs = $revision->loadDiffs();
 
+    if (!$diffs) {
+      throw new Exception(
+        "This revision has no diffs. Something has gone quite wrong.");
+    }
+
     $diff_vs = $request->getInt('vs');
     $target = end($diffs);
 

@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'applications/herald/storage/base');
+phutil_require_module('phabricator', 'applications/phid/storage/phid');
 
 phutil_require_module('phutil', 'utils');
 

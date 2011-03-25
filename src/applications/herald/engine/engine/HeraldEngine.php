@@ -26,7 +26,7 @@ class HeraldEngine {
   protected $fieldCache = array();
   protected $object = null;
 
-  public static function loadAndApplyRules(IHeraldable $object) {
+  public static function loadAndApplyRules(HeraldObjectAdapter $object) {
     $content_type = $object->getHeraldTypeName();
     $rules = HeraldRule::loadAllByContentTypeWithFullData($content_type);
 
@@ -37,13 +37,13 @@ class HeraldEngine {
     return $engine->getTranscript();
   }
 
-  public function applyRules(array $rules, IHeraldable $object) {
+  public function applyRules(array $rules, HeraldObjectAdapter $object) {
     $t_start = microtime(true);
 
     $rules = mpull($rules, null, 'getID');
 
     $this->transcript = new HeraldTranscript();
-    $this->transcript->setObjectID((string)$object->getFBID());
+    $this->transcript->setObjectPHID((string)$object->getPHID());
     $this->fieldCache = array();
     $this->results = array();
     $this->rules   = $rules;
@@ -71,7 +71,7 @@ class HeraldEngine {
             "Don't do this! You have formed an unresolvable cycle in the ".
             "dependency graph!");
           $xscript->setRuleName($rules[$rule_id]->getName());
-          $xscript->setRuleOwner($rules[$rule_id]->getOwnerID());
+          $xscript->setRuleOwner($rules[$rule_id]->getAuthorPHID());
           $this->transcript->addRuleTranscript($xscript);
         }
         $rule_matches = false;
@@ -86,7 +86,7 @@ class HeraldEngine {
     }
 
     $object_transcript = new HeraldObjectTranscript();
-    $object_transcript->setFBID($object->getFBID());
+    $object_transcript->setPHID($object->getPHID());
     $object_transcript->setName($object->getHeraldName());
     $object_transcript->setType($object->getHeraldTypeName());
     $object_transcript->setFields($this->fieldCache);
@@ -100,7 +100,7 @@ class HeraldEngine {
     return $effects;
   }
 
-  public function applyEffects(array $effects, IHeraldable $object) {
+  public function applyEffects(array $effects, HeraldObjectAdapter $object) {
     if ($object instanceof DryRunHeraldable) {
       $this->transcript->setDryRun(true);
     } else {
@@ -121,7 +121,10 @@ class HeraldEngine {
     return $this->transcript;
   }
 
-  protected function doesRuleMatch(HeraldRule $rule, IHeraldable $object) {
+  protected function doesRuleMatch(
+    HeraldRule $rule,
+    HeraldObjectAdapter $object) {
+
     $id = $rule->getID();
 
     if (isset($this->results[$id])) {
@@ -157,7 +160,7 @@ class HeraldEngine {
       $reason = "Rule failed automatically because it has no conditions.";
       $result = false;
 /* TOOD: Restore this in some form?
-    } else if (!is_fb_employee($rule->getOwnerID())) {
+    } else if (!is_fb_employee($rule->getAuthorPHID())) {
       $reason = "Rule failed automatically because its owner is not an ".
                 "active employee.";
       $result = false;
@@ -195,7 +198,7 @@ class HeraldEngine {
     $rule_transcript->setResult($result);
     $rule_transcript->setReason($reason);
     $rule_transcript->setRuleName($rule->getName());
-    $rule_transcript->setRuleOwner($rule->getOwnerID());
+    $rule_transcript->setRuleOwner($rule->getAuthorPHID());
 
     $this->transcript->addRuleTranscript($rule_transcript);
 
@@ -205,12 +208,12 @@ class HeraldEngine {
   protected function doesConditionMatch(
     HeraldRule $rule,
     HeraldCondition $condition,
-    IHeraldable $object) {
+    HeraldObjectAdapter $object) {
 
     $object_value = $this->getConditionObjectValue($condition, $object);
     $test_value   = $condition->getValue();
 
-    $cond = $condition->getCondition();
+    $cond = $condition->getFieldCondition();
 
     $transcript = new HeraldConditionTranscript();
     $transcript->setRuleID($rule->getID());
@@ -241,10 +244,10 @@ class HeraldEngine {
         $result = ($object_value != $test_value);
         break;
       case HeraldConditionConfig::CONDITION_IS_ME:
-        $result = ($object_value == $rule->getOwnerID());
+        $result = ($object_value == $rule->getAuthorPHID());
         break;
       case HeraldConditionConfig::CONDITION_IS_NOT_ME:
-        $result = ($object_value != $rule->getOwnerID());
+        $result = ($object_value != $rule->getAuthorPHID());
         break;
       case HeraldConditionConfig::CONDITION_IS_ANY:
         $test_value = array_flip($test_value);
@@ -364,7 +367,7 @@ class HeraldEngine {
 
   protected function getConditionObjectValue(
     HeraldCondition $condition,
-    IHeraldable $object) {
+    HeraldObjectAdapter $object) {
 
     $field = $condition->getFieldName();
 
@@ -391,7 +394,7 @@ class HeraldEngine {
       case HeraldFieldConfig::FIELD_AUTHOR:
       case HeraldFieldConfig::FIELD_REPOSITORY:
       case HeraldFieldConfig::FIELD_MERGE_REQUESTER:
-        // TODO: Type should be fbid.
+        // TODO: Type should be PHID.
         $result = $this->object->getHeraldField($field);
         break;
       case HeraldFieldConfig::FIELD_TAGS:
@@ -424,11 +427,14 @@ class HeraldEngine {
     return $result;
   }
 
-  protected function getRuleEffects(HeraldRule $rule, IHeraldable $object) {
+  protected function getRuleEffects(
+    HeraldRule $rule,
+    HeraldObjectAdapter $object) {
+
     $effects = array();
     foreach ($rule->getActions() as $action) {
       $effect = new HeraldEffect();
-      $effect->setObjectID($object->getFBID());
+      $effect->setObjectPHID($object->getPHID());
       $effect->setAction($action->getAction());
       $effect->setTarget($action->getTarget());
 

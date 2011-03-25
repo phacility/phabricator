@@ -225,7 +225,8 @@ class AphrontDefaultApplicationConfiguration
         'delete/(?P<id>\d+)/$' => 'HeraldDeleteController',
         'test/$' => 'HeraldTestConsoleController',
         'transcript/$' => 'HeraldTranscriptListController',
-        'transcript/(?P<id>\d+)/$' => 'HeraldTranscriptController',
+        'transcript/(?P<id>\d+)/(?:(?P<filter>\w+)/)?$'
+          => 'HeraldTranscriptController',
       ),
 
     );

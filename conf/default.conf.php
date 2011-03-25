@@ -267,6 +267,7 @@ return array(
     'image/jpeg'  => 'image/jpeg',
     'image/jpg'   => 'image/jpg',
     'image/png'   => 'image/png',
+    'image/gif'   => 'image/gif',
     'text/plain'  => 'text/plain; charset=utf-8',
   ),
 

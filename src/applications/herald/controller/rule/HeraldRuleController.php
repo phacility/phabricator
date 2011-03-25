@@ -444,7 +444,7 @@ class HeraldRuleController extends HeraldController {
     return array(
       'source' => array(
         'email'       => '/typeahead/common/mailable/',
-        'user'        => '/typeahead/common/user/',
+        'user'        => '/typeahead/common/users/',
         'repository'  => '/typeahead/common/repository/',
 /*
         'tag'         => '/datasource/tag/',

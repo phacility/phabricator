@@ -18,7 +18,7 @@
 
 class HeraldEffect {
 
-  protected $objectID;
+  protected $objectPHID;
   protected $action;
   protected $target;
 
@@ -27,13 +27,13 @@ class HeraldEffect {
 
   protected $reason;
 
-  public function setObjectID($object_id) {
-    $this->objectID = $object_id;
+  public function setObjectPHID($object_phid) {
+    $this->objectPHID = $object_phid;
     return $this;
   }
 
-  public function getObjectID() {
-    return $this->objectID;
+  public function getObjectPHID() {
+    return $this->objectPHID;
   }
 
   public function setAction($action) {

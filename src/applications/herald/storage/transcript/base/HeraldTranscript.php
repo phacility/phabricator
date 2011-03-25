@@ -19,7 +19,7 @@
 class HeraldTranscript extends HeraldDAO {
 
   protected $id;
-  protected $fbid;
+  protected $phid;
 
   protected $objectTranscript;
   protected $ruleTranscripts = array();
@@ -28,10 +28,9 @@ class HeraldTranscript extends HeraldDAO {
 
   protected $time;
   protected $host;
-  protected $path;
   protected $duration;
 
-  protected $objectID;
+  protected $objectPHID;
   protected $dryRun;
 
   public function getXHeraldRulesHeader() {
@@ -61,7 +60,8 @@ class HeraldTranscript extends HeraldDAO {
   protected function getConfiguration() {
     // Ugh. Too much of a mess to deal with.
     return array(
-      self::CONFIG_AUX_FBID     => 'HERALD_TRANSCRIPT',
+      self::CONFIG_AUX_PHID     => true,
+      self::CONFIG_TIMESTAMPS   => false,
       self::CONFIG_SERIALIZATION => array(
         'objectTranscript'      => self::SERIALIZATION_PHP,
         'ruleTranscripts'       => self::SERIALIZATION_PHP,
@@ -74,7 +74,6 @@ class HeraldTranscript extends HeraldDAO {
   public function __construct() {
     $this->time = time();
     $this->host = php_uname('n');
-    $this->path = realpath($_SERVER['PHP_ROOT']);
   }
 
   public function addApplyTranscript(HeraldApplyTranscript $transcript) {
@@ -131,14 +130,14 @@ class HeraldTranscript extends HeraldDAO {
 
   public function getMetadataMap() {
     return array(
-      'Run At Epoch' => date('F jS, g:i A', $this->time),
-      'Run On Host'  => $this->host.':'.$this->path,
+      'Run At Epoch' => date('F jS, g:i:s A', $this->time),
+      'Run On Host'  => $this->host,
       'Run Duration' => (int)(1000 * $this->duration).' ms',
     );
   }
 
-  public function getURI() {
-    return 'http://tools.facebook.com/herald/transcript/'.$this->getID().'/';
+  public function generatePHID() {
+    return PhabricatorPHID::generateNewPHID('HLXS');
   }
 
 }
