@@ -23,12 +23,11 @@ class DiffusionBrowseFileController extends DiffusionController {
     // Build the view selection form.
     $select_map = array(
       'highlighted' => 'View as Highlighted Text',
-      //'blame' => 'View as Highlighted Text with Blame',
+      'blame' => 'View as Highlighted Text with Blame',
       'plain' => 'View as Plain Text',
-      //'plainblame' => 'View as Plain Text with Blame',
+      'plainblame' => 'View as Plain Text with Blame',
     );
 
-    $drequest = $this->getDiffusionRequest();
     $request = $this->getRequest();
 
     $selected = $request->getStr('view');
@@ -58,79 +57,8 @@ class DiffusionBrowseFileController extends DiffusionController {
       '<button>view</button>');
     $view_select_panel->appendChild($view_select_form);
 
-    $file_query = DiffusionFileContentQuery::newFromDiffusionRequest(
-      $this->diffusionRequest);
-    $file_content = $file_query->loadFileContent();
-
     // Build the content of the file.
-    // TODO: image
-    // TODO: blame.
-    switch ($selected) {
-      case 'plain':
-        $style =
-          "margin: 1em 2em; width: 90%; height: 80em; font-family: monospace";
-        $corpus = phutil_render_tag(
-          'textarea',
-          array(
-            'style' => $style,
-          ),
-          phutil_escape_html($file_content->getCorpus()));
-          break;
-
-      case 'highlighted':
-      default:
-        require_celerity_resource('syntax-highlighting-css');
-        require_celerity_resource('diffusion-source-css');
-
-        $path = $drequest->getPath();
-        $highlightEngine = new PhutilDefaultSyntaxHighlighterEngine();
-        $data = $highlightEngine->highlightSource($path,
-          $file_content->getCorpus());
-        $data = explode("\n", rtrim($data));
-
-        $uri_path = $drequest->getUriPath();
-        $uri_rev  = $drequest->getCommit();
-
-        $color = null;
-        $rows = array();
-        $n = 1;
-        foreach ($data as $k => $line) {
-          if ($n == $drequest->getLine()) {
-            $tr = '<tr style="background: #ffff00;">';
-            $targ = '<a id="scroll_target"></a>';
-            Javelin::initBehavior('diffusion-jump-to',
-              array('target' => 'scroll_target'));
-          } else {
-            $tr = '<tr>';
-            $targ = null;
-          }
-
-          $l = phutil_render_tag(
-            'a',
-            array(
-              'href' => $uri_path.';'.$uri_rev.'$'.$n,
-            ),
-            $n);
-
-          $rows[] = $tr.'<th>'.$l.'</th><td>'.$targ.$line.'</td></tr>';
-          ++$n;
-        }
-
-        $corpus_table = phutil_render_tag(
-          'table',
-          array(
-            'class' => "diffusion-source remarkup-code",
-          ),
-          implode("\n", $rows));
-        $corpus = phutil_render_tag(
-          'div',
-          array(
-            'style' => 'padding: 0pt 2em;',
-          ),
-          $corpus_table);
-
-        break;
-    }
+    $corpus = $this->buildCorpus($selected);
 
     // Render the page.
     $content = array();
@@ -151,5 +79,153 @@ class DiffusionBrowseFileController extends DiffusionController {
       array(
         'title' => 'Browse',
       ));
+  }
+
+
+  public static function renderRevision(
+    DiffusionRequest $drequest,
+    $revision) {
+
+    $callsign = $drequest->getCallsign();
+
+    $name = 'r'.$callsign.$revision;
+    return phutil_render_tag(
+      'a',
+      array(
+        'href' => '/'.$name,
+      ),
+      $name
+    );
+  }
+
+
+  private function buildCorpus($selected) {
+    $blame = ($selected == 'blame' || $selected == 'plainblame');
+
+    $file_query = DiffusionFileContentQuery::newFromDiffusionRequest(
+      $this->diffusionRequest);
+    $file_query->setNeedsBlame($blame);
+
+    // TODO: image
+    // TODO: blame of blame.
+    switch ($selected) {
+      case 'plain':
+      case 'plainblame':
+        $style =
+          "margin: 1em 2em; width: 90%; height: 80em; font-family: monospace";
+        $corpus = phutil_render_tag(
+          'textarea',
+          array(
+            'style' => $style,
+          ),
+          phutil_escape_html($file_query->getRawData()));
+          break;
+
+      case 'highlighted':
+      case 'blame':
+      default:
+        require_celerity_resource('syntax-highlighting-css');
+        require_celerity_resource('diffusion-source-css');
+
+        list($data, $blamedata, $revs) = $file_query->getTokenizedData();
+
+        $drequest = $this->getDiffusionRequest();
+        $path = $drequest->getPath();
+        $highlightEngine = new PhutilDefaultSyntaxHighlighterEngine();
+        $data = $highlightEngine->highlightSource($path, $data);
+
+        $data = explode("\n", rtrim($data));
+
+        $rows = $this->buildDisplayRows($data, $blame, $blamedata, $drequest,
+          $revs);
+
+        $corpus_table = phutil_render_tag(
+          'table',
+          array(
+            'class' => "diffusion-source remarkup-code",
+          ),
+          implode("\n", $rows));
+        $corpus = phutil_render_tag(
+          'div',
+          array(
+            'style' => 'padding: 0pt 2em;',
+          ),
+          $corpus_table);
+
+        break;
+    }
+
+    return $corpus;
+  }
+
+
+  private static function buildDisplayRows($data, $blame, $blamedata, $drequest,
+    $revs) {
+    $last = null;
+    $color = null;
+    $rows = array();
+    $n = 1;
+    foreach ($data as $k => $line) {
+      if ($blame) {
+        if ($last == $blamedata[$k][0]) {
+          $blameinfo =
+            '<th style="background: '.$color.'; width: 9em;"></th>'.
+            '<th style="background: '.$color.'"></th>';
+        } else {
+          switch ($drequest->getRepository()->getVersionControlSystem()) {
+            case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+              // TODO: better color for git.
+              $color = '#dddddd';
+              break;
+            case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+              $color = sprintf(
+               '#%02xee%02x',
+               $revs[$blamedata[$k][0]],
+               $revs[$blamedata[$k][0]]);
+              break;
+            default:
+              throw new Exception('repository type not supported');
+          }
+          $revision_link = self::renderRevision(
+           $drequest,
+           $blamedata[$k][0]);
+
+          $author_link = $blamedata[$k][1];
+          $blameinfo =
+            '<th style="background: '.$color.
+              '; width: 9em;">'.$revision_link.'</th>'.
+            '<th style="background: '.$color.
+              '; font-weight: normal; color: #333;">'.$author_link.'</th>';
+          $last = $blamedata[$k][0];
+        }
+      } else {
+        $blameinfo = null;
+      }
+
+      if ($n == $drequest->getLine()) {
+        $tr = '<tr style="background: #ffff00;">';
+        $targ = '<a id="scroll_target"></a>';
+        Javelin::initBehavior('diffusion-jump-to',
+          array('target' => 'scroll_target'));
+      } else {
+        $tr = '<tr>';
+        $targ = null;
+      }
+
+      $uri_path = $drequest->getUriPath();
+      $uri_rev  = $drequest->getCommit();
+
+      $l = phutil_render_tag(
+        'a',
+        array(
+          'href' => $uri_path.';'.$uri_rev.'$'.$n,
+        ),
+        $n);
+
+      $rows[] = $tr.$blameinfo.'<th>'.$l.'</th><td>'.$targ.$line.'</td></tr>';
+      ++$n;
+    }
+
+    return $rows;
   }
 }

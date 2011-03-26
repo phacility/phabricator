@@ -26,17 +26,55 @@ final class DiffusionGitFileContentQuery extends DiffusionFileContentQuery {
     $commit = $drequest->getCommit();
 
     $local_path = $repository->getDetail('local-path');
-
-    list($corpus) = execx(
-      '(cd %s && git cat-file blob %s:%s)',
-      $local_path,
-      $commit,
-      $path);
+    if ($this->getNeedsBlame()) {
+      list($corpus) = execx(
+        '(cd %s && git --no-pager blame -c --date short %s -- %s)',
+        $local_path,
+        $commit,
+        $path);
+    } else {
+      list($corpus) = execx(
+        '(cd %s && git cat-file blob %s:%s)',
+        $local_path,
+        $commit,
+        $path);
+    }
 
     $file_content = new DiffusionFileContent();
     $file_content->setCorpus($corpus);
 
     return $file_content;
+  }
+
+  protected function tokenizeData($data) {
+    $m = array();
+    $blamedata = array();
+    $revs = array();
+
+    if ($this->getNeedsBlame()) {
+      $data = explode("\n", rtrim($data));
+      foreach ($data as $k => $line) {
+        // sample line:
+        // d1b4fcdd        (     hzhao   2009-05-01  202)function print();
+        preg_match('/^\s*?(\S+?)\s*\(\s*(\S+)\s+\S+\s+\d+\)(.*)?$/',
+                   $line, $m);
+        $data[$k] = idx($m, 3);
+        $blamedata[$k] = array($m[1], $m[2]);
+
+        $revs[$m[1]] = true;
+      }
+      $data = implode("\n", $data);
+
+      krsort($revs);
+      $ii = 0;
+      $len = count($revs);
+      foreach ($revs as $rev => $ignored) {
+        $revs[$rev] = (int)(0xEE * ($ii / $len));
+        ++$ii;
+      }
+    }
+
+    return array($data, $blamedata, $revs);
   }
 
 }

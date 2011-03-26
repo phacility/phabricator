@@ -29,7 +29,8 @@ final class DiffusionSvnFileContentQuery extends DiffusionFileContentQuery {
 
     try {
       list($corpus) = execx(
-        'svn --non-interactive cat %s%s@%s',
+        'svn --non-interactive %s %s%s@%s',
+        $this->getNeedsBlame() ? 'blame' : 'cat',
         $remote_uri,
         $path,
         $commit);
@@ -53,6 +54,37 @@ final class DiffusionSvnFileContentQuery extends DiffusionFileContentQuery {
     $file_content->setCorpus($corpus);
 
     return $file_content;
+  }
+
+  protected function tokenizeData($data)
+  {
+    $m = array();
+    $blamedata = array();
+    $revs = array();
+
+    if ($this->getNeedsBlame()) {
+      $data = explode("\n", rtrim($data));
+      foreach ($data as $k => $line) {
+        // sample line:
+        // 347498       yliu     function print();
+        preg_match('/^\s*(\d+)\s+(\S+)(?: (.*))?$/', $line, $m);
+        $data[$k] = idx($m, 3);
+        $blamedata[$k] = array($m[1], $m[2]);
+
+        $revs[$m[1]] = true;
+      }
+      $data = implode("\n", $data);
+
+      krsort($revs);
+      $ii = 0;
+      $len = count($revs);
+      foreach ($revs as $rev => $ignored) {
+        $revs[$rev] = (int)(0xEE * ($ii / $len));
+        ++$ii;
+      }
+    }
+
+    return array($data, $blamedata, $revs);
   }
 
 }

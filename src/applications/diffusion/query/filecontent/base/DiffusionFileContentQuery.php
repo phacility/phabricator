@@ -19,6 +19,7 @@
 abstract class DiffusionFileContentQuery {
 
   private $request;
+  private $needsBlame;
 
   final private function __construct() {
     // <private>
@@ -57,4 +58,24 @@ abstract class DiffusionFileContentQuery {
   }
 
   abstract protected function executeQuery();
+
+  final public function getRawData() {
+    return $this->loadFileContent()->getCorpus();
+  }
+
+  final public function getTokenizedData() {
+    return $this->tokenizeData($this->getRawData());
+  }
+
+  abstract protected function tokenizeData($data);
+
+  public function setNeedsBlame($needs_blame)
+  {
+    $this->needsBlame = $needs_blame;
+  }
+
+  public function getNeedsBlame()
+  {
+    return $this->needsBlame;
+  }
 }
