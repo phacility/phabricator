@@ -88,7 +88,7 @@ class DiffusionBrowseFileController extends DiffusionController {
           $file_content->getCorpus());
         $data = explode("\n", rtrim($data));
 
-        $uri_path = $request->getPath();
+        $uri_path = $drequest->getUriPath();
         $uri_rev  = $drequest->getCommit();
 
         $color = null;

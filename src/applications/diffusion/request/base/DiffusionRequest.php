@@ -92,6 +92,10 @@ class DiffusionRequest {
     return $this->path;
   }
 
+  public function getUriPath() {
+    return '/diffusion/'.$this->getCallsign().'/browse/'.$this->path;
+  }
+
   public function getLine() {
     return $this->line;
   }

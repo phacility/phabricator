@@ -94,6 +94,11 @@ class DiffusionGitRequest extends DiffusionRequest {
     throw new Exception("Unable to determine branch!");
   }
 
+  public function getUriPath() {
+    return '/diffusion/'.$this->getCallsign().'/browse/'.
+      $this->branch.'/'.$this->path;
+  }
+
   public function getCommit() {
     if ($this->commit) {
       return $this->commit;
