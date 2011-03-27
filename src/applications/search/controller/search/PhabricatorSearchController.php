@@ -196,7 +196,7 @@ class PhabricatorSearchController extends PhabricatorSearchBaseController {
     foreach ($query as $word) {
       $word = phutil_escape_html($word);
       $str = preg_replace(
-        '/('.preg_quote($word, '/').')/i',
+        '/(?:^|\b)('.preg_quote($word, '/').')(?:\b|$)/i',
         '<strong>\1</strong>',
         $str);
     }

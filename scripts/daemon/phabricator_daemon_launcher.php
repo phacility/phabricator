@@ -51,7 +51,7 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
         $desc = "'{$name}' ({$callsign})";
         $phid = $repository->getPHID();
 
-        echo "Launching 'git pull' daemon on the {$desc} repository...\n";
+        echo "Launching 'git fetch' daemon on the {$desc} repository...\n";
         $control->launchDaemon(
           'PhabricatorRepositoryGitFetchDaemon',
           array(
@@ -76,7 +76,7 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
           case 'git':
             echo "Launching 'git fetch' daemon on the {$desc} repository...\n";
             $control->launchDaemon(
-              'PhabricatorRepositoryGitPullDaemon',
+              'PhabricatorRepositoryGitFetchDaemon',
               array(
                 $phid,
               ));
