@@ -50,13 +50,20 @@ final class PhabricatorDaemonControl {
       "Started",
       "Daemon");
     foreach ($daemons as $daemon) {
+      $name = $daemon->getName();
+      if (!$daemon->isRunning()) {
+        $name = '<DEAD> '.$name;
+        if ($daemon->getPIDFile()) {
+          Filesystem::remove($daemon->getPIDFile());
+        }
+      }
       printf(
         "%5s\t%-24s\t%s\n",
         $daemon->getPID(),
         $daemon->getEpochStarted()
           ? date('M j Y, g:i:s A', $daemon->getEpochStarted())
           : null,
-        $daemon->getName());
+        $name);
     }
 
     return 0;
