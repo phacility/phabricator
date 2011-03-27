@@ -25,6 +25,8 @@ class PhabricatorDaemonLogViewController extends PhabricatorDaemonController {
   }
 
   public function processRequest() {
+    $request = $this->getRequest();
+    $user = $request->getUser();
 
     $log = id(new PhabricatorDaemonLog())->load($this->id);
     if (!$log) {
@@ -37,6 +39,38 @@ class PhabricatorDaemonLogViewController extends PhabricatorDaemonController {
 
     $content = array();
 
+    $argv = $log->getArgv();
+    $argv = implode("\n", $argv);
+
+    $form = id(new AphrontFormView())
+      ->setUser($user)
+      ->appendChild(
+        id(new AphrontFormStaticControl())
+          ->setLabel('Daemon')
+          ->setValue($log->getDaemon()))
+      ->appendChild(
+        id(new AphrontFormStaticControl())
+          ->setLabel('Host')
+          ->setValue($log->getHost()))
+      ->appendChild(
+        id(new AphrontFormStaticControl())
+          ->setLabel('PID')
+          ->setValue($log->getPID()))
+      ->appendChild(
+        id(new AphrontFormStaticControl())
+          ->setLabel('Started')
+          ->setValue(date('F jS, Y g:i:s A', $log->getDateCreated())))
+      ->appendChild(
+        id(new AphrontFormTextAreaControl())
+          ->setLabel('Argv')
+          ->setValue($argv));
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader('Daemon Details');
+    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->appendChild($form);
+
+    $content[] = $panel;
 
     $rows = array();
     foreach ($events as $event) {

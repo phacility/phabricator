@@ -209,6 +209,7 @@ class AphrontDefaultApplicationConfiguration
       ),
 
       '/daemon/' => array(
+        'task/(?P<id>\d+)/$' => 'PhabricatorWorkerTaskDetailController',
         'log/' => array(
           '(?P<id>\d+)/$' => 'PhabricatorDaemonLogViewController',
         ),

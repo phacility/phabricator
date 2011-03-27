@@ -26,15 +26,10 @@ class PhabricatorDaemonConsoleController extends PhabricatorDaemonController {
     foreach ($logs as $log) {
       $epoch = $log->getDateCreated();
 
-      $argv = $log->getArgv();
-      $argv = array_map('phutil_escape_html', $argv);
-      $argv = implode('<br />', $argv);
-
       $rows[] = array(
         phutil_escape_html($log->getDaemon()),
         phutil_escape_html($log->getHost()),
         $log->getPID(),
-        $argv,
         date('M j, Y', $epoch),
         date('g:i A', $epoch),
         phutil_render_tag(
@@ -53,17 +48,15 @@ class PhabricatorDaemonConsoleController extends PhabricatorDaemonController {
         'Daemon',
         'Host',
         'PID',
-        'Argv',
         'Date',
         'Time',
         'View',
       ));
     $daemon_table->setColumnClasses(
       array(
-        '',
-        '',
-        '',
         'wide wrap',
+        '',
+        '',
         '',
         'right',
         'action',
@@ -84,6 +77,13 @@ class PhabricatorDaemonConsoleController extends PhabricatorDaemonController {
         $task->getLeaseOwner(),
         $task->getLeaseExpires() - time(),
         $task->getFailureCount(),
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => '/daemon/task/'.$task->getID().'/',
+            'class' => 'button small grey',
+          ),
+          'View Task'),
       );
     }
 
@@ -95,6 +95,7 @@ class PhabricatorDaemonConsoleController extends PhabricatorDaemonController {
         'Owner',
         'Expries',
         'Failures',
+        '',
       ));
     $leased_table->setColumnClasses(
       array(
@@ -103,6 +104,7 @@ class PhabricatorDaemonConsoleController extends PhabricatorDaemonController {
         '',
         '',
         'n',
+        'action',
       ));
     $leased_table->setNoDataString('No tasks are leased by workers.');
 
