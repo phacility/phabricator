@@ -54,11 +54,15 @@ abstract class PhabricatorRepositoryCommitParserWorker
    * This method is kind of awkward here but both the SVN message and
    * change parsers use it.
    */
-  protected function getSVNLogXMLObject($uri, $revision) {
+  protected function getSVNLogXMLObject($uri, $revision, $verbose = false) {
+
+    if ($verbose) {
+      $verbose = '--verbose';
+    }
 
     try {
       list($xml) = execx(
-        'svn log --xml --limit 1 --non-interactive %s@%d',
+        "svn log --xml {$verbose} --limit 1 --non-interactive %s@%d",
         $uri,
         $revision);
     } catch (CommandException $ex) {
@@ -72,7 +76,7 @@ abstract class PhabricatorRepositoryCommitParserWorker
       }
       $fallback_uri->setProtocol('svn+ssh');
       list($xml) = execx(
-        'svn log --xml --limit 1 --non-interactive %s@%d',
+        "svn log --xml {$verbose} --limit 1 --non-interactive %s@%d",
         $fallback_uri,
         $revision);
     }

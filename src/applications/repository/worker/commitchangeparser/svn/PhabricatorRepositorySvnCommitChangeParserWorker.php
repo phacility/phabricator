@@ -54,7 +54,7 @@ class PhabricatorRepositorySvnCommitChangeParserWorker
 
     // Pull the top-level path changes out of "svn log". This is pretty
     // straightforward; just parse the XML log.
-    $log = $this->getSVNLogXMLObject($uri, $svn_commit);
+    $log = $this->getSVNLogXMLObject($uri, $svn_commit, $verbose = true);
 
     $entry = $log->logentry[0];
 

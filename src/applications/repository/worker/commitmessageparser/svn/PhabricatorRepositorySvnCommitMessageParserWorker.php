@@ -25,7 +25,10 @@ class PhabricatorRepositorySvnCommitMessageParserWorker
 
     $uri = $repository->getDetail('remote-uri');
 
-    $log = $this->getSVNLogXMLObject($uri, $commit->getCommitIdentifier());
+    $log = $this->getSVNLogXMLObject(
+      $uri,
+      $commit->getCommitIdentifier(),
+      $verbose = false);
 
     $entry = $log->logentry[0];
 
