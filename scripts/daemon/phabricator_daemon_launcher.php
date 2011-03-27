@@ -192,13 +192,20 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
       throw new Exception('Unknown commit.');
     }
 
+    $workers = array();
+
+
     switch ($repo->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        $worker = new PhabricatorRepositoryGitCommitChangeParserWorker(
+        $workers[] = new PhabricatorRepositoryGitCommitMessageParserWorker(
+          $commit->getID());
+        $workers[] = new PhabricatorRepositoryGitCommitChangeParserWorker(
           $commit->getID());
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        $worker = new PhabricatorRepositorySvnCommitChangeParserWorker(
+        $workers[] = new PhabricatorRepositorySvnCommitMessageParserWorker(
+          $commit->getID());
+        $workers[] = new PhabricatorRepositorySvnCommitChangeParserWorker(
           $commit->getID());
         break;
       default:
@@ -207,7 +214,10 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
 
     ExecFuture::pushEchoMode(true);
 
-    $worker->doWork();
+    foreach ($workers as $worker) {
+      echo "Running ".get_class($worker)."...\n";
+      $worker->doWork();
+    }
 
     echo "Done.\n";
 

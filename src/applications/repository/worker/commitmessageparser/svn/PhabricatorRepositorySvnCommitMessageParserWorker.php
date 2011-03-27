@@ -25,16 +25,8 @@ class PhabricatorRepositorySvnCommitMessageParserWorker
 
     $uri = $repository->getDetail('remote-uri');
 
-    list($xml) = execx(
-      'svn log --xml --limit 1 --non-interactive %s@%d',
-      $uri,
-      $commit->getCommitIdentifier());
+    $log = $this->getSVNLogXMLObject($uri, $commit->getCommitIdentifier());
 
-    // Subversion may send us back commit messages which won't parse because
-    // they have non UTF-8 garbage in them. Slam them into valid UTF-8.
-    $xml = phutil_utf8ize($xml);
-
-    $log = new SimpleXMLElement($xml);
     $entry = $log->logentry[0];
 
     $author = (string)$entry->author;

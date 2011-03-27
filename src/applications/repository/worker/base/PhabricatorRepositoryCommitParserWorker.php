@@ -50,4 +50,38 @@ abstract class PhabricatorRepositoryCommitParserWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit);
 
+  /**
+   * This method is kind of awkward here but both the SVN message and
+   * change parsers use it.
+   */
+  protected function getSVNLogXMLObject($uri, $revision) {
+
+    try {
+      list($xml) = execx(
+        'svn log --xml --limit 1 --non-interactive %s@%d',
+        $uri,
+        $revision);
+    } catch (CommandException $ex) {
+      // HTTPS is generally faster and more reliable than svn+ssh, but some
+      // commit messages with non-UTF8 text can't be retrieved over HTTPS, see
+      // Facebook rE197184 for one example. Make an attempt to fall back to
+      // svn+ssh if we've failed outright to retrieve the message.
+      $fallback_uri = new PhutilURI($uri);
+      if ($fallback_uri->getProtocol() != 'https') {
+        throw $ex;
+      }
+      $fallback_uri->setProtocol('svn+ssh');
+      list($xml) = execx(
+        'svn log --xml --limit 1 --non-interactive %s@%d',
+        $fallback_uri,
+        $revision);
+    }
+
+    // Subversion may send us back commit messages which won't parse because
+    // they have non UTF-8 garbage in them. Slam them into valid UTF-8.
+    $xml = phutil_utf8ize($xml);
+
+    return new SimpleXMLElement($xml);
+  }
+
 }
