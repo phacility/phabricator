@@ -44,7 +44,13 @@ class PhabricatorRepositorySvnCommitChangeParserWorker
     $svn_commit = $commit->getCommitIdentifier();
 
     $callsign = $repository->getCallsign();
-    echo "Parsing r{$callsign}{$svn_commit}...\n";
+    $full_name = 'r'.$callsign.$svn_commit;
+    echo "Parsing {$full_name}...\n";
+
+    if ($this->isBadCommit($full_name)) {
+      echo "This commit is marked bad!\n";
+      return;
+    }
 
     // Pull the top-level path changes out of "svn log". This is pretty
     // straightforward; just parse the XML log.

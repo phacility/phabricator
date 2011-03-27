@@ -84,4 +84,16 @@ abstract class PhabricatorRepositoryCommitParserWorker
     return new SimpleXMLElement($xml);
   }
 
+  protected function isBadCommit($full_commit_name) {
+    $repository = new PhabricatorRepository();
+
+    $bad_commit = queryfx_one(
+      $repository->establishConnection('w'),
+      'SELECT * FROM %T WHERE fullCommitName = %s',
+      PhabricatorRepository::TABLE_BADCOMMIT,
+      $full_commit_name);
+
+    return (bool)$bad_commit;
+  }
+
 }

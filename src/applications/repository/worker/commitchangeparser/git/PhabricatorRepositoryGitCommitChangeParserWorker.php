@@ -23,6 +23,13 @@ class PhabricatorRepositoryGitCommitChangeParserWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
+    $full_name = 'r'.$repository->getCallsign().$commit->getCommitIdentifier();
+    echo "Parsing {$full_name}...\n";
+    if ($this->isBadCommit($full_name)) {
+      echo "This commit is marked bad!\n";
+      return;
+    }
+
     $local_path = $repository->getDetail('local-path');
 
     list($raw) = execx(

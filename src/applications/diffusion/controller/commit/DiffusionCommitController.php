@@ -30,6 +30,12 @@ class DiffusionCommitController extends DiffusionController {
 
     $repository = $drequest->getRepository();
     $commit = $drequest->loadCommit();
+
+    if (!$commit) {
+      // TODO: Make more user-friendly.
+      throw new Exception('This commit has not parsed yet.');
+    }
+
     $commit_data = $drequest->loadCommitData();
 
     require_celerity_resource('diffusion-commit-view-css');
@@ -70,19 +76,38 @@ class DiffusionCommitController extends DiffusionController {
 
     $count = number_format(count($changes));
 
-    $change_panel = new AphrontPanelView();
-    $change_panel->setHeader("Changes ({$count})");
-    $change_panel->appendChild($change_table);
+    $bad_commit = null;
+    if ($count == 0) {
+      $bad_commit = queryfx_one(
+        id(new PhabricatorRepository())->establishConnection('r'),
+        'SELECT * FROM %T WHERE fullCommitName = %s',
+        PhabricatorRepository::TABLE_BADCOMMIT,
+        'r'.$repository->getCallsign().$commit->getCommitIdentifier());
+    }
 
-    $content[] = $change_panel;
+    if ($bad_commit) {
+      $error_panel = new AphrontErrorView();
+      $error_panel->setWidth(AphrontErrorView::WIDTH_WIDE);
+      $error_panel->setTitle('Bad Commit');
+      $error_panel->appendChild(
+        phutil_escape_html($bad_commit['description']));
 
+      $content[] = $error_panel;
+    } else {
+      $change_panel = new AphrontPanelView();
+      $change_panel->setHeader("Changes ({$count})");
+      $change_panel->appendChild($change_table);
 
-    $change_list =
-      '<div style="margin: 2em; color: #666; padding: 1em; background: #eee;">'.
-        '(list of changes goes here)'.
-      '</div>';
+      $content[] = $change_panel;
 
-    $content[] = $change_list;
+      $change_list =
+        '<div style="margin: 2em; color: #666; padding: 1em;
+          background: #eee;">'.
+          '(list of changes goes here)'.
+        '</div>';
+
+      $content[] = $change_list;
+    }
 
     return $this->buildStandardPageResponse(
       $content,
