@@ -110,6 +110,34 @@ class ManiphestTransactionSaveController extends ManiphestController {
           $transactions[] = $cc;
         }
         break;
+      case ManiphestTransactionType::TYPE_STATUS:
+        if (!$task->getOwnerPHID() &&
+            $request->getStr('resolution') !=
+            ManiphestTaskStatus::STATUS_OPEN) {
+          // Closing an unassigned task. Assign the user for this task
+          $assign = new ManiphestTransaction();
+          $assign->setAuthorPHID($user->getPHID());
+          $assign->setTransactionType(ManiphestTransactionType::TYPE_OWNER);
+          $assign->setNewValue($user->getPHID());
+          $transactions[] = $assign;
+        }
+        break;
+      case ManiphestTransactionType::TYPE_NONE:
+        $ccs = $task->getCCPHIDs();
+        $owner = $task->getOwnerPHID();
+
+        if ($user->getPHID() !== $owner && !in_array($user->getPHID(), $ccs)) {
+          // Current user, who is commenting, is not the owner or in ccs.
+          // Add him to ccs
+          $ccs[] = $user->getPHID();
+          $cc = new ManiphestTransaction();
+          $cc->setAuthorPHID($user->getPHID());
+          $cc->setTransactionType(ManiphestTransactionType::TYPE_CCS);
+          $cc->setNewValue($ccs);
+          $transactions[] = $cc;
+        }
+      default:
+        break;
     }
 
     $editor = new ManiphestTransactionEditor();
