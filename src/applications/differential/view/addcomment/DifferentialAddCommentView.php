@@ -85,7 +85,7 @@ final class DifferentialAddCommentView extends AphrontView {
           ->setValue($this->draft))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Comment'));
+          ->setValue('Clowncopterize'));
 
     Javelin::initBehavior(
       'differential-add-reviewers',
