@@ -140,7 +140,9 @@ final class DifferentialInlineCommentView extends AphrontView {
         '<span class="differential-inline-comment-line">'.$line.'</span>'.
         phutil_escape_html($handles[$inline->getAuthorPHID()]->getName()).
       '</div>'.
-      $content);
+      '<div class="phabricator-remarkup">'.
+        $content.
+      '</div>');
 
     return $this->scaffoldMarkup($markup);
   }

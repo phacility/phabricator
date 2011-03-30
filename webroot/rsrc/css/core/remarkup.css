@@ -2,8 +2,12 @@
  * @provides phabricator-remarkup-css
  */
 
+.phabricator-remarkup {
+  line-height: 1.45em;
+}
+
 .phabricator-remarkup p {
-  margin: 1em 0;
+  margin: 0 0 .75em;
 }
 
 .phabricator-remarkup code {
@@ -28,3 +32,7 @@
   margin: 1em 0 1em 3em;
 }
 
+.phabricator-remarkup h1,
+.phabricator-remarkup h2 {
+  margin: .75em 0 .5em;
+}

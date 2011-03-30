@@ -71,9 +71,3 @@
   padding: 4px 1em;
   background: #f3f3f3;
 }
-
-
-.maniphest-task-description p,
-.maniphest-transaction-comments p {
-  margin: .25em 0 .5em;
-}
