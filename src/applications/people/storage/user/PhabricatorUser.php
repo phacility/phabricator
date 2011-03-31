@@ -34,6 +34,8 @@ class PhabricatorUser extends PhabricatorUserDAO {
 
   protected $conduitCertificate;
 
+  protected $preferences = null;
+
   public function getProfileImagePHID() {
     return nonempty(
       $this->profileImagePHID,
@@ -159,6 +161,30 @@ class PhabricatorUser extends PhabricatorUserDAO {
       }
     }
     return false;
+  }
+
+  public function loadPreferences() {
+    if ($this->preferences) {
+      return $this->preferences;
+    }
+
+    $preferences = id(new PhabricatorUserPreferences())->loadOneWhere(
+      'userPHID = %s',
+      $this->getPHID());
+
+    if (!$preferences) {
+      $preferences = new PhabricatorUserPreferences();
+      $preferences->setUserPHID($this->getPHID());
+
+      $default_dict = array(
+        PhabricatorUserPreferences::PREFERENCE_TITLES => 'glyph',
+        PhabricatorUserPreferences::PREFERENCE_MONOSPACED => '');
+
+      $preferences->setPreferences($default_dict);
+    }
+
+    $this->preferences = $preferences;
+    return $preferences;
   }
 
 }

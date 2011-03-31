@@ -244,6 +244,9 @@ class AphrontDefaultApplicationConfiguration
           => 'HeraldTranscriptController',
       ),
 
+      '/preferences/' => array(
+        '$' => 'PhabricatorEditPreferencesController'
+      ),
     );
   }
 

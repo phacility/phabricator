@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'applications/people/storage/base');
+phutil_require_module('phabricator', 'applications/people/storage/preferences');
 phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/phid/storage/phid');
 phutil_require_module('phabricator', 'infrastructure/env');

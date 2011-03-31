@@ -142,7 +142,7 @@ class DiffusionBrowseFileController extends DiffusionController {
         $corpus_table = phutil_render_tag(
           'table',
           array(
-            'class' => "diffusion-source remarkup-code",
+            'class' => "diffusion-source remarkup-code PhabricatorMonospaced",
           ),
           implode("\n", $rows));
         $corpus = phutil_render_tag(

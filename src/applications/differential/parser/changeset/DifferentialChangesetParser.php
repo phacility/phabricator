@@ -1199,7 +1199,7 @@ EOSYNTHETIC;
     $table = null;
     if ($contents) {
       $table =
-        '<table class="differential-diff remarkup-code">'.
+        '<table class="differential-diff remarkup-code PhabricatorMonospaced">'.
           $contents.
         '</table>';
     }
