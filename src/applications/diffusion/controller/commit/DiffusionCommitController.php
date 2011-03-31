@@ -40,7 +40,11 @@ class DiffusionCommitController extends DiffusionController {
 
     $commit_data = $drequest->loadCommitData();
 
+    $factory = new DifferentialMarkupEngineFactory();
+    $engine = $factory->newDifferentialCommentMarkupEngine();
+
     require_celerity_resource('diffusion-commit-view-css');
+    require_celerity_resource('phabricator-remarkup-css');
 
     $detail_panel->appendChild(
       '<div class="diffusion-commit-view">'.
@@ -58,8 +62,8 @@ class DiffusionCommitController extends DiffusionController {
             '</tr>'.
           '</table>'.
           '<hr />'.
-          '<div class="diffusion-commit-message">'.
-            phutil_escape_html($commit_data->getCommitMessage()).
+          '<div class="diffusion-commit-message phabricator-remarkup">'.
+            $engine->markupText($commit_data->getCommitMessage()).
           '</div>'.
         '</div>'.
       '</div>');
