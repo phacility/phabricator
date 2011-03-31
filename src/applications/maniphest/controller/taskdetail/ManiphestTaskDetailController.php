@@ -34,6 +34,9 @@ class ManiphestTaskDetailController extends ManiphestController {
     $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
 
     $task = id(new ManiphestTask())->load($this->id);
+    if (!$task) {
+      return new Aphront404Response();
+    }
 
     $transactions = id(new ManiphestTransaction())->loadAllWhere(
       'taskID = %d',

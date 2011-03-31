@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'applications/differential/parser/markup');
 phutil_require_module('phabricator', 'applications/maniphest/constants/priority');
 phutil_require_module('phabricator', 'applications/maniphest/constants/status');
