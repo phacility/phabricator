@@ -87,6 +87,8 @@ EXAMPLE;
           ->setValue('Save Preferences'));
 
     $panel = new AphrontPanelView();
+    $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
+    $panel->setHeader('Phabricator Preferences');
     $panel->appendChild($form);
 
     $error_view = null;

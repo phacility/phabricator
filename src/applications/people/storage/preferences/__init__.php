@@ -8,5 +8,7 @@
 
 phutil_require_module('phabricator', 'applications/people/storage/base');
 
+phutil_require_module('phutil', 'utils');
+
 
 phutil_require_source('PhabricatorUserPreferences.php');

@@ -34,6 +34,6 @@ class PhabricatorUserPreferences extends PhabricatorUserDAO {
   }
 
   public function getPreference($key) {
-    return $this->getPreferences()[$key];
+    return idx($this->getPreferences(), $key);
   }
 }
