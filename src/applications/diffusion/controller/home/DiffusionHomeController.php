@@ -20,7 +20,41 @@ class DiffusionHomeController extends DiffusionController {
 
   public function processRequest() {
 
-    // TODO: Restore "shortcuts" feature.
+    $shortcuts = id(new PhabricatorRepositoryShortcut())->loadAll();
+    if ($shortcuts) {
+      $shortcuts = msort($shortcuts, 'getSequence');
+
+      $rows = array();
+      foreach ($shortcuts as $shortcut) {
+        $rows[] = array(
+          phutil_render_tag(
+            'a',
+            array(
+              'href' => $shortcut->getHref(),
+            ),
+            phutil_escape_html($shortcut->getName())),
+          phutil_escape_html($shortcut->getDescription()),
+        );
+      }
+
+      $shortcut_table = new AphrontTableView($rows);
+      $shortcut_table->setHeaders(
+        array(
+          'Link',
+          '',
+        ));
+      $shortcut_table->setColumnClasses(
+        array(
+          'pri',
+          'wide',
+        ));
+
+      $shortcut_panel = new AphrontPanelView();
+      $shortcut_panel->setHeader('Shortcuts');
+      $shortcut_panel->appendChild($shortcut_table);
+    } else {
+      $shortcut_panel = null;
+    }
 
     $repository = new PhabricatorRepository();
 
@@ -113,6 +147,7 @@ class DiffusionHomeController extends DiffusionController {
     return $this->buildStandardPageResponse(
       array(
         $crumbs,
+        $shortcut_panel,
         $panel,
       ),
       array(

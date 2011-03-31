@@ -11,6 +11,7 @@ phutil_require_module('phabricator', 'applications/diffusion/view/base');
 phutil_require_module('phabricator', 'applications/repository/constants/repositorytype');
 phutil_require_module('phabricator', 'applications/repository/storage/commit');
 phutil_require_module('phabricator', 'applications/repository/storage/repository');
+phutil_require_module('phabricator', 'applications/repository/storage/shortcut');
 phutil_require_module('phabricator', 'storage/queryfx');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/layout/panel');
