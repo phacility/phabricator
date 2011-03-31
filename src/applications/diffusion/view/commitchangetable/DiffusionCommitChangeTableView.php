@@ -49,7 +49,8 @@ final class DiffusionCommitChangeTableView extends DiffusionView {
         $this->linkBrowse($change->getPath()),
         $this->linkChange(
           $change->getChangeType(),
-          $change->getFileType()),
+          $change->getFileType(),
+          $change->getPath()),
         phutil_render_tag(
           'a',
           array(

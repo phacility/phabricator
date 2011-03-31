@@ -6,7 +6,10 @@
 
 
 
+phutil_require_module('phabricator', 'applications/differential/view/changesetlistview');
 phutil_require_module('phabricator', 'applications/diffusion/controller/base');
+phutil_require_module('phabricator', 'applications/diffusion/query/diff/base');
+phutil_require_module('phabricator', 'infrastructure/celerity/api');
 
 
 phutil_require_source('DiffusionChangeController.php');

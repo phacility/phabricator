@@ -29,7 +29,7 @@ abstract class DiffusionView extends AphrontView {
     return $this->diffusionRequest;
   }
 
-  final public function linkChange($change_type, $file_type) {
+  final public function linkChange($change_type, $file_type, $path = null) {
 
     $text = DifferentialChangeType::getFullNameForChangeType($change_type);
     if ($change_type == DifferentialChangeType::TYPE_CHILD) {
@@ -52,7 +52,7 @@ abstract class DiffusionView extends AphrontView {
     $callsign = $repository->getCallsign();
 
     $branch = $drequest->getBranchURIComponent($drequest->getBranch());
-    $path = $branch.$drequest->getPath();
+    $path = $branch.($path ? $path : $drequest->getPath());
 
     return phutil_render_tag(
       'a',

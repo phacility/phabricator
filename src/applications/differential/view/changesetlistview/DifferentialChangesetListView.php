@@ -21,6 +21,7 @@ class DifferentialChangesetListView extends AphrontView {
   private $changesets = array();
   private $editable;
   private $revision;
+  private $renderURI = '/differential/changeset/';
   private $vsMap = array();
 
   public function setChangesets($changesets) {
@@ -40,6 +41,11 @@ class DifferentialChangesetListView extends AphrontView {
 
   public function setVsMap(array $vs_map) {
     $this->vsMap = $vs_map;
+    return $this;
+  }
+
+  public function setRenderURI($render_uri) {
+    $this->renderURI = $render_uri;
     return $this;
   }
 
@@ -105,11 +111,11 @@ class DifferentialChangesetListView extends AphrontView {
     Javelin::initBehavior('differential-populate', array(
       'registry'    => $mapping,
       'whitespace'  => $whitespace,
-      'uri'         => '/differential/changeset/',
+      'uri'         => $this->renderURI,
     ));
 
     Javelin::initBehavior('differential-show-more', array(
-      'uri' => '/differential/changeset/',
+      'uri' => $this->renderURI,
     ));
 
     if ($this->editable) {

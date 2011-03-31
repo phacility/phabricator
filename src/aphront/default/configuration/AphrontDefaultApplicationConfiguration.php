@@ -205,6 +205,11 @@ class AphrontDefaultApplicationConfiguration
             '(?:[$](?P<line>\d+))?'.
             '$'
               => 'DiffusionBrowseController',
+          'diff/'.
+            '(?P<path>.*?)'.
+            '(?:[;](?P<commit>[a-z0-9]+))?'.
+            '$'
+              => 'DiffusionDiffController',
         ),
       ),
 

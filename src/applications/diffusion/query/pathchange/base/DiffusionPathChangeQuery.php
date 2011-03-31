@@ -73,6 +73,7 @@ class DiffusionPathChangeQuery {
       $change->setPath(ltrim($raw_change['pathName'], '/'));
       $change->setChangeType($raw_change['changeType']);
       $change->setFileType($raw_change['fileType']);
+      $change->setCommitIdentifier($commit->getCommitIdentifier());
       $changes[] = $change;
     }
 

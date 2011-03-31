@@ -21,9 +21,6 @@ class DiffusionChangeController extends DiffusionController {
   public function processRequest() {
     $drequest = $this->diffusionRequest;
 
-//    $browse_query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);
-//    $results = $browse_query->loadPaths();
-
     $content = array();
 
     $content[] = $this->buildCrumbs(
@@ -33,55 +30,23 @@ class DiffusionChangeController extends DiffusionController {
         'view'   => 'change',
       ));
 
-/*
-    if (!$results) {
 
-      switch ($browse_query->getReasonForEmptyResultSet()) {
-        case DiffusionBrowseQuery::REASON_IS_NONEXISTENT:
-          $title = 'Path Does Not Exist';
-          // TODO: Under git, this error message should be more specific. It
-          // may exist on some other branch.
-          $body  = "This path does not exist anywhere.";
-          $severity = AphrontErrorView::SEVERITY_ERROR;
-          break;
-        case DiffusionBrowseQuery::REASON_IS_DELETED:
-          // TODO: Format all these commits into nice VCS-agnostic links.
-          $commit = $drequest->getCommit();
-          $deleted = $browse_query->getDeletedAtCommit();
-          $existed = $browse_query->getExistedAtCommit();
+    $diff_query = DiffusionDiffQuery::newFromDiffusionRequest($drequest);
+    $changeset = $diff_query->loadChangeset();
 
-          $title = 'Path Was Deleted';
-          $body = "This path does not exist at {$commit}. It was deleted in ".
-                  "{$deleted} and last existed at {$existed}.";
-          $severity = AphrontErrorView::SEVERITY_WARNING;
-          break;
-        case DiffusionBrowseQuery::REASON_IS_FILE:
-          $controller = new DiffusionBrowseFileController($this->getRequest());
-          $controller->setDiffusionRequest($drequest);
-          return $this->delegateToController($controller);
-          break;
-        default:
-          throw new Exception("Unknown failure reason!");
-      }
+    $changeset_view = new DifferentialChangesetListView();
+    $changeset_view->setChangesets(array($changeset));
+    $changeset_view->setRenderURI(
+      '/diffusion/'.$drequest->getRepository()->getCallsign().'/diff/');
 
-      $error_view = new AphrontErrorView();
-      $error_view->setSeverity($severity);
-      $error_view->setTitle($title);
-      $error_view->appendChild('<p>'.$body.'</p>');
+    // TODO: This is pretty awkward, unify the CSS between Diffusion and
+    // Differential better.
+    require_celerity_resource('differential-core-view-css');
+    $content[] =
+      '<div class="differential-primary-pane">'.
+        $changeset_view->render().
+      '</div>';
 
-      $content[] = $error_view;
-
-    } else {
-      $browse_table = new DiffusionBrowseTableView();
-      $browse_table->setDiffusionRequest($drequest);
-      $browse_table->setPaths($results);
-
-      $browse_panel = new AphrontPanelView();
-      $browse_panel->appendChild($browse_table);
-
-      $content[] = $browse_panel;
-    }
-*/
 
     $nav = $this->buildSideNav('change', true);
     $nav->appendChild($content);

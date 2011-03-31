@@ -26,6 +26,8 @@ final class DiffusionPathChange {
   private $changeType;
   private $fileType;
   private $targetPath;
+  private $targetCommitIdentifier;
+  private $awayPaths = array();
 
   final public function setPath($path) {
     $this->path = $path;
@@ -61,6 +63,15 @@ final class DiffusionPathChange {
 
   public function getTargetPath() {
     return $this->targetPath;
+  }
+
+  public function setAwayPaths(array $away_paths) {
+    $this->awayPaths = $away_paths;
+    return $this;
+  }
+
+  public function getAwayPaths() {
+    return $this->awayPaths;
   }
 
   final public function setCommitIdentifier($commit) {
@@ -113,8 +124,6 @@ final class DiffusionPathChange {
     $first = idx(explode("\n", $message), 0);
     return substr($first, 0, 80);
   }
-
-
 
 
 }

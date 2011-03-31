@@ -144,6 +144,19 @@ abstract class DiffusionController extends PhabricatorController {
 
     $view = $spec['view'];
 
+    $path = null;
+    if (isset($spec['path'])) {
+      $path = $drequest->getPath();
+    }
+
+    if ($raw_commit) {
+      $commit_link = DiffusionView::linkCommit(
+        $repository,
+        $raw_commit);
+    } else {
+      $commit_link = '';
+    }
+
     switch ($view) {
       case 'history':
         $view_name = 'History';
@@ -152,14 +165,10 @@ abstract class DiffusionController extends PhabricatorController {
         $view_name = 'Browse';
         break;
       case 'change':
-        $crumb_list[] = 'TODO CHANGE';
+        $view_name = 'Change';
+        $crumb_list[] = phutil_escape_html($path).' ('.$commit_link.')';
         $crumbs->setCrumbs($crumb_list);
         return $crumbs;
-    }
-
-    $path = null;
-    if (isset($spec['path'])) {
-      $path = $drequest->getPath();
     }
 
     $view_root_uri = "/diffusion/{$callsign}/{$view}/{$branch_uri}";
@@ -209,9 +218,6 @@ abstract class DiffusionController extends PhabricatorController {
     $last_crumb = array_pop($crumb_list);
 
     if ($raw_commit) {
-      $commit_link = DiffusionView::linkCommit(
-        $repository,
-        $raw_commit);
       $jump_link = phutil_render_tag(
         'a',
         array(
