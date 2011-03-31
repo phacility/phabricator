@@ -30,11 +30,11 @@ class PhabricatorPHIDAllocateController
         ->setURI('/phid/?phid='.phutil_escape_uri($phid));
     }
 
-    $types = id(new PhabricatorPHIDType())->loadAll();
+    $types = PhabricatorPHIDConstants::getTypes();
 
     $options = array();
     foreach ($types as $type) {
-      $options[$type->getType()] = $type->getType().': '.$type->getName();
+      $options[$type] = $type;
     }
     asort($options);
 

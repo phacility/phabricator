@@ -29,4 +29,18 @@ final class PhabricatorPHIDConstants {
   const PHID_TYPE_REPO    = 'REPO';
   const PHID_TYPE_CMIT    = 'CMIT';
 
+  public static function getTypes() {
+    return array(
+      self::PHID_TYPE_USER,
+      self::PHID_TYPE_MLST,
+      self::PHID_TYPE_DREV,
+      self::PHID_TYPE_TASK,
+      self::PHID_TYPE_FILE,
+      self::PHID_TYPE_PROJ,
+      self::PHID_TYPE_UNKNOWN,
+      self::PHID_TYPE_MAGIC,
+      self::PHID_TYPE_REPO,
+      self::PHID_TYPE_CMIT,
+    );
+  }
 }

@@ -59,8 +59,6 @@ class AphrontDefaultApplicationConfiguration
       '/phid/' => array(
         '$' => 'PhabricatorPHIDLookupController',
         'list/$' => 'PhabricatorPHIDListController',
-        'type/$' => 'PhabricatorPHIDTypeListController',
-        'type/edit/(?:(?P<id>\d+)/)?$' => 'PhabricatorPHIDTypeEditController',
         'new/$' => 'PhabricatorPHIDAllocateController',
       ),
       '/people/' => array(

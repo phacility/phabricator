@@ -34,10 +34,6 @@ abstract class PhabricatorPHIDController extends PhabricatorController {
           'href' => '/phid/list/',
           'name' => 'PHID List',
         ),
-        'types' => array(
-          'href' => '/phid/type/',
-          'name' => 'PHID Types',
-        ),
       ),
       idx($data, 'tab'));
     $page->setGlyph('#');
