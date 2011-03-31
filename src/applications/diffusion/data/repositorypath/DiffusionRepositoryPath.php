@@ -23,6 +23,9 @@ final class DiffusionRepositoryPath {
   private $fileType;
   private $fileSize;
 
+  private $lastModifiedCommit;
+  private $lastCommitData;
+
   final public function setPath($path) {
     $this->path = $path;
     return $this;
@@ -39,6 +42,26 @@ final class DiffusionRepositoryPath {
 
   final public function getHash() {
     return $this->hash;
+  }
+
+  final public function setLastModifiedCommit(
+    PhabricatorRepositoryCommit $commit) {
+    $this->lastModifiedCommit = $commit;
+    return $this;
+  }
+
+  final public function getLastModifiedCommit() {
+    return $this->lastModifiedCommit;
+  }
+
+  final public function setLastCommitData(
+    PhabricatorRepositoryCommitData $last_commit_data) {
+    $this->lastCommitData = $last_commit_data;
+    return $this;
+  }
+
+  final public function getLastCommitData() {
+    return $this->lastCommitData;
   }
 
   final public function setFileType($file_type) {

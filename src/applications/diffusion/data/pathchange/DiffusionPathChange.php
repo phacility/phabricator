@@ -83,6 +83,15 @@ final class DiffusionPathChange {
     return $this->commitIdentifier;
   }
 
+  final public function setTargetCommitIdentifier($target_commit_identifier) {
+    $this->targetCommitIdentifier = $target_commit_identifier;
+    return $this;
+  }
+
+  final public function getTargetCommitIdentifier() {
+    return $this->targetCommitIdentifier;
+  }
+
   final public function setCommit($commit) {
     $this->commit = $commit;
     return $this;

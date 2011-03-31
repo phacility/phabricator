@@ -123,6 +123,32 @@ final class DiffusionSvnBrowseQuery extends DiffusionBrowseQuery {
       $path_id,
       implode(', ', $sql));
 
+    $loadable_commits = array();
+    foreach ($browse as $key => $file) {
+      // We need to strip out directories because we don't store last-modified
+      // in the filesystem table.
+      if ($file['fileType'] != DifferentialChangeType::FILE_DIRECTORY) {
+        $loadable_commits[] = $file['svnCommit'];
+        $browse[$key]['hasCommit'] = true;
+      }
+    }
+
+    $commits = array();
+    $commit_data = array();
+    if ($loadable_commits) {
+      // NOTE: Even though these are integers, use '%Ls' because MySQL doesn't
+      // use the second part of the key otherwise!
+      $commits = id(new PhabricatorRepositoryCommit())->loadAllWhere(
+        'repositoryID = %d AND commitIdentifier IN (%Ls)',
+        $repository->getID(),
+        $loadable_commits);
+      $commits = mpull($commits, null, 'getCommitIdentifier');
+      $commit_data = id(new PhabricatorRepositoryCommitData())->loadAllWhere(
+        'commitID in (%Ld)',
+        mpull($commits, 'getID'));
+      $commit_data = mpull($commit_data, null, 'getCommitID');
+    }
+
     $path_normal = DiffusionGitPathIDQuery::normalizePath($path);
 
     $results = array();
@@ -136,6 +162,15 @@ final class DiffusionSvnBrowseQuery extends DiffusionBrowseQuery {
 //      $result->setHash($hash);
       $result->setFileType($file['fileType']);
 //      $result->setFileSize($size);
+
+      if (!empty($file['hasCommit'])) {
+        $commit = idx($commits, $file['svnCommit']);
+        if ($commit) {
+          $data = idx($commit_data, $commit->getID());
+          $result->setLastModifiedCommit($commit);
+          $result->setLastCommitData($data);
+        }
+      }
 
       $results[] = $result;
     }

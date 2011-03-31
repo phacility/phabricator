@@ -62,6 +62,8 @@ class DiffusionPathChangeQuery {
     $changes = array();
 
 
+
+
     $raw_changes = isort($raw_changes, 'pathName');
     foreach ($raw_changes as $raw_change) {
       $type = $raw_change['changeType'];

@@ -32,4 +32,8 @@ class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
     ) + parent::getConfiguration();
   }
 
+  public function getSummary() {
+    return substr($this->getCommitMessage(), 0, 80);
+  }
+
 }

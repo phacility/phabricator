@@ -10,8 +10,12 @@ phutil_require_module('phabricator', 'applications/differential/constants/change
 phutil_require_module('phabricator', 'applications/diffusion/data/repositorypath');
 phutil_require_module('phabricator', 'applications/diffusion/query/browse/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/pathid/base');
+phutil_require_module('phabricator', 'applications/repository/storage/commit');
+phutil_require_module('phabricator', 'applications/repository/storage/commitdata');
 phutil_require_module('phabricator', 'applications/repository/storage/repository');
 phutil_require_module('phabricator', 'storage/queryfx');
+
+phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('DiffusionSvnBrowseQuery.php');

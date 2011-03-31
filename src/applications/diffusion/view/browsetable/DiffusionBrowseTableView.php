@@ -27,6 +27,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
 
   public function render() {
     $request = $this->getDiffusionRequest();
+    $repository = $request->getRepository();
 
     $base_path = trim($request->getPath(), '/');
     if ($base_path) {
@@ -39,18 +40,53 @@ final class DiffusionBrowseTableView extends DiffusionView {
       if ($path->getFileType() == DifferentialChangeType::FILE_DIRECTORY) {
         $browse_text = $path->getPath().'/';
         $dir_slash = '/';
+
+        $browse_link = '<strong>'.$this->linkBrowse(
+          $base_path.$path->getPath().$dir_slash,
+          array(
+            'text' => $browse_text,
+          )).'</strong>';
       } else {
         $browse_text = $path->getPath();
         $dir_slash = null;
+        $browse_link = $this->linkBrowse(
+          $base_path.$path->getPath().$dir_slash,
+          array(
+            'text' => $browse_text,
+          ));
+      }
+
+      $commit = $path->getLastModifiedCommit();
+      if ($commit) {
+        $epoch = $commit->getEpoch();
+        $modified = $this->linkCommit(
+          $repository,
+          $commit->getCommitIdentifier());
+        $date = date('M j, Y', $epoch);
+        $time = date('g:i A', $epoch);
+      } else {
+        $modified = '';
+        $date = '';
+        $time = '';
+      }
+
+      $data = $path->getLastCommitData();
+      if ($data) {
+        $author = phutil_escape_html($data->getAuthorName());
+        $details = phutil_escape_html($data->getSummary());
+      } else {
+        $author = '';
+        $details = '';
       }
 
       $rows[] = array(
         $this->linkHistory($base_path.$path->getPath().$dir_slash),
-        $this->linkBrowse(
-          $base_path.$path->getPath().$dir_slash,
-          array(
-            'text' => $browse_text,
-          )),
+        $browse_link,
+        $modified,
+        $date,
+        $time,
+        $author,
+        $details,
       );
     }
 
@@ -59,11 +95,21 @@ final class DiffusionBrowseTableView extends DiffusionView {
       array(
         'History',
         'Path',
+        'Modified',
+        'Date',
+        'Time',
+        'Author',
+        'Details',
       ));
     $view->setColumnClasses(
       array(
         '',
-        'wide pri',
+        '',
+        '',
+        '',
+        'right',
+        '',
+        'wide',
       ));
     return $view->render();
   }
