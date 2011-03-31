@@ -103,10 +103,14 @@ final class DiffusionSvnDiffQuery extends DiffusionDiffQuery {
     $parser = new ArcanistDiffParser();
     $parser->setDetectBinaryFiles(true);
 
-    $change = $parser->parseDiffusionPathChangesAndRawDiff(
-      $drequest->getPath(),
-      $path_changes,
-      $raw_diff);
+    $arcanist_changes = DiffusionPathChange::convertToArcanistChanges(
+      $path_changes);
+
+    $parser->setChanges($arcanist_changes);
+    $parser->forcePath($path->getPath());
+    $changes = $parser->parseDiff($raw_diff);
+
+    $change = $changes[$path->getPath()];
 
     $diff = DifferentialDiff::newFromRawChanges(array($change));
     $changesets = $diff->getChangesets();
