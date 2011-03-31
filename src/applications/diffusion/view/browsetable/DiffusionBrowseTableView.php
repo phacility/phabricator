@@ -25,6 +25,41 @@ final class DiffusionBrowseTableView extends DiffusionView {
     return $this;
   }
 
+  public static function renderLastModifiedColumns(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit = null,
+    PhabricatorRepositoryCommitData $data = null) {
+
+    if ($commit) {
+      $epoch = $commit->getEpoch();
+      $modified = DiffusionView::linkCommit(
+        $repository,
+        $commit->getCommitIdentifier());
+      $date = date('M j, Y', $epoch);
+      $time = date('g:i A', $epoch);
+    } else {
+      $modified = '';
+      $date = '';
+      $time = '';
+    }
+
+    if ($data) {
+      $author = phutil_escape_html($data->getAuthorName());
+      $details = phutil_escape_html($data->getSummary());
+    } else {
+      $author = '';
+      $details = '';
+    }
+
+    return array(
+      'commit'    => $modified,
+      'date'      => $date,
+      'time'      => $time,
+      'author'    => $author,
+      'details'   => $details,
+    );
+  }
+
   public function render() {
     $request = $this->getDiffusionRequest();
     $repository = $request->getRepository();
@@ -34,6 +69,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
       $base_path = $base_path.'/';
     }
 
+    $need_pull = array();
     $rows = array();
     foreach ($this->paths as $path) {
 
@@ -58,36 +94,44 @@ final class DiffusionBrowseTableView extends DiffusionView {
 
       $commit = $path->getLastModifiedCommit();
       if ($commit) {
-        $epoch = $commit->getEpoch();
-        $modified = $this->linkCommit(
+        $dict = self::renderLastModifiedColumns(
           $repository,
-          $commit->getCommitIdentifier());
-        $date = date('M j, Y', $epoch);
-        $time = date('g:i A', $epoch);
+          $commit,
+          $path->getLastCommitData());
       } else {
-        $modified = '';
-        $date = '';
-        $time = '';
-      }
-
-      $data = $path->getLastCommitData();
-      if ($data) {
-        $author = phutil_escape_html($data->getAuthorName());
-        $details = phutil_escape_html($data->getSummary());
-      } else {
-        $author = '';
-        $details = '';
+        $dict = array(
+          'commit'    => celerity_generate_unique_node_id(),
+          'date'      => celerity_generate_unique_node_id(),
+          'time'      => celerity_generate_unique_node_id(),
+          'author'    => celerity_generate_unique_node_id(),
+          'details'   => celerity_generate_unique_node_id(),
+        );
+        $uri =
+          '/diffusion/'.$repository->getCallsign().'/lastmodified/'.
+          $request->getBranchURIComponent($request->getBranch()).
+          $base_path.$path->getPath();
+        if ($request->getRawCommit()) {
+          $uri .= ';'.$request->getRawCommit();
+        }
+        $need_pull[$uri] = $dict;
+        foreach ($dict as $k => $uniq) {
+          $dict[$k] = '<span id="'.$uniq.'"></span>';
+        }
       }
 
       $rows[] = array(
         $this->linkHistory($base_path.$path->getPath().$dir_slash),
         $browse_link,
-        $modified,
-        $date,
-        $time,
-        $author,
-        $details,
+        $dict['commit'],
+        $dict['date'],
+        $dict['time'],
+        $dict['author'],
+        $dict['details'],
       );
+    }
+
+    if ($need_pull) {
+      Javelin::initBehavior('diffusion-pull-lastmodified', $need_pull);
     }
 
     $view = new AphrontTableView($rows);

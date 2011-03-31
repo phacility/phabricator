@@ -210,6 +210,11 @@ class AphrontDefaultApplicationConfiguration
             '(?:[;](?P<commit>[a-z0-9]+))?'.
             '$'
               => 'DiffusionDiffController',
+          'lastmodified/'.
+            '(?P<path>.*?)'.
+            '(?:[;](?P<commit>[a-z0-9]+))?'.
+            '$'
+              => 'DiffusionLastModifiedController',
         ),
       ),
 

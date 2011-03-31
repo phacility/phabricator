@@ -8,6 +8,8 @@
 
 phutil_require_module('phabricator', 'applications/differential/constants/changetype');
 phutil_require_module('phabricator', 'applications/diffusion/view/base');
+phutil_require_module('phabricator', 'infrastructure/celerity/api');
+phutil_require_module('phabricator', 'infrastructure/javelin/api');
 phutil_require_module('phabricator', 'view/control/table');
 
 phutil_require_module('phutil', 'markup');

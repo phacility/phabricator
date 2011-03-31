@@ -35,7 +35,8 @@ final class DiffusionSvnHistoryQuery extends DiffusionHistoryQuery {
     $paths = ipull($paths, 'id', 'path');
     $path_id = $paths['/'.trim($path, '/')];
 
-    // TODO: isDirect junk
+    // TODO: isDirect junk, but note that we need indirect events for the
+    // svnlastmodified query!
 
     $history_data = queryfx_all(
       $conn_r,
@@ -68,6 +69,7 @@ final class DiffusionSvnHistoryQuery extends DiffusionHistoryQuery {
     $history = array();
     foreach ($history_data as $row) {
       $item = new DiffusionPathChange();
+
       $commit = idx($commits, $row['commitID']);
       if ($commit) {
         $item->setCommit($commit);
