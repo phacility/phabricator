@@ -60,7 +60,19 @@ class PhabricatorStandardPageView extends AphrontPageView {
   }
 
   public function getTitle() {
-    return $this->getGlyph().' '.parent::getTitle();
+    $use_glyph = true;
+    $request = $this->getRequest();
+    if ($request) {
+      $user = $request->getUser();
+      if ($user && $user->loadPreferences()->getPreference(
+            PhabricatorUserPreferences::PREFERENCE_TITLES) !== 'glyph') {
+        $use_glyph = false;
+      }
+    }
+
+    return ($use_glyph ?
+            $this->getGlyph() : '['.$this->getApplicationName().']').
+      ' '.parent::getTitle();
   }
 
 
@@ -97,7 +109,7 @@ class PhabricatorStandardPageView extends AphrontPageView {
 
   protected function getHead() {
     $response = CelerityAPI::getStaticResourceResponse();
-    return
+    $head =
       '<script type="text/javascript">'.
         '(top != self) && top.location.replace(self.location.href);'.
         'window.__DEV__=1;'.
@@ -105,6 +117,27 @@ class PhabricatorStandardPageView extends AphrontPageView {
       $response->renderResourcesOfType('css').
       '<script type="text/javascript" src="/rsrc/js/javelin/init.dev.js">'.
       '</script>';
+
+    $request = $this->getRequest();
+    if ($request) {
+      $user = $request->getUser();
+      if ($user) {
+        $monospaced = $user->loadPreferences()->getPreference(
+          PhabricatorUserPreferences::PREFERENCE_MONOSPACED
+        );
+
+        if (strlen($monospaced)) {
+          $head .=
+            '<style type="text/css">'.
+            '.PhabricatorMonospaced { font: '.
+            $monospaced.
+            ' !important; }'.
+            '</style>';
+        }
+      }
+    }
+
+    return $head;
   }
 
   public function setGlyph($glyph) {

@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/people/storage/preferences');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'infrastructure/javelin/api');
