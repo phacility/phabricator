@@ -29,11 +29,20 @@ final class DiffusionBranchTableView extends DiffusionView {
     $drequest = $this->getDiffusionRequest();
     $current_branch = $drequest->getBranch();
 
+    $callsign = $drequest->getRepository()->getCallsign();
+
     $rows = array();
     $rowc = array();
     foreach ($this->branches as $branch) {
+      $branch_uri = $drequest->getBranchURIComponent($branch->getName());
+
       $rows[] = array(
-        phutil_escape_html($branch->getName()), // TODO: link
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => "/diffusion/{$callsign}/repository/{$branch_uri}",
+          ),
+          phutil_escape_html($branch->getName())),
         self::linkCommit(
           $drequest->getRepository(),
           $branch->getHeadCommitIdentifier()),
