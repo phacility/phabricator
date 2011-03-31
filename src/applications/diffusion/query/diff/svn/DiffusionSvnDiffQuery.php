@@ -112,8 +112,8 @@ final class DiffusionSvnDiffQuery extends DiffusionDiffQuery {
     $changesets = $diff->getChangesets();
     $changeset = reset($changesets);
 
-    $id = $drequest->getPath().';'.$drequest->getCommit();
-    $changeset->setID($id);
+    $reference = $drequest->getPath().';'.$drequest->getCommit();
+    $changeset->setRenderingReference($reference);
 
     return $changeset;
   }

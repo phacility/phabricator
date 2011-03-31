@@ -125,5 +125,33 @@ final class DiffusionPathChange {
     return substr($first, 0, 80);
   }
 
+  final public static function convertToArcanistChanges(array $changes) {
+    $direct = array();
+    $result = array();
+    foreach ($changes as $path) {
+      $change = new ArcanistDiffChange();
+      $change->setCurrentPath($path->getPath());
+      $direct[] = $path->getPath();
+      $change->setType($path->getChangeType());
+      $file_type = $path->getFileType();
+      if ($file_type == DifferentialChangeType::FILE_NORMAL) {
+        $file_type = DifferentialChangeType::FILE_TEXT;
+      }
+      $change->setFileType($file_type);
+      $change->setOldPath($path->getTargetPath());
+      foreach ($path->getAwayPaths() as $away_path) {
+        $change->addAwayPath($away_path);
+      }
+      $result[$path->getPath()] = $change;
+    }
+
+    return array_select_keys($result, $direct);
+  }
+
+  final public static function convertToDifferentialChangesets(array $changes) {
+    $arcanist_changes = self::convertToArcanistChanges($changes);
+    $diff = DifferentialDiff::newFromRawChanges($arcanist_changes);
+    return $diff->getChangesets();
+  }
 
 }

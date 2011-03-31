@@ -32,6 +32,7 @@ class DifferentialChangeset extends DifferentialDAO {
 
   private $unsavedHunks = array();
   private $hunks;
+  private $renderingReference;
 
   protected function getConfiguration() {
     return array(
@@ -73,6 +74,18 @@ class DifferentialChangeset extends DifferentialDAO {
       $name .= '/';
     }
     return $name;
+  }
+
+  public function setRenderingReference($rendering_reference) {
+    $this->renderingReference = $rendering_reference;
+    return $this;
+  }
+
+  public function getRenderingReference() {
+    if ($this->renderingReference) {
+      return $this->renderingReference;
+    }
+    return $this->getID();
   }
 
   public function addUnsavedHunk(DifferentialHunk $hunk) {

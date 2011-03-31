@@ -90,6 +90,10 @@ class DifferentialChangesetParser {
     return $this;
   }
 
+  public function getChangeset() {
+    return $this->changeset;
+  }
+
   public function getChangesetID() {
     return $this->changesetID;
   }
@@ -858,10 +862,10 @@ EOSYNTHETIC;
   }
 
   protected function renderShield($message, $more) {
-    $end = $this->getLength();
-    $changeset_id = $this->getChangesetID();
 
     if ($more) {
+      $end = $this->getLength();
+      $reference = $this->getChangeset()->getRenderingReference();
       $more =
         ' '.
         javelin_render_tag(
@@ -872,7 +876,7 @@ EOSYNTHETIC;
             'class'       => 'complete',
             'href'        => '#',
             'meta'        => array(
-              'id'    => $changeset_id,
+              'id'    => $reference,
               'range' => "0-{$end}",
             ),
           ),
@@ -958,6 +962,7 @@ EOSYNTHETIC;
     $gaps = array_reverse($gaps);
 
     $changeset = $this->changesetID;
+    $reference = $this->getChangeset()->getRenderingReference();
 
     for ($ii = $range_start; $ii < $range_start + $range_len; $ii++) {
       if (empty($mask[$ii])) {
@@ -977,7 +982,7 @@ EOSYNTHETIC;
               'mustcapture' => true,
               'sigil'       => 'show-more',
               'meta'        => array(
-                'id'    => $changeset,
+                'id'    => $reference,
                 'range' => "{$top}-{$len}/{$top}-20",
               ),
             ),
@@ -991,7 +996,7 @@ EOSYNTHETIC;
             'mustcapture' => true,
             'sigil'       => 'show-more',
             'meta'        => array(
-              'id'    => $changeset,
+              'id'    => $reference,
               'range' => "{$top}-{$len}/{$top}-{$len}",
             ),
           ),
@@ -1005,7 +1010,7 @@ EOSYNTHETIC;
               'mustcapture' => true,
               'sigil'       => 'show-more',
               'meta'        => array(
-                'id'    => $changeset,
+                'id'    => $reference,
                 'range' => "{$top}-{$len}/{$end}-20",
               ),
             ),
@@ -1067,13 +1072,13 @@ EOSYNTHETIC;
         $html[] = $context_not_available;
       }
 
-      if ($o_num) {
+      if ($o_num && $changeset) {
         $o_id = ' id="C'.$changeset.'OL'.$o_num.'"';
       } else {
         $o_id = null;
       }
 
-      if ($n_num) {
+      if ($n_num && $changeset) {
         $n_id = ' id="C'.$changeset.'NL'.$n_num.'"';
       } else {
         $n_id = null;

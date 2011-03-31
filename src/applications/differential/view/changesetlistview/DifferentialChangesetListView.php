@@ -70,10 +70,12 @@ class DifferentialChangesetListView extends AphrontView {
         $vs_id = null;
       }
 
-      $detail_uri = new PhutilURI('/differential/changeset/');
+      $ref = $changeset->getRenderingReference();
+
+      $detail_uri = new PhutilURI($this->renderURI);
       $detail_uri->setQueryParams(
         array(
-          'id'          => $id,
+          'id'          => $ref,
           'vs'          => $vs_id,
           'whitespace'  => 'TODO',
         ));
@@ -103,7 +105,7 @@ class DifferentialChangesetListView extends AphrontView {
       $output[] = $detail->render();
 
       $mapping[$uniq_id] = array(
-        $changeset->getID(),
+        $ref,
         $vs_id);
     }
 

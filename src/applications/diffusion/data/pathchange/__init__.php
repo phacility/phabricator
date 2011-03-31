@@ -6,6 +6,11 @@
 
 
 
+phutil_require_module('arcanist', 'parser/diff/change');
+
+phutil_require_module('phabricator', 'applications/differential/constants/changetype');
+phutil_require_module('phabricator', 'applications/differential/storage/diff');
+
 phutil_require_module('phutil', 'utils');
 
 

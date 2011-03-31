@@ -21,6 +21,8 @@ class DiffusionCommitController extends DiffusionController {
   public function processRequest() {
     $drequest = $this->getDiffusionRequest();
 
+    $callsign = $drequest->getRepository()->getCallsign();
+
     $content = array();
     $content[] = $this->buildCrumbs(array(
       'commit' => true,
@@ -43,7 +45,7 @@ class DiffusionCommitController extends DiffusionController {
     $detail_panel->appendChild(
       '<div class="diffusion-commit-view">'.
         '<div class="diffusion-commit-dateline">'.
-          'r'.$repository->getCallsign().$commit->getCommitIdentifier().
+          'r'.$callsign.$commit->getCommitIdentifier().
           ' &middot; '.
           date('F jS, Y g:i A', $commit->getEpoch()).
         '</div>'.
@@ -82,7 +84,7 @@ class DiffusionCommitController extends DiffusionController {
         id(new PhabricatorRepository())->establishConnection('r'),
         'SELECT * FROM %T WHERE fullCommitName = %s',
         PhabricatorRepository::TABLE_BADCOMMIT,
-        'r'.$repository->getCallsign().$commit->getCommitIdentifier());
+        'r'.$callsign.$commit->getCommitIdentifier());
     }
 
     if ($bad_commit) {
@@ -100,11 +102,36 @@ class DiffusionCommitController extends DiffusionController {
 
       $content[] = $change_panel;
 
-      $change_list =
-        '<div style="margin: 2em; color: #666; padding: 1em;
-          background: #eee;">'.
-          '(list of changes goes here)'.
-        '</div>';
+      if ($changes) {
+        $changesets = DiffusionPathChange::convertToDifferentialChangesets(
+          $changes);
+        foreach ($changesets as $changeset) {
+          $branch = $drequest->getBranchURIComponent(
+            $drequest->getBranch());
+          $filename = $changeset->getFilename();
+          $commit = $drequest->getCommit();
+          $reference = "{$branch}{$filename};{$commit}";
+          $changeset->setRenderingReference($reference);
+        }
+
+        $change_list = new DifferentialChangesetListView();
+        $change_list->setChangesets($changesets);
+        $change_list->setRenderURI('/diffusion/'.$callsign.'/diff/');
+
+        // TODO: This is pretty awkward, unify the CSS between Diffusion and
+        // Differential better.
+        require_celerity_resource('differential-core-view-css');
+        $change_list =
+          '<div class="differential-primary-pane">'.
+            $change_list->render().
+          '</div>';
+      } else {
+        $change_list =
+          '<div style="margin: 2em; color: #666; padding: 1em;
+            background: #eee;">'.
+            '(no changes blah blah)'.
+          '</div>';
+      }
 
       $content[] = $change_list;
     }
