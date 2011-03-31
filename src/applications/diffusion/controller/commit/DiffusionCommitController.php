@@ -109,7 +109,28 @@ class DiffusionCommitController extends DiffusionController {
       if ($changes) {
         $changesets = DiffusionPathChange::convertToDifferentialChangesets(
           $changes);
-        foreach ($changesets as $changeset) {
+
+        $vcs = $repository->getVersionControlSystem();
+        switch ($vcs) {
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+            $vcs_supports_directory_changes = true;
+            break;
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+            $vcs_supports_directory_changes = false;
+            break;
+          default:
+            throw new Exception("Unknown VCS.");
+        }
+
+        foreach ($changesets as $key => $changeset) {
+          $file_type = $changeset->getFileType();
+          if ($file_type == DifferentialChangeType::FILE_DIRECTORY) {
+            if (!$vcs_supports_directory_changes) {
+              unset($changesets[$key]);
+              continue;
+            }
+          }
+
           $branch = $drequest->getBranchURIComponent(
             $drequest->getBranch());
           $filename = $changeset->getFilename();

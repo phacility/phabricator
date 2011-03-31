@@ -20,6 +20,7 @@ abstract class PhabricatorRepositoryCommitParserWorker
   extends PhabricatorWorker {
 
   protected $commit;
+  protected $repository;
 
   final public function doWork() {
     $commit_id = $this->getTaskData();
@@ -42,6 +43,8 @@ abstract class PhabricatorRepositoryCommitParserWorker
     if (!$repository) {
       return;
     }
+
+    $this->repository = $repository;
 
     return $this->parseCommit($repository, $commit);
   }

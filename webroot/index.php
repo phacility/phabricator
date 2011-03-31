@@ -17,6 +17,7 @@
  */
 
 error_reporting(E_ALL | E_STRICT);
+ini_set('memory_limit', -1);
 
 $env = getenv('PHABRICATOR_ENV'); // Apache
 if (!$env) {

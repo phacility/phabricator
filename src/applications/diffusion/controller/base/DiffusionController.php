@@ -92,9 +92,14 @@ abstract class DiffusionController extends PhabricatorController {
   }
 
   public function buildCrumbs(array $spec = array()) {
-    $drequest = $this->diffusionRequest;
-
     $crumbs = new AphrontCrumbsView();
+    $crumb_list = $this->buildCrumbList($spec);
+    $crumbs->setCrumbs($crumb_list);
+    return $crumbs;
+  }
+
+  private function buildCrumbList(array $spec = array()) {
+    $drequest = $this->getDiffusionRequest();
 
     $crumb_list = array();
 
@@ -108,8 +113,7 @@ abstract class DiffusionController extends PhabricatorController {
         'Diffusion');
     } else {
       $crumb_list[] = 'Diffusion';
-      $crumbs->setCrumbs($crumb_list);
-      return $crumbs;
+      return $crumb_list;
     }
 
     $callsign = $repository->getCallsign();
@@ -124,8 +128,7 @@ abstract class DiffusionController extends PhabricatorController {
 
     if (empty($spec['view']) && empty($spec['commit'])) {
       $crumb_list[] = $repository_name;
-      $crumbs->setCrumbs($crumb_list);
-      return $crumbs;
+      return $crumb_list;
     }
 
     $crumb_list[] = phutil_render_tag(
@@ -138,8 +141,7 @@ abstract class DiffusionController extends PhabricatorController {
     $raw_commit = $drequest->getRawCommit();
     if (isset($spec['commit'])) {
       $crumb_list[] = "r{$callsign}{$raw_commit}";
-      $crumbs->setCrumbs($crumb_list);
-      return $crumbs;
+      return $crumb_list;
     }
 
     $view = $spec['view'];
@@ -167,8 +169,7 @@ abstract class DiffusionController extends PhabricatorController {
       case 'change':
         $view_name = 'Change';
         $crumb_list[] = phutil_escape_html($path).' ('.$commit_link.')';
-        $crumbs->setCrumbs($crumb_list);
-        return $crumbs;
+        return $crumb_list;
     }
 
     $view_root_uri = "/diffusion/{$callsign}/{$view}/{$branch_uri}";
@@ -231,10 +232,7 @@ abstract class DiffusionController extends PhabricatorController {
 
     $crumb_list[] = $last_crumb;
 
-
-    $crumbs->setCrumbs($crumb_list);
-
-    return $crumbs;
+    return $crumb_list;
   }
 
 }

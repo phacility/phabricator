@@ -47,7 +47,6 @@ class DiffusionChangeController extends DiffusionController {
         $changeset_view->render().
       '</div>';
 
-
     $nav = $this->buildSideNav('change', true);
     $nav->appendChild($content);
 

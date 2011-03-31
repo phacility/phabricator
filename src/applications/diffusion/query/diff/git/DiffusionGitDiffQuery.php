@@ -49,7 +49,7 @@ final class DiffusionGitDiffQuery extends DiffusionDiffQuery {
     $changeset = reset($changesets);
 
     $id =
-      $drequest->getBranch().'/'.
+      $drequest->getBranchURIComponent($drequest->getBranch()).
       $drequest->getPath().';'.
       $drequest->getCommit();
 

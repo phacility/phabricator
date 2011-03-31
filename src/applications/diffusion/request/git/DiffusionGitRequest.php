@@ -61,6 +61,11 @@ class DiffusionGitRequest extends DiffusionRequest {
         // sha1s.
         $this->commit = trim($commit);
 
+/*
+
+  TODO: Unclear if this is actually a good idea or not; it breaks commit views
+  at the very least.
+
         list($contains) = execx(
           '(cd %s && git branch --contains %s)',
           $local_path,
@@ -78,6 +83,8 @@ class DiffusionGitRequest extends DiffusionRequest {
           throw new Exception(
             "Commit does not exist on this branch!");
         }
+*/
+
       }
     }
 
@@ -89,7 +96,7 @@ class DiffusionGitRequest extends DiffusionRequest {
       return $this->branch;
     }
     if ($this->repository) {
-      return $this->repository->getDetail('default-branch', 'master');
+      return $this->repository->getDetail('default-branch', 'origin/master');
     }
     throw new Exception("Unable to determine branch!");
   }

@@ -21,10 +21,14 @@ class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
   protected $commitID;
   protected $authorName;
   protected $commitMessage;
+  protected $commitDetails = array();
 
   public function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
+      self::CONFIG_SERIALIZATION => array(
+        'commitDetails' => self::SERIALIZATION_JSON,
+      ),
     ) + parent::getConfiguration();
   }
 

@@ -36,13 +36,19 @@ final class DiffusionCommitChangeTableView extends DiffusionView {
       $change_verb = DifferentialChangeType::getFullNameForChangeType(
         $change->getChangeType());
 
-      $suffix = null;
-      if ($change->getFileType() == DifferentialChangeType::FILE_DIRECTORY) {
-        $suffix = '/';
-      }
-
       $path = $change->getPath();
-      $hash = substr(sha1($path), 0, 7);
+      if ($change->getFileType() == DifferentialChangeType::FILE_DIRECTORY) {
+        $path_column = phutil_escape_html($path).'/';
+      } else {
+        $hash = substr(md5($path), 0, 8);
+
+        $path_column = phutil_render_tag(
+          'a',
+          array(
+            'href' => '#'.$hash,
+          ),
+          phutil_escape_html($path));
+      }
 
       $rows[] = array(
         $this->linkHistory($change->getPath()),
@@ -51,12 +57,7 @@ final class DiffusionCommitChangeTableView extends DiffusionView {
           $change->getChangeType(),
           $change->getFileType(),
           $change->getPath()),
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => '#'.$hash,
-          ),
-          phutil_escape_html($path).$suffix),
+        $path_column,
       );
     }
 
