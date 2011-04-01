@@ -50,6 +50,16 @@ abstract class DiffusionFileContentQuery {
     return $query;
   }
 
+  public function getSupportsBlameOnBlame() {
+    return false;
+  }
+
+  public function getPrevRev($rev) {
+    // TODO: support git once the 'parent' info of a commit is saved
+    // to the database.
+    throw new Exception("Unsupported VCS!");
+  }
+
   final protected function getRequest() {
     return $this->request;
   }

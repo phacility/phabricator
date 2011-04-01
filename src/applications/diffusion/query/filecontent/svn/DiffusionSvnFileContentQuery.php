@@ -18,6 +18,14 @@
 
 final class DiffusionSvnFileContentQuery extends DiffusionFileContentQuery {
 
+  public function getSupportsBlameOnBlame() {
+    return true;
+  }
+
+  public function getPrevRev($rev) {
+    return max($rev - 1, 0);
+  }
+
   protected function executeQuery() {
     $drequest = $this->getRequest();
 

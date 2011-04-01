@@ -26,6 +26,7 @@ class DiffusionBrowseFileController extends DiffusionController {
     'jpeg'=> 'image/jpeg'
   );
 
+
   public function processRequest() {
 
     // Build the view selection form.
@@ -87,6 +88,20 @@ class DiffusionBrowseFileController extends DiffusionController {
       array(
         'title' => 'Browse',
       ));
+  }
+
+
+  /*
+   * Returns a content-type corrsponding to an image file extension
+   *
+   * @param string $path File path
+   * @return mixed A content-type string or NULL if path doesn't end with a
+   *               recognized image extension
+   */
+  public function getImageType($path) {
+    $ext = pathinfo($path);
+    $ext = $ext['extension'];
+    return idx($this->imageTypes, $ext);
   }
 
 
@@ -166,7 +181,7 @@ class DiffusionBrowseFileController extends DiffusionController {
           implode("\n", $text_list)));
 
         $rows = $this->buildDisplayRows($text_list, $rev_list, $blame_dict,
-          $needs_blame, $drequest);
+          $needs_blame, $drequest, $file_query, $selected);
 
         $corpus_table = phutil_render_tag(
           'table',
@@ -189,7 +204,7 @@ class DiffusionBrowseFileController extends DiffusionController {
 
 
   private static function buildDisplayRows($text_list, $rev_list, $blame_dict,
-    $needs_blame, DiffusionRequest $drequest) {
+    $needs_blame, DiffusionRequest $drequest, $file_query, $selected) {
     $last_rev = null;
     $color = null;
     $rows = array();
@@ -208,6 +223,8 @@ class DiffusionBrowseFileController extends DiffusionController {
         $rev = $rev_list[$k];
         if ($last_rev == $rev) {
           $blame_info =
+            ($file_query->getSupportsBlameOnBlame() ?
+              '<th style="background: '.$color.'; width: 2em;"></th>' : '').
             '<th style="background: '.$color.'; width: 9em;"></th>'.
             '<th style="background: '.$color.'"></th>';
         } else {
@@ -220,8 +237,25 @@ class DiffusionBrowseFileController extends DiffusionController {
             $drequest,
             substr($rev, 0, 7));
 
+          if (!$file_query->getSupportsBlameOnBlame()) {
+            $prev_link = '';
+          } else {
+            $prev_rev = $file_query->getPrevRev($rev);
+            $path = $drequest->getPath();
+            $prev_link = self::renderBrowse(
+              $drequest,
+              $path,
+              "\xC2\xAB",
+              $prev_rev,
+              $n,
+              $selected);
+            $prev_link = '<th style="background: ' . $color .
+              '; width: 2em;">' . $prev_link . '</th>';
+          }
+
           $author_link = $blame_dict[$rev]['author'];
           $blame_info =
+            $prev_link .
             '<th style="background: '.$color.
               '; width: 9em;">'.$revision_link.'</th>'.
             '<th style="background: '.$color.
@@ -278,17 +312,41 @@ class DiffusionBrowseFileController extends DiffusionController {
   }
 
 
-  /**
-   * Returns a content-type corrsponding to an image file extension
-   *
-   * @param string $path File path
-   * @return mixed A content-type string or NULL if path doesn't end with a
-   *               recognized image extension
-   */
-  public function getImageType($path) {
-    $ext = pathinfo($path);
-    $ext = $ext['extension'];
-    return idx($this->imageTypes, $ext);
+  private static function renderBrowse(
+    DiffusionRequest $drequest,
+    $path,
+    $name = null,
+    $rev = null,
+    $line = null,
+    $view = null) {
+
+    $callsign = $drequest->getCallsign();
+
+    if ($name === null) {
+      $name = $path;
+    }
+
+    $at = null;
+    if ($rev) {
+      $at = ';'.$rev;
+    }
+
+    if ($view) {
+      $view = '?view='.$view;
+    }
+
+    if ($line) {
+      $line = '$'.$line;
+    }
+
+    return phutil_render_tag(
+      'a',
+      array(
+        'href' => "/diffusion/{$callsign}/browse/{$path}{$at}{$line}{$view}",
+      ),
+      $name
+    );
   }
+
 
 }
