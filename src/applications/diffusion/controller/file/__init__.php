@@ -8,13 +8,13 @@
 
 phutil_require_module('phabricator', 'applications/diffusion/controller/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/filecontent/base');
-phutil_require_module('phabricator', 'applications/repository/constants/repositorytype');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'infrastructure/javelin/api');
 phutil_require_module('phabricator', 'view/layout/panel');
 
 phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'markup/syntax/engine/default');
+phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('DiffusionBrowseFileController.php');

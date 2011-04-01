@@ -82,35 +82,18 @@ class DiffusionBrowseFileController extends DiffusionController {
   }
 
 
-  public static function renderRevision(
-    DiffusionRequest $drequest,
-    $revision) {
-
-    $callsign = $drequest->getCallsign();
-
-    $name = 'r'.$callsign.$revision;
-    return phutil_render_tag(
-      'a',
-      array(
-        'href' => '/'.$name,
-      ),
-      $name
-    );
-  }
-
-
   private function buildCorpus($selected) {
-    $blame = ($selected == 'blame' || $selected == 'plainblame');
+    $needs_blame = ($selected == 'blame' || $selected == 'plainblame');
 
     $file_query = DiffusionFileContentQuery::newFromDiffusionRequest(
       $this->diffusionRequest);
-    $file_query->setNeedsBlame($blame);
+    $file_query->setNeedsBlame($needs_blame);
+    $file_query->loadFileContent();
 
     // TODO: image
     // TODO: blame of blame.
     switch ($selected) {
       case 'plain':
-      case 'plainblame':
         $style =
           "margin: 1em 2em; width: 90%; height: 80em; font-family: monospace";
         $corpus = phutil_render_tag(
@@ -119,7 +102,31 @@ class DiffusionBrowseFileController extends DiffusionController {
             'style' => $style,
           ),
           phutil_escape_html($file_query->getRawData()));
+
           break;
+
+      case 'plainblame':
+        $style =
+          "margin: 1em 2em; width: 90%; height: 80em; font-family: monospace";
+        list($text_list, $rev_list, $blame_dict) =
+          $file_query->getBlameData();
+
+        $rows = array();
+        foreach ($text_list as $k => $line) {
+          $rev = $rev_list[$k];
+          $author = $blame_dict[$rev]['author'];
+          $rows[] =
+            sprintf("%-10s %-15s %s", substr($rev, 0, 7), $author, $line);
+        }
+
+        $corpus = phutil_render_tag(
+          'textarea',
+          array(
+            'style' => $style,
+          ),
+          phutil_escape_html(implode("\n", $rows)));
+
+        break;
 
       case 'highlighted':
       case 'blame':
@@ -127,17 +134,17 @@ class DiffusionBrowseFileController extends DiffusionController {
         require_celerity_resource('syntax-highlighting-css');
         require_celerity_resource('diffusion-source-css');
 
-        list($data, $blamedata, $revs) = $file_query->getTokenizedData();
+        list($text_list, $rev_list, $blame_dict) = $file_query->getBlameData();
 
         $drequest = $this->getDiffusionRequest();
         $path = $drequest->getPath();
         $highlightEngine = new PhutilDefaultSyntaxHighlighterEngine();
-        $data = $highlightEngine->highlightSource($path, $data);
 
-        $data = explode("\n", rtrim($data));
+        $text_list = explode("\n", $highlightEngine->highlightSource($path,
+          implode("\n", $text_list)));
 
-        $rows = $this->buildDisplayRows($data, $blame, $blamedata, $drequest,
-          $revs);
+        $rows = $this->buildDisplayRows($text_list, $rev_list, $blame_dict,
+          $needs_blame, $drequest);
 
         $corpus_table = phutil_render_tag(
           'table',
@@ -159,49 +166,51 @@ class DiffusionBrowseFileController extends DiffusionController {
   }
 
 
-  private static function buildDisplayRows($data, $blame, $blamedata, $drequest,
-    $revs) {
-    $last = null;
+  private static function buildDisplayRows($text_list, $rev_list, $blame_dict,
+    $needs_blame, DiffusionRequest $drequest) {
+    $last_rev = null;
     $color = null;
     $rows = array();
     $n = 1;
-    foreach ($data as $k => $line) {
-      if ($blame) {
-        if ($last == $blamedata[$k][0]) {
-          $blameinfo =
+
+    $epoch_list = ipull($blame_dict, 'epoch');
+    $max = max($epoch_list);
+    $min = min($epoch_list);
+    $range = $max - $min + 1;
+
+    foreach ($text_list as $k => $line) {
+      if ($needs_blame) {
+        // If the line's rev is same as the line above, show empty content
+        // with same color; otherwise generate blame info. The newer a change
+        // is, the darker the color.
+        $rev = $rev_list[$k];
+        if ($last_rev == $rev) {
+          $blame_info =
             '<th style="background: '.$color.'; width: 9em;"></th>'.
             '<th style="background: '.$color.'"></th>';
         } else {
-          switch ($drequest->getRepository()->getVersionControlSystem()) {
-            case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-              // TODO: better color for git.
-              $color = '#dddddd';
-              break;
-            case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-              $color = sprintf(
-               '#%02xee%02x',
-               $revs[$blamedata[$k][0]],
-               $revs[$blamedata[$k][0]]);
-              break;
-            default:
-              throw new Exception('repository type not supported');
-          }
-          $revision_link = self::renderRevision(
-           $drequest,
-           $blamedata[$k][0]);
 
-          $author_link = $blamedata[$k][1];
-          $blameinfo =
+          $color_number = (int)(0xEE -
+            0xEE * ($blame_dict[$rev]['epoch'] - $min) / $range);
+          $color = sprintf('#%02xee%02x', $color_number, $color_number);
+
+          $revision_link = self::renderRevision(
+            $drequest,
+            substr($rev, 0, 7));
+
+          $author_link = $blame_dict[$rev]['author'];
+          $blame_info =
             '<th style="background: '.$color.
               '; width: 9em;">'.$revision_link.'</th>'.
             '<th style="background: '.$color.
               '; font-weight: normal; color: #333;">'.$author_link.'</th>';
-          $last = $blamedata[$k][0];
+          $last_rev = $rev;
         }
       } else {
-        $blameinfo = null;
+        $blame_info = null;
       }
 
+      // Highlight the line of interest if needed.
       if ($n == $drequest->getLine()) {
         $tr = '<tr style="background: #ffff00;">';
         $targ = '<a id="scroll_target"></a>';
@@ -212,6 +221,7 @@ class DiffusionBrowseFileController extends DiffusionController {
         $targ = null;
       }
 
+      // Create the row display.
       $uri_path = $drequest->getUriPath();
       $uri_rev  = $drequest->getCommit();
 
@@ -222,10 +232,27 @@ class DiffusionBrowseFileController extends DiffusionController {
         ),
         $n);
 
-      $rows[] = $tr.$blameinfo.'<th>'.$l.'</th><td>'.$targ.$line.'</td></tr>';
+      $rows[] = $tr.$blame_info.'<th>'.$l.'</th><td>'.$targ.$line.'</td></tr>';
       ++$n;
     }
 
     return $rows;
   }
+
+
+  private static function renderRevision(DiffusionRequest $drequest,
+    $revision) {
+
+    $callsign = $drequest->getCallsign();
+
+    $name = 'r'.$callsign.$revision;
+    return phutil_render_tag(
+      'a',
+      array(
+           'href' => '/'.$name,
+      ),
+      $name
+    );
+  }
+
 }

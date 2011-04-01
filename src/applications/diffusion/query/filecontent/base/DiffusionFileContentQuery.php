@@ -20,6 +20,7 @@ abstract class DiffusionFileContentQuery {
 
   private $request;
   private $needsBlame;
+  private $fileContent;
 
   final private function __construct() {
     // <private>
@@ -54,20 +55,53 @@ abstract class DiffusionFileContentQuery {
   }
 
   final public function loadFileContent() {
-    return $this->executeQuery();
+    $this->fileContent = $this->executeQuery();
   }
 
   abstract protected function executeQuery();
 
   final public function getRawData() {
-    return $this->loadFileContent()->getCorpus();
+    return $this->fileContent->getCorpus();
   }
 
-  final public function getTokenizedData() {
-    return $this->tokenizeData($this->getRawData());
+  final public function getBlameData() {
+    $raw_data = $this->getRawData();
+
+    $text_list = array();
+    $rev_list = array();
+    $blame_dict = array();
+
+    if (!$this->getNeedsBlame()) {
+      $text_list = explode("\n", rtrim($raw_data));
+    } else {
+      foreach (explode("\n", rtrim($raw_data)) as $k => $line) {
+        list($rev_id, $author, $text) = $this->tokenizeLine($line);
+
+        $text_list[$k] = $text;
+        $rev_list[$k] = $rev_id;
+
+        if (!isset($blame_dict[$rev_id]) &&
+            !isset($blame_dict[$rev_id]['author'] )) {
+          $blame_dict[$rev_id]['author'] = $author;
+        }
+      }
+
+      $repository = $this->getRequest()->getRepository();
+      $commits = id(new PhabricatorRepositoryCommit())->loadAllWhere(
+        'repositoryID = %d AND commitIdentifier IN (%Ls)', $repository->getID(),
+        array_unique($rev_list));
+
+      foreach ($commits as $commit) {
+        $commitIdentifier = $commit->getCommitIdentifier();
+        $epoch = $commit->getEpoch();
+        $blame_dict[$commitIdentifier]['epoch'] = $epoch;
+      }
+    }
+
+    return array($text_list, $rev_list, $blame_dict);
   }
 
-  abstract protected function tokenizeData($data);
+  abstract protected function tokenizeLine($line);
 
   public function setNeedsBlame($needs_blame)
   {

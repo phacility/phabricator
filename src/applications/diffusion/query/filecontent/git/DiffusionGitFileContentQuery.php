@@ -28,7 +28,7 @@ final class DiffusionGitFileContentQuery extends DiffusionFileContentQuery {
     $local_path = $repository->getDetail('local-path');
     if ($this->getNeedsBlame()) {
       list($corpus) = execx(
-        '(cd %s && git --no-pager blame -c --date short %s -- %s)',
+        '(cd %s && git --no-pager blame -c -l --date short %s -- %s)',
         $local_path,
         $commit,
         $path);
@@ -46,35 +46,17 @@ final class DiffusionGitFileContentQuery extends DiffusionFileContentQuery {
     return $file_content;
   }
 
-  protected function tokenizeData($data) {
+
+  protected function tokenizeLine($line) {
     $m = array();
-    $blamedata = array();
-    $revs = array();
-
-    if ($this->getNeedsBlame()) {
-      $data = explode("\n", rtrim($data));
-      foreach ($data as $k => $line) {
-        // sample line:
-        // d1b4fcdd        (     hzhao   2009-05-01  202)function print();
-        preg_match('/^\s*?(\S+?)\s*\(\s*(\S+)\s+\S+\s+\d+\)(.*)?$/',
-                   $line, $m);
-        $data[$k] = idx($m, 3);
-        $blamedata[$k] = array($m[1], $m[2]);
-
-        $revs[$m[1]] = true;
-      }
-      $data = implode("\n", $data);
-
-      krsort($revs);
-      $ii = 0;
-      $len = count($revs);
-      foreach ($revs as $rev => $ignored) {
-        $revs[$rev] = (int)(0xEE * ($ii / $len));
-        ++$ii;
-      }
-    }
-
-    return array($data, $blamedata, $revs);
+    // sample line:
+    // d1b4fcdd2a7c8c0f8cbdd01ca839d992135424dc
+    //                       (     hzhao   2009-05-01  202)function print();
+    preg_match('/^\s*?(\S+?)\s*\(\s*(\S+)\s+\S+\s+\d+\)(.*)?$/', $line, $m);
+    $rev_id = $m[1];
+    $author = $m[2];
+    $text = idx($m, 3);
+    return array($rev_id, $author, $text);
   }
 
 }
