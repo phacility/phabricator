@@ -18,6 +18,14 @@
 
 class DiffusionBrowseFileController extends DiffusionController {
 
+  protected $imageTypes = array(
+    'png' => 'image/png',
+    'gif' => 'image/gif',
+    'ico' => 'image/png',
+    'jpg' => 'image/jpeg',
+    'jpeg'=> 'image/jpeg'
+  );
+
   public function processRequest() {
 
     // Build the view selection form.
@@ -90,7 +98,23 @@ class DiffusionBrowseFileController extends DiffusionController {
     $file_query->setNeedsBlame($needs_blame);
     $file_query->loadFileContent();
 
-    // TODO: image
+    $drequest = $this->getDiffusionRequest();
+    $path = $drequest->getPath();
+
+    $image_type = $this->getImageType($path);
+    if ($image_type && !$selected) {
+      $data = $file_query->getRawData();
+
+      $corpus = phutil_render_tag(
+        'img',
+        array(
+          'style' => 'padding-bottom: 10px',
+          'src' => 'data:'.$image_type.';base64,'.base64_encode($data),
+        )
+      );
+      return $corpus;
+    }
+
     // TODO: blame of blame.
     switch ($selected) {
       case 'plain':
@@ -136,8 +160,6 @@ class DiffusionBrowseFileController extends DiffusionController {
 
         list($text_list, $rev_list, $blame_dict) = $file_query->getBlameData();
 
-        $drequest = $this->getDiffusionRequest();
-        $path = $drequest->getPath();
         $highlightEngine = new PhutilDefaultSyntaxHighlighterEngine();
 
         $text_list = explode("\n", $highlightEngine->highlightSource($path,
@@ -253,6 +275,20 @@ class DiffusionBrowseFileController extends DiffusionController {
       ),
       $name
     );
+  }
+
+
+  /**
+   * Returns a content-type corrsponding to an image file extension
+   *
+   * @param string $path File path
+   * @return mixed A content-type string or NULL if path doesn't end with a
+   *               recognized image extension
+   */
+  public function getImageType($path) {
+    $ext = pathinfo($path);
+    $ext = $ext['extension'];
+    return idx($this->imageTypes, $ext);
   }
 
 }
