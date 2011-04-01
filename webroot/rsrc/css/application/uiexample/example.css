@@ -1,0 +1,22 @@
+/**
+ * @provides phabricator-ui-example-css
+ */
+
+.phabricator-ui-example-note {
+  padding: .5em;
+  margin: 2em 1em 0.5em;
+  background: #ffffdd;
+  border: 1px solid #f5e178;
+}
+
+.phabricator-ui-example-note tt {
+  font-weight: bold;
+}
+
+.phabricator-ui-example-header {
+  margin: 1em 2em 2em;
+}
+
+.phabricator-ui-example-description {
+  margin: 1em 0;
+}

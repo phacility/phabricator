@@ -245,6 +245,12 @@ class AphrontDefaultApplicationConfiguration
       '/preferences/' => array(
         '$' => 'PhabricatorEditPreferencesController'
       ),
+
+      '/uiexample/' => array(
+        '$' => 'PhabricatorUIExampleRenderController',
+        'view/(?P<class>[^/]+)/$' => 'PhabricatorUIExampleRenderController',
+      ),
+
     );
   }
 
