@@ -43,11 +43,12 @@ final class DiffusionSvnHistoryQuery extends DiffusionHistoryQuery {
       'SELECT * FROM %T WHERE repositoryID = %d AND pathID = %d
         AND commitSequence <= %d
         ORDER BY commitSequence DESC
-        LIMIT %d',
+        LIMIT %d, %d',
       PhabricatorRepository::TABLE_PATHCHANGE,
       $repository->getID(),
       $path_id,
       $commit ? $commit : 0x7FFFFFFF,
+      $this->getOffset(),
       $this->getLimit());
 
     $commits = array();

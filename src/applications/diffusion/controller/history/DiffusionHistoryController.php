@@ -20,11 +20,27 @@ class DiffusionHistoryController extends DiffusionController {
 
   public function processRequest() {
     $drequest = $this->diffusionRequest;
+    $request = $this->getRequest();
+
+    $page_size = $request->getInt('pagesize', 100);
+    $offset = $request->getInt('page', 0);
 
     $history_query = DiffusionHistoryQuery::newFromDiffusionRequest(
       $drequest);
-
+    $history_query->setOffset($offset);
+    $history_query->setLimit($page_size + 1);
     $history = $history_query->loadHistory();
+
+    $pager = new AphrontPagerView();
+    $pager->setPageSize($page_size);
+    $pager->setOffset($offset);
+    if (count($history) == $page_size + 1) {
+      array_pop($history);
+      $pager->setHasMorePages(true);
+    } else {
+      $pager->setHasMorePages(false);
+    }
+    $pager->setURI($request->getRequestURI(), 'page');
 
     $content = array();
 
@@ -41,6 +57,7 @@ class DiffusionHistoryController extends DiffusionController {
 
     $history_panel = new AphrontPanelView();
     $history_panel->appendChild($history_table);
+    $history_panel->appendChild($pager);
 
     $content[] = $history_panel;
 
