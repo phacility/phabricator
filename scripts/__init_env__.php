@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+$include_path = ini_get('include_path');
+ini_set('include_path', $include_path.':'.dirname(__FILE__).'/../../');
+
 require_once dirname(dirname(__FILE__)).'/conf/__init_conf__.php';
 
 $env = getenv('PHABRICATOR_ENV');
@@ -29,6 +32,7 @@ $conf['phabricator.env'] = $env;
 
 phutil_require_module('phabricator', 'infrastructure/env');
 PhabricatorEnv::setEnvConfig($conf);
+
 
 foreach (PhabricatorEnv::getEnvConfig('load-libraries') as $library) {
   phutil_load_library($library);

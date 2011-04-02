@@ -50,7 +50,7 @@ abstract class PhabricatorRepositoryCommitParserWorker
   }
 
   final protected function shouldQueueFollowupTasks() {
-    return !!idx($this->getTaskData(), 'only');
+    return !idx($this->getTaskData(), 'only');
   }
 
   abstract protected function parseCommit(
