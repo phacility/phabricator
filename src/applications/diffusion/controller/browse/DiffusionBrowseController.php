@@ -87,8 +87,23 @@ class DiffusionBrowseController extends DiffusionController {
       $content[] = $error_view;
 
     } else {
+
+      $phids = array();
+      foreach ($results as $result) {
+        $data = $result->getLastCommitData();
+        if ($data) {
+          if ($data->getCommitDetail('authorPHID')) {
+            $phids[$data->getCommitDetail('authorPHID')] = true;
+          }
+        }
+      }
+      $phids = array_keys($phids);
+
+      $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+
       $browse_table = new DiffusionBrowseTableView();
       $browse_table->setDiffusionRequest($drequest);
+      $browse_table->setHandles($handles);
       $browse_table->setPaths($results);
 
       $browse_panel = new AphrontPanelView();
