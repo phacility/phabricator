@@ -55,7 +55,9 @@ final class DarkConsoleXHProfPluginAPI {
 
   public static function startProfiler() {
     self::includeXHProfLib();
-    xhprof_enable();
+    // Note: HPHP's implementation of XHProf currently requires an argument
+    // to xhprof_enable() -- see Facebook Task #531011.
+    xhprof_enable(0);
   }
 
   public static function stopProfiler() {
