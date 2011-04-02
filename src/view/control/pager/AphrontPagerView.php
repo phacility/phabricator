@@ -19,7 +19,7 @@
 final class AphrontPagerView extends AphrontView {
 
   private $offset;
-  private $pageSize;
+  private $pageSize = 100;
 
   private $count;
   private $hasMorePages;
@@ -81,6 +81,10 @@ final class AphrontPagerView extends AphrontView {
   }
 
   public function render() {
+    if (!$this->uri) {
+      throw new Exception(
+        "You must call setURI() before you can call render().");
+    }
 
     require_celerity_resource('aphront-pager-view-css');
 

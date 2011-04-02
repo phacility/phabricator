@@ -19,8 +19,25 @@
 class PhabricatorPeopleListController extends PhabricatorPeopleController {
 
   public function processRequest() {
+    $request = $this->getRequest();
+
+    $user = new PhabricatorUser();
+
+    $count = queryfx_one(
+      $user->establishConnection('r'),
+      'SELECT COUNT(*) N FROM %T',
+      $user->getTableName());
+    $count = idx($count, 'N', 0);
+
+    $pager = new AphrontPagerView();
+    $pager->setOffset($request->getInt('page', 0));
+    $pager->setCount($count);
+    $pager->setURI($request->getRequestURI(), 'page');
+
     $users = id(new PhabricatorUser())->loadAllWhere(
-      '1 = 1 ORDER BY id DESC LIMIT 100');
+      '1 = 1 ORDER BY id DESC LIMIT %d, %d',
+      $pager->getOffset(),
+      $pager->getPageSize());
 
     $rows = array();
     foreach ($users as $user) {
@@ -35,15 +52,6 @@ class PhabricatorPeopleListController extends PhabricatorPeopleController {
             'href'  => '/p/'.$user->getUsername().'/',
           ),
           'View Profile'),
-/*
-        phutil_render_tag(
-          'a',
-          array(
-            'class' => 'button grey small',
-            'href'  => '/people/edit/'.$user->getUsername().'/',
-          ),
-          'Edit'),
-*/
       );
     }
 
@@ -54,7 +62,6 @@ class PhabricatorPeopleListController extends PhabricatorPeopleController {
         'Username',
         'Real Name',
         '',
-//        '',
       ));
     $table->setColumnClasses(
       array(
@@ -62,13 +69,12 @@ class PhabricatorPeopleListController extends PhabricatorPeopleController {
         null,
         'wide',
         'action',
-//        'action',
       ));
 
     $panel = new AphrontPanelView();
-    $panel->appendChild($table);
     $panel->setHeader('People');
-//    $panel->setCreateButton('Create New User', '/people/edit/');
+    $panel->appendChild($table);
+    $panel->appendChild($pager);
 
     return $this->buildStandardPageResponse($panel, array(
       'title' => 'People',
