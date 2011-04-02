@@ -36,4 +36,8 @@ class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
     return substr($this->getCommitMessage(), 0, 80);
   }
 
+  public function getCommitDetail($key, $default = null) {
+    return idx($this->commitDetails, $key, $default);
+  }
+
 }

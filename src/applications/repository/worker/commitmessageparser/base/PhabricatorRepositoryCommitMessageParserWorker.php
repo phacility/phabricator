@@ -31,6 +31,18 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     $data->setCommitID($commit->getID());
     $data->setAuthorName($author);
     $data->setCommitMessage($message);
+
+    $repository = $this->repository;
+    $detail_parser = $repository->getDetail(
+      'detail-parser',
+      'PhabricatorRepositoryDefaultCommitMessageDetailParser');
+
+    if ($detail_parser) {
+      PhutilSymbolLoader::loadClass($detail_parser);
+      $parser_obj = newv($detail_parser, array($commit, $data));
+      $parser_obj->parseCommitDetails();
+    }
+
     $data->save();
   }
 

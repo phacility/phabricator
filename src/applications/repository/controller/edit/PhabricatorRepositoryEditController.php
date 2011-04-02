@@ -115,6 +115,8 @@ class PhabricatorRepositoryEditController
         $e_name = null;
       }
 
+      $repository->setDetail('description', $request->getStr('description'));
+
       if (!$errors) {
         $repository->save();
         return id(new AphrontRedirectResponse())
@@ -147,6 +149,12 @@ class PhabricatorRepositoryEditController
           ->setError($e_name)
           ->setCaption('Human-readable repository name.'))
       ->appendChild(
+        id(new AphrontFormTextAreaControl())
+          ->setLabel('Description')
+          ->setName('description')
+          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT)
+          ->setValue($repository->getDetail('description')))
+      ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel('Callsign')
           ->setName('callsign')
@@ -158,8 +166,11 @@ class PhabricatorRepositoryEditController
           ->setValue($repository->getVersionControlSystem()))
       ->appendChild(
         id(new AphrontFormStaticControl())
+          ->setLabel('ID')
+          ->setValue($repository->getID()))
+      ->appendChild(
+        id(new AphrontFormStaticControl())
           ->setLabel('PHID')
-          ->setName('phid')
           ->setValue($repository->getPHID()))
       ->appendChild(
         id(new AphrontFormSubmitControl())
@@ -194,6 +205,20 @@ class PhabricatorRepositoryEditController
     $e_uri = null;
     $e_path = null;
 
+    $is_git = false;
+    $is_svn = false;
+
+    switch ($repository->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        $is_git = true;
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $is_svn = true;
+        break;
+      default:
+        throw new Exception("Unsupported VCS!");
+    }
+
     if ($request->isFormPost()) {
       $tracking = ($request->getStr('tracking') == 'enabled' ? true : false);
       $repository->setDetail('tracking-enabled', $tracking);
@@ -202,6 +227,18 @@ class PhabricatorRepositoryEditController
       $repository->setDetail(
         'pull-frequency',
         max(1, $request->getInt('frequency')));
+
+      if ($is_git) {
+        $repository->setDetail(
+          'default-branch',
+          $request->getStr('default-branch'));
+      }
+
+      $repository->setDetail(
+        'detail-parser',
+        $request->getStr(
+          'detail-parser',
+          'PhabricatorRepositoryDefaultCommitMessageDetailParser'));
 
       if ($tracking) {
         if (!$repository->getDetail('remote-uri')) {
@@ -237,8 +274,11 @@ class PhabricatorRepositoryEditController
 
     $uri_caption = null;
     $path_caption = null;
+
+
     switch ($repository->getVersionControlSystem()) {
-      case 'git':
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        $is_git = true;
         $uri_caption =
           'The user the tracking daemon runs as must have permission to '.
           '<tt>git clone</tt> from this URI.';
@@ -247,7 +287,8 @@ class PhabricatorRepositoryEditController
           'repository (or create one if it does not yet exist). The daemon '.
           'will regularly pull remote changes into this working copy.';
         break;
-      case 'svn':
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $is_svn = true;
         $uri_caption =
           'The user the tracking daemon runs as must have permission to '.
           '<tt>svn log</tt> from this URI.';
@@ -263,7 +304,7 @@ class PhabricatorRepositoryEditController
         'repositories, importing commits as they happen and notifying '.
         'Differential, Diffusion, Herald, and other services. To enable '.
         'tracking for a repository, configure it here and then start (or '.
-        'restart) the PhabricatorRepositoryTrackingDaemon.</p>')
+        'restart) the daemons (TODO: explain this).</p>')
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel('Repository')
@@ -301,7 +342,43 @@ class PhabricatorRepositoryEditController
           ->setValue($repository->getDetail('pull-frequency', 15))
           ->setCaption(
             'Number of seconds daemon should sleep between requests. Larger '.
-            'numbers reduce load but also decrease responsiveness.'))
+            'numbers reduce load but also decrease responsiveness.'));
+
+    if ($is_git) {
+      $form
+        ->appendChild(
+          id(new AphrontFormTextControl())
+            ->setName('default-branch')
+            ->setLabel('Default Branch')
+            ->setValue(
+              $repository->getDetail(
+                'default-branch',
+                'origin/master'))
+            ->setCaption(
+              'Default <strong>remote</strong> branch to show in Diffusion.'));
+    }
+
+    $parsers = id(new PhutilSymbolLoader())
+      ->setAncestorClass('PhabricatorRepositoryCommitMessageDetailParser')
+      ->selectSymbolsWithoutLoading();
+    $parsers = ipull($parsers, 'name', 'name');
+
+    $form
+      ->appendChild(
+        '<p class="aphront-form-instructions">If you extend the commit '.
+        'message format, you can provide a new parser which will extract '.
+        'extra information from it when commits are imported. This is an '.
+        'advanced feature, and using the default parser will be suitable '.
+        'in most cases.</p>')
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setName('detail-parser')
+          ->setLabel('Detail Parser')
+          ->setOptions($parsers)
+          ->setValue(
+            $repository->getDetail(
+              'detail-parser',
+              'PhabricatorRepositoryDefaultCommitMessageDetailParser')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Save'));
@@ -309,7 +386,7 @@ class PhabricatorRepositoryEditController
     $panel = new AphrontPanelView();
     $panel->setHeader('Repository Tracking');
     $panel->appendChild($form);
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
 
     $nav = $this->sideNav;
     $nav->appendChild($error_view);

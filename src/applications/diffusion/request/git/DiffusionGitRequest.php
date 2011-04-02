@@ -46,6 +46,10 @@ class DiffusionGitRequest extends DiffusionRequest {
 
       $branch = $this->getBranch();
 
+      // TODO: Here, particularly, we should give the user a specific error
+      // message to indicate whether they've typed in some bogus branch and/or
+      // followed a bad link, or misconfigured the default branch in the
+      // Repository tool.
       execx(
         '(cd %s && git rev-parse --verify %s)',
         $local_path,

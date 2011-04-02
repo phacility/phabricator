@@ -105,6 +105,7 @@ class DiffusionHomeController extends DiffusionController {
             'href' => '/diffusion/'.$repository->getCallsign().'/',
           ),
           phutil_escape_html($repository->getName())),
+        phutil_escape_html($repository->getDetail('description')),
         PhabricatorRepositoryType::getNameForRepositoryType(
           $repository->getVersionControlSystem()),
         $size ? number_format($size) : '-',
@@ -122,6 +123,7 @@ class DiffusionHomeController extends DiffusionController {
     $table->setHeaders(
       array(
         'Repository',
+        'Description',
         'VCS',
         'Size',
         'Last',
@@ -130,6 +132,7 @@ class DiffusionHomeController extends DiffusionController {
       ));
     $table->setColumnClasses(
       array(
+        'pri',
         'wide',
         '',
         'n',

@@ -46,6 +46,8 @@ class DiffusionCommitController extends DiffusionController {
     require_celerity_resource('diffusion-commit-view-css');
     require_celerity_resource('phabricator-remarkup-css');
 
+    $property_table = $this->renderPropertyTable($commit, $commit_data);
+
     $detail_panel->appendChild(
       '<div class="diffusion-commit-view">'.
         '<div class="diffusion-commit-dateline">'.
@@ -55,12 +57,7 @@ class DiffusionCommitController extends DiffusionController {
         '</div>'.
         '<h1>Revision Detail</h1>'.
         '<div class="diffusion-commit-details">'.
-          '<table class="diffusion-commit-properties">'.
-            '<tr>'.
-              '<th>Author:</th>'.
-              '<td>'.phutil_escape_html($commit_data->getAuthorName()).'</td>'.
-            '</tr>'.
-          '</table>'.
+          $property_table.
           '<hr />'.
           '<div class="diffusion-commit-message phabricator-remarkup">'.
             $engine->markupText($commit_data->getCommitMessage()).
@@ -166,6 +163,64 @@ class DiffusionCommitController extends DiffusionController {
       array(
         'title' => 'Diffusion',
       ));
+  }
+
+  private function renderPropertyTable(
+    PhabricatorRepositoryCommit $commit,
+    PhabricatorRepositoryCommitData $data) {
+
+    $phids = array();
+    if ($data->getCommitDetail('authorPHID')) {
+      $phids[] = $data->getCommitDetail('authorPHID');
+    }
+    if ($data->getCommitDetail('reviewerPHID')) {
+      $phids[] = $data->getCommitDetail('reviewerPHID');
+    }
+    if ($data->getCommitDetail('differential.revisionPHID')) {
+      $phids[] = $data->getCommitDetail('differential.revisionPHID');
+    }
+
+    $handles = array();
+    if ($phids) {
+      $handles = id(new PhabricatorObjectHandleData($phids))
+        ->loadHandles();
+    }
+
+    $props = array();
+
+    $author_phid = $data->getCommitDetail('authorPHID');
+    if ($data->getCommitDetail('authorPHID')) {
+      $props['Author'] = $handles[$author_phid]->renderLink();
+    } else {
+      $props['Author'] = phutil_escape_html($data->getAuthorName());
+    }
+
+    $reviewer_phid = $data->getCommitDetail('reviewerPHID');
+    $reviewer_name = $data->getCommitDetail('reviewerName');
+    if ($reviewer_phid) {
+      $props['Reviewer'] = $handles[$reviewer_phid]->renderLink();
+    } else if ($reviewer_name) {
+      $props['Reviewer'] = phutil_escape_html($reviewer_name);
+    }
+
+    $revision_phid = $data->getCommitDetail('differential.revisionPHID');
+    if ($revision_phid) {
+      $props['Differential Revision'] = $handles[$revision_phid]->renderLink();
+    }
+
+    $rows = array();
+    foreach ($props as $key => $value) {
+      $rows[] =
+        '<tr>'.
+          '<th>'.$key.':</th>'.
+          '<td>'.$value.'</td>'.
+        '</tr>';
+    }
+
+    return
+      '<table class="diffusion-commit-properties">'.
+        implode("\n", $rows).
+      '</table>';
   }
 
 }

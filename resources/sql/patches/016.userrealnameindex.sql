@@ -1,0 +1,1 @@
+ALTER TABLE phabricator_user.user ADD key (realName);
