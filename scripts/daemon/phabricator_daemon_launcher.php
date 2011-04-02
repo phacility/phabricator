@@ -169,59 +169,6 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
 
     break;
 
-  case 'parse-commit':
-    $commit = isset($argv[2]) ? $argv[2] : null;
-    if (!$commit) {
-      throw new Exception("Provide a commit to parse!");
-    }
-    $matches = null;
-    if (!preg_match('/r([A-Z]+)([a-z0-9]+)/', $commit, $matches)) {
-      throw new Exception("Can't parse commit identifier!");
-    }
-    $repo = id(new PhabricatorRepository())->loadOneWhere(
-      'callsign = %s',
-      $matches[1]);
-    if (!$repo) {
-      throw new Exception("Unknown repository!");
-    }
-    $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-      'repositoryID = %d AND commitIdentifier = %s',
-      $repo->getID(),
-      $matches[2]);
-    if (!$commit) {
-      throw new Exception('Unknown commit.');
-    }
-
-    $workers = array();
-
-
-    switch ($repo->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        $workers[] = new PhabricatorRepositoryGitCommitMessageParserWorker(
-          $commit->getID());
-        $workers[] = new PhabricatorRepositoryGitCommitChangeParserWorker(
-          $commit->getID());
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        $workers[] = new PhabricatorRepositorySvnCommitMessageParserWorker(
-          $commit->getID());
-        $workers[] = new PhabricatorRepositorySvnCommitChangeParserWorker(
-          $commit->getID());
-        break;
-      default:
-        throw new Exception("Unknown repository type!");
-    }
-
-    ExecFuture::pushEchoMode(true);
-
-    foreach ($workers as $worker) {
-      echo "Running ".get_class($worker)."...\n";
-      $worker->doWork();
-    }
-
-    echo "Done.\n";
-
-    break;
   case '--help':
   case 'help':
   default:

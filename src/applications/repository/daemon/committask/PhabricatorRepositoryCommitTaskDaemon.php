@@ -47,14 +47,20 @@ class PhabricatorRepositoryCommitTaskDaemon
             $class = 'PhabricatorRepositoryGitCommitMessageParserWorker';
             $task = new PhabricatorWorkerTask();
             $task->setTaskClass($class);
-            $task->setData($commit->getID());
+            $task->setData(
+              array(
+                'commitID' => $commit->getID(),
+              ));
             $task->save();
             break;
           case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
             $class = 'PhabricatorRepositorySvnCommitMessageParserWorker';
             $task = new PhabricatorWorkerTask();
             $task->setTaskClass($class);
-            $task->setData($commit->getID());
+            $task->setData(
+              array(
+                'commitID' => $commit->getID(),
+              ));
             $task->save();
             break;
           default:

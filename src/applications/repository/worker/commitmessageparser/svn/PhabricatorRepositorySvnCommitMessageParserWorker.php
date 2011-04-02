@@ -37,10 +37,15 @@ class PhabricatorRepositorySvnCommitMessageParserWorker
 
     $this->updateCommitData($author, $message);
 
-    $task = new PhabricatorWorkerTask();
-    $task->setTaskClass('PhabricatorRepositorySvnCommitChangeParserWorker');
-    $task->setData($commit->getID());
-    $task->save();
+    if ($this->shouldQueueFollowupTasks()) {
+      $task = new PhabricatorWorkerTask();
+      $task->setTaskClass('PhabricatorRepositorySvnCommitChangeParserWorker');
+      $task->setData(
+        array(
+          'commitID' => $commit->getID(),
+        ));
+      $task->save();
+    }
   }
 
 }

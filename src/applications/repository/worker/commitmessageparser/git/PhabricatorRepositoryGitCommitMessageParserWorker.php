@@ -30,16 +30,24 @@ class PhabricatorRepositoryGitCommitMessageParserWorker
       $local_path,
       $commit->getCommitIdentifier());
 
-    // TODO: Need to slam UTF8?
 
     list($author, $message) = explode("\0", $info);
 
+    // Make sure these are valid UTF-8.
+    $author = phutil_utf8ize($author);
+    $message = phutil_utf8ize($message);
+
     $this->updateCommitData($author, $message);
 
-    $task = new PhabricatorWorkerTask();
-    $task->setTaskClass('PhabricatorRepositoryGitCommitChangeParserWorker');
-    $task->setData($commit->getID());
-    $task->save();
+    if ($this->shouldQueueFollowupTasks()) {
+      $task = new PhabricatorWorkerTask();
+      $task->setTaskClass('PhabricatorRepositoryGitCommitChangeParserWorker');
+      $task->setData(
+        array(
+          'commitID' => $commit->getID(),
+        ));
+      $task->save();
+    }
   }
 
 }

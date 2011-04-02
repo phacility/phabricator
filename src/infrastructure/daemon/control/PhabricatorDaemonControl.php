@@ -145,9 +145,6 @@ final class PhabricatorDaemonControl {
         **help**
             Show this help.
 
-        **parse-commit** __rXnnnn__
-            Parse a single commit.
-
         **repository-launch-master**
             Launches daemons to update and parse all tracked repositories. You
             must also launch Taskmaster daemons, either on the same machine or

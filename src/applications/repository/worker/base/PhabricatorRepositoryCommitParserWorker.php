@@ -23,7 +23,7 @@ abstract class PhabricatorRepositoryCommitParserWorker
   protected $repository;
 
   final public function doWork() {
-    $commit_id = $this->getTaskData();
+    $commit_id = idx($this->getTaskData(), 'commitID');
     if (!$commit_id) {
       return;
     }
@@ -47,6 +47,10 @@ abstract class PhabricatorRepositoryCommitParserWorker
     $this->repository = $repository;
 
     return $this->parseCommit($repository, $commit);
+  }
+
+  final protected function shouldQueueFollowupTasks() {
+    return !!idx($this->getTaskData(), 'only');
   }
 
   abstract protected function parseCommit(
