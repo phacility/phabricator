@@ -10,6 +10,7 @@ phutil_require_module('phabricator', 'aphront/response/ajax');
 phutil_require_module('phabricator', 'applications/diffusion/controller/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/lastmodified/base');
 phutil_require_module('phabricator', 'applications/diffusion/view/browsetable');
+phutil_require_module('phabricator', 'applications/phid/handle/data');
 
 phutil_require_module('phutil', 'utils');
 

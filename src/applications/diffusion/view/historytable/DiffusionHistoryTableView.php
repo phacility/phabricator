@@ -19,14 +19,22 @@
 final class DiffusionHistoryTableView extends DiffusionView {
 
   private $history;
+  private $handles = array();
 
   public function setHistory(array $history) {
     $this->history = $history;
     return $this;
   }
 
+  public function setHandles(array $handles) {
+    $this->handles = $handles;
+    return $this;
+  }
+
   public function render() {
     $drequest = $this->getDiffusionRequest();
+
+    $handles = $this->handles;
 
     $rows = array();
     foreach ($this->history as $history) {
@@ -38,6 +46,18 @@ final class DiffusionHistoryTableView extends DiffusionView {
       } else {
         $date = null;
         $time = null;
+      }
+
+      $data = $history->getCommitData();
+      $author_phid = null;
+      if ($data) {
+        $author_phid = $data->getCommitDetail('authorPHID');
+      }
+
+      if ($author_phid && isset($handles[$author_phid])) {
+        $author = $handles[$author_phid]->renderLink();
+      } else {
+        $author = phutil_escape_html($history->getAuthorName());
       }
 
       $rows[] = array(
@@ -54,7 +74,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
           $history->getFileType()),
         $date,
         $time,
-        phutil_escape_html($history->getAuthorName()),
+        $author,
         phutil_escape_html($history->getSummary()),
         // TODO: etc etc
       );

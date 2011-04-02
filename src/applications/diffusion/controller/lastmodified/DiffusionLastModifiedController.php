@@ -26,8 +26,16 @@ class DiffusionLastModifiedController extends DiffusionController {
       $drequest);
     list($commit, $commit_data) = $modified_query->loadLastModification();
 
+    $phids = array();
+    if ($commit_data->getCommitDetail('authorPHID')) {
+      $phids = array($commit_data->getCommitDetail('authorPHID'));
+    }
+
+    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+
     $output = DiffusionBrowseTableView::renderLastModifiedColumns(
       $drequest->getRepository(),
+      $handles,
       $commit,
       $commit_data);
 

@@ -19,14 +19,21 @@
 final class DiffusionBrowseTableView extends DiffusionView {
 
   private $paths;
+  private $handles = array();
 
   public function setPaths(array $paths) {
     $this->paths = $paths;
     return $this;
   }
 
+  public function setHandles(array $handles) {
+    $this->handles = $handles;
+    return $this;
+  }
+
   public static function renderLastModifiedColumns(
     PhabricatorRepository $repository,
+    array $handles,
     PhabricatorRepositoryCommit $commit = null,
     PhabricatorRepositoryCommitData $data = null) {
 
@@ -44,7 +51,12 @@ final class DiffusionBrowseTableView extends DiffusionView {
     }
 
     if ($data) {
-      $author = phutil_escape_html($data->getAuthorName());
+      $author_phid = $data->getCommitDetail('authorPHID');
+      if ($author_phid && isset($handles[$author_phid])) {
+        $author = $handles[$author_phid]->renderLink();
+      } else {
+        $author = phutil_escape_html($data->getAuthorName());
+      }
       $details = phutil_escape_html($data->getSummary());
     } else {
       $author = '';
@@ -96,6 +108,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
       if ($commit) {
         $dict = self::renderLastModifiedColumns(
           $repository,
+          $this->handles,
           $commit,
           $path->getLastCommitData());
       } else {

@@ -13,9 +13,11 @@ phutil_require_module('phabricator', 'applications/diffusion/query/history/base'
 phutil_require_module('phabricator', 'applications/diffusion/view/branchtable');
 phutil_require_module('phabricator', 'applications/diffusion/view/browsetable');
 phutil_require_module('phabricator', 'applications/diffusion/view/historytable');
+phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'view/layout/panel');
 
 phutil_require_module('phutil', 'markup');
+phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('DiffusionRepositoryController.php');

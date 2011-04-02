@@ -31,6 +31,17 @@ class DiffusionHistoryController extends DiffusionController {
     $history_query->setLimit($page_size + 1);
     $history = $history_query->loadHistory();
 
+    $phids = array();
+    foreach ($history as $item) {
+      $data = $item->getCommitData();
+      if ($data) {
+        if ($data->getCommitDetail('authorPHID')) {
+          $phids[] = $data->getCommitDetail('authorPHID');
+        }
+      }
+    }
+    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+
     $pager = new AphrontPagerView();
     $pager->setPageSize($page_size);
     $pager->setOffset($offset);
@@ -53,6 +64,7 @@ class DiffusionHistoryController extends DiffusionController {
 
     $history_table = new DiffusionHistoryTableView();
     $history_table->setDiffusionRequest($drequest);
+    $history_table->setHandles($handles);
     $history_table->setHistory($history);
 
     $history_panel = new AphrontPanelView();

@@ -29,10 +29,37 @@ class DiffusionRepositoryController extends DiffusionController {
     $history_query = DiffusionHistoryQuery::newFromDiffusionRequest(
       $drequest);
     $history_query->setLimit(15);
-
     $history = $history_query->loadHistory();
+
+    $browse_query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);
+    $browse_results = $browse_query->loadPaths();
+
+    $phids = array();
+
+    foreach ($history as $item) {
+      $data = $item->getCommitData();
+      if ($data) {
+        if ($data->getCommitDetail('authorPHID')) {
+          $phids[$data->getCommitDetail('authorPHID')] = true;
+        }
+      }
+    }
+
+    foreach ($browse_results as $item) {
+      $data = $item->getLastCommitData();
+      if ($data) {
+        if ($data->getCommitDetail('authorPHID')) {
+          $phids[$data->getCommitDetail('authorPHID')] = true;
+        }
+      }
+    }
+
+    $phids = array_keys($phids);
+    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+
     $history_table = new DiffusionHistoryTableView();
     $history_table->setDiffusionRequest($drequest);
+    $history_table->setHandles($handles);
     $history_table->setHistory($history);
 
     $callsign = $drequest->getRepository()->getCallsign();
@@ -49,12 +76,11 @@ class DiffusionRepositoryController extends DiffusionController {
 
     $content[] = $panel;
 
-    $browse_query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);
-    $results = $browse_query->loadPaths();
 
     $browse_table = new DiffusionBrowseTableView();
     $browse_table->setDiffusionRequest($drequest);
-    $browse_table->setPaths($results);
+    $browse_table->setHandles($handles);
+    $browse_table->setPaths($browse_results);
 
     $browse_panel = new AphrontPanelView();
     $browse_panel->setHeader('Browse Repository');
