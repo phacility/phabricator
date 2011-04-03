@@ -36,10 +36,11 @@ class DiffusionHistoryController extends DiffusionController {
       $data = $item->getCommitData();
       if ($data) {
         if ($data->getCommitDetail('authorPHID')) {
-          $phids[] = $data->getCommitDetail('authorPHID');
+          $phids[$data->getCommitDetail('authorPHID')] = true;
         }
       }
     }
+    $phids = array_keys($phids);
     $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
 
     $pager = new AphrontPagerView();

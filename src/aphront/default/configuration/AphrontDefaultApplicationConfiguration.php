@@ -251,6 +251,12 @@ class AphrontDefaultApplicationConfiguration
         'view/(?P<class>[^/]+)/$' => 'PhabricatorUIExampleRenderController',
       ),
 
+      '/owners/' => array(
+        '$' => 'PhabricatorOwnersListController',
+        'view/(?P<view>[^/]+)/$' => 'PhabricatorOwnersListController',
+        'package/(?P<id>\d+)/$' => 'PhabricatorOwnersDetailController',
+      ),
+
     );
   }
 
