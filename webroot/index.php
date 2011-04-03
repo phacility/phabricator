@@ -60,6 +60,11 @@ phutil_require_module('phabricator', 'aphront/console/plugin/errorlog/api');
 set_error_handler(array('DarkConsoleErrorLogPluginAPI', 'handleError'));
 set_exception_handler(array('DarkConsoleErrorLogPluginAPI', 'handleException'));
 
+$tz = PhabricatorEnv::getEnvConfig('phabricator.timezone');
+if ($tz) {
+  date_default_timezone_set($tz);
+}
+
 foreach (PhabricatorEnv::getEnvConfig('load-libraries') as $library) {
   phutil_load_library($library);
 }

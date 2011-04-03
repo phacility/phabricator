@@ -250,6 +250,13 @@ return array(
   // alone.
   'phabricator.version'         => 'UNSTABLE',
 
+  // PHP requires that you set a timezone in your php.ini before using date
+  // functions, or it will emit a warning. If this isn't possible (for instance,
+  // because you are using HPHP) you can set some valid constant for
+  // date_default_timezone_set() here and Phabricator will set it on your
+  // behalf, silencing the warning.
+  'phabricator.timezone'        => null,
+
 
 // -- Files ----------------------------------------------------------------- //
 
