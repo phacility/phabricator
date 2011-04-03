@@ -140,6 +140,11 @@ class DiffusionRequest {
     return $this->commit;
   }
 
+  public function setCommit($commit) {
+    $this->commit = $commit;
+    return $this;
+  }
+
   public function getCommitURIComponent($commit) {
     return $commit;
   }

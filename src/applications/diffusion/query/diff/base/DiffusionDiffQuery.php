@@ -57,4 +57,18 @@ abstract class DiffusionDiffQuery {
   }
 
   abstract protected function executeQuery();
+
+  protected function getEffectiveCommit() {
+    $drequest = $this->getRequest();
+
+    $modified_query = DiffusionLastModifiedQuery::newFromDiffusionRequest(
+      $drequest);
+    list($commit) = $modified_query->loadLastModification();
+    if (!$commit) {
+      // TODO: Improve error messages here.
+      return null;
+    }
+    return $commit->getCommitIdentifier();
+  }
+
 }

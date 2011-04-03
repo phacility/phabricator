@@ -21,6 +21,15 @@ final class DiffusionSvnDiffQuery extends DiffusionDiffQuery {
   protected function executeQuery() {
     $drequest = $this->getRequest();
 
+    if (!$drequest->getRawCommit()) {
+      $effective_commit = $this->getEffectiveCommit();
+      if (!$effective_commit) {
+        return null;
+      }
+      // TODO: Sketchy side effect.
+      $drequest->setCommit($effective_commit);
+    }
+
     $path_change_query = DiffusionPathChangeQuery::newFromDiffusionRequest(
       $drequest);
     $path_changes = $path_change_query->loadChanges();

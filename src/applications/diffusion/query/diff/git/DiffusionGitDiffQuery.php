@@ -22,6 +22,17 @@ final class DiffusionGitDiffQuery extends DiffusionDiffQuery {
     $drequest = $this->getRequest();
     $repository = $drequest->getRepository();
 
+    if (!$drequest->getRawCommit()) {
+      $effective_commit = $this->getEffectiveCommit();
+      if (!$effective_commit) {
+        return null;
+      }
+      // TODO: This side effect is kind of skethcy.
+      $drequest->setCommit($effective_commit);
+    } else {
+      $effective_commit = $drequest->getCommit();
+    }
+
     $options = array(
       '-M',
       '-C',
@@ -36,8 +47,8 @@ final class DiffusionGitDiffQuery extends DiffusionDiffQuery {
     list($raw_diff) = execx(
       "(cd %s && git diff {$options} %s^ %s -- %s)",
       $repository->getDetail('local-path'),
-      $drequest->getCommit(),
-      $drequest->getCommit(),
+      $effective_commit,
+      $effective_commit,
       $drequest->getPath());
 
     $parser = new ArcanistDiffParser();

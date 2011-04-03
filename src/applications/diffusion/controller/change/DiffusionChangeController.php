@@ -23,14 +23,6 @@ class DiffusionChangeController extends DiffusionController {
 
     $content = array();
 
-    $content[] = $this->buildCrumbs(
-      array(
-        'branch' => true,
-        'path'   => true,
-        'view'   => 'change',
-      ));
-
-
     $diff_query = DiffusionDiffQuery::newFromDiffusionRequest($drequest);
     $changeset = $diff_query->loadChangeset();
 
@@ -38,6 +30,13 @@ class DiffusionChangeController extends DiffusionController {
     $changeset_view->setChangesets(array($changeset));
     $changeset_view->setRenderURI(
       '/diffusion/'.$drequest->getRepository()->getCallsign().'/diff/');
+
+    $content[] = $this->buildCrumbs(
+      array(
+        'branch' => true,
+        'path'   => true,
+        'view'   => 'change',
+      ));
 
     // TODO: This is pretty awkward, unify the CSS between Diffusion and
     // Differential better.
