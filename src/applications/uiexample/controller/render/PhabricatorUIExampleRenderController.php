@@ -35,7 +35,7 @@ class PhabricatorUIExampleRenderController
     $selected = null;
     foreach ($classes as $class => $ignored) {
       $classes[$class] = newv($class, array());
-      if ($this->class == $class) {
+      if ($this->class == $classes[$class]->getName()) {
         $selected = $class;
       }
     }

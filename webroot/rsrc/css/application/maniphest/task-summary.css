@@ -80,37 +80,6 @@
   border-color: #0099ff;
 }
 
-
-
-.maniphest-basic-search-view {
-  background: #888888;
-  border-bottom: 1px solid #bbbbbb;
-}
-
-.maniphest-basic-search-actions {
-  float: right;
-  width: 200px;
-  padding: 10px;
-}
-
-.maniphest-basic-search-options {
-  margin-right: 225px;
-  background: #f0f0f0;
-  padding: 6px 0;
-}
-
-.maniphest-basic-search-options-table th {
-  padding: 6px 4px;
-  text-align: right;
-  width: 100px;
-  font-weight: bold;
-  color: #333333;
-}
-
-.maniphest-basic-search-options-table td {
-  padding: 6px 4px;
-}
-
 .maniphest-task-group-header {
   font-size: 18px;
   margin: 1.5em 14px 0;

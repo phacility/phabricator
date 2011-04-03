@@ -24,6 +24,7 @@
   width: 55%;
 }
 
+
 .aphront-form-error {
   width: 23%;
   float: right;
@@ -82,6 +83,10 @@
 .aphront-form-control-static .aphront-form-input {
   padding-top: 4px;
   font-size: 13px;
+}
+
+.aphront-form-control-togglebuttons .aphront-form-input {
+  padding-top: 5px;
 }
 
 table.aphront-form-control-checkbox-layout {

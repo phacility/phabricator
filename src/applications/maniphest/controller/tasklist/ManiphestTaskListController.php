@@ -80,24 +80,34 @@ class ManiphestTaskListController extends ManiphestController {
         'order'   => $order,
       ));
 
-    require_celerity_resource('maniphest-task-summary-css');
 
-    $nav->appendChild(
-      '<div class="maniphest-basic-search-view">'.
-        '<div class="maniphest-basic-search-actions">'.
-          '<a href="/maniphest/task/create/" class="green button">'.
-            'Create New Task'.
-          '</a>'.
-        '</div>'.
-        '<div class="maniphest-basic-search-options">'.
-          '<table class="maniphest-basic-search-options-table">'.
-            '<tr><th>Status:</th><td>'.$status_links.'</td></tr>'.
-            '<tr><th>Group:</th><td>'.$group_links.'</td></tr>'.
-            '<tr><th>Order:</th><td>'.$order_links.'</td></tr>'.
-          '</table>'.
-        '</div>'.
-        '<div style="clear: both;"></div>'.
-      '</div>');
+    $form = id(new AphrontFormView())
+      ->setUser($request->getUser())
+      ->appendChild(
+        id(new AphrontFormToggleButtonsControl())
+          ->setLabel('Status')
+          ->setValue($status_links))
+      ->appendChild(
+        id(new AphrontFormToggleButtonsControl())
+          ->setLabel('Group')
+          ->setValue($group_links))
+      ->appendChild(
+        id(new AphrontFormToggleButtonsControl())
+          ->setLabel('Order')
+          ->setValue($order_links));
+
+    $filter = new AphrontListFilterView();
+    $filter->addButton(
+      phutil_render_tag(
+        'a',
+        array(
+          'href' => '/maniphest/task/create/',
+          'class' => 'green button',
+        ),
+        'Create New Task'));
+    $filter->appendChild($form);
+
+    $nav->appendChild($filter);
 
     $have_tasks = false;
     foreach ($tasks as $group => $list) {
@@ -106,6 +116,8 @@ class ManiphestTaskListController extends ManiphestController {
         break;
       }
     }
+
+    require_celerity_resource('maniphest-task-summary-css');
 
     if (!$have_tasks) {
       $nav->appendChild(
