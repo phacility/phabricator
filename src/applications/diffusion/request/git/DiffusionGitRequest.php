@@ -109,7 +109,7 @@ class DiffusionGitRequest extends DiffusionRequest {
 
   public function getUriPath() {
     return '/diffusion/'.$this->getCallsign().'/browse/'.
-      $this->branch.'/'.$this->path;
+      $this->getBranchURIComponent($this->branch).$this->path;
   }
 
   public function getCommit() {
