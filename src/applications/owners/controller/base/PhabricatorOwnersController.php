@@ -25,6 +25,14 @@ abstract class PhabricatorOwnersController extends PhabricatorController {
     $page->setApplicationName('Owners');
     $page->setBaseURI('/owners/');
     $page->setTitle(idx($data, 'title'));
+    $page->setTabs(
+      array(
+        'index' => array(
+          'href' => '/owners/',
+          'name' => 'Package Index',
+        ),
+      ),
+      idx($data, 'tab'));
     $page->setGlyph("\xE2\x98\x81");
     $page->appendChild($view);
 

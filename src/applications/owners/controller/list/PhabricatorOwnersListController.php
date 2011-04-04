@@ -190,7 +190,8 @@ class PhabricatorOwnersListController extends PhabricatorOwnersController {
     return $this->buildStandardPageResponse(
       $nav,
       array(
-        'title' => 'List',
+        'title' => 'Package Index',
+        'tab' => 'index',
       ));
   }
 
