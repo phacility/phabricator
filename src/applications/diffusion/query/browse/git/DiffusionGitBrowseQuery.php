@@ -63,6 +63,10 @@ final class DiffusionGitBrowseQuery extends DiffusionBrowseQuery {
       return array();
     }
 
+    if ($this->shouldOnlyTestValidity()) {
+      return true;
+    }
+
     list($stdout) = execx(
       "(cd %s && git ls-tree -l %s:%s)",
       $local_path,

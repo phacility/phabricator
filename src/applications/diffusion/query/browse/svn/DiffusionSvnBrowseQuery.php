@@ -103,6 +103,10 @@ final class DiffusionSvnBrowseQuery extends DiffusionBrowseQuery {
       return array();
     }
 
+    if ($this->shouldOnlyTestValidity()) {
+      return true;
+    }
+
     $sql = array();
     foreach ($index as $row) {
       $sql[] = '('.(int)$row['pathID'].', '.(int)$row['maxCommit'].')';

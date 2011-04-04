@@ -23,6 +23,7 @@ abstract class DiffusionBrowseQuery {
   protected $reason;
   protected $existedAtCommit;
   protected $deletedAtCommit;
+  protected $validityOnly;
 
   const REASON_IS_FILE            = 'is-file';
   const REASON_IS_DELETED         = 'is-deleted';
@@ -77,6 +78,15 @@ abstract class DiffusionBrowseQuery {
 
   final public function loadPaths() {
     return $this->executeQuery();
+  }
+
+  final public function shouldOnlyTestValidity() {
+    return $this->validityOnly;
+  }
+
+  final public function needValidityOnly($need_validity_only) {
+    $this->validityOnly = $need_validity_only;
+    return $this;
   }
 
   abstract protected function executeQuery();

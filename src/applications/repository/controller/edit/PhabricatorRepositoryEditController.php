@@ -235,6 +235,12 @@ class PhabricatorRepositoryEditController
       }
 
       $repository->setDetail(
+        'default-owners-path',
+        $request->getStr(
+          'default-owners-path',
+          '/'));
+
+      $repository->setDetail(
         'detail-parser',
         $request->getStr(
           'detail-parser',
@@ -357,6 +363,17 @@ class PhabricatorRepositoryEditController
             ->setCaption(
               'Default <strong>remote</strong> branch to show in Diffusion.'));
     }
+
+    $form
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName('default-owners-path')
+          ->setLabel('Default Owners Path')
+          ->setValue(
+            $repository->getDetail(
+              'default-owners-path',
+              '/'))
+          ->setCaption('Default path in Owners tool.'));
 
     $parsers = id(new PhutilSymbolLoader())
       ->setAncestorClass('PhabricatorRepositoryCommitMessageDetailParser')

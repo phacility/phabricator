@@ -1,0 +1,37 @@
+/**
+ * @provides owners-path-editor-css
+ */
+
+.owners-path-editor-table {
+  margin: 10px;
+}
+
+.owners-path-editor-table td {
+  padding: 2px 4px;
+}
+
+.owners-path-editor-table select {
+  width: 150px;
+}
+
+.owners-path-editor-table input {
+  width: 550px;
+}
+
+.owners-path-editor-table div.error-display {
+  width: 200px;
+  padding: 4px 12px 0;
+}
+
+.owners-path-editor-table div.validating {
+  color: #666666;
+}
+
+.owners-path-editor-table div.invalid {
+  color: #aa0000;
+}
+
+.owners-path-editor-table div.valid {
+  color: #00aa00;
+  font-weight: bold;
+}

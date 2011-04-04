@@ -18,14 +18,16 @@
 
 class DiffusionGitRequest extends DiffusionRequest {
 
-  protected function initializeFromAphrontRequestDictionary() {
-    parent::initializeFromAphrontRequestDictionary();
+  protected function initializeFromAphrontRequestDictionary(array $data) {
+    parent::initializeFromAphrontRequestDictionary($data);
 
     $path = $this->path;
     $parts = explode('/', $path);
 
-    $branch = array_shift($parts);
-    $this->branch = $this->decodeBranchName($branch);
+    if (empty($data['nobranch'])) {
+      $branch = array_shift($parts);
+      $this->branch = $this->decodeBranchName($branch);
+    }
 
     foreach ($parts as $key => $part) {
       // Prevent any hyjinx since we're ultimately shipping this to the

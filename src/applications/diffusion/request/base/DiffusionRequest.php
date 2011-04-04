@@ -67,12 +67,12 @@ class DiffusionRequest {
     $object->commit     = idx($data, 'commit');
     $object->path       = idx($data, 'path');
 
-    $object->initializeFromAphrontRequestDictionary();
+    $object->initializeFromAphrontRequestDictionary($data);
 
     return $object;
   }
 
-  protected function initializeFromAphrontRequestDictionary() {
+  protected function initializeFromAphrontRequestDictionary(array $data) {
 
   }
 

@@ -218,6 +218,12 @@ class AphrontDefaultApplicationConfiguration
             '$'
               => 'DiffusionLastModifiedController',
         ),
+        'services/' => array(
+          'path/' => array(
+            'complete/$' => 'DiffusionPathCompleteController',
+            'validate/$' => 'DiffusionPathValidateController',
+          ),
+        ),
       ),
 
       '/daemon/' => array(
@@ -255,6 +261,7 @@ class AphrontDefaultApplicationConfiguration
         '$' => 'PhabricatorOwnersListController',
         'view/(?P<view>[^/]+)/$' => 'PhabricatorOwnersListController',
         'package/(?P<id>\d+)/$' => 'PhabricatorOwnersDetailController',
+        'new/$' => 'PhabricatorOwnersDetailController',
       ),
 
     );

@@ -2,6 +2,7 @@
  * @requires multirow-row-manager
  *           javelin-lib-dev
  *           javelin-typeahead-dev
+ *           path-typeahead
  * @provides herald-rule-editor
  * @javelin
  */
