@@ -8,12 +8,14 @@
 
 phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/differential/storage/revision');
+phutil_require_module('phabricator', 'applications/herald/adapter/commit');
 phutil_require_module('phabricator', 'applications/herald/adapter/differential');
 phutil_require_module('phabricator', 'applications/herald/adapter/dryrun');
 phutil_require_module('phabricator', 'applications/herald/controller/base');
 phutil_require_module('phabricator', 'applications/herald/engine/engine');
 phutil_require_module('phabricator', 'applications/herald/storage/rule');
 phutil_require_module('phabricator', 'applications/repository/storage/commit');
+phutil_require_module('phabricator', 'applications/repository/storage/commitdata');
 phutil_require_module('phabricator', 'applications/repository/storage/repository');
 phutil_require_module('phabricator', 'view/form/base');
 phutil_require_module('phabricator', 'view/form/control/submit');

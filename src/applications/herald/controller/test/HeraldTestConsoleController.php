@@ -61,6 +61,7 @@ class HeraldTestConsoleController extends HeraldController {
             $e_name = 'Invalid';
             $errors[] = 'There is no commit with that identifier.';
           }
+          $object = $commit;
         } else {
           $e_name = 'Invalid';
           $errors[] = 'This object name is not recognized.';
@@ -70,7 +71,13 @@ class HeraldTestConsoleController extends HeraldController {
           if ($object instanceof DifferentialRevision) {
             $adapter = new HeraldDifferentialRevisionAdapter($object);
           } else if ($object instanceof PhabricatorRepositoryCommit) {
-            $adapter = new HeraldDiffusionCommitAdapter($object);
+            $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
+              'commitID = %d',
+              $object->getID());
+            $adapter = new HeraldCommitAdapter(
+              $repo,
+              $object,
+              $data);
           } else {
             throw new Exception("Can not build adapter for object!");
           }

@@ -27,4 +27,13 @@ class PhabricatorOwnersOwner extends PhabricatorOwnersDAO {
     ) + parent::getConfiguration();
   }
 
+  public static function loadAllForPackages(array $packages) {
+    if (!$packages) {
+      return array();
+    }
+    return id(new PhabricatorOwnersOwner())->loadAllWhere(
+      'packageID IN (%Ls)',
+      mpull($packages, 'getID'));
+  }
+
 }

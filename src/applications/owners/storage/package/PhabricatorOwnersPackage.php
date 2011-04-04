@@ -66,6 +66,44 @@ class PhabricatorOwnersPackage extends PhabricatorOwnersDAO {
       $this->getID());
   }
 
+  public static function loadAffectedPackages(
+    PhabricatorRepository $repository,
+    array $paths) {
+
+    if (!$paths) {
+      return array();
+    }
+
+    $fragments = array(
+      '/' => true,
+    );
+
+    foreach ($paths as $path) {
+      $trailing_slash = preg_match('@/$@', $path) ? '/' : '';
+      $path = trim($path, '/');
+      $parts = explode('/', $path);
+      while (count($parts)) {
+        $fragments['/'.implode('/', $parts).$trailing_slash] = true;
+        $trailing_slash = '/';
+        array_pop($parts);
+      }
+    }
+
+    $package = new PhabricatorOwnersPackage();
+    $path = new PhabricatorOwnersPath();
+    $data = queryfx_all(
+      $package->establishConnection('r'),
+      'SELECT pkg.* FROM %T pkg JOIN %T p ON p.packageID = pkg.id
+        WHERE p.repositoryPHID = %s
+          AND p.path IN (%Ls)',
+      $package->getTableName(),
+      $path->getTableName(),
+      $repository->getPHID(),
+      array_keys($fragments));
+
+    return $package->loadAllFromArray($data);
+  }
+
   public function save() {
 
     // TODO: Transactions!

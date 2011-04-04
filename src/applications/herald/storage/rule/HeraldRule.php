@@ -30,6 +30,11 @@ class HeraldRule extends HeraldDAO {
     $rules = id(new HeraldRule())->loadAllWhere(
       'contentType = %s',
       $content_type);
+
+    if (!$rules) {
+      return array();
+    }
+
     $rule_ids = mpull($rules, 'getID');
 
     $conditions = id(new HeraldCondition())->loadAllWhere(
