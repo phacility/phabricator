@@ -1,6 +1,6 @@
 CREATE DATABASE phabricator_owners;
 
-CREATE TABLE phabricator_owners.onwners_package (
+CREATE TABLE phabricator_owners.owners_package (
   id int unsigned not null auto_increment primary key,
   phid varchar(64) binary not null,
   unique key(phid),
@@ -23,6 +23,5 @@ CREATE TABLE phabricator_owners.owners_path (
   packageID int unsigned not null,
   key(packageID),
   repositoryPHID varchar(64) binary not null,
-  path varchar(255) not null,
-  unique key (repositoryPHID, path)
+  path varchar(255) not null
 );

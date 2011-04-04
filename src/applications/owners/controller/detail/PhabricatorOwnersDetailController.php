@@ -21,132 +21,122 @@ class PhabricatorOwnersDetailController extends PhabricatorOwnersController {
   private $id;
 
   public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
+    $this->id = $data['id'];
   }
 
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    if ($this->id) {
-      $package = id(new PhabricatorOwnersPackage())->load($this->id);
-      if (!$package) {
-        return new Aphront404Response();
-      }
-    } else {
-      $package = new PhabricatorOwnersPackage();
-      $package->setPrimaryOwnerPHID($user->getPHID());
+    $package = id(new PhabricatorOwnersPackage())->load($this->id);
+    if (!$package) {
+      return new Aphront404Response();
     }
 
-    $e_name = true;
-    $e_primary = true;
+    $paths = $package->loadPaths();
+    $owners = $package->loadOwners();
 
-
-    $token_primary_owner = array();
-    $token_all_owners = array();
-
-    $title = $package->getID() ? 'Edit Package' : 'New Package';
-
-    $repos = id(new PhabricatorRepository())->loadAll();
-
-    $default_paths = array();
-    foreach ($repos as $repo) {
-      $default_path = $repo->getDetail('default-owners-path');
-      if ($default_path) {
-        $default_paths[$repo->getPHID()] = $default_path;
-      }
+    $phids = array();
+    foreach ($paths as $path) {
+      $phids[$path->getRepositoryPHID()] = true;
     }
+    foreach ($owners as $owner) {
+      $phids[$owner->getUserPHID()] = true;
+    }
+    $phids = array_keys($phids);
 
-    $repos = mpull($repos, 'getCallsign', 'getPHID');
+    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
 
-    $template = new AphrontTypeaheadTemplateView();
-    $template = $template->render();
+    $rows = array();
 
+    $rows[] = array(
+      'Name',
+      phutil_escape_html($package->getName()));
+    $rows[] = array(
+      'Description',
+      phutil_escape_html($package->getDescription()));
 
-    Javelin::initBehavior(
-      'owners-path-editor',
+    $primary_owner = null;
+    $primary_phid = $package->getPrimaryOwnerPHID();
+    if ($primary_phid && isset($handles[$primary_phid])) {
+      $primary_owner =
+        '<strong>'.$handles[$primary_phid]->renderLink().'</strong>';
+    }
+    $rows[] = array(
+      'Primary Owner',
+      $primary_owner,
+      );
+
+    $owner_links = array();
+    foreach ($owners as $owner) {
+      $owner_links[] = $handles[$owner->getUserPHID()]->renderLink();
+    }
+    $owner_links = implode('<br />', $owner_links);
+    $rows[] = array(
+      'Owners',
+      $owner_links);
+
+    $path_links = array();
+    foreach ($paths as $path) {
+      $callsign = $handles[$path->getRepositoryPHID()]->getName();
+      $repo = phutil_escape_html('r'.$callsign);
+      $path_link = phutil_render_tag(
+        'a',
+        array(
+          'href' => '/diffusion/'.$callsign.'/browse/:'.$path->getPath(),
+        ),
+        phutil_escape_html($path->getPath()));
+      $path_links[] = $repo.' '.$path_link;
+    }
+    $path_links = implode('<br />', $path_links);
+    $rows[] = array(
+      'Paths',
+      $path_links);
+
+    $table = new AphrontTableView($rows);
+    $table->setColumnClasses(
       array(
-        'root'                => 'path-editor',
-        'table'               => 'paths',
-        'add_button'          => 'addpath',
-        'repositories'        => $repos,
-        'input_template'      => $template,
-        'path_refs'           => array(),
-
-        'completeURI'         => '/diffusion/services/path/complete/',
-        'validateURI'         => '/diffusion/services/path/validate/',
-
-        'repositoryDefaultPaths' => $default_paths,
+        'header',
+        'wide',
       ));
 
-    require_celerity_resource('owners-path-editor-css');
-
-    $form = id(new AphrontFormView())
-      ->setUser($user)
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel('Name')
-          ->setName('name')
-          ->setValue($package->getName())
-          ->setError($e_name))
-      ->appendChild(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/users/')
-          ->setLabel('Primary Owner')
-          ->setName('primary')
-          ->setLimit(1)
-          ->setValue($token_primary_owner)
-          ->setError($e_primary))
-      ->appendChild(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/users/')
-          ->setLabel('Owners')
-          ->setName('owners')
-          ->setValue($token_all_owners)
-          ->setError($e_primary))
-      ->appendChild(
-        '<h1>Paths</h1>'.
-        '<div class="aphront-form-inset" id="path-editor">'.
-          '<div style="float: right;">'.
-            javelin_render_tag(
-              'a',
-              array(
-                'href' => '#',
-                'class' => 'button green',
-                'sigil' => 'addpath',
-                'mustcapture' => true,
-              ),
-              'Add New Path').
-          '</div>'.
-          '<p>Specify the files and directories which comprise this '.
-          'package.</p>'.
-          '<div style="clear: both;"></div>'.
-          javelin_render_tag(
-            'table',
-            array(
-              'class' => 'owners-path-editor-table',
-              'sigil' => 'paths',
-            ),
-            '').
-        '</div>')
-      ->appendChild(
-        id(new AphrontFormTextAreaControl())
-          ->setLabel('Description')
-          ->setName('description')
-          ->setValue($package->getDescription()))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue('Save Package'));
-
     $panel = new AphrontPanelView();
-    $panel->setHeader($title);
-    $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
-    $panel->appendChild($form);
+    $panel->setHeader(
+      'Package Details for "'.phutil_escape_html($package->getName()).'"');
+    $panel->addButton(
+      javelin_render_tag(
+        'a',
+        array(
+          'href' => '/owners/delete/'.$package->getID().'/',
+          'class' => 'button grey',
+          'sigil' => 'workflow',
+        ),
+        'Delete Package'));
+    $panel->addButton(
+      phutil_render_tag(
+        'a',
+        array(
+          'href' => '/owners/edit/'.$package->getID().'/',
+          'class' => 'button',
+        ),
+        'Edit Package'));
+    $panel->appendChild($table);
+
+    $nav = new AphrontSideNavView();
+    $nav->appendChild($panel);
+    $nav->addNavItem(
+      phutil_render_tag(
+        'a',
+        array(
+          'href' => '/owners/package/'.$package->getID().'/',
+          'class' => 'aphront-side-nav-selected',
+        ),
+        'Package Details'));
 
     return $this->buildStandardPageResponse(
-      $panel,
+      $nav,
       array(
-        'title' => $title,
+        'title' => "Package '".$package->getName()."'",
       ));
   }
 

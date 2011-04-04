@@ -20,6 +20,14 @@ class DiffusionSvnRequest extends DiffusionRequest {
 
   private $loadedCommit;
 
+  protected function initializeFromAphrontRequestDictionary(array $data) {
+    parent::initializeFromAphrontRequestDictionary($data);
+    if (!strncmp($this->path, ':', 1)) {
+      $this->path = substr($this->path, 1);
+      $this->path = ltrim($this->path, '/');
+    }
+  }
+
   public function getCommit() {
     if ($this->commit) {
       return $this->commit;

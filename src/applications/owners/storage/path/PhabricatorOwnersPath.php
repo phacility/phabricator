@@ -25,7 +25,7 @@ class PhabricatorOwnersPath extends PhabricatorOwnersDAO {
   public function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
-    );
+    ) + parent::getConfiguration();
   }
 
 }

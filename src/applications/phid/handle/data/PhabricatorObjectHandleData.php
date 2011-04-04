@@ -201,6 +201,28 @@ class PhabricatorObjectHandleData {
             $handles[$phid] = $handle;
           }
           break;
+        case PhabricatorPHIDConstants::PHID_TYPE_REPO:
+          $class = 'PhabricatorRepository';
+          PhutilSymbolLoader::loadClass($class);
+          $object = newv($class, array());
+
+          $repositories = $object->loadAllWhere('phid in (%Ls)', $phids);
+          $repositories = mpull($repositories, null, 'getPHID');
+
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            $handle->setType($type);
+            if (empty($repositories[$phid])) {
+              $handle->setName('Unknown Repository');
+            } else {
+              $repository = $repositories[$phid];
+              $handle->setName($repository->getCallsign());
+              $handle->setURI('/diffusion/'.$repository->getCallsign().'/');
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
         default:
           $loader = null;
           if (isset($external_loaders[$type])) {

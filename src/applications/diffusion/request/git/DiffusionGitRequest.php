@@ -24,8 +24,8 @@ class DiffusionGitRequest extends DiffusionRequest {
     $path = $this->path;
     $parts = explode('/', $path);
 
-    if (empty($data['nobranch'])) {
-      $branch = array_shift($parts);
+    $branch = array_shift($parts);
+    if ($branch != ':') {
       $this->branch = $this->decodeBranchName($branch);
     }
 

@@ -58,17 +58,41 @@ class PhabricatorOwnersListController extends PhabricatorOwnersController {
           phutil_escape_html($name)));
     }
 
+    $package = new PhabricatorOwnersPackage();
+
     switch ($this->view) {
       case 'search':
-        $content = $this->renderPackageTable(array(), 'Search Results');
+        $packages = array();
+
+        $header = 'Search Results';
+        $nodata = 'No packages match your query.';
         break;
       case 'owned':
-        $content = $this->renderOwnedView();
+        $owner = new PhabricatorOwnersOwner();
+        $data = queryfx_all(
+          $package->establishConnection('r'),
+          'SELECT p.* FROM %T p JOIN %T o ON p.id = o.packageID
+            WHERE o.userPHID = %s GROUP BY p.id',
+          $package->getTableName(),
+          $owner->getTableName(),
+          $user->getPHID());
+        $packages = $package->loadAllFromArray($data);
+
+        $header = 'Owned Packages';
+        $nodata = 'No owned packages';
         break;
       case 'all':
-        $content = $this->renderAllView();
+        $packages = $package->loadAll();
+
+        $header = 'All Packages';
+        $nodata = 'There are no defined packages.';
         break;
     }
+
+    $content = $this->renderPackageTable(
+      $packages,
+      $header,
+      $nodata);
 
     $filter = new AphrontListFilterView();
     $filter->addButton(
@@ -127,26 +151,68 @@ class PhabricatorOwnersListController extends PhabricatorOwnersController {
       ));
   }
 
-  private function renderOwnedView() {
-    $packages = array();
+  private function renderPackageTable(array $packages, $header, $nodata) {
 
-    return $this->renderPackageTable($packages, 'Owned Packages');
-  }
+    if ($packages) {
+      $package_ids = mpull($packages, 'getID');
 
-  private function renderAllView() {
-    $packages = array();
+      $owners = id(new PhabricatorOwnersOwner())->loadAllWhere(
+        'packageID IN (%Ld)',
+        $package_ids);
 
-    return $this->renderPackageTable($packages, 'All Packages');
-  }
+      $paths = id(new PhabricatorOwnersPath())->loadAllWhere(
+        'packageID in (%Ld)',
+        $package_ids);
 
-  private function renderPackageTable(array $packages, $header) {
+      $phids = array();
+      foreach ($owners as $owner) {
+        $phids[$owner->getUserPHID()] = true;
+      }
+      foreach ($paths as $path) {
+        $phids[$path->getRepositoryPHID()] = true;
+      }
+      $phids = array_keys($phids);
+
+      $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+
+      $owners = mgroup($owners, 'getPackageID');
+      $paths = mgroup($paths, 'getPackageID');
+    } else {
+      $handles = array();
+      $owners = array();
+      $paths = array();
+    }
 
     $rows = array();
     foreach ($packages as $package) {
+
+      $pkg_owners = idx($owners, $package->getID(), array());
+      foreach ($pkg_owners as $key => $owner) {
+        $pkg_owners[$key] = $handles[$owner->getUserPHID()]->renderLink();
+        if ($owner->getUserPHID() == $package->getPrimaryOwnerPHID()) {
+          $pkg_owners[$key] = '<strong>'.$pkg_owners[$key].'</strong>';
+        }
+      }
+      $pkg_owners = implode('<br />', $pkg_owners);
+
+      $pkg_paths = idx($paths, $package->getID(), array());
+      foreach ($pkg_paths as $key => $path) {
+        $repo = $handles[$path->getRepositoryPHID()]->getName();
+        $pkg_paths[$key] =
+          '<strong>'.$repo.'</strong> '.
+          phutil_escape_html($path->getPath());
+      }
+      $pkg_paths = implode('<br />', $pkg_paths);
+
       $rows[] = array(
-        'x',
-        'y',
-        'z',
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => '/owners/package/'.$package->getID().'/',
+          ),
+          phutil_escape_html($package->getName())),
+        $pkg_owners,
+        $pkg_paths,
       );
     }
 
@@ -159,7 +225,7 @@ class PhabricatorOwnersListController extends PhabricatorOwnersController {
       ));
     $table->setColumnClasses(
       array(
-        '',
+        'pri',
         '',
         'wide wrap',
       ));

@@ -6,6 +6,7 @@
   background: #f6f6f6;
   border-bottom: 1px solid #bbbbbb;
   width: 100%;
+  margin-bottom: 2em;
 }
 
 .aphront-list-filter-view-buttons {
@@ -24,7 +25,7 @@
 
 .aphront-list-filter-view-controls .aphront-form-view {
   border-width: 0;
-  padding: 0 0 6px;
+  padding: 12px 0 6px;
 }
 
 .aphront-list-filter-view-controls .aphront-form-view .aphront-form-label {

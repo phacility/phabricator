@@ -260,8 +260,10 @@ class AphrontDefaultApplicationConfiguration
       '/owners/' => array(
         '$' => 'PhabricatorOwnersListController',
         'view/(?P<view>[^/]+)/$' => 'PhabricatorOwnersListController',
+        'edit/(?P<id>\d+)/$' => 'PhabricatorOwnersEditController',
+        'new/$' => 'PhabricatorOwnersEditController',
         'package/(?P<id>\d+)/$' => 'PhabricatorOwnersDetailController',
-        'new/$' => 'PhabricatorOwnersDetailController',
+        'delete/(?P<id>\d+)/$' => 'PhabricatorOwnersDeleteController',
       ),
 
     );

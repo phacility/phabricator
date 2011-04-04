@@ -47,8 +47,7 @@ class DiffusionPathCompleteController extends DiffusionController {
     $drequest = DiffusionRequest::newFromAphrontRequestDictionary(
       array(
         'callsign'  => $repository->getCallsign(),
-        'path'      => $query_dir,
-        'nobranch'  => true,
+        'path'      => ':/'.$query_dir,
       ));
 
     $browse_query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);
