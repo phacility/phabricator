@@ -59,16 +59,59 @@ class PhabricatorOwnersListController extends PhabricatorOwnersController {
     }
 
     $package = new PhabricatorOwnersPackage();
+    $owner = new PhabricatorOwnersOwner();
+    $path = new PhabricatorOwnersPath();
 
     switch ($this->view) {
       case 'search':
         $packages = array();
 
+        $conn_r = $package->establishConnection('r');
+
+        $where = array('1 = 1');
+        $join = array();
+
+        if ($request->getStr('name')) {
+          $where[] = qsprintf(
+            $conn_r,
+            'p.name LIKE %~',
+            $request->getStr('name'));
+        }
+
+        if ($request->getStr('path')) {
+          $join[] = qsprintf(
+            $conn_r,
+            'JOIN %T path ON path.packageID = p.id',
+            $path->getTableName());
+          $where[] = qsprintf(
+            $conn_r,
+            'path.path LIKE %~',
+            $request->getStr('path'));
+        }
+
+        if ($request->getArr('owner')) {
+          $join[] = qsprintf(
+            $conn_r,
+            'JOIN %T o ON o.packageID = p.id',
+            $owner->getTableName());
+          $where[] = qsprintf(
+            $conn_r,
+            'o.userPHID IN (%Ls)',
+            $request->getArr('owner'));
+        }
+
+        $data = queryfx_all(
+          $conn_r,
+          'SELECT p.* FROM %T p %Q WHERE %Q GROUP BY p.id',
+          $package->getTableName(),
+          implode(' ', $join),
+          '('.implode(') AND (', $where).')');
+        $packages = $package->loadAllFromArray($data);
+
         $header = 'Search Results';
         $nodata = 'No packages match your query.';
         break;
       case 'owned':
-        $owner = new PhabricatorOwnersOwner();
         $data = queryfx_all(
           $package->establishConnection('r'),
           'SELECT p.* FROM %T p JOIN %T o ON p.id = o.packageID
