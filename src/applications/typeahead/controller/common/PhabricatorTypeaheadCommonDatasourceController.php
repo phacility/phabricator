@@ -28,6 +28,8 @@ class PhabricatorTypeaheadCommonDatasourceController
     $need_users = false;
     $need_lists = false;
     $need_projs = false;
+    $need_repos = false;
+    $need_packages = false;
     $need_upforgrabs = false;
     switch ($this->type) {
       case 'searchowner':
@@ -42,6 +44,12 @@ class PhabricatorTypeaheadCommonDatasourceController
         break;
       case 'projects':
         $need_projs = true;
+        break;
+      case 'repositories':
+        $need_repos = true;
+        break;
+      case 'packages':
+        $need_packages = true;
         break;
     }
 
@@ -84,6 +92,28 @@ class PhabricatorTypeaheadCommonDatasourceController
           $proj->getName(),
           '/project/view/'.$proj->getID().'/',
           $proj->getPHID(),
+        );
+      }
+    }
+
+    if ($need_repos) {
+      $repos = id(new PhabricatorRepository())->loadAll();
+      foreach ($repos as $repo) {
+        $data[] = array(
+          'r'.$repo->getCallsign().' ('.$repo->getName().')',
+          '/diffusion/'.$repo->getCallsign().'/',
+          $repo->getPHID(),
+        );
+      }
+    }
+
+    if ($need_packages) {
+      $packages = id(new PhabricatorOwnersPackage())->loadAll();
+      foreach ($packages as $package) {
+        $data[] = array(
+          $package->getName(),
+          '/owners/package/'.$package->getID().'/',
+          $package->getPHID(),
         );
       }
     }

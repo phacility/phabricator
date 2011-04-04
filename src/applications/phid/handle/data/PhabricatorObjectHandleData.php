@@ -223,6 +223,28 @@ class PhabricatorObjectHandleData {
             $handles[$phid] = $handle;
           }
           break;
+        case PhabricatorPHIDConstants::PHID_TYPE_OPKG:
+          $class = 'PhabricatorOwnersPackage';
+          PhutilSymbolLoader::loadClass($class);
+          $object = newv($class, array());
+
+          $packages = $object->loadAllWhere('phid in (%Ls)', $phids);
+          $packages = mpull($packages, null, 'getPHID');
+
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            $handle->setType($type);
+            if (empty($packages[$phid])) {
+              $handle->setName('Unknown Package');
+            } else {
+              $package = $packages[$phid];
+              $handle->setName($package->getName());
+              $handle->setURI('/owners/package/'.$package->getID().'/');
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
         default:
           $loader = null;
           if (isset($external_loaders[$type])) {

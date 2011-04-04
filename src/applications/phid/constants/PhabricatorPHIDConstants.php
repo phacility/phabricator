@@ -28,6 +28,7 @@ final class PhabricatorPHIDConstants {
   const PHID_TYPE_MAGIC   = '!!!!';
   const PHID_TYPE_REPO    = 'REPO';
   const PHID_TYPE_CMIT    = 'CMIT';
+  const PHID_TYPE_OPKG    = 'OPKG';
 
   public static function getTypes() {
     return array(
