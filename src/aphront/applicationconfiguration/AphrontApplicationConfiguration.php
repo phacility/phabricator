@@ -30,6 +30,7 @@ abstract class AphrontApplicationConfiguration {
   abstract public function getURIMap();
   abstract public function buildRequest();
   abstract public function build404Controller();
+  abstract public function buildRedirectController($uri);
 
   final public function setRequest(AphrontRequest $request) {
     $this->request = $request;
@@ -56,6 +57,15 @@ abstract class AphrontApplicationConfiguration {
     list($controller_class, $uri_data) = $mapper->mapPath($path);
 
     if (!$controller_class) {
+      if (!preg_match('@/$@', $path)) {
+        // If we failed to match anything but don't have a trailing slash, try
+        // to add a trailing slash and issue a redirect if that resolves.
+        list($controller_class, $uri_data) = $mapper->mapPath($path.'/');
+        if ($controller_class) {
+          return $this->buildRedirectController($path.'/');
+        }
+      }
+
       return $this->build404Controller();
     }
 

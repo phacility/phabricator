@@ -368,5 +368,12 @@ class AphrontDefaultApplicationConfiguration
     return array(new Phabricator404Controller($this->getRequest()), array());
   }
 
+  public function buildRedirectController($uri) {
+    return array(
+      new PhabricatorRedirectController($this->getRequest()),
+      array(
+        'uri' => $uri,
+      ));
+  }
 
 }

@@ -12,6 +12,7 @@ phutil_require_module('phabricator', 'aphront/response/ajax');
 phutil_require_module('phabricator', 'aphront/response/dialog');
 phutil_require_module('phabricator', 'aphront/response/webpage');
 phutil_require_module('phabricator', 'applications/base/controller/404');
+phutil_require_module('phabricator', 'applications/base/controller/redirect');
 phutil_require_module('phabricator', 'applications/people/storage/user');
 phutil_require_module('phabricator', 'view/dialog');
 phutil_require_module('phabricator', 'view/page/failure');
