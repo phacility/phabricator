@@ -22,7 +22,7 @@ require_once $root.'/scripts/__init_script__.php';
 require_once $root.'/scripts/__init_env__.php';
 
 if (empty($argv[1])) {
-  echo "usage: parse_one_commit.php <commit_name>\n";
+  echo "usage: parse_one_commit.php <commit_name> [--herald]\n";
   die(1);
 }
 
@@ -70,6 +70,10 @@ switch ($repo->getVersionControlSystem()) {
     break;
   default:
     throw new Exception("Unknown repository type!");
+}
+
+if (isset($argv[2]) && $argv[2] == '--herald') {
+  $workers[] = new PhabricatorRepositoryCommitHeraldWorker($spec);
 }
 
 ExecFuture::pushEchoMode(true);

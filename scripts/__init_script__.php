@@ -26,9 +26,3 @@ if (!@constant('__LIBPHUTIL__')) {
 }
 
 phutil_load_library(dirname(__FILE__).'/../src/');
-
-phutil_require_module('phutil', 'symbols');
-
-function __autoload($class) {
-  PhutilSymbolLoader::loadClass($class);
-}

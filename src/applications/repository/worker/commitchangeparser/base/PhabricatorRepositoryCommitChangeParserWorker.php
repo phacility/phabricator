@@ -71,5 +71,17 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
     return $result_map;
   }
 
+  protected function finishParse() {
+    $commit = $this->commit;
+    if ($this->shouldQueueFollowupTasks()) {
+      $task = new PhabricatorWorkerTask();
+      $task->setTaskClass('PhabricatorRepositoryCommitHeraldWorker');
+      $task->setData(
+        array(
+          'commitID' => $commit->getID(),
+        ));
+      $task->save();
+    }
+  }
 
 }

@@ -36,11 +36,11 @@ class PhabricatorRepositoryCommitHeraldWorker
       $data);
     $engine = new HeraldEngine();
 
-    $effects = $engine->applyRules($this->rules, $adapter);
+    $effects = $engine->applyRules($rules, $adapter);
     $engine->applyEffects($effects, $adapter);
 
-    $phids = $adapter->getEmailPHIDs();
-    if (!$phids) {
+    $email_phids = $adapter->getEmailPHIDs();
+    if (!$email_phids) {
       return;
     }
 
@@ -118,7 +118,8 @@ EOBODY;
     $subject = "[Herald/Commit] {$commit_name} ({$who}){$name}";
 
     $mailer = new PhabricatorMetaMTAMail();
-    $mailer->addTos($phids);
+    $mailer->setRelatedPHID($commit->getPHID());
+    $mailer->addTos($email_phids);
     $mailer->setSubject($subject);
     $mailer->setBody($body);
 

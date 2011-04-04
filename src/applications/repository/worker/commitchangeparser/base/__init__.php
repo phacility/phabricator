@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'applications/repository/storage/repository');
 phutil_require_module('phabricator', 'applications/repository/worker/base');
+phutil_require_module('phabricator', 'infrastructure/daemon/workers/storage/task');
 phutil_require_module('phabricator', 'storage/qsprintf');
 phutil_require_module('phabricator', 'storage/queryfx');
 

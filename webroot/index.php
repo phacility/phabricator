@@ -170,10 +170,6 @@ function setup_aphront_basics() {
   phutil_load_library('arcanist/src');
 }
 
-function __autoload($class_name) {
-  PhutilSymbolLoader::loadClass($class_name);
-}
-
 function phabricator_fatal_config_error($msg) {
   header('Content-Type: text/plain', $replace = true, $http_error = 500);
   $error = "CONFIG ERROR: ".$msg."\n";

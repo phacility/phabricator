@@ -33,6 +33,7 @@ $conf['phabricator.env'] = $env;
 phutil_require_module('phabricator', 'infrastructure/env');
 PhabricatorEnv::setEnvConfig($conf);
 
+phutil_load_library('arcanist/src');
 
 foreach (PhabricatorEnv::getEnvConfig('load-libraries') as $library) {
   phutil_load_library($library);

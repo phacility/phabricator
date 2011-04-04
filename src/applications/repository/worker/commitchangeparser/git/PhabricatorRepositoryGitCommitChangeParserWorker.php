@@ -244,6 +244,8 @@ class PhabricatorRepositoryGitCommitChangeParserWorker
         PhabricatorRepository::TABLE_PATHCHANGE,
         implode(', ', $sql_chunk));
     }
+
+    $this->finishParse();
   }
 
 }

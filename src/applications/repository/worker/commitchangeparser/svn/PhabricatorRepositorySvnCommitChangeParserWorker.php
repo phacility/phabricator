@@ -366,6 +366,8 @@ class PhabricatorRepositorySvnCommitChangeParserWorker
 
     $this->writeChanges($repository, $commit, $effects, $path_map, $commit_map);
     $this->writeBrowse($repository, $commit, $effects, $path_map);
+
+    $this->finishParse();
   }
 
   private function writeChanges(

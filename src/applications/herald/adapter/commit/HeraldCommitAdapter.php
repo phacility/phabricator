@@ -46,7 +46,7 @@ class HeraldCommitAdapter extends HeraldObjectAdapter {
   }
 
   public function getEmailPHIDs() {
-    return $this->emailPHIDs;
+    return array_keys($this->emailPHIDs);
   }
 
   public function getHeraldName() {
@@ -195,7 +195,7 @@ class HeraldCommitAdapter extends HeraldObjectAdapter {
           break;
         case HeraldActionConfig::ACTION_EMAIL:
           foreach ($effect->getTarget() as $fbid) {
-            $this->emailPHIDs[] = $fbid;
+            $this->emailPHIDs[$fbid] = true;
           }
           $result[] = new HeraldApplyTranscript(
             $effect,
