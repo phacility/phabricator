@@ -191,6 +191,9 @@ class HeraldRuleController extends HeraldController {
     $phids[] = $rule->getAuthorPHID();
 
     foreach ($rule->getActions() as $action) {
+      if (!is_array($action->getTarget())) {
+        continue;
+      }
       foreach ($action->getTarget() as $target) {
         $target = (array)$target;
         foreach ($target as $phid) {
