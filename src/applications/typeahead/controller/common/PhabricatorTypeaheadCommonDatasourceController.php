@@ -78,7 +78,7 @@ class PhabricatorTypeaheadCommonDatasourceController
       $lists = id(new PhabricatorMetaMTAMailingList())->loadAll();
       foreach ($lists as $list) {
         $data[] = array(
-          $list->getEmail(),
+          $list->getName(),
           $list->getURI(),
           $list->getPHID(),
         );
