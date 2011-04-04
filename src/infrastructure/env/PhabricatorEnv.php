@@ -31,6 +31,14 @@ final class PhabricatorEnv {
     return rtrim(self::getEnvConfig('phabricator.base-uri'), '/').$path;
   }
 
+  public static function getProductionURI($path) {
+    $uri = self::getEnvConfig('phabricator.production-uri');
+    if (!$uri) {
+      $uri = self::getEnvConfig('phabricator.base-uri');
+    }
+    return rtrim($uri, '/').$path;
+  }
+
   public static function getAllConfigKeys() {
     return self::$env;
   }

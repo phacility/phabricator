@@ -22,6 +22,11 @@ return array(
   // Example: "http://phabricator.example.com/"
   'phabricator.base-uri'        => null,
 
+  // If you have multiple environments, provide the production environment URI
+  // here so that emails, etc., generated in development/sandbox environments
+  // contain the right links.
+  'phabricator.production-uri'  => null,
+
   // The default PHID for users who haven't uploaded a profile image. It should
   // be 50x50px.
   'user.default-profile-image-phid' => 'PHID-FILE-f57aaefce707fc4060ef',

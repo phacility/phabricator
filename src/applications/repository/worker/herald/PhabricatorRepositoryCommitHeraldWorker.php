@@ -80,9 +80,9 @@ class PhabricatorRepositoryCommitHeraldWorker
 
     $description = $data->getCommitMessage();
 
-    $details = PhabricatorEnv::getURI('/'.$commit_name);
+    $details = PhabricatorEnv::getProductionURI('/'.$commit_name);
     $differential = $revision
-      ? PhabricatorEnv::getURI('/D'.$revision->getID())
+      ? PhabricatorEnv::getProductionURI('/D'.$revision->getID())
       : 'No revision.';
 
     $files = $adapter->loadAffectedPaths();
@@ -91,8 +91,9 @@ class PhabricatorRepositoryCommitHeraldWorker
 
     $xscript_id = $xscript->getID();
 
-    $manage_uri = PhabricatorEnv::getURI('/herald/view/commits/');
-    $why_uri = PhabricatorEnv::getURI('/herald/transcript/'.$xscript_id.'/');
+    $manage_uri = PhabricatorEnv::getProductionURI('/herald/view/commits/');
+    $why_uri = PhabricatorEnv::getProductionURI(
+      '/herald/transcript/'.$xscript_id.'/');
 
     $body = <<<EOBODY
 DESCRIPTION
