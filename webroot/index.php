@@ -45,20 +45,27 @@ if (!isset($_REQUEST['__path__'])) {
 
 require_once dirname(dirname(__FILE__)).'/conf/__init_conf__.php';
 
-$conf = phabricator_read_config_file($env);
-$conf['phabricator.env'] = $env;
+try {
+  $conf = phabricator_read_config_file($env);
+  $conf['phabricator.env'] = $env;
 
-setup_aphront_basics();
+  setup_aphront_basics();
 
-phutil_require_module('phabricator', 'infrastructure/env');
-PhabricatorEnv::setEnvConfig($conf);
+  phutil_require_module('phabricator', 'infrastructure/env');
+  PhabricatorEnv::setEnvConfig($conf);
 
-phutil_require_module('phabricator', 'aphront/console/plugin/xhprof/api');
-DarkConsoleXHProfPluginAPI::hookProfiler();
+  phutil_require_module('phabricator', 'aphront/console/plugin/xhprof/api');
+  DarkConsoleXHProfPluginAPI::hookProfiler();
 
-phutil_require_module('phabricator', 'aphront/console/plugin/errorlog/api');
-set_error_handler(array('DarkConsoleErrorLogPluginAPI', 'handleError'));
-set_exception_handler(array('DarkConsoleErrorLogPluginAPI', 'handleException'));
+  phutil_require_module('phabricator', 'aphront/console/plugin/errorlog/api');
+  set_error_handler(
+    array('DarkConsoleErrorLogPluginAPI', 'handleError'));
+  set_exception_handler(
+    array('DarkConsoleErrorLogPluginAPI', 'handleException'));
+} catch (Exception $ex) {
+  phabricator_fatal_config_error(
+    "[Exception] ".$ex->getMessage());
+}
 
 $tz = PhabricatorEnv::getEnvConfig('phabricator.timezone');
 if ($tz) {
