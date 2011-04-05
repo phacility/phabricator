@@ -12,6 +12,8 @@ JX.behavior('phabricator-object-selector', function(config) {
     phids[k] = true;
   }
   var attach_list = {};
+  var query_timer = null;
+  var query_delay = 50;
 
   var phid_input = JX.DOM.find(
     JX.$(config.form),
@@ -94,6 +96,7 @@ JX.behavior('phabricator-object-selector', function(config) {
   }
 
   function sendQuery() {
+    query_timer = null;
     JX.DOM.setContent(JX.$(config.results), renderNote('Loading...'))
     new JX.Request(config.uri, JX.bind(null, onreceive, ++n))
       .setData({
@@ -102,24 +105,6 @@ JX.behavior('phabricator-object-selector', function(config) {
       })
       .send();
   }
-
-  JX.DOM.listen(
-    JX.$(config.search),
-    'submit',
-    null,
-    function(e) {
-      e.kill();
-      sendQuery();
-    });
-  JX.DOM.listen(
-    JX.$(config.search),
-    'click',
-    'tag:button',
-    function(e) {
-      e.kill();
-      sendQuery();
-    });
-
 
   JX.DOM.listen(
     JX.$(config.results),
@@ -160,6 +145,26 @@ JX.behavior('phabricator-object-selector', function(config) {
       }
 
       redrawAttached();
+    });
+
+  JX.DOM.listen(
+    JX.$(config.filter),
+    'change',
+    null,
+    function(e) {
+      e.kill();
+      sendQuery();
+    });
+
+  JX.DOM.listen(
+    JX.$(config.query),
+    'keydown',
+    null,
+    function(e) {
+      if (query_timer) {
+        query_timer.stop();
+      }
+      query_timer = JX.defer(sendQuery, query_delay);
     });
 
   sendQuery();

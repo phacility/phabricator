@@ -101,9 +101,6 @@ class PhabricatorObjectSelectorDialog {
           <td class="phabricator-object-selector-search-text">
             <input type="text" id="'.$query_id.'" />
           </td>
-          <td class="phabricator-object-selector-search-button">
-            <button>Search</button>
-          </td>
         </tr>
       </table>');
     $result_box =
