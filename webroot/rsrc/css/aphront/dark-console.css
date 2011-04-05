@@ -70,3 +70,20 @@ a.dark-console-tab-selected {
 .dark-console .aphront-table-view tr.no-data td {
   color: #dddddd;
 }
+
+.dark-console-panel-ErrorLog {
+  max-height:       500px;
+  overflow:         auto;
+}
+
+.dark-console-panel-error-details {
+  display: none;
+}
+
+.dark-console-panel-error-separator {
+    background-color: #e8e8e8;
+    border-bottom: 1px solid #b7b7b7;
+    border-top: 1px solid #b7b7b7;
+    height: 2px;
+}
+

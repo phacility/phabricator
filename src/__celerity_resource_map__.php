@@ -18,7 +18,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-dark-console-css' =>
   array(
-    'uri' => '/res/056b0c12/rsrc/css/aphront/dark-console.css',
+    'uri' => '/res/0417eb95/rsrc/css/aphront/dark-console.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -60,24 +60,6 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/aphront/headsup-action-list-view.css',
-  ),
-  'aphront-list-filter-view-css' =>
-  array(
-    'uri' => '/res/50a790ae/rsrc/css/aphront/list-filter-view.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/aphront/list-filter-view.css',
-  ),
-  'aphront-pager-view-css' =>
-  array(
-    'uri' => '/res/73ec8cd5/rsrc/css/aphront/pager-view.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/aphront/pager-view.css',
   ),
   'aphront-panel-view-css' =>
   array(
@@ -133,6 +115,24 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/aphront/typeahead.css',
+  ),
+  'aphront-pager-view-css' =>
+  array(
+    'uri' => '/res/73ec8cd5/rsrc/css/aphront/pager-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/aphront/pager-view.css',
+  ),
+  'aphront-list-filter-view-css' =>
+  array(
+    'uri' => '/res/50a790ae/rsrc/css/aphront/list-filter-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/aphront/list-filter-view.css',
   ),
   'phabricator-standard-page-view' =>
   array(
@@ -297,15 +297,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/objectselector/object-selector.css',
   ),
-  'owners-path-editor-css' =>
-  array(
-    'uri' => '/res/f40dc6b1/rsrc/css/application/owners/owners-path-editor.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/application/owners/owners-path-editor.css',
-  ),
   'phabricator-profile-css' =>
   array(
     'uri' => '/res/259ad37f/rsrc/css/application/people/profile.css',
@@ -314,6 +305,15 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/application/people/profile.css',
+  ),
+  'owners-path-editor-css' =>
+  array(
+    'uri' => '/res/f40dc6b1/rsrc/css/application/owners/owners-path-editor.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/owners/owners-path-editor.css',
   ),
   'phabricator-ui-example-css' =>
   array(
@@ -360,6 +360,16 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/core/syntax.css',
   ),
+  'multirow-row-manager' =>
+  array(
+    'uri' => '/res/330d076b/rsrc/js/application/core/MultirowRowManager.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-lib-dev',
+    ),
+    'disk' => '/rsrc/js/application/core/MultirowRowManager.js',
+  ),
   'javelin-behavior-dark-console' =>
   array(
     'uri' => '/res/020b0265/rsrc/js/application/core/behavior-dark-console.js',
@@ -371,7 +381,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-phabricator-object-selector' =>
   array(
-    'uri' => '/res/4fe735af/rsrc/js/application/core/behavior-object-selector.js',
+    'uri' => '/res/c0f12b29/rsrc/js/application/core/behavior-object-selector.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -399,15 +409,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/core/behavior-workflow.js',
   ),
-  'multirow-row-manager' =>
+  'javelin-behavior-error-log' =>
   array(
-    'uri' => '/res/330d076b/rsrc/js/application/core/MultirowRowManager.js',
+    'uri' => '/res/c57a323f/rsrc/js/application/core/behavior-error-log.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-lib-dev',
     ),
-    'disk' => '/rsrc/js/application/core/MultirowRowManager.js',
+    'disk' => '/rsrc/js/application/core/behavior-error-log.js',
   ),
   'javelin-behavior-differential-add-reviewers' =>
   array(
@@ -499,17 +509,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/diffusion/behavior-pull-lastmodified.js',
   ),
-  'javelin-behavior-herald-rule-editor' =>
-  array(
-    'uri' => '/res/48108130/rsrc/js/application/herald/herald-rule-editor.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'herald-rule-editor',
-      1 => 'javelin-lib-dev',
-    ),
-    'disk' => '/rsrc/js/application/herald/herald-rule-editor.js',
-  ),
   'herald-rule-editor' =>
   array(
     'uri' => '/res/ec8e2110/rsrc/js/application/herald/HeraldRuleEditor.js',
@@ -522,6 +521,17 @@ celerity_register_resource_map(array(
       3 => 'path-typeahead',
     ),
     'disk' => '/rsrc/js/application/herald/HeraldRuleEditor.js',
+  ),
+  'javelin-behavior-herald-rule-editor' =>
+  array(
+    'uri' => '/res/48108130/rsrc/js/application/herald/herald-rule-editor.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'herald-rule-editor',
+      1 => 'javelin-lib-dev',
+    ),
+    'disk' => '/rsrc/js/application/herald/herald-rule-editor.js',
   ),
   'path-typeahead' =>
   array(
@@ -544,17 +554,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/maniphest/behavior-transaction-controls.js',
   ),
-  'javelin-behavior-owners-path-editor' =>
-  array(
-    'uri' => '/res/7568aa22/rsrc/js/application/owners/owners-path-editor.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'owners-path-editor',
-      1 => 'javelin-lib-dev',
-    ),
-    'disk' => '/rsrc/js/application/owners/owners-path-editor.js',
-  ),
   'owners-path-editor' =>
   array(
     'uri' => '/res/b01c1ca9/rsrc/js/application/owners/OwnersPathEditor.js',
@@ -567,6 +566,17 @@ celerity_register_resource_map(array(
       3 => 'path-typeahead',
     ),
     'disk' => '/rsrc/js/application/owners/OwnersPathEditor.js',
+  ),
+  'javelin-behavior-owners-path-editor' =>
+  array(
+    'uri' => '/res/7568aa22/rsrc/js/application/owners/owners-path-editor.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'owners-path-editor',
+      1 => 'javelin-lib-dev',
+    ),
+    'disk' => '/rsrc/js/application/owners/owners-path-editor.js',
   ),
   'javelin-magical-init' =>
   array(

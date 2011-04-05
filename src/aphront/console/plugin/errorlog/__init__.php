@@ -10,5 +10,9 @@ phutil_require_module('phabricator', 'aphront/console/plugin/base');
 phutil_require_module('phabricator', 'aphront/console/plugin/errorlog/api');
 phutil_require_module('phabricator', 'view/control/table');
 
+phutil_require_module('phutil', 'markup');
+phutil_require_module('phutil', 'utils');
+phutil_require_module('phutil', 'xsprintf/jsprintf');
+
 
 phutil_require_source('DarkConsoleErrorLogPlugin.php');

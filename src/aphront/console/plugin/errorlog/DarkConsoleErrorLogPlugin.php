@@ -46,39 +46,62 @@ class DarkConsoleErrorLogPlugin extends DarkConsolePlugin {
     $data = $this->getData();
 
     $rows = array();
-    foreach ($data as $row) {
-      switch ($row['event']) {
-        case 'error':
-          $file = $row['file'];
-          $line = $row['line'];
-          break;
-        case 'exception':
-          $file = $row['exception']->getFile();
-          $line = $row['exception']->getLine();
-          break;
+    $details = '';
+
+    foreach ($data as $index => $row) {
+      $file = $row['file'];
+      $line = $row['line'];
+
+      $tag = phutil_render_tag(
+        'a',
+        array(
+          'onclick' => jsprintf('show_details(%d)', $index),
+        ),
+        phutil_escape_html($row['str'].' at ['.basename($file).':'.$line.']'));
+      $rows[] = array($tag);
+
+      $details .=
+        '<div class="dark-console-panel-error-details" id="row-details-'.
+        $index.'">'.
+        phutil_escape_html($row['details'])."\n".
+        'Stack trace:'."\n";
+
+      foreach ($row['trace'] as $key => $entry) {
+        $line = '';
+        if (isset($entry['class'])) {
+          $line .= $entry['class'].'::';
+        }
+        $line .= idx($entry, 'function', '');
+        $onclick = '';
+        if (isset($entry['file'])) {
+          $line .= ' called at ['.$entry['file'].':'.$entry['line'].']';
+          $onclick = jsprintf(
+            'open_file(%s, %d)', $entry['file'], $entry['line']);
+        }
+
+        $details .= phutil_render_tag(
+          'a',
+          array(
+            'onclick' => $onclick,
+          ),
+          phutil_escape_html($line));
+        $details .= "\n";
       }
 
-
-      $rows[] = array(
-        basename($file).':'.$line,
-        $row['str'],
-      );
+      $details .= '</div>';
     }
 
     $table = new AphrontTableView($rows);
-    $table->setColumnClasses(
-      array(
-        null,
-        'wide wrap',
-      ));
-    $table->setHeaders(
-      array(
-        'File',
-        'Error',
-      ));
+    $table->setClassName('error-log');
+    $table->setHeaders(array('Error'));
     $table->setNoDataString('No errors.');
 
-    return $table->render();
+    return '<div>'.
+      '<div>'.$table->render().'</div>'.
+      '<div class="dark-console-panel-error-separator"></div>'.
+      '<pre class="PhabricatorMonospaced">'.
+      $details.'</pre>'.
+      '</div>';
   }
 }
 

@@ -101,6 +101,9 @@ class PhabricatorStandardPageView extends AphrontPageView {
         array(
           'uri' => '/~/',
         ));
+
+      // Change this to initBehavior when there is some behavior to initialize
+      require_celerity_resource('javelin-behavior-error-log');
     }
 
     $this->bodyContent = $this->renderChildren();

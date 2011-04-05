@@ -124,7 +124,7 @@ final class DarkConsoleCore {
       $panel_markup[] = javelin_render_tag(
         'div',
         array(
-          'class' => 'dark-console-panel',
+          'class' => 'dark-console-panel dark-console-panel-'.$key,
           'style' => $style,
           'sigil' => 'dark-console-panel',
         ),

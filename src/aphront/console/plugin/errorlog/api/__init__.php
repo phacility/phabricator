@@ -6,5 +6,8 @@
 
 
 
+phutil_require_module('phutil', 'error');
+phutil_require_module('phutil', 'readableserializer');
+
 
 phutil_require_source('DarkConsoleErrorLogPluginAPI.php');

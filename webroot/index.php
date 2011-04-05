@@ -71,6 +71,11 @@ $tz = PhabricatorEnv::getEnvConfig('phabricator.timezone');
 if ($tz) {
   date_default_timezone_set($tz);
 }
+phutil_require_module('phabricator', 'aphront/console/plugin/errorlog/api');
+phutil_require_module('phutil', 'error');
+
+PhutilErrorHandler::setErrorListener(
+  array('DarkConsoleErrorLogPluginAPI', 'handleErrors'));
 
 foreach (PhabricatorEnv::getEnvConfig('load-libraries') as $library) {
   phutil_load_library($library);
@@ -88,6 +93,7 @@ switch ($host) {
     $application = newv($config_class, array());
     break;
 }
+
 
 $application->setHost($host);
 $application->setPath($path);
@@ -125,6 +131,7 @@ foreach ($headers as $header) {
   list($header, $value) = $header;
   header("{$header}: {$value}");
 }
+
 
 // TODO: This shouldn't be possible in a production-configured environment.
 if (isset($_REQUEST['__profile__']) &&

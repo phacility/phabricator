@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+
 class DarkConsoleErrorLogPluginAPI {
 
   private static $errors = array();
@@ -30,29 +31,50 @@ class DarkConsoleErrorLogPluginAPI {
     return self::$errors;
   }
 
-  public static function handleError($num, $str, $file, $line, $cxt) {
-    if (!self::$discardMode) {
-      self::$errors[] = array(
-        'event'   => 'error',
-        'num'     => $num,
-        'str'     => $str,
-        'file'    => $file,
-        'line'    => $line,
-        'cxt'     => $cxt,
-        'trace'   => debug_backtrace(),
-      );
+  public static function handleErrors($event, $value, $metadata) {
+    if (self::$discardMode) {
+      return;
     }
-    error_log("{$file}:{$line} {$str}");
-  }
 
-  public static function handleException($ex) {
-    if (!self::$discardMode) {
-      self::$errors[] = array(
-        'event'     => 'exception',
-        'exception' => $ex,
-      );
+    switch ($event) {
+      case PhutilErrorHandler::EXCEPTION:
+        // $value is of type Exception
+        self::$errors[] = array(
+          'details'   => $value->getMessage(),
+          'event'     => $event,
+          'file'      => $value->getFile(),
+          'line'      => $value->getLine(),
+          'str'       => $value->getMessage(),
+          'trace'     => $metadata['trace'],
+        );
+        break;
+      case PhutilErrorHandler::ERROR:
+        // $value is a simple string
+        self::$errors[] = array(
+          'details'   => $value,
+          'event'     => $event,
+          'file'      => $metadata['file'],
+          'line'      => $metadata['line'],
+          'str'       => $value,
+          'trace'     => $metadata['trace'],
+        );
+        break;
+      case PhutilErrorHandler::PHLOG:
+        // $value can be anything
+        self::$errors[] = array(
+          'details' => PhutilReadableSerializer::printShallow($value, 3),
+          'event'   => $event,
+          'file'    => $metadata['file'],
+          'line'    => $metadata['line'],
+          'str'     => PhutilReadableSerializer::printShort($value),
+          'trace'   => $metadata['trace'],
+        );
+        break;
+      default:
+        error_log('Unknown event : '.$event);
+        break;
     }
-    error_log($ex);
   }
 
 }
+
