@@ -23,7 +23,18 @@ class ManiphestTaskSelectorSearchController extends ManiphestController {
     $user = $request->getUser();
 
     $query = new PhabricatorSearchQuery();
-    $query->setQuery($request->getStr('query'));
+
+    $query_str = $request->getStr('query');
+    $matches = array();
+    $task_ids = array();
+
+    // Collect all task IDs, e.g., T12 T651 T631, from the query string
+    preg_match_all('/\bT(\d+)\b/', $query_str, $matches);
+    if ($matches) {
+      $task_ids = $matches[1];
+    }
+
+    $query->setQuery($query_str);
     $query->setParameter('type', PhabricatorPHIDConstants::PHID_TYPE_TASK);
 
     switch ($request->getStr('filter')) {
@@ -42,9 +53,27 @@ class ManiphestTaskSelectorSearchController extends ManiphestController {
 
     $exec = new PhabricatorSearchMySQLExecutor();
     $results = $exec->executeSearch($query);
-    $results = ipull($results, 'phid');
 
-    $handles = id(new PhabricatorObjectHandleData($results))
+    $phids = array();
+
+    foreach ($results as $result) {
+      $phids[$result['phid']] = true;
+    }
+
+    // Do a separate query for task IDs if the query had them
+    if ($task_ids) {
+      $task_object = new ManiphestTask();
+
+      // It's OK to ignore filters, if user wants specific task IDs
+      $tasks = $task_object->loadAllWhere('id IN (%Ls)', $task_ids);
+
+      foreach ($tasks as $task) {
+        $phids[$task->getPHID()] = true;
+      }
+    }
+
+    $phids = array_keys($phids);
+    $handles = id(new PhabricatorObjectHandleData($phids))
       ->loadHandles();
 
     $data = array();
