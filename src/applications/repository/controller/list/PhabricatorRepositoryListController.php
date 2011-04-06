@@ -86,8 +86,53 @@ class PhabricatorRepositoryListController
     $panel->setCreateButton('Create New Repository', '/repository/create/');
     $panel->appendChild($table);
 
+    $projects = id(new PhabricatorRepositoryArcanistProject())->loadAll();
+
+    $rows = array();
+    foreach ($projects as $project) {
+      $repo = idx($repos, $project->getRepositoryID());
+      if ($repo) {
+        $repo_name = phutil_escape_html($repo->getName());
+      } else {
+        $repo_name = '-';
+      }
+
+      $rows[] = array(
+        phutil_escape_html($project->getName()),
+        $repo_name,
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => '/repository/project/'.$project->getID().'/',
+            'class' => 'button grey small',
+          ),
+          'Edit'),
+      );
+    }
+
+    $project_table = new AphrontTableView($rows);
+    $project_table->setHeaders(
+      array(
+        'Project ID',
+        'Repository',
+        '',
+      ));
+    $project_table->setColumnClasses(
+      array(
+        '',
+        'wide',
+        'action',
+      ));
+
+    $project_panel = new AphrontPanelView();
+    $project_panel->setHeader('Arcanist Projects');
+    $project_panel->appendChild($project_table);
+
     return $this->buildStandardPageResponse(
-      $panel,
+      array(
+        $panel,
+        $project_panel,
+      ),
       array(
         'title' => 'Repository List',
       ));

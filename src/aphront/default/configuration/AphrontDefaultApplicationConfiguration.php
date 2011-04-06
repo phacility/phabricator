@@ -166,6 +166,8 @@ class AphrontDefaultApplicationConfiguration
         'edit/(?P<id>\d+)/(?:(?P<view>\w+)?/)?$' =>
           'PhabricatorRepositoryEditController',
         'delete/(?P<id>\d+)/$'  => 'PhabricatorRepositoryDeleteController',
+        'project/(?P<id>\d+)/' =>
+          'PhabricatorRepositoryArcanistProjectEditController',
       ),
 
       '/search/' => array(

@@ -13,6 +13,10 @@ phutil_require_module('phabricator', 'applications/herald/config/contenttype');
 phutil_require_module('phabricator', 'applications/herald/config/field');
 phutil_require_module('phabricator', 'applications/herald/engine/effect');
 phutil_require_module('phabricator', 'applications/herald/storage/transcript/apply');
+phutil_require_module('phabricator', 'applications/owners/storage/owner');
+phutil_require_module('phabricator', 'applications/owners/storage/package');
+phutil_require_module('phabricator', 'applications/repository/storage/arcanistproject');
+phutil_require_module('phabricator', 'applications/repository/storage/repository');
 
 phutil_require_module('phutil', 'utils');
 

@@ -35,6 +35,7 @@ class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
       'creationMethod'            => 'optional string',
       'authorPHID'                => 'optional phid',
       'arcanistProject'           => 'optional string',
+      'repositoryUUID'            => 'optional string',
       'lintStatus'                =>
         'required enum<none, skip, okay, warn, fail>',
       'unitStatus'                =>
@@ -83,7 +84,23 @@ class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
     $diff->setSourceControlBaseRevision(
       $request->getValue('sourceControlBaseRevision'));
 
-    $diff->setArcanistProject($request->getValue('arcanistProject'));
+    $project_name = $request->getValue('arcanistProject');
+    $project_phid = null;
+    if ($project_name) {
+      $arcanist_project = id(new PhabricatorRepositoryArcanistProject())
+        ->loadOneWhere(
+          'name = %s',
+          $project_name);
+      if (!$arcanist_project) {
+        $arcanist_project = new PhabricatorRepositoryArcanistProject();
+        $arcanist_project->setName($project_name);
+        $arcanist_project->save();
+      }
+      $project_phid = $arcanist_project->getPHID();
+    }
+
+    $diff->setArcanistProjectPHID($project_phid);
+    $diff->setRepositoryUUID($request->getValue('repositoryUUID'));
 
     switch ($request->getValue('lintStatus')) {
       case 'skip':

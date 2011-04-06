@@ -36,8 +36,9 @@ class DifferentialDiff extends DifferentialDAO {
   protected $branch;
 
   protected $parentRevisionID;
-  protected $arcanistProject;
+  protected $arcanistProjectPHID;
   protected $creationMethod;
+  protected $repositoryUUID;
 
   protected $description;
 

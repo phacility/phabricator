@@ -19,8 +19,7 @@
 class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
 
   protected $revision;
-  protected $changesets;
-  protected $diff = null;
+  protected $diff;
 
   protected $explicitCCs;
   protected $explicitReviewers;
@@ -30,14 +29,17 @@ class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
   protected $newCCs = array();
   protected $remCCs = array();
 
-  public function __construct(DifferentialRevision $revision) {
+  protected $repository;
+  protected $affectedPackages;
+  protected $changesets;
+
+  public function __construct(
+    DifferentialRevision $revision,
+    DifferentialDiff $diff) {
+
     $revision->loadRelationships();
     $this->revision = $revision;
-  }
-
-  public function setDiff(Diff $diff) {
     $this->diff = $diff;
-    return $this;
   }
 
   public function setExplicitCCs($explicit_ccs) {
@@ -80,45 +82,101 @@ class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
     return HeraldContentTypeConfig::CONTENT_TYPE_DIFFERENTIAL;
   }
 
+  public function loadRepository() {
+    if ($this->repository === null) {
+      $diff = $this->diff;
+
+      $repository = false;
+
+      if ($diff->getRepositoryUUID()) {
+        $repository = id(new PhabricatorRepository())->loadOneWhere(
+          'uuid = %s',
+          $diff->getRepositoryUUID());
+      }
+
+      if (!$repository && $diff->getArcanistProjectPHID()) {
+        $project = id(new PhabricatorRepositoryArcanistProject())->loadOneWhere(
+          'phid = %s',
+          $diff->getArcanistProjectPHID());
+        if ($project && $project->getRepositoryID()) {
+          $repository = id(new PhabricatorRepository())->load(
+            $project->getRepositoryID());
+        }
+      }
+
+      $this->repository = $repository;
+    }
+    return $this->repository;
+  }
+
   protected function loadChangesets() {
-    if ($this->changesets) {
-      return $this->changesets;
+    if ($this->changesets === null) {
+      $this->changesets = $this->diff->loadChangesets();
     }
-    $diff = $this->loadDiff();
-    $changes = $diff->getChangesets();
-    return ($this->changesets = $changes);
+    return $this->changesets;
   }
 
-  protected function loadDiff() {
-    if ($this->diff === null) {
-      $this->diff = $this->revision->getActiveDiff();
+  protected function loadAffectedPaths() {
+    $changesets = $this->loadChangesets();
+
+    $paths = array();
+    foreach ($changesets as $changeset) {
+      $paths[] = $this->getAbsoluteRepositoryPathForChangeset($changeset);
     }
-    return $this->diff;
+    return $paths;
   }
 
-  protected function getContentDictionary() {
-    $changes = $this->loadChangesets();
+  protected function getAbsoluteRepositoryPathForChangeset(
+    DifferentialChangeset $changeset) {
+
+    $repository = $this->loadRepository();
+    if (!$repository) {
+      return '/'.ltrim($changeset->getFilename(), '/');
+    }
+
+    $diff = $this->diff;
+
+    return $changeset->getAbsoluteRepositoryPath($diff, $repository);
+  }
+
+  protected function loadContentDictionary() {
+    $changesets = $this->loadChangesets();
 
     $hunks = array();
-    if ($changes) {
-      $hunks = id(new DifferentialHunk())->loadAllwhere(
+    if ($changesets) {
+      $hunks = id(new DifferentialHunk())->loadAllWhere(
         'changesetID in (%Ld)',
-        mpull($changes, 'getID'));
+        mpull($changesets, 'getID'));
     }
 
     $dict = array();
     $hunks = mgroup($hunks, 'getChangesetID');
-    $changes = mpull($changes, null, 'getID');
-    foreach ($changes as $id => $change) {
-      $filename = $change->getFilename();
+    $changesets = mpull($changesets, null, 'getID');
+    foreach ($changesets as $id => $changeset) {
+      $path = $this->getAbsoluteRepositoryPathForChangeset($changeset);
       $content = array();
       foreach (idx($hunks, $id, array()) as $hunk) {
         $content[] = $hunk->makeChanges();
       }
-      $dict[$filename] = implode("\n", $content);
+      $dict[$path] = implode("\n", $content);
     }
 
     return $dict;
+  }
+
+  public function loadAffectedPackages() {
+    if ($this->affectedPackages === null) {
+      $this->affectedPackages = array();
+
+      $repository = $this->loadRepository();
+      if ($repository) {
+        $packages = PhabricatorOwnersPackage::loadAffectedPackages(
+          $repository,
+          $this->loadAffectedPaths());
+        $this->affectedPackages = $packages;
+      }
+    }
+    return $this->affectedPackages;
   }
 
   public function getHeraldField($field) {
@@ -134,8 +192,7 @@ class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
         return $this->revision->getAuthorPHID();
         break;
       case HeraldFieldConfig::FIELD_DIFF_FILE:
-        $changes = $this->loadChangesets();
-        return array_values(mpull($changes, 'getFilename'));
+        return $this->loadAffectedPaths();
       case HeraldFieldConfig::FIELD_CC:
         if (isset($this->explicitCCs)) {
           return array_keys($this->explicitCCs);
@@ -148,31 +205,21 @@ class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
         } else {
           return $this->revision->getReviewers();
         }
-/* TODO
       case HeraldFieldConfig::FIELD_REPOSITORY:
-        $id = $this->revision->getRepositoryID();
-        if (!$id) {
-          return null;
-        }
-        require_module_lazy('intern/repository');
-        $repository = RepositoryRef::getByID($id);
+        $repository = $this->loadRepository();
         if (!$repository) {
           return null;
         }
-        return $repository->getFBID();
-*/
+        return $repository->getPHID();
       case HeraldFieldConfig::FIELD_DIFF_CONTENT:
-        return $this->getContentDictionary();
-/* TODO
+        return $this->loadContentDictionary();
       case HeraldFieldConfig::FIELD_AFFECTED_PACKAGE:
-        return mpull(
-          DiffOwners::getPackages($this->loadDiff()),
-          'getFBID');
-*/
-/* TODO
+        $packages = $this->loadAffectedPackages();
+        return mpull($packages, 'getPHID');
       case HeraldFieldConfig::FIELD_AFFECTED_PACKAGE_OWNER:
-        return DiffOwners::getOwners($this->loadDiff());
-*/
+        $packages = $this->loadAffectedPackages();
+        $owners = PhabricatorOwnersOwner::loadAllForPackages($packages);
+        return mpull($owners, 'getUserPHID');
       default:
         throw new Exception("Invalid field '{$field}'.");
     }

@@ -9,7 +9,9 @@
 phutil_require_module('phabricator', 'applications/differential/constants/changetype');
 phutil_require_module('phabricator', 'applications/differential/storage/base');
 phutil_require_module('phabricator', 'applications/differential/storage/hunk');
+phutil_require_module('phabricator', 'applications/repository/constants/repositorytype');
 
+phutil_require_module('phutil', 'parser/uri');
 phutil_require_module('phutil', 'utils');
 
 

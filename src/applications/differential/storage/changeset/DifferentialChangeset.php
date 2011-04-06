@@ -157,4 +157,29 @@ class DifferentialChangeset extends DifferentialDAO {
     return substr(md5($this->getFilename()), 0, 8);
   }
 
+  public function getAbsoluteRepositoryPath(
+    DifferentialDiff $diff,
+    PhabricatorRepository $repository) {
+
+    $base = '/';
+    if ($diff->getSourceControlPath()) {
+      $base = id(new PhutilURI($diff->getSourceControlPath()))->getPath();
+    }
+
+    $path = $this->getFileName();
+    $path = rtrim($base, '/').'/'.ltrim($path, '/');
+
+    $vcs = $repository->getVersionControlSystem();
+    if ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_SVN) {
+      $prefix = $repository->getDetail('remote-uri');
+      $prefix = id(new PhutilURI($prefix))->getPath();
+      if (!strncmp($path, $prefix, strlen($prefix))) {
+        $path = substr($path, strlen($prefix));
+      }
+      $path = '/'.ltrim($path, '/');
+    }
+
+    return $path;
+  }
+
 }
