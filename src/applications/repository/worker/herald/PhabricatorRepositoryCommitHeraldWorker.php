@@ -23,6 +23,10 @@ class PhabricatorRepositoryCommitHeraldWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
+    if ($repository->getDetail('herald-disabled')) {
+      return;
+    }
+
     $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
       'commitID = %d',
       $commit->getID());

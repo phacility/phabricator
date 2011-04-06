@@ -27,6 +27,7 @@ class PhabricatorRepository extends PhabricatorRepositoryDAO {
   protected $phid;
   protected $name;
   protected $callsign;
+  protected $uuid;
 
   protected $versionControlSystem;
   protected $details = array();

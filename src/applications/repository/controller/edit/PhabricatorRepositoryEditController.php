@@ -241,6 +241,14 @@ class PhabricatorRepositoryEditController
           '/'));
 
       $repository->setDetail(
+        'herald-disabled',
+        $request->getInt('herald-disabled', 0));
+
+      if ($is_svn) {
+        $repository->setUUID($request->getStr('uuid'));
+      }
+
+      $repository->setDetail(
         'detail-parser',
         $request->getStr(
           'detail-parser',
@@ -375,6 +383,21 @@ class PhabricatorRepositoryEditController
               '/'))
           ->setCaption('Default path in Owners tool.'));
 
+    $form
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setName('herald-disabled')
+          ->setLabel('Herald Enabled')
+          ->setValue($repository->getDetail('herald-disabled', 0))
+          ->setOptions(
+            array(
+              0 => 'Enabled - Send Email',
+              1 => 'Disabled - Do Not Send Email',
+            ))
+          ->setCaption(
+            'You can temporarily disable Herald notifications when reparsing '.
+            'a repository or importing a new repository.'));
+
     $parsers = id(new PhutilSymbolLoader())
       ->setAncestorClass('PhabricatorRepositoryCommitMessageDetailParser')
       ->selectSymbolsWithoutLoading();
@@ -395,7 +418,19 @@ class PhabricatorRepositoryEditController
           ->setValue(
             $repository->getDetail(
               'detail-parser',
-              'PhabricatorRepositoryDefaultCommitMessageDetailParser')))
+              'PhabricatorRepositoryDefaultCommitMessageDetailParser')));
+
+    if ($is_svn) {
+      $form
+        ->appendChild(
+          id(new AphrontFormTextControl())
+            ->setName('uuid')
+            ->setLabel('UUID')
+            ->setValue($repository->getUUID())
+            ->setCaption('Repository UUID from <tt>svn info</tt>.'));
+    }
+
+    $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Save'));
