@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'applications/differential/view/changesetlistview');
 phutil_require_module('phabricator', 'applications/diffusion/controller/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/diff/base');

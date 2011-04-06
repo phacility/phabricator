@@ -26,6 +26,11 @@ class DiffusionChangeController extends DiffusionController {
     $diff_query = DiffusionDiffQuery::newFromDiffusionRequest($drequest);
     $changeset = $diff_query->loadChangeset();
 
+    if (!$changeset) {
+      // TODO: Refine this.
+      return new Aphront404Response();
+    }
+
     $changeset_view = new DifferentialChangesetListView();
     $changeset_view->setChangesets(array($changeset));
     $changeset_view->setRenderURI(

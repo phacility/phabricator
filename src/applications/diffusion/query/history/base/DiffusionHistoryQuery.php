@@ -22,6 +22,8 @@ abstract class DiffusionHistoryQuery {
   private $limit = 100;
   private $offset = 0;
 
+  protected $needDirectChanges;
+
   final private function __construct() {
     // <private>
   }
@@ -48,6 +50,11 @@ abstract class DiffusionHistoryQuery {
     $query->request = $request;
 
     return $query;
+  }
+
+  final public function needDirectChanges($direct) {
+    $this->needDirectChanges = $direct;
+    return $this;
   }
 
   final protected function getRequest() {

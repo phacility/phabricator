@@ -27,6 +27,8 @@ final class DiffusionSvnLastModifiedQuery extends DiffusionLastModifiedQuery {
     $history_query = DiffusionHistoryQuery::newFromDiffusionRequest(
       $drequest);
     $history_query->setLimit(1);
+
+    $history_query->needDirectChanges(true);
     $history_array = $history_query->loadHistory();
     $history = reset($history_array);
 

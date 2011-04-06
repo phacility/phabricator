@@ -35,19 +35,18 @@ final class DiffusionSvnHistoryQuery extends DiffusionHistoryQuery {
     $paths = ipull($paths, 'id', 'path');
     $path_id = $paths['/'.trim($path, '/')];
 
-    // TODO: isDirect junk, but note that we need indirect events for the
-    // svnlastmodified query!
-
     $history_data = queryfx_all(
       $conn_r,
       'SELECT * FROM %T WHERE repositoryID = %d AND pathID = %d
         AND commitSequence <= %d
+        %Q
         ORDER BY commitSequence DESC
         LIMIT %d, %d',
       PhabricatorRepository::TABLE_PATHCHANGE,
       $repository->getID(),
       $path_id,
       $commit ? $commit : 0x7FFFFFFF,
+      ($this->needDirectChanges ? 'AND isDirect = 1' : ''),
       $this->getOffset(),
       $this->getLimit());
 
