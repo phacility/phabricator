@@ -23,6 +23,7 @@ abstract class DiffusionHistoryQuery {
   private $offset = 0;
 
   protected $needDirectChanges;
+  protected $needChildChanges;
 
   final private function __construct() {
     // <private>
@@ -54,6 +55,11 @@ abstract class DiffusionHistoryQuery {
 
   final public function needDirectChanges($direct) {
     $this->needDirectChanges = $direct;
+    return $this;
+  }
+
+  final public function needChildChanges($child) {
+    $this->needChildChanges = $child;
     return $this;
   }
 

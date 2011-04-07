@@ -35,6 +35,16 @@ final class DiffusionSvnHistoryQuery extends DiffusionHistoryQuery {
     $paths = ipull($paths, 'id', 'path');
     $path_id = $paths['/'.trim($path, '/')];
 
+    $filter_query = '';
+    if ($this->needDirectChanges) {
+      if ($this->needChildChanges) {
+        $type = DifferentialChangeType::TYPE_CHILD;
+        $filter_query = 'AND (isDirect = 1 OR changeType = '.$type.')';
+      } else {
+        $filter_query = 'AND (isDirect = 1)';
+      }
+    }
+
     $history_data = queryfx_all(
       $conn_r,
       'SELECT * FROM %T WHERE repositoryID = %d AND pathID = %d
@@ -46,7 +56,7 @@ final class DiffusionSvnHistoryQuery extends DiffusionHistoryQuery {
       $repository->getID(),
       $path_id,
       $commit ? $commit : 0x7FFFFFFF,
-      ($this->needDirectChanges ? 'AND isDirect = 1' : ''),
+      $filter_query,
       $this->getOffset(),
       $this->getLimit());
 
