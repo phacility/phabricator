@@ -134,6 +134,36 @@ class PhabricatorObjectHandleData {
             $handles[$phid] = $handle;
           }
           break;
+        case PhabricatorPHIDConstants::PHID_TYPE_CMIT:
+          $class = 'PhabricatorRepositoryCommit';
+          PhutilSymbolLoader::loadClass($class);
+          $object = newv($class, array());
+
+          $commits = $object->loadAllWhere('phid in (%Ls)', $phids);
+          $commits = mpull($commits, null, 'getPHID');
+
+          $repository_ids = mpull($commits, 'getRepositoryID');
+          $repositories = id(new PhabricatorRepository())->loadAllWhere(
+            'id in (%Ld)', array_unique($repository_ids));
+          $callsigns = mpull($repositories, 'getCallsign');
+
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            $handle->setType($type);
+            if (empty($commits[$phid])) {
+              $handle->setName('Unknown Commit');
+            } else {
+              $commit = $commits[$phid];
+              $callsign = $callsigns[$repository_ids[$phid]];
+              $commit_identifier = $commit->getCommitIdentifier();
+              $handle->setName('Commit '.'r'.$callsign.$commit_identifier);
+              $handle->setURI('/r'.$callsign.$commit_identifier);
+              $handle->setFullName('r'.$callsign.$commit_identifier);
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
         case PhabricatorPHIDConstants::PHID_TYPE_TASK:
           $class = 'ManiphestTask';
           PhutilSymbolLoader::loadClass($class);

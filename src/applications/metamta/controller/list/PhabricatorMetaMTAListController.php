@@ -19,8 +19,16 @@
 class PhabricatorMetaMTAListController extends PhabricatorMetaMTAController {
 
   public function processRequest() {
-    $mails = id(new PhabricatorMetaMTAMail())->loadAllWhere(
-      '1 = 1 ORDER BY id DESC LIMIT 100');
+    $related_phid = $this->getRequest()->getStr('phid');
+
+    if ($related_phid) {
+      $mails = id(new PhabricatorMetaMTAMail())->loadAllWhere(
+        'relatedPHID = %s ORDER BY id DESC LIMIT 100',
+        $related_phid);
+    } else {
+      $mails = id(new PhabricatorMetaMTAMail())->loadAllWhere(
+        '1 = 1 ORDER BY id DESC LIMIT 100');
+    }
 
     $rows = array();
     foreach ($mails as $mail) {

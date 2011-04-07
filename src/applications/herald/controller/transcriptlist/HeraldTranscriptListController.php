@@ -24,12 +24,26 @@ class HeraldTranscriptListController extends HeraldController {
 
     // Pull these objects manually since the serialized fields are gigantic.
     $transcript = new HeraldTranscript();
+
+    $conn_r = $transcript->establishConnection('r');
+    $phid = $request->getStr('phid');
+    $where_clause = '';
+    if ($phid) {
+      $where_clause = qsprintf(
+        $conn_r,
+        'WHERE objectPHID = %s',
+        $phid
+      );
+    }
+
     $data = queryfx_all(
-      $transcript->establishConnection('r'),
+      $conn_r,
       'SELECT id, objectPHID, time, duration, dryRun FROM %T
+        %Q
         ORDER BY id DESC
         LIMIT 100',
-      $transcript->getTableName());
+      $transcript->getTableName(),
+      $where_clause);
 
     /*
 

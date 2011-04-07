@@ -313,6 +313,12 @@ class DifferentialRevisionViewController extends DifferentialController {
       'href'  => "/mail/?phid={$revision_phid}",
     );
 
+    $links[] = array(
+      'class' => 'transcripts-herald',
+      'name'  => 'Herald Transcripts',
+      'href'  => "/herald/transcript/?phid={$revision_phid}",
+    );
+
     return $links;
   }
 
