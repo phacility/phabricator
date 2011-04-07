@@ -13,6 +13,7 @@ phutil_require_module('phabricator', 'applications/owners/controller/base');
 phutil_require_module('phabricator', 'applications/owners/storage/package');
 phutil_require_module('phabricator', 'view/dialog');
 
+phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
 
 

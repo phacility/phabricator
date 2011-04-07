@@ -12,6 +12,7 @@ phutil_require_module('phabricator', 'infrastructure/daemon/storage/event');
 phutil_require_module('phabricator', 'infrastructure/daemon/storage/log');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/form/base');
+phutil_require_module('phabricator', 'view/form/control/static');
 phutil_require_module('phabricator', 'view/form/control/textarea');
 phutil_require_module('phabricator', 'view/layout/panel');
 

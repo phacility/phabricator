@@ -12,6 +12,7 @@ phutil_require_module('phabricator', 'aphront/response/file');
 phutil_require_module('phabricator', 'applications/files/controller/base');
 phutil_require_module('phabricator', 'applications/files/storage/file');
 phutil_require_module('phabricator', 'view/form/base');
+phutil_require_module('phabricator', 'view/form/control/static');
 phutil_require_module('phabricator', 'view/form/control/submit');
 phutil_require_module('phabricator', 'view/layout/panel');
 

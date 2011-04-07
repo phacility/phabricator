@@ -11,7 +11,10 @@ phutil_require_module('phabricator', 'applications/files/storage/file');
 phutil_require_module('phabricator', 'applications/people/controller/base');
 phutil_require_module('phabricator', 'applications/people/storage/profile');
 phutil_require_module('phabricator', 'view/form/base');
+phutil_require_module('phabricator', 'view/form/control/file');
 phutil_require_module('phabricator', 'view/form/control/submit');
+phutil_require_module('phabricator', 'view/form/control/text');
+phutil_require_module('phabricator', 'view/form/control/textarea');
 phutil_require_module('phabricator', 'view/layout/panel');
 
 phutil_require_module('phutil', 'utils');

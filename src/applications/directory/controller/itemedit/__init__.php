@@ -12,7 +12,10 @@ phutil_require_module('phabricator', 'applications/directory/controller/base');
 phutil_require_module('phabricator', 'applications/directory/storage/category');
 phutil_require_module('phabricator', 'applications/directory/storage/item');
 phutil_require_module('phabricator', 'view/form/base');
+phutil_require_module('phabricator', 'view/form/control/select');
 phutil_require_module('phabricator', 'view/form/control/submit');
+phutil_require_module('phabricator', 'view/form/control/text');
+phutil_require_module('phabricator', 'view/form/control/textarea');
 phutil_require_module('phabricator', 'view/form/error');
 phutil_require_module('phabricator', 'view/layout/panel');
 
