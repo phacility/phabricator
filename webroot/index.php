@@ -59,9 +59,9 @@ try {
 
   phutil_require_module('phabricator', 'aphront/console/plugin/errorlog/api');
   set_error_handler(
-    array('DarkConsoleErrorLogPluginAPI', 'handleError'));
+    array('PhutilErrorHandler', 'handleError'));
   set_exception_handler(
-    array('DarkConsoleErrorLogPluginAPI', 'handleException'));
+    array('PhutilErrorHandler', 'handleException'));
 } catch (Exception $ex) {
   phabricator_fatal_config_error(
     "[Exception] ".$ex->getMessage());

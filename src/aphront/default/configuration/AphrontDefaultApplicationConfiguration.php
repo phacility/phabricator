@@ -268,6 +268,20 @@ class AphrontDefaultApplicationConfiguration
         'delete/(?P<id>\d+)/$' => 'PhabricatorOwnersDeleteController',
       ),
 
+      '/xhpast/' => array(
+        '$' => 'PhabricatorXHPASTViewRunController',
+        'view/(?P<id>\d+)/$'
+          => 'PhabricatorXHPASTViewFrameController',
+        'frameset/(?P<id>\d+)/$'
+          => 'PhabricatorXHPASTViewFramesetController',
+        'input/(?P<id>\d+)/$'
+          => 'PhabricatorXHPASTViewInputController',
+        'tree/(?P<id>\d+)/$'
+          => 'PhabricatorXHPASTViewTreeController',
+        'stream/(?P<id>\d+)/$'
+          => 'PhabricatorXHPASTViewStreamController',
+      ),
+
     );
   }
 

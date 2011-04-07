@@ -16,36 +16,27 @@
  * limitations under the License.
  */
 
-/**
- * @group aphront
- */
-class AphrontWebpageResponse extends AphrontResponse {
+class PhabricatorXHPASTViewFramesetController
+  extends PhabricatorXHPASTViewController {
 
-  private $content;
-  private $frameable;
+  private $id;
 
-  public function setContent($content) {
-    $this->content = $content;
-    return $this;
+  public function willProcessRequest(array $data) {
+    $this->id = $data['id'];
   }
 
-  public function setFrameable($frameable) {
-    $this->frameable = $frameable;
-    return $this;
-  }
+  public function processRequest() {
+    $id = $this->id;
 
-  public function buildResponseString() {
-    return $this->content;
-  }
+    $response = new AphrontWebpageResponse();
+    $response->setFrameable(true);
+    $response->setContent(
+      '<frameset cols="33%, 34%, 33%">'.
+        '<frame src="/xhpast/input/'.$id.'/" />'.
+        '<frame src="/xhpast/tree/'.$id.'/" />'.
+        '<frame src="/xhpast/stream/'.$id.'/" />'.
+      '</frameset>');
 
-  public function getHeaders() {
-    $headers = array(
-      array('Content-Type', 'text/html; charset=UTF-8'),
-    );
-    if (!$this->frameable) {
-      $headers[] = array('X-Frame-Options', 'Deny');
-    }
-    return $headers;
+    return $response;
   }
-
 }
