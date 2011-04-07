@@ -29,15 +29,10 @@ abstract class PhabricatorRepositoryCommitDiscoveryDaemon
   final public function run() {
     $this->repository = $this->loadRepository();
 
-    $sleep = 15;
+    $sleep = $this->repository->getDetail('pull-frequency');
     while (true) {
-      $found = $this->discoverCommits();
-      if ($found) {
-        $sleep = 15;
-      } else {
-        $sleep = min($sleep + 15, 60 * 15);
-      }
-      $this->sleep($sleep);
+      $this->discoverCommits();
+      $this->sleep(max(2, $sleep));
     }
   }
 
