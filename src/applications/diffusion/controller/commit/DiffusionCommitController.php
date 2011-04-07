@@ -18,8 +18,11 @@
 
 class DiffusionCommitController extends DiffusionController {
 
+  const CHANGES_LIMIT = 100;
+
   public function processRequest() {
     $drequest = $this->getDiffusionRequest();
+    $request = $this->getRequest();
 
     $callsign = $drequest->getRepository()->getCallsign();
 
@@ -71,13 +74,17 @@ class DiffusionCommitController extends DiffusionController {
       $drequest);
     $changes = $change_query->loadChanges();
 
+    $original_changes_count = count($changes);
+    if ($request->getStr('show_all') !== 'true' &&
+        $original_changes_count > self::CHANGES_LIMIT) {
+      $changes = array_slice($changes, 0, self::CHANGES_LIMIT);
+    }
+
     $change_table = new DiffusionCommitChangeTableView();
     $change_table->setDiffusionRequest($drequest);
     $change_table->setPathChanges($changes);
 
-    // TODO: Large number of modified files check.
-
-    $count = number_format(count($changes));
+    $count = count($changes);
 
     $bad_commit = null;
     if ($count == 0) {
@@ -98,7 +105,27 @@ class DiffusionCommitController extends DiffusionController {
       $content[] = $error_panel;
     } else {
       $change_panel = new AphrontPanelView();
-      $change_panel->setHeader("Changes ({$count})");
+      $change_panel->setHeader("Changes (".number_format($count).")");
+
+      if ($count !== $original_changes_count) {
+        $show_all_button = phutil_render_tag(
+          'a',
+          array(
+            'class'   => 'button green',
+            'href'    => '?show_all=true',
+          ),
+          phutil_escape_html('Show All Changes'));
+        $warning_view = id(new AphrontErrorView())
+          ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+          ->setTitle(sprintf(
+                       "Showing only the first %d changes out of %s!",
+                       self::CHANGES_LIMIT,
+                       number_format($original_changes_count)));
+
+        $change_panel->appendChild($warning_view);
+        $change_panel->addButton($show_all_button);
+      }
+
       $change_panel->appendChild($change_table);
 
       $content[] = $change_panel;
