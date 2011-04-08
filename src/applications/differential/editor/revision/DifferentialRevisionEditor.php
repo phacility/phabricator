@@ -188,36 +188,24 @@ class DifferentialRevisionEditor {
       $diff->setRevisionID($revision->getID());
       $revision->setLineCount($diff->getLineCount());
 
-// TODO!
-//      $revision->setRepositoryID($diff->getRepositoryID());
+      $adapter = new HeraldDifferentialRevisionAdapter(
+        $revision,
+        $diff);
+      $adapter->setExplicitCCs($new['ccs']);
+      $adapter->setExplicitReviewers($new['rev']);
+      $adapter->setForbiddenCCs($revision->getUnsubscribed());
 
-/*
-      $iface = new DifferentialRevisionHeraldable($revision);
-      $iface->setExplicitCCs($new['ccs']);
-      $iface->setExplicitReviewers($new['rev']);
-      $iface->setForbiddenCCs($revision->getForbiddenCCPHIDs());
-      $iface->setForbiddenReviewers($revision->getForbiddenReviewers());
-      $iface->setDiff($diff);
-
-      $xscript = HeraldEngine::loadAndApplyRules($iface);
-      $xscript_uri = $xscript->getURI();
+      $xscript = HeraldEngine::loadAndApplyRules($adapter);
+      $xscript_uri = PhabricatorEnv::getProductionURI(
+        '/herald/transcript/'.$xscript->getID().'/');
       $xscript_phid = $xscript->getPHID();
       $xscript_header = $xscript->getXHeraldRulesHeader();
 
-
       $sub = array(
         'rev' => array(),
-        'ccs' => $iface->getCCsAddedByHerald(),
+        'ccs' => $adapter->getCCsAddedByHerald(),
       );
-      $rem_ccs = $iface->getCCsRemovedByHerald();
-*/
-  // TODO!
-      $sub = array(
-        'rev' => array(),
-        'ccs' => array(),
-      );
-
-
+      $rem_ccs = $adapter->getCCsRemovedByHerald();
     } else {
       $sub = array(
         'rev' => array(),
@@ -259,6 +247,8 @@ class DifferentialRevisionEditor {
 
     // TODO: When Herald is brought over, run through this stuff to figure
     // out which adds are Herald's fault.
+
+    // TODO: Still need to do this.
 
     if ($add['ccs'] || $rem['ccs']) {
       foreach (array_keys($add['ccs']) as $id) {
@@ -358,10 +348,8 @@ class DifferentialRevisionEditor {
       'actor'       => $this->getActorPHID(),
     );
 
-//  TODO: When timelines get implemented, move indexing to them.
+//  TODO: Move this into a worker task thing.
     PhabricatorSearchDifferentialIndexer::indexRevision($revision);
-//  TODO
-//    id(new ToolsTimelineEvent('difx', fb_json_encode($event)))->record();
 
     if ($this->silentUpdate) {
       return;
@@ -407,9 +395,8 @@ class DifferentialRevisionEditor {
     }
 
     foreach ($mail as $message) {
-// TODO
-//      $message->setHeraldTranscriptURI($xscript_uri);
-//      $message->setXHeraldRulesHeader($xscript_header);
+      $message->setHeraldTranscriptURI($xscript_uri);
+      $message->setXHeraldRulesHeader($xscript_header);
       $message->send();
     }
   }

@@ -24,7 +24,6 @@ class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
   protected $explicitCCs;
   protected $explicitReviewers;
   protected $forbiddenCCs;
-  protected $forbiddenReviewers;
 
   protected $newCCs = array();
   protected $remCCs = array();
@@ -54,11 +53,6 @@ class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
 
   public function setForbiddenCCs($forbidden_ccs) {
     $this->forbiddenCCs = $forbidden_ccs;
-    return $this;
-  }
-
-  public function setForbiddenReviewers($forbidden_reviewers) {
-    $this->forbiddenReviewers = $forbidden_reviewers;
     return $this;
   }
 
