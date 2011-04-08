@@ -794,10 +794,14 @@ abstract class LiskDAO {
 
     $id_mechanism = $this->getConfigOption(self::CONFIG_IDS);
     switch ($id_mechanism) {
-      //  If we are using autoincrement IDs, let MySQL assign the value for the
-      //  ID column.
       case self::IDS_AUTOINCREMENT:
-        unset($data[$this->getIDKeyForUse()]);
+        // If we are using autoincrement IDs, let MySQL assign the value for the
+        // ID column, if it is empty. If the caller has explicitly provided a
+        // value, use it.
+        $id_key = $this->getIDKeyForUse();
+        if (empty($data[$id_key])) {
+          unset($data[$id_key]);
+        }
         break;
       case self::IDS_PHID:
         if (empty($data[$this->getIDKeyForUse()])) {
