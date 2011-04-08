@@ -55,7 +55,7 @@ class PhabricatorRepositoryCommitHeraldWorker
 
     $name = null;
     if ($revision) {
-      $name = $revision->getName();
+      $name = $revision->getTitle();
     }
 
     $author_phid = $data->getCommitDetail('authorPHID');
