@@ -79,44 +79,16 @@ class PhabricatorConduitAPIController
       $metadata = idx($params, '__conduit__', array());
       unset($params['__conduit__']);
 
+      $result = null;
+
       $api_request = new ConduitAPIRequest($params);
 
-      if ($request->getUser()->getPHID()) {
-        $auth_okay = true;
-      } else if (!$method_handler->shouldRequireAuthentication()) {
-        $auth_okay = true;
-      } else {
-        $session_key = idx($metadata, 'sessionKey');
-        if (!$session_key) {
-          $auth_okay = false;
-          $error_code = 'ERR-NO-CERTIFICATE';
-          $error_info = "This server requires authentication but your client ".
-                        "is not configured with an authentication ".
-                        "certificate. Please refer to ".
-                        "page http://www.phabricator.com/docs/".
-                        "phabricator/article/".
-                        "Installing_Arcanist_Certificates.html for more info.";
-        } else {
-          $user = new PhabricatorUser();
-          $session = queryfx_one(
-            $user->establishConnection('r'),
-            'SELECT * FROM %T WHERE sessionKey = %s',
-            PhabricatorUser::SESSION_TABLE,
-            $session_key);
-          if (!$session) {
-            $auth_okay = false;
-            $result = null;
-            $error_code = 'ERR-INVALID-SESSION';
-            $error_info = 'Session key is invalid.';
-          } else {
-            // TODO: Make sessions timeout.
-            $auth_okay = true;
-          }
-        }
-        // TODO: When we session, read connectionID from the session table.
+      $auth_error = null;
+      if ($method_handler->shouldRequireAuthentication()) {
+        $auth_error = $this->authenticateUser($api_request, $metadata);
       }
 
-      if ($auth_okay) {
+      if ($auth_error === null) {
         try {
           $result = $method_handler->executeMethod($api_request);
           $error_code = null;
@@ -126,6 +98,8 @@ class PhabricatorConduitAPIController
           $error_code = $ex->getMessage();
           $error_info = $method_handler->getErrorDescription($error_code);
         }
+      } else {
+        list($error_code, $error_info) = $auth_error;
       }
     } catch (Exception $ex) {
       $result = null;
@@ -165,6 +139,65 @@ class PhabricatorConduitAPIController
           ->setMimeType('application/json')
           ->setContent('for(;;);'.json_encode($result));
     }
+  }
+
+  /**
+   * Authenticate the client making the request to a Phabricator user account.
+   *
+   * @param   ConduitAPIRequest Request being executed.
+   * @param   dict              Request metadata.
+   * @return  null|pair         Null to indicate successful authentication, or
+   *                            an error code and error message pair.
+   */
+  private function authenticateUser(
+    ConduitAPIRequest $api_request,
+    array $metadata) {
+
+    $request = $this->getRequest();
+
+    if ($request->getUser()->getPHID()) {
+      $api_request->setUser($request->getUser());
+      return null;
+    }
+
+    $session_key = idx($metadata, 'sessionKey');
+    if (!$session_key) {
+      return array(
+        'ERR-NO-CERTIFICATE',
+        'This server requires authentication but your client is not '.
+        'configured with an authentication certificate. Please refer to '.
+        '<http://www.phabricator.com/docs/phabricator/article/'.
+        'Installing_Arcanist_Certificates.html> for more info.',
+      );
+    }
+
+    $session = queryfx_one(
+      id(new PhabricatorUser())->establishConnection('r'),
+      'SELECT * FROM %T WHERE sessionKey = %s',
+      PhabricatorUser::SESSION_TABLE,
+      $session_key);
+    if (!$session) {
+      return array(
+        'ERR-INVALID-SESSION',
+        'Session key is invalid.',
+      );
+    }
+
+    // TODO: Make sessions timeout.
+    // TODO: When we pull a session, read connectionID from the session table.
+
+    $user = id(new PhabricatorUser())->loadOneWhere(
+      'phid = %s',
+      $session['userPHID']);
+    if (!$user) {
+      return array(
+        'ERR-INVALID-SESSION',
+        'Session is for nonexistent user.',
+      );
+    }
+
+    $api_request->setUser($user);
+    return null;
   }
 
   private function buildHumanReadableResponse(
