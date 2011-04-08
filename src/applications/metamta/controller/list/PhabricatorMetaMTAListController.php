@@ -19,17 +19,41 @@
 class PhabricatorMetaMTAListController extends PhabricatorMetaMTAController {
 
   public function processRequest() {
-    $related_phid = $this->getRequest()->getStr('phid');
+    // Get a page of mails together with pager.
+    $request = $this->getRequest();
+    $offset = $request->getInt('offset', 0);
+    $related_phid = $request->getStr('phid');
+
+    $pager = new AphrontPagerView();
+    $pager->setOffset($offset);
+    $pager->setURI($request->getRequestURI(), 'offset');
+
+    $mail = new PhabricatorMetaMTAMail();
+    $conn_r = $mail->establishConnection('r');
 
     if ($related_phid) {
-      $mails = id(new PhabricatorMetaMTAMail())->loadAllWhere(
-        'relatedPHID = %s ORDER BY id DESC LIMIT 100',
+      $where_clause = qsprintf(
+        $conn_r,
+        'WHERE relatedPHID = %s',
         $related_phid);
     } else {
-      $mails = id(new PhabricatorMetaMTAMail())->loadAllWhere(
-        '1 = 1 ORDER BY id DESC LIMIT 100');
+      $where_clause = 'WHERE 1 = 1';
     }
 
+    $data = queryfx_all(
+      $conn_r,
+      'SELECT * FROM %T
+        %Q
+        ORDER BY id DESC
+        LIMIT %d, %d',
+        $mail->getTableName(),
+        $where_clause,
+        $pager->getOffset(), $pager->getPageSize() + 1);
+    $data = $pager->sliceResults($data);
+
+    $mails = $mail->loadAllFromArray($data);
+
+    // Render the details table.
     $rows = array();
     foreach ($mails as $mail) {
       $rows[] = array(
@@ -71,10 +95,12 @@ class PhabricatorMetaMTAListController extends PhabricatorMetaMTAController {
         'action',
       ));
 
+    // Render the whole page.
     $panel = new AphrontPanelView();
     $panel->appendChild($table);
     $panel->setHeader('MetaMTA Messages');
     $panel->setCreateButton('Send New Message', '/mail/send/');
+    $panel->appendChild($pager);
 
     return $this->buildStandardPageResponse(
       $panel,

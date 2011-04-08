@@ -22,6 +22,7 @@ class HeraldTranscriptListController extends HeraldController {
 
     $request = $this->getRequest();
 
+    // Get one page of data together with the pager.
     // Pull these objects manually since the serialized fields are gigantic.
     $transcript = new HeraldTranscript();
 
@@ -32,18 +33,31 @@ class HeraldTranscriptListController extends HeraldController {
       $where_clause = qsprintf(
         $conn_r,
         'WHERE objectPHID = %s',
-        $phid
-      );
+        $phid);
     }
+
+    $offset = $request->getInt('offset', 0);
+    $page_size = 100;
+    $limit_clause = qsprintf(
+      $conn_r,
+      'LIMIT %d, %d',
+      $offset, $page_size + 1);
 
     $data = queryfx_all(
       $conn_r,
       'SELECT id, objectPHID, time, duration, dryRun FROM %T
         %Q
         ORDER BY id DESC
-        LIMIT 100',
+        %Q',
       $transcript->getTableName(),
-      $where_clause);
+      $where_clause,
+      $limit_clause);
+
+    $pager = new AphrontPagerView();
+    $pager->getPageSize($page_size);
+    $pager->setHasMorePages(count($data) == $page_size + 1);
+    $pager->setOffset($offset);
+    $pager->setURI($request->getRequestURI(), 'offset');
 
     /*
 
@@ -73,6 +87,7 @@ class HeraldTranscriptListController extends HeraldController {
       $filter);
 */
 
+    // Render the table.
     $handles = array();
     if ($data) {
       $phids = ipull($data, 'objectPHID', 'objectPHID');
@@ -118,10 +133,11 @@ class HeraldTranscriptListController extends HeraldController {
         'action',
       ));
 
-
+    // Render the whole page.
     $panel = new AphrontPanelView();
     $panel->setHeader('Herald Transcripts');
     $panel->appendChild($table);
+    $panel->appendChild($pager);
 
     return $this->buildStandardPageResponse(
       $panel,
