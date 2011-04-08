@@ -282,6 +282,8 @@ class AphrontDefaultApplicationConfiguration
           => 'PhabricatorXHPASTViewStreamController',
       ),
 
+      '/status/$' => 'PhabricatorStatusController',
+
     );
   }
 
