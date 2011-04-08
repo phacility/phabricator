@@ -36,8 +36,10 @@ class DifferentialRevision extends DifferentialDAO {
   protected $unsubscribed = array();
 
   private $relationships;
+  private $commits;
 
   const RELATIONSHIP_TABLE    = 'differential_relationship';
+  const TABLE_COMMIT          = 'differential_commit';
 
   const RELATION_REVIEWER     = 'revw';
   const RELATION_SUBSCRIBED   = 'subd';
@@ -50,6 +52,28 @@ class DifferentialRevision extends DifferentialDAO {
         'unsubscribed'  => self::SERIALIZATION_JSON,
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function loadCommitPHIDs() {
+    if (!$this->getID()) {
+      return ($this->commits = array());
+    }
+
+    $commits = queryfx_all(
+      $this->establishConnection('r'),
+      'SELECT commitPHID FROM %T WHERE revisionID = %d',
+      self::TABLE_COMMIT,
+      $this->getID());
+    $commits = ipull($commits, 'commitPHID');
+
+    return ($this->commits = $commits);
+  }
+
+  public function getCommitPHIDs() {
+    if ($this->commits === null) {
+      throw new Exception("Must load commits!");
+    }
+    return $this->commits;
   }
 
   public function getAttachedPHIDs($type) {

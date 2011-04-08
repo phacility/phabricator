@@ -44,6 +44,28 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     }
 
     $data->save();
+
+    $revision_id = $data->getCommitDetail('differential.revisionID');
+    if ($revision_id) {
+      $revision = id(new DifferentialRevision())->load($revision_id);
+      if ($revision) {
+
+        queryfx(
+          $revision->establishConnection('r'),
+          'INSERT IGNORE INTO %T (revisionID, commitPHID) VALUES (%d, %s)',
+          DifferentialRevision::TABLE_COMMIT,
+          $revision->getID(),
+          $commit->getPHID());
+
+        if ($revision->getStatus() != DifferentialRevisionStatus::COMMITTED) {
+          $editor = new DifferentialCommentEditor(
+            $revision,
+            $revision->getAuthorPHID(),
+            DifferentialAction::ACTION_COMMIT);
+          $editor->save();
+        }
+      }
+    }
   }
 
 }

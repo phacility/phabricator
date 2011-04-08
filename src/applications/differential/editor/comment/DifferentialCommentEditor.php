@@ -197,7 +197,12 @@ class DifferentialCommentEditor {
         break;
 
       case DifferentialAction::ACTION_COMMIT:
-        // This is handled externally. (TODO)
+        if (!$actor_is_author) {
+          throw new Exception('You can not commit a revision you do not own.');
+        }
+        $revision
+          ->setStatus(DifferentialRevisionStatus::COMMITTED)
+          ->save();
         break;
 
       case DifferentialAction::ACTION_ADDREVIEWERS:

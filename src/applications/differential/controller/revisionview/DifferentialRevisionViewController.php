@@ -65,6 +65,7 @@ class DifferentialRevisionViewController extends DifferentialController {
     $object_phids = array_merge(
       $revision->getReviewers(),
       $revision->getCCPHIDs(),
+      $revision->loadCommitPHIDs(),
       array(
         $revision->getAuthorPHID(),
         $user->getPHID(),
@@ -248,6 +249,15 @@ class DifferentialRevisionViewController extends DifferentialController {
         $links[] = $handles[$task_phid]->renderLink();
       }
       $properties['Maniphest Tasks'] = implode('<br />', $links);
+    }
+
+    $commit_phids = $revision->getCommitPHIDs();
+    if ($commit_phids) {
+      $links = array();
+      foreach ($commit_phids as $commit_phid) {
+        $links[] = $handles[$commit_phid]->renderLink();
+      }
+      $properties['Commits'] = implode('<br />', $links);
     }
 
     return $properties;
