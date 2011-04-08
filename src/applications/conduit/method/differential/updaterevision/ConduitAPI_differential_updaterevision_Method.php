@@ -39,6 +39,8 @@ class ConduitAPI_differential_updaterevision_Method extends ConduitAPIMethod {
     return array(
       'ERR_BAD_DIFF' => 'Bad diff ID.',
       'ERR_BAD_REVISION' => 'Bad revision ID.',
+      'ERR_WRONG_USER' => 'You are not the author of this revision.',
+      'ERR_COMMITTED' => 'This revision has already been committed.',
     );
   }
 
@@ -50,7 +52,13 @@ class ConduitAPI_differential_updaterevision_Method extends ConduitAPIMethod {
 
     $revision = id(new DifferentialRevision())->load($request->getValue('id'));
 
-    // TODO: verify owned, non-committed, etc.
+    if ($request->getUser()->getPHID() !== $revision->getAuthorPHID()) {
+      throw new ConduitException('ERR_WRONG_USER');
+    }
+
+    if ($revision->getStatus() == DifferentialRevisionStatus::COMMITTED) {
+      throw new ConduitException('ERR_COMMITTED');
+    }
 
     $editor = new DifferentialRevisionEditor(
       $revision,
