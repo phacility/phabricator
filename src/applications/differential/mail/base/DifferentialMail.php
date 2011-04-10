@@ -123,12 +123,14 @@ abstract class DifferentialMail {
 
     $actions = array();
     $body = $this->renderBody();
+/*
     $body .= <<<EOTEXT
 
 ACTIONS
   Reply to comment, or !accept, !reject, !abandon, !resign, or !showdiff.
 
 EOTEXT;
+*/
 
     if ($this->getHeraldTranscriptURI() && $this->isFirstMailToRecipients()) {
       $xscript_uri = $this->getHeraldTranscriptURI();
@@ -252,7 +254,7 @@ EOTEXT;
   }
 
   public function getRevisionURI() {
-    return PhabricatorEnv::getURI('/D'.$this->getRevision()->getID());
+    return PhabricatorEnv::getProductionURI('/D'.$this->getRevision()->getID());
   }
 
   public function setIsFirstMailToRecipients($first) {
