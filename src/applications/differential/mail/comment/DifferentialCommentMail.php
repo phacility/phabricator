@@ -111,20 +111,22 @@ class DifferentialCommentMail extends DifferentialMail {
     $revision = $this->getRevision();
     if ($revision->getStatus() == DifferentialRevisionStatus::COMMITTED) {
       $phids = $revision->loadCommitPHIDs();
-      $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
-      if (count($handles) == 1) {
-        $body[] = "COMMIT";
-      } else {
-        // This is unlikely to ever happen since we'll send this mail the first
-        // time we discover a commit, but it's not impossible if data was
-        // migrated, etc.
-        $body[] = "COMMITS";
-      }
+      if ($phids) {
+        $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+        if (count($handles) == 1) {
+          $body[] = "COMMIT";
+        } else {
+          // This is unlikely to ever happen since we'll send this mail the
+          // first time we discover a commit, but it's not impossible if data
+          // was migrated, etc.
+          $body[] = "COMMITS";
+        }
 
-      foreach ($handles as $handle) {
-        $body[] = '  '.PhabricatorEnv::getProductionURI($handle->getURI());
+        foreach ($handles as $handle) {
+          $body[] = '  '.PhabricatorEnv::getProductionURI($handle->getURI());
+        }
+        $body[] = null;
       }
-      $body[] = null;
     }
 
     return implode("\n", $body);
