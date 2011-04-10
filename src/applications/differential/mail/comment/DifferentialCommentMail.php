@@ -106,6 +106,8 @@ class DifferentialCommentMail extends DifferentialMail {
     }
 
     $body[] = $this->renderRevisionDetailLink();
+    $body[] = null;
+
     $revision = $this->getRevision();
     if ($revision->getStatus() == DifferentialRevisionStatus::COMMITTED) {
       $phids = $revision->loadCommitPHIDs();
@@ -124,8 +126,6 @@ class DifferentialCommentMail extends DifferentialMail {
       }
       $body[] = null;
     }
-
-    $body[] = null;
 
     return implode("\n", $body);
   }
