@@ -19,7 +19,10 @@ like this:
 
 To retrieve the certificate for a Phabricator host:
 
-  - Login to Phabricator.
+  - Login to Phabricator. **Make sure you log into the installation you are
+    trying to install a certificate for!** If you are installing a certificate
+    for ##phabricator.example.com##, you need to log into
+    ##phabricator.example.com##, **not** ##secure.phabricator.com##.
   - Go to Settings (upper right, near Search) > Arcanist Certificate.
 
 Copy the host info including the certificate into the "hosts" section.

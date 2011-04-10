@@ -163,11 +163,8 @@ class PhabricatorConduitAPIController
     $session_key = idx($metadata, 'sessionKey');
     if (!$session_key) {
       return array(
-        'ERR-NO-CERTIFICATE',
-        'This server requires authentication but your client is not '.
-        'configured with an authentication certificate. Please refer to '.
-        '<http://www.phabricator.com/docs/phabricator/article/'.
-        'Installing_Arcanist_Certificates.html> for more info.',
+        'ERR-INVALID-SESSION',
+        'Session key is not present.'
       );
     }
 

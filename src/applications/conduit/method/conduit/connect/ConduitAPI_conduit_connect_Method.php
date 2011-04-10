@@ -62,10 +62,15 @@ class ConduitAPI_conduit_connect_Method extends ConduitAPIMethod {
         "allowed time range. Either your system clock is out of whack or ".
         "you're executing a replay attack.",
       "ERR-NO-CERTIFICATE" =>
-        "This server requires authentication but your client is not ".
-        "configured with an authentication certificate. Please refer to page ".
-        "http://www.phabricator.com/docs/phabricator/article/".
-        "Installing_Arcanist_Certificates.html for more info."
+        'This server requires authentication but your client is not '.
+        'configured with an authentication certificate. For instructions on '.
+        "installing Arcanist certificates, see the documentation:\n\n".
+        '    http://www.phabricator.com/docs/phabricator/article/'.
+        'Installing_Arcanist_Certificates.html'.
+        "\n\n".
+        "Retrieve your certificate for this server by logging into the web ".
+        "interface and going here:\n\n".
+        '    '.PhabricatorEnv::getProductionURI('/settings/page/arcanist/'),
     );
   }
 
