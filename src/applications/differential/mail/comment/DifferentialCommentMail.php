@@ -108,16 +108,23 @@ class DifferentialCommentMail extends DifferentialMail {
     $body[] = $this->renderRevisionDetailLink();
     $revision = $this->getRevision();
     if ($revision->getStatus() == DifferentialRevisionStatus::COMMITTED) {
-      /*
-
-      TODO
-
-      $rev_ref = $revision->getRevisionRef();
-      if ($rev_ref) {
-        $body[] = "  Detail URL: ".$rev_ref->getDetailURL();
+      $phids = $revision->loadCommitPHIDs();
+      $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+      if (count($handles) == 1) {
+        $body[] = "COMMIT";
+      } else {
+        // This is unlikely to ever happen since we'll send this mail the first
+        // time we discover a commit, but it's not impossible if data was
+        // migrated, etc.
+        $body[] = "COMMITS";
       }
-      */
+
+      foreach ($handles as $handle) {
+        $body[] = '  '.PhabricatorEnv::getProductionURI($handle->getURI());
+      }
+      $body[] = null;
     }
+
     $body[] = null;
 
     return implode("\n", $body);
