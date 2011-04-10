@@ -140,7 +140,7 @@ EOTEXT;
       $body .= <<<EOTEXT
 
 MANAGE HERALD DIFFERENTIAL RULES
-  http://todo.com/herald/
+  {$manage_uri}
 
 WHY DID I GET THIS EMAIL?
   {$xscript_uri}
