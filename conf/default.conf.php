@@ -124,6 +124,9 @@ return array(
   // Default address to send mail "From".
   'metamta.default-address'     => 'noreply@example.com',
 
+  // Domain used to generate Message-IDs.
+  'metamta.domain'              => 'example.com',
+
   // When a user takes an action which generates an email notification (like
   // commenting on a Differential revision), Phabricator can either send that
   // mail "From" the user's email address (like "alincoln@logcabin.com") or

@@ -133,10 +133,13 @@ EOTEXT;
 */
 
     if ($this->getHeraldTranscriptURI() && $this->isFirstMailToRecipients()) {
+      $manage_uri = PhabricatorEnv::getProductionURI(
+        '/herald/view/differential/');
+
       $xscript_uri = $this->getHeraldTranscriptURI();
       $body .= <<<EOTEXT
 
-MANAGE HERALD RULES
+MANAGE HERALD DIFFERENTIAL RULES
   http://todo.com/herald/
 
 WHY DID I GET THIS EMAIL?
@@ -217,8 +220,8 @@ EOTEXT;
 
   protected function getMessageID() {
     $phid = $this->getRevision()->getPHID();
-    // TODO
-    return "<differential-rev-{$phid}-req@TODO.com>";
+    $domain = PhabricatorEnv::getEnvConfig('metamta.domain');
+    return "<differential-rev-{$phid}-req@{$domain}>";
   }
 
   public function setComment($comment) {
