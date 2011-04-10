@@ -20,6 +20,6 @@ like this:
 To retrieve the certificate for a Phabricator host:
 
   - Login to Phabricator.
-  - Go to Settings > Arcanist Certificate.
+  - Go to Settings (upper right, near Search) > Arcanist Certificate.
 
 Copy the host info including the certificate into the "hosts" section.
