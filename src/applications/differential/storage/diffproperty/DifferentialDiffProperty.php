@@ -25,7 +25,7 @@ class DifferentialDiffProperty extends DifferentialDAO {
   protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
-        'data'          => self::SERIALIZATION_JSON,
+        'data' => self::SERIALIZATION_JSON,
       )) + parent::getConfiguration();
   }
 

@@ -110,10 +110,23 @@ class DifferentialRevisionViewController extends DifferentialController {
       $visible_changesets = $changesets;
     }
 
+    $diff_properties = id(new DifferentialDiffProperty())->loadAllWhere(
+      'diffID = %d AND name IN (%Ls)',
+      $target->getID(),
+      array(
+        'arc:lint',
+        'arc:unit',
+      ));
+    $diff_properties = mpull($diff_properties, 'getData', 'getName');
+
     $revision_detail = new DifferentialRevisionDetailView();
     $revision_detail->setRevision($revision);
 
-    $properties = $this->getRevisionProperties($revision, $target, $handles);
+    $properties = $this->getRevisionProperties(
+      $revision,
+      $target,
+      $handles,
+      $diff_properties);
     $revision_detail->setProperties($properties);
 
     $actions = $this->getRevisionActions($revision);
@@ -201,7 +214,8 @@ class DifferentialRevisionViewController extends DifferentialController {
   private function getRevisionProperties(
     DifferentialRevision $revision,
     DifferentialDiff $diff,
-    array $handles) {
+    array $handles,
+    array $diff_properties) {
 
     $properties = array();
 
@@ -235,11 +249,81 @@ class DifferentialRevisionViewController extends DifferentialController {
 
     $lstar = DifferentialRevisionUpdateHistoryView::renderDiffLintStar($diff);
     $lmsg = DifferentialRevisionUpdateHistoryView::getDiffLintMessage($diff);
-    $properties['Lint'] = $lstar.' '.$lmsg;
+    $ldata = idx($diff_properties, 'arc:lint');
+    $ltail = null;
+    if ($ldata) {
+      $ldata = igroup($ldata, 'path');
+      $lint_messages = array();
+      foreach ($ldata as $path => $messages) {
+        $message_markup = array();
+        foreach ($messages as $message) {
+          $path = idx($message, 'path');
+          $line = idx($message, 'line');
+
+          $code = idx($message, 'code');
+          $severity = idx($message, 'severity');
+
+          $name = idx($message, 'name');
+          $description = idx($message, 'description');
+
+          $message_markup[] =
+            '<li>'.
+              '<span class="lint-severity-'.phutil_escape_html($severity).'">'.
+                phutil_escape_html(ucwords($severity)).
+              '</span>'.
+              ' '.
+              '('.phutil_escape_html($code).') '.
+              phutil_escape_html($name).
+              ' at line '.phutil_escape_html($line).
+              '<p>'.phutil_escape_html($description).'</p>'.
+            '</li>';
+        }
+        $lint_messages[] =
+          '<li class="lint-file-block">'.
+            'Lint for <strong>'.phutil_escape_html($path).'</strong>'.
+            '<ul>'.implode("\n", $message_markup).'</ul>'.
+          '</li>';
+      }
+      $ltail =
+        '<div class="differential-lint-block">'.
+          '<ul>'.
+            implode("\n", $lint_messages).
+          '</ul>'.
+        '</div>';
+    }
+
+    $properties['Lint'] = $lstar.' '.$lmsg.$ltail;
 
     $ustar = DifferentialRevisionUpdateHistoryView::renderDiffUnitStar($diff);
     $umsg = DifferentialRevisionUpdateHistoryView::getDiffUnitMessage($diff);
-    $properties['Unit'] = $ustar.' '.$umsg;
+
+    $udata = idx($diff_properties, 'arc:unit');
+    $utail = null;
+    if ($udata) {
+      $unit_messages = array();
+      foreach ($udata as $test) {
+        $name = phutil_escape_html(idx($test, 'name'));
+        $result = phutil_escape_html(idx($test, 'result'));
+        $userdata = phutil_escape_html(idx($test, 'userdata'));
+        $unit_messages[] =
+          '<tr>'.
+            '<th>'.$name.'</th>'.
+            '<th class="unit-test-result result-'.$result.'">'.
+              strtoupper($result).
+            '</th>'.
+            '<td>'.$userdata.'</td>'.
+          '</tr>';
+      }
+
+      $utail =
+        '<div class="differential-unit-block">'.
+          '<table class="differential-unit-table">'.
+            implode("\n", $unit_messages).
+          '</table>'.
+        '</div>';
+    }
+
+    $properties['Unit'] = $ustar.' '.$umsg.$utail;
 
     $tasks = $revision->getAttachedPHIDs(
       PhabricatorPHIDConstants::PHID_TYPE_TASK);
@@ -556,17 +640,6 @@ class DifferentialRevisionViewController extends DifferentialController {
         </tools:notice>;
     }
 
-
-    $blast_uri = RedirectURI(
-      '/intern/differential/?action=blast&fbid='.$revision->getFBID())
-      ->setTier('intern');
-    $links[] = array(
-      'blast',
-      <a href={$blast_uri}>Blast Revision</a>,
-    );
-
-
-
     $engineering_repository_id = RepositoryRef::getByCallsign('E')->getID();
     $svn_revision = $revision->getSVNRevision();
     if ($status == DifferentialConstants::COMMITTED &&
@@ -579,12 +652,6 @@ class DifferentialRevisionViewController extends DifferentialController {
         <a href={$href} id="ask_for_merge_link">Ask for Merge</a>,
       );
     }
-
-    $links[] = array(
-      'herald-transcript',
-      <a href={"/herald/transcript/?fbid=".$revision->getFBID()}
-        >Herald Transcripts</a>,
-    );
 
   }
 

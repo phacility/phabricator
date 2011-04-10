@@ -28,3 +28,50 @@
   margin-right: 265px;
 }
 
+.differential-unit-block,
+.differential-lint-block {
+  padding: .5em;
+  background: #fcfcec;
+  margin: .5em 0;
+  font-size: 11px;
+  line-height: 1.5em;
+}
+
+.differential-lint-block .lint-severity-warning {
+  background: #ffff66;
+  padding: 0 0.5em;
+  font-weight: bold;
+}
+
+.differential-lint-block .lint-severity-error {
+  background: #ff3333;
+  padding: 0 0.5em;
+  font-weight: bold;
+}
+
+.differential-lint-block .lint-file-block {
+}
+
+.differential-lint-block li li {
+  margin-left: 1.5em;
+}
+
+.differential-lint-block li li p {
+  margin-left: 1em;
+  color: #666666;
+}
+
+.differential-unit-table th {
+  white-space: nowrap;
+  padding: 4px 8px;
+}
+
+.differential-unit-table .result-fail {
+  background: #ff3333;
+}
+
+.differential-unit-table td {
+  width: 100%;
+  padding: 4px 8px;
+  color: #666666;
+}

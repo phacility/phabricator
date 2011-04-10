@@ -44,7 +44,7 @@ class ConduitAPI_differential_setdiffproperty_Method extends ConduitAPIMethod {
     $property = new DifferentialDiffProperty();
     $property->setDiffID($request->getValue('diff_id'));
     $property->setName($request->getValue('name'));
-    $property->setData($request->getValue('data'));
+    $property->setData(json_decode($request->getValue('data'), true));
     $property->save();
     return;
   }
