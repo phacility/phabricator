@@ -228,7 +228,8 @@ class DifferentialCommitMessage {
       $mail = id(new PhabricatorMetaMTAMailingList())->loadAllWhere(
         'email in (%Ls)',
         $need_mail);
-      $mail = mpull($mail, 'getPHID', 'getEmail');
+      $mail = mpull($mail, 'getPHID', 'getName') +
+              mpull($mail, 'getPHID', 'getEmail');
     } else {
       $mail = array();
     }
