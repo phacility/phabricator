@@ -144,7 +144,8 @@ final class DifferentialRevisionCommentView extends AphrontView {
             if ($inline_cache) {
               $inline_content = $inline_cache;
             } else {
-              $inline_content = $this->markupEngine->markupText($content);
+              $inline_content = $this->markupEngine->markupText(
+                $inline_content);
               if ($inline->getID()) {
                 $inline->setCache($inline_content);
                 $inline->save();
