@@ -7,7 +7,11 @@
 }
 
 .phabricator-remarkup p {
-  margin: 0 0 .75em;
+  margin: 0 0 1em;
+}
+
+.phabricator-remarkup p:last-child {
+  margin-bottom: 0;
 }
 
 .phabricator-remarkup code {

@@ -156,7 +156,11 @@ final class DifferentialRevisionCommentView extends AphrontView {
           $inline_render[] =
             '<tr>'.
               '<td class="inline-line-number">'.$lines.'</td>'.
-              '<td>'.$inline_content.'</td>'.
+              '<td>'.
+                '<div class="phabricator-remarkup">'.
+                  $inline_content.
+                '</div>'.
+              '</td>'.
             '</tr>';
         }
       }

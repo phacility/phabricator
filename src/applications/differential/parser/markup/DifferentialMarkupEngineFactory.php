@@ -21,6 +21,8 @@ class DifferentialMarkupEngineFactory {
   public function newDifferentialCommentMarkupEngine() {
     $engine = new PhutilRemarkupEngine();
 
+    $engine->setConfig('preserve-linebreaks', true);
+
     $rules = array();
     $rules[] = new PhutilRemarkupRuleEscapeRemarkup();
     $rules[] = new PhutilRemarkupRuleHyperlink();

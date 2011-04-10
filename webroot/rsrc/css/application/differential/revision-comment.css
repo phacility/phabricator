@@ -42,10 +42,7 @@
   overflow: hidden;
 }
 
-.differential-comment-core .phabricator-remarkup p {
-  margin: 0.35em 0;
-}
-
+.differential-comment-content .phabricator-remarkup code,
 .differential-comment-core .phabricator-remarkup code {
    width: 88ex;
    width: 81ch;
