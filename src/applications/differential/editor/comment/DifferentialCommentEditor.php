@@ -318,19 +318,17 @@ class DifferentialCommentEditor {
       ->setChangedByCommit($this->getChangedByCommit())
       ->send();
 
-/*
-
-  TODO
-
-    $event = array(
-      'revision_id' => $revision->getID(),
-      'fbid'        => $revision->getFBID(),
-      'feedback_id' => $feedback->getID(),
-      'action'      => $feedback->getAction(),
-      'actor'       => $this->actorPHID,
+    $event_data = array(
+      'revision_id'          => $revision->getID(),
+      'revision_phid'        => $revision->getPHID(),
+      'revision_name'        => $revision->getTitle(),
+      'revision_author_phid' => $revision->getAuthorPHID(),
+      'action'               => $comment->getAction(),
+      'feedback_content'     => $comment->getContent(),
+      'actor_phid'           => $this->actorPHID,
     );
-    id(new ToolsTimelineEvent('difx', fb_json_encode($event)))->record();
-*/
+    id(new PhabricatorTimelineEvent('difx', $event_data))
+      ->recordEvent();
 
     return $comment;
   }

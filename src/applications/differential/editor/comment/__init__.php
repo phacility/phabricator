@@ -14,6 +14,7 @@ phutil_require_module('phabricator', 'applications/differential/storage/changese
 phutil_require_module('phabricator', 'applications/differential/storage/comment');
 phutil_require_module('phabricator', 'applications/differential/storage/inlinecomment');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
+phutil_require_module('phabricator', 'infrastructure/daemon/timeline/storage/event');
 
 phutil_require_module('phutil', 'utils');
 
