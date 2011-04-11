@@ -25,9 +25,18 @@ class DifferentialRevisionListController extends DifferentialController {
   }
 
   public function processRequest() {
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    if ($request->isFormPost()) {
+      $phid_arr = $request->getArr('view_user');
+      $view_target = head($phid_arr);
+      return id(new AphrontRedirectResponse())
+        ->setURI($request->getRequestURI()->alter('phid', $view_target));
+    }
 
     $filters = array(
-      'Your Revisions',
+      'User Revisions',
       'active' => array(
         'name'  => 'Active Revisions',
         'queries' => array(
@@ -85,6 +94,7 @@ class DifferentialRevisionListController extends DifferentialController {
       'All Revisions',
       'allopen' => array(
         'name' => 'Open',
+        'nofilter' => true,
         'queries' => array(
           array(
             'query' => DifferentialRevisionListData::QUERY_ALL_OPEN,
@@ -98,15 +108,14 @@ class DifferentialRevisionListController extends DifferentialController {
       $this->filter = 'active';
     }
 
-    $request = $this->getRequest();
-    $user = $request->getUser();
+    $view_phid = nonempty($request->getStr('phid'), $user->getPHID());
 
     $queries = array();
     $filter = $filters[$this->filter];
     foreach ($filter['queries'] as $query) {
       $query_object = new DifferentialRevisionListData(
         $query['query'],
-        array($user->getPHID()));
+        array($view_phid));
       $queries[] = array(
         'object' => $query_object,
       ) + $query;
@@ -114,6 +123,10 @@ class DifferentialRevisionListController extends DifferentialController {
 
     $side_nav = new AphrontSideNavView();
 
+    $query = null;
+    if ($view_phid) {
+      $query = '?phid='.$view_phid;
+    }
 
     foreach ($filters as $filter_name => $filter_desc) {
       if (is_int($filter_name)) {
@@ -129,13 +142,16 @@ class DifferentialRevisionListController extends DifferentialController {
         phutil_render_tag(
           'a',
           array(
-            'href' => '/differential/filter/'.$filter_name.'/',
+            'href' => '/differential/filter/'.$filter_name.'/'.$query,
             'class' => $selected ? 'aphront-side-nav-selected' : null,
           ),
           phutil_escape_html($filter_desc['name'])));
     }
 
     $phids = array();
+
+    $phids[$view_phid] = true;
+
     $rev_ids = array();
     foreach ($queries as $key => $query) {
       $revisions = $query['object']->loadRevisions();
@@ -178,6 +194,25 @@ class DifferentialRevisionListController extends DifferentialController {
         ->loadHandles();
     } else {
       $handles = array();
+    }
+
+    if (empty($filters[$this->filter]['nofilter'])) {
+      $filter_form = id(new AphrontFormView())
+        ->setUser($user)
+        ->appendChild(
+          id(new AphrontFormTokenizerControl())
+            ->setDatasource('/typeahead/common/users/')
+            ->setLabel('View User')
+            ->setName('view_user')
+            ->setValue(
+              array(
+                $view_phid => $handles[$view_phid]->getFullName(),
+              ))
+            ->setLimit(1));
+
+      $filter_view = new AphrontListFilterView();
+      $filter_view->appendChild($filter_form);
+      $side_nav->appendChild($filter_view);
     }
 
     foreach ($queries as $query) {

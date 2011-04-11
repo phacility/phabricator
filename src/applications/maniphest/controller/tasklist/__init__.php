@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/maniphest/constants/priority');
 phutil_require_module('phabricator', 'applications/maniphest/constants/status');
 phutil_require_module('phabricator', 'applications/maniphest/controller/base');
@@ -15,6 +16,7 @@ phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'view/form/base');
 phutil_require_module('phabricator', 'view/form/control/togglebuttons');
+phutil_require_module('phabricator', 'view/form/control/tokenizer');
 phutil_require_module('phabricator', 'view/layout/listfilter');
 phutil_require_module('phabricator', 'view/layout/sidenav');
 

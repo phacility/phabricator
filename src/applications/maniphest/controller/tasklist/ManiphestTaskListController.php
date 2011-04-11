@@ -26,8 +26,20 @@ class ManiphestTaskListController extends ManiphestController {
 
   public function processRequest() {
 
+    $request = $this->getRequest();
+    $user = $request->getUser();
+    $uri = $request->getRequestURI();
+
+    if ($request->isFormPost()) {
+      $phid_arr = $request->getArr('view_user');
+      $view_target = head($phid_arr);
+      return id(new AphrontRedirectResponse())
+        ->setURI($request->getRequestURI()->alter('phid', $view_target));
+    }
+
+
     $views = array(
-      'Your Tasks',
+      'User Tasks',
       'action'    => 'Assigned',
       'created'   => 'Created',
       'triage'    => 'Need Triage',
@@ -43,8 +55,11 @@ class ManiphestTaskListController extends ManiphestController {
       $this->view = 'action';
     }
 
-    $request = $this->getRequest();
-    $uri = $request->getRequestURI();
+    $has_filter = array(
+      'action' => true,
+      'created' => true,
+      'triage' => true,
+    );
 
     $nav = new AphrontSideNavView();
     foreach ($views as $view => $name) {
@@ -73,7 +88,10 @@ class ManiphestTaskListController extends ManiphestController {
     list($grouping, $group_links) = $this->renderGroupLinks();
     list($order, $order_links) = $this->renderOrderLinks();
 
+    $view_phid = nonempty($request->getStr('phid'), $user->getPHID());
+
     list($tasks, $handles) = $this->loadTasks(
+      $view_phid,
       array(
         'status'  => $status_map,
         'group'   => $grouping,
@@ -82,7 +100,22 @@ class ManiphestTaskListController extends ManiphestController {
 
 
     $form = id(new AphrontFormView())
-      ->setUser($request->getUser())
+      ->setUser($user);
+
+    if (isset($has_filter[$this->view])) {
+      $form->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setLimit(1)
+          ->setDatasource('/typeahead/common/users/')
+          ->setName('view_user')
+          ->setLabel('View User')
+          ->setValue(
+            array(
+              $view_phid => $handles[$view_phid]->getFullName(),
+            )));
+    }
+
+    $form
       ->appendChild(
         id(new AphrontFormToggleButtonsControl())
           ->setLabel('Status')
@@ -145,11 +178,8 @@ class ManiphestTaskListController extends ManiphestController {
       ));
   }
 
-  private function loadTasks(array $dict) {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $phids = array($user->getPHID());
+  private function loadTasks($view_phid, array $dict) {
+    $phids = array($view_phid);
 
     $task = new ManiphestTask();
 
@@ -211,6 +241,7 @@ class ManiphestTaskListController extends ManiphestController {
     $data = call_user_func_array(array($task, 'loadAllWhere'), $argv);
 
     $handle_phids = mpull($data, 'getOwnerPHID');
+    $handle_phids[] = $view_phid;
     $handles = id(new PhabricatorObjectHandleData($handle_phids))
       ->loadHandles();
 
