@@ -16,12 +16,8 @@ schemata into it. First, load the initial database schema.
 
   mysql -uroot < path/to/phabricator/resources/sql/init/initialize.sql
 
-Next, load each of the database patches in order. (One day this will be
-better.)
-
-  mysql -uroot < path/to/phabricator/resources/sql/patches/000.project.sql
-  mysql -uroot < path/to/phabricator/resources/sql/patches/001...
-  ...
+After this you need to upgrade the schema see @{article:Upgrading Schema},
+but you need to finish the rest of the configuration first.
 
 = Configuring Apache =
 
@@ -119,3 +115,8 @@ configuring Apache:
 
 Now, look through ##default.conf.php## and override any options you want to
 change by providing overrides in ##myconfig.conf.php##.
+
+= Upgrading Schema =
+
+After you have configured Phabricator, you need to upgrade the database
+schema, see @{article:Upgrading Schema}

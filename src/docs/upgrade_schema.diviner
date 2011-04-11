@@ -1,0 +1,32 @@
+@title Upgrading Schema
+@group config
+
+This document descibes how to upgrade the database schema.
+
+= Prerequisites =
+
+This document assumes you've already initialized the MySQL database and
+configured your Phabricator environment. If you haven't, see
+@{article:Configuration Guide}.
+
+= Loading patches =
+
+If you are doing this for the first time to a freshly installed MySQL database,
+run the following command:
+
+  PHABRICATOR_ENV=<your_config> php path/to/phabricator/scripts/sql/upgrade_schema.php 0
+
+This will install all the patches starting from 0. Running this script will
+store the information of the latest installed patch in the Phabricator database.
+Next time you want to upgrade your schema, just run:
+
+  PHABRICATOR_ENV=<your_config> php path/to/phabricator/scripts/sql/upgrade_schema.php
+
+This will install all the patches that are new since the last time you ran
+this script.
+
+If you need to upgrade the schema starting from a specific patch, just run:
+
+  PHABRICATOR_ENV=<your_config> php path/to/phabricator/scripts/sql/upgrade_schema.php <patch_number>
+
+However, this isn't usually needed.
