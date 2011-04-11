@@ -44,7 +44,14 @@ class DifferentialRevisionViewController extends DifferentialController {
     }
 
     $diff_vs = $request->getInt('vs');
+
     $target = end($diffs);
+    $target_id = $request->getInt('id');
+    if ($target_id) {
+      if (isset($diffs[$target_id])) {
+        $target = $diffs[$target_id];
+      }
+    }
 
     $diffs = mpull($diffs, null, 'getID');
     if (empty($diffs[$diff_vs])) {
