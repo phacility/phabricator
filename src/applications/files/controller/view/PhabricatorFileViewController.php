@@ -41,6 +41,7 @@ class PhabricatorFileViewController extends PhabricatorFileController {
         $data = $file->loadFileData();
         $response = new AphrontFileResponse();
         $response->setContent($data);
+        $response->setCacheDurationInSeconds(60 * 60 * 24 * 30);
 
         if ($this->view == 'view') {
           if (!$file->isViewableInBrowser()) {
