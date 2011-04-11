@@ -305,11 +305,17 @@ class DifferentialRevisionViewController extends DifferentialController {
         $name = phutil_escape_html(idx($test, 'name'));
         $result = phutil_escape_html(idx($test, 'result'));
         $userdata = phutil_escape_html(idx($test, 'userdata'));
+        if (strlen($userdata) > 256) {
+          $userdata = substr($userdata, 0, 256).'...';
+        }
+        $userdata = str_replace("\n", '<br />', $userdata);
         $unit_messages[] =
           '<tr>'.
             '<th>'.$name.'</th>'.
-            '<th class="unit-test-result result-'.$result.'">'.
-              strtoupper($result).
+            '<th class="unit-test-result">'.
+              '<div class="result-'.$result.'">'.
+                strtoupper($result).
+              '</div>'.
             '</th>'.
             '<td>'.$userdata.'</td>'.
           '</tr>';

@@ -66,8 +66,18 @@
   padding: 4px 8px;
 }
 
+.differential-unit-table th.unit-test-result {
+  padding: 0;
+}
+
 .differential-unit-table .result-fail {
   background: #ff3333;
+  padding: 4px 8px;
+}
+
+.differential-unit-table .result-unsound {
+  background: #cc33cc;
+  padding: 4px 8px;
 }
 
 .differential-unit-table td {
