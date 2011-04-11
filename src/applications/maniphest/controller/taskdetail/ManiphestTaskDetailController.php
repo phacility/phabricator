@@ -39,7 +39,7 @@ class ManiphestTaskDetailController extends ManiphestController {
     }
 
     $transactions = id(new ManiphestTransaction())->loadAllWhere(
-      'taskID = %d',
+      'taskID = %d ORDER BY id ASC',
       $task->getID());
 
     $phids = array();
