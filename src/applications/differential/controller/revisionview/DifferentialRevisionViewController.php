@@ -129,14 +129,34 @@ class DifferentialRevisionViewController extends DifferentialController {
     $revision_detail = new DifferentialRevisionDetailView();
     $revision_detail->setRevision($revision);
 
+    $custom_renderer_class = PhabricatorEnv::getEnvConfig(
+      'differential.revision-custom-detail-renderer');
+    if ($custom_renderer_class) {
+      PhutilSymbolLoader::loadClass($custom_renderer_class);
+      $custom_renderer =
+        newv($custom_renderer_class, array());
+    }
+
     $properties = $this->getRevisionProperties(
       $revision,
       $target,
       $handles,
       $diff_properties);
+    if ($custom_renderer) {
+      $properties = array_merge(
+        $properties,
+        $custom_renderer->generateProperties($revision, $target));
+    }
+
     $revision_detail->setProperties($properties);
 
     $actions = $this->getRevisionActions($revision);
+    if ($custom_renderer) {
+      $actions = array_merge(
+        $actions,
+        $custom_renderer->generateActionLinks($revision, $target));
+    }
+
     $revision_detail->setActions($actions);
 
     $comment_view = new DifferentialRevisionCommentListView();

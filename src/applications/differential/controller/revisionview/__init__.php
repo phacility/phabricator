@@ -25,9 +25,11 @@ phutil_require_module('phabricator', 'applications/draft/storage/draft');
 phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
+phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'view/form/error');
 
 phutil_require_module('phutil', 'markup');
+phutil_require_module('phutil', 'symbols');
 phutil_require_module('phutil', 'utils');
 
 

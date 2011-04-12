@@ -141,6 +141,7 @@ phutil_register_library_map(array(
     'DifferentialRevisionCommentListView' => 'applications/differential/view/revisioncommentlist',
     'DifferentialRevisionCommentView' => 'applications/differential/view/revisioncomment',
     'DifferentialRevisionControlSystem' => 'applications/differential/constants/revisioncontrolsystem',
+    'DifferentialRevisionDetailRenderer' => 'applications/differential/controller/customrenderer',
     'DifferentialRevisionDetailView' => 'applications/differential/view/revisiondetail',
     'DifferentialRevisionEditController' => 'applications/differential/controller/revisionedit',
     'DifferentialRevisionEditor' => 'applications/differential/editor/revision',
