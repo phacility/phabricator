@@ -79,29 +79,71 @@ class PhabricatorOwnersPackage extends PhabricatorOwnersDAO {
     );
 
     foreach ($paths as $path) {
-      $trailing_slash = preg_match('@/$@', $path) ? '/' : '';
-      $path = trim($path, '/');
-      $parts = explode('/', $path);
-      while (count($parts)) {
-        $fragments['/'.implode('/', $parts).$trailing_slash] = true;
-        $trailing_slash = '/';
-        array_pop($parts);
+      $fragments += self::splitPath($path);
+    }
+
+    return self::loadPackagesForPaths($repository, array_keys($fragments));
+ }
+
+ public static function loadOwningPackages($repository, $path) {
+    if (empty($path)) {
+      return array();
+    }
+
+    $fragments = self::splitPath($path);
+    return self::loadPackagesForPaths($repository, array_keys($fragments), 1);
+ }
+
+  private static function loadPackagesForPaths(
+    PhabricatorRepository $repository,
+    array $paths,
+    $limit = 0) {
+    $package = new PhabricatorOwnersPackage();
+    $path = new PhabricatorOwnersPath();
+    $conn = $package->establishConnection('r');
+
+    $repository_clause = qsprintf($conn, 'AND p.repositoryPHID = %s',
+      $repository->getPHID());
+
+    $limit_clause = '';
+    if (!empty($limit)) {
+      $limit_clause = qsprintf($conn, 'LIMIT %d', $limit);
+    }
+
+    $data = queryfx_all(
+      $conn,
+      'SELECT pkg.id FROM %T pkg JOIN %T p ON p.packageID = pkg.id
+        WHERE p.path IN (%Ls) %Q ORDER BY LENGTH(p.path) DESC %Q',
+      $package->getTableName(),
+      $path->getTableName(),
+      $paths,
+      $repository_clause,
+      $limit_clause);
+
+    $ids = ipull($data, 'id');
+
+    if (empty($ids)) {
+      return array();
+    }
+
+    $order = array();
+    foreach ($ids as $id) {
+      if (empty($order[$id])) {
+        $order[$id] = true;
       }
     }
 
-    $package = new PhabricatorOwnersPackage();
-    $path = new PhabricatorOwnersPath();
-    $data = queryfx_all(
-      $package->establishConnection('r'),
-      'SELECT pkg.* FROM %T pkg JOIN %T p ON p.packageID = pkg.id
-        WHERE p.repositoryPHID = %s
-          AND p.path IN (%Ls)',
-      $package->getTableName(),
-      $path->getTableName(),
-      $repository->getPHID(),
-      array_keys($fragments));
+    $packages = $package->loadAllWhere('id in (%Ld)', array_keys($order));
 
-    return $package->loadAllFromArray($data);
+    $result = array();
+    // Reorder packages according to specificity.
+    foreach ($packages as $package) {
+      $result[$package->getID()] = $package;
+    }
+
+    $result = array_select_keys($result, array_keys($order));
+
+    return $result;
   }
 
   public function save() {
@@ -167,4 +209,16 @@ class PhabricatorOwnersPackage extends PhabricatorOwnersDAO {
     return parent::delete();
   }
 
+  private static function splitPath($path) {
+    $result = array();
+    $trailing_slash = preg_match('@/$@', $path) ? '/' : '';
+    $path = trim($path, '/');
+    $parts = explode('/', $path);
+    while (count($parts)) {
+      $result['/'.implode('/', $parts).$trailing_slash] = true;
+      $trailing_slash = '/';
+      array_pop($parts);
+    }
+    return $result;
+  }
 }
