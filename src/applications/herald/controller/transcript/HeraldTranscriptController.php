@@ -486,10 +486,15 @@ class HeraldTranscriptController extends HeraldController {
 
     $data = array();
     if ($object_xscript) {
+      $phid = $object_xscript->getPHID();
+      $handles = id(new PhabricatorObjectHandleData(array($phid)))
+        ->loadHandles();
+
       $data += array(
         'Object Name' => $object_xscript->getName(),
         'Object Type' => $object_xscript->getType(),
-        'Object PHID' => $object_xscript->getPHID(),
+        'Object PHID' => $phid,
+        'Object Link' => $handles[$phid]->renderLink(),
       );
     }
 
@@ -515,6 +520,8 @@ class HeraldTranscriptController extends HeraldController {
             'class' => 'herald-field-value-transcript',
           ),
           phutil_escape_html($value));
+      } else if ($name === 'Object Link') {
+        // The link cannot be escaped
       } else {
         $value = phutil_escape_html($value);
       }
