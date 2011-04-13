@@ -66,6 +66,9 @@ class PhabricatorTypeaheadCommonDatasourceController
     if ($need_users) {
       $users = id(new PhabricatorUser())->loadAll();
       foreach ($users as $user) {
+        if ($user->getIsSystemAgent()) {
+          continue;
+        }
         $data[] = array(
           $user->getUsername().' ('.$user->getRealName().')',
           '/p/'.$user->getUsername(),
