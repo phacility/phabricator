@@ -34,7 +34,7 @@ class PhabricatorUser extends PhabricatorUserDAO {
 
   protected $conduitCertificate;
 
-  protected $isSystemAgent;
+  protected $isSystemAgent = 0;
 
   private $preferences = null;
 

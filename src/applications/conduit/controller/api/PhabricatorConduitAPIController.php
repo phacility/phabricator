@@ -119,7 +119,13 @@ class PhabricatorConduitAPIController
     $log->setConnectionID($connection_id);
     $log->setError((string)$error_code);
     $log->setDuration(1000000 * ($time_end - $time_start));
-    $log->save();
+
+    // TODO: This is a hack, but the insert is comparatively expensive and
+    // we only really care about having these logs for real CLI clients, if
+    // even that.
+    if (empty($metadata['authToken'])) {
+      $log->save();
+    }
 
     $result = array(
       'result'      => $result,
