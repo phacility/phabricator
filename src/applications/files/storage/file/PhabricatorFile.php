@@ -121,6 +121,23 @@ class PhabricatorFile extends PhabricatorFileDAO {
     return $file;
   }
 
+  public static function newFromFileDownload($uri, $name) {
+    $uri = new PhutilURI($uri);
+    $timeout = stream_context_create(
+      array(
+        'http' => array(
+          'timeout' => 5,
+        ),
+      ));
+
+    $file_data = @file_get_contents($uri, false, $timeout);
+    if ($file_data === false) {
+      return null;
+    }
+
+    return self::newFromFileData($file_data, array('name' => $name));
+  }
+
   public static function normalizeFileName($file_name) {
     return preg_replace('/[^a-zA-Z0-9.~_-]/', '_', $file_name);
   }

@@ -30,6 +30,7 @@ class DifferentialMarkupEngineFactory {
     $rules[] = new PhabricatorRemarkupRuleDifferential();
     $rules[] = new PhabricatorRemarkupRuleDiffusion();
     $rules[] = new PhabricatorRemarkupRuleManiphest();
+    $rules[] = new PhabricatorRemarkupRuleImageMacro();
 
     $rules[] = new PhutilRemarkupRuleEscapeHTML();
     $rules[] = new PhutilRemarkupRuleMonospace();

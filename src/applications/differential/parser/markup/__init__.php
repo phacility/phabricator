@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'infrastructure/markup/remarkup/markuprule/differential');
 phutil_require_module('phabricator', 'infrastructure/markup/remarkup/markuprule/diffusion');
+phutil_require_module('phabricator', 'infrastructure/markup/remarkup/markuprule/imagemacro');
 phutil_require_module('phabricator', 'infrastructure/markup/remarkup/markuprule/maniphest');
 
 phutil_require_module('phutil', 'markup/engine/remarkup');
