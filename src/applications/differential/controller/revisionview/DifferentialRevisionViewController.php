@@ -360,14 +360,16 @@ class DifferentialRevisionViewController extends DifferentialController {
 
     $properties['Unit'] = $ustar.' '.$umsg.$utail;
 
-    $tasks = $revision->getAttachedPHIDs(
-      PhabricatorPHIDConstants::PHID_TYPE_TASK);
-    if ($tasks) {
-      $links = array();
-      foreach ($tasks as $task_phid) {
-        $links[] = $handles[$task_phid]->renderLink();
+    if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
+      $tasks = $revision->getAttachedPHIDs(
+        PhabricatorPHIDConstants::PHID_TYPE_TASK);
+      if ($tasks) {
+        $links = array();
+        foreach ($tasks as $task_phid) {
+          $links[] = $handles[$task_phid]->renderLink();
+        }
+        $properties['Maniphest Tasks'] = implode('<br />', $links);
       }
-      $properties['Maniphest Tasks'] = implode('<br />', $links);
     }
 
     $commit_phids = $revision->getCommitPHIDs();
@@ -419,12 +421,14 @@ class DifferentialRevisionViewController extends DifferentialController {
     require_celerity_resource('phabricator-object-selector-css');
     require_celerity_resource('javelin-behavior-phabricator-object-selector');
 
-    $links[] = array(
-      'class' => 'attach-maniphest',
-      'name'  => 'Edit Maniphest Tasks',
-      'href'  => "/differential/attach/{$revision_id}/TASK/",
-      'sigil' => 'workflow',
-    );
+    if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
+      $links[] = array(
+        'class' => 'attach-maniphest',
+        'name'  => 'Edit Maniphest Tasks',
+        'href'  => "/differential/attach/{$revision_id}/TASK/",
+        'sigil' => 'workflow',
+      );
+    }
 
     $links[] = array(
       'class' => 'transcripts-metamta',

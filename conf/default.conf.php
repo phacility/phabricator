@@ -286,6 +286,15 @@ return array(
     'text/plain'  => 'text/plain; charset=utf-8',
   ),
 
+// -- Differential ---------------------------------------------------------- //
+
+  'differential.revision-custom-detail-renderer'  => null,
+
+
+// -- Maniphest ------------------------------------------------------------- //
+
+  'maniphest.enabled' => true,
+
 // -- Customization --------------------------------------------------------- //
 
   // Paths to additional phutil libraries to load.
