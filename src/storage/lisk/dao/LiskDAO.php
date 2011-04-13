@@ -741,12 +741,13 @@ abstract class LiskDAO {
       }
       $this->setVersion($this->getVersion() + 1);
     } else {
+      $id = $this->getID();
       $conn->query(
-        'UPDATE %T SET %Q WHERE %C = %d',
+        'UPDATE %T SET %Q WHERE %C = '.(is_int($id) ? '%d' : '%s'),
         $this->getTableName(),
         $map,
         $this->getIDKeyForUse(),
-        $this->getID());
+        $id);
       // We can't detect a missing object because updating an object without
       // changing any values doesn't affect rows. We could jiggle timestamps
       // to catch this for objects which track them if we wanted.
