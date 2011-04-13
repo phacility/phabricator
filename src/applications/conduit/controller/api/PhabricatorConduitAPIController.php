@@ -160,6 +160,30 @@ class PhabricatorConduitAPIController
       return null;
     }
 
+    // Handle sessionless auth. TOOD: This is super messy.
+    if (isset($metadata['authUser'])) {
+      $user = id(new PhabricatorUser())->loadOneWhere(
+        'userName = %s',
+        $metadata['authUser']);
+      if (!$user) {
+        return array(
+          'ERR-INVALID-AUTH',
+          'Authentication is invalid.',
+        );
+      }
+      $token = idx($metadata, 'authToken');
+      $signature = idx($metadata, 'authSignature');
+      $certificate = $user->getConduitCertificate();
+      if (sha1($token.$certificate) !== $signature) {
+        return array(
+          'ERR-INVALID-AUTH',
+          'Authentication is invalid.',
+        );
+      }
+      $api_request->setUser($user);
+      return null;
+    }
+
     $session_key = idx($metadata, 'sessionKey');
     if (!$session_key) {
       return array(
