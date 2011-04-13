@@ -159,6 +159,8 @@ class DifferentialRevisionViewController extends DifferentialController {
 
     $revision_detail->setActions($actions);
 
+    $revision_detail->setUser($user);
+
     $comment_view = new DifferentialRevisionCommentListView();
     $comment_view->setComments($comments);
     $comment_view->setHandles($handles);
@@ -402,10 +404,10 @@ class DifferentialRevisionViewController extends DifferentialController {
     if (!$viewer_is_owner && !$viewer_is_reviewer) {
       $action = $viewer_is_cc ? 'rem' : 'add';
       $links[] = array(
-        'class' => $viewer_is_cc ? 'subscribe-rem' : 'subscribe-add',
-        'href'  => "/differential/subscribe/{$action}/{$revision_id}/",
-        'name'  => $viewer_is_cc ? 'Unsubscribe' : 'Subscribe',
-        'sigil' => 'workflow',
+        'class'   => $viewer_is_cc ? 'subscribe-rem' : 'subscribe-add',
+        'href'    => "/differential/subscribe/{$action}/{$revision_id}/",
+        'name'    => $viewer_is_cc ? 'Unsubscribe' : 'Subscribe',
+        'instant' => true,
       );
     } else {
       $links[] = array(

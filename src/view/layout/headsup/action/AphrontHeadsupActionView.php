@@ -22,6 +22,8 @@ final class AphrontHeadsupActionView extends AphrontView {
   private $class;
   private $uri;
   private $workflow;
+  private $instant;
+  private $user;
 
   public function setName($name) {
     $this->name = $name;
@@ -43,7 +45,31 @@ final class AphrontHeadsupActionView extends AphrontView {
     return $this;
   }
 
+  public function setInstant($instant) {
+    $this->instant = $instant;
+    return $this;
+  }
+
+  public function setUser($user) {
+    $this->user = $user;
+    return $this;
+  }
+
   public function render() {
+    if ($this->instant) {
+      $button_class = $this->class.' link';
+      return phabricator_render_form(
+        $this->user,
+        array(
+          'action' => $this->uri,
+          'method' => 'post',
+          'style'  => 'display: inline',
+        ),
+        '<button class="'.$button_class.'">'.
+          phutil_escape_html($this->name).
+        '</button>'
+      );
+    }
 
     if ($this->uri) {
       $tag = 'a';

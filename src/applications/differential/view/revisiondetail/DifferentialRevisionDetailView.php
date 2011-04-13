@@ -21,6 +21,7 @@ final class DifferentialRevisionDetailView extends AphrontView {
   private $revision;
   private $properties;
   private $actions;
+  private $user;
 
   public function setRevision($revision) {
     $this->revision = $revision;
@@ -34,6 +35,11 @@ final class DifferentialRevisionDetailView extends AphrontView {
 
   public function setActions(array $actions) {
     $this->actions = $actions;
+    return $this;
+  }
+
+  public function setUser($user) {
+    $this->user = $user;
     return $this;
   }
 
@@ -65,6 +71,8 @@ final class DifferentialRevisionDetailView extends AphrontView {
       $obj->setURI(idx($action, 'href'));
       $obj->setWorkflow(idx($action, 'sigil') == 'workflow');
       $obj->setClass(idx($action, 'class'));
+      $obj->setInstant(idx($action, 'instant'));
+      $obj->setUser($this->user);
       $actions[] = $obj;
     }
 

@@ -14,11 +14,13 @@
 }
 
 .aphront-headsup-action-list a,
-.aphront-headsup-action-list span {
+.aphront-headsup-action-list span,
+.aphront-headsup-action-list button {
   background-position: 8px center;
   background-repeat:   no-repeat;
   display:             block;
   padding:             4px 4px 4px 32px;
+  line-height:         normal;
 }
 
 .aphront-headsup-action-list span.unavailable {
