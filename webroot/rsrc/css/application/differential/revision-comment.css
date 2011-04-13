@@ -72,6 +72,11 @@
   background:       #fff3f3;
 }
 
+.differential-comment-action-rethink .differential-comment-content {
+  border-color:     #aa0000;
+  background:       #fff3f3;
+}
+
 .differential-comment-action-commit .differential-comment-content {
   border-color:     #006699;
   background:       #f3f3ff;

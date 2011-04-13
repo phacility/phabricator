@@ -467,11 +467,16 @@ class DifferentialRevisionViewController extends DifferentialController {
       switch ($revision->getStatus()) {
         case DifferentialRevisionStatus::NEEDS_REVIEW:
           $actions[DifferentialAction::ACTION_ABANDON] = true;
+          $actions[DifferentialAction::ACTION_RETHINK] = true;
           break;
         case DifferentialRevisionStatus::NEEDS_REVISION:
+          $actions[DifferentialAction::ACTION_ABANDON] = true;
+          $actions[DifferentialAction::ACTION_REQUEST] = true;
+          break;
         case DifferentialRevisionStatus::ACCEPTED:
           $actions[DifferentialAction::ACTION_ABANDON] = true;
           $actions[DifferentialAction::ACTION_REQUEST] = true;
+          $actions[DifferentialAction::ACTION_RETHINK] = true;
           break;
         case DifferentialRevisionStatus::COMMITTED:
           break;

@@ -183,6 +183,22 @@ class DifferentialCommentEditor {
           ->save();
         break;
 
+      case DifferentialAction::ACTION_RETHINK:
+        if (!$actor_is_author) {
+          throw new Exception(
+            "You can not plan changes to somebody else's revision");
+        }
+        if (($revision_status != DifferentialRevisionStatus::NEEDS_REVIEW) &&
+            ($revision_status != DifferentialRevisionStatus::ACCEPTED)) {
+          $action = DifferentialAction::ACTION_COMMENT;
+          break;
+        }
+
+        $revision
+          ->setStatus(DifferentialRevisionStatus::NEEDS_REVISION)
+          ->save();
+        break;
+
       case DifferentialAction::ACTION_RECLAIM:
         if (!$actor_is_author) {
           throw new Exception('You can not reclaim a revision you do not own.');

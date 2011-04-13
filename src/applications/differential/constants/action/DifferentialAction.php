@@ -22,6 +22,7 @@ final class DifferentialAction {
   const ACTION_COMMENT        = 'none';
   const ACTION_ACCEPT         = 'accept';
   const ACTION_REJECT         = 'reject';
+  const ACTION_RETHINK        = 'rethink';
   const ACTION_ABANDON        = 'abandon';
   const ACTION_REQUEST        = 'request_review';
   const ACTION_RECLAIM        = 'reclaim';
@@ -37,6 +38,7 @@ final class DifferentialAction {
       self::ACTION_COMMENT        => 'commented on',
       self::ACTION_ACCEPT         => 'accepted',
       self::ACTION_REJECT         => 'requested changes to',
+      self::ACTION_RETHINK        => 'planned changes to',
       self::ACTION_ABANDON        => 'abandoned',
       self::ACTION_COMMIT         => 'committed',
       self::ACTION_REQUEST        => 'requested a review of',
@@ -61,6 +63,7 @@ final class DifferentialAction {
       self::ACTION_COMMENT        => 'Comment',
       self::ACTION_ACCEPT         => "Accept Revision \xE2\x9C\x94",
       self::ACTION_REJECT         => "Request Changes \xE2\x9C\x98",
+      self::ACTION_RETHINK        => "Plan Changes \xE2\x9C\x98",
       self::ACTION_ABANDON        => 'Abandon Revision',
       self::ACTION_REQUEST        => 'Request Review',
       self::ACTION_RECLAIM        => 'Reclaim Revision',
