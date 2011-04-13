@@ -34,6 +34,8 @@ class PhabricatorUser extends PhabricatorUserDAO {
 
   protected $conduitCertificate;
 
+  protected $isSystemAgent;
+
   private $preferences = null;
 
   public function getProfileImagePHID() {
