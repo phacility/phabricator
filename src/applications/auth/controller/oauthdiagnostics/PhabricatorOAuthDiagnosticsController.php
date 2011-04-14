@@ -168,7 +168,7 @@ class PhabricatorOAuthDiagnosticsController
       if ($token_strict) {
         $results['App Login'] = array(
           $res_ok,
-          $token_strict,
+          '(A Valid Token)',
           "Raw application login to Facebook works.");
       } else {
         $data = json_decode($token_value, true);
