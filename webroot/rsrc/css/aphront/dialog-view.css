@@ -44,9 +44,9 @@
 }
 
 .jx-mask {
-  opacity:    .75;
-  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=75)";
-  filter:     alpha(opacity=75);
+  opacity:    .37;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=37)";
+  filter:     alpha(opacity=37);
   background: #222;
   position:   absolute;
   z-index:    5;
