@@ -38,6 +38,7 @@ class DifferentialMarkupEngineFactory {
     $rules[] = new PhutilRemarkupRuleItalic();
 
     $blocks = array();
+    $blocks[] = new PhutilRemarkupEngineRemarkupQuotesBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupHeaderBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupListBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupCodeBlockRule();

@@ -40,3 +40,11 @@
 .phabricator-remarkup h2 {
   margin: .75em 0 .5em;
 }
+
+.phabricator-remarkup blockquote {
+  border-left: 1px solid #AAAAAA;
+  color:       #333333;
+  font-style:  italic;
+  margin:      .5em 0em;
+  padding:     .25em 1em;
+}
