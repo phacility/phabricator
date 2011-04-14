@@ -102,7 +102,8 @@ class ConduitAPI_conduit_connect_Method extends ConduitAPIMethod {
         }
         break;
       default:
-        throw new ConduitException('ERR-UNKNOWN-CLIENT');
+        // Allow new clients by default.
+        break;
     }
 
     $token = $request->getValue('authToken');
