@@ -135,15 +135,9 @@ class PhabricatorOwnersPackage extends PhabricatorOwnersDAO {
 
     $packages = $package->loadAllWhere('id in (%Ld)', array_keys($order));
 
-    $result = array();
-    // Reorder packages according to specificity.
-    foreach ($packages as $package) {
-      $result[$package->getID()] = $package;
-    }
+    $packages = array_select_keys($packages, array_keys($order));
 
-    $result = array_select_keys($result, array_keys($order));
-
-    return $result;
+    return $packages;
   }
 
   public function save() {
