@@ -54,7 +54,7 @@ class PhabricatorTimelineIterator implements Iterator {
       $event->establishConnection('r'),
       'SELECT event.*, event_data.eventData eventData
         FROM %T event
-        LEFT JOIN %T event_data ON event_data.eventID = event.id
+        LEFT JOIN %T event_data ON event_data.id = event.dataID
         WHERE event.id > %d AND event.type in (%Ls)
         ORDER BY event.id ASC LIMIT %d',
       $event->getTableName(),

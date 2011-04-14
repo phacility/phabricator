@@ -34,9 +34,10 @@ class PhabricatorDaemonTimelineEventController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $data = id(new PhabricatorTimelineEventData())->loadOneWhere(
-      'eventID = %d',
-      $event->getID());
+    if ($event->getDataID()) {
+      $data = id(new PhabricatorTimelineEventData())->load(
+        $event->getDataID());
+    }
 
     if ($data) {
       $data = json_encode($data->getEventData());

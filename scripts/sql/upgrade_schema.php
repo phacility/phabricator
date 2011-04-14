@@ -21,6 +21,8 @@ $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 require_once $root.'/scripts/__init_env__.php';
 
+phutil_require_module('phutil', 'console');
+
 const TABLE_NAME = 'schema_version';
 
 if (isset($argv[1]) && !is_numeric($argv[1])) {
@@ -31,6 +33,15 @@ if (isset($argv[1]) && !is_numeric($argv[1])) {
     "run './update_schema.php' to apply all patches that are new since\n".
     "the last time this script was run\n\n";
   exit(0);
+}
+
+echo phutil_console_wrap(
+  "Before running this script, you should take down the Phabricator web ".
+  "interface and stop any running Phabricator daemons.");
+
+if (!phutil_console_confirm('Are you ready to continue?')) {
+  echo "Cancelled.\n";
+  exit(1);
 }
 
 // Use always the version from the commandline if it is defined

@@ -19,6 +19,8 @@
 class PhabricatorTimelineEvent extends PhabricatorTimelineDAO {
 
   protected $type;
+  protected $dataID;
+
   private $data;
 
   public function __construct($type, $data = null) {
@@ -43,14 +45,18 @@ class PhabricatorTimelineEvent extends PhabricatorTimelineDAO {
       throw new Exception("Event has already been recorded!");
     }
 
-    $this->save();
-
+    // Save the data first and point to it from the event to avoid a race
+    // condition where we insert the event before the data and a consumer reads
+    // it immediately.
     if ($this->data !== null) {
       $data = new PhabricatorTimelineEventData();
-      $data->setEventID($this->getID());
       $data->setEventData($this->data);
       $data->save();
+
+      $this->setDataID($data->getID());
     }
+
+    $this->save();
   }
 
   public function setData($data) {

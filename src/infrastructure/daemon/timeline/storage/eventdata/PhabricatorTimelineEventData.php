@@ -18,7 +18,6 @@
 
 class PhabricatorTimelineEventData extends PhabricatorTimelineDAO {
 
-  protected $eventID;
   protected $eventData;
 
   public function getConfiguration() {
