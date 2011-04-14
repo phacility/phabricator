@@ -101,6 +101,10 @@ class PhabricatorRepositoryGitCommitChangeParserWorker
           $change_target = $src_path;
           $move_away[$change_target][] = $change_path;
           break;
+        case 'T':
+          // Type of the file changed, fall through and treat it as a
+          // modification. Not 100% sure this is the right thing to do but it
+          // seems reasonable.
         case 'M':
           if ($file_type == DifferentialChangeType::FILE_DIRECTORY) {
             $change_type = DifferentialChangeType::TYPE_CHILD;
@@ -109,6 +113,8 @@ class PhabricatorRepositoryGitCommitChangeParserWorker
             $change_type = DifferentialChangeType::TYPE_CHANGE;
           }
           break;
+        // NOTE: "U" (unmerged) and "X" (unknown) statuses are also possible
+        // in theory but shouldn't appear here.
         default:
           throw new Exception("Failed to parse line '{$line}'.");
       }
