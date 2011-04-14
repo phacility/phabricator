@@ -506,7 +506,7 @@ class DifferentialRevisionViewController extends DifferentialController {
 
     $actions[DifferentialAction::ACTION_ADDREVIEWERS] = true;
 
-    return array_keys($actions);
+    return array_keys(array_filter($actions));
   }
 
   private function loadInlineComments(array $comments, array &$changesets) {
