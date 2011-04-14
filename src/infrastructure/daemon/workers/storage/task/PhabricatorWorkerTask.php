@@ -22,6 +22,7 @@ class PhabricatorWorkerTask extends PhabricatorWorkerDAO {
   protected $leaseOwner;
   protected $leaseExpires;
   protected $failureCount;
+  protected $dataID;
 
   private $serverTime;
   private $localTime;
@@ -58,16 +59,15 @@ class PhabricatorWorkerTask extends PhabricatorWorkerDAO {
       $this->failureCount = 0;
     }
 
-    $ret = parent::save();
-
     if ($is_new && $this->data) {
       $data = new PhabricatorWorkerTaskData();
-      $data->setTaskID($this->getID());
       $data->setData($this->data);
       $data->save();
+
+      $this->setDataID($data->getID());
     }
 
-    return $ret;
+    return parent::save();
   }
 
   public function setData($data) {

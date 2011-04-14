@@ -44,8 +44,8 @@ class PhabricatorWorkerTaskDetailController
     }
 
     $data = id(new PhabricatorWorkerTaskData())->loadOneWhere(
-      'taskID = %d',
-      $task->getID());
+      'id = %d',
+      $task->getDataID());
     if ($data) {
       $data = json_encode($data->getData());
     }

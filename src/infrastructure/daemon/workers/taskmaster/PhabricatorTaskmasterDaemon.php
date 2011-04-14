@@ -50,7 +50,7 @@ class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
           $conn_w,
           'SELECT task.*, taskdata.data _taskData, UNIX_TIMESTAMP() _serverTime
             FROM %T task LEFT JOIN %T taskdata
-              ON taskdata.taskID = task.id
+              ON taskdata.id = task.dataID
             WHERE leaseOwner = %s AND leaseExpires > UNIX_TIMESTAMP()
             LIMIT 1',
           $task_table->getTableName(),
@@ -97,9 +97,9 @@ class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
             if ($data !== null) {
               queryfx(
                 $conn_w,
-                'DELETE FROM %T WHERE taskID = %d',
+                'DELETE FROM %T WHERE id = %d',
                 $taskdata_table->getTableName(),
-                $task->getID());
+                $task->getDataID());
             }
           } catch (Exception $ex) {
             $task->setFailureCount($task->getFailureCount() + 1);

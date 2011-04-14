@@ -18,7 +18,6 @@
 
 class PhabricatorWorkerTaskData extends PhabricatorWorkerDAO {
 
-  protected $taskID;
   protected $data;
 
   public function getConfiguration() {
