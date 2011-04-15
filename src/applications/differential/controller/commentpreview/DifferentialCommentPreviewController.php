@@ -46,6 +46,7 @@ class DifferentialCommentPreviewController extends DifferentialController {
     $view->setHandles($handles);
     $view->setMarkupEngine($engine);
     $view->setPreview(true);
+    $view->setTargetDiff(null);
 
     $draft = new PhabricatorDraft();
     $draft

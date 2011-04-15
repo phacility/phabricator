@@ -23,6 +23,7 @@ final class DifferentialRevisionCommentListView extends AphrontView {
   private $inlines;
   private $changesets;
   private $user;
+  private $target;
 
   public function setComments(array $comments) {
     $this->comments = $comments;
@@ -49,6 +50,10 @@ final class DifferentialRevisionCommentListView extends AphrontView {
     return $this;
   }
 
+  public function setTargetDiff(DifferentialDiff $target) {
+    $this->target = $target;
+  }
+
   public function render() {
 
     require_celerity_resource('differential-revision-comment-list-css');
@@ -67,6 +72,7 @@ final class DifferentialRevisionCommentListView extends AphrontView {
       $view->setMarkupEngine($engine);
       $view->setInlineComments(idx($inlines, $comment->getID(), array()));
       $view->setChangesets($this->changesets);
+      $view->setTargetDiff($this->target);
 
       $html[] = $view->render();
     }

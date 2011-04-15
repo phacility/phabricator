@@ -24,6 +24,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
   private $preview;
   private $inlines;
   private $changesets;
+  private $target;
 
   public function setComment($comment) {
     $this->comment = $comment;
@@ -54,6 +55,10 @@ final class DifferentialRevisionCommentView extends AphrontView {
     // Ship these in sorted by getSortKey() and keyed by ID... or else!
     $this->changesets = $changesets;
     return $this;
+  }
+
+  public function setTargetDiff($target) {
+    $this->target = $target;
   }
 
   public function render() {
@@ -130,13 +135,16 @@ final class DifferentialRevisionCommentView extends AphrontView {
                      ($inline->getLineNumber() + $inline->getLineLength());
           }
 
-          $lines = phutil_render_tag(
-            'a',
-            array(
-              'href' => '#inline-'.$inline->getID(),
-              'class' => 'num',
-            ),
-            $lines);
+          if (!$this->target ||
+              $changeset->getDiffID() === $this->target->getID()) {
+            $lines = phutil_render_tag(
+              'a',
+              array(
+                'href' => '#inline-'.$inline->getID(),
+                'class' => 'num',
+              ),
+              $lines);
+          }
 
           $inline_content = $inline->getContent();
           if (strlen($inline_content)) {

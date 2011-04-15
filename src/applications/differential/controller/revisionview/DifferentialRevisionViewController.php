@@ -167,6 +167,7 @@ class DifferentialRevisionViewController extends DifferentialController {
     $comment_view->setInlineComments($inlines);
     $comment_view->setChangesets($all_changesets);
     $comment_view->setUser($user);
+    $comment_view->setTargetDiff($target);
 
     $diff_history = new DifferentialRevisionUpdateHistoryView();
     $diff_history->setDiffs($diffs);
