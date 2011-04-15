@@ -181,10 +181,25 @@ EOHELP
       $argv[$key] = escapeshellarg($arg);
     }
 
+    $bootloader = PhutilBootloader::getInstance();
+    $all_libraries = $bootloader->getAllLibraries();
+
+    $non_default_libraries = array_diff(
+      $all_libraries,
+      array('phutil', 'phabricator'));
+
+    $extra_libraries = array();
+    foreach ($non_default_libraries as $library) {
+      $extra_libraries[] = csprintf(
+        '--load-phutil-library=%s',
+        phutil_get_library_root($library));
+    }
+
     $future = new ExecFuture(
       "./launch_daemon.php ".
         "%s ".
         "--load-phutil-library=%s ".
+        implode(' ', $extra_libraries)." ".
         "--conduit-uri=%s ".
         "--daemonize ".
         "--phd=%s ".
