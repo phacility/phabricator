@@ -20,6 +20,7 @@ class DifferentialChangesetDetailView extends AphrontView {
 
   private $changeset;
   private $buttons = array();
+  private $revisionID;
 
   public function setChangeset($changeset) {
     $this->changeset = $changeset;
@@ -31,11 +32,20 @@ class DifferentialChangesetDetailView extends AphrontView {
     return $this;
   }
 
+  public function setRevisionID($revision_id) {
+    $this->revisionID = $revision_id;
+    return $this;
+  }
+
   public function render() {
     require_celerity_resource('differential-changeset-view-css');
     require_celerity_resource('syntax-highlighting-css');
 
-    $edit = false; // TODO
+    if ($this->revisionID) {
+      $edit = true;
+    } else {
+      $edit = false;
+    }
 
     $changeset = $this->changeset;
     $class = 'differential-changeset';
@@ -64,6 +74,13 @@ class DifferentialChangesetDetailView extends AphrontView {
       '<h1>'.phutil_escape_html($display_filename).'</h1>'.
       '<div style="clear: both;"></div>'.
       $this->renderChildren());
+
+    if ($edit) {
+      Javelin::initBehavior(
+        'differential-edit-inline-comments', array(
+          'uri' => '/differential/comment/inline/edit/'.$this->revisionID.'/',
+        ));
+    }
 
     return $output;
   }

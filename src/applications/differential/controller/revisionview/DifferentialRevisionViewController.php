@@ -99,19 +99,19 @@ class DifferentialRevisionViewController extends DifferentialController {
       $warning->setSeverity(AphrontErrorView::SEVERITY_WARNING);
       $warning->setWidth(AphrontErrorView::WIDTH_WIDE);
       $warning->appendChild(
-        "<p>This diff is very large and affects {$count} files. Only ".
-        "the first {$limit} files are shown. ".
+        "<p>This diff is very large and affects {$count} files. Use ".
+        "Table of Contents to open files in a standalone view. ".
         "<strong>".
           phutil_render_tag(
             'a',
             array(
               'href' => $request_uri->alter('large', 'true'),
             ),
-            'Show All Files').
+            'Show All Files Inline').
         "</strong>");
       $warning = $warning->render();
 
-      $visible_changesets = array_slice($changesets, 0, $limit, true);
+      $visible_changesets = array();
     } else {
       $warning = null;
       $visible_changesets = $changesets;
@@ -176,6 +176,9 @@ class DifferentialRevisionViewController extends DifferentialController {
 
     $toc_view = new DifferentialDiffTableOfContentsView();
     $toc_view->setChangesets($changesets);
+    $toc_view->setStandaloneViewLink(empty($visible_changesets));
+    $toc_view->setVsMap($vs_map);
+    $toc_view->setRevisionID($revision->getID());
 
     $changeset_view = new DifferentialChangesetListView();
     $changeset_view->setChangesets($visible_changesets);
@@ -205,8 +208,8 @@ class DifferentialRevisionViewController extends DifferentialController {
         $revision_detail->render().
         $comment_view->render().
         $diff_history->render().
-        $toc_view->render().
         $warning.
+        $toc_view->render().
         $changeset_view->render().
         $comment_form->render().
       '</div>',

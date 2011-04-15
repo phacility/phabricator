@@ -169,6 +169,7 @@ class DifferentialChangesetViewController extends DifferentialController {
     $detail = new DifferentialChangesetDetailView();
     $detail->setChangeset($changeset);
     $detail->appendChild($output);
+    $detail->setRevisionID($request->getInt('revision_id'));
 
     $output =
       '<div class="differential-primary-pane">'.

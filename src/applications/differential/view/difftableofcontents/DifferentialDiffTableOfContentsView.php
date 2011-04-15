@@ -19,11 +19,30 @@
 final class DifferentialDiffTableOfContentsView extends AphrontView {
 
   private $changesets = array();
+  private $standaloneViewLink = null;
+  private $renderURI = '/differential/changeset/';
+  private $revisionID;
 
   public function setChangesets($changesets) {
     $this->changesets = $changesets;
     return $this;
   }
+
+  public function setStandaloneViewLink($standalone_view_link) {
+    $this->standaloneViewLink = $standalone_view_link;
+    return $this;
+  }
+
+  public function setVsMap(array $vs_map) {
+    $this->vsMap = $vs_map;
+    return $this;
+  }
+
+  public function setRevisionID($revision_id) {
+    $this->revisionID = $revision_id;
+    return $this;
+  }
+
 
   public function render() {
 
@@ -62,12 +81,40 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
           }
         }
       } else {
-        $link = phutil_render_tag(
-          'a',
-          array(
-            'href' => '#'.$changeset->getAnchorName(),
-          ),
-          phutil_escape_html($display_file));
+
+        if ($this->standaloneViewLink) {
+          $id = $changeset->getID();
+          if ($id) {
+            $vs_id = idx($this->vsMap, $id);
+          } else {
+            $vs_id = null;
+          }
+          $ref = $changeset->getRenderingReference();
+          $detail_uri = new PhutilURI($this->renderURI);
+          $detail_uri->setQueryParams(
+            array(
+              'id'          => $ref,
+              'vs'          => $vs_id,
+              'whitespace'  => 'TODO',
+              'revision_id' => $this->revisionID,
+            ));
+
+          $link = phutil_render_tag(
+            'a',
+            array(
+              'href' => $detail_uri,
+              'target'  => '_blank',
+            ),
+            phutil_escape_html($display_file));
+        } else {
+          $link = phutil_render_tag(
+            'a',
+            array(
+              'href' => '#'.$changeset->getAnchorName(),
+            ),
+            phutil_escape_html($display_file));
+        }
+
         if ($type == DifferentialChangeType::TYPE_MOVE_HERE) {
           $meta = 'Moved from '.phutil_escape_html($changeset->getOldFile());
         } else if ($type == DifferentialChangeType::TYPE_COPY_HERE) {
@@ -99,7 +146,8 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
 
       $rows[] =
         '<tr>'.
-          '<td class="differential-toc-char" title='.$chartitle.'>'.$char.'</td>'.
+          '<td class="differential-toc-char" title='.$chartitle.'>'.$char.
+          '</td>'.
           '<td class="differential-toc-prop">'.$pchar.'</td>'.
           '<td class="differential-toc-ftype">'.$desc.'</td>'.
           '<td class="differential-toc-file">'.$link.$lines.'</td>'.
