@@ -135,7 +135,8 @@ class PhabricatorObjectSelectorDialog {
     }
 
     $handle_views = array();
-    foreach ($this->handles as $phid => $handle) {
+    foreach ($this->handles as $handle) {
+      $phid = $handle->getPHID();
       $view = new PhabricatorHandleObjectSelectorDataView($handle);
       $handle_views[$phid] = $view->renderData();
     }
