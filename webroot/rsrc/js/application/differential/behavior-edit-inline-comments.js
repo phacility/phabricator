@@ -25,7 +25,6 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       top = bot;
       bot = tmp;
     }
-
     var code = target.nextSibling;
 
     var pos = JX.$V(top).add(1 + JX.$V.getDim(target).x, 0);
@@ -68,6 +67,20 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     } catch (x) {
       return undefined;
     }
+  }
+
+  function isInlineCommentNode(target) {
+    return target &&
+            (!JX.DOM.isType(target, 'tr')
+             || target.className.indexOf('inline') !== -1);
+
+  }
+
+  function findInlineCommentTarget(target) {
+    while (isInlineCommentNode(target)) {
+      target = target.nextSibling;
+    }
+    return target;
   }
 
   JX.Stratcom.listen(
@@ -153,12 +166,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
           // We're shipping around raw HTML here for performance reasons, but
           // normally you should use sigils to encode this kind of data on
           // the document.
-          var target = insert.nextSibling;
-          while (target &&
-                 (!JX.DOM.isType(target, 'tr')
-                  || target.className.indexOf('inline') !== -1)) {
-            target = target.nextSibling;
-          }
+          var target = findInlineCommentTarget(insert.nextSibling);
           drawInlineComment(insert.parentNode, target, r);
           finishSelect();
           JX.Stratcom.invoke('differential-inline-comment-update');
@@ -207,6 +215,27 @@ JX.behavior('differential-edit-inline-comments', function(config) {
         updateReticle();
       }
     });
+
+  JX.Stratcom.listen(
+    'click',
+    [['differential-inline-comment', 'differential-inline-reply']],
+    function(e) {
+      new JX.Workflow(config.uri, e.getNodeData('differential-inline-reply'))
+        .setHandler(function(r) {
+          var base_row =
+            findInlineCommentTarget(
+              e.getNode('differential-inline-comment')
+               .parentNode
+               .parentNode
+            );
+          drawInlineComment(base_row.parentNode, base_row, r);
+          JX.Stratcom.invoke('differential-inline-comment-update');
+        })
+        .start();
+
+      e.kill();
+    }
+  );
 
   JX.Stratcom.listen(
     'click',

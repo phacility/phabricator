@@ -81,6 +81,23 @@ final class DifferentialInlineCommentView extends AphrontView {
     $handles = $this->handles;
 
     $links = array();
+
+    $links[] = javelin_render_tag(
+      'a',
+      array(
+        'href'        => '#',
+        'mustcapture' => true,
+        'sigil'       => 'differential-inline-reply',
+        'meta'        => array(
+          'is_new' => true,
+          'changeset' => $inline->getChangesetID(),
+          'number' => $inline->getLineNumber(),
+          'length' => $inline->getLineLength(),
+          'on_right' => $this->onRight,
+        )
+      ),
+      'Reply');
+
     if ($this->editable) {
       $links[] = javelin_render_tag(
         'a',
@@ -152,27 +169,18 @@ final class DifferentialInlineCommentView extends AphrontView {
       return $markup;
     }
 
-    if ($this->onRight) {
-      return
-        '<table>'.
-          '<tr>'.
-            '<th></th>'.
-            '<td></td>'.
-            '<th></th>'.
-            '<td>'.$markup.'</td>'.
-          '</tr>'.
-        '</table>';
-    } else {
-      return
-        '<table>'.
-          '<tr>'.
-            '<th></th>'.
-            '<td>'.$markup.'</td>'.
-            '<th></th>'.
-            '<td></td>'.
-          '</tr>'.
-        '</table>';
-    }
+    $left_markup = !$this->onRight ? $markup : '';
+    $right_markup = $this->onRight ? $markup : '';
+
+    return
+      '<table>'.
+        '<tr class="inline">'.
+          '<th></th>'.
+          '<td>'.$left_markup.'</td>'.
+          '<th></th>'.
+          '<td>'.$right_markup.'</td>'.
+        '</tr>'.
+      '</table>';
   }
 
 }
