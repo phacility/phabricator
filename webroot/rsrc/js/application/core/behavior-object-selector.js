@@ -20,6 +20,8 @@ JX.behavior('phabricator-object-selector', function(config) {
     'input',
     'aphront-dialog-application-input');
 
+  var last_value = JX.$(config.query).value;
+
   function onreceive(seq, r) {
     if (seq != n) {
       return;
@@ -161,6 +163,12 @@ JX.behavior('phabricator-object-selector', function(config) {
     'keydown',
     null,
     function(e) {
+      var cur_value = JX.$(config.query).value;
+      if (last_value == cur_value) {
+        return;
+      }
+      last_value = cur_value;
+
       if (query_timer) {
         query_timer.stop();
       }
