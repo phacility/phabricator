@@ -240,7 +240,7 @@ class DifferentialCommitMessage {
       $phid = idx($users, $name);
       if (!$phid) {
         throw new DifferentialCommitMessageParserException(
-          "Commit message references nonexistent 'Reviewer': ".$name);
+          "Commit message references nonexistent 'Reviewer' value '".$name."'");
       }
       $reviewer_phids[] = $phid;
     }
@@ -251,7 +251,8 @@ class DifferentialCommitMessage {
       $phid = idx($users, $name);
       if (!$phid) {
         throw new DifferentialCommitMessageParserException(
-          "Commit message references nonexistent 'Reviewed by': ".$name);
+          "Commit message references nonexistent 'Reviewed by' value '".
+          $name."'");
       }
       $reviewed_by_phids[] = $phid;
     }
@@ -265,7 +266,7 @@ class DifferentialCommitMessage {
       }
       if (!$phid) {
         throw new DifferentialCommitMessageParserException(
-          "Commit message references nonexistent 'CC': ".$name);
+          "Commit message references nonexistent 'CC' value '".$name."'");
       }
       $cc_phids[] = $phid;
     }
