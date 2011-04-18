@@ -122,7 +122,7 @@ class DifferentialInlineCommentEditController extends DifferentialController {
           ->setAuthorPHID($user->getPHID())
           ->setLineNumber($number)
           ->setLineLength($length)
-          ->setIsNewFile($is_new)
+          ->setIsNewFile($on_right)
           ->setContent($text)
           ->save();
 
