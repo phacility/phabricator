@@ -83,10 +83,12 @@ class DiffusionBrowseFileController extends DiffusionController {
     $nav = $this->buildSideNav('browse', true);
     $nav->appendChild($content);
 
+    $basename = basename($this->getDiffusionRequest()->getPath());
+
     return $this->buildStandardPageResponse(
       $nav,
       array(
-        'title' => 'Browse',
+        'title' => $basename,
       ));
   }
 
