@@ -69,6 +69,10 @@ class ConduitAPI_differential_getdiff_Method extends ConduitAPIMethod {
       $changeset->attachHunks($changeset->loadHunks());
     }
 
+    return $this->createDiffDict($diff);
+  }
+
+  public static function createDiffDict(DifferentialDiff $diff) {
     $dict = array(
       'id' => $diff->getID(),
       'parent' => $diff->getParentRevisionID(),
