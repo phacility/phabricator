@@ -32,13 +32,12 @@ class PhabricatorRemarkupRuleImageMacro
       $this->images[$row->getName()] = $row->getFilePHID();
     }
     $this->images[self::RANDOM_IMAGE_NAME] = '';
+    $this->hash = 0;
   }
 
   public function apply($text) {
-    $this->hash = 0;
-
     return preg_replace_callback(
-      '@\b([a-zA-Z0-9_\-]+)\b@U',
+      '@\b([a-zA-Z0-9_\-]+)\b@',
       array($this, 'markupImageMacro'),
       $text);
   }
