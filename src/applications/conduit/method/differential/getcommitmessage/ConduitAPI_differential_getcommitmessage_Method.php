@@ -66,6 +66,7 @@ class ConduitAPI_differential_getcommitmessage_Method extends ConduitAPIMethod {
           'testPlan'        => 'Test Plan',
           'blameRevision'   => 'Blame Revision',
           'revertPlan'      => 'Revert Plan',
+          'tasks'           => 'Tasks',
         );
 
         foreach ($fields as $field => $value) {

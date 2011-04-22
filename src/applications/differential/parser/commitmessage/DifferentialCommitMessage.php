@@ -39,6 +39,8 @@ class DifferentialCommitMessage {
   protected $revisionID;
   protected $gitSVNID;
 
+  protected $tasks = array();
+
   protected function __construct() {
 
   }
@@ -160,6 +162,14 @@ class DifferentialCommitMessage {
     return $this;
   }
 
+  public function setTasks(array $tasks) {
+    $this->tasks = $tasks;
+    return $this;
+  }
+
+  public function getTasks() {
+    return $this->tasks;
+  }
 
   public static function newFromRawCorpus($raw_corpus) {
     $message = new DifferentialCommitMessage();
@@ -201,6 +211,9 @@ class DifferentialCommitMessage {
           break;
         case 'Commenters':
           // Just drop this.
+          break;
+        case 'Tasks':
+          $message->setTasks($data);
           break;
         default:
           throw new Exception("Unrecognized field '{$field}'.");
@@ -298,7 +311,9 @@ class DifferentialCommitMessage {
       'CC'                    => 'CC',
       'Revert'                => 'Revert Plan',
       'Revert Plan'           => 'Revert Plan',
-
+      'Task ID'               => 'Tasks',
+      'Task IDs'              => 'Tasks',
+      'Tasks'                 => 'Tasks',
       'git-svn-id'            => 'git-svn-id',
 
       // This appears only in "arc amend"-ed messages, just discard it.

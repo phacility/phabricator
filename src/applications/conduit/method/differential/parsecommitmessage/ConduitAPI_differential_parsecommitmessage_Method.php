@@ -62,6 +62,7 @@ class ConduitAPI_differential_parsecommitmessage_Method
         'ccPHIDs'           => $message->getCCPHIDs(),
         'revisionID'        => $message->getRevisionID(),
         'gitSVNID'          => $message->getGitSVNID(),
+        'tasks'             => $message->getTasks(),
       ),
     );
   }

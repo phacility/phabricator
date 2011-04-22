@@ -31,6 +31,7 @@ class DifferentialRevisionEditor {
   protected $diff;
   protected $comments;
   protected $silentUpdate;
+  protected $tasks = null;
 
   public function __construct(DifferentialRevision $revision, $actor_phid) {
     $this->revision = $revision;
@@ -55,6 +56,11 @@ class DifferentialRevisionEditor {
     $editor->addDiff($diff, null);
     $editor->save();
 
+    // Tasks can only be updated after revision has been saved to the
+    // database. Currently tasks are updated only when a revision is created.
+    // UI must be used to modify tasks after creating one.
+    $editor->updateTasks();
+
     return $revision;
   }
 
@@ -70,6 +76,7 @@ class DifferentialRevisionEditor {
 
     $this->setReviewers($fields['reviewerPHIDs']);
     $this->setCCPHIDs($fields['ccPHIDs']);
+    $this->setTasks($fields['tasks']);
   }
 
   public function getRevision() {
@@ -84,6 +91,10 @@ class DifferentialRevisionEditor {
   public function setCCPHIDs(array $cc) {
     $this->cc = $cc;
     return $this;
+  }
+
+  public function setTasks(array $tasks) {
+    $this->tasks = $tasks;
   }
 
   public function addDiff(DifferentialDiff $diff, $comments) {
@@ -553,6 +564,21 @@ class DifferentialRevisionEditor {
     $comment->save();
 
     return $comment;
+  }
+
+  private function updateTasks() {
+    if ($this->tasks) {
+      $task_class = PhabricatorEnv::getEnvConfig(
+        'differential.attach-task-class');
+      if ($task_class) {
+        PhutilSymbolLoader::loadClass($task_class);
+        $task_attacher = newv($task_class, array());
+        $ret = $task_attacher->attachTasksToRevision(
+          $this->actorPHID,
+          $this->revision,
+          $this->tasks);
+      }
+    }
   }
 
 }

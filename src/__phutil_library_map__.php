@@ -156,6 +156,7 @@ phutil_register_library_map(array(
     'DifferentialRevisionUpdateHistoryView' => 'applications/differential/view/revisionupdatehistory',
     'DifferentialRevisionViewController' => 'applications/differential/controller/revisionview',
     'DifferentialSubscribeController' => 'applications/differential/controller/subscribe',
+    'DifferentialTasksAttacher' => 'applications/differential/tasks',
     'DifferentialUnitStatus' => 'applications/differential/constants/unitstatus',
     'DiffusionBranchInformation' => 'applications/diffusion/data/branch',
     'DiffusionBranchQuery' => 'applications/diffusion/query/branch/base',
