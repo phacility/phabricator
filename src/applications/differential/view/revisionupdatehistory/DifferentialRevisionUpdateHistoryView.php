@@ -21,6 +21,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
   private $diffs = array();
   private $selectedVersusDiffID;
   private $selectedDiffID;
+  private $selectedWhitespace;
 
   public function setDiffs($diffs) {
     $this->diffs = $diffs;
@@ -34,6 +35,11 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
 
   public function setSelectedDiffID($id) {
     $this->selectedDiffID = $id;
+    return $this;
+  }
+
+  public function setSelectedWhitespace($whitespace) {
+    $this->selectedWhitespace = $whitespace;
     return $this;
   }
 
@@ -157,7 +163,25 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
           'radios' => $radios,
         ));
 
-    $select = '<select><option>Ignore All</option></select>';
+      $options = array(
+        'ignore-all' => 'Ignore All',
+        'ignore-trailing' => 'Ignore Trailing',
+        'show-all' => 'Show All',
+      );
+
+      $select = '<select name="whitespace">';
+      foreach ($options as $value => $label) {
+        $select .= phutil_render_tag(
+          'option',
+          array(
+            'value' => $value,
+            'selected' => ($value == $this->selectedWhitespace)
+            ? 'selected'
+            : null,
+          ),
+          phutil_escape_html($label));
+      }
+      $select .= '</select>';
 
     return
       '<div class="differential-revision-history differential-panel">'.

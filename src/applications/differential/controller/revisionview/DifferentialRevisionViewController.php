@@ -173,6 +173,7 @@ class DifferentialRevisionViewController extends DifferentialController {
     $diff_history->setDiffs($diffs);
     $diff_history->setSelectedVersusDiffID($diff_vs);
     $diff_history->setSelectedDiffID($target->getID());
+    $diff_history->setSelectedWhitespace($request->getStr('whitespace'));
 
     $toc_view = new DifferentialDiffTableOfContentsView();
     $toc_view->setChangesets($changesets);
@@ -185,6 +186,7 @@ class DifferentialRevisionViewController extends DifferentialController {
     $changeset_view->setEditable(true);
     $changeset_view->setRevision($revision);
     $changeset_view->setVsMap($vs_map);
+    $changeset_view->setWhitespace($request->getStr('whitespace'));
 
     $draft = id(new PhabricatorDraft())->loadOneWhere(
       'authorPHID = %s AND draftKey = %s',

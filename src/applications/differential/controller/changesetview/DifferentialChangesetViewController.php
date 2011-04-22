@@ -132,6 +132,7 @@ class DifferentialChangesetViewController extends DifferentialController {
     $parser->setChangeset($changeset);
     $parser->setRightSideCommentMapping($right_source, $right_new);
     $parser->setLeftSideCommentMapping($left_source, $left_new);
+    $parser->setWhitespaceMode($request->getStr('whitespace'));
 
     $phids = array();
     $inlines = $this->loadInlineComments($id, $author_phid);

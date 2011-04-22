@@ -675,10 +675,10 @@ EOSYNTHETIC;
 
           $diff = DifferentialDiff::newFromRawChanges($changes);
           $changesets = $diff->getChangesets();
-          $alt_changeset = reset($changesets);
+          $changeset = reset($changesets);
 
           $this->subparser = new DifferentialChangesetParser();
-          $this->subparser->setChangeset($alt_changeset);
+          $this->subparser->setChangeset($changeset);
           $this->subparser->setWhitespaceMode(self::WHITESPACE_IGNORE_TRAILING);
         }
         foreach ($changeset->getHunks() as $hunk) {

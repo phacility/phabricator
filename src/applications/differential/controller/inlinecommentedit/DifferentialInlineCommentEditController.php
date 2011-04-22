@@ -70,7 +70,7 @@ class DifferentialInlineCommentEditController extends DifferentialController {
 
         if ($request->isFormPost()) {
           $inline->delete();
-          return $this->buildDeletedResponse();
+          return $this->buildEmptyResponse();
         }
 
         $edit_dialog->setTitle('Really delete this comment?');
@@ -95,7 +95,7 @@ class DifferentialInlineCommentEditController extends DifferentialController {
               $on_right);
           } else {
             $inline->delete();
-            return $this->buildDeletedResponse();
+            return $this->buildEmptyResponse();
           }
         }
 
@@ -112,7 +112,7 @@ class DifferentialInlineCommentEditController extends DifferentialController {
       case 'create':
 
         if (!$request->isFormPost() || !strlen($text)) {
-          return new AphrontAjaxResponse();
+          return $this->buildEmptyResponse();
         }
 
         $inline = id(new DifferentialInlineComment())
@@ -173,7 +173,7 @@ class DifferentialInlineCommentEditController extends DifferentialController {
         ));
   }
 
-  private function buildDeletedResponse() {
+  private function buildEmptyResponse() {
     return id(new AphrontAjaxResponse())
       ->setContent(
         array(
