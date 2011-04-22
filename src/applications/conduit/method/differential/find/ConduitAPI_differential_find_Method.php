@@ -34,7 +34,7 @@ class ConduitAPI_differential_find_Method extends ConduitAPIMethod {
 
     return array(
       'query' => 'required enum<'.$types.'>',
-      'guids' => 'required nonempty list<phid>',
+      'guids' => 'required nonempty list<guids>',
     );
   }
 
@@ -49,11 +49,11 @@ class ConduitAPI_differential_find_Method extends ConduitAPIMethod {
 
   protected function execute(ConduitAPIRequest $request) {
     $query = $request->getValue('query');
-    $phids = $request->getValue('guids');
+    $guids = $request->getValue('guids');
 
     $revisions = id(new DifferentialRevisionListData(
       $query,
-      (array)$phids))
+      (array)$guids))
       ->loadRevisions();
 
     $results = array();
@@ -64,6 +64,7 @@ class ConduitAPI_differential_find_Method extends ConduitAPIMethod {
       }
       $results[] = array(
         'id'          => $revision->getID(),
+        'phid'        => $revision->getPHID(),
         'name'        => $revision->getTitle(),
         'statusName'  => DifferentialRevisionStatus::getNameForRevisionStatus(
           $revision->getStatus()),
