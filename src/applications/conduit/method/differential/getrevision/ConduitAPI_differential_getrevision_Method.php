@@ -63,10 +63,23 @@ class ConduitAPI_differential_getrevision_Method extends ConduitAPIMethod {
         ConduitAPI_differential_getdiff_Method::createDiffDict($diff);
     }
 
+    $commit_dicts = array();
+    $commit_phids = $revision->loadCommitPHIDs();
+    $handles = id(new PhabricatorObjectHandleData($commit_phids))
+      ->loadHandles();
+
+    foreach ($commit_phids as $commit_phid) {
+      $commit_dicts[] = array(
+        'fullname'      => $handles[$commit_phid]->getFullName(),
+        'dateCommitted' => $handles[$commit_phid]->getTimestamp(),
+      );
+    }
+
     $dict = array(
       'id' => $revision->getID(),
       'phid' => $revision->getPHID(),
       'authorPHID' => $revision->getAuthorPHID(),
+      'uri' => PhabricatorEnv::getURI('/D'.$revision->getID()),
       'title' => $revision->getTitle(),
       'status' => $revision->getStatus(),
       'statusName'  => DifferentialRevisionStatus::getNameForRevisionStatus(
@@ -75,10 +88,10 @@ class ConduitAPI_differential_getrevision_Method extends ConduitAPIMethod {
       'testPlan' => $revision->getTestPlan(),
       'revertPlan' => $revision->getRevertPlan(),
       'blameRevision' => $revision->getBlameRevision(),
-      'dateCommitted' => $revision->getDateCommitted(),
       'lineCount' => $revision->getLineCount(),
       'reviewerPHIDs' => $reviewer_phids,
       'diffs' => $diff_dicts,
+      'commits' => $commit_dicts,
     );
 
     return $dict;

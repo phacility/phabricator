@@ -160,6 +160,7 @@ class PhabricatorObjectHandleData {
               $handle->setName('Commit '.'r'.$callsign.$commit_identifier);
               $handle->setURI('/r'.$callsign.$commit_identifier);
               $handle->setFullName('r'.$callsign.$commit_identifier);
+              $handle->setTimestamp($commit->getEpoch());
             }
             $handles[$phid] = $handle;
           }

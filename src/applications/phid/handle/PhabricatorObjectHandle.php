@@ -25,6 +25,7 @@ class PhabricatorObjectHandle {
   private $email;
   private $fullName;
   private $imageURI;
+  private $timestamp;
 
   public function setURI($uri) {
     $this->uri = $uri;
@@ -90,6 +91,15 @@ class PhabricatorObjectHandle {
 
   public function getImageURI() {
     return $this->imageURI;
+  }
+
+  public function setTimestamp($timestamp) {
+    $this->timestamp = $timestamp;
+    return $this;
+  }
+
+  public function getTimestamp() {
+    return $this->timestamp;
   }
 
   public function renderLink() {
