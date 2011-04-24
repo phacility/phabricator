@@ -47,6 +47,9 @@ class ConduitAPI_differential_getrevision_Method extends ConduitAPIMethod {
       throw new ConduitException('ERR_BAD_REVISION');
     }
 
+    $revision->loadRelationships();
+    $reviewer_phids = array_values($revision->getReviewers());
+
     $diffs = $revision->loadDiffs();
 
     $diff_dicts = array();
@@ -74,6 +77,7 @@ class ConduitAPI_differential_getrevision_Method extends ConduitAPIMethod {
       'blameRevision' => $revision->getBlameRevision(),
       'dateCommitted' => $revision->getDateCommitted(),
       'lineCount' => $revision->getLineCount(),
+      'reviewerPHIDs' => $reviewer_phids,
       'diffs' => $diff_dicts,
     );
 
