@@ -39,6 +39,7 @@ class DifferentialRevision extends DifferentialDAO {
   private $commits;
 
   const RELATIONSHIP_TABLE    = 'differential_relationship';
+  const TABLE_VIEW_TIME       = 'differential_viewtime';
   const TABLE_COMMIT          = 'differential_commit';
 
   const RELATION_REVIEWER     = 'revw';

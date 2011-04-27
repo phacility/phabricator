@@ -205,6 +205,8 @@ class DifferentialRevisionViewController extends DifferentialController {
     $comment_form->setUser($user);
     $comment_form->setDraft($draft);
 
+    $this->updateViewTime($user->getPHID(), $revision->getPHID());
+
     return $this->buildStandardPageResponse(
       '<div class="differential-primary-pane">'.
         $revision_detail->render().
@@ -593,6 +595,14 @@ class DifferentialRevisionViewController extends DifferentialController {
     return array($changesets, $vs_map);
   }
 
+  private function updateViewTime($user_phid, $revision_phid) {
+    $view_time =
+      id(new DifferentialViewTime())
+        ->setViewerPHID($user_phid)
+        ->setObjectPHID($revision_phid)
+        ->setViewTime(time())
+        ->replace();
+  }
 }
 /*
 

@@ -90,6 +90,16 @@ class DifferentialRevisionListController extends DifferentialController {
           ),
         ),
       ),
+      'updates' => array(
+        'name' => 'Updates',
+        'queries' => array(
+          array(
+            'query' => DifferentialRevisionListData::QUERY_UPDATED_SINCE,
+            'header' =>
+              'Diffs that have been updated since you\'ve last viewed them',
+          ),
+        ),
+      ),
       '<hr />',
       'All Revisions',
       'allopen' => array(

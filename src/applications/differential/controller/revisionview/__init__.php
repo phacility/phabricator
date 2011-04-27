@@ -15,6 +15,7 @@ phutil_require_module('phabricator', 'applications/differential/storage/comment'
 phutil_require_module('phabricator', 'applications/differential/storage/diffproperty');
 phutil_require_module('phabricator', 'applications/differential/storage/inlinecomment');
 phutil_require_module('phabricator', 'applications/differential/storage/revision');
+phutil_require_module('phabricator', 'applications/differential/storage/viewtime');
 phutil_require_module('phabricator', 'applications/differential/view/addcomment');
 phutil_require_module('phabricator', 'applications/differential/view/changesetlistview');
 phutil_require_module('phabricator', 'applications/differential/view/difftableofcontents');
