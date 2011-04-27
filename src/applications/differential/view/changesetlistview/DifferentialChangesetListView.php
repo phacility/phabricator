@@ -23,7 +23,9 @@ class DifferentialChangesetListView extends AphrontView {
   private $revision;
   private $renderURI = '/differential/changeset/';
   private $vsMap = array();
-  private $whitespace = null;
+
+  // This is the Default value for whitespace mode!
+  private $whitespace = 'ignore-trailing';
 
   public function setChangesets($changesets) {
     $this->changesets = $changesets;
@@ -51,8 +53,14 @@ class DifferentialChangesetListView extends AphrontView {
   }
 
   public function setWhitespace($whitespace) {
-    $this->whitespace = $whitespace;
+    if ($whitespace) {
+      $this->whitespace = $whitespace;
+    }
     return $this;
+  }
+
+  public function getWhitespace() {
+    return $this->whitespace;
   }
 
   public function render() {
