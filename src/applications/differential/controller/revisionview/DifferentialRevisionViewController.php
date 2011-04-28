@@ -157,6 +157,11 @@ class DifferentialRevisionViewController extends DifferentialController {
         $custom_renderer->generateActionLinks($revision, $target));
     }
 
+    $whitespace = $request->getStr(
+      'whitespace',
+      DifferentialChangesetParser::WHITESPACE_IGNORE_TRAILING
+    );
+
     $revision_detail->setActions($actions);
 
     $revision_detail->setUser($user);
@@ -174,19 +179,20 @@ class DifferentialRevisionViewController extends DifferentialController {
     $changeset_view->setEditable(true);
     $changeset_view->setRevision($revision);
     $changeset_view->setVsMap($vs_map);
-    $changeset_view->setWhitespace($request->getStr('whitespace'));
+    $changeset_view->setWhitespace($whitespace);
 
     $diff_history = new DifferentialRevisionUpdateHistoryView();
     $diff_history->setDiffs($diffs);
     $diff_history->setSelectedVersusDiffID($diff_vs);
     $diff_history->setSelectedDiffID($target->getID());
-    $diff_history->setSelectedWhitespace($changeset_view->getWhitespace());
+    $diff_history->setSelectedWhitespace($whitespace);
 
     $toc_view = new DifferentialDiffTableOfContentsView();
     $toc_view->setChangesets($changesets);
     $toc_view->setStandaloneViewLink(empty($visible_changesets));
     $toc_view->setVsMap($vs_map);
     $toc_view->setRevisionID($revision->getID());
+    $toc_view->setWhitespace($whitespace);
 
 
     $draft = id(new PhabricatorDraft())->loadOneWhere(

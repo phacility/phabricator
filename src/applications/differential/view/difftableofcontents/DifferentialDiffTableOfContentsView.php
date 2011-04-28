@@ -22,6 +22,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
   private $standaloneViewLink = null;
   private $renderURI = '/differential/changeset/';
   private $revisionID;
+  private $whitespace;
 
   public function setChangesets($changesets) {
     $this->changesets = $changesets;
@@ -43,6 +44,10 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
     return $this;
   }
 
+  public function setWhitespace($whitespace) {
+    $this->whitespace = $whitespace;
+    return $this;
+  }
 
   public function render() {
 
@@ -95,7 +100,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
             array(
               'id'          => $ref,
               'vs'          => $vs_id,
-              'whitespace'  => 'TODO',
+              'whitespace'  => $this->whitespace,
               'revision_id' => $this->revisionID,
             ));
 
