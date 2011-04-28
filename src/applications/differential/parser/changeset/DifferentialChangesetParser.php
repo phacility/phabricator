@@ -141,7 +141,6 @@ class DifferentialChangesetParser {
 
     $types = array();
     foreach ($lines as $line_index => $line) {
-      $lines[$line_index] = $line;
       if (isset($line[0])) {
         $char = $line[0];
         if ($char == ' ') {
@@ -308,18 +307,17 @@ class DifferentialChangesetParser {
 
     $this->old = $old;
     $this->new = $new;
+    if ($this->subparser) {
 
-    if ($this->subparser && false) { // TODO: This is bugged
+      // Use this parser's side-by-side line information -- notably, the
+      // change types -- but replace all the line text with the subparser's.
+      // This lets us render whitespace-only changes without marking them as
+      // different.
 
-      // Use the subparser's side-by-side line information -- notably, the
-      // change types -- but replace all the line text with ours. This lets us
-      // render whitespace-only changes without marking them as different.
-
-      $old = $this->subparser->old;
-      $new = $this->subparser->new;
-
-      $old_text = ipull($this->old, 'text', 'line');
-      $new_text = ipull($this->new, 'text', 'line');
+      $old = $this->old;
+      $new = $this->new;
+      $old_text = ipull($this->subparser->old, 'text', 'line');
+      $new_text = ipull($this->subparser->new, 'text', 'line');
 
       foreach ($old as $k => $desc) {
         if (empty($desc)) {
@@ -406,7 +404,7 @@ class DifferentialChangesetParser {
     $this->tokenHighlight($this->newRender);
 
     $unchanged = false;
-    if ($this->subparser && false) {
+    if ($this->subparser) {
       $unchanged = $this->subparser->isUnchanged();
       $whitelines = $this->subparser->isWhitespaceOnly();
     } else if (!$changed) {
@@ -671,15 +669,18 @@ class DifferentialChangesetParser {
 EOSYNTHETIC;
           }
 
-          $changes = id(new ArcanistDiffParser())->parseDiff($diff);
+          // subparser takes over the current non-whitespace-ignoring changeset
+          $this->subparser = new DifferentialChangesetParser();
+          foreach ($changeset->getHunks() as $hunk) {
+            $this->subparser->parseHunk($hunk);
+          }
 
+          // this parser takes new changeset; will use subparser's text later
+          $changes = id(new ArcanistDiffParser())->parseDiff($diff);
           $diff = DifferentialDiff::newFromRawChanges($changes);
           $changesets = $diff->getChangesets();
           $changeset = reset($changesets);
-
-          $this->subparser = new DifferentialChangesetParser();
-          $this->subparser->setChangeset($changeset);
-          $this->subparser->setWhitespaceMode(self::WHITESPACE_IGNORE_TRAILING);
+          $this->setChangeset($changeset);
         }
         foreach ($changeset->getHunks() as $hunk) {
           $this->parseHunk($hunk);
