@@ -159,6 +159,8 @@ abstract class LiskDAO {
   const IDS_PHID                    = 'ids-phid';
   const IDS_MANUAL                  = 'ids-manual';
 
+  private $__connections            = array();
+
   /**
    *  Build an empty object.
    *
@@ -601,14 +603,11 @@ abstract class LiskDAO {
       throw new Exception("Unknown mode '{$mode}', should be 'r' or 'w'.");
     }
 
-    // TODO: We don't do anything with the read/write mode right now, but
-    // should.
-
-    if (!isset($this->__connection)) {
-      $this->__connection = $this->establishConnection($mode);
+    if (!isset($this->__connections[$mode])) {
+      $this->__connections[$mode] = $this->establishConnection($mode);
     }
 
-    return $this->__connection;
+    return $this->__connections[$mode];
   }
 
 
