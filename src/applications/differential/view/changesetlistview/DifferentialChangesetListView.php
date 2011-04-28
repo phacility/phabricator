@@ -23,7 +23,7 @@ class DifferentialChangesetListView extends AphrontView {
   private $revision;
   private $renderURI = '/differential/changeset/';
   private $vsMap = array();
-  private $whitespace = null;
+  private $whitespace;
 
   public function setChangesets($changesets) {
     $this->changesets = $changesets;

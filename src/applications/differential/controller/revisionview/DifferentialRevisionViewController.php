@@ -157,6 +157,11 @@ class DifferentialRevisionViewController extends DifferentialController {
         $custom_renderer->generateActionLinks($revision, $target));
     }
 
+    $whitespace = $request->getStr(
+      'whitespace',
+      DifferentialChangesetParser::WHITESPACE_IGNORE_TRAILING
+    );
+
     $revision_detail->setActions($actions);
 
     $revision_detail->setUser($user);
@@ -169,24 +174,26 @@ class DifferentialRevisionViewController extends DifferentialController {
     $comment_view->setUser($user);
     $comment_view->setTargetDiff($target);
 
+    $changeset_view = new DifferentialChangesetListView();
+    $changeset_view->setChangesets($visible_changesets);
+    $changeset_view->setEditable(true);
+    $changeset_view->setRevision($revision);
+    $changeset_view->setVsMap($vs_map);
+    $changeset_view->setWhitespace($whitespace);
+
     $diff_history = new DifferentialRevisionUpdateHistoryView();
     $diff_history->setDiffs($diffs);
     $diff_history->setSelectedVersusDiffID($diff_vs);
     $diff_history->setSelectedDiffID($target->getID());
-    $diff_history->setSelectedWhitespace($request->getStr('whitespace'));
+    $diff_history->setSelectedWhitespace($whitespace);
 
     $toc_view = new DifferentialDiffTableOfContentsView();
     $toc_view->setChangesets($changesets);
     $toc_view->setStandaloneViewLink(empty($visible_changesets));
     $toc_view->setVsMap($vs_map);
     $toc_view->setRevisionID($revision->getID());
+    $toc_view->setWhitespace($whitespace);
 
-    $changeset_view = new DifferentialChangesetListView();
-    $changeset_view->setChangesets($visible_changesets);
-    $changeset_view->setEditable(true);
-    $changeset_view->setRevision($revision);
-    $changeset_view->setVsMap($vs_map);
-    $changeset_view->setWhitespace($request->getStr('whitespace'));
 
     $draft = id(new PhabricatorDraft())->loadOneWhere(
       'authorPHID = %s AND draftKey = %s',
@@ -604,273 +611,3 @@ class DifferentialRevisionViewController extends DifferentialController {
         ->replace();
   }
 }
-/*
-
-
-  protected function getSandcastleURI(Diff $diff) {
-    $uri = $this->getDiffProperty($diff, 'facebook:sandcastle_uri');
-    if (!$uri) {
-      $uri = $diff->getSandboxURL();
-    }
-    return $uri;
-  }
-
-  protected function getDiffProperty(Diff $diff, $property, $default = null) {
-    $diff_id = $diff->getID();
-    if (empty($this->diffProperties[$diff_id])) {
-      $props = id(new DifferentialDiffProperty())
-        ->loadAllWhere('diffID = %s', $diff_id);
-      $dict = array_pull($props, 'getData', 'getName');
-      $this->diffProperties[$diff_id] = $dict;
-    }
-    return idx($this->diffProperties[$diff_id], $property, $default);
-  }
-
-    $diff_table->appendChild(
-      <tr>
-        <td colspan="8" class="diff-differ-submit">
-          <label>Whitespace Changes:</label>
-          {id(<select name="whitespace" />)->setOptions(
-            array(
-              'ignore-all'      => 'Ignore All',
-              'ignore-trailing' => 'Ignore Trailing',
-              'show-all'        => 'Show All',
-            ), $request->getStr('whitespace'))}{' '}
-          <button type="submit">Show Diff</button>
-        </td>
-      </tr>);
-
-    $load_ids = array_filter(array($old, $diff->getID()));
-
-    $viewer_id = $this->getRequest()->getViewerContext()->getUserID();
-
-    $raw_objects = queryfx_all(
-      smc_get_db('cdb.differential', 'r'),
-      'SELECT * FROM changeset WHERE changeset.diffID IN (%Ld)',
-      $load_ids);
-
-    $raw_objects = array_group($raw_objects, 'diffID');
-    $objects = $raw_objects[$diff->getID()];
-
-    if (!$objects) {
-      $changesets = array();
-    } else {
-      $changesets = id(new DifferentialChangeset())->loadAllFromArray($objects);
-    }
-
-
-
-    $feedback = id(new DifferentialFeedback())->loadAllWithRevision($revision);
-    $feedback = array_merge($implied_feedback, $feedback);
-
-    $inline_comments = $this->loadInlineComments($feedback, $changesets);
-
-    $diff_map = array();
-    $diffs = array_psort($diffs, 'getID');
-    foreach ($diffs as $diff) {
-      $diff_map[$diff->getID()] = count($diff_map) + 1;
-    }
-    $visible_changesets = array_fill_keys($visible_changesets, true);
-    $hidden_changesets = array();
-    foreach ($changesets as $changeset) {
-      $id = $changeset->getID();
-      if (isset($visible_changesets[$id])) {
-        continue;
-      }
-      $hidden_changesets[$id] = $diff_map[$changeset->getDiffID()];
-    }
-
-
-    $engine = new RemarkupEngine();
-    $engine->enableFeature(RemarkupEngine::FEATURE_GUESS_IMAGES);
-    $engine->enableFeature(RemarkupEngine::FEATURE_YOUTUBE);
-    $engine->setCurrentSandcastle($this->getSandcastleURI($target_diff));
-
-    $syntax_link =
-      <a href={'http://www.intern.facebook.com/intern/wiki/index.php' .
-               '/Articles/Remarkup_Syntax_Reference'}
-         target="_blank"
-         tabindex="4">Remarkup Reference</a>;
-
-
-    $notice = null;
-    if ($this->getRequest()->getBool('diff_changed')) {
-      $notice =
-        <tools:notice title="Revision Updated Recently">
-          This revision was updated with a <strong>new diff</strong> while you
-          were providing feedback. Your inline comments appear on the
-          <strong>old diff</strong>.
-        </tools:notice>;
-    }
-
-    $engineering_repository_id = RepositoryRef::getByCallsign('E')->getID();
-    $svn_revision = $revision->getSVNRevision();
-    if ($status == DifferentialConstants::COMMITTED &&
-        $svn_revision &&
-        $revision->getRepositoryID() == $engineering_repository_id) {
-      $href = '/intern/push/request.php?rev='.$svn_revision;
-      $href = RedirectURI($href)->setTier('intern');
-      $links[] = array(
-        'merge',
-        <a href={$href} id="ask_for_merge_link">Ask for Merge</a>,
-      );
-    }
-
-  }
-
-
-  protected function renderDiffPropertyMoreLink(Diff $diff, $name) {
-    $target = <div class="star-more"
-                   style="display: none;">
-                <div class="star-loading">Loading...</div>
-              </div>;
-    $meta = array(
-      'target'  => $target->requireUniqueID(),
-      'uri'     => '/differential/diffprop/'.$diff->getID().'/'.$name.'/',
-    );
-    $more =
-      <span sigil="star-link-container">
-        &middot;
-        <a mustcapture="true"
-                 sigil="star-more"
-                  href="#"
-                  meta={$meta}>Show Details</a>
-      </span>;
-    return <x:frag>{$more}{$target}</x:frag>;
-  }
-
-
-
-  protected function getRevisionStatusDisplay(DifferentialRevision $revision) {
-    $viewer_id = $this->getRequest()->getViewerContext()->getUserID();
-    $viewer_is_owner = ($viewer_id == $revision->getOwnerID());
-    $status = $revision->getStatus();
-
-    $more = null;
-    switch ($status) {
-      case DifferentialConstants::NEEDS_REVIEW:
-        $message = 'Pending Review';
-        break;
-      case DifferentialConstants::NEEDS_REVISION:
-        $message = 'Awaiting Revision';
-        if ($viewer_is_owner) {
-          $more = 'Make the requested changes and update the revision.';
-        }
-        break;
-      case DifferentialConstants::ACCEPTED:
-        $message = 'Ready for Commit';
-        if ($viewer_is_owner) {
-          $more =
-            <x:frag>
-              Run <tt>arc commit</tt> (svn) or <tt>arc amend</tt> (git) to
-              proceed.
-            </x:frag>;
-        }
-        break;
-      case DifferentialConstants::COMMITTED:
-        $message = 'Committed';
-        $ref = $revision->getRevisionRef();
-        $more = $ref
-                ? (<a href={URI($ref->getDetailURL())}>
-                     {$ref->getName()}
-                   </a>)
-                : null;
-
-        $engineering_repository_id = RepositoryRef::getByCallsign('E')->getID();
-        if ($revision->getSVNRevision() &&
-            $revision->getRepositoryID() == $engineering_repository_id) {
-          Javelin::initBehavior(
-            'differential-revtracker-status',
-            array(
-              'uri' => '/differential/revtracker/'.$revision->getID().'/',
-              'statusId' => 'revtracker_status',
-              'mergeLinkId' => 'ask_for_merge_link',
-            ));
-        }
-        break;
-      case DifferentialConstants::ABANDONED:
-        $message = 'Abandoned';
-        break;
-      default:
-        throw new Exception("Unknown revision status.");
-    }
-
-    if ($more) {
-      $message =
-        <x:frag>
-          <strong id="revtracker_status">{$message}</strong>
-          &middot; {$more}
-        </x:frag>;
-    } else {
-      $message = <strong id="revtracker_status">{$message}</strong>;
-    }
-
-    return $message;
-  }
-
-}
-  protected function getDetailFields(
-    DifferentialRevision $revision,
-    Diff $diff,
-    array $handles) {
-
-    $sandcastle = $this->getSandcastleURI($diff);
-    if ($sandcastle) {
-      $fields['Sandcastle'] = <a href={$sandcastle}>{$sandcastle}</a>;
-    }
-
-
-    $blame_rev = $revision->getSvnBlameRevision();
-    if ($blame_rev) {
-      if ($revision->getRepositoryRef() && is_numeric($blame_rev)) {
-        $ref = new RevisionRef($revision->getRepositoryRef(), $blame_rev);
-        $fields['Blame Revision'] =
-          <a href={URI($ref->getDetailURL())}>
-            {$ref->getName()}
-          </a>;
-      } else {
-        $fields['Blame Revision'] = $blame_rev;
-      }
-    }
-
-
-    $bugzilla_id = $revision->getBugzillaID();
-    if ($bugzilla_id) {
-      $href = 'http://bugs.developers.facebook.com/show_bug.cgi?id='.
-        $bugzilla_id;
-      $fields['Bugzilla'] = <a href={$href}>{'#'.$bugzilla_id}</a>;
-    }
-
-    $fields['Apply Patch'] = <tt>arc patch --revision {$revision->getID()}</tt>;
-
-    if ($diff->getParentRevisionID()) {
-      $parent = id(new DifferentialRevision())->load(
-        $diff->getParentRevisionID());
-      if ($parent) {
-        $fields['Depends On'] =
-          <a href={$parent->getURI()}>
-            D{$parent->getID()}: {$parent->getName()}
-          </a>;
-      }
-    }
-
-    Javelin::initBehavior('differential-star-more');
-    if ($unit_details) {
-      $fields['Unit Tests'] =
-        <x:frag>
-          {$fields['Unit Tests']}
-          {$this->renderDiffPropertyMoreLink($diff, 'unit')}
-        </x:frag>;
-    }
-
-    $platform_impact = $revision->getPlatformImpact();
-    if ($platform_impact) {
-      $fields['Platform Impact'] =
-        <text linebreaks="true">{$platform_impact}</text>;
-    }
-
-    return $fields;
-  }
-
-
-*/
