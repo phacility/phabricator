@@ -216,16 +216,29 @@ class DifferentialRevisionListData {
 
     $data = queryfx_all(
       $revision->establishConnection('r'),
-      'SELECT DISTINCT revision.* FROM %T revision
-        JOIN %T rel ON rel.revisionID = revision.id
-          AND (rel.objectPHID in (%Ls) OR revision.authorPHID in (%Ls))
-        LEFT JOIN %T viewtime ON viewtime.viewerPHID in (%Ls)
-          AND viewtime.objectPHID = revision.phid
-        WHERE GREATEST(%d, IFNULL(viewtime.viewTime, 0)) < revision.dateModified
-        %Q',
+      'SELECT revs.* FROM (
+        (
+          SELECT revision.*
+          FROM %T revision
+          WHERE revision.authorPHID in (%Ls)
+        )
+        UNION
+        (
+           SELECT revision.*
+           FROM %T revision
+           JOIN %T rel
+           WHERE rel.revisionId = revision.Id AND rel.objectPHID in (%Ls)
+        )
+      ) as revs
+      LEFT JOIN %T viewtime ON
+        viewtime.viewerPHID in (%Ls)
+        AND viewtime.objectPHID = revs.phid
+      WHERE GREATEST(%d, IFNULL(viewtime.viewTime, 0)) < revs.dateModified
+      %Q',
+      $revision->getTableName(),
+      $this->ids,
       $revision->getTableName(),
       DifferentialRevision::RELATIONSHIP_TABLE,
-      $this->ids,
       $this->ids,
       DifferentialRevision::TABLE_VIEW_TIME,
       $this->ids,
