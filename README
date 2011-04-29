@@ -1,9 +1,6 @@
 PROJECT STATUS: CAVEAT EMPTOR
 
-This is an unstable preview release. I'm open sourcing some of Facebook's
-internal tools, but they'll be unstable for probably at least a couple months.
--epriestley
-
+This is an unstable preview release.
 
 WHAT IS PHABRICATOR?
 
@@ -15,5 +12,4 @@ Phabricator is highly unstable and has many missing features! These applications
 are being brought over from Facebook's internal toolset, but there's a lot of
 stuff that hasn't made it over yet. Feel free to follow the project but you
 probably shouldn't try to install this yet unless you're extremely ambitious
-or just want to take a look at it. I'm opening it up now mostly to make it
-easier for me to do test deployments outside of Facebook.
+or just want to take a look at it. 
