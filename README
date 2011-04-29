@@ -1,6 +1,9 @@
 PROJECT STATUS: CAVEAT EMPTOR
 
-This is an unstable preview release.
+This is an unstable preview release. You can learn more at http://phabricator.org/
+as well as click around our development install. Developer mailing list at
+https://groups.google.com/group/phabricator-dev and please report issues using
+GitHub.
 
 WHAT IS PHABRICATOR?
 
@@ -13,3 +16,8 @@ are being brought over from Facebook's internal toolset, but there's a lot of
 stuff that hasn't made it over yet. Feel free to follow the project but you
 probably shouldn't try to install this yet unless you're extremely ambitious
 or just want to take a look at it. 
+
+LICENSE
+
+Phabricator is released under the Apache 2.0 license except as otherwise noted.
+http://www.apache.org/licenses/LICENSE-2.0
