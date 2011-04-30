@@ -10,5 +10,8 @@ phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'storage/connection/mysql');
 phutil_require_module('phabricator', 'storage/lisk/dao');
 
+phutil_require_module('phutil', 'symbols');
+phutil_require_module('phutil', 'utils');
+
 
 phutil_require_source('PhabricatorLiskDAO.php');

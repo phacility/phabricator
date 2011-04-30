@@ -20,18 +20,18 @@
 abstract class PhabricatorLiskDAO extends LiskDAO {
 
   public function establishConnection($mode) {
-    $mysql_key = 'mysql';
-    if ($mode == 'r') {
-      $mysql_key = 'mysql_slave';
-    }
+    $conf_provider = PhabricatorEnv::getEnvConfig(
+      'mysql.configuration_provider', 'DatabaseConfigurationProvider');
+    PhutilSymbolLoader::loadClass($conf_provider);
+    $conf = newv($conf_provider, array($this, $mode));
+
     return new AphrontMySQLDatabaseConnection(
       array(
-        'user'      => PhabricatorEnv::getEnvConfig($mysql_key.'.user'),
-        'pass'      => PhabricatorEnv::getEnvConfig($mysql_key.'.pass'),
-        'host'      => PhabricatorEnv::getEnvConfig($mysql_key.'.host'),
-        'database'  => 'phabricator_'.$this->getApplicationName(),
+        'user'      => $conf->getUser(),
+        'pass'      => $conf->getPassword(),
+        'host'      => $conf->getHost(),
+        'database'  => $conf->getDatabase(),
       ));
-
   }
 
   public function getTableName() {

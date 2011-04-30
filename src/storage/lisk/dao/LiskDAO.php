@@ -603,6 +603,9 @@ abstract class LiskDAO {
       throw new Exception("Unknown mode '{$mode}', should be 'r' or 'w'.");
     }
 
+    // TODO There is currently no protection on 'r' queries against writing
+    // or on 'w' queries against reading
+
     if (!isset($this->__connections[$mode])) {
       $this->__connections[$mode] = $this->establishConnection($mode);
     }

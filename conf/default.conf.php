@@ -111,13 +111,6 @@ return array(
   // The MySQL server to connect to.
   'mysql.host' => 'localhost',
 
-  // READ-ONLY database connection information
-  // If you have a read-only slave mysql server, then you can fill out the
-  // below fields. If not, duplicate the above information for the slave.
-  'mysql_slave.user' => 'root',
-  'mysql_slave.pass' => '',
-  'mysql_slave.host' => 'localhost',
-
 // -- Email ----------------------------------------------------------------- //
 
   // Some Phabricator tools send email notifications, e.g. when Differential

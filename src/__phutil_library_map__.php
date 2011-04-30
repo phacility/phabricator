@@ -107,6 +107,7 @@ phutil_register_library_map(array(
     'DarkConsoleServicesPluginAPI' => 'aphront/console/plugin/services/api',
     'DarkConsoleXHProfPlugin' => 'aphront/console/plugin/xhprof',
     'DarkConsoleXHProfPluginAPI' => 'aphront/console/plugin/xhprof/api',
+    'DatabaseConfigurationProvider' => 'applications/base/storage/configuration',
     'DifferentialAction' => 'applications/differential/constants/action',
     'DifferentialAddCommentView' => 'applications/differential/view/addcomment',
     'DifferentialAttachController' => 'applications/differential/controller/attach',
