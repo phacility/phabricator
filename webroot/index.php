@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+
 error_reporting(E_ALL | E_STRICT);
 ini_set('memory_limit', -1);
 
@@ -41,6 +42,13 @@ if (!function_exists('mysql_connect')) {
 if (!isset($_REQUEST['__path__'])) {
   phabricator_fatal_config_error(
     "__path__ is not set. Your rewrite rules are not configured correctly.");
+}
+
+if (get_magic_quotes_gpc()) {
+  phabricator_fatal_config_error(
+    "Your server is configured with PHP 'magic_quotes_gpc' enabled. This ".
+    "feature is 'highly discouraged' by PHP's developers and you must ".
+    "disable it to run Phabricator. Consult the PHP manual for instructions.");
 }
 
 require_once dirname(dirname(__FILE__)).'/conf/__init_conf__.php';
