@@ -35,6 +35,8 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   protected $nextRetry;
   protected $relatedPHID;
 
+  private $skipSendOnSave;
+
   public function __construct() {
 
     $this->status     = self::STATUS_QUEUE;
@@ -115,9 +117,26 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this;
   }
 
+  /**
+   * Use this method to set an ID used for message threading. MetaMTA will
+   * set appropriate headers (Message-ID, In-Reply-To, References and
+   * Thread-Index) based on the capabilities of the underlying mailer.
+   *
+   * @param string  Unique identifier, appropriate for use in a Message-ID,
+   *                In-Reply-To or References headers.
+   * @param bool    If true, indicates this is the first message in the thread.
+   * @return this
+   */
+  public function setThreadID($thread_id, $is_first_message = false) {
+    $this->setParam('thread-id', $thread_id);
+    $this->setParam('is-first-message', $is_first_message);
+    return $this;
+  }
+
   public function save() {
     $try_send = (PhabricatorEnv::getEnvConfig('metamta.send-immediately')) &&
-                (!$this->getID());
+                (!$this->getID()) &&
+                (!$this->skipSendOnSave);
 
     $ret = parent::save();
 
@@ -128,12 +147,22 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $ret;
   }
 
-  private function buildDefaultMailer() {
+  public function buildDefaultMailer() {
     $class_name = PhabricatorEnv::getEnvConfig('metamta.mail-adapter');
     PhutilSymbolLoader::loadClass($class_name);
     return newv($class_name, array());
   }
 
+  /**
+   * Attempt to deliver an email immediately, in this process.
+   *
+   * @param bool  Try to deliver this email even if it has already been
+   *              delivered or is in backoff after a failed delivery attempt.
+   * @param PhabricatorMailImplementationAdapter Use a specific mail adapter,
+   *              instead of the default.
+   *
+   * @return void
+   */
   public function sendNow(
     $force_send = false,
     PhabricatorMailImplementationAdapter $mailer = null) {
@@ -151,6 +180,8 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         throw new Exception("Trying to send an email before next retry!");
       }
     }
+
+    $this->skipSendOnSave = true;
 
     try {
       $parameters = $this->parameters;
@@ -185,6 +216,9 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         $mailer->setFrom($default);
         unset($params['from']);
       }
+
+      $is_first = !empty($params['is-first-message']);
+      unset($params['is-first-message']);
 
       foreach ($params as $key => $value) {
         switch ($key) {
@@ -223,6 +257,16 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
             if ($value) {
               $mailer->setIsHTML(true);
             }
+            break;
+          case 'thread-id':
+            if ($is_first && $mailer->supportsMessageIDHeader()) {
+              $mailer->addHeader('Message-ID',  $value);
+            } else {
+              $mailer->addHeader('In-Reply-To', $value);
+              $mailer->addHeader('References',  $value);
+            }
+            $thread_index = $this->generateThreadIndex($value, $is_first);
+            $mailer->addHeader('Thread-Index', $thread_index);
             break;
           default:
             // Just discard.
@@ -275,6 +319,37 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     );
     $status_code = coalesce($status_code, '?');
     return idx($readable, $status_code, $status_code);
+  }
+
+  private function generateThreadIndex($seed, $is_first_mail) {
+    // When threading, Outlook ignores the 'References' and 'In-Reply-To'
+    // headers that most clients use. Instead, it uses a custom 'Thread-Index'
+    // header. The format of this header is something like this (from
+    // camel-exchange-folder.c in Evolution Exchange):
+
+    /* A new post to a folder gets a 27-byte-long thread index. (The value
+     * is apparently unique but meaningless.) Each reply to a post gets a
+     * 32-byte-long thread index whose first 27 bytes are the same as the
+     * parent's thread index. Each reply to any of those gets a
+     * 37-byte-long thread index, etc. The Thread-Index header contains a
+     * base64 representation of this value.
+     */
+
+    // The specific implementation uses a 27-byte header for the first email
+    // a recipient receives, and a random 5-byte suffix (32 bytes total)
+    // thereafter. This means that all the replies are (incorrectly) siblings,
+    // but it would be very difficult to keep track of the entire tree and this
+    // gets us reasonable client behavior.
+
+    $base = substr(md5($seed), 0, 27);
+    if (!$is_first_mail) {
+      // Not totally sure, but it seems like outlook orders replies by
+      // thread-index rather than timestamp, so to get these to show up in the
+      // right order we use the time as the last 4 bytes.
+      $base .= ' '.pack('N', time());
+    }
+
+    return base64_encode($base);
   }
 
 }

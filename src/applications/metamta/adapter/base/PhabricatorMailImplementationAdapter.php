@@ -27,6 +27,12 @@ abstract class PhabricatorMailImplementationAdapter {
   abstract public function setSubject($subject);
   abstract public function setIsHTML($is_html);
 
+  /**
+   * Some mailers, notably Amazon SES, do not support us setting a specific
+   * Message-ID header.
+   */
+  abstract public function supportsMessageIDHeader();
+
   abstract public function send();
 
 }

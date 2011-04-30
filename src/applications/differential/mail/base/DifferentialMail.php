@@ -65,8 +65,6 @@ abstract class DifferentialMail {
       throw new Exception('No "To:" users provided!');
     }
 
-    $message_id = $this->getMessageID();
-
     $cc_phids = $this->getCCPHIDs();
     $subject  = $this->buildSubject();
     $body     = $this->buildBody();
@@ -91,15 +89,11 @@ abstract class DifferentialMail {
       ->setSubject($subject)
       ->setBody($body)
       ->setIsHTML($this->shouldMarkMailAsHTML())
-      ->addHeader('Thread-Topic', $this->getRevision()->getTitle())
-      ->addHeader('Thread-Index', $this->generateThreadIndex());
+      ->addHeader('Thread-Topic', $this->getRevision()->getTitle());
 
-    if ($this->isFirstMailAboutRevision()) {
-      $mail->addHeader('Message-ID',  $message_id);
-    } else {
-      $mail->addHeader('In-Reply-To', $message_id);
-      $mail->addHeader('References',  $message_id);
-    }
+    $mail->setThreadID(
+      $this->getThreadID(),
+      $this->isFirstMailAboutRevision());
 
     if ($this->heraldRulesHeader) {
       $mail->addHeader('X-Herald-Rules', $this->heraldRulesHeader);
@@ -218,7 +212,7 @@ EOTEXT;
     return $this->revision;
   }
 
-  protected function getMessageID() {
+  protected function getThreadID() {
     $phid = $this->getRevision()->getPHID();
     $domain = PhabricatorEnv::getEnvConfig('metamta.domain');
     return "<differential-rev-{$phid}-req@{$domain}>";
@@ -276,36 +270,6 @@ EOTEXT;
 
   public function isFirstMailAboutRevision() {
     return $this->isFirstMailAboutRevision;
-  }
-
-  protected function generateThreadIndex() {
-    // When threading, Outlook ignores the 'References' and 'In-Reply-To'
-    // headers that most clients use. Instead, it uses a custom 'Thread-Index'
-    // header. The format of this header is something like this (from
-    // camel-exchange-folder.c in Evolution Exchange):
-
-    /* A new post to a folder gets a 27-byte-long thread index. (The value
-     * is apparently unique but meaningless.) Each reply to a post gets a
-     * 32-byte-long thread index whose first 27 bytes are the same as the
-     * parent's thread index. Each reply to any of those gets a
-     * 37-byte-long thread index, etc. The Thread-Index header contains a
-     * base64 representation of this value.
-     */
-
-    // The specific implementation uses a 27-byte header for the first email
-    // a recipient receives, and a random 5-byte suffix (32 bytes total)
-    // thereafter. This means that all the replies are (incorrectly) siblings,
-    // but it would be very difficult to keep track of the entire tree and this
-    // gets us reasonable client behavior.
-
-    $base = substr(md5($this->getRevision()->getPHID()), 0, 27);
-    if (!$this->isFirstMailAboutRevision()) {
-      // not totally sure, but it seems like outlook orders replies by
-      // thread-index rather than timestamp, so to get these to show up in the
-      // right order we use the time as the last 4 bytes.
-      $base .= ' ' . pack("N", time());
-    }
-    return base64_encode($base);
   }
 
   public function setHeraldTranscriptURI($herald_transcript_uri) {

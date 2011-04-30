@@ -16,74 +16,75 @@
  * limitations under the License.
  */
 
-class PhabricatorMailImplementationPHPMailerLiteAdapter
+/**
+ * Mail adapter that doesn't actually send any email, for writing unit tests
+ * against.
+ */
+class PhabricatorMailImplementationTestAdapter
   extends PhabricatorMailImplementationAdapter {
 
-  public function __construct() {
-    $root = phutil_get_library_root('phabricator');
-    $root = dirname($root);
-    require_once $root.'/externals/phpmailer/class.phpmailer-lite.php';
-    $this->mailer = newv('PHPMailerLite', array($use_exceptions = true));
-  }
+  private $guts = array();
+  private $config;
 
-  public function supportsMessageIDHeader() {
-    return true;
+  public function __construct(array $config) {
+    $this->config = $config;
   }
 
   public function setFrom($email) {
-    $this->mailer->SetFrom($email, '', $crazy_side_effects = false);
+    $this->guts['from'] = $email;
     return $this;
   }
 
   public function addReplyTo($email) {
-    $this->mailer->AddReplyTo($email);
+    $this->guts['reply-to'] = $email;
     return $this;
   }
 
   public function addTos(array $emails) {
     foreach ($emails as $email) {
-      $this->mailer->AddAddress($email);
+      $this->guts['tos'][] = $email;
     }
     return $this;
   }
 
   public function addCCs(array $emails) {
     foreach ($emails as $email) {
-      $this->mailer->AddCC($email);
+      $this->guts['ccs'][] = $email;
     }
     return $this;
   }
 
   public function addHeader($header_name, $header_value) {
-    if (strtolower($header_name) == 'message-id') {
-      $this->mailer->MessageID = $header_value;
-    } else {
-      $this->mailer->AddCustomHeader($header_name.': '.$header_value);
-    }
+    $this->guts['headers'][] = array($header_name, $header_value);
     return $this;
   }
 
   public function setBody($body) {
-    $this->mailer->Body = $body;
+    $this->guts['body'] = $body;
     return $this;
   }
 
   public function setSubject($subject) {
-    $this->mailer->Subject = $subject;
+    $this->guts['subject'] = $subject;
     return $this;
   }
 
   public function setIsHTML($is_html) {
-    $this->mailer->IsHTML(true);
+    $this->guts['is-html'] = $is_html;
     return $this;
   }
 
-  public function hasValidRecipients() {
-    return true;
+  public function supportsMessageIDHeader() {
+    return $this->config['supportsMessageIDHeader'];
   }
 
   public function send() {
-    return $this->mailer->Send();
+    $this->guts['did-send'] = true;
+    return true;
+  }
+
+  public function getGuts() {
+    return $this->guts;
   }
 
 }

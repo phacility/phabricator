@@ -28,6 +28,11 @@ class PhabricatorMailImplementationAmazonSESAdapter
     $this->mailer->customMailer = $this;
   }
 
+  public function supportsMessageIDHeader() {
+    // Amazon SES will ignore any Message-ID we provide.
+    return false;
+  }
+
   public function executeSend($body) {
     $key = PhabricatorEnv::getEnvConfig('amazon-ses.access-key');
     $secret = PhabricatorEnv::getEnvConfig('amazon-ses.secret-key');
@@ -36,7 +41,7 @@ class PhabricatorMailImplementationAmazonSESAdapter
     $root = dirname($root);
     require_once $root.'/externals/amazon-ses/ses.php';
 
-    $service = new SimpleEmailService($key, $secret);
+    $service = newv('SimpleEmailService', array($key, $secret));
     return $service->sendRawEmail($body);
   }
 
