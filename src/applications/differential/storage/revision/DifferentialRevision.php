@@ -151,4 +151,8 @@ class DifferentialRevision extends DifferentialDAO {
   public function getRawRelations($relation) {
     return idx($this->relationships, $relation, array());
   }
+
+  public function getUnsubscribedPHIDs() {
+    return array_keys($this->getUnsubscribed());
+  }
 }

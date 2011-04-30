@@ -204,7 +204,7 @@ class DifferentialRevisionEditor {
         $diff);
       $adapter->setExplicitCCs($new['ccs']);
       $adapter->setExplicitReviewers($new['rev']);
-      $adapter->setForbiddenCCs($revision->getUnsubscribed());
+      $adapter->setForbiddenCCs($revision->getUnsubscribedPHIDs());
 
       $xscript = HeraldEngine::loadAndApplyRules($adapter);
       $xscript_uri = PhabricatorEnv::getProductionURI(
