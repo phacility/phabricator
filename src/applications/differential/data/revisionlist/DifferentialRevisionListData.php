@@ -90,10 +90,33 @@ class DifferentialRevisionListData {
           $this->ids);
         break;
       case self::QUERY_OWNED_OR_REVIEWER:
-        $this->revisions = $this->loadAllWhereJoinReview(
-          'revision.authorPHID in (%Ls) OR relationship.objectPHID in (%Ls)',
+        $rev = new DifferentialRevision();
+        $data = queryfx_all(
+          $rev->establishConnection('r'),
+          'SELECT revs.* FROM (
+            (
+              SELECT revision.*
+              FROM %T revision
+              WHERE revision.authorPHID in (%Ls)
+            )
+            UNION
+            (
+              SELECT revision.*
+              FROM %T revision, %T rel
+              WHERE rel.revisionId = revision.Id
+                    AND rel.relation = %s
+                    AND rel.objectPHID in (%Ls)
+            )
+          ) as revs
+          %Q',
+          $rev->getTableName(),
           $this->ids,
-          $this->ids);
+          $rev->getTableName(),
+          DifferentialRevision::RELATIONSHIP_TABLE,
+          DifferentialRevision::RELATION_REVIEWER,
+          $this->ids,
+          $this->getOrderClause());
+        $this->revisions = $rev->loadAllFromArray($data);
         break;
       case self::QUERY_NEED_ACTION_FROM_SELF:
         $rev = new DifferentialRevision();
