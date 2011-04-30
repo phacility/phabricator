@@ -23,7 +23,7 @@ require_once $root.'/scripts/__init_env__.php';
 
 phutil_require_module('phutil', 'console');
 
-const TABLE_NAME = 'schema_version';
+define('SCHEMA_VERSION_TABLE_NAME', 'schema_version');
 
 if (isset($argv[1]) && !is_numeric($argv[1])) {
   print
@@ -82,7 +82,7 @@ if ($next_version === null) {
   $version = queryfx_one(
     $conn,
     'SELECT * FROM %T',
-    TABLE_NAME);
+    SCHEMA_VERSION_TABLE_NAME);
 
   if (!$version) {
     print "*** No version information in the database ***\n";
@@ -142,12 +142,16 @@ foreach ($patches as $patch) {
 
   // Patch was successful, update the db with the latest applied patch version
   // 'DELETE' and 'INSERT' instead of update, because the table might be empty
-  queryfx($conn, 'DELETE FROM %T', TABLE_NAME);
-  queryfx($conn, 'INSERT INTO %T values (%d)', TABLE_NAME, $patch['version']);
+  queryfx($conn, 'DELETE FROM %T', SCHEMA_VERSION_TABLE_NAME);
+  queryfx(
+    $conn,
+    'INSERT INTO %T values (%d)',
+    SCHEMA_VERSION_TABLE_NAME,
+    $patch['version']);
 
   $patch_applied = true;
 }
 
 if (!$patch_applied) {
-  print "Your database is already up-to-date\n";
+  print "Your database is already up-to-date.\n";
 }
