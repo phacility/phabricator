@@ -144,9 +144,11 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
         "{$error}.");
     }
 
-    $ret = @mysql_select_db($database, $conn);
-    if (!$ret) {
-      $this->throwQueryException($conn);
+    if ($database !== null) {
+      $ret = @mysql_select_db($database, $conn);
+      if (!$ret) {
+        $this->throwQueryException($conn);
+      }
     }
 
     $end = microtime(true);
@@ -249,6 +251,11 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
         // portable to parse the key out of the error and attach it to the
         // exception.
         throw new AphrontQueryDuplicateKeyException("{$errno}: {$error}");
+      case 1044: // Access denied to database
+      case 1045: // Access denied (auth)
+      case 1142: // Access denied to table
+      case 1143: // Access denied to column
+        throw new AphrontQueryAccessDeniedException("#{$errno}: {$error}");
       default:
         // TODO: 1064 is syntax error, and quite terrible in production.
         throw new AphrontQueryException("#{$errno}: {$error}");
