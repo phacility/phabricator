@@ -135,6 +135,8 @@ class DifferentialRevisionViewController extends DifferentialController {
       PhutilSymbolLoader::loadClass($custom_renderer_class);
       $custom_renderer =
         newv($custom_renderer_class, array());
+    } else {
+      $custom_renderer = null;
     }
 
     $properties = $this->getRevisionProperties(
