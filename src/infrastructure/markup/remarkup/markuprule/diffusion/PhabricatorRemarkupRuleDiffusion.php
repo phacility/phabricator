@@ -24,7 +24,7 @@ class PhabricatorRemarkupRuleDiffusion
 
   public function apply($text) {
     return preg_replace_callback(
-      '@\br([A-Z]+[a-z0-9]+)\b@',
+      '@\br([A-Z]+[a-f0-9]+)\b@',
       array($this, 'markupDiffusionLink'),
       $text);
   }
