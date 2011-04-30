@@ -97,7 +97,7 @@ return array(
     'recaptcha.private-key',
     'phabricator.csrf-key',
     'facebook.application-secret',
-    'github.secret',
+    'github.application-secret',
   ),
 
 // --  MySQL  --------------------------------------------------------------- //

@@ -27,6 +27,10 @@ final class PhabricatorEnv {
     return idx(self::$env, $key, $default);
   }
 
+  public static function envConfigExists($key) {
+    return array_key_exists($key, self::$env);
+  }
+
   public static function getURI($path) {
     return rtrim(self::getEnvConfig('phabricator.base-uri'), '/').$path;
   }

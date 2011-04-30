@@ -69,6 +69,16 @@ class DarkConsoleConfigPlugin extends DarkConsolePlugin {
     $mask = PhabricatorEnv::getEnvConfig('darkconsole.config-mask');
     $mask = array_fill_keys($mask, true);
 
+    foreach ($mask as $masked_key => $ignored) {
+      if (!PhabricatorEnv::envConfigExists($masked_key)) {
+        throw new Exception(
+          "Configuration 'darkconsole.config-mask' masks unknown ".
+          "configuration key '".$masked_key."'. If this key has been ".
+          "renamed, you might be accidentally exposing information which you ".
+          "don't intend to.");
+      }
+    }
+
     $rows = array();
     foreach ($config_data as $key => $value) {
       if (empty($mask[$key])) {
