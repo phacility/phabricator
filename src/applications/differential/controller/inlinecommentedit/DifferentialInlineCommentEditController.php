@@ -188,7 +188,7 @@ class DifferentialInlineCommentEditController extends DifferentialController {
         'class' => 'differential-inline-comment-edit-textarea',
         'name' => 'text',
       ),
-      $text);
+      phutil_escape_html($text));
   }
 
 }
