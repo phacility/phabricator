@@ -140,6 +140,7 @@
  * @task   save    Writing Objects
  * @task   hook    Hooks and Callbacks
  * @task   util    Utilities
+ * @task   isolate Isolation for Unit Testing
  *
  * @group storage
  */
@@ -160,6 +161,7 @@ abstract class LiskDAO {
   const IDS_MANUAL                  = 'ids-manual';
 
   private $__connections            = array();
+  private static $processIsolationLevel = 0;
 
   /**
    *  Build an empty object.
@@ -601,6 +603,14 @@ abstract class LiskDAO {
   protected function getConnection($mode) {
     if ($mode != 'r' && $mode != 'w') {
       throw new Exception("Unknown mode '{$mode}', should be 'r' or 'w'.");
+    }
+
+    if (self::shouldIsolateAllLiskEffectsToCurrentProcess()) {
+      $mode = 'isolate-'.$mode;
+      if (!isset($this->__connections[$mode])) {
+        $this->__connections[$mode] = $this->establishIsolatedConnection($mode);
+      }
+      return $this->__connections[$mode];
     }
 
     // TODO There is currently no protection on 'r' queries against writing
@@ -1045,6 +1055,43 @@ abstract class LiskDAO {
    * @task hook
    */
   protected function didDelete() {}
+
+
+/* -(  Isolation  )---------------------------------------------------------- */
+
+  /**
+   * @task isolate
+   */
+  public static function beginIsolateAllLiskEffectsToCurrentProcess() {
+    self::$processIsolationLevel++;
+  }
+
+  /**
+   * @task isolate
+   */
+  public static function endIsolateAllLiskEffectsToCurrentProcess() {
+    self::$processIsolationLevel--;
+    if (self::$processIsolationLevel < 0) {
+      throw new Exception(
+        "Lisk process isolation level was reduced below 0.");
+    }
+  }
+
+  /**
+   * @task isolate
+   */
+  public static function shouldIsolateAllLiskEffectsToCurrentProcess() {
+    return (bool)self::$processIsolationLevel;
+  }
+
+  /**
+   * @task isolate
+   */
+  private function establishIsolatedConnection($mode) {
+    $config = array();
+    return new AphrontIsolatedDatabaseConnection($config);
+  }
+
 
 /* -(  Utilities  )---------------------------------------------------------- */
 

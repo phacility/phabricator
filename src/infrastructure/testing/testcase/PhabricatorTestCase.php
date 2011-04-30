@@ -18,9 +18,47 @@
 
 abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
 
+
+  /**
+   * If true, put Lisk in process-isolated mode for the duration of the tests so
+   * that it will establish only isolated, side-effect-free database
+   * connections. Defaults to true.
+   *
+   * NOTE: You should disable this only in rare circumstances. Unit tests should
+   * not rely on external resources like databases, and should not produce
+   * side effects.
+   */
+  const PHABRICATOR_TESTCONFIG_ISOLATE_LISK = 'isolate-lisk';
+
+  private $configuration;
+
+  protected function getPhabricatorTestCaseConfiguration() {
+    return array();
+  }
+
+  private function getComputedConfiguration() {
+    return $this->getPhabricatorTestCaseConfiguration() + array(
+      self::PHABRICATOR_TESTCONFIG_ISOLATE_LISK => true,
+    );
+  }
+
   protected function willRunTests() {
     $root = dirname(phutil_get_library_root('phabricator'));
     require_once $root.'/scripts/__init_env__.php';
+
+    $config = $this->getComputedConfiguration();
+
+    if ($config[self::PHABRICATOR_TESTCONFIG_ISOLATE_LISK]) {
+      LiskDAO::beginIsolateAllLiskEffectsToCurrentProcess();
+    }
+  }
+
+  protected function didRunTests() {
+    $config = $this->getComputedConfiguration();
+
+    if ($config[self::PHABRICATOR_TESTCONFIG_ISOLATE_LISK]) {
+      LiskDAO::endIsolateAllLiskEffectsToCurrentProcess();
+    }
   }
 
 }

@@ -19,6 +19,15 @@
 class AphrontIsolatedDatabaseConnectionTestCase
   extends PhabricatorTestCase {
 
+  protected function getPhabricatorTestCaseConfiguration() {
+    return array(
+      // We disable this here because this test is unique (it is testing that
+      // isolation actually occurs) and must establish a live connection to the
+      // database to verify that.
+      self::PHABRICATOR_TESTCONFIG_ISOLATE_LISK => false,
+    );
+  }
+
   public function testIsolation() {
     $conn = $this->newIsolatedConnection();
 
