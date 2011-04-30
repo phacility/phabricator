@@ -22,6 +22,9 @@ class DifferentialMarkupEngineFactory {
     $engine = new PhutilRemarkupEngine();
 
     $engine->setConfig('preserve-linebreaks', true);
+    $engine->setConfig(
+      'pygments.enabled',
+      PhabricatorEnv::getEnvConfig('pygments.enabled'));
 
     $rules = array();
     $rules[] = new PhutilRemarkupRuleEscapeRemarkup();

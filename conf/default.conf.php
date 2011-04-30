@@ -265,6 +265,13 @@ return array(
   'phabricator.timezone'        => null,
 
 
+  // Phabricator can highlight PHP by default, but if you want syntax
+  // highlighting for other languages you should install the python package
+  // 'Pygments', make sure the 'pygmentize' script is available in the
+  // $PATH of the webserver, and then enable this.
+  'pygments.enabled'            => false,
+
+
 // -- Files ----------------------------------------------------------------- //
 
   // Lists which uploaded file types may be viewed in the browser. If a file
