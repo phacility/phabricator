@@ -313,6 +313,9 @@ return array(
 
   'differential.revision-custom-detail-renderer'  => null,
 
+  'phabricator.enable-reply-handling' => false,
+  'differential.replyhandler' => 'DifferentialReplyHandler',
+
 
 // -- Maniphest ------------------------------------------------------------- //
 

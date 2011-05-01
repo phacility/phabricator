@@ -33,6 +33,7 @@ abstract class DifferentialMail {
   protected $isFirstMailToRecipients;
   protected $heraldTranscriptURI;
   protected $heraldRulesHeader;
+  protected $replyHandler;
 
   abstract protected function renderSubject();
   abstract protected function renderBody();
@@ -70,16 +71,24 @@ abstract class DifferentialMail {
     $body     = $this->buildBody();
 
     $mail = new PhabricatorMetaMTAMail();
-    $handle = $this->getActorHandle();
-    $reply = $this->getReplyHandlerEmailAddress();
-    if ($handle) {
-      $mail->setFrom($handle->getPHID());
-      if ($reply) {
-        $mail->setReplyTo($this->getReplyHandlerEmailAddress());
+    $actor_handle = $this->getActorHandle();
+    $reply_handler = $this->getReplyHandler();
+
+    if ($actor_handle) {
+      $mail->setFrom($actor_handle->getPHID());
+    }
+
+    if ($reply_handler) {
+      if ($actor_handle) {
+        $actor = id(new PhabricatorUser())->loadOneWhere(
+          'phid = %s',
+          $actor_handle->getPHID());
+        $reply_handler->setActor($actor);
       }
-    } else {
-      if ($reply) {
-        $mail->setFrom($this->getReplyHandlerEmailAddress());
+
+      $reply_to = $reply_handler->getReplyHandlerEmailAddress();
+      if ($reply_to) {
+        $mail->setReplyTo($reply_to);
       }
     }
 
@@ -114,16 +123,12 @@ abstract class DifferentialMail {
 
   protected function buildBody() {
 
-    $actions = array();
     $body = $this->renderBody();
-/*
-    $body .= <<<EOTEXT
 
-ACTIONS
-  Reply to comment, or !accept, !reject, !abandon, !resign, or !showdiff.
-
-EOTEXT;
-*/
+    $handler_body_text = $this->getReplyHandlerBodyText();
+    if ($handler_body_text) {
+      $body .= $handler_body_text;
+    }
 
     if ($this->getHeraldTranscriptURI() && $this->isFirstMailToRecipients()) {
       $manage_uri = PhabricatorEnv::getProductionURI(
@@ -146,12 +151,45 @@ EOTEXT;
     return $body;
   }
 
-  protected function getReplyHandlerEmailAddress() {
-    return null;
-    // TODO
-    $phid = $this->getRevision()->getPHID();
-    $server = 'todo.example.com';
-    return "differential+{$phid}@{$server}";
+  protected function getReplyHandlerBodyText() {
+    $reply_handler = $this->getReplyHandler();
+
+    if (!$reply_handler) {
+      return null;
+    }
+
+    return $reply_handler->getBodyText();
+  }
+
+  protected function getReplyHandler() {
+    if ($this->replyHandler) {
+      return $this->replyHandler;
+    }
+
+    $reply_handler = self::loadReplyHandler();
+    if (!$reply_handler) {
+      return null;
+    }
+
+    $reply_handler->setRevision($this->getRevision());
+    $this->replyHandler = $reply_handler;
+    return $this->replyHandler;
+  }
+
+  public static function loadReplyHandler() {
+    if (!PhabricatorEnv::getEnvConfig('phabricator.enable-reply-handling')) {
+      return null;
+    }
+
+    $reply_handler = PhabricatorEnv::getEnvConfig('differential.replyhandler');
+
+    if (!$reply_handler) {
+      return null;
+    }
+
+    PhutilSymbolLoader::loadClass($reply_handler);
+    $reply_handler = newv($reply_handler, array());
+    return $reply_handler;
   }
 
   protected function formatText($text) {
