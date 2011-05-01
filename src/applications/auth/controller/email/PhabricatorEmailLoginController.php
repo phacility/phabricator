@@ -74,9 +74,9 @@ class PhabricatorEmailLoginController extends PhabricatorAuthController {
               $target_user->getPHID(),
             ));
           $mail->setBody(
-            "blah blah blah ".
+            "here is your link ".
               PhabricatorEnv::getURI('/login/etoken/'.$etoken.'/').'?email='.phutil_escape_uri($target_user->getEmail()));
-          $mail->save();
+          $mail->saveAndSend();
 
           $view = new AphrontRequestFailureView();
           $view->setHeader('Check Your Email');

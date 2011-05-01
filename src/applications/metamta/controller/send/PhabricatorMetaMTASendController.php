@@ -33,9 +33,8 @@ class PhabricatorMetaMTASendController extends PhabricatorMetaMTAController {
       $mail->setSimulatedFailureCount($request->getInt('failures'));
       $mail->setIsHTML($request->getInt('html'));
       $mail->save();
-      if ($request->getInt('immediately') &&
-          !PhabricatorEnv::getEnvConfig('metamta.send-immediately')) {
-        $mail->sendNow($force_send = true);
+      if ($request->getInt('immediately')) {
+        $mail->sendNow();
       }
 
       return id(new AphrontRedirectResponse())

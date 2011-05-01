@@ -35,8 +35,6 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   protected $nextRetry;
   protected $relatedPHID;
 
-  private $skipSendOnSave;
-
   public function __construct() {
 
     $this->status     = self::STATUS_QUEUE;
@@ -133,19 +131,26 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this;
   }
 
-  public function save() {
-    $try_send = (PhabricatorEnv::getEnvConfig('metamta.send-immediately')) &&
-                (!$this->getID()) &&
-                (!$this->skipSendOnSave);
+  /**
+   * Save a newly created mail to the database and attempt to send it
+   * immediately if the server is configured for immediate sends. When
+   * applications generate new mail they should generally use this method to
+   * deliver it. If the server doesn't use immediate sends, this has the same
+   * effect as calling save(): the mail will eventually be delivered by the
+   * MetaMTA daemon.
+   *
+   * @return this
+   */
+  public function saveAndSend() {
+    $ret = $this->save();
 
-    $ret = parent::save();
-
-    if ($try_send) {
+    if (PhabricatorEnv::getEnvConfig('metamta.send-immediately')) {
       $this->sendNow();
     }
 
     return $ret;
   }
+
 
   public function buildDefaultMailer() {
     $class_name = PhabricatorEnv::getEnvConfig('metamta.mail-adapter');
@@ -180,8 +185,6 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         throw new Exception("Trying to send an email before next retry!");
       }
     }
-
-    $this->skipSendOnSave = true;
 
     try {
       $parameters = $this->parameters;

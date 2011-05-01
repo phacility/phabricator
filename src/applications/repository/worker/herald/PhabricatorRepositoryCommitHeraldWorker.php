@@ -133,6 +133,6 @@ EOBODY;
       $mailer->setFrom($author_phid);
     }
 
-    $mailer->save();
+    $mailer->saveAndSend();
   }
 }

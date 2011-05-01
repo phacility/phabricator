@@ -101,8 +101,7 @@ abstract class DifferentialMail {
 
     $mail->setRelatedPHID($this->getRevision()->getPHID());
 
-    // Save this to the MetaMTA queue for later delivery to the MTA.
-    $mail->save();
+    $mail->saveAndSend();
   }
 
   protected function buildSubject() {
