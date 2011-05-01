@@ -5,6 +5,7 @@
     "intro" : "Introduction",
     "install" : "Installing",
     "config" : "Configuration",
+    "contrib" : "Contributing",
     "userguide" : "Application User Guides",
     "developer" : "Phabricator Developer Guides",
     "differential" : "Differential (Code Review)",
