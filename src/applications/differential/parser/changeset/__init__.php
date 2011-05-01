@@ -14,6 +14,7 @@ phutil_require_module('phabricator', 'applications/differential/storage/changese
 phutil_require_module('phabricator', 'applications/differential/storage/diff');
 phutil_require_module('phabricator', 'applications/differential/view/inlinecomment');
 phutil_require_module('phabricator', 'applications/files/uri');
+phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'infrastructure/javelin/markup');
 phutil_require_module('phabricator', 'storage/queryfx');
 

@@ -699,6 +699,9 @@ EOSYNTHETIC;
     $mask_force   = array()) {
 
     $this->highlightEngine = new PhutilDefaultSyntaxHighlighterEngine();
+    $this->highlightEngine->setConfig(
+      'pygments.enabled',
+      PhabricatorEnv::getEnvConfig('pygments.enabled'));
 
     $this->tryCacheStuff();
 
