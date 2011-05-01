@@ -1,0 +1,48 @@
+@title Contributor Introduction
+@group contrib
+
+Introduction to contributing to Phabricator, Arcanist and libphutil.
+
+= You Are Awesome =
+
+Contributors are awesome. If you're thinking about contributing, that means
+you're thinking about being awesome. That already makes you a little bit
+awesome. But if you contribute you'll definitely be really, seriously awesome.
+
+= Legal Stuff =
+
+Before we can accept contributions, you need to submit a super fine and fancy
+legal document called a Facebook Contributor License Agreement, which you can
+find here:
+
+https://developers.facebook.com/opensource/cla
+
+= Not Sure Where To Get Started? =
+
+If you want to contribute but aren't sure how (or want to try submitting a small
+patch before you build something bigger) you can search the Phabricator
+development install for open tasks in the "Bootcamp" project which are owned by
+"Up For Grabs". These are small-to-medium-sized bugs and projects intended to
+introduce new contributors to the codebase.
+
+= Required Reading =
+
+You should read the relevant coding convention documents before you submit a
+change and make sure you're following the project guidelines:
+
+  - @{article:General Coding Conventions} (for all languages)
+  - @{article:PHP Coding Conventions} (for PHP)
+
+= Philosophy =
+
+The Phabricator philosophy is simple tools that work well. Performance,
+reliability, and ease of use are of paramount importance. This does not exclude
+a rich featureset, but adding features shouldn't compromise these pillars.
+
+One of Phabricator's main strengths is that it's pretty fast, but it got there
+by accepting only patches which are also pretty fast and reverting out a bunch
+of garbage that was really slow. Accepting a few slow patches undoes all this
+work, so you need to be prepared to defend the performance of your patches. The
+best way you can do this is to do your homework and come armed with concrete
+performance measurements and information (XHProf profiles, EXPLAIN for query
+plans, etc.)
