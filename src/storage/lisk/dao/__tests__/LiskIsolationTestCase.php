@@ -42,7 +42,7 @@ class LiskIsolationTestCase extends PhabricatorTestCase {
     $dao = new LiskIsolationTestDAO();
 
     try {
-      $dao->establishConnection('r');
+      $dao->establishLiveConnection('r');
 
       $this->assertFailure(
         "LiskIsolationTestDAO did not throw an exception when instructed to ".

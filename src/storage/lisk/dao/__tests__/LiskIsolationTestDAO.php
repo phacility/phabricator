@@ -31,7 +31,7 @@ class LiskIsolationTestDAO extends LiskDAO {
     return PhabricatorPHID::generateNewPHID('TISO');
   }
 
-  public function establishConnection($mode) {
+  public function establishLiveConnection($mode) {
     throw new LiskIsolationTestDAOException(
       "Isolation failure! DAO is attempting to connect to an external ".
       "resource!");

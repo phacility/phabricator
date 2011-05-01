@@ -42,15 +42,15 @@
  * =Building New Objects=
  *
  * To create new Lisk objects, extend @{class:LiskDAO} and implement
- * @{method:establishConnection}. It should return an AphrontDatabaseConnection;
- * this will tell Lisk where to save your objects.
+ * @{method:establishLiveConnection}. It should return an
+ * AphrontDatabaseConnection; this will tell Lisk where to save your objects.
  *
  *   class Dog extends LiskDAO {
  *
  *     protected $name;
  *     protected $breed;
  *
- *     public function establishConnection() {
+ *     public function establishLiveConnection() {
  *       return $some_connection_object;
  *     }
  *   }
@@ -175,7 +175,7 @@ abstract class LiskDAO {
     }
   }
 
-  abstract protected function establishConnection($mode);
+  abstract protected function establishLiveConnection($mode);
 
 
 /* -(  Configuring Lisk  )--------------------------------------------------- */
@@ -370,7 +370,7 @@ abstract class LiskDAO {
 
 
   protected function loadRawDataWhere($pattern/*, $arg, $arg, $arg ... */) {
-    $connection = $this->getConnection('r');
+    $connection = $this->establishConnection('r');
 
     $lock_clause = '';
     if ($connection->isReadLocking()) {
@@ -600,7 +600,7 @@ abstract class LiskDAO {
    *
    * @task   info
    */
-  protected function getConnection($mode) {
+  public function establishConnection($mode) {
     if ($mode != 'r' && $mode != 'w') {
       throw new Exception("Unknown mode '{$mode}', should be 'r' or 'w'.");
     }
@@ -617,7 +617,7 @@ abstract class LiskDAO {
     // or on 'w' queries against reading
 
     if (!isset($this->__connections[$mode])) {
-      $this->__connections[$mode] = $this->establishConnection($mode);
+      $this->__connections[$mode] = $this->establishLiveConnection($mode);
     }
 
     return $this->__connections[$mode];
@@ -732,7 +732,7 @@ abstract class LiskDAO {
       $map[$k] = $v;
     }
 
-    $conn = $this->getConnection('w');
+    $conn = $this->establishConnection('w');
 
     foreach ($map as $key => $value) {
       $map[$key] = qsprintf($conn, '%C = %ns', $key, $value);
@@ -781,7 +781,7 @@ abstract class LiskDAO {
   public function delete() {
     $this->willDelete();
 
-    $conn = $this->getConnection('w');
+    $conn = $this->establishConnection('w');
     $conn->query(
       'DELETE FROM %T WHERE %C = %d',
       $this->getTableName(),
@@ -835,7 +835,7 @@ abstract class LiskDAO {
 
     $this->willWriteData($data);
 
-    $conn = $this->getConnection('w');
+    $conn = $this->establishConnection('w');
 
     $columns = array_keys($data);
 
