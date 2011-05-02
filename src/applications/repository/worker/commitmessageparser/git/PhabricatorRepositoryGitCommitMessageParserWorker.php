@@ -25,17 +25,19 @@ class PhabricatorRepositoryGitCommitMessageParserWorker
 
     $local_path = $repository->getDetail('local-path');
 
+    // NOTE: %B was introduced somewhat recently in git's history, so pull
+    // commit message information with %s and %b instead.
     list($info) = execx(
-      '(cd %s && git log -n 1 --pretty=format:%%an%%x00%%B %s)',
+      '(cd %s && git log -n 1 --pretty=format:%%an%%x00%%s%%n%%n%%b %s)',
       $local_path,
       $commit->getCommitIdentifier());
-
 
     list($author, $message) = explode("\0", $info);
 
     // Make sure these are valid UTF-8.
     $author = phutil_utf8ize($author);
     $message = phutil_utf8ize($message);
+    $message = trim($message);
 
     $this->updateCommitData($author, $message);
 
