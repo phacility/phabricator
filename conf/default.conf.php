@@ -29,7 +29,7 @@ return array(
 
   // The default PHID for users who haven't uploaded a profile image. It should
   // be 50x50px.
-  'user.default-profile-image-phid' => 'PHID-FILE-f57aaefce707fc4060ef',
+  'user.default-profile-image-phid' => 'PHID-FILE-4d61229816cfe6f2b2a3',
 
 // -- Access Control -------------------------------------------------------- //
 

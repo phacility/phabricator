@@ -11,19 +11,11 @@ configured your Phabricator environment. If you haven't, see
 
 = Loading patches =
 
-If you are doing this for the first time to a freshly installed MySQL database,
-run the following command:
-
-  PHABRICATOR_ENV=<your_config> path/to/phabricator/scripts/sql/upgrade_schema.php -v 0
-
-This will install all the patches starting from 0. Running this script will
-store the information of the latest installed patch in the Phabricator database.
-Next time you want to upgrade your schema, just run:
+To upgrade your database schema to the latest version, just run this command:
 
   PHABRICATOR_ENV=<your_config> path/to/phabricator/scripts/sql/upgrade_schema.php
 
-This will install all the patches that are new since the last time you ran
-this script.
+This will install all the patches that are new since you installed, or since the last time you ran this script.
 
 If your configuration uses an unprivileged user to connect to the database, you
 may have to override the default user so the schema changes can be applied with
@@ -35,4 +27,4 @@ If you need to upgrade the schema starting from a specific patch, just run:
 
   PHABRICATOR_ENV=<your_config> path/to/phabricator/scripts/sql/upgrade_schema.php -v <patch_number>
 
-However, this isn't usually needed.
+However, this isn't usually needed and could be dangerous!
