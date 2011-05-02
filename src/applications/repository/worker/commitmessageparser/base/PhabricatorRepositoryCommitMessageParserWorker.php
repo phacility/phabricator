@@ -51,7 +51,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       if ($revision) {
 
         queryfx(
-          $revision->establishConnection('r'),
+          $revision->establishConnection('w'),
           'INSERT IGNORE INTO %T (revisionID, commitPHID) VALUES (%d, %s)',
           DifferentialRevision::TABLE_COMMIT,
           $revision->getID(),

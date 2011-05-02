@@ -27,7 +27,7 @@ PhutilSymbolLoader::loadClass('PhabricatorRepositoryCommit');
 
 $commit = new PhabricatorRepositoryCommit();
 
-$conn_w = id(new PhabricatorRepository())->establishConnection('r');
+$conn_w = id(new PhabricatorRepository())->establishConnection('w');
 $sizes = queryfx_all(
   $conn_w,
   'SELECT repositoryID, count(*) N FROM %T GROUP BY repositoryID',

@@ -76,7 +76,7 @@ abstract class PhabricatorRepositoryCommitDiscoveryDaemon
       $event->recordEvent();
 
       queryfx(
-        $repository->establishConnection('r'),
+        $repository->establishConnection('w'),
         'INSERT INTO %T (repositoryID, size, lastCommitID, epoch)
           VALUES (%d, 1, %d, %d)
           ON DUPLICATE KEY UPDATE
