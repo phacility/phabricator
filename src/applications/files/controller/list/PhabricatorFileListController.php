@@ -19,8 +19,23 @@
 class PhabricatorFileListController extends PhabricatorFileController {
 
   public function processRequest() {
+
+    $request = $this->getRequest();
+
+    $pager = new AphrontPagerView();
+    $pager->setOffset($request->getInt('page'));
+
     $files = id(new PhabricatorFile())->loadAllWhere(
-      '1 = 1 ORDER BY id DESC LIMIT 100');
+      '1 = 1 ORDER BY id DESC LIMIT %d, %d',
+      $pager->getOffset(),
+      $pager->getPageSize() + 1);
+
+    if (count($files) > $pager->getPageSize()) {
+      $files = array_slice($files, 0, $pager->getPageSize(), true);
+      $pager->setHasMorePages(true);
+    }
+
+    $pager->setURI($request->getRequestURI(), 'page');
 
     $rows = array();
     foreach ($files as $file) {
@@ -81,6 +96,7 @@ class PhabricatorFileListController extends PhabricatorFileController {
     $panel->appendChild($table);
     $panel->setHeader('Files');
     $panel->setCreateButton('Upload File', '/file/upload/');
+    $panel->appendChild($pager);
 
     return $this->buildStandardPageResponse($panel, array(
       'title' => 'Files',

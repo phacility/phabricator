@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'applications/files/controller/base');
 phutil_require_module('phabricator', 'applications/files/storage/file');
+phutil_require_module('phabricator', 'view/control/pager');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/layout/panel');
 
