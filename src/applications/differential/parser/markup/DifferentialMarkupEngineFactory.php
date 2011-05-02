@@ -28,6 +28,9 @@ class DifferentialMarkupEngineFactory {
 
     $rules = array();
     $rules[] = new PhutilRemarkupRuleEscapeRemarkup();
+    if (PhabricatorEnv::getEnvConfig('files.enable-proxy')) {
+      $rules[] = new PhabricatorRemarkupRuleProxyImage();
+    }
     $rules[] = new PhutilRemarkupRuleHyperlink();
 
     $rules[] = new PhabricatorRemarkupRuleDifferential();

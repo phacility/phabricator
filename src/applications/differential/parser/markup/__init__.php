@@ -11,6 +11,7 @@ phutil_require_module('phabricator', 'infrastructure/markup/remarkup/markuprule/
 phutil_require_module('phabricator', 'infrastructure/markup/remarkup/markuprule/diffusion');
 phutil_require_module('phabricator', 'infrastructure/markup/remarkup/markuprule/imagemacro');
 phutil_require_module('phabricator', 'infrastructure/markup/remarkup/markuprule/maniphest');
+phutil_require_module('phabricator', 'infrastructure/markup/remarkup/markuprule/proxyimage');
 
 phutil_require_module('phutil', 'markup/engine/remarkup');
 phutil_require_module('phutil', 'markup/engine/remarkup/blockrule/remarkupcode');

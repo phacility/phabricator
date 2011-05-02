@@ -123,6 +123,17 @@ class PhabricatorFile extends PhabricatorFileDAO {
 
   public static function newFromFileDownload($uri, $name) {
     $uri = new PhutilURI($uri);
+
+    $protocol = $uri->getProtocol();
+    switch ($protocol) {
+      case 'http':
+      case 'https':
+        break;
+      default:
+        // Make sure we are not accessing any file:// URIs or similar.
+        return null;
+    }
+
     $timeout = stream_context_create(
       array(
         'http' => array(

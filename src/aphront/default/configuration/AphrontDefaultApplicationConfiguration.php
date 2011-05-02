@@ -60,6 +60,7 @@ class AphrontDefaultApplicationConfiguration
           'edit/(?:(?P<id>\d+)/)?$' => 'PhabricatorFileMacroEditController',
           'delete/(?P<id>\d+)/$' => 'PhabricatorFileMacroDeleteController',
         ),
+        'proxy/$' => 'PhabricatorFileProxyController',
       ),
       '/phid/' => array(
         '$' => 'PhabricatorPHIDLookupController',
