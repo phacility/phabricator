@@ -13,6 +13,7 @@ phutil_require_module('phabricator', 'applications/differential/mail/comment');
 phutil_require_module('phabricator', 'applications/differential/storage/changeset');
 phutil_require_module('phabricator', 'applications/differential/storage/comment');
 phutil_require_module('phabricator', 'applications/differential/storage/inlinecomment');
+phutil_require_module('phabricator', 'applications/herald/storage/transcript/base');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'infrastructure/daemon/timeline/storage/event');
 

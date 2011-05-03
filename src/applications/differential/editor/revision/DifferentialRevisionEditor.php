@@ -212,6 +212,10 @@ class DifferentialRevisionEditor {
       $xscript_phid = $xscript->getPHID();
       $xscript_header = $xscript->getXHeraldRulesHeader();
 
+      HeraldTranscript::saveXHeraldRulesHeader(
+        $revision->getPHID(),
+        $xscript_header);
+
       $sub = array(
         'rev' => array(),
         'ccs' => $adapter->getCCsAddedByHerald(),

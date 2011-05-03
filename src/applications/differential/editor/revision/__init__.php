@@ -13,6 +13,7 @@ phutil_require_module('phabricator', 'applications/differential/storage/comment'
 phutil_require_module('phabricator', 'applications/differential/storage/revision');
 phutil_require_module('phabricator', 'applications/herald/adapter/differential');
 phutil_require_module('phabricator', 'applications/herald/engine/engine');
+phutil_require_module('phabricator', 'applications/herald/storage/transcript/base');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'applications/search/index/indexer/differential');
 phutil_require_module('phabricator', 'infrastructure/env');

@@ -33,6 +33,8 @@ class HeraldTranscript extends HeraldDAO {
   protected $objectPHID;
   protected $dryRun;
 
+  const TABLE_SAVED_HEADER = 'herald_savedheader';
+
   public function getXHeraldRulesHeader() {
     $ids = array();
     foreach ($this->applyTranscripts as $xscript) {
@@ -56,6 +58,29 @@ class HeraldTranscript extends HeraldDAO {
 
     return implode(', ', $ids);
   }
+
+  public static function saveXHeraldRulesHeader($phid, $header) {
+    queryfx(
+      id(new HeraldTranscript())->establishConnection('w'),
+      'INSERT INTO %T (phid, header) VALUES (%s, %s)
+        ON DUPLICATE KEY UPDATE header = VALUES(header)',
+      self::TABLE_SAVED_HEADER,
+      $phid,
+      $header);
+  }
+
+  public static function loadXHeraldRulesHeader($phid) {
+    $header = queryfx_one(
+      id(new HeraldTranscript())->establishConnection('r'),
+      'SELECT * FROM %T WHERE phid = %s',
+      self::TABLE_SAVED_HEADER,
+      $phid);
+    if ($header) {
+      return idx($header, 'header');
+    }
+    return null;
+  }
+
 
   protected function getConfiguration() {
     // Ugh. Too much of a mess to deal with.

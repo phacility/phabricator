@@ -304,6 +304,9 @@ class DifferentialCommentEditor {
       ->loadHandles();
     $actor_handle = $handles[$this->actorPHID];
 
+    $xherald_header = HeraldTranscript::loadXHeraldRulesHeader(
+      $revision->getPHID());
+
     id(new DifferentialCommentMail(
       $revision,
       $actor_handle,
@@ -316,6 +319,7 @@ class DifferentialCommentEditor {
           array($revision->getAuthorPHID())))
       ->setCCPHIDs($revision->getCCPHIDs())
       ->setChangedByCommit($this->getChangedByCommit())
+      ->setXHeraldRulesHeader($xherald_header)
       ->send();
 
     $event_data = array(
