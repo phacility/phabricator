@@ -160,11 +160,13 @@ foreach ($package_spec as $name => $package) {
   }
 }
 
-
+ksort($runtime_map);
 $runtime_map = var_export($runtime_map, true);
 $runtime_map = preg_replace('/\s+$/m', '', $runtime_map);
 $runtime_map = preg_replace('/array \(/', 'array(', $runtime_map);
 
+ksort($package_map['packages']);
+ksort($package_map['reverse']);
 $package_map = var_export($package_map, true);
 $pacakge_map = preg_replace('/\s+$/m', '', $package_map);
 $package_map = preg_replace('/array \(/', 'array(', $package_map);

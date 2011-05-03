@@ -25,6 +25,18 @@ abstract class PhabricatorFileController extends PhabricatorController {
     $page->setBaseURI('/file/');
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x87\xAA");
+    $page->setTabs(
+      array(
+        'files' => array(
+          'name' => 'Files',
+          'href' => '/file/',
+        ),
+        'macros' => array(
+          'name' => 'Image Macros',
+          'href' => '/file/macro/',
+        ),
+      ),
+      idx($data, 'tab'));
     $page->appendChild($view);
 
     $response = new AphrontWebpageResponse();

@@ -86,3 +86,8 @@
   color:      #888888;
   font-style: italic;
 }
+
+.aphront-table-view td.thumb img {
+  max-width: 64px;
+  max-height: 64px;
+}

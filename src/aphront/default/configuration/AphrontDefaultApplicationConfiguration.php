@@ -55,6 +55,11 @@ class AphrontDefaultApplicationConfiguration
         '(?P<view>info)/(?P<phid>[^/]+)/' => 'PhabricatorFileViewController',
         '(?P<view>view)/(?P<phid>[^/]+)/' => 'PhabricatorFileViewController',
         '(?P<view>download)/(?P<phid>[^/]+)/' => 'PhabricatorFileViewController',
+        'macro/' => array(
+          '$' => 'PhabricatorFileMacroListController',
+          'edit/(?:(?P<id>\d+)/)?$' => 'PhabricatorFileMacroEditController',
+          'delete/(?P<id>\d+)/$' => 'PhabricatorFileMacroDeleteController',
+        ),
       ),
       '/phid/' => array(
         '$' => 'PhabricatorPHIDLookupController',
