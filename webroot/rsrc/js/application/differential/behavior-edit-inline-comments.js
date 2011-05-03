@@ -1,6 +1,10 @@
 /**
  * @provides javelin-behavior-differential-edit-inline-comments
- * @requires javelin-lib-dev
+ * @requires javelin-behavior
+ *           javelin-stratcom
+ *           javelin-dom
+ *           javelin-workflow
+ *           javelin-vector
  */
 
 JX.behavior('differential-edit-inline-comments', function(config) {
@@ -27,9 +31,9 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     }
     var code = target.nextSibling;
 
-    var pos = JX.$V(top).add(1 + JX.$V.getDim(target).x, 0);
-    var dim = JX.$V.getDim(code).add(-4, 0);
-    dim.y = (JX.$V(bot).y - pos.y) + JX.$V.getDim(bot).y;
+    var pos = JX.$V(top).add(1 + JX.Vector.getDim(target).x, 0);
+    var dim = JX.Vector.getDim(code).add(-4, 0);
+    dim.y = (JX.$V(bot).y - pos.y) + JX.Vector.getDim(bot).y;
 
     pos.setPos(reticle);
     dim.setDim(reticle);
@@ -48,7 +52,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
   }
 
   function drawInlineComment(table, anchor, r) {
-    copyRows(table, JX.$N('div', JX.HTML(r.markup)), anchor);
+    copyRows(table, JX.$N('div', JX.$H(r.markup)), anchor);
     finishSelect();
   }
 
@@ -245,7 +249,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       var data = {
         op: e.getNode('differential-inline-edit') ? 'edit' : 'delete',
         id: e.getNodeData('differential-inline-comment').id,
-        on_right: e.getNodeData('differential-inline-comment').on_right,
+        on_right: e.getNodeData('differential-inline-comment').on_right
       };
       new JX.Workflow(config.uri, data)
         .setHandler(function(r) {

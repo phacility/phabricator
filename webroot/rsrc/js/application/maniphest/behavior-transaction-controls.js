@@ -1,6 +1,10 @@
 /**
  * @provides javelin-behavior-maniphest-transaction-controls
- * @requires javelin-lib-dev
+ * @requires javelin-behavior
+ *           javelin-dom
+ *           javelin-tokenizer
+ *           javelin-typeahead
+ *           javelin-typeahead-preloaded-source
  */
 
 JX.behavior('maniphest-transaction-controls', function(config) {
@@ -51,31 +55,5 @@ JX.behavior('maniphest-transaction-controls', function(config) {
       }
     });
 
-/*
-
-  var root = JX.$(config.tokenizer);
-  var datasource = new JX.TypeaheadPreloadedSource(config.src);
-
-  var typeahead = new JX.Typeahead(root);
-  typeahead.setDatasource(datasource);
-
-  var tokenizer = new JX.Tokenizer(root);
-  tokenizer.setTypeahead(typeahead);
-  tokenizer.start();
-
-  JX.DOM.listen(
-    JX.$(config.select),
-    'change',
-    null,
-    function(e) {
-      if (JX.$(config.select).value == 'add_reviewers') {
-        JX.DOM.show(JX.$(config.row));
-        tokenizer.refresh();
-      } else {
-        JX.DOM.hide(JX.$(config.row));
-      }
-    });
-
-*/
 });
 

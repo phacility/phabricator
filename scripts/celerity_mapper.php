@@ -2,6 +2,32 @@
 <?php
 
 $package_spec = array(
+  'javelin.pkg.js' => array(
+    'javelin-util',
+    'javelin-install',
+    'javelin-event',
+    'javelin-stratcom',
+    'javelin-behavior',
+    'javelin-request',
+    'javelin-vector',
+    'javelin-dom',
+    'javelin-json',
+    'javelin-uri',
+  ),
+  'typeahead.pkg.js' => array(
+    'javelin-typeahead',
+    'javelin-typeahead-normalizer',
+    'javelin-typeahead-source',
+    'javelin-typeahead-preloaded-source',
+    'javelin-typeahead-ondemand-source',
+    'javelin-tokenizer',
+    'javelin-behavior-aphront-basic-tokenizer',
+  ),
+  'workflow.pkg.js' => array(
+    'javelin-mask',
+    'javelin-workflow',
+    'javelin-behavior-workflow',
+  ),
   'core.pkg.css' => array(
     'phabricator-core-css',
     'phabricator-core-buttons-css',
@@ -14,6 +40,7 @@ $package_spec = array(
     'aphront-crumbs-view-css',
     'aphront-tokenizer-control-css',
     'aphront-typeahead-control-css',
+    'aphront-list-filter-view-css',
 
     'phabricator-directory-css',
 
@@ -63,6 +90,7 @@ $files = id(new FileFinder($root))
   ->withType('f')
   ->withSuffix('js')
   ->withSuffix('css')
+  ->withFollowSymlinks(true)
   ->setGenerateChecksums(true)
   ->find();
 
@@ -101,9 +129,10 @@ foreach ($file_map as $path => $info) {
   $provides = array_filter($provides);
   $requires = array_filter($requires);
 
-  if (count($provides) !== 1) {
+  if (count($provides) > 1) {
+    // NOTE: Documentation-only JS is permitted to @provide no targets.
     throw new Exception(
-      "File {$path} must @provide exactly one Celerity target.");
+      "File {$path} must @provide at most one Celerity target.");
   }
 
   $provides = reset($provides);

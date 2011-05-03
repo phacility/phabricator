@@ -1,6 +1,6 @@
 /**
  * @requires herald-rule-editor
- *           javelin-lib-dev
+ *           javelin-behavior
  * @provides javelin-behavior-herald-rule-editor
  * @javelin
  */

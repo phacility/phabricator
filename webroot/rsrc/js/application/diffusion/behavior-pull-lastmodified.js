@@ -1,6 +1,9 @@
 /**
  * @provides javelin-behavior-diffusion-pull-lastmodified
- * @requires javelin-lib-dev
+ * @requires javelin-behavior
+ *           javelin-dom
+ *           javelin-util
+ *           javelin-request
  */
 
 JX.behavior('diffusion-pull-lastmodified', function(config) {
@@ -9,7 +12,7 @@ JX.behavior('diffusion-pull-lastmodified', function(config) {
     new JX.Request(uri, JX.bind(config[uri], function(r) {
       for (var k in r) {
         if (this[k]) {
-          JX.DOM.setContent(JX.$(this[k]), JX.HTML(r[k]));
+          JX.DOM.setContent(JX.$(this[k]), JX.$H(r[k]));
         }
       }
     })).send();

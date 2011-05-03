@@ -1,8 +1,13 @@
 /**
  * @requires multirow-row-manager
- *           javelin-lib-dev
- *           javelin-typeahead-dev
- *           path-typeahead
+ *           javelin-install
+ *           javelin-typeahead
+ *           javelin-util
+ *           javelin-dom
+ *           javelin-tokenizer
+ *           javelin-typeahead-preloaded-source
+ *           javelin-stratcom
+ *           javelin-json
  * @provides herald-rule-editor
  * @javelin
  */
@@ -257,7 +262,7 @@ JX.install('HeraldRuleEditor', {
     _newTokenizer : function(type) {
       var template = JX.$N(
         'div',
-        new JX.HTML(this._config.template.markup));
+        JX.$H(this._config.template.markup));
       template = template.firstChild;
       template.id = '';
 

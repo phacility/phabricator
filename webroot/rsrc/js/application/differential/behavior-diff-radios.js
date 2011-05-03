@@ -1,6 +1,8 @@
 /**
  * @provides javelin-behavior-differential-diff-radios
- * @requires javelin-lib-dev
+ * @requires javelin-behavior
+ *           javelin-stratcom
+ *           javelin-dom
  */
 
 JX.behavior('differential-diff-radios', function(config) {

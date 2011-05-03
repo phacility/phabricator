@@ -1,6 +1,10 @@
 /**
- * @requires javelin-lib-dev
- *           javelin-typeahead-dev
+ * @requires javelin-install
+ *           javelin-typeahead
+ *           javelin-dom
+ *           javelin-request
+ *           javelin-typeahead-ondemand-source
+ *           javelin-util
  * @provides path-typeahead
  * @javelin
  */

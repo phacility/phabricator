@@ -89,9 +89,6 @@ class PhabricatorStandardPageView extends AphrontPageView {
     require_celerity_resource('phabricator-core-buttons-css');
     require_celerity_resource('phabricator-standard-page-view');
 
-    require_celerity_resource('javelin-lib-dev');
-    require_celerity_resource('javelin-workflow-dev');
-
     Javelin::initBehavior('workflow', array());
 
     if ($console) {
@@ -118,8 +115,7 @@ class PhabricatorStandardPageView extends AphrontPageView {
         'window.__DEV__=1;'.
       '</script>'.
       $response->renderResourcesOfType('css').
-      '<script type="text/javascript" src="/rsrc/js/javelin/init.dev.js">'.
-      '</script>';
+      $response->renderSingleResource('javelin-magical-init');
 
     $request = $this->getRequest();
     if ($request) {

@@ -1,6 +1,8 @@
 /**
  * @provides javelin-behavior-differential-show-all-comments
- * @requires javelin-lib-dev
+ * @requires javelin-behavior
+ *           javelin-stratcom
+ *           javelin-dom
  */
 
 JX.behavior('differential-show-all-comments', function(config) {
@@ -11,7 +13,7 @@ JX.behavior('differential-show-all-comments', function(config) {
     function(e) {
       JX.DOM.setContent(
         e.getNode('differential-all-comments-container'),
-        JX.HTML(config.markup));
+        JX.$H(config.markup));
       e.kill();
     });
 

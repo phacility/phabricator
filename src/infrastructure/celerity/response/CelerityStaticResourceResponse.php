@@ -25,6 +25,7 @@ final class CelerityStaticResourceResponse {
   private $metadata = array();
   private $metadataBlock = 0;
   private $behaviors = array();
+  private $hasRendered = array();
 
   public function __construct() {
     if (isset($_REQUEST['__metablock__'])) {
@@ -64,13 +65,35 @@ final class CelerityStaticResourceResponse {
     return $this;
   }
 
+  public function renderSingleResource($symbol) {
+    $map = CelerityResourceMap::getInstance();
+    $resolved = $map->resolveResources(array($symbol));
+    $packaged = $map->packageResources($resolved);
+    return $this->renderPackagedResources($packaged);
+  }
+
   public function renderResourcesOfType($type) {
     $this->resolveResources();
-    $output = array();
+
+    $resources = array();
     foreach ($this->packaged as $resource) {
       if ($resource['type'] == $type) {
-        $output[] = $this->renderResource($resource);
+        $resources[] = $resource;
       }
+    }
+
+    return $this->renderPackagedResources($resources);
+  }
+
+  private function renderPackagedResources(array $resources) {
+    $output = array();
+    foreach ($resources as $resource) {
+      if (isset($this->hasRendered[$resource['uri']])) {
+        continue;
+      }
+      $this->hasRendered[$resource['uri']] = true;
+
+      $output[] = $this->renderResource($resource);
     }
     return implode("\n", $output);
   }

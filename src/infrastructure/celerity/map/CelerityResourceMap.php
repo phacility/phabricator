@@ -21,6 +21,7 @@ final class CelerityResourceMap {
   private static $instance;
   private $resourceMap;
   private $packageMap;
+  private $reverseMap;
 
   public static function getInstance() {
     if (empty(self::$instance)) {
@@ -105,6 +106,21 @@ final class CelerityResourceMap {
     }
 
     return $paths;
+  }
+
+  public function lookupSymbolInformation($symbol) {
+    return idx($this->resourceMap, $symbol);
+  }
+
+  public function lookupFileInformation($path) {
+    if (empty($this->reverseMap)) {
+      $this->reverseMap = array();
+      foreach ($this->resourceMap as $symbol => $data) {
+        $data['provides'] = $symbol;
+        $this->reverseMap[$data['disk']] = $data;
+      }
+    }
+    return idx($this->reverseMap, $path);
   }
 
 }

@@ -1,6 +1,10 @@
 /**
  * @provides javelin-behavior-differential-feedback-preview
- * @requires javelin-lib-dev
+ * @requires javelin-behavior
+ *           javelin-stratcom
+ *           javelin-dom
+ *           javelin-request
+ *           javelin-util
  */
 
 JX.behavior('differential-feedback-preview', function(config) {
@@ -28,7 +32,7 @@ JX.behavior('differential-feedback-preview', function(config) {
       cval = content.value;
 
       request = new JX.Request(config.uri, function(r) {
-        preview && JX.DOM.setContent(preview, JX.HTML(r));
+        preview && JX.DOM.setContent(preview, JX.$H(r));
         min = new Date().getTime() + 500;
         defer && defer.stop();
         defer = JX.defer(check, 500);
@@ -51,7 +55,7 @@ JX.behavior('differential-feedback-preview', function(config) {
 
   function refreshInlinePreview() {
     new JX.Request(config.inlineuri, function(r) {
-        JX.DOM.setContent(JX.$(config.inline), JX.HTML(r));
+        JX.DOM.setContent(JX.$(config.inline), JX.$H(r));
       })
       .setTimeout(5000)
       .send();

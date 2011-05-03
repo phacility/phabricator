@@ -1,8 +1,9 @@
 /**
  * @requires multirow-row-manager
- *           javelin-lib-dev
- *           javelin-typeahead-dev
+ *           javelin-install
  *           path-typeahead
+ *           javelin-dom
+ *           javelin-util
  * @provides owners-path-editor
  * @javelin
  */
@@ -105,7 +106,7 @@ JX.install('OwnersPathEditor', {
       var repo_cell = JX.$N('td', {}, repo_select);
       var typeahead_cell = JX.$N(
         'td',
-        JX.HTML(this._inputTemplate));
+        JX.$H(this._inputTemplate));
 
       // Text input for path.
       var path_input = JX.DOM.find(typeahead_cell, 'input');
@@ -113,7 +114,7 @@ JX.install('OwnersPathEditor', {
         path_input,
         {
           value : path_ref.path || "",
-          name : "path[" + this._count + "]",
+          name : "path[" + this._count + "]"
         });
 
       // The Typeahead requires a display div called hardpoint.

@@ -1,12 +1,16 @@
 /**
  * @provides javelin-behavior-differential-show-more
- * @requires javelin-lib-dev
+ * @requires javelin-behavior
+ *           javelin-dom
+ *           javelin-request
+ *           javelin-util
+ *           javelin-stratcom
  */
 
 JX.behavior('differential-show-more', function(config) {
 
   function onresponse(origin, response) {
-    var div = JX.$N('div', {}, JX.HTML(response));
+    var div = JX.$N('div', {}, JX.$H(response));
     var anchor = origin.getNode('context-target');
     var root = anchor.parentNode;
     copyRows(root, div, anchor);

@@ -42,22 +42,8 @@ class AphrontFormTokenizerControl extends AphrontFormControl {
   }
 
   protected function renderInput() {
-    require_celerity_resource('javelin-typeahead-dev');
-
     $name = $this->getName();
     $values = nonempty($this->getValue(), array());
-
-    $input = javelin_render_tag(
-      'input',
-      array(
-        'mustcapture' => true,
-        'name'        => $name,
-        'class'       => 'jx-tokenizer-input',
-        'sigil'       => 'tokenizer',
-        'style'       => 'width: 0px;',
-        'disabled'    => 'disabled',
-        'type'        => 'text',
-      ));
 
     if ($this->getID()) {
       $id = $this->getID();

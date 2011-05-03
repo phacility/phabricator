@@ -1,5 +1,8 @@
 /**
- * @requires javelin-lib-dev
+ * @requires javelin-install
+ *           javelin-stratcom
+ *           javelin-dom
+ *           javelin-util
  * @provides multirow-row-manager
  * @javelin
  */

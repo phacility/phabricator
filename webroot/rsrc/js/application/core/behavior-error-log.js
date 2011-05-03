@@ -1,6 +1,6 @@
 /**
  * @provides javelin-behavior-error-log
- * @requires javelin-lib-dev
+ * @requires javelin-dom
  */
 
 var current_details = null;

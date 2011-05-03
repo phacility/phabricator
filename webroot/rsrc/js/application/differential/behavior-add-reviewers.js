@@ -1,6 +1,10 @@
 /**
  * @provides javelin-behavior-differential-add-reviewers
- * @requires javelin-lib-dev
+ * @requires javelin-behavior
+ *           javelin-dom
+ *           javelin-tokenizer
+ *           javelin-typeahead
+ *           javelin-typeahead-preloaded-source
  */
 
 JX.behavior('differential-add-reviewers', function(config) {

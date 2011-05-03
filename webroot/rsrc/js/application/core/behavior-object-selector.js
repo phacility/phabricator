@@ -1,6 +1,10 @@
 /**
  * @provides javelin-behavior-phabricator-object-selector
- * @requires javelin-lib-dev
+ * @requires javelin-behavior
+ *           javelin-dom
+ *           javelin-request
+ *           javelin-util
+ *           javelin-stratcom
  */
 
 JX.behavior('phabricator-object-selector', function(config) {

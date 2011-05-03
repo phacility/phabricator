@@ -1,5 +1,10 @@
 /**
  * @provides javelin-behavior-dark-console
+ * @requires javelin-behavior
+ *           javelin-stratcom
+ *           javelin-util
+ *           javelin-dom
+ *           javelin-request
  */
 
 JX.behavior('dark-console', function(config) {

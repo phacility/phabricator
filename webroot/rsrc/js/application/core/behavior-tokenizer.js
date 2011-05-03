@@ -1,6 +1,10 @@
 /**
  * @provides javelin-behavior-aphront-basic-tokenizer
- * @requires javelin-lib-dev
+ * @requires javelin-behavior
+ *           javelin-typeahead
+ *           javelin-tokenizer
+ *           javelin-typeahead-preloaded-source
+ *           javelin-dom
  */
 
 JX.behavior('aphront-basic-tokenizer', function(config) {
@@ -10,7 +14,7 @@ JX.behavior('aphront-basic-tokenizer', function(config) {
 
   var typeahead = new JX.Typeahead(
     root,
-    JX.DOM.find(root, 'input', 'tokenizer'));
+    JX.DOM.find(root, 'input', 'tokenizer-input'));
   typeahead.setDatasource(datasource);
 
   var tokenizer = new JX.Tokenizer(root);

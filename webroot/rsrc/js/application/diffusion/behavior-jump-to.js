@@ -1,6 +1,9 @@
 /**
  * @provides javelin-behavior-diffusion-jump-to
- * @requires javelin-lib-dev
+ * @requires javelin-behavior
+ *           javelin-util
+ *           javelin-vector
+ *           javelin-dom
  */
 
 JX.behavior('diffusion-jump-to', function(config) {

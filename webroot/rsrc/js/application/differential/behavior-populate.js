@@ -1,12 +1,15 @@
 /**
  * @provides javelin-behavior-differential-populate
- * @requires javelin-lib-dev
+ * @requires javelin-behavior
+ *           javelin-request
+ *           javelin-util
+ *           javelin-dom
  */
 
 JX.behavior('differential-populate', function(config) {
 
   function onresponse(target, response) {
-    JX.DOM.replace(JX.$(target), JX.HTML(response));
+    JX.DOM.replace(JX.$(target), JX.$H(response));
   }
 
   for (var k in config.registry) {

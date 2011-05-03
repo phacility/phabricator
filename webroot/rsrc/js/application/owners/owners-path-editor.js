@@ -1,6 +1,6 @@
 /**
  * @requires owners-path-editor
- *           javelin-lib-dev
+ *           javelin-behavior
  * @provides javelin-behavior-owners-path-editor
  * @javelin
  */

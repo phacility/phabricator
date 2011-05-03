@@ -1,6 +1,8 @@
 /**
  * @provides javelin-behavior-workflow
- * @requires javelin-lib-dev
+ * @requires javelin-behavior
+ *           javelin-stratcom
+ *           javelin-workflow
  */
 
 JX.behavior('workflow', function() {

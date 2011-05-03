@@ -63,7 +63,7 @@ class AphrontTokenizerTemplateView extends AphrontView {
         'mustcapture' => true,
         'name'        => $name,
         'class'       => 'jx-tokenizer-input',
-        'sigil'       => 'tokenizer',
+        'sigil'       => 'tokenizer-input',
         'style'       => 'width: 0px;',
         'disabled'    => 'disabled',
         'type'        => 'text',
