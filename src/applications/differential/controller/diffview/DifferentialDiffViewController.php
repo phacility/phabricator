@@ -32,58 +32,72 @@ class DifferentialDiffViewController extends DifferentialController {
       return new Aphront404Response();
     }
 
-    $action_panel = new AphrontPanelView();
-    $action_panel->setHeader('Preview Diff');
-    $action_panel->setWidth(AphrontPanelView::WIDTH_WIDE);
-    $action_panel->appendChild(
-      '<p class="aphront-panel-instructions">Review the diff for correctness. '.
-      'When you are satisfied, either <strong>create a new revision</strong> '.
-      'or <strong>update an existing revision</strong>.');
+    if ($diff->getRevisionID()) {
+      $top_panel = new AphrontPanelView();
+      $top_panel->setWidth(AphrontPanelView::WIDTH_WIDE);
+      $link = phutil_render_tag(
+        'a',
+        array(
+          'href' => PhabricatorEnv::getURI('/D'.$diff->getRevisionID()),
+        ),
+        phutil_escape_html('D'.$diff->getRevisionID()));
+      $top_panel->appendChild("<h1>This diff belongs to revision {$link}</h1>");
+    } else {
+      $action_panel = new AphrontPanelView();
+      $action_panel->setHeader('Preview Diff');
+      $action_panel->setWidth(AphrontPanelView::WIDTH_WIDE);
+      $action_panel->appendChild(
+        '<p class="aphront-panel-instructions">Review the diff for '.
+        'correctness. When you are satisfied, either <strong>create a new '.
+        'revision</strong> or <strong>update an existing revision</strong>.');
 
-    // TODO: implmenent optgroup support in AphrontFormSelectControl?
-    $select = array();
-    $select[] = '<optgroup label="Create New Revision">';
-    $select[] = '<option value="">Create a new Revision...</option>';
-    $select[] = '</optgroup>';
-
-    $revision_data = new DifferentialRevisionListData(
-      DifferentialRevisionListData::QUERY_OPEN_OWNED,
-      array($request->getUser()->getPHID()));
-    $revisions = $revision_data->loadRevisions();
-
-    if ($revisions) {
-      $select[] = '<optgroup label="Update Existing Revision">';
-      foreach ($revisions as $revision) {
-        $select[] = phutil_render_tag(
-          'option',
-          array(
-            'value' => $revision->getID(),
-          ),
-          phutil_escape_html($revision->getTitle()));
-      }
+      // TODO: implmenent optgroup support in AphrontFormSelectControl?
+      $select = array();
+      $select[] = '<optgroup label="Create New Revision">';
+      $select[] = '<option value="">Create a new Revision...</option>';
       $select[] = '</optgroup>';
-    }
 
-    $select =
-      '<select name="revisionID">'.
+      $revision_data = new DifferentialRevisionListData(
+        DifferentialRevisionListData::QUERY_OPEN_OWNED,
+        array($request->getUser()->getPHID()));
+      $revisions = $revision_data->loadRevisions();
+
+      if ($revisions) {
+        $select[] = '<optgroup label="Update Existing Revision">';
+        foreach ($revisions as $revision) {
+          $select[] = phutil_render_tag(
+            'option',
+            array(
+              'value' => $revision->getID(),
+            ),
+            phutil_escape_html($revision->getTitle()));
+        }
+        $select[] = '</optgroup>';
+      }
+
+      $select =
+        '<select name="revisionID">'.
         implode("\n", $select).
-      '</select>';
+        '</select>';
 
-    $action_form = new AphrontFormView();
-    $action_form
-      ->setUser($request->getUser())
-      ->setAction('/differential/revision/edit/')
-      ->addHiddenInput('diffID', $diff->getID())
-      ->addHiddenInput('viaDiffView', 1)
-      ->appendChild(
-        id(new AphrontFormMarkupControl())
+      $action_form = new AphrontFormView();
+      $action_form
+        ->setUser($request->getUser())
+        ->setAction('/differential/revision/edit/')
+        ->addHiddenInput('diffID', $diff->getID())
+        ->addHiddenInput('viaDiffView', 1)
+        ->appendChild(
+          id(new AphrontFormMarkupControl())
           ->setLabel('Attach To')
           ->setValue($select))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
+        ->appendChild(
+          id(new AphrontFormSubmitControl())
           ->setValue('Continue'));
 
-    $action_panel->appendChild($action_form);
+      $action_panel->appendChild($action_form);
+
+      $top_panel = $action_panel;
+    }
 
 
 
@@ -101,7 +115,7 @@ class DifferentialDiffViewController extends DifferentialController {
         implode(
           "\n",
           array(
-            $action_panel->render(),
+            $top_panel->render(),
             $table_of_contents->render(),
             $details->render(),
           )).
