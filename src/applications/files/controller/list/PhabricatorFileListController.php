@@ -30,11 +30,7 @@ class PhabricatorFileListController extends PhabricatorFileController {
       $pager->getOffset(),
       $pager->getPageSize() + 1);
 
-    if (count($files) > $pager->getPageSize()) {
-      $files = array_slice($files, 0, $pager->getPageSize(), true);
-      $pager->setHasMorePages(true);
-    }
-
+    $files = $pager->sliceResults($files);
     $pager->setURI($request->getRequestURI(), 'page');
 
     $rows = array();

@@ -6,17 +6,13 @@
 
 
 
-phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'applications/daemon/controller/base');
 phutil_require_module('phabricator', 'applications/daemon/view/daemonlogevents');
 phutil_require_module('phabricator', 'infrastructure/daemon/storage/event');
-phutil_require_module('phabricator', 'infrastructure/daemon/storage/log');
-phutil_require_module('phabricator', 'view/form/base');
-phutil_require_module('phabricator', 'view/form/control/static');
-phutil_require_module('phabricator', 'view/form/control/textarea');
+phutil_require_module('phabricator', 'view/control/pager');
 phutil_require_module('phabricator', 'view/layout/panel');
 
 phutil_require_module('phutil', 'utils');
 
 
-phutil_require_source('PhabricatorDaemonLogViewController.php');
+phutil_require_source('PhabricatorDaemonCombinedLogController.php');

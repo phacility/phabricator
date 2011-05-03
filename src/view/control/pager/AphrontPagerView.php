@@ -80,6 +80,32 @@ final class AphrontPagerView extends AphrontView {
     return $this->count !== null;
   }
 
+  /**
+   * A common paging strategy is to select one extra record and use that to
+   * indicate that there's an additional page (this doesn't give you a
+   * complete page count but is often faster than counting the total number
+   * of items). This method will take a result array, slice it down to the
+   * page size if necessary, and call setHasMorePages() if there are more than
+   * one page of results.
+   *
+   *    $results = queryfx_all(
+   *      $conn,
+   *      'SELECT ... LIMIT %d, %d',
+   *      $pager->getOffset(),
+   *      $pager->getPageSize() + 1);
+   *    $results = $pager->sliceResults($results);
+   *
+   * @param   list  Result array.
+   * @return  list  One page of results.
+   */
+  public function sliceResults(array $results) {
+    if (count($results) > $this->getPageSize()) {
+      $results = array_slice($results, 0, $this->getPageSize(), true);
+      $this->setHasMorePages(true);
+    }
+    return $results;
+  }
+
   public function render() {
     if (!$this->uri) {
       throw new Exception(

@@ -34,7 +34,7 @@ class PhabricatorDaemonLogViewController extends PhabricatorDaemonController {
     }
 
     $events = id(new PhabricatorDaemonLogEvent())->loadAllWhere(
-      'logID = %d ORDER BY id DESC LIMIT 200',
+      'logID = %d ORDER BY id DESC LIMIT 1000',
       $log->getID());
 
     $content = array();
@@ -72,44 +72,19 @@ class PhabricatorDaemonLogViewController extends PhabricatorDaemonController {
 
     $content[] = $panel;
 
-    $rows = array();
-    foreach ($events as $event) {
-      $rows[] = array(
-        phutil_escape_html($event->getLogType()),
-        date('M j, Y', $event->getEpoch()),
-        date('g:i:s A', $event->getEpoch()),
-        str_replace("\n", '<br />', phutil_escape_html($event->getMessage())),
-      );
-    }
-
-    $log_table = new AphrontTableView($rows);
-    $log_table->setHeaders(
-      array(
-        'Type',
-        'Date',
-        'Time',
-        'Message',
-      ));
-    $log_table->setColumnClasses(
-      array(
-        '',
-        '',
-        'right',
-        'wide wrap',
-      ));
+    $event_view = new PhabricatorDaemonLogEventsView();
+    $event_view->setEvents($events);
 
     $log_panel = new AphrontPanelView();
     $log_panel->setHeader('Daemon Logs');
-    $log_panel->appendChild($log_table);
+    $log_panel->appendChild($event_view);
 
     $content[] = $log_panel;
-
-
 
     return $this->buildStandardPageResponse(
       $content,
       array(
-        'title' => 'Log',
+        'title' => 'Daemon Log',
       ));
   }
 
