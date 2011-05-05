@@ -50,33 +50,35 @@ class ManiphestTaskSummaryView extends AphrontView {
 
     return
       '<table class="maniphest-task-summary">'.
-        '<td class="maniphest-task-number '.$pri_class.'">'.
-          'T'.$task->getID().
-        '</td>'.
-        '<td class="maniphest-task-status">'.
-          ($task->getStatus() == ManiphestTaskStatus::STATUS_OPEN
-            ? 'Open'
-            : 'Closed').
-        '</td>'.
-        '<td class="maniphest-task-owner">'.
-          ($task->getOwnerPHID()
-            ? $handles[$task->getOwnerPHID()]->renderLink()
-            : '<em>None</em>').
-        '</td>'.
-        '<td class="maniphest-task-name">'.
-          phutil_render_tag(
-            'a',
-            array(
-              'href' => '/T'.$task->getID(),
-            ),
-            phutil_escape_html($task->getTitle())).
-        '</td>'.
-        '<td class="maniphest-task-priority">'.
-          ManiphestTaskPriority::getTaskPriorityName($task->getPriority()).
-        '</td>'.
-        '<td class="maniphest-task-updated">'.
-          phabricator_format_timestamp($task->getDateModified()).
-        '</td>'.
+        '<tr>'.
+          '<td class="maniphest-task-number '.$pri_class.'">'.
+            'T'.$task->getID().
+          '</td>'.
+          '<td class="maniphest-task-status">'.
+            ($task->getStatus() == ManiphestTaskStatus::STATUS_OPEN
+              ? 'Open'
+              : 'Closed').
+          '</td>'.
+          '<td class="maniphest-task-owner">'.
+            ($task->getOwnerPHID()
+              ? $handles[$task->getOwnerPHID()]->renderLink()
+              : '<em>None</em>').
+          '</td>'.
+          '<td class="maniphest-task-name">'.
+            phutil_render_tag(
+              'a',
+              array(
+                'href' => '/T'.$task->getID(),
+              ),
+              phutil_escape_html($task->getTitle())).
+          '</td>'.
+          '<td class="maniphest-task-priority">'.
+            ManiphestTaskPriority::getTaskPriorityName($task->getPriority()).
+          '</td>'.
+          '<td class="maniphest-task-updated">'.
+            phabricator_format_timestamp($task->getDateModified()).
+          '</td>'.
+        '</tr>'.
       '</table>';
   }
 
