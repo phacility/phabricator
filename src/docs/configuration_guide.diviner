@@ -16,8 +16,31 @@ schemata into it. First, load the initial database schema.
 
   mysql -uroot < path/to/phabricator/resources/sql/init/initialize.sql
 
-After this you need to upgrade the schema see @{article:Upgrading Schema},
+After this you need to upgrade the schema (see @{article:Upgrading Schema}),
 but you need to finish the rest of the configuration first.
+
+= Configuring Phabricator =
+
+Create a new file here:
+
+  path/to/phabricator/conf/custom/myconfig.conf.php
+
+...where ##myconfig## is some name which identifies your installation. Put this
+in the file:
+
+  <?php
+
+  return array(
+
+    // Important! This will put Phabricator into setup mode to help you
+    // configure things.
+    'phabricator.setup' => true,
+
+  ) + phabricator_read_config_file('production');
+
+For the last line, you can also use ##'development'## instead of
+##'production'## if you are planning to develop Phabricator itself. This will
+turn on some debugging features.
 
 = Configuring Apache =
 
@@ -49,27 +72,38 @@ this:
     RewriteRule ^/favicon.ico   -                       [L,QSA]
     RewriteRule ^(.*)$          /index.php?__path__=$1  [L,QSA]
 
-    # This will use "setup" defaults for configuration options, which will
-    # expose error messages. Before you make the install public, you should
-    # change this to "production" and/or customize your configuration. See
-    # the next section for details.
-    SetEnv PHABRICATOR_ENV setup
+    # This will use the config file you set up in the previous step. If you
+    # called it something other than 'myconfig', put that here.
+    SetEnv PHABRICATOR_ENV custom/myconfig
   </VirtualHost>
 
 Now, restart apache and navigate to whichever subdomain you set up. You should
-either see the Phabricator login screen, which means you're all set, or some
-useful error message telling you what else you need to fix (for instance, you
-may need to set up MySQL credentials). If you see something else, you did
-something very wrong and/or this document lied to you.
+either see the Phabricator setup screen, which is a simple text page that looks
+something like this:
+
+  PHABRICATOR SETUP
+
+  This setup mode will guide you through setting up your Phabricator
+  configuration.
+
+  >>>  REQUIRED PHP EXTENSIONS  ------------------------------------------------
+  ...
+
+If you see this, you're in good shape. Follow the instructions and correct any
+problems setup detects. If you don't see it but you do see a useful error
+message, try to fix that. If neither of these cover you, something is wrong.
+If you can't figure it out, come get help in IRC or on the mailing list (see
+http://phabricator.org/ for links).
 
 = Configuring Phabricator =
 
-Now that basic setup is complete, you should configure Phabricator. Phabricator
-configuration options which control how the applications behave are stored here:
+Now that basic setup is complete, you should configure Phabricator for your
+installation. Phabricator configuration options which control how the
+applications behave are documented here:
 
-  /path/to/phabricator/conf/
+  /path/to/phabricator/conf/default.conf.php
 
-There are several configuration templates:
+There are several builtin configurations:
 
   - ##default.conf.php##: root configuration, lists every configuration option
     and sets some default for it. Look in this file to figure out what you can
@@ -80,44 +114,14 @@ There are several configuration templates:
     changes to Phabricator itself.
   - ##production.conf.php##: pulls in ##default.conf.php##, but overrides some
     configuration options to provide better values for a production install.
-    Once you've completed setup, you should switch to this configuration or
-    one based upon it.
-  - ##setup.conf.php##: pulls in ##default.conf.php##, but sets some flags that
-    make it easier to set up a Phabricator install. Switch away from this before
-    deploying a production install.
 
-While you can use these templates as-is, you'll probably want to set up custom
-configuration. To do this, create a new file:
-
-  /path/to/phabricator/conf/custom/myconfig.conf.php
-
-Put this in the file:
-
-  <?php
-
-  return array(
-
-    // This is just an example.
-    'some.config' => 'some_value',
-
-  ) + phabricator_read_config_file('production');
-
-This will create a new config called "custom/myconfig" which uses the
-"production" config as the default but allows you to override options. You can
-select it by editing the VirtualHost or Directory entry you set up when
-configuring Apache:
-
-  <VirtualHost *>
-    # ...
-    SetEnv PHABRICATOR_ENV custom/myconfig
-    # ...
-  </VirtualHost>
-
-Now, look through ##default.conf.php## and override any options you want to
-change by providing overrides in ##myconfig.conf.php##.
+To actually configure your install, edit your ##custom/myconfig.conf.php## file
+and override values from either the ##'production'## or ##'development'##
+configurations. You should not edit the builtin configurations directly because
+that will make upgrading Phabricator more difficult in the future.
 
 = Upgrading Schema =
 
 After you have configured Phabricator, you need to upgrade the database
-schema, see @{article:Upgrading Schema}. You'll also need to do this after you
+schema -- see @{article:Upgrading Schema}. You'll also need to do this after you
 update the code in the future.

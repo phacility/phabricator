@@ -1,0 +1,298 @@
+<?php
+
+/*
+ * Copyright 2011 Facebook, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+class PhabricatorSetup {
+
+  const EXPECTED_SCHEMA_VERSION = 36;
+
+  public static function runSetup() {
+    header("Content-Type: text/plain");
+    self::write("PHABRICATOR SETUP\n\n");
+
+    // Force browser to stop buffering.
+    self::write(str_repeat(' ', 2048));
+    usleep(250000);
+
+    self::write("This setup mode will guide you through setting up your ".
+                "Phabricator configuration.\n");
+
+    self::writeHeader("REQUIRED PHP EXTENSIONS");
+    $extensions = array(
+      'mysql',
+      'hash',
+      'json',
+    );
+    foreach ($extensions as $extension) {
+      $ok = self::requireExtension($extension);
+      if (!$ok) {
+        self::writeFailure();
+        self::write("Setup failure! Install PHP extension '{$extension}'.");
+        return;
+      }
+    }
+    self::write("[OKAY] All extensions OKAY\n\n");
+
+    self::writeHeader("GIT SUBMODULES");
+    $root = dirname(phutil_get_library_root('phabricator'));
+    if (!Filesystem::pathExists($root.'/.git')) {
+      self::write(" skip  Not a git clone.\n\n");
+    } else {
+      list($info) = execx(
+        '(cd %s && git submodule status)',
+        $root);
+      foreach (explode("\n", rtrim($info)) as $line) {
+        $matches = null;
+        if (!preg_match('/^(.)([0-9a-f]{40}) (\S+)(?: |$)/', $line, $matches)) {
+          self::writeFailure();
+          self::write(
+            "Setup failure! 'git submodule' produced unexpected output:\n".
+            $line);
+          return;
+        }
+
+        $status = $matches[1];
+        $module = $matches[3];
+
+        switch ($status) {
+          case '-':
+          case '+':
+          case 'U':
+            self::writeFailure();
+            self::write(
+              "Setup failure! Git submodule '{$module}' is not up to date. ".
+              "Run:\n\n".
+              "  cd {$root} && git submodule update --init\n\n".
+              "...to update submodules.");
+            return;
+          case ' ':
+            self::write(" okay  Git submodule '{$module}' up to date.\n");
+            break;
+          default:
+            self::writeFailure();
+            self::write(
+              "Setup failure! 'git submodule' reported unknown status ".
+              "'{$status}' for submodule '{$module}'. This is a bug; report ".
+              "it to the Phabricator maintainers.");
+            return;
+        }
+      }
+    }
+    self::write("[OKAY] All submodules OKAY.");
+
+    self::writeHeader("BASIC CONFIGURATION");
+
+    $env = PhabricatorEnv::getEnvConfig('phabricator.env');
+    if ($env == 'production' || $env == 'default' || $env == 'development') {
+      self::writeFailure();
+      self::write(
+        "Setup failure! Your PHABRICATOR_ENV is set to '{$env}', which is ".
+        "a Phabricator environmental default. You should create a custom ".
+        "environmental configuration instead of editing the defaults ".
+        "directly. See this document for instructions:\n");
+        self::writeDoc('article/Configuration_Guide.html');
+      return;
+    } else {
+      self::write(" okay  Custom configuration loaded.\n");
+    }
+
+    if (!PhabricatorEnv::getEnvConfig('phabricator.base-uri')) {
+      self::writeFailure();
+      self::write(
+        "Setup failure! You must specify 'phabricator.base-uri' in your ".
+        "custom config file. Refer to 'default.conf.php' for documentation ".
+        "on configuration options.\n");
+      return;
+    } else {
+      self::write(" okay  phabricator.base-uri\n");
+    }
+
+    self::write("[OKAY] Basic configuration OKAY\n");
+
+    self::writeHeader('FACEBOOK INTEGRATION');
+    $fb_auth = PhabricatorEnv::getEnvConfig('facebook.auth-enabled');
+    if (!$fb_auth) {
+      self::write(" skip  'facebook.auth-enabled' not enabled.\n");
+    } else {
+      self::write(" okay  'facebook.auth-enabled' is enabled.\n");
+      $app_id = PhabricatorEnv::getEnvConfig('facebook.application-id');
+      $app_secret = PhabricatorEnv::getEnvConfig('facebook.application-secret');
+
+      if (!$app_id) {
+        self::writeFailure();
+        self::write(
+          "Setup failure! 'facebook.auth-enabled' is true but there is no ".
+          "setting for 'facebook.application-id'.\n");
+        return;
+      } else {
+        self::write(" okay  'facebook.application-id' is set.\n");
+      }
+
+      if (!is_string($app_id)) {
+        self::writeFailure();
+        self::write(
+          "Setup failure! 'facebook.application-id' should be a string.");
+        return;
+      } else {
+        self::write(" okay  'facebook.application-id' is string.\n");
+      }
+
+      if (!$app_secret) {
+        self::writeFailure();
+        self::write(
+          "Setup failure! 'facebook.auth-enabled' is true but there is no ".
+          "setting for 'facebook.application-secret'.");
+        return;
+      } else {
+        self::write(" okay  'facebook.application-secret is set.\n");
+      }
+
+      self::write("[OKAY] Facebook integration OKAY\n");
+    }
+
+    self::writeHeader("MySQL DATABASE CONFIGURATION");
+
+    $conn_user = PhabricatorEnv::getEnvConfig('mysql.user');
+    $conn_pass = PhabricatorEnv::getEnvConfig('mysql.pass');
+    $conn_host = PhabricatorEnv::getEnvConfig('mysql.host');
+
+    $timeout = ini_get('mysql.connect_timeout');
+    if ($timeout > 5) {
+      self::writeNote(
+        "Your MySQL connect timeout is very high ({$timeout} seconds). ".
+        "Consider reducing it by setting 'mysql.connect_timeout' in your ".
+        "php.ini.");
+    }
+
+    self::write(" okay  Trying to connect to MySQL database ".
+                "{$conn_user}@{$conn_host}...\n");
+
+    ini_set('mysql.connect_timeout', 2);
+
+    $conn_raw = new AphrontMySQLDatabaseConnection(
+      array(
+        'user'      => $conn_user,
+        'pass'      => $conn_pass,
+        'host'      => $conn_host,
+        'database'  => null,
+      ));
+
+    try {
+      queryfx($conn_raw, 'SELECT 1');
+      self::write(" okay  Connection successful!\n");
+    } catch (AphrontQueryConnectionException $ex) {
+      self::writeFailure();
+      self::write(
+        "Setup failure! Unable to connect to MySQL database ".
+        "'{$conn_host}' with user '{$conn_user}'. Edit Phabricator ".
+        "configuration keys 'mysql.user', 'mysql.host' and 'mysql.pass' to ".
+        "enable Phabricator to connect.");
+      return;
+    }
+
+    $databases = queryfx_all($conn_raw, 'SHOW DATABASES');
+    $databases = ipull($databases, 'Database');
+    $databases = array_fill_keys($databases, true);
+    if (empty($databases['phabricator_meta_data'])) {
+      self::writeFailure();
+      self::write(
+        "Setup failure! You haven't loaded the 'initialize.sql' file into ".
+        "MySQL. This file initializes necessary databases. See this guide for ".
+        "instructions:\n");
+      self::writeDoc('article/Configuration_Guide.html');
+      return;
+    } else {
+      self::write(" okay  Databases have been initialized.\n");
+    }
+
+    $schema_version = queryfx_one(
+      $conn_raw,
+      'SELECT version FROM phabricator_meta_data.schema_version');
+    $schema_version = idx($schema_version, 'version', 'null');
+
+    $expect = PhabricatorSQLPatchList::getExpectedSchemaVersion();
+    if ($schema_version != $expect) {
+      self::writeFailure();
+      self::write(
+        "Setup failure! You haven't upgraded your database schema to the ".
+        "latest version. Expected version is '{$expect}', but your local ".
+        "version is '{$schema_version}'. See this guide for instructions:\n");
+      self::writeDoc('article/Upgrading_Schema.html');
+      return;
+    } else {
+      self::write(" okay  Database schema are up to date (v{$expect}).\n");
+    }
+
+    self::write("[OKAY] Database configuration OKAY\n");
+
+
+    self::writeHeader('SUCCESS!');
+    self::write(
+      "Congratulations! Your setup seems mostly correct, or at least fairly ".
+      "reasonable.\n\n".
+      "*** NEXT STEP ***\n".
+      "Edit your configuration file (conf/{$env}.conf.php) and remove the ".
+      "'phabricator.setup' line to finish installation.");
+
+  }
+
+  public static function requireExtension($extension) {
+    if (extension_loaded($extension)) {
+      self::write(" okay  Extension '{$extension}' installed.\n");
+      return true;
+    } else {
+      self::write("[FAIL] Extension '{$extension}' is NOT INSTALLED!\n");
+      return false;
+    }
+  }
+
+  private static function writeFailure() {
+    self::write("\n\n<<< *** FAILURE! *** >>>\n");
+  }
+
+  private static function write($str) {
+    echo $str;
+    ob_flush();
+    flush();
+
+    // This, uh, makes it look cool. -_-
+    usleep(40000);
+  }
+
+  private static function writeNote($note) {
+    self::write(
+      'Note: '.wordwrap($note, 75, "\n      ", true)."\n\n");
+  }
+
+  public static function writeHeader($header) {
+    $template = '>>>'.str_repeat('-', 77);
+    $template = substr_replace(
+      $template,
+      '  '.$header.'  ',
+      3,
+      strlen($header) + 4);
+    self::write("\n\n{$template}\n\n");
+  }
+
+  public static function writeDoc($doc) {
+    self::write(
+      "\n".
+      '    http://phabricator.com/docs/phabricator/'.$doc.
+      "\n\n");
+  }
+
+}

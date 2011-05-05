@@ -89,6 +89,11 @@ foreach (PhabricatorEnv::getEnvConfig('load-libraries') as $library) {
   phutil_load_library($library);
 }
 
+if (PhabricatorEnv::getEnvConfig('phabricator.setup')) {
+  PhabricatorSetup::runSetup();
+  return;
+}
+
 
 $host = $_SERVER['HTTP_HOST'];
 $path = $_REQUEST['__path__'];

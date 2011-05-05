@@ -27,6 +27,10 @@ return array(
   // contain the right links.
   'phabricator.production-uri'  => null,
 
+  // Setting this to 'true' will invoke a special setup mode which helps guide
+  // you through setting up Phabricator.
+  'phabricator.setup'           => false,
+
   // The default PHID for users who haven't uploaded a profile image. It should
   // be 50x50px.
   'user.default-profile-image-phid' => 'PHID-FILE-4d61229816cfe6f2b2a3',
@@ -78,7 +82,7 @@ return array(
   // some data like queries and stack traces, so you should be careful about
   // turning it on in production (although users can not normally see it, even
   // if the deployment configuration enables it).
-  'darkconsole.enabled'         => true,
+  'darkconsole.enabled'         => false,
 
   // Always enable DarkConsole, even for logged out users. This potentially
   // exposes sensitive information to users, so make sure untrusted users can

@@ -18,5 +18,6 @@
 
 return array(
 
+  'darkconsole.enabled' => true,
 
 ) + phabricator_read_config_file('default');

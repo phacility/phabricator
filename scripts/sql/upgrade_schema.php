@@ -22,6 +22,7 @@ require_once $root.'/scripts/__init_script__.php';
 require_once $root.'/scripts/__init_env__.php';
 
 phutil_require_module('phutil', 'console');
+phutil_require_module('phabricator', 'infrastructure/setup/sql');
 
 define('SCHEMA_VERSION_TABLE_NAME', 'schema_version');
 
@@ -95,28 +96,7 @@ END;
     $next_version = $version['version'] + 1;
   }
 
-  // Find the patch files
-  $patches_dir = $root.'/resources/sql/patches/';
-  $finder = id(new FileFinder($patches_dir))
-    ->withSuffix('sql');
-  $results = $finder->find();
-
-  $patches = array();
-  foreach ($results as $r) {
-    $matches = array();
-    if (preg_match('/(\d+)\..*\.sql$/', $r, $matches)) {
-      $patches[] = array('version' => (int)$matches[1],
-                         'file' => $r);
-    } else {
-      print
-        "*** WARNING : File {$r} does not follow the normal naming ".
-        "convention. ***\n";
-    }
-  }
-
-  // Files are in some 'random' order returned by the operating system
-  // We need to apply them in proper order
-  $patches = isort($patches, 'version');
+  $patches = PhabricatorSQLPatchList::getPatchList();
 
   $patch_applied = false;
   foreach ($patches as $patch) {
@@ -124,16 +104,15 @@ END;
       continue;
     }
 
-    print "Applying patch {$patch['file']}\n";
-
-    $path = Filesystem::resolvePath($patches_dir.$patch['file']);
+    $short_name = basename($patch['path']);
+    print "Applying patch {$short_name}...\n";
 
     list($stdout, $stderr) = execx(
       "mysql --user=%s --password=%s --host=%s < %s",
       $conn_user,
       $conn_pass,
       $conn_host,
-      $path);
+      $patch['path']);
 
     if ($stderr) {
       print $stderr;
