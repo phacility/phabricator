@@ -34,6 +34,10 @@ abstract class PhabricatorMetaMTAController extends PhabricatorController {
           'name' => 'Mailing Lists',
           'href' => '/mail/lists/',
         ),
+        'received' => array(
+          'name' => 'Received',
+          'href' => '/mail/received/',
+        ),
       ),
       idx($data, 'tab'));
     $page->setGlyph("@");

@@ -1,0 +1,65 @@
+@title Configuring Inbound Email
+@group config
+
+This document contains instructions for configuring inbound email, so users
+may update Differential and Maniphest by replying to messages.
+
+= Preamble =
+
+This is extremely difficult to configure correctly. This is doubly true if
+you use sendmail.
+
+= Installing Mailparse =
+
+You need to install the PECL mailparse extension. In theory, you can do that
+with:
+
+  $ sudo pecl install mailparse
+
+You may run into an error like "needs mbstring". If so, try:
+
+  $ sudo yum install php-mbstring # or equivalent
+  $ sudo pecl install -n mailparse
+
+If you get a linker error like this:
+
+  COUNTEREXAMPLE
+  PHP Warning:  PHP Startup: Unable to load dynamic library
+  '/usr/lib64/php/modules/mailparse.so' - /usr/lib64/php/modules/mailparse.so:
+  undefined symbol: mbfl_name2no_encoding in Unknown on line 0
+
+...you need to edit your php.ini file so that mbstring.so is loaded **before**
+mailparse.so. This is not the default if you have individual files in
+##php.d/##.
+
+= Configuring Sendmail =
+
+Sendmail is very difficult to configure. First, you need to configure it for
+your domain so that mail can be delievered correctly. In broad strokes, this
+probably means something like this:
+
+  - add an MX record;
+  - make sendmail listen on external interfaces;
+  - open up port 25 if necessary (e.g., in your EC2 security policy);
+  - add your host to /etc/mail/local-host-names; and
+  - restart sendmail.
+
+Now, you can actually configure sendmail to deliver to Phabricator. In
+##/etc/aliases##, add an entry like this:
+
+  phabricator: "| PHABRICATOR_ENV=<ENV> /path/to/phabricator/scripts/mail/mail_handler.php"
+
+...where <ENV> is the PHABRICATOR_ENV the script should run under. Run
+##sudo newaliases##. Now you likely need to symlink this script into
+##/etc/smrsh/##:
+
+  sudo ln -s /path/to/phabricator/scripts/mail/mail_handler.php /etc/smrsh/
+
+Finally, edit ##/etc/mail/virtusertable## and add an entry like this:
+
+  @yourdomain.com	phabricator@localhost
+
+That will forward all mail to @yourdomain.com to the Phabricator processing
+script. Run ##sudo /etc/mail/make## or similar and then restart sendmail with
+##sudo /etc/init.d/sendmail restart##
+

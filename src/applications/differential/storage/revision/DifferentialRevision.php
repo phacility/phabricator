@@ -35,6 +35,8 @@ class DifferentialRevision extends DifferentialDAO {
   protected $attached = array();
   protected $unsubscribed = array();
 
+  protected $mailKey;
+
   private $relationships;
   private $commits;
 
@@ -113,6 +115,13 @@ class DifferentialRevision extends DifferentialDAO {
     return id(new DifferentialDiff())->loadOneWhere(
       'revisionID = %d ORDER BY id DESC LIMIT 1',
       $this->getID());
+  }
+
+  public function save() {
+    if (!$this->getMailKey()) {
+      $this->mailKey = sha1(Filesystem::readRandomBytes(20));
+    }
+    return parent::save();
   }
 
   public function loadRelationships() {

@@ -29,6 +29,8 @@ class ManiphestTask extends ManiphestDAO {
   protected $title;
   protected $description;
 
+  protected $mailKey;
+
   protected $attached = array();
   protected $projectPHIDs = array();
 
@@ -54,6 +56,13 @@ class ManiphestTask extends ManiphestDAO {
 
   public function getCCPHIDs() {
     return nonempty($this->ccPHIDs, array());
+  }
+
+  public function save() {
+    if (!$this->mailKey) {
+      $this->mailKey = sha1(Filesystem::readRandomBytes(20));
+    }
+    return parent::save();
   }
 
 }

@@ -120,6 +120,8 @@ class AphrontDefaultApplicationConfiguration
         'lists/$' => 'PhabricatorMetaMTAMailingListsController',
         'lists/edit/(?:(?P<id>\d+)/)?$'
           => 'PhabricatorMetaMTAMailingListEditController',
+        'receive/$' => 'PhabricatorMetaMTAReceiveController',
+        'received/$' => 'PhabricatorMetaMTAReceivedListController',
       ),
 
       '/login/' => array(
