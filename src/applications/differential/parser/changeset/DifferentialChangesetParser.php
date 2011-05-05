@@ -42,6 +42,8 @@ class DifferentialChangesetParser {
   protected $oldChangesetID = null;
   protected $noHighlight;
 
+  protected $renderCacheKey = null;
+
   private $handles;
   private $user;
 
@@ -64,6 +66,28 @@ class DifferentialChangesetParser {
 
   public function setLeftSideCommentMapping($id, $is_new) {
 
+  }
+
+  /**
+   * Set a key for identifying this changeset in the render cache. If set, the
+   * parser will attempt to use the changeset render cache, which can improve
+   * performance for frequently-viewed changesets.
+   *
+   * By default, there is no render cache key and parsers do not use the cache.
+   * This is appropriate for rarely-viewed changesets.
+   *
+   * NOTE: Currently, this key must be a valid Differential Changeset ID.
+   *
+   * @param   string  Key for identifying this changeset in the render cache.
+   * @return  this
+   */
+  public function setRenderCacheKey($key) {
+    $this->renderCacheKey = $key;
+    return $this;
+  }
+
+  private function getRenderCacheKey() {
+    return $this->renderCacheKey;
   }
 
   public function setChangeset($changeset) {
@@ -427,7 +451,8 @@ class DifferentialChangesetParser {
   }
 
   public function loadCache() {
-    if (!$this->changesetID) {
+    $render_cache_key = $this->getRenderCacheKey();
+    if (!$render_cache_key) {
       return false;
     }
 
@@ -439,7 +464,7 @@ class DifferentialChangesetParser {
       $conn_r,
       'SELECT * FROM %T WHERE id = %d',
       $changeset->getTableName().'_parse_cache',
-      $this->changesetID);
+      $render_cache_key);
 
     if (!$data) {
       return false;
@@ -488,7 +513,8 @@ class DifferentialChangesetParser {
   }
 
   public function saveCache() {
-    if (!$this->changesetID) {
+    $render_cache_key = $this->getRenderCacheKey();
+    if (!$render_cache_key) {
       return false;
     }
 
@@ -516,7 +542,7 @@ class DifferentialChangesetParser {
         'INSERT INTO %T (id, cache) VALUES (%d, %s)
           ON DUPLICATE KEY UPDATE cache = VALUES(cache)',
         $changeset->getTableName().'_parse_cache',
-        $this->changesetID,
+        $render_cache_key,
         $cache);
     } catch (AphrontQueryException $ex) {
       // TODO: uhoh
@@ -704,8 +730,6 @@ EOSYNTHETIC;
       PhabricatorEnv::getEnvConfig('pygments.enabled'));
 
     $this->tryCacheStuff();
-
-    $changeset_id = $this->changesetID;
 
     $feedback_mask = array();
 

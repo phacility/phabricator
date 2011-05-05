@@ -48,6 +48,8 @@ class DifferentialChangesetViewController extends DifferentialController {
       $right_new = true;
       $left_source = $right->getID();
       $left_new = false;
+
+      $render_cache_key = $right->getID();
     } else if ($vs == -1) {
       $right = null;
       $left = $changeset;
@@ -56,6 +58,8 @@ class DifferentialChangesetViewController extends DifferentialController {
       $right_new = false;
       $left_source = $left->getID();
       $left_new = true;
+
+      $render_cache_key = null;
     } else {
       $right = $changeset;
       $left = $vs_changeset;
@@ -64,6 +68,8 @@ class DifferentialChangesetViewController extends DifferentialController {
       $right_new = true;
       $left_source = $left->getID();
       $left_new = true;
+
+      $render_cache_key = null;
     }
 
     if ($left) {
@@ -130,6 +136,7 @@ class DifferentialChangesetViewController extends DifferentialController {
 
     $parser = new DifferentialChangesetParser();
     $parser->setChangeset($changeset);
+    $parser->setRenderCacheKey($render_cache_key);
     $parser->setRightSideCommentMapping($right_source, $right_new);
     $parser->setLeftSideCommentMapping($left_source, $left_new);
     $parser->setWhitespaceMode($request->getStr('whitespace'));
