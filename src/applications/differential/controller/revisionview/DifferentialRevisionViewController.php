@@ -161,7 +161,7 @@ class DifferentialRevisionViewController extends DifferentialController {
 
     $whitespace = $request->getStr(
       'whitespace',
-      DifferentialChangesetParser::WHITESPACE_IGNORE_TRAILING
+      DifferentialChangesetParser::WHITESPACE_IGNORE_ALL
     );
 
     $revision_detail->setActions($actions);
