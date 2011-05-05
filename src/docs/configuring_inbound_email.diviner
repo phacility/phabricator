@@ -47,7 +47,7 @@ probably means something like this:
 Now, you can actually configure sendmail to deliver to Phabricator. In
 ##/etc/aliases##, add an entry like this:
 
-  phabricator: "| PHABRICATOR_ENV=<ENV> /path/to/phabricator/scripts/mail/mail_handler.php"
+  phabricator: "| /path/to/phabricator/scripts/mail/mail_handler.php <ENV>"
 
 ...where <ENV> is the PHABRICATOR_ENV the script should run under. Run
 ##sudo newaliases##. Now you likely need to symlink this script into

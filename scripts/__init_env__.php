@@ -21,7 +21,9 @@ ini_set('include_path', $include_path.':'.dirname(__FILE__).'/../../');
 
 require_once dirname(dirname(__FILE__)).'/conf/__init_conf__.php';
 
-$env = getenv('PHABRICATOR_ENV');
+$env = isset($_SERVER['PHABRICATOR_ENV'])
+  ? $_SERVER['PHABRICATOR_ENV']
+  : getenv('PHABRICATOR_ENV');
 if (!$env) {
   echo "Define PHABRICATOR_ENV before running this script.\n";
   exit(1);

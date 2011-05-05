@@ -17,6 +17,10 @@
  * limitations under the License.
  */
 
+if ($argc > 1) {
+  $_SERVER['PHABRICATOR_ENV'] = $argv[1];
+}
+
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 require_once $root.'/scripts/__init_env__.php';
