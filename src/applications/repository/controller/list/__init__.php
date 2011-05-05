@@ -10,6 +10,7 @@ phutil_require_module('phabricator', 'applications/repository/constants/reposito
 phutil_require_module('phabricator', 'applications/repository/controller/base');
 phutil_require_module('phabricator', 'applications/repository/storage/arcanistproject');
 phutil_require_module('phabricator', 'applications/repository/storage/repository');
+phutil_require_module('phabricator', 'infrastructure/javelin/markup');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/layout/panel');
 

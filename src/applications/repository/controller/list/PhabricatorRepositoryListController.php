@@ -51,11 +51,12 @@ class PhabricatorRepositoryListController
             'href'  => '/repository/edit/'.$repo->getID().'/',
           ),
           'Edit'),
-        phutil_render_tag(
+        javelin_render_tag(
           'a',
           array(
             'class' => 'button small grey',
             'href'  => '/repository/delete/'.$repo->getID().'/',
+            'sigil' => 'workflow',
           ),
           'Delete'),
       );
