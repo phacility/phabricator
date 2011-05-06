@@ -4,6 +4,7 @@
   "lint_engine" : "PhutilLintEngine",
   "unit_engine" : "PhutilUnitTestEngine",
   "copyright_holder" : "Facebook, Inc.",
+  "remote_hooks_installed" : true,
   "phutil_libraries" : {
     "phabricator" : "src/"
   }
