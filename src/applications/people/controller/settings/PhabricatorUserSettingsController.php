@@ -105,10 +105,10 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
               $user->setProfileImagePHID($file->getPHID());
             }
           }
-
+          $user->setRealName($request->getStr('RealName'));
           $user->save();
           return id(new AphrontRedirectResponse())
-            ->setURI('/settings/page/account/');
+            ->setURI('/settings/page/account/?saved=true');
       }
     }
 
@@ -244,6 +244,16 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
 
     $editable = $this->accountEditable;
 
+    if ($request->getStr('saved')) {
+      $notice = new AphrontErrorView();
+      $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+      $notice->setTitle('Changed Saved');
+      $notice->appendChild('<p>Your changes have been saved.</p>');
+      $notice = $notice->render();
+    } else {
+     $notice = null;
+    }
+
     $form = new AphrontFormView();
     $form
       ->setUser($user)
@@ -255,8 +265,9 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Real Name')
-          ->setValue($user->getRealName())
-          ->setDisabled(!$editable))
+          ->setName('RealName')
+          ->setDisabled(!$editable)
+          ->setValue($user->getRealName()))
       ->appendChild(
           id(new AphrontFormMarkupControl())
             ->setValue('<hr />'))
@@ -290,7 +301,7 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
     $panel->appendChild($form);
 
-    return $panel->render();
+    return $notice.$panel->render();
   }
 
   private function renderEmailForm() {
