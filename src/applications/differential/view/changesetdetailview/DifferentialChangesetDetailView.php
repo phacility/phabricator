@@ -53,6 +53,14 @@ class DifferentialChangesetDetailView extends AphrontView {
       $class .= ' differential-changeset-immutable';
     }
 
+    $buttons = null;
+    if ($this->buttons) {
+      $buttons =
+        '<div class="differential-changeset-buttons">'.
+          implode('', $this->buttons).
+        '</div>';
+    }
+
     $display_filename = $changeset->getDisplayFilename();
     $output = javelin_render_tag(
       'div',
@@ -70,7 +78,7 @@ class DifferentialChangesetDetailView extends AphrontView {
           'name' => $changeset->getAnchorName(),
         ),
         '').
-      implode('', $this->buttons).
+      $buttons.
       '<h1>'.phutil_escape_html($display_filename).'</h1>'.
       '<div style="clear: both;"></div>'.
       $this->renderChildren());

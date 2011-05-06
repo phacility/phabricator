@@ -8,8 +8,10 @@
 
 phutil_require_module('arcanist', 'parser/diff');
 
+phutil_require_module('phabricator', 'aphront/response/400');
 phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'aphront/response/ajax');
+phutil_require_module('phabricator', 'aphront/response/file');
 phutil_require_module('phabricator', 'applications/differential/controller/base');
 phutil_require_module('phabricator', 'applications/differential/parser/changeset');
 phutil_require_module('phabricator', 'applications/differential/parser/markup');
@@ -23,6 +25,7 @@ phutil_require_module('phabricator', 'infrastructure/javelin/api');
 phutil_require_module('phutil', 'filesystem');
 phutil_require_module('phutil', 'filesystem/tempfile');
 phutil_require_module('phutil', 'future/exec');
+phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
 
 

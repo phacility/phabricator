@@ -24,6 +24,7 @@ class DifferentialChangesetListView extends AphrontView {
   private $renderURI = '/differential/changeset/';
   private $vsMap = array();
   private $whitespace;
+  private $standaloneViews;
 
   public function setChangesets($changesets) {
     $this->changesets = $changesets;
@@ -32,6 +33,11 @@ class DifferentialChangesetListView extends AphrontView {
 
   public function setEditable($editable) {
     $this->editable = $editable;
+    return $this;
+  }
+
+  public function setStandaloneViews($has_standalone_views) {
+    $this->standaloneViews = $has_standalone_views;
     return $this;
   }
 
@@ -78,23 +84,25 @@ class DifferentialChangesetListView extends AphrontView {
 
       $ref = $changeset->getRenderingReference();
 
-      $detail_uri = new PhutilURI($this->renderURI);
-      $detail_uri->setQueryParams(
-        array(
-          'id'          => $ref,
-          'vs'          => $vs_id,
-          'whitespace'  => $this->whitespace,
-        ));
+      $detail_button = null;
+      if ($this->standaloneViews) {
+        $detail_uri = new PhutilURI($this->renderURI);
+        $detail_uri->setQueryParams(
+          array(
+            'id'          => $ref,
+            'vs'          => $vs_id,
+            'whitespace'  => $this->whitespace,
+          ));
 
-      $detail_button = phutil_render_tag(
-        'a',
-        array(
-          'style'   => 'float: right',
-          'class'   => 'button small grey',
-          'href'    => $detail_uri,
-          'target'  => '_blank',
-        ),
-        'Standalone View');
+        $detail_button = phutil_render_tag(
+          'a',
+          array(
+            'class'   => 'button small grey',
+            'href'    => $detail_uri,
+            'target'  => '_blank',
+          ),
+          'View Standalone / Raw');
+      }
 
       $uniq_id = celerity_generate_unique_node_id();
 

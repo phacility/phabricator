@@ -136,7 +136,7 @@ celerity_register_resource_map(array(
   ),
   'differential-changeset-view-css' =>
   array(
-    'uri' => '/res/f26ca6f9/rsrc/css/application/differential/changeset-view.css',
+    'uri' => '/res/32a8bac6/rsrc/css/application/differential/changeset-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -690,7 +690,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/6c786373/differential.pkg.js',
       'type' => 'js',
     ),
-    '8d8a971a' =>
+    '8e4ef51b' =>
     array (
       'name' => 'differential.pkg.css',
       'symbols' =>
@@ -704,7 +704,7 @@ celerity_register_resource_map(array(
         6 => 'differential-revision-add-comment-css',
         7 => 'differential-revision-comment-list-css',
       ),
-      'uri' => '/res/pkg/8d8a971a/differential.pkg.css',
+      'uri' => '/res/pkg/8e4ef51b/differential.pkg.css',
       'type' => 'css',
     ),
     'eadf6ec3' =>
@@ -728,14 +728,14 @@ celerity_register_resource_map(array(
     'aphront-table-view-css' => '4270730a',
     'aphront-tokenizer-control-css' => '4270730a',
     'aphront-typeahead-control-css' => '4270730a',
-    'differential-changeset-view-css' => '8d8a971a',
-    'differential-core-view-css' => '8d8a971a',
-    'differential-revision-add-comment-css' => '8d8a971a',
-    'differential-revision-comment-css' => '8d8a971a',
-    'differential-revision-comment-list-css' => '8d8a971a',
-    'differential-revision-detail-css' => '8d8a971a',
-    'differential-revision-history-css' => '8d8a971a',
-    'differential-table-of-contents-css' => '8d8a971a',
+    'differential-changeset-view-css' => '8e4ef51b',
+    'differential-core-view-css' => '8e4ef51b',
+    'differential-revision-add-comment-css' => '8e4ef51b',
+    'differential-revision-comment-css' => '8e4ef51b',
+    'differential-revision-comment-list-css' => '8e4ef51b',
+    'differential-revision-detail-css' => '8e4ef51b',
+    'differential-revision-history-css' => '8e4ef51b',
+    'differential-table-of-contents-css' => '8e4ef51b',
     'diffusion-commit-view-css' => 'eadf6ec3',
     'javelin-behavior-differential-diff-radios' => '6c786373',
     'javelin-behavior-differential-edit-inline-comments' => '6c786373',

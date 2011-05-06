@@ -179,6 +179,7 @@ class DifferentialRevisionViewController extends DifferentialController {
     $changeset_view = new DifferentialChangesetListView();
     $changeset_view->setChangesets($visible_changesets);
     $changeset_view->setEditable(true);
+    $changeset_view->setStandaloneViews(true);
     $changeset_view->setRevision($revision);
     $changeset_view->setVsMap($vs_map);
     $changeset_view->setWhitespace($whitespace);

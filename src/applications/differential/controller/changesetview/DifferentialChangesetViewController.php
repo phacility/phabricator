@@ -33,6 +33,19 @@ class DifferentialChangesetViewController extends DifferentialController {
       return new Aphront404Response();
     }
 
+    $view = $request->getStr('view');
+    if ($view) {
+      $changeset->attachHunks($changeset->loadHunks());
+      switch ($view) {
+        case 'new':
+          return $this->buildRawFileResponse($changeset->makeNewFile());
+        case 'old':
+          return $this->buildRawFileResponse($changeset->makeOldFile());
+        default:
+          return new Aphront400Response();
+      }
+    }
+
     if ($vs && ($vs != -1)) {
       $vs_changeset = id(new DifferentialChangeset())->load($vs);
       if (!$vs_changeset) {
@@ -177,6 +190,26 @@ class DifferentialChangesetViewController extends DifferentialController {
     $detail = new DifferentialChangesetDetailView();
     $detail->setChangeset($changeset);
     $detail->appendChild($output);
+
+    if (!$vs) {
+      $detail->addButton(
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => $request->getRequestURI()->alter('view', 'old'),
+            'class' => 'grey button small',
+          ),
+          'View Raw File (Old Version)'));
+      $detail->addButton(
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => $request->getRequestURI()->alter('view', 'new'),
+            'class' => 'grey button small',
+          ),
+          'View Raw File (New Version)'));
+    }
+
     $detail->setRevisionID($request->getInt('revision_id'));
 
     $output =
@@ -202,5 +235,10 @@ class DifferentialChangesetViewController extends DifferentialController {
       $author_phid);
   }
 
+  private function buildRawFileResponse($text) {
+    return id(new AphrontFileResponse())
+      ->setMimeType('text/plain')
+      ->setContent($text);
+  }
 
 }
