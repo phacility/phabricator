@@ -30,13 +30,20 @@ class PhabricatorMailImplementationTestAdapter
     $this->config = $config;
   }
 
-  public function setFrom($email) {
+  public function setFrom($email, $name = '') {
     $this->guts['from'] = $email;
+    $this->guts['from-name'] = $name;
     return $this;
   }
 
-  public function addReplyTo($email) {
-    $this->guts['reply-to'] = $email;
+  public function addReplyTo($email, $name = '') {
+    if (empty($this->guts['reply-to'])) {
+      $this->guts['reply-to'] = array();
+    }
+    $this->guts['reply-to'][] = array(
+      'email' => $email,
+      'name'  => $name,
+    );
     return $this;
   }
 

@@ -30,13 +30,13 @@ class PhabricatorMailImplementationPHPMailerLiteAdapter
     return true;
   }
 
-  public function setFrom($email) {
-    $this->mailer->SetFrom($email, '', $crazy_side_effects = false);
+  public function setFrom($email, $name = '') {
+    $this->mailer->SetFrom($email, $name, $crazy_side_effects = false);
     return $this;
   }
 
-  public function addReplyTo($email) {
-    $this->mailer->AddReplyTo($email);
+  public function addReplyTo($email, $name = '') {
+    $this->mailer->AddReplyTo($email, $name);
     return $this;
   }
 

@@ -2,6 +2,10 @@ This is not a complete list of changes, just of API or workflow changes that may
 break existing installs. Newer changes are listed at the top. If you pull new
 changes and things stop working, check here first!
 
+May 10 2011 - PhabricatorMailImplementationAdapter
+  The signatures of setFrom() and addReplyTo() have changed, and they now
+  accept a second "$name = ''" parameter. This represents a human-readable
+  name component of the address.
 
 May 9 2011 - git submodule
   As of commit 2a39fd0, you must run "git submodule update --init" in your

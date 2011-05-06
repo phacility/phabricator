@@ -18,8 +18,8 @@
 
 abstract class PhabricatorMailImplementationAdapter {
 
-  abstract public function setFrom($email);
-  abstract public function addReplyTo($email);
+  abstract public function setFrom($email, $name = '');
+  abstract public function addReplyTo($email, $name = '');
   abstract public function addTos(array $emails);
   abstract public function addCCs(array $emails);
   abstract public function addHeader($header_name, $header_value);

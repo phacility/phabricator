@@ -213,15 +213,22 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         $mailer->setFrom($default);
       } else if (!PhabricatorEnv::getEnvConfig('metamta.can-send-as-user')) {
         $from = $params['from'];
+        $handle = $handles[$from];
         if (empty($params['reply-to'])) {
-          $params['reply-to'] = $handles[$from]->getEmail();
+          $params['reply-to'] = $handle->getEmail();
+          $params['reply-to-name'] = $handle->getFullName();
         }
-        $mailer->setFrom($default);
+        $mailer->setFrom(
+          $default,
+          $handle->getFullName());
         unset($params['from']);
       }
 
       $is_first = !empty($params['is-first-message']);
       unset($params['is-first-message']);
+
+      $reply_to_name = idx($params, 'reply-to-name', '');
+      unset($params['reply-to-name']);
 
       foreach ($params as $key => $value) {
         switch ($key) {
@@ -229,7 +236,7 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
             $mailer->setFrom($handles[$value]->getEmail());
             break;
           case 'reply-to':
-            $mailer->addReplyTo($value);
+            $mailer->addReplyTo($value, $reply_to_name);
             break;
           case 'to':
             $emails = array();
