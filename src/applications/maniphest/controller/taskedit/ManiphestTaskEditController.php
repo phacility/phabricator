@@ -29,6 +29,8 @@ class ManiphestTaskEditController extends ManiphestController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    $files = array();
+
     if ($this->id) {
       $task = id(new ManiphestTask())->load($this->id);
       if (!$task) {
@@ -38,6 +40,28 @@ class ManiphestTaskEditController extends ManiphestController {
       $task = new ManiphestTask();
       $task->setPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
       $task->setAuthorPHID($user->getPHID());
+
+      // These allow task creation with defaults.
+      if (!$request->isFormPost()) {
+        $task->setTitle($request->getStr('title'));
+      }
+
+      $file_phids = $request->getArr('files', array());
+      if (!$file_phids) {
+        // Allow a single 'file' key instead, mostly since Mac OS X urlencodes
+        // square brackets in URLs when passed to 'open', so you can't 'open'
+        // a URL like '?files[]=xyz' and have PHP interpret it correctly.
+        $phid = $request->getStr('file');
+        if ($phid) {
+          $file_phids = array($phid);
+        }
+      }
+
+      if ($file_phids) {
+        $files = id(new PhabricatorFile())->loadAllWhere(
+          'phid IN (%Ls)',
+          $file_phids);
+      }
     }
 
     $errors = array();
@@ -91,6 +115,14 @@ class ManiphestTaskEditController extends ManiphestController {
         if ($request->getArr('projects') != $task->getProjectPHIDs()) {
           $changes[ManiphestTransactionType::TYPE_PROJECTS]
             = $request->getArr('projects');
+        }
+
+        if ($files) {
+          $file_map = mpull($files, 'getPHID');
+          $file_map = array_fill_keys($file_map, true);
+          $changes[ManiphestTransactionType::TYPE_ATTACH] = array(
+            PhabricatorPHIDConstants::PHID_TYPE_FILE => $file_map,
+          );
         }
 
         $template = new ManiphestTransaction();
@@ -172,6 +204,7 @@ class ManiphestTaskEditController extends ManiphestController {
     $form = new AphrontFormView();
     $form
       ->setUser($user)
+      ->setAction($request->getRequestURI()->getPath())
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel('Title')
@@ -203,7 +236,26 @@ class ManiphestTaskEditController extends ManiphestController {
           ->setLabel('Projects')
           ->setName('projects')
           ->setValue($projects_value)
-          ->setDatasource('/typeahead/common/projects/'))
+          ->setDatasource('/typeahead/common/projects/'));
+
+    if ($files) {
+      $file_display = array();
+      foreach ($files as $file) {
+        $file_display[] = phutil_escape_html($file->getName());
+      }
+      $file_display = implode('<br />', $file_display);
+
+      $form->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel('Files')
+          ->setValue($file_display));
+
+      foreach ($files as $ii => $file) {
+        $form->addHiddenInput('files['.$ii.']', $file->getPHID());
+      }
+    }
+
+    $form
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel('Description')
