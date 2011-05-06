@@ -267,8 +267,24 @@ class DifferentialRevisionViewController extends DifferentialController {
     $properties = array();
 
     $status = $revision->getStatus();
+    $next_step = null;
+    if ($status == DifferentialRevisionStatus::ACCEPTED) {
+      switch ($diff->getSourceControlSystem()) {
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+          $next_step = 'arc amend --revision '.$revision->getID();
+          break;
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+          $next_step = 'arc commit --revision '.$revision->getID();
+          break;
+      }
+      if ($next_step) {
+        $next_step =
+          ' &middot; '.
+          'Next step: <tt>'.phutil_escape_html($next_step).'</tt>';
+      }
+    }
     $status = DifferentialRevisionStatus::getNameForRevisionStatus($status);
-    $properties['Revision Status'] = '<strong>'.$status.'</strong>';
+    $properties['Revision Status'] = '<strong>'.$status.'</strong>'.$next_step;
 
     $author = $handles[$revision->getAuthorPHID()];
     $properties['Author'] = $author->renderLink();
@@ -398,6 +414,11 @@ class DifferentialRevisionViewController extends DifferentialController {
       }
       $properties['Commits'] = implode('<br />', $links);
     }
+
+    $properties['Apply Patch'] =
+      '<tt>arc patch D'.$revision->getID().'</tt>';
+    $properties['Export Patch'] =
+      '<tt>arc export --revision '.$revision->getID().'</tt>';
 
     return $properties;
   }
