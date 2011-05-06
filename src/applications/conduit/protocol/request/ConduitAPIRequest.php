@@ -26,7 +26,7 @@ class ConduitAPIRequest {
   }
 
   public function getValue($key) {
-    return $this->params[$key];
+    return idx($this->params, $key);
   }
 
   public function getAllParameters() {
