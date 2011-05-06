@@ -39,13 +39,18 @@ class DifferentialChangesetParser {
   protected $whitespaceMode = null;
 
   protected $subparser;
-  protected $oldChangesetID = null;
   protected $noHighlight;
 
   protected $renderCacheKey = null;
 
   private $handles;
   private $user;
+
+  private $leftSideChangesetID;
+  private $leftSideAttachesToNewFile;
+
+  private $rightSideChangesetID;
+  private $rightSideAttachesToNewFile;
 
   const CACHE_VERSION = 4;
 
@@ -60,12 +65,38 @@ class DifferentialChangesetParser {
   const WHITESPACE_IGNORE_TRAILING  = 'ignore-trailing';
   const WHITESPACE_IGNORE_ALL       = 'ignore-all';
 
+  /**
+   * Configure which Changeset comments added to the right side of the visible
+   * diff will be attached to. The ID must be the ID of a real Differential
+   * Changeset.
+   *
+   * The complexity here is that we may show an arbitrary side of an arbitrary
+   * changeset as either the left or right part of a diff. This method allows
+   * the left and right halves of the displayed diff to be correctly mapped to
+   * storage changesets.
+   *
+   * @param id    The Differential Changeset ID that comments added to the right
+   *              side of the visible diff should be attached to.
+   * @param bool  If true, attach new comments to the right side of the storage
+   *              changeset. Note that this may be false, if the left side of
+   *              some storage changeset is being shown as the right side of
+   *              a display diff.
+   * @return this
+   */
   public function setRightSideCommentMapping($id, $is_new) {
-
+    $this->rightSideChangesetID = $id;
+    $this->rightSideAttachesToNewFile = $is_new;
+    return $this;
   }
 
+  /**
+   * See setRightSideCommentMapping(), but this sets information for the left
+   * side of the display diff.
+   */
   public function setLeftSideCommentMapping($id, $is_new) {
-
+    $this->leftSideChangesetID = $id;
+    $this->leftSideAttachesToNewFile = $is_new;
+    return $this;
   }
 
   /**
@@ -101,11 +132,6 @@ class DifferentialChangesetParser {
 
   public function setWhitespaceMode($whitespace_mode) {
     $this->whitespaceMode = $whitespace_mode;
-    return $this;
-  }
-
-  public function setOldChangesetID($old_changeset_id) {
-    $this->oldChangesetID = $old_changeset_id;
     return $this;
   }
 
@@ -236,7 +262,10 @@ class DifferentialChangesetParser {
   }
 
   public function parseInlineComment(DifferentialInlineComment $comment) {
-    $this->comments[] = $comment;
+    // Parse only comments which are actually visible.
+    if ($this->isCommentVisibleOnRenderedDiff($comment)) {
+      $this->comments[] = $comment;
+    }
     return $this;
   }
 
@@ -837,7 +866,7 @@ EOSYNTHETIC;
         $end = $comment->getLineNumber() +
                $comment->getLineLength() +
                self::LINES_CONTEXT;
-        $new = $this->isCommentInNewFile($comment);
+        $new = $this->isCommentOnRightSideWhenDisplayed($comment);
         for ($ii = $start; $ii <= $end; $ii++) {
           if ($new) {
             $new_mask[$ii] = true;
@@ -862,7 +891,7 @@ EOSYNTHETIC;
       foreach ($this->comments as $comment) {
         $final = $comment->getLineNumber() +
                  $comment->getLineLength();
-        if ($this->isCommentInNewFile($comment)) {
+        if ($this->isCommentOnRightSideWhenDisplayed($comment)) {
           $new_comments[$final][] = $comment;
         } else {
           $old_comments[$final][] = $comment;
@@ -881,12 +910,58 @@ EOSYNTHETIC;
     return $this->renderChangesetTable($this->changeset, $html);
   }
 
-  private function isCommentInNewFile(DifferentialInlineComment $comment) {
-    if ($this->oldChangesetID) {
-      return ($comment->getChangesetID() != $this->oldChangesetID);
-    } else {
-      return $comment->getIsNewFile();
+  /**
+   * Determine if an inline comment will appear on the rendered diff,
+   * taking into consideration which halves of which changesets will actually
+   * be shown.
+   *
+   * @param DifferentialInlineComment Comment to test for visibility.
+   * @return bool True if the comment is visible on the rendered diff.
+   */
+  private function isCommentVisibleOnRenderedDiff(
+    DifferentialInlineComment $comment) {
+
+    $changeset_id = $comment->getChangesetID();
+    $is_new = $comment->getIsNewFile();
+
+    if ($changeset_id == $this->rightSideChangesetID &&
+        $is_new == $this->rightSideAttachesToNewFile) {
+      return true;
     }
+
+    if ($changeset_id == $this->leftSideChangesetID &&
+        $is_new == $this->leftSideAttachesToNewFile) {
+      return true;
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Determine if a comment will appear on the right side of the display diff.
+   * Note that the comment must appear somewhere on the rendered changeset, as
+   * per isCommentVisibleOnRenderedDiff().
+   *
+   * @param DifferentialInlineComment Comment to test for display location.
+   * @return bool True for right, false for left.
+   */
+  private function isCommentOnRightSideWhenDisplayed(
+    DifferentialInlineComment $comment) {
+
+    if (!$this->isCommentVisibleOnRenderedDiff($comment)) {
+      throw new Exception("Comment is not visible on changeset!");
+    }
+
+    $changeset_id = $comment->getChangesetID();
+    $is_new = $comment->getIsNewFile();
+
+    if ($changeset_id == $this->rightSideChangesetID &&
+        $is_new == $this->rightSideAttachesToNewFile) {
+      return true;
+    }
+
+    return false;
   }
 
   protected function renderShield($message, $more) {
@@ -961,6 +1036,15 @@ EOSYNTHETIC;
 
     $range_len = min($range_len, $rows - $range_start);
 
+    // Gaps - compute gaps in the visible display diff, where we will render
+    // "Show more context" spacers. This builds an aggregate $mask of all the
+    // lines we must show (because they are near changed lines, near inline
+    // comments, or the request has explicitly asked for them, i.e. resulting
+    // from the user clicking "show more") and then finds all the gaps between
+    // visible lines. If a gap is smaller than the context size, we just
+    // display it. Otherwise, we record it into $gaps and will render a
+    // "show more context" element instead of diff text below.
+
     $gaps = array();
     $gap_start = 0;
     $in_gap = false;
@@ -989,11 +1073,29 @@ EOSYNTHETIC;
 
     $gaps = array_reverse($gaps);
 
-    $changeset = $this->changesetID;
     $reference = $this->getChangeset()->getRenderingReference();
+
+    $left_id = $this->leftSideChangesetID;
+    $right_id = $this->rightSideChangesetID;
+
+    // "N" stands for 'new' and means the comment should attach to the new file
+    // when stored, i.e. DifferentialInlineComment->setIsNewFile().
+    // "O" stands for 'old' and means the comment should attach to the old file.
+
+    $left_char = $this->leftSideAttachesToNewFile
+      ? 'N'
+      : 'O';
+    $right_char = $this->rightSideAttachesToNewFile
+      ? 'N'
+      : 'O';
 
     for ($ii = $range_start; $ii < $range_start + $range_len; $ii++) {
       if (empty($mask[$ii])) {
+        // If we aren't going to show this line, we've just entered a gap.
+        // Pop information about the next gap off the $gaps stack and render
+        // an appropriate "Show more context" element. This branch eventually
+        // increments $ii by the entire size of the gap and then continues
+        // the loop.
         $gap = array_pop($gaps);
         $top = $gap[0];
         $len = $gap[1];
@@ -1100,14 +1202,14 @@ EOSYNTHETIC;
         $html[] = $context_not_available;
       }
 
-      if ($o_num && $changeset) {
-        $o_id = ' id="C'.$changeset.'OL'.$o_num.'"';
+      if ($o_num && $left_id) {
+        $o_id = ' id="C'.$left_id.$left_char.'L'.$o_num.'"';
       } else {
         $o_id = null;
       }
 
-      if ($n_num && $changeset) {
-        $n_id = ' id="C'.$changeset.'NL'.$n_num.'"';
+      if ($n_num && $right_id) {
+        $n_id = ' id="C'.$right_id.$right_char.'L'.$n_num.'"';
       } else {
         $n_id = null;
       }
@@ -1156,7 +1258,7 @@ EOSYNTHETIC;
             ($comment->getAuthorPHID() == $user->getPHID()) &&
             (!$comment->getCommentID());
 
-    $on_right = $this->isCommentInNewFile($comment);
+    $on_right = $this->isCommentOnRightSideWhenDisplayed($comment);
 
     return id(new DifferentialInlineCommentView())
       ->setInlineComment($comment)

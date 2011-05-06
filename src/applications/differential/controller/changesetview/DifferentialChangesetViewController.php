@@ -154,8 +154,12 @@ class DifferentialChangesetViewController extends DifferentialController {
     $parser->setLeftSideCommentMapping($left_source, $left_new);
     $parser->setWhitespaceMode($request->getStr('whitespace'));
 
+    // Load both left-side and right-side inline comments.
+    $inlines = $this->loadInlineComments(
+      array($left_source, $right_source),
+      $author_phid);
+
     $phids = array();
-    $inlines = $this->loadInlineComments($id, $author_phid);
     foreach ($inlines as $inline) {
       $parser->parseInlineComment($inline);
       $phids[$inline->getAuthorPHID()] = true;
@@ -228,10 +232,15 @@ class DifferentialChangesetViewController extends DifferentialController {
       ));
   }
 
-  private function loadInlineComments($changeset_id, $author_phid) {
+  private function loadInlineComments(array $changeset_ids, $author_phid) {
+    $changeset_ids = array_unique(array_filter($changeset_ids));
+    if (!$changeset_ids) {
+      return;
+    }
+
     return id(new DifferentialInlineComment())->loadAllWhere(
-      'changesetID = %d AND (commentID IS NOT NULL OR authorPHID = %s)',
-      $changeset_id,
+      'changesetID IN (%Ld) AND (commentID IS NOT NULL OR authorPHID = %s)',
+      $changeset_ids,
       $author_phid);
   }
 
