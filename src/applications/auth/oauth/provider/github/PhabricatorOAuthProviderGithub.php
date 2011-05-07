@@ -78,7 +78,7 @@ class PhabricatorOAuthProviderGithub extends PhabricatorOAuthProvider {
   }
 
   public function retrieveUserEmail() {
-    return $this->userData['email'];
+    return idx($this->userData, 'email');
   }
 
   public function retrieveUserAccountName() {
@@ -103,7 +103,7 @@ class PhabricatorOAuthProviderGithub extends PhabricatorOAuthProvider {
   }
 
   public function retrieveUserRealName() {
-    return $this->userData['name'];
+    return idx($this->userData, 'name');
   }
 
 }

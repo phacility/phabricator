@@ -60,9 +60,9 @@ class PhabricatorOAuthDefaultRegistrationController
         }
       }
 
-      if ($user->getRealName() === null) {
+      if (!strlen($user->getRealName())) {
         $user->setRealName($request->getStr('realname'));
-        if (!strlen($user->getStr('realname'))) {
+        if (!strlen($user->getRealName())) {
           $e_realname = 'Required';
           $errors[] = 'Real name is required.';
         } else {
