@@ -112,9 +112,16 @@ class ManiphestTaskEditController extends ManiphestController {
           $changes[ManiphestTransactionType::TYPE_CCS] = $request->getArr('cc');
         }
 
-        if ($request->getArr('projects') != $task->getProjectPHIDs()) {
-          $changes[ManiphestTransactionType::TYPE_PROJECTS]
-            = $request->getArr('projects');
+        $new_proj_arr = $request->getArr('projects');
+        $new_proj_arr = array_values($new_proj_arr);
+        sort($new_proj_arr);
+
+        $cur_proj_arr = $task->getProjectPHIDs();
+        $cur_proj_arr = array_values($cur_proj_arr);
+        sort($cur_proj_arr);
+
+        if ($new_proj_arr != $cur_proj_arr) {
+          $changes[ManiphestTransactionType::TYPE_PROJECTS] = $new_proj_arr;
         }
 
         if ($files) {
