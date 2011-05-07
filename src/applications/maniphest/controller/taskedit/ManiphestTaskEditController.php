@@ -136,8 +136,10 @@ class ManiphestTaskEditController extends ManiphestController {
           $transactions[] = $transaction;
         }
 
-        $editor = new ManiphestTransactionEditor();
-        $editor->applyTransactions($task, $transactions);
+        if ($transactions) {
+          $editor = new ManiphestTransactionEditor();
+          $editor->applyTransactions($task, $transactions);
+        }
 
         return id(new AphrontRedirectResponse())
           ->setURI('/T'.$task->getID());
