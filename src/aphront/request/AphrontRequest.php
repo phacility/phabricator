@@ -68,6 +68,20 @@ class AphrontRequest {
     }
   }
 
+  final public function getBool($name, $default = null) {
+    if (isset($this->requestData[$name])) {
+      if ($this->requestData[$name] === 'true') {
+        return true;
+      } else if ($this->requestData[$name] === 'false') {
+        return false;
+      } else {
+        return (bool)$this->requestData[$name];
+      }
+    } else {
+      return $default;
+    }
+  }
+
   final public function getStr($name, $default = null) {
     if (isset($this->requestData[$name])) {
       $str = (string)$this->requestData[$name];

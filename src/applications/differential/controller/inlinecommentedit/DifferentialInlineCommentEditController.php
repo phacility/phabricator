@@ -28,8 +28,8 @@ class DifferentialInlineCommentEditController extends DifferentialController {
     $request = $this->getRequest();
 
     $changeset = $request->getInt('changeset');
-    $is_new = $request->getInt('is_new');
-    $on_right = $request->getInt('on_right');
+    $is_new = $request->getBool('is_new');
+    $on_right = $request->getBool('on_right');
     $number = $request->getInt('number');
     $length = $request->getInt('length');
     $text = $request->getStr('text');
