@@ -17,6 +17,7 @@
  */
 
 class ManiphestTransactionEditor {
+  const SUBJECT_PREFIX = '[Maniphest]';
 
   public function applyTransactions($task, array $transactions) {
 
@@ -174,10 +175,11 @@ class ManiphestTransactionEditor {
       "  ".$task_uri."\n";
 
     $thread_id = '<maniphest-task-'.$task->getPHID().'>';
+    $task_id = $task->getID();
+    $title = $task->getTitle();
 
     id(new PhabricatorMetaMTAMail())
-      ->setSubject(
-        '[Maniphest] T'.$task->getID().' '.$action.': '.$task->getTitle())
+      ->setSubject(self::SUBJECT_PREFIX." [{$action}] T{$task_id}: {$title}")
       ->setFrom($transaction->getAuthorPHID())
       ->addTos($email_to)
       ->addCCs($email_cc)

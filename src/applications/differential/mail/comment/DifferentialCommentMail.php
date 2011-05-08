@@ -45,9 +45,12 @@ class DifferentialCommentMail extends DifferentialMail {
   }
 
   protected function renderSubject() {
+    $verb = ucwords($this->getVerb());
     $revision = $this->getRevision();
-    $verb = $this->getVerb();
-    return ucwords($verb).': '.$revision->getTitle();
+    $title = $revision->getTitle();
+    $id = $revision->getID();
+    $subject = "[{$verb}] D{$id}: {$title}";
+    return $subject;
   }
 
   protected function getVerb() {
