@@ -30,46 +30,48 @@ if you want.
 Install things we need:
 
   sudo yum install git httpd php mysql-server php-mysql php-devel
-  
+
 If you already have LAMP setup, you've already got everything you need.
-  
+
 Now that you have git installed, grab Phabricator and its dependencies:
 
   $ cd somewhere/ # pick some install directory
   somewhere/ $ git clone git://github.com/facebook/libphutil.git
   somewhere/ $ git clone git://github.com/facebook/arcanist.git
   somewhere/ $ git clone git://github.com/facebook/phabricator.git
-  
+  somewhere/ $ cd phabricator
+  somewhere/phabricator/ $ git submodule update --init
+
 = Installing Optional Components =
 
 == APC ==
 
 Like everything else written in PHP, Phabricator will run much faster with APC
 installed. You likely need to install "pcre-devel" first:
-  
+
   sudo yum install pcre-devel
-  
+
 Then you can either install via PECL:
 
   sudo yum install php-pear
   sudo pecl install apc
-  
+
 ...or grab the package from PECL directly and follow the build instructions
 there:
 
   http://pecl.php.net/package/APC
-  
+
 Installing APC is optional but **strongly recommended**, especially on
 production hosts.
 
 Once APC is installed, test that it is available by running:
 
   php -i | grep apc
-  
+
 If it doesn't show up, add:
 
   extension=apc.so
-  
+
 ..to "/etc/php.d/apc.ini" or the "php.ini" file indicated by "php -i".
 
 == Flex 2.5.35 / Bison ==
@@ -80,7 +82,7 @@ than flex 2.5.4. At the time of writing, most packaging systems don't have flex
 2.5.35 available. You can get it from here and compile it manually:
 
   http://flex.sourceforge.net/
-  
+
 Then install bison normally:
 
   sudo yum install bison
