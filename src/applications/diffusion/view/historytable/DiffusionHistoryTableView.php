@@ -71,7 +71,9 @@ final class DiffusionHistoryTableView extends DiffusionView {
           $history->getCommitIdentifier()),
         $this->linkChange(
           $history->getChangeType(),
-          $history->getFileType()),
+          $history->getFileType(),
+          null,
+          $history->getCommitIdentifier()),
         $date,
         $time,
         $author,
