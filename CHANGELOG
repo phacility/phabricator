@@ -1,0 +1,12 @@
+This is not a complete list of changes, just of API or workflow changes that may
+break existing installs. Newer changes are listed at the top. If you pull new
+changes and things stop working, check here first!
+
+
+May 9 2011 - git submodule
+  As of commit 2a39fd0, you must run "git submodule update --init" in your
+  clone. This was added to the install documentation in commit 09b498c, see that
+  commit for details.
+
+May 9 2011 - Changelog
+  Created CHANGELOG
