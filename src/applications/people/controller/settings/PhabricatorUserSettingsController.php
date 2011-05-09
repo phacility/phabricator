@@ -105,10 +105,17 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
               $user->setProfileImagePHID($file->getPHID());
             }
           }
+          
+          if (!$request->getStr('real_name')) {
+            $account_return = 'empty=true'; 
+          } else {
+            $user->setRealName($request->getStr('real_name'));
+            $account_return = 'saved=true';
+          }         
 
           $user->save();
           return id(new AphrontRedirectResponse())
-            ->setURI('/settings/page/account/');
+            ->setURI('/settings/page/account/?'.$account_return);
       }
     }
 
@@ -244,6 +251,29 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
 
     $editable = $this->accountEditable;
 
+    if ($request->getStr('saved')) {
+      $notice_needed = true;
+      $notice_severity = AphrontErrorView::SEVERITY_NOTICE;
+      $notice_title = 'Changed Saved';
+      $notice_body = '<p>Your changes have been saved.</p>';
+    } else if ($request->getStr('empty')) {
+      $notice_needed = true;
+      $notice_severity = AphrontErrorView::SEVERITY_ERROR;
+      $notice_title = 'Humm! Do you have no name?';
+      $notice_body = '<p>Please enter your real name.</p>';
+    } else { 
+     $notice = null;
+     $notice_needed = false;
+    }
+
+    if ($notice_needed) {
+      $notice = new AphrontErrorView();
+      $notice->setSeverity($notice_severity);
+      $notice->setTitle($notice_title);
+      $notice->appendChild($notice_body);
+      $notice = $notice->render();
+    }
+
     $form = new AphrontFormView();
     $form
       ->setUser($user)
@@ -255,8 +285,9 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Real Name')
-          ->setValue($user->getRealName())
-          ->setDisabled(!$editable))
+          ->setName('real_name')
+          ->setDisabled(!$editable)
+          ->setValue($user->getRealName()))
       ->appendChild(
           id(new AphrontFormMarkupControl())
             ->setValue('<hr />'))
@@ -290,7 +321,7 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
     $panel->appendChild($form);
 
-    return $panel->render();
+    return $notice.$panel->render();
   }
 
   private function renderEmailForm() {
