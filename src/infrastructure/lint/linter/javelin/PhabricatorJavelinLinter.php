@@ -94,6 +94,10 @@ class PhabricatorJavelinLinter extends ArcanistLinter {
 
     $celerity = CelerityResourceMap::getInstance();
 
+    $path = preg_replace(
+      '@^externals/javelin/src/@',
+      'webroot/rsrc/js/javelin/',
+      $path);
     $info = $celerity->lookupFileInformation(substr($path, strlen('webroot')));
 
     $need = $external_classes;
@@ -133,7 +137,7 @@ class PhabricatorJavelinLinter extends ArcanistLinter {
 
     foreach ($requires as $component) {
       $this->raiseLintAtLine(
-        $line,
+        0,
         0,
         self::LINT_UNNECESSARY_DEPENDENCY,
         "This file @requires component '{$component}' but does not use ".
