@@ -71,6 +71,7 @@ $package_spec = array(
 
 
 require_once dirname(__FILE__).'/__init_script__.php';
+require_once dirname(__FILE__).'/__init_env__.php';
 
 if ($argc != 2) {
   $self = basename($argv[0]);
@@ -96,12 +97,14 @@ $files = id(new FileFinder($root))
 
 echo "Processing ".count($files)." files";
 
+$resource_hash = PhabricatorEnv::getEnvConfig('celerity.resource-hash');
+
 $file_map = array();
 foreach ($files as $path => $hash) {
   echo ".";
   $name = '/'.Filesystem::readablePath($path, $root);
   $file_map[$name] = array(
-    'hash' => $hash,
+    'hash' => md5($hash.$name.$resource_hash),
     'disk' => $path,
   );
 }

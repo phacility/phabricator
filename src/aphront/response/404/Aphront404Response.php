@@ -21,6 +21,10 @@
  */
 class Aphront404Response extends AphrontResponse {
 
+  public function getHTTPResponseCode() {
+    return 404;
+  }
+
   public function buildResponseString() {
     return '404 Not Found';
   }

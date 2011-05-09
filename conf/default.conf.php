@@ -337,4 +337,12 @@ return array(
   // track running daemons.
   'phd.pid-directory' => '/var/tmp/phd',
 
+  // This value is an input to the hash function when building resource hashes.
+  // It has no security value, but if you accidentally poison user caches (by
+  // pushing a bad patch or having something go wrong with a CDN, e.g.) you can
+  // change this to something else and rebuild the Celerity map to break user
+  // caches. Unless you are doing Celerity development, it is exceptionally
+  // unlikely that you need to modify this.
+  'celerity.resource-hash' => 'd9455ea150622ee044f7931dabfa52aa',
+
 );

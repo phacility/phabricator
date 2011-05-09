@@ -24,6 +24,7 @@ abstract class AphrontResponse {
   private $request;
   private $cacheable = false;
   private $responseCode = 200;
+  private $lastModified = null;
 
   public function setRequest($request) {
     $this->request = $request;
@@ -43,6 +44,11 @@ abstract class AphrontResponse {
     return $this;
   }
 
+  public function setLastModified($epoch_timestamp) {
+    $this->lastModified = $epoch_timestamp;
+    return $this;
+  }
+
   public function setHTTPResponseCode($code) {
     $this->responseCode = $code;
     return $this;
@@ -53,17 +59,31 @@ abstract class AphrontResponse {
   }
 
   public function getCacheHeaders() {
+    $headers = array();
     if ($this->cacheable) {
-      $epoch = time() + $this->cacheable;
-      return array(
-        array('Expires',       gmdate('D, d M Y H:i:s', $epoch) . ' GMT'),
-      );
+      $headers[] = array(
+        'Expires',
+        $this->formatEpochTimestampForHTTPHeader(time() + $this->cacheable));
     } else {
-      return array(
-        array('Cache-Control', 'private, no-cache, no-store, must-revalidate'),
-        array('Expires',       'Sat, 01 Jan 2000 00:00:00 GMT'),
-      );
+      $headers[] = array(
+        'Cache-Control',
+        'private, no-cache, no-store, must-revalidate');
+      $headers[] = array(
+        'Expires',
+        'Sat, 01 Jan 2000 00:00:00 GMT');
     }
+
+    if ($this->lastModified) {
+      $headers[] = array(
+        'Last-Modified',
+        $this->formatEpochTimestampForHTTPHeader($this->lastModified));
+    }
+
+    return $headers;
+  }
+
+  private function formatEpochTimestampForHTTPHeader($epoch_timestamp) {
+    return gmdate('D, d M Y H:i:s', $epoch_timestamp).' GMT';
   }
 
   abstract public function buildResponseString();

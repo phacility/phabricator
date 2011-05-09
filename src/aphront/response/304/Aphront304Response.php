@@ -19,14 +19,14 @@
 /**
  * @group aphront
  */
-class Aphront400Response extends AphrontResponse {
+class Aphront304Response extends AphrontResponse {
 
   public function getHTTPResponseCode() {
-    return 400;
+    return 304;
   }
 
   public function buildResponseString() {
-    return '400 Bad Request';
+    return '304 Not Modified';
   }
 
 }

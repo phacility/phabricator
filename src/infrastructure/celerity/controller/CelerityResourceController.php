@@ -38,6 +38,12 @@ class CelerityResourceController extends AphrontController {
       throw new Exception("Only CSS and JS resources may be served.");
     }
 
+    if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
+      // Return a "304 Not Modified". We don't care about the value of this
+      // field since we never change what resource is served by a given URI.
+      return $this->makeResponseCacheable(new Aphront304Response());
+    }
+
     $type = $matches[1];
 
     $root = dirname(phutil_get_library_root('phabricator'));
@@ -77,7 +83,12 @@ class CelerityResourceController extends AphrontController {
         break;
     }
 
+    return $this->makeResponseCacheable($response);
+  }
+
+  private function makeResponseCacheable(AphrontResponse $response) {
     $response->setCacheDurationInSeconds(60 * 60 * 24 * 30);
+    $response->setLastModified(time());
 
     return $response;
   }

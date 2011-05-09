@@ -8,6 +8,7 @@
 phutil_register_library_map(array(
   'class' =>
   array(
+    'Aphront304Response' => 'aphront/response/304',
     'Aphront400Response' => 'aphront/response/400',
     'Aphront404Response' => 'aphront/response/404',
     'AphrontAjaxResponse' => 'aphront/response/ajax',
@@ -503,6 +504,7 @@ phutil_register_library_map(array(
   ),
   'requires_class' =>
   array(
+    'Aphront304Response' => 'AphrontResponse',
     'Aphront400Response' => 'AphrontResponse',
     'Aphront404Response' => 'AphrontResponse',
     'AphrontAjaxResponse' => 'AphrontResponse',

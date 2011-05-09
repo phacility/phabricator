@@ -18,6 +18,7 @@ phutil_require_module('phabricator', 'view/dialog');
 phutil_require_module('phabricator', 'view/page/failure');
 phutil_require_module('phabricator', 'view/page/standard');
 
+phutil_require_module('phutil', 'error');
 phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
 

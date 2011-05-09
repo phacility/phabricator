@@ -315,6 +315,9 @@ class AphrontDefaultApplicationConfiguration
 
   public function handleException(Exception $ex) {
 
+    // Always log the unhandled exception.
+    phlog($ex);
+
     $class    = phutil_escape_html(get_class($ex));
     $message  = phutil_escape_html($ex->getMessage());
 
