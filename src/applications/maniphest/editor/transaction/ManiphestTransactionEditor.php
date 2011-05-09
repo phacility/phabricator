@@ -140,6 +140,12 @@ class ManiphestTransactionEditor {
         $phids[$phid] = true;
       }
     }
+    foreach ($email_to as $phid) {
+      $phids[$phid] = true;
+    }
+    foreach ($email_cc as $phid) {
+      $phids[$phid] = true;
+    }
     $phids = array_keys($phids);
 
     $handles = id(new PhabricatorObjectHandleData($phids))
@@ -162,6 +168,8 @@ class ManiphestTransactionEditor {
 
     $task_uri = PhabricatorEnv::getURI('/T'.$task->getID());
 
+    $reply_handler = $this->buildReplyHandler($task);
+
     if ($is_create) {
       $body .=
         "\n\n".
@@ -174,19 +182,43 @@ class ManiphestTransactionEditor {
       "TASK DETAIL\n".
       "  ".$task_uri."\n";
 
+    $reply_instructions = $reply_handler->getReplyHandlerInstructions();
+    if ($reply_instructions) {
+      $body .=
+        "\n".
+        "REPLY HANDLER ACTIONS\n".
+        "  ".$reply_instructions."\n";
+    }
+
     $thread_id = '<maniphest-task-'.$task->getPHID().'>';
     $task_id = $task->getID();
     $title = $task->getTitle();
 
-    id(new PhabricatorMetaMTAMail())
+    $template = id(new PhabricatorMetaMTAMail())
       ->setSubject(self::SUBJECT_PREFIX." [{$action}] T{$task_id}: {$title}")
       ->setFrom($transaction->getAuthorPHID())
-      ->addTos($email_to)
-      ->addCCs($email_cc)
       ->addHeader('Thread-Topic', 'Maniphest Task '.$task->getID())
       ->setThreadID($thread_id, $is_create)
       ->setRelatedPHID($task->getPHID())
-      ->setBody($body)
-      ->saveAndSend();
+      ->setBody($body);
+
+    $mails = $reply_handler->multiplexMail(
+      $template,
+      array_select_keys($handles, $email_to),
+      array_select_keys($handles, $email_cc));
+
+    foreach ($mails as $mail) {
+      $mail->saveAndSend();
+    }
+  }
+
+  private function buildReplyHandler(ManiphestTask $task) {
+    $handler_class = PhabricatorEnv::getEnvConfig(
+      'metamta.maniphest.reply-handler');
+
+    $handler_object = newv($handler_class, array());
+    $handler_object->setMailReceiver($task);
+
+    return $handler_object;
   }
 }

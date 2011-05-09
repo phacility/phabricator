@@ -76,6 +76,7 @@ class PhabricatorObjectHandleData {
               $handle->setEmail($user->getEmail());
               $handle->setFullName(
                 $user->getUsername().' ('.$user->getRealName().')');
+              $handle->setAlternateID($user->getID());
 
               $img_phid = $user->getProfileImagePHID();
               if ($img_phid) {

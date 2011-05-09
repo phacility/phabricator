@@ -70,47 +70,49 @@ abstract class DifferentialMail {
     $subject  = $this->buildSubject();
     $body     = $this->buildBody();
 
-    $mail = new PhabricatorMetaMTAMail();
+    $template = new PhabricatorMetaMTAMail();
     $actor_handle = $this->getActorHandle();
     $reply_handler = $this->getReplyHandler();
 
     if ($actor_handle) {
-      $mail->setFrom($actor_handle->getPHID());
+      $template->setFrom($actor_handle->getPHID());
     }
 
-    if ($reply_handler) {
-      if ($actor_handle) {
-        $actor = id(new PhabricatorUser())->loadOneWhere(
-          'phid = %s',
-          $actor_handle->getPHID());
-        $reply_handler->setActor($actor);
-      }
-
-      $reply_to = $reply_handler->getReplyHandlerEmailAddress();
-      if ($reply_to) {
-        $mail->setReplyTo($reply_to);
-      }
-    }
-
-    $mail
-      ->addTos($to_phids)
-      ->addCCs($cc_phids)
+    $template
       ->setSubject($subject)
       ->setBody($body)
       ->setIsHTML($this->shouldMarkMailAsHTML())
       ->addHeader('Thread-Topic', $this->getRevision()->getTitle());
 
-    $mail->setThreadID(
+    $template->setThreadID(
       $this->getThreadID(),
       $this->isFirstMailAboutRevision());
 
     if ($this->heraldRulesHeader) {
-      $mail->addHeader('X-Herald-Rules', $this->heraldRulesHeader);
+      $template->addHeader('X-Herald-Rules', $this->heraldRulesHeader);
     }
 
-    $mail->setRelatedPHID($this->getRevision()->getPHID());
+    $template->setRelatedPHID($this->getRevision()->getPHID());
 
-    $mail->saveAndSend();
+    $phids = array();
+    foreach ($to_phids as $phid) {
+      $phids[$phid] = true;
+    }
+    foreach ($cc_phids as $phid) {
+      $phids[$phid] = true;
+    }
+    $phids = array_keys($phids);
+
+    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+
+    $mails = $reply_handler->multiplexMail(
+      $template,
+      array_select_keys($handles, $to_phids),
+      array_select_keys($handles, $cc_phids));
+
+    foreach ($mails as $mail) {
+      $mail->saveAndSend();
+    }
   }
 
   protected function buildSubject() {
@@ -125,9 +127,12 @@ abstract class DifferentialMail {
 
     $body = $this->renderBody();
 
-    $handler_body_text = $this->getReplyHandlerBodyText();
-    if ($handler_body_text) {
-      $body .= $handler_body_text;
+    $reply_handler = $this->getReplyHandler();
+    $reply_instructions = $reply_handler->getReplyHandlerInstructions();
+    if ($reply_instructions) {
+      $body .=
+        "\nREPLY HANDLER ACTIONS\n".
+        "  {$reply_instructions}\n";
     }
 
     if ($this->getHeraldTranscriptURI() && $this->isFirstMailToRecipients()) {
@@ -151,45 +156,20 @@ EOTEXT;
     return $body;
   }
 
-  protected function getReplyHandlerBodyText() {
-    $reply_handler = $this->getReplyHandler();
-
-    if (!$reply_handler) {
-      return null;
-    }
-
-    return $reply_handler->getBodyText();
-  }
-
   protected function getReplyHandler() {
     if ($this->replyHandler) {
       return $this->replyHandler;
     }
 
-    $reply_handler = self::loadReplyHandler();
-    if (!$reply_handler) {
-      return null;
-    }
+    $handler_class = PhabricatorEnv::getEnvConfig(
+      'metamta.differential.reply-handler');
 
-    $reply_handler->setRevision($this->getRevision());
+    $reply_handler = newv($handler_class, array());
+    $reply_handler->setMailReceiver($this->getRevision());
+
     $this->replyHandler = $reply_handler;
+
     return $this->replyHandler;
-  }
-
-  public static function loadReplyHandler() {
-    if (!PhabricatorEnv::getEnvConfig('phabricator.enable-reply-handling')) {
-      return null;
-    }
-
-    $reply_handler = PhabricatorEnv::getEnvConfig('differential.replyhandler');
-
-    if (!$reply_handler) {
-      return null;
-    }
-
-    PhutilSymbolLoader::loadClass($reply_handler);
-    $reply_handler = newv($reply_handler, array());
-    return $reply_handler;
   }
 
   protected function formatText($text) {

@@ -180,6 +180,38 @@ return array(
   'amazon-ses.access-key'       =>  null,
   'amazon-ses.secret-key'       =>  null,
 
+  // You can configure a reply handler domain so that email sent from Maniphest
+  // will have a special "Reply To" address like "T123+82+af19f@example.com"
+  // that allows recipients to reply by email and interact with tasks. For
+  // instructions on configurating reply handlers, see the article
+  // "Configuring Inbound Email" in the Phabricator documentation. By default,
+  // this is set to 'null' and Phabricator will use a generic 'noreply@' address
+  // or the address of the acting user instead of a special reply handler
+  // address (see 'metamta.default-address'). If you set a domain here,
+  // Phabricator will begin generating private reply handler addresses. See
+  // also 'metamta.maniphest.reply-handler' to further configure behavior.
+  // This key should be set to the domain part after the @, like "example.com".
+  'metamta.maniphest.reply-handler-domain' => null,
+
+  // You can follow the instructions in "Configuring Inbound Email" in the
+  // Phabricator documentation and set 'metamta.maniphest.reply-handler-domain'
+  // to support updating Maniphest tasks by email. If you want more advanced
+  // customization than this provides, you can override the reply handler
+  // class with an implementation of your own. This will allow you to do things
+  // like have a single public reply handler or change how private reply
+  // handlers are generated and validated.
+  // This key should be set to a loadable subclass of
+  // PhabricatorMailReplyHandler (and possibly of ManiphestReplyHandler).
+  'metamta.maniphest.reply-handler' => 'ManiphestReplyHandler',
+
+  // See 'metamta.maniphest.reply-handler-domain'. This does the same thing,
+  // but allows email replies via Differential.
+  'metamta.differential.reply-handler-domain' => null,
+
+  // See 'metamta.maniphest.reply-handler'. This does the same thing, but
+  // affects Differential.
+  'metamta.differential.reply-handler' => 'DifferentialReplyHandler',
+
 
 // -- Auth ------------------------------------------------------------------ //
 
@@ -316,9 +348,6 @@ return array(
 // -- Differential ---------------------------------------------------------- //
 
   'differential.revision-custom-detail-renderer'  => null,
-
-  'phabricator.enable-reply-handling' => false,
-  'differential.replyhandler' => 'DifferentialReplyHandler',
 
 
 // -- Maniphest ------------------------------------------------------------- //

@@ -7,10 +7,9 @@
 
 
 phutil_require_module('phabricator', 'applications/metamta/storage/mail');
-phutil_require_module('phabricator', 'applications/people/storage/user');
+phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'infrastructure/env');
 
-phutil_require_module('phutil', 'symbols');
 phutil_require_module('phutil', 'utils');
 
 

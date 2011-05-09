@@ -16,9 +16,23 @@
  * limitations under the License.
  */
 
-class DifferentialReplyHandler {
-  protected $revision;
-  protected $actor;
+class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
+
+  public function validateMailReceiver($mail_receiver) {
+    if (!($mail_receiver instanceof DifferentialRevision)) {
+      throw new Exception("Receiver is not a DifferentialRevision!");
+    }
+  }
+
+  public function getPrivateReplyHandlerEmailAddress(
+    PhabricatorObjectHandle $handle) {
+    return $this->getDefaultPrivateReplyHandlerEmailAddress($handle, 'D');
+  }
+
+  public function getReplyHandlerDomain() {
+    return PhabricatorEnv::getEnvConfig(
+      'metamta.differential.reply-handler-domain');
+  }
 
   /*
    * Generate text like the following from the supported commands.
@@ -29,7 +43,11 @@ class DifferentialReplyHandler {
    *
    * "
    */
-  public function getBodyText() {
+  public function getReplyHandlerInstructions() {
+    if (!$this->supportsReplies()) {
+      return null;
+    }
+
     $supported_commands = $this->getSupportedCommands();
     $text = '';
     if (empty($supported_commands)) {
@@ -37,7 +55,6 @@ class DifferentialReplyHandler {
     }
 
     $comment_command_printed = false;
-    $text .= "\nACTIONS\n";
     if (in_array(DifferentialAction::ACTION_COMMENT, $supported_commands)) {
       $text .= 'Reply to comment';
       $comment_command_printed = true;
@@ -59,7 +76,7 @@ class DifferentialReplyHandler {
       $text .= implode(', ', $modified_commands);
     }
 
-    $text .= ".\n\n";
+    $text .= ".";
 
     return $text;
   }
@@ -73,19 +90,6 @@ class DifferentialReplyHandler {
       DifferentialAction::ACTION_RECLAIM,
       DifferentialAction::ACTION_RESIGN,
     );
-  }
-
-  public function getReplyHandlerEmailAddress() {
-    if (!self::isEnabled()) {
-      return null;
-    }
-
-    $revision = $this->getRevision();
-    if (!$revision) {
-      return null;
-    }
-
-    return '...'; // TODO: build the D1234+92+aldsbn@domain.com as per D226
   }
 
   public function handleAction($body) {
@@ -129,28 +133,6 @@ class DifferentialReplyHandler {
 
       throw $ex;
     }
-  }
-
-  public function setActor(PhabricatorUser $actor) {
-    $this->actor = $actor;
-    return $this;
-  }
-
-  public function getActor() {
-    return $this->actor;
-  }
-
-  public function setRevision(DifferentialRevision $revision) {
-    $this->revision = $revision;
-    return $this;
-  }
-
-  public function getRevision() {
-    return $this->revision;
-  }
-
-  public static function isEnabled() {
-    return PhabricatorEnv::getEnvConfig('phabricator.enable-reply-handling');
   }
 
 }

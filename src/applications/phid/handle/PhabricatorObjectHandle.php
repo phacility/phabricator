@@ -26,6 +26,7 @@ class PhabricatorObjectHandle {
   private $fullName;
   private $imageURI;
   private $timestamp;
+  private $alternateID;
 
   public function setURI($uri) {
     $this->uri = $uri;
@@ -100,6 +101,15 @@ class PhabricatorObjectHandle {
 
   public function getTimestamp() {
     return $this->timestamp;
+  }
+
+  public function setAlternateID($alternate_id) {
+    $this->alternateID = $alternate_id;
+    return $this;
+  }
+
+  public function getAlternateID() {
+    return $this->alternateID;
   }
 
   public function renderLink() {
