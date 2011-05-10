@@ -83,7 +83,7 @@ class AphrontDialogView extends AphrontView {
 
     $buttons = array();
     if ($this->submitButton) {
-      $buttons[] = phutil_render_tag(
+      $buttons[] = javelin_render_tag(
         'button',
         array(
           'name' => '__submit__',
