@@ -268,7 +268,7 @@ class ManiphestTaskDetailController extends ManiphestController {
         id(new AphrontFormTextAreaControl())
           ->setLabel('Comments')
           ->setName('comments')
-          ->setValue(''))
+          ->setID('transaction-comments'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Avast!'));
@@ -301,9 +301,26 @@ class ManiphestTaskDetailController extends ManiphestController {
       ),
     ));
 
+
+    Javelin::initBehavior('maniphest-transaction-preview', array(
+      'uri'     => '/maniphest/transaction/preview/'.$task->getID().'/',
+      'preview' => 'transaction-preview',
+      'comments' => 'transaction-comments',
+    ));
+
+
     $comment_panel = new AphrontPanelView();
     $comment_panel->appendChild($comment_form);
     $comment_panel->setHeader('Leap Into Action');
+
+    $preview_panel =
+      '<div class="maniphest-transaction-preview">
+        <div id="transaction-preview">
+          <div class="maniphest-loading-text">
+            Loading preview...
+          </div>
+        </div>
+      </div>';
 
     $transaction_view = new ManiphestTransactionListView();
     $transaction_view->setTransactions($transactions);
@@ -316,6 +333,7 @@ class ManiphestTaskDetailController extends ManiphestController {
         $panel,
         $transaction_view,
         $comment_panel,
+        $preview_panel,
       ),
       array(
         'title' => 'T'.$task->getID().' '.$task->getTitle(),

@@ -42,3 +42,15 @@
 .maniphest-task-detail-core {
   margin-right: 265px;
 }
+
+.maniphest-transaction-preview {
+  background: #f0f0f0;
+  border-top: 1px solid #dddddd;
+  border-bottom: 1px solid #aaaaaa;
+  margin: -1em 2em 2em;
+  padding: 15px 20px;
+}
+
+.maniphest-loading-text {
+  color: #666666;
+}

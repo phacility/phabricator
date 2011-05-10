@@ -5,52 +5,33 @@
  *           javelin-dom
  *           javelin-request
  *           javelin-util
+ *           phabricator-shaped-request
  */
 
 JX.behavior('differential-feedback-preview', function(config) {
 
   var action = JX.$(config.action);
   var content = JX.$(config.content);
-  var preview = JX.$(config.preview);
 
-  var aval = null;//action.value;
-  var cval = null;//content.value;
-  var defer = null;
-  var min = null;
-  var request = null;
+  var callback = function(r) {
+    JX.DOM.setContent(JX.$(config.preview), JX.$H(r));
+  };
 
-  function check() {
-    if (request || (min && (new Date().getTime() < min))) {
-      // Waiting on an async or just got one back, rate-limit.
-      return;
-    }
+  var getdata = function() {
+    return {
+      content : content.value,
+      action : action.value
+    };
+  };
 
-    defer && defer.stop();
+  var request = new JX.PhabricatorShapedRequest(config.uri, callback, getdata);
+  var trigger = JX.bind(request, request.trigger);
 
-    if (action.value !== aval || content.value !== cval) {
-      aval = action.value;
-      cval = content.value;
+  JX.DOM.listen(content, 'keydown', null, trigger);
+  JX.DOM.listen(action,  'change',  null, trigger);
 
-      request = new JX.Request(config.uri, function(r) {
-        preview && JX.DOM.setContent(preview, JX.$H(r));
-        min = new Date().getTime() + 500;
-        defer && defer.stop();
-        defer = JX.defer(check, 500);
-      });
-      request.listen('finally', function() { request = null; });
-      request.setData({action : aval, content : cval});
-      // If we don't get a response back soon, retry on the next action.
-      request.setTimeout(2000);
-      request.send();
-    } else {
-      defer = JX.defer(check, 2000);
-    }
-  }
+  request.start();
 
-  JX.DOM.listen(content, 'keydown', null, check);
-  JX.DOM.listen(action,  'change',  null, check);
-
-  check();
 
 
   function refreshInlinePreview() {

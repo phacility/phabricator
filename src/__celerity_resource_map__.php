@@ -61,6 +61,16 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/aphront/headsup-action-list-view.css',
   ),
+  0 =>
+  array(
+    'uri' => '/res/39de799e/rsrc/js/javelin/docs/Base.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-install',
+    ),
+    'disk' => '/rsrc/js/javelin/docs/Base.js',
+  ),
   'aphront-list-filter-view-css' =>
   array(
     'uri' => '/res/e6cff171/rsrc/css/aphront/list-filter-view.css',
@@ -284,16 +294,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/core/behavior-tokenizer.js',
   ),
-  0 =>
-  array(
-    'uri' => '/res/39de799e/rsrc/js/javelin/docs/Base.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-install',
-    ),
-    'disk' => '/rsrc/js/javelin/docs/Base.js',
-  ),
   'javelin-behavior-dark-console' =>
   array(
     'uri' => '/res/044c171f/rsrc/js/application/core/behavior-dark-console.js',
@@ -350,7 +350,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-differential-feedback-preview' =>
   array(
-    'uri' => '/res/79e7f18d/rsrc/js/application/differential/behavior-comment-preview.js',
+    'uri' => '/res/ab8a7d60/rsrc/js/application/differential/behavior-comment-preview.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -359,6 +359,7 @@ celerity_register_resource_map(array(
       2 => 'javelin-dom',
       3 => 'javelin-request',
       4 => 'javelin-util',
+      5 => 'phabricator-shaped-request',
     ),
     'disk' => '/rsrc/js/application/differential/behavior-comment-preview.js',
   ),
@@ -461,6 +462,19 @@ celerity_register_resource_map(array(
       4 => 'javelin-typeahead-preloaded-source',
     ),
     'disk' => '/rsrc/js/application/maniphest/behavior-transaction-controls.js',
+  ),
+  'javelin-behavior-maniphest-transaction-preview' =>
+  array(
+    'uri' => '/res/b211faf2/rsrc/js/application/maniphest/behavior-transaction-preview.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-util',
+      3 => 'phabricator-shaped-request',
+    ),
+    'disk' => '/rsrc/js/application/maniphest/behavior-transaction-preview.js',
   ),
   'javelin-behavior-owners-path-editor' =>
   array(
@@ -720,7 +734,7 @@ celerity_register_resource_map(array(
   ),
   'mainphest-task-detail-css' =>
   array(
-    'uri' => '/res/dbefc148/rsrc/css/application/maniphest/task-detail.css',
+    'uri' => '/res/fa248d0b/rsrc/css/application/maniphest/task-detail.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -851,6 +865,18 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/core/remarkup.css',
   ),
+  'phabricator-shaped-request' =>
+  array(
+    'uri' => '/res/1f0ef02b/rsrc/js/application/core/ShapedRequest.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-util',
+      2 => 'javelin-request',
+    ),
+    'disk' => '/rsrc/js/application/core/ShapedRequest.js',
+  ),
   'phabricator-standard-page-view' =>
   array(
     'uri' => '/res/9c468a70/rsrc/css/application/base/standard-page-view.css',
@@ -936,20 +962,6 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/33f413ef/typeahead.pkg.js',
       'type' => 'js',
     ),
-    '711616db' =>
-    array (
-      'name' => 'differential.pkg.js',
-      'symbols' =>
-      array (
-        0 => 'javelin-behavior-differential-feedback-preview',
-        1 => 'javelin-behavior-differential-edit-inline-comments',
-        2 => 'javelin-behavior-differential-populate',
-        3 => 'javelin-behavior-differential-show-more',
-        4 => 'javelin-behavior-differential-diff-radios',
-      ),
-      'uri' => '/res/pkg/711616db/differential.pkg.js',
-      'type' => 'js',
-    ),
     '7d23deb1' =>
     array (
       'name' => 'javelin.pkg.js',
@@ -993,6 +1005,20 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/ac70e6b7/core.pkg.css',
       'type' => 'css',
     ),
+    'b17926e1' =>
+    array (
+      'name' => 'differential.pkg.js',
+      'symbols' =>
+      array (
+        0 => 'javelin-behavior-differential-feedback-preview',
+        1 => 'javelin-behavior-differential-edit-inline-comments',
+        2 => 'javelin-behavior-differential-populate',
+        3 => 'javelin-behavior-differential-show-more',
+        4 => 'javelin-behavior-differential-diff-radios',
+      ),
+      'uri' => '/res/pkg/b17926e1/differential.pkg.js',
+      'type' => 'js',
+    ),
   ),
   'reverse' =>
   array (
@@ -1016,11 +1042,11 @@ celerity_register_resource_map(array(
     'diffusion-commit-view-css' => '03ef179e',
     'javelin-behavior' => '7d23deb1',
     'javelin-behavior-aphront-basic-tokenizer' => '33f413ef',
-    'javelin-behavior-differential-diff-radios' => '711616db',
-    'javelin-behavior-differential-edit-inline-comments' => '711616db',
-    'javelin-behavior-differential-feedback-preview' => '711616db',
-    'javelin-behavior-differential-populate' => '711616db',
-    'javelin-behavior-differential-show-more' => '711616db',
+    'javelin-behavior-differential-diff-radios' => 'b17926e1',
+    'javelin-behavior-differential-edit-inline-comments' => 'b17926e1',
+    'javelin-behavior-differential-feedback-preview' => 'b17926e1',
+    'javelin-behavior-differential-populate' => 'b17926e1',
+    'javelin-behavior-differential-show-more' => 'b17926e1',
     'javelin-behavior-workflow' => '122a6b6d',
     'javelin-dom' => '7d23deb1',
     'javelin-event' => '7d23deb1',

@@ -22,6 +22,7 @@ class ManiphestTransactionListView extends AphrontView {
   private $handles;
   private $user;
   private $markupEngine;
+  private $preview;
 
   public function setTransactions(array $transactions) {
     $this->transactions = $transactions;
@@ -40,6 +41,11 @@ class ManiphestTransactionListView extends AphrontView {
 
   public function setMarkupEngine(PhutilMarkupEngine $engine) {
     $this->markupEngine = $engine;
+    return $this;
+  }
+
+  public function setPreview($preview) {
+    $this->preview = $preview;
     return $this;
   }
 
@@ -76,6 +82,7 @@ class ManiphestTransactionListView extends AphrontView {
       $view->setTransactionGroup($group);
       $view->setHandles($this->handles);
       $view->setMarkupEngine($this->markupEngine);
+      $view->setPreview($this->preview);
       $views[] = $view->render();
     }
 

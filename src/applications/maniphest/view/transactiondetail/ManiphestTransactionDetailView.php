@@ -22,6 +22,7 @@ class ManiphestTransactionDetailView extends AphrontView {
   private $handles;
   private $markupEngine;
   private $forEmail;
+  private $preview;
 
   public function setTransactionGroup(array $transactions) {
     $this->transactions = $transactions;
@@ -35,6 +36,11 @@ class ManiphestTransactionDetailView extends AphrontView {
 
   public function setMarkupEngine(PhutilMarkupEngine $engine) {
     $this->markupEngine = $engine;
+    return $this;
+  }
+
+  public function setPreview($preview) {
+    $this->preview = $preview;
     return $this;
   }
 
@@ -107,7 +113,7 @@ class ManiphestTransactionDetailView extends AphrontView {
         if (strlen($comments)) {
           $comments = $this->markupEngine->markupText($comments);
           $comment_transaction->setCache($comments);
-          if ($comment_transaction->getID()) {
+          if ($comment_transaction->getID() && !$this->preview) {
             $comment_transaction->save();
           }
         }
@@ -120,6 +126,12 @@ class ManiphestTransactionDetailView extends AphrontView {
       $comment_block = null;
     }
 
+    if ($this->preview) {
+      $timestamp = 'COMMENT PREVIEW';
+    } else {
+      $timestamp = phabricator_format_timestamp($transaction->getDateCreated());
+    }
+
     return phutil_render_tag(
       'div',
       array(
@@ -129,7 +141,7 @@ class ManiphestTransactionDetailView extends AphrontView {
       '<div class="maniphest-transaction-detail-view '.$more_classes.'">'.
         '<div class="maniphest-transaction-header">'.
           '<div class="maniphest-transaction-timestamp">'.
-            phabricator_format_timestamp($transaction->getDateCreated()).
+            $timestamp.
           '</div>'.
           $descs.
         '</div>'.
