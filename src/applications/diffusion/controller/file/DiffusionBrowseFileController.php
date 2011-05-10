@@ -178,6 +178,9 @@ class DiffusionBrowseFileController extends DiffusionController {
         list($text_list, $rev_list, $blame_dict) = $file_query->getBlameData();
 
         $highlightEngine = new PhutilDefaultSyntaxHighlighterEngine();
+        $highlightEngine->setConfig(
+          'pygments.enabled',
+          PhabricatorEnv::getEnvConfig('pygments.enabled'));
 
         $text_list = explode("\n", $highlightEngine->highlightSource($path,
           implode("\n", $text_list)));
