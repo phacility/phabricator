@@ -816,7 +816,7 @@ EOSYNTHETIC;
     }
 
     $shield = null;
-    if ($range_start === null && $range_len === null) {
+    if ($range_start === null && $range_len === null && !$this->comments) {
       if ($this->isGenerated()) {
         $shield = $this->renderShield(
           "This file contains generated code, which does not normally need ".
