@@ -143,6 +143,14 @@ class ManiphestTransactionSaveController extends ManiphestController {
     $editor = new ManiphestTransactionEditor();
     $editor->applyTransactions($task, $transactions);
 
+    $draft = id(new PhabricatorDraft())->loadOneWhere(
+      'authorPHID = %s AND draftKey = %s',
+      $user->getPHID(),
+      $task->getPHID());
+    if ($draft) {
+      $draft->delete();
+    }
+
     return id(new AphrontRedirectResponse())
       ->setURI('/T'.$task->getID());
   }

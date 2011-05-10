@@ -207,6 +207,16 @@ class ManiphestTaskDetailController extends ManiphestController {
       $user->getPHID() => $user->getUsername().' ('.$user->getRealName().')',
     );
 
+    $draft = id(new PhabricatorDraft())->loadOneWhere(
+      'authorPHID = %s AND draftKey = %s',
+      $user->getPHID(),
+      $task->getPHID());
+    if ($draft) {
+      $draft_text = $draft->getDraft();
+    } else {
+      $draft_text = null;
+    }
+
     $comment_form = new AphrontFormView();
     $comment_form
       ->setUser($user)
@@ -268,6 +278,7 @@ class ManiphestTaskDetailController extends ManiphestController {
         id(new AphrontFormTextAreaControl())
           ->setLabel('Comments')
           ->setName('comments')
+          ->setValue($draft_text)
           ->setID('transaction-comments'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
