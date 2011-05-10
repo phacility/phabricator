@@ -29,7 +29,10 @@ class DifferentialNewDiffMail extends DifferentialReviewRequestMail {
       $verb = 'Updated';
     }
 
-    return "{$verb} ({$lines}): ".$revision->getTitle();
+    $revision_id = $revision->getID();
+    $revision_title = $revision->getTitle();
+
+    return "[{$verb}, {$lines}] D{$revision_id}: {$revision_title}";
   }
 
   protected function buildSubject() {
