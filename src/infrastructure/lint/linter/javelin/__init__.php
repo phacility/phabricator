@@ -7,9 +7,11 @@
 
 
 phutil_require_module('arcanist', 'lint/linter/base');
+phutil_require_module('arcanist', 'lint/severity');
 
 phutil_require_module('phabricator', 'infrastructure/celerity/map');
 
+phutil_require_module('phutil', 'filesystem');
 phutil_require_module('phutil', 'future');
 phutil_require_module('phutil', 'future/exec');
 phutil_require_module('phutil', 'moduleutils');

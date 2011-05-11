@@ -20,12 +20,25 @@ class PhabricatorJavelinLinter extends ArcanistLinter {
 
   private $symbols = array();
 
+  private $haveSymbolsBinary;
+  private $haveWarnedAboutBinary;
+
   const LINT_PRIVATE_ACCESS = 1;
   const LINT_MISSING_DEPENDENCY = 2;
   const LINT_UNNECESSARY_DEPENDENCY = 3;
   const LINT_UNKNOWN_DEPENDENCY = 4;
+  const LINT_MISSING_BINARY = 5;
 
   public function willLintPaths(array $paths) {
+
+    if ($this->haveSymbolsBinary === null) {
+      $binary = $this->getSymbolsBinaryPath();
+      $this->haveSymbolsBinary = Filesystem::pathExists($binary);
+      if (!$this->haveSymbolsBinary) {
+        return;
+      }
+    }
+
     $futures = array();
     foreach ($paths as $path) {
       $future = $this->newSymbolsFuture($path);
@@ -42,7 +55,9 @@ class PhabricatorJavelinLinter extends ArcanistLinter {
   }
 
   public function getLintSeverityMap() {
-    return array();
+    return array(
+      self::LINT_MISSING_BINARY => ArcanistLintSeverity::SEVERITY_WARNING,
+    );
   }
 
   public function getLintNameMap() {
@@ -51,10 +66,27 @@ class PhabricatorJavelinLinter extends ArcanistLinter {
       self::LINT_MISSING_DEPENDENCY => 'Missing Javelin Dependency',
       self::LINT_UNNECESSARY_DEPENDENCY => 'Unnecessary Javelin Dependency',
       self::LINT_UNKNOWN_DEPENDENCY => 'Unknown Javelin Dependency',
+      self::LINT_MISSING_BINARY => '`javelinsymbols` Binary Not Built',
     );
   }
 
   public function lintPath($path) {
+
+    if (!$this->haveSymbolsBinary) {
+      if (!$this->haveWarnedAboutBinary) {
+        $this->haveWarnedAboutBinary = true;
+        // TODO: Write build documentation for the Javelin binaries and point
+        // the user at it.
+        $this->raiseLintAtLine(
+          0,
+          0,
+          self::LINT_MISSING_BINARY,
+          "The 'javelinsymbols' binary in the Javelin project has not been ".
+          "built, so the Javelin linter can't run. This isn't a big concern, ".
+          "but means some Javelin problems can't be automatically detected.");
+      }
+      return;
+    }
 
     list($uses, $installs) = $this->getUsedAndInstalledSymbolsForPath($path);
     foreach ($uses as $symbol => $line) {
@@ -153,14 +185,18 @@ class PhabricatorJavelinLinter extends ArcanistLinter {
   }
 
   private function newSymbolsFuture($path) {
-    $root = dirname(phutil_get_library_root('phabricator'));
-
-    $support = $root.'/externals/javelin/support';
-    $javelinsymbols = $support.'/javelinsymbols/javelinsymbols';
+    $javelinsymbols = $this->getSymbolsBinaryPath();
 
     $future = new ExecFuture($javelinsymbols.' # '.escapeshellarg($path));
     $future->write($this->getData($path));
     return $future;
+  }
+
+  private function getSymbolsBinaryPath() {
+    $root = dirname(phutil_get_library_root('phabricator'));
+
+    $support = $root.'/externals/javelin/support';
+    return $support.'/javelinsymbols/javelinsymbols';
   }
 
   private function getUsedAndInstalledSymbolsForPath($path) {
