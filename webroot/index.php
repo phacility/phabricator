@@ -66,10 +66,9 @@ try {
   DarkConsoleXHProfPluginAPI::hookProfiler();
 
   phutil_require_module('phabricator', 'aphront/console/plugin/errorlog/api');
-  set_error_handler(
-    array('PhutilErrorHandler', 'handleError'));
-  set_exception_handler(
-    array('PhutilErrorHandler', 'handleException'));
+
+  PhutilErrorHandler::initialize();
+
 } catch (Exception $ex) {
   phabricator_fatal_config_error(
     "[Exception] ".$ex->getMessage());
