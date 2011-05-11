@@ -192,6 +192,8 @@ class DifferentialChangesetViewController extends DifferentialController {
       'whitespace' => $request->getStr('whitespace'),
     ));
 
+    Javelin::initBehavior('differential-comment-jump', array());
+
     $detail = new DifferentialChangesetDetailView();
     $detail->setChangeset($changeset);
     $detail->appendChild($output);
@@ -219,7 +221,8 @@ class DifferentialChangesetViewController extends DifferentialController {
 
     $output =
       '<div class="differential-primary-pane">'.
-        '<div class="differential-review-stage">'.
+        '<div class="differential-review-stage" '.
+          'id="differential-review-stage">'.
           $detail->render().
         '</div>'.
       '</div>';

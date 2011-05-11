@@ -85,6 +85,24 @@ final class DifferentialInlineCommentView extends AphrontView {
     $links[] = javelin_render_tag(
       'a',
       array(
+        'href'  => '#',
+        'mustcapture' => true,
+        'sigil' => 'differential-inline-prev',
+      ),
+      'Previous');
+
+    $links[] = javelin_render_tag(
+      'a',
+      array(
+        'href'  => '#',
+        'mustcapture' => true,
+        'sigil' => 'differential-inline-next',
+      ),
+      'Next');
+
+    $links[] = javelin_render_tag(
+      'a',
+      array(
         'href'        => '#',
         'mustcapture' => true,
         'sigil'       => 'differential-inline-reply',

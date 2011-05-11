@@ -133,6 +133,8 @@ class DifferentialChangesetListView extends AphrontView {
       'uri' => $this->renderURI,
     ));
 
+    Javelin::initBehavior('differential-comment-jump', array());
+
     if ($this->editable) {
       $revision = $this->revision;
       Javelin::initBehavior('differential-edit-inline-comments', array(
@@ -141,7 +143,7 @@ class DifferentialChangesetListView extends AphrontView {
     }
 
     return
-      '<div class="differential-review-stage">'.
+      '<div class="differential-review-stage" id="differential-review-stage">'.
         implode("\n", $output).
       '</div>';
   }

@@ -61,6 +61,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/aphront/headsup-action-list-view.css',
   ),
+  'aphront-list-filter-view-css' =>
+  array(
+    'uri' => '/res/e6cff171/rsrc/css/aphront/list-filter-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/aphront/list-filter-view.css',
+  ),
   0 =>
   array(
     'uri' => '/res/39de799e/rsrc/js/javelin/docs/Base.js',
@@ -70,15 +79,6 @@ celerity_register_resource_map(array(
       0 => 'javelin-install',
     ),
     'disk' => '/rsrc/js/javelin/docs/Base.js',
-  ),
-  'aphront-list-filter-view-css' =>
-  array(
-    'uri' => '/res/e6cff171/rsrc/css/aphront/list-filter-view.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/aphront/list-filter-view.css',
   ),
   'aphront-pager-view-css' =>
   array(
@@ -321,6 +321,18 @@ celerity_register_resource_map(array(
       4 => 'javelin-typeahead-preloaded-source',
     ),
     'disk' => '/rsrc/js/application/differential/behavior-add-reviewers.js',
+  ),
+  'javelin-behavior-differential-comment-jump' =>
+  array(
+    'uri' => '/res/a84186de/rsrc/js/application/differential/behavior-comment-jump.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-util',
+      2 => 'javelin-dom',
+    ),
+    'disk' => '/rsrc/js/application/differential/behavior-comment-jump.js',
   ),
   'javelin-behavior-differential-diff-radios' =>
   array(
