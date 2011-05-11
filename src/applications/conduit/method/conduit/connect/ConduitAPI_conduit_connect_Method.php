@@ -125,31 +125,7 @@ class ConduitAPI_conduit_connect_Method extends ConduitAPIMethod {
       if ($valid != $signature) {
         throw new ConduitException('ERR-INVALID-CERTIFICATE');
       }
-
-      $sessions = queryfx_all(
-        $user->establishConnection('r'),
-        'SELECT * FROM %T WHERE userPHID = %s AND type LIKE %>',
-        PhabricatorUser::SESSION_TABLE,
-        $user->getPHID(),
-        'conduit-');
-
-      $session_type = null;
-
-      $sessions = ipull($sessions, null, 'type');
-      for ($ii = 1; $ii <= 3; $ii++) {
-        if (empty($sessions['conduit-'.$ii])) {
-          $session_type = 'conduit-'.$ii;
-          break;
-        }
-      }
-
-      if (!$session_type) {
-        $sessions = isort($sessions, 'sessionStart');
-        $oldest = reset($sessions);
-        $session_type = $oldest['type'];
-      }
-
-      $session_key = $user->establishSession($session_type);
+      $session_key = $user->establishSession('conduit');
     } else {
       throw new ConduitException('ERR-NO-CERTIFICATE');
     }

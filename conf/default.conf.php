@@ -183,6 +183,15 @@ return array(
   // OAuth providers instead.
   'auth.password-auth-enabled'  => true,
 
+  // Maximum number of simultaneous web sessions each user is permitted to have.
+  // Setting this to "1" will prevent a user from logging in on more than one
+  // browser at the same time.
+  'auth.sessions.web'           => 5,
+
+  // Maximum number of simultaneous Conduit sessions each user is permitted
+  // to have.
+  'auth.sessions.conduit'       => 3,
+
 
 // -- Accounts -------------------------------------------------------------- //
 

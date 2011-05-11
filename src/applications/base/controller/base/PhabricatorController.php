@@ -43,10 +43,10 @@ abstract class PhabricatorController extends AphrontController {
       $info = queryfx_one(
         $user->establishConnection('r'),
         'SELECT u.* FROM %T u JOIN %T s ON u.phid = s.userPHID
-          AND s.type = %s AND s.sessionKey = %s',
+          AND s.type LIKE %> AND s.sessionKey = %s',
         $user->getTableName(),
         'phabricator_session',
-        'web',
+        'web-',
         $phsid);
       if ($info) {
         $user->loadFromArray($info);

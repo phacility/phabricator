@@ -2,6 +2,11 @@ This is not a complete list of changes, just of API or workflow changes that may
 break existing installs. Newer changes are listed at the top. If you pull new
 changes and things stop working, check here first!
 
+May 11 2011 - New session code
+  There's some new code which allows you to establish multiple web sessions.
+  When you update to it, all users will be logged out. This is expected, just
+  log in again and everything should work properly.
+
 May 10 2011 - PhabricatorMailImplementationAdapter
   The signatures of setFrom() and addReplyTo() have changed, and they now
   accept a second "$name = ''" parameter. This represents a human-readable

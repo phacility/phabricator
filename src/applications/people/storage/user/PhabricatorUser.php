@@ -134,12 +134,85 @@ class PhabricatorUser extends PhabricatorUserDAO {
     return substr(sha1($vec), 0, $len);
   }
 
+  /**
+   * Issue a new session key to this user. Phabricator supports different
+   * types of sessions (like "web" and "conduit") and each session type may
+   * have multiple concurrent sessions (this allows a user to be logged in on
+   * multiple browsers at the same time, for instance).
+   *
+   * Note that this method is transport-agnostic and does not set cookies or
+   * issue other types of tokens, it ONLY generates a new session key.
+   *
+   * You can configure the maximum number of concurrent sessions for various
+   * session types in the Phabricator configuration.
+   *
+   * @param   string  Session type, like "web".
+   * @return  string  Newly generated session key.
+   */
   public function establishSession($session_type) {
     $conn_w = $this->establishConnection('w');
 
-    $entropy = Filesystem::readRandomBytes(20);
+    if (strpos($session_type, '-') !== false) {
+      throw new Exception("Session type must not contain hyphen ('-')!");
+    }
 
+    // We allow multiple sessions of the same type, so when a caller requests
+    // a new session of type "web", we give them the first available session in
+    // "web-1", "web-2", ..., "web-N", up to some configurable limit. If none
+    // of these sessions is available, we overwrite the oldest session and
+    // reissue a new one in its place.
+
+    $session_limit = 1;
+    switch ($session_type) {
+      case 'web':
+        $session_limit = PhabricatorEnv::getEnvConfig('auth.sessions.web');
+        break;
+      case 'conduit':
+        $session_limit = PhabricatorEnv::getEnvConfig('auth.sessions.conduit');
+        break;
+      default:
+        throw new Exception("Unknown session type '{$session_type}'!");
+    }
+
+    $session_limit = (int)$session_limit;
+    if ($session_limit <= 0) {
+      throw new Exception(
+        "Session limit for '{$session_type}' must be at least 1!");
+    }
+
+    // Load all the currently active sessions.
+    $sessions = queryfx_all(
+      $conn_w,
+      'SELECT type, sessionStart FROM %T WHERE userPHID = %s AND type LIKE %>',
+      PhabricatorUser::SESSION_TABLE,
+      $this->getPHID(),
+      $session_type.'-');
+
+    // Choose which 'type' we'll actually establish, i.e. what number we're
+    // going to append to the basic session type. To do this, just check all
+    // the numbers sequentially until we find an available session.
+    $establish_type = null;
+    $sessions = ipull($sessions, null, 'type');
+    for ($ii = 1; $ii <= $session_limit; $ii++) {
+      if (empty($sessions[$session_type.'-'.$ii])) {
+        $establish_type = $session_type.'-'.$ii;
+        break;
+      }
+    }
+
+    // If we didn't find an available session, choose the oldest session and
+    // overwrite it.
+    if (!$establish_type) {
+      $sessions = isort($sessions, 'sessionStart');
+      $oldest = reset($sessions);
+      $establish_type = $oldest['type'];
+    }
+
+    // Consume entropy to generate a new session key, forestalling the eventual
+    // heat death of the universe.
+    $entropy = Filesystem::readRandomBytes(20);
     $session_key = sha1($entropy);
+
     queryfx(
       $conn_w,
       'INSERT INTO %T '.
@@ -151,10 +224,8 @@ class PhabricatorUser extends PhabricatorUserDAO {
         'sessionStart = VALUES(sessionStart)',
       self::SESSION_TABLE,
       $this->getPHID(),
-      $session_type,
+      $establish_type,
       $session_key);
-
-    $this->sessionKey = $session_key;
 
     return $session_key;
   }
