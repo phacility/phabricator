@@ -465,7 +465,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-maniphest-transaction-preview' =>
   array(
-    'uri' => '/res/b211faf2/rsrc/js/application/maniphest/behavior-transaction-preview.js',
+    'uri' => '/res/44e86555/rsrc/js/application/maniphest/behavior-transaction-preview.js',
     'type' => 'js',
     'requires' =>
     array(
