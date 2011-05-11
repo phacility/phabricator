@@ -51,9 +51,11 @@ JX.install('PhabricatorShapedRequest', {
         var request = new JX.Request(this._uri, JX.bind(this, function(r) {
           this._callback(r);
 
-          this._min = new Date().getTime() + this._rateLimit;
+          this._min = new Date().getTime() + this.getRateLimit();
           this._defer && this._defer.stop();
-          this._defer = JX.defer(JX.bind(this, this.trigger), this._rateLimit);
+          this._defer = JX.defer(
+            JX.bind(this, this.trigger),
+            this.getRateLimit());
         }));
         request.listen('finally', JX.bind(this, function() {
           this._request = null;
@@ -62,7 +64,9 @@ JX.install('PhabricatorShapedRequest', {
         request.setTimeout(this.getFrequency());
         request.send();
       } else {
-        this._defer = JX.defer(JX.bind(this, this.trigger), this._frequency);
+        this._defer = JX.defer(
+          JX.bind(this, this.trigger),
+          this.getFrequency());
       }
     },
 
@@ -82,7 +86,7 @@ JX.install('PhabricatorShapedRequest', {
   },
 
   properties : {
-    rateLimit : 250,
-    frequency : 750
+    rateLimit : 500,
+    frequency : 1000
   }
 });

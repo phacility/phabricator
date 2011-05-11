@@ -349,4 +349,13 @@ return array(
   // unlikely that you need to modify this.
   'celerity.resource-hash' => 'd9455ea150622ee044f7931dabfa52aa',
 
+  // In a development environment, it is desirable to force static resources
+  // (CSS and JS) to be read from disk on every request, so that edits to them
+  // appear when you reload the page even if you haven't updated the resource
+  // maps. This setting ensures requests will be verified against the state on
+  // disk. Generally, you should leave this off in production (caching behavior
+  // and performance improve with it off) but turn it on in development. (These
+  // settings are the defaults.)
+  'celerity.force-disk-reads' => false,
+
 );

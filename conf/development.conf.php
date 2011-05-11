@@ -19,5 +19,6 @@
 return array(
 
   'darkconsole.enabled' => true,
+  'celerity.force-disk-reads' => true,
 
 ) + phabricator_read_config_file('default');

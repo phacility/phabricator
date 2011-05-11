@@ -390,7 +390,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-differential-show-more' =>
   array(
-    'uri' => '/res/7a844635/rsrc/js/application/differential/behavior-show-more.js',
+    'uri' => '/res/9cbf1c9c/rsrc/js/application/differential/behavior-show-more.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -867,7 +867,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-shaped-request' =>
   array(
-    'uri' => '/res/1f0ef02b/rsrc/js/application/core/ShapedRequest.js',
+    'uri' => '/res/7b1522d3/rsrc/js/application/core/ShapedRequest.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1005,7 +1005,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/ac70e6b7/core.pkg.css',
       'type' => 'css',
     ),
-    'b17926e1' =>
+    'c5d10dfe' =>
     array (
       'name' => 'differential.pkg.js',
       'symbols' =>
@@ -1016,7 +1016,7 @@ celerity_register_resource_map(array(
         3 => 'javelin-behavior-differential-show-more',
         4 => 'javelin-behavior-differential-diff-radios',
       ),
-      'uri' => '/res/pkg/b17926e1/differential.pkg.js',
+      'uri' => '/res/pkg/c5d10dfe/differential.pkg.js',
       'type' => 'js',
     ),
   ),
@@ -1042,11 +1042,11 @@ celerity_register_resource_map(array(
     'diffusion-commit-view-css' => '03ef179e',
     'javelin-behavior' => '7d23deb1',
     'javelin-behavior-aphront-basic-tokenizer' => '33f413ef',
-    'javelin-behavior-differential-diff-radios' => 'b17926e1',
-    'javelin-behavior-differential-edit-inline-comments' => 'b17926e1',
-    'javelin-behavior-differential-feedback-preview' => 'b17926e1',
-    'javelin-behavior-differential-populate' => 'b17926e1',
-    'javelin-behavior-differential-show-more' => 'b17926e1',
+    'javelin-behavior-differential-diff-radios' => 'c5d10dfe',
+    'javelin-behavior-differential-edit-inline-comments' => 'c5d10dfe',
+    'javelin-behavior-differential-feedback-preview' => 'c5d10dfe',
+    'javelin-behavior-differential-populate' => 'c5d10dfe',
+    'javelin-behavior-differential-show-more' => 'c5d10dfe',
     'javelin-behavior-workflow' => '122a6b6d',
     'javelin-dom' => '7d23deb1',
     'javelin-event' => '7d23deb1',

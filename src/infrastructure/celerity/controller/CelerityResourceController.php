@@ -38,7 +38,8 @@ class CelerityResourceController extends AphrontController {
       throw new Exception("Only CSS and JS resources may be served.");
     }
 
-    if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
+    if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) &&
+        !PhabricatorEnv::getEnvConfig('celerity.force-disk-reads')) {
       // Return a "304 Not Modified". We don't care about the value of this
       // field since we never change what resource is served by a given URI.
       return $this->makeResponseCacheable(new Aphront304Response());
