@@ -284,16 +284,18 @@ class ManiphestTaskDetailController extends ManiphestController {
         id(new AphrontFormSubmitControl())
           ->setValue('Avast!'));
 
+    $control_map = array(
+      ManiphestTransactionType::TYPE_STATUS   => 'resolution',
+      ManiphestTransactionType::TYPE_OWNER    => 'assign_to',
+      ManiphestTransactionType::TYPE_CCS      => 'ccs',
+      ManiphestTransactionType::TYPE_PRIORITY => 'priority',
+      ManiphestTransactionType::TYPE_PROJECTS => 'projects',
+      ManiphestTransactionType::TYPE_ATTACH   => 'file',
+    );
+
     Javelin::initBehavior('maniphest-transaction-controls', array(
       'select' => 'transaction-action',
-      'controlMap' => array(
-        ManiphestTransactionType::TYPE_STATUS   => 'resolution',
-        ManiphestTransactionType::TYPE_OWNER    => 'assign_to',
-        ManiphestTransactionType::TYPE_CCS      => 'ccs',
-        ManiphestTransactionType::TYPE_PRIORITY => 'priority',
-        ManiphestTransactionType::TYPE_PROJECTS => 'projects',
-        ManiphestTransactionType::TYPE_ATTACH   => 'file',
-      ),
+      'controlMap' => $control_map,
       'tokenizers' => array(
         ManiphestTransactionType::TYPE_PROJECTS => array(
           'id'    => 'projects-tokenizer',
@@ -317,6 +319,8 @@ class ManiphestTaskDetailController extends ManiphestController {
       'uri'     => '/maniphest/transaction/preview/'.$task->getID().'/',
       'preview' => 'transaction-preview',
       'comments' => 'transaction-comments',
+      'action'   => 'transaction-action',
+      'map'      => $control_map,
     ));
 
 

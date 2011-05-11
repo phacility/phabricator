@@ -198,6 +198,11 @@ class ManiphestTransactionDetailView extends AphrontView {
         }
         break;
       case ManiphestTransactionType::TYPE_CCS:
+        if ($this->preview) {
+          $verb = 'Changed CC';
+          $desc = 'changed CCs..';
+          break;
+        }
         $added = array_diff($new, $old);
         $removed = array_diff($old, $new);
         if ($added && !$removed) {
@@ -221,6 +226,11 @@ class ManiphestTransactionDetailView extends AphrontView {
         }
         break;
       case ManiphestTransactionType::TYPE_PROJECTS:
+        if ($this->preview) {
+          $verb = 'Changed Projects';
+          $desc = 'changed projects..';
+          break;
+        }
         $added = array_diff($new, $old);
         $removed = array_diff($old, $new);
         if ($added && !$removed) {
@@ -286,6 +296,12 @@ class ManiphestTransactionDetailView extends AphrontView {
         }
         break;
       case ManiphestTransactionType::TYPE_ATTACH:
+        if ($this->preview) {
+          $verb = 'Changed Attached';
+          $desc = 'changed attachments..';
+          break;
+        }
+
         $old_raw = nonempty($old, array());
         $new_raw = nonempty($new, array());
 
@@ -330,6 +346,7 @@ class ManiphestTransactionDetailView extends AphrontView {
             $desc = 'detached '.$plural.': '.$rem_desc;
           }
         } else {
+          $verb = 'Changed Attached';
           $desc = 'changed attached '.$plural.', added: '.$add_desc.
                                               'removed: '.$rem_desc;
         }

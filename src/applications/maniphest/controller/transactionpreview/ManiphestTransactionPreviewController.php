@@ -48,13 +48,31 @@ class ManiphestTransactionPreviewController extends ManiphestController {
     $draft->setDraft($comments);
     $draft->save();
 
-    $handles = id(new PhabricatorObjectHandleData(array($user->getPHID())))
-      ->loadHandles();
+    $phids = array($user->getPHID());
+
+    $action = $request->getStr('action');
 
     $transaction = new ManiphestTransaction();
     $transaction->setAuthorPHID($user->getPHID());
     $transaction->setComments($comments);
-    $transaction->setTransactionType(ManiphestTransactionType::TYPE_NONE);
+    $transaction->setTransactionType($action);
+
+    $value = $request->getStr('value');
+    switch ($action) {
+      case ManiphestTransactionType::TYPE_OWNER:
+        if (!$value) {
+          $value = $user->getPHID();
+        }
+        $phids[] = $value;
+        break;
+      case ManiphestTransactionType::TYPE_PRIORITY:
+        $transaction->setOldValue($task->getPriority());
+        break;
+    }
+    $transaction->setNewValue($value);
+
+    $handles = id(new PhabricatorObjectHandleData($phids))
+      ->loadHandles();
 
     $transactions = array();
     $transactions[] = $transaction;
