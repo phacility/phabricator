@@ -189,6 +189,7 @@ class DifferentialChangesetViewController extends DifferentialController {
 
     Javelin::initBehavior('differential-show-more', array(
       'uri' => '/differential/changeset/',
+      'whitespace' => $request->getStr('whitespace'),
     ));
 
     $detail = new DifferentialChangesetDetailView();

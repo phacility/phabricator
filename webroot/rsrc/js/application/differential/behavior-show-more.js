@@ -26,6 +26,7 @@ JX.behavior('differential-show-more', function(config) {
       JX.DOM.setContent(container, 'Loading...');
       JX.DOM.alterClass(context, 'differential-show-more-loading', true);
       var data = e.getNodeData('show-more');
+      data['whitespace'] = config.whitespace;
       new JX.Request(config.uri, JX.bind(null, onresponse, e))
         .setData(data)
         .send();
