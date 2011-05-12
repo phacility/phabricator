@@ -28,7 +28,6 @@ class DifferentialChangesetParser {
 
   protected $filename     = null;
   protected $filetype     = null;
-  protected $changesetID  = null;
   protected $missingOld   = array();
   protected $missingNew   = array();
 
@@ -51,6 +50,8 @@ class DifferentialChangesetParser {
 
   private $rightSideChangesetID;
   private $rightSideAttachesToNewFile;
+
+  private $renderingReference;
 
   const CACHE_VERSION = 4;
 
@@ -123,9 +124,7 @@ class DifferentialChangesetParser {
 
   public function setChangeset($changeset) {
     $this->changeset = $changeset;
-
     $this->setFilename($changeset->getFilename());
-    $this->setChangesetID($changeset->getID());
 
     return $this;
   }
@@ -135,17 +134,13 @@ class DifferentialChangesetParser {
     return $this;
   }
 
-  public function setChangesetID($changeset_id) {
-    $this->changesetID = $changeset_id;
+  public function setRenderingReference($ref) {
+    $this->renderingReference = $ref;
     return $this;
   }
 
   public function getChangeset() {
     return $this->changeset;
-  }
-
-  public function getChangesetID() {
-    return $this->changesetID;
   }
 
   public function setFilename($filename) {
@@ -968,7 +963,7 @@ EOSYNTHETIC;
 
     if ($more) {
       $end = $this->getLength();
-      $reference = $this->getChangeset()->getRenderingReference();
+      $reference = $this->renderingReference;
       $more =
         ' '.
         javelin_render_tag(
@@ -979,8 +974,8 @@ EOSYNTHETIC;
             'class'       => 'complete',
             'href'        => '#',
             'meta'        => array(
-              'id'    => $reference,
-              'range' => "0-{$end}",
+              'ref'         => $reference,
+              'range'       => "0-{$end}",
             ),
           ),
           'Show File Contents');
@@ -1073,7 +1068,7 @@ EOSYNTHETIC;
 
     $gaps = array_reverse($gaps);
 
-    $reference = $this->getChangeset()->getRenderingReference();
+    $reference = $this->renderingReference;
 
     $left_id = $this->leftSideChangesetID;
     $right_id = $this->rightSideChangesetID;
@@ -1112,7 +1107,7 @@ EOSYNTHETIC;
               'mustcapture' => true,
               'sigil'       => 'show-more',
               'meta'        => array(
-                'id'    => $reference,
+                'ref'    => $reference,
                 'range' => "{$top}-{$len}/{$top}-20",
               ),
             ),
@@ -1126,7 +1121,7 @@ EOSYNTHETIC;
             'mustcapture' => true,
             'sigil'       => 'show-more',
             'meta'        => array(
-              'id'    => $reference,
+              'ref'    => $reference,
               'range' => "{$top}-{$len}/{$top}-{$len}",
             ),
           ),
@@ -1140,7 +1135,7 @@ EOSYNTHETIC;
               'mustcapture' => true,
               'sigil'       => 'show-more',
               'meta'        => array(
-                'id'    => $reference,
+                'ref'    => $reference,
                 'range' => "{$top}-{$len}/{$end}-20",
               ),
             ),

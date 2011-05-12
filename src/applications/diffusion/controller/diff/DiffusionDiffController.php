@@ -20,8 +20,8 @@ class DiffusionDiffController extends DiffusionController {
 
   public function willProcessRequest(array $data) {
     $request = $this->getRequest();
-    if ($request->getStr('id')) {
-      $parts = explode(';', $request->getStr('id'));
+    if ($request->getStr('ref')) {
+      $parts = explode(';', $request->getStr('ref'));
       $data['path'] = idx($parts, 0);
       $data['commit'] = idx($parts, 1);
     }
@@ -43,6 +43,7 @@ class DiffusionDiffController extends DiffusionController {
 
     $parser = new DifferentialChangesetParser();
     $parser->setChangeset($changeset);
+    $parser->setRenderingReference($diff_query->getRenderingReference());
     $parser->setWhitespaceMode(
       DifferentialChangesetParser::WHITESPACE_SHOW_ALL);
 

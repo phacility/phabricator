@@ -146,6 +146,7 @@ class DiffusionCommitController extends DiffusionController {
             throw new Exception("Unknown VCS.");
         }
 
+        $references = array();
         foreach ($changesets as $key => $changeset) {
           $file_type = $changeset->getFileType();
           if ($file_type == DifferentialChangeType::FILE_DIRECTORY) {
@@ -160,11 +161,12 @@ class DiffusionCommitController extends DiffusionController {
           $filename = $changeset->getFilename();
           $commit = $drequest->getCommit();
           $reference = "{$branch}{$filename};{$commit}";
-          $changeset->setRenderingReference($reference);
+          $references[$key] = $reference;
         }
 
         $change_list = new DifferentialChangesetListView();
         $change_list->setChangesets($changesets);
+        $change_list->setRenderingReferences($references);
         $change_list->setRenderURI('/diffusion/'.$callsign.'/diff/');
 
         // TODO: This is pretty awkward, unify the CSS between Diffusion and

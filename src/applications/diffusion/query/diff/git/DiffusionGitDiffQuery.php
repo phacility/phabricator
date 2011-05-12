@@ -59,12 +59,10 @@ final class DiffusionGitDiffQuery extends DiffusionDiffQuery {
     $changesets = $diff->getChangesets();
     $changeset = reset($changesets);
 
-    $id =
+    $this->renderingReference =
       $drequest->getBranchURIComponent($drequest->getBranch()).
       $drequest->getPath().';'.
       $drequest->getCommit();
-
-    $changeset->setID($id);
 
     return $changeset;
   }

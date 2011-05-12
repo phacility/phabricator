@@ -27,7 +27,7 @@ class DiffusionLastModifiedController extends DiffusionController {
     list($commit, $commit_data) = $modified_query->loadLastModification();
 
     $phids = array();
-    if ($commit_data->getCommitDetail('authorPHID')) {
+    if ($commit_data && $commit_data->getCommitDetail('authorPHID')) {
       $phids = array($commit_data->getCommitDetail('authorPHID'));
     }
 

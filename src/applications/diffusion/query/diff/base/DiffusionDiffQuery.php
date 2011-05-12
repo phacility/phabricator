@@ -19,6 +19,7 @@
 abstract class DiffusionDiffQuery {
 
   private $request;
+  protected $renderingReference;
 
   final private function __construct() {
     // <private>
@@ -50,6 +51,10 @@ abstract class DiffusionDiffQuery {
 
   final protected function getRequest() {
     return $this->request;
+  }
+
+  final public function getRenderingReference() {
+    return $this->renderingReference;
   }
 
   final public function loadChangeset() {

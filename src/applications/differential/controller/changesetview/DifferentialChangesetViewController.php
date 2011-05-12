@@ -24,9 +24,17 @@ class DifferentialChangesetViewController extends DifferentialController {
 
     $author_phid = $request->getUser()->getPHID();
 
-    $id = $request->getStr('id');
-    $vs = $request->getInt('vs');
+    $rendering_reference = $request->getStr('ref');
+    $parts = explode('/', $rendering_reference);
+    if (count($parts) == 2) {
+      list($id, $vs) = $parts;
+    } else {
+      $id = $parts[0];
+      $vs = 0;
+    }
 
+    $id = (int)$id;
+    $vs = (int)$vs;
 
     $changeset = id(new DifferentialChangeset())->load($id);
     if (!$changeset) {
@@ -149,6 +157,7 @@ class DifferentialChangesetViewController extends DifferentialController {
 
     $parser = new DifferentialChangesetParser();
     $parser->setChangeset($changeset);
+    $parser->setRenderingReference($rendering_reference);
     $parser->setRenderCacheKey($render_cache_key);
     $parser->setRightSideCommentMapping($right_source, $right_new);
     $parser->setLeftSideCommentMapping($left_source, $left_new);

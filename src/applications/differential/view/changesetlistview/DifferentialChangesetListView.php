@@ -22,7 +22,6 @@ class DifferentialChangesetListView extends AphrontView {
   private $editable;
   private $revision;
   private $renderURI = '/differential/changeset/';
-  private $vsMap = array();
   private $whitespace;
   private $standaloneViews;
 
@@ -46,8 +45,8 @@ class DifferentialChangesetListView extends AphrontView {
     return $this;
   }
 
-  public function setVsMap(array $vs_map) {
-    $this->vsMap = $vs_map;
+  public function setRenderingReferences(array $references) {
+    $this->references = $references;
     return $this;
   }
 
@@ -64,7 +63,6 @@ class DifferentialChangesetListView extends AphrontView {
   public function render() {
     require_celerity_resource('differential-changeset-view-css');
 
-    $vs_map = $this->vsMap;
     $changesets = $this->changesets;
 
     $output = array();
@@ -75,22 +73,15 @@ class DifferentialChangesetListView extends AphrontView {
       if (!$this->editable) {
         $class .= ' differential-changeset-noneditable';
       }
-      $id = $changeset->getID();
-      if ($id) {
-        $vs_id = idx($vs_map, $id);
-      } else {
-        $vs_id = null;
-      }
 
-      $ref = $changeset->getRenderingReference();
+      $ref = $this->references[$key];
 
       $detail_button = null;
       if ($this->standaloneViews) {
         $detail_uri = new PhutilURI($this->renderURI);
         $detail_uri->setQueryParams(
           array(
-            'id'          => $ref,
-            'vs'          => $vs_id,
+            'ref'         => $ref,
             'whitespace'  => $this->whitespace,
           ));
 
@@ -118,9 +109,7 @@ class DifferentialChangesetListView extends AphrontView {
           '<div class="differential-loading">Loading...</div>'));
       $output[] = $detail->render();
 
-      $mapping[$uniq_id] = array(
-        $ref,
-        $vs_id);
+      $mapping[$uniq_id] = $ref;
     }
 
     Javelin::initBehavior('differential-populate', array(
@@ -131,6 +120,7 @@ class DifferentialChangesetListView extends AphrontView {
 
     Javelin::initBehavior('differential-show-more', array(
       'uri' => $this->renderURI,
+      'whitespace' => $this->whitespace,
     ));
 
     Javelin::initBehavior('differential-comment-jump', array());

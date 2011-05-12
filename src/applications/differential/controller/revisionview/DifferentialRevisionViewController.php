@@ -58,7 +58,7 @@ class DifferentialRevisionViewController extends DifferentialController {
       $diff_vs = null;
     }
 
-    list($changesets, $vs_map) =
+    list($changesets, $vs_map, $rendering_references) =
       $this->loadChangesetsAndVsMap($diffs, $diff_vs, $target);
 
     $comments = $revision->loadComments();
@@ -181,7 +181,7 @@ class DifferentialRevisionViewController extends DifferentialController {
     $changeset_view->setEditable(true);
     $changeset_view->setStandaloneViews(true);
     $changeset_view->setRevision($revision);
-    $changeset_view->setVsMap($vs_map);
+    $changeset_view->setRenderingReferences($rendering_references);
     $changeset_view->setWhitespace($whitespace);
 
     $diff_history = new DifferentialRevisionUpdateHistoryView();
@@ -604,6 +604,11 @@ class DifferentialRevisionViewController extends DifferentialController {
     $changesets = idx($changeset_groups, $target->getID(), array());
     $changesets = mpull($changesets, null, 'getID');
 
+    $refs = array();
+    foreach ($changesets as $changeset) {
+      $refs[$changeset->getID()] = $changeset->getID();
+    }
+
     $vs_map = array();
     if ($diff_vs) {
       $vs_changesets = idx($changeset_groups, $diff_vs, array());
@@ -612,18 +617,23 @@ class DifferentialRevisionViewController extends DifferentialController {
         $file = $changeset->getFilename();
         if (isset($vs_changesets[$file])) {
           $vs_map[$changeset->getID()] = $vs_changesets[$file]->getID();
+          $refs[$changeset->getID()] =
+            $changeset->getID().'/'.$vs_changesets[$file]->getID();
           unset($vs_changesets[$file]);
+        } else {
+          $refs[$changeset->getID()] = $changeset->getID();
         }
       }
       foreach ($vs_changesets as $changeset) {
         $changesets[$changeset->getID()] = $changeset;
         $vs_map[$changeset->getID()] = -1;
+        $refs[$changeset->getID()] = $changeset->getID().'/-1';
       }
     }
 
     $changesets = msort($changesets, 'getSortKey');
 
-    return array($changesets, $vs_map);
+    return array($changesets, $vs_map, $refs);
   }
 
   private function updateViewTime($user_phid, $revision_phid) {

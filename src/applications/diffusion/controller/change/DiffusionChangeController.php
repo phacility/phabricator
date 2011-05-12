@@ -32,9 +32,18 @@ class DiffusionChangeController extends DiffusionController {
     }
 
     $changeset_view = new DifferentialChangesetListView();
-    $changeset_view->setChangesets(array($changeset));
+    $changeset_view->setChangesets(
+      array(
+        0 => $changeset,
+      ));
+    $changeset_view->setRenderingReferences(
+      array(
+        0 => $diff_query->getRenderingReference(),
+      ));
     $changeset_view->setRenderURI(
       '/diffusion/'.$drequest->getRepository()->getCallsign().'/diff/');
+    $changeset_view->setWhitespace(
+      DifferentialChangesetParser::WHITESPACE_SHOW_ALL);
 
     $content[] = $this->buildCrumbs(
       array(

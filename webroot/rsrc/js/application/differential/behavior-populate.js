@@ -15,8 +15,7 @@ JX.behavior('differential-populate', function(config) {
   for (var k in config.registry) {
     new JX.Request(config.uri, JX.bind(null, onresponse, k))
       .setData({
-        id: config.registry[k][0],
-        vs: config.registry[k][1],
+        ref : config.registry[k],
         whitespace: config.whitespace
       })
       .send();
