@@ -152,8 +152,8 @@ return array(
   'metamta.can-send-as-user'    => false,
 
   // Adapter class to use to transmit mail to the MTA. The default uses
-  // PHPMailerLite, which will invoke PHP's mail() function. This is appropriate
-  // if mail() actually works on your host, but if you haven't configured mail
+  // PHPMailerLite, which will invoke "sendmail". This is appropriate
+  // if sendmail actually works on your host, but if you haven't configured mail
   // it may not be so great. You can also use Amazon SES, by changing this to
   // 'PhabricatorMailImplementationAmazonSESAdapter', signing up for SES, and
   // filling in your 'amazon-ses.access-key' and 'amazon-ses.secret-key' below.

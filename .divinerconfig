@@ -3,7 +3,6 @@
   "src_base" : "https://github.com/facebook/phabricator/blob/master",
   "groups" : {
     "intro" : "Introduction",
-    "install" : "Installing",
     "config" : "Configuration",
     "contrib" : "Contributing",
     "userguide" : "Application User Guides",

@@ -36,6 +36,10 @@ in the file:
     // configure things.
     'phabricator.setup' => true,
 
+    // This will be the base domain for your install, and must be configured.
+    // Use "https://" if you have SSL. See below for some notes.
+    'phabricator.base-uri' => 'http://phabricator.example.com/',
+
   ) + phabricator_read_config_file('production');
 
 For the last line, you can also use ##'development'## instead of
@@ -60,7 +64,8 @@ or edit the Directory entry for the DocumentRoot. It should look something like
 this:
 
   <VirtualHost *>
-    # Change this to the domain which points to your host.
+    # Change this to the domain which points to your host, i.e. the domain
+    # you set as "phabricator.base-uri".
     ServerName phabricator.example.com
 
     # Change this to the path where you put 'phabricator' when you checked it
@@ -125,3 +130,14 @@ that will make upgrading Phabricator more difficult in the future.
 After you have configured Phabricator, you need to upgrade the database
 schema -- see @{article:Upgrading Schema}. You'll also need to do this after you
 update the code in the future.
+
+= Next Steps =
+
+Continue by:
+
+  - upgrading the database schema with @{article:Upgrading Schema}; or
+  - configuring Phabricator so it can send mail with
+    @{article:Configuring Outbound Email}; or
+  - configuring inbound mail with @{article:Configuring Inbound Email}; or
+  - learning about daemons with @{article:Managing Daemons with phd}; or
+  - contributing to Phabricator with @{article:Contributor Introduction}.

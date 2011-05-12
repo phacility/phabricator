@@ -1,5 +1,5 @@
 @title Installation Guide
-@group install
+@group intro
 
 This document contains basic install instructions to get Phabricator up and
 running.
@@ -43,6 +43,11 @@ Now that you have git installed, grab Phabricator and its dependencies:
   somewhere/phabricator/ $ git submodule update --init
 
 = Installing Optional Components =
+
+These components are optional and Phabricator will work without them, but works
+better if they are installed. You should read each section and decide if you
+want to install the component. At a minimum, **APC** will greatly improve
+performance.
 
 == APC ==
 
@@ -89,4 +94,6 @@ Then install bison normally:
 
 = Next Steps =
 
-If everything is installed, move on to @{article:Configuration Guide}.
+Continue by:
+
+  - configuring Phabricator with the @{article:Configuration Guide}.

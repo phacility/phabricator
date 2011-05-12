@@ -13,7 +13,7 @@ The major components of Phabricator are:
 
   - **Differential**, a code review tool; and
   - **Diffusion**, a repository browser.
-  
+
 Phabricator also includes a number of smaller tools.
 
 = Why use Phabricator? =
@@ -37,5 +37,8 @@ However, Phabricator may also not be a good solution for you:
     you can get anywhere.
   - If you loathe PHP, well, it's written in PHP.
 
+= Next Steps =
 
-  
+Continue by:
+
+  - installing Phabricator with the @{article:Installation Guide}.

@@ -1,0 +1,70 @@
+@title Managing Daemons with phd
+@group config
+
+Explains Phabricator daemons and the daemon control program ##phd##.
+
+= Overview =
+
+Phabricator uses daemons (background processing scripts) to handle a number of
+tasks, like:
+
+  - tracking repositories and discovering new commits;
+  - sending mail;
+  - updating objects in the search index; and
+  - custom tasks you define.
+
+Daemons are started and stopped with **phd** (the **Ph**abricator **D**aemon
+launcher). Daemons can be monitored via a web console.
+
+You do not need to run daemons for most parts of Phabricator to work, but a few
+features (principally, repository tracking with Diffusion) require them and
+several features will benefit in performance or stability if you configure
+daemons.
+
+= phd =
+
+**phd** is a command-line script (located at ##phabricator/bin/phd##). To get
+a list of commands, run ##phd help##:
+
+  phabricator/ $ ./bin/phd help
+  NAME
+          phd - phabricator daemon launcher
+  ...
+
+Generally, you will use:
+
+  - **phd launch** to launch daemons;
+  - **phd status** to get a list of running daemons; and
+  - **phd stop** to stop all daemons.
+
+NOTE: When you upgrade Phabricator or change configuration, you should restart
+the daemons by stopping and relaunching them.
+
+NOTE: When you **launch** a daemon, you can type any unique substring of its
+name, so **phd launch metamta** will work correctly.
+
+= Daemon Console =
+
+You can view status and debugging information for daemons in the Daemon Console
+via the web interface. Go to ##/daemon/## in your install or click
+**Daemon Console** from the homepage.
+
+The Daemon Console shows a list of all the daemons that have ever launched, and
+allows you to view log information for them. If you have issues with daemons,
+you may be able to find error information that will help you resolve the problem
+in the console.
+
+= Available Daemons =
+
+You can get a list of launchable daemons with **phd list**:
+
+  - **libphutil test daemons** are not generally useful unless you are
+    developing daemon infrastructure or debugging a daemon problem;
+  - **PhabricatorMetaMTADaemon** sends mail in the background, see
+    @{article:Configuring Outbound Email} for details;
+  - **PhabricatorTaskmasterDaemon** runs a generic task queue; and
+  - **PhabricatorRepository** daemons track repositories.
+
+TODO: Documentation on repository daemons is coming soon. The quick version is:
+run **phd repository-launch-master** after configuring them in the
+**Repositories** tool, then launch a few **taskmaster** daemons.
