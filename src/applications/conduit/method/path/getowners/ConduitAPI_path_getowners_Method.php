@@ -19,7 +19,7 @@
 class ConduitAPI_path_getowners_Method extends ConduitAPIMethod {
 
   public function getMethodDescription() {
-    return "Find owners package given its name";
+    return "Find the Owners package that contains a given path.";
   }
 
   public function defineParamTypes() {
@@ -30,14 +30,18 @@ class ConduitAPI_path_getowners_Method extends ConduitAPIMethod {
   }
 
   public function defineReturnType() {
-    return 'array of packages containing phid, primary_owner (phid=>username),'.
-      'owners(array of phid=>username)';
+    return
+      "array(".
+        "array(".
+          "'phid' => phid, ".
+          "'primaryOwner' => phid, ".
+          "'owners' => array(phid)))";
   }
 
   public function defineErrorTypes() {
     return array(
       'ERR_REP_NOT_FOUND'  => 'The repository callsign is not recognized',
-      'ERR_PATH_NOT_FOUND' => 'The specified path is not known to any package',
+      'ERR_PATH_NOT_FOUND' => 'The specified path is not in any package',
     );
   }
 
@@ -56,26 +60,16 @@ class ConduitAPI_path_getowners_Method extends ConduitAPIMethod {
       throw new ConduitException('ERR_PATH_NOT_FOUND');
     }
 
-    $owner = new PhabricatorOwnersOwner();
-    $user = new PhabricatorUser();
     $result = array();
     foreach ($packages as $package) {
-      $p_result = array();
-      $p_result['phid'] = $package->getID();
-      $primary_owner_phid = $package->getPrimaryOwnerPHID();
-      if (!empty($primary_owner_phid)) {
-        $p_user =  $user->loadOneWhere('phid = %s',
-          $primary_owner_phid);
-        $p_result['primaryOwner'] = $p_user->getPhid();
-      }
+      $p_owners =
+        id(new PhabricatorOwnersOwner())->loadAllForPackages(array($package));
 
-      $p_owners = $owner->loadAllForPackages(array($package));
-      $p_users = $user->loadAllWhere('phid IN (%Ls)',
-        mpull($p_owners, 'getUserPHID'));
-
-      $p_result['owners'] = array_values(mpull($p_users, 'getPhid'));
-
-      $result[] = $p_result;
+      $result[] = array(
+        'phid' => $package->getPHID(),
+        'primaryOwner' => $package->getPrimaryOwnerPHID(),
+        'owners' => array_values(mpull($p_owners, 'getUserPHID')),
+      );
     }
 
     return $result;
