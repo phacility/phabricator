@@ -34,6 +34,7 @@ class ConduitAPI_path_getowners_Method extends ConduitAPIMethod {
       "array(".
         "array(".
           "'phid' => phid, ".
+          "'name' => string, ".
           "'primaryOwner' => phid, ".
           "'owners' => array(phid)))";
   }
@@ -67,6 +68,7 @@ class ConduitAPI_path_getowners_Method extends ConduitAPIMethod {
 
       $result[] = array(
         'phid' => $package->getPHID(),
+        'name' => $package->getName(),
         'primaryOwner' => $package->getPrimaryOwnerPHID(),
         'owners' => array_values(mpull($p_owners, 'getUserPHID')),
       );
