@@ -98,9 +98,29 @@ abstract class PhabricatorMailReplyHandler {
       $groups[$private][] = $recipient;
     }
 
+    // When multiplexing mail, explicitly include To/Cc information in the
+    // message body and headers.
+    $add_headers = array();
+
+    $body = $mail_template->getBody();
+    $body .= "\n";
+    if ($to_handles) {
+      $body .= "To: ".implode(', ', mpull($to_handles, 'getName'))."\n";
+      $add_headers['X-Phabricator-To'] = $this->formatPHIDList($to_handles);
+    }
+    if ($cc_handles) {
+      $body .= "Cc: ".implode(', ', mpull($cc_handles, 'getName'))."\n";
+      $add_headers['X-Phabricator-Cc'] = $this->formatPHIDList($cc_handles);
+    }
+
     foreach ($groups as $reply_to => $group) {
       $mail = clone $mail_template;
       $mail->addTos(mpull($group, 'getPHID'));
+
+      $mail->setBody($body);
+      foreach ($add_headers as $header => $value) {
+        $mail->addHeader($header, $value);
+      }
 
       if (!$reply_to) {
         $reply_to = $this->getPublicReplyHandlerEmailAddress();
@@ -114,6 +134,14 @@ abstract class PhabricatorMailReplyHandler {
     }
 
     return $result;
+  }
+
+  protected function formatPHIDList(array $handles) {
+    $list = array();
+    foreach ($handles as $handle) {
+      $list[] = '<'.$handle->getPHID().'>';
+    }
+    return implode(', ', $list);
   }
 
   protected function getDefaultPrivateReplyHandlerEmailAddress(

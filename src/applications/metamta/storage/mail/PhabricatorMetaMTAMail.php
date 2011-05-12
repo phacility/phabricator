@@ -101,6 +101,10 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this;
   }
 
+  public function getBody() {
+    return $this->getParam('body');
+  }
+
   public function setIsHTML($html) {
     $this->setParam('is-html', $html);
     return $this;
