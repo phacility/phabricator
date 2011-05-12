@@ -35,6 +35,8 @@ class PhabricatorUser extends PhabricatorUserDAO {
   protected $conduitCertificate;
 
   protected $isSystemAgent = 0;
+  protected $isAdmin = 0;
+  protected $isDisabled = 0;
 
   private $preferences = null;
 
@@ -56,9 +58,13 @@ class PhabricatorUser extends PhabricatorUserDAO {
   }
 
   public function setPassword($password) {
-    $this->setPasswordSalt(md5(mt_rand()));
-    $hash = $this->hashPassword($password);
-    $this->setPasswordHash($hash);
+    if (!strlen($password)) {
+      $this->setPasswordHash('');
+    } else {
+      $this->setPasswordSalt(md5(mt_rand()));
+      $hash = $this->hashPassword($password);
+      $this->setPasswordHash($hash);
+    }
     return $this;
   }
 
@@ -77,6 +83,12 @@ class PhabricatorUser extends PhabricatorUserDAO {
   }
 
   public function comparePassword($password) {
+    if (!strlen($password)) {
+      return false;
+    }
+    if (!strlen($this->getPasswordHash())) {
+      return false;
+    }
     $password = $this->hashPassword($password);
     return ($password === $this->getPasswordHash());
   }

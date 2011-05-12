@@ -20,6 +20,7 @@ class PhabricatorPeopleListController extends PhabricatorPeopleController {
 
   public function processRequest() {
     $request = $this->getRequest();
+    $is_admin = $request->getUser()->getIsAdmin();
 
     $user = new PhabricatorUser();
 
@@ -41,40 +42,91 @@ class PhabricatorPeopleListController extends PhabricatorPeopleController {
 
     $rows = array();
     foreach ($users as $user) {
-      $rows[] = array(
-        $user->getPHID(),
-        $user->getUserName(),
-        $user->getRealName(),
-        phutil_render_tag(
+      $cols = array();
+      $cols[] = date('M jS, Y', $user->getDateCreated());
+      $cols[] = date('g:i:s A', $user->getDateCreated());
+      $cols[] = phutil_render_tag(
+        'a',
+        array(
+          'href' => '/p/'.$user->getUsername().'/',
+        ),
+        phutil_escape_html($user->getUserName()));
+      $cols[] = phutil_escape_html($user->getRealName());
+
+      if ($is_admin) {
+        $status = '';
+        if ($user->getIsDisabled()) {
+          $status = 'Disabled';
+        } else if ($user->getIsAdmin()) {
+          $status = 'Admin';
+        } else {
+          $status = '-';
+        }
+        $cols[] = $status;
+        $cols[] = phutil_render_tag(
           'a',
           array(
             'class' => 'button grey small',
-            'href'  => '/p/'.$user->getUsername().'/',
+            'href'  => '/people/edit/'.$user->getID().'/',
           ),
-          'View Profile'),
-      );
+          'Administrate User');
+      }
+
+      $rows[] = $cols;
     }
 
     $table = new AphrontTableView($rows);
-    $table->setHeaders(
-      array(
-        'PHID',
-        'Username',
-        'Real Name',
-        '',
-      ));
-    $table->setColumnClasses(
-      array(
-        null,
-        null,
-        'wide',
-        'action',
-      ));
+    if ($is_admin) {
+      $table->setHeaders(
+        array(
+          'Join Date',
+          'Time',
+          'Username',
+          'Real Name',
+          'Status',
+          '',
+        ));
+      $table->setColumnClasses(
+        array(
+          null,
+          'right',
+          'pri',
+          'wide',
+          null,
+          'action',
+        ));
+    } else {
+      $table->setHeaders(
+        array(
+          'Join Date',
+          'Time',
+          'Username',
+          'Real Name',
+        ));
+      $table->setColumnClasses(
+        array(
+          null,
+          'right',
+          'pri',
+          'wide',
+        ));
+    }
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('People');
+    $panel->setHeader('People ('.number_format($count).')');
     $panel->appendChild($table);
     $panel->appendChild($pager);
+
+    if ($is_admin) {
+      $panel->addButton(
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => '/people/edit/',
+            'class' => 'button green',
+          ),
+          'Create New Account'));
+    }
 
     return $this->buildStandardPageResponse($panel, array(
       'title' => 'People',

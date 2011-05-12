@@ -35,43 +35,6 @@ return array(
   // be 50x50px.
   'user.default-profile-image-phid' => 'PHID-FILE-4d61229816cfe6f2b2a3',
 
-// -- Access Control -------------------------------------------------------- //
-
-  // Phabricator users have one of three access levels: "anyone", "verified",
-  // or "admin". "anyone" means every user, including users who do not have
-  // accounts or are not logged into the system. "verified" is users who have
-  // accounts, are logged in, and have satisfied whatever verification steps
-  // the configuration requires (e.g., email verification and/or manual
-  // approval). "admin" is verified users with the "administrator" flag set.
-
-  // These configuration options control which access level is required to read
-  // data from Phabricator (e.g., view revisions and comments in Differential)
-  // and write data to Phabricator (e.g., upload files and create diffs). By
-  // default they are both set to "verified", meaning only verified user
-  // accounts can interact with the system in any meaningful way.
-
-  // If you are configuring an install for an open source project, you may
-  // want to reduce the "phabricator.read-access" requirement to "anyone". This
-  // will allow anyone to browse Phabricator content, even without logging in.
-
-  // Alternatively, you could raise the "phabricator.write-access" requirement
-  // to "admin", effectively creating a read-only install.
-
-
-  // Controls the minimum access level required to read data from Phabricator
-  // (e.g., view revisions in Differential). Allowed values are "anyone",
-  // "verified", or "admin". Note that "anyone" includes users who are not
-  // logged in! You should leave this at 'verified' unless you want your data
-  // to be publicly readable (e.g., you are developing open source software).
-  'phabricator.read-access'     => 'verified',
-
-  // Controls the minimum access level required to write data to Phabricator
-  // (e.g., create new revisions in Differential). Allowed values are
-  // "verified" or "admin". Setting this to "admin" will effectively create a
-  // read-only install.
-  'phabricator.write-access'    => 'verified',
-
-
 // -- DarkConsole ----------------------------------------------------------- //
 
   // DarkConsole is a administrative debugging/profiling tool built into

@@ -25,6 +25,16 @@ class PhabricatorStandardPageView extends AphrontPageView {
   private $glyph;
   private $bodyContent;
   private $request;
+  private $isAdminInterface;
+
+  public function setIsAdminInterface($is_admin_interface) {
+    $this->isAdminInterface = $is_admin_interface;
+    return $this;
+  }
+
+  public function getIsAdminInterface() {
+    return $this->isAdminInterface;
+  }
 
   public function setRequest($request) {
     $this->request = $request;
@@ -254,9 +264,14 @@ class PhabricatorStandardPageView extends AphrontPageView {
 
     $foot_links = implode(' &middot; ', $foot_links);
 
+    $admin_class = null;
+    if ($this->getIsAdminInterface()) {
+      $admin_class = 'phabricator-admin-page-view';
+    }
+
     return
       ($console ? '<darkconsole />' : null).
-      '<div class="phabricator-standard-page">'.
+      '<div class="phabricator-standard-page '.$admin_class.'">'.
         '<div class="phabricator-standard-header">'.
           '<div class="phabricator-login-details">'.
             $login_stuff.

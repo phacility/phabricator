@@ -46,6 +46,7 @@ class AphrontFormCheckboxControl extends AphrontFormControl {
           'name' => $box['name'],
           'value' => $box['value'],
           'checked' => $box['checked'] ? 'checked' : null,
+          'disabled' => $this->getDisabled() ? 'disabled' : null,
         ));
       $label = phutil_render_tag(
         'label',

@@ -22,6 +22,14 @@ abstract class PhabricatorController extends AphrontController {
     return true;
   }
 
+  public function shouldRequireAdmin() {
+    return false;
+  }
+
+  public function shouldRequireEnabledUser() {
+    return true;
+  }
+
   final public function willBeginExecution() {
 
     $request = $this->getRequest();
@@ -47,6 +55,13 @@ abstract class PhabricatorController extends AphrontController {
 
     $request->setUser($user);
 
+    if ($user->getIsDisabled() && $this->shouldRequireEnabledUser()) {
+      $disabled_user_controller = newv(
+        'PhabricatorDisabledUserController',
+        array($request));
+      return $this->delegateToController($disabled_user_controller);
+    }
+
     if (PhabricatorEnv::getEnvConfig('darkconsole.enabled')) {
       if ($user->getConsoleEnabled() ||
           PhabricatorEnv::getEnvConfig('darkconsole.always-on')) {
@@ -59,11 +74,21 @@ abstract class PhabricatorController extends AphrontController {
       $login_controller = newv('PhabricatorLoginController', array($request));
       return $this->delegateToController($login_controller);
     }
+
+    if ($this->shouldRequireAdmin() && !$user->getIsAdmin()) {
+      return new Aphront404Response();
+    }
+
   }
 
   public function buildStandardPageView() {
     $view = new PhabricatorStandardPageView();
     $view->setRequest($this->getRequest());
+
+    if ($this->shouldRequireAdmin()) {
+      $view->setIsAdminInterface(true);
+    }
+
     return $view;
   }
 

@@ -58,6 +58,10 @@ class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       return $this->setMessage("Invalid user '{$user_id}'")->save();
     }
 
+    if ($user->getIsDisabled()) {
+      return $this->setMessage("User '{$user_id}' is disabled")->save();
+    }
+
     $this->setAuthorPHID($user->getPHID());
 
     $receiver = self::loadReceiverObject($receiver_name);

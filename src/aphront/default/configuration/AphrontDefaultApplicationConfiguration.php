@@ -69,7 +69,8 @@ class AphrontDefaultApplicationConfiguration
       ),
       '/people/' => array(
         '$' => 'PhabricatorPeopleListController',
-        'edit/(?:(?P<username>\w+)/)?$' => 'PhabricatorPeopleEditController',
+        'edit/(?:(?P<id>\d+)/(?:(?P<view>\w+)/)?)?$'
+          => 'PhabricatorPeopleEditController',
       ),
       '/p/(?P<username>\w+)/$' => 'PhabricatorPeopleProfileController',
       '/profile/' => array(

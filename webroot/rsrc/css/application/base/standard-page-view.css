@@ -19,6 +19,10 @@
   position: relative;
 }
 
+.phabricator-admin-page-view .phabricator-standard-header {
+  background: #aa0000;
+}
+
 .phabricator-primary-navigation {
   padding-top: 12px;
   padding-bottom: 8px;

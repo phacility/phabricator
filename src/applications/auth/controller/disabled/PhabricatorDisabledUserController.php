@@ -16,27 +16,28 @@
  * limitations under the License.
  */
 
-class PhabricatorLogoutController extends PhabricatorAuthController {
-
-  public function shouldRequireLogin() {
-    return true;
-  }
+class PhabricatorDisabledUserController extends PhabricatorAuthController {
 
   public function shouldRequireEnabledUser() {
-    // Allow disabled users to logout.
     return false;
   }
 
   public function processRequest() {
     $request = $this->getRequest();
-
-    if ($request->isFormPost()) {
-      $request->clearCookie('phsid');
-      return id(new AphrontRedirectResponse())
-        ->setURI('/login/');
+    $user = $request->getUser();
+    if (!$user->getIsDisabled()) {
+      return new Aphront404Response();
     }
 
-    return id(new AphrontRedirectResponse())->setURI('/');
+    $failure_view = new AphrontRequestFailureView();
+    $failure_view->setHeader('Account Disabled');
+    $failure_view->appendChild('<p>Your account has been disabled.</p>');
+
+    return $this->buildStandardPageResponse(
+      $failure_view,
+      array(
+        'title' => 'Account Disabled',
+      ));
   }
 
 }
