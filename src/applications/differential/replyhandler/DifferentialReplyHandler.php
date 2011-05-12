@@ -112,7 +112,7 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
 
     try {
       $editor = new DifferentialCommentEditor(
-        $this->getRevision(),
+        $this->getMailReceiver(),
         $actor->getPHID(),
         $command);
 
@@ -124,7 +124,7 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
 
     } catch (Exception $ex) {
       $exception_mail = new DifferentialExceptionMail(
-        $this->getRevision(),
+        $this->getMailReceiver(),
         $ex,
         $body);
 
