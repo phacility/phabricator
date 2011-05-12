@@ -1,0 +1,98 @@
+@title Configuring Accounts and Registration
+@group config
+
+Describes how to configure user access to Phabricator.
+
+= Overview =
+
+Phabricator supports a number of login systems, like traditional
+username/password, Facebook OAuth, and GitHub OAuth. You can enable or disable
+these systems to configure who can register for and access your install, and
+how users with existing accounts can login.
+
+By default, only username/password auth is enabled, and there are no valid
+accounts. Start by creating a new account with the
+##phabricator/bin/accountadmin## script.
+
+= Using accountadmin =
+
+##accountadmin## is a user-friendly command line interface for creating and
+editing accounts. To use ##accountadmin##, just run the script:
+
+  $ ./phabricator/bin/accountadmin
+  Enter a username to create a new account or edit an existing account.
+
+    Enter a username:
+
+This will walk you through the process of creating an initial user account.
+Once you've created an account, you can login with it and use the web console
+to create and manage accounts more easily (provided you make your first account
+an administrator).
+
+You can use this script later to create or edit accounts if you, for example,
+accidentally remove your admin flag.
+
+= Managing Accounts with the Web Console =
+
+To manage accounts from the web, login as an administrator account and go to
+##/people/## or click "People" on the homepage. Provided you're an admin,
+you'll see options to create or edit accounts.
+
+= Configuring Facebook OAuth =
+
+You can configure Facebook OAuth to allow login, login and registration, or
+nothing (the default). If registration is not allowed, users must have an
+existing account in order to link a Facebook account to it, but can use
+Facebook to login once the accounts are linked.
+
+To configure Facebook OAuth, create a new Facebook Application:
+
+https://www.facebook.com/developers/createapp.php
+
+Once that is set up, edit your Phabricator configuration and set these keys:
+
+  - **facebook.auth-enabled**: set this to ##true##.
+  - **facebook.application-id**: set to your Facebook application's ID. Make
+    sure you set this as a string.
+  - **facebook.application-secret**: set to your Facebook application's
+    secret key.
+  - **facebook.registration-enabled**: set this to ##true## to let users
+    register for your install with a Facebook account (this is a very open
+    setting) or ##false## to prevent users from registering with Facebook.
+  - **facebook.auth-permanent**: you can set this to prevent account unlinking.
+    It is unlikely you want to prevent it, but Facebook's internal install uses
+    this option since Facebook uses Facebook as its only auth mechanism.
+
+= Configuring GitHub OAuth =
+
+You can configure GitHub OAuth to allow login, login and registration, or
+nothing (the default).
+
+To configure GitHub OAuth, create a new GitHub Application:
+
+https://github.com/account/applications/new
+
+Once you've created an application, edit your Phabricator configuration and
+set these keys:
+
+  - **github.auth-enabled**: set this to ##true##.
+  - **github.application-id**: set this to your application/client ID.
+  - **github.application-secret**: set this to your application secret.
+  - **github.registration-enabled**: set to ##true## to let users register with
+    just GitHub credentials (this is a very open setting) or ##false## to
+    prevent users from registering. If set to ##false##, users may still link
+    existing accounts and use GitHub to login, they just can't create new
+    accounts.
+  - **github.auth-permanent**: set to ##true## to prevent unlinking Phabricator
+    accounts from GitHub accounts.
+
+Note that you can see a list of your GitHub applications here, although it's not
+immediately clear how to get there via the UI:
+
+https://github.com/account/applications/
+
+= Next Steps =
+
+Continue by:
+
+  - returning to the @{article:Configuration Guide}.
