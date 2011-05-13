@@ -107,8 +107,14 @@ class DifferentialDiffViewController extends DifferentialController {
     $table_of_contents = id(new DifferentialDiffTableOfContentsView())
       ->setChangesets($changesets);
 
+    $refs = array();
+    foreach ($changesets as $changeset) {
+      $refs[$changeset->getID()] = $changeset->getID();
+    }
+
     $details = id(new DifferentialChangesetListView())
-      ->setChangesets($changesets);
+      ->setChangesets($changesets)
+      ->setRenderingReferences($refs);
 
     return $this->buildStandardPageResponse(
       '<div class="differential-primary-pane">'.
