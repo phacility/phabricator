@@ -94,12 +94,12 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
           } else {
             $vs_id = null;
           }
-          $ref = $changeset->getRenderingReference();
+
+          $ref = $vs_id ? $id.'/'.$vs_id : $id;
           $detail_uri = new PhutilURI($this->renderURI);
           $detail_uri->setQueryParams(
             array(
-              'id'          => $ref,
-              'vs'          => $vs_id,
+              'ref'         => $ref,
               'whitespace'  => $this->whitespace,
               'revision_id' => $this->revisionID,
             ));
