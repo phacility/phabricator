@@ -30,8 +30,9 @@ introduce new contributors to the codebase.
 You should read the relevant coding convention documents before you submit a
 change and make sure you're following the project guidelines:
 
-  - @{article:General Coding Conventions} (for all languages)
-  - @{article:PHP Coding Conventions} (for PHP)
+  - @{article:General Coding Standards} (for all languages)
+  - @{article:PHP Coding Standards} (for PHP)
+  - @{article:Javascript Coding Standards} (for Javascript)
 
 = Philosophy =
 

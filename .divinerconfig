@@ -6,6 +6,7 @@
     "config" : "Configuration",
     "contrib" : "Contributing",
     "userguide" : "Application User Guides",
+    "flavortext" : "Flavor Text",
     "developer" : "Phabricator Developer Guides",
     "differential" : "Differential (Code Review)",
     "diffusion" : "Diffusion (Repository Browser)",
