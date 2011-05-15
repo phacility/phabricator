@@ -1,0 +1,11 @@
+{
+  "server" : "irc.freenode.net",
+  "port" : 6667,
+  "nick" : "phabot",
+  "join" : [
+    "#phabot-test"
+  ],
+  "handlers" : [
+    "PhabricatorIRCProtocolHandler"
+  ]
+}

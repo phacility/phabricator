@@ -127,7 +127,7 @@ final class PhabricatorDaemonControl {
 
 **COMMAND REFERENCE**
 
-        **launch** [__n__] __daemon__
+        **launch** [__n__] __daemon__ [argv ...]
             Start a daemon (or n copies of a daemon).
 
         **list**
