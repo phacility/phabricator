@@ -464,7 +464,7 @@ class DifferentialRevisionViewController extends DifferentialController {
       $links[] = array(
         'class' => 'attach-maniphest',
         'name'  => 'Edit Maniphest Tasks',
-        'href'  => "/differential/attach/{$revision_id}/TASK/",
+        'href'  => "/search/attach/{$revision_phid}/TASK/",
         'sigil' => 'workflow',
       );
     }

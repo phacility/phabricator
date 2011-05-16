@@ -104,7 +104,6 @@ class AphrontDefaultApplicationConfiguration
             'edit/(?P<id>\d+)/$' => 'DifferentialInlineCommentEditController',
           ),
         ),
-        'attach/(?P<id>\d+)/(?P<type>\w+)/$' => 'DifferentialAttachController',
         'subscribe/(?P<action>add|rem)/(?P<id>\d+)/$'
           => 'DifferentialSubscribeController',
       ),
@@ -162,7 +161,6 @@ class AphrontDefaultApplicationConfiguration
           'save/' => 'ManiphestTransactionSaveController',
           'preview/(?P<id>\d+)/$' => 'ManiphestTransactionPreviewController',
         ),
-        'select/search/$' => 'ManiphestTaskSelectorSearchController',
       ),
 
       '/T(?P<id>\d+)$' => 'ManiphestTaskDetailController',
@@ -183,6 +181,10 @@ class AphrontDefaultApplicationConfiguration
       '/search/' => array(
         '$' => 'PhabricatorSearchController',
         '(?P<id>\d+)/$' => 'PhabricatorSearchController',
+        'attach/(?P<phid>[^/]+)/(?P<type>\w+)/$'
+          => 'PhabricatorSearchAttachController',
+        'select/(?P<type>\w+)/$'
+          => 'PhabricatorSearchSelectController',
       ),
 
       '/project/' => array(
@@ -351,6 +353,7 @@ class AphrontDefaultApplicationConfiguration
 
   public function willSendResponse(AphrontResponse $response) {
     $request = $this->getRequest();
+    $response->setRequest($request);
     if ($response instanceof AphrontDialogResponse) {
       if (!$request->isAjax()) {
         $view = new PhabricatorStandardPageView();

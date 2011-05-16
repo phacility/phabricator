@@ -164,7 +164,7 @@ JX.behavior('phabricator-object-selector', function(config) {
 
   JX.DOM.listen(
     JX.$(config.query),
-    'keydown',
+    ['change', 'keydown', 'keyup', 'keypress'],
     null,
     function(e) {
       var cur_value = JX.$(config.query).value;

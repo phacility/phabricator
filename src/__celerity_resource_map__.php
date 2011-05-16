@@ -501,7 +501,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-phabricator-object-selector' =>
   array(
-    'uri' => '/res/fd4ce976/rsrc/js/application/core/behavior-object-selector.js',
+    'uri' => '/res/12d4d90d/rsrc/js/application/core/behavior-object-selector.js',
     'type' => 'js',
     'requires' =>
     array(

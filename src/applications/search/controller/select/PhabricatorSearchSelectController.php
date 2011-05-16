@@ -16,7 +16,14 @@
  * limitations under the License.
  */
 
-class ManiphestTaskSelectorSearchController extends ManiphestController {
+class PhabricatorSearchSelectController
+  extends PhabricatorSearchController {
+
+  private $type;
+
+  public function willProcessRequest(array $data) {
+    $this->type = $data['type'];
+  }
 
   public function processRequest() {
     $request = $this->getRequest();
@@ -26,16 +33,9 @@ class ManiphestTaskSelectorSearchController extends ManiphestController {
 
     $query_str = $request->getStr('query');
     $matches = array();
-    $task_ids = array();
-
-    // Collect all task IDs, e.g., T12 T651 T631, from the query string
-    preg_match_all('/\bT(\d+)\b/', $query_str, $matches);
-    if ($matches) {
-      $task_ids = $matches[1];
-    }
 
     $query->setQuery($query_str);
-    $query->setParameter('type', PhabricatorPHIDConstants::PHID_TYPE_TASK);
+    $query->setParameter('type', $this->type);
 
     switch ($request->getStr('filter')) {
       case 'assigned':
@@ -54,23 +54,8 @@ class ManiphestTaskSelectorSearchController extends ManiphestController {
     $exec = new PhabricatorSearchMySQLExecutor();
     $results = $exec->executeSearch($query);
 
-    $phids = array();
-
-    foreach ($results as $result) {
-      $phids[$result['phid']] = true;
-    }
-
-    // Do a separate query for task IDs if the query had them
-    if ($task_ids) {
-      $task_object = new ManiphestTask();
-
-      // It's OK to ignore filters, if user wants specific task IDs
-      $tasks = $task_object->loadAllWhere('id IN (%Ls)', $task_ids);
-
-      foreach ($tasks as $task) {
-        $phids[$task->getPHID()] = true;
-      }
-    }
+    $phids = array_fill_keys(ipull($results, 'phid'), true);
+    $phids += $this->queryObjectNames($query_str);
 
     $phids = array_keys($phids);
     $handles = id(new PhabricatorObjectHandleData($phids))
@@ -84,4 +69,48 @@ class ManiphestTaskSelectorSearchController extends ManiphestController {
 
     return id(new AphrontAjaxResponse())->setContent($data);
   }
+
+  private function queryObjectNames($query) {
+
+    $pattern = null;
+    switch ($this->type) {
+      case PhabricatorPHIDConstants::PHID_TYPE_TASK:
+        $pattern = '/\bT(\d+)\b/';
+        break;
+      case PhabricatorPHIDConstants::PHID_TYPE_DREV:
+        $pattern = '/\bD(\d+)\b/';
+        break;
+    }
+
+    if (!$pattern) {
+      return array();
+    }
+
+    $matches = array();
+    preg_match_all($pattern, $query, $matches);
+    if (!$matches) {
+      return array();
+    }
+
+    $object_ids = $matches[1];
+    if (!$object_ids) {
+      return array();
+    }
+
+    switch ($this->type) {
+      case PhabricatorPHIDConstants::PHID_TYPE_DREV:
+        $objects = id(new DifferentialRevision())->loadAllWhere(
+          'id IN (%Ld)',
+          $object_ids);
+        break;
+      case PhabricatorPHIDConstants::PHID_TYPE_TASK:
+        $objects = id(new ManiphestTask())->loadAllWhere(
+          'id IN (%Ld)',
+          $object_ids);
+        break;
+    }
+
+    return array_fill_keys(mpull($objects, 'getPHID'), true);
+  }
+
 }

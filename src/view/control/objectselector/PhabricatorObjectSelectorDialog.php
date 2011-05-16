@@ -25,6 +25,7 @@ class PhabricatorObjectSelectorDialog {
   private $submitURI;
   private $noun;
   private $searchURI;
+  private $selectedFilter;
 
   public function setUser($user) {
     $this->user = $user;
@@ -33,6 +34,11 @@ class PhabricatorObjectSelectorDialog {
 
   public function setFilters(array $filters) {
     $this->filters = $filters;
+    return $this;
+  }
+
+  public function setSelectedFilter($selected_filter) {
+    $this->selectedFilter = $selected_filter;
     return $this;
   }
 
@@ -78,7 +84,10 @@ class PhabricatorObjectSelectorDialog {
       $options[] = phutil_render_tag(
         'option',
         array(
-          'value' => $key
+          'value' => $key,
+          'selected' => ($key == $this->selectedFilter)
+            ? 'selected'
+            : null,
         ),
         $label);
     }

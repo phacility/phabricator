@@ -162,9 +162,14 @@ class ManiphestTaskDetailController extends ManiphestController {
     $action->setClass('action-edit');
     $actions[] = $action;
 
+    require_celerity_resource('phabricator-object-selector-css');
+    require_celerity_resource('javelin-behavior-phabricator-object-selector');
+
     $action = new AphrontHeadsupActionView();
     $action->setName('Edit Differential Revisions');
-    $action->setClass('action-attach unavailable');
+    $action->setURI('/search/attach/'.$task->getPHID().'/DREV/');
+    $action->setWorkflow(true);
+    $action->setClass('action-attach');
     $actions[] = $action;
 
     $action_list = new AphrontHeadsupActionListView();

@@ -7,15 +7,16 @@
 
 
 phutil_require_module('phabricator', 'aphront/response/ajax');
-phutil_require_module('phabricator', 'applications/maniphest/controller/base');
+phutil_require_module('phabricator', 'applications/differential/storage/revision');
 phutil_require_module('phabricator', 'applications/maniphest/storage/task');
 phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'applications/phid/handle/view/selector');
+phutil_require_module('phabricator', 'applications/search/controller/search');
 phutil_require_module('phabricator', 'applications/search/execute/mysql');
 phutil_require_module('phabricator', 'applications/search/storage/query');
 
 phutil_require_module('phutil', 'utils');
 
 
-phutil_require_source('ManiphestTaskSelectorSearchController.php');
+phutil_require_source('PhabricatorSearchSelectController.php');
