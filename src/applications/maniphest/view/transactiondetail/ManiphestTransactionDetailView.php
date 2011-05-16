@@ -70,8 +70,16 @@ class ManiphestTransactionDetailView extends AphrontView {
     }
 
     $descs = implode("\n", $descs);
+
     if ($comments) {
       $descs .= "\n".$comments;
+    }
+
+    foreach ($this->transactions as $transaction) {
+      $supplemental = $this->renderSupplementalLinksForEmail($transaction);
+      if ($supplemental) {
+        $descs .= "\n\n".$supplemental;
+      }
     }
 
     $this->forEmail = false;
@@ -147,6 +155,59 @@ class ManiphestTransactionDetailView extends AphrontView {
         '</div>'.
         $comment_block.
       '</div>');
+  }
+
+  private function renderSupplementalLinksForEmail($transaction) {
+    $handles = $this->handles;
+
+    $type = $transaction->getTransactionType();
+    $new = $transaction->getNewValue();
+    $old = $transaction->getOldValue();
+
+    switch ($type) {
+      case ManiphestTransactionType::TYPE_ATTACH:
+        $old_raw = nonempty($old, array());
+        $new_raw = nonempty($new, array());
+
+        $attach_types = array(
+          PhabricatorPHIDConstants::PHID_TYPE_DREV,
+          PhabricatorPHIDConstants::PHID_TYPE_FILE,
+        );
+
+        foreach ($attach_types as $type) {
+          $old = array_keys(idx($old_raw, $type, array()));
+          $new = array_keys(idx($new_raw, $type, array()));
+          if ($old != $new) {
+            break;
+          }
+        }
+
+        $added = array_diff($new, $old);
+        if (!$added) {
+          break;
+        }
+
+        $links = array();
+        foreach (array_select_keys($handles, $added) as $handle) {
+          $links[] = '  '.PhabricatorEnv::getProductionURI($handle->getURI());
+        }
+        $links = implode("\n", $links);
+
+        switch ($type) {
+          case PhabricatorPHIDConstants::PHID_TYPE_DREV:
+            $title = 'ATTACHED REVISIONS';
+            break;
+          case PhabricatorPHIDConstants::PHID_TYPE_FILE:
+            $title = 'ATTACHED FILES';
+            break;
+        }
+
+        return $title."\n".$links;
+      default:
+        break;
+    }
+
+    return null;
   }
 
   private function describeAction($transaction) {
