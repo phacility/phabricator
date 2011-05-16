@@ -7,7 +7,6 @@
 
 
 phutil_require_module('phabricator', 'aphront/console/plugin/errorlog/api');
-phutil_require_module('phabricator', 'aphront/console/plugin/services/api');
 
 phutil_require_module('phutil', 'daemon/base');
 phutil_require_module('phutil', 'moduleutils');

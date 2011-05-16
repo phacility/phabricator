@@ -129,38 +129,42 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
         "available!");
     }
 
-    $conn = @mysql_connect(
-      $host,
-      $user,
-      $this->getConfiguration('pass'),
-      $new_link = true,
-      $flags = 0);
-
-    if (!$conn) {
-      $errno = mysql_errno();
-      $error = mysql_error();
-      throw new AphrontQueryConnectionException(
-        "Attempt to connect to {$user}@{$host} failed with error #{$errno}: ".
-        "{$error}.");
-    }
-
-    if ($database !== null) {
-      $ret = @mysql_select_db($database, $conn);
-      if (!$ret) {
-        $this->throwQueryException($conn);
-      }
-    }
-
-    $end = microtime(true);
-
-    DarkConsoleServicesPluginAPI::addEvent(
+    $profiler = PhutilServiceProfiler::getInstance();
+    $call_id = $profiler->beginServiceCall(
       array(
-        'event'     => DarkConsoleServicesPluginAPI::EVENT_CONNECT,
+        'type'      => 'connect',
         'host'      => $host,
         'database'  => $database,
-        'start'     => $start,
-        'end'       => $end,
       ));
+
+    try {
+      $conn = @mysql_connect(
+        $host,
+        $user,
+        $this->getConfiguration('pass'),
+        $new_link = true,
+        $flags = 0);
+
+      if (!$conn) {
+        $errno = mysql_errno();
+        $error = mysql_error();
+        throw new AphrontQueryConnectionException(
+          "Attempt to connect to {$user}@{$host} failed with error #{$errno}: ".
+          "{$error}.");
+      }
+
+      if ($database !== null) {
+        $ret = @mysql_select_db($database, $conn);
+        if (!$ret) {
+          $this->throwQueryException($conn);
+        }
+      }
+
+      $profiler->endServiceCall($call_id, array());
+    } catch (Exception $ex) {
+      $profiler->endServiceCall($call_id, array());
+      throw $ex;
+    }
 
     self::$connectionCache[$key] = $conn;
     $this->connection = $conn;
@@ -205,16 +209,17 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
         $this->requireConnection();
 
         $start = microtime(true);
-        $result = @mysql_query($raw_query, $this->connection);
-        $end = microtime(true);
 
-        DarkConsoleServicesPluginAPI::addEvent(
+        $profiler = PhutilServiceProfiler::getInstance();
+        $call_id = $profiler->beginServiceCall(
           array(
-            'event' => DarkConsoleServicesPluginAPI::EVENT_QUERY,
+            'type'  => 'query',
             'query' => $raw_query,
-            'start' => $start,
-            'end'   => $end,
           ));
+
+        $result = @mysql_query($raw_query, $this->connection);
+
+        $profiler->endServiceCall($call_id, array());
 
         if ($result) {
           $this->lastResult = $result;

@@ -76,8 +76,6 @@ if (isset($argv[2]) && $argv[2] == '--herald') {
   $workers[] = new PhabricatorRepositoryCommitHeraldWorker($spec);
 }
 
-ExecFuture::pushEchoMode(true);
-
 foreach ($workers as $worker) {
   echo "Running ".get_class($worker)."...\n";
   $worker->doWork();

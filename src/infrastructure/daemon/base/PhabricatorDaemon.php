@@ -21,9 +21,8 @@ abstract class PhabricatorDaemon extends PhutilDaemon {
   protected function willRun() {
     parent::willRun();
 
-    // Both of these store unbounded amounts of log data; make them discard it
-    // instead so that daemons do not require unbounded amounts of memory.
-    DarkConsoleServicesPluginAPI::enableDiscardMode();
+    // This stores unbounded amounts of log data; make it discard instead so
+    // that daemons do not require unbounded amounts of memory.
     DarkConsoleErrorLogPluginAPI::enableDiscardMode();
 
     $phabricator = phutil_get_library_root('phabricator');

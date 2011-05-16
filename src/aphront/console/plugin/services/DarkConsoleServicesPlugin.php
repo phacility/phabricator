@@ -29,7 +29,7 @@ class DarkConsoleServicesPlugin extends DarkConsolePlugin {
   }
 
   public function generateData() {
-    return DarkConsoleServicesPluginAPI::getEvents();
+    return PhutilServiceProfiler::getInstance()->getServiceCallLog();
   }
 
   public function render() {
@@ -38,15 +38,22 @@ class DarkConsoleServicesPlugin extends DarkConsolePlugin {
     $rows = array();
     foreach ($data as $row) {
 
-      switch ($row['event']) {
-        case DarkConsoleServicesPluginAPI::EVENT_QUERY:
+      switch ($row['type']) {
+        case 'query':
           $info = $row['query'];
           $info = phutil_escape_html($info);
           break;
-        case DarkConsoleServicesPluginAPI::EVENT_CONNECT:
+        case 'connect':
           $info = $row['host'].':'.$row['database'];
           $info = phutil_escape_html($info);
-
+          break;
+        case 'exec':
+          $info = $row['command'];
+          $info = phutil_escape_html($info);
+          break;
+        case 'conduit':
+          $info = $row['method'];
+          $info = phutil_escape_html($info);
           break;
         default:
           $info = '-';
@@ -54,8 +61,8 @@ class DarkConsoleServicesPlugin extends DarkConsolePlugin {
       }
 
       $rows[] = array(
-        $row['event'],
-        number_format(1000000 * ($row['end'] - $row['start'])).' us',
+        phutil_escape_html($row['type']),
+        number_format(1000000 * $row['duration']).' us',
         $info,
       );
     }

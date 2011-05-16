@@ -109,7 +109,6 @@ phutil_register_library_map(array(
     'DarkConsolePlugin' => 'aphront/console/plugin/base',
     'DarkConsoleRequestPlugin' => 'aphront/console/plugin/request',
     'DarkConsoleServicesPlugin' => 'aphront/console/plugin/services',
-    'DarkConsoleServicesPluginAPI' => 'aphront/console/plugin/services/api',
     'DarkConsoleXHProfPlugin' => 'aphront/console/plugin/xhprof',
     'DarkConsoleXHProfPluginAPI' => 'aphront/console/plugin/xhprof/api',
     'DatabaseConfigurationProvider' => 'applications/base/storage/configuration',
