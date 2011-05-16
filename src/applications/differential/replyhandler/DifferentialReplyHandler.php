@@ -84,12 +84,16 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
   public function getSupportedCommands() {
     return array(
       DifferentialAction::ACTION_COMMENT,
-      DifferentialAction::ACTION_ACCEPT,
       DifferentialAction::ACTION_REJECT,
       DifferentialAction::ACTION_ABANDON,
       DifferentialAction::ACTION_RECLAIM,
       DifferentialAction::ACTION_RESIGN,
+      DifferentialAction::ACTION_RETHINK,
     );
+  }
+
+  public function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
+    $this->handleAction($mail->getCleanTextBody());
   }
 
   public function handleAction($body) {

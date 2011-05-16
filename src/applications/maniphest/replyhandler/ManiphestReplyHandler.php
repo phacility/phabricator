@@ -36,12 +36,66 @@ class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
 
   public function getReplyHandlerInstructions() {
     if ($this->supportsReplies()) {
-      return "Reply to comment or attach files, or !close, !claim, ".
-             "!unsubscribe, or !assign <user|upforgrabs>. ".
-             "TODO: None of this works yet!";
+      return "Reply to comment or attach files, or !close, !claim, or ".
+             "!unsubscribe.";
     } else {
       return null;
     }
+  }
+
+  public function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
+
+    $task = $this->getMailReceiver();
+    $user = $this->getActor();
+
+    $body = $mail->getCleanTextBody();
+    $body = trim($body);
+
+    $lines = explode("\n", trim($body));
+    $first_line = head($lines);
+
+    $command = null;
+    $matches = null;
+    if (preg_match('/^!(\w+)/', $first_line, $matches)) {
+      $lines = array_slice($lines, 1);
+      $body = implode("\n", $lines);
+      $body = trim($body);
+
+      $command = $matches[1];
+    }
+
+    $ttype = ManiphestTransactionType::TYPE_NONE;
+    $new_value = null;
+    switch ($command) {
+      case 'close':
+        $ttype = ManiphestTransactionType::TYPE_STATUS;
+        $new_value = ManiphestTaskStatus::STATUS_CLOSED_RESOLVED;
+        break;
+      case 'claim':
+        $ttype = ManiphestTransactionType::TYPE_OWNER;
+        $new_value = $user->getPHID();
+        break;
+      case 'unsubscribe':
+        $ttype = ManiphestTransactionType::TYPE_CCS;
+        $ccs = $task->getCCPHIDs();
+        foreach ($ccs as $k => $phid) {
+          if ($phid == $user->getPHID()) {
+            unset($ccs[$k]);
+          }
+        }
+        $new_value = array_values($ccs);
+        break;
+    }
+
+    $xaction = new ManiphestTransaction();
+    $xaction->setAuthorPHID($user->getPHID());
+    $xaction->setTransactionType($ttype);
+    $xaction->setNewValue($new_value);
+    $xaction->setComments($body);
+
+    $editor = new ManiphestTransactionEditor();
+    $editor->applyTransactions($task, array($xaction));
+
   }
 
 }

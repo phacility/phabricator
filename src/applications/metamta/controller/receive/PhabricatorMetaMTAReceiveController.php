@@ -32,8 +32,8 @@ class PhabricatorMetaMTAReceiveController
       }
 
       $hash = PhabricatorMetaMTAReceivedMail::computeMailHash(
-        $receiver,
-        $user);
+        $receiver->getMailKey(),
+        $user->getPHID());
 
       $received = new PhabricatorMetaMTAReceivedMail();
       $received->setHeaders(

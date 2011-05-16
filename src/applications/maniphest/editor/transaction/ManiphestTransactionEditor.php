@@ -212,7 +212,7 @@ class ManiphestTransactionEditor {
     }
   }
 
-  private function buildReplyHandler(ManiphestTask $task) {
+  public function buildReplyHandler(ManiphestTask $task) {
     $handler_class = PhabricatorEnv::getEnvConfig(
       'metamta.maniphest.reply-handler');
 

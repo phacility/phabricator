@@ -6,8 +6,14 @@
 
 
 
+phutil_require_module('phabricator', 'applications/maniphest/constants/status');
+phutil_require_module('phabricator', 'applications/maniphest/constants/transactiontype');
+phutil_require_module('phabricator', 'applications/maniphest/editor/transaction');
+phutil_require_module('phabricator', 'applications/maniphest/storage/transaction');
 phutil_require_module('phabricator', 'applications/metamta/replyhandler/base');
 phutil_require_module('phabricator', 'infrastructure/env');
+
+phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('ManiphestReplyHandler.php');

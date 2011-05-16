@@ -78,42 +78,22 @@ class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       return $this->setMessage("Invalid mail hash!")->save();
     }
 
-    // TODO: Move this into the application logic instead.
     if ($receiver instanceof ManiphestTask) {
-      $this->processManiphestMail($receiver, $user);
+      $editor = new ManiphestTransactionEditor();
+      $handler = $editor->buildReplyHandler($receiver);
     } else if ($receiver instanceof DifferentialRevision) {
-      $this->processDifferentialMail($receiver, $user);
+      $handler = DifferentialMail::newReplyHandlerForRevision($receiver);
     }
+
+    $handler->setActor($user);
+    $handler->receiveEmail($this);
 
     $this->setMessage('OK');
 
     return $this->save();
   }
 
-  private function processManiphestMail(
-    ManiphestTask $task,
-    PhabricatorUser $user) {
-
-    // TODO: implement this
-
-  }
-
-  private function processDifferentialMail(
-    DifferentialRevision $revision,
-    PhabricatorUser $user) {
-
-    // TODO: Support actions
-
-    $editor = new DifferentialCommentEditor(
-      $revision,
-      $user->getPHID(),
-      DifferentialAction::ACTION_COMMENT);
-    $editor->setMessage($this->getCleanTextBody());
-    $editor->save();
-
-  }
-
-  private function getCleanTextBody() {
+  public function getCleanTextBody() {
     $body = idx($this->bodies, 'text');
 
     // TODO: Detect quoted content and exclude it.

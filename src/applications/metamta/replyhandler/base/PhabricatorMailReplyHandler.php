@@ -45,6 +45,7 @@ abstract class PhabricatorMailReplyHandler {
     PhabricatorObjectHandle $handle);
   abstract public function getReplyHandlerDomain();
   abstract public function getReplyHandlerInstructions();
+  abstract public function receiveEmail(PhabricatorMetaMTAReceivedMail $mail);
 
   public function supportsPrivateReplies() {
     return (bool)$this->getReplyHandlerDomain();
