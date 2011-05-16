@@ -167,6 +167,10 @@ return array(
   // PhabricatorMailReplyHandler (and possibly of ManiphestReplyHandler).
   'metamta.maniphest.reply-handler' => 'ManiphestReplyHandler',
 
+  // Prefix prepended to mail sent by Maniphest. You can change this to
+  // distinguish between testing and development installs, for example.
+  'metamta.maniphest.subject-prefix' => '[Maniphest]',
+
   // See 'metamta.maniphest.reply-handler-domain'. This does the same thing,
   // but allows email replies via Differential.
   'metamta.differential.reply-handler-domain' => null,
@@ -174,6 +178,9 @@ return array(
   // See 'metamta.maniphest.reply-handler'. This does the same thing, but
   // affects Differential.
   'metamta.differential.reply-handler' => 'DifferentialReplyHandler',
+
+  // Prefix prepended to mail sent by Differential.
+  'metamta.differential.subject-prefix' => '[Differential]',
 
 
 // -- Auth ------------------------------------------------------------------ //

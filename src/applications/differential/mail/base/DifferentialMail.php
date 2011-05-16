@@ -18,8 +18,6 @@
 
 abstract class DifferentialMail {
 
-  const SUBJECT_PREFIX  = '[Differential]';
-
   protected $to = array();
   protected $cc = array();
 
@@ -115,8 +113,12 @@ abstract class DifferentialMail {
     }
   }
 
+  protected function getSubjectPrefix() {
+    return PhabricatorEnv::getEnvConfig('metamta.differential.subject-prefix');
+  }
+
   protected function buildSubject() {
-    return self::SUBJECT_PREFIX.' '.$this->renderSubject();
+    return trim($this->getSubjectPrefix().' '.$this->renderSubject());
   }
 
   protected function shouldMarkMailAsHTML() {

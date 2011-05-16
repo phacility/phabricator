@@ -17,7 +17,6 @@
  */
 
 class ManiphestTransactionEditor {
-  const SUBJECT_PREFIX = '[Maniphest]';
 
   public function applyTransactions($task, array $transactions) {
 
@@ -130,6 +129,10 @@ class ManiphestTransactionEditor {
     $this->sendEmail($task, $transactions, $email_to, $email_cc);
   }
 
+  protected function getSubjectPrefix() {
+    return PhabricatorEnv::getEnvConfig('metamta.maniphest.subject-prefix');
+  }
+
   private function sendEmail($task, $transactions, $email_to, $email_cc) {
     $email_to = array_filter(array_unique($email_to));
     $email_cc = array_filter(array_unique($email_cc));
@@ -193,9 +196,11 @@ class ManiphestTransactionEditor {
     $thread_id = '<maniphest-task-'.$task->getPHID().'>';
     $task_id = $task->getID();
     $title = $task->getTitle();
+    $prefix = $this->getSubjectPrefix();
+    $subject = trim("{$prefix} [{$action}] T{$task_id}: {$title}");
 
     $template = id(new PhabricatorMetaMTAMail())
-      ->setSubject(self::SUBJECT_PREFIX." [{$action}] T{$task_id}: {$title}")
+      ->setSubject($subject)
       ->setFrom($transaction->getAuthorPHID())
       ->addHeader('Thread-Topic', 'Maniphest Task '.$task->getID())
       ->setThreadID($thread_id, $is_create)

@@ -40,11 +40,10 @@ class DifferentialNewDiffMail extends DifferentialReviewRequestMail {
       return parent::buildSubject();
     }
 
-    $prefix = self::SUBJECT_PREFIX;
-
+    $prefix = $this->getSubjectPrefix();
     $subject = $this->renderSubject();
 
-    return "{$prefix} {$subject}";
+    return trim("{$prefix} {$subject}");
   }
 
   protected function renderBody() {
