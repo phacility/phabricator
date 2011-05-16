@@ -96,9 +96,17 @@ class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
   public function getCleanTextBody() {
     $body = idx($this->bodies, 'text');
 
-    // TODO: Detect quoted content and exclude it.
+    // TODO: Refine this "algorithm".
 
-    return $body;
+    $lines = explode("\n", trim($body));
+    for ($ii = 0; $ii < count($lines); $ii++) {
+      if (preg_match('/^\s*On\b.*\bwrote:\s*$/', $lines[$ii])) {
+        $lines = array_slice($lines, 0, $ii);
+        break;
+      }
+    }
+
+    return trim(implode("\n", $lines));
   }
 
   public static function loadReceiverObject($receiver_name) {
