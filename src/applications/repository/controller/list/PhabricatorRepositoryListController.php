@@ -19,8 +19,15 @@
 class PhabricatorRepositoryListController
   extends PhabricatorRepositoryController {
 
+  public function shouldRequireAdmin() {
+    return false;
+  }
 
   public function processRequest() {
+
+    $request = $this->getRequest();
+    $user = $request->getUser();
+    $is_admin = $user->getIsAdmin();
 
     $repos = id(new PhabricatorRepository())->loadAll();
 
@@ -82,9 +89,21 @@ class PhabricatorRepositoryListController
         'action',
       ));
 
+    $table->setColumnVisibility(
+      array(
+        true,
+        true,
+        true,
+        true,
+        $is_admin,
+        $is_admin,
+      ));
+
     $panel = new AphrontPanelView();
     $panel->setHeader('Repositories');
-    $panel->setCreateButton('Create New Repository', '/repository/create/');
+    if ($is_admin) {
+      $panel->setCreateButton('Create New Repository', '/repository/create/');
+    }
     $panel->appendChild($table);
 
     $projects = id(new PhabricatorRepositoryArcanistProject())->loadAll();
@@ -123,6 +142,13 @@ class PhabricatorRepositoryListController
         '',
         'wide',
         'action',
+      ));
+
+    $project_table->setColumnVisibility(
+      array(
+        true,
+        true,
+        $is_admin,
       ));
 
     $project_panel = new AphrontPanelView();

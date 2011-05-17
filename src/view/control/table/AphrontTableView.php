@@ -25,6 +25,7 @@ class AphrontTableView extends AphrontView {
   protected $zebraStripes = true;
   protected $noDataString;
   protected $className;
+  protected $columnVisibility = array();
 
   public function __construct(array $data) {
     $this->data = $data;
@@ -60,6 +61,11 @@ class AphrontTableView extends AphrontView {
     return $this;
   }
 
+  public function setColumnVisibility(array $visibility) {
+    $this->columnVisibility = $visibility;
+    return $this;
+  }
+
   public function render() {
     require_celerity_resource('aphront-table-view-css');
 
@@ -80,10 +86,17 @@ class AphrontTableView extends AphrontView {
       }
     }
 
+    $visibility = array_values($this->columnVisibility);
     $headers = $this->headers;
     if ($headers) {
+      while (count($headers) > count($visibility)) {
+        $visibility[] = true;
+      }
       $table[] = '<tr>';
       foreach ($headers as $col_num => $header) {
+        if (!$visibility[$col_num]) {
+          continue;
+        }
         $class = idx($col_classes, $col_num);
         $table[] = '<th'.$class.'>'.$header.'</th>';
       }
@@ -97,6 +110,9 @@ class AphrontTableView extends AphrontView {
         while (count($row) > count($col_classes)) {
           $col_classes[] = null;
         }
+        while (count($row) > count($visibility)) {
+          $visibility[] = true;
+        }
         $class = idx($this->rowClasses, $row_num);
         if ($this->zebraStripes && ($row_num % 2)) {
           if ($class !== null) {
@@ -109,8 +125,14 @@ class AphrontTableView extends AphrontView {
           $class = ' class="'.$class.'"';
         }
         $table[] = '<tr'.$class.'>';
+        // NOTE: Use of a separate column counter is to allow this to work
+        // correctly if the row data has string or non-sequential keys.
         $col_num = 0;
         foreach ($row as $value) {
+          if (!$visibility[$col_num]) {
+            ++$col_num;
+            continue;
+          }
           $class = $col_classes[$col_num];
           if ($class !== null) {
             $table[] = '<td'.$class.'>';

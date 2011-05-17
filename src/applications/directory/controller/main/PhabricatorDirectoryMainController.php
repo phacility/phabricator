@@ -19,6 +19,12 @@
 class PhabricatorDirectoryMainController
   extends PhabricatorDirectoryController {
 
+  public function shouldRequireAdmin() {
+    // These controllers are admin-only by default, but this one is public,
+    // so allow non-admin users to view it.
+    return false;
+  }
+
   public function processRequest() {
 
 

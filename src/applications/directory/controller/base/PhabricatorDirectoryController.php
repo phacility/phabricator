@@ -18,18 +18,27 @@
 
 abstract class PhabricatorDirectoryController extends PhabricatorController {
 
+  public function shouldRequireAdmin() {
+    // Most controllers here are admin-only, so default to locking them down.
+    return true;
+  }
+
   public function buildStandardPageResponse($view, array $data) {
     $page = $this->buildStandardPageView();
 
     $page->setApplicationName('Directory');
     $page->setBaseURI('/');
     $page->setTitle(idx($data, 'title'));
-    $page->setTabs(
-      array(
-        'directory' => array(
-          'href' => '/',
-          'name' => 'Directory',
-        ),
+
+    $tabs = array(
+      'directory' => array(
+        'href' => '/',
+        'name' => 'Directory',
+      ),
+    );
+
+    if ($this->getRequest()->getUser()->getIsAdmin()) {
+      $tabs += array(
         'categories' => array(
           'href' => '/directory/category/',
           'name' => 'Categories',
@@ -38,7 +47,11 @@ abstract class PhabricatorDirectoryController extends PhabricatorController {
           'href' => '/directory/item/',
           'name' => 'Items',
         ),
-      ),
+      );
+    }
+
+    $page->setTabs(
+      $tabs,
       idx($data, 'tab'));
     $page->setGlyph("\xE2\x9A\x92");
     $page->appendChild($view);

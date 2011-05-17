@@ -42,75 +42,65 @@ class PhabricatorPeopleListController extends PhabricatorPeopleController {
 
     $rows = array();
     foreach ($users as $user) {
-      $cols = array();
-      $cols[] = date('M jS, Y', $user->getDateCreated());
-      $cols[] = date('g:i:s A', $user->getDateCreated());
-      $cols[] = phutil_render_tag(
-        'a',
-        array(
-          'href' => '/p/'.$user->getUsername().'/',
-        ),
-        phutil_escape_html($user->getUserName()));
-      $cols[] = phutil_escape_html($user->getRealName());
 
-      if ($is_admin) {
-        $status = '';
-        if ($user->getIsDisabled()) {
-          $status = 'Disabled';
-        } else if ($user->getIsAdmin()) {
-          $status = 'Admin';
-        } else {
-          $status = '-';
-        }
-        $cols[] = $status;
-        $cols[] = phutil_render_tag(
+      $status = '';
+      if ($user->getIsDisabled()) {
+        $status = 'Disabled';
+      } else if ($user->getIsAdmin()) {
+        $status = 'Admin';
+      } else {
+        $status = '-';
+      }
+
+      $rows[] = array(
+        date('M jS, Y', $user->getDateCreated()),
+        date('g:i:s A', $user->getDateCreated()),
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => '/p/'.$user->getUsername().'/',
+          ),
+          phutil_escape_html($user->getUserName())),
+        phutil_escape_html($user->getRealName()),
+        $status,
+        phutil_render_tag(
           'a',
           array(
             'class' => 'button grey small',
             'href'  => '/people/edit/'.$user->getID().'/',
           ),
-          'Administrate User');
-      }
-
-      $rows[] = $cols;
+          'Administrate User'),
+      );
     }
 
     $table = new AphrontTableView($rows);
-    if ($is_admin) {
-      $table->setHeaders(
-        array(
-          'Join Date',
-          'Time',
-          'Username',
-          'Real Name',
-          'Status',
-          '',
-        ));
-      $table->setColumnClasses(
-        array(
-          null,
-          'right',
-          'pri',
-          'wide',
-          null,
-          'action',
-        ));
-    } else {
-      $table->setHeaders(
-        array(
-          'Join Date',
-          'Time',
-          'Username',
-          'Real Name',
-        ));
-      $table->setColumnClasses(
-        array(
-          null,
-          'right',
-          'pri',
-          'wide',
-        ));
-    }
+    $table->setHeaders(
+      array(
+        'Join Date',
+        'Time',
+        'Username',
+        'Real Name',
+        'Status',
+        '',
+      ));
+    $table->setColumnClasses(
+      array(
+        null,
+        'right',
+        'pri',
+        'wide',
+        null,
+        'action',
+      ));
+    $table->setColumnVisibility(
+      array(
+        true,
+        true,
+        true,
+        true,
+        $is_admin,
+        $is_admin,
+      ));
 
     $panel = new AphrontPanelView();
     $panel->setHeader('People ('.number_format($count).')');
