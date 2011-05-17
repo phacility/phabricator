@@ -48,6 +48,7 @@ class PhabricatorPeopleEditController extends PhabricatorPeopleController {
       'basic'     => 'Basic Information',
       'password'  => 'Reset Password',
       'role'      => 'Edit Role',
+      'cert'      => 'Conduit Certificate',
     );
 
     if (!$user->getID()) {
@@ -77,6 +78,9 @@ class PhabricatorPeopleEditController extends PhabricatorPeopleController {
         break;
       case 'role':
         $response = $this->processRoleRequest($user);
+        break;
+      case 'cert':
+        $response = $this->processCertificateRequest($user);
         break;
     }
 
@@ -374,6 +378,49 @@ class PhabricatorPeopleEditController extends PhabricatorPeopleController {
     $panel->appendChild($form);
 
     return array($error_view, $panel);
+  }
+
+  private function processCertificateRequest($user) {
+    $request = $this->getRequest();
+    $admin = $request->getUser();
+
+
+    $form = new AphrontFormView();
+    $form
+      ->setUser($admin)
+      ->setAction($request->getRequestURI())
+      ->appendChild(
+        '<p class="aphront-form-instructions">You can use this certificate '.
+        'to write scripts or bots which interface with Phabricator over '.
+        'Conduit.</p>');
+
+    if ($user->getIsSystemAgent()) {
+      $form
+        ->appendChild(
+          id(new AphrontFormTextControl())
+            ->setLabel('Username')
+            ->setValue($user->getUsername()))
+        ->appendChild(
+          id(new AphrontFormTextAreaControl())
+            ->setLabel('Certificate')
+            ->setValue($user->getConduitCertificate()));
+    } else {
+      $form->appendChild(
+        id(new AphrontFormStaticControl())
+          ->setLabel('Certificate')
+          ->setValue(
+            'You may only view the certificates for System Agents. Mark '.
+            'this account as a "system agent" in the "Edit Role" tab to '.
+            'view the corresponding certificate.'));
+    }
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader('Conduit Certificate');
+    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+
+    $panel->appendChild($form);
+
+    return array($panel);
   }
 
 }

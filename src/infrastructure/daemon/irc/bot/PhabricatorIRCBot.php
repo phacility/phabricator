@@ -34,6 +34,8 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
   private $writeBuffer;
   private $readBuffer;
 
+  private $conduit;
+
   public function run() {
 
     $argv = $this->getArgv();
@@ -66,6 +68,25 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
     foreach ($handlers as $handler) {
       $obj = newv($handler, array($this));
       $this->handlers[] = $obj;
+    }
+
+    $conduit_uri = idx($config, 'conduit.uri');
+    if ($conduit_uri) {
+      $conduit_user = idx($config, 'conduit.user');
+      $conduit_cert = idx($config, 'conduit.cert');
+
+      $conduit = new ConduitClient($conduit_uri);
+      $response = $conduit->callMethodSynchronous(
+        'conduit.connect',
+        array(
+          'client'            => 'PhabricatorIRCBot',
+          'clientVersion'     => '1.0',
+          'clientDescription' => php_uname('n').':'.$nick,
+          'user'              => $conduit_user,
+          'certificate'       => $conduit_cert,
+        ));
+
+      $this->conduit = $conduit;
     }
 
     $errno = null;
@@ -130,7 +151,9 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
         } while (strlen($this->writeBuffer));
       }
 
-      $this->processReadBuffer();
+      do {
+        $routed_message = $this->processReadBuffer();
+      } while ($routed_message);
 
     } while (true);
   }
@@ -147,7 +170,7 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
   private function processReadBuffer() {
     $until = strpos($this->readBuffer, "\r\n");
     if ($until === false) {
-      return;
+      return false;
     }
 
     $message = substr($this->readBuffer, 0, $until);
@@ -171,6 +194,8 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
       $matches['data']);
 
     $this->routeMessage($irc_message);
+
+    return true;
   }
 
   private function routeMessage(PhabricatorIRCMessage $message) {
@@ -188,6 +213,15 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
     echo $is_read ? '<<< ' : '>>> ';
     echo addcslashes($message, "\0..\37\177..\377");
     echo "\n";
+  }
+
+  public function getConduit() {
+    if (empty($this->conduit)) {
+      throw new Exception(
+        "This bot is not configured with a Conduit uplink. Set 'conduit.uri', ".
+        "'conduit.user' and 'conduit.cert' in the configuration to connect.");
+    }
+    return $this->conduit;
   }
 
 }

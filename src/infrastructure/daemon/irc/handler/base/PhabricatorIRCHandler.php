@@ -35,6 +35,10 @@ abstract class PhabricatorIRCHandler {
     return $this;
   }
 
+  final protected function getConduit() {
+    return $this->bot->getConduit();
+  }
+
   abstract public function receiveMessage(PhabricatorIRCMessage $message);
 
 }
