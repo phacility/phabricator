@@ -10,6 +10,7 @@ phutil_require_module('phabricator', 'infrastructure/daemon/base');
 phutil_require_module('phabricator', 'infrastructure/daemon/irc/message');
 
 phutil_require_module('phutil', 'conduit/client');
+phutil_require_module('phutil', 'error');
 phutil_require_module('phutil', 'filesystem');
 phutil_require_module('phutil', 'utils');
 

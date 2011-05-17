@@ -200,7 +200,11 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
 
   private function routeMessage(PhabricatorIRCMessage $message) {
     foreach ($this->handlers as $handler) {
-      $handler->receiveMessage($message);
+      try {
+        $handler->receiveMessage($message);
+      } catch (Exception $ex) {
+        phlog($ex);
+      }
     }
   }
 

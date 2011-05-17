@@ -40,4 +40,30 @@ final class PhabricatorIRCMessage {
     return $this->command;
   }
 
+  public function getChannel() {
+    switch ($this->getCommand()) {
+      case 'PRIVMSG':
+        $matches = null;
+        $raw = $this->getRawData();
+        if (preg_match('/^(\S+)\s/', $raw, $matches)) {
+          return $matches[1];
+        }
+       break;
+    }
+    return null;
+  }
+
+  public function getMessageText() {
+    switch ($this->getCommand()) {
+      case 'PRIVMSG':
+        $matches = null;
+        $raw = $this->getRawData();
+        if (preg_match('/^\S+\s+:?(.*)$/', $raw, $matches)) {
+          return rtrim($matches[1], "\r\n");
+        }
+        break;
+    }
+    return null;
+  }
+
 }
