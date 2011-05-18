@@ -49,6 +49,14 @@ To configure Facebook OAuth, create a new Facebook Application:
 
 https://www.facebook.com/developers/createapp.php
 
+You should set these things in your application:
+
+  - **Site URL**: Set this to your full domain with protocol, like
+    "##https://phabricator.example.com/##".
+  - **Site Domain**: Set this to the entire domain, like ##example.com##. You
+    might be able to get away with including the subdomain if you want to
+    scope more tightly.
+
 Once that is set up, edit your Phabricator configuration and set these keys:
 
   - **facebook.auth-enabled**: set this to ##true##.
@@ -71,6 +79,13 @@ nothing (the default).
 To configure GitHub OAuth, create a new GitHub Application:
 
 https://github.com/account/applications/new
+
+You should set these things in your application:
+
+  - **URL**: Set this to the full domain with protocol, like
+    "##https://phabricator.example.com/##".
+  - **Callback URL**: Set this to your domain plus "##/oauth/github/login/##",
+    like "##https://phabricator.example.com/oauth/github/login/##".
 
 Once you've created an application, edit your Phabricator configuration and
 set these keys:
