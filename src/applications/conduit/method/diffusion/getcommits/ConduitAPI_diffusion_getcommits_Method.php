@@ -88,38 +88,27 @@ class ConduitAPI_diffusion_getcommits_Method extends ConduitAPIMethod {
       return $results;
     }
 
-    $conn_r = id(new PhabricatorRepositoryCommit())->establishConnection('r');
+    // Execute a complicated query to figure out the primary commit information
+    // for each referenced commit.
+    $cdata = $this->queryCommitInformation($commits, $repos);
 
-    $groups = array();
-    foreach ($commits as $name => $commit) {
-      $groups[$commit['repositoryID']][] = $commit['commitIdentifier'];
-    }
-
-    // NOTE: MySQL goes crazy and does a massive table scan if we build a more
-    // sensible version of this query. Make sure the query play is OK if you
-    // attempt to reduce the craziness here.
-    $query = array();
-    foreach ($groups as $repository_id => $identifiers) {
-      $query[] = qsprintf(
-        $conn_r,
-        'SELECT * FROM %T WHERE repositoryID = %d
-          AND commitIdentifier IN (%Ls)',
-        id(new PhabricatorRepositoryCommit())->getTableName(),
-        $repository_id,
-        $identifiers);
-    }
-    $cdata = queryfx_all(
-      $conn_r,
-      '%Q',
-      implode(' UNION ALL ', $query));
+    // We've built the queries so that each row also has the identifier we used
+    // to select it, which might be a git prefix rather than a full identifier.
+    $ref_map = ipull($cdata, 'commitIdentifier', 'commitRef');
 
     $cobjs = id(new PhabricatorRepositoryCommit())->loadAllFromArray($cdata);
     $cobjs = mgroup($cobjs, 'getRepositoryID', 'getCommitIdentifier');
     foreach ($commits as $name => $commit) {
+
+      // Expand short git names into full identifiers. For SVN this map is just
+      // the identity.
+      $full_identifier = idx($ref_map, $commit['commitIdentifier']);
+
       $repo_id = $commit['repositoryID'];
       unset($commits[$name]['repositoryID']);
 
-      if (empty($cobjs[$commit['repositoryID']][$commit['commitIdentifier']])) {
+      if (empty($full_identifier) ||
+          empty($cobjs[$commit['repositoryID']][$full_identifier])) {
         $results[$name] = $commit + array(
           'error' => 'ERR-UNKNOWN-COMMIT',
         );
@@ -127,21 +116,100 @@ class ConduitAPI_diffusion_getcommits_Method extends ConduitAPIMethod {
         continue;
       }
 
-      $cobj_arr = $cobjs[$commit['repositoryID']][$commit['commitIdentifier']];
+      $cobj_arr = $cobjs[$commit['repositoryID']][$full_identifier];
       $cobj = head($cobj_arr);
 
       $commits[$name] += array(
-        'epoch'      => $cobj->getEpoch(),
-        'commitPHID' => $cobj->getPHID(),
-        'commitID'   => $cobj->getID(),
+        'epoch'             => $cobj->getEpoch(),
+        'commitPHID'        => $cobj->getPHID(),
+        'commitID'          => $cobj->getID(),
       );
+
+      // Upgrade git short references into full commit identifiers.
+      $commits[$name]['commitIdentifier'] = $cobj->getCommitIdentifier();
     }
 
     if (!$commits) {
       return $results;
     }
 
+    $commits = $this->addRepositoryCommitDataInformation($commits);
+    $commits = $this->addDifferentialInformation($commits);
+
+    foreach ($commits as $name => $commit) {
+      $results[$name] = $commit;
+    }
+
+    return $results;
+  }
+
+  /**
+   * Retrieve primary commit information for all referenced commits.
+   */
+  private function queryCommitInformation(array $commits, array $repos) {
+    $conn_r = id(new PhabricatorRepositoryCommit())->establishConnection('r');
+    $repos = mpull($repos, null, 'getID');
+
+    $groups = array();
+    foreach ($commits as $name => $commit) {
+      $groups[$commit['repositoryID']][] = $commit['commitIdentifier'];
+    }
+
+    // NOTE: MySQL goes crazy and does a massive table scan if we build a more
+    // sensible version of this query. Make sure the query plan is OK if you
+    // attempt to reduce the craziness here. METANOTE: The addition of prefix
+    // selection for Git further complicates matters.
+    $query = array();
+    $commit_table = id(new PhabricatorRepositoryCommit())->getTableName();
+
+    foreach ($groups as $repository_id => $identifiers) {
+      $vcs = $repos[$repository_id]->getVersionControlSystem();
+      $is_git = ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_GIT);
+      if ($is_git) {
+        foreach ($identifiers as $identifier) {
+          if (strlen($identifier) < 7) {
+            // Don't bother with silly stuff like 'rX2', which will select
+            // 1/16th of all commits. Note that with length 7 we'll still get
+            // collisions in repositories at the tens-of-thousands-of-commits
+            // scale.
+            continue;
+          }
+          $query[] = qsprintf(
+            $conn_r,
+            'SELECT %T.*, %s commitRef
+              FROM %T WHERE repositoryID = %d
+              AND commitIdentifier LIKE %>',
+            $commit_table,
+            $identifier,
+            $commit_table,
+            $repository_id,
+            $identifier);
+        }
+      } else {
+        $query[] = qsprintf(
+          $conn_r,
+          'SELECT %T.*, commitIdentifier commitRef
+            FROM %T WHERE repositoryID = %d
+            AND commitIdentifier IN (%Ls)',
+          $commit_table,
+          $commit_table,
+          $repository_id,
+          $identifiers);
+      }
+    }
+
+    return queryfx_all(
+      $conn_r,
+      '%Q',
+      implode(' UNION ALL ', $query));
+  }
+
+  /**
+   * Enhance the commit list with RepositoryCommitData information.
+   */
+  private function addRepositoryCommitDataInformation(array $commits) {
     $commit_ids = ipull($commits, 'commitID');
+
     $data = id(new PhabricatorRepositoryCommitData())->loadAllWhere(
       'commitID in (%Ld)',
       $commit_ids);
@@ -155,10 +223,21 @@ class ConduitAPI_diffusion_getcommits_Method extends ConduitAPIMethod {
           'commitDetails' => $dobj->getCommitDetails(),
         );
       }
+
+      // Remove this information so we don't expose it via the API since
+      // external services shouldn't be storing internal Commit IDs.
       unset($commits[$name]['commitID']);
     }
 
+    return $commits;
+  }
+
+  /**
+   * Enhance the commit list with Differential information.
+   */
+  private function addDifferentialInformation(array $commits) {
     $commit_phids = ipull($commits, 'commitPHID');
+
     $rev_conn_r = id(new DifferentialRevision())->establishConnection('r');
     $revs = queryfx_all(
       $rev_conn_r,
@@ -180,11 +259,7 @@ class ConduitAPI_diffusion_getcommits_Method extends ConduitAPIMethod {
       }
     }
 
-    foreach ($commits as $name => $commit) {
-      $results[$name] = $commit;
-    }
-
-    return $results;
+    return $commits;
   }
 
 }

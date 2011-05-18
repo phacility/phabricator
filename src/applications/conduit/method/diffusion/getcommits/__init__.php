@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'applications/conduit/method/base');
 phutil_require_module('phabricator', 'applications/differential/storage/revision');
+phutil_require_module('phabricator', 'applications/repository/constants/repositorytype');
 phutil_require_module('phabricator', 'applications/repository/storage/commit');
 phutil_require_module('phabricator', 'applications/repository/storage/commitdata');
 phutil_require_module('phabricator', 'applications/repository/storage/repository');
