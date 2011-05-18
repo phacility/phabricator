@@ -300,7 +300,7 @@ return array(
   // has a mime type which does not appear in this list, it will always be
   // downloaded instead of displayed. This is a security consideration: if a
   // user uploads a file of type "text/html" and it is displayed as
-  // "text/html", they can eaily execute XSS attacks. This is also a usability
+  // "text/html", they can easily execute XSS attacks. This is also a usability
   // consideration, since browsers tend to freak out when viewing enormous
   // binary files.
   //
