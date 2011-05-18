@@ -258,10 +258,20 @@ class PhabricatorRepositoryEditController
         if (!$repository->getDetail('remote-uri')) {
           $e_uri = 'Required';
           $errors[] = "Repository URI is required.";
+        } else if ($is_svn &&
+          !preg_match('@/$@', $repository->getDetail('remote-uri'))) {
+
+          $e_uri = 'Invalid';
+          $errors[] = 'Subversion Repository URI must end in a slash ("/").';
+        } else {
+          $e_uri = null;
         }
+
         if (!$repository->getDetail('local-path')) {
           $e_path = 'Required';
           $errors[] = "Local path is required.";
+        } else {
+          $e_path = null;
         }
       }
 
