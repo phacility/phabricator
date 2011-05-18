@@ -124,7 +124,7 @@ abstract class DiffusionView extends AphrontView {
 
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        $commit_name = substr($commit, 0, 7);
+        $commit_name = substr($commit, 0, 16);
         break;
       default:
         $commit_name = $commit;

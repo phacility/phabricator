@@ -54,17 +54,20 @@ class DiffusionBrowseFileController extends DiffusionController {
     }
     $select .= '</select>';
 
+    require_celerity_resource('diffusion-source-css');
+
     $view_select_panel = new AphrontPanelView();
     $view_select_form = phutil_render_tag(
       'form',
       array(
         'action' => $request->getRequestURI(),
         'method' => 'get',
-        'style'  => 'display: inline',
+        'class'  => 'diffusion-browse-type-form',
       ),
       $select.
-      '<button>view</button>');
+      '<button>View</button>');
     $view_select_panel->appendChild($view_select_form);
+    $view_select_panel->appendChild('<div style="clear: both;"></div>');
 
     // Build the content of the file.
     $corpus = $this->buildCorpus($selected);
@@ -102,7 +105,7 @@ class DiffusionBrowseFileController extends DiffusionController {
    */
   public function getImageType($path) {
     $ext = pathinfo($path);
-    $ext = $ext['extension'];
+    $ext = idx($ext, 'extension');
     return idx($this->imageTypes, $ext);
   }
 
@@ -173,7 +176,6 @@ class DiffusionBrowseFileController extends DiffusionController {
       case 'blame':
       default:
         require_celerity_resource('syntax-highlighting-css');
-        require_celerity_resource('diffusion-source-css');
 
         list($text_list, $rev_list, $blame_dict) = $file_query->getBlameData();
 
@@ -215,10 +217,14 @@ class DiffusionBrowseFileController extends DiffusionController {
     $rows = array();
     $n = 1;
 
-    $epoch_list = ipull($blame_dict, 'epoch');
-    $max = max($epoch_list);
-    $min = min($epoch_list);
-    $range = $max - $min + 1;
+    if ($blame_dict) {
+      $epoch_list = ipull($blame_dict, 'epoch');
+      $max = max($epoch_list);
+      $min = min($epoch_list);
+      $range = $max - $min + 1;
+    } else {
+      $range = 1;
+    }
 
     foreach ($text_list as $k => $line) {
       if ($needs_blame) {
@@ -284,11 +290,12 @@ class DiffusionBrowseFileController extends DiffusionController {
 
       // Create the row display.
       $uri_path = $drequest->getUriPath();
-      $uri_rev  = $drequest->getCommit();
+      $uri_rev  = $drequest->getStableCommitName();
 
       $l = phutil_render_tag(
         'a',
         array(
+          'class' => 'diffusion-line-link',
           'href' => $uri_path.';'.$uri_rev.'$'.$n,
         ),
         $n);

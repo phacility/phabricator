@@ -27,6 +27,7 @@ class DiffusionRequest {
   protected $repository;
   protected $repositoryCommit;
   protected $repositoryCommitData;
+  protected $stableCommitName;
 
   final private function __construct() {
     // <private>
@@ -134,6 +135,19 @@ class DiffusionRequest {
       $this->repositoryCommitData = $data;
     }
     return $this->repositoryCommitData;
+  }
+
+  /**
+   * Retrieve a stable, permanent commit name. This returns a non-symbolic
+   * identifier for the current commit: e.g., a specific commit hash in git
+   * (NOT a symbolic name like "origin/master") or a specific revision number
+   * in SVN (NOT a symbolic name like "HEAD").
+   *
+   * @return string Stable commit name, like a git hash or SVN revision. Not
+   *                a symbolic commit reference.
+   */
+  public function getStableCommitName() {
+    return $this->stableCommitName;
   }
 
   final public function getRawCommit() {

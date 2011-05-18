@@ -52,7 +52,7 @@ class DiffusionGitRequest extends DiffusionRequest {
       // message to indicate whether they've typed in some bogus branch and/or
       // followed a bad link, or misconfigured the default branch in the
       // Repository tool.
-      execx(
+      list($this->stableCommitName) = execx(
         '(cd %s && git rev-parse --verify %s)',
         $local_path,
         $branch);
@@ -66,6 +66,10 @@ class DiffusionGitRequest extends DiffusionRequest {
         // Beyond verifying them, expand commit short forms to full 40-character
         // sha1s.
         $this->commit = trim($commit);
+
+        // If we have a commit, overwrite the branch commit with the more
+        // specific commit.
+        $this->stableCommitName = $this->commit;
 
 /*
 
@@ -117,6 +121,10 @@ class DiffusionGitRequest extends DiffusionRequest {
       return $this->commit;
     }
     return $this->getBranch();
+  }
+
+  public function getStableCommitName() {
+    return substr($this->stableCommitName, 0, 16);
   }
 
   public function getBranchURIComponent($branch) {

@@ -27,34 +27,40 @@ final class DiffusionGitBrowseQuery extends DiffusionBrowseQuery {
 
     $local_path = $repository->getDetail('local-path');
 
-    try {
-      list($stdout) = execx(
-        "(cd %s && git cat-file -t %s:%s)",
-        $local_path,
-        $commit,
-        $path);
-    } catch (CommandException $e) {
-      $stderr = $e->getStdErr();
-      if (preg_match('/^fatal: Not a valid object name/', $stderr)) {
-        // Grab two logs, since the first one is when the object was deleted.
+    if ($path == '') {
+      // Fast path to improve the performance of the repository view; we know
+      // the root is always a tree at any commit and always exists.
+      $stdout = 'tree';
+    } else {
+      try {
         list($stdout) = execx(
-          '(cd %s && git log -n2 --format="%%H" %s -- %s)',
+          "(cd %s && git cat-file -t %s:%s)",
           $local_path,
           $commit,
           $path);
-        $stdout = trim($stdout);
-        if ($stdout) {
-          $commits = explode("\n", $stdout);
-          $this->reason = self::REASON_IS_DELETED;
-          $this->deletedAtCommit = idx($commits, 0);
-          $this->existedAtCommit = idx($commits, 1);
-          return array();
-        }
+      } catch (CommandException $e) {
+        $stderr = $e->getStdErr();
+        if (preg_match('/^fatal: Not a valid object name/', $stderr)) {
+          // Grab two logs, since the first one is when the object was deleted.
+          list($stdout) = execx(
+            '(cd %s && git log -n2 --format="%%H" %s -- %s)',
+            $local_path,
+            $commit,
+            $path);
+          $stdout = trim($stdout);
+          if ($stdout) {
+            $commits = explode("\n", $stdout);
+            $this->reason = self::REASON_IS_DELETED;
+            $this->deletedAtCommit = idx($commits, 0);
+            $this->existedAtCommit = idx($commits, 1);
+            return array();
+          }
 
-        $this->reason = self::REASON_IS_NONEXISTENT;
-        return array();
-      } else {
-        throw $e;
+          $this->reason = self::REASON_IS_NONEXISTENT;
+          return array();
+        } else {
+          throw $e;
+        }
       }
     }
 

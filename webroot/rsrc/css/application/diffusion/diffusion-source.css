@@ -37,3 +37,11 @@
   overflow:           hidden;
 }
 
+.diffusion-line-link {
+  /* Give the user a larger click target. */
+  display: block;
+}
+
+.diffusion-browse-type-form {
+  float: right;
+}

@@ -18,8 +18,6 @@
 
 class DiffusionSvnRequest extends DiffusionRequest {
 
-  private $loadedCommit;
-
   protected function initializeFromAphrontRequestDictionary(array $data) {
     parent::initializeFromAphrontRequestDictionary($data);
     if (!strncmp($this->path, ':', 1)) {
@@ -28,18 +26,34 @@ class DiffusionSvnRequest extends DiffusionRequest {
     }
   }
 
+  public function getStableCommitName() {
+    if ($this->commit) {
+      return $this->commit;
+    }
+
+    if ($this->stableCommitName === null) {
+      $commit = id(new PhabricatorRepositoryCommit())
+        ->loadOneWhere(
+          'repositoryID = %d ORDER BY epoch DESC LIMIT 1',
+          $this->getRepository()->getID());
+      if ($commit) {
+        $this->stableCommitName = $commit->getCommitIdentifier();
+      } else {
+        // For new repositories, we may not have parsed any commits yet. Call
+        // the stable commit "1" and avoid fataling.
+        $this->stableCommitName = 1;
+      }
+    }
+
+    return $this->stableCommitName;
+  }
+
   public function getCommit() {
     if ($this->commit) {
       return $this->commit;
     }
 
-    if (!$this->loadedCommit) {
-      $this->loadedCommit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-        'repositoryID = %d ORDER BY epoch DESC LIMIT 1',
-        $this->getRepository()->getID())->getCommitIdentifier();
-    }
-
-    return $this->loadedCommit;
+    return $this->getStableCommitName();
   }
 
 }
