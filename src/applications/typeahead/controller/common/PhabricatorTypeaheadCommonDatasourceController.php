@@ -26,6 +26,7 @@ class PhabricatorTypeaheadCommonDatasourceController
   public function processRequest() {
 
     $need_users = false;
+    $need_all_users = false;
     $need_lists = false;
     $need_projs = false;
     $need_repos = false;
@@ -35,6 +36,7 @@ class PhabricatorTypeaheadCommonDatasourceController
       case 'searchowner':
         $need_users = true;
         $need_upforgrabs = true;
+        break;
       case 'users':
         $need_users = true;
         break;
@@ -51,6 +53,10 @@ class PhabricatorTypeaheadCommonDatasourceController
       case 'packages':
         $need_packages = true;
         break;
+      case 'accounts':
+        $need_users = true;
+        $need_all_users = true;
+        break;
     }
 
     $data = array();
@@ -66,8 +72,13 @@ class PhabricatorTypeaheadCommonDatasourceController
     if ($need_users) {
       $users = id(new PhabricatorUser())->loadAll();
       foreach ($users as $user) {
-        if ($user->getIsSystemAgent()) {
-          continue;
+        if (!$need_all_users) {
+          if ($user->getIsSystemAgent()) {
+            continue;
+          }
+          if ($user->getIsDisabled()) {
+            continue;
+          }
         }
         $data[] = array(
           $user->getUsername().' ('.$user->getRealName().')',

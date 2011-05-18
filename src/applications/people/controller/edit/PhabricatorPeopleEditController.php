@@ -159,6 +159,13 @@ class PhabricatorPeopleEditController extends PhabricatorPeopleController {
       if (!$errors) {
         try {
           $user->save();
+
+          $log = PhabricatorUserLog::newLog(
+            $admin,
+            $user,
+            PhabricatorUserLog::ACTION_CREATE);
+          $log->save();
+
           $response = id(new AphrontRedirectResponse())
             ->setURI('/people/edit/'.$user->getID().'/?saved=true');
           return $response;
@@ -259,6 +266,13 @@ class PhabricatorPeopleEditController extends PhabricatorPeopleController {
 
       if (!$errors) {
         $user->save();
+
+        $log = PhabricatorUserLog::newLog(
+          $admin,
+          $user,
+          PhabricatorUserLog::ACTION_RESET_PASSWORD);
+        $log->save();
+
         return id(new AphrontRedirectResponse())
           ->setURI($request->getRequestURI()->alter('saved', 'true'));
       }
@@ -306,16 +320,52 @@ class PhabricatorPeopleEditController extends PhabricatorPeopleController {
     $errors = array();
 
     if ($request->isFormPost()) {
+
+      $log_template = PhabricatorUserLog::newLog(
+        $admin,
+        $user,
+        null);
+
+      $logs = array();
+
       if ($is_self) {
         $errors[] = "You can not edit your own role.";
       } else {
-        $user->setIsAdmin($request->getInt('is_admin'));
-        $user->setIsDisabled($request->getInt('is_disabled'));
-        $user->setIsSystemAgent($request->getInt('is_agent'));
+        $new_admin = (bool)$request->getBool('is_admin');
+        $old_admin = (bool)$user->getIsAdmin();
+        if ($new_admin != $old_admin) {
+          $log = clone $log_template;
+          $log->setAction(PhabricatorUserLog::ACTION_ADMIN);
+          $log->setOldValue($old_admin);
+          $log->setNewValue($new_admin);
+          $user->setIsAdmin($new_admin);
+          $logs[] = $log;
+        }
+
+        $new_disabled = (bool)$request->getBool('is_disabled');
+        $old_disabled = (bool)$user->getIsDisabled();
+        if ($new_disabled != $old_disabled) {
+          $log = clone $log_template;
+          $log->setAction(PhabricatorUserLog::ACTION_DISABLE);
+          $log->setOldValue($old_disabled);
+          $log->setNewValue($new_disabled);
+          $user->setIsDisabled($new_disabled);
+          $logs[] = $log;
+        }
+
+        $new_agent = (bool)$request->getBool('is_agent');
+        $old_agent = (bool)$user->getIsSystemAgent();
+        if ($new_agent != $old_agent) {
+          // TODO: Get rid of this, move it to the create flow.
+          $user->setIsSystemAgent($new_agent);
+        }
       }
 
       if (!$errors) {
         $user->save();
+        foreach ($logs as $log) {
+          $log->save();
+        }
         return id(new AphrontRedirectResponse())
           ->setURI($request->getRequestURI()->alter('saved', 'true'));
       }

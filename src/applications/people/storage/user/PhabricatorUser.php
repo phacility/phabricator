@@ -227,6 +227,18 @@ class PhabricatorUser extends PhabricatorUserDAO {
       $establish_type,
       $session_key);
 
+    $log = PhabricatorUserLog::newLog(
+      $this,
+      $this,
+      PhabricatorUserLog::ACTION_LOGIN);
+    $log->setDetails(
+      array(
+        'session_type' => $session_type,
+        'session_issued' => $establish_type,
+      ));
+    $log->setSession($session_key);
+    $log->save();
+
     return $session_key;
   }
 

@@ -24,6 +24,27 @@ abstract class PhabricatorPeopleController extends PhabricatorController {
     $page->setApplicationName('People');
     $page->setBaseURI('/people/');
     $page->setTitle(idx($data, 'title'));
+
+    $tabs = array(
+      'directory' => array(
+        'name' => 'User Directory',
+        'href' => '/people/',
+      ),
+    );
+
+    if ($this->getRequest()->getUser()->getIsAdmin()) {
+      $tabs = array_merge(
+        $tabs,
+        array(
+          'logs' => array(
+            'name' => 'Activity Logs',
+            'href' => '/people/logs/',
+          ),
+        ));
+    }
+
+    $page->setTabs($tabs, idx($data, 'tab'));
+
     $page->setGlyph("\xE2\x99\x9F");
     $page->appendChild($view);
 

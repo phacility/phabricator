@@ -9,6 +9,7 @@
 phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/auth/controller/base');
 phutil_require_module('phabricator', 'applications/auth/oauth/provider/base');
+phutil_require_module('phabricator', 'applications/people/storage/log');
 phutil_require_module('phabricator', 'applications/people/storage/user');
 phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'view/form/base');

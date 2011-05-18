@@ -29,8 +29,16 @@ class PhabricatorLogoutController extends PhabricatorAuthController {
 
   public function processRequest() {
     $request = $this->getRequest();
+    $user = $request->getUser();
 
     if ($request->isFormPost()) {
+
+      $log = PhabricatorUserLog::newLog(
+        $user,
+        $user,
+        PhabricatorUserLog::ACTION_LOGOUT);
+      $log->save();
+
       $request->clearCookie('phsid');
       return id(new AphrontRedirectResponse())
         ->setURI('/login/');

@@ -61,6 +61,12 @@ class PhabricatorLoginController extends PhabricatorAuthController {
 
             return id(new AphrontRedirectResponse())
               ->setURI('/');
+          } else {
+            $log = PhabricatorUserLog::newLog(
+              null,
+              $user,
+              PhabricatorUserLog::ACTION_LOGIN_FAILURE);
+            $log->save();
           }
         }
 

@@ -120,7 +120,7 @@ class PhabricatorPeopleListController extends PhabricatorPeopleController {
 
     return $this->buildStandardPageResponse($panel, array(
       'title' => 'People',
-      'tab'   => 'people',
+      'tab'   => 'directory',
       ));
   }
 }
