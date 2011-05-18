@@ -36,6 +36,7 @@ class PhabricatorSetup {
       'mysql',
       'hash',
       'json',
+      'pcntl'
     );
     foreach ($extensions as $extension) {
       $ok = self::requireExtension($extension);
