@@ -4,8 +4,8 @@
   "groups" : {
     "intro" : "Introduction",
     "config" : "Configuration",
-    "contrib" : "Contributing",
     "userguide" : "Application User Guides",
+    "contrib" : "Contributing",
     "flavortext" : "Flavor Text",
     "developer" : "Phabricator Developer Guides",
     "differential" : "Differential (Code Review)",

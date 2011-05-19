@@ -42,6 +42,16 @@ abstract class DiffusionController extends PhabricatorController {
     $page->setBaseURI('/diffusion/');
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x89\x88");
+    $page->setTabs(
+      array(
+        'help' => array(
+          'href' => PhabricatorEnv::getDoclink(
+            'article/Diffusion_User_Guide.html'),
+          'name' => 'Help',
+        ),
+      ),
+      null);
+
     $page->appendChild($view);
 
     $response = new AphrontWebpageResponse();

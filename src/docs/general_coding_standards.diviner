@@ -1,18 +1,27 @@
 @title General Coding Standards
 @group contrib
 
-This document is a general coding standard for contributing to Phabricator, Arcanist, libphutil and Diviner.
-
+This document is a general coding standard for contributing to Phabricator,
+Arcanist, libphutil and Diviner.
 
 = Overview =
 
-This document contains practices and guidelines which apply across languages. Contributors should follow these guidelines. These guidelines are not hard-and-fast but should be followed unless there is a compelling reason to deviated from them.
-
+This document contains practices and guidelines which apply across languages.
+Contributors should follow these guidelines. These guidelines are not
+hard-and-fast but should be followed unless there is a compelling reason to
+deviated from them.
 
 = Code Complexity =
 
-  - Prefer to write simple code which is easy to understand. The simplest code is not necessarily the smallest, and some changes which make code larger (such as decomposing complex expressions and choosing more descriptive names) may also make it simpler. Be willing to make size tradeoffs in favor of simplicity.
-  - Prefer simple methods and functions which take a small number of parameters. Avoid methods and functions which are long and complex, or take an innumerable host of parameters. When possible, decompose monolithic, complex methods into several focused, simpler ones.
+  - Prefer to write simple code which is easy to understand. The simplest code
+    is not necessarily the smallest, and some changes which make code larger
+    (such as decomposing complex expressions and choosing more descriptive
+    names) may also make it simpler. Be willing to make size tradeoffs in favor
+    of simplicity.
+  - Prefer simple methods and functions which take a small number of parameters.
+    Avoid methods and functions which are long and complex, or take an
+    innumerable host of parameters. When possible, decompose monolithic, complex
+    methods into several focused, simpler ones.
   - Avoid putting many ideas on a single line of code.
 
 For example, avoid this kind of code:
@@ -42,11 +51,17 @@ And, obviously, don't do this sort of thing:
 = Performance =
 
   - Prefer to write efficient code.
-  - Strongly prefer to drive optimization decisions with hard data. Avoid optimizing based on intuition or rumor if you can not support it with concrete measurements.
-  - Prefer to optimize code which is slow and runs often. Optimizing code which is fast and runs rarely is usually a waste of time, and can even be harmful if it makes that code more difficult to understand or maintain. You can determine if code is fast or slow by measuring it.
+  - Strongly prefer to drive optimization decisions with hard data. Avoid
+    optimizing based on intuition or rumor if you can not support it with
+    concrete measurements.
+  - Prefer to optimize code which is slow and runs often. Optimizing code which
+    is fast and runs rarely is usually a waste of time, and can even be harmful
+    if it makes that code more difficult to understand or maintain. You can
+    determine if code is fast or slow by measuring it.
   - Reject performance discussions that aren't rooted in concrete data.
 
-In Phabricator, you can usually use the builtin XHProf profiling to quickly gather concrete performance data.
+In Phabricator, you can usually use the builtin XHProf profiling to quickly
+gather concrete performance data.
 
 
 = Naming Things =
@@ -83,9 +98,15 @@ Prefer these:
 = Error Handling =
 
   - Strongly prefer to detect errors.
-  - Strongly prefer to fail fast and loudly. The maximum cost of script termination is known, bounded, and fairly small. The maximum cost of continuing script execution when errors have occurred is unknown and unbounded. This also makes APIs much easier to use and problems far easier to debug.
+  - Strongly prefer to fail fast and loudly. The maximum cost of script
+    termination is known, bounded, and fairly small. The maximum cost of
+    continuing script execution when errors have occurred is unknown and
+    unbounded. This also makes APIs much easier to use and problems far easier
+    to debug.
 
-When you ignore errors, defer error handling, or degrade the severity of errors by treating them as warnings and then dismissing them, you risk dangerous behavior which may be difficult to troubleshoot:
+When you ignore errors, defer error handling, or degrade the severity of errors
+by treating them as warnings and then dismissing them, you risk dangerous
+behavior which may be difficult to troubleshoot:
 
   COUNTEREXAMPLE
   exec('echo '.$data.' > file.bak');                //  Bad!
@@ -105,7 +126,8 @@ Instead, fail loudly:
   }
   do_something_dangerous();
 
-But the best approach is to use or write an API which simplifies condition handling and makes it easier to get right than wrong:
+But the best approach is to use or write an API which simplifies condition
+handling and makes it easier to get right than wrong:
 
   execx('echo %s > file.bak', $data);               //  Good
   do_something_dangerous();
@@ -117,5 +139,8 @@ See @{article:System Commands} for details on the APIs used in this example.
 
 = Documentation, Comments and Formatting =
 
-  - Prefer to remove code by deleting it over removing it by commenting it out. It shall live forever in source control, and can be retrieved therefrom if it is ever again called upon.
-  - In source code, use only ASCII printable characters plus space and linefeed. Do not use UTF-8 or other multibyte encodings.
+  - Prefer to remove code by deleting it over removing it by commenting it out.
+    It shall live forever in source control, and can be retrieved therefrom if
+    it is ever again called upon.
+  - In source code, use only ASCII printable characters plus space and linefeed.
+    Do not use UTF-8 or other multibyte encodings.

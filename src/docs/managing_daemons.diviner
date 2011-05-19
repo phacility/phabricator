@@ -63,8 +63,5 @@ You can get a list of launchable daemons with **phd list**:
   - **PhabricatorMetaMTADaemon** sends mail in the background, see
     @{article:Configuring Outbound Email} for details;
   - **PhabricatorTaskmasterDaemon** runs a generic task queue; and
-  - **PhabricatorRepository** daemons track repositories.
-
-TODO: Documentation on repository daemons is coming soon. The quick version is:
-run **phd repository-launch-master** after configuring them in the
-**Repositories** tool, then launch a few **taskmaster** daemons.
+  - **PhabricatorRepository** daemons track repositories, descriptions are
+    available in the @{article:Diffusion User Guide}.

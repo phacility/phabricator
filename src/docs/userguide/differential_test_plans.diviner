@@ -1,0 +1,66 @@
+@title Differential User Guide: Test Plans
+@group userguide
+
+This document describes things you should think about when developing a test
+plan.
+
+= Overview =
+
+When you send a revision for review in Differential you must include a test
+plan. A test plan is a repeatable list of steps which document what you have
+done to verify the behavior of a change. A good test plan convinces a reviewer
+that you have been thorough in making sure your change works as intended and
+has enough detail to allow someone unfamiliar with your change to verify its
+behavior.
+
+This document has some common things to think about when developing or reviewing
+a test plan. Some of these suggestions might not be applicable to the software
+you are writing; they are adapted from Facebook's internal documentation.
+
+= All Changes =
+
+  - **Error Handling:** Are errors detected and handled properly? How does your
+    change deal with error cases? Did you test them and make sure you got the
+    right error messages and the right behavior? It's important that you test
+    what happens when things go wrong, not just that the change works if
+    everything else also works.
+  - **Service Impact:** How does your change affect services like memcache,
+    thrift, or databases? Are you adding new cachekeys or queries? Will
+    this change add a lot of load to services?
+  - **Performance:** How does your change affect performance? **NOTE**: If
+    your change is a performance-motivated change, you should include profiles
+    in your test plan proving that you have improved performance.
+  - **Unit Tests:** Is your change adequately covered by unit tests? Could you
+    improve test coverage? If you're fixing a bug, did you add a test to prevent
+    it from happening again? Are the unit tests testing just the code in
+    question, or would a failure of a database or network service cause your
+    test to fail?
+  - **Concurrent Change Robustness:** If you're making a refactoring change, is
+    it robust against people introducing new calls between the time you started
+    the change and when you commit it? For example, if you change the parameter
+    order of some function from ##f(a, b)## to ##f(b, a)## and a new callsite is
+    introduced in the meantime, could it go unnoticed? How bad would that be?
+    (Because of this risk, you should almost never make parameter order
+    changes.)
+  - **Revert Plan:** If your change needs to be reverted and you aren't around,
+    are any special steps or considerations that the reverter needs to know
+    about? If there are, make sure they're adequately described in the "Revert
+    Plan" field so someone without any knowledge of your patch (but with a
+    general knowledge of the system) can successfully revert your change.
+  - **Security:** Is your change robust against XSS, CSRF, and injection
+    attacks? Are you verifying the user has the right capabilities or
+    permissions? Are you consistently treating user data as untrustworthy? Are
+    you escaping data properly, and using dangerous functions only
+    when they are strictly necessary?
+  - **Architecture:** Is this the right change? Could there be a better way to
+    solve the problem? Have you talked to (or added as reviewers) domain experts
+    if you aren't one yourself? What are the limitations of this solution? What
+    tradeoffs did you make, and why?
+
+= Frontend / User-Facing Changes =
+
+  - **Static Resources:** Will your change cause the application to serve more
+    JS or CSS? Can you use less JS/CSS, or reuse more?
+  - **Browsers:** Have you tested your change in multiple browsers?
+
+

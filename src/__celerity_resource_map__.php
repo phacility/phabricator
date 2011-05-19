@@ -227,7 +227,7 @@ celerity_register_resource_map(array(
   ),
   'diffusion-source-css' =>
   array(
-    'uri' => '/res/494e1dd2/rsrc/css/application/diffusion/diffusion-source.css',
+    'uri' => '/res/415aad1a/rsrc/css/application/diffusion/diffusion-source.css',
     'type' => 'css',
     'requires' =>
     array(

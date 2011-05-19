@@ -47,4 +47,8 @@ final class PhabricatorEnv {
     return self::$env;
   }
 
+  public static function getDoclink($resource) {
+    return 'http://phabricator.com/docs/phabricator/'.$resource;
+  }
+
 }
