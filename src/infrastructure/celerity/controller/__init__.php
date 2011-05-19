@@ -11,6 +11,7 @@ phutil_require_module('phabricator', 'aphront/response/304');
 phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'aphront/response/file');
 phutil_require_module('phabricator', 'infrastructure/celerity/map');
+phutil_require_module('phabricator', 'infrastructure/env');
 
 phutil_require_module('phutil', 'filesystem');
 phutil_require_module('phutil', 'moduleutils');
