@@ -32,6 +32,7 @@ class DiffusionHistoryController extends DiffusionController {
 
     if (!$request->getBool('copies')) {
       $history_query->needDirectChanges(true);
+      $history_query->needChildChanges(true);
     }
 
     $history = $history_query->loadHistory();
