@@ -30,7 +30,7 @@ class DiffusionHistoryController extends DiffusionController {
     $history_query->setOffset($offset);
     $history_query->setLimit($page_size + 1);
 
-    if ($request->getStr('copies') !== 'true') {
+    if (!$request->getBool('copies')) {
       $history_query->needDirectChanges(true);
     }
 
@@ -68,13 +68,15 @@ class DiffusionHistoryController extends DiffusionController {
         'view'   => 'history',
       ));
 
-    if ($request->getStr('copies') === 'true') {
-      $button_uri = '?copies=false';
+    if ($request->getBool('copies')) {
       $button_title = 'Hide Copies/Branches';
     } else {
-      $button_uri = '?copies=true';
       $button_title = 'Show Copies/Branches';
     }
+
+    $button_uri = $request->getRequestURI()->alter(
+      'copies',
+      !$request->getBool('copies'));
 
     $button = phutil_render_tag(
       'a',
