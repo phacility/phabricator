@@ -435,8 +435,26 @@ class DifferentialChangesetParser {
       $this->oldRender = explode("\n", phutil_escape_html($old_corpus_block));
       $this->newRender = explode("\n", phutil_escape_html($new_corpus_block));
     } else {
-      $this->oldRender = $this->sourceHighlight($this->old, $old_corpus_block);
-      $this->newRender = $this->sourceHighlight($this->new, $new_corpus_block);
+      $old_future = $this->getHighlightFuture($old_corpus_block);
+      $new_future = $this->getHighlightFuture($new_corpus_block);
+      $futures = array(
+        'old' => $old_future,
+        'new' => $new_future,
+      );
+      foreach (Futures($futures) as $key => $future) {
+        switch ($key) {
+          case 'old':
+            $this->oldRender = $this->processHighlightedSource(
+              $this->old,
+              $future->resolve());
+            break;
+          case 'new':
+            $this->newRender = $this->processHighlightedSource(
+              $this->new,
+              $future->resolve());
+            break;
+        }
+      }
     }
 
     $this->applyIntraline(
@@ -648,10 +666,13 @@ class DifferentialChangesetParser {
     }
   }
 
-  protected function sourceHighlight($data, $corpus) {
-    $result = $this->highlightEngine->highlightSource(
+  protected function getHighlightFuture($corpus) {
+    return $this->highlightEngine->getHighlightFuture(
       $this->filetype,
       $corpus);
+  }
+
+  protected function processHighlightedSource($data, $result) {
 
     $result_lines = explode("\n", $result);
     foreach ($data as $key => $info) {

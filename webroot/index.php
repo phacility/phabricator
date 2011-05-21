@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+$__start__ = microtime(true);
 
 error_reporting(E_ALL | E_STRICT);
 ini_set('memory_limit', -1);

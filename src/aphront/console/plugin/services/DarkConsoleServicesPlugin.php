@@ -29,14 +29,19 @@ class DarkConsoleServicesPlugin extends DarkConsolePlugin {
   }
 
   public function generateData() {
-    return PhutilServiceProfiler::getInstance()->getServiceCallLog();
+
+    return array(
+      'start' => $GLOBALS['__start__'],
+      'log'   => PhutilServiceProfiler::getInstance()->getServiceCallLog(),
+    );
   }
 
   public function render() {
     $data = $this->getData();
+    $log = $data['log'];
 
     $rows = array();
-    foreach ($data as $row) {
+    foreach ($log as $row) {
 
       switch ($row['type']) {
         case 'query':
@@ -62,6 +67,7 @@ class DarkConsoleServicesPlugin extends DarkConsolePlugin {
 
       $rows[] = array(
         phutil_escape_html($row['type']),
+        '+'.number_format(1000 * ($row['begin'] - $data['start'])).' ms',
         number_format(1000000 * $row['duration']).' us',
         $info,
       );
@@ -72,11 +78,13 @@ class DarkConsoleServicesPlugin extends DarkConsolePlugin {
       array(
         null,
         'n',
+        'n',
         'wide wrap',
       ));
     $table->setHeaders(
       array(
         'Event',
+        'Start',
         'Duration',
         'Details',
       ));
