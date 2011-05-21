@@ -71,3 +71,22 @@
   padding: 4px 1em;
   background: #f3f3f3;
 }
+
+.maniphest-change-table {
+  width: 100%;
+  margin: .5em 0em;
+  border-collapse: separate;
+  border-spacing: 4px 0px;
+}
+
+.maniphest-change-table td {
+  width: 50%;
+  padding: 0.25em 1em;
+  background: #f9f9f9;
+}
+
+.maniphest-change-table th {
+  font-weight: bold;
+  padding: 0.25em;
+  border-bottom: 1px solid #cccccc;
+}

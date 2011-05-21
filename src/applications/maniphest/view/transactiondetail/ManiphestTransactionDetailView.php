@@ -24,6 +24,9 @@ class ManiphestTransactionDetailView extends AphrontView {
   private $forEmail;
   private $preview;
 
+  private $renderSummaryOnly;
+  private $renderFullSummary;
+
   public function setTransactionGroup(array $transactions) {
     $this->transactions = $transactions;
     return $this;
@@ -42,6 +45,24 @@ class ManiphestTransactionDetailView extends AphrontView {
   public function setPreview($preview) {
     $this->preview = $preview;
     return $this;
+  }
+
+  public function setRenderSummaryOnly($render_summary_only) {
+    $this->renderSummaryOnly = $render_summary_only;
+    return $this;
+  }
+
+  public function getRenderSummaryOnly() {
+    return $this->renderSummaryOnly;
+  }
+
+  public function setRenderFullSummary($render_full_summary) {
+    $this->renderFullSummary = $render_full_summary;
+    return $this;
+  }
+
+  public function getRenderFullSummary() {
+    return $this->renderFullSummary;
   }
 
   public function renderForEmail($with_date) {
@@ -76,7 +97,7 @@ class ManiphestTransactionDetailView extends AphrontView {
     }
 
     foreach ($this->transactions as $transaction) {
-      $supplemental = $this->renderSupplementalLinksForEmail($transaction);
+      $supplemental = $this->renderSupplementalInfoForEmail($transaction);
       if ($supplemental) {
         $descs .= "\n\n".$supplemental;
       }
@@ -108,9 +129,22 @@ class ManiphestTransactionDetailView extends AphrontView {
     foreach ($transactions as $transaction) {
       list($verb, $desc, $classes) = $this->describeAction($transaction);
       $more_classes = array_merge($more_classes, $classes);
-      $descs[] = $author->renderLink().' '.$desc.'.';
+      $full_summary = null;
+      if ($this->getRenderFullSummary()) {
+        $full_summary = $this->renderFullSummary($transaction);
+      }
+      $descs[] = javelin_render_tag(
+        'div',
+        array(
+          'sigil' => 'maniphest-transaction-description',
+        ),
+        $author->renderLink().' '.$desc.'.'.$full_summary);
     }
-    $descs = implode('<br />', $descs);
+    $descs = implode("\n", $descs);
+
+    if ($this->getRenderSummaryOnly()) {
+      return $descs;
+    }
 
     $more_classes = implode(' ', $more_classes);
 
@@ -157,7 +191,7 @@ class ManiphestTransactionDetailView extends AphrontView {
       '</div>');
   }
 
-  private function renderSupplementalLinksForEmail($transaction) {
+  private function renderSupplementalInfoForEmail($transaction) {
     $handles = $this->handles;
 
     $type = $transaction->getTransactionType();
@@ -165,6 +199,9 @@ class ManiphestTransactionDetailView extends AphrontView {
     $old = $transaction->getOldValue();
 
     switch ($type) {
+      case ManiphestTransactionType::TYPE_DESCRIPTION:
+        return "NEW DESCRIPTION\n  ".trim($new)."\n\n".
+               "PREVIOUS DESCRIPTION\n  ".trim($old);
       case ManiphestTransactionType::TYPE_ATTACH:
         $old_raw = nonempty($old, array());
         $new_raw = nonempty($new, array());
@@ -228,9 +265,13 @@ class ManiphestTransactionDetailView extends AphrontView {
                                    ' to '.$this->renderString($new);
         break;
       case ManiphestTransactionType::TYPE_DESCRIPTION:
-        // TODO: show the changes somehow.
         $verb = 'Edited';
-        $desc = 'updated the task description';
+        if ($this->forEmail || $this->getRenderFullSummary()) {
+          $desc = 'updated the task description';
+        } else {
+          $desc = 'updated the task description; '.
+                  $this->renderExpandLink($transaction);
+        }
         break;
       case ManiphestTransactionType::TYPE_NONE:
         $verb = 'Commented On';
@@ -417,6 +458,46 @@ class ManiphestTransactionDetailView extends AphrontView {
     }
 
     return array($verb, $desc, $classes);
+  }
+
+  private function renderFullSummary($transaction) {
+    switch ($transaction->getTransactionType()) {
+      case ManiphestTransactionType::TYPE_DESCRIPTION:
+        $engine = $this->markupEngine;
+
+        $old = $transaction->getOldValue();
+        $new = $transaction->getNewValue();
+        $table =
+          '<table class="maniphest-change-table">
+            <tr>
+              <th>Previous Description</th>
+              <th>New Description</th>
+            </tr>
+            <tr>
+              <td>'.$engine->markupText($old).'</td>
+              <td>'.$engine->markupText($new).'</td>
+            </tr>
+          </table>';
+
+        return $table;
+    }
+
+    return null;
+  }
+
+  private function renderExpandLink($transaction) {
+    $id = $transaction->getID();
+
+    Javelin::initBehavior('maniphest-transaction-expand');
+
+    return javelin_render_tag(
+      'a',
+      array(
+        'href'          => '/maniphest/task/descriptionchange/'.$id.'/',
+        'sigil'         => 'maniphest-expand-transaction',
+        'mustcapture'   => true,
+      ),
+      'show details');
   }
 
   private function renderHandles($phids) {
