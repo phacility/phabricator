@@ -38,7 +38,6 @@ class DifferentialChangesetParser {
   protected $whitespaceMode = null;
 
   protected $subparser;
-  protected $noHighlight;
 
   protected $renderCacheKey = null;
 
@@ -52,6 +51,7 @@ class DifferentialChangesetParser {
   private $rightSideAttachesToNewFile;
 
   private $renderingReference;
+  private $isSubparser;
 
   const CACHE_VERSION = 4;
 
@@ -355,6 +355,32 @@ class DifferentialChangesetParser {
 
     $this->old = $old;
     $this->new = $new;
+
+    $unchanged = false;
+    if ($this->subparser) {
+      $unchanged = $this->subparser->isUnchanged();
+      $whitelines = $this->subparser->isWhitespaceOnly();
+    } else if (!$changed) {
+      $filetype = $this->changeset->getFileType();
+      if ($filetype == DifferentialChangeType::FILE_TEXT ||
+          $filetype == DifferentialChangeType::FILE_SYMLINK) {
+        $unchanged = true;
+      }
+    }
+
+    $this->specialAttributes = array(
+      self::ATTR_UNCHANGED  => $unchanged,
+      self::ATTR_DELETED    => array_filter($this->old) &&
+                               !array_filter($this->new),
+      self::ATTR_WHITELINES => $whitelines
+    );
+
+    if ($this->isSubparser) {
+      // The rest of this function deals with formatting the diff for display;
+      // we can exit early if we're a subparser and avoid doing extra work.
+      return;
+    }
+
     if ($this->subparser) {
 
       // Use this parser's side-by-side line information -- notably, the
@@ -431,29 +457,24 @@ class DifferentialChangesetParser {
     $new_corpus = ipull($this->new, 'text');
     $new_corpus_block = implode("\n", $new_corpus);
 
-    if ($this->noHighlight) {
-      $this->oldRender = explode("\n", phutil_escape_html($old_corpus_block));
-      $this->newRender = explode("\n", phutil_escape_html($new_corpus_block));
-    } else {
-      $old_future = $this->getHighlightFuture($old_corpus_block);
-      $new_future = $this->getHighlightFuture($new_corpus_block);
-      $futures = array(
-        'old' => $old_future,
-        'new' => $new_future,
-      );
-      foreach (Futures($futures) as $key => $future) {
-        switch ($key) {
-          case 'old':
-            $this->oldRender = $this->processHighlightedSource(
-              $this->old,
-              $future->resolve());
-            break;
-          case 'new':
-            $this->newRender = $this->processHighlightedSource(
-              $this->new,
-              $future->resolve());
-            break;
-        }
+    $old_future = $this->getHighlightFuture($old_corpus_block);
+    $new_future = $this->getHighlightFuture($new_corpus_block);
+    $futures = array(
+      'old' => $old_future,
+      'new' => $new_future,
+    );
+    foreach (Futures($futures) as $key => $future) {
+      switch ($key) {
+        case 'old':
+          $this->oldRender = $this->processHighlightedSource(
+            $this->old,
+            $future->resolve());
+          break;
+        case 'new':
+          $this->newRender = $this->processHighlightedSource(
+            $this->new,
+            $future->resolve());
+          break;
       }
     }
 
@@ -469,27 +490,9 @@ class DifferentialChangesetParser {
     $this->tokenHighlight($this->oldRender);
     $this->tokenHighlight($this->newRender);
 
-    $unchanged = false;
-    if ($this->subparser) {
-      $unchanged = $this->subparser->isUnchanged();
-      $whitelines = $this->subparser->isWhitespaceOnly();
-    } else if (!$changed) {
-      $filetype = $this->changeset->getFileType();
-      if ($filetype == DifferentialChangeType::FILE_TEXT ||
-          $filetype == DifferentialChangeType::FILE_SYMLINK) {
-        $unchanged = true;
-      }
-    }
-
     $generated = (strpos($new_corpus_block, '@'.'generated') !== false);
 
-    $this->specialAttributes = array(
-      self::ATTR_GENERATED  => $generated,
-      self::ATTR_UNCHANGED  => $unchanged,
-      self::ATTR_DELETED    => array_filter($this->old) &&
-                               !array_filter($this->new),
-      self::ATTR_WHITELINES => $whitelines
-    );
+    $this->specialAttributes[self::ATTR_GENERATED] = $generated;
   }
 
   public function loadCache() {
@@ -741,18 +744,31 @@ EOSYNTHETIC;
           }
 
           // subparser takes over the current non-whitespace-ignoring changeset
-          $this->subparser = new DifferentialChangesetParser();
+          $subparser = new DifferentialChangesetParser();
+          $subparser->isSubparser = true;
+          $subparser->setChangeset($changeset);
           foreach ($changeset->getHunks() as $hunk) {
-            $this->subparser->parseHunk($hunk);
+            $subparser->parseHunk($hunk);
           }
+          // We need to call process() so that the subparser's values for
+          // things like.
+          $subparser->process();
+
+          $this->subparser = $subparser;
 
           // this parser takes new changeset; will use subparser's text later
           $changes = id(new ArcanistDiffParser())->parseDiff($diff);
           $diff = DifferentialDiff::newFromRawChanges($changes);
-          $changesets = $diff->getChangesets();
-          $changeset = reset($changesets);
-          $this->setChangeset($changeset);
+
+          // While we aren't updating $this->changeset (since it has a bunch
+          // of metadata we need to preserve, so that headers like "this file
+          // was moved" render correctly), we're overwriting the local
+          // $changeset so that the block below will choose the synthetic
+          // hunks we've built instead of the original hunks.
+          $changeset = head($diff->getChangesets());
         }
+
+        // This either uses the real hunks, or synthetic hunks we built above.
         foreach ($changeset->getHunks() as $hunk) {
           $this->parseHunk($hunk);
         }
