@@ -16,6 +16,14 @@ JX.install('PhabricatorDragAndDropFileUpload', {
 
   events : ['willUpload', 'didUpload'],
 
+  statics : {
+    isSupported : function() {
+      // TODO: Is there a better capability test for this? This seems okay in
+      // Safari, Firefox and Chrome.
+      return !!window.FileList;
+    }
+  },
+
   members : {
     _node : null,
     _depth : 0,

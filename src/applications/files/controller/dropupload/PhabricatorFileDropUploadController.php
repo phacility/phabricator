@@ -30,12 +30,13 @@ class PhabricatorFileDropUploadController extends PhabricatorFileController {
         'name' => $request->getStr('name'),
       ));
 
+    $view = new AphrontAttachedFileView();
+    $view->setFile($file);
+
     return id(new AphrontAjaxResponse())->setContent(
       array(
-        'name' => $file->getName(),
         'phid' => $file->getPHID(),
-        'size' => $file->getByteSize(),
-        'uri'  => $file->getViewURI(),
+        'html' => $view->render(),
       ));
   }
 

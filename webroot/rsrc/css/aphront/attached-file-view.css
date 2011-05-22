@@ -1,0 +1,24 @@
+/**
+ * @provides aphront-attached-file-view-css
+ */
+
+.aphront-attached-file-view {
+  border: 1px solid #aaaaaa;
+  background: #f9f9f9;
+  width: 100%;
+  margin: 4px 0;
+}
+
+.aphront-attached-file-view td,
+.aphront-attached-file-view th {
+  padding: 4px;
+}
+
+.aphront-attached-file-view th {
+  width: 100%;
+  font-size: 11px;
+}
+
+.aphront-attached-file-view-remove {
+  vertical-align: middle;
+}

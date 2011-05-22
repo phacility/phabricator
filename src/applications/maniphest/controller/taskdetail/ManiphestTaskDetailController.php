@@ -222,6 +222,8 @@ class ManiphestTaskDetailController extends ManiphestController {
       $draft_text = null;
     }
 
+    $panel_id = celerity_generate_unique_node_id();
+
     $comment_form = new AphrontFormView();
     $comment_form
       ->setUser($user)
@@ -286,12 +288,11 @@ class ManiphestTaskDetailController extends ManiphestController {
           ->setValue($draft_text)
           ->setID('transaction-comments'))
       ->appendChild(
-        id(new AphrontFormMarkupControl())
+        id(new AphrontFormDragAndDropUploadControl())
           ->setLabel('Attached Files')
-          ->setValue(
-            '<div id="file-list">'.
-              'None'.
-            '</div>'))
+          ->setName('files')
+          ->setDragAndDropTarget($panel_id)
+          ->setActivatedClass('aphront-panel-view-drag-and-drop'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Avast!'));
@@ -335,22 +336,11 @@ class ManiphestTaskDetailController extends ManiphestController {
       'map'      => $control_map,
     ));
 
-    $id = celerity_generate_unique_node_id();
-
     $comment_panel = new AphrontPanelView();
     $comment_panel->appendChild($comment_form);
-    $comment_panel->setID($id);
+    $comment_panel->setID($panel_id);
     $comment_panel->addClass('aphront-panel-accent');
-    $comment_panel->setHeader('Leap Into Action');
-
-    Javelin::initBehavior(
-      'maniphest-transaction-drag-and-drop',
-      array(
-        'target'          => $id,
-        'activatedClass'  => 'aphront-panel-view-drag-and-drop',
-        'uri'             => '/file/dropupload/',
-        'list'            => 'file-list',
-      ));
+    $comment_panel->setHeader('Weigh In');
 
     $preview_panel =
       '<div class="aphront-panel-preview">

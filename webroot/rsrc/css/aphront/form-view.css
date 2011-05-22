@@ -116,3 +116,13 @@ table.aphront-form-control-checkbox-layout th {
   background: #f3f3f3;
   border: 1px solid #afafaf;
 }
+
+.aphront-form-drag-and-drop-file-list {
+  width: 400px;
+}
+
+.drag-and-drop-instructions {
+  color: #333333;
+  font-size: 11px;
+  padding: 6px 8px;
+}
