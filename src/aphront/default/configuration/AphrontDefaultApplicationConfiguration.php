@@ -62,6 +62,8 @@ class AphrontDefaultApplicationConfiguration
           'delete/(?P<id>\d+)/$' => 'PhabricatorFileMacroDeleteController',
         ),
         'proxy/$' => 'PhabricatorFileProxyController',
+        'xform/(?P<transform>[^/]+)/(?P<phid>[^/]+)/'
+          => 'PhabricatorFileTransformController',
       ),
       '/phid/' => array(
         '$' => 'PhabricatorPHIDLookupController',

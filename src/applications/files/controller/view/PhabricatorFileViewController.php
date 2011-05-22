@@ -129,8 +129,37 @@ class PhabricatorFileViewController extends PhabricatorFileController {
     $panel->appendChild($form);
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
 
+
+    $transformations = id(new PhabricatorTransformedFile())->loadAllWhere(
+      'originalPHID = %s',
+      $file->getPHID());
+    $rows = array();
+    foreach ($transformations as $transformed) {
+      $phid = $transformed->getTransformedPHID();
+      $rows[] = array(
+        phutil_escape_html($transformed->getTransform()),
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => PhabricatorFileURI::getViewURIForPHID($phid),
+          ),
+          $phid));
+    }
+
+    $table = new AphrontTableView($rows);
+    $table->setHeaders(
+      array(
+        'Transform',
+        'File',
+      ));
+
+    $xform_panel = new AphrontPanelView();
+    $xform_panel->appendChild($table);
+    $xform_panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $xform_panel->setHeader('Transformations');
+
     return $this->buildStandardPageResponse(
-      array($panel),
+      array($panel, $xform_panel),
       array(
         'title' => 'File Info - '.$file->getName(),
       ));

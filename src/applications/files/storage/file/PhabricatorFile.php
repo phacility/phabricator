@@ -206,6 +206,10 @@ class PhabricatorFile extends PhabricatorFileDAO {
     return ($this->getViewableMimeType() !== null);
   }
 
+  public function isTransformableImage() {
+    return preg_match('@^image/(gif|png|jpe?g)@', $this->getViewableMimeType());
+  }
+
   public function getViewableMimeType() {
     $mime_map = PhabricatorEnv::getEnvConfig('files.viewable-mime-types');
 
