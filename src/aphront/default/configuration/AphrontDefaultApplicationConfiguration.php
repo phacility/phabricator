@@ -52,6 +52,7 @@ class AphrontDefaultApplicationConfiguration
       '/file/' => array(
         '$' => 'PhabricatorFileListController',
         'upload/$' => 'PhabricatorFileUploadController',
+        'dropupload/$' => 'PhabricatorFileDropUploadController',
         '(?P<view>info)/(?P<phid>[^/]+)/' => 'PhabricatorFileViewController',
         '(?P<view>view)/(?P<phid>[^/]+)/' => 'PhabricatorFileViewController',
         '(?P<view>download)/(?P<phid>[^/]+)/' => 'PhabricatorFileViewController',

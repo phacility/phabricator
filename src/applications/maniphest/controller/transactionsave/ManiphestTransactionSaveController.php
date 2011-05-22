@@ -27,7 +27,55 @@ class ManiphestTransactionSaveController extends ManiphestController {
       return new Aphront404Response();
     }
 
+    $transactions = array();
+
     $action = $request->getStr('action');
+
+    // If we have drag-and-dropped files, attach them first in a separate
+    // transaction. These can come in on any transaction type, which is why we
+    // handle them separately.
+    $files = array();
+
+    // Look for drag-and-drop uploads first.
+    $file_phids = $request->getArr('files');
+    if ($file_phids) {
+      $files = id(new PhabricatorFile())->loadAllWhere(
+        'phid in (%Ls)',
+        $file_phids);
+    }
+
+    // This means "attach a file" even though we store other types of data
+    // as 'attached'.
+    if ($action == ManiphestTransactionType::TYPE_ATTACH) {
+      if (!empty($_FILES['file'])) {
+        $err = idx($_FILES['file'], 'error');
+        if ($err != UPLOAD_ERR_NO_FILE) {
+          $file = PhabricatorFile::newFromPHPUpload($_FILES['file']);
+          $files[] = $file;
+        }
+      }
+    }
+
+    // If we had explicit or drag-and-drop files, create a transaction
+    // for those before we deal with whatever else might have happened.
+    $file_transaction = null;
+    if ($files) {
+      $files = mpull($files, 'getPHID', 'getPHID');
+      $new = $task->getAttached();
+      foreach ($files as $phid) {
+        if (empty($new[PhabricatorPHIDConstants::PHID_TYPE_FILE])) {
+          $new[PhabricatorPHIDConstants::PHID_TYPE_FILE] = array();
+        }
+        $new[PhabricatorPHIDConstants::PHID_TYPE_FILE][$phid] = array();
+      }
+      $transaction = new ManiphestTransaction();
+      $transaction
+        ->setAuthorPHID($user->getPHID())
+        ->setTransactionType(ManiphestTransactionType::TYPE_ATTACH);
+      $transaction->setNewValue($new);
+      $transactions[] = $transaction;
+      $file_transaction = $transaction;
+    }
 
     $transaction = new ManiphestTransaction();
     $transaction
@@ -36,8 +84,6 @@ class ManiphestTransactionSaveController extends ManiphestController {
       ->setTransactionType($action);
 
     switch ($action) {
-      case ManiphestTransactionType::TYPE_NONE:
-        break;
       case ManiphestTransactionType::TYPE_STATUS:
         $transaction->setNewValue($request->getStr('resolution'));
         break;
@@ -63,32 +109,22 @@ class ManiphestTransactionSaveController extends ManiphestController {
       case ManiphestTransactionType::TYPE_PRIORITY:
         $transaction->setNewValue($request->getInt('priority'));
         break;
+      case ManiphestTransactionType::TYPE_NONE:
       case ManiphestTransactionType::TYPE_ATTACH:
-        // This means "attach a file" even though we store other types of data
-        // as 'attached'.
-        $phid = null;
-        if (!empty($_FILES['file'])) {
-          $err = idx($_FILES['file'], 'error');
-          if ($err != UPLOAD_ERR_NO_FILE) {
-            $file = PhabricatorFile::newFromPHPUpload($_FILES['file']);
-            $phid = $file->getPHID();
-          }
+        // If we have a file transaction, just get rid of this secondary
+        // transaction and put the comments on it instead.
+        if ($file_transaction) {
+          $file_transaction->setComments($transaction->getComments());
+          $transaction = null;
         }
-        if ($phid) {
-          $new = $task->getAttached();
-          if (empty($new[PhabricatorPHIDConstants::PHID_TYPE_FILE])) {
-            $new[PhabricatorPHIDConstants::PHID_TYPE_FILE] = array();
-          }
-          $new[PhabricatorPHIDConstants::PHID_TYPE_FILE][$phid] = array();
-        }
-
-        $transaction->setNewValue($new);
         break;
       default:
         throw new Exception('unknown action');
     }
 
-    $transactions = array($transaction);
+    if ($transaction) {
+      $transactions[] = $transaction;
+    }
 
     switch ($action) {
       case ManiphestTransactionType::TYPE_OWNER:
@@ -139,6 +175,8 @@ class ManiphestTransactionSaveController extends ManiphestController {
       default:
         break;
     }
+
+
 
     $editor = new ManiphestTransactionEditor();
     $editor->applyTransactions($task, $transactions);

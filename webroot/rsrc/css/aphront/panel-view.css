@@ -62,3 +62,13 @@
 .aphront-panel-flush {
   margin: 0;
 }
+
+.aphront-panel-view-drag-and-drop {
+  background: #99ff99;
+  border-color: #669966;
+}
+
+.aphront-panel-view-drag-and-drop .aphront-form-view {
+  background: #ccffcc;
+  border-color: #669966;
+}

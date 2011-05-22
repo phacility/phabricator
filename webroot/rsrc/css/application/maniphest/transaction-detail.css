@@ -67,8 +67,9 @@
 }
 
 .maniphest-transaction-comments {
+  border-top: 1px solid #e6e6e6;
   padding: 4px 1em;
-  background: #f3f3f3;
+  background: #fcfcfc;
 }
 
 .maniphest-change-table {

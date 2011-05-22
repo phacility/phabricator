@@ -26,6 +26,7 @@ final class AphrontPanelView extends AphrontView {
   private $header;
   private $width;
   private $classes = array();
+  private $id;
 
   public function setCreateButton($create_button, $href) {
     $this->addButton(
@@ -60,6 +61,11 @@ final class AphrontPanelView extends AphrontView {
     return $this;
   }
 
+  public function setID($id) {
+    $this->id = $id;
+    return $this;
+  }
+
   public function render() {
     if ($this->header !== null) {
       $header = '<h1>'.$this->header.'</h1>';
@@ -85,12 +91,13 @@ final class AphrontPanelView extends AphrontView {
       $classes[] = 'aphront-panel-width-'.$this->width;
     }
 
-    return
-      '<div class="'.implode(' ', $classes).'">'.
-        $buttons.
-        $header.
-        $table.
-      '</div>';
+    return phutil_render_tag(
+      'div',
+      array(
+        'class' => implode(' ', $classes),
+        'id'    => $this->id,
+      ),
+      $buttons.$header.$table);
   }
 
 }
