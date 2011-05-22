@@ -61,7 +61,7 @@ JX.install('PhabricatorShapedRequest', {
           this._request = null;
         }));
         request.setData(data);
-        request.setTimeout(this.getFrequency());
+        request.setTimeout(this.getRequestTimeout());
         request.send();
       } else {
         this._defer = JX.defer(
@@ -87,6 +87,7 @@ JX.install('PhabricatorShapedRequest', {
 
   properties : {
     rateLimit : 500,
-    frequency : 1000
+    frequency : 1000,
+    requestTimeout : 20000
   }
 });
