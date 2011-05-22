@@ -331,12 +331,13 @@ class ManiphestTaskDetailController extends ManiphestController {
 
     $comment_panel = new AphrontPanelView();
     $comment_panel->appendChild($comment_form);
-    $comment_panel->setHeader('Leap Into Action');
+    $comment_panel->setHeader('Weigh In');
+    $comment_panel->addClass('aphront-panel-accent');
 
     $preview_panel =
-      '<div class="maniphest-transaction-preview">
+      '<div class="aphront-panel-preview">
         <div id="transaction-preview">
-          <div class="maniphest-loading-text">
+          <div class="aphront-panel-preview-loading-text">
             Loading preview...
           </div>
         </div>

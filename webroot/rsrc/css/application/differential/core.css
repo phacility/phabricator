@@ -5,6 +5,7 @@
 .differential-primary-pane {
   margin:           0 40px;
   max-width:        1162px;
+  padding-bottom:   2em;
 }
 
 .differential-panel {

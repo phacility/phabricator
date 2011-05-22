@@ -3,7 +3,7 @@
  */
 
 .maniphest-transaction-detail-container {
-  margin: 2px 1em 3px;
+  margin: 1em 1em 1.5em;
   background: 0px 0px no-repeat;
   min-height: 50px;
 }
@@ -45,7 +45,7 @@
 }
 
 .maniphest-transaction-header {
-  background: #e6e6e6;
+  background: #f3f3f3;
   padding: 4px 1em;
 }
 
@@ -55,10 +55,9 @@
 
 .maniphest-transaction-detail-view {
   margin-left: 54px;
-  border-color: #bbbbbb;
+  border-color: #dddddd;
   border-width: 1px 10px;
   border-style: solid;
-  min-height: 40px;
 }
 
 .maniphest-transaction-timestamp {

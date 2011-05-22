@@ -474,8 +474,16 @@ class ManiphestTransactionDetailView extends AphrontView {
               <th>New Description</th>
             </tr>
             <tr>
-              <td>'.$engine->markupText($old).'</td>
-              <td>'.$engine->markupText($new).'</td>
+              <td>
+                <div class="phabricator-remarkup">'.
+                  $engine->markupText($old).
+                '</div>
+              </td>
+              <td>
+                <div class="phabricator-remarkup">'.
+                  $engine->markupText($new).
+                '</div>
+              </td>
             </tr>
           </table>';
 

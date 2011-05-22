@@ -37,3 +37,28 @@
   margin-right: auto;
   margin-left: auto;
 }
+
+.aphront-panel-accent {
+  background: #efefdf;
+  border: 1px solid #666622;
+}
+
+.aphront-panel-accent .aphront-form-view {
+  background: #fffff5;
+  border: 1px solid #c4c4c0;
+}
+
+.aphront-panel-preview {
+  background: #fbfbfb;
+  border-bottom: 1px solid #aaaaaa;
+  margin: -1em 2em 2em;
+  padding: 15px 20px;
+}
+
+.aphront-panel-preview-loading-text {
+  color: #666666;
+}
+
+.aphront-panel-flush {
+  margin: 0;
+}

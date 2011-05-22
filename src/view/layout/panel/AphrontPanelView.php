@@ -25,6 +25,7 @@ final class AphrontPanelView extends AphrontView {
   private $buttons = array();
   private $header;
   private $width;
+  private $classes = array();
 
   public function setCreateButton($create_button, $href) {
     $this->addButton(
@@ -36,6 +37,11 @@ final class AphrontPanelView extends AphrontView {
         ),
         $create_button));
 
+    return $this;
+  }
+
+  public function addClass($class) {
+    $this->classes[] = $class;
     return $this;
   }
 
@@ -73,13 +79,14 @@ final class AphrontPanelView extends AphrontView {
 
     require_celerity_resource('aphront-panel-view-css');
 
-    $class = array('aphront-panel-view');
+    $classes = $this->classes;
+    $classes[] = 'aphront-panel-view';
     if ($this->width) {
-      $class[] = 'aphront-panel-width-'.$this->width;
+      $classes[] = 'aphront-panel-width-'.$this->width;
     }
 
     return
-      '<div class="'.implode(' ', $class).'">'.
+      '<div class="'.implode(' ', $classes).'">'.
         $buttons.
         $header.
         $table.

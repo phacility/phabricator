@@ -2,26 +2,6 @@
  * @provides differential-revision-add-comment-css
  */
 
-.differential-add-comment-panel .aphront-form-view {
-  background: #fffff5;
-}
-
-.differential-add-comment-panel .differential-panel {
-  margin-bottom: 0;
-}
-
-.differential-comment-preview {
-  background: #f0f0f0;
-  border-bottom: 1px solid #aaaaaa;
-  margin-bottom: 2em;
-  max-width: 1120px;
-  padding: 15px 20px;
-}
-
-.differential-comment-preview .differential-loading-text {
-  color: #aaaaaa;
-}
-
 #inline-comment-preview {
   margin-left: 60px;
   width: 550px;
