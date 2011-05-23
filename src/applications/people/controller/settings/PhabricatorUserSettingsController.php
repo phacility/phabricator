@@ -54,16 +54,31 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
     $account_editable = PhabricatorEnv::getEnvConfig('account.editable');
     $this->accountEditable = $account_editable;
 
+    $e_realname = true;
+    $e_email = true;
+    $errors = array();
+
     if ($request->isFormPost()) {
       switch ($this->page) {
         case 'email':
           if (!$account_editable) {
             return new Aphront400Response();
           }
+
           $user->setEmail($request->getStr('email'));
-          $user->save();
-          return id(new AphrontRedirectResponse())
-            ->setURI('/settings/page/email/?saved=true');
+
+          if (!strlen($user->getEmail())) {
+            $errors[] = 'You must enter an e-mail address';
+            $e_email = 'Required';
+          }
+
+          if (!$errors) {
+            $user->save();
+
+            return id(new AphrontRedirectResponse())
+              ->setURI('/settings/page/email/?saved=true');
+          }
+          break;
         case 'arcanist':
 
           if (!$request->isDialogFormPost()) {
@@ -93,6 +108,7 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
           $user->save();
           return id(new AphrontRedirectResponse())
             ->setURI('/settings/page/arcanist/?regenerated=true');
+          break;
         case 'account':
           if (!$account_editable) {
             return new Aphront400Response();
@@ -106,21 +122,33 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
             }
           }
 
-          $user->save();
-          return id(new AphrontRedirectResponse())
-            ->setURI('/settings/page/account/');
+          $user->setRealName($request->getStr('realname'));
+
+          if (!strlen($user->getRealName())) {
+            $errors[] = 'Real name must be nonempty';
+            $e_realname = 'Required';
+          }
+
+          if (!$errors) {
+            $user->save();
+
+            return id(new AphrontRedirectResponse())
+                ->setURI('/settings/page/account/?saved=true');
+          }
+          break;
       }
     }
+
 
     switch ($this->page) {
       case 'arcanist':
         $content = $this->renderArcanistCertificateForm();
         break;
       case 'account':
-        $content = $this->renderAccountForm();
+        $content = $this->renderAccountForm($errors, $e_realname);
         break;
       case 'email':
-        $content = $this->renderEmailForm();
+        $content = $this->renderEmailForm($errors, $e_email);
         break;
       default:
         if (empty($pages[$this->page])) {
@@ -235,7 +263,7 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
     return $notice.$cert->render().$regen->render();
   }
 
-  private function renderAccountForm() {
+  private function renderAccountForm(array $errors, $e_realname) {
     $request = $this->getRequest();
     $user = $request->getUser();
 
@@ -243,6 +271,22 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
       $user->getProfileImagePHID());
 
     $editable = $this->accountEditable;
+
+    $notice = null;
+    if (!$errors) {
+      if ($request->getStr('saved')) {
+        $notice = new AphrontErrorView();
+        $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+        $notice->setTitle('Changed Saved');
+        $notice->appendChild('<p>Your changes have been saved.</p>');
+        $notice = $notice->render();
+      }
+    } else {
+      $notice = new AphrontErrorView();
+      $notice->setTitle('Form Errors');
+      $notice->setErrors($errors);
+      $notice = $notice->render();
+    }
 
     $form = new AphrontFormView();
     $form
@@ -255,6 +299,8 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Real Name')
+          ->setName('realname')
+          ->setError($e_realname)
           ->setValue($user->getRealName())
           ->setDisabled(!$editable))
       ->appendChild(
@@ -290,23 +336,29 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
     $panel->appendChild($form);
 
-    return $panel->render();
+    return $notice.$panel->render();
   }
 
-  private function renderEmailForm() {
+  private function renderEmailForm(array $errors, $e_email) {
     $request = $this->getRequest();
     $user = $request->getUser();
 
     $editable = $this->accountEditable;
 
-    if ($request->getStr('saved')) {
-      $notice = new AphrontErrorView();
-      $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-      $notice->setTitle('Changed Saved');
-      $notice->appendChild('<p>Your changes have been saved.</p>');
-      $notice = $notice->render();
+    $notice = null;
+    if (!$errors) {
+      if ($request->getStr('saved')) {
+        $notice = new AphrontErrorView();
+        $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+        $notice->setTitle('Changed Saved');
+        $notice->appendChild('<p>Your changes have been saved.</p>');
+        $notice = $notice->render();
+      }
     } else {
-      $notice = null;
+      $notice = new AphrontErrorView();
+      $notice->setTitle('Form Errors');
+      $notice->setErrors($errors);
+      $notice = $notice->render();
     }
 
     $form = new AphrontFormView();
@@ -320,7 +372,8 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
           ->setCaption(
             'Note: there is no email validation yet; double-check your '.
             'typing.')
-          ->setValue($user->getEmail()));
+          ->setValue($user->getEmail())
+          ->setError($e_email));
 
     if ($editable) {
       $form
