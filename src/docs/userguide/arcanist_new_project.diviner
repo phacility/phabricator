@@ -1,0 +1,52 @@
+@title Arcanist User Guide: Configuring a New Project
+@group userguide
+
+Explains how to configure Arcanist projects with ##.arcconfig## files.
+
+= .arcconfig Basics =
+
+Arcanist uses ##.arcconfig## files to determine a number of things about project
+configuration. For instance, these are things it figures out from
+##.arcconfig##:
+
+  - where the logical root directory of a project is;
+  - which server Arcanist should send diffs to for code review; and
+  - which lint rules should be applied.
+
+An ##.arcconfig## file is a JSON file which you check into your project's root.
+A simple, valid file looks something like this:
+
+  {
+    "project_id" : "some_project_name",
+    "conduit_uri" : "https://phabricator.example.com/api/"
+  }
+
+Here's what these options mean:
+
+  - **project_id**: a human-readable string identifying the project
+  - **conduit_uri**: the Conduit API URI for the Phabricator installation that
+    Arcanist should send diffs to for review. Generally, if you access
+    Phabricator at ##https://phabricator.example.com/##, the **conduit_uri** is
+    ##https://phabricator.example.com/api/##. Be mindful about "http" vs
+    "https".
+
+For an exhaustive list of available options, see below.
+
+= Advanced .arcconfig =
+
+Other options include:
+
+  - **lint_engine**: the name of a subclass of @{class:ArcanistLintEngine},
+    which should be used to apply lint rules to this project. See (TODO).
+  - **unit_engine**: the name of a subclass of
+    @{class:ArcanistBaseUnitTestEngine}, which should be used to apply unit
+    test rules to this project. See (TODO).
+  - **arcanist_configuration**: the name of a subclass of
+    @{class:ArcanistConfiguration} which can add new command flags for this
+    project or provide entirely new commands.
+  - **remote_hooks_installed**: tells Arcanist that you've set up remote hooks
+    in the master repository (see @{article:Installing Arcanist SVN Hooks} for
+    SVN, or (TODO) for git).
+  - **copyright_holder**: used by @{class:ArcanistLicenseLinter} to apply
+    license notices to source files.
+  - **phutil_libraries**: map of additional Phutil libraries to load at startup.

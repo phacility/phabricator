@@ -1,0 +1,85 @@
+@title Arcanist User Guide: Customizing Lint, Unit Tests and Workflows
+@group userguide
+
+Explains how to build new classes to control how Arcanist behaves.
+
+NOTE: TODO: This document is pretty trash, follow at your own risk.
+
+= Overview =
+
+Arcanist has some basic configuration options available in the ##.arcconfig##
+file (see @{article:Setting Up .arcconfig}), but it can't handle everything. If
+you want to customize Arcanist at a deeper level, you need to build new classes.
+For instance:
+
+  - if you want to configure linters, or add new linters, you need to create a
+    new class which extends @{class:ArcanistLintEngine}.
+  - if you want to integrate with a unit testing framework, you need to create a
+    new class which extends @{class:ArcanistBaseUnitTestEngine}.
+  - if you you want to change how workflows behave, or add new workflows, you
+    need to create a new class which extends @{class:ArcanistConfiguration}.
+
+Arcanist works through a sort of dependency-injection approach. For example,
+Arcanist does not run lint rules by default, but you can set **lint_engine**
+in your ##.arcconfig## to the name of a class which extends
+@{class:ArcanistLintEngine}. When running from inside your project, Arcanist
+will load this class and call methods on it in order to run lint. To make this
+work, you need to do three things:
+
+  - actually write the class;
+  - add the library where the class exists to your ##.arcconfig##;
+  - add the class name to your ##.arcconfig## as the **lint_engine**,
+    **unit_engine**, or **arcanist_configuration**.
+
+= Write the Class =
+
+(TODO)
+
+= Load the Class =
+
+To make the class loadable, you need to put the path to it in your
+##.arcconfig##, under **phutil_libraries**:
+
+  {
+    // ...
+    "phutil_libraries" : {
+      // ...
+      "my-library" : "/path/to/my/library",
+      // ...
+    }
+    // ...
+  }
+
+You can either specify an absolute path, or a path relative to the project root.
+When you run ##arc --trace##, you should see a message to the effect that it has
+loaded your library.
+
+For debugging or testing, you can also run Arcanist with the
+##--load-phutil-library## flag:
+
+  arc --load-phutil-library=/path/to/library <command>
+
+You can specify this flag more than once to load several libraries. Note that
+if you use this flag, Arcanist will ignore any libraries listed in
+##.arcconfig##.
+
+= Use the Class =
+
+This step is easy: just edit ##.arcconfig## to specify your class name as
+the appropriate configuration value.
+
+  {
+    // ...
+    "lint_engine" : "MyCustomArcanistLintEngine",
+    // ...
+  }
+
+Now, when you run Arcanist in your project, it will invoke your class when
+appropriate.
+
+For lint and unit tests, you can also use the ##--engine## flag override the
+default engine:
+
+  arc lint --engine MyCustomArcanistLintEngine
+
+This is mostly useful for debugging and testing.

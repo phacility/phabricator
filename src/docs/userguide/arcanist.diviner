@@ -1,0 +1,139 @@
+@title Arcanist User Guide
+@group userguide
+
+Guide to Arcanist, a command-line tool for code review and revision management.
+
+Arcanists glues together several other tools, like Differential and lint. It
+also serves as the CLI to Phabricator, and is used to get changesets into
+Differential for review.
+
+A detailed command reference is available by running ##arc help##. This
+document provides a high level overview of common workflows.
+
+Arcanist has technical, contributor-focused documentation here:
+<http://www.phabricator.com/docs/arcanist/>
+
+= Overview =
+
+Arcanist is a wrapper script that sits on top of other tools (e.g.,
+Differential, linters, unit test frameworks, SVN, and git) and provides a
+simple command-line API to manage code review and some related revision control
+operations.
+
+Arcanist allows you to do things like:
+
+  - get detailed help about available commands with ##arc help##
+  - send your code to Differential for review with ##arc diff##
+  - show pending revision information with ##arc list##
+  - find likely reviewers for a change with ##arc cover##
+  - apply changes in a revision to the working copy with ##arc patch##
+  - download a patch from Differential with ##arc export##
+  - update Git commit messages after review with ##arc amend##
+  - commit SVN changes with ##arc commit##
+
+Once you've configured lint and unit test integration, you can also:
+
+  - check your code for syntax and style errors with ##arc lint##
+  - run unit tests that cover your changes with ##arc unit##
+
+Arcanist has some advanced features as well, you can:
+
+  - execute Conduit method calls with ##arc call-conduit##
+  - create or update libphutil libraries with ##arc liberate##
+  - activate tab completion with ##arc shell-complete##
+  - install arc as a pre-commit hook with ##arc svn-hook-pre-commit## or
+    ##arc git-hook-pre-receive##
+  - ...or extend Arcanist and add new commands
+
+Except where otherwise noted, these workflows are generally agnostic to the
+underlying version control system and will work properly in git or SVN
+repositories.
+
+= Installing Arcanist =
+
+Arcanist is meant to be installed on your local machine or development server,
+i.e. whatever machine you're editing code on. It runs on Linux and Mac OS X;
+To install it, clone it and libphutil off github:
+
+  somewhere/ $ git clone git://github.com/facebook/libphutil.git
+  somewhere/ $ git clone git://github.com/facebook/arcanist.git
+
+Now add ##somewhere/arcanist/bin/arc## to your path.
+
+== Installing Tab Completion ==
+
+If you use ##bash##, you can set up tab completion by adding something like this
+to your ##.bashrc##, ##.profile## or similar:
+
+  source /path/to/arcanist/resources/shell/bash-completion
+
+= Running Arcanist =
+
+Arcanist is a context-sensitive command which you should run in a working copy,
+like ##svn## or ##git##. Generally speaking, ##arc## commands operate on changed
+files in the working copy in svn, and on the commit at HEAD in git.
+
+== SVN Basics ==
+
+To **create a revision** in SVN:
+
+  $ nano source_code.c # Make changes.
+  $ arc diff
+
+This will give you a diff URI, which you can use to create a new revision via
+the web UI. To later **update an existing revision**, just do the same thing:
+
+  $ nano source_code.c # Make more changes.
+  $ arc diff
+
+This time, attach the diff to your existing revision. Once your revision has
+been accepted, you can commit it like this:
+
+  $ arc commit
+
+== Git Basics ==
+
+There are a lot of ways to use git, and Arcanist is flexible enough to handle
+several of them. Use a commit template similar to this one:
+
+  resources/git/commit-template.txt
+
+To **create a revision** in git:
+
+  $ nano source_code.c      # Make changes.
+  $ git commit -a           # Fill out the template.
+  $ arc diff
+
+To **update a revision** in git by amending HEAD:
+
+  $ nano source_code.c      # Make changes.
+  $ git commit -a --amend   # Amend into HEAD.
+  $ arc diff
+
+To **update a revision** in git by stacking local commits:
+
+  $ nano source_code.c      # Make changes.
+  $ git commit -a -m '...'  # Make another local commit.
+  $ arc diff HEAD^^         # Update with the last two changes.
+
+To **create and update a revision** using feature branches:
+
+  $ git checkout master
+  $ git checkout -b feature # Create a branch.
+  $ nano source_code.c      # Make changes.
+  $ git commit -a           # Fill out the template.
+  $ arc diff master         # Diff changes between here and branch 'master'
+  $ nano source_code.c      # Make more changes.
+  $ git commit -a -m '...'  # Or you can amend.
+  $ arc diff master         # Updates the diff.
+
+Once your revision has been accepted, use ##arc amend## to finalize it.
+
+  $ arc amend               # If you used an --amend workflow.
+
+If you used a multiple-commit workflow, you need to squash commits first with
+##git rebase -i## or similar, then amend the squashed commit.
+
+After amending, you can push the commit to the remote with ##git push## or
+##git svn dcommit## or via whatever other channel your project uses as
+applicable.
