@@ -284,6 +284,18 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/core/behavior-tokenizer.js',
   ),
+  'javelin-behavior-aphront-form-disable-on-submit' =>
+  array(
+    'uri' => '/res/6c659ede/rsrc/js/application/core/behavior-form.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-dom',
+    ),
+    'disk' => '/rsrc/js/application/core/behavior-form.js',
+  ),
   'javelin-behavior-dark-console' =>
   array(
     'uri' => '/res/044c171f/rsrc/js/application/core/behavior-dark-console.js',
