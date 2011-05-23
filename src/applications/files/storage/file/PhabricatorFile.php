@@ -206,6 +206,11 @@ class PhabricatorFile extends PhabricatorFileDAO {
     return '/file/xform/thumb-60x45/'.$this->getPHID().'/';
   }
 
+  public function getThumb160x120URI() {
+    return '/file/xform/thumb-160x120/'.$this->getPHID().'/';
+  }
+
+
   public function isViewableInBrowser() {
     return ($this->getViewableMimeType() !== null);
   }

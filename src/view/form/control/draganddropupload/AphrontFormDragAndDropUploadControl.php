@@ -47,13 +47,15 @@ class AphrontFormDragAndDropUploadControl extends AphrontFormControl {
 
     $files = $this->getValue();
     $value = array();
-    foreach ($files as $file) {
-      $view = new AphrontAttachedFileView();
-      $view->setFile($file);
-      $value[$file->getPHID()] = array(
-        'phid' => $file->getPHID(),
-        'html' => $view->render(),
-      );
+    if ($files) {
+      foreach ($files as $file) {
+        $view = new AphrontAttachedFileView();
+        $view->setFile($file);
+        $value[$file->getPHID()] = array(
+          'phid' => $file->getPHID(),
+          'html' => $view->render(),
+        );
+      }
     }
 
     Javelin::initBehavior(

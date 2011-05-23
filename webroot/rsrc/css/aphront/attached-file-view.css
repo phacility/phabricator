@@ -22,3 +22,18 @@
 .aphront-attached-file-view-remove {
   vertical-align: middle;
 }
+
+.aphront-file-preview-view {
+  float: left;
+  margin: 4px 4px 12px;
+  text-align: center;
+  font-size: 11px;
+  color: #333333;
+}
+
+.aphront-file-preview-thumb {
+  padding: 2px;
+  border: 1px solid #000000;
+  background: #ffffff;
+  margin-bottom: 2px;
+}

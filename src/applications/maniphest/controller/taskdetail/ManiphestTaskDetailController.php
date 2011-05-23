@@ -121,13 +121,22 @@ class ManiphestTaskDetailController extends ManiphestController {
     }
 
     if (idx($attached, PhabricatorPHIDConstants::PHID_TYPE_FILE)) {
-      $revs = idx($attached, PhabricatorPHIDConstants::PHID_TYPE_FILE);
-      $rev_links = array();
-      foreach ($revs as $rev => $info) {
-        $rev_links[] = $handles[$rev]->renderLink();
+      $file_infos = idx($attached, PhabricatorPHIDConstants::PHID_TYPE_FILE);
+      $file_phids = array_keys($file_infos);
+
+      if ($file_phids) {
+        $files = id(new PhabricatorFile())->loadAllWhere(
+          'phid IN (%Ls)',
+          $file_phids);
+
+        $views = array();
+        foreach ($files as $file) {
+          $view = new AphrontFilePreviewView();
+          $view->setFile($file);
+          $views[] = $view->render();
+        }
+        $dict['Files'] = implode('', $views);
       }
-      $rev_links = implode(', ', $rev_links);
-      $dict['Files'] = $rev_links;
     }
 
 
