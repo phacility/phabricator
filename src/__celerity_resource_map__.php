@@ -215,6 +215,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/diffusion/commit-view.css',
   ),
+  'diffusion-source-css' =>
+  array(
+    'uri' => '/res/db4566b6/rsrc/css/application/diffusion/diffusion-source.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/diffusion/diffusion-source.css',
+  ),
   'herald-css' =>
   array(
     'uri' => '/res/5051f3ab/rsrc/css/application/herald/herald.css',
@@ -652,12 +661,13 @@ celerity_register_resource_map(array(
   ),
   0 =>
   array(
-    'uri' => '/res/415aad1a/rsrc/css/application/diffusion/diffusion-source.css',
-    'type' => 'css',
+    'uri' => '/res/39de799e/rsrc/js/javelin/docs/Base.js',
+    'type' => 'js',
     'requires' =>
     array(
+      0 => 'javelin-install',
     ),
-    'disk' => '/rsrc/css/application/diffusion/diffusion-source.css',
+    'disk' => '/rsrc/js/javelin/docs/Base.js',
   ),
   'javelin-typeahead-normalizer' =>
   array(
