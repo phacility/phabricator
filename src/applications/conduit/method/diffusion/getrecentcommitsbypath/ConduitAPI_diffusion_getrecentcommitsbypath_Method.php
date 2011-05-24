@@ -50,6 +50,8 @@ class ConduitAPI_diffusion_getrecentcommitsbypath_Method
       )
     )
     ->setLimit(self::RESULT_LIMIT)
+    ->needDirectChanges(true)
+    ->needChildChanges(true)
     ->loadHistory();
 
     $raw_commit_identifiers = mpull($history, 'getCommitIdentifier');
