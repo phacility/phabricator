@@ -210,12 +210,13 @@ class DiffusionBrowseFileController extends DiffusionController {
   }
 
 
-  private static function buildDisplayRows($text_list, $rev_list, $blame_dict,
+  private function buildDisplayRows($text_list, $rev_list, $blame_dict,
     $needs_blame, DiffusionRequest $drequest, $file_query, $selected) {
     $last_rev = null;
     $color = null;
     $rows = array();
     $n = 1;
+    $view = $this->getRequest()->getStr('view');
 
     if ($blame_dict) {
       $epoch_list = ipull($blame_dict, 'epoch');
@@ -291,12 +292,13 @@ class DiffusionBrowseFileController extends DiffusionController {
       // Create the row display.
       $uri_path = $drequest->getUriPath();
       $uri_rev  = $drequest->getStableCommitName();
+      $uri_view = $view;
 
       $l = phutil_render_tag(
         'a',
         array(
           'class' => 'diffusion-line-link',
-          'href' => $uri_path.';'.$uri_rev.'$'.$n,
+          'href' => $uri_path.';'.$uri_rev.'$'.$n.'?view='.$view,
         ),
         $n);
 
