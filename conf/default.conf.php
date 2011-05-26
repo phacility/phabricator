@@ -143,6 +143,12 @@ return array(
   'amazon-ses.access-key'       =>  null,
   'amazon-ses.secret-key'       =>  null,
 
+  // If you're using Sendgrid to send email, provide your access credentials
+  // here. This will use the REST API. You can also use Sendgrid as a normal
+  // SMTP service.
+  'sendgrid.api-user'           => null,
+  'sendgrid.api-key'            => null,
+
   // You can configure a reply handler domain so that email sent from Maniphest
   // will have a special "Reply To" address like "T123+82+af19f@example.com"
   // that allows recipients to reply by email and interact with tasks. For

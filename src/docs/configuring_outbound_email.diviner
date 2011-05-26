@@ -5,17 +5,18 @@ Instructions for configuring Phabricator to send mail.
 
 = Overview =
 
-Phabricator can send outbound email via four different adapters:
+Phabricator can send outbound email via several different adapters:
 
-  - by running ##sendmail## on the local host; or
+  - by running ##sendmail## on the local host with SMTP; or
   - by using Amazon SES (Simple Email Service); or
+  - by using SendGrid's REST API; or
   - via a custom adapter you write; or
   - by dropping email into a hole and not delivering it.
 
-Of these, ##sendmail## is the default but requires some configuration. SES is
-the easiest but costs money and has some limitations. Writing a custom solution
-requires digging into the code. See below for details on how to set up each
-method.
+Of these, ##sendmail## is the default but requires some configuration. SES and
+SendGrid are easier, but cost money and have some limitations. Writing a custom
+solution requires digging into the code. See below for details on how to set up
+each method.
 
 Phabricator can also send outbound email in two ways:
 
@@ -50,6 +51,8 @@ your configuration. Possible values are:
     "sendmail", see "Adapter: Sendmail".
   - ##PhabricatorMailImplementationAmazonSESAdapter##: use Amazon SES, see
     "Adapter: Amazon SES".
+  - ##PhabricatorMailImplementationSendGridAdapter##: use SendGrid, see
+    "Adapter: SendGrid".
   - ##Some Custom Class You Write##: use a custom adapter you write, see
     "Adapter: Custom".
   - ##PhabricatorMailImplementationTestAdapter##: this will
@@ -89,6 +92,25 @@ To configure Phabricator to use Amazon SES, set these configuration keys:
 NOTE: Amazon SES is slow to accept mail (often 1-2 seconds) and application
 performance will improve greatly if you configure outbound email to send in
 the background.
+
+= Adapter: SendGrid =
+
+SendGrid is an email delivery service like Amazon SES. You can learn more at
+<http://sendgrid.com/>. It is easy to configure, but not free.
+
+You can configure SendGrid in two ways: you can send via SMTP or via the REST
+API. To use SMTP, just configure ##sendmail## and leave Phabricator's setup
+with defaults. To use the REST API, follow the instructions in this section.
+
+To configure Phabricator to use SendGrid, set these configuration keys:
+
+  - **metamta.mail-adapter**: set to
+    "PhabricatorMailImplementationSendGridAdapter".
+  - **sendgrid.api-user**: set to your SendGrid login name.
+  - **sendgrid.api-key**: set to your SendGrid password.
+
+If you're logged into your SendGrid account, you may be able to find this
+information easily by visiting <http://sendgrid.com/developer>.
 
 = Adapter: Custom =
 
