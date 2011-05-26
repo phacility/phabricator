@@ -26,6 +26,8 @@ phutil_require_module('phutil', 'markup/engine/remarkup/markuprule/escaperemarku
 phutil_require_module('phutil', 'markup/engine/remarkup/markuprule/hyperlink');
 phutil_require_module('phutil', 'markup/engine/remarkup/markuprule/italics');
 phutil_require_module('phutil', 'markup/engine/remarkup/markuprule/monospace');
+phutil_require_module('phutil', 'symbols');
+phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('DifferentialMarkupEngineFactory.php');

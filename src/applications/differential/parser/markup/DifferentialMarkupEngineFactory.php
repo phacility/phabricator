@@ -48,12 +48,30 @@ class DifferentialMarkupEngineFactory {
     $rules[] = new PhutilRemarkupRuleBold();
     $rules[] = new PhutilRemarkupRuleItalic();
 
+    $custom_rule_classes =
+      PhabricatorEnv::getEnvConfig('differential.custom-remarkup-rules');
+    if ($custom_rule_classes) {
+      foreach ($custom_rule_classes as $custom_rule_class) {
+        PhutilSymbolLoader::loadClass($custom_rule_class);
+        $rules[] = newv($custom_rule_class, array());
+      }
+    }
+
     $blocks = array();
     $blocks[] = new PhutilRemarkupEngineRemarkupQuotesBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupHeaderBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupListBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupCodeBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupDefaultBlockRule();
+
+    $custom_block_rule_classes =
+      PhabricatorEnv::getEnvConfig('differential.custom-remarkup-block-rules');
+    if ($custom_block_rule_classes) {
+      foreach ($custom_block_rule_classes as $custom_block_rule_class) {
+        PhutilSymbolLoader::loadClass($custom_block_rule_class);
+        $blocks[] = newv($custom_block_rule_class, array());
+      }
+    }
 
     foreach ($blocks as $block) {
       if (!($block instanceof PhutilRemarkupEngineRemarkupCodeBlockRule)) {

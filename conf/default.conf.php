@@ -334,6 +334,13 @@ return array(
 
   'differential.revision-custom-detail-renderer'  => null,
 
+  // Array for custom remarkup rules. The array should have a list of
+  // class names of classes that extend PhutilRemarkupRule
+  'differential.custom-remarkup-rules' => null,
+
+  // Array for custom remarkup block rules. The array should have a list of
+  // class names of classes that extend PhutilRemarkupEngineBlockRule
+  'differential.custom-remarkup-block-rules' => null,
 
 // -- Maniphest ------------------------------------------------------------- //
 
