@@ -464,17 +464,22 @@ class DifferentialChangesetParser {
       'new' => $new_future,
     );
     foreach (Futures($futures) as $key => $future) {
-      switch ($key) {
-        case 'old':
-          $this->oldRender = $this->processHighlightedSource(
-            $this->old,
-            $future->resolve());
-          break;
-        case 'new':
-          $this->newRender = $this->processHighlightedSource(
-            $this->new,
-            $future->resolve());
-          break;
+      try {
+        switch ($key) {
+          case 'old':
+            $this->oldRender = $this->processHighlightedSource(
+              $this->old,
+              $future->resolve());
+            break;
+          case 'new':
+            $this->newRender = $this->processHighlightedSource(
+              $this->new,
+              $future->resolve());
+            break;
+        }
+      } catch (Exception $ex) {
+        phlog($ex);
+        throw $ex;
       }
     }
 
