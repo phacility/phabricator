@@ -339,6 +339,10 @@ return array(
 
   'maniphest.enabled' => true,
 
+// -- Remarkup -------------------------------------------------------------- //
+
+  'remarkup.enable-embedded-youtube' => false,
+
 // -- Customization --------------------------------------------------------- //
 
   // Paths to additional phutil libraries to load.

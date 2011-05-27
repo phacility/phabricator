@@ -31,6 +31,11 @@ class DifferentialMarkupEngineFactory {
     if (PhabricatorEnv::getEnvConfig('files.enable-proxy')) {
       $rules[] = new PhabricatorRemarkupRuleProxyImage();
     }
+
+    if (PhabricatorEnv::getEnvConfig('remarkup.enable-embedded-youtube')) {
+      $rules[] = new PhabricatorRemarkupRuleYoutube();
+    }
+
     $rules[] = new PhutilRemarkupRuleHyperlink();
 
     $rules[] = new PhabricatorRemarkupRuleDifferential();
