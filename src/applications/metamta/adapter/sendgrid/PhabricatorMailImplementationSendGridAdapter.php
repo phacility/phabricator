@@ -105,15 +105,15 @@ class PhabricatorMailImplementationSendGridAdapter
     }
 
     $params['from'] = idx($this->params, 'from');
-    if (idx($this->params['from-name'])) {
-      $params['fromname'] = idx($this->params, 'fromname');
+    if (idx($this->params, 'from-name')) {
+      $params['fromname'] = $this->params['from-name'];
     }
 
-    if (idx($this->params, 'replyto')) {
-      $replyto = $this->params['replyto'];
+    if (idx($this->params, 'reply-to')) {
+      $replyto = $this->params['reply-to'];
 
       // Pick off the email part, no support for the name part in this API.
-      $params['replyto'] = $replyto[0];
+      $params['replyto'] = $replyto[0]['email'];
     }
 
     $headers = idx($this->params, 'headers', array());
