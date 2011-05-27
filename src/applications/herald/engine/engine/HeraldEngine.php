@@ -51,11 +51,27 @@ class HeraldEngine {
 
     $effects = array();
     foreach ($rules as $id => $rule) {
-
-
       $this->stack = array();
       try {
-        $rule_matches = $this->doesRuleMatch($rule, $object);
+        if (($rule->getRepetitionPolicy() ==
+             HeraldRepetitionPolicyConfig::FIRST) &&
+            $rule->getRuleApplied($object->getPHID())) {
+          // This rule is only supposed to be applied a single time, and it's
+          // aleady been applied, so this is an automatic failure.
+          $xscript = id(new HeraldRuleTranscript())
+            ->setRuleID($id)
+            ->setResult(false)
+            ->setRuleName($rule->getName())
+            ->setRuleOwner($rule->getAuthorPHID())
+            ->setReason(
+              "This rule is only supposed to be repeated a single time, ".
+              "and it has already been applied."
+            );
+          $this->transcript->addRuleTranscript($xscript);
+          $rule_matches = false;
+        } else {
+          $rule_matches = $this->doesRuleMatch($rule, $object);
+        }
       } catch (HeraldRecursiveConditionsException $ex) {
         $names = array();
         foreach ($this->stack as $rule_id => $ignored) {
@@ -101,18 +117,27 @@ class HeraldEngine {
   }
 
   public function applyEffects(array $effects, HeraldObjectAdapter $object) {
-    if ($object instanceof DryRunHeraldable) {
-      $this->transcript->setDryRun(true);
-    } else {
-      $this->transcript->setDryRun(false);
-    }
-    foreach ($object->applyHeraldEffects($effects) as $apply_xscript) {
+    $this->transcript->setDryRun($object instanceof HeraldDryRunAdapter);
+
+    $xscripts = $object->applyHeraldEffects($effects);
+    foreach ($xscripts as $apply_xscript) {
       if (!($apply_xscript instanceof HeraldApplyTranscript)) {
         throw new Exception(
           "Heraldable must return HeraldApplyTranscripts from ".
           "applyHeraldEffect().");
       }
       $this->transcript->addApplyTranscript($apply_xscript);
+    }
+
+    if (!$this->transcript->getDryRun()) {
+      // Mark all the rules that have had their effects applied as having been
+      // executed for the current object.
+      $ruleIDs = mpull($xscripts, 'getRuleID');
+      foreach ($ruleIDs as $ruleID) {
+        id(new HeraldRule())
+          ->setID($ruleID)
+          ->saveRuleApplied($object->getPHID());
+      }
     }
   }
 

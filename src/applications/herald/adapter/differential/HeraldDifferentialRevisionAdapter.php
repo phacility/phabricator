@@ -27,6 +27,7 @@ class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
 
   protected $newCCs = array();
   protected $remCCs = array();
+  protected $emailPHIDs = array();
 
   protected $repository;
   protected $affectedPackages;
@@ -62,6 +63,10 @@ class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
 
   public function getCCsRemovedByHerald() {
     return $this->remCCs;
+  }
+
+  public function getEmailPHIDsAddedByHerald() {
+    return $this->emailPHIDs;
   }
 
   public function getPHID() {
@@ -247,7 +252,9 @@ class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
             true,
             'OK, did nothing.');
           break;
+        case HeraldActionConfig::ACTION_EMAIL:
         case HeraldActionConfig::ACTION_ADD_CC:
+          $op = ($action == HeraldActionConfig::ACTION_EMAIL) ? 'email' : 'CC';
           $base_target = $effect->getTarget();
           $forbidden = array();
           foreach ($base_target as $key => $fbid) {
@@ -255,7 +262,11 @@ class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
               $forbidden[] = $fbid;
               unset($base_target[$key]);
             } else {
-              $this->newCCs[$fbid] = true;
+              if ($action == HeraldActionConfig::ACTION_EMAIL) {
+                $this->emailPHIDs[$fbid] = true;
+              } else {
+                $this->newCCs[$fbid] = true;
+              }
             }
           }
 
@@ -267,17 +278,18 @@ class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
               $result[] = new HeraldApplyTranscript(
                 $effect,
                 true,
-                'Added these addresses to CC list. Others could not be added.');
+                'Added these addresses to '.$op.' list. '.
+                'Others could not be added.');
             }
             $result[] = new HeraldApplyTranscript(
               $failed,
               false,
-              'CC forbidden, these addresses have unsubscribed.');
+              $op.' forbidden, these addresses have unsubscribed.');
           } else {
             $result[] = new HeraldApplyTranscript(
               $effect,
               true,
-              'Added addresses to CC list.');
+              'Added addresses to '.$op.' list.');
           }
           break;
         case HeraldActionConfig::ACTION_REMOVE_CC:

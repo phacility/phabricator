@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'applications/herald/config/condition');
 phutil_require_module('phabricator', 'applications/herald/config/field');
+phutil_require_module('phabricator', 'applications/herald/config/repetitionpolicy');
 phutil_require_module('phabricator', 'applications/herald/engine/effect');
 phutil_require_module('phabricator', 'applications/herald/engine/engine/exception');
 phutil_require_module('phabricator', 'applications/herald/storage/rule');

@@ -18,13 +18,18 @@
 
 class HeraldRule extends HeraldDAO {
 
+  const TABLE_RULE_APPLIED = 'herald_ruleapplied';
+
   protected $name;
   protected $authorPHID;
 
   protected $contentType;
   protected $mustMatchAll;
+  protected $repetitionPolicy;
 
-  protected $configVersion = 7;
+  protected $configVersion = 8;
+
+  private $ruleApplied = array(); // phids for which this rule has been applied
 
   public static function loadAllByContentTypeWithFullData($content_type) {
     $rules = id(new HeraldRule())->loadAllWhere(
@@ -45,15 +50,53 @@ class HeraldRule extends HeraldDAO {
       'ruleID in (%Ld)',
       $rule_ids);
 
+    $applied = queryfx_all(
+      id(new HeraldRule())->establishConnection('r'),
+      'SELECT * FROM %T WHERE ruleID in (%Ld)',
+      self::TABLE_RULE_APPLIED, $rule_ids
+    );
+
     $conditions = mgroup($conditions, 'getRuleID');
     $actions = mgroup($actions, 'getRuleID');
+    $applied = igroup($applied, 'ruleID');
+
 
     foreach ($rules as $rule) {
+      $rule->attachAllRuleApplied(idx($applied, $rule->getID(), array()));
       $rule->attachConditions(idx($conditions, $rule->getID(), array()));
       $rule->attachActions(idx($actions, $rule->getID(), array()));
     }
 
     return $rules;
+  }
+
+  public function getRuleApplied($phid) {
+    // defaults to false because (ruleID, phid) pairs not in the db imply
+    // a rule that's not been applied before
+    return idx($this->ruleApplied, $phid, false);
+  }
+
+  public function setRuleApplied($phid) {
+    $this->ruleApplied[$phid] = true;
+  }
+
+  public function attachAllRuleApplied(array $applied) {
+    // turn array of array(ruleID, phid) into array of ruleID => true
+    $this->ruleApplied = array_fill_keys(ipull($applied, 'phid'), true);
+ }
+
+  public function saveRuleApplied($phid) {
+    if (!$this->getID()) {
+      throw new Exception("Save rule before saving children.");
+    }
+
+    queryfx(
+      $this->establishConnection('w'),
+      'INSERT IGNORE INTO %T (phid, ruleID) VALUES (%s, %d)',
+      self::TABLE_RULE_APPLIED, $phid, $this->getID()
+    );
+
+    $this->setRuleApplied($phid);
   }
 
   public function loadConditions() {

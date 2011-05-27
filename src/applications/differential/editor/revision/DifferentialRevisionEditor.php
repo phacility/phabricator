@@ -289,13 +289,19 @@ class DifferentialRevisionEditor {
       array_keys($add['ccs']),
       $this->actorPHID);
 
-    // Add the author to the relevant set of users so they get a copy of the
-    // email.
+    // Add the author and users included from Herald rules to the relevant set
+    // of users so they get a copy of the email.
     if (!$this->silentUpdate) {
       if ($is_new) {
         $add['rev'][$this->getActorPHID()] = true;
+        if ($diff) {
+          $add['rev'] += $adapter->getEmailPHIDsAddedByHerald();
+        }
       } else {
         $stable['rev'][$this->getActorPHID()] = true;
+        if ($diff) {
+          $stable['rev'] += $adapter->getEmailPHIDsAddedByHerald();
+        }
       }
     }
 
@@ -355,13 +361,6 @@ class DifferentialRevisionEditor {
 
 // TODO
 //    $revision->saveTransaction();
-
-    $event = array(
-      'revision_id' => $revision->getID(),
-      'PHID'        => $revision->getPHID(),
-      'action'      => $is_new ? 'create' : 'update',
-      'actor'       => $this->getActorPHID(),
-    );
 
 //  TODO: Move this into a worker task thing.
     PhabricatorSearchDifferentialIndexer::indexRevision($revision);

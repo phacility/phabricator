@@ -237,6 +237,7 @@ phutil_register_library_map(array(
     'HeraldObjectAdapter' => 'applications/herald/adapter/base',
     'HeraldObjectTranscript' => 'applications/herald/storage/transcript/object',
     'HeraldRecursiveConditionsException' => 'applications/herald/engine/engine/exception',
+    'HeraldRepetitionPolicyConfig' => 'applications/herald/config/repetitionpolicy',
     'HeraldRule' => 'applications/herald/storage/rule',
     'HeraldRuleController' => 'applications/herald/controller/rule',
     'HeraldRuleTranscript' => 'applications/herald/storage/transcript/rule',

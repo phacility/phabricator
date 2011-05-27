@@ -41,6 +41,7 @@ class HeraldActionConfig {
           array(
             self::ACTION_ADD_CC,
             self::ACTION_REMOVE_CC,
+            self::ACTION_EMAIL,
             self::ACTION_NOTHING,
           ));
       case HeraldContentTypeConfig::CONTENT_TYPE_COMMIT:

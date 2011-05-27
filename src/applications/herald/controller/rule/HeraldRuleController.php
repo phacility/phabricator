@@ -74,6 +74,11 @@ class HeraldRuleController extends HeraldController {
       $rule->setName($request->getStr('name'));
       $rule->setMustMatchAll(($request->getStr('must_match') == 'all'));
 
+      $repetition_policy_param = $request->getStr('repetition_policy');
+      $rule->setRepetitionPolicy(
+        HeraldRepetitionPolicyConfig::toInt($repetition_policy_param)
+      );
+
       if (!strlen($rule->getName())) {
         $e_name = "Required";
         $errors[] = "Rule must have a name.";
@@ -250,6 +255,45 @@ class HeraldRuleController extends HeraldController {
       $action = '/herald/rule/'.$rule->getID().'/';
     }
 
+    // Make the selector for choosing how often this rule should be repeated
+    $repetition_selector = "";
+    $repetition_policy = HeraldRepetitionPolicyConfig::toString(
+      $rule->getRepetitionPolicy()
+    );
+    $repetition_options = HeraldRepetitionPolicyConfig::getMapForContentType(
+      $rule->getContentType()
+    );
+
+    if (empty($repetition_options)) {
+      // default option is 'every time'
+      $repetition_selector = idx(
+        HeraldRepetitionPolicyConfig::getMap(),
+        HeraldRepetitionPolicyConfig::EVERY
+      );
+    } else if (count($repetition_options) == 1) {
+      // if there's only 1 option, just pick it for the user
+      $repetition_selector = reset($repetition_options);
+    } else {
+      // give the user all the options for this rule type
+      $tags = array();
+
+      foreach ($repetition_options as $name => $option) {
+        $tags[] = phutil_render_tag(
+          'option',
+          array (
+            'selected'  => ($repetition_policy == $name) ? 'selected' : null,
+            'value'     => $name,
+          ),
+          phutil_escape_html($option)
+        );
+      }
+
+      $repetition_selector =
+        '<select name="repetition_policy">'.
+          implode("\n", $tags).
+        '</select>';
+    }
+
     require_celerity_resource('herald-css');
 
     $type_name = $content_type_map[$rule->getContentType()];
@@ -320,7 +364,9 @@ class HeraldRuleController extends HeraldController {
             ),
             'Create New Action').
           '</div>'.
-          '<p>Take these actions:</p>'.
+          '<p>'.
+            'Take these actions '.$repetition_selector.' this rule matches:'.
+          '</p>'.
           '<div style="clear: both;"></div>'.
           javelin_render_tag(
             'table',
