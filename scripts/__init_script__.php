@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+error_reporting(E_ALL | E_STRICT);
+ini_set('display_errors', 1);
+
 $include_path = ini_get('include_path');
 ini_set('include_path', $include_path.':'.dirname(__FILE__).'/../../');
 @include_once 'libphutil/src/__phutil_library_init__.php';
