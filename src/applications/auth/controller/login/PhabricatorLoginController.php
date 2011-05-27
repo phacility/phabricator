@@ -44,11 +44,17 @@ class PhabricatorLoginController extends PhabricatorAuthController {
       $error = false;
       $username = $request->getCookie('phusr');
       if ($request->isFormPost()) {
-        $username = $request->getStr('username');
+        $username_or_email = $request->getStr('username_or_email');
 
         $user = id(new PhabricatorUser())->loadOneWhere(
           'username = %s',
-          $username);
+          $username_or_email);
+
+        if (!$user) {
+          $user = id(new PhabricatorUser())->loadOneWhere(
+            'email = %s',
+            $username_or_email);
+        }
 
         $okay = false;
         if ($user) {
@@ -91,8 +97,8 @@ class PhabricatorLoginController extends PhabricatorAuthController {
         ->appendChild(
           id(new AphrontFormTextControl())
             ->setLabel('Username/Email')
-            ->setName('username')
-            ->setValue($username))
+            ->setName('username_or_email')
+            ->setValue($username_or_email))
         ->appendChild(
           id(new AphrontFormPasswordControl())
             ->setLabel('Password')
