@@ -272,30 +272,30 @@ class PhabricatorStandardPageView extends AphrontPageView {
     return
       ($console ? '<darkconsole />' : null).
       '<div class="phabricator-standard-page '.$admin_class.'">'.
-        '<div class="phabricator-standard-header">'.
-          '<div class="phabricator-login-details">'.
-            $login_stuff.
-          '</div>'.
-          '<table class="phabricator-primary-navigation">'.
-            '<tr>'.
-              '<th class="phabricator-logo">'.
-                '<a href="/">'.
-                  "Phabricat\xE2\x9A\x99r".
-                '</a> '.
-              '</th>'.
-              '<th>'.
-                phutil_render_tag(
-                  'a',
-                  array(
-                    'href'  => $this->getBaseURI(),
-                    'class' => 'phabricator-head-appname',
-                  ),
-                  phutil_escape_html($this->getApplicationName())).
-              '</th>'.
-              $tabs.
-            '</tr>'.
-          '</table>'.
-        '</div>'.
+        '<table class="phabricator-standard-header">'.
+          '<tr>'.
+            '<td class="phabricator-logo"><a href="/"> </a></td>'.
+            '<td>'.
+              '<table class="phabricator-primary-navigation">'.
+                '<tr>'.
+                  '<th>'.
+                    phutil_render_tag(
+                      'a',
+                      array(
+                        'href'  => $this->getBaseURI(),
+                        'class' => 'phabricator-head-appname',
+                      ),
+                      phutil_escape_html($this->getApplicationName())).
+                  '</th>'.
+                  $tabs.
+                '</tr>'.
+              '</table>'.
+            '</td>'.
+            '<td class="phabricator-login-details">'.
+              $login_stuff.
+            '</td>'.
+          '</tr>'.
+        '</table>'.
         $this->bodyContent.
         '<div style="clear: both;"></div>'.
       '</div>'.

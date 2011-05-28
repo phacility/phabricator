@@ -17,6 +17,13 @@
   color: white;
   overflow: hidden;
   position: relative;
+  width: 100%;
+}
+
+.phabricator-standard-header td {
+  vertical-align: bottom;
+  padding: 0;
+  margin: 0;
 }
 
 .phabricator-admin-page-view .phabricator-standard-header {
@@ -24,8 +31,7 @@
 }
 
 .phabricator-primary-navigation {
-  padding-top: 12px;
-  padding-bottom: 8px;
+  padding-top: 24px;
   padding-left: 24px;
 }
 
@@ -38,14 +44,25 @@
   vertical-align: bottom;
   font-size: 13px;
   border-bottom: 6px solid transparent;
+  padding-top: 14px;
   padding-bottom: 4px;
 }
 
-.phabricator-primary-navigation th.phabricator-logo {
-  font-size: 16px;
-  padding-top: 8px;
-  padding-left: 24px;
-  padding-right: 6px;
+.phabricator-logo {
+  width: 220px;
+}
+
+.phabricator-logo a {
+  display: block;
+  width: 220px;
+  height: 40px;
+  background: url('/rsrc/image/phabricator_logo.png') no-repeat 0 0;
+  padding: 0;
+  margin: 0;
+}
+
+.phabricator-logo a:hover {
+  background-position-y: -40px;
 }
 
 .phabricator-primary-navigation td {
@@ -63,9 +80,9 @@
   text-transform: uppercase;
 }
 
-.phabricator-login-details {
-  float: right;
-  padding: 6px 24px 0;
+td.phabricator-login-details {
+  text-align: right;
+  padding: 0px 24px 6px;
   font-size: 12px;
 }
 
