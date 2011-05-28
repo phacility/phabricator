@@ -33,11 +33,12 @@ class PhabricatorDirectoryCategoryListController
             'href' => '/directory/category/edit/'.$category->getID().'/',
           ),
           phutil_escape_html($category->getName())),
-        phutil_render_tag(
+        javelin_render_tag(
           'a',
           array(
             'href' => '/directory/category/delete/'.$category->getID().'/',
             'class' => 'button grey small',
+            'sigil' => 'workflow',
           ),
           'Delete'),
       );

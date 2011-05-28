@@ -37,11 +37,12 @@ class PhabricatorDirectoryItemListController
             'href' => '/directory/item/edit/'.$item->getID().'/',
           ),
           phutil_escape_html($item->getName())),
-        phutil_render_tag(
+        javelin_render_tag(
           'a',
           array(
             'href' => '/directory/item/delete/'.$item->getID().'/',
             'class' => 'button grey small',
+            'sigil' => 'workflow',
           ),
           'Delete'),
       );
