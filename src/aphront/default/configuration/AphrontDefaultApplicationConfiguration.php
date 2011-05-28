@@ -305,6 +305,9 @@ class AphrontDefaultApplicationConfiguration
 
       '/status/$' => 'PhabricatorStatusController',
 
+      '/help/' => array(
+        'keyboardshortcut/$' => 'PhabricatorHelpKeyboardShortcutController',
+      ),
     );
   }
 

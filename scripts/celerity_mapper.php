@@ -27,6 +27,10 @@ $package_spec = array(
     'javelin-mask',
     'javelin-workflow',
     'javelin-behavior-workflow',
+    'javelin-behavior-aphront-form-disable-on-submit',
+    'phabricator-keyboard-shortcut-manager',
+    'phabricator-keyboard-shortcut',
+    'javelin-behavior-phabricator-keyboard-shortcuts',
   ),
   'core.pkg.css' => array(
     'phabricator-core-css',

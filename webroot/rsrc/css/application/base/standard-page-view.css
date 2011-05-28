@@ -91,7 +91,6 @@ td.phabricator-login-details {
   color: #f3f3f3;
 }
 
-
 .phabricator-admin-page-view .phabricator-standard-header {
   background: #aa0000;
 }
@@ -102,4 +101,23 @@ td.phabricator-login-details {
 
 .phabricator-admin-page-view .phabricator-logo a {
   background-image: url('/rsrc/image/phabricator_logo_admin.png');
+}
+
+.keyboard-shortcut-help td,
+.keyboard-shortcut-help th {
+  padding: 8px;
+  vertical-align: middle;
+}
+
+.keyboard-shortcut-help th {
+  white-space: nowrap;
+  color: #666666;
+}
+
+.keyboard-shortcut-help kbd {
+  background: #222222;
+  padding: 6px;
+  color: #ffffff;
+  font-weight: bold;
+  border: 1px solid #555555;
 }

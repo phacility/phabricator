@@ -100,6 +100,11 @@ class PhabricatorStandardPageView extends AphrontPageView {
     require_celerity_resource('phabricator-standard-page-view');
 
     Javelin::initBehavior('workflow', array());
+    Javelin::initBehavior(
+      'phabricator-keyboard-shortcuts',
+      array(
+        'helpURI' => '/help/keyboardshortcut/',
+      ));
 
     if ($console) {
       require_celerity_resource('aphront-dark-console-css');

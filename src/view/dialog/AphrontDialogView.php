@@ -21,6 +21,7 @@ class AphrontDialogView extends AphrontView {
   private $title;
   private $submitButton;
   private $cancelURI;
+  private $cancelText = 'Cancel';
   private $submitURI;
   private $user;
   private $hidden = array();
@@ -52,8 +53,9 @@ class AphrontDialogView extends AphrontView {
     return $this;
   }
 
-  public function addCancelButton($uri) {
+  public function addCancelButton($uri, $text = 'Cancel') {
     $this->cancelURI = $uri;
+    $this->cancelText = $text;
     return $this;
   }
 
@@ -101,7 +103,7 @@ class AphrontDialogView extends AphrontView {
           'name'  => '__cancel__',
           'sigil' => 'jx-workflow-button',
         ),
-        'Cancel');
+        phutil_escape_html($this->cancelText));
     }
     $buttons = implode('', $buttons);
 
