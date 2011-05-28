@@ -94,8 +94,9 @@ class PhabricatorObjectHandleData {
             $handle->setPHID($phid);
             $handle->setType($type);
             switch ($phid) {
-              case 'PHID-!!!!-UP-FOR-GRABS':
+              case ManiphestTaskOwner::OWNER_UP_FOR_GRABS:
                 $handle->setName('Up For Grabs');
+                $handle->setFullName('upforgrabs (Up For Grabs)');
                 break;
               default:
                 $handle->setName('Foul Magicks');

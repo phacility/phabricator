@@ -113,9 +113,10 @@ class ManiphestTaskListController extends ManiphestController {
       $form->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setLimit(1)
-          ->setDatasource('/typeahead/common/users/')
+          ->setDatasource('/typeahead/common/searchowner/')
           ->setName('view_user')
           ->setLabel('View User')
+          ->setCaption('Use "upforgrabs" to find unassigned tasks.')
           ->setValue(
             array(
               $view_phid => $handles[$view_phid]->getFullName(),
@@ -211,6 +212,14 @@ class ManiphestTaskListController extends ManiphestController {
   private function loadTasks($view_phid, array $dict) {
     $phids = array($view_phid);
 
+    $include_upforgrabs = false;
+    foreach ($phids as $key => $phid) {
+      if ($phid == ManiphestTaskOwner::OWNER_UP_FOR_GRABS) {
+        unset($phids[$key]);
+        $include_upforgrabs = true;
+      }
+    }
+
     $task = new ManiphestTask();
 
     $argv = array();
@@ -229,16 +238,39 @@ class ManiphestTaskListController extends ManiphestController {
     $extra_clause = '1 = 1';
     switch ($this->view) {
       case 'action':
-        $extra_clause = 'ownerPHID in (%Ls)';
-        $argv[] = $phids;
+        $parts = array();
+        if ($phids) {
+          $parts[] = 'ownerPHID in (%Ls)';
+          $argv[] = $phids;
+        }
+        if ($include_upforgrabs) {
+          $parts[] = 'ownerPHID IS NULL';
+        }
+        $extra_clause = '('.implode(' OR ', $parts).')';
         break;
       case 'created':
-        $extra_clause = 'authorPHID in (%Ls)';
-        $argv[] = $phids;
+        $parts = array();
+        if ($phids) {
+          $parts[] = 'authorPHID in (%Ls)';
+          $argv[] = $phids;
+        }
+        if ($include_upforgrabs) {
+          // This should be impossible since every task is supposed to have a
+          // valid author, but we might as well run the query.
+          $parts[] = 'authorPHID IS NULL';
+        }
+        $extra_clause = '('.implode(' OR ', $parts).')';
         break;
       case 'triage':
-        $extra_clause = 'ownerPHID in (%Ls) AND priority = %d';
-        $argv[] = $phids;
+        $parts = array();
+        if ($phids) {
+          $parts[] = 'ownerPHID in (%Ls)';
+          $argv[] = $phids;
+        }
+        if ($include_upforgrabs) {
+          $parts[] = 'ownerPHID IS NULL';
+        }
+        $extra_clause = '('.implode(' OR ', $parts).') AND priority = %d';
         $argv[] = ManiphestTaskPriority::PRIORITY_TRIAGE;
         break;
       case 'alltriage':

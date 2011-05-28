@@ -100,7 +100,7 @@ class PhabricatorSearchManiphestIndexer
     } else {
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
-        'PHID-!!!!-UP-FOR-GRABS',
+        ManiphestTaskOwner::OWNER_UP_FOR_GRABS,
         PhabricatorPHIDConstants::PHID_TYPE_MAGIC,
         $owner
           ? $owner->getDateCreated()

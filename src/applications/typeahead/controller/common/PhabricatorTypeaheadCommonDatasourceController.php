@@ -63,9 +63,9 @@ class PhabricatorTypeaheadCommonDatasourceController
 
     if ($need_upforgrabs) {
       $data[] = array(
-        'Up For Grabs',
+        'upforgrabs (Up For Grabs)',
         null,
-        'PHID-!!!!-UP-FOR-GRABS',
+        ManiphestTaskOwner::OWNER_UP_FOR_GRABS,
       );
     }
 

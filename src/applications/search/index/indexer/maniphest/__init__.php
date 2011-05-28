@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/maniphest/constants/owner');
 phutil_require_module('phabricator', 'applications/maniphest/constants/status');
 phutil_require_module('phabricator', 'applications/maniphest/constants/transactiontype');
 phutil_require_module('phabricator', 'applications/maniphest/storage/transaction');

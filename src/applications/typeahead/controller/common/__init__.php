@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'aphront/response/ajax');
+phutil_require_module('phabricator', 'applications/maniphest/constants/owner');
 phutil_require_module('phabricator', 'applications/metamta/storage/mailinglist');
 phutil_require_module('phabricator', 'applications/owners/storage/package');
 phutil_require_module('phabricator', 'applications/people/storage/user');

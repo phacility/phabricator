@@ -268,6 +268,7 @@ phutil_register_library_map(array(
     'ManiphestTaskEditController' => 'applications/maniphest/controller/taskedit',
     'ManiphestTaskListController' => 'applications/maniphest/controller/tasklist',
     'ManiphestTaskListView' => 'applications/maniphest/view/tasklist',
+    'ManiphestTaskOwner' => 'applications/maniphest/constants/owner',
     'ManiphestTaskPriority' => 'applications/maniphest/constants/priority',
     'ManiphestTaskStatus' => 'applications/maniphest/constants/status',
     'ManiphestTaskSummaryView' => 'applications/maniphest/view/tasksummary',
