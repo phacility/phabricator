@@ -301,73 +301,26 @@ class ManiphestTaskListController extends ManiphestController {
   public function renderStatusLinks() {
     $request = $this->getRequest();
 
-    $sel = array(
-      'open'   => false,
-      'closed' => false,
+    $statuses = array(
+      'o'   => array('open' => true),
+      'c'   => array('closed' => true),
+      'oc'  => array('open' => true, 'closed' => true),
     );
 
     $status = $request->getStr('s');
-    if ($status == 'c') {
-      $sel['closed'] = true;
-    } else if ($status == 'oc') {
-      $sel['closed'] = true;
-      $sel['open'] = true;
-    } else {
-      $sel['open'] = true;
+    if (empty($statuses[$status])) {
+      $status = 'o';
     }
 
-    $just_one = (count(array_filter($sel)) == 1);
-
-    $flag_map = array(
-      'Open'    => 'open',
-      'Closed'  => 'closed',
-    );
     $button_names = array(
       'Open'    => 'o',
       'Closed'  => 'c',
+      'All'     => 'oc',
     );
 
-    $base_flags = array();
-    foreach ($flag_map as $name => $key) {
-      $base_flags[$button_names[$name]] = $sel[$key];
-    }
+    $status_links = $this->renderFilterLinks($button_names, $status, 's');
 
-    foreach ($button_names as $name => $letter) {
-      $flags = $base_flags;
-      $flags[$letter] = !$flags[$letter];
-      $button_names[$name] = implode('', array_keys(array_filter($flags)));
-    }
-
-    $uri = $request->getRequestURI();
-
-    $links = array();
-    foreach ($button_names as $name => $value) {
-      $selected = $sel[$flag_map[$name]];
-      $fixed = ($selected && $just_one);
-
-      $more = null;
-      if ($fixed) {
-        $href = null;
-        $more .= ' toggle-fixed';
-      } else {
-        $href = $uri->alter('s', $value);
-      }
-
-      if ($selected) {
-        $more .= ' toggle-selected';
-      }
-
-      $links[] = phutil_render_tag(
-        'a',
-        array(
-          'href'  => $href,
-          'class' => 'toggle'.$more,
-        ),
-        $name);
-    }
-    $status_links = implode("\n", $links);
-
-    return array($sel, $status_links);
+    return array($statuses[$status], $status_links);
   }
 
   public function renderOrderLinks() {
@@ -390,26 +343,7 @@ class ManiphestTaskListController extends ManiphestController {
       'Created'   => 'c',
     );
 
-    $uri = $request->getRequestURI();
-
-    $links = array();
-    foreach ($order_names as $name => $param_key) {
-      if ($param_key == $order) {
-        $more = ' toggle-selected toggle-fixed';
-        $href = null;
-      } else {
-        $more = null;
-        $href = $uri->alter('o', $param_key);
-      }
-      $links[] = phutil_render_tag(
-        'a',
-        array(
-          'class' => 'toggle'.$more,
-          'href'  => $href,
-        ),
-        $name);
-    }
-    $order_links = implode("\n", $links);
+    $order_links = $this->renderFilterLinks($order_names, $order, 'o');
 
     return array($order_by, $order_links);
   }
@@ -436,16 +370,23 @@ class ManiphestTaskListController extends ManiphestController {
       'None'      => 'n',
     );
 
+    $group_links = $this->renderFilterLinks($group_names, $group, 'g');
+
+    return array($group_by, $group_links);
+  }
+
+  private function renderFilterLinks($filter_map, $selected, $uri_param) {
+    $request = $this->getRequest();
     $uri = $request->getRequestURI();
 
     $links = array();
-    foreach ($group_names as $name => $param_key) {
-      if ($param_key == $group) {
+    foreach ($filter_map as $name => $value) {
+      if ($value == $selected) {
         $more = ' toggle-selected toggle-fixed';
         $href = null;
       } else {
         $more = null;
-        $href = $uri->alter('g', $param_key);
+        $href = $uri->alter($uri_param, $value);
       }
       $links[] = phutil_render_tag(
         'a',
@@ -455,10 +396,7 @@ class ManiphestTaskListController extends ManiphestController {
         ),
         $name);
     }
-    $group_links = implode("\n", $links);
-
-    return array($group_by, $group_links);
+    return implode("\n", $links);
   }
-
 
 }
