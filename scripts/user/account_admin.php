@@ -22,6 +22,7 @@ require_once $root.'/scripts/__init_script__.php';
 require_once $root.'/scripts/__init_env__.php';
 
 phutil_require_module('phutil', 'console');
+phutil_require_module('phutil', 'future/exec');
 
 echo "Enter a username to create a new account or edit an existing account.";
 
@@ -36,6 +37,8 @@ $user = id(new PhabricatorUser())->loadOneWhere(
   $username);
 
 if (!$user) {
+  $original = new PhabricatorUser();
+
   echo "There is no existing user account '{$username}'.\n";
   $ok = phutil_console_confirm(
     "Do you want to create a new '{$username}' account?",
@@ -47,6 +50,8 @@ if (!$user) {
   $user = new PhabricatorUser();
   $user->setUsername($username);
 } else {
+  $original = clone $user;
+
   echo "There is an existing user account '{$username}'.\n";
   $ok = phutil_console_confirm(
     "Do you want to edit the existing '{$username}' account?",
@@ -56,8 +61,6 @@ if (!$user) {
     exit(1);
   }
 }
-
-$original = clone $user;
 
 $user_realname = $user->getRealName();
 if (strlen($user_realname)) {
@@ -76,17 +79,34 @@ if (strlen($user_email)) {
 } else {
   $email_prompt = '';
 }
-$email = nonempty(
-  phutil_console_prompt("Enter user email address{$email_prompt}:"),
-  $user_email);
+
+do {
+  $email = nonempty(
+    phutil_console_prompt("Enter user email address{$email_prompt}:"),
+    $user_email);
+  $duplicate = id(new PhabricatorUser())->loadOneWhere(
+    'email = %s',
+    $email);
+  if ($duplicate && $duplicate->getID() != $user->getID()) {
+    $duplicate_username = $duplicate->getUsername();
+    echo "ERROR: There is already a user with that email address ".
+         "({$duplicate_username}). Each user must have a unique email ".
+         "address.\n";
+  } else {
+    break;
+  }
+} while (true);
 $user->setEmail($email);
 
 $changed_pass = false;
+// This disables local echo, so the user's password is not shown as they type
+// it.
+phutil_passthru('stty -echo');
 $password = phutil_console_prompt(
   "Enter a password for this user [blank to leave unchanged]:");
+phutil_passthru('stty echo');
 if (strlen($password)) {
-  $user->setPassword($password);
-  $changed_pass = true;
+  $changed_pass = $password;
 }
 
 $is_admin = $user->getIsAdmin();
@@ -101,7 +121,10 @@ printf($tpl, null, 'OLD VALUE', 'NEW VALUE');
 printf($tpl, 'Username', $original->getUsername(), $user->getUsername());
 printf($tpl, 'Real Name', $original->getRealName(), $user->getRealName());
 printf($tpl, 'Email', $original->getEmail(), $user->getEmail());
-printf($tpl, 'Password', null, $changed_pass ? 'Updated' : 'Unchanged');
+printf($tpl, 'Password', null,
+  ($changed_pass !== false)
+    ? 'Updated'
+    : 'Unchanged');
 
 printf(
   $tpl,
@@ -117,5 +140,11 @@ if (!phutil_console_confirm("Save these changes?", $default_no = false)) {
 }
 
 $user->save();
+if ($changed_pass !== false) {
+  // This must happen after saving the user because we use their PHID as a
+  // component of the password hash.
+  $user->setPassword($changed_pass);
+  $user->save();
+}
 
 echo "Saved changes.\n";

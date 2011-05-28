@@ -58,6 +58,12 @@ class PhabricatorUser extends PhabricatorUserDAO {
   }
 
   public function setPassword($password) {
+    if (!$this->getPHID()) {
+      throw new Exception(
+        "You can not set a password for an unsaved user because their PHID ".
+        "is a salt component in the password hash.");
+    }
+
     if (!strlen($password)) {
       $this->setPasswordHash('');
     } else {
