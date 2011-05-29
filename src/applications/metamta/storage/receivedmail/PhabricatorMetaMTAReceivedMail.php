@@ -39,9 +39,12 @@ class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
   public function processReceivedMail() {
     $to = idx($this->headers, 'to');
 
+    // Accept a match either at the beginning of the address or after an open
+    // angle bracket, as in:
+    //    "some display name" <D1+xyz+asdf@example.com>
     $matches = null;
     $ok = preg_match(
-      '/^((?:D|T)\d+)\+(\d+)\+([a-f0-9]{16})@/',
+      '/(?:^|<)((?:D|T)\d+)\+(\d+)\+([a-f0-9]{16})@/U',
       $to,
       $matches);
 
