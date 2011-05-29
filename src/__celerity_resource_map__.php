@@ -952,7 +952,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-standard-page-view' =>
   array(
-    'uri' => '/res/cb85b0c2/rsrc/css/application/base/standard-page-view.css',
+    'uri' => '/res/70988ec0/rsrc/css/application/base/standard-page-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1001,6 +1001,30 @@ celerity_register_resource_map(array(
       ),
       'uri' => '/res/pkg/122a6b6d/workflow.pkg.js',
       'type' => 'js',
+    ),
+    '196b23d4' =>
+    array (
+      'name' => 'core.pkg.css',
+      'symbols' =>
+      array (
+        0 => 'phabricator-core-css',
+        1 => 'phabricator-core-buttons-css',
+        2 => 'phabricator-standard-page-view',
+        3 => 'aphront-dialog-view-css',
+        4 => 'aphront-form-view-css',
+        5 => 'aphront-panel-view-css',
+        6 => 'aphront-side-nav-view-css',
+        7 => 'aphront-table-view-css',
+        8 => 'aphront-crumbs-view-css',
+        9 => 'aphront-tokenizer-control-css',
+        10 => 'aphront-typeahead-control-css',
+        11 => 'aphront-list-filter-view-css',
+        12 => 'phabricator-directory-css',
+        13 => 'phabricator-remarkup-css',
+        14 => 'syntax-highlighting-css',
+      ),
+      'uri' => '/res/pkg/196b23d4/core.pkg.css',
+      'type' => 'css',
     ),
     '1ac25e8a' =>
     array (
@@ -1054,30 +1078,6 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/d985d27a/javelin.pkg.js',
       'type' => 'js',
     ),
-    'e8e3f8ab' =>
-    array (
-      'name' => 'core.pkg.css',
-      'symbols' =>
-      array (
-        0 => 'phabricator-core-css',
-        1 => 'phabricator-core-buttons-css',
-        2 => 'phabricator-standard-page-view',
-        3 => 'aphront-dialog-view-css',
-        4 => 'aphront-form-view-css',
-        5 => 'aphront-panel-view-css',
-        6 => 'aphront-side-nav-view-css',
-        7 => 'aphront-table-view-css',
-        8 => 'aphront-crumbs-view-css',
-        9 => 'aphront-tokenizer-control-css',
-        10 => 'aphront-typeahead-control-css',
-        11 => 'aphront-list-filter-view-css',
-        12 => 'phabricator-directory-css',
-        13 => 'phabricator-remarkup-css',
-        14 => 'syntax-highlighting-css',
-      ),
-      'uri' => '/res/pkg/e8e3f8ab/core.pkg.css',
-      'type' => 'css',
-    ),
     'ed383f69' =>
     array (
       'name' => 'differential.pkg.js',
@@ -1095,15 +1095,15 @@ celerity_register_resource_map(array(
   ),
   'reverse' =>
   array (
-    'aphront-crumbs-view-css' => 'e8e3f8ab',
-    'aphront-dialog-view-css' => 'e8e3f8ab',
-    'aphront-form-view-css' => 'e8e3f8ab',
-    'aphront-list-filter-view-css' => 'e8e3f8ab',
-    'aphront-panel-view-css' => 'e8e3f8ab',
-    'aphront-side-nav-view-css' => 'e8e3f8ab',
-    'aphront-table-view-css' => 'e8e3f8ab',
-    'aphront-tokenizer-control-css' => 'e8e3f8ab',
-    'aphront-typeahead-control-css' => 'e8e3f8ab',
+    'aphront-crumbs-view-css' => '196b23d4',
+    'aphront-dialog-view-css' => '196b23d4',
+    'aphront-form-view-css' => '196b23d4',
+    'aphront-list-filter-view-css' => '196b23d4',
+    'aphront-panel-view-css' => '196b23d4',
+    'aphront-side-nav-view-css' => '196b23d4',
+    'aphront-table-view-css' => '196b23d4',
+    'aphront-tokenizer-control-css' => '196b23d4',
+    'aphront-typeahead-control-css' => '196b23d4',
     'differential-changeset-view-css' => '1ac25e8a',
     'differential-core-view-css' => '1ac25e8a',
     'differential-revision-add-comment-css' => '1ac25e8a',
@@ -1138,11 +1138,11 @@ celerity_register_resource_map(array(
     'javelin-util' => 'd985d27a',
     'javelin-vector' => 'd985d27a',
     'javelin-workflow' => '122a6b6d',
-    'phabricator-core-buttons-css' => 'e8e3f8ab',
-    'phabricator-core-css' => 'e8e3f8ab',
-    'phabricator-directory-css' => 'e8e3f8ab',
-    'phabricator-remarkup-css' => 'e8e3f8ab',
-    'phabricator-standard-page-view' => 'e8e3f8ab',
-    'syntax-highlighting-css' => 'e8e3f8ab',
+    'phabricator-core-buttons-css' => '196b23d4',
+    'phabricator-core-css' => '196b23d4',
+    'phabricator-directory-css' => '196b23d4',
+    'phabricator-remarkup-css' => '196b23d4',
+    'phabricator-standard-page-view' => '196b23d4',
+    'syntax-highlighting-css' => '196b23d4',
   ),
 ));
