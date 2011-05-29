@@ -115,6 +115,13 @@ class DifferentialInlineCommentEditController extends DifferentialController {
           return $this->buildEmptyResponse();
         }
 
+        // Verify revision and changeset correspond to actual objects.
+        $revision_obj = id(new DifferentialRevision())->load($this->revisionID);
+        $changeset_obj = id(new DifferentialChangeset())->load($changeset);
+        if (!$revision_obj || !$changeset_obj) {
+          throw new Exception("Invalid revision ID or changeset ID!");
+        }
+
         $inline = id(new DifferentialInlineComment())
           ->setRevisionID($this->revisionID)
           ->setChangesetID($changeset)
