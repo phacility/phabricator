@@ -348,6 +348,9 @@ return array(
 
 // -- Remarkup -------------------------------------------------------------- //
 
+  // If you enable this, linked YouTube videos will be embeded inline. This has
+  // mild security implications (you'll leak referrers to YouTube) and is pretty
+  // silly (but sort of awesome).
   'remarkup.enable-embedded-youtube' => false,
 
 // -- Customization --------------------------------------------------------- //

@@ -931,7 +931,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-remarkup-css' =>
   array(
-    'uri' => '/res/fc827787/rsrc/css/core/remarkup.css',
+    'uri' => '/res/774d4078/rsrc/css/core/remarkup.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1002,30 +1002,6 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/122a6b6d/workflow.pkg.js',
       'type' => 'js',
     ),
-    '196b23d4' =>
-    array (
-      'name' => 'core.pkg.css',
-      'symbols' =>
-      array (
-        0 => 'phabricator-core-css',
-        1 => 'phabricator-core-buttons-css',
-        2 => 'phabricator-standard-page-view',
-        3 => 'aphront-dialog-view-css',
-        4 => 'aphront-form-view-css',
-        5 => 'aphront-panel-view-css',
-        6 => 'aphront-side-nav-view-css',
-        7 => 'aphront-table-view-css',
-        8 => 'aphront-crumbs-view-css',
-        9 => 'aphront-tokenizer-control-css',
-        10 => 'aphront-typeahead-control-css',
-        11 => 'aphront-list-filter-view-css',
-        12 => 'phabricator-directory-css',
-        13 => 'phabricator-remarkup-css',
-        14 => 'syntax-highlighting-css',
-      ),
-      'uri' => '/res/pkg/196b23d4/core.pkg.css',
-      'type' => 'css',
-    ),
     '1ac25e8a' =>
     array (
       'name' => 'differential.pkg.css',
@@ -1058,6 +1034,30 @@ celerity_register_resource_map(array(
       ),
       'uri' => '/res/pkg/33f413ef/typeahead.pkg.js',
       'type' => 'js',
+    ),
+    '7fce98ed' =>
+    array (
+      'name' => 'core.pkg.css',
+      'symbols' =>
+      array (
+        0 => 'phabricator-core-css',
+        1 => 'phabricator-core-buttons-css',
+        2 => 'phabricator-standard-page-view',
+        3 => 'aphront-dialog-view-css',
+        4 => 'aphront-form-view-css',
+        5 => 'aphront-panel-view-css',
+        6 => 'aphront-side-nav-view-css',
+        7 => 'aphront-table-view-css',
+        8 => 'aphront-crumbs-view-css',
+        9 => 'aphront-tokenizer-control-css',
+        10 => 'aphront-typeahead-control-css',
+        11 => 'aphront-list-filter-view-css',
+        12 => 'phabricator-directory-css',
+        13 => 'phabricator-remarkup-css',
+        14 => 'syntax-highlighting-css',
+      ),
+      'uri' => '/res/pkg/7fce98ed/core.pkg.css',
+      'type' => 'css',
     ),
     'd985d27a' =>
     array (
@@ -1095,15 +1095,15 @@ celerity_register_resource_map(array(
   ),
   'reverse' =>
   array (
-    'aphront-crumbs-view-css' => '196b23d4',
-    'aphront-dialog-view-css' => '196b23d4',
-    'aphront-form-view-css' => '196b23d4',
-    'aphront-list-filter-view-css' => '196b23d4',
-    'aphront-panel-view-css' => '196b23d4',
-    'aphront-side-nav-view-css' => '196b23d4',
-    'aphront-table-view-css' => '196b23d4',
-    'aphront-tokenizer-control-css' => '196b23d4',
-    'aphront-typeahead-control-css' => '196b23d4',
+    'aphront-crumbs-view-css' => '7fce98ed',
+    'aphront-dialog-view-css' => '7fce98ed',
+    'aphront-form-view-css' => '7fce98ed',
+    'aphront-list-filter-view-css' => '7fce98ed',
+    'aphront-panel-view-css' => '7fce98ed',
+    'aphront-side-nav-view-css' => '7fce98ed',
+    'aphront-table-view-css' => '7fce98ed',
+    'aphront-tokenizer-control-css' => '7fce98ed',
+    'aphront-typeahead-control-css' => '7fce98ed',
     'differential-changeset-view-css' => '1ac25e8a',
     'differential-core-view-css' => '1ac25e8a',
     'differential-revision-add-comment-css' => '1ac25e8a',
@@ -1138,11 +1138,11 @@ celerity_register_resource_map(array(
     'javelin-util' => 'd985d27a',
     'javelin-vector' => 'd985d27a',
     'javelin-workflow' => '122a6b6d',
-    'phabricator-core-buttons-css' => '196b23d4',
-    'phabricator-core-css' => '196b23d4',
-    'phabricator-directory-css' => '196b23d4',
-    'phabricator-remarkup-css' => '196b23d4',
-    'phabricator-standard-page-view' => '196b23d4',
-    'syntax-highlighting-css' => '196b23d4',
+    'phabricator-core-buttons-css' => '7fce98ed',
+    'phabricator-core-css' => '7fce98ed',
+    'phabricator-directory-css' => '7fce98ed',
+    'phabricator-remarkup-css' => '7fce98ed',
+    'phabricator-standard-page-view' => '7fce98ed',
+    'syntax-highlighting-css' => '7fce98ed',
   ),
 ));

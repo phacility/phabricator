@@ -1,0 +1,122 @@
+@title Remarkup Reference
+@group userguide
+
+Explains how to make bold text, etc.
+
+= Overview =
+
+Phabricator uses a lightweight markup language called "Remarkup", similar to
+other lightweight markup langauges like Markdown and Wiki markup.
+
+This document describes how to format text using Remarkup.
+
+= Basic Styling =
+
+Format **basic text styles** like this:
+
+  **bold text**
+  //italic text//
+  ##monospaced text##
+
+Those produce **bold text**, //italic text// and ##monospaced text##,
+respectively.
+
+= Layout =
+
+Make **headers** like this:
+
+  = Large Header =
+  == Smaller Header ==
+  ===== Very Small Header =====
+
+This produces headers like the ones in this document.
+
+Make **lists** by indenting two spaces and beginning each item with a "-":
+
+  lang=demo
+  - milk
+  - eggs
+  - bread
+
+This produces a list like this:
+
+  - milk
+  - eggs
+  - bread
+
+Make **code blocks** by indenting two spaces:
+
+  f(x, y);
+
+You can specify a language for syntax highlighting with "lang=xxx":
+
+  lang=demo
+  lang=html
+  <a href="#">...</a>
+
+This will highlight the block using a highlighter for that language, if one is
+available (in most cases, this means you need to configure Pygments):
+
+  lang=html
+  <a href="#">...</a>
+
+You can also use a "COUNTEREXAMPLE" header to show that a block of code is
+bad and shouldn't be copied:
+
+  lang=demo
+  COUNTEREXAMPLE
+  function f() {
+    global $$variable_variable;
+  }
+
+This produces a block like this:
+
+  COUNTEREXAMPLE
+  function f() {
+    global $$variable_variable;
+  }
+
+= Linking URIs =
+
+URIs are automatically linked: http://phabricator.org/
+
+If you have a URI with problematic characters in it, like
+"##http://comma.org/,##", you can surround it with angle brackets:
+
+  <http://comma.org/,>
+
+This will force the parser to consume the whole URI: <http://comma.org/,>
+
+= Linking to Objects =
+
+You can link to Differential revisions, Diffusion commits and Maniphest tasks
+by mentioning the name of an object:
+
+  D123          # Link to Differential revision D123
+  rX123         # Link to SVN commit 123 from the "X" repository
+  rXaf3192cd5   # Link to Git commit "af3192cd5..." from the "X" repository.
+                # You must specify at least 7 characters of the hash.
+  T123          # Link to Maniphest task T123
+
+= Quoting Text =
+
+To quote text, preface it with an ">":
+
+  > This is quoted text.
+
+This appears like this:
+
+> This is quoted text.
+
+= Embedding Media =
+
+If you set configuration flags, you can embed media directly in text:
+
+  - **files.enable-proxy**: allows you to paste in image URLs and have them
+    render inline.
+  - **remarkup.enable-embedded-youtube**: allows you to paste in YouTube videos
+    and have them render inline.
+
+These options are disabled by default because they have security and/or
+silliness implications, read their descriptions in ##default.conf.php## before
+enabling them.

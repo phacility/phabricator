@@ -31,6 +31,12 @@
   background-color: #ffaaaa;
 }
 
+.phabricator-remarkup tt {
+  color: #333333;
+  background: #ebebeb;
+  padding: 0 .25em;
+}
+
 .phabricator-remarkup ul {
   list-style: disc;
   margin: 1em 0 1em 3em;
