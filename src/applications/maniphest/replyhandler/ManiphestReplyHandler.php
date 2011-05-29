@@ -64,6 +64,24 @@ class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
       $command = $matches[1];
     }
 
+    $xactions = array();
+
+    $files = $mail->getAttachments();
+    if ($files) {
+      $file_xaction = new ManiphestTransaction();
+      $file_xaction->setAuthorPHID($user->getPHID());
+      $file_xaction->setTransactionType(ManiphestTransactionType::TYPE_ATTACH);
+
+      $phid_type = PhabricatorPHIDConstants::PHID_TYPE_FILE;
+      $new = $task->getAttached();
+      foreach ($files as $file_phid) {
+        $new[$phid_type][$file_phid] = array();
+      }
+
+      $file_xaction->setNewValue($new);
+      $xactions[] = $file_xaction;
+    }
+
     $ttype = ManiphestTransactionType::TYPE_NONE;
     $new_value = null;
     switch ($command) {
@@ -93,8 +111,10 @@ class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
     $xaction->setNewValue($new_value);
     $xaction->setComments($body);
 
+    $xactions[] = $xaction;
+
     $editor = new ManiphestTransactionEditor();
-    $editor->applyTransactions($task, array($xaction));
+    $editor->applyTransactions($task, $xactions);
 
   }
 
