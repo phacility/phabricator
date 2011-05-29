@@ -11,6 +11,7 @@ phutil_require_module('phabricator', 'applications/maniphest/constants/transacti
 phutil_require_module('phabricator', 'applications/maniphest/editor/transaction');
 phutil_require_module('phabricator', 'applications/maniphest/storage/transaction');
 phutil_require_module('phabricator', 'applications/metamta/replyhandler/base');
+phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'infrastructure/env');
 
 phutil_require_module('phutil', 'utils');

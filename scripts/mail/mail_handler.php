@@ -44,7 +44,7 @@ $received->setBodies(array(
 ));
 
 $attachments = array();
-foreach ($received->getAttachments() as $attachment) {
+foreach ($parser->getAttachments() as $attachment) {
   $file = PhabricatorFile::newFromFileData(
     $attachment->getContent(),
     array(
