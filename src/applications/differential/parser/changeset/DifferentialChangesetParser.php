@@ -879,10 +879,6 @@ EOSYNTHETIC;
         $shield = $this->renderShield(
           "This file has a very large number of changes ({$lines} lines).",
           true);
-      } else if (preg_match('/\.sql3$/', $this->changeset->getFilename())) {
-        $shield = $this->renderShield(
-          ".sql3 files are hidden by default.",
-          true);
       }
     }
 
