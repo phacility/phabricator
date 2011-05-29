@@ -26,10 +26,6 @@
   margin: 0;
 }
 
-.phabricator-admin-page-view .phabricator-standard-header {
-  background: #aa0000;
-}
-
 .phabricator-primary-navigation {
   padding-top: 24px;
   padding-left: 24px;
@@ -75,6 +71,7 @@
   background: #336699;
 }
 
+
 .phabricator-standard-header .phabricator-head-appname {
   padding: 0 1em;
   text-transform: uppercase;
@@ -82,7 +79,8 @@
 
 td.phabricator-login-details {
   text-align: right;
-  padding: 0px 24px 6px;
+  vertical-align: middle;
+  padding: 0px 24px;
   font-size: 12px;
 }
 
@@ -91,4 +89,17 @@ td.phabricator-login-details {
   padding: .5em 1em;
   font-size: 11px;
   color: #f3f3f3;
+}
+
+
+.phabricator-admin-page-view .phabricator-standard-header {
+  background: #aa0000;
+}
+
+.phabricator-admin-page-view td.phabricator-selected-tab {
+  background: #cc3333;
+}
+
+.phabricator-admin-page-view .phabricator-logo a {
+  background-image: url('/rsrc/image/phabricator_logo_admin.png');
 }

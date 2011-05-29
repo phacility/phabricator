@@ -952,7 +952,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-standard-page-view' =>
   array(
-    'uri' => '/res/70988ec0/rsrc/css/application/base/standard-page-view.css',
+    'uri' => '/res/4db19fcb/rsrc/css/application/base/standard-page-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1035,7 +1035,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/33f413ef/typeahead.pkg.js',
       'type' => 'js',
     ),
-    '7fce98ed' =>
+    'a6102fe7' =>
     array (
       'name' => 'core.pkg.css',
       'symbols' =>
@@ -1056,7 +1056,7 @@ celerity_register_resource_map(array(
         13 => 'phabricator-remarkup-css',
         14 => 'syntax-highlighting-css',
       ),
-      'uri' => '/res/pkg/7fce98ed/core.pkg.css',
+      'uri' => '/res/pkg/a6102fe7/core.pkg.css',
       'type' => 'css',
     ),
     'd985d27a' =>
@@ -1095,15 +1095,15 @@ celerity_register_resource_map(array(
   ),
   'reverse' =>
   array (
-    'aphront-crumbs-view-css' => '7fce98ed',
-    'aphront-dialog-view-css' => '7fce98ed',
-    'aphront-form-view-css' => '7fce98ed',
-    'aphront-list-filter-view-css' => '7fce98ed',
-    'aphront-panel-view-css' => '7fce98ed',
-    'aphront-side-nav-view-css' => '7fce98ed',
-    'aphront-table-view-css' => '7fce98ed',
-    'aphront-tokenizer-control-css' => '7fce98ed',
-    'aphront-typeahead-control-css' => '7fce98ed',
+    'aphront-crumbs-view-css' => 'a6102fe7',
+    'aphront-dialog-view-css' => 'a6102fe7',
+    'aphront-form-view-css' => 'a6102fe7',
+    'aphront-list-filter-view-css' => 'a6102fe7',
+    'aphront-panel-view-css' => 'a6102fe7',
+    'aphront-side-nav-view-css' => 'a6102fe7',
+    'aphront-table-view-css' => 'a6102fe7',
+    'aphront-tokenizer-control-css' => 'a6102fe7',
+    'aphront-typeahead-control-css' => 'a6102fe7',
     'differential-changeset-view-css' => '1ac25e8a',
     'differential-core-view-css' => '1ac25e8a',
     'differential-revision-add-comment-css' => '1ac25e8a',
@@ -1138,11 +1138,11 @@ celerity_register_resource_map(array(
     'javelin-util' => 'd985d27a',
     'javelin-vector' => 'd985d27a',
     'javelin-workflow' => '122a6b6d',
-    'phabricator-core-buttons-css' => '7fce98ed',
-    'phabricator-core-css' => '7fce98ed',
-    'phabricator-directory-css' => '7fce98ed',
-    'phabricator-remarkup-css' => '7fce98ed',
-    'phabricator-standard-page-view' => '7fce98ed',
-    'syntax-highlighting-css' => '7fce98ed',
+    'phabricator-core-buttons-css' => 'a6102fe7',
+    'phabricator-core-css' => 'a6102fe7',
+    'phabricator-directory-css' => 'a6102fe7',
+    'phabricator-remarkup-css' => 'a6102fe7',
+    'phabricator-standard-page-view' => 'a6102fe7',
+    'syntax-highlighting-css' => 'a6102fe7',
   ),
 ));
