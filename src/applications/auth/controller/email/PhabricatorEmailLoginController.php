@@ -64,7 +64,20 @@ class PhabricatorEmailLoginController extends PhabricatorAuthController {
         }
 
         if (!$errors) {
-          $etoken = $target_user->generateEmailToken();
+          $uri = $target_user->getEmailLoginURI();
+          $body = <<<EOBODY
+Condolences on forgetting your password. You can use this link to reset it:
+
+  {$uri}
+
+After you set a new password, consider writing it down on a sticky note and
+attaching it to your monitor so you don't forget again! Choosing a very short,
+easy-to-remember password like "cat" or "1234" might also help.
+
+Best Wishes,
+Phabricator
+
+EOBODY;
 
           $mail = new PhabricatorMetaMTAMail();
           $mail->setSubject('[Phabricator] Password Reset');
@@ -73,9 +86,7 @@ class PhabricatorEmailLoginController extends PhabricatorAuthController {
             array(
               $target_user->getPHID(),
             ));
-          $mail->setBody(
-            "here is your link ".
-              PhabricatorEnv::getURI('/login/etoken/'.$etoken.'/').'?email='.phutil_escape_uri($target_user->getEmail()));
+          $mail->setBody($body);
           $mail->saveAndSend();
 
           $view = new AphrontRequestFailureView();

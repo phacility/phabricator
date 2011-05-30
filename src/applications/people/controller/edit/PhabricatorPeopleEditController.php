@@ -46,7 +46,6 @@ class PhabricatorPeopleEditController extends PhabricatorPeopleController {
 
     $views = array(
       'basic'     => 'Basic Information',
-      'password'  => 'Reset Password',
       'role'      => 'Edit Role',
       'cert'      => 'Conduit Certificate',
     );
@@ -72,9 +71,6 @@ class PhabricatorPeopleEditController extends PhabricatorPeopleController {
     switch ($view) {
       case 'basic':
         $response = $this->processBasicRequest($user);
-        break;
-      case 'password':
-        $response = $this->processPasswordRequest($user);
         break;
       case 'role':
         $response = $this->processRoleRequest($user);
@@ -124,13 +120,21 @@ class PhabricatorPeopleEditController extends PhabricatorPeopleController {
     $e_email    = true;
     $errors = array();
 
+    $welcome_checked = true;
+
     $request = $this->getRequest();
     if ($request->isFormPost()) {
+      $welcome_checked = $request->getInt('welcome');
+
       if (!$user->getID()) {
         $user->setUsername($request->getStr('username'));
+        $user->setEmail($request->getStr('email'));
+
+        if ($request->getStr('role') == 'agent') {
+          $user->setIsSystemAgent(true);
+        }
       }
       $user->setRealName($request->getStr('realname'));
-      $user->setEmail($request->getStr('email'));
 
       if (!strlen($user->getUsername())) {
         $errors[] = "Username is required.";
@@ -158,13 +162,52 @@ class PhabricatorPeopleEditController extends PhabricatorPeopleController {
 
       if (!$errors) {
         try {
+          $is_new = !$user->getID();
+
           $user->save();
 
-          $log = PhabricatorUserLog::newLog(
-            $admin,
-            $user,
-            PhabricatorUserLog::ACTION_CREATE);
-          $log->save();
+          if ($is_new) {
+            $log = PhabricatorUserLog::newLog(
+              $admin,
+              $user,
+              PhabricatorUserLog::ACTION_CREATE);
+            $log->save();
+
+            if ($welcome_checked) {
+              $admin_username = $admin->getUserName();
+              $admin_realname = $admin->getRealName();
+              $user_username = $user->getUserName();
+
+              $base_uri = PhabricatorEnv::getProductionURI('/');
+
+              $uri = $user->getEmailLoginURI();
+              $body = <<<EOBODY
+Welcome to Phabricator!
+
+{$admin_username} ({$admin_realname}) has created an account for you.
+
+  Username: {$user_username}
+
+To login to Phabricator, follow this link and set a password:
+
+  {$uri}
+
+After you have set a password, you can login in the future by going here:
+
+  {$base_uri}
+
+Love,
+Phabricator
+
+EOBODY;
+              $mail = id(new PhabricatorMetaMTAMail())
+                ->addTos(array($user->getPHID()))
+                ->setSubject('[Phabricator] Welcome to Phabricator')
+                ->setBody($body)
+                ->setFrom($admin->getPHID())
+                ->saveAndSend();
+            }
+          }
 
           $response = id(new AphrontRedirectResponse())
             ->setURI('/people/edit/'.$user->getID().'/?saved=true');
@@ -228,12 +271,46 @@ class PhabricatorPeopleEditController extends PhabricatorPeopleController {
         id(new AphrontFormTextControl())
           ->setLabel('Email')
           ->setName('email')
+          ->setDisabled($is_immutable)
           ->setValue($user->getEmail())
-          ->setError($e_email))
+          ->setError($e_email));
+
+    if (!$user->getID()) {
+      $form
+        ->appendChild(
+          id(new AphrontFormSelectControl())
+            ->setLabel('Role')
+            ->setName('role')
+            ->setValue('user')
+            ->setOptions(
+              array(
+                'user'  => 'Normal User',
+                'agent' => 'System Agent',
+              ))
+            ->setCaption(
+              'You can create a "system agent" account for bots, scripts, '.
+              'etc.'))
+        ->appendChild(
+          id(new AphrontFormCheckboxControl())
+            ->addCheckbox(
+              'welcome',
+              1,
+              'Send "Welcome to Phabricator" email.',
+              $welcome_checked));
+    } else {
+      $form->appendChild(
+        id(new AphrontFormStaticControl())
+          ->setLabel('Role')
+          ->setValue(
+            $user->getIsSystemAgent()
+              ? 'System Agent'
+              : 'Normal User'));
+    }
+
+    $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Save')
-          ->addCancelButton('/people/'));
+          ->setValue('Save'));
 
     $panel = new AphrontPanelView();
     if ($user->getID()) {
@@ -244,69 +321,6 @@ class PhabricatorPeopleEditController extends PhabricatorPeopleController {
 
     $panel->appendChild($form);
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-
-    return array($error_view, $panel);
-  }
-
-  private function processPasswordRequest(PhabricatorUser $user) {
-    $request = $this->getRequest();
-    $admin = $request->getUser();
-
-    $e_password = true;
-    $errors = array();
-
-    if ($request->isFormPost()) {
-      if (strlen($request->getStr('password'))) {
-        $user->setPassword($request->getStr('password'));
-        $e_password = null;
-      } else {
-        $errors[] = 'Password is required.';
-        $e_password = 'Required';
-      }
-
-      if (!$errors) {
-        $user->save();
-
-        $log = PhabricatorUserLog::newLog(
-          $admin,
-          $user,
-          PhabricatorUserLog::ACTION_RESET_PASSWORD);
-        $log->save();
-
-        return id(new AphrontRedirectResponse())
-          ->setURI($request->getRequestURI()->alter('saved', 'true'));
-      }
-    }
-
-    $error_view = null;
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setTitle('Form Errors')
-        ->setErrors($errors);
-    }
-
-
-    $form = id(new AphrontFormView())
-      ->setUser($admin)
-      ->setAction($request->getRequestURI()->alter('saved', null))
-      ->appendChild(
-        '<p class="aphront-form-instructions">Submitting this form will '.
-        'change this user\'s password. They will no longer be able to login '.
-        'with their old password.</p>')
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel('New Password')
-          ->setName('password')
-          ->setError($e_password))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue('Reset Password'));
-
-
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Reset Password');
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->appendChild($form);
 
     return array($error_view, $panel);
   }
@@ -351,13 +365,6 @@ class PhabricatorPeopleEditController extends PhabricatorPeopleController {
           $log->setNewValue($new_disabled);
           $user->setIsDisabled($new_disabled);
           $logs[] = $log;
-        }
-
-        $new_agent = (bool)$request->getBool('is_agent');
-        $old_agent = (bool)$user->getIsSystemAgent();
-        if ($new_agent != $old_agent) {
-          // TODO: Get rid of this, move it to the create flow.
-          $user->setIsSystemAgent($new_agent);
         }
       }
 
@@ -405,14 +412,6 @@ class PhabricatorPeopleEditController extends PhabricatorPeopleController {
             1,
             'Disabled: can not login.',
             $user->getIsDisabled())
-          ->setDisabled($is_self))
-      ->appendChild(
-        id(new AphrontFormCheckboxControl())
-          ->addCheckbox(
-            'is_agent',
-            1,
-            'Agent: system agent (robot).',
-            $user->getIsSystemAgent())
           ->setDisabled($is_self));
 
     if (!$is_self) {
@@ -459,9 +458,7 @@ class PhabricatorPeopleEditController extends PhabricatorPeopleController {
         id(new AphrontFormStaticControl())
           ->setLabel('Certificate')
           ->setValue(
-            'You may only view the certificates for System Agents. Mark '.
-            'this account as a "system agent" in the "Edit Role" tab to '.
-            'view the corresponding certificate.'));
+            'You may only view the certificates of System Agents.'));
     }
 
     $panel = new AphrontPanelView();
