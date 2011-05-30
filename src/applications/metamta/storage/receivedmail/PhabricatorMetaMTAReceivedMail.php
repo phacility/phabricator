@@ -36,6 +36,16 @@ class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     ) + parent::getConfiguration();
   }
 
+  public function setHeaders(array $headers) {
+    // Normalize headers to lowercase.
+    $normalized = array();
+    foreach ($headers as $name => $value) {
+      $normalized[strtolower($name)] = $value;
+    }
+    $this->headers = $normalized;
+    return $this;
+  }
+
   public function processReceivedMail() {
     $to = idx($this->headers, 'to');
 
