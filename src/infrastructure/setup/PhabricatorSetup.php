@@ -253,8 +253,7 @@ class PhabricatorSetup {
 
         $have_adapter = true;
 
-        list($err) = exec_manual('which sendmail');
-        if ($err) {
+        if (!Filesystem::pathExists('/usr/bin/sendmail')) {
           self::writeFailure();
           self::write(
             "Setup failure! You don't have a 'sendmail' binary on this system ".
