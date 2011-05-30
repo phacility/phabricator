@@ -66,10 +66,12 @@ class ConduitAPI_differential_find_Method extends ConduitAPIMethod {
       if (!$diff) {
         continue;
       }
+      $id = $revision->getID();
       $results[] = array(
-        'id'          => $revision->getID(),
+        'id'          => $id,
         'phid'        => $revision->getPHID(),
         'name'        => $revision->getTitle(),
+        'uri'         => PhabricatorEnv::getProductionURI('/D'.$id),
         'dateCreated' => $revision->getDateCreated(),
         'authorPHID'  => $revision->getAuthorPHID(),
         'statusName'  => DifferentialRevisionStatus::getNameForRevisionStatus(

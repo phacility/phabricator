@@ -126,7 +126,12 @@ class ConduitAPI_diffusion_getcommits_Method extends ConduitAPIMethod {
       );
 
       // Upgrade git short references into full commit identifiers.
-      $commits[$name]['commitIdentifier'] = $cobj->getCommitIdentifier();
+      $identifier = $cobj->getCommitIdentifier();
+      $commits[$name]['commitIdentifier'] = $identifier;
+
+      $callsign = $commits[$name]['callsign'];
+      $uri = "/r{$callsign}{$identifier}";
+      $commits[$name]['uri'] = PhabricatorEnv::getProductionURI($uri);
     }
 
     if (!$commits) {

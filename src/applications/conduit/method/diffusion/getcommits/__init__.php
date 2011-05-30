@@ -12,6 +12,7 @@ phutil_require_module('phabricator', 'applications/repository/constants/reposito
 phutil_require_module('phabricator', 'applications/repository/storage/commit');
 phutil_require_module('phabricator', 'applications/repository/storage/commitdata');
 phutil_require_module('phabricator', 'applications/repository/storage/repository');
+phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'storage/qsprintf');
 phutil_require_module('phabricator', 'storage/queryfx');
 

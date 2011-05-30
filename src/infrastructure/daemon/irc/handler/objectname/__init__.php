@@ -7,7 +7,6 @@
 
 
 phutil_require_module('phabricator', 'infrastructure/daemon/irc/handler/base');
-phutil_require_module('phabricator', 'infrastructure/env');
 
 
 phutil_require_source('PhabricatorIRCObjectNameHandler.php');

@@ -113,6 +113,8 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
 
   private function runSelectLoop() {
     do {
+      $this->stillWorking();
+
       $read = array($this->socket);
       if (strlen($this->writeBuffer)) {
         $write = array($this->socket);
