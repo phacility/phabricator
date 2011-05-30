@@ -248,7 +248,7 @@ class PhabricatorUser extends PhabricatorUserDAO {
     return $session_key;
   }
 
-  public function generateEmailToken($offset = 0) {
+  private function generateEmailToken($offset = 0) {
     return $this->generateToken(
       time() + ($offset * self::EMAIL_CYCLE_FREQUENCY),
       self::EMAIL_CYCLE_FREQUENCY,
@@ -264,6 +264,13 @@ class PhabricatorUser extends PhabricatorUserDAO {
       }
     }
     return false;
+  }
+
+  public function getEmailLoginURI() {
+    $token = $this->generateEmailToken();
+    $uri = PhabricatorEnv::getProductionURI('/login/etoken/'.$token.'/');
+    $uri = new PhutilURI($uri);
+    return $uri->alter('email', $this->getEmail());
   }
 
   public function loadPreferences() {
