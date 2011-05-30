@@ -92,6 +92,7 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
               '<p>Really destroy the old certificate? Any established '.
               'sessions will be terminated.');
 
+
             return id(new AphrontDialogResponse())
               ->setDialog($dialog);
           }
@@ -199,7 +200,13 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
       $notice = null;
     }
 
-    $host = PhabricatorEnv::getEnvConfig('phabricator.base-uri') . 'api/';
+    $host = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
+    if ($host[strlen($host)-1] === '/') {
+      $host .= 'api/';
+    } else {
+      $host .= '/api/';
+    }
+
     $conduit_setting = sprintf(
       '    %s: {'."\n".
       '      "user" : %s,'."\n".
@@ -245,7 +252,6 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
     $regen_form = new AphrontFormView();
     $regen_form
       ->setUser($user)
-      ->setWorkflow(true)
       ->setAction('/settings/page/arcanist/')
       ->appendChild(
         '<p class="aphront-form-instructions">You can regenerate this '.
