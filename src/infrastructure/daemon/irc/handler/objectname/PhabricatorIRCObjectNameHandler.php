@@ -35,24 +35,76 @@ class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
         $message = $message->getMessageText();
         $matches = null;
         $phids = array();
-        if (preg_match_all('/(?:^|\b)D(\d+)(?:\b|$)/', $message, $matches)) {
-          if ($matches[1]) {
-            $revisions = $this->getConduit()->callMethodSynchronous(
-              'differential.find',
-              array(
-                'query' => 'revision-ids',
-                'guids' => $matches[1],
-              ));
 
-            // TODO: This is utter hacks until phid.find or similar lands.
-            foreach ($revisions as $revision) {
-              $phids[$revision['phid']] =
-                'D'.$revision['id'].' '.$revision['name'].' - '.
-                PhabricatorEnv::getProductionURI('/D'.$revision['id']);
+        $pattern =
+          '@'.
+          '(?<!/)(?:^|\b)'. // Negative lookbehind prevent matching "/D123".
+          '(D|T)(\d+)'.
+          '(?:\b|$)'.
+          '@';
+
+        $revision_ids = array();
+        $task_ids = array();
+        $commit_names = array();
+
+        if (preg_match_all($pattern, $message, $matches, PREG_SET_ORDER)) {
+          foreach ($matches as $match) {
+            switch ($match[1]) {
+              case 'D':
+                $revision_ids[] = $match[2];
+                break;
+              case 'T':
+                $task_ids[] = $match[2];
+                break;
             }
           }
         }
-        foreach ($phids as $phid => $description) {
+
+        $pattern =
+          '@'.
+          '(?<!/)(?:^|\b)'.
+          '(r[A-Z]+[0-9a-z]{1,40})'.
+          '(?:\b|$)'.
+          '@';
+        if (preg_match_all($pattern, $message, $matches, PREG_SET_ORDER)) {
+          foreach ($matches as $match) {
+            $commit_names[] = $match[1];
+          }
+        }
+
+        $output = array();
+
+        if ($revision_ids) {
+          $revisions = $this->getConduit()->callMethodSynchronous(
+            'differential.find',
+            array(
+              'query' => 'revision-ids',
+              'guids' => $revision_ids,
+            ));
+          foreach ($revisions as $revision) {
+            $output[] =
+              'D'.$revision['id'].' '.$revision['name'].' - '.
+              $revision['uri'];
+          }
+        }
+
+        // TODO: Support tasks in Conduit.
+
+        if ($commit_names) {
+          $commits = $this->getConduit()->callMethodSynchronous(
+            'diffusion.getcommits',
+            array(
+              'commits' => $commit_names,
+            ));
+          foreach ($commits as $commit) {
+            if (isset($commit['error'])) {
+              continue;
+            }
+            $output[] = $commit['uri'];
+          }
+        }
+
+        foreach ($output as $description) {
           $this->write('PRIVMSG', "{$channel} :{$description}");
         }
         break;
