@@ -118,8 +118,15 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
           if (!empty($_FILES['profile'])) {
             $err = idx($_FILES['profile'], 'error');
             if ($err != UPLOAD_ERR_NO_FILE) {
-              $file = PhabricatorFile::newFromPHPUpload($_FILES['profile']);
-              $user->setProfileImagePHID($file->getPHID());
+              $okey = PhabricatorFile::isFileAnImage($_FILES['profile']);
+              if ($okey) {
+                $file = PhabricatorFile::newFromPHPUpload($_FILES['profile']);
+                $user->setProfileImagePHID($file->getPHID());
+              } else {
+                $errors[] =
+                  'Only images with extension (*.jpg⎟*.jpeg⎟*.png⎟*.gif) '.
+                  'will be accepted.';
+              }
             }
           }
 
@@ -531,8 +538,5 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
     }
 
     return $notice.$panel->render();
-
-
   }
-
 }
