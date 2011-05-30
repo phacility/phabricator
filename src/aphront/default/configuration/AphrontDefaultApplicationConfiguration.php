@@ -126,6 +126,7 @@ class AphrontDefaultApplicationConfiguration
           => 'PhabricatorMetaMTAMailingListEditController',
         'receive/$' => 'PhabricatorMetaMTAReceiveController',
         'received/$' => 'PhabricatorMetaMTAReceivedListController',
+        'sendgrid/$' => 'PhabricatorMetaMTASendGridReceiveController',
       ),
 
       '/login/' => array(
