@@ -36,7 +36,6 @@ class PhabricatorSetup {
       'mysql',
       'hash',
       'json',
-      'pcntl',
       'openssl',
     );
     foreach ($extensions as $extension) {
@@ -47,10 +46,32 @@ class PhabricatorSetup {
         return;
       }
     }
-    self::write("[OKAY] All extensions OKAY\n\n");
+
+    $root = dirname(phutil_get_library_root('phabricator'));
+
+    // On RHEL6, doing a distro install of pcntl makes it available from the
+    // CLI binary but not from the Apache module. This isn't entirely
+    // unreasonable and we don't need it from Apache, so do an explicit test
+    // for CLI availability.
+    list($err, $stdout, $stderr) = exec_manual(
+      '%s/scripts/setup/pcntl_available.php',
+      $root);
+    if ($err) {
+      self::writeFailure();
+      self::write("Unable to execute scripts/setup/pcntl_available.php.");
+      return;
+    } else {
+      if (trim($stdout) == 'YES') {
+        self::write(" okay  pcntl is available from the command line.\n");
+        self::write("[OKAY] All extensions OKAY\n\n");
+      } else {
+        self::write(" warn  pcntl is not available!\n");
+        self::write("[WARN] *** WARNING *** pcntl extension not available. ".
+                    "You will not be able to run daemons.\n");
+      }
+    }
 
     self::writeHeader("GIT SUBMODULES");
-    $root = dirname(phutil_get_library_root('phabricator'));
     if (!Filesystem::pathExists($root.'/.git')) {
       self::write(" skip  Not a git clone.\n\n");
     } else {
