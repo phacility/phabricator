@@ -416,6 +416,36 @@ class DifferentialRevisionEditor {
     }
   }
 
+  public static function addCCAndUpdateRevision(
+    $revision,
+    $phid,
+    $reason) {
+
+    self::addCC($revision, $phid, $reason);
+
+    $unsubscribed = $revision->getUnsubscribed();
+    if (isset($unsubscribed[$phid])) {
+      unset($unsubscribed[$phid]);
+      $revision->setUnsubscribed($unsubscribed);
+      $revision->save();
+    }
+  }
+
+  public static function removeCCAndUpdateRevision(
+    $revision,
+    $phid,
+    $reason) {
+
+    self::removeCC($revision, $phid, $reason);
+
+    $unsubscribed = $revision->getUnsubscribed();
+    if (empty($unsubscribed[$phid])) {
+      $unsubscribed[$phid] = true;
+      $revision->setUnsubscribed($unsubscribed);
+      $revision->save();
+    }
+  }
+
   public static function addCC(
     DifferentialRevision $revision,
     $phid,
