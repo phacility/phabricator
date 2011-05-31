@@ -55,10 +55,10 @@ if (get_magic_quotes_gpc()) {
 require_once dirname(dirname(__FILE__)).'/conf/__init_conf__.php';
 
 try {
+  setup_aphront_basics();
+
   $conf = phabricator_read_config_file($env);
   $conf['phabricator.env'] = $env;
-
-  setup_aphront_basics();
 
   phutil_require_module('phabricator', 'infrastructure/env');
   PhabricatorEnv::setEnvConfig($conf);
