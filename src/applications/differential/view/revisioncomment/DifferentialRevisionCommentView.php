@@ -25,6 +25,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
   private $inlines;
   private $changesets;
   private $target;
+  private $commentNumber;
 
   public function setComment($comment) {
     $this->comment = $comment;
@@ -61,6 +62,11 @@ final class DifferentialRevisionCommentView extends AphrontView {
     $this->target = $target;
   }
 
+  public function setCommentNumber($comment_number) {
+    $this->commentNumber = $comment_number;
+    return $this;
+  }
+
   public function render() {
 
     require_celerity_resource('phabricator-remarkup-css');
@@ -77,6 +83,24 @@ final class DifferentialRevisionCommentView extends AphrontView {
     } else {
       $date = date('F jS, Y g:i:s A', $comment->getDateCreated());
     }
+
+    $info = array($date);
+
+    $comment_anchor = null;
+    $num = $this->commentNumber;
+    if ($num) {
+      Javelin::initBehavior('phabricator-watch-anchor');
+      $info[] = phutil_render_tag(
+        'a',
+        array(
+          'name' => 'comment-'.$num,
+          'href' => '#comment-'.$num,
+        ),
+        'Comment D'.$comment->getRevisionID().'#'.$num);
+      $comment_anchor = 'anchor-comment-'.$num;
+    }
+
+    $info = implode(' &middot; ', $info);
 
     $author = $this->handles[$comment->getAuthorPHID()];
     $author_link = $author->renderLink();
@@ -189,21 +213,25 @@ final class DifferentialRevisionCommentView extends AphrontView {
       $background = "background-image: url('{$uri}');";
     }
 
-    return
-      '<div class="differential-comment '.$action_class.'">'.
-        '<div class="differential-comment-head">'.
-          '<div class="differential-comment-date">'.$date.'</div>'.
-          '<div class="differential-comment-title">'.$title.'</div>'.
-        '</div>'.
-        '<div class="differential-comment-body" style="'.$background.'">'.
-          '<div class="differential-comment-content">'.
-            '<div class="differential-comment-core">'.
-              $content.
-            '</div>'.
-            $inline_render.
+    return phutil_render_tag(
+      'div',
+      array(
+        'class' => "differential-comment {$action_class}",
+        'id'    => $comment_anchor,
+      ),
+      '<div class="differential-comment-head">'.
+        '<span class="differential-comment-info">'.$info.'</span>'.
+        '<span class="differential-comment-title">'.$title.'</span>'.
+        '<div style="clear: both;"></div>'.
+      '</div>'.
+      '<div class="differential-comment-body" style="'.$background.'">'.
+        '<div class="differential-comment-content">'.
+          '<div class="differential-comment-core">'.
+            $content.
           '</div>'.
+          $inline_render.
         '</div>'.
-      '</div>';
+      '</div>');
   }
 
 }

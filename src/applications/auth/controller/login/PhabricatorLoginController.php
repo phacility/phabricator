@@ -42,7 +42,7 @@ class PhabricatorLoginController extends PhabricatorAuthController {
     $error_view = null;
     if ($password_auth) {
       $error = false;
-      $username = $request->getCookie('phusr');
+      $username_or_email = $request->getCookie('phusr');
       if ($request->isFormPost()) {
         $username_or_email = $request->getStr('username_or_email');
 

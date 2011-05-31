@@ -2,10 +2,21 @@
  * @provides maniphest-transaction-detail-css
  */
 
+.maniphest-trnasaction-list-view {
+  padding: .5em 1.5em;
+}
+
 .maniphest-transaction-detail-container {
-  margin: 1em 1em 1.5em;
-  background: 0px 0px no-repeat;
+  margin: 1em 1em 1.25em;
+  background: 2px 2px no-repeat;
   min-height: 50px;
+  padding: 2px 2px;
+  border: 1px solid transparent;
+}
+
+.maniphest-transaction-list-view .anchor-target {
+  background-color: #ffffdd;
+  border-color: #ffff00;
 }
 
 .maniphest-transaction-detail-container .upforgrab {

@@ -23,6 +23,7 @@ class ManiphestTransactionDetailView extends AphrontView {
   private $markupEngine;
   private $forEmail;
   private $preview;
+  private $commentNumber;
 
   private $renderSummaryOnly;
   private $renderFullSummary;
@@ -63,6 +64,11 @@ class ManiphestTransactionDetailView extends AphrontView {
 
   public function getRenderFullSummary() {
     return $this->renderFullSummary;
+  }
+
+  public function setCommentNumber($comment_number) {
+    $this->commentNumber = $comment_number;
+    return $this;
   }
 
   public function renderForEmail($with_date) {
@@ -174,16 +180,37 @@ class ManiphestTransactionDetailView extends AphrontView {
       $timestamp = phabricator_format_timestamp($transaction->getDateCreated());
     }
 
+    $info = array();
+    $info[] = $timestamp;
+
+
+    $comment_anchor = null;
+    $num = $this->commentNumber;
+    if ($num) {
+      Javelin::initBehavior('phabricator-watch-anchor');
+      $info[] = javelin_render_tag(
+        'a',
+        array(
+          'name' => 'comment-'.$num,
+          'href' => '#comment-'.$num,
+        ),
+        'Comment T'.$any_transaction->getTaskID().'#'.$num);
+      $comment_anchor = 'anchor-comment-'.$num;
+    }
+
+    $info = implode(' &middot; ', $info);
+
     return phutil_render_tag(
       'div',
       array(
-        'class' =>  "maniphest-transaction-detail-container",
+        'class' => "maniphest-transaction-detail-container",
         'style' => "background-image: url('".$author->getImageURI()."')",
+        'id'    => $comment_anchor,
       ),
       '<div class="maniphest-transaction-detail-view '.$more_classes.'">'.
         '<div class="maniphest-transaction-header">'.
           '<div class="maniphest-transaction-timestamp">'.
-            $timestamp.
+            $info.
           '</div>'.
           $descs.
         '</div>'.

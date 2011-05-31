@@ -63,7 +63,7 @@ final class DifferentialRevisionCommentListView extends AphrontView {
 
     $inlines = mgroup($this->inlines, 'getCommentID');
 
-
+    $num = 1;
     $html = array();
     foreach ($this->comments as $comment) {
       $view = new DifferentialRevisionCommentView();
@@ -73,6 +73,7 @@ final class DifferentialRevisionCommentListView extends AphrontView {
       $view->setInlineComments(idx($inlines, $comment->getID(), array()));
       $view->setChangesets($this->changesets);
       $view->setTargetDiff($this->target);
+      $view->setCommentNumber($num++);
 
       $html[] = $view->render();
     }
@@ -158,7 +159,7 @@ final class DifferentialRevisionCommentListView extends AphrontView {
     }
 
     return
-      '<div>'.
+      '<div class="differential-comment-list">'.
         implode("\n", $header).
         $hidden.
         implode("\n", $visible).
