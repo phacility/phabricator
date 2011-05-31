@@ -141,7 +141,18 @@ class PhabricatorSetup {
         "on configuration options.\n");
       return;
     } else {
-      self::write(" okay  phabricator.base-uri\n");
+      $host = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
+      if (preg_match('/(https|http)\:\/\//', $host)) {
+        self::write(" okay  phabricator.base-uri\n");
+      } else {
+        self::writeFailure();
+        self::write(
+          "You must specify the protocol over which your host works (e.g: ".
+          "\"http:// or https://\")\nin your custom config file (do not".
+          "forget the trailing slash at the end of the hostname).\n\tRefer to ".
+          "'default.conf.php' for documentation on configuration options.\n");
+        return;
+      }
     }
 
     self::write("[OKAY] Basic configuration OKAY\n");

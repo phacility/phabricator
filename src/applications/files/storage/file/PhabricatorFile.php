@@ -153,6 +153,13 @@ class PhabricatorFile extends PhabricatorFileDAO {
     return preg_replace('/[^a-zA-Z0-9.~_-]/', '_', $file_name);
   }
 
+  public static function isFileAnImage($file_name) {
+    if (preg_match('/(?:\.jpe?g|.png|.gif)/', $file_name)) {
+      return true;
+    }
+    return false;
+  }
+
   public function delete() {
     $this->openTransaction();
       switch ($this->getStorageEngine()) {
