@@ -89,6 +89,7 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
       DifferentialAction::ACTION_RECLAIM,
       DifferentialAction::ACTION_RESIGN,
       DifferentialAction::ACTION_RETHINK,
+      'unsubscribe',
     );
   }
 
@@ -112,6 +113,13 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
     $actor = $this->getActor();
     if (!$actor) {
       throw new Exception('No actor is set for the reply action.');
+    }
+
+    switch ($command) {
+      case 'unsubscribe':
+        $this->unsubscribeUser($this->getMailReceiver(), $actor);
+        // TODO: Send the user a confirmation email?
+        return null;
     }
 
     try {
@@ -138,5 +146,17 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
       throw $ex;
     }
   }
+
+  private function unsubscribeUser(
+    DifferentialRevision $revision,
+    PhabricatorUser $user) {
+
+    $revision->loadRelationships();
+    DifferentialRevisionEditor::removeCCAndUpdateRevision(
+      $revision,
+      $user->getPHID(),
+      $user->getPHID());
+  }
+
 
 }

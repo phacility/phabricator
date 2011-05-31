@@ -37,8 +37,6 @@ class DifferentialSubscribeController extends DifferentialController {
     }
 
     if (!$request->isFormPost()) {
-      // TODO: This dialog is silly but we're CSRF-able otherwise.
-
       $dialog = new AphrontDialogView();
 
       switch ($this->action) {
@@ -74,28 +72,16 @@ class DifferentialSubscribeController extends DifferentialController {
 
     switch ($this->action) {
       case 'add':
-        DifferentialRevisionEditor::addCC(
+        DifferentialRevisionEditor::addCCAndUpdateRevision(
           $revision,
           $phid,
           $phid);
-        $unsubscribed = $revision->getUnsubscribed();
-        if (isset($unsubscribed[$phid])) {
-          unset($unsubscribed[$phid]);
-          $revision->setUnsubscribed($unsubscribed);
-          $revision->save();
-        }
         break;
       case 'rem':
-        DifferentialRevisionEditor::removeCC(
+        DifferentialRevisionEditor::removeCCAndUpdateRevision(
           $revision,
-          $user->getPHID(),
-          $user->getPHID());
-        $unsubscribed = $revision->getUnsubscribed();
-        if (empty($unsubscribed[$phid])) {
-          $unsubscribed[$phid] = true;
-          $revision->setUnsubscribed($unsubscribed);
-          $revision->save();
-        }
+          $phid,
+          $phid);
         break;
       default:
         return new Aphront400Response();
