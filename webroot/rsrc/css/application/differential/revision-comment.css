@@ -3,12 +3,27 @@
  */
 
 
-.differential-comment-date {
+.differential-comment {
+  padding: 3px 6px;
+  margin-bottom: 10px;
+  border: 1px solid transparent;
+}
+
+.differential-comment-list .anchor-target {
+  background-color: #ffffdd;
+  border-color: #ffff00;
+}
+
+.differential-comment-info {
   color:       #666666;
   float:       right;
   font-size:   11px;
-  margin:      0em;
+  margin:      0 0 3px;
   padding-top: 6px;
+}
+
+.differential-comment-info a {
+  font-weight: bold;
 }
 
 .differential-comment-title {
@@ -24,7 +39,6 @@
   padding-left:         62px;
   background-repeat:    no-repeat;
   background-position:  6px 0px;
-  margin-bottom:        14px;
 }
 
 .differential-comment-content {

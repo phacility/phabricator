@@ -43,9 +43,22 @@ final class CelerityStaticResourceResponse {
     return $this->metadataBlock;
   }
 
+  /**
+   * Register a behavior for initialization. NOTE: if $config is empty,
+   * a behavior will execute only once even if it is initialized multiple times.
+   * If $config is nonempty, the behavior will be invoked once for each config.
+   */
   public function initBehavior($behavior, array $config = array()) {
     $this->requireResource('javelin-behavior-'.$behavior);
-    $this->behaviors[$behavior][] = $config;
+
+    if (empty($this->behaviors[$behavior])) {
+      $this->behaviors[$behavior] = array();
+    }
+
+    if ($config) {
+      $this->behaviors[$behavior][] = $config;
+    }
+
     return $this;
   }
 

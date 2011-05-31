@@ -20,18 +20,10 @@
  * @group markup
  */
 class PhabricatorRemarkupRuleDifferential
-  extends PhutilRemarkupRule {
+  extends PhabricatorRemarkupRuleObjectName {
 
-  public function apply($text) {
-    return preg_replace_callback(
-      '@\bD(\d+)\b@',
-      array($this, 'markupDifferentialLink'),
-      $text);
-  }
-
-  public function markupDifferentialLink($matches) {
-    return $this->getEngine()->storeText(
-      '<a href="/D'.$matches[1].'">D'.$matches[1].'</a>');
+  protected function getObjectNamePrefix() {
+    return 'D';
   }
 
 }

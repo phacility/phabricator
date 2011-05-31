@@ -65,14 +65,7 @@ final class AphrontFormView extends AphrontView {
   public function render() {
     require_celerity_resource('aphront-form-view-css');
 
-    static $initialized_behavior;
-    if (!$initialized_behavior) {
-      // TODO: This is sort of a yucky hack.
-      $initialized_behavior = true;
-      Javelin::initBehavior(
-        'aphront-form-disable-on-submit',
-        array());
-    }
+    Javelin::initBehavior('aphront-form-disable-on-submit');
 
     return javelin_render_tag(
       'form',

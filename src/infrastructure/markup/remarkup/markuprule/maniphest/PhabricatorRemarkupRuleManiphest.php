@@ -20,18 +20,10 @@
  * @group markup
  */
 class PhabricatorRemarkupRuleManiphest
-  extends PhutilRemarkupRule {
+  extends PhabricatorRemarkupRuleObjectName {
 
-  public function apply($text) {
-    return preg_replace_callback(
-      '@\bT(\d+)\b@',
-      array($this, 'markupManiphestLink'),
-      $text);
-  }
-
-  public function markupManiphestLink($matches) {
-    return $this->getEngine()->storeText(
-      '<a href="/T'.$matches[1].'">T'.$matches[1].'</a>');
+  protected function getObjectNamePrefix() {
+    return 'T';
   }
 
 }

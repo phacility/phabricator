@@ -77,17 +77,19 @@ class ManiphestTransactionListView extends AphrontView {
       $groups[] = $group;
     }
 
+    $sequence = 1;
     foreach ($groups as $group) {
       $view = new ManiphestTransactionDetailView();
       $view->setTransactionGroup($group);
       $view->setHandles($this->handles);
       $view->setMarkupEngine($this->markupEngine);
       $view->setPreview($this->preview);
+      $view->setCommentNumber($sequence++);
       $views[] = $view->render();
     }
 
     return
-      '<div style="padding: .5em 1.5em;">'.
+      '<div class="maniphest-transaction-list-view">'.
         implode("\n", $views).
       '</div>';
   }
