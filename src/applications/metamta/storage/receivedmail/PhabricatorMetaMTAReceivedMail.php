@@ -109,17 +109,8 @@ class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
   public function getCleanTextBody() {
     $body = idx($this->bodies, 'text');
 
-    // TODO: Refine this "algorithm".
-
-    $lines = explode("\n", trim($body));
-    for ($ii = 0; $ii < count($lines); $ii++) {
-      if (preg_match('/^\s*On\b.*\bwrote:\s*$/', $lines[$ii])) {
-        $lines = array_slice($lines, 0, $ii);
-        break;
-      }
-    }
-
-    return trim(implode("\n", $lines));
+    $parser = new PhabricatorMetaMTAEmailBodyParser($body);
+    return $parser->stripQuotedText();
   }
 
   public static function loadReceiverObject($receiver_name) {
