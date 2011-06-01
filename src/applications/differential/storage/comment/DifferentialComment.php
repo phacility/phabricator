@@ -18,10 +18,21 @@
 
 class DifferentialComment extends DifferentialDAO {
 
+  const METADATA_ADDED_REVIEWERS = 'added-reviewers';
+
   protected $authorPHID;
   protected $revisionID;
   protected $action;
   protected $content;
   protected $cache;
+  protected $metadata = array();
+
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_SERIALIZATION => array(
+        'metadata' => self::SERIALIZATION_JSON,
+      ),
+    ) + parent::getConfiguration();
+  }
 
 }

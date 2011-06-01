@@ -25,12 +25,14 @@ class ManiphestTransaction extends ManiphestDAO {
   protected $newValue;
   protected $comments;
   protected $cache;
+  protected $metadata = array();
 
   public function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
         'oldValue' => self::SERIALIZATION_JSON,
         'newValue' => self::SERIALIZATION_JSON,
+        'metadata' => self::SERIALIZATION_JSON,
       ),
     ) + parent::getConfiguration();
   }

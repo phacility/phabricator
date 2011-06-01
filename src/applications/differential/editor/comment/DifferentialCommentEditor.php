@@ -84,6 +84,8 @@ class DifferentialCommentEditor {
       $reviewer_phids = array_combine($reviewer_phids, $reviewer_phids);
     }
 
+    $metadata = array();
+
     switch ($action) {
       case DifferentialAction::ACTION_COMMENT:
         break;
@@ -242,13 +244,8 @@ class DifferentialCommentEditor {
             $add = $added_reviewers,
             $actor_phid);
 
-          $handles = id(new PhabricatorObjectHandleData($added_reviewers))
-            ->loadHandles();
-          $usernames = mpull($handles, 'getName');
-
-          $this->message =
-            'Added reviewers: '.implode(', ', $usernames)."\n\n".
-            $this->message;
+          $key = DifferentialComment::METADATA_ADDED_REVIEWERS;
+          $metadata[$key] = $added_reviewers;
 
         } else {
           $action = DifferentialAction::ACTION_COMMENT;
@@ -282,6 +279,7 @@ class DifferentialCommentEditor {
       ->setRevisionID($revision->getID())
       ->setAction($action)
       ->setContent((string)$this->message)
+      ->setMetadata($metadata)
       ->save();
 
     $changesets = array();

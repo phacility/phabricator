@@ -109,6 +109,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
     $verb = phutil_escape_html($verb);
 
     $content = $comment->getContent();
+    $head_content = null;
     if (strlen(rtrim($content))) {
       $title = "{$author_link} {$verb} this revision:";
       $cache = $comment->getCache();
@@ -127,10 +128,11 @@ final class DifferentialRevisionCommentView extends AphrontView {
         '</div>';
     } else {
       $title = null;
-      $content =
+      $head_content =
         '<div class="differential-comment-nocontent">'.
           "<p>{$author_link} {$verb} this revision.</p>".
         '</div>';
+      $content = null;
     }
 
     if ($this->inlines) {
@@ -213,6 +215,29 @@ final class DifferentialRevisionCommentView extends AphrontView {
       $background = "background-image: url('{$uri}');";
     }
 
+    $metadata_blocks = array();
+    $metadata = $comment->getMetadata();
+    $added_reviewers = idx(
+      $metadata,
+      DifferentialComment::METADATA_ADDED_REVIEWERS);
+    if ($added_reviewers) {
+      $reviewers = array();
+      foreach ($added_reviewers as $phid) {
+        $reviewers[] = $this->handles[$phid]->renderLink();
+      }
+      $reviewers = 'Added reviewers: '.implode(', ', $reviewers);
+      $metadata_blocks[] = $reviewers;
+    }
+
+    if ($metadata_blocks) {
+      $metadata_blocks =
+        '<div class="differential-comment-metadata">'.
+          implode("\n", $metadata_blocks).
+        '</div>';
+    } else {
+      $metadata_blocks = null;
+    }
+
     return phutil_render_tag(
       'div',
       array(
@@ -226,6 +251,8 @@ final class DifferentialRevisionCommentView extends AphrontView {
       '</div>'.
       '<div class="differential-comment-body" style="'.$background.'">'.
         '<div class="differential-comment-content">'.
+          $head_content.
+          $metadata_blocks.
           '<div class="differential-comment-core">'.
             $content.
           '</div>'.

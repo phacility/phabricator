@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'applications/differential/constants/action');
+phutil_require_module('phabricator', 'applications/differential/storage/comment');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'infrastructure/javelin/api');
 phutil_require_module('phabricator', 'view/base');

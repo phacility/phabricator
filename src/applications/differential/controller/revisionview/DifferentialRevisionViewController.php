@@ -78,6 +78,19 @@ class DifferentialRevisionViewController extends DifferentialController {
         $user->getPHID(),
       ),
       mpull($comments, 'getAuthorPHID'));
+
+    foreach ($comments as $comment) {
+      $metadata = $comment->getMetadata();
+      $added_reviewers = idx(
+        $metadata,
+        DifferentialComment::METADATA_ADDED_REVIEWERS);
+      if ($added_reviewers) {
+        foreach ($added_reviewers as $phid) {
+          $object_phids[] = $phid;
+        }
+      }
+    }
+
     foreach ($revision->getAttached() as $type => $phids) {
       foreach ($phids as $phid => $info) {
         $object_phids[] = $phid;
