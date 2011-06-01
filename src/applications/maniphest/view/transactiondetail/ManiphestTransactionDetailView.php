@@ -183,10 +183,9 @@ class ManiphestTransactionDetailView extends AphrontView {
     $info = array();
     $info[] = $timestamp;
 
-
     $comment_anchor = null;
     $num = $this->commentNumber;
-    if ($num) {
+    if ($num && !$this->preview) {
       Javelin::initBehavior('phabricator-watch-anchor');
       $info[] = javelin_render_tag(
         'a',

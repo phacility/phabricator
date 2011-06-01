@@ -88,7 +88,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
 
     $comment_anchor = null;
     $num = $this->commentNumber;
-    if ($num) {
+    if ($num && !$this->preview) {
       Javelin::initBehavior('phabricator-watch-anchor');
       $info[] = phutil_render_tag(
         'a',
