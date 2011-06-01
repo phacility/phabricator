@@ -26,23 +26,34 @@ phutil_require_module('phabricator', 'infrastructure/setup/sql');
 
 define('SCHEMA_VERSION_TABLE_NAME', 'schema_version');
 
-$options = getopt('v:u:p:') + array(
-  'v' => null,
-  'u' => null,
-  'p' => null,
+// TODO: getopt() is super terrible, move to something less terrible.
+$options = getopt('fhv:u:p:') + array(
+  'v' => null, // Upgrade from specific version
+  'u' => null, // Override MySQL User
+  'p' => null, // Override MySQL Pass
 );
 
-if ($options['v'] && !is_numeric($options['v'])) {
+foreach (array('h', 'f') as $key) {
+  // By default, these keys are set to 'false' to indicate that the flag was
+  // passed.
+  if (array_key_exists($key, $options)) {
+    $options[$key] = true;
+  }
+}
+
+if (!empty($options['h']) || ($options['v'] && !is_numeric($options['v']))) {
   usage();
 }
 
-echo phutil_console_wrap(
-  "Before running this script, you should take down the Phabricator web ".
-  "interface and stop any running Phabricator daemons.");
+if (empty($options['f'])) {
+  echo phutil_console_wrap(
+    "Before running this script, you should take down the Phabricator web ".
+    "interface and stop any running Phabricator daemons.");
 
-if (!phutil_console_confirm('Are you ready to continue?')) {
-  echo "Cancelled.\n";
-  exit(1);
+  if (!phutil_console_confirm('Are you ready to continue?')) {
+    echo "Cancelled.\n";
+    exit(1);
+  }
 }
 
 // Use always the version from the commandline if it is defined
@@ -153,12 +164,14 @@ END;
 
 function usage() {
   echo
-    "usage: upgrade_schema.php [-v version] [-u user -p pass]".
+    "usage: upgrade_schema.php [-v version] [-u user -p pass] [-f] [-h]".
     "\n\n".
-    "Run 'upgrade_schema.php -v 12' to apply all patches starting from ".
-    "version 12.\n".
     "Run 'upgrade_schema.php -u root -p hunter2' to override the configured ".
-    "default user.\n";
+    "default user.\n".
+    "Run 'upgrade_schema.php -v 12' to apply all patches starting from ".
+    "version 12. It is very unlikely you need to do this.\n".
+    "Use the -f flag to upgrade noninteractively, without prompting.\n".
+    "Use the -h flag to show this help.\n";
   exit(1);
 }
 

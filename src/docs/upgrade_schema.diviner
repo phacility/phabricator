@@ -23,8 +23,7 @@ root or some other admin user:
 
   PHABRICATOR_ENV=<your_config> path/to/phabricator/scripts/sql/upgrade_schema.php -u <user> -p <pass>
 
-If you need to upgrade the schema starting from a specific patch, just run:
+You can avoid the prompt the script issues by passing the ##-f## flag (for
+example, if you are scripting the upgrade process).
 
-  PHABRICATOR_ENV=<your_config> path/to/phabricator/scripts/sql/upgrade_schema.php -v <patch_number>
-
-However, this isn't usually needed and could be dangerous!
+  PHABRICATOR_ENV=<your_config> path/to/phabricator/scripts/sql/upgrade_schema.php -f
