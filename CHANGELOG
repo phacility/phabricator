@@ -2,6 +2,12 @@ This is not a complete list of changes, just of API or workflow changes that may
 break existing installs. Newer changes are listed at the top. If you pull new
 changes and things stop working, check here first!
 
+May 31 2011 - Javelin submodule moved
+  The externals/javelin submodule location has moved. If you have an older
+  checkout of Phabricator, you may need to edit .git/config to point at
+  facebook/javelin.git instead of epriestley/javelin.git, then remove the
+  externals/javelin directory, and then run "git submodule update --init".
+
 May 11 2011 - New session code
   There's some new code which allows you to establish multiple web sessions.
   When you update to it, all users will be logged out. This is expected, just
