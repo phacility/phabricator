@@ -29,6 +29,9 @@
   text-align: center;
   font-size: 11px;
   color: #333333;
+  overflow: hidden;
+  width: 166px;
+  white-space: nowrap;
 }
 
 .aphront-file-preview-thumb {
@@ -36,4 +39,5 @@
   border: 1px solid #000000;
   background: #ffffff;
   margin-bottom: 2px;
+  width: 160px;
 }

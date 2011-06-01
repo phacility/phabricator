@@ -36,6 +36,7 @@ final class AphrontFilePreviewView extends AphrontView {
         'src'     => $file->getThumb160x120URI(),
         'width'   => 160,
         'height'  => 120,
+        'title'   => $file->getName(),
       ));
     $link = phutil_render_tag(
       'a',
@@ -45,12 +46,25 @@ final class AphrontFilePreviewView extends AphrontView {
       ),
       $img);
 
+    $display_name = $file->getName();
+    if (strlen($display_name) > 22) {
+      $display_name =
+        substr($display_name, 0, 11).
+        "\xE2\x80\xA6".
+        substr($display_name, -9);
+    }
+
     return
       '<div class="aphront-file-preview-view">
         <div class="aphront-file-preview-thumb">'.
           $link.
         '</div>'.
-        phutil_escape_html($file->getName()).
+        phutil_render_tag(
+          'span',
+          array(
+            'title' => $file->getName(),
+          ),
+          phutil_escape_html($display_name)).
       '</div>';
   }
 

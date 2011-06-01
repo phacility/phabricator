@@ -9,7 +9,7 @@
 celerity_register_resource_map(array(
   'aphront-attached-file-view-css' =>
   array(
-    'uri' => '/res/bac9f95c/rsrc/css/aphront/attached-file-view.css',
+    'uri' => '/res/a6ca5487/rsrc/css/aphront/attached-file-view.css',
     'type' => 'css',
     'requires' =>
     array(
