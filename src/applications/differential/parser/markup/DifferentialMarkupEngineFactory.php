@@ -43,11 +43,6 @@ class DifferentialMarkupEngineFactory {
     $rules[] = new PhabricatorRemarkupRuleManiphest();
     $rules[] = new PhabricatorRemarkupRuleImageMacro();
 
-    $rules[] = new PhutilRemarkupRuleEscapeHTML();
-    $rules[] = new PhutilRemarkupRuleMonospace();
-    $rules[] = new PhutilRemarkupRuleBold();
-    $rules[] = new PhutilRemarkupRuleItalic();
-
     $custom_rule_classes =
       PhabricatorEnv::getEnvConfig('differential.custom-remarkup-rules');
     if ($custom_rule_classes) {
@@ -56,6 +51,12 @@ class DifferentialMarkupEngineFactory {
         $rules[] = newv($custom_rule_class, array());
       }
     }
+
+    $rules[] = new PhutilRemarkupRuleEscapeHTML();
+    $rules[] = new PhutilRemarkupRuleMonospace();
+    $rules[] = new PhutilRemarkupRuleBold();
+    $rules[] = new PhutilRemarkupRuleItalic();
+
 
     $blocks = array();
     $blocks[] = new PhutilRemarkupEngineRemarkupQuotesBlockRule();
