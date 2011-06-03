@@ -25,12 +25,21 @@ class PhabricatorFileMacroListController extends PhabricatorFileController {
     $pager = new AphrontPagerView();
     $pager->setOffset($request->getInt('page'));
 
-    $macros = id(new PhabricatorFileImageMacro())->loadAllWhere(
+    $macro_table = new PhabricatorFileImageMacro();
+    $macros = $macro_table->loadAllWhere(
       '1 = 1 ORDER BY id DESC LIMIT %d, %d',
       $pager->getOffset(),
-      $pager->getPageSize() + 1);
+      $pager->getPageSize());
 
-    $macros = $pager->sliceResults($macros);
+    // Get an exact count since the size here is reasonably going to be a few
+    // thousand at most in any reasonable case.
+    $count = queryfx_one(
+      $macro_table->establishConnection('r'),
+      'SELECT COUNT(*) N FROM %T',
+      $macro_table->getTableName());
+    $count = $count['N'];
+
+    $pager->setCount($count);
     $pager->setURI($request->getRequestURI(), 'page');
 
     $rows = array();
@@ -44,10 +53,16 @@ class PhabricatorFileMacroListController extends PhabricatorFileController {
           ),
           phutil_escape_html($macro->getName())),
         phutil_render_tag(
-          'img',
+          'a',
           array(
-            'src' => $src,
-          )),
+            'href'    => $src,
+            'target'  => '_blank',
+          ),
+          phutil_render_tag(
+            'img',
+            array(
+              'src' => $src,
+            ))),
         javelin_render_tag(
           'a',
           array(
@@ -75,6 +90,7 @@ class PhabricatorFileMacroListController extends PhabricatorFileController {
 
     $panel = new AphrontPanelView();
     $panel->appendChild($table);
+
     $panel->setHeader('Image Macros');
     $panel->setCreateButton('New Image Macro', '/file/macro/edit/');
     $panel->appendChild($pager);
