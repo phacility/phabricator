@@ -43,7 +43,7 @@ then
   confirm
 fi
 
-echo "Phabricator will be installed to: $(ROOT).";
+echo "Phabricator will be installed to: $(pwd).";
 confirm
 
 echo "Testing sudo/root..."
