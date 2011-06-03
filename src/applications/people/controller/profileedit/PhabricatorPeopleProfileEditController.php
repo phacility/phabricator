@@ -32,7 +32,7 @@ class PhabricatorPeopleProfileEditController
       $profile->setUserPHID($user->getPHID());
     }
 
-
+    $errors = array();
     if ($request->isFormPost()) {
       $profile->setTitle($request->getStr('title'));
       $profile->setBlurb($request->getStr('blurb'));
@@ -41,14 +41,29 @@ class PhabricatorPeopleProfileEditController
         $err = idx($_FILES['image'], 'error');
         if ($err != UPLOAD_ERR_NO_FILE) {
           $file = PhabricatorFile::newFromPHPUpload($_FILES['image']);
-          $profile->setProfileImagePHID($file->getPHID());
+          $okay = $file->isTransformableImage();
+          if ($okay) {
+            $profile->setProfileImagePHID($file->getPHID());
+          } else {
+            $errors[] =
+              'Only valid image files (jpg, jpeg, png or gif) '.
+              'will be accepted.';
+          }
         }
       }
 
-      $profile->save();
-      $response = id(new AphrontRedirectResponse())
-        ->setURI('/p/'.$user->getUsername().'/');
-      return $response;
+      if (!$errors) {
+        $profile->save();
+        $response = id(new AphrontRedirectResponse())
+          ->setURI('/p/'.$user->getUsername().'/');
+        return $response;
+      }
+    }
+
+    if ($errors) {
+      $error_view = new AphrontErrorView();
+      $error_view->setTitle('Form Errors');
+      $error_view->setErrors($errors);
     }
 
     $form = new AphrontFormView();
@@ -88,7 +103,10 @@ class PhabricatorPeopleProfileEditController
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
 
     return $this->buildStandardPageResponse(
-      $panel,
+      array(
+        $error_view,
+        $panel,
+      ),
       array(
         'title' => 'Edit Profile',
       ));
