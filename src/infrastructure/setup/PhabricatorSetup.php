@@ -130,18 +130,28 @@ class PhabricatorSetup {
         self::writeDoc('article/Configuration_Guide.html');
       return;
     } else {
-      self::write(" okay  Custom configuration loaded.\n");
-    }
-
-    if (!PhabricatorEnv::getEnvConfig('phabricator.base-uri')) {
-      self::writeFailure();
-      self::write(
-        "Setup failure! You must specify 'phabricator.base-uri' in your ".
-        "custom config file. Refer to 'default.conf.php' for documentation ".
-        "on configuration options.\n");
-      return;
-    } else {
-      self::write(" okay  phabricator.base-uri\n");
+      $host = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
+      $protocol = id(new PhutilURI($host))->getProtocol();
+      if (!($protocol === 'http') || !($protocol === 'https')) {
+        self::writeFailure();
+        self::write(
+          "You must specify the protocol over which your host works (e.g.: ".
+          "\"http:// or https://\")\nin your custom config file.\nRefer to ".
+          "'default.conf.php' for documentation on configuration options.\n");
+        return;
+      }
+      if (preg_match('/.*\/$/', $host)) {
+        self::write(" okay  phabricator.base-uri\n");
+      } else {
+        self::writeFailure();
+        self::write(
+          "You must add a trailing slash at the end of the host\n(e.g.: ".
+          "\"http://phabricator.example.com/ instead of ".
+          "http://phabricator.example.com\")\nin your custom config file.".
+          "\nRefer to 'default.conf.php' for documentation on configuration ".
+          "options.\n");
+        return;
+      }
     }
 
     self::write("[OKAY] Basic configuration OKAY\n");

@@ -118,14 +118,22 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
             $err = idx($_FILES['profile'], 'error');
             if ($err != UPLOAD_ERR_NO_FILE) {
               $file = PhabricatorFile::newFromPHPUpload($_FILES['profile']);
-              $user->setProfileImagePHID($file->getPHID());
+              $okay = $file->isTransformableImage();
+
+              if ($okay) {
+                 $user->setProfileImagePHID($file->getPHID());
+              } else {
+                $errors[] =
+                  'Only valid image files (jpg, jpeg, png or gif) '.
+                  'will be accepted.';
+              }
             }
           }
 
           $user->setRealName($request->getStr('realname'));
 
           if (!strlen($user->getRealName())) {
-            $errors[] = 'Real name must be nonempty';
+            $errors[] = 'Real name must be nonempty.';
             $e_realname = 'Required';
           }
 
@@ -245,7 +253,6 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
     $regen_form = new AphrontFormView();
     $regen_form
       ->setUser($user)
-      ->setWorkflow(true)
       ->setAction('/settings/page/arcanist/')
       ->appendChild(
         '<p class="aphront-form-instructions">You can regenerate this '.
@@ -526,7 +533,5 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
 
     return $notice.$panel->render();
 
-
   }
-
 }
