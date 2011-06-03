@@ -43,12 +43,10 @@ then
   confirm
 fi
 
-ROOT=`pwd`
-echo "Phabricator will be installed to: ${ROOT}.";
+echo "Phabricator will be installed to: $(ROOT).";
 confirm
 
 echo "Testing sudo/root..."
-SUDO=""
 if [[ $EUID -ne 0 ]] # Check if we're root. If we are, continue.
 then
   sudo true
