@@ -160,7 +160,7 @@ class DiffusionBrowseFileController extends DiffusionController {
           $rev = $rev_list[$k];
           $author = $blame_dict[$rev]['author'];
           $rows[] =
-            sprintf("%-10s %-15s %s", substr($rev, 0, 7), $author, $line);
+            sprintf("%-10s %-20s %s", substr($rev, 0, 7), $author, $line);
         }
 
         $corpus = phutil_render_tag(
@@ -269,8 +269,8 @@ class DiffusionBrowseFileController extends DiffusionController {
           $blame_info =
             $prev_link .
             '<th style="background: '.$color.
-              '; width: 9em;">'.$revision_link.'</th>'.
-            '<th style="background: '.$color.
+              '; width: 12em;">'.$revision_link.'</th>'.
+            '<th style="background: '.$color.'; width: 12em'.
               '; font-weight: normal; color: #333;">'.$author_link.'</th>';
           $last_rev = $rev;
         }
