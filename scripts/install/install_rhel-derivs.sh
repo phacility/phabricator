@@ -1,0 +1,142 @@
+#!/bin/bash
+
+confirm() {
+  echo "Press RETURN to continue, or ^C to cancel.";
+  read -e ignored
+}
+
+RHEL_VER_FILE="/etc/redhat-release"
+
+if [[ ! -f $RHEL_VER_FILE ]]
+then
+  echo "It looks like you're not running a Red Hat-derived distribution."
+  echo "This script is intended to install Phabricator on RHEL-derived"
+  echo "distributions such as RHEL, Fedora, CentOS, and Scientific Linux."
+  echo "Proceed with caution."
+  confirm
+fi
+
+echo "PHABRICATOR RED HAT DERIVATIVE INSTALLATION SCRIPT";
+echo "This script will install Phabricator and all of its core dependencies.";
+echo "Run it from the directory you want to install into.";
+echo
+
+RHEL_REGEX="release ([0-9]+)\."
+
+if [[ $(cat $RHEL_VER_FILE) =~ $RHEL_REGEX ]]
+then
+  RHEL_MAJOR_VER=${BASH_REMATCH[1]}
+else
+  echo "Ut oh, we were unable to determine your distribution's major"
+  echo "version number. Please make sure you're running 6.0+ before"
+  echo "proceeding."
+  confirm
+fi
+
+if [[ $RHEL_MAJOR_VER < 6 ]]
+then
+  echo "** WARNING **"
+  echo "A major version less than 6 was detected. Because of this,"
+  echo "several needed dependencies are not available via default repos."
+  echo "Specifically, RHEL 5 does not have a PEAR package for php53-*."
+  echo "We will attempt to install it manually, for APC. Please be careful."
+  confirm
+fi
+
+echo "Phabricator will be installed to: $(pwd).";
+confirm
+
+echo "Testing sudo/root..."
+if [[ $EUID -ne 0 ]] # Check if we're root. If we are, continue.
+then
+  sudo true
+  SUDO="sudo"
+  if [[ $? -ne 0 ]]
+  then
+    echo "ERROR: You must be able to sudo to run this script, or run it as root.";
+    exit 1
+  fi
+  
+fi
+
+if [[ $RHEL_MAJOR_VER == 5 ]]
+then
+  # RHEL 5's "php" package is actually 5.1. The "php53" package won't let us install php-pecl-apc.
+  # (it tries to pull in php 5.1 stuff) ...
+  echo "Adding EPEL repo, for git."
+  $SUDO rpm -Uvh http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-4.noarch.rpm
+  YUMCOMMAND="$SUDO yum install httpd git php53 php53-cli php53-mysql php53-process php53-devel php53-gd gcc wget make pcre-devel"
+else
+  # RHEL 6+ defaults with php 5.3
+  YUMCOMMAND="$SUDO yum install httpd git php php-cli php-mysql php-process php-devel php-gd php-pecl-apc php-pecl-json"
+fi
+
+echo "Dropping to yum to install dependencies..."
+echo "Running: ${YUMCOMMAND}"
+echo "Yum will prompt you with [Y/n] to continue installing."
+
+$YUMCOMMAND
+
+if [[ $? -ne 0 ]]
+then
+  echo "The yum command failed. Please fix the errors and re-run this script."
+  exit 1
+fi
+
+if [[ $RHEL_MAJOR_VER == 5 ]]
+then
+  # Now that we've ensured all the devel packages required for pecl/apc are there, let's
+  # set up PEAR, and install apc.
+  echo "Attempting to install PEAR"
+  wget http://pear.php.net/go-pear.phar
+  echo "Downloading PEAR: $PEARCOMMAND"
+  $SUDO php go-pear.phar && $SUDO pecl install apc
+fi
+
+if [[ $? -ne 0 ]]
+then
+  echo "The apc install failed. Continuing without APC, performance may be impacted."
+fi
+
+if [[ "$(pidof httpd)" ]]
+then
+  echo "If php was installed above, please run: /etc/init.d/httpd graceful"
+else
+  echo "Please remember to start the httpd with: /etc/init.d/httpd start"
+fi
+
+if [[ ! "$(pidof mysql)" ]]
+then
+  echo "Please remember to start the mysql server: /etc/init.d/mysqld start"
+fi
+
+confirm
+
+if [[ ! -e libphutil ]]
+then
+  git clone git://github.com/facebook/libphutil.git
+else
+  (cd libphutil && git pull --rebase)
+fi
+
+if [[ ! -e arcanist ]]
+then
+  git clone git://github.com/facebook/arcanist.git
+else
+  (cd arcanist && git pull --rebase)
+fi
+
+if [[ ! -e phabricator ]]
+then
+  git clone git://github.com/facebook/phabricator.git
+else
+  (cd phabricator && git pull --rebase)
+fi
+
+(cd phabricator && git submodule update --init)
+
+echo
+echo
+echo "Install probably worked mostly correctly. Continue with the 'Configuration Guide':";
+echo
+echo "    http://phabricator.com/docs/phabricator/article/Configuration_Guide.html";
