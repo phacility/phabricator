@@ -404,6 +404,26 @@ class DifferentialChangesetParser {
           continue;
         }
         $new[$k]['text'] = idx($new_text, $desc['line']);
+
+        // If there's a corresponding "old" text and the line is marked as
+        // unchanged, test if there are internal whitespace changes between
+        // non-whitespace characters, e.g. spaces added to a string or spaces
+        // added around operators. If we find internal spaces, mark the line
+        // as changed.
+        //
+        // We only need to do this for "new" lines because any line that is
+        // missing either "old" or "new" text certainly can not have internal
+        // whitespace changes without also having non-whitespace changes,
+        // because characters had to be either added or removed to create the
+        // possibility of internal whitespace.
+        if (isset($old[$k]['text']) && empty($new[$k]['type'])) {
+          if (trim($old[$k]['text']) != trim($new[$k]['text'])) {
+            // The strings aren't the same when trimmed, so there are internal
+            // whitespace changes. Mark this line changed.
+            $old[$k]['type'] = '-';
+            $new[$k]['type'] = '+';
+          }
+        }
       }
 
       $this->old = $old;
@@ -725,7 +745,7 @@ class DifferentialChangesetParser {
           Filesystem::writeFile($old_tmp, $changeset->makeOldFile());
           Filesystem::writeFile($new_tmp, $changeset->makeNewFile());
           list($err, $diff) = exec_manual(
-            'diff -bw -U65535 %s %s',
+            'diff -bw -U65535 %s %s       ',
             $old_tmp,
             $new_tmp);
 
