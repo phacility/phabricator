@@ -181,7 +181,6 @@
   margin-left: 8px;
 }
 
-
 .differential-property-table {
   width: auto;
   margin: .75em auto;
@@ -228,4 +227,17 @@
 
 .differential-property-table tr.property-table-header td.nval {
   background: #aaffaa;
+}
+
+.differential-inline-undo {
+  padding: 4px;
+  text-align: center;
+  background: #ffeeaa;
+  margin: 3px 0 1px;
+  font: 11px "Verdana";
+  color: 444444;
+}
+
+.differential-inline-undo a {
+  font-weight: bold;
 }

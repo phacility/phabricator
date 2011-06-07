@@ -49,24 +49,9 @@ class DifferentialInlineCommentEditController extends DifferentialController {
     $edit_dialog->addSubmitButton();
     $edit_dialog->addCancelButton('#');
 
-    $inline = null;
-    if ($inline_id) {
-      $inline = id(new DifferentialInlineComment())
-        ->load($inline_id);
-
-      if (!$inline ||
-          $inline->getAuthorPHID() != $user->getPHID() ||
-          $inline->getCommentID() ||
-          $inline->getRevisionID() != $this->revisionID) {
-        throw new Exception("That comment is not editable!");
-      }
-    }
-
     switch ($op) {
       case 'delete':
-        if (!$inline) {
-          return new Aphront400Response();
-        }
+        $inline = $this->loadInlineCommentForEditing($inline_id);
 
         if ($request->isFormPost()) {
           $inline->delete();
@@ -81,9 +66,7 @@ class DifferentialInlineCommentEditController extends DifferentialController {
 
         return id(new AphrontDialogResponse())->setDialog($edit_dialog);
       case 'edit':
-        if (!$inline) {
-          return new Aphront400Response();
-        }
+        $inline = $this->loadInlineCommentForEditing($inline_id);
 
         if ($request->isFormPost()) {
           if (strlen($text)) {
@@ -106,7 +89,7 @@ class DifferentialInlineCommentEditController extends DifferentialController {
 
         $edit_dialog->appendChild(
           $this->renderTextArea(
-            $inline->getContent()));
+            nonempty($text, $inline->getContent())));
 
         return id(new AphrontDialogResponse())->setDialog($edit_dialog);
       case 'create':
@@ -134,8 +117,21 @@ class DifferentialInlineCommentEditController extends DifferentialController {
           ->save();
 
         return $this->buildRenderedCommentResponse($inline, $on_right);
+
+      case 'reply':
       default:
-        $edit_dialog->setTitle('New Inline Comment');
+
+        if ($op == 'reply') {
+          $inline = $this->loadInlineComment($inline_id);
+          // Override defaults.
+          $changeset = $inline->getChangesetID();
+          $is_new = $inline->getIsNewFile();
+          $number = $inline->getLineNumber();
+          $length = $inline->getLineLength();
+          $edit_dialog->setTitle('Reply to Inline Comment');
+        } else {
+          $edit_dialog->setTitle('New Inline Comment');
+        }
 
         $edit_dialog->addHiddenInput('op', 'create');
         $edit_dialog->addHiddenInput('changeset', $changeset);
@@ -143,7 +139,7 @@ class DifferentialInlineCommentEditController extends DifferentialController {
         $edit_dialog->addHiddenInput('number', $number);
         $edit_dialog->addHiddenInput('length', $length);
 
-        $edit_dialog->appendChild($this->renderTextArea(''));
+        $edit_dialog->appendChild($this->renderTextArea($text));
 
         return id(new AphrontDialogResponse())->setDialog($edit_dialog);
     }
@@ -189,13 +185,61 @@ class DifferentialInlineCommentEditController extends DifferentialController {
   }
 
   private function renderTextArea($text) {
-    return phutil_render_tag(
+    return javelin_render_tag(
       'textarea',
       array(
         'class' => 'differential-inline-comment-edit-textarea',
+        'sigil' => 'differential-inline-comment-edit-textarea',
         'name' => 'text',
       ),
       phutil_escape_html($text));
+  }
+
+  private function loadInlineComment($id) {
+    $inline = null;
+
+    if ($id) {
+      $inline = id(new DifferentialInlineComment())->load($id);
+    }
+
+    if (!$inline) {
+      throw new Exception("No such inline comment!");
+    }
+
+    return $inline;
+  }
+
+  private function loadInlineCommentForEditing($id) {
+    $inline = $this->loadInlineComment($id);
+    $user = $this->getRequest()->getUser();
+
+    if (!$this->canEditInlineComment($user, $inline, $this->revisionID)) {
+      throw new Exception("That comment is not editable!");
+    }
+    return $inline;
+  }
+
+  private function canEditInlineComment(
+    PhabricatorUser $user,
+    DifferentialInlineComment $inline,
+    $revision_id) {
+
+    // Only the author may edit a comment.
+    if ($inline->getAuthorPHID() != $user->getPHID()) {
+      return false;
+    }
+
+    // Saved comments may not be edited.
+    if ($inline->getCommentID()) {
+      return false;
+    }
+
+    // Inline must be attached to the active revision.
+    if ($inline->getRevisionID() != $revision_id) {
+      return false;
+    }
+
+    return true;
   }
 
 }

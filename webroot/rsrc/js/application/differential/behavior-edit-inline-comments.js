@@ -3,8 +3,9 @@
  * @requires javelin-behavior
  *           javelin-stratcom
  *           javelin-dom
- *           javelin-workflow
+ *           javelin-util
  *           javelin-vector
+ *           differential-inline-comment-editor
  */
 
 JX.behavior('differential-edit-inline-comments', function(config) {
@@ -18,8 +19,8 @@ JX.behavior('differential-edit-inline-comments', function(config) {
   var target = null;
   var root   = null;
   var changeset = null;
-  var workflow = false;
-  var is_new = false;
+
+  var editor = null;
 
   function updateReticle() {
     var top = origin;
@@ -45,16 +46,11 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     JX.DOM.hide(reticle);
   }
 
-  function finishSelect() {
+  JX.DifferentialInlineCommentEditor.listen('done', function() {
     selecting = false;
-    workflow = false;
+    editor = false;
     hideReticle();
-  }
-
-  function drawInlineComment(table, anchor, r) {
-    copyRows(table, JX.$N('div', JX.$H(r.markup)), anchor);
-    finishSelect();
-  }
+  });
 
   function isOnRight(node) {
     return node.parentNode.firstChild != node;
@@ -73,25 +69,11 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     }
   }
 
-  function isInlineCommentNode(target) {
-    return target &&
-            (!JX.DOM.isType(target, 'tr')
-             || target.className.indexOf('inline') !== -1);
-
-  }
-
-  function findInlineCommentTarget(target) {
-    while (isInlineCommentNode(target)) {
-      target = target.nextSibling;
-    }
-    return target;
-  }
-
   JX.Stratcom.listen(
     'mousedown',
     ['differential-changeset', 'tag:th'],
     function(e) {
-      if (workflow  ||
+      if (editor  ||
           selecting ||
           getRowNumber(e.getTarget()) === undefined) {
         return;
@@ -119,7 +101,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     ['differential-changeset', 'tag:th'],
     function(e) {
       if (!selecting ||
-          workflow ||
+          editor ||
           (getRowNumber(e.getTarget()) === undefined) ||
           (isOnRight(e.getTarget()) != isOnRight(origin)) ||
           (e.getNode('differential-changeset') !== root)) {
@@ -135,7 +117,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     'mouseup',
     null,
     function(e) {
-      if (workflow || !selecting) {
+      if (editor || !selecting) {
         return;
       }
 
@@ -153,38 +135,16 @@ JX.behavior('differential-edit-inline-comments', function(config) {
         insert = target.parentNode;
       }
 
-      var data = {
-        op: 'new',
-        changeset: changeset,
-        number: o,
-        length: len,
-        is_new: isNewFile(target) ? 1 : 0,
-        on_right: isOnRight(target) ? 1 : 0
-      };
-
-      workflow = true;
-
-      var w = new JX.Workflow(config.uri, data)
-        .setHandler(function(r) {
-          // Skip over any rows which contain inline feedback. Don't mimic this!
-          // We're shipping around raw HTML here for performance reasons, but
-          // normally you should use sigils to encode this kind of data on
-          // the document.
-          var target = findInlineCommentTarget(insert.nextSibling);
-          drawInlineComment(insert.parentNode, target, r);
-          finishSelect();
-          JX.Stratcom.invoke('differential-inline-comment-update');
-        })
-        .setCloseHandler(finishSelect);
-
-
-      w.listen('error', function(e) {
-        // TODO: uh, tell the user I guess
-        finishSelect();
-        JX.Stratcom.context().stop();
-      });
-
-      w.start();
+      editor = new JX.DifferentialInlineCommentEditor(config.uri)
+        .setTemplates(config.undo_templates)
+        .setOperation('new')
+        .setChangeset(changeset)
+        .setLineNumber(o)
+        .setLength(len)
+        .setIsNew(isNewFile(target) ? 1 : 0)
+        .setOnRight(isOnRight(target) ? 1 : 0)
+        .setRow(insert.nextSibling)
+        .start();
 
       e.kill();
     });
@@ -193,7 +153,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     ['mouseover', 'mouseout'],
     'differential-inline-comment',
     function(e) {
-      if (selecting || workflow) {
+      if (selecting || editor) {
         return;
       }
 
@@ -220,50 +180,28 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       }
     });
 
-  JX.Stratcom.listen(
-    'click',
-    [['differential-inline-comment', 'differential-inline-reply']],
-    function(e) {
-      new JX.Workflow(config.uri, e.getNodeData('differential-inline-reply'))
-        .setHandler(function(r) {
-          var base_row =
-            findInlineCommentTarget(
-              e.getNode('differential-inline-comment')
-               .parentNode
-               .parentNode
-            );
-          drawInlineComment(base_row.parentNode, base_row, r);
-          JX.Stratcom.invoke('differential-inline-comment-update');
-        })
-        .start();
+  var action_handler = function(op, e) {
+    var data = e.getNodeData('differential-inline-comment');
+    var node = e.getNode('differential-inline-comment');
 
-      e.kill();
-    }
-  );
+    editor = new JX.DifferentialInlineCommentEditor(config.uri)
+      .setTemplates(config.undo_templates)
+      .setOperation(op)
+      .setID(data.id)
+      .setOnRight(data.on_right)
+      .setOriginalText(data.original)
+      .setRow(node.parentNode.parentNode)
+      .start();
 
-  JX.Stratcom.listen(
-    'click',
-    [['differential-inline-comment', 'differential-inline-delete'],
-     ['differential-inline-comment', 'differential-inline-edit']],
-    function(e) {
-      var data = {
-        op: e.getNode('differential-inline-edit') ? 'edit' : 'delete',
-        id: e.getNodeData('differential-inline-comment').id,
-        on_right: e.getNodeData('differential-inline-comment').on_right
-      };
-      new JX.Workflow(config.uri, data)
-        .setHandler(function(r) {
-          var base_row = e.getNode('differential-inline-comment')
-            .parentNode
-            .parentNode;
-          if (data.op == 'edit' && r.markup) {
-            drawInlineComment(base_row.parentNode, base_row, r);
-          }
-          JX.DOM.remove(base_row);
-          JX.Stratcom.invoke('differential-inline-comment-update');
-        })
-        .start();
-      e.kill();
-    });
+    e.kill();
+  }
+
+  for (var op in {'edit' : 1, 'delete' : 1, 'reply' : 1}) {
+    JX.Stratcom.listen(
+      'click',
+      ['differential-inline-comment', 'differential-inline-' + op],
+      JX.bind(null, action_handler, op));
+  }
 
 });
+

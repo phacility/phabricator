@@ -78,7 +78,7 @@ class PhabricatorJavelinLinter extends ArcanistLinter {
         // TODO: Write build documentation for the Javelin binaries and point
         // the user at it.
         $this->raiseLintAtLine(
-          0,
+          1,
           0,
           self::LINT_MISSING_BINARY,
           "The 'javelinsymbols' binary in the Javelin project has not been ".

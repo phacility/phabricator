@@ -126,9 +126,13 @@ class DifferentialChangesetListView extends AphrontView {
     Javelin::initBehavior('differential-comment-jump', array());
 
     if ($this->editable) {
+
+      $undo_templates = $this->renderUndoTemplates();
+
       $revision = $this->revision;
       Javelin::initBehavior('differential-edit-inline-comments', array(
         'uri' => '/differential/comment/inline/edit/'.$revision->getID().'/',
+        'undo_templates' => $undo_templates,
       ));
     }
 
@@ -136,6 +140,37 @@ class DifferentialChangesetListView extends AphrontView {
       '<div class="differential-review-stage" id="differential-review-stage">'.
         implode("\n", $output).
       '</div>';
+  }
+
+  /**
+   * Render the "Undo" markup for the inline comment undo feature.
+   */
+  private function renderUndoTemplates() {
+    $link = javelin_render_tag(
+      'a',
+      array(
+        'href'  => '#',
+        'sigil' => 'differential-inline-comment-undo',
+      ),
+      'Undo');
+
+    $div = phutil_render_tag(
+      'div',
+      array(
+        'class' => 'differential-inline-undo',
+      ),
+      'Changes discarded. '.$link);
+
+    $content = '<th></th><td>'.$div.'</td>';
+    $empty   = '<th></th><td></td>';
+
+    $left = array($content, $empty);
+    $right = array($empty, $content);
+
+    return array(
+      'l' => '<table><tr>'.implode('', $left).'</tr></table>',
+      'r' => '<table><tr>'.implode('', $right).'</tr></table>',
+    );
   }
 
 }

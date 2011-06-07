@@ -83,13 +83,6 @@ class DifferentialChangesetDetailView extends AphrontView {
       '<div style="clear: both;"></div>'.
       $this->renderChildren());
 
-    if ($edit) {
-      Javelin::initBehavior(
-        'differential-edit-inline-comments', array(
-          'uri' => '/differential/comment/inline/edit/'.$this->revisionID.'/',
-        ));
-    }
-
     return $output;
   }
 

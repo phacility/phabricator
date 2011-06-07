@@ -73,6 +73,7 @@ final class DifferentialInlineCommentView extends AphrontView {
       'number' => $inline->getLineNumber(),
       'length' => $inline->getLineLength(),
       'on_right' => $this->onRight,
+      'original' => $inline->getContent(),
     );
 
     $sigil = 'differential-inline-comment';
@@ -106,13 +107,6 @@ final class DifferentialInlineCommentView extends AphrontView {
         'href'        => '#',
         'mustcapture' => true,
         'sigil'       => 'differential-inline-reply',
-        'meta'        => array(
-          'is_new' => true,
-          'changeset' => $inline->getChangesetID(),
-          'number' => $inline->getLineNumber(),
-          'length' => $inline->getLineLength(),
-          'on_right' => $this->onRight,
-        )
       ),
       'Reply');
 

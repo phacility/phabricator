@@ -44,4 +44,5 @@ function copyRows(dst, src, before) {
       dst.appendChild(rows[ii]);
     }
   }
+  return rows;
 }
