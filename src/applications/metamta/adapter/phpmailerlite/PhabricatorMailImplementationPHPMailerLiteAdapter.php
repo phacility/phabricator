@@ -24,6 +24,7 @@ class PhabricatorMailImplementationPHPMailerLiteAdapter
     $root = dirname($root);
     require_once $root.'/externals/phpmailer/class.phpmailer-lite.php';
     $this->mailer = newv('PHPMailerLite', array($use_exceptions = true));
+    $this->mailer->CharSet = 'utf-8';
   }
 
   public function supportsMessageIDHeader() {
