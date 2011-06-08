@@ -235,6 +235,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       DifferentialUnitStatus::UNIT_WARN => self::STAR_WARN,
       DifferentialUnitStatus::UNIT_FAIL => self::STAR_FAIL,
       DifferentialUnitStatus::UNIT_SKIP => self::STAR_SKIP,
+      DifferentialUnitStatus::UNIT_POSTPONED => self::STAR_SKIP,
     );
 
     $star = idx($map, $diff->getUnitStatus(), self::STAR_FAIL);
@@ -270,6 +271,8 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
         return 'Unit Test Errors';
       case DifferentialUnitStatus::UNIT_SKIP:
         return 'Unit Tests Skipped';
+      case DifferentialUnitStatus::UNIT_POSTPONED:
+        return 'Unit Tests Postponed';
     }
     return '???';
   }

@@ -373,6 +373,7 @@ class DifferentialRevisionViewController extends DifferentialController {
     $ustar = DifferentialRevisionUpdateHistoryView::renderDiffUnitStar($diff);
     $umsg = DifferentialRevisionUpdateHistoryView::getDiffUnitMessage($diff);
 
+    $postponed_count = 0;
     $udata = idx($diff_properties, 'arc:unit');
     $utail = null;
     if ($udata) {
@@ -380,29 +381,40 @@ class DifferentialRevisionViewController extends DifferentialController {
       foreach ($udata as $test) {
         $name = phutil_escape_html(idx($test, 'name'));
         $result = phutil_escape_html(idx($test, 'result'));
-        $userdata = phutil_escape_html(idx($test, 'userdata'));
-        if (strlen($userdata) > 256) {
-          $userdata = substr($userdata, 0, 256).'...';
-        }
-        $userdata = str_replace("\n", '<br />', $userdata);
-        $unit_messages[] =
-          '<tr>'.
+
+        if ($result != DifferentialUnitTestResult::RESULT_POSTPONED &&
+            $result != DifferentialUnitTestResult::RESULT_PASS) {
+          $userdata = phutil_escape_html(idx($test, 'userdata'));
+          if (strlen($userdata) > 256) {
+            $userdata = substr($userdata, 0, 256).'...';
+          }
+          $userdata = str_replace("\n", '<br />', $userdata);
+          $unit_messages[] =
+            '<tr>'.
             '<th>'.$name.'</th>'.
             '<th class="unit-test-result">'.
-              '<div class="result-'.$result.'">'.
-                strtoupper($result).
-              '</div>'.
+            '<div class="result-'.$result.'">'.
+            strtoupper($result).
+            '</div>'.
             '</th>'.
             '<td>'.$userdata.'</td>'.
-          '</tr>';
-      }
+            '</tr>';
 
-      $utail =
-        '<div class="differential-unit-block">'.
-          '<table class="differential-unit-table">'.
+          $utail =
+            '<div class="differential-unit-block">'.
+            '<table class="differential-unit-table">'.
             implode("\n", $unit_messages).
-          '</table>'.
-        '</div>';
+            '</table>'.
+            '</div>';
+        } else if ($result == DifferentialUnitTestResult::RESULT_POSTPONED) {
+          $postponed_count++;
+        }
+      }
+    }
+
+    if ($postponed_count > 0 &&
+        $diff->getUnitStatus() == DifferentialUnitStatus::UNIT_POSTPONED) {
+      $umsg = $postponed_count.' '.$umsg;
     }
 
     $properties['Unit'] = $ustar.' '.$umsg.$utail;

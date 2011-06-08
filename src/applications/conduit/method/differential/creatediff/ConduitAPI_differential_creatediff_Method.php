@@ -134,6 +134,9 @@ class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
       case 'fail':
         $diff->setUnitStatus(DifferentialUnitStatus::UNIT_FAIL);
         break;
+      case 'postponed':
+        $diff->setUnitStatus(DifferentialUnitStatus::UNIT_POSTPONED);
+        break;
       case 'none':
       default:
         $diff->setUnitStatus(DifferentialUnitStatus::UNIT_NONE);

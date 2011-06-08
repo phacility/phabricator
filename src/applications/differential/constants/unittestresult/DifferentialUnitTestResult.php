@@ -16,13 +16,13 @@
  * limitations under the License.
  */
 
-final class DifferentialUnitStatus {
+final class DifferentialUnitTestResult {
 
-  const UNIT_NONE             = 0;
-  const UNIT_OKAY             = 1;
-  const UNIT_WARN             = 2;
-  const UNIT_FAIL             = 3;
-  const UNIT_SKIP             = 4;
-  const UNIT_POSTPONED        = 5;
+  const RESULT_PASS         = 'pass';
+  const RESULT_FAIL         = 'fail';
+  const RESULT_SKIP         = 'skip';
+  const RESULT_BROKEN       = 'broken';
+  const RESULT_UNSOUND      = 'unsound';
+  const RESULT_POSTPONED    = 'postponed';
 
 }

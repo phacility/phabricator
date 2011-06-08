@@ -9,6 +9,8 @@
 phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'applications/differential/constants/action');
 phutil_require_module('phabricator', 'applications/differential/constants/revisionstatus');
+phutil_require_module('phabricator', 'applications/differential/constants/unitstatus');
+phutil_require_module('phabricator', 'applications/differential/constants/unittestresult');
 phutil_require_module('phabricator', 'applications/differential/controller/base');
 phutil_require_module('phabricator', 'applications/differential/parser/changeset');
 phutil_require_module('phabricator', 'applications/differential/storage/changeset');
