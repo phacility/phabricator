@@ -121,3 +121,32 @@ td.phabricator-login-details {
   font-weight: bold;
   border: 1px solid #555555;
 }
+
+.keyboard-focus-focus-reticle {
+  z-index: 32;
+  border: 1px solid #999999;
+
+  position: absolute;
+  -webkit-box-shadow: 0 0 3px #000;
+  -mox-box-shadow:    0 0 3px #000;
+  box-shadow:         0 0 3px #000;
+}
+
+.keyboard-shortcuts-available {
+  width: 100%;
+}
+
+.keyboard-shortcuts-available th {
+  width: 100%;
+  vertical-align: middle;
+  color: #666666;
+  text-align: right;
+  padding-right: 8px;
+  font-size: 11px;
+}
+
+.keyboard-shortcuts-available td {
+  padding: 8px;
+  background: url('/rsrc/image/icon/fatcow/key_question.png') 0px 0px no-repeat;
+}
+

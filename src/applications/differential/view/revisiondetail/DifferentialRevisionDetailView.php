@@ -82,6 +82,9 @@ final class DifferentialRevisionDetailView extends AphrontView {
     return
       '<div class="differential-revision-detail differential-panel">'.
         $action_list->render().
+        '<div class="differential-keyboard-shortcuts">'.
+          id(new AphrontKeyboardShortcutsAvailableView())->render().
+        '</div>'.
         '<div class="differential-revision-detail-core">'.
           '<h1>'.phutil_escape_html($revision->getTitle()).'</h1>'.
           $properties.

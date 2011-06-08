@@ -4,6 +4,7 @@
  *           javelin-util
  *           javelin-stratcom
  *           javelin-dom
+ *           javelin-vector
  * @javelin
  */
 
@@ -29,6 +30,7 @@ JX.install('KeyboardShortcutManager', {
 
   members : {
     _shortcuts : null,
+    _focusReticle : null,
 
     /**
      * Instead of calling this directly, you should call
@@ -46,6 +48,35 @@ JX.install('KeyboardShortcutManager', {
         });
       }
       return desc;
+    },
+
+    /**
+     * Scroll an element into view.
+     */
+    scrollTo : function(node) {
+      window.scrollTo(0, JX.$V(node).y - 40);
+    },
+
+    /**
+     * Move the keyboard shortcut focus to an element.
+     */
+    focusOn : function(node) {
+      this._clearReticle();
+
+      var r = JX.$N('div', {className : 'keyboard-focus-focus-reticle'});
+
+      // Outset the reticle 8 pixels away from the element, so there's some
+      // space between the focused element and the outline.
+      JX.Vector.getPos(node).add(-8, -8).setPos(r);
+      JX.Vector.getDim(node).add(16, 16).setDim(r);
+      document.body.appendChild(r);
+
+      this._focusReticle = r;
+    },
+
+    _clearReticle : function() {
+      this._focusReticle && JX.DOM.remove(this._focusReticle);
+      this._focusReticle = null;
     },
     _onkeypress : function(e) {
       var raw = e.getRawEvent();
