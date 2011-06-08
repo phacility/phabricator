@@ -5,6 +5,7 @@
  *           javelin-util
  *           javelin-dom
  *           javelin-request
+ *           phabricator-keyboard-shortcut
  */
 
 JX.behavior('dark-console', function(config) {
@@ -29,31 +30,21 @@ JX.behavior('dark-console', function(config) {
         .send();
     });
 
-  JX.Stratcom.listen(
-    'keypress',
-    null,
-    function(e) {
-      var raw = e.getRawEvent();
-      if ((String.fromCharCode(raw.charCode).charAt(0) == '`') &&
-          !raw.shiftKey &&
-          !raw.metaKey) {
+  var desc = 'Toggle visibility of DarkConsole.';
+  new JX.KeyboardShortcut('`', desc)
+    .setHandler(function(manager) {
+      var console = JX.DOM.find(document.body, 'table', 'dark-console');
 
-        if (JX.Stratcom.pass()) {
-          return;
-        }
-
-        var console = JX.DOM.find(document.body, 'table', 'dark-console');
-
-        config.visible = !config.visible;
-        if (config.visible) {
-          JX.DOM.show(console);
-        } else {
-          JX.DOM.hide(console);
-        }
-
-        new JX.Request(config.uri, JX.bag)
-          .setData({visible: config.visible ? 1 : 0})
-          .send();
+      config.visible = !config.visible;
+      if (config.visible) {
+        JX.DOM.show(console);
+      } else {
+        JX.DOM.hide(console);
       }
-    });
+
+      new JX.Request(config.uri, JX.bag)
+        .setData({visible: config.visible ? 1 : 0})
+        .send();
+    })
+    .register();
 });

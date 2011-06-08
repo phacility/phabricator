@@ -145,7 +145,7 @@ celerity_register_resource_map(array(
   ),
   'differential-changeset-view-css' =>
   array(
-    'uri' => '/res/d92a2fb5/rsrc/css/application/differential/changeset-view.css',
+    'uri' => '/res/4cb57f5f/rsrc/css/application/differential/changeset-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -330,7 +330,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-dark-console' =>
   array(
-    'uri' => '/res/044c171f/rsrc/js/application/core/behavior-dark-console.js',
+    'uri' => '/res/c80156c4/rsrc/js/application/core/behavior-dark-console.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -339,6 +339,7 @@ celerity_register_resource_map(array(
       2 => 'javelin-util',
       3 => 'javelin-dom',
       4 => 'javelin-request',
+      5 => 'phabricator-keyboard-shortcut',
     ),
     'disk' => '/rsrc/js/application/core/behavior-dark-console.js',
   ),
@@ -1057,23 +1058,6 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/33f413ef/typeahead.pkg.js',
       'type' => 'js',
     ),
-    '3bf80070' =>
-    array (
-      'name' => 'differential.pkg.css',
-      'symbols' =>
-      array (
-        0 => 'differential-core-view-css',
-        1 => 'differential-changeset-view-css',
-        2 => 'differential-revision-detail-css',
-        3 => 'differential-revision-history-css',
-        4 => 'differential-table-of-contents-css',
-        5 => 'differential-revision-comment-css',
-        6 => 'differential-revision-add-comment-css',
-        7 => 'differential-revision-comment-list-css',
-      ),
-      'uri' => '/res/pkg/3bf80070/differential.pkg.css',
-      'type' => 'css',
-    ),
     '64383b02' =>
     array (
       'name' => 'core.pkg.css',
@@ -1096,6 +1080,23 @@ celerity_register_resource_map(array(
         14 => 'syntax-highlighting-css',
       ),
       'uri' => '/res/pkg/64383b02/core.pkg.css',
+      'type' => 'css',
+    ),
+    'b1200c80' =>
+    array (
+      'name' => 'differential.pkg.css',
+      'symbols' =>
+      array (
+        0 => 'differential-core-view-css',
+        1 => 'differential-changeset-view-css',
+        2 => 'differential-revision-detail-css',
+        3 => 'differential-revision-history-css',
+        4 => 'differential-table-of-contents-css',
+        5 => 'differential-revision-comment-css',
+        6 => 'differential-revision-add-comment-css',
+        7 => 'differential-revision-comment-list-css',
+      ),
+      'uri' => '/res/pkg/b1200c80/differential.pkg.css',
       'type' => 'css',
     ),
     'db95a6d0' =>
@@ -1159,14 +1160,14 @@ celerity_register_resource_map(array(
     'aphront-table-view-css' => '64383b02',
     'aphront-tokenizer-control-css' => '64383b02',
     'aphront-typeahead-control-css' => '64383b02',
-    'differential-changeset-view-css' => '3bf80070',
-    'differential-core-view-css' => '3bf80070',
-    'differential-revision-add-comment-css' => '3bf80070',
-    'differential-revision-comment-css' => '3bf80070',
-    'differential-revision-comment-list-css' => '3bf80070',
-    'differential-revision-detail-css' => '3bf80070',
-    'differential-revision-history-css' => '3bf80070',
-    'differential-table-of-contents-css' => '3bf80070',
+    'differential-changeset-view-css' => 'b1200c80',
+    'differential-core-view-css' => 'b1200c80',
+    'differential-revision-add-comment-css' => 'b1200c80',
+    'differential-revision-comment-css' => 'b1200c80',
+    'differential-revision-comment-list-css' => 'b1200c80',
+    'differential-revision-detail-css' => 'b1200c80',
+    'differential-revision-history-css' => 'b1200c80',
+    'differential-table-of-contents-css' => 'b1200c80',
     'diffusion-commit-view-css' => '03ef179e',
     'javelin-behavior' => 'db95a6d0',
     'javelin-behavior-aphront-basic-tokenizer' => '33f413ef',
