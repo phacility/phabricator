@@ -229,12 +229,13 @@ class DifferentialChangesetViewController extends DifferentialController {
     $detail->setRevisionID($request->getInt('revision_id'));
 
     $output =
-      '<div class="differential-primary-pane">'.
-        '<div class="differential-review-stage" '.
-          'id="differential-review-stage">'.
-          $detail->render().
-        '</div>'.
-      '</div>';
+      id(new DifferentialPrimaryPaneView())
+        ->setLineWidthFromChangesets(array($changeset))
+        ->appendChild(
+          '<div class="differential-review-stage" '.
+            'id="differential-review-stage">'.
+            $detail->render().
+          '</div>');
 
     return $this->buildStandardPageResponse(
       array(

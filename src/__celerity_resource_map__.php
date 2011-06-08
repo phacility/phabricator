@@ -154,7 +154,7 @@ celerity_register_resource_map(array(
   ),
   'differential-core-view-css' =>
   array(
-    'uri' => '/res/d0ae90e5/rsrc/css/application/differential/core.css',
+    'uri' => '/res/dd6b4ca9/rsrc/css/application/differential/core.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -186,7 +186,7 @@ celerity_register_resource_map(array(
   ),
   'differential-revision-comment-css' =>
   array(
-    'uri' => '/res/e3539439/rsrc/css/application/differential/revision-comment.css',
+    'uri' => '/res/9dcbc5a2/rsrc/css/application/differential/revision-comment.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1114,6 +1114,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/64383b02/core.pkg.css',
       'type' => 'css',
     ),
+<<<<<<< HEAD
     'bb028d56' =>
     array (
       'name' => 'workflow.pkg.js',
@@ -1129,6 +1130,24 @@ celerity_register_resource_map(array(
       ),
       'uri' => '/res/pkg/bb028d56/workflow.pkg.js',
       'type' => 'js',
+=======
+    '9b16dd9e' =>
+    array (
+      'name' => 'differential.pkg.css',
+      'symbols' =>
+      array (
+        0 => 'differential-core-view-css',
+        1 => 'differential-changeset-view-css',
+        2 => 'differential-revision-detail-css',
+        3 => 'differential-revision-history-css',
+        4 => 'differential-table-of-contents-css',
+        5 => 'differential-revision-comment-css',
+        6 => 'differential-revision-add-comment-css',
+        7 => 'differential-revision-comment-list-css',
+      ),
+      'uri' => '/res/pkg/9b16dd9e/differential.pkg.css',
+      'type' => 'css',
+>>>>>>> Provide basic capabilities to make Differential column width flexible
     ),
     'db95a6d0' =>
     array (
@@ -1175,6 +1194,7 @@ celerity_register_resource_map(array(
     'aphront-table-view-css' => '64383b02',
     'aphront-tokenizer-control-css' => '64383b02',
     'aphront-typeahead-control-css' => '64383b02',
+<<<<<<< HEAD
     'differential-changeset-view-css' => '5dc7e9ec',
     'differential-core-view-css' => '5dc7e9ec',
     'differential-revision-add-comment-css' => '5dc7e9ec',
@@ -1183,6 +1203,16 @@ celerity_register_resource_map(array(
     'differential-revision-detail-css' => '5dc7e9ec',
     'differential-revision-history-css' => '5dc7e9ec',
     'differential-table-of-contents-css' => '5dc7e9ec',
+=======
+    'differential-changeset-view-css' => '9b16dd9e',
+    'differential-core-view-css' => '9b16dd9e',
+    'differential-revision-add-comment-css' => '9b16dd9e',
+    'differential-revision-comment-css' => '9b16dd9e',
+    'differential-revision-comment-list-css' => '9b16dd9e',
+    'differential-revision-detail-css' => '9b16dd9e',
+    'differential-revision-history-css' => '9b16dd9e',
+    'differential-table-of-contents-css' => '9b16dd9e',
+>>>>>>> Provide basic capabilities to make Differential column width flexible
     'diffusion-commit-view-css' => '03ef179e',
     'javelin-behavior' => 'db95a6d0',
     'javelin-behavior-aphront-basic-tokenizer' => '33f413ef',

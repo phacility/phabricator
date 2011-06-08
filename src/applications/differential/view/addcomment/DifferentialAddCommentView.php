@@ -117,14 +117,16 @@ final class DifferentialAddCommentView extends AphrontView {
     $panel_view->addClass('aphront-panel-flush');
 
     return
-      $panel_view->render().
-      '<div class="aphront-panel-preview aphront-panel-flush">'.
-        '<div id="comment-preview">'.
-          '<span class="aphront-panel-preview-loading-text">'.
-            'Loading comment preview...'.
-          '</span>'.
-        '</div>'.
-        '<div id="inline-comment-preview">'.
+      '<div class="differential-add-comment-panel">'.
+        $panel_view->render().
+        '<div class="aphront-panel-preview aphront-panel-flush">'.
+          '<div id="comment-preview">'.
+            '<span class="aphront-panel-preview-loading-text">'.
+              'Loading comment preview...'.
+            '</span>'.
+          '</div>'.
+          '<div id="inline-comment-preview">'.
+          '</div>'.
         '</div>'.
       '</div>';
   }

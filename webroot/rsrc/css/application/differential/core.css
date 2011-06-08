@@ -4,8 +4,13 @@
 
 .differential-primary-pane {
   margin:           0 40px;
-  max-width:        1162px;
   padding-bottom:   2em;
+
+  /**
+   * This is potentially overridden by a 'style' attribute which selects a
+   * different width based on the maximum character width of the diff.
+   */
+  max-width:        1162px;
 }
 
 .differential-panel {

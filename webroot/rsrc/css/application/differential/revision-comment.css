@@ -9,6 +9,14 @@
   border: 1px solid transparent;
 }
 
+.differential-comment-list {
+  max-width: 1162px;
+}
+
+.differential-add-comment-panel {
+  max-width: 1162px;
+}
+
 .differential-comment-list .anchor-target {
   background-color: #ffffdd;
   border-color: #ffff00;

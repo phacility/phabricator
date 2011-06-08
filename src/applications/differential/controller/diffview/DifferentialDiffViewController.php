@@ -117,15 +117,14 @@ class DifferentialDiffViewController extends DifferentialController {
       ->setRenderingReferences($refs);
 
     return $this->buildStandardPageResponse(
-      '<div class="differential-primary-pane">'.
-        implode(
-          "\n",
+      id(new DifferentialPrimaryPaneView())
+        ->setLineWidthFromChangesets($changesets)
+        ->appendChild(
           array(
             $top_panel->render(),
             $table_of_contents->render(),
             $details->render(),
-          )).
-      '</div>',
+          )),
       array(
         'title' => 'Diff View',
       ));

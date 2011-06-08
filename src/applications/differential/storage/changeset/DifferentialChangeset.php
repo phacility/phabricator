@@ -169,4 +169,17 @@ class DifferentialChangeset extends DifferentialDAO {
     return $path;
   }
 
+  /**
+   * Retreive the configured wordwrap width for this changeset.
+   */
+  public function getWordWrapWidth() {
+    $config = PhabricatorEnv::getEnvConfig('differential.wordwrap');
+    foreach ($config as $regexp => $width) {
+      if (preg_match($regexp, $this->getFileName())) {
+        return $width;
+      }
+    }
+    return 80;
+  }
+
 }

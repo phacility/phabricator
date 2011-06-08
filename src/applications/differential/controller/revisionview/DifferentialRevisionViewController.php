@@ -231,15 +231,16 @@ class DifferentialRevisionViewController extends DifferentialController {
     $this->updateViewTime($user->getPHID(), $revision->getPHID());
 
     return $this->buildStandardPageResponse(
-      '<div class="differential-primary-pane">'.
-        $revision_detail->render().
-        $comment_view->render().
-        $diff_history->render().
-        $warning.
-        $toc_view->render().
-        $changeset_view->render().
-        $comment_form->render().
-      '</div>',
+      id(new DifferentialPrimaryPaneView())
+        ->setLineWidthFromChangesets($changesets)
+        ->appendChild(
+          $revision_detail->render().
+          $comment_view->render().
+          $diff_history->render().
+          $warning.
+          $toc_view->render().
+          $changeset_view->render().
+          $comment_form->render()),
       array(
         'title' => $revision->getTitle(),
       ));

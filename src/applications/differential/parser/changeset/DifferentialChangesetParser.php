@@ -53,6 +53,8 @@ class DifferentialChangesetParser {
   private $renderingReference;
   private $isSubparser;
 
+  private $lineWidth = 80;
+
   const CACHE_VERSION = 4;
 
   const ATTR_GENERATED  = 'attr:generated';
@@ -118,13 +120,26 @@ class DifferentialChangesetParser {
     return $this;
   }
 
+  /**
+   * Set the character width at which lines will be wrapped. Defaults to 80.
+   *
+   * @param   int Hard-wrap line-width for diff display.
+   * @return this
+   */
+  public function setLineWidth($width) {
+    $this->lineWidth = $width;
+    return $this;
+  }
+
   private function getRenderCacheKey() {
     return $this->renderCacheKey;
   }
 
   public function setChangeset($changeset) {
     $this->changeset = $changeset;
+
     $this->setFilename($changeset->getFilename());
+    $this->setLineWidth($changeset->getWordWrapWidth());
 
     return $this;
   }
@@ -646,7 +661,7 @@ class DifferentialChangesetParser {
           $text,
           $intra[$key]);
       }
-      if (isset($corpus[$key]) && strlen($corpus[$key]) > 80) {
+      if (isset($corpus[$key]) && strlen($corpus[$key]) > $this->lineWidth) {
         $render[$key] = $this->lineWrap($render[$key]);
       }
     }
@@ -669,7 +684,7 @@ class DifferentialChangesetParser {
       } else {
         ++$c;
       }
-      if ($c == 80) {
+      if ($c == $this->lineWidth) {
         $ins[] = ($ii + 1);
         $c = 0;
       }
