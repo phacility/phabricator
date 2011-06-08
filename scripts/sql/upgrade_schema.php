@@ -59,6 +59,7 @@ if (empty($options['f'])) {
 // Use always the version from the commandline if it is defined
 $next_version = isset($options['v']) ? (int)$options['v'] : null;
 
+// TODO: Get this stuff from DatabaseConfigurationProvider?
 if ($options['u']) {
   $conn_user = $options['u'];
   $conn_pass = $options['p'];
@@ -67,6 +68,17 @@ if ($options['u']) {
   $conn_pass = PhabricatorEnv::getEnvConfig('mysql.pass');
 }
 $conn_host = PhabricatorEnv::getEnvConfig('mysql.host');
+
+// Split out port information, since the command-line client requires a
+// separate flag for the port.
+$uri = new PhutilURI('mysql://'.$conn_host);
+if ($uri->getPort()) {
+  $conn_port = $uri->getPort();
+  $conn_bare_hostname = $uri->getDomain();
+} else {
+  $conn_port = null;
+  $conn_bare_hostname = $conn_host;
+}
 
 $conn = new AphrontMySQLDatabaseConnection(
   array(
@@ -118,11 +130,17 @@ END;
     $short_name = basename($patch['path']);
     print "Applying patch {$short_name}...\n";
 
+    if ($conn_port) {
+      $port = '--port='.(int)$conn_port;
+    } else {
+      $port = null;
+    }
+
     list($stdout, $stderr) = execx(
-      "mysql --user=%s --password=%s --host=%s < %s",
+      "mysql --user=%s --password=%s --host=%s {$port} < %s",
       $conn_user,
       $conn_pass,
-      $conn_host,
+      $conn_bare_hostname,
       $patch['path']);
 
     if ($stderr) {

@@ -75,7 +75,9 @@ return array(
   // The password to use when connecting to MySQL.
   'mysql.pass' => '',
 
-  // The MySQL server to connect to.
+  // The MySQL server to connect to. If you want to connect to a different
+  // port than the default (which is 3306), specify it in the hostname
+  // (e.g., db.example.com:1234).
   'mysql.host' => 'localhost',
 
 // -- Email ----------------------------------------------------------------- //
