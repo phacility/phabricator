@@ -145,7 +145,7 @@ celerity_register_resource_map(array(
   ),
   'differential-changeset-view-css' =>
   array(
-    'uri' => '/res/a239213a/rsrc/css/application/differential/changeset-view.css',
+    'uri' => '/res/d92a2fb5/rsrc/css/application/differential/changeset-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1057,7 +1057,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/33f413ef/typeahead.pkg.js',
       'type' => 'js',
     ),
-    '613cf273' =>
+    '3bf80070' =>
     array (
       'name' => 'differential.pkg.css',
       'symbols' =>
@@ -1071,7 +1071,7 @@ celerity_register_resource_map(array(
         6 => 'differential-revision-add-comment-css',
         7 => 'differential-revision-comment-list-css',
       ),
-      'uri' => '/res/pkg/613cf273/differential.pkg.css',
+      'uri' => '/res/pkg/3bf80070/differential.pkg.css',
       'type' => 'css',
     ),
     '64383b02' =>
@@ -1159,14 +1159,14 @@ celerity_register_resource_map(array(
     'aphront-table-view-css' => '64383b02',
     'aphront-tokenizer-control-css' => '64383b02',
     'aphront-typeahead-control-css' => '64383b02',
-    'differential-changeset-view-css' => '613cf273',
-    'differential-core-view-css' => '613cf273',
-    'differential-revision-add-comment-css' => '613cf273',
-    'differential-revision-comment-css' => '613cf273',
-    'differential-revision-comment-list-css' => '613cf273',
-    'differential-revision-detail-css' => '613cf273',
-    'differential-revision-history-css' => '613cf273',
-    'differential-table-of-contents-css' => '613cf273',
+    'differential-changeset-view-css' => '3bf80070',
+    'differential-core-view-css' => '3bf80070',
+    'differential-revision-add-comment-css' => '3bf80070',
+    'differential-revision-comment-css' => '3bf80070',
+    'differential-revision-comment-list-css' => '3bf80070',
+    'differential-revision-detail-css' => '3bf80070',
+    'differential-revision-history-css' => '3bf80070',
+    'differential-table-of-contents-css' => '3bf80070',
     'diffusion-commit-view-css' => '03ef179e',
     'javelin-behavior' => 'db95a6d0',
     'javelin-behavior-aphront-basic-tokenizer' => '33f413ef',

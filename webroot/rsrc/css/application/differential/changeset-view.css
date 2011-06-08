@@ -180,3 +180,52 @@
 .differential-changeset-buttons a.button {
   margin-left: 8px;
 }
+
+
+.differential-property-table {
+  width: auto;
+  margin: .75em auto;
+  background: #e3e3e3;
+}
+
+.differential-property-table th {
+  text-align: right;
+  width: 10em;
+  font-weight: bold;
+  color: #666666;
+  white-space: nowrap;
+  padding: 4px 8px;
+  border-right: 1px solid #666666;
+}
+
+.differential-property-table td {
+  padding: 4px 8px;
+  width: 35em;
+}
+
+.differential-property-table td em {
+  color: #888888;
+}
+
+.differential-property-table tr.property-table-header th,
+.differential-property-table tr.property-table-header td {
+  text-align: center;
+  font-weight: bold;
+  border-bottom: 1px solid #666666;
+}
+
+.differential-property-table td.oval {
+  background: #ffd0d0;
+}
+
+.differential-property-table td.nval {
+  background: #d0ffd0;
+}
+
+.differential-property-table tr.property-table-header td.oval {
+  background: #ffaaaa;
+}
+
+.differential-property-table tr.property-table-header td.nval {
+  background: #aaffaa;
+}

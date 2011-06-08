@@ -1340,41 +1340,44 @@ EOSYNTHETIC;
       return null;
     }
 
-    return null;
-/*
-  TODO
-
-    $table = <table class="differential-property-table" />;
-    $table->appendChild(
-      <tr class="property-table-header">
-        <th>Property Changes</th>
-        <td class="oval">Old Value</td>
-        <td class="nval">New Value</td>
-      </tr>);
-
     $keys = array_keys($old + $new);
     sort($keys);
+
+    $rows = array();
     foreach ($keys as $key) {
       $oval = idx($old, $key);
       $nval = idx($new, $key);
       if ($oval !== $nval) {
         if ($oval === null) {
-          $oval = <em>null</em>;
+          $oval = '<em>null</em>';
+        } else {
+          $oval = phutil_escape_html($oval);
         }
+
         if ($nval === null) {
-          $nval = <em>null</em>;
+          $nval = '<em>null</em>';
+        } else {
+          $nval = phutil_escape_html($nval);
         }
-        $table->appendChild(
-          <tr>
-            <th>{$key}</th>
-            <td class="oval">{$oval}</td>
-            <td class="nval">{$nval}</td>
-          </tr>);
+
+        $rows[] =
+          '<tr>'.
+            '<th>'.phutil_escape_html($key).'</th>'.
+            '<td class="oval">'.$oval.'</td>'.
+            '<td class="nval">'.$nval.'</td>'.
+          '</tr>';
       }
     }
 
-    return $table;
-*/
+    return
+      '<table class="differential-property-table">'.
+        '<tr class="property-table-header">'.
+          '<th>Property Changes</th>'.
+          '<td class="oval">Old Value</td>'.
+          '<td class="nval">New Value</td>'.
+        '</tr>'.
+        implode('', $rows).
+      '</table>';
   }
 
   protected function renderChangesetTable($changeset, $contents) {
