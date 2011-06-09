@@ -28,7 +28,7 @@ final class DiffusionGitFileContentQuery extends DiffusionFileContentQuery {
     $local_path = $repository->getDetail('local-path');
     if ($this->getNeedsBlame()) {
       list($corpus) = execx(
-        '(cd %s && git --no-pager blame -c -l --date short %s -- %s)',
+        '(cd %s && git --no-pager blame -c -l --date=short %s -- %s)',
         $local_path,
         $commit,
         $path);

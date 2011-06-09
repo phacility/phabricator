@@ -292,13 +292,15 @@ class DiffusionBrowseFileController extends DiffusionController {
       // Create the row display.
       $uri_path = $drequest->getUriPath();
       $uri_rev  = $drequest->getStableCommitName();
-      $uri_view = $view;
+      $uri_view = $view
+        ? '?view='.$view
+        : null;
 
       $l = phutil_render_tag(
         'a',
         array(
           'class' => 'diffusion-line-link',
-          'href' => $uri_path.';'.$uri_rev.'$'.$n.'?view='.$view,
+          'href' => $uri_path.';'.$uri_rev.'$'.$n.$uri_view,
         ),
         $n);
 
