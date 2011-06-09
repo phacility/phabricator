@@ -24,6 +24,7 @@ final class DifferentialInlineCommentView extends AphrontView {
   private $handles;
   private $markupEngine;
   private $editable;
+  private $preview;
 
   public function setInlineComment(DifferentialInlineComment $comment) {
     $this->inlineComment = $comment;
@@ -55,6 +56,10 @@ final class DifferentialInlineCommentView extends AphrontView {
     return $this;
   }
 
+  public function setPreview($preview) {
+    $this->preview = $preview;
+  }
+
   public function render() {
 
     $inline = $this->inlineComment;
@@ -83,34 +88,36 @@ final class DifferentialInlineCommentView extends AphrontView {
 
     $links = array();
 
-    $links[] = javelin_render_tag(
-      'a',
-      array(
-        'href'  => '#',
-        'mustcapture' => true,
-        'sigil' => 'differential-inline-prev',
-      ),
-      'Previous');
+    if (!$this->preview) {
+      $links[] = javelin_render_tag(
+        'a',
+        array(
+          'href'  => '#',
+          'mustcapture' => true,
+          'sigil' => 'differential-inline-prev',
+        ),
+        'Previous');
 
-    $links[] = javelin_render_tag(
-      'a',
-      array(
-        'href'  => '#',
-        'mustcapture' => true,
-        'sigil' => 'differential-inline-next',
-      ),
-      'Next');
+      $links[] = javelin_render_tag(
+        'a',
+        array(
+          'href'  => '#',
+          'mustcapture' => true,
+          'sigil' => 'differential-inline-next',
+        ),
+        'Next');
 
-    $links[] = javelin_render_tag(
-      'a',
-      array(
-        'href'        => '#',
-        'mustcapture' => true,
-        'sigil'       => 'differential-inline-reply',
-      ),
-      'Reply');
+      $links[] = javelin_render_tag(
+        'a',
+        array(
+          'href'        => '#',
+          'mustcapture' => true,
+          'sigil'       => 'differential-inline-reply',
+        ),
+        'Reply');
+    }
 
-    if ($this->editable) {
+    if ($this->editable && !$this->preview) {
       $links[] = javelin_render_tag(
         'a',
         array(

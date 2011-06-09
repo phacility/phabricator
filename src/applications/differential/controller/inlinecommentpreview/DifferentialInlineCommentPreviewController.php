@@ -53,6 +53,7 @@ class DifferentialInlineCommentPreviewController
       $view->setMarkupEngine($engine);
       $view->setHandles($handles);
       $view->setEditable(false);
+      $view->setPreview(true);
       $views[] = $view->render();
     }
     $views = implode("\n", $views);
