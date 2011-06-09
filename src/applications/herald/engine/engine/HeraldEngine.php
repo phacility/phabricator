@@ -132,11 +132,14 @@ class HeraldEngine {
     if (!$this->transcript->getDryRun()) {
       // Mark all the rules that have had their effects applied as having been
       // executed for the current object.
-      $ruleIDs = mpull($xscripts, 'getRuleID');
-      foreach ($ruleIDs as $ruleID) {
-        id(new HeraldRule())
-          ->setID($ruleID)
-          ->saveRuleApplied($object->getPHID());
+      $rule_ids = mpull($xscripts, 'getRuleID');
+      foreach ($rule_ids as $rule_id) {
+        if (!$rule_id) {
+          // Some apply transcripts are purely informational and not associated
+          // with a rule, e.g. carryover emails from earlier revisions.
+          continue;
+        }
+        HeraldRule::saveRuleApplied($rule_id, $object->getPHID());
       }
     }
   }

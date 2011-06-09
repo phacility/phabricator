@@ -85,18 +85,12 @@ class HeraldRule extends HeraldDAO {
     $this->ruleApplied = array_fill_keys(ipull($applied, 'phid'), true);
  }
 
-  public function saveRuleApplied($phid) {
-    if (!$this->getID()) {
-      throw new Exception("Save rule before saving children.");
-    }
-
+  public static function saveRuleApplied($rule_id, $phid) {
     queryfx(
-      $this->establishConnection('w'),
+      id(new HeraldRule())->establishConnection('w'),
       'INSERT IGNORE INTO %T (phid, ruleID) VALUES (%s, %d)',
-      self::TABLE_RULE_APPLIED, $phid, $this->getID()
+      self::TABLE_RULE_APPLIED, $phid, $rule_id
     );
-
-    $this->setRuleApplied($phid);
   }
 
   public function loadConditions() {
