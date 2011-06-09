@@ -1073,23 +1073,6 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/33f413ef/typeahead.pkg.js',
       'type' => 'js',
     ),
-    '5dc7e9ec' =>
-    array (
-      'name' => 'differential.pkg.css',
-      'symbols' =>
-      array (
-        0 => 'differential-core-view-css',
-        1 => 'differential-changeset-view-css',
-        2 => 'differential-revision-detail-css',
-        3 => 'differential-revision-history-css',
-        4 => 'differential-table-of-contents-css',
-        5 => 'differential-revision-comment-css',
-        6 => 'differential-revision-add-comment-css',
-        7 => 'differential-revision-comment-list-css',
-      ),
-      'uri' => '/res/pkg/5dc7e9ec/differential.pkg.css',
-      'type' => 'css',
-    ),
     '64383b02' =>
     array (
       'name' => 'core.pkg.css',
@@ -1114,23 +1097,6 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/64383b02/core.pkg.css',
       'type' => 'css',
     ),
-<<<<<<< HEAD
-    'bb028d56' =>
-    array (
-      'name' => 'workflow.pkg.js',
-      'symbols' =>
-      array (
-        0 => 'javelin-mask',
-        1 => 'javelin-workflow',
-        2 => 'javelin-behavior-workflow',
-        3 => 'javelin-behavior-aphront-form-disable-on-submit',
-        4 => 'phabricator-keyboard-shortcut-manager',
-        5 => 'phabricator-keyboard-shortcut',
-        6 => 'javelin-behavior-phabricator-keyboard-shortcuts',
-      ),
-      'uri' => '/res/pkg/bb028d56/workflow.pkg.js',
-      'type' => 'js',
-=======
     '9b16dd9e' =>
     array (
       'name' => 'differential.pkg.css',
@@ -1147,7 +1113,22 @@ celerity_register_resource_map(array(
       ),
       'uri' => '/res/pkg/9b16dd9e/differential.pkg.css',
       'type' => 'css',
->>>>>>> Provide basic capabilities to make Differential column width flexible
+    ),
+    'bb028d56' =>
+    array (
+      'name' => 'workflow.pkg.js',
+      'symbols' =>
+      array (
+        0 => 'javelin-mask',
+        1 => 'javelin-workflow',
+        2 => 'javelin-behavior-workflow',
+        3 => 'javelin-behavior-aphront-form-disable-on-submit',
+        4 => 'phabricator-keyboard-shortcut-manager',
+        5 => 'phabricator-keyboard-shortcut',
+        6 => 'javelin-behavior-phabricator-keyboard-shortcuts',
+      ),
+      'uri' => '/res/pkg/bb028d56/workflow.pkg.js',
+      'type' => 'js',
     ),
     'db95a6d0' =>
     array (
@@ -1194,16 +1175,6 @@ celerity_register_resource_map(array(
     'aphront-table-view-css' => '64383b02',
     'aphront-tokenizer-control-css' => '64383b02',
     'aphront-typeahead-control-css' => '64383b02',
-<<<<<<< HEAD
-    'differential-changeset-view-css' => '5dc7e9ec',
-    'differential-core-view-css' => '5dc7e9ec',
-    'differential-revision-add-comment-css' => '5dc7e9ec',
-    'differential-revision-comment-css' => '5dc7e9ec',
-    'differential-revision-comment-list-css' => '5dc7e9ec',
-    'differential-revision-detail-css' => '5dc7e9ec',
-    'differential-revision-history-css' => '5dc7e9ec',
-    'differential-table-of-contents-css' => '5dc7e9ec',
-=======
     'differential-changeset-view-css' => '9b16dd9e',
     'differential-core-view-css' => '9b16dd9e',
     'differential-revision-add-comment-css' => '9b16dd9e',
@@ -1212,7 +1183,6 @@ celerity_register_resource_map(array(
     'differential-revision-detail-css' => '9b16dd9e',
     'differential-revision-history-css' => '9b16dd9e',
     'differential-table-of-contents-css' => '9b16dd9e',
->>>>>>> Provide basic capabilities to make Differential column width flexible
     'diffusion-commit-view-css' => '03ef179e',
     'javelin-behavior' => 'db95a6d0',
     'javelin-behavior-aphront-basic-tokenizer' => '33f413ef',
