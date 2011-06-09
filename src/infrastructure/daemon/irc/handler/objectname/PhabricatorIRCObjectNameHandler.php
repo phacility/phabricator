@@ -23,6 +23,12 @@
  */
 class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
 
+  /**
+   * Map of PHIDs to the last mention of them (as an epoch timestamp); prevents
+   * us from spamming chat when a single object is discussed.
+   */
+  private $recentlyMentioned = array();
+
   public function receiveMessage(PhabricatorIRCMessage $message) {
 
     switch ($message->getCommand()) {
@@ -82,7 +88,7 @@ class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
               'guids' => $revision_ids,
             ));
           foreach ($revisions as $revision) {
-            $output[] =
+            $output[$revision['phid']] =
               'D'.$revision['id'].' '.$revision['name'].' - '.
               $revision['uri'];
           }
@@ -100,11 +106,21 @@ class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
             if (isset($commit['error'])) {
               continue;
             }
-            $output[] = $commit['uri'];
+            $output[$commit['commitPHID']] = $commit['uri'];
           }
         }
 
-        foreach ($output as $description) {
+        foreach ($output as $phid => $description) {
+
+          // Don't mention the same object more than once every 10 minutes, so
+          // we avoid spamming the chat over and over again for discsussions of
+          // a specific revision, for example.
+          $quiet_until = idx($this->recentlyMentioned, $phid, 0) + (60 * 10);
+          if (time() < $quiet_until) {
+            continue;
+          }
+          $this->recentlyMentioned[$phid] = time();
+
           $this->write('PRIVMSG', "{$channel} :{$description}");
         }
         break;
