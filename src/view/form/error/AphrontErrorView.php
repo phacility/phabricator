@@ -24,6 +24,7 @@ final class AphrontErrorView extends AphrontView {
 
   const WIDTH_DEFAULT = 'default';
   const WIDTH_WIDE = 'wide';
+  const WIDTH_DIALOG = 'dialog';
 
   private $title;
   private $errors;

@@ -29,6 +29,10 @@ class AphrontDialogView extends AphrontView {
   private $renderAsForm = true;
   private $formID;
 
+  private $width      = 'default';
+  const WIDTH_DEFAULT = 'default';
+  const WIDTH_FORM    = 'form';
+
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
     return $this;
@@ -80,6 +84,11 @@ class AphrontDialogView extends AphrontView {
     return $this;
   }
 
+  public function setWidth($width) {
+    $this->width = $width;
+    return $this;
+  }
+
   final public function render() {
     require_celerity_resource('aphront-dialog-view-css');
 
@@ -113,6 +122,16 @@ class AphrontDialogView extends AphrontView {
     }
 
     $more = $this->class;
+
+    switch ($this->width) {
+      case self::WIDTH_FORM:
+        $more .= ' aphront-dialog-view-width-'.$this->width;
+        break;
+      case self::WIDTH_DEFAULT:
+        break;
+      default:
+        throw new Exception("Unknown dialog width '{$this->width}'!");
+    }
 
     $attributes = array(
       'class'   => 'aphront-dialog-view '.$more,

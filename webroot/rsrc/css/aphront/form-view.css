@@ -2,11 +2,18 @@
  * @provides aphront-form-view-css
  */
 
-.aphront-form-view {
-  background: #e7e7e7;
+/**
+ * These styles are overrides for .aphront-form-view
+ */
+.aphront-form-view-shaded {
   border: 1px solid #c4c4c4;
+  background: #e7e7e7;
+}
+
+.aphront-form-view-padded {
   padding: 1em;
 }
+
 
 .aphront-form-view label.aphront-form-label {
   padding-top: 4px;

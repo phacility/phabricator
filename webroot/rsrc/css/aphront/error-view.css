@@ -15,6 +15,10 @@
   width: 720px;
 }
 
+.aphront-error-width-dialog {
+  width: 300px;
+}
+
 .aphront-error-width-wide {
   width: 95%;
 }

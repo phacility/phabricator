@@ -67,18 +67,22 @@ final class AphrontFormView extends AphrontView {
 
     Javelin::initBehavior('aphront-form-disable-on-submit');
 
+    $layout = id(new AphrontFormLayoutView())
+      ->setBackgroundShading(true)
+      ->setPadded(true)
+      ->appendChild($this->renderDataInputs())
+      ->appendChild($this->renderChildren());
+
     return javelin_render_tag(
       'form',
       array(
         'action'  => $this->action,
         'method'  => $this->method,
-        'class'   => 'aphront-form-view',
         'enctype' => $this->encType,
         'sigil'   => $this->workflow ? 'workflow' : null,
         'id'      => $this->id,
       ),
-      $this->renderDataInputs().
-      $this->renderChildren());
+      $layout->render());
   }
 
   private function renderDataInputs() {

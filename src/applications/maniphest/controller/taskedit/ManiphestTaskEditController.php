@@ -210,6 +210,8 @@ class ManiphestTaskEditController extends ManiphestController {
       $header_name = 'Create New Task';
     }
 
+    $project_tokenizer_id = celerity_generate_unique_node_id();
+
     $form = new AphrontFormView();
     $form
       ->setUser($user)
@@ -245,7 +247,21 @@ class ManiphestTaskEditController extends ManiphestController {
           ->setLabel('Projects')
           ->setName('projects')
           ->setValue($projects_value)
+          ->setID($project_tokenizer_id)
+          ->setCaption(
+            javelin_render_tag(
+              'a',
+              array(
+                'href'        => '/project/quickcreate/',
+                'mustcapture' => true,
+                'sigil'       => 'project-create',
+              ),
+              'Create New Project'))
           ->setDatasource('/typeahead/common/projects/'));
+
+    Javelin::initBehavior('maniphest-project-create', array(
+      'tokenizerID' => $project_tokenizer_id,
+    ));
 
     if ($files) {
       $file_display = array();

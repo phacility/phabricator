@@ -5,6 +5,7 @@
  *           javelin-tokenizer
  *           javelin-typeahead-preloaded-source
  *           javelin-dom
+ *           javelin-stratcom
  */
 
 JX.behavior('aphront-basic-tokenizer', function(config) {
@@ -27,6 +28,8 @@ JX.behavior('aphront-basic-tokenizer', function(config) {
   if (config.value) {
     tokenizer.setInitialValue(config.value);
   }
+
+  JX.Stratcom.addData(root, {'tokenizer' : tokenizer});
 
   tokenizer.start();
 });

@@ -200,6 +200,7 @@ class AphrontDefaultApplicationConfiguration
         'view/(?P<id>\d+)/$' => 'PhabricatorProjectProfileController',
         'affiliation/(?P<id>\d+)/$'
           => 'PhabricatorProjectAffiliationEditController',
+        'quickcreate/$' => 'PhabricatorProjectQuickCreateController',
       ),
 
       '/r(?P<callsign>[A-Z]+)(?P<commit>[a-z0-9]+)$'
