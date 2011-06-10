@@ -134,13 +134,10 @@ td.phabricator-login-details {
 }
 
 .keyboard-focus-focus-reticle {
-  z-index: 32;
-  border: 1px solid #999999;
-
+  z-index: 1;
+  background: #fffff3;
   position: absolute;
-  -webkit-box-shadow: 0 0 3px #000;
-  -mox-box-shadow:    0 0 3px #000;
-  box-shadow:         0 0 3px #000;
+  border: 1px solid #eeeed3;
 }
 
 .keyboard-shortcuts-available {

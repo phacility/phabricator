@@ -2,8 +2,13 @@
  * @provides differential-changeset-view-css
  */
 
+.differential-changeset {
+  z-index: 2;
+  position: relative;
+}
+
 .differential-diff {
-  background:         #ffffff;
+  background:         transparent;
   font-family:        "Menlo", "Consolas", "Monaco", monospace;
   font-size:          10px;
   width:              100%;
