@@ -305,6 +305,13 @@ class AphrontDefaultApplicationConfiguration
 
       '/status/$' => 'PhabricatorStatusController',
 
+      '/paste/' => array(
+        '$' => 'PhabricatorPasteHomeController',
+        'create/' => 'PhabricatorPasteCreateController',
+      ),
+
+      '/P(?P<id>\d+)$' => 'PhabricatorPasteViewController',
+
       '/help/' => array(
         'keyboardshortcut/$' => 'PhabricatorHelpKeyboardShortcutController',
       ),
