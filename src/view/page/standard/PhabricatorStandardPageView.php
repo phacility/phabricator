@@ -206,7 +206,7 @@ class PhabricatorStandardPageView extends AphrontPageView {
       // in the execution workflow.
       if ($user && $user->getPHID()) {
         $login_stuff =
-          'Logged in as '.phutil_render_tag(
+          phutil_render_tag(
             'a',
             array(
               'href' => '/p/'.$user->getUsername().'/',

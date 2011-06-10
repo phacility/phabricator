@@ -42,6 +42,7 @@
   border-bottom: 6px solid transparent;
   padding-top: 14px;
   padding-bottom: 4px;
+  white-space: nowrap;
 }
 
 .phabricator-logo {
@@ -82,6 +83,7 @@ td.phabricator-login-details {
   vertical-align: middle;
   padding: 0px 24px;
   font-size: 12px;
+  white-space: nowrap;
 }
 
 .phabricator-page-foot {
