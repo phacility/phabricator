@@ -46,6 +46,7 @@ class PhabricatorPasteCreateController extends PhabricatorPasteController {
           $text,
           array(
             'name' => $title,
+            'mime-type' => 'text/plain; charset=utf-8',
         ));
         $paste->setFilePHID($paste_file->getPHID());
         $paste->setAuthorPHID($user->getPHID());
