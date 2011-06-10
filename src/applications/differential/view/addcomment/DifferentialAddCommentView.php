@@ -47,6 +47,22 @@ final class DifferentialAddCommentView extends AphrontView {
     return $this;
   }
 
+  private function generateWarningView(
+    $status,
+    array $titles,
+    $id,
+    $content) {
+
+    $warning = new AphrontErrorView();
+    $warning->setSeverity(AphrontErrorView::SEVERITY_ERROR);
+    $warning->setWidth(AphrontErrorView::WIDTH_WIDE);
+    $warning->setID($id);
+    $warning->appendChild($content);
+    $warning->setTitle(idx($titles, $status, 'Warning'));
+
+    return $warning;
+  }
+
   public function render() {
 
     require_celerity_resource('differential-revision-add-comment-css');
@@ -96,6 +112,52 @@ final class DifferentialAddCommentView extends AphrontView {
         'row' => 'add-reviewers',
       ));
 
+    $diff = $revision->loadActiveDiff();
+    $lint_warning = null;
+    $unit_warning = null;
+    if ($diff->getLintStatus() >= DifferentialLintStatus::LINT_WARN) {
+      $titles =
+        array(
+          DifferentialLintStatus::LINT_WARN => 'Lint Warning',
+          DifferentialLintStatus::LINT_FAIL => 'Lint Failure',
+          DifferentialLintStatus::LINT_SKIP => 'Lint Skipped'
+        );
+      $content =
+        "<p>This diff has Lint Problems. Make sure you are OK with them ".
+        "before you accept this diff.</p>";
+      $lint_warning = $this->generateWarningView(
+        $diff->getLintStatus(),
+        $titles,
+        'lint-warning',
+        $content);
+    }
+
+    if ($diff->getUnitStatus() >= DifferentialUnitStatus::UNIT_WARN) {
+      $titles =
+        array(
+          DifferentialUnitStatus::UNIT_WARN => 'Unit Tests Warning',
+          DifferentialUnitStatus::UNIT_FAIL => 'Unit Tests Failure',
+          DifferentialUnitStatus::UNIT_SKIP => 'Unit Tests Skipped',
+          DifferentialUnitStatus::UNIT_POSTPONED => 'Unit Tests Postponed'
+        );
+      $content =
+        "<p>This diff has Unit Test Problems. Make sure you are OK with them ".
+        "before you accept this diff.</p>";
+      $unit_warning = $this->generateWarningView(
+        $diff->getUnitStatus(),
+        $titles,
+        'unit-warning',
+        $content);
+    }
+
+    Javelin::initBehavior(
+      'differential-accept-with-errors',
+      array(
+        'select' => 'comment-action',
+        'lint_warning' => $lint_warning ? 'lint-warning' : null,
+        'unit_warning' => $unit_warning ? 'unit-warning' : null,
+      ));
+
     $rev_id = $revision->getID();
 
     Javelin::initBehavior(
@@ -112,6 +174,12 @@ final class DifferentialAddCommentView extends AphrontView {
 
     $panel_view = new AphrontPanelView();
     $panel_view->appendChild($form);
+    if ($lint_warning) {
+      $panel_view->appendChild($lint_warning);
+    }
+    if ($unit_warning) {
+      $panel_view->appendChild($unit_warning);
+    }
     $panel_view->setHeader('Leap Into Action');
     $panel_view->addClass('aphront-panel-accent');
     $panel_view->addClass('aphront-panel-flush');

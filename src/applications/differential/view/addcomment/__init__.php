@@ -7,6 +7,8 @@
 
 
 phutil_require_module('phabricator', 'applications/differential/constants/action');
+phutil_require_module('phabricator', 'applications/differential/constants/lintstatus');
+phutil_require_module('phabricator', 'applications/differential/constants/unitstatus');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'infrastructure/javelin/api');
 phutil_require_module('phabricator', 'view/base');
@@ -15,6 +17,7 @@ phutil_require_module('phabricator', 'view/form/control/select');
 phutil_require_module('phabricator', 'view/form/control/submit');
 phutil_require_module('phabricator', 'view/form/control/textarea');
 phutil_require_module('phabricator', 'view/form/control/tokenizer');
+phutil_require_module('phabricator', 'view/form/error');
 phutil_require_module('phabricator', 'view/layout/panel');
 
 phutil_require_module('phutil', 'utils');

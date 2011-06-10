@@ -30,6 +30,7 @@ final class AphrontErrorView extends AphrontView {
   private $errors;
   private $severity;
   private $width;
+  private $id;
 
   public function setTitle($title) {
     $this->title = $title;
@@ -48,6 +49,11 @@ final class AphrontErrorView extends AphrontView {
 
   public function setWidth($width) {
     $this->width = $width;
+    return $this;
+  }
+
+  public function setID($id) {
+    $this->id = $id;
     return $this;
   }
 
@@ -85,11 +91,14 @@ final class AphrontErrorView extends AphrontView {
     $more_classes = implode(' ', $more_classes);
 
     return
-      '<div class="aphront-error-view '.$more_classes.'">'.
+      phutil_render_tag(
+        'div',
+        array(
+          'id' => $this->id,
+          'class' => 'aphront-error-view '.$more_classes,
+        ),
         $title.
         $this->renderChildren().
-        $list.
-      '</div>';
-
+        $list);
   }
 }

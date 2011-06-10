@@ -16,15 +16,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/aphront/attached-file-view.css',
   ),
-  'aphront-crumbs-view-css' =>
-  array(
-    'uri' => '/res/9009e6bd/rsrc/css/aphront/crumbs-view.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/aphront/crumbs-view.css',
-  ),
   'aphront-dark-console-css' =>
   array(
     'uri' => '/res/e7011594/rsrc/css/aphront/dark-console.css',
@@ -34,15 +25,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/aphront/dark-console.css',
   ),
-  'aphront-dialog-view-css' =>
-  array(
-    'uri' => '/res/61a58113/rsrc/css/aphront/dialog-view.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/aphront/dialog-view.css',
-  ),
   'aphront-error-view-css' =>
   array(
     'uri' => '/res/e4c5e4ed/rsrc/css/aphront/error-view.css',
@@ -51,6 +33,34 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/aphront/error-view.css',
+  ),
+  0 =>
+  array(
+    'uri' => '/res/39de799e/rsrc/js/javelin/docs/Base.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-install',
+    ),
+    'disk' => '/rsrc/js/javelin/docs/Base.js',
+  ),
+  'aphront-crumbs-view-css' =>
+  array(
+    'uri' => '/res/9009e6bd/rsrc/css/aphront/crumbs-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/aphront/crumbs-view.css',
+  ),
+  'aphront-dialog-view-css' =>
+  array(
+    'uri' => '/res/61a58113/rsrc/css/aphront/dialog-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/aphront/dialog-view.css',
   ),
   'aphront-form-view-css' =>
   array(
@@ -360,6 +370,17 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/core/behavior-dark-console.js',
   ),
+  'javelin-behavior-differential-accept-with-errors' =>
+  array(
+    'uri' => '/res/41c4685b/rsrc/js/application/differential/behavior-accept-with-errors.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+    ),
+    'disk' => '/rsrc/js/application/differential/behavior-accept-with-errors.js',
+  ),
   'javelin-behavior-differential-add-reviewers' =>
   array(
     'uri' => '/res/dc79790c/rsrc/js/application/differential/behavior-add-reviewers.js',
@@ -589,16 +610,6 @@ celerity_register_resource_map(array(
       1 => 'javelin-behavior',
     ),
     'disk' => '/rsrc/js/application/owners/owners-path-editor.js',
-  ),
-  0 =>
-  array(
-    'uri' => '/res/39de799e/rsrc/js/javelin/docs/Base.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-install',
-    ),
-    'disk' => '/rsrc/js/javelin/docs/Base.js',
   ),
   'javelin-behavior-phabricator-keyboard-shortcuts' =>
   array(
