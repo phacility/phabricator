@@ -144,6 +144,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
         .setIsNew(isNewFile(target) ? 1 : 0)
         .setOnRight(isOnRight(target) ? 1 : 0)
         .setRow(insert.nextSibling)
+        .setTable(insert.parentNode)
         .start();
 
       e.kill();
@@ -183,6 +184,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
   var action_handler = function(op, e) {
     var data = e.getNodeData('differential-inline-comment');
     var node = e.getNode('differential-inline-comment');
+    var row  = node.parentNode.parentNode;
 
     editor = new JX.DifferentialInlineCommentEditor(config.uri)
       .setTemplates(config.undo_templates)
@@ -190,7 +192,8 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       .setID(data.id)
       .setOnRight(data.on_right)
       .setOriginalText(data.original)
-      .setRow(node.parentNode.parentNode)
+      .setRow(row)
+      .setTable(row.parentNode)
       .start();
 
     e.kill();

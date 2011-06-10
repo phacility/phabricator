@@ -39,7 +39,7 @@ JX.install('DifferentialInlineCommentEditor', {
     },
     _draw : function(content, exact_row) {
       var row = this.getRow();
-      var table = row.parentNode;
+      var table = this.getTable();
       var target = exact_row ? row : this._skipOverInlineCommentRows(row);
 
       return copyRows(table, content, target);
@@ -183,6 +183,7 @@ JX.install('DifferentialInlineCommentEditor', {
   properties : {
     operation : null,
     row : null,
+    table : null,
     onRight : null,
     ID : null,
     lineNumber : null,
