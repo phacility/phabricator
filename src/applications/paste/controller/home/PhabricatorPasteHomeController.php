@@ -19,11 +19,83 @@
 class PhabricatorPasteHomeController extends PhabricatorPasteController {
 
   public function processRequest() {
+
+    $request = $this->getRequest();
+
+    $pager = new AphrontPagerView();
+    $pager->setOffset($request->getInt('page'));
+
+    $pastes = id(new PhabricatorPaste())->loadAllWhere(
+      '1 = 1 ORDER BY id DESC LIMIT %d, %d',
+      $pager->getOffset(),
+      $pager->getPageSize() + 1);
+
+    $pastes = $pager->sliceResults($pastes);
+    $pager->setURI($request->getRequestURI(), 'page');
+
+    $phids = mpull($pastes, 'getAuthorPHID');
+    $handles = array();
+    if ($phids) {
+      $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    }
+
+    $rows = array();
+    foreach ($pastes as $paste) {
+
+      $handle = $handles[$paste->getAuthorPHID()];
+
+      $rows[] = array(
+        phutil_escape_html($paste->getPHID()),
+        phutil_escape_html($paste->getTitle()),
+
+        // TODO: Make this filter by user instead of going to their profile.
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => '/p/'.$handle->getName().'/',
+          ),
+          phutil_escape_html($handle->getName())),
+
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => PhabricatorFileURI::getViewURIForPHID(
+              $paste->getFilePHID()),
+          ),
+          phutil_escape_html($paste->getFilePHID())),
+
+        phutil_render_tag(
+          'a',
+          array(
+            'class' => 'small button grey',
+            'href'  => '/P'.$paste->getID(),
+          ),
+          'View'),
+      );
+    }
+
+    $table = new AphrontTableView($rows);
+    $table->setHeaders(
+      array(
+        'PHID',
+        'Title',
+        'Author',
+        'File PHID',
+        'View'
+      ));
+
+    $panel = new AphrontPanelView();
+    $panel->setWidth(AphrontPanelView::WIDTH_FULL);
+    $panel->setHeader("Paste");
+    $panel->setCreateButton('Paste Something', '/paste/create/');
+    $panel->appendChild($table);
+    $panel->appendChild($pager);
+
     return $this->buildStandardPageResponse(
-      null,
+      $panel,
       array(
         'title' => 'Paste',
-        'tab' => 'home',
-      ));
+      )
+    );
   }
 }
