@@ -34,7 +34,7 @@ class PhabricatorProjectListController
             'class' => 'small grey button',
             'href' => '/project/view/'.$project->getID().'/',
           ),
-          'View Project Project Profile'),
+          'View Project Profile'),
       );
     }
 
@@ -52,13 +52,13 @@ class PhabricatorProjectListController
 
     $panel = new AphrontPanelView();
     $panel->appendChild($table);
-    $panel->setHeader('People');
-    $panel->setCreateButton('Create New Project Project', '/project/edit/');
+    $panel->setHeader('Project');
+    $panel->setCreateButton('Create New Project', '/project/edit/');
 
     return $this->buildStandardPageResponse(
       $panel,
       array(
-        'title' => 'Project Projects',
+        'title' => 'Projects',
       ));
   }
 
