@@ -48,4 +48,15 @@ class DatabaseConfigurationProvider {
   final protected function getMode() {
     return $this->mode;
   }
+
+  public static function getConfiguration() {
+    // Get DB info. Note that we are using a dummy PhabricatorUser object in
+    // creating the DatabaseConfigurationProvider, which is not used at all.
+    $conf_provider = PhabricatorEnv::getEnvConfig(
+      'mysql.configuration_provider', 'DatabaseConfigurationProvider');
+    PhutilSymbolLoader::loadClass($conf_provider);
+    $conf = newv($conf_provider, array(new PhabricatorUser(), 'r'));
+    return $conf;
+  }
+
 }

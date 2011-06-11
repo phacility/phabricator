@@ -68,7 +68,7 @@ class PhabricatorSetup {
     } else {
       if (trim($stdout) == 'YES') {
         self::write(" okay  pcntl is available from the command line.\n");
-        self::write("[OKAY] All extensions OKAY\n\n");
+        self::write("[OKAY] All extensions OKAY\n");
       } else {
         self::write(" warn  pcntl is not available!\n");
         self::write("[WARN] *** WARNING *** pcntl extension not available. ".
@@ -120,7 +120,7 @@ class PhabricatorSetup {
         }
       }
     }
-    self::write("[OKAY] All submodules OKAY.");
+    self::write("[OKAY] All submodules OKAY.\n");
 
     self::writeHeader("BASIC CONFIGURATION");
 
@@ -241,9 +241,10 @@ class PhabricatorSetup {
 
     self::writeHeader("MySQL DATABASE CONFIGURATION");
 
-    $conn_user = PhabricatorEnv::getEnvConfig('mysql.user');
-    $conn_pass = PhabricatorEnv::getEnvConfig('mysql.pass');
-    $conn_host = PhabricatorEnv::getEnvConfig('mysql.host');
+    $conf = DatabaseConfigurationProvider::getConfiguration();
+    $conn_user = $conf->getUser();
+    $conn_pass = $conf->getPassword();
+    $conn_host = $conf->getHost();
 
     $timeout = ini_get('mysql.connect_timeout');
     if ($timeout > 5) {

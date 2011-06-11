@@ -59,15 +59,16 @@ if (empty($options['f'])) {
 // Use always the version from the commandline if it is defined
 $next_version = isset($options['v']) ? (int)$options['v'] : null;
 
-// TODO: Get this stuff from DatabaseConfigurationProvider?
+$conf = DatabaseConfigurationProvider::getConfiguration();
+
 if ($options['u']) {
   $conn_user = $options['u'];
   $conn_pass = $options['p'];
 } else {
-  $conn_user = PhabricatorEnv::getEnvConfig('mysql.user');
-  $conn_pass = PhabricatorEnv::getEnvConfig('mysql.pass');
+  $conn_user = $conf->getUser();
+  $conn_pass = $conf->getPassword();
 }
-$conn_host = PhabricatorEnv::getEnvConfig('mysql.host');
+$conn_host = $conf->getHost();
 
 // Split out port information, since the command-line client requires a
 // separate flag for the port.
