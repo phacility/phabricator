@@ -132,7 +132,11 @@ class PhabricatorSetup {
     } else {
       $host = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
       $protocol = id(new PhutilURI($host))->getProtocol();
-      if (!($protocol === 'http') || !($protocol === 'https')) {
+      $allowed_protocols = array(
+        'http'  => true,
+        'https' => true,
+      );
+      if (empty($allowed_protocols[$protocol])) {
         self::writeFailure();
         self::write(
           "You must specify the protocol over which your host works (e.g.: ".
