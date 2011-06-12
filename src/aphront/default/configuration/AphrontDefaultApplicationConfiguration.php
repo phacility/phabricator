@@ -315,6 +315,17 @@ class AphrontDefaultApplicationConfiguration
       '/help/' => array(
         'keyboardshortcut/$' => 'PhabricatorHelpKeyboardShortcutController',
       ),
+
+      '/countdown/' => array(
+        '$'
+          => 'PhabricatorCountdownListController',
+        '(?P<id>\d+)/$'
+          => 'PhabricatorCountdownViewController',
+        'edit/(?:(?P<id>\d+)/)?$'
+          => 'PhabricatorCountdownEditController',
+        'delete/(?P<id>\d+)/$'
+          => 'PhabricatorCountdownDeleteController'
+      ),
     );
   }
 
