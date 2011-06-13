@@ -43,12 +43,10 @@ class PhabricatorFileTransformController extends PhabricatorFileController {
       return new Aphront404Response();
     }
 
-    if (!$file->isViewableInBrowser()) {
-      return new Aphront400Response();
-    }
+    $type = $file->getMimeType();
 
-    if (!$file->isTransformableImage()) {
-      return new Aphront400Response();
+    if (!$file->isViewableInBrowser() || !$file->isTransformableImage()) {
+      return $this->buildDefaultTransformation($file);
     }
 
     switch ($this->transform) {
@@ -76,6 +74,39 @@ class PhabricatorFileTransformController extends PhabricatorFileController {
     $xform->save();
 
     return $this->buildTransformedFileResponse($xform);
+  }
+
+  private function buildDefaultTransformation(PhabricatorFile $file) {
+    static $regexps = array(
+      '@application/zip@'     => 'zip',
+      '@image/@'              => 'image',
+      '@application/pdf@'     => 'pdf',
+      '@.*@'                  => 'default',
+    );
+
+    $type = $file->getMimeType();
+    $prefix = 'default';
+    foreach ($regexps as $regexp => $implied_prefix) {
+      if (preg_match($regexp, $type)) {
+        $prefix = $implied_prefix;
+        break;
+      }
+    }
+
+    switch ($this->transform) {
+      case 'thumb-160x120':
+        $suffix = '160x120';
+        break;
+      case 'thumb-60x45':
+        $suffix = '60x45';
+        break;
+      default:
+        throw new Exception("Unsupported transformation type!");
+    }
+
+    $path = "/rsrc/image/icon/fatcow/thumbnails/{$prefix}{$suffix}.png";
+    return id(new AphrontRedirectResponse())
+      ->setURI($path);
   }
 
   private function buildTransformedFileResponse(
@@ -123,9 +154,25 @@ class PhabricatorFileTransformController extends PhabricatorFileController {
       $dx, $dy,
       $scale * $dx, $scale * $dy);
 
-    ob_start();
-    imagejpeg($dst);
-    return ob_get_clean();
+    $img = null;
+
+    if (function_exists('imagejpeg')) {
+      ob_start();
+      imagejpeg($dst);
+      $img = ob_get_clean();
+    } else if (function_exists('imagepng')) {
+      ob_start();
+      imagepng($dst);
+      $img = ob_get_clean();
+    } else if (function_exists('imagegif')) {
+      ob_start();
+      imagegif($dst);
+      $img = ob_get_clean();
+    } else {
+      throw new Exception("No image generation functions exist!");
+    }
+
+    return $img;
   }
 
 }

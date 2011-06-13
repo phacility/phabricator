@@ -216,7 +216,35 @@ class PhabricatorFile extends PhabricatorFileDAO {
   }
 
   public function isTransformableImage() {
-    return preg_match('@^image/(gif|png|jpe?g)@', $this->getViewableMimeType());
+
+    // NOTE: The way the 'gd' extension works in PHP is that you can install it
+    // with support for only some file types, so it might be able to handle
+    // PNG but not JPEG. Try to generate thumbnails for whatever we can. Setup
+    // warns you if you don't have complete support.
+
+    $matches = null;
+    $ok = preg_match(
+      '@^image/(gif|png|jpe?g)@',
+      $this->getViewableMimeType(),
+      $matches);
+    if (!$ok) {
+      return false;
+    }
+
+    switch ($matches[1]) {
+      case 'jpg';
+      case 'jpeg':
+        return function_exists('imagejpeg');
+        break;
+      case 'png':
+        return function_exists('imagepng');
+        break;
+      case 'gif':
+        return function_exists('imagegif');
+        break;
+      default:
+        throw new Exception('Unknown type matched as image MIME type.');
+    }
   }
 
   public function getViewableMimeType() {

@@ -165,6 +165,39 @@ class PhabricatorSetup {
 
     self::write("[OKAY] Basic configuration OKAY\n");
 
+
+    $issue_gd_warning = false;
+    self::writeHeader('GD LIBRARY');
+    if (extension_loaded('gd')) {
+      self::write(" okay  Extension 'gd' is loaded.\n");
+      $image_type_map = array(
+        'imagepng'  => 'PNG',
+        'imagegif'  => 'GIF',
+        'imagejpeg' => 'JPEG',
+      );
+      foreach ($image_type_map as $function => $image_type) {
+        if (function_exists($function)) {
+          self::write(" okay  Support for '{$image_type}' is available.\n");
+        } else {
+          self::write(" warn  Support for '{$image_type}' is not available!\n");
+          $issue_gd_warning = true;
+        }
+      }
+    } else {
+      self::write(" warn  Extension 'gd' is not loaded.\n");
+      $issue_gd_warning = true;
+    }
+
+    if ($issue_gd_warning) {
+      self::write(
+        "[WARN] The 'gd' library is missing or lacks full support. ".
+        "Phabricator will not be able to generate image thumbnails without ".
+        "gd.\n");
+    } else {
+      self::write("[OKAY] 'gd' loaded and has full image type support.\n");
+    }
+
+
     self::writeHeader('FACEBOOK INTEGRATION');
     $fb_auth = PhabricatorEnv::getEnvConfig('facebook.auth-enabled');
     if (!$fb_auth) {
