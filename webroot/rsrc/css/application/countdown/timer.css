@@ -1,0 +1,40 @@
+/**
+ * @provides phabricator-countdown-css
+ */
+
+.phabricator-timer {
+  width: 80%;
+  margin: 0 auto;
+  margin-top: 2em;
+  margin-bottom: 2em;
+  background: #efefef;
+  border-top: 1px solid #cccccc;
+}
+
+.phabricator-timer-header {
+  padding: 8px;
+  background: #dfdfdf;
+}
+
+.phabricator-timer-pane {
+  padding: 8px 2em;
+}
+
+.phabricator-timer-table {
+  width: 100%;
+}
+
+.phabricator-timer-table th {
+  font-weight: bold;
+  text-align: center;
+  color: #666666;
+  width: 10%;
+  padding: 4px;
+}
+
+.phabricator-timer-table td {
+  padding: 4px;
+  text-align: center;
+  font-size: 4em;
+}
+
