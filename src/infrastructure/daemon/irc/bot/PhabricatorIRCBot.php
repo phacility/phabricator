@@ -56,9 +56,9 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
 
     $nick     = idx($config, 'nick', 'phabot');
 
-    if (!preg_match('/^[A-Za-z0-9_]+$/', $nick)) {
+    if (!preg_match('/^[A-Za-z0-9_`[{}^|\]\\-]+$/', $nick)) {
       throw new Exception(
-        "Nickname '{$nick}' is invalid, must be alphanumeric!");
+        "Nickname '{$nick}' is invalid!");
     }
 
     if (!$join) {
