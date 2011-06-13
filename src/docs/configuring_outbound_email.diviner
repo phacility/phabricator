@@ -89,6 +89,11 @@ To configure Phabricator to use Amazon SES, set these configuration keys:
   - **amazon-ses.access-key**: set to your Amazon SES access key.
   - **amazon-ses.secret-key**: set to your Amazon SES secret key.
 
+NOTE: Amazon SES **requires you to verify your "From" address**. Configure which
+"From" address to use by setting "##metamta.default-address##" in your config,
+then follow the Amazon SES verification process to verify it. You won't be able
+to send email until you do this!
+
 NOTE: Amazon SES is slow to accept mail (often 1-2 seconds) and application
 performance will improve greatly if you configure outbound email to send in
 the background.
