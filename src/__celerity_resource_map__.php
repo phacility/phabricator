@@ -161,6 +161,16 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/differential/core.css',
   ),
+  0 =>
+  array(
+    'uri' => '/res/39de799e/rsrc/js/javelin/docs/Base.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-install',
+    ),
+    'disk' => '/rsrc/js/javelin/docs/Base.js',
+  ),
   'differential-inline-comment-editor' =>
   array(
     'uri' => '/res/5e4f0aa4/rsrc/js/application/differential/DifferentialInlineCommentEditor.js',
@@ -293,16 +303,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/javelin/lib/behavior.js',
   ),
-  0 =>
-  array(
-    'uri' => '/res/39de799e/rsrc/js/javelin/docs/Base.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-install',
-    ),
-    'disk' => '/rsrc/js/javelin/docs/Base.js',
-  ),
   'javelin-behavior-aphront-basic-tokenizer' =>
   array(
     'uri' => '/res/bce3961b/rsrc/js/application/core/behavior-tokenizer.js',
@@ -341,6 +341,18 @@ celerity_register_resource_map(array(
       2 => 'javelin-dom',
     ),
     'disk' => '/rsrc/js/application/core/behavior-form.js',
+  ),
+  'javelin-behavior-countdown-timer' =>
+  array(
+    'uri' => '/res/48477cc8/rsrc/js/application/countdown/timer.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-util',
+    ),
+    'disk' => '/rsrc/js/application/countdown/timer.js',
   ),
   'javelin-behavior-dark-console' =>
   array(
@@ -940,6 +952,15 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/core/core.css',
+  ),
+  'phabricator-countdown-css' =>
+  array(
+    'uri' => '/res/7fd1e21f/rsrc/css/application/countdown/timer.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/countdown/timer.css',
   ),
   'phabricator-directory-css' =>
   array(
