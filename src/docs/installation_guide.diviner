@@ -8,11 +8,12 @@ running.
 
 Phabricator is a LAMP application suite, so you basically need LAMP:
 
-  - **Linux**: Some flavor of Linux is required. MacOS is an acceptable flavor
-    of Linux. Windows is not an acceptable flavor of Linux. Phabricator will not
-    install or work properly on Windows. (If you want it to, send patches.)
-    Phabricator is actively developed on OSX and Amazon's Linux; if you run
-    into issues on other flavors, send patches or complaints.
+  - **Linux**: Some flavor of Linux is required. Mac OS X is an acceptable
+    flavor of Linux. Windows is not an acceptable flavor of Linux. Phabricator
+    will not install or work properly on Windows. (If you want it to, send
+    patches.) Phabricator has active contributors running it on Mac OS X, Amazon
+    Linux, Ubuntu, RHEL and CentOS; if you run into issues on other flavors,
+    send patches or complaints.
   - **Apache**: You need Apache. You might be able to use something else, but
     you're on your own.
   - **MySQL**: You need MySQL.
@@ -23,17 +24,34 @@ You'll probably also need a **domain name** and you'll certainly need
 
 = Installing Required Components =
 
-This document assumes you have "yum". If you don't, substitute whatever package
-manager you do have, or go hunt down all this stuff and build it from source
-if you want.
+If you are installing on Ubuntu or an RedHat derivative, there are install
+scripts available which should handle most of the things discussed in this
+document for you:
 
-Install things we need:
+  - **RedHat Derivatives**: <http://phabricator.com/rsrc/install/install_rhel-derivs.sh>
+  - **Ubuntu**: <http://phabricator.com/rsrc/install/install_ubuntu.sh>
 
-  sudo yum install git httpd php mysql-server php-mysql php-devel
+If those work for you, you can skip directly to the
+@{article:Configuration Guide}. These scripts are also available in the
+##scripts/install## directory in the project itself.
 
-If you already have LAMP setup, you've already got everything you need.
+Otherwise, here's a general description of what you need to install:
 
-Now that you have git installed, grab Phabricator and its dependencies:
+  - git (usually called "git" in package management systems)
+  - Apache (usually "httpd" or "apache2")
+  - MySQL Server (usually "mysqld" or "mysql-server")
+  - PHP (usually "php")
+  - Required PHP extensions: mysql, curl, pcntl (these might be something like
+    "php-mysql" or "php5-mysql")
+  - Optional PHP extensions: gd, apc (special instructions for APC are available
+    below if you have difficulty installing it)
+
+If you already have LAMP setup, you've probably already got everything you need.
+It may also be helpful to refer to the install scripts above, even if they don't
+work for your system.
+
+Now that you have all that stuff installed, grab Phabricator and its
+dependencies:
 
   $ cd somewhere/ # pick some install directory
   somewhere/ $ git clone git://github.com/facebook/libphutil.git
@@ -49,13 +67,13 @@ installed. You likely need to install "pcre-devel" first:
 
   sudo yum install pcre-devel
 
-Then you can either install via PECL:
+Then you have two options. Either install via PECL (try this first):
 
   sudo yum install php-pear
   sudo pecl install apc
 
-...or grab the package from PECL directly and follow the build instructions
-there:
+**If that doesn't work**, grab the package from PECL directly and follow the
+build instructions there:
 
   http://pecl.php.net/package/APC
 
