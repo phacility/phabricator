@@ -216,7 +216,18 @@ EOHELP
   }
 
   protected function getControlDirectory($dir) {
-    return PhabricatorEnv::getEnvConfig('phd.pid-directory').'/'.$dir;
+    $path = PhabricatorEnv::getEnvConfig('phd.pid-directory').'/'.$dir;
+    if (!Filesystem::pathExists($path)) {
+      list($err) = exec_manual('mkdir -p %s', $path);
+      if ($err) {
+        throw new Exception(
+          "phd requires the directory '{$path}' to exist, but it does not ".
+          "exist and could not be created. Create this directory or update ".
+          "'phd.pid-directory' in your configuration to point to an existing ".
+          "directory.");
+      }
+    }
+    return $path;
   }
 
   protected function loadAvailableDaemonClasses() {

@@ -24,9 +24,6 @@ require_once $root.'/scripts/__init_env__.php';
 phutil_require_module('phabricator', 'infrastructure/daemon/control');
 $control = new PhabricatorDaemonControl();
 
-$phd_dir = PhabricatorEnv::getEnvConfig('phd.pid-directory');
-$pid_dir = $phd_dir.'/pid';
-
 switch (isset($argv[1]) ? $argv[1] : 'help') {
   case 'list':
     $err = $control->executeListCommand();
@@ -202,6 +199,3 @@ function phd_load_tracked_repositories() {
 
   return $repositories;
 }
-
-
-
