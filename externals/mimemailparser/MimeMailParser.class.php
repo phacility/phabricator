@@ -10,35 +10,35 @@ require_once('attachment.class.php');
  * @version $Id$
  */
 class MimeMailParser {
-	
+
 	/**
 	 * PHP MimeParser Resource ID
 	 */
 	public $resource;
-	
+
 	/**
 	 * A file pointer to email
 	 */
 	public $stream;
-	
+
 	/**
 	 * A text of an email
 	 */
 	public $data;
-	
+
 	/**
 	 * Stream Resources for Attachments
 	 */
 	public $attachment_streams;
-	
+
 	/**
 	 * Inialize some stuff
-	 * @return 
+	 * @return
 	 */
 	public function __construct() {
 		$this->attachment_streams = array();
 	}
-	
+
 	/**
 	 * Free the held resouces
 	 * @return void
@@ -57,7 +57,7 @@ class MimeMailParser {
 			fclose($stream);
 		}
 	}
-	
+
 	/**
 	 * Set the file path we use to get the email text
 	 * @return Object MimeMailParser Instance
@@ -70,7 +70,7 @@ class MimeMailParser {
 		$this->parse();
 		return $this;
 	}
-	
+
 	/**
 	 * Set the Stream resource we use to get the email text
 	 * @return Object MimeMailParser Instance
@@ -95,7 +95,7 @@ class MimeMailParser {
 		} else {
 			$this->stream = $stream;
 		}
-		
+
 		$this->resource = mailparse_msg_create();
 		// parses the message incrementally low memory usage but slower
 		while(!feof($this->stream)) {
@@ -104,10 +104,10 @@ class MimeMailParser {
 		$this->parse();
 		return $this;
 	}
-	
+
 	/**
 	 * Set the email text
-	 * @return Object MimeMailParser Instance 
+	 * @return Object MimeMailParser Instance
 	 * @param $data String
 	 */
 	public function setText($data) {
@@ -118,7 +118,7 @@ class MimeMailParser {
 		$this->parse();
 		return $this;
 	}
-	
+
 	/**
 	 * Parse the Message into parts
 	 * @return void
@@ -132,7 +132,7 @@ class MimeMailParser {
 			$this->parts[$part_id] = mailparse_msg_get_part_data($part);
 		}
 	}
-	
+
 	/**
 	 * Retrieve the Email Headers
 	 * @return Array
@@ -157,7 +157,7 @@ class MimeMailParser {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Retrieve a specific Email Header
 	 * @return String
@@ -174,13 +174,20 @@ class MimeMailParser {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Returns the email message body in the specified format
 	 * @return Mixed String Body or False if not found
 	 * @param $type Object[optional]
 	 */
 	public function getMessageBody($type = 'text') {
+
+	  // NOTE: This function has been modified for Phabricator. The default
+	  // implementation returns the last matching part, which throws away text
+	  // for many emails. Instead, we concatenate all matching parts. See
+	  // issue 22 for discussion:
+	  // http://code.google.com/p/php-mime-mail-parser/issues/detail?id=22
+
 		$body = false;
 		$mime_types = array(
 			'text'=> 'text/plain',
@@ -188,10 +195,23 @@ class MimeMailParser {
 		);
 		if (in_array($type, array_keys($mime_types))) {
 			foreach($this->parts as $part) {
+  			$disposition = $this->getPartContentDisposition($part);
+  			if ($disposition == 'attachment') {
+  			  // text/plain parts with "Content-Disposition: attachment" are
+  			  // attachments, not part of the text body.
+  			  continue;
+  			}
 				if ($this->getPartContentType($part) == $mime_types[$type]) {
-                    $headers = $this->getPartHeaders($part);
-					$body = $this->decode($this->getPartBody($part), array_key_exists('content-transfer-encoding', $headers) ? 
-$headers['content-transfer-encoding'] : '');
+          $headers = $this->getPartHeaders($part);
+          // Concatenate all the matching parts into the body text. For example,
+          // if a user sends a message with some text, then an image, and then
+          // some more text, the text body of the email gets split over several
+          // attachments.
+					$body .= $this->decode(
+					  $this->getPartBody($part),
+					  array_key_exists('content-transfer-encoding', $headers)
+					    ? $headers['content-transfer-encoding']
+					    : '');
 				}
 			}
 		} else {
@@ -223,7 +243,7 @@ $headers['content-transfer-encoding'] : '');
 		return $headers;
 	}
 
-	
+
 	/**
 	 * Returns the attachments contents in order of appearance
 	 * @return Array
@@ -236,8 +256,8 @@ $headers['content-transfer-encoding'] : '');
 			$disposition = $this->getPartContentDisposition($part);
 			if (in_array($disposition, $dispositions)) {
 				$attachments[] = new MimeMailParser_attachment(
-					$part['disposition-filename'], 
-					$this->getPartContentType($part), 
+					$part['disposition-filename'],
+					$this->getPartContentType($part),
 					$this->getAttachmentStream($part),
 					$disposition,
 					$this->getPartHeaders($part)
@@ -246,7 +266,7 @@ $headers['content-transfer-encoding'] : '');
 		}
 		return $attachments;
 	}
-	
+
 	/**
 	 * Return the Headers for a MIME part
 	 * @return Array
@@ -258,7 +278,7 @@ $headers['content-transfer-encoding'] : '');
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Return a Specific Header for a MIME part
 	 * @return Array
@@ -271,7 +291,7 @@ $headers['content-transfer-encoding'] : '');
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Return the ContentType of the MIME part
 	 * @return String
@@ -283,7 +303,7 @@ $headers['content-transfer-encoding'] : '');
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Return the Content Disposition
 	 * @return String
@@ -295,7 +315,7 @@ $headers['content-transfer-encoding'] : '');
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Retrieve the raw Header of a MIME part
 	 * @return String
@@ -328,7 +348,7 @@ $headers['content-transfer-encoding'] : '');
 		}
 		return $body;
 	}
-	
+
 	/**
 	 * Retrieve the Header from a MIME part from file
 	 * @return String Mime Header Part
@@ -353,7 +373,7 @@ $headers['content-transfer-encoding'] : '');
 		$body = fread($this->stream, $end-$start);
 		return $body;
 	}
-	
+
 	/**
 	 * Retrieve the Header from a MIME part from text
 	 * @return String Mime Header Part
@@ -376,14 +396,14 @@ $headers['content-transfer-encoding'] : '');
 		$body = substr($this->data, $start, $end-$start);
 		return $body;
 	}
-	
+
 	/**
 	 * Read the attachment Body and save temporary file resource
 	 * @return String Mime Body Part
 	 * @param $part Array
 	 */
 	private function getAttachmentStream(&$part) {
-		$temp_fp = tmpfile();   
+		$temp_fp = tmpfile();
 
         array_key_exists('content-transfer-encoding', $part['headers']) ? $encoding = $part['headers']['content-transfer-encoding'] : $encoding = '';
 
@@ -416,7 +436,7 @@ $headers['content-transfer-encoding'] : '');
 		return $temp_fp;
 	}
 
-    
+
     /**
      * Decode the string depending on encoding type.
      * @return String the decoded string.

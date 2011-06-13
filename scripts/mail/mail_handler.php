@@ -45,6 +45,15 @@ $received->setBodies(array(
 
 $attachments = array();
 foreach ($parser->getAttachments() as $attachment) {
+  if (preg_match('@text/(plain|html)@', $attachment->getContentType()) &&
+      $attachment->getContentDisposition() == 'inline') {
+    // If this is an "inline" attachment with some sort of text content-type,
+    // do not treat it as a file for attachment. MimeMailParser already picked
+    // it up in the getMessageBody() call above. We still want to treat 'inline'
+    // attachments with other content types (e.g., images) as attachments.
+    continue;
+  }
+
   $file = PhabricatorFile::newFromFileData(
     $attachment->getContent(),
     array(
