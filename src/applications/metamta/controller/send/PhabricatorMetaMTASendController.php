@@ -45,14 +45,44 @@ class PhabricatorMetaMTASendController extends PhabricatorMetaMTAController {
       "Enter a number to simulate that many consecutive send failures before ".
       "really attempting to deliver via the underlying MTA.";
 
+    $doclink_href = PhabricatorEnv::getDoclink(
+      'article/Configuring_Outbound_Email.html');
+
+    $doclink = phutil_render_tag(
+      'a',
+      array(
+        'href' => $doclink_href,
+        'target' => '_blank',
+      ),
+    'Configuring Outbound Email');
+    $instructions =
+      '<p class="aphront-form-instructions">This form will send a normal '.
+      'email using the settings you have configured for Phabricator. For more '.
+      'information, see '.$doclink.'.</p>';
+
+    $adapter = PhabricatorEnv::getEnvConfig('metamta.mail-adapter');
+    $warning = null;
+    if ($adapter == 'PhabricatorMailImplementationTestAdapter') {
+      $warning = new AphrontErrorView();
+      $warning->setTitle('Email is Disabled');
+      $warning->setSeverity(AphrontErrorView::SEVERITY_WARNING);
+      $warning->appendChild(
+        '<p>This installation of Phabricator is currently set to use '.
+        '<tt>PhabricatorMailImplementationTestAdapter</tt> to deliver '.
+        'outbound email. This completely disables outbound email! All '.
+        'outbound email will be thrown in a deep, dark hole until you '.
+        'configure a real adapter.</p>');
+    }
 
     $form = new AphrontFormView();
     $form->setUser($request->getUser());
     $form->setAction('/mail/send/');
     $form
+      ->appendChild($instructions)
       ->appendChild(
-        '<p class="aphront-form-instructions">This form will send a normal '.
-        'email using MetaMTA as a transport mechanism.</p>')
+        id(new AphrontFormStaticControl())
+          ->setLabel('Configured Adapter')
+          ->setValue($adapter))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setLabel('To')
@@ -97,7 +127,10 @@ class PhabricatorMetaMTASendController extends PhabricatorMetaMTAController {
     $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
 
     return $this->buildStandardPageResponse(
-      $panel,
+      array(
+        $warning,
+        $panel,
+      ),
       array(
         'title' => 'Send Mail',
       ));

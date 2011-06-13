@@ -37,7 +37,7 @@ echo
 set +x
 
 sudo apt-get -qq update
-sudo apt-get install git mysql-server apache2 php5 php5-mysql php5-gd php5-dev php-apc dpkg-dev
+sudo apt-get install git mysql-server apache2 php5 php5-mysql php5-gd php5-dev php5-curl php-apc dpkg-dev
 
 HAVEPCNTL=`php -r "echo extension_loaded('pcntl');"`
 if [ $HAVEPCNTL != "1" ]
