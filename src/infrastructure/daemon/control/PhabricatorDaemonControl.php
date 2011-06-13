@@ -128,7 +128,10 @@ final class PhabricatorDaemonControl {
 **COMMAND REFERENCE**
 
         **launch** [__n__] __daemon__ [argv ...]
+        **debug** __daemon__ [argv ...]
             Start a daemon (or n copies of a daemon).
+            With **debug**, do not daemonize. Use this if you're having trouble
+            getting daemons working.
 
         **list**
             List available daemons.
@@ -160,7 +163,7 @@ EOHELP
     return 1;
   }
 
-  public function launchDaemon($daemon, array $argv) {
+  public function launchDaemon($daemon, array $argv, $debug) {
     $symbols = $this->loadAvailableDaemonClasses();
     $symbols = ipull($symbols, 'name', 'name');
     if (empty($symbols[$daemon])) {
@@ -195,24 +198,40 @@ EOHELP
         phutil_get_library_root($library));
     }
 
-    $future = new ExecFuture(
+    $command = csprintf(
       "./launch_daemon.php ".
         "%s ".
         "--load-phutil-library=%s ".
         implode(' ', $extra_libraries)." ".
         "--conduit-uri=%s ".
-        "--daemonize ".
         "--phd=%s ".
+        ($debug ? '--trace ' : '--daemonize ').
         implode(' ', $argv),
       $daemon,
       phutil_get_library_root('phabricator'),
       PhabricatorEnv::getURI('/api/'),
       $pid_dir);
 
-    // Play games to keep 'ps' looking reasonable.
-    $future->setCWD($launch_daemon);
+    if ($debug) {
+      // Don't terminate when the user sends ^C; it will be sent to the
+      // subprocess which will terminate normally.
+      pcntl_signal(
+        SIGINT,
+        array('PhabricatorDaemonControl', 'ignoreSignal'));
 
-    $future->resolvex();
+      echo "\n    libphutil/scripts/daemon/ \$ {$command}\n\n";
+
+      phutil_passthru('(cd %s && exec %C)', $launch_daemon, $command);
+    } else {
+      $future = new ExecFuture('exec %C', $command);
+      // Play games to keep 'ps' looking reasonable.
+      $future->setCWD($launch_daemon);
+      $future->resolvex();
+    }
+  }
+
+  public static function ignoreSignal($signo) {
+    return;
   }
 
   protected function getControlDirectory($dir) {

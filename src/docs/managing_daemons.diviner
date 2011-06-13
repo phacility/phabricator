@@ -34,6 +34,7 @@ a list of commands, run ##phd help##:
 Generally, you will use:
 
   - **phd launch** to launch daemons;
+  - **phd debug** to debug problems with daemons;
   - **phd status** to get a list of running daemons; and
   - **phd stop** to stop all daemons.
 
@@ -53,6 +54,10 @@ The Daemon Console shows a list of all the daemons that have ever launched, and
 allows you to view log information for them. If you have issues with daemons,
 you may be able to find error information that will help you resolve the problem
 in the console.
+
+NOTE: The easiest way to figure out what's wrong with a daemon is usually to use
+**phd debug** to launch it instead of **phd launch**. This will run it without
+daemonizing it, so you can see output in your console.
 
 = Available Daemons =
 

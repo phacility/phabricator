@@ -105,6 +105,9 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
     break;
 
   case 'launch':
+  case 'debug':
+    $is_debug = ($argv[1] == 'debug');
+
     $daemon = idx($argv, 2);
     if (!$daemon) {
       throw new Exception("Daemon name required!");
@@ -113,16 +116,18 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
     $pass_argv = array_slice($argv, 3);
 
     $n = 1;
-    if (is_numeric($daemon)) {
-      $n = $daemon;
-      if ($n < 1) {
-        throw new Exception("Count must be at least 1!");
+    if (!$is_debug) {
+      if (is_numeric($daemon)) {
+        $n = $daemon;
+        if ($n < 1) {
+          throw new Exception("Count must be at least 1!");
+        }
+        $daemon = idx($argv, 3);
+        if (!$daemon) {
+          throw new Exception("Daemon name required!");
+        }
+        $pass_argv = array_slice($argv, 4);
       }
-      $daemon = idx($argv, 3);
-      if (!$daemon) {
-        throw new Exception("Daemon name required!");
-      }
-      $pass_argv = array_slice($argv, 4);
     }
 
     $loader = new PhutilSymbolLoader();
@@ -154,11 +159,17 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
       $daemon = reset($match);
     }
 
-    echo "Launching {$n} x {$daemon}";
+    if ($is_debug) {
+      echo "Launching {$daemon} in debug mode (nondaemonized)...\n";
+    } else {
+      echo "Launching {$n} x {$daemon}";
+    }
 
     for ($ii = 0; $ii < $n; $ii++) {
-      $control->launchDaemon($daemon, $pass_argv);
-      echo ".";
+      $control->launchDaemon($daemon, $pass_argv, $is_debug);
+      if (!$is_debug) {
+        echo ".";
+      }
     }
 
     echo "\n";
