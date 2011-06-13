@@ -42,14 +42,7 @@ Now that you have git installed, grab Phabricator and its dependencies:
   somewhere/ $ cd phabricator
   somewhere/phabricator/ $ git submodule update --init
 
-= Installing Optional Components =
-
-These components are optional and Phabricator will work without them, but works
-better if they are installed. You should read each section and decide if you
-want to install the component. At a minimum, **APC** will greatly improve
-performance.
-
-== APC ==
+= Installing APC (Optional) =
 
 Like everything else written in PHP, Phabricator will run much faster with APC
 installed. You likely need to install "pcre-devel" first:
@@ -78,19 +71,6 @@ If it doesn't show up, add:
   extension=apc.so
 
 ..to "/etc/php.d/apc.ini" or the "php.ini" file indicated by "php -i".
-
-== Flex 2.5.35 / Bison ==
-
-If you want to build XHPAST (an XHP parser, which is required for developing
-libphutil or Arcanist), you also need flex 2.5.35, which is a NEWER version
-than flex 2.5.4. At the time of writing, most packaging systems don't have flex
-2.5.35 available. You can get it from here and compile it manually:
-
-  http://flex.sourceforge.net/
-
-Then install bison normally:
-
-  sudo yum install bison
 
 = Next Steps =
 
