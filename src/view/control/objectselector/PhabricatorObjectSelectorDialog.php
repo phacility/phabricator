@@ -23,9 +23,13 @@ class PhabricatorObjectSelectorDialog {
   private $handles = array();
   private $cancelURI;
   private $submitURI;
-  private $noun;
   private $searchURI;
   private $selectedFilter;
+
+  private $title;
+  private $header;
+  private $buttonText;
+  private $instructions;
 
   public function setUser($user) {
     $this->user = $user;
@@ -62,8 +66,23 @@ class PhabricatorObjectSelectorDialog {
     return $this;
   }
 
-  public function setNoun($noun) {
-    $this->noun = $noun;
+  public function setTitle($title) {
+    $this->title = $title;
+    return $this;
+  }
+
+  public function setHeader($header) {
+    $this->header = $header;
+    return $this;
+  }
+
+  public function setButtonText($button_text) {
+    $this->buttonText = $button_text;
+    return $this;
+  }
+
+  public function setInstructions($instructions) {
+    $this->instructions = $instructions;
     return $this;
   }
 
@@ -93,6 +112,14 @@ class PhabricatorObjectSelectorDialog {
     }
     $options = implode("\n", $options);
 
+    $instructions = null;
+    if ($this->instructions) {
+      $instructions =
+        '<p class="phabricator-object-selector-instructions">'.
+          $this->instructions.
+        '</p>';
+    }
+
     $search_box = phabricator_render_form(
       $user,
       array(
@@ -119,10 +146,11 @@ class PhabricatorObjectSelectorDialog {
       '<div class="phabricator-object-selector-current">'.
         '<div class="phabricator-object-selector-currently-attached">'.
           '<div class="phabricator-object-selector-header">'.
-            'Currently Attached '.$this->noun.
+            phutil_escape_html($this->header).
           '</div>'.
           '<div id="'.$current_id.'">'.
           '</div>'.
+          $instructions.
         '</div>'.
       '</div>';
 
@@ -130,14 +158,14 @@ class PhabricatorObjectSelectorDialog {
     $dialog = new AphrontDialogView();
     $dialog
       ->setUser($this->user)
-      ->setTitle('Manage Attached '.$this->noun)
+      ->setTitle($this->title)
       ->setClass('phabricator-object-selector-dialog')
       ->appendChild($search_box)
       ->appendChild($result_box)
       ->appendChild($attached_box)
       ->setRenderDialogAsDiv()
       ->setFormID($form_id)
-      ->addSubmitButton('Save '.$this->noun);
+      ->addSubmitButton($this->buttonText);
 
     if ($this->cancelURI) {
       $dialog->addCancelButton($this->cancelURI);

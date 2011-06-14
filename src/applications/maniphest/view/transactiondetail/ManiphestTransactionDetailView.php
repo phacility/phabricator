@@ -396,6 +396,10 @@ class ManiphestTransactionDetailView extends AphrontView {
           $verb = 'Spited';
           $desc = 'closed this task out of spite';
           $classes[] = 'spited';
+        } else if ($new == ManiphestTaskStatus::STATUS_CLOSED_DUPLICATE) {
+          $verb = 'Merged';
+          $desc = 'closed this task as a duplicate';
+          $classes[] = 'duplicate';
         } else {
           $verb = 'Closed';
           $full = idx(ManiphestTaskStatus::getTaskStatusMap(), $new, '???');

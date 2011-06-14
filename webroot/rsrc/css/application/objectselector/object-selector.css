@@ -86,3 +86,9 @@ td.phabricator-object-selector-search-text {
   color: #888888;
   text-align: center;
 }
+
+.phabricator-object-selector-instructions {
+  font-size: 11px;
+  color: #666666;
+  margin-top: 1.25em;
+}

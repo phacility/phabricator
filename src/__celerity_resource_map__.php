@@ -63,7 +63,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-headsup-action-list-view-css' =>
   array(
-    'uri' => '/res/71783633/rsrc/css/aphront/headsup-action-list-view.css',
+    'uri' => '/res/b7c6bbc2/rsrc/css/aphront/headsup-action-list-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -626,7 +626,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-phabricator-object-selector' =>
   array(
-    'uri' => '/res/12d4d90d/rsrc/js/application/core/behavior-object-selector.js',
+    'uri' => '/res/34f9a11e/rsrc/js/application/core/behavior-object-selector.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -902,7 +902,7 @@ celerity_register_resource_map(array(
   ),
   'maniphest-transaction-detail-css' =>
   array(
-    'uri' => '/res/7ee02b5e/rsrc/css/application/maniphest/transaction-detail.css',
+    'uri' => '/res/149fccab/rsrc/css/application/maniphest/transaction-detail.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1038,7 +1038,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-object-selector-css' =>
   array(
-    'uri' => '/res/ced4098a/rsrc/css/application/objectselector/object-selector.css',
+    'uri' => '/res/62a8fd92/rsrc/css/application/objectselector/object-selector.css',
     'type' => 'css',
     'requires' =>
     array(

@@ -80,7 +80,7 @@ JX.behavior('phabricator-object-selector', function(config) {
     var btn = JX.$N(
       'a',
       {className: 'button small grey'},
-      attach ? 'Attach' : 'Remove');
+      attach ? 'Select' : 'Remove');
 
     JX.Stratcom.addSigil(btn, 'object-attach-button');
     JX.Stratcom.addData(btn, {handle : h, table : table});

@@ -175,6 +175,13 @@ class ManiphestTaskDetailController extends ManiphestController {
     require_celerity_resource('javelin-behavior-phabricator-object-selector');
 
     $action = new AphrontHeadsupActionView();
+    $action->setName('Merge Duplicates');
+    $action->setURI('/search/attach/'.$task->getPHID().'/TASK/merge/');
+    $action->setWorkflow(true);
+    $action->setClass('action-merge');
+    $actions[] = $action;
+
+    $action = new AphrontHeadsupActionView();
     $action->setName('Edit Differential Revisions');
     $action->setURI('/search/attach/'.$task->getPHID().'/DREV/');
     $action->setWorkflow(true);

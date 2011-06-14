@@ -55,6 +55,10 @@
   border-color: #aa0000;
 }
 
+.maniphest-transaction-detail-container .duplicate {
+  border-color: #333333;
+}
+
 .maniphest-transaction-header {
   background: #f3f3f3;
   padding: 4px 1em;

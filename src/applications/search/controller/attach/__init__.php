@@ -10,6 +10,7 @@ phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'aphront/response/dialog');
 phutil_require_module('phabricator', 'aphront/response/reload');
 phutil_require_module('phabricator', 'applications/differential/storage/revision');
+phutil_require_module('phabricator', 'applications/maniphest/constants/status');
 phutil_require_module('phabricator', 'applications/maniphest/constants/transactiontype');
 phutil_require_module('phabricator', 'applications/maniphest/editor/transaction');
 phutil_require_module('phabricator', 'applications/maniphest/storage/task');
@@ -19,6 +20,7 @@ phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'applications/search/controller/search');
 phutil_require_module('phabricator', 'view/control/objectselector');
 
+phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
 
 
