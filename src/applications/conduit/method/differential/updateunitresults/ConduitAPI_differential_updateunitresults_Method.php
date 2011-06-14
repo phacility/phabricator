@@ -41,7 +41,6 @@ extends ConduitAPIMethod {
     return array(
       'ERR_BAD_DIFF'   => 'Bad diff ID.',
       'ERR_NO_RESULTS' => 'Could not find the postponed test',
-      'ERR_BAD_FILE'   => 'No results for given file',
     );
   }
 
@@ -88,7 +87,9 @@ extends ConduitAPIMethod {
     unset($unit_result);
 
     if (!$unit_status) {
-      throw new ConduitException('ERR_BAD_FILE');
+      phlog("Could not update test results: {$diff_id} {$file} {$name}".
+            " {$result} {$message}");
+      return;
     }
 
     $diff_property->setData($unit_results);
