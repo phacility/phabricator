@@ -167,3 +167,38 @@ That will forward all mail to @yourdomain.com to the Phabricator processing
 script. Run ##sudo /etc/mail/make## or similar and then restart sendmail with
 ##sudo /etc/init.d/sendmail restart##.
 
+= MTA: Configuring Lamson =
+
+Before you can configure Lamson, you need to install Mailparse. See the section
+"Installing Mailparse" above.
+
+In contrast to Sendmail, Lamson is relatively easy to configure. It is fairly
+minimal, and is suitable for a development or testing environment. Lamson
+listens for incoming SMTP mails and passes the content directly to Phabricator.
+
+To get started, follow the provided instructions
+(<http://lamsonproject.org/docs/getting_started.html>) to set up an instance.
+One likely deployment issue is that binding to port 25 requires root
+privileges. Lamson is capable of starting as root then dropping privileges, but
+you must supply ##-uid## and ##-gid## arguments to do so, as demonstrated by
+Step 8 in Lamson's deployment tutorial (located here:
+<http://lamsonproject.org/docs/deploying_oneshotblog.html>).
+
+The Lamson handler code itself is very concise; it merely needs to pass the
+content of the email to Phabricator:
+
+  import logging, subprocess
+  from lamson.routing import route, stateless
+  from lamson import view
+  
+  PHABRICATOR_ROOT = "/path/to/phabricator"
+  PHABRICATOR_ENV = "custom/myconf"
+  LOGGING_ENABLED = True
+  
+  @route("(address)@(host)", address=".+")
+  @stateless
+  def START(message, address=None, host=None):
+      if LOGGING_ENABLED:
+          logging.debug("%s", message.original)
+      process = subprocess.Popen([PHABRICATOR_ROOT + "scripts/mail/mail_handler.php",PHABRICATOR_ENV],stdin=subprocess.PIPE)
+      process.communicate(message.original)
