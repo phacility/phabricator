@@ -18,8 +18,6 @@
 
 /**
  * Trivial example worker; processes tasks which require no work very slowly.
- *
- * @group worker
  */
 class PhabricatorGoodForNothingWorker extends PhabricatorWorker {
   protected function doWork() {

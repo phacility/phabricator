@@ -11,10 +11,13 @@
     "differential" : "Differential (Code Review)",
     "diffusion" : "Diffusion (Repository Browser)",
     "maniphest" : "Maniphest (Task Tracking)",
+    "herald" : "Herald (Notifications)",
     "celerity" : "Celerity (CSS/JS Management)",
     "aphront" : "Aphront (Web Stack)",
     "console" : "DarkConsole (Debugging Console)",
-    "storage" : "Storage"
+    "storage" : "Storage",
+    "irc" : "IRC",
+    "markup" : "Remarkup Extensions"
   },
   "engines" : [
     ["DivinerArticleEngine", {}],

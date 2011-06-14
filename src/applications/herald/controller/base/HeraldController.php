@@ -27,6 +27,8 @@ abstract class HeraldController extends PhabricatorController {
     $page->setGlyph("\xE2\x98\xBF");
     $page->appendChild($view);
 
+    $doclink = PhabricatorEnv::getDoclink('article/Herald_User_Guide.html');
+
     $page->setTabs(
       array(
         'rules' => array(
@@ -40,6 +42,10 @@ abstract class HeraldController extends PhabricatorController {
         'transcripts' => array(
           'href' => '/herald/transcript/',
           'name' => 'Transcripts',
+        ),
+        'help' => array(
+          'href' => $doclink,
+          'name' => 'Help',
         ),
       ),
       idx($data, 'tab'));

@@ -1,0 +1,62 @@
+@title Herald User Guide
+@group userguide
+
+Use Herald to get notified of changes you care about.
+
+= Overview =
+
+Herald allows you to write processing rules that take effect when objects are
+created or updated. For instance, you might want to get notified every time
+someone sends out a revision that affects some file you're interested in, even
+if they didn't add you as a reviewer.
+
+Herald is less useful for small organizations (where everyone will generally
+know most of what's going on) but the usefulness of the application increases
+as an organization scales. Once there is too much activity to keep track of it
+all, Herald allows you to filter it down so you're only notified of things you
+are interested in.
+
+= Rules, Conditions and Actions =
+
+The best way to think of Herald is as a system similar to the mail rules you can
+set up in most email clients, to organize mail based on "To", "Subject", etc.
+Herald works very similarly, but operates on Phabricator objects (like revisions
+and commits) instead of emails.
+
+Every time an object is created or updated, Herald rules are run on it and
+the actions for any matching rules are taken.
+
+To create a new Herald rule, choose which type of event you want to act on
+(e.g., changes to Differential Revisions, or Commits), and then set a list of
+conditions. For example, you might add the condition ##Author is alincoln
+(Abraham Lincoln)## to keep track of everything alincoln does. Finally, set
+a list of actions to take when the conditions match, like adding yourself to the
+CC list.
+
+Now you'll automatically be added to CC any time alincoln creates a revision,
+and can keep an eye on what he's up to.
+
+= Testing Rules =
+
+When you've created a rule, use the "Test Console" to test it out. Enter a
+revision or commit and Herald will do a dry run against that object, showing
+you which rules //would// match had it actually been updated. Dry runs executed
+via the test console don't take any actions.
+
+= Advanced Herald =
+
+A few features in Herald are particularly complicated:
+
+  - **matches regexp pair**: for Differential revisions, you can set a condition
+  like "Any changed file content matches regexp pair...". This allows you to
+  specify two regexes in JSON format. The first will be used to match the
+  filename of the changed file; the second will be used to match the content.
+  For example, if you want to match revisions which add or remove calls to
+  a "muffinize" function, //but only in JS files//, you can set the value
+  to ##["/\.js$/", "/muffinize/"]## or similar.
+  - **Another Herald rule**: you can create Herald rules which depend on other
+  rules. This can be useful if you need to express a more complicated predicate
+  than "all" vs "any" allows, or have a common set of conditions which you want
+  to share between several rules. If a rule is only being used as a group of
+  conditions, you can set the action to "Do Nothing".
+
