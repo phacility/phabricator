@@ -196,7 +196,11 @@ class ManiphestTaskDetailController extends ManiphestController {
         $action_list->render().
         '<div class="maniphest-task-detail-core">'.
           '<h1>'.
-            phutil_escape_html('T'.$task->getID().' '.$task->getTitle()).
+            '<span class="aphront-headsup-object-name">'.
+              phutil_escape_html('T'.$task->getID()).
+            '</span>'.
+            ' '.
+            phutil_escape_html($task->getTitle()).
           '</h1>'.
           $table.
         '</div>'.

@@ -242,7 +242,7 @@ class DifferentialRevisionViewController extends DifferentialController {
           $changeset_view->render().
           $comment_form->render()),
       array(
-        'title' => $revision->getTitle(),
+        'title' => 'D'.$revision->getID().' '.$revision->getTitle(),
       ));
   }
 
