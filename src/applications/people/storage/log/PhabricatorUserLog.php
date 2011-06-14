@@ -28,6 +28,9 @@ class PhabricatorUserLog extends PhabricatorUserDAO {
   const ACTION_ADMIN          = 'admin';
   const ACTION_DISABLE        = 'disable';
 
+  const ACTION_CONDUIT_CERTIFICATE = 'conduit-cert';
+  const ACTION_CONDUIT_CERTIFICATE_FAILURE = 'conduit-cert-fail';
+
   protected $actorPHID;
   protected $userPHID;
   protected $action;
@@ -57,6 +60,15 @@ class PhabricatorUserLog extends PhabricatorUserDAO {
     }
 
     return $log;
+  }
+
+  public static function loadRecentEventsFromThisIP($action, $timespan) {
+    return id(new PhabricatorUserLog())->loadAllWhere(
+      'action = %s AND remoteAddr = %s AND dateCreated > %d
+        ORDER BY dateCreated DESC',
+      $action,
+      idx($_SERVER, 'REMOTE_ADDR'),
+      time() - $timespan);
   }
 
   public function save() {

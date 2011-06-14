@@ -84,9 +84,9 @@ class AphrontDefaultApplicationConfiguration
         '$' => 'PhabricatorConduitConsoleController',
         'method/(?P<method>[^/]+)$' => 'PhabricatorConduitConsoleController',
         'log/$' => 'PhabricatorConduitLogController',
+        'token/$' => 'PhabricatorConduitTokenController',
       ),
       '/api/(?P<method>[^/]+)$' => 'PhabricatorConduitAPIController',
-
 
       '/D(?P<id>\d+)' => 'DifferentialRevisionViewController',
       '/differential/' => array(
