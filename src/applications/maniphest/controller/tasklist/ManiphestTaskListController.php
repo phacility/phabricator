@@ -163,9 +163,10 @@ class ManiphestTaskListController extends ManiphestController {
         $task_list->setTasks($list);
         $task_list->setHandles($handles);
 
+        $count = number_format(count($list));
         $nav->appendChild(
           '<h1 class="maniphest-task-group-header">'.
-            phutil_escape_html($group).
+            phutil_escape_html($group).' ('.$count.')'.
           '</h1>');
         $nav->appendChild($task_list);
       }
