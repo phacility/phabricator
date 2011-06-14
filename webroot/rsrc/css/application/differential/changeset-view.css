@@ -145,12 +145,21 @@
   white-space:        normal;
 }
 
+.differential-inline-comment-unsaved-draft {
+  background: #f1f1f1;
+  border: 1px dashed #666666;
+}
+
 .differential-inline-comment-head {
   font-weight:  bold;
   color:        #333333;
   border-bottom:  1px solid #ccccaa;
   padding-bottom: 6px;
   margin-bottom:  4px;
+}
+
+.differential-inline-comment-unsaved-draft .differential-inline-comment-head {
+  border-bottom: 1px solid #aaaaaa;
 }
 
 .differential-inline-comment-links,

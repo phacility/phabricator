@@ -88,6 +88,12 @@ final class DifferentialInlineCommentView extends AphrontView {
 
     $links = array();
 
+    $is_draft = false;
+    if (!$inline->getCommentID()) {
+      $links[] = 'Unsaved Draft';
+      $is_draft = true;
+    }
+
     if (!$this->preview) {
       $links[] = javelin_render_tag(
         'a',
@@ -163,10 +169,18 @@ final class DifferentialInlineCommentView extends AphrontView {
       ),
       '');
 
+    $classes = array(
+      'differential-inline-comment',
+    );
+    if ($is_draft) {
+      $classes[] = 'differential-inline-comment-unsaved-draft';
+    }
+    $classes = implode(' ', $classes);
+
     $markup = javelin_render_tag(
       'div',
       array(
-        'class' => 'differential-inline-comment',
+        'class' => $classes,
         'sigil' => $sigil,
         'meta'  => $metadata,
       ),
