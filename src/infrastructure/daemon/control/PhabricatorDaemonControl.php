@@ -163,7 +163,7 @@ EOHELP
     return 1;
   }
 
-  public function launchDaemon($daemon, array $argv, $debug) {
+  public function launchDaemon($daemon, array $argv, $debug = false) {
     $symbols = $this->loadAvailableDaemonClasses();
     $symbols = ipull($symbols, 'name', 'name');
     if (empty($symbols[$daemon])) {
