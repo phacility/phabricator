@@ -37,6 +37,15 @@ class PhabricatorCountdownViewController
 
     require_celerity_resource('phabricator-countdown-css');
 
+    $chrome_visible = $request->getBool('chrome', true);
+    $chrome_link = phutil_render_tag(
+      'a',
+      array(
+        'href' => $request->getRequestURI()->alter('chrome', !$chrome_visible),
+        'class' => 'phabricator-timer-chrome-link',
+      ),
+      $chrome_visible ? 'Disable Chrome' : 'Enable Chrome');
+
     $content =
       '<div class="phabricator-timer">
         <h1 class="phabricator-timer-header">'.
@@ -56,8 +65,9 @@ class PhabricatorCountdownViewController
               <td id="phabricator-timer-minutes"></td>
               <td id="phabricator-timer-seconds"></td>
           </table>
-        </div>
-      </div>';
+        </div>'.
+        $chrome_link.
+      '</div>';
 
     Javelin::initBehavior('countdown-timer', array(
       'timestamp' => $timer->getDatepoint()
@@ -65,10 +75,12 @@ class PhabricatorCountdownViewController
 
     $panel = $content;
 
-    return $this->buildStandardPageResponse($panel,
+    return $this->buildStandardPageResponse(
+      $panel,
       array(
-        'title' => 'T-minus..',
+        'title' => 'Countdown: '.$timer->getTitle(),
         'tab' => 'view',
+        'chrome' => $chrome_visible
       ));
   }
 

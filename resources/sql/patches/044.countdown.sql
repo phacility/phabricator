@@ -12,5 +12,5 @@ CREATE TABLE phabricator_countdown.countdown_timer (
 INSERT INTO phabricator_directory.directory_item
   (name, description, href, categoryID, sequence, dateCreated, dateModified)
 VALUES
-  ("Counterdown", "T-minus X to Y", "/countdown/", 5, 350,
+  ("Countdown", "Utilize the full capabilities of your ALU.", "/countdown/", 5, 350,
     UNIX_TIMESTAMP(), UNIX_TIMESTAMP());

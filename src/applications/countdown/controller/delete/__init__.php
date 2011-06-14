@@ -13,6 +13,7 @@ phutil_require_module('phabricator', 'applications/countdown/controller/base');
 phutil_require_module('phabricator', 'applications/countdown/storage/timer');
 phutil_require_module('phabricator', 'view/dialog');
 
+phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
 
 

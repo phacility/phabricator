@@ -26,6 +26,7 @@ class PhabricatorStandardPageView extends AphrontPageView {
   private $bodyContent;
   private $request;
   private $isAdminInterface;
+  private $showChrome = true;
 
   public function setIsAdminInterface($is_admin_interface) {
     $this->isAdminInterface = $is_admin_interface;
@@ -67,6 +68,15 @@ class PhabricatorStandardPageView extends AphrontPageView {
     $this->tabs = $tabs;
     $this->selectedTab = $selected_tab;
     return $this;
+  }
+
+  public function setShowChrome($show_chrome) {
+    $this->showChrome = $show_chrome;
+    return $this;
+  }
+
+  public function getShowChrome() {
+    return $this->showChrome;
   }
 
   public function getTitle() {
@@ -274,9 +284,10 @@ class PhabricatorStandardPageView extends AphrontPageView {
       $admin_class = 'phabricator-admin-page-view';
     }
 
-    return
-      ($console ? '<darkconsole />' : null).
-      '<div class="phabricator-standard-page '.$admin_class.'">'.
+    $header_chrome = null;
+    $footer_chrome = null;
+    if ($this->getShowChrome()) {
+      $header_chrome =
         '<table class="phabricator-standard-header">'.
           '<tr>'.
             '<td class="phabricator-logo"><a href="/"> </a></td>'.
@@ -300,13 +311,21 @@ class PhabricatorStandardPageView extends AphrontPageView {
               $login_stuff.
             '</td>'.
           '</tr>'.
-        '</table>'.
+        '</table>';
+      $footer_chrome =
+        '<div class="phabricator-page-foot">'.
+          $foot_links.
+        '</div>';
+    }
+
+    return
+      ($console ? '<darkconsole />' : null).
+      '<div class="phabricator-standard-page '.$admin_class.'">'.
+        $header_chrome.
         $this->bodyContent.
         '<div style="clear: both;"></div>'.
       '</div>'.
-      '<div class="phabricator-page-foot">'.
-        $foot_links.
-      '</div>';
+      $footer_chrome;
   }
 
   protected function getTail() {
@@ -314,6 +333,16 @@ class PhabricatorStandardPageView extends AphrontPageView {
     return
       $response->renderResourcesOfType('js').
       $response->renderHTMLFooter();
+  }
+
+  protected function getBodyClasses() {
+    $classes = array();
+
+    if (!$this->getShowChrome()) {
+      $classes[] = 'phabricator-chromeless-page';
+    }
+
+    return implode(' ', $classes);
   }
 
 }

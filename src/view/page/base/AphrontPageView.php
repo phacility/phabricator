@@ -49,6 +49,10 @@ class AphrontPageView extends AphrontView {
     return $response;
   }
 
+  protected function getBodyClasses() {
+    return null;
+  }
+
   public function render() {
 
     $this->willRenderPage();
@@ -58,6 +62,8 @@ class AphrontPageView extends AphrontView {
     $body  = $this->getBody();
     $tail  = $this->getTail();
 
+    $body_classes = $this->getBodyClasses();
+
     $response = <<<EOHTML
 <!DOCTYPE html>
 <html>
@@ -65,7 +71,7 @@ class AphrontPageView extends AphrontView {
     <title>{$title}</title>
     {$head}
   </head>
-  <body>
+  <body class="{$body_classes}">
     {$body}
   </body>
   {$tail}

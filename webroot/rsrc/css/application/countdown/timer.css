@@ -38,3 +38,8 @@
   font-size: 4em;
 }
 
+.phabricator-timer-chrome-link {
+  float: right;
+  padding: 3px 6px;
+  font-size: 11px;
+}

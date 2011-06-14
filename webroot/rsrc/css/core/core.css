@@ -60,6 +60,10 @@ body {
   *font-size: small;
 }
 
+body.phabricator-chromeless-page {
+  background: #ffffff;
+}
+
 select, input, button, textarea, button {
   font: 99% 'lucida grande', tahoma, verdana, arial, clean, sans-serif;
 }

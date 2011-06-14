@@ -12,6 +12,15 @@
   box-shadow:         0 0 6px #000;
 }
 
+.phabricator-chromeless-page .phabricator-standard-page {
+  background:           transparent;
+  border-width:         0px;
+
+  -webkit-box-shadow:   none;
+  -mox-box-shadow:      none;
+  box-shadow:           none;
+}
+
 .phabricator-standard-header {
   background: #005588;
   color: white;

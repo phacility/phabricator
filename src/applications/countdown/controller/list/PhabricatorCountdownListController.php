@@ -35,22 +35,16 @@ class PhabricatorCountdownListController
 
     $timers = $pager->sliceResults($timers);
 
+    $phids = mpull($timers, 'getAuthorPHID');
+    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+
     $rows = array();
     foreach ($timers as $timer) {
-
-      $control_buttons = array();
-      $control_buttons[] = phutil_render_tag(
-        'a',
-        array(
-          'class' => 'small button grey',
-          'href' => '/countdown/'.$timer->getID().'/',
-        ),
-        'View');
-
+      $edit_button = null;
+      $delete_button = null;
       if ($user->getIsAdmin() ||
           ($user->getPHID() == $timer->getAuthorPHID())) {
-
-        $control_buttons[] = phutil_render_tag(
+        $edit_button = phutil_render_tag(
           'a',
           array(
             'class' => 'small button grey',
@@ -58,7 +52,7 @@ class PhabricatorCountdownListController
           ),
           'Edit');
 
-        $control_buttons[] = javelin_render_tag(
+        $delete_button = javelin_render_tag(
           'a',
           array(
             'class' => 'small button grey',
@@ -66,14 +60,19 @@ class PhabricatorCountdownListController
             'sigil' => 'workflow'
           ),
           'Delete');
-
       }
-
       $rows[] = array(
         phutil_escape_html($timer->getID()),
-        phutil_escape_html($timer->getTitle()),
+        $handles[$timer->getAuthorPHID()]->renderLink(),
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => '/countdown/'.$timer->getID().'/',
+          ),
+          phutil_escape_html($timer->getTitle())),
         phabricator_format_timestamp($timer->getDatepoint()),
-        implode('', $control_buttons)
+        $edit_button,
+        $delete_button,
       );
     }
 
@@ -81,17 +80,21 @@ class PhabricatorCountdownListController
     $table->setHeaders(
       array(
         'ID',
+        'Author',
         'Title',
         'End Date',
-        'Action'
+        '',
+        ''
       ));
 
     $table->setColumnClasses(
       array(
         null,
         null,
+        'wide pri',
         null,
-        'action'
+        'action',
+        'action',
       ));
 
     $panel = id(new AphrontPanelView())
@@ -103,7 +106,7 @@ class PhabricatorCountdownListController
     return $this->buildStandardPageResponse($panel,
       array(
         'title' => 'Countdown',
-        'tab' => 'countdown',
+        'tab'   => 'list',
       ));
   }
 }

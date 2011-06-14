@@ -45,6 +45,7 @@ class PhabricatorCountdownEditController
       $action_label = 'Update Timer';
     } else {
       $timer = new PhabricatorTimer();
+      $timer->setDatePoint(time());
     }
 
     $error_view = null;
@@ -75,7 +76,7 @@ class PhabricatorCountdownEditController
         $timer->setAuthorPHID($user->getPHID());
         $timer->save();
         return id(new AphrontRedirectResponse())
-          ->setURI('/countdown/'.$timer->getID());
+          ->setURI('/countdown/'.$timer->getID().'/');
       }
       else {
         $error_view = id(new AphrontErrorView())
@@ -109,13 +110,13 @@ class PhabricatorCountdownEditController
       ->setHeader($action_label)
       ->appendChild($form);
 
-    return $this->buildStandardPageResponse(array(
+    return $this->buildStandardPageResponse(
+      array(
         $error_view,
-        $panel
+        $panel,
       ),
       array(
-        'title' => 'Countdown management',
-        'tab' => 'management',
+        'title' => 'Edit Countdown',
       ));
   }
 }
