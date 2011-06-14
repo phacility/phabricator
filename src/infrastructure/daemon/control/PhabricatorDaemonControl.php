@@ -163,6 +163,19 @@ EOHELP
     return 1;
   }
 
+  public function pingConduit() {
+    // It's fairly common to have issues here, e.g. because Phabricator isn't
+    // running, isn't accessible, you put the domain in your hostsfile but it
+    // isn't available on the production host, etc. If any of this doesn't work,
+    // conduit will throw.
+
+    // We do this here rather than in the daemon since there's an HTTPS + curl
+    // + fork issue of some kind that makes
+    $conduit = new ConduitClient(PhabricatorEnv::getURI('/api/'));
+    $conduit->setTimeout(5);
+    $conduit->callMethodSynchronous('conduit.ping', array());
+  }
+
   public function launchDaemon($daemon, array $argv, $debug = false) {
     $symbols = $this->loadAvailableDaemonClasses();
     $symbols = ipull($symbols, 'name', 'name');
@@ -171,6 +184,7 @@ EOHELP
     }
 
     $pid_dir = $this->getControlDirectory('pid');
+    $log_dir = $this->getControlDirectory('log').'/daemons.log';
 
     $libphutil_root = dirname(phutil_get_library_root('phutil'));
     $launch_daemon = $libphutil_root.'/scripts/daemon/';
@@ -205,12 +219,14 @@ EOHELP
         implode(' ', $extra_libraries)." ".
         "--conduit-uri=%s ".
         "--phd=%s ".
+        "--log=%s ".
         ($debug ? '--trace ' : '--daemonize ').
         implode(' ', $argv),
       $daemon,
       phutil_get_library_root('phabricator'),
       PhabricatorEnv::getURI('/api/'),
-      $pid_dir);
+      $pid_dir,
+      $log_dir);
 
     if ($debug) {
       // Don't terminate when the user sends ^C; it will be sent to the
@@ -234,7 +250,7 @@ EOHELP
     return;
   }
 
-  protected function getControlDirectory($dir) {
+  public function getControlDirectory($dir) {
     $path = PhabricatorEnv::getEnvConfig('phd.pid-directory').'/'.$dir;
     if (!Filesystem::pathExists($path)) {
       list($err) = exec_manual('mkdir -p %s', $path);

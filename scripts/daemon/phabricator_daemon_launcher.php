@@ -42,6 +42,8 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
     if (!$need_launch) {
       echo "There are no repositories with tracking enabled.\n";
     } else {
+      will_launch($control);
+
       foreach ($need_launch as $repository) {
         $name = $repository->getName();
         $callsign = $repository->getCallsign();
@@ -63,6 +65,8 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
     if (!$need_launch) {
       echo "There are no repositories with tracking enabled.\n";
     } else {
+      will_launch($control);
+
       foreach ($need_launch as $repository) {
         $name = $repository->getName();
         $callsign = $repository->getCallsign();
@@ -159,6 +163,8 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
       $daemon = reset($match);
     }
 
+    will_launch($control);
+
     if ($is_debug) {
       echo "Launching {$daemon} in debug mode (nondaemonized)...\n";
     } else {
@@ -210,3 +216,11 @@ function phd_load_tracked_repositories() {
 
   return $repositories;
 }
+
+function will_launch($control) {
+  echo "Staging launch...\n";
+  $control->pingConduit();
+  $log_dir = $control->getControlDirectory('log').'/daemons.log';
+  echo "NOTE: Logs will appear in '{$log_dir}'.\n\n";
+}
+
