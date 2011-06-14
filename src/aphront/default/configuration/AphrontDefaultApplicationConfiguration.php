@@ -307,8 +307,8 @@ class AphrontDefaultApplicationConfiguration
       '/status/$' => 'PhabricatorStatusController',
 
       '/paste/' => array(
-        '$' => 'PhabricatorPasteHomeController',
-        'create/' => 'PhabricatorPasteCreateController',
+        '$' => 'PhabricatorPasteCreateController',
+        'list/' => 'PhabricatorPasteListController',
       ),
 
       '/P(?P<id>\d+)$' => 'PhabricatorPasteViewController',

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorPasteHomeController extends PhabricatorPasteController {
+class PhabricatorPasteListController extends PhabricatorPasteController {
 
   public function processRequest() {
 
@@ -45,8 +45,7 @@ class PhabricatorPasteHomeController extends PhabricatorPasteController {
       $handle = $handles[$paste->getAuthorPHID()];
 
       $rows[] = array(
-        phutil_escape_html($paste->getPHID()),
-        phutil_escape_html($paste->getTitle()),
+        phutil_escape_html('P'.$paste->getID()),
 
         // TODO: Make this filter by user instead of going to their profile.
         phutil_render_tag(
@@ -59,42 +58,52 @@ class PhabricatorPasteHomeController extends PhabricatorPasteController {
         phutil_render_tag(
           'a',
           array(
-            'href' => PhabricatorFileURI::getViewURIForPHID(
-              $paste->getFilePHID()),
+            'href' => '/P'.$paste->getID(),
           ),
-          phutil_escape_html($paste->getFilePHID())),
+          phutil_escape_html(
+            nonempty(
+              $paste->getTitle(),
+              'Untitled Masterwork P'.$paste->getID()))),
 
         phutil_render_tag(
           'a',
           array(
-            'class' => 'small button grey',
-            'href'  => '/P'.$paste->getID(),
+            'href' => PhabricatorFileURI::getViewURIForPHID(
+              $paste->getFilePHID()),
           ),
-          'View'),
+          phutil_escape_html($paste->getFilePHID())),
       );
     }
 
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'PHID',
-        'Title',
+        'Paste ID',
         'Author',
-        'File PHID',
-        'View'
+        'Title',
+        'File',
+      ));
+
+    $table->setColumnClasses(
+      array(
+        null,
+        null,
+        'wide pri',
+        null,
       ));
 
     $panel = new AphrontPanelView();
     $panel->setWidth(AphrontPanelView::WIDTH_FULL);
     $panel->setHeader("Paste");
-    $panel->setCreateButton('Paste Something', '/paste/create/');
+    $panel->setCreateButton('Paste Something', '/paste/');
     $panel->appendChild($table);
     $panel->appendChild($pager);
 
     return $this->buildStandardPageResponse(
       $panel,
       array(
-        'title' => 'Paste',
+        'title' => 'Paste List',
+        'tab'   => 'list',
       )
     );
   }

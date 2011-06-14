@@ -9,6 +9,7 @@
 phutil_require_module('phabricator', 'aphront/response/400');
 phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'applications/files/storage/file');
+phutil_require_module('phabricator', 'applications/files/uri');
 phutil_require_module('phabricator', 'applications/paste/controller/base');
 phutil_require_module('phabricator', 'applications/paste/storage/paste');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');

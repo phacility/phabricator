@@ -27,6 +27,7 @@ class PhabricatorPasteCreateController extends PhabricatorPasteController {
     $error_view = null;
     $e_text = true;
 
+    $paste_text = null;
     if ($request->isFormPost()) {
       $errors = array();
       $title = $request->getStr('title');
@@ -59,6 +60,19 @@ class PhabricatorPasteCreateController extends PhabricatorPasteController {
         $error_view->setErrors($errors);
         $error_view->setTitle('A problem has occurred!');
       }
+    } else {
+      $copy = $request->getInt('copy');
+      if ($copy) {
+        $copy_paste = id(new PhabricatorPaste())->load($copy);
+        if ($copy_paste) {
+          $title = nonempty($copy_paste->getTitle(), 'P'.$copy_paste->getID());
+          $paste->setTitle('Copy of '.$title);
+          $copy_file = id(new PhabricatorFile())->loadOneWhere(
+            'phid = %s',
+            $copy_paste->getFilePHID());
+          $paste_text = $copy_file->loadFileData();
+        }
+      }
     }
 
     $form = new AphrontFormView();
@@ -74,6 +88,8 @@ class PhabricatorPasteCreateController extends PhabricatorPasteController {
         id(new AphrontFormTextAreaControl())
           ->setLabel('Text')
           ->setError($e_text)
+          ->setValue($paste_text)
+          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
           ->setName('text'))
       ->appendChild(
         id(new AphrontFormSubmitControl())

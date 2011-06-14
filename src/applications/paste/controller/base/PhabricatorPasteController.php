@@ -28,9 +28,9 @@ abstract class PhabricatorPasteController extends PhabricatorController {
     $page->setGlyph("\xE2\x9C\x8E");
     $page->setTabs(
       array(
-        'create' => array(
-          'href' => '/paste/create',
-          'name' => 'Create a Paste',
+        'list' => array(
+          'href' => '/paste/list/',
+          'name' => 'Paste List',
         ),
       ),
       idx($data, 'tab'));

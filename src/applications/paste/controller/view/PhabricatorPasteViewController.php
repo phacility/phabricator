@@ -43,16 +43,6 @@ class PhabricatorPasteViewController extends PhabricatorPasteController {
 
     $corpus = $this->buildCorpus($paste, $file);
 
-    /* TODO
-    $raw_button = phutil_render_tag(
-      'a',
-      array(
-        'class' => 'small button grey',
-        'href'  => '/P'.$paste->getId().'/raw/',
-      ),
-      'Raw Paste');
-    */
-
     $panel = new AphrontPanelView();
 
     if (strlen($paste->getTitle())) {
@@ -64,14 +54,31 @@ class PhabricatorPasteViewController extends PhabricatorPasteController {
     }
 
     $panel->setWidth(AphrontPanelView::WIDTH_FULL);
-    $panel->setCreateButton('Paste Something', '/paste/create/');
+    $panel->addButton(
+      phutil_render_tag(
+        'a',
+        array(
+          'href' => '/paste/?copy='.$paste->getID(),
+          'class' => 'green button',
+        ),
+        'Copy This'));
+
+    $raw_uri = PhabricatorFileURI::getViewURIForPHID($paste->getFilePHID());
+    $panel->addButton(
+      phutil_render_tag(
+        'a',
+        array(
+          'href'  => $raw_uri,
+          'class' => 'button',
+        ),
+        'View Raw Text'));
+
     $panel->appendChild($corpus);
-    // $panel->appendChild($raw_button);
 
     return $this->buildStandardPageResponse(
       $panel,
       array(
-        'title' => 'Viewing Paste '.$this->id,
+        'title' => 'Paste: '.nonempty($paste->getTitle(), 'P'.$paste->getID()),
         'tab' => 'view',
       ));
   }

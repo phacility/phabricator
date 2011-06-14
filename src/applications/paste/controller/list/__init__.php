@@ -18,4 +18,4 @@ phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
 
 
-phutil_require_source('PhabricatorPasteHomeController.php');
+phutil_require_source('PhabricatorPasteListController.php');

@@ -9,6 +9,7 @@
 phutil_require_module('phabricator', 'infrastructure/daemon/control/reference');
 phutil_require_module('phabricator', 'infrastructure/env');
 
+phutil_require_module('phutil', 'conduit/client');
 phutil_require_module('phutil', 'console');
 phutil_require_module('phutil', 'filesystem');
 phutil_require_module('phutil', 'future/exec');
