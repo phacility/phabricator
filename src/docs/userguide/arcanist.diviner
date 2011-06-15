@@ -96,7 +96,15 @@ been accepted, you can commit it like this:
 There are a lot of ways to use git, and Arcanist is flexible enough to handle
 several of them. Use a commit template similar to this one:
 
-  resources/git/commit-template.txt
+  arcanist/resources/git/commit-template.txt
+
+The easiest way to set up the template is to check it into your repository
+somewhere and then add this to your ##.git/config## file:
+
+  [commit]
+    template = path/to/template.txt
+
+You can also configure it globally, consult the git documentation for details.
 
 To **create a revision** in git:
 
