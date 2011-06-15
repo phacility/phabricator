@@ -313,6 +313,27 @@ class PhabricatorSetup {
       self::write(" okay  Database schema are up to date (v{$expect}).\n");
     }
 
+    $index_min_length = queryfx_one(
+      $conn_raw,
+      'SHOW VARIABLES LIKE %s',
+      'ft_min_word_len');
+    $index_min_length = idx($index_min_length, 'Value', 4);
+    if ($index_min_length >= 4) {
+      self::writeNote(
+        "MySQL is configured with a 'ft_min_word_len' of 4 or greater, which ".
+        "means you will not be able to search for 3-letter terms. Consider ".
+        "setting this in your configuration:\n".
+        "\n".
+        "    [mysqld]\n".
+        "        ft_min_word_len=3\n".
+        "\n".
+        "Then optionally run:\n".
+        "\n".
+        "    REPAIR TABLE phabricator_search.search_documentfield QUICK;\n".
+        "\n".
+        "...to reindex existing documents.");
+    }
+
     self::write("[OKAY] Database configuration OKAY\n");
 
 
@@ -457,8 +478,9 @@ class PhabricatorSetup {
   }
 
   private static function writeNote($note) {
-    self::write(
-      'Note: '.wordwrap($note, 75, "\n      ", true)."\n\n");
+    $note = "*** NOTE: ".wordwrap($note, 75, "\n", true);
+    $note = "\n".str_replace("\n", "\n          ", $note)."\n\n";
+    self::write($note);
   }
 
   public static function writeHeader($header) {
