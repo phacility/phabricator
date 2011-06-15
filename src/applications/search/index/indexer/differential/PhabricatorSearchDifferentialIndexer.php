@@ -77,12 +77,22 @@ class PhabricatorSearchDifferentialIndexer
 
     $rev->loadRelationships();
 
-    foreach ($rev->getReviewers() as $phid) {
+    // If a revision needs review, the owners are the reviewers. Otherwise, the
+    // owner is the author (e.g., accepted, rejected, committed).
+    if ($rev->getStatus() == DifferentialRevisionStatus::NEEDS_REVIEW) {
+      foreach ($rev->getReviewers() as $phid) {
+        $doc->addRelationship(
+          PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
+          $phid,
+          PhabricatorPHIDConstants::PHID_TYPE_USER,
+          $rev->getDateModified()); // Bogus timestamp.
+      }
+    } else {
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
-        $phid,
+        $rev->getAuthorPHID(),
         PhabricatorPHIDConstants::PHID_TYPE_USER,
-        $rev->getDateModified()); // Bogus timestamp.
+        $rev->getDateCreated());
     }
 
     $ccphids = $rev->getCCPHIDs();

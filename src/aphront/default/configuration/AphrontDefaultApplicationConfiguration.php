@@ -192,6 +192,7 @@ class AphrontDefaultApplicationConfiguration
           => 'PhabricatorSearchAttachController',
         'select/(?P<type>\w+)/$'
           => 'PhabricatorSearchSelectController',
+        'index/(?P<phid>[^/]+)/$' => 'PhabricatorSearchIndexController',
       ),
 
       '/project/' => array(

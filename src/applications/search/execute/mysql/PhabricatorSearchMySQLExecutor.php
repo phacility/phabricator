@@ -18,6 +18,73 @@
 
 class PhabricatorSearchMySQLExecutor extends PhabricatorSearchExecutor {
 
+  /**
+   * Rebuild the PhabricatorSearchAbstractDocument that was used to index
+   * an object out of the index itself. This is primarily useful for debugging,
+   * as it allows you to inspect the search index representation of a
+   * document.
+   *
+   * @param  phid PHID of a document which exists in the search index.
+   * @return null|PhabricatorSearchAbstractDocument Abstract document object
+   *           which corresponds to the original abstract document used to
+   *           build the document index.
+   */
+  public function reconstructDocument($phid) {
+    $dao_doc = new PhabricatorSearchDocument();
+    $dao_field = new PhabricatorSearchDocumentField();
+    $dao_relationship = new PhabricatorSearchDocumentRelationship();
+
+    $t_doc = $dao_doc->getTableName();
+    $t_field = $dao_field->getTableName();
+    $t_relationship = $dao_relationship->getTableName();
+
+    $doc = queryfx_one(
+      $dao_doc->establishConnection('r'),
+      'SELECT * FROM %T WHERE phid = %s',
+      $t_doc,
+      $phid);
+
+    if (!$doc) {
+      return null;
+    }
+
+    $fields = queryfx_all(
+      $dao_field->establishConnection('r'),
+      'SELECT * FROM %T WHERE phid = %s',
+      $t_field,
+      $phid);
+
+    $relationships = queryfx_all(
+      $dao_relationship->establishConnection('r'),
+      'SELECT * FROM %T WHERE phid = %s',
+      $t_relationship,
+      $phid);
+
+    $adoc = id(new PhabricatorSearchAbstractDocument())
+      ->setPHID($phid)
+      ->setDocumentType($doc['documentType'])
+      ->setDocumentTitle($doc['documentTitle'])
+      ->setDocumentCreated($doc['documentCreated'])
+      ->setDocumentModified($doc['documentModified']);
+
+    foreach ($fields as $field) {
+      $adoc->addField(
+        $field['field'],
+        $field['corpus'],
+        $field['auxPHID']);
+    }
+
+    foreach ($relationships as $relationship) {
+      $adoc->addRelationship(
+        $relationship['relation'],
+        $relationship['relatedPHID'],
+        $relationship['relatedType'],
+        $relationship['relatedTime']);
+    }
+
+    return $adoc;
+  }
+
   public function executeSearch(PhabricatorSearchQuery $query) {
 
     $where = array();

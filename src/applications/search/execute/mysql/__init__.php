@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'applications/search/constants/relationship');
 phutil_require_module('phabricator', 'applications/search/execute/base');
+phutil_require_module('phabricator', 'applications/search/index/abstractdocument');
 phutil_require_module('phabricator', 'applications/search/storage/document/document');
 phutil_require_module('phabricator', 'applications/search/storage/document/field');
 phutil_require_module('phabricator', 'applications/search/storage/document/relationship');

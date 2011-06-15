@@ -332,6 +332,9 @@ class DifferentialCommentEditor {
     id(new PhabricatorTimelineEvent('difx', $event_data))
       ->recordEvent();
 
+    // TODO: Move to a daemon?
+    PhabricatorSearchDifferentialIndexer::indexRevision($revision);
+
     return $comment;
   }
 
