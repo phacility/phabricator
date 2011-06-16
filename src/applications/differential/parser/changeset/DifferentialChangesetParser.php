@@ -742,10 +742,16 @@ class DifferentialChangesetParser {
 
     $changeset = $this->changeset;
 
+    // Get the diff for figuring out the creation method. Currently
+    // 'web' method is broken for 'ignore-all' mode, because the original
+    // file is not available, only the diff part.
+    $diff = id(new DifferentialDiff())->load($changeset->getDiffID());
+
     if ($changeset->getFileType() == DifferentialChangeType::FILE_TEXT ||
         $changeset->getFileType() == DifferentialChangeType::FILE_SYMLINK) {
       if ($skip_cache || !$this->loadCache()) {
-        if ($this->whitespaceMode == self::WHITESPACE_IGNORE_ALL) {
+        if ($this->whitespaceMode == self::WHITESPACE_IGNORE_ALL &&
+            $diff->getCreationMethod() != 'web') {
 
           // Huge mess. Generate a "-bw" (ignore all whitespace changes) diff,
           // parse it out, and then play a shell game with the parsed format
