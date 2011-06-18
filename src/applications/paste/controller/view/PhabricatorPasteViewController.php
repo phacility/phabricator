@@ -104,7 +104,7 @@ class PhabricatorPasteViewController extends PhabricatorPasteController {
     $corpus_table = phutil_render_tag(
       'table',
       array(
-        'class' => "diffusion-source remarkup-code PhabricatorMonospaced",
+        'class' => 'diffusion-source remarkup-code PhabricatorMonospaced',
       ),
       implode("\n", $rows));
 
@@ -127,7 +127,8 @@ class PhabricatorPasteViewController extends PhabricatorPasteController {
       // And eventually this will highlight a line that you click
       // like diffusion does. Or maybe allow for line comments
       // like differential. Either way it will be better than it is now.
-      $rows[] = '<tr><th>'.$n.'</th><td>'.$line.'</td></tr>';
+      $rows[] = '<tr><th>'.$n.'</th>'.
+        '<td style="white-space: pre-wrap;">'.$line.'</td></tr>';
       ++$n;
     }
 
