@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorProjectEditController
+class PhabricatorProjectProfileEditController
   extends PhabricatorProjectController {
 
   private $id;
@@ -35,9 +35,7 @@ class PhabricatorProjectEditController
       if (!$project) {
         return new Aphront404Response();
       }
-      $profile = id(new PhabricatorProjectProfile())->loadOneWhere(
-        'projectPHID = %s',
-        $project->getPHID());
+      $profile = $project->getProfile();
     } else {
       $project = new PhabricatorProject();
       $project->setAuthorPHID($user->getPHID());
@@ -47,12 +45,13 @@ class PhabricatorProjectEditController
       $profile = new PhabricatorProjectProfile();
     }
 
+    $options = PhabricatorProjectStatus::getStatusMap();
+
     $e_name = true;
     $errors = array();
-
     if ($request->isFormPost()) {
-
       $project->setName($request->getStr('name'));
+      $project->setStatus($request->getStr('status'));
       $profile->setBlurb($request->getStr('blurb'));
 
       if (!strlen($project->getName())) {
@@ -60,6 +59,21 @@ class PhabricatorProjectEditController
         $errors[] = 'Project name is required.';
       } else {
         $e_name = null;
+      }
+
+      if (!empty($_FILES['image'])) {
+        $err = idx($_FILES['image'], 'error');
+        if ($err != UPLOAD_ERR_NO_FILE) {
+          $file = PhabricatorFile::newFromPHPUpload($_FILES['image']);
+          $okay = $file->isTransformableImage();
+          if ($okay) {
+            $profile->setProfileImagePHID($file->getPHID());
+          } else {
+            $errors[] =
+              'Only valid image files (jpg, jpeg, png or gif) '.
+              'will be accepted.';
+          }
+        }
       }
 
       if (!$errors) {
@@ -92,6 +106,7 @@ class PhabricatorProjectEditController
     $form
       ->setUser($user)
       ->setAction($action)
+      ->setEncType('multipart/form-data')
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Name')
@@ -99,13 +114,24 @@ class PhabricatorProjectEditController
           ->setValue($project->getName())
           ->setError($e_name))
       ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel('Project Status')
+          ->setName('status')
+          ->setOptions($options)
+          ->setValue($project->getStatus()))
+      ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel('Blurb')
           ->setName('blurb')
           ->setValue($profile->getBlurb()))
       ->appendChild(
+        id(new AphrontFormFileControl())
+          ->setLabel('Change Image')
+          ->setName('image')
+          ->setCaption('Upload a 280px-wide image.'))
+      ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->addCancelButton('/project/')
+          ->addCancelButton('/project/view/'.$project->getID().'/')
           ->setValue('Save'));
 
     $panel = new AphrontPanelView();
@@ -122,5 +148,4 @@ class PhabricatorProjectEditController
         'title' => $title,
       ));
   }
-
 }

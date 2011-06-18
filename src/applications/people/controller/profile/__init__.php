@@ -14,7 +14,7 @@ phutil_require_module('phabricator', 'applications/people/controller/base');
 phutil_require_module('phabricator', 'applications/people/storage/profile');
 phutil_require_module('phabricator', 'applications/people/storage/user');
 phutil_require_module('phabricator', 'applications/people/storage/useroauthinfo');
-phutil_require_module('phabricator', 'infrastructure/celerity/api');
+phutil_require_module('phabricator', 'view/layout/profile');
 phutil_require_module('phabricator', 'view/utils');
 
 phutil_require_module('phutil', 'markup');

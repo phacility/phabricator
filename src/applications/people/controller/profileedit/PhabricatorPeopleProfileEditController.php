@@ -60,6 +60,7 @@ class PhabricatorPeopleProfileEditController
       }
     }
 
+    $error_view = null;
     if ($errors) {
       $error_view = new AphrontErrorView();
       $error_view->setTitle('Form Errors');
