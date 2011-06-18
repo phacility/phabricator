@@ -22,6 +22,7 @@ class PhabricatorMetaMTAReceivedListController
   public function processRequest() {
 
     $request = $this->getRequest();
+    $user = $request->getUser();
 
     $pager = new AphrontPagerView();
     $pager->setOffset($request->getInt('page'));
@@ -45,8 +46,8 @@ class PhabricatorMetaMTAReceivedListController
     foreach ($mails as $mail) {
       $rows[] = array(
         $mail->getID(),
-        date('M jS Y', $mail->getDateCreated()),
-        date('g:i:s A', $mail->getDateCreated()),
+        phabricator_date($mail->getDateCreated(), $user),
+        phabricator_time($mail->getDateCreated(), $user),
         $mail->getAuthorPHID()
           ? $handles[$mail->getAuthorPHID()]->renderLink()
           : '-',

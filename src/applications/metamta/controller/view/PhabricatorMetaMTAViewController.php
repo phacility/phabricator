@@ -27,6 +27,7 @@ class PhabricatorMetaMTAViewController extends PhabricatorMetaMTAController {
   public function processRequest() {
 
     $request = $this->getRequest();
+    $user = $request->getUser();
 
     $mail = id(new PhabricatorMetaMTAMail())->load($this->id);
     if (!$mail) {
@@ -46,7 +47,7 @@ class PhabricatorMetaMTAViewController extends PhabricatorMetaMTAController {
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel('Created')
-          ->setValue(date('F jS, Y g:i:s A', $mail->getDateCreated())))
+          ->setValue(phabricator_datetime($mail->getDateCreated(), $user)))
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel('Status')

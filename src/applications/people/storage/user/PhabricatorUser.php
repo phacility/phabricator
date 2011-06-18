@@ -27,6 +27,7 @@ class PhabricatorUser extends PhabricatorUserDAO {
   protected $passwordSalt;
   protected $passwordHash;
   protected $profileImagePHID;
+  protected $timezoneIdentifier;
 
   protected $consoleEnabled = 0;
   protected $consoleVisible = 0;

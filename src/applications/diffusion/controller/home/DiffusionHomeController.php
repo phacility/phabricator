@@ -19,6 +19,8 @@
 class DiffusionHomeController extends DiffusionController {
 
   public function processRequest() {
+    $request = $this->getRequest();
+    $user = $request->getUser();
 
     $shortcuts = id(new PhabricatorRepositoryShortcut())->loadAll();
     if ($shortcuts) {
@@ -94,8 +96,8 @@ class DiffusionHomeController extends DiffusionController {
       $date = '-';
       $time = '-';
       if ($commit) {
-        $date = date('M j, Y', $commit->getEpoch());
-        $time = date('g:i A', $commit->getEpoch());
+        $date = phabricator_date($commit->getEpoch(), $user);
+        $time = phabricator_time($commit->getEpoch(), $user);
       }
 
       $rows[] = array(

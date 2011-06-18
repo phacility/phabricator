@@ -137,6 +137,14 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
             $e_realname = 'Required';
           }
 
+          $new_timezone = $request->getStr('timezone');
+          if (in_array($new_timezone, DateTimeZone::listIdentifiers(), true)) {
+            $user->setTimezoneIdentifier($new_timezone);
+          } else {
+            $errors[] =
+              'The selected timezone is not a valid timezone.';
+          }
+
           if (!$errors) {
             $user->save();
 
@@ -324,12 +332,24 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
               ))));
 
     if ($editable) {
+      $timezone_ids = DateTimeZone::listIdentifiers();
+      $timezone_id_map = array_combine($timezone_ids, $timezone_ids);
+
       $form
         ->appendChild(
           id(new AphrontFormFileControl())
             ->setLabel('Change Image')
             ->setName('profile')
             ->setCaption('Upload a 50x50px image.'))
+        ->appendChild(
+            id(new AphrontFormMarkupControl())
+              ->setValue('<hr />'))
+        ->appendChild(
+          id(new AphrontFormSelectControl())
+            ->setLabel('Timezone')
+            ->setName('timezone')
+            ->setOptions($timezone_id_map)
+            ->setValue($user->getTimezoneIdentifier()))
         ->appendChild(
             id(new AphrontFormMarkupControl())
               ->setValue('<hr />'))

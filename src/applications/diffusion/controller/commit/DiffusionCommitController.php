@@ -23,6 +23,7 @@ class DiffusionCommitController extends DiffusionController {
   public function processRequest() {
     $drequest = $this->getDiffusionRequest();
     $request = $this->getRequest();
+    $user = $request->getUser();
 
     $callsign = $drequest->getRepository()->getCallsign();
 
@@ -56,7 +57,7 @@ class DiffusionCommitController extends DiffusionController {
         '<div class="diffusion-commit-dateline">'.
           'r'.$callsign.$commit->getCommitIdentifier().
           ' &middot; '.
-          date('F jS, Y g:i A', $commit->getEpoch()).
+          phabricator_datetime($commit->getEpoch(), $user).
         '</div>'.
         '<h1>Revision Detail</h1>'.
         '<div class="diffusion-commit-details">'.
