@@ -53,8 +53,8 @@ class PhabricatorPeopleListController extends PhabricatorPeopleController {
       }
 
       $rows[] = array(
-        date('M jS, Y', $user->getDateCreated()),
-        date('g:i:s A', $user->getDateCreated()),
+        phabricator_date($user->getDateCreated(), $user),
+        phabricator_time($user->getDateCreated(), $user),
         phutil_render_tag(
           'a',
           array(

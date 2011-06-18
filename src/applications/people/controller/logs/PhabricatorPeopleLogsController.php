@@ -169,8 +169,8 @@ class PhabricatorPeopleLogsController extends PhabricatorPeopleController {
     $rows = array();
     foreach ($logs as $log) {
       $rows[] = array(
-        date('M jS, Y', $log->getDateCreated()),
-        date('g:i:s A', $log->getDateCreated()),
+        phabricator_date($log->getDateCreated(),$user),
+        phabricator_time($log->getDateCreated(),$user),
         $log->getAction(),
         $log->getActorPHID()
           ? phutil_escape_html($handles[$log->getActorPHID()]->getName())
