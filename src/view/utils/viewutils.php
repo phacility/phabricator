@@ -16,6 +16,24 @@
  * limitations under the License.
  */
 
+function phabricator_date($epoch, $user) {
+  $zone = new DateTimeZone($user->getTimezoneIdentifier());
+  $date = new DateTime('@'.$epoch, $zone);
+  return $date->format('M j Y');
+}
+
+function phabricator_time($epoch, $user) {
+  $zone = new DateTimeZone($user->getTimezoneIdentifier());
+  $date = new DateTime('@'.$epoch, $zone);
+  return $date->format('g:i A');
+}
+
+function phabricator_datetime($epoch, $user) {
+  $zone = new DateTimeZone($user->getTimezoneIdentifier());
+  $date = new DateTime('@'.$epoch, $zone);
+  return $date->format('M j Y, g:i A');
+}
+
 function phabricator_format_relative_time($duration) {
   return phabricator_format_units_generic(
     $duration,

@@ -21,6 +21,7 @@ class HeraldTranscriptListController extends HeraldController {
   public function processRequest() {
 
     $request = $this->getRequest();
+    $user = $request->getUser();
 
     // Get one page of data together with the pager.
     // Pull these objects manually since the serialized fields are gigantic.
@@ -98,8 +99,8 @@ class HeraldTranscriptListController extends HeraldController {
     $rows = array();
     foreach ($data as $xscript) {
       $rows[] = array(
-        date('F jS', $xscript['time']),
-        date('g:i:s A', $xscript['time']),
+        phabricator_date($xscript['time'],$user),
+        phabricator_time($xscript['time'],$user),
         $handles[$xscript['objectPHID']]->renderLink(),
         $xscript['dryRun'] ? 'Yes' : '',
         number_format((int)(1000 * $xscript['duration'])).' ms',
