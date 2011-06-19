@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/differential/constants/action');
 phutil_require_module('phabricator', 'applications/differential/constants/revisionstatus');
 phutil_require_module('phabricator', 'applications/differential/mail/ccwelcome');
 phutil_require_module('phabricator', 'applications/differential/mail/newdiff');
@@ -16,6 +17,7 @@ phutil_require_module('phabricator', 'applications/herald/engine/engine');
 phutil_require_module('phabricator', 'applications/herald/storage/transcript/base');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'applications/search/index/indexer/differential');
+phutil_require_module('phabricator', 'infrastructure/daemon/timeline/storage/event');
 phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'storage/qsprintf');
 phutil_require_module('phabricator', 'storage/queryfx');

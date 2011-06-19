@@ -359,6 +359,22 @@ class DifferentialRevisionEditor {
 
     $revision->save();
 
+    $event_data = array(
+      'revision_id'          => $revision->getID(),
+      'revision_phid'        => $revision->getPHID(),
+      'revision_name'        => $revision->getTitle(),
+      'revision_author_phid' => $revision->getAuthorPHID(),
+      'action'               => $is_new
+        ? DifferentialAction::ACTION_CREATE
+        : DifferentialAction::ACTION_UPDATE,
+      'feedback_content'     => $is_new
+        ? ''
+        : $this->getComments(),
+      'actor_phid'           => $revision->getAuthorPHID(),
+    );
+    id(new PhabricatorTimelineEvent('difx', $event_data))
+      ->recordEvent();
+
 // TODO
 //    $revision->saveTransaction();
 
