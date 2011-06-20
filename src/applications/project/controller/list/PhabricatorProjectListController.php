@@ -23,6 +23,21 @@ class PhabricatorProjectListController
 
     $projects = id(new PhabricatorProject())->loadAllWhere(
       '1 = 1 ORDER BY id DESC limit 100');
+    $project_phids = mpull($projects, 'getPHID');
+
+    $profiles = array();
+    if ($projects) {
+      $profiles = id(new PhabricatorProjectProfile())->loadAllWhere(
+        'projectPHID in (%Ls)',
+        $project_phids);
+      $profiles = mpull($profiles, null, 'getProjectPHID');
+    }
+
+    $affil_groups = array();
+    if ($projects) {
+      $affil_groups = PhabricatorProjectAffiliation::loadAllForProjectPHIDs(
+        $project_phids);
+    }
 
     $author_phids = mpull($projects, 'getAuthorPHID');
     $handles = id(new PhabricatorObjectHandleData($author_phids))
@@ -30,12 +45,15 @@ class PhabricatorProjectListController
 
     $rows = array();
     foreach ($projects as $project) {
+      $profile = $profiles[$project->getPHID()];
+      $affiliations = $affil_groups[$project->getPHID()];
+
       $documents = new PhabricatorProjectTransactionSearch($project->getPHID());
       // search all open documents by default
       $documents->setSearchOptions();
       $documents = $documents->executeSearch();
 
-      $documents_types = igroup($documents,'documentType');
+      $documents_types = igroup($documents, 'documentType');
       $tasks = idx(
         $documents_types,
         PhabricatorPHIDConstants::PHID_TYPE_TASK);
@@ -48,8 +66,6 @@ class PhabricatorProjectListController
         PhabricatorPHIDConstants::PHID_TYPE_DREV);
       $revisions_amount = count($revisions);
 
-      $profile = $project->getProfile();
-      $affiliations = $project->loadAffiliations();
       $population = count($affiliations);
 
       $status = PhabricatorProjectStatus::getNameForStatus(

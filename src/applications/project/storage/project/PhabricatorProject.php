@@ -34,7 +34,7 @@ class PhabricatorProject extends PhabricatorProjectDAO {
       PhabricatorPHIDConstants::PHID_TYPE_PROJ);
   }
 
-  public function getProfile() {
+  public function loadProfile() {
     $profile = id(new PhabricatorProjectProfile())->loadOneWhere(
       'projectPHID = %s',
       $this->getPHID());
@@ -42,9 +42,8 @@ class PhabricatorProject extends PhabricatorProjectDAO {
   }
 
   public function loadAffiliations() {
-    $affiliations = id(new PhabricatorProjectAffiliation())->loadAllWhere(
-      'projectPHID = %s ORDER BY IF(status = "former", 1, 0), dateCreated',
-      $this->getPHID());
-    return $affiliations;
+    $affils = PhabricatorProjectAffiliation::loadAllForProjectPHIDs(
+      array($this->getPHID()));
+    return $affils[$this->getPHID()];
   }
 }

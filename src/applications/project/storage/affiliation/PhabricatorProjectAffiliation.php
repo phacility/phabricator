@@ -23,4 +23,17 @@ class PhabricatorProjectAffiliation extends PhabricatorProjectDAO {
   protected $role;
   protected $status;
 
+  public static function loadAllForProjectPHIDs($phids) {
+    if (!$phids) {
+      return array();
+    }
+    $default = array_fill_keys($phids, array());
+
+    $affiliations = id(new PhabricatorProjectAffiliation())->loadAllWhere(
+      'projectPHID IN (%Ls) ORDER BY IF(status = "former", 1, 0), dateCreated',
+      $phids);
+
+    return mgroup($affiliations, 'getProjectPHID') + $default;
+  }
+
 }

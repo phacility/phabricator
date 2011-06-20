@@ -36,7 +36,7 @@ class PhabricatorProjectProfileController
     if (!$project) {
       return new Aphront404Response();
     }
-    $profile = $project->getProfile();
+    $profile = $project->loadProfile();
     if (!$profile) {
       $profile = new PhabricatorProjectProfile();
     }
