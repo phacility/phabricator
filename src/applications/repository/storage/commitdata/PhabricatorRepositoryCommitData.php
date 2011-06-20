@@ -18,6 +18,8 @@
 
 class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
 
+  const SUMMARY_MAX_LENGTH = 100;
+
   protected $commitID;
   protected $authorName;
   protected $commitMessage;
@@ -33,7 +35,12 @@ class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
   }
 
   public function getSummary() {
-    return substr($this->getCommitMessage(), 0, 80);
+    $message = $this->getCommitMessage();
+    $lines = explode("\n", $message);
+    $summary = head($lines);
+    $summary = substr($summary, 0, self::SUMMARY_MAX_LENGTH);
+
+    return $summary;
   }
 
   public function getCommitDetail($key, $default = null) {

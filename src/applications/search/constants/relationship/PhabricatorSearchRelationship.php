@@ -24,6 +24,7 @@ final class PhabricatorSearchRelationship {
   const RELATIONSHIP_COMMENTER  = 'comm';
   const RELATIONSHIP_OWNER      = 'ownr';
   const RELATIONSHIP_PROJECT    = 'proj';
+  const RELATIONSHIP_REPOSITORY = 'repo';
 
   const RELATIONSHIP_OPEN       = 'open';
   const RELATIONSHIP_TOUCH      = 'poke';

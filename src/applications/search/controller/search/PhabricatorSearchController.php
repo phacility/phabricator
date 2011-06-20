@@ -70,6 +70,7 @@ class PhabricatorSearchController extends PhabricatorSearchBaseController {
     $options = array(
       '' => 'All Documents',
       PhabricatorPHIDConstants::PHID_TYPE_DREV => 'Differential Revisions',
+      PhabricatorPHIDConstants::PHID_TYPE_CMIT => 'Repository Commits',
       PhabricatorPHIDConstants::PHID_TYPE_TASK => 'Maniphest Tasks',
     ) + $more;
 

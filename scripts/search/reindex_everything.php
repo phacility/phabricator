@@ -24,18 +24,22 @@ require_once $root.'/scripts/__init_env__.php';
 // TODO: Get rid of this script eventually, once this stuff is better-formalized
 // in Timeline consumers.
 
-phutil_require_module('phutil', 'symbols');
-PhutilSymbolLoader::loadClass('DifferentialRevision');
-PhutilSymbolLoader::loadClass('PhabricatorSearchDifferentialIndexer');
-PhutilSymbolLoader::loadClass('ManiphestTask');
-PhutilSymbolLoader::loadClass('PhabricatorSearchManiphestIndexer');
-
 echo "Loading revisions...\n";
 $revs = id(new DifferentialRevision())->loadAll();
 $count = count($revs);
 echo "Reindexing {$count} revisions";
 foreach ($revs as $rev) {
   PhabricatorSearchDifferentialIndexer::indexRevision($rev);
+  echo '.';
+}
+echo "\n";
+
+echo "Loading commits...\n";
+$commits = id(new PhabricatorRepositoryCommit())->loadAll();
+$count = count($commits);
+echo "Reindexing {$count} commits";
+foreach ($commits as $commit) {
+  PhabricatorSearchCommitIndexer::indexCommit($commit);
   echo '.';
 }
 echo "\n";

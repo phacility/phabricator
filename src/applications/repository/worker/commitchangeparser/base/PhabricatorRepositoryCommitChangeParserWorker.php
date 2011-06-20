@@ -73,6 +73,8 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
 
   protected function finishParse() {
     $commit = $this->commit;
+    PhabricatorSearchCommitIndexer::indexCommit($commit);
+
     if ($this->shouldQueueFollowupTasks()) {
       $task = new PhabricatorWorkerTask();
       $task->setTaskClass('PhabricatorRepositoryCommitHeraldWorker');
