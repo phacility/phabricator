@@ -3,7 +3,7 @@ CREATE TABLE phabricator_conduit.conduit_certificatetoken (
   userPHID VARCHAR(64) BINARY NOT NULL,
   token VARCHAR(64),
   dateCreated INT UNSIGNED NOT NULL,
-  dateModified INT UNSIGNED NOT NULL,
+  dateModified INT UNSIGNED NOT NULL
 );
 
 ALTER TABLE phabricator_conduit.conduit_certificatetoken
