@@ -135,9 +135,9 @@ td.phabricator-login-details {
 
 .keyboard-focus-focus-reticle {
   z-index: 1;
-  background: #fffff3;
+  background: #ffffd3;
   position: absolute;
-  border: 1px solid #eeeed3;
+  border: 1px solid #999900;
 }
 
 .keyboard-shortcuts-available {

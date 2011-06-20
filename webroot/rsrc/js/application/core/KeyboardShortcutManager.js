@@ -80,13 +80,13 @@ JX.install('KeyboardShortcutManager', {
       // Outset the reticle some pixels away from the element, so there's some
       // space between the focused element and the outline.
       var p  = JX.Vector.getPos(node);
-      p.add(-6, -6).setPos(r);
+      p.add(-4, -4).setPos(r);
       // Compute the size we need to extend to the full extent of the focused
       // nodes.
       JX.Vector.getPos(extended_node)
         .add(-p.x, -p.y)
         .add(JX.Vector.getDim(extended_node))
-        .add(12, 12)
+        .add(8, 8)
         .setDim(r);
       document.body.appendChild(r);
 
