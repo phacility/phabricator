@@ -27,7 +27,7 @@ class PhabricatorUser extends PhabricatorUserDAO {
   protected $passwordSalt;
   protected $passwordHash;
   protected $profileImagePHID;
-  protected $timezoneIdentifier;
+  protected $timezoneIdentifier = '';
 
   protected $consoleEnabled = 0;
   protected $consoleVisible = 0;
@@ -296,6 +296,13 @@ class PhabricatorUser extends PhabricatorUserDAO {
 
     $this->preferences = $preferences;
     return $preferences;
+  }
+
+  public function getTimezoneIdentifier() {
+    // If the user hasn't set one, guess the server's time.
+    return nonempty(
+      $this->timezoneIdentifier,
+      date_default_timezone_get());
   }
 
 }
