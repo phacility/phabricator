@@ -19,9 +19,11 @@
 class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
 
   private $username;
+  private $page;
 
   public function willProcessRequest(array $data) {
-    $this->username = $data['username'];
+    $this->username = idx($data, 'username');
+    $this->page = idx($data, 'page');
   }
 
   public function processRequest() {
@@ -83,44 +85,56 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
       }
     }
 
-    foreach ($links as $k => $link) {
-      $links[$k] = '<li>'.$link.'</li>';
+    // TODO:  perhaps, if someone wants to add to the profile of the user the
+    //        ability to show the task/revisions where he is working/commenting
+    //        on, this has to be changed to something like
+    //        |$this->page = key($pages)|, since the "page" regexp was added to
+    //        the aphrontconfiguration.
+    if (empty($links[$this->page])) {
+      $this->page = 'action';
     }
-    $links =
-      '<ul class="profile-nav-links">'.
-        implode("\n", $links).
-      '</ul>';
 
-    $title = nonempty($profile->getTitle(), 'Untitled Document');
-
-    $username_tag =
-      '<h1 class="profile-username">'.
-        phutil_escape_html($user->getUserName()).
-      '</h1>';
-    $realname_tag =
-      '<h2 class="profile-realname">'.
-        '('.phutil_escape_html($user->getRealName()).')'.
-      '</h2>';
-    $title_tag =
-      '<h2 class="profile-usertitle">'.
-        phutil_escape_html($title).
-      '</h2>';
+    switch ($this->page) {
+      default:
+        $content = $this->renderBasicInformation($user, $profile);
+        break;
+    }
 
     $src_phid = $profile->getProfileImagePHID();
     if (!$src_phid) {
       $src_phid = $user->getProfileImagePHID();
     }
-    $src = PhabricatorFileURI::getViewURIForPHID($src_phid);
+    $picture = PhabricatorFileURI::getViewURIForPHID($src_phid);
+    $title = nonempty($profile->getTitle(), 'Untitled Document');
+    $realname = '('.$user->getRealName().')';
 
-    $picture = phutil_render_tag(
-      'img',
+    $profile = new PhabricatorProfileView();
+    $profile->setProfilePicture($picture);
+    $profile->setProfileNames(
+      $user->getUserName(),
+      $realname,
+      $title);
+    foreach ($links as $page => $name) {
+      if (is_integer($page)) {
+        $profile->addProfileItem(
+          phutil_render_tag(
+            'span',
+            array(),
+            $name));
+      } else {
+        $profile->addProfileItem($page);
+      }
+    }
+
+    $profile->appendChild($content);
+    return $this->buildStandardPageResponse(
+      $profile,
       array(
-        'class' => 'profile-image',
-        'src'   => $src,
+        'title' => $user->getUsername(),
       ));
+  }
 
-    require_celerity_resource('phabricator-profile-css');
-
+  private function renderBasicInformation($user, $profile) {
     $blurb = nonempty(
       $profile->getBlurb(),
       '//Nothing is known about this rare specimen.//');
@@ -158,30 +172,6 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
         </div>
       </div>';
 
-    $profile =
-      '<table class="phabricator-profile-master-layout">
-        <tr>
-          <td class="phabricator-profile-navigation">'.
-            $username_tag.
-            $realname_tag.
-            $title_tag.
-            '<hr />'.
-            $picture.
-            '<hr />'.
-            $links.
-            '<hr />'.
-          '</td>
-          <td class="phabricator-profile-content">'.
-          $content.
-          '</td>
-        </tr>
-      </table>';
-
-    return $this->buildStandardPageResponse(
-      $profile,
-      array(
-        'title' => $user->getUsername(),
-      ));
+    return $content;
   }
-
 }

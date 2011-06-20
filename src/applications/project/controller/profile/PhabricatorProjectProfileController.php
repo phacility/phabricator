@@ -20,139 +20,168 @@ class PhabricatorProjectProfileController
   extends PhabricatorProjectController {
 
   private $id;
+  private $page;
 
   public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
+    $this->id = idx($data, 'id');
+    $this->page = idx($data, 'page');
   }
 
   public function processRequest() {
+    $request = $this->getRequest();
+    $user = $request->getUser();
+    $uri = $request->getRequestURI();
 
     $project = id(new PhabricatorProject())->load($this->id);
     if (!$project) {
       return new Aphront404Response();
     }
-    $profile = id(new PhabricatorProjectProfile())->loadOneWhere(
-      'projectPHID = %s',
-      $project->getPHID());
+    $profile = $project->getProfile();
     if (!$profile) {
       $profile = new PhabricatorProjectProfile();
     }
 
-    require_celerity_resource('phabricator-profile-css');
-
     $src_phid = $profile->getProfileImagePHID();
-    $src = PhabricatorFileURI::getViewURIForPHID($src_phid);
+    if (!$src_phid) {
+      $src_phid = $user->getProfileImagePHID();
+    }
+    $picture = PhabricatorFileURI::getViewURIForPHID($src_phid);
 
-    $picture = phutil_render_tag(
-      'img',
-      array(
-        'class' => 'profile-image',
-        'src'   => $src,
-      ));
+    $pages = array(
+      /*
+      '<h2>Active Documents</h2>',
+      'tasks'        => 'Maniphest Tasks',
+      'revisions'    => 'Differential Revisions',
+      '<hr />',
+      '<h2>Workflow</h2>',
+      'goals'        => 'Goals',
+      'statistics'   => 'Statistics',
+      '<hr />', */
+      '<h2>Information</h2>',
+      'edit'         => 'Edit Profile',
+      'affiliation'  => 'Edit Affiliation',
+    );
 
-    $links =
-      '<ul class="profile-nav-links">'.
-        '<li><a href="/project/edit/'.$project->getID().'/">'.
-          'Edit Project</a></li>'.
-        '<li><a href="/project/affiliation/'.$project->getID().'/">'.
-          'Edit Affiliation</a></li>'.
-      '</ul>';
+    if (empty($pages[$this->page])) {
+      $this->page = 'action';   // key($pages);
+    }
 
-    $blurb = nonempty(
-      $profile->getBlurb(),
-      '//Nothing is known about this elusive project.//');
+    switch ($this->page) {
+      default:
+        $content = $this->renderBasicInformation($project, $profile);
+        break;
+    }
 
-    $factory = new DifferentialMarkupEngineFactory();
-    $engine = $factory->newDifferentialCommentMarkupEngine();
-    $blurb = $engine->markupText($blurb);
-
-
-    $affiliations = id(new PhabricatorProjectAffiliation())->loadAllWhere(
-      'projectPHID = %s ORDER BY IF(status = "former", 1, 0), dateCreated',
-      $project->getPHID());
-
-    $phids = array_merge(
-      array($project->getAuthorPHID()),
-      mpull($affiliations, 'getUserPHID'));
-    $handles = id(new PhabricatorObjectHandleData($phids))
-      ->loadHandles();
-
-    $affiliated = array();
-    foreach ($affiliations as $affiliation) {
-      $user = $handles[$affiliation->getUserPHID()]->renderLink();
-      $role = phutil_escape_html($affiliation->getRole());
-
-      $status = null;
-      if ($affiliation->getStatus() == 'former') {
-        $role = '<em>Former '.$role.'</em>';
+    $profile = new PhabricatorProfileView();
+    $profile->setProfilePicture($picture);
+    $profile->setProfileNames($project->getName());
+    foreach ($pages as $page => $name) {
+      if (is_integer($page)) {
+        $profile->addProfileItem(
+          phutil_render_tag(
+            'span',
+            array(),
+            $name));
+      } else {
+        $uri->setPath('/project/'.$page.'/'.$project->getID().'/');
+        $profile->addProfileItem(
+          phutil_render_tag(
+            'a',
+            array(
+              'href' => $uri,
+              'class' => ($this->page == $page)
+                ? 'phabricator-profile-item-selected'
+                : null,
+            ),
+            phutil_escape_html($name)));
       }
-
-      $affiliated[] = '<li>'.$user.' &mdash; '.$role.$status.'</li>';
-    }
-    if ($affiliated) {
-      $affiliated = '<ul>'.implode("\n", $affiliated).'</ul>';
-    } else {
-      $affiliated = '<p><em>No one is affiliated with this project.</em></p>';
     }
 
-    $timestamp = phabricator_format_timestamp($project->getDateCreated());
-
-    $content =
-      '<div class="phabricator-profile-info-group">
-        <h1 class="phabricator-profile-info-header">Basic Information</h1>
-        <div class="phabricator-profile-info-pane">
-          <table class="phabricator-profile-info-table">
-            <tr>
-              <th>Creator</th>
-              <td>'.$handles[$project->getAuthorPHID()]->renderLink().'</td>
-            </tr>
-            <tr>
-              <th>Created</th>
-              <td>'.$timestamp.'</td>
-            </tr>
-            <tr>
-              <th>PHID</th>
-              <td>'.phutil_escape_html($project->getPHID()).'</td>
-            </tr>
-            <tr>
-              <th>Blurb</th>
-              <td>'.$blurb.'</td>
-            </tr>
-          </table>
-        </div>
-      </div>';
-
-    $content .=
-      '<div class="phabricator-profile-info-group">
-        <h1 class="phabricator-profile-info-header">Resources</h1>
-        <div class="phabricator-profile-info-pane">'.
-        $affiliated.
-        '</div>
-      </div>';
-
-
-    $profile_markup =
-      '<table class="phabricator-profile-master-layout">
-        <tr>
-          <td class="phabricator-profile-navigation">'.
-            '<h1>'.phutil_escape_html($project->getName()).'</h1>'.
-            '<hr />'.
-            $picture.
-            '<hr />'.
-            $links.
-            '<hr />'.
-          '</td>
-          <td class="phabricator-profile-content">'.
-          $content.
-          '</td>
-        </tr>
-      </table>';
+    $profile->appendChild($content);
 
     return $this->buildStandardPageResponse(
-      $profile_markup,
+      $profile,
       array(
         'title' => $project->getName(),
-      ));
+        ));
   }
 
+  private function renderBasicInformation($project, $profile) {
+    $blurb = nonempty(
+       $profile->getBlurb(),
+       '//Nothing is known about this elusive project.//');
+
+     $factory = new DifferentialMarkupEngineFactory();
+     $engine = $factory->newDifferentialCommentMarkupEngine();
+     $blurb = $engine->markupText($blurb);
+
+     $affiliations = $project->loadAffiliations();
+
+     $phids = array_merge(
+       array($project->getAuthorPHID()),
+       mpull($affiliations, 'getUserPHID'));
+     $handles = id(new PhabricatorObjectHandleData($phids))
+       ->loadHandles();
+
+     $affiliated = array();
+     foreach ($affiliations as $affiliation) {
+       $user = $handles[$affiliation->getUserPHID()]->renderLink();
+       $role = phutil_escape_html($affiliation->getRole());
+
+       $status = null;
+       if ($affiliation->getStatus() == 'former') {
+         $role = '<em>Former '.$role.'</em>';
+       }
+
+       $affiliated[] = '<li>'.$user.' &mdash; '.$role.$status.'</li>';
+     }
+     if ($affiliated) {
+       $affiliated = '<ul>'.implode("\n", $affiliated).'</ul>';
+     } else {
+       $affiliated = '<p><em>No one is affiliated with this project.</em></p>';
+     }
+
+     $timestamp = phabricator_format_timestamp($project->getDateCreated());
+     $status = PhabricatorProjectStatus::getNameForStatus(
+       $project->getStatus());
+
+     $content =
+       '<div class="phabricator-profile-info-group">
+         <h1 class="phabricator-profile-info-header">Basic Information</h1>
+         <div class="phabricator-profile-info-pane">
+           <table class="phabricator-profile-info-table">
+             <tr>
+               <th>Creator</th>
+               <td>'.$handles[$project->getAuthorPHID()]->renderLink().'</td>
+             </tr>
+             <tr>
+               <th>Status</th>
+               <td><strong>'.phutil_escape_html($status).'</strong></td>
+             </tr>
+             <tr>
+               <th>Created</th>
+               <td>'.$timestamp.'</td>
+             </tr>
+             <tr>
+               <th>PHID</th>
+               <td>'.phutil_escape_html($project->getPHID()).'</td>
+             </tr>
+             <tr>
+               <th>Blurb</th>
+               <td>'.$blurb.'</td>
+             </tr>
+           </table>
+         </div>
+       </div>';
+
+     $content .=
+       '<div class="phabricator-profile-info-group">
+         <h1 class="phabricator-profile-info-header">Resources</h1>
+         <div class="phabricator-profile-info-pane">'.
+         $affiliated.
+         '</div>
+       </div>';
+
+    return $content;
+  }
 }
