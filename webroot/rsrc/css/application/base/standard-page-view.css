@@ -68,7 +68,7 @@
 }
 
 .phabricator-logo a:hover {
-  background-position-y: -40px;
+  background-position: 0 -40px;
 }
 
 .phabricator-primary-navigation td {
