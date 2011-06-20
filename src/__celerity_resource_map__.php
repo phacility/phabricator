@@ -1078,7 +1078,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-standard-page-view' =>
   array(
-    'uri' => '/res/964a64f2/rsrc/css/application/base/standard-page-view.css',
+    'uri' => '/res/e8238633/rsrc/css/application/base/standard-page-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1132,6 +1132,30 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/2892314d/typeahead.pkg.js',
       'type' => 'js',
     ),
+    'c2d123fd' =>
+    array (
+      'name' => 'core.pkg.css',
+      'symbols' =>
+      array (
+        0 => 'phabricator-core-css',
+        1 => 'phabricator-core-buttons-css',
+        2 => 'phabricator-standard-page-view',
+        3 => 'aphront-dialog-view-css',
+        4 => 'aphront-form-view-css',
+        5 => 'aphront-panel-view-css',
+        6 => 'aphront-side-nav-view-css',
+        7 => 'aphront-table-view-css',
+        8 => 'aphront-crumbs-view-css',
+        9 => 'aphront-tokenizer-control-css',
+        10 => 'aphront-typeahead-control-css',
+        11 => 'aphront-list-filter-view-css',
+        12 => 'phabricator-directory-css',
+        13 => 'phabricator-remarkup-css',
+        14 => 'syntax-highlighting-css',
+      ),
+      'uri' => '/res/pkg/c2d123fd/core.pkg.css',
+      'type' => 'css',
+    ),
     'da416e1c' =>
     array (
       'name' => 'differential.pkg.js',
@@ -1181,30 +1205,6 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/f1d27e2a/workflow.pkg.js',
       'type' => 'js',
     ),
-    'f9cba469' =>
-    array (
-      'name' => 'core.pkg.css',
-      'symbols' =>
-      array (
-        0 => 'phabricator-core-css',
-        1 => 'phabricator-core-buttons-css',
-        2 => 'phabricator-standard-page-view',
-        3 => 'aphront-dialog-view-css',
-        4 => 'aphront-form-view-css',
-        5 => 'aphront-panel-view-css',
-        6 => 'aphront-side-nav-view-css',
-        7 => 'aphront-table-view-css',
-        8 => 'aphront-crumbs-view-css',
-        9 => 'aphront-tokenizer-control-css',
-        10 => 'aphront-typeahead-control-css',
-        11 => 'aphront-list-filter-view-css',
-        12 => 'phabricator-directory-css',
-        13 => 'phabricator-remarkup-css',
-        14 => 'syntax-highlighting-css',
-      ),
-      'uri' => '/res/pkg/f9cba469/core.pkg.css',
-      'type' => 'css',
-    ),
     55967526 =>
     array (
       'name' => 'differential.pkg.css',
@@ -1225,15 +1225,15 @@ celerity_register_resource_map(array(
   ),
   'reverse' =>
   array (
-    'aphront-crumbs-view-css' => 'f9cba469',
-    'aphront-dialog-view-css' => 'f9cba469',
-    'aphront-form-view-css' => 'f9cba469',
-    'aphront-list-filter-view-css' => 'f9cba469',
-    'aphront-panel-view-css' => 'f9cba469',
-    'aphront-side-nav-view-css' => 'f9cba469',
-    'aphront-table-view-css' => 'f9cba469',
-    'aphront-tokenizer-control-css' => 'f9cba469',
-    'aphront-typeahead-control-css' => 'f9cba469',
+    'aphront-crumbs-view-css' => 'c2d123fd',
+    'aphront-dialog-view-css' => 'c2d123fd',
+    'aphront-form-view-css' => 'c2d123fd',
+    'aphront-list-filter-view-css' => 'c2d123fd',
+    'aphront-panel-view-css' => 'c2d123fd',
+    'aphront-side-nav-view-css' => 'c2d123fd',
+    'aphront-table-view-css' => 'c2d123fd',
+    'aphront-tokenizer-control-css' => 'c2d123fd',
+    'aphront-typeahead-control-css' => 'c2d123fd',
     'differential-changeset-view-css' => '55967526',
     'differential-core-view-css' => '55967526',
     'differential-revision-add-comment-css' => '55967526',
@@ -1270,13 +1270,13 @@ celerity_register_resource_map(array(
     'javelin-util' => 'db95a6d0',
     'javelin-vector' => 'db95a6d0',
     'javelin-workflow' => 'f1d27e2a',
-    'phabricator-core-buttons-css' => 'f9cba469',
-    'phabricator-core-css' => 'f9cba469',
-    'phabricator-directory-css' => 'f9cba469',
+    'phabricator-core-buttons-css' => 'c2d123fd',
+    'phabricator-core-css' => 'c2d123fd',
+    'phabricator-directory-css' => 'c2d123fd',
     'phabricator-keyboard-shortcut' => 'f1d27e2a',
     'phabricator-keyboard-shortcut-manager' => 'f1d27e2a',
-    'phabricator-remarkup-css' => 'f9cba469',
-    'phabricator-standard-page-view' => 'f9cba469',
-    'syntax-highlighting-css' => 'f9cba469',
+    'phabricator-remarkup-css' => 'c2d123fd',
+    'phabricator-standard-page-view' => 'c2d123fd',
+    'syntax-highlighting-css' => 'c2d123fd',
   ),
 ));
