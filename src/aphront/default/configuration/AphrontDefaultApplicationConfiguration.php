@@ -76,7 +76,8 @@ class AphrontDefaultApplicationConfiguration
         'edit/(?:(?P<id>\d+)/(?:(?P<view>\w+)/)?)?$'
           => 'PhabricatorPeopleEditController',
       ),
-      '/p/(?P<username>\w+)/$' => 'PhabricatorPeopleProfileController',
+      '/p/(?P<username>\w+)/(?:(?P<page>\w+)/)?$'
+        => 'PhabricatorPeopleProfileController',
       '/profile/' => array(
         'edit/$' => 'PhabricatorPeopleProfileEditController',
       ),
@@ -197,8 +198,9 @@ class AphrontDefaultApplicationConfiguration
 
       '/project/' => array(
         '$' => 'PhabricatorProjectListController',
-        'edit/(?:(?P<id>\d+)/)?$' => 'PhabricatorProjectEditController',
-        'view/(?P<id>\d+)/$' => 'PhabricatorProjectProfileController',
+        'edit/(?:(?P<id>\d+)/)?$' => 'PhabricatorProjectProfileEditController',
+        'view/(?P<id>\d+)/(?:(?P<page>\w+)/)?$'
+          => 'PhabricatorProjectProfileController',
         'affiliation/(?P<id>\d+)/$'
           => 'PhabricatorProjectAffiliationEditController',
         'quickcreate/$' => 'PhabricatorProjectQuickCreateController',

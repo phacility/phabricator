@@ -6,8 +6,12 @@
 
 
 
+phutil_require_module('phabricator', 'applications/phid/constants');
+phutil_require_module('phabricator', 'applications/phid/handle/data');
+phutil_require_module('phabricator', 'applications/project/constants/status');
 phutil_require_module('phabricator', 'applications/project/controller/base');
 phutil_require_module('phabricator', 'applications/project/storage/project');
+phutil_require_module('phabricator', 'applications/project/transactions/search');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/layout/panel');
 

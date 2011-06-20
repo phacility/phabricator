@@ -1,0 +1,97 @@
+/**
+ * @provides phabricator-profile-css
+ */
+
+table.phabricator-profile-master-layout {
+  width: 100%;
+}
+
+td.phabricator-profile-navigation {
+  width: 300px;
+  background: #efefef;
+  border-right: 1px solid #cccccc;
+  padding-top: 8px;
+  padding-bottom: 8em;
+}
+
+td.phabricator-profile-navigation a,
+td.phabricator-profile-navigation span {
+  display: block;
+  margin: 0 0 2px;
+  min-width: 150px;
+  font-weight: bold;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+td.phabricator-profile-navigation a {
+  padding: 4px 8px 4px 10px;
+}
+
+td.phabricator-profile-navigation a:hover {
+  text-decoration: none;
+  background: #cccccc;
+}
+
+td.phabricator-profile-navigation  a.phabricator-profile-item-selected,
+td.phabricator-profile-navigation  a.phabricator-profile-item-selected :hover {
+  background: #cccccc;
+}
+
+td.phabricator-profile-navigation hr {
+  border: none;
+  background: #cccccc;
+  padding: 0;
+  margin: 10px 0;
+  height: 1px;
+}
+
+td.phabricator-profile-navigation h1,
+td.phabricator-profile-navigation h2 {
+  padding: 2px 0px 0px 10px;
+}
+
+td.phabricator-profile-content {
+  padding: 2em 2%;
+}
+
+.phabricator-profile-info-table th {
+  font-weight: bold;
+  text-align: right;
+  color: #666666;
+  width: 10%;
+  padding: 4px;
+}
+
+.phabricator-profile-info-table td {
+  width: 100%;
+  padding: 4px;
+}
+
+.phabricator-profile-info-group {
+  margin-bottom: 2em;
+  background: #efefef;
+  border-top: 1px solid #cccccc;
+}
+
+.phabricator-profile-info-header {
+  padding: 8px;
+  background: #dfdfdf;
+}
+
+.phabricator-profile-info-pane {
+  padding: 8px 2em;
+}
+
+.phabricator-profile-info-table {
+  width: 100%;
+}
+
+h2.phabricator-profile-realname {
+  color: #666666;
+}
+
+img.phabricator-profile-image {
+  width: 280px;
+  margin: 10px;
+}

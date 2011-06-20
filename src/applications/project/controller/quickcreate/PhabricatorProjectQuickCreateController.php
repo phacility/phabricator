@@ -28,10 +28,10 @@ class PhabricatorProjectQuickCreateController
     $project = new PhabricatorProject();
     $project->setAuthorPHID($user->getPHID());
     $profile = new PhabricatorProjectProfile();
+    $options = PhabricatorProjectStatus::getStatusMap();
 
     $e_name = true;
     $errors = array();
-
     if ($request->isFormPost()) {
 
       $project->setName($request->getStr('name'));
@@ -46,7 +46,6 @@ class PhabricatorProjectQuickCreateController
 
       if (!$errors) {
         $project->save();
-
         $profile->setProjectPHID($project->getPHID());
         $profile->save();
 
@@ -91,5 +90,4 @@ class PhabricatorProjectQuickCreateController
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }
-
 }

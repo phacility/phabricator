@@ -1048,12 +1048,12 @@ celerity_register_resource_map(array(
   ),
   'phabricator-profile-css' =>
   array(
-    'uri' => '/res/adcdb5f3/rsrc/css/application/people/profile.css',
+    'uri' => '/res/4cb0251e/rsrc/css/application/profile/profile-view.css',
     'type' => 'css',
     'requires' =>
     array(
     ),
-    'disk' => '/rsrc/css/application/people/profile.css',
+    'disk' => '/rsrc/css/application/profile/profile-view.css',
   ),
   'phabricator-remarkup-css' =>
   array(
