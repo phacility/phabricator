@@ -1,2 +1,5 @@
-ALTER TABLE search_documentrelationship add key (relatedPHID, relation);
-ALTER TABLE search_documentrelationship add key (relation, relatedPHID);
+ALTER TABLE phabricator_search.search_documentrelationship
+  add key (relatedPHID, relation);
+
+ALTER TABLE phabricator_search.search_documentrelationship
+  add key (relation, relatedPHID);
