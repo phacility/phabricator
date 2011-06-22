@@ -745,7 +745,25 @@ class DifferentialChangesetParser {
     if ($changeset->getFileType() == DifferentialChangeType::FILE_TEXT ||
         $changeset->getFileType() == DifferentialChangeType::FILE_SYMLINK) {
       if ($skip_cache || !$this->loadCache()) {
-        if ($this->whitespaceMode == self::WHITESPACE_IGNORE_ALL) {
+
+        // The "ignore all whitespace" algorithm depends on rediffing the
+        // files, and we currently need complete representations of both
+        // files to do anything reasonable. If we only have parts of the files,
+        // don't use the "ignore all" algorithm.
+        $can_use_ignore_all = true;
+        $hunks = $changeset->getHunks();
+        if (count($hunks) !== 1) {
+          $can_use_ignore_all = false;
+        } else {
+          $first_hunk = reset($hunks);
+          if ($first_hunk->getOldOffset() != 1 ||
+              $first_hunk->getNewOffset() != 1) {
+            $can_use_ignore_all = false;
+          }
+        }
+
+        if ($this->whitespaceMode == self::WHITESPACE_IGNORE_ALL &&
+            $can_use_ignore_all) {
 
           // Huge mess. Generate a "-bw" (ignore all whitespace changes) diff,
           // parse it out, and then play a shell game with the parsed format
