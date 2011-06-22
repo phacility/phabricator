@@ -298,12 +298,17 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
               $mailer->addHeader('Message-ID',  $value);
             } else {
               $in_reply_to = $value;
+              $references = array($value);
               $parent_id = $this->getParentMessageID();
               if ($parent_id) {
                 $in_reply_to = $parent_id;
+                // By RFC 2822, the most immediate parent should appear last
+                // in the "References" header, so this order is intentional.
+                $references[] = $parent_id;
               }
+              $references = implode(' ', $references);
               $mailer->addHeader('In-Reply-To', $in_reply_to);
-              $mailer->addHeader('References',  $in_reply_to);
+              $mailer->addHeader('References',  $references);
             }
             $thread_index = $this->generateThreadIndex($value, $is_first);
             $mailer->addHeader('Thread-Index', $thread_index);
