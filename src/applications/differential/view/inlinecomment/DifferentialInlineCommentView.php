@@ -90,7 +90,7 @@ final class DifferentialInlineCommentView extends AphrontView {
 
     $is_draft = false;
     if (!$inline->getCommentID()) {
-      $links[] = 'Unsaved Draft';
+      $links[] = 'Not Submitted Yet';
       $is_draft = true;
     }
 
