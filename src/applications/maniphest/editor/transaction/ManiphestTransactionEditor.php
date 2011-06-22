@@ -18,6 +18,13 @@
 
 class ManiphestTransactionEditor {
 
+  private $parentMessageID;
+
+  public function setParentMessageID($parent_message_id) {
+    $this->parentMessageID = $parent_message_id;
+    return $this;
+  }
+
   public function applyTransactions($task, array $transactions) {
 
     $email_cc = $task->getCCPHIDs();
@@ -202,6 +209,7 @@ class ManiphestTransactionEditor {
     $template = id(new PhabricatorMetaMTAMail())
       ->setSubject($subject)
       ->setFrom($transaction->getAuthorPHID())
+      ->setParentMessageID($this->parentMessageID)
       ->addHeader('Thread-Topic', 'Maniphest Task '.$task->getID())
       ->setThreadID($thread_id, $is_create)
       ->setRelatedPHID($task->getPHID())

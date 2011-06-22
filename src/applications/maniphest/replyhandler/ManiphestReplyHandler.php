@@ -114,8 +114,8 @@ class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
     $xactions[] = $xaction;
 
     $editor = new ManiphestTransactionEditor();
+    $editor->setParentMessageID($mail->getMessageID());
     $editor->applyTransactions($task, $xactions);
-
   }
 
 }

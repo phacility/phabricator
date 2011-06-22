@@ -46,6 +46,10 @@ class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     return $this;
   }
 
+  public function getMessageID() {
+    return idx($this->headers, 'message-id');
+  }
+
   public function processReceivedMail() {
     $to = idx($this->headers, 'to');
 

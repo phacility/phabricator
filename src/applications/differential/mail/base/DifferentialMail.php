@@ -32,6 +32,7 @@ abstract class DifferentialMail {
   protected $heraldTranscriptURI;
   protected $heraldRulesHeader;
   protected $replyHandler;
+  protected $parentMessageID;
 
   abstract protected function renderSubject();
   abstract protected function renderBody();
@@ -51,6 +52,11 @@ abstract class DifferentialMail {
       return $handle->getName();
     }
     return '???';
+  }
+
+  public function setParentMessageID($parent_message_id) {
+    $this->parentMessageID = $parent_message_id;
+    return $this;
   }
 
   public function setXHeraldRulesHeader($header) {
@@ -80,6 +86,7 @@ abstract class DifferentialMail {
       ->setSubject($subject)
       ->setBody($body)
       ->setIsHTML($this->shouldMarkMailAsHTML())
+      ->setParentMessageID($this->parentMessageID)
       ->addHeader('Thread-Topic', $this->getRevision()->getTitle());
 
     $template->setThreadID(

@@ -28,6 +28,8 @@ class DifferentialCommentEditor {
   protected $changedByCommit;
   protected $addedReviewers = array();
 
+  private $parentMessageID;
+
   public function __construct(
     DifferentialRevision $revision,
     $actor_phid,
@@ -36,6 +38,11 @@ class DifferentialCommentEditor {
     $this->revision = $revision;
     $this->actorPHID  = $actor_phid;
     $this->action   = $action;
+  }
+
+  public function setParentMessageID($parent_message_id) {
+    $this->parentMessageID = $parent_message_id;
+    return $this;
   }
 
   public function setMessage($message) {
@@ -318,6 +325,7 @@ class DifferentialCommentEditor {
       ->setCCPHIDs($revision->getCCPHIDs())
       ->setChangedByCommit($this->getChangedByCommit())
       ->setXHeraldRulesHeader($xherald_header)
+      ->setParentMessageID($this->parentMessageID)
       ->send();
 
     $event_data = array(

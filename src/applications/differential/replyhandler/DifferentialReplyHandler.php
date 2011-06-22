@@ -18,6 +18,8 @@
 
 class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
 
+  private $receivedMail;
+
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof DifferentialRevision)) {
       throw new Exception("Receiver is not a DifferentialRevision!");
@@ -94,6 +96,7 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
   }
 
   public function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
+    $this->receivedMail = $mail;
     $this->handleAction($mail->getCleanTextBody());
   }
 
@@ -128,6 +131,12 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
         $actor->getPHID(),
         $command);
 
+      // NOTE: We have to be careful about this because Facebook's
+      // implementation jumps straight into handleAction() and will not have
+      // a PhabricatorMetaMTAReceivedMail object.
+      if ($this->receivedMail) {
+        $editor->setParentMessageID($this->receivedMail->getMessageID());
+      }
       $editor->setMessage($body);
       $editor->setAddCC(($command != DifferentialAction::ACTION_RESIGN));
       $comment = $editor->save();

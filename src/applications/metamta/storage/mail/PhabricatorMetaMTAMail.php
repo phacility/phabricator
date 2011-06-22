@@ -62,6 +62,27 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return idx($this->parameters, $param);
   }
 
+  /**
+   * In Gmail, conversations will be broken if you reply to a thread and the
+   * server sends back a response without referencing your Message-ID, even if
+   * it references a Message-ID earlier in the thread. To avoid this, use the
+   * parent email's message ID explicitly if it's available. This overwrites the
+   * "In-Reply-To" and "References" headers we would otherwise generate. This
+   * needs to be set whenever an action is triggered by an email message. See
+   * T251 for more details.
+   *
+   * @param   string The "Message-ID" of the email which precedes this one.
+   * @return  this
+   */
+  public function setParentMessageID($id) {
+    $this->setParam('parent-message-id', $id);
+    return $this;
+  }
+
+  public function getParentMessageID() {
+    return $this->getParam('parent-message-id');
+  }
+
   public function getSubject() {
     return $this->getParam('subject');
   }
@@ -276,8 +297,13 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
             if ($is_first && $mailer->supportsMessageIDHeader()) {
               $mailer->addHeader('Message-ID',  $value);
             } else {
-              $mailer->addHeader('In-Reply-To', $value);
-              $mailer->addHeader('References',  $value);
+              $in_reply_to = $value;
+              $parent_id = $this->getParentMessageID();
+              if ($parent_id) {
+                $in_reply_to = $parent_id;
+              }
+              $mailer->addHeader('In-Reply-To', $in_reply_to);
+              $mailer->addHeader('References',  $in_reply_to);
             }
             $thread_index = $this->generateThreadIndex($value, $is_first);
             $mailer->addHeader('Thread-Index', $thread_index);
