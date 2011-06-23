@@ -79,7 +79,11 @@ class PhabricatorUser extends PhabricatorUserDAO {
     if (!$this->conduitCertificate) {
       $this->conduitCertificate = $this->generateConduitCertificate();
     }
-    return parent::save();
+    $result = parent::save();
+
+    PhabricatorSearchUserIndexer::indexUser($this);
+
+    return $result;
   }
 
   private function generateConduitCertificate() {
