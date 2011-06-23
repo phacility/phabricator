@@ -186,14 +186,6 @@ class DifferentialChangesetParser {
     $this->parsedHunk = true;
     $lines = $hunk->getChanges();
 
-    // Flatten UTF-8 into "\0". We don't support UTF-8 because the diffing
-    // algorithms are byte-oriented (not character oriented) and everyone seems
-    // to be in agreement that it's fairly reasonable not to allow UTF-8 in
-    // source files. These bytes will later be replaced with a "?" glyph, but
-    // in the meantime we replace them with "\0" since Pygments is happy to
-    // deal with that.
-    $lines = preg_replace('/[\x80-\xFF]/', "\0", $lines);
-
     $lines = str_replace(
       array("\t", "\r\n", "\r"),
       array('  ', "\n",   "\n"),
@@ -702,11 +694,18 @@ class DifferentialChangesetParser {
 
 
   protected function tokenHighlight(&$render) {
+    // TODO: This is really terribly horrible and should be fixed. We have two
+    // byte-oriented algorithms (wordwrap and intraline diff) which are not
+    // unicode-aware and can accept a valid UTF-8 string but emit an invalid
+    // one by adding markup inside the byte sequences of characters. The right
+    // fix here is to make them UTF-8 aware. Short of that, we can repair the
+    // possibly-broken UTF-8 string into a valid UTF-8 string by replacing all
+    // UTF-8 bytes with a Unicode Replacement Character.
     foreach ($render as $key => $text) {
-      $render[$key] = str_replace(
-      "\0",
-      '<span class="uu">'."\xEF\xBF\xBD".'</span>',
-      $text);
+      $render[$key] = preg_replace(
+        '/[\x80-\xFF]/',
+        '<span class="uu">'."\xEF\xBF\xBD".'</span>',
+        $text);
     }
   }
 
