@@ -35,7 +35,7 @@ class PhabricatorProjectProfileEditController
       if (!$project) {
         return new Aphront404Response();
       }
-      $profile = $project->getProfile();
+      $profile = $project->loadProfile();
     } else {
       $project = new PhabricatorProject();
       $project->setAuthorPHID($user->getPHID());
