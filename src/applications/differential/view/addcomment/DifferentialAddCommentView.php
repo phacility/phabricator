@@ -94,6 +94,14 @@ final class DifferentialAddCommentView extends AphrontView {
           ->setID('add-reviewers-tokenizer')
           ->setDisableBehavior(true))
       ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel('Add CCs')
+          ->setName('ccs')
+          ->setControlID('add-ccs')
+          ->setControlStyle('display: none')
+          ->setID('add-ccs-tokenizer')
+          ->setDisableBehavior(true))
+      ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setName('comment')
           ->setID('comment-content')
@@ -104,12 +112,21 @@ final class DifferentialAddCommentView extends AphrontView {
           ->setValue('Clowncopterize'));
 
     Javelin::initBehavior(
-      'differential-add-reviewers',
+      'differential-add-reviewers-and-ccs',
       array(
-        'src' => '/typeahead/common/users/',
-        'tokenizer' => 'add-reviewers-tokenizer',
+        'dynamic' => array(
+          'add_reviewers' => array(
+            'tokenizer' => 'add-reviewers-tokenizer',
+            'src' => '/typeahead/common/users/',
+            'row' => 'add-reviewers',
+          ),
+          'add_ccs' => array(
+            'tokenizer' => 'add-ccs-tokenizer',
+            'src' => '/typeahead/common/mailable/',
+            'row' => 'add-ccs',
+          ),
+        ),
         'select' => 'comment-action',
-        'row' => 'add-reviewers',
       ));
 
     $diff = $revision->loadActiveDiff();

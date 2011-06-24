@@ -381,9 +381,9 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/differential/behavior-accept-with-errors.js',
   ),
-  'javelin-behavior-differential-add-reviewers' =>
+  'javelin-behavior-differential-add-reviewers-and-ccs' =>
   array(
-    'uri' => '/res/dc79790c/rsrc/js/application/differential/behavior-add-reviewers.js',
+    'uri' => '/res/fc352745/rsrc/js/application/differential/behavior-add-reviewers-and-ccs.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -393,7 +393,7 @@ celerity_register_resource_map(array(
       3 => 'javelin-typeahead',
       4 => 'javelin-typeahead-preloaded-source',
     ),
-    'disk' => '/rsrc/js/application/differential/behavior-add-reviewers.js',
+    'disk' => '/rsrc/js/application/differential/behavior-add-reviewers-and-ccs.js',
   ),
   'javelin-behavior-differential-comment-jump' =>
   array(
@@ -893,7 +893,7 @@ celerity_register_resource_map(array(
   ),
   'maniphest-task-summary-css' =>
   array(
-    'uri' => '/res/e86389c4/rsrc/css/application/maniphest/task-summary.css',
+    'uri' => '/res/14cb4b5d/rsrc/css/application/maniphest/task-summary.css',
     'type' => 'css',
     'requires' =>
     array(

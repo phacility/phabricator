@@ -89,6 +89,14 @@ class DifferentialRevisionViewController extends DifferentialController {
           $object_phids[] = $phid;
         }
       }
+      $added_ccs = idx(
+        $metadata,
+        DifferentialComment::METADATA_ADDED_CCS);
+      if ($added_ccs) {
+        foreach ($added_ccs as $phid) {
+          $object_phids[] = $phid;
+        }
+      }
     }
 
     foreach ($revision->getAttached() as $type => $phids) {
@@ -570,6 +578,7 @@ class DifferentialRevisionViewController extends DifferentialController {
     }
 
     $actions[DifferentialAction::ACTION_ADDREVIEWERS] = true;
+    $actions[DifferentialAction::ACTION_ADDCCS] = true;
 
     return array_keys(array_filter($actions));
   }

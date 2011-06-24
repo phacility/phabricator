@@ -33,6 +33,7 @@ class DifferentialCommentSaveController extends DifferentialController {
     $comment    = $request->getStr('comment');
     $action     = $request->getStr('action');
     $reviewers  = $request->getArr('reviewers');
+    $ccs        = $request->getArr('ccs');
 
     $editor = new DifferentialCommentEditor(
       $revision,
@@ -44,6 +45,7 @@ class DifferentialCommentSaveController extends DifferentialController {
       ->setAttachInlineComments(true)
       ->setAddCC($action != DifferentialAction::ACTION_RESIGN)
       ->setAddedReviewers($reviewers)
+      ->setAddedCCs($ccs)
       ->save();
 
     // TODO: Diff change detection?

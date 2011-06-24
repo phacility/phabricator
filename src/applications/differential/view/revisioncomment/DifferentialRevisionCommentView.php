@@ -231,12 +231,17 @@ final class DifferentialRevisionCommentView extends AphrontView {
       $metadata,
       DifferentialComment::METADATA_ADDED_REVIEWERS);
     if ($added_reviewers) {
-      $reviewers = array();
-      foreach ($added_reviewers as $phid) {
-        $reviewers[] = $this->handles[$phid]->renderLink();
-      }
-      $reviewers = 'Added reviewers: '.implode(', ', $reviewers);
+      $reviewers = 'Added reviewers: '.$this->renderHandleList(
+        $added_reviewers);
       $metadata_blocks[] = $reviewers;
+    }
+
+    $added_ccs = idx(
+      $metadata,
+      DifferentialComment::METADATA_ADDED_CCS);
+    if ($added_ccs) {
+      $ccs = 'Added CCs: '.$this->renderHandleList($added_ccs);
+      $metadata_blocks[] = $ccs;
     }
 
     if ($metadata_blocks) {
@@ -269,6 +274,14 @@ final class DifferentialRevisionCommentView extends AphrontView {
           $inline_render.
         '</div>'.
       '</div>');
+  }
+
+  private function renderHandleList(array $phids) {
+    $result = array();
+    foreach ($phids as $phid) {
+      $result[] = $this->handles[$phid]->renderLink();
+    }
+    return implode(', ', $result);
   }
 
 }

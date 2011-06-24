@@ -27,6 +27,7 @@ class DifferentialCommentEditor {
   protected $addCC;
   protected $changedByCommit;
   protected $addedReviewers = array();
+  private $addedCCs = array();
 
   private $parentMessageID;
 
@@ -76,6 +77,15 @@ class DifferentialCommentEditor {
 
   public function getAddedReviewers() {
     return $this->addedReviewers;
+  }
+
+  public function setAddedCCs($added_ccs) {
+    $this->addedCCs = $added_ccs;
+    return $this;
+  }
+
+  public function getAddedCCs() {
+    return $this->addedCCs;
   }
 
   public function save() {
@@ -258,7 +268,34 @@ class DifferentialCommentEditor {
           $action = DifferentialAction::ACTION_COMMENT;
         }
         break;
+      case DifferentialAction::ACTION_ADDCCS:
+        $added_ccs = $this->getAddedCCs();
 
+        $current_ccs = $revision->getCCPHIDs();
+        if ($current_ccs) {
+          $current_ccs = array_combine($current_ccs, $current_ccs);
+          foreach ($added_ccs as $k => $cc) {
+            if (isset($current_ccs[$cc])) {
+              unset($added_ccs[$k]);
+            }
+          }
+        }
+
+        if ($added_ccs) {
+          foreach ($added_ccs as $cc) {
+            DifferentialRevisionEditor::addCC(
+              $revision,
+              $cc,
+              $this->actorPHID);
+          }
+
+          $key = DifferentialComment::METADATA_ADDED_CCS;
+          $metadata[$key] = $added_ccs;
+
+        } else {
+          $action = DifferentialAction::ACTION_COMMENT;
+        }
+        break;
       default:
         throw new Exception('Unsupported action.');
     }
