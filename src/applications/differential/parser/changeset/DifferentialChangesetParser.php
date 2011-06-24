@@ -660,36 +660,54 @@ class DifferentialChangesetParser {
     }
   }
 
-  protected function lineWrap($l) {
+  /**
+   * Hard-wrap a piece of UTF-8 text with embedded HTML tags and entities.
+   *
+   * @param   string An HTML string with tags and entities.
+   * @return  string Hard-wrapped string.
+   */
+  protected function lineWrap($line) {
     $c = 0;
-    $len = strlen($l);
-    $ins = array();
+    $break_here = array();
+
+    // Convert the UTF-8 string into a list of UTF-8 characters.
+    $vector = phutil_utf8v($line);
+    $len = count($vector);
+    $byte_pos = 0;
     for ($ii = 0; $ii < $len; ++$ii) {
-      if ($l[$ii] == '&') {
+      // An ampersand indicates an HTML entity; consume the whole thing (until
+      // ";") but treat it all as one character.
+      if ($vector[$ii] == '&') {
         do {
           ++$ii;
-        } while ($l[$ii] != ';');
+        } while ($vector[$ii] != ';');
         ++$c;
-      } else if ($l[$ii] == '<') {
+      // An "<" indicates an HTML tag, consume the whole thing but don't treat
+      // it as a character.
+      } else if ($vector[$ii] == '<') {
         do {
           ++$ii;
-        } while ($l[$ii] != '>');
+        } while ($vector[$ii] != '>');
       } else {
         ++$c;
       }
+
+      // Keep track of where we need to break the string later.
       if ($c == $this->lineWidth) {
-        $ins[] = ($ii + 1);
+        $break_here[$ii] = true;
         $c = 0;
       }
     }
-    while (($pos = array_pop($ins))) {
-      $l = substr_replace(
-        $l,
-        "<span class=\"over-the-line\">\xE2\xAC\x85</span><br />",
-        $pos,
-        0);
+
+    $result = array();
+    foreach ($vector as $ii => $char) {
+      $result[] = $char;
+      if (isset($break_here[$ii])) {
+        $result[] = "<span class=\"over-the-line\">!</span><br />";
+      }
     }
-    return $l;
+
+    return implode('', $result);
   }
 
 
