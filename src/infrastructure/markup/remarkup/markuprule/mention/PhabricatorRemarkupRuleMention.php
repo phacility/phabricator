@@ -48,9 +48,16 @@ class PhabricatorRemarkupRuleMention
       $user_table->getTableName(),
       $usernames);
 
+    $engine = $this->getEngine();
+    $metadata_key = 'phabricator.mentioned-user-phids';
+    $mentioned = $engine->getTextMetadata($metadata_key, array());
+
     foreach ($real_user_names as $row) {
       $this->actualUsers[strtolower($row['username'])] = $row;
+      $mentioned[$row['phid']] = $row['phid'];
     }
+
+    $engine->setTextMetadata($metadata_key, $mentioned);
 
     return preg_replace_callback(
       $regexp,

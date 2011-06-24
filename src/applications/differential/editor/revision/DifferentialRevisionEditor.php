@@ -600,6 +600,8 @@ class DifferentialRevisionEditor {
           implode(', ', $sql));
       }
     $conn_w->saveTransaction();
+
+    $revision->loadRelationships();
   }
 
 

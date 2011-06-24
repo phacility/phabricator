@@ -273,7 +273,7 @@ class DifferentialCommentEditor {
 
         $current_ccs = $revision->getCCPHIDs();
         if ($current_ccs) {
-          $current_ccs = array_combine($current_ccs, $current_ccs);
+          $current_ccs = array_fill_keys($current_ccs, true);
           foreach ($added_ccs as $k => $cc) {
             if (isset($current_ccs[$cc])) {
               unset($added_ccs[$k]);
@@ -307,9 +307,6 @@ class DifferentialCommentEditor {
         $this->actorPHID);
     }
 
-    // Reload relationships to pick up any reviewer/CC changes.
-    $revision->loadRelationships();
-
     $inline_comments = array();
     if ($this->attachInlineComments) {
       $inline_comments = id(new DifferentialInlineComment())->loadAllWhere(
@@ -338,6 +335,43 @@ class DifferentialCommentEditor {
       foreach ($inline_comments as $inline) {
         $inline->setCommentID($comment->getID());
         $inline->save();
+      }
+    }
+
+    // Find any "@mentions" in the comment blocks.
+    $content_blocks = array($comment->getContent());
+    foreach ($inline_comments as $inline) {
+      $content_blocks[] = $inline->getContent();
+    }
+    $mention_ccs = DifferentialMarkupEngineFactory::extractPHIDsFromMentions(
+      $content_blocks);
+    if ($mention_ccs) {
+      $current_ccs = $revision->getCCPHIDs();
+      if ($current_ccs) {
+        $current_ccs = array_fill_keys($current_ccs, true);
+        foreach ($mention_ccs as $key => $mention_cc) {
+          if (isset($current_ccs[$mention_cc])) {
+            unset($mention_ccs);
+          }
+        }
+      }
+      if ($mention_ccs) {
+        $metadata = $comment->getMetadata();
+        $metacc = idx(
+          $metadata,
+          DifferentialComment::METADATA_ADDED_CCS,
+          array());
+        foreach ($mention_ccs as $cc_phid) {
+          DifferentialRevisionEditor::addCC(
+            $revision,
+            $cc_phid,
+            $this->actorPHID);
+          $metacc[] = $cc_phid;
+        }
+        $metadata[DifferentialComment::METADATA_ADDED_CCS] = $metacc;
+
+        $comment->setMetadata($metadata);
+        $comment->save();
       }
     }
 

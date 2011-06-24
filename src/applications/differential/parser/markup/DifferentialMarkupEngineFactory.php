@@ -18,6 +18,23 @@
 
 class DifferentialMarkupEngineFactory {
 
+  public static function extractPHIDsFromMentions(array $content_blocks) {
+    $mentions = array();
+
+    $factory = new DifferentialMarkupEngineFactory();
+    $engine = $factory->newDifferentialCommentMarkupEngine();
+
+    foreach ($content_blocks as $content_block) {
+      $engine->markupText($content_block);
+      $phids = $engine->getTextMetadata(
+        'phabricator.mentioned-user-phids',
+        array());
+      $mentions += $phids;
+    }
+
+    return $mentions;
+  }
+
   public function newDifferentialCommentMarkupEngine() {
     $engine = new PhutilRemarkupEngine();
 
