@@ -133,3 +133,12 @@ strings with the image you specify. For instance, you could upload an image of a
 dancing banana to create a macro named "peanutbutterjellytime", and then any
 time you type that string it will be replaced with the image of a dancing
 banana.
+
+= Mentioning Users =
+
+In Differential and Maniphest, you can mention another user by writing:
+
+  @username
+
+When you submit your comment, this will add them as a CC on the revision or task
+if they aren't already CC'd.
