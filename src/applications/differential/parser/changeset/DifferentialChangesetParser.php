@@ -520,6 +520,9 @@ class DifferentialChangesetParser {
       ipull($this->intra, 1),
       $new_corpus);
 
+    $this->tokenHighlight($this->oldRender);
+    $this->tokenHighlight($this->newRender);
+
     $generated = (strpos($new_corpus_block, '@'.'generated') !== false);
 
     $this->specialAttributes[self::ATTR_GENERATED] = $generated;
@@ -705,6 +708,23 @@ class DifferentialChangesetParser {
     }
 
     return implode('', $result);
+  }
+
+
+  protected function tokenHighlight(&$render) {
+    // TODO: This is really terribly horrible and should be fixed. We have two
+    // byte-oriented algorithms (wordwrap and intraline diff) which are not
+    // unicode-aware and can accept a valid UTF-8 string but emit an invalid
+    // one by adding markup inside the byte sequences of characters. The right
+    // fix here is to make them UTF-8 aware. Short of that, we can repair the
+    // possibly-broken UTF-8 string into a valid UTF-8 string by replacing all
+    // UTF-8 bytes with a Unicode Replacement Character.
+    foreach ($render as $key => $text) {
+      $render[$key] = preg_replace(
+        '/[\x80-\xFF]/',
+        '<span class="uu">'."\xEF\xBF\xBD".'</span>',
+        $text);
+    }
   }
 
   protected function getHighlightFuture($corpus) {
