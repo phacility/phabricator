@@ -42,6 +42,7 @@ class DifferentialMarkupEngineFactory {
     $rules[] = new PhabricatorRemarkupRuleDiffusion();
     $rules[] = new PhabricatorRemarkupRuleManiphest();
     $rules[] = new PhabricatorRemarkupRuleImageMacro();
+    $rules[] = new PhabricatorRemarkupRuleMention();
 
     $custom_rule_classes =
       PhabricatorEnv::getEnvConfig('differential.custom-remarkup-rules');

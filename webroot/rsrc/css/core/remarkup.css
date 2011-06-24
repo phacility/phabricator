@@ -59,3 +59,15 @@
   max-width: 640px;
   max-height: 640px;
 }
+
+.phabricator-remarkup-mention-exists {
+  font-weight: bold;
+  padding: 0 .25em;
+  background: #aaffaa;
+}
+
+.aphront-panel-preview .phabricator-remarkup-mention-unknown {
+  font-weight: bold;
+  padding: 0 .25em;
+  background: #ffaaaa;
+}
