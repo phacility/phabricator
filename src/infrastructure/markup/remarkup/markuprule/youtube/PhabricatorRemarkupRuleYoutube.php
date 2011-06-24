@@ -38,12 +38,18 @@ class PhabricatorRemarkupRuleYoutube
     if ($v) {
       $youtube_src = 'https://www.youtube.com/embed/'.$v;
       $iframe =
-        '<div class="embedded-youtube-video">
-              <iframe width="650" height="400" '.
-        'style="margin: 1em auto; border: 0px" '.
-        'src="'.$youtube_src.'" '.
-        'frameborder="0"></iframe>
-            </div>';
+        '<div class="embedded-youtube-video">'.
+          phutil_render_tag(
+            'iframe',
+            array(
+              'width'       => '650',
+              'height'      => '400',
+              'style'       => 'margin: 1em auto; border: 0px;',
+              'src'         => $youtube_src,
+              'frameborder' => 0,
+            ),
+            '').
+        '</div>';
       return $this->getEngine()->storeText($iframe);
     } else {
       return $this->uri;
