@@ -3,28 +3,27 @@
 
 Explains how to build new classes to control how Arcanist behaves.
 
-NOTE: TODO: This document is pretty trash, follow at your own risk.
-
 = Overview =
 
 Arcanist has some basic configuration options available in the ##.arcconfig##
-file (see @{article:Setting Up .arcconfig}), but it can't handle everything. If
-you want to customize Arcanist at a deeper level, you need to build new classes.
-For instance:
+file (see @{article:Arcanist User Guide: Configuring a New Project}), but it
+can't handle everything. If you want to customize Arcanist at a deeper level,
+you need to build new classes. For instance:
 
   - if you want to configure linters, or add new linters, you need to create a
-    new class which extends @{class:ArcanistLintEngine}.
+    new class which extends @{class@arcanist:ArcanistLintEngine}.
   - if you want to integrate with a unit testing framework, you need to create a
-    new class which extends @{class:ArcanistBaseUnitTestEngine}.
+    new class which extends @{class@arcanist:ArcanistBaseUnitTestEngine}.
   - if you you want to change how workflows behave, or add new workflows, you
-    need to create a new class which extends @{class:ArcanistConfiguration}.
+    need to create a new class which extends
+    @{class@arcanist:ArcanistConfiguration}.
 
 Arcanist works through a sort of dependency-injection approach. For example,
 Arcanist does not run lint rules by default, but you can set **lint_engine**
 in your ##.arcconfig## to the name of a class which extends
-@{class:ArcanistLintEngine}. When running from inside your project, Arcanist
-will load this class and call methods on it in order to run lint. To make this
-work, you need to do three things:
+@{class@arcanist:ArcanistLintEngine}. When running from inside your project,
+Arcanist will load this class and call methods on it in order to run lint. To
+make this work, you need to do three things:
 
   - actually write the class;
   - add the library where the class exists to your ##.arcconfig##;
@@ -33,7 +32,31 @@ work, you need to do three things:
 
 = Write the Class =
 
-(TODO)
+Start by creating a new phutil library -- this is a directory which will contain
+class files for Arcanist to load. You can either put it inside your project, or
+outside (if you want to share lint rules between several projects, for
+instance). To create a new library, run ##arc liberate##:
+
+  $ arc liberate path/to/new/library
+
+This will prompt you to name your library and create a new directory on disk.
+Create a new ##lint/## directory in this library (or ##unit/##, or whatever you
+want). This creates a module. Put ##CustomArcanistLintEngine.php## inside the
+##lint/## directory:
+
+  lang=php
+  <?php
+
+  class CustomArcanistLintEngine extends ArcanistLintEngine {
+
+  }
+
+Now run ##arc liberate## on the library again. Whenever you add, remove, or
+rename modules or classes you should run ##arc liberate## to update the
+classmap.
+
+You can either write the class body now (refer to the documentation for the
+class you are extending) or continue with integrating it into your project.
 
 = Load the Class =
 
@@ -44,15 +67,16 @@ To make the class loadable, you need to put the path to it in your
     // ...
     "phutil_libraries" : {
       // ...
-      "my-library" : "/path/to/my/library",
+      "library-a" : "/path/to/my/library", // Absolute path
+      "library-b" : "support/arcanist",    // Relative path in this project
       // ...
     }
     // ...
   }
 
 You can either specify an absolute path, or a path relative to the project root.
-When you run ##arc --trace##, you should see a message to the effect that it has
-loaded your library.
+When you run ##arc list --trace##, you should see a message to the effect that
+it has loaded your library.
 
 For debugging or testing, you can also run Arcanist with the
 ##--load-phutil-library## flag:
@@ -70,7 +94,7 @@ the appropriate configuration value.
 
   {
     // ...
-    "lint_engine" : "MyCustomArcanistLintEngine",
+    "lint_engine" : "CustomArcanistLintEngine",
     // ...
   }
 

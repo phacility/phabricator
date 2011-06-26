@@ -18,17 +18,14 @@ A simple, valid file looks something like this:
 
   {
     "project_id" : "some_project_name",
-    "conduit_uri" : "https://phabricator.example.com/api/"
+    "conduit_uri" : "https://phabricator.example.com/"
   }
 
 Here's what these options mean:
 
   - **project_id**: a human-readable string identifying the project
-  - **conduit_uri**: the Conduit API URI for the Phabricator installation that
-    Arcanist should send diffs to for review. Generally, if you access
-    Phabricator at ##https://phabricator.example.com/##, the **conduit_uri** is
-    ##https://phabricator.example.com/api/##. Be mindful about "http" vs
-    "https".
+  - **conduit_uri**: the URI for the Phabricator installation that Arcanist
+    should send diffs to for review. Be mindful about "http" vs "https".
 
 For an exhaustive list of available options, see below.
 
@@ -36,17 +33,20 @@ For an exhaustive list of available options, see below.
 
 Other options include:
 
-  - **lint_engine**: the name of a subclass of @{class:ArcanistLintEngine},
-    which should be used to apply lint rules to this project. See (TODO).
+  - **lint_engine**: the name of a subclass of
+    @{class@arcanist:ArcanistLintEngine}, which should be used to apply lint
+    rules to this project. See @{article:Arcanist User Guide: Customizing Lint,
+    Unit Tests and Workflows}.
   - **unit_engine**: the name of a subclass of
-    @{class:ArcanistBaseUnitTestEngine}, which should be used to apply unit
-    test rules to this project. See (TODO).
+    @{class@arcanist:ArcanistBaseUnitTestEngine}, which should be used to apply
+    unit test rules to this project. See
+    @{article:Arcanist User Guide: Customizing Lint, Unit Tests and Workflows}.
   - **arcanist_configuration**: the name of a subclass of
-    @{class:ArcanistConfiguration} which can add new command flags for this
-    project or provide entirely new commands.
+    @{class@arcanist:ArcanistConfiguration} which can add new command flags for
+    this project or provide entirely new commands.
   - **remote_hooks_installed**: tells Arcanist that you've set up remote hooks
-    in the master repository (see @{article:Installing Arcanist SVN Hooks} for
-    SVN, or (TODO) for git).
-  - **copyright_holder**: used by @{class:ArcanistLicenseLinter} to apply
-    license notices to source files.
+    in the master repository (see @{article:Arcanist User Guide: Repository
+    Hooks}).
+  - **copyright_holder**: used by @{class@arcanist:ArcanistLicenseLinter} to
+    apply license notices to source files.
   - **phutil_libraries**: map of additional Phutil libraries to load at startup.

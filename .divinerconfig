@@ -1,6 +1,6 @@
 {
   "name" : "Phabricator",
-  "src_base" : "https://github.com/facebook/phabricator/blob/master",
+  "src_base" : "https://secure.phabricator.com/diffusion/P/browse/origin:master",
   "groups" : {
     "intro" : "Introduction",
     "config" : "Configuration",
