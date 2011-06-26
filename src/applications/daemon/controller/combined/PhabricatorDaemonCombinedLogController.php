@@ -37,6 +37,7 @@ class PhabricatorDaemonCombinedLogController
 
     $event_view = new PhabricatorDaemonLogEventsView();
     $event_view->setEvents($events);
+    $event_view->setUser($request->getUser());
     $event_view->setCombinedLog(true);
 
     $log_panel = new AphrontPanelView();

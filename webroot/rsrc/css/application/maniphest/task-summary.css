@@ -49,8 +49,8 @@
 
 .maniphest-task-summary td.maniphest-task-updated {
   text-align: left;
-  width: 11%;
-  min-width: 120px;
+  width: 13%;
+  min-width: 160px;
 }
 
 .maniphest-task-summary .pri-bullet {

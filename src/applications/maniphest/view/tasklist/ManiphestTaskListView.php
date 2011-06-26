@@ -20,6 +20,7 @@ class ManiphestTaskListView extends AphrontView {
 
   private $tasks;
   private $handles;
+  private $user;
 
   public function setTasks(array $tasks) {
     $this->tasks = $tasks;
@@ -31,12 +32,18 @@ class ManiphestTaskListView extends AphrontView {
     return $this;
   }
 
+  public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
+    return $this;
+  }
+
   public function render() {
 
     $views = array();
     foreach ($this->tasks as $task) {
       $view = new ManiphestTaskSummaryView();
       $view->setTask($task);
+      $view->setUser($this->user);
       $view->setHandles($this->handles);
       $views[] = $view->render();
     }

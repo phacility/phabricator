@@ -20,6 +20,7 @@ class ManiphestTaskSummaryView extends AphrontView {
 
   private $task;
   private $handles;
+  private $user;
 
   public function setTask(ManiphestTask $task) {
     $this->task = $task;
@@ -31,7 +32,17 @@ class ManiphestTaskSummaryView extends AphrontView {
     return $this;
   }
 
+  public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
+    return $this;
+  }
+
   public function render() {
+
+    if (!$this->user) {
+      throw new Exception("Call setUser() before rendering!");
+    }
+
     $task = $this->task;
     $handles = $this->handles;
 
@@ -76,7 +87,7 @@ class ManiphestTaskSummaryView extends AphrontView {
             ManiphestTaskPriority::getTaskPriorityName($task->getPriority()).
           '</td>'.
           '<td class="maniphest-task-updated">'.
-            phabricator_format_timestamp($task->getDateModified()).
+            phabricator_datetime($task->getDateModified(), $this->user).
           '</td>'.
         '</tr>'.
       '</table>';

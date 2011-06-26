@@ -59,7 +59,8 @@ class PhabricatorDaemonLogViewController extends PhabricatorDaemonController {
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel('Started')
-          ->setValue(date('F jS, Y g:i:s A', $log->getDateCreated())))
+          ->setValue(
+            phabricator_datetime($log->getDateCreated(), $user)))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel('Argv')
@@ -73,6 +74,7 @@ class PhabricatorDaemonLogViewController extends PhabricatorDaemonController {
     $content[] = $panel;
 
     $event_view = new PhabricatorDaemonLogEventsView();
+    $event_view->setUser($user);
     $event_view->setEvents($events);
 
     $log_panel = new AphrontPanelView();

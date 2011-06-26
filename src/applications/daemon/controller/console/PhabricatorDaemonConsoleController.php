@@ -22,7 +22,11 @@ class PhabricatorDaemonConsoleController extends PhabricatorDaemonController {
     $logs = id(new PhabricatorDaemonLog())->loadAllWhere(
       '1 = 1 ORDER BY id DESC LIMIT 15');
 
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
     $daemon_table = new PhabricatorDaemonLogListView();
+    $daemon_table->setUser($user);
     $daemon_table->setDaemonLogs($logs);
 
     $daemon_panel = new AphrontPanelView();

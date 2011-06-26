@@ -50,6 +50,7 @@ class ManiphestTaskDescriptionChangeController extends ManiphestController {
     $view = new ManiphestTransactionDetailView();
     $view->setTransactionGroup($transactions);
     $view->setHandles($handles);
+    $view->setUser($user);
     $view->setMarkupEngine($engine);
     $view->setRenderSummaryOnly(true);
     $view->setRenderFullSummary(true);

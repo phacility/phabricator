@@ -42,6 +42,7 @@ class DifferentialCommentPreviewController extends DifferentialController {
     $comment->setAuthorPHID($author_phid);
 
     $view = new DifferentialRevisionCommentView();
+    $view->setUser($request->getUser());
     $view->setComment($comment);
     $view->setHandles($handles);
     $view->setMarkupEngine($engine);

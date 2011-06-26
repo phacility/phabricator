@@ -19,13 +19,23 @@
 final class PhabricatorDaemonLogListView extends AphrontView {
 
   private $daemonLogs;
+  private $user;
 
   public function setDaemonLogs(array $daemon_logs) {
     $this->daemonLogs = $daemon_logs;
   }
 
+  public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
+    return $this;
+  }
+
   public function render() {
     $rows = array();
+
+    if (!$this->user) {
+      throw new Exception("Call setUser() before rendering!");
+    }
 
     foreach ($this->daemonLogs as $log) {
       $epoch = $log->getDateCreated();
@@ -73,8 +83,8 @@ final class PhabricatorDaemonLogListView extends AphrontView {
         phutil_escape_html($log->getDaemon()),
         phutil_escape_html($log->getHost()),
         $log->getPID(),
-        date('M j, Y', $epoch),
-        date('g:i A', $epoch),
+        phabricator_date($epoch, $this->user),
+        phabricator_time($epoch, $this->user),
         phutil_render_tag(
           'a',
           array(

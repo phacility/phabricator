@@ -68,6 +68,7 @@ final class DifferentialRevisionCommentListView extends AphrontView {
     foreach ($this->comments as $comment) {
       $view = new DifferentialRevisionCommentView();
       $view->setComment($comment);
+      $view->setUser($this->user);
       $view->setHandles($this->handles);
       $view->setMarkupEngine($engine);
       $view->setInlineComments(idx($inlines, $comment->getID(), array()));

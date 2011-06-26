@@ -33,6 +33,7 @@ class PhabricatorDaemonLogListController extends PhabricatorDaemonController {
     $pager->setURI($request->getRequestURI(), 'page');
 
     $daemon_table = new PhabricatorDaemonLogListView();
+    $daemon_table->setUser($request->getUser());
     $daemon_table->setDaemonLogs($logs);
 
     $daemon_panel = new AphrontPanelView();

@@ -160,6 +160,7 @@ class ManiphestTaskListController extends ManiphestController {
     } else {
       foreach ($tasks as $group => $list) {
         $task_list = new ManiphestTaskListView();
+        $task_list->setUser($user);
         $task_list->setTasks($list);
         $task_list->setHandles($handles);
 

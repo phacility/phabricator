@@ -27,6 +27,7 @@ class ManiphestTransactionDetailView extends AphrontView {
 
   private $renderSummaryOnly;
   private $renderFullSummary;
+  private $user;
 
   public function setTransactionGroup(array $transactions) {
     $this->transactions = $transactions;
@@ -71,6 +72,11 @@ class ManiphestTransactionDetailView extends AphrontView {
     return $this;
   }
 
+  public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
+    return $this;
+  }
+
   public function renderForEmail($with_date) {
     $this->forEmail = true;
 
@@ -87,8 +93,11 @@ class ManiphestTransactionDetailView extends AphrontView {
       }
       $desc = $author.' '.$desc.'.';
       if ($with_date) {
-        $desc = 'On '.date('M jS \a\t g:i A', $transaction->getDateCreated()).
-                ', '.$desc;
+        // NOTE: This is going into a (potentially multi-recipient) email so
+        // we can't use a single user's timezone preferences. Use the server's
+        // instead, but make the timezone explicit.
+        $datetime = date('M jS \a\t g:i A T', $transaction->getDateCreated());
+        $desc = "On {$datetime}, {$desc}";
       }
       $descs[] = $desc;
       if ($transaction->hasComments()) {
@@ -114,6 +123,11 @@ class ManiphestTransactionDetailView extends AphrontView {
   }
 
   public function render() {
+
+    if (!$this->user) {
+      throw new Exception("Call setUser() before render()!");
+    }
+
     $handles = $this->handles;
     $transactions = $this->transactions;
 
@@ -177,7 +191,9 @@ class ManiphestTransactionDetailView extends AphrontView {
     if ($this->preview) {
       $timestamp = 'COMMENT PREVIEW';
     } else {
-      $timestamp = phabricator_format_timestamp($transaction->getDateCreated());
+      $timestamp = phabricator_datetime(
+        $transaction->getDateCreated(),
+        $this->user);
     }
 
     $info = array();

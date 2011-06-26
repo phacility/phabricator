@@ -28,6 +28,9 @@ class PhabricatorFileViewController extends PhabricatorFileController {
 
   public function processRequest() {
 
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
     $file = id(new PhabricatorFile())->loadOneWhere(
       'phid = %s',
       $this->phid);
@@ -93,7 +96,7 @@ class PhabricatorFileViewController extends PhabricatorFileController {
         id(new AphrontFormStaticControl())
           ->setLabel('Created')
           ->setName('created')
-          ->setValue(date('Y-m-d g:i:s A', $file->getDateCreated())))
+          ->setValue(phabricator_datetime($file->getDateCreated(), $user)))
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel('Mime Type')

@@ -26,6 +26,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
   private $changesets;
   private $target;
   private $commentNumber;
+  private $user;
 
   public function setComment($comment) {
     $this->comment = $comment;
@@ -67,7 +68,16 @@ final class DifferentialRevisionCommentView extends AphrontView {
     return $this;
   }
 
+  public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
+    return $this;
+  }
+
   public function render() {
+
+    if (!$this->user) {
+      throw new Exception("Call setUser() before rendering!");
+    }
 
     require_celerity_resource('phabricator-remarkup-css');
     require_celerity_resource('differential-revision-comment-css');
@@ -81,7 +91,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
     if ($this->preview) {
       $date = 'COMMENT PREVIEW';
     } else {
-      $date = date('F jS, Y g:i:s A', $comment->getDateCreated());
+      $date = phabricator_datetime($comment->getDateCreated(), $this->user);
     }
 
     $info = array($date);

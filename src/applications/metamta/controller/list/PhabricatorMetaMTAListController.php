@@ -21,6 +21,7 @@ class PhabricatorMetaMTAListController extends PhabricatorMetaMTAController {
   public function processRequest() {
     // Get a page of mails together with pager.
     $request = $this->getRequest();
+    $user = $request->getUser();
     $offset = $request->getInt('offset', 0);
     $related_phid = $request->getStr('phid');
 
@@ -60,7 +61,7 @@ class PhabricatorMetaMTAListController extends PhabricatorMetaMTAController {
         PhabricatorMetaMTAMail::getReadableStatus($mail->getStatus()),
         $mail->getRetryCount(),
         ($mail->getNextRetry() - time()).' s',
-        date('Y-m-d g:i:s A', $mail->getDateCreated()),
+        phabricator_datetime($mail->getDateCreated(), $user),
         (time() - $mail->getDateModified()).' s',
         phutil_escape_html($mail->getSubject()),
         phutil_render_tag(

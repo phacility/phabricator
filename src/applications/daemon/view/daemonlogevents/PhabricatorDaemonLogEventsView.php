@@ -20,6 +20,7 @@ final class PhabricatorDaemonLogEventsView extends AphrontView {
 
   private $events;
   private $combinedLog;
+  private $user;
 
   public function setEvents(array $events) {
     $this->events = $events;
@@ -29,14 +30,23 @@ final class PhabricatorDaemonLogEventsView extends AphrontView {
     $this->combinedLog = $is_combined;
   }
 
+  public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
+    return $this;
+  }
+
   public function render() {
     $rows = array();
+
+    if (!$this->user) {
+      throw new Exception("Call setUser() before rendering!");
+    }
 
     foreach ($this->events as $event) {
       $row = array(
         phutil_escape_html($event->getLogType()),
-        date('M j, Y', $event->getEpoch()),
-        date('g:i:s A', $event->getEpoch()),
+        phabricator_date($event->getEpoch(), $this->user),
+        phabricator_time($event->getEpoch(), $this->user),
         str_replace("\n", '<br />', phutil_escape_html($event->getMessage())),
       );
 

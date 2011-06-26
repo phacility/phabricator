@@ -80,6 +80,7 @@ class ManiphestTransactionListView extends AphrontView {
     $sequence = 1;
     foreach ($groups as $group) {
       $view = new ManiphestTransactionDetailView();
+      $view->setUser($this->user);
       $view->setTransactionGroup($group);
       $view->setHandles($this->handles);
       $view->setMarkupEngine($this->markupEngine);
