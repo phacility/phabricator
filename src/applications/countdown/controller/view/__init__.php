@@ -11,6 +11,7 @@ phutil_require_module('phabricator', 'applications/countdown/controller/base');
 phutil_require_module('phabricator', 'applications/countdown/storage/timer');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'infrastructure/javelin/api');
+phutil_require_module('phabricator', 'view/utils');
 
 phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');

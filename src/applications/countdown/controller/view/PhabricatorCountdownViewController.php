@@ -49,8 +49,9 @@ class PhabricatorCountdownViewController
     $content =
       '<div class="phabricator-timer">
         <h1 class="phabricator-timer-header">'.
-          phutil_escape_html($timer->getTitle()).'
-        </h1>
+          phutil_escape_html($timer->getTitle()).' &middot; '.
+          phabricator_datetime($timer->getDatePoint(), $user).
+        '</h1>
         <div class="phabricator-timer-pane">
           <table class="phabricator-timer-table">
             <tr>
