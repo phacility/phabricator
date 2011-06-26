@@ -25,7 +25,7 @@ development install for open tasks in the "Bootcamp" project which are owned by
 "Up For Grabs". These are small-to-medium-sized bugs and projects intended to
 introduce new contributors to the codebase.
 
-= Required Reading =
+= Suggested Reading =
 
 You should read the relevant coding convention documents before you submit a
 change and make sure you're following the project guidelines:
@@ -33,17 +33,3 @@ change and make sure you're following the project guidelines:
   - @{article:General Coding Standards} (for all languages)
   - @{article:PHP Coding Standards} (for PHP)
   - @{article:Javascript Coding Standards} (for Javascript)
-
-= Philosophy =
-
-The Phabricator philosophy is simple tools that work well. Performance,
-reliability, and ease of use are of paramount importance. This does not exclude
-a rich featureset, but adding features shouldn't compromise these pillars.
-
-One of Phabricator's main strengths is that it's pretty fast, but it got there
-by accepting only patches which are also pretty fast and reverting out a bunch
-of garbage that was really slow. Accepting a few slow patches undoes all this
-work, so you need to be prepared to defend the performance of your patches. The
-best way you can do this is to do your homework and come armed with concrete
-performance measurements and information (XHProf profiles, EXPLAIN for query
-plans, etc.)
