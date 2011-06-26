@@ -252,12 +252,14 @@ class ManiphestTaskEditController extends ManiphestController {
             javelin_render_tag(
               'a',
               array(
-                'href'        => '/project/quickcreate/',
+                'href'        => '/project/create/',
                 'mustcapture' => true,
                 'sigil'       => 'project-create',
               ),
               'Create New Project'))
           ->setDatasource('/typeahead/common/projects/'));
+
+    require_celerity_resource('aphront-error-view-css');
 
     Javelin::initBehavior('maniphest-project-create', array(
       'tokenizerID' => $project_tokenizer_id,

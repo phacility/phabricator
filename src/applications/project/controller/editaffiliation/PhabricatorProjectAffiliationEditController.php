@@ -52,7 +52,12 @@ class PhabricatorProjectAffiliationEditController
 
       if (!strlen($affiliation->getRole())) {
         if ($affiliation->getID()) {
-          $affiliation->delete();
+          if ($affiliation->getIsOwner()) {
+            $affiliation->setRole('Owner');
+            $affiliation->save();
+          } else {
+            $affiliation->delete();
+          }
         }
       } else {
         $affiliation->save();

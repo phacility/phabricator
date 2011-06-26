@@ -21,7 +21,8 @@ class PhabricatorProjectAffiliation extends PhabricatorProjectDAO {
   protected $projectPHID;
   protected $userPHID;
   protected $role;
-  protected $status;
+  protected $status = '';
+  protected $isOwner = 0;
 
   public static function loadAllForProjectPHIDs($phids) {
     if (!$phids) {

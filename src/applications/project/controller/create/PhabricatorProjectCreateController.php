@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorProjectQuickCreateController
+class PhabricatorProjectCreateController
   extends PhabricatorProjectController {
 
 
@@ -28,13 +28,14 @@ class PhabricatorProjectQuickCreateController
     $project = new PhabricatorProject();
     $project->setAuthorPHID($user->getPHID());
     $profile = new PhabricatorProjectProfile();
-    $options = PhabricatorProjectStatus::getStatusMap();
 
     $e_name = true;
     $errors = array();
     if ($request->isFormPost()) {
 
       $project->setName($request->getStr('name'));
+      $project->setStatus(PhabricatorProjectStatus::ONGOING);
+
       $profile->setBlurb($request->getStr('blurb'));
 
       if (!strlen($project->getName())) {
@@ -49,11 +50,23 @@ class PhabricatorProjectQuickCreateController
         $profile->setProjectPHID($project->getPHID());
         $profile->save();
 
-        return id(new AphrontAjaxResponse())
-          ->setContent(array(
-            'phid' => $project->getPHID(),
-            'name' => $project->getName(),
-          ));
+        id(new PhabricatorProjectAffiliation())
+          ->setUserPHID($user->getPHID())
+          ->setProjectPHID($project->getPHID())
+          ->setRole('Owner')
+          ->setIsOwner(true)
+          ->save();
+
+        if ($request->isAjax()) {
+          return id(new AphrontAjaxResponse())
+            ->setContent(array(
+              'phid' => $project->getPHID(),
+              'name' => $project->getName(),
+            ));
+        } else {
+          return id(new AphrontRedirectResponse())
+            ->setURI('/project/view/'.$project->getID().'/');
+        }
       }
     }
 
@@ -61,11 +74,17 @@ class PhabricatorProjectQuickCreateController
     if ($errors) {
       $error_view = new AphrontErrorView();
       $error_view->setTitle('Form Errors');
-      $error_view->setWidth(AphrontErrorView::WIDTH_DIALOG);
       $error_view->setErrors($errors);
     }
 
-    $form = id(new AphrontFormLayoutView())
+    if ($request->isAjax()) {
+      $form = new AphrontFormLayoutView();
+    } else {
+      $form = new AphrontFormView();
+      $form->setUser($user);
+    }
+
+    $form
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Name')
@@ -79,15 +98,44 @@ class PhabricatorProjectQuickCreateController
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT)
           ->setValue($profile->getBlurb()));
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($user)
-      ->setWidth(AphrontDialogView::WIDTH_FORM)
-      ->setTitle('Create a New Project')
-      ->appendChild($error_view)
-      ->appendChild($form)
-      ->addSubmitButton('Create Project')
-      ->addCancelButton('/project/');
+    if ($request->isAjax()) {
 
-    return id(new AphrontDialogResponse())->setDialog($dialog);
+      if ($error_view) {
+        $error_view->setWidth(AphrontErrorView::WIDTH_DIALOG);
+      }
+
+      $dialog = id(new AphrontDialogView())
+        ->setUser($user)
+        ->setWidth(AphrontDialogView::WIDTH_FORM)
+        ->setTitle('Create a New Project')
+        ->appendChild($error_view)
+        ->appendChild($form)
+        ->addSubmitButton('Create Project')
+        ->addCancelButton('/project/');
+
+      return id(new AphrontDialogResponse())->setDialog($dialog);
+    } else {
+
+      $form
+        ->appendChild(
+          id(new AphrontFormSubmitControl())
+            ->setValue('Create')
+            ->addCancelButton('/project/'));
+
+      $panel = new AphrontPanelView();
+      $panel
+        ->setWidth(AphrontPanelView::WIDTH_FORM)
+        ->setHeader('Create a New Project')
+        ->appendChild($form);
+
+      return $this->buildStandardPageResponse(
+        array(
+          $error_view,
+          $panel,
+        ),
+        array(
+          'title' => 'Create new Project',
+        ));
+    }
   }
 }

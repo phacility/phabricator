@@ -12,6 +12,7 @@ phutil_require_module('phabricator', 'aphront/response/dialog');
 phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/auth/oauth/provider/base');
 phutil_require_module('phabricator', 'applications/files/storage/file');
+phutil_require_module('phabricator', 'applications/files/transform');
 phutil_require_module('phabricator', 'applications/files/uri');
 phutil_require_module('phabricator', 'applications/people/controller/base');
 phutil_require_module('phabricator', 'applications/people/storage/user');

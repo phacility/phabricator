@@ -121,7 +121,7 @@ class PhabricatorProjectListController
     $panel = new AphrontPanelView();
     $panel->appendChild($table);
     $panel->setHeader('Project');
-    $panel->setCreateButton('Create New Project', '/project/edit/');
+    $panel->setCreateButton('Create New Project', '/project/create/');
 
     return $this->buildStandardPageResponse(
       $panel,

@@ -56,9 +56,6 @@ class PhabricatorFileTransformController extends PhabricatorFileController {
       case 'thumb-60x45':
         $xformed_file = $this->executeThumbTransform($file, 60, 45);
         break;
-      case 'profile-50x50':
-        $xformed_file = $this->executeProfile50x50Transform($file);
-        break;
       default:
         return new Aphront400Response();
     }
@@ -118,61 +115,9 @@ class PhabricatorFileTransformController extends PhabricatorFileController {
       PhabricatorFileURI::getViewURIForPHID($xform->getTransformedPHID()));
   }
 
-  private function executeProfile50x50Transform(PhabricatorFile $file) {
-    $data = $file->loadFileData();
-    $jpeg = $this->crudelyScaleTo($data, 50, 50);
-
-    return PhabricatorFile::newFromFileData($jpeg, array(
-      'name' => 'profile-'.$file->getName(),
-    ));
-  }
-
   private function executeThumbTransform(PhabricatorFile $file, $x, $y) {
-    $data = $file->loadFileData();
-    $jpeg = $this->crudelyScaleTo($data, $x, $y);
-    return PhabricatorFile::newFromFileData($jpeg, array(
-      'name' => 'thumb-'.$file->getName(),
-    ));
-  }
-
-  /**
-   * Very crudely scale an image up or down to an exact size.
-   */
-  private function crudelyScaleTo($data, $dx, $dy) {
-    $src = imagecreatefromstring($data);
-    $x = imagesx($src);
-    $y = imagesy($src);
-
-    $scale = min($x / $dx, $y / $dy);
-    $dst = imagecreatetruecolor($dx, $dy);
-
-    imagecopyresampled(
-      $dst,
-      $src,
-      0, 0,
-      0, 0,
-      $dx, $dy,
-      $scale * $dx, $scale * $dy);
-
-    $img = null;
-
-    if (function_exists('imagejpeg')) {
-      ob_start();
-      imagejpeg($dst);
-      $img = ob_get_clean();
-    } else if (function_exists('imagepng')) {
-      ob_start();
-      imagepng($dst);
-      $img = ob_get_clean();
-    } else if (function_exists('imagegif')) {
-      ob_start();
-      imagegif($dst);
-      $img = ob_get_clean();
-    } else {
-      throw new Exception("No image generation functions exist!");
-    }
-
-    return $img;
+    $xformer = new PhabricatorImageTransformer();
+    return $xformer->executeThumbTransform($file, $x, $y);
   }
 
 }

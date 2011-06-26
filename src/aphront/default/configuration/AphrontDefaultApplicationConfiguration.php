@@ -198,12 +198,12 @@ class AphrontDefaultApplicationConfiguration
 
       '/project/' => array(
         '$' => 'PhabricatorProjectListController',
-        'edit/(?:(?P<id>\d+)/)?$' => 'PhabricatorProjectProfileEditController',
+        'edit/(?P<id>\d+)/$' => 'PhabricatorProjectProfileEditController',
         'view/(?P<id>\d+)/(?:(?P<page>\w+)/)?$'
           => 'PhabricatorProjectProfileController',
         'affiliation/(?P<id>\d+)/$'
           => 'PhabricatorProjectAffiliationEditController',
-        'quickcreate/$' => 'PhabricatorProjectQuickCreateController',
+        'create/$' => 'PhabricatorProjectCreateController',
       ),
 
       '/r(?P<callsign>[A-Z]+)(?P<commit>[a-z0-9]+)$'

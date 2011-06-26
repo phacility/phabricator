@@ -119,9 +119,14 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
             if ($err != UPLOAD_ERR_NO_FILE) {
               $file = PhabricatorFile::newFromPHPUpload($_FILES['profile']);
               $okay = $file->isTransformableImage();
-
               if ($okay) {
-                 $user->setProfileImagePHID($file->getPHID());
+                $xformer = new PhabricatorImageTransformer();
+                $xformed = $xformer->executeProfileTransform(
+                  $file,
+                  $width = 50,
+                  $min_height = 50,
+                  $max_height = 50);
+                $user->setProfileImagePHID($xformed->getPHID());
               } else {
                 $errors[] =
                   'Only valid image files (jpg, jpeg, png or gif) '.
@@ -339,8 +344,7 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
         ->appendChild(
           id(new AphrontFormFileControl())
             ->setLabel('Change Image')
-            ->setName('profile')
-            ->setCaption('Upload a 50x50px image.'))
+            ->setName('profile'))
         ->appendChild(
             id(new AphrontFormMarkupControl())
               ->setValue('<hr />'))

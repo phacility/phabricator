@@ -43,7 +43,13 @@ class PhabricatorPeopleProfileEditController
           $file = PhabricatorFile::newFromPHPUpload($_FILES['image']);
           $okay = $file->isTransformableImage();
           if ($okay) {
-            $profile->setProfileImagePHID($file->getPHID());
+            $xformer = new PhabricatorImageTransformer();
+            $xformed = $xformer->executeProfileTransform(
+              $file,
+              $width = 280,
+              $min_height = 140,
+              $max_height = 420);
+            $profile->setProfileImagePHID($xformed->getPHID());
           } else {
             $errors[] =
               'Only valid image files (jpg, jpeg, png or gif) '.

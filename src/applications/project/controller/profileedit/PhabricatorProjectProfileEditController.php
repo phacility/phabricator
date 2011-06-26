@@ -19,10 +19,8 @@
 class PhabricatorProjectProfileEditController
   extends PhabricatorProjectController {
 
-  private $id;
-
   public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
+    $this->id = $data['id'];
   }
 
   public function processRequest() {
@@ -30,16 +28,11 @@ class PhabricatorProjectProfileEditController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    if ($this->id) {
-      $project = id(new PhabricatorProject())->load($this->id);
-      if (!$project) {
-        return new Aphront404Response();
-      }
-      $profile = $project->loadProfile();
-    } else {
-      $project = new PhabricatorProject();
-      $project->setAuthorPHID($user->getPHID());
+    $project = id(new PhabricatorProject())->load($this->id);
+    if (!$project) {
+      return new Aphront404Response();
     }
+    $profile = $project->loadProfile();
 
     if (empty($profile)) {
       $profile = new PhabricatorProjectProfile();
@@ -67,7 +60,13 @@ class PhabricatorProjectProfileEditController
           $file = PhabricatorFile::newFromPHPUpload($_FILES['image']);
           $okay = $file->isTransformableImage();
           if ($okay) {
-            $profile->setProfileImagePHID($file->getPHID());
+            $xformer = new PhabricatorImageTransformer();
+            $xformed = $xformer->executeProfileTransform(
+              $file,
+              $width = 280,
+              $min_height = 140,
+              $max_height = 420);
+            $profile->setProfileImagePHID($xformed->getPHID());
           } else {
             $errors[] =
               'Only valid image files (jpg, jpeg, png or gif) '.
@@ -92,15 +91,9 @@ class PhabricatorProjectProfileEditController
       $error_view->setErrors($errors);
     }
 
-    if ($project->getID()) {
-      $header_name = 'Edit Project';
-      $title = 'Edit Project';
-      $action = '/project/edit/'.$project->getID().'/';
-    } else {
-      $header_name = 'Create Project';
-      $title = 'Create Project';
-      $action = '/project/edit/';
-    }
+    $header_name = 'Edit Project';
+    $title = 'Edit Project';
+    $action = '/project/edit/'.$project->getID().'/';
 
     $form = new AphrontFormView();
     $form
@@ -127,8 +120,7 @@ class PhabricatorProjectProfileEditController
       ->appendChild(
         id(new AphrontFormFileControl())
           ->setLabel('Change Image')
-          ->setName('image')
-          ->setCaption('Upload a 280px-wide image.'))
+          ->setName('image'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton('/project/view/'.$project->getID().'/')
