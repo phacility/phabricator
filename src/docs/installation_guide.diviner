@@ -44,7 +44,8 @@ Otherwise, here's a general description of what you need to install:
   - Required PHP extensions: mysql, curl, pcntl (these might be something like
     "php-mysql" or "php5-mysql")
   - Optional PHP extensions: gd, apc (special instructions for APC are available
-    below if you have difficulty installing it)
+    below if you have difficulty installing it), xhprof (instructions below,
+    you only need this if you are developing Phabricator)
 
 If you already have LAMP setup, you've probably already got everything you need.
 It may also be helpful to refer to the install scripts above, even if they don't
@@ -89,6 +90,17 @@ If it doesn't show up, add:
   extension=apc.so
 
 ..to "/etc/php.d/apc.ini" or the "php.ini" file indicated by "php -i".
+
+= Installing XHProf (Optional) =
+
+XHProf is a PHP profiling tool. You don't need to install it unless you are
+developing Phabricator and making performance changes.
+
+You can find installation instructions for xhprof here:
+
+  http://mirror.facebook.net/facebook/xhprof/doc.html#installation
+
+You only need to install the PHP extension, not any of the library.
 
 = Next Steps =
 
