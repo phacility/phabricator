@@ -12,22 +12,19 @@ with teams. Phabricator is largely based on Facebook's internal tools.
 The major components of Phabricator are:
 
   - **Differential**, a code review tool; and
-  - **Diffusion**, a repository browser.
+  - **Diffusion**, a repository browser; and
+  - **Maniphest**, a bug tracker.
 
 Phabricator also includes a number of smaller tools.
 
 = Why use Phabricator? =
 
-Phabricator gives you a box of reasonably decent tools for a comparatively small
-setup cost. Plus:
-
-  - It has some good project names.
-  - Facebook integration makes it very hip indeed.
-  - It's fairly snappy.
-  - You only have to install and configure one thing instead of setting up
-    and customizing a bunch of different things.
-  - A couple of the core tools are actually pretty good.
-  - Maniphest allows you to close tasks "out of spite".
+Phabricator gives you a box of solid tools for a comparatively small setup cost.
+The tools all work together and are richly integrated. The whole thing is free
+and open source. You own all your data. Phabricator is extremely fast and proven
+to scale both to large datasets (Facebook has 500,000+ commits across many
+repositories) and large organizations (Facebook has 500+ fulltime engineers).
+Phabricator's tools are easy to learn, understand, and use.
 
 However, Phabricator may also not be a good solution for you:
 
@@ -35,7 +32,8 @@ However, Phabricator may also not be a good solution for you:
     with the toolsets you use lacking.
   - If you don't use SVN or Git, you'll have to add support for your VCS before
     you can get anywhere.
-  - If you loathe PHP, well, it's written in PHP.
+  - If you loathe PHP, well, it's written in PHP. Sorry. It is a victim of
+    circumstances. We assert it is well-written PHP, at least.
 
 = Next Steps =
 
