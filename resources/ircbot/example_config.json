@@ -6,7 +6,8 @@
     "#phabot-test"
   ],
   "handlers" : [
-    "PhabricatorIRCProtocolHandler"
+    "PhabricatorIRCProtocolHandler",
+    "PhabricatorIRCObjectNameHandler"
   ],
 
   "conduit.uri" : null,
