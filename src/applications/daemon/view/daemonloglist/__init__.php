@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'infrastructure/daemon/control/reference');
 phutil_require_module('phabricator', 'view/base');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/utils');

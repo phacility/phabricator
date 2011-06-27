@@ -42,14 +42,8 @@ final class PhabricatorDaemonLogListView extends AphrontView {
 
       if ($log->getHost() == php_uname('n')) {
 
-        // This will probably fail since apache can't signal the process, but
-        // we can check the error code to figure out if the process exists.
-        $is_running = posix_kill($log->getPID(), 0);
-        if (posix_get_last_error() == 1) {
-          // "Operation Not Permitted", indicates that the PID exists. If it
-          // doesn't, we'll get an error 3 ("No such process") instead.
-          $is_running = true;
-        }
+        $pid = $log->getPID();
+        $is_running = PhabricatorDaemonReference::isProcessRunning($pid);
 
         if ($is_running) {
           $running = phutil_render_tag(

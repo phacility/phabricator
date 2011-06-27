@@ -55,11 +55,26 @@ final class PhabricatorDaemonReference {
   }
 
   public function isRunning() {
-    $pid = $this->getPID();
+    return self::isProcessRunning($this->getPID());
+  }
+
+  public static function isProcessRunning($pid) {
     if (!$pid) {
       return false;
     }
-    return posix_kill($pid, 0);
+
+    // This may fail if we can't signal the process because we are running as
+    // a different user (for example, we are 'apache' and the process is some
+    // other user's, or we are a normal user and the process is root's), but
+    // we can check the error code to figure out if the process exists.
+    $is_running = posix_kill($pid, 0);
+    if (posix_get_last_error() == 1) {
+      // "Operation Not Permitted", indicates that the PID exists. If it
+      // doesn't, we'll get an error 3 ("No such process") instead.
+      $is_running = true;
+    }
+
+    return $is_running;
   }
 
   public function waitForExit($seconds) {
