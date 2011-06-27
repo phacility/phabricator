@@ -41,6 +41,7 @@ class DifferentialMarkupEngineFactory {
     $rules[] = new PhabricatorRemarkupRuleDifferential();
     $rules[] = new PhabricatorRemarkupRuleDiffusion();
     $rules[] = new PhabricatorRemarkupRuleManiphest();
+    $rules[] = new PhabricatorRemarkupRulePaste();
     $rules[] = new PhabricatorRemarkupRuleImageMacro();
     $rules[] = new PhabricatorRemarkupRuleMention();
 
