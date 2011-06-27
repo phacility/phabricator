@@ -34,7 +34,7 @@ class ConduitAPI_paste_info_Method extends ConduitAPIMethod {
 
   public function defineErrorTypes() {
     return array(
-      'ERR_BAD_PASTE' => 'No such paste exists'
+      'ERR_BAD_PASTE' => 'No such paste exists',
     );
   }
 
