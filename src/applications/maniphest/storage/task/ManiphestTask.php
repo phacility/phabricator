@@ -34,6 +34,8 @@ class ManiphestTask extends ManiphestDAO {
   protected $attached = array();
   protected $projectPHIDs = array();
 
+  protected $ownerOrdering;
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,

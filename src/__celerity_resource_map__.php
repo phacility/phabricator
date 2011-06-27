@@ -72,7 +72,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-list-filter-view-css' =>
   array(
-    'uri' => '/res/e6cff171/rsrc/css/aphront/list-filter-view.css',
+    'uri' => '/res/0f5ddaba/rsrc/css/aphront/list-filter-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -893,7 +893,7 @@ celerity_register_resource_map(array(
   ),
   'maniphest-task-summary-css' =>
   array(
-    'uri' => '/res/0bacdd7f/rsrc/css/application/maniphest/task-summary.css',
+    'uri' => '/res/e86389c4/rsrc/css/application/maniphest/task-summary.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1132,7 +1132,24 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/2892314d/typeahead.pkg.js',
       'type' => 'js',
     ),
-    'cfafcff7' =>
+    55967526 =>
+    array (
+      'name' => 'differential.pkg.css',
+      'symbols' =>
+      array (
+        0 => 'differential-core-view-css',
+        1 => 'differential-changeset-view-css',
+        2 => 'differential-revision-detail-css',
+        3 => 'differential-revision-history-css',
+        4 => 'differential-table-of-contents-css',
+        5 => 'differential-revision-comment-css',
+        6 => 'differential-revision-add-comment-css',
+        7 => 'differential-revision-comment-list-css',
+      ),
+      'uri' => '/res/pkg/55967526/differential.pkg.css',
+      'type' => 'css',
+    ),
+    '8e9024dc' =>
     array (
       'name' => 'core.pkg.css',
       'symbols' =>
@@ -1153,7 +1170,7 @@ celerity_register_resource_map(array(
         13 => 'phabricator-remarkup-css',
         14 => 'syntax-highlighting-css',
       ),
-      'uri' => '/res/pkg/cfafcff7/core.pkg.css',
+      'uri' => '/res/pkg/8e9024dc/core.pkg.css',
       'type' => 'css',
     ),
     'da416e1c' =>
@@ -1205,35 +1222,18 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/f1d27e2a/workflow.pkg.js',
       'type' => 'js',
     ),
-    55967526 =>
-    array (
-      'name' => 'differential.pkg.css',
-      'symbols' =>
-      array (
-        0 => 'differential-core-view-css',
-        1 => 'differential-changeset-view-css',
-        2 => 'differential-revision-detail-css',
-        3 => 'differential-revision-history-css',
-        4 => 'differential-table-of-contents-css',
-        5 => 'differential-revision-comment-css',
-        6 => 'differential-revision-add-comment-css',
-        7 => 'differential-revision-comment-list-css',
-      ),
-      'uri' => '/res/pkg/55967526/differential.pkg.css',
-      'type' => 'css',
-    ),
   ),
   'reverse' =>
   array (
-    'aphront-crumbs-view-css' => 'cfafcff7',
-    'aphront-dialog-view-css' => 'cfafcff7',
-    'aphront-form-view-css' => 'cfafcff7',
-    'aphront-list-filter-view-css' => 'cfafcff7',
-    'aphront-panel-view-css' => 'cfafcff7',
-    'aphront-side-nav-view-css' => 'cfafcff7',
-    'aphront-table-view-css' => 'cfafcff7',
-    'aphront-tokenizer-control-css' => 'cfafcff7',
-    'aphront-typeahead-control-css' => 'cfafcff7',
+    'aphront-crumbs-view-css' => '8e9024dc',
+    'aphront-dialog-view-css' => '8e9024dc',
+    'aphront-form-view-css' => '8e9024dc',
+    'aphront-list-filter-view-css' => '8e9024dc',
+    'aphront-panel-view-css' => '8e9024dc',
+    'aphront-side-nav-view-css' => '8e9024dc',
+    'aphront-table-view-css' => '8e9024dc',
+    'aphront-tokenizer-control-css' => '8e9024dc',
+    'aphront-typeahead-control-css' => '8e9024dc',
     'differential-changeset-view-css' => '55967526',
     'differential-core-view-css' => '55967526',
     'differential-revision-add-comment-css' => '55967526',
@@ -1270,13 +1270,13 @@ celerity_register_resource_map(array(
     'javelin-util' => 'db95a6d0',
     'javelin-vector' => 'db95a6d0',
     'javelin-workflow' => 'f1d27e2a',
-    'phabricator-core-buttons-css' => 'cfafcff7',
-    'phabricator-core-css' => 'cfafcff7',
-    'phabricator-directory-css' => 'cfafcff7',
+    'phabricator-core-buttons-css' => '8e9024dc',
+    'phabricator-core-css' => '8e9024dc',
+    'phabricator-directory-css' => '8e9024dc',
     'phabricator-keyboard-shortcut' => 'f1d27e2a',
     'phabricator-keyboard-shortcut-manager' => 'f1d27e2a',
-    'phabricator-remarkup-css' => 'cfafcff7',
-    'phabricator-standard-page-view' => 'cfafcff7',
-    'syntax-highlighting-css' => 'cfafcff7',
+    'phabricator-remarkup-css' => '8e9024dc',
+    'phabricator-standard-page-view' => '8e9024dc',
+    'syntax-highlighting-css' => '8e9024dc',
   ),
 ));

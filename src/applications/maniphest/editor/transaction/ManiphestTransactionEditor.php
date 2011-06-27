@@ -89,6 +89,13 @@ class ManiphestTransactionEditor {
             $task->setStatus($new);
             break;
           case ManiphestTransactionType::TYPE_OWNER:
+            if ($new) {
+              $handles = id(new PhabricatorObjectHandleData(array($new)))
+                ->loadHandles();
+              $task->setOwnerOrdering($handles[$new]->getName());
+            } else {
+              $task->setOwnerOrdering(null);
+            }
             $task->setOwnerPHID($new);
             break;
           case ManiphestTransactionType::TYPE_CCS:

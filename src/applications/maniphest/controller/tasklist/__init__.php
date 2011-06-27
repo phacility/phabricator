@@ -14,6 +14,8 @@ phutil_require_module('phabricator', 'applications/maniphest/storage/task');
 phutil_require_module('phabricator', 'applications/maniphest/view/tasklist');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
+phutil_require_module('phabricator', 'storage/queryfx');
+phutil_require_module('phabricator', 'view/control/pager');
 phutil_require_module('phabricator', 'view/form/base');
 phutil_require_module('phabricator', 'view/form/control/togglebuttons');
 phutil_require_module('phabricator', 'view/form/control/tokenizer');

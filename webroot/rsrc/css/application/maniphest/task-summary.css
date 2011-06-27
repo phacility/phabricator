@@ -82,6 +82,13 @@
 
 .maniphest-task-group-header {
   font-size: 18px;
-  margin: 1.5em 14px 0;
+  margin: 1em 14px 0;
   border-bottom: 1px solid #dddddd;
+}
+
+.maniphest-total-result-count {
+  text-align: right;
+  padding-right: 2em;
+  font-size: 11px;
+  color: #666666;
 }

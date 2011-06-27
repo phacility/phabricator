@@ -18,6 +18,8 @@
 
 class ManiphestTaskListController extends ManiphestController {
 
+  const DEFAULT_PAGE_SIZE = 1000;
+
   private $view;
 
   public function willProcessRequest(array $data) {
@@ -90,12 +92,17 @@ class ManiphestTaskListController extends ManiphestController {
 
     $view_phid = nonempty($request->getStr('phid'), $user->getPHID());
 
-    list($tasks, $handles) = $this->loadTasks(
+    $page = $request->getInt('page');
+    $page_size = self::DEFAULT_PAGE_SIZE;
+
+    list($tasks, $handles, $total_count) = $this->loadTasks(
       $view_phid,
       array(
         'status'  => $status_map,
         'group'   => $grouping,
         'order'   => $order,
+        'offset'  => $page,
+        'limit'   => $page_size,
       ));
 
 
@@ -158,6 +165,25 @@ class ManiphestTaskListController extends ManiphestController {
           'No matching tasks.'.
         '</h1>');
     } else {
+      $pager = new AphrontPagerView();
+      $pager->setURI($request->getRequestURI(), 'page');
+      $pager->setPageSize($page_size);
+      $pager->setOffset($page);
+      $pager->setCount($total_count);
+
+      $cur = ($pager->getOffset() + 1);
+      $max = min($pager->getOffset() + $page_size, $total_count);
+      $tot = $total_count;
+
+      $cur = number_format($cur);
+      $max = number_format($max);
+      $tot = number_format($tot);
+
+      $nav->appendChild(
+        '<div class="maniphest-total-result-count">'.
+          "Displaying tasks {$cur} - {$max} of {$tot}.".
+        '</div>');
+
       foreach ($tasks as $group => $list) {
         $task_list = new ManiphestTaskListView();
         $task_list->setUser($user);
@@ -171,6 +197,8 @@ class ManiphestTaskListController extends ManiphestController {
           '</h1>');
         $nav->appendChild($task_list);
       }
+
+      $nav->appendChild($pager);
     }
 
     return $this->buildStandardPageResponse(
@@ -224,23 +252,63 @@ class ManiphestTaskListController extends ManiphestController {
         break;
     }
 
-    switch ($dict['order']) {
+    $order = array();
+    switch ($dict['group']) {
       case 'priority':
-        $order = 'priority DESC, dateModified DESC';
+        $order[] = 'priority';
         break;
-      case 'created':
-        $order = 'id DESC';
+      case 'owner':
+        $order[] = 'ownerOrdering';
         break;
-      default:
-        $order = 'dateModified DESC';
+      case 'status':
+        $order[] = 'status';
         break;
     }
 
-    $sql = "({$status_clause}) AND ({$extra_clause}) ORDER BY {$order}";
+    switch ($dict['order']) {
+      case 'priority':
+        $order[] = 'priority';
+        $order[] = 'dateModified';
+        break;
+      case 'created':
+        $order[] = 'id';
+        break;
+      default:
+        $order[] = 'dateModified';
+        break;
+    }
 
-    array_unshift($argv, $sql);
+    $order = array_unique($order);
 
-    $data = call_user_func_array(array($task, 'loadAllWhere'), $argv);
+    foreach ($order as $k => $column) {
+      switch ($column) {
+        case 'ownerOrdering':
+          $order[$k] = "{$column} ASC";
+          break;
+        default:
+          $order[$k] = "{$column} DESC";
+          break;
+      }
+    }
+
+    $order = implode(', ', $order);
+
+    $offset = (int)idx($dict, 'offset', 0);
+    $limit = (int)idx($dict, 'limit', self::DEFAULT_PAGE_SIZE);
+
+    $sql = "SELECT SQL_CALC_FOUND_ROWS * FROM %T WHERE ".
+           "({$status_clause}) AND ({$extra_clause}) ORDER BY {$order} ".
+           "LIMIT {$offset}, {$limit}";
+
+    array_unshift($argv, $task->getTableName());
+
+    $conn = $task->establishConnection('r');
+    $data = vqueryfx_all($conn, $sql, $argv);
+
+    $total_row_count = queryfx_one($conn, 'SELECT FOUND_ROWS() N');
+    $total_row_count = $total_row_count['N'];
+
+    $data = $task->loadAllFromArray($data);
 
     $handle_phids = mpull($data, 'getOwnerPHID');
     $handle_phids[] = $view_phid;
@@ -252,9 +320,15 @@ class ManiphestTaskListController extends ManiphestController {
         $data = mgroup($data, 'getPriority');
         krsort($data);
 
+        // If we have invalid priorities, they'll all map to "???". Merge
+        // arrays to prevent them from overwriting each other.
+
         $out = array();
         foreach ($data as $pri => $tasks) {
-          $out[ManiphestTaskPriority::getTaskPriorityName($pri)] = $tasks;
+          $out[ManiphestTaskPriority::getTaskPriorityName($pri)][] = $tasks;
+        }
+        foreach ($out as $pri => $tasks) {
+          $out[$pri] = array_mergev($tasks);
         }
         $data = $out;
 
@@ -297,7 +371,7 @@ class ManiphestTaskListController extends ManiphestController {
         break;
     }
 
-    return array($data, $handles);
+    return array($data, $handles, $total_row_count);
   }
 
   public function renderStatusLinks() {
