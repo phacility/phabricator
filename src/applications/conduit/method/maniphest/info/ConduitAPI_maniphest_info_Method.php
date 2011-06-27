@@ -51,14 +51,14 @@ class ConduitAPI_maniphest_info_Method extends ConduitAPIMethod {
       'phid'         => $task->getPHID(),
       'authorPHID'   => $task->getAuthorPHID(),
       'ownerPHID'    => $task->getAuthorPHID(),
-      'ccPHIDs'      => array($task->getCCPHIDs()),
+      'ccPHIDs'      => $task->getCCPHIDs(),
       'status'       => $task->getStatus(),
       'priority'     => ManiphestTaskPriority::getTaskPriorityName(
         $task->getPriority()),
       'title'        => $task->getTitle(),
       'description'  => $task->getDescription(),
-      'projectPHIDs' => array($task->getProjectPHIDs()),
-      'uri'          => PhabricatorEnv::getURI('/T'.$task->getID()),
+      'projectPHIDs' => $task->getProjectPHIDs(),
+      'uri'          => PhabricatorEnv::getProductionURI('/T'.$task->getID()),
 
       // Not sure what this is yet.
       // 'attached' => array($task->getAttached()),
