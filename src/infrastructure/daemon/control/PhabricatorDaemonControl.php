@@ -216,17 +216,24 @@ EOHELP
       "./launch_daemon.php ".
         "%s ".
         "--load-phutil-library=%s ".
-        implode(' ', $extra_libraries)." ".
+        "%C ".
         "--conduit-uri=%s ".
         "--phd=%s ".
-        "--log=%s ".
-        ($debug ? '--trace ' : '--daemonize ').
-        implode(' ', $argv),
+        ($debug ? '--trace ' : '--daemonize '),
       $daemon,
       phutil_get_library_root('phabricator'),
+      implode(' ', $extra_libraries),
       PhabricatorEnv::getURI('/api/'),
-      $pid_dir,
-      $log_dir);
+      $pid_dir);
+
+    if (!$debug) {
+      // If we're running "phd debug", send output straight to the console
+      // instead of to a logfile.
+      $command = csprintf("%C --log=%s", $command, $log_dir);
+    }
+
+    // Append the daemon's argv.
+    $command = csprintf("%C %C", $command, implode(' ', $argv));
 
     if ($debug) {
       // Don't terminate when the user sends ^C; it will be sent to the

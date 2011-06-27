@@ -163,7 +163,15 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
       $daemon = reset($match);
     }
 
-    will_launch($control);
+    $with_logs = true;
+    if ($is_debug) {
+      // In debug mode, we emit errors straight to stdout, so nothing useful
+      // will show up in the logs. Don't echo the message about stuff showing
+      // up in them, since it would be confusing.
+      $with_logs = false;
+    }
+
+    will_launch($control, $with_logs);
 
     if ($is_debug) {
       echo "Launching {$daemon} in debug mode (nondaemonized)...\n";
@@ -217,10 +225,12 @@ function phd_load_tracked_repositories() {
   return $repositories;
 }
 
-function will_launch($control) {
+function will_launch($control, $with_logs = true) {
   echo "Staging launch...\n";
   $control->pingConduit();
-  $log_dir = $control->getControlDirectory('log').'/daemons.log';
-  echo "NOTE: Logs will appear in '{$log_dir}'.\n\n";
+  if ($with_logs) {
+    $log_dir = $control->getControlDirectory('log').'/daemons.log';
+    echo "NOTE: Logs will appear in '{$log_dir}'.\n\n";
+  }
 }
 
