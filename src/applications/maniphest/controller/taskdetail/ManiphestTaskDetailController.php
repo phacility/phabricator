@@ -116,7 +116,7 @@ class ManiphestTaskDetailController extends ManiphestController {
       foreach ($revs as $rev => $info) {
         $rev_links[] = $handles[$rev]->renderLink();
       }
-      $rev_links = implode(', ', $rev_links);
+      $rev_links = implode('<br />', $rev_links);
       $dict['Revisions'] = $rev_links;
     }
 
