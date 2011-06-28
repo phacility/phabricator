@@ -110,12 +110,15 @@ class PhabricatorSearchMySQLExecutor extends PhabricatorSearchExecutor {
         'MATCH(corpus) AGAINST (%s)',
         $q);
 
-//      if ($query->getParameter('order') == AdjutantQuery::ORDER_RELEVANCE) {
-        $order = qsprintf(
-          $conn_r,
-          'ORDER BY MAX(MATCH(corpus) AGAINST (%s)) DESC',
-          $q);
-//      }
+      // When searching for a string, promote user listings above other
+      // listings.
+      $order = qsprintf(
+        $conn_r,
+        'ORDER BY
+          IF(documentType = %s, 0, 1) ASC,
+          MAX(MATCH(corpus) AGAINST (%s)) DESC',
+        'USER',
+        $q);
 
       $field = $query->getParameter('field');
       if ($field/* && $field != AdjutantQuery::FIELD_ALL*/) {
@@ -201,6 +204,9 @@ class PhabricatorSearchMySQLExecutor extends PhabricatorSearchExecutor {
       $where = '';
     }
 
+    $offset = (int)$query->getParameter('offset', 0);
+    $limit  = (int)$query->getParameter('limit', 25);
+
     $hits = queryfx_all(
       $conn_r,
       'SELECT
@@ -213,11 +219,13 @@ class PhabricatorSearchMySQLExecutor extends PhabricatorSearchExecutor {
           %Q
         GROUP BY document.phid
           %Q
-        LIMIT 50',
+        LIMIT %d, %d',
       $t_doc,
       $join,
       $where,
-      $order);
+      $order,
+      $offset,
+      $limit);
 
     return $hits;
   }

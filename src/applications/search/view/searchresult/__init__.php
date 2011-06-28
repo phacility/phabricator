@@ -8,13 +8,12 @@
 
 phutil_require_module('phabricator', 'applications/files/uri');
 phutil_require_module('phabricator', 'applications/phid/constants');
-phutil_require_module('phabricator', 'applications/phid/handle');
-phutil_require_module('phabricator', 'applications/repository/constants/repositorytype');
-phutil_require_module('phabricator', 'applications/repository/storage/repository');
+phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'infrastructure/env');
+phutil_require_module('phabricator', 'view/base');
 
-phutil_require_module('phutil', 'symbols');
+phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
 
 
-phutil_require_source('PhabricatorObjectHandleData.php');
+phutil_require_source('PhabricatorSearchResultView.php');

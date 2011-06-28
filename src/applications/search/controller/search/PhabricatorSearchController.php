@@ -72,6 +72,7 @@ class PhabricatorSearchController extends PhabricatorSearchBaseController {
       PhabricatorPHIDConstants::PHID_TYPE_DREV => 'Differential Revisions',
       PhabricatorPHIDConstants::PHID_TYPE_CMIT => 'Repository Commits',
       PhabricatorPHIDConstants::PHID_TYPE_TASK => 'Maniphest Tasks',
+      PhabricatorPHIDConstants::PHID_TYPE_USER => 'Phabricator Users',
     ) + $more;
 
     $status_options = array(
@@ -152,33 +153,55 @@ class PhabricatorSearchController extends PhabricatorSearchBaseController {
     $search_panel->setHeader('Search Phabricator');
     $search_panel->appendChild($search_form);
 
+    require_celerity_resource('phabricator-search-results-css');
+
     if ($query->getID()) {
+
+      $limit = 20;
+
+      $pager = new AphrontPagerView();
+      $pager->setURI($request->getRequestURI(), 'page');
+      $pager->setPageSize($limit);
+      $pager->setOffset($request->getInt('page'));
+
+      $query->setParameter('limit', $limit + 1);
+      $query->setParameter('offset', $pager->getOffset());
+
       $executor = new PhabricatorSearchMySQLExecutor();
       $results = $executor->executeSearch($query);
       $results = ipull($results, 'phid');
-      $handles = id(new PhabricatorObjectHandleData($results))
-        ->loadHandles();
-      $results = array();
-      foreach ($handles as $handle) {
-        $results[] =
-          '<h1 style="font-size: 14px; font-weight: normal; margin: 4px 0 8px;">'.
-            phutil_render_tag(
-              'a',
-              array(
-                'href' => $handle->getURI(),
-              ),
-              $this->emboldenQuery($handle->getName(), $query->getQuery())).
-          '</h1>';
+
+      $results = $pager->sliceResults($results);
+
+      if ($results) {
+
+        $loader = new PhabricatorObjectHandleData($results);
+        $handles = $loader->loadHandles();
+        $objects = $loader->loadObjects();
+        $results = array();
+        foreach ($handles as $phid => $handle) {
+          $view = new PhabricatorSearchResultView();
+          $view->setHandle($handle);
+          $view->setQuery($query);
+          $view->setObject($objects[$phid]);
+          $results[] = $view->render();
+        }
+        $results =
+          '<div class="phabricator-search-result-list">'.
+            implode("\n", $results).
+            '<div class="search-results-pager">'.
+              $pager->render().
+            '</div>'.
+          '</div>';
+      } else {
+        $results =
+          '<div class="phabricator-search-result-list">'.
+            '<p class="phabricator-search-no-results">No search results.</p>'.
+          '</div>';
       }
-      $results =
-        '<div style="padding: 1em 3em 2em;">'.
-          implode("\n", $results).
-        '</div>';
     } else {
       $results = null;
     }
-
-    $results = print_r($results, true);
 
     return $this->buildStandardPageResponse(
       array(
@@ -190,18 +213,5 @@ class PhabricatorSearchController extends PhabricatorSearchBaseController {
       ));
   }
 
-  private function emboldenQuery($str, $query) {
-    $query = preg_split("/\s+/", $query);
-    $query = array_filter($query);
-    $str = phutil_escape_html($str);
-    foreach ($query as $word) {
-      $word = phutil_escape_html($word);
-      $str = preg_replace(
-        '/(?:^|\b)('.preg_quote($word, '/').')(?:\b|$)/i',
-        '<strong>\1</strong>',
-        $str);
-    }
-    return $str;
-  }
 
 }

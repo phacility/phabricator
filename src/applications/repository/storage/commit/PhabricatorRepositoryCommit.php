@@ -23,6 +23,8 @@ class PhabricatorRepositoryCommit extends PhabricatorRepositoryDAO {
   protected $commitIdentifier;
   protected $epoch;
 
+  private $commitData;
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID   => true,
@@ -33,6 +35,18 @@ class PhabricatorRepositoryCommit extends PhabricatorRepositoryDAO {
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorPHIDConstants::PHID_TYPE_CMIT);
+  }
+
+  public function attachCommitData(PhabricatorRepositoryCommitData $data) {
+    $this->commitData = $data;
+    return $this;
+  }
+
+  public function getCommitData() {
+    if (!$this->commitData) {
+      throw new Exception("Attach commit data with attachCommitData() first!");
+    }
+    return $this->commitData;
   }
 
 }

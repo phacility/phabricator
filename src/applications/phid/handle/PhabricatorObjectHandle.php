@@ -112,6 +112,17 @@ class PhabricatorObjectHandle {
     return $this->alternateID;
   }
 
+  public function getTypeName() {
+    static $map = array(
+      PhabricatorPHIDConstants::PHID_TYPE_USER => 'User',
+      PhabricatorPHIDConstants::PHID_TYPE_TASK => 'Task',
+      PhabricatorPHIDConstants::PHID_TYPE_DREV => 'Revision',
+      PhabricatorPHIDConstants::PHID_TYPE_CMIT => 'Commit',
+    );
+
+    return idx($map, $this->getType());
+  }
+
   public function renderLink() {
 
     switch ($this->getType()) {

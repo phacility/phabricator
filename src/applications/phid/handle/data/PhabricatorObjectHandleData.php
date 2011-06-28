@@ -24,6 +24,55 @@ class PhabricatorObjectHandleData {
     $this->phids = $phids;
   }
 
+  public function loadObjects() {
+    $types = array();
+    foreach ($this->phids as $phid) {
+      $type = $this->lookupType($phid);
+      $types[$type][] = $phid;
+    }
+
+    $objects = array_fill_keys($this->phids, null);
+    foreach ($types as $type => $phids) {
+      switch ($type) {
+        case PhabricatorPHIDConstants::PHID_TYPE_USER:
+          $user_dao = newv('PhabricatorUser', array());
+          $users = $user_dao->loadAllWhere(
+            'phid in (%Ls)',
+            $phids);
+          foreach ($users as $user) {
+            $objects[$user->getPHID()] = $user;
+          }
+          break;
+        case PhabricatorPHIDConstants::PHID_TYPE_CMIT:
+          $commit_dao = newv('PhabricatorRepositoryCommit', array());
+          $commits = $commit_dao->loadAllWhere(
+            'phid IN (%Ls)',
+            $phids);
+          $commit_data = array();
+          if ($commits) {
+            $data_dao = newv('PhabricatorRepositoryCommitData', array());
+            $commit_data = $data_dao->loadAllWhere(
+              'id IN (%Ld)',
+              mpull($commits, 'getID'));
+            $commit_data = mpull($commit_data, null, 'getCommitID');
+          }
+          foreach ($commits as $commit) {
+            $data = idx($commit_data, $commit->getID());
+            if ($data) {
+              $commit->attachCommitData($data);
+              $objects[$commit->getPHID()] = $commit;
+            } else {
+             // If we couldn't load the commit data, just act as though we
+             // couldn't load the object at all so we don't load half an object.
+            }
+          }
+          break;
+      }
+    }
+
+    return $objects;
+  }
+
   public function loadHandles() {
 
     $types = array();
@@ -157,8 +206,17 @@ class PhabricatorObjectHandleData {
             } else {
               $commit = $commits[$phid];
               $callsign = $callsigns[$repository_ids[$phid]];
+              $repository = $repositories[$repository_ids[$phid]];
               $commit_identifier = $commit->getCommitIdentifier();
-              $handle->setName('Commit '.'r'.$callsign.$commit_identifier);
+
+              $vcs = $repository->getVersionControlSystem();
+              if ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_GIT) {
+                $short_identifier = substr($commit_identifier, 0, 16);
+              } else {
+                $short_identifier = $commit_identifier;
+              }
+
+              $handle->setName('r'.$callsign.$short_identifier);
               $handle->setURI('/r'.$callsign.$commit_identifier);
               $handle->setFullName('r'.$callsign.$commit_identifier);
               $handle->setTimestamp($commit->getEpoch());
