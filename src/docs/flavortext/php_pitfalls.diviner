@@ -4,9 +4,9 @@
 This document discusses difficult traps and pitfalls in PHP, and how to avoid,
 work around, or at least understand them.
 
-= array_merge() in Incredibly Slow =
+= array_merge() in Incredibly Slow When Merging A List of Arrays =
 
-If you merge arrays like this:
+If you merge a list of arrays like this:
 
   COUNTEREXAMPLE
   $result = array();
@@ -14,9 +14,9 @@ If you merge arrays like this:
     $result = array_merge($result, $one_list);
   }
 
-...your program now has a huge runtime runtime because it generates a large
-number of intermediate arrays and copies every element it has previously seen
-each time you iterate.
+...your program now has a huge runtime because it generates a large number of
+intermediate arrays and copies every element it has previously seen each time
+you iterate.
 
 In a libphutil environment, you can use ##array_mergev($list_of_lists)##
 instead.
