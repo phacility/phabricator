@@ -154,6 +154,15 @@ class DifferentialCommitMessageData {
     $fields[] = new DifferentialCommitMessageField('Differential Revision',
                                                    $revision->getID());
 
+    // append custom commit message fields
+    $modify_class = PhabricatorEnv::getEnvConfig(
+      'differential.modify-commit-message-class');
+
+    if ($modify_class) {
+      $modifier = newv($modify_class, array($revision));
+      $fields = $modifier->modifyFields($fields);
+    }
+
     $this->fields = $fields;
   }
 
