@@ -9,6 +9,7 @@
 phutil_require_module('phabricator', 'applications/conduit/method/base');
 phutil_require_module('phabricator', 'applications/conduit/protocol/exception');
 phutil_require_module('phabricator', 'applications/paste/storage/paste');
+phutil_require_module('phabricator', 'infrastructure/env');
 
 phutil_require_module('phutil', 'utils');
 
