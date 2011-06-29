@@ -1,21 +1,11 @@
-PROJECT STATUS: CAVEAT EMPTOR
+Phabricator is a open source collection of web applications which make it easier
+to write, review, and share source code. Phabricator was developed at Facebook.
 
-This is an unstable preview release. You can learn more at http://phabricator.org/
-as well as click around our development install. Developer mailing list at
-https://groups.google.com/group/phabricator-dev and please report issues using
-GitHub.
+This is an early release. It's pretty high-quality and usable, but under
+active development so things may change quickly.
 
-WHAT IS PHABRICATOR?
-
-Phabricator is a suite of web applications that facilitate software development
-tasks, particularly code review. The primary application in the suite is
-Differential, a code review tool.
-
-Phabricator is highly unstable and has many missing features! These applications
-are being brought over from Facebook's internal toolset, but there's a lot of
-stuff that hasn't made it over yet. Feel free to follow the project but you
-probably shouldn't try to install this yet unless you're extremely ambitious
-or just want to take a look at it. 
+You can learn more about the project and find links to documentation and
+resources at: http://phabricator.org/
 
 LICENSE
 
