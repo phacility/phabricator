@@ -45,12 +45,13 @@ class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
         $pattern =
           '@'.
           '(?<!/)(?:^|\b)'. // Negative lookbehind prevent matching "/D123".
-          '(D|T)(\d+)'.
+          '(D|T|P)(\d+)'.
           '(?:\b|$)'.
           '@';
 
         $revision_ids = array();
         $task_ids = array();
+        $paste_ids = array();
         $commit_names = array();
 
         if (preg_match_all($pattern, $message, $matches, PREG_SET_ORDER)) {
@@ -61,6 +62,9 @@ class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
                 break;
               case 'T':
                 $task_ids[] = $match[2];
+                break;
+              case 'P':
+                $paste_ids[] = $match[2];
                 break;
             }
           }
@@ -95,6 +99,22 @@ class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
         }
 
         // TODO: Support tasks in Conduit.
+
+        if ($paste_ids) {
+          foreach ($paste_ids as $paste_id) {
+            $paste = $this->getConduit()->callMethodSynchronous(
+              'paste.info',
+              array(
+                'paste_id' => $paste_id,
+              ));
+            // Eventually I'd like to show the username of the paster as well,
+            // however that will need something like a user.username_from_phid
+            // since we (ideally) want to keep the bot to Conduit calls...and
+            // not call to Phabricator-specific stuff (like actually loading
+            // the User object and fetching his/her username.)
+            $output[$paste['phid']] = 'P'.$paste['id'].': '.$paste['uri'];
+          }
+        }
 
         if ($commit_names) {
           $commits = $this->getConduit()->callMethodSynchronous(
