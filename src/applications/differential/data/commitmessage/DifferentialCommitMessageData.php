@@ -19,7 +19,7 @@
 class DifferentialCommitMessageData {
 
   protected $revision;
-  protected $dict = array();
+  protected $fields = array();
   protected $mode;
   protected $comments;
 
@@ -66,12 +66,14 @@ class DifferentialCommitMessageData {
   public function prepare() {
     $revision = $this->revision;
 
-    $dict = array();
+    $fields = array();
     if ($revision->getSummary()) {
-      $dict['Summary'] = $revision->getSummary();
+      $fields[] =
+        new DifferentialCommitMessageField('Summary', $revision->getSummary());
     }
 
-    $dict['Test Plan'] = $revision->getTestPlan();
+    $fields[] =
+      new DifferentialCommitMessageField('Test Plan', $revision->getTestPlan());
 
     $reviewer = null;
     $commenters = array();
@@ -95,7 +97,9 @@ class DifferentialCommitMessageData {
 
     if ($this->mode == self::MODE_AMEND) {
       if ($reviewer) {
-        $dict['Reviewed By'] = $handles[$reviewer]->getName();
+        $fields[] =
+          new DifferentialCommitMessageField('Reviewed By',
+                                             $handles[$reviewer]->getName());
       }
     }
 
@@ -105,79 +109,82 @@ class DifferentialCommitMessageData {
         $reviewer_names[] = $handles[$uid]->getName();
       }
       $reviewer_names = implode(', ', $reviewer_names);
-      $dict['Reviewers'] = $reviewer_names;
+      $fields[] = new DifferentialCommitMessageField('Reviewers',
+                                                     $reviewer_names);
     }
 
     $user_handles = array_select_keys($handles, $commenters);
     if ($user_handles) {
-      $dict['Commenters'] = implode(
-        ', ',
-        mpull($user_handles, 'getName'));
+      $commenters = implode(', ', mpull($user_handles, 'getName'));
+      $fields[] = new DifferentialCommitMessageField('Commenters', $commenters);
     }
 
     $cc_handles = array_select_keys($handles, $ccphids);
     if ($cc_handles) {
-      $dict['CC'] = implode(
-        ', ',
-        mpull($cc_handles, 'getName'));
+      $cc = implode(', ', mpull($cc_handles, 'getName'));
+      $fields[] = new DifferentialCommitMessageField('CC', $cc);
     }
 
     if ($revision->getRevertPlan()) {
-      $dict['Revert Plan'] = $revision->getRevertPlan();
+      $fields[] =
+        new DifferentialCommitMessageField('Revert Plan',
+                                           $revision->getRevertPlan());
     }
 
     if ($revision->getBlameRevision()) {
-      $dict['Blame Revision'] = $revision->getBlameRevision();
+      $fields[] =
+        new DifferentialCommitMessageField('Blame Revision',
+                                           $revision->getBlameRevision());
     }
 
     if ($this->mode == self::MODE_EDIT) {
       // In edit mode, include blank fields.
-      $dict += array(
-        'Summary'         => '',
-        'Reviewers'       => '',
-        'CC'              => '',
-        'Revert Plan'     => '',
-        'Blame Revision'  => '',
+      $fields += array(
+        new DifferentialCommitMessageField('Summary', ''),
+        new DifferentialCommitMessageField('Reviewers', ''),
+        new DifferentialCommitMessageField('CC', ''),
+        new DifferentialCommitMessageField('Revert Plan', ''),
+        new DifferentialCommitMessageField('Blame Revision', ''),
       );
     }
 
-    $dict['Title'] = $revision->getTitle();
+    $fields[] =
+      new DifferentialCommitMessageField('Title', $revision->getTitle());
 
-    $dict['Differential Revision'] = $revision->getID();
+    $fields[] = new DifferentialCommitMessageField('Differential Revision',
+                                                   $revision->getID());
 
-    $this->dict = $dict;
+    $this->fields = $fields;
   }
 
-  public function overwriteFieldValue($field, $value) {
-    $this->dict[$field] = $value;
+  public function overwriteFieldValue($name, $value) {
+    $field = $this->getField($name);
+    if ($field) {
+      $field->setValue($value);
+    }
     return $this;
   }
 
-  public function getCommitMessage() {
+  private function getField($name) {
+    foreach ($this->fields as $field) {
+      if ($field->getName() == $name) {
+        return $field;
+      }
+    }
+    return null;
+  }
 
-    $revision = $this->revision;
-    $dict = $this->dict;
+  public function getCommitMessage() {
+    $fields = $this->fields;
 
     $message = array();
-    $message[] = $dict['Title']."\n";
-    unset($dict['Title']);
 
-    $one_line = array(
-      'Differential Revision' => true,
-      'Reviewed By'           => true,
-      'Revert'                => true,
-      'Blame Rev'             => true,
-      'Commenters'            => true,
-      'CC'                    => true,
-      'Reviewers'             => true,
-    );
+    $title = $this->getField('Title');
+    $message[] = $title->getValue() . "\n";
 
-    foreach ($dict as $key => $value) {
-      $value = trim($value);
-      if (isset($one_line[$key])) {
-        $message[] = "{$key}: {$value}";
-      } else {
-        $message[] = "{$key}:\n{$value}\n";
+    foreach ($fields as $field) {
+      if ($field->getName() != 'Title') {
+        $message[] = $field->render();
       }
     }
 

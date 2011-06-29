@@ -139,6 +139,7 @@ phutil_register_library_map(array(
     'DifferentialCommentSaveController' => 'applications/differential/controller/commentsave',
     'DifferentialCommitMessage' => 'applications/differential/parser/commitmessage',
     'DifferentialCommitMessageData' => 'applications/differential/data/commitmessage',
+    'DifferentialCommitMessageField' => 'applications/differential/data/commitmessage',
     'DifferentialCommitMessageParserException' => 'applications/differential/parser/commitmessage/exception',
     'DifferentialController' => 'applications/differential/controller/base',
     'DifferentialDAO' => 'applications/differential/storage/base',

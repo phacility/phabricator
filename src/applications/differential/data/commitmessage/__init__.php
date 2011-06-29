@@ -14,3 +14,4 @@ phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('DifferentialCommitMessageData.php');
+phutil_require_source('DifferentialCommitMessageField.php');
