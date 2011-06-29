@@ -63,7 +63,7 @@ class PhabricatorPeopleEditController extends PhabricatorPeopleController {
     if ($request->getStr('saved')) {
       $notice = new AphrontErrorView();
       $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-      $notice->setTitle('Changed Saved');
+      $notice->setTitle('Changes Saved');
       $notice->appendChild('<p>Your changes were saved.</p>');
       $content[] = $notice;
     }
