@@ -52,6 +52,7 @@ class ConduitAPI_paste_info_Method extends ConduitAPIMethod {
       'filePHID'    => $paste->getFilePHID(),
       'title'       => $paste->getTitle(),
       'dateCreated' => $paste->getDateCreated(),
+      'uri'         => PhabricatorEnv::getProductionURI('/P'.$paste->getID()),
     );
 
     return $result;
