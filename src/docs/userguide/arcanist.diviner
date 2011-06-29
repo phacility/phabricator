@@ -30,6 +30,7 @@ Arcanist allows you to do things like:
   - download a patch from Differential with ##arc export##
   - update Git commit messages after review with ##arc amend##
   - commit SVN changes with ##arc commit##
+  - view enhanced information about Git branches with ##arc branch##
 
 Once you've configured lint and unit test integration, you can also:
 
@@ -43,7 +44,7 @@ Arcanist has some advanced features as well, you can:
   - activate tab completion with ##arc shell-complete##
   - install arc as a pre-commit hook with ##arc svn-hook-pre-commit## or
     ##arc git-hook-pre-receive##
-  - ...or extend Arcanist and add new commands
+  - ...or extend Arcanist and add new commands.
 
 Except where otherwise noted, these workflows are generally agnostic to the
 underlying version control system and will work properly in git or SVN
