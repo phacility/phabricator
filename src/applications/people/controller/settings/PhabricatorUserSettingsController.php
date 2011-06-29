@@ -297,7 +297,7 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
       if ($request->getStr('saved')) {
         $notice = new AphrontErrorView();
         $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-        $notice->setTitle('Changed Saved');
+        $notice->setTitle('Changes Saved');
         $notice->appendChild('<p>Your changes have been saved.</p>');
         $notice = $notice->render();
       }
@@ -381,7 +381,7 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
       if ($request->getStr('saved')) {
         $notice = new AphrontErrorView();
         $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-        $notice->setTitle('Changed Saved');
+        $notice->setTitle('Changes Saved');
         $notice->appendChild('<p>Your changes have been saved.</p>');
         $notice = $notice->render();
       }
