@@ -98,7 +98,17 @@ class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
           }
         }
 
-        // TODO: Support tasks in Conduit.
+        if ($task_ids) {
+          foreach ($task_ids as $task_id) {
+            $task = $this->getConduit()->callMethodSynchronous(
+              'maniphest.info',
+              array(
+                'task_id' => $task_id,
+              ));
+            $output[$task['phid']] = 'T'.$task['id'].': '.$task['title'].
+              ' (Priority: '.$task['priority'].') - '.$task['uri'];
+          }
+        }
 
         if ($paste_ids) {
           foreach ($paste_ids as $paste_id) {

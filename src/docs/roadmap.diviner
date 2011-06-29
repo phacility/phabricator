@@ -1,0 +1,106 @@
+@title Roadmap and Status
+@group intro
+
+Insight into the direction and progress of Phabricator. This document was last
+updated **June 29, 2011**.
+
+= Status =
+
+Phabricator is in an early release stage, but quite usable. The project is under
+active development, with around 200 commits from a dozen contributors in the
+last 30 days. Morale is high. A few people are tweeting about it. Someone wrote
+a Wikipedia page. There are a handful of questions on Quora. As far as we know,
+the product has a perfect safety record and has not caused anyone violent
+physical harm.
+
+= Current Development =
+
+Phabricator was released about two months ago. Since then, the focus has been
+on two major areas:
+
+  - **Setup/Install Process**: There was barely any install/setup documentation
+    when we released.
+  - **Pilot Installs**: Facebook was the only install when we released. We
+    wanted to get some early adopters to do installs and give us feedback.
+
+The setup/install process is much better now (there's still room for work, of
+course) and we've gotten a bunch of great feedback from pilot installs (and
+implemented a lot of it).
+
+We've also been focusing a lot on things that are mostly feature buildout:
+
+  - **Maniphest**: I wrote Maniphest in about 20 hours in January to track bugs
+    in Phabricator itself, but it seems to be getting a lot of traction. We're
+    doing a lot of feature buildout for it to make it more full-fledged, more
+    scalable, better integrated, and more useful.
+  - **Maturing New Applications**: Generally, there are a lot of apps
+    which landed recently in Phabricator's history (Maniphest, Projects, Search,
+    and Paste are all less than 6 months old; Herald and Diffusion are about
+    a year old; Differential is about 4 years old) which are missing obvious
+    features. We're fixing this stuff.
+  - **Roles and Permissions**: At Facebook, everyone basically had access to
+    everything but this doesn't work everywhere, especially for open source
+    projects. We're working on making this more granular and auditable.
+  - **Version 1.0**: At some point we probably need to bite the bullet, figure
+    out release management, and cut a release. We should probably build some
+    kind of update notifier before we do this. We can probably put this off for
+    a while longer by just declaring trunk a "kind of okay now release" since
+    the balance of feedback for this model has been positive (we've been able to
+    respond quick to a lot of bug reports and get fixes out in a few hours),
+    it's just off-putting to have the documentation caveating the project's
+    readiness so heavily.
+  - **Performance and Quality**: These are permanent priorities for the project,
+    and we're doing a lot of work to continue improving both.
+
+= Future Development =
+
+Most of the future work involves feature buildout. These are projects we're
+thinking about in a very early stage, and may not happen or may look completely
+different when we implement them:
+
+  - **Activity Streams / News Feed**: It can be difficult to get a sense of
+    project activity right now. Some sort of news feed is the obvious approach,
+    but a lot of the models for this aren't great (Google Code, GitHub,
+    Facebook's internal news feed) and we can probably build a more useful
+    product if we spend some time on it. This dataset has a pretty good mapping
+    to "importance" (a review is more important than a comment) which isn't as
+    strong in social data. Stressing that might get us somewhere useful.
+  - **Projects**: This is a feature which existed with a very basic
+    implementation at Facebook, called "tags". It had a lot of product problems
+    that we're experimenting with addressing by making projects more heavyweight
+    and structured. This feature is really bare-bones right now but seems to
+    be getting some traction in pilot installs and there are a lot of obvious
+    ways to build it out, integrate it, and make it more useful.
+  - **Wiki**: We're probably going to build something like a Wiki since it's
+    the biggest hole in the "complete package" that Phabricator presents. We
+    have a lot of the infrastructure we need to do this quickly and some product
+    ideas which could fix a lot of the problems we had with Facebook's wiki.
+    Biggest blocker here is coming up with a totally awesome name for it.
+  - **Drydock**: Build infrastructure to let Phabricator manage working copies
+    in a scalable way. This is a general piece of infrastructure which enables
+    us to build a lot of features, like: sandcastle (your changes are
+    automatically pushed to a machine and reviewers can access that machine to
+    see them), asynchronous unit testing, watir/selenium testing,
+    Differential-managed merging, and web bisect. This is difficult because
+    "scalable" is very big and it needs to shard easily across a pool of
+    machines. Facebook has a less general version of this which took a long time
+    to get working, but it solved a lot of the hard problems so it may be less
+    daunting for us.
+  - **Testing**: Phabricator has very little test coverage right now and we'd
+    like to improve it. But we also want to make sure we're designing the right
+    test environment and solving problems like database stubbing in a robust
+    way. Facebook ended up with some solutions in this space which had tradeoffs
+    and downsides we'd like to avoid.
+  - **Importers**: Unclear how much time we want to spend here, but providing
+    ways to import from other bug tracking and code review systems could lower
+    the barrier to adoption. But this could also be a massive timesuck.
+  - **Evangelism**: Phabricator had an intentionally quiet launch because the
+    install process wasn't any good and we wanted to get feedback (there were
+    other reasons, as well). It's starting to get some traction and feedback
+    from people have used it seems to be pretty positive. At some point it may
+    be appropriate to spend more time evangelizing it.
+  - **Mission**: Phabricator doesn't have a clear mission statement. Do we want
+    to develop a revenue model around it? Do we want to actively compete with
+    the many other products in this space? For now, improving the software is
+    probably the most important thing we can do to achieve any of these goals,
+    but we don't currently have a clear long-term vision.
