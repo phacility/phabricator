@@ -57,6 +57,7 @@ class DifferentialRevisionEditController extends DifferentialController {
 
     $e_title = true;
     $e_testplan = true;
+    $e_reviewers = null;
     $errors = array();
 
     $revision->loadRelationships();
@@ -71,17 +72,22 @@ class DifferentialRevisionEditController extends DifferentialController {
       if (!strlen(trim($revision->getTitle()))) {
         $errors[] = 'You must provide a title.';
         $e_title = 'Required';
+      } else {
+        $e_title = null;
       }
 
       if (!strlen(trim($revision->getTestPlan()))) {
         $errors[] = 'You must provide a test plan.';
         $e_testplan = 'Required';
+      } else {
+        $e_testplan = null;
       }
 
       $user_phid = $request->getUser()->getPHID();
 
       if (in_array($user_phid, $request->getArr('reviewers'))) {
         $errors[] = 'You may not review your own revision.';
+        $e_reviewers = 'Invalid';
       }
 
       if (!$errors) {
@@ -172,6 +178,7 @@ class DifferentialRevisionEditController extends DifferentialController {
           ->setLabel('Reviewers')
           ->setName('reviewers')
           ->setDatasource('/typeahead/common/users/')
+          ->setError($e_reviewers)
           ->setValue($reviewer_map))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
