@@ -102,6 +102,13 @@ You can find installation instructions for xhprof here:
 
 You only need to install the PHP extension, not any of the library.
 
+= Updating Phabricator =
+
+Since Phabricator is under active development, you should update frequently.
+You can use a script similar to this one to automate the process:
+
+  http://phabricator.com/rsrc/install/update_phabricator.sh
+
 = Next Steps =
 
 Continue by:
