@@ -71,6 +71,32 @@ class DifferentialCommentMail extends DifferentialMail {
     $body  = array();
 
     $body[] = "{$actor} has {$verb} the revision \"{$name}\".";
+
+    // If the commented added reviewers or CCs, list them explicitly.
+    $meta = $comment->getMetadata();
+    $m_reviewers = idx(
+      $meta,
+      DifferentialComment::METADATA_ADDED_REVIEWERS,
+      array());
+    $m_cc = idx(
+      $meta,
+      DifferentialComment::METADATA_ADDED_CCS,
+      array());
+    $load = array_merge($m_reviewers, $m_cc);
+    if ($load) {
+      $handles = id(new PhabricatorObjectHandleData($load))->loadHandles();
+      if ($m_reviewers) {
+        $body[] = 'Added Reviewers: '.$this->renderHandleList(
+          $handles,
+          $m_reviewers);
+      }
+      if ($m_cc) {
+        $body[] = 'Added CCs: '.$this->renderHandleList(
+          $handles,
+          $m_cc);
+      }
+    }
+
     $body[] = null;
 
     $content = $comment->getContent();
@@ -133,5 +159,13 @@ class DifferentialCommentMail extends DifferentialMail {
     }
 
     return implode("\n", $body);
+  }
+
+  private function renderHandleList(array $handles, array $phids) {
+    $names = array();
+    foreach ($phids as $phid) {
+      $names[] = $handles[$phid]->getName();
+    }
+    return implode(', ', $names);
   }
 }
