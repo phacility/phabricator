@@ -48,12 +48,20 @@ abstract class PhabricatorMailReplyHandler {
   abstract public function receiveEmail(PhabricatorMetaMTAReceivedMail $mail);
 
   public function supportsPrivateReplies() {
-    return (bool)$this->getReplyHandlerDomain();
+    return (bool)$this->getReplyHandlerDomain() &&
+           !$this->supportsPublicReplies();
+  }
+
+  public function supportsPublicReplies() {
+    if (!PhabricatorEnv::getEnvConfig('metamta.public-replies')) {
+      return false;
+    }
+    return (bool)$this->getPublicReplyHandlerEmailAddress();
   }
 
   final public function supportsReplies() {
     return $this->supportsPrivateReplies() ||
-           (bool)$this->getPublicReplyHandlerEmailAddress();
+           $this->supportsPublicReplies();
   }
 
   public function getPublicReplyHandlerEmailAddress() {
@@ -143,6 +151,22 @@ abstract class PhabricatorMailReplyHandler {
       $list[] = '<'.$handle->getPHID().'>';
     }
     return implode(', ', $list);
+  }
+
+  protected function getDefaultPublicReplyHandlerEmailAddress($prefix) {
+
+    $receiver = $this->getMailReceiver();
+    $receiver_id = $receiver->getID();
+    $domain = $this->getReplyHandlerDomain();
+
+    // We compute a hash using the object's own PHID to prevent an attacker
+    // from blindly interacting with objects that they haven't ever received
+    // mail about by just sending to D1@, D2@, etc...
+    $hash = PhabricatorMetaMTAReceivedMail::computeMailHash(
+      $receiver->getMailKey(),
+      $receiver->getPHID());
+
+    return "{$prefix}{$receiver_id}+public+{$hash}@{$domain}";
   }
 
   protected function getDefaultPrivateReplyHandlerEmailAddress(

@@ -58,7 +58,7 @@ class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     //    "some display name" <D1+xyz+asdf@example.com>
     $matches = null;
     $ok = preg_match(
-      '/(?:^|<)((?:D|T)\d+)\+(\d+)\+([a-f0-9]{16})@/U',
+      '/(?:^|<)((?:D|T)\d+)\+([\w]+)\+([a-f0-9]{16})@/U',
       $to,
       $matches);
 
@@ -70,9 +70,35 @@ class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     $user_id = $matches[2];
     $hash = $matches[3];
 
-    $user = id(new PhabricatorUser())->load($user_id);
-    if (!$user) {
-      return $this->setMessage("Invalid user '{$user_id}'")->save();
+    if ($user_id == 'public') {
+      if (!PhabricatorEnv::getEnvConfig('metamta.public-replies')) {
+        return $this->setMessage("Public replies not enabled.")->save();
+      }
+
+      // Strip the email address out of the 'from' if necessary, since it might
+      // have some formatting like '"Abraham Lincoln" <alincoln@logcab.in>'.
+      $from = idx($this->headers, 'from');
+      $matches = null;
+      $ok = preg_match('/<(.*)>/', $from, $matches);
+      if ($ok) {
+        $from = $matches[1];
+      }
+
+      $user = id(new PhabricatorUser())->loadOneWhere(
+        'email = %s',
+        $from);
+      if (!$user) {
+        return $this->setMessage("Invalid public user '{$from}'.")->save();
+      }
+
+      $use_user_hash = false;
+    } else {
+      $user = id(new PhabricatorUser())->load($user_id);
+      if (!$user) {
+        return $this->setMessage("Invalid private user '{$user_id}'.")->save();
+      }
+
+      $use_user_hash = true;
     }
 
     if ($user->getIsDisabled()) {
@@ -88,9 +114,17 @@ class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
 
     $this->setRelatedPHID($receiver->getPHID());
 
-    $expect_hash = self::computeMailHash(
-      $receiver->getMailKey(),
-      $user->getPHID());
+    if ($use_user_hash) {
+      // This is a private reply-to address, check that the user hash is
+      // correct.
+      $check_phid = $user->getPHID();
+    } else {
+      // This is a public reply-to address, check that the object hash is
+      // correct.
+      $check_phid = $receiver->getPHID();
+    }
+
+    $expect_hash = self::computeMailHash($receiver->getMailKey(), $check_phid);
     if ($expect_hash != $hash) {
       return $this->setMessage("Invalid mail hash!")->save();
     }

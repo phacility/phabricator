@@ -190,6 +190,17 @@ return array(
   // Prefix prepended to mail sent by Differential.
   'metamta.differential.subject-prefix' => '[Differential]',
 
+  // By default, Phabricator generates unique reply-to addresses and sends a
+  // separate email to each recipient when you enable reply handling. This is
+  // more secure than using "From" to establish user identity, but can mean
+  // users may receive multiple emails when they are on mailing lists. Instead,
+  // you can use a single, non-unique reply to address and authenticate users
+  // based on the "From" address by setting this to 'true'. This trades away
+  // a little bit of security for convenience, but it's reasonable in many
+  // installs. Object interactions are still protected using hashes in the
+  // single public email address, so objects can not be replied to blindly.
+  'metamta.public-replies' => false,
+
 
 // -- Auth ------------------------------------------------------------------ //
 

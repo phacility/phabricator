@@ -29,6 +29,10 @@ class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
     return $this->getDefaultPrivateReplyHandlerEmailAddress($handle, 'T');
   }
 
+  public function getPublicReplyHandlerEmailAddress() {
+    return $this->getDefaultPublicReplyHandlerEmailAddress('T');
+  }
+
   public function getReplyHandlerDomain() {
     return PhabricatorEnv::getEnvConfig(
       'metamta.maniphest.reply-handler-domain');
