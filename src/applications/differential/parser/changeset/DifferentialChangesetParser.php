@@ -700,7 +700,7 @@ class DifferentialChangesetParser {
     foreach ($vector as $ii => $char) {
       $result[] = $char;
       if (isset($break_here[$ii])) {
-        $result[] = "<span class=\"over-the-line\">!</span><br />";
+        $result[] = "<span class=\"over-the-line\">\xE2\xAC\x85</span><br />";
       }
     }
 
