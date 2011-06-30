@@ -56,7 +56,7 @@ then
     echo "ERROR: You must be able to sudo to run this script, or run it as root.";
     exit 1
   fi
-  
+
 fi
 
 if [[ $RHEL_MAJOR_VER == 5 ]]
@@ -65,10 +65,10 @@ then
   # (it tries to pull in php 5.1 stuff) ...
   echo "Adding EPEL repo, for git."
   $SUDO rpm -Uvh http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-4.noarch.rpm
-  YUMCOMMAND="$SUDO yum install httpd git php53 php53-cli php53-mysql php53-process php53-devel php53-gd gcc wget make pcre-devel"
+  YUMCOMMAND="$SUDO yum install httpd git php53 php53-cli php53-mysql php53-process php53-devel php53-gd gcc wget make pcre-devel mysql-server"
 else
   # RHEL 6+ defaults with php 5.3
-  YUMCOMMAND="$SUDO yum install httpd git php php-cli php-mysql php-process php-devel php-gd php-pecl-apc php-pecl-json"
+  YUMCOMMAND="$SUDO yum install httpd git php php-cli php-mysql php-process php-devel php-gd php-pecl-apc php-pecl-json mysql-server"
 fi
 
 echo "Dropping to yum to install dependencies..."
