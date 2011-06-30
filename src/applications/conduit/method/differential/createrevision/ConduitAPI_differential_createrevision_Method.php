@@ -26,7 +26,6 @@ class ConduitAPI_differential_createrevision_Method extends ConduitAPIMethod {
     return array(
       'diffid' => 'required diffid',
       'fields' => 'required dict',
-      'user'   => 'required guid',
     );
   }
 
@@ -51,7 +50,7 @@ class ConduitAPI_differential_createrevision_Method extends ConduitAPIMethod {
     $revision = DifferentialRevisionEditor::newRevisionFromConduitWithDiff(
       $fields,
       $diff,
-      $request->getValue('user')); // TODO: Should be authoritative
+      $request->getUser()->getPHID());
 
     return array(
       'revisionid'  => $revision->getID(),
