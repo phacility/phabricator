@@ -160,12 +160,4 @@ class DifferentialCommentMail extends DifferentialMail {
 
     return implode("\n", $body);
   }
-
-  private function renderHandleList(array $handles, array $phids) {
-    $names = array();
-    foreach ($phids as $phid) {
-      $names[] = $handles[$phid]->getName();
-    }
-    return implode(', ', $names);
-  }
 }

@@ -39,6 +39,12 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
     $this->setChangesets($changesets);
   }
 
+  protected function renderReviewersLine() {
+    $reviewers = $this->getRevision()->getReviewers();
+    $handles = id(new PhabricatorObjectHandleData($reviewers))->loadHandles();
+    return 'Reviewers: '.$this->renderHandleList($handles, $reviewers);
+  }
+
   protected function renderReviewRequestBody() {
     $revision = $this->getRevision();
 
