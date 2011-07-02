@@ -210,14 +210,22 @@ class PhabricatorObjectHandleData {
               $repository = $repositories[$repository_ids[$phid]];
               $commit_identifier = $commit->getCommitIdentifier();
 
-              $vcs = $repository->getVersionControlSystem();
-              if ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_GIT) {
-                $short_identifier = substr($commit_identifier, 0, 16);
+              // In case where the repository for the commit was deleted,
+              // we don't have have info about the repository anymore.
+              if ($repository) {
+                $vcs = $repository->getVersionControlSystem();
+                if ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_GIT) {
+                  $short_identifier = substr($commit_identifier, 0, 16);
+                } else {
+                  $short_identifier = $commit_identifier;
+                }
+
+                $handle->setName('r'.$callsign.$short_identifier);
               } else {
-                $short_identifier = $commit_identifier;
+
+                $handle->setName('Commit '.'r'.$callsign.$commit_identifier);
               }
 
-              $handle->setName('r'.$callsign.$short_identifier);
               $handle->setURI('/r'.$callsign.$commit_identifier);
               $handle->setFullName('r'.$callsign.$commit_identifier);
               $handle->setTimestamp($commit->getEpoch());
