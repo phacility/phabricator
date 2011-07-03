@@ -14,6 +14,7 @@ phutil_require_module('phabricator', 'applications/herald/storage/transcript/bas
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'view/control/table');
+phutil_require_module('phabricator', 'view/form/error');
 phutil_require_module('phabricator', 'view/layout/panel');
 phutil_require_module('phabricator', 'view/layout/sidenav');
 
