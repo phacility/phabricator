@@ -96,7 +96,7 @@ class PhabricatorPasteViewController extends PhabricatorPasteController {
 
     $text_list = explode(
       "\n", $highlightEngine->highlightSource(
-        $paste->getTitle(),
+        nonempty($paste->getLanguage(), $paste->getTitle()),
         $file->loadFileData()));
 
     $rows = $this->buildDisplayRows($text_list);
