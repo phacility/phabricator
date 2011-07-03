@@ -74,7 +74,7 @@ class PhabricatorProjectListController
       $blurb = nonempty(
         $profile->getBlurb(),
         'Oops!, nothing is known about this elusive project.');
-      $blurb = $this->textWrap($blurb, $columns = 100);
+      $blurb = phutil_utf8_shorten($blurb, $columns = 100);
 
       $rows[] = array(
         phutil_escape_html($project->getName()),
@@ -128,19 +128,5 @@ class PhabricatorProjectListController
       array(
         'title' => 'Projects',
       ));
-  }
-
-  private function textWrap($text, $length) {
-    if (strlen($text) <= $length) {
-      return $text;
-    } else {
-      // TODO:  perhaps this could be improved, adding the ability to get the
-      //        last letter and suppress it, if it is one of [(,:; ,etc.
-      //        making "blurb" looks a little bit better. :)
-      $wrapped = wordwrap($text, $length, '__#END#__');
-      $end_position = strpos($wrapped, '__#END#__');
-      $wrapped = substr($text, 0, $end_position).'...';
-      return $wrapped;
-    }
   }
 }
