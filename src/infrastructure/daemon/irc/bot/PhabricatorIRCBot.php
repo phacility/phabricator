@@ -130,6 +130,14 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
       }
 
       if ($read) {
+        // Test for connection termination; in PHP, fread() off a nonblocking,
+        // closed socket is empty string.
+        if (feof($this->socket)) {
+          // This indicates the connection was terminated on the other side,
+          // just exit via exception and let the overseer restart us after a
+          // delay so we can reconnect.
+          throw new Exception("Remote host closed connection.");
+        }
         do {
           $data = fread($this->socket, 4096);
           if ($data === false) {
