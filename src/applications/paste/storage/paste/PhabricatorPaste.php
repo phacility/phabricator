@@ -22,6 +22,7 @@ class PhabricatorPaste extends PhabricatorPasteDAO {
   protected $title;
   protected $authorPHID;
   protected $filePHID;
+  protected $language;
 
   public function getConfiguration() {
     return array(

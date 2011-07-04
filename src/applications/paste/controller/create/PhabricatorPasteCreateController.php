@@ -31,6 +31,16 @@ class PhabricatorPasteCreateController extends PhabricatorPasteController {
     if ($request->isFormPost()) {
       $errors = array();
       $title = $request->getStr('title');
+
+      $language = $request->getStr('language');
+      if ($language == 'infer') {
+        // If it's infer, store an empty string. Otherwise, store the
+        // language name. We do this so we can refer to 'infer' elsewhere
+        // in the code (such as default value) while retaining backwards
+        // compatibility with old posts with no language stored.
+        $language = '';
+      }
+
       $text = $request->getStr('text');
 
       if (!strlen($text)) {
@@ -41,6 +51,7 @@ class PhabricatorPasteCreateController extends PhabricatorPasteController {
       }
 
       $paste->setTitle($title);
+      $paste->setLanguage($language);
 
       if (!$errors) {
         $paste_file = PhabricatorFile::newFromFileData(
@@ -76,6 +87,26 @@ class PhabricatorPasteCreateController extends PhabricatorPasteController {
     }
 
     $form = new AphrontFormView();
+
+    // If we're coming back from an error and the language was already defined,
+    // use that. Otherwise, ask the config for the default.
+    if ($paste->getLanguage()) {
+      $language_default = $paste->getLanguage();
+    } else {
+      $language_default = PhabricatorEnv::getEnvConfig(
+        'pygments.dropdown-default');
+    }
+
+    $available_languages = PhabricatorEnv::getEnvConfig(
+      'pygments.dropdown-choices');
+    asort($available_languages);
+
+    $language_select = id(new AphrontFormSelectControl())
+      ->setLabel('Language')
+      ->setName('language')
+      ->setValue($language_default)
+      ->setOptions($available_languages);
+
     $form
       ->setUser($user)
       ->setAction($request->getRequestURI()->getPath())
@@ -84,6 +115,7 @@ class PhabricatorPasteCreateController extends PhabricatorPasteController {
           ->setLabel('Title')
           ->setValue($paste->getTitle())
           ->setName('title'))
+      ->appendChild($language_select)
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel('Text')
