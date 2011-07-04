@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group conduit
+ */
 class ConduitAPI_diffusion_getrecentcommitsbypath_Method
   extends ConduitAPIMethod {
 

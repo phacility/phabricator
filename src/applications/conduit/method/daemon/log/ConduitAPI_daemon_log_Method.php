@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group conduit
+ */
 class ConduitAPI_daemon_log_Method extends ConduitAPIMethod {
 
   public function shouldRequireAuthentication() {
