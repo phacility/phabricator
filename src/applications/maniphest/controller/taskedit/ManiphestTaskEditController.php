@@ -285,11 +285,20 @@ class ManiphestTaskEditController extends ManiphestController {
       }
     }
 
+    $email_create = PhabricatorEnv::getEnvConfig(
+      'metamta.maniphest.public-create-email');
+    $email_hint = null;
+    if (!$task->getID() && $email_create) {
+      $email_hint = 'You can also create tasks by sending an email to: '.
+                    '<tt>'.phutil_escape_html($email_create).'</tt>';
+    }
+
     $form
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel('Description')
           ->setName('description')
+          ->setCaption($email_hint)
           ->setValue($task->getDescription()))
       ->appendChild(
         id(new AphrontFormSubmitControl())

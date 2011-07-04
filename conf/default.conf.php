@@ -201,6 +201,16 @@ return array(
   // single public email address, so objects can not be replied to blindly.
   'metamta.public-replies' => false,
 
+  // You can configure an email address like "bugs@phabricator.example.com"
+  // which will automatically create Maniphest tasks when users send email
+  // to it. This relies on the "From" address to authenticate users, so it is
+  // is not completely secure. To set this up, enter a complete email
+  // address like "bugs@phabricator.example.com" and then configure mail to
+  // that address so it routed to Phabricator (if you've already configured
+  // reply handlers, you're probably already done). See "Configuring Inbound
+  // Email" in the documentation for more information.
+  'metamta.maniphest.public-create-email' => null,
+
 
 // -- Auth ------------------------------------------------------------------ //
 

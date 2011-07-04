@@ -7,7 +7,9 @@
 
 
 phutil_require_module('phabricator', 'applications/differential/mail/base');
+phutil_require_module('phabricator', 'applications/maniphest/constants/priority');
 phutil_require_module('phabricator', 'applications/maniphest/editor/transaction');
+phutil_require_module('phabricator', 'applications/maniphest/storage/task');
 phutil_require_module('phabricator', 'applications/metamta/parser');
 phutil_require_module('phabricator', 'applications/metamta/storage/base');
 phutil_require_module('phabricator', 'applications/people/storage/user');
