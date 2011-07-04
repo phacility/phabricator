@@ -16,6 +16,14 @@
  * limitations under the License.
  */
 
+/**
+ * Interface to the static resource map, which is a graph of available
+ * resources, resource dependencies, and packaging information. You generally do
+ * not need to invoke it directly; instead, you call higher-level Celerity APIs
+ * and it uses the resource map to satisfy your requests.
+ *
+ * @group celerity
+ */
 final class CelerityResourceMap {
 
   private static $instance;
@@ -123,10 +131,4 @@ final class CelerityResourceMap {
     return idx($this->reverseMap, $path);
   }
 
-}
-
-function celerity_register_resource_map(array $map, array $package_map) {
-  $instance = CelerityResourceMap::getInstance();
-  $instance->setResourceMap($map);
-  $instance->setPackageMap($package_map);
 }

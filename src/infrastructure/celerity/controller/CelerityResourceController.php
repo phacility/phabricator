@@ -16,6 +16,13 @@
  * limitations under the License.
  */
 
+/**
+ * Delivers CSS and JS resources to the browser. This controller handles all
+ * ##/res/## requests, and manages caching, package construction, and resource
+ * preprocessing.
+ *
+ * @group celerity
+ */
 class CelerityResourceController extends AphrontController {
 
   private $path;

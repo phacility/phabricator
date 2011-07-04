@@ -17,20 +17,13 @@
  */
 
 /**
- * Indirection layer which provisions for a terrifying future where we need to
- * build multiple resource responses per page.
+ * Registers a resource map for Celerity. This is glue code between the Celerity
+ * mapper script and @{class:CelerityResourceMap}.
  *
  * @group celerity
  */
-final class CelerityAPI {
-
-  private static $response;
-
-  public static function getStaticResourceResponse() {
-    if (empty(self::$response)) {
-      self::$response = new CelerityStaticResourceResponse();
-    }
-    return self::$response;
-  }
-
+function celerity_register_resource_map(array $map, array $package_map) {
+  $instance = CelerityResourceMap::getInstance();
+  $instance->setResourceMap($map);
+  $instance->setPackageMap($package_map);
 }
