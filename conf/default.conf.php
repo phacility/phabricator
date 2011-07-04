@@ -305,14 +305,6 @@ return array(
   // behalf, silencing the warning.
   'phabricator.timezone'        => null,
 
-
-  // Phabricator can highlight PHP by default, but if you want syntax
-  // highlighting for other languages you should install the python package
-  // 'Pygments', make sure the 'pygmentize' script is available in the
-  // $PATH of the webserver, and then enable this.
-  'pygments.enabled'            => false,
-
-
 // -- Files ----------------------------------------------------------------- //
 
   // Lists which uploaded file types may be viewed in the browser. If a file
@@ -415,5 +407,42 @@ return array(
   // and performance improve with it off) but turn it on in development. (These
   // settings are the defaults.)
   'celerity.force-disk-reads' => false,
+
+  // -- Pygments ------------------------------------------------------------ //
+  // Phabricator can highlight PHP by default, but if you want syntax
+  // highlighting for other languages you should install the python package
+  // 'Pygments', make sure the 'pygmentize' script is available in the
+  // $PATH of the webserver, and then enable this.
+  'pygments.enabled'            => false,
+
+  // In places that we display a dropdown to syntax-highlight code,
+  // this is where that list is defined.
+  // Syntax is 'lexer-name' => 'Display Name',
+  'pygments.dropdown-choices' => array(
+    'apacheconf' => 'Apache Configuration',
+    'bash' => 'Bash Scripting',
+    'brainfuck' => 'Brainf*ck',
+    'c' => 'C',
+    'cpp' => 'C++',
+    'css' => 'CSS',
+    'diff' => 'Diff',
+    'django' => 'Django Templating',
+    'erb' => 'Embedded Ruby/ERB',
+    'erlang' => 'Erlang',
+    'html' => 'HTML',
+    'infer' => 'Infer from title (extension)',
+    'java' => 'Java',
+    'js' => 'Javascript',
+    'mysql' => 'MySQL',
+    'perl' => 'Perl',
+    'php' => 'PHP',
+    'text' => 'Plain Text',
+    'python' => 'Python',
+    // TODO: 'remarkup' => 'Remarkup',
+    'ruby' => 'Ruby',
+    'xml' => 'XML',
+  ),
+
+  'pygments.dropdown-default' => 'infer',
 
 );
