@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group maniphest
+ */
 class ManiphestTransactionSaveController extends ManiphestController {
 
   public function processRequest() {

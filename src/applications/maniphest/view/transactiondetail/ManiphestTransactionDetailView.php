@@ -16,7 +16,10 @@
  * limitations under the License.
  */
 
-class ManiphestTransactionDetailView extends AphrontView {
+/**
+ * @group maniphest
+ */
+class ManiphestTransactionDetailView extends ManiphestView {
 
   private $transactions;
   private $handles;

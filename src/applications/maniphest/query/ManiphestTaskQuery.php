@@ -19,6 +19,8 @@
 /**
  * Query tasks by specific criteria. This class uses the higher-performance
  * but less-general Maniphest indexes to satisfy queries.
+ *
+ * @group maniphest
  */
 final class ManiphestTaskQuery {
 

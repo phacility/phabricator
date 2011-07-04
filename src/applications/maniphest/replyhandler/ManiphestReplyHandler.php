@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group maniphest
+ */
 class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
