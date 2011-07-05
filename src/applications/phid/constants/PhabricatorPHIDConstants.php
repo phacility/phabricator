@@ -30,6 +30,7 @@ final class PhabricatorPHIDConstants {
   const PHID_TYPE_CMIT    = 'CMIT';
   const PHID_TYPE_OPKG    = 'OPKG';
   const PHID_TYPE_PSTE    = 'PSTE';
+  const PHID_TYPE_STRY    = 'STRY';
 
   public static function getTypes() {
     return array(
@@ -44,6 +45,8 @@ final class PhabricatorPHIDConstants {
       self::PHID_TYPE_REPO,
       self::PHID_TYPE_CMIT,
       self::PHID_TYPE_PSTE,
+      self::PHID_TYPE_OPKG,
+      self::PHID_TYPE_STRY,
     );
   }
 }
