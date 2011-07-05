@@ -440,6 +440,16 @@ class DifferentialRevisionViewController extends DifferentialController {
 
     $properties['Unit'] = $ustar.' '.$umsg.$utail;
 
+    $drevs = $revision->getAttachedPHIDs(
+      PhabricatorPHIDConstants::PHID_TYPE_DREV);
+    if ($drevs) {
+      $links = array();
+      foreach ($drevs as $drev_phid) {
+        $links[] = $handles[$drev_phid]->renderLink();
+      }
+      $properties['Depends On'] = implode('<br />', $links);
+    }
+
     if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
       $tasks = $revision->getAttachedPHIDs(
         PhabricatorPHIDConstants::PHID_TYPE_TASK);
@@ -512,6 +522,13 @@ class DifferentialRevisionViewController extends DifferentialController {
 
     require_celerity_resource('phabricator-object-selector-css');
     require_celerity_resource('javelin-behavior-phabricator-object-selector');
+
+    $links[] = array(
+      'class' => 'action-dependencies',
+      'name'  => 'Edit Dependencies',
+      'href'  => "/search/attach/{$revision_phid}/DREV/dependencies/",
+      'sigil' => 'workflow',
+    );
 
     if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
       $links[] = array(

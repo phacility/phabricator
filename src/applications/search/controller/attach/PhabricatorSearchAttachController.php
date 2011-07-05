@@ -22,8 +22,9 @@ class PhabricatorSearchAttachController extends PhabricatorSearchController {
   private $type;
   private $action;
 
-  const ACTION_ATTACH = 'attach';
-  const ACTION_MERGE  = 'merge';
+  const ACTION_ATTACH       = 'attach';
+  const ACTION_MERGE        = 'merge';
+  const ACTION_DEPENDENCIES = 'dependencies';
 
   public function willProcessRequest(array $data) {
     $this->phid = $data['phid'];
@@ -58,12 +59,23 @@ class PhabricatorSearchAttachController extends PhabricatorSearchController {
       switch ($this->action) {
         case self::ACTION_MERGE:
           return $this->performMerge($object, $handle, $phids);
+
+        case self::ACTION_DEPENDENCIES:
         case self::ACTION_ATTACH:
+          $two_way = true;
+          if ($this->action == self::ACTION_DEPENDENCIES) {
+            $two_way = false;
+            $this->detectGraphCycles(
+              $object,
+              $attach_type,
+              $phids);
+          }
           $this->performAttach(
             $object_type,
             $object,
             $attach_type,
-            $phids);
+            $phids,
+            $two_way);
           return id(new AphrontReloadResponse())->setURI($handle->getURI());
         default:
           throw new Exception("Unsupported attach action.");
@@ -71,6 +83,7 @@ class PhabricatorSearchAttachController extends PhabricatorSearchController {
     } else {
       switch ($this->action) {
         case self::ACTION_ATTACH:
+        case self::ACTION_DEPENDENCIES:
           $phids = $object->getAttachedPHIDs($attach_type);
           break;
         default:
@@ -132,7 +145,8 @@ class PhabricatorSearchAttachController extends PhabricatorSearchController {
     $object_type,
     $object,
     $attach_type,
-    array $phids) {
+    array $phids,
+    $two_way) {
 
     $object_phid = $object->getPHID();
 
@@ -160,6 +174,10 @@ class PhabricatorSearchAttachController extends PhabricatorSearchController {
 
     // Update the primary object.
     $this->writeOutboundEdges($object_type, $object, $attach_type, $phids);
+
+    if (!$two_way) {
+      return;
+    }
 
     // Loop through all of the attached/detached objects and update them.
     foreach ($attach_objs as $phid => $attach_obj) {
@@ -290,6 +308,12 @@ class PhabricatorSearchAttachController extends PhabricatorSearchController {
           "These tasks will be merged into the current task and then closed. ".
           "The current task will grow stronger.";
         break;
+      case self::ACTION_DEPENDENCIES:
+        $dialog_title = "Edit Dependencies";
+        $header_text = "Current Dependencies";
+        $button_text = "Save Dependencies";
+        $instructions = null;
+        break;
     }
 
     return array(
@@ -300,6 +324,41 @@ class PhabricatorSearchAttachController extends PhabricatorSearchController {
       'button'                => $button_text,
       'instructions'          => $instructions,
     );
+  }
+
+  private function detectGraphCycles(
+    $object,
+    $attach_type,
+    array $phids) {
+
+    // Detect graph cycles.
+    $graph = new PhabricatorObjectGraph();
+    $graph->setEdgeType($attach_type);
+    $graph->addNodes(array(
+      $object->getPHID() => $phids,
+    ));
+    $graph->loadGraph();
+
+    foreach ($phids as $phid) {
+      $cycle = $graph->detectCycles($phid);
+      if (!$cycle) {
+        continue;
+      }
+
+      // TODO: Improve this behavior so it's not all-or-nothing?
+
+      $handles = id(new PhabricatorObjectHandleData($cycle))
+        ->loadHandles();
+      $names = array();
+      foreach ($cycle as $cycle_phid) {
+        $names[] = $handles[$cycle_phid]->getFullName();
+      }
+      $names = implode(" \xE2\x86\x92 ", $names);
+      $which = $handles[$phid]->getFullName();
+      throw new Exception(
+        "You can not create a dependency on '{$which}' because it ".
+        "would create a circular dependency: {$names}.");
+    }
   }
 
 }

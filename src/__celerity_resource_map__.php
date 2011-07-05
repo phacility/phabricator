@@ -63,7 +63,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-headsup-action-list-view-css' =>
   array(
-    'uri' => '/res/af3dff49/rsrc/css/aphront/headsup-action-list-view.css',
+    'uri' => '/res/5f89dc44/rsrc/css/aphront/headsup-action-list-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -463,7 +463,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-differential-keyboard-navigation' =>
   array(
-    'uri' => '/res/3bdfaec7/rsrc/js/application/differential/behavior-keyboard-nav.js',
+    'uri' => '/res/e36415a2/rsrc/js/application/differential/behavior-keyboard-nav.js',
     'type' => 'js',
     'requires' =>
     array(

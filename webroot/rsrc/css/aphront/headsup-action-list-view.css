@@ -65,3 +65,7 @@
 .aphront-headsup-action-list .action-merge {
   background-image: url(/rsrc/image/icon/fatcow/arrow_merge.png);
 }
+
+.aphront-headsup-action-list .action-dependencies {
+  background-image: url(/rsrc/image/icon/fatcow/link.png);
+}

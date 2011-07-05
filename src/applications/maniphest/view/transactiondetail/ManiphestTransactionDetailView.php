@@ -456,7 +456,9 @@ class ManiphestTransactionDetailView extends ManiphestView {
         $old_raw = nonempty($old, array());
         $new_raw = nonempty($new, array());
 
-        foreach (array(PhabricatorPHIDConstants::PHID_TYPE_DREV,
+        foreach (array(
+          PhabricatorPHIDConstants::PHID_TYPE_DREV,
+          PhabricatorPHIDConstants::PHID_TYPE_TASK,
           PhabricatorPHIDConstants::PHID_TYPE_FILE) as $type) {
           $old = array_keys(idx($old_raw, $type, array()));
           $new = array_keys(idx($new_raw, $type, array()));
@@ -479,6 +481,11 @@ class ManiphestTransactionDetailView extends ManiphestView {
           case PhabricatorPHIDConstants::PHID_TYPE_FILE:
             $singular = 'file';
             $plural = 'files';
+            break;
+          case PhabricatorPHIDConstants::PHID_TYPE_TASK:
+            $singular = 'Maniphest Task';
+            $plural = 'Maniphest Tasks';
+            $dependency = true;
             break;
         }
 

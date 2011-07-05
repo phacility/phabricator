@@ -129,8 +129,18 @@ class ManiphestTaskDetailController extends ManiphestController {
       }
     }
 
-    if (idx($attached, PhabricatorPHIDConstants::PHID_TYPE_DREV)) {
-      $revs = idx($attached, PhabricatorPHIDConstants::PHID_TYPE_DREV);
+    $dtasks = idx($attached, PhabricatorPHIDConstants::PHID_TYPE_TASK);
+    if ($dtasks) {
+      $dtask_links = array();
+      foreach ($dtasks as $dtask => $info) {
+        $dtask_links[] = $handles[$dtask]->renderLink();
+      }
+      $dtask_links = implode('<br />', $dtask_links);
+      $dict['Depends On'] = $dtask_links;
+    }
+
+    $revs = idx($attached, PhabricatorPHIDConstants::PHID_TYPE_DREV);
+    if ($revs) {
       $rev_links = array();
       foreach ($revs as $rev => $info) {
         $rev_links[] = $handles[$rev]->renderLink();
@@ -139,23 +149,21 @@ class ManiphestTaskDetailController extends ManiphestController {
       $dict['Revisions'] = $rev_links;
     }
 
-    if (idx($attached, PhabricatorPHIDConstants::PHID_TYPE_FILE)) {
-      $file_infos = idx($attached, PhabricatorPHIDConstants::PHID_TYPE_FILE);
+    $file_infos = idx($attached, PhabricatorPHIDConstants::PHID_TYPE_FILE);
+    if ($file_infos) {
       $file_phids = array_keys($file_infos);
 
-      if ($file_phids) {
-        $files = id(new PhabricatorFile())->loadAllWhere(
-          'phid IN (%Ls)',
-          $file_phids);
+      $files = id(new PhabricatorFile())->loadAllWhere(
+        'phid IN (%Ls)',
+        $file_phids);
 
-        $views = array();
-        foreach ($files as $file) {
-          $view = new AphrontFilePreviewView();
-          $view->setFile($file);
-          $views[] = $view->render();
-        }
-        $dict['Files'] = implode('', $views);
+      $views = array();
+      foreach ($files as $file) {
+        $view = new AphrontFilePreviewView();
+        $view->setFile($file);
+        $views[] = $view->render();
       }
+      $dict['Files'] = implode('', $views);
     }
 
     $dict['Description'] =
@@ -210,6 +218,13 @@ class ManiphestTaskDetailController extends ManiphestController {
     $action->setURI('/search/attach/'.$task->getPHID().'/TASK/merge/');
     $action->setWorkflow(true);
     $action->setClass('action-merge');
+    $actions[] = $action;
+
+    $action = new AphrontHeadsupActionView();
+    $action->setName('Edit Dependencies');
+    $action->setURI('/search/attach/'.$task->getPHID().'/TASK/dependencies/');
+    $action->setWorkflow(true);
+    $action->setClass('action-dependencies');
     $actions[] = $action;
 
     $action = new AphrontHeadsupActionView();
