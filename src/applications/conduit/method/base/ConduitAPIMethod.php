@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group conduit
+ */
 abstract class ConduitAPIMethod {
 
   abstract public function getMethodDescription();

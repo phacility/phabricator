@@ -16,7 +16,10 @@
  * limitations under the License.
  */
 
-final class ManiphestTransactionType {
+/**
+ * @group maniphest
+ */
+final class ManiphestTransactionType extends ManiphestConstants {
 
   const TYPE_NONE         = 'comment';
   const TYPE_STATUS       = 'status';

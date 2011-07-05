@@ -6,8 +6,8 @@
 
 
 
+phutil_require_module('phabricator', 'applications/maniphest/view/base');
 phutil_require_module('phabricator', 'applications/maniphest/view/transactiondetail');
-phutil_require_module('phabricator', 'view/base');
 
 
 phutil_require_source('ManiphestTransactionListView.php');

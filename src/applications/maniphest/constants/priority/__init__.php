@@ -6,6 +6,8 @@
 
 
 
+phutil_require_module('phabricator', 'applications/maniphest/constants/base');
+
 phutil_require_module('phutil', 'utils');
 
 

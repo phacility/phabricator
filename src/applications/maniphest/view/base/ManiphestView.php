@@ -17,12 +17,8 @@
  */
 
 /**
- * @group conduit
+ * @group maniphest
  */
-abstract class PhabricatorConduitDAO extends PhabricatorLiskDAO {
-
-  public function getApplicationName() {
-    return 'conduit';
-  }
+abstract class ManiphestView extends AphrontView {
 
 }

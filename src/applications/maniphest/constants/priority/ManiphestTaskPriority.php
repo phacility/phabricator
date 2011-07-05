@@ -16,7 +16,10 @@
  * limitations under the License.
  */
 
-final class ManiphestTaskPriority {
+/**
+ * @group maniphest
+ */
+final class ManiphestTaskPriority extends ManiphestConstants {
 
   const PRIORITY_UNBREAK_NOW  = 100;
   const PRIORITY_TRIAGE       = 90;

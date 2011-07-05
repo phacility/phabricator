@@ -1,9 +1,12 @@
 @title Things You Should Do Soon: Static Resources
 @group flavortext
 
-
 Over time, you'll write more JS and CSS and eventually need to put systems in
 place to manage it.
+
+This is part of @{article:Things You Should Do Soon}, which describes
+architectural problems in web applications which you should begin to consider
+before you encounter them.
 
 = Manage Dependencies Automatically =
 

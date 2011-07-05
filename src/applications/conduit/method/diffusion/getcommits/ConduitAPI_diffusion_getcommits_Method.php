@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group conduit
+ */
 class ConduitAPI_diffusion_getcommits_Method extends ConduitAPIMethod {
 
   public function getMethodDescription() {

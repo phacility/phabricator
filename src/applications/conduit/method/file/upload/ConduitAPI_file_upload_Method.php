@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group conduit
+ */
 class ConduitAPI_file_upload_Method extends ConduitAPIMethod {
 
   public function getMethodDescription() {

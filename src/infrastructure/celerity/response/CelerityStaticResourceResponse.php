@@ -16,6 +16,13 @@
  * limitations under the License.
  */
 
+/**
+ * Tracks and resolves dependencies the page declares with
+ * @{function:require_celerity_resource}, and then builds appropriate HTML or
+ * Ajax responses.
+ *
+ * @group celerity
+ */
 final class CelerityStaticResourceResponse {
 
   private $symbols = array();

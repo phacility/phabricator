@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group maniphest
+ */
 abstract class ManiphestController extends PhabricatorController {
 
   public function buildStandardPageResponse($view, array $data) {

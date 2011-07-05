@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group maniphest
+ */
 class ManiphestTransaction extends ManiphestDAO {
 
   protected $taskID;

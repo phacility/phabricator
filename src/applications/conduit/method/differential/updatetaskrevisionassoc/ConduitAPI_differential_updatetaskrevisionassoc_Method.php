@@ -16,8 +16,12 @@
  * limitations under the License.
  */
 
+/**
+ * @group conduit
+ */
 class ConduitAPI_differential_updatetaskrevisionassoc_Method
   extends ConduitAPIMethod {
+
   public function getMethodDescription() {
     return "Given a task together with its original and new associated ".
       "revisions, update the revisions for their attached_tasks.";

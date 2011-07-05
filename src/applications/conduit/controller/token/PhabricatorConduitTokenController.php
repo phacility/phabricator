@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group conduit
+ */
 class PhabricatorConduitTokenController extends PhabricatorConduitController {
 
   public function processRequest() {
