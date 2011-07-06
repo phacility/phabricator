@@ -89,23 +89,19 @@ class PhabricatorPasteViewController extends PhabricatorPasteController {
     require_celerity_resource('diffusion-source-css');
     require_celerity_resource('syntax-highlighting-css');
 
-    $highlight_engine = new PhutilDefaultSyntaxHighlighterEngine();
-    $highlight_engine->setConfig(
-      'pygments.enabled',
-      PhabricatorEnv::getEnvConfig('pygments.enabled'));
-
-
     $language = $paste->getLanguage();
+    $source = $file->loadFileData();
     if (empty($language)) {
-      $language = $highlight_engine->getLanguageFromFilename(
-        $paste->getTitle());
+      $source = PhabricatorSyntaxHighlighter::highlightWithFilename(
+        $paste->getTitle(),
+        $source);
+    } else {
+      $source = PhabricatorSyntaxHighlighter::highlightWithLanguage(
+        $language,
+        $source);
     }
 
-    $text_list = explode(
-      "\n",
-      $highlight_engine->highlightSource(
-        $language,
-        $file->loadFileData()));
+    $text_list = explode("\n", $source);
 
     $rows = $this->buildDisplayRows($text_list);
 

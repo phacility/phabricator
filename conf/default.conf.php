@@ -486,4 +486,23 @@ return array(
 
   'pygments.dropdown-default' => 'infer',
 
+  // This is an override list of regular expressions which allows you to choose
+  // what language files are highlighted as. If your projects have certain rules
+  // about filenames or use unusual or ambiguous language extensions, you can
+  // create a mapping here. This is an ordered dictionary of regular expressions
+  // which will be tested against the filename. They should map to either an
+  // explicit language as a string value, or a numeric index into the captured
+  // groups as an integer.
+  'syntax.filemap' => array(
+    // Example: Treat all '*.xyz' files as PHP.
+    // '@\\.xyz$@' => 'php',
+
+    // Example: Treat 'httpd.conf' as 'apacheconf'.
+    // '@/httpd\\.conf$@' => 'apacheconf',
+
+    // Example: Treat all '*.x.bak' file as '.x'. NOTE: we map to capturing
+    // group 1 by specifying the mapping as "1".
+    // '@\\.([^.]+)\\.bak$@' => 1,
+  ),
+
 );

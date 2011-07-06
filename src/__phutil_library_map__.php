@@ -511,6 +511,7 @@ phutil_register_library_map(array(
     'PhabricatorSetup' => 'infrastructure/setup',
     'PhabricatorStandardPageView' => 'view/page/standard',
     'PhabricatorStatusController' => 'applications/status/base',
+    'PhabricatorSyntaxHighlighter' => 'applications/markup/syntax',
     'PhabricatorTaskmasterDaemon' => 'infrastructure/daemon/workers/taskmaster',
     'PhabricatorTestCase' => 'infrastructure/testing/testcase',
     'PhabricatorTimelineCursor' => 'infrastructure/daemon/timeline/storage/cursor',

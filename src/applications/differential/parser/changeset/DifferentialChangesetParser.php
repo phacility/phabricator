@@ -873,10 +873,7 @@ EOSYNTHETIC;
     $this->isTopLevel = (($range_start === null) && ($range_len === null));
 
 
-    $this->highlightEngine = new PhutilDefaultSyntaxHighlighterEngine();
-    $this->highlightEngine->setConfig(
-      'pygments.enabled',
-      PhabricatorEnv::getEnvConfig('pygments.enabled'));
+    $this->highlightEngine = PhabricatorSyntaxHighlighter::newEngine();
 
     $this->tryCacheStuff();
 
