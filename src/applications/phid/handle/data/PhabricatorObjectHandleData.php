@@ -202,7 +202,8 @@ class PhabricatorObjectHandleData {
             $handle = new PhabricatorObjectHandle();
             $handle->setPHID($phid);
             $handle->setType($type);
-            if (empty($commits[$phid])) {
+            if (empty($commits[$phid]) ||
+                !isset($callsigns[$repository_ids[$phid]])) {
               $handle->setName('Unknown Commit');
             } else {
               $commit = $commits[$phid];
