@@ -27,7 +27,6 @@ class DifferentialChangesetParser {
   protected $parsedHunk   = false;
 
   protected $filename     = null;
-  protected $filetype     = null;
   protected $missingOld   = array();
   protected $missingNew   = array();
 
@@ -161,10 +160,7 @@ class DifferentialChangesetParser {
 
   public function setFilename($filename) {
     $this->filename = $filename;
-    if (strpos($filename, '.', 1) !== false) {
-      $parts = explode('.', $filename);
-      $this->filetype = end($parts);
-    }
+    return $this;
   }
 
   public function setHandles(array $handles) {
@@ -723,7 +719,7 @@ class DifferentialChangesetParser {
 
   protected function getHighlightFuture($corpus) {
     return $this->highlightEngine->getHighlightFuture(
-      $this->filetype,
+      $this->highlightEngine->getLanguageFromFilename($this->filename),
       $corpus);
   }
 
