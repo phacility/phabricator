@@ -30,7 +30,7 @@ final class PhabricatorProjectStatus {
 
   public static function getNameForStatus($status) {
     static $map = array(
-      self::UNKNOWN         => 'Who knows?',
+      self::UNKNOWN         => '',
       self::NOT_STARTED     => 'Not started',
       self::IN_PROGRESS     => 'In progress',
       self::ONGOING         => 'Ongoing',
