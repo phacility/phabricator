@@ -191,6 +191,11 @@ class PhabricatorProjectProfileController
     $tasks = $query->execute();
     $count = $query->getRowCount();
 
+    $phids = mpull($tasks, 'getOwnerPHID');
+    $phids = array_filter($phids);
+    $handles = id(new PhabricatorObjectHandleData($phids))
+      ->loadHandles();
+
     $task_views = array();
     foreach ($tasks as $task) {
       $view = id(new ManiphestTaskSummaryView())
