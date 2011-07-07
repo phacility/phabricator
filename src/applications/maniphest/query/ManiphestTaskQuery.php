@@ -28,6 +28,7 @@ final class ManiphestTaskQuery {
   private $ownerPHIDs       = array();
   private $includeUnowned   = null;
   private $projectPHIDs     = array();
+  private $subscriberPHIDs  = array();
 
   private $status           = 'status-any';
   const STATUS_ANY          = 'status-any';
@@ -89,6 +90,11 @@ final class ManiphestTaskQuery {
     return $this;
   }
 
+  public function withSubscribers(array $subscribers) {
+    $this->subscriberPHIDs = $subscribers;
+    return $this;
+  }
+
   public function setGroupBy($group) {
     $this->groupBy = $group;
     return $this;
@@ -139,6 +145,7 @@ final class ManiphestTaskQuery {
     $where[] = $this->buildPriorityWhereClause($conn);
     $where[] = $this->buildAuthorWhereClause($conn);
     $where[] = $this->buildOwnerWhereClause($conn);
+    $where[] = $this->buildSubscriberWhereClause($conn);
     $where[] = $this->buildProjectWhereClause($conn);
 
     $where = array_filter($where);
@@ -150,6 +157,7 @@ final class ManiphestTaskQuery {
 
     $join = array();
     $join[] = $this->buildProjectJoinClause($conn);
+    $join[] = $this->buildSubscriberJoinClause($conn);
 
     $join = array_filter($join);
     if ($join) {
@@ -272,6 +280,17 @@ final class ManiphestTaskQuery {
     }
   }
 
+  private function buildSubscriberWhereClause($conn) {
+    if (!$this->subscriberPHIDs) {
+      return null;
+    }
+
+    return qsprintf(
+      $conn,
+      'subscriber.subscriberPHID IN (%Ls)',
+      $this->subscriberPHIDs);
+  }
+
   private function buildProjectWhereClause($conn) {
     if (!$this->projectPHIDs) {
       return null;
@@ -293,6 +312,18 @@ final class ManiphestTaskQuery {
       $conn,
       'JOIN %T project ON project.taskPHID = task.phid',
       $project_dao->getTableName());
+  }
+
+  private function buildSubscriberJoinClause($conn) {
+    if (!$this->subscriberPHIDs) {
+      return null;
+    }
+
+    $subscriber_dao = new ManiphestTaskSubscriber();
+    return qsprintf(
+      $conn,
+      'JOIN %T subscriber ON subscriber.taskPHID = task.phid',
+      $subscriber_dao->getTableName());
   }
 
   private function buildOrderClause($conn) {

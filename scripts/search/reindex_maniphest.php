@@ -26,6 +26,7 @@ $tasks = id(new ManiphestTask())->loadAll();
 echo "Updating relationships for ".count($tasks)." tasks";
 foreach ($tasks as $task) {
   ManiphestTaskProject::updateTaskProjects($task);
+  ManiphestTaskSubscriber::updateTaskSubscribers($task);
   echo '.';
 }
 echo "\nDone.\n";

@@ -54,9 +54,10 @@ class ManiphestTaskListController extends ManiphestController {
 
     $views = array(
       'User Tasks',
-      'action'    => 'Assigned',
-      'created'   => 'Created',
-      'triage'    => 'Need Triage',
+      'action'     => 'Assigned',
+      'created'    => 'Created',
+      'subscribed' => 'Subscribed',
+      'triage'     => 'Need Triage',
       '<hr />',
       'All Tasks',
       'alltriage'   => 'Need Triage',
@@ -70,6 +71,7 @@ class ManiphestTaskListController extends ManiphestController {
     $has_filter = array(
       'action' => true,
       'created' => true,
+      'subscribed' => true,
       'triage' => true,
     );
 
@@ -269,6 +271,9 @@ class ManiphestTaskListController extends ManiphestController {
         break;
       case 'created':
         $query->withAuthors($user_phids);
+        break;
+      case 'subscribed':
+        $query->withSubscribers($user_phids);
         break;
       case 'triage':
         $query->withOwners($user_phids);

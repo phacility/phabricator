@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'applications/maniphest/constants/owner');
+phutil_require_module('phabricator', 'applications/maniphest/storage/subscriber');
 phutil_require_module('phabricator', 'applications/maniphest/storage/task');
 phutil_require_module('phabricator', 'applications/maniphest/storage/taskproject');
 phutil_require_module('phabricator', 'storage/qsprintf');

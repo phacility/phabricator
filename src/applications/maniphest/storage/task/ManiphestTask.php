@@ -37,6 +37,7 @@ class ManiphestTask extends ManiphestDAO {
   protected $attached = array();
   protected $projectPHIDs = array();
   private $projectsNeedUpdate;
+  private $subscribersNeedUpdate;
 
   protected $ownerOrdering;
 
@@ -70,6 +71,18 @@ class ManiphestTask extends ManiphestDAO {
     return $this;
   }
 
+  public function setCCPHIDs(array $phids) {
+    $this->ccPHIDs = $phids;
+    $this->subscribersNeedUpdate = true;
+    return $this;
+  }
+
+  public function setOwnerPHID($phid) {
+    $this->ownerPHID = $phid;
+    $this->subscribersNeedUpdate = true;
+    return $this;
+  }
+
   public function save() {
     if (!$this->mailKey) {
       $this->mailKey = sha1(Filesystem::readRandomBytes(20));
@@ -82,6 +95,13 @@ class ManiphestTask extends ManiphestDAO {
       // table.
       ManiphestTaskProject::updateTaskProjects($this);
       $this->projectsNeedUpdate = false;
+    }
+
+    if ($this->subscribersNeedUpdate) {
+      // If we've changed the subscriber PHIDs for this task, update the link
+      // table.
+      ManiphestTaskSubscriber::updateTaskSubscribers($this);
+      $this->subscribersNeedUpdate = false;
     }
 
     return $result;
