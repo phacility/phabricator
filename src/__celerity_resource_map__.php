@@ -1062,7 +1062,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-profile-css' =>
   array(
-    'uri' => '/res/4cb0251e/rsrc/css/application/profile/profile-view.css',
+    'uri' => '/res/ebe1ac2f/rsrc/css/application/profile/profile-view.css',
     'type' => 'css',
     'requires' =>
     array(
