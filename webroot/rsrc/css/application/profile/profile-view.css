@@ -95,3 +95,10 @@ img.phabricator-profile-image {
   width: 280px;
   margin: 10px;
 }
+
+.phabricator-profile-info-pane-more-link {
+  text-align: right;
+  padding: .25em;
+  font-weight: bold;
+  margin: .5em 1em 0;
+}
