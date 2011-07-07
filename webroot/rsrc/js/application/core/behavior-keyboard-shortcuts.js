@@ -20,7 +20,7 @@ JX.behavior('phabricator-keyboard-shortcuts', function(config) {
         return;
       }
       var desc = manager.getShortcutDescriptions();
-      var data = {keys : JX.JSON.serialize(desc)};
+      var data = {keys : JX.JSON.stringify(desc)};
       workflow = new JX.Workflow(config.helpURI, data)
         .setCloseHandler(function() {
           workflow = null;

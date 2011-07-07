@@ -2,7 +2,8 @@
 @group config
 
 This document contains instructions for configuring inbound email, so users
-may update Differential and Maniphest by replying to messages.
+may update Differential and Maniphest by replying to messages and create
+Maniphest tasks via email.
 
 = Preamble =
 
@@ -42,6 +43,11 @@ configured correctly, according to the instructions below -- will parse incoming
 email and allow users to interact with Maniphest tasks and Differential
 revisions over email.
 
+You can also set up a task creation email address, like ##bugs@example.com##,
+which will create a Maniphest task out of any email which is set to it. To do
+this, set ##metamta.maniphest.public-create-email## in your configuration. This
+has some mild security implications, see below.
+
 = Security =
 
 The email reply channel is "somewhat" authenticated. Each reply-to address is
@@ -73,6 +79,9 @@ can act as another user, but increases convenience if you use mailing lists and,
 practically, is a reasonable setting for many installs. The reply-to address
 will still contain a hash unique to the object it represents, so users who have
 not received an email about an object can not blindly interact with it.
+
+If you enable ##metamta.maniphest.public-create-email##, that address also uses
+the weaker "From" authentication mechanism.
 
 NOTE: Phabricator does not currently attempt to verify "From" addresses because
 this is technically complex, seems unreasonably difficult in the general case,
