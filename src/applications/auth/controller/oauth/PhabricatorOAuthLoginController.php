@@ -135,12 +135,7 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
         ->setURI('/settings/page/'.$provider_key.'/');
     }
 
-    $next_uri = '/';
-    if ($this->oauthState) {
-      // Make sure a blind redirect to evil.com is impossible.
-      $uri = new PhutilURI($this->oauthState);
-      $next_uri = $uri->getPath();
-    }
+    $next_uri = $request->getCookie('next_uri', '/');
 
     // Login with known auth.
 
@@ -158,6 +153,7 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
 
       $request->setCookie('phusr', $known_user->getUsername());
       $request->setCookie('phsid', $session_key);
+      $request->clearCookie('next_uri');
       return id(new AphrontRedirectResponse())
         ->setURI($next_uri);
     }
