@@ -31,9 +31,16 @@ class PhabricatorLoginController extends PhabricatorAuthController {
     }
 
     $next_uri = $this->getRequest()->getPath();
-    if ($next_uri == '/login/') {
-      $next_uri = null;
+    $request->setCookie('next_uri', $next_uri);
+    if ($next_uri == '/login/' && !$request->isFormPost()) {
+      // The user went straight to /login/, so presumably they want to go
+      // to the dashboard upon logging in. Because, you know, that's logical.
+      // And people are logical. Sometimes... Fine, no they're not.
+      // We check for POST here because getPath() would get reset to /login/.
+       $request->setCookie('next_uri', '/');
     }
+
+    // Always use $request->getCookie('next_uri', '/') after the above.
 
     $password_auth = PhabricatorEnv::getEnvConfig('auth.password-auth-enabled');
 
@@ -66,7 +73,7 @@ class PhabricatorLoginController extends PhabricatorAuthController {
             $request->setCookie('phsid', $session_key);
 
             return id(new AphrontRedirectResponse())
-              ->setURI('/');
+              ->setURI($request->getCookie('next_uri', '/'));
           } else {
             $log = PhabricatorUserLog::newLog(
               null,
@@ -93,7 +100,6 @@ class PhabricatorLoginController extends PhabricatorAuthController {
       $form
         ->setUser($request->getUser())
         ->setAction('/login/')
-        ->addHiddenInput('next', $next_uri)
         ->appendChild(
           id(new AphrontFormTextControl())
             ->setLabel('Username/Email')
@@ -114,8 +120,6 @@ class PhabricatorLoginController extends PhabricatorAuthController {
   //    $panel->setCreateButton('Register New Account', '/login/register/');
       $forms['Phabricator Login'] = $form;
     }
-
-    $oauth_state = $next_uri;
 
     $providers = array(
       PhabricatorOAuthProvider::PROVIDER_FACEBOOK,
@@ -160,7 +164,6 @@ class PhabricatorLoginController extends PhabricatorAuthController {
         ->addHiddenInput('client_id', $client_id)
         ->addHiddenInput('redirect_uri', $redirect_uri)
         ->addHiddenInput('scope', $minimum_scope)
-        ->addHiddenInput('state', $oauth_state)
         ->setUser($request->getUser())
         ->setMethod('GET')
         ->appendChild(
