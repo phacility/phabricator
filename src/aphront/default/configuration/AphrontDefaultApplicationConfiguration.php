@@ -361,10 +361,14 @@ class AphrontDefaultApplicationConfiguration
     $class    = phutil_escape_html(get_class($ex));
     $message  = phutil_escape_html($ex->getMessage());
 
+    $string = (string)$ex;
+    $string = phutil_escape_html($string);
+    $string = str_replace("\n", '<br />', $string);
+
     $content =
       '<div class="aphront-unhandled-exception">'.
         '<h1>Unhandled Exception "'.$class.'": '.$message.'</h1>'.
-        '<code>'.phutil_escape_html((string)$ex).'</code>'.
+        '<code>'.$string.'</code>'.
       '</div>';
 
     $user = $this->getRequest()->getUser();
