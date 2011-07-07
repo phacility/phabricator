@@ -50,15 +50,50 @@ class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     return idx($this->headers, 'message-id');
   }
 
+  public function getSubject() {
+    return idx($this->headers, 'subject');
+  }
+
   public function processReceivedMail() {
     $to = idx($this->headers, 'to');
+    $to = $this->getRawEmailAddress($to);
 
-    // Accept a match either at the beginning of the address or after an open
-    // angle bracket, as in:
-    //    "some display name" <D1+xyz+asdf@example.com>
+    $from = idx($this->headers, 'from');
+
+    $create_task = PhabricatorEnv::getEnvConfig(
+      'metamta.maniphest.public-create-email');
+
+    if ($create_task && $to == $create_task) {
+      $user = $this->lookupPublicUser();
+      if (!$user) {
+        // TODO: We should probably bounce these since from the user's
+        // perspective their email vanishes into a black hole.
+        return $this->setMessage("Invalid public user '{$from}'.")->save();
+      }
+
+      $this->setAuthorPHID($user->getPHID());
+
+      $receiver = new ManiphestTask();
+      $receiver->setAuthorPHID($user->getPHID());
+      $receiver->setPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
+
+      $editor = new ManiphestTransactionEditor();
+      $handler = $editor->buildReplyHandler($receiver);
+
+      $handler->setActor($user);
+      $handler->receiveEmail($this);
+
+      $this->setRelatedPHID($receiver->getPHID());
+      $this->setMessage('OK');
+
+      return $this->save();
+    }
+
+    // We've already stripped this, so look for an object address which has
+    // a format like: D291+291+b0a41ca848d66dcc@example.com
     $matches = null;
     $ok = preg_match(
-      '/(?:^|<)((?:D|T)\d+)\+(\d+)\+([a-f0-9]{16})@/U',
+      '/^((?:D|T)\d+)\+([\w]+)\+([a-f0-9]{16})@/U',
       $to,
       $matches);
 
@@ -70,9 +105,25 @@ class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     $user_id = $matches[2];
     $hash = $matches[3];
 
-    $user = id(new PhabricatorUser())->load($user_id);
-    if (!$user) {
-      return $this->setMessage("Invalid user '{$user_id}'")->save();
+    if ($user_id == 'public') {
+      if (!PhabricatorEnv::getEnvConfig('metamta.public-replies')) {
+        return $this->setMessage("Public replies not enabled.")->save();
+      }
+
+      $user = $this->lookupPublicUser();
+
+      if (!$user) {
+        return $this->setMessage("Invalid public user '{$from}'.")->save();
+      }
+
+      $use_user_hash = false;
+    } else {
+      $user = id(new PhabricatorUser())->load($user_id);
+      if (!$user) {
+        return $this->setMessage("Invalid private user '{$user_id}'.")->save();
+      }
+
+      $use_user_hash = true;
     }
 
     if ($user->getIsDisabled()) {
@@ -88,9 +139,17 @@ class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
 
     $this->setRelatedPHID($receiver->getPHID());
 
-    $expect_hash = self::computeMailHash(
-      $receiver->getMailKey(),
-      $user->getPHID());
+    if ($use_user_hash) {
+      // This is a private reply-to address, check that the user hash is
+      // correct.
+      $check_phid = $user->getPHID();
+    } else {
+      // This is a public reply-to address, check that the object hash is
+      // correct.
+      $check_phid = $receiver->getPHID();
+    }
+
+    $expect_hash = self::computeMailHash($receiver->getMailKey(), $check_phid);
     if ($expect_hash != $hash) {
       return $this->setMessage("Invalid mail hash!")->save();
     }
@@ -147,5 +206,27 @@ class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     return substr($hash, 0, 16);
   }
 
+  /**
+   * Strip an email address down to the actual user@domain.tld part if
+   * necessary, since sometimes it will have formatting like
+   * '"Abraham Lincoln" <alincoln@logcab.in>'.
+   */
+  private function getRawEmailAddress($address) {
+    $matches = null;
+    $ok = preg_match('/<(.*)>/', $address, $matches);
+    if ($ok) {
+      $address = $matches[1];
+    }
+    return $address;
+  }
+
+  private function lookupPublicUser() {
+    $from = idx($this->headers, 'from');
+    $from = $this->getRawEmailAddress($from);
+
+    return id(new PhabricatorUser())->loadOneWhere(
+      'email = %s',
+      $from);
+  }
 
 }

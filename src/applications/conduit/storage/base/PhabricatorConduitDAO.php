@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group conduit
+ */
 abstract class PhabricatorConduitDAO extends PhabricatorLiskDAO {
 
   public function getApplicationName() {

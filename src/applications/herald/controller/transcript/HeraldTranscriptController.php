@@ -42,40 +42,45 @@ class HeraldTranscriptController extends HeraldController {
       throw new Exception('Uknown transcript!');
     }
 
-    $field_names = HeraldFieldConfig::getFieldMap();
-    $condition_names = HeraldConditionConfig::getConditionMap();
-    $action_names = HeraldActionConfig::getActionMap();
-
     require_celerity_resource('herald-test-css');
-
-    $filter = $this->getFilterPHIDs();
-    $this->filterTranscript($xscript, $filter);
-    $phids = array_merge($filter, $this->getTranscriptPHIDs($xscript));
-    $phids = array_unique($phids);
-    $phids = array_filter($phids);
-
-    $handles = id(new PhabricatorObjectHandleData($phids))
-      ->loadHandles();
-    $this->handles = $handles;
-
-    $object_xscript = $xscript->getObjectTranscript();
 
     $nav = $this->buildSideNav();
 
-    $apply_xscript_panel = $this->buildApplyTranscriptPanel(
-      $xscript);
-    $nav->appendChild($apply_xscript_panel);
+    $object_xscript = $xscript->getObjectTranscript();
+    if (!$object_xscript) {
+      $notice = id(new AphrontErrorView())
+        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+        ->setTitle('Old Transcript')
+        ->appendChild(
+          '<p>Details of this transcript have been garbage collected.</p>');
+      $nav->appendChild($notice);
+    } else {
+      $filter = $this->getFilterPHIDs();
+      $this->filterTranscript($xscript, $filter);
+      $phids = array_merge($filter, $this->getTranscriptPHIDs($xscript));
+      $phids = array_unique($phids);
+      $phids = array_filter($phids);
 
-    $action_xscript_panel = $this->buildActionTranscriptPanel(
-      $xscript);
-    $nav->appendChild($action_xscript_panel);
+      $handles = id(new PhabricatorObjectHandleData($phids))
+        ->loadHandles();
+      $this->handles = $handles;
 
-    $object_xscript_panel = $this->buildObjectTranscriptPanel(
-      $xscript);
-    $nav->appendChild($object_xscript_panel);
+      $apply_xscript_panel = $this->buildApplyTranscriptPanel(
+        $xscript);
+      $nav->appendChild($apply_xscript_panel);
+
+      $action_xscript_panel = $this->buildActionTranscriptPanel(
+        $xscript);
+      $nav->appendChild($action_xscript_panel);
+
+      $object_xscript_panel = $this->buildObjectTranscriptPanel(
+        $xscript);
+      $nav->appendChild($object_xscript_panel);
+    }
 
 /*
 
+  TODO
 
     $notice = null;
     if ($xscript->getDryRun()) {
@@ -84,30 +89,6 @@ class HeraldTranscriptController extends HeraldController {
           This was a dry run to test Herald rules, no actions were executed.
         </tools:notice>;
     }
-
-    if (!$object_xscript) {
-      $notice =
-        <x:frag>
-          <tools:notice title="Old Transcript">
-            Details of this transcript have been discarded. Full transcripts
-            are retained for 30 days.
-          </tools:notice>
-          {$notice}
-        </x:frag>;
-    }
-
-
-    return
-      <herald:standard-page title="Transcript">
-        <div style="padding: 1em;">
-          <tools:side-nav items={$this->renderNavItems()}>
-            {$notice}
-            {$apply_xscript_markup}
-            {$rule_table}
-            {$object_xscript_table}
-          </tools:side-nav>
-        </div>
-      </herald:standard-page>;
 */
 
     return $this->buildStandardPageResponse(
@@ -264,7 +245,7 @@ class HeraldTranscriptController extends HeraldController {
     foreach ($xscript->getApplyTranscripts() as $id => $apply_xscript) {
       $rule_id = $apply_xscript->getRuleID();
       if ($filter_owned) {
-        if (!$rule_xscripts[$rule_id]) {
+        if (empty($rule_xscripts[$rule_id])) {
           // No associated rule so you can't own this effect.
           continue;
         }

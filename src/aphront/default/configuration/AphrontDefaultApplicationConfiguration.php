@@ -330,6 +330,10 @@ class AphrontDefaultApplicationConfiguration
         'delete/(?P<id>\d+)/$'
           => 'PhabricatorCountdownDeleteController'
       ),
+
+      '/feed/' => array(
+        '$' => 'PhabricatorFeedStreamController',
+      ),
     );
   }
 

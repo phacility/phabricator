@@ -12,6 +12,7 @@
     "diffusion" : "Diffusion (Repository Browser)",
     "maniphest" : "Maniphest (Task Tracking)",
     "herald" : "Herald (Notifications)",
+    "conduit" : "Conduit (Phabricator HTTP API)",
     "celerity" : "Celerity (CSS/JS Management)",
     "aphront" : "Aphront (Web Stack)",
     "console" : "DarkConsole (Debugging Console)",

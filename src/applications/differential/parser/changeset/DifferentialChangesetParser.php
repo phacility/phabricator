@@ -27,7 +27,6 @@ class DifferentialChangesetParser {
   protected $parsedHunk   = false;
 
   protected $filename     = null;
-  protected $filetype     = null;
   protected $missingOld   = array();
   protected $missingNew   = array();
 
@@ -161,10 +160,7 @@ class DifferentialChangesetParser {
 
   public function setFilename($filename) {
     $this->filename = $filename;
-    if (strpos($filename, '.', 1) !== false) {
-      $parts = explode('.', $filename);
-      $this->filetype = end($parts);
-    }
+    return $this;
   }
 
   public function setHandles(array $handles) {
@@ -341,6 +337,21 @@ class DifferentialChangesetParser {
         switch ($this->whitespaceMode) {
           case self::WHITESPACE_IGNORE_TRAILING:
             if (rtrim($o_desc['text']) == rtrim($n_desc['text'])) {
+              if ($o_desc['type']) {
+                // If we're converting this into an unchanged line because of
+                // a trailing whitespace difference, mark it as a whitespace
+                // change so we can show "This file was modified only by
+                // adding or removing trailing whitespace." instead of
+                // "This file was not modified.".
+                $whitelines = true;
+              }
+              $similar = true;
+            }
+            break;
+          default:
+            // In this case, the lines are similar if there is no change type
+            // (that is, just trust the diff algorithm).
+            if (!$o_desc['type']) {
               $similar = true;
             }
             break;
@@ -349,7 +360,6 @@ class DifferentialChangesetParser {
           $o_desc['type'] = null;
           $n_desc['type'] = null;
           $skip_intra[count($old)] = true;
-          $whitelines = true;
         } else {
           $changed = true;
         }
@@ -700,7 +710,7 @@ class DifferentialChangesetParser {
     foreach ($vector as $ii => $char) {
       $result[] = $char;
       if (isset($break_here[$ii])) {
-        $result[] = "<span class=\"over-the-line\">!</span><br />";
+        $result[] = "<span class=\"over-the-line\">\xE2\xAC\x85</span><br />";
       }
     }
 
@@ -709,7 +719,7 @@ class DifferentialChangesetParser {
 
   protected function getHighlightFuture($corpus) {
     return $this->highlightEngine->getHighlightFuture(
-      $this->filetype,
+      $this->highlightEngine->getLanguageFromFilename($this->filename),
       $corpus);
   }
 
@@ -744,24 +754,38 @@ class DifferentialChangesetParser {
         $changeset->getFileType() == DifferentialChangeType::FILE_SYMLINK) {
       if ($skip_cache || !$this->loadCache()) {
 
+        $ignore_all = ($this->whitespaceMode == self::WHITESPACE_IGNORE_ALL);
+
         // The "ignore all whitespace" algorithm depends on rediffing the
         // files, and we currently need complete representations of both
         // files to do anything reasonable. If we only have parts of the files,
         // don't use the "ignore all" algorithm.
-        $can_use_ignore_all = true;
-        $hunks = $changeset->getHunks();
-        if (count($hunks) !== 1) {
-          $can_use_ignore_all = false;
-        } else {
-          $first_hunk = reset($hunks);
-          if ($first_hunk->getOldOffset() != 1 ||
-              $first_hunk->getNewOffset() != 1) {
-            $can_use_ignore_all = false;
+        if ($ignore_all) {
+          $hunks = $changeset->getHunks();
+          if (count($hunks) !== 1) {
+            $ignore_all = false;
+          } else {
+            $first_hunk = reset($hunks);
+            if ($first_hunk->getOldOffset() != 1 ||
+                $first_hunk->getNewOffset() != 1) {
+              $ignore_all = false;
+            }
           }
         }
 
-        if ($this->whitespaceMode == self::WHITESPACE_IGNORE_ALL &&
-            $can_use_ignore_all) {
+        if ($ignore_all) {
+          $old_file = $changeset->makeOldFile();
+          $new_file = $changeset->makeNewFile();
+          if ($old_file == $new_file) {
+            // If the old and new files are exactly identical, the synthetic
+            // diff below will give us nonsense and whitespace modes are
+            // irrelevant anyway. This occurs when you, e.g., copy a file onto
+            // itself in Subversion (see T271).
+            $ignore_all = false;
+          }
+        }
+
+        if ($ignore_all) {
 
           // Huge mess. Generate a "-bw" (ignore all whitespace changes) diff,
           // parse it out, and then play a shell game with the parsed format
@@ -773,8 +797,8 @@ class DifferentialChangesetParser {
 
           $old_tmp = new TempFile();
           $new_tmp = new TempFile();
-          Filesystem::writeFile($old_tmp, $changeset->makeOldFile());
-          Filesystem::writeFile($new_tmp, $changeset->makeNewFile());
+          Filesystem::writeFile($old_tmp, $old_file);
+          Filesystem::writeFile($new_tmp, $new_file);
           list($err, $diff) = exec_manual(
             'diff -bw -U65535 %s %s       ',
             $old_tmp,
@@ -849,10 +873,7 @@ EOSYNTHETIC;
     $this->isTopLevel = (($range_start === null) && ($range_len === null));
 
 
-    $this->highlightEngine = new PhutilDefaultSyntaxHighlighterEngine();
-    $this->highlightEngine->setConfig(
-      'pygments.enabled',
-      PhabricatorEnv::getEnvConfig('pygments.enabled'));
+    $this->highlightEngine = PhabricatorSyntaxHighlighter::newEngine();
 
     $this->tryCacheStuff();
 

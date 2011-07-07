@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group conduit
+ */
 class ConduitAPI_conduit_ping_Method extends ConduitAPIMethod {
 
   public function shouldRequireAuthentication() {

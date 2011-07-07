@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group maniphest
+ */
 class ManiphestDAO extends PhabricatorLiskDAO {
 
   public function getApplicationName() {

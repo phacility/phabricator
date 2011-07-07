@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group conduit
+ */
 class ConduitAPI_user_find_Method extends ConduitAPIMethod {
 
   public function getMethodDescription() {

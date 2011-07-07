@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group conduit
+ */
 class ConduitAPI_conduit_getcertificate_Method extends ConduitAPIMethod {
 
   public function shouldRequireAuthentication() {
@@ -29,6 +32,7 @@ class ConduitAPI_conduit_getcertificate_Method extends ConduitAPIMethod {
   public function defineParamTypes() {
     return array(
       'token' => 'required string',
+      'host'  => 'required string',
     );
   }
 
@@ -46,6 +50,7 @@ class ConduitAPI_conduit_getcertificate_Method extends ConduitAPIMethod {
   }
 
   protected function execute(ConduitAPIRequest $request) {
+    $this->validateHost($request->getValue('host'));
 
     $failed_attempts = PhabricatorUserLog::loadRecentEventsFromThisIP(
       PhabricatorUserLog::ACTION_CONDUIT_CERTIFICATE_FAILURE,

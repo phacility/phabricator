@@ -115,7 +115,7 @@ JX.install('HeraldRuleEditor', {
         this._config.actions[k][1] = this._getActionTarget(k);
       }
 
-      rule.value = JX.JSON.serialize({
+      rule.value = JX.JSON.stringify({
         conditions: this._config.conditions,
         actions: this._config.actions
       });

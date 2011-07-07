@@ -20,7 +20,8 @@ class PhabricatorPeopleListController extends PhabricatorPeopleController {
 
   public function processRequest() {
     $request = $this->getRequest();
-    $is_admin = $request->getUser()->getIsAdmin();
+    $viewer = $request->getUser();
+    $is_admin = $viewer->getIsAdmin();
 
     $user = new PhabricatorUser();
 
@@ -53,8 +54,8 @@ class PhabricatorPeopleListController extends PhabricatorPeopleController {
       }
 
       $rows[] = array(
-        phabricator_date($user->getDateCreated(), $user),
-        phabricator_time($user->getDateCreated(), $user),
+        phabricator_date($user->getDateCreated(), $viewer),
+        phabricator_time($user->getDateCreated(), $viewer),
         phutil_render_tag(
           'a',
           array(

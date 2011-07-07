@@ -16,6 +16,12 @@
  * limitations under the License.
  */
 
+/**
+ * Indirection layer which provisions for a terrifying future where we need to
+ * build multiple resource responses per page.
+ *
+ * @group celerity
+ */
 final class CelerityAPI {
 
   private static $response;
@@ -28,17 +34,3 @@ final class CelerityAPI {
   }
 
 }
-
-function require_celerity_resource($symbol) {
-  $response = CelerityAPI::getStaticResourceResponse();
-  $response->requireResource($symbol);
-}
-
-function celerity_generate_unique_node_id() {
-  static $uniq = 0;
-  $response = CelerityAPI::getStaticResourceResponse();
-  $block = $response->getMetadataBlock();
-
-  return 'UQ'.$block.'_'.($uniq++);
-}
-

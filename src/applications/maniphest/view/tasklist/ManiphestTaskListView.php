@@ -16,7 +16,10 @@
  * limitations under the License.
  */
 
-class ManiphestTaskListView extends AphrontView {
+/**
+ * @group maniphest
+ */
+class ManiphestTaskListView extends ManiphestView {
 
   private $tasks;
   private $handles;

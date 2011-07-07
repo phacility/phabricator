@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group conduit
+ */
 abstract class ConduitAPIMethod {
 
   abstract public function getMethodDescription();
@@ -61,6 +64,31 @@ abstract class ConduitAPIMethod {
     }
     $method_fragment = $match[1];
     return str_replace('_', '.', $method_fragment);
+  }
+
+  protected function validateHost($host) {
+    if (!$host) {
+      // If the client doesn't send a host key, don't complain. We should in
+      // the future, but this change isn't severe enough to bump the protocol
+      // version.
+
+      // TODO: Remove this once the protocol version gets bumped past 2 (i.e.,
+      // require the host key be present and valid).
+      return;
+    }
+
+    $host = new PhutilURI($host);
+    $host->setPath('/');
+    $host = (string)$host;
+
+    $self = PhabricatorEnv::getProductionURI('/');
+    if ($self !== $host) {
+      throw new Exception(
+        "Your client is connecting to this install as '{$host}', but it is ".
+        "configured as '{$self}'. The client and server must use the exact ".
+        "same URI to identify the install. Edit your .arcconfig or ".
+        "phabricator/conf so they agree on the URI for the install.");
+    }
   }
 
 }

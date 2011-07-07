@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group maniphest
+ */
 class ManiphestTaskListController extends ManiphestController {
 
   const DEFAULT_PAGE_SIZE = 1000;
@@ -33,23 +36,31 @@ class ManiphestTaskListController extends ManiphestController {
     $uri = $request->getRequestURI();
 
     if ($request->isFormPost()) {
-      $phid_arr = $request->getArr('view_user');
-      $view_target = head($phid_arr);
-      return id(new AphrontRedirectResponse())
-        ->setURI($request->getRequestURI()->alter('phid', $view_target));
-    }
+      // Redirect to GET so URIs can be copy/pasted.
 
+      $user_phids = $request->getArr('set_users');
+      $proj_phids = $request->getArr('set_projects');
+      $user_phids = implode(',', $user_phids);
+      $proj_phids = implode(',', $proj_phids);
+      $user_phids = nonempty($user_phids, null);
+      $proj_phids = nonempty($proj_phids, null);
+
+      $uri = $request->getRequestURI()
+        ->alter('users', $user_phids)
+        ->alter('projects', $proj_phids);
+
+      return id(new AphrontRedirectResponse())->setURI($uri);
+    }
 
     $views = array(
       'User Tasks',
-      'action'    => 'Assigned',
-      'created'   => 'Created',
-      'triage'    => 'Need Triage',
-//      'touched'   => 'Touched',
+      'action'     => 'Assigned',
+      'created'    => 'Created',
+      'subscribed' => 'Subscribed',
+      'triage'     => 'Need Triage',
       '<hr />',
       'All Tasks',
       'alltriage'   => 'Need Triage',
-      'unassigned'  => 'Unassigned',
       'all'         => 'All Tasks',
     );
 
@@ -60,6 +71,7 @@ class ManiphestTaskListController extends ManiphestController {
     $has_filter = array(
       'action' => true,
       'created' => true,
+      'subscribed' => true,
       'triage' => true,
     );
 
@@ -77,7 +89,7 @@ class ManiphestTaskListController extends ManiphestController {
           phutil_render_tag(
             'a',
             array(
-              'href' => $uri,
+              'href' => $uri->alter('page', null),
               'class' => ($this->view == $view)
                 ? 'aphront-side-nav-selected'
                 : null,
@@ -90,13 +102,26 @@ class ManiphestTaskListController extends ManiphestController {
     list($grouping, $group_links) = $this->renderGroupLinks();
     list($order, $order_links) = $this->renderOrderLinks();
 
-    $view_phid = nonempty($request->getStr('phid'), $user->getPHID());
+    $user_phids = $request->getStr('users');
+    if (strlen($user_phids)) {
+      $user_phids = explode(',', $user_phids);
+    } else {
+      $user_phids = array($user->getPHID());
+    }
+
+    $project_phids = $request->getStr('projects');
+    if (strlen($project_phids)) {
+      $project_phids = explode(',', $project_phids);
+    } else {
+      $project_phids = array();
+    }
 
     $page = $request->getInt('page');
     $page_size = self::DEFAULT_PAGE_SIZE;
 
     list($tasks, $handles, $total_count) = $this->loadTasks(
-      $view_phid,
+      $user_phids,
+      $project_phids,
       array(
         'status'  => $status_map,
         'group'   => $grouping,
@@ -105,23 +130,33 @@ class ManiphestTaskListController extends ManiphestController {
         'limit'   => $page_size,
       ));
 
-
     $form = id(new AphrontFormView())
-      ->setUser($user);
+      ->setUser($user)
+      ->setAction($request->getRequestURI());
 
     if (isset($has_filter[$this->view])) {
+      $tokens = array();
+      foreach ($user_phids as $phid) {
+        $tokens[$phid] = $handles[$phid]->getFullName();
+      }
       $form->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setLimit(1)
           ->setDatasource('/typeahead/common/searchowner/')
-          ->setName('view_user')
-          ->setLabel('View User')
-          ->setCaption('Use "upforgrabs" to find unassigned tasks.')
-          ->setValue(
-            array(
-              $view_phid => $handles[$view_phid]->getFullName(),
-            )));
+          ->setName('set_users')
+          ->setLabel('Users')
+          ->setValue($tokens));
     }
+
+    $tokens = array();
+    foreach ($project_phids as $phid) {
+      $tokens[$phid] = $handles[$phid]->getFullName();
+    }
+    $form->appendChild(
+      id(new AphrontFormTokenizerControl())
+        ->setDatasource('/typeahead/common/projects/')
+        ->setName('set_projects')
+        ->setLabel('Projects')
+        ->setValue($tokens));
 
     $form
       ->appendChild(
@@ -136,6 +171,10 @@ class ManiphestTaskListController extends ManiphestController {
         id(new AphrontFormToggleButtonsControl())
           ->setLabel('Order')
           ->setValue($order_links));
+
+    $form->appendChild(
+      id(new AphrontFormSubmitControl())
+        ->setValue('Filter Tasks'));
 
     $filter = new AphrontListFilterView();
     $filter->addButton(
@@ -209,141 +248,74 @@ class ManiphestTaskListController extends ManiphestController {
       ));
   }
 
-  private function loadTasks($view_phid, array $dict) {
-    $phids = array($view_phid);
+  private function loadTasks(
+    array $user_phids,
+    array $project_phids,
+    array $dict) {
 
-    $include_upforgrabs = false;
-    foreach ($phids as $key => $phid) {
-      if ($phid == ManiphestTaskOwner::OWNER_UP_FOR_GRABS) {
-        unset($phids[$key]);
-        $include_upforgrabs = true;
-      }
-    }
-
-    $task = new ManiphestTask();
-
-    $argv = array();
+    $query = new ManiphestTaskQuery();
+    $query->withProjects($project_phids);
 
     $status = $dict['status'];
     if (!empty($status['open']) && !empty($status['closed'])) {
-      $status_clause = '1 = 1';
+      $query->withStatus(ManiphestTaskQuery::STATUS_ANY);
     } else if (!empty($status['open'])) {
-      $status_clause = 'status = %d';
-      $argv[] = 0;
+      $query->withStatus(ManiphestTaskQuery::STATUS_OPEN);
     } else {
-      $status_clause = 'status > %d';
-      $argv[] = 0;
+      $query->withStatus(ManiphestTaskQuery::STATUS_CLOSED);
     }
 
-    $extra_clause = '1 = 1';
     switch ($this->view) {
       case 'action':
-        $parts = array();
-        if ($phids) {
-          $parts[] = 'ownerPHID in (%Ls)';
-          $argv[] = $phids;
-        }
-        if ($include_upforgrabs) {
-          $parts[] = 'ownerPHID IS NULL';
-        }
-        $extra_clause = '('.implode(' OR ', $parts).')';
+        $query->withOwners($user_phids);
         break;
       case 'created':
-        $parts = array();
-        if ($phids) {
-          $parts[] = 'authorPHID in (%Ls)';
-          $argv[] = $phids;
-        }
-        if ($include_upforgrabs) {
-          // This should be impossible since every task is supposed to have a
-          // valid author, but we might as well run the query.
-          $parts[] = 'authorPHID IS NULL';
-        }
-        $extra_clause = '('.implode(' OR ', $parts).')';
+        $query->withAuthors($user_phids);
+        break;
+      case 'subscribed':
+        $query->withSubscribers($user_phids);
         break;
       case 'triage':
-        $parts = array();
-        if ($phids) {
-          $parts[] = 'ownerPHID in (%Ls)';
-          $argv[] = $phids;
-        }
-        if ($include_upforgrabs) {
-          $parts[] = 'ownerPHID IS NULL';
-        }
-        $extra_clause = '('.implode(' OR ', $parts).') AND priority = %d';
-        $argv[] = ManiphestTaskPriority::PRIORITY_TRIAGE;
+        $query->withOwners($user_phids);
+        $query->withPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
         break;
       case 'alltriage':
-        $extra_clause = 'priority = %d';
-        $argv[] = ManiphestTaskPriority::PRIORITY_TRIAGE;
-        break;
-      case 'unassigned':
-        $extra_clause = 'ownerPHID is NULL';
+        $query->withPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
         break;
       case 'all':
         break;
     }
 
-    $order = array();
-    switch ($dict['group']) {
-      case 'priority':
-        $order[] = 'priority';
-        break;
-      case 'owner':
-        $order[] = 'ownerOrdering';
-        break;
-      case 'status':
-        $order[] = 'status';
-        break;
-    }
+    $order_map = array(
+      'priority'  => ManiphestTaskQuery::ORDER_PRIORITY,
+      'created'   => ManiphestTaskQuery::ORDER_CREATED,
+    );
+    $query->setOrderBy(
+      idx(
+        $order_map,
+        $dict['order'],
+        ManiphestTaskQuery::ORDER_MODIFIED));
 
-    switch ($dict['order']) {
-      case 'priority':
-        $order[] = 'priority';
-        $order[] = 'dateModified';
-        break;
-      case 'created':
-        $order[] = 'id';
-        break;
-      default:
-        $order[] = 'dateModified';
-        break;
-    }
+    $group_map = array(
+      'priority'  => ManiphestTaskQuery::GROUP_PRIORITY,
+      'owner'     => ManiphestTaskQuery::GROUP_OWNER,
+      'status'    => ManiphestTaskQuery::GROUP_STATUS,
+    );
+    $query->setGroupBy(
+      idx(
+        $group_map,
+        $dict['group'],
+        ManiphestTaskQuery::GROUP_NONE));
 
-    $order = array_unique($order);
+    $query->setCalculateRows(true);
+    $query->setLimit($dict['limit']);
+    $query->setOffset($dict['offset']);
 
-    foreach ($order as $k => $column) {
-      switch ($column) {
-        case 'ownerOrdering':
-          $order[$k] = "{$column} ASC";
-          break;
-        default:
-          $order[$k] = "{$column} DESC";
-          break;
-      }
-    }
-
-    $order = implode(', ', $order);
-
-    $offset = (int)idx($dict, 'offset', 0);
-    $limit = (int)idx($dict, 'limit', self::DEFAULT_PAGE_SIZE);
-
-    $sql = "SELECT SQL_CALC_FOUND_ROWS * FROM %T WHERE ".
-           "({$status_clause}) AND ({$extra_clause}) ORDER BY {$order} ".
-           "LIMIT {$offset}, {$limit}";
-
-    array_unshift($argv, $task->getTableName());
-
-    $conn = $task->establishConnection('r');
-    $data = vqueryfx_all($conn, $sql, $argv);
-
-    $total_row_count = queryfx_one($conn, 'SELECT FOUND_ROWS() N');
-    $total_row_count = $total_row_count['N'];
-
-    $data = $task->loadAllFromArray($data);
+    $data = $query->execute();
+    $total_row_count = $query->getRowCount();
 
     $handle_phids = mpull($data, 'getOwnerPHID');
-    $handle_phids[] = $view_phid;
+    $handle_phids = array_merge($handle_phids, $project_phids, $user_phids);
     $handles = id(new PhabricatorObjectHandleData($handle_phids))
       ->loadHandles();
 

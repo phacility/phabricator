@@ -31,6 +31,10 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
     return $this->getDefaultPrivateReplyHandlerEmailAddress($handle, 'D');
   }
 
+  public function getPublicReplyHandlerEmailAddress() {
+    return $this->getDefaultPublicReplyHandlerEmailAddress('D');
+  }
+
   public function getReplyHandlerDomain() {
     return PhabricatorEnv::getEnvConfig(
       'metamta.differential.reply-handler-domain');

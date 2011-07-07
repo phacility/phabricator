@@ -70,3 +70,4 @@ You can get a list of launchable daemons with **phd list**:
   - **PhabricatorTaskmasterDaemon** runs a generic task queue; and
   - **PhabricatorRepository** daemons track repositories, descriptions are
     available in the @{article:Diffusion User Guide}.
+  - **PhabricatorGarbageCollectorDaemon** cleans up old logs and caches.

@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group conduit
+ */
 abstract class PhabricatorConduitController extends PhabricatorController {
 
   public function buildStandardPageResponse($view, array $data) {

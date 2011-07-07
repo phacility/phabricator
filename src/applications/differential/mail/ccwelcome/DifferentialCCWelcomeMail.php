@@ -30,6 +30,7 @@ class DifferentialCCWelcomeMail extends DifferentialReviewRequestMail {
     $body = array();
 
     $body[] = "{$actor} added you to the CC list for the revision \"{$name}\".";
+    $body[] = $this->renderReviewersLine();
     $body[] = null;
 
     $body[] = $this->renderReviewRequestBody();

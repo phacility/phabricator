@@ -16,7 +16,10 @@
  * limitations under the License.
  */
 
-final class ManiphestTaskStatus {
+/**
+ * @group maniphest
+ */
+final class ManiphestTaskStatus extends ManiphestConstants {
 
   const STATUS_OPEN               = 0;
   const STATUS_CLOSED_RESOLVED    = 1;

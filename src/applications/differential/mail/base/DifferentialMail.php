@@ -319,4 +319,12 @@ EOTEXT;
     return $this->heraldTranscriptURI;
   }
 
+  protected function renderHandleList(array $handles, array $phids) {
+    $names = array();
+    foreach ($phids as $phid) {
+      $names[] = $handles[$phid]->getName();
+    }
+    return implode(', ', $names);
+  }
+
 }

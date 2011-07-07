@@ -93,6 +93,12 @@ class HeraldRuleController extends HeraldController {
 
       $conditions = array();
       foreach ($data['conditions'] as $condition) {
+        if ($condition === null) {
+          // We manage this as a sparse array on the client, so may receive
+          // NULL if conditions have been removed.
+          continue;
+        }
+
         $obj = new HeraldCondition();
         $obj->setFieldName($condition[0]);
         $obj->setFieldCondition($condition[1]);
@@ -149,6 +155,11 @@ class HeraldRuleController extends HeraldController {
 
       $actions = array();
       foreach ($data['actions'] as $action) {
+        if ($action === null) {
+          // Sparse on the client; removals can give us NULLs.
+          continue;
+        }
+
         $obj = new HeraldAction();
         $obj->setAction($action[0]);
 

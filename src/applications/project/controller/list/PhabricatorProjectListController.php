@@ -43,38 +43,40 @@ class PhabricatorProjectListController
     $handles = id(new PhabricatorObjectHandleData($author_phids))
       ->loadHandles();
 
+    $project_phids = mpull($projects, 'getPHID');
+
+    $query = id(new ManiphestTaskQuery())
+      ->withProjects($project_phids)
+      ->withAnyProject(true)
+      ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
+      ->setLimit(PHP_INT_MAX);
+
+    $tasks = $query->execute();
+    $groups = array();
+    foreach ($tasks as $task) {
+      foreach ($task->getProjectPHIDs() as $phid) {
+        $groups[$phid][] = $task;
+      }
+    }
+
+
     $rows = array();
     foreach ($projects as $project) {
-      $profile = $profiles[$project->getPHID()];
-      $affiliations = $affil_groups[$project->getPHID()];
+      $phid = $project->getPHID();
 
-      $documents = new PhabricatorProjectTransactionSearch($project->getPHID());
-      // search all open documents by default
-      $documents->setSearchOptions();
-      $documents = $documents->executeSearch();
+      $profile = $profiles[$phid];
+      $affiliations = $affil_groups[$phid];
 
-      $documents_types = igroup($documents, 'documentType');
-      $tasks = idx(
-        $documents_types,
-        PhabricatorPHIDConstants::PHID_TYPE_TASK);
-      $tasks_amount = count($tasks);
-
-      // TODO: set up a relationship between the project and the arcanist's
-      //       project, to be able get the revisions.
-      $revisions = idx(
-        $documents_types,
-        PhabricatorPHIDConstants::PHID_TYPE_DREV);
-      $revisions_amount = count($revisions);
+      $group = idx($groups, $phid, array());
+      $task_count = count($group);
 
       $population = count($affiliations);
 
       $status = PhabricatorProjectStatus::getNameForStatus(
         $project->getStatus());
 
-      $blurb = nonempty(
-        $profile->getBlurb(),
-        'Oops!, nothing is known about this elusive project.');
-      $blurb = $this->textWrap($blurb, $columns = 100);
+      $blurb = $profile->getBlurb();
+      $blurb = phutil_utf8_shorten($blurb, $columns = 100);
 
       $rows[] = array(
         phutil_escape_html($project->getName()),
@@ -82,8 +84,12 @@ class PhabricatorProjectListController
         $handles[$project->getAuthorPHID()]->renderLink(),
         phutil_escape_html($population),
         phutil_escape_html($status),
-        phutil_escape_html($tasks_amount),
-        //  phutil_escape_html($revisions_amount),
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => '/maniphest/view/all/?projects='.$phid,
+          ),
+          phutil_escape_html($task_count)),
         phutil_render_tag(
           'a',
           array(
@@ -98,12 +104,11 @@ class PhabricatorProjectListController
     $table->setHeaders(
       array(
         'Project',
-        'Blurb',
+        'Description',
         'Mastermind',
         'Population',
         'Status',
         'Open Tasks',
-        // 'Open Revisions',
         '',
       ));
     $table->setColumnClasses(
@@ -112,9 +117,8 @@ class PhabricatorProjectListController
         'wide',
         '',
         'right',
-        'pri',
+        '',
         'right',
-        // 'right',
         'action',
       ));
 
@@ -128,19 +132,5 @@ class PhabricatorProjectListController
       array(
         'title' => 'Projects',
       ));
-  }
-
-  private function textWrap($text, $length) {
-    if (strlen($text) <= $length) {
-      return $text;
-    } else {
-      // TODO:  perhaps this could be improved, adding the ability to get the
-      //        last letter and suppress it, if it is one of [(,:; ,etc.
-      //        making "blurb" looks a little bit better. :)
-      $wrapped = wordwrap($text, $length, '__#END#__');
-      $end_position = strpos($wrapped, '__#END#__');
-      $wrapped = substr($text, 0, $end_position).'...';
-      return $wrapped;
-    }
   }
 }
