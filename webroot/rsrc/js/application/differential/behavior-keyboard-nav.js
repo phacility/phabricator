@@ -118,6 +118,13 @@ JX.behavior('differential-keyboard-navigation', function(config) {
     manager.focusOn(selected, extent);
   }
 
+  var is_haunted = false;
+  function haunt() {
+    is_haunted = !is_haunted;
+    var haunt = JX.$(config.haunt)
+    JX.DOM.alterClass(haunt, 'differential-haunted-panel', is_haunted);
+  }
+
   new JX.KeyboardShortcut('j', 'Jump to next change.')
     .setHandler(function(manager) {
       jump(manager, 1);
@@ -128,6 +135,10 @@ JX.behavior('differential-keyboard-navigation', function(config) {
     .setHandler(function(manager) {
       jump(manager, -1);
     })
+    .register();
+
+  new JX.KeyboardShortcut('z', 'Haunt / unhaunt comment panel.')
+    .setHandler(haunt)
     .register();
 
 });

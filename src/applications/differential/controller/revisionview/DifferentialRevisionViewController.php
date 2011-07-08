@@ -238,9 +238,17 @@ class DifferentialRevisionViewController extends DifferentialController {
 
     $this->updateViewTime($user->getPHID(), $revision->getPHID());
 
+    $pane_id = celerity_generate_unique_node_id();
+    Javelin::initBehavior(
+      'differential-keyboard-navigation',
+      array(
+        'haunt' => $pane_id,
+      ));
+
     return $this->buildStandardPageResponse(
       id(new DifferentialPrimaryPaneView())
         ->setLineWidthFromChangesets($changesets)
+        ->setID($pane_id)
         ->appendChild(
           $revision_detail->render().
           $comment_view->render().

@@ -136,8 +136,6 @@ class DifferentialChangesetListView extends AphrontView {
       ));
     }
 
-    Javelin::initBehavior('differential-keyboard-navigation', array());
-
     return
       '<div class="differential-review-stage" id="differential-review-stage">'.
         implode("\n", $output).

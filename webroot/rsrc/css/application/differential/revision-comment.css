@@ -17,6 +17,38 @@
   max-width: 1162px;
 }
 
+/* Spooky haunted panel which floats on the bottom of the screen. */
+.differential-haunted-panel .differential-add-comment-panel {
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  z-index: 5;
+  overflow: auto;
+  max-height: 375px;
+  max-width: none;
+
+  box-shadow: 0 0 4px #000;
+  -webkit-box-shadow: 0 0 4px #000;
+  -moz-box-shadow: 0 0 4px #000;
+
+}
+
+.differential-haunted-panel .differential-add-comment-panel h1 {
+  display: none;
+}
+
+.differential-haunted-panel .aphront-panel-preview {
+  display: none;
+}
+
+
+.differential-haunted-panel {
+  padding-bottom: 250px;
+}
+
+
 .differential-comment-list .anchor-target {
   background-color: #ffffdd;
   border-color: #ffff00;
@@ -172,3 +204,4 @@
   border-bottom: 1px solid #dddddd;
   color: #666666;
 }
+

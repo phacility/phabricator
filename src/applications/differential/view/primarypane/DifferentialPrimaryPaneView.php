@@ -19,9 +19,15 @@
 final class DifferentialPrimaryPaneView extends AphrontView {
 
   private $lineWidth = 80;
+  private $id;
 
   public function setLineWidth($width) {
     $this->lineWidth = $width;
+    return $this;
+  }
+
+  public function setID($id) {
+    $this->id = $id;
     return $this;
   }
 
@@ -67,6 +73,7 @@ final class DifferentialPrimaryPaneView extends AphrontView {
       array(
         'class' => 'differential-primary-pane',
         'style' => "max-width: {$width}px",
+        'id'    => $this->id,
       ),
       $style_tag.$this->renderChildren());
   }
