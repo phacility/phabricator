@@ -31,6 +31,7 @@ final class PhabricatorPHIDConstants {
   const PHID_TYPE_OPKG    = 'OPKG';
   const PHID_TYPE_PSTE    = 'PSTE';
   const PHID_TYPE_STRY    = 'STRY';
+  const PHID_TYPE_POLL    = 'POLL';
 
   public static function getTypes() {
     return array(
@@ -47,6 +48,7 @@ final class PhabricatorPHIDConstants {
       self::PHID_TYPE_PSTE,
       self::PHID_TYPE_OPKG,
       self::PHID_TYPE_STRY,
+      self::PHID_TYPE_POLL,
     );
   }
 }
