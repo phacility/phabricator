@@ -20,6 +20,7 @@ class PhabricatorFileDropUploadController extends PhabricatorFileController {
 
   public function processRequest() {
     $request = $this->getRequest();
+    $user = $request->getUser();
 
     $data = file_get_contents('php://input');
     $name = $request->getStr('name');
@@ -28,6 +29,7 @@ class PhabricatorFileDropUploadController extends PhabricatorFileController {
       $data,
       array(
         'name' => $request->getStr('name'),
+        'authorPHID' => $user->getPHID(),
       ));
 
     $view = new AphrontAttachedFileView();

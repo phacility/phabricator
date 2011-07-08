@@ -39,6 +39,7 @@ class PhabricatorFileMacroEditController extends PhabricatorFileController {
     $e_name = true;
 
     $request = $this->getRequest();
+    $user = $request->getUser();
     if ($request->isFormPost()) {
 
       $macro->setName($request->getStr('name'));
@@ -60,6 +61,7 @@ class PhabricatorFileMacroEditController extends PhabricatorFileController {
           idx($_FILES, 'file'),
           array(
             'name' => $request->getStr('name'),
+            'authorPHID' => $user->getPHID(),
           ));
         $macro->setFilePHID($file->getPHID());
 
