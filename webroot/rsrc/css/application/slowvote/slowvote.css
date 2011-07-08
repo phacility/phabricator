@@ -1,0 +1,60 @@
+/**
+ * @provides phabricator-slowvote-css
+ */
+
+.phabricator-slowvote-comments {
+  width: 100%;
+}
+
+.phabricator-slowvote-comments th {
+  width: 150px;
+  text-align: right;
+  padding: 6px 4px 6px;
+  white-space: nowrap;
+}
+
+.phabricator-slowvote-comments td {
+  vertical-align: top;
+  padding: 6px 2px;
+  border-bottom: 1px solid #d0d0d0;
+}
+
+.phabricator-slowvote-datestamp {
+  font-size: 9px;
+  font-family: "Verdana";
+  color: #666666;
+  margin-top: 1px;
+}
+
+.phabricator-slowvote-hr {
+  border: none;
+  height: 1px;
+  position: relative;
+  background: #c0c0c0;
+}
+
+.phabricator-slowvote-count {
+  float: right;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.phabricator-slowvote-label {
+  display: block;
+  width: 100%;
+  font-size: 14px;
+  font-weight: bold;
+  color: #222222;
+  text-align: left;
+  margin: 0px 0px 6px;
+  padding: 6px 4px;
+  background: #cccccc;
+  border-bottom: 1px solid #aaaaaa;
+  cursor: pointer;
+}
+
+.aphront-form-input .phabricator-slowvote-label input {
+  display: inline;
+  width: auto;
+  margin-right: 12px;
+}

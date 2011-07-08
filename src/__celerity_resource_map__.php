@@ -283,17 +283,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/herald/herald-test.css',
   ),
-  0 =>
-  array(
-    'uri' => '/res/1da00bfe/rsrc/js/javelin/lib/__tests__/URI.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-uri',
-      1 => 'javelin-php-serializer',
-    ),
-    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
-  ),
   'javelin-behavior' =>
   array(
     'uri' => '/res/b28adfa1/rsrc/js/javelin/lib/behavior.js',
@@ -486,6 +475,17 @@ celerity_register_resource_map(array(
       2 => 'javelin-dom',
     ),
     'disk' => '/rsrc/js/application/differential/behavior-show-all-comments.js',
+  ),
+  0 =>
+  array(
+    'uri' => '/res/1da00bfe/rsrc/js/javelin/lib/__tests__/URI.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-uri',
+      1 => 'javelin-php-serializer',
+    ),
+    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
   ),
   'javelin-behavior-differential-show-more' =>
   array(
@@ -1098,6 +1098,15 @@ celerity_register_resource_map(array(
       2 => 'javelin-request',
     ),
     'disk' => '/rsrc/js/application/core/ShapedRequest.js',
+  ),
+  'phabricator-slowvote-css' =>
+  array(
+    'uri' => '/res/2caefc66/rsrc/css/application/slowvote/slowvote.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/slowvote/slowvote.css',
   ),
   'phabricator-standard-page-view' =>
   array(

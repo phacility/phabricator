@@ -1,0 +1,27 @@
+@title Slowvote User Guide
+@group userguide
+
+Detailed dispute resolution manual.
+
+= Overview =
+
+Slowvote is a simple polling application for asking questions like "Where should
+we order pizza from?", "Are dogs better than cats?" and "What is the optimal
+strategic direction for our company?". You can use it to quickly get feedback
+from people in a lightweight, structured way.
+
+Slowvote is based on a Facebook application called Quickvote, which was pretty
+good when it was originally written but went through a couple of poorly executed
+rewrites and ended up being extremely slow and glitchy, often taking more than
+10 seconds to load. I originally designed and implemented the entire Slowvote
+application while waiting for a Quikvote to load.
+
+= Plurality vs Approval =
+
+When you create a poll, you can choose **plurality** or **approval** voting.
+
+In plurality voting, users choose one option. The winning option is the one with
+the most votes.
+
+In approval voting, users choose all the options they approve of. The winning
+option is the one the largest number of people accept.

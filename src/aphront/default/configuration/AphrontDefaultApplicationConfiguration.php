@@ -334,6 +334,12 @@ class AphrontDefaultApplicationConfiguration
       '/feed/' => array(
         '$' => 'PhabricatorFeedStreamController',
       ),
+
+      '/V(?P<id>\d+)$'  => 'PhabricatorSlowvotePollController',
+      '/vote/' => array(
+        '(?:view/(?P<view>\w+)/)?$' => 'PhabricatorSlowvoteListController',
+        'create/'   => 'PhabricatorSlowvoteCreateController',
+      ),
     );
   }
 
