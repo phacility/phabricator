@@ -34,35 +34,80 @@ class PhabricatorSlowvoteListController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $filters = array(
+    $views = array(
       self::VIEW_ALL      => 'All Slowvotes',
       self::VIEW_CREATED  => 'Created',
       self::VIEW_VOTED    => 'Voted In',
     );
 
-    $view = isset($filters[$this->view])
+    $view = isset($views[$this->view])
       ? $this->view
       : self::VIEW_ALL;
 
-    $side_nav = new AphrontSideNavView();
-    foreach ($filters as $key => $name) {
-      $side_nav->addNavItem(
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => '/vote/view/'.$key.'/',
-            'class' => ($view == $key) ? 'aphront-side-nav-selected' : null,
-          ),
-          phutil_escape_html($name)));
-    }
-
-
-    $poll = new PhabricatorSlowvotePoll();
-    $conn = $poll->establishConnection('r');
+    $side_nav = $this->renderSideNav($views, $view);
 
     $pager = new AphrontPagerView();
     $pager->setOffset($request->getInt('page'));
     $pager->setURI($request->getRequestURI(), 'page');
+
+    $polls = $this->loadPolls($pager, $view);
+
+    $phids = mpull($polls, 'getAuthorPHID');
+    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+
+    $rows = array();
+    foreach ($polls as $poll) {
+      $rows[] = array(
+        $handles[$poll->getAuthorPHID()]->renderLink(),
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => '/V'.$poll->getID(),
+          ),
+          phutil_escape_html('V'.$poll->getID().' '.$poll->getQuestion())),
+        phabricator_date($poll->getDateCreated(), $user),
+        phabricator_time($poll->getDateCreated(), $user),
+      );
+    }
+
+    $table = new AphrontTableView($rows);
+    $table->setColumnClasses(
+      array(
+        '',
+        'pri wide',
+        '',
+        'right',
+      ));
+    $table->setHeaders(
+      array(
+        'Author',
+        'Poll',
+        'Date',
+        'Time',
+      ));
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader($this->getTableHeader($view));
+    $panel->setCreateButton('Create Slowvote', '/vote/create/');
+    $panel->appendChild($table);
+    $panel->appendChild($pager);
+
+    $side_nav->appendChild($panel);
+
+    return $this->buildStandardPageResponse(
+      $side_nav,
+      array(
+        'title' => 'Slowvotes',
+      ));
+  }
+
+  private function loadPolls(AphrontPagerView $pager, $view) {
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $poll = new PhabricatorSlowvotePoll();
+
+    $conn = $poll->establishConnection('r');
     $offset = $pager->getOffset();
     $limit = $pager->getPageSize() + 1;
 
@@ -104,43 +149,28 @@ class PhabricatorSlowvoteListController
     }
 
     $data = $pager->sliceResults($data);
-    $polls = $poll->loadAllFromArray($data);
+    return $poll->loadAllFromArray($data);
+  }
 
-    $phids = mpull($polls, 'getAuthorPHID');
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
-
-    $rows = array();
-    foreach ($polls as $poll) {
-      $rows[] = array(
-        $handles[$poll->getAuthorPHID()]->renderLink(),
+  private function renderSideNav(array $views, $view) {
+    $side_nav = new AphrontSideNavView();
+    foreach ($views as $key => $name) {
+      $side_nav->addNavItem(
         phutil_render_tag(
           'a',
           array(
-            'href' => '/V'.$poll->getID(),
+            'href' => '/vote/view/'.$key.'/',
+            'class' => ($view == $key)
+              ? 'aphront-side-nav-selected'
+              : null,
           ),
-          phutil_escape_html('V'.$poll->getID().' '.$poll->getQuestion())),
-        phabricator_date($poll->getDateCreated(), $user),
-        phabricator_time($poll->getDateCreated(), $user),
-      );
+          phutil_escape_html($name)));
     }
+    return $side_nav;
+  }
 
-    $table = new AphrontTableView($rows);
-    $table->setColumnClasses(
-      array(
-        '',
-        'pri wide',
-        '',
-        'right',
-      ));
-    $table->setHeaders(
-      array(
-        'Author',
-        'Poll',
-        'Date',
-        'Time',
-      ));
-
-    $headers = array(
+  private function getTableHeader($view) {
+    static $headers = array(
       self::VIEW_ALL
         => 'Slowvotes Not Yet Consumed by the Ravages of Time',
       self::VIEW_CREATED
@@ -148,20 +178,7 @@ class PhabricatorSlowvoteListController
       self::VIEW_VOTED
         => 'Slowvotes Within Which You Express Your Mighty Opinion',
     );
-
-    $panel = new AphrontPanelView();
-    $panel->setHeader(idx($headers, $view));
-    $panel->setCreateButton('Create Slowvote', '/vote/create/');
-    $panel->appendChild($table);
-    $panel->appendChild($pager);
-
-    $side_nav->appendChild($panel);
-
-    return $this->buildStandardPageResponse(
-      $side_nav,
-      array(
-        'title' => 'Slowvotes',
-      ));
+    return idx($headers, $view);
   }
 
 }
