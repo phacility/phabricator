@@ -55,6 +55,8 @@ class PhabricatorPasteListController extends PhabricatorPasteController {
           ),
           phutil_escape_html($handle->getName())),
 
+        phutil_escape_html($paste->getLanguage()),
+
         phutil_render_tag(
           'a',
           array(
@@ -80,12 +82,14 @@ class PhabricatorPasteListController extends PhabricatorPasteController {
       array(
         'Paste ID',
         'Author',
+        'Language',
         'Title',
         'File',
       ));
 
     $table->setColumnClasses(
       array(
+        null,
         null,
         null,
         'wide pri',
