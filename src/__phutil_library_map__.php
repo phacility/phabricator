@@ -457,7 +457,6 @@ phutil_register_library_map(array(
     'PhabricatorProjectProfileController' => 'applications/project/controller/profile',
     'PhabricatorProjectProfileEditController' => 'applications/project/controller/profileedit',
     'PhabricatorProjectStatus' => 'applications/project/constants/status',
-    'PhabricatorProjectTransactionSearch' => 'applications/project/transactions/search',
     'PhabricatorRedirectController' => 'applications/base/controller/redirect',
     'PhabricatorRemarkupRuleDifferential' => 'infrastructure/markup/remarkup/markuprule/differential',
     'PhabricatorRemarkupRuleDiffusion' => 'infrastructure/markup/remarkup/markuprule/diffusion',

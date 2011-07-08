@@ -29,6 +29,7 @@ final class ManiphestTaskQuery {
   private $includeUnowned   = null;
   private $projectPHIDs     = array();
   private $subscriberPHIDs  = array();
+  private $anyProject       = false;
 
   private $status           = 'status-any';
   const STATUS_ANY          = 'status-any';
@@ -129,6 +130,11 @@ final class ManiphestTaskQuery {
     return $this->rowCount;
   }
 
+  public function withAnyProject($any_project) {
+    $this->anyProject = $any_project;
+    return $this;
+  }
+
   public function execute() {
 
     $task_dao = new ManiphestTask();
@@ -176,14 +182,18 @@ final class ManiphestTaskQuery {
       //    multiple times. We use GROUP BY to make them distinct again.
       //  - We want to treat the query as an intersection query, not a union
       //    query. We sum the project count and require it be the same as the
-      //    number of projects we're searching for.
+      //    number of projects we're searching for. (If 'anyProject' is set,
+      //    we do union instead.)
 
       $group = 'GROUP BY task.id';
-      $count = ', COUNT(1) projectCount';
-      $having = qsprintf(
-        $conn,
-        'HAVING projectCount = %d',
-        count($this->projectPHIDs));
+
+      if (!$this->anyProject) {
+        $count = ', COUNT(1) projectCount';
+        $having = qsprintf(
+          $conn,
+          'HAVING projectCount = %d',
+          count($this->projectPHIDs));
+      }
     }
 
     $order = $this->buildOrderClause($conn);

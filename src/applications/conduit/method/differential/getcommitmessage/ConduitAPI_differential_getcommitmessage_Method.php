@@ -74,9 +74,7 @@ class ConduitAPI_differential_getcommitmessage_Method extends ConduitAPIMethod {
 
         foreach ($fields as $field => $value) {
           if (isset($simple_fields[$field])) {
-            $message_data->overwriteFieldValue(
-              $simple_fields[$field],
-              $value);
+            $message_data->setField($simple_fields[$field], $value);
           } else {
             $overwrite = true;
             static $overwrite_map = array(
@@ -96,9 +94,7 @@ class ConduitAPI_differential_getcommitmessage_Method extends ConduitAPIMethod {
                 break;
             }
             if ($overwrite) {
-              $message_data->overwriteFieldValue(
-                $overwrite_map[$field],
-                $value);
+              $message_data->setField($overwrite_map[$field], $value);
             }
           }
         }

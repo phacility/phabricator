@@ -111,76 +111,127 @@ class PhabricatorProjectProfileController
        $profile->getBlurb(),
        '//Nothing is known about this elusive project.//');
 
-     $factory = new DifferentialMarkupEngineFactory();
-     $engine = $factory->newDifferentialCommentMarkupEngine();
-     $blurb = $engine->markupText($blurb);
+    $factory = new DifferentialMarkupEngineFactory();
+    $engine = $factory->newDifferentialCommentMarkupEngine();
+    $blurb = $engine->markupText($blurb);
 
-     $affiliations = $project->loadAffiliations();
+    $affiliations = $project->loadAffiliations();
 
-     $phids = array_merge(
-       array($project->getAuthorPHID()),
-       mpull($affiliations, 'getUserPHID'));
-     $handles = id(new PhabricatorObjectHandleData($phids))
-       ->loadHandles();
+    $phids = array_merge(
+      array($project->getAuthorPHID()),
+      mpull($affiliations, 'getUserPHID'));
+    $handles = id(new PhabricatorObjectHandleData($phids))
+      ->loadHandles();
 
-     $affiliated = array();
-     foreach ($affiliations as $affiliation) {
-       $user = $handles[$affiliation->getUserPHID()]->renderLink();
-       $role = phutil_escape_html($affiliation->getRole());
+    $affiliated = array();
+    foreach ($affiliations as $affiliation) {
+      $user = $handles[$affiliation->getUserPHID()]->renderLink();
+      $role = phutil_escape_html($affiliation->getRole());
 
-       $status = null;
-       if ($affiliation->getStatus() == 'former') {
-         $role = '<em>Former '.$role.'</em>';
-       }
+      $status = null;
+      if ($affiliation->getStatus() == 'former') {
+        $role = '<em>Former '.$role.'</em>';
+      }
 
-       $affiliated[] = '<li>'.$user.' &mdash; '.$role.$status.'</li>';
-     }
-     if ($affiliated) {
-       $affiliated = '<ul>'.implode("\n", $affiliated).'</ul>';
-     } else {
-       $affiliated = '<p><em>No one is affiliated with this project.</em></p>';
-     }
+      $affiliated[] = '<li>'.$user.' &mdash; '.$role.$status.'</li>';
+    }
+    if ($affiliated) {
+      $affiliated = '<ul>'.implode("\n", $affiliated).'</ul>';
+    } else {
+      $affiliated = '<p><em>No one is affiliated with this project.</em></p>';
+    }
 
-     $timestamp = phabricator_format_timestamp($project->getDateCreated());
-     $status = PhabricatorProjectStatus::getNameForStatus(
-       $project->getStatus());
+    $timestamp = phabricator_format_timestamp($project->getDateCreated());
+    $status = PhabricatorProjectStatus::getNameForStatus(
+      $project->getStatus());
 
-     $content =
-       '<div class="phabricator-profile-info-group">
-         <h1 class="phabricator-profile-info-header">Basic Information</h1>
-         <div class="phabricator-profile-info-pane">
-           <table class="phabricator-profile-info-table">
-             <tr>
-               <th>Creator</th>
-               <td>'.$handles[$project->getAuthorPHID()]->renderLink().'</td>
-             </tr>
-             <tr>
-               <th>Status</th>
-               <td><strong>'.phutil_escape_html($status).'</strong></td>
-             </tr>
-             <tr>
-               <th>Created</th>
-               <td>'.$timestamp.'</td>
-             </tr>
-             <tr>
-               <th>PHID</th>
-               <td>'.phutil_escape_html($project->getPHID()).'</td>
-             </tr>
-             <tr>
-               <th>Blurb</th>
-               <td>'.$blurb.'</td>
-             </tr>
-           </table>
-         </div>
-       </div>';
+    $content =
+      '<div class="phabricator-profile-info-group">
+        <h1 class="phabricator-profile-info-header">Basic Information</h1>
+        <div class="phabricator-profile-info-pane">
+          <table class="phabricator-profile-info-table">
+            <tr>
+              <th>Creator</th>
+              <td>'.$handles[$project->getAuthorPHID()]->renderLink().'</td>
+            </tr>
+            <tr>
+              <th>Status</th>
+              <td><strong>'.phutil_escape_html($status).'</strong></td>
+            </tr>
+            <tr>
+              <th>Created</th>
+              <td>'.$timestamp.'</td>
+            </tr>
+            <tr>
+              <th>PHID</th>
+              <td>'.phutil_escape_html($project->getPHID()).'</td>
+            </tr>
+            <tr>
+              <th>Blurb</th>
+              <td>'.$blurb.'</td>
+            </tr>
+          </table>
+        </div>
+      </div>';
 
-     $content .=
-       '<div class="phabricator-profile-info-group">
-         <h1 class="phabricator-profile-info-header">Resources</h1>
-         <div class="phabricator-profile-info-pane">'.
+    $content .=
+      '<div class="phabricator-profile-info-group">
+        <h1 class="phabricator-profile-info-header">Resources</h1>
+        <div class="phabricator-profile-info-pane">'.
          $affiliated.
-         '</div>
-       </div>';
+        '</div>
+      </div>';
+
+    $query = id(new ManiphestTaskQuery())
+      ->withProjects(array($project->getPHID()))
+      ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
+      ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
+      ->setLimit(10)
+      ->setCalculateRows(true);
+    $tasks = $query->execute();
+    $count = $query->getRowCount();
+
+    $phids = mpull($tasks, 'getOwnerPHID');
+    $phids = array_filter($phids);
+    $handles = id(new PhabricatorObjectHandleData($phids))
+      ->loadHandles();
+
+    $task_views = array();
+    foreach ($tasks as $task) {
+      $view = id(new ManiphestTaskSummaryView())
+        ->setTask($task)
+        ->setHandles($handles)
+        ->setUser($this->getRequest()->getUser());
+      $task_views[] = $view->render();
+    }
+
+    if (empty($tasks)) {
+      $task_views = '<em>No open tasks.</em>';
+    } else {
+      $task_views = implode('', $task_views);
+    }
+
+    $open = number_format($count);
+
+    $more_link = phutil_render_tag(
+      'a',
+      array(
+        'href' => '/maniphest/view/all/?projects='.$project->getPHID(),
+      ),
+      "View All Open Tasks \xC2\xBB");
+
+    $content .=
+      '<div class="phabricator-profile-info-group">
+        <h1 class="phabricator-profile-info-header">'.
+          "Open Tasks ({$open})".
+        '</h1>'.
+        '<div class="phabricator-profile-info-pane">'.
+          $task_views.
+          '<div class="phabricator-profile-info-pane-more-link">'.
+            $more_link.
+          '</div>'.
+        '</div>
+      </div>';
 
     return $content;
   }

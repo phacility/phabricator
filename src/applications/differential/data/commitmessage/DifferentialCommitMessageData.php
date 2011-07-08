@@ -66,14 +66,11 @@ class DifferentialCommitMessageData {
   public function prepare() {
     $revision = $this->revision;
 
-    $fields = array();
     if ($revision->getSummary()) {
-      $fields[] =
-        new DifferentialCommitMessageField('Summary', $revision->getSummary());
+      $this->setField('Summary', $revision->getSummary());
     }
 
-    $fields[] =
-      new DifferentialCommitMessageField('Test Plan', $revision->getTestPlan());
+    $this->setField('Test Plan', $revision->getTestPlan());
 
     $reviewer = null;
     $commenters = array();
@@ -97,9 +94,7 @@ class DifferentialCommitMessageData {
 
     if ($this->mode == self::MODE_AMEND) {
       if ($reviewer) {
-        $fields[] =
-          new DifferentialCommitMessageField('Reviewed By',
-                                             $handles[$reviewer]->getName());
+        $this->setField('Reviewed By', $handles[$reviewer]->getName());
       }
     }
 
@@ -109,50 +104,42 @@ class DifferentialCommitMessageData {
         $reviewer_names[] = $handles[$uid]->getName();
       }
       $reviewer_names = implode(', ', $reviewer_names);
-      $fields[] = new DifferentialCommitMessageField('Reviewers',
-                                                     $reviewer_names);
+      $this->setField('Reviewers', $reviewer_names);
     }
 
     $user_handles = array_select_keys($handles, $commenters);
     if ($user_handles) {
       $commenters = implode(', ', mpull($user_handles, 'getName'));
-      $fields[] = new DifferentialCommitMessageField('Commenters', $commenters);
+      $this->setField('Commenters', $commenters);
     }
 
     $cc_handles = array_select_keys($handles, $ccphids);
     if ($cc_handles) {
       $cc = implode(', ', mpull($cc_handles, 'getName'));
-      $fields[] = new DifferentialCommitMessageField('CC', $cc);
+      $this->setField('CC', $cc);
     }
 
     if ($revision->getRevertPlan()) {
-      $fields[] =
-        new DifferentialCommitMessageField('Revert Plan',
-                                           $revision->getRevertPlan());
+      $this->setField('Revert Plan', $revision->getRevertPlan());
     }
 
     if ($revision->getBlameRevision()) {
-      $fields[] =
-        new DifferentialCommitMessageField('Blame Revision',
-                                           $revision->getBlameRevision());
+      $this->setField('Blame Revision', $revision->getBlameRevision());
     }
 
     if ($this->mode == self::MODE_EDIT) {
       // In edit mode, include blank fields.
-      $fields += array(
-        new DifferentialCommitMessageField('Summary', ''),
-        new DifferentialCommitMessageField('Reviewers', ''),
-        new DifferentialCommitMessageField('CC', ''),
-        new DifferentialCommitMessageField('Revert Plan', ''),
-        new DifferentialCommitMessageField('Blame Revision', ''),
-      );
+      $blank_fields = array('Summary', 'Reviewers', 'CC', 'Revert Plan',
+                            'Blame Revision');
+      foreach ($blank_fields as $blank_field) {
+        if (!$this->getField($blank_field)) {
+          $this->setField($blank_field, '');
+        }
+      }
     }
 
-    $fields[] =
-      new DifferentialCommitMessageField('Title', $revision->getTitle());
-
-    $fields[] = new DifferentialCommitMessageField('Differential Revision',
-                                                   $revision->getID());
+    $this->setField('Title', $revision->getTitle());
+    $this->setField('Differential Revision', $revision->getID());
 
     // append custom commit message fields
     $modify_class = PhabricatorEnv::getEnvConfig(
@@ -162,14 +149,14 @@ class DifferentialCommitMessageData {
       $modifier = newv($modify_class, array($revision));
       $fields = $modifier->modifyFields($fields);
     }
-
-    $this->fields = $fields;
   }
 
-  public function overwriteFieldValue($name, $value) {
+  public function setField($name, $value) {
     $field = $this->getField($name);
     if ($field) {
       $field->setValue($value);
+    } else {
+      $this->fields[] = new DifferentialCommitMessageField($name, $value);
     }
     return $this;
   }
