@@ -122,7 +122,12 @@ class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
             // since we (ideally) want to keep the bot to Conduit calls...and
             // not call to Phabricator-specific stuff (like actually loading
             // the User object and fetching his/her username.)
-            $output[$paste['phid']] = 'P'.$paste['id'].': '.$paste['uri'].' - '.$paste['title'];
+            $output[$paste['phid']] = 'P'.$paste['id'].': '.$paste['uri'].' - '.
+              $paste['title'];
+
+            if ($paste['language']) {
+              $output[$paste['phid']] .= ' ('.$paste['language'].')';
+            }
           }
         }
 
