@@ -46,18 +46,6 @@ class PhabricatorSlowvotePollController
       'pollID = %d',
       $poll->getID());
 
-    switch ($poll->getMethod()) {
-      case PhabricatorSlowvotePoll::METHOD_PLURALITY:
-        $out_of_total = count($choices);
-        break;
-      case PhabricatorSlowvotePoll::METHOD_APPROVAL:
-        // Count unique respondents for approval votes.
-        $out_of_total = count(mpull($choices, null, 'getAuthorPHID'));
-        break;
-      default:
-        throw new Exception("Unknown poll method!");
-    }
-
     $choices_by_option = mgroup($choices, 'getOptionID');
     $comments_by_user = mpull($comments, null, 'getAuthorPHID');
     $choices_by_user = mgroup($choices, 'getAuthorPHID');
@@ -130,71 +118,10 @@ class PhabricatorSlowvotePollController
 
     $option_markup = array();
     foreach ($options as $option) {
-      $id = $option->getID();
-      switch ($poll->getMethod()) {
-        case PhabricatorSlowvotePoll::METHOD_PLURALITY:
-
-          // Render a radio button.
-
-          $selected_option = head($viewer_choices);
-          if ($selected_option) {
-            $selected = $selected_option->getOptionID();
-          } else {
-            $selected = null;
-          }
-
-          if ($selected == $id) {
-            $checked = "checked";
-          } else {
-            $checked = null;
-          }
-
-          $input = phutil_render_tag(
-            'input',
-            array(
-              'type'      => 'radio',
-              'name'      => 'vote[]',
-              'value'     => $id,
-              'checked'   => $checked,
-            ));
-          break;
-        case PhabricatorSlowvotePoll::METHOD_APPROVAL:
-
-          // Render a check box.
-
-          $checked = null;
-          foreach ($viewer_choices as $choice) {
-            if ($choice->getOptionID() == $id) {
-              $checked = 'checked';
-              break;
-            }
-          }
-
-          $input = phutil_render_tag(
-            'input',
-            array(
-              'type'    => 'checkbox',
-              'name'    => 'vote[]',
-              'checked' => $checked,
-              'value'   => $id,
-            ));
-          break;
-        default:
-          throw new Exception("Unknown poll method!");
-      }
-
-      if ($checked) {
-        $checked_class = 'phabricator-slowvote-checked';
-      } else {
-        $checked_class = null;
-      }
-
-      $option_markup[] = phutil_render_tag(
-        'label',
-        array(
-          'class' => 'phabricator-slowvote-label '.$checked_class,
-        ),
-        $input.phutil_escape_html($option->getName()));
+      $option_markup[] = $this->renderPollOption(
+        $poll,
+        $viewer_choices,
+        $option);
     }
     $option_markup = implode("\n", $option_markup);
 
@@ -219,85 +146,15 @@ class PhabricatorSlowvotePollController
         throw new Exception("Unknown poll method!");
     }
 
-    $can_see_responses = false;
-    $need_vote = false;
-    switch ($poll->getResponseVisibility()) {
-      case PhabricatorSlowvotePoll::RESPONSES_VISIBLE:
-        $can_see_responses = true;
-        break;
-      case PhabricatorSlowvotePoll::RESPONSES_VOTERS:
-        $can_see_responses = (bool)$viewer_choices;
-        $need_vote = true;
-        break;
-      case PhabricatorSlowvotePoll::RESPONSES_OWNER:
-        $can_see_responses = ($viewer_phid == $poll->getAuthorPHID());
-        break;
-    }
-
-    $result_markup = id(new AphrontFormLayoutView())
-      ->appendChild('<h1>Ongoing Deliberation</h1>');
-
-    if (!$can_see_responses) {
-      if ($need_vote) {
-        $reason = "You must vote to see the results.";
-      } else {
-        $reason = "The results are not public.";
-      }
-      $result_markup
-        ->appendChild(
-          '<p class="aphront-form-instructions"><em>'.$reason.'</em></p>');
-    } else {
-      foreach ($options as $option) {
-        $id = $option->getID();
-
-        $chosen = idx($choices_by_option, $id, array());
-        $users = array_select_keys($handles, mpull($chosen, 'getAuthorPHID'));
-        if ($users) {
-          $user_markup = array();
-          foreach ($users as $handle) {
-            $user_markup[] = $handle->renderLink();
-          }
-          $user_markup = implode('', $user_markup);
-        } else {
-          $user_markup = 'This option has failed to appeal to anyone.';
-        }
-
-        $comment_markup = $this->renderComments(
-          idx($comments_by_option, $id, array()),
-          $handles);
-
-        $display = sprintf(
-          '%d / %d (%d%%)',
-          number_format(count($chosen)),
-          number_format($out_of_total),
-          $out_of_total
-            ? round(100 * count($chosen) / $out_of_total)
-            : 0);
-
-        $result_markup->appendChild(
-          '<div>'.
-            '<div class="phabricator-slowvote-count">'.
-              $display.
-            '</div>'.
-            '<h1>'.phutil_escape_html($option->getName()).'</h1>'.
-            '<hr class="phabricator-slowvote-hr" />'.
-            $user_markup.
-            '<hr class="phabricator-slowvote-hr" />'.
-            $comment_markup.
-          '</div>');
-      }
-
-      if ($poll->getMethod() == PhabricatorSlowvotePoll::METHOD_APPROVAL &&
-          $comments) {
-        $comment_markup = $this->renderComments(
-          $comments,
-          $handles);
-        $result_markup->appendChild(
-          '<h1>Motions Proposed for Consideration</h1>');
-        $result_markup->appendChild($comment_markup);
-      }
-
-    }
+    $result_markup = $this->renderResultMarkup(
+      $poll,
+      $options,
+      $choices,
+      $comments,
+      $viewer_choices,
+      $choices_by_option,
+      $comments_by_option,
+      $handles);
 
     if ($viewer_choices) {
       $instructions =
@@ -387,4 +244,193 @@ class PhabricatorSlowvotePollController
     return $comment_markup;
   }
 
+  private function renderPollOption(
+    PhabricatorSlowvotePoll $poll,
+    array $viewer_choices,
+    PhabricatorSlowvoteOption $option) {
+
+    $id = $option->getID();
+    switch ($poll->getMethod()) {
+      case PhabricatorSlowvotePoll::METHOD_PLURALITY:
+
+        // Render a radio button.
+
+        $selected_option = head($viewer_choices);
+        if ($selected_option) {
+          $selected = $selected_option->getOptionID();
+        } else {
+          $selected = null;
+        }
+
+        if ($selected == $id) {
+          $checked = "checked";
+        } else {
+          $checked = null;
+        }
+
+        $input = phutil_render_tag(
+          'input',
+          array(
+            'type'      => 'radio',
+            'name'      => 'vote[]',
+            'value'     => $id,
+            'checked'   => $checked,
+          ));
+        break;
+      case PhabricatorSlowvotePoll::METHOD_APPROVAL:
+
+        // Render a check box.
+
+        $checked = null;
+        foreach ($viewer_choices as $choice) {
+          if ($choice->getOptionID() == $id) {
+            $checked = 'checked';
+            break;
+          }
+        }
+
+        $input = phutil_render_tag(
+          'input',
+          array(
+            'type'    => 'checkbox',
+            'name'    => 'vote[]',
+            'checked' => $checked,
+            'value'   => $id,
+          ));
+        break;
+      default:
+        throw new Exception("Unknown poll method!");
+    }
+
+    if ($checked) {
+      $checked_class = 'phabricator-slowvote-checked';
+    } else {
+      $checked_class = null;
+    }
+
+    return phutil_render_tag(
+      'label',
+      array(
+        'class' => 'phabricator-slowvote-label '.$checked_class,
+      ),
+      $input.phutil_escape_html($option->getName()));
+  }
+
+  private function renderVoteCount(
+    PhabricatorSlowvotePoll $poll,
+    array $choices,
+    array $chosen) {
+
+    switch ($poll->getMethod()) {
+      case PhabricatorSlowvotePoll::METHOD_PLURALITY:
+        $out_of_total = count($choices);
+        break;
+      case PhabricatorSlowvotePoll::METHOD_APPROVAL:
+        // Count unique respondents for approval votes.
+        $out_of_total = count(mpull($choices, null, 'getAuthorPHID'));
+        break;
+      default:
+        throw new Exception("Unknown poll method!");
+    }
+
+    return sprintf(
+      '%d / %d (%d%%)',
+      number_format(count($chosen)),
+      number_format($out_of_total),
+      $out_of_total
+        ? round(100 * count($chosen) / $out_of_total)
+        : 0);
+  }
+
+  private function renderResultMarkup(
+    PhabricatorSlowvotePoll $poll,
+    array $options,
+    array $choices,
+    array $comments,
+    array $viewer_choices,
+    array $choices_by_option,
+    array $comments_by_option,
+    array $handles) {
+
+    $viewer_phid = $this->getRequest()->getUser()->getPHID();
+
+    $can_see_responses = false;
+    $need_vote = false;
+    switch ($poll->getResponseVisibility()) {
+      case PhabricatorSlowvotePoll::RESPONSES_VISIBLE:
+        $can_see_responses = true;
+        break;
+      case PhabricatorSlowvotePoll::RESPONSES_VOTERS:
+        $can_see_responses = (bool)$viewer_choices;
+        $need_vote = true;
+        break;
+      case PhabricatorSlowvotePoll::RESPONSES_OWNER:
+        $can_see_responses = ($viewer_phid == $poll->getAuthorPHID());
+        break;
+    }
+
+    $result_markup = id(new AphrontFormLayoutView())
+      ->appendChild('<h1>Ongoing Deliberation</h1>');
+
+    if (!$can_see_responses) {
+      if ($need_vote) {
+        $reason = "You must vote to see the results.";
+      } else {
+        $reason = "The results are not public.";
+      }
+      $result_markup
+        ->appendChild(
+          '<p class="aphront-form-instructions"><em>'.$reason.'</em></p>');
+      return $result_markup;
+    }
+
+    foreach ($options as $option) {
+      $id = $option->getID();
+
+      $chosen = idx($choices_by_option, $id, array());
+      $users = array_select_keys($handles, mpull($chosen, 'getAuthorPHID'));
+      if ($users) {
+        $user_markup = array();
+        foreach ($users as $handle) {
+          $user_markup[] = $handle->renderLink();
+        }
+        $user_markup = implode('', $user_markup);
+      } else {
+        $user_markup = 'This option has failed to appeal to anyone.';
+      }
+
+      $comment_markup = $this->renderComments(
+        idx($comments_by_option, $id, array()),
+        $handles);
+
+      $vote_count = $this->renderVoteCount(
+        $poll,
+        $choices,
+        $chosen);
+
+      $result_markup->appendChild(
+        '<div>'.
+          '<div class="phabricator-slowvote-count">'.
+            $vote_count.
+          '</div>'.
+          '<h1>'.phutil_escape_html($option->getName()).'</h1>'.
+          '<hr class="phabricator-slowvote-hr" />'.
+          $user_markup.
+          '<hr class="phabricator-slowvote-hr" />'.
+          $comment_markup.
+        '</div>');
+    }
+
+    if ($poll->getMethod() == PhabricatorSlowvotePoll::METHOD_APPROVAL &&
+        $comments) {
+      $comment_markup = $this->renderComments(
+        $comments,
+        $handles);
+      $result_markup->appendChild(
+        '<h1>Motions Proposed for Consideration</h1>');
+      $result_markup->appendChild($comment_markup);
+    }
+
+    return $result_markup;
+  }
 }
