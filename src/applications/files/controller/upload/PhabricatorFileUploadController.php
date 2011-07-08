@@ -21,16 +21,21 @@ class PhabricatorFileUploadController extends PhabricatorFileController {
   public function processRequest() {
 
     $request = $this->getRequest();
-    if ($request->isFormPost()) {
-      $file = PhabricatorFile::newFromPHPUpload(
-        idx($_FILES, 'file'),
-        array(
-          'name' => $request->getStr('name'),
-        ));
+    $user = $request->getUser();
 
-      return id(new AphrontRedirectResponse())
-        ->setURI('/file/info/'.phutil_escape_uri($file->getPHID()).'/');
+    if ($request->isFormPost()) {
+      $files = $request->getArr('file');
+
+      if (count($files) > 1) {
+        return id(new AphrontRedirectResponse())
+          ->setURI('/file/?author='.phutil_escape_uri($user->getUserName()));
+      } else {
+        return id(new AphrontRedirectResponse())
+          ->setURI('/file/info/'.end($files).'/');
+      }
     }
+
+    $panel_id = celerity_generate_unique_node_id();
 
     $form = new AphrontFormView();
     $form->setAction('/file/upload/');
@@ -38,26 +43,25 @@ class PhabricatorFileUploadController extends PhabricatorFileController {
 
     $form
       ->setEncType('multipart/form-data')
+
       ->appendChild(
-        id(new AphrontFormFileControl())
-          ->setLabel('File')
-          ->setName('file')
-          ->setError(true))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel('Name')
-          ->setName('name')
-          ->setCaption('Optional file display name.'))
+        id(new AphrontFormDragAndDropUploadControl())
+        ->setLabel('Files')
+        ->setName('file')
+        ->setError(true)
+          ->setDragAndDropTarget($panel_id)
+          ->setActivatedClass('aphront-panel-view-drag-and-drop'))
+
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Upload')
-          ->addCancelButton('/file/'));
+        ->setValue('Done here!'));
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Upload File');
 
     $panel->appendChild($form);
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->setID($panel_id);
 
     return $this->buildStandardPageResponse(
       array($panel),

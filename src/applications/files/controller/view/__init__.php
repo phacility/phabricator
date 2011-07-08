@@ -13,6 +13,7 @@ phutil_require_module('phabricator', 'applications/files/controller/base');
 phutil_require_module('phabricator', 'applications/files/storage/file');
 phutil_require_module('phabricator', 'applications/files/storage/transformed');
 phutil_require_module('phabricator', 'applications/files/uri');
+phutil_require_module('phabricator', 'applications/people/storage/user');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/form/base');
 phutil_require_module('phabricator', 'view/form/control/static');

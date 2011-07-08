@@ -117,7 +117,11 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
           if (!empty($_FILES['profile'])) {
             $err = idx($_FILES['profile'], 'error');
             if ($err != UPLOAD_ERR_NO_FILE) {
-              $file = PhabricatorFile::newFromPHPUpload($_FILES['profile']);
+              $file = PhabricatorFile::newFromPHPUpload(
+                $_FILES['profile'],
+                array(
+                  'authorPHID' => $user->getPHID(),
+                ));
               $okay = $file->isTransformableImage();
               if ($okay) {
                 $xformer = new PhabricatorImageTransformer();

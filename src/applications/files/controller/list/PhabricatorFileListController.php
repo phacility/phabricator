@@ -22,13 +22,32 @@ class PhabricatorFileListController extends PhabricatorFileController {
 
     $request = $this->getRequest();
 
+    $author_username = $request->getStr('author');
+    if ($author_username) {
+      $author = id(new PhabricatorUser())->loadOneWhere(
+        'userName = %s',
+        $author_username);
+
+      if (!$author) {
+        return id(new Aphront404Response());
+      }
+    }
+
     $pager = new AphrontPagerView();
     $pager->setOffset($request->getInt('page'));
 
-    $files = id(new PhabricatorFile())->loadAllWhere(
-      '1 = 1 ORDER BY id DESC LIMIT %d, %d',
-      $pager->getOffset(),
-      $pager->getPageSize() + 1);
+    if ($author) {
+      $files = id(new PhabricatorFile())->loadAllWhere(
+        'authorPHID = %s ORDER BY id DESC LIMIT %d, %d',
+        $author->getPHID(),
+        $pager->getOffset(),
+        $pager->getPageSize() + 1);
+    } else {
+      $files = id(new PhabricatorFile())->loadAllWhere(
+        '1 = 1 ORDER BY id DESC LIMIT %d, %d',
+        $pager->getOffset(),
+        $pager->getPageSize() + 1);
+    }
 
     $files = $pager->sliceResults($files);
     $pager->setURI($request->getRequestURI(), 'page');
