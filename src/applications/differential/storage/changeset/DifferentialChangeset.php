@@ -33,6 +33,8 @@ class DifferentialChangeset extends DifferentialDAO {
   private $unsavedHunks = array();
   private $hunks;
 
+  const TABLE_CACHE = 'differential_changeset_parse_cache';
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(

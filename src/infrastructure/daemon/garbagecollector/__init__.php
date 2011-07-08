@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/differential/storage/changeset');
 phutil_require_module('phabricator', 'applications/herald/storage/transcript/base');
 phutil_require_module('phabricator', 'infrastructure/daemon/base');
 phutil_require_module('phabricator', 'infrastructure/daemon/storage/event');

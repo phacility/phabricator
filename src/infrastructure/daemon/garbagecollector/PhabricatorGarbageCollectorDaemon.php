@@ -62,12 +62,12 @@ class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
 
       $n_herald = $this->collectHeraldTranscripts();
       $n_daemon = $this->collectDaemonLogs();
-      $n_render = $this->collectRenderCaches();
+      $n_parse  = $this->collectParseCaches();
 
       $collected = array(
-        'Herald Transcript'  => $n_herald,
-        'Daemon Log'         => $n_daemon,
-        'Render Cache'       => $n_render,
+        'Herald Transcript'           => $n_herald,
+        'Daemon Log'                  => $n_daemon,
+        'Differential Parse Cache'    => $n_parse,
       );
       $collected = array_filter($collected);
 
@@ -131,9 +131,23 @@ class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
     return $conn_w->getAffectedRows();
   }
 
-  private function collectRenderCaches() {
-    // TODO: Implement this, no epoch column on the table right now.
-    return 0;
+  private function collectParseCaches() {
+    $key = 'gcdaemon.ttl.differential-parse-cache';
+    $ttl = PhabricatorEnv::getEnvConfig($key);
+    if ($ttl <= 0) {
+      return 0;
+    }
+
+    $table = new DifferentialChangeset();
+    $conn_w = $table->establishConnection('w');
+
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T WHERE dateCreated < %d LIMIT 100',
+      DifferentialChangeset::TABLE_CACHE,
+      time() - $ttl);
+
+    return $conn_w->getAffectedRows();
   }
 
 }

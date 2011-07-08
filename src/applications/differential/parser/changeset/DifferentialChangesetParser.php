@@ -624,11 +624,12 @@ class DifferentialChangesetParser {
       $conn_w = $changeset->establishConnection('w');
       queryfx(
         $conn_w,
-        'INSERT INTO %T (id, cache) VALUES (%d, %s)
+        'INSERT INTO %T (id, cache, dateCreated) VALUES (%d, %s, %d)
           ON DUPLICATE KEY UPDATE cache = VALUES(cache)',
-        $changeset->getTableName().'_parse_cache',
+        DifferentialChangeset::TABLE_CACHE,
         $render_cache_key,
-        $cache);
+        $cache,
+        time());
     } catch (AphrontQueryException $ex) {
       // TODO: uhoh
     }
