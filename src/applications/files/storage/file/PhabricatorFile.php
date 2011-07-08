@@ -29,6 +29,7 @@ class PhabricatorFile extends PhabricatorFileDAO {
   protected $name;
   protected $mimeType;
   protected $byteSize;
+  protected $authorPHID;
 
   protected $storageEngine;
   protected $storageFormat;
@@ -88,9 +89,14 @@ class PhabricatorFile extends PhabricatorFileDAO {
     $file_name = idx($params, 'name');
     $file_name = self::normalizeFileName($file_name);
 
+    // If for whatever reason, authorPHID isn't passed as a param
+    // (always the case with newFromFileDownload()), store a ''
+    $authorPHID = idx($params, 'authorPHID');
+
     $file = new PhabricatorFile();
     $file->setName($file_name);
     $file->setByteSize(strlen($data));
+    $file->setAuthorPHID($authorPHID);
 
     $blob = new PhabricatorFileStorageBlob();
     $blob->setData($data);

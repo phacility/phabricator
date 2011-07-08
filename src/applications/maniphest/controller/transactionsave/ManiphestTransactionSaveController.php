@@ -53,7 +53,11 @@ class ManiphestTransactionSaveController extends ManiphestController {
       if (!empty($_FILES['file'])) {
         $err = idx($_FILES['file'], 'error');
         if ($err != UPLOAD_ERR_NO_FILE) {
-          $file = PhabricatorFile::newFromPHPUpload($_FILES['file']);
+          $file = PhabricatorFile::newFromPHPUpload(
+            $_FILES['file'],
+            array(
+              'authorPHID' => $user->getPHID(),
+            ));
           $files[] = $file;
         }
       }

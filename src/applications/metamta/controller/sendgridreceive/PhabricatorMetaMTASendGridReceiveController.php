@@ -26,6 +26,7 @@ class PhabricatorMetaMTASendGridReceiveController
   public function processRequest() {
 
     $request = $this->getRequest();
+    $user = $request->getUser();
 
     $raw_headers = $request->getStr('headers');
     $raw_headers = explode("\n", rtrim($raw_headers));
@@ -51,7 +52,11 @@ class PhabricatorMetaMTASendGridReceiveController
     $file_phids = array();
     foreach ($_FILES as $file_raw) {
       try {
-        $file = PhabricatorFile::newFromPHPUpload($file_raw);
+        $file = PhabricatorFile::newFromPHPUpload(
+          $file_raw,
+          array(
+            'authorPHID' => $user->getPHID(),
+          ));
         $file_phids[] = $file->getPHID();
       } catch (Exception $ex) {
         phlog($ex);

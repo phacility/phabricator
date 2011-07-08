@@ -71,6 +71,20 @@ class PhabricatorFileViewController extends PhabricatorFileController {
         break;
     }
 
+    $author_child = null;
+    if ($file->getAuthorPHID()) {
+      $author = id(new PhabricatorUser())->loadOneWhere(
+        'phid = %s',
+        $file->getAuthorPHID());
+
+      if ($author) {
+        $author_child = id(new AphrontFormStaticControl())
+          ->setLabel('Author')
+          ->setName('author')
+          ->setValue($author->getUserName());
+      }
+    }
+
     $form = new AphrontFormView();
 
     if ($file->isViewableInBrowser()) {
@@ -80,7 +94,7 @@ class PhabricatorFileViewController extends PhabricatorFileController {
       $form->setAction('/file/download/'.$file->getPHID().'/');
       $button_name = 'Download File';
     }
-    $form->setUser($this->getRequest()->getUser());
+    $form->setUser($user);
     $form
       ->appendChild(
         id(new AphrontFormStaticControl())
@@ -92,6 +106,7 @@ class PhabricatorFileViewController extends PhabricatorFileController {
           ->setLabel('PHID')
           ->setName('phid')
           ->setValue($file->getPHID()))
+      ->appendChild($author_child)
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel('Created')

@@ -45,11 +45,13 @@ class ConduitAPI_file_upload_Method extends ConduitAPIMethod {
     $data = $request->getValue('data_base64');
     $name = $request->getValue('name');
     $data = base64_decode($data, $strict = true);
+    $user = $request->getUser();
 
     $file = PhabricatorFile::newFromFileData(
       $data,
       array(
-        'name' => $name
+        'name' => $name,
+        'authorPHID' => $user->getPHID(),
       ));
     return $file->getPHID();
   }

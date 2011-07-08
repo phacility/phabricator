@@ -40,7 +40,11 @@ class PhabricatorPeopleProfileEditController
       if (!empty($_FILES['image'])) {
         $err = idx($_FILES['image'], 'error');
         if ($err != UPLOAD_ERR_NO_FILE) {
-          $file = PhabricatorFile::newFromPHPUpload($_FILES['image']);
+          $file = PhabricatorFile::newFromPHPUpload(
+            $_FILES['image'],
+            array(
+              'authorPHID' => $user->getPHID(),
+            ));
           $okay = $file->isTransformableImage();
           if ($okay) {
             $xformer = new PhabricatorImageTransformer();

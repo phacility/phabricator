@@ -76,7 +76,8 @@ class PhabricatorOAuthDefaultRegistrationController
           $file = PhabricatorFile::newFromFileData(
             $image,
             array(
-              'name' => $provider->getProviderKey().'-profile.jpg'
+              'name' => $provider->getProviderKey().'-profile.jpg',
+              'authorPHID' => $user->getPHID(),
             ));
           $user->setProfileImagePHID($file->getPHID());
         }
