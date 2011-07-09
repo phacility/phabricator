@@ -40,6 +40,8 @@ class ManiphestTransactionEditor {
       $new = $transaction->getNewValue();
       $email_to[] = $transaction->getAuthorPHID();
 
+      $value_is_phid_set = false;
+
       switch ($type) {
         case ManiphestTransactionType::TYPE_NONE:
           $old = null;
@@ -52,6 +54,7 @@ class ManiphestTransactionEditor {
           break;
         case ManiphestTransactionType::TYPE_CCS:
           $old = $task->getCCPHIDs();
+          $value_is_phid_set = true;
           break;
         case ManiphestTransactionType::TYPE_PRIORITY:
           $old = $task->getPriority();
@@ -67,12 +70,40 @@ class ManiphestTransactionEditor {
           break;
         case ManiphestTransactionType::TYPE_PROJECTS:
           $old = $task->getProjectPHIDs();
+          $value_is_phid_set = true;
           break;
         default:
           throw new Exception('Unknown action type.');
       }
 
-      if (($old !== null) && ($old == $new)) {
+      $old_cmp = $old;
+      $new_cmp = $new;
+      if ($value_is_phid_set) {
+
+        // Normalize the old and new values if they are PHID sets so we don't
+        // get any no-op transactions where the values differ only by keys,
+        // order, duplicates, etc.
+
+        if (is_array($old)) {
+          $old = array_filter($old);
+          $old = array_unique($old);
+          sort($old);
+          $old = array_values($old);
+          $old_cmp = $old;
+        }
+
+        if (is_array($new)) {
+          $new = array_filter($new);
+          $new = array_unique($new);
+          $transaction->setNewValue($new);
+
+          $new_cmp = $new;
+          sort($new_cmp);
+          $new_cmp = array_values($new_cmp);
+        }
+      }
+
+      if (($old !== null) && ($old_cmp == $new_cmp)) {
         if (count($transactions) > 1 && !$transaction->hasComments()) {
           // If we have at least one other transaction and this one isn't
           // doing anything and doesn't have any comments, just throw it

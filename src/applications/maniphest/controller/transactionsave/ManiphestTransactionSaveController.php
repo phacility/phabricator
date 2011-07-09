@@ -84,6 +84,14 @@ class ManiphestTransactionSaveController extends ManiphestController {
       $file_transaction = $transaction;
     }
 
+    // Compute new CCs added by @mentions. We're going to try to add them to
+    // another CC transaction if we can. If there aren't any CC transactions,
+    // we'll create a new CC transaction after we handle everything else.
+    $mention_ccs = DifferentialMarkupEngineFactory::extractPHIDsFromMentions(
+      array(
+        $request->getStr('comments'),
+      ));
+
     $transaction = new ManiphestTransaction();
     $transaction
       ->setAuthorPHID($user->getPHID())
@@ -109,6 +117,10 @@ class ManiphestTransactionSaveController extends ManiphestController {
       case ManiphestTransactionType::TYPE_CCS:
         $ccs = $request->getArr('ccs');
         $ccs = array_merge($ccs, $task->getCCPHIDs());
+        if ($mention_ccs) {
+          $ccs = array_merge($ccs, $mention_ccs);
+          $mention_ccs = array();
+        }
         $ccs = array_filter($ccs);
         $ccs = array_unique($ccs);
         $transaction->setNewValue($ccs);
@@ -143,9 +155,11 @@ class ManiphestTransactionSaveController extends ManiphestController {
         $old = $task->getCCPHIDs();
         $new = array_merge(
           $old,
-          array($task->getOwnerPHID()));
+          array($task->getOwnerPHID()),
+          $mention_ccs);
         $new = array_unique(array_filter($new));
         if ($old != $new) {
+          $mention_ccs = null;
           $cc = new ManiphestTransaction();
           $cc->setAuthorPHID($user->getPHID());
           $cc->setTransactionType(ManiphestTransactionType::TYPE_CCS);
@@ -165,7 +179,7 @@ class ManiphestTransactionSaveController extends ManiphestController {
           $transactions[] = $assign;
         }
         break;
-      case ManiphestTransactionType::TYPE_NONE:
+      default:
         $ccs = $task->getCCPHIDs();
         $owner = $task->getOwnerPHID();
 
@@ -173,17 +187,31 @@ class ManiphestTransactionSaveController extends ManiphestController {
           // Current user, who is commenting, is not the owner or in ccs.
           // Add him to ccs
           $ccs[] = $user->getPHID();
+          if ($mention_ccs) {
+            $ccs = array_merge($ccs, $mention_ccs);
+            $mention_ccs = null;
+          }
           $cc = new ManiphestTransaction();
           $cc->setAuthorPHID($user->getPHID());
           $cc->setTransactionType(ManiphestTransactionType::TYPE_CCS);
           $cc->setNewValue($ccs);
           $transactions[] = $cc;
         }
-      default:
         break;
     }
 
+    if ($mention_ccs) {
+      // We have mention CCs and didn't pick up a CC transaction anywhere that
+      // we could shove them into, create a new CC transaction.
+      $cc = new ManiphestTransaction();
+      $cc->setAuthorPHID($user->getPHID());
+      $cc->setTransactionType(ManiphestTransactionType::TYPE_CCS);
 
+      $ccs = array_merge($task->getCCPHIDs(), $mention_ccs);
+      $cc->setNewValue($ccs);
+
+      $transactions[] = $cc;
+    }
 
     $editor = new ManiphestTransactionEditor();
     $editor->applyTransactions($task, $transactions);

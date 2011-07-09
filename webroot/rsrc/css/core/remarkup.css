@@ -62,12 +62,10 @@
 
 .phabricator-remarkup-mention-exists {
   font-weight: bold;
-  padding: 0 .25em;
-  background: #aaffaa;
+  background: #e6f3ff;
 }
 
 .aphront-panel-preview .phabricator-remarkup-mention-unknown {
   font-weight: bold;
-  padding: 0 .25em;
   background: #ffaaaa;
 }
