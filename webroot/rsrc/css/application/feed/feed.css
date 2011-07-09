@@ -1,0 +1,22 @@
+/**
+ * @provides phabricator-feed-css
+ */
+
+.phabricator-feed-story {
+  padding-left: 64px;
+  margin: .5em 0 1em;
+  background: 5px 2px no-repeat;
+}
+
+.phabricator-feed-story-head {
+}
+
+.phabricator-feed-story-body {
+  padding: .5em 0;
+  color: #444444;
+}
+
+.phabricator-feed-story-foot {
+  color: #888888;
+  font-size: 11px;
+}

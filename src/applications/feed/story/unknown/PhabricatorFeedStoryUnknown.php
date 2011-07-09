@@ -19,7 +19,19 @@
 class PhabricatorFeedStoryUnknown extends PhabricatorFeedStory {
 
   public function renderView() {
-    return new PhabricatorFeedStoryView();
+    $data = $this->getStoryData();
+
+    $view = new PhabricatorFeedStoryView();
+
+    $view->setTitle('Unknown Story');
+    $view->setEpoch($data->getEpoch());
+
+    $view->appendChild(
+      'This is an unrenderable feed story of type '.
+      '"'.phutil_escape_html($data->getStoryType()).'".');
+
+
+    return $view;
   }
 
 }

@@ -39,4 +39,12 @@ class PhabricatorFeedStoryData extends PhabricatorFeedDAO {
       PhabricatorPHIDConstants::PHID_TYPE_STRY);
   }
 
+  public function getEpoch() {
+    return $this->chronologicalKey >> 32;
+  }
+
+  public function getValue($key, $default = null) {
+    return idx($this->storyData, $key, $default);
+  }
+
 }

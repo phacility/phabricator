@@ -20,16 +20,73 @@ final class PhabricatorFeedStreamController extends PhabricatorFeedController {
 
   public function processRequest() {
 
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    if ($request->isFormPost()) {
+      $story = id(new PhabricatorFeedStoryPublisher())
+        ->setRelatedPHIDs(array($viewer->getPHID()))
+        ->setStoryType('PhabricatorFeedStoryStatus')
+        ->setStoryTime(time())
+        ->setStoryAuthorPHID($viewer->getPHID())
+        ->setStoryData(
+          array(
+            'content' => $request->getStr('status')
+          ))
+        ->publish();
+
+      return id(new AphrontRedirectResponse())->setURI(
+        $request->getRequestURI());
+    }
+
     $query = new PhabricatorFeedQuery();
     $stories = $query->execute();
 
-    $views = array();
-    foreach ($stories as $story) {
-      $views[] = $story->renderView();
+    $handles = array();
+    $objects = array();
+    if ($stories) {
+      $handle_phids = array_mergev(mpull($stories, 'getRequiredHandlePHIDs'));
+      $object_phids = array_mergev(mpull($stories, 'getRequiredObjectPHIDs'));
+
+      $handles = id(new PhabricatorObjectHandleData($handle_phids))
+        ->loadHandles();
+
+      $objects = id(new PhabricatorObjectHandleData($object_phids))
+        ->loadObjects();
     }
 
+    $views = array();
+    foreach ($stories as $story) {
+      $story->setHandles($handles);
+      $story->setObjects($objects);
+
+      $view = $story->renderView();
+      $view->setViewer($viewer);
+
+      $views[] = $view->render();
+    }
+
+    $post_form = id(new AphrontFormView())
+      ->setUser($viewer)
+      ->appendChild(
+        id(new AphrontFormTextAreaControl())
+          ->setLabel('Pithy Wit')
+          ->setName('status'))
+      ->appendChild(
+        id(new AphrontFormSubmitControl())
+          ->setValue('Publish'));
+
+    $post = new AphrontPanelView();
+    $post->setWidth(AphrontPanelView::WIDTH_FORM);
+    $post->setHeader('High Horse Soapbox');
+    $post->appendChild($post_form);
+
+    $page = array();
+    $page[] = $post;
+    $page[] = $views;
+
     return $this->buildStandardPageResponse(
-      $views,
+      $page,
       array(
         'title' => 'Feed',
       ));

@@ -20,10 +20,43 @@ abstract class PhabricatorFeedStory {
 
   private $data;
 
+  private $handles;
+  private $objects;
+
   final public function __construct(PhabricatorFeedStoryData $data) {
     $this->data = $data;
   }
 
   abstract public function renderView();
+
+  public function getRequiredHandlePHIDs() {
+    return array();
+  }
+
+  public function getRequiredObjectPHIDs() {
+    return array();
+  }
+
+  final public function setHandles(array $handles) {
+    $this->handles = $handles;
+    return $this;
+  }
+
+  final public function setObjects(array $objects) {
+    $this->objects = $objects;
+    return $this;
+  }
+
+  final protected function getHandles() {
+    return $this->handles;
+  }
+
+  final protected function getObjects() {
+    return $this->objects;
+  }
+
+  final protected function getStoryData() {
+    return $this->data;
+  }
 
 }
