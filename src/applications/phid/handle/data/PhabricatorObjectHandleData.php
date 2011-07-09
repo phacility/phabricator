@@ -52,7 +52,7 @@ class PhabricatorObjectHandleData {
           if ($commits) {
             $data_dao = newv('PhabricatorRepositoryCommitData', array());
             $commit_data = $data_dao->loadAllWhere(
-              'id IN (%Ld)',
+              'commitID IN (%Ld)',
               mpull($commits, 'getID'));
             $commit_data = mpull($commit_data, null, 'getCommitID');
           }

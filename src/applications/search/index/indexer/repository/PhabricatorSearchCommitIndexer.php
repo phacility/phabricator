@@ -31,6 +31,10 @@ class PhabricatorSearchCommitIndexer
       'id = %d',
       $commit->getRepositoryID());
 
+    if (!$repository) {
+      return;
+    }
+
     $title = 'r'.$repository->getCallsign().$commit->getCommitIdentifier().
       " ".$commit_data->getSummary();
 
