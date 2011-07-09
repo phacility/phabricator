@@ -83,8 +83,8 @@ abstract class PhabricatorMailReplyHandler {
       $mail->addTos(mpull($to_handles, 'getPHID'));
       $mail->addCCs(mpull($cc_handles, 'getPHID'));
 
-      $reply_to = $this->getPublicReplyHandlerEmailAddress();
-      if ($reply_to) {
+      if ($this->supportsPublicReplies()) {
+        $reply_to = $this->getPublicReplyHandlerEmailAddress();
         $mail->setReplyTo($reply_to);
       }
 
@@ -131,7 +131,7 @@ abstract class PhabricatorMailReplyHandler {
         $mail->addHeader($header, $value);
       }
 
-      if (!$reply_to) {
+      if (!$reply_to && $this->supportsPublicReplies()) {
         $reply_to = $this->getPublicReplyHandlerEmailAddress();
       }
 
