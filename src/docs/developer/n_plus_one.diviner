@@ -10,8 +10,8 @@ The N+1 query problem is a common performance antipattern. It looks like this:
   COUNTEREXAMPLE
   $cats = load_cats();
   foreach ($cats as $cat) {
-   $cats_hats = load_hats_for_cat($cat);
-   // ...
+    $cats_hats = load_hats_for_cat($cat);
+    // ...
   }
 
 Assuming ##load_cats()## has an implementation that boils down to:
@@ -49,7 +49,7 @@ iterating through it (this is oversimplified and omits error checking):
   $cats = load_cats();
   $hats = load_all_hats_for_these_cats($cats);
   foreach ($cats as $cat) {
-   $cats_hats = $hats[$cat->getID()];
+    $cats_hats = $hats[$cat->getID()];
   }
 
 That is, issue these queries:
@@ -60,7 +60,8 @@ That is, issue these queries:
 In this case, the total number of queries issued is always 2, no matter how many
 objects there are. You've removed the "N" part from the page's query plan, and
 are no longer paying the overhead of issuing hundreds of extra queries. This
-will perform much better.
+will perform much better (although, as with all performance changes, you should
+verify this claim by measuring it).
 
 = Detecting the Problem =
 
