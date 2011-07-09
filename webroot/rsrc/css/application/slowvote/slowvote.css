@@ -58,3 +58,12 @@
   width: auto;
   margin-right: 12px;
 }
+
+.phabricator-slowvote-facepile {
+  width: 50px;
+  height: 50px;
+  overflow: hidden;
+  position: relative;
+  float: left;
+  margin: 0px 4px 6px 0px;
+}

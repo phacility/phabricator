@@ -110,7 +110,9 @@ class PhabricatorSlowvotePollController
         $poll->getAuthorPHID(),
       ));
 
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $query = new PhabricatorObjectHandleData($phids);
+    $handles = $query->loadHandles();
+    $objects = $query->loadObjects();
 
     if ($poll->getShuffle()) {
       shuffle($options);
@@ -129,8 +131,8 @@ class PhabricatorSlowvotePollController
     switch ($poll->getMethod()) {
       case PhabricatorSlowvotePoll::METHOD_PLURALITY:
         $choice_ids = array();
-        foreach ($choices_by_user as $user_phid => $choices) {
-          $choice_ids[$user_phid] = head($choices)->getOptionID();
+        foreach ($choices_by_user as $user_phid => $user_choices) {
+          $choice_ids[$user_phid] = head($user_choices)->getOptionID();
         }
         foreach ($comments as $comment) {
           $choice = idx($choice_ids, $comment->getAuthorPHID());
@@ -154,7 +156,8 @@ class PhabricatorSlowvotePollController
       $viewer_choices,
       $choices_by_option,
       $comments_by_option,
-      $handles);
+      $handles,
+      $objects);
 
     if ($viewer_choices) {
       $instructions =
@@ -350,7 +353,8 @@ class PhabricatorSlowvotePollController
     array $viewer_choices,
     array $choices_by_option,
     array $comments_by_option,
-    array $handles) {
+    array $handles,
+    array $objects) {
 
     $viewer_phid = $this->getRequest()->getUser()->getPHID();
 
@@ -392,7 +396,25 @@ class PhabricatorSlowvotePollController
       if ($users) {
         $user_markup = array();
         foreach ($users as $handle) {
-          $user_markup[] = $handle->renderLink();
+          $object = idx($objects, $handle->getPHID());
+          if (!$object) {
+            continue;
+          }
+
+          $profile_image = PhabricatorFileURI::getViewURIForPHID(
+            $object->getProfileImagePHID());
+
+          $user_markup[] = phutil_render_tag(
+            'a',
+            array(
+              'href'  => $handle->getURI(),
+              'class' => 'phabricator-slowvote-facepile',
+            ),
+            phutil_render_tag(
+              'img',
+              array(
+                'src' => $profile_image,
+              )));
         }
         $user_markup = implode('', $user_markup);
       } else {
@@ -416,6 +438,7 @@ class PhabricatorSlowvotePollController
           '<h1>'.phutil_escape_html($option->getName()).'</h1>'.
           '<hr class="phabricator-slowvote-hr" />'.
           $user_markup.
+          '<div style="clear: both;">'.
           '<hr class="phabricator-slowvote-hr" />'.
           $comment_markup.
         '</div>');
