@@ -68,7 +68,6 @@ class AphrontDefaultApplicationConfiguration
       '/phid/' => array(
         '$' => 'PhabricatorPHIDLookupController',
         'list/$' => 'PhabricatorPHIDListController',
-        'new/$' => 'PhabricatorPHIDAllocateController',
       ),
       '/people/' => array(
         '$' => 'PhabricatorPeopleListController',

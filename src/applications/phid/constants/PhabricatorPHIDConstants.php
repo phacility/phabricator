@@ -33,22 +33,4 @@ final class PhabricatorPHIDConstants {
   const PHID_TYPE_STRY    = 'STRY';
   const PHID_TYPE_POLL    = 'POLL';
 
-  public static function getTypes() {
-    return array(
-      self::PHID_TYPE_USER,
-      self::PHID_TYPE_MLST,
-      self::PHID_TYPE_DREV,
-      self::PHID_TYPE_TASK,
-      self::PHID_TYPE_FILE,
-      self::PHID_TYPE_PROJ,
-      self::PHID_TYPE_UNKNOWN,
-      self::PHID_TYPE_MAGIC,
-      self::PHID_TYPE_REPO,
-      self::PHID_TYPE_CMIT,
-      self::PHID_TYPE_PSTE,
-      self::PHID_TYPE_OPKG,
-      self::PHID_TYPE_STRY,
-      self::PHID_TYPE_POLL,
-    );
-  }
 }
