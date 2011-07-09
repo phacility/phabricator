@@ -27,6 +27,8 @@ class PhabricatorStandardPageView extends AphrontPageView {
   private $request;
   private $isAdminInterface;
   private $showChrome = true;
+  private $isFrameable = false;
+  private $disableConsole;
 
   public function setIsAdminInterface($is_admin_interface) {
     $this->isAdminInterface = $is_admin_interface;
@@ -48,6 +50,16 @@ class PhabricatorStandardPageView extends AphrontPageView {
 
   public function setApplicationName($application_name) {
     $this->applicationName = $application_name;
+    return $this;
+  }
+
+  public function setFrameable($frameable) {
+    $this->isFrameable = $frameable;
+    return $this;
+  }
+
+  public function setDisableConsole($disable) {
+    $this->disableConsole = $disable;
     return $this;
   }
 
@@ -103,7 +115,7 @@ class PhabricatorStandardPageView extends AphrontPageView {
         "You must set the Request to render a PhabricatorStandardPageView.");
     }
 
-    $console = $this->getRequest()->getApplicationConfiguration()->getConsole();
+    $console = $this->getConsole();
 
     require_celerity_resource('phabricator-core-css');
     require_celerity_resource('phabricator-core-buttons-css');
@@ -133,10 +145,16 @@ class PhabricatorStandardPageView extends AphrontPageView {
 
 
   protected function getHead() {
+
+    $framebust = null;
+    if (!$this->isFrameable) {
+      $framebust = '(top != self) && top.location.replace(self.location.href);';
+    }
+
     $response = CelerityAPI::getStaticResourceResponse();
     $head =
       '<script type="text/javascript">'.
-        '(top != self) && top.location.replace(self.location.href);'.
+        $framebust.
         'window.__DEV__=1;'.
       '</script>'.
       $response->renderResourcesOfType('css').
@@ -185,7 +203,7 @@ class PhabricatorStandardPageView extends AphrontPageView {
   }
 
   protected function getBody() {
-    $console = $this->getRequest()->getApplicationConfiguration()->getConsole();
+    $console = $this->getConsole();
 
     $tabs = array();
     foreach ($this->tabs as $name => $tab) {
@@ -345,4 +363,10 @@ class PhabricatorStandardPageView extends AphrontPageView {
     return implode(' ', $classes);
   }
 
+  private function getConsole() {
+    if ($this->disableConsole) {
+      return null;
+    }
+    return $this->getRequest()->getApplicationConfiguration()->getConsole();
+  }
 }

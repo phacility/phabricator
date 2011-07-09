@@ -7,6 +7,8 @@
 
 
 phutil_require_module('phabricator', 'aphront/console/plugin/base');
+phutil_require_module('phabricator', 'storage/connection/mysql');
+phutil_require_module('phabricator', 'storage/queryfx');
 phutil_require_module('phabricator', 'view/control/table');
 
 phutil_require_module('phutil', 'markup');

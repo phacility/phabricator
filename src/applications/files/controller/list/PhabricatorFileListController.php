@@ -22,6 +22,7 @@ class PhabricatorFileListController extends PhabricatorFileController {
 
     $request = $this->getRequest();
 
+    $author = null;
     $author_username = $request->getStr('author');
     if ($author_username) {
       $author = id(new PhabricatorUser())->loadOneWhere(

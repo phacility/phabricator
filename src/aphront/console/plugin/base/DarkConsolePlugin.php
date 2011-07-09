@@ -61,6 +61,10 @@ abstract class DarkConsolePlugin {
     return $this->request;
   }
 
+  public function getRequestURI() {
+    return $this->getRequest()->getRequestURI();
+  }
+
   public function isPermanent() {
     return false;
   }

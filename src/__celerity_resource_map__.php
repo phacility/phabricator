@@ -27,7 +27,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-dark-console-css' =>
   array(
-    'uri' => '/res/e7011594/rsrc/css/aphront/dark-console.css',
+    'uri' => '/res/a7d1dbf1/rsrc/css/aphront/dark-console.css',
     'type' => 'css',
     'requires' =>
     array(

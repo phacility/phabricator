@@ -28,6 +28,14 @@ abstract class PhabricatorXHProfController extends PhabricatorController {
     $page->appendChild($view);
 
     $response = new AphrontWebpageResponse();
+
+    if (isset($data['frame'])) {
+      $response->setFrameable(true);
+      $page->setFrameable(true);
+      $page->setShowChrome(false);
+      $page->setDisableConsole(true);
+    }
+
     return $response->setContent($page->render());
   }
 

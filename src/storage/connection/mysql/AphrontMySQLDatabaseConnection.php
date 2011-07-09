@@ -213,8 +213,9 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
         $profiler = PhutilServiceProfiler::getInstance();
         $call_id = $profiler->beginServiceCall(
           array(
-            'type'  => 'query',
-            'query' => $raw_query,
+            'type'    => 'query',
+            'config'  => $this->configuration,
+            'query'   => $raw_query,
           ));
 
         $result = @mysql_query($raw_query, $this->connection);

@@ -58,6 +58,7 @@ class PhabricatorXHProfProfileController
       $view,
       array(
         'title' => 'Profile',
+        'frame' => $request->getBool('frame'),
       ));
   }
 }

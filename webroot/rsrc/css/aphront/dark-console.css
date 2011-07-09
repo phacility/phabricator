@@ -87,3 +87,68 @@ a.dark-console-tab-selected {
     height: 2px;
 }
 
+.explain-sev-1 {
+  color: #33ff33;
+}
+
+.explain-sev-2 {
+  color: #99ff33;
+}
+
+.explain-sev-3 {
+  color: #ccff33;
+}
+
+.explain-sev-4 {
+  color: #ffff33;
+}
+
+.explain-sev-5 {
+  color: #ffcc33;
+}
+
+.explain-sev-6 {
+  color: #ffffff;
+  font-weight: bold;
+  background: #aa0000;
+  padding: 0 1em;
+  border: 2px solid #ffff00;
+}
+
+.explain-sev-7 {
+  color: #aaaaaa;
+}
+
+.dark-console-panel-header {
+  background: #606060;
+  border-bottom: 1px solid #505050;
+  padding: .25em 1em .25em 0;
+}
+
+.dark-console-panel-header h1 {
+  padding: 1em;
+  font-size: 12px;
+  font-weight: normal;
+}
+
+.dark-console-panel-header .button {
+  margin-top: .5em;
+  float: right;
+}
+
+.dark-console-panel a.bright-link {
+  color: #00cfff;
+  font-weight: bold;
+}
+
+.dark-console iframe {
+  width: 98%;
+  margin: .5em 1%;
+  height: 450px;
+  border: 0;
+}
+
+.dark-console-no-content {
+  padding: 1.5em 2em;
+  font-style: italic;
+}
