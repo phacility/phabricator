@@ -97,16 +97,37 @@ abstract class DiffusionFileContentQuery {
       }
 
       $repository = $this->getRequest()->getRepository();
+
       $commits = id(new PhabricatorRepositoryCommit())->loadAllWhere(
         'repositoryID = %d AND commitIdentifier IN (%Ls)', $repository->getID(),
         array_unique($rev_list));
 
       foreach ($commits as $commit) {
-        $commitIdentifier = $commit->getCommitIdentifier();
-        $epoch = $commit->getEpoch();
-        $blame_dict[$commitIdentifier]['epoch'] = $epoch;
+        $blame_dict[$commit->getCommitIdentifier()]['epoch'] =
+          $commit->getEpoch();
       }
-    }
+
+      $commits_data = id(new PhabricatorRepositoryCommitData())->loadAllWhere(
+        'commitID IN (%Ls)',
+        mpull($commits, 'getID'));
+
+      $phids = array();
+      foreach ($commits_data as $data) {
+        $phids[] = $data->getCommitDetail('authorPHID');
+      }
+
+      $handles = id(new PhabricatorObjectHandleData(array_unique($phids)))
+        ->loadHandles();
+
+      foreach ($commits_data as $data) {
+        if ($data->getCommitDetail('authorPHID')) {
+          $commit_identifier =
+            $commits[$data->getCommitID()]->getCommitIdentifier();
+          $blame_dict[$commit_identifier]['author'] =
+            $handles[$data->getCommitDetail('authorPHID')]->renderLink();
+        }
+      }
+   }
 
     return array($text_list, $rev_list, $blame_dict);
   }
