@@ -1,0 +1,73 @@
+@title Performance: N+1 Query Problem
+@group developer
+
+How to avoid a common performance pitfall.
+
+= Overview =
+
+The N+1 query problem is a common performance antipattern. It looks like this:
+
+  COUNTEREXAMPLE
+  $cats = load_cats();
+  foreach ($cats as $cat) {
+   $cats_hats = load_hats_for_cat($cat);
+   // ...
+  }
+
+Assuming ##load_cats()## has an implementation that boils down to:
+
+  SELECT * FROM cat WHERE ...
+
+..and ##load_hats_for_cat($cat)## has an implementation something like this:
+
+  SELECT * FROM hat WHERE catID = ...
+
+..you will issue "N+1" queries when the code executes, where N is the number of
+cats:
+
+  SELECT * FROM cat WHERE ...
+  SELECT * FROM hat WHERE catID = 1
+  SELECT * FROM hat WHERE catID = 2
+  SELECT * FROM hat WHERE catID = 3
+  SELECT * FROM hat WHERE catID = 4
+  SELECT * FROM hat WHERE catID = 5
+  ...
+
+The problem with this is that each query has quite a bit of overhead. **It is
+//much faster// to issue 1 query which returns 100 results than to issue 100
+queries which each return 1 result.** This is particularly true if your database
+is on a different machine which is, say, 1-2ms away on the network. In this
+case, issuing 100 queries serially has a minimum cost of 100-200ms, even if they
+can be satisfied instantly by MySQL. This is far higher than the entire
+server-side generation cost for most Phabricator pages should be.
+
+= Batching Queries =
+
+Fix the N+1 query problem by batching queries. Load all your data before
+iterating through it (this is oversimplified and omits error checking):
+
+  $cats = load_cats();
+  $hats = load_all_hats_for_these_cats($cats);
+  foreach ($cats as $cat) {
+   $cats_hats = $hats[$cat->getID()];
+  }
+
+That is, issue these queries:
+
+  SELECT * FROM cat WHERE ...
+  SELECT * FROM hat WHERE catID IN (1, 2, 3, 4, 5, ...)
+
+In this case, the total number of queries issued is always 2, no matter how many
+objects there are. You've removed the "N" part from the page's query plan, and
+are no longer paying the overhead of issuing hundreds of extra queries. This
+will perform much better.
+
+= Detecting the Problem =
+
+Beyond reasoning about it while figuring out how to load the data you need, the
+easiest way to detect this issue is to check the "Services" tab in DarkConsole
+(see @{article:Using DarkConsole}), which lists all the service calls made on a
+page. If you see a bunch of similar queries, this often indicates an N+1 query
+issue (or a similar kind of query batching problem). Restructuring code so you
+can run a single query to fetch all the data at once will always improve the
+performance of the page.
