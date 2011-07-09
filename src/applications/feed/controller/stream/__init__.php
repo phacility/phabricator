@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'aphront/response/redirect');
+phutil_require_module('phabricator', 'applications/feed/constants/story');
 phutil_require_module('phabricator', 'applications/feed/controller/base');
 phutil_require_module('phabricator', 'applications/feed/publisher');
 phutil_require_module('phabricator', 'applications/feed/query');

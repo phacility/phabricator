@@ -71,7 +71,7 @@ final class PhabricatorFeedStoryPublisher {
 
     $sql = array();
     $conn = $ref->establishConnection('w');
-    foreach ($this->relatedPHIDs as $phid) {
+    foreach (array_unique($this->relatedPHIDs) as $phid) {
       $sql[] = qsprintf(
         $conn,
         '(%s, %s)',

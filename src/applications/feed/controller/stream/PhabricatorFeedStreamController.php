@@ -26,7 +26,7 @@ final class PhabricatorFeedStreamController extends PhabricatorFeedController {
     if ($request->isFormPost()) {
       $story = id(new PhabricatorFeedStoryPublisher())
         ->setRelatedPHIDs(array($viewer->getPHID()))
-        ->setStoryType('PhabricatorFeedStoryStatus')
+        ->setStoryType(PhabricatorFeedStoryTypeConstants::STORY_STATUS)
         ->setStoryTime(time())
         ->setStoryAuthorPHID($viewer->getPHID())
         ->setStoryData(

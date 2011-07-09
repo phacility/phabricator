@@ -12,6 +12,8 @@ phutil_require_module('phabricator', 'applications/differential/mail/ccwelcome')
 phutil_require_module('phabricator', 'applications/differential/mail/newdiff');
 phutil_require_module('phabricator', 'applications/differential/storage/comment');
 phutil_require_module('phabricator', 'applications/differential/storage/revision');
+phutil_require_module('phabricator', 'applications/feed/constants/story');
+phutil_require_module('phabricator', 'applications/feed/publisher');
 phutil_require_module('phabricator', 'applications/herald/adapter/differential');
 phutil_require_module('phabricator', 'applications/herald/engine/engine');
 phutil_require_module('phabricator', 'applications/herald/storage/transcript/base');

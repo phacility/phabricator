@@ -24,6 +24,8 @@ class PhabricatorFeedStoryView extends PhabricatorFeedView {
   private $epoch;
   private $viewer;
 
+  private $oneLine;
+
   public function setViewer(PhabricatorUser $viewer) {
     $this->viewer = $viewer;
     return $this;
@@ -44,6 +46,11 @@ class PhabricatorFeedStoryView extends PhabricatorFeedView {
     return $this;
   }
 
+  public function setOneLineStory($one_line) {
+    $this->oneLine = $one_line;
+    return $this;
+  }
+
   public function render() {
 
     $head = phutil_render_tag(
@@ -53,29 +60,34 @@ class PhabricatorFeedStoryView extends PhabricatorFeedView {
       ),
       nonempty($this->title, 'Untitled Story'));
 
-    $body = phutil_render_tag(
-      'div',
-      array(
-        'class' => 'phabricator-feed-story-body',
-      ),
-      $this->renderChildren());
-
-    if ($this->epoch) {
-      $foot = phabricator_datetime($this->epoch, $this->viewer);
-    } else {
-      $foot = '';
-    }
-
-    $foot = phutil_render_tag(
-      'div',
-      array(
-        'class' => 'phabricator-feed-story-foot',
-      ),
-      $foot);
-
+    $body = null;
+    $foot = null;
     $image_style = null;
-    if ($this->image) {
-      $image_style = 'background-image: url('.$this->image.')';
+
+    if (!$this->oneLine) {
+      $body = phutil_render_tag(
+        'div',
+        array(
+          'class' => 'phabricator-feed-story-body',
+        ),
+        $this->renderChildren());
+
+      if ($this->epoch) {
+        $foot = phabricator_datetime($this->epoch, $this->viewer);
+      } else {
+        $foot = '';
+      }
+
+      $foot = phutil_render_tag(
+        'div',
+        array(
+          'class' => 'phabricator-feed-story-foot',
+        ),
+        $foot);
+
+      if ($this->image) {
+        $image_style = 'background-image: url('.$this->image.')';
+      }
     }
 
     require_celerity_resource('phabricator-feed-css');
@@ -83,7 +95,9 @@ class PhabricatorFeedStoryView extends PhabricatorFeedView {
     return phutil_render_tag(
       'div',
       array(
-        'class' => 'phabricator-feed-story',
+        'class' => $this->oneLine
+          ? 'phabricator-feed-story phabricator-feed-story-one-line'
+          : 'phabricator-feed-story',
         'style' => $image_style,
       ),
       $head.$body.$foot);

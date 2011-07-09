@@ -375,6 +375,18 @@ class DifferentialRevisionEditor {
     id(new PhabricatorTimelineEvent('difx', $event_data))
       ->recordEvent();
 
+    id(new PhabricatorFeedStoryPublisher())
+      ->setStoryType(PhabricatorFeedStoryTypeConstants::STORY_DIFFERENTIAL)
+      ->setStoryData($event_data)
+      ->setStoryTime(time())
+      ->setStoryAuthorPHID($revision->getAuthorPHID())
+      ->setRelatedPHIDs(
+        array(
+          $revision->getPHID(),
+          $revision->getAuthorPHID(),
+        ))
+      ->publish();
+
 // TODO
 //    $revision->saveTransaction();
 

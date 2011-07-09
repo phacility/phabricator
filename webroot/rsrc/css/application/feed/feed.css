@@ -6,6 +6,13 @@
   padding-left: 64px;
   margin: .5em 0 1em;
   background: 5px 2px no-repeat;
+  min-height: 64px;
+}
+
+.phabricator-feed-story-one-line {
+  min-height: 0;
+  font-size: 11px;
+  color: #444444;
 }
 
 .phabricator-feed-story-head {

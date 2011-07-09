@@ -412,6 +412,20 @@ class DifferentialCommentEditor {
       ->recordEvent();
 
     // TODO: Move to a daemon?
+    id(new PhabricatorFeedStoryPublisher())
+      ->setStoryType(PhabricatorFeedStoryTypeConstants::STORY_DIFFERENTIAL)
+      ->setStoryData($event_data)
+      ->setStoryTime(time())
+      ->setStoryAuthorPHID($this->actorPHID)
+      ->setRelatedPHIDs(
+        array(
+          $revision->getPHID(),
+          $this->actorPHID,
+          $revision->getAuthorPHID(),
+        ))
+      ->publish();
+
+    // TODO: Move to a daemon?
     PhabricatorSearchDifferentialIndexer::indexRevision($revision);
 
     return $comment;
