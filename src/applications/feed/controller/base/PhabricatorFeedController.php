@@ -28,6 +28,13 @@ abstract class PhabricatorFeedController extends PhabricatorController {
     $page->appendChild($view);
 
     $response = new AphrontWebpageResponse();
+
+    if (!empty($data['public'])) {
+      $page->setFrameable(true);
+      $page->setShowChrome(false);
+      $response->setFrameable(true);
+    }
+
     return $response->setContent($page->render());
   }
 

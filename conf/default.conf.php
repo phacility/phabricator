@@ -416,6 +416,15 @@ return array(
   'gcdaemon.ttl.differential-parse-cache'   => 14 * (24 * 60 * 60),
 
 
+// -- Feed ------------------------------------------------------------------ //
+
+  // If you set this to true, you can embed Phabricator activity feeds in other
+  // pages using iframes. These feeds are completely public, and a login is not
+  // required to view them! This is intended for things like open source
+  // projects that want to expose an activity feed on the project homepage.
+  'feed.public' => false,
+
+
 // -- Customization --------------------------------------------------------- //
 
   // Paths to additional phutil libraries to load.

@@ -332,6 +332,7 @@ class AphrontDefaultApplicationConfiguration
 
       '/feed/' => array(
         '$' => 'PhabricatorFeedStreamController',
+        'public/$' => 'PhabricatorFeedPublicStreamController',
       ),
 
       '/V(?P<id>\d+)$'  => 'PhabricatorSlowvotePollController',
