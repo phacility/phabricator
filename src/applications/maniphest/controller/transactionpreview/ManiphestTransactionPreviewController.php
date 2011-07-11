@@ -80,8 +80,7 @@ class ManiphestTransactionPreviewController extends ManiphestController {
     $transactions = array();
     $transactions[] = $transaction;
 
-    $factory = new DifferentialMarkupEngineFactory();
-    $engine = $factory->newDifferentialCommentMarkupEngine();
+    $engine = PhabricatorMarkupEngine::newManiphestMarkupEngine();
 
     $transaction_view = new ManiphestTransactionListView();
     $transaction_view->setTransactions($transactions);

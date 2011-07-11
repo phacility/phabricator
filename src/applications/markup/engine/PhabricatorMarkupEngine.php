@@ -16,13 +16,12 @@
  * limitations under the License.
  */
 
-class DifferentialMarkupEngineFactory {
+class PhabricatorMarkupEngine {
 
   public static function extractPHIDsFromMentions(array $content_blocks) {
     $mentions = array();
 
-    $factory = new DifferentialMarkupEngineFactory();
-    $engine = $factory->newDifferentialCommentMarkupEngine();
+    $engine = self::newDifferentialMarkupEngine();
 
     foreach ($content_blocks as $content_block) {
       $engine->markupText($content_block);
@@ -35,21 +34,62 @@ class DifferentialMarkupEngineFactory {
     return $mentions;
   }
 
-  public function newDifferentialCommentMarkupEngine() {
+  public static function newManiphestMarkupEngine() {
+    return self::newMarkupEngine(array(
+    ));
+  }
+
+  public static function newPhrictionMarkupEngine() {
+    return self::newMarkupEngine(array(
+    ));
+  }
+
+  public static function newDifferentialMarkupEngine() {
+    return self::newMarkupEngine(array(
+      'custom-inline' => PhabricatorEnv::getEnvConfig(
+        'differential.custom-remarkup-rules'),
+      'custom-block'  => PhabricatorEnv::getEnvConfig(
+        'differential.custom-remarkup-block-rules'),
+    ));
+  }
+
+  public static function newProfileMarkupEngine() {
+    return self::newMarkupEngine(array(
+    ));
+  }
+
+  public static function newSlowvoteMarkupEngine() {
+    return self::newMarkupEngine(array(
+    ));
+  }
+
+  private static function getMarkupEngineDefaultConfiguration() {
+    return array(
+      'pygments'      => PhabricatorEnv::getEnvConfig('pygments.enabled'),
+      'fileproxy'     => PhabricatorEnv::getEnvConfig('files.enable-proxy'),
+      'youtube'       => PhabricatorEnv::getEnvConfig(
+        'remarkup.enable-embedded-youtube'),
+      'custom-inline' => array(),
+      'custom-block'  => array(),
+    );
+  }
+
+  private static function newMarkupEngine(array $options) {
+
+    $options += self::getMarkupEngineDefaultConfiguration();
+
     $engine = new PhutilRemarkupEngine();
 
     $engine->setConfig('preserve-linebreaks', true);
-    $engine->setConfig(
-      'pygments.enabled',
-      PhabricatorEnv::getEnvConfig('pygments.enabled'));
+    $engine->setConfig('pygments.enabled', $options['pygments']);
 
     $rules = array();
     $rules[] = new PhutilRemarkupRuleEscapeRemarkup();
-    if (PhabricatorEnv::getEnvConfig('files.enable-proxy')) {
+    if ($options['fileproxy']) {
       $rules[] = new PhabricatorRemarkupRuleProxyImage();
     }
 
-    if (PhabricatorEnv::getEnvConfig('remarkup.enable-embedded-youtube')) {
+    if ($options['youtube']) {
       $rules[] = new PhabricatorRemarkupRuleYoutube();
     }
 
@@ -62,8 +102,7 @@ class DifferentialMarkupEngineFactory {
     $rules[] = new PhabricatorRemarkupRuleImageMacro();
     $rules[] = new PhabricatorRemarkupRuleMention();
 
-    $custom_rule_classes =
-      PhabricatorEnv::getEnvConfig('differential.custom-remarkup-rules');
+    $custom_rule_classes = $options['custom-inline'];
     if ($custom_rule_classes) {
       foreach ($custom_rule_classes as $custom_rule_class) {
         PhutilSymbolLoader::loadClass($custom_rule_class);
@@ -76,7 +115,6 @@ class DifferentialMarkupEngineFactory {
     $rules[] = new PhutilRemarkupRuleBold();
     $rules[] = new PhutilRemarkupRuleItalic();
 
-
     $blocks = array();
     $blocks[] = new PhutilRemarkupEngineRemarkupQuotesBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupHeaderBlockRule();
@@ -84,8 +122,7 @@ class DifferentialMarkupEngineFactory {
     $blocks[] = new PhutilRemarkupEngineRemarkupCodeBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupDefaultBlockRule();
 
-    $custom_block_rule_classes =
-      PhabricatorEnv::getEnvConfig('differential.custom-remarkup-block-rules');
+    $custom_block_rule_classes = $options['custom-block'];
     if ($custom_block_rule_classes) {
       foreach ($custom_block_rule_classes as $custom_block_rule_class) {
         PhutilSymbolLoader::loadClass($custom_block_rule_class);

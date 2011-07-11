@@ -47,8 +47,7 @@ class ManiphestTaskDescriptionChangeController extends ManiphestController {
     }
     $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
 
-    $factory = new DifferentialMarkupEngineFactory();
-    $engine = $factory->newDifferentialCommentMarkupEngine();
+    $engine = PhabricatorMarkupEngine::newManiphestMarkupEngine();
 
     $view = new ManiphestTransactionDetailView();
     $view->setTransactionGroup($transactions);

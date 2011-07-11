@@ -87,7 +87,7 @@ class ManiphestTransactionSaveController extends ManiphestController {
     // Compute new CCs added by @mentions. We're going to try to add them to
     // another CC transaction if we can. If there aren't any CC transactions,
     // we'll create a new CC transaction after we handle everything else.
-    $mention_ccs = DifferentialMarkupEngineFactory::extractPHIDsFromMentions(
+    $mention_ccs = PhabricatorMarkupEngine::extractPHIDsFromMentions(
       array(
         $request->getStr('comments'),
       ));

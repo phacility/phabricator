@@ -207,8 +207,7 @@ class PhabricatorSlowvotePollController
   private function renderComments(array $comments, array $handles) {
     $viewer = $this->getRequest()->getUser();
 
-    $factory = new DifferentialMarkupEngineFactory();
-    $engine = $factory->newDifferentialCommentMarkupEngine();
+    $engine = PhabricatorMarkupEngine::newSlowvoteMarkupEngine();
 
     $comment_markup = array();
     foreach ($comments as $comment) {

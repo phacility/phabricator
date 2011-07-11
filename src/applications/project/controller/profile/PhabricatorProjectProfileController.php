@@ -111,8 +111,7 @@ class PhabricatorProjectProfileController
        $profile->getBlurb(),
        '//Nothing is known about this elusive project.//');
 
-    $factory = new DifferentialMarkupEngineFactory();
-    $engine = $factory->newDifferentialCommentMarkupEngine();
+    $engine = PhabricatorMarkupEngine::newProfileMarkupEngine();
     $blurb = $engine->markupText($blurb);
 
     $affiliations = $project->loadAffiliations();

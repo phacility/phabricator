@@ -44,8 +44,7 @@ class DiffusionCommitController extends DiffusionController {
 
     $commit_data = $drequest->loadCommitData();
 
-    $factory = new DifferentialMarkupEngineFactory();
-    $engine = $factory->newDifferentialCommentMarkupEngine();
+    $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
 
     require_celerity_resource('diffusion-commit-view-css');
     require_celerity_resource('phabricator-remarkup-css');

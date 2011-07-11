@@ -10,13 +10,13 @@ phutil_require_module('phabricator', 'applications/differential/constants/action
 phutil_require_module('phabricator', 'applications/differential/constants/revisionstatus');
 phutil_require_module('phabricator', 'applications/differential/editor/revision');
 phutil_require_module('phabricator', 'applications/differential/mail/comment');
-phutil_require_module('phabricator', 'applications/differential/parser/markup');
 phutil_require_module('phabricator', 'applications/differential/storage/changeset');
 phutil_require_module('phabricator', 'applications/differential/storage/comment');
 phutil_require_module('phabricator', 'applications/differential/storage/inlinecomment');
 phutil_require_module('phabricator', 'applications/feed/constants/story');
 phutil_require_module('phabricator', 'applications/feed/publisher');
 phutil_require_module('phabricator', 'applications/herald/storage/transcript/base');
+phutil_require_module('phabricator', 'applications/markup/engine');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'applications/search/index/indexer/differential');
 phutil_require_module('phabricator', 'infrastructure/daemon/timeline/storage/event');

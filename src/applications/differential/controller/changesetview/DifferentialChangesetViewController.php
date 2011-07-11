@@ -179,8 +179,7 @@ class DifferentialChangesetViewController extends DifferentialController {
       ->loadHandles();
     $parser->setHandles($handles);
 
-    $factory = new DifferentialMarkupEngineFactory();
-    $engine = $factory->newDifferentialCommentMarkupEngine();
+    $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
     $parser->setMarkupEngine($engine);
 
     if ($request->isAjax()) {

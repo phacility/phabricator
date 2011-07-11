@@ -39,8 +39,7 @@ class DifferentialInlineCommentPreviewController
       $user->getPHID(),
       $this->revisionID);
 
-    $factory = new DifferentialMarkupEngineFactory();
-    $engine = $factory->newDifferentialCommentMarkupEngine();
+    $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
 
     $phids = array($user->getPHID());
     $handles = id(new PhabricatorObjectHandleData($phids))

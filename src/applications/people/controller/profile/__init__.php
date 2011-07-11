@@ -8,8 +8,8 @@
 
 phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'applications/auth/oauth/provider/base');
-phutil_require_module('phabricator', 'applications/differential/parser/markup');
 phutil_require_module('phabricator', 'applications/files/uri');
+phutil_require_module('phabricator', 'applications/markup/engine');
 phutil_require_module('phabricator', 'applications/people/controller/base');
 phutil_require_module('phabricator', 'applications/people/storage/profile');
 phutil_require_module('phabricator', 'applications/people/storage/user');

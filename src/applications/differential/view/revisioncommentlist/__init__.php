@@ -6,8 +6,8 @@
 
 
 
-phutil_require_module('phabricator', 'applications/differential/parser/markup');
 phutil_require_module('phabricator', 'applications/differential/view/revisioncomment');
+phutil_require_module('phabricator', 'applications/markup/engine');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'infrastructure/javelin/api');
 phutil_require_module('phabricator', 'infrastructure/javelin/markup');

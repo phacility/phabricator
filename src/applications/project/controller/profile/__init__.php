@@ -7,10 +7,10 @@
 
 
 phutil_require_module('phabricator', 'aphront/response/404');
-phutil_require_module('phabricator', 'applications/differential/parser/markup');
 phutil_require_module('phabricator', 'applications/files/uri');
 phutil_require_module('phabricator', 'applications/maniphest/query');
 phutil_require_module('phabricator', 'applications/maniphest/view/tasksummary');
+phutil_require_module('phabricator', 'applications/markup/engine');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'applications/project/constants/status');
 phutil_require_module('phabricator', 'applications/project/controller/base');

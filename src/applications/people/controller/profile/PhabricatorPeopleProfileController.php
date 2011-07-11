@@ -139,8 +139,7 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
       $profile->getBlurb(),
       '//Nothing is known about this rare specimen.//');
 
-    $factory = new DifferentialMarkupEngineFactory();
-    $engine = $factory->newDifferentialCommentMarkupEngine();
+    $engine = PhabricatorMarkupEngine::newProfileMarkupEngine();
     $blurb = $engine->markupText($blurb);
 
     $content =

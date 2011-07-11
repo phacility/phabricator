@@ -8,13 +8,13 @@
 
 phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'aphront/response/ajax');
-phutil_require_module('phabricator', 'applications/differential/parser/markup');
 phutil_require_module('phabricator', 'applications/draft/storage/draft');
 phutil_require_module('phabricator', 'applications/maniphest/constants/transactiontype');
 phutil_require_module('phabricator', 'applications/maniphest/controller/base');
 phutil_require_module('phabricator', 'applications/maniphest/storage/task');
 phutil_require_module('phabricator', 'applications/maniphest/storage/transaction');
 phutil_require_module('phabricator', 'applications/maniphest/view/transactionlist');
+phutil_require_module('phabricator', 'applications/markup/engine');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 
 phutil_require_module('phutil', 'utils');

@@ -8,7 +8,6 @@
 
 phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'aphront/response/redirect');
-phutil_require_module('phabricator', 'applications/differential/parser/markup');
 phutil_require_module('phabricator', 'applications/draft/storage/draft');
 phutil_require_module('phabricator', 'applications/files/storage/file');
 phutil_require_module('phabricator', 'applications/maniphest/constants/status');
@@ -17,6 +16,7 @@ phutil_require_module('phabricator', 'applications/maniphest/controller/base');
 phutil_require_module('phabricator', 'applications/maniphest/editor/transaction');
 phutil_require_module('phabricator', 'applications/maniphest/storage/task');
 phutil_require_module('phabricator', 'applications/maniphest/storage/transaction');
+phutil_require_module('phabricator', 'applications/markup/engine');
 phutil_require_module('phabricator', 'applications/phid/constants');
 
 phutil_require_module('phutil', 'utils');

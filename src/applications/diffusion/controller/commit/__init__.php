@@ -7,12 +7,12 @@
 
 
 phutil_require_module('phabricator', 'applications/differential/constants/changetype');
-phutil_require_module('phabricator', 'applications/differential/parser/markup');
 phutil_require_module('phabricator', 'applications/differential/view/changesetlistview');
 phutil_require_module('phabricator', 'applications/diffusion/controller/base');
 phutil_require_module('phabricator', 'applications/diffusion/data/pathchange');
 phutil_require_module('phabricator', 'applications/diffusion/query/pathchange/base');
 phutil_require_module('phabricator', 'applications/diffusion/view/commitchangetable');
+phutil_require_module('phabricator', 'applications/markup/engine');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'applications/repository/constants/repositorytype');
 phutil_require_module('phabricator', 'applications/repository/storage/repository');

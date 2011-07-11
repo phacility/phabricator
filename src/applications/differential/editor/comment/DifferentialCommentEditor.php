@@ -343,7 +343,7 @@ class DifferentialCommentEditor {
     foreach ($inline_comments as $inline) {
       $content_blocks[] = $inline->getContent();
     }
-    $mention_ccs = DifferentialMarkupEngineFactory::extractPHIDsFromMentions(
+    $mention_ccs = PhabricatorMarkupEngine::extractPHIDsFromMentions(
       $content_blocks);
     if ($mention_ccs) {
       $current_ccs = $revision->getCCPHIDs();

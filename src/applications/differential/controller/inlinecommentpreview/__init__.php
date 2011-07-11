@@ -8,9 +8,9 @@
 
 phutil_require_module('phabricator', 'aphront/response/ajax');
 phutil_require_module('phabricator', 'applications/differential/controller/base');
-phutil_require_module('phabricator', 'applications/differential/parser/markup');
 phutil_require_module('phabricator', 'applications/differential/storage/inlinecomment');
 phutil_require_module('phabricator', 'applications/differential/view/inlinecomment');
+phutil_require_module('phabricator', 'applications/markup/engine');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 
 phutil_require_module('phutil', 'utils');

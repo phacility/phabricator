@@ -33,8 +33,7 @@ class DifferentialCommentPreviewController extends DifferentialController {
     $handles = id(new PhabricatorObjectHandleData(array($author_phid)))
       ->loadHandles();
 
-    $factory = new DifferentialMarkupEngineFactory();
-    $engine = $factory->newDifferentialCommentMarkupEngine();
+    $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
 
     $comment = new DifferentialComment();
     $comment->setContent($request->getStr('content'));
