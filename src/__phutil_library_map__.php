@@ -586,6 +586,7 @@ phutil_register_library_map(array(
     'PhrictionDocumentController' => 'applications/phriction/controller/document',
     'PhrictionEditController' => 'applications/phriction/controller/edit',
     'PhrictionHistoryController' => 'applications/phriction/controller/history',
+    'PhrictionListController' => 'applications/phriction/controller/list',
   ),
   'function' =>
   array(
@@ -1082,6 +1083,7 @@ phutil_register_library_map(array(
     'PhrictionDocumentController' => 'PhrictionController',
     'PhrictionEditController' => 'PhrictionController',
     'PhrictionHistoryController' => 'PhrictionController',
+    'PhrictionListController' => 'PhrictionController',
   ),
   'requires_interface' =>
   array(

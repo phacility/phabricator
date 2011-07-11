@@ -24,6 +24,8 @@ class PhrictionDocument extends PhrictionDAO {
   protected $depth;
   protected $contentID;
 
+  private $contentObject;
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID   => true,
@@ -74,6 +76,18 @@ class PhrictionDocument extends PhrictionDAO {
     $this->slug   = self::normalizeSlug($slug);
     $this->depth  = substr_count($this->slug, '/');
     return $this;
+  }
+
+  public function attachContent(PhrictionContent $content) {
+    $this->contentObject = $content;
+    return $this;
+  }
+
+  public function getContent() {
+    if (!$this->contentObject) {
+      throw new Exception("Attach content with attachContent() first.");
+    }
+    return $this->contentObject;
   }
 
 }

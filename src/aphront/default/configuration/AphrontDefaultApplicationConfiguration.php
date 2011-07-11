@@ -347,6 +347,9 @@ class AphrontDefaultApplicationConfiguration
       '/w/(?P<slug>.+/)$' => 'PhrictionDocumentController',
 
       '/phriction/' => array(
+        '$'                       => 'PhrictionListController',
+        'list/(?P<view>[^/]+)/$'  => 'PhrictionListController',
+
         'history(?P<slug>/)$'     => 'PhrictionHistoryController',
         'history/(?P<slug>.+/)$'  => 'PhrictionHistoryController',
 
