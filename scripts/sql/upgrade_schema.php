@@ -137,16 +137,21 @@ END;
       $port = null;
     }
 
-    list($stdout, $stderr) = execx(
-      "mysql --user=%s --password=%s --host=%s {$port} < %s",
-      $conn_user,
-      $conn_pass,
-      $conn_bare_hostname,
-      $patch['path']);
+    if (preg_match('/\.php$/', $patch['path'])) {
+      $schema_conn = $conn;
+      require_once $patch['path'];
+    } else {
+      list($stdout, $stderr) = execx(
+        "mysql --user=%s --password=%s --host=%s {$port} < %s",
+        $conn_user,
+        $conn_pass,
+        $conn_bare_hostname,
+        $patch['path']);
 
-    if ($stderr) {
-      print $stderr;
-      exit(-1);
+      if ($stderr) {
+        print $stderr;
+        exit(-1);
+      }
     }
 
     // Patch was successful, update the db with the latest applied patch version

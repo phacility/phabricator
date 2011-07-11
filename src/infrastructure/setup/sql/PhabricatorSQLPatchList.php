@@ -23,21 +23,19 @@ final class PhabricatorSQLPatchList {
 
     // Find the patch files
     $patches_dir = $root.'/resources/sql/patches/';
-    $finder = id(new FileFinder($patches_dir))
-      ->withSuffix('sql');
+    $finder = new FileFinder($patches_dir);
     $results = $finder->find();
 
     $patches = array();
     foreach ($results as $path) {
       $matches = array();
-      if (preg_match('/(\d+)\..*\.sql$/', $path, $matches)) {
-        $patches[] = array(
-          'version' => (int)$matches[1],
-          'path'    => $patches_dir.$path,
-        );
-      } else {
-        throw new Exception("Patch file '{$path}' is not properly named.");
+      if (!preg_match('/(\d+)\..*\.(sql|php)$/', $path, $matches)) {
+        continue;
       }
+      $patches[] = array(
+        'version' => (int)$matches[1],
+        'path'    => $patches_dir.$path,
+      );
     }
 
     // Files are in some 'random' order returned by the operating system
