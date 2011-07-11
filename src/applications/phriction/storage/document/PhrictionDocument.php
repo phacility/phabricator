@@ -36,13 +36,25 @@ class PhrictionDocument extends PhrictionDAO {
       PhabricatorPHIDConstants::PHID_TYPE_WIKI);
   }
 
-  public static function getSlugURI($slug) {
+  public static function getSlugURI($slug, $type = 'document') {
+    static $types = array(
+      'document'  => '/w/',
+      'history'   => '/phriction/history/',
+    );
+
+    if (empty($types[$type])) {
+      throw new Exception("Unknown URI type '{$type}'!");
+    }
+
+    $prefix = $types[$type];
+
     if ($slug == '/') {
-      return '/w/';
+      return $prefix;
     } else {
-      return '/w/'.$slug;
+      return $prefix.$slug;
     }
   }
+
 
   public static function normalizeSlug($slug) {
 

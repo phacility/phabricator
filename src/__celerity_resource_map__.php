@@ -27,7 +27,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-dark-console-css' =>
   array(
-    'uri' => '/res/a7d1dbf1/rsrc/css/aphront/dark-console.css',
+    'uri' => '/res/1a9f84bb/rsrc/css/aphront/dark-console.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1137,7 +1137,7 @@ celerity_register_resource_map(array(
   ),
   'phriction-document-css' =>
   array(
-    'uri' => '/res/b682cd2e/rsrc/css/application/phriction/phriction-document-css.css',
+    'uri' => '/res/e764414a/rsrc/css/application/phriction/phriction-document-css.css',
     'type' => 'css',
     'requires' =>
     array(

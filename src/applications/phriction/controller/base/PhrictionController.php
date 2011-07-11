@@ -27,6 +27,24 @@ abstract class PhrictionController extends PhabricatorController {
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x9A\xA1");
 
+    $tabs = array();
+    if (!empty($data['document'])) {
+      $tabs['document'] = array(
+        'name' => 'Document',
+        'href' => $data['document'],
+      );
+    }
+    if (!empty($data['history'])) {
+      $tabs['history'] = array(
+        'name' => 'History',
+        'href' => $data['history'],
+      );
+    }
+
+    if (!empty($tabs)) {
+      $page->setTabs($tabs, idx($data, 'tab'));
+    }
+
     $page->appendChild($view);
 
     $response = new AphrontWebpageResponse();

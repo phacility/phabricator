@@ -73,7 +73,8 @@ class PhrictionDocumentController
     return $this->buildStandardPageResponse(
       $page,
       array(
-        'title' => 'Phriction - '.$page_title,
+        'title'   => 'Phriction - '.$page_title,
+        'history' => PhrictionDocument::getSlugURI($slug, 'history'),
       ));
 
   }
