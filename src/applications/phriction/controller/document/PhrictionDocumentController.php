@@ -34,12 +34,46 @@ class PhrictionDocumentController
       return id(new AphrontRedirectResponse())->setURI($uri);
     }
 
-    $slug_info = 'Phriction page for '.phutil_escape_html($this->slug);
+    require_celerity_resource('phriction-document-css');
+
+    $document = id(new PhrictionDocument())->loadOneWhere(
+      'slug = %s',
+      $slug);
+
+    if (!$document) {
+      $page_content = '<em>No content here!</em>';
+      $page_title = 'Page Not Found';
+      $button = phutil_render_tag(
+        'a',
+        array(
+          'href' => '/phriction/edit/?slug='.$slug,
+          'class' => 'green button',
+        ),
+        'Create Page');
+    } else {
+      $content = id(new PhrictionContent())->load($document->getContentID());
+      $page_content = phutil_escape_html($content->getContent());
+      $page_title = $content->getTitle();
+      $button = phutil_render_tag(
+        'a',
+        array(
+          'href' => '/phriction/edit/'.$document->getID().'/',
+          'class' => 'button',
+        ),
+        'Edit Page');
+    }
+
+    $page =
+      '<div class="phriction-header">'.
+        $button.
+        '<h1>'.phutil_escape_html($page_title).'</h1>'.
+      '</div>'.
+      $page_content;
 
     return $this->buildStandardPageResponse(
-      $slug_info,
+      $page,
       array(
-        'title' => 'Phriction',
+        'title' => 'Phriction - '.$page_title,
       ));
 
   }

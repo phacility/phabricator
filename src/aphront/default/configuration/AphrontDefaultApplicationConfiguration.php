@@ -345,6 +345,10 @@ class AphrontDefaultApplicationConfiguration
       '/w(?P<slug>/)$'    => 'PhrictionDocumentController',
       // Match "/w/x/y/z/" with slug "x/y/z/".
       '/w/(?P<slug>.+/)$' => 'PhrictionDocumentController',
+
+      '/phriction/' => array(
+        'edit/(?:(?P<id>\d+)/)?$' => 'PhrictionEditController',
+      ),
     );
   }
 

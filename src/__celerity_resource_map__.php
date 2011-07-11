@@ -1135,6 +1135,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/uiexample/example.css',
   ),
+  'phriction-document-css' =>
+  array(
+    'uri' => '/res/b682cd2e/rsrc/css/application/phriction/phriction-document-css.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/phriction/phriction-document-css.css',
+  ),
   'syntax-highlighting-css' =>
   array(
     'uri' => '/res/e5cc3d88/rsrc/css/core/syntax.css',

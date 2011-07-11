@@ -579,10 +579,12 @@ phutil_register_library_map(array(
     'PhabricatorXHProfProfileController' => 'applications/xhprof/controller/profile',
     'PhabricatorXHProfProfileSymbolView' => 'applications/xhprof/view/symbol',
     'PhabricatorXHProfProfileTopLevelView' => 'applications/xhprof/view/toplevel',
+    'PhrictionContent' => 'applications/phriction/storage/content',
     'PhrictionController' => 'applications/phriction/controller/base',
     'PhrictionDAO' => 'applications/phriction/storage/base',
     'PhrictionDocument' => 'applications/phriction/storage/document',
     'PhrictionDocumentController' => 'applications/phriction/controller/document',
+    'PhrictionEditController' => 'applications/phriction/controller/edit',
   ),
   'function' =>
   array(
@@ -1072,10 +1074,12 @@ phutil_register_library_map(array(
     'PhabricatorXHProfProfileController' => 'PhabricatorXHProfController',
     'PhabricatorXHProfProfileSymbolView' => 'AphrontView',
     'PhabricatorXHProfProfileTopLevelView' => 'AphrontView',
+    'PhrictionContent' => 'PhrictionDAO',
     'PhrictionController' => 'PhabricatorController',
     'PhrictionDAO' => 'PhabricatorLiskDAO',
     'PhrictionDocument' => 'PhrictionDAO',
     'PhrictionDocumentController' => 'PhrictionController',
+    'PhrictionEditController' => 'PhrictionController',
   ),
   'requires_interface' =>
   array(

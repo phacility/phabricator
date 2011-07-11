@@ -16,20 +16,15 @@
  * limitations under the License.
  */
 
-abstract class PhrictionController extends PhabricatorController {
+class PhrictionContent extends PhrictionDAO {
 
-  public function buildStandardPageResponse($view, array $data) {
+  protected $id;
+  protected $documentID;
+  protected $version;
+  protected $authorPHID;
 
-    $page = $this->buildStandardPageView();
+  protected $title;
+  protected $slug;
+  protected $content;
 
-    $page->setApplicationName('Phriction');
-    $page->setBaseURI('/w/');
-    $page->setTitle(idx($data, 'title'));
-    $page->setGlyph("\xE2\x9A\xA1");
-
-    $page->appendChild($view);
-
-    $response = new AphrontWebpageResponse();
-    return $response->setContent($page->render());
-  }
 }

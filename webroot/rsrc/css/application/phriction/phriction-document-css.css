@@ -1,0 +1,12 @@
+/**
+ * @provides phriction-document-css
+ */
+
+.phriction-header {
+  background: #dddddd;
+  padding: 1em;
+}
+
+.phriction-header a.button {
+  float: right;
+}
