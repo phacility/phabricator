@@ -147,7 +147,7 @@ class DifferentialCommitMessageData {
 
     if ($modify_class) {
       $modifier = newv($modify_class, array($revision));
-      $fields = $modifier->modifyFields($fields);
+      $this->fields = $modifier->modifyFields($this->fields);
     }
   }
 
