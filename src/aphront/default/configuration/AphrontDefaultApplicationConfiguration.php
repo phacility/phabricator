@@ -339,6 +339,11 @@ class AphrontDefaultApplicationConfiguration
         '(?:view/(?P<view>\w+)/)?$' => 'PhabricatorSlowvoteListController',
         'create/'   => 'PhabricatorSlowvoteCreateController',
       ),
+
+      // Match "/w/" with slug "/".
+      '/w(?P<slug>/)$'    => 'PhrictionDocumentController',
+      // Match "/w/x/y/z/" with slug "x/y/z/".
+      '/w/(?P<slug>.+/)$' => 'PhrictionDocumentController',
     );
   }
 

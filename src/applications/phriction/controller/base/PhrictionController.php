@@ -16,22 +16,20 @@
  * limitations under the License.
  */
 
-final class PhabricatorPHIDConstants {
+abstract class PhrictionController extends PhabricatorController {
 
-  const PHID_TYPE_USER    = 'USER';
-  const PHID_TYPE_MLST    = 'MLST';
-  const PHID_TYPE_DREV    = 'DREV';
-  const PHID_TYPE_TASK    = 'TASK';
-  const PHID_TYPE_FILE    = 'FILE';
-  const PHID_TYPE_PROJ    = 'PROJ';
-  const PHID_TYPE_UNKNOWN = '????';
-  const PHID_TYPE_MAGIC   = '!!!!';
-  const PHID_TYPE_REPO    = 'REPO';
-  const PHID_TYPE_CMIT    = 'CMIT';
-  const PHID_TYPE_OPKG    = 'OPKG';
-  const PHID_TYPE_PSTE    = 'PSTE';
-  const PHID_TYPE_STRY    = 'STRY';
-  const PHID_TYPE_POLL    = 'POLL';
-  const PHID_TYPE_WIKI    = 'WIKI';
+  public function buildStandardPageResponse($view, array $data) {
 
+    $page = $this->buildStandardPageView();
+
+    $page->setApplicationName('Phriction');
+    $page->setBaseURI('/phriction/');
+    $page->setTitle(idx($data, 'title'));
+    $page->setGlyph("\xE2\x9A\xA1");
+
+    $page->appendChild($view);
+
+    $response = new AphrontWebpageResponse();
+    return $response->setContent($page->render());
+  }
 }
