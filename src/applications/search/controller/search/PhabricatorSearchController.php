@@ -72,6 +72,7 @@ class PhabricatorSearchController extends PhabricatorSearchBaseController {
       PhabricatorPHIDConstants::PHID_TYPE_DREV => 'Differential Revisions',
       PhabricatorPHIDConstants::PHID_TYPE_CMIT => 'Repository Commits',
       PhabricatorPHIDConstants::PHID_TYPE_TASK => 'Maniphest Tasks',
+      PhabricatorPHIDConstants::PHID_TYPE_WIKI => 'Phriction Documents',
       PhabricatorPHIDConstants::PHID_TYPE_USER => 'Phabricator Users',
     ) + $more;
 

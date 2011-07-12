@@ -118,6 +118,7 @@ class PhabricatorObjectHandle {
       PhabricatorPHIDConstants::PHID_TYPE_TASK => 'Task',
       PhabricatorPHIDConstants::PHID_TYPE_DREV => 'Revision',
       PhabricatorPHIDConstants::PHID_TYPE_CMIT => 'Commit',
+      PhabricatorPHIDConstants::PHID_TYPE_WIKI => 'Phriction',
     );
 
     return idx($map, $this->getType());

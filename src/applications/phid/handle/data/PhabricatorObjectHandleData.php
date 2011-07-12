@@ -345,6 +345,35 @@ class PhabricatorObjectHandleData {
             $handles[$phid] = $handle;
           }
           break;
+        case PhabricatorPHIDConstants::PHID_TYPE_WIKI:
+          $document_dao = newv('PhrictionDocument', array());
+          $content_dao  = newv('PhrictionContent', array());
+
+          $conn = $document_dao->establishConnection('r');
+          $documents = queryfx_all(
+            $conn,
+            'SELECT * FROM %T document JOIN %T content
+              ON document.contentID = content.id
+              WHERE document.phid IN (%Ls)',
+              $document_dao->getTableName(),
+              $content_dao->getTableName(),
+              $phids);
+          $documents = ipull($documents, null, 'phid');
+
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            $handle->setType($type);
+            if (empty($documents[$phid])) {
+              $handle->setName('Unknown Document');
+            } else {
+              $info = $documents[$phid];
+              $handle->setName($info['title']);
+              $handle->setURI(PhrictionDocument::getSlugURI($info['slug']));
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
         default:
           $loader = null;
           if (isset($external_loaders[$type])) {

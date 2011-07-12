@@ -104,6 +104,9 @@ class PhrictionEditController
         $document->setContentID($new_content->getID());
         $document->save();
 
+        $document->attachContent($new_content);
+        PhabricatorSearchPhrictionIndexer::indexDocument($document);
+
         $uri = PhrictionDocument::getSlugURI($document->getSlug());
         return id(new AphrontRedirectResponse())->setURI($uri);
       }
