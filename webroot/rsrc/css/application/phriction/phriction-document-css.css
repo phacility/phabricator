@@ -3,10 +3,29 @@
  */
 
 .phriction-header {
-  background: #dddddd;
+  background: #eeeeee;
+  border-bottom: 1px solid #dddddd;
   padding: 1em;
 }
 
 .phriction-header a.button {
   float: right;
+}
+
+.phriction-header h1 {
+  margin: .25em 0;
+}
+
+.phriction-content {
+  max-width: 960px;
+  margin: 1em;
+}
+
+.phriction-byline {
+  padding: .25em 0 1em;
+  color: #444444;
+}
+
+.phriction-content .phriction-link {
+  font-weight: bold;
 }

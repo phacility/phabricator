@@ -27,6 +27,8 @@ class PhrictionDocumentController
 
   public function processRequest() {
 
+    $request = $this->getRequest();
+
     $slug = PhrictionDocument::normalizeSlug($this->slug);
     if ($slug != $this->slug) {
       $uri = PhrictionDocument::getSlugURI($slug);
@@ -41,19 +43,62 @@ class PhrictionDocumentController
       $slug);
 
     if (!$document) {
-      $page_content = '<em>No content here!</em>';
+      $create_uri = '/phriction/edit/?slug='.$slug;
+
+      $page_content =
+        '<div class="phriction-content">'.
+          '<em>No content here!</em><br />'.
+          'No document found at <tt>'.phutil_escape_html($slug).'</tt>. '.
+          'You can <strong>'.
+          phutil_render_tag(
+            'a',
+            array(
+              'href' => $create_uri,
+            ),
+            'create a new document').'</strong>.'.
+        '</div>';
       $page_title = 'Page Not Found';
       $button = phutil_render_tag(
         'a',
         array(
-          'href' => '/phriction/edit/?slug='.$slug,
+          'href' => $create_uri,
           'class' => 'green button',
         ),
         'Create Page');
     } else {
       $content = id(new PhrictionContent())->load($document->getContentID());
-      $page_content = phutil_escape_html($content->getContent());
       $page_title = $content->getTitle();
+
+      $phids = array($content->getAuthorPHID());
+      $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+
+      $age = time() - $content->getDateCreated();
+      $age = floor($age / (60 * 60 * 24));
+
+      if ($age < 1) {
+        $when = 'today';
+      } else if ($age == 1) {
+        $when = 'yesterday';
+      } else {
+        $when = "{$age} days ago";
+      }
+
+      $byline =
+        '<div class="phriction-byline">'.
+          "Last updated {$when} by ".
+          $handles[$content->getAuthorPHID()]->renderLink().'.'.
+        '</div>';
+
+      $engine = PhabricatorMarkupEngine::newPhrictionMarkupEngine();
+
+      $page_content =
+        '<div class="phriction-content">'.
+          $byline.
+          '<div class="phabricator-remarkup">'.
+            $engine->markupText($content->getContent()).
+          '</div>'.
+        '</div>';
+
       $button = phutil_render_tag(
         'a',
         array(

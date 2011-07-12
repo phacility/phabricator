@@ -58,7 +58,8 @@ class PhrictionEditController
 
         $default_title = null;
         if ($slug) {
-          $default_title = end(explode('/', trim($slug, '/')));
+          $parts = explode('/', trim($slug, '/'));
+          $default_title = end($parts);
           $default_title = str_replace('_', ' ', $default_title);
           $default_title = ucwords($default_title);
         }

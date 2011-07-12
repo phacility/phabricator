@@ -13,6 +13,7 @@ phutil_require_module('phabricator', 'infrastructure/markup/remarkup/markuprule/
 phutil_require_module('phabricator', 'infrastructure/markup/remarkup/markuprule/maniphest');
 phutil_require_module('phabricator', 'infrastructure/markup/remarkup/markuprule/mention');
 phutil_require_module('phabricator', 'infrastructure/markup/remarkup/markuprule/paste');
+phutil_require_module('phabricator', 'infrastructure/markup/remarkup/markuprule/phriction');
 phutil_require_module('phabricator', 'infrastructure/markup/remarkup/markuprule/proxyimage');
 phutil_require_module('phabricator', 'infrastructure/markup/remarkup/markuprule/youtube');
 

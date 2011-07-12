@@ -7,6 +7,8 @@
 
 
 phutil_require_module('phabricator', 'aphront/response/redirect');
+phutil_require_module('phabricator', 'applications/markup/engine');
+phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'applications/phriction/controller/base');
 phutil_require_module('phabricator', 'applications/phriction/storage/content');
 phutil_require_module('phabricator', 'applications/phriction/storage/document');

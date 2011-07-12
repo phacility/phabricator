@@ -101,6 +101,7 @@ class PhabricatorMarkupEngine {
     $rules[] = new PhabricatorRemarkupRulePaste();
     $rules[] = new PhabricatorRemarkupRuleImageMacro();
     $rules[] = new PhabricatorRemarkupRuleMention();
+    $rules[] = new PhabricatorRemarkupRulePhriction();
 
     $custom_rule_classes = $options['custom-inline'];
     if ($custom_rule_classes) {
