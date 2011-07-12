@@ -19,6 +19,9 @@
 $__start__ = microtime(true);
 
 error_reporting(E_ALL | E_STRICT);
+
+phabricator_detect_insane_memory_limit();
+
 ini_set('memory_limit', -1);
 
 $env = getenv('PHABRICATOR_ENV'); // Apache
@@ -205,4 +208,32 @@ function phabricator_fatal_config_error($msg) {
   echo $error;
 
   die();
+}
+
+function phabricator_detect_insane_memory_limit() {
+  $memory_limit = ini_get('memory_limit');
+  $char_limit   = 12;
+  if (strlen($memory_limit) <= $char_limit) {
+    return;
+  }
+
+  // colmdoyle ran into an issue on an Ubuntu box with Suhosin where his
+  // 'memory_limit' was set to:
+  //
+  //   3232323232323232323232323232323232323232323232323232323232323232M
+  //
+  // Not a typo. A wizard did it.
+  //
+  // Anyway, with this 'memory_limit', the machine would immediately fatal
+  // when executing the ini_set() later. I wasn't able to reproduce this on my
+  // EC2 Ubuntu + Suhosin box, but verified that it caused the problem on his
+  // machine and that setting it to a more sensible value fixed it. Since I
+  // have no idea how to actually trigger the issue, we look for a coarse
+  // approximation of it (a memory_limit setting more than 12 characters in
+  // length).
+
+  phabricator_fatal_config_error(
+    "Your PHP 'memory_limit' is set to something ridiculous ".
+    "(\"{$memory_limit}\"). Set it to a more reasonable value (it must be no ".
+    "more than {$char_limit} characters long).");
 }
