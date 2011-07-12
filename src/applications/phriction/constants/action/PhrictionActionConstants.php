@@ -16,12 +16,18 @@
  * limitations under the License.
  */
 
-final class PhabricatorFeedStoryTypeConstants
-  extends PhabricatorFeedConstants {
+class PhrictionActionConstants extends PhrictionConstants {
 
-  const STORY_UNKNOWN      = 'PhabricatorFeedStoryUnknown';
-  const STORY_STATUS       = 'PhabricatorFeedStoryStatus';
-  const STORY_DIFFERENTIAL = 'PhabricatorFeedStoryDifferential';
-  const STORY_PHRICTION    = 'PhabricatorFeedStoryPhriction';
+  const ACTION_CREATE   = 'create';
+  const ACTION_EDIT     = 'edit';
+
+  public static function getActionPastTenseVerb($action) {
+    static $map = array(
+      self::ACTION_CREATE   => 'created',
+      self::ACTION_EDIT     => 'edited',
+    );
+
+    return idx($map, $action, "brazenly {$action}'d");
+  }
 
 }

@@ -368,7 +368,7 @@ class DifferentialRevisionEditor {
         ? DifferentialAction::ACTION_CREATE
         : DifferentialAction::ACTION_UPDATE,
       'feedback_content'     => $is_new
-        ? ''
+        ? phutil_utf8_shorten($revision->getSummary(), 140)
         : $this->getComments(),
       'actor_phid'           => $revision->getAuthorPHID(),
     );
