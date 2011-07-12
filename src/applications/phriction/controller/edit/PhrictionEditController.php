@@ -132,6 +132,13 @@ class PhrictionEditController
     $uri = PhrictionDocument::getSlugURI($uri);
     $uri = PhabricatorEnv::getProductionURI($uri);
 
+    $remarkup_reference = phutil_render_tag(
+      'a',
+      array(
+        'href' => PhabricatorEnv::getDoclink('article/Remarkup_Reference.html'),
+      ),
+      'Formatting Reference');
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setAction($request->getRequestURI()->getPath())
@@ -151,7 +158,8 @@ class PhrictionEditController
           ->setLabel('Content')
           ->setValue($content->getContent())
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
-          ->setName('content'))
+          ->setName('content')
+          ->setCaption($remarkup_reference))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($submit_button));

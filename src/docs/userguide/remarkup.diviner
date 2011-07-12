@@ -142,3 +142,14 @@ In Differential and Maniphest, you can mention another user by writing:
 
 When you submit your comment, this will add them as a CC on the revision or task
 if they aren't already CC'd.
+
+= Phriction Documents =
+
+You can link to Phriction documents with a name or path:
+
+  Make sure you sign and date your [legal/Letter of Marque and Reprisal]!
+
+With a pipe (##|##), you can retitle the link. Use this to mislead your
+opponents:
+
+  Check out these [legal/boring_documents/ | exciting legal documents]!

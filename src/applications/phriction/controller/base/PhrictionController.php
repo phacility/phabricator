@@ -41,10 +41,12 @@ abstract class PhrictionController extends PhabricatorController {
       );
     }
 
-    if (!empty($tabs)) {
-      $page->setTabs($tabs, idx($data, 'tab'));
-    }
+    $tabs['help'] = array(
+      'name' => 'Help',
+      'href' => PhabricatorEnv::getDoclink('article/Phriction_User_Guide.html'),
+    );
 
+    $page->setTabs($tabs, idx($data, 'tab'));
     $page->appendChild($view);
 
     $response = new AphrontWebpageResponse();
