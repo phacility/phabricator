@@ -40,12 +40,9 @@ class PhrictionEditController
       }
       $content = id(new PhrictionContent())->load($document->getContentID());
     } else if ($slug) {
-      $document = null;
-      if ($slug) {
-        $document = id(new PhrictionDocument())->loadOneWhere(
-          'slug = %s',
-          $slug);
-      }
+      $document = id(new PhrictionDocument())->loadOneWhere(
+        'slug = %s',
+        $slug);
 
       if ($document) {
         $content = id(new PhrictionContent())->load($document->getContentID());
@@ -56,14 +53,7 @@ class PhrictionEditController
         $content  = new PhrictionContent();
         $content->setSlug($slug);
 
-        $default_title = null;
-        if ($slug) {
-          $parts = explode('/', trim($slug, '/'));
-          $default_title = end($parts);
-          $default_title = str_replace('_', ' ', $default_title);
-          $default_title = ucwords($default_title);
-        }
-        $default_title = nonempty($default_title, 'New Document');
+        $default_title = PhrictionDocument::getDefaultSlugTitle($slug);
         $content->setTitle($default_title);
       }
     } else {

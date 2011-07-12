@@ -42,6 +42,8 @@ class PhrictionDocumentController
       'slug = %s',
       $slug);
 
+    $breadcrumbs = $this->renderBreadcrumbs($slug);
+
     if (!$document) {
       $create_uri = '/phriction/edit/?slug='.$slug;
 
@@ -112,6 +114,7 @@ class PhrictionDocumentController
       '<div class="phriction-header">'.
         $button.
         '<h1>'.phutil_escape_html($page_title).'</h1>'.
+        $breadcrumbs.
       '</div>'.
       $page_content;
 
@@ -122,6 +125,59 @@ class PhrictionDocumentController
         'history' => PhrictionDocument::getSlugURI($slug, 'history'),
       ));
 
+  }
+
+  private function renderBreadcrumbs($slug) {
+
+    $ancestor_handles = array();
+    $ancestral_slugs = PhrictionDocument::getSlugAncestry($slug);
+    $ancestral_slugs[] = $slug;
+    if ($ancestral_slugs) {
+      $empty_slugs = array_fill_keys($ancestral_slugs, null);
+      $ancestors = id(new PhrictionDocument())->loadAllWhere(
+        'slug IN (%Ls)',
+        $ancestral_slugs);
+      $ancestors = mpull($ancestors, null, 'getSlug');
+
+      $ancestor_phids = mpull($ancestors, 'getPHID');
+      $handles = array();
+      if ($ancestor_phids) {
+        $handles = id(new PhabricatorObjectHandleData($ancestor_phids))
+          ->loadHandles();
+      }
+
+      $ancestor_handles = array();
+      foreach ($ancestral_slugs as $slug) {
+        if (isset($ancestors[$slug])) {
+          $ancestor_handles[] = $handles[$ancestors[$slug]->getPHID()];
+        } else {
+          $handle = new PhabricatorObjectHandle();
+          $handle->setName(PhrictionDocument::getDefaultSlugTitle($slug));
+          $handle->setURI(PhrictionDocument::getSlugURI($slug));
+          $ancestor_handles[] = $handle;
+        }
+      }
+    }
+
+    $breadcrumbs = array();
+    foreach ($ancestor_handles as $ancestor_handle) {
+      $breadcrumbs[] = $ancestor_handle->renderLink();
+    }
+
+    $list = phutil_render_tag(
+      'a',
+      array(
+        'href' => '/phriction/',
+      ),
+      'Document Index');
+
+    return
+      '<div class="phriction-breadcrumbs">'.
+        $list.' &middot; '.
+        '<span class="phriction-document-crumbs">'.
+          implode(" \xC2\xBB ", $breadcrumbs).
+        '</span>'.
+      '</div>';
   }
 
 }

@@ -29,3 +29,12 @@
 .phriction-content .phriction-link {
   font-weight: bold;
 }
+
+.phriction-breadcrumbs {
+  font-size: 12px;
+  color: #666666;
+}
+
+.phriction-document-crumbs a {
+  font-weight: bold;
+}
