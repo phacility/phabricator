@@ -32,7 +32,7 @@ class DarkConsoleServicesPlugin extends DarkConsolePlugin {
 
     $log = PhutilServiceProfiler::getInstance()->getServiceCallLog();
     foreach ($log as $key => $entry) {
-      $config = $entry['config'];
+      $config = idx($entry, 'config', array());
       unset($log[$key]['config']);
 
       if (empty($_REQUEST['__analyze__'])) {
@@ -168,13 +168,12 @@ class DarkConsoleServicesPlugin extends DarkConsolePlugin {
     $counts = array();
 
     foreach ($log as $row) {
-      $totals[$row['type']] += $row['duration'];
-      $counts[$row['type']]++;
+      $totals[$row['type']] = idx($totals, $row['type'], 0) + $row['duration'];
+      $counts[$row['type']] = idx($counts, $row['type'], 0) + 1;
     }
     $totals['All'] = array_sum($totals);
     $counts['All'] = array_sum($counts);
 
-    $table = new AphrontTableView();
     $summary = array();
     foreach ($totals as $type => $total) {
       $summary[] = array(
