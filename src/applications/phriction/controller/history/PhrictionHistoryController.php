@@ -57,11 +57,17 @@ class PhrictionHistoryController
     foreach ($history as $content) {
 
       $uri = PhrictionDocument::getSlugURI($document->getSlug());
+      $version = $content->getVersion();
 
       $rows[] = array(
         phabricator_date($content->getDateCreated(), $user),
         phabricator_time($content->getDateCreated(), $user),
-        (int)$content->getVersion(),
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => $uri.'?v='.$version,
+          ),
+          'Version '.$version),
         $handles[$content->getAuthorPHID()]->renderLink(),
       );
     }

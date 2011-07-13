@@ -28,6 +28,7 @@ class PhrictionDocumentController
   public function processRequest() {
 
     $request = $this->getRequest();
+    $user = $request->getUser();
 
     $slug = PhrictionDocument::normalizeSlug($this->slug);
     if ($slug != $this->slug) {
@@ -43,6 +44,7 @@ class PhrictionDocumentController
       $slug);
 
     $breadcrumbs = $this->renderBreadcrumbs($slug);
+    $version_note = null;
 
     if (!$document) {
       $create_uri = '/phriction/edit/?slug='.$slug;
@@ -68,7 +70,28 @@ class PhrictionDocumentController
         ),
         'Create Page');
     } else {
-      $content = id(new PhrictionContent())->load($document->getContentID());
+      $version = $request->getInt('v');
+      if ($version) {
+        $content = id(new PhrictionContent())->loadOneWhere(
+          'documentID = %d AND version = %d',
+          $document->getID(),
+          $version);
+        if (!$content) {
+          return new Aphront404Response();
+        }
+
+        if ($content->getID() != $document->getContentID()) {
+          $version_note = new AphrontErrorView();
+          $version_note->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+          $version_note->setTitle('Older Version');
+          $version_note->appendChild(
+            'You are viewing an older version of this document, as it '.
+            'appeared on '.
+            phabricator_datetime($content->getDateCreated(), $user).'.');
+        }
+      } else {
+        $content = id(new PhrictionContent())->load($document->getContentID());
+      }
       $page_title = $content->getTitle();
 
       $phids = array($content->getAuthorPHID());
@@ -110,12 +133,17 @@ class PhrictionDocumentController
         'Edit Page');
     }
 
+    if ($version_note) {
+      $version_note = $version_note->render();
+    }
+
     $page =
       '<div class="phriction-header">'.
         $button.
         '<h1>'.phutil_escape_html($page_title).'</h1>'.
         $breadcrumbs.
       '</div>'.
+      $version_note.
       $page_content;
 
     return $this->buildStandardPageResponse(
