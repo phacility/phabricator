@@ -13,6 +13,7 @@ phutil_require_module('phabricator', 'view/control/table');
 
 phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'serviceprofiler');
+phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('DarkConsoleServicesPlugin.php');
