@@ -118,9 +118,29 @@ class AphrontRequest {
   }
 
   final public function isFormPost() {
-    return $this->getExists(self::TYPE_FORM) &&
-           $this->isHTTPPost() &&
-           $this->getUser()->validateCSRFToken($this->getStr('__csrf__'));
+    $post = $this->getExists(self::TYPE_FORM) &&
+            $this->isHTTPPost();
+
+    if (!$post) {
+      return false;
+    }
+
+    $valid = $this->getUser()->validateCSRFToken($this->getStr('__csrf__'));
+    if (!$valid) {
+      // This should only be able to happen if you load a form, pull your
+      // internet for 6 hours, and then reconnect and immediately submit,
+      // but give the user some indication of what happened since the workflow
+      // is incredibly confusing otherwise.
+      throw new AphrontCSRFException(
+        "The form you just submitted did not include a valid CSRF token. ".
+        "This token is a technical security measure which prevents a ".
+        "certain type of login hijacking attack. However, the token can ".
+        "become invalid if you leave a page open for more than six hours ".
+        "without a connection to the internet. To fix this problem: reload ".
+        "the page, and then resubmit it.");
+    }
+
+    return true;
   }
 
   final public function getCookie($name, $default = null) {

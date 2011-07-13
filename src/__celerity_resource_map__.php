@@ -293,17 +293,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/javelin/lib/behavior.js',
   ),
-  0 =>
-  array(
-    'uri' => '/res/1da00bfe/rsrc/js/javelin/lib/__tests__/URI.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-uri',
-      1 => 'javelin-php-serializer',
-    ),
-    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
-  ),
   'javelin-behavior-aphront-basic-tokenizer' =>
   array(
     'uri' => '/res/5e183bd5/rsrc/js/application/core/behavior-tokenizer.js',
@@ -601,6 +590,17 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/maniphest/behavior-transaction-preview.js',
   ),
+  0 =>
+  array(
+    'uri' => '/res/1da00bfe/rsrc/js/javelin/lib/__tests__/URI.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-uri',
+      1 => 'javelin-php-serializer',
+    ),
+    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
+  ),
   'javelin-behavior-owners-path-editor' =>
   array(
     'uri' => '/res/9cf78ffc/rsrc/js/application/owners/owners-path-editor.js',
@@ -651,6 +651,18 @@ celerity_register_resource_map(array(
       3 => 'javelin-dom',
     ),
     'disk' => '/rsrc/js/application/core/behavior-watch-anchor.js',
+  ),
+  'javelin-behavior-refresh-csrf' =>
+  array(
+    'uri' => '/res/39aa51f7/rsrc/js/application/core/behavior-refresh-csrf.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-request',
+      1 => 'javelin-behavior',
+      2 => 'javelin-dom',
+    ),
+    'disk' => '/rsrc/js/application/core/behavior-refresh-csrf.js',
   ),
   'javelin-behavior-workflow' =>
   array(
@@ -1137,7 +1149,7 @@ celerity_register_resource_map(array(
   ),
   'phriction-document-css' =>
   array(
-    'uri' => '/res/c08b5f24/rsrc/css/application/phriction/phriction-document-css.css',
+    'uri' => '/res/77d5f57f/rsrc/css/application/phriction/phriction-document-css.css',
     'type' => 'css',
     'requires' =>
     array(

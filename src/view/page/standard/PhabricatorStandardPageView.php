@@ -122,6 +122,7 @@ class PhabricatorStandardPageView extends AphrontPageView {
     require_celerity_resource('phabricator-standard-page-view');
 
     Javelin::initBehavior('workflow', array());
+    Javelin::initBehavior('refresh-csrf', array());
     Javelin::initBehavior(
       'phabricator-keyboard-shortcuts',
       array(

@@ -130,7 +130,35 @@ class PhabricatorUser extends PhabricatorUserDAO {
   }
 
   public function validateCSRFToken($token) {
-    for ($ii = -1; $ii <= 1; $ii++) {
+
+    // When the user posts a form, we check that it contains a valid CSRF token.
+    // Tokens cycle each hour (every CSRF_CYLCE_FREQUENCY seconds) and we accept
+    // either the current token, the next token (users can submit a "future"
+    // token if you have two web frontends that have some clock skew) or any of
+    // the last 6 tokens. This means that pages are valid for up to 7 hours.
+    // There is also some Javascript which periodically refreshes the CSRF
+    // tokens on each page, so theoretically pages should be valid indefinitely.
+    // However, this code may fail to run (if the user loses their internet
+    // connection, or there's a JS problem, or they don't have JS enabled).
+    // Choosing the size of the window in which we accept old CSRF tokens is
+    // an issue of balancing concerns between security and usability. We could
+    // choose a very narrow (e.g., 1-hour) window to reduce vulnerability to
+    // attacks using captured CSRF tokens, but it's also more likely that real
+    // users will be affected by this, e.g. if they close their laptop for an
+    // hour, open it back up, and try to submit a form before the CSRF refresh
+    // can kick in. Since the user experience of submitting a form with expired
+    // CSRF is often quite bad (you basically lose data, or it's a big pain to
+    // recover at least) and I believe we gain little additional protection
+    // by keeping the window very short (the overwhelming value here is in
+    // preventing blind attacks, and most attacks which can capture CSRF tokens
+    // can also just capture authentication information [sniffing networks]
+    // or act as the user [xss]) the 7 hour default seems like a reasonable
+    // balance. Other major platforms have much longer CSRF token lifetimes,
+    // like Rails (session duration) and Django (forever), which suggests this
+    // is a reasonable analysis.
+    $csrf_window = 6;
+
+    for ($ii = -$csrf_window; $ii <= 1; $ii++) {
       $valid = $this->getCSRFToken($ii);
       if ($token == $valid) {
         return true;
