@@ -84,13 +84,21 @@ class ManiphestTransactionSaveController extends ManiphestController {
       $file_transaction = $transaction;
     }
 
-    // Compute new CCs added by @mentions. We're going to try to add them to
-    // another CC transaction if we can. If there aren't any CC transactions,
-    // we'll create a new CC transaction after we handle everything else.
-    $mention_ccs = PhabricatorMarkupEngine::extractPHIDsFromMentions(
+    // Compute new CCs added by @mentions. Several things can cause CCs to
+    // be added as side effects: mentions, explicit CCs, users who aren't
+    // CC'd interacting with the task, and ownership changes. We build up a
+    // list of all the CCs and then construct a transaction for them at the
+    // end if necessary.
+    $added_ccs = PhabricatorMarkupEngine::extractPHIDsFromMentions(
       array(
         $request->getStr('comments'),
       ));
+
+    $cc_transaction = new ManiphestTransaction();
+    $cc_transaction
+      ->setAuthorPHID($user->getPHID())
+      ->setTransactionType(ManiphestTransactionType::TYPE_CCS);
+    $force_cc_transaction = false;
 
     $transaction = new ManiphestTransaction();
     $transaction
@@ -115,15 +123,19 @@ class ManiphestTransactionSaveController extends ManiphestController {
         $transaction->setNewValue($projects);
         break;
       case ManiphestTransactionType::TYPE_CCS:
-        $ccs = $request->getArr('ccs');
-        $ccs = array_merge($ccs, $task->getCCPHIDs());
-        if ($mention_ccs) {
-          $ccs = array_merge($ccs, $mention_ccs);
-          $mention_ccs = array();
-        }
-        $ccs = array_filter($ccs);
-        $ccs = array_unique($ccs);
-        $transaction->setNewValue($ccs);
+        // Accumulate the new explicit CCs into the array that we'll add in
+        // the CC transaction later.
+        $added_ccs = array_merge($added_ccs, $request->getArr('ccs'));
+
+        // Transfer any comments over to the CC transaction.
+        $cc_transaction->setComments($transaction->getComments());
+
+        // Make sure we include this transaction, even if the user didn't
+        // actually add any CC's, because we'll discard their comment otherwise.
+        $force_cc_transaction = true;
+
+        // Throw away the primary transaction.
+        $transaction = null;
         break;
       case ManiphestTransactionType::TYPE_PRIORITY:
         $transaction->setNewValue($request->getInt('priority'));
@@ -145,72 +157,66 @@ class ManiphestTransactionSaveController extends ManiphestController {
       $transactions[] = $transaction;
     }
 
+    // When you interact with a task, we add you to the CC list so you get
+    // further updates, and possibly assign the task to you if you took an
+    // ownership action (closing it) but it's currently unowned. We also move
+    // previous owners to CC if ownership changes. Detect all these conditions
+    // and create side-effect transactions for them.
+
+    $implicitly_claimed = false;
     switch ($action) {
       case ManiphestTransactionType::TYPE_OWNER:
         if ($task->getOwnerPHID() == $transaction->getNewValue()) {
           // If this is actually no-op, don't generate the side effect.
           break;
         }
-        // When a task is reassigned, move the previous owner to CC.
-        $old = $task->getCCPHIDs();
-        $new = array_merge(
-          $old,
-          array($task->getOwnerPHID()),
-          $mention_ccs);
-        $new = array_unique(array_filter($new));
-        if ($old != $new) {
-          $mention_ccs = null;
-          $cc = new ManiphestTransaction();
-          $cc->setAuthorPHID($user->getPHID());
-          $cc->setTransactionType(ManiphestTransactionType::TYPE_CCS);
-          $cc->setNewValue($new);
-          $transactions[] = $cc;
-        }
+        // Otherwise, when a task is reassigned, move the previous owner to CC.
+        $added_ccs[] = $task->getOwnerPHID();
         break;
       case ManiphestTransactionType::TYPE_STATUS:
         if (!$task->getOwnerPHID() &&
             $request->getStr('resolution') !=
             ManiphestTaskStatus::STATUS_OPEN) {
-          // Closing an unassigned task. Assign the user for this task
+          // Closing an unassigned task. Assign the user as the owner of
+          // this task.
           $assign = new ManiphestTransaction();
           $assign->setAuthorPHID($user->getPHID());
           $assign->setTransactionType(ManiphestTransactionType::TYPE_OWNER);
           $assign->setNewValue($user->getPHID());
           $transactions[] = $assign;
-        }
-        break;
-      default:
-        $ccs = $task->getCCPHIDs();
-        $owner = $task->getOwnerPHID();
 
-        if ($user->getPHID() !== $owner && !in_array($user->getPHID(), $ccs)) {
-          // Current user, who is commenting, is not the owner or in ccs.
-          // Add him to ccs
-          $ccs[] = $user->getPHID();
-          if ($mention_ccs) {
-            $ccs = array_merge($ccs, $mention_ccs);
-            $mention_ccs = null;
-          }
-          $cc = new ManiphestTransaction();
-          $cc->setAuthorPHID($user->getPHID());
-          $cc->setTransactionType(ManiphestTransactionType::TYPE_CCS);
-          $cc->setNewValue($ccs);
-          $transactions[] = $cc;
+          $implicitly_claimed = true;
         }
         break;
     }
 
-    if ($mention_ccs) {
-      // We have mention CCs and didn't pick up a CC transaction anywhere that
-      // we could shove them into, create a new CC transaction.
-      $cc = new ManiphestTransaction();
-      $cc->setAuthorPHID($user->getPHID());
-      $cc->setTransactionType(ManiphestTransactionType::TYPE_CCS);
 
-      $ccs = array_merge($task->getCCPHIDs(), $mention_ccs);
-      $cc->setNewValue($ccs);
+    $user_owns_task = false;
+    if ($implicitly_claimed) {
+      $user_owns_task = true;
+    } else {
+      if ($action == ManiphestTransactionType::TYPE_OWNER) {
+        if ($transaction->getNewValue() == $user->getPHID()) {
+          $user_owns_task = true;
+        }
+      } else if ($task->getOwnerPHID() == $user->getPHID()) {
+        $user_owns_task = true;
+      }
+    }
 
-      $transactions[] = $cc;
+    if (!$user_owns_task) {
+      // If we aren't making the user the new task owner and they aren't the
+      // existing task owner, add them to CC.
+      $added_ccs[] = $user->getPHID();
+    }
+
+    if ($added_ccs || $force_cc_transaction) {
+      // We've added CCs, so include a CC transaction. It's safe to do this even
+      // if we're just "adding" CCs which already exist, because the
+      // ManiphestTransactionEditor is smart enough to ignore them.
+      $all_ccs = array_merge($task->getCCPHIDs(), $added_ccs);
+      $cc_transaction->setNewValue($all_ccs);
+      $transactions[] = $cc_transaction;
     }
 
     $editor = new ManiphestTransactionEditor();
