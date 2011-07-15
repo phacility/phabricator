@@ -133,3 +133,8 @@ table.aphront-form-control-checkbox-layout th {
   font-size: 11px;
   padding: 6px 8px;
 }
+
+.aphront-textarea-drag-and-drop {
+  background: #99ff99;
+  border-color: #669966;
+}

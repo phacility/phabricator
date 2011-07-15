@@ -193,6 +193,7 @@ class PhrictionEditController
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
           ->setName('content')
           ->setID('document-textarea')
+          ->setEnableDragAndDropFileUploads(true)
           ->setCaption($remarkup_reference))
       ->appendChild(
         id(new AphrontFormSubmitControl())

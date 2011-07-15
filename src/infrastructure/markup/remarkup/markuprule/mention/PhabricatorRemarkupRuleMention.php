@@ -72,13 +72,12 @@ class PhabricatorRemarkupRuleMention
     $username = strtolower($matches[1]);
     $exists = isset($this->actualUsers[$username]);
 
-    $real = $this->actualUsers[$username]['realName'];
-
     $class = $exists
       ? 'phabricator-remarkup-mention-exists'
       : 'phabricator-remarkup-mention-unknown';
 
     if ($exists) {
+      $real = $this->actualUsers[$username]['realName'];
       $tag = phutil_render_tag(
         'a',
         array(
