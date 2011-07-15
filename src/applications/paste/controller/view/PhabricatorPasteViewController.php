@@ -42,7 +42,6 @@ class PhabricatorPasteViewController extends PhabricatorPasteController {
     }
 
     $corpus = $this->buildCorpus($paste, $file);
-
     $panel = new AphrontPanelView();
 
     if (strlen($paste->getTitle())) {
@@ -58,10 +57,10 @@ class PhabricatorPasteViewController extends PhabricatorPasteController {
       phutil_render_tag(
         'a',
         array(
-          'href' => '/paste/?copy='.$paste->getID(),
+          'href' => '/paste/?fork='.$paste->getID(),
           'class' => 'green button',
         ),
-        'Copy This'));
+        'Fork This'));
 
     $raw_uri = PhabricatorFileURI::getViewURIForPHID($paste->getFilePHID());
     $panel->addButton(
@@ -74,6 +73,37 @@ class PhabricatorPasteViewController extends PhabricatorPasteController {
         'View Raw Text'));
 
     $panel->appendChild($corpus);
+
+    $forks_of_this_paste = id(new PhabricatorPaste())->loadAllWhere(
+      'parentPHID = %s',
+      $paste->getPHID());
+
+    if ($forks_of_this_paste) {
+      $forks = array();
+      foreach ($forks_of_this_paste as $fork) {
+        $forks[] = array(
+          $fork->getID(),
+          phutil_render_tag(
+            'a',
+            array(
+              'href' => '/P'.$fork->getID(),
+            ),
+            phutil_escape_html($fork->getTitle())
+          )
+        );
+      }
+
+      $forks_table = new AphrontTableView($forks);
+      $forks_table->setHeaders(
+        array(
+          'Paste ID',
+          'Title',
+        )
+      );
+
+      $panel->setHeader("Forks of this Paste");
+      $panel->appendChild($forks_table);
+    }
 
     return $this->buildStandardPageResponse(
       $panel,
