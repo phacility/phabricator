@@ -38,3 +38,21 @@
 .phriction-document-crumbs a {
   font-weight: bold;
 }
+
+.phriction-children {
+  padding: 1em 2em;
+  background: #eeeeee;
+  border-top: 1px solid #dddddd;
+}
+
+.phriction-children ul {
+  margin-left: 2.5em;
+  list-style: circle;
+  color: #999999;
+}
+
+.phriction-children-header {
+  padding: 0 0 .5em 0;
+  margin: 0;
+  font-weight: bold;
+}

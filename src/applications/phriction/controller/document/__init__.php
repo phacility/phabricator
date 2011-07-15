@@ -15,6 +15,7 @@ phutil_require_module('phabricator', 'applications/phriction/controller/base');
 phutil_require_module('phabricator', 'applications/phriction/storage/content');
 phutil_require_module('phabricator', 'applications/phriction/storage/document');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
+phutil_require_module('phabricator', 'storage/queryfx');
 phutil_require_module('phabricator', 'view/form/error');
 phutil_require_module('phabricator', 'view/utils');
 
