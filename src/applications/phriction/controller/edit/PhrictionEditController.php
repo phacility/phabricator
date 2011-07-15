@@ -150,6 +150,8 @@ class PhrictionEditController
       ),
       'Formatting Reference');
 
+    $cancel_uri = PhrictionDocument::getSlugURI($document->getSlug());
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setAction($request->getRequestURI()->getPath())
@@ -173,6 +175,7 @@ class PhrictionEditController
           ->setCaption($remarkup_reference))
       ->appendChild(
         id(new AphrontFormSubmitControl())
+          ->addCancelButton($cancel_uri)
           ->setValue($submit_button));
 
     $panel = id(new AphrontPanelView())
