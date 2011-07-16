@@ -2,7 +2,7 @@
  * @provides javelin-behavior-differential-show-more
  * @requires javelin-behavior
  *           javelin-dom
- *           javelin-request
+ *           javelin-workflow
  *           javelin-util
  *           javelin-stratcom
  */
@@ -27,9 +27,9 @@ JX.behavior('differential-show-more', function(config) {
       JX.DOM.alterClass(context, 'differential-show-more-loading', true);
       var data = e.getNodeData('show-more');
       data['whitespace'] = config.whitespace;
-      new JX.Request(config.uri, JX.bind(null, onresponse, e))
-        .setData(data)
-        .send();
+      new JX.Workflow(config.uri, data)
+        .setHandler(JX.bind(null, onresponse, e))
+        .start();
       e.kill();
     });
 

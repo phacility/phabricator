@@ -1,7 +1,7 @@
 /**
  * @provides javelin-behavior-differential-populate
  * @requires javelin-behavior
- *           javelin-request
+ *           javelin-workflow
  *           javelin-util
  *           javelin-dom
  */
@@ -13,12 +13,14 @@ JX.behavior('differential-populate', function(config) {
   }
 
   for (var k in config.registry) {
-    new JX.Request(config.uri, JX.bind(null, onresponse, k))
-      .setData({
-        ref : config.registry[k],
-        whitespace: config.whitespace
-      })
-      .send();
+    var data = {
+      ref : config.registry[k],
+      whitespace: config.whitespace
+    };
+
+    new JX.Workflow(config.uri, data)
+      .setHandler(JX.bind(null, onresponse, k))
+      .start();
   }
 
 });
