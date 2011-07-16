@@ -27,19 +27,16 @@ class PhabricatorPasteCreateController extends PhabricatorPasteController {
     $error_view = null;
     $e_text = true;
 
+    $fork = $request->getInt('fork');
+
     $paste_text = null;
+    $paste_parent = null;
+
     if ($request->isFormPost()) {
       $errors = array();
       $title = $request->getStr('title');
 
-      $language = $request->getStr('language');
-      if ($language == 'infer') {
-        // If it's infer, store an empty string. Otherwise, store the
-        // language name. We do this so we can refer to 'infer' elsewhere
-        // in the code (such as default value) while retaining backwards
-        // compatibility with old posts with no language stored.
-        $language = '';
-      }
+      $paste_language = $request->getStr('language');
 
       $text = $request->getStr('text');
 
@@ -50,10 +47,26 @@ class PhabricatorPasteCreateController extends PhabricatorPasteController {
         $e_text = null;
       }
 
+      $parent = id(new PhabricatorPaste())->loadOneWhere(
+        'phid = %s',
+        $request->getStr('parent'));
+
+      if ($parent) {
+        $paste->setParentPHID($parent->getPHID());
+      }
+
       $paste->setTitle($title);
-      $paste->setLanguage($language);
 
       if (!$errors) {
+        if ($paste_language == 'infer') {
+          // If it's infer, store an empty string. Otherwise, store the
+          // language name. We do this so we can refer to 'infer' elsewhere
+          // in the code (such as default value) while retaining backwards
+          // compatibility with old posts with no language stored.
+          $paste_language = '';
+        }
+        $paste->setLanguage($paste_language);
+
         $paste_file = PhabricatorFile::newFromFileData(
           $text,
           array(
@@ -73,30 +86,25 @@ class PhabricatorPasteCreateController extends PhabricatorPasteController {
         $error_view->setTitle('A problem has occurred!');
       }
     } else {
-      $copy = $request->getInt('copy');
-      if ($copy) {
-        $copy_paste = id(new PhabricatorPaste())->load($copy);
-        if ($copy_paste) {
-          $title = nonempty($copy_paste->getTitle(), 'P'.$copy_paste->getID());
-          $paste->setTitle('Copy of '.$title);
-          $copy_file = id(new PhabricatorFile())->loadOneWhere(
+      if ($fork) {
+        $fork_paste = id(new PhabricatorPaste())->load($fork);
+        if ($fork_paste) {
+          $paste->setTitle('Fork of '.$fork_paste->getID().': '.
+            $fork_paste->getTitle());
+          $fork_file = id(new PhabricatorFile())->loadOneWhere(
             'phid = %s',
-            $copy_paste->getFilePHID());
-          $paste_text = $copy_file->loadFileData();
+            $fork_paste->getFilePHID());
+          $paste_text = $fork_file->loadFileData();
+          $paste_language = nonempty($fork_paste->getLanguage(), 'infer');
+          $paste_parent = $fork_paste->getPHID();
         }
+      } else {
+        $paste_language = PhabricatorEnv::getEnvConfig(
+          'pygments.dropdown-default');
       }
     }
 
     $form = new AphrontFormView();
-
-    // If we're coming back from an error and the language was already defined,
-    // use that. Otherwise, ask the config for the default.
-    if ($paste->getLanguage()) {
-      $language_default = $paste->getLanguage();
-    } else {
-      $language_default = PhabricatorEnv::getEnvConfig(
-        'pygments.dropdown-default');
-    }
 
     $available_languages = PhabricatorEnv::getEnvConfig(
       'pygments.dropdown-choices');
@@ -105,12 +113,13 @@ class PhabricatorPasteCreateController extends PhabricatorPasteController {
     $language_select = id(new AphrontFormSelectControl())
       ->setLabel('Language')
       ->setName('language')
-      ->setValue($language_default)
+      ->setValue($paste_language)
       ->setOptions($available_languages);
 
     $form
       ->setUser($user)
       ->setAction($request->getRequestURI()->getPath())
+      ->addHiddenInput('parent', $paste_parent)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Title')
@@ -127,7 +136,7 @@ class PhabricatorPasteCreateController extends PhabricatorPasteController {
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton('/paste/')
-          ->setValue('Create Paste'));
+        ->setValue('Create Paste'));
 
     $panel = new AphrontPanelView();
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
