@@ -8,6 +8,7 @@
  *           javelin-typeahead-preloaded-source
  *           javelin-stratcom
  *           javelin-json
+ *           phabricator-prefab
  * @provides herald-rule-editor
  * @javelin
  */
@@ -350,20 +351,11 @@ JX.install('HeraldRuleEditor', {
       return [action_cell, target_cell];
     },
     _renderSelect : function(map, selected, sigil) {
-      var select = JX.$N(
-        'select',
-        {
-          style : {width: '250px', margin: '0 .5em 0 0'},
-          sigil : sigil
-        });
-      for (var k in map) {
-        select.options[select.options.length] = new Option(map[k], k);
-        if (k == selected) {
-          select.value = k;
-        }
-      }
-      select.value = select.value || JX.keys(map)[0];
-      return select;
+      var attrs = {
+        style : {width: '250px', margin: '0 .5em 0 0'},
+        sigil : sigil
+      };
+      return JX.Prefab.renderSelect(map, selected, attrs);
     }
   }
 });

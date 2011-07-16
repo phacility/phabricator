@@ -258,7 +258,7 @@ celerity_register_resource_map(array(
   ),
   'herald-rule-editor' =>
   array(
-    'uri' => '/res/ba957508/rsrc/js/application/herald/HeraldRuleEditor.js',
+    'uri' => '/res/4d6dff2b/rsrc/js/application/herald/HeraldRuleEditor.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -271,6 +271,7 @@ celerity_register_resource_map(array(
       6 => 'javelin-typeahead-preloaded-source',
       7 => 'javelin-stratcom',
       8 => 'javelin-json',
+      9 => 'phabricator-prefab',
     ),
     'disk' => '/rsrc/js/application/herald/HeraldRuleEditor.js',
   ),
@@ -664,6 +665,24 @@ celerity_register_resource_map(array(
       3 => 'phabricator-shaped-request',
     ),
     'disk' => '/rsrc/js/application/phriction/phriction-document-preview.js',
+  ),
+  'javelin-behavior-projects-resource-editor' =>
+  array(
+    'uri' => '/res/a54d5616/rsrc/js/application/projects/projects-resource-editor.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'phabricator-prefab',
+      2 => 'multirow-row-manager',
+      3 => 'javelin-tokenizer',
+      4 => 'javelin-typeahead-preloaded-source',
+      5 => 'javelin-typeahead',
+      6 => 'javelin-dom',
+      7 => 'javelin-json',
+      8 => 'javelin-util',
+    ),
+    'disk' => '/rsrc/js/application/projects/projects-resource-editor.js',
   ),
   'javelin-behavior-refresh-csrf' =>
   array(
@@ -1094,6 +1113,18 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/objectselector/object-selector.css',
   ),
+  'phabricator-prefab' =>
+  array(
+    'uri' => '/res/5784a112/rsrc/js/application/core/Prefab.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-util',
+      2 => 'javelin-dom',
+    ),
+    'disk' => '/rsrc/js/application/core/Prefab.js',
+  ),
   'phabricator-profile-css' =>
   array(
     'uri' => '/res/ebe1ac2f/rsrc/css/application/profile/profile-view.css',
@@ -1168,6 +1199,15 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/application/phriction/phriction-document-css.css',
+  ),
+  'project-edit-css' =>
+  array(
+    'uri' => '/res/c192b5f9/rsrc/css/application/projects/project-edit.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/projects/project-edit.css',
   ),
   'syntax-highlighting-css' =>
   array(

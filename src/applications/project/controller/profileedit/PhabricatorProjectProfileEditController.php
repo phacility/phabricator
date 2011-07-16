@@ -49,8 +49,12 @@ class PhabricatorProjectProfileEditController
 
     $options = PhabricatorProjectStatus::getStatusMap();
 
+    $affiliations = $project->loadAffiliations();
+    $affiliations = mpull($affiliations, null, 'getUserPHID');
+
     $e_name = true;
     $errors = array();
+    $state = null;
     if ($request->isFormPost()) {
       $project->setName($request->getStr('name'));
       $project->setStatus($request->getStr('status'));
@@ -89,12 +93,97 @@ class PhabricatorProjectProfileEditController
         }
       }
 
+      $resources = $request->getStr('resources');
+      $resources = json_decode($resources, true);
+      if (!is_array($resources)) {
+        throw new Exception(
+          "Project resource information was not correctly encoded in the ".
+          "request.");
+      }
+
+      $state = array();
+      foreach ($resources as $resource) {
+        $user_phid = $resource['phid'];
+        if (!$user_phid) {
+          continue;
+        }
+        if (isset($state[$user_phid])) {
+          // TODO: We should deal with this better -- the user has entered
+          // the same resource more than once.
+        }
+        $state[$user_phid] = array(
+          'phid'    => $user_phid,
+          'status'  => $resource['status'],
+          'role'    => $resource['role'],
+          'owner'   => $resource['owner'],
+        );
+      }
+
+      $all_phids = array_merge(array_keys($state), array_keys($affiliations));
+      $all_phids = array_unique($all_phids);
+
+      $delete_affiliations = array();
+      $save_affiliations = array();
+      foreach ($all_phids as $phid) {
+        $old = idx($affiliations, $phid);
+        $new = idx($state, $phid);
+
+        if ($old && !$new) {
+          $delete_affiliations[] = $affiliations[$phid];
+          continue;
+        }
+
+        if (!$old) {
+          $affil = new PhabricatorProjectAffiliation();
+          $affil->setUserPHID($phid);
+        } else {
+          $affil = $old;
+        }
+
+        $affil->setRole((string)$new['role']);
+        $affil->setStatus((string)$new['status']);
+        $affil->setIsOwner((int)$new['owner']);
+
+        $save_affiliations[] = $affil;
+      }
+
       if (!$errors) {
         $project->save();
         $profile->setProjectPHID($project->getPHID());
         $profile->save();
+
+        foreach ($delete_affiliations as $affil) {
+          $affil->delete();
+        }
+
+        foreach ($save_affiliations as $save) {
+          $save->setProjectPHID($project->getPHID());
+          $save->save();
+        }
+
         return id(new AphrontRedirectResponse())
           ->setURI('/project/view/'.$project->getID().'/');
+      } else {
+        $phids = array_keys($state);
+        $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+        foreach ($state as $phid => $info) {
+          $state[$phid]['name'] = $handles[$phid]->getFullName();
+        }
+      }
+    } else {
+      $phids = mpull($affiliations, 'getUserPHID');
+      $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+
+      $state = array();
+      foreach ($affiliations as $affil) {
+        $user_phid = $affil->getUserPHID();
+        $state[] = array(
+          'phid'    => $user_phid,
+          'name'    => $handles[$user_phid]->getFullName(),
+          'status'  => $affil->getStatus(),
+          'role'    => $affil->getRole(),
+          'owner'   => $affil->getIsOwner(),
+        );
       }
     }
 
@@ -109,8 +198,11 @@ class PhabricatorProjectProfileEditController
     $title = 'Edit Project';
     $action = '/project/edit/'.$project->getID().'/';
 
+    require_celerity_resource('project-edit-css');
+
     $form = new AphrontFormView();
     $form
+      ->setID('project-edit-form')
       ->setUser($user)
       ->setAction($action)
       ->setEncType('multipart/form-data')
@@ -142,9 +234,47 @@ class PhabricatorProjectProfileEditController
           ->setLabel('Change Image')
           ->setName('image'))
       ->appendChild(
+        '<h1>Resources</h1>'.
+        '<input type="hidden" name="resources" id="resources" />'.
+        '<div class="aphront-form-inset">'.
+          '<div style="float: right;">'.
+            javelin_render_tag(
+              'a',
+              array(
+                'href' => '#',
+                'class' => 'button green',
+                'sigil' => 'add-resource',
+                'mustcapture' => true,
+              ),
+              'Add New Resource').
+          '</div>'.
+          '<p></p>'.
+          '<div style="clear: both;"></div>'.
+          javelin_render_tag(
+            'table',
+            array(
+              'sigil' => 'resources',
+              'class' => 'project-resource-table',
+            ),
+            '').
+        '</div>')
+      ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton('/project/view/'.$project->getID().'/')
           ->setValue('Save'));
+
+    $template = new AphrontTokenizerTemplateView();
+    $template = $template->render();
+
+    Javelin::initBehavior(
+      'projects-resource-editor',
+      array(
+        'root'              => 'project-edit-form',
+        'tokenizerTemplate' => $template,
+        'tokenizerSource'   => '/typeahead/common/users/',
+        'input'             => 'resources',
+        'state'             => array_values($state),
+      ));
 
     $panel = new AphrontPanelView();
     $panel->setHeader($header_name);
