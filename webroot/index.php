@@ -55,6 +55,8 @@ if (get_magic_quotes_gpc()) {
     "disable it to run Phabricator. Consult the PHP manual for instructions.");
 }
 
+register_shutdown_function('phabricator_shutdown');
+
 require_once dirname(dirname(__FILE__)).'/conf/__init_conf__.php';
 
 try {
@@ -74,8 +76,7 @@ try {
   PhutilErrorHandler::initialize();
 
 } catch (Exception $ex) {
-  phabricator_fatal_config_error(
-    "[Exception] ".$ex->getMessage());
+  phabricator_fatal("[Initialization Exception] ".$ex->getMessage());
 }
 
 $tz = PhabricatorEnv::getEnvConfig('phabricator.timezone');
@@ -130,11 +131,13 @@ try {
   $response = $application->handleException($ex);
 }
 
-$response = $application->willSendResponse($response);
-
-$response->setRequest($request);
-
-$response_string = $response->buildResponseString();
+try {
+  $response = $application->willSendResponse($response);
+  $response->setRequest($request);
+  $response_string = $response->buildResponseString();
+} catch (Exception $ex) {
+  phabricator_fatal('[Rendering Exception] '.$ex->getMessage());
+}
 
 $code = $response->getHTTPResponseCode();
 if ($code != 200) {
@@ -172,7 +175,6 @@ if (isset($_REQUEST['__profile__']) &&
 
 echo $response_string;
 
-
 /**
  * @group aphront
  */
@@ -198,15 +200,11 @@ function setup_aphront_basics() {
   // directories).
   phutil_load_library($aphront_root.'/src');
   phutil_load_library('arcanist/src');
+
 }
 
 function phabricator_fatal_config_error($msg) {
-  header('Content-Type: text/plain', $replace = true, $http_error = 500);
-  $error = "CONFIG ERROR: ".$msg."\n";
-
-  error_log($error);
-  echo $error;
-
+  phabricator_fatal("CONFIG ERROR: ".$msg."\n");
   die();
 }
 
@@ -236,4 +234,45 @@ function phabricator_detect_insane_memory_limit() {
     "Your PHP 'memory_limit' is set to something ridiculous ".
     "(\"{$memory_limit}\"). Set it to a more reasonable value (it must be no ".
     "more than {$char_limit} characters long).");
+}
+
+function phabricator_shutdown() {
+  $event = error_get_last();
+
+  if (!$event) {
+    return;
+  }
+
+  if ($event['type'] != E_ERROR) {
+    return;
+  }
+
+  $msg = ">>> UNRECOVERABLE FATAL ERROR <<<\n\n";
+  if ($event) {
+    // Even though we should be emitting this as text-plain, escape things just
+    // to be sure since we can't really be sure what the program state is when
+    // we get here.
+    $msg .= phutil_escape_html($event['message'])."\n\n";
+    $msg .= phutil_escape_html($event['file'].':'.$event['line']);
+  }
+
+  // flip dem tables
+  $msg .= "\n\n\n";
+  $msg .= "\xe2\x94\xbb\xe2\x94\x81\xe2\x94\xbb\x20\xef\xb8\xb5\x20\xc2\xaf".
+          "\x5c\x5f\x28\xe3\x83\x84\x29\x5f\x2f\xc2\xaf\x20\xef\xb8\xb5\x20".
+          "\xe2\x94\xbb\xe2\x94\x81\xe2\x94\xbb";
+
+  phabricator_fatal($msg);
+}
+
+function phabricator_fatal($msg) {
+  header(
+    'Content-Type: text/plain; charset=utf-8',
+    $replace = true,
+    $http_error = 500);
+
+  error_log($msg);
+  echo $msg;
+
+  exit(1);
 }

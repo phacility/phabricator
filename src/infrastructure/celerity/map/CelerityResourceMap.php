@@ -63,7 +63,7 @@ final class CelerityResourceMap {
   private function resolveResource(array &$map, $symbol) {
     if (empty($this->resourceMap[$symbol])) {
       throw new Exception(
-        "Attempting to resolve unknown resource, '{$symbol}'.");
+        "Attempting to resolve unknown Celerity resource, '{$symbol}'.");
     }
 
     $info = $this->resourceMap[$symbol];
@@ -94,8 +94,8 @@ final class CelerityResourceMap {
         $package = $this->packageMap['reverse'][$symbol];
         $package_info = $this->packageMap['packages'][$package];
         $packaged[$package_info['name']] = $package_info;
-        foreach ($package_info['symbols'] as $symbol) {
-          $handled[$symbol] = true;
+        foreach ($package_info['symbols'] as $packaged_symbol) {
+          $handled[$packaged_symbol] = true;
         }
       }
     }
