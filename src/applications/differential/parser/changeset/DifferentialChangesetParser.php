@@ -489,10 +489,20 @@ class DifferentialChangesetParser {
       }
     }
 
-    $old_corpus = ipull($this->old, 'text');
+    // NOTE: Micro-optimize a couple of ipull()s here since it gives us a
+    // 10% performance improvement for certain types of large diffs like
+    // Phriction changes.
+
+    $old_corpus = array();
+    foreach ($this->old as $o) {
+      $old_corpus[] = $o['text'];
+    }
     $old_corpus_block = implode("\n", $old_corpus);
 
-    $new_corpus = ipull($this->new, 'text');
+    $new_corpus = array();
+    foreach ($this->new as $n) {
+      $new_corpus[] = $n['text'];
+    }
     $new_corpus_block = implode("\n", $new_corpus);
 
     $old_future = $this->getHighlightFuture($old_corpus_block);
@@ -796,33 +806,11 @@ class DifferentialChangesetParser {
           // especially for python) or often produce a much larger set of
           // differences than necessary.
 
-          $old_tmp = new TempFile();
-          $new_tmp = new TempFile();
-          Filesystem::writeFile($old_tmp, $old_file);
-          Filesystem::writeFile($new_tmp, $new_file);
-          list($err, $diff) = exec_manual(
-            'diff -bw -U65535 %s %s       ',
-            $old_tmp,
-            $new_tmp);
-
-          if (!strlen($diff)) {
-            // If there's no diff text, that means the files are identical
-            // except for whitespace changes. Build a synthetic, changeless
-            // diff. TODO: this is incredibly hacky.
-            $entire_file = explode("\n", $changeset->makeOldFile());
-            foreach ($entire_file as $k => $line) {
-              $entire_file[$k] = ' '.$line;
-            }
-            $len = count($entire_file);
-            $entire_file = implode("\n", $entire_file);
-
-            $diff = <<<EOSYNTHETIC
---- ignored 9999-99-99
-+++ ignored 9999-99-99
-@@ -{$len},{$len} +{$len},{$len} @@
-{$entire_file}
-EOSYNTHETIC;
-          }
+          $engine = new PhabricatorDifferenceEngine();
+          $engine->setIgnoreWhitespace(true);
+          $no_whitespace_changeset = $engine->generateChangesetFromFileContent(
+            $old_file,
+            $new_file);
 
           // subparser takes over the current non-whitespace-ignoring changeset
           $subparser = new DifferentialChangesetParser();
@@ -832,21 +820,17 @@ EOSYNTHETIC;
             $subparser->parseHunk($hunk);
           }
           // We need to call process() so that the subparser's values for
-          // things like.
+          // metadata (like 'unchanged') is correct.
           $subparser->process();
 
           $this->subparser = $subparser;
-
-          // this parser takes new changeset; will use subparser's text later
-          $changes = id(new ArcanistDiffParser())->parseDiff($diff);
-          $diff = DifferentialDiff::newFromRawChanges($changes);
 
           // While we aren't updating $this->changeset (since it has a bunch
           // of metadata we need to preserve, so that headers like "this file
           // was moved" render correctly), we're overwriting the local
           // $changeset so that the block below will choose the synthetic
           // hunks we've built instead of the original hunks.
-          $changeset = head($diff->getChangesets());
+          $changeset = $no_whitespace_changeset;
         }
 
         // This either uses the real hunks, or synthetic hunks we built above.
@@ -1595,6 +1579,44 @@ EOSYNTHETIC;
     }
 
     return $ret;
+  }
+
+  /**
+   * Parse the 'range' specification that this class and the client-side JS
+   * emit to indicate that a user clicked "Show more..." on a diff. Generally,
+   * use is something like this:
+   *
+   *   $spec = $request->getStr('range');
+   *   $parsed = DifferentialChangesetParser::parseRangeSpecification($spec);
+   *   list($start, $end, $mask) = $parsed;
+   *   $parser->render($start, $end, $mask);
+   *
+   * @param string Range specification, indicating the range of the diff that
+   *               should be rendered.
+   * @return tuple List of <start, end, mask> suitable for passing to
+   *               @{method:render}.
+   */
+  public static function parseRangeSpecification($spec) {
+    $range_s = null;
+    $range_e = null;
+    $mask = array();
+
+    if ($spec) {
+      $match = null;
+      if (preg_match('@^(\d+)-(\d+)(?:/(\d+)-(\d+))?$@', $spec, $match)) {
+        $range_s = (int)$match[1];
+        $range_e = (int)$match[2];
+        if (count($match) > 3) {
+          $start = (int)$match[3];
+          $len = (int)$match[4];
+          for ($ii = $start; $ii < $start + $len; $ii++) {
+            $mask[$ii] = true;
+          }
+        }
+      }
+    }
+
+    return array($range_s, $range_e, $mask);
   }
 
 }

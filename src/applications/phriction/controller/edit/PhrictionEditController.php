@@ -38,7 +38,19 @@ class PhrictionEditController
       if (!$document) {
         return new Aphront404Response();
       }
-      $content = id(new PhrictionContent())->load($document->getContentID());
+
+      $revert = $request->getInt('revert');
+      if ($revert) {
+        $content = id(new PhrictionContent())->loadOneWhere(
+          'documentID = %d AND version = %d',
+          $document->getID(),
+          $revert);
+        if (!$content) {
+          return new Aphront404Response();
+        }
+      } else {
+        $content = id(new PhrictionContent())->load($document->getContentID());
+      }
     } else if ($slug) {
       $document = id(new PhrictionDocument())->loadOneWhere(
         'slug = %s',

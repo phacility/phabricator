@@ -62,3 +62,33 @@
   margin-bottom: 1em;
   font-size: 11px;
 }
+
+
+.phriction-document-history-diff {
+  margin:           0 0 0 2em;
+  padding-bottom:   2em;
+  max-width:        1162px;
+}
+
+.phriction-revert-table {
+  width: 100%;
+}
+
+.phriction-revert-table td {
+  text-align: center;
+  width: 50%;
+  padding: .5em 0;
+}
+
+.phriction-history-nav-table {
+  width: 100%;
+}
+
+.phriction-history-nav-table td {
+  width: 50%;
+  color: #444444;
+}
+
+.phriction-history-nav-table td.nav-next {
+  text-align: right;
+}

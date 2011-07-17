@@ -47,27 +47,9 @@ class DiffusionDiffController extends DiffusionController {
     $parser->setWhitespaceMode(
       DifferentialChangesetParser::WHITESPACE_SHOW_ALL);
 
-    $range_s = null;
-    $range_e = null;
-    $mask = array();
-
-    // TODO: This duplicates a block in DifferentialChangesetViewController.
-    $range = $request->getStr('range');
-    if ($range) {
-      $match = null;
-      if (preg_match('@^(\d+)-(\d+)(?:/(\d+)-(\d+))?$@', $range, $match)) {
-        $range_s = (int)$match[1];
-        $range_e = (int)$match[2];
-        if (count($match) > 3) {
-          $start = (int)$match[3];
-          $len = (int)$match[4];
-          for ($ii = $start; $ii < $start + $len; $ii++) {
-            $mask[$ii] = true;
-          }
-        }
-      }
-    }
-
+    $spec = $request->getStr('range');
+    list($range_s, $range_e, $mask) =
+      DifferentialChangesetParser::parseRangeSpecification($spec);
     $output = $parser->render($range_s, $range_e, $mask);
 
     return id(new AphrontAjaxResponse())

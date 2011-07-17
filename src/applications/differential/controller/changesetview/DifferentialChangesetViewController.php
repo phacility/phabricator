@@ -110,50 +110,21 @@ class DifferentialChangesetViewController extends DifferentialController {
         $right_data = $left->makeOldFile();
       }
 
-      $left_tmp = new TempFile();
-      $right_tmp = new TempFile();
-      Filesystem::writeFile($left_tmp, $left_data);
-      Filesystem::writeFile($right_tmp, $right_data);
-      list($err, $stdout) = exec_manual(
-        '/usr/bin/diff -U65535 %s %s',
-        $left_tmp,
-        $right_tmp);
+      $engine = new PhabricatorDifferenceEngine();
+      $synthetic = $engine->generateChangesetFromFileContent(
+        $left_data,
+        $right_data);
 
       $choice = nonempty($left, $right);
-      if ($stdout) {
-        $parser = new ArcanistDiffParser();
-        $changes = $parser->parseDiff($stdout);
-        $diff = DifferentialDiff::newFromRawChanges($changes);
-        $changesets = $diff->getChangesets();
-        $first = reset($changesets);
-        $choice->attachHunks($first->getHunks());
-      } else {
-        $choice->attachHunks(array());
-      }
+      $choice->attachHunks($synthetic->getHunks());
 
       $changeset = $choice;
       $changeset->setID(null);
     }
 
-    $range_s = null;
-    $range_e = null;
-    $mask = array();
-
-    $range = $request->getStr('range');
-    if ($range) {
-      $match = null;
-      if (preg_match('@^(\d+)-(\d+)(?:/(\d+)-(\d+))?$@', $range, $match)) {
-        $range_s = (int)$match[1];
-        $range_e = (int)$match[2];
-        if (count($match) > 3) {
-          $start = (int)$match[3];
-          $len = (int)$match[4];
-          for ($ii = $start; $ii < $start + $len; $ii++) {
-            $mask[$ii] = true;
-          }
-        }
-      }
-    }
+    $spec = $request->getStr('range');
+    list($range_s, $range_e, $mask) =
+      DifferentialChangesetParser::parseRangeSpecification($spec);
 
     $parser = new DifferentialChangesetParser();
     $parser->setChangeset($changeset);

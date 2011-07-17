@@ -357,6 +357,7 @@ class AphrontDefaultApplicationConfiguration
         'edit/(?:(?P<id>\d+)/)?$' => 'PhrictionEditController',
 
         'preview/$' => 'PhrictionDocumentPreviewController',
+        'diff/(?P<id>\d+)/$' => 'PhrictionDiffController',
       ),
     );
   }

@@ -38,6 +38,8 @@ class PhrictionHistoryController
       return new Aphront404Response();
     }
 
+    $current = id(new PhrictionContent())->load($document->getContentID());
+
     $pager = new AphrontPagerView();
     $pager->setOffset($request->getInt('page'));
     $pager->setURI($request->getRequestURI(), 'page');
@@ -59,6 +61,35 @@ class PhrictionHistoryController
       $uri = PhrictionDocument::getSlugURI($document->getSlug());
       $version = $content->getVersion();
 
+      $diff_uri = new PhutilURI('/phriction/diff/'.$document->getID().'/');
+
+      $vs_previous = '<em>Created</em>';
+      if ($content->getVersion() != 1) {
+        $uri = $diff_uri
+          ->alter('l', $content->getVersion() - 1)
+          ->alter('r', $content->getVersion());
+        $vs_previous = phutil_render_tag(
+          'a',
+          array(
+            'href' => $uri,
+          ),
+          'Show Change');
+      }
+
+      $vs_head = '<em>Current</em>';
+      if ($content->getID() != $document->getContentID()) {
+        $uri = $diff_uri
+          ->alter('l', $content->getVersion())
+          ->alter('r', $current->getVersion());
+
+        $vs_head = phutil_render_tag(
+          'a',
+          array(
+            'href' => $uri,
+          ),
+          'Show Later Changes');
+      }
+
       $rows[] = array(
         phabricator_date($content->getDateCreated(), $user),
         phabricator_time($content->getDateCreated(), $user),
@@ -69,6 +100,9 @@ class PhrictionHistoryController
           ),
           'Version '.$version),
         $handles[$content->getAuthorPHID()]->renderLink(),
+        '',
+        $vs_previous,
+        $vs_head,
       );
     }
 
@@ -79,13 +113,19 @@ class PhrictionHistoryController
         'Time',
         'Version',
         'Author',
+        'Description',
+        'Against Previous',
+        'Against Current',
       ));
     $table->setColumnClasses(
       array(
         '',
         'right',
+        'pri',
         '',
         'wide',
+        '',
+        '',
       ));
 
     $panel = new AphrontPanelView();

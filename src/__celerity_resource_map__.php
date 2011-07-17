@@ -1162,7 +1162,7 @@ celerity_register_resource_map(array(
   ),
   'phriction-document-css' =>
   array(
-    'uri' => '/res/a6d15e09/rsrc/css/application/phriction/phriction-document-css.css',
+    'uri' => '/res/a0eb9ea1/rsrc/css/application/phriction/phriction-document-css.css',
     'type' => 'css',
     'requires' =>
     array(
