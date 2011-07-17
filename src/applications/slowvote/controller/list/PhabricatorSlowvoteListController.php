@@ -58,15 +58,15 @@ class PhabricatorSlowvoteListController
     $rows = array();
     foreach ($polls as $poll) {
       $rows[] = array(
-        $handles[$poll->getAuthorPHID()]->renderLink(),
+        'V'.$poll->getID(),
         phutil_render_tag(
           'a',
           array(
             'href' => '/V'.$poll->getID(),
           ),
-          phutil_escape_html('V'.$poll->getID().' '.$poll->getQuestion())),
-        phabricator_date($poll->getDateCreated(), $user),
-        phabricator_time($poll->getDateCreated(), $user),
+          phutil_escape_html($poll->getQuestion())),
+        $handles[$poll->getAuthorPHID()]->renderLink(),
+        phabricator_format_timestamp($poll->getDateCreated(), $user),
       );
     }
 
@@ -80,10 +80,10 @@ class PhabricatorSlowvoteListController
       ));
     $table->setHeaders(
       array(
-        'Author',
+        'ID',
         'Poll',
-        'Date',
-        'Time',
+        'Author',
+        'Created',
       ));
 
     $panel = new AphrontPanelView();
