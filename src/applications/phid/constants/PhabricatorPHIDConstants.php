@@ -33,5 +33,6 @@ final class PhabricatorPHIDConstants {
   const PHID_TYPE_STRY    = 'STRY';
   const PHID_TYPE_POLL    = 'POLL';
   const PHID_TYPE_WIKI    = 'WIKI';
+  const PHID_TYPE_APRJ    = 'APRJ';
 
 }

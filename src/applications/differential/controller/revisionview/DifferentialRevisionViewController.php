@@ -99,6 +99,10 @@ class DifferentialRevisionViewController extends DifferentialController {
       }
     }
 
+    if ($target->getArcanistProjectPHID()) {
+      $object_phids[] = $target->getArcanistProjectPHID();
+    }
+
     foreach ($revision->getAttached() as $type => $phids) {
       foreach ($phids as $phid => $info) {
         $object_phids[] = $phid;
@@ -455,6 +459,13 @@ class DifferentialRevisionViewController extends DifferentialController {
         $links[] = $handles[$commit_phid]->renderLink();
       }
       $properties['Commits'] = implode('<br />', $links);
+    }
+
+    $properties['Lines'] = number_format($diff->getLineCount());
+    $arcanist_phid = $diff->getArcanistProjectPHID();
+    if ($arcanist_phid) {
+      $properties['Arcanist Project'] = phutil_escape_html(
+        $handles[$arcanist_phid]->getName());
     }
 
     $properties['Apply Patch'] =

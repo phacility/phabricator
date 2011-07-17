@@ -345,6 +345,26 @@ class PhabricatorObjectHandleData {
             $handles[$phid] = $handle;
           }
           break;
+        case PhabricatorPHIDConstants::PHID_TYPE_APRJ:
+          $project_dao = newv('PhabricatorRepositoryArcanistProject', array());
+
+          $projects = $project_dao->loadAllWhere(
+            'phid IN (%Ls)',
+            $phids);
+          $projects = mpull($projects, null, 'getPHID');
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            $handle->setType($type);
+            if (empty($projects[$phid])) {
+              $handle->setName('Unknown Arcanist Project');
+            } else {
+              $project = $projects[$phid];
+              $handle->setName($project->getName());
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
         case PhabricatorPHIDConstants::PHID_TYPE_WIKI:
           $document_dao = newv('PhrictionDocument', array());
           $content_dao  = newv('PhrictionContent', array());

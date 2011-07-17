@@ -75,6 +75,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
     $rows = array();
     $disable = false;
     $radios = array();
+    $last_base = null;
     foreach ($data as $row) {
 
       $name = phutil_escape_html($row['name']);
@@ -123,7 +124,8 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
         $old = null;
       }
 
-      $desc = phutil_escape_html($row['desc']);
+      $desc = $row['desc'];
+
       if ($row['age']) {
         $age = phabricator_format_timestamp($row['age']);
       } else {
@@ -144,11 +146,18 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
         $unit = null;
       }
 
+      $base = $this->renderBaseRevision($diff);
+      if ($last_base !== null && $base !== $last_base) {
+        // TODO: Render some kind of notice about rebases.
+      }
+      $last_base = $base;
+
       $rows[] =
         '<tr'.$class.'>'.
           '<td class="revhistory-name">'.$name.'</td>'.
           '<td class="revhistory-id">'.$id.'</td>'.
-          '<td class="revhistory-desc">'.$desc.'</td>'.
+          '<td class="revhistory-base">'.phutil_escape_html($base).'</td>'.
+          '<td class="revhistory-desc">'.phutil_escape_html($desc).'</td>'.
           '<td class="revhistory-age">'.$age.'</td>'.
           '<td class="revhistory-star">'.$lint.'</td>'.
           '<td class="revhistory-star">'.$unit.'</td>'.
@@ -157,31 +166,31 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
         '</tr>';
     }
 
-      Javelin::initBehavior(
-        'differential-diff-radios',
+    Javelin::initBehavior(
+      'differential-diff-radios',
+      array(
+        'radios' => $radios,
+      ));
+
+    $options = array(
+      'ignore-all' => 'Ignore All',
+      'ignore-trailing' => 'Ignore Trailing',
+      'show-all' => 'Show All',
+    );
+
+    $select = '<select name="whitespace">';
+    foreach ($options as $value => $label) {
+      $select .= phutil_render_tag(
+        'option',
         array(
-          'radios' => $radios,
-        ));
-
-      $options = array(
-        'ignore-all' => 'Ignore All',
-        'ignore-trailing' => 'Ignore Trailing',
-        'show-all' => 'Show All',
-      );
-
-      $select = '<select name="whitespace">';
-      foreach ($options as $value => $label) {
-        $select .= phutil_render_tag(
-          'option',
-          array(
-            'value' => $value,
-            'selected' => ($value == $this->selectedWhitespace)
-            ? 'selected'
-            : null,
-          ),
-          phutil_escape_html($label));
-      }
-      $select .= '</select>';
+          'value' => $value,
+          'selected' => ($value == $this->selectedWhitespace)
+          ? 'selected'
+          : null,
+        ),
+        phutil_escape_html($label));
+    }
+    $select .= '</select>';
 
     return
       '<div class="differential-revision-history differential-panel">'.
@@ -191,6 +200,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
             '<tr>'.
               '<th>Diff</th>'.
               '<th>ID</th>'.
+              '<th>Base</th>'.
               '<th>Description</th>'.
               '<th>Created</th>'.
               '<th>Lint</th>'.
@@ -285,4 +295,17 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       '</span>';
   }
 
+  private function renderBaseRevision(DifferentialDiff $diff) {
+    switch ($diff->getSourceControlSystem()) {
+      case 'git':
+        return substr($diff->getSourceControlBaseRevision(), 0, 7);
+      case 'svn':
+        $base = $diff->getSourceControlBaseRevision();
+        $base = explode('@', $base);
+        $base = end($base);
+        return $base;
+      default:
+        return null;
+    }
+  }
 }
