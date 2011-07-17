@@ -66,7 +66,8 @@ class PhabricatorSlowvoteListController
           ),
           phutil_escape_html($poll->getQuestion())),
         $handles[$poll->getAuthorPHID()]->renderLink(),
-        phabricator_format_timestamp($poll->getDateCreated(), $user),
+        phabricator_date($poll->getDateCreated(), $user),
+        phabricator_time($poll->getDateCreated(), $user),
       );
     }
 
@@ -76,6 +77,7 @@ class PhabricatorSlowvoteListController
         '',
         'pri wide',
         '',
+        '',
         'right',
       ));
     $table->setHeaders(
@@ -83,7 +85,8 @@ class PhabricatorSlowvoteListController
         'ID',
         'Poll',
         'Author',
-        'Created',
+        'Date',
+        'Time',
       ));
 
     $panel = new AphrontPanelView();
