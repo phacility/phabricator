@@ -355,6 +355,8 @@ class AphrontDefaultApplicationConfiguration
         'history/(?P<slug>.+/)$'  => 'PhrictionHistoryController',
 
         'edit/(?:(?P<id>\d+)/)?$' => 'PhrictionEditController',
+
+        'preview/$' => 'PhrictionDocumentPreviewController',
       ),
     );
   }

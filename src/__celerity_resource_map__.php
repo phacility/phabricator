@@ -90,7 +90,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-panel-view-css' =>
   array(
-    'uri' => '/res/e0139b9c/rsrc/css/aphront/panel-view.css',
+    'uri' => '/res/58da9c70/rsrc/css/aphront/panel-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -292,6 +292,17 @@ celerity_register_resource_map(array(
       0 => 'javelin-magical-init',
     ),
     'disk' => '/rsrc/js/javelin/lib/behavior.js',
+  ),
+  0 =>
+  array(
+    'uri' => '/res/1da00bfe/rsrc/js/javelin/lib/__tests__/URI.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-uri',
+      1 => 'javelin-php-serializer',
+    ),
+    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
   ),
   'javelin-behavior-aphront-basic-tokenizer' =>
   array(
@@ -590,17 +601,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/maniphest/behavior-transaction-preview.js',
   ),
-  0 =>
-  array(
-    'uri' => '/res/1da00bfe/rsrc/js/javelin/lib/__tests__/URI.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-uri',
-      1 => 'javelin-php-serializer',
-    ),
-    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
-  ),
   'javelin-behavior-owners-path-editor' =>
   array(
     'uri' => '/res/9cf78ffc/rsrc/js/application/owners/owners-path-editor.js',
@@ -651,6 +651,19 @@ celerity_register_resource_map(array(
       3 => 'javelin-dom',
     ),
     'disk' => '/rsrc/js/application/core/behavior-watch-anchor.js',
+  ),
+  'javelin-behavior-phriction-document-preview' =>
+  array(
+    'uri' => '/res/f1665ecd/rsrc/js/application/phriction/phriction-document-preview.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-util',
+      3 => 'phabricator-shaped-request',
+    ),
+    'disk' => '/rsrc/js/application/phriction/phriction-document-preview.js',
   ),
   'javelin-behavior-refresh-csrf' =>
   array(
@@ -1149,7 +1162,7 @@ celerity_register_resource_map(array(
   ),
   'phriction-document-css' =>
   array(
-    'uri' => '/res/77d5f57f/rsrc/css/application/phriction/phriction-document-css.css',
+    'uri' => '/res/84784c2d/rsrc/css/application/phriction/phriction-document-css.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1194,6 +1207,30 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/25f94e94/typeahead.pkg.js',
       'type' => 'js',
     ),
+    '2ac15016' =>
+    array (
+      'name' => 'core.pkg.css',
+      'symbols' =>
+      array (
+        0 => 'phabricator-core-css',
+        1 => 'phabricator-core-buttons-css',
+        2 => 'phabricator-standard-page-view',
+        3 => 'aphront-dialog-view-css',
+        4 => 'aphront-form-view-css',
+        5 => 'aphront-panel-view-css',
+        6 => 'aphront-side-nav-view-css',
+        7 => 'aphront-table-view-css',
+        8 => 'aphront-crumbs-view-css',
+        9 => 'aphront-tokenizer-control-css',
+        10 => 'aphront-typeahead-control-css',
+        11 => 'aphront-list-filter-view-css',
+        12 => 'phabricator-directory-css',
+        13 => 'phabricator-remarkup-css',
+        14 => 'syntax-highlighting-css',
+      ),
+      'uri' => '/res/pkg/2ac15016/core.pkg.css',
+      'type' => 'css',
+    ),
     '307df223' =>
     array (
       'name' => 'javelin.pkg.js',
@@ -1230,30 +1267,6 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/95b66c1a/differential.pkg.css',
       'type' => 'css',
     ),
-    'a06761eb' =>
-    array (
-      'name' => 'core.pkg.css',
-      'symbols' =>
-      array (
-        0 => 'phabricator-core-css',
-        1 => 'phabricator-core-buttons-css',
-        2 => 'phabricator-standard-page-view',
-        3 => 'aphront-dialog-view-css',
-        4 => 'aphront-form-view-css',
-        5 => 'aphront-panel-view-css',
-        6 => 'aphront-side-nav-view-css',
-        7 => 'aphront-table-view-css',
-        8 => 'aphront-crumbs-view-css',
-        9 => 'aphront-tokenizer-control-css',
-        10 => 'aphront-typeahead-control-css',
-        11 => 'aphront-list-filter-view-css',
-        12 => 'phabricator-directory-css',
-        13 => 'phabricator-remarkup-css',
-        14 => 'syntax-highlighting-css',
-      ),
-      'uri' => '/res/pkg/a06761eb/core.pkg.css',
-      'type' => 'css',
-    ),
     'd0713563' =>
     array (
       'name' => 'workflow.pkg.js',
@@ -1287,15 +1300,15 @@ celerity_register_resource_map(array(
   ),
   'reverse' =>
   array (
-    'aphront-crumbs-view-css' => 'a06761eb',
-    'aphront-dialog-view-css' => 'a06761eb',
-    'aphront-form-view-css' => 'a06761eb',
-    'aphront-list-filter-view-css' => 'a06761eb',
-    'aphront-panel-view-css' => 'a06761eb',
-    'aphront-side-nav-view-css' => 'a06761eb',
-    'aphront-table-view-css' => 'a06761eb',
-    'aphront-tokenizer-control-css' => 'a06761eb',
-    'aphront-typeahead-control-css' => 'a06761eb',
+    'aphront-crumbs-view-css' => '2ac15016',
+    'aphront-dialog-view-css' => '2ac15016',
+    'aphront-form-view-css' => '2ac15016',
+    'aphront-list-filter-view-css' => '2ac15016',
+    'aphront-panel-view-css' => '2ac15016',
+    'aphront-side-nav-view-css' => '2ac15016',
+    'aphront-table-view-css' => '2ac15016',
+    'aphront-tokenizer-control-css' => '2ac15016',
+    'aphront-typeahead-control-css' => '2ac15016',
     'differential-changeset-view-css' => '95b66c1a',
     'differential-core-view-css' => '95b66c1a',
     'differential-revision-add-comment-css' => '95b66c1a',
@@ -1332,13 +1345,13 @@ celerity_register_resource_map(array(
     'javelin-util' => '307df223',
     'javelin-vector' => '307df223',
     'javelin-workflow' => 'd0713563',
-    'phabricator-core-buttons-css' => 'a06761eb',
-    'phabricator-core-css' => 'a06761eb',
-    'phabricator-directory-css' => 'a06761eb',
+    'phabricator-core-buttons-css' => '2ac15016',
+    'phabricator-core-css' => '2ac15016',
+    'phabricator-directory-css' => '2ac15016',
     'phabricator-keyboard-shortcut' => 'd0713563',
     'phabricator-keyboard-shortcut-manager' => 'd0713563',
-    'phabricator-remarkup-css' => 'a06761eb',
-    'phabricator-standard-page-view' => 'a06761eb',
-    'syntax-highlighting-css' => 'a06761eb',
+    'phabricator-remarkup-css' => '2ac15016',
+    'phabricator-standard-page-view' => '2ac15016',
+    'syntax-highlighting-css' => '2ac15016',
   ),
 ));

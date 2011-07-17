@@ -60,6 +60,8 @@ class PhrictionEditController
       return new Aphront404Response();
     }
 
+    require_celerity_resource('phriction-document-css');
+
     $e_title = true;
     $errors = array();
 
@@ -133,7 +135,7 @@ class PhrictionEditController
 
     if ($document->getID()) {
       $panel_header = 'Edit Phriction Document';
-      $submit_button = 'Edit Document';
+      $submit_button = 'Save Changes';
     } else {
       $panel_header = 'Create New Phriction Document';
       $submit_button = 'Create Document';
@@ -172,6 +174,7 @@ class PhrictionEditController
           ->setValue($content->getContent())
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
           ->setName('content')
+          ->setID('document-textarea')
           ->setCaption($remarkup_reference))
       ->appendChild(
         id(new AphrontFormSubmitControl())
@@ -183,10 +186,31 @@ class PhrictionEditController
       ->setHeader($panel_header)
       ->appendChild($form);
 
+    $preview_panel =
+      '<div class="aphront-panel-preview aphront-panel-preview-wide">
+        <div class="phriction-document-preview-header">
+          Document Preview
+        </div>
+        <div id="document-preview">
+          <div class="aphront-panel-preview-loading-text">
+            Loading preview...
+          </div>
+        </div>
+      </div>';
+
+    Javelin::initBehavior(
+      'phriction-document-preview',
+      array(
+        'preview'   => 'document-preview',
+        'textarea'  => 'document-textarea',
+        'uri'       => '/phriction/preview/',
+      ));
+
     return $this->buildStandardPageResponse(
       array(
         $error_view,
         $panel,
+        $preview_panel,
       ),
       array(
         'title' => 'Edit Document',

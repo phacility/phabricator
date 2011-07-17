@@ -56,3 +56,9 @@
   margin: 0;
   font-weight: bold;
 }
+
+.phriction-document-preview-header {
+  color: #666666;
+  margin-bottom: 1em;
+  font-size: 11px;
+}

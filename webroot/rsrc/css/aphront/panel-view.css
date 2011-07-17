@@ -55,6 +55,14 @@
   padding: 15px 20px;
 }
 
+.aphront-panel-preview-wide {
+  width: 1080px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 2em;
+  padding-right: 2em;
+}
+
 .aphront-panel-preview-loading-text {
   color: #666666;
 }

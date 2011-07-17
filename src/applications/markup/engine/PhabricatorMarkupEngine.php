@@ -41,6 +41,10 @@ class PhabricatorMarkupEngine {
 
   public static function newPhrictionMarkupEngine() {
     return self::newMarkupEngine(array(
+      // Disable image macros on the wiki since they're less useful, we don't
+      // cache documents, and the module is prohibitively expensive for large
+      // documents.
+      'macros' => false,
     ));
   }
 
@@ -71,6 +75,7 @@ class PhabricatorMarkupEngine {
         'remarkup.enable-embedded-youtube'),
       'custom-inline' => array(),
       'custom-block'  => array(),
+      'macros'        => true,
     );
   }
 
@@ -99,7 +104,11 @@ class PhabricatorMarkupEngine {
     $rules[] = new PhabricatorRemarkupRuleDiffusion();
     $rules[] = new PhabricatorRemarkupRuleManiphest();
     $rules[] = new PhabricatorRemarkupRulePaste();
-    $rules[] = new PhabricatorRemarkupRuleImageMacro();
+
+    if ($options['macros']) {
+      $rules[] = new PhabricatorRemarkupRuleImageMacro();
+    }
+
     $rules[] = new PhabricatorRemarkupRuleMention();
     $rules[] = new PhabricatorRemarkupRulePhriction();
 
