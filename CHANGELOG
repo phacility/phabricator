@@ -2,6 +2,10 @@ This is not a complete list of changes, just of API or workflow changes that may
 break existing installs. Newer changes are listed at the top. If you pull new
 changes and things stop working, check here first!
 
+July 18 2011 - Phriction Link Syntax Change
+  Phriction link sytnax now requires [[double brackets]], not single
+  brackets.
+
 June 29 2011 - Maniphest project indexes
   Old Maniphest tasks will not appear in project filter views until you run
   "scripts/search/reindex_maniphest.php" to build indexes. New tasks will have

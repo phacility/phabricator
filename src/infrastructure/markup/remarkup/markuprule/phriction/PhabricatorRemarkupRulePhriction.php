@@ -24,7 +24,7 @@ class PhabricatorRemarkupRulePhriction
 
   public function apply($text) {
     return preg_replace_callback(
-      '@\B\\[([^|\\]]+)(?:\\|([^\\]]+))?\\]\B@U',
+      '@\B\\[\\[([^|\\]]+)(?:\\|([^\\]]+))?\\]\\]\B@U',
       array($this, 'markupDocumentLink'),
       $text);
   }
