@@ -6,32 +6,14 @@
 
 
 
-phutil_require_module('phabricator', 'aphront/response/400');
 phutil_require_module('phabricator', 'aphront/response/404');
-phutil_require_module('phabricator', 'aphront/response/dialog');
-phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/auth/oauth/provider/base');
-phutil_require_module('phabricator', 'applications/files/storage/file');
-phutil_require_module('phabricator', 'applications/files/transform');
-phutil_require_module('phabricator', 'applications/files/uri');
 phutil_require_module('phabricator', 'applications/people/controller/base');
-phutil_require_module('phabricator', 'applications/people/storage/user');
-phutil_require_module('phabricator', 'applications/people/storage/useroauthinfo');
-phutil_require_module('phabricator', 'infrastructure/env');
-phutil_require_module('phabricator', 'storage/queryfx');
-phutil_require_module('phabricator', 'view/dialog');
-phutil_require_module('phabricator', 'view/form/base');
-phutil_require_module('phabricator', 'view/form/control/file');
-phutil_require_module('phabricator', 'view/form/control/markup');
-phutil_require_module('phabricator', 'view/form/control/select');
-phutil_require_module('phabricator', 'view/form/control/static');
-phutil_require_module('phabricator', 'view/form/control/submit');
-phutil_require_module('phabricator', 'view/form/control/text');
-phutil_require_module('phabricator', 'view/form/control/textarea');
-phutil_require_module('phabricator', 'view/form/error');
-phutil_require_module('phabricator', 'view/layout/panel');
+phutil_require_module('phabricator', 'applications/people/controller/settings/panels/account');
+phutil_require_module('phabricator', 'applications/people/controller/settings/panels/conduit');
+phutil_require_module('phabricator', 'applications/people/controller/settings/panels/email');
+phutil_require_module('phabricator', 'applications/people/controller/settings/panels/oauth');
 phutil_require_module('phabricator', 'view/layout/sidenav');
-phutil_require_module('phabricator', 'view/utils');
 
 phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
