@@ -38,6 +38,15 @@ class PhabricatorProjectProfileEditController
       $profile = new PhabricatorProjectProfile();
     }
 
+    if ($project->getSubprojectPHIDs()) {
+      $phids = $project->getSubprojectPHIDs();
+      $handles = id(new PhabricatorObjectHandleData($phids))
+        ->loadHandles();
+      $subprojects = mpull($handles, 'getFullName', 'getPHID');
+    } else {
+      $subprojects = array();
+    }
+
     $options = PhabricatorProjectStatus::getStatusMap();
 
     $e_name = true;
@@ -45,6 +54,7 @@ class PhabricatorProjectProfileEditController
     if ($request->isFormPost()) {
       $project->setName($request->getStr('name'));
       $project->setStatus($request->getStr('status'));
+      $project->setSubprojectPHIDs($request->getArr('set_subprojects'));
       $profile->setBlurb($request->getStr('blurb'));
 
       if (!strlen($project->getName())) {
@@ -122,6 +132,12 @@ class PhabricatorProjectProfileEditController
           ->setName('blurb')
           ->setValue($profile->getBlurb()))
       ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource('/typeahead/common/projects/')
+          ->setLabel('Subprojects')
+          ->setName('set_subprojects')
+          ->setValue($subprojects))
+      ->appendChild(
         id(new AphrontFormFileControl())
           ->setLabel('Change Image')
           ->setName('image'))
@@ -132,7 +148,7 @@ class PhabricatorProjectProfileEditController
 
     $panel = new AphrontPanelView();
     $panel->setHeader($header_name);
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
     $panel->appendChild($form);
 
     return $this->buildStandardPageResponse(

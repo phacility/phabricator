@@ -22,16 +22,28 @@ class PhabricatorProject extends PhabricatorProjectDAO {
   protected $phid;
   protected $status = PhabricatorProjectStatus::UNKNOWN;
   protected $authorPHID;
+  protected $subprojectPHIDs = array();
+
+  private $subprojectsNeedUpdate;
 
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_SERIALIZATION => array(
+        'subprojectPHIDs' => self::SERIALIZATION_JSON,
+      ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorPHIDConstants::PHID_TYPE_PROJ);
+  }
+
+  public function setSubprojectPHIDs(array $phids) {
+    $this->subprojectPHIDs = $phids;
+    $this->subprojectsNeedUpdate = true;
+    return $this;
   }
 
   public function loadProfile() {
@@ -46,4 +58,18 @@ class PhabricatorProject extends PhabricatorProjectDAO {
       array($this->getPHID()));
     return $affils[$this->getPHID()];
   }
+
+  public function save() {
+    $result = parent::save();
+
+    if ($this->subprojectsNeedUpdate) {
+      // If we've changed the project PHIDs for this task, update the link
+      // table.
+      PhabricatorProjectSubproject::updateProjectSubproject($this);
+      $this->subprojectsNeedUpdate = false;
+    }
+
+    return $result;
+  }
+
 }

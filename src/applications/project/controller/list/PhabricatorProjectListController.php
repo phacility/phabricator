@@ -43,8 +43,6 @@ class PhabricatorProjectListController
     $handles = id(new PhabricatorObjectHandleData($author_phids))
       ->loadHandles();
 
-    $project_phids = mpull($projects, 'getPHID');
-
     $query = id(new ManiphestTaskQuery())
       ->withProjects($project_phids)
       ->withAnyProject(true)
