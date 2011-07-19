@@ -58,12 +58,12 @@ class PhabricatorProjectProfileController
       'statistics'   => 'Statistics',
       '<hr />', */
       '<h2>Information</h2>',
-      'edit'         => 'Edit Profile',
+      'edit'         => 'Edit Project',
       'affiliation'  => 'Edit Affiliation',
     );
 
     if (empty($pages[$this->page])) {
-      $this->page = 'action';   // key($pages);
+      $this->page = 'action';
     }
 
     switch ($this->page) {
@@ -106,6 +106,9 @@ class PhabricatorProjectProfileController
         ));
   }
 
+  //----------------------------------------------------------------------------
+  // Helper functions
+
   private function renderBasicInformation($project, $profile) {
     $blurb = nonempty(
        $profile->getBlurb(),
@@ -118,7 +121,10 @@ class PhabricatorProjectProfileController
 
     $phids = array_merge(
       array($project->getAuthorPHID()),
-      mpull($affiliations, 'getUserPHID'));
+      $project->getSubprojectPHIDs(),
+      mpull($affiliations, 'getUserPHID')
+    );
+    $phids = array_unique($phids);
     $handles = id(new PhabricatorObjectHandleData($phids))
       ->loadHandles();
 
@@ -134,11 +140,23 @@ class PhabricatorProjectProfileController
 
       $affiliated[] = '<li>'.$user.' &mdash; '.$role.$status.'</li>';
     }
+
     if ($affiliated) {
       $affiliated = '<ul>'.implode("\n", $affiliated).'</ul>';
     } else {
       $affiliated = '<p><em>No one is affiliated with this project.</em></p>';
     }
+
+    if ($project->getSubprojectPHIDs()) {
+      $table = $this->renderSubprojectTable(
+        $handles,
+        $project->getSubprojectPHIDs());
+      $subproject_list = $table->render();
+    } else {
+      $subproject_list =
+        '<p><em>There are no projects attached for such specie.</em></p>';
+    }
+
 
     $timestamp = phabricator_format_timestamp($project->getDateCreated());
     $status = PhabricatorProjectStatus::getNameForStatus(
@@ -174,12 +192,19 @@ class PhabricatorProjectProfileController
       </div>';
 
     $content .=
-      '<div class="phabricator-profile-info-group">
-        <h1 class="phabricator-profile-info-header">Resources</h1>
-        <div class="phabricator-profile-info-pane">'.
+      '<div class="phabricator-profile-info-group">'.
+        '<h1 class="phabricator-profile-info-header">Resources</h1>'.
+        '<div class="phabricator-profile-info-pane">'.
          $affiliated.
-        '</div>
-      </div>';
+        '</div>'.
+      '</div>';
+
+    $content .= '<div class="phabricator-profile-info-group">'.
+      '<h1 class="phabricator-profile-info-header">Subprojects</h1>'.
+      '<div class="phabricator-profile-info-pane">'.
+        $subproject_list.
+        '</div>'.
+      '</div>';
 
     $query = id(new ManiphestTaskQuery())
       ->withProjects(array($project->getPHID()))
@@ -233,5 +258,40 @@ class PhabricatorProjectProfileController
       </div>';
 
     return $content;
+  }
+
+  private function renderSubprojectTable(
+    PhabricatorObjectHandleData $handles,
+    $subprojects_phids) {
+
+    $rows = array();
+    foreach ($subprojects_phids as $subproject_phid) {
+      $phid = $handles[$subproject_phid]->getPHID();
+
+      $rows[] = array(
+        phutil_escape_html($handles[$phid]->getFullName()),
+        phutil_render_tag(
+          'a',
+          array(
+            'class' => 'small grey button',
+            'href' => $handles[$phid]->getURI(),
+          ),
+          'View Project Profile'),
+      );
+    }
+
+    $table = new AphrontTableView($rows);
+     $table->setHeaders(
+       array(
+         'Name',
+         '',
+       ));
+     $table->setColumnClasses(
+       array(
+         'pri',
+         'action right',
+       ));
+
+    return $table;
   }
 }
