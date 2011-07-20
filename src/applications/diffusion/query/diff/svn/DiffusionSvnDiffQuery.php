@@ -75,6 +75,14 @@ final class DiffusionSvnDiffQuery extends DiffusionDiffQuery {
         $old_name = $path->getTargetPath();
         $new_name = $path->getPath();
         break;
+      case DifferentialChangeType::TYPE_MOVE_AWAY:
+        $old = array(
+          $path->getPath(),
+          $path->getCommitIdentifier() - 1);
+        $old_name = $path->getPath();
+        $new_name = null;
+        $new = null;
+        break;
       default:
         $old = array($path->getPath(), $path->getCommitIdentifier() - 1);
         $new = array($path->getPath(), $path->getCommitIdentifier());
