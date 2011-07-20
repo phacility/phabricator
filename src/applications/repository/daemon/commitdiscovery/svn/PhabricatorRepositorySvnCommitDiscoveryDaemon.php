@@ -27,51 +27,96 @@ class PhabricatorRepositorySvnCommitDiscoveryDaemon
       throw new Exception("Repository is not a svn repository.");
     }
 
-    $repository_phid = $repository->getPHID();
-
-    $uri = $repository->getDetail('remote-uri');
+    $uri = $this->getBaseSVNLogURI();
     list($xml) = execx(
       'svn log --xml --non-interactive --quiet --limit 1 %s@HEAD',
       $uri);
 
-    // TODO: We need to slam the XML output into valid UTF-8.
-
-    $log = new SimpleXMLElement($xml);
-    $entry = $log->logentry[0];
-    $commit = (int)$entry['revision'];
+    $results = $this->parseSVNLogXML($xml);
+    $commit = key($results);
+    $epoch  = reset($results);
 
     if ($this->isKnownCommit($commit)) {
       return false;
     }
 
-    $this->discoverCommit($commit);
+    $this->discoverCommit($commit, $epoch);
 
     return true;
   }
 
-  private function discoverCommit($commit) {
-    $discover = array();
-    $largest_known = $commit - 1;
-    while ($largest_known > 0 && !$this->isKnownCommit($largest_known)) {
-      $largest_known--;
+  private function discoverCommit($commit, $epoch) {
+    $uri = $this->getBaseSVNLogURI();
+
+    $discover = array(
+      $commit => $epoch,
+    );
+    $upper_bound = $commit;
+
+    $limit = 1;
+    while ($upper_bound > 1 && !$this->isKnownCommit($upper_bound)) {
+      // Find all the unknown commits on this path. Note that we permit
+      // importing an SVN subdirectory rather than the entire repository, so
+      // commits may be nonsequential.
+      list($err, $xml, $stderr) = exec_manual(
+        'svn log --xml --non-interactive --quiet --limit %d %s@%d',
+        $limit,
+        $uri,
+        $upper_bound - 1);
+      if ($err) {
+        if (preg_match('/path not found/', $stderr)) {
+          // We've gone all the way back through history and this path was not
+          // affected by earlier commits.
+          break;
+        } else {
+          throw new Exception("svn log error #{$err}: {$stderr}");
+        }
+      }
+      $discover += $this->parseSVNLogXML($xml);
+
+      $upper_bound = min(array_keys($discover));
+
+      // Discover 2, 4, 8, ... 256 logs at a time. This allows us to initially
+      // import large repositories fairly quickly, while pulling only as much
+      // data as we need in the common case (when we've already imported the
+      // repository and are just grabbing one commit at a time).
+      $limit = min($limit * 2, 256);
     }
 
-    $repository = $this->getRepository();
-    $uri = $repository->getDetail('remote-uri');
+    // NOTE: We do writes only after discovering all the commits so that we're
+    // never left in a state where we've missed commits -- if the discovery
+    // script terminates it can always resume and restore the import to a good
+    // state. This is also why we sort the discovered commits so we can do
+    // writes forward from the smallest one.
 
-    for ($ii = $largest_known + 1; $ii <= $commit; $ii++) {
-      list($xml) = execx(
-        'svn log --xml --non-interactive --quiet --limit 1 %s@%d',
-        $uri,
-        $ii);
-      $log = new SimpleXMLElement($xml);
-      $entry = $log->logentry[0];
-
-      $identifier = (int)$entry['revision'];
-      $epoch = (int)strtotime((string)$entry->date[0]);
-
-      $this->recordCommit($identifier, $epoch);
+    ksort($discover);
+    foreach ($discover as $commit => $epoch) {
+      $this->recordCommit($commit, $epoch);
     }
   }
 
+  private function parseSVNLogXML($xml) {
+    $xml = phutil_utf8ize($xml);
+
+    $result = array();
+
+    $log = new SimpleXMLElement($xml);
+    foreach ($log->logentry as $entry) {
+      $commit = (int)$entry['revision'];
+      $epoch  = (int)strtotime((string)$entry->date[0]);
+      $result[$commit] = $epoch;
+    }
+
+    return $result;
+  }
+
+
+  private function getBaseSVNLogURI() {
+    $repository = $this->getRepository();
+
+    $uri = $repository->getDetail('remote-uri');
+    $subpath = $repository->getDetail('svn-subpath');
+
+    return $uri.$subpath;
+  }
 }

@@ -32,7 +32,6 @@ class PhabricatorRepositoryEditController
   public function processRequest() {
 
     $request = $this->getRequest();
-    $user = $request->getUser();
 
     $repository = id(new PhabricatorRepository())->load($this->id);
     if (!$repository) {
@@ -52,7 +51,7 @@ class PhabricatorRepositoryEditController
         $repository->save();
       }
 
-      $views['github'] = 'Github';
+      $views['github'] = 'GitHub';
     }
 
     $this->repository = $repository;
@@ -95,11 +94,6 @@ class PhabricatorRepositoryEditController
     $user = $request->getUser();
     $repository = $this->repository;
     $repository_id = $repository->getID();
-
-    $type_map = array(
-      'svn' => 'Subversion',
-      'git' => 'Git',
-    );
 
     $errors = array();
 
@@ -223,7 +217,9 @@ class PhabricatorRepositoryEditController
       $tracking = ($request->getStr('tracking') == 'enabled' ? true : false);
       $repository->setDetail('tracking-enabled', $tracking);
       $repository->setDetail('remote-uri', $request->getStr('uri'));
-      $repository->setDetail('local-path', $request->getStr('path'));
+      if ($is_git) {
+        $repository->setDetail('local-path', $request->getStr('path'));
+      }
       $repository->setDetail(
         'pull-frequency',
         max(1, $request->getInt('frequency')));
@@ -246,6 +242,11 @@ class PhabricatorRepositoryEditController
 
       if ($is_svn) {
         $repository->setUUID($request->getStr('uuid'));
+        $subpath = ltrim($request->getStr('svn-subpath'), '/');
+        if ($subpath) {
+          $subpath = rtrim($subpath, '/').'/';
+        }
+        $repository->setDetail('svn-subpath', $subpath);
       }
 
       $repository->setDetail(
@@ -262,16 +263,18 @@ class PhabricatorRepositoryEditController
           !preg_match('@/$@', $repository->getDetail('remote-uri'))) {
 
           $e_uri = 'Invalid';
-          $errors[] = 'Subversion Repository URI must end in a slash ("/").';
+          $errors[] = 'Subversion Repository Root must end in a slash ("/").';
         } else {
           $e_uri = null;
         }
 
-        if (!$repository->getDetail('local-path')) {
-          $e_path = 'Required';
-          $errors[] = "Local path is required.";
-        } else {
-          $e_path = null;
+        if ($is_git) {
+          if (!$repository->getDetail('local-path')) {
+            $e_path = 'Required';
+            $errors[] = "Local path is required.";
+          } else {
+            $e_path = null;
+          }
         }
       }
 
@@ -296,28 +299,22 @@ class PhabricatorRepositoryEditController
         'before changes will take effect.');
     }
 
-    $uri_caption = null;
-    $path_caption = null;
-
-
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $is_git = true;
-        $uri_caption =
-          'The user the tracking daemon runs as must have permission to '.
-          '<tt>git clone</tt> from this URI.';
-        $path_caption =
-          'Directory where the daemon should look to find a copy of the '.
-          'repository (or create one if it does not yet exist). The daemon '.
-          'will regularly pull remote changes into this working copy.';
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         $is_svn = true;
-        $uri_caption =
-          'The user the tracking daemon runs as must have permission to '.
-          '<tt>svn log</tt> from this URI.';
         break;
     }
+
+    $doc_href = PhabricatorEnv::getDoclink('article/Diffusion_User_Guide.html');
+    $user_guide_link = phutil_render_tag(
+      'a',
+      array(
+        'href' => $doc_href,
+      ),
+      'Diffusion User Guide');
 
     $form = new AphrontFormView();
     $form
@@ -328,7 +325,8 @@ class PhabricatorRepositoryEditController
         'repositories, importing commits as they happen and notifying '.
         'Differential, Diffusion, Herald, and other services. To enable '.
         'tracking for a repository, configure it here and then start (or '.
-        'restart) the daemons (TODO: explain this).</p>')
+        'restart) the daemons. More information is available in the '.
+        '<strong>'.$user_guide_link.'</strong>.</p>')
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel('Repository')
@@ -344,21 +342,67 @@ class PhabricatorRepositoryEditController
           ->setValue(
             $repository->getDetail('tracking-enabled')
               ? 'enabled'
-              : 'disabled'))
+              : 'disabled'));
+
+    $uri_label = 'Repository URI';
+    if ($is_git) {
+      $instructions =
+        'NOTE: The user the tracking daemon runs as must have permission to '.
+        '<tt>git clone</tt> from this URI.';
+      $form->appendChild(
+        '<p class="aphront-form-instructions">'.$instructions.'</p>');
+    } else if ($is_svn) {
+      $instructions =
+        'Enter the <strong>Repository Root</strong> for this SVN repository. '.
+        'You can figure this out by running <tt>svn info</tt> and looking at '.
+        'the value in the <tt>Repository Root</tt> field. It should be a URI '.
+        'and look like <tt>http://svn.example.org/svn/</tt> or '.
+        '<tt>svn+ssh://svn.example.com/svnroot/</tt>.'.
+        '<br /><br />'.
+        'NOTE: The user the daemons run as must be able to execute '.
+        '<tt>svn log</tt> against this URI.';
+      $form->appendChild(
+        '<p class="aphront-form-instructions">'.$instructions.'</p>');
+      $uri_label = 'Repository Root';
+    }
+
+    $form
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('uri')
-          ->setLabel('URI')
+          ->setLabel($uri_label)
           ->setValue($repository->getDetail('remote-uri'))
-          ->setError($e_uri)
-          ->setCaption($uri_caption))
-      ->appendChild(
+          ->setError($e_uri));
+
+    if ($is_git) {
+      $form->appendChild(
+        '<p class="aphront-form-instructions">Select a path on local disk '.
+        'which the daemons should <tt>git clone</tt> the repository into. '.
+        'This must be readable and writable by the daemons, and readable by '.
+        'the webserver. The daemons will <tt>git fetch</tt> and keep this '.
+        'repository up to date.</p>');
+      $form->appendChild(
         id(new AphrontFormTextControl())
           ->setName('path')
           ->setLabel('Local Path')
           ->setValue($repository->getDetail('local-path'))
-          ->setError($e_path)
-          ->setCaption($path_caption))
+          ->setError($e_path));
+    } else if ($is_svn) {
+      $form->appendChild(
+        '<p class="aphront-form-instructions">If you only want to parse one '.
+        'subpath of the repository, specify it here, relative to the '.
+        'repository root (e.g., <tt>trunk/</tt> or <tt>projects/wheel/</tt>). '.
+        'If you want to parse multiple subdirectories, create a separate '.
+        'Phabricator repository for each one.</p>');
+      $form->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName('svn-subpath')
+          ->setLabel('Subpath')
+          ->setValue($repository->getDetail('svn-subpath'))
+          ->setError($e_path));
+    }
+
+    $form
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('frequency')
