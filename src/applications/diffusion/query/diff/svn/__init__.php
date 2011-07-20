@@ -13,9 +13,8 @@ phutil_require_module('phabricator', 'applications/differential/storage/diff');
 phutil_require_module('phabricator', 'applications/diffusion/data/pathchange');
 phutil_require_module('phabricator', 'applications/diffusion/query/diff/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/pathchange/base');
+phutil_require_module('phabricator', 'infrastructure/diff/engine');
 
-phutil_require_module('phutil', 'filesystem');
-phutil_require_module('phutil', 'filesystem/tempfile');
 phutil_require_module('phutil', 'future');
 phutil_require_module('phutil', 'future/exec');
 phutil_require_module('phutil', 'utils');

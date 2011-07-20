@@ -90,24 +90,17 @@ final class DiffusionSvnDiffQuery extends DiffusionDiffQuery {
     $futures = array_filter($futures);
 
     foreach (Futures($futures) as $key => $future) {
-      $futures[$key] = $future->resolvex();
+      list($stdout) = $future->resolvex();
+      $futures[$key] = $stdout;
     }
 
     $old_data = idx($futures, 'old', '');
     $new_data = idx($futures, 'new', '');
 
-    $old_tmp = new TempFile();
-    $new_tmp = new TempFile();
-
-    Filesystem::writeFile($old_tmp, $old_data);
-    Filesystem::writeFile($new_tmp, $new_data);
-
-    list($err, $raw_diff) = exec_manual(
-      'diff -L %s -L %s -U65535 %s %s',
-      nonempty($old_name, '/dev/universe').' 9999-99-99',
-      nonempty($new_name, '/dev/universe').' 9999-99-99',
-      $old_tmp,
-      $new_tmp);
+    $engine = new PhabricatorDifferenceEngine();
+    $engine->setOldName($old_name);
+    $engine->setNewName($new_name);
+    $raw_diff = $engine->generateRawDiffFromFileContent($old_data, $new_data);
 
     $parser = new ArcanistDiffParser();
     $parser->setDetectBinaryFiles(true);
