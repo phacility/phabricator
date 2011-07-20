@@ -239,7 +239,7 @@ class PhabricatorSetup {
       self::write("[OKAY] Facebook integration OKAY\n");
     }
 
-    self::writeHeader("MySQL DATABASE CONFIGURATION");
+    self::writeHeader("MySQL DATABASE & STORAGE CONFIGURATION");
 
     $conf = DatabaseConfigurationProvider::getConfiguration();
     $conn_user = $conf->getUser();
@@ -334,7 +334,77 @@ class PhabricatorSetup {
         "...to reindex existing documents.");
     }
 
-    self::write("[OKAY] Database configuration OKAY\n");
+    $max_allowed_packet = queryfx_one(
+      $conn_raw,
+      'SHOW VARIABLES LIKE %s',
+      'max_allowed_packet');
+    $max_allowed_packet = idx($max_allowed_packet, 'Value', PHP_INT_MAX);
+
+    $recommended_minimum = 1024 * 1024;
+    if ($max_allowed_packet < $recommended_minimum) {
+      self::writeNote(
+        "MySQL is configured with a small 'max_allowed_packet' ".
+        "('{$max_allowed_packet}'), which may cause some large writes to ".
+        "fail. Consider raising this to at least {$recommended_minimum}.");
+    } else {
+      self::write(" okay  max_allowed_packet = {$max_allowed_packet}.\n");
+    }
+
+    $mysql_key = 'storage.mysql-engine.max-size';
+    $mysql_limit = PhabricatorEnv::getEnvConfig($mysql_key);
+
+    if ($mysql_limit && ($mysql_limit + 8192) > $max_allowed_packet) {
+      self::writeFailure();
+      self::write(
+        "Setup failure! Your Phabricator 'storage.mysql-engine.max-size' ".
+        "configuration ('{$mysql_limit}') must be at least 8KB smaller ".
+        "than your MySQL 'max_allowed_packet' configuration ".
+        "('{$max_allowed_packet}'). Raise the 'max_allowed_packet' in your ".
+        "MySQL configuration, or reduce the maximum file size allowed by ".
+        "the Phabricator configuration.\n");
+      return;
+    } else if (!$mysql_limit) {
+      self::write(" skip  MySQL file storage engine not configured.\n");
+    } else {
+      self::write(" okay  MySQL file storage engine configuration okay.\n");
+    }
+
+    $local_key = 'storage.local-disk.path';
+    $local_path = PhabricatorEnv::getEnvConfig($local_key);
+    if ($local_path) {
+      if (!Filesystem::pathExists($local_path) || !is_writable($local_path)) {
+        self::writeFailure();
+        self::write(
+          "Setup failure! You have configured local disk storage but the ".
+          "path you specified ('{$local_path}') does not exist or is not ".
+          "writable.\n");
+        return;
+      } else {
+        self::write(" okay  Local disk storage exists and is writable.\n");
+      }
+    } else {
+      self::write(" skip  Not configured for local disk storage.\n");
+    }
+
+    $selector = PhabricatorEnv::getEnvConfig('storage.engine-selector');
+
+    try {
+      $storage_selector_exists = class_exists($selector);
+    } catch (Exception $ex) {
+      $storage_selector_exists = false;
+    }
+
+    if ($storage_selector_exists) {
+      self::write(" okay  Using '{$selector}' as a storage engine selector.\n");
+    } else {
+      self::writeFailure();
+      self::write(
+        "Setup failure! You have configured '{$selector}' as a storage engine ".
+        "selector but it does not exist or could not be loaded.\n");
+      return;
+    }
+
+    self::write("[OKAY] Database and storage configuration OKAY\n");
 
 
     self::writeHeader("OUTBOUND EMAIL CONFIGURATION");
@@ -475,7 +545,7 @@ class PhabricatorSetup {
     flush();
 
     // This, uh, makes it look cool. -_-
-    usleep(40000);
+    usleep(20000);
   }
 
   private static function writeNote($note) {

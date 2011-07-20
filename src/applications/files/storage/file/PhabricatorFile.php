@@ -18,12 +18,7 @@
 
 class PhabricatorFile extends PhabricatorFileDAO {
 
-  const STORAGE_ENGINE_BLOB = 'blob';
-
   const STORAGE_FORMAT_RAW  = 'raw';
-
-  // TODO: We need to reconcile this with MySQL packet size.
-  const FILE_SIZE_BYTE_LIMIT = 12582912;
 
   protected $phid;
   protected $name;
@@ -80,10 +75,49 @@ class PhabricatorFile extends PhabricatorFileDAO {
   }
 
   public static function newFromFileData($data, array $params = array()) {
-    $file_size = strlen($data);
 
-    if ($file_size > self::FILE_SIZE_BYTE_LIMIT) {
-      throw new Exception("File is too large to store.");
+    $selector_class = PhabricatorEnv::getEnvConfig('storage.engine-selector');
+    $selector = newv($selector_class, array());
+
+    $engines = $selector->selectStorageEngines($data, $params);
+    if (!$engines) {
+      throw new Exception("No valid storage engines are available!");
+    }
+
+    $data_handle = null;
+    $engine_identifier = null;
+    foreach ($engines as $engine) {
+      try {
+        // Perform the actual write.
+        $data_handle = $engine->writeFile($data, $params);
+        if (!$data_handle || strlen($data_handle) > 255) {
+          // This indicates an improperly implemented storage engine.
+          throw new Exception(
+            "Storage engine '{$engine}' executed writeFile() but did not ".
+            "return a valid handle ('{$data_handle}') to the data: it must ".
+            "be nonempty and no longer than 255 characters.");
+        }
+
+        $engine_identifier = $engine->getEngineIdentifier();
+        if (!$engine_identifier || strlen($engine_identifier) > 32) {
+          throw new Exception(
+            "Storage engine '{$engine}' returned an improper engine ".
+            "identifier '{$engine_identifier}': it must be nonempty ".
+            "and no longer than 32 characters.");
+        }
+
+        // We stored the file somewhere so stop trying to write it to other
+        // places.
+        break;
+      } catch (Exception $ex) {
+        // If an engine doesn't work, keep trying all the other valid engines
+        // in case something else works.
+        phlog($ex);
+      }
+    }
+
+    if (!$data_handle) {
+      throw new Exception("All storage engines failed to write file!");
     }
 
     $file_name = idx($params, 'name');
@@ -98,16 +132,12 @@ class PhabricatorFile extends PhabricatorFileDAO {
     $file->setByteSize(strlen($data));
     $file->setAuthorPHID($authorPHID);
 
-    $blob = new PhabricatorFileStorageBlob();
-    $blob->setData($data);
-    $blob->save();
+    $file->setStorageEngine($engine_identifier);
+    $file->setStorageHandle($data_handle);
 
-    // TODO: This stuff is almost certainly YAGNI, but we could imagine having
-    // an alternate disk store and gzipping or encrypting things or something
-    // crazy like that and this isn't toooo much extra code.
-    $file->setStorageEngine(self::STORAGE_ENGINE_BLOB);
+    // TODO: This is probably YAGNI, but allows for us to do encryption or
+    // compression later if we want.
     $file->setStorageFormat(self::STORAGE_FORMAT_RAW);
-    $file->setStorageHandle($blob->getID());
 
     if (isset($params['mime-type'])) {
       $file->setMimeType($params['mime-type']);
@@ -160,38 +190,19 @@ class PhabricatorFile extends PhabricatorFileDAO {
   }
 
   public function delete() {
-    $this->openTransaction();
-      switch ($this->getStorageEngine()) {
-        case self::STORAGE_ENGINE_BLOB:
-          $handle = $this->getStorageHandle();
-          $blob = id(new PhabricatorFileStorageBlob())->load($handle);
-          $blob->delete();
-          break;
-        default:
-          throw new Exception("Unknown storage engine!");
-      }
+    $engine = $this->instantiateStorageEngine();
 
-      $ret = parent::delete();
-    $this->saveTransaction();
+    $ret = parent::delete();
+
+    $engine->deleteFile($this->getStorageHandle());
+
     return $ret;
   }
 
   public function loadFileData() {
 
-    $handle = $this->getStorageHandle();
-    $data   = null;
-
-    switch ($this->getStorageEngine()) {
-      case self::STORAGE_ENGINE_BLOB:
-        $blob = id(new PhabricatorFileStorageBlob())->load($handle);
-        if (!$blob) {
-          throw new Exception("Failed to load file blob data.");
-        }
-        $data = $blob->getData();
-        break;
-      default:
-        throw new Exception("Unknown storage engine.");
-    }
+    $engine = $this->instantiateStorageEngine();
+    $data = $engine->readFile($this->getStorageHandle());
 
     switch ($this->getStorageFormat()) {
       case self::STORAGE_FORMAT_RAW:
@@ -251,6 +262,22 @@ class PhabricatorFile extends PhabricatorFileDAO {
       default:
         throw new Exception('Unknown type matched as image MIME type.');
     }
+  }
+
+  protected function instantiateStorageEngine() {
+    $engines = id(new PhutilSymbolLoader())
+      ->setType('class')
+      ->setAncestorClass('PhabricatorFileStorageEngine')
+      ->selectAndLoadSymbols();
+
+    foreach ($engines as $engine_class) {
+      $engine = newv($engine_class['name'], array());
+      if ($engine->getEngineIdentifier() == $this->getStorageEngine()) {
+        return $engine;
+      }
+    }
+
+    throw new Exception("File's storage engine could be located!");
   }
 
   public function getViewableMimeType() {

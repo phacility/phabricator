@@ -345,6 +345,42 @@ return array(
   // unsure, it is safer to leave this disabled.
   'files.enable-proxy' => false,
 
+
+// -- Storage --------------------------------------------------------------- //
+
+  // Phabricator allows users to upload files, and can keep them in various
+  // storage engines. This section allows you to configure which engines
+  // Phabricator will use, and how it will use them.
+
+  // The largest filesize Phabricator will store in the MySQL BLOB storage
+  // engine, which just uses a database table to store files. While this isn't a
+  // best practice, it's really easy to set up. This is hard-limited by the
+  // value of 'max_allowed_packet' in MySQL (since this often defaults to 1MB,
+  // the default here is slightly smaller than 1MB). Set this to 0 to disable
+  // use of the MySQL blob engine.
+  'storage.mysql-engine.max-size' => 1000000,
+
+  // Phabricator provides a local disk storage engine, which just writes files
+  // to some directory on local disk. The webserver must have read/write
+  // permissions on this directory. This is straightforward and suitable for
+  // most installs, but will not scale past one web frontend unless the path
+  // is actually an NFS mount, since you'll end up with some of the files
+  // written to each web frontend and no way for them to share. To use the
+  // local disk storage engine, specify the path to a directory here. To
+  // disable it, specify null.
+  'storage.local-disk.path'       => null,
+
+  // TODO: Implement S3.
+
+  // Phabricator uses a storage engine selector to choose which storage engine
+  // to use when writing file data. If you add new storage engines or want to
+  // provide very custom rules (e.g., write images to one storage engine and
+  // other files to a different one), you can provide an alternate
+  // implementation here. The default engine will use choose MySQL, Local Disk,
+  // and S3, in that order, if they have valid configurations above and a file
+  // fits within configured limits.
+  'storage.engine-selector' => 'PhabricatorDefaultFileStorageEngineSelector',
+
 // -- Differential ---------------------------------------------------------- //
 
   'differential.revision-custom-detail-renderer'  => null,

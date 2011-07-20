@@ -2,6 +2,11 @@ This is not a complete list of changes, just of API or workflow changes that may
 break existing installs. Newer changes are listed at the top. If you pull new
 changes and things stop working, check here first!
 
+July 21 2011 - New File Storage Engines
+  Some of the default configuration for storage engines has changed.
+  Particularly, the default maximum filesize for MySQL storage is now 1MB, down
+  from 12MB. See the article "Configuring Storage Engines" for details.
+
 July 18 2011 - Phriction Link Syntax Change
   Phriction link sytnax now requires [[double brackets]], not single
   brackets.

@@ -16,6 +16,11 @@
  * limitations under the License.
  */
 
+/**
+ * Simple blob store DAO for @{class:PhabricatorMySQLFileStorageEngine}.
+ *
+ * @group filestorage
+ */
 class PhabricatorFileStorageBlob extends PhabricatorFileDAO {
 
   protected $data;
