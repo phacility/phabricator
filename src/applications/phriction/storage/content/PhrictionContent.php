@@ -26,5 +26,6 @@ class PhrictionContent extends PhrictionDAO {
   protected $title;
   protected $slug;
   protected $content;
+  protected $description;
 
 }

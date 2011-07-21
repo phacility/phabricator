@@ -100,7 +100,7 @@ class PhrictionHistoryController
           ),
           'Version '.$version),
         $handles[$content->getAuthorPHID()]->renderLink(),
-        '',
+        phutil_escape_html($content->getDescription()),
         $vs_previous,
         $vs_head,
       );
