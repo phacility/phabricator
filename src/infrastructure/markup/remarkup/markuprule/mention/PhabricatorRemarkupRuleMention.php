@@ -29,8 +29,9 @@ class PhabricatorRemarkupRuleMention
     // NOTE: Negative lookahead for period prevents us from picking up email
     // addresses, while allowing constructs like "@tomo, lol". The negative
     // lookbehind for a word character prevents us from matching "mail@lists"
-    // while allowing "@tomo/@mroch".
-    $regexp = '/(?<!\w)@([a-zA-Z0-9]+)\b(?![.])/';
+    // while allowing "@tomo/@mroch". The negative lookahead prevents us from
+    // matching "@joe.com" while allowing us to match "hey, @joe.".
+    $regexp = '/(?<!\w)@([a-zA-Z0-9]+)\b(?![.]\w)/';
 
     $matches = null;
     $ok = preg_match_all($regexp, $text, $matches);
