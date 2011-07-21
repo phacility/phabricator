@@ -42,18 +42,18 @@ class PhabricatorPasteViewController extends PhabricatorPasteController {
     }
 
     $corpus = $this->buildCorpus($paste, $file);
-    $panel = new AphrontPanelView();
+    $paste_panel = new AphrontPanelView();
 
     if (strlen($paste->getTitle())) {
-      $panel->setHeader(
+      $paste_panel->setHeader(
         'Viewing Paste '.$paste->getID().' - '.
         phutil_escape_html($paste->getTitle()));
     } else {
-      $panel->setHeader('Viewing Paste '.$paste->getID());
+      $paste_panel->setHeader('Viewing Paste '.$paste->getID());
     }
 
-    $panel->setWidth(AphrontPanelView::WIDTH_FULL);
-    $panel->addButton(
+    $paste_panel->setWidth(AphrontPanelView::WIDTH_FULL);
+    $paste_panel->addButton(
       phutil_render_tag(
         'a',
         array(
@@ -63,7 +63,7 @@ class PhabricatorPasteViewController extends PhabricatorPasteController {
         'Fork This'));
 
     $raw_uri = PhabricatorFileURI::getViewURIForPHID($paste->getFilePHID());
-    $panel->addButton(
+    $paste_panel->addButton(
       phutil_render_tag(
         'a',
         array(
@@ -72,13 +72,16 @@ class PhabricatorPasteViewController extends PhabricatorPasteController {
         ),
         'View Raw Text'));
 
-    $panel->appendChild($corpus);
+    $paste_panel->appendChild($corpus);
 
+    $forks_panel = null;
     $forks_of_this_paste = id(new PhabricatorPaste())->loadAllWhere(
       'parentPHID = %s',
       $paste->getPHID());
 
     if ($forks_of_this_paste) {
+      $forks_panel = new AphrontPanelView();
+      $forks_panel->setHeader("Forks of this paste");
       $forks = array();
       foreach ($forks_of_this_paste as $fork) {
         $forks[] = array(
@@ -92,7 +95,6 @@ class PhabricatorPasteViewController extends PhabricatorPasteController {
           )
         );
       }
-
       $forks_table = new AphrontTableView($forks);
       $forks_table->setHeaders(
         array(
@@ -100,13 +102,20 @@ class PhabricatorPasteViewController extends PhabricatorPasteController {
           'Title',
         )
       );
-
-      $panel->setHeader("Forks of this Paste");
-      $panel->appendChild($forks_table);
+      $forks_table->setColumnClasses(
+        array(
+          null,
+          'wide pri',
+        )
+      );
+      $forks_panel->appendChild($forks_table);
     }
 
     return $this->buildStandardPageResponse(
-      $panel,
+      array(
+        $paste_panel,
+        $forks_panel,
+      ),
       array(
         'title' => 'Paste: '.nonempty($paste->getTitle(), 'P'.$paste->getID()),
         'tab' => 'view',
