@@ -34,6 +34,7 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
       'email'       => 'Email',
 //      'password'    => 'Password',
       'conduit'     => 'Conduit Certificate',
+      'sshkeys'     => 'SSH Public Keys',
     );
 
     $oauth_providers = PhabricatorOAuthProvider::getAllProviders();
@@ -59,6 +60,9 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
         break;
       case 'conduit':
         $delegate = new PhabricatorUserConduitSettingsPanelController($request);
+        break;
+      case 'sshkeys':
+        $delegate = new PhabricatorUserSSHKeysSettingsPanelController($request);
         break;
       default:
         if (empty($this->pages[$this->page])) {
