@@ -184,4 +184,15 @@ class DifferentialChangeset extends DifferentialDAO {
     return 80;
   }
 
+  public function getWhitespaceMatters() {
+    $config = PhabricatorEnv::getEnvConfig('differential.whitespace-matters');
+    foreach ($config as $regexp) {
+      if (preg_match($regexp, $this->getFileName())) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
 }

@@ -173,7 +173,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       ));
 
     $options = array(
-      'ignore-all' => 'Ignore All',
+      'ignore-all' => 'Ignore Most',
       'ignore-trailing' => 'Ignore Trailing',
       'show-all' => 'Show All',
     );

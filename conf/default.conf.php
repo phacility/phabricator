@@ -416,6 +416,12 @@ return array(
   // DifferentialCommitMessageModifier
   'differential.modify-commit-message-class' => null,
 
+  // List of file regexps were whitespace is meaningful and should not
+  // use 'ignore-all' by default
+  'differential.whitespace-matters' => array(
+    '/\.py$/',
+  ),
+
 
 // -- Maniphest ------------------------------------------------------------- //
 

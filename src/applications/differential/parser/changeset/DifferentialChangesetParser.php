@@ -767,6 +767,10 @@ class DifferentialChangesetParser {
 
         $ignore_all = ($this->whitespaceMode == self::WHITESPACE_IGNORE_ALL);
 
+        if ($ignore_all && $changeset->getWhitespaceMatters()) {
+          $ignore_all = false;
+        }
+
         // The "ignore all whitespace" algorithm depends on rediffing the
         // files, and we currently need complete representations of both
         // files to do anything reasonable. If we only have parts of the files,
