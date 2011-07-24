@@ -21,7 +21,12 @@ class PhabricatorUserSSHKeysSettingsPanelController
 
   const PANEL_BASE_URI = '/settings/page/sshkeys/';
 
+  public static function isEnabled() {
+    return PhabricatorEnv::getEnvConfig('auth.sshkeys.enabled');
+  }
+
   public function processRequest() {
+
     $request = $this->getRequest();
     $user = $request->getUser();
 

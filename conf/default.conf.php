@@ -228,6 +228,13 @@ return array(
   // to have.
   'auth.sessions.conduit'       => 3,
 
+  // Set this true to enable the Settings -> SSH Public Keys panel, which will
+  // allow users to associated SSH public keys with their accounts. This is only
+  // really useful if you're setting up services over SSH and want to use
+  // Phabricator for authentication; in most situations you can leave this
+  // disabled.
+  'auth.sshkeys.enabled'        => false,
+
 
 // -- Accounts -------------------------------------------------------------- //
 

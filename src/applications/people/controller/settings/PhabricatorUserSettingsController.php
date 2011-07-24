@@ -29,13 +29,18 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
 
     $request = $this->getRequest();
 
+    // TODO: Implement a password panel.
+
     $this->pages = array(
       'account'     => 'Account',
       'email'       => 'Email',
-//      'password'    => 'Password',
+      'preferences' => 'Preferences',
       'conduit'     => 'Conduit Certificate',
-      'sshkeys'     => 'SSH Public Keys',
     );
+
+    if (PhabricatorUserSSHKeysSettingsPanelController::isEnabled()) {
+      $this->pages['sshkeys'] = 'SSH Public Keys';
+    }
 
     $oauth_providers = PhabricatorOAuthProvider::getAllProviders();
     foreach ($oauth_providers as $provider) {
@@ -63,6 +68,10 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
         break;
       case 'sshkeys':
         $delegate = new PhabricatorUserSSHKeysSettingsPanelController($request);
+        break;
+      case 'preferences':
+        $delegate = new PhabricatorUserPreferenceSettingsPanelController(
+          $request);
         break;
       default:
         if (empty($this->pages[$this->page])) {

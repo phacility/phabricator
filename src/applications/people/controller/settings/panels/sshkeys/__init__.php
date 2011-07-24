@@ -12,6 +12,7 @@ phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'aphront/response/reload');
 phutil_require_module('phabricator', 'applications/people/controller/settings/panels/base');
 phutil_require_module('phabricator', 'applications/people/storage/usersshkey');
+phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'infrastructure/javelin/markup');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/dialog');

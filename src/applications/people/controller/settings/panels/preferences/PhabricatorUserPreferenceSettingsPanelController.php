@@ -15,8 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class PhabricatorEditPreferencesController
-extends PhabricatorPreferencesController {
+class PhabricatorUserPreferenceSettingsPanelController
+  extends PhabricatorUserSettingsPanelController {
 
   public function processRequest() {
 
@@ -40,7 +40,7 @@ extends PhabricatorPreferencesController {
       $preferences->setPreferences($pref_dict);
       $preferences->save();
       return id(new AphrontRedirectResponse())
-        ->setURI('/preferences/?saved=true');
+        ->setURI('/settings/page/preferences/?saved=true');
     }
 
     $example_string = <<<EXAMPLE
@@ -51,8 +51,8 @@ function helloWorld() {
 EXAMPLE;
 
     $form = id(new AphrontFormView())
-      ->setAction('/preferences/')
       ->setUser($user)
+      ->setAction('/settings/page/preferences/')
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel('Page Titles')
@@ -99,15 +99,12 @@ EXAMPLE;
         ->setErrors(array('Your preferences have been saved.'));
     }
 
-    return $this->buildStandardPageResponse(
-      array(
-        $error_view,
-        $panel,
-      ),
-      array(
-        'title' => 'Edit Preferences',
-      ));
-
+    return id(new AphrontNullView())
+      ->appendChild(
+        array(
+          $error_view,
+          $panel,
+        ));
   }
 }
 
