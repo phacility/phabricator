@@ -13,6 +13,7 @@ phutil_require_module('phabricator', 'storage/connection/mysql');
 phutil_require_module('phabricator', 'storage/queryfx');
 
 phutil_require_module('phutil', 'filesystem');
+phutil_require_module('phutil', 'filesystem/tempfile');
 phutil_require_module('phutil', 'future/exec');
 phutil_require_module('phutil', 'moduleutils');
 phutil_require_module('phutil', 'parser/uri');

@@ -31,6 +31,93 @@ class PhabricatorSetup {
     self::write("This setup mode will guide you through setting up your ".
                 "Phabricator configuration.\n");
 
+    self::writeHeader("CORE CONFIGURATION");
+
+    // NOTE: Test this first since other tests depend on the ability to
+    // execute system commands and will fail if safe_mode is enabled.
+    $safe_mode = ini_get('safe_mode');
+    if ($safe_mode) {
+      self::writeFailure();
+      self::write(
+        "Setup failure! You have 'safe_mode' enabled. Phabricator will not ".
+        "run in safe mode, and it has been deprecated in PHP 5.3 and removed ".
+        "in PHP 5.4.\n");
+      return;
+    } else {
+      self::write(" okay  PHP's deprecated 'safe_mode' is disabled.\n");
+    }
+
+    // NOTE: Also test this early since we can't include files from other
+    // libraries if this is set strictly.
+
+    $open_basedir = ini_get('open_basedir');
+    if ($open_basedir) {
+
+      // 'open_basedir' restricts which files we're allowed to access with
+      // file operations. This might be okay -- we don't need to write to
+      // arbitrary places in the filesystem -- but we need to access certain
+      // resources. This setting is unlikely to be providing any real measure
+      // of security so warn even if things look OK.
+
+      try {
+        phutil_require_module('phutil', 'utils');
+        $open_libphutil = true;
+      } catch (Exception $ex) {
+        $message = $ex->getMessage();
+        self::write("Unable to load modules from libphutil: {$message}\n");
+        $open_libphutil = false;
+      }
+
+      try {
+        phutil_require_module('arcanist', 'workflow/base');
+        $open_arcanist = true;
+      } catch (Exception $ex) {
+        $message = $ex->getMessage();
+        self::write("Unable to load modules from Arcanist: {$message}\n");
+        $open_arcanist = false;
+      }
+
+      $open_urandom = @fopen('/dev/urandom', 'r');
+      if (!$open_urandom) {
+        self::write("Unable to open /dev/urandom!\n");
+      }
+
+      try {
+        $tmp = new TempFile();
+        file_put_contents($tmp, '.');
+        $open_tmp = @fopen((string)$tmp, 'r');
+      } catch (Exception $ex) {
+        $message = $ex->getMessage();
+        $dir = sys_get_temp_dir();
+        self::write("Unable to open temp files from '{$dir}': {$message}\n");
+        $open_tmp = false;
+      }
+
+      if (!$open_urandom || !$open_tmp || !$open_libphutil || !$open_arcanist) {
+        self::writeFailure();
+        self::write(
+          "Setup failure! Your server is configured with 'open_basedir' in ".
+          "php.ini which prevents Phabricator from opening files it needs to ".
+          "access. Either make the setting more permissive or remove it. It ".
+          "is unlikely you derive significant security benefits from having ".
+          "this configured; files outside this directory can still be ".
+          "accessed through system command execution.");
+        return;
+      } else {
+        self::write(
+          "[WARN] You have an 'open_basedir' configured in your php.ini. ".
+          "Although the setting seems permissive enough that Phabricator ".
+          "will run properly, you may run into problems because of it. It is ".
+          "unlikely you gain much real security benefit from having it ".
+          "configured, because the application can still access files outside ".
+          "the 'open_basedir' by running system commands.\n");
+      }
+    } else {
+      self::write(" okay  'open_basedir' is not set.\n");
+    }
+
+    self::write("[OKAY] Core configuration OKAY.\n");
+
     self::writeHeader("REQUIRED PHP EXTENSIONS");
     $extensions = array(
       'mysql',
@@ -161,6 +248,22 @@ class PhabricatorSetup {
           "options.\n");
         return;
       }
+    }
+
+    $timezone = nonempty(
+      PhabricatorEnv::getEnvConfig('phabricator.timezone'),
+      ini_get('date.timezone'));
+    if (!$timezone) {
+      self::writeFailure();
+      self::write(
+        "Setup failure! Your configuration fails to specify a server ".
+        "timezone. Either set 'date.timezone' in your php.ini or ".
+        "'phabricator.timezone' in your Phabricator configuration. See the ".
+        "PHP documentation for a list of supported timezones:\n\n".
+        "http://us.php.net/manual/en/timezones.php\n");
+      return;
+    } else {
+      self::write(" okay  Timezone '{$timezone}' configured.\n");
     }
 
     self::write("[OKAY] Basic configuration OKAY\n");
@@ -372,12 +475,19 @@ class PhabricatorSetup {
     $local_key = 'storage.local-disk.path';
     $local_path = PhabricatorEnv::getEnvConfig($local_key);
     if ($local_path) {
-      if (!Filesystem::pathExists($local_path) || !is_writable($local_path)) {
+      if (!Filesystem::pathExists($local_path) ||
+          !is_readable($local_path) ||
+          !is_writable($local_path)) {
         self::writeFailure();
         self::write(
           "Setup failure! You have configured local disk storage but the ".
           "path you specified ('{$local_path}') does not exist or is not ".
-          "writable.\n");
+          "readable or writable.\n");
+        if ($open_basedir) {
+          self::write(
+            "You have an 'open_basedir' setting -- make sure Phabricator is ".
+            "allowed to open files in the local storage directory.\n");
+        }
         return;
       } else {
         self::write(" okay  Local disk storage exists and is writable.\n");
