@@ -508,7 +508,6 @@ class PhabricatorRepositoryEditController
 
   private function processGithubRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
     $repository = $this->repository;
     $repository_id = $repository->getID();
 
@@ -516,9 +515,10 @@ class PhabricatorRepositoryEditController
     $path = '/github-post-receive/'.$repository_id.'/'.$token.'/';
     $post_uri = PhabricatorEnv::getURI($path);
 
-    $gitform = new AphrontFormView();
+    $gitform = new AphrontFormLayoutView();
     $gitform
-      ->setUser($user)
+      ->setBackgroundShading(true)
+      ->setPadded(true)
       ->appendChild(
         '<p class="aphront-form-instructions">You can configure GitHub to '.
         'notify Phabricator after changes are pushed. Log into GitHub, go '.
