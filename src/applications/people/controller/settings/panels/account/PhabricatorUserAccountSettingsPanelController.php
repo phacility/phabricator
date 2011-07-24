@@ -25,43 +25,16 @@ class PhabricatorUserAccountSettingsPanelController
     $user = $request->getUser();
     $editable = $this->getAccountEditable();
 
-    $e_realname = true;
+    $e_realname = $editable ? true : null;
     $errors = array();
     if ($request->isFormPost()) {
-      if (!$editable) {
-        return new Aphront400Response();
-      }
 
-      if (!empty($_FILES['profile'])) {
-        $err = idx($_FILES['profile'], 'error');
-        if ($err != UPLOAD_ERR_NO_FILE) {
-          $file = PhabricatorFile::newFromPHPUpload(
-            $_FILES['profile'],
-            array(
-              'authorPHID' => $user->getPHID(),
-            ));
-          $okay = $file->isTransformableImage();
-          if ($okay) {
-            $xformer = new PhabricatorImageTransformer();
-            $xformed = $xformer->executeProfileTransform(
-              $file,
-              $width = 50,
-              $min_height = 50,
-              $max_height = 50);
-            $user->setProfileImagePHID($xformed->getPHID());
-          } else {
-            $errors[] =
-              'Only valid image files (jpg, jpeg, png or gif) '.
-              'will be accepted.';
-          }
+      if ($editable) {
+        $user->setRealName($request->getStr('realname'));
+        if (!strlen($user->getRealName())) {
+          $errors[] = 'Real name must be nonempty.';
+          $e_realname = 'Required';
         }
-      }
-
-      $user->setRealName($request->getStr('realname'));
-
-      if (!strlen($user->getRealName())) {
-        $errors[] = 'Real name must be nonempty.';
-        $e_realname = 'Required';
       }
 
       $new_timezone = $request->getStr('timezone');
@@ -77,9 +50,6 @@ class PhabricatorUserAccountSettingsPanelController
             ->setURI('/settings/page/account/?saved=true');
       }
     }
-
-    $img_src = PhabricatorFileURI::getViewURIForPHID(
-      $user->getProfileImagePHID());
 
     $notice = null;
     if (!$errors) {
@@ -97,6 +67,9 @@ class PhabricatorUserAccountSettingsPanelController
       $notice = $notice->render();
     }
 
+    $timezone_ids = DateTimeZone::listIdentifiers();
+    $timezone_id_map = array_combine($timezone_ids, $timezone_ids);
+
     $form = new AphrontFormView();
     $form
       ->setUser($user)
@@ -113,46 +86,17 @@ class PhabricatorUserAccountSettingsPanelController
           ->setValue($user->getRealName())
           ->setDisabled(!$editable))
       ->appendChild(
-          id(new AphrontFormMarkupControl())
-            ->setValue('<hr />'))
+        id(new AphrontFormSelectControl())
+          ->setLabel('Timezone')
+          ->setName('timezone')
+          ->setOptions($timezone_id_map)
+          ->setValue($user->getTimezoneIdentifier()))
       ->appendChild(
-        id(new AphrontFormMarkupControl())
-          ->setLabel('Profile Image')
-          ->setValue(
-            phutil_render_tag(
-              'img',
-              array(
-                'src' => $img_src,
-              ))));
-
-    if ($editable) {
-      $timezone_ids = DateTimeZone::listIdentifiers();
-      $timezone_id_map = array_combine($timezone_ids, $timezone_ids);
-
-      $form
-        ->appendChild(
-          id(new AphrontFormFileControl())
-            ->setLabel('Change Image')
-            ->setName('profile'))
-        ->appendChild(
-            id(new AphrontFormMarkupControl())
-              ->setValue('<hr />'))
-        ->appendChild(
-          id(new AphrontFormSelectControl())
-            ->setLabel('Timezone')
-            ->setName('timezone')
-            ->setOptions($timezone_id_map)
-            ->setValue($user->getTimezoneIdentifier()))
-        ->appendChild(
-            id(new AphrontFormMarkupControl())
-              ->setValue('<hr />'))
-        ->appendChild(
-          id(new AphrontFormSubmitControl())
-            ->setValue('Save'));
-    }
+        id(new AphrontFormSubmitControl())
+          ->setValue('Save'));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Profile Settings');
+    $panel->setHeader('Account Settings');
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
     $panel->appendChild($form);
 

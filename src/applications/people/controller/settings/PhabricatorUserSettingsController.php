@@ -33,6 +33,7 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
 
     $this->pages = array(
       'account'     => 'Account',
+      'profile'     => 'Profile',
       'email'       => 'Email',
       'preferences' => 'Preferences',
       'conduit'     => 'Conduit Certificate',
@@ -59,6 +60,9 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
     switch ($this->page) {
       case 'account':
         $delegate = new PhabricatorUserAccountSettingsPanelController($request);
+        break;
+      case 'profile':
+        $delegate = new PhabricatorUserProfileSettingsPanelController($request);
         break;
       case 'email':
         $delegate = new PhabricatorUserEmailSettingsPanelController($request);

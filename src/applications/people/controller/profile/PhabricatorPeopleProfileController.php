@@ -50,7 +50,7 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
       $links[] = phutil_render_tag(
         'a',
         array(
-          'href' => '/profile/edit/',
+          'href' => '/settings/page/profile/',
         ),
         'Edit Profile');
     }

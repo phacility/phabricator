@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-class PhabricatorPeopleProfileEditController
-  extends PhabricatorPeopleController {
+class PhabricatorUserProfileSettingsPanelController
+  extends PhabricatorUserSettingsPanelController {
 
   public function processRequest() {
 
@@ -48,12 +48,22 @@ class PhabricatorPeopleProfileEditController
           $okay = $file->isTransformableImage();
           if ($okay) {
             $xformer = new PhabricatorImageTransformer();
-            $xformed = $xformer->executeProfileTransform(
+
+            // Generate the large picture for the profile page.
+            $large_xformed = $xformer->executeProfileTransform(
               $file,
               $width = 280,
               $min_height = 140,
               $max_height = 420);
-            $profile->setProfileImagePHID($xformed->getPHID());
+            $profile->setProfileImagePHID($large_xformed->getPHID());
+
+            // Generate the small picture for comments, etc.
+            $small_xformed = $xformer->executeProfileTransform(
+              $file,
+              $width = 50,
+              $min_height = 50,
+              $max_height = 50);
+            $user->setProfileImagePHID($small_xformed->getPHID());
           } else {
             $errors[] =
               'Only valid image files (jpg, jpeg, png or gif) '.
@@ -63,9 +73,10 @@ class PhabricatorPeopleProfileEditController
       }
 
       if (!$errors) {
+        $user->save();
         $profile->save();
         $response = id(new AphrontRedirectResponse())
-          ->setURI('/p/'.$user->getUsername().'/');
+          ->setURI('/settings/page/profile/?saved=true');
         return $response;
       }
     }
@@ -75,12 +86,24 @@ class PhabricatorPeopleProfileEditController
       $error_view = new AphrontErrorView();
       $error_view->setTitle('Form Errors');
       $error_view->setErrors($errors);
+    } else {
+      if ($request->getStr('saved')) {
+        $error_view = new AphrontErrorView();
+        $error_view->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+        $error_view->setTitle('Changes Saved');
+        $error_view->appendChild('<p>Your changes have been saved.</p>');
+        $error_view = $error_view->render();
+      }
     }
+
+    $img_src = PhabricatorFileURI::getViewURIForPHID(
+      $user->getProfileImagePHID());
+    $profile_uri = PhabricatorEnv::getURI('/p/'.$user->getUsername().'/');
 
     $form = new AphrontFormView();
     $form
       ->setUser($request->getUser())
-      ->setAction('/profile/edit/')
+      ->setAction('/settings/page/profile/')
       ->setEncType('multipart/form-data')
       ->appendChild(
         id(new AphrontFormTextControl())
@@ -89,20 +112,37 @@ class PhabricatorPeopleProfileEditController
           ->setValue($profile->getTitle())
           ->setCaption('Serious business title.'))
       ->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel('Profile URI')
+          ->setValue(
+            phutil_render_tag(
+              'a',
+              array(
+                'href' => $profile_uri,
+              ),
+              phutil_escape_html($profile_uri))))
+      ->appendChild(
         '<p class="aphront-form-instructions">Write something about yourself! '.
         'Make sure to include <strong>important information</strong> like '.
-        'your <strong>favorite pokemon</strong> and which '.
-        '<strong>Starcraft race</strong> you play.</p>')
+        'your favorite pokemon and which Starcraft race you play.</p>')
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel('Blurb')
           ->setName('blurb')
           ->setValue($profile->getBlurb()))
       ->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel('Profile Image')
+          ->setValue(
+            phutil_render_tag(
+              'img',
+              array(
+                'src' => $img_src,
+              ))))
+      ->appendChild(
         id(new AphrontFormFileControl())
           ->setLabel('Change Image')
-          ->setName('image')
-          ->setCaption('Upload a 280px-wide image.'))
+          ->setName('image'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Save')
@@ -113,14 +153,12 @@ class PhabricatorPeopleProfileEditController
     $panel->appendChild($form);
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
 
-    return $this->buildStandardPageResponse(
-      array(
-        $error_view,
-        $panel,
-      ),
-      array(
-        'title' => 'Edit Profile',
-      ));
+    return id(new AphrontNullView())
+      ->appendChild(
+        array(
+          $error_view,
+          $panel,
+        ));
   }
 
 }
