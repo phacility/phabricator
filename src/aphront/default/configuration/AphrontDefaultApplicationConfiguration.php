@@ -246,6 +246,10 @@ class AphrontDefaultApplicationConfiguration
             'validate/$' => 'DiffusionPathValidateController',
           ),
         ),
+        'author/' => array(
+          '$' => 'DiffusionCommitListController',
+          '(?P<username>\w+)/$' => 'DiffusionCommitListController',
+        ),
       ),
 
       '/daemon/' => array(

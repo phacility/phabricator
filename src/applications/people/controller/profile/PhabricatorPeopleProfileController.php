@@ -141,6 +141,14 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
 
     $engine = PhabricatorMarkupEngine::newProfileMarkupEngine();
     $blurb = $engine->markupText($blurb);
+    $commit_list =
+      phutil_render_tag(
+        'a',
+        array(
+          'href' => '/diffusion/author/'.
+            phutil_escape_uri($user->getUsername()),
+        ),
+        'Recent Commits');
 
     $content =
       '<div class="phabricator-profile-info-group">
@@ -166,6 +174,18 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
             <tr>
               <th>Blurb</th>
               <td>'.$blurb.'</td>
+            </tr>
+          </table>
+        </div>
+      </div>';
+    $content .=
+      '<div class="phabricator-profile-info-group">
+        <h1 class="phabricator-profile-info-header">Recent Activities</h1>
+        <div class="phabricator-profile-info-pane">
+          <table class="phabricator-profile-info-table">
+            <tr>
+              <th>Commits</th>
+              <td>'.$commit_list.'</td>
             </tr>
           </table>
         </div>
