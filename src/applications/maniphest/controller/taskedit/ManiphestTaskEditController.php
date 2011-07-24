@@ -76,6 +76,7 @@ class ManiphestTaskEditController extends ManiphestController {
 
       $new_title = $request->getStr('title');
       $new_desc = $request->getStr('description');
+      $new_status = $request->getStr('status');
 
       if ($task->getID()) {
         if ($new_title != $task->getTitle()) {
@@ -83,6 +84,9 @@ class ManiphestTaskEditController extends ManiphestController {
         }
         if ($new_desc != $task->getDescription()) {
           $changes[ManiphestTransactionType::TYPE_DESCRIPTION] = $new_desc;
+        }
+        if ($new_status != $task->getStatus()) {
+          $changes[ManiphestTransactionType::TYPE_STATUS] = $new_status;
         }
       } else {
         $task->setTitle($new_title);
@@ -225,7 +229,22 @@ class ManiphestTaskEditController extends ManiphestController {
           ->setName('title')
           ->setError($e_title)
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT)
-          ->setValue($task->getTitle()))
+          ->setValue($task->getTitle()));
+
+    if ($task->getID()) {
+      // Only show this in "edit" mode, not "create" mode, since creating a
+      // non-open task is kind of silly and it would just clutter up the
+      // "create" interface.
+      $form
+        ->appendChild(
+          id(new AphrontFormSelectControl())
+            ->setLabel('Status')
+            ->setName('status')
+            ->setValue($task->getStatus())
+            ->setOptions(ManiphestTaskStatus::getTaskStatusMap()));
+    }
+
+    $form
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setLabel('Assigned To')
