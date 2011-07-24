@@ -96,10 +96,10 @@ class PhrictionEditController
           $is_new = true;
           $document->save();
         }
-
         $new_content = new PhrictionContent();
         $new_content->setSlug($document->getSlug());
         $new_content->setTitle($title);
+        $new_content->setDescription($request->getStr('description'));
         $new_content->setContent($request->getStr('content'));
 
         $new_content->setDocumentID($document->getID());
@@ -176,6 +176,12 @@ class PhrictionEditController
           ->setValue($content->getTitle())
           ->setError($e_title)
           ->setName('title'))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel('Description')
+          ->setValue($content->getDescription())
+          ->setError(null)
+          ->setName('description'))
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel('URI')
