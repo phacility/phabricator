@@ -18,8 +18,6 @@
 
 class PhabricatorSetup {
 
-  const EXPECTED_SCHEMA_VERSION = 36;
-
   public static function runSetup() {
     header("Content-Type: text/plain");
     self::write("PHABRICATOR SETUP\n\n");
