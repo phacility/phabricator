@@ -40,7 +40,6 @@ class PhabricatorSearchAttachController extends PhabricatorSearchController {
     $handles = $handle_data->loadHandles();
     $handle = $handles[$this->phid];
 
-    $object_phid = $this->phid;
     $object_type = $handle->getType();
     $attach_type = $this->type;
 
@@ -60,72 +59,15 @@ class PhabricatorSearchAttachController extends PhabricatorSearchController {
         case self::ACTION_MERGE:
           return $this->performMerge($object, $handle, $phids);
         case self::ACTION_ATTACH:
-          // Fall through to the workflow below.
-          break;
+          $this->performAttach(
+            $object_type,
+            $object,
+            $attach_type,
+            $phids);
+          return id(new AphrontReloadResponse())->setURI($handle->getURI());
         default:
           throw new Exception("Unsupported attach action.");
       }
-
-      // sort() so that removing [X, Y] and then adding [Y, X] is correctly
-      // detected as a no-op.
-      sort($phids);
-
-      $old_phids = $object->getAttachedPHIDs($attach_type);
-      sort($old_phids);
-
-      if (($phids || $old_phids) && ($phids !== $old_phids)) {
-
-        $all_phids = array_merge($phids, $old_phids);
-        $attach_objs = id(new PhabricatorObjectHandleData($all_phids))
-          ->loadObjects();
-
-        // Remove PHIDs which don't actually exist, to prevent silliness.
-        $phids = array_keys(array_select_keys($attach_objs, $phids));
-        if ($phids) {
-          $phids = array_combine($phids, $phids);
-        }
-
-        // Update the primary object.
-        switch ($object_type) {
-          case PhabricatorPHIDConstants::PHID_TYPE_DREV:
-            $object->setAttachedPHIDs($attach_type, $phids);
-            $object->save();
-            break;
-          case PhabricatorPHIDConstants::PHID_TYPE_TASK:
-            $this->applyTaskTransaction(
-              $object,
-              $attach_type,
-              $phids);
-            break;
-        }
-
-        // Loop through all of the attached/detached objects and update them.
-        foreach ($attach_objs as $phid => $attach_obj) {
-          $attached_phids = $attach_obj->getAttachedPHIDs($object_type);
-          // Figure out if we're attaching or detaching this object.
-          if (isset($phids[$phid])) {
-            $attached_phids[] = $object_phid;
-          } else {
-            $attached_phids = array_fill_keys($attached_phids, true);
-            unset($attached_phids[$object_phid]);
-            $attached_phids = array_keys($attached_phids);
-          }
-          switch ($attach_type) {
-            case PhabricatorPHIDConstants::PHID_TYPE_DREV:
-              $attach_obj->setAttachedPHIDs($object_type, $attached_phids);
-              $attach_obj->save();
-              break;
-            case PhabricatorPHIDConstants::PHID_TYPE_TASK:
-              $this->applyTaskTransaction(
-                $attach_obj,
-                $object_type,
-                $attached_phids);
-              break;
-          }
-        }
-      }
-
-      return id(new AphrontReloadResponse())->setURI($handle->getURI());
     } else {
       switch ($this->action) {
         case self::ACTION_ATTACH:
@@ -137,34 +79,7 @@ class PhabricatorSearchAttachController extends PhabricatorSearchController {
       }
     }
 
-    switch ($this->type) {
-      case PhabricatorPHIDConstants::PHID_TYPE_DREV:
-        $noun = 'Revisions';
-        $selected = 'created';
-        break;
-      case PhabricatorPHIDConstants::PHID_TYPE_TASK:
-        $noun = 'Tasks';
-        $selected = 'assigned';
-        break;
-    }
-
-    switch ($this->action) {
-      case self::ACTION_ATTACH:
-        $dialog_title = "Manage Attached {$noun}";
-        $header_text = "Currently Attached {$noun}";
-        $button_text = "Save {$noun}";
-        $instructions = null;
-        break;
-      case self::ACTION_MERGE:
-        $dialog_title = "Merge Duplicate Tasks";
-        $header_text = "Tasks To Merge";
-        $button_text = "Merge {$noun}";
-        $instructions =
-          "These tasks will be merged into the current task and then closed. ".
-          "The current task (\"".phutil_escape_html($handle->getName())."\") ".
-          "will grow stronger.";
-        break;
-    }
+    $strings = $this->getStrings();
 
     $handles = id(new PhabricatorObjectHandleData($phids))
       ->loadHandles();
@@ -176,16 +91,16 @@ class PhabricatorSearchAttachController extends PhabricatorSearchController {
       ->setFilters(array(
         'assigned' => 'Assigned to Me',
         'created'  => 'Created By Me',
-        'open'     => 'All Open '.$noun,
-        'all'      => 'All '.$noun,
+        'open'     => 'All Open '.$strings['target_plural_noun'],
+        'all'      => 'All '.$strings['target_plural_noun'],
       ))
-      ->setSelectedFilter($selected)
+      ->setSelectedFilter($strings['selected'])
       ->setCancelURI($handle->getURI())
       ->setSearchURI('/search/select/'.$attach_type.'/')
-      ->setTitle($dialog_title)
-      ->setHeader($header_text)
-      ->setButtonText($button_text)
-      ->setInstructions($instructions);
+      ->setTitle($strings['title'])
+      ->setHeader($strings['header'])
+      ->setButtonText($strings['button'])
+      ->setInstructions($strings['instructions']);
 
     $dialog = $obj_dialog->buildDialog();
 
@@ -211,6 +126,58 @@ class PhabricatorSearchAttachController extends PhabricatorSearchController {
 
     $transaction->setNewValue($new);
     $editor->applyTransactions($task, array($transaction));
+  }
+
+  private function performAttach(
+    $object_type,
+    $object,
+    $attach_type,
+    array $phids) {
+
+    $object_phid = $object->getPHID();
+
+    // sort() so that removing [X, Y] and then adding [Y, X] is correctly
+    // detected as a no-op.
+    sort($phids);
+    $old_phids = $object->getAttachedPHIDs($attach_type);
+    sort($old_phids);
+    $phids = array_values($phids);
+    $old_phids = array_values($old_phids);
+
+    if ($phids === $old_phids) {
+      return;
+    }
+
+    $all_phids = array_merge($phids, $old_phids);
+    $attach_objs = id(new PhabricatorObjectHandleData($all_phids))
+      ->loadObjects();
+
+    // Remove PHIDs which don't actually exist, to prevent silliness.
+    $phids = array_keys(array_select_keys($attach_objs, $phids));
+    if ($phids) {
+      $phids = array_combine($phids, $phids);
+    }
+
+    // Update the primary object.
+    $this->writeOutboundEdges($object_type, $object, $attach_type, $phids);
+
+    // Loop through all of the attached/detached objects and update them.
+    foreach ($attach_objs as $phid => $attach_obj) {
+      $attached_phids = $attach_obj->getAttachedPHIDs($object_type);
+      // Figure out if we're attaching or detaching this object.
+      if (isset($phids[$phid])) {
+        $attached_phids[] = $object_phid;
+      } else {
+        $attached_phids = array_fill_keys($attached_phids, true);
+        unset($attached_phids[$object_phid]);
+        $attached_phids = array_keys($attached_phids);
+      }
+      $this->writeOutboundEdges(
+        $attach_type,
+        $attach_obj,
+        $object_type,
+        $attached_phids);
+    }
   }
 
   private function performMerge(
@@ -275,4 +242,64 @@ class PhabricatorSearchAttachController extends PhabricatorSearchController {
 
     return $response;
   }
+
+  private function writeOutboundEdges(
+    $object_type,
+    $object,
+    $attach_type,
+    array $attach_phids) {
+
+    switch ($object_type) {
+      case PhabricatorPHIDConstants::PHID_TYPE_DREV:
+        $object->setAttachedPHIDs($attach_type, $attach_phids);
+        $object->save();
+        break;
+      case PhabricatorPHIDConstants::PHID_TYPE_TASK:
+        $this->applyTaskTransaction(
+          $object,
+          $attach_type,
+          $attach_phids);
+        break;
+    }
+  }
+
+  private function getStrings() {
+    switch ($this->type) {
+      case PhabricatorPHIDConstants::PHID_TYPE_DREV:
+        $noun = 'Revisions';
+        $selected = 'created';
+        break;
+      case PhabricatorPHIDConstants::PHID_TYPE_TASK:
+        $noun = 'Tasks';
+        $selected = 'assigned';
+        break;
+    }
+
+    switch ($this->action) {
+      case self::ACTION_ATTACH:
+        $dialog_title = "Manage Attached {$noun}";
+        $header_text = "Currently Attached {$noun}";
+        $button_text = "Save {$noun}";
+        $instructions = null;
+        break;
+      case self::ACTION_MERGE:
+        $dialog_title = "Merge Duplicate Tasks";
+        $header_text = "Tasks To Merge";
+        $button_text = "Merge {$noun}";
+        $instructions =
+          "These tasks will be merged into the current task and then closed. ".
+          "The current task will grow stronger.";
+        break;
+    }
+
+    return array(
+      'target_plural_noun'    => $noun,
+      'selected'              => $selected,
+      'title'                 => $dialog_title,
+      'header'                => $header_text,
+      'button'                => $button_text,
+      'instructions'          => $instructions,
+    );
+  }
+
 }
