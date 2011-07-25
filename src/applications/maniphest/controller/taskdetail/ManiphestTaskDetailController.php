@@ -141,7 +141,6 @@ class ManiphestTaskDetailController extends ManiphestController {
       }
     }
 
-
     $dict['Description'] =
       '<div class="maniphest-task-description">'.
         '<div class="phabricator-remarkup">'.

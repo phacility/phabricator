@@ -83,6 +83,44 @@ class ManiphestTask extends ManiphestDAO {
     return $this;
   }
 
+  public function setAuxiliaryAttribute($key, $val) {
+    $this->removeAuxiliaryAttribute($key);
+
+    $attribute = new ManiphestTaskAuxiliaryStorage();
+    $attribute->setTaskPHID($this->phid);
+    $attribute->setName($key);
+    $attribute->setValue($val);
+    $attribute->save();
+  }
+
+  public function loadAuxiliaryAttribute($key) {
+    $attribute = id(new ManiphestTaskAuxiliaryStorage())->loadOneWhere(
+      'taskPHID = %s AND name = %s',
+      $this->getPHID(),
+      $key);
+
+    return $attribute;
+  }
+
+  public function removeAuxiliaryAttribute($key) {
+    $attribute = id(new ManiphestTaskAuxiliaryStorage())->loadOneWhere(
+      'taskPHID = %s AND name = %s',
+      $this->getPHID(),
+      $key);
+
+    if ($attribute) {
+      $attribute->delete();
+    }
+  }
+
+  public function loadAuxiliaryAttributes() {
+    $attributes = id(new ManiphestTaskAuxiliaryStorage())->loadAllWhere(
+      'taskPHID = %s',
+      $this->getPHID());
+
+    return $attributes;
+  }
+
   public function save() {
     if (!$this->mailKey) {
       $this->mailKey = sha1(Filesystem::readRandomBytes(20));

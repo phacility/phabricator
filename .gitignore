@@ -8,3 +8,6 @@
 *#
 *~
 *.swp
+
+# NetBeans project files
+/nbproject/ 
