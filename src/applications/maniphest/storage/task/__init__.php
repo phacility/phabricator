@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/maniphest/storage/auxiliary');
 phutil_require_module('phabricator', 'applications/maniphest/storage/base');
 phutil_require_module('phabricator', 'applications/maniphest/storage/subscriber');
 phutil_require_module('phabricator', 'applications/maniphest/storage/taskproject');
