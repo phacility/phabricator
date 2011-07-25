@@ -67,6 +67,24 @@ class PhabricatorObjectHandleData {
             }
           }
           break;
+        case PhabricatorPHIDConstants::PHID_TYPE_TASK:
+          $task_dao = newv('ManiphestTask', array());
+          $tasks = $task_dao->loadAllWhere(
+            'phid IN (%Ls)',
+            $phids);
+          foreach ($tasks as $task) {
+            $objects[$task->getPHID()] = $task;
+          }
+          break;
+        case PhabricatorPHIDConstants::PHID_TYPE_DREV:
+          $revision_dao = newv('DifferentialRevision', array());
+          $revisions = $revision_dao->loadAllWhere(
+            'phid IN (%Ls)',
+            $phids);
+          foreach ($revisions as $revision) {
+            $objects[$revision->getPHID()] = $revision;
+          }
+          break;
       }
     }
 

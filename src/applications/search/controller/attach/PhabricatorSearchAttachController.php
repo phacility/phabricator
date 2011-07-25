@@ -36,30 +36,16 @@ class PhabricatorSearchAttachController extends PhabricatorSearchController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $handles = id(new PhabricatorObjectHandleData(array($this->phid)))
-      ->loadHandles();
+    $handle_data = new PhabricatorObjectHandleData(array($this->phid));
+    $handles = $handle_data->loadHandles();
     $handle = $handles[$this->phid];
 
     $object_phid = $this->phid;
     $object_type = $handle->getType();
     $attach_type = $this->type;
 
-    // Load the object we're going to attach/detach stuff from. This is the
-    // object that triggered the action, e.g. the revision you clicked
-    // "Edit Maniphest Tasks" on.
-    $object = null;
-    switch ($object_type) {
-      case PhabricatorPHIDConstants::PHID_TYPE_DREV:
-        $object = id(new DifferentialRevision())->loadOneWhere(
-          'phid = %s',
-          $this->phid);
-        break;
-      case PhabricatorPHIDConstants::PHID_TYPE_TASK:
-        $object = id(new ManiphestTask())->loadOneWhere(
-          'phid = %s',
-          $this->phid);
-        break;
-    }
+    $objects = $handle_data->loadObjects();
+    $object = idx($objects, $this->phid);
 
     if (!$object) {
       return new Aphront404Response();
@@ -89,22 +75,9 @@ class PhabricatorSearchAttachController extends PhabricatorSearchController {
 
       if (($phids || $old_phids) && ($phids !== $old_phids)) {
 
-        // Load all the objects we're attaching or detaching from the main
-        // object.
-        switch ($attach_type) {
-          case PhabricatorPHIDConstants::PHID_TYPE_DREV:
-            $attach_objs = id(new DifferentialRevision())->loadAllWhere(
-              'phid IN (%Ls)',
-              array_merge($phids, $old_phids));
-            break;
-          case PhabricatorPHIDConstants::PHID_TYPE_TASK:
-            $attach_objs = id(new ManiphestTask())->loadAllWhere(
-              'phid IN (%Ls)',
-              array_merge($phids, $old_phids));
-            break;
-        }
-
-        $attach_objs = mpull($attach_objs, null, 'getPHID');
+        $all_phids = array_merge($phids, $old_phids);
+        $attach_objs = id(new PhabricatorObjectHandleData($all_phids))
+          ->loadObjects();
 
         // Remove PHIDs which don't actually exist, to prevent silliness.
         $phids = array_keys(array_select_keys($attach_objs, $phids));
