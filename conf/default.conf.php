@@ -427,6 +427,12 @@ return array(
 
   'maniphest.enabled' => true,
 
+  // Array of custom fields for Maniphest tasks. The array should contain
+  // arrays of field specifications keyed with 'type', 'label', 'caption',
+  // 'required' and whatever specific options exist for the given field
+  // type.
+  'maniphest.custom-fields' => array(),
+
 // -- Remarkup -------------------------------------------------------------- //
 
   // If you enable this, linked YouTube videos will be embeded inline. This has

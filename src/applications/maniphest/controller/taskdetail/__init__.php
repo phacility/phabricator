@@ -13,6 +13,7 @@ phutil_require_module('phabricator', 'applications/maniphest/constants/priority'
 phutil_require_module('phabricator', 'applications/maniphest/constants/status');
 phutil_require_module('phabricator', 'applications/maniphest/constants/transactiontype');
 phutil_require_module('phabricator', 'applications/maniphest/controller/base');
+phutil_require_module('phabricator', 'applications/maniphest/extensions/task');
 phutil_require_module('phabricator', 'applications/maniphest/storage/task');
 phutil_require_module('phabricator', 'applications/maniphest/storage/transaction');
 phutil_require_module('phabricator', 'applications/maniphest/view/transactionlist');
