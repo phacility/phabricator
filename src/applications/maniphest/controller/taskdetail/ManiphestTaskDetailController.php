@@ -41,6 +41,9 @@ class ManiphestTaskDetailController extends ManiphestController {
       return new Aphront404Response();
     }
 
+    $aux_fields = id(new ManiphestDefaultTaskExtensions())
+      ->getAuxiliaryFieldSpecifications();
+
     $transactions = id(new ManiphestTransaction())->loadAllWhere(
       'taskID = %d ORDER BY id ASC',
       $task->getID());
@@ -110,6 +113,20 @@ class ManiphestTaskDetailController extends ManiphestController {
       $dict['Projects'] = implode(', ', $project_links);
     } else {
       $dict['Projects'] = '<em>None</em>';
+    }
+
+    if ($aux_fields) {
+      foreach ($aux_fields as $aux_field) {
+        $attribute = $task->loadAuxiliaryAttribute(
+          $aux_field->getAuxiliaryKey()
+        );
+
+        if ($attribute) {
+          $aux_field->setValue($attribute->getValue());
+        }
+
+        $dict[$aux_field->getLabel()] = $aux_field->renderForDetailView();
+      }
     }
 
     if (idx($attached, PhabricatorPHIDConstants::PHID_TYPE_DREV)) {
