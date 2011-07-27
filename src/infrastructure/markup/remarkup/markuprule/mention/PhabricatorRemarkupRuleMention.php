@@ -22,7 +22,8 @@
 class PhabricatorRemarkupRuleMention
   extends PhutilRemarkupRule {
 
-  private $actualUsers;
+  const KEY_RULE_MENTION  = 'rule.mention';
+  const KEY_MENTIONED     = 'phabricator.mentioned-user-phids';
 
   public function apply($text) {
 
@@ -33,17 +34,40 @@ class PhabricatorRemarkupRuleMention
     // matching "@joe.com" while allowing us to match "hey, @joe.".
     $regexp = '/(?<!\w)@([a-zA-Z0-9]+)\b(?![.]\w)/';
 
-    $matches = null;
-    $ok = preg_match_all($regexp, $text, $matches);
-    if (!$ok) {
-      // No mentions in this text.
-      return $text;
+    return preg_replace_callback(
+      $regexp,
+      array($this, 'markupMention'),
+      $text);
+  }
+
+  private function markupMention($matches) {
+    $username = strtolower($matches[1]);
+    $engine = $this->getEngine();
+
+    $token = $engine->storeText('');
+
+    $metadata_key = self::KEY_RULE_MENTION;
+    $metadata = $engine->getTextMetadata($metadata_key, array());
+    if (empty($metadata[$username])) {
+      $metadata[$username] = array();
+    }
+    $metadata[$username][] = $token;
+    $engine->setTextMetadata($metadata_key, $metadata);
+
+    return $token;
+  }
+
+  public function didMarkupText() {
+    $engine = $this->getEngine();
+
+    $metadata_key = self::KEY_RULE_MENTION;
+    $metadata = $engine->getTextMetadata($metadata_key, array());
+    if (empty($metadata)) {
+      // No mentions, or we already processed them.
+      return;
     }
 
-    $usernames = $matches[1];
-
-    // TODO: This is a little sketchy perf-wise. Once APC comes up, it is an
-    // ideal candidate to back with an APC cache.
+    $usernames = array_keys($metadata);
     $user_table = new PhabricatorUser();
     $real_user_names = queryfx_all(
       $user_table->establishConnection('r'),
@@ -51,52 +75,48 @@ class PhabricatorRemarkupRuleMention
       $user_table->getTableName(),
       $usernames);
 
-    $engine = $this->getEngine();
-    $metadata_key = 'phabricator.mentioned-user-phids';
-    $mentioned = $engine->getTextMetadata($metadata_key, array());
+    $actual_users = array();
 
+    $mentioned_key = self::KEY_MENTIONED;
+    $mentioned = $engine->getTextMetadata($mentioned_key, array());
     foreach ($real_user_names as $row) {
-      $this->actualUsers[strtolower($row['username'])] = $row;
+      $actual_users[strtolower($row['username'])] = $row;
       $mentioned[$row['phid']] = $row['phid'];
     }
 
-    $engine->setTextMetadata($metadata_key, $mentioned);
+    $engine->setTextMetadata($mentioned_key, $mentioned);
 
-    return preg_replace_callback(
-      $regexp,
-      array($this, 'markupMention'),
-      $text);
-  }
+    foreach ($metadata as $username => $tokens) {
+      $exists = isset($actual_users[$username]);
+      $class = $exists
+        ? 'phabricator-remarkup-mention-exists'
+        : 'phabricator-remarkup-mention-unknown';
 
-  public function markupMention($matches) {
-    $username = strtolower($matches[1]);
-    $exists = isset($this->actualUsers[$username]);
-
-    $class = $exists
-      ? 'phabricator-remarkup-mention-exists'
-      : 'phabricator-remarkup-mention-unknown';
-
-    if ($exists) {
-      $real = $this->actualUsers[$username]['realName'];
-      $tag = phutil_render_tag(
-        'a',
-        array(
-          'class'   => $class,
-          'href'    => '/p/'.$username.'/',
-          'target'  => '_blank',
-          'title'   => $real,
-        ),
-        phutil_escape_html('@'.$username));
-    } else {
-      $tag = phutil_render_tag(
-        'span',
-        array(
-          'class' => $class,
-        ),
-        phutil_escape_html('@'.$username));
+      if ($exists) {
+        $tag = phutil_render_tag(
+          'a',
+          array(
+            'class'   => $class,
+            'href'    => '/p/'.$username.'/',
+            'target'  => '_blank',
+            'title'   => $actual_users[$username]['realName'],
+          ),
+          phutil_escape_html('@'.$username));
+      } else {
+        $tag = phutil_render_tag(
+          'span',
+          array(
+            'class' => $class,
+          ),
+          phutil_escape_html('@'.$username));
+      }
+      foreach ($tokens as $token) {
+        $engine->overwriteStoredText($token, $tag);
+      }
     }
 
-    return $this->getEngine()->storeText($tag);
+    // Don't re-process these mentions.
+    $engine->setTextMetadata($metadata_key, array());
   }
 
 }

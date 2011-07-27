@@ -26,7 +26,7 @@ class PhabricatorMarkupEngine {
     foreach ($content_blocks as $content_block) {
       $engine->markupText($content_block);
       $phids = $engine->getTextMetadata(
-        'phabricator.mentioned-user-phids',
+        PhabricatorRemarkupRuleMention::KEY_MENTIONED,
         array());
       $mentions += $phids;
     }
