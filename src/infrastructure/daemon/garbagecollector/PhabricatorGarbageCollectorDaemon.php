@@ -104,8 +104,9 @@ class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
           objectTranscript     = "",
           ruleTranscripts      = "",
           conditionTranscripts = "",
-          applyTranscripts     = ""
-        WHERE `time` < %d AND objectTranscript != ""
+          applyTranscripts     = "",
+          garbageCollected     = 1
+        WHERE garbageCollected = 0 AND `time` < %d
         LIMIT 100',
       $table->getTableName(),
       time() - $ttl);
