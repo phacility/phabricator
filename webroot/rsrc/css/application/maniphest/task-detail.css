@@ -16,7 +16,6 @@
   margin-bottom: 8px;
 }
 
-
 .maniphest-task-properties {
   font-size: 12px;
   width:    100%;
@@ -41,4 +40,9 @@
 
 .maniphest-task-detail-core {
   margin-right: 265px;
+}
+
+.maniphest-task-detail-core .create-button-container {
+  float:right;
+  margin-top:-0.5em;
 }
