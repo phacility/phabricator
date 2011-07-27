@@ -78,6 +78,8 @@ class ManiphestTaskEditController extends ManiphestController {
       $new_desc = $request->getStr('description');
       $new_status = $request->getStr('status');
 
+      $workflow = '';
+
       if ($task->getID()) {
         if ($new_title != $task->getTitle()) {
           $changes[ManiphestTransactionType::TYPE_TITLE] = $new_title;
@@ -93,6 +95,8 @@ class ManiphestTaskEditController extends ManiphestController {
         $task->setDescription($new_desc);
         $changes[ManiphestTransactionType::TYPE_STATUS] =
           ManiphestTaskStatus::STATUS_OPEN;
+
+        $workflow = 'create';
       }
 
       $owner_tokenizer = $request->getArr('assigned_to');
@@ -103,9 +107,12 @@ class ManiphestTaskEditController extends ManiphestController {
         $errors[] = 'Title is required.';
       }
 
-      if (!$errors) {
-
-
+      if ($errors) {
+        $task->setPriority($request->getInt('priority'));
+        $task->setOwnerPHID($owner_phid);
+        $task->setCCPHIDs($request->getArr('cc'));
+        $task->setProjectPHIDs($request->getArr('projects'));
+      } else {
         if ($request->getInt('priority') != $task->getPriority()) {
           $changes[ManiphestTransactionType::TYPE_PRIORITY] =
             $request->getInt('priority');
@@ -155,8 +162,14 @@ class ManiphestTaskEditController extends ManiphestController {
           $editor->applyTransactions($task, $transactions);
         }
 
+        $redirect_uri = '/T'.$task->getID();
+
+        if ($workflow) {
+          $redirect_uri .= '?workflow='.$workflow;
+        }
+
         return id(new AphrontRedirectResponse())
-          ->setURI('/T'.$task->getID());
+          ->setURI($redirect_uri);
       }
     } else {
       if (!$task->getID()) {
@@ -166,10 +179,23 @@ class ManiphestTaskEditController extends ManiphestController {
       }
     }
 
+    $template_task = null;
+    $template_id = $request->getStr('template');
+    if ($template_id && !$request->isFormPost()) {
+      $template_task = id(new ManiphestTask())->load($template_id);
+    }
+
+    if (!$task->getID() && $template_task) {
+      $task->setCCPHIDs($template_task->getCCPHIDs());
+      $task->setProjectPHIDs($template_task->getProjectPHIDs());
+      $task->setOwnerPHID($template_task->getOwnerPHID());
+    }
+
     $phids = array_merge(
       array($task->getOwnerPHID()),
       $task->getCCPHIDs(),
       $task->getProjectPHIDs());
+
     $phids = array_filter($phids);
     $phids = array_unique($phids);
 
