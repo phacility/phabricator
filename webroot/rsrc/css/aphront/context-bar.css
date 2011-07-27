@@ -1,0 +1,23 @@
+/**
+ * @provides aphront-contextbar-view-css
+ */
+
+.aphront-contextbar-view {
+  background: #efefef;
+  margin-bottom: 6px;
+  padding: 6px 2em;
+  border-bottom: 1px solid #dfdfdf;
+}
+
+.aphront-contextbar-core {
+}
+
+.aphront-contextbar-content {
+  padding-top: 5px;
+  font-size: 13px;
+  color: #666666;
+}
+
+.aphront-contextbar-buttons {
+  float: right;
+}

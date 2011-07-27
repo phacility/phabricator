@@ -72,6 +72,8 @@ class ManiphestTaskEditController extends ManiphestController {
       }
     }
 
+    $template_id = $request->getStr('template');
+
     $errors = array();
     $e_title = true;
 
@@ -210,19 +212,15 @@ class ManiphestTaskEditController extends ManiphestController {
         $task->setCCPHIDs(array(
           $user->getPHID(),
         ));
+        if ($template_id) {
+          $template_task = id(new ManiphestTask())->load($template_id);
+          if ($template_task) {
+            $task->setCCPHIDs($template_task->getCCPHIDs());
+            $task->setProjectPHIDs($template_task->getProjectPHIDs());
+            $task->setOwnerPHID($template_task->getOwnerPHID());
+          }
+        }
       }
-    }
-
-    $template_task = null;
-    $template_id = $request->getStr('template');
-    if ($template_id && !$request->isFormPost()) {
-      $template_task = id(new ManiphestTask())->load($template_id);
-    }
-
-    if (!$task->getID() && $template_task) {
-      $task->setCCPHIDs($template_task->getCCPHIDs());
-      $task->setProjectPHIDs($template_task->getProjectPHIDs());
-      $task->setOwnerPHID($template_task->getOwnerPHID());
     }
 
     $phids = array_merge(
@@ -267,12 +265,17 @@ class ManiphestTaskEditController extends ManiphestController {
       $projects_value = array();
     }
 
+    $cancel_id = nonempty($task->getID(), $template_id);
+    if ($cancel_id) {
+      $cancel_uri = '/T'.$cancel_id;
+    } else {
+      $cancel_uri = '/maniphest/';
+    }
+
     if ($task->getID()) {
-      $cancel_uri = '/T'.$task->getID();
       $button_name = 'Save Task';
       $header_name = 'Edit Task';
     } else {
-      $cancel_uri = '/maniphest/';
       $button_name = 'Create Task';
       $header_name = 'Create New Task';
     }
@@ -283,6 +286,7 @@ class ManiphestTaskEditController extends ManiphestController {
     $form
       ->setUser($user)
       ->setAction($request->getRequestURI()->getPath())
+      ->addHiddenInput('template', $template_id)
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel('Title')

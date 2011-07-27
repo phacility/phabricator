@@ -29,6 +29,7 @@ phutil_require_module('phabricator', 'view/form/control/select');
 phutil_require_module('phabricator', 'view/form/control/submit');
 phutil_require_module('phabricator', 'view/form/control/textarea');
 phutil_require_module('phabricator', 'view/form/control/tokenizer');
+phutil_require_module('phabricator', 'view/layout/contextbar');
 phutil_require_module('phabricator', 'view/layout/filepreview');
 phutil_require_module('phabricator', 'view/layout/headsup/action');
 phutil_require_module('phabricator', 'view/layout/headsup/actionlist');

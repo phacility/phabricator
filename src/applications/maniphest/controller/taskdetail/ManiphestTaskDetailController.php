@@ -188,18 +188,18 @@ class ManiphestTaskDetailController extends ManiphestController {
         implode("\n", $table).
       '</table>';
 
-    $create_new_button = '';
+    $context_bar = null;
     if ($request->getStr('workflow') == 'create') {
-      $create_new_button =
-        '<div class="create-button-container">'.
-           phutil_render_tag(
-           'a',
-           array(
-             'href' => '/maniphest/task/create/?template='.$task->getID(),
-             'class' => 'green button',
-           ),
-           'Create New Task').
-        '</div>';
+      $context_bar = new AphrontContextBarView();
+      $context_bar->addButton(
+         phutil_render_tag(
+         'a',
+         array(
+           'href' => '/maniphest/task/create/?template='.$task->getID(),
+           'class' => 'green button',
+         ),
+        'Create Another Task'));
+      $context_bar->appendChild('New task created.');
     }
 
     $actions = array();
@@ -241,7 +241,6 @@ class ManiphestTaskDetailController extends ManiphestController {
       '<div class="maniphest-panel">'.
         $action_list->render().
         '<div class="maniphest-task-detail-core">'.
-          $create_new_button.
           '<h1>'.
             '<span class="aphront-headsup-object-name">'.
               phutil_escape_html('T'.$task->getID()).
@@ -426,6 +425,7 @@ class ManiphestTaskDetailController extends ManiphestController {
 
     return $this->buildStandardPageResponse(
       array(
+        $context_bar,
         $panel,
         $transaction_view,
         $comment_panel,
