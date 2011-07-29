@@ -236,12 +236,12 @@ class PhabricatorConduitAPIController
     $result = null) {
 
     $param_rows = array();
-    $param_rows[] = array('Method', phutil_escape_html($method));
+    $param_rows[] = array('Method', $this->renderAPIValue($method));
     if ($request) {
       foreach ($request->getAllParameters() as $key => $value) {
         $param_rows[] = array(
           phutil_escape_html($key),
-          phutil_escape_html(json_encode($value)),
+          $this->renderAPIValue($value),
         );
       }
     }
@@ -257,7 +257,7 @@ class PhabricatorConduitAPIController
     foreach ($result as $key => $value) {
       $result_rows[] = array(
         phutil_escape_html($key),
-        phutil_escape_html(json_encode($value)),
+        $this->renderAPIValue($value),
       );
     }
 
@@ -284,6 +284,20 @@ class PhabricatorConduitAPIController
       array(
         'title' => 'Method Call Result',
       ));
+  }
+
+  private function renderAPIValue($value) {
+    $json = new PhutilJSON();
+    if (is_array($value)) {
+      $value = $json->encodeFormatted($value);
+      $value = phutil_escape_html($value);
+    } else {
+      $value = phutil_escape_html($value);
+    }
+
+    $value = '<pre style="white-space: pre-wrap;">'.$value.'</pre>';
+
+    return $value;
   }
 
 }

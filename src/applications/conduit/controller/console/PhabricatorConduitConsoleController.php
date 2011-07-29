@@ -106,7 +106,7 @@ class PhabricatorConduitConsoleController
     $panel = new AphrontPanelView();
     $panel->setHeader('Conduit API: '.phutil_escape_html($this->method));
     $panel->appendChild($form);
-    $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
+    $panel->setWidth(AphrontPanelView::WIDTH_FULL);
 
     $view = new AphrontSideNavView();
     foreach ($this->buildNavItems() as $item) {
@@ -154,9 +154,7 @@ class PhabricatorConduitConsoleController
             'class' => $selected ? 'aphront-side-nav-selected' : null,
             'href'  => '/conduit/method/'.$method_name,
           ),
-          '<span style="padding-left: 1em;">'.
-            phutil_escape_html($method_name).
-          '</span>');
+          phutil_escape_html($method_name));
       }
       $items[] = '<hr />';
     }
