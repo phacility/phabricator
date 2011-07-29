@@ -219,6 +219,18 @@ class PhabricatorFile extends PhabricatorFileDAO {
     return PhabricatorFileURI::getViewURIForPHID($this->getPHID());
   }
 
+  public function getInfoURI() {
+    return '/file/info/'.$this->getPHID().'/';
+  }
+
+  public function getBestURI() {
+    if ($this->isViewableInBrowser()) {
+      return $this->getViewURI();
+    } else {
+      return $this->getInfoURI();
+    }
+  }
+
   public function getThumb60x45URI() {
     return '/file/xform/thumb-60x45/'.$this->getPHID().'/';
   }
