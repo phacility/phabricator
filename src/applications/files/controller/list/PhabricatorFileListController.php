@@ -21,6 +21,9 @@ class PhabricatorFileListController extends PhabricatorFileController {
   public function processRequest() {
 
     $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $upload_panel = $this->renderUploadPanel();
 
     $author = null;
     $author_username = $request->getStr('author');
@@ -32,6 +35,10 @@ class PhabricatorFileListController extends PhabricatorFileController {
       if (!$author) {
         return id(new Aphront404Response());
       }
+
+      $title = 'Files Uploaded by '.phutil_escape_html($author->getUsername());
+    } else {
+      $title = 'Files';
     }
 
     $pager = new AphrontPagerView();
@@ -53,7 +60,15 @@ class PhabricatorFileListController extends PhabricatorFileController {
     $files = $pager->sliceResults($files);
     $pager->setURI($request->getRequestURI(), 'page');
 
+    $phids = mpull($files, 'getAuthorPHID');
+    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+
+    $highlighted = $request->getStr('h');
+    $highlighted = explode('-', $highlighted);
+    $highlighted = array_fill_keys($highlighted, true);
+
     $rows = array();
+    $rowc = array();
     foreach ($files as $file) {
       if ($file->isViewableInBrowser()) {
         $view_button = phutil_render_tag(
@@ -66,10 +81,25 @@ class PhabricatorFileListController extends PhabricatorFileController {
       } else {
         $view_button = null;
       }
+
+      if (isset($highlighted[$file->getID()])) {
+        $rowc[] = 'highlighted';
+      } else {
+        $rowc[] = '';
+      }
+
       $rows[] = array(
-        phutil_escape_html($file->getPHID()),
-        phutil_escape_html($file->getName()),
-        phutil_escape_html($file->getByteSize()),
+        phutil_escape_html('F'.$file->getID()),
+        $file->getAuthorPHID()
+          ? $handles[$file->getAuthorPHID()]->renderLink()
+          : null,
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => $file->getViewURI(),
+          ),
+          phutil_escape_html($file->getName())),
+        phutil_escape_html(number_format($file->getByteSize()).' bytes'),
         phutil_render_tag(
           'a',
           array(
@@ -85,38 +115,91 @@ class PhabricatorFileListController extends PhabricatorFileController {
             'href'  => '/file/download/'.$file->getPHID().'/',
           ),
           'Download'),
+        phabricator_date($file->getDateCreated(), $user),
+        phabricator_time($file->getDateCreated(), $user),
       );
     }
 
     $table = new AphrontTableView($rows);
+    $table->setRowClasses($rowc);
     $table->setHeaders(
       array(
-        'PHID',
+        'File ID',
+        'Author',
         'Name',
         'Size',
         '',
         '',
         '',
+        'Created',
+        '',
       ));
     $table->setColumnClasses(
       array(
         null,
-        'wide',
-        null,
+        '',
+        'wide pri',
+        'right',
         'action',
         'action',
         'action',
+        '',
+        'right',
       ));
 
     $panel = new AphrontPanelView();
     $panel->appendChild($table);
-    $panel->setHeader('Files');
-    $panel->setCreateButton('Upload File', '/file/upload/');
+    $panel->setHeader($title);
     $panel->appendChild($pager);
 
-    return $this->buildStandardPageResponse($panel, array(
-      'title' => 'Files',
-      'tab'   => 'files',
+    return $this->buildStandardPageResponse(
+      array(
+        $upload_panel,
+        $panel,
+      ),
+      array(
+        'title' => 'Files',
+        'tab'   => 'files',
       ));
   }
+
+  private function renderUploadPanel() {
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    require_celerity_resource('files-css');
+    $upload_id = celerity_generate_unique_node_id();
+    $panel_id  = celerity_generate_unique_node_id();
+
+    $upload_panel = new AphrontPanelView();
+    $upload_panel->setHeader('Upload Files');
+    $upload_panel->setCreateButton(
+      'Basic Uploader', '/file/upload/');
+
+    $upload_panel->setWidth(AphrontPanelView::WIDTH_FULL);
+    $upload_panel->setID($panel_id);
+
+    $upload_panel->appendChild(
+      phutil_render_tag(
+        'div',
+        array(
+          'id'    => $upload_id,
+          'style' => 'display: none;',
+          'class' => 'files-drag-and-drop',
+        ),
+        ''));
+
+    Javelin::initBehavior(
+      'files-drag-and-drop',
+      array(
+        'uri'             => '/file/dropupload/',
+        'browseURI'       => '/file/?author='.$user->getUsername(),
+        'control'         => $upload_id,
+        'target'          => $panel_id,
+        'activatedClass'  => 'aphront-panel-view-drag-and-drop',
+      ));
+
+    return $upload_panel;
+  }
+
 }

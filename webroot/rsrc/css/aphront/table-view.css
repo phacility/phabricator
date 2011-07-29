@@ -74,9 +74,12 @@
   white-space:      normal;
 }
 
-.aphront-table-view tr.highlighted,
+.aphront-table-view tr.highlighted {
+  background: #ffff99;
+}
+
 .aphront-table-view tr.alt-highlighted {
-  background: #ffff66;
+  background: #f3f399;
 }
 
 

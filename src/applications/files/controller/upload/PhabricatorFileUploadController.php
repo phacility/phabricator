@@ -24,18 +24,15 @@ class PhabricatorFileUploadController extends PhabricatorFileController {
     $user = $request->getUser();
 
     if ($request->isFormPost()) {
-      $files = $request->getArr('file');
+      $file = PhabricatorFile::newFromPHPUpload(
+        idx($_FILES, 'file'),
+        array(
+          'name'        => $request->getStr('name'),
+          'authorPHID'  => $user->getPHID(),
+        ));
 
-      if (count($files) > 1) {
-        return id(new AphrontRedirectResponse())
-          ->setURI('/file/?author='.phutil_escape_uri($user->getUserName()));
-      } else {
-        return id(new AphrontRedirectResponse())
-          ->setURI('/file/info/'.end($files).'/');
-      }
+      return id(new AphrontRedirectResponse())->setURI($file->getBestURI());
     }
-
-    $panel_id = celerity_generate_unique_node_id();
 
     $form = new AphrontFormView();
     $form->setAction('/file/upload/');
@@ -43,25 +40,26 @@ class PhabricatorFileUploadController extends PhabricatorFileController {
 
     $form
       ->setEncType('multipart/form-data')
-
       ->appendChild(
-        id(new AphrontFormDragAndDropUploadControl())
-        ->setLabel('Files')
-        ->setName('file')
-        ->setError(true)
-          ->setDragAndDropTarget($panel_id)
-          ->setActivatedClass('aphront-panel-view-drag-and-drop'))
-
+        id(new AphrontFormFileControl())
+          ->setLabel('File')
+          ->setName('file')
+          ->setError(true))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel('Name')
+          ->setName('name')
+          ->setCaption('Optional file display name.'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-        ->setValue('Done here!'));
+          ->setValue('Upload')
+          ->addCancelButton('/file/'));
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Upload File');
 
     $panel->appendChild($form);
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->setID($panel_id);
 
     return $this->buildStandardPageResponse(
       array($panel),

@@ -94,6 +94,9 @@ class PhabricatorFileViewController extends PhabricatorFileController {
       $form->setAction('/file/download/'.$file->getPHID().'/');
       $button_name = 'Download File';
     }
+
+    $file_id = 'F'.$file->getID();
+
     $form->setUser($user);
     $form
       ->appendChild(
@@ -101,6 +104,14 @@ class PhabricatorFileViewController extends PhabricatorFileController {
           ->setLabel('Name')
           ->setName('name')
           ->setValue($file->getName()))
+      ->appendChild(
+        id(new AphrontFormStaticControl())
+          ->setLabel('ID')
+          ->setName('id')
+          ->setValue($file_id)
+          ->setCaption(
+            'Download this file with: <tt>arc download '.
+            phutil_escape_html($file_id).'</tt>'))
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel('PHID')
