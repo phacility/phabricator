@@ -1207,6 +1207,11 @@ class DifferentialChangesetParser {
         $contents = array();
 
         if ($len > 40) {
+          $is_first_block = false;
+          if ($ii == 0) {
+            $is_first_block = true;
+          }
+
           $contents[] = javelin_render_tag(
             'a',
             array(
@@ -1218,7 +1223,9 @@ class DifferentialChangesetParser {
                 'range' => "{$top}-{$len}/{$top}-20",
               ),
             ),
-            "\xE2\x96\xB2 Show 20 Lines");
+            $is_first_block
+              ? "Show First 20 Lines"
+              : "\xE2\x96\xB2 Show 20 Lines");
         }
 
         $contents[] = javelin_render_tag(
@@ -1235,6 +1242,11 @@ class DifferentialChangesetParser {
           'Show All '.$len.' Lines');
 
         if ($len > 40) {
+          $is_last_block = false;
+          if ($ii + $len >= $rows) {
+            $is_last_block = true;
+          }
+
           $contents[] = javelin_render_tag(
             'a',
             array(
@@ -1246,7 +1258,9 @@ class DifferentialChangesetParser {
                 'range' => "{$top}-{$len}/{$end}-20",
               ),
             ),
-            "\xE2\x96\xBC Show 20 Lines");
+            $is_last_block
+              ? "Show Last 20 Lines"
+              : "\xE2\x96\xBC Show 20 Lines");
         };
 
         $container = javelin_render_tag(
