@@ -55,8 +55,13 @@ class PhabricatorConduitAPIController
           "'{$method_class}', or need to run 'arc build'.");
       }
 
-      // Fake out checkModule, the class has already been autoloaded by the
-      // class_exists() call above.
+      $class_info = new ReflectionClass($method_class);
+      if ($class_info->isAbstract()) {
+        throw new Exception(
+          "Method '{$method}' is not valid; the implementation is an abstract ".
+          "base class.");
+      }
+
       $method_handler = newv($method_class, array());
 
       if (isset($_REQUEST['params']) && is_array($_REQUEST['params'])) {

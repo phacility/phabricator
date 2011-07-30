@@ -8,9 +8,10 @@
 
 phutil_require_module('phabricator', 'applications/conduit/method/paste/base');
 phutil_require_module('phabricator', 'applications/conduit/protocol/exception');
+phutil_require_module('phabricator', 'applications/files/storage/file');
 phutil_require_module('phabricator', 'applications/paste/storage/paste');
 
 phutil_require_module('phutil', 'utils');
 
 
-phutil_require_source('ConduitAPI_paste_info_Method.php');
+phutil_require_source('ConduitAPI_paste_create_Method.php');

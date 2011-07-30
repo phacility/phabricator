@@ -179,7 +179,16 @@ class PhabricatorConduitConsoleController
       ->setAncestorClass('ConduitAPIMethod')
       ->setType('class')
       ->selectSymbolsWithoutLoading();
-    return array_values(ipull($classes, 'name'));
+
+    $class_names = array_values(ipull($classes, 'name'));
+    foreach ($class_names as $key => $class_name) {
+      $class_info = new ReflectionClass($class_name);
+      if ($class_info->isAbstract()) {
+        unset($class_names[$key]);
+      }
+    }
+
+    return array_values($class_names);
   }
 
 }

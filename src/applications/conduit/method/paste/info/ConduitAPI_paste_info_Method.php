@@ -19,7 +19,7 @@
 /**
  * @group conduit
  */
-class ConduitAPI_paste_info_Method extends ConduitAPIMethod {
+class ConduitAPI_paste_info_Method extends ConduitAPI_paste_Method {
 
   public function getMethodDescription() {
     return "Retrieve an array of information about a paste.";
@@ -48,18 +48,7 @@ class ConduitAPI_paste_info_Method extends ConduitAPIMethod {
       throw new ConduitException('ERR_BAD_PASTE');
     }
 
-    $result = array(
-      'id'          => $paste->getID(),
-      'phid'        => $paste->getPHID(),
-      'authorPHID'  => $paste->getAuthorPHID(),
-      'filePHID'    => $paste->getFilePHID(),
-      'title'       => $paste->getTitle(),
-      'dateCreated' => $paste->getDateCreated(),
-      'language'    => $paste->getLanguage(),
-      'uri'         => PhabricatorEnv::getProductionURI('/P'.$paste->getID()),
-    );
-
-    return $result;
+    return $this->buildPasteInfoDictionary($paste);
   }
 
 }
