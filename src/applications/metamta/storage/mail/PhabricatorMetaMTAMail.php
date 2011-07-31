@@ -88,11 +88,13 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   }
 
   public function addTos(array $phids) {
+    $phids = array_unique($phids);
     $this->setParam('to', $phids);
     return $this;
   }
 
   public function addCCs(array $phids) {
+    $phids = array_unique($phids);
     $this->setParam('cc', $phids);
     return $this;
   }
