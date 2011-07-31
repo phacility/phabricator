@@ -74,6 +74,17 @@
   white-space:      normal;
 }
 
+div.single-display-line-bounds {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+span.single-display-line-content {
+  white-space: pre;
+  position: absolute;
+}
+
 .aphront-table-view tr.highlighted {
   background: #ffff99;
 }
@@ -94,3 +105,4 @@
   max-width: 64px;
   max-height: 64px;
 }
+

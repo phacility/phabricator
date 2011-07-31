@@ -38,7 +38,8 @@ class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
     $message = $this->getCommitMessage();
     $lines = explode("\n", $message);
     $summary = head($lines);
-    $summary = substr($summary, 0, self::SUMMARY_MAX_LENGTH);
+
+    $summary = phutil_utf8_shorten($summary, self::SUMMARY_MAX_LENGTH);
 
     return $summary;
   }

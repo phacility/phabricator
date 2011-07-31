@@ -57,7 +57,8 @@ final class DiffusionBrowseTableView extends DiffusionView {
       } else {
         $author = phutil_escape_html($data->getAuthorName());
       }
-      $details = phutil_escape_html($data->getSummary());
+      $details = AphrontTableView::renderSingleDisplayLine(
+        phutil_escape_html($data->getSummary()));
     } else {
       $author = '';
       $details = '';

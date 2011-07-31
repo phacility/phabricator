@@ -154,5 +154,29 @@ class AphrontTableView extends AphrontView {
     $table[] = '</table>';
     return implode('', $table);
   }
+
+  public static function renderSingleDisplayLine($line) {
+
+    // TODO: Is there a cleaner way to do this? We use a relative div with
+    // overflow hidden to provide the bounds, and an absolute span with
+    // white-space: pre to prevent wrapping. We need to append a character
+    // (&nbsp; -- nonbreaking space) afterward to give the bounds div height
+    // (alternatively, we could hard-code the line height). This is gross but
+    // it's not clear that there's a better appraoch.
+
+    return phutil_render_tag(
+      'div',
+      array(
+        'class' => 'single-display-line-bounds',
+      ),
+      phutil_render_tag(
+        'span',
+        array(
+          'class' => 'single-display-line-content',
+        ),
+        $line).'&nbsp;');
+  }
+
+
 }
 
