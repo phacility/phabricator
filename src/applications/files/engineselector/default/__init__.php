@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'applications/files/engine/localdisk');
 phutil_require_module('phabricator', 'applications/files/engine/mysql');
+phutil_require_module('phabricator', 'applications/files/engine/s3');
 phutil_require_module('phabricator', 'applications/files/engineselector/base');
 phutil_require_module('phabricator', 'infrastructure/env');
 

@@ -48,6 +48,11 @@ final class PhabricatorDefaultFileStorageEngineSelector
       $engines[] = new PhabricatorLocalDiskFileStorageEngine();
     }
 
+    $s3_key = 'storage.s3.bucket';
+    if (PhabricatorEnv::getEnvConfig($s3_key)) {
+      $engines[] = new PhabricatorS3FileStorageEngine();
+    }
+
     if ($mysql_limit && empty($engines)) {
       // If we return no engines, an exception will be thrown but it will be
       // a little vague ("No valid storage engines"). Since this is a default

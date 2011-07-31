@@ -377,7 +377,14 @@ return array(
   // disable it, specify null.
   'storage.local-disk.path'       => null,
 
-  // TODO: Implement S3.
+  // If you want to store files in Amazon S3, specify an AWS access and secret
+  // key here and a bucket name below.
+  'amazon-s3.access-key'          =>  null,
+  'amazon-s3.secret-key'          =>  null,
+
+  // Set this to a valid Amazon S3 bucket to store files there. You must also
+  // configure S3 access keys above.
+  'storage.s3.bucket'             => null,
 
   // Phabricator uses a storage engine selector to choose which storage engine
   // to use when writing file data. If you add new storage engines or want to
