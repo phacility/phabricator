@@ -47,6 +47,11 @@ class ManiphestTaskEditController extends ManiphestController {
       // These allow task creation with defaults.
       if (!$request->isFormPost()) {
         $task->setTitle($request->getStr('title'));
+
+        $default_projects = $request->getStr('projects');
+        if ($default_projects) {
+          $task->setProjectPHIDs(explode(';', $default_projects));
+        }
       }
 
       $file_phids = $request->getArr('files', array());

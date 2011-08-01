@@ -176,12 +176,19 @@ class ManiphestTaskListController extends ManiphestController {
       id(new AphrontFormSubmitControl())
         ->setValue('Filter Tasks'));
 
+    $create_uri = new PhutilURI('/maniphest/task/create/');
+    if ($project_phids) {
+      // If we have project filters selected, use them as defaults for task
+      // creation.
+      $create_uri->setQueryParam('projects', implode(';', $project_phids));
+    }
+
     $filter = new AphrontListFilterView();
     $filter->addButton(
       phutil_render_tag(
         'a',
         array(
-          'href' => '/maniphest/task/create/',
+          'href'  => (string)$create_uri,
           'class' => 'green button',
         ),
         'Create New Task'));
