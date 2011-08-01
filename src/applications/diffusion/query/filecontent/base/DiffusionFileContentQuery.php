@@ -134,13 +134,11 @@ abstract class DiffusionFileContentQuery {
 
   abstract protected function tokenizeLine($line);
 
-  public function setNeedsBlame($needs_blame)
-  {
+  public function setNeedsBlame($needs_blame) {
     $this->needsBlame = $needs_blame;
   }
 
-  public function getNeedsBlame()
-  {
+  public function getNeedsBlame() {
     return $this->needsBlame;
   }
 }

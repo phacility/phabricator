@@ -30,7 +30,7 @@ class PhabricatorCountdownEditController
     $user = $request->getUser();
     $action_label = 'Create Timer';
 
-    if ($this->id)  {
+    if ($this->id) {
       $timer = id(new PhabricatorTimer())->load($this->id);
       // If no timer is found
       if (!$timer) {
