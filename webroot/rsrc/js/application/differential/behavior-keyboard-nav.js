@@ -8,8 +8,10 @@
 JX.behavior('differential-keyboard-navigation', function(config) {
 
   var cursor = -1;
-  var cursor_block = null;
   var changesets;
+
+  var selection_begin = null;
+  var selection_end = null;
 
   function init() {
     if (changesets) {
@@ -53,6 +55,10 @@ JX.behavior('differential-keyboard-navigation', function(config) {
       return 'ignore';
     }
 
+    if (row.className.indexOf('differential-changeset') !== -1) {
+      return 'file';
+    }
+
     var cells = JX.DOM.scry(row, 'td');
 
     for (var ii = 0; ii < cells.length; ii++) {
@@ -67,7 +73,7 @@ JX.behavior('differential-keyboard-navigation', function(config) {
     return null;
   }
 
-  function jump(manager, delta) {
+  function jump(manager, delta, jump_to_file) {
     init();
 
     if (cursor < 0) {
@@ -79,8 +85,6 @@ JX.behavior('differential-keyboard-navigation', function(config) {
       }
     }
 
-    var selected;
-    var extent;
     while (true) {
       var blocks = getBlocks(cursor);
       var focus;
@@ -91,31 +95,42 @@ JX.behavior('differential-keyboard-navigation', function(config) {
       }
 
       for (var ii = 0; ii < blocks.length; ii++) {
-        if (blocks[ii][0] == cursor_block) {
+        if (blocks[ii][0] == selection_begin) {
           focus = ii;
           break;
         }
       }
 
-      focus += delta;
+      while (true) {
+        focus += delta;
 
-      if (blocks[focus]) {
-        selected = blocks[focus][0];
-        extent = blocks[focus][1];
-        cursor_block = selected;
-        break;
-      } else {
-        var adjusted = (cursor + delta);
-        if (adjusted < 0 || adjusted >= changesets.length) {
-          // Stop cursor movement when the user reaches either end.
+        if (blocks[focus]) {
+          var row_type = getRowType(blocks[focus][0]);
+          if (jump_to_file && row_type != 'file') {
+            continue;
+          }
+
+          selection_begin = blocks[focus][0];
+          selection_end = blocks[focus][1];
+
+          manager.scrollTo(selection_begin);
+          manager.focusOn(selection_begin, selection_end);
+
           return;
+        } else {
+          var adjusted = (cursor + delta);
+          if (adjusted < 0 || adjusted >= changesets.length) {
+            // Stop cursor movement when the user reaches either end.
+            return;
+          }
+          cursor = adjusted;
+
+          // Break the inner loop and go to the next file.
+          break;
         }
-        cursor = adjusted;
       }
     }
 
-    manager.scrollTo(selected);
-    manager.focusOn(selected, extent);
   }
 
   var is_haunted = false;
@@ -136,6 +151,19 @@ JX.behavior('differential-keyboard-navigation', function(config) {
       jump(manager, -1);
     })
     .register();
+
+  new JX.KeyboardShortcut('J', 'Jump to next file.')
+    .setHandler(function(manager) {
+      jump(manager, 1, true);
+    })
+    .register();
+
+  new JX.KeyboardShortcut('K', 'Jump to previous file.')
+    .setHandler(function(manager) {
+      jump(manager, -1, true);
+    })
+    .register();
+
 
   new JX.KeyboardShortcut('z', 'Haunt / unhaunt comment panel.')
     .setHandler(haunt)
