@@ -56,6 +56,16 @@ class PhabricatorFileViewController extends PhabricatorFileController {
         }
 
         if ($download) {
+          if (!$request->isFormPost()) {
+            // Require a POST to download files to hinder attacks where you
+            // <applet src="http://phabricator.example.com/file/..." /> on some
+            // other domain.
+            return id(new AphrontRedirectResponse())
+              ->setURI($file->getInfoURI());
+          }
+        }
+
+        if ($download) {
           $mime_type = $file->getMimeType();
         } else {
           $mime_type = $file->getViewableMimeType();

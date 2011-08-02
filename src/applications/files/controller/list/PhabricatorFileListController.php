@@ -96,7 +96,7 @@ class PhabricatorFileListController extends PhabricatorFileController {
         phutil_render_tag(
           'a',
           array(
-            'href' => $file->getViewURI(),
+            'href' => $file->getBestURI(),
           ),
           phutil_escape_html($file->getName())),
         phutil_escape_html(number_format($file->getByteSize()).' bytes'),
@@ -108,13 +108,6 @@ class PhabricatorFileListController extends PhabricatorFileController {
           ),
           'Info'),
         $view_button,
-        phutil_render_tag(
-          'a',
-          array(
-            'class' => 'small button grey',
-            'href'  => '/file/download/'.$file->getPHID().'/',
-          ),
-          'Download'),
         phabricator_date($file->getDateCreated(), $user),
         phabricator_time($file->getDateCreated(), $user),
       );
@@ -130,7 +123,6 @@ class PhabricatorFileListController extends PhabricatorFileController {
         'Size',
         '',
         '',
-        '',
         'Created',
         '',
       ));
@@ -140,7 +132,6 @@ class PhabricatorFileListController extends PhabricatorFileController {
         '',
         'wide pri',
         'right',
-        'action',
         'action',
         'action',
         '',
