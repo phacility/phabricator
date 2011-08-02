@@ -164,14 +164,6 @@ class ManiphestTaskEditController extends ManiphestController {
           $changes[ManiphestTransactionType::TYPE_PROJECTS] = $new_proj_arr;
         }
 
-        // TODO: Capture auxiliary field changes in a transaction
-        foreach ($aux_fields as $aux_field) {
-          $task->setAuxiliaryAttribute(
-            $aux_field->getAuxiliaryKey(),
-            $aux_field->getValueForStorage()
-          );
-        }
-
         if ($files) {
           $file_map = mpull($files, 'getPHID');
           $file_map = array_fill_keys($file_map, true);
@@ -196,6 +188,14 @@ class ManiphestTaskEditController extends ManiphestController {
           $editor->applyTransactions($task, $transactions);
         }
 
+        // TODO: Capture auxiliary field changes in a transaction
+        foreach ($aux_fields as $aux_field) {
+          $task->setAuxiliaryAttribute(
+            $aux_field->getAuxiliaryKey(),
+            $aux_field->getValueForStorage()
+          );
+        }
+        
         $redirect_uri = '/T'.$task->getID();
 
         if ($workflow) {
