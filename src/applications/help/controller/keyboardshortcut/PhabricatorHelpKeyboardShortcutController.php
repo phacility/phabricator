@@ -29,6 +29,14 @@ class PhabricatorHelpKeyboardShortcutController
       return new Aphront400Response();
     }
 
+    // There have been at least two users asking for a keyboard shortcut to
+    // close the dialog, so be explicit that escape works since it isn't
+    // terribly discoverable.
+    $keys[] = array(
+      'keys'        => array('esc'),
+      'description' => 'Close any dialog, including this one.',
+    );
+
     $rows = array();
     foreach ($keys as $shortcut) {
       $keystrokes = array();
