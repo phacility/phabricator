@@ -71,6 +71,18 @@ class PhabricatorFileViewController extends PhabricatorFileController {
           $mime_type = $file->getViewableMimeType();
         }
 
+        // If an alternate file domain is configured, forbid all views which
+        // don't originate from it.
+        if (!$download) {
+          $alt = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
+          if ($alt) {
+            $domain = id(new PhutilURI($alt))->getDomain();
+            if ($domain != $request->getHost()) {
+              return new Aphront400Response();
+            }
+          }
+        }
+
         $response->setMimeType($mime_type);
 
         if ($download) {
@@ -98,7 +110,7 @@ class PhabricatorFileViewController extends PhabricatorFileController {
     $form = new AphrontFormView();
 
     if ($file->isViewableInBrowser()) {
-      $form->setAction('/file/view/'.$file->getPHID().'/');
+      $form->setAction($file->getViewURI());
       $button_name = 'View File';
     } else {
       $form->setAction('/file/download/'.$file->getPHID().'/');

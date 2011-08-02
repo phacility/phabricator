@@ -6,5 +6,9 @@
 
 
 
+phutil_require_module('phabricator', 'applications/files/storage/file');
+
+phutil_require_module('phutil', 'utils');
+
 
 phutil_require_source('PhabricatorFileURI.php');

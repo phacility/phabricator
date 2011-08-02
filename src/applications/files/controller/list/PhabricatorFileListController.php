@@ -75,7 +75,7 @@ class PhabricatorFileListController extends PhabricatorFileController {
           'a',
           array(
             'class' => 'small button grey',
-            'href'  => '/file/view/'.$file->getPHID().'/',
+            'href'  => $file->getViewURI(),
           ),
           'View');
       } else {

@@ -19,7 +19,18 @@
 final class PhabricatorFileURI {
 
   public static function getViewURIForPHID($phid) {
-    return '/file/view/'.$phid.'/';
+
+    // TODO: Get rid of this class, the advent of the applet attack makes the
+    // tiny optimization it represented effectively obsolete.
+
+    $file = id(new PhabricatorFile())->loadOneWhere(
+      'phid = %s',
+      $phid);
+    if ($file) {
+      return $file->getViewURI();
+    }
+
+    return null;
   }
 
 }

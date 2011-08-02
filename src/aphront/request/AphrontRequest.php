@@ -181,16 +181,48 @@ class AphrontRequest {
   }
 
   final public function setCookie($name, $value, $expire = null) {
+
+    // Ensure cookies are only set on the configured domain.
+
+    $base_uri = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
+    $base_uri = new PhutilURI($base_uri);
+
+    $base_domain = $base_uri->getDomain();
+    $base_protocol = $base_uri->getProtocol();
+
+    $actual_host = $this->getHost();
+    if ($base_domain != $actual_host) {
+      throw new Exception(
+        "This install of Phabricator is configured as '{$base_domain}' but ".
+        "you are accessing it via '{$actual_host}'. Access Phabricator via ".
+        "the primary configured domain.");
+    }
+
     if ($expire === null) {
       $expire = time() + (60 * 60 * 24 * 365 * 5);
     }
+
+    if ($value == '') {
+      // NOTE: If we're clearing the cookie, also clear it on the entire
+      // domain. This allows us to clear older cookies which we didn't scope
+      // as tightly.
+      setcookie(
+        $name,
+        $value,
+        $expire,
+        $path = '/',
+        $domain = '',
+        $secure = ($base_protocol == 'https'),
+        $http_only = true);
+    }
+
     setcookie(
       $name,
       $value,
       $expire,
       $path = '/',
-      $domain = '',
-      $secure = false,
+      $base_domain,
+      $secure = ($base_protocol == 'https'),
       $http_only = true);
   }
 

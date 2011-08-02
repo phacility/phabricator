@@ -216,7 +216,16 @@ class PhabricatorFile extends PhabricatorFileDAO {
   }
 
   public function getViewURI() {
-    return PhabricatorFileURI::getViewURIForPHID($this->getPHID());
+    $alt = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
+    if ($alt) {
+      $path = '/file/alt/'.$this->generateSecretKey().'/'.$this->getPHID().'/';
+      $uri = new PhutilURI($alt);
+      $uri->setPath($path);
+
+      return (string)$uri;
+    } else {
+      return '/file/view/'.$this->getPHID().'/';
+    }
   }
 
   public function getInfoURI() {
@@ -300,6 +309,16 @@ class PhabricatorFile extends PhabricatorFileDAO {
     $mime_type = trim(reset($mime_parts));
 
     return idx($mime_map, $mime_type);
+  }
+
+  public function validateSecretKey($key) {
+    return ($key == $this->generateSecretKey());
+  }
+
+  private function generateSecretKey() {
+    $file_key = PhabricatorEnv::getEnvConfig('phabricator.file-key');
+    $hash = sha1($this->phid.$this->storageHandle.$file_key);
+    return substr($hash, 0, 20);
   }
 
 }

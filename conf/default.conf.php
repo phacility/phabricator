@@ -35,6 +35,35 @@ return array(
   // be 50x50px.
   'user.default-profile-image-phid' => 'PHID-FILE-4d61229816cfe6f2b2a3',
 
+// -- IMPORTANT! Security! -------------------------------------------------- //
+
+  // IMPORTANT: By default, Phabricator serves files from the same domain the
+  // application lives on. This is convenient but not secure: it creates
+  // a vulnerability where an external attacker can:
+  //
+  //  - Convince a privileged user to upload a file which appears to be an
+  //    image or some other inoccuous type of file (the file is actually both
+  //    a JAR and an image); and
+  //  - convince the user to give them the URI for the image; and
+  //  - convince the user to click a link to a site which embeds the "image"
+  //    using an <applet /> tag. This steals the user's credentials.
+  //
+  // If the attacker is internal, they can execute the first two steps
+  // themselves and need only convince another user to click a link in order to
+  // steal their credentials.
+  //
+  // To avoid this, you should configure a second domain in the same way you
+  // have the primary domain configured (e.g., point it at the same machine and
+  // set up the same vhost rules) and provide it here. For instance, if your
+  // primary install is on "http://www.phabricator-example.com/", you could
+  // configure "http://www.phabricator-files.com/" and specify the entire
+  // domain (with protocol) here. This will enforce that viewable files are
+  // served only from the alternate domain. Ideally, you should use a completely
+  // separate domain name rather than just a different subdomain.
+  //
+  // It is STRONGLY RECOMMENDED that you configure this. Phabricator makes this
+  // attack difficult, but it is viable unless you isolate the file domain.
+  'security.alternate-file-domain'  => null,
 
 // -- DarkConsole ----------------------------------------------------------- //
 
@@ -314,6 +343,12 @@ return array(
   // addresses.
   'phabricator.mail-key'        => '5ce3e7e8787f6e40dfae861da315a5cdf1018f12',
 
+
+  // This is hashed with other inputs to generate file secret keys. Changing
+  // it will invalidate all file URIs if you have an alternate file domain
+  // configured (see 'security.alternate-file-domain').
+  'phabricator.file-key'        => 'ade8dadc8b4382067069a4d4798112191af8a190',
+
   // Version string displayed in the footer. You probably should leave this
   // alone.
   'phabricator.version'         => 'UNSTABLE',
@@ -338,6 +373,9 @@ return array(
   //
   // The keys in this array are viewable mime types; the values are the mime
   // types they will be delivered as when they are viewed in the browser.
+  //
+  // IMPORTANT: Making any file types viewable is a security vulnerability if
+  // you do not configure 'security.alternate-file-domain' above.
   'files.viewable-mime-types' => array(
     'image/jpeg'  => 'image/jpeg',
     'image/jpg'   => 'image/jpg',
