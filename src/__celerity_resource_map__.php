@@ -738,7 +738,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-refresh-csrf' =>
   array(
-    'uri' => '/res/39aa51f7/rsrc/js/application/core/behavior-refresh-csrf.js',
+    'uri' => '/res/a8204a73/rsrc/js/application/core/behavior-refresh-csrf.js',
     'type' => 'js',
     'requires' =>
     array(

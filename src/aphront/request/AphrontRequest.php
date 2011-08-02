@@ -117,15 +117,33 @@ class AphrontRequest {
     return $this->getExists(self::TYPE_AJAX);
   }
 
-  final public function isFormPost() {
-    $post = $this->getExists(self::TYPE_FORM) &&
-            $this->isHTTPPost();
+  public static function getCSRFTokenName() {
+    return '__csrf__';
+  }
 
-    if (!$post) {
-      return false;
+  public static function getCSRFHeaderName() {
+    return 'X-Phabricator-Csrf';
+  }
+
+  final public function validateCSRF() {
+    $token_name = self::getCSRFTokenName();
+    $token = $this->getStr($token_name);
+
+    // No token in the request, check the HTTP header which is added for Ajax
+    // requests.
+    if (empty($token)) {
+
+      // PHP mangles HTTP headers by uppercasing them and replacing hyphens with
+      // underscores, then prepending 'HTTP_'.
+      $php_index = self::getCSRFHeaderName();
+      $php_index = strtoupper($php_index);
+      $php_index = str_replace('-', '_', $php_index);
+      $php_index = 'HTTP_'.$php_index;
+
+      $token = idx($_SERVER, $php_index);
     }
 
-    $valid = $this->getUser()->validateCSRFToken($this->getStr('__csrf__'));
+    $valid = $this->getUser()->validateCSRFToken($token);
     if (!$valid) {
       // This should only be able to happen if you load a form, pull your
       // internet for 6 hours, and then reconnect and immediately submit,
@@ -141,6 +159,17 @@ class AphrontRequest {
     }
 
     return true;
+  }
+
+  final public function isFormPost() {
+    $post = $this->getExists(self::TYPE_FORM) &&
+            $this->isHTTPPost();
+
+    if (!$post) {
+      return false;
+    }
+
+    return $this->validateCSRF();
   }
 
   final public function getCookie($name, $default = null) {

@@ -56,7 +56,7 @@ function phabricator_render_form(PhabricatorUser $user, $attributes, $content) {
       'input',
       array(
         'type' => 'hidden',
-        'name' => '__csrf__',
+        'name' => AphrontRequest::getCSRFTokenName(),
         'value' => $user->getCSRFToken(),
       )).
     phutil_render_tag(

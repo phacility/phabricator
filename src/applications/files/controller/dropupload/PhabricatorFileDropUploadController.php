@@ -22,6 +22,9 @@ class PhabricatorFileDropUploadController extends PhabricatorFileController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    // NOTE: Throws if valid CSRF token is not present in the request.
+    $request->validateCSRF();
+
     $data = file_get_contents('php://input');
     $name = $request->getStr('name');
 

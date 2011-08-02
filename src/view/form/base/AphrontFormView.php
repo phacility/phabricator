@@ -92,7 +92,7 @@ final class AphrontFormView extends AphrontView {
 
     $data = $this->data + array(
       '__form__' => 1,
-      '__csrf__' => $this->user->getCSRFToken(),
+      AphrontRequest::getCSRFTokenName() => $this->user->getCSRFToken(),
     );
     $inputs = array();
     foreach ($data as $key => $value) {

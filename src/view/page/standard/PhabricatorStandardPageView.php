@@ -121,8 +121,23 @@ class PhabricatorStandardPageView extends AphrontPageView {
     require_celerity_resource('phabricator-core-buttons-css');
     require_celerity_resource('phabricator-standard-page-view');
 
+    $current_token = null;
+    $request = $this->getRequest();
+    if ($request) {
+      $user = $request->getUser();
+      if ($user) {
+        $current_token = $user->getCSRFToken();
+      }
+    }
+
     Javelin::initBehavior('workflow', array());
-    Javelin::initBehavior('refresh-csrf', array());
+    Javelin::initBehavior(
+      'refresh-csrf',
+      array(
+        'tokenName' => AphrontRequest::getCSRFTokenName(),
+        'header'    => AphrontRequest::getCSRFHeaderName(),
+        'current'   => $current_token,
+      ));
     Javelin::initBehavior(
       'phabricator-keyboard-shortcuts',
       array(

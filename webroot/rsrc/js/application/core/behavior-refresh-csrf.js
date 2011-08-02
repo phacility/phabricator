@@ -27,18 +27,26 @@
  */
 JX.behavior('refresh-csrf', function(config) {
 
+  var current_token = config.current;
+
   function refresh_csrf() {
     new JX.Request('/login/refresh/', function(r) {
-        var inputs = JX.DOM.scry(document.body, 'input');
-        for (var ii = 0; ii < inputs.length; ii++) {
-          if (inputs[ii].name == '__csrf__') {
-            inputs[ii].value = r.token;
-          }
+      current_token = r.token;
+      var inputs = JX.DOM.scry(document.body, 'input');
+      for (var ii = 0; ii < inputs.length; ii++) {
+        if (inputs[ii].name == config.tokenName) {
+          inputs[ii].value = r.token;
         }
-      })
-      .send();
+      }
+    })
+    .send();
   }
 
   // Refresh the CSRF tokens every 55 minutes.
   setInterval(refresh_csrf, 1000 * 60 * 55);
+
+  // Additionally, add the CSRF token as an HTTP header to every AJAX request.
+  JX.Request.listen('open', function(r) {
+    r.getTransport().setRequestHeader(config.header, current_token);
+  });
 });
