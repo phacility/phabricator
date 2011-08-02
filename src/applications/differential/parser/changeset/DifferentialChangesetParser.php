@@ -540,7 +540,30 @@ class DifferentialChangesetParser {
       ipull($this->intra, 1),
       $new_corpus);
 
-    $generated = (strpos($new_corpus_block, '@'.'generated') !== false);
+
+    /**
+     * Generated code should be marked with ' @generated', '{@generated', or
+     * the block must begin with '@generated'.
+     *
+     * Any other instances of '@generated' will be ignored.
+     */
+    $generated = false;
+    $pos = strpos($new_corpus_block, '@generated');
+    if ($pos === 0) {
+      $generated = true;
+    } else {
+      $prefix_char = substr($new_corpus_block, $pos - 1, 1);
+      switch ($prefix_char) {
+        case ' ':
+        case '{':
+          $generated = true;
+          break;
+
+        default:
+          $generated = false;
+          break;
+      }
+    }
 
     $this->specialAttributes[self::ATTR_GENERATED] = $generated;
   }
