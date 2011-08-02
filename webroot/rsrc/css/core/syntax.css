@@ -119,4 +119,10 @@
 .remarkup-code .se { color: #BB6622 } /* Literal.String.Escape */
 .remarkup-code .si { color: #BB6688 } /* Literal.String.Interpol */
 
-
+.remarkup-code .rbw_r { color: red; }
+.remarkup-code .rbw_o { color: orange; }
+.remarkup-code .rbw_y { color: yellow; }
+.remarkup-code .rbw_g { color: green; }
+.remarkup-code .rbw_b { color: blue; }
+.remarkup-code .rbw_i { color: #2E0854; } /* No "indigo" or "violet". */
+.remarkup-code .rbw_v { color: #820BBB; }
