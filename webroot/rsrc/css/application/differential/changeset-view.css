@@ -61,24 +61,20 @@
 
 .differential-diff td.old {
   background:   #ffd0d0;
-  color:        #161111;
 }
 
 .differential-diff td.new {
   background:   #d0ffd0;
-  color:        #111611;
 }
 
 .differential-diff td.old-full,
 .differential-diff td.old span.bright {
   background: #ffaaaa;
-  color:      #221111;
 }
 
 .differential-diff td.new-full,
 .differential-diff td.new span.bright {
   background: #aaffaa;
-  color:      #112211;
 }
 
 .differential-diff td.show-more,
