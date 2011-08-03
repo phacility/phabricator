@@ -15,7 +15,14 @@ To upgrade your database schema to the latest version, just run this command:
 
   PHABRICATOR_ENV=<your_config> path/to/phabricator/scripts/sql/upgrade_schema.php
 
-This will install all the patches that are new since you installed, or since the last time you ran this script.
+NOTE: Make sure you put 'PHABRICATOR_ENV=...' at the beginning of the line, not
+in the middle. The shell won't parse environmental variables declared after the
+command. You can also ##export PHABRICATOR_ENV=...## in your ~/.bashrc or
+~/.profile or similar, depending on which shell you use and how your system is
+configured.
+
+This will install all the patches that are new since you installed, or since the
+last time you ran this script.
 
 If your configuration uses an unprivileged user to connect to the database, you
 may have to override the default user so the schema changes can be applied with
