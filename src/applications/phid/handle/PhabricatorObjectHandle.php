@@ -27,6 +27,8 @@ class PhabricatorObjectHandle {
   private $imageURI;
   private $timestamp;
   private $alternateID;
+  private $status = 'open';
+
 
   public function setURI($uri) {
     $this->uri = $uri;
@@ -53,6 +55,15 @@ class PhabricatorObjectHandle {
 
   public function getName() {
     return $this->name;
+  }
+
+  public function setStatus($status) {
+    $this->status = $status;
+    return $this;
+  }
+
+  public function getStatus() {
+    return $this->status;
   }
 
   public function setFullName($full_name) {
@@ -134,10 +145,16 @@ class PhabricatorObjectHandle {
         $name = $this->getFullName();
     }
 
+    $class = null;
+    if ($this->status != PhabricatorObjectHandleStatus::STATUS_OPEN) {
+      $class = 'handle-status-'.phutil_escape_html($this->status);
+    }
+
     return phutil_render_tag(
       'a',
       array(
-        'href' => $this->getURI(),
+        'href'  => $this->getURI(),
+        'class' => $class,
       ),
       phutil_escape_html($name));
   }

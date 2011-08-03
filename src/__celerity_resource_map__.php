@@ -1218,7 +1218,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-standard-page-view' =>
   array(
-    'uri' => '/res/cbc3bb69/rsrc/css/application/base/standard-page-view.css',
+    'uri' => '/res/325b5b0f/rsrc/css/application/base/standard-page-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1274,7 +1274,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/03ef179e/diffusion.pkg.css',
       'type' => 'css',
     ),
-    '124bba3b' =>
+    '1258c2b0' =>
     array (
       'name' => 'core.pkg.css',
       'symbols' =>
@@ -1295,7 +1295,7 @@ celerity_register_resource_map(array(
         13 => 'phabricator-remarkup-css',
         14 => 'syntax-highlighting-css',
       ),
-      'uri' => '/res/pkg/124bba3b/core.pkg.css',
+      'uri' => '/res/pkg/1258c2b0/core.pkg.css',
       'type' => 'css',
     ),
     '25f94e94' =>
@@ -1383,15 +1383,15 @@ celerity_register_resource_map(array(
   ),
   'reverse' =>
   array (
-    'aphront-crumbs-view-css' => '124bba3b',
-    'aphront-dialog-view-css' => '124bba3b',
-    'aphront-form-view-css' => '124bba3b',
-    'aphront-list-filter-view-css' => '124bba3b',
-    'aphront-panel-view-css' => '124bba3b',
-    'aphront-side-nav-view-css' => '124bba3b',
-    'aphront-table-view-css' => '124bba3b',
-    'aphront-tokenizer-control-css' => '124bba3b',
-    'aphront-typeahead-control-css' => '124bba3b',
+    'aphront-crumbs-view-css' => '1258c2b0',
+    'aphront-dialog-view-css' => '1258c2b0',
+    'aphront-form-view-css' => '1258c2b0',
+    'aphront-list-filter-view-css' => '1258c2b0',
+    'aphront-panel-view-css' => '1258c2b0',
+    'aphront-side-nav-view-css' => '1258c2b0',
+    'aphront-table-view-css' => '1258c2b0',
+    'aphront-tokenizer-control-css' => '1258c2b0',
+    'aphront-typeahead-control-css' => '1258c2b0',
     'differential-changeset-view-css' => '3f2092d7',
     'differential-core-view-css' => '3f2092d7',
     'differential-revision-add-comment-css' => '3f2092d7',
@@ -1428,13 +1428,13 @@ celerity_register_resource_map(array(
     'javelin-util' => '307df223',
     'javelin-vector' => '307df223',
     'javelin-workflow' => 'd0713563',
-    'phabricator-core-buttons-css' => '124bba3b',
-    'phabricator-core-css' => '124bba3b',
-    'phabricator-directory-css' => '124bba3b',
+    'phabricator-core-buttons-css' => '1258c2b0',
+    'phabricator-core-css' => '1258c2b0',
+    'phabricator-directory-css' => '1258c2b0',
     'phabricator-keyboard-shortcut' => 'd0713563',
     'phabricator-keyboard-shortcut-manager' => 'd0713563',
-    'phabricator-remarkup-css' => '124bba3b',
-    'phabricator-standard-page-view' => '124bba3b',
-    'syntax-highlighting-css' => '124bba3b',
+    'phabricator-remarkup-css' => '1258c2b0',
+    'phabricator-standard-page-view' => '1258c2b0',
+    'syntax-highlighting-css' => '1258c2b0',
   ),
 ));

@@ -6,10 +6,13 @@
 
 
 
+phutil_require_module('phabricator', 'applications/differential/constants/revisionstatus');
 phutil_require_module('phabricator', 'applications/files/uri');
 phutil_require_module('phabricator', 'applications/maniphest/constants/owner');
+phutil_require_module('phabricator', 'applications/maniphest/constants/status');
 phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/phid/handle');
+phutil_require_module('phabricator', 'applications/phid/handle/const/status');
 phutil_require_module('phabricator', 'applications/phriction/storage/document');
 phutil_require_module('phabricator', 'applications/repository/constants/repositorytype');
 phutil_require_module('phabricator', 'applications/repository/storage/repository');

@@ -199,6 +199,14 @@ class PhabricatorObjectHandleData {
               $handle->setName($rev->getTitle());
               $handle->setURI('/D'.$rev->getID());
               $handle->setFullName('D'.$rev->getID().': '.$rev->getTitle());
+
+              $status = $rev->getStatus();
+              if (($status == DifferentialRevisionStatus::COMMITTED) ||
+                  ($status == DifferentialRevisionStatus::ABANDONED)) {
+                $closed = PhabricatorObjectHandleStatus::STATUS_CLOSED;
+                $handle->setStatus($closed);
+              }
+
             }
             $handles[$phid] = $handle;
           }
@@ -271,6 +279,10 @@ class PhabricatorObjectHandleData {
               $handle->setName($task->getTitle());
               $handle->setURI('/T'.$task->getID());
               $handle->setFullName('T'.$task->getID().': '.$task->getTitle());
+              if ($task->getStatus() != ManiphestTaskStatus::STATUS_OPEN) {
+                $closed = PhabricatorObjectHandleStatus::STATUS_CLOSED;
+                $handle->setStatus($closed);
+              }
             }
             $handles[$phid] = $handle;
           }

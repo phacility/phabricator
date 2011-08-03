@@ -169,3 +169,7 @@ td.phabricator-login-details {
 .workflow-header button {
   float: right;
 }
+
+.handle-status-closed {
+  text-decoration: line-through;
+}
