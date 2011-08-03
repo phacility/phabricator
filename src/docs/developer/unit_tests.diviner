@@ -49,7 +49,7 @@ Here's a simple example test:
     }
 
     public function testAllIsRightWithTheWorld() {
-      $this->assertEqual(4, 2 + 2, '2 + 2 = 4');
+      $this->assertEqual(4, $this->two + $this->two, '2 + 2 = 4');
     }
 
   }
