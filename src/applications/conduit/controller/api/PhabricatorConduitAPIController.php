@@ -91,12 +91,23 @@ class PhabricatorConduitAPIController
 
       $api_request = new ConduitAPIRequest($params);
 
+      $allow_unguarded_writes = false;
       $auth_error = null;
       if ($method_handler->shouldRequireAuthentication()) {
         $auth_error = $this->authenticateUser($api_request, $metadata);
+        // If we've explicitly authenticated the user here and either done
+        // CSRF validation or are using a non-web authentication mechanism.
+        $allow_unguarded_writes = true;
+      }
+
+      if ($method_handler->shouldAllowUnguardedWrites()) {
+        $allow_unguarded_writes = true;
       }
 
       if ($auth_error === null) {
+        if ($allow_unguarded_writes) {
+          $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        }
         try {
           $result = $method_handler->executeMethod($api_request);
           $error_code = null;
@@ -105,6 +116,9 @@ class PhabricatorConduitAPIController
           $result = null;
           $error_code = $ex->getMessage();
           $error_info = $method_handler->getErrorDescription($error_code);
+        }
+        if ($allow_unguarded_writes) {
+          unset($unguarded);
         }
       } else {
         list($error_code, $error_info) = $auth_error;
@@ -132,7 +146,9 @@ class PhabricatorConduitAPIController
     // we only really care about having these logs for real CLI clients, if
     // even that.
     if (empty($metadata['authToken'])) {
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
       $log->save();
+      unset($unguarded);
     }
 
     $result = array(
@@ -170,6 +186,7 @@ class PhabricatorConduitAPIController
     $request = $this->getRequest();
 
     if ($request->getUser()->getPHID()) {
+      $request->validateCSRF();
       $api_request->setUser($request->getUser());
       return null;
     }

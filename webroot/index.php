@@ -116,6 +116,9 @@ $application->setHost($host);
 $application->setPath($path);
 $application->willBuildRequest();
 $request = $application->buildRequest();
+
+$write_guard = new AphrontWriteGuard($request);
+
 $application->setRequest($request);
 list($controller, $uri_data) = $application->buildController();
 try {
@@ -136,8 +139,12 @@ try {
   $response->setRequest($request);
   $response_string = $response->buildResponseString();
 } catch (Exception $ex) {
+  $write_guard->dispose();
   phabricator_fatal('[Rendering Exception] '.$ex->getMessage());
 }
+
+$write_guard->dispose();
+
 
 $code = $response->getHTTPResponseCode();
 if ($code != 200) {

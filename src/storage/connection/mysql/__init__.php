@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'aphront/writeguard');
 phutil_require_module('phabricator', 'storage/connection/base');
 phutil_require_module('phabricator', 'storage/exception/accessdenied');
 phutil_require_module('phabricator', 'storage/exception/base');

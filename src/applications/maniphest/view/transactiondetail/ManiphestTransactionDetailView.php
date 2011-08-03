@@ -179,7 +179,9 @@ class ManiphestTransactionDetailView extends ManiphestView {
           $comments = $this->markupEngine->markupText($comments);
           $comment_transaction->setCache($comments);
           if ($comment_transaction->getID() && !$this->preview) {
+            $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
             $comment_transaction->save();
+            unset($unguarded);
           }
         }
       }

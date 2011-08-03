@@ -129,7 +129,8 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
       }
 
       $oauth_info->setUserID($current_user->getID());
-      $oauth_info->save();
+
+      $this->saveOAuthInfo($oauth_info);
 
       return id(new AphrontRedirectResponse())
         ->setURI('/settings/page/'.$provider_key.'/');
@@ -149,7 +150,7 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
 
       $session_key = $known_user->establishSession('web');
 
-      $oauth_info->save();
+      $this->saveOAuthInfo($oauth_info);
 
       $request->setCookie('phusr', $known_user->getUsername());
       $request->setCookie('phsid', $session_key);
@@ -316,5 +317,13 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
 
     return $oauth_info;
   }
+
+  private function saveOAuthInfo(PhabricatorUserOAuthInfo $info) {
+    // UNGUARDED WRITES: Logging-in users don't have their CSRF set up yet.
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+    $info->save();
+  }
+
+
 
 }

@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'aphront/response/file');
+phutil_require_module('phabricator', 'aphront/writeguard');
 phutil_require_module('phabricator', 'applications/conduit/controller/base');
 phutil_require_module('phabricator', 'applications/conduit/method/base');
 phutil_require_module('phabricator', 'applications/conduit/protocol/request');

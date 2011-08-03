@@ -208,6 +208,12 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
       try {
         $this->requireConnection();
 
+        // TODO: Do we need to include transactional statements here?
+        $is_write = !preg_match('/^(SELECT|SHOW)\s/', $raw_query);
+        if ($is_write) {
+          AphrontWriteGuard::willWrite();
+        }
+
         $start = microtime(true);
 
         $profiler = PhutilServiceProfiler::getInstance();
@@ -216,6 +222,7 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
             'type'    => 'query',
             'config'  => $this->configuration,
             'query'   => $raw_query,
+            'write'   => $is_write,
           ));
 
         $result = @mysql_query($raw_query, $this->connection);

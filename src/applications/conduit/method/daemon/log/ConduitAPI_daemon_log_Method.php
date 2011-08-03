@@ -26,6 +26,10 @@ class ConduitAPI_daemon_log_Method extends ConduitAPIMethod {
     return false;
   }
 
+  public function shouldAllowUnguardedWrites() {
+    return false;
+  }
+
   public function getMethodDescription() {
     return "Used by daemons to log events.";
   }

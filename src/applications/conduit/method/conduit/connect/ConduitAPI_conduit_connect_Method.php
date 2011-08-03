@@ -25,6 +25,10 @@ class ConduitAPI_conduit_connect_Method extends ConduitAPIMethod {
     return false;
   }
 
+  public function shouldAllowUnguardedWrites() {
+    return true;
+  }
+
   public function getMethodDescription() {
     return "Connect a session-based client.";
   }

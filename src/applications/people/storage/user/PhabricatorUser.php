@@ -252,6 +252,9 @@ class PhabricatorUser extends PhabricatorUserDAO {
     $entropy = Filesystem::readRandomBytes(20);
     $session_key = sha1($entropy);
 
+    // UNGUARDED WRITES: Logging-in users don't have CSRF stuff yet.
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+
     queryfx(
       $conn_w,
       'INSERT INTO %T '.

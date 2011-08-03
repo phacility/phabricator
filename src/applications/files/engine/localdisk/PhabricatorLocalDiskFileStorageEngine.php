@@ -66,6 +66,7 @@ final class PhabricatorLocalDiskFileStorageEngine
       execx('mkdir -p %s', $parent);
     }
 
+    AphrontWriteGuard::willWrite();
     Filesystem::writeFile($root.'/'.$name, $data);
 
     return $name;
@@ -89,6 +90,7 @@ final class PhabricatorLocalDiskFileStorageEngine
   public function deleteFile($handle) {
     $path = $this->getLocalDiskFileStorageFullPath($handle);
     if (Filesystem::pathExists($path)) {
+      AphrontWriteGuard::willWrite();
       Filesystem::remove($path);
     }
   }

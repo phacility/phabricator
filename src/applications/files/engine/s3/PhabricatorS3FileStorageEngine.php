@@ -49,6 +49,7 @@ final class PhabricatorS3FileStorageEngine
 
     $name = 'phabricator/'.sha1(Filesystem::readRandomBytes(20));
 
+    AphrontWriteGuard::willWrite();
     $s3->putObject(
       $data,
       $this->getBucketName(),
@@ -76,6 +77,8 @@ final class PhabricatorS3FileStorageEngine
    * @task impl
    */
   public function deleteFile($handle) {
+
+    AphrontWriteGuard::willWrite();
     $this->newS3API()->deleteObject(
       $this->getBucketName(),
       $handle);

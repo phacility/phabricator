@@ -158,7 +158,10 @@ final class DifferentialInlineCommentView extends AphrontView {
       $content = $this->markupEngine->markupText($content);
       if ($inline->getID()) {
         $inline->setCache($content);
+
+        $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
         $inline->save();
+        unset($unguarded);
       }
     }
 

@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'aphront/writeguard');
 phutil_require_module('phabricator', 'applications/files/engine/base');
 phutil_require_module('phabricator', 'infrastructure/env');
 

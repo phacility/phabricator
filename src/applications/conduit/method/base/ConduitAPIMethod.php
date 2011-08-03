@@ -52,6 +52,10 @@ abstract class ConduitAPIMethod {
     return true;
   }
 
+  public function shouldAllowUnguardedWrites() {
+    return false;
+  }
+
   public static function getAPIMethodNameFromClassName($class_name) {
     $match = null;
     $is_valid = preg_match(
