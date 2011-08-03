@@ -32,3 +32,56 @@ Once you've added test classes, you can run them with:
   - ##arc unit##, to run tests for all modules affected by changes in the
     working copy.
   - ##arc diff## will also run ##arc unit## for you.
+
+= Example Test Case =
+
+Here's a simple example test:
+
+  lang=php
+  class PhabricatorTrivialTestCase extends PhabricatorTestCase {
+
+    private $two;
+
+    public function willRunOneTest($test_name) {
+      // You can execute setup steps which will run before each test in this
+      // method.
+      $this->two = 2;
+    }
+
+    public function testAllIsRightWithTheWorld() {
+      $this->assertEqual(4, 2 + 2, '2 + 2 = 4');
+    }
+
+  }
+
+You can see this class at @{class:PhabricatorTrivialTestCase} and run it with:
+
+  phabricator/ $ arc unit src/infrastructure/testing/testcase/
+   PASS   <1ms*  testAllIsRightWithTheWorld
+
+For more information on writing tests, see
+@{class@arcnaist:ArcanistPhutilTestCase} and @{class:PhabricatorTestCase}.
+
+= Database Isolation =
+
+By default, Phabricator isolates unit tests from the database. It makes a crude
+effort to simulate some side effects (principally, ID assignment on insert), but
+any queries which read data will fail to select any rows and throw an exception
+about isolation. In general, isolation is good, but this can make certain types
+of tests difficult to write. When you encounter issues, you can deal with them
+in a number of ways. From best to worst:
+
+  - Encounter no issues; your tests are fast and isolated.
+  - Add more simulated side effects if you encounter minor issues and simulation
+    is reasonable.
+  - Build a real database simulation layer (fairly complex).
+  - Disable isolation for a single test by using
+    ##LiskDAO::endIsolateAllLiskEffectsToCurrentProcess();## before your test
+    and ##LiskDAO::beginIsolateAllLiskEffectsToCurrentProcess();## after your
+    test. This will disable isolation for one test. NOT RECOMMENDED.
+  - Disable isolation for your entire test case by overriding
+    ##getPhabricatorTestCaseConfiguration()## and providing
+    ##self::PHABRICATOR_TESTCONFIG_ISOLATE_LISK => false## in the configuration
+    dictionary you return. This will disable isolation entirely. STRONGLY NOT
+    RECOMMENDED.
+

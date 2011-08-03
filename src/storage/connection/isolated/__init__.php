@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'storage/connection/base');
 
 phutil_require_module('phutil', 'utils');

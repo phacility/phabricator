@@ -34,7 +34,7 @@ This produces headers like the ones in this document.
 
 Make **lists** by indenting two spaces and beginning each item with a "-":
 
-  lang=demo
+  lang=text
   - milk
   - eggs
   - bread
@@ -51,7 +51,7 @@ Make **code blocks** by indenting two spaces:
 
 You can specify a language for syntax highlighting with "lang=xxx":
 
-  lang=demo
+  lang=text
   lang=html
   <a href="#">...</a>
 
@@ -64,7 +64,7 @@ available (in most cases, this means you need to configure Pygments):
 You can also use a "COUNTEREXAMPLE" header to show that a block of code is
 bad and shouldn't be copied:
 
-  lang=demo
+  lang=text
   COUNTEREXAMPLE
   function f() {
     global $$variable_variable;
