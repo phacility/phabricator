@@ -33,6 +33,8 @@ class ManiphestTaskEditController extends ManiphestController {
     $user = $request->getUser();
 
     $files = array();
+    $parent_task = null;
+    $template_id = null;
 
     if ($this->id) {
       $task = id(new ManiphestTask())->load($this->id);
@@ -70,9 +72,15 @@ class ManiphestTaskEditController extends ManiphestController {
           'phid IN (%Ls)',
           $file_phids);
       }
-    }
 
-    $template_id = $request->getStr('template');
+      $template_id = $request->getInt('template');
+
+      // You can only have a parent task if you're creating a new task.
+      $parent_id = $request->getInt('parent');
+      if ($parent_id) {
+        $parent_task = id(new ManiphestTask())->load($parent_id);
+      }
+    }
 
     $errors = array();
     $e_title = true;
@@ -197,7 +205,26 @@ class ManiphestTaskEditController extends ManiphestController {
             $aux_field->getValueForStorage()
           );
         }
-        
+
+        if ($parent_task) {
+          $type_task = PhabricatorPHIDConstants::PHID_TYPE_TASK;
+
+          // NOTE: It's safe to simply apply this transaction without doing
+          // cycle detection because we know the new task has no children.
+          $new_value = $parent_task->getAttached();
+          $new_value[$type_task][$task->getPHID()] = true;
+
+          $parent_xaction = clone $template;
+          $attach_type = ManiphestTransactionType::TYPE_ATTACH;
+          $parent_xaction->setTransactionType($attach_type);
+          $parent_xaction->setNewValue($new_value);
+
+          $editor = new ManiphestTransactionEditor();
+          $editor->applyTransactions($parent_task, array($parent_xaction));
+
+          $workflow = $parent_task->getID();
+        }
+
         $redirect_uri = '/T'.$task->getID();
 
         if ($workflow) {
@@ -227,6 +254,10 @@ class ManiphestTaskEditController extends ManiphestController {
       array($task->getOwnerPHID()),
       $task->getCCPHIDs(),
       $task->getProjectPHIDs());
+
+    if ($parent_task) {
+      $phids[] = $parent_task->getPHID();
+    }
 
     $phids = array_filter($phids);
     $phids = array_unique($phids);
@@ -275,6 +306,10 @@ class ManiphestTaskEditController extends ManiphestController {
     if ($task->getID()) {
       $button_name = 'Save Task';
       $header_name = 'Edit Task';
+    } else if ($parent_task) {
+      $cancel_uri = '/T'.$parent_task->getID();
+      $button_name = 'Create Task';
+      $header_name = 'Create New Subtask';
     } else {
       $button_name = 'Create Task';
       $header_name = 'Create New Task';
@@ -286,7 +321,18 @@ class ManiphestTaskEditController extends ManiphestController {
     $form
       ->setUser($user)
       ->setAction($request->getRequestURI()->getPath())
-      ->addHiddenInput('template', $template_id)
+      ->addHiddenInput('template', $template_id);
+
+    if ($parent_task) {
+      $form
+        ->appendChild(
+          id(new AphrontFormStaticControl())
+            ->setLabel('Parent Task')
+            ->setValue($handles[$parent_task->getPHID()]->getFullName()))
+        ->addHiddenInput('parent', $parent_task->getID());
+    }
+
+    $form
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel('Title')

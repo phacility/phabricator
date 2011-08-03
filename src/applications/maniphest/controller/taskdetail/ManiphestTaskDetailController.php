@@ -221,6 +221,13 @@ class ManiphestTaskDetailController extends ManiphestController {
     $actions[] = $action;
 
     $action = new AphrontHeadsupActionView();
+    $action->setName('Create Subtask');
+    $action->setURI('/maniphest/task/create/?parent='.$task->getID());
+    $action->setClass('action-branch');
+    $actions[] = $action;
+
+
+    $action = new AphrontHeadsupActionView();
     $action->setName('Edit Dependencies');
     $action->setURI('/search/attach/'.$task->getPHID().'/TASK/dependencies/');
     $action->setWorkflow(true);
