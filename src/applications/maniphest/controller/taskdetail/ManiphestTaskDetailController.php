@@ -41,6 +41,12 @@ class ManiphestTaskDetailController extends ManiphestController {
       return new Aphront404Response();
     }
 
+    $workflow = $request->getStr('workflow');
+    $parent_task = null;
+    if ($workflow && is_numeric($workflow)) {
+      $parent_task = id(new ManiphestTask())->load($workflow);
+    }
+
     $aux_fields = id(new ManiphestDefaultTaskExtensions())
       ->getAuxiliaryFieldSpecifications();
 
@@ -64,7 +70,6 @@ class ManiphestTaskDetailController extends ManiphestController {
       $phids[$task->getOwnerPHID()] = true;
     }
     $phids[$task->getAuthorPHID()] = true;
-    $phids = array_keys($phids);
 
     $attached = $task->getAttached();
     foreach ($attached as $type => $list) {
@@ -72,6 +77,12 @@ class ManiphestTaskDetailController extends ManiphestController {
         $phids[$phid] = true;
       }
     }
+
+    if ($parent_task) {
+      $phids[$parent_task->getPHID()] = true;
+    }
+
+    $phids = array_keys($phids);
 
     $handles = id(new PhabricatorObjectHandleData($phids))
       ->loadHandles();
@@ -189,7 +200,22 @@ class ManiphestTaskDetailController extends ManiphestController {
       '</table>';
 
     $context_bar = null;
-    if ($request->getStr('workflow') == 'create') {
+
+    if ($parent_task) {
+      $context_bar = new AphrontContextBarView();
+      $context_bar->addButton(
+         phutil_render_tag(
+         'a',
+         array(
+           'href' => '/maniphest/task/create/?parent='.$parent_task->getID(),
+           'class' => 'green button',
+         ),
+        'Create Another Subtask'));
+      $context_bar->appendChild(
+        'Created a subtask of <strong>'.
+        $handles[$parent_task->getPHID()]->renderLink().
+        '</strong>');
+    } else if ($workflow == 'create') {
       $context_bar = new AphrontContextBarView();
       $context_bar->addButton(
          phutil_render_tag(
