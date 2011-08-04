@@ -42,6 +42,7 @@ class PhabricatorMailImplementationAmazonSESAdapter
     require_once $root.'/externals/amazon-ses/ses.php';
 
     $service = newv('SimpleEmailService', array($key, $secret));
+    $service->enableUseExceptions(true);
     return $service->sendRawEmail($body);
   }
 

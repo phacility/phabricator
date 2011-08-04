@@ -66,6 +66,12 @@ class SimpleEmailService
   public function verifyPeer() { return $this->__verifyPeer; }
   public function enableVerifyPeer($enable = true) { $this->__verifyPeer = $enable; }
 
+  // If you use exceptions, errors will be communicated by throwing a
+  // SimpleEmailServiceException. By default, they will be trigger_error()'d.
+  protected $__useExceptions = 0;
+  public function useExceptions() { return $this->__useExceptions; }
+  public function enableUseExceptions($enable = true) { $this->__useExceptions = $enable; }
+
   /**
   * Constructor
   *
@@ -94,7 +100,7 @@ class SimpleEmailService
 
   /**
   * Lists the email addresses that have been verified and can be used as the 'From' address
-  * 
+  *
   * @return An array containing two items: a list of verified email addresses, and the request id.
   */
   public function listVerifiedEmailAddresses() {
@@ -368,16 +374,21 @@ class SimpleEmailService
   public function __triggerError($functionname, $error)
   {
     if($error == false) {
-      trigger_error(sprintf("SimpleEmailService::%s(): Encountered an error, but no description given", $functionname), E_USER_WARNING);
+      $message = sprintf("SimpleEmailService::%s(): Encountered an error, but no description given", $functionname);
     }
     else if(isset($error['curl']) && $error['curl'])
     {
-      trigger_error(sprintf("SimpleEmailService::%s(): %s %s", $functionname, $error['code'], $error['message']), E_USER_WARNING);
+      $message = sprintf("SimpleEmailService::%s(): %s %s", $functionname, $error['code'], $error['message']);
     }
     else if(isset($error['Error']))
     {
       $e = $error['Error'];
       $message = sprintf("SimpleEmailService::%s(): %s - %s: %s\nRequest Id: %s\n", $functionname, $e['Type'], $e['Code'], $e['Message'], $error['RequestId']);
+    }
+
+    if ($this->useExceptions()) {
+      throw new SimpleEmailServiceException($message);
+    } else {
       trigger_error($message, E_USER_WARNING);
     }
   }
@@ -719,4 +730,13 @@ final class SimpleEmailServiceMessage {
       return false;
     return true;
   }
+}
+
+
+/**
+ * Thrown by SimpleEmailService when errors occur if you call
+ * enableUseExceptions(true).
+ */
+final class SimpleEmailServiceException extends Exception {
+
 }
