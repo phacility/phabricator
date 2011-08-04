@@ -204,7 +204,7 @@ $runtime_map = preg_replace('/array \(/', 'array(', $runtime_map);
 ksort($package_map['packages']);
 ksort($package_map['reverse']);
 $package_map = var_export($package_map, true);
-$pacakge_map = preg_replace('/\s+$/m', '', $package_map);
+$package_map = preg_replace('/\s+$/m', '', $package_map);
 $package_map = preg_replace('/array \(/', 'array(', $package_map);
 
 $resource_map = <<<EOFILE
@@ -216,7 +216,7 @@ $resource_map = <<<EOFILE
  * @generated
  */
 
-celerity_register_resource_map({$runtime_map}, {$pacakge_map});
+celerity_register_resource_map({$runtime_map}, {$package_map});
 
 EOFILE;
 
