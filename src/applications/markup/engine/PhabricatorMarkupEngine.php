@@ -100,7 +100,11 @@ class PhabricatorMarkupEngine {
 
     $rules[] = new PhutilRemarkupRuleHyperlink();
 
+    $rules[] = new PhabricatorRemarkupRuleDifferentialHandle();
+    $rules[] = new PhabricatorRemarkupRuleManiphestHandle();
+
     $rules[] = new PhabricatorRemarkupRuleEmbedFile();
+
     $rules[] = new PhabricatorRemarkupRuleDifferential();
     $rules[] = new PhabricatorRemarkupRuleDiffusion();
     $rules[] = new PhabricatorRemarkupRuleManiphest();

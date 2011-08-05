@@ -11,6 +11,23 @@ other lightweight markup langauges like Markdown and Wiki markup.
 
 This document describes how to format text using Remarkup.
 
+= Quick Reference =
+
+All the syntax is explained in more detail below, but this is a quick guide to
+formatting text in Remarkup:
+
+  **bold** //italic// ##monospaced##
+  = Large Header=
+  == Smaller Header ==
+  > Quoted Text
+  D123 T123 rX123   # Link to Objects
+  {D123} {T123}     # Link to Objects (Full Name)
+  {F123}            # Embed Images
+  [[wiki page]]     # Link to Phriction
+  @username         # Mention a user
+  Indent two spaces for code.
+  Indent two spaces with "-" for lists.
+
 = Basic Styling =
 
 Format **basic text styles** like this:
@@ -103,6 +120,14 @@ You can also link directly to a comment in Maniphest and Differential:
 
   T123#4        # Link to comment #4 of T123
 
+You can also generate full-name references to some objects by using braces:
+
+  {D123}        # Link to Differential revision D123 with the full name
+  {T123}        # Link to Maniphest task T123 with the full name
+
+These references will also show when an object changes state (for instance, a
+task is closed or a revision is committed).
+
 = Quoting Text =
 
 To quote text, preface it with an ">":
@@ -112,6 +137,15 @@ To quote text, preface it with an ">":
 This appears like this:
 
 > This is quoted text.
+
+= Embedding Images =
+
+You can embed an image by using braces to refer to it:
+
+  {F92}         # Embed the image file F92
+
+In most interfaces, you can drag-and-drop an image from your computer into the
+text area to upload and reference it.
 
 = Embedding Media =
 
