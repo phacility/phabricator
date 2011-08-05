@@ -38,6 +38,7 @@ class ManiphestAuxiliaryFieldDefaultSpecification
 
   public function setFieldType($val) {
     $this->fieldType = $val;
+    return $this;
   }
 
   public function getError() {
@@ -46,6 +47,7 @@ class ManiphestAuxiliaryFieldDefaultSpecification
 
   public function setError($val) {
     $this->error = $val;
+    return $this;
   }
 
   public function getSelectOptions() {
@@ -54,10 +56,12 @@ class ManiphestAuxiliaryFieldDefaultSpecification
 
   public function setSelectOptions($array) {
     $this->selectOptions = $array;
+    return $this;
   }
 
   public function setRequired($bool) {
     $this->required = $bool;
+    return $this;
   }
 
   public function isRequired() {
@@ -91,6 +95,7 @@ class ManiphestAuxiliaryFieldDefaultSpecification
 
     $control->setValue($this->getValue());
     $control->setLabel($this->getLabel());
+    $control->setCaption($this->getCaption());
     $control->setName('auxiliary['.$this->getAuxiliaryKey().']');
     $control->setError($this->getError());
 
@@ -99,10 +104,7 @@ class ManiphestAuxiliaryFieldDefaultSpecification
 
   public function setValueFromRequest($request) {
     $aux_post_values = $request->getArr('auxiliary');
-
-    $this->setValue(
-      $aux_post_values[$this->getAuxiliaryKey()]
-    );
+    $this->setValue(idx($aux_post_values, $this->getAuxiliaryKey()));
   }
 
   public function getValueForStorage() {

@@ -49,6 +49,9 @@ class ConduitAPI_maniphest_info_Method extends ConduitAPIMethod {
       throw new ConduitException('ERR_BAD_TASK');
     }
 
+    $auxiliary = $task->loadAuxiliaryAttributes();
+    $auxiliary = mpull($auxiliary, 'getValue', 'getName');
+
     $result = array(
       'id'           => $task->getID(),
       'phid'         => $task->getPHID(),
@@ -62,6 +65,8 @@ class ConduitAPI_maniphest_info_Method extends ConduitAPIMethod {
       'description'  => $task->getDescription(),
       'projectPHIDs' => $task->getProjectPHIDs(),
       'uri'          => PhabricatorEnv::getProductionURI('/T'.$task->getID()),
+
+      'auxiliary'    => $auxiliary,
 
       // Not sure what this is yet.
       // 'attached' => array($task->getAttached()),

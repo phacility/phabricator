@@ -47,8 +47,8 @@ class ManiphestTaskDetailController extends ManiphestController {
       $parent_task = id(new ManiphestTask())->load($workflow);
     }
 
-    $aux_fields = id(new ManiphestDefaultTaskExtensions())
-      ->getAuxiliaryFieldSpecifications();
+    $extensions = ManiphestTaskExtensions::newExtensions();
+    $aux_fields = $extensions->getAuxiliaryFieldSpecifications();
 
     $transactions = id(new ManiphestTransaction())->loadAllWhere(
       'taskID = %d ORDER BY id ASC',

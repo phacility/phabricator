@@ -85,8 +85,8 @@ class ManiphestTaskEditController extends ManiphestController {
     $errors = array();
     $e_title = true;
 
-    $aux_fields = id(new ManiphestDefaultTaskExtensions())
-      ->getAuxiliaryFieldSpecifications();
+    $extensions = ManiphestTaskExtensions::newExtensions();
+    $aux_fields = $extensions->getAuxiliaryFieldSpecifications();
 
     if ($request->isFormPost()) {
 
@@ -394,8 +394,7 @@ class ManiphestTaskEditController extends ManiphestController {
     $attributes = $task->loadAuxiliaryAttributes();
     $attributes = mpull($attributes, 'getValue', 'getName');
 
-    foreach ($aux_fields as $aux_field)
-    {
+    foreach ($aux_fields as $aux_field) {
       if (!$request->isFormPost()) {
         $attribute = null;
 

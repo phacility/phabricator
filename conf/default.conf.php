@@ -453,12 +453,13 @@ return array(
 
   'maniphest.enabled' => true,
 
-  // Array of custom fields for Maniphest tasks. The array should contain
-  // arrays of field specifications keyed with 'type', 'label', 'caption',
-  // 'required' and whatever specific options exist for the given field
-  // type.
+  // Array of custom fields for Maniphest tasks. For details on adding custom
+  // fields to Maniphest, see "Maniphest User Guide: Adding Custom Fields".
   'maniphest.custom-fields' => array(),
 
+  // Class which drives custom field construction. See "Maniphest User Guide:
+  // Adding Custom Fields" in the documentation for more information.
+  'maniphest.custom-task-extensions-class' => 'ManiphestDefaultTaskExtensions',
 
 // -- Remarkup -------------------------------------------------------------- //
 

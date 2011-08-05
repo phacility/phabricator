@@ -19,7 +19,8 @@
 /**
  * @group maniphest
  */
-final class ManiphestDefaultTaskExtensions {
+final class ManiphestDefaultTaskExtensions
+  extends ManiphestTaskExtensions {
 
   public function getAuxiliaryFieldSpecifications() {
     $fields = PhabricatorEnv::getEnvConfig('maniphest.custom-fields');

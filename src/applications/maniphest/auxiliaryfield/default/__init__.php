@@ -12,5 +12,7 @@ phutil_require_module('phabricator', 'applications/maniphest/auxiliaryfield/vali
 phutil_require_module('phabricator', 'view/form/control/select');
 phutil_require_module('phabricator', 'view/form/control/text');
 
+phutil_require_module('phutil', 'utils');
+
 
 phutil_require_source('ManiphestAuxiliaryFieldDefaultSpecification.php');
