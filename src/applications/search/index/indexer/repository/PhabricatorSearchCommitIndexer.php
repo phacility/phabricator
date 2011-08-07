@@ -63,7 +63,7 @@ class PhabricatorSearchCommitIndexer
       PhabricatorPHIDConstants::PHID_TYPE_REPO,
       $date_created);
 
-    PhabricatorSearchDocument::reindexAbstractDocument($doc);
+    self::reindexAbstractDocument($doc);
   }
 }
 

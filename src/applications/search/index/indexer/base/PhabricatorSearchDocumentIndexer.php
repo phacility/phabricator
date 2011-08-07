@@ -16,4 +16,13 @@
  * limitations under the License.
  */
 
-abstract class PhabricatorSearchDocumentIndexer { }
+abstract class PhabricatorSearchDocumentIndexer {
+
+  // TODO: Make this whole class tree concrete?
+  final protected static function reindexAbstractDocument(
+    PhabricatorSearchAbstractDocument $document) {
+    $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
+    $engine->reindexAbstractDocument($document);
+  }
+
+}

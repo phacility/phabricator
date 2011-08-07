@@ -16,7 +16,77 @@
  * limitations under the License.
  */
 
-class PhabricatorSearchMySQLExecutor extends PhabricatorSearchExecutor {
+final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
+
+  public function reindexAbstractDocument(
+    PhabricatorSearchAbstractDocument $doc) {
+
+    $phid = $doc->getPHID();
+    if (!$phid) {
+      throw new Exception("Document has no PHID!");
+    }
+
+    $store = new PhabricatorSearchDocument();
+    $store->setPHID($doc->getPHID());
+    $store->setDocumentType($doc->getDocumentType());
+    $store->setDocumentTitle($doc->getDocumentTitle());
+    $store->setDocumentCreated($doc->getDocumentCreated());
+    $store->setDocumentModified($doc->getDocumentModified());
+    $store->replace();
+
+    $conn_w = $store->establishConnection('w');
+
+    $field_dao = new PhabricatorSearchDocumentField();
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T WHERE phid = %s',
+      $field_dao->getTableName(),
+      $phid);
+    foreach ($doc->getFieldData() as $field) {
+      list($ftype, $corpus, $aux_phid) = $field;
+      queryfx(
+        $conn_w,
+        'INSERT INTO %T (phid, phidType, field, auxPHID, corpus) '.
+        ' VALUES (%s, %s, %s, %ns, %s)',
+        $field_dao->getTableName(),
+        $phid,
+        $doc->getDocumentType(),
+        $ftype,
+        $aux_phid,
+        $corpus);
+    }
+
+
+    $sql = array();
+    foreach ($doc->getRelationshipData() as $relationship) {
+      list($rtype, $to_phid, $to_type, $time) = $relationship;
+      $sql[] = qsprintf(
+        $conn_w,
+        '(%s, %s, %s, %s, %d)',
+        $phid,
+        $to_phid,
+        $rtype,
+        $to_type,
+        $time);
+    }
+
+    $rship_dao = new PhabricatorSearchDocumentRelationship();
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T WHERE phid = %s',
+      $rship_dao->getTableName(),
+      $phid);
+    if ($sql) {
+      queryfx(
+        $conn_w,
+        'INSERT INTO %T'.
+        ' (phid, relatedPHID, relation, relatedType, relatedTime) '.
+        ' VALUES %Q',
+        $rship_dao->getTableName(),
+        implode(', ', $sql));
+    }
+
+  }
 
   /**
    * Rebuild the PhabricatorSearchAbstractDocument that was used to index

@@ -30,6 +30,6 @@ class PhabricatorSearchUserIndexer
     // TODO: Index the blurbs from their profile or something? Probably not
     // actually useful...
 
-    PhabricatorSearchDocument::reindexAbstractDocument($doc);
+    self::reindexAbstractDocument($doc);
   }
 }

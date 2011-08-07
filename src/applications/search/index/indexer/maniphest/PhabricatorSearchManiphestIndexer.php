@@ -127,6 +127,6 @@ class PhabricatorSearchManiphestIndexer
         $time);
     }
 
-    PhabricatorSearchDocument::reindexAbstractDocument($doc);
+    self::reindexAbstractDocument($doc);
   }
 }

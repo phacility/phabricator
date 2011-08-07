@@ -32,8 +32,8 @@ class PhabricatorSearchIndexController extends PhabricatorSearchBaseController {
 
   public function processRequest() {
 
-    $executor = new PhabricatorSearchMySQLExecutor();
-    $document = $executor->reconstructDocument($this->phid);
+    $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
+    $document = $engine->reconstructDocument($this->phid);
     if (!$document) {
       return new Aphront404Response();
     }

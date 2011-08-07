@@ -9,7 +9,6 @@
 phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/search/index/abstractdocument');
 phutil_require_module('phabricator', 'applications/search/index/indexer/base');
-phutil_require_module('phabricator', 'applications/search/storage/document/document');
 
 
 phutil_require_source('PhabricatorSearchUserIndexer.php');

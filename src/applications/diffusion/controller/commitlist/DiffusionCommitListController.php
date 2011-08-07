@@ -67,8 +67,8 @@ class DiffusionCommitListController extends DiffusionController {
         ),
         phutil_escape_html($user->getUsername()));
 
-      $executor = new PhabricatorSearchMySQLExecutor();
-      $results = $executor->executeSearch($query);
+      $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
+      $results = $engine->executeSearch($query);
       $results = $pager->sliceResults($results);
       $result_phids = ipull($results, 'phid');
       $commit_table = self::createCommitTable($result_phids, $user);

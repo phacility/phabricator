@@ -7,10 +7,6 @@
 
 
 phutil_require_module('phabricator', 'applications/search/storage/base');
-phutil_require_module('phabricator', 'applications/search/storage/document/field');
-phutil_require_module('phabricator', 'applications/search/storage/document/relationship');
-phutil_require_module('phabricator', 'storage/qsprintf');
-phutil_require_module('phabricator', 'storage/queryfx');
 
 
 phutil_require_source('PhabricatorSearchDocument.php');

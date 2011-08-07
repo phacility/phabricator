@@ -11,7 +11,7 @@ phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'applications/search/controller/base');
-phutil_require_module('phabricator', 'applications/search/execute/mysql');
+phutil_require_module('phabricator', 'applications/search/selector/base');
 phutil_require_module('phabricator', 'applications/search/storage/query');
 phutil_require_module('phabricator', 'applications/search/view/searchresult');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');

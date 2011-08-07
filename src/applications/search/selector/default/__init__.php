@@ -6,7 +6,8 @@
 
 
 
+phutil_require_module('phabricator', 'applications/search/engine/mysql');
 phutil_require_module('phabricator', 'applications/search/selector/base');
 
 
-phutil_require_source('PhabricatorSearchDocumentIndexer.php');
+phutil_require_source('PhabricatorDefaultSearchEngineSelector.php');

@@ -16,7 +16,10 @@
  * limitations under the License.
  */
 
-abstract class PhabricatorSearchExecutor {
+final class PhabricatorDefaultSearchEngineSelector
+  extends PhabricatorSearchEngineSelector {
 
-
+  public function newEngine() {
+    return new PhabricatorSearchEngineMySQL();
+  }
 }

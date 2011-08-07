@@ -41,6 +41,6 @@ class PhabricatorSearchPhrictionIndexer
       PhabricatorPHIDConstants::PHID_TYPE_USER,
       $content->getDateCreated());
 
-    PhabricatorSearchDocument::reindexAbstractDocument($doc);
+    self::reindexAbstractDocument($doc);
   }
 }

@@ -168,8 +168,8 @@ class PhabricatorSearchController extends PhabricatorSearchBaseController {
       $query->setParameter('limit', $limit + 1);
       $query->setParameter('offset', $pager->getOffset());
 
-      $executor = new PhabricatorSearchMySQLExecutor();
-      $results = $executor->executeSearch($query);
+      $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
+      $results = $engine->executeSearch($query);
       $results = ipull($results, 'phid');
 
       $results = $pager->sliceResults($results);

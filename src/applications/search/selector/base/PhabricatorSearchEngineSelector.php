@@ -16,23 +16,17 @@
  * limitations under the License.
  */
 
-class PhabricatorSearchDocument extends PhabricatorSearchDAO {
+abstract class PhabricatorSearchEngineSelector {
 
-  protected $phid;
-  protected $documentType;
-  protected $documentTitle;
-  protected $documentCreated;
-  protected $documentModified;
-
-  public function getConfiguration() {
-    return array(
-      self::CONFIG_TIMESTAMPS => false,
-      self::CONFIG_IDS        => self::IDS_MANUAL,
-    ) + parent::getConfiguration();
+  final public function __construct() {
+    // <empty>
   }
 
-  public function getIDKey() {
-    return 'phid';
+  abstract public function newEngine();
+
+  final public static function newSelector() {
+    $class = PhabricatorEnv::getEnvConfig('search.engine-selector');
+    return newv($class, array());
   }
 
 }

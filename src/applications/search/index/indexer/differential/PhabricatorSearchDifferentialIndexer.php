@@ -107,6 +107,6 @@ class PhabricatorSearchDifferentialIndexer
         $rev->getDateModified()); // Bogus timestamp.
     }
 
-    PhabricatorSearchDocument::reindexAbstractDocument($doc);
+    self::reindexAbstractDocument($doc);
   }
 }

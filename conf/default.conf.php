@@ -35,6 +35,7 @@ return array(
   // be 50x50px.
   'user.default-profile-image-phid' => 'PHID-FILE-4d61229816cfe6f2b2a3',
 
+
 // -- DarkConsole ----------------------------------------------------------- //
 
   // DarkConsole is a administrative debugging/profiling tool built into
@@ -67,6 +68,7 @@ return array(
     'github.application-secret',
   ),
 
+
 // --  MySQL  --------------------------------------------------------------- //
 
   // The username to use when connecting to MySQL.
@@ -79,6 +81,7 @@ return array(
   // port than the default (which is 3306), specify it in the hostname
   // (e.g., db.example.com:1234).
   'mysql.host' => 'localhost',
+
 
 // -- Email ----------------------------------------------------------------- //
 
@@ -322,6 +325,7 @@ return array(
   // behalf, silencing the warning.
   'phabricator.timezone'        => null,
 
+
 // -- Files ----------------------------------------------------------------- //
 
   // Lists which uploaded file types may be viewed in the browser. If a file
@@ -395,6 +399,18 @@ return array(
   // fits within configured limits.
   'storage.engine-selector' => 'PhabricatorDefaultFileStorageEngineSelector',
 
+
+// -- Search ---------------------------------------------------------------- //
+
+  // Phabricator uses a search engine selector to choose which search engine
+  // to use when indexing and reconstructing documents, and when executing
+  // queries. You can override the engine selector to provide a new selector
+  // class which can select some custom engine you implement, if you want to
+  // store your documents in some search engine which does not have default
+  // support.
+  'search.engine-selector'  => 'PhabricatorDefaultSearchEngineSelector',
+
+
 // -- Differential ---------------------------------------------------------- //
 
   'differential.revision-custom-detail-renderer'  => null,
@@ -439,6 +455,7 @@ return array(
   // 'required' and whatever specific options exist for the given field
   // type.
   'maniphest.custom-fields' => array(),
+
 
 // -- Remarkup -------------------------------------------------------------- //
 

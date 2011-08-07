@@ -10,7 +10,7 @@ phutil_require_module('phabricator', 'applications/diffusion/controller/base');
 phutil_require_module('phabricator', 'applications/people/storage/user');
 phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
-phutil_require_module('phabricator', 'applications/search/execute/mysql');
+phutil_require_module('phabricator', 'applications/search/selector/base');
 phutil_require_module('phabricator', 'applications/search/storage/query');
 phutil_require_module('phabricator', 'view/control/pager');
 phutil_require_module('phabricator', 'view/control/table');
