@@ -16,6 +16,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/aphront/attached-file-view.css',
   ),
+  'aphront-calendar-view-css' =>
+  array(
+    'uri' => '/res/7036c676/rsrc/css/aphront/calendar-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/aphront/calendar-view.css',
+  ),
   'aphront-contextbar-view-css' =>
   array(
     'uri' => '/res/3e2f3045/rsrc/css/aphront/context-bar.css',

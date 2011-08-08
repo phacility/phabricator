@@ -356,6 +356,10 @@ class AphrontDefaultApplicationConfiguration
         'preview/$' => 'PhrictionDocumentPreviewController',
         'diff/(?P<id>\d+)/$' => 'PhrictionDiffController',
       ),
+
+      '/calendar/' => array(
+        '$' => 'PhabricatorCalendarBrowseController',
+      ),
     );
   }
 

@@ -1,0 +1,41 @@
+/**
+ * @provides aphront-calendar-view-css
+ */
+
+.aphront-calendar-view {
+  width:            100%;
+  border-collapse:  collapse;
+  background:       #fdfdfd;
+  border:           2px solid #003366;
+}
+
+tr.aphront-calendar-month-year-header th {
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+  padding: .5em;
+  color: white;
+  background: #003366;
+}
+
+tr.aphront-calendar-day-of-week-header th {
+  text-align: center;
+  font-size: 11px;
+  padding: .25em;
+  color: white;
+  background: #3366BB;
+}
+
+table.aphront-calendar-view td {
+  border: 1px solid #dfdfdf;
+  padding: .5em;
+}
+
+table.aphront-calendar-view td div {
+  min-height: 70px;
+}
+
+.aphront-calendar-day-of-month {
+  text-align: right;
+  color: #666666;
+}
