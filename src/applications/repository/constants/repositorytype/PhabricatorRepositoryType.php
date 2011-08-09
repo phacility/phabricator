@@ -18,15 +18,23 @@
 
 final class PhabricatorRepositoryType {
 
-  const REPOSITORY_TYPE_GIT = 'git';
-  const REPOSITORY_TYPE_SVN = 'svn';
+  const REPOSITORY_TYPE_GIT         = 'git';
+  const REPOSITORY_TYPE_SVN         = 'svn';
+  const REPOSITORY_TYPE_MERCURIAL   = 'hg';
+
+  public static function getAllRepositoryTypes() {
+    static $map = array(
+      self::REPOSITORY_TYPE_GIT       => 'Git',
+      self::REPOSITORY_TYPE_SVN       => 'Subversion',
+
+      // TODO: Stabilize and remove caveat.
+      self::REPOSITORY_TYPE_MERCURIAL => 'Mercurial (LIMITED SUPPORT!)',
+    );
+    return $map;
+  }
 
   public static function getNameForRepositoryType($type) {
-    static $map = array(
-      self::REPOSITORY_TYPE_GIT => 'Git',
-      self::REPOSITORY_TYPE_SVN => 'Subversion',
-    );
-
+    $map = self::getAllRepositoryTypes();
     return idx($map, $type, 'Unknown');
   }
 

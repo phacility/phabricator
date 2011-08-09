@@ -16,19 +16,19 @@
  * limitations under the License.
  */
 
-final class PhabricatorRepositoryGitFetchDaemon
+final class PhabricatorRepositoryMercurialPullDaemon
   extends PhabricatorRepositoryPullLocalDaemon {
 
   protected function getSupportedRepositoryType() {
-    return PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
+    return PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL;
   }
 
   protected function executeCreate($remote_uri, $local_path) {
-    execx('git clone %s %s', $remote_uri, rtrim($local_path, '/'));
+    execx('hg clone %s %s', $remote_uri, rtrim($local_path, '/'));
   }
 
   protected function executeUpdate($remote_uri, $local_path) {
-    execx('(cd %s && git fetch --all)', $local_path);
+    execx('(cd %s && hg pull -u)', $local_path);
   }
 
 }

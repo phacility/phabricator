@@ -72,7 +72,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-form-view-css' =>
   array(
-    'uri' => '/res/c79fd668/rsrc/css/aphront/form-view.css',
+    'uri' => '/res/16af59d8/rsrc/css/aphront/form-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1482,7 +1482,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/ac869011/typeahead.pkg.js',
       'type' => 'js',
     ),
-    70966590 =>
+    'f6422902' =>
     array(
       'name' => 'core.pkg.css',
       'symbols' =>
@@ -1503,21 +1503,21 @@ celerity_register_resource_map(array(
         13 => 'phabricator-remarkup-css',
         14 => 'syntax-highlighting-css',
       ),
-      'uri' => '/res/pkg/70966590/core.pkg.css',
+      'uri' => '/res/pkg/f6422902/core.pkg.css',
       'type' => 'css',
     ),
   ),
   'reverse' =>
   array(
-    'aphront-crumbs-view-css' => '70966590',
-    'aphront-dialog-view-css' => '70966590',
-    'aphront-form-view-css' => '70966590',
-    'aphront-list-filter-view-css' => '70966590',
-    'aphront-panel-view-css' => '70966590',
-    'aphront-side-nav-view-css' => '70966590',
-    'aphront-table-view-css' => '70966590',
-    'aphront-tokenizer-control-css' => '70966590',
-    'aphront-typeahead-control-css' => '70966590',
+    'aphront-crumbs-view-css' => 'f6422902',
+    'aphront-dialog-view-css' => 'f6422902',
+    'aphront-form-view-css' => 'f6422902',
+    'aphront-list-filter-view-css' => 'f6422902',
+    'aphront-panel-view-css' => 'f6422902',
+    'aphront-side-nav-view-css' => 'f6422902',
+    'aphront-table-view-css' => 'f6422902',
+    'aphront-tokenizer-control-css' => 'f6422902',
+    'aphront-typeahead-control-css' => 'f6422902',
     'differential-changeset-view-css' => '7bf96a66',
     'differential-core-view-css' => '7bf96a66',
     'differential-revision-add-comment-css' => '7bf96a66',
@@ -1554,13 +1554,13 @@ celerity_register_resource_map(array(
     'javelin-util' => '3dbf4083',
     'javelin-vector' => '3dbf4083',
     'javelin-workflow' => '95c67dcd',
-    'phabricator-core-buttons-css' => '70966590',
-    'phabricator-core-css' => '70966590',
-    'phabricator-directory-css' => '70966590',
+    'phabricator-core-buttons-css' => 'f6422902',
+    'phabricator-core-css' => 'f6422902',
+    'phabricator-directory-css' => 'f6422902',
     'phabricator-keyboard-shortcut' => '95c67dcd',
     'phabricator-keyboard-shortcut-manager' => '95c67dcd',
-    'phabricator-remarkup-css' => '70966590',
-    'phabricator-standard-page-view' => '70966590',
-    'syntax-highlighting-css' => '70966590',
+    'phabricator-remarkup-css' => 'f6422902',
+    'phabricator-standard-page-view' => 'f6422902',
+    'syntax-highlighting-css' => 'f6422902',
   ),
 ));

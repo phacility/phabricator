@@ -30,10 +30,7 @@ class PhabricatorRepositoryCreateController
 
     $repository = new PhabricatorRepository();
 
-    $type_map = array(
-      'git' => 'Git',
-      'svn' => 'Subversion',
-    );
+    $type_map = PhabricatorRepositoryType::getAllRepositoryTypes();
     $errors = array();
 
     if ($request->isFormPost()) {

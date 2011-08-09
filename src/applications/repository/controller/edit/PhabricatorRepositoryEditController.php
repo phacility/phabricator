@@ -204,6 +204,7 @@ class PhabricatorRepositoryEditController
 
     $is_git = false;
     $is_svn = false;
+    $is_mercurial = false;
 
     $e_ssh_key = null;
     $e_ssh_keyfile = null;
@@ -215,22 +216,29 @@ class PhabricatorRepositoryEditController
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         $is_svn = true;
         break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $is_mercurial = true;
+        break;
       default:
         throw new Exception("Unsupported VCS!");
     }
+
+    $has_branches       = ($is_git || $is_mercurial);
+    $has_local          = ($is_git || $is_mercurial);
+    $has_http_support   = $is_svn;
 
     if ($request->isFormPost()) {
       $tracking = ($request->getStr('tracking') == 'enabled' ? true : false);
       $repository->setDetail('tracking-enabled', $tracking);
       $repository->setDetail('remote-uri', $request->getStr('uri'));
-      if ($is_git) {
+      if ($has_local) {
         $repository->setDetail('local-path', $request->getStr('path'));
       }
       $repository->setDetail(
         'pull-frequency',
         max(1, $request->getInt('frequency')));
 
-      if ($is_git) {
+      if ($has_branches) {
         $repository->setDetail(
           'default-branch',
           $request->getStr('default-branch'));
@@ -290,7 +298,7 @@ class PhabricatorRepositoryEditController
           $e_uri = null;
         }
 
-        if ($is_git) {
+        if ($has_local) {
           if (!$repository->getDetail('local-path')) {
             $e_path = 'Required';
             $errors[] = "Local path is required.";
@@ -319,6 +327,13 @@ class PhabricatorRepositoryEditController
       $error_view->appendChild(
         'Tracking changes were saved. You may need to restart the daemon '.
         'before changes will take effect.');
+    } else if (!$repository->getDetail('tracking-enabled')) {
+      $error_view = new AphrontErrorView();
+      $error_view->setSeverity(AphrontErrorView::SEVERITY_WARNING);
+      $error_view->setTitle('Repository Not Tracked');
+      $error_view->appendChild(
+        'Tracking is currently "Disabled" for this repository, so it will '.
+        'not be imported into Phabricator. You can enable it below.');
     }
 
     switch ($repository->getVersionControlSystem()) {
@@ -375,12 +390,28 @@ class PhabricatorRepositoryEditController
       '<h1>Remote URI</h1>'.
       '<div class="aphront-form-inset">');
 
-    $uri_label = 'Repository URI';
+    $clone_command = null;
+    $fetch_command = null;
     if ($is_git) {
-      $instructions =
-        'Enter the URI to clone this repository from. It should look like '.
-        '<tt>git@github.com:example/example.git</tt> or '.
-        '<tt>ssh://user@host.com/git/example.git</tt>';
+      $clone_command = 'git clone';
+      $fetch_command = 'git fetch';
+    } else if ($is_mercurial) {
+      $clone_command = 'hg clone';
+      $fetch_command = 'hg pull';
+    }
+
+    $uri_label = 'Repository URI';
+    if ($has_local) {
+      if ($is_git) {
+        $instructions =
+          'Enter the URI to clone this repository from. It should look like '.
+          '<tt>git@github.com:example/example.git</tt>, <tt> '.
+          '<tt>ssh://user@host.com/git/example.git</tt>';
+      } else if ($is_mercurial) {
+        $instructions =
+          'Enter the URI to clone this repository from. It should look '.
+          'something like <tt>ssh://user@host.com/hg/example</tt>';
+      }
       $form->appendChild(
         '<p class="aphront-form-instructions">'.$instructions.'</p>');
     } else if ($is_svn) {
@@ -436,9 +467,7 @@ class PhabricatorRepositoryEditController
             '...specify a path on disk where the daemon should '.
             'look for a private key.'));
 
-    $supports_http = $is_svn;
-
-    if ($supports_http) {
+    if ($has_http_support) {
       $form
         ->appendChild(
           '<div class="aphront-form-instructions">'.
@@ -479,13 +508,13 @@ class PhabricatorRepositoryEditController
       '<h1>Importing Repository Information</h1>'.
       '<div class="aphront-form-inset">');
 
-    if ($is_git) {
+    if ($has_local) {
       $form->appendChild(
         '<p class="aphront-form-instructions">Select a path on local disk '.
-        'which the daemons should <tt>git clone</tt> the repository into. '.
-        'This must be readable and writable by the daemons, and readable by '.
-        'the webserver. The daemons will <tt>git fetch</tt> and keep this '.
-        'repository up to date.</p>');
+        'which the daemons should <tt>'.$clone_command.'</tt> the repository '.
+        'into. This must be readable and writable by the daemons, and '.
+        'readable by the webserver. The daemons will <tt>'.$fetch_command.
+        '</tt> and keep this repository up to date.</p>');
       $form->appendChild(
         id(new AphrontFormTextControl())
           ->setName('path')
@@ -523,7 +552,15 @@ class PhabricatorRepositoryEditController
       '<h1>Application Configuration</h1>'.
       '<div class="aphront-form-inset">');
 
-    if ($is_git) {
+    if ($has_branches) {
+
+      $default_branch_name = null;
+      if ($is_mercurial) {
+        $default_branch_name = 'default';
+      } else if ($is_git) {
+        $default_branch_name = 'origin/master';
+      }
+
       $form
         ->appendChild(
           id(new AphrontFormTextControl())
@@ -532,7 +569,7 @@ class PhabricatorRepositoryEditController
             ->setValue(
               $repository->getDetail(
                 'default-branch',
-                'origin/master'))
+                $default_branch_name))
             ->setCaption(
               'Default <strong>remote</strong> branch to show in Diffusion.'));
     }

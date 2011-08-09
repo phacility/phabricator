@@ -7,9 +7,10 @@
 
 
 phutil_require_module('phabricator', 'applications/repository/constants/repositorytype');
-phutil_require_module('phabricator', 'applications/repository/daemon/pulllocal');
+phutil_require_module('phabricator', 'applications/repository/daemon/base');
 
+phutil_require_module('phutil', 'filesystem');
 phutil_require_module('phutil', 'future/exec');
 
 
-phutil_require_source('PhabricatorRepositoryGitFetchDaemon.php');
+phutil_require_source('PhabricatorRepositoryPullLocalDaemon.php');
