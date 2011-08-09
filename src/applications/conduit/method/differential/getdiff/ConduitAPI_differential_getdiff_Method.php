@@ -79,6 +79,7 @@ class ConduitAPI_differential_getdiff_Method extends ConduitAPIMethod {
     $dict = array(
       'id' => $diff->getID(),
       'parent' => $diff->getParentRevisionID(),
+      'revisionID' => $diff->getRevisionID(),
       'sourceControlBaseRevision' => $diff->getSourceControlBaseRevision(),
       'sourceControlPath' => $diff->getSourceControlPath(),
       'changes' => array(),
