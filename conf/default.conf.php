@@ -446,6 +446,9 @@ return array(
   ),
 
 
+  'differential.field-selector' => 'DifferentialDefaultFieldSelector',
+
+
 // -- Maniphest ------------------------------------------------------------- //
 
   'maniphest.enabled' => true,
