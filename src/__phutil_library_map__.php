@@ -163,6 +163,8 @@ phutil_register_library_map(array(
     'DifferentialExceptionMail' => 'applications/differential/mail/exception',
     'DifferentialFieldSelector' => 'applications/differential/field/selector/base',
     'DifferentialFieldSpecification' => 'applications/differential/field/specification/base',
+    'DifferentialFieldSpecificationIncompleteException' => 'applications/differential/field/exception/incomplete',
+    'DifferentialFieldValidationException' => 'applications/differential/field/exception/validation',
     'DifferentialHunk' => 'applications/differential/storage/hunk',
     'DifferentialInlineComment' => 'applications/differential/storage/inlinecomment',
     'DifferentialInlineCommentEditController' => 'applications/differential/controller/inlinecommentedit',

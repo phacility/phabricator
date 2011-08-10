@@ -8,5 +8,7 @@
 
 phutil_require_module('phabricator', 'applications/differential/storage/base');
 
+phutil_require_module('phutil', 'utils');
+
 
 phutil_require_source('DifferentialAuxiliaryField.php');

@@ -6,5 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/differential/field/exception/incomplete');
+
 
 phutil_require_source('DifferentialFieldSpecification.php');

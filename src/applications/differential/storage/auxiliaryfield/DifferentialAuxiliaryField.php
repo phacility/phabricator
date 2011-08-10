@@ -32,4 +32,28 @@ final class DifferentialAuxiliaryField extends DifferentialDAO {
     return $this;
   }
 
+  public static function loadFromStorage(
+    DifferentialRevision $revision,
+    array $aux_fields) {
+
+    $storage_keys = array_filter(mpull($aux_fields, 'getStorageKey'));
+    $field_data = array();
+    if ($storage_keys) {
+      $field_data = id(new DifferentialAuxiliaryField())->loadAllWhere(
+        'revisionPHID = %s AND name IN (%Ls)',
+        $revision->getPHID(),
+        $storage_keys);
+      $field_data = mpull($field_data, 'getValue', 'getName');
+    }
+
+    foreach ($aux_fields as $aux_field) {
+      $key = $aux_field->getStorageKey();
+      if ($key) {
+        $aux_field->setValueFromStorage(idx($field_data, $key));
+      }
+    }
+
+    return $aux_fields;
+  }
+
 }

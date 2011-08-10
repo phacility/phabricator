@@ -33,6 +33,8 @@ class DifferentialRevisionEditor {
   protected $silentUpdate;
   protected $tasks = null;
 
+  private $auxiliaryFields = array();
+
   public function __construct(DifferentialRevision $revision, $actor_phid) {
     $this->revision = $revision;
     $this->actorPHID = $actor_phid;
@@ -77,6 +79,11 @@ class DifferentialRevisionEditor {
     $this->setReviewers($fields['reviewerPHIDs']);
     $this->setCCPHIDs($fields['ccPHIDs']);
     $this->setTasks($fields['tasks']);
+  }
+
+  public function setAuxiliaryFields(array $auxiliary_fields) {
+    $this->auxiliaryFields = $auxiliary_fields;
+    return $this;
   }
 
   public function getRevision() {
@@ -288,6 +295,8 @@ class DifferentialRevisionEditor {
       array_keys($rem['ccs']),
       array_keys($add['ccs']),
       $this->actorPHID);
+
+    $this->updateAuxiliaryFields();
 
     // Add the author and users included from Herald rules to the relevant set
     // of users so they get a copy of the email.
@@ -643,6 +652,43 @@ class DifferentialRevisionEditor {
       }
     }
   }
+
+  private function updateAuxiliaryFields() {
+    $aux_map = array();
+    foreach ($this->auxiliaryFields as $aux_field) {
+      $key = $aux_field->getStorageKey();
+      $val = $aux_field->getValueForStorage();
+
+      $aux_map[$key] = $val;
+    }
+
+    if (!$aux_map) {
+      return;
+    }
+
+    $revision = $this->revision;
+
+    $fields = id(new DifferentialAuxiliaryField())->loadAllWhere(
+      'revisionPHID = %s AND name IN (%Ls)',
+      $revision->getPHID(),
+      array_keys($aux_map));
+    $fields = mpull($fields, null, 'getName');
+
+    foreach ($aux_map as $key => $val) {
+      $obj = idx($fields, $key);
+      if (!$obj) {
+        $obj = new DifferentialAuxiliaryField();
+        $obj->setRevisionPHID($revision->getPHID());
+        $obj->setName($key);
+      }
+
+      if ($obj->getValue() !== $val) {
+        $obj->setValue($val);
+        $obj->save();
+      }
+    }
+  }
+
 
 }
 

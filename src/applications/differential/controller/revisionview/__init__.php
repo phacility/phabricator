@@ -12,7 +12,9 @@ phutil_require_module('phabricator', 'applications/differential/constants/revisi
 phutil_require_module('phabricator', 'applications/differential/constants/unitstatus');
 phutil_require_module('phabricator', 'applications/differential/constants/unittestresult');
 phutil_require_module('phabricator', 'applications/differential/controller/base');
+phutil_require_module('phabricator', 'applications/differential/field/selector/base');
 phutil_require_module('phabricator', 'applications/differential/parser/changeset');
+phutil_require_module('phabricator', 'applications/differential/storage/auxiliaryfield');
 phutil_require_module('phabricator', 'applications/differential/storage/changeset');
 phutil_require_module('phabricator', 'applications/differential/storage/comment');
 phutil_require_module('phabricator', 'applications/differential/storage/diffproperty');

@@ -43,6 +43,8 @@ class DifferentialRevisionViewController extends DifferentialController {
         "This revision has no diffs. Something has gone quite wrong.");
     }
 
+    $aux_fields = $this->loadAuxiliaryFields($revision);
+
     $diff_vs = $request->getInt('vs');
 
     $target = end($diffs);
@@ -153,6 +155,7 @@ class DifferentialRevisionViewController extends DifferentialController {
 
     $revision_detail = new DifferentialRevisionDetailView();
     $revision_detail->setRevision($revision);
+    $revision_detail->setAuxiliaryFields($aux_fields);
 
     $custom_renderer_class = PhabricatorEnv::getEnvConfig(
       'differential.revision-custom-detail-renderer');
@@ -715,4 +718,19 @@ class DifferentialRevisionViewController extends DifferentialController {
         ->setViewTime(time())
         ->replace();
   }
+
+  private function loadAuxiliaryFields(DifferentialRevision $revision) {
+    $aux_fields = DifferentialFieldSelector::newSelector()
+      ->getFieldSpecifications();
+    foreach ($aux_fields as $key => $aux_field) {
+      if (!$aux_field->shouldAppearOnRevisionView()) {
+        unset($aux_fields[$key]);
+      }
+    }
+
+    return DifferentialAuxiliaryField::loadFromStorage(
+      $revision,
+      $aux_fields);
+  }
+
 }

@@ -41,6 +41,8 @@ class DifferentialRevisionEditController extends DifferentialController {
       $revision = new DifferentialRevision();
     }
 
+    $aux_fields = $this->loadAuxiliaryFields($revision);
+
     $diff_id = $request->getInt('diffID');
     if ($diff_id) {
       $diff = id(new DifferentialDiff())->load($diff_id);
@@ -66,8 +68,6 @@ class DifferentialRevisionEditController extends DifferentialController {
       $revision->setTitle($request->getStr('title'));
       $revision->setSummary($request->getStr('summary'));
       $revision->setTestPlan($request->getStr('testplan'));
-      $revision->setBlameRevision($request->getStr('blame'));
-      $revision->setRevertPlan($request->getStr('revert'));
 
       if (!strlen(trim($revision->getTitle()))) {
         $errors[] = 'You must provide a title.';
@@ -90,11 +90,21 @@ class DifferentialRevisionEditController extends DifferentialController {
         $e_reviewers = 'Invalid';
       }
 
+      foreach ($aux_fields as $aux_field) {
+        $aux_field->setValueFromRequest($request);
+        try {
+          $aux_field->validateField();
+        } catch (DifferentialFieldValidationException $ex) {
+          $errors[] = $ex->getMessage();
+        }
+      }
+
       if (!$errors) {
         $editor = new DifferentialRevisionEditor($revision, $user_phid);
         if ($diff) {
           $editor->addDiff($diff, $request->getStr('comments'));
         }
+        $editor->setAuxiliaryFields($aux_fields);
         $editor->setCCPHIDs($request->getArr('cc'));
         $editor->setReviewers($request->getArr('reviewers'));
         $editor->save();
@@ -185,20 +195,14 @@ class DifferentialRevisionEditController extends DifferentialController {
           ->setLabel('CC')
           ->setName('cc')
           ->setDatasource('/typeahead/common/mailable/')
-          ->setValue($cc_map))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel('Blame Revision')
-          ->setName('blame')
-          ->setValue($revision->getBlameRevision())
-          ->setCaption('Revision which broke the stuff which this '.
-                       'change fixes.'))
-      ->appendChild(
-        id(new AphrontFormTextAreaControl())
-          ->setLabel('Revert Plan')
-          ->setName('revert')
-          ->setValue($revision->getRevertPlan())
-          ->setCaption('Special steps required to safely revert this change.'));
+          ->setValue($cc_map));
+
+    foreach ($aux_fields as $aux_field) {
+      $control = $aux_field->renderEditControl();
+      if ($control) {
+        $form->appendChild($control);
+      }
+    }
 
     $submit = id(new AphrontFormSubmitControl())
       ->setValue('Save');
@@ -229,6 +233,21 @@ class DifferentialRevisionEditController extends DifferentialController {
       array(
         'title' => 'Edit Differential Revision',
       ));
+  }
+
+  private function loadAuxiliaryFields(DifferentialRevision $revision) {
+
+    $aux_fields = DifferentialFieldSelector::newSelector()
+      ->getFieldSpecifications();
+    foreach ($aux_fields as $key => $aux_field) {
+      if (!$aux_field->shouldAppearOnEdit()) {
+        unset($aux_fields[$key]);
+      }
+    }
+
+    return DifferentialAuxiliaryField::loadFromStorage(
+      $revision,
+      $aux_fields);
   }
 
 }

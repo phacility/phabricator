@@ -10,6 +10,7 @@ phutil_require_module('phabricator', 'applications/differential/constants/action
 phutil_require_module('phabricator', 'applications/differential/constants/revisionstatus');
 phutil_require_module('phabricator', 'applications/differential/mail/ccwelcome');
 phutil_require_module('phabricator', 'applications/differential/mail/newdiff');
+phutil_require_module('phabricator', 'applications/differential/storage/auxiliaryfield');
 phutil_require_module('phabricator', 'applications/differential/storage/comment');
 phutil_require_module('phabricator', 'applications/differential/storage/revision');
 phutil_require_module('phabricator', 'applications/feed/constants/story');
