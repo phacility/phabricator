@@ -51,8 +51,8 @@ class PhabricatorSearchSelectController
         break;
     }
 
-    $exec = new PhabricatorSearchMySQLExecutor();
-    $results = $exec->executeSearch($query);
+    $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
+    $results = $engine->executeSearch($query);
 
     $phids = array_fill_keys(ipull($results, 'phid'), true);
     $phids += $this->queryObjectNames($query_str);

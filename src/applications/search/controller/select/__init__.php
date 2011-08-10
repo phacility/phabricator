@@ -13,7 +13,7 @@ phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'applications/phid/handle/view/selector');
 phutil_require_module('phabricator', 'applications/search/controller/search');
-phutil_require_module('phabricator', 'applications/search/execute/mysql');
+phutil_require_module('phabricator', 'applications/search/selector/base');
 phutil_require_module('phabricator', 'applications/search/storage/query');
 
 phutil_require_module('phutil', 'utils');
