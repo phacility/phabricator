@@ -10,6 +10,8 @@ phutil_require_module('phabricator', 'applications/conduit/method/base');
 phutil_require_module('phabricator', 'applications/conduit/method/differential/getdiff');
 phutil_require_module('phabricator', 'applications/conduit/protocol/exception');
 phutil_require_module('phabricator', 'applications/differential/constants/revisionstatus');
+phutil_require_module('phabricator', 'applications/differential/field/selector/base');
+phutil_require_module('phabricator', 'applications/differential/storage/auxiliaryfield');
 phutil_require_module('phabricator', 'applications/differential/storage/revision');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'infrastructure/env');

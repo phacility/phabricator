@@ -18,7 +18,7 @@
 
 class DifferentialFieldSpecificationIncompleteException extends Exception {
 
-  public function __construct(DifferentialFieldSpecification $spec, $claim) {
+  public function __construct(DifferentialFieldSpecification $spec) {
     $key = $spec->getStorageKey();
     $class = get_class($spec);
 

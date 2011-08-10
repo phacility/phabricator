@@ -70,4 +70,12 @@ final class DifferentialBlameRevisionFieldSpecification
     return phutil_escape_html($this->value);
   }
 
+  public function shouldAppearOnConduitView() {
+    return true;
+  }
+
+  public function getValueForConduit() {
+    return $this->value;
+  }
+
 }

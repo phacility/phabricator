@@ -78,6 +78,8 @@ class ConduitAPI_differential_getrevision_Method extends ConduitAPIMethod {
       );
     }
 
+    $auxiliary_fields = $this->loadAuxiliaryFields($revision);
+
     $dict = array(
       'id' => $revision->getID(),
       'phid' => $revision->getPHID(),
@@ -95,9 +97,26 @@ class ConduitAPI_differential_getrevision_Method extends ConduitAPIMethod {
       'reviewerPHIDs' => $reviewer_phids,
       'diffs' => $diff_dicts,
       'commits' => $commit_dicts,
+      'auxiliary' => $auxiliary_fields,
     );
 
     return $dict;
+  }
+
+  private function loadAuxiliaryFields(DifferentialRevision $revision) {
+    $aux_fields = DifferentialFieldSelector::newSelector()
+      ->getFieldSpecifications();
+    foreach ($aux_fields as $key => $aux_field) {
+      if (!$aux_field->shouldAppearOnConduitView()) {
+        unset($aux_fields[$key]);
+      }
+    }
+
+    $aux_fields = DifferentialAuxiliaryField::loadFromStorage(
+      $revision,
+      $aux_fields);
+
+    return mpull($aux_fields, 'getValueForConduit', 'getStorageKey');
   }
 
 }

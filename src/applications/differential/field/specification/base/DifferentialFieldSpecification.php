@@ -27,6 +27,7 @@
  * @task storage Field Storage
  * @task edit Extending the Revision Edit Interface
  * @task view Extending the Revision View Interface
+ * @task conduit Extending the Conduit View Interface
  */
 abstract class DifferentialFieldSpecification {
 
@@ -130,5 +131,22 @@ abstract class DifferentialFieldSpecification {
     throw new DifferentialFieldSpecificationIncompleteException($this);
   }
 
+
+/* -(  Extending the Conduit Interface  )------------------------------------ */
+
+
+  /**
+   * @task conduit
+   */
+  public function shouldAppearOnConduitView() {
+    return false;
+  }
+
+  /**
+   * @task conduit
+   */
+  public function getValueForConduit() {
+    throw new DifferentialFieldSpecificationIncompleteException($this);
+  }
 
 }
