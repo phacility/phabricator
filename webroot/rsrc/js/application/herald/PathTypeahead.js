@@ -98,8 +98,7 @@ JX.install('PathTypeahead', {
       this._typeahead.listen(
         'choose',
         JX.bind(this, function() {
-          JX.defer(
-            JX.bind(this._typeahead, this._typeahead.refresh));
+          setTimeout(JX.bind(this._typeahead, this._typeahead.refresh), 0);
         }));
 
       var repo_set_input = JX.bind(this, this._onrepochange);

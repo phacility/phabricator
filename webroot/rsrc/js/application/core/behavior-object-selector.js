@@ -173,10 +173,8 @@ JX.behavior('phabricator-object-selector', function(config) {
       }
       last_value = cur_value;
 
-      if (query_timer) {
-        query_timer.stop();
-      }
-      query_timer = JX.defer(sendQuery, query_delay);
+      clearTimeout(query_timer);
+      query_timer = setTimeout(sendQuery, query_delay);
     });
 
   sendQuery();

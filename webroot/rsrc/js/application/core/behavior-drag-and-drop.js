@@ -39,7 +39,7 @@ JX.behavior('aphront-drag-and-drop', function(config) {
     redraw(true);
 
     // This redraws the instructions.
-    JX.defer(redraw, 1000);
+    setTimeout(redraw, 1000);
   });
 
   drop.start();

@@ -24,11 +24,10 @@ JX.behavior('phabricator-watch-anchor', function() {
     }
   }
 
-  JX.Stratcom.listen(
-    'hashchange',
-    null,
-    // Defer invocation so other listeners can update the document.
-    function() { JX.defer(highlight); });
-
-  JX.defer(highlight);
+  // Defer invocation so other listeners can update the document.
+  var fn = function() {
+    setTimeout(highlight, 0);
+  };
+  JX.Stratcom.listen('hashchange', null, fn);
+  fn();
 });

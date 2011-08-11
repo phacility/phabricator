@@ -42,7 +42,7 @@ JX.behavior('countdown-timer', function(config) {
     JX.DOM.setContent(JX.$('phabricator-timer-minutes'), minutes);
     JX.DOM.setContent(JX.$('phabricator-timer-seconds'), seconds);
 
-    JX.defer(calculateTimeLeft, 1000);
+    setTimeout(calculateTimeLeft, 1000);
   }
 });
 
