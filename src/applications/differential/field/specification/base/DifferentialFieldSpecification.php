@@ -28,7 +28,7 @@
  * @task edit Extending the Revision Edit Interface
  * @task view Extending the Revision View Interface
  * @task conduit Extending the Conduit View Interface
- * @task handles Loading Handles
+ * @task load Loading Additional Data
  * @task context Contextual Data
  */
 abstract class DifferentialFieldSpecification {
@@ -36,6 +36,7 @@ abstract class DifferentialFieldSpecification {
   private $revision;
   private $diff;
   private $handles;
+  private $diffProperties;
 
 
 /* -(  Storage  )------------------------------------------------------------ */
@@ -174,11 +175,34 @@ abstract class DifferentialFieldSpecification {
     return;
   }
 
+  /**
+   * @task edit
+   */
+  public function willWriteRevision(DifferentialRevisionEditor $editor) {
+    return;
+  }
+
+  /**
+   * @task edit
+   */
+  public function didWriteRevision(DifferentialRevisionEditor $editor) {
+    return;
+  }
+
 
 /* -(  Extending the Revision View Interface  )------------------------------ */
 
 
   /**
+   * Determine if this field should appear on the revision detail view
+   * interface. One use of this interface is to add purely informational
+   * fields to the revision view, without any sort of backing storage.
+   *
+   * If you return true from this method, you must implement the methods
+   * @{method:renderLabelForRevisionView} and
+   * @{method:renderValueForRevisionView}.
+   *
+   * @return bool True if this field should appear when viewing a revision.
    * @task view
    */
   public function shouldAppearOnRevisionView() {
@@ -187,6 +211,13 @@ abstract class DifferentialFieldSpecification {
 
 
   /**
+   * Return a string field label which will appear in the revision detail
+   * table.
+   *
+   * You must implement this method if you return true from
+   * @{method:shouldAppearOnRevisionView}.
+   *
+   * @return string Label for field in revision detail view.
    * @task view
    */
   public function renderLabelForRevisionView() {
@@ -195,6 +226,16 @@ abstract class DifferentialFieldSpecification {
 
 
   /**
+   * Return a markup block representing the field for the revision detail
+   * view. Note that you can return null to suppress display (for instance,
+   * if the field shows related objects of some type and the revision doesn't
+   * have any related objects).
+   *
+   * You must implement this method if you return true from
+   * @{method:shouldAppearOnRevisionView}.
+   *
+   * @return string|null Display markup for field value, or null to suppress
+   *                     field rendering.
    * @task view
    */
   public function renderValueForRevisionView() {
@@ -231,7 +272,7 @@ abstract class DifferentialFieldSpecification {
   }
 
 
-/* -(  Loading Handles  )---------------------------------------------------- */
+/* -(  Loading Additional Data  )-------------------------------------------- */
 
 
   /**
@@ -248,7 +289,7 @@ abstract class DifferentialFieldSpecification {
    * You can later retrieve these handles by calling @{method:getHandle}.
    *
    * @return list List of PHIDs to load handles for.
-   * @task handles
+   * @task load
    */
   protected function getRequiredHandlePHIDs() {
     return array();
@@ -263,7 +304,7 @@ abstract class DifferentialFieldSpecification {
    * need.
    *
    * @return list List of PHIDs to load handles for.
-   * @task handles
+   * @task load
    */
   public function getRequiredHandlePHIDsForRevisionView() {
     return $this->getRequiredHandlePHIDs();
@@ -278,10 +319,21 @@ abstract class DifferentialFieldSpecification {
    * need.
    *
    * @return list List of PHIDs to load handles for.
-   * @task handles
+   * @task load
    */
   public function getRequiredHandlePHIDsForEdit() {
     return $this->getRequiredHandlePHIDs();
+  }
+
+
+  /**
+   * Specify which diff properties this field needs to load.
+   *
+   * @return list List of diff property keys this field requires.
+   * @task load
+   */
+  public function getRequiredDiffProperties() {
+    return array();
   }
 
 
@@ -315,6 +367,14 @@ abstract class DifferentialFieldSpecification {
   /**
    * @task context
    */
+  final public function setDiffProperties(array $diff_properties) {
+    $this->diffProperties = $diff_properties;
+    return $this;
+  }
+
+  /**
+   * @task context
+   */
   final protected function getRevision() {
     if (empty($this->revision)) {
       throw new DifferentialFieldDataNotAvailableException($this);
@@ -341,6 +401,9 @@ abstract class DifferentialFieldSpecification {
    * @task context
    */
   final protected function getHandle($phid) {
+    if ($this->handles === null) {
+      throw new DifferentialFieldDataNotAvailableException($this);
+    }
     if (empty($this->handles[$phid])) {
       $class = get_class($this);
       throw new Exception(
@@ -349,6 +412,32 @@ abstract class DifferentialFieldSpecification {
         "PHIDs you need from getRequiredHandlePHIDs().");
     }
     return $this->handles[$phid];
+  }
+
+  /**
+   * Get a diff property which this field previously requested by returning
+   * the key from @{method:getRequiredDiffProperties}.
+   *
+   * @param  string      Diff property key.
+   * @return string|null Diff property, or null if the property does not have
+   *                     a value.
+   * @task context
+   */
+  final public function getDiffProperty($key) {
+    if ($this->diffProperties === null) {
+      // This will be set to some (possibly empty) array if we've loaded
+      // properties, so null means diff properties aren't available in this
+      // context.
+      throw new DifferentialFieldDataNotAvailableException($this);
+    }
+    if (!array_key_exists($key, $this->diffProperties)) {
+      $class = get_class($this);
+      throw new Exception(
+        "A differential field (of class '{$class}') is attempting to retrieve ".
+        "a diff property ('{$key}') which it did not request. Return all ".
+        "diff property keys you need from getRequiredDiffProperties().");
+    }
+    return $this->diffProperties[$key];
   }
 
 }

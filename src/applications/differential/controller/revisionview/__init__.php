@@ -9,8 +9,6 @@
 phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'applications/differential/constants/action');
 phutil_require_module('phabricator', 'applications/differential/constants/revisionstatus');
-phutil_require_module('phabricator', 'applications/differential/constants/unitstatus');
-phutil_require_module('phabricator', 'applications/differential/constants/unittestresult');
 phutil_require_module('phabricator', 'applications/differential/controller/base');
 phutil_require_module('phabricator', 'applications/differential/field/selector/base');
 phutil_require_module('phabricator', 'applications/differential/parser/changeset');
@@ -30,7 +28,6 @@ phutil_require_module('phabricator', 'applications/differential/view/revisiondet
 phutil_require_module('phabricator', 'applications/differential/view/revisionupdatehistory');
 phutil_require_module('phabricator', 'applications/draft/storage/draft');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
-phutil_require_module('phabricator', 'applications/repository/constants/repositorytype');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'infrastructure/javelin/api');

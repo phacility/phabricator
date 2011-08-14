@@ -165,11 +165,24 @@ class DifferentialRevisionEditor {
       if ($revision->getAuthorPHID() === null) {
         $revision->setAuthorPHID($this->getActorPHID());
       }
-
+      if ($revision->getRevertPlan() === null) {
+        $revision->setRevertPlan('');
+      }
+      if ($revision->getBlameRevision() === null) {
+        $revision->setBlameRevision('');
+      }
+      if ($revision->getSummary() === null) {
+        $revision->setSummary('');
+      }
+      if ($revision->getTestPlan() === null) {
+        $revision->setTestPlan('');
+      }
       $revision->save();
     }
 
     $revision->loadRelationships();
+
+    $this->willWriteRevision();
 
     if ($this->reviewers === null) {
       $this->reviewers = $revision->getReviewers();
@@ -367,6 +380,8 @@ class DifferentialRevisionEditor {
     }
 
     $revision->save();
+
+    $this->didWriteRevision();
 
     $event_data = array(
       'revision_id'          => $revision->getID(),
@@ -689,6 +704,17 @@ class DifferentialRevisionEditor {
     }
   }
 
+  private function willWriteRevision() {
+    foreach ($this->auxiliaryFields as $aux_field) {
+      $aux_field->willWriteRevision($this);
+    }
+  }
+
+  private function didWriteRevision() {
+    foreach ($this->auxiliaryFields as $aux_field) {
+      $aux_field->didWriteRevision($this);
+    }
+  }
 
 }
 

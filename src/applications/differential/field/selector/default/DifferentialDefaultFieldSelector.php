@@ -21,10 +21,15 @@ final class DifferentialDefaultFieldSelector
 
   public function getFieldSpecifications() {
     return array(
+      new DifferentialRevisionStatusFieldSpecification(),
       new DifferentialAuthorFieldSpecification(),
+      new DifferentialReviewersFieldSpecification(),
+      new DifferentialCCsFieldSpecification(),
+      new DifferentialUnitFieldSpecification(),
+      new DifferentialLintFieldSpecification(),
+      new DifferentialCommitsFieldSpecification(),
       new DifferentialDependenciesFieldSpecification(),
       new DifferentialManiphestTasksFieldSpecification(),
-      new DifferentialCommitsFieldSpecification(),
       new DifferentialHostFieldSpecification(),
       new DifferentialPathFieldSpecification(),
       new DifferentialLinesFieldSpecification(),

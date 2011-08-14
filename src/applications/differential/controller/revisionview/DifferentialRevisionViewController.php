@@ -58,10 +58,7 @@ class DifferentialRevisionViewController extends DifferentialController {
       $diff_vs = null;
     }
 
-    $aux_fields = $this->loadAuxiliaryFields($revision);
-    foreach ($aux_fields as $aux_field) {
-      $aux_field->setDiff($target);
-    }
+    $aux_fields = $this->loadAuxiliaryFields($revision, $target);
 
     list($changesets, $vs_map, $rendering_references) =
       $this->loadChangesetsAndVsMap($diffs, $diff_vs, $target);
@@ -156,47 +153,31 @@ class DifferentialRevisionViewController extends DifferentialController {
       $visible_changesets = $changesets;
     }
 
-    $diff_properties = id(new DifferentialDiffProperty())->loadAllWhere(
-      'diffID = %d AND name IN (%Ls)',
-      $target->getID(),
-      array(
-        'arc:lint',
-        'arc:unit',
-      ));
-    $diff_properties = mpull($diff_properties, 'getData', 'getName');
-
     $revision_detail = new DifferentialRevisionDetailView();
     $revision_detail->setRevision($revision);
     $revision_detail->setAuxiliaryFields($aux_fields);
 
+    $actions = $this->getRevisionActions($revision);
+
     $custom_renderer_class = PhabricatorEnv::getEnvConfig(
       'differential.revision-custom-detail-renderer');
     if ($custom_renderer_class) {
+
+      // TODO: Either deprecate generateProperties() or build a better version
+      // of the action links and deprecate the whole class. Custom fields
+      // now provide a much more powerful version of generateProperties().
+
       PhutilSymbolLoader::loadClass($custom_renderer_class);
       $custom_renderer =
         newv($custom_renderer_class, array());
-    } else {
-      $custom_renderer = null;
-    }
+      $properties = $custom_renderer->generateProperties($revision, $target);
+      $revision_detail->setProperties($properties);
 
-    $properties = $this->getRevisionProperties(
-      $revision,
-      $target,
-      $handles,
-      $diff_properties);
-    if ($custom_renderer) {
-      $properties = array_merge(
-        $properties,
-        $custom_renderer->generateProperties($revision, $target));
-    }
-
-    $revision_detail->setProperties($properties);
-
-    $actions = $this->getRevisionActions($revision);
-    if ($custom_renderer) {
       $actions = array_merge(
         $actions,
         $custom_renderer->generateActionLinks($revision, $target));
+    } else {
+      $revision_detail->setProperties(array());
     }
 
     $whitespace = $request->getStr(
@@ -307,143 +288,6 @@ class DifferentialRevisionViewController extends DifferentialController {
     return $comments;
   }
 
-  private function getRevisionProperties(
-    DifferentialRevision $revision,
-    DifferentialDiff $diff,
-    array $handles,
-    array $diff_properties) {
-
-    $properties = array();
-
-    $status = $revision->getStatus();
-    $next_step = null;
-    if ($status == DifferentialRevisionStatus::ACCEPTED) {
-      switch ($diff->getSourceControlSystem()) {
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-          $next_step = 'arc amend --revision '.$revision->getID();
-          break;
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-          $next_step = 'arc commit --revision '.$revision->getID();
-          break;
-      }
-      if ($next_step) {
-        $next_step =
-          ' &middot; '.
-          'Next step: <tt>'.phutil_escape_html($next_step).'</tt>';
-      }
-    }
-    $status = DifferentialRevisionStatus::getNameForRevisionStatus($status);
-    $properties['Revision Status'] = '<strong>'.$status.'</strong>'.$next_step;
-
-    $properties['Reviewers'] = $this->renderHandleLinkList(
-      array_select_keys(
-        $handles,
-        $revision->getReviewers()));
-
-    $properties['CCs'] = $this->renderHandleLinkList(
-      array_select_keys(
-        $handles,
-        $revision->getCCPHIDs()));
-
-    $lstar = DifferentialRevisionUpdateHistoryView::renderDiffLintStar($diff);
-    $lmsg = DifferentialRevisionUpdateHistoryView::getDiffLintMessage($diff);
-    $ldata = idx($diff_properties, 'arc:lint');
-    $ltail = null;
-    if ($ldata) {
-      $ldata = igroup($ldata, 'path');
-      $lint_messages = array();
-      foreach ($ldata as $path => $messages) {
-        $message_markup = array();
-        foreach ($messages as $message) {
-          $path = idx($message, 'path');
-          $line = idx($message, 'line');
-
-          $code = idx($message, 'code');
-          $severity = idx($message, 'severity');
-
-          $name = idx($message, 'name');
-          $description = idx($message, 'description');
-
-          $message_markup[] =
-            '<li>'.
-              '<span class="lint-severity-'.phutil_escape_html($severity).'">'.
-                phutil_escape_html(ucwords($severity)).
-              '</span>'.
-              ' '.
-              '('.phutil_escape_html($code).') '.
-              phutil_escape_html($name).
-              ' at line '.phutil_escape_html($line).
-              '<p>'.phutil_escape_html($description).'</p>'.
-            '</li>';
-        }
-        $lint_messages[] =
-          '<li class="lint-file-block">'.
-            'Lint for <strong>'.phutil_escape_html($path).'</strong>'.
-            '<ul>'.implode("\n", $message_markup).'</ul>'.
-          '</li>';
-      }
-      $ltail =
-        '<div class="differential-lint-block">'.
-          '<ul>'.
-            implode("\n", $lint_messages).
-          '</ul>'.
-        '</div>';
-    }
-
-    $properties['Lint'] = $lstar.' '.$lmsg.$ltail;
-
-    $ustar = DifferentialRevisionUpdateHistoryView::renderDiffUnitStar($diff);
-    $umsg = DifferentialRevisionUpdateHistoryView::getDiffUnitMessage($diff);
-
-    $postponed_count = 0;
-    $udata = idx($diff_properties, 'arc:unit');
-    $utail = null;
-    if ($udata) {
-      $unit_messages = array();
-      foreach ($udata as $test) {
-        $name = phutil_escape_html(idx($test, 'name'));
-        $result = phutil_escape_html(idx($test, 'result'));
-
-        if ($result != DifferentialUnitTestResult::RESULT_POSTPONED &&
-            $result != DifferentialUnitTestResult::RESULT_PASS) {
-          $userdata = phutil_escape_html(idx($test, 'userdata'));
-          if (strlen($userdata) > 256) {
-            $userdata = substr($userdata, 0, 256).'...';
-          }
-          $userdata = str_replace("\n", '<br />', $userdata);
-          $unit_messages[] =
-            '<tr>'.
-            '<th>'.$name.'</th>'.
-            '<th class="unit-test-result">'.
-            '<div class="result-'.$result.'">'.
-            strtoupper($result).
-            '</div>'.
-            '</th>'.
-            '<td>'.$userdata.'</td>'.
-            '</tr>';
-
-          $utail =
-            '<div class="differential-unit-block">'.
-            '<table class="differential-unit-table">'.
-            implode("\n", $unit_messages).
-            '</table>'.
-            '</div>';
-        } else if ($result == DifferentialUnitTestResult::RESULT_POSTPONED) {
-          $postponed_count++;
-        }
-      }
-    }
-
-    if ($postponed_count > 0 &&
-        $diff->getUnitStatus() == DifferentialUnitStatus::UNIT_POSTPONED) {
-      $umsg = $postponed_count.' '.$umsg;
-    }
-
-    $properties['Unit'] = $ustar.' '.$umsg.$utail;
-
-    return $properties;
-  }
-
   private function getRevisionActions(DifferentialRevision $revision) {
     $viewer_phid = $this->getRequest()->getUser()->getPHID();
     $viewer_is_owner = ($revision->getAuthorPHID() == $viewer_phid);
@@ -510,14 +354,6 @@ class DifferentialRevisionViewController extends DifferentialController {
     );
 
     return $links;
-  }
-
-
-  private function renderHandleLinkList(array $list) {
-    if (empty($list)) {
-      return '<em>None</em>';
-    }
-    return implode(', ', mpull($list, 'renderLink'));
   }
 
   private function getRevisionCommentActions(DifferentialRevision $revision) {
@@ -674,7 +510,9 @@ class DifferentialRevisionViewController extends DifferentialController {
         ->replace();
   }
 
-  private function loadAuxiliaryFields(DifferentialRevision $revision) {
+  private function loadAuxiliaryFields(
+    DifferentialRevision $revision,
+    DifferentialDiff $diff) {
     $aux_fields = DifferentialFieldSelector::newSelector()
       ->getFieldSpecifications();
     foreach ($aux_fields as $key => $aux_field) {
@@ -683,9 +521,42 @@ class DifferentialRevisionViewController extends DifferentialController {
       }
     }
 
-    return DifferentialAuxiliaryField::loadFromStorage(
+    $aux_fields = DifferentialAuxiliaryField::loadFromStorage(
       $revision,
       $aux_fields);
+
+    $aux_props = array();
+    foreach ($aux_fields as $key => $aux_field) {
+      $aux_field->setDiff($diff);
+      $aux_props[$key] = $aux_field->getRequiredDiffProperties();
+    }
+
+    $required_properties = array_mergev($aux_props);
+    $property_map = array();
+    if ($required_properties) {
+      $properties = id(new DifferentialDiffProperty())->loadAllWhere(
+        'diffID = %d AND name IN (%Ls)',
+        $diff->getID(),
+        $required_properties);
+      $property_map = mpull($properties, 'getData', 'getName');
+    }
+
+    foreach ($aux_fields as $key => $aux_field) {
+      // Give each field only the properties it specifically required, and
+      // set 'null' for each requested key which we didn't actually load a
+      // value for (otherwise, getDiffProperty() will throw).
+      if ($aux_props[$key]) {
+        $props = array_select_keys($property_map, $aux_props[$key]) +
+                 array_fill_keys($aux_props[$key], null);
+      } else {
+        $props = array();
+      }
+
+      $aux_field->setDiffProperties($props);
+    }
+
+    return $aux_fields;
   }
+
 
 }
