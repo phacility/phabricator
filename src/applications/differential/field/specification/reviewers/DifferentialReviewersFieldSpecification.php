@@ -19,6 +19,9 @@
 final class DifferentialReviewersFieldSpecification
   extends DifferentialFieldSpecification {
 
+  private $reviewers;
+  private $error;
+
   public function shouldAppearOnRevisionView() {
     return true;
   }
@@ -49,5 +52,45 @@ final class DifferentialReviewersFieldSpecification
     $revision = $this->getRevision();
     return $revision->getReviewers();
   }
+
+  public function shouldAppearOnEdit() {
+    $this->reviewers = $this->getReviewerPHIDs();
+    return true;
+  }
+
+  public function getRequiredHandlePHIDsForRevisionEdit() {
+    return $this->reviewers;
+  }
+
+  public function setValueFromRequest(AphrontRequest $request) {
+    $this->reviewers = $request->getArr('reviewers');
+    return $this;
+  }
+
+  public function validateField() {
+    if (in_array($this->getUser()->getPHID(), $this->reviewers)) {
+      $this->error = 'Invalid';
+      throw new DifferentialFieldValidationException(
+        "You may not review your own revision!");
+    }
+  }
+
+  public function renderEditControl() {
+    $reviewer_map = array();
+    foreach ($this->reviewers as $phid) {
+      $reviewer_map[$phid] = $this->getHandle($phid)->getFullName();
+    }
+    return id(new AphrontFormTokenizerControl())
+      ->setLabel('Reviewers')
+      ->setName('reviewers')
+      ->setDatasource('/typeahead/common/users/')
+      ->setValue($reviewer_map)
+      ->setError($this->error);
+  }
+
+  public function willWriteRevision(DifferentialRevisionEditor $editor) {
+    $editor->setReviewers($this->reviewers);
+  }
+
 
 }

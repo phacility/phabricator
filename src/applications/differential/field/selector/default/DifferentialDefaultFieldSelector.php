@@ -21,6 +21,9 @@ final class DifferentialDefaultFieldSelector
 
   public function getFieldSpecifications() {
     return array(
+      new DifferentialTitleFieldSpecification(),
+      new DifferentialSummaryFieldSpecification(),
+      new DifferentialTestPlanFieldSpecification(),
       new DifferentialRevisionStatusFieldSpecification(),
       new DifferentialAuthorFieldSpecification(),
       new DifferentialReviewersFieldSpecification(),

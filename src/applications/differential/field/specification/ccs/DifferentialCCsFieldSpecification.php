@@ -19,6 +19,8 @@
 final class DifferentialCCsFieldSpecification
   extends DifferentialFieldSpecification {
 
+  private $ccs;
+
   public function shouldAppearOnRevisionView() {
     return true;
   }
@@ -48,6 +50,36 @@ final class DifferentialCCsFieldSpecification
   private function getCCPHIDs() {
     $revision = $this->getRevision();
     return $revision->getCCPHIDs();
+  }
+
+  public function shouldAppearOnEdit() {
+    $this->ccs = $this->getCCPHIDs();
+    return true;
+  }
+
+  public function getRequiredHandlePHIDsForRevisionEdit() {
+    return $this->ccs;
+  }
+
+  public function setValueFromRequest(AphrontRequest $request) {
+    $this->ccs = $request->getArr('cc');
+    return $this;
+  }
+
+  public function renderEditControl() {
+    $cc_map = array();
+    foreach ($this->ccs as $phid) {
+      $cc_map[$phid] = $this->getHandle($phid)->getFullName();
+    }
+    return id(new AphrontFormTokenizerControl())
+      ->setLabel('CC')
+      ->setName('cc')
+      ->setDatasource('/typeahead/common/mailable/')
+      ->setValue($cc_map);
+  }
+
+  public function willWriteRevision(DifferentialRevisionEditor $editor) {
+    $editor->setCCPHIDs($this->ccs);
   }
 
 }

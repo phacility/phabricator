@@ -672,9 +672,10 @@ class DifferentialRevisionEditor {
     $aux_map = array();
     foreach ($this->auxiliaryFields as $aux_field) {
       $key = $aux_field->getStorageKey();
-      $val = $aux_field->getValueForStorage();
-
-      $aux_map[$key] = $val;
+      if ($key !== null) {
+        $val = $aux_field->getValueForStorage();
+        $aux_map[$key] = $val;
+      }
     }
 
     if (!$aux_map) {

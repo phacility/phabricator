@@ -37,6 +37,7 @@ abstract class DifferentialFieldSpecification {
   private $diff;
   private $handles;
   private $diffProperties;
+  private $user;
 
 
 /* -(  Storage  )------------------------------------------------------------ */
@@ -321,7 +322,7 @@ abstract class DifferentialFieldSpecification {
    * @return list List of PHIDs to load handles for.
    * @task load
    */
-  public function getRequiredHandlePHIDsForEdit() {
+  public function getRequiredHandlePHIDsForRevisionEdit() {
     return $this->getRequiredHandlePHIDs();
   }
 
@@ -375,6 +376,14 @@ abstract class DifferentialFieldSpecification {
   /**
    * @task context
    */
+  final public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
+    return $this;
+  }
+
+  /**
+   * @task context
+   */
   final protected function getRevision() {
     if (empty($this->revision)) {
       throw new DifferentialFieldDataNotAvailableException($this);
@@ -390,6 +399,16 @@ abstract class DifferentialFieldSpecification {
       throw new DifferentialFieldDataNotAvailableException($this);
     }
     return $this->diff;
+  }
+
+  /**
+   * @task context
+   */
+  final protected function getUser() {
+    if (empty($this->user)) {
+      throw new DifferentialFieldDataNotAvailableException($this);
+    }
+    return $this->user;
   }
 
   /**

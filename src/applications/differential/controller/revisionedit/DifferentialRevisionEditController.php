@@ -41,6 +41,7 @@ class DifferentialRevisionEditController extends DifferentialController {
       $revision = new DifferentialRevision();
     }
 
+    $revision->loadRelationships();
     $aux_fields = $this->loadAuxiliaryFields($revision);
 
     $diff_id = $request->getInt('diffID');
@@ -57,38 +58,11 @@ class DifferentialRevisionEditController extends DifferentialController {
       $diff = null;
     }
 
-    $e_title = true;
-    $e_testplan = true;
-    $e_reviewers = null;
     $errors = array();
 
-    $revision->loadRelationships();
 
     if ($request->isFormPost() && !$request->getStr('viaDiffView')) {
-      $revision->setTitle($request->getStr('title'));
-      $revision->setSummary($request->getStr('summary'));
-      $revision->setTestPlan($request->getStr('testplan'));
-
-      if (!strlen(trim($revision->getTitle()))) {
-        $errors[] = 'You must provide a title.';
-        $e_title = 'Required';
-      } else {
-        $e_title = null;
-      }
-
-      if (!strlen(trim($revision->getTestPlan()))) {
-        $errors[] = 'You must provide a test plan.';
-        $e_testplan = 'Required';
-      } else {
-        $e_testplan = null;
-      }
-
       $user_phid = $request->getUser()->getPHID();
-
-      if (in_array($user_phid, $request->getArr('reviewers'))) {
-        $errors[] = 'You may not review your own revision.';
-        $e_reviewers = 'Invalid';
-      }
 
       foreach ($aux_fields as $aux_field) {
         $aux_field->setValueFromRequest($request);
@@ -105,30 +79,24 @@ class DifferentialRevisionEditController extends DifferentialController {
           $editor->addDiff($diff, $request->getStr('comments'));
         }
         $editor->setAuxiliaryFields($aux_fields);
-        $editor->setCCPHIDs($request->getArr('cc'));
-        $editor->setReviewers($request->getArr('reviewers'));
         $editor->save();
 
         return id(new AphrontRedirectResponse())
           ->setURI('/D'.$revision->getID());
       }
-
-      $reviewer_phids = $request->getArr('reviewers');
-      $cc_phids = $request->getArr('cc');
-    } else {
-      $reviewer_phids = $revision->getReviewers();
-      $cc_phids = $revision->getCCPHIDs();
     }
 
-    $phids = array_merge($reviewer_phids, $cc_phids);
+    $aux_phids = array();
+    foreach ($aux_fields as $key => $aux_field) {
+      $aux_phids[$key] = $aux_field->getRequiredHandlePHIDsForRevisionEdit();
+    }
+    $phids = array_mergev($aux_phids);
     $phids = array_unique($phids);
-
     $handles = id(new PhabricatorObjectHandleData($phids))
       ->loadHandles();
-    $handles = mpull($handles, 'getFullName', 'getPHID');
-
-    $reviewer_map = array_select_keys($handles, $reviewer_phids);
-    $cc_map = array_select_keys($handles, $cc_phids);
+    foreach ($aux_fields as $key => $aux_field) {
+      $aux_field->setHandles(array_select_keys($handles, $aux_phids[$key]));
+    }
 
     $form = new AphrontFormView();
     $form->setUser($request->getUser());
@@ -163,39 +131,6 @@ class DifferentialRevisionEditController extends DifferentialController {
         ->appendChild(
           id(new AphrontFormDividerControl()));
     }
-
-    $form
-      ->appendChild(
-        id(new AphrontFormTextAreaControl())
-          ->setLabel('Title')
-          ->setName('title')
-          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT)
-          ->setValue($revision->getTitle())
-          ->setError($e_title))
-      ->appendChild(
-        id(new AphrontFormTextAreaControl())
-          ->setLabel('Summary')
-          ->setName('summary')
-          ->setValue($revision->getSummary()))
-      ->appendChild(
-        id(new AphrontFormTextAreaControl())
-          ->setLabel('Test Plan')
-          ->setName('testplan')
-          ->setValue($revision->getTestPlan())
-          ->setError($e_testplan))
-      ->appendChild(
-        id(new AphrontFormTokenizerControl())
-          ->setLabel('Reviewers')
-          ->setName('reviewers')
-          ->setDatasource('/typeahead/common/users/')
-          ->setError($e_reviewers)
-          ->setValue($reviewer_map))
-      ->appendChild(
-        id(new AphrontFormTokenizerControl())
-          ->setLabel('CC')
-          ->setName('cc')
-          ->setDatasource('/typeahead/common/mailable/')
-          ->setValue($cc_map));
 
     foreach ($aux_fields as $aux_field) {
       $control = $aux_field->renderEditControl();
@@ -237,11 +172,16 @@ class DifferentialRevisionEditController extends DifferentialController {
 
   private function loadAuxiliaryFields(DifferentialRevision $revision) {
 
+    $user = $this->getRequest()->getUser();
+
     $aux_fields = DifferentialFieldSelector::newSelector()
       ->getFieldSpecifications();
     foreach ($aux_fields as $key => $aux_field) {
+      $aux_field->setRevision($revision);
       if (!$aux_field->shouldAppearOnEdit()) {
         unset($aux_fields[$key]);
+      } else {
+        $aux_field->setUser($user);
       }
     }
 

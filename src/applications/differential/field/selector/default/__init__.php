@@ -21,6 +21,9 @@ phutil_require_module('phabricator', 'applications/differential/field/specificat
 phutil_require_module('phabricator', 'applications/differential/field/specification/path');
 phutil_require_module('phabricator', 'applications/differential/field/specification/reviewers');
 phutil_require_module('phabricator', 'applications/differential/field/specification/revisionstatus');
+phutil_require_module('phabricator', 'applications/differential/field/specification/summary');
+phutil_require_module('phabricator', 'applications/differential/field/specification/testplan');
+phutil_require_module('phabricator', 'applications/differential/field/specification/title');
 phutil_require_module('phabricator', 'applications/differential/field/specification/unit');
 
 
