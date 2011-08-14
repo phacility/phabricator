@@ -29,7 +29,6 @@ phutil_require_module('phabricator', 'applications/differential/view/revisioncom
 phutil_require_module('phabricator', 'applications/differential/view/revisiondetail');
 phutil_require_module('phabricator', 'applications/differential/view/revisionupdatehistory');
 phutil_require_module('phabricator', 'applications/draft/storage/draft');
-phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'applications/repository/constants/repositorytype');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');

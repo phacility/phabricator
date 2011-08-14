@@ -104,19 +104,28 @@ class DifferentialRevisionViewController extends DifferentialController {
       }
     }
 
-    if ($target->getArcanistProjectPHID()) {
-      $object_phids[] = $target->getArcanistProjectPHID();
-    }
-
     foreach ($revision->getAttached() as $type => $phids) {
       foreach ($phids as $phid => $info) {
         $object_phids[] = $phid;
       }
     }
+
+    $aux_phids = array();
+    foreach ($aux_fields as $key => $aux_field) {
+      $aux_phids[$key] = $aux_field->getRequiredHandlePHIDsForRevisionView();
+    }
+    $object_phids = array_merge($object_phids, array_mergev($aux_phids));
     $object_phids = array_unique($object_phids);
 
     $handles = id(new PhabricatorObjectHandleData($object_phids))
       ->loadHandles();
+
+    foreach ($aux_fields as $key => $aux_field) {
+      // Make sure each field only has access to handles it specifically
+      // requested, not all handles. Otherwise you can get a field which works
+      // only in the presence of other fields.
+      $aux_field->setHandles(array_select_keys($handles, $aux_phids[$key]));
+    }
 
     $request_uri = $request->getRequestURI();
 
@@ -326,9 +335,6 @@ class DifferentialRevisionViewController extends DifferentialController {
     $status = DifferentialRevisionStatus::getNameForRevisionStatus($status);
     $properties['Revision Status'] = '<strong>'.$status.'</strong>'.$next_step;
 
-    $author = $handles[$revision->getAuthorPHID()];
-    $properties['Author'] = $author->renderLink();
-
     $properties['Reviewers'] = $this->renderHandleLinkList(
       array_select_keys(
         $handles,
@@ -434,43 +440,6 @@ class DifferentialRevisionViewController extends DifferentialController {
     }
 
     $properties['Unit'] = $ustar.' '.$umsg.$utail;
-
-    $drevs = $revision->getAttachedPHIDs(
-      PhabricatorPHIDConstants::PHID_TYPE_DREV);
-    if ($drevs) {
-      $links = array();
-      foreach ($drevs as $drev_phid) {
-        $links[] = $handles[$drev_phid]->renderLink();
-      }
-      $properties['Depends On'] = implode('<br />', $links);
-    }
-
-    if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
-      $tasks = $revision->getAttachedPHIDs(
-        PhabricatorPHIDConstants::PHID_TYPE_TASK);
-      if ($tasks) {
-        $links = array();
-        foreach ($tasks as $task_phid) {
-          $links[] = $handles[$task_phid]->renderLink();
-        }
-        $properties['Maniphest Tasks'] = implode('<br />', $links);
-      }
-    }
-
-    $commit_phids = $revision->getCommitPHIDs();
-    if ($commit_phids) {
-      $links = array();
-      foreach ($commit_phids as $commit_phid) {
-        $links[] = $handles[$commit_phid]->renderLink();
-      }
-      $properties['Commits'] = implode('<br />', $links);
-    }
-
-    $arcanist_phid = $diff->getArcanistProjectPHID();
-    if ($arcanist_phid) {
-      $properties['Arcanist Project'] = phutil_escape_html(
-        $handles[$arcanist_phid]->getName());
-    }
 
     return $properties;
   }

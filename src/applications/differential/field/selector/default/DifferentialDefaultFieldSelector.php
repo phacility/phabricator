@@ -21,9 +21,14 @@ final class DifferentialDefaultFieldSelector
 
   public function getFieldSpecifications() {
     return array(
+      new DifferentialAuthorFieldSpecification(),
+      new DifferentialDependenciesFieldSpecification(),
+      new DifferentialManiphestTasksFieldSpecification(),
+      new DifferentialCommitsFieldSpecification(),
       new DifferentialHostFieldSpecification(),
       new DifferentialPathFieldSpecification(),
       new DifferentialLinesFieldSpecification(),
+      new DifferentialArcanistProjectFieldSpecification(),
       new DifferentialApplyPatchFieldSpecification(),
       new DifferentialExportPatchFieldSpecification(),
     );

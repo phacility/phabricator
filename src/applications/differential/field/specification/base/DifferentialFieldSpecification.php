@@ -28,12 +28,14 @@
  * @task edit Extending the Revision Edit Interface
  * @task view Extending the Revision View Interface
  * @task conduit Extending the Conduit View Interface
+ * @task handles Loading Handles
  * @task context Contextual Data
  */
 abstract class DifferentialFieldSpecification {
 
   private $revision;
   private $diff;
+  private $handles;
 
 
 /* -(  Storage  )------------------------------------------------------------ */
@@ -229,7 +231,62 @@ abstract class DifferentialFieldSpecification {
   }
 
 
+/* -(  Loading Handles  )---------------------------------------------------- */
+
+
+  /**
+   * Specify which @{class:PhabricatorObjectHandles} need to be loaded for your
+   * field to render correctly.
+   *
+   * This is a convenience method which makes the handles available on all
+   * interfaces where the field appears. If your field needs handles on only
+   * some interfaces (or needs different handles on different interfaces) you
+   * can overload the more specific methods to customize which interfaces you
+   * retrieve handles for. Requesting only the handles you need will improve
+   * the performance of your field.
+   *
+   * You can later retrieve these handles by calling @{method:getHandle}.
+   *
+   * @return list List of PHIDs to load handles for.
+   * @task handles
+   */
+  protected function getRequiredHandlePHIDs() {
+    return array();
+  }
+
+  /**
+   * Specify which @{class:PhabricatorObjectHandles} need to be loaded for your
+   * field to render correctly on the view interface.
+   *
+   * This is a more specific version of @{method:getRequiredHandlePHIDs} which
+   * can be overridden to improve field performance by loading only data you
+   * need.
+   *
+   * @return list List of PHIDs to load handles for.
+   * @task handles
+   */
+  public function getRequiredHandlePHIDsForRevisionView() {
+    return $this->getRequiredHandlePHIDs();
+  }
+
+  /**
+   * Specify which @{class:PhabricatorObjectHandles} need to be loaded for your
+   * field to render correctly on the edit interface.
+   *
+   * This is a more specific version of @{method:getRequiredHandlePHIDs} which
+   * can be overridden to improve field performance by loading only data you
+   * need.
+   *
+   * @return list List of PHIDs to load handles for.
+   * @task handles
+   */
+  public function getRequiredHandlePHIDsForEdit() {
+    return $this->getRequiredHandlePHIDs();
+  }
+
+
 /* -(  Contextual Data  )---------------------------------------------------- */
+
 
   /**
    * @task context
@@ -244,6 +301,14 @@ abstract class DifferentialFieldSpecification {
    */
   final public function setDiff(DifferentialDiff $diff) {
     $this->diff = $diff;
+    return $this;
+  }
+
+  /**
+   * @task context
+   */
+  final public function setHandles(array $handles) {
+    $this->handles = $handles;
     return $this;
   }
 
@@ -265,6 +330,25 @@ abstract class DifferentialFieldSpecification {
       throw new DifferentialFieldDataNotAvailableException($this);
     }
     return $this->diff;
+  }
+
+  /**
+   * Get the handle for an object PHID. You must overload
+   * @{method:getRequiredHandlePHIDs} (or a more specific version thereof)
+   * and include the PHID you want in the list for it to be available here.
+   *
+   * @return PhabricatorObjectHandle Handle to the object.
+   * @task context
+   */
+  final protected function getHandle($phid) {
+    if (empty($this->handles[$phid])) {
+      $class = get_class($this);
+      throw new Exception(
+        "A differential field (of class '{$class}') is attempting to retrieve ".
+        "a handle ('{$phid}') which it did not request. Return all handle ".
+        "PHIDs you need from getRequiredHandlePHIDs().");
+    }
+    return $this->handles[$phid];
   }
 
 }
