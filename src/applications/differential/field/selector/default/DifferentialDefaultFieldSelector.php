@@ -20,7 +20,13 @@ final class DifferentialDefaultFieldSelector
   extends DifferentialFieldSelector {
 
   public function getFieldSpecifications() {
-    return array();
+    return array(
+      new DifferentialHostFieldSpecification(),
+      new DifferentialPathFieldSpecification(),
+      new DifferentialLinesFieldSpecification(),
+      new DifferentialApplyPatchFieldSpecification(),
+      new DifferentialExportPatchFieldSpecification(),
+    );
   }
 
 }

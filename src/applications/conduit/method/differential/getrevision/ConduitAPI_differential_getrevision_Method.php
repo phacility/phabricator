@@ -116,7 +116,7 @@ class ConduitAPI_differential_getrevision_Method extends ConduitAPIMethod {
       $revision,
       $aux_fields);
 
-    return mpull($aux_fields, 'getValueForConduit', 'getStorageKey');
+    return mpull($aux_fields, 'getValueForConduit', 'getKeyForConduit');
   }
 
 }

@@ -39,14 +39,14 @@ final class DifferentialRevertPlanFieldSpecification
   }
 
   public function setValueFromRequest(AphrontRequest $request) {
-    $this->value = $request->getStr('aux:phabricator:revert-plan');
+    $this->value = $request->getStr($this->getStorageKey());
     return $this;
   }
 
   public function renderEditControl() {
     return id(new AphrontFormTextAreaControl())
       ->setLabel('Revert Plan')
-      ->setName('aux:phabricator:revert-plan')
+      ->setName($this->getStorageKey())
       ->setCaption('Special steps required to safely revert this change.')
       ->setValue($this->value);
   }

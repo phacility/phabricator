@@ -47,6 +47,7 @@ final class DifferentialAuxiliaryField extends DifferentialDAO {
     }
 
     foreach ($aux_fields as $aux_field) {
+      $aux_field->setRevision($revision);
       $key = $aux_field->getStorageKey();
       if ($key) {
         $aux_field->setValueFromStorage(idx($field_data, $key));

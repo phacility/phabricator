@@ -39,7 +39,7 @@ final class DifferentialBlameRevisionFieldSpecification
   }
 
   public function setValueFromRequest(AphrontRequest $request) {
-    $this->value = $request->getStr('aux:phabricator:blame-revision');
+    $this->value = $request->getStr($this->getStorageKey());
     return $this;
   }
 
@@ -47,7 +47,7 @@ final class DifferentialBlameRevisionFieldSpecification
     return id(new AphrontFormTextControl())
       ->setLabel('Blame Revision')
       ->setCaption('Revision which broke the stuff which this change fixes.')
-      ->setName('aux:phabricator:blame-revision')
+      ->setName($this->getStorageKey())
       ->setValue($this->value);
   }
 

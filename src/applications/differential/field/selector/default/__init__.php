@@ -7,6 +7,11 @@
 
 
 phutil_require_module('phabricator', 'applications/differential/field/selector/base');
+phutil_require_module('phabricator', 'applications/differential/field/specification/applypatch');
+phutil_require_module('phabricator', 'applications/differential/field/specification/exportpatch');
+phutil_require_module('phabricator', 'applications/differential/field/specification/host');
+phutil_require_module('phabricator', 'applications/differential/field/specification/lines');
+phutil_require_module('phabricator', 'applications/differential/field/specification/path');
 
 
 phutil_require_source('DifferentialDefaultFieldSelector.php');

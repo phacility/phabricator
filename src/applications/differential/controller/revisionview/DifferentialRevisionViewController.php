@@ -43,8 +43,6 @@ class DifferentialRevisionViewController extends DifferentialController {
         "This revision has no diffs. Something has gone quite wrong.");
     }
 
-    $aux_fields = $this->loadAuxiliaryFields($revision);
-
     $diff_vs = $request->getInt('vs');
 
     $target = end($diffs);
@@ -58,6 +56,11 @@ class DifferentialRevisionViewController extends DifferentialController {
     $diffs = mpull($diffs, null, 'getID');
     if (empty($diffs[$diff_vs])) {
       $diff_vs = null;
+    }
+
+    $aux_fields = $this->loadAuxiliaryFields($revision);
+    foreach ($aux_fields as $aux_field) {
+      $aux_field->setDiff($target);
     }
 
     list($changesets, $vs_map, $rendering_references) =
@@ -336,17 +339,6 @@ class DifferentialRevisionViewController extends DifferentialController {
         $handles,
         $revision->getCCPHIDs()));
 
-    $host = $diff->getSourceMachine();
-    if ($host) {
-      $properties['Host'] = phutil_escape_html($host);
-    }
-
-    $path = $diff->getSourcePath();
-    if ($path) {
-      $branch = $diff->getBranch() ? ' ('.$diff->getBranch().')' : '';
-      $properties['Path'] = phutil_escape_html("{$path} {$branch}");
-    }
-
     $lstar = DifferentialRevisionUpdateHistoryView::renderDiffLintStar($diff);
     $lmsg = DifferentialRevisionUpdateHistoryView::getDiffLintMessage($diff);
     $ldata = idx($diff_properties, 'arc:lint');
@@ -474,17 +466,11 @@ class DifferentialRevisionViewController extends DifferentialController {
       $properties['Commits'] = implode('<br />', $links);
     }
 
-    $properties['Lines'] = number_format($diff->getLineCount());
     $arcanist_phid = $diff->getArcanistProjectPHID();
     if ($arcanist_phid) {
       $properties['Arcanist Project'] = phutil_escape_html(
         $handles[$arcanist_phid]->getName());
     }
-
-    $properties['Apply Patch'] =
-      '<tt>arc patch D'.$revision->getID().'</tt>';
-    $properties['Export Patch'] =
-      '<tt>arc export --revision '.$revision->getID().'</tt>';
 
     return $properties;
   }

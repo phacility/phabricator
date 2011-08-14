@@ -16,8 +16,7 @@
  * limitations under the License.
  */
 
-final class DifferentialFieldSpecificationIncompleteException
-  extends Exception {
+final class DifferentialFieldDataNotAvailableException extends Exception {
 
   public function __construct(DifferentialFieldSpecification $spec) {
     $key = $spec->getStorageKey();
@@ -25,8 +24,7 @@ final class DifferentialFieldSpecificationIncompleteException
 
     parent::__construct(
       "Differential field specification for '{$key}' (of class '{$class}') is ".
-      "incompletely implemented: it claims it should appear in a context but ".
-      "does not implement all the required methods for that context.");
+      "attempting to access data which is not available in this context.");
   }
 
 }
