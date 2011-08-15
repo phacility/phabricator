@@ -28,6 +28,7 @@
  * @task edit Extending the Revision Edit Interface
  * @task view Extending the Revision View Interface
  * @task conduit Extending the Conduit View Interface
+ * @task commit Extending Commit Messages
  * @task load Loading Additional Data
  * @task context Contextual Data
  */
@@ -177,6 +178,16 @@ abstract class DifferentialFieldSpecification {
   }
 
   /**
+   * Hook for applying revision changes via the editor. Normally, you should
+   * not implement this, but a number of builtin fields use the revision object
+   * itself as storage. If you need to do something similar for whatever reason,
+   * this method gives you an opportunity to interact with the editor or
+   * revision before changes are saved (for example, you can write the field's
+   * value into some property of the revision).
+   *
+   * @param DifferentialRevisionEditor  Active editor which is applying changes
+   *                                    to the revision.
+   * @return void
    * @task edit
    */
   public function willWriteRevision(DifferentialRevisionEditor $editor) {
@@ -184,6 +195,14 @@ abstract class DifferentialFieldSpecification {
   }
 
   /**
+   * Hook after an edit operation has completed. This allows you to update
+   * link tables or do other write operations which should happen after the
+   * revision is saved. Normally you don't need to implement this.
+   *
+   *
+   * @param DifferentialRevisionEditor  Active editor which has just applied
+   *                                    changes to the revision.
+   * @return void
    * @task edit
    */
   public function didWriteRevision(DifferentialRevisionEditor $editor) {
@@ -270,6 +289,63 @@ abstract class DifferentialFieldSpecification {
       throw new DifferentialFieldSpecificationIncompleteException($this);
     }
     return $key;
+  }
+
+
+/* -(  Extending Commit Messages  )------------------------------------------ */
+
+
+  /**
+   * Determine if this field should appear in commit messages. You should return
+   * true if this field participates in any part of the commit message workflow,
+   * even if it is not rendered by default.
+   *
+   * If you implement this method, you must implement
+   * @{method:getCommitMessageKey} and
+   * @{method:setValueFromParsedCommitMessage}.
+   *
+   * @return bool True if this field appears in commit messages in any capacity.
+   * @task commit
+   */
+  public function shouldAppearOnCommitMessage() {
+    return false;
+  }
+
+  /**
+   * Key which identifies this field in parsed commit messages. Commit messages
+   * exist in two forms: raw textual commit messages and parsed dictionaries of
+   * fields. This method must return a unique string which identifies this field
+   * in dictionaries. Principally, this dictionary is shipped to and from arc
+   * over Conduit. Keys should be appropriate property names, like "testPlan"
+   * (not "Test Plan") and must be globally unique.
+   *
+   * You must implement this method if you return true from
+   * @{method:shouldAppearOnCommitMessage}.
+   *
+   * @return string Key which identifies the field in dictionaries.
+   * @task commit
+   */
+  public function getCommitMessageKey() {
+    throw new DifferentialFieldSpecificationIncompleteException($this);
+  }
+
+  /**
+   * Set this field's value from a value in a parsed commit message dictionary.
+   * Afterward, this field will go through the normal write workflows and the
+   * change will be permanently stored via either the storage mechanisms (if
+   * your field implements them), revision write hooks (if your field implements
+   * them) or discarded (if your field implements neither, e.g. is just a
+   * display field).
+   *
+   * You must implement this method if you return true from
+   * @{method:shouldAppearOnCommitMessage}.
+   *
+   * @param mixed Field value from a parsed commit message dictionary.
+   * @return this
+   * @task commit
+   */
+  public function setValueFromParsedCommitMessage($value) {
+    throw new DifferentialFieldSpecificationIncompleteException($this);
   }
 
 

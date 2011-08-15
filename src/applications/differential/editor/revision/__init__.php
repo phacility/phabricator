@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'applications/differential/constants/action');
 phutil_require_module('phabricator', 'applications/differential/constants/revisionstatus');
+phutil_require_module('phabricator', 'applications/differential/field/selector/base');
 phutil_require_module('phabricator', 'applications/differential/mail/ccwelcome');
 phutil_require_module('phabricator', 'applications/differential/mail/newdiff');
 phutil_require_module('phabricator', 'applications/differential/storage/auxiliaryfield');

@@ -54,4 +54,17 @@ final class DifferentialTitleFieldSpecification
     }
   }
 
+  public function shouldAppearOnCommitMessage() {
+    return true;
+  }
+
+  public function getCommitMessageKey() {
+    return 'title';
+  }
+
+  public function setValueFromParsedCommitMessage($value) {
+    $this->title = $value;
+    return $this;
+  }
+
 }

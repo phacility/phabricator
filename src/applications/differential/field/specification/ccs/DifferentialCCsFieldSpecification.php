@@ -82,4 +82,17 @@ final class DifferentialCCsFieldSpecification
     $editor->setCCPHIDs($this->ccs);
   }
 
+  public function shouldAppearOnCommitMessage() {
+    return true;
+  }
+
+  public function getCommitMessageKey() {
+    return 'ccPHIDs';
+  }
+
+  public function setValueFromParsedCommitMessage($value) {
+    $this->value = nonempty($value, array());
+    return $this;
+  }
+
 }

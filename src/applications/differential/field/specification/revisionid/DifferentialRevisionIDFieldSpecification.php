@@ -16,43 +16,23 @@
  * limitations under the License.
  */
 
-final class DifferentialSummaryFieldSpecification
+final class DifferentialRevisionIDFieldSpecification
   extends DifferentialFieldSpecification {
 
-  private $summary;
-
-  public function shouldAppearOnEdit() {
-    $this->summary = $this->getRevision()->getSummary();
-    return true;
-  }
-
-  public function setValueFromRequest(AphrontRequest $request) {
-    $this->summary = $request->getStr('summary');
-    return $this;
-  }
-
-  public function renderEditControl() {
-    return id(new AphrontFormTextAreaControl())
-      ->setLabel('Summary')
-      ->setName('summary')
-      ->setValue($this->summary);
-  }
-
-  public function willWriteRevision(DifferentialRevisionEditor $editor) {
-    $this->getRevision()->setSummary($this->summary);
-  }
+  private $id;
 
   public function shouldAppearOnCommitMessage() {
     return true;
   }
 
   public function getCommitMessageKey() {
-    return 'summary';
+    return 'revisionID';
   }
 
   public function setValueFromParsedCommitMessage($value) {
-    $this->summary = $value;
+    $this->id = $value;
     return $this;
   }
+
 
 }

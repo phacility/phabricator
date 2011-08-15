@@ -54,6 +54,9 @@ class ConduitAPI_differential_updaterevision_Method extends ConduitAPIMethod {
     }
 
     $revision = id(new DifferentialRevision())->load($request->getValue('id'));
+    if (!$revision) {
+      throw new ConduitException('ERR_BAD_REVISION');
+    }
 
     if ($request->getUser()->getPHID() !== $revision->getAuthorPHID()) {
       throw new ConduitException('ERR_WRONG_USER');

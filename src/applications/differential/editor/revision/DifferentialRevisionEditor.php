@@ -70,15 +70,36 @@ class DifferentialRevisionEditor {
 
     $revision = $this->revision;
 
-    $revision->setTitle((string)$fields['title']);
-    $revision->setSummary((string)$fields['summary']);
-    $revision->setTestPlan((string)$fields['testPlan']);
-    $revision->setBlameRevision((string)$fields['blameRevision']);
-    $revision->setRevertPlan((string)$fields['revertPlan']);
+    $aux_fields = DifferentialFieldSelector::newSelector()
+      ->getFieldSpecifications();
 
-    $this->setReviewers($fields['reviewerPHIDs']);
-    $this->setCCPHIDs($fields['ccPHIDs']);
-    $this->setTasks($fields['tasks']);
+    foreach ($aux_fields as $key => $aux_field) {
+      $aux_field->setRevision($revision);
+      if (!$aux_field->shouldAppearOnCommitMessage()) {
+        unset($aux_fields[$key]);
+      }
+    }
+
+    $aux_fields = mpull($aux_fields, null, 'getCommitMessageKey');
+
+    foreach ($fields as $field => $value) {
+
+      if ($field == 'tasks') {
+        // TODO: Deprecate once this can be fully supported with custom fields.
+        // This is just to prevent a backcompat break for Facebook.
+        $this->setTasks($value);
+        continue;
+      }
+
+      if (empty($aux_fields[$field])) {
+        throw new Exception(
+          "Parsed commit message contains unrecognized field '{$field}'.");
+      }
+      $aux_fields[$field]->setValueFromParsedCommitMessage($value);
+    }
+
+    $aux_fields = array_values($aux_fields);
+    $this->setAuxiliaryFields($aux_fields);
   }
 
   public function setAuxiliaryFields(array $auxiliary_fields) {

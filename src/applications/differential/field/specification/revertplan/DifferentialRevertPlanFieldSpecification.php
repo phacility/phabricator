@@ -78,4 +78,17 @@ final class DifferentialRevertPlanFieldSpecification
     return $this->value;
   }
 
+  public function shouldAppearOnCommitMessage() {
+    return true;
+  }
+
+  public function getCommitMessageKey() {
+    return 'revertPlan';
+  }
+
+  public function setValueFromParsedCommitMessage($value) {
+    $this->value = $value;
+    return $this;
+  }
+
 }

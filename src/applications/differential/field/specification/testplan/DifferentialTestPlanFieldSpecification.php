@@ -53,4 +53,18 @@ final class DifferentialTestPlanFieldSpecification
     }
   }
 
+  public function shouldAppearOnCommitMessage() {
+    return true;
+  }
+
+  public function getCommitMessageKey() {
+    return 'testPlan';
+  }
+
+  public function setValueFromParsedCommitMessage($value) {
+    $this->plan = $value;
+    return $this;
+  }
+
+
 }

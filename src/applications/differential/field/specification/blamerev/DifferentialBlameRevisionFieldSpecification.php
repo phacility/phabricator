@@ -78,4 +78,17 @@ final class DifferentialBlameRevisionFieldSpecification
     return $this->value;
   }
 
+  public function shouldAppearOnCommitMessage() {
+    return true;
+  }
+
+  public function getCommitMessageKey() {
+    return 'blameRevision';
+  }
+
+  public function setValueFromParsedCommitMessage($value) {
+    $this->value = $value;
+    return $this;
+  }
+
 }

@@ -92,5 +92,17 @@ final class DifferentialReviewersFieldSpecification
     $editor->setReviewers($this->reviewers);
   }
 
+  public function shouldAppearOnCommitMessage() {
+    return true;
+  }
+
+  public function getCommitMessageKey() {
+    return 'reviewerPHIDs';
+  }
+
+  public function setValueFromParsedCommitMessage($value) {
+    $this->reviewers = nonempty($value, array());
+    return $this;
+  }
 
 }
