@@ -207,6 +207,16 @@ return array(
   // PhabricatorMailReplyHandler (and possibly of ManiphestReplyHandler).
   'metamta.maniphest.reply-handler' => 'ManiphestReplyHandler',
 
+  // If you don't want phabricator to take up an entire domain
+  // (or subdomain for that matter), you can use this and set a common
+  // prefix for mail sent by phabricator. It will make use of the fact that
+  // a mail-address such as phabricator+D123+1hjk213h@example.com will be
+  // delivered to the phabricator users mailbox.
+  // Set this to the left part of the email address and it well get
+  // prepended to all outgoing mail. If you want to use e.g.
+  // 'phabricator@example.com' this should be set to 'phabricator'.
+  'metamta.single-reply-handler-prefix' => null,
+
   // Prefix prepended to mail sent by Maniphest. You can change this to
   // distinguish between testing and development installs, for example.
   'metamta.maniphest.subject-prefix' => '[Maniphest]',

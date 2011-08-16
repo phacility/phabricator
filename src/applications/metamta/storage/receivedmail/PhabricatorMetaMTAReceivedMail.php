@@ -92,8 +92,16 @@ class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     // We've already stripped this, so look for an object address which has
     // a format like: D291+291+b0a41ca848d66dcc@example.com
     $matches = null;
+    $single_handle_prefix = PhabricatorEnv::getEnvConfig(
+      'metamta.single-reply-handler-prefix');
+
+    $prefixPattern = ($single_handle_prefix)
+      ? preg_quote($single_handle_prefix, '/') . '\+'
+      : '';
+    $pattern = "/^{$prefixPattern}((?:D|T)\d+)\+([\w]+)\+([a-f0-9]{16})@/U";
+
     $ok = preg_match(
-      '/^((?:D|T)\d+)\+([\w]+)\+([a-f0-9]{16})@/U',
+      $pattern,
       $to,
       $matches);
 
