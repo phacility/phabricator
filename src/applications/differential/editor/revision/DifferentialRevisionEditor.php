@@ -83,15 +83,13 @@ class DifferentialRevisionEditor {
     $aux_fields = mpull($aux_fields, null, 'getCommitMessageKey');
 
     foreach ($fields as $field => $value) {
-
-      if ($field == 'tasks') {
-        // TODO: Deprecate once this can be fully supported with custom fields.
-        // This is just to prevent a backcompat break for Facebook.
-        $this->setTasks($value);
-        continue;
-      }
-
       if (empty($aux_fields[$field])) {
+        if ($field == 'tasks') {
+          // TODO: Deprecate once this can be fully supported with custom
+          // fields. This is just to prevent a backcompat break for Facebook.
+          $this->setTasks($value);
+          continue;
+        }
         throw new Exception(
           "Parsed commit message contains unrecognized field '{$field}'.");
       }
@@ -253,7 +251,7 @@ class DifferentialRevisionEditor {
       $xscript_phid = $xscript->getPHID();
       $xscript_header = $xscript->getXHeraldRulesHeader();
 
-      HeraldTranscript::saveXHeraldRulesHeader(
+      $xscript_header = HeraldTranscript::saveXHeraldRulesHeader(
         $revision->getPHID(),
         $xscript_header);
 

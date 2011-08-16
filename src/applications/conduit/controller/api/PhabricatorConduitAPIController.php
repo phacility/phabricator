@@ -124,6 +124,7 @@ class PhabricatorConduitAPIController
         list($error_code, $error_info) = $auth_error;
       }
     } catch (Exception $ex) {
+      phlog($ex);
       $result = null;
       $error_code = 'ERR-CONDUIT-CORE';
       $error_info = $ex->getMessage();

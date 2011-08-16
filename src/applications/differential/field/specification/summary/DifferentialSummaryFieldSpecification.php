@@ -19,7 +19,7 @@
 final class DifferentialSummaryFieldSpecification
   extends DifferentialFieldSpecification {
 
-  private $summary;
+  private $summary = '';
 
   public function shouldAppearOnEdit() {
     $this->summary = $this->getRevision()->getSummary();
@@ -51,7 +51,7 @@ final class DifferentialSummaryFieldSpecification
   }
 
   public function setValueFromParsedCommitMessage($value) {
-    $this->summary = $value;
+    $this->summary = (string)$value;
     return $this;
   }
 

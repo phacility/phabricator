@@ -60,6 +60,13 @@ class HeraldTranscript extends HeraldDAO {
   }
 
   public static function saveXHeraldRulesHeader($phid, $header) {
+
+    // Combine any existing header with the new header, listing all rules
+    // which have ever triggered for this object.
+    $header = self::combineXHeraldRulesHeaders(
+      self::loadXHeraldRulesHeader($phid),
+      $header);
+
     queryfx(
       id(new HeraldTranscript())->establishConnection('w'),
       'INSERT INTO %T (phid, header) VALUES (%s, %s)
@@ -67,6 +74,16 @@ class HeraldTranscript extends HeraldDAO {
       self::TABLE_SAVED_HEADER,
       $phid,
       $header);
+
+    return $header;
+  }
+
+  private static function combineXHeraldRulesHeaders($u, $v) {
+    $u = preg_split('/[, ]+/', $u);
+    $v = preg_split('/[, ]+/', $v);
+
+    $combined = array_unique(array_filter(array_merge($u, $v)));
+    return implode(', ', $combined);
   }
 
   public static function loadXHeraldRulesHeader($phid) {

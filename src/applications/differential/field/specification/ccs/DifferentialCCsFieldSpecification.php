@@ -19,7 +19,7 @@
 final class DifferentialCCsFieldSpecification
   extends DifferentialFieldSpecification {
 
-  private $ccs;
+  private $ccs = array();
 
   public function shouldAppearOnRevisionView() {
     return true;

@@ -17,6 +17,7 @@ phutil_require_module('phabricator', 'storage/queryfx');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/layout/panel');
 
+phutil_require_module('phutil', 'error');
 phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'parser/json');
 phutil_require_module('phutil', 'utils');
