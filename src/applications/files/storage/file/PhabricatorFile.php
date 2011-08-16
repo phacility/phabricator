@@ -48,7 +48,7 @@ class PhabricatorFile extends PhabricatorFileDAO {
 
     $err = idx($spec, 'error');
     if ($err) {
-      throw new Exception("File upload failed with error '{$err}'.");
+      throw new PhabricatorFileUploadException($err);
     }
 
     $tmp_name = idx($spec, 'tmp_name');

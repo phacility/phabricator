@@ -420,6 +420,7 @@ phutil_register_library_map(array(
     'PhabricatorFileTransformController' => 'applications/files/controller/transform',
     'PhabricatorFileURI' => 'applications/files/uri',
     'PhabricatorFileUploadController' => 'applications/files/controller/upload',
+    'PhabricatorFileUploadException' => 'applications/files/exception/upload',
     'PhabricatorFileViewController' => 'applications/files/controller/view',
     'PhabricatorGarbageCollectorDaemon' => 'infrastructure/daemon/garbagecollector',
     'PhabricatorGoodForNothingWorker' => 'infrastructure/daemon/workers/worker/goodfornothing',

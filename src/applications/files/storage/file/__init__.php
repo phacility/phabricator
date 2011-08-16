@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/files/exception/upload');
 phutil_require_module('phabricator', 'applications/files/storage/base');
 phutil_require_module('phabricator', 'applications/files/uri');
 phutil_require_module('phabricator', 'applications/phid/constants');
