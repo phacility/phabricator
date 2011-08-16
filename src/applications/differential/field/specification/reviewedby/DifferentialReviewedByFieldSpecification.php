@@ -21,6 +21,32 @@ final class DifferentialReviewedByFieldSpecification
 
   private $reviewedBy;
 
+  protected function didSetRevision() {
+    $this->reviewedBy = array();
+    $revision = $this->getRevision();
+
+    $status = $revision->getStatus();
+    if ($status == DifferentialRevisionStatus::ACCEPTED ||
+        $status == DifferentialRevisionStatus::COMMITTED) {
+      $reviewer = null;
+      $comments = $revision->loadComments();
+      foreach ($comments as $comment) {
+        $action = $comment->getAction();
+        if ($action == DifferentialAction::ACTION_ACCEPT) {
+          $reviewer = $comment->getAuthorPHID();
+        } else if ($action == DifferentialAction::ACTION_REJECT ||
+                   $action == DifferentialAction::ACTION_ABANDON ||
+                   $action == DifferentialAction::ACTION_RETHINK) {
+          $reviewer = null;
+        }
+      }
+
+      if ($reviewer) {
+        $this->reviewedBy = array($reviewer);
+      }
+    }
+  }
+
   public function shouldAppearOnCommitMessage() {
     return true;
   }
@@ -34,5 +60,33 @@ final class DifferentialReviewedByFieldSpecification
     return $this;
   }
 
+  public function shouldAppearOnCommitMessageTemplate() {
+    return false;
+  }
+
+  public function renderLabelForCommitMessage() {
+    return 'Reviewed By';
+  }
+
+  public function getRequiredHandlePHIDsForCommitMessage() {
+    return $this->reviewedBy;
+  }
+
+  public function renderValueForCommitMessage($is_edit) {
+    if ($is_edit) {
+      return null;
+    }
+
+    if (!$this->reviewedBy) {
+      return null;
+    }
+
+    $names = array();
+    foreach ($this->reviewedBy as $phid) {
+      $names[] = $this->getHandle($phid)->getName();
+    }
+
+    return implode(', ', $names);
+  }
 
 }

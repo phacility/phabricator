@@ -22,8 +22,11 @@ final class DifferentialSummaryFieldSpecification
   private $summary = '';
 
   public function shouldAppearOnEdit() {
-    $this->summary = $this->getRevision()->getSummary();
     return true;
+  }
+
+  protected function didSetRevision() {
+    $this->summary = $this->getRevision()->getSummary();
   }
 
   public function setValueFromRequest(AphrontRequest $request) {
@@ -53,6 +56,18 @@ final class DifferentialSummaryFieldSpecification
   public function setValueFromParsedCommitMessage($value) {
     $this->summary = (string)$value;
     return $this;
+  }
+
+  public function shouldOverwriteWhenCommitMessageIsEdited() {
+    return true;
+  }
+
+  public function renderLabelForCommitMessage() {
+    return 'Summary';
+  }
+
+  public function renderValueForCommitMessage($is_edit) {
+    return $this->summary;
   }
 
 }

@@ -69,6 +69,7 @@ class DifferentialRevisionEditor {
   public function copyFieldsFromConduit(array $fields) {
 
     $revision = $this->revision;
+    $revision->loadRelationships();
 
     $aux_fields = DifferentialFieldSelector::newSelector()
       ->getFieldSpecifications();

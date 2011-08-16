@@ -21,6 +21,10 @@ final class DifferentialRevisionIDFieldSpecification
 
   private $id;
 
+  protected function didSetRevision() {
+    $this->id = $this->getRevision()->getID();
+  }
+
   public function shouldAppearOnCommitMessage() {
     return true;
   }
@@ -32,6 +36,14 @@ final class DifferentialRevisionIDFieldSpecification
   public function setValueFromParsedCommitMessage($value) {
     $this->id = $value;
     return $this;
+  }
+
+  public function renderLabelForCommitMessage() {
+    return 'Differential Revision';
+  }
+
+  public function renderValueForCommitMessage($is_edit) {
+    return $this->id;
   }
 
 

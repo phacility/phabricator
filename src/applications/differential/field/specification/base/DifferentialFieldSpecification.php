@@ -348,6 +348,71 @@ abstract class DifferentialFieldSpecification {
     throw new DifferentialFieldSpecificationIncompleteException($this);
   }
 
+  /**
+   * In revision control systems which read revision information from the
+   * working copy, the user may edit the commit message outside of invoking
+   * "arc diff --edit". When they do this, only some fields (those fields which
+   * can not be edited by other users) are safe to overwrite. For instance, it
+   * is fine to overwrite "Summary" because no one else can edit it, but not
+   * to overwrite "Reviewers" because reviewers may have been added or removed
+   * via the web interface.
+   *
+   * If a field is safe to overwrite when edited in a working copy commit
+   * message, return true. If the authoritative value should always be used,
+   * return false. By default, fields can not be overwritten.
+   *
+   * @return bool True to indicate the field is save to overwrite.
+   * @task commit
+   */
+  public function shouldOverwriteWhenCommitMessageIsEdited() {
+    return false;
+  }
+
+  /**
+   * Return true if this field should be suggested to the user during
+   * "arc diff --edit". Basicially, return true if the field is something the
+   * user might want to fill out (like "Summary"), and false if it's a
+   * system/display/readonly field (like "Differential Revision"). If this
+   * method returns true, the field will be rendered even if it has no value
+   * during edit and update operations.
+   *
+   * @return bool True to indicate the field should appear in the edit template.
+   * @task commit
+   */
+  public function shouldAppearOnCommitMessageTemplate() {
+    return true;
+  }
+
+  /**
+   * Render a human-readable label for this field, like "Summary" or
+   * "Test Plan". This is distinct from the commit message key, but generally
+   * they should be similar.
+   *
+   * @return string Human-readable field label for commit messages.
+   * @task commit
+   */
+  public function renderLabelForCommitMessage() {
+    throw new DifferentialFieldSpecificationIncompleteException($this);
+  }
+
+  /**
+   * Render a human-readable value for this field when it appears in commit
+   * messages (for instance, lists of users should be rendered as user names).
+   *
+   * The ##$is_edit## parameter allows you to distinguish between commit
+   * messages being rendered for editing and those being rendered for amending
+   * or commit. Some fields may decline to render a value in one mode (for
+   * example, "Reviewed By" appears only when doing commit/amend, not while
+   * editing).
+   *
+   * @param bool True if the message is being edited.
+   * @return string Human-readable field value.
+   * @task commit
+   */
+  public function renderValueForCommitMessage($is_edit) {
+    throw new DifferentialFieldSpecificationIncompleteException($this);
+  }
+
 
 /* -(  Loading Additional Data  )-------------------------------------------- */
 
@@ -402,6 +467,21 @@ abstract class DifferentialFieldSpecification {
     return $this->getRequiredHandlePHIDs();
   }
 
+  /**
+   * Specify which @{class:PhabricatorObjectHandles} need to be loaded for your
+   * field to render correctly on the commit message interface.
+   *
+   * This is a more specific version of @{method:getRequiredHandlePHIDs} which
+   * can be overridden to improve field performance by loading only data you
+   * need.
+   *
+   * @return list List of PHIDs to load handles for.
+   * @task load
+   */
+  public function getRequiredHandlePHIDsForCommitMessage() {
+    return $this->getRequiredHandlePHIDs();
+  }
+
 
   /**
    * Specify which diff properties this field needs to load.
@@ -422,8 +502,17 @@ abstract class DifferentialFieldSpecification {
    */
   final public function setRevision(DifferentialRevision $revision) {
     $this->revision = $revision;
+    $this->didSetRevision();
     return $this;
   }
+
+  /**
+   * @task context
+   */
+  protected function didSetRevision() {
+    return;
+  }
+
 
   /**
    * @task context

@@ -23,8 +23,11 @@ final class DifferentialTestPlanFieldSpecification
   private $error = true;
 
   public function shouldAppearOnEdit() {
-    $this->plan = $this->getRevision()->getTestPlan();
     return true;
+  }
+
+  protected function didSetRevision() {
+    $this->plan = $this->getRevision()->getTestPlan();
   }
 
   public function setValueFromRequest(AphrontRequest $request) {
@@ -64,6 +67,18 @@ final class DifferentialTestPlanFieldSpecification
   public function setValueFromParsedCommitMessage($value) {
     $this->plan = $value;
     return $this;
+  }
+
+  public function shouldOverwriteWhenCommitMessageIsEdited() {
+    return true;
+  }
+
+  public function renderLabelForCommitMessage() {
+    return 'Test Plan';
+  }
+
+  public function renderValueForCommitMessage($is_edit) {
+    return $this->plan;
   }
 
 

@@ -53,11 +53,18 @@ final class DifferentialCCsFieldSpecification
   }
 
   public function shouldAppearOnEdit() {
-    $this->ccs = $this->getCCPHIDs();
     return true;
   }
 
+  protected function didSetRevision() {
+    $this->ccs = $this->getCCPHIDs();
+  }
+
   public function getRequiredHandlePHIDsForRevisionEdit() {
+    return $this->ccs;
+  }
+
+  public function getRequiredHandlePHIDsForCommitMessage() {
     return $this->ccs;
   }
 
@@ -93,6 +100,22 @@ final class DifferentialCCsFieldSpecification
   public function setValueFromParsedCommitMessage($value) {
     $this->value = nonempty($value, array());
     return $this;
+  }
+
+  public function renderLabelForCommitMessage() {
+    return 'CC';
+  }
+
+  public function renderValueForCommitMessage($is_edit) {
+    if (!$this->ccs) {
+      return null;
+    }
+
+    $names = array();
+    foreach ($this->ccs as $phid) {
+      $names[] = $this->getHandle($phid)->getName();
+    }
+    return implode(', ', $names);
   }
 
 }

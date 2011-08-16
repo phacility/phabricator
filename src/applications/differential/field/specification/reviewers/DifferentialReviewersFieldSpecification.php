@@ -54,8 +54,11 @@ final class DifferentialReviewersFieldSpecification
   }
 
   public function shouldAppearOnEdit() {
-    $this->reviewers = $this->getReviewerPHIDs();
     return true;
+  }
+
+  protected function didSetRevision() {
+    $this->reviewers = $this->getReviewerPHIDs();
   }
 
   public function getRequiredHandlePHIDsForRevisionEdit() {
@@ -103,6 +106,27 @@ final class DifferentialReviewersFieldSpecification
   public function setValueFromParsedCommitMessage($value) {
     $this->reviewers = nonempty($value, array());
     return $this;
+  }
+
+  public function renderLabelForCommitMessage() {
+    return 'Reviewers';
+  }
+
+  public function getRequiredHandlePHIDsForCommitMessage() {
+    return $this->reviewers;
+  }
+
+  public function renderValueForCommitMessage($is_edit) {
+    if (!$this->reviewers) {
+      return null;
+    }
+
+    $names = array();
+    foreach ($this->reviewers as $phid) {
+      $names[] = $this->getHandle($phid)->getName();
+    }
+
+    return implode(', ', $names);
   }
 
 }

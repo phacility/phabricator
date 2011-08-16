@@ -51,57 +51,87 @@ class ConduitAPI_differential_getcommitmessage_Method extends ConduitAPIMethod {
       throw new ConduitException('ERR_NOT_FOUND');
     }
 
-    $edit = $request->getValue('edit');
-    $mode = $edit
-      ? DifferentialCommitMessageData::MODE_EDIT
-      : DifferentialCommitMessageData::MODE_AMEND;
+    $revision->loadRelationships();
 
-    $message_data = new DifferentialCommitMessageData($revision, $mode);
-    $message_data->prepare();
+    $is_edit = $request->getValue('edit');
 
-    if ($mode == DifferentialCommitMessageData::MODE_EDIT) {
+    $aux_fields = DifferentialFieldSelector::newSelector()
+      ->getFieldSpecifications();
+
+    foreach ($aux_fields as $key => $aux_field) {
+      $aux_field->setRevision($revision);
+      if (!$aux_field->shouldAppearOnCommitMessage()) {
+        unset($aux_fields[$key]);
+      }
+    }
+
+    $aux_fields = DifferentialAuxiliaryField::loadFromStorage(
+      $revision,
+      $aux_fields);
+    $aux_fields = mpull($aux_fields, null, 'getCommitMessageKey');
+
+    if ($is_edit) {
       $fields = $request->getValue('fields');
-      if ($fields) {
+      foreach ($fields as $field => $value) {
 
-        static $simple_fields = array(
-          'title'           => 'Title',
-          'summary'         => 'Summary',
-          'testPlan'        => 'Test Plan',
-          'blameRevision'   => 'Blame Revision',
-          'revertPlan'      => 'Revert Plan',
-          'tasks'           => 'Tasks',
-        );
-
-        foreach ($fields as $field => $value) {
-          if (isset($simple_fields[$field])) {
-            $message_data->setField($simple_fields[$field], $value);
-          } else {
-            $overwrite = true;
-            static $overwrite_map = array(
-              'reviewerPHIDs' => 'Reviewers',
-              'ccPHIDs' => 'CC',
-              'taskPHIDs' => 'Tasks',
-            );
-            switch ($field) {
-              case 'reviewerPHIDs':
-              case 'ccPHIDs':
-                $handles = id(new PhabricatorObjectHandleData($value))
-                  ->loadHandles($handles);
-                $value = implode(', ', mpull($handles, 'getName'));
-                break;
-              default:
-                $overwrite = false;
-                break;
-            }
-            if ($overwrite) {
-              $message_data->setField($overwrite_map[$field], $value);
-            }
+        $aux_field = idx($aux_fields, $field);
+        if (!$aux_field) {
+          if ($field == 'tasks') {
+            // TODO: Remove, backcompat for Facebook.
+            continue;
           }
+          throw new Exception(
+            "Commit message includes field '{$field}' which does not ".
+            "correspond to any configured field.");
+        }
+
+        if ($aux_field->shouldOverwriteWhenCommitMessageIsEdited()) {
+          $aux_field->setValueFromParsedCommitMessage($value);
         }
       }
     }
 
-    $commit_message = $message_data->getCommitMessage();
+
+    $aux_phids = array();
+    foreach ($aux_fields as $field_key => $field) {
+      $aux_phids[$field_key] = $field->getRequiredHandlePHIDsForCommitMessage();
+    }
+    $phids = array_unique(array_mergev($aux_phids));
+    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    foreach ($aux_fields as $field_key => $field) {
+      $field->setHandles(array_select_keys($handles, $aux_phids[$field_key]));
+    }
+
+
+    $commit_message = array();
+    foreach ($aux_fields as $field_key => $field) {
+      $value = $field->renderValueForCommitMessage($is_edit);
+      $label = $field->renderLabelForCommitMessage();
+      if ($value === null || !strlen($value)) {
+        if ($field_key === 'title') {
+          $commit_message[] = '<<Enter Revision Title>>';
+        } else {
+          if ($field->shouldAppearOnCommitMessageTemplate() && $is_edit) {
+            $commit_message[] = $label.': ';
+          }
+        }
+      } else {
+        if ($field_key === 'title') {
+          $commit_message[] = $value;
+        } else {
+          $value = str_replace(
+            array("\r\n", "\r"),
+            array("\n",   "\n"),
+            $value);
+          if (strpos($value, "\n") !== false) {
+            $commit_message[] = "{$label}:\n{$value}";
+          } else {
+            $commit_message[] = "{$label}: {$value}";
+          }
+        }
+      }
+    }
+    $commit_message = implode("\n\n", $commit_message);
 
     return wordwrap($commit_message, 80);
   }

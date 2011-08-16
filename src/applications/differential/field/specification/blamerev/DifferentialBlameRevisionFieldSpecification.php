@@ -91,4 +91,16 @@ final class DifferentialBlameRevisionFieldSpecification
     return $this;
   }
 
+  public function shouldOverwriteWhenCommitMessageIsEdited() {
+    return true;
+  }
+
+  public function renderLabelForCommitMessage() {
+    return 'Blame Revision';
+  }
+
+  public function renderValueForCommitMessage($is_edit) {
+    return $this->value;
+  }
+
 }

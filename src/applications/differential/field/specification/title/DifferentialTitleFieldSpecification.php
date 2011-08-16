@@ -23,8 +23,11 @@ final class DifferentialTitleFieldSpecification
   private $error = true;
 
   public function shouldAppearOnEdit() {
-    $this->title = $this->getRevision()->getTitle();
     return true;
+  }
+
+  protected function didSetRevision() {
+    $this->title = $this->getRevision()->getTitle();
   }
 
   public function setValueFromRequest(AphrontRequest $request) {
@@ -65,6 +68,18 @@ final class DifferentialTitleFieldSpecification
   public function setValueFromParsedCommitMessage($value) {
     $this->title = $value;
     return $this;
+  }
+
+  public function shouldOverwriteWhenCommitMessageIsEdited() {
+    return true;
+  }
+
+  public function renderLabelForCommitMessage() {
+    return 'Title';
+  }
+
+  public function renderValueForCommitMessage($is_edit) {
+    return $this->title;
   }
 
 }

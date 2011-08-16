@@ -91,4 +91,16 @@ final class DifferentialRevertPlanFieldSpecification
     return $this;
   }
 
+  public function shouldOverwriteWhenCommitMessageIsEdited() {
+    return true;
+  }
+
+  public function renderLabelForCommitMessage() {
+    return 'Revert Plan';
+  }
+
+  public function renderValueForCommitMessage($is_edit) {
+    return $this->value;
+  }
+
 }
