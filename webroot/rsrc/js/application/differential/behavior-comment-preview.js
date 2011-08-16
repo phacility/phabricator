@@ -47,5 +47,5 @@ JX.behavior('differential-feedback-preview', function(config) {
     null,
     refreshInlinePreview);
 
-  refreshInlinePreview();
+  setTimeout(refreshInlinePreview, 0);
 });
