@@ -632,6 +632,8 @@ class DifferentialChangesetParser {
     try {
       $changeset = new DifferentialChangeset();
       $conn_w = $changeset->establishConnection('w');
+
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
       queryfx(
         $conn_w,
         'INSERT INTO %T (id, cache, dateCreated) VALUES (%d, %s, %d)
