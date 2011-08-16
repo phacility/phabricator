@@ -56,7 +56,8 @@ class AphrontDefaultApplicationConfiguration
         '(?P<view>info)/(?P<phid>[^/]+)/' => 'PhabricatorFileViewController',
         '(?P<view>view)/(?P<phid>[^/]+)/' => 'PhabricatorFileViewController',
         '(?P<view>download)/(?P<phid>[^/]+)/' => 'PhabricatorFileViewController',
-        'alt/(?<key>[^/]+)/(?<phid>[^/]+)/' => 'PhabricatorFileAltViewController',
+        'alt/(?P<key>[^/]+)/(?P<phid>[^/]+)/'
+          => 'PhabricatorFileAltViewController',
         'macro/' => array(
           '$' => 'PhabricatorFileMacroListController',
           'edit/(?:(?P<id>\d+)/)?$' => 'PhabricatorFileMacroEditController',

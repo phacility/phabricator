@@ -30,8 +30,7 @@ JX.behavior('differential-feedback-preview', function(config) {
   JX.DOM.listen(content, 'keydown', null, trigger);
   JX.DOM.listen(action,  'change',  null, trigger);
 
-  request.start();
-
+  setTimeout(function() { request.start(); }, 0);
 
 
   function refreshInlinePreview() {
