@@ -502,6 +502,7 @@ class DifferentialRevisionViewController extends DifferentialController {
   }
 
   private function updateViewTime($user_phid, $revision_phid) {
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
     $view_time =
       id(new DifferentialViewTime())
         ->setViewerPHID($user_phid)
