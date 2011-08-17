@@ -25,6 +25,11 @@ class ConduitAPI_conduit_getcertificate_Method extends ConduitAPIMethod {
     return false;
   }
 
+  public function shouldAllowUnguardedWrites() {
+    // This method performs logging and is on the authentication pathway.
+    return true;
+  }
+
   public function getMethodDescription() {
     return "Retrieve certificate information for a user.";
   }
@@ -91,6 +96,7 @@ class ConduitAPI_conduit_getcertificate_Method extends ConduitAPIMethod {
   }
 
   private function logFailure() {
+
     $log = id(new PhabricatorUserLog())
       ->setUserPHID('-')
       ->setAction(PhabricatorUserLog::ACTION_CONDUIT_CERTIFICATE_FAILURE)
