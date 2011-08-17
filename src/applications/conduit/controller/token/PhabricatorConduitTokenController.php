@@ -25,6 +25,11 @@ class PhabricatorConduitTokenController extends PhabricatorConduitController {
 
     $user = $this->getRequest()->getUser();
 
+    // Ideally we'd like to verify this, but it's fine to leave it unguarded
+    // for now and verifying it would need some Ajax junk or for the user to
+    // click a button or similar.
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+
     $old_token = id(new PhabricatorConduitCertificateToken())
       ->loadOneWhere(
         'userPHID = %s',
