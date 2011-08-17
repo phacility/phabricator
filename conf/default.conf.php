@@ -360,6 +360,10 @@ return array(
   // behalf, silencing the warning.
   'phabricator.timezone'        => null,
 
+  // When unhandled exceptions occur, stack traces are hidden by default.
+  // You can enable traces for development to make it easier to debug problems.
+  'phabricator.show-stack-traces' => false,
+
 
 // -- Files ----------------------------------------------------------------- //
 

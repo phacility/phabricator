@@ -69,3 +69,22 @@
 .aphront-exception-dialog .aphront-dialog-head {
   background: #aa0000;
 }
+
+.aphront-exception-dialog .exception-message {
+  font-size: 14px;
+  background: #efefef;
+  padding: 1em;
+}
+
+.aphront-exception-dialog .exception-trace {
+  margin-top: 1em;
+  padding: .5em 1em;
+}
+
+.aphront-exception-dialog .exception-trace-header {
+  font-size: 11px;
+  color: #666666;
+  border-bottom: 1px solid #aaaaaa;
+  padding-bottom: .5em;
+  margin-bottom: .5em;
+}

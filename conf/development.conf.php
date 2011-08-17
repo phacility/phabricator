@@ -18,7 +18,8 @@
 
 return array(
 
-  'darkconsole.enabled' => true,
-  'celerity.force-disk-reads' => true,
+  'darkconsole.enabled'           => true,
+  'celerity.force-disk-reads'     => true,
+  'phabricator.show-stack-traces' => true,
 
 ) + phabricator_read_config_file('default');

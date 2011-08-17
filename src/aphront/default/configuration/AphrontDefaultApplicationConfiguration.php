@@ -389,14 +389,16 @@ class AphrontDefaultApplicationConfiguration
     $class    = phutil_escape_html(get_class($ex));
     $message  = phutil_escape_html($ex->getMessage());
 
-    $string = (string)$ex;
-    $string = phutil_escape_html($string);
-    $string = str_replace("\n", '<br />', $string);
+    if (PhabricatorEnv::getEnvConfig('phabricator.show-stack-traces')) {
+      $trace = $this->renderStackTrace($ex->getTrace());
+    } else {
+      $trace = null;
+    }
 
     $content =
       '<div class="aphront-unhandled-exception">'.
-        '<h1>Unhandled Exception "'.$class.'": '.$message.'</h1>'.
-        '<code>'.$string.'</code>'.
+        '<div class="exception-message">'.$message.'</div>'.
+        $trace.
       '</div>';
 
     $user = $this->getRequest()->getUser();
@@ -407,11 +409,14 @@ class AphrontDefaultApplicationConfiguration
 
     $dialog = new AphrontDialogView();
     $dialog
-      ->setTitle('Exception!')
+      ->setTitle('Unhandled Exception ("'.$class.'")')
       ->setClass('aphront-exception-dialog')
       ->setUser($user)
-      ->appendChild($content)
-      ->addCancelButton('/');
+      ->appendChild($content);
+
+    if ($this->getRequest()->isAjax()) {
+      $dialog->addCancelButton('/', 'Close');
+    }
 
     $response = new AphrontDialogResponse();
     $response->setDialog($dialog);
@@ -478,6 +483,95 @@ class AphrontDefaultApplicationConfiguration
       array(
         'uri' => $uri,
       ));
+  }
+
+  private function renderStackTrace($trace) {
+
+    $libraries = PhutilBootloader::getInstance()->getAllLibraries();
+
+    // TODO: Make this configurable?
+    $host = 'https://secure.phabricator.com';
+
+    $browse = array(
+      'arcanist' =>
+        $host.'/diffusion/ARC/browse/origin:master/src/',
+      'phutil' =>
+        $host.'/diffusion/PHU/browse/origin:master/src/',
+      'phabricator' =>
+        $host.'/diffusion/P/browse/origin:master/src/',
+    );
+
+    $rows = array();
+    $depth = count($trace);
+    foreach ($trace as $part) {
+      $lib = null;
+      $file = $part['file'];
+      $relative = $file;
+      foreach ($libraries as $library) {
+        $root = phutil_get_library_root($library);
+        if (Filesystem::isDescendant($file, $root)) {
+          $lib = $library;
+          $relative = Filesystem::readablePath($file, $root);
+          break;
+        }
+      }
+
+      $where = '';
+      if (isset($part['class'])) {
+        $where .= $part['class'].'::';
+      }
+      if (isset($part['function'])) {
+        $where .= $part['function'].'()';
+      }
+
+      if (isset($browse[$lib])) {
+        $file_name = phutil_render_tag(
+          'a',
+          array(
+            'href' => $browse[$lib].$relative.'$'.$part['line'],
+            'title' => $file,
+            'target' => '_blank',
+          ),
+          phutil_escape_html($relative));
+      } else {
+        $file_name = phutil_render_tag(
+          'span',
+          array(
+            'title' => $file,
+          ),
+          phutil_escape_html($relative));
+      }
+      $file_name = $file_name.' : '.(int)$part['line'];
+
+
+      $rows[] = array(
+        $depth--,
+        phutil_escape_html($lib),
+        $file_name,
+        phutil_escape_html($where),
+      );
+    }
+    $table = new AphrontTableView($rows);
+    $table->setHeaders(
+      array(
+        'Depth',
+        'Library',
+        'File',
+        'Where',
+      ));
+    $table->setColumnClasses(
+      array(
+        'n',
+        '',
+        '',
+        'wide',
+      ));
+
+    return
+      '<div class="exception-trace">'.
+        '<div class="exception-trace-header">Stack Trace</div>'.
+        $table->render().
+      '</div>';
   }
 
 }
