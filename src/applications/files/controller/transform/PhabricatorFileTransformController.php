@@ -49,6 +49,10 @@ class PhabricatorFileTransformController extends PhabricatorFileController {
       return $this->buildDefaultTransformation($file);
     }
 
+    // We're essentially just building a cache here and don't need CSRF
+    // protection.
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+
     switch ($this->transform) {
       case 'thumb-160x120':
         $xformed_file = $this->executeThumbTransform($file, 160, 120);
