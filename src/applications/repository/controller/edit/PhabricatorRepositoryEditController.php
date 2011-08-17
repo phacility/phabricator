@@ -48,7 +48,10 @@ class PhabricatorRepositoryEditController
       if (!$repository->getDetail('github-token')) {
         $token = substr(base64_encode(Filesystem::readRandomBytes(8)), 0, 8);
         $repository->setDetail('github-token', $token);
+
+        $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
         $repository->save();
+        unset($unguarded);
       }
 
       $views['github'] = 'GitHub';
