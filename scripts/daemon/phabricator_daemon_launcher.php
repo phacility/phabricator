@@ -24,6 +24,17 @@ require_once $root.'/scripts/__init_env__.php';
 phutil_require_module('phabricator', 'infrastructure/daemon/control');
 $control = new PhabricatorDaemonControl();
 
+must_have_extension('pcntl');
+must_have_extension('posix');
+
+function must_have_extension($ext) {
+  if (!extension_loaded($ext)) {
+    echo "ERROR: The PHP extension '{$ext}' is not installed. You must ".
+         "install it to run daemons on this machine.\n";
+    exit(1);
+  }
+}
+
 switch (isset($argv[1]) ? $argv[1] : 'help') {
   case 'list':
     $err = $control->executeListCommand();
