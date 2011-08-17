@@ -19,7 +19,9 @@
 /**
  * @group conduit
  */
-class ConduitAPI_maniphest_info_Method extends ConduitAPIMethod {
+final class ConduitAPI_maniphest_info_Method
+  extends ConduitAPI_maniphest_Method {
+
 
   public function getMethodDescription() {
     return "Retrieve information about a Maniphest task, given its id.";
@@ -49,29 +51,7 @@ class ConduitAPI_maniphest_info_Method extends ConduitAPIMethod {
       throw new ConduitException('ERR_BAD_TASK');
     }
 
-    $auxiliary = $task->loadAuxiliaryAttributes();
-    $auxiliary = mpull($auxiliary, 'getValue', 'getName');
-
-    $result = array(
-      'id'           => $task->getID(),
-      'phid'         => $task->getPHID(),
-      'authorPHID'   => $task->getAuthorPHID(),
-      'ownerPHID'    => $task->getAuthorPHID(),
-      'ccPHIDs'      => $task->getCCPHIDs(),
-      'status'       => $task->getStatus(),
-      'priority'     => ManiphestTaskPriority::getTaskPriorityName(
-        $task->getPriority()),
-      'title'        => $task->getTitle(),
-      'description'  => $task->getDescription(),
-      'projectPHIDs' => $task->getProjectPHIDs(),
-      'uri'          => PhabricatorEnv::getProductionURI('/T'.$task->getID()),
-
-      'auxiliary'    => $auxiliary,
-
-      // Not sure what this is yet.
-      // 'attached' => array($task->getAttached()),
-    );
-    return $result;
+    return $this->buildTaskInfoDictionary($task);
   }
 
 }
