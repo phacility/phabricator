@@ -142,12 +142,9 @@ class PhabricatorMailImplementationSendGridAdapter
     $future = new HTTPSFuture(
       'https://sendgrid.com/api/mail.send.json',
       $params);
+    $future->setMethod('POST');
 
-    list($code, $body) = $future->resolve();
-
-    if ($code !== 200) {
-      throw new Exception("REST API call failed with HTTP code {$code}.");
-    }
+    list($body) = $future->resolvex();
 
     $response = json_decode($body, true);
     if (!is_array($response)) {
