@@ -19,18 +19,12 @@
 final class DifferentialRevisionDetailView extends AphrontView {
 
   private $revision;
-  private $properties;
   private $actions;
   private $user;
   private $auxiliaryFields = array();
 
   public function setRevision($revision) {
     $this->revision = $revision;
-    return $this;
-  }
-
-  public function setProperties(array $properties) {
-    $this->properties = $properties;
     return $this;
   }
 
@@ -57,14 +51,6 @@ final class DifferentialRevisionDetailView extends AphrontView {
     $revision = $this->revision;
 
     $rows = array();
-    foreach ($this->properties as $key => $field) {
-      $rows[] =
-        '<tr>'.
-          '<th>'.phutil_escape_html($key).':</th>'.
-          '<td>'.$field.'</td>'.
-        '</tr>';
-    }
-
     foreach ($this->auxiliaryFields as $field) {
       $value = $field->renderValueForRevisionView();
       if ($value !== null) {

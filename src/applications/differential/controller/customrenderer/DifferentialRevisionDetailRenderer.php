@@ -29,15 +29,4 @@ abstract class DifferentialRevisionDetailRenderer {
    */
   abstract public function generateActionLinks(DifferentialRevision $revision,
                                                DifferentialDiff $diff);
-
-  /**
-   * This function must return an array of properties. These
-   * properties will be shown below other properties on differential
-   * revision page. Array keys are used for property names and array
-   * values are used for the actual property values. These property
-   * values will be displayed on the page as they are given, so they
-   * should be properly escaped.
-   */
-  abstract public function generateProperties(DifferentialRevision $revision,
-                                              DifferentialDiff $diff);
 }

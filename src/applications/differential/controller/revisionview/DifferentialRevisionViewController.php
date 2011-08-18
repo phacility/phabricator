@@ -163,21 +163,14 @@ class DifferentialRevisionViewController extends DifferentialController {
       'differential.revision-custom-detail-renderer');
     if ($custom_renderer_class) {
 
-      // TODO: Either deprecate generateProperties() or build a better version
-      // of the action links and deprecate the whole class. Custom fields
-      // now provide a much more powerful version of generateProperties().
-
+      // TODO: build a better version of the action links and deprecate the
+      // whole DifferentialRevisionDetailRenderer class.
       PhutilSymbolLoader::loadClass($custom_renderer_class);
       $custom_renderer =
         newv($custom_renderer_class, array());
-      $properties = $custom_renderer->generateProperties($revision, $target);
-      $revision_detail->setProperties($properties);
-
       $actions = array_merge(
         $actions,
         $custom_renderer->generateActionLinks($revision, $target));
-    } else {
-      $revision_detail->setProperties(array());
     }
 
     $whitespace = $request->getStr(
