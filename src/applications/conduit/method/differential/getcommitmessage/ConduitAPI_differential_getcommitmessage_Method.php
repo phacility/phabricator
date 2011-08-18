@@ -76,10 +76,6 @@ class ConduitAPI_differential_getcommitmessage_Method extends ConduitAPIMethod {
 
         $aux_field = idx($aux_fields, $field);
         if (!$aux_field) {
-          if ($field == 'tasks') {
-            // TODO: Remove, backcompat for Facebook.
-            continue;
-          }
           throw new Exception(
             "Commit message includes field '{$field}' which does not ".
             "correspond to any configured field.");
