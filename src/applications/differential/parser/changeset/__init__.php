@@ -8,6 +8,7 @@
 
 phutil_require_module('arcanist', 'difference');
 
+phutil_require_module('phabricator', 'aphront/writeguard');
 phutil_require_module('phabricator', 'applications/differential/constants/changetype');
 phutil_require_module('phabricator', 'applications/differential/storage/changeset');
 phutil_require_module('phabricator', 'applications/differential/view/inlinecomment');

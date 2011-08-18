@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'aphront/writeguard');
 phutil_require_module('phabricator', 'applications/conduit/controller/base');
 phutil_require_module('phabricator', 'applications/conduit/storage/token');
 phutil_require_module('phabricator', 'view/layout/panel');

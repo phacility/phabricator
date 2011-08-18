@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'aphront/response/webpage');
+phutil_require_module('phabricator', 'aphront/writeguard');
 phutil_require_module('phabricator', 'applications/files/storage/file');
 phutil_require_module('phabricator', 'applications/metamta/controller/base');
 phutil_require_module('phabricator', 'applications/metamta/storage/receivedmail');

@@ -9,7 +9,7 @@
 phutil_require_module('phabricator', 'applications/metamta/adapter/base');
 phutil_require_module('phabricator', 'infrastructure/env');
 
-phutil_require_module('phutil', 'future/https');
+phutil_require_module('phutil', 'future/http/https');
 phutil_require_module('phutil', 'utils');
 
 

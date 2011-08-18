@@ -9,6 +9,7 @@
 phutil_require_module('phabricator', 'aphront/response/400');
 phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'aphront/response/file');
+phutil_require_module('phabricator', 'aphront/writeguard');
 phutil_require_module('phabricator', 'applications/repository/controller/base');
 phutil_require_module('phabricator', 'applications/repository/storage/githubnotification');
 phutil_require_module('phabricator', 'applications/repository/storage/repository');

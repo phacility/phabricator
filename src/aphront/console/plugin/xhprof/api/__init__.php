@@ -6,6 +6,8 @@
 
 
 
+phutil_require_module('phabricator', 'aphront/writeguard');
+
 phutil_require_module('phutil', 'symbols');
 
 
