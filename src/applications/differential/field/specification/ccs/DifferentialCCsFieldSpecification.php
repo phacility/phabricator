@@ -98,7 +98,7 @@ final class DifferentialCCsFieldSpecification
   }
 
   public function setValueFromParsedCommitMessage($value) {
-    $this->value = nonempty($value, array());
+    $this->ccs = nonempty($value, array());
     return $this;
   }
 
