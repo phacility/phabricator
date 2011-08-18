@@ -91,8 +91,6 @@ class ConduitAPI_differential_getrevision_Method extends ConduitAPIMethod {
         $revision->getStatus()),
       'summary' => $revision->getSummary(),
       'testPlan' => $revision->getTestPlan(),
-      'revertPlan' => $revision->getRevertPlan(),
-      'blameRevision' => $revision->getBlameRevision(),
       'lineCount' => $revision->getLineCount(),
       'reviewerPHIDs' => $reviewer_phids,
       'diffs' => $diff_dicts,
