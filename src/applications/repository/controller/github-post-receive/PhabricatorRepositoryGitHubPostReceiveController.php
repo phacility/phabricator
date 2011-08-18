@@ -56,6 +56,9 @@ class PhabricatorRepositoryGitHubPostReceiveController
           "won't do anything!");
     }
 
+    // GitHub POSTs here and doesn't do CSRF.
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+
     $notification = new PhabricatorRepositoryGitHubNotification();
     $notification->setRepositoryPHID($repo->getPHID());
     $notification->setRemoteAddress($_SERVER['REMOTE_ADDR']);
