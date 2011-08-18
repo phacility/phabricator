@@ -351,7 +351,7 @@ class DifferentialCommentEditor {
         $current_ccs = array_fill_keys($current_ccs, true);
         foreach ($mention_ccs as $key => $mention_cc) {
           if (isset($current_ccs[$mention_cc])) {
-            unset($mention_ccs);
+            unset($mention_ccs[$key]);
           }
         }
       }
