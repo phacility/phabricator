@@ -36,19 +36,11 @@ final class DifferentialDefaultFieldSelector
       new DifferentialManiphestTasksFieldSpecification(),
       new DifferentialHostFieldSpecification(),
       new DifferentialPathFieldSpecification(),
-      new DifferentialLinesFieldSpecification(),
       new DifferentialArcanistProjectFieldSpecification(),
       new DifferentialApplyPatchFieldSpecification(),
       new DifferentialExportPatchFieldSpecification(),
       new DifferentialRevisionIDFieldSpecification(),
       new DifferentialGitSVNIDFieldSpecification(),
-
-      // TODO: Remove these from the default set, we need them temporarily
-      // because the commit message dictionary always contains their keys
-      // right now.
-      new DifferentialBlameRevisionFieldSpecification(),
-      new DifferentialRevertPlanFieldSpecification(),
-
     );
   }
 
