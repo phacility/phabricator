@@ -46,5 +46,8 @@ final class DifferentialRevisionIDFieldSpecification
     return $this->id;
   }
 
+  public function parseValueFromCommitMessage($value) {
+    return $value;
+  }
 
 }

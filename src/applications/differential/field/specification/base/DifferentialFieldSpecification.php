@@ -337,6 +337,9 @@ abstract class DifferentialFieldSpecification {
    * them) or discarded (if your field implements neither, e.g. is just a
    * display field).
    *
+   * The value you receive will either be null or something you originally
+   * returned from @{method:parseValueFromCommitMessage}.
+   *
    * You must implement this method if you return true from
    * @{method:shouldAppearOnCommitMessage}.
    *
@@ -413,6 +416,48 @@ abstract class DifferentialFieldSpecification {
     throw new DifferentialFieldSpecificationIncompleteException($this);
   }
 
+  /**
+   * Return one or more labels which this field parses in commit messages. For
+   * example, you might parse all of "Task", "Tasks" and "Task Numbers" or
+   * similar. This is just to make it easier to get commit messages to parse
+   * when users are typing in the fields manually as opposed to using a
+   * template, by accepting alternate spellings / pluralizations / etc. By
+   * default, only the label returned from @{method:renderLabelForCommitMessage}
+   * is parsed.
+   *
+   * @return list List of supported labels that this field can parse from commit
+   *              messages.
+   * @task commit
+   */
+  public function getSupportedCommitMessageLabels() {
+    return array($this->renderLabelForCommitMessage());
+  }
+
+  /**
+   * Parse a raw text block from a commit message into a canonical
+   * representation of the field value. For example, the "CC" field accepts a
+   * comma-delimited list of usernames and emails and parses them into valid
+   * PHIDs, emitting a PHID list.
+   *
+   * If you encounter errors (like a nonexistent username) while parsing,
+   * you should throw a @{class:DifferentialFieldParseException}.
+   *
+   * Generally, this method should accept whatever you return from
+   * @{method:renderValueForCommitMessage} and parse it back into a sensible
+   * representation.
+   *
+   * You must implement this method if you return true from
+   * @{method:shouldAppearOnCommitMessage}.
+   *
+   * @param string
+   * @return mixed The canonical representation of the field value. For example,
+   *               you should lookup usernames and object references.
+   * @task commit
+   */
+  public function parseValueFromCommitMessage($value) {
+    throw new DifferentialFieldSpecificationIncompleteException($this);
+  }
+
 
 /* -(  Loading Additional Data  )-------------------------------------------- */
 
@@ -482,7 +527,6 @@ abstract class DifferentialFieldSpecification {
     return $this->getRequiredHandlePHIDs();
   }
 
-
   /**
    * Specify which diff properties this field needs to load.
    *
@@ -491,6 +535,82 @@ abstract class DifferentialFieldSpecification {
    */
   public function getRequiredDiffProperties() {
     return array();
+  }
+
+  /**
+   * Parse a list of users into a canonical PHID list.
+   *
+   * @param string Raw list of comma-separated user names.
+   * @return list List of corresponding PHIDs.
+   * @task load
+   */
+  protected function parseCommitMessageUserList($value) {
+    return $this->parseCommitMessageObjectList($value, $mailables = false);
+  }
+
+  /**
+   * Parse a list of mailable objects into a canonical PHID list.
+   *
+   * @param string Raw list of comma-separated mailable names.
+   * @return list List of corresponding PHIDs.
+   * @task load
+   */
+  protected function parseCommitMessageMailableList($value) {
+    return $this->parseCommitMessageObjectList($value, $mailables = true);
+  }
+
+
+  /**
+   * Parse and lookup a list of object names, converting them to PHIDs.
+   *
+   * @param string Raw list of comma-separated object names.
+   * @return list List of corresponding PHIDs.
+   * @task load
+   */
+  private function parseCommitMessageObjectList($value, $include_mailables) {
+    $value = array_unique(array_filter(preg_split('/[\s,]+/', $value)));
+    if (!$value) {
+      return array();
+    }
+
+    $object_map = array();
+
+    $users = id(new PhabricatorUser())->loadAllWhere(
+      '(username IN (%Ls)) OR (email IN (%Ls))',
+      $value,
+      $value);
+    $object_map += mpull($users, 'getPHID', 'getUsername');
+    $object_map += mpull($users, 'getPHID', 'getEmail');
+
+    if ($include_mailables) {
+      $mailables = id(new PhabricatorMetaMTAMailingList())->loadAllWhere(
+        '(email IN (%Ls)) OR (name IN (%Ls))',
+        $value,
+        $value);
+      $object_map += mpull($mailables, 'getPHID', 'getName');
+      $object_map += mpull($mailables, 'getPHID', 'getEmail');
+    }
+
+    $invalid = array();
+    $results = array();
+    foreach ($value as $name) {
+      if (empty($object_map[$name])) {
+        $invalid[] = $name;
+      } else {
+        $results[] = $object_map[$name];
+      }
+    }
+
+    if ($invalid) {
+      $invalid = implode(', ', $invalid);
+      $what = $include_mailables
+        ? "users and mailing lists"
+        : "users";
+      throw new DifferentialFieldParseException(
+        "Commit message references nonexistent {$what}: {$invalid}.");
+    }
+
+    return array_unique($results);
   }
 
 

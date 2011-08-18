@@ -89,4 +89,8 @@ final class DifferentialReviewedByFieldSpecification
     return implode(', ', $names);
   }
 
+  public function parseValueFromCommitMessage($value) {
+    return $this->parseCommitMessageUserList($value);
+  }
+
 }

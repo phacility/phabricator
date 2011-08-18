@@ -46,4 +46,8 @@ final class DifferentialGitSVNIDFieldSpecification
     return null;
   }
 
+  public function parseValueFromCommitMessage($value) {
+    return $value;
+  }
+
 }

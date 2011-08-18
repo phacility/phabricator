@@ -99,8 +99,20 @@ final class DifferentialRevertPlanFieldSpecification
     return 'Revert Plan';
   }
 
+
   public function renderValueForCommitMessage($is_edit) {
     return $this->value;
+  }
+
+  public function getSupportedCommitMessageLabels() {
+    return array(
+      'Revert Plan',
+      'Revert',
+    );
+  }
+
+  public function parseValueFromCommitMessage($value) {
+    return $value;
   }
 
 }

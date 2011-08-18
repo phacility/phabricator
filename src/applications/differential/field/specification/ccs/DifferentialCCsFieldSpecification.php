@@ -118,4 +118,15 @@ final class DifferentialCCsFieldSpecification
     return implode(', ', $names);
   }
 
+  public function getSupportedCommitMessageLabels() {
+    return array(
+      'CC',
+      'CCs',
+    );
+  }
+
+  public function parseValueFromCommitMessage($value) {
+    return $this->parseCommitMessageMailableList($value);
+  }
+
 }

@@ -16,6 +16,6 @@
  * limitations under the License.
  */
 
-class DifferentialCommitMessageParserException extends Exception {
+final class DifferentialFieldParseException extends Exception {
 
 }

@@ -103,4 +103,15 @@ final class DifferentialBlameRevisionFieldSpecification
     return $this->value;
   }
 
+  public function getSupportedCommitMessageLabels() {
+    return array(
+      'Blame Revision',
+      'Blame Rev',
+    );
+  }
+
+  public function parseValueFromCommitMessage($value) {
+    return $value;
+  }
+
 }

@@ -81,5 +81,8 @@ final class DifferentialTestPlanFieldSpecification
     return $this->plan;
   }
 
+  public function parseValueFromCommitMessage($value) {
+    return $value;
+  }
 
 }

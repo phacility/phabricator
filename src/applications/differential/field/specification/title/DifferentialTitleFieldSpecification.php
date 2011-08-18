@@ -82,4 +82,8 @@ final class DifferentialTitleFieldSpecification
     return $this->title;
   }
 
+  public function parseValueFromCommitMessage($value) {
+    return preg_replace('/\s*\n\s*/', ' ', $value);
+  }
+
 }

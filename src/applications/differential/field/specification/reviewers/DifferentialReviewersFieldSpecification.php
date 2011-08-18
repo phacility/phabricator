@@ -129,4 +129,15 @@ final class DifferentialReviewersFieldSpecification
     return implode(', ', $names);
   }
 
+  public function getSupportedCommitMessageLabels() {
+    return array(
+      'Reviewer',
+      'Reviewers',
+    );
+  }
+
+  public function parseValueFromCommitMessage($value) {
+    return $this->parseCommitMessageUserList($value);
+  }
+
 }

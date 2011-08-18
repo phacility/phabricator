@@ -8,6 +8,11 @@
 
 phutil_require_module('phabricator', 'applications/differential/field/exception/incomplete');
 phutil_require_module('phabricator', 'applications/differential/field/exception/notavailable');
+phutil_require_module('phabricator', 'applications/differential/field/exception/parse');
+phutil_require_module('phabricator', 'applications/metamta/storage/mailinglist');
+phutil_require_module('phabricator', 'applications/people/storage/user');
+
+phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('DifferentialFieldSpecification.php');

@@ -7,7 +7,9 @@
 
 
 phutil_require_module('phabricator', 'applications/conduit/method/base');
-phutil_require_module('phabricator', 'applications/differential/parser/commitmessage');
+phutil_require_module('phabricator', 'applications/differential/field/selector/base');
+
+phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('ConduitAPI_differential_parsecommitmessage_Method.php');

@@ -70,4 +70,8 @@ final class DifferentialSummaryFieldSpecification
     return $this->summary;
   }
 
+  public function parseValueFromCommitMessage($value) {
+    return $value;
+  }
+
 }
