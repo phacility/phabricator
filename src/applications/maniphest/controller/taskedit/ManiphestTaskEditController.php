@@ -445,6 +445,8 @@ class ManiphestTaskEditController extends ManiphestController {
                     '<tt>'.phutil_escape_html($email_create).'</tt>';
     }
 
+    $panel_id = celerity_generate_unique_node_id();
+
     $form
       ->appendChild(
         id(new AphrontFormTextAreaControl())
@@ -453,6 +455,12 @@ class ManiphestTaskEditController extends ManiphestController {
           ->setCaption($email_hint)
           ->setValue($task->getDescription()))
       ->appendChild(
+        id(new AphrontFormDragAndDropUploadControl())
+          ->setLabel('Attached Files')
+          ->setName('files')
+          ->setDragAndDropTarget($panel_id)
+          ->setActivatedClass('aphront-panel-view-drag-and-drop'))
+      ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($cancel_uri)
           ->setValue($button_name));
@@ -460,6 +468,7 @@ class ManiphestTaskEditController extends ManiphestController {
     $panel = new AphrontPanelView();
     $panel->setWidth(AphrontPanelView::WIDTH_FULL);
     $panel->setHeader($header_name);
+    $panel->setID($panel_id);
     $panel->appendChild($form);
 
     return $this->buildStandardPageResponse(
