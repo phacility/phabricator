@@ -50,6 +50,9 @@ abstract class PhabricatorController extends AphrontController {
         $phsid);
       if ($info) {
         $user->loadFromArray($info);
+      } else {
+        // The session cookie is invalid, so clear it.
+        $request->clearCookie('phsid');
       }
     }
 
