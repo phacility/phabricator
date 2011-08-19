@@ -141,6 +141,8 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
     // Login with known auth.
 
     if ($oauth_info->getID()) {
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+
       $known_user = id(new PhabricatorUser())->load($oauth_info->getUserID());
 
       $request->getApplicationConfiguration()->willAuthenticateUserWithOAuth(
