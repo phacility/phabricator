@@ -190,7 +190,9 @@ class AphrontRequest {
     $base_domain = $base_uri->getDomain();
     $base_protocol = $base_uri->getProtocol();
 
-    $actual_host = $this->getHost();
+    // The "Host" header may include a port number; if so, ignore it. We can't
+    // use PhutilURI since there's no URI scheme.
+    list($actual_host) = explode(':', $this->getHost(), 2);
     if ($base_domain != $actual_host) {
       throw new Exception(
         "This install of Phabricator is configured as '{$base_domain}' but ".
