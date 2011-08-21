@@ -253,6 +253,16 @@ return array(
   // Email" in the documentation for more information.
   'metamta.maniphest.public-create-email' => null,
 
+  // If you enable 'metamta.public-replies', Phabricator uses "From" to
+  // authenticate users. You can additionally enable this setting to try to
+  // authenticate with 'Reply-To'. Note that this is completely spoofable and
+  // insecure (any user can set any 'Reply-To' address) but depending on the
+  // nature of your install or other deliverability conditions this might be
+  // okay. Generally, you can't do much more by spoofing Reply-To than be
+  // annoying (you can write but not read content). But, you know, this is
+  // still **COMPLETELY INSECURE**.
+  'metamta.insecure-auth-with-reply-to' => false,
+
 
 // -- Auth ------------------------------------------------------------------ //
 

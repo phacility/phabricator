@@ -232,9 +232,26 @@ class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     $from = idx($this->headers, 'from');
     $from = $this->getRawEmailAddress($from);
 
-    return id(new PhabricatorUser())->loadOneWhere(
+    $user = id(new PhabricatorUser())->loadOneWhere(
       'email = %s',
       $from);
+
+    // If Phabricator is configured to allow "Reply-To" authentication, try
+    // the "Reply-To" address if we failed to match the "From" address.
+    $config_key = 'metamta.insecure-auth-with-reply-to';
+    $allow_reply_to = PhabricatorEnv::getEnvConfig($config_key);
+
+    if (!$user && $allow_reply_to) {
+      $reply_to = idx($this->headers, 'reply-to');
+      $reply_to = $this->getRawEmailAddress($reply_to);
+      if ($reply_to) {
+        $user = id(new PhabricatorUser())->loadOneWhere(
+          'email = %s',
+          $reply_to);
+      }
+    }
+
+    return $user;
   }
 
 }
