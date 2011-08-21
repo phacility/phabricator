@@ -505,7 +505,7 @@ class AphrontDefaultApplicationConfiguration
     $depth = count($trace);
     foreach ($trace as $part) {
       $lib = null;
-      $file = $part['file'];
+      $file = idx($part, 'file');
       $relative = $file;
       foreach ($libraries as $library) {
         $root = phutil_get_library_root($library);
@@ -524,24 +524,28 @@ class AphrontDefaultApplicationConfiguration
         $where .= $part['function'].'()';
       }
 
-      if (isset($browse[$lib])) {
-        $file_name = phutil_render_tag(
-          'a',
-          array(
-            'href' => $browse[$lib].$relative.'$'.$part['line'],
-            'title' => $file,
-            'target' => '_blank',
-          ),
-          phutil_escape_html($relative));
+      if ($file) {
+        if (isset($browse[$lib])) {
+          $file_name = phutil_render_tag(
+            'a',
+            array(
+              'href' => $browse[$lib].$relative.'$'.$part['line'],
+              'title' => $file,
+              'target' => '_blank',
+            ),
+            phutil_escape_html($relative));
+        } else {
+          $file_name = phutil_render_tag(
+            'span',
+            array(
+              'title' => $file,
+            ),
+            phutil_escape_html($relative));
+        }
+        $file_name = $file_name.' : '.(int)$part['line'];
       } else {
-        $file_name = phutil_render_tag(
-          'span',
-          array(
-            'title' => $file,
-          ),
-          phutil_escape_html($relative));
+        $file_name = '<em>(Internal)</em>';
       }
-      $file_name = $file_name.' : '.(int)$part['line'];
 
 
       $rows[] = array(
