@@ -56,6 +56,8 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
     $pass     = idx($config, 'pass');
     $nick     = idx($config, 'nick', 'phabot');
     $user     = idx($config, 'user', $nick);
+    $ssl      = idx($config, 'ssl', false);
+	  $nickpass = idx($config, 'nickpass');
 
     if (!preg_match('/^[A-Za-z0-9_`[{}^|\]\\-]+$/', $nick)) {
       throw new Exception(
@@ -105,6 +107,10 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
     $this->writeCommand('USER', "{$user} 0 * :{$user}");
     if ($pass) {
       $this->writeCommand('PASS', "{$pass}");
+    }
+
+    if ($nickpass) {
+    	$this->writeCommand("NickServ IDENTIFY ", "{$nickpass}");
     }
 
     $this->writeCommand('NICK', "{$nick}");
