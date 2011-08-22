@@ -27,6 +27,7 @@ class DifferentialComment extends DifferentialDAO {
   protected $content;
   protected $cache;
   protected $metadata = array();
+  protected $contentSource;
 
   public function getConfiguration() {
     return array(
@@ -34,6 +35,15 @@ class DifferentialComment extends DifferentialDAO {
         'metadata' => self::SERIALIZATION_JSON,
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function setContentSource(PhabricatorContentSource $content_source) {
+    $this->contentSource = $content_source->serialize();
+    return $this;
+  }
+
+  public function getContentSource() {
+    return PhabricatorContentSource::newFromSerialized($this->contentSource);
   }
 
 }

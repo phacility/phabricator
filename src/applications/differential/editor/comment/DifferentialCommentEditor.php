@@ -30,6 +30,7 @@ class DifferentialCommentEditor {
   private $addedCCs = array();
 
   private $parentMessageID;
+  private $contentSource;
 
   public function __construct(
     DifferentialRevision $revision,
@@ -86,6 +87,11 @@ class DifferentialCommentEditor {
 
   public function getAddedCCs() {
     return $this->addedCCs;
+  }
+
+  public function setContentSource(PhabricatorContentSource $content_source) {
+    $this->contentSource = $content_source;
+    return $this;
   }
 
   public function save() {
@@ -320,8 +326,13 @@ class DifferentialCommentEditor {
       ->setRevisionID($revision->getID())
       ->setAction($action)
       ->setContent((string)$this->message)
-      ->setMetadata($metadata)
-      ->save();
+      ->setMetadata($metadata);
+
+    if ($this->contentSource) {
+      $comment->setContentSource($this->contentSource);
+    }
+
+    $comment->save();
 
     $changesets = array();
     if ($inline_comments) {

@@ -182,8 +182,15 @@ class ManiphestTaskEditController extends ManiphestController {
           );
         }
 
+        $content_source = PhabricatorContentSource::newForSource(
+          PhabricatorContentSource::SOURCE_WEB,
+          array(
+            'ip' => $request->getRemoteAddr(),
+          ));
+
         $template = new ManiphestTransaction();
         $template->setAuthorPHID($user->getPHID());
+        $template->setContentSource($content_source);
         $transactions = array();
 
         foreach ($changes as $type => $value) {

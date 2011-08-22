@@ -40,8 +40,15 @@ class DifferentialCommentSaveController extends DifferentialController {
       $request->getUser()->getPHID(),
       $action);
 
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_WEB,
+      array(
+        'ip' => $request->getRemoteAddr(),
+      ));
+
     $editor
       ->setMessage($comment)
+      ->setContentSource($content_source)
       ->setAttachInlineComments(true)
       ->setAddCC($action != DifferentialAction::ACTION_RESIGN)
       ->setAddedReviewers($reviewers)

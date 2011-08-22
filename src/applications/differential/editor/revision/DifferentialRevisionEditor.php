@@ -33,6 +33,7 @@ class DifferentialRevisionEditor {
   protected $silentUpdate;
 
   private $auxiliaryFields = array();
+  private $contentSource;
 
   public function __construct(DifferentialRevision $revision, $actor_phid) {
     $this->revision = $revision;
@@ -105,6 +106,11 @@ class DifferentialRevisionEditor {
 
   public function setCCPHIDs(array $cc) {
     $this->cc = $cc;
+    return $this;
+  }
+
+  public function setContentSource(PhabricatorContentSource $content_source) {
+    $this->contentSource = $content_source;
     return $this;
   }
 
@@ -652,6 +658,11 @@ class DifferentialRevisionEditor {
       ->setRevisionID($revision_id)
       ->setContent($this->getComments())
       ->setAction('update');
+
+    if ($this->contentSource) {
+      $comment->setContentSource($this->contentSource);
+    }
+
     $comment->save();
 
     return $comment;

@@ -8,5 +8,9 @@ They are available under the Creative Commons Attribution 3.0 License:
 
 Some icons have been adapted from the FatCow set for use in Phabricator:
 
-  key_question.png
-
+  key_question.png      (from key_*.png)
+  source/web.png        (from world.png)
+  source/email.png      (from email.png)
+  source/conduit.png    (from satellite_dish.png)
+  source/mobile.png     (from phone.png)
+  source/tablet.png     (from tablet.png)

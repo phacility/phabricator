@@ -29,6 +29,7 @@ class ManiphestTransaction extends ManiphestDAO {
   protected $comments;
   protected $cache;
   protected $metadata = array();
+  protected $contentSource;
 
   public function getConfiguration() {
     return array(
@@ -104,5 +105,13 @@ class ManiphestTransaction extends ManiphestDAO {
     return (bool)strlen(trim($this->getComments()));
   }
 
+  public function setContentSource(PhabricatorContentSource $content_source) {
+    $this->contentSource = $content_source->serialize();
+    return $this;
+  }
+
+  public function getContentSource() {
+    return PhabricatorContentSource::newFromSerialized($this->contentSource);
+  }
 
 }

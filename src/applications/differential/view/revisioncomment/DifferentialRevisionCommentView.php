@@ -94,7 +94,14 @@ final class DifferentialRevisionCommentView extends AphrontView {
       $date = phabricator_datetime($comment->getDateCreated(), $this->user);
     }
 
-    $info = array($date);
+    $info = array();
+
+    $content_source = new PhabricatorContentSourceView();
+    $content_source->setContentSource($comment->getContentSource());
+    $content_source->setUser($this->user);
+    $info[] = $content_source->render();
+
+    $info[] = $date;
 
     $comment_anchor = null;
     $num = $this->commentNumber;
@@ -110,7 +117,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
       $comment_anchor = 'anchor-comment-'.$num;
     }
 
-    $info = implode(' &middot; ', $info);
+    $info = implode(' &middot; ', array_filter($info));
 
     $author = $this->handles[$comment->getAuthorPHID()];
     $author_link = $author->renderLink();
@@ -278,6 +285,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
           '</div>'.
           $inline_render.
         '</div>'.
+        $content_source->render().
       '</div>');
   }
 

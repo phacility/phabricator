@@ -87,7 +87,12 @@ final class ConduitAPI_maniphest_createtask_Method
       );
     }
 
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_CONDUIT,
+      array());
+
     $template = new ManiphestTransaction();
+    $template->setContentSource($content_source);
     $template->setAuthorPHID($request->getUser()->getPHID());
 
     $transactions = array();

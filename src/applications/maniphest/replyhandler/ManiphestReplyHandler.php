@@ -66,7 +66,14 @@ class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
 
     $xactions = array();
 
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_EMAIL,
+      array(
+        'id' => $mail->getID(),
+      ));
+
     $template = new ManiphestTransaction();
+    $template->setContentSource($content_source);
     $template->setAuthorPHID($user->getPHID());
 
     if ($is_new_task) {

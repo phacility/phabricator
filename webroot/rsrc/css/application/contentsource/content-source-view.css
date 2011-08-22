@@ -1,0 +1,32 @@
+/**
+ * @provides phabricator-content-source-view-css
+ */
+
+.phabricator-content-source-view {
+  padding: 2px 20px 2px 0;
+  font-size: 11px;
+  color: #888888;
+  font-weight: normal;
+  background: no-repeat right center;
+  position: relative;
+}
+
+.phabricator-content-source-web {
+  background-image: url(/rsrc/image/icon/fatcow/source/web.png);
+}
+
+.phabricator-content-source-email {
+  background-image: url(/rsrc/image/icon/fatcow/source/email.png);
+}
+
+.phabricator-content-source-conduit {
+  background-image: url(/rsrc/image/icon/fatcow/source/conduit.png);
+}
+
+.phabricator-content-source-mobile {
+  background-image: url(/rsrc/image/icon/fatcow/source/mobile.png);
+}
+
+.phabricator-content-source-tablet {
+  background-image: url(/rsrc/image/icon/fatcow/source/tablet.png);
+}

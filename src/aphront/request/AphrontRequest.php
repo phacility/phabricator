@@ -252,4 +252,8 @@ class AphrontRequest {
     return $this->isFormPost() && $this->getStr('__dialog__');
   }
 
+  final public function getRemoteAddr() {
+    return $_SERVER['REMOTE_ADDR'];
+  }
+
 }

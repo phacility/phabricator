@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'applications/differential/storage/base');
+phutil_require_module('phabricator', 'applications/metamta/contentsource/source');
 
 
 phutil_require_source('DifferentialComment.php');

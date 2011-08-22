@@ -219,6 +219,16 @@ class ManiphestTransactionSaveController extends ManiphestController {
       $transactions[] = $cc_transaction;
     }
 
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_WEB,
+      array(
+        'ip' => $request->getRemoteAddr(),
+      ));
+
+    foreach ($transactions as $transaction) {
+      $transaction->setContentSource($content_source);
+    }
+
     $editor = new ManiphestTransactionEditor();
     $editor->applyTransactions($task, $transactions);
 

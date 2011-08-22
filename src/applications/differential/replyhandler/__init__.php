@@ -10,6 +10,7 @@ phutil_require_module('phabricator', 'applications/differential/constants/action
 phutil_require_module('phabricator', 'applications/differential/editor/comment');
 phutil_require_module('phabricator', 'applications/differential/editor/revision');
 phutil_require_module('phabricator', 'applications/differential/mail/exception');
+phutil_require_module('phabricator', 'applications/metamta/contentsource/source');
 phutil_require_module('phabricator', 'applications/metamta/replyhandler/base');
 phutil_require_module('phabricator', 'infrastructure/env');
 

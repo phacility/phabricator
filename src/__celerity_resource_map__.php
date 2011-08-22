@@ -643,6 +643,17 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/maniphest/behavior-transaction-preview.js',
   ),
+  0 =>
+  array(
+    'uri' => '/res/1da00bfe/rsrc/js/javelin/lib/__tests__/URI.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-uri',
+      1 => 'javelin-php-serializer',
+    ),
+    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
+  ),
   'javelin-behavior-owners-path-editor' =>
   array(
     'uri' => '/res/9cf78ffc/rsrc/js/application/owners/owners-path-editor.js',
@@ -724,17 +735,6 @@ celerity_register_resource_map(array(
       8 => 'javelin-util',
     ),
     'disk' => '/rsrc/js/application/projects/projects-resource-editor.js',
-  ),
-  0 =>
-  array(
-    'uri' => '/res/1da00bfe/rsrc/js/javelin/lib/__tests__/URI.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-uri',
-      1 => 'javelin-php-serializer',
-    ),
-    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
   ),
   'javelin-behavior-refresh-csrf' =>
   array(
@@ -1168,6 +1168,15 @@ celerity_register_resource_map(array(
       5 => 'javelin-util',
     ),
     'disk' => '/rsrc/js/application/herald/PathTypeahead.js',
+  ),
+  'phabricator-content-source-view-css' =>
+  array(
+    'uri' => '/res/7147f14c/rsrc/css/application/contentsource/content-source-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/contentsource/content-source-view.css',
   ),
   'phabricator-core-buttons-css' =>
   array(

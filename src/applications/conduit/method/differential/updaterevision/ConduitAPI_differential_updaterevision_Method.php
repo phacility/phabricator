@@ -66,9 +66,14 @@ class ConduitAPI_differential_updaterevision_Method extends ConduitAPIMethod {
       throw new ConduitException('ERR_COMMITTED');
     }
 
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_CONDUIT,
+      array());
+
     $editor = new DifferentialRevisionEditor(
       $revision,
       $revision->getAuthorPHID());
+    $editor->setContentSource($content_source);
     $fields = $request->getValue('fields');
     $editor->copyFieldsFromConduit($fields);
 

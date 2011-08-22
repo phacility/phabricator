@@ -139,6 +139,12 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
       // implementation jumps straight into handleAction() and will not have
       // a PhabricatorMetaMTAReceivedMail object.
       if ($this->receivedMail) {
+        $content_source = PhabricatorContentSource::newForSource(
+          PhabricatorContentSource::SOURCE_EMAIL,
+          array(
+            'id' => $this->receivedMail->getID(),
+          ));
+        $editor->setContentSource($content_source);
         $editor->setParentMessageID($this->receivedMail->getMessageID());
       }
       $editor->setMessage($body);

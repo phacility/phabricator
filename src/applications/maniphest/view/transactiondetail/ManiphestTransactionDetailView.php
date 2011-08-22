@@ -202,6 +202,13 @@ class ManiphestTransactionDetailView extends ManiphestView {
     }
 
     $info = array();
+
+    $source_transaction = nonempty($comment_transaction, $any_transaction);
+    $content_source = new PhabricatorContentSourceView();
+    $content_source->setContentSource($source_transaction->getContentSource());
+    $content_source->setUser($this->user);
+    $info[] = $content_source->render();
+
     $info[] = $timestamp;
 
     $comment_anchor = null;
@@ -218,7 +225,8 @@ class ManiphestTransactionDetailView extends ManiphestView {
       $comment_anchor = 'anchor-comment-'.$num;
     }
 
-    $info = implode(' &middot; ', $info);
+
+    $info = implode(' &middot; ', array_filter($info));
 
     return phutil_render_tag(
       'div',

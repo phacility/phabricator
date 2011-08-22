@@ -12,6 +12,7 @@ phutil_require_module('phabricator', 'applications/differential/constants/revisi
 phutil_require_module('phabricator', 'applications/differential/editor/revision');
 phutil_require_module('phabricator', 'applications/differential/storage/diff');
 phutil_require_module('phabricator', 'applications/differential/storage/revision');
+phutil_require_module('phabricator', 'applications/metamta/contentsource/source');
 phutil_require_module('phabricator', 'infrastructure/env');
 
 phutil_require_module('phutil', 'utils');
