@@ -53,8 +53,9 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
     $port     = idx($config, 'port', 6667);
     $join     = idx($config, 'join', array());
     $handlers = idx($config, 'handlers', array());
-
+    $pass     = idx($config, 'pass');
     $nick     = idx($config, 'nick', 'phabot');
+    $user     = idx($config, 'user', $nick);
 
     if (!preg_match('/^[A-Za-z0-9_`[{}^|\]\\-]+$/', $nick)) {
       throw new Exception(
@@ -101,8 +102,11 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
     }
 
     $this->socket = $socket;
+    $this->writeCommand('USER', "{$user} 0 * :{$user}");
+    if ($pass) {
+      $this->writeCommand('PASS', "{$pass}");
+    }
 
-    $this->writeCommand('USER', "{$nick} 0 * :{$nick}");
     $this->writeCommand('NICK', "{$nick}");
     foreach ($join as $channel) {
       $this->writeCommand('JOIN', "{$channel}");
