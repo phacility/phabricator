@@ -179,6 +179,10 @@ final class DiffusionSvnBrowseQuery extends DiffusionBrowseQuery {
       $results[] = $result;
     }
 
+    if (empty($results)) {
+      $this->reason = self::REASON_IS_EMPTY;
+    }
+
     return $results;
   }
 
