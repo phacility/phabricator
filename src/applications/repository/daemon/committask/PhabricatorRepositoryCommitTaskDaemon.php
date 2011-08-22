@@ -40,6 +40,12 @@ class PhabricatorRepositoryCommitTaskDaemon
         // TODO: Cache these.
         $repository = id(new PhabricatorRepository())->load(
           $commit->getRepositoryID());
+        if (!$repository) {
+          // TODO: As above, although this almost certainly means the user just
+          // deleted the repository and we're correct to ignore the event in
+          // the timeline.
+          continue;
+        }
 
         $vcs = $repository->getVersionControlSystem();
         switch ($vcs) {
