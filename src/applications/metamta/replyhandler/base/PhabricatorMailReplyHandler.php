@@ -166,7 +166,16 @@ abstract class PhabricatorMailReplyHandler {
       $receiver->getMailKey(),
       $receiver->getPHID());
 
-    return "{$prefix}{$receiver_id}+public+{$hash}@{$domain}";
+    $address = "{$prefix}{$receiver_id}+public+{$hash}@{$domain}";
+    return $this->getSingleReplyHandlerPrefix($address);
+  }
+
+  protected function getSingleReplyHandlerPrefix($address) {
+    $single_handle_prefix = PhabricatorEnv::getEnvConfig(
+      'metamta.single-reply-handler-prefix');
+    return ($single_handle_prefix)
+      ? $single_handle_prefix . '+' . $address
+      : $address;
   }
 
   protected function getDefaultPrivateReplyHandlerEmailAddress(
@@ -186,7 +195,8 @@ abstract class PhabricatorMailReplyHandler {
       $handle->getPHID());
     $domain = $this->getReplyHandlerDomain();
 
-    return "{$prefix}{$receiver_id}+{$user_id}+{$hash}@{$domain}";
+    $address = "{$prefix}{$receiver_id}+{$user_id}+{$hash}@{$domain}";
+    return $this->getSingleReplyHandlerPrefix($address);
   }
 
 }

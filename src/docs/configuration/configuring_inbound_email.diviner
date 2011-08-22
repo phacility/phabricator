@@ -43,6 +43,14 @@ configured correctly, according to the instructions below -- will parse incoming
 email and allow users to interact with Maniphest tasks and Differential
 revisions over email.
 
+If you don't want phabricator to take up an entire domain (or subdomain) you
+can configure a general prefix so you can use a single mailbox to receive mail
+on. To make use of this set ##metamta.single-reply-handler-prefix## to the
+prefix of your choice, and phabricator will prepend this to the 'Reply-To'
+mail address. This works because everything up to the first (optional) '+'
+character in an email-address is considered the receiver, and everything
+after is essentially "ignored".
+
 You can also set up a task creation email address, like ##bugs@example.com##,
 which will create a Maniphest task out of any email which is set to it. To do
 this, set ##metamta.maniphest.public-create-email## in your configuration. This
