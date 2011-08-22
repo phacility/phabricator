@@ -56,6 +56,8 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
     $pass     = idx($config, 'pass');
     $nick     = idx($config, 'nick', 'phabot');
     $user     = idx($config, 'user', $nick);
+    $ssl      = idx($config, 'ssl', false);
+	$nickpass = idx($config, 'nickpass');
 
     if (!preg_match('/^[A-Za-z0-9_`[{}^|\]\\-]+$/', $nick)) {
       throw new Exception(
@@ -92,7 +94,11 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
 
     $errno = null;
     $error = null;
-    $socket = fsockopen($server, $port, $errno, $error);
+    if (!$ssl){
+      $socket = fsockopen($server, $port, $errno, $error);
+    }else{
+      $socket = fsockopen('ssl://'.$server, $port, $errno, $error);
+    }
     if (!$socket) {
       throw new Exception("Failed to connect, #{$errno}: {$error}");
     }
@@ -106,6 +112,10 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
     if ($pass) {
       $this->writeCommand('PASS', "{$pass}");
     }
+
+	if ($nickpass){
+		$this->writeCommand("NickServ IDENTIFY ", "{$nickpass}");
+	}
 
     $this->writeCommand('NICK', "{$nick}");
     foreach ($join as $channel) {
