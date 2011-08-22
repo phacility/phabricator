@@ -64,7 +64,7 @@ class PhabricatorRepositorySvnCommitDiscoveryDaemon
         $uri,
         $upper_bound - 1);
       if ($err) {
-        if (preg_match('/path not found/', $stderr)) {
+        if (preg_match('/(path|File) not found/', $stderr)) {
           // We've gone all the way back through history and this path was not
           // affected by earlier commits.
           break;
