@@ -57,7 +57,8 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
     $nick     = idx($config, 'nick', 'phabot');
     $user     = idx($config, 'user', $nick);
     $ssl      = idx($config, 'ssl', false);
-    
+	$nickpass = idx($config, 'nickpass');
+
     if (!preg_match('/^[A-Za-z0-9_`[{}^|\]\\-]+$/', $nick)) {
       throw new Exception(
         "Nickname '{$nick}' is invalid!");
@@ -111,6 +112,10 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
     if ($pass) {
       $this->writeCommand('PASS', "{$pass}");
     }
+
+	if ($nickpass){
+		$this->writeCommand("NickServ IDENTIFY ", "{$nickpass}");
+	}
 
     $this->writeCommand('NICK', "{$nick}");
     foreach ($join as $channel) {
