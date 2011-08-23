@@ -35,6 +35,7 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
   private $readBuffer;
 
   private $conduit;
+  private $checkMotd = true;
 
   public function run() {
 
@@ -51,7 +52,7 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
 
     $server   = idx($config, 'server');
     $port     = idx($config, 'port', 6667);
-    $join     = idx($config, 'join', array());
+    $this->join  = idx($config, 'join', array());
     $handlers = idx($config, 'handlers', array());
     $pass     = idx($config, 'pass');
     $nick     = idx($config, 'nick', 'phabot');
@@ -64,7 +65,7 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
         "Nickname '{$nick}' is invalid!");
     }
 
-    if (!$join) {
+    if (!$this->join) {
       throw new Exception("No channels to 'join' in config!");
     }
 
@@ -118,9 +119,6 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
     }
 
     $this->writeCommand('NICK', "{$nick}");
-    foreach ($join as $channel) {
-      $this->writeCommand('JOIN', "{$channel}");
-    }
 
     $this->runSelectLoop();
   }
@@ -157,6 +155,14 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
           if ($data === false) {
             throw new Exception("fread() failed!");
           } else {
+            // We Check for the end of the MoTD message before joining any channels
+            // this prevents us from joining to soon.
+            if (strpos($this->readBuffer,"376") && $this->checkMotd){
+              foreach ($this->join as $channel){
+                $this->writeCommand("JOIN", "{$channel}");
+              }
+              $this->checkMotd = false;
+            }
             $this->debugLog(true, $data);
             $this->readBuffer .= $data;
           }
