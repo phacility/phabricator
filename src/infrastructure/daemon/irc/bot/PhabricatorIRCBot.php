@@ -144,7 +144,7 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
       }
 
       if ($read) {
-	// Test for connection termination; in PHP, fread() off a nonblocking,
+        // Test for connection termination; in PHP, fread() off a nonblocking,
         // closed socket is empty string.
         if (feof($this->socket)) {
           // This indicates the connection was terminated on the other side,
@@ -157,14 +157,14 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
           if ($data === false) {
             throw new Exception("fread() failed!");
           } else {
-	        // We check for the End of MOTD Message
-	        // Once found we know its ok to connect to channels
-	        // we will join the given channels only once and its on the initial connect.
-	        if (strpos($data, "376") && $this->checkMotd == true) {
+            // We check for the End of MOTD Message
+            // Once found we know its ok to connect to channels
+            // we will join the given channels only once and its on the initial connect.
+            if (strpos($data, "376") && $this->checkMotd == true) {
               foreach ($this->join as $channel) {
                 $this->writeCommand("JOIN", "{$channel}");
-	          }
-	          $this->checkMotd = false;
+              }
+              $this->checkMotd = false;
             }
             $this->debugLog(true, $data);
             $this->readBuffer .= $data;
