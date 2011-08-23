@@ -159,6 +159,7 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
           } else {
 	    // We check for the End of MOTD Message
 	    // Once found we know its ok to connect to channels
+	    // we will join the given channels only once and its on the initial connect.
 	    if (strpos($data,"376") && $this->checkMotd == true){
               foreach ($this->join as $channel){
 		$this->writeCommand("JOIN","{$channel}");
