@@ -61,6 +61,7 @@ class ManiphestTaskSummaryView extends ManiphestView {
     );
 
     $pri_class = idx($classes, $task->getPriority());
+    $status_map = ManiphestTaskStatus::getTaskStatusMap();
 
     return
       '<table class="maniphest-task-summary">'.
@@ -69,9 +70,7 @@ class ManiphestTaskSummaryView extends ManiphestView {
             'T'.$task->getID().
           '</td>'.
           '<td class="maniphest-task-status">'.
-            ($task->getStatus() == ManiphestTaskStatus::STATUS_OPEN
-              ? 'Open'
-              : 'Closed').
+            idx($status_map, $task->getStatus(), 'Unknown').
           '</td>'.
           '<td class="maniphest-task-owner">'.
             ($task->getOwnerPHID()
