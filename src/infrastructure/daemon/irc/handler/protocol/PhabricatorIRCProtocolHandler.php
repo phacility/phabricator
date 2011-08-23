@@ -25,6 +25,15 @@ class PhabricatorIRCProtocolHandler extends PhabricatorIRCHandler {
 
   public function receiveMessage(PhabricatorIRCMessage $message) {
     switch ($message->getCommand()) {
+      case '376': // End of MOTD
+        $join = $this->getConfig('join');
+        if (!$join) {
+          throw new Exception("Not configured to join any channels!");
+        }
+        foreach ($join as $channel) {
+          $this->write('JOIN', $channel);
+        }
+        break;
       case 'PING':
         $this->write('PONG', $message->getRawData());
         break;

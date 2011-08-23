@@ -35,6 +35,7 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
   private $readBuffer;
 
   private $conduit;
+  private $config;
 
   public function run() {
 
@@ -51,7 +52,6 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
 
     $server   = idx($config, 'server');
     $port     = idx($config, 'port', 6667);
-    $join     = idx($config, 'join', array());
     $handlers = idx($config, 'handlers', array());
     $pass     = idx($config, 'pass');
     $nick     = idx($config, 'nick', 'phabot');
@@ -59,13 +59,11 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
     $ssl      = idx($config, 'ssl', false);
     $nickpass = idx($config, 'nickpass');
 
+    $this->config = $config;
+
     if (!preg_match('/^[A-Za-z0-9_`[{}^|\]\\-]+$/', $nick)) {
       throw new Exception(
         "Nickname '{$nick}' is invalid!");
-    }
-
-    if (!$join) {
-      throw new Exception("No channels to 'join' in config!");
     }
 
     foreach ($handlers as $handler) {
@@ -114,15 +112,15 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
     }
 
     if ($nickpass) {
-    	$this->writeCommand("NickServ IDENTIFY ", "{$nickpass}");
+      $this->writeCommand("NickServ IDENTIFY ", "{$nickpass}");
     }
 
     $this->writeCommand('NICK', "{$nick}");
-    foreach ($join as $channel) {
-      $this->writeCommand('JOIN', "{$channel}");
-    }
-
     $this->runSelectLoop();
+  }
+
+  public function getConfig($key, $default = null) {
+    return idx($this->config, $key, $default);
   }
 
   private function runSelectLoop() {
