@@ -117,7 +117,7 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
     }
 
     if ($nickpass) {
-	  $this->writeCommand("NickServ IDENTIFY ", "{$nickpass}");
+      $this->writeCommand("NickServ IDENTIFY ", "{$nickpass}");
     }
 
     $this->writeCommand('NICK', "{$nick}");
@@ -178,7 +178,7 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
           if ($len === false) {
             throw new Exception("fwrite() failed!");
           } else {
-	    $this->debugLog(false, substr($this->writeBuffer, 0, $len));
+            $this->debugLog(false, substr($this->writeBuffer, 0, $len));
             $this->writeBuffer = substr($this->writeBuffer, $len);
           }
         } while (strlen($this->writeBuffer));
