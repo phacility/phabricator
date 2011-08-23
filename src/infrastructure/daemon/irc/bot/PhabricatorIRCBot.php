@@ -36,6 +36,8 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
 
   private $conduit;
 
+  private $checkMotd = true;
+
   public function run() {
 
     $argv = $this->getArgv();
@@ -51,7 +53,7 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
 
     $server   = idx($config, 'server');
     $port     = idx($config, 'port', 6667);
-    $join     = idx($config, 'join', array());
+    $this->join  = idx($config, 'join', array());
     $handlers = idx($config, 'handlers', array());
     $pass     = idx($config, 'pass');
     $nick     = idx($config, 'nick', 'phabot');
@@ -64,7 +66,7 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
         "Nickname '{$nick}' is invalid!");
     }
 
-    if (!$join) {
+    if (!$this->join) {
       throw new Exception("No channels to 'join' in config!");
     }
 
@@ -109,18 +111,16 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
 
     $this->socket = $socket;
     $this->writeCommand('USER', "{$user} 0 * :{$user}");
+
     if ($pass) {
       $this->writeCommand('PASS', "{$pass}");
     }
 
     if ($nickpass) {
-    	$this->writeCommand("NickServ IDENTIFY ", "{$nickpass}");
+	  $this->writeCommand("NickServ IDENTIFY ", "{$nickpass}");
     }
 
     $this->writeCommand('NICK', "{$nick}");
-    foreach ($join as $channel) {
-      $this->writeCommand('JOIN', "{$channel}");
-    }
 
     $this->runSelectLoop();
   }
@@ -157,6 +157,15 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
           if ($data === false) {
             throw new Exception("fread() failed!");
           } else {
+            // We check for the End of MOTD Message
+            // Once found we know its ok to connect to channels
+            // we will join the given channels only once and its on the initial connect.
+            if (strpos($data, "376") && $this->checkMotd == true) {
+              foreach ($this->join as $channel) {
+                $this->writeCommand("JOIN", "{$channel}");
+              }
+              $this->checkMotd = false;
+            }
             $this->debugLog(true, $data);
             $this->readBuffer .= $data;
           }
@@ -169,7 +178,7 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
           if ($len === false) {
             throw new Exception("fwrite() failed!");
           } else {
-            $this->debugLog(false, substr($this->writeBuffer, 0, $len));
+	    $this->debugLog(false, substr($this->writeBuffer, 0, $len));
             $this->writeBuffer = substr($this->writeBuffer, $len);
           }
         } while (strlen($this->writeBuffer));
