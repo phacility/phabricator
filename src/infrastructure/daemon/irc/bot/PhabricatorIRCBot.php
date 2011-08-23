@@ -36,7 +36,7 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
 
   private $conduit;
 
-  private $checkMotd = TRUE;
+  private $checkMotd = true;
 
   public function run() {
 
@@ -53,7 +53,7 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
 
     $server   = idx($config, 'server');
     $port     = idx($config, 'port', 6667);
-    $this->join     = idx($config, 'join', array());
+    $this->join  = idx($config, 'join', array());
     $handlers = idx($config, 'handlers', array());
     $pass     = idx($config, 'pass');
     $nick     = idx($config, 'nick', 'phabot');
@@ -157,14 +157,14 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
           if ($data === false) {
             throw new Exception("fread() failed!");
           } else {
-	    // We check for the End of MOTD Message
-	    // Once found we know its ok to connect to channels
-	    // we will join the given channels only once and its on the initial connect.
-	    if (strpos($data,"376") && $this->checkMotd == true){
-              foreach ($this->join as $channel){
-		$this->writeCommand("JOIN","{$channel}");
-	      }
-	      $this->checkMotd = false;
+	        // We check for the End of MOTD Message
+	        // Once found we know its ok to connect to channels
+	        // we will join the given channels only once and its on the initial connect.
+	        if (strpos($data, "376") && $this->checkMotd == true) {
+              foreach ($this->join as $channel) {
+                $this->writeCommand("JOIN", "{$channel}");
+	          }
+	          $this->checkMotd = false;
             }
             $this->debugLog(true, $data);
             $this->readBuffer .= $data;
