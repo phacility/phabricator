@@ -1121,7 +1121,6 @@ class DifferentialChangesetParser {
         '<td colspan="4" class="show-more">'.
             'Context not available.'.
         '</td>');
-      $context_not_available = $context_not_available;
     }
 
     $html = array();
