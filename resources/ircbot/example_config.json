@@ -2,6 +2,7 @@
   "server" : "irc.freenode.net",
   "port" : 6667,
   "nick" : "phabot",
+  "ssl" : false,
   "join" : [
     "#phabot-test"
   ],
@@ -14,3 +15,29 @@
   "conduit.user" : null,
   "conduit.cert" : null
 }
+
+
+// ssl with username and password and nick pass
+
+{
+  "server" : "irc.freenode.net",
+  "port" : 6697,
+  "nick" : "phabot",
+  "ssl" : true,
+  "user":"phabot",
+  "pass":"mykillerpassword",
+  "nickpass":"myawesomenickpassword",
+  "join" : [
+    "#phabot-test"
+  ],
+  "handlers" : [
+    "PhabricatorIRCProtocolHandler",
+    "PhabricatorIRCObjectNameHandler"
+  ],
+
+  "conduit.uri" : null,
+  "conduit.user" : null,
+  "conduit.cert" : null
+}
+
+
