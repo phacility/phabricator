@@ -56,7 +56,8 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
     $pass     = idx($config, 'pass');
     $nick     = idx($config, 'nick', 'phabot');
     $user     = idx($config, 'user', $nick);
-
+    $ssl      = idx($config, 'ssl', false);
+    
     if (!preg_match('/^[A-Za-z0-9_`[{}^|\]\\-]+$/', $nick)) {
       throw new Exception(
         "Nickname '{$nick}' is invalid!");
@@ -92,7 +93,11 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
 
     $errno = null;
     $error = null;
-    $socket = fsockopen($server, $port, $errno, $error);
+    if (!$ssl){
+      $socket = fsockopen($server, $port, $errno, $error);
+    }else{
+      $socket = fsockopen('ssl://'.$server, $port, $errno, $error);
+    }
     if (!$socket) {
       throw new Exception("Failed to connect, #{$errno}: {$error}");
     }
