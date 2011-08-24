@@ -53,6 +53,7 @@ class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
         $task_ids = array();
         $paste_ids = array();
         $commit_names = array();
+        $vote_ids = array();
 
         if (preg_match_all($pattern, $message, $matches, PREG_SET_ORDER)) {
           foreach ($matches as $match) {
@@ -67,7 +68,7 @@ class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
                 $paste_ids[] = $match[2];
                 break;
               case 'V':
-                 $vote_idsp[] = $match[2];
+                 $vote_ids[] = $match[2];
                  break;
             }
           }
