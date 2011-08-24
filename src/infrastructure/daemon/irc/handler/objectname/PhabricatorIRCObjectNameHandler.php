@@ -45,7 +45,7 @@ class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
         $pattern =
           '@'.
           '(?<!/)(?:^|\b)'. // Negative lookbehind prevent matching "/D123".
-          '(D|T|P)(\d+)'.
+          '(D|T|P|V)(\d+)'.
           '(?:\b|$)'.
           '@';
 
@@ -66,6 +66,9 @@ class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
               case 'P':
                 $paste_ids[] = $match[2];
                 break;
+              case 'V':
+                 $vote_idsp[] = $match[2];
+                 break;
             }
           }
         }
@@ -109,6 +112,18 @@ class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
               ' (Priority: '.$task['priority'].') - '.$task['uri'];
           }
         }
+
+       if ($vote_ids) {
+         foreach ($vote_ids as $vote_id) {
+           $vote = $this->getConduit()->callMethodSynchronous(
+             'slowvote.info',
+             array(
+               'poll_id' => $vote_id,
+           ));
+           $output[$vote['phid']] = 'V'.$vote['id'].':'.$vote['question'].
+              ' Come Vote '.$vote['uri'];
+         }
+       }
 
         if ($paste_ids) {
           foreach ($paste_ids as $paste_id) {
