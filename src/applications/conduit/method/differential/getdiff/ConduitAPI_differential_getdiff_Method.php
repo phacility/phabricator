@@ -72,10 +72,15 @@ class ConduitAPI_differential_getdiff_Method extends ConduitAPIMethod {
       $changeset->attachHunks($changeset->loadHunks());
     }
 
-    return $this->createDiffDict($diff);
+    $properties = id(new DifferentialDiffProperty())->loadAllWhere(
+      'diffID = %d',
+      $diff_id);
+
+    return $this->createDiffDict($diff, $properties);
   }
 
-  public static function createDiffDict(DifferentialDiff $diff) {
+  public static function createDiffDict(DifferentialDiff $diff,
+                                        array $properties) {
     $dict = array(
       'id' => $diff->getID(),
       'parent' => $diff->getParentRevisionID(),
@@ -83,6 +88,7 @@ class ConduitAPI_differential_getdiff_Method extends ConduitAPIMethod {
       'sourceControlBaseRevision' => $diff->getSourceControlBaseRevision(),
       'sourceControlPath' => $diff->getSourceControlPath(),
       'changes' => array(),
+      'properties' => array(),
     );
 
     foreach ($diff->getChangesets() as $changeset) {
@@ -113,6 +119,10 @@ class ConduitAPI_differential_getdiff_Method extends ConduitAPIMethod {
         'hunks'         => $hunks,
       );
       $dict['changes'][] = $change;
+    }
+
+    foreach ($properties as $property) {
+      $dict['properties'][$property->getName()] = $property->getData();
     }
 
     return $dict;
