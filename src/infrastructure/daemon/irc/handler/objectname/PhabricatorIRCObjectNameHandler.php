@@ -121,7 +121,7 @@ class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
              array(
                'poll_id' => $vote_id,
            ));
-           $output[$vote['phid']] = 'V'.$vote['id'].':'.$vote['question'].
+           $output[$vote['phid']] = 'V'.$vote['id'].': '.$vote['question'].
               ' Come Vote '.$vote['uri'];
          }
        }
