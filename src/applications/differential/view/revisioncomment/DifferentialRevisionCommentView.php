@@ -195,7 +195,9 @@ final class DifferentialRevisionCommentView extends AphrontView {
                 $inline_content);
               if ($inline->getID()) {
                 $inline->setCache($inline_content);
+                $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
                 $inline->save();
+                unset($unguarded);
               }
             }
           }
