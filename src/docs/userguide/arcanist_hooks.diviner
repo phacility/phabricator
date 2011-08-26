@@ -3,6 +3,8 @@
 
 Describes how to set up Arcanist as an SVN pre-commit hook.
 
+NOTE: This whole thing might be a little shaky and take a touch of finesse.
+
 = Installing Arcanist SVN Hooks =
 
 You can install Arcanist as an SVN pre-commit hook, to reject commits which
@@ -13,6 +15,7 @@ engines.
 To install Arcanist as a pre-commit hook, add this to your svn/hooks/pre-commit:
 
   #!/bin/sh
+  set -e # Exit with an error code if this fails.
   /usr/local/bin/php -f /path/to/arcanist/bin/arc svn-hook-pre-commit $@ 1>&2
 
 Make sure you make this file executable, or you'll get an error for every commit
@@ -31,6 +34,7 @@ build new linters or customize lint engines. For example, your hook might
 look like this:
 
   #!/bin/sh
+  set -e # Exit with an error code if this fails.
   /usr/local/bin/php -f /path/to/arcanist/bin/arc svn-hook-pre-commit \
     --load-phutil-library=/path/to/custom/lint/engine \
     --load-phutil-library=/path/to/custom/unittest/engine \
