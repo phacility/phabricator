@@ -16,9 +16,9 @@ Arcanist has technical, contributor-focused documentation here:
 = Overview =
 
 Arcanist is a wrapper script that sits on top of other tools (e.g.,
-Differential, linters, unit test frameworks, SVN, and git) and provides a
-simple command-line API to manage code review and some related revision control
-operations.
+Differential, linters, unit test frameworks, git, Mercurial, and SVN) and
+provides a simple command-line API to manage code review and some related
+revision control operations.
 
 Arcanist allows you to do things like:
 
@@ -30,6 +30,7 @@ Arcanist allows you to do things like:
   - download a patch from Differential with ##arc export##
   - update Git commit messages after review with ##arc amend##
   - commit SVN changes with ##arc commit##
+  - merge Git and Mercurial changes with ##arc merge##
   - view enhanced information about Git branches with ##arc branch##
 
 Once you've configured lint and unit test integration, you can also:
@@ -47,8 +48,8 @@ Arcanist has some advanced features as well, you can:
   - ...or extend Arcanist and add new commands.
 
 Except where otherwise noted, these workflows are generally agnostic to the
-underlying version control system and will work properly in git or SVN
-repositories.
+underlying version control system and will work properly in git, Mercurial, or
+SVN repositories.
 
 = Installing Arcanist =
 
@@ -71,8 +72,9 @@ to your ##.bashrc##, ##.profile## or similar:
 = Running Arcanist =
 
 Arcanist is a context-sensitive command which you should run in a working copy,
-like ##svn## or ##git##. Generally speaking, ##arc## commands operate on changed
-files in the working copy in svn, and on the commit at HEAD in git.
+like ##git##, ##hg##, or ##svn##. Generally speaking, ##arc## commands operate
+on changed files in the working copy in SVN, a commit range you specify in git,
+and outgoing changes on the current branch in Mercurial.
 
 == SVN Basics ==
 
@@ -95,7 +97,73 @@ been accepted, you can commit it like this:
 == Git Basics ==
 
 There are a lot of ways to use git, and Arcanist is flexible enough to handle
-several of them. Use a commit template similar to this one:
+several of them. Git workflows divide into two major groups based on your
+**doctrine of history mutability**.
+
+Choose a **history mutability doctrine** by setting ##"immutable_history"## in
+your ##.arcconfig##. Valid values are ##true## to enforce a **conservative
+history mutability doctrine** or ##false## to enforce a **liberal history
+mutability doctrine**.
+
+A **liberal history mutability doctrine** means you rewrite local history. You
+develop in feature branches, but squash or amend before pushing by using ##git
+commit --amend## or ##git rebase -i##. Generally, one idea in the remote is
+represented by one commit. Arc will read revision information from commit
+messages, and you will finalize commits with ##arc amend##.
+
+A **conservative history mutability doctrine** means that you do not rewrite
+local history. This is similar to how Mercurial works. You develop in feature
+branches and push them without squashing commits. You do not use ##git commit
+--amend## or ##git rebase -i##. Generally, one idea in the remote is represented
+by many commits. You will specify revision information via web workflows, and
+finalize commits with ##arc merge##.
+
+You can also choose no doctrine, which allows you to use both ##arc amend##
+and ##arc merge##. This isn't recommended, but Phabricator explicitly tries to
+support a broad range of git workflows. For recommendations on how to use git
+and why this choice of doctrines exists, see @{article:Recommendations on
+Revision Control}. If you aren't compelled by this and want to use a mixed
+workflow, you can pick and choose parts of each workflow.
+
+Phabricator associates commits to revisions (code reviews) by using commit
+messages and commit hashes. It will be unable to detect that you have committed
+a revision if you rebase (which changes all the hashes), and don't ##arc amend##
+or ##arc merge##, and don't ##arc diff## to update Differential with the new
+local hashes. You can use ##arc mark-committed## to explicitly mark revisions
+committed.
+
+=== Git: Conservative Mutability Doctrine ===
+
+NOTE: This doctrine is new and experimental.
+
+This section assumes you are using git with a **conservative history mutability
+doctrine** and have set ##"immutable_history" : true## in your ##.arcconfig##.
+
+To **create or update a revision** in git with a conservative doctrine:
+
+  $ git checkout master
+  $ git checkout -b feature   # Create a feature branch
+  $ git commit -m '...'       # Make a commit
+  $ arc diff master           # Send changes since master for review
+  $ git commit -m '...'       # Make more changes
+  $ git commit -m '...'
+  $ arc diff master           # Update the revision
+
+Once the revision has been accepted:
+
+  $ git checkout master       # Checkout master
+  $ arc merge feature         # Merge your feature branch with "arc merge" to
+                              # generate a rich merge commit.
+
+Now you can ##git push## or similar.
+
+=== Git: Liberal Mutability Doctrine ===
+
+This section assumes you are using git with a **liberal history mutability
+doctrine** and have set ##"immutable_history" : false## in your ##.arcconfig##.
+
+Under a liberal mutability doctrine, arc will read revision information from
+your commit message. Use a commit template similar to this one:
 
   arcanist/resources/git/commit-template.txt
 
@@ -111,19 +179,19 @@ To **create a revision** in git:
 
   $ nano source_code.c      # Make changes.
   $ git commit -a           # Fill out the template.
-  $ arc diff
+  $ arc diff origin/master  # Send changes from the origin for review.
 
 To **update a revision** in git by amending HEAD:
 
   $ nano source_code.c      # Make changes.
   $ git commit -a --amend   # Amend into HEAD.
-  $ arc diff
+  $ arc diff origin/master  # Send changes from the origin for review.
 
 To **update a revision** in git by stacking local commits:
 
   $ nano source_code.c      # Make changes.
   $ git commit -a -m '...'  # Make another local commit.
-  $ arc diff HEAD^^         # Update with the last two changes.
+  $ arc diff origin/master  # Send changes from the origin for review.
 
 To **create and update a revision** using feature branches:
 
@@ -138,11 +206,27 @@ To **create and update a revision** using feature branches:
 
 Once your revision has been accepted, use ##arc amend## to finalize it.
 
-  $ arc amend               # If you used an --amend workflow.
-
-If you used a multiple-commit workflow, you need to squash commits first with
-##git rebase -i## or similar, then amend the squashed commit.
+  $ git rebase -i           # Squash commits if necessary.
+  $ arc amend               # Update HEAD with final revision information.
 
 After amending, you can push the commit to the remote with ##git push## or
 ##git svn dcommit## or via whatever other channel your project uses as
 applicable.
+
+== Mercurial ==
+
+Mercurial works similarly to git's immutable history doctrine.
+
+To **create or update** a revision in Mercurial:
+
+  $ hg commit -m '...'    # Create a commit
+  $ arc diff              # Creates or updates a revision with outgoing changes
+                          # on this branch.
+
+Once a revision has been accepted, you can finalize it with ##arc merge##:
+
+  $ arc merge             # Works like "hg merge && hg commit" but gives you a
+                          # rich commit message.
+
+This won't work if there are no remote changes on your branch, since the merge
+is linear. In this case, just skip this step. You can now "hg push" or similar.
