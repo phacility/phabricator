@@ -8,13 +8,10 @@
 
 phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'aphront/response/redirect');
-phutil_require_module('phabricator', 'applications/feed/constants/story');
-phutil_require_module('phabricator', 'applications/feed/publisher');
-phutil_require_module('phabricator', 'applications/phriction/constants/action');
 phutil_require_module('phabricator', 'applications/phriction/controller/base');
+phutil_require_module('phabricator', 'applications/phriction/editor/document');
 phutil_require_module('phabricator', 'applications/phriction/storage/content');
 phutil_require_module('phabricator', 'applications/phriction/storage/document');
-phutil_require_module('phabricator', 'applications/search/index/indexer/phriction');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'infrastructure/javelin/api');

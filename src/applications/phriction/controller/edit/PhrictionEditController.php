@@ -88,52 +88,15 @@ class PhrictionEditController
       }
 
       if (!count($errors)) {
+        $editor = id(PhrictionDocumentEditor::newForSlug($slug))
+          ->setUser($user)
+          ->setTitle($title)
+          ->setContent($request->getStr('content'))
+          ->setDescription($request->getStr('description'));
 
-        // TODO: This should all be transactional.
+        $editor->save();
 
-        $is_new = false;
-        if (!$document->getID()) {
-          $is_new = true;
-          $document->save();
-        }
-        $new_content = new PhrictionContent();
-        $new_content->setSlug($document->getSlug());
-        $new_content->setTitle($title);
-        $new_content->setDescription($request->getStr('description'));
-        $new_content->setContent($request->getStr('content'));
-
-        $new_content->setDocumentID($document->getID());
-        $new_content->setVersion($content->getVersion() + 1);
-
-        $new_content->setAuthorPHID($user->getPHID());
-        $new_content->save();
-
-        $document->setContentID($new_content->getID());
-        $document->save();
-
-        $document->attachContent($new_content);
-        PhabricatorSearchPhrictionIndexer::indexDocument($document);
-
-        id(new PhabricatorFeedStoryPublisher())
-          ->setRelatedPHIDs(
-            array(
-              $document->getPHID(),
-              $user->getPHID(),
-            ))
-          ->setStoryAuthorPHID($user->getPHID())
-          ->setStoryTime(time())
-          ->setStoryType(PhabricatorFeedStoryTypeConstants::STORY_PHRICTION)
-          ->setStoryData(
-            array(
-              'phid'    => $document->getPHID(),
-              'action'  => $is_new
-                ? PhrictionActionConstants::ACTION_CREATE
-                : PhrictionActionConstants::ACTION_EDIT,
-              'content' => phutil_utf8_shorten($new_content->getContent(), 140),
-            ))
-          ->publish();
-
-        $uri = PhrictionDocument::getSlugURI($document->getSlug());
+        $uri = PhrictionDocument::getSlugURI($slug);
         return id(new AphrontRedirectResponse())->setURI($uri);
       }
     }
