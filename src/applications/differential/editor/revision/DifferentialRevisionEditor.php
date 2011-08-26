@@ -681,15 +681,23 @@ class DifferentialRevisionEditor {
 
     foreach ($aux_map as $key => $val) {
       $obj = idx($fields, $key);
-      if (!$obj) {
-        $obj = new DifferentialAuxiliaryField();
-        $obj->setRevisionPHID($revision->getPHID());
-        $obj->setName($key);
-      }
+      if (!strlen($val)) {
+        // If the new value is empty, just delete the old row if one exists and
+        // don't add a new row if it doesn't.
+        if ($obj) {
+          $obj->delete();
+        }
+      } else {
+        if (!$obj) {
+          $obj = new DifferentialAuxiliaryField();
+          $obj->setRevisionPHID($revision->getPHID());
+          $obj->setName($key);
+        }
 
-      if ($obj->getValue() !== $val) {
-        $obj->setValue($val);
-        $obj->save();
+        if ($obj->getValue() !== $val) {
+          $obj->setValue($val);
+          $obj->save();
+        }
       }
     }
   }
