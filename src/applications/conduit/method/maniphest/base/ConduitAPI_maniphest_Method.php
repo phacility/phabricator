@@ -22,28 +22,45 @@
 abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
 
   protected function buildTaskInfoDictionary(ManiphestTask $task) {
-    $auxiliary = $task->loadAuxiliaryAttributes();
-    $auxiliary = mpull($auxiliary, 'getValue', 'getName');
+    $results = $this->buildTaskInfoDictionaries(array($task));
+    return idx($results, $task->getPHID());
+  }
 
-    $result = array(
-      'id'           => $task->getID(),
-      'phid'         => $task->getPHID(),
-      'authorPHID'   => $task->getAuthorPHID(),
-      'ownerPHID'    => $task->getOwnerPHID(),
-      'ccPHIDs'      => $task->getCCPHIDs(),
-      'status'       => $task->getStatus(),
-      'priority'     => ManiphestTaskPriority::getTaskPriorityName(
-        $task->getPriority()),
-      'title'        => $task->getTitle(),
-      'description'  => $task->getDescription(),
-      'projectPHIDs' => $task->getProjectPHIDs(),
-      'uri'          => PhabricatorEnv::getProductionURI('/T'.$task->getID()),
-      'auxiliary'    => $auxiliary,
+  protected function buildTaskInfoDictionaries(array $tasks) {
+    if (!$tasks) {
+      return array();
+    }
 
-      'objectName'   => 'T'.$task->getID(),
-      'dateCreated'  => $task->getDateCreated(),
-      'dateModified' => $task->getDateModified(),
-    );
+    $all_aux = id(new ManiphestTaskAuxiliaryStorage())->loadAllWhere(
+      'taskPHID in (%Ls)',
+      mpull($tasks, 'getPHID'));
+    $all_aux = mgroup($all_aux, 'getTaskPHID');
+
+    $result = array();
+    foreach ($tasks as $task) {
+      $auxiliary = idx($all_aux, $task->getPHID(), array());
+      $auxiliary = mpull($auxiliary, 'getValue', 'getName');
+
+      $result[$task->getPHID()] = array(
+        'id'           => $task->getID(),
+        'phid'         => $task->getPHID(),
+        'authorPHID'   => $task->getAuthorPHID(),
+        'ownerPHID'    => $task->getOwnerPHID(),
+        'ccPHIDs'      => $task->getCCPHIDs(),
+        'status'       => $task->getStatus(),
+        'priority'     => ManiphestTaskPriority::getTaskPriorityName(
+          $task->getPriority()),
+        'title'        => $task->getTitle(),
+        'description'  => $task->getDescription(),
+        'projectPHIDs' => $task->getProjectPHIDs(),
+        'uri'          => PhabricatorEnv::getProductionURI('/T'.$task->getID()),
+        'auxiliary'    => $auxiliary,
+
+        'objectName'   => 'T'.$task->getID(),
+        'dateCreated'  => $task->getDateCreated(),
+        'dateModified' => $task->getDateModified(),
+      );
+    }
 
     return $result;
   }
