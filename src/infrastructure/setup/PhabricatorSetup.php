@@ -156,7 +156,11 @@ class PhabricatorSetup {
       $root);
     if ($err) {
       self::writeFailure();
-      self::write("Unable to execute scripts/setup/pcntl_available.php.");
+      self::write("Unable to execute scripts/setup/pcntl_available.php to ".
+                  "test for the availability of pcntl from the CLI.\n".
+                  "   err: {$err}\n".
+                  "stdout: {$stdout}\n".
+                  "stderr: {$stderr}\n");
       return;
     } else {
       if (trim($stdout) == 'YES') {
