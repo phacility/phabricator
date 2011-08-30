@@ -285,7 +285,6 @@ final class DifferentialRevisionCommentView extends AphrontView {
           '</div>'.
           $inline_render.
         '</div>'.
-        $content_source->render().
       '</div>');
   }
 
