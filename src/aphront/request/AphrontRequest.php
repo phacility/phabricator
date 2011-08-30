@@ -204,33 +204,16 @@ class AphrontRequest {
       $expire = time() + (60 * 60 * 24 * 365 * 5);
     }
 
-    if ($value == '') {
-      // NOTE: If we're clearing the cookie, also clear it on the entire
-      // domain and both HTTP/HTTPS versions. This allows us to clear older
-      // cookies which we didn't scope as tightly. Eventually we could remove
-      // this, although it doesn't really hurt us. Basically, we're just making
-      // really sure that cookies get cleared when we try to clear them.
-      $secure_options = array(true, false);
-      $domain_options = array('', $base_domain);
-    } else {
-      // Otherwise, when setting cookies, set only one tightly-scoped cookie.
-      $is_secure = ($base_protocol == 'https');
-      $secure_options = array($is_secure);
-      $domain_options = array($base_domain);
-    }
+    $is_secure = ($base_protocol == 'https');
 
-    foreach ($secure_options as $cookie_secure) {
-      foreach ($domain_options as $cookie_domain) {
-        setcookie(
-          $name,
-          $value,
-          $expire,
-          $path = '/',
-          $cookie_domain,
-          $cookie_secure,
-          $http_only = true);
-      }
-    }
+    setcookie(
+      $name,
+      $value,
+      $expire,
+      $path = '/',
+      $base_domain,
+      $is_secure,
+      $http_only = true);
   }
 
   final public function setUser($user) {
