@@ -193,6 +193,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/differential/DifferentialInlineCommentEditor.js',
   ),
+  'differential-local-commits-view-css' =>
+  array(
+    'uri' => '/res/8cdacd82/rsrc/css/application/differential/local-commits-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/differential/local-commits-view.css',
+  ),
   'differential-revision-add-comment-css' =>
   array(
     'uri' => '/res/849748d3/rsrc/css/application/differential/add-comment.css',

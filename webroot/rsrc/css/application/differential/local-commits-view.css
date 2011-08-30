@@ -1,0 +1,30 @@
+/**
+ * @provides differential-local-commits-view-css
+ */
+
+.differential-local-commits-table {
+  width: 100%;
+  font-size: 11px;
+  border-collapse: separate;
+  border-spacing: 1px 2px;
+}
+
+.differential-local-commits-table th {
+  color: #666666;
+  padding: 4px 6px;
+}
+
+.differential-local-commits-table tr td {
+  background: #dcdeca;
+}
+
+.differential-local-commits-table td {
+  padding: 4px 6px;
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+.differential-local-commits-table td.summary {
+  white-space: normal;
+  width: 100%;
+}

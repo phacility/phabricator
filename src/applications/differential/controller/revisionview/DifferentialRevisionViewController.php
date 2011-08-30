@@ -58,7 +58,12 @@ class DifferentialRevisionViewController extends DifferentialController {
       $diff_vs = null;
     }
 
-    $aux_fields = $this->loadAuxiliaryFields($revision, $target);
+    list($aux_fields, $props) = $this->loadAuxiliaryFieldsAndProperties(
+      $revision,
+      $target,
+      array(
+        'local:commits',
+      ));
 
     list($changesets, $vs_map, $rendering_references) =
       $this->loadChangesetsAndVsMap($diffs, $diff_vs, $target);
@@ -204,13 +209,16 @@ class DifferentialRevisionViewController extends DifferentialController {
     $diff_history->setSelectedDiffID($target->getID());
     $diff_history->setSelectedWhitespace($whitespace);
 
+    $local_view = new DifferentialLocalCommitsView();
+    $local_view->setUser($user);
+    $local_view->setLocalCommits(idx($props, 'local:commits'));
+
     $toc_view = new DifferentialDiffTableOfContentsView();
     $toc_view->setChangesets($changesets);
     $toc_view->setStandaloneViewLink(empty($visible_changesets));
     $toc_view->setVsMap($vs_map);
     $toc_view->setRevisionID($revision->getID());
     $toc_view->setWhitespace($whitespace);
-
 
     $draft = id(new PhabricatorDraft())->loadOneWhere(
       'authorPHID = %s AND draftKey = %s',
@@ -247,6 +255,7 @@ class DifferentialRevisionViewController extends DifferentialController {
           $comment_view->render().
           $diff_history->render().
           $warning.
+          $local_view->render().
           $toc_view->render().
           $changeset_view->render().
           $comment_form->render()),
@@ -504,9 +513,11 @@ class DifferentialRevisionViewController extends DifferentialController {
         ->replace();
   }
 
-  private function loadAuxiliaryFields(
+  private function loadAuxiliaryFieldsAndProperties(
     DifferentialRevision $revision,
-    DifferentialDiff $diff) {
+    DifferentialDiff $diff,
+    array $special_properties) {
+
     $aux_fields = DifferentialFieldSelector::newSelector()
       ->getFieldSpecifications();
     foreach ($aux_fields as $key => $aux_field) {
@@ -526,6 +537,10 @@ class DifferentialRevisionViewController extends DifferentialController {
     }
 
     $required_properties = array_mergev($aux_props);
+    $required_properties = array_merge(
+      $required_properties,
+      $special_properties);
+
     $property_map = array();
     if ($required_properties) {
       $properties = id(new DifferentialDiffProperty())->loadAllWhere(
@@ -549,7 +564,11 @@ class DifferentialRevisionViewController extends DifferentialController {
       $aux_field->setDiffProperties($props);
     }
 
-    return $aux_fields;
+    return array(
+      $aux_fields,
+      array_select_keys(
+        $property_map,
+        $special_properties));
   }
 
 

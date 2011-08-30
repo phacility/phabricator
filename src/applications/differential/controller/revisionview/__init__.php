@@ -23,6 +23,7 @@ phutil_require_module('phabricator', 'applications/differential/storage/viewtime
 phutil_require_module('phabricator', 'applications/differential/view/addcomment');
 phutil_require_module('phabricator', 'applications/differential/view/changesetlistview');
 phutil_require_module('phabricator', 'applications/differential/view/difftableofcontents');
+phutil_require_module('phabricator', 'applications/differential/view/localcommits');
 phutil_require_module('phabricator', 'applications/differential/view/primarypane');
 phutil_require_module('phabricator', 'applications/differential/view/revisioncommentlist');
 phutil_require_module('phabricator', 'applications/differential/view/revisiondetail');
