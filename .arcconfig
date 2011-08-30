@@ -7,5 +7,6 @@
   "remote_hooks_installed" : true,
   "phutil_libraries" : {
     "phabricator" : "src/"
-  }
+  },
+  "lint.xhpast.naminghook" : "PhabricatorSymbolNameLinter"
 }
