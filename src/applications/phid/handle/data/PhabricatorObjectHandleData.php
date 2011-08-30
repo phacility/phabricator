@@ -115,6 +115,7 @@ class PhabricatorObjectHandleData {
               case ManiphestTaskOwner::OWNER_UP_FOR_GRABS:
                 $handle->setName('Up For Grabs');
                 $handle->setFullName('upforgrabs (Up For Grabs)');
+                $handle->setComplete(true);
                 break;
               default:
                 $handle->setName('Foul Magicks');
@@ -145,6 +146,7 @@ class PhabricatorObjectHandleData {
               $handle->setFullName(
                 $user->getUsername().' ('.$user->getRealName().')');
               $handle->setAlternateID($user->getID());
+              $handle->setComplete(true);
 
               $img_phid = $user->getProfileImagePHID();
               if ($img_phid) {
@@ -176,6 +178,7 @@ class PhabricatorObjectHandleData {
               $handle->setName($list->getName());
               $handle->setURI($list->getURI());
               $handle->setFullName($list->getName());
+              $handle->setComplete(true);
             }
             $handles[$phid] = $handle;
           }
@@ -199,6 +202,7 @@ class PhabricatorObjectHandleData {
               $handle->setName($rev->getTitle());
               $handle->setURI('/D'.$rev->getID());
               $handle->setFullName('D'.$rev->getID().': '.$rev->getTitle());
+              $handle->setComplete(true);
 
               $status = $rev->getStatus();
               if (($status == DifferentialRevisionStatus::COMMITTED) ||
@@ -256,6 +260,7 @@ class PhabricatorObjectHandleData {
               $handle->setURI('/r'.$callsign.$commit_identifier);
               $handle->setFullName('r'.$callsign.$commit_identifier);
               $handle->setTimestamp($commit->getEpoch());
+              $handle->setComplete(true);
             }
             $handles[$phid] = $handle;
           }
@@ -279,6 +284,7 @@ class PhabricatorObjectHandleData {
               $handle->setName($task->getTitle());
               $handle->setURI('/T'.$task->getID());
               $handle->setFullName('T'.$task->getID().': '.$task->getTitle());
+              $handle->setComplete(true);
               if ($task->getStatus() != ManiphestTaskStatus::STATUS_OPEN) {
                 $closed = PhabricatorObjectHandleStatus::STATUS_CLOSED;
                 $handle->setStatus($closed);
@@ -305,6 +311,7 @@ class PhabricatorObjectHandleData {
               $file = $files[$phid];
               $handle->setName($file->getName());
               $handle->setURI($file->getViewURI());
+              $handle->setComplete(true);
             }
             $handles[$phid] = $handle;
           }
@@ -327,6 +334,7 @@ class PhabricatorObjectHandleData {
               $project = $projects[$phid];
               $handle->setName($project->getName());
               $handle->setURI('/project/view/'.$project->getID().'/');
+              $handle->setComplete(true);
             }
             $handles[$phid] = $handle;
           }
@@ -349,6 +357,7 @@ class PhabricatorObjectHandleData {
               $repository = $repositories[$phid];
               $handle->setName($repository->getCallsign());
               $handle->setURI('/diffusion/'.$repository->getCallsign().'/');
+              $handle->setComplete(true);
             }
             $handles[$phid] = $handle;
           }
@@ -371,6 +380,7 @@ class PhabricatorObjectHandleData {
               $package = $packages[$phid];
               $handle->setName($package->getName());
               $handle->setURI('/owners/package/'.$package->getID().'/');
+              $handle->setComplete(true);
             }
             $handles[$phid] = $handle;
           }
@@ -391,6 +401,7 @@ class PhabricatorObjectHandleData {
             } else {
               $project = $projects[$phid];
               $handle->setName($project->getName());
+              $handle->setComplete(true);
             }
             $handles[$phid] = $handle;
           }
@@ -420,6 +431,7 @@ class PhabricatorObjectHandleData {
               $info = $documents[$phid];
               $handle->setName($info['title']);
               $handle->setURI(PhrictionDocument::getSlugURI($info['slug']));
+              $handle->setComplete(true);
             }
             $handles[$phid] = $handle;
           }

@@ -19,29 +19,23 @@
 /**
  * @group conduit
  */
-final class ConduitAPI_user_whoami_Method
-  extends ConduitAPI_user_Method {
+abstract class ConduitAPI_phid_Method extends ConduitAPIMethod {
 
-  public function getMethodDescription() {
-    return "Retrieve information about the logged-in user.";
-  }
+  protected function buildHandleInformationDictionary(
+    PhabricatorObjectHandle $handle) {
 
-  public function defineParamTypes() {
     return array(
+      'phid'      => $handle->getPHID(),
+      'uri'       => PhabricatorEnv::getProductionURI($handle->getURI()),
+
+      'typeName'  => $handle->getTypeName(),
+      'type'      => $handle->getType(),
+
+      'name'      => $handle->getName(),
+      'fullName'  => $handle->getFullName(),
+
+      'status'    => $handle->getStatus(),
     );
-  }
-
-  public function defineReturnType() {
-    return 'nonempty dict<string, wild>';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
-  }
-
-  protected function execute(ConduitAPIRequest $request) {
-    return $this->buildUserInformationDictionary($request->getUser());
   }
 
 }

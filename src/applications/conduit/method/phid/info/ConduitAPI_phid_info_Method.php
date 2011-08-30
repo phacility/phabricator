@@ -19,15 +19,16 @@
 /**
  * @group conduit
  */
-final class ConduitAPI_user_whoami_Method
-  extends ConduitAPI_user_Method {
+final class ConduitAPI_phid_info_Method
+  extends ConduitAPI_phid_Method {
 
   public function getMethodDescription() {
-    return "Retrieve information about the logged-in user.";
+    return "Retrieve information about an arbitrary PHID.";
   }
 
   public function defineParamTypes() {
     return array(
+      'phid' => 'required phid',
     );
   }
 
@@ -37,11 +38,23 @@ final class ConduitAPI_user_whoami_Method
 
   public function defineErrorTypes() {
     return array(
+      'ERR-BAD-PHID' => 'No such object exists.',
     );
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    return $this->buildUserInformationDictionary($request->getUser());
+
+    $phid = $request->getValue('phid');
+
+    $handles = id(new PhabricatorObjectHandleData(array($phid)))
+      ->loadHandles();
+
+    $handle = $handles[$phid];
+    if (!$handle->isComplete()) {
+      throw new ConduitException('ERR-BAD-PHID');
+    }
+
+    return $this->buildHandleInformationDictionary($handle);
   }
 
 }

@@ -19,15 +19,16 @@
 /**
  * @group conduit
  */
-final class ConduitAPI_user_whoami_Method
+final class ConduitAPI_user_info_Method
   extends ConduitAPI_user_Method {
 
   public function getMethodDescription() {
-    return "Retrieve information about the logged-in user.";
+    return "Retrieve information about a user by PHID.";
   }
 
   public function defineParamTypes() {
     return array(
+      'phid' => 'required phid',
     );
   }
 
@@ -37,11 +38,21 @@ final class ConduitAPI_user_whoami_Method
 
   public function defineErrorTypes() {
     return array(
+      'ERR-BAD-USER' => 'No such user exists.',
     );
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    return $this->buildUserInformationDictionary($request->getUser());
+
+    $user = id(new PhabricatorUser())->loadOneWhere(
+      'phid = %s',
+      $request->getValue('phid'));
+
+    if (!$user) {
+      throw new ConduitException('ERR-BAD-USER');
+    }
+
+    return $this->buildUserInformationDictionary($user);
   }
 
 }

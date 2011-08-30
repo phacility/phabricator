@@ -28,7 +28,7 @@ class PhabricatorObjectHandle {
   private $timestamp;
   private $alternateID;
   private $status = 'open';
-
+  private $complete;
 
   public function setURI($uri) {
     $this->uri = $uri;
@@ -133,6 +133,27 @@ class PhabricatorObjectHandle {
     );
 
     return idx($map, $this->getType());
+  }
+
+  public function setComplete($complete) {
+    $this->complete = $complete;
+    return $this;
+  }
+
+  /**
+   * Determine if the handle represents an object which was completely loaded
+   * (i.e., the underlying object exists) vs an object which could not be
+   * completely loaded (e.g., the type or data for the PHID could not be
+   * identified or located).
+   *
+   * Basically, @{class:PhabricatorObjectHandleData} gives you back a handle for
+   * any PHID you give it, but it gives you a complete handle only for valid
+   * PHIDs.
+   *
+   * @return bool True if the handle represents a complete object.
+   */
+  public function isComplete() {
+    return $this->complete;
   }
 
   public function renderLink() {

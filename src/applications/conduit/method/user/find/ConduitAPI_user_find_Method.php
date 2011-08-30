@@ -19,7 +19,8 @@
 /**
  * @group conduit
  */
-class ConduitAPI_user_find_Method extends ConduitAPIMethod {
+final class ConduitAPI_user_find_Method
+  extends ConduitAPI_user_Method {
 
   public function getMethodDescription() {
     return "Find user PHIDs which correspond to provided user aliases. ".
