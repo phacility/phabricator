@@ -30,9 +30,6 @@ class PhrictionEditController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $slug = $request->getStr('slug');
-    $slug = PhrictionDocument::normalizeSlug($slug);
-
     if ($this->id) {
       $document = id(new PhrictionDocument())->load($this->id);
       if (!$document) {
@@ -51,7 +48,14 @@ class PhrictionEditController
       } else {
         $content = id(new PhrictionContent())->load($document->getContentID());
       }
-    } else if ($slug) {
+
+    } else {
+      $slug = $request->getStr('slug');
+      $slug = PhrictionDocument::normalizeSlug($slug);
+      if (!$slug) {
+        return new Aphront404Response();
+      }
+
       $document = id(new PhrictionDocument())->loadOneWhere(
         'slug = %s',
         $slug);
@@ -68,8 +72,6 @@ class PhrictionEditController
         $default_title = PhrictionDocument::getDefaultSlugTitle($slug);
         $content->setTitle($default_title);
       }
-    } else {
-      return new Aphront404Response();
     }
 
     require_celerity_resource('phriction-document-css');
@@ -88,7 +90,7 @@ class PhrictionEditController
       }
 
       if (!count($errors)) {
-        $editor = id(PhrictionDocumentEditor::newForSlug($slug))
+        $editor = id(PhrictionDocumentEditor::newForSlug($document->getSlug()))
           ->setUser($user)
           ->setTitle($title)
           ->setContent($request->getStr('content'))
@@ -96,7 +98,7 @@ class PhrictionEditController
 
         $editor->save();
 
-        $uri = PhrictionDocument::getSlugURI($slug);
+        $uri = PhrictionDocument::getSlugURI($document->getSlug());
         return id(new AphrontRedirectResponse())->setURI($uri);
       }
     }
@@ -132,7 +134,7 @@ class PhrictionEditController
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setAction($request->getRequestURI()->getPath())
-      ->addHiddenInput('slug', $slug)
+      ->addHiddenInput('slug', $document->getSlug())
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Title')
