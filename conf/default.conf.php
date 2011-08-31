@@ -602,7 +602,6 @@ return array(
   // projects that want to expose an activity feed on the project homepage.
   'feed.public' => false,
 
-
 // -- Customization --------------------------------------------------------- //
 
   // Paths to additional phutil libraries to load.
@@ -636,7 +635,13 @@ return array(
   // settings are the defaults.)
   'celerity.force-disk-reads' => false,
 
-  // -- Pygments ------------------------------------------------------------ //
+  // You can respond to various application events by installing listeners,
+  // which will receive callbacks when interesting things occur. Specify a list
+  // of classes which extend PhabricatorEventListener here.
+  'events.listeners'  => array(),
+
+// -- Pygments -------------------------------------------------------------- //
+
   // Phabricator can highlight PHP by default, but if you want syntax
   // highlighting for other languages you should install the python package
   // 'Pygments', make sure the 'pygmentize' script is available in the

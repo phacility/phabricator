@@ -118,6 +118,7 @@ $application->willBuildRequest();
 $request = $application->buildRequest();
 
 $write_guard = new AphrontWriteGuard($request);
+PhabricatorEventEngine::initialize();
 
 $application->setRequest($request);
 list($controller, $uri_data) = $application->buildController();

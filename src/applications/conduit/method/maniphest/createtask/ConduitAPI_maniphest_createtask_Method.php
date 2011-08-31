@@ -103,6 +103,20 @@ final class ConduitAPI_maniphest_createtask_Method
       $transactions[] = $transaction;
     }
 
+    $event = new PhabricatorEvent(
+      PhabricatorEventType::TYPE_MANIPHEST_WILLEDITTASK,
+      array(
+        'task'          => $task,
+        'new'           => true,
+        'transactions'  => $transactions,
+      ));
+    $event->setUser($request->getUser());
+    $event->setConduitRequest($request);
+    PhabricatorEventEngine::dispatchEvent($event);
+
+    $task = $event->getValue('task');
+    $transactions = $event->getValue('transactions');
+
     $editor = new ManiphestTransactionEditor();
     $editor->applyTransactions($task, $transactions);
 

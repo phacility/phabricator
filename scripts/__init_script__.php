@@ -33,3 +33,4 @@ phutil_load_library(dirname(__FILE__).'/../src/');
 // NOTE: This is dangerous in general, but we know we're in a script context and
 // are not vulnerable to CSRF.
 AphrontWriteGuard::allowDangerousUnguardedWrites(true);
+PhabricatorEventEngine::initialize();

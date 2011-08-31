@@ -1,0 +1,27 @@
+@title Events User Guide: Installing Event Listeners
+@group userguide
+
+Using Phabricator event listeners to customize behavior.
+
+= Overview =
+
+Phabricator allows you to install custom runtime event listeners which can react
+to certain things happening (like a Maniphest Task being edited) and run custom
+code to perform logging, synchronize with other systems, or modify workflows.
+
+NOTE: This feature is new and experimental, so few events are available and
+things might not be completely stable.
+
+= Available Events =
+
+== PhabricatorEventType::TYPE_MANIPHEST_WILLEDITTASK ==
+
+This event is dispatched before a task is edited, and allows you to respond to
+or alter the edit. Data available on this event:
+
+  - ##task## The {@class:ManiphestTask} being edited.
+  - ##transactions## The list of edits (objects of class
+    @{class:ManiphestTransaction}) being applied.
+  - ##new## A boolean indicating if this task is being created.
+  - ##mail## If this edit originates from email, the
+    @{class:PhabricatorMetaMTAReceivedMail} object.

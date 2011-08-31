@@ -150,6 +150,21 @@ class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
       $xactions[] = $file_xaction;
     }
 
+    $event = new PhabricatorEvent(
+      PhabricatorEventType::TYPE_MANIPHEST_WILLEDITTASK,
+      array(
+        'task'          => $task,
+        'mail'          => $mail,
+        'new'           => $is_new_task,
+        'transactions'  => $xactions,
+      ));
+    $event->setUser($user);
+    PhabricatorEventEngine::dispatchEvent($event);
+
+    $task = $event->getValue('task');
+    $xactions = $event->getValue('transactions');
+
+
     $editor = new ManiphestTransactionEditor();
     $editor->setParentMessageID($mail->getMessageID());
     $editor->applyTransactions($task, $xactions);

@@ -229,6 +229,20 @@ class ManiphestTransactionSaveController extends ManiphestController {
       $transaction->setContentSource($content_source);
     }
 
+    $event = new PhabricatorEvent(
+      PhabricatorEventType::TYPE_MANIPHEST_WILLEDITTASK,
+      array(
+        'task'          => $task,
+        'new'           => false,
+        'transactions'  => $transactions,
+      ));
+    $event->setUser($user);
+    $event->setAphrontRequest($request);
+    PhabricatorEventEngine::dispatchEvent($event);
+
+    $task = $event->getValue('task');
+    $transactions = $event->getValue('transactions');
+
     $editor = new ManiphestTransactionEditor();
     $editor->applyTransactions($task, $transactions);
 

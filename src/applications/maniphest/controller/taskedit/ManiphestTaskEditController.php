@@ -201,6 +201,21 @@ class ManiphestTaskEditController extends ManiphestController {
         }
 
         if ($transactions) {
+
+          $event = new PhabricatorEvent(
+            PhabricatorEventType::TYPE_MANIPHEST_WILLEDITTASK,
+            array(
+              'task'          => $task,
+              'new'           => !$task->getID(),
+              'transactions'  => $transactions,
+            ));
+          $event->setUser($user);
+          $event->setAphrontRequest($request);
+          PhabricatorEventEngine::dispatchEvent($event);
+
+          $task = $event->getValue('task');
+          $transactions = $event->getValue('transactions');
+
           $editor = new ManiphestTransactionEditor();
           $editor->applyTransactions($task, $transactions);
         }
