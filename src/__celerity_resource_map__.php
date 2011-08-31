@@ -451,7 +451,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-differential-edit-inline-comments' =>
   array(
-    'uri' => '/res/9d4ca5d7/rsrc/js/application/differential/behavior-edit-inline-comments.js',
+    'uri' => '/res/af3bf064/rsrc/js/application/differential/behavior-edit-inline-comments.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1427,20 +1427,6 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/3f2092d7/differential.pkg.css',
       'type' => 'css',
     ),
-    '66a154fc' =>
-    array(
-      'name' => 'differential.pkg.js',
-      'symbols' =>
-      array(
-        0 => 'javelin-behavior-differential-feedback-preview',
-        1 => 'javelin-behavior-differential-edit-inline-comments',
-        2 => 'javelin-behavior-differential-populate',
-        3 => 'javelin-behavior-differential-show-more',
-        4 => 'javelin-behavior-differential-diff-radios',
-      ),
-      'uri' => '/res/pkg/66a154fc/differential.pkg.js',
-      'type' => 'js',
-    ),
     '95c67dcd' =>
     array(
       'name' => 'workflow.pkg.js',
@@ -1455,6 +1441,20 @@ celerity_register_resource_map(array(
         6 => 'javelin-behavior-phabricator-keyboard-shortcuts',
       ),
       'uri' => '/res/pkg/95c67dcd/workflow.pkg.js',
+      'type' => 'js',
+    ),
+    '982ad44b' =>
+    array(
+      'name' => 'differential.pkg.js',
+      'symbols' =>
+      array(
+        0 => 'javelin-behavior-differential-feedback-preview',
+        1 => 'javelin-behavior-differential-edit-inline-comments',
+        2 => 'javelin-behavior-differential-populate',
+        3 => 'javelin-behavior-differential-show-more',
+        4 => 'javelin-behavior-differential-diff-radios',
+      ),
+      'uri' => '/res/pkg/982ad44b/differential.pkg.js',
       'type' => 'js',
     ),
     'ac869011' =>
@@ -1521,11 +1521,11 @@ celerity_register_resource_map(array(
     'javelin-behavior' => '3dbf4083',
     'javelin-behavior-aphront-basic-tokenizer' => 'ac869011',
     'javelin-behavior-aphront-form-disable-on-submit' => '95c67dcd',
-    'javelin-behavior-differential-diff-radios' => '66a154fc',
-    'javelin-behavior-differential-edit-inline-comments' => '66a154fc',
-    'javelin-behavior-differential-feedback-preview' => '66a154fc',
-    'javelin-behavior-differential-populate' => '66a154fc',
-    'javelin-behavior-differential-show-more' => '66a154fc',
+    'javelin-behavior-differential-diff-radios' => '982ad44b',
+    'javelin-behavior-differential-edit-inline-comments' => '982ad44b',
+    'javelin-behavior-differential-feedback-preview' => '982ad44b',
+    'javelin-behavior-differential-populate' => '982ad44b',
+    'javelin-behavior-differential-show-more' => '982ad44b',
     'javelin-behavior-phabricator-keyboard-shortcuts' => '95c67dcd',
     'javelin-behavior-workflow' => '95c67dcd',
     'javelin-dom' => '3dbf4083',

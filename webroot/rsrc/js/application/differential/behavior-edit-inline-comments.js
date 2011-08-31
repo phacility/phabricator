@@ -186,12 +186,19 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     var node = e.getNode('differential-inline-comment');
     var row  = node.parentNode.parentNode;
 
+    var original = data.original;
+    if (op == 'reply') {
+      // If the user hit "reply", the original text is empty (a new reply), not
+      // the text of the comment they're replying to.
+      original = '';
+    }
+
     editor = new JX.DifferentialInlineCommentEditor(config.uri)
       .setTemplates(config.undo_templates)
       .setOperation(op)
       .setID(data.id)
       .setOnRight(data.on_right)
-      .setOriginalText(data.original)
+      .setOriginalText(original)
       .setRow(row)
       .setTable(row.parentNode)
       .start();
