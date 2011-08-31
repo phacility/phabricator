@@ -145,6 +145,21 @@ class PhabricatorSetup {
       }
     }
 
+    list($err, $stdout, $stderr) = exec_manual(
+      '/usr/bin/env php -r %s',
+      'exit;');
+    if ($err) {
+      self::writeFailure();
+      self::write("Unable to execute 'php' on the command line from the web ".
+                  "server. Verify that 'php' is in the webserver's PATH.\n".
+                  "   err: {$err}\n".
+                  "stdout: {$stdout}\n".
+                  "stderr: {$stderr}\n");
+      return;
+    } else {
+      self::write(" okay  PHP is available from the command line.\n");
+    }
+
     $root = dirname(phutil_get_library_root('phabricator'));
 
     // On RHEL6, doing a distro install of pcntl makes it available from the
