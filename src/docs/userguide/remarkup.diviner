@@ -187,3 +187,9 @@ With a pipe (##|##), you can retitle the link. Use this to mislead your
 opponents:
 
   Check out these [[legal/boring_documents/ | exciting legal documents]]!
+
+You can also use this as an explicit syntax for other web links, either within
+Phabricator or on the internet at large:
+
+  [[/herald/transcript/ | Herald Transcripts]]
+  [[http://www.boring-legal-documents.com/ | exciting legal documents]]
