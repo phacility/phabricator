@@ -145,6 +145,22 @@ class AphrontRequest {
 
     $valid = $this->getUser()->validateCSRFToken($token);
     if (!$valid) {
+
+      // Add some diagnostic details so we can figure out if some CSRF issues
+      // are JS problems or people accessing Ajax URIs directly with their
+      // browsers.
+      if ($token) {
+        $token_info = "with an invalid CSRF token";
+      } else {
+        $token_info = "without a CSRF token";
+      }
+
+      if ($this->isAjax()) {
+        $more_info = "(This was an Ajax request, {$token_info}.)";
+      } else {
+        $more_info = "(This was a web request, {$token_info}.)";
+      }
+
       // This should only be able to happen if you load a form, pull your
       // internet for 6 hours, and then reconnect and immediately submit,
       // but give the user some indication of what happened since the workflow
@@ -155,7 +171,8 @@ class AphrontRequest {
         "certain type of login hijacking attack. However, the token can ".
         "become invalid if you leave a page open for more than six hours ".
         "without a connection to the internet. To fix this problem: reload ".
-        "the page, and then resubmit it.");
+        "the page, and then resubmit it.\n\n".
+        $more_info);
     }
 
     return true;
