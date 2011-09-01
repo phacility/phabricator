@@ -1180,7 +1180,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-content-source-view-css' =>
   array(
-    'uri' => '/res/7147f14c/rsrc/css/application/contentsource/content-source-view.css',
+    'uri' => '/res/361cae20/rsrc/css/application/contentsource/content-source-view.css',
     'type' => 'css',
     'requires' =>
     array(
