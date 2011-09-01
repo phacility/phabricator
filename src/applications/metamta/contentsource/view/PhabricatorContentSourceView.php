@@ -41,6 +41,7 @@ final class PhabricatorContentSourceView extends AphrontView {
       PhabricatorContentSource::SOURCE_EMAIL    => 'Email',
       PhabricatorContentSource::SOURCE_MOBILE   => 'Mobile',
       PhabricatorContentSource::SOURCE_TABLET   => 'Tablet',
+      PhabricatorContentSource::SOURCE_FAX      => 'Fax',
     );
 
     $source = $this->contentSource->getSource();

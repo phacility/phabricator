@@ -24,6 +24,7 @@ final class PhabricatorContentSource {
   const SOURCE_CONDUIT  = 'conduit';
   const SOURCE_MOBILE   = 'mobile';
   const SOURCE_TABLET   = 'tablet';
+  const SOURCE_FAX      = 'fax';
 
   private $source;
   private $params = array();
