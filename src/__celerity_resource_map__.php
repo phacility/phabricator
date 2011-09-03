@@ -652,6 +652,17 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/maniphest/behavior-transaction-preview.js',
   ),
+  0 =>
+  array(
+    'uri' => '/res/1da00bfe/rsrc/js/javelin/lib/__tests__/URI.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-uri',
+      1 => 'javelin-php-serializer',
+    ),
+    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
+  ),
   'javelin-behavior-owners-path-editor' =>
   array(
     'uri' => '/res/9cf78ffc/rsrc/js/application/owners/owners-path-editor.js',
@@ -1282,15 +1293,6 @@ celerity_register_resource_map(array(
       2 => 'javelin-dom',
     ),
     'disk' => '/rsrc/js/application/core/Prefab.js',
-  ),
-  0 =>
-  array(
-    'uri' => '/res/936e8e81/rsrc/js/javelin/docs/onload.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/js/javelin/docs/onload.js',
   ),
   'phabricator-profile-css' =>
   array(

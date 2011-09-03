@@ -32,6 +32,8 @@ class PhabricatorRepository extends PhabricatorRepositoryDAO {
   protected $versionControlSystem;
   protected $details = array();
 
+  private $sshKeyfile;
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -53,6 +55,185 @@ class PhabricatorRepository extends PhabricatorRepositoryDAO {
   public function setDetail($key, $value) {
     $this->details[$key] = $value;
     return $this;
+  }
+
+  public function getRemoteURI() {
+    $raw_uri = $this->getDetail('remote-uri');
+
+    $vcs = $this->getVersionControlSystem();
+    $is_git = ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_GIT);
+
+    // If there's no protocol (git implicit SSH) reformat the URI to be a
+    // normal URI. These git URIs look like "user@domain.com:path" instead of
+    // "ssh://user@domain/path".
+    $uri = new PhutilURI($raw_uri);
+    if ($is_git && !$uri->getProtocol()) {
+      list($domain, $path) = explode(':', $raw_uri, 2);
+      $uri = new PhutilURI('ssh://'.$domain.'/'.$path);
+    }
+
+    if ($this->isSSHProtocol($uri->getProtocol())) {
+      if ($this->getSSHLogin()) {
+        $uri->setUser($this->getSSHLogin());
+      }
+    }
+
+    return (string)$uri;
+  }
+
+  public function getLocalPath() {
+    return $this->getDetail('local-path');
+  }
+
+  public function execRemoteCommand($pattern /*, $arg, ... */) {
+    $args = func_get_args();
+    $args = $this->formatRemoteCommand($args);
+    return call_user_func_array('exec_manual', $args);
+  }
+
+  public function execxRemoteCommand($pattern /*, $arg, ... */) {
+    $args = func_get_args();
+    $args = $this->formatRemoteCommand($args);
+    return call_user_func_array('execx', $args);
+  }
+
+  public function passthruRemoteCommand($pattern /*, $arg, ... */) {
+    $args = func_get_args();
+    $args = $this->formatRemoteCommand($args);
+    return call_user_func_array('phutil_passthru', $args);
+  }
+
+  public function execLocalCommand($pattern /*, $arg, ... */) {
+    $args = func_get_args();
+    $args = $this->formatLocalCommand($args);
+    return call_user_func_array('exec_manual', $args);
+  }
+
+  public function execxLocalCommand($pattern /*, $arg, ... */) {
+    $args = func_get_args();
+    $args = $this->formatLocalCommand($args);
+    return call_user_func_array('execx', $args);
+  }
+
+  public function passthruLocalCommand($pattern /*, $arg, ... */) {
+    $args = func_get_args();
+    $args = $this->formatLocalCommand($args);
+    return call_user_func_array('phutil_passthru', $args);
+  }
+
+  private function formatRemoteCommand(array $args) {
+    $pattern = $args[0];
+    $args = array_slice($args, 1);
+
+    if ($this->shouldUseSSH()) {
+      switch ($this->getVersionControlSystem()) {
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+          $pattern = "SVN_SSH=%s svn {$pattern}";
+          array_unshift(
+            $args,
+            csprintf(
+              'ssh -l %s -i %s',
+              $this->getSSHLogin(),
+              $this->getSSHKeyfile()));
+          break;
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+          $command = call_user_func_array(
+            'csprintf',
+            array_merge(
+              array(
+                "(ssh-add %s && git {$pattern})",
+                $this->getSSHKeyfile(),
+              ),
+              $args));
+          $pattern = "ssh-agent sh -c %s";
+          $args = array($command);
+          break;
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+          $pattern = "hg --config ui.ssh=%s {$pattern}";
+          array_unshift(
+            $args,
+            csprintf(
+              'ssh -l %s -i %s',
+              $this->getSSHLogin(),
+              $this->getSSHKeyfile()));
+          break;
+        default:
+          throw new Exception("Unrecognized version control system.");
+      }
+    } else {
+      switch ($this->getVersionControlSystem()) {
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+          $pattern = "svn {$pattern}";
+          break;
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+          $pattern = "git {$pattern}";
+          break;
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+          $pattern = "hg {$pattern}";
+          break;
+        default:
+          throw new Exception("Unrecognized version control system.");
+      }
+    }
+
+    array_unshift($args, $pattern);
+
+    return $args;
+  }
+
+  private function formatLocalCommand(array $args) {
+    $pattern = $args[0];
+    $args = array_slice($args, 1);
+
+    switch ($this->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $pattern = "(cd %s && svn {$pattern})";
+        array_unshift($args, $this->getLocalPath());
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        $pattern = "(cd %s && git {$pattern})";
+        array_unshift($args, $this->getLocalPath());
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $pattern = "(cd %s && hg {$pattern})";
+        array_unshift($args, $this->getLocalPath());
+        break;
+      default:
+        throw new Exception("Unrecognized version control system.");
+    }
+
+    array_unshift($args, $pattern);
+
+    return $args;
+  }
+
+  private function getSSHLogin() {
+    return $this->getDetail('ssh-login');
+  }
+
+  private function getSSHKeyfile() {
+    if (!$this->sshKeyfile) {
+      $keyfile = new TempFile('phabricator-repository-ssh-key');
+      chmod($keyfile, 0600);
+      Filesystem::writeFile($keyfile, $this->getDetail('ssh-key'));
+      $this->sshKeyfile = $keyfile;
+    }
+
+    return (string)$this->sshKeyfile;
+  }
+
+  public function shouldUseSSH() {
+    $uri = new PhutilURI($this->getRemoteURI());
+    $protocol = $uri->getProtocol();
+    if ($this->isSSHProtocol($protocol)) {
+      return (bool)$this->getDetail('ssh-key');
+    } else {
+      return false;
+    }
+  }
+
+  private function isSSHProtocol($protocol) {
+    return ($protocol == 'ssh' || $protocol == 'svn+ssh');
   }
 
 }

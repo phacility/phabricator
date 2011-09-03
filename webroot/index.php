@@ -250,7 +250,7 @@ function phabricator_shutdown() {
     return;
   }
 
-  if ($event['type'] != E_ERROR) {
+  if ($event['type'] != E_ERROR && $event['type'] != E_PARSE) {
     return;
   }
 

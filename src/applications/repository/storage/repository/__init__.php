@@ -8,9 +8,15 @@
 
 phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/phid/storage/phid');
+phutil_require_module('phabricator', 'applications/repository/constants/repositorytype');
 phutil_require_module('phabricator', 'applications/repository/storage/base');
 
+phutil_require_module('phutil', 'filesystem');
+phutil_require_module('phutil', 'filesystem/tempfile');
+phutil_require_module('phutil', 'future/exec');
+phutil_require_module('phutil', 'parser/uri');
 phutil_require_module('phutil', 'utils');
+phutil_require_module('phutil', 'xsprintf/csprintf');
 
 
 phutil_require_source('PhabricatorRepository.php');
