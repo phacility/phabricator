@@ -209,7 +209,7 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
         $this->requireConnection();
 
         // TODO: Do we need to include transactional statements here?
-        $is_write = !preg_match('/^(SELECT|SHOW)\s/', $raw_query);
+        $is_write = !preg_match('/^(SELECT|SHOW|EXPLAIN)\s/', $raw_query);
         if ($is_write) {
           AphrontWriteGuard::willWrite();
         }

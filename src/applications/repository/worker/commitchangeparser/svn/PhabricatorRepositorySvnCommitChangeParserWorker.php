@@ -496,11 +496,59 @@ class PhabricatorRepositorySvnCommitChangeParserWorker
     $commit_table = new PhabricatorRepositoryCommit();
     $commit_data = queryfx_all(
       $commit_table->establishConnection('w'),
-      'SELECT id, commitIdentifier FROM %T WHERE commitIdentifier in (%Ld)',
+      'SELECT id, commitIdentifier FROM %T
+        WHERE repositoryID = %d AND commitIdentifier in (%Ld)',
       $commit_table->getTableName(),
+      $repository->getID(),
       $commits);
 
-    return ipull($commit_data, 'id', 'commitIdentifier');
+    $commit_map = ipull($commit_data, 'id', 'commitIdentifier');
+
+    $need = array();
+    foreach ($commits as $commit) {
+      if (empty($commit_map[$commit])) {
+        $need[] = $commit;
+      }
+    }
+
+    // If we are parsing a Subversion repository and have been configured to
+    // import only some subdirectory of it, we may find commits which reference
+    // other foreign commits outside of the directory (for instance, because of
+    // a move or copy). Rather than trying to execute full parses on them, just
+    // create stub commits and identify the stubs as foreign commits.
+    if ($need) {
+      $subpath = $repository->getDetail('svn-subpath');
+      if (!$subpath) {
+        $commits = implode(', ', $need);
+        throw new Exception(
+          "Missing commits ({$need}) in a SVN repository which is not ".
+          "configured for subdirectory-only parsing!");
+      }
+      foreach ($need as $foreign_commit) {
+        $commit = new PhabricatorRepositoryCommit();
+        $commit->setRepositoryID($repository->getID());
+        $commit->setCommitIdentifier($foreign_commit);
+        $commit->setEpoch(0);
+        $commit->save();
+
+        $data = new PhabricatorRepositoryCommitData();
+        $data->setCommitID($commit->getID());
+        $data->setAuthorName('');
+        $data->setCommitMessage('');
+        $data->setCommitDetails(
+          array(
+            'foreign-svn-stub'  => true,
+            // Denormalize this to make it easier to debug cases where someone
+            // did half a parse and then changed the subdirectory or something
+            // like that.
+            'svn-subpath'       => $subpath,
+          ));
+        $data->save();
+        $commit_map[$foreign_commit] = $commit->getID();
+      }
+    }
+
+    return $commit_map;
   }
 
   private function lookupPathFileType(
