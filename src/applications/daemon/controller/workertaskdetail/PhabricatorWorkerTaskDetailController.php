@@ -46,6 +46,35 @@ class PhabricatorWorkerTaskDetailController
     $data = id(new PhabricatorWorkerTaskData())->loadOneWhere(
       'id = %d',
       $task->getDataID());
+
+    $extra = null;
+    switch ($task->getTaskClass()) {
+      case 'PhabricatorRepositorySvnCommitChangeParserWorker':
+      case 'PhabricatorRepositoryGitCommitChangeParserWorker':
+        $commit_id = idx($data->getData(), 'commitID');
+        if ($commit_id) {
+          $commit = id(new PhabricatorRepositoryCommit())->load($commit_id);
+          if ($commit) {
+            $repository = id(new PhabricatorRepository())->load(
+              $commit->getRepositoryID());
+            if ($repository) {
+              $extra =
+                "<strong>NOTE:</strong> ".
+                "You can manually retry this task by running this script:".
+                "<pre>".
+                  "phabricator/\$ ./scripts/repository/parse_one_commit.php ".
+                  "r".
+                  phutil_escape_html($repository->getCallsign()).
+                  phutil_escape_html($commit->getCommitIdentifier()).
+                "</pre>";
+            }
+          }
+        }
+        break;
+      default:
+        break;
+    }
+
     if ($data) {
       $data = json_encode($data->getData());
     }
@@ -75,14 +104,23 @@ class PhabricatorWorkerTaskDetailController
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel('Data')
-          ->setValue($data))
+          ->setValue($data));
+
+    if ($extra) {
+      $form->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel('More')
+          ->setValue($extra));
+    }
+
+    $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton('/daemon/'));
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Task Detail');
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
     $panel->appendChild($form);
 
     return $this->buildStandardPageResponse(
