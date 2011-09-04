@@ -496,8 +496,10 @@ class PhabricatorRepositorySvnCommitChangeParserWorker
     $commit_table = new PhabricatorRepositoryCommit();
     $commit_data = queryfx_all(
       $commit_table->establishConnection('w'),
-      'SELECT id, commitIdentifier FROM %T WHERE commitIdentifier in (%Ld)',
+      'SELECT id, commitIdentifier FROM %T
+        WHERE repositoryID = %d AND commitIdentifier in (%Ld)',
       $commit_table->getTableName(),
+      $repository->getID(),
       $commits);
 
     return ipull($commit_data, 'id', 'commitIdentifier');
