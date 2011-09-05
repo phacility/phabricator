@@ -252,6 +252,7 @@ class AphrontDefaultApplicationConfiguration
           '$' => 'DiffusionCommitListController',
           '(?P<username>\w+)/$' => 'DiffusionCommitListController',
         ),
+        'symbol/(?P<name>[^/]+)/$' => 'DiffusionSymbolController',
       ),
 
       '/daemon/' => array(
