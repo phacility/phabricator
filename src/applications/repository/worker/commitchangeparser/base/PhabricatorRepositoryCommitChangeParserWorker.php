@@ -25,11 +25,11 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
     return 60 * 60 * 24;
   }
 
-  protected function lookupOrCreatePaths(array $paths) {
+  public static function lookupOrCreatePaths(array $paths) {
     $repository = new PhabricatorRepository();
     $conn_w = $repository->establishConnection('w');
 
-    $result_map = $this->lookupPaths($paths);
+    $result_map = self::lookupPaths($paths);
 
     $missing_paths = array_fill_keys($paths, true);
     $missing_paths = array_diff_key($missing_paths, $result_map);
@@ -47,13 +47,13 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
           PhabricatorRepository::TABLE_PATH,
           implode(', ', $sql));
       }
-      $result_map += $this->lookupPaths($missing_paths);
+      $result_map += self::lookupPaths($missing_paths);
     }
 
     return $result_map;
   }
 
-  private function lookupPaths(array $paths) {
+  private static function lookupPaths(array $paths) {
     $repository = new PhabricatorRepository();
     $conn_w = $repository->establishConnection('w');
 
