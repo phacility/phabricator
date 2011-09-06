@@ -128,7 +128,7 @@ class PhabricatorRepository extends PhabricatorRepositoryDAO {
     if ($this->shouldUseSSH()) {
       switch ($this->getVersionControlSystem()) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-          $pattern = "SVN_SSH=%s svn {$pattern}";
+          $pattern = "SVN_SSH=%s svn --non-interactive {$pattern}";
           array_unshift(
             $args,
             csprintf(
@@ -160,10 +160,30 @@ class PhabricatorRepository extends PhabricatorRepositoryDAO {
         default:
           throw new Exception("Unrecognized version control system.");
       }
+    } else if ($this->shouldUseHTTP()) {
+      switch ($this->getVersionControlSystem()) {
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+          $pattern =
+            "svn ".
+            "--non-interactive ".
+            "--no-auth-cache ".
+            "--trust-server-cert ".
+            "--username %s ".
+            "--password %s ".
+            $pattern;
+          array_unshift(
+            $args,
+            $this->getDetail('http-login'),
+            $this->getDetail('http-pass'));
+          break;
+        default:
+          throw new Exception(
+            "No support for HTTP Basic Auth in this version control system.");
+      }
     } else {
       switch ($this->getVersionControlSystem()) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-          $pattern = "svn {$pattern}";
+          $pattern = "svn --non-interactive {$pattern}";
           break;
         case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
           $pattern = "git {$pattern}";
@@ -187,7 +207,7 @@ class PhabricatorRepository extends PhabricatorRepositoryDAO {
 
     switch ($this->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        $pattern = "(cd %s && svn {$pattern})";
+        $pattern = "(cd %s && svn --non-interactive {$pattern})";
         array_unshift($args, $this->getLocalPath());
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
@@ -212,11 +232,21 @@ class PhabricatorRepository extends PhabricatorRepositoryDAO {
   }
 
   private function getSSHKeyfile() {
-    if (!$this->sshKeyfile) {
-      $keyfile = new TempFile('phabricator-repository-ssh-key');
-      chmod($keyfile, 0600);
-      Filesystem::writeFile($keyfile, $this->getDetail('ssh-key'));
-      $this->sshKeyfile = $keyfile;
+    if ($this->sshKeyfile === null) {
+      $key = $this->getDetail('ssh-key');
+      $keyfile = $this->getDetail('ssh-keyfile');
+      if ($keyfile) {
+        // Make sure we can read the file, that it exists, etc.
+        Filesystem::readFile($keyfile);
+        $this->sshKeyfile = $keyfile;
+      } else if ($key) {
+        $keyfile = new TempFile('phabricator-repository-ssh-key');
+        chmod($keyfile, 0600);
+        Filesystem::writeFile($keyfile, $key);
+        $this->sshKeyfile = $keyfile;
+      } else {
+        $this->sshKeyfile = '';
+      }
     }
 
     return (string)$this->sshKeyfile;
@@ -226,7 +256,17 @@ class PhabricatorRepository extends PhabricatorRepositoryDAO {
     $uri = new PhutilURI($this->getRemoteURI());
     $protocol = $uri->getProtocol();
     if ($this->isSSHProtocol($protocol)) {
-      return (bool)$this->getDetail('ssh-key');
+      return (bool)$this->getSSHKeyfile();
+    } else {
+      return false;
+    }
+  }
+
+  public function shouldUseHTTP() {
+    $uri = new PhutilURI($this->getRemoteURI());
+    $protocol = $uri->getProtocol();
+    if ($this->isHTTPProtocol($protocol)) {
+      return (bool)$this->getDetail('http-login');
     } else {
       return false;
     }
@@ -234,6 +274,10 @@ class PhabricatorRepository extends PhabricatorRepositoryDAO {
 
   private function isSSHProtocol($protocol) {
     return ($protocol == 'ssh' || $protocol == 'svn+ssh');
+  }
+
+  private function isHTTPProtocol($protocol) {
+    return ($protocol == 'http' || $protocol == 'https');
   }
 
 }

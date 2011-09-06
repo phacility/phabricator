@@ -205,6 +205,9 @@ class PhabricatorRepositoryEditController
     $is_git = false;
     $is_svn = false;
 
+    $e_ssh_key = null;
+    $e_ssh_keyfile = null;
+
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $is_git = true;
@@ -241,6 +244,19 @@ class PhabricatorRepositoryEditController
 
       $repository->setDetail('ssh-login', $request->getStr('ssh-login'));
       $repository->setDetail('ssh-key', $request->getStr('ssh-key'));
+      $repository->setDetail('ssh-keyfile', $request->getStr('ssh-keyfile'));
+
+      $repository->setDetail('http-login', $request->getStr('http-login'));
+      $repository->setDetail('http-pass',  $request->getStr('http-pass'));
+
+      if ($repository->getDetail('ssh-key') &&
+          $repository->getDetail('ssh-keyfile')) {
+        $errors[] =
+          "Specify only one of 'SSH Private Key' and 'SSH Private Key File', ".
+          "not both.";
+        $e_ssh_key = 'Choose Only One';
+        $e_ssh_keyfile = 'Choose Only One';
+      }
 
       $repository->setDetail(
         'herald-disabled',
@@ -392,8 +408,8 @@ class PhabricatorRepositoryEditController
       '<div class="aphront-form-instructions">'.
         'If you want to connect to this repository over SSH, enter the '.
         'username and private key to use. You can leave these fields blank if '.
-        'the repository does not use SSH. <strong>NOTE: This feature is not '.
-        'yet fully supported.</strong>'.
+        'the repository does not use SSH.'.
+        ' <strong>NOTE: This feature is not yet fully supported.</strong>'.
       '</div>');
 
     $form
@@ -407,14 +423,55 @@ class PhabricatorRepositoryEditController
           ->setName('ssh-key')
           ->setLabel('SSH Private Key')
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT)
-          ->setValue($repository->getDetail('ssh-key')))
+          ->setValue($repository->getDetail('ssh-key'))
+          ->setError($e_ssh_key)
+          ->setCaption('Specify the entire private key, <em>or</em>...'))
       ->appendChild(
-        id(new AphrontFormMarkupControl())
-          ->setLabel('Test Connection')
-          ->setValue(
-            'To test these credentials, <strong>save this form</strong> and '.
-            'then run: <code>phabricator/scripts/repository/test_connection'.
-            '.php '.phutil_escape_html($repository->getCallsign()).'</code>'));
+        id(new AphrontFormTextControl())
+          ->setName('ssh-keyfile')
+          ->setLabel('SSH Private Key File')
+          ->setValue($repository->getDetail('ssh-keyfile'))
+          ->setError($e_ssh_keyfile)
+          ->setCaption(
+            '...specify a path on disk where the daemon should '.
+            'look for a private key.'));
+
+    $supports_http = $is_svn;
+
+    if ($supports_http) {
+      $form
+        ->appendChild(
+          '<div class="aphront-form-instructions">'.
+            'If you want to connect to this repository over HTTP Basic Auth, '.
+            'enter the username and password to use. You can leave these '.
+            'fields blank if the repository does not use HTTP Basic Auth.'.
+            ' <strong>NOTE: This feature is not yet fully supported.</strong>'.
+          '</div>')
+        ->appendChild(
+          id(new AphrontFormTextControl())
+            ->setName('http-login')
+            ->setLabel('HTTP Basic Login')
+            ->setValue($repository->getDetail('http-login')))
+        ->appendChild(
+          id(new AphrontFormTextControl())
+            ->setName('http-pass')
+            ->setLabel('HTTP Basic Password')
+            ->setValue($repository->getDetail('http-pass')));
+    }
+
+    $form
+      ->appendChild(
+        '<div class="aphront-form-important">'.
+          'To test your authentication configuration, <strong>save this '.
+          'form</strong> and then run this script:'.
+          '<code>'.
+            'phabricator/ $ ./scripts/repository/test_connection.php '.
+            phutil_escape_html($repository->getCallsign()).
+          '</code>'.
+          'This will verify that your configuration is correct and the '.
+          'daemons can connect to the remote repository and pull changes '.
+          'from it.'.
+        '</div>');
 
     $form->appendChild('</div>');
 
