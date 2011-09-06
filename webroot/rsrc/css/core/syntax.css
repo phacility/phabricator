@@ -14,6 +14,9 @@
   padding:        1px 0 3px;
 }
 
+.remarkup-code span {
+  border-bottom: 1px solid transparent;
+}
 
 .remarkup-code .hll {
   background-color: #ffffcc;
@@ -126,3 +129,9 @@
 .remarkup-code .rbw_b { color: blue; }
 .remarkup-code .rbw_i { color: indigo; }
 .remarkup-code .rbw_v { color: violet; }
+
+.repository-crossreference .remarkup-code .nc,
+.repository-crossreference .remarkup-code .nf {
+  cursor: help;
+  border-bottom: 1px dotted #bbddbb;
+}

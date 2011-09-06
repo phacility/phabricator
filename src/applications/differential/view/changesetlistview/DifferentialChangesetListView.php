@@ -136,6 +136,12 @@ class DifferentialChangesetListView extends AphrontView {
       ));
     }
 
+    Javelin::initBehavior(
+      'repository-crossreference',
+      array(
+        'container' => 'differential-review-stage',
+      ));
+
     return
       '<div class="differential-review-stage" id="differential-review-stage">'.
         implode("\n", $output).
