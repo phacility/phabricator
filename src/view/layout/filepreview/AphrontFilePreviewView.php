@@ -41,7 +41,7 @@ final class AphrontFilePreviewView extends AphrontView {
     $link = phutil_render_tag(
       'a',
       array(
-        'href'    => $file->getViewURI(),
+        'href'    => $file->getBestURI(),
         'target'  => '_blank',
       ),
       $img);
