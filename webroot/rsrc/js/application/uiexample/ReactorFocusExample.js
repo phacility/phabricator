@@ -1,0 +1,18 @@
+/**
+ * @provides phabricator-uiexample-reactor-focus
+ * @requires javelin-install
+ *           javelin-view
+ *           javelin-util
+ *           javelin-dom
+ *           javelin-reactor-dom
+ */
+
+JX.install('ReactorFocusExample', {
+  extend: 'View',
+  members: {
+    render: function(rendered_children) {
+      var input = JX.$N('input');
+      return [input, JX.RDOM.$DT(JX.RDOM.hasFocus(input))];
+    }
+  }
+});

@@ -1,0 +1,18 @@
+/**
+ * @provides phabricator-uiexample-reactor-mouseover
+ * @requires javelin-install
+ *           javelin-view
+ *           javelin-util
+ *           javelin-dom
+ *           javelin-reactor-dom
+ */
+
+JX.install('ReactorMouseoverExample', {
+  extend: 'View',
+  members: {
+    render: function(rendered_children) {
+      var target = JX.$N("span", "mouseover me ");
+      return [target, JX.RDOM.$DT(JX.RDOM.isMouseOver(target))];
+    }
+  }
+});

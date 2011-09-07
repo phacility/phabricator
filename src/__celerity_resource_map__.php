@@ -819,6 +819,16 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/javelin/ext/reactor/core/DynVal.js',
   ),
+  0 =>
+  array(
+    'uri' => '/res/11520eb6/rsrc/js/javelin/lib/__tests__/JSON.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-json',
+    ),
+    'disk' => '/rsrc/js/javelin/lib/__tests__/JSON.js',
+  ),
   'javelin-event' =>
   array(
     'uri' => '/res/f42fa6ea/rsrc/js/javelin/core/Event.js',
@@ -1438,6 +1448,148 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/uiexample/example.css',
   ),
+  'phabricator-uiexample-javelin-view' =>
+  array(
+    'uri' => '/res/a2ce2cfc/rsrc/js/application/uiexample/JavelinViewExample.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-view',
+      2 => 'javelin-util',
+      3 => 'javelin-dom',
+    ),
+    'disk' => '/rsrc/js/application/uiexample/JavelinViewExample.js',
+  ),
+  'phabricator-uiexample-reactor-button' =>
+  array(
+    'uri' => '/res/142127f6/rsrc/js/application/uiexample/ReactorButtonExample.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-view',
+      2 => 'javelin-util',
+      3 => 'javelin-dom',
+      4 => 'javelin-reactor-dom',
+    ),
+    'disk' => '/rsrc/js/application/uiexample/ReactorButtonExample.js',
+  ),
+  'phabricator-uiexample-reactor-checkbox' =>
+  array(
+    'uri' => '/res/c75cb9e9/rsrc/js/application/uiexample/ReactorCheckboxExample.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-view',
+      2 => 'javelin-util',
+      3 => 'javelin-dom',
+      4 => 'javelin-reactor-dom',
+    ),
+    'disk' => '/rsrc/js/application/uiexample/ReactorCheckboxExample.js',
+  ),
+  'phabricator-uiexample-reactor-focus' =>
+  array(
+    'uri' => '/res/3cc992eb/rsrc/js/application/uiexample/ReactorFocusExample.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-view',
+      2 => 'javelin-util',
+      3 => 'javelin-dom',
+      4 => 'javelin-reactor-dom',
+    ),
+    'disk' => '/rsrc/js/application/uiexample/ReactorFocusExample.js',
+  ),
+  'phabricator-uiexample-reactor-input' =>
+  array(
+    'uri' => '/res/4953da16/rsrc/js/application/uiexample/ReactorInputExample.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-view',
+      2 => 'javelin-util',
+      3 => 'javelin-dom',
+      4 => 'javelin-reactor-dom',
+      5 => 'javelin-view-html',
+      6 => 'javelin-view-interpreter',
+      7 => 'javelin-view-renderer',
+    ),
+    'disk' => '/rsrc/js/application/uiexample/ReactorInputExample.js',
+  ),
+  'phabricator-uiexample-reactor-mouseover' =>
+  array(
+    'uri' => '/res/52a355b6/rsrc/js/application/uiexample/ReactorMouseoverExample.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-view',
+      2 => 'javelin-util',
+      3 => 'javelin-dom',
+      4 => 'javelin-reactor-dom',
+    ),
+    'disk' => '/rsrc/js/application/uiexample/ReactorMouseoverExample.js',
+  ),
+  'phabricator-uiexample-reactor-radio' =>
+  array(
+    'uri' => '/res/ae87f3af/rsrc/js/application/uiexample/ReactorRadioExample.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-view',
+      2 => 'javelin-util',
+      3 => 'javelin-dom',
+      4 => 'javelin-reactor-dom',
+    ),
+    'disk' => '/rsrc/js/application/uiexample/ReactorRadioExample.js',
+  ),
+  'phabricator-uiexample-reactor-select' =>
+  array(
+    'uri' => '/res/23cb448a/rsrc/js/application/uiexample/ReactorSelectExample.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-view',
+      2 => 'javelin-util',
+      3 => 'javelin-dom',
+      4 => 'javelin-reactor-dom',
+    ),
+    'disk' => '/rsrc/js/application/uiexample/ReactorSelectExample.js',
+  ),
+  'phabricator-uiexample-reactor-sendclass' =>
+  array(
+    'uri' => '/res/8cd34264/rsrc/js/application/uiexample/ReactorSendClassExample.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-view',
+      2 => 'javelin-util',
+      3 => 'javelin-dom',
+      4 => 'javelin-reactor-dom',
+    ),
+    'disk' => '/rsrc/js/application/uiexample/ReactorSendClassExample.js',
+  ),
+  'phabricator-uiexample-reactor-sendproperties' =>
+  array(
+    'uri' => '/res/18af54aa/rsrc/js/application/uiexample/ReactorSendPropertiesExample.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-view',
+      2 => 'javelin-util',
+      3 => 'javelin-dom',
+      4 => 'javelin-reactor-dom',
+    ),
+    'disk' => '/rsrc/js/application/uiexample/ReactorSendPropertiesExample.js',
+  ),
   'phriction-document-css' =>
   array(
     'uri' => '/res/a0eb9ea1/rsrc/css/application/phriction/phriction-document-css.css',
@@ -1464,16 +1616,6 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/core/syntax.css',
-  ),
-  0 =>
-  array(
-    'uri' => '/res/11520eb6/rsrc/js/javelin/lib/__tests__/JSON.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-json',
-    ),
-    'disk' => '/rsrc/js/javelin/lib/__tests__/JSON.js',
   ),
 ), array(
   'packages' =>
