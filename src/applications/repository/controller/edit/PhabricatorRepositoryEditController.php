@@ -453,7 +453,7 @@ class PhabricatorRepositoryEditController
             ->setLabel('HTTP Basic Login')
             ->setValue($repository->getDetail('http-login')))
         ->appendChild(
-          id(new AphrontFormTextControl())
+          id(new AphrontFormPasswordControl())
             ->setName('http-pass')
             ->setLabel('HTTP Basic Password')
             ->setValue($repository->getDetail('http-pass')));
