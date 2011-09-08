@@ -18,6 +18,7 @@
 
 class DiffusionBrowseFileController extends DiffusionController {
 
+  // Image types we want to display inline using <img> tags
   protected $imageTypes = array(
     'png' => 'image/png',
     'gif' => 'image/gif',
@@ -26,6 +27,11 @@ class DiffusionBrowseFileController extends DiffusionController {
     'jpeg'=> 'image/jpeg'
   );
 
+  // Document types that should trigger link to ?view=raw
+  protected $documentTypes = array(
+    'pdf'=> 'application/pdf',
+    'ps' => 'application/postscript',
+  );
 
   public function processRequest() {
 
@@ -35,11 +41,33 @@ class DiffusionBrowseFileController extends DiffusionController {
       'blame' => 'View as Highlighted Text with Blame',
       'plain' => 'View as Plain Text',
       'plainblame' => 'View as Plain Text with Blame',
+      'raw' => 'View as raw document',
     );
 
     $request = $this->getRequest();
 
+    $drequest = $this->getDiffusionRequest();
+    $path = $drequest->getPath();
     $selected = $request->getStr('view');
+    $needs_blame = ($selected == 'blame' || $selected == 'plainblame');
+    $file_query = DiffusionFileContentQuery::newFromDiffusionRequest(
+      $this->diffusionRequest);
+    $file_query->setNeedsBlame($needs_blame);
+    $file_query->loadFileContent();
+    $data = $file_query->getRawData();
+    if ($selected === 'raw') {
+      $response = new AphrontFileResponse();
+      $response->setContent($data);
+      $mime_type = $this->getDocumentType($path);
+      if ($mime_type) {
+        $response->setMimeType($mime_type);
+      } else {
+        $as_filename = idx(pathinfo($path), 'basename');
+        $response->setDownload($as_filename);
+      }
+      return $response;
+    }
+
     $select = '<select name="view">';
     foreach ($select_map as $k => $v) {
       $option = phutil_render_tag(
@@ -70,7 +98,14 @@ class DiffusionBrowseFileController extends DiffusionController {
     $view_select_panel->appendChild('<div style="clear: both;"></div>');
 
     // Build the content of the file.
-    $corpus = $this->buildCorpus($selected);
+    $corpus = $this->buildCorpus(
+      $selected,
+      $file_query,
+      $needs_blame,
+      $drequest,
+      $path,
+      $data
+    );
 
     // Render the page.
     $content = array();
@@ -96,7 +131,7 @@ class DiffusionBrowseFileController extends DiffusionController {
   }
 
 
-  /*
+  /**
    * Returns a content-type corrsponding to an image file extension
    *
    * @param string $path File path
@@ -109,22 +144,28 @@ class DiffusionBrowseFileController extends DiffusionController {
     return idx($this->imageTypes, $ext);
   }
 
+  /**
+   * Returns a content-type corresponding to an document file extension
+   *
+   * @param string $path File path
+   * @return mixed A content-type string or NULL if path doesn't end with a
+   *               recognized document extension
+   */
+  public function getDocumentType($path) {
+    $ext = pathinfo($path);
+    $ext = idx($ext, 'extension');
+    return idx($this->documentTypes, $ext);
+  }
 
-  private function buildCorpus($selected) {
-    $needs_blame = ($selected == 'blame' || $selected == 'plainblame');
 
-    $file_query = DiffusionFileContentQuery::newFromDiffusionRequest(
-      $this->diffusionRequest);
-    $file_query->setNeedsBlame($needs_blame);
-    $file_query->loadFileContent();
-
-    $drequest = $this->getDiffusionRequest();
-    $path = $drequest->getPath();
-
+  private function buildCorpus($selected,
+                               $file_query,
+                               $needs_blame,
+                               $drequest,
+                               $path,
+                               $data) {
     $image_type = $this->getImageType($path);
     if ($image_type && !$selected) {
-      $data = $file_query->getRawData();
-
       $corpus = phutil_render_tag(
         'img',
         array(
@@ -134,6 +175,28 @@ class DiffusionBrowseFileController extends DiffusionController {
       );
       return $corpus;
     }
+
+    $document_type = $this->getDocumentType($path);
+    if (($document_type && !$selected) || !phutil_is_utf8($data)) {
+      $data = $file_query->getRawData();
+      $document_type_description = $document_type ? $document_type : 'binary';
+      $corpus = phutil_render_tag(
+        'p',
+        array(
+          'style' => 'text-align: center;'
+        ),
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => '?view=raw',
+            'class' => 'button'
+          ),
+          "View $document_type_description"
+        )
+      );
+      return $corpus;
+    }
+
 
     // TODO: blame of blame.
     switch ($selected) {

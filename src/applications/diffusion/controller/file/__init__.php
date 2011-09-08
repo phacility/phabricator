@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'aphront/response/file');
 phutil_require_module('phabricator', 'applications/diffusion/controller/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/filecontent/base');
 phutil_require_module('phabricator', 'applications/markup/syntax');
