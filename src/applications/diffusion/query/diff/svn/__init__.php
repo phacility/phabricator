@@ -16,7 +16,6 @@ phutil_require_module('phabricator', 'applications/diffusion/query/pathchange/ba
 phutil_require_module('phabricator', 'infrastructure/diff/engine');
 
 phutil_require_module('phutil', 'future');
-phutil_require_module('phutil', 'future/exec');
 phutil_require_module('phutil', 'utils');
 
 

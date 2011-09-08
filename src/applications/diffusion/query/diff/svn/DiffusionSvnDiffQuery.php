@@ -140,9 +140,9 @@ final class DiffusionSvnDiffQuery extends DiffusionDiffQuery {
     $repository = $drequest->getRepository();
 
     list($ref, $rev) = $spec;
-    return new ExecFuture(
-      'svn --non-interactive cat %s%s@%d',
-      $repository->getDetail('remote-uri'),
+    return $repository->getRemoteCommandFuture(
+      'cat %s%s@%d',
+      $repository->getRemoteURI(),
       $ref,
       $rev);
   }
