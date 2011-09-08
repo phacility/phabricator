@@ -97,6 +97,12 @@ class PhabricatorRepository extends PhabricatorRepositoryDAO {
     return call_user_func_array('execx', $args);
   }
 
+  public function getRemoteCommandFuture($pattern /*, $arg, ... */) {
+    $args = func_get_args();
+    $args = $this->formatRemoteCommand($args);
+    return newv('ExecFuture', $args);
+  }
+
   public function passthruRemoteCommand($pattern /*, $arg, ... */) {
     $args = func_get_args();
     $args = $this->formatRemoteCommand($args);
@@ -115,11 +121,18 @@ class PhabricatorRepository extends PhabricatorRepositoryDAO {
     return call_user_func_array('execx', $args);
   }
 
+  public function getLocalCommandFuture($pattern /*, $arg, ... */) {
+    $args = func_get_args();
+    $args = $this->formatLocalCommand($args);
+    return newv('ExecFuture', $args);
+
+  }
   public function passthruLocalCommand($pattern /*, $arg, ... */) {
     $args = func_get_args();
     $args = $this->formatLocalCommand($args);
     return call_user_func_array('phutil_passthru', $args);
   }
+
 
   private function formatRemoteCommand(array $args) {
     $pattern = $args[0];
