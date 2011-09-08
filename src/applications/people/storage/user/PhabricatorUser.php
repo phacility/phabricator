@@ -284,6 +284,16 @@ class PhabricatorUser extends PhabricatorUserDAO {
     return $session_key;
   }
 
+  public function destroySession($session_key) {
+    $conn_w = $this->establishConnection('w');
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T WHERE userPHID = %s AND sessionKey = %s',
+      self::SESSION_TABLE,
+      $this->getPHID(),
+      $session_key);
+  }
+
   private function generateEmailToken($offset = 0) {
     return $this->generateToken(
       time() + ($offset * self::EMAIL_CYCLE_FREQUENCY),

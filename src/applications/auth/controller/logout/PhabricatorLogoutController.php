@@ -39,7 +39,15 @@ class PhabricatorLogoutController extends PhabricatorAuthController {
         PhabricatorUserLog::ACTION_LOGOUT);
       $log->save();
 
+      // Destroy the user's session in the database so logout works even if
+      // their cookies have some issues. We'll detect cookie issues when they
+      // try to login again and tell them to clear any junk.
+      $phsid = $request->getCookie('phsid');
+      if ($phsid) {
+        $user->destroySession($phsid);
+      }
       $request->clearCookie('phsid');
+
       return id(new AphrontRedirectResponse())
         ->setURI('/login/');
     }
