@@ -34,6 +34,10 @@ class PhabricatorFileProxyController extends PhabricatorFileController {
       $uri);
 
     if (!$proxy) {
+      // This write is fine to skip CSRF checks for, we're just building a
+      // cache of some remote image.
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+
       $file = PhabricatorFile::newFromFileDownload(
         $uri,
         nonempty(basename($uri), 'proxied-file'));
@@ -43,6 +47,8 @@ class PhabricatorFileProxyController extends PhabricatorFileController {
         $proxy->setFilePHID($file->getPHID());
         $proxy->save();
       }
+
+      unset($unguarded);
     }
 
     if ($proxy) {
