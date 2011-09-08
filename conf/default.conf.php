@@ -335,6 +335,24 @@ return array(
   'github.application-secret'   => null,
 
 
+// -- Google ---------------------------------------------------------------- //
+
+  // Can users use Google credentials to login to Phabricator?
+  'google.auth-enabled'         => false,
+
+  // Can users use Google credentials to create new Phabricator accounts?
+  'google.registration-enabled' => true,
+
+  // Are Google accounts permanently linked to Phabricator accounts, or can
+  // the user unlink them?
+  'google.auth-permanent'       => false,
+
+  // The Google "Client ID" to use for Google API access.
+  'google.application-id'       => null,
+
+  // The Google "Client Secret" to use for Google API access.
+  'google.application-secret'   => null,
+
 // -- Recaptcha ------------------------------------------------------------- //
 
   // Is Recaptcha enabled? If disabled, captchas will not appear.

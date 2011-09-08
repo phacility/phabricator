@@ -63,9 +63,7 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
         'access_token' => $this->accessToken,
       ));
 
-    $user_json = @file_get_contents($userinfo_uri);
-    $user_data = json_decode($user_json, true);
-
+    $user_data = @file_get_contents($userinfo_uri);
     $provider->setUserData($user_data);
     $provider->setAccessToken($this->accessToken);
 
@@ -240,7 +238,7 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
       'client_secret' => $client_secret,
       'redirect_uri'  => $redirect_uri,
       'code'          => $code,
-    );
+    ) + $provider->getExtraTokenParameters();
 
     $post_data = http_build_query($query_data);
     $post_length = strlen($post_data);
@@ -270,8 +268,7 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
       return $this->buildErrorResponse(new PhabricatorOAuthFailureView());
     }
 
-    $data = array();
-    parse_str($response, $data);
+    $data = $provider->decodeTokenResponse($response);
 
     $token = idx($data, 'access_token');
     if (!$token) {

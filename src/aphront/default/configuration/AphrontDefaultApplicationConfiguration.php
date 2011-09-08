@@ -138,7 +138,7 @@ class AphrontDefaultApplicationConfiguration
       '/logout/$' => 'PhabricatorLogoutController',
 
       '/oauth/' => array(
-        '(?P<provider>github|facebook)/' => array(
+        '(?P<provider>\w+)/' => array(
           'login/$'     => 'PhabricatorOAuthLoginController',
           'diagnose/$'  => 'PhabricatorOAuthDiagnosticsController',
           'unlink/$'    => 'PhabricatorOAuthUnlinkController',

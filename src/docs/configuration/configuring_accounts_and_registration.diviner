@@ -6,9 +6,9 @@ Describes how to configure user access to Phabricator.
 = Overview =
 
 Phabricator supports a number of login systems, like traditional
-username/password, Facebook OAuth, and GitHub OAuth. You can enable or disable
-these systems to configure who can register for and access your install, and
-how users with existing accounts can login.
+username/password, Facebook OAuth, GitHub OAuth, and Google OAuth. You can
+enable or disable these systems to configure who can register for and access
+your install, and how users with existing accounts can login.
 
 By default, only username/password auth is enabled, and there are no valid
 accounts. Start by creating a new account with the
@@ -105,6 +105,37 @@ Note that you can see a list of your GitHub applications here, although it's not
 immediately clear how to get there via the UI:
 
 https://github.com/account/applications/
+
+= Configuring Google OAuth =
+
+You can configure Google OAuth to allow login, login and registration, or
+nothing (the default).
+
+To configure Google OAuth, create a new Google "API Project":
+
+https://code.google.com/apis/console/
+
+You don't need to enable any **Services**, just go to **API Access**, click
+**"Create an OAuth 2.0 client ID..."**, and configure these settings:
+
+  - Click **More Options** next to **Authorized Redirect APIs** and add the
+    full domain (with protocol) plus ##/oauth/google/login/## to the list.
+    For example, ##https://phabricator.example.com/oauth/google/login/##
+  - Click **Create Client ID**.
+
+Once you've created a client ID, edit your Phabricator configuration and set
+these keys:
+
+  - **google.auth-enabled**: set this to ##true##.
+  - **google.application-id**: set this to your Client ID (from above).
+  - **google.application-secret**: set this to your Client Secret (from above).
+  - **google.registration-enabled**: set this to ##true## to let users register
+    with just Google credentials (this is a very open setting) or ##false## to
+    prevent users from registering. If set to ##false##, users may still link
+    existing accounts and use Google to login, they jus can't create new
+    accounts.
+  - **google.auth-permanent**: set this to ##true## to prevent unlinking
+    Phabricator accounts from Google accounts.
 
 = Next Steps =
 

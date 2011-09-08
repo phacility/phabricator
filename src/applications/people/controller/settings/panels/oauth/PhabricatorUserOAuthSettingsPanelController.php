@@ -68,12 +68,20 @@ class PhabricatorUserOAuthSettingsPanelController
       $auth_uri = $provider->getAuthURI();
       $client_id = $provider->getClientID();
       $redirect_uri = $provider->getRedirectURI();
+      $minimum_scope  = $provider->getMinimumScope();
 
       $form
         ->setAction($auth_uri)
         ->setMethod('GET')
         ->addHiddenInput('redirect_uri', $redirect_uri)
         ->addHiddenInput('client_id', $client_id)
+        ->addHiddenInput('scope', $minimum_scope);
+
+      foreach ($provider->getExtraAuthParameters() as $key => $value) {
+        $form->addHiddenInput($key, $value);
+      }
+
+      $form
         ->appendChild(
           id(new AphrontFormSubmitControl())
             ->setValue('Link '.$provider_name." Account \xC2\xBB"));

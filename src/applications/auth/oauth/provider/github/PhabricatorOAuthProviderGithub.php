@@ -69,7 +69,7 @@ class PhabricatorOAuthProviderGithub extends PhabricatorOAuthProvider {
   }
 
   public function setUserData($data) {
-    $this->userData = $data['user'];
+    $this->userData = idx(json_decode($data, true), 'user');
     return $this;
   }
 

@@ -69,7 +69,7 @@ class PhabricatorOAuthProviderFacebook extends PhabricatorOAuthProvider {
   }
 
   public function setUserData($data) {
-    $this->userData = $data;
+    $this->userData = json_decode($data, true);
     return $this;
   }
 

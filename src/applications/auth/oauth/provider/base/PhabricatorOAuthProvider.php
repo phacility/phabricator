@@ -20,6 +20,7 @@ abstract class PhabricatorOAuthProvider {
 
   const PROVIDER_FACEBOOK = 'facebook';
   const PROVIDER_GITHUB   = 'github';
+  const PROVIDER_GOOGLE   = 'google';
 
   private $accessToken;
 
@@ -32,7 +33,25 @@ abstract class PhabricatorOAuthProvider {
   abstract public function getClientID();
   abstract public function getClientSecret();
   abstract public function getAuthURI();
+
+  /**
+   * If the provider needs extra stuff in the auth request, return it here.
+   * For example, Google needs a response_type parameter.
+   */
+  public function getExtraAuthParameters() {
+    return array();
+  }
+
   abstract public function getTokenURI();
+
+  /**
+   * If the provider needs extra stuff in the token request, return it here.
+   * For example, Google needs a grant_type parameter.
+   */
+  public function getExtraTokenParameters() {
+    return array();
+  }
+
   abstract public function getUserInfoURI();
   abstract public function getMinimumScope();
 
@@ -44,9 +63,20 @@ abstract class PhabricatorOAuthProvider {
   abstract public function retrieveUserAccountURI();
   abstract public function retrieveUserRealName();
 
+  /**
+   * Override this if the provider returns the token response as, e.g., JSON
+   * or XML.
+   */
+  public function decodeTokenResponse($response) {
+    $data = null;
+    parse_str($response, $data);
+    return $data;
+  }
+
   public function __construct() {
 
   }
+
 
   final public function setAccessToken($access_token) {
     $this->accessToken = $access_token;
@@ -65,6 +95,9 @@ abstract class PhabricatorOAuthProvider {
       case self::PROVIDER_GITHUB:
         $class = 'PhabricatorOAuthProviderGithub';
         break;
+      case self::PROVIDER_GOOGLE:
+        $class = 'PhabricatorOAuthProviderGoogle';
+        break;
       default:
         throw new Exception('Unknown OAuth provider.');
     }
@@ -76,6 +109,7 @@ abstract class PhabricatorOAuthProvider {
     $all = array(
       self::PROVIDER_FACEBOOK,
       self::PROVIDER_GITHUB,
+      self::PROVIDER_GOOGLE,
     );
     $providers = array();
     foreach ($all as $provider) {
