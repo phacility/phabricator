@@ -21,7 +21,7 @@ class PhabricatorObjectHandleData {
   private $phids;
 
   public function __construct(array $phids) {
-    $this->phids = $phids;
+    $this->phids = array_unique($phids);
   }
 
   public function loadObjects() {

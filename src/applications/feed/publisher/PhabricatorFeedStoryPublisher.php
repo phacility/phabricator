@@ -108,6 +108,26 @@ final class PhabricatorFeedStoryPublisher {
     // Generate a random number for the lower 32 bits of the key.
     $rand = head(unpack('L', Filesystem::readRandomBytes(4)));
 
-    return ($time << 32) + ($rand);
+    // On 32-bit machines, we have to get creative.
+    if (PHP_INT_SIZE < 8) {
+      // We're on a 32-bit machine.
+      if (function_exists('bcadd')) {
+        // Try to use the 'bc' extension.
+        return bcadd(bcmul($time, bcpow(2, 32)), $rand);
+      } else {
+        // Do the math in MySQL. TODO: If we formalize a bc dependency, get
+        // rid of this.
+        $conn_r = id(new PhabricatorFeedStoryData())->establishConnection('r');
+        $result = queryfx_one(
+          $conn_r,
+          'SELECT (%d << 32) + %d as N',
+          $time,
+          $rand);
+        return $result['N'];
+      }
+    } else {
+      // This is a 64 bit machine, so we can just do the math.
+      return ($time << 32) + $rand;
+    }
   }
 }
