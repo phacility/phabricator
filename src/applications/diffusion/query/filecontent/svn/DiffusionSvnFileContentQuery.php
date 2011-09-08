@@ -33,11 +33,11 @@ final class DiffusionSvnFileContentQuery extends DiffusionFileContentQuery {
     $path = $drequest->getPath();
     $commit = $drequest->getCommit();
 
-    $remote_uri = $repository->getDetail('remote-uri');
+    $remote_uri = $repository->getRemoteURI();
 
     try {
-      list($corpus) = execx(
-        'svn --non-interactive %s %s%s@%s',
+      list($corpus) = $repository->execxRemoteCommand(
+        '%s %s%s@%s',
         $this->getNeedsBlame() ? 'blame' : 'cat',
         $remote_uri,
         $path,

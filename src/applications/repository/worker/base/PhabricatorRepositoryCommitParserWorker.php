@@ -68,8 +68,8 @@ abstract class PhabricatorRepositoryCommitParserWorker
     }
 
     try {
-      list($xml) = execx(
-        "svn log --xml {$verbose} --limit 1 --non-interactive %s@%d",
+      list($xml) = $this->repository->execxRemoteCommand(
+        "log --xml {$verbose} --limit 1 %s@%d",
         $uri,
         $revision);
     } catch (CommandException $ex) {

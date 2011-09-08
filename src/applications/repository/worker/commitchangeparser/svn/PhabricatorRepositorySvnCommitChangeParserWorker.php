@@ -593,10 +593,9 @@ class PhabricatorRepositorySvnCommitChangeParserWorker
     // position in the document.
     $all_paths = array_reverse(array_keys($parents));
     foreach (array_chunk($all_paths, 64) as $path_chunk) {
-      list($raw_xml) = execx(
-        'svn --non-interactive --xml ls %C',
-        implode(' ', $path_chunk));
-
+      list($raw_xml) = $repository->execxRemoteCommand(
+         '--xml ls %C',
+         implode(' ', $path_chunk));
       $xml = new SimpleXMLElement($raw_xml);
       foreach ($xml->list as $list) {
         $list_path = (string)$list['path'];
@@ -669,8 +668,8 @@ class PhabricatorRepositorySvnCommitChangeParserWorker
     $cache_loc = sys_get_temp_dir().'/diffusion.'.$hashkey.'.svnls';
     if (!Filesystem::pathExists($cache_loc)) {
       $tmp = new TempFile();
-      execx(
-        'svn --non-interactive --xml ls -R %s%s@%d > %s',
+      $repository->execxRemoteCommand(
+        '--xml ls -R %s%s@%d > %s',
         $repository->getDetail('remote-uri'),
         $path,
         $rev,
