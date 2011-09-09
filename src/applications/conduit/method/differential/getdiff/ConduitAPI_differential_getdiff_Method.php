@@ -82,6 +82,8 @@ class ConduitAPI_differential_getdiff_Method extends ConduitAPIMethod {
       'revisionID' => $diff->getRevisionID(),
       'sourceControlBaseRevision' => $diff->getSourceControlBaseRevision(),
       'sourceControlPath' => $diff->getSourceControlPath(),
+      'unitStatus' => $diff->getUnitStatus(),
+      'lintStatus' => $diff->getLintStatus(),
       'changes' => array(),
       'properties' => array(),
     );
