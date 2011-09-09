@@ -87,6 +87,18 @@
   margin: 0.75em 3% 1.25em;
 }
 
+.aphront-form-important {
+  margin: .5em 0;
+  background: #ffffdd;
+  padding: .5em 1em;
+}
+.aphront-form-important code {
+  display: block;
+  padding: .25em;
+  margin: .5em 2em;
+}
+
+
 .aphront-form-control-static .aphront-form-input {
   padding-top: 4px;
   font-size: 13px;

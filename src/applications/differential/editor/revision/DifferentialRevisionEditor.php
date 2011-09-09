@@ -175,12 +175,6 @@ class DifferentialRevisionEditor {
       if ($revision->getAuthorPHID() === null) {
         $revision->setAuthorPHID($this->getActorPHID());
       }
-      if ($revision->getRevertPlan() === null) {
-        $revision->setRevertPlan('');
-      }
-      if ($revision->getBlameRevision() === null) {
-        $revision->setBlameRevision('');
-      }
       if ($revision->getSummary() === null) {
         $revision->setSummary('');
       }

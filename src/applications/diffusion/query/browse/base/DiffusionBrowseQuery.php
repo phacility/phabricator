@@ -25,11 +25,12 @@ abstract class DiffusionBrowseQuery {
   protected $deletedAtCommit;
   protected $validityOnly;
 
-  const REASON_IS_FILE            = 'is-file';
-  const REASON_IS_DELETED         = 'is-deleted';
-  const REASON_IS_NONEXISTENT     = 'nonexistent';
-  const REASON_BAD_COMMIT         = 'bad-commit';
-  const REASON_IS_EMPTY           = 'empty';
+  const REASON_IS_FILE              = 'is-file';
+  const REASON_IS_DELETED           = 'is-deleted';
+  const REASON_IS_NONEXISTENT       = 'nonexistent';
+  const REASON_BAD_COMMIT           = 'bad-commit';
+  const REASON_IS_EMPTY             = 'empty';
+  const REASON_IS_UNTRACKED_PARENT  = 'untracked-parent';
 
   final private function __construct() {
     // <private>

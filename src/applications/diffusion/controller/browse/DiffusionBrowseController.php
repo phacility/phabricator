@@ -75,6 +75,16 @@ class DiffusionBrowseController extends DiffusionController {
           $controller->setDiffusionRequest($drequest);
           return $this->delegateToController($controller);
           break;
+        case DiffusionBrowseQuery::REASON_IS_UNTRACKED_PARENT:
+          $subdir = $drequest->getRepository()->getDetail('svn-subpath');
+          $title = 'Directory Not Tracked';
+          $body =
+            "This repository is configured to track only one subdirectory ".
+            "of the entire repository ('".phutil_escape_html($subdir)."'), ".
+            "but you aren't looking at something in that subdirectory, so no ".
+            "information is available.";
+          $severity = AphrontErrorView::SEVERITY_WARNING;
+          break;
         default:
           throw new Exception("Unknown failure reason!");
       }

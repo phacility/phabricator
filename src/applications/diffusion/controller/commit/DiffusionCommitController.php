@@ -44,31 +44,47 @@ class DiffusionCommitController extends DiffusionController {
 
     $commit_data = $drequest->loadCommitData();
 
-    $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
+    $is_foreign = $commit_data->getCommitDetail('foreign-svn-stub');
+    if ($is_foreign) {
+      $subpath = $commit_data->getCommitDetail('svn-subpath');
 
-    require_celerity_resource('diffusion-commit-view-css');
-    require_celerity_resource('phabricator-remarkup-css');
+      $error_panel = new AphrontErrorView();
+      $error_panel->setWidth(AphrontErrorView::WIDTH_WIDE);
+      $error_panel->setTitle('Commit Not Tracked');
+      $error_panel->setSeverity(AphrontErrorView::SEVERITY_WARNING);
+      $error_panel->appendChild(
+        "This Diffusion repository is configured to track only one ".
+        "subdirectory of the entire Subversion repository, and this commit ".
+        "didn't affect the tracked subdirectory ('".
+        phutil_escape_html($subpath)."'), so no information is available.");
+      $content[] = $error_panel;
+    } else {
+      $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
 
-    $property_table = $this->renderPropertyTable($commit, $commit_data);
+      require_celerity_resource('diffusion-commit-view-css');
+      require_celerity_resource('phabricator-remarkup-css');
 
-    $detail_panel->appendChild(
-      '<div class="diffusion-commit-view">'.
-        '<div class="diffusion-commit-dateline">'.
-          'r'.$callsign.$commit->getCommitIdentifier().
-          ' &middot; '.
-          phabricator_datetime($commit->getEpoch(), $user).
-        '</div>'.
-        '<h1>Revision Detail</h1>'.
-        '<div class="diffusion-commit-details">'.
-          $property_table.
-          '<hr />'.
-          '<div class="diffusion-commit-message phabricator-remarkup">'.
-            $engine->markupText($commit_data->getCommitMessage()).
+      $property_table = $this->renderPropertyTable($commit, $commit_data);
+
+      $detail_panel->appendChild(
+        '<div class="diffusion-commit-view">'.
+          '<div class="diffusion-commit-dateline">'.
+            'r'.$callsign.$commit->getCommitIdentifier().
+            ' &middot; '.
+            phabricator_datetime($commit->getEpoch(), $user).
           '</div>'.
-        '</div>'.
-      '</div>');
+          '<h1>Revision Detail</h1>'.
+          '<div class="diffusion-commit-details">'.
+            $property_table.
+            '<hr />'.
+            '<div class="diffusion-commit-message phabricator-remarkup">'.
+              $engine->markupText($commit_data->getCommitMessage()).
+            '</div>'.
+          '</div>'.
+        '</div>');
 
-    $content[] = $detail_panel;
+      $content[] = $detail_panel;
+    }
 
     $change_query = DiffusionPathChangeQuery::newFromDiffusionRequest(
       $drequest);
@@ -103,6 +119,23 @@ class DiffusionCommitController extends DiffusionController {
         phutil_escape_html($bad_commit['description']));
 
       $content[] = $error_panel;
+    } else if ($is_foreign) {
+      // Don't render anything else.
+    } else if (!count($changes)) {
+      $no_changes = new AphrontErrorView();
+      $no_changes->setWidth(AphrontErrorView::WIDTH_WIDE);
+      $no_changes->setSeverity(AphrontErrorView::SEVERITY_WARNING);
+      $no_changes->setTitle('Not Yet Parsed');
+      // TODO: This can also happen with weird SVN changes that don't do
+      // anything (or only alter properties?), although the real no-changes case
+      // is extremely rare and might be impossible to produce organically. We
+      // should probably write some kind of "Nothing Happened!" change into the
+      // DB once we parse these changes so we can distinguish between
+      // "not parsed yet" and "no changes".
+      $no_changes->appendChild(
+        "This commit hasn't been fully parsed yet (or doesn't affect any ".
+        "paths).");
+      $content[] = $no_changes;
     } else {
       $change_panel = new AphrontPanelView();
       $change_panel->setHeader("Changes (".number_format($count).")");
@@ -130,59 +163,51 @@ class DiffusionCommitController extends DiffusionController {
 
       $content[] = $change_panel;
 
-      if ($changes) {
-        $changesets = DiffusionPathChange::convertToDifferentialChangesets(
-          $changes);
+      $changesets = DiffusionPathChange::convertToDifferentialChangesets(
+        $changes);
 
-        $vcs = $repository->getVersionControlSystem();
-        switch ($vcs) {
-          case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-            $vcs_supports_directory_changes = true;
-            break;
-          case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-            $vcs_supports_directory_changes = false;
-            break;
-          default:
-            throw new Exception("Unknown VCS.");
-        }
-
-        $references = array();
-        foreach ($changesets as $key => $changeset) {
-          $file_type = $changeset->getFileType();
-          if ($file_type == DifferentialChangeType::FILE_DIRECTORY) {
-            if (!$vcs_supports_directory_changes) {
-              unset($changesets[$key]);
-              continue;
-            }
-          }
-
-          $branch = $drequest->getBranchURIComponent(
-            $drequest->getBranch());
-          $filename = $changeset->getFilename();
-          $commit = $drequest->getCommit();
-          $reference = "{$branch}{$filename};{$commit}";
-          $references[$key] = $reference;
-        }
-
-        $change_list = new DifferentialChangesetListView();
-        $change_list->setChangesets($changesets);
-        $change_list->setRenderingReferences($references);
-        $change_list->setRenderURI('/diffusion/'.$callsign.'/diff/');
-
-        // TODO: This is pretty awkward, unify the CSS between Diffusion and
-        // Differential better.
-        require_celerity_resource('differential-core-view-css');
-        $change_list =
-          '<div class="differential-primary-pane">'.
-            $change_list->render().
-          '</div>';
-      } else {
-        $change_list =
-          '<div style="margin: 2em; color: #666; padding: 1em;
-            background: #eee;">'.
-            '(no changes blah blah)'.
-          '</div>';
+      $vcs = $repository->getVersionControlSystem();
+      switch ($vcs) {
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+          $vcs_supports_directory_changes = true;
+          break;
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+          $vcs_supports_directory_changes = false;
+          break;
+        default:
+          throw new Exception("Unknown VCS.");
       }
+
+      $references = array();
+      foreach ($changesets as $key => $changeset) {
+        $file_type = $changeset->getFileType();
+        if ($file_type == DifferentialChangeType::FILE_DIRECTORY) {
+          if (!$vcs_supports_directory_changes) {
+            unset($changesets[$key]);
+            continue;
+          }
+        }
+
+        $branch = $drequest->getBranchURIComponent(
+          $drequest->getBranch());
+        $filename = $changeset->getFilename();
+        $commit = $drequest->getCommit();
+        $reference = "{$branch}{$filename};{$commit}";
+        $references[$key] = $reference;
+      }
+
+      $change_list = new DifferentialChangesetListView();
+      $change_list->setChangesets($changesets);
+      $change_list->setRenderingReferences($references);
+      $change_list->setRenderURI('/diffusion/'.$callsign.'/diff/');
+
+      // TODO: This is pretty awkward, unify the CSS between Diffusion and
+      // Differential better.
+      require_celerity_resource('differential-core-view-css');
+      $change_list =
+        '<div class="differential-primary-pane">'.
+          $change_list->render().
+        '</div>';
 
       $content[] = $change_list;
     }

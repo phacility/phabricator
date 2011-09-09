@@ -28,9 +28,9 @@ class PhabricatorRepositorySvnCommitDiscoveryDaemon
     }
 
     $uri = $this->getBaseSVNLogURI();
-    list($xml) = execx(
-      'svn log --xml --non-interactive --quiet --limit 1 %s@HEAD',
-      $uri);
+    list($xml) = $repository->execxRemoteCommand(
+        ' log --xml --quiet --limit 1 %s@HEAD',
+        $uri);
 
     $results = $this->parseSVNLogXML($xml);
     $commit = key($results);
@@ -47,6 +47,7 @@ class PhabricatorRepositorySvnCommitDiscoveryDaemon
 
   private function discoverCommit($commit, $epoch) {
     $uri = $this->getBaseSVNLogURI();
+    $repository = $this->getRepository();
 
     $discover = array(
       $commit => $epoch,
@@ -58,8 +59,8 @@ class PhabricatorRepositorySvnCommitDiscoveryDaemon
       // Find all the unknown commits on this path. Note that we permit
       // importing an SVN subdirectory rather than the entire repository, so
       // commits may be nonsequential.
-      list($err, $xml, $stderr) = exec_manual(
-        'svn log --xml --non-interactive --quiet --limit %d %s@%d',
+      list($err, $xml, $stderr) = $repository->execRemoteCommand(
+        ' log --xml --quiet --limit %d %s@%d',
         $limit,
         $uri,
         $upper_bound - 1);

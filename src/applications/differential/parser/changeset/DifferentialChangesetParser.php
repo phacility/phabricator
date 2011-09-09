@@ -899,22 +899,66 @@ class DifferentialChangesetParser {
           }
         }
 
+        $this->comments = msort($this->comments, 'getID');
+        $old_comments = array();
+        $new_comments = array();
+        foreach ($this->comments as $comment) {
+          if ($this->isCommentOnRightSideWhenDisplayed($comment)) {
+            $new_comments[] = $comment;
+          } else {
+            $old_comments[] = $comment;
+          }
+        }
+
+        $html_old = array();
+        $html_new = array();
+        foreach ($old_comments as $comment) {
+          $xhp = $this->renderInlineComment($comment);
+          $html_old[] =
+            '<tr class="inline"><th /><td>'.
+              $xhp.
+            '</td><th /><td /></tr>';
+        }
+        foreach ($new_comments as $comment) {
+          $xhp = $this->renderInlineComment($comment);
+          $html_new[] =
+            '<tr class="inline"><th /><td /><th /><td>'.
+              $xhp.
+            '</td></tr>';
+        }
+
+        $changset_id = $this->changeset->getID();
+        if (!$old) {
+          $th_old = '<th></th>';
+        }
+        else {
+          $th_old = '<th id="C'.$changset_id.'OL1">1</th>';
+        }
+        if (!$cur) {
+          $th_new = '<th></th>';
+        }
+        else {
+          $th_new = '<th id="C'.$changset_id.'NL1">1</th>';
+        }
+
         $output = $this->renderChangesetTable(
           $this->changeset,
           '<tr>'.
-            '<th></th>'.
+            $th_old.
             '<td class="differential-old-image">'.
               '<div class="differential-image-stage">'.
                 $old.
               '</div>'.
             '</td>'.
-            '<th></th>'.
+            $th_new.
             '<td class="differential-new-image">'.
               '<div class="differential-image-stage">'.
                 $cur.
               '</div>'.
             '</td>'.
-          '</tr>');
+          '</tr>'.
+          implode('', $html_old).
+          implode('', $html_new));
 
         return $output;
       case DifferentialChangeType::FILE_DIRECTORY:

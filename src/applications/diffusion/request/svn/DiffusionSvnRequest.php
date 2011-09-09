@@ -20,6 +20,14 @@ class DiffusionSvnRequest extends DiffusionRequest {
 
   protected function initializeFromAphrontRequestDictionary(array $data) {
     parent::initializeFromAphrontRequestDictionary($data);
+
+    if ($this->path === null) {
+      $subpath = $this->repository->getDetail('svn-subpath');
+      if ($subpath) {
+        $this->path = $subpath;
+      }
+    }
+
     if (!strncmp($this->path, ':', 1)) {
       $this->path = substr($this->path, 1);
       $this->path = ltrim($this->path, '/');

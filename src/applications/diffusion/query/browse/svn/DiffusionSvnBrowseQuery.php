@@ -25,6 +25,15 @@ final class DiffusionSvnBrowseQuery extends DiffusionBrowseQuery {
     $path = $drequest->getPath();
     $commit = $drequest->getCommit();
 
+    $subpath = $repository->getDetail('svn-subpath');
+    if ($subpath && strncmp($subpath, $path, strlen($subpath))) {
+      // If we have a subpath and the path isn't a child of it, it (almost
+      // certainly) won't exist since we don't track commits which affect
+      // it. (Even if it exists, return a consistent result.)
+      $this->reason = self::REASON_IS_UNTRACKED_PARENT;
+      return array();
+    }
+
     $conn_r = $repository->establishConnection('r');
 
     $parent_path = dirname($path);

@@ -205,6 +205,9 @@ class PhabricatorRepositoryEditController
     $is_git = false;
     $is_svn = false;
 
+    $e_ssh_key = null;
+    $e_ssh_keyfile = null;
+
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $is_git = true;
@@ -238,6 +241,22 @@ class PhabricatorRepositoryEditController
         $request->getStr(
           'default-owners-path',
           '/'));
+
+      $repository->setDetail('ssh-login', $request->getStr('ssh-login'));
+      $repository->setDetail('ssh-key', $request->getStr('ssh-key'));
+      $repository->setDetail('ssh-keyfile', $request->getStr('ssh-keyfile'));
+
+      $repository->setDetail('http-login', $request->getStr('http-login'));
+      $repository->setDetail('http-pass',  $request->getStr('http-pass'));
+
+      if ($repository->getDetail('ssh-key') &&
+          $repository->getDetail('ssh-keyfile')) {
+        $errors[] =
+          "Specify only one of 'SSH Private Key' and 'SSH Private Key File', ".
+          "not both.";
+        $e_ssh_key = 'Choose Only One';
+        $e_ssh_keyfile = 'Choose Only One';
+      }
 
       $repository->setDetail(
         'herald-disabled',
@@ -329,10 +348,14 @@ class PhabricatorRepositoryEditController
         'Differential, Diffusion, Herald, and other services. To enable '.
         'tracking for a repository, configure it here and then start (or '.
         'restart) the daemons. More information is available in the '.
-        '<strong>'.$user_guide_link.'</strong>.</p>')
+        '<strong>'.$user_guide_link.'</strong>.</p>');
+
+    $form
+      ->appendChild(
+        '<h1>Basics</h1><div class="aphront-form-inset">')
       ->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel('Repository')
+          ->setLabel('Repository Name')
           ->setValue($repository->getName()))
       ->appendChild(
         id(new AphrontFormSelectControl())
@@ -345,13 +368,19 @@ class PhabricatorRepositoryEditController
           ->setValue(
             $repository->getDetail('tracking-enabled')
               ? 'enabled'
-              : 'disabled'));
+              : 'disabled'))
+      ->appendChild('</div>');
+
+    $form->appendChild(
+      '<h1>Remote URI</h1>'.
+      '<div class="aphront-form-inset">');
 
     $uri_label = 'Repository URI';
     if ($is_git) {
       $instructions =
-        'NOTE: The user the tracking daemon runs as must have permission to '.
-        '<tt>git clone</tt> from this URI.';
+        'Enter the URI to clone this repository from. It should look like '.
+        '<tt>git@github.com:example/example.git</tt> or '.
+        '<tt>ssh://user@host.com/git/example.git</tt>';
       $form->appendChild(
         '<p class="aphront-form-instructions">'.$instructions.'</p>');
     } else if ($is_svn) {
@@ -360,10 +389,7 @@ class PhabricatorRepositoryEditController
         'You can figure this out by running <tt>svn info</tt> and looking at '.
         'the value in the <tt>Repository Root</tt> field. It should be a URI '.
         'and look like <tt>http://svn.example.org/svn/</tt> or '.
-        '<tt>svn+ssh://svn.example.com/svnroot/</tt>.'.
-        '<br /><br />'.
-        'NOTE: The user the daemons run as must be able to execute '.
-        '<tt>svn log</tt> against this URI.';
+        '<tt>svn+ssh://svn.example.com/svnroot/</tt>';
       $form->appendChild(
         '<p class="aphront-form-instructions">'.$instructions.'</p>');
       $uri_label = 'Repository Root';
@@ -374,8 +400,84 @@ class PhabricatorRepositoryEditController
         id(new AphrontFormTextControl())
           ->setName('uri')
           ->setLabel($uri_label)
+          ->setID('remote-uri')
           ->setValue($repository->getDetail('remote-uri'))
           ->setError($e_uri));
+
+    $form->appendChild(
+      '<div class="aphront-form-instructions">'.
+        'If you want to connect to this repository over SSH, enter the '.
+        'username and private key to use. You can leave these fields blank if '.
+        'the repository does not use SSH.'.
+        ' <strong>NOTE: This feature is not yet fully supported.</strong>'.
+      '</div>');
+
+    $form
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName('ssh-login')
+          ->setLabel('SSH User')
+          ->setValue($repository->getDetail('ssh-login')))
+      ->appendChild(
+        id(new AphrontFormTextAreaControl())
+          ->setName('ssh-key')
+          ->setLabel('SSH Private Key')
+          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT)
+          ->setValue($repository->getDetail('ssh-key'))
+          ->setError($e_ssh_key)
+          ->setCaption('Specify the entire private key, <em>or</em>...'))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName('ssh-keyfile')
+          ->setLabel('SSH Private Key File')
+          ->setValue($repository->getDetail('ssh-keyfile'))
+          ->setError($e_ssh_keyfile)
+          ->setCaption(
+            '...specify a path on disk where the daemon should '.
+            'look for a private key.'));
+
+    $supports_http = $is_svn;
+
+    if ($supports_http) {
+      $form
+        ->appendChild(
+          '<div class="aphront-form-instructions">'.
+            'If you want to connect to this repository over HTTP Basic Auth, '.
+            'enter the username and password to use. You can leave these '.
+            'fields blank if the repository does not use HTTP Basic Auth.'.
+            ' <strong>NOTE: This feature is not yet fully supported.</strong>'.
+          '</div>')
+        ->appendChild(
+          id(new AphrontFormTextControl())
+            ->setName('http-login')
+            ->setLabel('HTTP Basic Login')
+            ->setValue($repository->getDetail('http-login')))
+        ->appendChild(
+          id(new AphrontFormTextControl())
+            ->setName('http-pass')
+            ->setLabel('HTTP Basic Password')
+            ->setValue($repository->getDetail('http-pass')));
+    }
+
+    $form
+      ->appendChild(
+        '<div class="aphront-form-important">'.
+          'To test your authentication configuration, <strong>save this '.
+          'form</strong> and then run this script:'.
+          '<code>'.
+            'phabricator/ $ ./scripts/repository/test_connection.php '.
+            phutil_escape_html($repository->getCallsign()).
+          '</code>'.
+          'This will verify that your configuration is correct and the '.
+          'daemons can connect to the remote repository and pull changes '.
+          'from it.'.
+        '</div>');
+
+    $form->appendChild('</div>');
+
+    $form->appendChild(
+      '<h1>Importing Repository Information</h1>'.
+      '<div class="aphront-form-inset">');
 
     if ($is_git) {
       $form->appendChild(
@@ -415,6 +517,12 @@ class PhabricatorRepositoryEditController
             'Number of seconds daemon should sleep between requests. Larger '.
             'numbers reduce load but also decrease responsiveness.'));
 
+    $form->appendChild('</div>');
+
+    $form->appendChild(
+      '<h1>Application Configuration</h1>'.
+      '<div class="aphront-form-inset">');
+
     if ($is_git) {
       $form
         ->appendChild(
@@ -452,8 +560,8 @@ class PhabricatorRepositoryEditController
               1 => 'Disabled - Do Not Send Email',
             ))
           ->setCaption(
-            'You can temporarily disable Herald notifications when reparsing '.
-            'a repository or importing a new repository.'));
+            'You can temporarily disable Herald commit notifications when '.
+            'reparsing a repository or importing a new repository.'));
 
     $parsers = id(new PhutilSymbolLoader())
       ->setAncestorClass('PhabricatorRepositoryCommitMessageDetailParser')
@@ -487,10 +595,12 @@ class PhabricatorRepositoryEditController
             ->setCaption('Repository UUID from <tt>svn info</tt>.'));
     }
 
+    $form->appendChild('</div>');
+
     $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Save'));
+          ->setValue('Save Configuration'));
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Repository Tracking');

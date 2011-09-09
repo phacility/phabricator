@@ -35,13 +35,13 @@ final class PhabricatorContentSourceView extends AphrontView {
   public function render() {
     require_celerity_resource('phabricator-content-source-view-css');
 
-    $type = null;
     $map = array(
-      PhabricatorContentSource::SOURCE_WEB      => 'web',
-      PhabricatorContentSource::SOURCE_CONDUIT  => 'conduit',
-      PhabricatorContentSource::SOURCE_EMAIL    => 'email',
-      PhabricatorContentSource::SOURCE_MOBILE   => 'mobile',
-      PhabricatorContentSource::SOURCE_TABLET   => 'tablet',
+      PhabricatorContentSource::SOURCE_WEB      => 'Web',
+      PhabricatorContentSource::SOURCE_CONDUIT  => 'Conduit',
+      PhabricatorContentSource::SOURCE_EMAIL    => 'Email',
+      PhabricatorContentSource::SOURCE_MOBILE   => 'Mobile',
+      PhabricatorContentSource::SOURCE_TABLET   => 'Tablet',
+      PhabricatorContentSource::SOURCE_FAX      => 'Fax',
     );
 
     $source = $this->contentSource->getSource();
@@ -51,14 +51,12 @@ final class PhabricatorContentSourceView extends AphrontView {
       return;
     }
 
-    $type_class = 'phabricator-content-source-'.$type;
-
     return phutil_render_tag(
       'span',
       array(
-        'class' => "phabricator-content-source-view {$type_class}",
+        'class' => "phabricator-content-source-view",
       ),
-      'Via');
+      "Via {$type}");
   }
 
 }
