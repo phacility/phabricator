@@ -53,6 +53,7 @@ final class PhrictionDocumentEditor {
       $content = new PhrictionContent();
       $content->setSlug($slug);
       $content->setTitle($default_title);
+      $content->setContent('');
     }
 
     $obj = new PhrictionDocumentEditor();
