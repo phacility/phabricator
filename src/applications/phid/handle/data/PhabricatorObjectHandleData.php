@@ -132,6 +132,17 @@ class PhabricatorObjectHandleData {
           $users = $object->loadAllWhere('phid IN (%Ls)', $phids);
           $users = mpull($users, null, 'getPHID');
 
+          $image_phids = mpull($users, 'getProfileImagePHID');
+          $image_phids = array_unique(array_filter($image_phids));
+
+          $images = array();
+          if ($image_phids) {
+            $images = id(new PhabricatorFile())->loadAllWhere(
+              'phid IN (%Ls)',
+              $image_phids);
+            $images = mpull($images, 'getViewURI', 'getPHID');
+          }
+
           foreach ($phids as $phid) {
             $handle = new PhabricatorObjectHandle();
             $handle->setPHID($phid);
@@ -148,10 +159,9 @@ class PhabricatorObjectHandleData {
               $handle->setAlternateID($user->getID());
               $handle->setComplete(true);
 
-              $img_phid = $user->getProfileImagePHID();
-              if ($img_phid) {
-                $handle->setImageURI(
-                  PhabricatorFileURI::getViewURIForPHID($img_phid));
+              $img_uri = idx($images, $user->getProfileImagePHID());
+              if ($img_uri) {
+                $handle->setImageURI($img_uri);
               }
             }
             $handles[$phid] = $handle;
