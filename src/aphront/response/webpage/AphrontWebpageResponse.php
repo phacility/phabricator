@@ -22,15 +22,9 @@
 class AphrontWebpageResponse extends AphrontResponse {
 
   private $content;
-  private $frameable;
 
   public function setContent($content) {
     $this->content = $content;
-    return $this;
-  }
-
-  public function setFrameable($frameable) {
-    $this->frameable = $frameable;
     return $this;
   }
 
@@ -42,9 +36,7 @@ class AphrontWebpageResponse extends AphrontResponse {
     $headers = array(
       array('Content-Type', 'text/html; charset=UTF-8'),
     );
-    if (!$this->frameable) {
-      $headers[] = array('X-Frame-Options', 'Deny');
-    }
+    $headers = array_merge(parent::getHeaders(), $headers);
     return $headers;
   }
 

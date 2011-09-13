@@ -76,6 +76,7 @@ class AphrontFileResponse extends AphrontResponse {
       );
     }
 
+    $headers = array_merge(parent::getHeaders(), $headers);
     return $headers;
   }
 

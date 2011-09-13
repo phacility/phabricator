@@ -26,6 +26,8 @@ abstract class AphrontResponse {
   private $responseCode = 200;
   private $lastModified = null;
 
+  protected $frameable;
+
   public function setRequest($request) {
     $this->request = $request;
     return $this;
@@ -36,7 +38,12 @@ abstract class AphrontResponse {
   }
 
   public function getHeaders() {
-    return array();
+    $headers = array();
+    if (!$this->frameable) {
+      $headers[] = array('X-Frame-Options', 'Deny');
+    }
+
+    return $headers;
   }
 
   public function setCacheDurationInSeconds($duration) {
@@ -56,6 +63,11 @@ abstract class AphrontResponse {
 
   public function getHTTPResponseCode() {
     return $this->responseCode;
+  }
+
+  public function setFrameable($frameable) {
+    $this->frameable = $frameable;
+    return $this;
   }
 
   public function getCacheHeaders() {

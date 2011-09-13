@@ -33,9 +33,11 @@ class AphrontRedirectResponse extends AphrontResponse {
   }
 
   public function getHeaders() {
-    return array(
+    $headers = array(
       array('Location', $this->uri),
     );
+    $headers = array_merge(parent::getHeaders(), $headers);
+    return $headers;
   }
 
   public function buildResponseString() {

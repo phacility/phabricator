@@ -37,9 +37,11 @@ class AphrontAjaxResponse extends AphrontResponse {
   }
 
   public function getHeaders() {
-    return array(
+    $headers = array(
       array('Content-Type', 'text/plain; charset=UTF-8'),
     );
+    $headers = array_merge(parent::getHeaders(), $headers);
+    return $headers;
   }
 
 }
