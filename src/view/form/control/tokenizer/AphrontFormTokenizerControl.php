@@ -58,10 +58,11 @@ class AphrontFormTokenizerControl extends AphrontFormControl {
 
     if (!$this->disableBehavior) {
       Javelin::initBehavior('aphront-basic-tokenizer', array(
-        'id'    => $id,
-        'src'   => $this->datasource,
-        'value' => $values,
-        'limit' => $this->limit,
+        'id'        => $id,
+        'src'       => $this->datasource,
+        'value'     => $values,
+        'limit'     => $this->limit,
+        'ondemand'  => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
       ));
     }
 

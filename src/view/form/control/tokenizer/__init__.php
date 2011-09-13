@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
+phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'infrastructure/javelin/api');
 phutil_require_module('phabricator', 'view/control/tokenizer');
 phutil_require_module('phabricator', 'view/form/control/base');

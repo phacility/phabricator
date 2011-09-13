@@ -25,6 +25,9 @@ class PhabricatorTypeaheadCommonDatasourceController
 
   public function processRequest() {
 
+    $request = $this->getRequest();
+    $query = $request->getStr('q');
+
     $need_users = false;
     $need_all_users = false;
     $need_lists = false;
@@ -70,7 +73,16 @@ class PhabricatorTypeaheadCommonDatasourceController
     }
 
     if ($need_users) {
-      $users = id(new PhabricatorUser())->loadAll();
+      if ($query) {
+        // TODO: We probably need to split last names here. Workaround until
+        // we get that up and running is to not enable server-side datasources.
+        $users = id(new PhabricatorUser())->loadAllWhere(
+          '(userName LIKE %> OR realName LIKE %>)',
+          $query,
+          $query);
+      } else {
+        $users = id(new PhabricatorUser())->loadAll();
+      }
       foreach ($users as $user) {
         if (!$need_all_users) {
           if ($user->getIsSystemAgent()) {

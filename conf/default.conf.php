@@ -402,6 +402,20 @@ return array(
   // You can enable traces for development to make it easier to debug problems.
   'phabricator.show-stack-traces' => false,
 
+  // Tokenizers are UI controls which let the user select other users, email
+  // addresses, project names, etc., by typing the first few letters and having
+  // the control autocomplete from a list. They can load their data in two ways:
+  // either in a big chunk up front, or as the user types. By default, the data
+  // is loaded in a big chunk. This is simpler and performs better for small
+  // datasets. However, if you have a very large number of users or projects,
+  // (in the ballpark of more than a thousand), loading all that data may become
+  // slow enough that it's worthwhile to query on demand instead. This makes
+  // the typeahead slightly less responsive but overall performance will be much
+  // better if you have a ton of stuff. You can figure out which setting is
+  // best for your install by changing this setting and then playing with a
+  // user tokenizer (like the user selectors in Maniphest or Differential) and
+  // seeing which setting loads faster and feels better.
+  'tokenizer.ondemand'          => false,
 
 // -- Files ----------------------------------------------------------------- //
 

@@ -4,6 +4,7 @@
  *           javelin-typeahead
  *           javelin-tokenizer
  *           javelin-typeahead-preloaded-source
+ *           javelin-typeahead-ondemand-source
  *           javelin-dom
  *           javelin-stratcom
  */
@@ -11,7 +12,12 @@
 JX.behavior('aphront-basic-tokenizer', function(config) {
   var root = JX.$(config.id);
 
-  var datasource = new JX.TypeaheadPreloadedSource(config.src);
+  var datasource;
+  if (config.ondemand) {
+    datasource = new JX.TypeaheadOnDemandSource(config.src);
+  } else {
+    datasource = new JX.TypeaheadPreloadedSource(config.src);
+  }
 
   var typeahead = new JX.Typeahead(
     root,
