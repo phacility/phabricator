@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group phriction
+ */
 class PhrictionDocumentController
   extends PhrictionController {
 

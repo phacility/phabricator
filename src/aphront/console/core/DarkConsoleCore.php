@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group console
+ */
 final class DarkConsoleCore {
 
   const PLUGIN_ERRORLOG     = 'ErrorLog';
@@ -57,7 +60,6 @@ final class DarkConsoleCore {
 
   public static function newPlugin($plugin) {
     $class = 'DarkConsole'.$plugin.'Plugin';
-    PhutilSymbolLoader::loadClass($class);
     return newv($class, array());
   }
 

@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group console
+ */
 class DarkConsoleController extends PhabricatorController {
 
   protected $op;

@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group slowvote
+ */
 abstract class PhabricatorSlowvoteController extends PhabricatorController {
 
   public function buildStandardPageResponse($view, array $data) {

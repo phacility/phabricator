@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group phriction
+ */
 class PhrictionDocument extends PhrictionDAO {
 
   protected $id;

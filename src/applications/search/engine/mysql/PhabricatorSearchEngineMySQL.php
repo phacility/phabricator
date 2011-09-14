@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group search
+ */
 final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
 
   public function reindexAbstractDocument(

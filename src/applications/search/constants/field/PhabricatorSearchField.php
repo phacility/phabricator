@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group search
+ */
 final class PhabricatorSearchField {
 
   const FIELD_TITLE         = 'titl';

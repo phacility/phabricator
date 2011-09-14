@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group search
+ */
 abstract class PhabricatorSearchDocumentIndexer {
 
   // TODO: Make this whole class tree concrete?

@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group slowvote
+ */
 class PhabricatorSlowvoteCreateController
   extends PhabricatorSlowvoteController {
 

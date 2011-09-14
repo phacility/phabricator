@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group search
+ */
 class PhabricatorSearchDocumentField extends PhabricatorSearchDAO {
 
   protected $phid;

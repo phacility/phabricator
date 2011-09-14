@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group console
+ */
 class DarkConsoleRequestPlugin extends DarkConsolePlugin {
 
   public function getName() {

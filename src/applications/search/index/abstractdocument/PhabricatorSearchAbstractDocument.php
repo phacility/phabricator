@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group search
+ */
 final class PhabricatorSearchAbstractDocument {
 
   private $phid;

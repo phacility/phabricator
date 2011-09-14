@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group search
+ */
 abstract class PhabricatorSearchEngineSelector {
 
   final public function __construct() {

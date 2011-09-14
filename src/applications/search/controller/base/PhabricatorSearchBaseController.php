@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group search
+ */
 abstract class PhabricatorSearchBaseController extends PhabricatorController {
 
   public function buildStandardPageResponse($view, array $data) {

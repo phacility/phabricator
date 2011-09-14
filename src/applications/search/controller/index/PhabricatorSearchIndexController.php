@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group search
+ */
 class PhabricatorSearchIndexController extends PhabricatorSearchBaseController {
 
   private $phid;

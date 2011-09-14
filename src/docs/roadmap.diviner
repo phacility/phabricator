@@ -2,7 +2,7 @@
 @group intro
 
 Insight into the direction and progress of Phabricator. This document was last
-updated **July 22, 2011**.
+updated **September 14th, 2011**.
 
 = Status =
 
@@ -14,6 +14,7 @@ active development.
 The current focus on Phabricator is primarily feature buildout, particularly in
 these applications:
 
+  - **Mercurial**: Mercurial support is actively landing.
   - **Maniphest**: A lot of early adopters are getting into the suite because
     of this tool, and we're continuing to improve it.
   - **Phriction**: We just landed a wiki application, which basically works but

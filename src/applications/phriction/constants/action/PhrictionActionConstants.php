@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group phriction
+ */
 class PhrictionActionConstants extends PhrictionConstants {
 
   const ACTION_CREATE   = 'create';

@@ -17,7 +17,7 @@
  */
 
 /**
- * @group markup
+ * @group phriction
  */
 class PhrictionDocumentTestCase extends PhabricatorTestCase {
 

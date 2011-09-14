@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group console
+ */
 abstract class DarkConsolePlugin {
 
   private $data;

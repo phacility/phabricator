@@ -16,7 +16,9 @@
  * limitations under the License.
  */
 
-
+/**
+ * @group console
+ */
 class DarkConsoleErrorLogPluginAPI {
 
   private static $errors = array();

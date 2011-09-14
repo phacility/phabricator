@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group console
+ */
 class DarkConsoleServicesPlugin extends DarkConsolePlugin {
 
   protected $observations;

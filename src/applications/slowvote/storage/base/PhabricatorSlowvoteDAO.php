@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group slowvote
+ */
 class PhabricatorSlowvoteDAO extends PhabricatorLiskDAO {
 
   public function getApplicationName() {

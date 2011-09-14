@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group phriction
+ */
 abstract class PhrictionController extends PhabricatorController {
 
   public function buildStandardPageResponse($view, array $data) {

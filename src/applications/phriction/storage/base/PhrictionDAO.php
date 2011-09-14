@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group phriction
+ */
 abstract class PhrictionDAO extends PhabricatorLiskDAO {
 
   public function getApplicationName() {

@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group slowvote
+ */
 class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO {
 
   const RESPONSES_VISIBLE = 0;
