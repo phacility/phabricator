@@ -522,6 +522,13 @@ return array(
 
   'differential.field-selector' => 'DifferentialDefaultFieldSelector',
 
+  // If you set this to true, users can "!accept" revisions via email (normally,
+  // they can take other actions but can not "!accept"). This action is disabled
+  // by default because email authentication can be configured to be very weak,
+  // and, socially, email "!accept" is kind of sketchy and implies revisions may
+  // not actually be receiving thorough review.
+  'differential.enable-email-accept' => false,
+
 
 // -- Maniphest ------------------------------------------------------------- //
 

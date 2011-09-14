@@ -88,7 +88,7 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
   }
 
   public function getSupportedCommands() {
-    return array(
+    $actions = array(
       DifferentialAction::ACTION_COMMENT,
       DifferentialAction::ACTION_REJECT,
       DifferentialAction::ACTION_ABANDON,
@@ -97,6 +97,12 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
       DifferentialAction::ACTION_RETHINK,
       'unsubscribe',
     );
+
+    if (PhabricatorEnv::getEnvConfig('differential.enable-email-accept')) {
+      $actions[] = DifferentialAction::ACTION_ACCEPT;
+    }
+
+    return $actions;
   }
 
   public function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
