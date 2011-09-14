@@ -364,6 +364,8 @@ class DifferentialRevisionEditor {
       $diff->setDescription(substr($this->getComments(), 0, 80));
       $diff->save();
 
+      $this->updateAffectedPathTable($revision, $diff, $changesets);
+
       // An updated diff should require review, as long as it's not committed
       // or accepted. The "accepted" status is "sticky" to encourage courtesy
       // re-diffs after someone accepts with minor changes/suggestions.
@@ -716,6 +718,95 @@ class DifferentialRevisionEditor {
   private function didWriteRevision() {
     foreach ($this->auxiliaryFields as $aux_field) {
       $aux_field->didWriteRevision($this);
+    }
+  }
+
+  /**
+   * Updated the table which links Differential revisions to paths they affect,
+   * so Diffusion can efficiently find pending revisions for a given file.
+   */
+  private function updateAffectedPathTable(
+    DifferentialRevision $revision,
+    DifferentialDiff $diff,
+    array $changesets) {
+
+    $project = $diff->loadArcanistProject();
+    if (!$project) {
+      // Probably an old revision from before projects.
+      return;
+    }
+
+    $repository = $project->loadRepository();
+    if (!$repository) {
+      // Probably no project <-> repository link, or the repository where the
+      // project lives is untracked.
+      return;
+    }
+
+    $path_prefix = null;
+
+    $local_root = $diff->getSourceControlPath();
+    if ($local_root) {
+      // We're in a working copy which supports subdirectory checkouts (e.g.,
+      // SVN) so we need to figure out what prefix we should add to each path
+      // (e.g., trunk/projects/example/) to get the absolute path from the
+      // root of the repository. DVCS systems like Git and Mercurial are not
+      // affected.
+
+      // Normalize both paths and check if the repository root is a prefix of
+      // the local root. If so, throw it away. Note that this correctly handles
+      // the case where the remote path is "/".
+      $local_root = id(new PhutilURI($local_root))->getPath();
+      $local_root = rtrim($local_root, '/');
+
+      $repo_root = id(new PhutilURI($repository->getRemoteURI()))->getPath();
+      $repo_root = rtrim($repo_root, '/');
+
+      if (!strncmp($repo_root, $local_root, strlen($repo_root))) {
+        $path_prefix = substr($local_root, strlen($repo_root));
+      }
+    }
+
+    $paths = array();
+    foreach ($changesets as $changeset) {
+      $paths[] = $path_prefix.'/'.$changeset->getFileName();
+    }
+
+    $path_map = id(new DiffusionPathIDQuery($paths))->loadPathIDs($paths);
+
+    $table = new DifferentialAffectedPath();
+    $conn_w = $table->establishConnection('w');
+
+    $sql = array();
+    foreach ($paths as $path) {
+      $path_id = idx($path_map, $path);
+      if (!$path_id) {
+        // Don't bother creating these, it probably means we're either adding
+        // a file (in which case having this row is irrelevant since Diffusion
+        // won't be querying for it) or something is misconfigured (in which
+        // case we'd just be writing garbage).
+        continue;
+      }
+      $sql[] = qsprintf(
+        $conn_w,
+        '(%d, %d, %d, %d)',
+        $repository->getID(),
+        $path_id,
+        time(),
+        $revision->getID());
+    }
+
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T WHERE revisionID = %d',
+      $table->getTableName(),
+      $revision->getID());
+    foreach (array_chunk($sql, 256) as $chunk) {
+      queryfx(
+        $conn_w,
+        'INSERT INTO %T (repositoryID, pathID, epoch, revisionID) VALUES %Q',
+        $table->getTableName(),
+        implode(', ', $chunk));
     }
   }
 

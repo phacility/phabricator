@@ -75,6 +75,15 @@ class DifferentialDiff extends DifferentialDAO {
       $this->getID());
   }
 
+  public function loadArcanistProject() {
+    if (!$this->getArcanistProjectPHID()) {
+      return null;
+    }
+    return id(new PhabricatorRepositoryArcanistProject())->loadOneWhere(
+      'phid = %s',
+      $this->getArcanistProjectPHID());
+  }
+
   public function save() {
 // TODO: sort out transactions
 //    $this->openTransaction();

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-final class DiffusionGitPathIDQuery {
+final class DiffusionPathIDQuery {
 
   public function __construct(array $paths) {
     $this->paths = $paths;

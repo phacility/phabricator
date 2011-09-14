@@ -16,29 +16,22 @@
  * limitations under the License.
  */
 
-class PhabricatorRepositoryArcanistProject
-  extends PhabricatorRepositoryDAO {
+/**
+ * Denormalized index table which stores relationships between revisions in
+ * Differential and paths in Diffusion.
+ *
+ * @group differential
+ */
+final class DifferentialAffectedPath extends DifferentialDAO {
 
-  protected $name;
-  protected $phid;
   protected $repositoryID;
+  protected $pathID;
+  protected $epoch;
+  protected $revisionID;
 
   public function getConfiguration() {
     return array(
-      self::CONFIG_AUX_PHID   => true,
       self::CONFIG_TIMESTAMPS => false,
     ) + parent::getConfiguration();
   }
-
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID('APRJ');
-  }
-
-  public function loadRepository() {
-    if (!$this->getRepositoryID()) {
-      return null;
-    }
-    return id(new PhabricatorRepository())->load($this->getRepositoryID());
-  }
-
 }

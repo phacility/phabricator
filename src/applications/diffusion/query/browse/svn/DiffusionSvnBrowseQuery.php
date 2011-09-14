@@ -37,7 +37,7 @@ final class DiffusionSvnBrowseQuery extends DiffusionBrowseQuery {
     $conn_r = $repository->establishConnection('r');
 
     $parent_path = dirname($path);
-    $path_query = new DiffusionGitPathIDQuery(
+    $path_query = new DiffusionPathIDQuery(
       array(
         $path,
         $parent_path,
@@ -162,7 +162,7 @@ final class DiffusionSvnBrowseQuery extends DiffusionBrowseQuery {
       $commit_data = mpull($commit_data, null, 'getCommitID');
     }
 
-    $path_normal = DiffusionGitPathIDQuery::normalizePath($path);
+    $path_normal = DiffusionPathIDQuery::normalizePath($path);
 
     $results = array();
     foreach ($browse as $file) {

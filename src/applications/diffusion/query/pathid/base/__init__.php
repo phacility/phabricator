@@ -12,4 +12,4 @@ phutil_require_module('phabricator', 'storage/queryfx');
 phutil_require_module('phutil', 'utils');
 
 
-phutil_require_source('DiffusionGitPathIDQuery.php');
+phutil_require_source('DiffusionPathIDQuery.php');
