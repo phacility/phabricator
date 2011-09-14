@@ -53,4 +53,9 @@ final class DiffusionPathIDQuery {
     return '/'.trim($path, '/');
   }
 
+  public static function getParentPath($path) {
+    $path = self::normalizePath($path);
+    return dirname($path);
+  }
+
 }

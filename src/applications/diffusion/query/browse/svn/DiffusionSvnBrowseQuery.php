@@ -36,7 +36,7 @@ final class DiffusionSvnBrowseQuery extends DiffusionBrowseQuery {
 
     $conn_r = $repository->establishConnection('r');
 
-    $parent_path = dirname($path);
+    $parent_path = DiffusionPathIDQuery::getParentPath($path);
     $path_query = new DiffusionPathIDQuery(
       array(
         $path,
