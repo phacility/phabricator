@@ -40,6 +40,18 @@ in the file:
     // Use "https://" if you have SSL. See below for some notes.
     'phabricator.base-uri' => 'http://phabricator.example.com/',
 
+    // Connection information for MySQL.
+    'mysql.host' => 'localhost',
+    'mysql.user' => 'root',
+    'mysql.pass' => 'trustno1hunter2',
+
+    // Basic email domain configuration.
+    'metamta.default-address' => 'noreply@phabricator.example.com',
+    'metamta.domain'          => 'phabricator.example.com',
+
+    // NOTE: Check default.conf.php for detailed explanations of all the
+    // configuration options, including these.
+
   ) + phabricator_read_config_file('production');
 
 For the last line, you can also use ##'development'## instead of
