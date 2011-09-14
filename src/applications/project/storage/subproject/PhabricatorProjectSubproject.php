@@ -17,13 +17,12 @@
  */
 
 /**
- * This is a DAO for the Task -> Project table, which denormalizes the
- * relationship between tasks and projects into a link table so it can be
- * efficiently queried. This table is not authoritative; the projectPHIDs field
- * of ManiphestTask is. The rows in this table are regenerated when transactions
- * are applied to tasks which affected their associated projects.
- *
- * @group maniphest
+ * This is a DAO for the Project -> subproject table, which
+ * denormalizes the relationship between projects and subprojects into
+ * a link table so it can be efficiently queried. This table is not
+ * authoritative; the subprojectPHIDs field of PhabricatorProject is.
+ * The rows in this table are regenerated when subprojects of a project
+ * are updated.
  */
 final class PhabricatorProjectSubproject extends PhabricatorProjectDAO {
 
