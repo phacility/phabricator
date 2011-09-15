@@ -73,6 +73,16 @@ switch ($vcs) {
       $repository->getRemoteURI(),
       'just-testing');
     break;
+  case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+    // TODO: 'hg id' doesn't support --insecure so we can't tell it not to
+    // spew. If 'hg id' eventually supports --insecure, consider using it.
+    echo "(It is safe to ignore any 'certificate with fingerprint ... not ".
+         "verified' warnings, although you may want to configure Mercurial ".
+         "to recognize the server's fingerprint/certificate.)\n";
+    $err = $repository->passthruRemoteCommand(
+      'id --rev tip %s',
+      $repository->getRemoteURI());
+    break;
   default:
     throw new Exception("Unsupported repository type.");
 }
