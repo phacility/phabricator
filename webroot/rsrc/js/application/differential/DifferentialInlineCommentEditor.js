@@ -109,9 +109,6 @@ JX.install('DifferentialInlineCommentEditor', {
           'textarea',
           'differential-inline-comment-edit-textarea');
       } catch (ex) {
-        if (ex !== JX.$.NotFound) {
-          throw ex;
-        }
         // The close handler is called whenever the dialog closes, even if the
         // user closed it by completing the workflow with "Save". The
         // JX.Workflow API should probably be refined to allow programmatic

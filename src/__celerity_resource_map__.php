@@ -181,7 +181,7 @@ celerity_register_resource_map(array(
   ),
   'differential-inline-comment-editor' =>
   array(
-    'uri' => '/res/5e4f0aa4/rsrc/js/application/differential/DifferentialInlineCommentEditor.js',
+    'uri' => '/res/ff5f42a9/rsrc/js/application/differential/DifferentialInlineCommentEditor.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -703,14 +703,13 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-phabricator-watch-anchor' =>
   array(
-    'uri' => '/res/46298448/rsrc/js/application/core/behavior-watch-anchor.js',
+    'uri' => '/res/96f40736/rsrc/js/application/core/behavior-watch-anchor.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-behavior',
       1 => 'javelin-stratcom',
-      2 => 'javelin-util',
-      3 => 'javelin-dom',
+      2 => 'javelin-dom',
     ),
     'disk' => '/rsrc/js/application/core/behavior-watch-anchor.js',
   ),
