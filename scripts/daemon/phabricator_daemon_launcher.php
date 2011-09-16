@@ -85,7 +85,7 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
         $phid = $repository->getPHID();
 
         switch ($repository->getVersionControlSystem()) {
-          case 'git':
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
             echo "Launching 'git fetch' daemon on the {$desc} repository...\n";
             $control->launchDaemon(
               'PhabricatorRepositoryGitFetchDaemon',
@@ -99,7 +99,7 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
                 $phid,
               ));
             break;
-          case 'svn':
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
             echo "Launching discovery daemon on the {$desc} repository...\n";
             $control->launchDaemon(
               'PhabricatorRepositorySvnCommitDiscoveryDaemon',
@@ -107,6 +107,21 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
                 $phid,
               ));
             break;
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+            echo "Launching 'hg pull' daemon on the {$desc} repository...\n";
+            $control->launchDaemon(
+              'PhabricatorRepositoryMercurialPullDaemon',
+              array(
+                $phid,
+              ));
+            echo "Launching discovery daemon on the {$desc} repository...\n";
+            $control->launchDaemon(
+              'PhabricatorRepositoryMercurialCommitDiscoveryDaemon',
+              array(
+                $phid,
+              ));
+            break;
+
         }
       }
 
