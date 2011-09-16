@@ -39,7 +39,7 @@ abstract class PhabricatorRepositoryPullLocalDaemon
         "repository '{$repo_name}' is a '{$repo_type_name}' repository.");
     }
 
-    $tracked = $repository->getDetail('tracking-enabled');
+    $tracked = $repository->isTracked();
     if (!$tracked) {
       throw new Exception("Tracking is not enabled for this repository.");
     }

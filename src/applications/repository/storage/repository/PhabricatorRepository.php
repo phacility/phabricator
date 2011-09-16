@@ -293,4 +293,8 @@ class PhabricatorRepository extends PhabricatorRepositoryDAO {
     return ($protocol == 'http' || $protocol == 'https');
   }
 
+  public function isTracked() {
+    return $this->getDetail('tracking-enabled', false);
+  }
+
 }

@@ -243,7 +243,7 @@ function phd_load_tracked_repositories() {
 
   $repositories = id(new PhabricatorRepository())->loadAll();
   foreach ($repositories as $key => $repository) {
-    if (!$repository->getDetail('tracking-enabled')) {
+    if (!$repository->isTracked()) {
       unset($repositories[$key]);
     }
   }

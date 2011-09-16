@@ -34,7 +34,7 @@ class PhabricatorRepositoryListController
     $rows = array();
     foreach ($repos as $repo) {
 
-      if ($repo->getDetail('tracking-enabled')) {
+      if ($repo->isTracked()) {
         $diffusion_link = phutil_render_tag(
           'a',
           array(

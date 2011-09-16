@@ -62,7 +62,7 @@ class DiffusionHomeController extends DiffusionController {
 
     $repositories = $repository->loadAll();
     foreach ($repositories as $key => $repository) {
-      if (!$repository->getDetail('tracking-enabled')) {
+      if (!$repository->isTracked()) {
         unset($repositories[$key]);
       }
     }
