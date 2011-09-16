@@ -1188,7 +1188,10 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryGitHubNotification' => 'PhabricatorRepositoryDAO',
     'PhabricatorRepositoryGitHubPostReceiveController' => 'PhabricatorRepositoryController',
     'PhabricatorRepositoryListController' => 'PhabricatorRepositoryController',
+<<<<<<< HEAD
     'PhabricatorRepositoryMercurialCommitDiscoveryDaemon' => 'PhabricatorRepositoryCommitDiscoveryDaemon',
+=======
+>>>>>>> Add a Mercurial message parser
     'PhabricatorRepositoryMercurialCommitMessageParserWorker' => 'PhabricatorRepositoryCommitMessageParserWorker',
     'PhabricatorRepositoryMercurialPullDaemon' => 'PhabricatorRepositoryPullLocalDaemon',
     'PhabricatorRepositoryPullLocalDaemon' => 'PhabricatorRepositoryDaemon',
