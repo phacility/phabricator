@@ -51,27 +51,24 @@ class PhabricatorRepositoryCommitTaskDaemon
         switch ($vcs) {
           case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
             $class = 'PhabricatorRepositoryGitCommitMessageParserWorker';
-            $task = new PhabricatorWorkerTask();
-            $task->setTaskClass($class);
-            $task->setData(
-              array(
-                'commitID' => $commit->getID(),
-              ));
-            $task->save();
             break;
           case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
             $class = 'PhabricatorRepositorySvnCommitMessageParserWorker';
-            $task = new PhabricatorWorkerTask();
-            $task->setTaskClass($class);
-            $task->setData(
-              array(
-                'commitID' => $commit->getID(),
-              ));
-            $task->save();
+            break;
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+            $class = 'PhabricatorRepositoryMercurialCommitMessageParserWorker';
             break;
           default:
             throw new Exception("Unknown repository type.");
         }
+
+        $task = new PhabricatorWorkerTask();
+        $task->setTaskClass($class);
+        $task->setData(
+          array(
+            'commitID' => $commit->getID(),
+          ));
+        $task->save();
 
         $this->stillWorking();
       }
