@@ -36,6 +36,11 @@ abstract class PhabricatorRepositoryCommitDiscoveryDaemon
     }
   }
 
+  final public function runOnce() {
+    $this->repository = $this->loadRepository();
+    $this->discoverCommits();
+  }
+
   protected function isKnownCommit($target) {
     if (isset($this->commitCache[$target])) {
       return true;
