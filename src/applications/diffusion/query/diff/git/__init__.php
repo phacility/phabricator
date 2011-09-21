@@ -7,6 +7,7 @@
 
 
 phutil_require_module('arcanist', 'parser/diff');
+phutil_require_module('arcanist', 'repository/api/git');
 
 phutil_require_module('phabricator', 'applications/differential/storage/diff');
 phutil_require_module('phabricator', 'applications/diffusion/query/diff/base');

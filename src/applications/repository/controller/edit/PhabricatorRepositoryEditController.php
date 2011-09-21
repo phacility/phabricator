@@ -405,7 +405,7 @@ class PhabricatorRepositoryEditController
       if ($is_git) {
         $instructions =
           'Enter the URI to clone this repository from. It should look like '.
-          '<tt>git@github.com:example/example.git</tt>, <tt> '.
+          '<tt>git@github.com:example/example.git</tt> or '.
           '<tt>ssh://user@host.com/git/example.git</tt>';
       } else if ($is_mercurial) {
         $instructions =
