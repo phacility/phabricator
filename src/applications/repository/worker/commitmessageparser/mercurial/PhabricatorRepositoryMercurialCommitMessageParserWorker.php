@@ -23,8 +23,6 @@ class PhabricatorRepositoryMercurialCommitMessageParserWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
-    $local_path = $repository->getDetail('local-path');
-
     list($stdout) = $repository->execxLocalCommand(
       'log --template %s --rev %s',
       '{author}\\n{desc}',
@@ -48,6 +46,17 @@ class PhabricatorRepositoryMercurialCommitMessageParserWorker
         ));
       $task->save();
     }
+  }
+
+  protected function getCommitHashes(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit) {
+
+    $commit_hash = $commit->getCommitIdentifier();
+
+    return array(
+      array(DifferentialRevisionHash::HASH_MERCURIAL_COMMIT, $commit_hash),
+    );
   }
 
 }

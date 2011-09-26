@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/differential/constants/revisionhash');
 phutil_require_module('phabricator', 'applications/repository/worker/commitmessageparser/base');
 phutil_require_module('phabricator', 'infrastructure/daemon/workers/storage/task');
 

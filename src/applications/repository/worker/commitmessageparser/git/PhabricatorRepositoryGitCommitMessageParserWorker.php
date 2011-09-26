@@ -23,13 +23,10 @@ class PhabricatorRepositoryGitCommitMessageParserWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
-    $local_path = $repository->getDetail('local-path');
-
     // NOTE: %B was introduced somewhat recently in git's history, so pull
     // commit message information with %s and %b instead.
-    list($info) = execx(
-      '(cd %s && git log -n 1 --pretty=format:%%an%%x00%%s%%n%%n%%b %s)',
-      $local_path,
+    list($info) = $repository->execxLocalCommand(
+      'log -n 1 --pretty=format:%%an%%x00%%s%%n%%n%%b %s',
       $commit->getCommitIdentifier());
 
     list($author, $message) = explode("\0", $info);
@@ -50,6 +47,24 @@ class PhabricatorRepositoryGitCommitMessageParserWorker
         ));
       $task->save();
     }
+  }
+
+  protected function getCommitHashes(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit) {
+
+    list($stdout) = $repository->execxLocalCommand(
+      'log -n 1 --format=%s %s --',
+      '%T',
+      $commit->getCommitIdentifier());
+
+    $commit_hash = $commit->getCommitIdentifier();
+    $tree_hash = trim($stdout);
+
+    return array(
+      array(DifferentialRevisionHash::HASH_GIT_COMMIT, $commit_hash),
+      array(DifferentialRevisionHash::HASH_GIT_TREE, $tree_hash),
+    );
   }
 
 }

@@ -48,4 +48,11 @@ class PhabricatorRepositorySvnCommitMessageParserWorker
     }
   }
 
+  protected function getCommitHashes(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit) {
+    return array();
+  }
+
+
 }
