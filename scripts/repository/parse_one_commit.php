@@ -17,69 +17,7 @@
  * limitations under the License.
  */
 
-$root = dirname(dirname(dirname(__FILE__)));
-require_once $root.'/scripts/__init_script__.php';
-require_once $root.'/scripts/__init_env__.php';
-
-if (empty($argv[1])) {
-  echo "usage: parse_one_commit.php <commit_name> [--herald]\n";
-  die(1);
-}
-
-$commit = isset($argv[1]) ? $argv[1] : null;
-if (!$commit) {
-  throw new Exception("Provide a commit to parse!");
-}
-$matches = null;
-if (!preg_match('/r([A-Z]+)([a-z0-9]+)/', $commit, $matches)) {
-  throw new Exception("Can't parse commit identifier!");
-}
-$repo = id(new PhabricatorRepository())->loadOneWhere(
-  'callsign = %s',
-  $matches[1]);
-if (!$repo) {
-  throw new Exception("Unknown repository!");
-}
-$commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-  'repositoryID = %d AND commitIdentifier = %s',
-  $repo->getID(),
-  $matches[2]);
-if (!$commit) {
-  throw new Exception('Unknown commit.');
-}
-
-$workers = array();
-
-$spec = array(
-  'commitID'  => $commit->getID(),
-  'only'      => true,
-);
-
-switch ($repo->getVersionControlSystem()) {
-  case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-    $workers[] = new PhabricatorRepositoryGitCommitMessageParserWorker(
-      $spec);
-    $workers[] = new PhabricatorRepositoryGitCommitChangeParserWorker(
-      $spec);
-    break;
-  case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-    $workers[] = new PhabricatorRepositorySvnCommitMessageParserWorker(
-      $spec);
-    $workers[] = new PhabricatorRepositorySvnCommitChangeParserWorker(
-      $spec);
-    break;
-  default:
-    throw new Exception("Unknown repository type!");
-}
-
-if (isset($argv[2]) && $argv[2] == '--herald') {
-  $workers[] = new PhabricatorRepositoryCommitHeraldWorker($spec);
-}
-
-foreach ($workers as $worker) {
-  echo "Running ".get_class($worker)."...\n";
-  $worker->doWork();
-}
-
-echo "Done.\n";
-
+echo "This script is obsolete. Instead, use:\n\n".
+     "  $ reparse.php <commit_name> --message --change\n\n".
+     "See that script for more options.\n";
+exit(1);

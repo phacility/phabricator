@@ -62,10 +62,12 @@ class PhabricatorWorkerTaskDetailController
                 "<strong>NOTE:</strong> ".
                 "You can manually retry this task by running this script:".
                 "<pre>".
-                  "phabricator/\$ ./scripts/repository/parse_one_commit.php ".
+                  "phabricator/\$ ./scripts/repository/reparse.php ".
                   "r".
                   phutil_escape_html($repository->getCallsign()).
                   phutil_escape_html($commit->getCommitIdentifier()).
+                  " ".
+                  "--change".
                 "</pre>";
             }
           }
