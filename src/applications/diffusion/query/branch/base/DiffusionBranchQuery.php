@@ -33,6 +33,9 @@ abstract class DiffusionBranchQuery {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $class = 'DiffusionGitBranchQuery';
         break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $class = 'DiffusionMercurialBranchQuery';
+        break;
       default:
         throw new Exception("Unsupported VCS!");
     }

@@ -35,6 +35,9 @@ abstract class DiffusionFileContentQuery {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $class = 'DiffusionGitFileContentQuery';
         break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $class = 'DiffusionMercurialFileContentQuery';
+        break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         $class = 'DiffusionSvnFileContentQuery';
         break;

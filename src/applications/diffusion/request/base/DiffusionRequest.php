@@ -55,6 +55,9 @@ class DiffusionRequest {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         $class = 'DiffusionSvnRequest';
         break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $class = 'DiffusionMercurialRequest';
+        break;
       default:
         $class = 'DiffusionRequest';
         break;

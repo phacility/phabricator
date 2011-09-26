@@ -172,6 +172,7 @@ class DiffusionCommitController extends DiffusionController {
           $vcs_supports_directory_changes = true;
           break;
         case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
           $vcs_supports_directory_changes = false;
           break;
         default:

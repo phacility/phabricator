@@ -16,34 +16,32 @@
  * limitations under the License.
  */
 
-final class DiffusionGitHistoryQuery extends DiffusionHistoryQuery {
+final class DiffusionMercurialFileContentQuery
+  extends DiffusionFileContentQuery {
 
   protected function executeQuery() {
     $drequest = $this->getRequest();
 
     $repository = $drequest->getRepository();
     $path = $drequest->getPath();
-    $commit_hash = $drequest->getCommit();
+    $commit = $drequest->getCommit();
 
-    $local_path = $repository->getDetail('local-path');
-
-    list($stdout) = execx(
-      '(cd %s && git log '.
-        '--skip=%d '.
-        '-n %d '.
-        '--abbrev=40 '.
-        '--pretty=format:%%H '.
-        '%s -- %s)',
-      $local_path,
-      $this->getOffset(),
-      $this->getLimit(),
-      $commit_hash,
+    list($corpus) = $repository->execxLocalCommand(
+      'cat --rev %s -- %s',
+      $commit,
       $path);
 
-    $hashes = explode("\n", $stdout);
-    $hashes = array_filter($hashes);
+    $file_content = new DiffusionFileContent();
+    $file_content->setCorpus($corpus);
 
-    return $this->loadHistoryForCommitIdentifiers($hashes);
+    return $file_content;
+  }
+
+
+  protected function tokenizeLine($line) {
+    // TODO: Support blame.
+    throw new Exception(
+      "Diffusion does not currently support blame for Mercurial.");
   }
 
 }

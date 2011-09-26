@@ -41,6 +41,9 @@ abstract class DiffusionHistoryQuery {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         $class = 'DiffusionSvnHistoryQuery';
         break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $class = 'DiffusionMercurialHistoryQuery';
+        break;
       default:
         throw new Exception("Unsupported VCS!");
     }
@@ -90,4 +93,76 @@ abstract class DiffusionHistoryQuery {
   }
 
   abstract protected function executeQuery();
+
+  final protected function loadHistoryForCommitIdentifiers(array $identifiers) {
+    if (!$identifiers) {
+      return array();
+    }
+
+    $commits = array();
+    $commit_data = array();
+    $path_changes = array();
+
+    $drequest = $this->getRequest();
+    $repository = $drequest->getRepository();
+
+    $path = $drequest->getPath();
+
+    $commits = id(new PhabricatorRepositoryCommit())->loadAllWhere(
+      'repositoryID = %d AND commitIdentifier IN (%Ls)',
+        $repository->getID(),
+      $identifiers);
+    $commits = mpull($commits, null, 'getCommitIdentifier');
+
+    if (!$commits) {
+      return array();
+    }
+
+    $commit_data = id(new PhabricatorRepositoryCommitData())->loadAllWhere(
+      'commitID in (%Ld)',
+      mpull($commits, 'getID'));
+    $commit_data = mpull($commit_data, null, 'getCommitID');
+
+    $conn_r = $repository->establishConnection('r');
+
+    $path_normal = DiffusionPathIDQuery::normalizePath($path);
+    $paths = queryfx_all(
+      $conn_r,
+      'SELECT id, path FROM %T WHERE path IN (%Ls)',
+      PhabricatorRepository::TABLE_PATH,
+      array($path_normal));
+    $paths = ipull($paths, 'id', 'path');
+    $path_id = idx($paths, $path_normal);
+
+    $path_changes = queryfx_all(
+      $conn_r,
+      'SELECT * FROM %T WHERE commitID IN (%Ld) AND pathID = %d',
+      PhabricatorRepository::TABLE_PATHCHANGE,
+      mpull($commits, 'getID'),
+      $path_id);
+    $path_changes = ipull($path_changes, null, 'commitID');
+
+    $history = array();
+    foreach ($identifiers as $identifier) {
+      $item = new DiffusionPathChange();
+      $item->setCommitIdentifier($identifier);
+      $commit = idx($commits, $identifier);
+      if ($commit) {
+        $item->setCommit($commit);
+        $data = idx($commit_data, $commit->getID());
+        if ($data) {
+          $item->setCommitData($data);
+        }
+        $change = idx($path_changes, $commit->getID());
+        if ($change) {
+          $item->setChangeType($change['changeType']);
+          $item->setFileType($change['fileType']);
+        }
+      }
+      $history[] = $item;
+    }
+
+    return $history;
+  }
+
 }

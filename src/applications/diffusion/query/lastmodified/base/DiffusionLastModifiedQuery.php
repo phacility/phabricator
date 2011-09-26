@@ -33,6 +33,9 @@ abstract class DiffusionLastModifiedQuery {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $class = 'DiffusionGitLastModifiedQuery';
         break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $class = 'DiffusionMercurialLastModifiedQuery';
+        break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         $class = 'DiffusionSvnLastModifiedQuery';
         break;

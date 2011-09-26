@@ -16,34 +16,35 @@
  * limitations under the License.
  */
 
-final class DiffusionGitHistoryQuery extends DiffusionHistoryQuery {
+final class DiffusionMercurialLastModifiedQuery
+  extends DiffusionLastModifiedQuery {
 
   protected function executeQuery() {
     $drequest = $this->getRequest();
-
     $repository = $drequest->getRepository();
+
     $path = $drequest->getPath();
-    $commit_hash = $drequest->getCommit();
 
-    $local_path = $repository->getDetail('local-path');
+    // TODO: Share some of this with History query.
+    list($hash) = $repository->execxLocalCommand(
+      'log --template %s --limit 1 --branch %s --rev %s:0 -- %s',
+      '{node}\\n',
+      $drequest->getBranch(),
+      $drequest->getCommit(),
+      nonempty(ltrim($path, '/'), '.'));
+    $hash = trim($hash);
 
-    list($stdout) = execx(
-      '(cd %s && git log '.
-        '--skip=%d '.
-        '-n %d '.
-        '--abbrev=40 '.
-        '--pretty=format:%%H '.
-        '%s -- %s)',
-      $local_path,
-      $this->getOffset(),
-      $this->getLimit(),
-      $commit_hash,
-      $path);
+    $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
+      'repositoryID = %d AND commitIdentifier = %s',
+      $repository->getID(),
+      $hash);
+    if ($commit) {
+      $commit_data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
+        'commitID = %d',
+        $commit->getID());
+    }
 
-    $hashes = explode("\n", $stdout);
-    $hashes = array_filter($hashes);
-
-    return $this->loadHistoryForCommitIdentifiers($hashes);
+    return array($commit, $commit_data);
   }
 
 }

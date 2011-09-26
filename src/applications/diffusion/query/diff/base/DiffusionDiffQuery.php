@@ -34,6 +34,9 @@ abstract class DiffusionDiffQuery {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $class = 'DiffusionGitDiffQuery';
         break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $class = 'DiffusionMercurialDiffQuery';
+        break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         $class = 'DiffusionSvnDiffQuery';
         break;

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-final class DiffusionGitHistoryQuery extends DiffusionHistoryQuery {
+final class DiffusionMercurialHistoryQuery extends DiffusionHistoryQuery {
 
   protected function executeQuery() {
     $drequest = $this->getRequest();
@@ -25,23 +25,19 @@ final class DiffusionGitHistoryQuery extends DiffusionHistoryQuery {
     $path = $drequest->getPath();
     $commit_hash = $drequest->getCommit();
 
-    $local_path = $repository->getDetail('local-path');
+    $path = DiffusionPathIDQuery::normalizePath($path);
 
-    list($stdout) = execx(
-      '(cd %s && git log '.
-        '--skip=%d '.
-        '-n %d '.
-        '--abbrev=40 '.
-        '--pretty=format:%%H '.
-        '%s -- %s)',
-      $local_path,
-      $this->getOffset(),
-      $this->getLimit(),
+    list($stdout) = $repository->execxLocalCommand(
+      'log --template %s --limit %d --branch %s --rev %s:0 -- %s',
+      '{node}\\n',
+      ($this->getOffset() + $this->getLimit()), // No '--skip' in Mercurial.
+      $drequest->getBranch(),
       $commit_hash,
-      $path);
+      nonempty(ltrim($path, '/'), '.'));
 
     $hashes = explode("\n", $stdout);
     $hashes = array_filter($hashes);
+    $hashes = array_slice($hashes, $this->getOffset());
 
     return $this->loadHistoryForCommitIdentifiers($hashes);
   }

@@ -16,34 +16,25 @@
  * limitations under the License.
  */
 
-final class DiffusionGitHistoryQuery extends DiffusionHistoryQuery {
+final class DiffusionMercurialBranchQuery extends DiffusionBranchQuery {
 
   protected function executeQuery() {
     $drequest = $this->getRequest();
-
     $repository = $drequest->getRepository();
-    $path = $drequest->getPath();
-    $commit_hash = $drequest->getCommit();
 
-    $local_path = $repository->getDetail('local-path');
+    list($stdout) = $repository->execxLocalCommand(
+      'branches');
+    $branch_info = ArcanistMercurialParser::parseMercurialBranches($stdout);
 
-    list($stdout) = execx(
-      '(cd %s && git log '.
-        '--skip=%d '.
-        '-n %d '.
-        '--abbrev=40 '.
-        '--pretty=format:%%H '.
-        '%s -- %s)',
-      $local_path,
-      $this->getOffset(),
-      $this->getLimit(),
-      $commit_hash,
-      $path);
+    $branches = array();
+    foreach ($branch_info as $name => $info) {
+      $branch = new DiffusionBranchInformation();
+      $branch->setName($name);
+      $branch->setHeadCommitIdentifier($info['rev']);
+      $branches[] = $branch;
+    }
 
-    $hashes = explode("\n", $stdout);
-    $hashes = array_filter($hashes);
-
-    return $this->loadHistoryForCommitIdentifiers($hashes);
+    return $branches;
   }
 
 }

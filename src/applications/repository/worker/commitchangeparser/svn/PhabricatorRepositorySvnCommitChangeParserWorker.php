@@ -758,6 +758,7 @@ class PhabricatorRepositorySvnCommitChangeParserWorker
     return $map;
   }
 
+  // TODO: Replace with DiffusionPathIDQuery::getParentPath().
   private function getParentPath($path) {
     $path = rtrim($path, '/');
     $path = dirname($path);
@@ -767,6 +768,7 @@ class PhabricatorRepositorySvnCommitChangeParserWorker
     return $path;
   }
 
+  // TODO: Replace with DiffusionPathIDQuery::expandPathToRoot().
   private function expandAllParentPaths($path, $include_self = false) {
     $parents = array();
     if ($include_self) {

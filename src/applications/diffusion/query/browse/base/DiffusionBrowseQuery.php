@@ -46,6 +46,9 @@ abstract class DiffusionBrowseQuery {
         // TODO: Verify local-path?
         $class = 'DiffusionGitBrowseQuery';
         break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $class = 'DiffusionMercurialBrowseQuery';
+        break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         $class = 'DiffusionSvnBrowseQuery';
         break;
