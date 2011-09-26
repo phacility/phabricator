@@ -16,11 +16,12 @@
  * limitations under the License.
  */
 
-// TODO: Unify with similar Repository constants
-final class DifferentialRevisionControlSystem {
+final class DifferentialRevisionHash {
 
-  const SVN         = 'svn';
-  const GIT         = 'git';
-  const MERCURIAL   = 'hg';
+  const TABLE_NAME = 'differential_revisionhash';
+
+  const HASH_GIT_COMMIT         = 'gtcm';
+  const HASH_GIT_TREE           = 'gttr';
+  const HASH_MERCURIAL_COMMIT   = 'hgcm';
 
 }

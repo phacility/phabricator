@@ -365,6 +365,7 @@ class DifferentialRevisionEditor {
       $diff->save();
 
       $this->updateAffectedPathTable($revision, $diff, $changesets);
+      $this->updateRevisionHashTable($revision, $diff);
 
       // An updated diff should require review, as long as it's not committed
       // or accepted. The "accepted" status is "sticky" to encourage courtesy
@@ -722,7 +723,7 @@ class DifferentialRevisionEditor {
   }
 
   /**
-   * Updated the table which links Differential revisions to paths they affect,
+   * Update the table which links Differential revisions to paths they affect,
    * so Diffusion can efficiently find pending revisions for a given file.
    */
   private function updateAffectedPathTable(
@@ -807,6 +808,84 @@ class DifferentialRevisionEditor {
         'INSERT INTO %T (repositoryID, pathID, epoch, revisionID) VALUES %Q',
         $table->getTableName(),
         implode(', ', $chunk));
+    }
+  }
+
+
+  /**
+   * Update the table connecting revisions to DVCS local hashes, so we can
+   * identify revisions by commit/tree hashes.
+   */
+  private function updateRevisionHashTable(
+    DifferentialRevision $revision,
+    DifferentialDiff $diff) {
+
+    $vcs = $diff->getSourceControlSystem();
+    if ($vcs == DifferentialRevisionControlSystem::SVN) {
+      // Subversion has no local commit or tree hash information, so we don't
+      // have to do anything.
+      return;
+    }
+
+    $property = id(new DifferentialDiffProperty())->loadOneWhere(
+      'diffID = %d AND name = %s',
+      $diff->getID(),
+      'local:commits');
+    if (!$property) {
+      return;
+    }
+
+    $hashes = array();
+
+    $data = $property->getData();
+    switch ($vcs) {
+      case DifferentialRevisionControlSystem::GIT:
+        foreach ($data as $commit) {
+          $hashes[] = array(
+            DifferentialRevisionHash::HASH_GIT_COMMIT,
+            $commit['commit'],
+          );
+          $hashes[] = array(
+            DifferentialRevisionHash::HASH_GIT_TREE,
+            $commit['tree'],
+          );
+        }
+        break;
+      case DifferentialRevisionControlSystem::MERCURIAL:
+        foreach ($data as $commit) {
+          $hashes[] = array(
+            DifferentialRevisionHash::HASH_MERCURIAL_COMMIT,
+            $commit['rev'],
+          );
+        }
+        break;
+    }
+
+    $conn_w = $revision->establishConnection('w');
+
+    $sql = array();
+    foreach ($hashes as $info) {
+      list($type, $hash) = $info;
+      $sql[] = qsprintf(
+        $conn_w,
+        '(%d, %s, %s)',
+        $revision->getID(),
+        $type,
+        $hash);
+    }
+
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T WHERE revisionID = %d',
+      DifferentialRevisionHash::TABLE_NAME,
+      $revision->getID());
+
+    if ($sql) {
+      queryfx(
+        $conn_w,
+        'INSERT INTO %T (revisionID, type, hash) VALUES %Q',
+        DifferentialRevisionHash::TABLE_NAME,
+        implode(', ', $sql));
     }
   }
 
