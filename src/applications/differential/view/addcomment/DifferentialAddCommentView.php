@@ -158,9 +158,16 @@ final class DifferentialAddCommentView extends AphrontView {
           DifferentialUnitStatus::UNIT_SKIP => 'Unit Tests Skipped',
           DifferentialUnitStatus::UNIT_POSTPONED => 'Unit Tests Postponed'
         );
-      $content =
-        "<p>This diff has Unit Test Problems. Make sure you are OK with them ".
-        "before you accept this diff.</p>";
+      if ($diff->getUnitStatus() == DifferentialUnitStatus::UNIT_POSTPONED) {
+        $content =
+          "<p>This diff has postponed unit tests. The results should be ".
+          "coming in soon. You should probably wait for them before accepting ".
+          "this diff.</p>";
+      } else {
+        $content =
+          "<p>This diff has Unit Test Problems. Make sure you are OK with ".
+          "them before you accept this diff.</p>";
+      }
       $unit_warning = $this->generateWarningView(
         $diff->getUnitStatus(),
         $titles,
