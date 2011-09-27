@@ -457,6 +457,7 @@ phutil_register_library_map(array(
     'PhabricatorLintEngine' => 'infrastructure/lint/engine',
     'PhabricatorLiskDAO' => 'applications/base/storage/lisk',
     'PhabricatorLocalDiskFileStorageEngine' => 'applications/files/engine/localdisk',
+    'PhabricatorLocalTimeTestCase' => 'view/utils/__tests__',
     'PhabricatorLoginController' => 'applications/auth/controller/login',
     'PhabricatorLogoutController' => 'applications/auth/controller/logout',
     'PhabricatorMailImplementationAdapter' => 'applications/metamta/adapter/base',
@@ -700,6 +701,7 @@ phutil_register_library_map(array(
   ),
   'function' =>
   array(
+    '__phabricator_format_local_time' => 'view/utils',
     '_qsprintf_check_scalar_type' => 'storage/qsprintf',
     '_qsprintf_check_type' => 'storage/qsprintf',
     'celerity_generate_unique_node_id' => 'infrastructure/celerity/api',
@@ -1073,6 +1075,7 @@ phutil_register_library_map(array(
     'PhabricatorLintEngine' => 'PhutilLintEngine',
     'PhabricatorLiskDAO' => 'LiskDAO',
     'PhabricatorLocalDiskFileStorageEngine' => 'PhabricatorFileStorageEngine',
+    'PhabricatorLocalTimeTestCase' => 'PhabricatorTestCase',
     'PhabricatorLoginController' => 'PhabricatorAuthController',
     'PhabricatorLogoutController' => 'PhabricatorAuthController',
     'PhabricatorMailImplementationAmazonSESAdapter' => 'PhabricatorMailImplementationPHPMailerLiteAdapter',

@@ -17,24 +17,60 @@
  */
 
 function phabricator_date($epoch, $user) {
-  $zone = new DateTimeZone($user->getTimezoneIdentifier());
-  $date = new DateTime('@'.$epoch);
-  $date->setTimeZone($zone);
-  return $date->format('M j Y');
+  return __phabricator_format_local_time(
+    $epoch,
+    $user,
+    'M j Y');
 }
 
 function phabricator_time($epoch, $user) {
-  $zone = new DateTimeZone($user->getTimezoneIdentifier());
-  $date = new DateTime('@'.$epoch);
-  $date->setTimeZone($zone);
-  return $date->format('g:i A');
+  return __phabricator_format_local_time(
+    $epoch,
+    $user,
+    'g:i A');
 }
 
 function phabricator_datetime($epoch, $user) {
-  $zone = new DateTimeZone($user->getTimezoneIdentifier());
+  return __phabricator_format_local_time(
+    $epoch,
+    $user,
+    'M j Y, g:i A');
+}
+
+/**
+ * Internal date rendering method. Do not call this directly; instead, call
+ * @{function:phabricator_date}, @{function:phabricator_time}, or
+ * @{function:phabricator_datetime}.
+ *
+ * @param int Unix epoch timestamp.
+ * @param PhabricatorUser User viewing the timestamp.
+ * @param string Date format, as per DateTime class.
+ * @return string Formatted, local date/time.
+ */
+function __phabricator_format_local_time($epoch, $user, $format) {
+  if (!$epoch) {
+    // If we're missing date information for something, the DateTime class will
+    // throw an exception when we try to construct an object. Since this is a
+    // display function, just return an empty string.
+    return '';
+  }
+
+  $user_zone = $user->getTimezoneIdentifier();
+
+  static $zones = array();
+  if (empty($zones[$user_zone])) {
+    $zones[$user_zone] = new DateTimeZone($user_zone);
+  }
+  $zone = $zones[$user_zone];
+
+  // NOTE: Although DateTime takes a second DateTimeZone parameter to its
+  // constructor, it ignores it if the date string includes timezone
+  // information. Further, it treats epoch timestamps ("@946684800") as having
+  // a UTC timezone. Set the timezone explicitly after constructing the object.
   $date = new DateTime('@'.$epoch);
   $date->setTimeZone($zone);
-  return $date->format('M j Y, g:i A');
+
+  return $date->format($format);
 }
 
 function phabricator_format_relative_time($duration) {
