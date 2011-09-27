@@ -36,31 +36,80 @@ abstract class PhabricatorRepositoryCommitMessageDetailParser {
     return $this->commitData;
   }
 
+  /**
+   * Try to link a commit name to a Phabricator account. Basically we throw it
+   * at the wall and see if something sticks.
+   */
   public function resolveUserPHID($user_name) {
     if (!strlen($user_name)) {
       return null;
     }
 
-    $by_username = id(new PhabricatorUser())->loadOneWhere(
-      'userName = %s',
-      $user_name);
-    if ($by_username) {
-      return $by_username->getPHID();
+    $phid = $this->findUserByUserName($user_name);
+    if ($phid) {
+      return $phid;
+    }
+    $phid = $this->findUserByEmailAddress($user_name);
+    if ($phid) {
+      return $phid;
+    }
+    $phid = $this->findUserByRealName($user_name);
+    if ($phid) {
+      return $phid;
     }
 
-    // Note, real names are not guaranteed unique, which is why we do it this
-    // way.
-    $by_realname = id(new PhabricatorUser())->loadAllWhere(
-      'realName = %s LIMIT 1',
-      $user_name);
-    if ($by_realname) {
-      $by_realname = reset($by_realname);
-      return $by_realname->getPHID();
+    // No hits yet, try to parse it as an email address.
+
+    $email = new PhutilEmailAddress($user_name);
+
+    $phid = $this->findUserByEmailAddress($email->getAddress());
+    if ($phid) {
+      return $phid;
+    }
+
+    $display_name = $email->getDisplayName();
+    if ($display_name) {
+      $phid = $this->findUserByRealName($display_name);
+      if ($phid) {
+        return $phid;
+      }
     }
 
     return null;
   }
 
   abstract public function parseCommitDetails();
+
+  private function findUserByUserName($user_name) {
+    $by_username = id(new PhabricatorUser())->loadOneWhere(
+      'userName = %s',
+      $user_name);
+    if ($by_username) {
+      return $by_username->getPHID();
+    }
+    return null;
+  }
+
+  private function findUserByRealName($real_name) {
+    // Note, real names are not guaranteed unique, which is why we do it this
+    // way.
+    $by_realname = id(new PhabricatorUser())->loadOneWhere(
+      'realName = %s LIMIT 1',
+      $real_name);
+    if ($by_realname) {
+      return $by_realname->getPHID();
+    }
+    return null;
+  }
+
+  private function findUserByEmailAddress($email_address) {
+    $by_email = id(new PhabricatorUser())->loadOneWhere(
+      'email = %s',
+      $email_address);
+    if ($by_email) {
+      return $by_email->getPHID();
+    }
+    return null;
+  }
 
 }

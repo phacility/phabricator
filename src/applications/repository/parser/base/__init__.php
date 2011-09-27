@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'applications/people/storage/user');
 
+phutil_require_module('phutil', 'parser/emailaddress');
 phutil_require_module('phutil', 'utils');
 
 

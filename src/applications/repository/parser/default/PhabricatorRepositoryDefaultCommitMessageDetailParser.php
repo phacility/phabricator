@@ -53,12 +53,19 @@ class PhabricatorRepositoryDefaultCommitMessageDetailParser
       $reviewer_phid = $this->resolveUserPHID($details['reviewerName']);
       if ($reviewer_phid) {
         $details['reviewerPHID'] = $reviewer_phid;
+      } else {
+        unset($details['reviewerPHID']);
       }
+    } else {
+      unset($details['reviewerName']);
+      unset($details['reviewerPHID']);
     }
 
     $author_phid = $this->resolveUserPHID($author_name);
     if ($author_phid) {
       $details['authorPHID'] = $author_phid;
+    } else {
+      unset($details['authorPHID']);
     }
 
     $data->setCommitDetails($details);
