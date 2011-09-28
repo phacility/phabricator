@@ -30,12 +30,11 @@ class PhabricatorRepositoryGitCommitChangeParserWorker
       return;
     }
 
-    $local_path = $repository->getDetail('local-path');
-
-    list($raw) = execx(
-      '(cd %s && git log -n1 -M -C -B --find-copies-harder --raw -t '.
-        '--abbrev=40 --pretty=format: %s)',
-      $local_path,
+    // NOTE: "--pretty=format: " is to disable log output, we only want the
+    // part we get from "--raw".
+    list($raw) = $repository->execLocalCommand(
+      'log -n1 -M -C -B --find-copies-harder --raw -t '.
+        '--abbrev=40 --pretty=format: %s',
       $commit->getCommitIdentifier());
 
     $changes = array();

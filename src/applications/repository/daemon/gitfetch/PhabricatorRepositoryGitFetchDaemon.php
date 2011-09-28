@@ -23,12 +23,22 @@ final class PhabricatorRepositoryGitFetchDaemon
     return PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
   }
 
-  protected function executeCreate($remote_uri, $local_path) {
-    execx('git clone %s %s', $remote_uri, rtrim($local_path, '/'));
+  protected function executeCreate(
+    PhabricatorRepository $repository,
+    $local_path) {
+
+    $repository->execxRemoteCommand(
+      'clone %s %s',
+      $repository->getRemoteURI(),
+      rtrim($local_path, '/'));
   }
 
-  protected function executeUpdate($remote_uri, $local_path) {
-    execx('(cd %s && git fetch --all)', $local_path);
+  protected function executeUpdate(
+    PhabricatorRepository $repository,
+    $local_path) {
+
+    $repository->execxLocalCommand(
+      'fetch --all');
   }
 
 }

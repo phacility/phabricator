@@ -29,7 +29,6 @@ class PhabricatorRepositoryMercurialCommitDiscoveryDaemon
 
     $repository_phid = $repository->getPHID();
 
-    $repo_base = $repository->getDetail('local-path');
     list($stdout) = $repository->execxLocalCommand('branches');
 
     $branches = ArcanistMercurialParser::parseMercurialBranches($stdout);

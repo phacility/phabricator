@@ -29,8 +29,8 @@ class PhabricatorRepositorySvnCommitDiscoveryDaemon
 
     $uri = $this->getBaseSVNLogURI();
     list($xml) = $repository->execxRemoteCommand(
-        ' log --xml --quiet --limit 1 %s@HEAD',
-        $uri);
+      'log --xml --quiet --limit 1 %s@HEAD',
+      $uri);
 
     $results = $this->parseSVNLogXML($xml);
     $commit = key($results);

@@ -32,10 +32,8 @@ class PhabricatorRepositoryGitCommitDiscoveryDaemon
 
     $repository_phid = $repository->getPHID();
 
-    $repo_base = $repository->getDetail('local-path');
-    list($stdout) = execx(
-      '(cd %s && git branch -r --verbose --no-abbrev)',
-      $repo_base);
+    list($stdout) = $repository->execxLocalCommand(
+      'branch -r --verbose --no-abbrev');
 
     $branches = DiffusionGitBranchQuery::parseGitRemoteBranchOutput($stdout);
 
@@ -57,7 +55,6 @@ class PhabricatorRepositoryGitCommitDiscoveryDaemon
     $insert = array();
 
     $repository = $this->getRepository();
-    $repo_base = $repository->getDetail('local-path');
 
     $discover[] = $commit;
     $insert[] = $commit;
@@ -66,9 +63,8 @@ class PhabricatorRepositoryGitCommitDiscoveryDaemon
 
     while (true) {
       $target = array_pop($discover);
-      list($parents) = execx(
-        '(cd %s && git log -n1 --pretty="%%P" %s)',
-        $repo_base,
+      list($parents) = $repository->execxLocalCommand(
+        'log -n1 --pretty="%%P" %s',
         $target);
       $parents = array_filter(explode(' ', trim($parents)));
       foreach ($parents as $parent) {
@@ -93,9 +89,8 @@ class PhabricatorRepositoryGitCommitDiscoveryDaemon
 
     while (true) {
       $target = array_pop($insert);
-      list($epoch) = execx(
-        '(cd %s && git log -n1 --pretty="%%at" %s)',
-        $repo_base,
+      list($epoch) = $repository->execxLocalCommand(
+        'log -n1 --pretty="%%at" %s',
         $target);
       $epoch = trim($epoch);
 

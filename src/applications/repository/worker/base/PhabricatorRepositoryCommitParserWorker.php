@@ -67,26 +67,10 @@ abstract class PhabricatorRepositoryCommitParserWorker
       $verbose = '--verbose';
     }
 
-    try {
-      list($xml) = $this->repository->execxRemoteCommand(
-        "log --xml {$verbose} --limit 1 %s@%d",
-        $uri,
-        $revision);
-    } catch (CommandException $ex) {
-      // HTTPS is generally faster and more reliable than svn+ssh, but some
-      // commit messages with non-UTF8 text can't be retrieved over HTTPS, see
-      // Facebook rE197184 for one example. Make an attempt to fall back to
-      // svn+ssh if we've failed outright to retrieve the message.
-      $fallback_uri = new PhutilURI($uri);
-      if ($fallback_uri->getProtocol() != 'https') {
-        throw $ex;
-      }
-      $fallback_uri->setProtocol('svn+ssh');
-      list($xml) = execx(
-        "svn log --xml {$verbose} --limit 1 --non-interactive %s@%d",
-        $fallback_uri,
-        $revision);
-    }
+    list($xml) = $this->repository->execxRemoteCommand(
+      "log --xml {$verbose} --limit 1 %s@%d",
+      $uri,
+      $revision);
 
     // Subversion may send us back commit messages which won't parse because
     // they have non UTF-8 garbage in them. Slam them into valid UTF-8.

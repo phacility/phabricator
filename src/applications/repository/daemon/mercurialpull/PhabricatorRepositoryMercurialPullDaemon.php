@@ -23,12 +23,20 @@ final class PhabricatorRepositoryMercurialPullDaemon
     return PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL;
   }
 
-  protected function executeCreate($remote_uri, $local_path) {
-    execx('hg clone %s %s', $remote_uri, rtrim($local_path, '/'));
+  protected function executeCreate(
+    PhabricatorRepository $repository,
+    $local_path) {
+    $repository->execxRemoteCommand(
+      'clone %s %s',
+      $repository->getRemoteURI(),
+      rtrim($local_path, '/'));
   }
 
-  protected function executeUpdate($remote_uri, $local_path) {
-    execx('(cd %s && hg pull -u)', $local_path);
+  protected function executeUpdate(
+    PhabricatorRepository $repository,
+    $local_path) {
+    $repository->execxLocalCommand(
+      'pull -u');
   }
 
 }

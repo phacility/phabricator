@@ -11,7 +11,5 @@ phutil_require_module('phabricator', 'applications/repository/storage/repository
 phutil_require_module('phabricator', 'applications/repository/worker/commitchangeparser/base');
 phutil_require_module('phabricator', 'storage/queryfx');
 
-phutil_require_module('phutil', 'future/exec');
-
 
 phutil_require_source('PhabricatorRepositoryGitCommitChangeParserWorker.php');
