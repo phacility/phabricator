@@ -874,12 +874,35 @@ class DifferentialChangesetParser {
       case DifferentialChangeType::FILE_IMAGE:
         $old = null;
         $cur = null;
+        // TODO: Improve the architectural issue as discussed in D955
+        // https://secure.phabricator.com/D955
+        $reference = $this->renderingReference;
+        $parts = explode('/', $reference);
+        if (count($parts) == 2) {
+          list($id, $vs) = $parts;
+        } else {
+          $id = $parts[0];
+          $vs = 0;
+        }
+        $id = (int)$id;
+        $vs = (int)$vs;
 
-        $metadata = $this->changeset->getMetadata();
-        $data = idx($metadata, 'attachment-data');
+        if (!$vs) {
+          $metadata = $this->changeset->getMetadata();
+          $data = idx($metadata, 'attachment-data');
 
-        $old_phid = idx($metadata, 'old:binary-phid');
-        $new_phid = idx($metadata, 'new:binary-phid');
+          $old_phid = idx($metadata, 'old:binary-phid');
+          $new_phid = idx($metadata, 'new:binary-phid');
+        } else {
+          $vs_changeset = id(new DifferentialChangeset())->load($vs);
+          $vs_metadata = $vs_changeset->getMetadata();
+          $old_phid = idx($vs_metadata, 'new:binary-phid');
+
+          $changeset = id(new DifferentialChangeset())->load($id);
+          $metadata = $changeset->getMetadata();
+          $new_phid = idx($metadata, 'new:binary-phid');
+        }
+
         if ($old_phid || $new_phid) {
           if ($old_phid) {
             $old_uri = PhabricatorFileURI::getViewURIForPHID($old_phid);
@@ -927,18 +950,17 @@ class DifferentialChangesetParser {
             '</td></tr>';
         }
 
-        $changset_id = $this->changeset->getID();
         if (!$old) {
           $th_old = '<th></th>';
         }
         else {
-          $th_old = '<th id="C'.$changset_id.'OL1">1</th>';
+          $th_old = '<th id="C'.$vs.'OL1">1</th>';
         }
         if (!$cur) {
           $th_new = '<th></th>';
         }
         else {
-          $th_new = '<th id="C'.$changset_id.'NL1">1</th>';
+          $th_new = '<th id="C'.$id.'NL1">1</th>';
         }
 
         $output = $this->renderChangesetTable(
