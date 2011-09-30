@@ -96,8 +96,11 @@
  *     ->save();
  *
  * Note that **Lisk automatically builds getters and setters for all of your
- * object's properties** via __call(). You can override these by defining
- * versions yourself.
+ * object's properties** via __call(). If you want to add custom behavior to
+ * your getters or setters, you can do so by overriding the readField and
+ * writeField methods. Do not implement your own setters and getters, as they
+ * will result in an inconsistent object state (and new values won't get
+ * written to the database).
  *
  * Calling save() will persist the object to the database. After calling
  * save(), you can call getID() to retrieve the object's ID.
@@ -162,6 +165,7 @@ abstract class LiskDAO {
 
   private $__connections            = array();
   private static $processIsolationLevel = 0;
+  private static $__checkedClasses = array();
 
   /**
    *  Build an empty object.
@@ -172,6 +176,29 @@ abstract class LiskDAO {
     $id_key = $this->getIDKey();
     if ($id_key) {
       $this->$id_key = null;
+    }
+
+    $this_class = get_class($this);
+    if (empty(self::$__checkedClasses[$this_class])) {
+      self::$__checkedClasses = true;
+      if (PhabricatorEnv::getEnvConfig('lisk.check_property_methods')) {
+        $class = new ReflectionClass(get_class($this));
+        $methods = $class->getMethods();
+        $properties = $this->getProperties();
+        foreach ($methods as $method) {
+          $name = strtolower($method->getName());
+          if (!(strncmp($name, 'get', 3) && strncmp($name, 'set', 3))) {
+            $name = substr($name, 3);
+            $declaring_class_name = $method->getDeclaringClass()->getName();
+            if (isset($properties[$name]) &&
+                $declaring_class_name !== 'LiskDAO') {
+              throw new Exception(
+                "Cannot implement method {$method->getName()} in ".
+                "{$declaring_class_name}.");
+            }
+          }
+        }
+      }
     }
   }
 
@@ -526,10 +553,11 @@ abstract class LiskDAO {
 
 
   /**
-   * Retrieve a list of all object properties. Note that some may be
-   * "transient", which means they should not be persisted to the database.
-   * Transient properties can be identified by calling
-   * getTransientProperties().
+   * Retrieve a list of all object properties. This list only includes
+   * properties that are declared as protected, and it is expected that
+   * all properties returned by this function should be persisted to the
+   * database.
+   * Properties that should not be persisted must be declared as private.
    *
    * @return dict  Dictionary of normalized (lowercase) to canonical (original
    *               case) property names.
@@ -645,23 +673,6 @@ abstract class LiskDAO {
   }
 
 
-  /**
-   * Convert this object into a property dictionary containing only properties
-   * which will be persisted to the database.
-   *
-   * @return dict  Dictionary of persistent object properties.
-   *
-   * @task   info
-   */
-  protected function getPersistentPropertyValues() {
-    $map = $this->getPropertyValues();
-    foreach ($this->getTransientProperties() as $p) {
-      unset($map[$p]);
-    }
-    return $map;
-  }
-
-
 /* -(  Writing Objects  )---------------------------------------------------- */
 
 
@@ -721,7 +732,7 @@ abstract class LiskDAO {
     $use_locks = $this->getConfigOption(self::CONFIG_OPTIMISTIC_LOCKS);
 
     $this->willSaveObject();
-    $data = $this->getPersistentPropertyValues();
+    $data = $this->getPropertyValues();
     $this->willWriteData($data);
 
     $map = array();
@@ -803,7 +814,7 @@ abstract class LiskDAO {
    */
   protected function insertRecordIntoDatabase($mode) {
     $this->willSaveObject();
-    $data = $this->getPersistentPropertyValues();
+    $data = $this->getPropertyValues();
 
     $id_mechanism = $this->getConfigOption(self::CONFIG_IDS);
     switch ($id_mechanism) {
@@ -964,21 +975,6 @@ abstract class LiskDAO {
 
 
   /**
-   * If your object has properties which you don't want to be persisted to the
-   * database, you can override this method and specify them.
-   *
-   * @return list    List of properties which should NOT be persisted.
-   *                 Property names should be in normalized (lowercase) form.
-   *                 By default, all properties are persistent.
-   *
-   * @task   hook
-   */
-  protected function getTransientProperties() {
-    return array();
-  }
-
-
-  /**
    * Hook to apply serialization or validation to data before it is written to
    * the database. See also willReadData().
    *
@@ -1055,6 +1051,35 @@ abstract class LiskDAO {
    * @task hook
    */
   protected function didDelete() {}
+
+  /**
+   * Reads the value from a field. Override this method for custom behavior
+   * of getField() instead of overriding getField directly.
+   *
+   * @param  string  Canonical field name
+   * @return mixed   Value of the field
+   *
+   * @task hook
+   */
+  protected function readField($field) {
+    if (isset($this->$field)) {
+      return $this->$field;
+    }
+    return null;
+  }
+
+  /**
+   * Writes a value to a field. Override this method for custom behavior of
+   * setField($value) instead of overriding setField directly.
+   *
+   * @param  string  Canonical field name
+   * @param  mixed   Value to write
+   *
+   * @task hook
+   */
+  protected function writeField($field, $value) {
+    $this->$field = $value;
+  }
 
 
 /* -(  Isolation  )---------------------------------------------------------- */
@@ -1148,10 +1173,7 @@ abstract class LiskDAO {
       if (count($args) !== 0) {
         throw new Exception("Getter call should have zero args: {$method}");
       }
-      if (isset($this->$property)) {
-        return $this->$property;
-      }
-      return null;
+      return $this->readField($property);
     }
 
     if (!strncmp($method, 'set', 3)) {
@@ -1166,7 +1188,7 @@ abstract class LiskDAO {
       if ($property == 'ID') {
         $property = $this->getIDKeyForUse();
       }
-      $this->$property = $args[0];
+      $this->writeField($property, $args[0]);
       return $this;
     }
 

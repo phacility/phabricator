@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'storage/connection/isolated');
 phutil_require_module('phabricator', 'storage/exception/count');
 phutil_require_module('phabricator', 'storage/exception/objectmissing');
