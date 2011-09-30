@@ -42,8 +42,10 @@ foreach (PhabricatorEnv::getEnvConfig('load-libraries') as $library) {
 }
 
 PhutilErrorHandler::initialize();
+PhabricatorEventEngine::initialize();
 
 $tz = PhabricatorEnv::getEnvConfig('phabricator.timezone');
 if ($tz) {
   date_default_timezone_set($tz);
 }
+
