@@ -29,6 +29,9 @@ class PhabricatorEventEngine {
   public static function initialize() {
     self::$instance = new PhabricatorEventEngine();
 
+    // Register the DarkConosole event logger.
+    id(new DarkConsoleEventPluginAPI())->register();
+
     // Instantiate and register custom event listeners so they can react to
     // events.
     $listeners = PhabricatorEnv::getEnvConfig('events.listeners');
@@ -51,10 +54,30 @@ class PhabricatorEventEngine {
     return $this;
   }
 
+  /**
+   * Get all the objects currently listening to any event.
+   */
+  public function getAllListeners() {
+    $listeners = array_mergev($this->listeners);
+    $listeners = mpull($listeners, null, 'getListenerID');
+    return $listeners;
+  }
+
   public static function dispatchEvent(PhabricatorEvent $event) {
     $instance = self::getInstance();
 
     $listeners = idx($instance->listeners, $event->getType(), array());
+    $global_listeners = idx(
+      $instance->listeners,
+      PhabricatorEventType::TYPE_ALL,
+      array());
+
+    // Merge and deduplicate listeners (we want to send the event to each
+    // listener only once, even if it satisfies multiple criteria for the
+    // event).
+    $listeners = array_merge($listeners, $global_listeners);
+    $listeners = mpull($listeners, null, 'getListenerID');
+
     foreach ($listeners as $listener) {
       if ($event->isStopped()) {
         // Do this first so if someone tries to dispatch a stopped event it

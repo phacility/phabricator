@@ -25,6 +25,9 @@ abstract class PhabricatorDaemon extends PhutilDaemon {
     // that daemons do not require unbounded amounts of memory.
     DarkConsoleErrorLogPluginAPI::enableDiscardMode();
 
+    // Also accumulates potentially unlimited amounts of data.
+    DarkConsoleEventPluginAPI::enableDiscardMode();
+
     $phabricator = phutil_get_library_root('phabricator');
     $root = dirname($phabricator);
     require_once $root.'/scripts/__init_env__.php';

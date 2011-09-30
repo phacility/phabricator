@@ -16,9 +16,32 @@
  * limitations under the License.
  */
 
-final class PhabricatorEventType extends PhabricatorEventConstants {
+/**
+ * @group console
+ */
+class DarkConsoleEventPluginAPI extends PhabricatorEventListener {
 
-  const TYPE_ALL                    = '*';
-  const TYPE_MANIPHEST_WILLEDITTASK = 'maniphest.willEditTask';
+  private static $events = array();
+  private static $discardMode = false;
+
+  public static function enableDiscardMode() {
+    self::$discardMode = true;
+  }
+
+  public static function getEvents() {
+    return self::$events;
+  }
+
+  public function register() {
+    $this->listen(PhabricatorEventType::TYPE_ALL);
+  }
+
+  public function handleEvent(PhabricatorEvent $event) {
+    if (self::$discardMode) {
+      return;
+    }
+    self::$events[] = $event;
+  }
 
 }
+
