@@ -30,9 +30,6 @@ abstract class PhabricatorDaemon extends PhutilDaemon {
 
     $phabricator = phutil_get_library_root('phabricator');
     $root = dirname($phabricator);
-    require_once $root.'/scripts/__init_env__.php';
-
-    // Daemons may perform writes.
-    AphrontWriteGuard::allowDangerousUnguardedWrites(true);
+    require_once $root.'/scripts/__init_script__.php';
   }
 }

@@ -75,7 +75,6 @@ $package_spec = array(
 
 
 require_once dirname(__FILE__).'/__init_script__.php';
-require_once dirname(__FILE__).'/__init_env__.php';
 
 if ($argc != 2) {
   $self = basename($argv[0]);

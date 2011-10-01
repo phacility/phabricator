@@ -44,7 +44,7 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
 
   protected function willRunTests() {
     $root = dirname(phutil_get_library_root('phabricator'));
-    require_once $root.'/scripts/__init_env__.php';
+    require_once $root.'/scripts/__init_script__.php';
 
     $config = $this->getComputedConfiguration();
 

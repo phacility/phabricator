@@ -23,7 +23,6 @@ if ($argc > 1) {
 
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
-require_once $root.'/scripts/__init_env__.php';
 require_once $root.'/externals/mimemailparser/MimeMailParser.class.php';
 
 phutil_require_module(

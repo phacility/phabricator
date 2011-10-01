@@ -19,7 +19,6 @@
 
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
-require_once $root.'/scripts/__init_env__.php';
 
 phutil_require_module('phutil', 'console');
 phutil_require_module('phabricator', 'infrastructure/setup/sql');

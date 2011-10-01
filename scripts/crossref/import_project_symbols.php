@@ -19,7 +19,6 @@
 
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
-require_once $root.'/scripts/__init_env__.php';
 
 if ($argc !== 2) {
   echo phutil_console_format(

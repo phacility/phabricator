@@ -19,7 +19,6 @@
 
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
-require_once $root.'/scripts/__init_env__.php';
 
 ini_set('memory_limit', -1);
 $tasks = id(new ManiphestTask())->loadAll();

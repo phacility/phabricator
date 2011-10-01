@@ -33,3 +33,36 @@ phutil_load_library(dirname(__FILE__).'/../src/');
 // NOTE: This is dangerous in general, but we know we're in a script context and
 // are not vulnerable to CSRF.
 AphrontWriteGuard::allowDangerousUnguardedWrites(true);
+
+$include_path = ini_get('include_path');
+ini_set('include_path', $include_path.':'.dirname(__FILE__).'/../../');
+
+require_once dirname(dirname(__FILE__)).'/conf/__init_conf__.php';
+
+$env = isset($_SERVER['PHABRICATOR_ENV'])
+  ? $_SERVER['PHABRICATOR_ENV']
+  : getenv('PHABRICATOR_ENV');
+if (!$env) {
+  echo "Define PHABRICATOR_ENV before running this script.\n";
+  exit(1);
+}
+
+$conf = phabricator_read_config_file($env);
+$conf['phabricator.env'] = $env;
+
+phutil_require_module('phabricator', 'infrastructure/env');
+PhabricatorEnv::setEnvConfig($conf);
+
+phutil_load_library('arcanist/src');
+
+foreach (PhabricatorEnv::getEnvConfig('load-libraries') as $library) {
+  phutil_load_library($library);
+}
+
+PhutilErrorHandler::initialize();
+PhabricatorEventEngine::initialize();
+
+$tz = PhabricatorEnv::getEnvConfig('phabricator.timezone');
+if ($tz) {
+  date_default_timezone_set($tz);
+}

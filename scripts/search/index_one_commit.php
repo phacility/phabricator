@@ -19,7 +19,6 @@
 
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
-require_once $root.'/scripts/__init_env__.php';
 
 if (empty($argv[1])) {
   echo "usage: index_one_commit.php <commit_name>\n";

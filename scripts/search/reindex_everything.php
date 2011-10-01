@@ -19,7 +19,6 @@
 
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
-require_once $root.'/scripts/__init_env__.php';
 
 // TODO: Get rid of this script eventually, once this stuff is better-formalized
 // in Timeline consumers.
