@@ -69,15 +69,36 @@ final class PhabricatorDaemonControl {
     return 0;
   }
 
-  public function executeStopCommand() {
+  public function executeStopCommand($pids = null) {
     $daemons = $this->loadRunningDaemons();
     if (!$daemons) {
       echo "There are no running Phabricator daemons.\n";
       return 0;
     }
 
-    $running = $daemons;
+    $daemons = mpull($daemons, null, 'getPID');
 
+    $running = array();
+    if ($pids == null) {
+      $running = $daemons;
+    } else {
+      // We were given a PID or set of PIDs to kill.
+      foreach ($pids as $key => $pid) {
+        if (empty($daemons[$pid])) {
+          echo "{$pid} is not Phabricator-controlled. Not killing.\n";
+          continue;
+        } else {
+          $running[] = $daemons[$pid];
+        }
+      }
+    }
+
+    if (empty($running)) {
+      echo "No daemons to kill.\n";
+      return 0;
+    }
+
+    $killed = array();
     foreach ($running as $key => $daemon) {
       $pid = $daemon->getPID();
       $name = $daemon->getName();
@@ -88,6 +109,7 @@ final class PhabricatorDaemonControl {
         unset($running[$key]);
       } else {
         posix_kill($pid, SIGINT);
+        $killed[] = $daemon;
       }
     }
 
@@ -110,9 +132,10 @@ final class PhabricatorDaemonControl {
       $pid = $daemon->getPID();
       echo "KILLing daemon {$pid}.\n";
       posix_kill($pid, SIGKILL);
+      $killed[] = $daemon;
     }
 
-    foreach ($daemons as $daemon) {
+    foreach ($killed as $daemon) {
       if ($daemon->getPIDFile()) {
         Filesystem::remove($daemon->getPIDFile());
       }
@@ -136,14 +159,12 @@ final class PhabricatorDaemonControl {
         **list**
             List available daemons.
 
-        **stop**
-            Stop all daemons.
-
         **status**
             List running daemons.
 
-        **stop**
-            Stop all running daemons.
+        **stop** [PID ...]
+            Stop all running daemons if no PIDs are given, or a particular
+            PID or set of PIDs, if they are supplied.
 
         **help**
             Show this help.
@@ -306,7 +327,5 @@ EOHELP
 
   protected function killDaemon(PhabricatorDaemonReference $ref) {
   }
-
-
 
 }
