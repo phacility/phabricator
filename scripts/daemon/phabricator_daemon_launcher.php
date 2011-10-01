@@ -45,7 +45,8 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
     exit($err);
 
   case 'stop':
-    $err = $control->executeStopCommand();
+    $pass_argv = array_slice($argv, 2);
+    $err = $control->executeStopCommand($pass_argv);
     exit($err);
 
   case 'repository-launch-readonly':
