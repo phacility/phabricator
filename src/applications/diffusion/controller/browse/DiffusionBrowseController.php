@@ -122,6 +122,8 @@ class DiffusionBrowseController extends DiffusionController {
       $content[] = $browse_panel;
     }
 
+    $content[] = $this->buildOpenRevisions();
+
     $nav = $this->buildSideNav('browse', false);
     $nav->appendChild($content);
 

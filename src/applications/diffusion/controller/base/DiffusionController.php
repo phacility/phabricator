@@ -108,6 +108,44 @@ abstract class DiffusionController extends PhabricatorController {
     return $crumbs;
   }
 
+  protected function buildOpenRevisions() {
+    $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
+    $path = $drequest->getPath();
+
+    $path_map = id(new DiffusionPathIDQuery(array($path)))->loadPathIDs();
+    $path_id = idx($path_map, $path);
+    if (!$path_id) {
+      return null;
+    }
+
+    $revisions = id(new DifferentialRevisionQuery())
+      ->withPath($repository->getID(), $path_id)
+      ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
+      ->setOrder(DifferentialRevisionQuery::ORDER_PATH_MODIFIED)
+      ->setLimit(10)
+      ->needRelationships(true)
+      ->execute();
+
+    if (!$revisions) {
+      return null;
+    }
+
+    $view = id(new DifferentialRevisionListView())
+      ->setRevisions($revisions)
+      ->setUser($this->getRequest()->getUser());
+
+    $phids = $view->getRequiredHandlePHIDs();
+    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $view->setHandles($handles);
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader('Pending Differential Revisions');
+    $panel->appendChild($view);
+
+    return $panel;
+  }
+
   private function buildCrumbList(array $spec = array()) {
     $drequest = $this->getDiffusionRequest();
 

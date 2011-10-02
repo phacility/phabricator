@@ -117,9 +117,11 @@ class DiffusionBrowseFileController extends DiffusionController {
       ));
     $content[] = $view_select_panel;
     $content[] = $corpus;
+    $content[] = $this->buildOpenRevisions();
 
     $nav = $this->buildSideNav('browse', true);
     $nav->appendChild($content);
+
 
     $basename = basename($this->getDiffusionRequest()->getPath());
 

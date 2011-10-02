@@ -773,13 +773,23 @@ class DifferentialRevisionEditor {
       $paths[] = $path_prefix.'/'.$changeset->getFileName();
     }
 
-    $path_map = id(new DiffusionPathIDQuery($paths))->loadPathIDs($paths);
+    // Mark this as also touching all parent paths, so you can see all pending
+    // changes to any file within a directory.
+    $all_paths = array();
+    foreach ($paths as $local) {
+      foreach (DiffusionPathIDQuery::expandPathToRoot($local) as $path) {
+        $all_paths[$path] = true;
+      }
+    }
+    $all_paths = array_keys($all_paths);
+
+    $path_map = id(new DiffusionPathIDQuery($all_paths))->loadPathIDs();
 
     $table = new DifferentialAffectedPath();
     $conn_w = $table->establishConnection('w');
 
     $sql = array();
-    foreach ($paths as $path) {
+    foreach ($all_paths as $path) {
       $path_id = idx($path_map, $path);
       if (!$path_id) {
         // Don't bother creating these, it probably means we're either adding
