@@ -24,6 +24,7 @@ class DifferentialChangesetListView extends AphrontView {
   private $renderURI = '/differential/changeset/';
   private $whitespace;
   private $standaloneViews;
+  private $symbolIndexes = array();
 
   public function setChangesets($changesets) {
     $this->changesets = $changesets;
@@ -47,6 +48,11 @@ class DifferentialChangesetListView extends AphrontView {
 
   public function setRenderingReferences(array $references) {
     $this->references = $references;
+    return $this;
+  }
+
+  public function setSymbolIndexes(array $indexes) {
+    $this->symbolIndexes = $indexes;
     return $this;
   }
 
@@ -100,6 +106,7 @@ class DifferentialChangesetListView extends AphrontView {
       $detail = new DifferentialChangesetDetailView();
       $detail->setChangeset($changeset);
       $detail->addButton($detail_button);
+      $detail->setSymbolIndex(idx($this->symbolIndexes, $key));
       $detail->appendChild(
         phutil_render_tag(
           'div',
@@ -135,12 +142,6 @@ class DifferentialChangesetListView extends AphrontView {
         'undo_templates' => $undo_templates,
       ));
     }
-
-    Javelin::initBehavior(
-      'repository-crossreference',
-      array(
-        'container' => 'differential-review-stage',
-      ));
 
     return
       '<div class="differential-review-stage" id="differential-review-stage">'.

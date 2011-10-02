@@ -6,12 +6,17 @@
 
 
 
+phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/diffusion/controller/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/symbol');
+phutil_require_module('phabricator', 'applications/repository/storage/arcanistproject');
+phutil_require_module('phabricator', 'applications/repository/storage/repository');
+phutil_require_module('phabricator', 'storage/queryfx');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/layout/panel');
 
 phutil_require_module('phutil', 'markup');
+phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('DiffusionSymbolController.php');

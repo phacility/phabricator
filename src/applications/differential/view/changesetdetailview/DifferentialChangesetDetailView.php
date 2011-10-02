@@ -21,6 +21,7 @@ class DifferentialChangesetDetailView extends AphrontView {
   private $changeset;
   private $buttons = array();
   private $revisionID;
+  private $symbolIndex;
 
   public function setChangeset($changeset) {
     $this->changeset = $changeset;
@@ -34,6 +35,11 @@ class DifferentialChangesetDetailView extends AphrontView {
 
   public function setRevisionID($revision_id) {
     $this->revisionID = $revision_id;
+    return $this;
+  }
+
+  public function setSymbolIndex($symbol_index) {
+    $this->symbolIndex = $symbol_index;
     return $this;
   }
 
@@ -61,6 +67,16 @@ class DifferentialChangesetDetailView extends AphrontView {
         '</div>';
     }
 
+    $id = celerity_generate_unique_node_id();
+
+    if ($this->symbolIndex) {
+      Javelin::initBehavior(
+        'repository-crossreference',
+        array(
+          'container' => $id,
+        ) + $this->symbolIndex);
+    }
+
     $display_filename = $changeset->getDisplayFilename();
     $output = javelin_render_tag(
       'div',
@@ -71,6 +87,7 @@ class DifferentialChangesetDetailView extends AphrontView {
           'right' => $this->changeset->getID(),
         ),
         'class' => $class,
+        'id'    => $id,
       ),
       phutil_render_tag(
         'a',

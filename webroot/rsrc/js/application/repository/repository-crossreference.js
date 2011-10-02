@@ -22,7 +22,10 @@ JX.behavior('repository-crossreference', function(config) {
       if (JX.DOM.isNode(target, 'span') && (target.className in map)) {
         var uri = JX.$U('/diffusion/symbol/' + target.innerHTML + '/');
         uri.addQueryParams({
-          type : map[target.className]
+          type : map[target.className],
+          lang : config.lang,
+          projects : config.projects.join(','),
+          jump : true
         });
         window.open(uri);
         e.kill();

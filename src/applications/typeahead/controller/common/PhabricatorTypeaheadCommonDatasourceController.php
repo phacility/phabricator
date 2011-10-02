@@ -35,6 +35,7 @@ class PhabricatorTypeaheadCommonDatasourceController
     $need_repos = false;
     $need_packages = false;
     $need_upforgrabs = false;
+    $need_arcanist_projects = false;
     switch ($this->type) {
       case 'searchowner':
         $need_users = true;
@@ -60,6 +61,10 @@ class PhabricatorTypeaheadCommonDatasourceController
         $need_users = true;
         $need_all_users = true;
         break;
+      case 'arcanistprojects':
+        $need_arcanist_projects = true;
+        break;
+
     }
 
     $data = array();
@@ -146,6 +151,17 @@ class PhabricatorTypeaheadCommonDatasourceController
           $package->getName(),
           '/owners/package/'.$package->getID().'/',
           $package->getPHID(),
+        );
+      }
+    }
+
+    if ($need_arcanist_projects) {
+      $arcprojs = id(new PhabricatorRepositoryArcanistProject())->loadAll();
+      foreach ($arcprojs as $proj) {
+        $data[] = array(
+          $proj->getName(),
+          null,
+          $proj->getPHID(),
         );
       }
     }

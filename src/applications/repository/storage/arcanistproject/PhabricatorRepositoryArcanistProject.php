@@ -23,10 +23,17 @@ class PhabricatorRepositoryArcanistProject
   protected $phid;
   protected $repositoryID;
 
+  protected $symbolIndexLanguages = array();
+  protected $symbolIndexProjects  = array();
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID   => true,
       self::CONFIG_TIMESTAMPS => false,
+      self::CONFIG_SERIALIZATION => array(
+        'symbolIndexLanguages' => self::SERIALIZATION_JSON,
+        'symbolIndexProjects'  => self::SERIALIZATION_JSON,
+      ),
     ) + parent::getConfiguration();
   }
 

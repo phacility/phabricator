@@ -759,7 +759,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-repository-crossreference' =>
   array(
-    'uri' => '/res/e80365e9/rsrc/js/application/repository/repository-crossreference.js',
+    'uri' => '/res/49472f48/rsrc/js/application/repository/repository-crossreference.js',
     'type' => 'js',
     'requires' =>
     array(

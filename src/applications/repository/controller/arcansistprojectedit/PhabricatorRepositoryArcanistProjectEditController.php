@@ -46,6 +46,15 @@ class PhabricatorRepositoryArcanistProjectEditController
     }
 
     if ($request->isFormPost()) {
+
+      $indexed = $request->getStr('symbolIndexLanguages');
+      $indexed = strtolower($indexed);
+      $indexed = preg_split('/[ ,]+/', $indexed);
+      $indexed = array_filter($indexed);
+      $project->setSymbolIndexLanguages($indexed);
+
+      $project->setSymbolIndexProjects($request->getArr('symbolIndexProjects'));
+
       $repo_id = $request->getInt('repository', 0);
       if (isset($repos[$repo_id])) {
         $project->setRepositoryID($repo_id);
@@ -54,6 +63,22 @@ class PhabricatorRepositoryArcanistProjectEditController
         return id(new AphrontRedirectResponse())
           ->setURI('/repository/');
       }
+    }
+
+    $langs = $project->getSymbolIndexLanguages();
+    if ($langs) {
+      $langs = implode(', ', $langs);
+    } else {
+      $langs = null;
+    }
+
+    if ($project->getSymbolIndexProjects()) {
+      $uses = id(new PhabricatorRepositoryArcanistProject())->loadAllWhere(
+        'phid in (%Ls)',
+        $project->getSymbolIndexProjects());
+      $uses = mpull($uses, 'getName', 'getPHID');
+    } else {
+      $uses = array();
     }
 
     $form = id(new AphrontFormView())
@@ -73,12 +98,24 @@ class PhabricatorRepositoryArcanistProjectEditController
           ->setName('repository')
           ->setValue($project->getRepositoryID()))
       ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel('Indexed Languages')
+          ->setName('symbolIndexLanguages')
+          ->setCaption('Separate with commas, for example: <tt>php, py</tt>')
+          ->setValue($langs))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel('Uses Symbols From')
+          ->setName('symbolIndexProjects')
+          ->setDatasource('/typeahead/common/arcanistprojects/')
+          ->setValue($uses))
+      ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton('/repository/')
           ->setValue('Save'));
 
     $panel = new AphrontPanelView();
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
     $panel->setHeader('Edit Arcanist Project');
     $panel->appendChild($form);
 

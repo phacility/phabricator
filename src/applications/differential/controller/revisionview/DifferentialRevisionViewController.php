@@ -180,11 +180,11 @@ class DifferentialRevisionViewController extends DifferentialController {
 
     $whitespace = $request->getStr(
       'whitespace',
-      DifferentialChangesetParser::WHITESPACE_IGNORE_ALL
-    );
+      DifferentialChangesetParser::WHITESPACE_IGNORE_ALL);
+
+    $symbol_indexes = $this->buildSymbolIndexes($target, $visible_changesets);
 
     $revision_detail->setActions($actions);
-
     $revision_detail->setUser($user);
 
     $comment_view = new DifferentialRevisionCommentListView();
@@ -202,6 +202,7 @@ class DifferentialRevisionViewController extends DifferentialController {
     $changeset_view->setRevision($revision);
     $changeset_view->setRenderingReferences($rendering_references);
     $changeset_view->setWhitespace($whitespace);
+    $changeset_view->setSymbolIndexes($symbol_indexes);
 
     $diff_history = new DifferentialRevisionUpdateHistoryView();
     $diff_history->setDiffs($diffs);
@@ -569,6 +570,41 @@ class DifferentialRevisionViewController extends DifferentialController {
       array_select_keys(
         $property_map,
         $special_properties));
+  }
+
+  private function buildSymbolIndexes(
+    DifferentialDiff $target,
+    array $visible_changesets) {
+
+    $engine = PhabricatorSyntaxHighlighter::newEngine();
+
+    $symbol_indexes = array();
+    $arc_project = $target->loadArcanistProject();
+    if (!$arc_project) {
+      return array();
+    }
+
+    $langs = $arc_project->getSymbolIndexLanguages();
+    if (!$langs) {
+      return array();
+    }
+
+    $project_phids = array_merge(
+      array($arc_project->getPHID()),
+      nonempty($arc_project->getSymbolIndexProjects(), array()));
+
+    $indexed_langs = array_fill_keys($langs, true);
+    foreach ($visible_changesets as $key => $changeset) {
+      $lang = $engine->getLanguageFromFilename($changeset->getFileName());
+      if (isset($indexed_langs[$lang])) {
+        $symbol_indexes[$key] = array(
+          'lang'      => $lang,
+          'projects'  => $project_phids,
+        );
+      }
+    }
+
+    return $symbol_indexes;
   }
 
 

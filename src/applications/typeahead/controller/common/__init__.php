@@ -12,6 +12,7 @@ phutil_require_module('phabricator', 'applications/metamta/storage/mailinglist')
 phutil_require_module('phabricator', 'applications/owners/storage/package');
 phutil_require_module('phabricator', 'applications/people/storage/user');
 phutil_require_module('phabricator', 'applications/project/storage/project');
+phutil_require_module('phabricator', 'applications/repository/storage/arcanistproject');
 phutil_require_module('phabricator', 'applications/repository/storage/repository');
 phutil_require_module('phabricator', 'applications/typeahead/controller/base');
 
