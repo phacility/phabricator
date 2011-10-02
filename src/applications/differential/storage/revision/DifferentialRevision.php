@@ -134,8 +134,11 @@ class DifferentialRevision extends DifferentialDAO {
       self::RELATIONSHIP_TABLE,
       $this->getID());
 
-    $this->relationships = igroup($data, 'relation');
+    return $this->attachRelationships($data);
+  }
 
+  public function attachRelationships(array $relationships) {
+    $this->relationships = igroup($relationships, 'relation');
     return $this;
   }
 

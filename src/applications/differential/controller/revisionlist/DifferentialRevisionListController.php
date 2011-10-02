@@ -172,38 +172,42 @@ class DifferentialRevisionListController extends DifferentialController {
       $queries[$key]['revisions'] = $revisions;
     }
 
-    $rev = new DifferentialRevision();
     if ($rev_ids) {
-      $rev_ids = array_keys($rev_ids);
-      $reviewers = queryfx_all(
+      $rev = new DifferentialRevision();
+      $relationships = queryfx_all(
         $rev->establishConnection('r'),
-        'SELECT revisionID, objectPHID FROM %T revision JOIN %T relationship
-          ON revision.id = relationship.revisionID
-          WHERE revision.id IN (%Ld)
-            AND relationship.relation = %s
-          ORDER BY sequence',
-        $rev->getTableName(),
+        'SELECT * FROM %T WHERE revisionID IN (%Ld) ORDER BY sequence',
         DifferentialRevision::RELATIONSHIP_TABLE,
-        $rev_ids,
-        DifferentialRevision::RELATION_REVIEWER);
-
-      $reviewer_map = array();
-      foreach ($reviewers as $reviewer) {
-        $reviewer_map[$reviewer['revisionID']][] = $reviewer['objectPHID'];
-      }
-      foreach ($reviewer_map as $revision_id => $reviewer_ids) {
-        $phids[reset($reviewer_ids)] = true;
-      }
+        array_keys($rev_ids));
+      $relationships = igroup($relationships, 'revisionID');
     } else {
-      $reviewer_map = array();
+      $relationships = array();
     }
 
-    if ($phids) {
-      $phids = array_keys($phids);
-      $handles = id(new PhabricatorObjectHandleData($phids))
-        ->loadHandles();
-    } else {
-      $handles = array();
+    foreach ($queries as $query) {
+      foreach ($query['revisions'] as $revision) {
+        $revision->attachRelationships(
+          idx(
+            $relationships,
+            $revision->getID(),
+            array()));
+      }
+    }
+
+    $phids = array();
+    foreach ($queries as $key => $query) {
+      $view = id(new DifferentialRevisionListView())
+        ->setRevisions($query['revisions'])
+        ->setUser($user)
+        ->setNoDataString(idx($query, 'nodata'));
+      $phids[] = $view->getRequiredHandlePHIDs();
+      $queries[$key]['view'] = $view;
+    }
+    $phids = array_mergev($phids);
+    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+
+    foreach ($queries as $query) {
+      $query['view']->setHandles($handles);
     }
 
     if (empty($filters[$this->filter]['nofilter'])) {
@@ -226,13 +230,13 @@ class DifferentialRevisionListController extends DifferentialController {
     }
 
     foreach ($queries as $query) {
-      $table = $this->renderRevisionTable(
-        $query['revisions'],
-        $query['header'],
-        idx($query, 'nodata'),
-        $handles,
-        $reviewer_map);
-      $side_nav->appendChild($table);
+      $table = $query['view']->render();
+
+      $panel = new AphrontPanelView();
+      $panel->setHeader($query['header']);
+      $panel->appendChild($table);
+
+      $side_nav->appendChild($panel);
     }
 
     return $this->buildStandardPageResponse(
@@ -241,83 +245,6 @@ class DifferentialRevisionListController extends DifferentialController {
         'title' => 'Differential Home',
         'tab' => 'revisions',
       ));
-  }
-
-  private function renderRevisionTable(
-    array $revisions,
-    $header,
-    $nodata,
-    array $handles,
-    array $reviewer_map) {
-
-    $rows = array();
-    foreach ($revisions as $revision) {
-      $status = DifferentialRevisionStatus::getNameForRevisionStatus(
-        $revision->getStatus());
-
-      $reviewers = idx($reviewer_map, $revision->getID(), array());
-      if ($reviewers) {
-        $first = reset($reviewers);
-        if (count($reviewers) > 1) {
-          $suffix = ' (+'.(count($reviewers) - 1).')';
-        } else {
-          $suffix = null;
-        }
-        $reviewers = $handles[$first]->renderLink().$suffix;
-      } else {
-        $reviewers = '<em>None</em>';
-      }
-
-      $rows[] = array(
-        'D'.$revision->getID(),
-        '<strong>'.phutil_render_tag(
-          'a',
-          array(
-            'href' => '/D'.$revision->getID(),
-          ),
-          phutil_escape_html($revision->getTitle())).'</strong>',
-        phutil_escape_html($status),
-        number_format($revision->getLineCount()),
-        $handles[$revision->getAuthorPHID()]->renderLink(),
-        $reviewers,
-        phabricator_format_timestamp($revision->getDateModified()),
-        phabricator_format_timestamp($revision->getDateCreated()),
-      );
-    }
-
-    $table = new AphrontTableView($rows);
-    $table->setHeaders(
-      array(
-        'ID',
-        'Revision',
-        'Status',
-        'Lines',
-        'Author',
-        'Reviewers',
-        'Updated',
-        'Created',
-      ));
-    $table->setColumnClasses(
-      array(
-        null,
-        'wide',
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-      ));
-    if ($nodata !== null) {
-      $table->setNoDataString($nodata);
-    }
-
-
-    $panel = new AphrontPanelView();
-    $panel->setHeader($header);
-    $panel->appendChild($table);
-
-    return $panel;
   }
 
 }
