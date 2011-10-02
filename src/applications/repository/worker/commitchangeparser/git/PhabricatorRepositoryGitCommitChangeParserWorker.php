@@ -32,7 +32,7 @@ class PhabricatorRepositoryGitCommitChangeParserWorker
 
     // NOTE: "--pretty=format: " is to disable log output, we only want the
     // part we get from "--raw".
-    list($raw) = $repository->execLocalCommand(
+    list($raw) = $repository->execxLocalCommand(
       'log -n1 -M -C -B --find-copies-harder --raw -t '.
         '--abbrev=40 --pretty=format: %s',
       $commit->getCommitIdentifier());
