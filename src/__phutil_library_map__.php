@@ -222,6 +222,7 @@ phutil_register_library_map(array(
     'DifferentialRevisionListController' => 'applications/differential/controller/revisionlist',
     'DifferentialRevisionListData' => 'applications/differential/data/revisionlist',
     'DifferentialRevisionListView' => 'applications/differential/view/revisionlist',
+    'DifferentialRevisionQuery' => 'applications/differential/query/revision',
     'DifferentialRevisionStatus' => 'applications/differential/constants/revisionstatus',
     'DifferentialRevisionStatusFieldSpecification' => 'applications/differential/field/specification/revisionstatus',
     'DifferentialRevisionUpdateHistoryView' => 'applications/differential/view/revisionupdatehistory',
