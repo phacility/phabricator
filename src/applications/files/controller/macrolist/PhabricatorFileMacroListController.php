@@ -42,9 +42,22 @@ class PhabricatorFileMacroListController extends PhabricatorFileController {
     $pager->setCount($count);
     $pager->setURI($request->getRequestURI(), 'page');
 
+    $file_phids = mpull($macros, 'getFilePHID');
+    $files = id(new PhabricatorFile())->loadAllWhere(
+      "phid IN (%Ls)",
+      $file_phids);
+    $author_phids = mpull($files, 'getAuthorPHID', 'getPHID');
+    $handles = id(new PhabricatorObjectHandleData($author_phids))
+      ->loadHandles();
+
     $rows = array();
     foreach ($macros as $macro) {
       $src = PhabricatorFileURI::getViewURIForPHID($macro->getFilePHID());
+      $file_phid = $macro->getFilePHID();
+      $author_link = isset($author_phids[$file_phid])
+        ? $handles[$author_phids[$file_phid]]->renderLink()
+        : null;
+
       $rows[] = array(
         phutil_render_tag(
           'a',
@@ -52,6 +65,8 @@ class PhabricatorFileMacroListController extends PhabricatorFileController {
             'href' => '/file/macro/edit/'.$macro->getID().'/',
           ),
           phutil_escape_html($macro->getName())),
+
+        $author_link,
         phutil_render_tag(
           'a',
           array(
@@ -78,12 +93,14 @@ class PhabricatorFileMacroListController extends PhabricatorFileController {
     $table->setHeaders(
       array(
         'Name',
+        'Author',
         'Image',
         '',
       ));
     $table->setColumnClasses(
       array(
         'pri',
+        '',
         'wide thumb',
         'action',
       ));
