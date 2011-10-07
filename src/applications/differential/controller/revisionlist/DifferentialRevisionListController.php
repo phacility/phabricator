@@ -158,15 +158,10 @@ class DifferentialRevisionListController extends DifferentialController {
           phutil_escape_html($filter_desc['name'])));
     }
 
-    $phids = array();
-
-    $phids[$view_phid] = true;
-
     $rev_ids = array();
     foreach ($queries as $key => $query) {
       $revisions = $query['object']->loadRevisions();
       foreach ($revisions as $revision) {
-        $phids[$revision->getAuthorPHID()] = true;
         $rev_ids[$revision->getID()] = true;
       }
       $queries[$key]['revisions'] = $revisions;
@@ -204,6 +199,8 @@ class DifferentialRevisionListController extends DifferentialController {
       $queries[$key]['view'] = $view;
     }
     $phids = array_mergev($phids);
+    $phids[] = $view_phid;
+
     $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
 
     foreach ($queries as $query) {
