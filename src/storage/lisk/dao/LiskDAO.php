@@ -98,9 +98,7 @@
  * Note that **Lisk automatically builds getters and setters for all of your
  * object's properties** via __call(). If you want to add custom behavior to
  * your getters or setters, you can do so by overriding the readField and
- * writeField methods. Do not implement your own setters and getters, as they
- * will result in an inconsistent object state (and new values won't get
- * written to the database).
+ * writeField methods.
  *
  * Calling save() will persist the object to the database. After calling
  * save(), you can call getID() to retrieve the object's ID.
@@ -154,6 +152,7 @@ abstract class LiskDAO {
   const CONFIG_TIMESTAMPS           = 'timestamps';
   const CONFIG_AUX_PHID             = 'auxiliary-phid';
   const CONFIG_SERIALIZATION        = 'col-serialization';
+  const CONFIG_PARTIAL_OBJECTS      = 'partial-objects';
 
   const SERIALIZATION_NONE          = 'id';
   const SERIALIZATION_JSON          = 'json';
@@ -164,6 +163,8 @@ abstract class LiskDAO {
   const IDS_MANUAL                  = 'ids-manual';
 
   private $__connections            = array();
+  private $__dirtyFields            = array();
+  private $__missingFields          = array();
   private static $processIsolationLevel = 0;
   private static $__checkedClasses = array();
 
@@ -178,23 +179,28 @@ abstract class LiskDAO {
       $this->$id_key = null;
     }
 
-    $this_class = get_class($this);
-    if (empty(self::$__checkedClasses[$this_class])) {
-      self::$__checkedClasses = true;
-      if (PhabricatorEnv::getEnvConfig('lisk.check_property_methods')) {
-        $class = new ReflectionClass(get_class($this));
-        $methods = $class->getMethods();
-        $properties = $this->getProperties();
-        foreach ($methods as $method) {
-          $name = strtolower($method->getName());
-          if (!(strncmp($name, 'get', 3) && strncmp($name, 'set', 3))) {
-            $name = substr($name, 3);
-            $declaring_class_name = $method->getDeclaringClass()->getName();
-            if (isset($properties[$name]) &&
-                $declaring_class_name !== 'LiskDAO') {
-              throw new Exception(
-                "Cannot implement method {$method->getName()} in ".
-                "{$declaring_class_name}.");
+    if ($this->getConfigOption(self::CONFIG_PARTIAL_OBJECTS)) {
+      $this->resetDirtyFields();
+
+      $this_class = get_class($this);
+      if (empty(self::$__checkedClasses[$this_class])) {
+        self::$__checkedClasses = true;
+
+        if (PhabricatorEnv::getEnvConfig('lisk.check_property_methods')) {
+          $class = new ReflectionClass(get_class($this));
+          $methods = $class->getMethods();
+          $properties = $this->getProperties();
+          foreach ($methods as $method) {
+            $name = strtolower($method->getName());
+            if (!(strncmp($name, 'get', 3) && strncmp($name, 'set', 3))) {
+              $name = substr($name, 3);
+              $declaring_class_name = $method->getDeclaringClass()->getName();
+              if (isset($properties[$name]) &&
+                  $declaring_class_name !== 'LiskDAO') {
+                throw new Exception(
+                  "Cannot implement method {$method->getName()} in ".
+                  "{$declaring_class_name}.");
+              }
             }
           }
         }
@@ -268,6 +274,16 @@ abstract class LiskDAO {
    * This will cause Lisk to JSON-serialize the 'complex' field before it is
    * written, and unserialize it when it is read.
    *
+   * CONFIG_PARTIAL_OBJECTS
+   * Sometimes, it is useful to load only some fields of an object (such as
+   * when you are loading all objects of a class, but only care about a few
+   * fields). Turning on this option (by setting it to a truthy value) allows
+   * users of the class to create/use partial objects, but it comes with some
+   * side effects: your class cannot override the setters and getters provided
+   * by Lisk (use readField and writeField instead), and you should not
+   * directly access or assign protected members of your class (use the getters
+   * and setters).
+   *
    *
    * @return dictionary  Map of configuration options to values.
    *
@@ -278,6 +294,7 @@ abstract class LiskDAO {
       self::CONFIG_OPTIMISTIC_LOCKS         => false,
       self::CONFIG_IDS                      => self::IDS_AUTOINCREMENT,
       self::CONFIG_TIMESTAMPS               => true,
+      self::CONFIG_PARTIAL_OBJECTS          => false,
     );
   }
 
@@ -340,6 +357,20 @@ abstract class LiskDAO {
     return $this->loadAllWhere('1 = 1');
   }
 
+  /**
+   * Loads all objects, but only fetches the specified columns.
+   *
+   * @param  string  Column name.
+   * @param  ...     More column names.
+   * @return dict    Dictionary of all objects, keyed by ID.
+   *
+   * @task   load
+   */
+  public function loadColumns($column1/*, $column2, ... */) {
+    $columns = func_get_args();
+    return $this->loadColumnsWhere($columns, '1 = 1');
+  }
+
 
   /**
    * Load all objects which match a WHERE clause. You provide everything after
@@ -356,6 +387,30 @@ abstract class LiskDAO {
    * @task   load
    */
   public function loadAllWhere($pattern/*, $arg, $arg, $arg ... */) {
+    $args = func_get_args();
+    array_unshift($args, null);
+    $data = call_user_func_array(
+      array($this, 'loadRawDataWhere'),
+      $args);
+    return $this->loadAllFromArray($data);
+  }
+
+  /**
+   * Loads selected columns from objects that match a WHERE clause. You must
+   * provide everything after the WHERE. See loadAllWhere().
+   *
+   * @param  array   List of column names.
+   * @param  string  queryfx()-style SQL WHERE clause.
+   * @param  ...     Zero or more conversions.
+   * @return dict    Dictionary of matching objecks, keyed by ID.
+   *
+   * @task   load
+   */
+  public function loadColumnsWhere($columns, $pattern/*, $arg, $arg, ... */) {
+    if (!$this->getConfigOption(self::CONFIG_PARTIAL_OBJECTS)) {
+      throw new BadMethodCallException(
+        "This class does not support partial objects.");
+    }
     $args = func_get_args();
     $data = call_user_func_array(
       array($this, 'loadRawDataWhere'),
@@ -378,6 +433,7 @@ abstract class LiskDAO {
    */
   public function loadOneWhere($pattern/*, $arg, $arg, $arg ... */) {
     $args = func_get_args();
+    array_unshift($args, null);
     $data = call_user_func_array(
       array($this, 'loadRawDataWhere'),
       $args);
@@ -396,7 +452,7 @@ abstract class LiskDAO {
   }
 
 
-  protected function loadRawDataWhere($pattern/*, $arg, $arg, $arg ... */) {
+  protected function loadRawDataWhere($columns, $pattern/*, $arg, $arg ... */) {
     $connection = $this->establishConnection('r');
 
     $lock_clause = '';
@@ -407,10 +463,25 @@ abstract class LiskDAO {
     }
 
     $args = func_get_args();
-    $args = array_slice($args, 1);
+    $args = array_slice($args, 2);
 
-    $pattern = 'SELECT * FROM %T WHERE '.$pattern.' %Q';
+    if (!$columns) {
+      $column = '*';
+    } else {
+      $column = '%LC';
+      $columns[] = $this->getIDKey();
+
+      $properties = $this->getProperties();
+      $this->__missingFields = array_diff_key(
+        array_flip($properties),
+        array_flip($columns));
+    }
+
+    $pattern = 'SELECT '.$column.' FROM %T WHERE '.$pattern.' %Q';
     array_unshift($args, $this->getTableName());
+    if ($columns) {
+      array_unshift($args, $columns);
+    }
     array_push($args, $lock_clause);
     array_unshift($args, $pattern);
 
@@ -733,6 +804,9 @@ abstract class LiskDAO {
 
     $this->willSaveObject();
     $data = $this->getPropertyValues();
+    if ($this->getConfigOption(self::CONFIG_PARTIAL_OBJECTS)) {
+      $data = array_intersect_key($data, $this->__dirtyFields);
+    }
     $this->willWriteData($data);
 
     $map = array();
@@ -777,6 +851,10 @@ abstract class LiskDAO {
     }
 
     $this->didWriteData();
+
+    if ($this->getConfigOption(self::CONFIG_PARTIAL_OBJECTS)) {
+      $this->resetDirtyFields();
+    }
 
     return $this;
   }
@@ -873,6 +951,10 @@ abstract class LiskDAO {
     }
 
     $this->didWriteData();
+
+    if ($this->getConfigOption(self::CONFIG_PARTIAL_OBJECTS)) {
+      $this->resetDirtyFields();
+    }
 
     return $this;
   }
@@ -1154,6 +1236,19 @@ abstract class LiskDAO {
     }
   }
 
+  /**
+   * Resets the dirty fields (fields which need to be written on next save/
+   * update/insert/replace). If this DAO has timestamps, the modified time
+   * is always a dirty field.
+   *
+   * @task util
+   */
+  private function resetDirtyFields() {
+    $this->__dirtyFields = array();
+    if ($this->getConfigOption(self::CONFIG_TIMESTAMPS)) {
+      $this->__dirtyFields['dateModified'] = true;
+    }
+  }
 
   /**
    * Black magic. Builds implied get*() and set*() for all properties.
@@ -1173,6 +1268,10 @@ abstract class LiskDAO {
       if (count($args) !== 0) {
         throw new Exception("Getter call should have zero args: {$method}");
       }
+      if ($this->getConfigOption(self::CONFIG_PARTIAL_OBJECTS) &&
+          isset($this->__missingFields[$property])) {
+        throw new Exception("Cannot get field that wasn't loaded: {$property}");
+      }
       return $this->readField($property);
     }
 
@@ -1187,6 +1286,11 @@ abstract class LiskDAO {
       }
       if ($property == 'ID') {
         $property = $this->getIDKeyForUse();
+      }
+      if ($this->getConfigOption(self::CONFIG_PARTIAL_OBJECTS)) {
+        // Accept writes to fields that weren't initially loaded
+        unset($this->__missingFields[$property]);
+        $this->__dirtyFields[$property] = true;
       }
       $this->writeField($property, $args[0]);
       return $this;
