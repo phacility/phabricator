@@ -450,7 +450,7 @@ abstract class LiskDAO {
   }
 
 
-  protected function loadRawDataWhere(array $columns, $pattern/*, $args... */) {
+  protected function loadRawDataWhere($columns, $pattern/*, $args... */) {
     $connection = $this->establishConnection('r');
 
     $lock_clause = '';
