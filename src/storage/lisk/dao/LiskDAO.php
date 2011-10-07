@@ -360,14 +360,12 @@ abstract class LiskDAO {
   /**
    * Loads all objects, but only fetches the specified columns.
    *
-   * @param  string  Column name.
-   * @param  ...     More column names.
-   * @return dict    Dictionary of all objects, keyed by ID.
+   * @param  array  Array of canonical column names as strings
+   * @return dict   Dictionary of all objects, keyed by ID.
    *
    * @task   load
    */
-  public function loadColumns($column1/*, $column2, ... */) {
-    $columns = func_get_args();
+  public function loadColumns(array $columns) {
     return $this->loadColumnsWhere($columns, '1 = 1');
   }
 
@@ -406,7 +404,7 @@ abstract class LiskDAO {
    *
    * @task   load
    */
-  public function loadColumnsWhere($columns, $pattern/*, $arg, $arg, ... */) {
+  public function loadColumnsWhere(array $columns, $pattern/*, $args... */) {
     if (!$this->getConfigOption(self::CONFIG_PARTIAL_OBJECTS)) {
       throw new BadMethodCallException(
         "This class does not support partial objects.");
@@ -452,7 +450,7 @@ abstract class LiskDAO {
   }
 
 
-  protected function loadRawDataWhere($columns, $pattern/*, $arg, $arg ... */) {
+  protected function loadRawDataWhere(array $columns, $pattern/*, $args... */) {
     $connection = $this->establishConnection('r');
 
     $lock_clause = '';

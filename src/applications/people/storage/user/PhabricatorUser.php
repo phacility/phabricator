@@ -41,15 +41,25 @@ class PhabricatorUser extends PhabricatorUserDAO {
 
   private $preferences = null;
 
-  public function getProfileImagePHID() {
-    return nonempty(
-      $this->profileImagePHID,
-      PhabricatorEnv::getEnvConfig('user.default-profile-image-phid'));
+  protected function readField($field) {
+    if ($field === 'profileImagePHID') {
+      return nonempty(
+        $this->profileImagePHID,
+        PhabricatorEnv::getEnvConfig('user.default-profile-image-phid'));
+    }
+    if ($field === 'timezoneIdentifier') {
+      // If the user hasn't set one, guess the server's time.
+      return nonempty(
+        $this->timezoneIdentifier,
+        date_default_timezone_get());
+    }
+    return parent::readField($field);
   }
 
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_PARTIAL_OBJECTS => true,
     ) + parent::getConfiguration();
   }
 
@@ -76,8 +86,8 @@ class PhabricatorUser extends PhabricatorUserDAO {
   }
 
   public function save() {
-    if (!$this->conduitCertificate) {
-      $this->conduitCertificate = $this->generateConduitCertificate();
+    if (!$this->getConduitCertificate()) {
+      $this->setConduitCertificate($this->generateConduitCertificate());
     }
     $result = parent::save();
 
@@ -169,7 +179,7 @@ class PhabricatorUser extends PhabricatorUserDAO {
 
   private function generateToken($epoch, $frequency, $key, $len) {
     $time_block = floor($epoch / $frequency);
-    $vec = $this->getPHID().$this->passwordHash.$key.$time_block;
+    $vec = $this->getPHID().$this->getPasswordHash().$key.$time_block;
     return substr(sha1($vec), 0, $len);
   }
 
@@ -341,13 +351,6 @@ class PhabricatorUser extends PhabricatorUserDAO {
 
     $this->preferences = $preferences;
     return $preferences;
-  }
-
-  public function getTimezoneIdentifier() {
-    // If the user hasn't set one, guess the server's time.
-    return nonempty(
-      $this->timezoneIdentifier,
-      date_default_timezone_get());
   }
 
 }
