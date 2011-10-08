@@ -410,18 +410,21 @@ class ManiphestTaskDetailController extends ManiphestController {
       'controlMap' => $control_map,
       'tokenizers' => array(
         ManiphestTransactionType::TYPE_PROJECTS => array(
-          'id'    => 'projects-tokenizer',
-          'src'   => '/typeahead/common/projects/',
+          'id'       => 'projects-tokenizer',
+          'src'      => '/typeahead/common/projects/',
+          'ondemand' => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
         ),
         ManiphestTransactionType::TYPE_OWNER => array(
-          'id'    => 'assign-tokenizer',
-          'src'   => '/typeahead/common/users/',
-          'value' => $default_claim,
-          'limit' => 1,
+          'id'       => 'assign-tokenizer',
+          'src'      => '/typeahead/common/users/',
+          'value'    => $default_claim,
+          'limit'    => 1,
+          'ondemand' => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
         ),
         ManiphestTransactionType::TYPE_CCS => array(
-          'id'    => 'cc-tokenizer',
-          'src'   => '/typeahead/common/mailable/',
+          'id'       => 'cc-tokenizer',
+          'src'      => '/typeahead/common/mailable/',
+          'ondemand' => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
         ),
       ),
     ));

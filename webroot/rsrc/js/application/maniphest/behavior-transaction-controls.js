@@ -14,7 +14,13 @@ JX.behavior('maniphest-transaction-controls', function(config) {
   for (var k in config.tokenizers) {
     var tconfig = config.tokenizers[k];
     var root = JX.$(tconfig.id);
-    var datasource = new JX.TypeaheadPreloadedSource(tconfig.src);
+
+    var datasource;
+    if (tconfig.ondemand) {
+      datasource = new JX.TypeaheadOnDemandSource(tconfig.src);
+    } else {
+      datasource = new JX.TypeaheadPreloadedSource(tconfig.src);
+    }
 
     var typeahead = new JX.Typeahead(root);
     typeahead.setDatasource(datasource);

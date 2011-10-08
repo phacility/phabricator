@@ -120,11 +120,13 @@ final class DifferentialAddCommentView extends AphrontView {
             'tokenizer' => 'add-reviewers-tokenizer',
             'src' => '/typeahead/common/users/',
             'row' => 'add-reviewers',
+            'ondemand' => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
           ),
           'add_ccs' => array(
             'tokenizer' => 'add-ccs-tokenizer',
             'src' => '/typeahead/common/mailable/',
             'row' => 'add-ccs',
+            'ondemand' => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
           ),
         ),
         'select' => 'comment-action',

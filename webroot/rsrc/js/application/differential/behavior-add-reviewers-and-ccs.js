@@ -11,7 +11,13 @@ JX.behavior('differential-add-reviewers-and-ccs', function(config) {
 
   function buildTokenizer(props) {
     var root = JX.$(props.tokenizer);
-    var datasource = new JX.TypeaheadPreloadedSource(props.src);
+
+    var datasource;
+    if (props.ondemand) {
+      datasource = new JX.TypeaheadOnDemandSource(props.src);
+    } else {
+      datasource = new JX.TypeaheadPreloadedSource(props.src);
+    }
 
     var typeahead = new JX.Typeahead(root);
     typeahead.setDatasource(datasource);
