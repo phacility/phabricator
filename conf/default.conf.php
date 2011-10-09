@@ -402,6 +402,14 @@ return array(
   // You can enable traces for development to make it easier to debug problems.
   'phabricator.show-stack-traces' => false,
 
+  // When users write comments which have URIs, they'll be automaticaly linked
+  // if the protocol appears in this set. This whitelist is primarily to prevent
+  // security issues like javascript:// URIs.
+  'uri.allowed-protocols' => array(
+    'http'  => true,
+    'https' => true,
+  ),
+
   // Tokenizers are UI controls which let the user select other users, email
   // addresses, project names, etc., by typing the first few letters and having
   // the control autocomplete from a list. They can load their data in two ways:

@@ -76,6 +76,8 @@ class PhabricatorMarkupEngine {
       'custom-inline' => array(),
       'custom-block'  => array(),
       'macros'        => true,
+      'uri.allowed-protocols' => PhabricatorEnv::getEnvConfig(
+        'uri.allowed-protocols'),
     );
   }
 
@@ -87,6 +89,9 @@ class PhabricatorMarkupEngine {
 
     $engine->setConfig('preserve-linebreaks', true);
     $engine->setConfig('pygments.enabled', $options['pygments']);
+    $engine->setConfig(
+      'uri.allowed-protocols',
+      $options['uri.allowed-protocols']);
 
     $rules = array();
     $rules[] = new PhutilRemarkupRuleEscapeRemarkup();
@@ -98,6 +103,7 @@ class PhabricatorMarkupEngine {
       $rules[] = new PhabricatorRemarkupRuleYoutube();
     }
 
+    $rules[] = new PhabricatorRemarkupRulePhriction();
     $rules[] = new PhutilRemarkupRuleHyperlink();
 
     $rules[] = new PhabricatorRemarkupRuleDifferentialHandle();
@@ -115,7 +121,6 @@ class PhabricatorMarkupEngine {
     }
 
     $rules[] = new PhabricatorRemarkupRuleMention();
-    $rules[] = new PhabricatorRemarkupRulePhriction();
 
     $custom_rule_classes = $options['custom-inline'];
     if ($custom_rule_classes) {
