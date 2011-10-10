@@ -111,7 +111,15 @@ class DiffusionSymbolController extends DiffusionController {
 
       $repo = idx($repos, $project->getRepositoryID());
       if ($repo) {
-        $href = '/diffusion/'.$repo->getCallsign().'/browse'.$file.'$'.$line;
+
+        $drequest = DiffusionRequest::newFromAphrontRequestDictionary(
+          array(
+            'callsign' => $repo->getCallsign(),
+          ));
+        $branch = $drequest->getBranchURIComponent($drequest->getBranch());
+        $file = $branch.ltrim($file, '/');
+
+        $href = '/diffusion/'.$repo->getCallsign().'/browse/'.$file.'$'.$line;
 
         if ($request->getBool('jump') && count($symbols) == 1) {
           // If this is a clickthrough from Differential, just jump them
