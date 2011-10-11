@@ -31,10 +31,7 @@ class PhabricatorPHID extends PhabricatorPHIDDAO {
       throw new Exception("Can not generate PHID with no type.");
     }
 
-    $entropy = Filesystem::readRandomBytes(20);
-
-    $uniq = sha1($entropy);
-    $uniq = substr($uniq, 0, 20);
+    $uniq = Filesystem::readRandomCharacters(20);
     $phid = 'PHID-'.$type.'-'.$uniq;
 
     $phid_rec = new PhabricatorPHID();

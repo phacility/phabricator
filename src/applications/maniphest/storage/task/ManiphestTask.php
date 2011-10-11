@@ -123,7 +123,7 @@ class ManiphestTask extends ManiphestDAO {
 
   public function save() {
     if (!$this->mailKey) {
-      $this->mailKey = sha1(Filesystem::readRandomBytes(20));
+      $this->mailKey = Filesystem::readRandomCharacters(20);
     }
 
     $result = parent::save();

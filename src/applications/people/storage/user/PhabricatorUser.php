@@ -97,10 +97,7 @@ class PhabricatorUser extends PhabricatorUserDAO {
   }
 
   private function generateConduitCertificate() {
-    $entropy = Filesystem::readRandomBytes(256);
-    $entropy = base64_encode($entropy);
-    $entropy = substr($entropy, 0, 255);
-    return $entropy;
+    return Filesystem::readRandomCharacters(255);
   }
 
   public function comparePassword($password) {
@@ -259,8 +256,7 @@ class PhabricatorUser extends PhabricatorUserDAO {
 
     // Consume entropy to generate a new session key, forestalling the eventual
     // heat death of the universe.
-    $entropy = Filesystem::readRandomBytes(20);
-    $session_key = sha1($entropy);
+    $session_key = Filesystem::readRandomCharacters(40);
 
     // UNGUARDED WRITES: Logging-in users don't have CSRF stuff yet.
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();

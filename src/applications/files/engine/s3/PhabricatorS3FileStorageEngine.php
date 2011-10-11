@@ -47,7 +47,7 @@ final class PhabricatorS3FileStorageEngine
   public function writeFile($data, array $params) {
     $s3 = $this->newS3API();
 
-    $name = 'phabricator/'.sha1(Filesystem::readRandomBytes(20));
+    $name = 'phabricator/'.Filesystem::readRandomCharacters(20);
 
     AphrontWriteGuard::willWrite();
     $s3->putObject(

@@ -40,7 +40,7 @@ class PhabricatorConduitTokenController extends PhabricatorConduitController {
 
     $token = id(new PhabricatorConduitCertificateToken())
       ->setUserPHID($user->getPHID())
-      ->setToken(sha1(Filesystem::readRandomBytes(128)))
+      ->setToken(Filesystem::readRandomCharacters(40))
       ->save();
 
     $panel = new AphrontPanelView();

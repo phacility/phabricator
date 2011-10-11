@@ -117,7 +117,7 @@ class DifferentialRevision extends DifferentialDAO {
 
   public function save() {
     if (!$this->getMailKey()) {
-      $this->mailKey = sha1(Filesystem::readRandomBytes(20));
+      $this->mailKey = Filesystem::readRandomCharacters(40);
     }
     return parent::save();
   }
