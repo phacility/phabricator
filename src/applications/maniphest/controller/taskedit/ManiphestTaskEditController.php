@@ -176,7 +176,7 @@ class ManiphestTaskEditController extends ManiphestController {
 
         if ($files) {
           $file_map = mpull($files, 'getPHID');
-          $file_map = array_fill_keys($file_map, true);
+          $file_map = array_fill_keys($file_map, array());
           $changes[ManiphestTransactionType::TYPE_ATTACH] = array(
             PhabricatorPHIDConstants::PHID_TYPE_FILE => $file_map,
           );
@@ -234,7 +234,7 @@ class ManiphestTaskEditController extends ManiphestController {
           // NOTE: It's safe to simply apply this transaction without doing
           // cycle detection because we know the new task has no children.
           $new_value = $parent_task->getAttached();
-          $new_value[$type_task][$task->getPHID()] = true;
+          $new_value[$type_task][$task->getPHID()] = array();
 
           $parent_xaction = clone $template;
           $attach_type = ManiphestTransactionType::TYPE_ATTACH;
@@ -475,13 +475,19 @@ class ManiphestTaskEditController extends ManiphestController {
           ->setLabel('Description')
           ->setName('description')
           ->setCaption($email_hint)
-          ->setValue($task->getDescription()))
-      ->appendChild(
-        id(new AphrontFormDragAndDropUploadControl())
-          ->setLabel('Attached Files')
-          ->setName('files')
-          ->setDragAndDropTarget($panel_id)
-          ->setActivatedClass('aphront-panel-view-drag-and-drop'))
+          ->setValue($task->getDescription()));
+
+    if (!$task->getID()) {
+      $form
+        ->appendChild(
+          id(new AphrontFormDragAndDropUploadControl())
+            ->setLabel('Attached Files')
+            ->setName('files')
+            ->setDragAndDropTarget($panel_id)
+            ->setActivatedClass('aphront-panel-view-drag-and-drop'));
+    }
+
+    $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($cancel_uri)
