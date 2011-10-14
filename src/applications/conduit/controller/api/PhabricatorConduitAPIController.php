@@ -67,7 +67,22 @@ class PhabricatorConduitAPIController
       if (isset($_REQUEST['params']) && is_array($_REQUEST['params'])) {
         $params_post = $request->getArr('params');
         foreach ($params_post as $key => $value) {
-          $params_post[$key] = json_decode($value, true);
+          $decoded_value = json_decode($value, true);
+          if ($decoded_value === null && strtolower($value) != 'null') {
+            // When json_decode() fails, it returns null. This almost certainly
+            // indicates that a user was using the web UI and didn't put quotes
+            // around a string value. We can either do what we think they meant
+            // (treat it as a string) or fail. For now, err on the side of
+            // caution and fail. In the future, if we make the Conduit API
+            // actually do type checking, it might be reasonable to treat it as
+            // a string if the parameter type is string.
+            throw new Exception(
+              "The value for parameter '{$key}' is not valid JSON. All ".
+              "parameters must be encoded as JSON values, including strings ".
+              "(which means you need to surround them in double quotes). ".
+              "Check your syntax. Value was: {$value}");
+          }
+          $params_post[$key] = $decoded_value;
         }
         $params = $params_post;
       } else {
