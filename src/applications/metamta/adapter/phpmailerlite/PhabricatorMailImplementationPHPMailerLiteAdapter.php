@@ -75,7 +75,7 @@ class PhabricatorMailImplementationPHPMailerLiteAdapter
   }
 
   public function setIsHTML($is_html) {
-    $this->mailer->IsHTML(true);
+    $this->mailer->IsHTML($is_html);
     return $this;
   }
 
