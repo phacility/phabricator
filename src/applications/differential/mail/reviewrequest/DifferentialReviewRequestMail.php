@@ -77,4 +77,39 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
 
     return implode("\n", $body);
   }
+
+  protected function buildAttachments() {
+    $attachments = array();
+    if (PhabricatorEnv::getEnvConfig('metamta.differential.attach-patches')) {
+      $revision = $this->getRevision();
+      $revision_id = $revision->getID();
+
+      $diffs = $revision->loadDiffs();
+      $diff_number = count($diffs);
+      $diff = array_pop($diffs);
+
+      $filename = "D{$revision_id}.{$diff_number}.diff";
+
+      $diff->attachChangesets($diff->loadChangesets());
+      // TODO: We could batch this to improve performance.
+      foreach ($diff->getChangesets() as $changeset) {
+        $changeset->attachHunks($changeset->loadHunks());
+      }
+      $diff_dict = $diff->getDiffDict();
+
+      $changes = array();
+      foreach ($diff_dict['changes'] as $changedict) {
+        $changes[] = ArcanistDiffChange::newFromDictionary($changedict);
+      }
+      $bundle = ArcanistBundle::newFromChanges($changes);
+      $unified_diff = $bundle->toUnifiedDiff();
+
+      $attachments[] = array(
+        'data' => $unified_diff,
+        'filename' => $filename,
+        'mimetype' => 'text/x-diff; charset=utf-8'
+      );
+    }
+    return $attachments;
+  }
 }
