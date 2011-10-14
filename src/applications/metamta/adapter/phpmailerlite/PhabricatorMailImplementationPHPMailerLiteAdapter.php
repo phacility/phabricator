@@ -55,6 +55,16 @@ class PhabricatorMailImplementationPHPMailerLiteAdapter
     return $this;
   }
 
+  public function addAttachment($data, $filename, $mimetype) {
+    $this->mailer->AddStringAttachment(
+      $data,
+      $filename,
+      'base64',
+      $mimetype
+    );
+    return $this;
+  }
+
   public function addHeader($header_name, $header_value) {
     if (strtolower($header_name) == 'message-id') {
       $this->mailer->MessageID = $header_value;
@@ -75,7 +85,7 @@ class PhabricatorMailImplementationPHPMailerLiteAdapter
   }
 
   public function setIsHTML($is_html) {
-    $this->mailer->IsHTML(true);
+    $this->mailer->IsHTML($is_html);
     return $this;
   }
 

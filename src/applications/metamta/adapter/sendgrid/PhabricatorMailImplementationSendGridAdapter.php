@@ -55,6 +55,12 @@ class PhabricatorMailImplementationSendGridAdapter
     return $this;
   }
 
+  public function addAttachment($data, $filename, $mimetype) {
+    throw new Exception(
+      'SendGrid adapter does not currently support attachments.'
+    );
+  }
+
   public function addHeader($header_name, $header_value) {
     $this->params['headers'][] = array($header_name, $header_value);
     return $this;
