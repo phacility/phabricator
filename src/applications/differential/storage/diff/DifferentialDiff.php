@@ -146,4 +146,56 @@ class DifferentialDiff extends DifferentialDAO {
     return $diff;
   }
 
+  public function getDiffDict() {
+    $dict = array(
+      'id' => $this->getID(),
+      'parent' => $this->getParentRevisionID(),
+      'revisionID' => $this->getRevisionID(),
+      'sourceControlBaseRevision' => $this->getSourceControlBaseRevision(),
+      'sourceControlPath' => $this->getSourceControlPath(),
+      'unitStatus' => $this->getUnitStatus(),
+      'lintStatus' => $this->getLintStatus(),
+      'changes' => array(),
+      'properties' => array(),
+    );
+
+    foreach ($this->getChangesets() as $changeset) {
+      $hunks = array();
+      foreach ($changeset->getHunks() as $hunk) {
+        $hunks[] = array(
+          'oldOffset' => $hunk->getOldOffset(),
+          'newOffset' => $hunk->getNewOffset(),
+          'oldLength' => $hunk->getOldLen(),
+          'newLength' => $hunk->getNewLen(),
+          'addLines'  => null,
+          'delLines'  => null,
+          'isMissingOldNewline' => null,
+          'isMissingNewNewline' => null,
+          'corpus'    => $hunk->getChanges(),
+        );
+      }
+      $change = array(
+        'metadata'      => $changeset->getMetadata(),
+        'oldPath'       => $changeset->getOldFile(),
+        'currentPath'   => $changeset->getFileName(),
+        'awayPaths'     => $changeset->getAwayPaths(),
+        'oldProperties' => $changeset->getOldProperties(),
+        'newProperties' => $changeset->getNewProperties(),
+        'type'          => $changeset->getChangeType(),
+        'fileType'      => $changeset->getFileType(),
+        'commitHash'    => null,
+        'hunks'         => $hunks,
+      );
+      $dict['changes'][] = $change;
+    }
+
+    $properties = id(new DifferentialDiffProperty())->loadAllWhere(
+      'diffID = %d',
+      $this->getID());
+    foreach ($properties as $property) {
+      $dict['properties'][$property->getName()] = $property->getData();
+    }
+
+    return $dict;
+  }
 }

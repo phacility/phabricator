@@ -232,6 +232,11 @@ return array(
   // Prefix prepended to mail sent by Differential.
   'metamta.differential.subject-prefix' => '[Differential]',
 
+  // Set this to true if you want patches to be attached to mail from
+  // Differential.  This won't work if you are using SendGrid as your mail
+  // adapter.
+  'metamta.differential.attach-patches' => false,
+
   // By default, Phabricator generates unique reply-to addresses and sends a
   // separate email to each recipient when you enable reply handling. This is
   // more secure than using "From" to establish user identity, but can mean

@@ -70,9 +70,10 @@ abstract class DifferentialMail {
       throw new Exception('No "To:" users provided!');
     }
 
-    $cc_phids = $this->getCCPHIDs();
-    $subject  = $this->buildSubject();
-    $body     = $this->buildBody();
+    $cc_phids    = $this->getCCPHIDs();
+    $subject     = $this->buildSubject();
+    $body        = $this->buildBody();
+    $attachments = $this->buildAttachments();
 
     $template = new PhabricatorMetaMTAMail();
     $actor_handle = $this->getActorHandle();
@@ -88,6 +89,14 @@ abstract class DifferentialMail {
       ->setIsHTML($this->shouldMarkMailAsHTML())
       ->setParentMessageID($this->parentMessageID)
       ->addHeader('Thread-Topic', $this->getRevision()->getTitle());
+
+    foreach ($attachments as $attachment) {
+      $template->addAttachment(
+        $attachment['data'],
+        $attachment['filename'],
+        $attachment['mimetype']
+      );
+    }
 
     $template->setThreadID(
       $this->getThreadID(),
@@ -163,6 +172,21 @@ EOTEXT;
     }
 
     return $body;
+  }
+
+  /**
+   * You can override this method in a subclass and return array of attachments
+   * to be sent with the email.  Each attachment is a dictionary with 'data',
+   * 'filename' and 'mimetype' keys.  For example:
+   *
+   *   array(
+   *     'data' => 'some text',
+   *     'filename' => 'example.txt',
+   *     'mimetype' => 'text/plain'
+   *   );
+   */
+  protected function buildAttachments() {
+    return array();
   }
 
   public function getReplyHandler() {

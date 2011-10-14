@@ -62,8 +62,7 @@ class ConduitAPI_differential_getrevision_Method extends ConduitAPIMethod {
       foreach ($diff->getChangesets() as $changeset) {
         $changeset->attachHunks($changeset->loadHunks());
       }
-      $diff_dicts[] =
-        ConduitAPI_differential_getdiff_Method::createDiffDict($diff);
+      $diff_dicts[] = $diff->getDiffDict();
     }
 
     $commit_dicts = array();
