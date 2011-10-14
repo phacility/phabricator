@@ -115,6 +115,17 @@ class ManiphestTaskDetailController extends ManiphestController {
 
     $dict['Author'] = $handles[$task->getAuthorPHID()]->renderLink();
 
+    $source = $task->getOriginalEmailSource();
+    if ($source) {
+      $subject = '[T'.$task->getID().'] '.$task->getTitle();
+      $dict['From Email'] = phutil_render_tag(
+        'a',
+        array(
+          'href' => 'mailto:'.$source.'?subject='.$subject
+        ),
+        phutil_escape_html($source));
+    }
+
     $projects = $task->getProjectPHIDs();
     if ($projects) {
       $project_links = array();

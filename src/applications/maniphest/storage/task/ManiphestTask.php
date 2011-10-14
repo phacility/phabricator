@@ -31,7 +31,7 @@ class ManiphestTask extends ManiphestDAO {
 
   protected $title;
   protected $description;
-
+  protected $originalEmailSource;
   protected $mailKey;
 
   protected $attached = array();

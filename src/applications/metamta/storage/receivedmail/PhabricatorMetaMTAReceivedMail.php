@@ -64,16 +64,34 @@ class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       'metamta.maniphest.public-create-email');
 
     if ($create_task && $to == $create_task) {
+      $receiver = new ManiphestTask();
+
       $user = $this->lookupPublicUser();
-      if (!$user) {
-        // TODO: We should probably bounce these since from the user's
-        // perspective their email vanishes into a black hole.
-        return $this->setMessage("Invalid public user '{$from}'.")->save();
+      if ($user) {
+        $this->setAuthorPHID($user->getPHID());
+      } else {
+        $default_author = PhabricatorEnv::getEnvConfig(
+          'metamta.manipest.default-public-author');
+
+        if ($default_author) {
+          $user = id(new PhabricatorUser())->loadOneWhere(
+            'username = %s',
+            $default_author);
+          if ($user) {
+            $receiver->setOriginalEmailSource($from);
+          } else {
+            throw new Exception(
+              "Phabricator is misconfigured, the configuration key ".
+              "'metamta.manipest.default-public-author' is set to user ".
+              "'{$default_author}' but that user does not exist.");
+          }
+        } else {
+          // TODO: We should probably bounce these since from the user's
+          // perspective their email vanishes into a black hole.
+          return $this->setMessage("Invalid public user '{$from}'.")->save();
+        }
       }
 
-      $this->setAuthorPHID($user->getPHID());
-
-      $receiver = new ManiphestTask();
       $receiver->setAuthorPHID($user->getPHID());
       $receiver->setPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
 

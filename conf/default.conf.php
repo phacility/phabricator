@@ -268,6 +268,17 @@ return array(
   // still **COMPLETELY INSECURE**.
   'metamta.insecure-auth-with-reply-to' => false,
 
+  // If you enable 'metamta.maniphest.public-create-email' and create an
+  // email address like "bugs@phabricator.example.com", it will default to
+  // rejecting mail which doesn't come from a known user. However, you might
+  // want to let anyone send email to this address; to do so, set a default
+  // author here (a Phabricator username). A typical use of this might be to
+  // create a "System Agent" user called "bugs" and use that name here. If you
+  // specify a valid username, mail will always be accepted and used to create
+  // a task, even if the sender is not a system user. The original email
+  // address will be stored in an 'From Email' field on the task.
+  'metamta.maniphest.default-public-author' => null,
+
 
 // -- Auth ------------------------------------------------------------------ //
 
