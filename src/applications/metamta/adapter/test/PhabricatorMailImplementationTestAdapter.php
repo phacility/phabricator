@@ -61,6 +61,15 @@ class PhabricatorMailImplementationTestAdapter
     return $this;
   }
 
+  public function addAttachment($data, $filename, $mimetype) {
+    $this->guts['attachments'][] = array(
+      'data' => $data,
+      'filename' => $filename,
+      'mimetype' => $mimetype
+    );
+    return $this;
+  }
+
   public function addHeader($header_name, $header_value) {
     $this->guts['headers'][] = array($header_name, $header_value);
     return $this;
