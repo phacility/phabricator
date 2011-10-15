@@ -593,7 +593,7 @@ abstract class LiskDAO {
 
     foreach ($rows as $row) {
       $obj = clone $this;
-      if ($id_key) {
+      if ($id_key && isset($row[$id_key])) {
         $result[$row[$id_key]] = $obj->loadFromArray($row);
       } else {
         $result[] = $obj->loadFromArray($row);
