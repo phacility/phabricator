@@ -175,13 +175,23 @@ final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
     $q = $query->getQuery();
 
     if (strlen($q)) {
-     $join[] = qsprintf(
-        $conn_r,
-        "{$t_field} field ON field.phid = document.phid");
-      $where[] = qsprintf(
-        $conn_r,
-        'MATCH(corpus) AGAINST (%s)',
-        $q);
+      if (preg_match('/[+\-"<>()*~]/', $q)) {
+        $join[] = qsprintf(
+          $conn_r,
+          "{$t_field} field ON field.phid = document.phid");
+        $where[] = str_replace('\\"', '"', qsprintf(
+            $conn_r,
+            'MATCH(corpus) AGAINST (%s IN BOOLEAN MODE)',
+            $q));
+      } else {
+        $join[] = qsprintf(
+          $conn_r,
+          "{$t_field} field ON field.phid = document.phid");
+        $where[] = qsprintf(
+          $conn_r,
+          'MATCH(corpus) AGAINST (%s)',
+          $q);
+      }
 
       // When searching for a string, promote user listings above other
       // listings.
