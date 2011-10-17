@@ -7,6 +7,7 @@ confirm() {
 
 GIT='git'
 
+LTS="Ubuntu 10.04"
 ISSUE=`cat /etc/issue`
 if [[ $ISSUE != Ubuntu* ]]
 then
@@ -14,7 +15,7 @@ then
   echo "to be something else. Your results may vary.";
   echo
   confirm
-elif [[ $ISSUE != "Ubuntu 10.04*" ]]
+elif [[ `expr match "$ISSUE" "$LTS"` -eq ${#LTS} ]]
 then
   GIT='git-core'
 fi
