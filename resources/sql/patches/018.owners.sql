@@ -1,4 +1,4 @@
-CREATE DATABASE phabricator_owners;
+CREATE DATABASE IF NOT EXISTS phabricator_owners;
 
 CREATE TABLE phabricator_owners.owners_package (
   id int unsigned not null auto_increment primary key,
