@@ -1,4 +1,4 @@
-CREATE DATABASE phabricator_slowvote;
+CREATE DATABASE IF NOT EXISTS phabricator_slowvote;
 
 CREATE TABLE phabricator_slowvote.slowvote_poll (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,

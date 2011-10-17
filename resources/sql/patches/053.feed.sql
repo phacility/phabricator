@@ -1,4 +1,4 @@
-CREATE DATABASE phabricator_feed;
+CREATE DATABASE IF NOT EXISTS phabricator_feed;
 
 CREATE TABLE phabricator_feed.feed_storydata (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,

@@ -1,4 +1,4 @@
-CREATE DATABASE phabricator_pastebin;
+CREATE DATABASE IF NOT EXISTS phabricator_pastebin;
 
 CREATE TABLE phabricator_pastebin.pastebin_paste (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
