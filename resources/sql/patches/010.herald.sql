@@ -1,4 +1,4 @@
-CREATE DATABASE phabricator_herald;
+CREATE DATABASE IF NOT EXISTS phabricator_herald;
 
 CREATE TABLE phabricator_herald.herald_action (
   id int unsigned not null auto_increment primary key,

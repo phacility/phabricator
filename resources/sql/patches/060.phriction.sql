@@ -1,4 +1,4 @@
-CREATE DATABASE phabricator_phriction;
+CREATE DATABASE IF NOT EXISTS phabricator_phriction;
 
 CREATE TABLE phabricator_phriction.phriction_document (
   id INT UNSIGNED NOT NULL,

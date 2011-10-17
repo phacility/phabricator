@@ -1,4 +1,4 @@
-CREATE DATABASE phabricator_countdown;
+CREATE DATABASE IF NOT EXISTS phabricator_countdown;
 
 CREATE TABLE phabricator_countdown.countdown_timer (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
