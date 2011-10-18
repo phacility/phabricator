@@ -126,8 +126,8 @@ abstract class DiffusionFileContentQuery {
         if ($data->getCommitDetail('authorPHID')) {
           $commit_identifier =
             $commits[$data->getCommitID()]->getCommitIdentifier();
-          $blame_dict[$commit_identifier]['author'] =
-            $handles[$data->getCommitDetail('authorPHID')]->renderLink();
+          $blame_dict[$commit_identifier]['handle'] =
+            $handles[$data->getCommitDetail('authorPHID')];
         }
       }
    }

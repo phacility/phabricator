@@ -223,7 +223,11 @@ class DiffusionBrowseFileController extends DiffusionController {
         $rows = array();
         foreach ($text_list as $k => $line) {
           $rev = $rev_list[$k];
-          $author = $blame_dict[$rev]['author'];
+          if (isset($blame_dict[$rev]['handle'])) {
+            $author = $blame_dict[$rev]['handle']->getName();
+          } else {
+            $author = $blame_dict[$rev]['author'];
+          }
           $rows[] =
             sprintf("%-10s %-20s %s", substr($rev, 0, 7), $author, $line);
         }
@@ -328,7 +332,11 @@ class DiffusionBrowseFileController extends DiffusionController {
               '; width: 2em;">' . $prev_link . '</th>';
           }
 
-          $author_link = $blame_dict[$rev]['author'];
+          if (isset($blame_dict[$rev]['handle'])) {
+            $author_link = $blame_dict[$rev]['handle']->renderLink();
+          } else {
+            $author_link = phutil_escape_html($blame_dict[$rev]['author']);
+          }
           $blame_info =
             $prev_link .
             '<th style="background: '.$color.
