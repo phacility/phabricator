@@ -88,7 +88,7 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
       $diff_number = count($diffs);
       $diff = array_pop($diffs);
 
-      $filename = "D{$revision_id}.{$diff_number}.diff";
+      $filename = "D{$revision_id}.{$diff_number}.patch";
 
       $diff->attachChangesets($diff->loadChangesets());
       // TODO: We could batch this to improve performance.
@@ -107,7 +107,7 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
       $attachments[] = array(
         'data' => $unified_diff,
         'filename' => $filename,
-        'mimetype' => 'text/x-diff; charset=utf-8'
+        'mimetype' => 'text/x-patch; charset=utf-8'
       );
     }
     return $attachments;
