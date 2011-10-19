@@ -41,7 +41,7 @@ class PhabricatorFile extends PhabricatorFileDAO {
       PhabricatorPHIDConstants::PHID_TYPE_FILE);
   }
 
-  public static function newFromPHPUpload($spec, array $params = array()) {
+  public static function readUploadedFileData($spec) {
     if (!$spec) {
       throw new Exception("No file was uploaded!");
     }
@@ -63,6 +63,12 @@ class PhabricatorFile extends PhabricatorFileDAO {
     if (strlen($file_data) != $file_size) {
       throw new Exception("File size disagrees with uploaded size.");
     }
+
+    return $file_data;
+  }
+
+  public static function newFromPHPUpload($spec, array $params = array()) {
+    $file_data = self::readUploadedFileData($spec);
 
     $file_name = nonempty(
       idx($params, 'name'),
