@@ -178,10 +178,12 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
    * @return this
    */
   public function saveAndSend() {
-    $ret = $this->save();
+    $ret = null;
 
     if (PhabricatorEnv::getEnvConfig('metamta.send-immediately')) {
-      $this->sendNow();
+      $ret = $this->sendNow();
+    } else {
+      $ret = $this->save();
     }
 
     return $ret;
@@ -343,8 +345,7 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     } catch (Exception $ex) {
       $this->setStatus(self::STATUS_FAIL);
       $this->setMessage($ex->getMessage());
-      $this->save();
-      return;
+      return $this->save();
     }
 
     if ($this->getRetryCount() < $this->getSimulatedFailureCount()) {
@@ -373,7 +374,7 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       $this->setStatus(self::STATUS_SENT);
     }
 
-    $this->save();
+    return $this->save();
   }
 
   public static function getReadableStatus($status_code) {
