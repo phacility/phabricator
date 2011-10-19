@@ -165,4 +165,25 @@ class DifferentialRevision extends DifferentialDAO {
   public function getUnsubscribedPHIDs() {
     return array_keys($this->getUnsubscribed());
   }
+
+  public function loadReviewedBy() {
+    $reviewer = null;
+
+    if ($this->status == DifferentialRevisionStatus::ACCEPTED ||
+        $this->status == DifferentialRevisionStatus::COMMITTED) {
+      $comments = $this->loadComments();
+      foreach ($comments as $comment) {
+        $action = $comment->getAction();
+        if ($action == DifferentialAction::ACTION_ACCEPT) {
+          $reviewer = $comment->getAuthorPHID();
+        } else if ($action == DifferentialAction::ACTION_REJECT ||
+                   $action == DifferentialAction::ACTION_ABANDON ||
+                   $action == DifferentialAction::ACTION_RETHINK) {
+          $reviewer = null;
+        }
+      }
+    }
+
+    return $reviewer;
+  }
 }

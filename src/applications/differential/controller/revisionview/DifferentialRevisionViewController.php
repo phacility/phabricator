@@ -368,6 +368,7 @@ class DifferentialRevisionViewController extends DifferentialController {
     $viewer_phid = $this->getRequest()->getUser()->getPHID();
     $viewer_is_owner = ($viewer_phid == $revision->getAuthorPHID());
     $viewer_is_reviewer = in_array($viewer_phid, $revision->getReviewers());
+    $viewer_did_accept = ($viewer_phid === $revision->loadReviewedBy());
 
     if ($viewer_is_owner) {
       switch ($revision->getStatus()) {
@@ -403,6 +404,8 @@ class DifferentialRevisionViewController extends DifferentialController {
           break;
         case DifferentialRevisionStatus::ACCEPTED:
           $actions[DifferentialAction::ACTION_REJECT] = true;
+          $actions[DifferentialAction::ACTION_RESIGN] =
+            $viewer_is_reviewer && !$viewer_did_accept;
           break;
         case DifferentialRevisionStatus::COMMITTED:
         case DifferentialRevisionStatus::ABANDONED:

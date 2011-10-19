@@ -24,26 +24,10 @@ final class DifferentialReviewedByFieldSpecification
   protected function didSetRevision() {
     $this->reviewedBy = array();
     $revision = $this->getRevision();
+    $reviewer = $revision->loadReviewedBy();
 
-    $status = $revision->getStatus();
-    if ($status == DifferentialRevisionStatus::ACCEPTED ||
-        $status == DifferentialRevisionStatus::COMMITTED) {
-      $reviewer = null;
-      $comments = $revision->loadComments();
-      foreach ($comments as $comment) {
-        $action = $comment->getAction();
-        if ($action == DifferentialAction::ACTION_ACCEPT) {
-          $reviewer = $comment->getAuthorPHID();
-        } else if ($action == DifferentialAction::ACTION_REJECT ||
-                   $action == DifferentialAction::ACTION_ABANDON ||
-                   $action == DifferentialAction::ACTION_RETHINK) {
-          $reviewer = null;
-        }
-      }
-
-      if ($reviewer) {
-        $this->reviewedBy = array($reviewer);
-      }
+    if ($reviewer) {
+      $this->reviewedBy = array($reviewer);
     }
   }
 

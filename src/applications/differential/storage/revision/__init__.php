@@ -6,6 +6,8 @@
 
 
 
+phutil_require_module('phabricator', 'applications/differential/constants/action');
+phutil_require_module('phabricator', 'applications/differential/constants/revisionstatus');
 phutil_require_module('phabricator', 'applications/differential/storage/base');
 phutil_require_module('phabricator', 'applications/differential/storage/comment');
 phutil_require_module('phabricator', 'applications/differential/storage/diff');
