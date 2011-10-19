@@ -24,7 +24,12 @@ class DifferentialDiffCreateController extends DifferentialController {
 
     if ($request->isFormPost()) {
       $parser = new ArcanistDiffParser();
-      $diff = $request->getStr('diff');
+      $diff = null;
+      try {
+        $diff = PhabricatorFile::readUploadedFileData($_FILES['diff-file']);
+      } catch (Exception $ex) {
+        $diff = $request->getStr('diff');
+      }
       $changes = $parser->parseDiff($diff);
       $diff = DifferentialDiff::newFromRawChanges($changes);
 
@@ -42,17 +47,23 @@ class DifferentialDiffCreateController extends DifferentialController {
     $form = new AphrontFormView();
     $form
       ->setAction('/differential/diff/create/')
+      ->setEncType('multipart/form-data')
       ->setUser($request->getUser())
       ->appendChild(
         '<p class="aphront-form-instructions">The best way to create a '.
         'Differential diff is by using <strong>Arcanist</strong>, but you '.
         'can also just paste a diff (e.g., from <tt>svn diff</tt> or '.
-        '<tt>git diff</tt>) into this box if you really want.</p>')
+        '<tt>git diff</tt>) into this box or upload it as a file if you '.
+        'really want.</p>')
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel('Raw Diff')
           ->setName('diff')
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL))
+      ->appendChild(
+        id(new AphrontFormFileControl())
+          ->setLabel('Raw Diff from file')
+          ->setName('diff-file'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue("Create Diff \xC2\xBB"));
