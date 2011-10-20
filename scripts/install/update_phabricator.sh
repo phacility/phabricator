@@ -25,6 +25,13 @@ fi
 (cd $ROOT/phabricator && git pull && git submodule update --init)
 
 
+### RUN TESTS ##################################################################
+
+# This is an acceptance test that makes sure all symboles can be loaded to
+# avoid issues like missing methods in descendants of abstract base class.
+(cd $ROOT/phabricator && ../arcanist/bin/arc unit src/infrastructure/__tests__/)
+
+
 ### GENERATE DOCUMENTATION #####################################################
 
 # This generates documentation if you have diviner/ checked out. You generally
@@ -37,6 +44,7 @@ then
   (cd $ROOT/arcanist && $ROOT/diviner/bin/diviner .)
   (cd $ROOT/phabricator && $ROOT/diviner/bin/diviner .)
 fi
+
 
 ### CYCLE APACHE AND DAEMONS ###################################################
 

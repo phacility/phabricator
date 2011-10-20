@@ -9,6 +9,7 @@
 phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/diffusion/controller/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/symbol');
+phutil_require_module('phabricator', 'applications/diffusion/request/base');
 phutil_require_module('phabricator', 'applications/repository/storage/arcanistproject');
 phutil_require_module('phabricator', 'applications/repository/storage/repository');
 phutil_require_module('phabricator', 'storage/queryfx');
