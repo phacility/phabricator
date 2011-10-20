@@ -29,7 +29,7 @@ abstract class PhabricatorSlowvoteController extends PhabricatorController {
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x9C\x94");
 
-    $doc_href = PhabricatorEnv::getDoclink('articles/Slowvote_User_Guide.html');
+    $doc_href = PhabricatorEnv::getDoclink('article/Slowvote_User_Guide.html');
     $page->setTabs(
       array(
         'help' => array(
