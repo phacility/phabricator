@@ -48,12 +48,13 @@ class PhabricatorMarkupEngine {
     ));
   }
 
-  public static function newDifferentialMarkupEngine() {
+  public static function newDifferentialMarkupEngine(array $options = array()) {
     return self::newMarkupEngine(array(
       'custom-inline' => PhabricatorEnv::getEnvConfig(
         'differential.custom-remarkup-rules'),
       'custom-block'  => PhabricatorEnv::getEnvConfig(
         'differential.custom-remarkup-block-rules'),
+      'differential.diff' => idx($options, 'differential.diff'),
     ));
   }
 
@@ -75,6 +76,7 @@ class PhabricatorMarkupEngine {
         'remarkup.enable-embedded-youtube'),
       'custom-inline' => array(),
       'custom-block'  => array(),
+      'differential.diff' => null,
       'macros'        => true,
       'uri.allowed-protocols' => PhabricatorEnv::getEnvConfig(
         'uri.allowed-protocols'),
@@ -92,9 +94,19 @@ class PhabricatorMarkupEngine {
     $engine->setConfig(
       'uri.allowed-protocols',
       $options['uri.allowed-protocols']);
+    $engine->setConfig('differential.diff', $options['differential.diff']);
 
     $rules = array();
     $rules[] = new PhutilRemarkupRuleEscapeRemarkup();
+
+    $custom_rule_classes = $options['custom-inline'];
+    if ($custom_rule_classes) {
+      foreach ($custom_rule_classes as $custom_rule_class) {
+        PhutilSymbolLoader::loadClass($custom_rule_class);
+        $rules[] = newv($custom_rule_class, array());
+      }
+    }
+
     if ($options['fileproxy']) {
       $rules[] = new PhabricatorRemarkupRuleProxyImage();
     }
@@ -121,14 +133,6 @@ class PhabricatorMarkupEngine {
     }
 
     $rules[] = new PhabricatorRemarkupRuleMention();
-
-    $custom_rule_classes = $options['custom-inline'];
-    if ($custom_rule_classes) {
-      foreach ($custom_rule_classes as $custom_rule_class) {
-        PhutilSymbolLoader::loadClass($custom_rule_class);
-        $rules[] = newv($custom_rule_class, array());
-      }
-    }
 
     $rules[] = new PhutilRemarkupRuleEscapeHTML();
     $rules[] = new PhutilRemarkupRuleMonospace();

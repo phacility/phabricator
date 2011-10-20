@@ -58,7 +58,9 @@ final class DifferentialRevisionCommentListView extends AphrontView {
 
     require_celerity_resource('differential-revision-comment-list-css');
 
-    $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
+    $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine(array(
+      'differential.diff' => $this->target
+    ));
 
     $inlines = mgroup($this->inlines, 'getCommentID');
 
