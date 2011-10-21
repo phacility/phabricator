@@ -19,6 +19,7 @@
 .maniphest-task-properties {
   font-size: 12px;
   width:    100%;
+  table-layout: fixed;
 }
 
 .maniphest-task-properties tt {

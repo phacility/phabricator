@@ -5,6 +5,7 @@
 .differential-revision-properties {
   font-size: 12px;
   width:    100%;
+  table-layout: fixed;
 }
 
 .differential-revision-properties tt {
@@ -13,7 +14,7 @@
 
 .differential-revision-properties th {
   font-weight:    bold;
-  width:          100px;
+  width:          120px;
   text-align:     right;
   padding:        3px 4px 3px 3px;
   color:          #333333;

@@ -24,6 +24,7 @@
   color: #000000;
   margin: 1em 2em;
   padding: .5em 1.5em;
+  overflow: auto;
 }
 
 .phabricator-remarkup code.remarkup-counterexample {
