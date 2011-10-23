@@ -114,17 +114,23 @@ class DifferentialDiff extends DifferentialDAO {
       $changeset = new DifferentialChangeset();
       $add_lines = 0;
       $del_lines = 0;
-      foreach ($change->getHunks() as $hunk) {
-        $dhunk = new DifferentialHunk();
-        $dhunk->setOldOffset($hunk->getOldOffset());
-        $dhunk->setOldLen($hunk->getOldLength());
-        $dhunk->setNewOffset($hunk->getNewOffset());
-        $dhunk->setNewLen($hunk->getNewLength());
-        $dhunk->setChanges($hunk->getCorpus());
-        $changeset->addUnsavedHunk($dhunk);
-        $add_lines += $hunk->getAddLines();
-        $del_lines += $hunk->getDelLines();
-        $lines += $add_lines + $del_lines;
+      $hunks = $change->getHunks();
+      if ($hunks) {
+        foreach ($hunks as $hunk) {
+          $dhunk = new DifferentialHunk();
+          $dhunk->setOldOffset($hunk->getOldOffset());
+          $dhunk->setOldLen($hunk->getOldLength());
+          $dhunk->setNewOffset($hunk->getNewOffset());
+          $dhunk->setNewLen($hunk->getNewLength());
+          $dhunk->setChanges($hunk->getCorpus());
+          $changeset->addUnsavedHunk($dhunk);
+          $add_lines += $hunk->getAddLines();
+          $del_lines += $hunk->getDelLines();
+          $lines += $add_lines + $del_lines;
+        }
+      } else {
+        // This happens when you add empty files.
+        $changeset->attachHunks(array());
       }
 
       $changeset->setOldFile($change->getOldPath());
