@@ -127,6 +127,7 @@ EOBODY;
     $mailer->addTos($email_phids);
     $mailer->setSubject($subject);
     $mailer->setBody($body);
+    $mailer->setIsBulk(true);
 
     $mailer->addHeader('X-Herald-Rules', $xscript->getXHeraldRulesHeader());
     if ($author_phid) {

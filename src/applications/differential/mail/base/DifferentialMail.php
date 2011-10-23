@@ -106,6 +106,7 @@ abstract class DifferentialMail {
       $template->addHeader('X-Herald-Rules', $this->heraldRulesHeader);
     }
 
+    $template->setIsBulk(true);
     $template->setRelatedPHID($this->getRevision()->getPHID());
 
     $phids = array();

@@ -254,6 +254,7 @@ class ManiphestTransactionEditor {
       ->addHeader('Thread-Topic', 'Maniphest Task '.$task->getID())
       ->setThreadID($thread_id, $is_create)
       ->setRelatedPHID($task->getPHID())
+      ->setIsBulk(true)
       ->setBody($body);
 
     $mails = $reply_handler->multiplexMail(

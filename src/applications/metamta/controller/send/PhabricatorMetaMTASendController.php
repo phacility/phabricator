@@ -32,6 +32,7 @@ class PhabricatorMetaMTASendController extends PhabricatorMetaMTAController {
       $mail->setFrom($request->getUser()->getPHID());
       $mail->setSimulatedFailureCount($request->getInt('failures'));
       $mail->setIsHTML($request->getInt('html'));
+      $mail->setIsBulk($request->getInt('bulk'));
       $mail->save();
       if ($request->getInt('immediately')) {
         $mail->sendNow();
@@ -110,6 +111,10 @@ class PhabricatorMetaMTASendController extends PhabricatorMetaMTAController {
         id(new AphrontFormCheckboxControl())
           ->setLabel('HTML')
           ->addCheckbox('html', '1', 'Send as HTML email.'))
+      ->appendChild(
+        id(new AphrontFormCheckboxControl())
+          ->setLabel('Bulk')
+          ->addCheckbox('bulk', '1', 'Send with bulk email headers.'))
       ->appendChild(
         id(new AphrontFormCheckboxControl())
           ->setLabel('Send Now')

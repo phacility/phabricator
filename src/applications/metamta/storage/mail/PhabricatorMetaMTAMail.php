@@ -152,6 +152,20 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   }
 
   /**
+   * Flag that this is an auto-generated bulk message and should have bulk
+   * headers added to it if appropriate. Broadly, this means some flavor of
+   * "Precedence: bulk" or similar, but is implementation and configuration
+   * dependent.
+   *
+   * @param bool  True if the mail is automated bulk mail.
+   * @return this
+   */
+  public function setIsBulk($is_bulk) {
+    $this->setParam('is-bulk', $is_bulk);
+    return $this;
+  }
+
+  /**
    * Use this method to set an ID used for message threading. MetaMTA will
    * set appropriate headers (Message-ID, In-Reply-To, References and
    * Thread-Index) based on the capabilities of the underlying mailer.
@@ -313,6 +327,13 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
           case 'is-html':
             if ($value) {
               $mailer->setIsHTML(true);
+            }
+            break;
+          case 'is-bulk':
+            if ($value) {
+              if (PhabricatorEnv::getEnvConfig('metamta.precedence-bulk')) {
+                $mailer->addHeader('Precedence', 'bulk');
+              }
             }
             break;
           case 'thread-id':
