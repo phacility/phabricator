@@ -15,6 +15,7 @@ phutil_require_module('phabricator', 'applications/project/storage/project');
 phutil_require_module('phabricator', 'applications/repository/storage/arcanistproject');
 phutil_require_module('phabricator', 'applications/repository/storage/repository');
 phutil_require_module('phabricator', 'applications/typeahead/controller/base');
+phutil_require_module('phabricator', 'storage/queryfx');
 
 phutil_require_module('phutil', 'utils');
 

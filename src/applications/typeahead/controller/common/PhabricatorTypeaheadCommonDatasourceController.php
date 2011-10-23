@@ -85,12 +85,21 @@ class PhabricatorTypeaheadCommonDatasourceController
         'realName',
         'phid');
       if ($query) {
-        // TODO: We probably need to split last names here. Workaround until
-        // we get that up and running is to not enable server-side datasources.
-        $users = id(new PhabricatorUser())->loadColumnsWhere($columns,
-          '(userName LIKE %> OR realName LIKE %>)',
-          $query,
+        $conn_r = id(new PhabricatorUser())->establishConnection('r');
+        $ids = queryfx_all(
+          $conn_r,
+          'SELECT DISTINCT userID FROM %T WHERE token LIKE %>',
+          PhabricatorUser::NAMETOKEN_TABLE,
           $query);
+        $ids = ipull($ids, 'userID');
+        if ($ids) {
+          $users = id(new PhabricatorUser())->loadColumnsWhere(
+            $columns,
+            'id IN (%Ld)',
+            $ids);
+        } else {
+          $users = array();
+        }
       } else {
         $users = id(new PhabricatorUser())->loadColumns($columns);
       }
