@@ -173,3 +173,8 @@ td.phabricator-login-details {
 .handle-status-closed {
   text-decoration: line-through;
 }
+
+.PhabricatorMonospaced {
+  font-family:        "Menlo", "Consolas", "Monaco", monospace;
+  font-size:          10px;
+}
