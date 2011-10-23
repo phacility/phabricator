@@ -61,6 +61,7 @@ class PhabricatorFileAltViewController extends PhabricatorFileController {
     $data = $file->loadFileData();
     $response = new AphrontFileResponse();
     $response->setContent($data);
+    $response->setMimeType($file->getMimeType());
     $response->setCacheDurationInSeconds(60 * 60 * 24 * 30);
 
     return $response;

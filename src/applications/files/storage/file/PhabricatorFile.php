@@ -25,6 +25,7 @@ class PhabricatorFile extends PhabricatorFileDAO {
   protected $mimeType;
   protected $byteSize;
   protected $authorPHID;
+  protected $secretKey;
 
   protected $storageEngine;
   protected $storageFormat;
@@ -222,9 +223,14 @@ class PhabricatorFile extends PhabricatorFileDAO {
   }
 
   public function getViewURI() {
+    if (!$this->getPHID()) {
+      throw new Exception(
+        "You must save a file before you can generate a view URI.");
+    }
+
     $alt = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
     if ($alt) {
-      $path = '/file/alt/'.$this->generateSecretKey().'/'.$this->getPHID().'/';
+      $path = '/file/alt/'.$this->getSecretKey().'/'.$this->getPHID().'/';
       $uri = new PhutilURI($alt);
       $uri->setPath($path);
 
@@ -318,13 +324,17 @@ class PhabricatorFile extends PhabricatorFileDAO {
   }
 
   public function validateSecretKey($key) {
-    return ($key == $this->generateSecretKey());
+    return ($key == $this->getSecretKey());
   }
 
-  private function generateSecretKey() {
-    $file_key = PhabricatorEnv::getEnvConfig('phabricator.file-key');
-    $hash = sha1($this->phid.$this->storageHandle.$file_key);
-    return substr($hash, 0, 20);
+  public function save() {
+    if (!$this->getSecretKey()) {
+      $this->setSecretKey($this->generateSecretKey());
+    }
+    return parent::save();
   }
 
+  public function generateSecretKey() {
+    return Filesystem::readRandomCharacters(20);
+  }
 }

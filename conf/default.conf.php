@@ -406,12 +406,6 @@ return array(
   // addresses.
   'phabricator.mail-key'        => '5ce3e7e8787f6e40dfae861da315a5cdf1018f12',
 
-
-  // This is hashed with other inputs to generate file secret keys. Changing
-  // it will invalidate all file URIs if you have an alternate file domain
-  // configured (see 'security.alternate-file-domain').
-  'phabricator.file-key'        => 'ade8dadc8b4382067069a4d4798112191af8a190',
-
   // Version string displayed in the footer. You probably should leave this
   // alone.
   'phabricator.version'         => 'UNSTABLE',
