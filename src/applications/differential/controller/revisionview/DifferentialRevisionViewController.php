@@ -20,6 +20,10 @@ class DifferentialRevisionViewController extends DifferentialController {
 
   private $revisionID;
 
+  public function shouldRequireLogin() {
+    return !$this->allowsAnonymousAccess();
+  }
+
   public function willProcessRequest(array $data) {
     $this->revisionID = $data['id'];
   }
@@ -28,6 +32,7 @@ class DifferentialRevisionViewController extends DifferentialController {
 
     $request = $this->getRequest();
     $user = $request->getUser();
+    $viewer_is_anonymous = !$user->isLoggedIn();
 
     $revision = id(new DifferentialRevision())->load($this->revisionID);
     if (!$revision) {
@@ -197,7 +202,7 @@ class DifferentialRevisionViewController extends DifferentialController {
 
     $changeset_view = new DifferentialChangesetListView();
     $changeset_view->setChangesets($visible_changesets);
-    $changeset_view->setEditable(true);
+    $changeset_view->setEditable(!$viewer_is_anonymous);
     $changeset_view->setStandaloneViews(true);
     $changeset_view->setRevision($revision);
     $changeset_view->setRenderingReferences($rendering_references);
@@ -221,24 +226,26 @@ class DifferentialRevisionViewController extends DifferentialController {
     $toc_view->setRevisionID($revision->getID());
     $toc_view->setWhitespace($whitespace);
 
-    $draft = id(new PhabricatorDraft())->loadOneWhere(
-      'authorPHID = %s AND draftKey = %s',
-      $user->getPHID(),
-      'differential-comment-'.$revision->getID());
-    if ($draft) {
-      $draft = $draft->getDraft();
-    } else {
-      $draft = null;
+    if (!$viewer_is_anonymous) {
+      $draft = id(new PhabricatorDraft())->loadOneWhere(
+        'authorPHID = %s AND draftKey = %s',
+        $user->getPHID(),
+        'differential-comment-'.$revision->getID());
+      if ($draft) {
+        $draft = $draft->getDraft();
+      } else {
+        $draft = null;
+      }
+
+      $comment_form = new DifferentialAddCommentView();
+      $comment_form->setRevision($revision);
+      $comment_form->setActions($this->getRevisionCommentActions($revision));
+      $comment_form->setActionURI('/differential/comment/save/');
+      $comment_form->setUser($user);
+      $comment_form->setDraft($draft);
+
+      $this->updateViewTime($user->getPHID(), $revision->getPHID());
     }
-
-    $comment_form = new DifferentialAddCommentView();
-    $comment_form->setRevision($revision);
-    $comment_form->setActions($this->getRevisionCommentActions($revision));
-    $comment_form->setActionURI('/differential/comment/save/');
-    $comment_form->setUser($user);
-    $comment_form->setDraft($draft);
-
-    $this->updateViewTime($user->getPHID(), $revision->getPHID());
 
     $pane_id = celerity_generate_unique_node_id();
     Javelin::initBehavior(
@@ -247,19 +254,22 @@ class DifferentialRevisionViewController extends DifferentialController {
         'haunt' => $pane_id,
       ));
 
+    $page_pane = id(new DifferentialPrimaryPaneView())
+      ->setLineWidthFromChangesets($changesets)
+      ->setID($pane_id)
+      ->appendChild(
+        $revision_detail->render().
+        $comment_view->render().
+        $diff_history->render().
+        $warning.
+        $local_view->render().
+        $toc_view->render().
+        $changeset_view->render());
+    if ($comment_form) {
+      $page_pane->appendChild($comment_form->render());
+    }
     return $this->buildStandardPageResponse(
-      id(new DifferentialPrimaryPaneView())
-        ->setLineWidthFromChangesets($changesets)
-        ->setID($pane_id)
-        ->appendChild(
-          $revision_detail->render().
-          $comment_view->render().
-          $diff_history->render().
-          $warning.
-          $local_view->render().
-          $toc_view->render().
-          $changeset_view->render().
-          $comment_form->render()),
+      $page_pane,
       array(
         'title' => 'D'.$revision->getID().' '.$revision->getTitle(),
       ));
@@ -296,6 +306,7 @@ class DifferentialRevisionViewController extends DifferentialController {
     $viewer_is_owner = ($revision->getAuthorPHID() == $viewer_phid);
     $viewer_is_reviewer = in_array($viewer_phid, $revision->getReviewers());
     $viewer_is_cc = in_array($viewer_phid, $revision->getCCPHIDs());
+    $viewer_is_anonymous = !$this->getRequest()->getUser()->isLoggedIn();
     $status = $revision->getStatus();
     $revision_id = $revision->getID();
     $revision_phid = $revision->getPHID();
@@ -310,51 +321,53 @@ class DifferentialRevisionViewController extends DifferentialController {
       );
     }
 
-    if (!$viewer_is_owner && !$viewer_is_reviewer) {
-      $action = $viewer_is_cc ? 'rem' : 'add';
-      $links[] = array(
-        'class'   => $viewer_is_cc ? 'subscribe-rem' : 'subscribe-add',
-        'href'    => "/differential/subscribe/{$action}/{$revision_id}/",
-        'name'    => $viewer_is_cc ? 'Unsubscribe' : 'Subscribe',
-        'instant' => true,
-      );
-    } else {
-      $links[] = array(
-        'class' => 'subscribe-rem unavailable',
-        'name'  => 'Automatically Subscribed',
-      );
-    }
+    if (!$viewer_is_anonymous) {
+      if (!$viewer_is_owner && !$viewer_is_reviewer) {
+        $action = $viewer_is_cc ? 'rem' : 'add';
+        $links[] = array(
+          'class'   => $viewer_is_cc ? 'subscribe-rem' : 'subscribe-add',
+          'href'    => "/differential/subscribe/{$action}/{$revision_id}/",
+          'name'    => $viewer_is_cc ? 'Unsubscribe' : 'Subscribe',
+          'instant' => true,
+        );
+      } else {
+        $links[] = array(
+          'class' => 'subscribe-rem unavailable',
+          'name'  => 'Automatically Subscribed',
+        );
+      }
 
-    require_celerity_resource('phabricator-object-selector-css');
-    require_celerity_resource('javelin-behavior-phabricator-object-selector');
+      require_celerity_resource('phabricator-object-selector-css');
+      require_celerity_resource('javelin-behavior-phabricator-object-selector');
 
-    $links[] = array(
-      'class' => 'action-dependencies',
-      'name'  => 'Edit Dependencies',
-      'href'  => "/search/attach/{$revision_phid}/DREV/dependencies/",
-      'sigil' => 'workflow',
-    );
-
-    if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
       $links[] = array(
-        'class' => 'attach-maniphest',
-        'name'  => 'Edit Maniphest Tasks',
-        'href'  => "/search/attach/{$revision_phid}/TASK/",
+        'class' => 'action-dependencies',
+        'name'  => 'Edit Dependencies',
+        'href'  => "/search/attach/{$revision_phid}/DREV/dependencies/",
         'sigil' => 'workflow',
       );
+
+      if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
+        $links[] = array(
+          'class' => 'attach-maniphest',
+          'name'  => 'Edit Maniphest Tasks',
+          'href'  => "/search/attach/{$revision_phid}/TASK/",
+          'sigil' => 'workflow',
+        );
+      }
+
+      $links[] = array(
+        'class' => 'transcripts-metamta',
+        'name'  => 'MetaMTA Transcripts',
+        'href'  => "/mail/?phid={$revision_phid}",
+      );
+
+      $links[] = array(
+        'class' => 'transcripts-herald',
+        'name'  => 'Herald Transcripts',
+        'href'  => "/herald/transcript/?phid={$revision_phid}",
+      );
     }
-
-    $links[] = array(
-      'class' => 'transcripts-metamta',
-      'name'  => 'MetaMTA Transcripts',
-      'href'  => "/mail/?phid={$revision_phid}",
-    );
-
-    $links[] = array(
-      'class' => 'transcripts-herald',
-      'name'  => 'Herald Transcripts',
-      'href'  => "/herald/transcript/?phid={$revision_phid}",
-    );
 
     return $links;
   }

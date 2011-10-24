@@ -19,6 +19,10 @@
 class DifferentialChangesetViewController extends DifferentialController {
 
 
+  public function shouldRequireLogin() {
+    return !$this->allowsAnonymousAccess();
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
 

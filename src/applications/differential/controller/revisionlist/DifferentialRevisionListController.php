@@ -20,6 +20,10 @@ class DifferentialRevisionListController extends DifferentialController {
 
   private $filter;
 
+  public function shouldRequireLogin() {
+    return !$this->allowsAnonymousAccess();
+  }
+
   public function willProcessRequest(array $data) {
     $this->filter = idx($data, 'filter');
   }
@@ -27,6 +31,7 @@ class DifferentialRevisionListController extends DifferentialController {
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
+    $viewer_is_anonymous = !$user->isLoggedIn();
 
     if ($request->isFormPost()) {
       $phid_arr = $request->getArr('view_user');
@@ -35,72 +40,77 @@ class DifferentialRevisionListController extends DifferentialController {
         ->setURI($request->getRequestURI()->alter('phid', $view_target));
     }
 
-    $filters = array(
-      'User Revisions',
-      'active' => array(
-        'name'  => 'Active Revisions',
-        'queries' => array(
-          array(
-            'query'
-              => DifferentialRevisionListData::QUERY_NEED_ACTION_FROM_SELF,
-            'header' => 'Action Required',
-            'nodata' => 'You have no revisions requiring action.',
-          ),
-          array(
-            'query'
-              => DifferentialRevisionListData::QUERY_NEED_ACTION_FROM_OTHERS,
-            'header' => 'Waiting on Others',
-            'nodata' => 'You have no revisions waiting on others',
-          ),
-        ),
-      ),
-      'open' => array(
-        'name' => 'Open Revisions',
-        'queries' => array(
-          array(
-            'query' => DifferentialRevisionListData::QUERY_OPEN_OWNED,
-            'header' => 'Your Open Revisions',
+    $filters = array();
+    if (!$viewer_is_anonymous) {
+      $filters = array(
+        'User Revisions',
+        'active' => array(
+          'name'  => 'Active Revisions',
+          'queries' => array(
+            array(
+              'query'
+                => DifferentialRevisionListData::QUERY_NEED_ACTION_FROM_SELF,
+              'header' => 'Action Required',
+              'nodata' => 'You have no revisions requiring action.',
+            ),
+            array(
+              'query'
+                => DifferentialRevisionListData::QUERY_NEED_ACTION_FROM_OTHERS,
+              'header' => 'Waiting on Others',
+              'nodata' => 'You have no revisions waiting on others',
+            ),
           ),
         ),
-      ),
-      'reviews' => array(
-        'name' => 'Open Reviews',
-        'queries' => array(
-          array(
-            'query' => DifferentialRevisionListData::QUERY_OPEN_REVIEWER,
-            'header' => 'Your Open Reviews',
+        'open' => array(
+          'name' => 'Open Revisions',
+          'queries' => array(
+            array(
+              'query' => DifferentialRevisionListData::QUERY_OPEN_OWNED,
+              'header' => 'Your Open Revisions',
+            ),
           ),
         ),
-      ),
-      'all' => array(
-        'name' => 'All Revisions',
-        'queries' => array(
-          array(
-            'query' => DifferentialRevisionListData::QUERY_OWNED,
-            'header' => 'Your Revisions',
+        'reviews' => array(
+          'name' => 'Open Reviews',
+          'queries' => array(
+            array(
+              'query' => DifferentialRevisionListData::QUERY_OPEN_REVIEWER,
+              'header' => 'Your Open Reviews',
+            ),
           ),
         ),
-      ),
-      'related' => array(
-        'name' => 'All Revisions and Reviews',
-        'queries' => array(
-          array(
-            'query' => DifferentialRevisionListData::QUERY_OWNED_OR_REVIEWER,
-            'header' => 'Your Revisions and Reviews',
+        'all' => array(
+          'name' => 'All Revisions',
+          'queries' => array(
+            array(
+              'query' => DifferentialRevisionListData::QUERY_OWNED,
+              'header' => 'Your Revisions',
+            ),
           ),
         ),
-      ),
-      'updates' => array(
-        'name' => 'Updates',
-        'queries' => array(
-          array(
-            'query' => DifferentialRevisionListData::QUERY_UPDATED_SINCE,
-            'header' =>
-              'Diffs that have been updated since you\'ve last viewed them',
+        'related' => array(
+          'name' => 'All Revisions and Reviews',
+          'queries' => array(
+            array(
+              'query' => DifferentialRevisionListData::QUERY_OWNED_OR_REVIEWER,
+              'header' => 'Your Revisions and Reviews',
+            ),
           ),
         ),
-      ),
-      '<hr />',
+        'updates' => array(
+          'name' => 'Updates',
+          'queries' => array(
+            array(
+              'query' => DifferentialRevisionListData::QUERY_UPDATED_SINCE,
+              'header' =>
+                'Diffs that have been updated since you\'ve last viewed them',
+            ),
+          ),
+        ),
+        '<hr />'
+      );
+    }
+    $filters = array_merge($filters, array(
       'All Revisions',
       'allopen' => array(
         'name' => 'Open',
@@ -112,10 +122,14 @@ class DifferentialRevisionListController extends DifferentialController {
           ),
         ),
       ),
-    );
+    ));
 
     if (empty($filters[$this->filter])) {
-      $this->filter = 'active';
+      if (!$viewer_is_anonymous) {
+        $this->filter = 'active';
+      } else {
+        $this->filter = 'allopen';
+      }
     }
 
     $view_phid = nonempty($request->getStr('phid'), $user->getPHID());
