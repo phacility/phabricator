@@ -18,9 +18,15 @@
 
 abstract class DifferentialController extends PhabricatorController {
 
+  protected function allowsAnonymousAccess() {
+    return PhabricatorEnv::getEnvConfig('differential.anonymous-access');
+  }
+
   public function buildStandardPageResponse($view, array $data) {
 
     require_celerity_resource('differential-core-view-css');
+
+    $viewer_is_anonymous = !$this->getRequest()->getUser()->isLoggedIn();
 
     $page = $this->buildStandardPageView();
 
@@ -29,18 +35,22 @@ abstract class DifferentialController extends PhabricatorController {
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x9A\x99");
     $page->appendChild($view);
-    $page->setTabs(
-      array(
-        'revisions' => array(
-          'name' => 'Revisions',
-          'href' => '/differential/',
-        ),
+    $tabs = array(
+      'revisions' => array(
+        'name' => 'Revisions',
+        'href' => '/differential/',
+      )
+    );
+    if (!$viewer_is_anonymous) {
+      $tabs = array_merge($tabs, array(
         'create' => array(
           'name' => 'Create Diff',
           'href' => '/differential/diff/create/',
-        ),
-      ),
-      idx($data, 'tab'));
+        )
+      ));
+    }
+    $page->setTabs($tabs, idx($data, 'tab'));
+    $page->setIsLoggedOut($viewer_is_anonymous);
 
     $response = new AphrontWebpageResponse();
     return $response->setContent($page->render());

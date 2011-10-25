@@ -570,6 +570,11 @@ return array(
   // not actually be receiving thorough review.
   'differential.enable-email-accept' => false,
 
+  // If you set this to true, users won't need to login to view differential
+  // revisions.  Anonymous users will have read-only access and won't be able to
+  // interact with the revisions.
+  'differential.anonymous-access' => false,
+
 
 // -- Maniphest ------------------------------------------------------------- //
 
