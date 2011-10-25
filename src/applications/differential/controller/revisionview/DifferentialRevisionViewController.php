@@ -378,7 +378,9 @@ class DifferentialRevisionViewController extends DifferentialController {
       DifferentialAction::ACTION_COMMENT => true,
     );
 
-    $viewer_phid = $this->getRequest()->getUser()->getPHID();
+    $viewer = $this->getRequest()->getUser();
+    $viewer_phid = $viewer->getPHID();
+    $viewer_is_admin =  $viewer->getIsAdmin();
     $viewer_is_owner = ($viewer_phid == $revision->getAuthorPHID());
     $viewer_is_reviewer = in_array($viewer_phid, $revision->getReviewers());
     $viewer_did_accept = ($viewer_phid === $revision->loadReviewedBy());
@@ -407,15 +409,18 @@ class DifferentialRevisionViewController extends DifferentialController {
     } else {
       switch ($revision->getStatus()) {
         case DifferentialRevisionStatus::NEEDS_REVIEW:
+          $actions[DifferentialAction::ACTION_ABANDON] = $viewer_is_admin;
           $actions[DifferentialAction::ACTION_ACCEPT] = true;
           $actions[DifferentialAction::ACTION_REJECT] = true;
           $actions[DifferentialAction::ACTION_RESIGN] = $viewer_is_reviewer;
           break;
         case DifferentialRevisionStatus::NEEDS_REVISION:
+          $actions[DifferentialAction::ACTION_ABANDON] = $viewer_is_admin;
           $actions[DifferentialAction::ACTION_ACCEPT] = true;
           $actions[DifferentialAction::ACTION_RESIGN] = $viewer_is_reviewer;
           break;
         case DifferentialRevisionStatus::ACCEPTED:
+          $actions[DifferentialAction::ACTION_ABANDON] = $viewer_is_admin;
           $actions[DifferentialAction::ACTION_REJECT] = true;
           $actions[DifferentialAction::ACTION_RESIGN] =
             $viewer_is_reviewer && !$viewer_did_accept;

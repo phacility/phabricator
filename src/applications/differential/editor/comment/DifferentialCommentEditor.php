@@ -98,7 +98,9 @@ class DifferentialCommentEditor {
     $revision = $this->revision;
     $action = $this->action;
     $actor_phid = $this->actorPHID;
+    $actor = id(new PhabricatorUser())->loadOneWhere('PHID = %s', $actor_phid);
     $actor_is_author = ($actor_phid == $revision->getAuthorPHID());
+    $actor_is_admin = $actor->getIsAdmin();
     $revision_status = $revision->getStatus();
 
     $revision->loadRelationships();
@@ -128,7 +130,7 @@ class DifferentialCommentEditor {
         break;
 
       case DifferentialAction::ACTION_ABANDON:
-        if (!$actor_is_author) {
+        if (!($actor_is_author || $actor_is_admin)) {
           throw new Exception('You can only abandon your revisions.');
         }
         if ($revision_status == DifferentialRevisionStatus::COMMITTED) {
