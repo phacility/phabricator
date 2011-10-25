@@ -35,6 +35,18 @@ class PhabricatorStandardPageView extends AphrontPageView {
     return $this;
   }
 
+  public function setIsLoggedOut($is_logged_out) {
+    if ($is_logged_out) {
+      $this->tabs = array_merge($this->tabs, array(
+        'login' => array(
+          'name' => 'Login',
+          'href' => '/login/'
+        )
+      ));
+    }
+    return $this;
+  }
+
   public function getIsAdminInterface() {
     return $this->isAdminInterface;
   }

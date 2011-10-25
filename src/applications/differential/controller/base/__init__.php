@@ -9,6 +9,7 @@
 phutil_require_module('phabricator', 'aphront/response/webpage');
 phutil_require_module('phabricator', 'applications/base/controller/base');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
+phutil_require_module('phabricator', 'infrastructure/env');
 
 phutil_require_module('phutil', 'utils');
 

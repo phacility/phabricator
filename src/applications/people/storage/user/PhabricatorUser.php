@@ -86,6 +86,10 @@ class PhabricatorUser extends PhabricatorUserDAO {
     return $this;
   }
 
+  public function isLoggedIn() {
+    return !($this->getPHID() === null);
+  }
+
   public function save() {
     if (!$this->getConduitCertificate()) {
       $this->setConduitCertificate($this->generateConduitCertificate());
