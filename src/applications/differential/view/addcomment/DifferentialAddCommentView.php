@@ -69,11 +69,6 @@ final class DifferentialAddCommentView extends AphrontView {
 
     $revision = $this->revision;
 
-    $actions = array();
-    foreach ($this->actions as $action) {
-      $actions[$action] = DifferentialAction::getActionVerb($action);
-    }
-
     $form = new AphrontFormView();
     $form
       ->setUser($this->user)
@@ -84,7 +79,7 @@ final class DifferentialAddCommentView extends AphrontView {
           ->setLabel('Action')
           ->setName('action')
           ->setID('comment-action')
-          ->setOptions($actions))
+          ->setOptions($this->actions))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setLabel('Add Reviewers')
