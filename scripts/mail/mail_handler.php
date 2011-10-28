@@ -60,7 +60,15 @@ foreach ($parser->getAttachments() as $attachment) {
     ));
   $attachments[] = $file->getPHID();
 }
-$received->setAttachments($attachments);
-$received->save();
 
-$received->processReceivedMail();
+try {
+  $received->setAttachments($attachments);
+  $received->save();
+  $received->processReceivedMail();
+} catch (Exception $e) {
+  $received
+    ->setMessage('EXCEPTION: '.$e->getMessage())
+    ->save();
+}
+
+
