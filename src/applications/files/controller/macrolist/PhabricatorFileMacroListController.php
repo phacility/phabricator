@@ -43,12 +43,16 @@ class PhabricatorFileMacroListController extends PhabricatorFileController {
     $pager->setURI($request->getRequestURI(), 'page');
 
     $file_phids = mpull($macros, 'getFilePHID');
-    $files = id(new PhabricatorFile())->loadAllWhere(
-      "phid IN (%Ls)",
-      $file_phids);
-    $author_phids = mpull($files, 'getAuthorPHID', 'getPHID');
-    $handles = id(new PhabricatorObjectHandleData($author_phids))
-      ->loadHandles();
+
+    $files = array();
+    if ($file_phids) {
+      $files = id(new PhabricatorFile())->loadAllWhere(
+        "phid IN (%Ls)",
+        $file_phids);
+      $author_phids = mpull($files, 'getAuthorPHID', 'getPHID');
+      $handles = id(new PhabricatorObjectHandleData($author_phids))
+        ->loadHandles();
+    }
 
     $rows = array();
     foreach ($macros as $macro) {
