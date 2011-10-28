@@ -20,6 +20,7 @@ final class DiffusionSvnDiffQuery extends DiffusionDiffQuery {
 
   protected function executeQuery() {
     $drequest = $this->getRequest();
+    $repository = $drequest->getRepository();
 
     if (!$drequest->getRawCommit()) {
       $effective_commit = $this->getEffectiveCommit();
@@ -111,6 +112,12 @@ final class DiffusionSvnDiffQuery extends DiffusionDiffQuery {
     $raw_diff = $engine->generateRawDiffFromFileContent($old_data, $new_data);
 
     $parser = new ArcanistDiffParser();
+
+    $try_encoding = $repository->getDetail('encoding');
+    if ($try_encoding) {
+      $parser->setTryEncoding($try_encoding);
+    }
+
     $parser->setDetectBinaryFiles(true);
 
     $arcanist_changes = DiffusionPathChange::convertToArcanistChanges(

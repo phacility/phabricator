@@ -113,6 +113,7 @@ class PhabricatorRepositoryEditController
       }
 
       $repository->setDetail('description', $request->getStr('description'));
+      $repository->setDetail('encoding', $request->getStr('encoding'));
 
       if (!$errors) {
         $repository->save();
@@ -133,6 +134,9 @@ class PhabricatorRepositoryEditController
       $error_view->appendChild(
         'Repository changes were saved.');
     }
+
+    $encoding_doc_link = PhabricatorEnv::getDoclink(
+        'article/User_Guide:_UTF-8_and_Character_Encoding.html');
 
     $form = new AphrontFormView();
     $form
@@ -156,6 +160,21 @@ class PhabricatorRepositoryEditController
           ->setLabel('Callsign')
           ->setName('callsign')
           ->setValue($repository->getCallsign()))
+      ->appendChild('
+        <p class="aphront-form-instructions">'.
+          'If source code in this repository uses a character '.
+          'encoding other than UTF-8 (for example, ISO-8859-1), '.
+          'specify it here. You can usually leave this field blank. '.
+          'See User Guide: '.
+          '<a href="'.$encoding_doc_link.'">'.
+            'UTF-8 and Character Encoding'.
+          '</a> for more information.'.
+        '</p>')
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel('Encoding')
+          ->setName('encoding')
+          ->setValue($repository->getDetail('encoding')))
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel('Type')

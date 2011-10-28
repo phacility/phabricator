@@ -76,6 +76,12 @@ final class DiffusionGitDiffQuery extends DiffusionDiffQuery {
     }
 
     $parser = new ArcanistDiffParser();
+
+    $try_encoding = $repository->getDetail('encoding');
+    if ($try_encoding) {
+      $parser->setTryEncoding($try_encoding);
+    }
+
     $parser->setDetectBinaryFiles(true);
     $changes = $parser->parseDiff($raw_diff);
 
