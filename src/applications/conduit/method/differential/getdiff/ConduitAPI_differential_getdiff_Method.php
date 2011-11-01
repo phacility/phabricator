@@ -43,6 +43,10 @@ class ConduitAPI_differential_getdiff_Method extends ConduitAPIMethod {
     );
   }
 
+  public function shouldRequireAuthentication() {
+    return !PhabricatorEnv::getEnvConfig('differential.anonymous-access');
+  }
+
   protected function execute(ConduitAPIRequest $request) {
     $diff = null;
 

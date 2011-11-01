@@ -10,6 +10,7 @@ phutil_require_module('phabricator', 'applications/conduit/method/base');
 phutil_require_module('phabricator', 'applications/conduit/protocol/exception');
 phutil_require_module('phabricator', 'applications/differential/storage/diff');
 phutil_require_module('phabricator', 'applications/differential/storage/revision');
+phutil_require_module('phabricator', 'infrastructure/env');
 
 phutil_require_module('phutil', 'utils');
 
