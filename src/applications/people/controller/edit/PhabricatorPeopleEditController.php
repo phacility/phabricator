@@ -121,6 +121,7 @@ class PhabricatorPeopleEditController extends PhabricatorPeopleController {
     $errors = array();
 
     $welcome_checked = true;
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 
     $request = $this->getRequest();
     if ($request->isFormPost()) {
@@ -196,10 +197,16 @@ After you have set a password, you can login in the future by going here:
 
   {$base_uri}
 
+EOBODY;
+
+              if (!$is_serious) {
+                $body .= <<<EOBODY
 Love,
 Phabricator
 
 EOBODY;
+              }
+
               $mail = id(new PhabricatorMetaMTAMail())
                 ->addTos(array($user->getPHID()))
                 ->setSubject('[Phabricator] Welcome to Phabricator')

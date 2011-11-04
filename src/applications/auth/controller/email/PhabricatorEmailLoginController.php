@@ -33,6 +33,8 @@ class PhabricatorEmailLoginController extends PhabricatorAuthController {
     $e_captcha = true;
     $errors = array();
 
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+
     if ($request->isFormPost()) {
       $e_email = null;
       $e_captcha = 'Again';
@@ -65,7 +67,15 @@ class PhabricatorEmailLoginController extends PhabricatorAuthController {
 
         if (!$errors) {
           $uri = $target_user->getEmailLoginURI();
-          $body = <<<EOBODY
+          if ($is_serious) {
+            $body = <<<EOBODY
+You can use this link to reset your Phabricator password:
+
+  {$uri}
+
+EOBODY;
+          } else {
+            $body = <<<EOBODY
 Condolences on forgetting your password. You can use this link to reset it:
 
   {$uri}
@@ -78,6 +88,7 @@ Best Wishes,
 Phabricator
 
 EOBODY;
+          }
 
           $mail = new PhabricatorMetaMTAMail();
           $mail->setSubject('[Phabricator] Password Reset');

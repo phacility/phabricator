@@ -334,6 +334,14 @@ class ManiphestTaskDetailController extends ManiphestController {
 
     $panel_id = celerity_generate_unique_node_id();
 
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+
+    if ($is_serious) {
+      // Prevent tasks from being closed "out of spite" in serious business
+      // installs.
+      unset($resolution_types[ManiphestTaskStatus::STATUS_CLOSED_SPITE]);
+    }
+
     $comment_form = new AphrontFormView();
     $comment_form
       ->setUser($user)
@@ -405,7 +413,7 @@ class ManiphestTaskDetailController extends ManiphestController {
           ->setActivatedClass('aphront-panel-view-drag-and-drop'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Avast!'));
+          ->setValue($is_serious ? 'Submit' : 'Avast!'));
 
     $control_map = array(
       ManiphestTransactionType::TYPE_STATUS   => 'resolution',
@@ -453,7 +461,7 @@ class ManiphestTaskDetailController extends ManiphestController {
     $comment_panel->appendChild($comment_form);
     $comment_panel->setID($panel_id);
     $comment_panel->addClass('aphront-panel-accent');
-    $comment_panel->setHeader('Weigh In');
+    $comment_panel->setHeader($is_serious ? 'Add Comment' : 'Weigh In');
 
     $preview_panel =
       '<div class="aphront-panel-preview">
