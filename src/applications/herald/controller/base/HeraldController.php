@@ -29,25 +29,35 @@ abstract class HeraldController extends PhabricatorController {
 
     $doclink = PhabricatorEnv::getDoclink('article/Herald_User_Guide.html');
 
-    $page->setTabs(
-      array(
-        'rules' => array(
-          'href' => '/herald/',
-          'name' => 'Rules',
-        ),
-        'test' => array(
-          'href' => '/herald/test/',
-          'name' => 'Test Console',
-        ),
-        'transcripts' => array(
-          'href' => '/herald/transcript/',
-          'name' => 'Transcripts',
-        ),
-        'help' => array(
-          'href' => $doclink,
-          'name' => 'Help',
-        ),
+    $tabs = array(
+      'rules' => array(
+        'href' => '/herald/',
+        'name' => 'Rules',
       ),
+      'test' => array(
+        'href' => '/herald/test/',
+        'name' => 'Test Console',
+      ),
+      'transcripts' => array(
+        'href' => '/herald/transcript/',
+        'name' => 'Transcripts',
+      ),
+      'help' => array(
+        'href' => $doclink,
+        'name' => 'Help',
+      ),
+    );
+
+    $user = $this->getRequest()->getUser();
+    if ($user->getIsAdmin()) {
+      $tabs['all'] = array(
+        'href' => '/herald/all',
+        'name' => 'All Rules',
+      );
+    }
+
+    $page->setTabs(
+      $tabs,
       idx($data, 'tab'));
 
     $response = new AphrontWebpageResponse();

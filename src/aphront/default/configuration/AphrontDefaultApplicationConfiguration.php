@@ -274,6 +274,10 @@ class AphrontDefaultApplicationConfiguration
         'rule/(?:(?P<id>\d+)/)?$' => 'HeraldRuleController',
         'delete/(?P<id>\d+)/$' => 'HeraldDeleteController',
         'test/$' => 'HeraldTestConsoleController',
+        'all/' => array(
+          '$' => 'HeraldAllRulesController',
+          'view/(?P<view>[^/]+)/$' => 'HeraldAllRulesController',
+        ),
         'transcript/$' => 'HeraldTranscriptListController',
         'transcript/(?P<id>\d+)/(?:(?P<filter>\w+)/)?$'
           => 'HeraldTranscriptController',

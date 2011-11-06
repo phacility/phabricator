@@ -36,7 +36,7 @@ class HeraldRuleController extends HeraldController {
       if (!$rule) {
         return new Aphront404Response();
       }
-      if ($rule->getAuthorPHID() != $user->getPHID()) {
+      if ($rule->getAuthorPHID() != $user->getPHID() && !$user->getIsAdmin()) {
         throw new Exception("You don't own this rule and can't edit it.");
       }
     } else {

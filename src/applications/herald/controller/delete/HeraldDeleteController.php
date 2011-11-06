@@ -34,7 +34,7 @@ class HeraldDeleteController extends HeraldController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    if ($user->getPHID() != $rule->getAuthorPHID()) {
+    if ($user->getPHID() != $rule->getAuthorPHID() && !$user->getIsAdmin()) {
       return new Aphront400Response();
     }
 

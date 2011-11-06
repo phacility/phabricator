@@ -44,64 +44,13 @@ class HeraldHomeController extends HeraldController {
     $handles = id(new PhabricatorObjectHandleData($need_phids))
       ->loadHandles();
 
-    $type = 'differential';
-
-    $rows = array();
-    foreach ($rules as $rule) {
-      $owner = $handles[$rule->getAuthorPHID()]->renderLink();
-
-      $name = phutil_render_tag(
-        'a',
-        array(
-          'href' => '/herald/rule/'.$rule->getID().'/',
-        ),
-        phutil_escape_html($rule->getName()));
-
-      $delete = 'delete';
-      $delete = javelin_render_tag(
-        'a',
-        array(
-          'href' => '/herald/delete/'.$rule->getID().'/',
-          'sigil' => 'workflow',
-          'class' => 'button small grey',
-        ),
-        'Delete');
-
-      $rows[] = array(
-        $map[$rule->getContentType()],
-        $owner,
-        $name,
-        $delete,
-      );
-    }
-
-    $rules_for = phutil_escape_html($map[$this->view]);
-
-    $table = new AphrontTableView($rows);
-    $table->setNoDataString(
-      "No matching subscription rules for {$rules_for}.");
-
-    $table->setHeaders(
-      array(
-        'Type',
-        'Owner',
-        'Rule Name',
-        '',
-      ));
-    $table->setColumnClasses(
-      array(
-        '',
-        '',
-        'wide wrap pri',
-        'action'
-      ));
-
-    $panel = new AphrontPanelView();
-    $panel->setHeader("Herald Rules for {$rules_for}");
-    $panel->setCreateButton(
-      'Create New Herald Rule',
-      '/herald/new/'.$this->view.'/');
-    $panel->appendChild($table);
+    $list_view = id(new HeraldRuleListView())
+      ->setRules($rules)
+      ->setHandles($handles)
+      ->setMap($map)
+      ->setAllowCreation(true)
+      ->setView($this->view);
+    $panel = $list_view->render();
 
     $sidenav = new AphrontSideNavView();
     $sidenav->appendChild($panel);
