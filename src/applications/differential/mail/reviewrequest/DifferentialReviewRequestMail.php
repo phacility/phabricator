@@ -104,10 +104,10 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
       $bundle = ArcanistBundle::newFromChanges($changes);
       $unified_diff = $bundle->toUnifiedDiff();
 
-      $attachments[] = array(
-        'data' => $unified_diff,
-        'filename' => $filename,
-        'mimetype' => 'text/x-patch; charset=utf-8'
+      $attachments[] = new PhabricatorMetaMTAAttachment(
+        $unified_diff,
+        $filename,
+        'text/x-patch; charset=utf-8'
       );
     }
     return $attachments;

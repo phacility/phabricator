@@ -20,5 +20,6 @@ final class PhabricatorEventType extends PhabricatorEventConstants {
 
   const TYPE_ALL                    = '*';
   const TYPE_MANIPHEST_WILLEDITTASK = 'maniphest.willEditTask';
+  const TYPE_DIFFERENTIAL_WILLSENDMAIL = 'differential.willSendMail';
 
 }

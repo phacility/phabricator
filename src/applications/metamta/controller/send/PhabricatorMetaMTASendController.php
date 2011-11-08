@@ -34,10 +34,11 @@ class PhabricatorMetaMTASendController extends PhabricatorMetaMTAController {
       if ($files) {
         foreach ($files as $phid) {
           $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $phid);
-          $mail->addAttachment(
+          $mail->addAttachment(new PhabricatorMetaMTAAttachment(
             $file->loadFileData(),
             $file->getName(),
-            $file->getMimeType());
+            $file->getMimeType()
+          ));
         }
       }
 

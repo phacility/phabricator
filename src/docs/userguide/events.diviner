@@ -25,3 +25,10 @@ or alter the edit. Data available on this event:
   - ##new## A boolean indicating if this task is being created.
   - ##mail## If this edit originates from email, the
     @{class:PhabricatorMetaMTAReceivedMail} object.
+
+== PhabricatorEventType::TYPE_DIFFERENTIAL_WILLSENDMAIL ==
+
+This event is dispatche before Differential sends an email, and allows you to
+edit the message that will be sent.  Data available on this event:
+
+  - ##mail## The {@class:PhabricatorMetaMTAMail} being edited.

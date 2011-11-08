@@ -104,12 +104,17 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this;
   }
 
-  public function addAttachment($data, $filename, $mimetype) {
-    $this->parameters['attachments'][] = array(
-      'data' => $data,
-      'filename' => $filename,
-      'mimetype' => $mimetype
-    );
+  public function addAttachment(PhabricatorMetaMTAAttachment $attachment) {
+    $this->parameters['attachments'][] = $attachment;
+    return $this;
+  }
+
+  public function getAttachments() {
+    return $this->getParam('attachments');
+  }
+
+  public function setAttachments(array $attachments) {
+    $this->setParam('attachments', $attachments);
     return $this;
   }
 
@@ -312,9 +317,9 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
           case 'attachments':
             foreach ($value as $attachment) {
               $mailer->addAttachment(
-                $attachment['data'],
-                $attachment['filename'],
-                $attachment['mimetype']
+                $attachment->getData(),
+                $attachment->getFileName(),
+                $attachment->getMimeType()
               );
             }
             break;

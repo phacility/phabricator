@@ -90,13 +90,7 @@ abstract class DifferentialMail {
       ->setParentMessageID($this->parentMessageID)
       ->addHeader('Thread-Topic', $this->getRevision()->getTitle());
 
-    foreach ($attachments as $attachment) {
-      $template->addAttachment(
-        $attachment['data'],
-        $attachment['filename'],
-        $attachment['mimetype']
-      );
-    }
+    $template->setAttachments($attachments);
 
     $template->setThreadID(
       $this->getThreadID(),
@@ -119,6 +113,16 @@ abstract class DifferentialMail {
     $phids = array_keys($phids);
 
     $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+
+    $event = new PhabricatorEvent(
+      PhabricatorEventType::TYPE_DIFFERENTIAL_WILLSENDMAIL,
+      array(
+        'mail' => $template,
+      )
+    );
+    PhabricatorEventEngine::dispatchEvent($event);
+
+    $template = $event->getValue('mail');
 
     $mails = $reply_handler->multiplexMail(
       $template,
@@ -177,14 +181,8 @@ EOTEXT;
 
   /**
    * You can override this method in a subclass and return array of attachments
-   * to be sent with the email.  Each attachment is a dictionary with 'data',
-   * 'filename' and 'mimetype' keys.  For example:
-   *
-   *   array(
-   *     'data' => 'some text',
-   *     'filename' => 'example.txt',
-   *     'mimetype' => 'text/plain'
-   *   );
+   * to be sent with the email.  Each attachment is an instance of
+   * PhabricatorMetaMTAAttachment.
    */
   protected function buildAttachments() {
     return array();

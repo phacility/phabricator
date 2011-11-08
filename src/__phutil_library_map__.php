@@ -488,6 +488,7 @@ phutil_register_library_map(array(
     'PhabricatorMailImplementationTestAdapter' => 'applications/metamta/adapter/test',
     'PhabricatorMailReplyHandler' => 'applications/metamta/replyhandler/base',
     'PhabricatorMarkupEngine' => 'applications/markup/engine',
+    'PhabricatorMetaMTAAttachment' => 'applications/metamta/storage/mail',
     'PhabricatorMetaMTAController' => 'applications/metamta/controller/base',
     'PhabricatorMetaMTADAO' => 'applications/metamta/storage/base',
     'PhabricatorMetaMTADaemon' => 'applications/metamta/daemon/mta',
