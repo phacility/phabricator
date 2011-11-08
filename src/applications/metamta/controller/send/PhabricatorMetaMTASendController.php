@@ -23,11 +23,23 @@ class PhabricatorMetaMTASendController extends PhabricatorMetaMTAController {
     $request = $this->getRequest();
 
     if ($request->isFormPost()) {
+
       $mail = new PhabricatorMetaMTAMail();
       $mail->addTos($request->getArr('to'));
       $mail->addCCs($request->getArr('cc'));
       $mail->setSubject($request->getStr('subject'));
       $mail->setBody($request->getStr('body'));
+
+      $files = $request->getArr('files');
+      if ($files) {
+        foreach ($files as $phid) {
+          $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $phid);
+          $mail->addAttachment(
+            $file->loadFileData(),
+            $file->getName(),
+            $file->getMimeType());
+        }
+      }
 
       $mail->setFrom($request->getUser()->getPHID());
       $mail->setSimulatedFailureCount($request->getInt('failures'));
@@ -75,6 +87,8 @@ class PhabricatorMetaMTASendController extends PhabricatorMetaMTAController {
         'configure a real adapter.</p>');
     }
 
+    $panel_id = celerity_generate_unique_node_id();
+
     $form = new AphrontFormView();
     $form->setUser($request->getUser());
     $form->setAction('/mail/send/');
@@ -103,6 +117,12 @@ class PhabricatorMetaMTASendController extends PhabricatorMetaMTAController {
           ->setLabel('Body')
           ->setName('body'))
       ->appendChild(
+        id(new AphrontFormDragAndDropUploadControl())
+          ->setLabel('Attach Files')
+          ->setName('files')
+          ->setDragAndDropTarget($panel_id)
+          ->setActivatedClass('aphront-panel-view-drag-and-drop'))
+      ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Simulate Failures')
           ->setName('failures')
@@ -129,6 +149,7 @@ class PhabricatorMetaMTASendController extends PhabricatorMetaMTAController {
     $panel = new AphrontPanelView();
     $panel->setHeader('Send Email');
     $panel->appendChild($form);
+    $panel->setID($panel_id);
     $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
 
     return $this->buildStandardPageResponse(

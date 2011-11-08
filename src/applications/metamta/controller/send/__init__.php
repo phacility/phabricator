@@ -7,11 +7,14 @@
 
 
 phutil_require_module('phabricator', 'aphront/response/redirect');
+phutil_require_module('phabricator', 'applications/files/storage/file');
 phutil_require_module('phabricator', 'applications/metamta/controller/base');
 phutil_require_module('phabricator', 'applications/metamta/storage/mail');
+phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'view/form/base');
 phutil_require_module('phabricator', 'view/form/control/checkbox');
+phutil_require_module('phabricator', 'view/form/control/draganddropupload');
 phutil_require_module('phabricator', 'view/form/control/static');
 phutil_require_module('phabricator', 'view/form/control/submit');
 phutil_require_module('phabricator', 'view/form/control/text');
