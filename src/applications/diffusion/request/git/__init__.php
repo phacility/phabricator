@@ -8,7 +8,5 @@
 
 phutil_require_module('phabricator', 'applications/diffusion/request/base');
 
-phutil_require_module('phutil', 'future/exec');
-
 
 phutil_require_source('DiffusionGitRequest.php');

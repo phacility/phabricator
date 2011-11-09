@@ -25,26 +25,22 @@ final class DiffusionGitBrowseQuery extends DiffusionBrowseQuery {
     $path = $drequest->getPath();
     $commit = $drequest->getCommit();
 
-    $local_path = $repository->getDetail('local-path');
-
     if ($path == '') {
       // Fast path to improve the performance of the repository view; we know
       // the root is always a tree at any commit and always exists.
       $stdout = 'tree';
     } else {
       try {
-        list($stdout) = execx(
-          "(cd %s && git cat-file -t %s:%s)",
-          $local_path,
+        list($stdout) = $repository->execxLocalCommand(
+          'cat-file -t %s:%s',
           $commit,
           $path);
       } catch (CommandException $e) {
         $stderr = $e->getStdErr();
         if (preg_match('/^fatal: Not a valid object name/', $stderr)) {
           // Grab two logs, since the first one is when the object was deleted.
-          list($stdout) = execx(
-            '(cd %s && git log -n2 --format="%%H" %s -- %s)',
-            $local_path,
+          list($stdout) = $repository->execxLocalCommand(
+            'log -n2 --format="%%H" %s -- %s',
             $commit,
             $path);
           $stdout = trim($stdout);
@@ -73,9 +69,8 @@ final class DiffusionGitBrowseQuery extends DiffusionBrowseQuery {
       return true;
     }
 
-    list($stdout) = execx(
-      "(cd %s && git ls-tree -l %s:%s)",
-      $local_path,
+    list($stdout) = $repository->execxLocalCommand(
+      'ls-tree -l %s:%s',
       $commit,
       $path);
 

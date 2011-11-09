@@ -24,9 +24,8 @@ final class DiffusionGitBranchQuery extends DiffusionBranchQuery {
 
     $local_path = $repository->getDetail('local-path');
 
-    list($stdout) = execx(
-      '(cd %s && git branch -r --verbose --no-abbrev)',
-      $local_path);
+    list($stdout) = $repository->execxLocalCommand(
+      'branch -r --verbose --no-abbrev');
 
     $branches = array();
     foreach (self::parseGitRemoteBranchOutput($stdout) as $name => $head) {

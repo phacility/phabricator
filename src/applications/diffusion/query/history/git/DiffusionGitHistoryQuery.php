@@ -25,16 +25,13 @@ final class DiffusionGitHistoryQuery extends DiffusionHistoryQuery {
     $path = $drequest->getPath();
     $commit_hash = $drequest->getCommit();
 
-    $local_path = $repository->getDetail('local-path');
-
-    list($stdout) = execx(
-      '(cd %s && git log '.
+    list($stdout) = $repository->execxLocalCommand(
+      'log '.
         '--skip=%d '.
         '-n %d '.
         '--abbrev=40 '.
         '--pretty=format:%%H '.
-        '%s -- %s)',
-      $local_path,
+        '%s -- %s',
       $this->getOffset(),
       $this->getLimit(),
       $commit_hash,

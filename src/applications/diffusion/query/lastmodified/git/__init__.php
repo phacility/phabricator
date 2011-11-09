@@ -10,7 +10,6 @@ phutil_require_module('phabricator', 'applications/diffusion/query/lastmodified/
 phutil_require_module('phabricator', 'applications/repository/storage/commit');
 phutil_require_module('phabricator', 'applications/repository/storage/commitdata');
 
-phutil_require_module('phutil', 'future/exec');
 phutil_require_module('phutil', 'utils');
 
 

@@ -22,9 +22,8 @@ final class DiffusionGitLastModifiedQuery extends DiffusionLastModifiedQuery {
     $drequest = $this->getRequest();
     $repository = $drequest->getRepository();
 
-    list($hash) = execx(
-      "(cd %s && git log -n1 --format=%%H %s -- %s)",
-      $repository->getDetail('local-path'),
+    list($hash) = $repository->execxLocalCommand(
+      'log -n1 --format=%%H %s -- %s',
       $drequest->getCommit(),
       $drequest->getPath());
     $hash = trim($hash);

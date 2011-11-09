@@ -25,17 +25,14 @@ final class DiffusionGitFileContentQuery extends DiffusionFileContentQuery {
     $path = $drequest->getPath();
     $commit = $drequest->getCommit();
 
-    $local_path = $repository->getDetail('local-path');
     if ($this->getNeedsBlame()) {
-      list($corpus) = execx(
-        '(cd %s && git --no-pager blame -c -l --date=short %s -- %s)',
-        $local_path,
+      list($corpus) = $repository->execxLocalCommand(
+        '--no-pager blame -c -l --date=short %s -- %s',
         $commit,
         $path);
     } else {
-      list($corpus) = execx(
-        '(cd %s && git cat-file blob %s:%s)',
-        $local_path,
+      list($corpus) = $repository->execxLocalCommand(
+        'cat-file blob %s:%s',
         $commit,
         $path);
     }

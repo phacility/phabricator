@@ -45,27 +45,24 @@ final class DiffusionGitDiffQuery extends DiffusionDiffQuery {
     $options = implode(' ', $options);
 
     try {
-      list($raw_diff) = execx(
-        "(cd %s && git diff %C %s^ %s -- %s)",
-        $repository->getDetail('local-path'),
+      list($raw_diff) = $repository->execxLocalCommand(
+        'diff %C %s^ %s -- %s',
         $options,
         $effective_commit,
         $effective_commit,
         $drequest->getPath());
     } catch (CommandException $ex) {
       // Check if this is the root commit by seeing if it has parents.
-      list($parents) = execx(
-        '(cd %s && git log --format=%s %s --)',
-        $repository->getDetail('local-path'),
+      list($parents) = $repository->execxLocalCommand(
+        'log --format=%s %s --',
         '%P', // "parents"
         $effective_commit);
       if (!strlen(trim($parents))) {
         // No parents means we're looking at the root revision. Diff against
         // the empty tree hash instead, since there is no parent so "^" does
         // not work. See ArcanistGitAPI for more discussion.
-        list($raw_diff) = execx(
-          '(cd %s && git diff %C %s %s -- %s)',
-          $repository->getDetail('local-path'),
+        list($raw_diff) = $repository->execxLocalCommand(
+          'diff %C %s %s -- %s',
           $options,
           ArcanistGitAPI::GIT_MAGIC_ROOT_COMMIT,
           $effective_commit,
