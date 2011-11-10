@@ -8,7 +8,6 @@
 
 phutil_require_module('phabricator', 'aphront/console/plugin/event/api');
 phutil_require_module('phabricator', 'infrastructure/env');
-phutil_require_module('phabricator', 'infrastructure/events/constant/type');
 
 phutil_require_module('phutil', 'utils');
 

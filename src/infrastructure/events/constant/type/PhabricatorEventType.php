@@ -16,9 +16,8 @@
  * limitations under the License.
  */
 
-final class PhabricatorEventType extends PhabricatorEventConstants {
+final class PhabricatorEventType extends PhutilEventType {
 
-  const TYPE_ALL                    = '*';
   const TYPE_MANIPHEST_WILLEDITTASK = 'maniphest.willEditTask';
   const TYPE_DIFFERENTIAL_WILLSENDMAIL = 'differential.willSendMail';
 

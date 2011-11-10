@@ -120,7 +120,7 @@ abstract class DifferentialMail {
         'mail' => $template,
       )
     );
-    PhabricatorEventEngine::dispatchEvent($event);
+    PhutilEventEngine::dispatchEvent($event);
 
     $template = $event->getValue('mail');
 

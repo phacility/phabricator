@@ -6,7 +6,7 @@
 
 
 
-phutil_require_module('phutil', 'utils');
+phutil_require_module('phutil', 'events/event');
 
 
 phutil_require_source('PhabricatorEvent.php');

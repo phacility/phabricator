@@ -19,7 +19,7 @@
 /**
  * @group console
  */
-class DarkConsoleEventPluginAPI extends PhabricatorEventListener {
+class DarkConsoleEventPluginAPI extends PhutilEventListener {
 
   private static $events = array();
   private static $discardMode = false;
@@ -36,7 +36,7 @@ class DarkConsoleEventPluginAPI extends PhabricatorEventListener {
     $this->listen(PhabricatorEventType::TYPE_ALL);
   }
 
-  public function handleEvent(PhabricatorEvent $event) {
+  public function handleEvent(PhutilEvent $event) {
     if (self::$discardMode) {
       return;
     }

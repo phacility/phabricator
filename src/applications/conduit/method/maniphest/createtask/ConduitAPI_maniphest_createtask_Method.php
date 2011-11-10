@@ -112,7 +112,7 @@ final class ConduitAPI_maniphest_createtask_Method
       ));
     $event->setUser($request->getUser());
     $event->setConduitRequest($request);
-    PhabricatorEventEngine::dispatchEvent($event);
+    PhutilEventEngine::dispatchEvent($event);
 
     $task = $event->getValue('task');
     $transactions = $event->getValue('transactions');

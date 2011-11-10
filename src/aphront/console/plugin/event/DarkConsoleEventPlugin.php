@@ -31,7 +31,7 @@ class DarkConsoleEventPlugin extends DarkConsolePlugin {
 
   public function generateData() {
 
-    $listeners = PhabricatorEventEngine::getInstance()->getAllListeners();
+    $listeners = PhutilEventEngine::getInstance()->getAllListeners();
     foreach ($listeners as $key => $listener) {
       $listeners[$key] = array(
         'id'      => $listener->getListenerID(),

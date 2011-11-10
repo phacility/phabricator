@@ -159,7 +159,7 @@ class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
         'transactions'  => $xactions,
       ));
     $event->setUser($user);
-    PhabricatorEventEngine::dispatchEvent($event);
+    PhutilEventEngine::dispatchEvent($event);
 
     $task = $event->getValue('task');
     $xactions = $event->getValue('transactions');

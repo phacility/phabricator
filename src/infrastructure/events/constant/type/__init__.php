@@ -6,7 +6,7 @@
 
 
 
-phutil_require_module('phabricator', 'infrastructure/events/constant/base');
+phutil_require_module('phutil', 'events/constant/type');
 
 
 phutil_require_source('PhabricatorEventType.php');

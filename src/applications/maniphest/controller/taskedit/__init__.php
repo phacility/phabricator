@@ -23,7 +23,6 @@ phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'infrastructure/events/constant/type');
-phutil_require_module('phabricator', 'infrastructure/events/engine');
 phutil_require_module('phabricator', 'infrastructure/events/event');
 phutil_require_module('phabricator', 'infrastructure/javelin/api');
 phutil_require_module('phabricator', 'infrastructure/javelin/markup');
@@ -38,6 +37,7 @@ phutil_require_module('phabricator', 'view/form/control/tokenizer');
 phutil_require_module('phabricator', 'view/form/error');
 phutil_require_module('phabricator', 'view/layout/panel');
 
+phutil_require_module('phutil', 'events/engine');
 phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
 

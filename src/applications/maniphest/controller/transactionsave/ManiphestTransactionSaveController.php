@@ -238,7 +238,7 @@ class ManiphestTransactionSaveController extends ManiphestController {
       ));
     $event->setUser($user);
     $event->setAphrontRequest($request);
-    PhabricatorEventEngine::dispatchEvent($event);
+    PhutilEventEngine::dispatchEvent($event);
 
     $task = $event->getValue('task');
     $transactions = $event->getValue('transactions');
