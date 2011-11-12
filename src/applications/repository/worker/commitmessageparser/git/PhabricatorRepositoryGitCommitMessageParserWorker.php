@@ -26,15 +26,10 @@ class PhabricatorRepositoryGitCommitMessageParserWorker
     // NOTE: %B was introduced somewhat recently in git's history, so pull
     // commit message information with %s and %b instead.
     list($info) = $repository->execxLocalCommand(
-      'log -n 1 --pretty=format:%%e%%x00%%an%%x00%%s%%n%%n%%b %s',
+      "log -n 1 --encoding='UTF-8' --pretty=format:%%an%%x00%%s%%n%%n%%b %s",
       $commit->getCommitIdentifier());
 
-    list($encoding, $author, $message) = explode("\0", $info);
-
-    if ($encoding != "UTF-8") {
-      $author = mb_convert_encoding($author, 'UTF-8', $encoding);
-      $message = mb_convert_encoding($message, 'UTF-8', $encoding);
-    }
+    list($author, $message) = explode("\0", $info);
 
     // Make sure these are valid UTF-8.
     $author = phutil_utf8ize($author);
