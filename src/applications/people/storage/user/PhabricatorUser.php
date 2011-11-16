@@ -43,18 +43,26 @@ class PhabricatorUser extends PhabricatorUserDAO {
   private $preferences = null;
 
   protected function readField($field) {
-    if ($field === 'profileImagePHID') {
-      return nonempty(
-        $this->profileImagePHID,
-        PhabricatorEnv::getEnvConfig('user.default-profile-image-phid'));
+    switch ($field) {
+      case 'profileImagePHID':
+        return nonempty(
+          $this->profileImagePHID,
+          PhabricatorEnv::getEnvConfig('user.default-profile-image-phid'));
+      case 'timezoneIdentifier':
+        // If the user hasn't set one, guess the server's time.
+        return nonempty(
+          $this->timezoneIdentifier,
+          date_default_timezone_get());
+      // Make sure these return booleans.
+      case 'isAdmin':
+        return (bool)$this->isAdmin;
+      case 'isDisabled':
+        return (bool)$this->isDisabled;
+      case 'isSystemAgent':
+        return (bool)$this->isSystemAgent;
+      default:
+        return parent::readField($field);
     }
-    if ($field === 'timezoneIdentifier') {
-      // If the user hasn't set one, guess the server's time.
-      return nonempty(
-        $this->timezoneIdentifier,
-        date_default_timezone_get());
-    }
-    return parent::readField($field);
   }
 
   public function getConfiguration() {

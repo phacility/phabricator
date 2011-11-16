@@ -29,6 +29,7 @@ class PhabricatorObjectHandle {
   private $alternateID;
   private $status = 'open';
   private $complete;
+  private $disabled;
 
   public function setURI($uri) {
     $this->uri = $uri;
@@ -135,10 +136,19 @@ class PhabricatorObjectHandle {
     return idx($map, $this->getType());
   }
 
+
+  /**
+   * Set whether or not the underlying object is complete. See
+   * @{method:getComplete} for an explanation of what it means to be complete.
+   *
+   * @param bool True if the handle represents a complete object.
+   * @return this
+   */
   public function setComplete($complete) {
     $this->complete = $complete;
     return $this;
   }
+
 
   /**
    * Determine if the handle represents an object which was completely loaded
@@ -155,6 +165,34 @@ class PhabricatorObjectHandle {
   public function isComplete() {
     return $this->complete;
   }
+
+
+  /**
+   * Set whether or not the underlying object is disabled. See
+   * @{method:getDisabled} for an explanation of what it means to be disabled.
+   *
+   * @param bool True if the handle represents a disabled object.
+   * @return this
+   */
+  public function setDisabled($disabled) {
+    $this->disabled = $disabled;
+    return $this;
+  }
+
+
+  /**
+   * Determine if the handle represents an object which has been disabled --
+   * for example, disabled users, archived projects, etc. These objects are
+   * complete and exist, but should be excluded from some system interactions
+   * (for instance, they usually should not appear in typeaheads, and should
+   * not have mail/notifications delivered to or about them).
+   *
+   * @return bool True if the handle represents a disabled object.
+   */
+  public function isDisabled() {
+    return $this->disabled;
+  }
+
 
   public function renderLink() {
 

@@ -296,18 +296,23 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
             $mailer->addReplyTo($value, $reply_to_name);
             break;
           case 'to':
-            $emails = array();
-            foreach ($value as $phid) {
-              $emails[] = $handles[$phid]->getEmail();
+            $emails = $this->getDeliverableEmailsFromHandles($value, $handles);
+            if ($emails) {
+              $mailer->addTos($emails);
+            } else {
+              if ($value) {
+                throw new Exception(
+                  "All 'To' objects are undeliverable (e.g., disabled users).");
+              } else {
+                throw new Exception("No 'To' specified!");
+              }
             }
-            $mailer->addTos($emails);
             break;
           case 'cc':
-            $emails = array();
-            foreach ($value as $phid) {
-              $emails[] = $handles[$phid]->getEmail();
+            $emails = $this->getDeliverableEmailsFromHandles($value, $handles);
+            if ($emails) {
+              $mailer->addCCs($emails);
             }
-            $mailer->addCCs($emails);
             break;
           case 'headers':
             foreach ($value as $header_key => $header_value) {
@@ -442,6 +447,24 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     }
 
     return base64_encode($base);
+  }
+
+  private function getDeliverableEmailsFromHandles(
+    array $phids,
+    array $handles) {
+
+    $emails = array();
+    foreach ($phids as $phid) {
+      if ($handles[$phid]->isDisabled()) {
+        continue;
+      }
+      if (!$handles[$phid]->isComplete()) {
+        continue;
+      }
+      $emails[] = $handles[$phid]->getEmail();
+    }
+
+    return $emails;
   }
 
 }
