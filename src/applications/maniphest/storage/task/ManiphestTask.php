@@ -62,17 +62,21 @@ class ManiphestTask extends ManiphestDAO {
   }
 
   public function getCCPHIDs() {
-    return nonempty($this->ccPHIDs, array());
+    return array_values(nonempty($this->ccPHIDs, array()));
   }
 
   public function setProjectPHIDs(array $phids) {
-    $this->projectPHIDs = $phids;
+    $this->projectPHIDs = array_values($phids);
     $this->projectsNeedUpdate = true;
     return $this;
   }
 
+  public function getProjectPHIDs() {
+    return array_values(nonempty($this->projectPHIDs, array()));
+  }
+
   public function setCCPHIDs(array $phids) {
-    $this->ccPHIDs = $phids;
+    $this->ccPHIDs = array_values($phids);
     $this->subscribersNeedUpdate = true;
     return $this;
   }
