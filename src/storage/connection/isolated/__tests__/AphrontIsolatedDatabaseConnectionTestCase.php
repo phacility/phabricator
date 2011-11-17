@@ -31,7 +31,7 @@ class AphrontIsolatedDatabaseConnectionTestCase
   public function testIsolation() {
     $conn = $this->newIsolatedConnection();
 
-    $test_phid = 'PHID-TEST-'.sha1(mt_rand());
+    $test_phid = 'PHID-TEST-'.Filesystem::readRandomCharacters(20);
 
     queryfx(
       $conn,

@@ -11,6 +11,7 @@ phutil_require_module('phabricator', 'infrastructure/testing/testcase');
 phutil_require_module('phabricator', 'storage/connection/isolated');
 phutil_require_module('phabricator', 'storage/queryfx');
 
+phutil_require_module('phutil', 'filesystem');
 phutil_require_module('phutil', 'utils');
 
 

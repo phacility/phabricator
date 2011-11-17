@@ -62,7 +62,7 @@ class DiffusionGitRequest extends DiffusionRequest {
           $this->commit);
 
         // Beyond verifying them, expand commit short forms to full 40-character
-        // sha1s.
+        // hashes.
         $this->commit = trim($commit);
 
         // If we have a commit, overwrite the branch commit with the more
