@@ -30,15 +30,8 @@ abstract class PhabricatorDirectoryController extends PhabricatorController {
     $page->setBaseURI('/');
     $page->setTitle(idx($data, 'title'));
 
-    $tabs = array(
-      'directory' => array(
-        'href' => '/',
-        'name' => 'Directory',
-      ),
-    );
-
     if ($this->getRequest()->getUser()->getIsAdmin()) {
-      $tabs += array(
+      $tabs = array(
         'categories' => array(
           'href' => '/directory/category/',
           'name' => 'Categories',
@@ -48,6 +41,8 @@ abstract class PhabricatorDirectoryController extends PhabricatorController {
           'name' => 'Items',
         ),
       );
+    } else {
+      $tabs = array();
     }
 
     $page->setTabs(
