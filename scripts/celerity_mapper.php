@@ -130,7 +130,7 @@ foreach ($files as $path => $hash) {
 echo "\n";
 
 $runtime_map = array();
-
+$resource_graph = array();
 $hash_map = array();
 
 $parser = new PhutilDocblockParser();
@@ -168,12 +168,28 @@ foreach ($file_map as $path => $info) {
 
   $hash_map[$provides] = $info['hash'];
 
+  $resource_graph[$provides] = $requires;
+
   $runtime_map[$provides] = array(
     'uri'       => $uri,
     'type'      => $type,
     'requires'  => $requires,
     'disk'      => $path,
   );
+}
+
+$celerity_resource_graph = new CelerityResourceGraph();
+$celerity_resource_graph->addNodes($resource_graph);
+$celerity_resource_graph->setResourceGraph($resource_graph);
+$celerity_resource_graph->loadGraph();
+
+foreach ($resource_graph as $provides => $requires) {
+  $cycle = $celerity_resource_graph->detectCycles($provides);
+  if ($cycle) {
+    throw new Exception(
+      "Cycle detected in resource graph: ". implode($cycle, " => ")
+    );
+  }
 }
 
 $package_map = array();
