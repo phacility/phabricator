@@ -211,6 +211,69 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/differential/add-comment.css',
   ),
+  'differential-revision-comment-css' =>
+  array(
+    'uri' => '/res/9fb8013b/rsrc/css/application/differential/revision-comment.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/differential/revision-comment.css',
+  ),
+  'differential-revision-comment-list-css' =>
+  array(
+    'uri' => '/res/3b31faa3/rsrc/css/application/differential/revision-comment-list.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/differential/revision-comment-list.css',
+  ),
+  'differential-revision-detail-css' =>
+  array(
+    'uri' => '/res/caa89172/rsrc/css/application/differential/revision-detail.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/differential/revision-detail.css',
+  ),
+  'differential-revision-history-css' =>
+  array(
+    'uri' => '/res/0d7d515d/rsrc/css/application/differential/revision-history.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/differential/revision-history.css',
+  ),
+  'differential-table-of-contents-css' =>
+  array(
+    'uri' => '/res/d173445b/rsrc/css/application/differential/table-of-contents.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/differential/table-of-contents.css',
+  ),
+  'diffusion-commit-view-css' =>
+  array(
+    'uri' => '/res/bc39d876/rsrc/css/application/diffusion/commit-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/diffusion/commit-view.css',
+  ),
+  'diffusion-source-css' =>
+  array(
+    'uri' => '/res/db4566b6/rsrc/css/application/diffusion/diffusion-source.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/diffusion/diffusion-source.css',
+  ),
   'files-css' =>
   array(
     'uri' => '/res/a265a77d/rsrc/css/application/files/files.css',
@@ -228,6 +291,25 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/application/herald/herald.css',
+  ),
+  'herald-rule-editor' =>
+  array(
+    'uri' => '/res/4d6dff2b/rsrc/js/application/herald/HeraldRuleEditor.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'multirow-row-manager',
+      1 => 'javelin-install',
+      2 => 'javelin-typeahead',
+      3 => 'javelin-util',
+      4 => 'javelin-dom',
+      5 => 'javelin-tokenizer',
+      6 => 'javelin-typeahead-preloaded-source',
+      7 => 'javelin-stratcom',
+      8 => 'javelin-json',
+      9 => 'phabricator-prefab',
+    ),
+    'disk' => '/rsrc/js/application/herald/HeraldRuleEditor.js',
   ),
   'herald-test-css' =>
   array(
@@ -312,99 +394,6 @@ celerity_register_resource_map(array(
       2 => 'javelin-util',
     ),
     'disk' => '/rsrc/js/application/countdown/timer.js',
-  ),
-  0 =>
-  array(
-    'uri' => '/res/b6096fdd/rsrc/js/javelin/lib/__tests__/URI.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-uri',
-      1 => 'javelin-php-serializer',
-    ),
-    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
-  ),
-  'differential-revision-comment-css' =>
-  array(
-    'uri' => '/res/9fb8013b/rsrc/css/application/differential/revision-comment.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/application/differential/revision-comment.css',
-  ),
-  'differential-revision-comment-list-css' =>
-  array(
-    'uri' => '/res/3b31faa3/rsrc/css/application/differential/revision-comment-list.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/application/differential/revision-comment-list.css',
-  ),
-  'differential-revision-detail-css' =>
-  array(
-    'uri' => '/res/caa89172/rsrc/css/application/differential/revision-detail.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/application/differential/revision-detail.css',
-  ),
-  'differential-revision-history-css' =>
-  array(
-    'uri' => '/res/0d7d515d/rsrc/css/application/differential/revision-history.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/application/differential/revision-history.css',
-  ),
-  'differential-table-of-contents-css' =>
-  array(
-    'uri' => '/res/d173445b/rsrc/css/application/differential/table-of-contents.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/application/differential/table-of-contents.css',
-  ),
-  'diffusion-commit-view-css' =>
-  array(
-    'uri' => '/res/bc39d876/rsrc/css/application/diffusion/commit-view.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/application/diffusion/commit-view.css',
-  ),
-  'diffusion-source-css' =>
-  array(
-    'uri' => '/res/db4566b6/rsrc/css/application/diffusion/diffusion-source.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/application/diffusion/diffusion-source.css',
-  ),
-  'herald-rule-editor' =>
-  array(
-    'uri' => '/res/4d6dff2b/rsrc/js/application/herald/HeraldRuleEditor.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'multirow-row-manager',
-      1 => 'javelin-install',
-      2 => 'javelin-typeahead',
-      3 => 'javelin-util',
-      4 => 'javelin-dom',
-      5 => 'javelin-tokenizer',
-      6 => 'javelin-typeahead-preloaded-source',
-      7 => 'javelin-stratcom',
-      8 => 'javelin-json',
-      9 => 'phabricator-prefab',
-    ),
-    'disk' => '/rsrc/js/application/herald/HeraldRuleEditor.js',
   ),
   'javelin-behavior-dark-console' =>
   array(
@@ -829,6 +818,16 @@ celerity_register_resource_map(array(
       3 => 'javelin-reactor',
     ),
     'disk' => '/rsrc/js/javelin/ext/reactor/core/DynVal.js',
+  ),
+  0 =>
+  array(
+    'uri' => '/res/11520eb6/rsrc/js/javelin/lib/__tests__/JSON.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-json',
+    ),
+    'disk' => '/rsrc/js/javelin/lib/__tests__/JSON.js',
   ),
   'javelin-event' =>
   array(
