@@ -83,6 +83,7 @@ class AphrontDefaultApplicationConfiguration
         '$' => 'PhabricatorConduitConsoleController',
         'method/(?P<method>[^/]+)$' => 'PhabricatorConduitConsoleController',
         'log/$' => 'PhabricatorConduitLogController',
+        'log/view/(?P<view>[^/]+)/$' => 'PhabricatorConduitLogController',
         'token/$' => 'PhabricatorConduitTokenController',
       ),
       '/api/(?P<method>[^/]+)$' => 'PhabricatorConduitAPIController',
