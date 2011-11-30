@@ -84,7 +84,7 @@ class ConduitAPI_differential_getdiff_Method extends ConduitAPIMethod {
     if ($project) {
       $project_name = $project->getName();
     } else {
-      $project_name = '';
+      $project_name = null;
     }
     $basic_dict['projectName'] = $project_name;
 
