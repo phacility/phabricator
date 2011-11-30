@@ -27,6 +27,7 @@ final class AphrontPagerView extends AphrontView {
   private $uri;
   private $pagingParameter;
   private $surroundingPages = 2;
+  private $enableKeyboardShortcuts;
 
   final public function setPageSize($page_size) {
     $this->pageSize = max(1, $page_size);
@@ -106,6 +107,11 @@ final class AphrontPagerView extends AphrontView {
     return $results;
   }
 
+  public function setEnableKeyboardShortcuts($enable) {
+    $this->enableKeyboardShortcuts = $enable;
+    return $this;
+  }
+
   public function render() {
     if (!$this->uri) {
       throw new Exception(
@@ -146,12 +152,16 @@ final class AphrontPagerView extends AphrontView {
 
     $links = array();
 
+    $prev_index = null;
+    $next_index = null;
+
     if ($min > 0) {
       $links[] = array(0, 'First', null);
     }
 
     if ($page > 0) {
       $links[] = array($page - 1, 'Prev', null);
+      $prev_index = $page - 1;
     }
 
     for ($ii = $min; $ii <= $max; $ii++) {
@@ -160,6 +170,7 @@ final class AphrontPagerView extends AphrontView {
 
     if ($page < $last && $last > 0) {
       $links[] = array($page + 1, 'Next', null);
+      $next_index = $page + 1;
     }
 
     if ($max < ($last - 1)) {
@@ -168,20 +179,29 @@ final class AphrontPagerView extends AphrontView {
 
     $base_uri = $this->uri;
     $parameter = $this->pagingParameter;
-    $page_size = $this->getPageSize();
+
+    if ($this->enableKeyboardShortcuts) {
+      $pager_links = array();
+      $pager_index = array(
+        'prev' => $prev_index,
+        'next' => $next_index,
+      );
+      foreach ($pager_index as $key => $index) {
+        if ($index !== null) {
+          $display_index = $this->getDisplayIndex($index);
+          $pager_links[$key] = (string)$base_uri->alter(
+            $parameter,
+            $display_index);
+        }
+      }
+      Javelin::initBehavior('phabricator-keyboard-pager', $pager_links);
+    }
 
     // Convert tuples into rendered nodes.
     $rendered_links = array();
     foreach ($links as $link) {
       list($index, $label, $class) = $link;
-      // Use a 1-based sequence for display so that the number in the URI is
-      // the same as the page number you're on.
-      if ($index == 0) {
-        // No need for the first page to say page=1.
-        $display_index = null;
-      } else {
-        $display_index = $index * $page_size;
-      }
+      $display_index = $this->getDisplayIndex($index);
       $link = $base_uri->alter($parameter, $display_index);
       $rendered_links[] = phutil_render_tag(
         'a',
@@ -196,6 +216,19 @@ final class AphrontPagerView extends AphrontView {
       '<div class="aphront-pager-view">'.
         implode('', $rendered_links).
       '</div>';
+  }
+
+  private function getDisplayIndex($page_index) {
+    $page_size = $this->getPageSize();
+    // Use a 1-based sequence for display so that the number in the URI is
+    // the same as the page number you're on.
+    if ($page_index == 0) {
+      // No need for the first page to say page=1.
+      $display_index = null;
+    } else {
+      $display_index = $page_index * $page_size;
+    }
+    return $display_index;
   }
 
 }

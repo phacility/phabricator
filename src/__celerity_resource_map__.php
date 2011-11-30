@@ -248,6 +248,17 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/javelin/lib/behavior.js',
   ),
+  0 =>
+  array(
+    'uri' => '/res/b6096fdd/rsrc/js/javelin/lib/__tests__/URI.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-uri',
+      1 => 'javelin-php-serializer',
+    ),
+    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
+  ),
   'javelin-behavior-aphront-basic-tokenizer' =>
   array(
     'uri' => '/res/9be30797/rsrc/js/application/core/behavior-tokenizer.js',
@@ -674,6 +685,18 @@ celerity_register_resource_map(array(
       1 => 'javelin-behavior',
     ),
     'disk' => '/rsrc/js/application/owners/owners-path-editor.js',
+  ),
+  'javelin-behavior-phabricator-keyboard-pager' =>
+  array(
+    'uri' => '/res/56d64eff/rsrc/js/application/core/behavior-keyboard-pager.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-uri',
+      2 => 'phabricator-keyboard-shortcut',
+    ),
+    'disk' => '/rsrc/js/application/core/behavior-keyboard-pager.js',
   ),
   'javelin-behavior-phabricator-keyboard-shortcuts' =>
   array(

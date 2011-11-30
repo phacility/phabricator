@@ -32,7 +32,7 @@ class PhabricatorConduitLogController extends PhabricatorConduitController {
 
     $nav = new AphrontSideNavView();
     $links = array(
-      'calls'         => 'All Calls',
+      'calls' => 'All Calls',
     );
 
     if (empty($links[$this->view])) {
@@ -65,6 +65,7 @@ class PhabricatorConduitLogController extends PhabricatorConduitController {
       $pager->getPageSize() + 1);
     $calls = $pager->sliceResults($calls);
     $pager->setURI(new PhutilURI('/conduit/log/view/'.$this->view.'/'), 'page');
+    $pager->setEnableKeyboardShortcuts(true);
 
     $min = $pager->getOffset() + 1;
     $max = ($min + count($calls) - 1);
