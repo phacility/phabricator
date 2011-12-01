@@ -130,6 +130,8 @@ class PhabricatorSetup {
       'hash',
       'json',
       'openssl',
+      'mbstring',
+      'iconv',
 
       // There is a chance we might not need this, but some configurations (like
       // Amazon SES) will require it. Just mark it 'required' since it's widely

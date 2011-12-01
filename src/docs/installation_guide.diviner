@@ -41,7 +41,7 @@ Otherwise, here's a general description of what you need to install:
   - Apache (usually "httpd" or "apache2")
   - MySQL Server (usually "mysqld" or "mysql-server")
   - PHP (usually "php")
-  - Required PHP extensions: mysql, curl, pcntl (these might be something like
+  - Required PHP extensions: mbstring, iconv, mysql, curl, pcntl (these might be something like
     "php-mysql" or "php5-mysql")
   - Optional PHP extensions: gd, apc (special instructions for APC are available
     below if you have difficulty installing it), xhprof (instructions below,
