@@ -72,11 +72,7 @@ class ConduitAPI_differential_parsecommitmessage_Method
       }
     }
 
-    // TODO: This is for backcompat only, remove once Arcanist gets updated.
-    $error = head($errors);
-
     return array(
-      'error'  => $error,
       'errors' => $errors,
       'fields' => $fields,
     );
