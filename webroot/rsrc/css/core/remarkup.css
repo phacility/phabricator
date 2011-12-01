@@ -119,3 +119,10 @@
   font-weight: bold;
   background: #ffaaaa;
 }
+
+.phabricator-remarkup .remarkup-note {
+  margin: 1em 1.5em;
+  padding: 0.5em 1em;
+  border: 1px solid #ddddff;
+  background: #f3f3ff;
+}

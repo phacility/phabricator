@@ -342,6 +342,9 @@ class ManiphestTaskDetailController extends ManiphestController {
       unset($resolution_types[ManiphestTaskStatus::STATUS_CLOSED_SPITE]);
     }
 
+    $remarkup_href = PhabricatorEnv::getDoclink(
+      'article/Remarkup_Reference.html');
+
     $comment_form = new AphrontFormView();
     $comment_form
       ->setUser($user)
@@ -404,6 +407,14 @@ class ManiphestTaskDetailController extends ManiphestController {
           ->setLabel('Comments')
           ->setName('comments')
           ->setValue($draft_text)
+          ->setCaption(
+            phutil_render_tag(
+              'a',
+              array(
+                'href' => $remarkup_href,
+                'target' => '_blank',
+              ),
+              'Remarkup Syntax Reference'))
           ->setID('transaction-comments'))
       ->appendChild(
         id(new AphrontFormDragAndDropUploadControl())

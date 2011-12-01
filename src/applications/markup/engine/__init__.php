@@ -25,6 +25,7 @@ phutil_require_module('phutil', 'markup/engine/remarkup/blockrule/remarkupcode')
 phutil_require_module('phutil', 'markup/engine/remarkup/blockrule/remarkupdefault');
 phutil_require_module('phutil', 'markup/engine/remarkup/blockrule/remarkupheader');
 phutil_require_module('phutil', 'markup/engine/remarkup/blockrule/remarkuplist');
+phutil_require_module('phutil', 'markup/engine/remarkup/blockrule/remarkupnote');
 phutil_require_module('phutil', 'markup/engine/remarkup/blockrule/remarkupquotes');
 phutil_require_module('phutil', 'markup/engine/remarkup/markuprule/bold');
 phutil_require_module('phutil', 'markup/engine/remarkup/markuprule/escapehtml');

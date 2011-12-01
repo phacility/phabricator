@@ -25,8 +25,8 @@ formatting text in Remarkup:
   {F123}            # Embed Images
   [[wiki page]]     # Link to Phriction
   @username         # Mention a user
-  Indent two spaces for code.
-  Indent two spaces with "-" for lists.
+  Use "- " or "* " for list items.
+  Use ``` or indent two spaces for code.
 
 = Basic Styling =
 
@@ -49,12 +49,16 @@ Make **headers** like this:
 
 This produces headers like the ones in this document.
 
-Make **lists** by indenting two spaces and beginning each item with a "-":
+Make **lists** by beginning each item with a "-" or a "*":
 
   lang=text
   - milk
   - eggs
   - bread
+
+  * duck
+  * duck
+  * goose
 
 This produces a list like this:
 
@@ -62,9 +66,16 @@ This produces a list like this:
   - eggs
   - bread
 
+(Note that you need to put a space after the "-" or "*".)
+
 Make **code blocks** by indenting two spaces:
 
   f(x, y);
+
+You can also use three backticks to enclose the code block:
+
+  ```f(x, y);
+  g(f);```
 
 You can specify a language for syntax highlighting with "lang=xxx":
 
@@ -93,6 +104,10 @@ This produces a block like this:
   function f() {
     global $$variable_variable;
   }
+
+You can also use "NOTE:" to call out an important idea.
+
+NOTE: Don't cross the streams!
 
 = Linking URIs =
 
