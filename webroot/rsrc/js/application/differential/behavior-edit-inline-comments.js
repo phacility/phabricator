@@ -75,6 +75,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     function(e) {
       if (editor  ||
           selecting ||
+          e.isRightButton() ||
           getRowNumber(e.getTarget()) === undefined) {
         return;
       }
