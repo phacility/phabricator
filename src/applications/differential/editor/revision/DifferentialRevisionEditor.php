@@ -86,6 +86,10 @@ class DifferentialRevisionEditor {
       $aux_fields[$field]->setValueFromParsedCommitMessage($value);
     }
 
+    foreach ($aux_fields as $aux_field) {
+      $aux_field->validateField();
+    }
+
     $aux_fields = array_values($aux_fields);
     $this->setAuxiliaryFields($aux_fields);
   }

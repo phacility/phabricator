@@ -166,7 +166,8 @@ abstract class DifferentialFieldSpecification {
    * the field is saved. It gives you an opportunity to inspect the field value
    * and throw a @{class:DifferentialFieldValidationException} if there is a
    * problem with the value the user has provided (for example, the value the
-   * user entered is not correctly formatted).
+   * user entered is not correctly formatted). This method is also called after
+   * @{method:setValueFromParsedCommitMessage} before the revision is saved.
    *
    * By default, fields are not validated.
    *
