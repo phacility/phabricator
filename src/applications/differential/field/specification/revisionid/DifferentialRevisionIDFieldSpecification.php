@@ -29,6 +29,10 @@ final class DifferentialRevisionIDFieldSpecification
     return true;
   }
 
+  public function shouldAppearOnCommitMessageTemplate() {
+    return false;
+  }
+
   public function getCommitMessageKey() {
     return 'revisionID';
   }

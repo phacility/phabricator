@@ -22,12 +22,12 @@
 class ConduitAPI_differential_getcommitmessage_Method extends ConduitAPIMethod {
 
   public function getMethodDescription() {
-    return "Retrieve Differential commit messages.";
+    return "Retrieve Differential commit messages or message templates.";
   }
 
   public function defineParamTypes() {
     return array(
-      'revision_id' => 'required revision_id',
+      'revision_id' => 'optional revision_id',
       'fields' => 'optional dict<string, wild>',
       'edit' => 'optional bool',
     );
@@ -46,9 +46,13 @@ class ConduitAPI_differential_getcommitmessage_Method extends ConduitAPIMethod {
   protected function execute(ConduitAPIRequest $request) {
     $id = $request->getValue('revision_id');
 
-    $revision = id(new DifferentialRevision())->load($id);
-    if (!$revision) {
-      throw new ConduitException('ERR_NOT_FOUND');
+    if ($id) {
+      $revision = id(new DifferentialRevision())->load($id);
+      if (!$revision) {
+        throw new ConduitException('ERR_NOT_FOUND');
+      }
+    } else {
+      $revision = new DifferentialRevision();
     }
 
     $revision->loadRelationships();

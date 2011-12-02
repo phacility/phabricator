@@ -67,6 +67,11 @@ class PhabricatorConduitAPIController
       if (isset($_REQUEST['params']) && is_array($_REQUEST['params'])) {
         $params_post = $request->getArr('params');
         foreach ($params_post as $key => $value) {
+          if ($value == '') {
+            // Interpret empty string null (e.g., the user didn't type anything
+            // into the box).
+            $value = 'null';
+          }
           $decoded_value = json_decode($value, true);
           if ($decoded_value === null && strtolower($value) != 'null') {
             // When json_decode() fails, it returns null. This almost certainly
