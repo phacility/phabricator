@@ -38,6 +38,12 @@ final class DifferentialRevisionQuery {
   const STATUS_ANY      = 'status-any';
   const STATUS_OPEN     = 'status-open';
 
+  private $author = null;
+  private $ccs = array();
+  private $reviewers = array();
+  private $revIDs = array();
+  private $phids = array();
+
   private $order            = 'order-modified';
   const ORDER_MODIFIED      = 'order-modified';
   const ORDER_CREATED       = 'order-created';
@@ -77,6 +83,74 @@ final class DifferentialRevisionQuery {
     return $this;
   }
 
+  /**
+   * Filter results to revisions authored by a given PHID. If an invalid PHID is
+   * provided, no results will be returned.
+   *
+   * @param phid Author PHID
+   * @return this
+   * @task config
+   */
+  public function withAuthor($author_phid) {
+    $this->author = $author_phid;
+    return $this;
+  }
+
+  /**
+   * Filter results to revisions which CC all of the listed people. Calling this
+   * function will clear anything set by previous calls to withCCs or withCC.
+   *
+   * @param array List of PHIDs of subscribers
+   * @return this
+   * @task config
+   */
+  public function withCCs(array $cc_phids) {
+    $this->ccs = $cc_phids;
+    return $this;
+  }
+
+  /**
+   * Add a PHID to the list of CCs that must be present on the revision. Calling
+   * this multiple times will continue to add CC PHID constraints, and will not
+   * clear anything set by previous calls to withCCs or withCC.
+   *
+   * @param phid CC PHID
+   * @return this
+   * @task config
+   */
+  public function withCC($cc) {
+    $this->ccs[] = $cc;
+    return $this;
+  }
+
+  /**
+   * Filter results to revisions that have all of the provided PHIDs as
+   * reviewers. Calling this function will clear anything set by previous calls
+   * to withReviewers or withReviewer.
+   *
+   * @param array List of PHIDs of reviewers
+   * @return this
+   * @task config
+   */
+  public function withReviewers(array $reviewer_phids) {
+    $this->reviewers = $reviewer_phids;
+    return $this;
+  }
+
+  /**
+   * Add a PHID to the list of reviewers that must be present on the revision.
+   * Calling this multiple times will continue to add reviewer PHID constraints,
+   * and will not clear anything set by previous calls to withReviewers or
+   * withReviewer.
+   *
+   * @param phid reviewer PHID
+   * @return this
+   * @task config
+   */
+  public function withReviewer($reviewer) {
+    $this->reviewers[] = $reviewer;
+    return $this;
+  }
 
   /**
    * Filter results to revisions with a given status. Provide a class constant,
@@ -88,6 +162,32 @@ final class DifferentialRevisionQuery {
    */
   public function withStatus($status_constant) {
     $this->status = $status_constant;
+    return $this;
+  }
+
+
+  /**
+   * Filter results to only return revisions whose ids are in the given set.
+   *
+   * @param array List of revision ids
+   * @return this
+   * @task config
+   */
+  public function withIDs(array $ids) {
+    $this->revIDs = $ids;
+    return $this;
+  }
+
+
+  /**
+   * Filter results to only return revisions whose PHIDs are in the given set.
+   *
+   * @param array List of revision PHIDs
+   * @return this
+   * @task config
+   */
+  public function withPHIDs(array $phids) {
+    $this->phids = $phids;
     return $this;
   }
 
@@ -245,6 +345,47 @@ final class DifferentialRevisionQuery {
       }
       $path_clauses = '('.implode(' OR ', $path_clauses).')';
       $where[] = $path_clauses;
+    }
+
+    if ($this->author) {
+      $where[] = qsprintf(
+        $conn_r,
+        'authorPHID = %s',
+        $this->author);
+    }
+
+    foreach ($this->ccs as $cc) {
+      $where[] = qsprintf(
+        $conn_r,
+        'id IN '.
+        '(SELECT revisionID FROM %T WHERE relation = %s AND objectPHID = %s)',
+        DifferentialRevision::RELATIONSHIP_TABLE,
+        DifferentialRevision::RELATION_SUBSCRIBED,
+        $cc);
+    }
+
+    foreach ($this->reviewers as $reviewer) {
+      $where[] = qsprintf(
+        $conn_r,
+        'id IN '.
+        '(SELECT revisionID FROM %T WHERE relation = %s AND objectPHID = %s)',
+        DifferentialRevision::RELATIONSHIP_TABLE,
+        DifferentialRevision::RELATION_REVIEWER,
+        $reviewer);
+    }
+
+    if ($this->revIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'id IN (%Ld)',
+        $this->revIDs);
+    }
+
+    if ($this->phids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'phid IN (%Ls)',
+        $this->phids);
     }
 
     switch ($this->status) {
