@@ -29,27 +29,11 @@ abstract class DifferentialController extends PhabricatorController {
     $viewer_is_anonymous = !$this->getRequest()->getUser()->isLoggedIn();
 
     $page = $this->buildStandardPageView();
-
     $page->setApplicationName('Differential');
     $page->setBaseURI('/differential/');
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x9A\x99");
     $page->appendChild($view);
-    $tabs = array(
-      'revisions' => array(
-        'name' => 'Revisions',
-        'href' => '/differential/',
-      )
-    );
-    if (!$viewer_is_anonymous) {
-      $tabs = array_merge($tabs, array(
-        'create' => array(
-          'name' => 'Create Diff',
-          'href' => '/differential/diff/create/',
-        )
-      ));
-    }
-    $page->setTabs($tabs, idx($data, 'tab'));
     $page->setIsLoggedOut($viewer_is_anonymous);
 
     $response = new AphrontWebpageResponse();

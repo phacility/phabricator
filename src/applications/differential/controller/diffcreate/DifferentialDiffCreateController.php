@@ -45,13 +45,22 @@ class DifferentialDiffCreateController extends DifferentialController {
     }
 
     $form = new AphrontFormView();
+    $arcanist_href = PhabricatorEnv::getDoclink(
+      'article/Arcanist_User_Guide.html');
+    $arcanist_link = phutil_render_tag(
+      'a',
+      array(
+        'href' => $arcanist_href,
+        'target' => '_blank',
+      ),
+      'Arcanist');
     $form
       ->setAction('/differential/diff/create/')
       ->setEncType('multipart/form-data')
       ->setUser($request->getUser())
       ->appendChild(
         '<p class="aphront-form-instructions">The best way to create a '.
-        'Differential diff is by using <strong>Arcanist</strong>, but you '.
+        "Differential diff is by using $arcanist_link, but you ".
         'can also just paste a diff (e.g., from <tt>svn diff</tt> or '.
         '<tt>git diff</tt>) into this box or upload it as a file if you '.
         'really want.</p>')

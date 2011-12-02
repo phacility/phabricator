@@ -233,10 +233,26 @@ class DifferentialRevisionListController extends DifferentialController {
               array(
                 $view_phid => $handles[$view_phid]->getFullName(),
               ))
-            ->setLimit(1));
-
+              ->setLimit(1))
+        ->appendChild(
+          id(new AphrontFormSubmitControl())
+            ->setValue('Filter Revisions'));
       $filter_view = new AphrontListFilterView();
       $filter_view->appendChild($filter_form);
+
+      $viewer_is_anonymous = !$this->getRequest()->getUser()->isLoggedIn();
+      if (!$viewer_is_anonymous) {
+        $create_uri = new PhutilURI('/differential/diff/create/');
+        $filter_view->addButton(
+          phutil_render_tag(
+            'a',
+            array(
+              'href'  => (string)$create_uri,
+              'class' => 'green button',
+            ),
+            'Create Revision'));
+      }
+
       $side_nav->appendChild($filter_view);
     }
 
