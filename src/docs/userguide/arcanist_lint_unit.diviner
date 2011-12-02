@@ -30,38 +30,11 @@ make this work, you need to do three things:
   - add the class name to your ##.arcconfig## as the **lint_engine**,
     **unit_engine**, or **arcanist_configuration**.
 
-= Write the Class =
+= Create a libphutil Library =
 
-Start by creating a new phutil library -- this is a directory which will contain
-class files for Arcanist to load. You can either put it inside your project, or
-outside (if you want to share lint rules between several projects, for
-instance). To create a new library, run ##arc liberate##:
-
-  $ arc liberate path/to/new/library
-
-This will prompt you to name your library and create a new directory on disk.
-Create a new ##lint/## directory in this library (or ##unit/##, or whatever you
-want). This creates a module. Put ##CustomArcanistLintEngine.php## inside the
-##lint/## directory:
-
-  lang=php
-  <?php
-
-  class CustomArcanistLintEngine extends ArcanistLintEngine {
-
-  }
-
-Now run ##arc liberate## on the library again. Whenever you add, remove, or
-rename modules or classes you should run ##arc liberate## to update the
-classmap.
-
-You can either write the class body now (refer to the documentation for the
-class you are extending) or continue with integrating it into your project.
-
-= Load the Class =
-
-To make the class loadable, you need to put the path to it in your
-##.arcconfig##, under **phutil_libraries**:
+If you haven't created a library for the class to live in yet, you need to do
+that first. Follow the instructions in @{article:libphutil Library User Guide},
+then make the library loadable by adding it to your ##.arcconfig## like this:
 
   {
     // ...
