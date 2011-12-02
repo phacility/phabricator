@@ -35,10 +35,25 @@ phutil_require_module(
 $parser = new MimeMailParser();
 $parser->setText(file_get_contents('php://stdin'));
 
+$text_body = $parser->getMessageBody('text');
+
+$text_body_headers = $parser->getMessageBodyHeaders('text');
+$content_type = idx($text_body_headers, 'content-type');
+if (
+  !phutil_is_utf8($text_body) &&
+  preg_match('/charset="(.*?)"/', $content_type, $matches)
+) {
+  $text_body = mb_convert_encoding($text_body, "UTF-8", $matches[1]);
+}
+
+$headers = $parser->getHeaders();
+$headers['subject'] = iconv_mime_decode($headers['subject'], 0, "UTF-8");
+$headers['from'] = iconv_mime_decode($headers['from'], 0, "UTF-8");
+
 $received = new PhabricatorMetaMTAReceivedMail();
-$received->setHeaders($parser->getHeaders());
+$received->setHeaders($headers);
 $received->setBodies(array(
-  'text' => $parser->getMessageBody('text'),
+  'text' => $text_body,
   'html' => $parser->getMessageBody('html'),
 ));
 
