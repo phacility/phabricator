@@ -69,8 +69,13 @@ class DifferentialRevisionEditor {
     $aux_fields = DifferentialFieldSelector::newSelector()
       ->getFieldSpecifications();
 
+    $user = id(new PhabricatorUser())->loadOneWhere(
+      'phid = %s',
+      $this->actorPHID);
+
     foreach ($aux_fields as $key => $aux_field) {
       $aux_field->setRevision($revision);
+      $aux_field->setUser($user);
       if (!$aux_field->shouldAppearOnCommitMessage()) {
         unset($aux_fields[$key]);
       }
