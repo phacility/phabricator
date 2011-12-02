@@ -17,6 +17,7 @@ phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'view/control/pager');
 phutil_require_module('phabricator', 'view/form/base');
 phutil_require_module('phabricator', 'view/form/control/submit');
+phutil_require_module('phabricator', 'view/form/control/text');
 phutil_require_module('phabricator', 'view/form/control/togglebuttons');
 phutil_require_module('phabricator', 'view/form/control/tokenizer');
 phutil_require_module('phabricator', 'view/layout/listfilter');

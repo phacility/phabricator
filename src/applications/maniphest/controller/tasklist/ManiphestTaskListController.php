@@ -40,14 +40,17 @@ class ManiphestTaskListController extends ManiphestController {
 
       $user_phids = $request->getArr('set_users');
       $proj_phids = $request->getArr('set_projects');
+      $task_ids   = $request->getStr('set_tasks');
       $user_phids = implode(',', $user_phids);
       $proj_phids = implode(',', $proj_phids);
       $user_phids = nonempty($user_phids, null);
       $proj_phids = nonempty($proj_phids, null);
+      $task_ids   = nonempty($task_ids, null);
 
       $uri = $request->getRequestURI()
         ->alter('users', $user_phids)
-        ->alter('projects', $proj_phids);
+        ->alter('projects', $proj_phids)
+        ->alter('tasks', $task_ids);
 
       return id(new AphrontRedirectResponse())->setURI($uri);
     }
@@ -62,6 +65,8 @@ class ManiphestTaskListController extends ManiphestController {
       'All Tasks',
       'alltriage'   => 'Need Triage',
       'all'         => 'All Tasks',
+      '<hr />',
+      'custom'      => 'Custom',
     );
 
     if (empty($views[$this->view])) {
@@ -116,12 +121,20 @@ class ManiphestTaskListController extends ManiphestController {
       $project_phids = array();
     }
 
+    $task_ids = $request->getStr('tasks');
+    if (strlen($task_ids)) {
+      $task_ids = preg_split('/[\s,]+/', $task_ids);
+    } else {
+      $task_ids = array();
+    }
+
     $page = $request->getInt('page');
     $page_size = self::DEFAULT_PAGE_SIZE;
 
     list($tasks, $handles, $total_count) = $this->loadTasks(
       $user_phids,
       $project_phids,
+      $task_ids,
       array(
         'status'  => $status_map,
         'group'   => $grouping,
@@ -145,6 +158,15 @@ class ManiphestTaskListController extends ManiphestController {
           ->setName('set_users')
           ->setLabel('Users')
           ->setValue($tokens));
+    }
+
+    if ($this->view == 'custom') {
+      $form->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName('set_tasks')
+          ->setLabel('Task IDs')
+          ->setValue(join(',', $task_ids))
+      );
     }
 
     $tokens = array();
@@ -258,10 +280,12 @@ class ManiphestTaskListController extends ManiphestController {
   private function loadTasks(
     array $user_phids,
     array $project_phids,
+    array $task_ids,
     array $dict) {
 
     $query = new ManiphestTaskQuery();
     $query->withProjects($project_phids);
+    $query->withTaskIDs($task_ids);
 
     $status = $dict['status'];
     if (!empty($status['open']) && !empty($status['closed'])) {

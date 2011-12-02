@@ -24,6 +24,7 @@
  */
 final class ManiphestTaskQuery {
 
+  private $taskIDs          = array();
   private $authorPHIDs      = array();
   private $ownerPHIDs       = array();
   private $includeUnowned   = null;
@@ -60,6 +61,11 @@ final class ManiphestTaskQuery {
 
   public function withAuthors(array $authors) {
     $this->authorPHIDs = $authors;
+    return $this;
+  }
+
+  public function withTaskIDs(array $ids) {
+    $this->taskIDs = $ids;
     return $this;
   }
 
@@ -147,6 +153,7 @@ final class ManiphestTaskQuery {
     }
 
     $where = array();
+    $where[] = $this->buildTaskIDsWhereClause($conn);
     $where[] = $this->buildStatusWhereClause($conn);
     $where[] = $this->buildPriorityWhereClause($conn);
     $where[] = $this->buildAuthorWhereClause($conn);
@@ -225,6 +232,17 @@ final class ManiphestTaskQuery {
     }
 
     return $task_dao->loadAllFromArray($data);
+  }
+
+  private function buildTaskIDsWhereClause($conn) {
+    if (!$this->taskIDs) {
+      return null;
+    }
+
+    return qsprintf(
+      $conn,
+      'id in (%Ld)',
+      $this->taskIDs);
   }
 
   private function buildStatusWhereClause($conn) {
