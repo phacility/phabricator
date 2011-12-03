@@ -296,6 +296,7 @@ class PhabricatorObjectHandleData {
               $handle->setURI('/T'.$task->getID());
               $handle->setFullName('T'.$task->getID().': '.$task->getTitle());
               $handle->setComplete(true);
+              $handle->setAlternateID($task->getID());
               if ($task->getStatus() != ManiphestTaskStatus::STATUS_OPEN) {
                 $closed = PhabricatorObjectHandleStatus::STATUS_CLOSED;
                 $handle->setStatus($closed);
