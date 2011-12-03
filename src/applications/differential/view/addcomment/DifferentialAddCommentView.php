@@ -104,7 +104,15 @@ final class DifferentialAddCommentView extends AphrontView {
           ->setID('comment-content')
           ->setLabel('Comment')
           ->setEnableDragAndDropFileUploads(true)
-          ->setValue($this->draft))
+          ->setValue($this->draft)
+          ->setCaption(phutil_render_tag(
+            'a',
+            array(
+              'href' => PhabricatorEnv::getDoclink(
+                'article/Remarkup_Reference.html'),
+              'target' => '_blank',
+            ),
+            'Remarkup Reference')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($is_serious ? 'Submit' : 'Clowncopterize'));
