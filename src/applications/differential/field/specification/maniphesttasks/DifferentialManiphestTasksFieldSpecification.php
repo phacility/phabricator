@@ -69,10 +69,13 @@ final class DifferentialManiphestTasksFieldSpecification
     $user = $this->getUser();
     $type = ManiphestTransactionType::TYPE_ATTACH;
     $attach_type = PhabricatorPHIDConstants::PHID_TYPE_DREV;
-    $attach_data = array($revision->getPHID() => array());
 
-    $tasks = id(new ManiphestTask())
-      ->loadAllWhere('phid IN (%Ld)', $this->maniphestTasks);
+    $tasks = array();
+    if ($this->maniphestTasks) {
+      $tasks = id(new ManiphestTask())->loadAllWhere(
+        'phid IN (%Ls)',
+        $this->maniphestTasks);
+    }
 
     foreach ($tasks as $task) {
       $transaction = new ManiphestTransaction();
@@ -80,7 +83,10 @@ final class DifferentialManiphestTasksFieldSpecification
       $transaction->setTransactionType($type);
 
       $new = $task->getAttached();
-      $new[$attach_type] = $attach_data;
+      if (empty($new[$attach_type])) {
+        $new[$attach_type] = array();
+      }
+      $new[$attach_type][$revision->getPHID] = array();
 
       $transaction->setNewValue($new);
       $maniphest_editor->applyTransactions($task, array($transaction));

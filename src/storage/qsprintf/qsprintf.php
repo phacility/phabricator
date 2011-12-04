@@ -283,6 +283,11 @@ function _qsprintf_check_scalar_type($value, $type, $query) {
           $query,
           "Expected a scalar or null for %{$type} conversion.");
       }
+      if (!is_numeric($value)) {
+        throw new AphrontQueryParameterException(
+          $query,
+          "Expected numeric value for %{$type} conversion.");
+      }
       break;
 
     case 'Ls': case 's':
