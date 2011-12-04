@@ -124,7 +124,7 @@ class PhabricatorUserOAuthSettingsPanelController
         if ($expires <= time()) {
           $expires = "Expired";
         } else {
-          $expires = phabricator_format_timestamp($expires);
+          $expires = phabricator_datetime($expires, $user);
         }
       } else {
         $expires = 'No Information Available';

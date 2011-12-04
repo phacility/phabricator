@@ -22,6 +22,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
   private $selectedVersusDiffID;
   private $selectedDiffID;
   private $selectedWhitespace;
+  private $user;
 
   public function setDiffs($diffs) {
     $this->diffs = $diffs;
@@ -41,6 +42,15 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
   public function setSelectedWhitespace($whitespace) {
     $this->selectedWhitespace = $whitespace;
     return $this;
+  }
+
+  public function setUser($user) {
+    $this->user = $user;
+    return $this;
+  }
+
+  public function getUser() {
+    return $this->user;
   }
 
   public function render() {
@@ -127,7 +137,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       $desc = $row['desc'];
 
       if ($row['age']) {
-        $age = phabricator_format_timestamp($row['age']);
+        $age = phabricator_datetime($row['age'], $this->getUser());
       } else {
         $age = null;
       }

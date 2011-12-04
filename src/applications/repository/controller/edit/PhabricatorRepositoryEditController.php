@@ -680,6 +680,7 @@ class PhabricatorRepositoryEditController
     $request = $this->getRequest();
     $repository = $this->repository;
     $repository_id = $repository->getID();
+    $viewer = $this->getRequest()->getUser();
 
     $token = $repository->getDetail('github-token');
     $path = '/github-post-receive/'.$repository_id.'/'.$token.'/';
@@ -716,7 +717,7 @@ class PhabricatorRepositoryEditController
     foreach ($notifications as $notification) {
       $rows[] = array(
         phutil_escape_html($notification->getRemoteAddress()),
-        phabricator_format_timestamp($notification->getDateCreated()),
+        phabricator_datetime($notification->getDateCreated(), $viewer),
         $notification->getPayload()
           ? phutil_escape_html(substr($notification->getPayload(), 0, 32).'...')
           : 'Empty',

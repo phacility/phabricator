@@ -70,7 +70,7 @@ class PhabricatorCountdownListController
             'href' => '/countdown/'.$timer->getID().'/',
           ),
           phutil_escape_html($timer->getTitle())),
-        phabricator_format_timestamp($timer->getDatepoint()),
+        phabricator_datetime($timer->getDatepoint(), $user),
         $edit_button,
         $delete_button,
       );

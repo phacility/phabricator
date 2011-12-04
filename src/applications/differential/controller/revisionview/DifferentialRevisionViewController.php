@@ -214,6 +214,7 @@ class DifferentialRevisionViewController extends DifferentialController {
     $diff_history->setSelectedVersusDiffID($diff_vs);
     $diff_history->setSelectedDiffID($target->getID());
     $diff_history->setSelectedWhitespace($whitespace);
+    $diff_history->setUser($user);
 
     $local_view = new DifferentialLocalCommitsView();
     $local_view->setUser($user);

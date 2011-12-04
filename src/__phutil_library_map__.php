@@ -736,7 +736,6 @@ phutil_register_library_map(array(
     'phabricator_date' => 'view/utils',
     'phabricator_datetime' => 'view/utils',
     'phabricator_format_relative_time' => 'view/utils',
-    'phabricator_format_timestamp' => 'view/utils',
     'phabricator_format_units_generic' => 'view/utils',
     'phabricator_render_form' => 'infrastructure/javelin/markup',
     'phabricator_time' => 'view/utils',

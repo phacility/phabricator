@@ -81,25 +81,6 @@ function phabricator_format_relative_time($duration) {
     $precision = 0);
 }
 
-function phabricator_format_timestamp($epoch) {
-  $difference = (time() - $epoch);
-
-  if ($difference < 0) {
-    $difference = -$difference;
-    $relative = 'from now';
-  } else {
-    $relative = 'ago';
-  }
-
-  if ($difference < 60 * 60 * 24) {
-    return phabricator_format_relative_time($difference).' '.$relative;
-  } else if (date('Y') == date('Y', $epoch)) {
-    return date('M j, g:i A', $epoch);
-  } else {
-    return date('F jS, Y', $epoch);
-  }
-}
-
 function phabricator_format_units_generic(
   $n,
   array $scales,

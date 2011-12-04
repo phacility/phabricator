@@ -157,8 +157,8 @@ class PhabricatorProjectProfileController
         '<p><em>There are no projects attached for such specie.</em></p>';
     }
 
-
-    $timestamp = phabricator_format_timestamp($project->getDateCreated());
+    $viewer = $this->getRequest()->getUser();
+    $timestamp = phabricator_datetime($project->getDateCreated(), $viewer);
     $status = PhabricatorProjectStatus::getNameForStatus(
       $project->getStatus());
 

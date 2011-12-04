@@ -150,6 +150,8 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
         ),
         'Recent Commits');
 
+    $viewer = $this->getRequest()->getUser();
+
     $content =
       '<div class="phabricator-profile-info-group">
         <h1 class="phabricator-profile-info-header">Basic Information</h1>
@@ -161,7 +163,9 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
             </tr>
             <tr>
               <th>User Since</th>
-              <td>'.phabricator_format_timestamp($user->getDateCreated()).'</td>
+              <td>'.phabricator_datetime($user->getDateCreated(),
+                                         $viewer).
+             '</td>
             </tr>
           </table>
         </div>
