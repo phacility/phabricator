@@ -29,7 +29,6 @@ class DifferentialRevisionListData {
   const QUERY_PHIDS                    = 'phids';
   const QUERY_CC                       = 'cc';
   const QUERY_ALL_OPEN                 = 'all-open';
-  const QUERY_UPDATED_SINCE            = 'updated-since';
 
   private $ids;
   private $filter;
@@ -194,9 +193,6 @@ class DifferentialRevisionListData {
           'revision.phid in (%Ls)',
           $this->ids);
         break;
-      case self::QUERY_UPDATED_SINCE:
-        $this->revisions = $this->loadAllUpdated();
-        break;
     }
 
     return $this->revisions;
@@ -209,44 +205,6 @@ class DifferentialRevisionListData {
       DifferentialRevisionStatus::ACCEPTED,
     );
   }
-
-  private function loadAllUpdated() {
-    $revision = new DifferentialRevision();
-    $min_view_time = (int)PhabricatorEnv::getEnvConfig('updates.min-view-time');
-
-    $data = queryfx_all(
-      $revision->establishConnection('r'),
-      'SELECT revs.* FROM (
-        (
-          SELECT revision.*
-          FROM %T revision
-          WHERE revision.authorPHID in (%Ls)
-        )
-        UNION
-        (
-           SELECT revision.*
-           FROM %T revision
-           JOIN %T rel
-           WHERE rel.revisionId = revision.Id AND rel.objectPHID in (%Ls)
-        )
-      ) as revs
-      LEFT JOIN %T viewtime ON
-        viewtime.viewerPHID in (%Ls)
-        AND viewtime.objectPHID = revs.phid
-      WHERE GREATEST(%d, IFNULL(viewtime.viewTime, 0)) < revs.dateModified
-      %Q',
-      $revision->getTableName(),
-      $this->ids,
-      $revision->getTableName(),
-      DifferentialRevision::RELATIONSHIP_TABLE,
-      $this->ids,
-      DifferentialRevision::TABLE_VIEW_TIME,
-      $this->ids,
-      $min_view_time,
-      $this->getOrderClause());
-    return $revision->loadAllFromArray($data);
-  }
-
 
   private function loadAllOpen() {
     return $this->loadAllWhere('status in (%Ld)', $this->getOpenStatuses());
