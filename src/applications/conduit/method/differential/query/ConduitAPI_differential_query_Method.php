@@ -39,7 +39,7 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
     $order_types = implode(', ', $order_types);
 
     return array(
-      'author'    => 'optional phid',
+      'authors'   => 'optional list<phid>',
       'ccs'       => 'optional list<phid>',
       'reviewers' => 'optional list<phid>',
       'paths'     => 'optional list<string>',
@@ -62,7 +62,7 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $author    = $request->getValue('author');
+    $authors   = $request->getValue('authors');
     $ccs       = $request->getValue('ccs');
     $reviewers = $request->getValue('reviewers');
     $paths     = $request->getValue('paths');
@@ -74,7 +74,7 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
     $phids     = $request->getValue('phids');
 
     $query = new DifferentialRevisionQuery();
-    $query->withAuthor($author);
+    $query->withAuthors($authors);
     if ($ccs) {
       $query->withCCs($ccs);
     }
