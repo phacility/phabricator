@@ -86,7 +86,7 @@ final class DifferentialManiphestTasksFieldSpecification
       if (empty($new[$attach_type])) {
         $new[$attach_type] = array();
       }
-      $new[$attach_type][$revision->getPHID] = array();
+      $new[$attach_type][$revision->getPHID()] = array();
 
       $transaction->setNewValue($new);
       $maniphest_editor->applyTransactions($task, array($transaction));
