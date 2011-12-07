@@ -101,6 +101,10 @@ function xsprintf_query($userdata, &$pattern, &$pos, &$value, &$length) {
 
   $prefix   = '';
 
+  if (!($conn instanceof AphrontDatabaseConnection)) {
+    throw new Exception("Invalid database connection!");
+  }
+
   switch ($type) {
     case '=': // Nullable test
       switch ($next) {

@@ -7,15 +7,17 @@
 
 
 phutil_require_module('phabricator', 'aphront/response/redirect');
+phutil_require_module('phabricator', 'applications/differential/constants/revisionstatus');
 phutil_require_module('phabricator', 'applications/differential/controller/base');
-phutil_require_module('phabricator', 'applications/differential/data/revisionlist');
-phutil_require_module('phabricator', 'applications/differential/storage/revision');
+phutil_require_module('phabricator', 'applications/differential/query/revision');
 phutil_require_module('phabricator', 'applications/differential/view/revisionlist');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
-phutil_require_module('phabricator', 'storage/queryfx');
+phutil_require_module('phabricator', 'view/control/pager');
 phutil_require_module('phabricator', 'view/form/base');
 phutil_require_module('phabricator', 'view/form/control/submit');
+phutil_require_module('phabricator', 'view/form/control/togglebuttons');
 phutil_require_module('phabricator', 'view/form/control/tokenizer');
+phutil_require_module('phabricator', 'view/form/error');
 phutil_require_module('phabricator', 'view/layout/listfilter');
 phutil_require_module('phabricator', 'view/layout/panel');
 phutil_require_module('phabricator', 'view/layout/sidenav');

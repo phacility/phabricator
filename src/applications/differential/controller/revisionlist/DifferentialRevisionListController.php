@@ -40,219 +40,146 @@ class DifferentialRevisionListController extends DifferentialController {
         ->setURI($request->getRequestURI()->alter('phid', $view_target));
     }
 
-    $filters = array();
-    if (!$viewer_is_anonymous) {
-      $filters = array(
-        'User Revisions',
-        'active' => array(
-          'name'  => 'Active Revisions',
-          'queries' => array(
-            array(
-              'query'
-                => DifferentialRevisionListData::QUERY_NEED_ACTION_FROM_SELF,
-              'header' => 'Action Required',
-              'nodata' => 'You have no revisions requiring action.',
-            ),
-            array(
-              'query'
-                => DifferentialRevisionListData::QUERY_NEED_ACTION_FROM_OTHERS,
-              'header' => 'Waiting on Others',
-              'nodata' => 'You have no revisions waiting on others',
-            ),
-          ),
-        ),
-        'open' => array(
-          'name' => 'Open Revisions',
-          'queries' => array(
-            array(
-              'query' => DifferentialRevisionListData::QUERY_OPEN_OWNED,
-              'header' => 'Your Open Revisions',
-            ),
-          ),
-        ),
-        'reviews' => array(
-          'name' => 'Open Reviews',
-          'queries' => array(
-            array(
-              'query' => DifferentialRevisionListData::QUERY_OPEN_REVIEWER,
-              'header' => 'Your Open Reviews',
-            ),
-          ),
-        ),
-        'all' => array(
-          'name' => 'All Revisions',
-          'queries' => array(
-            array(
-              'query' => DifferentialRevisionListData::QUERY_OWNED,
-              'header' => 'Your Revisions',
-            ),
-          ),
-        ),
-        'related' => array(
-          'name' => 'All Revisions and Reviews',
-          'queries' => array(
-            array(
-              'query' => DifferentialRevisionListData::QUERY_OWNED_OR_REVIEWER,
-              'header' => 'Your Revisions and Reviews',
-            ),
-          ),
-        ),
-        '<hr />'
-      );
-    }
-    $filters = array_merge($filters, array(
-      'All Revisions',
-      'allopen' => array(
-        'name' => 'Open',
-        'nofilter' => true,
-        'queries' => array(
-          array(
-            'query' => DifferentialRevisionListData::QUERY_ALL_OPEN,
-            'header' => 'All Open Revisions',
-          ),
-        ),
-      ),
-    ));
+    $params = array_filter(
+      array(
+        'phid' => $request->getStr('phid'),
+        'status' => $request->getStr('status'),
+        'order' => $request->getStr('order'),
+      ));
 
-    if (empty($filters[$this->filter])) {
-      if (!$viewer_is_anonymous) {
-        $this->filter = 'active';
-      } else {
-        $this->filter = 'allopen';
-      }
-    }
+    $default_filter = ($viewer_is_anonymous ? 'all' : 'active');
+    $filters = $this->getFilters();
+    $this->filter = $this->selectFilter(
+      $filters,
+      $this->filter,
+      $default_filter);
 
-    $view_phid = nonempty($request->getStr('phid'), $user->getPHID());
+    $uri = new PhutilURI('/differential/filter/'.$this->filter.'/');
+    $uri->setQueryParams($params);
 
-    $queries = array();
-    $filter = $filters[$this->filter];
-    foreach ($filter['queries'] as $query) {
-      $query_object = new DifferentialRevisionListData(
-        $query['query'],
-        array($view_phid));
-      $queries[] = array(
-        'object' => $query_object,
-      ) + $query;
-    }
+    // Fill in the defaults we'll actually use for calculations if any
+    // parameters are missing.
+    $params += array(
+      'phid' => $user->getPHID(),
+      'status' => 'open',
+      'order' => 'modified',
+    );
 
     $side_nav = new AphrontSideNavView();
-
-    $query = null;
-    if ($view_phid) {
-      $query = '?phid='.$view_phid;
+    foreach ($filters as $filter) {
+      list($filter_name, $display_name) = $filter;
+      if ($filter_name) {
+        $href = clone $uri;
+        $href->setPath('/differential/filter/'.$filter_name.'/');
+        if ($filter_name == $this->filter) {
+          $class = 'aphront-side-nav-selected';
+        } else {
+          $class = null;
+        }
+        $item = phutil_render_tag(
+          'a',
+          array(
+            'href' => (string)$href,
+            'class' => $class,
+          ),
+          phutil_escape_html($display_name));
+      } else {
+        $item = phutil_render_tag(
+          'span',
+          array(),
+          phutil_escape_html($display_name));
+      }
+      $side_nav->addNavItem($item);
     }
 
-    foreach ($filters as $filter_name => $filter_desc) {
-      if (is_int($filter_name)) {
-        $side_nav->addNavItem(
-          phutil_render_tag(
-            'span',
-            array(),
-            $filter_desc));
-        continue;
+    $panels = array();
+    $handles = array();
+    $controls = $this->getFilterControls($this->filter);
+    if ($this->getFilterRequiresUser($this->filter) && !$params['phid']) {
+      // In the anonymous case, we still want to let you see some user's
+      // list, but we don't have a default PHID to provide (normally, we use
+      // the viewing user's). Show a warning instead.
+      $warning = new AphrontErrorView();
+      $warning->setSeverity(AphrontErrorView::SEVERITY_WARNING);
+      $warning->setTitle('User Required');
+      $warning->appendChild(
+        'This filter requires that a user be specified above.');
+      $panels[] = $warning;
+    } else {
+      $query = $this->buildQuery($this->filter, $params['phid']);
+
+      $pager = null;
+      if ($this->getFilterAllowsPaging($this->filter)) {
+        $pager = new AphrontPagerView();
+        $pager->setOffset($request->getInt('page'));
+        $pager->setPageSize(1000);
+        $pager->setURI($uri, 'page');
+
+        $query->setOffset($pager->getOffset());
+        $query->setLimit($pager->getPageSize() + 1);
       }
-      $selected = ($filter_name == $this->filter);
-      $side_nav->addNavItem(
+
+      foreach ($controls as $control) {
+        $this->applyControlToQuery($control, $query, $params);
+      }
+
+      $revisions = $query->execute();
+
+      if ($pager) {
+        $revisions = $pager->sliceResults($revisions);
+      }
+
+      $views = $this->buildViews($this->filter, $params['phid'], $revisions);
+
+      $view_objects = ipull($views, 'view');
+      $phids = array_mergev(mpull($view_objects, 'getRequiredHandlePHIDs'));
+      $phids[] = $params['phid'];
+      $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+
+      foreach ($views as $view) {
+        $view['view']->setHandles($handles);
+        $panel = new AphrontPanelView();
+        $panel->setHeader($view['title']);
+        $panel->appendChild($view['view']);
+        if ($pager) {
+          $panel->appendChild($pager);
+        }
+        $panels[] = $panel;
+      }
+    }
+
+    $filter_form = id(new AphrontFormView())
+      ->setAction('/differential/filter/'.$this->filter.'/')
+      ->setUser($user);
+    foreach ($controls as $control) {
+      $control_view = $this->renderControl($control, $handles, $uri, $params);
+      $filter_form->appendChild($control_view);
+    }
+    $filter_form
+      ->addHiddenInput('status', $params['status'])
+      ->addHiddenInput('order', $params['order'])
+      ->appendChild(
+        id(new AphrontFormSubmitControl())
+          ->setValue('Filter Revisions'));
+
+    $filter_view = new AphrontListFilterView();
+    $filter_view->appendChild($filter_form);
+
+    if (!$viewer_is_anonymous) {
+      $create_uri = new PhutilURI('/differential/diff/create/');
+      $filter_view->addButton(
         phutil_render_tag(
           'a',
           array(
-            'href' => '/differential/filter/'.$filter_name.'/'.$query,
-            'class' => $selected ? 'aphront-side-nav-selected' : null,
+            'href'  => (string)$create_uri,
+            'class' => 'green button',
           ),
-          phutil_escape_html($filter_desc['name'])));
+          'Create Revision'));
     }
 
-    $rev_ids = array();
-    foreach ($queries as $key => $query) {
-      $revisions = $query['object']->loadRevisions();
-      foreach ($revisions as $revision) {
-        $rev_ids[$revision->getID()] = true;
-      }
-      $queries[$key]['revisions'] = $revisions;
-    }
+    $side_nav->appendChild($filter_view);
 
-    if ($rev_ids) {
-      $rev = new DifferentialRevision();
-      $relationships = queryfx_all(
-        $rev->establishConnection('r'),
-        'SELECT * FROM %T WHERE revisionID IN (%Ld) ORDER BY sequence',
-        DifferentialRevision::RELATIONSHIP_TABLE,
-        array_keys($rev_ids));
-      $relationships = igroup($relationships, 'revisionID');
-    } else {
-      $relationships = array();
-    }
-
-    foreach ($queries as $query) {
-      foreach ($query['revisions'] as $revision) {
-        $revision->attachRelationships(
-          idx(
-            $relationships,
-            $revision->getID(),
-            array()));
-      }
-    }
-
-    $phids = array();
-    foreach ($queries as $key => $query) {
-      $view = id(new DifferentialRevisionListView())
-        ->setRevisions($query['revisions'])
-        ->setUser($user)
-        ->setNoDataString(idx($query, 'nodata'));
-      $phids[] = $view->getRequiredHandlePHIDs();
-      $queries[$key]['view'] = $view;
-    }
-    $phids = array_mergev($phids);
-    $phids[] = $view_phid;
-
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
-
-    foreach ($queries as $query) {
-      $query['view']->setHandles($handles);
-    }
-
-    if (empty($filters[$this->filter]['nofilter'])) {
-      $filter_form = id(new AphrontFormView())
-        ->setUser($user)
-        ->appendChild(
-          id(new AphrontFormTokenizerControl())
-            ->setDatasource('/typeahead/common/users/')
-            ->setLabel('View User')
-            ->setName('view_user')
-            ->setValue(
-              array(
-                $view_phid => $handles[$view_phid]->getFullName(),
-              ))
-              ->setLimit(1))
-        ->appendChild(
-          id(new AphrontFormSubmitControl())
-            ->setValue('Filter Revisions'));
-      $filter_view = new AphrontListFilterView();
-      $filter_view->appendChild($filter_form);
-
-      $viewer_is_anonymous = !$this->getRequest()->getUser()->isLoggedIn();
-      if (!$viewer_is_anonymous) {
-        $create_uri = new PhutilURI('/differential/diff/create/');
-        $filter_view->addButton(
-          phutil_render_tag(
-            'a',
-            array(
-              'href'  => (string)$create_uri,
-              'class' => 'green button',
-            ),
-            'Create Revision'));
-      }
-
-      $side_nav->appendChild($filter_view);
-    }
-
-    foreach ($queries as $query) {
-      $table = $query['view']->render();
-
-      $panel = new AphrontPanelView();
-      $panel->setHeader($query['header']);
-      $panel->appendChild($table);
-
+    foreach ($panels as $panel) {
       $side_nav->appendChild($panel);
     }
 
@@ -262,6 +189,263 @@ class DifferentialRevisionListController extends DifferentialController {
         'title' => 'Differential Home',
         'tab' => 'revisions',
       ));
+  }
+
+  private function getFilters() {
+    return array(
+      array(null,         'User Revisions'),
+      array('active',     'Active'),
+      array('revisions',  'Revisions'),
+      array('reviews',    'Reviews'),
+      array('subscribed', 'Subscribed'),
+      array(null,         'All Revisions'),
+      array('all',        'All'),
+    );
+  }
+
+  private function selectFilter(
+    array $filters,
+    $requested_filter,
+    $default_filter) {
+
+    // If the user requested a filter, make sure it actually exists.
+    if ($requested_filter) {
+      foreach ($filters as $filter) {
+        if ($filter[0] === $requested_filter) {
+          return $requested_filter;
+        }
+      }
+    }
+
+    // If not, return the default filter.
+    return $default_filter;
+  }
+
+  private function getFilterRequiresUser($filter) {
+    static $requires = array(
+      'active'      => true,
+      'revisions'   => true,
+      'reviews'     => true,
+      'subscribed'  => true,
+      'all'         => false,
+    );
+    if (!isset($requires[$filter])) {
+      throw new Exception("Unknown filter '{$filter}'!");
+    }
+    return $requires[$filter];
+  }
+
+  private function getFilterAllowsPaging($filter) {
+    static $allows = array(
+      'active'      => false,
+      'revisions'   => true,
+      'reviews'     => true,
+      'subscribed'  => true,
+      'all'         => true,
+    );
+    if (!isset($allows[$filter])) {
+      throw new Exception("Unknown filter '{$filter}'!");
+    }
+    return $allows[$filter];
+  }
+
+  private function getFilterControls($filter) {
+    static $controls = array(
+      'active'      => array('phid'),
+      'revisions'   => array('phid', 'status', 'order'),
+      'reviews'     => array('phid', 'status', 'order'),
+      'subscribed'  => array('phid', 'status', 'order'),
+      'all'         => array('status', 'order'),
+    );
+    if (!isset($controls[$filter])) {
+      throw new Exception("Unknown filter '{$filter}'!");
+    }
+    return $controls[$filter];
+  }
+
+  private function buildQuery($filter, $user_phid) {
+    $query = new DifferentialRevisionQuery();
+
+    $query->needRelationships(true);
+
+    switch ($filter) {
+      case 'active':
+        $query->withResponsibleUsers(array($user_phid));
+        $query->withStatus(DifferentialRevisionQuery::STATUS_OPEN);
+        $query->setLimit(null);
+        break;
+      case 'revisions':
+        $query->withAuthors(array($user_phid));
+        break;
+      case 'reviews':
+        $query->withReviewers(array($user_phid));
+        break;
+      case 'subscribed':
+        $query->withSubscribers(array($user_phid));
+        break;
+      case 'all':
+        break;
+      default:
+        throw new Exception("Unknown filter '{$filter}'!");
+    }
+    return $query;
+  }
+
+  private function renderControl(
+    $control,
+    array $handles,
+    PhutilURI $uri,
+    array $params) {
+    switch ($control) {
+      case 'phid':
+        $view_phid = $params['phid'];
+        $value = array();
+        if ($view_phid) {
+          $value = array(
+            $view_phid => $handles[$view_phid]->getFullName(),
+          );
+        }
+        return id(new AphrontFormTokenizerControl())
+          ->setDatasource('/typeahead/common/users/')
+          ->setLabel('View User')
+          ->setName('view_user')
+          ->setValue($value)
+          ->setLimit(1);
+      case 'status':
+        $links = $this->renderToggleButtons(
+          array(
+            'open' => 'Open',
+            'all'  => 'All',
+          ),
+          $params['status'],
+          $uri,
+          'status');
+        return id(new AphrontFormToggleButtonsControl())
+          ->setLabel('Status')
+          ->setValue($links);
+      case 'order':
+        $links = $this->renderToggleButtons(
+          array(
+            'modified' => 'Modified',
+            'created' => 'Created',
+          ),
+          $params['order'],
+          $uri,
+          'order');
+        return id(new AphrontFormToggleButtonsControl())
+          ->setLabel('Order')
+          ->setValue($links);
+      default:
+        throw new Exception("Unknown control '{$control}'!");
+    }
+  }
+
+  private function applyControlToQuery($control, $query, array $params) {
+    switch ($control) {
+      case 'phid':
+        // Already applied by query construction.
+        break;
+      case 'status':
+        if ($params['status'] == 'open') {
+          $query->withStatus(DifferentialRevisionQuery::STATUS_OPEN);
+        }
+        break;
+      case 'order':
+        if ($params['order'] == 'created') {
+          $query->setOrder(DifferentialRevisionQuery::ORDER_CREATED);
+        }
+        break;
+      default:
+        throw new Exception("Unknown control '{$control}'!");
+    }
+  }
+
+  private function buildViews($filter, $user_phid, array $revisions) {
+    $user = $this->getRequest()->getUser();
+
+    $views = array();
+    switch ($filter) {
+      case 'active':
+        $active = array();
+        $waiting = array();
+
+        // Bucket revisions into $active (revisions you need to do something
+        // about) and $waiting (revisions you're waiting on someone else to do
+        // something about).
+        foreach ($revisions as $revision) {
+          $status_review = DifferentialRevisionStatus::NEEDS_REVIEW;
+          $needs_review = ($revision->getStatus() == $status_review);
+          $filter_is_author = ($revision->getAuthorPHID() == $user_phid);
+
+          // If exactly one of "needs review" and "the user is the author" is
+          // true, the user needs to act on it. Otherwise, they're waiting on
+          // it.
+          if ($needs_review ^ $filter_is_author) {
+            $active[] = $revision;
+          } else {
+            $waiting[] = $revision;
+          }
+        }
+
+        $view = id(new DifferentialRevisionListView())
+          ->setRevisions($active)
+          ->setUser($user)
+          ->setNoDataString("You have no active revisions requiring action.");
+        $views[] = array(
+          'title' => 'Action Required',
+          'view'  => $view,
+        );
+
+        $view = id(new DifferentialRevisionListView())
+          ->setRevisions($waiting)
+          ->setUser($user)
+          ->setNoDataString("You have no active revisions waiting on others.");
+        $views[] = array(
+          'title' => 'Waiting On Others',
+          'view'  => $view,
+        );
+        break;
+      case 'revisions':
+      case 'reviews':
+      case 'subscribed':
+      case 'all':
+        $titles = array(
+          'revisions'   => 'Revisions by Author',
+          'reviews'     => 'Revisions by Reviewer',
+          'subscribed'  => 'Revisions by Subscriber',
+          'all'         => 'Revisions',
+        );
+        $view = id(new DifferentialRevisionListView())
+          ->setRevisions($revisions)
+          ->setUser($user);
+        $views[] = array(
+          'title' => idx($titles, $filter),
+          'view'  => $view,
+        );
+        break;
+      default:
+        throw new Exception("Unknown filter '{$filter}'!");
+    }
+    return $views;
+  }
+
+  private function renderToggleButtons($buttons, $selected, $uri, $param) {
+    $links = array();
+    foreach ($buttons as $value => $name) {
+      if ($value == $selected) {
+        $more = ' toggle-selected toggle-fixed';
+      } else {
+        $more = null;
+      }
+      $links[] = phutil_render_tag(
+        'a',
+        array(
+          'class' => 'toggle'.$more,
+          'href'  => $uri->alter($param, $value),
+        ),
+        phutil_escape_html($name));
+    }
+    return implode('', $links);
   }
 
 }

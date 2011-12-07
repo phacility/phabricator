@@ -259,31 +259,11 @@ final class DifferentialRevisionQuery {
     $table = new DifferentialRevision();
     $conn_r = $table->establishConnection('r');
 
-    $select = qsprintf(
-      $conn_r,
-      'SELECT r.* FROM %T r',
-      $table->getTableName());
-
-    $joins = $this->buildJoinsClause($conn_r);
-    $where = $this->buildWhereClause($conn_r);
-    $group_by = $this->buildGroupByClause($conn_r);
-    $order_by = $this->buildOrderByClause($conn_r);
-
-    $limit = qsprintf(
-      $conn_r,
-      'LIMIT %d, %d',
-      (int)$this->offset,
-      $this->limit);
-
-    $data = queryfx_all(
-      $conn_r,
-      '%Q %Q %Q %Q %Q %Q',
-      $select,
-      $joins,
-      $where,
-      $group_by,
-      $order_by,
-      $limit);
+    if ($this->shouldUseResponsibleFastPath()) {
+      $data = $this->loadDataUsingResponsibleFastPath();
+    } else {
+      $data = $this->loadData();
+    }
 
     $revisions = $table->loadAllFromArray($data);
 
@@ -304,6 +284,96 @@ final class DifferentialRevisionQuery {
     }
 
     return $revisions;
+  }
+
+
+  /**
+   * Determine if we should execute an optimized, fast-path query to fetch
+   * open revisions for one responsible user. This is used by the Differential
+   * dashboard and much faster when executed as a UNION ALL than with JOIN
+   * and WHERE, which is why we special case it.
+   */
+  private function shouldUseResponsibleFastPath() {
+    if ((count($this->responsibles) == 1) &&
+        ($this->status == self::STATUS_OPEN) &&
+        ($this->order == self::ORDER_MODIFIED) &&
+        !$this->offset &&
+        !$this->limit &&
+        !$this->subscribers &&
+        !$this->reviewers &&
+        !$this->ccs &&
+        !$this->authors &&
+        !$this->revIDs &&
+        !$this->phids) {
+      return true;
+    }
+    return false;
+  }
+
+
+  private function loadDataUsingResponsibleFastPath() {
+    $table = new DifferentialRevision();
+    $conn_r = $table->establishConnection('r');
+
+    $responsible_phid = reset($this->responsibles);
+    $open_statuses = array(
+      DifferentialRevisionStatus::NEEDS_REVIEW,
+      DifferentialRevisionStatus::NEEDS_REVISION,
+      DifferentialRevisionStatus::ACCEPTED,
+    );
+
+    return queryfx_all(
+      $conn_r,
+      'SELECT * FROM %T WHERE authorPHID = %s AND status IN (%Ld)
+        UNION ALL
+       SELECT r.* FROM %T r JOIN %T rel
+        ON rel.revisionID = r.id
+        AND rel.relation = %s
+        AND rel.objectPHID = %s
+        WHERE r.status IN (%Ld)',
+      $table->getTableName(),
+      $responsible_phid,
+      $open_statuses,
+
+      $table->getTableName(),
+      DifferentialRevision::RELATIONSHIP_TABLE,
+      DifferentialRevision::RELATION_REVIEWER,
+      $responsible_phid,
+      $open_statuses);
+  }
+
+  private function loadData() {
+    $table = new DifferentialRevision();
+    $conn_r = $table->establishConnection('r');
+
+    $select = qsprintf(
+      $conn_r,
+      'SELECT r.* FROM %T r',
+      $table->getTableName());
+
+    $joins = $this->buildJoinsClause($conn_r);
+    $where = $this->buildWhereClause($conn_r);
+    $group_by = $this->buildGroupByClause($conn_r);
+    $order_by = $this->buildOrderByClause($conn_r);
+
+    $limit = '';
+    if ($this->offset || $this->limit) {
+      $limit = qsprintf(
+        $conn_r,
+        'LIMIT %d, %d',
+        (int)$this->offset,
+        $this->limit);
+    }
+
+    return queryfx_all(
+      $conn_r,
+      '%Q %Q %Q %Q %Q %Q',
+      $select,
+      $joins,
+      $where,
+      $group_by,
+      $order_by,
+      $limit);
   }
 
 
