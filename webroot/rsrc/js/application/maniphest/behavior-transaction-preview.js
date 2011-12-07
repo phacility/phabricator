@@ -46,5 +46,5 @@ JX.behavior('maniphest-transaction-preview', function(config) {
   JX.DOM.listen(comments, 'keydown', null, trigger);
   JX.DOM.listen(action, 'change', null, trigger);
 
-  setTimeout(function() { request.start(); }, 0);
+  request.start();
 });

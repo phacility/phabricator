@@ -146,9 +146,31 @@ final class CelerityStaticResourceResponse {
 
     $onload = array();
     if ($this->behaviors) {
-      $behavior = json_encode($this->behaviors);
-      $onload[] = 'JX.initBehaviors('.$behavior.')';
+      $behaviors = $this->behaviors;
       $this->behaviors = array();
+
+      $higher_priority_names = array(
+        'refresh-csrf',
+      );
+
+      $higher_priority_behaviors = array_select_keys(
+        $behaviors,
+        $higher_priority_names);
+
+      foreach ($higher_priority_names as $name) {
+        unset($behaviors[$name]);
+      }
+
+      $behavior_groups = array(
+        $higher_priority_behaviors,
+        $behaviors);
+
+      foreach ($behavior_groups as $group) {
+        if (!$group) {
+          continue;
+        }
+        $onload[] = 'JX.initBehaviors('.json_encode($group).')';
+      }
     }
 
     if ($onload) {

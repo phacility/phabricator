@@ -9,6 +9,7 @@
 phutil_require_module('phabricator', 'infrastructure/celerity/map');
 
 phutil_require_module('phutil', 'markup');
+phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('CelerityStaticResourceResponse.php');
