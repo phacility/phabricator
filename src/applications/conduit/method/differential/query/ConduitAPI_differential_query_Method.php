@@ -39,16 +39,20 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
     $order_types = implode(', ', $order_types);
 
     return array(
-      'authors'   => 'optional list<phid>',
-      'ccs'       => 'optional list<phid>',
-      'reviewers' => 'optional list<phid>',
-      'paths'     => 'optional list<string>',
-      'status'    => 'optional enum<'.$status_types.'>',
-      'order'     => 'optional enum<'.$order_types.'>',
-      'limit'     => 'optional uint',
-      'offset'    => 'optional uint',
-      'ids'       => 'optional list<uint>',
-      'phids'     => 'optional list<phid>',
+      'authors'           => 'optional list<phid>',
+      'ccs'               => 'optional list<phid>',
+      'reviewers'         => 'optional list<phid>',
+      // TODO: Implement this, it needs to accept a repository ID in addition
+      // to a path so the signature needs to be a little more complicated.
+      // 'paths'          => 'optional list<pair<...>>',
+      'status'            => 'optional enum<'.$status_types.'>',
+      'order'             => 'optional enum<'.$order_types.'>',
+      'limit'             => 'optional uint',
+      'offset'            => 'optional uint',
+      'ids'               => 'optional list<uint>',
+      'phids'             => 'optional list<phid>',
+      'subscribers'       => 'optional list<phid>',
+      'responsibleUsers'  => 'optional list<phid>',
     );
   }
 
@@ -62,30 +66,39 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $authors   = $request->getValue('authors');
-    $ccs       = $request->getValue('ccs');
-    $reviewers = $request->getValue('reviewers');
-    $paths     = $request->getValue('paths');
-    $status    = $request->getValue('status');
-    $order     = $request->getValue('order');
-    $limit     = $request->getValue('limit');
-    $offset    = $request->getValue('offset');
-    $ids       = $request->getValue('ids');
-    $phids     = $request->getValue('phids');
+    $authors            = $request->getValue('authors');
+    $ccs                = $request->getValue('ccs');
+    $reviewers          = $request->getValue('reviewers');
+    $status             = $request->getValue('status');
+    $order              = $request->getValue('order');
+    $limit              = $request->getValue('limit');
+    $offset             = $request->getValue('offset');
+    $ids                = $request->getValue('ids');
+    $phids              = $request->getValue('phids');
+    $subscribers        = $request->getValue('subscribers');
+    $responsible_users  = $request->getValue('responsibleUsers');
 
     $query = new DifferentialRevisionQuery();
-    $query->withAuthors($authors);
+    if ($authors) {
+      $query->withAuthors($authors);
+    }
     if ($ccs) {
       $query->withCCs($ccs);
     }
     if ($reviewers) {
       $query->withReviewers($reviewers);
     }
+/* TODO: Implement.
+    $paths     = $request->getValue('paths');
     if ($paths) {
       foreach ($paths as $path) {
-        $query->withPath($path);
+
+        // (Lookup the repository IDs.)
+
+        $query->withPath($repository_id, $path);
       }
     }
+*/
     if ($status) {
       $query->withStatus($status);
     }
@@ -103,6 +116,12 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
     }
     if ($phids) {
       $query->withPHIDs($phids);
+    }
+    if ($responsible_users) {
+      $query->withResponsibleUsers($responsible_users);
+    }
+    if ($subscribers) {
+      $query->withSubscribers($subscribers);
     }
 
     $revisions = $query->execute();

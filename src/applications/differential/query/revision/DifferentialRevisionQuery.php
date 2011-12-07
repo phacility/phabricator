@@ -43,6 +43,8 @@ final class DifferentialRevisionQuery {
   private $reviewers = array();
   private $revIDs = array();
   private $phids = array();
+  private $subscribers = array();
+  private $responsibles = array();
 
   private $order            = 'order-modified';
   const ORDER_MODIFIED      = 'order-modified';
@@ -84,32 +86,20 @@ final class DifferentialRevisionQuery {
   }
 
   /**
-   * Filter results to revisions authored by a given PHID.
-   *
-   * @param phid Author PHID
-   * @return this
-   * @task config
-   */
-  public function withAuthor($author_phid) {
-    $this->authors[] = $author_phid;
-    return $this;
-  }
-
-  /**
    * Filter results to revisions authored by one of the given PHIDs.
    *
    * @param array List of PHIDs of authors
    * @return this
    * @task config
    */
-  public function withAuthors(array $author_list) {
-    $this->authors = $author_list;
+  public function withAuthors(array $author_phids) {
+    $this->authors = $author_phids;
     return $this;
   }
 
   /**
    * Filter results to revisions which CC one of the listed people. Calling this
-   * function will clear anything set by previous calls to withCCs or withCC.
+   * function will clear anything set by previous calls to @{method:withCCs}.
    *
    * @param array List of PHIDs of subscribers
    * @return this
@@ -120,22 +110,11 @@ final class DifferentialRevisionQuery {
     return $this;
   }
 
-  /**
-   * Filter results to include revisions which CC the given PHID.
-   *
-   * @param phid CC PHID
-   * @return this
-   * @task config
-   */
-  public function withCC($cc) {
-    $this->ccs[] = $cc;
-    return $this;
-  }
 
   /**
    * Filter results to revisions that have one of the provided PHIDs as
    * reviewers. Calling this function will clear anything set by previous calls
-   * to withReviewers or withReviewer.
+   * to @{method:withReviewers}.
    *
    * @param array List of PHIDs of reviewers
    * @return this
@@ -146,18 +125,6 @@ final class DifferentialRevisionQuery {
     return $this;
   }
 
-  /**
-   * Filter results to include revisions which have the given PHID as a
-   * reviewer.
-   *
-   * @param phid reviewer PHID
-   * @return this
-   * @task config
-   */
-  public function withReviewer($reviewer) {
-    $this->reviewers[] = $reviewer;
-    return $this;
-  }
 
   /**
    * Filter results to revisions with a given status. Provide a class constant,
@@ -195,6 +162,34 @@ final class DifferentialRevisionQuery {
    */
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
+    return $this;
+  }
+
+
+  /**
+   * Given a set of users, filter results to return only revisions they are
+   * responsible for (i.e., they are either authors or reviewers).
+   *
+   * @param array List of user PHIDs.
+   * @return this
+   * @task config
+   */
+  public function withResponsibleUsers(array $responsible_phids) {
+    $this->responsibles = $responsible_phids;
+    return $this;
+  }
+
+
+  /**
+   * Filter results to only return revisions with a given set of subscribers
+   * (i.e., they are authors, reviewers or CC'd).
+   *
+   * @param array List of user PHIDs.
+   * @return this
+   * @task config
+   */
+  public function withSubscribers(array $subscriber_phids) {
+    $this->subscribers = $subscriber_phids;
     return $this;
   }
 
@@ -331,8 +326,9 @@ final class DifferentialRevisionQuery {
     if ($this->ccs) {
       $joins[] = qsprintf(
         $conn_r,
-        'JOIN %T rel ON rel.revisionID = r.id '.
-        'AND rel.relation = %s AND rel.objectPHID in (%Ls)',
+        'JOIN %T cc_rel ON cc_rel.revisionID = r.id '.
+        'AND cc_rel.relation = %s '.
+        'AND cc_rel.objectPHID in (%Ls)',
         DifferentialRevision::RELATIONSHIP_TABLE,
         DifferentialRevision::RELATION_SUBSCRIBED,
         $this->ccs);
@@ -341,11 +337,37 @@ final class DifferentialRevisionQuery {
     if ($this->reviewers) {
       $joins[] = qsprintf(
         $conn_r,
-        'JOIN %T rel ON rel.revisionID = r.id '.
-        'AND rel.relation = %s AND rel.objectPHID in (%Ls)',
+        'JOIN %T reviewer_rel ON reviewer_rel.revisionID = r.id '.
+        'AND reviewer_rel.relation = %s '.
+        'AND reviewer_rel.objectPHID in (%Ls)',
         DifferentialRevision::RELATIONSHIP_TABLE,
         DifferentialRevision::RELATION_REVIEWER,
         $this->reviewers);
+    }
+
+    if ($this->subscribers) {
+      $joins[] = qsprintf(
+        $conn_r,
+        'JOIN %T sub_rel ON sub_rel.revisionID = r.id '.
+        'AND sub_rel.relation IN (%Ls) '.
+        'AND sub_rel.objectPHID in (%Ls)',
+        DifferentialRevision::RELATIONSHIP_TABLE,
+        array(
+          DifferentialRevision::RELATION_SUBSCRIBED,
+          DifferentialRevision::RELATION_REVIEWER,
+        ),
+        $this->subscribers);
+    }
+
+    if ($this->responsibles) {
+      $joins[] = qsprintf(
+        $conn_r,
+        'LEFT JOIN %T responsibles_rel ON responsibles_rel.revisionID = r.id '.
+        'AND responsibles_rel.relation = %s '.
+        'AND responsibles_rel.objectPHID in (%Ls)',
+        DifferentialRevision::RELATIONSHIP_TABLE,
+        DifferentialRevision::RELATION_REVIEWER,
+        $this->responsibles);
     }
 
     $joins = implode(' ', $joins);
@@ -395,6 +417,13 @@ final class DifferentialRevisionQuery {
         $this->phids);
     }
 
+    if ($this->responsibles) {
+      $where[] = qsprintf(
+        $conn_r,
+        '(responsibles_rel.objectPHID IS NOT NULL OR r.authorPHID IN (%Ls))',
+        $this->responsibles);
+    }
+
     switch ($this->status) {
       case self::STATUS_ANY:
         break;
@@ -427,7 +456,14 @@ final class DifferentialRevisionQuery {
    * @task internal
    */
   private function buildGroupByClause($conn_r) {
-    $needs_distinct = (count($this->pathIDs) > 1);
+    $join_triggers = array_merge(
+      $this->pathIDs,
+      $this->ccs,
+      $this->reviewers,
+      $this->subscribers,
+      $this->responsibles);
+
+    $needs_distinct = (count($join_triggers) > 1);
 
     if ($needs_distinct) {
       return 'GROUP BY r.id';
