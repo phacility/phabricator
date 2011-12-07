@@ -110,9 +110,10 @@ final class DifferentialAddCommentView extends AphrontView {
             array(
               'href' => PhabricatorEnv::getDoclink(
                 'article/Remarkup_Reference.html'),
+              'tabindex' => '-1',
               'target' => '_blank',
             ),
-            'Remarkup Reference')))
+            'Formatting Reference')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($is_serious ? 'Submit' : 'Clowncopterize'));

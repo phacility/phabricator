@@ -412,9 +412,10 @@ class ManiphestTaskDetailController extends ManiphestController {
               'a',
               array(
                 'href' => $remarkup_href,
+                'tabindex' => '-1',
                 'target' => '_blank',
               ),
-              'Remarkup Syntax Reference'))
+              'Formatting Reference'))
           ->setID('transaction-comments'))
       ->appendChild(
         id(new AphrontFormDragAndDropUploadControl())

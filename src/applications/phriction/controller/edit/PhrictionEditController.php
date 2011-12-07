@@ -129,6 +129,8 @@ class PhrictionEditController
       'a',
       array(
         'href' => PhabricatorEnv::getDoclink('article/Remarkup_Reference.html'),
+        'tabindex' => '-1',
+        'target' => '_blank',
       ),
       'Formatting Reference');
 
