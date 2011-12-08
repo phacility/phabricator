@@ -52,6 +52,10 @@ class AphrontRequest {
     return $this;
   }
 
+  final public function getRequestData() {
+    return $this->requestData;
+  }
+
   final public function getPath() {
     return $this->path;
   }

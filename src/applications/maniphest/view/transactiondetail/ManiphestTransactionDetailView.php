@@ -27,6 +27,7 @@ class ManiphestTransactionDetailView extends ManiphestView {
   private $forEmail;
   private $preview;
   private $commentNumber;
+  private $rangeSpecification;
 
   private $renderSummaryOnly;
   private $renderFullSummary;
@@ -78,6 +79,15 @@ class ManiphestTransactionDetailView extends ManiphestView {
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
     return $this;
+  }
+
+  public function setRangeSpecification($range) {
+    $this->rangeSpecification = $range;
+    return $this;
+  }
+
+  public function getRangeSpecification() {
+    return $this->rangeSpecification;
   }
 
   public function renderForEmail($with_date) {
@@ -529,31 +539,27 @@ class ManiphestTransactionDetailView extends ManiphestView {
   private function renderFullSummary($transaction) {
     switch ($transaction->getTransactionType()) {
       case ManiphestTransactionType::TYPE_DESCRIPTION:
-        $engine = $this->markupEngine;
+        $id = $transaction->getID();
+        $old_text = wordwrap($transaction->getOldValue(), 80);
+        $new_text = wordwrap($transaction->getNewValue(), 80);
 
-        $old = $transaction->getOldValue();
-        $new = $transaction->getNewValue();
-        $table =
-          '<table class="maniphest-change-table">
-            <tr>
-              <th>Previous Description</th>
-              <th>New Description</th>
-            </tr>
-            <tr>
-              <td>
-                <div class="phabricator-remarkup">'.
-                  $engine->markupText($old).
-                '</div>
-              </td>
-              <td>
-                <div class="phabricator-remarkup">'.
-                  $engine->markupText($new).
-                '</div>
-              </td>
-            </tr>
-          </table>';
+        $engine = new PhabricatorDifferenceEngine();
+        $changeset = $engine->generateChangesetFromFileContent($old_text,
+                                                               $new_text);
 
-        return $table;
+        $whitespace_mode = DifferentialChangesetParser::WHITESPACE_SHOW_ALL;
+
+        $parser = new DifferentialChangesetParser();
+        $parser->setChangeset($changeset);
+        $parser->setRenderingReference($id);
+        $parser->setWhitespaceMode($whitespace_mode);
+
+        $spec = $this->getRangeSpecification();
+        list($range_s, $range_e, $mask) =
+          DifferentialChangesetParser::parseRangeSpecification($spec);
+        $output = $parser->render($range_s, $range_e, $mask);
+
+        return $output;
     }
 
     return null;
@@ -563,6 +569,20 @@ class ManiphestTransactionDetailView extends ManiphestView {
     $id = $transaction->getID();
 
     Javelin::initBehavior('maniphest-transaction-expand');
+
+    switch ($transaction->getTransactionType()) {
+      case ManiphestTransactionType::TYPE_DESCRIPTION:
+        require_celerity_resource('differential-changeset-view-css');
+        require_celerity_resource('syntax-highlighting-css');
+        $whitespace_mode = DifferentialChangesetParser::WHITESPACE_SHOW_ALL;
+        Javelin::initBehavior('differential-show-more', array(
+          'uri'         => '/maniphest/task/descriptionchange/'.$id.'/',
+          'whitespace'  => $whitespace_mode,
+        ));
+        break;
+      default:
+        break;
+    }
 
     return javelin_render_tag(
       'a',

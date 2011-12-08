@@ -23,8 +23,17 @@ class ManiphestTaskDescriptionChangeController extends ManiphestController {
 
   private $transactionID;
 
+  private function setTransactionID($transaction_id) {
+    $this->transactionID = $transaction_id;
+    return $this;
+  }
+
+  public function getTransactionID() {
+    return $this->transactionID;
+  }
+
   public function willProcessRequest(array $data) {
-    $this->transactionID = $data['id'];
+    $this->setTransactionID($data['id']);
   }
 
   public function processRequest() {
@@ -32,7 +41,15 @@ class ManiphestTaskDescriptionChangeController extends ManiphestController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $transaction = id(new ManiphestTransaction())->load($this->transactionID);
+    // this means we're using "show more" on a diff of a description and
+    // should thus use the rendering reference to identify the transaction
+    $ref = $request->getStr('ref');
+    if ($ref) {
+      $this->setTransactionID($ref);
+    }
+
+    $transaction_id = $this->getTransactionID();
+    $transaction = id(new ManiphestTransaction())->load($transaction_id);
     if (!$transaction) {
       return new Aphront404Response();
     }
@@ -56,6 +73,7 @@ class ManiphestTaskDescriptionChangeController extends ManiphestController {
     $view->setMarkupEngine($engine);
     $view->setRenderSummaryOnly(true);
     $view->setRenderFullSummary(true);
+    $view->setRangeSpecification($request->getStr('range'));
 
     return id(new AphrontAjaxResponse())->setContent($view->render());
   }
