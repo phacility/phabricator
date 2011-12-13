@@ -26,15 +26,6 @@ abstract class PhabricatorPasteController extends PhabricatorController {
     $page->setBaseURI('/paste/');
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x9C\x8E");
-    $page->setTabs(
-      array(
-        'list' => array(
-          'href' => '/paste/list/',
-          'name' => 'Paste List',
-        ),
-      ),
-      idx($data, 'tab'));
-
     $page->appendChild($view);
 
     $response = new AphrontWebpageResponse();
