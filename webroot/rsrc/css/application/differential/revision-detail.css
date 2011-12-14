@@ -61,29 +61,29 @@
   color: #666666;
 }
 
-.differential-unit-table th {
-  white-space: nowrap;
-  padding: 4px 8px;
+.differential-unit-block li {
+  margin-left: 1.5em;
 }
 
-.differential-unit-table th.unit-test-result {
+.differential-unit-block li p {
+  margin-left: 1em;
+  color: #666666;
+}
+
+.differential-unit-block .unit-test-result {
   padding: 0;
 }
 
-.differential-unit-table .result-fail {
+.differential-unit-block .unit-result-fail {
   background: #ff3333;
-  padding: 4px 8px;
+  padding: 0 0.5em;
+  font-weight: bold;
 }
 
-.differential-unit-table .result-unsound {
+.differential-unit-block .unit-result-unsound {
   background: #cc33cc;
-  padding: 4px 8px;
-}
-
-.differential-unit-table td {
-  width: 100%;
-  padding: 4px 8px;
-  color: #666666;
+  padding: 0 0.5em;
+  font-weight: bold;
 }
 
 .differential-keyboard-shortcuts {

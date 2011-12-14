@@ -44,37 +44,35 @@ final class DifferentialUnitFieldSpecification
     if ($udata) {
       $unit_messages = array();
       foreach ($udata as $test) {
-        $name = phutil_escape_html(idx($test, 'name'));
-        $result = phutil_escape_html(idx($test, 'result'));
+        $name = idx($test, 'name');
+        $result = idx($test, 'result');
 
         if ($result != DifferentialUnitTestResult::RESULT_POSTPONED &&
             $result != DifferentialUnitTestResult::RESULT_PASS) {
-          $userdata = phutil_escape_html(idx($test, 'userdata'));
-          if (strlen($userdata) > 256) {
-            $userdata = substr($userdata, 0, 256).'...';
-          }
+          $userdata = phutil_utf8_shorten(idx($test, 'userdata'), 256);
+          $userdata = phutil_escape_html($userdata);
           $userdata = str_replace("\n", '<br />', $userdata);
-          $unit_messages[] =
-            '<tr>'.
-            '<th>'.$name.'</th>'.
-            '<th class="unit-test-result">'.
-            '<div class="result-'.$result.'">'.
-            strtoupper($result).
-            '</div>'.
-            '</th>'.
-            '<td>'.$userdata.'</td>'.
-            '</tr>';
 
-          $utail =
-            '<div class="differential-unit-block">'.
-            '<table class="differential-unit-table">'.
-            implode("\n", $unit_messages).
-            '</table>'.
-            '</div>';
+          $unit_messages[] =
+            '<li>'.
+              '<span class="unit-result-'.phutil_escape_html($result).'">'.
+                phutil_escape_html(ucwords($result)).
+              '</span>'.
+              ' '.
+              phutil_escape_html($name).
+              '<p>'.$userdata.'</p>'.
+            '</li>';
+
         } else if ($result == DifferentialUnitTestResult::RESULT_POSTPONED) {
           $postponed_count++;
         }
       }
+      $utail =
+        '<div class="differential-unit-block">'.
+          '<ul>'.
+            implode("\n", $unit_messages).
+          '</ul>'.
+        '</div>';
     }
 
     if ($postponed_count > 0 &&
