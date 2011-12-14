@@ -28,7 +28,16 @@ or alter the edit. Data available on this event:
 
 == PhabricatorEventType::TYPE_DIFFERENTIAL_WILLSENDMAIL ==
 
-This event is dispatche before Differential sends an email, and allows you to
+This event is dispatched before Differential sends an email, and allows you to
 edit the message that will be sent.  Data available on this event:
 
   - ##mail## The {@class:PhabricatorMetaMTAMail} being edited.
+
+== PhabricatorEventType::TYPE_DIFFERENTIAL_WILLMARKGENERATED ==
+
+This event is dispatched before Differential decides if a file is generated (and
+doesn't need to be reviewed) or not.  Data available on this event:
+
+  - ##corpus## Body of the file.
+  - ##is_generated## Boolean indicating if this file should be treated as
+    generated.

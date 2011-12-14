@@ -540,7 +540,18 @@ class DifferentialChangesetParser {
       ipull($this->intra, 1),
       $new_corpus);
 
-    $generated = (strpos($new_corpus_block, '@'.'generated') !== false);
+    $generated_guess = (strpos($new_corpus_block, '@'.'generated') !== false);
+
+    $event = new PhabricatorEvent(
+      PhabricatorEventType::TYPE_DIFFERENTIAL_WILLMARKGENERATED,
+      array(
+        'corpus' => $new_corpus_block,
+        'is_generated' => $generated_guess
+      )
+    );
+    PhutilEventEngine::dispatchEvent($event);
+
+    $generated = $event->getValue('is_generated');
 
     $this->specialAttributes[self::ATTR_GENERATED] = $generated;
   }
