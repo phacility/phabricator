@@ -26,7 +26,9 @@ $is_all = false;
 $reparse_message = false;
 $reparse_change = false;
 $reparse_herald = false;
+$reparse_owners = false;
 $reparse_what = false;
+$force = false;
 
 $args = array_slice($argv, 1);
 foreach ($args as $arg) {
@@ -46,6 +48,12 @@ foreach ($args as $arg) {
         break;
       case 'herald':
         $reparse_herald = true;
+        break;
+      case 'owners':
+        $reparse_owners = true;
+        break;
+      case 'force':
+        $force = true;
         break;
       case 'trace':
         PhutilServiceProfiler::installEchoListener();
@@ -67,9 +75,21 @@ foreach ($args as $arg) {
 if (!$reparse_what) {
   usage("Specify a commit or repository to reparse.");
 }
-if (!$reparse_message && !$reparse_change && !$reparse_herald) {
-  usage("Specify what information to reparse with --message, --change, and/or ".
-        "--herald.");
+if (!$reparse_message && !$reparse_change && !$reparse_herald &&
+    !$reparse_owners) {
+  usage("Specify what information to reparse with --message, --change,  ".
+        "--herald, and/or --owners");
+}
+if ($reparse_owners && !$force) {
+  echo phutil_console_wrap(
+    "You are about to recreate the relationship entries between the commits ".
+    "and the packages they touch. This might delete some existing ".
+    "relationship entries for some old commits.");
+
+  if (!phutil_console_confirm('Are you ready to continue?')) {
+    echo "Cancelled.\n";
+    exit(1);
+  }
 }
 
 $commits = array();
@@ -157,6 +177,10 @@ foreach ($commits as $commit) {
     $classes[] = 'PhabricatorRepositoryCommitHeraldWorker';
   }
 
+  if ($reparse_owners) {
+    $classes[] = 'PhabricatorRepositoryCommitOwnersWorker';
+  }
+
   $spec = array(
     'commitID'  => $commit->getID(),
     'only'      => true,
@@ -194,7 +218,7 @@ function help() {
   $help = <<<EOHELP
 **SUMMARY**
 
-    **reparse.php** __what__ __which_parts__ [--trace]
+    **reparse.php** __what__ __which_parts__ [--trace] [--force]
 
     Rerun the Diffusion parser on specific commits and repositories. Mostly
     useful for debugging changes to Diffusion.
@@ -221,6 +245,11 @@ function help() {
         __--herald__
             Reevaluate Herald rules (may send huge amounts of email!)
 
+        __--owners__
+            Reevaluate related commits for owners packages (may delete existing
+            relationship entries between your package and some old commits!)
+
+    __--force__: act noninteractively, without prompting
     __--trace__: run with debug tracing
     __--help__: show this help
 

@@ -76,6 +76,17 @@ class PhabricatorOwnersDetailController extends PhabricatorOwnersController {
       'Owners',
       $owner_links);
 
+    $rows[] = array(
+      'Related Commits',
+      phutil_render_tag(
+        'a',
+        array(
+          'href' => '/owners/related/view/all/?phid='.$package->getPHID(),
+        ),
+        phutil_escape_html('Related Commits'))
+    );
+
+
     $path_links = array();
     foreach ($paths as $path) {
       $callsign = $handles[$path->getRepositoryPHID()]->getName();

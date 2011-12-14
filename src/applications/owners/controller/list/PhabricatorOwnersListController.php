@@ -257,6 +257,12 @@ class PhabricatorOwnersListController extends PhabricatorOwnersController {
           phutil_escape_html($package->getName())),
         $pkg_owners,
         $pkg_paths,
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => '/owners/related/view/all/?phid='.$package->getPHID(),
+          ),
+          phutil_escape_html('Related Commits'))
       );
     }
 
@@ -266,12 +272,14 @@ class PhabricatorOwnersListController extends PhabricatorOwnersController {
         'Name',
         'Owners',
         'Paths',
+        'Related Commits',
       ));
     $table->setColumnClasses(
       array(
         'pri',
         '',
         'wide wrap',
+        'narrow',
       ));
 
     $panel = new AphrontPanelView();

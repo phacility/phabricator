@@ -31,6 +31,10 @@ abstract class PhabricatorOwnersController extends PhabricatorController {
           'href' => '/owners/',
           'name' => 'Package Index',
         ),
+        'related' => array(
+          'href' => '/owners/related/',
+          'name' => 'Related Commits',
+        ),
       ),
       idx($data, 'tab'));
     $page->setGlyph("\xE2\x98\x81");

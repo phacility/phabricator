@@ -76,13 +76,21 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
     PhabricatorSearchCommitIndexer::indexCommit($commit);
 
     if ($this->shouldQueueFollowupTasks()) {
-      $task = new PhabricatorWorkerTask();
-      $task->setTaskClass('PhabricatorRepositoryCommitHeraldWorker');
-      $task->setData(
+      $herald_task = new PhabricatorWorkerTask();
+      $herald_task->setTaskClass('PhabricatorRepositoryCommitHeraldWorker');
+      $herald_task->setData(
         array(
           'commitID' => $commit->getID(),
         ));
-      $task->save();
+      $herald_task->save();
+
+      $owner_task = new PhabricatorWorkerTask();
+      $owner_task->setTaskClass('PhabricatorRepositoryCommitOwnersWorker');
+      $owner_task->setData(
+        array(
+          'commitID' => $commit->getID(),
+        ));
+      $owner_task->save();
     }
   }
 

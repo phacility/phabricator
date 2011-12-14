@@ -62,19 +62,8 @@ class HeraldCommitAdapter extends HeraldObjectAdapter {
 
   public function loadAffectedPaths() {
     if ($this->affectedPaths === null) {
-      $drequest = $this->buildDiffusionRequest();
-      $path_query = DiffusionPathChangeQuery::newFromDiffusionRequest(
-        $drequest);
-      $paths = $path_query->loadChanges();
-
-      $result = array();
-      foreach ($paths as $path) {
-        $basic_path = '/'.$path->getPath();
-        if ($path->getFileType() == DifferentialChangeType::FILE_DIRECTORY) {
-          $basic_path = rtrim($basic_path, '/').'/';
-        }
-        $result[] = $basic_path;
-      }
+      $result = PhabricatorOwnerPathQuery::loadAffectedPaths(
+        $this->repository, $this->commit);
       $this->affectedPaths = $result;
     }
     return $this->affectedPaths;
@@ -104,14 +93,6 @@ class HeraldCommitAdapter extends HeraldObjectAdapter {
       }
     }
     return $this->affectedRevision;
-  }
-
-  private function buildDiffusionRequest() {
-    return DiffusionRequest::newFromAphrontRequestDictionary(
-      array(
-        'callsign'  => $this->repository->getCallsign(),
-        'commit'    => $this->commit->getCommitIdentifier(),
-      ));
   }
 
   public function getHeraldField($field) {

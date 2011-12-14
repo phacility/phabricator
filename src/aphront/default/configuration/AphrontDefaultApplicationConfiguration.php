@@ -296,6 +296,10 @@ class AphrontDefaultApplicationConfiguration
         'new/$' => 'PhabricatorOwnersEditController',
         'package/(?P<id>\d+)/$' => 'PhabricatorOwnersDetailController',
         'delete/(?P<id>\d+)/$' => 'PhabricatorOwnersDeleteController',
+        'related/' => array(
+          '$' => 'PhabricatorOwnerRelatedListController',
+          'view/(?P<view>[^/]+)/$' => 'PhabricatorOwnerRelatedListController',
+        ),
       ),
 
       '/xhpast/' => array(
