@@ -557,7 +557,8 @@ return array(
   // against each regexp in order until one matches. The default configuration
   // uses a width of 100 for Java and 80 for other languages. Note that 80 is
   // the greatest column width of all time. Changes here will not be immediately
-  // reflected in old revisions unless you purge the render cache.
+  // reflected in old revisions unless you purge the changeset render cache
+  // (with `./scripts/util/purge_cache.php --changesets`).
   'differential.wordwrap' => array(
     '/\.java$/' => 100,
     '/.*/'      => 80,
