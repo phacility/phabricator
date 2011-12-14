@@ -100,7 +100,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
           $committer = $data->getCommitDetail('authorPHID');
           if (!$committer) {
             $committer = $revision->getAuthorPHID();
-            $message = 'Change committed by '.$commit->getAuthorName().'.';
+            $message = 'Change committed by '.$data->getAuthorName().'.';
           }
           $editor = new DifferentialCommentEditor(
             $revision,
