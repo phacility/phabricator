@@ -96,11 +96,9 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
           $commit->getPHID());
 
         if ($revision->getStatus() != DifferentialRevisionStatus::COMMITTED) {
-          $committer = null;
           $message = null;
-          if ($commit->getDetail('authorPHID')) {
-            $committer = $commit->getDetail('authorPHID');
-          } else {
+          $committer = $data->getCommitDetail('authorPHID');
+          if (!$committer) {
             $committer = $revision->getAuthorPHID();
             $message = 'Change committed by '.$commit->getAuthorName().'.';
           }
