@@ -376,7 +376,7 @@ class HeraldRuleController extends HeraldController {
     }
 
     $all_rules = id(new HeraldRule())->loadAllWhere(
-      'authorPHID = %d AND contentType = %s',
+      'authorPHID = %s AND contentType = %s',
       $rule->getAuthorPHID(),
       $rule->getContentType());
     $all_rules = mpull($all_rules, 'getName', 'getID');
