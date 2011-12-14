@@ -313,10 +313,23 @@ class PhabricatorPasteListController extends PhabricatorPasteController {
       $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
     }
 
+    $phids = mpull($pastes, 'getFilePHID');
+    $file_uris = array();
+    if ($phids) {
+      $files = id(new PhabricatorFile())->loadAllWhere(
+        'phid in (%Ls)',
+        $phids
+      );
+      if ($files) {
+        $file_uris = mpull($files, 'getBestURI', 'getPHID');
+      }
+    }
+
     $paste_list_rows = array();
     foreach ($pastes as $paste) {
 
       $handle = $handles[$paste->getAuthorPHID()];
+      $file_uri = $file_uris[$paste->getFilePHID()];
 
       $paste_list_rows[] = array(
         phutil_escape_html('P'.$paste->getID()),
@@ -344,8 +357,7 @@ class PhabricatorPasteListController extends PhabricatorPasteController {
         phutil_render_tag(
           'a',
           array(
-            'href' => PhabricatorFileURI::getViewURIForPHID(
-              $paste->getFilePHID()),
+            'href' => $file_uri,
           ),
           phutil_escape_html($paste->getFilePHID())),
       );
