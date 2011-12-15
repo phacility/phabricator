@@ -11,6 +11,7 @@ phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/files/controller/base');
 phutil_require_module('phabricator', 'applications/files/storage/file');
 phutil_require_module('phabricator', 'applications/files/storage/imagemacro');
+phutil_require_module('phabricator', 'applications/files/view/sidenav');
 phutil_require_module('phabricator', 'view/form/base');
 phutil_require_module('phabricator', 'view/form/control/file');
 phutil_require_module('phabricator', 'view/form/control/submit');

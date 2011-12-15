@@ -6,10 +6,10 @@
 
 
 
-phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'applications/files/controller/base');
 phutil_require_module('phabricator', 'applications/files/storage/file');
-phutil_require_module('phabricator', 'applications/people/storage/user');
+phutil_require_module('phabricator', 'applications/files/view/sidenav');
+phutil_require_module('phabricator', 'applications/files/view/upload');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'infrastructure/javelin/api');

@@ -108,19 +108,23 @@ class PhabricatorFileMacroEditController extends PhabricatorFileController {
 
     $panel = new AphrontPanelView();
     if ($macro->getID()) {
-      $panel->setHeader('Edit Image Macro');
+      $title = 'Edit Image Macro';
     } else {
-      $panel->setHeader('Create Image Macro');
+      $title = 'Create Image Macro';
     }
-
+    $panel->setHeader($title);
     $panel->appendChild($form);
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->setWidth(AphrontPanelView::WIDTH_FULL);
+
+    $side_nav = new PhabricatorFileSideNavView();
+    $side_nav->setSelectedFilter('create_macro');
+    $side_nav->appendChild($error_view);
+    $side_nav->appendChild($panel);
 
     return $this->buildStandardPageResponse(
-      array($error_view, $panel),
+      $side_nav,
       array(
-        'title' => 'Edit Image Macro',
+        'title' => $title,
       ));
   }
-
 }

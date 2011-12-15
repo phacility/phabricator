@@ -9,11 +9,7 @@
 phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/files/controller/base');
 phutil_require_module('phabricator', 'applications/files/storage/file');
-phutil_require_module('phabricator', 'view/form/base');
-phutil_require_module('phabricator', 'view/form/control/file');
-phutil_require_module('phabricator', 'view/form/control/submit');
-phutil_require_module('phabricator', 'view/form/control/text');
-phutil_require_module('phabricator', 'view/layout/panel');
+phutil_require_module('phabricator', 'applications/files/view/upload');
 
 phutil_require_module('phutil', 'utils');
 

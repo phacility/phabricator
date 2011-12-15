@@ -34,32 +34,8 @@ class PhabricatorFileUploadController extends PhabricatorFileController {
       return id(new AphrontRedirectResponse())->setURI($file->getBestURI());
     }
 
-    $form = new AphrontFormView();
-    $form->setAction('/file/upload/');
-    $form->setUser($request->getUser());
-
-    $form
-      ->setEncType('multipart/form-data')
-      ->appendChild(
-        id(new AphrontFormFileControl())
-          ->setLabel('File')
-          ->setName('file')
-          ->setError(true))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel('Name')
-          ->setName('name')
-          ->setCaption('Optional file display name.'))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue('Upload')
-          ->addCancelButton('/file/'));
-
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Upload File');
-
-    $panel->appendChild($form);
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel = new PhabricatorFileUploadView();
+    $panel->setUser($user);
 
     return $this->buildStandardPageResponse(
       array($panel),
@@ -67,5 +43,4 @@ class PhabricatorFileUploadController extends PhabricatorFileController {
         'title' => 'Upload File',
       ));
   }
-
 }

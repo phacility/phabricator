@@ -17,7 +17,6 @@
  */
 
 class PhabricatorFileMacroListController extends PhabricatorFileController {
-
   public function processRequest() {
 
     $request = $this->getRequest();
@@ -116,8 +115,12 @@ class PhabricatorFileMacroListController extends PhabricatorFileController {
     $panel->setCreateButton('New Image Macro', '/file/macro/edit/');
     $panel->appendChild($pager);
 
+    $side_nav = new PhabricatorFileSideNavView();
+    $side_nav->setSelectedFilter('all_macros');
+    $side_nav->appendChild($panel);
+
     return $this->buildStandardPageResponse(
-      $panel,
+      $side_nav,
       array(
         'title' => 'Image Macros',
         'tab'   => 'macros',
