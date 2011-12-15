@@ -109,6 +109,21 @@ class PhrictionHistoryController
       );
     }
 
+    $crumbs = new AphrontCrumbsView();
+    $crumbs->setCrumbs(
+      array(
+        'Phriction',
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => PhrictionDocument::getSlugURI($document->getSlug()),
+          ),
+          phutil_escape_html($current->getTitle())
+        ),
+        'History',
+      ));
+
+
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
@@ -136,15 +151,13 @@ class PhrictionHistoryController
     $panel->appendChild($table);
     $panel->appendChild($pager);
 
-    $slug = $document->getSlug();
-
     return $this->buildStandardPageResponse(
-      $panel,
+      array(
+        $crumbs,
+        $panel,
+      ),
       array(
         'title'     => 'Document History',
-        'history'   => PhrictionDocument::getSlugURI($slug, 'history'),
-        'document'  => PhrictionDocument::getSlugURI($slug),
-        'tab'       => 'history',
       ));
 
   }

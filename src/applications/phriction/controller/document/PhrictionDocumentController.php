@@ -72,6 +72,7 @@ class PhrictionDocumentController
           'class' => 'green button',
         ),
         'Create Page');
+      $buttons = $button;
     } else {
       $version = $request->getInt('v');
       if ($version) {
@@ -127,13 +128,22 @@ class PhrictionDocumentController
           '</div>'.
         '</div>';
 
-      $button = phutil_render_tag(
+      $edit_button = phutil_render_tag(
         'a',
         array(
           'href' => '/phriction/edit/'.$document->getID().'/',
           'class' => 'button',
         ),
         'Edit Page');
+      $history_button = phutil_render_tag(
+        'a',
+        array(
+          'href' => PhrictionDocument::getSlugURI($slug, 'history'),
+          'class' => 'button grey',
+        ),
+        'View History');
+      // these float right so button2 which is right most goes first
+      $buttons = $history_button.$edit_button;
     }
 
     if ($version_note) {
@@ -144,7 +154,7 @@ class PhrictionDocumentController
 
     $page =
       '<div class="phriction-header">'.
-        $button.
+        $buttons.
         '<h1>'.phutil_escape_html($page_title).'</h1>'.
         $breadcrumbs.
       '</div>'.
@@ -156,7 +166,6 @@ class PhrictionDocumentController
       $page,
       array(
         'title'   => 'Phriction - '.$page_title,
-        'history' => PhrictionDocument::getSlugURI($slug, 'history'),
       ));
 
   }

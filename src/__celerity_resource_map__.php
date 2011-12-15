@@ -1605,7 +1605,7 @@ celerity_register_resource_map(array(
   ),
   'phriction-document-css' =>
   array(
-    'uri' => '/res/a0eb9ea1/rsrc/css/application/phriction/phriction-document-css.css',
+    'uri' => '/res/8d09bd7f/rsrc/css/application/phriction/phriction-document-css.css',
     'type' => 'css',
     'requires' =>
     array(

@@ -195,10 +195,7 @@ class PhrictionDiffController
       ),
       array(
         'title'     => 'Document History',
-        'history'   => PhrictionDocument::getSlugURI($slug, 'history'),
-        'document'  => PhrictionDocument::getSlugURI($slug),
       ));
-
   }
 
   private function renderRevertButton(
