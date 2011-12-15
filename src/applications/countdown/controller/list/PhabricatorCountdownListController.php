@@ -106,7 +106,6 @@ class PhabricatorCountdownListController
     return $this->buildStandardPageResponse($panel,
       array(
         'title' => 'Countdown',
-        'tab'   => 'list',
       ));
   }
 }

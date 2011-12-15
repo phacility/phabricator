@@ -80,7 +80,6 @@ class PhabricatorCountdownViewController
       $panel,
       array(
         'title' => 'Countdown: '.$timer->getTitle(),
-        'tab' => 'view',
         'chrome' => $chrome_visible
       ));
   }

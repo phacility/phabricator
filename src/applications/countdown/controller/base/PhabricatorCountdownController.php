@@ -26,14 +26,6 @@ abstract class PhabricatorCountdownController extends PhabricatorController {
     $page->setBaseURI('/countdown/');
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x9A\xB2");
-    $page->setTabs(
-      array(
-        'list' => array(
-          'href' => '/countdown/',
-          'name' => 'Countdown List',
-        ),
-      ),
-      idx($data, 'tab'));
     $page->setShowChrome(idx($data, 'chrome', true));
 
     $page->appendChild($view);
