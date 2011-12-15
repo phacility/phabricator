@@ -142,7 +142,7 @@ class PhrictionDocumentController
           'class' => 'button grey',
         ),
         'View History');
-      // these float right so button2 which is right most goes first
+      // these float right so history_button which is right most goes first
       $buttons = $history_button.$edit_button;
     }
 
