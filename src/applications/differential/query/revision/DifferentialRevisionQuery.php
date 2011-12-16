@@ -330,7 +330,7 @@ final class DifferentialRevisionQuery {
         ON rel.revisionID = r.id
         AND rel.relation = %s
         AND rel.objectPHID = %s
-        WHERE r.status IN (%Ld) ORDER BY dateModified',
+        WHERE r.status IN (%Ld) ORDER BY dateModified DESC',
       $table->getTableName(),
       $responsible_phid,
       $open_statuses,
