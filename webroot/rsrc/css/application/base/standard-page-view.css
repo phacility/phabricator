@@ -6,6 +6,7 @@
 .phabricator-standard-page {
   background: #ffffff;
   border-bottom: 1px solid #888888;
+  overflow-x: auto;
 
   -webkit-box-shadow: 0 0 6px #000;
   -mox-box-shadow:    0 0 6px #000;
