@@ -58,7 +58,7 @@ final class DifferentialManiphestTasksFieldSpecification
    *
    * @return void
    */
-  public function willWriteRevision(DifferentialRevisionEditor $editor) {
+  public function didWriteRevision(DifferentialRevisionEditor $editor) {
     // 1 -- revision => tasks
     $revision = $editor->getRevision();
     $revision->setAttachedPHIDs(PhabricatorPHIDConstants::PHID_TYPE_TASK,
@@ -86,6 +86,11 @@ final class DifferentialManiphestTasksFieldSpecification
       if (empty($new[$attach_type])) {
         $new[$attach_type] = array();
       }
+      if (array_key_exists($revision->getPHID(), $new[$attach_type])) {
+        // Already attached, just skip the update.
+        continue;
+      }
+
       $new[$attach_type][$revision->getPHID()] = array();
 
       $transaction->setNewValue($new);
