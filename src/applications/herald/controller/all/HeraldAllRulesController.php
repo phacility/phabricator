@@ -20,6 +20,15 @@ class HeraldAllRulesController extends HeraldController {
 
   private $view;
   private $viewPHID;
+  private $filter;
+
+  public function getFilter() {
+    return $this->filter;
+  }
+  public function setFilter($filter) {
+    $this->filter = 'all/view/'.$filter;
+    return $this;
+  }
 
   public function shouldRequireAdmin() {
     return true;
@@ -27,6 +36,7 @@ class HeraldAllRulesController extends HeraldController {
 
   public function willProcessRequest(array $data) {
     $this->view = idx($data, 'view');
+    $this->setFilter($this->view);
   }
 
   public function processRequest() {
@@ -108,7 +118,10 @@ class HeraldAllRulesController extends HeraldController {
     }
 
     return $this->buildStandardPageResponse(
-      $sidenav,
+      array(
+        $filter_view,
+        $panel
+      ),
       array(
         'title' => 'Herald',
         'tab' => 'all',

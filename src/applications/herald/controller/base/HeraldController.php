@@ -25,43 +25,57 @@ abstract class HeraldController extends PhabricatorController {
     $page->setBaseURI('/herald/');
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x98\xBF");
-    $page->appendChild($view);
 
     $doclink = PhabricatorEnv::getDoclink('article/Herald_User_Guide.html');
 
+    $nav = new AphrontSideNavFilterView();
+    $nav
+      ->setBaseURI(new PhutilURI('/herald/'))
+      ->addLabel('Rules')
+      ->addFilter('new', 'Create Rule');
+    $rules_map = HeraldContentTypeConfig::getContentTypeMap();
+    $first_filter = null;
+    foreach ($rules_map as $key => $value) {
+      $nav->addFilter('view/'.$key, $value);
+      if (!$first_filter) {
+        $first_filter = 'view/'.$key;
+      }
+    }
+
+    $nav
+      ->addSpacer()
+      ->addLabel('Utilities')
+      ->addFilter('test',       'Test Console')
+      ->addFilter('transcript', 'Transcripts');
+
+    $user = $this->getRequest()->getUser();
+    if ($user->getIsAdmin()) {
+      $nav
+        ->addSpacer()
+        ->addLabel('Admin');
+      $view_PHID = nonempty($this->getRequest()->getStr('phid'), null);
+      foreach ($rules_map as $key => $value) {
+        $nav
+          ->addFilter('all/view/'.$key, $value);
+      }
+    }
+
+    $nav->selectFilter($this->getFilter(), $first_filter);
+    $nav->appendChild($view);
+    $page->appendChild($nav);
+
     $tabs = array(
-      'rules' => array(
-        'href' => '/herald/',
-        'name' => 'Rules',
-      ),
-      'test' => array(
-        'href' => '/herald/test/',
-        'name' => 'Test Console',
-      ),
-      'transcripts' => array(
-        'href' => '/herald/transcript/',
-        'name' => 'Transcripts',
-      ),
       'help' => array(
         'href' => $doclink,
         'name' => 'Help',
       ),
     );
-
-    $user = $this->getRequest()->getUser();
-    if ($user->getIsAdmin()) {
-      $tabs['all'] = array(
-        'href' => '/herald/all',
-        'name' => 'All Rules',
-      );
-    }
-
-    $page->setTabs(
-      $tabs,
-      idx($data, 'tab'));
+    $page->setTabs($tabs. null);
 
     $response = new AphrontWebpageResponse();
     return $response->setContent($page->render());
 
   }
+
+  abstract function getFilter();
 }

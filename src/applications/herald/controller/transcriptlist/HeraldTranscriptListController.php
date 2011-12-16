@@ -18,6 +18,10 @@
 
 class HeraldTranscriptListController extends HeraldController {
 
+  public function getFilter() {
+    return 'transcript';
+  }
+
   public function processRequest() {
 
     $request = $this->getRequest();

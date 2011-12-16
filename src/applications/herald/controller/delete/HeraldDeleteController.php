@@ -20,6 +20,12 @@ class HeraldDeleteController extends HeraldController {
 
   private $id;
 
+  public function getFilter() {
+    // note this controller is only used from a dialog-context at the moment
+    // and there is actually no "delete" filter
+    return 'delete';
+  }
+
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
   }

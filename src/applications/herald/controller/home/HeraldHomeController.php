@@ -19,9 +19,19 @@
 class HeraldHomeController extends HeraldController {
 
   private $view;
+  private $filter;
 
   public function willProcessRequest(array $data) {
     $this->view = idx($data, 'view');
+    $this->setFilter($this->view);
+  }
+
+  public function getFilter() {
+    return $this->filter;
+  }
+  public function setFilter($filter) {
+    $this->filter = 'view/'.$filter;
+    return $this;
   }
 
   public function processRequest() {
@@ -52,28 +62,11 @@ class HeraldHomeController extends HeraldController {
       ->setView($this->view);
     $panel = $list_view->render();
 
-    $sidenav = new AphrontSideNavView();
-    $sidenav->appendChild($panel);
-
-    foreach ($map as $key => $value) {
-      $sidenav->addNavItem(
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => '/herald/view/'.$key.'/',
-            'class' => ($key == $this->view)
-              ? 'aphront-side-nav-selected'
-              : null,
-          ),
-          phutil_escape_html($value)));
-    }
 
     return $this->buildStandardPageResponse(
-      $sidenav,
+      $panel,
       array(
         'title' => 'Herald',
-        'tab' => 'rules',
       ));
   }
-
 }

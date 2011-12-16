@@ -19,6 +19,14 @@
 class HeraldRuleController extends HeraldController {
 
   private $id;
+  private $filter;
+
+  public function getFilter() {
+    return $this->filter;
+  }
+  public function setFilter($filter) {
+    $this->filter = 'view/'.$filter;
+  }
 
   public function willProcessRequest(array $data) {
     $this->id = (int)idx($data, 'id');
@@ -50,6 +58,7 @@ class HeraldRuleController extends HeraldController {
       }
       $rule->setContentType($type);
     }
+    $this->setFilter($rule->getContentType());
 
     $local_version = id(new HeraldRule())->getConfigVersion();
     if ($rule->getConfigVersion() > $local_version) {

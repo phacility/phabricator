@@ -11,9 +11,7 @@ phutil_require_module('phabricator', 'applications/herald/controller/base');
 phutil_require_module('phabricator', 'applications/herald/storage/rule');
 phutil_require_module('phabricator', 'applications/herald/view/rulelist');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
-phutil_require_module('phabricator', 'view/layout/sidenav');
 
-phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
 
 

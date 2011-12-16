@@ -20,6 +20,10 @@ class HeraldNewController extends HeraldController {
 
   private $type;
 
+  public function getFilter() {
+    return 'new';
+  }
+
   public function willProcessRequest(array $data) {
     $this->type = idx($data, 'type');
   }
@@ -51,7 +55,7 @@ class HeraldNewController extends HeraldController {
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Create New Herald Rule');
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->setWidth(AphrontPanelView::WIDTH_FULL);
     $panel->appendChild($form);
 
     return $this->buildStandardPageResponse(

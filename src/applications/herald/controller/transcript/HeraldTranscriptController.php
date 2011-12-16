@@ -26,6 +26,10 @@ class HeraldTranscriptController extends HeraldController {
   private $filter;
   private $handles;
 
+  public function getFilter() {
+    return 'transcript';
+  }
+
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
     $map = $this->getFilterMap();

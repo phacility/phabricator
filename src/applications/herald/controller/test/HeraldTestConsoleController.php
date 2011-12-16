@@ -18,6 +18,10 @@
 
 class HeraldTestConsoleController extends HeraldController {
 
+  public function getFilter() {
+    return 'test';
+  }
+
   public function processRequest() {
 
     $request = $this->getRequest();
@@ -128,7 +132,7 @@ class HeraldTestConsoleController extends HeraldController {
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Test Herald Rules');
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->setWidth(AphrontPanelView::WIDTH_FULL);
     $panel->appendChild($form);
 
     return $this->buildStandardPageResponse(
