@@ -74,14 +74,14 @@ class AphrontIsolatedDatabaseConnection extends AphrontDatabaseConnection {
   public function executeRawQuery($raw_query) {
 
     // NOTE: "[\s<>K]*" allows any number of (properly escaped) comments to
-    // appear prior to the INSERT/UPDATE, since this connection escapes them
-    // as "<K>" (above).
-    if (!preg_match('/^[\s<>K]*(INSERT|UPDATE)\s*/i', $raw_query)) {
+    // appear prior to the INSERT/UPDATE/DELETE, since this connection escapes
+    // them as "<K>" (above).
+    if (!preg_match('/^[\s<>K]*(INSERT|UPDATE|DELETE)\s*/i', $raw_query)) {
       $doc_uri = PhabricatorEnv::getDoclink('article/Writing_Unit_Tests.html');
       throw new Exception(
-        "Database isolation currently only supports INSERT and UPDATE ".
+        "Database isolation currently only supports INSERT, UPDATE and DELETE ".
         "queries. For more information, see <{$doc_uri}>. You are trying to ".
-        "issue a query which does not begin with INSERT or UPDATE: ".
+        "issue a query which does not begin with INSERT, UPDATE or DELETE: ".
         "'".$raw_query."'");
     }
 

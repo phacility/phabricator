@@ -70,6 +70,11 @@ class AphrontIsolatedDatabaseConnectionTestCase
       "IDs '{$id1}' and '{$id2}' are distinct.");
   }
 
+  public function testDeletePermitted() {
+    $conn = $this->newIsolatedConnection();
+    queryfx($conn, 'DELETE');
+  }
+
   private function newIsolatedConnection() {
     $config = array();
     return new AphrontIsolatedDatabaseConnection($config);
