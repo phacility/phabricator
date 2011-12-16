@@ -59,43 +59,14 @@ final class DifferentialManiphestTasksFieldSpecification
    * @return void
    */
   public function didWriteRevision(DifferentialRevisionEditor $editor) {
-    // 1 -- revision => tasks
-    $revision = $editor->getRevision();
-    $revision->setAttachedPHIDs(PhabricatorPHIDConstants::PHID_TYPE_TASK,
-      $this->maniphestTasks);
-
-    // 2 -- tasks => revision
-    $maniphest_editor = new ManiphestTransactionEditor();
-    $user = $this->getUser();
-    $type = ManiphestTransactionType::TYPE_ATTACH;
-    $attach_type = PhabricatorPHIDConstants::PHID_TYPE_DREV;
-
-    $tasks = array();
-    if ($this->maniphestTasks) {
-      $tasks = id(new ManiphestTask())->loadAllWhere(
-        'phid IN (%Ls)',
-        $this->maniphestTasks);
-    }
-
-    foreach ($tasks as $task) {
-      $transaction = new ManiphestTransaction();
-      $transaction->setAuthorPHID($user->getPHID());
-      $transaction->setTransactionType($type);
-
-      $new = $task->getAttached();
-      if (empty($new[$attach_type])) {
-        $new[$attach_type] = array();
-      }
-      if (array_key_exists($revision->getPHID(), $new[$attach_type])) {
-        // Already attached, just skip the update.
-        continue;
-      }
-
-      $new[$attach_type][$revision->getPHID()] = array();
-
-      $transaction->setNewValue($new);
-      $maniphest_editor->applyTransactions($task, array($transaction));
-    }
+    $aeditor = new PhabricatorObjectAttachmentEditor(
+      PhabricatorPHIDConstants::PHID_TYPE_DREV,
+      $editor->getRevision());
+    $aeditor->setUser($this->getUser());
+    $aeditor->attachObjects(
+      PhabricatorPHIDConstants::PHID_TYPE_TASK,
+      $this->maniphestTasks,
+      $two_way = true);
   }
 
   protected function didSetRevision() {

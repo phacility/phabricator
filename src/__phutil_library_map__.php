@@ -522,6 +522,7 @@ phutil_register_library_map(array(
     'PhabricatorOAuthProviderGoogle' => 'applications/auth/oauth/provider/google',
     'PhabricatorOAuthRegistrationController' => 'applications/auth/controller/oauthregistration/base',
     'PhabricatorOAuthUnlinkController' => 'applications/auth/controller/unlink',
+    'PhabricatorObjectAttachmentEditor' => 'applications/search/editor/attach',
     'PhabricatorObjectGraph' => 'applications/phid/graph',
     'PhabricatorObjectHandle' => 'applications/phid/handle',
     'PhabricatorObjectHandleConstants' => 'applications/phid/handle/const/base',

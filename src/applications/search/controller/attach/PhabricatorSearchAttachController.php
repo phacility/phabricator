@@ -73,12 +73,16 @@ class PhabricatorSearchAttachController extends PhabricatorSearchController {
               $attach_type,
               $phids);
           }
-          $this->performAttach(
+
+          $editor = new PhabricatorObjectAttachmentEditor(
             $object_type,
-            $object,
+            $object);
+          $editor->setUser($this->getRequest()->getUser());
+          $editor->attachObjects(
             $attach_type,
             $phids,
             $two_way);
+
           return id(new AphrontReloadResponse())->setURI($handle->getURI());
         default:
           throw new Exception("Unsupported attach action.");
@@ -121,84 +125,6 @@ class PhabricatorSearchAttachController extends PhabricatorSearchController {
     $dialog = $obj_dialog->buildDialog();
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
-  }
-
-  private function applyTaskTransaction(
-    ManiphestTask $task,
-    $attach_type,
-    array $new_phids) {
-
-    $user = $this->getRequest()->getUser();
-
-    $editor = new ManiphestTransactionEditor();
-    $type = ManiphestTransactionType::TYPE_ATTACH;
-
-    $transaction = new ManiphestTransaction();
-    $transaction->setAuthorPHID($user->getPHID());
-    $transaction->setTransactionType($type);
-
-    $new = $task->getAttached();
-    $new[$attach_type] = array_fill_keys($new_phids, array());
-
-    $transaction->setNewValue($new);
-    $editor->applyTransactions($task, array($transaction));
-  }
-
-  private function performAttach(
-    $object_type,
-    $object,
-    $attach_type,
-    array $phids,
-    $two_way) {
-
-    $object_phid = $object->getPHID();
-
-    // sort() so that removing [X, Y] and then adding [Y, X] is correctly
-    // detected as a no-op.
-    sort($phids);
-    $old_phids = $object->getAttachedPHIDs($attach_type);
-    sort($old_phids);
-    $phids = array_values($phids);
-    $old_phids = array_values($old_phids);
-
-    if ($phids === $old_phids) {
-      return;
-    }
-
-    $all_phids = array_merge($phids, $old_phids);
-    $attach_objs = id(new PhabricatorObjectHandleData($all_phids))
-      ->loadObjects();
-
-    // Remove PHIDs which don't actually exist, to prevent silliness.
-    $phids = array_keys(array_select_keys($attach_objs, $phids));
-    if ($phids) {
-      $phids = array_combine($phids, $phids);
-    }
-
-    // Update the primary object.
-    $this->writeOutboundEdges($object_type, $object, $attach_type, $phids);
-
-    if (!$two_way) {
-      return;
-    }
-
-    // Loop through all of the attached/detached objects and update them.
-    foreach ($attach_objs as $phid => $attach_obj) {
-      $attached_phids = $attach_obj->getAttachedPHIDs($object_type);
-      // Figure out if we're attaching or detaching this object.
-      if (isset($phids[$phid])) {
-        $attached_phids[] = $object_phid;
-      } else {
-        $attached_phids = array_fill_keys($attached_phids, true);
-        unset($attached_phids[$object_phid]);
-        $attached_phids = array_keys($attached_phids);
-      }
-      $this->writeOutboundEdges(
-        $attach_type,
-        $attach_obj,
-        $object_type,
-        $attached_phids);
-    }
   }
 
   private function performMerge(
@@ -262,26 +188,6 @@ class PhabricatorSearchAttachController extends PhabricatorSearchController {
     $editor->applyTransactions($task, array($add_ccs));
 
     return $response;
-  }
-
-  private function writeOutboundEdges(
-    $object_type,
-    $object,
-    $attach_type,
-    array $attach_phids) {
-
-    switch ($object_type) {
-      case PhabricatorPHIDConstants::PHID_TYPE_DREV:
-        $object->setAttachedPHIDs($attach_type, $attach_phids);
-        $object->save();
-        break;
-      case PhabricatorPHIDConstants::PHID_TYPE_TASK:
-        $this->applyTaskTransaction(
-          $object,
-          $attach_type,
-          $attach_phids);
-        break;
-    }
   }
 
   private function getStrings() {

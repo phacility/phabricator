@@ -8,11 +8,9 @@
 
 phutil_require_module('phabricator', 'applications/differential/field/exception/parse');
 phutil_require_module('phabricator', 'applications/differential/field/specification/base');
-phutil_require_module('phabricator', 'applications/maniphest/constants/transactiontype');
-phutil_require_module('phabricator', 'applications/maniphest/editor/transaction');
 phutil_require_module('phabricator', 'applications/maniphest/storage/task');
-phutil_require_module('phabricator', 'applications/maniphest/storage/transaction');
 phutil_require_module('phabricator', 'applications/phid/constants');
+phutil_require_module('phabricator', 'applications/search/editor/attach');
 phutil_require_module('phabricator', 'infrastructure/env');
 
 phutil_require_module('phutil', 'utils');
