@@ -107,7 +107,7 @@ class ConduitAPI_differential_getcommitmessage_Method extends ConduitAPIMethod {
     foreach ($aux_fields as $field_key => $field) {
       $value = $field->renderValueForCommitMessage($is_edit);
       $label = $field->renderLabelForCommitMessage();
-      if ($value === null || !strlen($value)) {
+      if (!strlen($value)) {
         if ($field_key === 'title') {
           $commit_message[] = '<<Enter Revision Title>>';
         } else {

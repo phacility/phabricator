@@ -147,7 +147,11 @@ class ManiphestTaskDetailController extends ManiphestController {
           $aux_field->setValue($attribute->getValue());
         }
 
-        $dict[$aux_field->getLabel()] = $aux_field->renderForDetailView();
+        $value = $aux_field->renderForDetailView();
+
+        if (strlen($value)) {
+          $dict[$aux_field->getLabel()] = $value;
+        }
       }
     }
 
