@@ -83,21 +83,20 @@ class PhabricatorProjectListController
         $project_phids);
     }
 
-    $author_phids = mpull($projects, 'getAuthorPHID');
-    $handles = id(new PhabricatorObjectHandleData($author_phids))
-      ->loadHandles();
-
-    $query = id(new ManiphestTaskQuery())
-      ->withProjects($project_phids)
-      ->withAnyProject(true)
-      ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
-      ->setLimit(PHP_INT_MAX);
-
-    $tasks = $query->execute();
+    $tasks = array();
     $groups = array();
-    foreach ($tasks as $task) {
-      foreach ($task->getProjectPHIDs() as $phid) {
-        $groups[$phid][] = $task;
+    if ($project_phids) {
+      $query = id(new ManiphestTaskQuery())
+        ->withProjects($project_phids)
+        ->withAnyProject(true)
+        ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
+        ->setLimit(PHP_INT_MAX);
+
+      $tasks = $query->execute();
+      foreach ($tasks as $task) {
+        foreach ($task->getProjectPHIDs() as $phid) {
+          $groups[$phid][] = $task;
+        }
       }
     }
 
@@ -114,31 +113,25 @@ class PhabricatorProjectListController
 
       $population = count($affiliations);
 
-      $status = PhabricatorProjectStatus::getNameForStatus(
-        $project->getStatus());
-
       $blurb = $profile->getBlurb();
-      $blurb = phutil_utf8_shorten($blurb, $columns = 100);
+      $blurb = phutil_utf8_shorten($blurb, 64);
+
 
       $rows[] = array(
-        phutil_escape_html($project->getName()),
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => '/project/view/'.$project->getID().'/',
+          ),
+          phutil_escape_html($project->getName())),
         phutil_escape_html($blurb),
-        $handles[$project->getAuthorPHID()]->renderLink(),
         phutil_escape_html($population),
-        phutil_escape_html($status),
         phutil_render_tag(
           'a',
           array(
             'href' => '/maniphest/view/all/?projects='.$phid,
           ),
           phutil_escape_html($task_count)),
-        phutil_render_tag(
-          'a',
-          array(
-            'class' => 'small grey button',
-            'href' => '/project/view/'.$project->getID().'/',
-          ),
-          'View Project Profile'),
       );
     }
 
@@ -147,21 +140,15 @@ class PhabricatorProjectListController
       array(
         'Project',
         'Description',
-        'Mastermind',
         'Population',
-        'Status',
         'Open Tasks',
-        '',
       ));
     $table->setColumnClasses(
       array(
         'pri',
         'wide',
         '',
-        'right',
-        '',
-        'right',
-        'action',
+        ''
       ));
 
     $panel = new AphrontPanelView();

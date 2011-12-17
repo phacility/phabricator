@@ -65,11 +65,14 @@ final class PhabricatorProjectQuery {
         PHP_INT_MAX);
     }
 
+    $order = 'ORDER BY name';
+
     $data = queryfx_all(
       $conn_r,
-      'SELECT p.* FROM %T p %Q %Q',
+      'SELECT p.* FROM %T p %Q %Q %Q',
       $table->getTableName(),
       $joins,
+      $order,
       $limit);
 
     return $table->loadAllFromArray($data);
