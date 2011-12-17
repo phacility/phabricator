@@ -135,4 +135,25 @@ class PhrictionDocument extends PhrictionDAO {
     return $this->contentObject;
   }
 
+  public static function isProjectSlug($slug) {
+    $slug = self::normalizeSlug($slug);
+    $prefix = 'projects/';
+    if ($slug == $prefix) {
+      // The 'projects/' document is not itself a project slug.
+      return false;
+    }
+    return !strncmp($slug, $prefix, strlen($prefix));
+  }
+
+  public static function getProjectSlugIdentifier($slug) {
+    if (!self::isProjectSlug($slug)) {
+      throw new Exception("Slug '{$slug}' is not a project slug!");
+    }
+
+    $slug = self::normalizeSlug($slug);
+    $parts = explode('/', $slug);
+    return $parts[1].'/';
+  }
+
+
 }

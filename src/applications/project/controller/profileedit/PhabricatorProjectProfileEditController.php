@@ -56,7 +56,17 @@ class PhabricatorProjectProfileEditController
     $errors = array();
     $state = null;
     if ($request->isFormPost()) {
-      $project->setName($request->getStr('name'));
+
+      try {
+        $editor = new PhabricatorProjectEditor($project);
+        $editor->setUser($user);
+        $editor->setName($request->getStr('name'));
+        $editor->save();
+      } catch (PhabricatorProjectNameCollisionException $ex) {
+        $e_name = 'Not Unique';
+        $errors[] = $ex->getMessage();
+      }
+
       $project->setStatus($request->getStr('status'));
       $project->setSubprojectPHIDs($request->getArr('set_subprojects'));
       $profile->setBlurb($request->getStr('blurb'));

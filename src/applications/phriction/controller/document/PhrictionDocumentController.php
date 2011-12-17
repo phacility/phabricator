@@ -98,7 +98,19 @@ class PhrictionDocumentController
       }
       $page_title = $content->getTitle();
 
-      $phids = array($content->getAuthorPHID());
+      $project_phid = null;
+      if (PhrictionDocument::isProjectSlug($slug)) {
+        $project = id(new PhabricatorProject())->loadOneWhere(
+          'phrictionSlug = %s',
+          PhrictionDocument::getProjectSlugIdentifier($slug));
+        $project_phid = $project->getPHID();
+      }
+
+      $phids = array_filter(
+        array(
+          $content->getAuthorPHID(),
+          $project_phid,
+        ));
       $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
 
       $age = time() - $content->getDateCreated();
@@ -112,10 +124,21 @@ class PhrictionDocumentController
         $when = "{$age} days ago";
       }
 
+
+      $project_info = null;
+      if ($project_phid) {
+        $project_info =
+          '<br />This document is about the project '.
+          $handles[$project_phid]->renderLink().'.';
+      }
+
+
+
       $byline =
         '<div class="phriction-byline">'.
           "Last updated {$when} by ".
           $handles[$content->getAuthorPHID()]->renderLink().'.'.
+          $project_info.
         '</div>';
 
       $engine = PhabricatorMarkupEngine::newPhrictionMarkupEngine();

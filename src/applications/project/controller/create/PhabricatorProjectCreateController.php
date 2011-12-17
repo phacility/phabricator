@@ -33,17 +33,19 @@ class PhabricatorProjectCreateController
     $errors = array();
     if ($request->isFormPost()) {
 
-      $project->setName($request->getStr('name'));
+      try {
+        $editor = new PhabricatorProjectEditor($project);
+        $editor->setUser($user);
+        $editor->setName($request->getStr('name'));
+        $editor->save();
+      } catch (PhabricatorProjectNameCollisionException $ex) {
+        $e_name = 'Not Unique';
+        $errors[] = $ex->getMessage();
+      }
+
       $project->setStatus(PhabricatorProjectStatus::ONGOING);
 
       $profile->setBlurb($request->getStr('blurb'));
-
-      if (!strlen($project->getName())) {
-        $e_name = 'Required';
-        $errors[] = 'Project name is required.';
-      } else {
-        $e_name = null;
-      }
 
       if (!$errors) {
         $project->save();

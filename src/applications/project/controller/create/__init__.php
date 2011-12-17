@@ -11,6 +11,7 @@ phutil_require_module('phabricator', 'aphront/response/dialog');
 phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/project/constants/status');
 phutil_require_module('phabricator', 'applications/project/controller/base');
+phutil_require_module('phabricator', 'applications/project/editor/project');
 phutil_require_module('phabricator', 'applications/project/storage/affiliation');
 phutil_require_module('phabricator', 'applications/project/storage/profile');
 phutil_require_module('phabricator', 'applications/project/storage/project');

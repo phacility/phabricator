@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/phid/storage/phid');
+phutil_require_module('phabricator', 'applications/phriction/storage/document');
 phutil_require_module('phabricator', 'applications/project/constants/status');
 phutil_require_module('phabricator', 'applications/project/storage/affiliation');
 phutil_require_module('phabricator', 'applications/project/storage/base');

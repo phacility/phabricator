@@ -201,12 +201,28 @@ final class PhrictionDocumentEditor {
     $document->attachContent($new_content);
     PhabricatorSearchPhrictionIndexer::indexDocument($document);
 
+    $project_phid = null;
+    $slug = $document->getSlug();
+    if (PhrictionDocument::isProjectSlug($slug)) {
+      $project = id(new PhabricatorProject())->loadOneWhere(
+        'phrictionSlug = %s',
+        PhrictionDocument::getProjectSlugIdentifier($slug));
+      if ($project) {
+        $project_phid = $project->getPHID();
+      }
+    }
+
+    $related_phids = array(
+      $document->getPHID(),
+      $this->user->getPHID(),
+    );
+
+    if ($project_phid) {
+      $related_phids[] = $project_phid;
+    }
+
     id(new PhabricatorFeedStoryPublisher())
-      ->setRelatedPHIDs(
-        array(
-          $document->getPHID(),
-          $this->user->getPHID(),
-        ))
+      ->setRelatedPHIDs($related_phids)
       ->setStoryAuthorPHID($this->user->getPHID())
       ->setStoryTime(time())
       ->setStoryType(PhabricatorFeedStoryTypeConstants::STORY_PHRICTION)
@@ -215,6 +231,7 @@ final class PhrictionDocumentEditor {
           'phid'    => $document->getPHID(),
           'action'  => $feed_action,
           'content' => phutil_utf8_shorten($new_content->getContent(), 140),
+          'project' => $project_phid,
         ))
       ->publish();
 

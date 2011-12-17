@@ -13,6 +13,7 @@ phutil_require_module('phabricator', 'applications/files/transform');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'applications/project/constants/status');
 phutil_require_module('phabricator', 'applications/project/controller/base');
+phutil_require_module('phabricator', 'applications/project/editor/project');
 phutil_require_module('phabricator', 'applications/project/storage/affiliation');
 phutil_require_module('phabricator', 'applications/project/storage/profile');
 phutil_require_module('phabricator', 'applications/project/storage/project');
