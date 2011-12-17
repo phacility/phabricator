@@ -40,10 +40,6 @@ JX.behavior('projects-resource-editor', function(config) {
       tokenizer.addToken(data.phid, data.name);
     }
 
-    var status = JX.Prefab.renderSelect(
-      {'' : 'Current', 'former' : 'Former'},
-      data.status || '');
-
     var role = JX.$N('input', {type: 'text', value : data.role || ''});
 
     var ownership = JX.Prefab.renderSelect(
@@ -54,7 +50,6 @@ JX.behavior('projects-resource-editor', function(config) {
       var tokens = tokenizer.getTokens();
       return {
         phid : JX.keys(tokens)[0] || null,
-        status : status.value,
         role : role.value,
         owner : ownership.value
       };
@@ -64,7 +59,6 @@ JX.behavior('projects-resource-editor', function(config) {
     r.push([null,                 JX.$N('label', {}, 'User:')]);
     r.push(['user-tokenizer',     template]);
     r.push(['role-label',         JX.$N('label', {}, 'Role:')]);
-    r.push([null,                 status]);
     r.push(['role',                role]);
     r.push([null,                 ownership]);
 

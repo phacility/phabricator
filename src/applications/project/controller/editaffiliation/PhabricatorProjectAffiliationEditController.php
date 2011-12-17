@@ -48,7 +48,6 @@ class PhabricatorProjectAffiliationEditController
 
     if ($request->isFormPost()) {
       $affiliation->setRole($request->getStr('role'));
-      $affiliation->setStatus($request->getStr('status'));
 
       if (!strlen($affiliation->getRole())) {
         if ($affiliation->getID()) {
@@ -67,11 +66,6 @@ class PhabricatorProjectAffiliationEditController
         ->setURI('/project/view/'.$project->getID().'/');
     }
 
-    $status_options = array(
-      '' => 'Current',
-      'former' => 'Former',
-    );
-
     $form = new AphrontFormView();
     $form
       ->setUser($user)
@@ -81,12 +75,6 @@ class PhabricatorProjectAffiliationEditController
           ->setLabel('Role')
           ->setName('role')
           ->setValue($affiliation->getRole()))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel('Status')
-          ->setName('status')
-          ->setOptions($status_options)
-          ->setValue($affiliation->getStatus()))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton('/project/view/'.$project->getID().'/')

@@ -113,7 +113,6 @@ class PhabricatorProjectProfileEditController
         }
         $state[$user_phid] = array(
           'phid'    => $user_phid,
-          'status'  => $resource['status'],
           'role'    => $resource['role'],
           'owner'   => $resource['owner'],
         );
@@ -141,7 +140,6 @@ class PhabricatorProjectProfileEditController
         }
 
         $affil->setRole((string)$new['role']);
-        $affil->setStatus((string)$new['status']);
         $affil->setIsOwner((int)$new['owner']);
 
         $save_affiliations[] = $affil;
@@ -180,7 +178,6 @@ class PhabricatorProjectProfileEditController
         $state[] = array(
           'phid'    => $user_phid,
           'name'    => $handles[$user_phid]->getFullName(),
-          'status'  => $affil->getStatus(),
           'role'    => $affil->getRole(),
           'owner'   => $affil->getIsOwner(),
         );

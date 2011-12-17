@@ -21,7 +21,6 @@ class PhabricatorProjectAffiliation extends PhabricatorProjectDAO {
   protected $projectPHID;
   protected $userPHID;
   protected $role;
-  protected $status = '';
   protected $isOwner = 0;
 
   public static function loadAllForProjectPHIDs($phids) {
@@ -31,7 +30,7 @@ class PhabricatorProjectAffiliation extends PhabricatorProjectDAO {
     $default = array_fill_keys($phids, array());
 
     $affiliations = id(new PhabricatorProjectAffiliation())->loadAllWhere(
-      'projectPHID IN (%Ls) ORDER BY IF(status = "former", 1, 0), dateCreated',
+      'projectPHID IN (%Ls) ORDER BY dateCreated',
       $phids);
 
     return mgroup($affiliations, 'getProjectPHID') + $default;

@@ -132,13 +132,7 @@ class PhabricatorProjectProfileController
     foreach ($affiliations as $affiliation) {
       $user = $handles[$affiliation->getUserPHID()]->renderLink();
       $role = phutil_escape_html($affiliation->getRole());
-
-      $status = null;
-      if ($affiliation->getStatus() == 'former') {
-        $role = '<em>Former '.$role.'</em>';
-      }
-
-      $affiliated[] = '<li>'.$user.' &mdash; '.$role.$status.'</li>';
+      $affiliated[] = '<li>'.$user.' &mdash; '.$role.'</li>';
     }
 
     if ($affiliated) {

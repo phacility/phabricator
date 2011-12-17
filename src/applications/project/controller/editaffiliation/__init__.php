@@ -12,7 +12,6 @@ phutil_require_module('phabricator', 'applications/project/controller/base');
 phutil_require_module('phabricator', 'applications/project/storage/affiliation');
 phutil_require_module('phabricator', 'applications/project/storage/project');
 phutil_require_module('phabricator', 'view/form/base');
-phutil_require_module('phabricator', 'view/form/control/select');
 phutil_require_module('phabricator', 'view/form/control/submit');
 phutil_require_module('phabricator', 'view/form/control/text');
 phutil_require_module('phabricator', 'view/layout/panel');

@@ -67,7 +67,7 @@ final class PhabricatorProjectQuery {
 
     $data = queryfx_all(
       $conn_r,
-      'SELECT * FROM %T p %Q %Q',
+      'SELECT p.* FROM %T p %Q %Q',
       $table->getTableName(),
       $joins,
       $limit);

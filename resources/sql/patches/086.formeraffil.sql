@@ -1,0 +1,1 @@
+ALTER TABLE phabricator_project.project_affiliation DROP status;
