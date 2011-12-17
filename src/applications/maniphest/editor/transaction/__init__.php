@@ -6,6 +6,9 @@
 
 
 
+phutil_require_module('phabricator', 'applications/feed/constants/story');
+phutil_require_module('phabricator', 'applications/feed/publisher');
+phutil_require_module('phabricator', 'applications/maniphest/constants/action');
 phutil_require_module('phabricator', 'applications/maniphest/constants/status');
 phutil_require_module('phabricator', 'applications/maniphest/constants/transactiontype');
 phutil_require_module('phabricator', 'applications/maniphest/view/transactiondetail');

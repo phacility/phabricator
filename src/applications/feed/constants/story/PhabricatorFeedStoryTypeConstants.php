@@ -23,5 +23,6 @@ final class PhabricatorFeedStoryTypeConstants
   const STORY_STATUS       = 'PhabricatorFeedStoryStatus';
   const STORY_DIFFERENTIAL = 'PhabricatorFeedStoryDifferential';
   const STORY_PHRICTION    = 'PhabricatorFeedStoryPhriction';
+  const STORY_MANIPHEST    = 'PhabricatorFeedStoryManiphest';
 
 }
