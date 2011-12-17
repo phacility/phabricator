@@ -53,7 +53,7 @@ final class DifferentialRevisionDetailView extends AphrontView {
     $rows = array();
     foreach ($this->auxiliaryFields as $field) {
       $value = $field->renderValueForRevisionView();
-      if ($value !== null) {
+      if (strlen($value)) {
         $label = $field->renderLabelForRevisionView();
         $rows[] =
           '<tr>'.
