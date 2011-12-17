@@ -190,6 +190,8 @@ class DifferentialDiff extends DifferentialDAO {
         'type'          => $changeset->getChangeType(),
         'fileType'      => $changeset->getFileType(),
         'commitHash'    => null,
+        'addLines'      => $changeset->getAddLines(),
+        'delLines'      => $changeset->getDelLines(),
         'hunks'         => $hunks,
       );
       $dict['changes'][] = $change;
