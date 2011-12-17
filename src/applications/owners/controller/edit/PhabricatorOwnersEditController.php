@@ -47,6 +47,7 @@ class PhabricatorOwnersEditController extends PhabricatorOwnersController {
     if ($request->isFormPost()) {
       $package->setName($request->getStr('name'));
       $package->setDescription($request->getStr('description'));
+      $package->setAuditingEnabled($request->getStr('auditing') === 'enabled');
 
       $primary = $request->getArr('primary');
       $primary = reset($primary);
@@ -207,6 +208,18 @@ class PhabricatorOwnersEditController extends PhabricatorOwnersController {
           ->setName('owners')
           ->setValue($token_all_owners)
           ->setError($e_owners))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setName('auditing')
+          ->setLabel('Auditing')
+          ->setOptions(array(
+            'disabled'  => 'Disabled',
+            'enabled'   => 'Enabled',
+          ))
+          ->setValue(
+            $package->getAuditingEnabled()
+              ? 'enabled'
+              : 'disabled'))
       ->appendChild(
         '<h1>Paths</h1>'.
         '<div class="aphront-form-inset" id="path-editor">'.

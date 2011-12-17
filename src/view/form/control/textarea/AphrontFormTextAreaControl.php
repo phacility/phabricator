@@ -23,11 +23,22 @@ class AphrontFormTextAreaControl extends AphrontFormControl {
   const HEIGHT_VERY_TALL  = 'very-tall';
 
   private $height;
+  private $readOnly;
   private $enableDragAndDropFileUploads;
+
 
   public function setHeight($height) {
     $this->height = $height;
     return $this;
+  }
+
+  public function setReadOnly($read_only) {
+    $this->readOnly = $read_only;
+    return $this;
+  }
+
+  protected function getReadOnly() {
+    return $this->readOnly;
   }
 
   protected function getCustomControlClass() {
@@ -69,6 +80,7 @@ class AphrontFormTextAreaControl extends AphrontFormControl {
       array(
         'name'      => $this->getName(),
         'disabled'  => $this->getDisabled() ? 'disabled' : null,
+        'readonly'  => $this->getReadonly() ? 'readonly' : null,
         'class'     => $height_class,
         'style'     => $this->getControlStyle(),
         'id'        => $id,

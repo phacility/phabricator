@@ -20,6 +20,7 @@ class PhabricatorOwnersPackage extends PhabricatorOwnersDAO {
 
   protected $phid;
   protected $name;
+  protected $auditingEnabled;
   protected $description;
   protected $primaryOwnerPHID;
 

@@ -16,20 +16,10 @@
  * limitations under the License.
  */
 
-class PhabricatorOwnersPackageCommitRelationship extends PhabricatorOwnersDAO {
+abstract class PhabricatorAuditDAO extends PhabricatorLiskDAO {
 
-  protected $packagePHID;
-  protected $commitPHID;
-  protected $auditReasons = array();
-  protected $auditStatus;
-
-  public function getConfiguration() {
-    return array(
-      self::CONFIG_TIMESTAMPS => false,
-      self::CONFIG_SERIALIZATION => array(
-        'auditReasons' => self::SERIALIZATION_JSON,
-      ),
-    ) + parent::getConfiguration();
+  public function getApplicationName() {
+    return 'audit';
   }
 
 }

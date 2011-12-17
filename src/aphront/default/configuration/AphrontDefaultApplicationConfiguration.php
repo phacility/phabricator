@@ -303,6 +303,11 @@ class AphrontDefaultApplicationConfiguration
         ),
       ),
 
+      '/audit/' => array(
+        '$' => 'PhabricatorAuditEditController',
+        'edit/$' => 'PhabricatorAuditEditController',
+      ),
+
       '/xhpast/' => array(
         '$' => 'PhabricatorXHPASTViewRunController',
         'view/(?P<id>\d+)/$'

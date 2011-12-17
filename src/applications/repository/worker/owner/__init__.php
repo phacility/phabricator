@@ -6,9 +6,13 @@
 
 
 
+phutil_require_module('phabricator', 'applications/audit/constants/status');
+phutil_require_module('phabricator', 'applications/differential/storage/revision');
 phutil_require_module('phabricator', 'applications/owners/query/path');
+phutil_require_module('phabricator', 'applications/owners/storage/owner');
 phutil_require_module('phabricator', 'applications/owners/storage/package');
 phutil_require_module('phabricator', 'applications/owners/storage/packagecommitrelationship');
+phutil_require_module('phabricator', 'applications/repository/storage/commitdata');
 phutil_require_module('phabricator', 'applications/repository/worker/base');
 
 phutil_require_module('phutil', 'utils');

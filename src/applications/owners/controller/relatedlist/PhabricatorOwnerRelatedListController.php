@@ -23,6 +23,7 @@ class PhabricatorOwnerRelatedListController
   private $user;
   private $view;
   private $packagePHID;
+  private $auditStatus;
 
   public function willProcessRequest(array $data) {
     $this->view = idx($data, 'view', 'all');
@@ -34,15 +35,18 @@ class PhabricatorOwnerRelatedListController
     if ($this->request->isFormPost()) {
       $package_phids = $this->request->getArr('search_packages');
       $package_phid = head($package_phids);
+      $status = $this->request->getStr('search_status');
       return id(new AphrontRedirectResponse())
         ->setURI(
           $this->request
             ->getRequestURI()
-            ->alter('phid', $package_phid));
+            ->alter('phid', $package_phid)
+            ->alter('status', $status));
     }
 
     $this->user = $this->request->getUser();
     $this->packagePHID = nonempty($this->request->getStr('phid'), null);
+    $this->auditStatus = $this->request->getStr('status', 'needaudit');
 
     $search_view = $this->renderSearchView();
     $list_panel = $this->renderListPanel();
@@ -69,6 +73,16 @@ class PhabricatorOwnerRelatedListController
     $package = id(new PhabricatorOwnersPackage())->loadOneWhere(
       "phid = %s",
       $this->packagePHID);
+    if ($this->view === 'audit' && !$package->getAuditingEnabled()) {
+      return id(new AphrontErrorView())
+        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+        ->setTitle("Package doesn't have auditing enabled. ".
+                   "Please choose another one.");
+    }
+
+    $conn_r = id(new PhabricatorOwnersPackageCommitRelationship())
+      ->establishConnection('r');
+    $status_arr = $this->getStatusArr();
 
     $offset = $this->request->getInt('offset', 0);
     $pager = new AphrontPagerView();
@@ -76,26 +90,17 @@ class PhabricatorOwnerRelatedListController
     $pager->setOffset($offset);
     $pager->setURI($this->request->getRequestURI(), 'offset');
 
-    $conn_r = id(new PhabricatorOwnersPackageCommitRelationship())
-      ->establishConnection('r');
-
-    switch ($this->view) {
-      case 'all':
-        $data = queryfx_all(
-          $conn_r,
-          'SELECT commitPHID FROM %T
-            WHERE packagePHID = %s
-            ORDER BY id DESC
-            LIMIT %d, %d',
-          id(new PhabricatorOwnersPackageCommitRelationship())->getTableName(),
-          $package->getPHID(),
-          $pager->getOffset(),
-          $pager->getPageSize() + 1);
-        break;
-
-      default:
-        throw new Exception("view {$this->view} not recognized");
-    }
+    $data = queryfx_all(
+      $conn_r,
+      'SELECT commitPHID, auditStatus, auditReasons FROM %T
+        WHERE packagePHID = %s AND auditStatus in (%Ls)
+        ORDER BY id DESC
+        LIMIT %d, %d',
+      id(new PhabricatorOwnersPackageCommitRelationship())->getTableName(),
+      $package->getPHID(),
+      $status_arr,
+      $pager->getOffset(),
+      $pager->getPageSize() + 1);
 
     $data = $pager->sliceResults($data);
     $data = ipull($data, null, 'commitPHID');
@@ -106,9 +111,50 @@ class PhabricatorOwnerRelatedListController
     return $list_panel;
   }
 
+  private function getStatusArr() {
+    switch ($this->view) {
+      case 'all':
+        $status_arr =
+          array_keys(PhabricatorAuditStatusConstants::getStatusNameMap());
+        break;
+      case 'audit':
+        switch ($this->auditStatus) {
+          case 'needaudit':
+            $status_arr =
+              array(
+                PhabricatorAuditStatusConstants::AUDIT_REQUIRED,
+                PhabricatorAuditStatusConstants::CONCERNED,
+              );
+            break;
+          case 'accepted':
+            $status_arr =
+              array(
+                PhabricatorAuditStatusConstants::ACCEPTED,
+              );
+            break;
+          case 'all':
+            $status_arr =
+              array(
+                PhabricatorAuditStatusConstants::AUDIT_REQUIRED,
+                PhabricatorAuditStatusConstants::CONCERNED,
+                PhabricatorAuditStatusConstants::ACCEPTED,
+              );
+            break;
+          default:
+            throw new Exception("Status {$this->auditStatus} not recognized");
+        }
+        break;
+
+      default:
+        throw new Exception("view {$this->view} not recognized");
+    }
+    return $status_arr;
+  }
+
   private function renderSideNav() {
     $views = array(
       'all' => 'Related to Package',
+      'audit' => 'Needs Attention',
     );
 
     $query = null;
@@ -155,6 +201,21 @@ class PhabricatorOwnerRelatedListController
           ->setValue($view_packages)
           ->setLimit(1));
 
+    if ($this->view === 'audit') {
+      $select_map = array(
+        'needaudit' => 'Needs Audit',
+        'accepted' => 'Accepted',
+        'all' => 'All',
+      );
+      $select = id(new AphrontFormSelectControl())
+        ->setLabel('Audit Status')
+        ->setName('search_status')
+        ->setOptions($select_map)
+        ->setValue($this->auditStatus);
+
+      $search_form->appendChild($select);
+    }
+
     $search_form->appendChild(
       id(new AphrontFormSubmitControl())
         ->setValue('Search'));
@@ -169,6 +230,17 @@ class PhabricatorOwnerRelatedListController
     $loader = new PhabricatorObjectHandleData($commit_phids);
     $handles = $loader->loadHandles();
     $objects = $loader->loadObjects();
+
+    $owners = id(new PhabricatorOwnersOwner())->loadAllWhere(
+      'packageID = %d',
+      $package->getID());
+    $owners_phids = mpull($owners, 'getUserPHID');
+    if ($this->user->getIsAdmin() ||
+        in_array($this->user->getPHID(), $owners_phids)) {
+      $allowed_to_audit = true;
+    } else {
+      $allowed_to_audit = false;
+    }
 
     $rows = array();
     foreach ($commit_phids as $commit_phid) {
@@ -191,6 +263,33 @@ class PhabricatorOwnerRelatedListController
         phutil_escape_html($commit_data->getSummary()),
       );
 
+      if ($this->view === 'audit') {
+        $relationship = $data[$commit_phid];
+        $status_link = phutil_escape_html(
+          idx(PhabricatorAuditStatusConstants::getStatusNameMap(),
+            $relationship['auditStatus']));
+        if ($allowed_to_audit)
+          $status_link = phutil_render_tag(
+            'a',
+            array(
+              'href' => sprintf('/audit/edit/?c-phid=%s&p-phid=%s',
+                idx($relationship, 'commitPHID'),
+                $this->packagePHID),
+            ),
+            $status_link);
+
+        $reasons = json_decode($relationship['auditReasons'], true);
+        $reasons = array_map('phutil_escape_html', $reasons);
+        $reasons = implode($reasons, '<br>');
+
+        $row = array_merge(
+          $row,
+          array(
+            $status_link,
+            $reasons,
+          ));
+      }
+
       $rows[] = $row;
     }
 
@@ -202,6 +301,14 @@ class PhabricatorOwnerRelatedListController
       'Time',
       'Summary',
     );
+    if ($this->view === 'audit') {
+      $headers = array_merge(
+        $headers,
+        array(
+          'Audit Status',
+          'Audit Reasons',
+        ));
+    }
     $commit_table->setHeaders($headers);
 
     $column_classes =
@@ -211,6 +318,14 @@ class PhabricatorOwnerRelatedListController
         'right',
         'wide',
       );
+    if ($this->view === 'audit') {
+      $column_classes = array_merge(
+        $column_classes,
+        array(
+          '',
+          '',
+        ));
+    }
     $commit_table->setColumnClasses($column_classes);
 
     $list_panel = new AphrontPanelView();
@@ -221,7 +336,8 @@ class PhabricatorOwnerRelatedListController
           'href' => '/owners/package/'.$package->getID().'/',
         ),
         phutil_escape_html($package->getName())).
-      '"');
+      '"'.
+      ($this->view === 'audit' ? ' and need attention' : ''));
     $list_panel->appendChild($commit_table);
 
     return $list_panel;

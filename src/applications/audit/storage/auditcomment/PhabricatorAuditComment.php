@@ -16,20 +16,22 @@
  * limitations under the License.
  */
 
-class PhabricatorOwnersPackageCommitRelationship extends PhabricatorOwnersDAO {
+class PhabricatorAuditComment extends PhabricatorAuditDAO {
 
-  protected $packagePHID;
-  protected $commitPHID;
-  protected $auditReasons = array();
-  protected $auditStatus;
+  protected $phid;
+  protected $actorPHID;
+  protected $targetPHID;
+  protected $action;
+  protected $content;
 
   public function getConfiguration() {
     return array(
-      self::CONFIG_TIMESTAMPS => false,
-      self::CONFIG_SERIALIZATION => array(
-        'auditReasons' => self::SERIALIZATION_JSON,
-      ),
+      self::CONFIG_AUX_PHID => true,
     ) + parent::getConfiguration();
+  }
+
+  public function generatePHID() {
+    return PhabricatorPHID::generateNewPHID('ACMT');
   }
 
 }

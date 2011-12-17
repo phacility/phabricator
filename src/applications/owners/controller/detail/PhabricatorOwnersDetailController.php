@@ -77,6 +77,11 @@ class PhabricatorOwnersDetailController extends PhabricatorOwnersController {
       $owner_links);
 
     $rows[] = array(
+      'Auditing',
+      $package->getAuditingEnabled() ? 'Enabled' : 'Disabled',
+    );
+
+    $rows[] = array(
       'Related Commits',
       phutil_render_tag(
         'a',

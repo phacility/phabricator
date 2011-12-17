@@ -16,20 +16,20 @@
  * limitations under the License.
  */
 
-class PhabricatorOwnersPackageCommitRelationship extends PhabricatorOwnersDAO {
+abstract class PhabricatorAuditController extends PhabricatorController {
 
-  protected $packagePHID;
-  protected $commitPHID;
-  protected $auditReasons = array();
-  protected $auditStatus;
+  public function buildStandardPageResponse($view, array $data) {
 
-  public function getConfiguration() {
-    return array(
-      self::CONFIG_TIMESTAMPS => false,
-      self::CONFIG_SERIALIZATION => array(
-        'auditReasons' => self::SERIALIZATION_JSON,
-      ),
-    ) + parent::getConfiguration();
+    $page = $this->buildStandardPageView();
+
+    $page->setApplicationName('Audit');
+    $page->setBaseURI('/audit/');
+    $page->setTitle(idx($data, 'title'));
+    $page->setGlyph("\xE2\x9C\x8D");
+    $page->appendChild($view);
+
+    $response = new AphrontWebpageResponse();
+    return $response->setContent($page->render());
+
   }
-
 }

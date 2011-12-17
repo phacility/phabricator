@@ -16,20 +16,24 @@
  * limitations under the License.
  */
 
-class PhabricatorOwnersPackageCommitRelationship extends PhabricatorOwnersDAO {
+class PhabricatorAuditStatusConstants {
 
-  protected $packagePHID;
-  protected $commitPHID;
-  protected $auditReasons = array();
-  protected $auditStatus;
+  const NONE = '';
+  const AUDIT_NOT_REQUIRED = 'audit-not-required';
+  const AUDIT_REQUIRED = 'audit-required';
+  const CONCERNED = 'concerned';
+  const ACCEPTED = 'accepted';
 
-  public function getConfiguration() {
-    return array(
-      self::CONFIG_TIMESTAMPS => false,
-      self::CONFIG_SERIALIZATION => array(
-        'auditReasons' => self::SERIALIZATION_JSON,
-      ),
-    ) + parent::getConfiguration();
+  public static function getStatusNameMap() {
+    static $map = array(
+      self::NONE => 'Not Apply',
+      self::AUDIT_NOT_REQUIRED => 'Audit Not Required',
+      self::AUDIT_REQUIRED => 'Audit Required',
+      self::CONCERNED => 'Concerned',
+      self::ACCEPTED => 'Accepted',
+    );
+
+    return $map;
   }
 
 }
