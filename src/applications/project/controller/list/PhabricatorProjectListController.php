@@ -21,9 +21,6 @@ class PhabricatorProjectListController
 
   public function processRequest() {
 
-    $side_nav = new AphrontSideNavView();
-
-
     $projects = id(new PhabricatorProject())->loadAllWhere(
       '1 = 1 ORDER BY id DESC limit 100');
     $project_phids = mpull($projects, 'getPHID');
@@ -128,10 +125,8 @@ class PhabricatorProjectListController
     $panel->setHeader('Project');
     $panel->setCreateButton('Create New Project', '/project/create/');
 
-    $side_nav->appendChild($panel);
-
     return $this->buildStandardPageResponse(
-      $side_nav,
+      $panel,
       array(
         'title' => 'Projects',
       ));
