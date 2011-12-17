@@ -199,6 +199,7 @@ class AphrontDefaultApplicationConfiguration
 
       '/project/' => array(
         '$' => 'PhabricatorProjectListController',
+        'filter/(?P<filter>[^/]+)/$' => 'PhabricatorProjectListController',
         'edit/(?P<id>\d+)/$' => 'PhabricatorProjectProfileEditController',
         'view/(?P<id>\d+)/(?:(?P<page>\w+)/)?$'
           => 'PhabricatorProjectProfileController',

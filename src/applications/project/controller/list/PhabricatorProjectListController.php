@@ -19,10 +19,54 @@
 class PhabricatorProjectListController
   extends PhabricatorProjectController {
 
-  public function processRequest() {
+  private $filter;
 
-    $projects = id(new PhabricatorProject())->loadAllWhere(
-      '1 = 1 ORDER BY id DESC limit 100');
+  public function willProcessRequest(array $data) {
+    $this->filter = idx($data, 'filter');
+  }
+
+  public function processRequest() {
+    $request = $this->getRequest();
+
+    $nav = new AphrontSideNavFilterView();
+    $nav
+      ->setBaseURI(new PhutilURI('/project/filter/'))
+      ->addLabel('User')
+      ->addFilter('active',   'Active')
+      ->addFilter('owned',    'Owned')
+      ->addSpacer()
+      ->addLabel('All')
+      ->addFilter('all',      'All Projects');
+    $this->filter = $nav->selectFilter($this->filter, 'active');
+
+    $pager = new AphrontPagerView();
+    $pager->setPageSize(250);
+    $pager->setURI($request->getRequestURI(), 'page');
+    $pager->setOffset($request->getInt('page'));
+
+    $query = new PhabricatorProjectQuery();
+    $query->setOffset($pager->getOffset());
+    $query->setLimit($pager->getPageSize() + 1);
+
+    $view_phid = $request->getUser()->getPHID();
+
+    switch ($this->filter) {
+      case 'active':
+        $table_header = 'Active Projects';
+        $query->setMembers(array($view_phid));
+        break;
+      case 'owned':
+        $table_header = 'Owned Projects';
+        $query->setOwners(array($view_phid));
+        break;
+      case 'all':
+        $table_header = 'All Projects';
+        break;
+    }
+
+    $projects = $query->execute();
+    $projects = $pager->sliceResults($projects);
+
     $project_phids = mpull($projects, 'getPHID');
 
     $profiles = array();
@@ -121,12 +165,15 @@ class PhabricatorProjectListController
       ));
 
     $panel = new AphrontPanelView();
-    $panel->appendChild($table);
-    $panel->setHeader('Project');
+    $panel->setHeader($table_header);
     $panel->setCreateButton('Create New Project', '/project/create/');
+    $panel->appendChild($table);
+    $panel->appendChild($pager);
+
+    $nav->appendChild($panel);
 
     return $this->buildStandardPageResponse(
-      $panel,
+      $nav,
       array(
         'title' => 'Projects',
       ));

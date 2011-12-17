@@ -10,13 +10,16 @@ phutil_require_module('phabricator', 'applications/maniphest/query');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'applications/project/constants/status');
 phutil_require_module('phabricator', 'applications/project/controller/base');
+phutil_require_module('phabricator', 'applications/project/query/project');
 phutil_require_module('phabricator', 'applications/project/storage/affiliation');
 phutil_require_module('phabricator', 'applications/project/storage/profile');
-phutil_require_module('phabricator', 'applications/project/storage/project');
+phutil_require_module('phabricator', 'view/control/pager');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/layout/panel');
+phutil_require_module('phabricator', 'view/layout/sidenavfilter');
 
 phutil_require_module('phutil', 'markup');
+phutil_require_module('phutil', 'parser/uri');
 phutil_require_module('phutil', 'utils');
 
 
