@@ -7,13 +7,10 @@
 
 
 phutil_require_module('phabricator', 'aphront/response/404');
+phutil_require_module('phabricator', 'applications/feed/builder/feed');
 phutil_require_module('phabricator', 'applications/feed/controller/base');
 phutil_require_module('phabricator', 'applications/feed/query');
-phutil_require_module('phabricator', 'applications/people/storage/user');
-phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'infrastructure/env');
-
-phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('PhabricatorFeedPublicStreamController.php');

@@ -36,34 +36,14 @@ final class PhabricatorFeedPublicStreamController
     $query = new PhabricatorFeedQuery();
     $stories = $query->execute();
 
-    $handles = array();
-    $objects = array();
-    if ($stories) {
-      $handle_phids = array_mergev(mpull($stories, 'getRequiredHandlePHIDs'));
-      $object_phids = array_mergev(mpull($stories, 'getRequiredObjectPHIDs'));
-      $handles = id(new PhabricatorObjectHandleData($handle_phids))
-        ->loadHandles();
-      $objects = id(new PhabricatorObjectHandleData($object_phids))
-        ->loadObjects();
-    }
+    $builder = new PhabricatorFeedBuilder($stories);
+    $builder
+      ->setUser($request->getUser());
 
-    // TODO: We need this for timezones but should develop some more general
-    // solution for logged-out pages.
-    $dummy_user = new PhabricatorUser();
-
-    $views = array();
-    foreach ($stories as $story) {
-      $story->setHandles($handles);
-      $story->setObjects($objects);
-
-      $view = $story->renderView();
-      $view->setViewer($dummy_user);
-
-      $views[] = $view->render();
-    }
+    $view = $builder->buildView();
 
     return $this->buildStandardPageResponse(
-      $views,
+      $view,
       array(
         'title'   => 'Public Feed',
         'public'  => true,

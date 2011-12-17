@@ -42,29 +42,9 @@ final class PhabricatorFeedStreamController extends PhabricatorFeedController {
     $query = new PhabricatorFeedQuery();
     $stories = $query->execute();
 
-    $handles = array();
-    $objects = array();
-    if ($stories) {
-      $handle_phids = array_mergev(mpull($stories, 'getRequiredHandlePHIDs'));
-      $object_phids = array_mergev(mpull($stories, 'getRequiredObjectPHIDs'));
-
-      $handles = id(new PhabricatorObjectHandleData($handle_phids))
-        ->loadHandles();
-
-      $objects = id(new PhabricatorObjectHandleData($object_phids))
-        ->loadObjects();
-    }
-
-    $views = array();
-    foreach ($stories as $story) {
-      $story->setHandles($handles);
-      $story->setObjects($objects);
-
-      $view = $story->renderView();
-      $view->setViewer($viewer);
-
-      $views[] = $view->render();
-    }
+    $builder = new PhabricatorFeedBuilder($stories);
+    $builder->setUser($request->getUser());
+    $view = $builder->buildView();
 
     $post_form = id(new AphrontFormView())
       ->setUser($viewer)
@@ -83,7 +63,7 @@ final class PhabricatorFeedStreamController extends PhabricatorFeedController {
 
     $page = array();
     $page[] = $post;
-    $page[] = $views;
+    $page[] = $view;
 
     return $this->buildStandardPageResponse(
       $page,

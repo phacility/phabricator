@@ -429,6 +429,7 @@ phutil_register_library_map(array(
     'PhabricatorEvent' => 'infrastructure/events/event',
     'PhabricatorEventEngine' => 'infrastructure/events/engine',
     'PhabricatorEventType' => 'infrastructure/events/constant/type',
+    'PhabricatorFeedBuilder' => 'applications/feed/builder/feed',
     'PhabricatorFeedConstants' => 'applications/feed/constants/base',
     'PhabricatorFeedController' => 'applications/feed/controller/base',
     'PhabricatorFeedDAO' => 'applications/feed/storage/base',
