@@ -41,8 +41,8 @@ final class AphrontSideNavFilterView extends AphrontView {
   private $baseURI;
   private $selectedFilter = false;
 
-  public function addFilter($key, $name) {
-    $this->items[] = array('filter', $key, $name);
+  public function addFilter($key, $name, $uri = null) {
+    $this->items[] = array('filter', $key, $name, 'uri' => $uri);
     return $this;
   }
 
@@ -63,11 +63,13 @@ final class AphrontSideNavFilterView extends AphrontView {
 
   public function selectFilter($key, $default) {
     $this->selectedFilter = $default;
-    foreach ($this->items as $item) {
-      if ($item[0] == 'filter') {
-        if ($item[1] == $key) {
-          $this->selectedFilter = $key;
-          break;
+    if ($key !== null) {
+      foreach ($this->items as $item) {
+        if ($item[0] == 'filter') {
+          if ($item[1] == $key) {
+            $this->selectedFilter = $key;
+            break;
+          }
         }
       }
     }
@@ -101,9 +103,13 @@ final class AphrontSideNavFilterView extends AphrontView {
             ? 'aphront-side-nav-selected'
             : null;
 
-          $href = clone $this->baseURI;
-          $href->setPath($href->getPath().$key.'/');
-          $href = (string)$href;
+          if (empty($item['uri'])) {
+            $href = clone $this->baseURI;
+            $href->setPath($href->getPath().$key.'/');
+            $href = (string)$href;
+          } else {
+            $href = $item['uri'];
+          }
 
           $view->addNavItem(
             phutil_render_tag(

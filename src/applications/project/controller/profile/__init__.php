@@ -7,20 +7,24 @@
 
 
 phutil_require_module('phabricator', 'aphront/response/404');
+phutil_require_module('phabricator', 'applications/feed/builder/feed');
+phutil_require_module('phabricator', 'applications/feed/query');
 phutil_require_module('phabricator', 'applications/files/uri');
 phutil_require_module('phabricator', 'applications/maniphest/query');
 phutil_require_module('phabricator', 'applications/maniphest/view/tasksummary');
-phutil_require_module('phabricator', 'applications/markup/engine');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
-phutil_require_module('phabricator', 'applications/project/constants/status');
+phutil_require_module('phabricator', 'applications/phriction/storage/document');
 phutil_require_module('phabricator', 'applications/project/controller/base');
 phutil_require_module('phabricator', 'applications/project/storage/profile');
 phutil_require_module('phabricator', 'applications/project/storage/project');
+phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'view/control/table');
-phutil_require_module('phabricator', 'view/layout/profile');
+phutil_require_module('phabricator', 'view/layout/profileheader');
+phutil_require_module('phabricator', 'view/layout/sidenavfilter');
 phutil_require_module('phabricator', 'view/utils');
 
 phutil_require_module('phutil', 'markup');
+phutil_require_module('phutil', 'parser/uri');
 phutil_require_module('phutil', 'utils');
 
 

@@ -89,11 +89,10 @@ class PhabricatorProjectProfileEditController
           $okay = $file->isTransformableImage();
           if ($okay) {
             $xformer = new PhabricatorImageTransformer();
-            $xformed = $xformer->executeProfileTransform(
+            $xformed = $xformer->executeThumbTransform(
               $file,
-              $width = 280,
-              $min_height = 140,
-              $max_height = 420);
+              $x = 50,
+              $y = 50);
             $profile->setProfileImagePHID($xformed->getPHID());
           } else {
             $errors[] =

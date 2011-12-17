@@ -1,0 +1,32 @@
+/**
+ * @provides phabricator-profile-header-css
+ */
+
+.phabricator-profile-header {
+  background: #efefef;
+  width: 100%;
+  border-bottom: 1px solid #cccccc;
+}
+
+.phabricator-profile-header .profile-header-name {
+  font-size: 22px;
+  font-weight: bold;
+  padding: 12px 12px 6px;
+  width: 100%;
+}
+
+.phabricator-profile-header .profile-header-picture-frame {
+  margin: 11px;
+  width: 50px;
+  height: 50px;
+  position: relative;
+
+  background: no-repeat;
+  border: 1px solid #ffffff;
+}
+
+.phabricator-profile-header .profile-header-description {
+  padding: 0 12px 12px;
+  color: #444444;
+  font-size: 11px;
+}

@@ -30,7 +30,6 @@ class PhabricatorProjectProfileController
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
-    $uri = $request->getRequestURI();
 
     $project = id(new PhabricatorProject())->load($this->id);
     if (!$project) {
@@ -47,127 +46,110 @@ class PhabricatorProjectProfileController
     }
     $picture = PhabricatorFileURI::getViewURIForPHID($src_phid);
 
-    $pages = array(
-      /*
-      '<h2>Active Documents</h2>',
-      'tasks'        => 'Maniphest Tasks',
-      'revisions'    => 'Differential Revisions',
-      '<hr />',
-      '<h2>Workflow</h2>',
-      'goals'        => 'Goals',
-      'statistics'   => 'Statistics',
-      '<hr />', */
-      '<h2>Information</h2>',
-      'edit'         => 'Edit Project',
-      'affiliation'  => 'Edit Affiliation',
-    );
+    $nav_view = new AphrontSideNavFilterView();
+    $uri = new PhutilURI('/project/view/'.$project->getID().'/');
+    $nav_view->setBaseURI($uri);
 
-    if (empty($pages[$this->page])) {
-      $this->page = 'action';
-    }
+    $external_arrow = "\xE2\x86\x97";
+    $tasks_uri = '/maniphest/view/all/?projects='.$project->getPHID();
+    $slug = PhrictionDocument::normalizeSlug($project->getName());
+    $phriction_uri = '/w/projects/'.$slug.'/';
 
+    $edit_uri = '/project/edit/'.$project->getID().'/';
+
+    $nav_view->addFilter('dashboard', 'Dashboard');
+    $nav_view->addSpacer();
+    $nav_view->addFilter('feed', 'Feed');
+    $nav_view->addFilter(null, 'Tasks '.$external_arrow, $tasks_uri);
+    $nav_view->addFilter(null, 'Wiki '.$external_arrow, $phriction_uri);
+    $nav_view->addFilter('people', 'People');
+    $nav_view->addFilter('about', 'About');
+    $nav_view->addSpacer();
+    $nav_view->addFilter(null, "Edit Project\xE2\x80\xA6", $edit_uri);
+
+    $this->page = $nav_view->selectFilter($this->page, 'dashboard');
+
+
+    require_celerity_resource('phabricator-profile-css');
     switch ($this->page) {
-      default:
-        $content = $this->renderBasicInformation($project, $profile);
+      case 'dashboard':
+        $content = $this->renderTasksPage($project, $profile);
+
+        $query = new PhabricatorFeedQuery();
+        $query->setFilterPHIDs(
+          array(
+            $project->getPHID(),
+          ));
+        $stories = $query->execute();
+
+        $builder = new PhabricatorFeedBuilder($stories);
+        $builder->setUser($user);
+        $view = $builder->buildView();
+
+        $content .=
+          '<div style="padding: 2em;">'.
+            $view->render().
+          '</div>';
         break;
+      case 'about':
+        $content = $this->renderAboutPage($project, $profile);
+        break;
+      case 'people':
+        $content = $this->renderPeoplePage($project, $profile);
+        break;
+      case 'feed':
+        $content = $this->renderFeedPage($project, $profile);
+        break;
+      default:
+        throw new Exception("Unimplemented filter '{$this->page}'.");
     }
 
-    $profile = new PhabricatorProfileView();
-    $profile->setProfilePicture($picture);
-    $profile->setProfileNames($project->getName());
-    foreach ($pages as $page => $name) {
-      if (is_integer($page)) {
-        $profile->addProfileItem(
-          phutil_render_tag(
-            'span',
-            array(),
-            $name));
-      } else {
-        $uri->setPath('/project/'.$page.'/'.$project->getID().'/');
-        $profile->addProfileItem(
-          phutil_render_tag(
-            'a',
-            array(
-              'href' => $uri,
-              'class' => ($this->page == $page)
-                ? 'phabricator-profile-item-selected'
-                : null,
-            ),
-            phutil_escape_html($name)));
-      }
-    }
+    $content = '<div style="padding: 2em;">'.$content.'</div>';
+    $nav_view->appendChild($content);
 
-    $profile->appendChild($content);
+    $header = new PhabricatorProfileHeaderView();
+    $header->setName($project->getName());
+    $header->setDescription(
+      phutil_utf8_shorten($profile->getBlurb(), 1024));
+    $header->setProfilePicture($picture);
+
+    $header->appendChild($nav_view);
 
     return $this->buildStandardPageResponse(
-      $profile,
+      $header,
       array(
-        'title' => $project->getName(),
-        ));
+        'title' => $project->getName().' Project',
+      ));
   }
 
-  //----------------------------------------------------------------------------
-  // Helper functions
+  private function renderAboutPage(
+    PhabricatorProject $project,
+    PhabricatorProjectProfile $profile) {
 
-  private function renderBasicInformation($project, $profile) {
-    $blurb = nonempty(
-       $profile->getBlurb(),
-       '//Nothing is known about this elusive project.//');
+    $viewer = $this->getRequest()->getUser();
 
-    $engine = PhabricatorMarkupEngine::newProfileMarkupEngine();
-    $blurb = $engine->markupText($blurb);
-
-    $affiliations = $project->loadAffiliations();
+    $blurb = $profile->getBlurb();
+    $blurb = phutil_escape_html($blurb);
+    $blurb = str_replace("\n", '<br />', $blurb);
 
     $phids = array_merge(
       array($project->getAuthorPHID()),
-      $project->getSubprojectPHIDs(),
-      mpull($affiliations, 'getUserPHID')
+      $project->getSubprojectPHIDs()
     );
     $phids = array_unique($phids);
     $handles = id(new PhabricatorObjectHandleData($phids))
       ->loadHandles();
 
-    $affiliated = array();
-    foreach ($affiliations as $affiliation) {
-      $user = $handles[$affiliation->getUserPHID()]->renderLink();
-      $role = phutil_escape_html($affiliation->getRole());
-      $affiliated[] = '<li>'.$user.' &mdash; '.$role.'</li>';
-    }
-
-    if ($affiliated) {
-      $affiliated = '<ul>'.implode("\n", $affiliated).'</ul>';
-    } else {
-      $affiliated = '<p><em>No one is affiliated with this project.</em></p>';
-    }
-
-    if ($project->getSubprojectPHIDs()) {
-      $table = $this->renderSubprojectTable(
-        $handles,
-        $project->getSubprojectPHIDs());
-      $subproject_list = $table->render();
-    } else {
-      $subproject_list =
-        '<p><em>There are no projects attached for such specie.</em></p>';
-    }
-
-    $viewer = $this->getRequest()->getUser();
     $timestamp = phabricator_datetime($project->getDateCreated(), $viewer);
-    $status = PhabricatorProjectStatus::getNameForStatus(
-      $project->getStatus());
 
-    $content =
+    $about =
       '<div class="phabricator-profile-info-group">
-        <h1 class="phabricator-profile-info-header">Basic Information</h1>
+        <h1 class="phabricator-profile-info-header">About</h1>
         <div class="phabricator-profile-info-pane">
           <table class="phabricator-profile-info-table">
             <tr>
               <th>Creator</th>
               <td>'.$handles[$project->getAuthorPHID()]->renderLink().'</td>
-            </tr>
-            <tr>
-              <th>Status</th>
-              <td><strong>'.phutil_escape_html($status).'</strong></td>
             </tr>
             <tr>
               <th>Created</th>
@@ -185,20 +167,88 @@ class PhabricatorProjectProfileController
         </div>
       </div>';
 
-    $content .=
+    if ($project->getSubprojectPHIDs()) {
+      $table = $this->renderSubprojectTable(
+        $handles,
+        $project->getSubprojectPHIDs());
+      $subproject_list = $table->render();
+    } else {
+      $subproject_list = '<p><em>No subprojects.</em></p>';
+    }
+
+    $about .=
       '<div class="phabricator-profile-info-group">'.
-        '<h1 class="phabricator-profile-info-header">Resources</h1>'.
+        '<h1 class="phabricator-profile-info-header">Subprojects</h1>'.
+        '<div class="phabricator-profile-info-pane">'.
+          $subproject_list.
+        '</div>'.
+      '</div>';
+
+    return $about;
+  }
+
+  private function renderPeoplePage(
+    PhabricatorProject $project,
+    PhabricatorProjectProfile $profile) {
+
+    $affiliations = $project->loadAffiliations();
+
+    $phids = mpull($affiliations, 'getUserPHID');
+    $handles = id(new PhabricatorObjectHandleData($phids))
+      ->loadHandles();
+
+    $affiliated = array();
+    foreach ($affiliations as $affiliation) {
+      $user = $handles[$affiliation->getUserPHID()]->renderLink();
+      $role = phutil_escape_html($affiliation->getRole());
+      $affiliated[] = '<li>'.$user.' &mdash; '.$role.'</li>';
+    }
+
+    if ($affiliated) {
+      $affiliated = '<ul>'.implode("\n", $affiliated).'</ul>';
+    } else {
+      $affiliated = '<p><em>No one is affiliated with this project.</em></p>';
+    }
+
+    return
+      '<div class="phabricator-profile-info-group">'.
+        '<h1 class="phabricator-profile-info-header">People</h1>'.
         '<div class="phabricator-profile-info-pane">'.
          $affiliated.
         '</div>'.
       '</div>';
+  }
 
-    $content .= '<div class="phabricator-profile-info-group">'.
-      '<h1 class="phabricator-profile-info-header">Subprojects</h1>'.
-      '<div class="phabricator-profile-info-pane">'.
-        $subproject_list.
-        '</div>'.
-      '</div>';
+  private function renderFeedPage(
+    PhabricatorProject $project,
+    PhabricatorProjectProfile $profile) {
+
+    $query = new PhabricatorFeedQuery();
+    $query->setFilterPHIDs(array($project->getPHID()));
+    $stories = $query->execute();
+
+    if (!$stories) {
+      return 'There are no stories about this project.';
+    }
+
+    $query = new PhabricatorFeedQuery();
+    $query->setFilterPHIDs(
+      array(
+        $project->getPHID(),
+      ));
+    $stories = $query->execute();
+
+    $builder = new PhabricatorFeedBuilder($stories);
+    $builder->setUser($this->getRequest()->getUser());
+    $view = $builder->buildView();
+
+    return $view->render();
+  }
+
+
+  private function renderTasksPage(
+    PhabricatorProject $project,
+    PhabricatorProjectProfile $profile) {
 
     $query = id(new ManiphestTaskQuery())
       ->withProjects(array($project->getPHID()))
@@ -238,7 +288,7 @@ class PhabricatorProjectProfileController
       ),
       "View All Open Tasks \xC2\xBB");
 
-    $content .=
+    $content =
       '<div class="phabricator-profile-info-group">
         <h1 class="phabricator-profile-info-header">'.
           "Open Tasks ({$open})".
