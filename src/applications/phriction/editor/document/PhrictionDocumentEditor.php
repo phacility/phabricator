@@ -89,17 +89,53 @@ final class PhrictionDocumentEditor {
     return $this->document;
   }
 
+  public function delete() {
+    if (!$this->user) {
+      throw new Exception("Call setUser() before deleting a document!");
+    }
+
+    // TODO: Should we do anything about deleting an already-deleted document?
+    // We currently allow it.
+
+    $document = $this->document;
+    $content  = $this->content;
+
+    $new_content = $this->buildContentTemplate($document, $content);
+
+    $new_content->setChangeType(PhrictionChangeType::CHANGE_DELETE);
+    $new_content->setContent('');
+
+    return $this->updateDocument($document, $content, $new_content);
+  }
+
   public function save() {
     if (!$this->user) {
-      throw new Exception("Call setUser() before save()!");
+      throw new Exception("Call setUser() before updating a document!");
+    }
+
+    if ($this->newContent === '') {
+      // If this is an edit which deletes all the content, just treat it as
+      // a delete. NOTE: null means "don't change the content", not "delete
+      // the page"! Thus the strict type check.
+      return $this->delete();
     }
 
     $document = $this->document;
     $content  = $this->content;
 
+    $new_content = $this->buildContentTemplate($document, $content);
+
+    return $this->updateDocument($document, $content, $new_content);
+  }
+
+  private function buildContentTemplate(
+    PhrictionDocument $document,
+    PhrictionContent $content) {
+
     $new_content = new PhrictionContent();
     $new_content->setSlug($document->getSlug());
     $new_content->setAuthorPHID($this->user->getPHID());
+    $new_content->setChangeType(PhrictionChangeType::CHANGE_EDIT);
 
     $new_content->setTitle(
       coalesce(
@@ -115,12 +151,44 @@ final class PhrictionDocumentEditor {
       $new_content->setDescription($this->description);
     }
 
-    $new_content->setVersion($content->getVersion() + 1);
+    return $new_content;
+  }
 
-    // TODO: This should be transactional.
+  private function updateDocument($document, $content, $new_content) {
+
     $is_new = false;
     if (!$document->getID()) {
       $is_new = true;
+    }
+
+    $new_content->setVersion($content->getVersion() + 1);
+
+    $change_type = $new_content->getChangeType();
+    switch ($change_type) {
+      case PhrictionChangeType::CHANGE_EDIT:
+        $doc_status = PhrictionDocumentStatus::STATUS_EXISTS;
+        $feed_action = $is_new
+          ? PhrictionActionConstants::ACTION_CREATE
+          : PhrictionActionConstants::ACTION_EDIT;
+        break;
+      case PhrictionChangeType::CHANGE_DELETE:
+        $doc_status = PhrictionDocumentStatus::STATUS_DELETED;
+        $feed_action = PhrictionActionConstants::ACTION_DELETE;
+        if ($is_new) {
+          throw new Exception(
+            "You can not delete a document which doesn't exist yet!");
+        }
+        break;
+      default:
+        throw new Exception(
+          "Unsupported content change type '{$change_type}'!");
+    }
+
+    $document->setStatus($doc_status);
+
+    // TODO: This should be transactional.
+
+    if ($is_new) {
       $document->save();
     }
 
@@ -145,9 +213,7 @@ final class PhrictionDocumentEditor {
       ->setStoryData(
         array(
           'phid'    => $document->getPHID(),
-          'action'  => $is_new
-            ? PhrictionActionConstants::ACTION_CREATE
-            : PhrictionActionConstants::ACTION_EDIT,
+          'action'  => $feed_action,
           'content' => phutil_utf8_shorten($new_content->getContent(), 140),
         ))
       ->publish();

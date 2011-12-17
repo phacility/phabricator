@@ -9,6 +9,8 @@
 phutil_require_module('phabricator', 'applications/feed/constants/story');
 phutil_require_module('phabricator', 'applications/feed/publisher');
 phutil_require_module('phabricator', 'applications/phriction/constants/action');
+phutil_require_module('phabricator', 'applications/phriction/constants/changetype');
+phutil_require_module('phabricator', 'applications/phriction/constants/documentstatus');
 phutil_require_module('phabricator', 'applications/phriction/storage/content');
 phutil_require_module('phabricator', 'applications/phriction/storage/document');
 phutil_require_module('phabricator', 'applications/search/index/indexer/phriction');

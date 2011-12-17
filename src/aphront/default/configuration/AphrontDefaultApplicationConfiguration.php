@@ -365,6 +365,7 @@ class AphrontDefaultApplicationConfiguration
         'history/(?P<slug>.+/)$'  => 'PhrictionHistoryController',
 
         'edit/(?:(?P<id>\d+)/)?$' => 'PhrictionEditController',
+        'delete/(?P<id>\d+)/$'    => 'PhrictionDeleteController',
 
         'preview/$' => 'PhrictionDocumentPreviewController',
         'diff/(?P<id>\d+)/$' => 'PhrictionDiffController',

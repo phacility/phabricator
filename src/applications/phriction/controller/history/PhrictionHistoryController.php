@@ -93,6 +93,9 @@ class PhrictionHistoryController
           'Show Later Changes');
       }
 
+      $change_type = PhrictionChangeType::getChangeTypeLabel(
+        $content->getChangeType());
+
       $rows[] = array(
         phabricator_date($content->getDateCreated(), $user),
         phabricator_time($content->getDateCreated(), $user),
@@ -103,6 +106,7 @@ class PhrictionHistoryController
           ),
           'Version '.$version),
         $handles[$content->getAuthorPHID()]->renderLink(),
+        $change_type,
         phutil_escape_html($content->getDescription()),
         $vs_previous,
         $vs_head,
@@ -131,6 +135,7 @@ class PhrictionHistoryController
         'Time',
         'Version',
         'Author',
+        'Type',
         'Description',
         'Against Previous',
         'Against Current',
@@ -140,6 +145,7 @@ class PhrictionHistoryController
         '',
         'right',
         'pri',
+        '',
         '',
         'wide',
         '',

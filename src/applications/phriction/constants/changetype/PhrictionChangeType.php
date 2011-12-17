@@ -19,19 +19,22 @@
 /**
  * @group phriction
  */
-class PhrictionContent extends PhrictionDAO {
+final class PhrictionChangeType extends PhrictionConstants {
 
-  protected $id;
-  protected $documentID;
-  protected $version;
-  protected $authorPHID;
+  const CHANGE_EDIT       = 0;
+  const CHANGE_DELETE     = 1;
+  const CHANGE_MOVE_HERE  = 2;
+  const CHANGE_MOVE_AWAY  = 3;
 
-  protected $title;
-  protected $slug;
-  protected $content;
-  protected $description;
+  public static function getChangeTypeLabel($const) {
+    static $map = array(
+      self::CHANGE_EDIT       => 'Edit',
+      self::CHANGE_DELETE     => 'Delete',
+      self::CHANGE_MOVE_HERE  => 'Move Here',
+      self::CHANGE_MOVE_AWAY  => 'Move Away',
+    );
 
-  protected $changeType;
-  protected $changeRef;
+    return idx($map, $const, '???');
+  }
 
 }

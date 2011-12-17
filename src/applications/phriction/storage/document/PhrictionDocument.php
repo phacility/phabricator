@@ -26,6 +26,7 @@ class PhrictionDocument extends PhrictionDAO {
   protected $slug;
   protected $depth;
   protected $contentID;
+  protected $status;
 
   private $contentObject;
 

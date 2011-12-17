@@ -10,6 +10,7 @@ phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'aphront/response/ajax');
 phutil_require_module('phabricator', 'applications/differential/parser/changeset');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
+phutil_require_module('phabricator', 'applications/phriction/constants/changetype');
 phutil_require_module('phabricator', 'applications/phriction/controller/base');
 phutil_require_module('phabricator', 'applications/phriction/storage/content');
 phutil_require_module('phabricator', 'applications/phriction/storage/document');

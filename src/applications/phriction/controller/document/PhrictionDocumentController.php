@@ -120,12 +120,28 @@ class PhrictionDocumentController
 
       $engine = PhabricatorMarkupEngine::newPhrictionMarkupEngine();
 
+      $doc_status = $document->getStatus();
+      if ($doc_status == PhrictionDocumentStatus::STATUS_EXISTS) {
+        $core_content =
+          '<div class="phabricator-remarkup">'.
+            $engine->markupText($content->getContent()).
+          '</div>';
+      } else if ($doc_status == PhrictionDocumentStatus::STATUS_DELETED) {
+        $notice = new AphrontErrorView();
+        $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+        $notice->setTitle('Document Deleted');
+        $notice->appendChild(
+          'This document has been deleted. You can edit it to put new content '.
+          'here, or use history to revert to an earlier version.');
+        $core_content = $notice->render();
+      } else {
+        throw new Exception("Unknown document status '{$doc_status}'!");
+      }
+
       $page_content =
         '<div class="phriction-content">'.
           $byline.
-          '<div class="phabricator-remarkup">'.
-            $engine->markupText($content->getContent()).
-          '</div>'.
+          $core_content.
         '</div>';
 
       $edit_button = phutil_render_tag(
@@ -134,7 +150,7 @@ class PhrictionDocumentController
           'href' => '/phriction/edit/'.$document->getID().'/',
           'class' => 'button',
         ),
-        'Edit Page');
+        'Edit Document');
       $history_button = phutil_render_tag(
         'a',
         array(
@@ -238,12 +254,14 @@ class PhrictionDocumentController
       'SELECT d.slug, d.depth, c.title FROM %T d JOIN %T c
         ON d.contentID = c.id
         WHERE d.slug LIKE %> AND d.depth IN (%d, %d)
+          AND d.status = %d
         ORDER BY d.depth, c.title LIMIT %d',
       $document_dao->getTableName(),
       $content_dao->getTableName(),
       ($slug == '/' ? '' : $slug),
       $d_child,
       $d_grandchild,
+      PhrictionDocumentStatus::STATUS_EXISTS,
       $limit);
 
     if (!$children) {
@@ -329,12 +347,13 @@ class PhrictionDocumentController
   }
 
   private function renderChildDocumentLink(array $info) {
+    $title = nonempty($info['title'], '(Untitled Document)');
     $item = phutil_render_tag(
       'a',
       array(
         'href' => PhrictionDocument::getSlugURI($info['slug']),
       ),
-      phutil_escape_html($info['title']));
+      phutil_escape_html($title));
 
     if (isset($info['empty'])) {
       $item = '<em>'.$item.'</em>';

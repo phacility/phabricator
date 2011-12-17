@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'applications/conduit/method/base');
+phutil_require_module('phabricator', 'applications/phriction/constants/documentstatus');
 phutil_require_module('phabricator', 'applications/phriction/storage/document');
 phutil_require_module('phabricator', 'infrastructure/env');
 

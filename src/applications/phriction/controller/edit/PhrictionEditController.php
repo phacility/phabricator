@@ -116,9 +116,17 @@ class PhrictionEditController
     if ($document->getID()) {
       $panel_header = 'Edit Phriction Document';
       $submit_button = 'Save Changes';
+      $delete_button = phutil_render_tag(
+        'a',
+        array(
+          'href' => '/phriction/delete/'.$document->getID().'/',
+          'class' => 'grey button',
+        ),
+        'Delete Document');
     } else {
       $panel_header = 'Create New Phriction Document';
       $submit_button = 'Create Document';
+      $delete_button = null;
     }
 
     $uri = $document->getSlug();
@@ -147,12 +155,6 @@ class PhrictionEditController
           ->setError($e_title)
           ->setName('title'))
       ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel('Description')
-          ->setValue($content->getDescription())
-          ->setError(null)
-          ->setName('description'))
-      ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel('URI')
           ->setValue($uri))
@@ -166,6 +168,12 @@ class PhrictionEditController
           ->setEnableDragAndDropFileUploads(true)
           ->setCaption($remarkup_reference))
       ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel('Edit Notes')
+          ->setValue($content->getDescription())
+          ->setError(null)
+          ->setName('description'))
+      ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($cancel_uri)
           ->setValue($submit_button));
@@ -174,6 +182,10 @@ class PhrictionEditController
       ->setWidth(AphrontPanelView::WIDTH_WIDE)
       ->setHeader($panel_header)
       ->appendChild($form);
+
+    if ($delete_button) {
+      $panel->addButton($delete_button);
+    }
 
     $preview_panel =
       '<div class="aphront-panel-preview aphront-panel-preview-wide">

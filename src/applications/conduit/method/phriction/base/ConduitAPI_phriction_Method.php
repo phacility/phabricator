@@ -33,6 +33,8 @@ abstract class ConduitAPI_phriction_Method extends ConduitAPIMethod {
     $uri = PhrictionDocument::getSlugURI($content->getSlug());
     $uri = PhabricatorEnv::getProductionURI($uri);
 
+    $doc_status = $doc->getStatus();
+
     return array(
       'phid'        => $doc->getPHID(),
       'uri'         => $uri,
@@ -41,6 +43,7 @@ abstract class ConduitAPI_phriction_Method extends ConduitAPIMethod {
       'authorPHID'  => $content->getAuthorPHID(),
       'title'       => $content->getTitle(),
       'content'     => $content->getContent(),
+      'status'      => PhrictionDocumentStatus::getConduitConstant($doc_status),
       'description' => $content->getDescription(),
       'dateCreated' => $content->getDateCreated(),
     );

@@ -19,19 +19,18 @@
 /**
  * @group phriction
  */
-class PhrictionContent extends PhrictionDAO {
+final class PhrictionDocumentStatus extends PhrictionConstants {
 
-  protected $id;
-  protected $documentID;
-  protected $version;
-  protected $authorPHID;
+  const STATUS_EXISTS     = 0;
+  const STATUS_DELETED    = 1;
 
-  protected $title;
-  protected $slug;
-  protected $content;
-  protected $description;
+  public static function getConduitConstant($const) {
+    static $map = array(
+      self::STATUS_EXISTS   => 'exists',
+      self::STATUS_DELETED   => 'deleted',
+    );
 
-  protected $changeType;
-  protected $changeRef;
+    return idx($map, $const, 'unknown');
+  }
 
 }
