@@ -58,7 +58,7 @@ of 7-character hashes:
 
 Because 7-character hashes are likely to collide for even moderately large
 repositories, Diffusion generally uses either a 16-character prefix (which makes
-collisions very unlikely) or the full 40-character SHA1 (which makes collisions
+collisions very unlikely) or the full 40-character hash (which makes collisions
 astronomically unlikely).
 
 = Adding Repositories =

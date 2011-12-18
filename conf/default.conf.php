@@ -65,6 +65,12 @@ return array(
   // attack difficult, but it is viable unless you isolate the file domain.
   'security.alternate-file-domain'  => null,
 
+  // Default key for HMAC digests where the key is not important (i.e., the
+  // hash itself is secret). You can change this if you want (to any other
+  // string), but doing so will break existing sessions and CSRF tokens.
+  'security.hmac-key' => '[D\t~Y7eNmnQGJ;rnH6aF;m2!vJ8@v8C=Cs:aQS\.Qw',
+
+
 // -- DarkConsole ----------------------------------------------------------- //
 
   // DarkConsole is a administrative debugging/profiling tool built into

@@ -471,6 +471,7 @@ phutil_register_library_map(array(
     'PhabricatorGarbageCollectorDaemon' => 'infrastructure/daemon/garbagecollector',
     'PhabricatorGoodForNothingWorker' => 'infrastructure/daemon/workers/worker/goodfornothing',
     'PhabricatorHandleObjectSelectorDataView' => 'applications/phid/handle/view/selector',
+    'PhabricatorHash' => 'infrastructure/util/hash',
     'PhabricatorHelpController' => 'applications/help/controller/base',
     'PhabricatorHelpKeyboardShortcutController' => 'applications/help/controller/keyboardshortcut',
     'PhabricatorIRCBot' => 'infrastructure/daemon/irc/bot',

@@ -14,6 +14,7 @@ phutil_require_module('phabricator', 'applications/metamta/parser');
 phutil_require_module('phabricator', 'applications/metamta/storage/base');
 phutil_require_module('phabricator', 'applications/people/storage/user');
 phutil_require_module('phabricator', 'infrastructure/env');
+phutil_require_module('phabricator', 'infrastructure/util/hash');
 
 phutil_require_module('phutil', 'utils');
 

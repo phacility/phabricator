@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'applications/people/storage/base');
+phutil_require_module('phabricator', 'infrastructure/util/hash');
 
 phutil_require_module('phutil', 'utils');
 

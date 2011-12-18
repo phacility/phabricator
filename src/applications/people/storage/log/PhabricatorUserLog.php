@@ -89,7 +89,7 @@ class PhabricatorUserLog extends PhabricatorUserDAO {
     // seeing the logs doesn't compromise all the sessions which appear in
     // them. This just prevents casual leaks, like in a screenshot.
     if (strlen($session)) {
-      $this->session = sha1($session);
+      $this->session = PhabricatorHash::digest($session);
     }
     return $this;
   }

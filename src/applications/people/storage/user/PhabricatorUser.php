@@ -191,7 +191,7 @@ class PhabricatorUser extends PhabricatorUserDAO {
   private function generateToken($epoch, $frequency, $key, $len) {
     $time_block = floor($epoch / $frequency);
     $vec = $this->getPHID().$this->getPasswordHash().$key.$time_block;
-    return substr(sha1($vec), 0, $len);
+    return substr(PhabricatorHash::digest($vec), 0, $len);
   }
 
   /**
