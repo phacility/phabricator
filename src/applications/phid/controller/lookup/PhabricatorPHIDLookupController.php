@@ -105,7 +105,6 @@ class PhabricatorPHIDLookupController
       ),
       array(
         'title' => 'PHID Lookup',
-        'tab'   => 'lookup',
       ));
   }
 
