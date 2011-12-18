@@ -35,8 +35,11 @@ final class PhabricatorRepositoryMercurialPullDaemon
   protected function executeUpdate(
     PhabricatorRepository $repository,
     $local_path) {
-    $repository->execxLocalCommand(
-      'pull -u');
+
+    // This is a local command, but needs credentials.
+    $future = $repository->getRemoteCommandFuture('pull -u');
+    $future->setCWD($local_path);
+    $future->resolvex();
   }
 
 }
