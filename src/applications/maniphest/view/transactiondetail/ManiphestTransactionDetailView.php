@@ -525,7 +525,7 @@ class ManiphestTransactionDetailView extends ManiphestView {
           }
         } else {
           $verb = 'Changed Attached';
-          $desc = 'changed attached '.$plural.', added: '.$add_desc.
+          $desc = 'changed attached '.$plural.', added: '.$add_desc.'; '.
                                               'removed: '.$rem_desc;
         }
         break;
