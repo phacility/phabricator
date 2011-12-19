@@ -58,6 +58,22 @@ On Fri, May 27, 2011 at 9:39 AM, Someone
 > ...
 
 EOEMAIL
+,
+<<<EOEMAIL
+OKAY
+
+-----Oprindelig Meddelelse-----
+
+> ...
+EOEMAIL
+,
+<<<EOEMAIL
+OKAY
+
+-----Original Message-----
+
+> ...
+EOEMAIL
     );
   }
 
