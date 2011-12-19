@@ -39,7 +39,7 @@ $package_spec = array(
     'javelin-tokenizer',
     'javelin-behavior-aphront-basic-tokenizer',
   ),
-  'workflow.pkg.js' => array(
+  'core.pkg.js' => array(
     'javelin-mask',
     'javelin-workflow',
     'javelin-behavior-workflow',
@@ -47,6 +47,8 @@ $package_spec = array(
     'phabricator-keyboard-shortcut-manager',
     'phabricator-keyboard-shortcut',
     'javelin-behavior-phabricator-keyboard-shortcuts',
+    'javelin-behavior-refresh-csrf',
+    'javelin-behavior-phabricator-watch-anchor',
   ),
   'core.pkg.css' => array(
     'phabricator-core-css',
@@ -76,13 +78,29 @@ $package_spec = array(
     'differential-revision-comment-css',
     'differential-revision-add-comment-css',
     'differential-revision-comment-list-css',
+    'phabricator-object-selector-css',
+    'aphront-headsup-action-list-view-css',
+    'phabricator-content-source-view-css',
+    'differential-local-commits-view-css',
   ),
   'differential.pkg.js' => array(
+    'phabricator-drag-and-drop-file-upload',
+    'phabricator-shaped-request',
+
     'javelin-behavior-differential-feedback-preview',
     'javelin-behavior-differential-edit-inline-comments',
     'javelin-behavior-differential-populate',
     'javelin-behavior-differential-show-more',
     'javelin-behavior-differential-diff-radios',
+    'javelin-behavior-differential-accept-with-errors',
+    'javelin-behavior-differential-comment-jump',
+    'javelin-behavior-differential-add-reviewers-and-ccs',
+    'javelin-behavior-differential-keyboard-navigation',
+    'javelin-behavior-aphront-drag-and-drop',
+    'javelin-behavior-aphront-drag-and-drop-textarea',
+    'javelin-behavior-phabricator-object-selector',
+
+    'differential-inline-comment-editor',
   ),
   'diffusion.pkg.css' => array(
     'diffusion-commit-view-css',
