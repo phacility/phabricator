@@ -27,6 +27,9 @@ class PhabricatorRepositoryDefaultCommitMessageDetailParser
     $message = $data->getCommitMessage();
     $author_name = $data->getAuthorName();
 
+    // TODO: Some day, it would be good to drive all of this via
+    // DifferentialFieldSpecification configuration directly.
+
     $match = null;
 
     if (preg_match(
@@ -34,7 +37,15 @@ class PhabricatorRepositoryDefaultCommitMessageDetailParser
       $message,
       $match)) {
 
-      $id = (int)$match[1];
+      // NOTE: We now accept ONLY full URIs because if we accept numeric IDs
+      // then anyone importing the Phabricator repository will have their
+      // first few thousand revisions marked committed. This does mean that
+      // some older revisions won't re-parse correctly, but that shouldn't
+      // really affect anyone. If necesary, an install can extend the parser
+      // and restore the older, more-liberal parsing fairly easily.
+
+      $id = DifferentialRevisionIDFieldSpecification::parseRevisionIDFromURI(
+        $match[1]);
       if ($id) {
         $details['differential.revisionID'] = (int)$match[1];
         $revision = id(new DifferentialRevision())->load($id);

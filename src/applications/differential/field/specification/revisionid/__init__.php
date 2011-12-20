@@ -6,7 +6,12 @@
 
 
 
+phutil_require_module('phabricator', 'applications/differential/field/exception/parse');
 phutil_require_module('phabricator', 'applications/differential/field/specification/base');
+phutil_require_module('phabricator', 'infrastructure/env');
+
+phutil_require_module('phutil', 'parser/uri');
+phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('DifferentialRevisionIDFieldSpecification.php');

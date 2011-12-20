@@ -47,11 +47,46 @@ final class DifferentialRevisionIDFieldSpecification
   }
 
   public function renderValueForCommitMessage($is_edit) {
-    return $this->id;
+    return PhabricatorEnv::getProductionURI('/D'.$this->id);
   }
 
   public function parseValueFromCommitMessage($value) {
-    return $value;
+    $rev = trim($value);
+
+    if (!strlen($rev)) {
+      return null;
+    }
+
+    if (is_numeric($rev)) {
+      // TODO: Eventually, remove support for bare revision numbers.
+      return (int)$rev;
+    }
+
+    $rev = self::parseRevisionIDFromURI($rev);
+    if ($rev !== null) {
+      return $rev;
+    }
+
+    $example_uri = PhabricatorEnv::getProductionURI('/D123');
+    throw new DifferentialFieldParseException(
+      "Commit references invalid 'Differential Revision'. Expected a ".
+      "Phabricator URI like '{$example_uri}', got '{$value}'.");
+  }
+
+  public static function parseRevisionIDFromURI($uri) {
+    $path = id(new PhutilURI($uri))->getPath();
+
+    $matches = null;
+    if (preg_match('#^/D(\d+)$#', $path, $matches)) {
+      $id = (int)$matches[1];
+      // Make sure the URI is the same as our URI. Basically, we want to ignore
+      // commits from other Phabricator installs.
+      if ($uri == PhabricatorEnv::getProductionURI('/D'.$id)) {
+        return $id;
+      }
+    }
+
+    return null;
   }
 
 }

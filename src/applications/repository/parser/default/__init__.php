@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/differential/field/specification/revisionid');
 phutil_require_module('phabricator', 'applications/differential/storage/revision');
 phutil_require_module('phabricator', 'applications/repository/parser/base');
 
