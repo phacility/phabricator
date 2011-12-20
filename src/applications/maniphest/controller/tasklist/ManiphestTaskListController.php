@@ -33,7 +33,6 @@ class ManiphestTaskListController extends ManiphestController {
 
     $request = $this->getRequest();
     $user = $request->getUser();
-    $uri = $request->getRequestURI();
 
     if ($request->isFormPost()) {
       // Redirect to GET so URIs can be copy/pasted.
@@ -55,23 +54,21 @@ class ManiphestTaskListController extends ManiphestController {
       return id(new AphrontRedirectResponse())->setURI($uri);
     }
 
-    $views = array(
-      'User Tasks',
-      'action'     => 'Assigned',
-      'created'    => 'Created',
-      'subscribed' => 'Subscribed',
-      'triage'     => 'Need Triage',
-      '<hr />',
-      'All Tasks',
-      'alltriage'   => 'Need Triage',
-      'all'         => 'All Tasks',
-      '<hr />',
-      'custom'      => 'Custom',
-    );
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI('/maniphest/view/'));
+    $nav->addLabel('User Tasks');
+    $nav->addFilter('action',       'Assigned');
+    $nav->addFilter('created',      'Created');
+    $nav->addFilter('subscribed',   'Subscribed');
+    $nav->addFilter('triage',       'Need Triage');
+    $nav->addSpacer();
+    $nav->addLabel('All Tasks');
+    $nav->addFilter('alltriage',    'Need Triage');
+    $nav->addFilter('all',          'All Tasks');
+    $nav->addSpacer();
+    $nav->addFilter('custom',       'Custom');
 
-    if (empty($views[$this->view])) {
-      $this->view = 'action';
-    }
+    $this->view = $nav->selectFilter($this->view, 'action');
 
     $has_filter = array(
       'action' => true,
@@ -79,29 +76,6 @@ class ManiphestTaskListController extends ManiphestController {
       'subscribed' => true,
       'triage' => true,
     );
-
-    $nav = new AphrontSideNavView();
-    foreach ($views as $view => $name) {
-      if (is_integer($view)) {
-        $nav->addNavItem(
-          phutil_render_tag(
-            'span',
-            array(),
-            $name));
-      } else {
-        $uri->setPath('/maniphest/view/'.$view.'/');
-        $nav->addNavItem(
-          phutil_render_tag(
-            'a',
-            array(
-              'href' => $uri->alter('page', null),
-              'class' => ($this->view == $view)
-                ? 'aphront-side-nav-selected'
-                : null,
-            ),
-            phutil_escape_html($name)));
-      }
-    }
 
     list($status_map, $status_links) = $this->renderStatusLinks();
     list($grouping, $group_links) = $this->renderGroupLinks();
