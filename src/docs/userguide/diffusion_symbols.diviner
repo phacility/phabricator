@@ -1,0 +1,84 @@
+@title Diffusion User Guide: Symbol Indexes
+@group userguide
+
+Guide to configuring and using the symbol index.
+
+= Overview =
+
+Phabricator can maintain a symbol index, which keeps track of where classes
+and functions are defined in the codebase. Once you set up indexing, you can
+use the index to do things like:
+
+  - link symbol uses in Differential code reviews to their definitions
+  - allow you to search for symbols
+  - let the IRC bot answer questions like "Where is SomeClass?"
+
+NOTE: Symbol indexing is somewhat new, and has broader support for PHP than for
+other languages.
+
+= Populating the Index =
+
+To populate the index, you need to write a script which identifies symbols in
+your codebase and set up a cronjob which pipes its output to:
+
+  ./scripts/symbols/import_project_symbols.php
+
+Phabricator includes a script which can identify symbols in PHP projects:
+
+  ./scripts/symbols/generate_php_symbols.php
+
+If you want to identify symbols from another language, you need to write a
+script which can export them (for example, maybe by parsing a ##ctags## file).
+
+The output format of the script should be one symbol per line:
+
+  <name> <type> <lang> <line> <path>
+
+For example:
+
+  ExampleClass class php 13 /src/classes/ExampleClass.php
+
+Your script should enumerate all the symbols in your project, and provide paths
+from the project root (where ".arcconfig" is) beginning with a "/". If there are
+any duplicate symbols, it should include logic to pick the "best" one -- symbol
+names must be unique within a project, type and language.
+
+You can look at ##generate_php_symbols.php## for an example of how you might
+write such a script, and run this command to see its output:
+
+  $ cd phabricator/
+  $ find . -type f -name '*.php' | ./scripts/symbols/generate_php_symbols.php
+
+To actually build the symbol index, pipe this data to the
+##import_project_symbols.php## script, providing the project name:
+
+  $ ./scripts/symbols/import_project_symbols.php yourproject < symbols_data
+
+Then just set up a cronjob to run that however often you like.
+
+You can test that the import worked by querying for symbols using the Conduit
+method ##differential.findsymbols##. Some features (like that method, and the
+IRC bot integration) will start working immediately. Others will require more
+configuration.
+
+= Configuring Differential Integration =
+
+To configure Differential integration, you need to tell Phabricator which
+projects have symbol indexes you want to use, and which other projects they
+should pull symbols from. To do this, go to
+##Repositories -> Arcanist Projects -> Edit## as an administrator. You need to
+fill out these fields:
+
+  - **Repository**: Associate the project with a tracked repository.
+  - **Indexed Languages**: Fill in all the languages you've built indexes for.
+  - **Uses Symbols From**: If this project depends on other projects, add the
+    other projects which symbols should be looked for here. For example,
+    Phabricator lists "Arcanist" and "libphutil" because it uses classes and
+    functions from these projects.
+
+Once you've configured a project, new revisions in that project will
+automatically link symbols in Differential.
+
+NOTE: Because this feature depends on the syntax highlighter, it will work
+better for some languages than others. It currently works fairly well for PHP,
+but your milage may vary for other languages.

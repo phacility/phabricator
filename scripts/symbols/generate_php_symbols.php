@@ -23,7 +23,7 @@ require_once $root.'/scripts/__init_script__.php';
 phutil_require_module('phutil', 'console');
 phutil_require_module('phutil', 'parser/xhpast/bin');
 
-if ($argc !== 1) {
+if ($argc !== 1 || posix_isatty(STDIN)) {
   echo phutil_console_format(
     "usage: find . -type f -name '*.php' | ./generate_php_symbols.php\n");
   exit(1);

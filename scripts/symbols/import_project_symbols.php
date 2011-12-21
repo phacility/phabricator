@@ -20,6 +20,8 @@
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
+phutil_require_module('phutil', 'console');
+
 if ($argc !== 2) {
   echo phutil_console_format(
     "usage: import_project_symbols.php __project_name__ < __symbol_file__\n");
