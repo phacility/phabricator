@@ -55,12 +55,6 @@ class ConduitAPI_conduit_connect_Method extends ConduitAPIMethod {
         "Client/server version mismatch. Update your client.",
       "ERR-UNKNOWN-CLIENT" =>
         "Client is unknown.",
-      "ERR-UPDATE-ARC" =>
-        "Arcanist is now open source! Update your scripts/aliases to use ".
-        "'/home/engshare/devtools/arcanist/bin/arc' if you're running from ".
-        "a Facebook host, or see ".
-        "<http://www.intern.facebook.com/intern/wiki/index.php/Arcanist> for ".
-        "laptop instructions.",
       "ERR-INVALID-USER" =>
         "The username you are attempting to authenticate with is not valid.",
       "ERR-INVALID-CERTIFICATE" =>
@@ -92,14 +86,23 @@ class ConduitAPI_conduit_connect_Method extends ConduitAPIMethod {
 
     switch ($client) {
       case 'arc':
-        $server_version = 2;
+        $server_version = 3;
         switch ($client_version) {
-          case 1:
-            throw new ConduitException('ERR-UPDATE-ARC');
           case $server_version:
             break;
           default:
-            throw new ConduitException('ERR-BAD-VERSION');
+            $ex = new ConduitException('ERR-BAD-VERSION');
+
+            if ($server_version < $client_version) {
+              $upgrade = "Upgrade your Phabricator install.";
+            } else {
+              $upgrade = "Upgrade your 'arc' client.";
+            }
+
+            $ex->setErrorDescription(
+              "Your 'arc' client version is '{$client_version}', but this ".
+              "server expects version '{$server_version}'. {$upgrade}");
+            throw $ex;
         }
         break;
       default:

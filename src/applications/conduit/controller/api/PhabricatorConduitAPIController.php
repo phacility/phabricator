@@ -140,7 +140,11 @@ class PhabricatorConduitAPIController
         } catch (ConduitException $ex) {
           $result = null;
           $error_code = $ex->getMessage();
-          $error_info = $method_handler->getErrorDescription($error_code);
+          if ($ex->getErrorDescription()) {
+            $error_info = $ex->getErrorDescription();
+          } else {
+            $error_info = $method_handler->getErrorDescription($error_code);
+          }
         }
         if ($allow_unguarded_writes) {
           unset($unguarded);
