@@ -56,6 +56,10 @@ class DiffusionSymbolController extends DiffusionController {
       }
     }
 
+    $query->needPaths(true);
+    $query->needArcanistProjects(true);
+    $query->needRepositories(true);
+
     $symbols = $query->execute();
 
     // For PHP builtins, jump to php.net documentation.
@@ -70,56 +74,21 @@ class DiffusionSymbolController extends DiffusionController {
       }
     }
 
-    if ($symbols) {
-      $projects = id(new PhabricatorRepositoryArcanistProject())->loadAllWhere(
-        'id IN (%Ld)',
-        mpull($symbols, 'getArcanistProjectID', 'getID'));
-    } else {
-      $projects = array();
-    }
-
-    $path_map = array();
-    if ($symbols) {
-      $path_map = queryfx_all(
-        id(new PhabricatorRepository())->establishConnection('r'),
-        'SELECT * FROM %T WHERE id IN (%Ld)',
-        PhabricatorRepository::TABLE_PATH,
-        mpull($symbols, 'getPathID'));
-      $path_map = ipull($path_map, 'path', 'id');
-    }
-
-    $repo_ids = array_filter(mpull($projects, 'getRepositoryID'));
-    if ($repo_ids) {
-      $repos = id(new PhabricatorRepository())->loadAllWhere(
-        'id IN (%Ld)',
-        $repo_ids);
-    } else {
-      $repos = array();
-    }
-
     $rows = array();
     foreach ($symbols as $symbol) {
-      $project = idx($projects, $symbol->getArcanistProjectID());
+      $project = $symbol->getArcanistProject();
       if ($project) {
         $project_name = $project->getName();
       } else {
         $project_name = '-';
       }
 
-      $file = phutil_escape_html(idx($path_map, $symbol->getPathID()));
+      $file = phutil_escape_html($symbol->getPath());
       $line = phutil_escape_html($symbol->getLineNumber());
 
-      $repo = idx($repos, $project->getRepositoryID());
+      $repo = $symbol->getRepository();
       if ($repo) {
-
-        $drequest = DiffusionRequest::newFromAphrontRequestDictionary(
-          array(
-            'callsign' => $repo->getCallsign(),
-          ));
-        $branch = $drequest->getBranchURIComponent($drequest->getBranch());
-        $file = $branch.ltrim($file, '/');
-
-        $href = '/diffusion/'.$repo->getCallsign().'/browse/'.$file.'$'.$line;
+        $href = $symbol->getURI();
 
         if ($request->getBool('jump') && count($symbols) == 1) {
           // If this is a clickthrough from Differential, just jump them

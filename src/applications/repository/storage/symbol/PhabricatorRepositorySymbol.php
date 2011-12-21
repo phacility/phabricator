@@ -16,6 +16,15 @@
  * limitations under the License.
  */
 
+
+/**
+ * Records information about symbol locations in a codebase, like where classes
+ * and functions are defined.
+ *
+ * Query symbols with @{class:DiffusionSymbolQuery}.
+ *
+ * @group diffusion
+ */
 class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
 
   protected $arcanistProjectID;
@@ -25,11 +34,67 @@ class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
   protected $pathID;
   protected $lineNumber;
 
+  private $path = false;
+  private $arcanistProject = false;
+  private $repository = false;
+
   public function getConfiguration() {
     return array(
       self::CONFIG_IDS => self::IDS_MANUAL,
       self::CONFIG_TIMESTAMPS => false,
     ) + parent::getConfiguration();
+  }
+
+  public function getURI() {
+    $repo = $this->getRepository();
+    $file = $this->getPath();
+    $line = $this->getLineNumber();
+
+    $drequest = DiffusionRequest::newFromAphrontRequestDictionary(
+      array(
+        'callsign' => $repo->getCallsign(),
+      ));
+    $branch = $drequest->getBranchURIComponent($drequest->getBranch());
+    $file = $branch.ltrim($file, '/');
+
+    return '/diffusion/'.$repo->getCallsign().'/browse/'.$file.'$'.$line;
+  }
+
+  public function getPath() {
+    if ($this->path === false) {
+      throw new Exception('Call attachPath() before getPath()!');
+    }
+    return $this->path;
+  }
+
+  public function attachPath($path) {
+    $this->path = $path;
+    return $this;
+  }
+
+  public function getRepository() {
+    if ($this->repository === false) {
+      throw new Exception('Call attachRepository() before getRepository()!');
+    }
+    return $this->repository;
+  }
+
+  public function attachRepository($repository) {
+    $this->repository = $repository;
+    return $this;
+  }
+
+  public function getArcanistProject() {
+    if ($this->arcanistProject === false) {
+      throw new Exception(
+        'Call attachArcanistProject() before getArcanistProject()!');
+    }
+    return $this->arcanistProject;
+  }
+
+  public function attachArcanistProject($project) {
+    $this->arcanistProject = $project;
+    return $this;
   }
 
 }
