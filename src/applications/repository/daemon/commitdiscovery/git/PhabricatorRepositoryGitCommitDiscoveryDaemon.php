@@ -30,7 +30,23 @@ class PhabricatorRepositoryGitCommitDiscoveryDaemon
       throw new Exception("Repository is not a git repository.");
     }
 
-    $repository_phid = $repository->getPHID();
+    list($remotes) = $repository->execxLocalCommand(
+      'remote show -n origin');
+
+    $matches = null;
+    if (!preg_match('/^\s*Fetch URL:\s*(.*?)\s*$/m', $remotes, $matches)) {
+      throw new Exception(
+        "Expected 'Fetch URL' in 'git remote show -n origin'.");
+    }
+
+    $remote = $matches[1];
+    $expect = $repository->getDetail('remote-uri');
+    if ($remote != $expect) {
+      $local_path = $repository->getLocalPath();
+      throw new Exception(
+        "Working copy '{$local_path}' has origin URL '{$remote}', but the ".
+        "configured URL '{$expect}' is expected. Refusing to proceed.");
+    }
 
     list($stdout) = $repository->execxLocalCommand(
       'branch -r --verbose --no-abbrev');
