@@ -178,8 +178,41 @@ class PhabricatorOwnersPackage extends PhabricatorOwnersDAO {
       }
       $cur_paths = mgroup($cur_paths, 'getRepositoryPHID', 'getPath');
       foreach ($new_paths as $repository_phid => $paths) {
+        // get repository object for path validation
+        $repository = id(new PhabricatorRepository())->loadOneWhere(
+          'phid = %s',
+          $repository_phid);
+        if (!$repository) {
+          continue;
+        }
         foreach ($paths as $path => $ignored) {
-          if (empty($cur_paths[$repository_phid][$path])) {
+          $path = ltrim($path, '/');
+          // build query to validate path
+          $drequest = DiffusionRequest::newFromAphrontRequestDictionary(
+            array(
+              'callsign' => $repository->getCallsign(),
+              'path'     => ':/'.$path,
+            ));
+          $query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);
+          $query->needValidityOnly(true);
+          $valid = $query->loadPaths();
+          $is_directory = true;
+          if (!$valid) {
+            switch ($query->getReasonForEmptyResultSet()) {
+              case DiffusionBrowseQuery::REASON_IS_FILE:
+                $valid = true;
+                $is_directory = false;
+                break;
+              case DiffusionBrowseQuery::REASON_IS_EMPTY:
+                $valid = true;
+                break;
+            }
+          }
+          if ($is_directory && substr($path, -1) != '/') {
+            $path .= '/';
+          }
+          $path = '/'.$path;
+          if (empty($cur_paths[$repository_phid][$path]) && $valid) {
             $obj = new PhabricatorOwnersPath();
             $obj->setPackageID($this->getID());
             $obj->setRepositoryPHID($repository_phid);

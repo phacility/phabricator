@@ -6,10 +6,13 @@
 
 
 
+phutil_require_module('phabricator', 'applications/diffusion/query/browse/base');
+phutil_require_module('phabricator', 'applications/diffusion/request/base');
 phutil_require_module('phabricator', 'applications/owners/storage/base');
 phutil_require_module('phabricator', 'applications/owners/storage/owner');
 phutil_require_module('phabricator', 'applications/owners/storage/path');
 phutil_require_module('phabricator', 'applications/phid/storage/phid');
+phutil_require_module('phabricator', 'applications/repository/storage/repository');
 phutil_require_module('phabricator', 'storage/qsprintf');
 phutil_require_module('phabricator', 'storage/queryfx');
 
