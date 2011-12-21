@@ -580,7 +580,15 @@ abstract class DifferentialFieldSpecification {
       '(username IN (%Ls)) OR (email IN (%Ls))',
       $value,
       $value);
-    $object_map += mpull($users, 'getPHID', 'getUsername');
+    $user_map = mpull($users, 'getPHID', 'getUsername');
+    foreach ($user_map as $username => $phid) {
+      // Usernames may have uppercase letters in them. Put both names in the
+      // map so we can try the original case first, so that username *always*
+      // works in weird edge cases where some other mailable object collides.
+      $object_map[$username] = $phid;
+      $object_map[strtolower($username)] = $phid;
+    }
+
     $object_map += mpull($users, 'getPHID', 'getEmail');
 
     if ($include_mailables) {
@@ -596,7 +604,11 @@ abstract class DifferentialFieldSpecification {
     $results = array();
     foreach ($value as $name) {
       if (empty($object_map[$name])) {
-        $invalid[] = $name;
+        if (empty($object_map[strtolower($name)])) {
+          $invalid[] = $name;
+        } else {
+          $results[] = $object_map[strtolower($name)];
+        }
       } else {
         $results[] = $object_map[$name];
       }
