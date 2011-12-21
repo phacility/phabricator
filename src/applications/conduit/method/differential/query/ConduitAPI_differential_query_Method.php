@@ -124,36 +124,40 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
       $query->withSubscribers($subscribers);
     }
 
+    $query->needRelationships(true);
+    $query->needCommitPHIDs(true);
+    $query->needDiffIDs(true);
+    $query->needActiveDiffs(true);
+
     $revisions = $query->execute();
 
     $results = array();
     foreach ($revisions as $revision) {
-      $diff = $revision->loadActiveDiff();
+      $diff = $revision->getActiveDiff();
       if (!$diff) {
         continue;
       }
 
-      $revision->loadRelationships();
-
       $id = $revision->getID();
       $results[] = array(
-        'id'          => $id,
-        'phid'        => $revision->getPHID(),
-        'title'       => $revision->getTitle(),
-        'uri'         => PhabricatorEnv::getProductionURI('/D'.$id),
-        'dateCreated' => $revision->getDateCreated(),
-        'authorPHID'  => $revision->getAuthorPHID(),
-        'status'      => $revision->getStatus(),
-        'statusName'  => DifferentialRevisionStatus::getNameForRevisionStatus(
+        'id'            => $id,
+        'phid'          => $revision->getPHID(),
+        'title'         => $revision->getTitle(),
+        'uri'           => PhabricatorEnv::getProductionURI('/D'.$id),
+        'dateCreated'   => $revision->getDateCreated(),
+        'dateModified'  => $revision->getDateModified(),
+        'authorPHID'    => $revision->getAuthorPHID(),
+        'status'        => $revision->getStatus(),
+        'statusName'    => DifferentialRevisionStatus::getNameForRevisionStatus(
           $revision->getStatus()),
-        'sourcePath'  => $diff->getSourcePath(),
-        'summary'     => $revision->getSummary(),
-        'testPlan'    => $revision->getTestPlan(),
-        'lineCount'   => $revision->getLineCount(),
-        'diffs'       => array_keys($revision->loadDiffs()),
-        'commits'     => $revision->loadCommitPHIDs(),
-        'reviewers'   => array_values($revision->getReviewers()),
-        'ccs'         => array_values($revision->getCCPHIDs()),
+        'sourcePath'    => $diff->getSourcePath(),
+        'summary'       => $revision->getSummary(),
+        'testPlan'      => $revision->getTestPlan(),
+        'lineCount'     => $revision->getLineCount(),
+        'diffs'         => $revision->getDiffIDs(),
+        'commits'       => $revision->getCommitPHIDs(),
+        'reviewers'     => array_values($revision->getReviewers()),
+        'ccs'           => array_values($revision->getCCPHIDs()),
       );
     }
 

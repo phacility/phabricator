@@ -234,10 +234,14 @@ class PhabricatorObjectHandleData {
           $commits = $object->loadAllWhere('phid in (%Ls)', $phids);
           $commits = mpull($commits, null, 'getPHID');
 
-          $repository_ids = mpull($commits, 'getRepositoryID');
-          $repositories = id(new PhabricatorRepository())->loadAllWhere(
-            'id in (%Ld)', array_unique($repository_ids));
-          $callsigns = mpull($repositories, 'getCallsign');
+          $repository_ids = array();
+          $callsigns = array();
+          if ($commits) {
+            $repository_ids = mpull($commits, 'getRepositoryID');
+            $repositories = id(new PhabricatorRepository())->loadAllWhere(
+              'id in (%Ld)', array_unique($repository_ids));
+            $callsigns = mpull($repositories, 'getCallsign');
+          }
 
           foreach ($phids as $phid) {
             $handle = new PhabricatorObjectHandle();

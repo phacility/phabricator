@@ -61,7 +61,10 @@ final class DifferentialRevisionQuery {
   private $limit  = 1000;
   private $offset = 0;
 
-  private $needRelationships = false;
+  private $needRelationships  = false;
+  private $needActiveDiffs    = false;
+  private $needDiffIDs        = false;
+  private $needCommitPHIDs    = false;
 
 
 /* -(  Query Configuration  )------------------------------------------------ */
@@ -245,6 +248,48 @@ final class DifferentialRevisionQuery {
   }
 
 
+  /**
+   * Set whether or not the query should load the active diff for each
+   * revision.
+   *
+   * @param bool True to load and attach diffs.
+   * @return this
+   * @task config
+   */
+  public function needActiveDiffs($need_active_diffs) {
+    $this->needActiveDiffs = $need_active_diffs;
+    return $this;
+  }
+
+
+  /**
+   * Set whether or not the query should load the associated commit PHIDs for
+   * each revision.
+   *
+   * @param bool True to load and attach diffs.
+   * @return this
+   * @task config
+   */
+  public function needCommitPHIDs($need_commit_phids) {
+    $this->needCommitPHIDs = $need_commit_phids;
+    return $this;
+  }
+
+
+  /**
+   * Set whether or not the query should load associated diff IDs for each
+   * revision.
+   *
+   * @param bool True to load and attach diff IDs.
+   * @return this
+   * @task config
+   */
+  public function needDiffIDs($need_diff_ids) {
+    $this->needDiffIDs = $need_diff_ids;
+    return $this;
+  }
+
+
 /* -(  Query Execution  )---------------------------------------------------- */
 
 
@@ -267,19 +312,21 @@ final class DifferentialRevisionQuery {
 
     $revisions = $table->loadAllFromArray($data);
 
-    if ($revisions && $this->needRelationships) {
-      $relationships = queryfx_all(
-        $conn_r,
-        'SELECT * FROM %T WHERE revisionID in (%Ld) ORDER BY sequence',
-        DifferentialRevision::RELATIONSHIP_TABLE,
-        mpull($revisions, 'getID'));
-      $relationships = igroup($relationships, 'revisionID');
-      foreach ($revisions as $revision) {
-        $revision->attachRelationships(
-          idx(
-            $relationships,
-            $revision->getID(),
-            array()));
+    if ($revisions) {
+      if ($this->needRelationships) {
+        $this->loadRelationships($conn_r, $revisions);
+      }
+
+      if ($this->needCommitPHIDs) {
+        $this->loadCommitPHIDs($conn_r, $revisions);
+      }
+
+      if ($this->needActiveDiffs || $this->needDiffIDs) {
+        $this->loadDiffIDs($conn_r, $revisions);
+      }
+
+      if ($this->needActiveDiffs) {
+        $this->loadActiveDiffs($conn_r, $revisions);
       }
     }
 
@@ -560,6 +607,78 @@ final class DifferentialRevisionQuery {
         return 'ORDER BY p.epoch DESC';
       default:
         throw new Exception("Unknown query order constant '{$this->order}'.");
+    }
+  }
+
+  private function loadRelationships($conn_r, array $revisions) {
+    $relationships = queryfx_all(
+      $conn_r,
+      'SELECT * FROM %T WHERE revisionID in (%Ld) ORDER BY sequence',
+      DifferentialRevision::RELATIONSHIP_TABLE,
+      mpull($revisions, 'getID'));
+    $relationships = igroup($relationships, 'revisionID');
+    foreach ($revisions as $revision) {
+      $revision->attachRelationships(
+        idx(
+          $relationships,
+          $revision->getID(),
+          array()));
+    }
+  }
+
+  private function loadCommitPHIDs($conn_r, array $revisions) {
+    $commit_phids = queryfx_all(
+      $conn_r,
+      'SELECT * FROM %T WHERE revisionID IN (%Ld)',
+      DifferentialRevision::TABLE_COMMIT,
+      mpull($revisions, 'getID'));
+    $commit_phids = igroup($commit_phids, 'revisionID');
+    foreach ($revisions as $revision) {
+      $phids = idx($commit_phids, $revision->getID(), array());
+      $phids = ipull($phids, 'commitPHID');
+      $revision->attachCommitPHIDs($phids);
+    }
+  }
+
+  private function loadDiffIDs($conn_r, array $revisions) {
+    $diff_table = new DifferentialDiff();
+
+    $diff_ids = queryfx_all(
+      $conn_r,
+      'SELECT revisionID, id FROM %T WHERE revisionID IN (%Ld)
+        ORDER BY id DESC',
+      $diff_table->getTableName(),
+      mpull($revisions, 'getID'));
+    $diff_ids = igroup($diff_ids, 'revisionID');
+
+    foreach ($revisions as $revision) {
+      $ids = idx($diff_ids, $revision->getID(), array());
+      $ids = ipull($ids, 'id');
+      $revision->attachDiffIDs($ids);
+    }
+  }
+
+  private function loadActiveDiffs($conn_r, array $revisions) {
+    $diff_table = new DifferentialDiff();
+
+    $load_ids = array();
+    foreach ($revisions as $revision) {
+      $diffs = $revision->getDiffIDs();
+      if ($diffs) {
+        $load_ids[] = max($diffs);
+      }
+    }
+
+    $active_diffs = array();
+    if ($load_ids) {
+      $active_diffs = $diff_table->loadAllWhere(
+        'id IN (%Ld)',
+        $load_ids);
+    }
+
+    $active_diffs = mpull($active_diffs, null, 'getRevisionID');
+    foreach ($revisions as $revision) {
+      $revision->attachActiveDiff(idx($active_diffs, $revision->getID()));
     }
   }
 
