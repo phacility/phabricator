@@ -43,6 +43,10 @@ abstract class PhabricatorIRCHandler {
     return $this->bot->getConfig($key, $default);
   }
 
+  final protected function getURI($path) {
+    return $this->bot->getConfig('conduit.uri').$path;
+  }
+
   abstract public function receiveMessage(PhabricatorIRCMessage $message);
 
 }

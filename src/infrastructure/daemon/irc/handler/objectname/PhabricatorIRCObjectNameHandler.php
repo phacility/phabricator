@@ -38,9 +38,10 @@ class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
           break;
         }
 
+        $this->handleSymbols($message);
+
         $message = $message->getMessageText();
         $matches = null;
-        $phids = array();
 
         $pattern =
           '@'.
@@ -176,6 +177,39 @@ class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
         }
         break;
     }
+  }
+
+  private function handleSymbols(PhabricatorIRCMessage $message) {
+    $channel = $message->getChannel();
+    $text = $message->getMessageText();
+
+    $matches = null;
+    if (!preg_match('/where is (\S+?)\?/i', $text, $matches)) {
+      return;
+    }
+
+    $symbol = $matches[1];
+    $results = $this->getConduit()->callMethodSynchronous(
+      'diffusion.findsymbols',
+      array(
+        'name' => $symbol,
+      ));
+
+    if (count($results) > 1) {
+      $uri = $this->getURI('/diffusion/symbol/'.$symbol.'/');
+      $response = "Multiple symbols named '{$symbol}': {$uri}";
+    } else if (count($results) == 1) {
+      $result = head($results);
+      $response =
+        $result['type'].' '.
+        $result['name'].' '.
+        '('.$result['language'].'): '.
+        $result['uri'];
+    } else {
+      $response = "No symbol '{$symbol}' found anywhere.";
+    }
+
+    $this->write('PRIVMSG', "{$channel} :{$response}");
   }
 
 }
