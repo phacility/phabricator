@@ -72,6 +72,9 @@ class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
       $collected = array_filter($collected);
 
       foreach ($collected as $thing => $count) {
+        if ($thing == 'Daemon Log' && !$this->getTraceMode()) {
+          continue;
+        }
         $count = number_format($count);
         echo "Garbage collected {$count} '{$thing}' objects.\n";
       }

@@ -27,7 +27,6 @@ class PhabricatorMetaMTADaemon extends PhabricatorDaemon {
         time());
       foreach ($mail as $message) {
         $message->sendNow();
-        echo ".";
       }
       $this->sleep(1);
     } while (true);

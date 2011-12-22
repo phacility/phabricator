@@ -236,9 +236,11 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
   }
 
   private function debugLog($is_read, $message) {
-    echo $is_read ? '<<< ' : '>>> ';
-    echo addcslashes($message, "\0..\37\177..\377");
-    echo "\n";
+    if ($this->getTraceMode()) {
+      echo $is_read ? '<<< ' : '>>> ';
+      echo addcslashes($message, "\0..\37\177..\377");
+      echo "\n";
+    }
   }
 
   public function getConduit() {
