@@ -211,7 +211,9 @@ class PhabricatorOwnersPackage extends PhabricatorOwnersDAO {
           if ($is_directory && substr($path, -1) != '/') {
             $path .= '/';
           }
-          $path = '/'.$path;
+          if (substr($path, 0, 1) != '/') {
+            $path = '/'.$path;
+          }
           if (empty($cur_paths[$repository_phid][$path]) && $valid) {
             $obj = new PhabricatorOwnersPath();
             $obj->setPackageID($this->getID());
