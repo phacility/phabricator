@@ -40,7 +40,7 @@ class PhabricatorRepositoryGitCommitDiscoveryDaemon
     }
 
     $remote = $matches[1];
-    $expect = $repository->getDetail('remote-uri');
+    $expect = $repository->getRemoteURI();
     if ($remote != $expect) {
       $local_path = $repository->getLocalPath();
       throw new Exception(

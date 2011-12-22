@@ -47,7 +47,7 @@ class PhabricatorRepositoryDefaultCommitMessageDetailParser
       $id = DifferentialRevisionIDFieldSpecification::parseRevisionIDFromURI(
         $match[1]);
       if ($id) {
-        $details['differential.revisionID'] = (int)$match[1];
+        $details['differential.revisionID'] = $id;
         $revision = id(new DifferentialRevision())->load($id);
         if ($revision) {
           $details['differential.revisionPHID'] = $revision->getPHID();
