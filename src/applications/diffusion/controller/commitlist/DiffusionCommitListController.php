@@ -105,7 +105,15 @@ class DiffusionCommitListController extends DiffusionController {
     foreach ($commit_phids as $phid) {
       $handle = $handles[$phid];
       $object = $objects[$phid];
-      $commit_data = $object->getCommitData();
+
+      $summary = null;
+      if ($object) {
+        $commit_data = $object->getCommitData();
+        if ($commit_data) {
+          $summary = $commit_data->getSummary();
+        }
+      }
+
       $epoch = $handle->getTimeStamp();
       $date = phabricator_date($epoch, $user);
       $time = phabricator_time($epoch, $user);
@@ -119,7 +127,7 @@ class DiffusionCommitListController extends DiffusionController {
         $link,
         $date,
         $time,
-        phutil_escape_html($commit_data->getSummary()),
+        phutil_escape_html($summary),
       );
     }
     $commit_table = new AphrontTableView($rows);
