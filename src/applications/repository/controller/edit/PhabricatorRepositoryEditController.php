@@ -211,6 +211,7 @@ class PhabricatorRepositoryEditController
 
     $e_ssh_key = null;
     $e_ssh_keyfile = null;
+    $e_branch = null;
 
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
@@ -245,6 +246,15 @@ class PhabricatorRepositoryEditController
         $repository->setDetail(
           'default-branch',
           $request->getStr('default-branch'));
+        if ($is_git) {
+          $branch_name = $repository->getDetail('default-branch');
+          if (strpos($branch_name, '/') !== false) {
+            $e_branch = 'Invalid';
+            $errors[] = "Your branch name should not specify an explicit ".
+                        "remote. For instance, use 'master', not ".
+                        "'origin/master'.";
+          }
+        }
       }
 
       $repository->setDetail(
@@ -444,7 +454,6 @@ class PhabricatorRepositoryEditController
         'If you want to connect to this repository over SSH, enter the '.
         'username and private key to use. You can leave these fields blank if '.
         'the repository does not use SSH.'.
-        ' <strong>NOTE: This feature is not yet fully supported.</strong>'.
       '</div>');
 
     $form
@@ -478,7 +487,6 @@ class PhabricatorRepositoryEditController
             'If you want to connect to this repository over HTTP Basic Auth, '.
             'enter the username and password to use. You can leave these '.
             'fields blank if the repository does not use HTTP Basic Auth.'.
-            ' <strong>NOTE: This feature is not yet fully supported.</strong>'.
           '</div>')
         ->appendChild(
           id(new AphrontFormTextControl())
@@ -562,7 +570,7 @@ class PhabricatorRepositoryEditController
       if ($is_mercurial) {
         $default_branch_name = 'default';
       } else if ($is_git) {
-        $default_branch_name = 'origin/master';
+        $default_branch_name = 'master';
       }
 
       $form
@@ -574,6 +582,7 @@ class PhabricatorRepositoryEditController
               $repository->getDetail(
                 'default-branch',
                 $default_branch_name))
+            ->setError($e_branch)
             ->setCaption(
               'Default <strong>remote</strong> branch to show in Diffusion.'));
     }

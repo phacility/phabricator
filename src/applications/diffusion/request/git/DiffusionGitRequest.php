@@ -53,7 +53,8 @@ class DiffusionGitRequest extends DiffusionRequest {
       // followed a bad link, or misconfigured the default branch in the
       // Repository tool.
       list($this->stableCommitName) = $repository->execxLocalCommand(
-        'rev-parse --verify %s',
+        'rev-parse --verify %s/%s',
+        DiffusionBranchInformation::DEFAULT_GIT_REMOTE,
         $branch);
 
       if ($this->commit) {
@@ -103,7 +104,7 @@ class DiffusionGitRequest extends DiffusionRequest {
       return $this->branch;
     }
     if ($this->repository) {
-      return $this->repository->getDetail('default-branch', 'origin/master');
+      return $this->repository->getDetail('default-branch', 'master');
     }
     throw new Exception("Unable to determine branch!");
   }
@@ -117,7 +118,8 @@ class DiffusionGitRequest extends DiffusionRequest {
     if ($this->commit) {
       return $this->commit;
     }
-    return $this->getBranch();
+    $remote = DiffusionBranchInformation::DEFAULT_GIT_REMOTE;
+    return $remote.'/'.$this->getBranch();
   }
 
   public function getStableCommitName() {
@@ -129,7 +131,17 @@ class DiffusionGitRequest extends DiffusionRequest {
   }
 
   private function decodeBranchName($branch) {
-    return str_replace(':', '/', $branch);
+    $branch = str_replace(':', '/', $branch);
+
+    // Backward compatibility for older-style URIs which had an explicit
+    // "origin" remote in the branch name. If a remote is specified, strip it
+    // away.
+    if (strpos($branch, '/') !== false) {
+      $parts = explode('/', $branch);
+      $branch = end($parts);
+    }
+
+    return $branch;
   }
 
   private function encodeBranchName($branch) {

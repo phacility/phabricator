@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/diffusion/data/branch');
 phutil_require_module('phabricator', 'applications/diffusion/query/branch/git');
 phutil_require_module('phabricator', 'applications/repository/constants/repositorytype');
 phutil_require_module('phabricator', 'applications/repository/daemon/commitdiscovery/base');

@@ -28,7 +28,7 @@ final class PhabricatorRepositoryGitFetchDaemon
     $local_path) {
 
     $repository->execxRemoteCommand(
-      'clone %s %s',
+      'clone --origin origin %s %s',
       $repository->getRemoteURI(),
       rtrim($local_path, '/'));
   }

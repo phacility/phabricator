@@ -27,8 +27,12 @@ final class DiffusionGitBranchQuery extends DiffusionBranchQuery {
     list($stdout) = $repository->execxLocalCommand(
       'branch -r --verbose --no-abbrev');
 
+    $branch_list = self::parseGitRemoteBranchOutput(
+      $stdout,
+      $only_this_remote = DiffusionBranchInformation::DEFAULT_GIT_REMOTE);
+
     $branches = array();
-    foreach (self::parseGitRemoteBranchOutput($stdout) as $name => $head) {
+    foreach ($branch_list as $name => $head) {
       $branch = new DiffusionBranchInformation();
       $branch->setName($name);
       $branch->setHeadCommitIdentifier($head);
@@ -38,7 +42,29 @@ final class DiffusionGitBranchQuery extends DiffusionBranchQuery {
     return $branches;
   }
 
-  public static function parseGitRemoteBranchOutput($stdout) {
+
+  /**
+   * Parse the output of 'git branch -r --verbose --no-abbrev' or similar into
+   * a map. For instance:
+   *
+   *   array(
+   *     'origin/master' => '99a9c082f9a1b68c7264e26b9e552484a5ae5f25',
+   *   );
+   *
+   * If you specify $only_this_remote, branches will be filtered to only those
+   * on the given remote, **and the remote name will be stripped**. For example:
+   *
+   *   array(
+   *     'master' => '99a9c082f9a1b68c7264e26b9e552484a5ae5f25',
+   *   );
+   *
+   * @param string stdout of git branch command.
+   * @param string Filter branches to those on a specific remote.
+   * @return map Map of 'branch' or 'remote/branch' to hash at HEAD.
+   */
+  public static function parseGitRemoteBranchOutput(
+    $stdout,
+    $only_this_remote = null) {
     $map = array();
 
     $lines = array_filter(explode("\n", $stdout));
@@ -57,7 +83,25 @@ final class DiffusionGitBranchQuery extends DiffusionBranchQuery {
       if (!preg_match('/^[ *] (\S+)\s+([a-z0-9]{40}) /', $line, $matches)) {
         throw new Exception("Failed to parse {$line}!");
       }
-      $map[$matches[1]] = $matches[2];
+
+      $remote_branch = $matches[1];
+      $branch_head = $matches[2];
+
+      if ($only_this_remote) {
+        $matches = null;
+        if (!preg_match('#^([^/]+)/(.*)$#', $remote_branch, $matches)) {
+          throw new Exception(
+            "Failed to parse remote branch '{$remote_branch}'!");
+        }
+        $remote_name = $matches[1];
+        $branch_name = $matches[2];
+        if ($remote_name != $only_this_remote) {
+          continue;
+        }
+        $map[$branch_name] = $branch_head;
+      } else {
+        $map[$remote_branch] = $branch_head;
+      }
     }
 
     return $map;

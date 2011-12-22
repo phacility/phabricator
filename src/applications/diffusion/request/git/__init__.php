@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/diffusion/data/branch');
 phutil_require_module('phabricator', 'applications/diffusion/request/base');
 
 

@@ -18,6 +18,8 @@
 
 final class DiffusionBranchInformation {
 
+  const DEFAULT_GIT_REMOTE = 'origin';
+
   private $name;
   private $headCommitIdentifier;
 

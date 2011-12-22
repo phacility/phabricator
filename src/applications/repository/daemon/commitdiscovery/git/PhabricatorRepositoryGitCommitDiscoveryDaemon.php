@@ -47,7 +47,9 @@ class PhabricatorRepositoryGitCommitDiscoveryDaemon
     list($stdout) = $repository->execxLocalCommand(
       'branch -r --verbose --no-abbrev');
 
-    $branches = DiffusionGitBranchQuery::parseGitRemoteBranchOutput($stdout);
+    $branches = DiffusionGitBranchQuery::parseGitRemoteBranchOutput(
+      $stdout,
+      $only_this_remote = DiffusionBranchInformation::DEFAULT_GIT_REMOTE);
 
     $got_something = false;
     foreach ($branches as $name => $commit) {
