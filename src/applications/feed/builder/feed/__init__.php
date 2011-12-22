@@ -7,8 +7,11 @@
 
 
 phutil_require_module('phabricator', 'applications/phid/handle/data');
+phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'view/null');
+phutil_require_module('phabricator', 'view/utils');
 
+phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
 
 

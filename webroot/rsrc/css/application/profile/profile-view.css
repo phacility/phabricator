@@ -70,17 +70,16 @@ td.phabricator-profile-content {
 
 .phabricator-profile-info-group {
   margin-bottom: 2em;
-  background: #efefef;
-  border-top: 1px solid #cccccc;
 }
 
 .phabricator-profile-info-header {
   padding: 8px;
-  background: #dfdfdf;
+  background: #f0f0f0;
+  border-top: 1px solid #d9d9d9;
 }
 
 .phabricator-profile-info-pane {
-  padding: 8px 2em;
+  padding: 8px .5em;
 }
 
 .phabricator-profile-info-table {

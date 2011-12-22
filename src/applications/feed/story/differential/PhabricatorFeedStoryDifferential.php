@@ -50,7 +50,7 @@ class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
 
     $view->setTitle(
       '<strong>'.$handles[$author_phid]->renderLink().'</strong>'.
-      ' '.$verb.' '.
+      ' '.$verb.' revision '.
       '<strong>'.$handles[$revision_phid]->renderLink().'</strong>.');
     $view->setEpoch($data->getEpoch());
 

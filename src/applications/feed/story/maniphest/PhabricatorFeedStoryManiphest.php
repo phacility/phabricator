@@ -49,7 +49,7 @@ class PhabricatorFeedStoryManiphest extends PhabricatorFeedStory {
     $verb = ManiphestAction::getActionPastTenseVerb($action);
     $title =
       '<strong>'.$handles[$author_phid]->renderLink().'</strong>'.
-      " {$verb} ".
+      " {$verb} task ".
       '<strong>'.$handles[$task_phid]->renderLink().'</strong>';
     switch ($action) {
       case ManiphestAction::ACTION_ASSIGN:

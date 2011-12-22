@@ -50,10 +50,33 @@ final class PhabricatorFeedBuilder {
 
     $null_view = new AphrontNullView();
 
-    $views = array();
+    require_celerity_resource('phabricator-feed-css');
+
+    $last_date = null;
+    $today = phabricator_date(time(), $user);
     foreach ($stories as $story) {
       $story->setHandles($handles);
       $story->setObjects($objects);
+
+      $date = phabricator_date($story->getEpoch(), $user);
+      if ($date == $today) {
+        $date = 'Today';
+      }
+
+      if ($date !== $last_date) {
+        if ($last_date !== null) {
+          $null_view->appendChild(
+            '<div class="phabricator-feed-story-date-separator"></div>');
+        }
+        $last_date = $date;
+        $null_view->appendChild(
+          phutil_render_tag(
+            'div',
+            array(
+              'class' => 'phabricator-feed-story-date',
+            ),
+            phutil_escape_html($date)));
+      }
 
       $view = $story->renderView();
       $view->setViewer($user);
@@ -61,7 +84,10 @@ final class PhabricatorFeedBuilder {
       $null_view->appendChild($view);
     }
 
-    return $null_view;
+    return id(new AphrontNullView())->appendChild(
+      '<div class="phabricator-feed-frame">'.
+        $null_view->render().
+      '</div>');
   }
 
 }

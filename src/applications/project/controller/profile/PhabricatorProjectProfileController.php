@@ -82,14 +82,7 @@ class PhabricatorProjectProfileController
           ));
         $stories = $query->execute();
 
-        $builder = new PhabricatorFeedBuilder($stories);
-        $builder->setUser($user);
-        $view = $builder->buildView();
-
-        $content .=
-          '<div style="padding: 2em;">'.
-            $view->render().
-          '</div>';
+        $content .= $this->renderStories($stories);
         break;
       case 'about':
         $content = $this->renderAboutPage($project, $profile);
@@ -104,7 +97,7 @@ class PhabricatorProjectProfileController
         throw new Exception("Unimplemented filter '{$this->page}'.");
     }
 
-    $content = '<div style="padding: 2em;">'.$content.'</div>';
+    $content = '<div style="padding: 1em;">'.$content.'</div>';
     $nav_view->appendChild($content);
 
     $header = new PhabricatorProfileHeaderView();
@@ -238,11 +231,22 @@ class PhabricatorProjectProfileController
       ));
     $stories = $query->execute();
 
+    return $this->renderStories($stories);
+  }
+
+  private function renderStories(array $stories) {
+
     $builder = new PhabricatorFeedBuilder($stories);
     $builder->setUser($this->getRequest()->getUser());
     $view = $builder->buildView();
 
-    return $view->render();
+    return
+      '<div class="phabricator-profile-info-group">'.
+        '<h1 class="phabricator-profile-info-header">Activity Feed</h1>'.
+        '<div class="phabricator-profile-info-pane">'.
+         $view->render().
+        '</div>'.
+      '</div>';
   }
 
 

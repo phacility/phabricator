@@ -59,4 +59,8 @@ abstract class PhabricatorFeedStory {
     return $this->data;
   }
 
+  final public function getEpoch() {
+    return $this->getStoryData()->getEpoch();
+  }
+
 }

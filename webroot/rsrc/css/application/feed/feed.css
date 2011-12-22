@@ -2,6 +2,11 @@
  * @provides phabricator-feed-css
  */
 
+.phabricator-feed-frame {
+  width: 640px;
+  padding: 1em;
+}
+
 .phabricator-feed-story {
   padding-left: 64px;
   margin: .5em 0 1em;
@@ -26,4 +31,15 @@
 .phabricator-feed-story-foot {
   color: #888888;
   font-size: 11px;
+}
+
+.phabricator-feed-story-date {
+  color: #666666;
+  font-size: 11px;
+  border-bottom: 1px solid #eeeeee;
+  padding: .5em 0;
+}
+
+.phabricator-feed-story-date-separator {
+  margin-top: 2em;
 }
