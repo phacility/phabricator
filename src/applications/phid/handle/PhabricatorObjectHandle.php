@@ -206,7 +206,7 @@ class PhabricatorObjectHandle {
 
     $class = null;
     if ($this->status != PhabricatorObjectHandleStatus::STATUS_OPEN) {
-      $class = 'handle-status-'.phutil_escape_html($this->status);
+      $class = 'handle-status-'.$this->status;
     }
 
     return phutil_render_tag(
