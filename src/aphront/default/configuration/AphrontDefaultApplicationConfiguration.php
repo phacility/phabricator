@@ -173,9 +173,6 @@ class AphrontDefaultApplicationConfiguration
 
       '/T(?P<id>\d+)$' => 'ManiphestTaskDetailController',
 
-      '/github-post-receive/(?P<id>\d+)/(?P<token>[^/]+)/$'
-        => 'PhabricatorRepositoryGitHubPostReceiveController',
-
       '/repository/' => array(
         '$'                     => 'PhabricatorRepositoryListController',
         'create/$'              => 'PhabricatorRepositoryCreateController',

@@ -43,20 +43,6 @@ class PhabricatorRepositoryEditController
       'tracking'  => 'Tracking',
     );
 
-    $vcs = $repository->getVersionControlSystem();
-    if ($vcs == DifferentialRevisionControlSystem::GIT) {
-      if (!$repository->getDetail('github-token')) {
-        $token = substr(base64_encode(Filesystem::readRandomBytes(8)), 0, 8);
-        $repository->setDetail('github-token', $token);
-
-        $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-        $repository->save();
-        unset($unguarded);
-      }
-
-      $views['github'] = 'GitHub';
-    }
-
     $this->repository = $repository;
 
     if (!isset($views[$this->view])) {
@@ -85,8 +71,6 @@ class PhabricatorRepositoryEditController
         return $this->processBasicRequest();
       case 'tracking':
         return $this->processTrackingRequest();
-      case 'github':
-        return $this->processGithubRequest();
       default:
         throw new Exception("Unknown view.");
     }
@@ -675,86 +659,4 @@ class PhabricatorRepositoryEditController
       ));
   }
 
-
-  private function processGithubRequest() {
-    $request = $this->getRequest();
-    $repository = $this->repository;
-    $repository_id = $repository->getID();
-    $viewer = $this->getRequest()->getUser();
-
-    $token = $repository->getDetail('github-token');
-    $path = '/github-post-receive/'.$repository_id.'/'.$token.'/';
-    $post_uri = PhabricatorEnv::getURI($path);
-
-    $gitform = new AphrontFormLayoutView();
-    $gitform
-      ->setBackgroundShading(true)
-      ->setPadded(true)
-      ->appendChild(
-        '<p class="aphront-form-instructions">You can configure GitHub to '.
-        'notify Phabricator after changes are pushed. Log into GitHub, go '.
-        'to "Admin" &rarr; "Service Hooks" &rarr; "Post-Receive URLs", and '.
-        'add this URL to the list. Obviously, this will only work if your '.
-        'Phabricator installation is accessible from the internet.</p>')
-      ->appendChild(
-        '<p class="aphront-form-instructions"> If things are working '.
-        'properly, push notifications should appear below once you make some '.
-        'commits.</p>')
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel('URL')
-          ->setCaption('Set this as a GitHub "Post-Receive URL".')
-          ->setValue($post_uri))
-      ->appendChild('<br /><br />')
-      ->appendChild('<h1>Recent Commit Notifications</h1>');
-
-    $notifications = id(new PhabricatorRepositoryGitHubNotification())
-      ->loadAllWhere(
-        'repositoryPHID = %s ORDER BY id DESC limit 10',
-        $repository->getPHID());
-
-    $rows = array();
-    foreach ($notifications as $notification) {
-      $rows[] = array(
-        phutil_escape_html($notification->getRemoteAddress()),
-        phabricator_datetime($notification->getDateCreated(), $viewer),
-        $notification->getPayload()
-          ? phutil_escape_html(substr($notification->getPayload(), 0, 32).'...')
-          : 'Empty',
-      );
-    }
-
-    $notification_table = new AphrontTableView($rows);
-    $notification_table->setHeaders(
-      array(
-        'Remote Address',
-        'Received',
-        'Payload',
-      ));
-    $notification_table->setColumnClasses(
-      array(
-        null,
-        null,
-        'wide',
-      ));
-    $notification_table->setNoDataString(
-      'Phabricator has not yet received any commit notifications for this '.
-      'repository from GitHub.');
-
-    $gitform->appendChild($notification_table);
-
-    $github = new AphrontPanelView();
-    $github->setHeader('GitHub Integration');
-    $github->appendChild($gitform);
-    $github->setWidth(AphrontPanelView::WIDTH_FORM);
-
-    $nav = $this->sideNav;
-    $nav->appendChild($github);
-
-    return $this->buildStandardPageResponse(
-      $nav,
-      array(
-        'title' => 'Repository Github Integration',
-      ));
-  }
 }
