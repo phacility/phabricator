@@ -7,9 +7,9 @@
 
 
 phutil_require_module('phabricator', 'applications/differential/field/specification/base');
+phutil_require_module('phabricator', 'applications/markup/engine');
 phutil_require_module('phabricator', 'view/form/control/text');
 
-phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
 
 

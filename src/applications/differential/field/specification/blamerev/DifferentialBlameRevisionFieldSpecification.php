@@ -67,7 +67,8 @@ final class DifferentialBlameRevisionFieldSpecification
     if (!$this->value) {
       return null;
     }
-    return phutil_escape_html($this->value);
+    $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
+    return $engine->markupText($this->value);
   }
 
   public function shouldAppearOnConduitView() {
