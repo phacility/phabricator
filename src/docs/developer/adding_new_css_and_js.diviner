@@ -44,7 +44,7 @@ rare and inadvisable in CSS), declare then with ##@requires##:
   JX.install('Duck', {
     ...
   });
-  
+
 Then rebuild the Celerity map (see the next section).
 
 = Changing an Existing File =
@@ -53,7 +53,7 @@ When you add, move or remove a file, or change the contents of existing JS or
 CSS file, you should rebuild the Celerity map:
 
   phabricator/ $ ./scripts/celerity_mapper.php ./webroot
-  
+
 If you've only changed file content things will generally work even if you
 don't, but they might start not working as well in the future if you skip this
 step.
@@ -65,7 +65,7 @@ To include a CSS or JS file in a page, use
 
   require_celerity_resource('duck-style-css');
   require_celerity_resource('duck');
-  
+
 If your map is up to date, the resource should now be included correctly when
 the page is rendered.
 
