@@ -33,6 +33,9 @@ final class ManiphestDefaultTaskExtensions
       $spec->setFieldType(idx($info, 'type'));
       $spec->setRequired(idx($info, 'required'));
 
+      $spec->setCheckboxLabel(idx($info, 'checkbox-label'));
+      $spec->setCheckboxValue(idx($info, 'checkbox-value', 1));
+
       if ($spec->getFieldType() ==
         ManiphestAuxiliaryFieldDefaultSpecification::TYPE_SELECT) {
         $spec->setSelectOptions(idx($info, 'options'));

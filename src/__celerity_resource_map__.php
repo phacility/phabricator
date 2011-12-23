@@ -72,7 +72,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-form-view-css' =>
   array(
-    'uri' => '/res/16af59d8/rsrc/css/aphront/form-view.css',
+    'uri' => '/res/4d1d9d08/rsrc/css/aphront/form-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1682,6 +1682,30 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/4e7acf1a/core.pkg.js',
       'type' => 'js',
     ),
+    '831e959b' =>
+    array(
+      'name' => 'core.pkg.css',
+      'symbols' =>
+      array(
+        0 => 'phabricator-core-css',
+        1 => 'phabricator-core-buttons-css',
+        2 => 'phabricator-standard-page-view',
+        3 => 'aphront-dialog-view-css',
+        4 => 'aphront-form-view-css',
+        5 => 'aphront-panel-view-css',
+        6 => 'aphront-side-nav-view-css',
+        7 => 'aphront-table-view-css',
+        8 => 'aphront-crumbs-view-css',
+        9 => 'aphront-tokenizer-control-css',
+        10 => 'aphront-typeahead-control-css',
+        11 => 'aphront-list-filter-view-css',
+        12 => 'phabricator-directory-css',
+        13 => 'phabricator-remarkup-css',
+        14 => 'syntax-highlighting-css',
+      ),
+      'uri' => '/res/pkg/831e959b/core.pkg.css',
+      'type' => 'css',
+    ),
     '8710f5ac' =>
     array(
       'name' => 'differential.pkg.js',
@@ -1741,30 +1765,6 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/bbe7e6f7/typeahead.pkg.js',
       'type' => 'js',
     ),
-    'e1e8a800' =>
-    array(
-      'name' => 'core.pkg.css',
-      'symbols' =>
-      array(
-        0 => 'phabricator-core-css',
-        1 => 'phabricator-core-buttons-css',
-        2 => 'phabricator-standard-page-view',
-        3 => 'aphront-dialog-view-css',
-        4 => 'aphront-form-view-css',
-        5 => 'aphront-panel-view-css',
-        6 => 'aphront-side-nav-view-css',
-        7 => 'aphront-table-view-css',
-        8 => 'aphront-crumbs-view-css',
-        9 => 'aphront-tokenizer-control-css',
-        10 => 'aphront-typeahead-control-css',
-        11 => 'aphront-list-filter-view-css',
-        12 => 'phabricator-directory-css',
-        13 => 'phabricator-remarkup-css',
-        14 => 'syntax-highlighting-css',
-      ),
-      'uri' => '/res/pkg/e1e8a800/core.pkg.css',
-      'type' => 'css',
-    ),
     'e4f8b52c' =>
     array(
       'name' => 'differential.pkg.css',
@@ -1789,16 +1789,16 @@ celerity_register_resource_map(array(
   ),
   'reverse' =>
   array(
-    'aphront-crumbs-view-css' => 'e1e8a800',
-    'aphront-dialog-view-css' => 'e1e8a800',
-    'aphront-form-view-css' => 'e1e8a800',
+    'aphront-crumbs-view-css' => '831e959b',
+    'aphront-dialog-view-css' => '831e959b',
+    'aphront-form-view-css' => '831e959b',
     'aphront-headsup-action-list-view-css' => 'e4f8b52c',
-    'aphront-list-filter-view-css' => 'e1e8a800',
-    'aphront-panel-view-css' => 'e1e8a800',
-    'aphront-side-nav-view-css' => 'e1e8a800',
-    'aphront-table-view-css' => 'e1e8a800',
-    'aphront-tokenizer-control-css' => 'e1e8a800',
-    'aphront-typeahead-control-css' => 'e1e8a800',
+    'aphront-list-filter-view-css' => '831e959b',
+    'aphront-panel-view-css' => '831e959b',
+    'aphront-side-nav-view-css' => '831e959b',
+    'aphront-table-view-css' => '831e959b',
+    'aphront-tokenizer-control-css' => '831e959b',
+    'aphront-typeahead-control-css' => '831e959b',
     'differential-changeset-view-css' => 'e4f8b52c',
     'differential-core-view-css' => 'e4f8b52c',
     'differential-inline-comment-editor' => '8710f5ac',
@@ -1847,16 +1847,16 @@ celerity_register_resource_map(array(
     'javelin-vector' => 'b164acea',
     'javelin-workflow' => '4e7acf1a',
     'phabricator-content-source-view-css' => 'e4f8b52c',
-    'phabricator-core-buttons-css' => 'e1e8a800',
-    'phabricator-core-css' => 'e1e8a800',
-    'phabricator-directory-css' => 'e1e8a800',
+    'phabricator-core-buttons-css' => '831e959b',
+    'phabricator-core-css' => '831e959b',
+    'phabricator-directory-css' => '831e959b',
     'phabricator-drag-and-drop-file-upload' => '8710f5ac',
     'phabricator-keyboard-shortcut' => '4e7acf1a',
     'phabricator-keyboard-shortcut-manager' => '4e7acf1a',
     'phabricator-object-selector-css' => 'e4f8b52c',
-    'phabricator-remarkup-css' => 'e1e8a800',
+    'phabricator-remarkup-css' => '831e959b',
     'phabricator-shaped-request' => '8710f5ac',
-    'phabricator-standard-page-view' => 'e1e8a800',
-    'syntax-highlighting-css' => 'e1e8a800',
+    'phabricator-standard-page-view' => '831e959b',
+    'syntax-highlighting-css' => '831e959b',
   ),
 ));

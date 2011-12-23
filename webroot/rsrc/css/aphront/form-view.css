@@ -116,9 +116,11 @@ table.aphront-form-control-checkbox-layout {
 table.aphront-form-control-checkbox-layout th {
   padding-top: 2px;
   padding-left: 0.35em;
+  padding-bottom: 4px;
 }
 
 .aphront-form-control-checkbox-layout td input {
+  margin-top: 4px;
   width: auto;
 }
 

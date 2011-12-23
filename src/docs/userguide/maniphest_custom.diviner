@@ -44,11 +44,15 @@ Each array key must be unique, and is used to organize the internal storage of
 the field. These options are available:
 
   - **label**: Display label for the field on the edit and detail interfaces.
-  - **type**: Field type, one of **int**, **string** or **select**.
+  - **type**: Field type, one of **int**, **string**, **bool** or **select**.
   - **caption**: A caption to display underneath the field (optional).
   - **required**: True if the user should be required to provide a value.
   - **options**: If type is set to **select**, provide options for the dropdown
     as a dictionary.
+  - **checkbox-label**: If type is set to **bool**, an optional string to
+    show next to the checkbox.
+  - **checkbox-value**: If type is set to **bool**, the value to show on
+    the detail view when the checkbox is selected.
 
 = Advanced Field Customization =
 

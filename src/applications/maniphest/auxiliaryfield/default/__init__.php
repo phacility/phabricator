@@ -9,9 +9,11 @@
 phutil_require_module('phabricator', 'applications/maniphest/auxiliaryfield/base');
 phutil_require_module('phabricator', 'applications/maniphest/auxiliaryfield/typeexception');
 phutil_require_module('phabricator', 'applications/maniphest/auxiliaryfield/validationexception');
+phutil_require_module('phabricator', 'view/form/control/checkbox');
 phutil_require_module('phabricator', 'view/form/control/select');
 phutil_require_module('phabricator', 'view/form/control/text');
 
+phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
 
 

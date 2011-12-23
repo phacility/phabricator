@@ -26,11 +26,14 @@ class ManiphestAuxiliaryFieldDefaultSpecification
   private $fieldType;
 
   private $selectOptions;
+  private $checkboxLabel;
+  private $checkboxValue;
   private $error;
 
   const TYPE_SELECT = 'select';
   const TYPE_STRING = 'string';
   const TYPE_INT    = 'int';
+  const TYPE_BOOL   = 'bool';
 
   public function getFieldType() {
     return $this->fieldType;
@@ -68,35 +71,62 @@ class ManiphestAuxiliaryFieldDefaultSpecification
     return $this->required;
   }
 
+  public function setCheckboxLabel($checkbox_label) {
+    $this->checkboxLabel = $checkbox_label;
+    return $this;
+  }
+
+  public function getCheckboxLabel() {
+    return $this->checkboxLabel;
+  }
+
+  public function setCheckboxValue($checkbox_value) {
+    $this->checkboxValue = $checkbox_value;
+    return $this;
+  }
+
+  public function getCheckboxValue() {
+    return $this->checkboxValue;
+  }
+
   public function renderControl() {
     $control = null;
 
-    switch ($this->getFieldType()) {
+    $type = $this->getFieldType();
+    switch ($type) {
       case self::TYPE_INT:
-
         $control = new AphrontFormTextControl();
         break;
-
       case self::TYPE_STRING:
         $control = new AphrontFormTextControl();
         break;
-
       case self::TYPE_SELECT:
         $control = new AphrontFormSelectControl();
         $control->setOptions($this->getSelectOptions());
         break;
-
+      case self::TYPE_BOOL:
+        $control = new AphrontFormCheckboxControl();
+        break;
       default:
+        $label = $this->getLabel();
         throw new ManiphestAuxiliaryFieldTypeException(
-          $this->getFieldType().' is not a valid type for '.$this->getLabel()
-        );
+          "Field type '{$type}' is not a valid type (for field '{$label}').");
         break;
     }
 
-    $control->setValue($this->getValue());
+    if ($type == self::TYPE_BOOL) {
+      $control->addCheckbox(
+        'auxiliary['.$this->getAuxiliaryKey().']',
+        1,
+        $this->getCheckboxLabel(),
+        (bool)$this->getValue());
+    } else {
+      $control->setValue($this->getValue());
+      $control->setName('auxiliary['.$this->getAuxiliaryKey().']');
+    }
+
     $control->setLabel($this->getLabel());
     $control->setCaption($this->getCaption());
-    $control->setName('auxiliary['.$this->getAuxiliaryKey().']');
     $control->setError($this->getError());
 
     return $control;
@@ -104,7 +134,7 @@ class ManiphestAuxiliaryFieldDefaultSpecification
 
   public function setValueFromRequest($request) {
     $aux_post_values = $request->getArr('auxiliary');
-    $this->setValue(idx($aux_post_values, $this->getAuxiliaryKey()));
+    $this->setValue(idx($aux_post_values, $this->getAuxiliaryKey(), ''));
   }
 
   public function getValueForStorage() {
@@ -123,17 +153,29 @@ class ManiphestAuxiliaryFieldDefaultSpecification
             $this->getLabel().' must be an integer value.'
           );
         }
-
         break;
-
+      case self::TYPE_BOOL:
+        return true;
       case self::TYPE_STRING:
         return true;
-        break;
-
       case self::TYPE_SELECT:
         return true;
-        break;
     }
+  }
+
+  public function renderForDetailView() {
+    switch ($this->getFieldType()) {
+      case self::TYPE_BOOL:
+        if ($this->getValue()) {
+          return phutil_escape_html($this->getCheckboxValue());
+        } else {
+          return null;
+        }
+      case self::TYPE_SELECT:
+        $display = idx($this->getSelectOptions(), $this->getValue());
+        return phutil_escape_html($display);
+    }
+    return parent::renderForDetailView();
   }
 
 }
