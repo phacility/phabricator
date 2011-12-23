@@ -39,14 +39,10 @@ class PhabricatorRepositoryGitCommitDiscoveryDaemon
         "Expected 'Fetch URL' in 'git remote show -n origin'.");
     }
 
-    $remote = $matches[1];
-    $expect = $repository->getRemoteURI();
-    if ($remote != $expect) {
-      $local_path = $repository->getLocalPath();
-      throw new Exception(
-        "Working copy '{$local_path}' has origin URL '{$remote}', but the ".
-        "configured URL '{$expect}' is expected. Refusing to proceed.");
-    }
+    self::verifySameGitOrigin(
+      $matches[1],
+      $repository->getRemoteURI(),
+      $repository->getLocalPath());
 
     list($stdout) = $repository->execxLocalCommand(
       'branch -r --verbose --no-abbrev');
@@ -115,6 +111,23 @@ class PhabricatorRepositoryGitCommitDiscoveryDaemon
       if (empty($insert)) {
         break;
       }
+    }
+  }
+
+  public static function verifySameGitOrigin($remote, $expect, $where) {
+    $remote_uri = PhabricatorRepository::newPhutilURIFromGitURI($remote);
+    $expect_uri = PhabricatorRepository::newPhutilURIFromGitURI($expect);
+
+    $remote_path = $remote_uri->getPath();
+    $expect_path = $expect_uri->getPath();
+
+    if ($remote_path != $expect_path) {
+      throw new Exception(
+        "Working copy at '{$where}' has a mismatched origin URL. It has ".
+        "origin URL '{$remote}' (with remote path '{$remote_path}'), but the ".
+        "configured URL '{$expect}' (with remote path '{$expect_path}') is ".
+        "expected. Refusing to proceed because this may indicate that the ".
+        "working copy is actually some other repository.");
     }
   }
 

@@ -57,19 +57,30 @@ class PhabricatorRepository extends PhabricatorRepositoryDAO {
     return $this;
   }
 
+  public static function newPhutilURIFromGitURI($raw_uri) {
+    // If there's no protocol (git implicit SSH) reformat the URI to be a
+    // normal URI. These git URIs look like "user@domain.com:path" instead of
+    // "ssh://user@domain/path".
+
+    $uri = new PhutilURI($raw_uri);
+    if (!$uri->getProtocol()) {
+      list($domain, $path) = explode(':', $raw_uri, 2);
+      $uri = new PhutilURI('ssh://'.$domain.'/'.$path);
+    }
+
+    return $uri;
+  }
+
   public function getRemoteURI() {
     $raw_uri = $this->getDetail('remote-uri');
 
     $vcs = $this->getVersionControlSystem();
     $is_git = ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_GIT);
 
-    // If there's no protocol (git implicit SSH) reformat the URI to be a
-    // normal URI. These git URIs look like "user@domain.com:path" instead of
-    // "ssh://user@domain/path".
-    $uri = new PhutilURI($raw_uri);
-    if ($is_git && !$uri->getProtocol()) {
-      list($domain, $path) = explode(':', $raw_uri, 2);
-      $uri = new PhutilURI('ssh://'.$domain.'/'.$path);
+    if ($is_git) {
+      $uri = self::newPhutilURIFromGitURI($raw_uri);
+    } else {
+      $uri = new PhutilURI($raw_uri);
     }
 
     if ($this->isSSHProtocol($uri->getProtocol())) {
