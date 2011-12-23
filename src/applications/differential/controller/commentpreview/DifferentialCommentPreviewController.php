@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,15 +30,35 @@ class DifferentialCommentPreviewController extends DifferentialController {
 
     $author_phid = $request->getUser()->getPHID();
 
-    $handles = id(new PhabricatorObjectHandleData(array($author_phid)))
-      ->loadHandles();
+    $action = $request->getStr('action');
 
     $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
 
     $comment = new DifferentialComment();
     $comment->setContent($request->getStr('content'));
-    $comment->setAction($request->getStr('action'));
+    $comment->setAction($action);
     $comment->setAuthorPHID($author_phid);
+
+    $handles = array($author_phid);
+
+    $reviewers = $request->getStr('reviewers');
+    if ($action == DifferentialAction::ACTION_ADDREVIEWERS && $reviewers) {
+      $reviewers = explode(',', $reviewers);
+      $comment->setMetadata(array(
+        DifferentialComment::METADATA_ADDED_REVIEWERS => $reviewers));
+      $handles = array_merge($handles, $reviewers);
+    }
+
+    $ccs = $request->getStr('ccs');
+    if ($action == DifferentialAction::ACTION_ADDCCS && $ccs) {
+      $ccs = explode(',', $ccs);
+      $comment->setMetadata(array(
+        DifferentialComment::METADATA_ADDED_CCS => $ccs));
+      $handles = array_merge($handles, $ccs);
+    }
+
+    $handles = id(new PhabricatorObjectHandleData($handles))
+      ->loadHandles();
 
     $view = new DifferentialRevisionCommentView();
     $view->setUser($request->getUser());

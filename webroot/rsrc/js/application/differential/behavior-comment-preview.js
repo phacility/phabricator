@@ -12,16 +12,25 @@ JX.behavior('differential-feedback-preview', function(config) {
 
   var action = JX.$(config.action);
   var content = JX.$(config.content);
+  var previewTokenizers = {};
+  for (var field in config.previewTokenizers) {
+    var tokenizer = JX.$(config.previewTokenizers[field]);
+    previewTokenizers[field] = JX.Stratcom.getData(tokenizer).tokenizer;
+  }
 
   var callback = function(r) {
     JX.DOM.setContent(JX.$(config.preview), JX.$H(r));
   };
 
   var getdata = function() {
-    return {
+    var data = {
       content : content.value,
       action : action.value
     };
+    for (var field in previewTokenizers) {
+      data[field] = JX.keys(previewTokenizers[field].getTokens()).join(',');
+    }
+    return data;
   };
 
   var request = new JX.PhabricatorShapedRequest(config.uri, callback, getdata);
@@ -29,6 +38,9 @@ JX.behavior('differential-feedback-preview', function(config) {
 
   JX.DOM.listen(content, 'keydown', null, trigger);
   JX.DOM.listen(action,  'change',  null, trigger);
+  for (var field in previewTokenizers) {
+    previewTokenizers[field].listen('change', trigger);
+  }
 
   request.start();
 

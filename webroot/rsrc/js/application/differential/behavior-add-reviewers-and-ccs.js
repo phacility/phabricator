@@ -24,6 +24,9 @@ JX.behavior('differential-add-reviewers-and-ccs', function(config) {
 
     var tokenizer = new JX.Tokenizer(root);
     tokenizer.setTypeahead(typeahead);
+
+    JX.Stratcom.addData(root, {'tokenizer' : tokenizer});
+
     tokenizer.start();
 
     return tokenizer;

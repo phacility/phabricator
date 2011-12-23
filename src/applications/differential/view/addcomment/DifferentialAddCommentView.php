@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,6 +200,10 @@ final class DifferentialAddCommentView extends AphrontView {
         'preview'   => 'comment-preview',
         'action'    => 'comment-action',
         'content'   => 'comment-content',
+        'previewTokenizers' => array(
+          'reviewers' => 'add-reviewers-tokenizer',
+          'ccs'       => 'add-ccs-tokenizer',
+        ),
 
         'inlineuri' => '/differential/comment/inline/preview/'.$rev_id.'/',
         'inline'    => 'inline-comment-preview',
