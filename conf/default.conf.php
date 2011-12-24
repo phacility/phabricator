@@ -743,6 +743,8 @@ return array(
     // Example: Treat all '*.x.bak' file as '.x'. NOTE: we map to capturing
     // group 1 by specifying the mapping as "1".
     // '@\\.([^.]+)\\.bak$@' => 1,
+
+    '@\.arcconfig$@' => 'js',
   ),
 
 );
