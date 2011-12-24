@@ -37,6 +37,8 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
       return new Aphront404Response();
     }
 
+    require_celerity_resource('phabricator-profile-css');
+
     $profile = id(new PhabricatorUserProfile())->loadOneWhere(
       'userPHID = %s',
       $user->getPHID());
@@ -44,16 +46,29 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
       $profile = new PhabricatorUserProfile();
     }
 
-    $links = array();
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI('/p/'.$user->getUserName().'/'));
+    $nav->addFilter('feed', 'Feed');
+    $nav->addFilter('about', 'About');
 
-    if ($user->getPHID() == $viewer->getPHID()) {
-      $links[] = phutil_render_tag(
-        'a',
-        array(
-          'href' => '/settings/page/profile/',
-        ),
-        'Edit Profile');
-    }
+    $nav->addSpacer();
+    $nav->addLabel('Activity');
+
+    $external_arrow = "\xE2\x86\x97";
+    $nav->addFilter(
+      null,
+      "Revisions {$external_arrow}",
+      '/differential/filter/revisions/?phid='.$user->getPHID());
+
+    $nav->addFilter(
+      null,
+      "Tasks {$external_arrow}",
+      '/maniphest/view/action/?users='.$user->getPHID());
+
+    $nav->addFilter(
+      null,
+      "Commits {$external_arrow}",
+      '/diffusion/author/'.$user->getUserName().'/');
 
     $oauths = id(new PhabricatorUserOAuthInfo())->loadAllWhere(
       'userID = %d',
@@ -61,6 +76,7 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
     $oauths = mpull($oauths, null, 'getOAuthProvider');
 
     $providers = PhabricatorOAuthProvider::getAllProviders();
+    $added_spacer = false;
     foreach ($providers as $provider) {
       if (!$provider->isProviderEnabled()) {
         continue;
@@ -76,28 +92,26 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
       $href = $oauths[$provider_key]->getAccountURI();
 
       if ($href) {
-        $links[] = phutil_render_tag(
-          'a',
-          array(
-            'href' => $href,
-          ),
-          phutil_escape_html($name));
+        if (!$added_spacer) {
+          $nav->addSpacer();
+          $nav->addLabel('Linked Accounts');
+          $added_spacer = true;
+        }
+        $nav->addFilter(null, $name.' '.$external_arrow, $href);
       }
     }
 
-    // TODO:  perhaps, if someone wants to add to the profile of the user the
-    //        ability to show the task/revisions where he is working/commenting
-    //        on, this has to be changed to something like
-    //        |$this->page = key($pages)|, since the "page" regexp was added to
-    //        the aphrontconfiguration.
-    if (empty($links[$this->page])) {
-      $this->page = 'action';
-    }
+    $this->page = $nav->selectFilter($this->page, 'feed');
 
     switch ($this->page) {
-      default:
+      case 'feed':
+        $content = $this->renderUserFeed($user);
+        break;
+      case 'about':
         $content = $this->renderBasicInformation($user, $profile);
         break;
+      default:
+        throw new Exception("Unknown page '{$this->page}'!");
     }
 
     $src_phid = $profile->getProfileImagePHID();
@@ -105,36 +119,31 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
       $src_phid = $user->getProfileImagePHID();
     }
     $picture = PhabricatorFileURI::getViewURIForPHID($src_phid);
-    $title = nonempty($profile->getTitle(), 'Untitled Document');
-    $realname = '('.$user->getRealName().')';
 
-    $profile = new PhabricatorProfileView();
-    $profile->setProfilePicture($picture);
-    $profile->setProfileNames(
-      $user->getUserName(),
-      $realname,
-      $title);
-    foreach ($links as $page => $name) {
-      if (is_integer($page)) {
-        $profile->addProfileItem(
-          phutil_render_tag(
-            'span',
-            array(),
-            $name));
-      } else {
-        $profile->addProfileItem($page);
-      }
+    $header = new PhabricatorProfileHeaderView();
+    $header
+      ->setProfilePicture($picture)
+      ->setName($user->getUserName().' ('.$user->getRealName().')')
+      ->setDescription($profile->getTitle());
+
+    $header->appendChild($nav);
+    $nav->appendChild(
+      '<div style="padding: 1em;">'.$content.'</div>');
+
+    if ($user->getPHID() == $viewer->getPHID()) {
+      $nav->addSpacer();
+      $nav->addFilter(null, 'Edit Profile...', '/settings/page/profile/');
     }
 
-    $profile->appendChild($content);
     return $this->buildStandardPageResponse(
-      $profile,
+      $header,
       array(
         'title' => $user->getUsername(),
       ));
   }
 
   private function renderBasicInformation($user, $profile) {
+
     $blurb = nonempty(
       $profile->getBlurb(),
       '//Nothing is known about this rare specimen.//');
@@ -182,19 +191,28 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
           </table>
         </div>
       </div>';
-    $content .=
-      '<div class="phabricator-profile-info-group">
-        <h1 class="phabricator-profile-info-header">Recent Activities</h1>
-        <div class="phabricator-profile-info-pane">
-          <table class="phabricator-profile-info-table">
-            <tr>
-              <th>Commits</th>
-              <td>'.$commit_list.'</td>
-            </tr>
-          </table>
-        </div>
-      </div>';
 
     return $content;
+  }
+
+  private function renderUserFeed(PhabricatorUser $user) {
+    $query = new PhabricatorFeedQuery();
+    $query->setFilterPHIDs(
+      array(
+        $user->getPHID(),
+      ));
+    $stories = $query->execute();
+
+    $builder = new PhabricatorFeedBuilder($stories);
+    $builder->setUser($this->getRequest()->getUser());
+    $view = $builder->buildView();
+
+    return
+      '<div class="phabricator-profile-info-group">
+        <h1 class="phabricator-profile-info-header">Activity Feed</h1>
+        <div class="phabricator-profile-info-pane">
+          '.$view->render().'
+        </div>
+      </div>';
   }
 }
