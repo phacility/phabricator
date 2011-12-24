@@ -41,6 +41,9 @@ class ManiphestTask extends ManiphestDAO {
 
   protected $ownerOrdering;
 
+  private $auxiliaryAttributes;
+  private $auxiliaryDirty = array();
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -87,43 +90,47 @@ class ManiphestTask extends ManiphestDAO {
     return $this;
   }
 
-  public function setAuxiliaryAttribute($key, $val) {
-    $this->removeAuxiliaryAttribute($key);
-
-    $attribute = new ManiphestTaskAuxiliaryStorage();
-    $attribute->setTaskPHID($this->phid);
-    $attribute->setName($key);
-    $attribute->setValue($val);
-    $attribute->save();
-  }
-
-  public function loadAuxiliaryAttribute($key) {
-    $attribute = id(new ManiphestTaskAuxiliaryStorage())->loadOneWhere(
-      'taskPHID = %s AND name = %s',
-      $this->getPHID(),
-      $key);
-
-    return $attribute;
-  }
-
-  public function removeAuxiliaryAttribute($key) {
-    $attribute = id(new ManiphestTaskAuxiliaryStorage())->loadOneWhere(
-      'taskPHID = %s AND name = %s',
-      $this->getPHID(),
-      $key);
-
-    if ($attribute) {
-      $attribute->delete();
+  public function getAuxiliaryAttribute($key, $default = null) {
+    if ($this->auxiliaryAttributes === null) {
+      throw new Exception("Attach auxiliary attributes before getting them!");
     }
+    return idx($this->auxiliaryAttributes, $key, $default);
   }
 
-  public function loadAuxiliaryAttributes() {
-    $attributes = id(new ManiphestTaskAuxiliaryStorage())->loadAllWhere(
+  public function setAuxiliaryAttribute($key, $val) {
+    if ($this->auxiliaryAttributes === null) {
+      throw new Exception("Attach auxiliary attributes before setting them!");
+    }
+    $this->auxiliaryAttributes[$key] = $val;
+    $this->auxiliaryDirty[$key] = true;
+    return $this;
+  }
+
+  public function attachAuxiliaryAttributes(array $attrs) {
+    if ($this->auxiliaryDirty) {
+      throw new Exception(
+        "This object has dirty attributes, you can not attach new attributes ".
+        "without writing or discarding the dirty attributes.");
+    }
+    $this->auxiliaryAttributes = $attrs;
+    return $this;
+  }
+
+  public function loadAndAttachAuxiliaryAttributes() {
+    if (!$this->getPHID()) {
+      $this->auxiliaryAttributes = array();
+      return;
+    }
+
+    $storage = id(new ManiphestTaskAuxiliaryStorage())->loadAllWhere(
       'taskPHID = %s',
       $this->getPHID());
 
-    return $attributes;
+    $this->auxiliaryAttributes = mpull($storage, 'getValue', 'getName');
+
+    return $this;
   }
+
 
   public function save() {
     if (!$this->mailKey) {
@@ -146,7 +153,55 @@ class ManiphestTask extends ManiphestDAO {
       $this->subscribersNeedUpdate = false;
     }
 
+    if ($this->auxiliaryDirty) {
+      $this->writeAuxiliaryUpdates();
+      $this->auxiliaryDirty = array();
+    }
+
     return $result;
+  }
+
+  private function writeAuxiliaryUpdates() {
+    $table = new ManiphestTaskAuxiliaryStorage();
+    $conn_w = $table->establishConnection('w');
+    $update = array();
+    $remove = array();
+
+    foreach ($this->auxiliaryDirty as $key => $dirty) {
+      $value = $this->getAuxiliaryAttribute($key);
+      if ($value === null) {
+        $remove[$key] = true;
+      } else {
+        $update[$key] = $value;
+      }
+    }
+
+    if ($remove) {
+      queryfx(
+        $conn_w,
+        'DELETE FROM %T WHERE taskPHID = %s AND name IN (%Ls)',
+        $table->getTableName(),
+        $this->getPHID(),
+        array_keys($remove));
+    }
+
+    if ($update) {
+      $sql = array();
+      foreach ($update as $key => $val) {
+        $sql[] = qsprintf(
+          $conn_w,
+          '(%s, %s, %s)',
+          $this->getPHID(),
+          $key,
+          $val);
+      }
+      queryfx(
+        $conn_w,
+        'INSERT INTO %T (taskPHID, name, value) VALUES %Q
+          ON DUPLICATE KEY UPDATE value = VALUES(value)',
+        $table->getTableName(),
+        implode(', ', $sql));
+    }
   }
 
 }

@@ -47,9 +47,6 @@ class ManiphestTaskDetailController extends ManiphestController {
       $parent_task = id(new ManiphestTask())->load($workflow);
     }
 
-    $extensions = ManiphestTaskExtensions::newExtensions();
-    $aux_fields = $extensions->getAuxiliaryFieldSpecifications();
-
     $transactions = id(new ManiphestTransaction())->loadAllWhere(
       'taskID = %d ORDER BY id ASC',
       $task->getID());
@@ -137,18 +134,14 @@ class ManiphestTaskDetailController extends ManiphestController {
       $dict['Projects'] = '<em>None</em>';
     }
 
+    $extensions = ManiphestTaskExtensions::newExtensions();
+    $aux_fields = $extensions->getAuxiliaryFieldSpecifications();
     if ($aux_fields) {
+      $task->loadAndAttachAuxiliaryAttributes();
       foreach ($aux_fields as $aux_field) {
-        $attribute = $task->loadAuxiliaryAttribute(
-          $aux_field->getAuxiliaryKey()
-        );
-
-        if ($attribute) {
-          $aux_field->setValue($attribute->getValue());
-        }
-
+        $aux_key = $aux_field->getAuxiliaryKey();
+        $aux_field->setValue($task->getAuxiliaryAttribute($aux_key));
         $value = $aux_field->renderForDetailView();
-
         if (strlen($value)) {
           $dict[$aux_field->getLabel()] = $value;
         }

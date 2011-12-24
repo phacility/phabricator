@@ -200,8 +200,20 @@ class ManiphestTaskEditController extends ManiphestController {
           $transactions[] = $transaction;
         }
 
-        if ($transactions) {
+        if ($aux_fields) {
+          $task->loadAndAttachAuxiliaryAttributes();
+          foreach ($aux_fields as $aux_field) {
+            $transaction = clone $template;
+            $transaction->setTransactionType(
+              ManiphestTransactionType::TYPE_AUXILIARY);
+            $aux_key = $aux_field->getAuxiliaryKey();
+            $transaction->setMetadataValue('aux:key', $aux_key);
+            $transaction->setNewValue($aux_field->getValueForStorage());
+            $transactions[] = $transaction;
+          }
+        }
 
+        if ($transactions) {
           $event = new PhabricatorEvent(
             PhabricatorEventType::TYPE_MANIPHEST_WILLEDITTASK,
             array(
@@ -218,14 +230,6 @@ class ManiphestTaskEditController extends ManiphestController {
 
           $editor = new ManiphestTransactionEditor();
           $editor->applyTransactions($task, $transactions);
-        }
-
-        // TODO: Capture auxiliary field changes in a transaction
-        foreach ($aux_fields as $aux_field) {
-          $task->setAuxiliaryAttribute(
-            $aux_field->getAuxiliaryKey(),
-            $aux_field->getValueForStorage()
-          );
         }
 
         if ($parent_task) {
@@ -413,27 +417,27 @@ class ManiphestTaskEditController extends ManiphestController {
               'Create New Project'))
           ->setDatasource('/typeahead/common/projects/'));
 
-    $attributes = $task->loadAuxiliaryAttributes();
-    $attributes = mpull($attributes, 'getValue', 'getName');
+    if ($aux_fields) {
 
-    foreach ($aux_fields as $aux_field) {
       if (!$request->isFormPost()) {
-        $attribute = null;
-
-        if (isset($attributes[$aux_field->getAuxiliaryKey()])) {
-          $attribute = $attributes[$aux_field->getAuxiliaryKey()];
-          $aux_field->setValueFromStorage($attribute);
+        $task->loadAndAttachAuxiliaryAttributes();
+        foreach ($aux_fields as $aux_field) {
+          $aux_key = $aux_field->getAuxiliaryKey();
+          $value = $task->getAuxiliaryAttribute($aux_key);
+          $aux_field->setValueFromStorage($value);
         }
       }
 
-      if ($aux_field->isRequired() && !$aux_field->getError()
-        && !$aux_field->getValue()) {
-        $aux_field->setError(true);
+      foreach ($aux_fields as $aux_field) {
+        if ($aux_field->isRequired() &&
+            !$aux_field->getError() &&
+            !$aux_field->getValue()) {
+          $aux_field->setError(true);
+        }
+
+        $aux_control = $aux_field->renderControl();
+        $form->appendChild($aux_control);
       }
-
-      $aux_control = $aux_field->renderControl();
-
-      $form->appendChild($aux_control);
     }
 
     require_celerity_resource('aphront-error-view-css');

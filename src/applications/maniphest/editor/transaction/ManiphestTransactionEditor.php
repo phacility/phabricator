@@ -72,6 +72,14 @@ class ManiphestTransactionEditor {
           $old = $task->getProjectPHIDs();
           $value_is_phid_set = true;
           break;
+        case ManiphestTransactionType::TYPE_AUXILIARY:
+          $aux_key = $transaction->getMetadataValue('aux:key');
+          if (!$aux_key) {
+            throw new Exception(
+              "Expected 'aux:key' metadata on TYPE_AUXILIARY transaction.");
+          }
+          $old = $task->getAuxiliaryAttribute($aux_key);
+          break;
         default:
           throw new Exception('Unknown action type.');
       }
@@ -149,6 +157,10 @@ class ManiphestTransactionEditor {
             break;
           case ManiphestTransactionType::TYPE_PROJECTS:
             $task->setProjectPHIDs($new);
+            break;
+          case ManiphestTransactionType::TYPE_AUXILIARY:
+            $aux_key = $transaction->getMetadataValue('aux:key');
+            $task->setAuxiliaryAttribute($aux_key, $new);
             break;
           default:
             throw new Exception('Unknown action type.');

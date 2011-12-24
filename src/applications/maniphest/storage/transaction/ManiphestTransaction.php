@@ -81,6 +81,21 @@ class ManiphestTransaction extends ManiphestDAO {
     return $phids;
   }
 
+  public function getMetadataValue($key, $default = null) {
+    if (!is_array($this->metadata)) {
+      return $default;
+    }
+    return idx($this->metadata, $key, $default);
+  }
+
+  public function setMetadataValue($key, $value) {
+    if (!is_array($this->metadata)) {
+      $this->metadata = array();
+    }
+    $this->metadata[$key] = $value;
+    return $this;
+  }
+
   public function canGroupWith($target) {
     if ($target->getAuthorPHID() != $this->getAuthorPHID()) {
       return false;
@@ -95,7 +110,16 @@ class ManiphestTransaction extends ManiphestDAO {
     }
 
     if ($target->getTransactionType() == $this->getTransactionType()) {
-      return false;
+      $aux_type = ManiphestTransactionType::TYPE_AUXILIARY;
+      if ($this->getTransactionType() == $aux_type) {
+        $that_key = $target->getMetadataValue('aux:key');
+        $this_key = $this->getMetadataValue('aux:key');
+        if ($that_key == $this_key) {
+          return false;
+        }
+      } else {
+        return false;
+      }
     }
 
     return true;

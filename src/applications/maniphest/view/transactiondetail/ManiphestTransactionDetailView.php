@@ -529,6 +529,28 @@ class ManiphestTransactionDetailView extends ManiphestView {
                                               'removed: '.$rem_desc;
         }
         break;
+      case ManiphestTransactionType::TYPE_AUXILIARY:
+
+        // TODO: This is temporary and hacky! Allow auxiliary fields to
+        // customize this.
+
+        $old_esc = phutil_escape_html($old);
+        $new_esc = phutil_escape_html($new);
+
+        $aux_key = $transaction->getMetadataValue('aux:key');
+        if ($old === null) {
+          $verb = "Set Field";
+          $desc = "set field '{$aux_key}' to '{$new_esc}'";
+        } else if ($new === null) {
+          $verb = "Removed Field";
+          $desc = "removed field '{$aux_key}'";
+        } else {
+          $verb = "Updated Field";
+          $desc = "updated field '{$aux_key}' ".
+                  "from '{$old_esc}' to '{$new_esc}'";
+        }
+
+        break;
       default:
         return array($type, ' brazenly '.$type."'d", $classes);
     }

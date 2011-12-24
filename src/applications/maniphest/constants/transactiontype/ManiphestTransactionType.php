@@ -32,6 +32,7 @@ final class ManiphestTransactionType extends ManiphestConstants {
 
   const TYPE_TITLE        = 'title';
   const TYPE_DESCRIPTION  = 'description';
+  const TYPE_AUXILIARY    = 'aux';
 
   public static function getTransactionTypeMap() {
     return array(
