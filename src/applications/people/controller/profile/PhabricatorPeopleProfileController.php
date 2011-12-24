@@ -114,10 +114,7 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
         throw new Exception("Unknown page '{$this->page}'!");
     }
 
-    $src_phid = $profile->getProfileImagePHID();
-    if (!$src_phid) {
-      $src_phid = $user->getProfileImagePHID();
-    }
+    $src_phid = $user->getProfileImagePHID();
     $picture = PhabricatorFileURI::getViewURIForPHID($src_phid);
 
     $header = new PhabricatorProfileHeaderView();
