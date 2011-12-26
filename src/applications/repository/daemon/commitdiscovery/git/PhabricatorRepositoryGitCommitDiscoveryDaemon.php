@@ -121,7 +121,10 @@ class PhabricatorRepositoryGitCommitDiscoveryDaemon
     $remote_path = $remote_uri->getPath();
     $expect_path = $expect_uri->getPath();
 
-    if ($remote_path != $expect_path) {
+    $remote_match = self::normalizeGitPath($remote_path);
+    $expect_match = self::normalizeGitPath($expect_path);
+
+    if ($remote_match != $expect_match) {
       throw new Exception(
         "Working copy at '{$where}' has a mismatched origin URL. It has ".
         "origin URL '{$remote}' (with remote path '{$remote_path}'), but the ".
@@ -129,6 +132,14 @@ class PhabricatorRepositoryGitCommitDiscoveryDaemon
         "expected. Refusing to proceed because this may indicate that the ".
         "working copy is actually some other repository.");
     }
+  }
+
+  private static function normalizeGitPath($path) {
+    // Strip away trailing "/" and ".git", so similar paths correctly match.
+
+    $path = rtrim($path, '/');
+    $path = preg_replace('/\.git$/', '', $path);
+    return $path;
   }
 
 }

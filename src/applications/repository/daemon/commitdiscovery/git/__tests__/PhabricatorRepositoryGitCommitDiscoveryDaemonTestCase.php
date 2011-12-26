@@ -63,6 +63,18 @@ final class PhabricatorRepositoryGitCommitDiscoveryDaemonTestCase
         false,
         'Git implicit SSH path changes should fail.',
       ),
+      array(
+        'user@domain.com:path/repo.git',
+        'user@domain.com:path/repo',
+        true,
+        'Optional .git extension should not prevent matches.',
+      ),
+      array(
+        'user@domain.com:path/repo/',
+        'user@domain.com:path/repo',
+        true,
+        'Optional trailing slash should not prevent matches.',
+      ),
     );
 
     foreach ($cases as $case) {
