@@ -32,20 +32,16 @@ JX.install('PhabricatorShapedRequest', {
 
     trigger : function() {
 
-      if (this._request) {
-        // Waiting on a request, rate-limit.
-        return;
-      }
-
-      if (this._min && (new Date().getTime() < this._min)) {
-        // Just got a request back, rate-limit.
-        return;
-      }
-
       clearTimeout(this._defer);
       var data = this._dataCallback();
 
-      if (this.shouldSendRequest(this._last, data)) {
+      // Waiting on a request, rate-limit.
+      var waiting = (this._request);
+
+      // Just got a request back, rate-limit.
+      var recent = (this._min && (new Date().getTime() < this._min));
+
+      if (!waiting && !recent && this.shouldSendRequest(this._last, data)) {
         this._last = data;
         var request = new JX.Request(this._uri, JX.bind(this, function(r) {
           this._callback(r);
