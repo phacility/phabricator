@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -306,6 +306,24 @@ class PhabricatorRepository extends PhabricatorRepositoryDAO {
 
   public function isTracked() {
     return $this->getDetail('tracking-enabled', false);
+  }
+
+  public function shouldTrackBranch($branch) {
+    $vcs = $this->getVersionControlSystem();
+
+    $is_git = ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_GIT);
+
+    $use_filter = ($is_git);
+
+    if ($use_filter) {
+      $filter = $this->getDetail('branch-filter', array());
+      if ($filter && !isset($filter[$branch])) {
+        return false;
+      }
+    }
+
+    // By default, track all branches.
+    return true;
   }
 
 }

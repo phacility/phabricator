@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,13 +52,28 @@ class PhabricatorRepositoryGitCommitDiscoveryDaemon
       $only_this_remote = DiffusionBranchInformation::DEFAULT_GIT_REMOTE);
 
     $got_something = false;
+    $tracked_something = false;
     foreach ($branches as $name => $commit) {
+      if (!$repository->shouldTrackBranch($name)) {
+        continue;
+      }
+
+      $tracked_something = true;
+
       if ($this->isKnownCommit($commit)) {
         continue;
       } else {
         $this->discoverCommit($commit);
         $got_something = true;
       }
+    }
+
+    if (!$tracked_something) {
+      $repo_name = $repository->getName();
+      $repo_callsign = $repository->getCallsign();
+      throw new Exception(
+        "Repository r{$repo_callsign} '{$repo_name}' has no tracked branches! ".
+        "Verify that your branch filtering settings are correct.");
     }
 
     return $got_something;

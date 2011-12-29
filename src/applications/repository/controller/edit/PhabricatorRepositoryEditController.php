@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -229,6 +229,7 @@ class PhabricatorRepositoryEditController
 
     $has_branches       = ($is_git || $is_mercurial);
     $has_local          = ($is_git || $is_mercurial);
+    $has_branch_filter  = ($is_git);
     $has_http_support   = $is_svn;
 
     if ($request->isFormPost()) {
@@ -238,6 +239,14 @@ class PhabricatorRepositoryEditController
       if ($has_local) {
         $repository->setDetail('local-path', $request->getStr('path'));
       }
+
+      if ($has_branch_filter) {
+        $branch_filter = $request->getStrList('branch-filter');
+        $branch_filter = array_fill_keys($branch_filter, true);
+
+        $repository->setDetail('branch-filter', $branch_filter);
+      }
+
       $repository->setDetail(
         'pull-frequency',
         max(1, $request->getInt('frequency')));
@@ -548,6 +557,22 @@ class PhabricatorRepositoryEditController
           ->setError($e_path));
     }
 
+    if ($has_branch_filter) {
+      $branch_filter_str = implode(
+        ', ',
+        array_keys($repository->getDetail('branch-filter', array())));
+      $form
+        ->appendChild(
+          id(new AphrontFormTextControl())
+            ->setName('branch-filter')
+            ->setLabel('Track Only')
+            ->setValue($branch_filter_str)
+            ->setCaption(
+              'Optional list of branches to track. Other branches will be '.
+              'completely ignored. If left empty, all branches are tracked. '.
+              'Example: <tt>master, release</tt>'));
+    }
+
     $form
       ->appendChild(
         id(new AphrontFormTextControl())
@@ -584,7 +609,7 @@ class PhabricatorRepositoryEditController
                 $default_branch_name))
             ->setError($e_branch)
             ->setCaption(
-              'Default <strong>remote</strong> branch to show in Diffusion.'));
+              'Default branch to show in Diffusion.'));
     }
 
     $form

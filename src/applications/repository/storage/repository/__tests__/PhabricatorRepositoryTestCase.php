@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,34 @@ final class PhabricatorRepositoryTestCase
         (string)$uri,
         "Normalized Git URI '{$raw}'");
     }
+  }
+
+  public function testBranchFilter() {
+    $git = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
+
+    $repo = new PhabricatorRepository();
+    $repo->setVersionControlSystem($git);
+
+    $this->assertEqual(
+      true,
+      $repo->shouldTrackBranch('imaginary'),
+      'Track all branches by default.');
+
+    $repo->setDetail(
+      'branch-filter',
+      array(
+        'master' => true,
+      ));
+
+    $this->assertEqual(
+      true,
+      $repo->shouldTrackBranch('master'),
+      'Track listed branches.');
+
+    $this->assertEqual(
+      false,
+      $repo->shouldTrackBranch('imaginary'),
+      'Do not track unlisted branches.');
   }
 
 }

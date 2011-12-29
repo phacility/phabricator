@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,14 @@ abstract class PhabricatorRepositoryCommitDiscoveryDaemon
   }
 
   final public function run() {
-    $this->repository = $this->loadRepository();
-
-    $sleep = $this->repository->getDetail('pull-frequency');
     while (true) {
+      // Reload the repository every time to pick up changes from the web
+      // console.
+      $this->repository = $this->loadRepository();
       $this->discoverCommits();
-      $this->sleep(max(2, $sleep));
+
+      $sleep = max(2, $this->getRepository()->getDetail('pull-frequency'));
+      $this->sleep($sleep);
     }
   }
 
