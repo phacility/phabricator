@@ -18,6 +18,10 @@
 
 abstract class PhabricatorMetaMTAController extends PhabricatorController {
 
+  public function shouldRequireAdmin() {
+    return true;
+  }
+
   public function buildStandardPageResponse($view, array $data) {
     $page = $this->buildStandardPageView();
 

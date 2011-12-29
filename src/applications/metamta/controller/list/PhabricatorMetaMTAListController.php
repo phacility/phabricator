@@ -100,7 +100,9 @@ class PhabricatorMetaMTAListController extends PhabricatorMetaMTAController {
     $panel = new AphrontPanelView();
     $panel->appendChild($table);
     $panel->setHeader('MetaMTA Messages');
-    $panel->setCreateButton('Send New Message', '/mail/send/');
+    if ($user->getIsAdmin()) {
+      $panel->setCreateButton('Send New Test Message', '/mail/send/');
+    }
     $panel->appendChild($pager);
 
     return $this->buildStandardPageResponse(

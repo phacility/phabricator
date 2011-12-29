@@ -20,11 +20,12 @@ class PhabricatorFeedStoryManiphest extends PhabricatorFeedStory {
 
   public function getRequiredHandlePHIDs() {
     $data = $this->getStoryData();
-    return array(
-      $this->getStoryData()->getAuthorPHID(),
-      $data->getValue('taskPHID'),
-      $data->getValue('ownerPHID'),
-    );
+    return array_filter(
+        array(
+        $this->getStoryData()->getAuthorPHID(),
+        $data->getValue('taskPHID'),
+        $data->getValue('ownerPHID'),
+      ));
   }
 
   public function getRequiredObjectPHIDs() {
@@ -36,7 +37,6 @@ class PhabricatorFeedStoryManiphest extends PhabricatorFeedStory {
   public function renderView() {
     $data = $this->getStoryData();
 
-    $handles = $this->getHandles();
     $author_phid = $data->getAuthorPHID();
     $owner_phid = $data->getValue('ownerPHID');
     $task_phid = $data->getValue('taskPHID');
@@ -47,18 +47,27 @@ class PhabricatorFeedStoryManiphest extends PhabricatorFeedStory {
     $view = new PhabricatorFeedStoryView();
 
     $verb = ManiphestAction::getActionPastTenseVerb($action);
-    $title =
-      '<strong>'.$handles[$author_phid]->renderLink().'</strong>'.
-      " {$verb} task ".
-      '<strong>'.$handles[$task_phid]->renderLink().'</strong>';
+    $extra = null;
     switch ($action) {
       case ManiphestAction::ACTION_ASSIGN:
-        $title .=
-          ' to '.
-          '<strong>'.$handles[$owner_phid]->renderLink().'</strong>';
+        if ($owner_phid) {
+          $extra =
+            ' to '.
+            '<strong>'.$this->getHandle($owner_phid)->renderLink().'</strong>';
+        } else {
+          $verb = 'placed';
+          $extra = ' up for grabs';
+        }
         break;
     }
+
+    $title =
+      '<strong>'.$this->getHandle($author_phid)->renderLink().'</strong>'.
+      " {$verb} task ".
+      '<strong>'.$this->getHandle($task_phid)->renderLink().'</strong>';
+    $title .= $extra;
     $title .= '.';
+
     $view->setTitle($title);
 
     switch ($action) {

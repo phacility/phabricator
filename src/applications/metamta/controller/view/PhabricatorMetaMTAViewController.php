@@ -61,10 +61,6 @@ class PhabricatorMetaMTAViewController extends PhabricatorMetaMTAController {
           ->setLabel('Related PHID')
           ->setValue($mail->getRelatedPHID()))
       ->appendChild(
-        id(new AphrontFormTextAreaControl())
-          ->setLabel('Parameters')
-          ->setValue(json_encode($mail->getParameters())))
-      ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton('/mail/', 'Done'));
 
