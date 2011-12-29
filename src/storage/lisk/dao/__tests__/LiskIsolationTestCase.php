@@ -53,4 +53,57 @@ class LiskIsolationTestCase extends PhabricatorTestCase {
 
   }
 
+  public function testMagicMethods() {
+
+    $dao = new LiskIsolationTestDAO();
+
+    $this->assertEqual(
+      null,
+      $dao->getName(),
+      'getName() on empty object');
+
+    $this->assertEqual(
+      $dao,
+      $dao->setName('x'),
+      'setName() returns $this');
+
+    $this->assertEqual(
+      'y',
+      $dao->setName('y')->getName(),
+      'setName() has an effect');
+
+    $ex = null;
+    try {
+      $dao->gxxName();
+    } catch (Exception $thrown) {
+      $ex = $thrown;
+    }
+    $this->assertEqual(
+      true,
+      (bool)$ex,
+      'Typoing "get" should throw.');
+
+    $ex = null;
+    try {
+      $dao->sxxName('z');
+    } catch (Exception $thrown) {
+      $ex = $thrown;
+    }
+    $this->assertEqual(
+      true,
+      (bool)$ex,
+      'Typoing "set" should throw.');
+
+    $ex = null;
+    try {
+      $dao->madeUpMethod();
+    } catch (Exception $thrown) {
+      $ex = $thrown;
+    }
+    $this->assertEqual(
+      true,
+      (bool)$ex,
+      'Made up method should throw.');
+  }
+
 }

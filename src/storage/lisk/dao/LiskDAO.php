@@ -616,7 +616,10 @@ abstract class LiskDAO {
    * @task   info
    */
   public function getID() {
-    $id_key = $this->getIDKeyForUse();
+    static $id_key = null;
+    if ($id_key === null) {
+      $id_key = $this->getIDKeyForUse();
+    }
     return $this->$id_key;
   }
 
@@ -1258,42 +1261,66 @@ abstract class LiskDAO {
    * @task   util
    */
   public function __call($method, $args) {
-    if (!strncmp($method, 'get', 3)) {
-      $property = substr($method, 3);
-      if (!($property = $this->checkProperty($property))) {
-        throw new Exception("Bad getter call: {$method}");
+
+    // NOTE: This method is very performance-sensitive (many thousands of calls
+    // per page on some pages), and thus has some silliness in the name of
+    // optimizations.
+
+    static $dispatch_map = array();
+    static $partial = null;
+    if ($partial === null) {
+      $partial = $this->getConfigOption(self::CONFIG_PARTIAL_OBJECTS);
+    }
+
+    if ($method[0] === 'g') {
+      if (isset($dispatch_map[$method])) {
+        $property = $dispatch_map[$method];
+      } else {
+        if (substr($method, 0, 3) !== 'get') {
+          throw new Exception("Unable to resolve method '{$method}'!");
+        }
+        $property = substr($method, 3);
+        if (!($property = $this->checkProperty($property))) {
+          throw new Exception("Bad getter call: {$method}");
+        }
+        $dispatch_map[$method] = $property;
       }
-      if (count($args) !== 0) {
-        throw new Exception("Getter call should have zero args: {$method}");
-      }
-      if ($this->getConfigOption(self::CONFIG_PARTIAL_OBJECTS) &&
-          isset($this->__missingFields[$property])) {
+
+      if ($partial && isset($this->__missingFields[$property])) {
         throw new Exception("Cannot get field that wasn't loaded: {$property}");
       }
+
       return $this->readField($property);
     }
 
-    if (!strncmp($method, 'set', 3)) {
-      $property = substr($method, 3);
-      $property = $this->checkProperty($property);
-      if (!$property) {
-        throw new Exception("Bad setter call: {$method}");
+    if ($method[0] === 's') {
+      if (isset($dispatch_map[$method])) {
+        $property = $dispatch_map[$method];
+      } else {
+        if (substr($method, 0, 3) !== 'set') {
+          throw new Exception("Unable to resolve method '{$method}'!");
+        }
+        $property = substr($method, 3);
+        $property = $this->checkProperty($property);
+        if (!$property) {
+          throw new Exception("Bad setter call: {$method}");
+        }
+        if ($property == 'ID') {
+          $property = $this->getIDKeyForUse();
+        }
+        $dispatch_map[$method] = $property;
       }
-      if (count($args) !== 1) {
-        throw new Exception("Setter should have exactly one arg: {$method}");
-      }
-      if ($property == 'ID') {
-        $property = $this->getIDKeyForUse();
-      }
-      if ($this->getConfigOption(self::CONFIG_PARTIAL_OBJECTS)) {
+      if ($partial) {
         // Accept writes to fields that weren't initially loaded
         unset($this->__missingFields[$property]);
         $this->__dirtyFields[$property] = true;
       }
+
       $this->writeField($property, $args[0]);
+
       return $this;
     }
 
-    throw new Exception("Unable to resolve method: {$method}.");
+    throw new Exception("Unable to resolve method '{$method}'.");
   }
 }
