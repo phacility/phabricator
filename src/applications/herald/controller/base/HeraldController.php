@@ -70,7 +70,7 @@ abstract class HeraldController extends PhabricatorController {
         'name' => 'Help',
       ),
     );
-    $page->setTabs($tabs. null);
+    $page->setTabs($tabs, null);
 
     $response = new AphrontWebpageResponse();
     return $response->setContent($page->render());
