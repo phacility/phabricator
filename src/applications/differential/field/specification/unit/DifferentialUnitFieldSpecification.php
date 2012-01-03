@@ -49,9 +49,9 @@ final class DifferentialUnitFieldSpecification
 
         if ($result != DifferentialUnitTestResult::RESULT_POSTPONED &&
             $result != DifferentialUnitTestResult::RESULT_PASS) {
-          $userdata = phutil_utf8_shorten(idx($test, 'userdata'), 256);
-          $userdata = phutil_escape_html($userdata);
-          $userdata = str_replace("\n", '<br />', $userdata);
+          $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
+          $userdata = phutil_utf8_shorten(idx($test, 'userdata'), 512);
+          $userdata = $engine->markupText($userdata);
 
           $unit_messages[] =
             '<li>'.
