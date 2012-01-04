@@ -27,6 +27,11 @@ th.aphront-side-nav-navigation span {
   text-decoration: none;
 }
 
+th.aphront-side-nav-navigation span {
+  padding-left: 12px;
+  padding-top: 6px;
+}
+
 th.aphront-side-nav-navigation a:hover {
   text-decoration: none;
   background:     #f3f3f9;
