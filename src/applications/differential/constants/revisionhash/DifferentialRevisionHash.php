@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,5 +23,13 @@ final class DifferentialRevisionHash {
   const HASH_GIT_COMMIT         = 'gtcm';
   const HASH_GIT_TREE           = 'gttr';
   const HASH_MERCURIAL_COMMIT   = 'hgcm';
+
+  public static function getTypes() {
+    return array(
+      DifferentialRevisionHash::HASH_GIT_COMMIT,
+      DifferentialRevisionHash::HASH_GIT_TREE,
+      DifferentialRevisionHash::HASH_MERCURIAL_COMMIT,
+    );
+  }
 
 }

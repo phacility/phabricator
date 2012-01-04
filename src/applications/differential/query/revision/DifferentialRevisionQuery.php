@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ final class DifferentialRevisionQuery {
   private $ccs = array();
   private $reviewers = array();
   private $revIDs = array();
+  private $commitHashes = array();
   private $phids = array();
   private $subscribers = array();
   private $responsibles = array();
@@ -89,7 +90,9 @@ final class DifferentialRevisionQuery {
   }
 
   /**
-   * Filter results to revisions authored by one of the given PHIDs.
+   * Filter results to revisions authored by one of the given PHIDs. Calling
+   * this function will clear anything set by previous calls to
+   * @{method:withAuthors}.
    *
    * @param array List of PHIDs of authors
    * @return this
@@ -113,7 +116,6 @@ final class DifferentialRevisionQuery {
     return $this;
   }
 
-
   /**
    * Filter results to revisions that have one of the provided PHIDs as
    * reviewers. Calling this function will clear anything set by previous calls
@@ -128,6 +130,20 @@ final class DifferentialRevisionQuery {
     return $this;
   }
 
+  /**
+   * Filter results to revisions that have one of the provided commit hashes.
+   * Calling this function will clear anything set by previous calls to
+   * @{method:withCommitHashes}.
+   *
+   * @param array List of pairs <Class DifferentialRevisionHash::HASH_$type
+   *              constant, hash>
+   * @return this
+   * @task config
+   */
+  public function withCommitHashes(array $commit_hashes) {
+    $this->commitHashes = $commit_hashes;
+    return $this;
+  }
 
   /**
    * Filter results to revisions with a given status. Provide a class constant,
@@ -351,6 +367,7 @@ final class DifferentialRevisionQuery {
         !$this->ccs &&
         !$this->authors &&
         !$this->revIDs &&
+        !$this->commitHashes &&
         !$this->phids) {
       return true;
     }
@@ -440,6 +457,13 @@ final class DifferentialRevisionQuery {
         $path_table->getTableName());
     }
 
+    if ($this->commitHashes) {
+      $joins[] = qsprintf(
+        $conn_r,
+        'JOIN %T hash_rel ON hash_rel.revisionID = r.id',
+        DifferentialRevisionHash::TABLE_NAME);
+    }
+
     if ($this->ccs) {
       $joins[] = qsprintf(
         $conn_r,
@@ -525,6 +549,20 @@ final class DifferentialRevisionQuery {
         $conn_r,
         'id IN (%Ld)',
         $this->revIDs);
+    }
+
+    if ($this->commitHashes) {
+      $hash_clauses = array();
+      foreach ($this->commitHashes as $info) {
+        list($type, $hash) = $info;
+        $hash_clauses[] = qsprintf(
+          $conn_r,
+          '(hash_rel.type = %s AND hash_rel.hash = %s)',
+          $type,
+          $hash);
+      }
+      $hash_clauses = '('.implode(' OR ', $hash_clauses).')';
+      $where[] = $hash_clauses;
     }
 
     if ($this->phids) {

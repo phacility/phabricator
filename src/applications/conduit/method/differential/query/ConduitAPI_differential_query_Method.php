@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,9 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
   }
 
   public function defineParamTypes() {
+    $hash_types = DifferentialRevisionHash::getTypes();
+    $hash_types = implode(', ', $hash_types);
+
     $status_types = array(
       DifferentialRevisionQuery::STATUS_ANY,
       DifferentialRevisionQuery::STATUS_OPEN,
@@ -45,6 +48,8 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
       // TODO: Implement this, it needs to accept a repository ID in addition
       // to a path so the signature needs to be a little more complicated.
       // 'paths'          => 'optional list<pair<...>>',
+      'commitHashes'      => 'optional list<pair<enum<'.
+                             $hash_types.'>, string>>',
       'status'            => 'optional enum<'.$status_types.'>',
       'order'             => 'optional enum<'.$order_types.'>',
       'limit'             => 'optional uint',
@@ -62,6 +67,7 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
 
   public function defineErrorTypes() {
     return array(
+      'ERR-INVALID-PARAMETER' => 'Missing or malformed parameter.',
     );
   }
 
@@ -71,6 +77,7 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
     $reviewers          = $request->getValue('reviewers');
     $status             = $request->getValue('status');
     $order              = $request->getValue('order');
+    $commit_hashes      = $request->getValue('commitHashes');
     $limit              = $request->getValue('limit');
     $offset             = $request->getValue('offset');
     $ids                = $request->getValue('ids');
@@ -98,7 +105,20 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
         $query->withPath($repository_id, $path);
       }
     }
-*/
+ */
+    if ($commit_hashes) {
+      $hash_types = DifferentialRevisionHash::getTypes();
+      foreach ($commit_hashes as $info) {
+        list($type, $hash) = $info;
+        if (empty($type) ||
+            !in_array($type, $hash_types) ||
+            empty($hash)) {
+              throw new ConduitException('ERR-INVALID-PARAMETER');
+        }
+      }
+      $query->withCommitHashes($commit_hashes);
+    }
+
     if ($status) {
       $query->withStatus($status);
     }
@@ -163,5 +183,4 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
 
     return $results;
   }
-
 }

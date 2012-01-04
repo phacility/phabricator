@@ -7,6 +7,8 @@
 
 
 phutil_require_module('phabricator', 'applications/conduit/method/base');
+phutil_require_module('phabricator', 'applications/conduit/protocol/exception');
+phutil_require_module('phabricator', 'applications/differential/constants/revisionhash');
 phutil_require_module('phabricator', 'applications/differential/constants/revisionstatus');
 phutil_require_module('phabricator', 'applications/differential/query/revision');
 phutil_require_module('phabricator', 'infrastructure/env');

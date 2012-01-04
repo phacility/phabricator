@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,22 +65,14 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         $this->repository,
         $this->commit);
       if ($hashes) {
-        $sql = array();
-        foreach ($hashes as $info) {
-          list($type, $hash) = $info;
-          $sql[] = qsprintf(
-            $conn_w,
-            '(type = %s AND hash = %s)',
-            $type,
-            $hash);
-        }
-        $revision = queryfx_one(
-          $conn_w,
-          'SELECT revisionID FROM %T WHERE %Q LIMIT 1',
-          DifferentialRevisionHash::TABLE_NAME,
-          implode(' OR ', $sql));
-        if ($revision) {
-          $revision_id = $revision['revisionID'];
+
+        $query = new DifferentialRevisionQuery();
+        $query->withCommitHashes($hashes);
+        $revisions = $query->execute();
+
+        if (!empty($revisions)) {
+          $revision = $this->identifyBestRevision($revisions);
+          $revision_id = $revision->getID();
         }
       }
     }
@@ -112,4 +104,60 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     }
   }
 
+  /**
+   * When querying for revisions by hash, more than one revision may be found.
+   * This function identifies the "best" revision from such a set.  Typically,
+   * there is only one revision found.   Otherwise, we try to pick an accepted
+   * revision first, followed by an open revision, and otherwise we go with a
+   * committed or abandoned revision as a last resort.
+   */
+  private function identifyBestRevision(array $revisions) {
+    // get the simplest, common case out of the way
+    if (count($revisions) == 1) {
+      return reset($revisions);
+    }
+
+    $first_choice = array();
+    $second_choice = array();
+    $third_choice = array();
+    foreach ($revisions as $revision) {
+      switch ($revision->getStatus()) {
+        // "Accepted" revisions -- ostensibly what we're looking for!
+        case DifferentialRevisionStatus::ACCEPTED:
+          $first_choice[] = $revision;
+          break;
+        // "Open" revisions
+        case DifferentialRevisionStatus::NEEDS_REVIEW:
+        case DifferentialRevisionStatus::NEEDS_REVISION:
+          $second_choice[] = $revision;
+          break;
+        // default is a wtf? here
+        default:
+        case DifferentialRevisionStatus::ABANDONED:
+        case DifferentialRevisionStatus::COMMITTED:
+          $third_choice[] = $revision;
+          break;
+      }
+    }
+
+    // go down the ladder like a bro at last call
+    if (!empty($first_choice)) {
+      return $this->identifyMostRecentRevision($first_choice);
+    }
+    if (!empty($second_choice)) {
+      return $this->identifyMostRecentRevision($second_choice);
+    }
+    if (!empty($third_choice)) {
+      return $this->identifyMostRecentRevision($third_choice);
+    }
+  }
+
+  /**
+   * Given a set of revisions, returns the revision with the latest
+   * updated time.   This is ostensibly the most recent revision.
+   */
+  private function identifyMostRecentRevision(array $revisions) {
+    $revisions = msort($revisions, 'getDateModified');
+    return end($revisions);
+  }
 }
