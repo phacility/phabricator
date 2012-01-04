@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -364,8 +364,19 @@ class PhabricatorStandardPageView extends AphrontPageView {
         '</div>';
     }
 
+    $developer_warning = null;
+    if (PhabricatorEnv::getEnvConfig('phabricator.show-error-callout') &&
+        DarkConsoleErrorLogPluginAPI::getErrors()) {
+      $developer_warning =
+        '<div class="aphront-developer-error-callout">'.
+          'This page raised PHP errors. Find them in DarkConsole '.
+          'or the error log.'.
+        '</div>';
+    }
+
     return
       ($console ? '<darkconsole />' : null).
+      $developer_warning.
       '<div class="phabricator-standard-page '.$admin_class.'">'.
         $header_chrome.
         $this->bodyContent.

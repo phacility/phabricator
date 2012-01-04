@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -426,6 +426,10 @@ return array(
   // When unhandled exceptions occur, stack traces are hidden by default.
   // You can enable traces for development to make it easier to debug problems.
   'phabricator.show-stack-traces' => false,
+
+  // Shows an error callout if a page generated PHP errors, warnings or notices.
+  // This makes it harder to miss problems while developing Phabricator.
+  'phabricator.show-error-callout' => false,
 
   // When users write comments which have URIs, they'll be automaticaly linked
   // if the protocol appears in this set. This whitelist is primarily to prevent

@@ -179,3 +179,12 @@ td.phabricator-login-details {
   font-family:        "Menlo", "Consolas", "Monaco", monospace;
   font-size:          10px;
 }
+
+.aphront-developer-error-callout {
+  padding: 2em;
+  background: #aa0000;
+  color: white;
+  text-align: center;
+  font-size: 11px;
+  font-family: "Verdana";
+}

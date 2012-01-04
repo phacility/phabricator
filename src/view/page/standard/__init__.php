@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'aphront/console/plugin/errorlog/api');
 phutil_require_module('phabricator', 'aphront/request');
 phutil_require_module('phabricator', 'applications/people/storage/preferences');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
