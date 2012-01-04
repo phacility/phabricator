@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,7 +123,6 @@ class DifferentialChangesetViewController extends DifferentialController {
       $choice->attachHunks($synthetic->getHunks());
 
       $changeset = $choice;
-      $changeset->setID(null);
     }
 
     $spec = $request->getStr('range');
@@ -143,10 +142,24 @@ class DifferentialChangesetViewController extends DifferentialController {
       array($left_source, $right_source),
       $author_phid);
 
+    if ($left_new) {
+      $inlines = array_merge(
+        $inlines,
+        $this->buildLintInlineComments($left));
+    }
+
+    if ($right_new) {
+      $inlines = array_merge(
+        $inlines,
+        $this->buildLintInlineComments($right));
+    }
+
     $phids = array();
     foreach ($inlines as $inline) {
       $parser->parseInlineComment($inline);
-      $phids[$inline->getAuthorPHID()] = true;
+      if ($inline->getAuthorPHID()) {
+        $phids[$inline->getAuthorPHID()] = true;
+      }
     }
     $phids = array_keys($phids);
 
@@ -236,6 +249,36 @@ class DifferentialChangesetViewController extends DifferentialController {
     return id(new AphrontFileResponse())
       ->setMimeType('text/plain')
       ->setContent($text);
+  }
+
+  private function buildLintInlineComments($changeset) {
+    $lint = id(new DifferentialDiffProperty())->loadOneWhere(
+      'diffID = %d AND name = %s',
+      $changeset->getDiffID(),
+      'arc:lint');
+    if (!$lint) {
+      return;
+    }
+    $lint = $lint->getData();
+
+    $inlines = array();
+    foreach ($lint as $msg) {
+      if ($msg['path'] != $changeset->getFileName()) {
+        continue;
+      }
+      $inline = new DifferentialInlineComment();
+      $inline->setChangesetID($changeset->getID());
+      $inline->setIsNewFile(true);
+      $inline->setSyntheticAuthor('Lint: '.$msg['name']);
+      $inline->setLineNumber($msg['line']);
+      $inline->setLineLength(0);
+
+      $inline->setContent('%%%'.$msg['description'].'%%%');
+
+      $inlines[] = $inline;
+    }
+
+    return $inlines;
   }
 
 }

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,5 +30,16 @@ class DifferentialInlineComment extends DifferentialDAO {
 
   protected $content;
   protected $cache;
+
+  private $syntheticAuthor;
+
+  public function setSyntheticAuthor($synthetic_author) {
+    $this->syntheticAuthor = $synthetic_author;
+    return $this;
+  }
+
+  public function getSyntheticAuthor() {
+    return $this->syntheticAuthor;
+  }
 
 }

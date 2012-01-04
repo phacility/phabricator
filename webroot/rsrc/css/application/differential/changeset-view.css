@@ -161,6 +161,16 @@
   border-bottom: 1px solid #aaaaaa;
 }
 
+.differential-inline-comment-synthetic {
+  background: #efffff;
+  border: 1px solid #20dfdf;
+}
+
+.differential-inline-comment-synthetic .differential-inline-comment-head {
+  border-bottom: 1px solid #20dfdf;
+}
+
+
 .differential-inline-comment-links,
 .differential-inline-comment-line {
   font-weight:  normal;

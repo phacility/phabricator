@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,8 +88,13 @@ final class DifferentialInlineCommentView extends AphrontView {
 
     $links = array();
 
+    $is_synthetic = false;
+    if ($inline->getSyntheticAuthor()) {
+      $is_synthetic = true;
+    }
+
     $is_draft = false;
-    if (!$inline->getCommentID()) {
+    if (!$inline->getCommentID() && !$is_synthetic) {
       $links[] = 'Not Submitted Yet';
       $is_draft = true;
     }
@@ -113,14 +118,22 @@ final class DifferentialInlineCommentView extends AphrontView {
         ),
         'Next');
 
-      $links[] = javelin_render_tag(
-        'a',
-        array(
-          'href'        => '#',
-          'mustcapture' => true,
-          'sigil'       => 'differential-inline-reply',
-        ),
-        'Reply');
+      if (!$is_synthetic) {
+
+        // NOTE: No product reason why you can't reply to these, but the reply
+        // mechanism currently sends the inline comment ID to the server, not
+        // file/line information, and synthetic comments don't have an inline
+        // comment ID.
+
+        $links[] = javelin_render_tag(
+          'a',
+          array(
+            'href'        => '#',
+            'mustcapture' => true,
+            'sigil'       => 'differential-inline-reply',
+          ),
+          'Reply');
+      }
     }
 
     if ($this->editable && !$this->preview) {
@@ -178,7 +191,16 @@ final class DifferentialInlineCommentView extends AphrontView {
     if ($is_draft) {
       $classes[] = 'differential-inline-comment-unsaved-draft';
     }
+    if ($is_synthetic) {
+      $classes[] = 'differential-inline-comment-synthetic';
+    }
     $classes = implode(' ', $classes);
+
+    if ($is_synthetic) {
+      $author = $inline->getSyntheticAuthor();
+    } else {
+      $author = $handles[$inline->getAuthorPHID()]->getName();
+    }
 
     $markup = javelin_render_tag(
       'div',
@@ -191,7 +213,7 @@ final class DifferentialInlineCommentView extends AphrontView {
         $anchor.
         $links.
         '<span class="differential-inline-comment-line">'.$line.'</span>'.
-        phutil_escape_html($handles[$inline->getAuthorPHID()]->getName()).
+        phutil_escape_html($author).
       '</div>'.
       '<div class="phabricator-remarkup">'.
         $content.
