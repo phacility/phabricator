@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -174,8 +174,11 @@ class DarkConsoleServicesPlugin extends DarkConsolePlugin {
       $totals[$row['type']] = idx($totals, $row['type'], 0) + $row['duration'];
       $counts[$row['type']] = idx($counts, $row['type'], 0) + 1;
     }
-    $totals['All'] = array_sum($totals);
-    $counts['All'] = array_sum($counts);
+    $totals['All Services'] = array_sum($totals);
+    $counts['All Services'] = array_sum($counts);
+
+    $totals['Entire Page'] = $page_total;
+    $counts['Entire Page'] = '-';
 
     $summary = array();
     foreach ($totals as $type => $total) {
