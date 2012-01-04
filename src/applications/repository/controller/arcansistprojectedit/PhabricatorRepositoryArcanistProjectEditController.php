@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,10 +47,8 @@ class PhabricatorRepositoryArcanistProjectEditController
 
     if ($request->isFormPost()) {
 
-      $indexed = $request->getStr('symbolIndexLanguages');
-      $indexed = strtolower($indexed);
-      $indexed = preg_split('/[ ,]+/', $indexed);
-      $indexed = array_filter($indexed);
+      $indexed = $request->getStrList('symbolIndexLanguages');
+      $indexed = array_map('strtolower', $indexed);
       $project->setSymbolIndexLanguages($indexed);
 
       $project->setSymbolIndexProjects($request->getArr('symbolIndexProjects'));

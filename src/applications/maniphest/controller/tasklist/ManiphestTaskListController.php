@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,12 +95,7 @@ class ManiphestTaskListController extends ManiphestController {
       $project_phids = array();
     }
 
-    $task_ids = $request->getStr('tasks');
-    if (strlen($task_ids)) {
-      $task_ids = preg_split('/[\s,]+/', $task_ids);
-    } else {
-      $task_ids = array();
-    }
+    $task_ids = $request->getStrList('tasks');
 
     $page = $request->getInt('page');
     $page_size = self::DEFAULT_PAGE_SIZE;

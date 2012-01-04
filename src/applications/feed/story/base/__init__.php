@@ -6,5 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/phid/handle');
+
 
 phutil_require_source('PhabricatorFeedStory.php');

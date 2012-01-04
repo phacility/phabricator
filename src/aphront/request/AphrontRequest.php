@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
  * limitations under the License.
  */
 
-
 /**
+ *
+ * @task data Accessing Request Data
+ *
  * @group aphront
  */
 class AphrontRequest {
@@ -47,15 +49,6 @@ class AphrontRequest {
     return $this->applicationConfiguration;
   }
 
-  final public function setRequestData(array $request_data) {
-    $this->requestData = $request_data;
-    return $this;
-  }
-
-  final public function getRequestData() {
-    return $this->requestData;
-  }
-
   final public function getPath() {
     return $this->path;
   }
@@ -64,6 +57,30 @@ class AphrontRequest {
     return $this->host;
   }
 
+
+/* -(  Accessing Request Data  )--------------------------------------------- */
+
+
+  /**
+   * @task data
+   */
+  final public function setRequestData(array $request_data) {
+    $this->requestData = $request_data;
+    return $this;
+  }
+
+
+  /**
+   * @task data
+   */
+  final public function getRequestData() {
+    return $this->requestData;
+  }
+
+
+  /**
+   * @task data
+   */
   final public function getInt($name, $default = null) {
     if (isset($this->requestData[$name])) {
       return (int)$this->requestData[$name];
@@ -72,6 +89,10 @@ class AphrontRequest {
     }
   }
 
+
+  /**
+   * @task data
+   */
   final public function getBool($name, $default = null) {
     if (isset($this->requestData[$name])) {
       if ($this->requestData[$name] === 'true') {
@@ -86,6 +107,10 @@ class AphrontRequest {
     }
   }
 
+
+  /**
+   * @task data
+   */
   final public function getStr($name, $default = null) {
     if (isset($this->requestData[$name])) {
       $str = (string)$this->requestData[$name];
@@ -100,6 +125,10 @@ class AphrontRequest {
     }
   }
 
+
+  /**
+   * @task data
+   */
   final public function getArr($name, $default = array()) {
     if (isset($this->requestData[$name]) &&
         is_array($this->requestData[$name])) {
@@ -109,6 +138,26 @@ class AphrontRequest {
     }
   }
 
+
+  /**
+   * @task data
+   */
+  final public function getStrList($name, $default = array()) {
+    if (!isset($this->requestData[$name])) {
+      return $default;
+    }
+    $list = $this->getStr($name);
+    $list = preg_split('/[,\n]/', $list);
+    $list = array_map('trim', $list);
+    $list = array_filter($list, 'strlen');
+    $list = array_values($list);
+    return $list;
+  }
+
+
+  /**
+   * @task data
+   */
   final public function getExists($name) {
     return array_key_exists($name, $this->requestData);
   }

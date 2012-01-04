@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,7 @@ class PhabricatorPHIDLookupController
 
     $request = $this->getRequest();
     if ($request->isFormPost()) {
-      $phids = preg_split('/[\s,]+/', $request->getStr('phids'));
-      $phids = array_filter($phids);
+      $phids = $request->getStrList('phids');
       if ($phids) {
         $handles = id(new PhabricatorObjectHandleData($phids))
           ->loadHandles();
