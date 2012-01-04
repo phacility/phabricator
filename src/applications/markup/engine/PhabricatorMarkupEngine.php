@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,6 +141,7 @@ class PhabricatorMarkupEngine {
 
     $blocks = array();
     $blocks[] = new PhutilRemarkupEngineRemarkupQuotesBlockRule();
+    $blocks[] = new PhutilRemarkupEngineRemarkupLiteralBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupHeaderBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupListBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupCodeBlockRule();
@@ -156,7 +157,14 @@ class PhabricatorMarkupEngine {
     }
 
     foreach ($blocks as $block) {
-      if (!($block instanceof PhutilRemarkupEngineRemarkupCodeBlockRule)) {
+      if ($block instanceof PhutilRemarkupEngineRemarkupLiteralBlockRule) {
+        $literal_rules = array();
+        $literal_rules[] = new PhutilRemarkupRuleHyperlink();
+        $literal_rules[] = new PhutilRemarkupRuleEscapeHTML();
+        $literal_rules[] = new PhutilRemarkupRuleLinebreaks();
+        $block->setMarkupRules($literal_rules);
+      } else if (
+          !($block instanceof PhutilRemarkupEngineRemarkupCodeBlockRule)) {
         $block->setMarkupRules($rules);
       }
     }
