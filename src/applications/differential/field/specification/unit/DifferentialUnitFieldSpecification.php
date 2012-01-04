@@ -67,14 +67,14 @@ final class DifferentialUnitFieldSpecification
           $postponed_count++;
         }
       }
-    }
-    if ($unit_messages) {
-      $utail =
-        '<div class="differential-unit-block">'.
-          '<ul>'.
-            implode("\n", $unit_messages).
-          '</ul>'.
-        '</div>';
+      if ($unit_messages) {
+        $utail =
+          '<div class="differential-unit-block">'.
+            '<ul>'.
+              implode("\n", $unit_messages).
+            '</ul>'.
+          '</div>';
+      }
     }
 
     if ($postponed_count > 0 &&
