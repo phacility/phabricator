@@ -13,7 +13,6 @@ phutil_require_module('phabricator', 'applications/differential/constants/unitte
 phutil_require_module('phabricator', 'applications/differential/storage/diff');
 phutil_require_module('phabricator', 'applications/differential/storage/diffproperty');
 
-phutil_require_module('phutil', 'error');
 phutil_require_module('phutil', 'utils');
 
 

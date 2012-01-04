@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,13 +74,11 @@ extends ConduitAPIMethod {
     $postponed_count = 0;
     $unit_status = null;
 
+    // If the test result already exists, then update it with
+    // the new info.
     foreach ($unit_results as &$unit_result) {
-      // Update the results for the test that has the same path.
-      if (($unit_result['name'] === $file ||
-           $unit_result['name'] === $diff->getSourcePath().$file) &&
-          $unit_result['result'] ===
-          DifferentialUnitTestResult::RESULT_POSTPONED) {
-        $unit_result['name'] = $name;
+      if ($unit_result['name'] === $name) {
+        $unit_result['file'] = $file;
         $unit_result['result'] = $result;
         $unit_result['userdata'] = $message;
         $unit_status = $result;
@@ -89,10 +87,15 @@ extends ConduitAPIMethod {
     }
     unset($unit_result);
 
+    // If the test result doesn't exist, just add it.
     if (!$unit_status) {
-      phlog("Could not update test results: {$diff_id} {$file} {$name}".
-            " {$result} {$message}");
-      return;
+      $unit_result = array();
+      $unit_result['file'] = $file;
+      $unit_result['name'] = $name;
+      $unit_result['result'] = $result;
+      $unit_result['userdata'] = $message;
+      $unit_status = $result;
+      $unit_results[] = $unit_result;
     }
 
     $diff_property->setData($unit_results);
