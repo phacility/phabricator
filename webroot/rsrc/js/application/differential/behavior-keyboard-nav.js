@@ -2,6 +2,7 @@
  * @provides javelin-behavior-differential-keyboard-navigation
  * @requires javelin-behavior
  *           javelin-dom
+ *           javelin-stratcom
  *           phabricator-keyboard-shortcut
  */
 
@@ -28,21 +29,28 @@ JX.behavior('differential-keyboard-navigation', function(config) {
     var blocks = [[changesets[cursor], changesets[cursor]]];
     var start = null;
     var type;
-    for (var ii = 0; ii < rows.length; ii++) {
-      type = getRowType(rows[ii]);
-      if (type == 'ignore') {
-        continue;
-      }
-      if (!type && start) {
+    var ii;
+
+    function push() {
+      if (start) {
         blocks.push([start, rows[ii - 1]]);
-        start = null;
+      }
+      start = null;
+    }
+
+    for (ii = 0; ii < rows.length; ii++) {
+      type = getRowType(rows[ii]);
+      if (type == 'comment') {
+        // If we see these types of rows, make a block for each one.
+        push();
+      }
+      if (!type) {
+        push();
       } else if (type && !start) {
         start = rows[ii];
       }
     }
-    if (start) {
-      blocks.push([start, rows[ii - 1]]);
-    }
+    push();
 
     return blocks;
   }
@@ -52,7 +60,7 @@ JX.behavior('differential-keyboard-navigation', function(config) {
     // to be easily focused in the future (inline comments, 'show more..').
 
     if (row.className.indexOf('inline') !== -1) {
-      return 'ignore';
+      return 'comment';
     }
 
     if (row.className.indexOf('differential-changeset') !== -1) {
@@ -73,7 +81,7 @@ JX.behavior('differential-keyboard-navigation', function(config) {
     return null;
   }
 
-  function jump(manager, delta, jump_to_file) {
+  function jump(manager, delta, jump_to_type) {
     init();
 
     if (cursor < 0) {
@@ -106,7 +114,7 @@ JX.behavior('differential-keyboard-navigation', function(config) {
 
         if (blocks[focus]) {
           var row_type = getRowType(blocks[focus][0]);
-          if (jump_to_file && row_type != 'file') {
+          if (jump_to_type && row_type != jump_to_type) {
             continue;
           }
 
@@ -133,6 +141,15 @@ JX.behavior('differential-keyboard-navigation', function(config) {
 
   }
 
+  // When inline comments are updated, wipe out our cache of blocks since
+  // comments may have been added or deleted.
+  JX.Stratcom.listen(
+    null,
+    'differential-inline-comment-update',
+    function() {
+      changesets = null;
+    });
+
   var is_haunted = false;
   function haunt() {
     is_haunted = !is_haunted;
@@ -154,13 +171,52 @@ JX.behavior('differential-keyboard-navigation', function(config) {
 
   new JX.KeyboardShortcut('J', 'Jump to next file.')
     .setHandler(function(manager) {
-      jump(manager, 1, true);
+      jump(manager, 1, 'file');
     })
     .register();
 
   new JX.KeyboardShortcut('K', 'Jump to previous file.')
     .setHandler(function(manager) {
-      jump(manager, -1, true);
+      jump(manager, -1, 'file');
+    })
+    .register();
+
+  new JX.KeyboardShortcut('n', 'Jump to next inline comment.')
+    .setHandler(function(manager) {
+      jump(manager, 1, 'comment');
+    })
+    .register();
+
+  new JX.KeyboardShortcut('p', 'Jump to previous inline comment.')
+    .setHandler(function(manager) {
+      jump(manager, -1, 'comment');
+    })
+    .register();
+
+
+  function inline_op(node, op) {
+    if (!JX.DOM.scry(node, 'a', 'differential-inline-' + op)) {
+      // No link for this operation, e.g. editing a comment you can't edit.
+      return;
+    }
+
+    var data = {
+      node: JX.DOM.find(node, 'div', 'differential-inline-comment'),
+      op: op
+    };
+
+    JX.Stratcom.invoke('differential-inline-action', null, data);
+  }
+
+  new JX.KeyboardShortcut('r', 'Reply to selected inline comment.')
+    .setHandler(function(manager) {
+      inline_op(selection_begin, 'reply');
+    })
+    .register();
+
+  new JX.KeyboardShortcut('e', 'Edit selected inline comment.')
+    .setHandler(function(manager) {
+      inline_op(selection_begin, 'edit');
     })
     .register();
 
