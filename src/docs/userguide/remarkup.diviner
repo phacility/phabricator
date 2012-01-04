@@ -27,6 +27,7 @@ formatting text in Remarkup:
   @username         # Mention a user
   Use "- " or "* " for list items.
   Use ``` or indent two spaces for code.
+  Use %%% for a literal block.
 
 = Basic Styling =
 
@@ -208,3 +209,14 @@ Phabricator or on the internet at large:
 
   [[/herald/transcript/ | Herald Transcripts]]
   [[http://www.boring-legal-documents.com/ | exciting legal documents]]
+
+= Literal Blocks =
+
+To place text in a literal block use "%%%":
+
+  %%%Text that won't be processed by remarkup
+  [[http://www.example.com | example]]
+  %%%
+
+Remarkup will not process the text inside of literal blocks (other than to
+escape HTML, linkify URLs, and preserve line breaks).
