@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
 
     $action = $comment->getAction();
 
-    $action_class = 'differential-comment-action-'.phutil_escape_html($action);
+    $action_class = 'differential-comment-action-'.$action;
 
     if ($this->preview) {
       $date = 'COMMENT PREVIEW';
