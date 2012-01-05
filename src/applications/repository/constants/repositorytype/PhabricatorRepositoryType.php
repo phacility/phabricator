@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,7 @@ final class PhabricatorRepositoryType {
     static $map = array(
       self::REPOSITORY_TYPE_GIT       => 'Git',
       self::REPOSITORY_TYPE_SVN       => 'Subversion',
-
-      // TODO: Stabilize and remove caveat.
-      self::REPOSITORY_TYPE_MERCURIAL => 'Mercurial (LIMITED SUPPORT!)',
+      self::REPOSITORY_TYPE_MERCURIAL => 'Mercurial',
     );
     return $map;
   }
