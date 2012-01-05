@@ -22,7 +22,6 @@ phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'infrastructure/diff/engine');
 phutil_require_module('phabricator', 'infrastructure/javelin/api');
 
-phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
 
 

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,12 @@ class DifferentialChangesetListView extends AphrontView {
 
     $changesets = $this->changesets;
 
+    if ($this->standaloneViews) {
+      Javelin::initBehavior(
+        'differential-dropdown-menus',
+        array());
+    }
+
     $output = array();
     $mapping = array();
     foreach ($changesets as $key => $changeset) {
@@ -91,14 +97,20 @@ class DifferentialChangesetListView extends AphrontView {
             'whitespace'  => $this->whitespace,
           ));
 
-        $detail_button = phutil_render_tag(
+        $detail_button = javelin_render_tag(
           'a',
           array(
             'class'   => 'button small grey',
+            'meta'    => array(
+              'detailURI' => (string)$detail_uri,
+              'leftURI'   => (string)$detail_uri->alter('view', 'old'),
+              'rightURI'  => (string)$detail_uri->alter('view', 'new'),
+            ),
             'href'    => $detail_uri,
             'target'  => '_blank',
+            'sigil'   => 'differential-view-options',
           ),
-          'View Standalone / Raw');
+          "View Options \xE2\x96\xBC");
       }
 
       $uniq_id = celerity_generate_unique_node_id();

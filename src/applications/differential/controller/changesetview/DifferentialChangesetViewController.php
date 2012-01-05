@@ -194,25 +194,6 @@ class DifferentialChangesetViewController extends DifferentialController {
     $detail->setChangeset($changeset);
     $detail->appendChild($output);
 
-    if (!$vs) {
-      $detail->addButton(
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => $request->getRequestURI()->alter('view', 'old'),
-            'class' => 'grey button small',
-          ),
-          'View Raw File (Old Version)'));
-      $detail->addButton(
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => $request->getRequestURI()->alter('view', 'new'),
-            'class' => 'grey button small',
-          ),
-          'View Raw File (New Version)'));
-    }
-
     $detail->setRevisionID($request->getInt('revision_id'));
 
     $output =

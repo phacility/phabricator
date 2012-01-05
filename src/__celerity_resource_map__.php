@@ -470,6 +470,20 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/differential/behavior-diff-radios.js',
   ),
+  'javelin-behavior-differential-dropdown-menus' =>
+  array(
+    'uri' => '/res/08e751ee/rsrc/js/application/differential/behavior-dropdown-menus.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-stratcom',
+      3 => 'phabricator-dropdown-menu',
+      4 => 'phabricator-menu-item',
+    ),
+    'disk' => '/rsrc/js/application/differential/behavior-dropdown-menus.js',
+  ),
   'javelin-behavior-differential-edit-inline-comments' =>
   array(
     'uri' => '/res/c24338ce/rsrc/js/application/differential/behavior-edit-inline-comments.js',
@@ -1303,7 +1317,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-core-buttons-css' =>
   array(
-    'uri' => '/res/3059cf79/rsrc/css/core/buttons.css',
+    'uri' => '/res/89b939ae/rsrc/css/core/buttons.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1351,6 +1365,21 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/core/DragAndDropFileUpload.js',
   ),
+  'phabricator-dropdown-menu' =>
+  array(
+    'uri' => '/res/d55c3771/rsrc/js/application/core/DropdownMenu.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-util',
+      2 => 'javelin-dom',
+      3 => 'javelin-vector',
+      4 => 'javelin-stratcom',
+      5 => 'phabricator-menu-item',
+    ),
+    'disk' => '/rsrc/js/application/core/DropdownMenu.js',
+  ),
   'phabricator-feed-css' =>
   array(
     'uri' => '/res/7d1d0015/rsrc/css/application/feed/feed.css',
@@ -1385,6 +1414,17 @@ celerity_register_resource_map(array(
       4 => 'javelin-vector',
     ),
     'disk' => '/rsrc/js/application/core/KeyboardShortcutManager.js',
+  ),
+  'phabricator-menu-item' =>
+  array(
+    'uri' => '/res/8a9be282/rsrc/js/application/core/DropdownMenuItem.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-dom',
+    ),
+    'disk' => '/rsrc/js/application/core/DropdownMenuItem.js',
   ),
   'phabricator-object-selector-css' =>
   array(
@@ -1707,30 +1747,6 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/4e7acf1a/core.pkg.js',
       'type' => 'js',
     ),
-    '4f6e449d' =>
-    array(
-      'name' => 'core.pkg.css',
-      'symbols' =>
-      array(
-        0 => 'phabricator-core-css',
-        1 => 'phabricator-core-buttons-css',
-        2 => 'phabricator-standard-page-view',
-        3 => 'aphront-dialog-view-css',
-        4 => 'aphront-form-view-css',
-        5 => 'aphront-panel-view-css',
-        6 => 'aphront-side-nav-view-css',
-        7 => 'aphront-table-view-css',
-        8 => 'aphront-crumbs-view-css',
-        9 => 'aphront-tokenizer-control-css',
-        10 => 'aphront-typeahead-control-css',
-        11 => 'aphront-list-filter-view-css',
-        12 => 'phabricator-directory-css',
-        13 => 'phabricator-remarkup-css',
-        14 => 'syntax-highlighting-css',
-      ),
-      'uri' => '/res/pkg/4f6e449d/core.pkg.css',
-      'type' => 'css',
-    ),
     '540effd7' =>
     array(
       'name' => 'typeahead.pkg.js',
@@ -1787,19 +1803,43 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/b164acea/javelin.pkg.js',
       'type' => 'js',
     ),
+    'faf854fc' =>
+    array(
+      'name' => 'core.pkg.css',
+      'symbols' =>
+      array(
+        0 => 'phabricator-core-css',
+        1 => 'phabricator-core-buttons-css',
+        2 => 'phabricator-standard-page-view',
+        3 => 'aphront-dialog-view-css',
+        4 => 'aphront-form-view-css',
+        5 => 'aphront-panel-view-css',
+        6 => 'aphront-side-nav-view-css',
+        7 => 'aphront-table-view-css',
+        8 => 'aphront-crumbs-view-css',
+        9 => 'aphront-tokenizer-control-css',
+        10 => 'aphront-typeahead-control-css',
+        11 => 'aphront-list-filter-view-css',
+        12 => 'phabricator-directory-css',
+        13 => 'phabricator-remarkup-css',
+        14 => 'syntax-highlighting-css',
+      ),
+      'uri' => '/res/pkg/faf854fc/core.pkg.css',
+      'type' => 'css',
+    ),
   ),
   'reverse' =>
   array(
-    'aphront-crumbs-view-css' => '4f6e449d',
-    'aphront-dialog-view-css' => '4f6e449d',
-    'aphront-form-view-css' => '4f6e449d',
+    'aphront-crumbs-view-css' => 'faf854fc',
+    'aphront-dialog-view-css' => 'faf854fc',
+    'aphront-form-view-css' => 'faf854fc',
     'aphront-headsup-action-list-view-css' => '8b139246',
-    'aphront-list-filter-view-css' => '4f6e449d',
-    'aphront-panel-view-css' => '4f6e449d',
-    'aphront-side-nav-view-css' => '4f6e449d',
-    'aphront-table-view-css' => '4f6e449d',
-    'aphront-tokenizer-control-css' => '4f6e449d',
-    'aphront-typeahead-control-css' => '4f6e449d',
+    'aphront-list-filter-view-css' => 'faf854fc',
+    'aphront-panel-view-css' => 'faf854fc',
+    'aphront-side-nav-view-css' => 'faf854fc',
+    'aphront-table-view-css' => 'faf854fc',
+    'aphront-tokenizer-control-css' => 'faf854fc',
+    'aphront-typeahead-control-css' => 'faf854fc',
     'differential-changeset-view-css' => '8b139246',
     'differential-core-view-css' => '8b139246',
     'differential-inline-comment-editor' => '11a5c52c',
@@ -1848,16 +1888,16 @@ celerity_register_resource_map(array(
     'javelin-vector' => 'b164acea',
     'javelin-workflow' => '4e7acf1a',
     'phabricator-content-source-view-css' => '8b139246',
-    'phabricator-core-buttons-css' => '4f6e449d',
-    'phabricator-core-css' => '4f6e449d',
-    'phabricator-directory-css' => '4f6e449d',
+    'phabricator-core-buttons-css' => 'faf854fc',
+    'phabricator-core-css' => 'faf854fc',
+    'phabricator-directory-css' => 'faf854fc',
     'phabricator-drag-and-drop-file-upload' => '11a5c52c',
     'phabricator-keyboard-shortcut' => '4e7acf1a',
     'phabricator-keyboard-shortcut-manager' => '4e7acf1a',
     'phabricator-object-selector-css' => '8b139246',
-    'phabricator-remarkup-css' => '4f6e449d',
+    'phabricator-remarkup-css' => 'faf854fc',
     'phabricator-shaped-request' => '11a5c52c',
-    'phabricator-standard-page-view' => '4f6e449d',
-    'syntax-highlighting-css' => '4f6e449d',
+    'phabricator-standard-page-view' => 'faf854fc',
+    'syntax-highlighting-css' => 'faf854fc',
   ),
 ));
