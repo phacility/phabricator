@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,9 +127,18 @@ class HeraldRuleController extends HeraldController {
           ->setError($e_name)
           ->setValue($rule->getName()))
       ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel('Author')
-          ->setValue($handles[$rule->getAuthorPHID()]->getName()))
+        id(new AphrontFormMarkupControl())
+          ->setLabel('Owner')
+          ->setValue('<div id="author-input"/>'))
+      ->appendChild(
+        // Build this explicitly so we can add a sigil to it.
+        javelin_render_tag(
+          'input',
+          array(
+            'type'  => 'hidden',
+            'name'  => 'author',
+            'sigil' => 'author',
+          )))
       ->appendChild(
         id(new AphrontFormMarkupControl())
           ->setValue(
@@ -317,6 +326,11 @@ class HeraldRuleController extends HeraldController {
       $actions[] = $obj;
     }
 
+    $author = $request->getStr('author');
+    if ($author) {
+      $rule->setAuthorPHID($author);
+    }
+
     $rule->attachConditions($conditions);
     $rule->attachActions($actions);
 
@@ -427,6 +441,8 @@ class HeraldRuleController extends HeraldController {
         'template' => $this->buildTokenizerTemplates() + array(
           'rules' => $all_rules,
         ),
+        'author' => array($rule->getAuthorPHID() =>
+                          $handles[$rule->getAuthorPHID()]->getName()),
         'info' => $config_info,
       ));
   }
@@ -456,6 +472,7 @@ class HeraldRuleController extends HeraldController {
       }
     }
 
+    $phids += array($rule->getAuthorPHID());
     $handles = id(new PhabricatorObjectHandleData($phids))
       ->loadHandles();
     return $handles;

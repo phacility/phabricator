@@ -25,7 +25,6 @@ phutil_require_module('phabricator', 'infrastructure/javelin/markup');
 phutil_require_module('phabricator', 'view/control/tokenizer');
 phutil_require_module('phabricator', 'view/form/base');
 phutil_require_module('phabricator', 'view/form/control/markup');
-phutil_require_module('phabricator', 'view/form/control/static');
 phutil_require_module('phabricator', 'view/form/control/submit');
 phutil_require_module('phabricator', 'view/form/control/text');
 phutil_require_module('phabricator', 'view/form/error');

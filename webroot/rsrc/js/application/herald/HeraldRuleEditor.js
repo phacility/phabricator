@@ -65,6 +65,7 @@ JX.install('HeraldRuleEditor', {
 
     this._renderConditions(conditions);
     this._renderActions(actions);
+    this._renderAuthorInput();
   },
 
   members : {
@@ -115,11 +116,16 @@ JX.install('HeraldRuleEditor', {
       for (k in this._config.actions) {
         this._config.actions[k][1] = this._getActionTarget(k);
       }
-
       rule.value = JX.JSON.stringify({
         conditions: this._config.conditions,
         actions: this._config.actions
       });
+
+      var authorInput = JX.DOM.find(this._root, 'input', 'author');
+      var authorID = JX.keys(this._config.authorGetter())[0];
+      if (authorID) {
+        authorInput.value = authorID;
+      }
     },
 
     _getConditionValue : function(id) {
@@ -236,6 +242,16 @@ JX.install('HeraldRuleEditor', {
       return [input, get_fn, set_fn];
     },
 
+    _renderAuthorInput : function() {
+        var tokenizer = this._newTokenizer('email', 1);
+        input = tokenizer[0];
+        set_fn = tokenizer[2];
+        set_fn(this._config.author);
+        this._config.authorGetter = tokenizer[1];
+        var author_cell = JX.$('author-input');
+        JX.DOM.setContent(author_cell, input);
+   },
+
     _renderValueInputForRow : function(row_id) {
       var cond = this._config.conditions[row_id];
       var type = this._config.info.values[cond[0]][cond[1]];
@@ -260,7 +276,7 @@ JX.install('HeraldRuleEditor', {
       return node;
     },
 
-    _newTokenizer : function(type) {
+    _newTokenizer : function(type, limit) {
       var template = JX.$N(
         'div',
         JX.$H(this._config.template.markup));
@@ -274,6 +290,7 @@ JX.install('HeraldRuleEditor', {
       typeahead.setDatasource(datasource);
 
       var tokenizer = new JX.Tokenizer(template);
+      tokenizer.setLimit(limit);
       tokenizer.setTypeahead(typeahead);
       tokenizer.start();
 

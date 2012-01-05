@@ -285,7 +285,7 @@ celerity_register_resource_map(array(
   ),
   'herald-css' =>
   array(
-    'uri' => '/res/5051f3ab/rsrc/css/application/herald/herald.css',
+    'uri' => '/res/ed5556e6/rsrc/css/application/herald/herald.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -294,7 +294,7 @@ celerity_register_resource_map(array(
   ),
   'herald-rule-editor' =>
   array(
-    'uri' => '/res/4d6dff2b/rsrc/js/application/herald/HeraldRuleEditor.js',
+    'uri' => '/res/ec9eea63/rsrc/js/application/herald/HeraldRuleEditor.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -332,14 +332,13 @@ celerity_register_resource_map(array(
   ),
   0 =>
   array(
-    'uri' => '/res/b6096fdd/rsrc/js/javelin/lib/__tests__/URI.js',
+    'uri' => '/res/14c48a9f/rsrc/js/javelin/lib/__tests__/behavior.js',
     'type' => 'js',
     'requires' =>
     array(
-      0 => 'javelin-uri',
-      1 => 'javelin-php-serializer',
+      0 => 'javelin-behavior',
     ),
-    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
+    'disk' => '/rsrc/js/javelin/lib/__tests__/behavior.js',
   ),
   'javelin-behavior-aphront-basic-tokenizer' =>
   array(
