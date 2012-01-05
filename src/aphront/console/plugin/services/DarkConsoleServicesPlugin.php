@@ -178,7 +178,7 @@ class DarkConsoleServicesPlugin extends DarkConsolePlugin {
     $counts['All Services'] = array_sum($counts);
 
     $totals['Entire Page'] = $page_total;
-    $counts['Entire Page'] = '-';
+    $counts['Entire Page'] = 0;
 
     $summary = array();
     foreach ($totals as $type => $total) {
