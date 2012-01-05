@@ -257,7 +257,7 @@ class DifferentialChangesetViewController extends DifferentialController {
       $changeset->getDiffID(),
       'arc:lint');
     if (!$lint) {
-      return;
+      return array();
     }
     $lint = $lint->getData();
 
