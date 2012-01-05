@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -187,7 +187,18 @@ class DifferentialRevisionViewController extends DifferentialController {
       'whitespace',
       DifferentialChangesetParser::WHITESPACE_IGNORE_ALL);
 
-    $symbol_indexes = $this->buildSymbolIndexes($target, $visible_changesets);
+    $arc_project = $target->loadArcanistProject();
+
+    if ($arc_project) {
+      $symbol_indexes = $this->buildSymbolIndexes(
+        $target,
+        $arc_project,
+        $visible_changesets);
+      $repository = $arc_project->loadRepository();
+    } else {
+      $symbol_indexes = array();
+      $repository = null;
+    }
 
     $revision_detail->setActions($actions);
     $revision_detail->setUser($user);
@@ -205,8 +216,12 @@ class DifferentialRevisionViewController extends DifferentialController {
     $changeset_view->setEditable(!$viewer_is_anonymous);
     $changeset_view->setStandaloneViews(true);
     $changeset_view->setRevision($revision);
+    $changeset_view->setDiff($target);
     $changeset_view->setRenderingReferences($rendering_references);
     $changeset_view->setWhitespace($whitespace);
+    if ($repository) {
+      $changeset_view->setRepository($repository, $target);
+    }
     $changeset_view->setSymbolIndexes($symbol_indexes);
 
     $diff_history = new DifferentialRevisionUpdateHistoryView();
@@ -597,20 +612,17 @@ class DifferentialRevisionViewController extends DifferentialController {
 
   private function buildSymbolIndexes(
     DifferentialDiff $target,
+    PhabricatorRepositoryArcanistProject $arc_project,
     array $visible_changesets) {
 
     $engine = PhabricatorSyntaxHighlighter::newEngine();
-
-    $symbol_indexes = array();
-    $arc_project = $target->loadArcanistProject();
-    if (!$arc_project) {
-      return array();
-    }
 
     $langs = $arc_project->getSymbolIndexLanguages();
     if (!$langs) {
       return array();
     }
+
+    $symbol_indexes = array();
 
     $project_phids = array_merge(
       array($arc_project->getPHID()),

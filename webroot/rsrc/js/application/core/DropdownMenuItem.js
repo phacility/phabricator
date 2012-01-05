@@ -17,12 +17,20 @@ JX.install('PhabricatorMenuItem', {
     _action : null,
 
     render : function() {
-      return JX.$N('a', { href : '#', meta : { item : this } }, this._name);
+      if (this.getDisabled()) {
+        return JX.$N('span', this._name);
+      } else {
+        return JX.$N('a', { href : '#', meta : { item : this } }, this._name);
+      }
     },
 
     select : function() {
       this._action();
     }
+  },
+
+  properties : {
+    disabled : false
   }
 
 });

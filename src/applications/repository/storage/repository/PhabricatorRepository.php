@@ -57,6 +57,22 @@ class PhabricatorRepository extends PhabricatorRepositoryDAO {
     return $this;
   }
 
+  public function getDiffusionBrowseURIForPath($path) {
+    switch ($this->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $branch = '/'.$this->getDetail('default-branch');
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $branch = null;
+        break;
+      default:
+        throw new Exception("Unknown VCS.");
+    }
+
+    return '/diffusion/'.$this->getCallsign().'/browse'.$branch.$path;
+  }
+
   public static function newPhutilURIFromGitURI($raw_uri) {
     // If there's no protocol (git implicit SSH) reformat the URI to be a
     // normal URI. These git URIs look like "user@domain.com:path" instead of

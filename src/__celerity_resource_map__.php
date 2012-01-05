@@ -472,15 +472,16 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-differential-dropdown-menus' =>
   array(
-    'uri' => '/res/08e751ee/rsrc/js/application/differential/behavior-dropdown-menus.js',
+    'uri' => '/res/c5abbb83/rsrc/js/application/differential/behavior-dropdown-menus.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-behavior',
       1 => 'javelin-dom',
-      2 => 'javelin-stratcom',
-      3 => 'phabricator-dropdown-menu',
-      4 => 'phabricator-menu-item',
+      2 => 'javelin-util',
+      3 => 'javelin-stratcom',
+      4 => 'phabricator-dropdown-menu',
+      5 => 'phabricator-menu-item',
     ),
     'disk' => '/rsrc/js/application/differential/behavior-dropdown-menus.js',
   ),
@@ -1418,7 +1419,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-menu-item' =>
   array(
-    'uri' => '/res/8a9be282/rsrc/js/application/core/DropdownMenuItem.js',
+    'uri' => '/res/cfd0a620/rsrc/js/application/core/DropdownMenuItem.js',
     'type' => 'js',
     'requires' =>
     array(

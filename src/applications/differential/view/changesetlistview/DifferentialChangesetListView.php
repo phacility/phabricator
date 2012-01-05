@@ -25,6 +25,8 @@ class DifferentialChangesetListView extends AphrontView {
   private $whitespace;
   private $standaloneViews;
   private $symbolIndexes = array();
+  private $repository;
+  private $diff;
 
   public function setChangesets($changesets) {
     $this->changesets = $changesets;
@@ -43,6 +45,16 @@ class DifferentialChangesetListView extends AphrontView {
 
   public function setRevision(DifferentialRevision $revision) {
     $this->revision = $revision;
+    return $this;
+  }
+
+  public function setRepository(PhabricatorRepository $repository) {
+    $this->repository = $repository;
+    return $this;
+  }
+
+  public function setDiff(DifferentialDiff $diff) {
+    $this->diff = $diff;
     return $this;
   }
 
@@ -79,6 +91,7 @@ class DifferentialChangesetListView extends AphrontView {
 
     $output = array();
     $mapping = array();
+    $repository = $this->repository;
     foreach ($changesets as $key => $changeset) {
       $file = $changeset->getFilename();
       $class = 'differential-changeset';
@@ -97,14 +110,21 @@ class DifferentialChangesetListView extends AphrontView {
             'whitespace'  => $this->whitespace,
           ));
 
+        $diffusion_uri = null;
+        if ($repository) {
+          $diffusion_uri = $repository->getDiffusionBrowseURIForPath(
+            $changeset->getAbsoluteRepositoryPath($this->diff, $repository));
+        }
+
         $detail_button = javelin_render_tag(
           'a',
           array(
             'class'   => 'button small grey',
             'meta'    => array(
-              'detailURI' => (string)$detail_uri,
-              'leftURI'   => (string)$detail_uri->alter('view', 'old'),
-              'rightURI'  => (string)$detail_uri->alter('view', 'new'),
+              'detailURI'     => (string)$detail_uri,
+              'leftURI'       => (string)$detail_uri->alter('view', 'old'),
+              'rightURI'      => (string)$detail_uri->alter('view', 'new'),
+              'diffusionURI'  => $diffusion_uri,
             ),
             'href'    => $detail_uri,
             'target'  => '_blank',

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,10 +156,14 @@ final class DiffusionSvnBrowseQuery extends DiffusionBrowseQuery {
         $repository->getID(),
         $loadable_commits);
       $commits = mpull($commits, null, 'getCommitIdentifier');
-      $commit_data = id(new PhabricatorRepositoryCommitData())->loadAllWhere(
-        'commitID in (%Ld)',
-        mpull($commits, 'getID'));
-      $commit_data = mpull($commit_data, null, 'getCommitID');
+      if ($commits) {
+        $commit_data = id(new PhabricatorRepositoryCommitData())->loadAllWhere(
+          'commitID in (%Ld)',
+          mpull($commits, 'getID'));
+        $commit_data = mpull($commit_data, null, 'getCommitID');
+      } else {
+        $commit_data = array();
+      }
     }
 
     $path_normal = DiffusionPathIDQuery::normalizePath($path);
