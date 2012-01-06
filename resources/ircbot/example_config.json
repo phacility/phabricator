@@ -7,10 +7,13 @@
   ],
   "handlers" : [
     "PhabricatorIRCProtocolHandler",
-    "PhabricatorIRCObjectNameHandler"
+    "PhabricatorIRCObjectNameHandler",
+    "PhabricatorIRCDifferentialNotificationHandler"
   ],
 
   "conduit.uri" : null,
   "conduit.user" : null,
-  "conduit.cert" : null
+  "conduit.cert" : null,
+
+  "notification.channels" : ["#phabot-test"]
 }

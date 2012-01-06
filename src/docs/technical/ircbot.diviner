@@ -33,6 +33,7 @@ These are the configuration values it reads:
     IRCBot.
   - ##conduit.uri##, ##conduit.user##, ##conduit.cert## Conduit configuration,
     see below.
+  - ##notification.channels## Notification configuration, see below.
 
 = Handlers =
 
@@ -46,6 +47,9 @@ the IRC bot. These are the default handlers available:
   - @{class:PhabricatorIRCObjectNameHandler} This handler looks for users
     mentioning Phabricator objects like "T123" and "D345" in chat, looks them
     up, and says their name with a link to the object. Requires conduit.
+  - @{class:PhabricatorIRCDifferentialNotificationHandler} This handler posts
+    notifications about changes to revisions to IRC to the channels listed in
+    ##notification.channels##.
 
 You can also write your own handlers, by extending
 @{class:PhabricatorIRCHandler}.
@@ -53,9 +57,9 @@ You can also write your own handlers, by extending
 = Conduit =
 
 Some handlers (e.g., @{class:PhabricatorIRCObjectNameHandler}) need to read data
-from Phabricator. They do this over Conduit, Phabricator's HTTP API. You can
-use this method to allow other scripts or programs to access Phabricator's data
-from different servers and in different languages.
+from Phabricator over Conduit, Phabricator's HTTP API. You can use this method
+to allow other scripts or programs to access Phabricator's data from different
+servers and in different languages.
 
 To allow the bot to access Conduit, you need to create a user that it can login
 with. To do this, login to Phabricator as an administrator and go to
