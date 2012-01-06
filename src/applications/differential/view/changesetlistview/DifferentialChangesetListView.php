@@ -101,6 +101,8 @@ class DifferentialChangesetListView extends AphrontView {
 
       $ref = $this->references[$key];
 
+      $detail = new DifferentialChangesetDetailView();
+
       $detail_button = null;
       if ($this->standaloneViews) {
         $detail_uri = new PhutilURI($this->renderURI);
@@ -125,6 +127,7 @@ class DifferentialChangesetListView extends AphrontView {
               'leftURI'       => (string)$detail_uri->alter('view', 'old'),
               'rightURI'      => (string)$detail_uri->alter('view', 'new'),
               'diffusionURI'  => $diffusion_uri,
+              'containerID'   => $detail->getID(),
             ),
             'href'    => $detail_uri,
             'target'  => '_blank',
@@ -133,12 +136,12 @@ class DifferentialChangesetListView extends AphrontView {
           "View Options \xE2\x96\xBC");
       }
 
-      $uniq_id = celerity_generate_unique_node_id();
 
-      $detail = new DifferentialChangesetDetailView();
       $detail->setChangeset($changeset);
       $detail->addButton($detail_button);
       $detail->setSymbolIndex(idx($this->symbolIndexes, $key));
+
+      $uniq_id = celerity_generate_unique_node_id();
       $detail->appendChild(
         phutil_render_tag(
           'div',

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ class DifferentialChangesetDetailView extends AphrontView {
   private $buttons = array();
   private $revisionID;
   private $symbolIndex;
+  private $id;
 
   public function setChangeset($changeset) {
     $this->changeset = $changeset;
@@ -41,6 +42,13 @@ class DifferentialChangesetDetailView extends AphrontView {
   public function setSymbolIndex($symbol_index) {
     $this->symbolIndex = $symbol_index;
     return $this;
+  }
+
+  public function getID() {
+    if (!$this->id) {
+      $this->id = celerity_generate_unique_node_id();
+    }
+    return $this->id;
   }
 
   public function render() {
@@ -67,7 +75,7 @@ class DifferentialChangesetDetailView extends AphrontView {
         '</div>';
     }
 
-    $id = celerity_generate_unique_node_id();
+    $id = $this->getID();
 
     if ($this->symbolIndex) {
       Javelin::initBehavior(

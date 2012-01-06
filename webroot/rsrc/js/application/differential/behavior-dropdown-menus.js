@@ -10,33 +10,70 @@
 
 JX.behavior('differential-dropdown-menus', function(config) {
 
-  var buttons = JX.DOM.scry(window.document, 'a', 'differential-view-options');
+  function build_menu(button, data) {
 
-  for (var ii = 0; ii < buttons.length; ii++) {
-    var data = JX.Stratcom.getData(buttons[ii]);
+    function show_more() {
+      var container = JX.$(data.containerID);
+      var nodes = JX.DOM.scry(container, 'tr', 'context-target');
+      for (var ii = 0; ii < nodes.length; ii++) {
+        var show = JX.DOM.scry(nodes[ii], 'a', 'show-more');
+        for (var jj = 0; jj < show.length; jj++) {
+          if (JX.Stratcom.getData(show[jj]).type != 'all') {
+            continue;
+          }
+          var event_data = {
+            context : nodes[ii],
+            show : show[jj]
+          };
+          JX.Stratcom.invoke('differential-reveal-context', null, event_data);
+        }
+      }
+    }
 
-    var diffusion_item = new JX.PhabricatorMenuItem(
-      'Browse in Diffusion',
-      JX.bind(null, window.open, data.diffusionURI))
+    function link_to(name, uri) {
+      var item = new JX.PhabricatorMenuItem(
+        name,
+        JX.bind(null, window.open, uri));
+      item.setDisabled(!uri);
+      return item;
+    }
 
+    var reveal_item = new JX.PhabricatorMenuItem('', show_more);
+
+    var diffusion_item = link_to('Browse in Diffusion', data.diffusionURI);
     if (!data.diffusionURI) {
       diffusion_item.setDisabled(true);
     }
 
-    new JX.PhabricatorDropdownMenu(buttons[ii])
+    var menu = new JX.PhabricatorDropdownMenu(buttons[ii])
+      .addItem(reveal_item)
       .addItem(diffusion_item)
-      .addItem(
-        new JX.PhabricatorMenuItem(
-          'View Standalone',
-          JX.bind(null, window.open, data.detailURI)))
-      .addItem(
-        new JX.PhabricatorMenuItem(
-          'Show Raw File (Left)',
-          JX.bind(null, window.open, data.leftURI)))
-      .addItem(
-        new JX.PhabricatorMenuItem(
-          'Show Raw File (Right)',
-          JX.bind(null, window.open, data.rightURI)));
+      .addItem(link_to('View Standalone', data.detailURI))
+      .addItem(link_to('Show Raw File (Left)', data.leftURI))
+      .addItem(link_to('Show Raw File (Right)', data.rightURI));
+
+    menu.listen(
+      'open',
+      function() {
+
+        // When the user opens the menu, check if there are any "Show More"
+        // links in the changeset body. If there aren't, disable the "Show
+        // Entire File" menu item since it won't change anything.
+
+        var nodes = JX.DOM.scry(JX.$(data.containerID), 'a', 'show-more');
+        if (nodes.length) {
+          reveal_item.setDisabled(false);
+          reveal_item.setName('Show Entire File');
+        } else {
+          reveal_item.setDisabled(true);
+          reveal_item.setName('Entire File Shown');
+        }
+      });
+  }
+
+  var buttons = JX.DOM.scry(window.document, 'a', 'differential-view-options');
+  for (var ii = 0; ii < buttons.length; ii++) {
+    build_menu(buttons[ii], JX.Stratcom.getData(buttons[ii]));
   }
 
 });

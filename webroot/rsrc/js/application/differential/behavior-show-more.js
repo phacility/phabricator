@@ -9,28 +9,40 @@
 
 JX.behavior('differential-show-more', function(config) {
 
-  function onresponse(origin, response) {
+  function onresponse(context, response) {
     var div = JX.$N('div', {}, JX.$H(response));
-    var anchor = origin.getNode('context-target');
-    var root = anchor.parentNode;
-    copyRows(root, div, anchor);
-    root.removeChild(anchor);
+    var root = context.parentNode;
+    copyRows(root, div, context);
+    root.removeChild(context);
   }
 
   JX.Stratcom.listen(
     'click',
     'show-more',
     function(e) {
-      var context = e.getNodes()['context-target'];
+      var event_data = {
+        context :  e.getNodes()['context-target'],
+        show : e.getNodes()['show-more']
+      };
+
+      JX.Stratcom.invoke('differential-reveal-context', null, event_data);
+      e.kill();
+    });
+
+  JX.Stratcom.listen(
+    'differential-reveal-context',
+    null,
+    function(e) {
+      var context = e.getData().context;
+      var data = JX.Stratcom.getData(e.getData().show);
+
       var container = JX.DOM.find(context, 'td');
       JX.DOM.setContent(container, 'Loading...');
       JX.DOM.alterClass(context, 'differential-show-more-loading', true);
-      var data = e.getNodeData('show-more');
       data['whitespace'] = config.whitespace;
       new JX.Workflow(config.uri, data)
-        .setHandler(JX.bind(null, onresponse, e))
+        .setHandler(JX.bind(null, onresponse, context))
         .start();
-      e.kill();
     });
 
 });
