@@ -3,6 +3,7 @@
  * @requires javelin-behavior
  *           javelin-stratcom
  *           javelin-dom
+ *           javelin-vector
  */
 
 JX.behavior('phabricator-watch-anchor', function() {
@@ -20,9 +21,38 @@ JX.behavior('phabricator-watch-anchor', function() {
   }
 
   // Defer invocation so other listeners can update the document.
-  var fn = function() {
+  function defer_highlight() {
     setTimeout(highlight, 0);
-  };
-  JX.Stratcom.listen('hashchange', null, fn);
-  fn();
+  }
+
+  // In some cases, we link to an anchor but the anchor target ajaxes in
+  // later. If it pops in within the first few seconds, jump to it.
+  function try_anchor(anchor) {
+    try {
+      // If the anchor exists, assume the browser handled the jump.
+      JX.$(anchor);
+      defer_highlight();
+    } catch (e) {
+      var n = 50;
+      var try_anchor_again = function () {
+        try {
+          window.scrollTo(0, JX.$V(JX.$(anchor)).y - 60);
+          defer_highlight();
+        } catch (e) {
+          if (n--) {
+            setTimeout(try_anchor_again, 100);
+          }
+        }
+      };
+      try_anchor_again();
+    }
+  }
+
+  JX.Stratcom.listen('hashchange', null, try_anchor);
+
+  var anchor = window.location.hash.replace('#', '');
+  if (anchor) {
+    try_anchor(anchor);
+  }
+
 });
