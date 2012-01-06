@@ -457,4 +457,47 @@ class PhabricatorUser extends PhabricatorUserDAO {
     }
   }
 
+  public function sendWelcomeEmail(PhabricatorUser $admin) {
+    $admin_username = $admin->getUserName();
+    $admin_realname = $admin->getRealName();
+    $user_username = $this->getUserName();
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+
+    $base_uri = PhabricatorEnv::getProductionURI('/');
+
+    $uri = $this->getEmailLoginURI();
+    $body = <<<EOBODY
+Welcome to Phabricator!
+
+{$admin_username} ({$admin_realname}) has created an account for you.
+
+  Username: {$user_username}
+
+To login to Phabricator, follow this link and set a password:
+
+  {$uri}
+
+After you have set a password, you can login in the future by going here:
+
+  {$base_uri}
+
+EOBODY;
+
+    if (!$is_serious) {
+      $body .= <<<EOBODY
+
+Love,
+Phabricator
+
+EOBODY;
+    }
+
+    $mail = id(new PhabricatorMetaMTAMail())
+      ->addTos(array($this->getPHID()))
+      ->setSubject('[Phabricator] Welcome to Phabricator')
+      ->setBody($body)
+      ->setFrom($admin->getPHID())
+      ->saveAndSend();
+  }
+
 }

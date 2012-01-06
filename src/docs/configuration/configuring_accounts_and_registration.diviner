@@ -38,6 +38,21 @@ To manage accounts from the web, login as an administrator account and go to
 ##/people/## or click "People" on the homepage. Provided you're an admin,
 you'll see options to create or edit accounts.
 
+= Managing Accounts from the Command Line =
+
+You can use ##scripts/user/add_user.php## to batch create accounts. Run it
+like:
+
+  $ ./add_user.php <username> <email> <realname> <admin>
+
+For example:
+
+  $ ./add_user.php alincoln alincoln@logcabin.com 'Abraham Lincoln' tjefferson
+
+This will create a new ##alincoln## user and send them a "Welcome to
+Phabricator" email from ##tjefferson## with instructions on how to log in and
+set a password.
+
 = Configuring Facebook OAuth =
 
 You can configure Facebook OAuth to allow login, login and registration, or
