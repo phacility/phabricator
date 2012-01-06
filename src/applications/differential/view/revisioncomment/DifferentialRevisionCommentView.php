@@ -27,6 +27,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
   private $target;
   private $commentNumber;
   private $user;
+  private $versusDiffID;
 
   public function setComment($comment) {
     $this->comment = $comment;
@@ -61,6 +62,12 @@ final class DifferentialRevisionCommentView extends AphrontView {
 
   public function setTargetDiff($target) {
     $this->target = $target;
+    return $this;
+  }
+
+  public function setVersusDiffID($diff_vs) {
+    $this->versusDiffID = $diff_vs;
+    return $this;
   }
 
   public function setCommentNumber($comment_number) {
@@ -181,15 +188,60 @@ final class DifferentialRevisionCommentView extends AphrontView {
                      ($inline->getLineNumber() + $inline->getLineLength());
           }
 
-          if (!$this->target ||
-              $changeset->getDiffID() === $this->target->getID()) {
+          $on_target = ($this->target) &&
+                       ($this->target->getID() == $changeset->getDiffID());
+
+          $is_visible = false;
+          if ($inline->getIsNewFile()) {
+            // This comment is on the right side of the versus diff, and visible
+            // on the left side of the page.
+            if ($this->versusDiffID) {
+              if ($changeset->getDiffID() == $this->versusDiffID) {
+                $is_visible = true;
+              }
+            }
+
+            // This comment is on the right side of the target diff, and visible
+            // on the right side of the page.
+            if ($on_target) {
+              $is_visible = true;
+            }
+          } else {
+            // Ths comment is on the left side of the target diff, and visible
+            // on the left side of the page.
+            if (!$this->versusDiffID) {
+              if ($on_target) {
+                $is_visible = true;
+              }
+            }
+
+            // TODO: We still get one edge case wrong here, when we have a
+            // versus diff and the file didn't exist in the old version. The
+            // comment is visible because we show the left side of the target
+            // diff when there's no corresponding file in the versus diff, but
+            // we incorrectly link it off-page.
+          }
+
+          $where = null;
+          if ($is_visible) {
             $lines = phutil_render_tag(
               'a',
               array(
-                'href' => '#inline-'.$inline->getID(),
-                'class' => 'num',
+                'href'    => '#inline-'.$inline->getID(),
+                'class'   => 'num',
               ),
               $lines);
+          } else {
+            $diff_id = $changeset->getDiffID();
+            $lines = phutil_render_tag(
+              'a',
+              array(
+                'href'    => '?id='.$diff_id.'#inline-'.$inline->getID(),
+                'class'   => 'num',
+                'target'  => '_blank',
+              ),
+              $lines." \xE2\x86\x97");
+            $where = '(On Diff #'.$diff_id.')';
           }
 
           $inline_content = $inline->getContent();
@@ -212,6 +264,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
           $inline_render[] =
             '<tr>'.
               '<td class="inline-line-number">'.$lines.'</td>'.
+              '<td class="inline-which-diff">'.$where.'</td>'.
               '<td>'.
                 '<div class="phabricator-remarkup">'.
                   $inline_content.

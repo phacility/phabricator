@@ -191,6 +191,11 @@
   width: 70px; /* Need lots of width for 23,950-23,951 */
 }
 
+.differential-inline-summary td.inline-which-diff {
+  padding: 0 8px 0 0;
+  color: #666666;
+}
+
 .differential-inline-summary td.inline-line-number a:hover {
   background: #3b5998;
   color: white;

@@ -210,6 +210,7 @@ class DifferentialRevisionViewController extends DifferentialController {
     $comment_view->setChangesets($all_changesets);
     $comment_view->setUser($user);
     $comment_view->setTargetDiff($target);
+    $comment_view->setVersusDiffID($diff_vs);
 
     $changeset_view = new DifferentialChangesetListView();
     $changeset_view->setChangesets($visible_changesets);

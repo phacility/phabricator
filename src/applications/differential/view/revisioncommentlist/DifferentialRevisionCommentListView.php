@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ final class DifferentialRevisionCommentListView extends AphrontView {
   private $changesets;
   private $user;
   private $target;
+  private $versusDiffID;
 
   public function setComments(array $comments) {
     $this->comments = $comments;
@@ -52,6 +53,12 @@ final class DifferentialRevisionCommentListView extends AphrontView {
 
   public function setTargetDiff(DifferentialDiff $target) {
     $this->target = $target;
+    return $this;
+  }
+
+  public function setVersusDiffID($diff_vs) {
+    $this->versusDiffID = $diff_vs;
+    return $this;
   }
 
   public function render() {
@@ -75,6 +82,7 @@ final class DifferentialRevisionCommentListView extends AphrontView {
       $view->setInlineComments(idx($inlines, $comment->getID(), array()));
       $view->setChangesets($this->changesets);
       $view->setTargetDiff($this->target);
+      $view->setVersusDiffID($this->versusDiffID);
       $view->setCommentNumber($num++);
 
       $html[] = $view->render();
