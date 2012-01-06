@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -240,54 +240,99 @@ class PhabricatorUser extends PhabricatorUserDAO {
         "Session limit for '{$session_type}' must be at least 1!");
     }
 
-    // Load all the currently active sessions.
-    $sessions = queryfx_all(
-      $conn_w,
-      'SELECT type, sessionStart FROM %T WHERE userPHID = %s AND type LIKE %>',
-      PhabricatorUser::SESSION_TABLE,
-      $this->getPHID(),
-      $session_type.'-');
-
-    // Choose which 'type' we'll actually establish, i.e. what number we're
-    // going to append to the basic session type. To do this, just check all
-    // the numbers sequentially until we find an available session.
-    $establish_type = null;
-    $sessions = ipull($sessions, null, 'type');
-    for ($ii = 1; $ii <= $session_limit; $ii++) {
-      if (empty($sessions[$session_type.'-'.$ii])) {
-        $establish_type = $session_type.'-'.$ii;
-        break;
-      }
-    }
-
-    // If we didn't find an available session, choose the oldest session and
-    // overwrite it.
-    if (!$establish_type) {
-      $sessions = isort($sessions, 'sessionStart');
-      $oldest = reset($sessions);
-      $establish_type = $oldest['type'];
-    }
+    // NOTE: Session establishment is sensitive to race conditions, as when
+    // piping `arc` to `arc`:
+    //
+    //   arc export ... | arc paste ...
+    //
+    // To avoid this, we overwrite an old session only if it hasn't been
+    // re-established since we read it.
 
     // Consume entropy to generate a new session key, forestalling the eventual
     // heat death of the universe.
     $session_key = Filesystem::readRandomCharacters(40);
 
-    // UNGUARDED WRITES: Logging-in users don't have CSRF stuff yet.
-    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-
-    queryfx(
+    // Load all the currently active sessions.
+    $sessions = queryfx_all(
       $conn_w,
-      'INSERT INTO %T '.
-        '(userPHID, type, sessionKey, sessionStart)'.
-      ' VALUES '.
-        '(%s, %s, %s, UNIX_TIMESTAMP()) '.
-      'ON DUPLICATE KEY UPDATE '.
-        'sessionKey = VALUES(sessionKey), '.
-        'sessionStart = VALUES(sessionStart)',
-      self::SESSION_TABLE,
+      'SELECT type, sessionKey, sessionStart FROM %T
+        WHERE userPHID = %s AND type LIKE %>',
+      PhabricatorUser::SESSION_TABLE,
       $this->getPHID(),
-      $establish_type,
-      $session_key);
+      $session_type.'-');
+    $sessions = ipull($sessions, null, 'type');
+    $sessions = isort($sessions, 'sessionStart');
+
+    $existing_sessions = array_keys($sessions);
+
+    $retries = 0;
+    while (true) {
+
+      // Choose which 'type' we'll actually establish, i.e. what number we're
+      // going to append to the basic session type. To do this, just check all
+      // the numbers sequentially until we find an available session.
+      $establish_type = null;
+      for ($ii = 1; $ii <= $session_limit; $ii++) {
+        $try_type = $session_type.'-'.$ii;
+        if (!in_array($try_type, $existing_sessions)) {
+          $establish_type = $try_type;
+          $expect_key = $session_key;
+          $existing_sessions[] = $try_type;
+
+          // Ensure the row exists so we can issue an update below. We don't
+          // care if we race here or not.
+          queryfx(
+            $conn_w,
+            'INSERT IGNORE INTO %T (userPHID, type, sessionKey, sessionStart)
+              VALUES (%s, %s, %s, 0)',
+            self::SESSION_TABLE,
+            $this->getPHID(),
+            $establish_type,
+            $session_key);
+          break;
+        }
+      }
+
+      // If we didn't find an available session, choose the oldest session and
+      // overwrite it.
+      if (!$establish_type) {
+        $oldest = reset($sessions);
+        $establish_type = $oldest['type'];
+        $expect_key = $oldest['sessionKey'];
+      }
+
+      // UNGUARDED WRITES: Logging-in users don't have CSRF stuff yet.
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+
+        // This is so that we'll only overwrite the session if it hasn't been
+        // refreshed since we read it. If it has, the session key will be
+        // different and we know we're racing other processes. Whichever one
+        // won gets the session, we go back and try again.
+
+        queryfx(
+          $conn_w,
+          'UPDATE %T SET sessionKey = %s, sessionStart = UNIX_TIMESTAMP()
+            WHERE userPHID = %s AND type = %s AND sessionKey = %s',
+          self::SESSION_TABLE,
+          $session_key,
+          $this->getPHID(),
+          $establish_type,
+          $expect_key);
+
+      unset($unguarded);
+
+      if ($conn_w->getAffectedRows()) {
+        // The update worked, so the session is valid.
+        break;
+      } else {
+        // We know this just got grabbed, so don't try it again.
+        unset($sessions[$establish_type]);
+      }
+
+      if (++$retries > $session_limit) {
+        throw new Exception("Failed to establish a session!");
+      }
+    }
 
     $log = PhabricatorUserLog::newLog(
       $this,

@@ -309,7 +309,7 @@ return array(
 
   // Maximum number of simultaneous Conduit sessions each user is permitted
   // to have.
-  'auth.sessions.conduit'       => 3,
+  'auth.sessions.conduit'       => 5,
 
   // Set this true to enable the Settings -> SSH Public Keys panel, which will
   // allow users to associated SSH public keys with their accounts. This is only
