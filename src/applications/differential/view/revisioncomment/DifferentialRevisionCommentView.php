@@ -176,7 +176,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
         $inlines = msort($inlines, 'getLineNumber');
         $inline_render[] =
           '<tr>'.
-            '<th colspan="2">'.
+            '<th colspan="3">'.
               phutil_escape_html($changeset->getFileName()).
             '</th>'.
           '</tr>';
