@@ -7,8 +7,10 @@
 
 
 phutil_require_module('phabricator', 'applications/conduit/method/maniphest/base');
-phutil_require_module('phabricator', 'applications/maniphest/constants/priority');
+phutil_require_module('phabricator', 'applications/conduit/protocol/exception');
 phutil_require_module('phabricator', 'applications/maniphest/storage/task');
 
+phutil_require_module('phutil', 'utils');
 
-phutil_require_source('ConduitAPI_maniphest_createtask_Method.php');
+
+phutil_require_source('ConduitAPI_maniphest_update_Method.php');
