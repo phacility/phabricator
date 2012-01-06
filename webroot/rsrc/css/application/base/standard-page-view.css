@@ -5,12 +5,6 @@
 
 .phabricator-standard-page {
   background: #ffffff;
-  border-bottom: 1px solid #888888;
-  overflow-x: auto;
-
-  -webkit-box-shadow: 0 0 6px #000;
-  -mox-box-shadow:    0 0 6px #000;
-  box-shadow:         0 0 6px #000;
 }
 
 .phabricator-chromeless-page .phabricator-standard-page {
@@ -96,11 +90,14 @@ td.phabricator-login-details {
   white-space: nowrap;
 }
 
+
 .phabricator-page-foot {
   text-align: right;
+  margin: 2em;
+  border-top: 1px solid #afafaf;
   padding: .5em 1em;
   font-size: 11px;
-  color: #f3f3f3;
+  color: #666666;
 }
 
 .phabricator-admin-page-view .phabricator-standard-header {
