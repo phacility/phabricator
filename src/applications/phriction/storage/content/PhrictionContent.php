@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,5 +33,28 @@ class PhrictionContent extends PhrictionDAO {
 
   protected $changeType;
   protected $changeRef;
+
+  public function renderContent() {
+    $engine = PhabricatorMarkupEngine::newPhrictionMarkupEngine();
+    $markup = $engine->markupText($this->getContent());
+
+    $toc = PhutilRemarkupEngineRemarkupHeaderBlockRule::renderTableOfContents(
+      $engine);
+    if ($toc) {
+      $toc =
+        '<div class="phabricator-remarkup-toc">'.
+          '<div class="phabricator-remarkup-toc-header">'.
+            'Table of Contents'.
+          '</div>'.
+          $toc.
+        '</div>';
+    }
+
+    return
+      '<div class="phabricator-remarkup">'.
+        $toc.
+        $markup.
+      '</div>';
+  }
 
 }

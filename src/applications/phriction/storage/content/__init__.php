@@ -6,7 +6,10 @@
 
 
 
+phutil_require_module('phabricator', 'applications/markup/engine');
 phutil_require_module('phabricator', 'applications/phriction/storage/base');
+
+phutil_require_module('phutil', 'markup/engine/remarkup/blockrule/remarkupheader');
 
 
 phutil_require_source('PhrictionContent.php');

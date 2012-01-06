@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,11 @@ class PhrictionDocumentPreviewController
     $request = $this->getRequest();
     $document = $request->getStr('document');
 
+    $content_obj = new PhrictionContent();
+    $content_obj->setContent($document);
+
     $engine = PhabricatorMarkupEngine::newPhrictionMarkupEngine();
-    $content =
-      '<div class="phabricator-remarkup">'.
-        $engine->markupText($document).
-      '</div>';
+    $content = $content_obj->renderContent();
 
     return id(new AphrontAjaxResponse())->setContent($content);
   }
