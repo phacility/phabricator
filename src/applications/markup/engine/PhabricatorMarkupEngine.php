@@ -78,6 +78,7 @@ class PhabricatorMarkupEngine {
       'custom-inline' => array(),
       'custom-block'  => array(),
       'differential.diff' => null,
+      'header.generate-toc' => false,
       'macros'        => true,
       'uri.allowed-protocols' => PhabricatorEnv::getEnvConfig(
         'uri.allowed-protocols'),
