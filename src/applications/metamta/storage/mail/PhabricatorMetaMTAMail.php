@@ -316,6 +316,9 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
             break;
           case 'headers':
             foreach ($value as $header_key => $header_value) {
+              // NOTE: If we have \n in a header, SES rejects the email.
+              $header_value = str_replace("\n", " ", $header_value);
+
               $mailer->addHeader($header_key, $header_value);
             }
             break;
