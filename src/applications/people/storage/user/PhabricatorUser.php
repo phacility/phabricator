@@ -265,8 +265,12 @@ class PhabricatorUser extends PhabricatorUserDAO {
 
     $existing_sessions = array_keys($sessions);
 
+    // UNGUARDED WRITES: Logging-in users don't have CSRF stuff yet.
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+
     $retries = 0;
     while (true) {
+
 
       // Choose which 'type' we'll actually establish, i.e. what number we're
       // going to append to the basic session type. To do this, just check all
@@ -301,25 +305,20 @@ class PhabricatorUser extends PhabricatorUserDAO {
         $expect_key = $oldest['sessionKey'];
       }
 
-      // UNGUARDED WRITES: Logging-in users don't have CSRF stuff yet.
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      // This is so that we'll only overwrite the session if it hasn't been
+      // refreshed since we read it. If it has, the session key will be
+      // different and we know we're racing other processes. Whichever one
+      // won gets the session, we go back and try again.
 
-        // This is so that we'll only overwrite the session if it hasn't been
-        // refreshed since we read it. If it has, the session key will be
-        // different and we know we're racing other processes. Whichever one
-        // won gets the session, we go back and try again.
-
-        queryfx(
-          $conn_w,
-          'UPDATE %T SET sessionKey = %s, sessionStart = UNIX_TIMESTAMP()
-            WHERE userPHID = %s AND type = %s AND sessionKey = %s',
-          self::SESSION_TABLE,
-          $session_key,
-          $this->getPHID(),
-          $establish_type,
-          $expect_key);
-
-      unset($unguarded);
+      queryfx(
+        $conn_w,
+        'UPDATE %T SET sessionKey = %s, sessionStart = UNIX_TIMESTAMP()
+          WHERE userPHID = %s AND type = %s AND sessionKey = %s',
+        self::SESSION_TABLE,
+        $session_key,
+        $this->getPHID(),
+        $establish_type,
+        $expect_key);
 
       if ($conn_w->getAffectedRows()) {
         // The update worked, so the session is valid.
