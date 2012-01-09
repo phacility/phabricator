@@ -96,11 +96,22 @@ If it doesn't show up, add:
 XHProf is a PHP profiling tool. You don't need to install it unless you are
 developing Phabricator and making performance changes.
 
-You can find installation instructions for xhprof here:
+You can install xhprof with:
 
-  http://mirror.facebook.net/facebook/xhprof/doc.html#installation
+  $ pecl install xhprof
 
-You only need to install the PHP extension, not any of the library.
+If you have a PEAR version prior to 1.9.3, you may run into a `phpize` failure.
+If so, you can download the source and build it with:
+
+  $ cd extension/
+  $ phpize
+  $ ./configure
+  $ make
+  $ sudo make install
+
+You may also need to add "##extension=xhprof.so#" to your php.ini.
+
+See <https://bugs.php.net/bug.php?id=59747> for more information.
 
 = Updating Phabricator =
 
