@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,24 @@ final class PhabricatorIRCMessage {
     return $this->command;
   }
 
-  public function getChannel() {
+  public function getReplyTo() {
+    switch ($this->getCommand()) {
+      case 'PRIVMSG':
+        $target = $this->getTarget();
+        if ($target[0] == '#') {
+          return $target;
+        }
+
+        $matches = null;
+        if (preg_match('/^:([^!]+)!/', $this->sender, $matches)) {
+          return $matches[1];
+        }
+        break;
+    }
+    return null;
+  }
+
+  public function getTarget() {
     switch ($this->getCommand()) {
       case 'PRIVMSG':
         $matches = null;

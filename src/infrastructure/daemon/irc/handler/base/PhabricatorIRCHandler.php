@@ -47,6 +47,10 @@ abstract class PhabricatorIRCHandler {
     return $this->bot->getConfig('conduit.uri').$path;
   }
 
+  final protected function isChannelName($name) {
+    return (strpos($name, '#') === 0);
+  }
+
   abstract public function receiveMessage(PhabricatorIRCMessage $message);
 
   public function runBackgroundTasks() {
