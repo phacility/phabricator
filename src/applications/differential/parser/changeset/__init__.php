@@ -12,7 +12,7 @@ phutil_require_module('phabricator', 'aphront/writeguard');
 phutil_require_module('phabricator', 'applications/differential/constants/changetype');
 phutil_require_module('phabricator', 'applications/differential/storage/changeset');
 phutil_require_module('phabricator', 'applications/differential/view/inlinecomment');
-phutil_require_module('phabricator', 'applications/files/uri');
+phutil_require_module('phabricator', 'applications/files/storage/file');
 phutil_require_module('phabricator', 'applications/markup/syntax');
 phutil_require_module('phabricator', 'infrastructure/diff/engine');
 phutil_require_module('phabricator', 'infrastructure/events/constant/type');

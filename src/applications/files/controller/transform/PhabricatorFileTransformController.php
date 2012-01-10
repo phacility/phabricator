@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,10 +113,21 @@ class PhabricatorFileTransformController extends PhabricatorFileController {
   private function buildTransformedFileResponse(
     PhabricatorTransformedFile $xform) {
 
+    $file = id(new PhabricatorFile())->loadOneWhere(
+      'phid = %s',
+      $xform->getTransformedPHID());
+    if ($file) {
+      $uri = $file->getBestURI();
+    } else {
+      $bad_phid = $xform->getTransformedPHID();
+      throw new Exception(
+        "Unable to load file with phid {$bad_phid}."
+      );
+    }
+
     // TODO: We could just delegate to the file view controller instead,
     // which would save the client a roundtrip, but is slightly more complex.
-    return id(new AphrontRedirectResponse())->setURI(
-      PhabricatorFileURI::getViewURIForPHID($xform->getTransformedPHID()));
+    return id(new AphrontRedirectResponse())->setURI($uri);
   }
 
   private function executeThumbTransform(PhabricatorFile $file, $x, $y) {

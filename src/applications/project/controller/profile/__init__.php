@@ -9,7 +9,7 @@
 phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'applications/feed/builder/feed');
 phutil_require_module('phabricator', 'applications/feed/query');
-phutil_require_module('phabricator', 'applications/files/uri');
+phutil_require_module('phabricator', 'applications/files/storage/file');
 phutil_require_module('phabricator', 'applications/maniphest/query');
 phutil_require_module('phabricator', 'applications/maniphest/view/tasksummary');
 phutil_require_module('phabricator', 'applications/phid/handle/data');

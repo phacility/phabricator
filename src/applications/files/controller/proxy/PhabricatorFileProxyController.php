@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,16 @@ class PhabricatorFileProxyController extends PhabricatorFileController {
     }
 
     if ($proxy) {
-      $view_uri = PhabricatorFileURI::getViewURIForPHID($proxy->getFilePHID());
+      $file = id(new PhabricatorFile())->loadOneWhere('phid = %s',
+                                                      $proxy->getFilePHID());
+      if ($file) {
+        $view_uri = $file->getBestURI();
+      } else {
+        $bad_phid = $proxy->getFilePHID();
+        throw new Exception(
+          "Unable to load file with phid {$bad_phid}."
+        );
+      }
       return id(new AphrontRedirectResponse())->setURI($view_uri);
     }
 

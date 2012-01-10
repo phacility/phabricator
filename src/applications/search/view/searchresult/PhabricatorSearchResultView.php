@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,17 +54,7 @@ final class PhabricatorSearchResultView extends AphrontView {
       ),
       PhabricatorEnv::getProductionURI($handle->getURI()));
 
-    switch ($handle->getType()) {
-      case PhabricatorPHIDConstants::PHID_TYPE_USER:
-        if ($this->object) {
-          $img_phid = $this->object->getProfileImagePHID();
-          $img = PhabricatorFileURI::getViewURIForPHID($img_phid);
-        }
-        break;
-      default:
-        $img = null;
-        break;
-    }
+    $img = $handle->getImageURI();
 
     if ($img) {
       $img = phutil_render_tag(

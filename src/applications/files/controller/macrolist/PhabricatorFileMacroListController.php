@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,11 +52,12 @@ class PhabricatorFileMacroListController extends PhabricatorFileController {
       $handles = id(new PhabricatorObjectHandleData($author_phids))
         ->loadHandles();
     }
+    $files_map = mpull($files, null, 'getPHID');
 
     $rows = array();
     foreach ($macros as $macro) {
-      $src = PhabricatorFileURI::getViewURIForPHID($macro->getFilePHID());
       $file_phid = $macro->getFilePHID();
+      $file = $files_map[$file_phid];
       $author_link = isset($author_phids[$file_phid])
         ? $handles[$author_phids[$file_phid]]->renderLink()
         : null;
@@ -73,13 +74,13 @@ class PhabricatorFileMacroListController extends PhabricatorFileController {
         phutil_render_tag(
           'a',
           array(
-            'href'    => $src,
+            'href'    => $file->getBestURI(),
             'target'  => '_blank',
           ),
           phutil_render_tag(
             'img',
             array(
-              'src' => $src,
+              'src' => $file->getBestURI(),
             ))),
         javelin_render_tag(
           'a',

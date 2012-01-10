@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,8 +96,14 @@ class PhabricatorUserProfileSettingsPanelController
       }
     }
 
-    $img_src = PhabricatorFileURI::getViewURIForPHID(
+    $file = id(new PhabricatorFile())->loadOneWhere(
+      'phid = %s',
       $user->getProfileImagePHID());
+    if ($file) {
+      $img_src = $file->getBestURI();
+    } else {
+      $img_src = null;
+    }
     $profile_uri = PhabricatorEnv::getURI('/p/'.$user->getUsername().'/');
 
     $form = new AphrontFormView();

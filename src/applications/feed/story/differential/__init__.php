@@ -9,7 +9,6 @@
 phutil_require_module('phabricator', 'applications/differential/constants/action');
 phutil_require_module('phabricator', 'applications/feed/story/base');
 phutil_require_module('phabricator', 'applications/feed/view/story');
-phutil_require_module('phabricator', 'applications/files/uri');
 
 phutil_require_module('phutil', 'markup');
 

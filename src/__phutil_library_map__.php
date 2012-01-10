@@ -475,7 +475,6 @@ phutil_register_library_map(array(
     'PhabricatorFileStorageEngine' => 'applications/files/engine/base',
     'PhabricatorFileStorageEngineSelector' => 'applications/files/engineselector/base',
     'PhabricatorFileTransformController' => 'applications/files/controller/transform',
-    'PhabricatorFileURI' => 'applications/files/uri',
     'PhabricatorFileUploadController' => 'applications/files/controller/upload',
     'PhabricatorFileUploadException' => 'applications/files/exception/upload',
     'PhabricatorFileUploadView' => 'applications/files/view/upload',

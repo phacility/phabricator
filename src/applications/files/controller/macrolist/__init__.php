@@ -9,7 +9,6 @@
 phutil_require_module('phabricator', 'applications/files/controller/base');
 phutil_require_module('phabricator', 'applications/files/storage/file');
 phutil_require_module('phabricator', 'applications/files/storage/imagemacro');
-phutil_require_module('phabricator', 'applications/files/uri');
 phutil_require_module('phabricator', 'applications/files/view/sidenav');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'infrastructure/javelin/markup');

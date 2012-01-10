@@ -10,7 +10,7 @@ phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'applications/auth/oauth/provider/base');
 phutil_require_module('phabricator', 'applications/feed/builder/feed');
 phutil_require_module('phabricator', 'applications/feed/query');
-phutil_require_module('phabricator', 'applications/files/uri');
+phutil_require_module('phabricator', 'applications/files/storage/file');
 phutil_require_module('phabricator', 'applications/markup/engine');
 phutil_require_module('phabricator', 'applications/people/controller/base');
 phutil_require_module('phabricator', 'applications/people/storage/profile');

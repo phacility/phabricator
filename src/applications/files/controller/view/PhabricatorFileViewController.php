@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,6 +184,11 @@ class PhabricatorFileViewController extends PhabricatorFileController {
     $transformations = id(new PhabricatorTransformedFile())->loadAllWhere(
       'originalPHID = %s',
       $file->getPHID());
+    $transformed_phids = mpull($transformations, 'getTransformedPHID');
+    $transformed_files = id(new PhabricatorFile())->loadAllWhere(
+      'phid in (%Ls)',
+      $transformed_phids);
+    $transformed_map = mpull($transformed_files, null, 'getPHID');
     $rows = array();
     foreach ($transformations as $transformed) {
       $phid = $transformed->getTransformedPHID();
@@ -192,7 +197,7 @@ class PhabricatorFileViewController extends PhabricatorFileController {
         phutil_render_tag(
           'a',
           array(
-            'href' => PhabricatorFileURI::getViewURIForPHID($phid),
+            'href' => $transformed_map[$phid]->getBestURI(),
           ),
           $phid));
     }

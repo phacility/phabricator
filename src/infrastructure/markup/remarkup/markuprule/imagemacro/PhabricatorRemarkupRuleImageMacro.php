@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,11 +69,17 @@ class PhabricatorRemarkupRuleImageMacro
         $phid = $this->images[$matches[1]];
       }
 
+      $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $phid);
+      if ($file) {
+        $src_uri = $file->getBestURI();
+      } else {
+        $src_uri = null;
+      }
 
       $img = phutil_render_tag(
         'img',
         array(
-          'src'   => PhabricatorFileURI::getViewURIForPHID($phid),
+          'src'   => $src_uri,
           'alt'   => $matches[1],
           'title' => $matches[1]),
         null);

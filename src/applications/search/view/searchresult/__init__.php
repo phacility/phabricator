@@ -6,7 +6,6 @@
 
 
 
-phutil_require_module('phabricator', 'applications/files/uri');
 phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'infrastructure/env');

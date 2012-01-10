@@ -6,8 +6,8 @@
 
 
 
+phutil_require_module('phabricator', 'applications/files/storage/file');
 phutil_require_module('phabricator', 'applications/files/storage/imagemacro');
-phutil_require_module('phabricator', 'applications/files/uri');
 
 phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'markup/engine/remarkup/markuprule/base');

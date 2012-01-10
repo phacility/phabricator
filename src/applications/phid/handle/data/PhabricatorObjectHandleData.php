@@ -140,7 +140,7 @@ class PhabricatorObjectHandleData {
             $images = id(new PhabricatorFile())->loadAllWhere(
               'phid IN (%Ls)',
               $image_phids);
-            $images = mpull($images, 'getViewURI', 'getPHID');
+            $images = mpull($images, 'getBestURI', 'getPHID');
           }
 
           foreach ($phids as $phid) {
