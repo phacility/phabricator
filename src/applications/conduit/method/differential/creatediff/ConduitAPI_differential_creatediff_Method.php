@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,8 @@ class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
     if ($parent_id) {
       $parent_rev = id(new DifferentialRevision())->load($parent_id);
       if ($parent_rev) {
-        if ($parent_rev->getStatus() != DifferentialRevisionStatus::COMMITTED) {
+        if ($parent_rev->getStatus() !=
+            ArcanistDifferentialRevisionStatus::COMMITTED) {
           $diff->setParentRevisionID($parent_id);
         }
       }

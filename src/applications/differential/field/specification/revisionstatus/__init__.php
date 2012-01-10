@@ -6,7 +6,8 @@
 
 
 
-phutil_require_module('phabricator', 'applications/differential/constants/revisionstatus');
+phutil_require_module('arcanist', 'differential/constants/revisionstatus');
+
 phutil_require_module('phabricator', 'applications/differential/field/specification/base');
 phutil_require_module('phabricator', 'applications/repository/constants/repositorytype');
 

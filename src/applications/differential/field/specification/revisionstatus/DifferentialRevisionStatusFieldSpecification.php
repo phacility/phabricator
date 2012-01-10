@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ final class DifferentialRevisionStatusFieldSpecification
 
     $status = $revision->getStatus();
     $next_step = null;
-    if ($status == DifferentialRevisionStatus::ACCEPTED) {
+    if ($status == ArcanistDifferentialRevisionStatus::ACCEPTED) {
       switch ($diff->getSourceControlSystem()) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
           $next_step = 'arc amend --revision '.$revision->getID();
@@ -48,7 +48,8 @@ final class DifferentialRevisionStatusFieldSpecification
           'Next step: <tt>'.phutil_escape_html($next_step).'</tt>';
       }
     }
-    $status = DifferentialRevisionStatus::getNameForRevisionStatus($status);
+    $status =
+      ArcanistDifferentialRevisionStatus::getNameForRevisionStatus($status);
     return '<strong>'.$status.'</strong>'.$next_step;
   }
 

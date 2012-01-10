@@ -87,7 +87,8 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
           $revision->getID(),
           $commit->getPHID());
 
-        if ($revision->getStatus() != DifferentialRevisionStatus::COMMITTED) {
+        if ($revision->getStatus() !=
+            ArcanistDifferentialRevisionStatus::COMMITTED) {
           $message = null;
           $committer = $data->getCommitDetail('authorPHID');
           if (!$committer) {
@@ -123,18 +124,18 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     foreach ($revisions as $revision) {
       switch ($revision->getStatus()) {
         // "Accepted" revisions -- ostensibly what we're looking for!
-        case DifferentialRevisionStatus::ACCEPTED:
+        case ArcanistDifferentialRevisionStatus::ACCEPTED:
           $first_choice[] = $revision;
           break;
         // "Open" revisions
-        case DifferentialRevisionStatus::NEEDS_REVIEW:
-        case DifferentialRevisionStatus::NEEDS_REVISION:
+        case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
+        case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
           $second_choice[] = $revision;
           break;
         // default is a wtf? here
         default:
-        case DifferentialRevisionStatus::ABANDONED:
-        case DifferentialRevisionStatus::COMMITTED:
+        case ArcanistDifferentialRevisionStatus::ABANDONED:
+        case ArcanistDifferentialRevisionStatus::COMMITTED:
           $third_choice[] = $revision;
           break;
       }

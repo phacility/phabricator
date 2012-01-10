@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,16 +133,18 @@ class DifferentialCommentEditor {
         if (!($actor_is_author || $actor_is_admin)) {
           throw new Exception('You can only abandon your revisions.');
         }
-        if ($revision_status == DifferentialRevisionStatus::COMMITTED) {
+        if ($revision_status ==
+            ArcanistDifferentialRevisionStatus::COMMITTED) {
           throw new Exception('You can not abandon a committed revision.');
         }
-        if ($revision_status == DifferentialRevisionStatus::ABANDONED) {
+        if ($revision_status ==
+            ArcanistDifferentialRevisionStatus::ABANDONED) {
           $action = DifferentialAction::ACTION_COMMENT;
           break;
         }
 
         $revision
-          ->setStatus(DifferentialRevisionStatus::ABANDONED)
+          ->setStatus(ArcanistDifferentialRevisionStatus::ABANDONED)
           ->save();
         break;
 
@@ -150,14 +152,16 @@ class DifferentialCommentEditor {
         if ($actor_is_author) {
           throw new Exception('You can not accept your own revision.');
         }
-        if (($revision_status != DifferentialRevisionStatus::NEEDS_REVIEW) &&
-            ($revision_status != DifferentialRevisionStatus::NEEDS_REVISION)) {
+        if (($revision_status !=
+             ArcanistDifferentialRevisionStatus::NEEDS_REVIEW) &&
+            ($revision_status !=
+             ArcanistDifferentialRevisionStatus::NEEDS_REVISION)) {
           $action = DifferentialAction::ACTION_COMMENT;
           break;
         }
 
         $revision
-          ->setStatus(DifferentialRevisionStatus::ACCEPTED)
+          ->setStatus(ArcanistDifferentialRevisionStatus::ACCEPTED)
           ->save();
 
         if (!isset($reviewer_phids[$actor_phid])) {
@@ -174,14 +178,16 @@ class DifferentialCommentEditor {
         if (!$actor_is_author) {
           throw new Exception('You must own a revision to request review.');
         }
-        if (($revision_status != DifferentialRevisionStatus::NEEDS_REVISION) &&
-            ($revision_status != DifferentialRevisionStatus::ACCEPTED)) {
+        if (($revision_status !=
+             ArcanistDifferentialRevisionStatus::NEEDS_REVISION) &&
+            ($revision_status !=
+             ArcanistDifferentialRevisionStatus::ACCEPTED)) {
           $action = DifferentialAction::ACTION_COMMENT;
           break;
         }
 
         $revision
-          ->setStatus(DifferentialRevisionStatus::NEEDS_REVIEW)
+          ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW)
           ->save();
         break;
 
@@ -190,8 +196,10 @@ class DifferentialCommentEditor {
           throw new Exception(
             'You can not request changes to your own revision.');
         }
-        if (($revision_status != DifferentialRevisionStatus::NEEDS_REVIEW) &&
-            ($revision_status != DifferentialRevisionStatus::ACCEPTED)) {
+        if (($revision_status !=
+             ArcanistDifferentialRevisionStatus::NEEDS_REVIEW) &&
+            ($revision_status !=
+             ArcanistDifferentialRevisionStatus::ACCEPTED)) {
           $action = DifferentialAction::ACTION_COMMENT;
           break;
         }
@@ -206,7 +214,7 @@ class DifferentialCommentEditor {
         }
 
         $revision
-          ->setStatus(DifferentialRevisionStatus::NEEDS_REVISION)
+          ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVISION)
           ->save();
         break;
 
@@ -215,14 +223,16 @@ class DifferentialCommentEditor {
           throw new Exception(
             "You can not plan changes to somebody else's revision");
         }
-        if (($revision_status != DifferentialRevisionStatus::NEEDS_REVIEW) &&
-            ($revision_status != DifferentialRevisionStatus::ACCEPTED)) {
+        if (($revision_status !=
+             ArcanistDifferentialRevisionStatus::NEEDS_REVIEW) &&
+            ($revision_status !=
+             ArcanistDifferentialRevisionStatus::ACCEPTED)) {
           $action = DifferentialAction::ACTION_COMMENT;
           break;
         }
 
         $revision
-          ->setStatus(DifferentialRevisionStatus::NEEDS_REVISION)
+          ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVISION)
           ->save();
         break;
 
@@ -230,18 +240,19 @@ class DifferentialCommentEditor {
         if (!$actor_is_author) {
           throw new Exception('You can not reclaim a revision you do not own.');
         }
-        if ($revision_status != DifferentialRevisionStatus::ABANDONED) {
+        if ($revision_status !=
+            ArcanistDifferentialRevisionStatus::ABANDONED) {
           $action = DifferentialAction::ACTION_COMMENT;
           break;
         }
         $revision
-          ->setStatus(DifferentialRevisionStatus::NEEDS_REVIEW)
+          ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW)
           ->save();
         break;
 
       case DifferentialAction::ACTION_COMMIT:
         $revision
-          ->setStatus(DifferentialRevisionStatus::COMMITTED)
+          ->setStatus(ArcanistDifferentialRevisionStatus::COMMITTED)
           ->save();
         break;
 

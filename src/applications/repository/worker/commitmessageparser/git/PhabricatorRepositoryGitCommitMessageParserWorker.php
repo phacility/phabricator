@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,8 +62,10 @@ class PhabricatorRepositoryGitCommitMessageParserWorker
     $tree_hash = trim($stdout);
 
     return array(
-      array(DifferentialRevisionHash::HASH_GIT_COMMIT, $commit_hash),
-      array(DifferentialRevisionHash::HASH_GIT_TREE, $tree_hash),
+      array(ArcanistDifferentialRevisionHash::HASH_GIT_COMMIT,
+            $commit_hash),
+      array(ArcanistDifferentialRevisionHash::HASH_GIT_TREE,
+            $tree_hash),
     );
   }
 

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,8 +86,9 @@ class ConduitAPI_differential_getrevision_Method extends ConduitAPIMethod {
       'uri' => PhabricatorEnv::getURI('/D'.$revision->getID()),
       'title' => $revision->getTitle(),
       'status' => $revision->getStatus(),
-      'statusName'  => DifferentialRevisionStatus::getNameForRevisionStatus(
-        $revision->getStatus()),
+      'statusName'  =>
+        ArcanistDifferentialRevisionStatus::getNameForRevisionStatus(
+          $revision->getStatus()),
       'summary' => $revision->getSummary(),
       'testPlan' => $revision->getTestPlan(),
       'lineCount' => $revision->getLineCount(),

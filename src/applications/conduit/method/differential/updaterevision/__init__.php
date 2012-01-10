@@ -6,9 +6,10 @@
 
 
 
+phutil_require_module('arcanist', 'differential/constants/revisionstatus');
+
 phutil_require_module('phabricator', 'applications/conduit/method/base');
 phutil_require_module('phabricator', 'applications/conduit/protocol/exception');
-phutil_require_module('phabricator', 'applications/differential/constants/revisionstatus');
 phutil_require_module('phabricator', 'applications/differential/editor/revision');
 phutil_require_module('phabricator', 'applications/differential/storage/diff');
 phutil_require_module('phabricator', 'applications/differential/storage/revision');

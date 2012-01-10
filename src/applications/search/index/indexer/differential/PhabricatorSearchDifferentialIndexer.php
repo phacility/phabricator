@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,8 +43,8 @@ class PhabricatorSearchDifferentialIndexer
       PhabricatorPHIDConstants::PHID_TYPE_USER,
       $rev->getDateCreated());
 
-    if ($rev->getStatus() != DifferentialRevisionStatus::COMMITTED &&
-        $rev->getStatus() != DifferentialRevisionStatus::ABANDONED) {
+    if ($rev->getStatus() != ArcanistDifferentialRevisionStatus::COMMITTED &&
+        $rev->getStatus() != ArcanistDifferentialRevisionStatus::ABANDONED) {
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
         $rev->getPHID(),
@@ -82,7 +82,7 @@ class PhabricatorSearchDifferentialIndexer
 
     // If a revision needs review, the owners are the reviewers. Otherwise, the
     // owner is the author (e.g., accepted, rejected, committed).
-    if ($rev->getStatus() == DifferentialRevisionStatus::NEEDS_REVIEW) {
+    if ($rev->getStatus() == ArcanistDifferentialRevisionStatus::NEEDS_REVIEW) {
       foreach ($rev->getReviewers() as $phid) {
         $doc->addRelationship(
           PhabricatorSearchRelationship::RELATIONSHIP_OWNER,

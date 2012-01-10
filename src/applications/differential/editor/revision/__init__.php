@@ -6,10 +6,11 @@
 
 
 
+phutil_require_module('arcanist', 'differential/constants/revisionhash');
+phutil_require_module('arcanist', 'differential/constants/revisionstatus');
+
 phutil_require_module('phabricator', 'applications/differential/constants/action');
 phutil_require_module('phabricator', 'applications/differential/constants/revisioncontrolsystem');
-phutil_require_module('phabricator', 'applications/differential/constants/revisionhash');
-phutil_require_module('phabricator', 'applications/differential/constants/revisionstatus');
 phutil_require_module('phabricator', 'applications/differential/field/selector/base');
 phutil_require_module('phabricator', 'applications/differential/mail/ccwelcome');
 phutil_require_module('phabricator', 'applications/differential/mail/newdiff');

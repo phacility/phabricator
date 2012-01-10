@@ -26,7 +26,7 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
   }
 
   public function defineParamTypes() {
-    $hash_types = DifferentialRevisionHash::getTypes();
+    $hash_types = ArcanistDifferentialRevisionHash::getTypes();
     $hash_types = implode(', ', $hash_types);
 
     $status_types = array(
@@ -107,7 +107,7 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
     }
  */
     if ($commit_hashes) {
-      $hash_types = DifferentialRevisionHash::getTypes();
+      $hash_types = ArcanistDifferentialRevisionHash::getTypes();
       foreach ($commit_hashes as $info) {
         list($type, $hash) = $info;
         if (empty($type) ||
@@ -168,8 +168,9 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
         'dateModified'  => $revision->getDateModified(),
         'authorPHID'    => $revision->getAuthorPHID(),
         'status'        => $revision->getStatus(),
-        'statusName'    => DifferentialRevisionStatus::getNameForRevisionStatus(
-          $revision->getStatus()),
+        'statusName'    =>
+          ArcanistDifferentialRevisionStatus::getNameForRevisionStatus(
+            $revision->getStatus()),
         'sourcePath'    => $diff->getSourcePath(),
         'summary'       => $revision->getSummary(),
         'testPlan'      => $revision->getTestPlan(),

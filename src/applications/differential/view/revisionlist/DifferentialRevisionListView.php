@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,8 @@ final class DifferentialRevisionListView extends AphrontView {
     $rows = array();
     foreach ($this->revisions as $revision) {
       $status = $revision->getStatus();
-      $status = DifferentialRevisionStatus::getNameForRevisionStatus($status);
+      $status =
+        ArcanistDifferentialRevisionStatus::getNameForRevisionStatus($status);
 
       $reviewer_phids = $revision->getReviewers();
       if ($reviewer_phids) {

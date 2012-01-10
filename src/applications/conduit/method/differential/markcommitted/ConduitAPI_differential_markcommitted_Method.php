@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,8 @@ class ConduitAPI_differential_markcommitted_Method extends ConduitAPIMethod {
       throw new ConduitException('ERR_NOT_FOUND');
     }
 
-    if ($revision->getStatus() == DifferentialRevisionStatus::COMMITTED) {
+    if ($revision->getStatus() ==
+        ArcanistDifferentialRevisionStatus::COMMITTED) {
       // This can occur if someone runs 'mark-committed' and hits a race, or
       // they have a remote hook installed but don't have the
       // 'remote_hook_installed' flag set, or similar. In any case, just treat
@@ -66,7 +67,7 @@ class ConduitAPI_differential_markcommitted_Method extends ConduitAPIMethod {
       DifferentialAction::ACTION_COMMIT);
     $editor->save();
 
-    $revision->setStatus(DifferentialRevisionStatus::COMMITTED);
+    $revision->setStatus(ArcanistDifferentialRevisionStatus::COMMITTED);
     $revision->setDateCommitted(time());
     $revision->save();
 

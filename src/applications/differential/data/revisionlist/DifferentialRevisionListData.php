@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ class DifferentialRevisionListData {
         $this->revisions = $this->loadAllWhere(
           'revision.status in (%Ld) AND revision.authorPHID in (%Ls)',
           array(
-            DifferentialRevisionStatus::ACCEPTED,
+            ArcanistDifferentialRevisionStatus::ACCEPTED,
           ),
           $this->ids);
         break;
@@ -137,15 +137,15 @@ class DifferentialRevisionListData {
           $rev->getTableName(),
           $this->ids,
           array(
-            DifferentialRevisionStatus::NEEDS_REVISION,
-            DifferentialRevisionStatus::ACCEPTED,
+            ArcanistDifferentialRevisionStatus::NEEDS_REVISION,
+            ArcanistDifferentialRevisionStatus::ACCEPTED,
           ),
           $rev->getTableName(),
           DifferentialRevision::RELATIONSHIP_TABLE,
           DifferentialRevision::RELATION_REVIEWER,
           $this->ids,
           array(
-            DifferentialRevisionStatus::NEEDS_REVIEW,
+            ArcanistDifferentialRevisionStatus::NEEDS_REVIEW,
           ),
           $this->getOrderClause());
 
@@ -172,15 +172,15 @@ class DifferentialRevisionListData {
           $rev->getTableName(),
           $this->ids,
           array(
-            DifferentialRevisionStatus::NEEDS_REVIEW,
+            ArcanistDifferentialRevisionStatus::NEEDS_REVIEW,
           ),
           $rev->getTableName(),
           DifferentialRevision::RELATIONSHIP_TABLE,
           DifferentialRevision::RELATION_REVIEWER,
           $this->ids,
           array(
-            DifferentialRevisionStatus::NEEDS_REVISION,
-            DifferentialRevisionStatus::ACCEPTED,
+            ArcanistDifferentialRevisionStatus::NEEDS_REVISION,
+            ArcanistDifferentialRevisionStatus::ACCEPTED,
           ),
           $this->getOrderClause());
 
@@ -200,9 +200,9 @@ class DifferentialRevisionListData {
 
   private function getOpenStatuses() {
     return array(
-      DifferentialRevisionStatus::NEEDS_REVIEW,
-      DifferentialRevisionStatus::NEEDS_REVISION,
-      DifferentialRevisionStatus::ACCEPTED,
+      ArcanistDifferentialRevisionStatus::NEEDS_REVIEW,
+      ArcanistDifferentialRevisionStatus::NEEDS_REVISION,
+      ArcanistDifferentialRevisionStatus::ACCEPTED,
     );
   }
 

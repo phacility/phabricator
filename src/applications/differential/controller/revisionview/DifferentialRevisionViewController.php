@@ -403,46 +403,46 @@ class DifferentialRevisionViewController extends DifferentialController {
 
     if ($viewer_is_owner) {
       switch ($revision->getStatus()) {
-        case DifferentialRevisionStatus::NEEDS_REVIEW:
+        case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
           $actions[DifferentialAction::ACTION_ABANDON] = true;
           $actions[DifferentialAction::ACTION_RETHINK] = true;
           break;
-        case DifferentialRevisionStatus::NEEDS_REVISION:
+        case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
           $actions[DifferentialAction::ACTION_ABANDON] = true;
           $actions[DifferentialAction::ACTION_REQUEST] = true;
           break;
-        case DifferentialRevisionStatus::ACCEPTED:
+        case ArcanistDifferentialRevisionStatus::ACCEPTED:
           $actions[DifferentialAction::ACTION_ABANDON] = true;
           $actions[DifferentialAction::ACTION_REQUEST] = true;
           $actions[DifferentialAction::ACTION_RETHINK] = true;
           break;
-        case DifferentialRevisionStatus::COMMITTED:
+        case ArcanistDifferentialRevisionStatus::COMMITTED:
           break;
-        case DifferentialRevisionStatus::ABANDONED:
+        case ArcanistDifferentialRevisionStatus::ABANDONED:
           $actions[DifferentialAction::ACTION_RECLAIM] = true;
           break;
       }
     } else {
       switch ($revision->getStatus()) {
-        case DifferentialRevisionStatus::NEEDS_REVIEW:
+        case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
           $admin_actions[DifferentialAction::ACTION_ABANDON] = $viewer_is_admin;
           $actions[DifferentialAction::ACTION_ACCEPT] = true;
           $actions[DifferentialAction::ACTION_REJECT] = true;
           $actions[DifferentialAction::ACTION_RESIGN] = $viewer_is_reviewer;
           break;
-        case DifferentialRevisionStatus::NEEDS_REVISION:
+        case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
           $admin_actions[DifferentialAction::ACTION_ABANDON] = $viewer_is_admin;
           $actions[DifferentialAction::ACTION_ACCEPT] = true;
           $actions[DifferentialAction::ACTION_RESIGN] = $viewer_is_reviewer;
           break;
-        case DifferentialRevisionStatus::ACCEPTED:
+        case ArcanistDifferentialRevisionStatus::ACCEPTED:
           $admin_actions[DifferentialAction::ACTION_ABANDON] = $viewer_is_admin;
           $actions[DifferentialAction::ACTION_REJECT] = true;
           $actions[DifferentialAction::ACTION_RESIGN] =
             $viewer_is_reviewer && !$viewer_did_accept;
           break;
-        case DifferentialRevisionStatus::COMMITTED:
-        case DifferentialRevisionStatus::ABANDONED:
+        case ArcanistDifferentialRevisionStatus::COMMITTED:
+        case ArcanistDifferentialRevisionStatus::ABANDONED:
           break;
       }
     }

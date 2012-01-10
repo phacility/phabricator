@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ class DifferentialRevisionEditor {
     $revision->setPHID($revision->generatePHID());
 
     $revision->setAuthorPHID($user_phid);
-    $revision->setStatus(DifferentialRevisionStatus::NEEDS_REVIEW);
+    $revision->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
 
     $editor = new DifferentialRevisionEditor($revision, $user_phid);
 
@@ -176,7 +176,7 @@ class DifferentialRevisionEditor {
       // ID for the revision if we don't have one already.
       $revision->setLineCount(0);
       if ($revision->getStatus() === null) {
-        $revision->setStatus(DifferentialRevisionStatus::NEEDS_REVIEW);
+        $revision->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
       }
       if ($revision->getTitle() === null) {
         $revision->setTitle('Untitled Revision');
@@ -381,9 +381,9 @@ class DifferentialRevisionEditor {
       // re-diffs after someone accepts with minor changes/suggestions.
 
       $status = $revision->getStatus();
-      if ($status != DifferentialRevisionStatus::COMMITTED &&
-          $status != DifferentialRevisionStatus::ACCEPTED) {
-        $revision->setStatus(DifferentialRevisionStatus::NEEDS_REVIEW);
+      if ($status != ArcanistDifferentialRevisionStatus::COMMITTED &&
+          $status != ArcanistDifferentialRevisionStatus::ACCEPTED) {
+        $revision->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
       }
 
     } else {
@@ -861,11 +861,11 @@ class DifferentialRevisionEditor {
       case DifferentialRevisionControlSystem::GIT:
         foreach ($data as $commit) {
           $hashes[] = array(
-            DifferentialRevisionHash::HASH_GIT_COMMIT,
+            ArcanistDifferentialRevisionHash::HASH_GIT_COMMIT,
             $commit['commit'],
           );
           $hashes[] = array(
-            DifferentialRevisionHash::HASH_GIT_TREE,
+            ArcanistDifferentialRevisionHash::HASH_GIT_TREE,
             $commit['tree'],
           );
         }
@@ -873,7 +873,7 @@ class DifferentialRevisionEditor {
       case DifferentialRevisionControlSystem::MERCURIAL:
         foreach ($data as $commit) {
           $hashes[] = array(
-            DifferentialRevisionHash::HASH_MERCURIAL_COMMIT,
+            ArcanistDifferentialRevisionHash::HASH_MERCURIAL_COMMIT,
             $commit['rev'],
           );
         }
@@ -896,14 +896,14 @@ class DifferentialRevisionEditor {
     queryfx(
       $conn_w,
       'DELETE FROM %T WHERE revisionID = %d',
-      DifferentialRevisionHash::TABLE_NAME,
+      ArcanistDifferentialRevisionHash::TABLE_NAME,
       $revision->getID());
 
     if ($sql) {
       queryfx(
         $conn_w,
         'INSERT INTO %T (revisionID, type, hash) VALUES %Q',
-        DifferentialRevisionHash::TABLE_NAME,
+        ArcanistDifferentialRevisionHash::TABLE_NAME,
         implode(', ', $sql));
     }
   }

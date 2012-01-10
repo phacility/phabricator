@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,7 +138,8 @@ class DifferentialCommentMail extends DifferentialMail {
     $body[] = null;
 
     $revision = $this->getRevision();
-    if ($revision->getStatus() == DifferentialRevisionStatus::COMMITTED) {
+    if ($revision->getStatus() ==
+        ArcanistDifferentialRevisionStatus::COMMITTED) {
       $phids = $revision->loadCommitPHIDs();
       if ($phids) {
         $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();

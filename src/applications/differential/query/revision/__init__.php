@@ -6,8 +6,9 @@
 
 
 
-phutil_require_module('phabricator', 'applications/differential/constants/revisionhash');
-phutil_require_module('phabricator', 'applications/differential/constants/revisionstatus');
+phutil_require_module('arcanist', 'differential/constants/revisionhash');
+phutil_require_module('arcanist', 'differential/constants/revisionstatus');
+
 phutil_require_module('phabricator', 'applications/differential/storage/affectedpath');
 phutil_require_module('phabricator', 'applications/differential/storage/diff');
 phutil_require_module('phabricator', 'applications/differential/storage/revision');
