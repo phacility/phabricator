@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,45 +18,17 @@
 
 class PhabricatorOwnersListController extends PhabricatorOwnersController {
 
-  private $view;
+  protected $view;
 
   public function willProcessRequest(array $data) {
-    $this->view = idx($data, 'view');
+    $this->view = idx($data, 'view', 'owned');
+    $this->setSideNavFilter('view/'.$this->view);
   }
 
   public function processRequest() {
 
     $request = $this->getRequest();
     $user = $request->getUser();
-
-    $views = array(
-      'owned'   => 'Owned Packages',
-      'all'     => 'All Packages',
-      'search'  => 'Search Results',
-    );
-
-    if (empty($views[$this->view])) {
-      reset($views);
-      $this->view = key($views);
-    }
-
-    if ($this->view != 'search') {
-      unset($views['search']);
-    }
-
-    $nav = new AphrontSideNavView();
-    foreach ($views as $key => $name) {
-      $nav->addNavItem(
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => '/owners/view/'.$key.'/',
-            'class' => ($this->view == $key)
-              ? 'aphront-side-nav-selected'
-              : null,
-          ),
-          phutil_escape_html($name)));
-    }
 
     $package = new PhabricatorOwnersPackage();
     $owner = new PhabricatorOwnersOwner();
@@ -184,14 +156,13 @@ class PhabricatorOwnersListController extends PhabricatorOwnersController {
 
     $filter->appendChild($form);
 
-    $nav->appendChild($filter);
-    $nav->appendChild($content);
-
     return $this->buildStandardPageResponse(
-      $nav,
+      array(
+        $filter,
+        $content,
+      ),
       array(
         'title' => 'Package Index',
-        'tab' => 'index',
       ));
   }
 
@@ -289,4 +260,17 @@ class PhabricatorOwnersListController extends PhabricatorOwnersController {
     return $panel;
   }
 
+  protected function getExtraPackageViews() {
+    switch ($this->view) {
+      case 'search':
+        $extra = array(array('name' => 'Search Results',
+                             'key'  => 'view/search'));
+        break;
+      default:
+        $extra = array();
+        break;
+    }
+
+    return $extra;
+  }
 }

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,7 +146,14 @@ class PhabricatorOwnersEditController extends PhabricatorOwnersController {
     $token_all_owners = array_select_keys($handles, $owners);
     $token_all_owners = mpull($token_all_owners, 'getFullName');
 
-    $title = $package->getID() ? 'Edit Package' : 'New Package';
+    if ($package->getID()) {
+      $title = 'Edit Package';
+      $side_nav_filter = 'edit/'.$this->id;
+    } else {
+      $title = 'New Package';
+      $side_nav_filter = 'new';
+    }
+    $this->setSideNavFilter($side_nav_filter);
 
     $repos = id(new PhabricatorRepository())->loadAll();
 
@@ -268,4 +275,15 @@ class PhabricatorOwnersEditController extends PhabricatorOwnersController {
       ));
   }
 
+  protected function getExtraPackageViews() {
+    if ($this->id) {
+      $extra = array(array('name' => 'Edit',
+                           'key'  => 'edit/'.$this->id));
+    } else {
+      $extra = array(array('name' => 'New',
+                           'key'  => 'new'));
+    }
+
+    return $extra;
+  }
 }

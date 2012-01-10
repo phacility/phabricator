@@ -23,7 +23,6 @@ phutil_require_module('phabricator', 'view/form/control/tokenizer');
 phutil_require_module('phabricator', 'view/form/error');
 phutil_require_module('phabricator', 'view/layout/listfilter');
 phutil_require_module('phabricator', 'view/layout/panel');
-phutil_require_module('phabricator', 'view/layout/sidenav');
 phutil_require_module('phabricator', 'view/utils');
 
 phutil_require_module('phutil', 'markup');

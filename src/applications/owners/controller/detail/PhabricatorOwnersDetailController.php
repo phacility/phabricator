@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
 class PhabricatorOwnersDetailController extends PhabricatorOwnersController {
 
   private $id;
+  private $package;
 
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
@@ -32,6 +33,7 @@ class PhabricatorOwnersDetailController extends PhabricatorOwnersController {
     if (!$package) {
       return new Aphront404Response();
     }
+    $this->package = $package;
 
     $paths = $package->loadPaths();
     $owners = $package->loadOwners();
@@ -138,22 +140,22 @@ class PhabricatorOwnersDetailController extends PhabricatorOwnersController {
         'Edit Package'));
     $panel->appendChild($table);
 
-    $nav = new AphrontSideNavView();
-    $nav->appendChild($panel);
-    $nav->addNavItem(
-      phutil_render_tag(
-        'a',
-        array(
-          'href' => '/owners/package/'.$package->getID().'/',
-          'class' => 'aphront-side-nav-selected',
-        ),
-        'Package Details'));
+    $key = 'package/'.$package->getID();
+    $this->setSideNavFilter($key);
 
     return $this->buildStandardPageResponse(
-      $nav,
+      $panel,
       array(
         'title' => "Package '".$package->getName()."'",
       ));
+  }
+
+  protected function getExtraPackageViews() {
+    $package = $this->package;
+    return array(
+      array('name' => 'Details',
+            'key'  => 'package/'.$package->getID(),
+        ));
   }
 
 }

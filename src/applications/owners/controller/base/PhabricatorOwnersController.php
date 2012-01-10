@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,15 @@
 
 abstract class PhabricatorOwnersController extends PhabricatorController {
 
+  private $filter;
+
+  private function getSideNavFilter() {
+    return $this->filter;
+  }
+  protected function setSideNavFilter($filter) {
+    $this->filter = $filter;
+    return $this;
+  }
   public function buildStandardPageResponse($view, array $data) {
 
     $page = $this->buildStandardPageView();
@@ -25,22 +34,65 @@ abstract class PhabricatorOwnersController extends PhabricatorController {
     $page->setApplicationName('Owners');
     $page->setBaseURI('/owners/');
     $page->setTitle(idx($data, 'title'));
-    $page->setTabs(
-      array(
-        'index' => array(
-          'href' => '/owners/',
-          'name' => 'Package Index',
-        ),
-        'related' => array(
-          'href' => '/owners/related/',
-          'name' => 'Related Commits',
-        ),
-      ),
-      idx($data, 'tab'));
     $page->setGlyph("\xE2\x98\x81");
-    $page->appendChild($view);
+    $nav = $this->renderSideNav();
+    $nav->appendChild($view);
+    $page->appendChild($nav);
 
     $response = new AphrontWebpageResponse();
     return $response->setContent($page->render());
+  }
+
+  public function renderSideNav() {
+    $package_views = array(
+      array('name' => 'Owned',
+            'key'  => 'view/owned'),
+      array('name' => 'All',
+            'key'  => 'view/all'),
+    );
+
+    $package_views =
+      array_merge($this->getExtraPackageViews(),
+                  $package_views);
+
+    $base_uri = new PhutilURI('/owners/');
+
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseUri($base_uri);
+    $nav->addLabel('Packages');
+    foreach ($package_views as $view) {
+      $nav->addFilter($view['key'], $view['name']);
+    }
+    $nav->addSpacer();
+    $nav->addLabel('Related Commits');
+    $related_views = $this->getRelatedViews();
+    foreach ($related_views as $view) {
+      $href = clone $base_uri;
+      $href->setPath($href->getPath().$view['key']);
+      $href = (string)$href;
+      $nav->addFilter($view['key'],
+                      $view['name'],
+                      $href);
+    }
+
+    $filter = $this->getSideNavFilter();
+    $nav->selectFilter($filter, 'view/owned');
+
+    return $nav;
+  }
+
+  protected function getExtraPackageViews() {
+    return array();
+  }
+
+  protected function getRelatedViews() {
+    $related_views = array(
+      array('name' => 'Related to Package',
+            'key'  => 'related/view/all'),
+      array('name' => 'Needs Attention',
+            'key'  => 'related/view/audit')
+          );
+
+    return $related_views;
   }
 }

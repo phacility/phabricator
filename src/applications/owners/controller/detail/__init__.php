@@ -13,7 +13,6 @@ phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'infrastructure/javelin/markup');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/layout/panel');
-phutil_require_module('phabricator', 'view/layout/sidenav');
 
 phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');

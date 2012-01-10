@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,17 +50,37 @@ class PhabricatorOwnerRelatedListController
 
     $search_view = $this->renderSearchView();
     $list_panel = $this->renderListPanel();
-    $nav = $this->renderSideNav();
 
-    $nav->appendChild($search_view);
-    $nav->appendChild($list_panel);
+    $side_nav_filter = 'related/view/'.$this->view.$this->getQueryString();
+    $this->setSideNavFilter($side_nav_filter);
 
     return $this->buildStandardPageResponse(
-      $nav,
+      array(
+        $search_view,
+        $list_panel
+      ),
       array(
         'title' => 'Related Commits',
-        'tab' => 'related',
       ));
+  }
+
+  protected function getRelatedViews() {
+    $related_views = parent::getRelatedViews();
+    if ($this->packagePHID) {
+      $query = $this->getQueryString();
+      foreach ($related_views as &$view) {
+        $view['key'] = $view['key'].$query;
+      }
+    }
+    return $related_views;
+  }
+
+  private function getQueryString() {
+    $query = null;
+    if ($this->packagePHID) {
+      $query = '/?phid=' . $this->packagePHID;
+    }
+    return $query;
   }
 
   private function renderListPanel() {
@@ -149,33 +169,6 @@ class PhabricatorOwnerRelatedListController
         throw new Exception("view {$this->view} not recognized");
     }
     return $status_arr;
-  }
-
-  private function renderSideNav() {
-    $views = array(
-      'all' => 'Related to Package',
-      'audit' => 'Needs Attention',
-    );
-
-    $query = null;
-    if ($this->packagePHID) {
-      $query = '?phid=' . $this->packagePHID;
-    }
-
-    $nav = new AphrontSideNavView();
-    foreach ($views as $key => $name) {
-      $nav->addNavItem(
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => '/owners/related/view/'.$key.'/'.$query,
-            'class' => ($this->view === $key
-               ? 'aphront-side-nav-selected'
-               : null),
-          ),
-          phutil_escape_html($name)));
-    }
-    return $nav;
   }
 
   private function renderSearchView() {
