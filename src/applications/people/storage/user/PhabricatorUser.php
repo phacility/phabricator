@@ -152,6 +152,10 @@ class PhabricatorUser extends PhabricatorUserDAO {
 
   public function validateCSRFToken($token) {
 
+    if (!$this->getPHID()) {
+      return true;
+    }
+
     // When the user posts a form, we check that it contains a valid CSRF token.
     // Tokens cycle each hour (every CSRF_CYLCE_FREQUENCY seconds) and we accept
     // either the current token, the next token (users can submit a "future"
@@ -185,6 +189,7 @@ class PhabricatorUser extends PhabricatorUserDAO {
         return true;
       }
     }
+
     return false;
   }
 

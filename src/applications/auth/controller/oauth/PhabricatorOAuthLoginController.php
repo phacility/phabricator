@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,8 +134,6 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
         ->setURI('/settings/page/'.$provider_key.'/');
     }
 
-    $next_uri = $request->getCookie('next_uri', '/');
-
     // Login with known auth.
 
     if ($oauth_info->getID()) {
@@ -154,9 +152,14 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
 
       $request->setCookie('phusr', $known_user->getUsername());
       $request->setCookie('phsid', $session_key);
-      $request->clearCookie('next_uri');
-      return id(new AphrontRedirectResponse())
-        ->setURI($next_uri);
+
+      $uri = new PhutilURI('/login/validate/');
+      $uri->setQueryParams(
+        array(
+          'phusr' => $known_user->getUsername(),
+        ));
+
+      return id(new AphrontRedirectResponse())->setURI((string)$uri);
     }
 
     $oauth_email = $provider->retrieveUserEmail();

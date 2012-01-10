@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,22 @@ class PhabricatorEmailTokenController extends PhabricatorAuthController {
       return new Aphront400Response();
     }
 
+    if ($request->getUser()->getPHID()) {
+      $view = new AphrontRequestFailureView();
+      $view->setHeader('Already Logged In');
+      $view->appendChild(
+        '<p>You are already logged in.</p>');
+      $view->appendChild(
+        '<div class="aphront-failure-continue">'.
+          '<a class="button" href="/">Return Home</a>'.
+        '</div>');
+      return $this->buildStandardPageResponse(
+        $view,
+        array(
+          'title' => 'Already Logged In',
+        ));
+    }
+
     $token = $this->token;
     $email = $request->getStr('email');
 
@@ -61,81 +77,18 @@ class PhabricatorEmailTokenController extends PhabricatorAuthController {
         ));
     }
 
-    if ($request->getUser()->getPHID() != $target_user->getPHID()) {
-      $session_key = $target_user->establishSession('web');
-      $request->setCookie('phusr', $target_user->getUsername());
-      $request->setCookie('phsid', $session_key);
-    }
+    $session_key = $target_user->establishSession('web');
+    $request->setCookie('phusr', $target_user->getUsername());
+    $request->setCookie('phsid', $session_key);
 
-    $errors = array();
-
-    $e_pass = true;
-    $e_confirm = true;
-
-    if ($request->isFormPost()) {
-      $e_pass = 'Error';
-      $e_confirm = 'Error';
-
-      $pass = $request->getStr('password');
-      $confirm = $request->getStr('confirm');
-
-      if (strlen($pass) < 3) {
-        $errors[] = 'That password is ridiculously short.';
-      }
-
-      if ($pass !== $confirm) {
-        $errors[] = "Passwords do not match.";
-      }
-
-      if (!$errors) {
-        $target_user->setPassword($pass);
-        $target_user->save();
-        return id(new AphrontRedirectResponse())
-          ->setURI('/');
-      }
-    }
-
-    if ($errors) {
-      $error_view = new AphrontErrorView();
-      $error_view->setTitle('Password Reset Failed');
-      $error_view->setErrors($errors);
-    } else {
-      $error_view = null;
-    }
-
-    $form = new AphrontFormView();
-    $form
-      ->setUser($target_user)
-      ->setAction('/login/etoken/'.$token.'/')
-      ->addHiddenInput('email', $email)
-      ->appendChild(
-        id(new AphrontFormPasswordControl())
-          ->setLabel('New Password')
-          ->setName('password')
-          ->setError($e_pass))
-      ->appendChild(
-        id(new AphrontFormPasswordControl())
-          ->setLabel('Confirm Password')
-          ->setName('confirm')
-          ->setError($e_confirm))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue('Reset Password')
-          ->addCancelButton('/', 'Skip'));
-
-    $panel = new AphrontPanelView();
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->setHeader('Reset Password');
-    $panel->appendChild($form);
-
-    return $this->buildStandardPageResponse(
+    $uri = new PhutilURI('/login/validate/');
+    $uri->setQueryParams(
       array(
-        $error_view,
-        $panel,
-      ),
-      array(
-        'title' => 'Create New Account',
+        'phusr' => $target_user->getUsername(),
+        'next'  => '/login/reset/',
       ));
-  }
 
+    return id(new AphrontRedirectResponse())
+      ->setURI((string)$uri);
+  }
 }

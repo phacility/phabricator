@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,16 +31,13 @@ class PhabricatorLoginController extends PhabricatorAuthController {
     }
 
     $next_uri = $this->getRequest()->getPath();
-    $request->setCookie('next_uri', $next_uri);
-    if ($next_uri == '/login/' && !$request->isFormPost()) {
-      // The user went straight to /login/, so presumably they want to go
-      // to the dashboard upon logging in. Because, you know, that's logical.
-      // And people are logical. Sometimes... Fine, no they're not.
-      // We check for POST here because getPath() would get reset to /login/.
-       $request->setCookie('next_uri', '/');
+    if ($next_uri == '/login/') {
+      $next_uri = '/';
     }
 
-    // Always use $request->getCookie('next_uri', '/') after the above.
+    if (!$request->isFormPost()) {
+      $request->setCookie('next_uri', $next_uri);
+    }
 
     $password_auth = PhabricatorEnv::getEnvConfig('auth.password-auth-enabled');
 
@@ -72,8 +69,14 @@ class PhabricatorLoginController extends PhabricatorAuthController {
             $request->setCookie('phusr', $user->getUsername());
             $request->setCookie('phsid', $session_key);
 
+            $uri = new PhutilURI('/login/validate/');
+            $uri->setQueryParams(
+              array(
+                'phusr' => $user->getUsername(),
+              ));
+
             return id(new AphrontRedirectResponse())
-              ->setURI($request->getCookie('next_uri', '/'));
+              ->setURI((string)$uri);
           } else {
             $log = PhabricatorUserLog::newLog(
               null,
