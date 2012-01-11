@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ class PhabricatorProjectListController
     foreach ($projects as $project) {
       $phid = $project->getPHID();
 
-      $profile = $profiles[$phid];
+      $profile = idx($profiles, $phid);
       $affiliations = $affil_groups[$phid];
 
       $group = idx($groups, $phid, array());
@@ -113,8 +113,12 @@ class PhabricatorProjectListController
 
       $population = count($affiliations);
 
-      $blurb = $profile->getBlurb();
-      $blurb = phutil_utf8_shorten($blurb, 64);
+      if ($profile) {
+        $blurb = $profile->getBlurb();
+        $blurb = phutil_utf8_shorten($blurb, 64);
+      } else {
+        $blurb = null;
+      }
 
 
       $rows[] = array(
