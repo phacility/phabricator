@@ -671,6 +671,14 @@ return array(
   // projects that want to expose an activity feed on the project homepage.
   'feed.public' => false,
 
+
+// -- Drydock --------------------------------------------------------------- //
+
+  // If you want to use Drydock's builtin EC2 Blueprints, configure your AWS
+  // EC2 credentials here.
+  'amazon-ec2.access-key'   => null,
+  'amazon-ec2.secret-key'   => null,
+
 // -- Customization --------------------------------------------------------- //
 
   // Paths to additional phutil libraries to load.

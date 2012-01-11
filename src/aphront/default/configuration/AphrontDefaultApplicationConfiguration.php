@@ -380,6 +380,18 @@ class AphrontDefaultApplicationConfiguration
       '/calendar/' => array(
         '$' => 'PhabricatorCalendarBrowseController',
       ),
+
+      '/drydock/' => array(
+        '$' => 'DrydockResourceListController',
+        'resource/$' => 'DrydockResourceListController',
+        'resource/allocate/$' => 'DrydockResourceAllocateController',
+        'host/' => array(
+          '$' => 'DrydockHostListController',
+          'edit/$' => 'DrydockHostEditController',
+          'edit/(?P<id>\d+)/$' => 'DrydockhostEditController',
+        ),
+        'lease/$' => 'DrydockLeaseListController',
+      ),
     );
   }
 
