@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,6 +98,7 @@ if (PhabricatorEnv::getEnvConfig('phabricator.setup')) {
   return;
 }
 
+phabricator_detect_bad_base_uri();
 
 $host = $_SERVER['HTTP_HOST'];
 $path = $_REQUEST['__path__'];
@@ -213,7 +214,28 @@ function setup_aphront_basics() {
 
 function phabricator_fatal_config_error($msg) {
   phabricator_fatal("CONFIG ERROR: ".$msg."\n");
-  die();
+}
+
+function phabricator_detect_bad_base_uri() {
+  $conf = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
+  $uri = new PhutilURI($conf);
+  switch ($uri->getProtocol()) {
+    case 'http':
+    case 'https':
+      break;
+    default:
+      phabricator_fatal_config_error(
+        "'phabricator.base-uri' is set to '{$conf}', which is invalid. ".
+        "The URI must start with 'http://' or 'https://'.");
+  }
+
+  if (strpos($uri->getDomain(), '.') === false) {
+    phabricator_fatal_config_error(
+      "'phabricator.base-uri' is set to '{$conf}', which is invalid. The URI ".
+      "must contain a dot ('.'), like 'http://example.com/', not just ".
+      "'http://example/'. Some web browsers will not set cookies on domains ".
+      "with no TLD, and Phabricator requires cookies for login.");
+  }
 }
 
 function phabricator_detect_insane_memory_limit() {

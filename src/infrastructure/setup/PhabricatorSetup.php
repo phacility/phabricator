@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -250,7 +250,8 @@ class PhabricatorSetup {
       return;
     } else {
       $host = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
-      $protocol = id(new PhutilURI($host))->getProtocol();
+      $host_uri = new PhutilURI($host);
+      $protocol = $host_uri->getProtocol();
       $allowed_protocols = array(
         'http'  => true,
         'https' => true,
@@ -264,7 +265,7 @@ class PhabricatorSetup {
         return;
       }
       if (preg_match('/.*\/$/', $host)) {
-        self::write(" okay  phabricator.base-uri\n");
+        self::write(" okay  phabricator.base-uri protocol\n");
       } else {
         self::writeFailure();
         self::write(
@@ -273,6 +274,19 @@ class PhabricatorSetup {
           "http://phabricator.example.com\")\nin your custom config file.".
           "\nRefer to 'default.conf.php' for documentation on configuration ".
           "options.\n");
+        return;
+      }
+
+      $host_domain = $host_uri->getDomain();
+      if (strpos($host_domain, '.') !== false) {
+        self::write(" okay  phabricator.base-uri domain\n");
+      } else {
+        self::writeFailure();
+        self::write(
+          "You must host Phabricator on a domain that contains a dot ('.'). ".
+          "The current domain, '{$host_domain}', does not have a dot, so some ".
+          "browsers will not set cookies on it. For instance, ".
+          "'http://example.com/ is OK, but 'http://example/' won't work.");
         return;
       }
     }
