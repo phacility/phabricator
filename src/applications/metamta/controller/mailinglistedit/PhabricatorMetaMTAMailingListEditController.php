@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ class PhabricatorMetaMTAMailingListEditController
     }
 
     $e_email = true;
+    $e_uri = null;
+    $e_name = true;
     $errors = array();
 
     $request = $this->getRequest();
@@ -48,6 +50,26 @@ class PhabricatorMetaMTAMailingListEditController
       if (!strlen($list->getEmail())) {
         $e_email = 'Required';
         $errors[] = 'Email is required.';
+      }
+
+      if (!strlen($list->getName())) {
+        $e_name = 'Required';
+        $errors[] = 'Name is required.';
+      }
+
+      if ($list->getURI()) {
+        $uri = new PhutilURI($list->getURI());
+        $proto = $uri->getProtocol();
+        $allowed_protocols = PhabricatorEnv::getEnvConfig(
+          'uri.allowed-protocols');
+        if (empty($allowed_protocols[$proto])) {
+          $e_uri = 'Invalid';
+          $protocol_list = implode(', ', array_keys($allowed_protocols));
+          $protocol_list = phutil_escape_html($protocol_list);
+          $errors[] =
+            'URI must use one of the allowed protocols: '.
+            $protocol_list.'.';
+        }
       }
 
       if (!$errors) {
@@ -78,16 +100,21 @@ class PhabricatorMetaMTAMailingListEditController
           ->setLabel('Email')
           ->setName('email')
           ->setValue($list->getEmail())
+          ->setCaption('Email will be delivered to this address.')
           ->setError($e_email))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Name')
           ->setName('name')
+          ->setError($e_name)
+          ->setCaption('Human-readable display and autocomplete name.')
           ->setValue($list->getName()))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('URI')
           ->setName('uri')
+          ->setError($e_uri)
+          ->setCaption('Optional link to mailing list archives or info.')
           ->setValue($list->getURI()))
       ->appendChild(
         id(new AphrontFormStaticControl())
