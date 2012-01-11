@@ -77,7 +77,9 @@ extends ConduitAPIMethod {
     // If the test result already exists, then update it with
     // the new info.
     foreach ($unit_results as &$unit_result) {
-      if ($unit_result['name'] === $name) {
+      if ($unit_result['name'] === $name ||
+          $unit_result['name'] === $file) {
+        $unit_result['name'] = $name;
         $unit_result['file'] = $file;
         $unit_result['result'] = $result;
         $unit_result['userdata'] = $message;
