@@ -90,6 +90,7 @@ phutil_register_library_map(array(
     'CelerityStaticResourceResponse' => 'infrastructure/celerity/response',
     'ConduitAPIMethod' => 'applications/conduit/method/base',
     'ConduitAPIRequest' => 'applications/conduit/protocol/request',
+    'ConduitAPIResponse' => 'applications/conduit/protocol/response',
     'ConduitAPI_arcanist_Method' => 'applications/conduit/method/arcanist/base',
     'ConduitAPI_arcanist_projectinfo_Method' => 'applications/conduit/method/arcanist/projectinfo',
     'ConduitAPI_conduit_connect_Method' => 'applications/conduit/method/conduit/connect',

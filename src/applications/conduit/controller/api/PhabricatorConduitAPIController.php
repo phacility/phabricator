@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -181,23 +181,22 @@ class PhabricatorConduitAPIController
       unset($unguarded);
     }
 
-    $result = array(
-      'result'      => $result,
-      'error_code'  => $error_code,
-      'error_info'  => $error_info,
-    );
+    $response = id(new ConduitAPIResponse())
+      ->setResult($result)
+      ->setErrorCode($error_code)
+      ->setErrorInfo($error_info);
 
     switch ($request->getStr('output')) {
       case 'human':
         return $this->buildHumanReadableResponse(
           $method,
           $api_request,
-          $result);
+          $response->toDictionary());
       case 'json':
       default:
         return id(new AphrontFileResponse())
           ->setMimeType('application/json')
-          ->setContent('for(;;);'.json_encode($result));
+          ->setContent('for(;;);'.$response->toJSON());
     }
   }
 

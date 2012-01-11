@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ class ConduitAPIRequest {
     return $this->params;
   }
 
-  public function setUser($user) {
+  public function setUser(PhabricatorUser $user) {
     $this->user = $user;
     return $this;
   }
