@@ -74,14 +74,22 @@ class PhabricatorRepository extends PhabricatorRepositoryDAO {
   }
 
   public static function newPhutilURIFromGitURI($raw_uri) {
-    // If there's no protocol (git implicit SSH) reformat the URI to be a
-    // normal URI. These git URIs look like "user@domain.com:path" instead of
-    // "ssh://user@domain/path".
-
     $uri = new PhutilURI($raw_uri);
     if (!$uri->getProtocol()) {
-      list($domain, $path) = explode(':', $raw_uri, 2);
-      $uri = new PhutilURI('ssh://'.$domain.'/'.$path);
+      if (strpos($raw_uri, '/') === 0) {
+        // If the URI starts with a '/', it's an implicit file:// URI on the
+        // local disk.
+        $uri = new PhutilURI('file://'.$raw_uri);
+      } else if (strpos($raw_uri, ':') !== false) {
+        // If there's no protocol (git implicit SSH) but the URI has a colon,
+        // it's a git implicit SSH URI. Reformat the URI to be a normal URI.
+        // These git URIs look like "user@domain.com:path" instead of
+        // "ssh://user@domain/path".
+        list($domain, $path) = explode(':', $raw_uri, 2);
+        $uri = new PhutilURI('ssh://'.$domain.'/'.$path);
+      } else {
+        throw new Exception("The Git URI '{$raw_uri}' could not be parsed.");
+      }
     }
 
     return $uri;

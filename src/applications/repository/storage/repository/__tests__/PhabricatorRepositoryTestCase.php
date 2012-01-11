@@ -23,6 +23,7 @@ final class PhabricatorRepositoryTestCase
     static $map = array(
       'ssh://user@domain.com/path.git'  => 'ssh://user@domain.com/path.git',
       'user@domain.com:path.git'        => 'ssh://user@domain.com/path.git',
+      '/path/to/local/repo.git'         => 'file:///path/to/local/repo.git',
     );
 
     foreach ($map as $raw => $expect) {
@@ -31,6 +32,25 @@ final class PhabricatorRepositoryTestCase
         $expect,
         (string)$uri,
         "Normalized Git URI '{$raw}'");
+    }
+  }
+
+  public function testParseBadGitURI() {
+    $junk = array(
+      'herp derp moon balloon',
+    );
+
+    foreach ($junk as $garbage) {
+      $ex = null;
+      try {
+        $uri = PhabricatorRepository::newPhutilURIFromGitURI($garbage);
+      } catch (Exception $caught) {
+        $ex = $caught;
+      }
+      $this->assertEqual(
+        true,
+        (bool)$ex,
+        'Expect exception when parsing garbage.');
     }
   }
 

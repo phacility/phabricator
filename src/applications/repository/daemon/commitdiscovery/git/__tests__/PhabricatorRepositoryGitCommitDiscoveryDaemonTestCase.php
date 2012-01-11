@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,18 @@ final class PhabricatorRepositoryGitCommitDiscoveryDaemonTestCase
         'user@domain.com:path/repo',
         true,
         'Optional trailing slash should not prevent matches.',
+      ),
+      array(
+        'file:///path/to/local/repo.git',
+        'file:///path/to/local/repo.git',
+        true,
+        'file:// protocol should be supported.',
+      ),
+      array(
+        '/path/to/local/repo.git',
+        'file:///path/to/local/repo.git',
+        true,
+        'Implicit file:// protocol should be recognized.',
       ),
     );
 
