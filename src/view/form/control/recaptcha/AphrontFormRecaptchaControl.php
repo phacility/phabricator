@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,11 @@
  * limitations under the License.
  */
 
+/**
+ *
+ * @phutil-external-symbol function recaptcha_get_html
+ * @phutil-external-symbol function recaptcha_check_answer
+ */
 class AphrontFormRecaptchaControl extends AphrontFormControl {
 
   protected function getCustomControlClass() {
