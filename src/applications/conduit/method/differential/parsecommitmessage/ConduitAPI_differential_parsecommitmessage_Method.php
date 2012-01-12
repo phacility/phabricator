@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ class ConduitAPI_differential_parsecommitmessage_Method
       if (!$aux_field->shouldAppearOnCommitMessage()) {
         unset($aux_fields[$key]);
       }
+      $aux_field->setUser($request->getUser());
     }
 
     $aux_fields = mpull($aux_fields, null, 'getCommitMessageKey');
@@ -66,9 +67,21 @@ class ConduitAPI_differential_parsecommitmessage_Method
       $field = $aux_fields[$field_key];
       try {
         $fields[$field_key] = $field->parseValueFromCommitMessage($field_value);
+        $field->setValueFromParsedCommitMessage($fields[$field_key]);
       } catch (DifferentialFieldParseException $ex) {
         $field_label = $field->renderLabelForCommitMessage();
         $errors[] = "Error parsing field '{$field_label}': ".$ex->getMessage();
+      }
+    }
+
+    foreach ($aux_fields as $field_key => $aux_field) {
+      try {
+        $aux_field->validateField();
+      } catch (DifferentialFieldValidationException $ex) {
+        $field_label = $aux_field->renderLabelForCommitMessage();
+        $errors[] =
+          "Invalid or missing field '{$field_label}': ".
+          $ex->getMessage();
       }
     }
 
