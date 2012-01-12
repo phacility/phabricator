@@ -234,7 +234,10 @@ function phabricator_detect_bad_base_uri() {
       "'phabricator.base-uri' is set to '{$conf}', which is invalid. The URI ".
       "must contain a dot ('.'), like 'http://example.com/', not just ".
       "'http://example/'. Some web browsers will not set cookies on domains ".
-      "with no TLD, and Phabricator requires cookies for login.");
+      "with no TLD, and Phabricator requires cookies for login. ".
+      "If you are using localhost, create an entry in the hosts file like ".
+      "'127.0.0.1 example.com', and access the localhost with ".
+      "'http://example.com/'.");
   }
 }
 

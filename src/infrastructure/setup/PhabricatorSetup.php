@@ -286,7 +286,10 @@ class PhabricatorSetup {
           "You must host Phabricator on a domain that contains a dot ('.'). ".
           "The current domain, '{$host_domain}', does not have a dot, so some ".
           "browsers will not set cookies on it. For instance, ".
-          "'http://example.com/ is OK, but 'http://example/' won't work.");
+          "'http://example.com/ is OK, but 'http://example/' won't work. ".
+          "If you are using localhost, create an entry in the hosts file like ".
+          "'127.0.0.1 example.com', and access the localhost with ".
+          "'http://example.com/'.");
         return;
       }
     }
