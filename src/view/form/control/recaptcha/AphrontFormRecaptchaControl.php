@@ -31,13 +31,17 @@ class AphrontFormRecaptchaControl extends AphrontFormControl {
     return self::isRecaptchaEnabled();
   }
 
-  private static function isRecaptchaEnabled() {
+  public static function isRecaptchaEnabled() {
     return PhabricatorEnv::getEnvConfig('recaptcha.enabled');
   }
 
   private static function requireLib() {
     $root = phutil_get_library_root('phabricator');
     require_once dirname($root).'/externals/recaptcha/recaptchalib.php';
+  }
+
+  public static function hasCaptchaResponse(AphrontRequest $request) {
+    return $request->getBool('recaptcha_response_field');
   }
 
   public static function processCaptcha(AphrontRequest $request) {

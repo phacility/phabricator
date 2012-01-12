@@ -43,11 +43,33 @@ class PhabricatorLoginController extends PhabricatorAuthController {
 
     $forms = array();
 
-    $error_view = null;
+
+    $errors = array();
     if ($password_auth) {
-      $error = false;
+      $require_captcha = false;
+      $e_captcha = true;
       $username_or_email = $request->getCookie('phusr');
       if ($request->isFormPost()) {
+
+        if (AphrontFormRecaptchaControl::isRecaptchaEnabled()) {
+          $failed_attempts = PhabricatorUserLog::loadRecentEventsFromThisIP(
+            PhabricatorUserLog::ACTION_LOGIN_FAILURE,
+            60 * 15);
+          if (count($failed_attempts) > 5) {
+            $require_captcha = true;
+            if (!AphrontFormRecaptchaControl::processCaptcha($request)) {
+              if (AphrontFormRecaptchaControl::hasCaptchaResponse($request)) {
+                $e_captcha = 'Invalid';
+                $errors[] = 'CAPTCHA was not entered correctly.';
+              } else {
+                $e_captcha = 'Required';
+                $errors[] = 'Too many login failures recently. You must '.
+                            'submit a CAPTCHA with your login request.';
+              }
+            }
+          }
+        }
+
         $username_or_email = $request->getStr('username_or_email');
 
         $user = id(new PhabricatorUser())->loadOneWhere(
@@ -60,43 +82,46 @@ class PhabricatorLoginController extends PhabricatorAuthController {
             $username_or_email);
         }
 
-        $okay = false;
-        if ($user) {
-          if ($user->comparePassword($request->getStr('password'))) {
-
-            $session_key = $user->establishSession('web');
-
-            $request->setCookie('phusr', $user->getUsername());
-            $request->setCookie('phsid', $session_key);
-
-            $uri = new PhutilURI('/login/validate/');
-            $uri->setQueryParams(
-              array(
-                'phusr' => $user->getUsername(),
-              ));
-
-            return id(new AphrontRedirectResponse())
-              ->setURI((string)$uri);
-          } else {
-            $log = PhabricatorUserLog::newLog(
-              null,
-              $user,
-              PhabricatorUserLog::ACTION_LOGIN_FAILURE);
-            $log->save();
+        if (!$errors) {
+          // Perform username/password tests only if we didn't get rate limited
+          // by the CAPTCHA.
+          if (!$user || !$user->comparePassword($request->getStr('password'))) {
+            $errors[] = 'Bad username/password.';
           }
         }
 
-        if (!$okay) {
+        if (!$errors) {
+          $session_key = $user->establishSession('web');
+
+          $request->setCookie('phusr', $user->getUsername());
+          $request->setCookie('phsid', $session_key);
+
+          $uri = new PhutilURI('/login/validate/');
+          $uri->setQueryParams(
+            array(
+              'phusr' => $user->getUsername(),
+            ));
+
+          return id(new AphrontRedirectResponse())
+            ->setURI((string)$uri);
+        } else {
+          $log = PhabricatorUserLog::newLog(
+            null,
+            $user,
+            PhabricatorUserLog::ACTION_LOGIN_FAILURE);
+          $log->save();
+
           $request->clearCookie('phusr');
           $request->clearCookie('phsid');
         }
-
-        $error = true;
       }
 
-      if ($error) {
+      if ($errors) {
         $error_view = new AphrontErrorView();
-        $error_view->setTitle('Bad username/password.');
+        $error_view->setTitle('Login Failed');
+        $error_view->setErrors($errors);
+      } else {
+        $error_view = null;
       }
 
       $form = new AphrontFormView();
@@ -114,7 +139,15 @@ class PhabricatorLoginController extends PhabricatorAuthController {
             ->setName('password')
             ->setCaption(
               '<a href="/login/email/">'.
-                'Forgot your password? / Email Login</a>'))
+                'Forgot your password? / Email Login</a>'));
+
+      if ($require_captcha) {
+        $form->appendChild(
+          id(new AphrontFormRecaptchaControl())
+            ->setError($e_captcha));
+      }
+
+      $form
         ->appendChild(
           id(new AphrontFormSubmitControl())
             ->setValue('Login'));

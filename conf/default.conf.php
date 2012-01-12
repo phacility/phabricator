@@ -390,7 +390,9 @@ return array(
 
 // -- Recaptcha ------------------------------------------------------------- //
 
-  // Is Recaptcha enabled? If disabled, captchas will not appear.
+  // Is Recaptcha enabled? If disabled, captchas will not appear. You should
+  // enable Recaptcha if your install is public-facing, as it hinders
+  // brute-force attacks.
   'recaptcha.enabled'           => false,
 
   // Your Recaptcha public key, obtained from Recaptcha.
