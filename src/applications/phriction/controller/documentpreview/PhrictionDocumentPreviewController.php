@@ -27,6 +27,19 @@ class PhrictionDocumentPreviewController
     $request = $this->getRequest();
     $document = $request->getStr('document');
 
+    $draft_key = $request->getStr('draftkey');
+    if ($draft_key) {
+      $table = new PhabricatorDraft();
+      queryfx(
+        $table->establishConnection('w'),
+        'INSERT INTO %T (authorPHID, draftKey, draft) VALUES (%s, %s, %s)
+          ON DUPLICATE KEY UPDATE draft = VALUES(draft)',
+        $table->getTableName(),
+        $request->getUser()->getPHID(),
+        $draft_key,
+        $document);
+    }
+
     $content_obj = new PhrictionContent();
     $content_obj->setContent($document);
 
