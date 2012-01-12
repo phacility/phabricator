@@ -134,7 +134,6 @@ class AphrontDefaultApplicationConfiguration
         'email/$' => 'PhabricatorEmailLoginController',
         'etoken/(?P<token>\w+)/$' => 'PhabricatorEmailTokenController',
         'refresh/$' => 'PhabricatorRefreshCSRFController',
-        'reset/$' => 'PhabricatorResetPasswordController',
         'validate/$' => 'PhabricatorLoginValidateController',
       ),
 

@@ -327,6 +327,10 @@ return array(
   // information remains consistent across both systems.
   'account.editable'            => true,
 
+  // When users set or reset a password, it must have at least this many
+  // characters.
+  'account.minimum-password-length'  => 8,
+
 
 // --  Facebook  ------------------------------------------------------------ //
 

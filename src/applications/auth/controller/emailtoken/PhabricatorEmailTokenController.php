@@ -81,11 +81,17 @@ class PhabricatorEmailTokenController extends PhabricatorAuthController {
     $request->setCookie('phusr', $target_user->getUsername());
     $request->setCookie('phsid', $session_key);
 
+    if (PhabricatorEnv::getEnvConfig('account.editable')) {
+      $next = '/settings/page/password/?token='.$token;
+    } else {
+      $next = '/';
+    }
+
     $uri = new PhutilURI('/login/validate/');
     $uri->setQueryParams(
       array(
         'phusr' => $target_user->getUsername(),
-        'next'  => '/login/reset/',
+        'next'  => $next,
       ));
 
     return id(new AphrontRedirectResponse())

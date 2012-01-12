@@ -32,31 +32,65 @@ class PhabricatorUserPasswordSettingsPanelController
       return new Aphront400Response();
     }
 
+    $min_len = PhabricatorEnv::getEnvConfig('account.minimum-password-length');
+    $min_len = (int)$min_len;
+
+    // NOTE: To change your password, you need to prove you own the account,
+    // either by providing the old password or by carrying a token to
+    // the workflow from a password reset email.
+
+    $token = $request->getStr('token');
+    if ($token) {
+      $valid_token = $user->validateEmailToken($token);
+    } else {
+      $valid_token = false;
+    }
+
+    $e_old = true;
+    $e_new = true;
+    $e_conf = true;
+
     $errors = array();
     if ($request->isFormPost()) {
-      if ($user->comparePassword($request->getStr('old_pw'))) {
-        $pass = $request->getStr('new_pw');
-        $conf = $request->getStr('conf_pw');
-        if ($pass === $conf) {
-          if (strlen($pass)) {
-            $user->setPassword($pass);
-            // This write is unguarded because the CSRF token has already
-            // been checked in the call to $request->isFormPost() and
-            // the CSRF token depends on the password hash, so when it
-            // is changed here the CSRF token check will fail.
-            $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-            $user->save();
-            unset($unguarded);
-            return id(new AphrontRedirectResponse())
-              ->setURI('/settings/page/password/?saved=true');
-          } else {
-            $errors[] = 'Your new password is too short.';
-          }
-        } else {
-          $errors[] = 'New password and confirmation do not match.';
+      if (!$valid_token) {
+        if (!$user->comparePassword($request->getStr('old_pw'))) {
+          $errors[] = 'The old password you entered is incorrect.';
+          $e_old = 'Invalid';
         }
-      } else {
-        $errors[] = 'The old password you entered is incorrect.';
+      }
+
+      $pass = $request->getStr('new_pw');
+      $conf = $request->getStr('conf_pw');
+
+      if (strlen($pass) < $min_len) {
+        $errors[] = 'Your new password is too short.';
+        $e_new = 'Too Short';
+      }
+
+      if ($pass !== $conf) {
+        $errors[] = 'New password and confirmation do not match.';
+        $e_conf = 'Invalid';
+      }
+
+      if (!$errors) {
+        $user->setPassword($pass);
+        // This write is unguarded because the CSRF token has already
+        // been checked in the call to $request->isFormPost() and
+        // the CSRF token depends on the password hash, so when it
+        // is changed here the CSRF token check will fail.
+        $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $user->save();
+        unset($unguarded);
+
+        if ($valid_token) {
+          // If this is a password set/reset, kick the user to the home page
+          // after we update their account.
+          $next = '/';
+        } else {
+          $next = '/settings/page/password/?saved=true';
+        }
+
+        return id(new AphrontRedirectResponse())->setURI($next);
       }
     }
 
@@ -74,22 +108,36 @@ class PhabricatorUserPasswordSettingsPanelController
       $notice->setErrors($errors);
     }
 
+    $len_caption = null;
+    if ($min_len) {
+      $len_caption = 'Minimum password length: '.$min_len.' characters.';
+    }
+
     $form = new AphrontFormView();
     $form
       ->setUser($user)
-      ->appendChild(
+      ->addHiddenInput('token', $token);
+
+    if (!$valid_token) {
+      $form->appendChild(
         id(new AphrontFormPasswordControl())
           ->setLabel('Old Password')
+          ->setError($e_old)
           ->setName('old_pw'));
+    }
+
     $form
       ->appendChild(
         id(new AphrontFormPasswordControl())
           ->setLabel('New Password')
+          ->setError($e_new)
           ->setName('new_pw'));
     $form
       ->appendChild(
         id(new AphrontFormPasswordControl())
           ->setLabel('Confirm Password')
+          ->setCaption($len_caption)
+          ->setError($e_conf)
           ->setName('conf_pw'));
     $form
       ->appendChild(
