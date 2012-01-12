@@ -2,7 +2,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,10 @@ if (!$args) {
   usage("Specify which caches you want to purge.");
 }
 
-foreach ($args as $arg) {
-  switch ($arg) {
+$changesets = array();
+$len = count($args);
+for ($ii = 0; $ii < $len; $ii++) {
+  switch ($args[$ii]) {
     case '--all':
       $purge_changesets = true;
       $purge_differential = true;
@@ -41,6 +43,14 @@ foreach ($args as $arg) {
       break;
     case '--changesets':
       $purge_changesets = true;
+      while (isset($args[$ii + 1]) && (substr($args[$ii + 1], 0, 2) !== '--')) {
+        $changeset = $args[++$ii];
+        if (!is_numeric($changeset)) {
+          return usage("Changeset argument '{$changeset}' ".
+                       "is not a positive integer.");
+        }
+        $changesets[] = intval($changeset);
+      }
       break;
     case '--differential':
       $purge_differential = true;
@@ -51,17 +61,27 @@ foreach ($args as $arg) {
     case '--help':
       return help();
     default:
-      return usage("Unrecognized argument '{$arg}'.");
+      return usage("Unrecognized argument '{$args[$ii]}'.");
   }
 }
 
 if ($purge_changesets) {
-  echo "Purging changeset cache...\n";
   $table = new DifferentialChangeset();
-  queryfx(
-    $table->establishConnection('w'),
-    'TRUNCATE TABLE %T',
-    DifferentialChangeset::TABLE_CACHE);
+  if ($changesets) {
+    echo "Purging changeset cache for changesets ".
+         implode($changesets, ",")."\n";
+    queryfx(
+      $table->establishConnection('w'),
+      'DELETE FROM %T WHERE id IN (%Ld)',
+      DifferentialChangeset::TABLE_CACHE,
+      $changesets);
+  } else {
+    echo "Purging changeset cache...\n";
+    queryfx(
+      $table->establishConnection('w'),
+      'TRUNCATE TABLE %T',
+      DifferentialChangeset::TABLE_CACHE);
+  }
   echo "Done.\n";
 }
 
@@ -98,7 +118,10 @@ function help() {
   $help = <<<EOHELP
 **SUMMARY**
 
-    **purge_cache.php** [--maniphest] [--differential] [--changesets]
+    **purge_cache.php**
+        [--maniphest]
+        [--differential]
+        [--changesets [changeset_id ...]]
     **purge_cache.php** --all
     **purge_cache.php** --help
 
@@ -117,8 +140,10 @@ function help() {
     __--all__
         Purge all long-lived caches.
 
-    __--changesets__
-        Purge Differential changeset render cache.
+    __--changesets [changeset_id ...]__
+        Purge Differential changeset render cache. If changeset_ids are present,
+        the script will delete the cache for those changesets; otherwise it will
+        delete the cache for all the changesets.
 
     __--differential__
         Purge Differential comment formatting cache.
