@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phutil', 'parser/uri');
 phutil_require_module('phutil', 'utils');
 
 

@@ -11,6 +11,7 @@ phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/directory/controller/base');
 phutil_require_module('phabricator', 'applications/directory/storage/category');
 phutil_require_module('phabricator', 'applications/directory/storage/item');
+phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'view/form/base');
 phutil_require_module('phabricator', 'view/form/control/select');
 phutil_require_module('phabricator', 'view/form/control/submit');

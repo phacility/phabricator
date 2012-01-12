@@ -79,13 +79,9 @@ class PhabricatorLoginValidateController extends PhabricatorAuthController {
         ));
     }
 
-    $next = nonempty(
-      $request->getStr('next'),
-      $request->getCookie('next_uri'),
-      '/');
-     $request->clearCookie('next_uri');
-
-    if (strpos($next, '/') !== 0) {
+    $next = nonempty($request->getStr('next'), $request->getCookie('next_uri'));
+    $request->clearCookie('next_uri');
+    if (!PhabricatorEnv::isValidLocalWebResource($next)) {
       $next = '/';
     }
 

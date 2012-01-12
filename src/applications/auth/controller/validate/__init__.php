@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/auth/controller/base');
+phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'view/page/failure');
 
 phutil_require_module('phutil', 'markup');

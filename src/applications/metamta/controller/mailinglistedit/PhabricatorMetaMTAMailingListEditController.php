@@ -58,17 +58,9 @@ class PhabricatorMetaMTAMailingListEditController
       }
 
       if ($list->getURI()) {
-        $uri = new PhutilURI($list->getURI());
-        $proto = $uri->getProtocol();
-        $allowed_protocols = PhabricatorEnv::getEnvConfig(
-          'uri.allowed-protocols');
-        if (empty($allowed_protocols[$proto])) {
+        if (!PhabricatorEnv::isValidWebResource($list->getURI())) {
           $e_uri = 'Invalid';
-          $protocol_list = implode(', ', array_keys($allowed_protocols));
-          $protocol_list = phutil_escape_html($protocol_list);
-          $errors[] =
-            'URI must use one of the allowed protocols: '.
-            $protocol_list.'.';
+          $errors[] = 'Mailing list URI must point to a valid web page.';
         }
       }
 
