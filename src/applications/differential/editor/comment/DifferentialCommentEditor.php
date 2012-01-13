@@ -144,8 +144,7 @@ class DifferentialCommentEditor {
         }
 
         $revision
-          ->setStatus(ArcanistDifferentialRevisionStatus::ABANDONED)
-          ->save();
+          ->setStatus(ArcanistDifferentialRevisionStatus::ABANDONED);
         break;
 
       case DifferentialAction::ACTION_ACCEPT:
@@ -161,8 +160,7 @@ class DifferentialCommentEditor {
         }
 
         $revision
-          ->setStatus(ArcanistDifferentialRevisionStatus::ACCEPTED)
-          ->save();
+          ->setStatus(ArcanistDifferentialRevisionStatus::ACCEPTED);
 
         if (!isset($reviewer_phids[$actor_phid])) {
           DifferentialRevisionEditor::alterReviewers(
@@ -187,8 +185,7 @@ class DifferentialCommentEditor {
         }
 
         $revision
-          ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW)
-          ->save();
+          ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
         break;
 
       case DifferentialAction::ACTION_REJECT:
@@ -214,8 +211,7 @@ class DifferentialCommentEditor {
         }
 
         $revision
-          ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVISION)
-          ->save();
+          ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVISION);
         break;
 
       case DifferentialAction::ACTION_RETHINK:
@@ -232,8 +228,7 @@ class DifferentialCommentEditor {
         }
 
         $revision
-          ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVISION)
-          ->save();
+          ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVISION);
         break;
 
       case DifferentialAction::ACTION_RECLAIM:
@@ -246,14 +241,12 @@ class DifferentialCommentEditor {
           break;
         }
         $revision
-          ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW)
-          ->save();
+          ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
         break;
 
       case DifferentialAction::ACTION_COMMIT:
         $revision
-          ->setStatus(ArcanistDifferentialRevisionStatus::COMMITTED)
-          ->save();
+          ->setStatus(ArcanistDifferentialRevisionStatus::COMMITTED);
         break;
 
       case DifferentialAction::ACTION_ADDREVIEWERS:
@@ -315,6 +308,12 @@ class DifferentialCommentEditor {
       default:
         throw new Exception('Unsupported action.');
     }
+
+    // Always save the revision (even if we didn't actually change any of its
+    // properties) so that it jumps to the top of the revision list when sorted
+    // by "updated". Notably, this allows "ping" comments to push it to the
+    // top of the action list.
+    $revision->save();
 
     if ($this->addCC) {
       DifferentialRevisionEditor::addCC(
