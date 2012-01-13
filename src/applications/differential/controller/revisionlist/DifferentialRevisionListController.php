@@ -316,6 +316,7 @@ class DifferentialRevisionListController extends DifferentialController {
           array(
             'all'  => 'All',
             'open' => 'Open',
+            'committed' => 'Committed',
           ),
           $params['status'],
           $uri,
@@ -348,6 +349,8 @@ class DifferentialRevisionListController extends DifferentialController {
       case 'status':
         if ($params['status'] == 'open') {
           $query->withStatus(DifferentialRevisionQuery::STATUS_OPEN);
+        } elseif ($params['status'] == 'committed') {
+          $query->withStatus(DifferentialRevisionQuery::STATUS_COMMITTED);
         }
         break;
       case 'order':
