@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ abstract class HeraldController extends PhabricatorController {
     $nav = new AphrontSideNavFilterView();
     $nav
       ->setBaseURI(new PhutilURI('/herald/'))
-      ->addLabel('Rules')
+      ->addLabel('My Rules')
       ->addFilter('new', 'Create Rule');
     $rules_map = HeraldContentTypeConfig::getContentTypeMap();
     $first_filter = null;
@@ -40,6 +40,12 @@ abstract class HeraldController extends PhabricatorController {
       if (!$first_filter) {
         $first_filter = 'view/'.$key;
       }
+    }
+    $nav
+      ->addSpacer()
+      ->addLabel('Global Rules');
+    foreach ($rules_map as $key => $value) {
+      $nav->addFilter("view/${key}/global", $value);
     }
 
     $nav

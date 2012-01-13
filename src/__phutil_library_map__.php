@@ -335,6 +335,7 @@ phutil_register_library_map(array(
     'HeraldRuleController' => 'applications/herald/controller/rule',
     'HeraldRuleListView' => 'applications/herald/view/rulelist',
     'HeraldRuleTranscript' => 'applications/herald/storage/transcript/rule',
+    'HeraldRuleTypeConfig' => 'applications/herald/config/ruletype',
     'HeraldTestConsoleController' => 'applications/herald/controller/test',
     'HeraldTranscript' => 'applications/herald/storage/transcript/base',
     'HeraldTranscriptController' => 'applications/herald/controller/transcript',

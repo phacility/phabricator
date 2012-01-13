@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,18 +23,39 @@ class HeraldActionConfig {
   const ACTION_EMAIL        = 'email';
   const ACTION_NOTHING      = 'nothing';
 
-  public static function getActionMap() {
-    return array(
-      self::ACTION_ADD_CC       => 'Add emails to CC',
-      self::ACTION_REMOVE_CC    => 'Remove emails from CC',
-      self::ACTION_EMAIL        => 'Send an email to',
-      self::ACTION_NOTHING      => 'Do nothing',
-    );
+  public static function getActionMessageMapForRuleType($rule_type) {
+    $generic_mappings =
+      array(
+        self::ACTION_NOTHING      => 'Do nothing',
+      );
+
+    switch ($rule_type) {
+      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
+        $specific_mappings =
+          array(
+            self::ACTION_ADD_CC       => 'Add emails to CC',
+            self::ACTION_REMOVE_CC    => 'Remove emails from CC',
+            self::ACTION_EMAIL        => 'Send an email to',
+          );
+        break;
+      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
+        $specific_mappings =
+          array(
+            self::ACTION_ADD_CC       => 'CC me',
+            self::ACTION_REMOVE_CC    => 'Remove me from CC',
+            self::ACTION_EMAIL        => 'Email me',
+          );
+        break;
+      default:
+        throw new Exception("Unknown rule type '${rule_type}'");
+    }
+    return $generic_mappings + $specific_mappings;
   }
 
-  public static function getActionMapForContentType($type) {
-    $map = self::getActionMap();
-    switch ($type) {
+  public static function getActionMessageMap($content_type,
+                                             $rule_type) {
+    $map = self::getActionMessageMapForRuleType($rule_type);
+    switch ($content_type) {
       case HeraldContentTypeConfig::CONTENT_TYPE_DIFFERENTIAL:
         return array_select_keys(
           $map,
@@ -68,6 +89,46 @@ class HeraldActionConfig {
       default:
         throw new Exception("Unknown content type '{$type}'.");
     }
+  }
+
+  /**
+   * Create a HeraldAction to save from data.
+   *
+   * $data is of the form:
+   *   array(
+   *     0 => <action type>
+   *     1 => array(<targets>)
+   *   )
+   */
+  public static function willSaveAction($rule_type,
+                                        $author_phid,
+                                        $data) {
+    $obj = new HeraldAction();
+    $obj->setAction($data[0]);
+
+    // for personal rule types, set the target to be the owner of the rule
+    if ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL) {
+      switch ($obj->getAction()) {
+        case HeraldActionConfig::ACTION_EMAIL:
+        case HeraldActionConfig::ACTION_ADD_CC:
+        case HeraldActionConfig::ACTION_REMOVE_CC:
+          $data[1] = array($author_phid => $author_phid);
+          break;
+        case HeraldActionConfig::ACTION_NOTHING:
+          break;
+        default:
+          throw new Exception('Unrecognized action type: ' .
+                              $obj->getAction());
+      }
+    }
+
+    if (is_array($data[1])) {
+      $obj->setTarget(array_keys($data[1]));
+    } else {
+      $obj->setTarget($data[1]);
+    }
+
+    return $obj;
   }
 
 }

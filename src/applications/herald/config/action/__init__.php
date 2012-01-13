@@ -7,6 +7,8 @@
 
 
 phutil_require_module('phabricator', 'applications/herald/config/contenttype');
+phutil_require_module('phabricator', 'applications/herald/config/ruletype');
+phutil_require_module('phabricator', 'applications/herald/storage/action');
 
 phutil_require_module('phutil', 'utils');
 

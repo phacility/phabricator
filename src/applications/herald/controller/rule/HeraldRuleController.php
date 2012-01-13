@@ -38,13 +38,14 @@ class HeraldRuleController extends HeraldController {
     $user = $request->getUser();
 
     $content_type_map = HeraldContentTypeConfig::getContentTypeMap();
+    $rule_type_map = HeraldRuleTypeConfig::getRuleTypeMap();
 
     if ($this->id) {
       $rule = id(new HeraldRule())->load($this->id);
       if (!$rule) {
         return new Aphront404Response();
       }
-      if ($rule->getAuthorPHID() != $user->getPHID() && !$user->getIsAdmin()) {
+      if (!$this->canEditRule($rule, $user)) {
         throw new Exception("You don't own this rule and can't edit it.");
       }
     } else {
@@ -52,11 +53,17 @@ class HeraldRuleController extends HeraldController {
       $rule->setAuthorPHID($user->getPHID());
       $rule->setMustMatchAll(true);
 
-      $type = $request->getStr('type');
-      if (!isset($content_type_map[$type])) {
-        $type = HeraldContentTypeConfig::CONTENT_TYPE_DIFFERENTIAL;
+      $content_type = $request->getStr('content_type');
+      if (!isset($content_type_map[$content_type])) {
+        $content_type = HeraldContentTypeConfig::CONTENT_TYPE_DIFFERENTIAL;
       }
-      $rule->setContentType($type);
+      $rule->setContentType($content_type);
+
+      $rule_type = $request->getStr('rule_type');
+      if (!isset($rule_type_map[$rule_type])) {
+        $rule_type = HeraldRuleTypeConfig::RULE_TYPE_GLOBAL;
+      }
+      $rule->setRuleType($rule_type);
     }
     $this->setFilter($rule->getContentType());
 
@@ -104,12 +111,14 @@ class HeraldRuleController extends HeraldController {
 
     require_celerity_resource('herald-css');
 
-    $type_name = $content_type_map[$rule->getContentType()];
+    $content_type_name = $content_type_map[$rule->getContentType()];
+    $rule_type_name = $rule_type_map[$rule->getRuleType()];
 
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setID('herald-rule-edit-form')
-      ->addHiddenInput('type', $rule->getContentType())
+      ->addHiddenInput('content_type', $rule->getContentType())
+      ->addHiddenInput('rule_type', $rule->getRuleType())
       ->addHiddenInput('save', 1)
       ->appendChild(
         // Build this explicitly so we can add a sigil to it.
@@ -142,7 +151,8 @@ class HeraldRuleController extends HeraldController {
       ->appendChild(
         id(new AphrontFormMarkupControl())
           ->setValue(
-            "This rule triggers for <strong>{$type_name}</strong>."))
+            "This <strong>${rule_type_name}</strong> rule triggers for " .
+            "<strong>${content_type_name}</strong>."))
       ->appendChild(
         '<h1>Conditions</h1>'.
         '<div class="aphront-form-inset">'.
@@ -213,6 +223,13 @@ class HeraldRuleController extends HeraldController {
       array(
         'title' => 'Edit Rule',
       ));
+  }
+
+  private function canEditRule($rule, $user) {
+    return
+      $user->getIsAdmin() ||
+      $rule->getRuleType() == HeraldRuleTypeConfig::RULE_TYPE_GLOBAL ||
+      $rule->getAuthorPHID() == $user->getPHID();
   }
 
   private function saveRule($rule, $request) {
@@ -301,6 +318,11 @@ class HeraldRuleController extends HeraldController {
       $conditions[] = $obj;
     }
 
+    $author = $request->getStr('author');
+    if ($author) {
+      $rule->setAuthorPHID($author);
+    }
+
     $actions = array();
     foreach ($data['actions'] as $action) {
       if ($action === null) {
@@ -308,27 +330,15 @@ class HeraldRuleController extends HeraldController {
         continue;
       }
 
-      $obj = new HeraldAction();
-      $obj->setAction($action[0]);
-
       if (!isset($action[1])) {
         // Legitimate for any action which doesn't need a target, like
         // "Do nothing".
         $action[1] = null;
       }
 
-      if (is_array($action[1])) {
-        $obj->setTarget(array_keys($action[1]));
-      } else {
-        $obj->setTarget($action[1]);
-      }
-
-      $actions[] = $obj;
-    }
-
-    $author = $request->getStr('author');
-    if ($author) {
-      $rule->setAuthorPHID($author);
+      $actions[] = HeraldActionConfig::willSaveAction($rule->getRuleType(),
+                                                      $rule->getAuthorPHID(),
+                                                      $action);
     }
 
     $rule->attachConditions($conditions);
@@ -425,11 +435,15 @@ class HeraldRuleController extends HeraldController {
     }
 
     $config_info['actions'] =
-      HeraldActionConfig::getActionMapForContentType($rule->getContentType());
+      HeraldActionConfig::getActionMessageMap($rule->getContentType(),
+                                              $rule->getRuleType());
+
+    $config_info['rule_type'] = $rule->getRuleType();
 
     foreach ($config_info['actions'] as $action => $name) {
       $config_info['targets'][$action] =
-        HeraldValueTypeConfig::getValueTypeForAction($action);
+        HeraldValueTypeConfig::getValueTypeForAction($action,
+                                                     $rule->getRuleType());
     }
 
     Javelin::initBehavior(

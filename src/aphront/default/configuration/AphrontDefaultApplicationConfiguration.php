@@ -270,7 +270,10 @@ class AphrontDefaultApplicationConfiguration
 
       '/herald/' => array(
         '$' => 'HeraldHomeController',
-        'view/(?P<view>[^/]+)/$' => 'HeraldHomeController',
+        'view/(?P<view>[^/]+)/' => array(
+          '$' => 'HeraldHomeController',
+          '(?P<global>global)/$' => 'HeraldHomeController'
+        ),
         'new/(?:(?P<type>[^/]+)/)?$' => 'HeraldNewController',
         'rule/(?:(?P<id>\d+)/)?$' => 'HeraldRuleController',
         'delete/(?P<id>\d+)/$' => 'HeraldDeleteController',

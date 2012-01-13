@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,16 @@ class HeraldHomeController extends HeraldController {
 
   private $view;
   private $filter;
+  private $global;
 
   public function willProcessRequest(array $data) {
     $this->view = idx($data, 'view');
-    $this->setFilter($this->view);
+    $this->global = idx($data, 'global');
+    if ($this->global) {
+      $this->setFilter($this->view . '/global');
+    } else {
+      $this->setFilter($this->view);
+    }
   }
 
   public function getFilter() {
@@ -45,10 +51,17 @@ class HeraldHomeController extends HeraldController {
       $this->view = key($map);
     }
 
-    $rules = id(new HeraldRule())->loadAllWhere(
-      'contentType = %s AND authorPHID = %s',
-      $this->view,
-      $user->getPHID());
+    if ($this->global) {
+      $rules = id(new HeraldRule())->loadAllWhere(
+        'contentType = %s AND ruleType = %s',
+        $this->view,
+        'global');
+    } else {
+      $rules = id(new HeraldRule())->loadAllWhere(
+        'contentType = %s AND authorPHID = %s',
+        $this->view,
+        $user->getPHID());
+    }
 
     $need_phids = mpull($rules, 'getAuthorPHID');
     $handles = id(new PhabricatorObjectHandleData($need_phids))

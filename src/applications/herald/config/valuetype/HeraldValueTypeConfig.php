@@ -76,7 +76,12 @@ class HeraldValueTypeConfig {
     }
   }
 
-  public static function getValueTypeForAction($action) {
+  public static function getValueTypeForAction($action, $rule_type) {
+    // users can't change targets for personal rule actions
+    if ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL) {
+      return self::VALUE_NONE;
+    }
+
     switch ($action) {
       case HeraldActionConfig::ACTION_ADD_CC:
       case HeraldActionConfig::ACTION_REMOVE_CC:

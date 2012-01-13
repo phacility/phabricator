@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,14 @@
 
 class HeraldNewController extends HeraldController {
 
-  private $type;
+  private $contentType;
 
   public function getFilter() {
     return 'new';
   }
 
   public function willProcessRequest(array $data) {
-    $this->type = idx($data, 'type');
+    $this->contentType = idx($data, 'type');
   }
 
   public function processRequest() {
@@ -33,11 +33,13 @@ class HeraldNewController extends HeraldController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $map = HeraldContentTypeConfig::getContentTypeMap();
-    if (empty($map[$this->type])) {
-      reset($map);
-      $this->type = key($map);
+    $content_type_map = HeraldContentTypeConfig::getContentTypeMap();
+    if (empty($content_type_map[$this->contentType])) {
+      reset($content_type_map);
+      $this->contentType = key($content_type_map);
     }
+
+    $rule_type_map = HeraldRuleTypeConfig::getRuleTypeMap();
 
     $form = id(new AphrontFormView())
       ->setUser($user)
@@ -45,13 +47,18 @@ class HeraldNewController extends HeraldController {
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel('New rule for')
-          ->setName('type')
-          ->setValue($this->type)
-          ->setOptions($map))
+          ->setName('content_type')
+          ->setValue($this->contentType)
+          ->setOptions($content_type_map))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel('Type')
+          ->setName('rule_type')
+          ->setOptions($rule_type_map))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Create Rule')
-          ->addCancelButton('/herald/view/'.$this->type.'/'));
+          ->addCancelButton('/herald/view/'.$this->contentType.'/'));
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Create New Herald Rule');
