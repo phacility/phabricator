@@ -13,7 +13,8 @@ The major components of Phabricator are:
 
   - **Differential**, a code review tool; and
   - **Diffusion**, a repository browser; and
-  - **Maniphest**, a bug tracker.
+  - **Maniphest**, a bug tracker; and
+  - **Phriction**, a wiki.
 
 Phabricator also includes a number of smaller tools.
 
@@ -30,8 +31,8 @@ However, Phabricator may also not be a good solution for you:
 
   - If you develop primarily on Windows, you are likely to find integration
     with the toolsets you use lacking.
-  - If you don't use SVN or Git, you'll have to add support for your VCS before
-    you can get anywhere.
+  - If you don't use SVN, Git or Mercurial, you'll have to add support for your
+    VCS before you can get anywhere.
   - If you loathe PHP, well, it's written in PHP. Sorry. It is a victim of
     circumstances. We assert it is well-written PHP, at least.
 

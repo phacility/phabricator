@@ -21,9 +21,20 @@ https://developers.facebook.com/opensource/cla
 
 If you want to contribute but aren't sure how (or want to try submitting a small
 patch before you build something bigger) you can search the Phabricator
-development install for open tasks in the "Bootcamp" project which are owned by
-"Up For Grabs". These are small-to-medium-sized bugs and projects intended to
-introduce new contributors to the codebase.
+development install for open tasks (these are pretty up-to-date) or come find
+us in IRC and ask for some pointers.
+
+= Submitting Patches =
+
+To submit patches against libphutil, Arcanist or Phabricator, create a commit
+and use ##arc## to send it for review (probably with ##epriestley## as a
+reviewer):
+
+  $ arc diff
+
+When your change is accepted, send a pull request on GitHub. (You can also
+just submit a pull request, but Differential is preferred for nontrivial
+changes.)
 
 = Suggested Reading =
 

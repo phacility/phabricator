@@ -155,5 +155,6 @@ Continue by:
   - configuring Phabricator so it can send mail with
     @{article:Configuring Outbound Email}; or
   - configuring inbound mail with @{article:Configuring Inbound Email}; or
+  - importing repositories with @{article:Diffusion User Guide}; or
   - learning about daemons with @{article:Managing Daemons with phd}; or
   - contributing to Phabricator with @{article:Contributor Introduction}.
