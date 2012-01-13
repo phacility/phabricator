@@ -138,8 +138,21 @@ class DifferentialCommentMail extends DifferentialMail {
     $body[] = null;
 
     $revision = $this->getRevision();
-    if ($revision->getStatus() ==
-        ArcanistDifferentialRevisionStatus::COMMITTED) {
+    $status = $revision->getStatus();
+
+    if ($status == ArcanistDifferentialRevisionStatus::NEEDS_REVISION ||
+        $status == ArcanistDifferentialRevisionStatus::ACCEPTED) {
+      $diff = $revision->loadActiveDiff();
+      if ($diff) {
+        $branch = $diff->getBranch();
+        if ($branch) {
+          $body[] = "BRANCH\n  $branch";
+          $body[] = null;
+        }
+      }
+    }
+
+    if ($status == ArcanistDifferentialRevisionStatus::COMMITTED) {
       $phids = $revision->loadCommitPHIDs();
       if ($phids) {
         $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
