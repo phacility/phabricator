@@ -24,7 +24,6 @@ class DifferentialCommentEditor {
 
   protected $attachInlineComments;
   protected $message;
-  protected $addCC;
   protected $changedByCommit;
   protected $addedReviewers = array();
   private $addedCCs = array();
@@ -54,11 +53,6 @@ class DifferentialCommentEditor {
 
   public function setAttachInlineComments($attach) {
     $this->attachInlineComments = $attach;
-    return $this;
-  }
-
-  public function setAddCC($add) {
-    $this->addCC = $add;
     return $this;
   }
 
@@ -315,7 +309,9 @@ class DifferentialCommentEditor {
     // top of the action list.
     $revision->save();
 
-    if ($this->addCC) {
+    if ($action != DifferentialAction::ACTION_RESIGN &&
+        $this->actorPHID != $revision->getAuthorPHID() &&
+        !in_array($this->actorPHID, $revision->getReviewers())) {
       DifferentialRevisionEditor::addCC(
         $revision,
         $this->actorPHID,

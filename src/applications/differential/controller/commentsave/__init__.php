@@ -8,7 +8,6 @@
 
 phutil_require_module('phabricator', 'aphront/response/400');
 phutil_require_module('phabricator', 'aphront/response/redirect');
-phutil_require_module('phabricator', 'applications/differential/constants/action');
 phutil_require_module('phabricator', 'applications/differential/controller/base');
 phutil_require_module('phabricator', 'applications/differential/editor/comment');
 phutil_require_module('phabricator', 'applications/differential/storage/revision');
