@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,41 +29,47 @@ class PhabricatorRepositoryCommitOwnersWorker
       $repository,
       $affected_paths);
 
-    if (!$affected_packages) {
-      return;
-    }
+    if ($affected_packages) {
+      foreach ($affected_packages as $package) {
+        $relationship = id(new PhabricatorOwnersPackageCommitRelationship())
+          ->loadOneWhere('packagePHID=%s AND commitPHID=%s',
+          $package->getPHID(),
+          $commit->getPHID());
 
-    foreach ($affected_packages as $package) {
-      $relationship = id(new PhabricatorOwnersPackageCommitRelationship())
-        ->loadOneWhere('packagePHID=%s AND commitPHID=%s',
-        $package->getPHID(),
-        $commit->getPHID());
-
-      // Don't update relationship if  it exists  already
-      if (!$relationship) {
-        if ($package->getAuditingEnabled()) {
-          $reasons = $this->checkAuditReasons($commit, $package);
-          if ($reasons) {
-            $audit_status =
-              PhabricatorAuditStatusConstants::AUDIT_REQUIRED;
+        // Don't update relationship if  it exists  already
+        if (!$relationship) {
+          if ($package->getAuditingEnabled()) {
+            $reasons = $this->checkAuditReasons($commit, $package);
+            if ($reasons) {
+              $audit_status =
+                PhabricatorAuditStatusConstants::AUDIT_REQUIRED;
+            } else {
+              $audit_status =
+                PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED;
+            }
           } else {
-            $audit_status =
-              PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED;
+            $reasons = array();
+            $audit_status = PhabricatorAuditStatusConstants::NONE;
           }
-        } else {
-          $reasons = array();
-          $audit_status = PhabricatorAuditStatusConstants::NONE;
+
+          $relationship = new PhabricatorOwnersPackageCommitRelationship();
+          $relationship->setPackagePHID($package->getPHID());
+          $relationship->setCommitPHID($commit->getPHID());
+          $relationship->setAuditReasons($reasons);
+          $relationship->setAuditStatus($audit_status);
+
+          $relationship->save();
         }
-
-        $relationship = new PhabricatorOwnersPackageCommitRelationship();
-        $relationship->setPackagePHID($package->getPHID());
-        $relationship->setCommitPHID($commit->getPHID());
-        $relationship->setAuditReasons($reasons);
-        $relationship->setAuditStatus($audit_status);
-
-        $relationship->save();
       }
     }
+
+    $herald_task = new PhabricatorWorkerTask();
+    $herald_task->setTaskClass('PhabricatorRepositoryCommitHeraldWorker');
+    $herald_task->setData(
+      array(
+        'commitID' => $commit->getID(),
+      ));
+    $herald_task->save();
   }
 
   private function checkAuditReasons(

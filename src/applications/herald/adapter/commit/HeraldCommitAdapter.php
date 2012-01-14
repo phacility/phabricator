@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ class HeraldCommitAdapter extends HeraldObjectAdapter {
   protected $affectedPaths;
   protected $affectedRevision;
   protected $affectedPackages;
+  protected $auditNeededPackages;
 
   public function __construct(
     PhabricatorRepository $repository,
@@ -77,6 +78,24 @@ class HeraldCommitAdapter extends HeraldObjectAdapter {
       $this->affectedPackages = $packages;
     }
     return $this->affectedPackages;
+  }
+
+  public function loadAuditNeededPackage() {
+    if ($this->auditNeededPackages === null) {
+      $status_arr = array (
+        PhabricatorAuditStatusConstants::AUDIT_REQUIRED,
+          PhabricatorAuditStatusConstants::CONCERNED,
+        );
+      $relationships = id(new PhabricatorOwnersPackageCommitRelationship())
+          ->loadAllWhere(
+        "commitPHID = %s AND auditStatus IN (%Ls)",
+        $this->commit->getPHID(),
+        $status_arr);
+
+      $packages = mpull($relationships, 'getPackagePHID');
+      $this->auditNeededPackages = $packages;
+    }
+    return $this->auditNeededPackages;
   }
 
   public function loadDifferentialRevision() {
@@ -140,6 +159,8 @@ class HeraldCommitAdapter extends HeraldObjectAdapter {
         $packages = $this->loadAffectedPackages();
         $owners = PhabricatorOwnersOwner::loadAllForPackages($packages);
         return mpull($owners, 'getUserPHID');
+      case HeraldFieldConfig::FIELD_NEED_AUDIT_FOR_PACKAGE:
+        return $this->loadAuditNeededPackage();
       case HeraldFieldConfig::FIELD_DIFFERENTIAL_REVISION:
         $revision = $this->loadDifferentialRevision();
         if (!$revision) {

@@ -14,6 +14,7 @@ phutil_require_module('phabricator', 'applications/owners/storage/package');
 phutil_require_module('phabricator', 'applications/owners/storage/packagecommitrelationship');
 phutil_require_module('phabricator', 'applications/repository/storage/commitdata');
 phutil_require_module('phabricator', 'applications/repository/worker/base');
+phutil_require_module('phabricator', 'infrastructure/daemon/workers/storage/task');
 
 phutil_require_module('phutil', 'utils');
 

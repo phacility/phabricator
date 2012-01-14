@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ class HeraldValueTypeConfig {
           case HeraldFieldConfig::FIELD_TAGS:
             return self::VALUE_TAG;
           case HeraldFieldConfig::FIELD_AFFECTED_PACKAGE:
+          case HeraldFieldConfig::FIELD_NEED_AUDIT_FOR_PACKAGE:
             return self::VALUE_OWNERS_PACKAGE;
           default:
             return self::VALUE_USER;

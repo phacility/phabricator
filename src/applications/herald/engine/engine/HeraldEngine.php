@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -436,6 +436,7 @@ class HeraldEngine {
         break;
       case HeraldFieldConfig::FIELD_AFFECTED_PACKAGE:
       case HeraldFieldConfig::FIELD_AFFECTED_PACKAGE_OWNER:
+      case HeraldFieldConfig::FIELD_NEED_AUDIT_FOR_PACKAGE:
         $result = $this->object->getHeraldField($field);
         if (!is_array($result)) {
           throw new HeraldInvalidFieldException(

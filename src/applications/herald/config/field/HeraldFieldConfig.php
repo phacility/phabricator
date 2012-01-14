@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ class HeraldFieldConfig {
   const FIELD_RULE                   = 'rule';
   const FIELD_AFFECTED_PACKAGE       = 'affected-package';
   const FIELD_AFFECTED_PACKAGE_OWNER = 'affected-package-owner';
+  const FIELD_NEED_AUDIT_FOR_PACKAGE  = 'need-audit-for-package';
   const FIELD_DIFFERENTIAL_REVISION  = 'differential-revision';
   const FIELD_DIFFERENTIAL_REVIEWERS = 'differential-reviewers';
   const FIELD_DIFFERENTIAL_CCS       = 'differential-ccs';
@@ -51,6 +52,8 @@ class HeraldFieldConfig {
       self::FIELD_RULE                   => 'Another Herald rule',
       self::FIELD_AFFECTED_PACKAGE       => 'Any affected package',
       self::FIELD_AFFECTED_PACKAGE_OWNER => "Any affected package's owner",
+      self::FIELD_NEED_AUDIT_FOR_PACKAGE =>
+                                          'Affected packages that need audit',
       self::FIELD_DIFFERENTIAL_REVISION  => 'Differential revision',
       self::FIELD_DIFFERENTIAL_REVIEWERS => 'Differential reviewers',
       self::FIELD_DIFFERENTIAL_CCS       => 'Differential CCs',
@@ -93,6 +96,7 @@ class HeraldFieldConfig {
             self::FIELD_RULE,
             self::FIELD_AFFECTED_PACKAGE,
             self::FIELD_AFFECTED_PACKAGE_OWNER,
+            self::FIELD_NEED_AUDIT_FOR_PACKAGE,
             self::FIELD_DIFFERENTIAL_REVISION,
             self::FIELD_DIFFERENTIAL_REVIEWERS,
             self::FIELD_DIFFERENTIAL_CCS,
