@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ final class DifferentialLintFieldSpecification
 
   public function renderValueForRevisionView() {
     $diff = $this->getDiff();
+    $path_changesets = mpull($diff->loadChangesets(), 'getId', 'getFileName');
 
     $lstar = DifferentialRevisionUpdateHistoryView::renderDiffLintStar($diff);
     $lmsg = DifferentialRevisionUpdateHistoryView::getDiffLintMessage($diff);
@@ -53,6 +54,13 @@ final class DifferentialLintFieldSpecification
           $name = idx($message, 'name');
           $description = idx($message, 'description');
 
+          $line_link = phutil_escape_html($line);
+          if (isset($path_changesets[$path])) {
+            $href = '#C'.$path_changesets[$path].'NL'.$line;
+            $line_link = '<a href="'.phutil_escape_html($href).'">'.
+              $line_link.
+              '</a>';
+          }
           $message_markup[] =
             '<li>'.
               '<span class="lint-severity-'.phutil_escape_html($severity).'">'.
@@ -61,7 +69,7 @@ final class DifferentialLintFieldSpecification
               ' '.
               '('.phutil_escape_html($code).') '.
               phutil_escape_html($name).
-              ' at line '.phutil_escape_html($line).
+              ' at line '.$line_link.
               '<p>'.phutil_escape_html($description).'</p>'.
             '</li>';
         }
