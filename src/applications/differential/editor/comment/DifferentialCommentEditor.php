@@ -105,40 +105,58 @@ class DifferentialCommentEditor {
 
     $metadata = array();
 
+    $inline_comments = array();
+    if ($this->attachInlineComments) {
+      $inline_comments = id(new DifferentialInlineComment())->loadAllWhere(
+        'authorPHID = %s AND revisionID = %d AND commentID IS NULL',
+        $this->actorPHID,
+        $revision->getID());
+    }
+
     switch ($action) {
       case DifferentialAction::ACTION_COMMENT:
+        if (!$this->message && !$inline_comments) {
+          throw new DifferentialActionHasNoEffectException(
+            "You are submitting an empty comment with no action: ".
+            "you must act on the revision or post a comment.");
+        }
         break;
 
       case DifferentialAction::ACTION_RESIGN:
         if ($actor_is_author) {
           throw new Exception('You can not resign from your own revision!');
         }
-        if (isset($reviewer_phids[$actor_phid])) {
-          DifferentialRevisionEditor::alterReviewers(
-            $revision,
-            $reviewer_phids,
-            $rem = array($actor_phid),
-            $add = array(),
-            $actor_phid);
+        if (empty($reviewer_phids[$actor_phid])) {
+          throw new DifferentialActionHasNoEffectException(
+            "You can not resign from this revision because you are not ".
+            "a reviewer.");
         }
+        DifferentialRevisionEditor::alterReviewers(
+          $revision,
+          $reviewer_phids,
+          $rem = array($actor_phid),
+          $add = array(),
+          $actor_phid);
         break;
 
       case DifferentialAction::ACTION_ABANDON:
         if (!($actor_is_author || $actor_is_admin)) {
-          throw new Exception('You can only abandon your revisions.');
-        }
-        if ($revision_status ==
-            ArcanistDifferentialRevisionStatus::COMMITTED) {
-          throw new Exception('You can not abandon a committed revision.');
-        }
-        if ($revision_status ==
-            ArcanistDifferentialRevisionStatus::ABANDONED) {
-          $action = DifferentialAction::ACTION_COMMENT;
-          break;
+          throw new Exception('You can only abandon your own revisions.');
         }
 
-        $revision
-          ->setStatus(ArcanistDifferentialRevisionStatus::ABANDONED);
+        if ($revision_status == ArcanistDifferentialRevisionStatus::COMMITTED) {
+          throw new DifferentialActionHasNoEffectException(
+            "You can not abandon this revision because it has already ".
+            "been committed.");
+        }
+
+        if ($revision_status == ArcanistDifferentialRevisionStatus::ABANDONED) {
+          throw new DifferentialActionHasNoEffectException(
+            "You can not abandon this revision because it has already ".
+            "been abandoned.");
+        }
+
+        $revision->setStatus(ArcanistDifferentialRevisionStatus::ABANDONED);
         break;
 
       case DifferentialAction::ACTION_ACCEPT:
@@ -149,8 +167,24 @@ class DifferentialCommentEditor {
              ArcanistDifferentialRevisionStatus::NEEDS_REVIEW) &&
             ($revision_status !=
              ArcanistDifferentialRevisionStatus::NEEDS_REVISION)) {
-          $action = DifferentialAction::ACTION_COMMENT;
-          break;
+
+          switch ($revision_status) {
+            case ArcanistDifferentialRevisionStatus::ACCEPTED:
+              throw new DifferentialActionHasNoEffectException(
+                "You can not accept this revision because someone else ".
+                "already accepted it.");
+            case ArcanistDifferentialRevisionStatus::ABANDONED:
+              throw new DifferentialActionHasNoEffectException(
+                "You can not accept this revision because it has been ".
+                "abandoned.");
+            case ArcanistDifferentialRevisionStatus::COMMITTED:
+              throw new DifferentialActionHasNoEffectException(
+                "You can not accept this revision because it has already ".
+                "been committed.");
+            default:
+              throw new Exception(
+                "Unexpected revision state '{$revision_status}'!");
+          }
         }
 
         $revision
@@ -170,16 +204,30 @@ class DifferentialCommentEditor {
         if (!$actor_is_author) {
           throw new Exception('You must own a revision to request review.');
         }
-        if (($revision_status !=
-             ArcanistDifferentialRevisionStatus::NEEDS_REVISION) &&
-            ($revision_status !=
-             ArcanistDifferentialRevisionStatus::ACCEPTED)) {
-          $action = DifferentialAction::ACTION_COMMENT;
-          break;
+
+        switch ($revision_status) {
+          case ArcanistDifferentialRevisionStatus::ACCEPTED:
+          case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
+            $revision->setStatus(
+              ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
+            break;
+          case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
+            throw new DifferentialActionHasNoEffectException(
+              "You can not request review of this revision because it has ".
+              "been abandoned.");
+          case ArcanistDifferentialRevisionStatus::ABANDONED:
+            throw new DifferentialActionHasNoEffectException(
+              "You can not request review of this revision because it has ".
+              "been abandoned.");
+          case ArcanistDifferentialRevisionStatus::COMMITTED:
+            throw new DifferentialActionHasNoEffectException(
+              "You can not request review of this revision because it has ".
+              "already been committed.");
+          default:
+            throw new Exception(
+              "Unexpected revision state '{$revision_status}'!");
         }
 
-        $revision
-          ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
         break;
 
       case DifferentialAction::ACTION_REJECT:
@@ -187,12 +235,26 @@ class DifferentialCommentEditor {
           throw new Exception(
             'You can not request changes to your own revision.');
         }
-        if (($revision_status !=
-             ArcanistDifferentialRevisionStatus::NEEDS_REVIEW) &&
-            ($revision_status !=
-             ArcanistDifferentialRevisionStatus::ACCEPTED)) {
-          $action = DifferentialAction::ACTION_COMMENT;
-          break;
+
+        switch ($revision_status) {
+          case ArcanistDifferentialRevisionStatus::ACCEPTED:
+          case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
+          case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
+            // NOTE: We allow you to reject an already-rejected revision
+            // because it doesn't create any ambiguity and avoids a rather
+            // needless dialog.
+            break;
+          case ArcanistDifferentialRevisionStatus::ABANDONED:
+            throw new DifferentialActionHasNoEffectException(
+              "You can not request changes to this revision because it has ".
+              "been abandoned.");
+          case ArcanistDifferentialRevisionStatus::COMMITTED:
+            throw new DifferentialActionHasNoEffectException(
+              "You can not request changes to this revision because it has ".
+              "already been committed.");
+          default:
+            throw new Exception(
+              "Unexpected revision state '{$revision_status}'!");
         }
 
         if (!isset($reviewer_phids[$actor_phid])) {
@@ -213,12 +275,23 @@ class DifferentialCommentEditor {
           throw new Exception(
             "You can not plan changes to somebody else's revision");
         }
-        if (($revision_status !=
-             ArcanistDifferentialRevisionStatus::NEEDS_REVIEW) &&
-            ($revision_status !=
-             ArcanistDifferentialRevisionStatus::ACCEPTED)) {
-          $action = DifferentialAction::ACTION_COMMENT;
-          break;
+
+        switch ($revision_status) {
+          case ArcanistDifferentialRevisionStatus::ACCEPTED:
+          case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
+          case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
+            break;
+          case ArcanistDifferentialRevisionStatus::ABANDONED:
+            throw new DifferentialActionHasNoEffectException(
+              "You can not plan changes to this revision because it has ".
+              "been abandoned.");
+          case ArcanistDifferentialRevisionStatus::COMMITTED:
+            throw new DifferentialActionHasNoEffectException(
+              "You can not plan changes to this revision because it has ".
+              "already been committed.");
+          default:
+            throw new Exception(
+              "Unexpected revision state '{$revision_status}'!");
         }
 
         $revision
@@ -229,11 +302,13 @@ class DifferentialCommentEditor {
         if (!$actor_is_author) {
           throw new Exception('You can not reclaim a revision you do not own.');
         }
-        if ($revision_status !=
-            ArcanistDifferentialRevisionStatus::ABANDONED) {
-          $action = DifferentialAction::ACTION_COMMENT;
-          break;
+
+
+        if ($revision_status != ArcanistDifferentialRevisionStatus::ABANDONED) {
+          throw new DifferentialActionHasNoEffectException(
+            "You can not reclaim this revision because it is not abandoned.");
         }
+
         $revision
           ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
         break;
@@ -245,6 +320,8 @@ class DifferentialCommentEditor {
 
       case DifferentialAction::ACTION_ADDREVIEWERS:
         $added_reviewers = $this->getAddedReviewers();
+        $user_tried_to_add = count($added_reviewers);
+
         foreach ($added_reviewers as $k => $user_phid) {
           if ($user_phid == $revision->getAuthorPHID()) {
             unset($added_reviewers[$k]);
@@ -268,21 +345,27 @@ class DifferentialCommentEditor {
           $metadata[$key] = $added_reviewers;
 
         } else {
-          $action = DifferentialAction::ACTION_COMMENT;
+          if ($user_tried_to_add == 0) {
+            throw new DifferentialActionHasNoEffectException(
+              "You can not add reviewers, because you did not specify any ".
+              "reviewers.");
+          } else if ($user_tried_to_add == 1) {
+            throw new DifferentialActionHasNoEffectException(
+              "You can not add that reviewer, because they are already an ".
+              "author or reviewer.");
+          } else {
+            throw new DifferentialActionHasNoEffectException(
+              "You can not add those reviewers, because they are all already ".
+              "authors or reviewers.");
+          }
         }
+
         break;
       case DifferentialAction::ACTION_ADDCCS:
         $added_ccs = $this->getAddedCCs();
+        $user_tried_to_add = count($added_ccs);
 
-        $current_ccs = $revision->getCCPHIDs();
-        if ($current_ccs) {
-          $current_ccs = array_fill_keys($current_ccs, true);
-          foreach ($added_ccs as $k => $cc) {
-            if (isset($current_ccs[$cc])) {
-              unset($added_ccs[$k]);
-            }
-          }
-        }
+        $added_ccs = $this->filterAddedCCs($added_ccs);
 
         if ($added_ccs) {
           foreach ($added_ccs as $cc) {
@@ -296,7 +379,19 @@ class DifferentialCommentEditor {
           $metadata[$key] = $added_ccs;
 
         } else {
-          $action = DifferentialAction::ACTION_COMMENT;
+          if ($user_tried_to_add == 0) {
+            throw new DifferentialActionHasNoEffectException(
+              "You can not add CCs, because you did not specify any ".
+              "CCs.");
+          } else if ($user_tried_to_add == 1) {
+            throw new DifferentialActionHasNoEffectException(
+              "You can not add that CC, because they are already an ".
+              "author, reviewer or CC.");
+          } else {
+            throw new DifferentialActionHasNoEffectException(
+              "You can not add those CCs, because they are all already ".
+              "authors, reviewers or CCs.");
+          }
         }
         break;
       default:
@@ -316,14 +411,6 @@ class DifferentialCommentEditor {
         $revision,
         $this->actorPHID,
         $this->actorPHID);
-    }
-
-    $inline_comments = array();
-    if ($this->attachInlineComments) {
-      $inline_comments = id(new DifferentialInlineComment())->loadAllWhere(
-        'authorPHID = %s AND revisionID = %d AND commentID IS NULL',
-        $this->actorPHID,
-        $revision->getID());
     }
 
     $comment = id(new DifferentialComment())
@@ -362,15 +449,7 @@ class DifferentialCommentEditor {
     $mention_ccs = PhabricatorMarkupEngine::extractPHIDsFromMentions(
       $content_blocks);
     if ($mention_ccs) {
-      $current_ccs = $revision->getCCPHIDs();
-      if ($current_ccs) {
-        $current_ccs = array_fill_keys($current_ccs, true);
-        foreach ($mention_ccs as $key => $mention_cc) {
-          if (isset($current_ccs[$mention_cc])) {
-            unset($mention_ccs[$key]);
-          }
-        }
-      }
+      $mention_ccs = $this->filterAddedCCs($mention_ccs);
       if ($mention_ccs) {
         $metadata = $comment->getMetadata();
         $metacc = idx(
@@ -445,6 +524,30 @@ class DifferentialCommentEditor {
     PhabricatorSearchDifferentialIndexer::indexRevision($revision);
 
     return $comment;
+  }
+
+  private function filterAddedCCs(array $ccs) {
+    $revision = $this->revision;
+
+    $current_ccs = $revision->getCCPHIDs();
+    $current_ccs = array_fill_keys($current_ccs, true);
+
+    $reviewer_phids = $revision->getReviewers();
+    $reviewer_phids = array_fill_keys($reviewer_phids, true);
+
+    foreach ($ccs as $key => $cc) {
+      if (isset($current_ccs[$cc])) {
+        unset($ccs[$key]);
+      }
+      if (isset($reviewer_phids[$cc])) {
+        unset($ccs[$key]);
+      }
+      if ($cc == $revision->getAuthorPHID()) {
+        unset($ccs[$key]);
+      }
+    }
+
+    return $ccs;
   }
 
 }

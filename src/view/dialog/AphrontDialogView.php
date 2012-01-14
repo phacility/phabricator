@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,13 @@ class AphrontDialogView extends AphrontView {
   }
 
   public function addHiddenInput($key, $value) {
-    $this->hidden[] = array($key, $value);
+    if (is_array($value)) {
+      foreach ($value as $hidden_key => $hidden_value) {
+        $this->hidden[] = array($key.'['.$hidden_key.']', $hidden_value);
+      }
+    } else {
+      $this->hidden[] = array($key, $value);
+    }
     return $this;
   }
 
