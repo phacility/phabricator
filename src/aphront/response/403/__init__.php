@@ -11,4 +11,4 @@ phutil_require_module('phabricator', 'view/page/failure');
 phutil_require_module('phabricator', 'view/page/standard');
 
 
-phutil_require_source('Aphront404Response.php');
+phutil_require_source('Aphront403Response.php');

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ class PhabricatorFileAltViewController extends PhabricatorFileController {
     }
 
     if (!$file->validateSecretKey($this->key)) {
-      return new Aphront404Response();
+      return new Aphront403Response();
     }
 
     // It's safe to bypass view restrictions because we know we are being served

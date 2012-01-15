@@ -19,19 +19,20 @@
 /**
  * @group aphront
  */
-class Aphront404Response extends AphrontWebpageResponse {
+class Aphront403Response extends AphrontWebpageResponse {
 
   public function getHTTPResponseCode() {
-    return 404;
+    return 403;
   }
 
   public function buildResponseString() {
     $failure = new AphrontRequestFailureView();
-    $failure->setHeader('404 Not Found');
-    $failure->appendChild('<p>The page you requested was not found.</p>');
+    $failure->setHeader('403 Forbidden');
+    $failure->appendChild(
+      '<p>You do not have privileges to access the requested page.</p>');
 
     $view = new PhabricatorStandardPageView();
-    $view->setTitle('404 Not Found');
+    $view->setTitle('403 Forbidden');
     $view->setRequest($this->getRequest());
     $view->appendChild($failure);
 

@@ -10,6 +10,7 @@ phutil_register_library_map(array(
   array(
     'Aphront304Response' => 'aphront/response/304',
     'Aphront400Response' => 'aphront/response/400',
+    'Aphront403Response' => 'aphront/response/403',
     'Aphront404Response' => 'aphront/response/404',
     'AphrontAjaxResponse' => 'aphront/response/ajax',
     'AphrontApplicationConfiguration' => 'aphront/applicationconfiguration',
@@ -785,7 +786,8 @@ phutil_register_library_map(array(
   array(
     'Aphront304Response' => 'AphrontResponse',
     'Aphront400Response' => 'AphrontResponse',
-    'Aphront404Response' => 'AphrontResponse',
+    'Aphront403Response' => 'AphrontWebpageResponse',
+    'Aphront404Response' => 'AphrontWebpageResponse',
     'AphrontAjaxResponse' => 'AphrontResponse',
     'AphrontAttachedFileView' => 'AphrontView',
     'AphrontCSRFException' => 'AphrontException',

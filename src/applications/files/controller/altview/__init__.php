@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'aphront/response/400');
+phutil_require_module('phabricator', 'aphront/response/403');
 phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'aphront/response/file');
 phutil_require_module('phabricator', 'applications/files/controller/base');
