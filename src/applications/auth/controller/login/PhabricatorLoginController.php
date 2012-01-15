@@ -30,6 +30,25 @@ class PhabricatorLoginController extends PhabricatorAuthController {
       return id(new AphrontRedirectResponse())->setURI('/');
     }
 
+    if ($request->isConduit()) {
+
+      // A common source of errors in Conduit client configuration is getting
+      // the request path wrong. The client will end up here, so make some
+      // effort to give them a comprehensible error message.
+
+      $request_path = $this->getRequest()->getPath();
+      $conduit_path = '/api/<method>';
+      $example_path = '/api/conduit.ping';
+
+      $message =
+        "ERROR: You are making a Conduit API request to '{$request_path}', ".
+        "but the correct HTTP request path to use in order to access a ".
+        "Conduit method is '{$conduit_path}' (for example, ".
+        "'{$example_path}'). Check your configuration.";
+
+      return id(new AphrontPlainTextResponse())->setContent($message);
+    }
+
     $next_uri = $this->getRequest()->getPath();
     if ($next_uri == '/login/') {
       $next_uri = '/';

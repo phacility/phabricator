@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,11 +59,6 @@ class AphrontFileResponse extends AphrontResponse {
   public function getHeaders() {
     $headers = array(
       array('Content-Type', $this->getMimeType()),
-      // Without this, IE can decide that we surely meant "text/html" when
-      // delivering another content type since, you know, it looks like it's
-      // probably an HTML document. This closes the security hole that policy
-      // creates.
-      array('X-Content-Type-Options', 'nosniff'),
     );
 
     if (strlen($this->getDownload())) {

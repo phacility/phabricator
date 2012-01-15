@@ -26,6 +26,7 @@ class AphrontRequest {
 
   const TYPE_AJAX = '__ajax__';
   const TYPE_FORM = '__form__';
+  const TYPE_CONDUIT = '__conduit__';
 
   private $host;
   private $path;
@@ -168,6 +169,10 @@ class AphrontRequest {
 
   final public function isAjax() {
     return $this->getExists(self::TYPE_AJAX);
+  }
+
+  final public function isConduit() {
+    return $this->getExists(self::TYPE_CONDUIT);
   }
 
   public static function getCSRFTokenName() {

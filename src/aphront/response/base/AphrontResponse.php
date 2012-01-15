@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,6 +90,14 @@ abstract class AphrontResponse {
         'Last-Modified',
         $this->formatEpochTimestampForHTTPHeader($this->lastModified));
     }
+
+    $headers[] = array(
+      // IE has a feature where it may override an explicit Content-Type
+      // declaration by inferring a content type. This can be a security risk
+      // and we always explicitly transmit the correct Content-Type header, so
+      // prevent IE from using inferred content types.
+      array('X-Content-Type-Options', 'nosniff'),
+    );
 
     return $headers;
   }
