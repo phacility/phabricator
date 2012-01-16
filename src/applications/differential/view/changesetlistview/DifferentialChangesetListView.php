@@ -25,6 +25,7 @@ class DifferentialChangesetListView extends AphrontView {
   private $renderURI = '/differential/changeset/';
   private $whitespace;
   private $standaloneViews;
+  private $user;
   private $symbolIndexes = array();
   private $repository;
   private $diff;
@@ -41,6 +42,11 @@ class DifferentialChangesetListView extends AphrontView {
 
   public function setStandaloneViews($has_standalone_views) {
     $this->standaloneViews = $has_standalone_views;
+    return $this;
+  }
+
+  public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
     return $this;
   }
 
@@ -133,6 +139,19 @@ class DifferentialChangesetListView extends AphrontView {
           $meta['rightURI'] = (string)$detail_uri->alter('view', 'new');
         }
 
+        if ($this->user) {
+          $path = ltrim(
+            $changeset->getAbsoluteRepositoryPath($this->diff, $repository),
+            '/');
+          $line = 1; // TODO: get first changed line
+          $editor_link = $this->user->loadEditorLink($path, $line, $repository);
+          if ($editor_link) {
+            $meta['editor'] = $editor_link;
+          } else {
+            $meta['editorConfigure'] = '/settings/page/preferences/';
+          }
+        }
+
         $detail_button = javelin_render_tag(
           'a',
           array(
@@ -144,7 +163,6 @@ class DifferentialChangesetListView extends AphrontView {
           ),
           "View Options \xE2\x96\xBC");
       }
-
 
       $detail->setChangeset($changeset);
       $detail->addButton($detail_button);

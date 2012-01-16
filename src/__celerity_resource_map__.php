@@ -330,16 +330,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/javelin/lib/behavior.js',
   ),
-  0 =>
-  array(
-    'uri' => '/res/14c48a9f/rsrc/js/javelin/lib/__tests__/behavior.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-behavior',
-    ),
-    'disk' => '/rsrc/js/javelin/lib/__tests__/behavior.js',
-  ),
   'javelin-behavior-aphront-basic-tokenizer' =>
   array(
     'uri' => '/res/9be30797/rsrc/js/application/core/behavior-tokenizer.js',
@@ -471,7 +461,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-differential-dropdown-menus' =>
   array(
-    'uri' => '/res/acba60ad/rsrc/js/application/differential/behavior-dropdown-menus.js',
+    'uri' => '/res/7bfb2fdb/rsrc/js/application/differential/behavior-dropdown-menus.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1437,18 +1427,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/objectselector/object-selector.css',
   ),
-  'phabricator-prefab' =>
-  array(
-    'uri' => '/res/5784a112/rsrc/js/application/core/Prefab.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-install',
-      1 => 'javelin-util',
-      2 => 'javelin-dom',
-    ),
-    'disk' => '/rsrc/js/application/core/Prefab.js',
-  ),
   'phabricator-profile-css' =>
   array(
     'uri' => '/res/9869d10b/rsrc/css/application/profile/profile-view.css',
@@ -1466,6 +1444,29 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/application/profile/profile-header-view.css',
+  ),
+  0 =>
+  array(
+    'uri' => '/res/b6096fdd/rsrc/js/javelin/lib/__tests__/URI.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-uri',
+      1 => 'javelin-php-serializer',
+    ),
+    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
+  ),
+  'phabricator-prefab' =>
+  array(
+    'uri' => '/res/5784a112/rsrc/js/application/core/Prefab.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-util',
+      2 => 'javelin-dom',
+    ),
+    'disk' => '/rsrc/js/application/core/Prefab.js',
   ),
   'phabricator-remarkup-css' =>
   array(

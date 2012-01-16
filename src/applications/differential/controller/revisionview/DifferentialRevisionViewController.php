@@ -238,6 +238,7 @@ class DifferentialRevisionViewController extends DifferentialController {
     $changeset_view->setChangesets($visible_changesets);
     $changeset_view->setEditable(!$viewer_is_anonymous);
     $changeset_view->setStandaloneViews(true);
+    $changeset_view->setUser($user);
     $changeset_view->setRevision($revision);
     $changeset_view->setDiff($target);
     $changeset_view->setRenderingReferences($rendering_references);

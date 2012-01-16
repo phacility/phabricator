@@ -200,6 +200,7 @@ class DiffusionCommitController extends DiffusionController {
       $change_list->setChangesets($changesets);
       $change_list->setRenderingReferences($references);
       $change_list->setRenderURI('/diffusion/'.$callsign.'/diff/');
+      $change_list->setUser($user);
 
       // TODO: This is pretty awkward, unify the CSS between Diffusion and
       // Differential better.

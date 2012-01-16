@@ -403,6 +403,7 @@ class PhabricatorUser extends PhabricatorUserDAO {
 
       $default_dict = array(
         PhabricatorUserPreferences::PREFERENCE_TITLES => 'glyph',
+        PhabricatorUserPreferences::PREFERENCE_EDITOR => '',
         PhabricatorUserPreferences::PREFERENCE_MONOSPACED => '');
 
       $preferences->setPreferences($default_dict);
@@ -410,6 +411,20 @@ class PhabricatorUser extends PhabricatorUserDAO {
 
     $this->preferences = $preferences;
     return $preferences;
+  }
+
+  public function loadEditorLink($path,
+                                 $line,
+                                 PhabricatorRepository $repository) {
+    $editor = $this->loadPreferences()->getPreference(
+      PhabricatorUserPreferences::PREFERENCE_EDITOR);
+    if ($editor) {
+      return strtr($editor, array(
+        '%f' => phutil_escape_uri($path),
+        '%l' => phutil_escape_uri($line),
+        '%r' => phutil_escape_uri($repository->getCallsign()),
+      ));
+    }
   }
 
   private static function tokenizeName($name) {

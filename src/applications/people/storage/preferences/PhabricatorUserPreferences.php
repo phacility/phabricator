@@ -19,6 +19,7 @@
 class PhabricatorUserPreferences extends PhabricatorUserDAO {
 
   const PREFERENCE_MONOSPACED     = 'monospaced';
+  const PREFERENCE_EDITOR         = 'editor';
   const PREFERENCE_TITLES         = 'titles';
 
   const PREFERENCE_RE_PREFIX      = 're-prefix';

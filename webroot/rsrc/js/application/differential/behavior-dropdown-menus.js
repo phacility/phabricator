@@ -56,6 +56,15 @@ JX.behavior('differential-dropdown-menus', function(config) {
     if (data.rightURI) {
       menu.addItem(link_to('Show Raw File (Right)', data.rightURI));
     }
+    if (data.editor) {
+      menu.addItem(new JX.PhabricatorMenuItem(
+        'Open in Editor',
+        JX.bind(null, location.assign, data.editor), // Open in the same window.
+        data.editor));
+    }
+    if (data.editorConfigure) {
+      menu.addItem(link_to('Configure Editor', data.editorConfigure));
+    }
 
     menu.listen(
       'open',
