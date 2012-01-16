@@ -504,4 +504,8 @@ EOBODY;
       ->saveAndSend();
   }
 
+  public static function validateUsername($username) {
+    return (bool)preg_match('/^[a-zA-Z0-9]+$/', $username);
+  }
+
 }

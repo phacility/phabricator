@@ -2,7 +2,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,13 @@ if (!strlen($username)) {
   echo "Cancelled.\n";
   exit(1);
 }
+
+if (!PhabricatorUser::validateUsername($username)) {
+  echo "The username '{$username}' is invalid. Usernames must consist of only ".
+       "numbers and letters.\n";
+  exit(1);
+}
+
 
 $user = id(new PhabricatorUser())->loadOneWhere(
   'username = %s',

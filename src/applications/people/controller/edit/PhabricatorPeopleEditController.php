@@ -139,7 +139,7 @@ class PhabricatorPeopleEditController extends PhabricatorPeopleController {
       if (!strlen($user->getUsername())) {
         $errors[] = "Username is required.";
         $e_username = 'Required';
-      } else if (!preg_match('/^[a-z0-9]+$/', $user->getUsername())) {
+      } else if (!PhabricatorUser::validateUsername($user->getUsername())) {
         $errors[] = "Username must consist of only numbers and letters.";
         $e_username = 'Invalid';
       } else {

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,13 +39,12 @@ class PhabricatorOAuthDefaultRegistrationController
 
       $user->setUsername($request->getStr('username'));
       $username = $user->getUsername();
-      $matches = null;
       if (!strlen($user->getUsername())) {
         $e_username = 'Required';
         $errors[] = 'Username is required.';
-      } else if (!preg_match('/^[a-zA-Z0-9]+$/', $username, $matches)) {
+      } else if (!PhabricatorUser::validateUsername($username)) {
         $e_username = 'Invalid';
-        $errors[] = 'Username may only contain letters and numbers.';
+        $errors[] = 'Username must consist of only numbers and letters.';
       } else {
         $e_username = null;
       }
