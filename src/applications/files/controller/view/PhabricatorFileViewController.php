@@ -109,12 +109,21 @@ class PhabricatorFileViewController extends PhabricatorFileController {
 
     $form = new AphrontFormView();
 
+    $submit = new AphrontFormSubmitControl();
+
     if ($file->isViewableInBrowser()) {
       $form->setAction($file->getViewURI());
-      $button_name = 'View File';
+      $submit->setValue('View File');
     } else {
       $form->setAction('/file/download/'.$file->getPHID().'/');
-      $button_name = 'Download File';
+      $submit->setValue('Download File');
+    }
+
+    if (($user->getPHID() == $file->getAuthorPHID()) ||
+        ($user->getIsAdmin())) {
+      $submit->addCancelButton(
+        '/file/delete/'.$file->getID().'/',
+        'Delete File');
     }
 
     $file_id = 'F'.$file->getID();
@@ -171,8 +180,7 @@ class PhabricatorFileViewController extends PhabricatorFileController {
           ->setName('storageHandle')
           ->setValue($file->getStorageHandle()))
       ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue($button_name));
+        id($submit));
 
     $panel = new AphrontPanelView();
     $panel->setHeader('File Info - '.$file->getName());

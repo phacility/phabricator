@@ -54,6 +54,7 @@ class AphrontDefaultApplicationConfiguration
         'filter/(?P<filter>\w+)/$' => 'PhabricatorFileListController',
         'upload/$' => 'PhabricatorFileUploadController',
         'dropupload/$' => 'PhabricatorFileDropUploadController',
+        'delete/(?P<id>\d+)/$' => 'PhabricatorFileDeleteController',
         '(?P<view>info)/(?P<phid>[^/]+)/' => 'PhabricatorFileViewController',
         '(?P<view>view)/(?P<phid>[^/]+)/' => 'PhabricatorFileViewController',
         '(?P<view>download)/(?P<phid>[^/]+)/' => 'PhabricatorFileViewController',
