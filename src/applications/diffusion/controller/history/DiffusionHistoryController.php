@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,19 +71,17 @@ class DiffusionHistoryController extends DiffusionController {
 
     if ($request->getBool('copies')) {
       $button_title = 'Hide Copies/Branches';
+      $copies_new = null;
     } else {
       $button_title = 'Show Copies/Branches';
+      $copies_new = true;
     }
-
-    $button_uri = $request->getRequestURI()->alter(
-      'copies',
-      !$request->getBool('copies'));
 
     $button = phutil_render_tag(
       'a',
       array(
         'class'   => 'button small grey',
-        'href'    => $button_uri,
+        'href'    => $request->getRequestURI()->alter('copies', $copies_new),
       ),
       phutil_escape_html($button_title));
 

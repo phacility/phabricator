@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,11 @@ class PhabricatorCountdownViewController
     require_celerity_resource('phabricator-countdown-css');
 
     $chrome_visible = $request->getBool('chrome', true);
+    $chrome_new = $chrome_visible ? false : null;
     $chrome_link = phutil_render_tag(
       'a',
       array(
-        'href' => $request->getRequestURI()->alter('chrome', !$chrome_visible),
+        'href' => $request->getRequestURI()->alter('chrome', $chrome_new),
         'class' => 'phabricator-timer-chrome-link',
       ),
       $chrome_visible ? 'Disable Chrome' : 'Enable Chrome');
