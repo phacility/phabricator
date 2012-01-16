@@ -180,39 +180,43 @@ class PhabricatorFileViewController extends PhabricatorFileController {
     $panel->appendChild($form);
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
 
+    $xform_panel = null;
 
     $transformations = id(new PhabricatorTransformedFile())->loadAllWhere(
       'originalPHID = %s',
       $file->getPHID());
-    $transformed_phids = mpull($transformations, 'getTransformedPHID');
-    $transformed_files = id(new PhabricatorFile())->loadAllWhere(
-      'phid in (%Ls)',
-      $transformed_phids);
-    $transformed_map = mpull($transformed_files, null, 'getPHID');
-    $rows = array();
-    foreach ($transformations as $transformed) {
-      $phid = $transformed->getTransformedPHID();
-      $rows[] = array(
-        phutil_escape_html($transformed->getTransform()),
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => $transformed_map[$phid]->getBestURI(),
-          ),
-          $phid));
+    if ($transformations) {
+      $transformed_phids = mpull($transformations, 'getTransformedPHID');
+      $transformed_files = id(new PhabricatorFile())->loadAllWhere(
+        'phid in (%Ls)',
+        $transformed_phids);
+      $transformed_map = mpull($transformed_files, null, 'getPHID');
+
+      $rows = array();
+      foreach ($transformations as $transformed) {
+        $phid = $transformed->getTransformedPHID();
+        $rows[] = array(
+          phutil_escape_html($transformed->getTransform()),
+          phutil_render_tag(
+            'a',
+            array(
+              'href' => $transformed_map[$phid]->getBestURI(),
+            ),
+            $phid));
+      }
+
+      $table = new AphrontTableView($rows);
+      $table->setHeaders(
+        array(
+          'Transform',
+          'File',
+        ));
+
+      $xform_panel = new AphrontPanelView();
+      $xform_panel->appendChild($table);
+      $xform_panel->setWidth(AphrontPanelView::WIDTH_FORM);
+      $xform_panel->setHeader('Transformations');
     }
-
-    $table = new AphrontTableView($rows);
-    $table->setHeaders(
-      array(
-        'Transform',
-        'File',
-      ));
-
-    $xform_panel = new AphrontPanelView();
-    $xform_panel->appendChild($table);
-    $xform_panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $xform_panel->setHeader('Transformations');
 
     return $this->buildStandardPageResponse(
       array($panel, $xform_panel),
