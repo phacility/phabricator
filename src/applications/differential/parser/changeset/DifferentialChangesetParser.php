@@ -1618,7 +1618,9 @@ class DifferentialChangesetParser {
         case DifferentialChangeType::TYPE_COPY_HERE:
           $message =
             "This {$files[$file]} was {$verb} ".
-            "<strong>{$changeset->getOldFile()}</strong>.";
+            "<strong>".
+              phutil_escape_html($changeset->getOldFile()).
+            "</strong>.";
           break;
         case DifferentialChangeType::TYPE_MOVE_AWAY:
         case DifferentialChangeType::TYPE_COPY_AWAY:
@@ -1627,11 +1629,11 @@ class DifferentialChangesetParser {
           if (count($paths) > 1) {
             $message =
               "This {$files[$file]} was {$verb}: ".
-              "<strong>".implode(', ', $paths)."</strong>.";
+              "<strong>".phutil_escape_html(implode(', ', $paths))."</strong>.";
           } else {
             $message =
               "This {$files[$file]} was {$verb} ".
-              "<strong>".reset($paths)."</strong>.";
+              "<strong>".phutil_escape_html(reset($paths))."</strong>.";
           }
           break;
         case DifferentialChangeType::TYPE_CHANGE:
