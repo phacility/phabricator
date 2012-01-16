@@ -64,8 +64,40 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
       $type = $changeset->getChangeType();
       $ftype = $changeset->getFileType();
 
+      if ($this->standaloneViewLink) {
+        $id = $changeset->getID();
+        if ($id) {
+          $vs_id = idx($this->vsMap, $id);
+        } else {
+          $vs_id = null;
+        }
+
+        $ref = $vs_id ? $id.'/'.$vs_id : $id;
+        $detail_uri = new PhutilURI($this->renderURI);
+        $detail_uri->setQueryParams(
+          array(
+            'ref'         => $ref,
+            'whitespace'  => $this->whitespace,
+            'revision_id' => $this->revisionID,
+          ));
+
+        $link = phutil_render_tag(
+          'a',
+          array(
+            'href' => $detail_uri,
+            'target'  => '_blank',
+          ),
+          phutil_escape_html($display_file));
+      } else {
+        $link = phutil_render_tag(
+          'a',
+          array(
+            'href' => '#'.$changeset->getAnchorName(),
+          ),
+          phutil_escape_html($display_file));
+      }
+
       if (DifferentialChangeType::isOldLocationChangeType($type)) {
-        $link = phutil_escape_html($display_file);
         $away = $changeset->getAwayPaths();
         if (count($away) > 1) {
           $meta = array();
@@ -85,48 +117,12 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
             $meta = 'Copied to '.phutil_escape_html(reset($away));
           }
         }
+      } else if ($type == DifferentialChangeType::TYPE_MOVE_HERE) {
+        $meta = 'Moved from '.phutil_escape_html($changeset->getOldFile());
+      } else if ($type == DifferentialChangeType::TYPE_COPY_HERE) {
+        $meta = 'Copied from '.phutil_escape_html($changeset->getOldFile());
       } else {
-
-        if ($this->standaloneViewLink) {
-          $id = $changeset->getID();
-          if ($id) {
-            $vs_id = idx($this->vsMap, $id);
-          } else {
-            $vs_id = null;
-          }
-
-          $ref = $vs_id ? $id.'/'.$vs_id : $id;
-          $detail_uri = new PhutilURI($this->renderURI);
-          $detail_uri->setQueryParams(
-            array(
-              'ref'         => $ref,
-              'whitespace'  => $this->whitespace,
-              'revision_id' => $this->revisionID,
-            ));
-
-          $link = phutil_render_tag(
-            'a',
-            array(
-              'href' => $detail_uri,
-              'target'  => '_blank',
-            ),
-            phutil_escape_html($display_file));
-        } else {
-          $link = phutil_render_tag(
-            'a',
-            array(
-              'href' => '#'.$changeset->getAnchorName(),
-            ),
-            phutil_escape_html($display_file));
-        }
-
-        if ($type == DifferentialChangeType::TYPE_MOVE_HERE) {
-          $meta = 'Moved from '.phutil_escape_html($changeset->getOldFile());
-        } else if ($type == DifferentialChangeType::TYPE_COPY_HERE) {
-          $meta = 'Copied from '.phutil_escape_html($changeset->getOldFile());
-        } else {
-          $meta = null;
-        }
+        $meta = null;
       }
 
       $line_count = $changeset->getAffectedLineCount();
