@@ -48,9 +48,13 @@ JX.behavior('differential-dropdown-menus', function(config) {
     var menu = new JX.PhabricatorDropdownMenu(buttons[ii])
       .addItem(reveal_item)
       .addItem(diffusion_item)
-      .addItem(link_to('View Standalone', data.detailURI))
-      .addItem(link_to('Show Raw File (Left)', data.leftURI))
-      .addItem(link_to('Show Raw File (Right)', data.rightURI));
+      .addItem(link_to('View Standalone', data.detailURI));
+    if (data.leftURI) {
+      menu.addItem(link_to('Show Raw File (Left)', data.leftURI));
+    }
+    if (data.rightURI) {
+      menu.addItem(link_to('Show Raw File (Right)', data.rightURI));
+    }
 
     menu.listen(
       'open',
