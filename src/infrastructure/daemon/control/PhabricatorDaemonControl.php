@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,8 @@ final class PhabricatorDaemonControl {
       return 0;
     }
 
-    $killed = array();
+    $all_daemons = $running;
+
     foreach ($running as $key => $daemon) {
       $pid = $daemon->getPID();
       $name = $daemon->getName();
@@ -109,7 +110,6 @@ final class PhabricatorDaemonControl {
         unset($running[$key]);
       } else {
         posix_kill($pid, SIGINT);
-        $killed[] = $daemon;
       }
     }
 
@@ -132,10 +132,9 @@ final class PhabricatorDaemonControl {
       $pid = $daemon->getPID();
       echo "KILLing daemon {$pid}.\n";
       posix_kill($pid, SIGKILL);
-      $killed[] = $daemon;
     }
 
-    foreach ($killed as $daemon) {
+    foreach ($all_daemons as $daemon) {
       if ($daemon->getPIDFile()) {
         Filesystem::remove($daemon->getPIDFile());
       }
