@@ -115,6 +115,52 @@ This produces a block like this:
     global $$variable_variable;
   }
 
+You can use ##lines=N## to limit the vertical size of a chunk of code, and
+##name=some_name.ext## to give it a name. For example, this:
+
+  lang=text
+  lang=html, name=example.html, lines=12, counterexample
+  ...
+
+...produces this:
+
+  lang=html, name=example.html, lines=12, counterexample
+  <p>Apple</p>
+  <p>Apricot</p>
+  <p>Avocado</p>
+  <p>Banana</p>
+  <p>Bilberry</p>
+  <p>Blackberry</p>
+  <p>Blackcurrant</p>
+  <p>Blueberry</p>
+  <p>Currant</p>
+  <p>Cherry</p>
+  <p>Cherimoya</p>
+  <p>Clementine</p>
+  <p>Date</p>
+  <p>Damson</p>
+  <p>Durian</p>
+  <p>Eggplant</p>
+  <p>Elderberry</p>
+  <p>Feijoa</p>
+  <p>Gooseberry</p>
+  <p>Grape</p>
+  <p>Grapefruit</p>
+  <p>Guava</p>
+  <p>Huckleberry</p>
+  <p>Jackfruit</p>
+  <p>Jambul</p>
+  <p>Kiwi fruit</p>
+  <p>Kumquat</p>
+  <p>Legume</p>
+  <p>Lemon</p>
+  <p>Lime</p>
+  <p>Lychee</p>
+  <p>Mandarine</p>
+  <p>Mango</p>
+  <p>Mangostine</p>
+  <p>Melon</p>
+
 You can also use "NOTE:" to call out an important idea.
 
 NOTE: Don't cross the streams!
@@ -167,10 +213,21 @@ This appears like this:
 
 You can embed an image by using braces to refer to it:
 
-  {F92}         # Embed the image file F92
+  {F123}         # Embed the image file F123
 
 In most interfaces, you can drag-and-drop an image from your computer into the
 text area to upload and reference it.
+
+You can set file display options like this:
+
+  {F123, layout=left, float, size=full}
+
+Valid options are:
+
+  - **layout** left (default), center, right, inline
+  - **float** If layout is set to left or right, the image will be floated so
+    text wraps around it.
+  - **size** thumb (default), full
 
 = Embedding Media =
 

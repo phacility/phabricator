@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ class PhabricatorRemarkupRuleEmbedFile
 
   public function apply($text) {
     return preg_replace_callback(
-      "@{F(\d+)}@",
+      "@{F(\d+)([^}]+?)?}@",
       array($this, 'markupEmbedFile'),
       $text);
   }
@@ -37,22 +37,87 @@ class PhabricatorRemarkupRuleEmbedFile
       $file = id(new PhabricatorFile())->load($matches[1]);
     }
 
-    if ($file) {
-      return $this->getEngine()->storeText(
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => $file->getViewURI(),
-            'target' => '_blank',
-          ),
-          phutil_render_tag(
-            'img',
-            array(
-              'src' => $file->getThumb160x120URI(),
-            ))));
-    } else {
+    if (!$file) {
       return $matches[0];
     }
+
+    $options = array(
+      'size'    => 'thumb',
+      'layout'  => 'left',
+      'float'   => false,
+    );
+
+    if (!empty($matches[2])) {
+      $options = PhutilSimpleOptions::parse($matches[2]) + $options;
+    }
+
+    switch ($options['size']) {
+      case 'full':
+        $src_uri = $file->getBestURI();
+        $link = null;
+        break;
+      case 'thumb':
+      default:
+        $src_uri = $file->getThumb160x120URI();
+        $link = $file->getBestURI();
+        break;
+    }
+
+    $embed = phutil_render_tag(
+      'img',
+      array(
+        'src' => $src_uri,
+        'class' => 'phabricator-remarkup-embed-image',
+      ));
+
+    if ($link) {
+      $embed = phutil_render_tag(
+        'a',
+        array(
+          'href' => $link,
+          'target' => '_blank',
+        ),
+        $embed);
+    }
+
+    $layout_class = null;
+    switch ($options['layout']) {
+      case 'right':
+      case 'center':
+      case 'inline':
+      case 'left':
+        $layout_class = 'phabricator-remarkup-embed-layout-'.$options['layout'];
+        break;
+      default:
+        $layout_class = 'phabricator-remarkup-embed-layout-left';
+        break;
+    }
+
+    if ($options['float']) {
+      switch ($options['layout']) {
+        case 'center':
+        case 'inline':
+          break;
+        case 'right':
+          $layout_class .= ' phabricator-remarkup-embed-float-right';
+          break;
+        case 'left':
+        default:
+          $layout_class .= ' phabricator-remarkup-embed-float-left';
+          break;
+      }
+    }
+
+    if ($layout_class) {
+      $embed = phutil_render_tag(
+        'div',
+        array(
+          'class' => $layout_class,
+        ),
+        $embed);
+    }
+
+    return $this->getEngine()->storeText($embed);
   }
 
 }

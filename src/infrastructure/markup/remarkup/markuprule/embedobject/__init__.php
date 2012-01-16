@@ -10,6 +10,7 @@ phutil_require_module('phabricator', 'applications/files/storage/file');
 
 phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'markup/engine/remarkup/markuprule/base');
+phutil_require_module('phutil', 'parser/simpleoptions');
 phutil_require_module('phutil', 'utils');
 
 

@@ -96,8 +96,8 @@
   overflow: hidden;
 }
 
-.differential-comment-content .phabricator-remarkup code,
-.differential-comment-core .phabricator-remarkup code {
+.differential-comment-content .phabricator-remarkup .remarkup-code-block,
+.differential-comment-core .phabricator-remarkup .remarkup-code-block {
    width: 88ex;
    width: 81ch;
 }
