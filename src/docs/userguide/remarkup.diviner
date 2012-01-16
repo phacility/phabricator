@@ -14,17 +14,23 @@ This document describes how to format text using Remarkup.
 = Quick Reference =
 
 All the syntax is explained in more detail below, but this is a quick guide to
-formatting text in Remarkup:
+formatting text in Remarkup.
+
+These are inline styles, and can be applied to most text:
 
   **bold** //italic// ##monospaced##
-  = Large Header=
-  == Smaller Header ==
-  > Quoted Text
   D123 T123 rX123   # Link to Objects
   {D123} {T123}     # Link to Objects (Full Name)
   {F123}            # Embed Images
   [[wiki page]]     # Link to Phriction
   @username         # Mention a user
+
+These are block styles, and must be separated from surrounding text by
+empty lines:
+
+  = Large Header=
+  == Smaller Header ==
+  > Quoted Text
   Use "- " or "* " for list items.
   Use ``` or indent two spaces for code.
   Use %%% for a literal block.
@@ -45,10 +51,13 @@ respectively.
 Make **headers** like this:
 
   = Large Header =
+
   == Smaller Header ==
+
   ===== Very Small Header =====
 
-This produces headers like the ones in this document.
+This produces headers like the ones in this document. Make sure you have an
+empty line before and after the header.
 
 Make **lists** by beginning each item with a "-" or a "*":
 
