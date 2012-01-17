@@ -645,6 +645,9 @@ class DifferentialChangesetParser {
   }
 
   protected function applyIntraline(&$render, $intra, $corpus) {
+
+    $line_break = "<span class=\"over-the-line\">\xE2\xAC\x85</span><br />";
+
     foreach ($render as $key => $text) {
       if (isset($intra[$key])) {
         $render[$key] = ArcanistDiffUtils::applyIntralineDiff(
@@ -652,59 +655,10 @@ class DifferentialChangesetParser {
           $intra[$key]);
       }
       if (isset($corpus[$key]) && strlen($corpus[$key]) > $this->lineWidth) {
-        $render[$key] = $this->lineWrap($render[$key]);
+        $lines = phutil_utf8_hard_wrap_html($render[$key], $this->lineWidth);
+        $render[$key] = implode($line_break, $lines);
       }
     }
-  }
-
-  /**
-   * Hard-wrap a piece of UTF-8 text with embedded HTML tags and entities.
-   *
-   * @param   string An HTML string with tags and entities.
-   * @return  string Hard-wrapped string.
-   */
-  protected function lineWrap($line) {
-    $c = 0;
-    $break_here = array();
-
-    // Convert the UTF-8 string into a list of UTF-8 characters.
-    $vector = phutil_utf8v($line);
-    $len = count($vector);
-    $byte_pos = 0;
-    for ($ii = 0; $ii < $len; ++$ii) {
-      // An ampersand indicates an HTML entity; consume the whole thing (until
-      // ";") but treat it all as one character.
-      if ($vector[$ii] == '&') {
-        do {
-          ++$ii;
-        } while ($vector[$ii] != ';');
-        ++$c;
-      // An "<" indicates an HTML tag, consume the whole thing but don't treat
-      // it as a character.
-      } else if ($vector[$ii] == '<') {
-        do {
-          ++$ii;
-        } while ($vector[$ii] != '>');
-      } else {
-        ++$c;
-      }
-
-      // Keep track of where we need to break the string later.
-      if ($c == $this->lineWidth) {
-        $break_here[$ii] = true;
-        $c = 0;
-      }
-    }
-
-    $result = array();
-    foreach ($vector as $ii => $char) {
-      $result[] = $char;
-      if (isset($break_here[$ii])) {
-        $result[] = "<span class=\"over-the-line\">\xE2\xAC\x85</span><br />";
-      }
-    }
-
-    return implode('', $result);
   }
 
   protected function getHighlightFuture($corpus) {
