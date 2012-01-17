@@ -137,6 +137,14 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
       $nav->addFilter(null, 'Edit Profile...', '/settings/page/profile/');
     }
 
+    if ($viewer->getIsAdmin()) {
+      $nav->addSpacer();
+      $nav->addFilter(
+        null,
+        'Administrate User...',
+        '/people/edit/'.$user->getID().'/');
+    }
+
     return $this->buildStandardPageResponse(
       $header,
       array(

@@ -91,13 +91,11 @@ abstract class AphrontResponse {
         $this->formatEpochTimestampForHTTPHeader($this->lastModified));
     }
 
-    $headers[] = array(
-      // IE has a feature where it may override an explicit Content-Type
-      // declaration by inferring a content type. This can be a security risk
-      // and we always explicitly transmit the correct Content-Type header, so
-      // prevent IE from using inferred content types.
-      array('X-Content-Type-Options', 'nosniff'),
-    );
+    // IE has a feature where it may override an explicit Content-Type
+    // declaration by inferring a content type. This can be a security risk
+    // and we always explicitly transmit the correct Content-Type header, so
+    // prevent IE from using inferred content types.
+    $headers[] = array('X-Content-Type-Options', 'nosniff');
 
     return $headers;
   }

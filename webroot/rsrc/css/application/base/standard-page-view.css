@@ -172,6 +172,11 @@ td.phabricator-login-details {
   text-decoration: line-through;
 }
 
+a.handle-disabled {
+  background: #999999;
+  color: #cccccc;
+}
+
 .PhabricatorMonospaced {
   font-family:        "Menlo", "Consolas", "Monaco", monospace;
   font-size:          10px;

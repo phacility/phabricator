@@ -134,6 +134,28 @@ class DifferentialRevisionViewController extends DifferentialController {
       $aux_field->setHandles(array_select_keys($handles, $aux_phids[$key]));
     }
 
+    $reviewer_warning = null;
+    $has_live_reviewer = false;
+    foreach ($revision->getReviewers() as $reviewer) {
+      if (!$handles[$reviewer]->isDisabled()) {
+        $has_live_reviewer = true;
+      }
+    }
+    if (!$has_live_reviewer) {
+      $reviewer_warning = new AphrontErrorView();
+      $reviewer_warning->setSeverity(AphrontErrorView::SEVERITY_WARNING);
+      $reviewer_warning->setTitle('No Active Reviewers');
+      if ($revision->getReviewers()) {
+        $reviewer_warning->appendChild(
+          '<p>All specified reviewers are disabled. You may want to add '.
+          'some new reviewers.</p>');
+      } else {
+        $reviewer_warning->appendChild(
+          '<p>This revision has no specified reviewers. You may want to '.
+          'add some.</p>');
+      }
+    }
+
     $request_uri = $request->getRequestURI();
 
     $limit = 100;
@@ -272,6 +294,7 @@ class DifferentialRevisionViewController extends DifferentialController {
     $page_pane = id(new DifferentialPrimaryPaneView())
       ->setLineWidthFromChangesets($changesets)
       ->setID($pane_id)
+      ->appendChild($reviewer_warning)
       ->appendChild(
         $revision_detail->render().
         $comment_view->render().

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -577,9 +577,12 @@ abstract class DifferentialFieldSpecification {
     $object_map = array();
 
     $users = id(new PhabricatorUser())->loadAllWhere(
-      '(username IN (%Ls)) OR (email IN (%Ls))',
+      '((username IN (%Ls)) OR (email IN (%Ls)))
+        AND isDisabled = 0
+        AND isSystemAgent = 0',
       $value,
       $value);
+
     $user_map = mpull($users, 'getPHID', 'getUsername');
     foreach ($user_map as $username => $phid) {
       // Usernames may have uppercase letters in them. Put both names in the
@@ -620,7 +623,8 @@ abstract class DifferentialFieldSpecification {
         ? "users and mailing lists"
         : "users";
       throw new DifferentialFieldParseException(
-        "Commit message references nonexistent {$what}: {$invalid}.");
+        "Commit message references disabled or nonexistent {$what}: ".
+        "{$invalid}.");
     }
 
     return array_unique($results);
