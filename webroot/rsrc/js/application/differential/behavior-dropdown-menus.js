@@ -33,7 +33,8 @@ JX.behavior('differential-dropdown-menus', function(config) {
     function link_to(name, uri) {
       var item = new JX.PhabricatorMenuItem(
         name,
-        JX.bind(null, window.open, uri));
+        JX.bind(null, window.open, uri),
+        uri);
       item.setDisabled(!uri);
       return item;
     }

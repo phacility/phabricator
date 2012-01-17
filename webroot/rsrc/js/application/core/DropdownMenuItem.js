@@ -7,8 +7,9 @@
 
 JX.install('PhabricatorMenuItem', {
 
-  construct : function(name, action) {
+  construct : function(name, action, href) {
     this.setName(name);
+    this.setHref(href || '#');
     this._action = action;
   },
 
@@ -19,7 +20,7 @@ JX.install('PhabricatorMenuItem', {
       if (this.getDisabled()) {
         return JX.$N('span', this.getName());
       } else {
-        var attrs = { href : '#', meta : { item : this } };
+        var attrs = { href : this.getHref(), meta : { item : this } };
         return JX.$N('a', attrs, this.getName());
       }
     },
@@ -31,6 +32,7 @@ JX.install('PhabricatorMenuItem', {
 
   properties : {
     name : '',
+    href : '',
     disabled : false
   }
 
