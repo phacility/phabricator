@@ -33,7 +33,7 @@ final class DifferentialLintFieldSpecification
 
   public function renderValueForRevisionView() {
     $diff = $this->getDiff();
-    $path_changesets = mpull($diff->loadChangesets(), 'getId', 'getFileName');
+    $path_changesets = mpull($diff->loadChangesets(), 'getId', 'getFilename');
 
     $lstar = DifferentialRevisionUpdateHistoryView::renderDiffLintStar($diff);
     $lmsg = DifferentialRevisionUpdateHistoryView::getDiffLintMessage($diff);

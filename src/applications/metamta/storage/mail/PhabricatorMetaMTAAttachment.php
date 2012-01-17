@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ class PhabricatorMetaMTAAttachment {
 
   public function __construct($data, $filename, $mimetype) {
     $this->setData($data);
-    $this->setFileName($filename);
+    $this->setFilename($filename);
     $this->setMimeType($mimetype);
   }
 
@@ -36,11 +36,11 @@ class PhabricatorMetaMTAAttachment {
     return $this;
   }
 
-  public function getFileName() {
+  public function getFilename() {
     return $this->filename;
   }
 
-  public function setFileName($filename) {
+  public function setFilename($filename) {
     $this->filename = $filename;
     return $this;
   }

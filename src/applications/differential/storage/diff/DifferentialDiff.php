@@ -186,7 +186,7 @@ class DifferentialDiff extends DifferentialDAO {
       $change = array(
         'metadata'      => $changeset->getMetadata(),
         'oldPath'       => $changeset->getOldFile(),
-        'currentPath'   => $changeset->getFileName(),
+        'currentPath'   => $changeset->getFilename(),
         'awayPaths'     => $changeset->getAwayPaths(),
         'oldProperties' => $changeset->getOldProperties(),
         'newProperties' => $changeset->getNewProperties(),

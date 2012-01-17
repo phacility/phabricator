@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ class DifferentialChangeset extends DifferentialDAO {
 
   protected $diffID;
   protected $oldFile;
-  protected $fileName;
+  protected $filename;
   protected $awayPaths;
   protected $changeType;
   protected $fileType;
@@ -155,7 +155,7 @@ class DifferentialChangeset extends DifferentialDAO {
       $base = id(new PhutilURI($diff->getSourceControlPath()))->getPath();
     }
 
-    $path = $this->getFileName();
+    $path = $this->getFilename();
     $path = rtrim($base, '/').'/'.ltrim($path, '/');
 
     $vcs = $repository->getVersionControlSystem();
@@ -177,7 +177,7 @@ class DifferentialChangeset extends DifferentialDAO {
   public function getWordWrapWidth() {
     $config = PhabricatorEnv::getEnvConfig('differential.wordwrap');
     foreach ($config as $regexp => $width) {
-      if (preg_match($regexp, $this->getFileName())) {
+      if (preg_match($regexp, $this->getFilename())) {
         return $width;
       }
     }
@@ -187,7 +187,7 @@ class DifferentialChangeset extends DifferentialDAO {
   public function getWhitespaceMatters() {
     $config = PhabricatorEnv::getEnvConfig('differential.whitespace-matters');
     foreach ($config as $regexp) {
-      if (preg_match($regexp, $this->getFileName())) {
+      if (preg_match($regexp, $this->getFilename())) {
         return true;
       }
     }

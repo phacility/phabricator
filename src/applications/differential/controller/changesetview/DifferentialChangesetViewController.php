@@ -244,7 +244,7 @@ class DifferentialChangesetViewController extends DifferentialController {
 
     $inlines = array();
     foreach ($lint as $msg) {
-      if ($msg['path'] != $changeset->getFileName()) {
+      if ($msg['path'] != $changeset->getFilename()) {
         continue;
       }
       $inline = new DifferentialInlineComment();

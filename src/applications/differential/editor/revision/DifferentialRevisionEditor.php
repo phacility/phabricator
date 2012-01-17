@@ -779,7 +779,7 @@ class DifferentialRevisionEditor {
 
     $paths = array();
     foreach ($changesets as $changeset) {
-      $paths[] = $path_prefix.'/'.$changeset->getFileName();
+      $paths[] = $path_prefix.'/'.$changeset->getFilename();
     }
 
     // Mark this as also touching all parent paths, so you can see all pending

@@ -654,7 +654,7 @@ class DifferentialRevisionViewController extends DifferentialController {
 
     $indexed_langs = array_fill_keys($langs, true);
     foreach ($visible_changesets as $key => $changeset) {
-      $lang = $engine->getLanguageFromFilename($changeset->getFileName());
+      $lang = $engine->getLanguageFromFilename($changeset->getFilename());
       if (isset($indexed_langs[$lang])) {
         $symbol_indexes[$key] = array(
           'lang'      => $lang,
