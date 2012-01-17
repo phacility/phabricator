@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -228,15 +228,17 @@ class PhabricatorFile extends PhabricatorFileDAO {
         "You must save a file before you can generate a view URI.");
     }
 
+    $name = phutil_escape_uri($this->getName());
+
     $alt = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
     if ($alt) {
-      $path = '/file/alt/'.$this->getSecretKey().'/'.$this->getPHID().'/';
+      $path = '/file/alt/'.$this->getSecretKey().'/'.$this->getPHID().'/'.$name;
       $uri = new PhutilURI($alt);
       $uri->setPath($path);
 
       return (string)$uri;
     } else {
-      return '/file/view/'.$this->getPHID().'/';
+      return '/file/view/'.$this->getPHID().'/'.$name;
     }
   }
 
