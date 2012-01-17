@@ -24,7 +24,6 @@ class DifferentialChangesetParser {
   protected $intra        = array();
   protected $newRender    = null;
   protected $oldRender    = null;
-  protected $parsedHunk   = false;
 
   protected $filename     = null;
   protected $missingOld   = array();
@@ -179,7 +178,6 @@ class DifferentialChangesetParser {
   }
 
   public function parseHunk(DifferentialHunk $hunk) {
-    $this->parsedHunk = true;
     $lines = $hunk->getChanges();
 
     $lines = str_replace(
