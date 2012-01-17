@@ -242,24 +242,6 @@ class DifferentialChangesetParser {
     }
   }
 
-  public function getDisplayLine($offset, $length) {
-    $start = 1;
-    for ($ii = $offset; $ii > 0; $ii--) {
-      if ($this->new[$ii] && $this->new[$ii]['line']) {
-        $start = $this->new[$ii]['line'];
-        break;
-      }
-    }
-    $end = $start;
-    for ($ii = $offset + $length; $ii < count($this->new); $ii++) {
-      if ($this->new[$ii] && $this->new[$ii]['line']) {
-        $end = $this->new[$ii]['line'];
-        break;
-      }
-    }
-    return "{$start},{$end}";
-  }
-
   public function parseInlineComment(DifferentialInlineComment $comment) {
     // Parse only comments which are actually visible.
     if ($this->isCommentVisibleOnRenderedDiff($comment)) {
