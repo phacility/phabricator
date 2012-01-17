@@ -60,6 +60,17 @@ storage. To do this, set the configuration key:
   - ##storage.local-disk.path##: Set to some writable directory on local disk.
     Make that directory. You're done.
 
+== Amazon S3 ==
+
+  - **Pros**: Scales well.
+  - **Cons**: More complicated and expensive than other approaches.
+
+To enable file storage in S3, set these key:
+
+  - ##amazon-s3.access-key## Your AWS access key.
+  - ##amazon-s3.secret-key## Your AWS secret key.
+  - ##storage.s3.bucket## S3 bucket name where files should be stored.
+
 == Custom Engine ==
 
 For details about writing a custom storage engine, see @{article:File Storage

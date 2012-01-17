@@ -14,8 +14,8 @@ Phabricator is a LAMP application suite, so you basically need LAMP:
     patches.) Phabricator has active contributors running it on Mac OS X, Amazon
     Linux, Ubuntu, RHEL and CentOS; if you run into issues on other flavors,
     send patches or complaints.
-  - **Apache**: You need Apache. You might be able to use something else, but
-    you're on your own.
+  - **Apache** (or nginx): You need Apache (or nginx). You might be able to use
+    something else, but you're on your own.
   - **MySQL**: You need MySQL.
   - **PHP**: You need PHP 5.2 or newer.
 
@@ -38,11 +38,11 @@ If those work for you, you can skip directly to the
 Otherwise, here's a general description of what you need to install:
 
   - git (usually called "git" in package management systems)
-  - Apache (usually "httpd" or "apache2")
+  - Apache (usually "httpd" or "apache2") (or nginx)
   - MySQL Server (usually "mysqld" or "mysql-server")
   - PHP (usually "php")
-  - Required PHP extensions: mbstring, iconv, mysql, curl, pcntl (these might be something like
-    "php-mysql" or "php5-mysql")
+  - Required PHP extensions: mbstring, iconv, mysql, curl, pcntl (these might be
+    something like "php-mysql" or "php5-mysql")
   - Optional PHP extensions: gd, apc (special instructions for APC are available
     below if you have difficulty installing it), xhprof (instructions below,
     you only need this if you are developing Phabricator)
