@@ -56,10 +56,12 @@ final class DifferentialLintFieldSpecification
 
           $line_link = phutil_escape_html($line);
           if (isset($path_changesets[$path])) {
-            $href = '#C'.$path_changesets[$path].'NL'.$line;
-            $line_link = '<a href="'.phutil_escape_html($href).'">'.
-              $line_link.
-              '</a>';
+            $line_link = phutil_render_tag(
+              'a',
+              array(
+                'href' => '#C'.$path_changesets[$path].'NL'.$line,
+              ),
+              $line_link);
           }
           $message_markup[] =
             '<li>'.
