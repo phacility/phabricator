@@ -268,20 +268,6 @@ class DifferentialChangesetParser {
       $o_desc = array_pop($this->old);
       $n_desc = array_pop($this->new);
 
-      $oend = end($this->old);
-      if ($oend) {
-        $o_next = $oend['type'];
-      } else {
-        $o_next = null;
-      }
-
-      $nend = end($this->new);
-      if ($nend) {
-        $n_next = $nend['type'];
-      } else {
-        $n_next = null;
-      }
-
       if ($o_desc) {
         $o_type = $o_desc['type'];
       } else {
