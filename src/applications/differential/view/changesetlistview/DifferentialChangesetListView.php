@@ -19,6 +19,7 @@
 class DifferentialChangesetListView extends AphrontView {
 
   private $changesets = array();
+  private $references = array();
   private $editable;
   private $revision;
   private $renderURI = '/differential/changeset/';
