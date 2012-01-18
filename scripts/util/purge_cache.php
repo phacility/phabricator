@@ -92,6 +92,12 @@ if ($purge_differential) {
     $table->establishConnection('w'),
     'UPDATE %T SET cache = NULL',
     $table->getTableName());
+  echo "Purging Differential inline comment cache...\n";
+  $table = new DifferentialInlineComment();
+  queryfx(
+    $table->establishConnection('w'),
+    'UPDATE %T SET cache = NULL',
+    $table->getTableName());
   echo "Done.\n";
 }
 
