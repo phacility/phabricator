@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,25 @@
 
 final class PhabricatorProjectQuery {
 
+  private $ids;
+  private $phids;
   private $owners;
   private $members;
 
   private $limit;
   private $offset;
+
+  private $needMembers;
+
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
+    return $this;
+  }
+
+  public function withPHIDs(array $phids) {
+    $this->phids = $phids;
+    return $this;
+  }
 
   public function setLimit($limit) {
     $this->limit = $limit;
@@ -44,13 +58,19 @@ final class PhabricatorProjectQuery {
     return $this;
   }
 
+  public function needMembers($need_members) {
+    $this->needMembers = $need_members;
+    return $this;
+  }
+
   public function execute() {
     $table = id(new PhabricatorProject());
     $conn_r = $table->establishConnection('r');
 
+    $where = $this->buildWhereClause($conn_r);
     $joins = $this->buildJoinsClause($conn_r);
 
-    $limit = null;
+    $limit = '';
     if ($this->limit) {
       $limit = qsprintf(
         $conn_r,
@@ -69,13 +89,51 @@ final class PhabricatorProjectQuery {
 
     $data = queryfx_all(
       $conn_r,
-      'SELECT p.* FROM %T p %Q %Q %Q',
+      'SELECT p.* FROM %T p %Q %Q %Q %Q',
       $table->getTableName(),
       $joins,
+      $where,
       $order,
       $limit);
 
-    return $table->loadAllFromArray($data);
+    $projects = $table->loadAllFromArray($data);
+
+    if ($projects && $this->needMembers) {
+      $members = PhabricatorProjectAffiliation::loadAllForProjectPHIDs(
+        mpull($projects, 'getPHID'));
+      foreach ($projects as $project) {
+        $project->attachAffiliations(
+          array_values(idx($members, $project->getPHID(), array())));
+      }
+    }
+
+    return $projects;
+  }
+
+  private function buildWhereClause($conn_r) {
+    $where = array();
+
+    if ($this->ids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'id IN (%Ld)',
+        $this->ids);
+    }
+
+    if ($this->phids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'phid IN (%Ls)',
+        $this->phids);
+    }
+
+    if ($where) {
+      $where = 'WHERE ('.implode(') AND (', $where).')';
+    } else {
+      $where = '';
+    }
+
+    return $where;
   }
 
   private function buildJoinsClause($conn_r) {

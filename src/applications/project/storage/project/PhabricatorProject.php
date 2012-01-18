@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ class PhabricatorProject extends PhabricatorProjectDAO {
   protected $phrictionSlug;
 
   private $subprojectsNeedUpdate;
+  private $affiliations;
 
   public function getConfiguration() {
     return array(
@@ -52,6 +53,18 @@ class PhabricatorProject extends PhabricatorProjectDAO {
       'projectPHID = %s',
       $this->getPHID());
     return $profile;
+  }
+
+  public function getAffiliations() {
+    if ($this->affiliations === null) {
+      throw new Exception('Attach affiliations first!');
+    }
+    return $this->affiliations;
+  }
+
+  public function attachAffiliations(array $affiliations) {
+    $this->affiliations = $affiliations;
+    return $this;
   }
 
   public function loadAffiliations() {
