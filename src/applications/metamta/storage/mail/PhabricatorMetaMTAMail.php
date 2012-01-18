@@ -24,6 +24,7 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   const STATUS_QUEUE = 'queued';
   const STATUS_SENT  = 'sent';
   const STATUS_FAIL  = 'fail';
+  const STATUS_VOID  = 'void';
 
   const MAX_RETRIES   = 250;
   const RETRY_DELAY   = 5;
@@ -264,28 +265,53 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       $handles = id(new PhabricatorObjectHandleData($phids))
         ->loadHandles();
 
+      $exclude = array();
+
       $params = $this->parameters;
       $default = PhabricatorEnv::getEnvConfig('metamta.default-address');
       if (empty($params['from'])) {
         $mailer->setFrom($default);
-      } else if (!PhabricatorEnv::getEnvConfig('metamta.can-send-as-user')) {
+      } else {
         $from = $params['from'];
-        $handle = $handles[$from];
-        if (empty($params['reply-to'])) {
-          $params['reply-to'] = $handle->getEmail();
-          $params['reply-to-name'] = $handle->getFullName();
+
+        // If the user has set their preferences to not send them email about
+        // things they do, exclude them from being on To or Cc.
+        $from_user = id(new PhabricatorUser())->loadOneWhere(
+          'phid = %s',
+          $from);
+        if ($from_user) {
+          $pref_key = PhabricatorUserPreferences::PREFERENCE_NO_SELF_MAIL;
+          $exclude_self = $from_user
+            ->loadPreferences()
+            ->getPreference($pref_key);
+          if ($exclude_self) {
+            $exclude[$from] = true;
+          }
         }
-        $mailer->setFrom(
-          $default,
-          $handle->getFullName());
-        unset($params['from']);
+
+        if (!PhabricatorEnv::getEnvConfig('metamta.can-send-as-user')) {
+          $handle = $handles[$from];
+          if (empty($params['reply-to'])) {
+            $params['reply-to'] = $handle->getEmail();
+            $params['reply-to-name'] = $handle->getFullName();
+          }
+          $mailer->setFrom(
+            $default,
+            $handle->getFullName());
+          unset($params['from']);
+        }
       }
 
-      $is_first = !empty($params['is-first-message']);
+      $is_first = idx($params, 'is-first-message');
       unset($params['is-first-message']);
+
+      $is_threaded = (bool)idx($params, 'thread-id');
 
       $reply_to_name = idx($params, 'reply-to-name', '');
       unset($params['reply-to-name']);
+
+      $add_cc = null;
+      $add_to = null;
 
       foreach ($params as $key => $value) {
         switch ($key) {
@@ -296,22 +322,21 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
             $mailer->addReplyTo($value, $reply_to_name);
             break;
           case 'to':
-            $emails = $this->getDeliverableEmailsFromHandles($value, $handles);
+            $emails = $this->getDeliverableEmailsFromHandles(
+              $value,
+              $handles,
+              $exclude);
             if ($emails) {
-              $mailer->addTos($emails);
-            } else {
-              if ($value) {
-                throw new Exception(
-                  "All 'To' objects are undeliverable (e.g., disabled users).");
-              } else {
-                throw new Exception("No 'To' specified!");
-              }
+              $add_to = $emails;
             }
             break;
           case 'cc':
-            $emails = $this->getDeliverableEmailsFromHandles($value, $handles);
+            $emails = $this->getDeliverableEmailsFromHandles(
+              $value,
+              $handles,
+              $exclude);
             if ($emails) {
-              $mailer->addCCs($emails);
+              $add_cc = $emails;
             }
             break;
           case 'headers':
@@ -335,6 +360,30 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
             $mailer->setBody($value);
             break;
           case 'subject':
+            if ($is_threaded) {
+              $add_re = PhabricatorEnv::getEnvConfig('metamta.re-prefix');
+
+              // If this message has a single recipient, respect their "Re:"
+              // preference. Otherwise, use the global setting.
+
+              $to = idx($params, 'to', array());
+              $cc = idx($params, 'cc', array());
+              if (count($to) == 1 && count($cc) == 0) {
+                $user = id(new PhabricatorUser())->loadOneWhere(
+                  'phid = %s',
+                  head($to));
+                if ($user) {
+                  $prefs = $user->loadPreferences();
+                  $pref_key = PhabricatorUserPreferences::PREFERENCE_RE_PREFIX;
+                  $add_re = $prefs->getPreference($pref_key, $add_re);
+                }
+              }
+
+              if ($add_re) {
+                $value = 'Re: '.$value;
+              }
+            }
+
             $mailer->setSubject($value);
             break;
           case 'is-html':
@@ -376,6 +425,23 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
       $mailer->addHeader('X-Mail-Transport-Agent', 'MetaMTA');
 
+      if ($add_to) {
+        $mailer->addTos($add_to);
+        if ($add_cc) {
+          $mailer->addCCs($add_cc);
+        }
+      } else if ($add_cc) {
+        // If we have CC addresses but no "to" address, promote the CCs to
+        // "to".
+        $mailer->addTos($add_cc);
+      } else {
+        $this->setStatus(self::STATUS_VOID);
+        $this->setMessage(
+          "Message has no valid recipients: all To/CC are disabled or ".
+          "configured not to receive this mail.");
+        return $this->save();
+      }
+
     } catch (Exception $ex) {
       $this->setStatus(self::STATUS_FAIL);
       $this->setMessage($ex->getMessage());
@@ -416,6 +482,7 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       self::STATUS_QUEUE => "Queued for Delivery",
       self::STATUS_FAIL  => "Delivery Failed",
       self::STATUS_SENT  => "Sent",
+      self::STATUS_VOID  => "Void",
     );
     $status_code = coalesce($status_code, '?');
     return idx($readable, $status_code, $status_code);
@@ -454,7 +521,8 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
   private function getDeliverableEmailsFromHandles(
     array $phids,
-    array $handles) {
+    array $handles,
+    array $exclude) {
 
     $emails = array();
     foreach ($phids as $phid) {
@@ -462,6 +530,9 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         continue;
       }
       if (!$handles[$phid]->isComplete()) {
+        continue;
+      }
+      if (isset($exclude[$phid])) {
         continue;
       }
       $emails[] = $handles[$phid]->getEmail();

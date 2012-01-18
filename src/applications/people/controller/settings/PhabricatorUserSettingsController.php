@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,37 +29,9 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
 
     $request = $this->getRequest();
 
-    $this->pages = array(
-      'account'     => 'Account',
-      'profile'     => 'Profile',
-      'email'       => 'Email',
-      'password'    => 'Password',
-      'preferences' => 'Preferences',
-      'conduit'     => 'Conduit Certificate',
-    );
-
-    if (!PhabricatorEnv::getEnvConfig('account.editable') ||
-        !PhabricatorEnv::getEnvConfig('auth.password-auth-enabled')) {
-      unset($this->pages['password']);
-    }
-
-    if (PhabricatorUserSSHKeysSettingsPanelController::isEnabled()) {
-      $this->pages['sshkeys'] = 'SSH Public Keys';
-    }
-
     $oauth_providers = PhabricatorOAuthProvider::getAllProviders();
-    foreach ($oauth_providers as $provider) {
-      if (!$provider->isProviderEnabled()) {
-        continue;
-      }
-      $key = $provider->getProviderKey();
-      $name = $provider->getProviderName();
-      $this->pages[$key] = $name.' Account';
-    }
-
-    if (empty($this->pages[$this->page])) {
-      $this->page = key($this->pages);
-    }
+    $sidenav = $this->renderSideNav($oauth_providers);
+    $this->page = $sidenav->selectFilter($this->page, 'account');
 
     switch ($this->page) {
       case 'account':
@@ -70,6 +42,10 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
         break;
       case 'email':
         $delegate = new PhabricatorUserEmailSettingsPanelController($request);
+        break;
+      case 'emailpref':
+        $delegate = new PhabricatorUserEmailPreferenceSettingsPanelController(
+          $request);
         break;
       case 'password':
         $delegate = new PhabricatorUserPasswordSettingsPanelController(
@@ -86,17 +62,14 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
           $request);
         break;
       default:
-        if (empty($this->pages[$this->page])) {
-          return new Aphront404Response();
-        }
         $delegate = new PhabricatorUserOAuthSettingsPanelController($request);
         $delegate->setOAuthProvider($oauth_providers[$this->page]);
+        break;
     }
 
     $response = $this->delegateToController($delegate);
 
     if ($response instanceof AphrontView) {
-      $sidenav = $this->renderSideNav();
       $sidenav->appendChild($response);
       return $this->buildStandardPageResponse(
         $sidenav,
@@ -108,20 +81,53 @@ class PhabricatorUserSettingsController extends PhabricatorPeopleController {
     }
   }
 
-  private function renderSideNav() {
-    $sidenav = new AphrontSideNavView();
-    foreach ($this->pages as $page => $name) {
-      $sidenav->addNavItem(
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => '/settings/page/'.$page.'/',
-            'class' => ($page == $this->page)
-              ? 'aphront-side-nav-selected'
-              : null,
-          ),
-          phutil_escape_html($name)));
+  private function renderSideNav($oauth_providers) {
+    $sidenav = new AphrontSideNavFilterView();
+    $sidenav
+      ->setBaseURI(new PhutilURI('/settings/page/'))
+      ->addLabel('Account Information')
+      ->addFilter('account', 'Account')
+      ->addFilter('profile', 'Profile')
+      ->addSpacer()
+      ->addLabel('Email')
+      ->addFilter('email', 'Email Address')
+      ->addFilter('emailpref', 'Email Preferences')
+      ->addSpacer()
+      ->addLabel('Authentication');
+
+    if (PhabricatorEnv::getEnvConfig('account.editable') &&
+        PhabricatorEnv::getEnvConfig('auth.password-auth-enabled')) {
+      $sidenav->addFilter('password', 'Password');
     }
+
+    $sidenav->addFilter('conduit', 'Conduit Certificate');
+
+    if (PhabricatorUserSSHKeysSettingsPanelController::isEnabled()) {
+      $sidenav->addFilter('sshkeys', 'SSH Public Keys');
+    }
+
+    $sidenav->addSpacer();
+    $sidenav->addLabel('Application Settings');
+    $sidenav->addFilter('preferences', 'Display Preferences');
+
+    $items = array();
+    foreach ($oauth_providers as $provider) {
+      if (!$provider->isProviderEnabled()) {
+        continue;
+      }
+      $key = $provider->getProviderKey();
+      $name = $provider->getProviderName();
+      $items[$key] = $name.' Account';
+    }
+
+    if ($items) {
+      $sidenav->addSpacer();
+      $sidenav->addLabel('Linked Accounts');
+      foreach ($items as $key => $name) {
+        $sidenav->addFilter($key, $name);
+      }
+    }
+
     return $sidenav;
   }
 }

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,15 +55,6 @@ class PhabricatorUserOAuthSettingsPanelController
           $provider_name.' account linked to your Phabricator account. You '.
           'can link an account, which will allow you to use it to log into '.
           'Phabricator.</p>');
-
-      switch ($provider_key) {
-        case PhabricatorOAuthProvider::PROVIDER_GITHUB:
-          $form->appendChild(
-            '<p class="aphront-form-instructions">Additionally, you must '.
-            'link your Github account before Phabricator can access any '.
-            'information about hosted repositories.</p>');
-          break;
-      }
 
       $auth_uri = $provider->getAuthURI();
       $client_id = $provider->getClientID();

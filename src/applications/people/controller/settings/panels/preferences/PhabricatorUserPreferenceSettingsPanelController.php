@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 class PhabricatorUserPreferenceSettingsPanelController
   extends PhabricatorUserSettingsPanelController {
 
@@ -24,20 +25,18 @@ class PhabricatorUserPreferenceSettingsPanelController
     $user = $request->getUser();
     $preferences = $user->loadPreferences();
 
+    $pref_monospaced  = PhabricatorUserPreferences::PREFERENCE_MONOSPACED;
+    $pref_titles      = PhabricatorUserPreferences::PREFERENCE_TITLES;
+
     if ($request->isFormPost()) {
-      $monospaced = $request->getStr(
-        PhabricatorUserPreferences::PREFERENCE_MONOSPACED);
+      $monospaced = $request->getStr($pref_monospaced);
 
       // Prevent the user from doing stupid things.
       $monospaced = preg_replace('/[^a-z0-9 ,"]+/i', '', $monospaced);
 
-      $pref_dict = array(
-        PhabricatorUserPreferences::PREFERENCE_TITLES =>
-        $request->getStr(PhabricatorUserPreferences::PREFERENCE_TITLES),
-        PhabricatorUserPreferences::PREFERENCE_MONOSPACED =>
-        $monospaced);
+      $preferences->setPreference($pref_titles, $request->getStr($pref_titles));
+      $preferences->setPreference($pref_monospaced, $monospaced);
 
-      $preferences->setPreferences($pref_dict);
       $preferences->save();
       return id(new AphrontRedirectResponse())
         ->setURI('/settings/page/preferences/?saved=true');
@@ -56,9 +55,8 @@ EXAMPLE;
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel('Page Titles')
-          ->setName(PhabricatorUserPreferences::PREFERENCE_TITLES)
-          ->setValue($preferences->getPreference(
-                       PhabricatorUserPreferences::PREFERENCE_TITLES))
+          ->setName($pref_titles)
+          ->setValue($preferences->getPreference($pref_titles))
           ->setOptions(
             array(
               'glyph' =>
@@ -69,13 +67,12 @@ EXAMPLE;
       ->appendChild(
         id(new AphrontFormTextControl())
         ->setLabel('Monospaced Font')
-        ->setName(PhabricatorUserPreferences::PREFERENCE_MONOSPACED)
+        ->setName($pref_monospaced)
         ->setCaption(
           'Overrides default fonts in tools like Differential. '.
           '(Default: 10px "Menlo", "Consolas", "Monaco", '.
           'monospace)')
-        ->setValue($preferences->getPreference(
-                     PhabricatorUserPreferences::PREFERENCE_MONOSPACED)))
+        ->setValue($preferences->getPreference($pref_monospaced)))
       ->appendChild(
         id(new AphrontFormMarkupControl())
         ->setValue(
@@ -88,7 +85,7 @@ EXAMPLE;
 
     $panel = new AphrontPanelView();
     $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
-    $panel->setHeader('Phabricator Preferences');
+    $panel->setHeader('Display Preferences');
     $panel->appendChild($form);
 
     $error_view = null;

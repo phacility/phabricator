@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,14 @@
 
 class PhabricatorUserPreferences extends PhabricatorUserDAO {
 
-  const PREFERENCE_MONOSPACED = 'monospaced';
-  const PREFERENCE_TITLES = 'titles';
+  const PREFERENCE_MONOSPACED     = 'monospaced';
+  const PREFERENCE_TITLES         = 'titles';
+
+  const PREFERENCE_RE_PREFIX      = 're-prefix';
+  const PREFERENCE_NO_SELF_MAIL   = 'self-mail';
 
   protected $userPHID;
-  protected $preferences;
+  protected $preferences = array();
 
   public function getConfiguration() {
     return array(
@@ -33,7 +36,18 @@ class PhabricatorUserPreferences extends PhabricatorUserDAO {
     ) + parent::getConfiguration();
   }
 
-  public function getPreference($key) {
-    return idx($this->getPreferences(), $key);
+  public function getPreference($key, $default = null) {
+    return idx($this->preferences, $key, $default);
   }
+
+  public function setPreference($key, $value) {
+    $this->preferences[$key] = $value;
+    return $this;
+  }
+
+  public function unsetPreference($key) {
+    unset($this->preferences[$key]);
+    return $this;
+  }
+
 }

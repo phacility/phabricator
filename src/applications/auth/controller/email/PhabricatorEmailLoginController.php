@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,9 +90,12 @@ Phabricator
 EOBODY;
           }
 
+          // NOTE: Don't set the user as 'from', or they may not receive the
+          // mail if they have the "don't send me email about my own actions"
+          // preference set.
+
           $mail = new PhabricatorMetaMTAMail();
           $mail->setSubject('[Phabricator] Password Reset');
-          $mail->setFrom($target_user->getPHID());
           $mail->addTos(
             array(
               $target_user->getPHID(),

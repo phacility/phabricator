@@ -294,6 +294,11 @@ return array(
   // of any affected mail.
   'metamta.precedence-bulk' => false,
 
+  // Mail.app on OS X Lion won't respect threading headers unless the subject
+  // is prefixed with "Re:". If you enable this option, Phabricator will add
+  // "Re:" to the subject line of all mail which is expected to thread.
+  'metamta.re-prefix' => false,
+
 
 // -- Auth ------------------------------------------------------------------ //
 

@@ -7,6 +7,8 @@
 
 
 phutil_require_module('phabricator', 'applications/metamta/storage/base');
+phutil_require_module('phabricator', 'applications/people/storage/preferences');
+phutil_require_module('phabricator', 'applications/people/storage/user');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'infrastructure/env');
 
