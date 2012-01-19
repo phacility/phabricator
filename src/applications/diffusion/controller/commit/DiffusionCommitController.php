@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -261,6 +261,18 @@ class DiffusionCommitController extends DiffusionController {
     $revision_phid = $data->getCommitDetail('differential.revisionPHID');
     if ($revision_phid) {
       $props['Differential Revision'] = $handles[$revision_phid]->renderLink();
+    }
+
+    $request = $this->getDiffusionRequest();
+
+    $contains = DiffusionContainsQuery::newFromDiffusionRequest($request);
+    $branches = $contains->loadContainingBranches();
+
+    if ($branches) {
+      // TODO: Separate these into 'tracked' and other; link tracked branches.
+      $branches = implode(', ', array_keys($branches));
+      $branches = phutil_escape_html($branches);
+      $props['Branches'] = $branches;
     }
 
     $rows = array();

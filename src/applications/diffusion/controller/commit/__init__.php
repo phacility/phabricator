@@ -10,6 +10,7 @@ phutil_require_module('phabricator', 'applications/differential/constants/change
 phutil_require_module('phabricator', 'applications/differential/view/changesetlistview');
 phutil_require_module('phabricator', 'applications/diffusion/controller/base');
 phutil_require_module('phabricator', 'applications/diffusion/data/pathchange');
+phutil_require_module('phabricator', 'applications/diffusion/query/contains/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/pathchange/base');
 phutil_require_module('phabricator', 'applications/diffusion/view/commitchangetable');
 phutil_require_module('phabricator', 'applications/markup/engine');

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -167,12 +167,12 @@ abstract class DiffusionController extends PhabricatorController {
     $callsign = $repository->getCallsign();
     $repository_name = phutil_escape_html($repository->getName()).' Repository';
 
-    $branch_name = $drequest->getBranch();
-    if ($branch_name) {
-      $repository_name .= ' ('.phutil_escape_html($branch_name).')';
+    if (empty($spec['commit'])) {
+      $branch_name = $drequest->getBranch();
+      if ($branch_name) {
+        $repository_name .= ' ('.phutil_escape_html($branch_name).')';
+      }
     }
-
-    $branch_uri = $drequest->getBranchURIComponent($drequest->getBranch());
 
     if (empty($spec['view']) && empty($spec['commit'])) {
       $crumb_list[] = $repository_name;
@@ -220,6 +220,7 @@ abstract class DiffusionController extends PhabricatorController {
         return $crumb_list;
     }
 
+    $branch_uri = $drequest->getBranchURIComponent($drequest->getBranch());
     $view_root_uri = "/diffusion/{$callsign}/{$view}/{$branch_uri}";
     $jump_href = $view_root_uri;
 
