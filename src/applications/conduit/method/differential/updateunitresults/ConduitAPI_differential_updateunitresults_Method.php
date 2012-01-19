@@ -78,7 +78,8 @@ extends ConduitAPIMethod {
     // the new info.
     foreach ($unit_results as &$unit_result) {
       if ($unit_result['name'] === $name ||
-          $unit_result['name'] === $file) {
+          $unit_result['name'] === $file ||
+          $unit_result['name'] === $diff->getSourcePath().$file) {
         $unit_result['name'] = $name;
         $unit_result['file'] = $file;
         $unit_result['result'] = $result;
