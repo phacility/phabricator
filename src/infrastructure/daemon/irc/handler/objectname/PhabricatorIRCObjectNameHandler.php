@@ -46,7 +46,7 @@ class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
         $pattern =
           '@'.
           '(?<!/)(?:^|\b)'. // Negative lookbehind prevent matching "/D123".
-          '(D|T|P|V)(\d+)'.
+          '(D|T|P|V|F)(\d+)'.
           '(?:\b|$)'.
           '@';
 
@@ -55,6 +55,7 @@ class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
         $paste_ids = array();
         $commit_names = array();
         $vote_ids = array();
+        $file_ids = array();
 
         if (preg_match_all($pattern, $message, $matches, PREG_SET_ORDER)) {
           foreach ($matches as $match) {
@@ -70,6 +71,9 @@ class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
                 break;
               case 'V':
                  $vote_ids[] = $match[2];
+                 break;
+              case 'F':
+                 $file_ids[] = $match[2];
                  break;
             }
           }
@@ -124,6 +128,18 @@ class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
            ));
            $output[$vote['phid']] = 'V'.$vote['id'].': '.$vote['question'].
               ' Come Vote '.$vote['uri'];
+         }
+       }
+       
+       if ($file_ids) {
+         foreach ($file_ids as $file_id) {
+           $file = $this->getConduit()->callMethodSynchronous(
+             'file.info',
+             array(
+               'id' => $file_id,
+           ));
+           $output[$file['phid']] = $file['objectName'].": ".$file['uri']." - ".
+              $file['name'];
          }
        }
 
