@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,33 +137,43 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
         'database'  => $database,
       ));
 
-    try {
-      $conn = @mysql_connect(
-        $host,
-        $user,
-        $this->getConfiguration('pass'),
-        $new_link = true,
-        $flags = 0);
+    $retries = max(1, PhabricatorEnv::getEnvConfig('mysql.connection-retries'));
+    while ($retries--) {
+      try {
+        $conn = @mysql_connect(
+          $host,
+          $user,
+          $this->getConfiguration('pass'),
+          $new_link = true,
+          $flags = 0);
 
-      if (!$conn) {
-        $errno = mysql_errno();
-        $error = mysql_error();
-        throw new AphrontQueryConnectionException(
-          "Attempt to connect to {$user}@{$host} failed with error #{$errno}: ".
-          "{$error}.");
-      }
+        if (!$conn) {
+          $errno = mysql_errno();
+          $error = mysql_error();
+          throw new AphrontQueryConnectionException(
+            "Attempt to connect to {$user}@{$host} failed with error ".
+            "#{$errno}: {$error}.", $errno);
+        }
 
-      if ($database !== null) {
-        $ret = @mysql_select_db($database, $conn);
-        if (!$ret) {
-          $this->throwQueryException($conn);
+        if ($database !== null) {
+          $ret = @mysql_select_db($database, $conn);
+          if (!$ret) {
+            $this->throwQueryException($conn);
+          }
+        }
+
+        $profiler->endServiceCall($call_id, array());
+        break;
+      } catch (Exception $ex) {
+        if ($retries && $ex->getCode() == 2003) {
+          $class = get_class($ex);
+          $message = $ex->getMessage();
+          phlog("Retrying ({$retries}) after {$class}: {$message}");
+        } else {
+          $profiler->endServiceCall($call_id, array());
+          throw $ex;
         }
       }
-
-      $profiler->endServiceCall($call_id, array());
-    } catch (Exception $ex) {
-      $profiler->endServiceCall($call_id, array());
-      throw $ex;
     }
 
     self::$connectionCache[$key] = $conn;
@@ -203,7 +213,7 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
 
   public function executeRawQuery($raw_query) {
     $this->lastResult = null;
-    $retries = 3;
+    $retries = max(1, PhabricatorEnv::getEnvConfig('mysql.connection-retries'));
     while ($retries--) {
       try {
         $this->requireConnection();
@@ -242,6 +252,9 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
         if ($this->isInsideTransaction()) {
           throw $ex;
         }
+        $class = get_class($ex);
+        $message = $ex->getMessage();
+        phlog("Retrying ({$retries}) after {$class}: {$message}");
         $this->closeConnection();
       }
     }

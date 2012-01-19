@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'aphront/writeguard');
+phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'storage/connection/base');
 phutil_require_module('phabricator', 'storage/exception/accessdenied');
 phutil_require_module('phabricator', 'storage/exception/base');
@@ -15,6 +16,7 @@ phutil_require_module('phabricator', 'storage/exception/connectionlost');
 phutil_require_module('phabricator', 'storage/exception/duplicatekey');
 phutil_require_module('phabricator', 'storage/exception/recoverable');
 
+phutil_require_module('phutil', 'error');
 phutil_require_module('phutil', 'serviceprofiler');
 phutil_require_module('phutil', 'utils');
 
