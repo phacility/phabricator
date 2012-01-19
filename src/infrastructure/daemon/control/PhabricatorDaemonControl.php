@@ -84,8 +84,11 @@ final class PhabricatorDaemonControl {
     } else {
       // We were given a PID or set of PIDs to kill.
       foreach ($pids as $key => $pid) {
-        if (empty($daemons[$pid])) {
-          echo "{$pid} is not Phabricator-controlled. Not killing.\n";
+        if (!preg_match('/^\d+$/', $pid)) {
+          echo "'{$pid}' is not a valid PID.\n";
+          continue;
+        } else if (empty($daemons[$pid])) {
+          echo "'{$pid}' is not Phabricator-controlled PID. Not killing.\n";
           continue;
         } else {
           $running[] = $daemons[$pid];
