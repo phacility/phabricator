@@ -15,6 +15,7 @@ phutil_require_module('phabricator', 'applications/differential/view/inlinecomme
 phutil_require_module('phabricator', 'applications/files/storage/file');
 phutil_require_module('phabricator', 'applications/markup/syntax');
 phutil_require_module('phabricator', 'infrastructure/diff/engine');
+phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'infrastructure/events/constant/type');
 phutil_require_module('phabricator', 'infrastructure/events/event');
 phutil_require_module('phabricator', 'infrastructure/javelin/markup');
