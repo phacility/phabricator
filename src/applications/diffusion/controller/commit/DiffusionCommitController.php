@@ -192,8 +192,7 @@ class DiffusionCommitController extends DiffusionController {
         $branch = $drequest->getBranchURIComponent(
           $drequest->getBranch());
         $filename = $changeset->getFilename();
-        $commit = $drequest->getCommit();
-        $reference = "{$branch}{$filename};{$commit}";
+        $reference = "{$branch}{$filename};".$drequest->getCommit();
         $references[$key] = $reference;
       }
 
@@ -216,7 +215,7 @@ class DiffusionCommitController extends DiffusionController {
     return $this->buildStandardPageResponse(
       $content,
       array(
-        'title' => 'Diffusion',
+        'title' => 'r'.$callsign.$commit->getCommitIdentifier(),
       ));
   }
 
