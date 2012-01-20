@@ -326,7 +326,7 @@ class PhabricatorObjectHandleData {
             } else {
               $file = $files[$phid];
               $handle->setName($file->getName());
-              $handle->setURI($file->getViewURI());
+              $handle->setURI($file->getBestURI());
               $handle->setComplete(true);
             }
             $handles[$phid] = $handle;
