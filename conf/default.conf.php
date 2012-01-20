@@ -87,7 +87,7 @@ return array(
   // exposes sensitive information to users, so make sure untrusted users can
   // not access an install running in this mode. You should definitely leave
   // this off in production. It is only really useful for using DarkConsole
-  // utilties to debug or profile logged-out pages. You must set
+  // utilities to debug or profile logged-out pages. You must set
   // 'darkconsole.enabled' to use this option.
   'darkconsole.always-on'       => false,
 
@@ -442,7 +442,7 @@ return array(
   // This makes it harder to miss problems while developing Phabricator.
   'phabricator.show-error-callout' => false,
 
-  // When users write comments which have URIs, they'll be automaticaly linked
+  // When users write comments which have URIs, they'll be automatically linked
   // if the protocol appears in this set. This whitelist is primarily to prevent
   // security issues like javascript:// URIs.
   'uri.allowed-protocols' => array(

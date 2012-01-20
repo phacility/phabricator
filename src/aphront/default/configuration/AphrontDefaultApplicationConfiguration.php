@@ -57,7 +57,8 @@ class AphrontDefaultApplicationConfiguration
         'delete/(?P<id>\d+)/$' => 'PhabricatorFileDeleteController',
         '(?P<view>info)/(?P<phid>[^/]+)/' => 'PhabricatorFileViewController',
         '(?P<view>view)/(?P<phid>[^/]+)/' => 'PhabricatorFileViewController',
-        '(?P<view>download)/(?P<phid>[^/]+)/' => 'PhabricatorFileViewController',
+        '(?P<view>download)/(?P<phid>[^/]+)/'
+          => 'PhabricatorFileViewController',
         'alt/(?P<key>[^/]+)/(?P<phid>[^/]+)/'
           => 'PhabricatorFileAltViewController',
         'macro/' => array(
