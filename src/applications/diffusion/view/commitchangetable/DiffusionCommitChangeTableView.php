@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,18 +37,17 @@ final class DiffusionCommitChangeTableView extends DiffusionView {
         $change->getChangeType());
 
       $path = $change->getPath();
+      $hash = substr(md5($path), 0, 8);
       if ($change->getFileType() == DifferentialChangeType::FILE_DIRECTORY) {
-        $path_column = phutil_escape_html($path).'/';
-      } else {
-        $hash = substr(md5($path), 0, 8);
-
-        $path_column = phutil_render_tag(
-          'a',
-          array(
-            'href' => '#'.$hash,
-          ),
-          phutil_escape_html($path));
+        $path .= '/';
       }
+
+      $path_column = phutil_render_tag(
+        'a',
+        array(
+          'href' => '#'.$hash,
+        ),
+        phutil_escape_html($path));
 
       $rows[] = array(
         $this->linkHistory($change->getPath()),
