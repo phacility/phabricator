@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -293,7 +293,8 @@ class HeraldTranscriptController extends HeraldController {
   private function buildApplyTranscriptPanel($xscript) {
     $handles = $this->handles;
 
-    $action_names = HeraldActionConfig::getActionMap();
+    $action_names = HeraldActionConfig::getActionMessageMapForRuleType(
+      HeraldRuleTypeConfig::RULE_TYPE_GLOBAL);
 
     $rows = array();
     foreach ($xscript->getApplyTranscripts() as $apply_xscript) {
@@ -357,7 +358,6 @@ class HeraldTranscriptController extends HeraldController {
 
     $field_names = HeraldFieldConfig::getFieldMap();
     $condition_names = HeraldConditionConfig::getConditionMap();
-    $action_names = HeraldActionConfig::getActionMap();
 
     $handles = $this->handles;
 

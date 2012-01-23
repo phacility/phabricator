@@ -9,6 +9,7 @@
 phutil_require_module('phabricator', 'applications/herald/config/action');
 phutil_require_module('phabricator', 'applications/herald/config/condition');
 phutil_require_module('phabricator', 'applications/herald/config/field');
+phutil_require_module('phabricator', 'applications/herald/config/ruletype');
 phutil_require_module('phabricator', 'applications/herald/controller/base');
 phutil_require_module('phabricator', 'applications/herald/storage/transcript/base');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
