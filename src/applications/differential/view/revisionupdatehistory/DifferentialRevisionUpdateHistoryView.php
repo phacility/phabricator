@@ -151,9 +151,15 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       if ($row['obj']) {
         $lint = self::renderDiffLintStar($row['obj']);
         $unit = self::renderDiffUnitStar($row['obj']);
+        $lint_message = self::getDiffLintMessage($diff);
+        $unit_message = self::getDiffUnitMessage($diff);
+        $lint_title = ' title="'.phutil_escape_html($lint_message).'"';
+        $unit_title = ' title="'.phutil_escape_html($unit_message).'"';
       } else {
         $lint = null;
         $unit = null;
+        $lint_title = null;
+        $unit_title = null;
       }
 
       $base = $this->renderBaseRevision($diff);
@@ -169,8 +175,8 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
           '<td class="revhistory-base">'.phutil_escape_html($base).'</td>'.
           '<td class="revhistory-desc">'.phutil_escape_html($desc).'</td>'.
           '<td class="revhistory-age">'.$age.'</td>'.
-          '<td class="revhistory-star">'.$lint.'</td>'.
-          '<td class="revhistory-star">'.$unit.'</td>'.
+          '<td class="revhistory-star"'.$lint_title.'>'.$lint.'</td>'.
+          '<td class="revhistory-star"'.$unit_title.'>'.$unit.'</td>'.
           '<td class="revhistory-old'.$old_class.'">'.$old.'</td>'.
           '<td class="revhistory-new'.$new_class.'">'.$new.'</td>'.
         '</tr>';
