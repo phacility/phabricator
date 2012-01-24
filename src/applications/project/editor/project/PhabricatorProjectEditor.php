@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,13 @@ final class PhabricatorProjectEditor {
 
   private $project;
   private $user;
-
   private $projectName;
+
+  private $addAffiliations;
+  private $remAffiliations;
 
   public function __construct(PhabricatorProject $project) {
     $this->project = $project;
-  }
-
-  public function setName($name) {
-    $this->projectName = $name;
-    return $this;
   }
 
   public function setUser(PhabricatorUser $user) {
@@ -37,28 +34,50 @@ final class PhabricatorProjectEditor {
     return $this;
   }
 
-  public function save() {
+  public function applyTransactions(array $transactions) {
     if (!$this->user) {
       throw new Exception('Call setUser() before save()!');
     }
+    $user = $this->user;
 
     $project = $this->project;
 
     $is_new = !$project->getID();
 
     if ($is_new) {
-      $project->setAuthorPHID($this->user->getPHID());
+      $project->setAuthorPHID($user->getPHID());
     }
 
-    if (($this->projectName !== null) &&
-        ($this->projectName !== $project->getName())) {
-      $project->setName($this->projectName);
-      $project->setPhrictionSlug($this->projectName);
-      $this->validateName($project);
+    foreach ($transactions as $xaction) {
+      $type = $xaction->getTransactionType();
+
+      $this->setTransactionOldValue($project, $xaction);
+      $this->applyTransactionEffect($project, $xaction);
+
     }
 
     try {
       $project->save();
+
+      foreach ($transactions as $xaction) {
+        $xaction->setAuthorPHID($user->getPHID());
+        $xaction->setProjectID($project->getID());
+        $xaction->save();
+      }
+
+      foreach ($this->remAffiliations as $affil) {
+        $affil->delete();
+      }
+
+      foreach ($this->addAffiliations as $affil) {
+        $affil->setProjectPHID($project->getPHID());
+        $affil->save();
+      }
+
+      foreach ($transactions as $xaction) {
+        $this->publishTransactionStory($project, $xaction);
+      }
+
     } catch (AphrontQueryDuplicateKeyException $ex) {
       // We already validated the slug, but might race. Try again to see if
       // that's the issue. If it is, we'll throw a more specific exception. If
@@ -98,6 +117,99 @@ final class PhabricatorProjectEditor {
         "the name of another project, '{$other_name}' (Project ID: ".
         "{$other_id}). Choose a unique name.");
     }
+  }
+
+  private function setTransactionOldValue(
+    PhabricatorProject $project,
+    PhabricatorProjectTransaction $xaction) {
+
+    $type = $xaction->getTransactionType();
+    switch ($type) {
+      case PhabricatorProjectTransactionType::TYPE_NAME:
+        $xaction->setOldValue($project->getName());
+        break;
+      case PhabricatorProjectTransactionType::TYPE_MEMBERS:
+        $affils = $project->loadAffiliations();
+        $project->attachAffiliations($affils);
+
+        $old_value = mpull($affils, 'getUserPHID');
+        $old_value = array_values($old_value);
+        $xaction->setOldValue($affils);
+
+        $new_value = $xaction->getNewValue();
+        $new_value = array_filter($new_value);
+        $new_value = array_unique($new_value);
+        $new_value = array_values($new_value);
+        $xaction->setNewValue($new_value);
+        break;
+      default:
+        throw new Exception("Unknown transaction type '{$type}'!");
+    }
+  }
+
+  private function applyTransactionEffect(
+    PhabricatorProject $project,
+    PhabricatorProjectTransaction $xaction) {
+
+    $type = $xaction->getTransactionType();
+    switch ($type) {
+      case PhabricatorProjectTransactionType::TYPE_NAME:
+        $project->setName($xaction->getNewValue());
+        $project->setPhrictionSlug($xaction->getNewValue());
+        $this->validateName($project);
+        break;
+      case PhabricatorProjectTransactionType::TYPE_MEMBERS:
+        $old = array_fill_keys($xaction->getOldValue(), true);
+        $new = array_fill_keys($xaction->getNewValue(), true);
+
+        $add = array();
+        $rem = array();
+
+        foreach ($project->getAffiliations() as $affil) {
+          if (empty($new[$affil->getUserPHID()])) {
+            $rem[] = $affil;
+          }
+        }
+
+        foreach ($new as $phid => $ignored) {
+          if (empty($old[$phid])) {
+            $affil = new PhabricatorProjectAffiliation();
+            $affil->setUserPHID($phid);
+            $add[] = $affil;
+          }
+        }
+
+        $this->addAffiliations = $add;
+        $this->remAffiliations = $rem;
+        break;
+      default:
+        throw new Exception("Unknown transaction type '{$type}'!");
+    }
+  }
+
+  private function publishTransactionStory(
+    PhabricatorProject $project,
+    PhabricatorProjectTransaction $xaction) {
+
+    $related_phids = array(
+      $project->getPHID(),
+      $xaction->getAuthorPHID(),
+    );
+
+    id(new PhabricatorFeedStoryPublisher())
+      ->setStoryType(PhabricatorFeedStoryTypeConstants::STORY_PROJECT)
+      ->setStoryData(
+        array(
+          'projectPHID'   => $project->getPHID(),
+          'transactionID' => $xaction->getID(),
+          'type'          => $xaction->getTransactionType(),
+          'old'           => $xaction->getOldValue(),
+          'new'           => $xaction->getNewValue(),
+        ))
+      ->setStoryTime(time())
+      ->setStoryAuthorPHID($xaction->getAuthorPHID())
+      ->setRelatedPHIDs($related_phids)
+      ->publish();
   }
 
 }

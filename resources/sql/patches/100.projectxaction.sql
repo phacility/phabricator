@@ -1,0 +1,11 @@
+CREATE TABLE phabricator_project.project_transaction (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  projectID INT UNSIGNED NOT NULL,
+  authorPHID VARCHAR(64) BINARY NOT NULL,
+  transactionType VARCHAR(32) NOT NULL,
+  oldValue LONGBLOB NOT NULL,
+  newValue LONGBLOB NOT NULL,
+  dateCreated INT UNSIGNED NOT NULL,
+  dateModified INT UNSIGNED NOT NULL,
+  KEY (projectID)
+) ENGINE=InnoDB;

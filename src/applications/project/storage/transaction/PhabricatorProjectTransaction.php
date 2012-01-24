@@ -16,14 +16,24 @@
  * limitations under the License.
  */
 
-final class PhabricatorFeedStoryTypeConstants
-  extends PhabricatorFeedConstants {
+/**
+ * @group project
+ */
+class PhabricatorProjectTransaction extends PhabricatorProjectDAO {
 
-  const STORY_UNKNOWN       = 'PhabricatorFeedStoryUnknown';
-  const STORY_STATUS        = 'PhabricatorFeedStoryStatus';
-  const STORY_DIFFERENTIAL  = 'PhabricatorFeedStoryDifferential';
-  const STORY_PHRICTION     = 'PhabricatorFeedStoryPhriction';
-  const STORY_MANIPHEST     = 'PhabricatorFeedStoryManiphest';
-  const STORY_PROJECT       = 'PhabricatorFeedStoryProject';
+  protected $projectID;
+  protected $authorPHID;
+  protected $transactionType;
+  protected $oldValue;
+  protected $newValue;
+
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_SERIALIZATION => array(
+        'oldValue' => self::SERIALIZATION_JSON,
+        'newValue' => self::SERIALIZATION_JSON,
+      ),
+    ) + parent::getConfiguration();
+  }
 
 }

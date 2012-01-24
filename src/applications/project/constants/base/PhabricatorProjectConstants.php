@@ -16,14 +16,6 @@
  * limitations under the License.
  */
 
-final class PhabricatorFeedStoryTypeConstants
-  extends PhabricatorFeedConstants {
-
-  const STORY_UNKNOWN       = 'PhabricatorFeedStoryUnknown';
-  const STORY_STATUS        = 'PhabricatorFeedStoryStatus';
-  const STORY_DIFFERENTIAL  = 'PhabricatorFeedStoryDifferential';
-  const STORY_PHRICTION     = 'PhabricatorFeedStoryPhriction';
-  const STORY_MANIPHEST     = 'PhabricatorFeedStoryManiphest';
-  const STORY_PROJECT       = 'PhabricatorFeedStoryProject';
+abstract class PhabricatorProjectConstants {
 
 }
