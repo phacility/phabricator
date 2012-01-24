@@ -56,6 +56,8 @@ final class DifferentialLintFieldSpecification
 
           $line_link = phutil_escape_html($line);
           if (isset($path_changesets[$path])) {
+            // TODO: Create standalone links for large diffs. Logic is in
+            // DifferentialDiffTableOfContentsView::renderChangesetLink().
             $line_link = phutil_render_tag(
               'a',
               array(

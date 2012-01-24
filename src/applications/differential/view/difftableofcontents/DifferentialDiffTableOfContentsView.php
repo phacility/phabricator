@@ -58,44 +58,9 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
 
     $changesets = $this->changesets;
     foreach ($changesets as $changeset) {
-      $file = $changeset->getFilename();
-      $display_file = $changeset->getDisplayFilename();
-
       $type = $changeset->getChangeType();
       $ftype = $changeset->getFileType();
-
-      if ($this->standaloneViewLink) {
-        $id = $changeset->getID();
-        if ($id) {
-          $vs_id = idx($this->vsMap, $id);
-        } else {
-          $vs_id = null;
-        }
-
-        $ref = $vs_id ? $id.'/'.$vs_id : $id;
-        $detail_uri = new PhutilURI($this->renderURI);
-        $detail_uri->setQueryParams(
-          array(
-            'ref'         => $ref,
-            'whitespace'  => $this->whitespace,
-            'revision_id' => $this->revisionID,
-          ));
-
-        $link = phutil_render_tag(
-          'a',
-          array(
-            'href' => $detail_uri,
-            'target'  => '_blank',
-          ),
-          phutil_escape_html($display_file));
-      } else {
-        $link = phutil_render_tag(
-          'a',
-          array(
-            'href' => '#'.$changeset->getAnchorName(),
-          ),
-          phutil_escape_html($display_file));
-      }
+      $link = $this->renderChangesetLink($changeset);
 
       if (DifferentialChangeType::isOldLocationChangeType($type)) {
         $away = $changeset->getAwayPaths();
@@ -169,5 +134,37 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
           implode("\n", $rows).
         '</table>'.
       '</div>';
+  }
+
+  private function renderChangesetLink(DifferentialChangeset $changeset) {
+    $display_file = $changeset->getDisplayFilename();
+
+    if ($this->standaloneViewLink) {
+      $id = $changeset->getID();
+      $vs_id = idx($this->vsMap, $id);
+
+      $ref = $vs_id ? $id.'/'.$vs_id : $id;
+      $detail_uri = new PhutilURI($this->renderURI);
+      $detail_uri->setQueryParams(
+        array(
+          'ref'         => $ref,
+          'whitespace'  => $this->whitespace,
+          'revision_id' => $this->revisionID,
+        ));
+
+      return phutil_render_tag(
+        'a',
+        array(
+          'href' => $detail_uri,
+          'target'  => '_blank',
+        ),
+        phutil_escape_html($display_file));
+    }
+    return phutil_render_tag(
+      'a',
+      array(
+        'href' => '#'.$changeset->getAnchorName(),
+      ),
+      phutil_escape_html($display_file));
   }
 }
