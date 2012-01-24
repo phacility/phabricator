@@ -114,14 +114,16 @@ final class DifferentialRevisionCommentView extends AphrontView {
     $num = $this->commentNumber;
     if ($num && !$this->preview) {
       Javelin::initBehavior('phabricator-watch-anchor');
+      $anchor_name = 'comment-'.$num;
       $info[] = phutil_render_tag(
         'a',
         array(
-          'name' => 'comment-'.$num,
-          'href' => '#comment-'.$num,
+          'name'  => $anchor_name,
+          'id'    => $anchor_name,
+          'href'  => '#'.$anchor_name,
         ),
         'Comment D'.$comment->getRevisionID().'#'.$num);
-      $comment_anchor = 'anchor-comment-'.$num;
+      $comment_anchor = 'anchor-'.$anchor_name;
     }
 
     $info = implode(' &middot; ', array_filter($info));

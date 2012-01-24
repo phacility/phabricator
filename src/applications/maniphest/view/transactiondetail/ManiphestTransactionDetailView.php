@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -225,16 +225,17 @@ class ManiphestTransactionDetailView extends ManiphestView {
     $num = $this->commentNumber;
     if ($num && !$this->preview) {
       Javelin::initBehavior('phabricator-watch-anchor');
+      $anchor_name = 'comment-'.$num;
       $info[] = javelin_render_tag(
         'a',
         array(
-          'name' => 'comment-'.$num,
-          'href' => '#comment-'.$num,
+          'name'  => $anchor_name,
+          'id'    => $anchor_name,
+          'href'  => '#'.$anchor_name,
         ),
         'Comment T'.$any_transaction->getTaskID().'#'.$num);
-      $comment_anchor = 'anchor-comment-'.$num;
+      $comment_anchor = 'anchor-'.$anchor_name;
     }
-
 
     $info = implode(' &middot; ', array_filter($info));
 
