@@ -11,6 +11,7 @@ phutil_require_module('phabricator', 'applications/repository/storage/commit');
 phutil_require_module('phabricator', 'applications/repository/storage/repository');
 phutil_require_module('phabricator', 'infrastructure/daemon/workers/storage/task');
 phutil_require_module('phabricator', 'infrastructure/daemon/workers/storage/taskdata');
+phutil_require_module('phabricator', 'infrastructure/javelin/markup');
 phutil_require_module('phabricator', 'view/form/base');
 phutil_require_module('phabricator', 'view/form/control/markup');
 phutil_require_module('phabricator', 'view/form/control/static');

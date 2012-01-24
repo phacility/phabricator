@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,12 +118,32 @@ class PhabricatorWorkerTaskDetailController
     $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->addCancelButton('/daemon/'));
+          ->addCancelButton('/daemon/', 'Back'));
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Task Detail');
     $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
     $panel->appendChild($form);
+
+    $panel->addButton(
+      javelin_render_tag(
+        'a',
+        array(
+          'href' => '/daemon/task/'.$task->getID().'/delete/',
+          'class' => 'button grey',
+          'sigil' => 'workflow',
+        ),
+        'Delete Task'));
+
+    $panel->addButton(
+      javelin_render_tag(
+        'a',
+        array(
+          'href' => '/daemon/task/'.$task->getID().'/release/',
+          'class' => 'button grey',
+          'sigil' => 'workflow',
+        ),
+        'Free Lease'));
 
     return $this->buildStandardPageResponse(
       $panel,

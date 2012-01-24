@@ -259,6 +259,8 @@ class AphrontDefaultApplicationConfiguration
 
       '/daemon/' => array(
         'task/(?P<id>\d+)/$' => 'PhabricatorWorkerTaskDetailController',
+        'task/(?P<id>\d+)/(?P<action>[^/]+)/$'
+          => 'PhabricatorWorkerTaskUpdateController',
         'log/' => array(
           '$' => 'PhabricatorDaemonLogListController',
           'combined/$' => 'PhabricatorDaemonCombinedLogController',
