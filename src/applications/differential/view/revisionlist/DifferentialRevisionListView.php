@@ -112,7 +112,7 @@ final class DifferentialRevisionListView extends AphrontView {
         'Lines',
         'Author',
         'Reviewers',
-        'Updated',
+        'Modified',
         'Created',
       ));
     $table->setColumnClasses(
