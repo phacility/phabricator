@@ -123,14 +123,14 @@ final class DifferentialAddCommentView extends AphrontView {
       'differential-add-reviewers-and-ccs',
       array(
         'dynamic' => array(
-          'add_reviewers' => array(
-            'tokenizer' => 'add-reviewers-tokenizer',
+          'add-reviewers-tokenizer' => array(
+            'actions' => array('request_review' => 1, 'add_reviewers' => 1),
             'src' => '/typeahead/common/users/',
             'row' => 'add-reviewers',
             'ondemand' => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
           ),
-          'add_ccs' => array(
-            'tokenizer' => 'add-ccs-tokenizer',
+          'add-ccs-tokenizer' => array(
+            'actions' => array('add_ccs' => 1),
             'src' => '/typeahead/common/mailable/',
             'row' => 'add-ccs',
             'ondemand' => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),

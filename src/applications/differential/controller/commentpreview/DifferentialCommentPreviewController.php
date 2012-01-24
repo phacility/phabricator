@@ -42,7 +42,8 @@ class DifferentialCommentPreviewController extends DifferentialController {
     $handles = array($author_phid);
 
     $reviewers = $request->getStr('reviewers');
-    if ($action == DifferentialAction::ACTION_ADDREVIEWERS && $reviewers) {
+    if (($action == DifferentialAction::ACTION_ADDREVIEWERS
+        || $action == DifferentialAction::ACTION_REQUEST) && $reviewers) {
       $reviewers = explode(',', $reviewers);
       $comment->setMetadata(array(
         DifferentialComment::METADATA_ADDED_REVIEWERS => $reviewers));

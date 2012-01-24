@@ -9,8 +9,8 @@
 
 JX.behavior('differential-add-reviewers-and-ccs', function(config) {
 
-  function buildTokenizer(props) {
-    var root = JX.$(props.tokenizer);
+  function buildTokenizer(id, props) {
+    var root = JX.$(id);
 
     var datasource;
     if (props.ondemand) {
@@ -37,7 +37,8 @@ JX.behavior('differential-add-reviewers-and-ccs', function(config) {
     props = config.dynamic[k];
     dynamic[k] = {
       row : JX.$(props.row),
-      tokenizer : buildTokenizer(props)
+      tokenizer : buildTokenizer(k, props),
+      actions : props.actions
     };
   }
 
@@ -48,7 +49,7 @@ JX.behavior('differential-add-reviewers-and-ccs', function(config) {
     function(e) {
       var v = JX.$(config.select).value;
       for (var k in dynamic) {
-        if (v == k) {
+        if (dynamic[k].actions[v]) {
           JX.DOM.show(dynamic[k].row);
           dynamic[k].tokenizer.refresh();
         } else {

@@ -228,6 +228,12 @@ class DifferentialCommentEditor {
               "Unexpected revision state '{$revision_status}'!");
         }
 
+        $added_reviewers = $this->addReviewers();
+        if ($added_reviewers) {
+          $key = DifferentialComment::METADATA_ADDED_REVIEWERS;
+          $metadata[$key] = $added_reviewers;
+        }
+
         break;
 
       case DifferentialAction::ACTION_REJECT:
@@ -319,32 +325,14 @@ class DifferentialCommentEditor {
         break;
 
       case DifferentialAction::ACTION_ADDREVIEWERS:
-        $added_reviewers = $this->getAddedReviewers();
-        $user_tried_to_add = count($added_reviewers);
-
-        foreach ($added_reviewers as $k => $user_phid) {
-          if ($user_phid == $revision->getAuthorPHID()) {
-            unset($added_reviewers[$k]);
-          }
-          if (!empty($reviewer_phids[$user_phid])) {
-            unset($added_reviewers[$k]);
-          }
-        }
-
-        $added_reviewers = array_unique($added_reviewers);
+        $added_reviewers = $this->addReviewers();
 
         if ($added_reviewers) {
-          DifferentialRevisionEditor::alterReviewers(
-            $revision,
-            $reviewer_phids,
-            $rem = array(),
-            $add = $added_reviewers,
-            $actor_phid);
-
           $key = DifferentialComment::METADATA_ADDED_REVIEWERS;
           $metadata[$key] = $added_reviewers;
 
         } else {
+          $user_tried_to_add = count($this->getAddedReviewers());
           if ($user_tried_to_add == 0) {
             throw new DifferentialActionHasNoEffectException(
               "You can not add reviewers, because you did not specify any ".
@@ -548,6 +536,34 @@ class DifferentialCommentEditor {
     }
 
     return $ccs;
+  }
+
+  private function addReviewers() {
+    $revision = $this->revision;
+    $added_reviewers = $this->getAddedReviewers();
+    $reviewer_phids = $revision->getReviewers();
+
+    foreach ($added_reviewers as $k => $user_phid) {
+      if ($user_phid == $revision->getAuthorPHID()) {
+        unset($added_reviewers[$k]);
+      }
+      if (!empty($reviewer_phids[$user_phid])) {
+        unset($added_reviewers[$k]);
+      }
+    }
+
+    $added_reviewers = array_unique($added_reviewers);
+
+    if ($added_reviewers) {
+      DifferentialRevisionEditor::alterReviewers(
+        $revision,
+        $reviewer_phids,
+        $rem = array(),
+        $added_reviewers,
+        $this->actorPHID);
+    }
+
+    return $added_reviewers;
   }
 
 }
