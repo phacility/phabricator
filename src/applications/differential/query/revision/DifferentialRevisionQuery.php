@@ -47,6 +47,7 @@ final class DifferentialRevisionQuery {
   private $phids = array();
   private $subscribers = array();
   private $responsibles = array();
+  private $branches = array();
 
   private $order            = 'order-modified';
   const ORDER_MODIFIED      = 'order-modified';
@@ -157,6 +158,19 @@ final class DifferentialRevisionQuery {
    */
   public function withStatus($status_constant) {
     $this->status = $status_constant;
+    return $this;
+  }
+
+
+  /**
+   * Filter results to revisions on given branches.
+   *
+   * @param  list List of branch names.
+   * @return this
+   * @task config
+   */
+  public function withBranches(array $branches) {
+    $this->branches = $branches;
     return $this;
   }
 
@@ -339,12 +353,44 @@ final class DifferentialRevisionQuery {
         $this->loadCommitPHIDs($conn_r, $revisions);
       }
 
-      if ($this->needActiveDiffs || $this->needDiffIDs) {
+      $need_active = $this->needActiveDiffs ||
+                     $this->branches;
+
+      $need_ids = $need_active ||
+                  $this->needDiffIDs;
+
+
+      if ($need_ids) {
         $this->loadDiffIDs($conn_r, $revisions);
       }
 
-      if ($this->needActiveDiffs) {
+      if ($need_active) {
         $this->loadActiveDiffs($conn_r, $revisions);
+      }
+
+      if ($this->branches) {
+
+        // TODO: We could filter this in SQL instead and might get better
+        // performance in some cases.
+
+        $branch_map = array_fill_keys($this->branches, true);
+        foreach ($revisions as $key => $revision) {
+          $diff = $revision->getActiveDiff();
+          if (!$diff) {
+            unset($revisions[$key]);
+            continue;
+          }
+
+          // TODO: Old arc uploaded the wrong branch name for Mercurial (i.e.,
+          // with a trailing "\n"). Once the arc version gets bumped, do a
+          // migration and remove this.
+          $branch = trim($diff->getBranch());
+
+          if (!$diff || empty($branch_map[$branch])) {
+            unset($revisions[$key]);
+            continue;
+          }
+        }
       }
     }
 

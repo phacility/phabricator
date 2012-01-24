@@ -58,6 +58,7 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
       'phids'             => 'optional list<phid>',
       'subscribers'       => 'optional list<phid>',
       'responsibleUsers'  => 'optional list<phid>',
+      'branches'          => 'optional list<string>',
     );
   }
 
@@ -84,6 +85,7 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
     $phids              = $request->getValue('phids');
     $subscribers        = $request->getValue('subscribers');
     $responsible_users  = $request->getValue('responsibleUsers');
+    $branches           = $request->getValue('branches');
 
     $query = new DifferentialRevisionQuery();
     if ($authors) {
@@ -143,6 +145,9 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
     if ($subscribers) {
       $query->withSubscribers($subscribers);
     }
+    if ($branches) {
+      $query->withBranches($branches);
+    }
 
     $query->needRelationships(true);
     $query->needCommitPHIDs(true);
@@ -172,6 +177,7 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
           ArcanistDifferentialRevisionStatus::getNameForRevisionStatus(
             $revision->getStatus()),
         'sourcePath'    => $diff->getSourcePath(),
+        'branch'        => $diff->getBranch(),
         'summary'       => $revision->getSummary(),
         'testPlan'      => $revision->getTestPlan(),
         'lineCount'     => $revision->getLineCount(),
