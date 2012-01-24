@@ -137,7 +137,6 @@ final class DifferentialRevisionCommentView extends AphrontView {
     $content = $comment->getContent();
     $head_content = null;
     if (strlen(rtrim($content))) {
-      $title = "{$author_link} {$verb} this revision:";
       $cache = $comment->getCache();
       if (strlen($cache)) {
         $content = $cache;
@@ -155,6 +154,9 @@ final class DifferentialRevisionCommentView extends AphrontView {
         '<div class="phabricator-remarkup">'.
           $content.
         '</div>';
+    }
+    if (strlen(rtrim($content)) || $this->inlines) {
+      $title = "{$author_link} {$verb} this revision:";
     } else {
       $title = null;
       $head_content =
