@@ -592,6 +592,7 @@ return array(
   // use 'ignore-all' by default
   'differential.whitespace-matters' => array(
     '/\.py$/',
+    '/\.l?hs$/',
   ),
 
   'differential.field-selector' => 'DifferentialDefaultFieldSelector',
