@@ -86,4 +86,25 @@ class DrydockLease extends DrydockDAO {
     }
   }
 
+  public function waitUntilActive() {
+    while (true) {
+      switch ($this->status) {
+        case DrydockLeaseStatus::STATUS_ACTIVE:
+          break 2;
+        case DrydockLeaseStatus::STATUS_RELEASED:
+        case DrydockLeaseStatus::STATUS_EXPIRED:
+        case DrydockLeaseStatus::STATUS_BROKEN:
+          throw new Exception("Lease will never become active!");
+        case DrydockLeaseStatus::STATUS_PENDING:
+          break;
+      }
+      sleep(2);
+      $this->reload();
+    }
+
+    $this->attachResource($this->loadResource());
+
+    return $this;
+  }
+
 }

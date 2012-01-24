@@ -6,13 +6,9 @@
 
 
 
-phutil_require_module('phabricator', 'applications/drydock/blueprint/base');
 phutil_require_module('phabricator', 'applications/drydock/constants/leasestatus');
-phutil_require_module('phabricator', 'applications/drydock/constants/resourcestatus');
 phutil_require_module('phabricator', 'applications/drydock/storage/lease');
-phutil_require_module('phabricator', 'applications/drydock/storage/resource');
-
-phutil_require_module('phutil', 'utils');
+phutil_require_module('phabricator', 'infrastructure/daemon/workers/storage/task');
 
 
 phutil_require_source('DrydockAllocator.php');

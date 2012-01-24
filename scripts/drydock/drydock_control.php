@@ -29,6 +29,8 @@ $allocator = new DrydockAllocator();
 $allocator->setResourceType('host');
 $lease = $allocator->allocate();
 
+$lease->waitUntilActive();
+
 $i_file = $lease->getInterface('command');
 
 list($stdout) = $i_file->execx('ls / ; echo -- ; uptime ; echo -- ; uname -n');

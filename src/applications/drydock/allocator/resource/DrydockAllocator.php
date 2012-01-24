@@ -42,45 +42,15 @@ final class DrydockAllocator {
   }
 
   public function allocate() {
-    $type = $this->getResourceType();
-
-    $candidates = id(new DrydockResource())->loadAllWhere(
-      'type = %s AND status = %s',
-      $type,
-      DrydockResourceStatus::STATUS_OPEN);
-
-    if ($candidates) {
-      shuffle($candidates);
-      $resource = head($candidates);
-    } else {
-      $blueprints = DrydockBlueprint::getAllBlueprintsForResource($type);
-
-      foreach ($blueprints as $key => $blueprint) {
-        if (!$blueprint->canAllocateResources()) {
-          unset($blueprints[$key]);
-          continue;
-        }
-      }
-
-      if (!$blueprints) {
-        throw new Exception(
-          "There are no valid existing '{$type}' resources, and no valid ".
-          "blueprints to build new ones.");
-      }
-
-      // TODO: Rank intelligently.
-      shuffle($blueprints);
-
-      $blueprint = head($blueprints);
-      $resource = $blueprint->allocateResource();
-    }
-
     $lease = $this->getPendingLease();
-    $lease->setResourceID($resource->getID());
-    $lease->setStatus(DrydockLeaseStatus::STATUS_ACTIVE);
-    $lease->save();
 
-    $lease->attachResource($resource);
+    $task = new PhabricatorWorkerTask();
+    $task->setTaskClass('DrydockAllocatorWorker');
+    $task->setData(array(
+      'type'    => $this->getResourceType(),
+      'lease'   => $lease->getID(),
+    ));
+    $task->save();
 
     return $lease;
   }
