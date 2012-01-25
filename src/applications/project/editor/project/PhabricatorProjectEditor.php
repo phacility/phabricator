@@ -134,7 +134,7 @@ final class PhabricatorProjectEditor {
 
         $old_value = mpull($affils, 'getUserPHID');
         $old_value = array_values($old_value);
-        $xaction->setOldValue($affils);
+        $xaction->setOldValue($old_value);
 
         $new_value = $xaction->getNewValue();
         $new_value = array_filter($new_value);
@@ -174,6 +174,7 @@ final class PhabricatorProjectEditor {
         foreach ($new as $phid => $ignored) {
           if (empty($old[$phid])) {
             $affil = new PhabricatorProjectAffiliation();
+            $affil->setRole('');
             $affil->setUserPHID($phid);
             $add[] = $affil;
           }

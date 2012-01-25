@@ -21,6 +21,7 @@ final class PhabricatorProfileHeaderView extends AphrontView {
   protected $profilePicture;
   protected $profileName;
   protected $profileDescription;
+  protected $profileActions = array();
 
   public function setProfilePicture($picture) {
     $this->profilePicture = $picture;
@@ -34,6 +35,11 @@ final class PhabricatorProfileHeaderView extends AphrontView {
 
   public function setDescription($description) {
     $this->profileDescription = $description;
+    return $this;
+  }
+
+  public function addAction($action) {
+    $this->profileActions[] = $action;
     return $this;
   }
 
@@ -56,6 +62,9 @@ final class PhabricatorProfileHeaderView extends AphrontView {
         <tr>
           <td class="profile-header-name">'.
             phutil_escape_html($this->profileName).
+          '</td>
+          <td class="profile-header-actions" rowspan="2">'.
+            self::renderSingleView($this->profileActions).
           '</td>
           <td class="profile-header-picture" rowspan="2">'.
             $image.

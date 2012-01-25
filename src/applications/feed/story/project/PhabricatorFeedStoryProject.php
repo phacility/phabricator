@@ -40,7 +40,9 @@ class PhabricatorFeedStoryProject extends PhabricatorFeedStory {
     $old = $data->getValue('old');
     $new = $data->getValue('new');
     $proj = $this->getHandle($data->getValue('projectPHID'));
-    $auth = $this->getHandle($data->getAuthorPHID());
+
+    $author_phid = $data->getAuthorPHID();
+    $author = $this->getHandle($author_phid);
 
     switch ($type) {
       case PhabricatorProjectTransactionType::TYPE_NAME:
@@ -58,11 +60,36 @@ class PhabricatorFeedStoryProject extends PhabricatorFeedStory {
             '<strong>'.phutil_escape_html($new).'</strong>).';
         }
         break;
+      case PhabricatorProjectTransactionType::TYPE_MEMBERS:
+        $add = array_diff($new, $old);
+        $rem = array_diff($old, $new);
+
+        if ((count($add) == 1) && (count($rem) == 0) &&
+            (head($add) == $author_phid)) {
+          $action = 'joined project <strong>'.$proj->renderLink().'</strong>.';
+        } else if ((count($add) == 0) && (count($rem) == 1) &&
+                   (head($rem) == $author_phid)) {
+          $action = 'left project <strong>'.$proj->renderLink().'</strong>.';
+        } else if (empty($rem)) {
+          $action = 'added members to project '.
+            '<strong>'.$proj->renderLink().'</strong>: '.
+            $this->renderHandleList($add).'.';
+        } else if (empty($add)) {
+          $action = 'removed members from project '.
+            '<strong>'.$proj->renderLink().'</strong>: '.
+            $this->renderHandleList($rem).'.';
+        } else {
+          $action = 'changed members of project '.
+            '<strong>'.$proj->renderLink().'</strong>, added: '.
+            $this->renderHandleList($add).'; removed: '.
+            $this->renderHandleList($rem).'.';
+        }
+        break;
       default:
-        $action = 'updated project <strong>'.$proj->renderLink().'</strong>';
+        $action = 'updated project <strong>'.$proj->renderLink().'</strong>.';
         break;
     }
-    $view->setTitle('<strong>'.$auth->renderLink().'</strong> '.$action);
+    $view->setTitle('<strong>'.$author->renderLink().'</strong> '.$action);
     $view->setOneLineStory(true);
 
     return $view;

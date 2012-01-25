@@ -1483,7 +1483,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-profile-header-css' =>
   array(
-    'uri' => '/res/d39ef6a4/rsrc/css/application/profile/profile-header-view.css',
+    'uri' => '/res/4b1cb23b/rsrc/css/application/profile/profile-header-view.css',
     'type' => 'css',
     'requires' =>
     array(

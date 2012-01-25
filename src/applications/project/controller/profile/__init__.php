@@ -18,6 +18,7 @@ phutil_require_module('phabricator', 'applications/project/controller/base');
 phutil_require_module('phabricator', 'applications/project/storage/profile');
 phutil_require_module('phabricator', 'applications/project/storage/project');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
+phutil_require_module('phabricator', 'infrastructure/javelin/markup');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/layout/profileheader');
 phutil_require_module('phabricator', 'view/layout/sidenavfilter');

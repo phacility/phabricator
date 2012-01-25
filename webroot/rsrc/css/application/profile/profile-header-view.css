@@ -15,6 +15,10 @@
   width: 100%;
 }
 
+.phabricator-profile-header .profile-header-actions {
+  padding: 12px;
+}
+
 .phabricator-profile-header .profile-header-picture-frame {
   margin: 11px;
   width: 50px;

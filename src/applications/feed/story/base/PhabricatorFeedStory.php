@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,6 +75,14 @@ abstract class PhabricatorFeedStory {
 
   final public function getEpoch() {
     return $this->getStoryData()->getEpoch();
+  }
+
+  final protected function renderHandleList(array $phids) {
+    $list = array();
+    foreach ($phids as $phid) {
+      $list[] = '<strong>'.$this->getHandle($phid)->renderLink().'</strong>';
+    }
+    return implode(', ', $list);
   }
 
 }

@@ -207,6 +207,8 @@ class AphrontDefaultApplicationConfiguration
         'affiliation/(?P<id>\d+)/$'
           => 'PhabricatorProjectAffiliationEditController',
         'create/$' => 'PhabricatorProjectCreateController',
+        'update/(?P<id>\d+)/(?P<action>[^/]+)/$'
+          => 'PhabricatorProjectUpdateController',
       ),
 
       '/r(?P<callsign>[A-Z]+)(?P<commit>[a-z0-9]+)$'

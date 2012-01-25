@@ -52,7 +52,7 @@ class PhabricatorProjectProfileController
       $picture = null;
     }
 
-
+    $members = mpull($project->loadAffiliations(), null, 'getUserPHID');
 
     $nav_view = new AphrontSideNavFilterView();
     $uri = new PhutilURI('/project/view/'.$project->getID().'/');
@@ -113,6 +113,33 @@ class PhabricatorProjectProfileController
     $header->setDescription(
       phutil_utf8_shorten($profile->getBlurb(), 1024));
     $header->setProfilePicture($picture);
+
+    $action = null;
+    if (empty($members[$user->getPHID()])) {
+      $action = phabricator_render_form(
+        $user,
+        array(
+          'action' => '/project/update/'.$project->getID().'/join/',
+          'method' => 'post',
+        ),
+        phutil_render_tag(
+          'button',
+          array(
+            'class' => 'green',
+          ),
+          'Join Project'));
+    } else {
+      $action = javelin_render_tag(
+        'a',
+        array(
+          'href'  => '/project/update/'.$project->getID().'/leave/',
+          'sigil' => 'workflow',
+          'class' => 'grey button',
+        ),
+        'Leave Project...');
+    }
+
+    $header->addAction($action);
 
     $header->appendChild($nav_view);
 
