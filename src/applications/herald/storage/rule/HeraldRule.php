@@ -87,15 +87,6 @@ class HeraldRule extends HeraldDAO {
     return $this;
   }
 
-  public static function saveRuleApplied($rule_id, $phid) {
-    queryfx(
-      id(new HeraldRule())->establishConnection('w'),
-      'INSERT IGNORE INTO %T (phid, ruleID) VALUES (%s, %d)',
-      self::TABLE_RULE_APPLIED,
-      $phid,
-      $rule_id);
-  }
-
   public function loadConditions() {
     if (!$this->getID()) {
       return array();

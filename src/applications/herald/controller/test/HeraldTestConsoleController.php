@@ -96,7 +96,7 @@ class HeraldTestConsoleController extends HeraldController {
           $effects = $engine->applyRules($rules, $adapter);
 
           $dry_run = new HeraldDryRunAdapter();
-          $engine->applyEffects($effects, $dry_run);
+          $engine->applyEffects($effects, $dry_run, $rules);
 
           $xscript = $engine->getTranscript();
 

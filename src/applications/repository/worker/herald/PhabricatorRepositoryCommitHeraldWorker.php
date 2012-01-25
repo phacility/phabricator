@@ -42,7 +42,7 @@ class PhabricatorRepositoryCommitHeraldWorker
     $engine = new HeraldEngine();
 
     $effects = $engine->applyRules($rules, $adapter);
-    $engine->applyEffects($effects, $adapter);
+    $engine->applyEffects($effects, $adapter, $rules);
 
     $email_phids = $adapter->getEmailPHIDs();
     if (!$email_phids) {

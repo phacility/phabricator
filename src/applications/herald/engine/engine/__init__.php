@@ -16,6 +16,8 @@ phutil_require_module('phabricator', 'applications/herald/storage/transcript/bas
 phutil_require_module('phabricator', 'applications/herald/storage/transcript/condition');
 phutil_require_module('phabricator', 'applications/herald/storage/transcript/object');
 phutil_require_module('phabricator', 'applications/herald/storage/transcript/rule');
+phutil_require_module('phabricator', 'storage/qsprintf');
+phutil_require_module('phabricator', 'storage/queryfx');
 
 phutil_require_module('phutil', 'utils');
 
