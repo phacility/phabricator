@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -341,6 +341,8 @@ class ManiphestTaskEditController extends ManiphestController {
       $header_name = 'Create New Task';
     }
 
+    require_celerity_resource('maniphest-task-edit-css');
+
     $project_tokenizer_id = celerity_generate_unique_node_id();
 
     $form = new AphrontFormView();
@@ -478,6 +480,7 @@ class ManiphestTaskEditController extends ManiphestController {
         id(new AphrontFormTextAreaControl())
           ->setLabel('Description')
           ->setName('description')
+          ->setID('description-textarea')
           ->setCaption($email_hint)
           ->setValue($task->getDescription()));
 
@@ -503,13 +506,34 @@ class ManiphestTaskEditController extends ManiphestController {
     $panel->setID($panel_id);
     $panel->appendChild($form);
 
+    $description_preview_panel =
+      '<div class="aphront-panel-preview aphront-panel-preview-full">
+        <div class="maniphest-description-preview-header">
+          Description Preview
+        </div>
+        <div id="description-preview">
+          <div class="aphront-panel-preview-loading-text">
+            Loading preview...
+          </div>
+        </div>
+      </div>';
+
+    Javelin::initBehavior(
+      'maniphest-description-preview',
+      array(
+        'preview'   => 'description-preview',
+        'textarea'  => 'description-textarea',
+        'uri'       => '/maniphest/task/descriptionpreview/',
+      ));
+
     return $this->buildStandardPageResponse(
       array(
         $error_view,
         $panel,
+        $description_preview_panel
       ),
       array(
-        'title' => 'Create Task',
+        'title' => $header_name,
       ));
   }
 }
