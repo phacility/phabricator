@@ -203,7 +203,8 @@ EOHELP
     $symbols = $this->loadAvailableDaemonClasses();
     $symbols = ipull($symbols, 'name', 'name');
     if (empty($symbols[$daemon])) {
-      throw new Exception("Daemon '{$daemon}' is not known.");
+      throw new Exception(
+        "Daemon '{$daemon}' is not loaded, misspelled or abstract.");
     }
 
     $pid_dir = $this->getControlDirectory('pid');
@@ -299,6 +300,7 @@ EOHELP
     $loader = new PhutilSymbolLoader();
     return $loader
       ->setAncestorClass('PhutilDaemon')
+      ->setConcreteOnly(true)
       ->selectSymbolsWithoutLoading();
   }
 

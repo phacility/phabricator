@@ -39,13 +39,10 @@ abstract class DrydockBlueprint {
       $blueprints = id(new PhutilSymbolLoader())
         ->setType('class')
         ->setAncestorClass('DrydockBlueprint')
+        ->setConcreteOnly(true)
         ->selectAndLoadSymbols();
       $list = ipull($blueprints, 'name', 'name');
       foreach ($list as $class_name => $ignored) {
-        $reflection = new ReflectionClass($class_name);
-        if ($reflection->isAbstract()) {
-          continue;
-        }
         $list[$class_name] = newv($class_name, array());
       }
     }

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,17 +178,10 @@ class PhabricatorConduitConsoleController
     $classes = id(new PhutilSymbolLoader())
       ->setAncestorClass('ConduitAPIMethod')
       ->setType('class')
+      ->setConcreteOnly(true)
       ->selectSymbolsWithoutLoading();
 
-    $class_names = array_values(ipull($classes, 'name'));
-    foreach ($class_names as $key => $class_name) {
-      $class_info = new ReflectionClass($class_name);
-      if ($class_info->isAbstract()) {
-        unset($class_names[$key]);
-      }
-    }
-
-    return array_values($class_names);
+    return array_values(ipull($classes, 'name'));
   }
 
 }
