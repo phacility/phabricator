@@ -139,7 +139,7 @@ class DifferentialChangesetListView extends AphrontView {
           $meta['rightURI'] = (string)$detail_uri->alter('view', 'new');
         }
 
-        if ($this->user) {
+        if ($this->user && $repository) {
           $path = ltrim(
             $changeset->getAbsoluteRepositoryPath($this->diff, $repository),
             '/');

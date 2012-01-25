@@ -34,10 +34,11 @@ final class DifferentialRevisionQuery {
 
   private $pathIDs = array();
 
-  private $status       = 'status-any';
-  const STATUS_ANY      = 'status-any';
-  const STATUS_OPEN     = 'status-open';
-  const STATUS_COMMITTED = 'status-committed';
+  private $status         = 'status-any';
+  const STATUS_ANY        = 'status-any';
+  const STATUS_OPEN       = 'status-open';
+  const STATUS_ACCEPTED   = 'status-accepted';
+  const STATUS_COMMITTED  = 'status-committed';
 
   private $authors = array();
   private $ccs = array();
@@ -637,6 +638,14 @@ final class DifferentialRevisionQuery {
           array(
             ArcanistDifferentialRevisionStatus::NEEDS_REVIEW,
             ArcanistDifferentialRevisionStatus::NEEDS_REVISION,
+            ArcanistDifferentialRevisionStatus::ACCEPTED,
+          ));
+        break;
+      case self::STATUS_ACCEPTED:
+        $where[] = qsprintf(
+          $conn_r,
+          'status IN (%Ld)',
+          array(
             ArcanistDifferentialRevisionStatus::ACCEPTED,
           ));
         break;

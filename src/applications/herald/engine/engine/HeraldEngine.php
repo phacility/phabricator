@@ -180,8 +180,6 @@ class HeraldEngine {
           implode(', ', $sql));
       }
     }
-
-    die("DERP");
   }
 
   public function getTranscript() {

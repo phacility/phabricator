@@ -32,6 +32,8 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
     $status_types = array(
       DifferentialRevisionQuery::STATUS_ANY,
       DifferentialRevisionQuery::STATUS_OPEN,
+      DifferentialRevisionQuery::STATUS_ACCEPTED,
+      DifferentialRevisionQuery::STATUS_COMMITTED,
     );
     $status_types = implode(', ', $status_types);
 
