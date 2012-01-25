@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,8 @@ class PhabricatorRepositoryCommitHeraldWorker
       $commit->getID());
 
     $rules = HeraldRule::loadAllByContentTypeWithFullData(
-      HeraldContentTypeConfig::CONTENT_TYPE_COMMIT);
+      HeraldContentTypeConfig::CONTENT_TYPE_COMMIT,
+      $commit->getPHID());
 
     $adapter = new HeraldCommitAdapter(
       $repository,

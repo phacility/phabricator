@@ -28,7 +28,9 @@ class HeraldEngine {
 
   public static function loadAndApplyRules(HeraldObjectAdapter $object) {
     $content_type = $object->getHeraldTypeName();
-    $rules = HeraldRule::loadAllByContentTypeWithFullData($content_type);
+    $rules = HeraldRule::loadAllByContentTypeWithFullData(
+      $content_type,
+      $object->getPHID());
 
     $engine = new HeraldEngine();
     $effects = $engine->applyRules($rules, $object);
