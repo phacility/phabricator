@@ -7,11 +7,10 @@
 }
 
 .maniphest-transaction-detail-container {
-  margin: 1em 1em 1.25em;
-  background: 2px 2px no-repeat;
+  margin: 1em 2em 1.25em;
+  background: 0px 2px no-repeat;
   min-height: 50px;
-  padding: 2px 2px;
-  border: 1px solid transparent;
+  padding: 2px 0px;
 }
 
 .maniphest-transaction-list-view .anchor-target {
