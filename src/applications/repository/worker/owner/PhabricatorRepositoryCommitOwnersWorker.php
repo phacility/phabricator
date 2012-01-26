@@ -36,7 +36,7 @@ class PhabricatorRepositoryCommitOwnersWorker
           $package->getPHID(),
           $commit->getPHID());
 
-        // Don't update relationship if  it exists  already
+        // Don't update relationship if it exists already
         if (!$relationship) {
           if ($package->getAuditingEnabled()) {
             $reasons = $this->checkAuditReasons($commit, $package);
@@ -63,13 +63,15 @@ class PhabricatorRepositoryCommitOwnersWorker
       }
     }
 
-    $herald_task = new PhabricatorWorkerTask();
-    $herald_task->setTaskClass('PhabricatorRepositoryCommitHeraldWorker');
-    $herald_task->setData(
-      array(
-        'commitID' => $commit->getID(),
-      ));
-    $herald_task->save();
+    if ($this->shouldQueueFollowupTasks()) {
+      $herald_task = new PhabricatorWorkerTask();
+      $herald_task->setTaskClass('PhabricatorRepositoryCommitHeraldWorker');
+      $herald_task->setData(
+        array(
+          'commitID' => $commit->getID(),
+        ));
+      $herald_task->save();
+    }
   }
 
   private function checkAuditReasons(
@@ -117,7 +119,7 @@ class PhabricatorRepositoryCommitOwnersWorker
     $owners_phids = mpull($owners, 'getUserPHID');
 
     if (!($commit_author_phid && in_array($commit_author_phid, $owners_phids) ||
-        $revision_author_phid && in_array($revision_author_phid,
+        $commit_reviewedby_phid && in_array($commit_reviewedby_phid,
           $owners_phids))) {
       $reasons[] = "Owners Not Involved";
     }
