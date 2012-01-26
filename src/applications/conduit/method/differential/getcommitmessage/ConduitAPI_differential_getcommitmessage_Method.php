@@ -76,6 +76,9 @@ class ConduitAPI_differential_getcommitmessage_Method extends ConduitAPIMethod {
 
     if ($is_edit) {
       $fields = $request->getValue('fields');
+      if (!is_array($fields)) {
+        $fields = array();
+      }
       foreach ($fields as $field => $value) {
 
         $aux_field = idx($aux_fields, $field);
