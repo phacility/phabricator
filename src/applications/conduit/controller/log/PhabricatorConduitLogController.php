@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,36 +21,8 @@
  */
 class PhabricatorConduitLogController extends PhabricatorConduitController {
 
-  private $view;
-
-  public function willProcessRequest(array $data) {
-    $this->view = idx($data, 'view');
-  }
-
   public function processRequest() {
     $request = $this->getRequest();
-
-    $nav = new AphrontSideNavView();
-    $links = array(
-      'calls' => 'All Calls',
-    );
-
-    if (empty($links[$this->view])) {
-      $this->view = key($links);
-    }
-
-    foreach ($links as $slug => $name) {
-      $nav->addNavItem(
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => '/conduit/log/view/'.$slug.'/',
-            'class' => ($slug == $this->view)
-              ? 'aphront-side-nav-selected'
-              : null,
-          ),
-          phutil_escape_html($name)));
-    }
 
     $conn_table = new PhabricatorConduitConnectionLog();
     $call_table = new PhabricatorConduitMethodCallLog();
@@ -64,7 +36,7 @@ class PhabricatorConduitLogController extends PhabricatorConduitController {
       $pager->getOffset(),
       $pager->getPageSize() + 1);
     $calls = $pager->sliceResults($calls);
-    $pager->setURI(new PhutilURI('/conduit/log/view/'.$this->view.'/'), 'page');
+    $pager->setURI(new PhutilURI('/conduit/log/'), 'page');
     $pager->setEnableKeyboardShortcuts(true);
 
     $min = $pager->getOffset() + 1;
@@ -83,13 +55,13 @@ class PhabricatorConduitLogController extends PhabricatorConduitController {
     $panel->setHeader('Conduit Method Calls ('.$min.'-'.$max.')');
     $panel->appendChild($table);
     $panel->appendChild($pager);
-    $nav->appendChild($panel);
+
+    $this->setFilter('log');
 
     return $this->buildStandardPageResponse(
-      $nav,
+      $panel,
       array(
         'title' => 'Conduit Logs',
-        'tab'   => 'logs',
       ));
   }
 

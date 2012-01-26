@@ -83,7 +83,7 @@ class AphrontDefaultApplicationConfiguration
         => 'PhabricatorPeopleProfileController',
       '/conduit/' => array(
         '$' => 'PhabricatorConduitConsoleController',
-        'method/(?P<method>[^/]+)$' => 'PhabricatorConduitConsoleController',
+        'method/(?P<method>[^/]+)/$' => 'PhabricatorConduitConsoleController',
         'log/$' => 'PhabricatorConduitLogController',
         'log/view/(?P<view>[^/]+)/$' => 'PhabricatorConduitLogController',
         'token/$' => 'PhabricatorConduitTokenController',

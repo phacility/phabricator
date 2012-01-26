@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,8 @@ class PhabricatorConduitTokenController extends PhabricatorConduitController {
       '<p class="aphront-form-instructions">arc will then complete the '.
       'install process for you.</p>');
 
+    $this->setFilter('token');
+    $this->setShowSideNav(false);
 
     return $this->buildStandardPageResponse(
       $panel,
