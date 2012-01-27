@@ -346,7 +346,8 @@ class DiffusionBrowseFileController extends DiffusionController {
               "\xC2\xAB",
               $prev_rev,
               $n,
-              $selected);
+              $selected,
+              'Blame previous revision');
             $prev_link = '<th style="background: ' . $color .
               '; width: 2em;">' . $prev_link . '</th>';
           }
@@ -424,7 +425,8 @@ class DiffusionBrowseFileController extends DiffusionController {
     $name = null,
     $rev = null,
     $line = null,
-    $view = null) {
+    $view = null,
+    $title = null) {
 
     $callsign = $drequest->getCallsign();
 
@@ -449,6 +451,7 @@ class DiffusionBrowseFileController extends DiffusionController {
       'a',
       array(
         'href' => "/diffusion/{$callsign}/browse/{$path}{$at}{$line}{$view}",
+        'title' => $title,
       ),
       $name
     );
