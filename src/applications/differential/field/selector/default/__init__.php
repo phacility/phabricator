@@ -13,7 +13,6 @@ phutil_require_module('phabricator', 'applications/differential/field/specificat
 phutil_require_module('phabricator', 'applications/differential/field/specification/ccs');
 phutil_require_module('phabricator', 'applications/differential/field/specification/commits');
 phutil_require_module('phabricator', 'applications/differential/field/specification/dependencies');
-phutil_require_module('phabricator', 'applications/differential/field/specification/exportpatch');
 phutil_require_module('phabricator', 'applications/differential/field/specification/gitsvnid');
 phutil_require_module('phabricator', 'applications/differential/field/specification/host');
 phutil_require_module('phabricator', 'applications/differential/field/specification/lint');
