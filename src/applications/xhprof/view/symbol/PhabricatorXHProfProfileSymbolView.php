@@ -19,19 +19,14 @@
 /**
  * @phutil-external-symbol function xhprof_compute_flat_info
  */
-class PhabricatorXHProfProfileSymbolView extends AphrontView {
+final class PhabricatorXHProfProfileSymbolView
+  extends PhabricatorXHProfProfileView {
 
   private $profileData;
-  private $baseURI;
   private $symbol;
 
   public function setProfileData(array $data) {
     $this->profileData = $data;
-    return $this;
-  }
-
-  public function setBaseURI($uri) {
-    $this->baseURI = $uri;
     return $this;
   }
 
@@ -67,8 +62,6 @@ class PhabricatorXHProfProfileSymbolView extends AphrontView {
       }
     }
 
-    $base_uri = $this->baseURI;
-
     $rows = array();
     $rows[] = array(
       'Metrics for this Call',
@@ -77,12 +70,7 @@ class PhabricatorXHProfProfileSymbolView extends AphrontView {
       '',
     );
     $rows[] = array(
-      phutil_render_tag(
-        'a',
-        array(
-          'href' => $base_uri.'?symbol='.$symbol,
-        ),
-        phutil_escape_html($symbol)),
+      $this->renderSymbolLink($symbol),
       $flat[$symbol]['ct'],
       $flat[$symbol]['wt'],
       '100%',
@@ -96,12 +84,7 @@ class PhabricatorXHProfProfileSymbolView extends AphrontView {
     );
     foreach ($parents as $key => $name) {
       $rows[] = array(
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => $base_uri.'?symbol='.$name,
-          ),
-          phutil_escape_html($name)),
+        $this->renderSymbolLink($name),
         $data[$key]['ct'],
         $data[$key]['wt'],
         '',
@@ -152,17 +135,10 @@ class PhabricatorXHProfProfileSymbolView extends AphrontView {
   }
 
   private function formatRows($rows) {
-    $base_uri = $this->baseURI;
-
     $result = array();
     foreach ($rows as $row) {
       $result[] = array(
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => $base_uri.'?symbol='.$row[0],
-          ),
-          phutil_escape_html($row[0])),
+        $this->renderSymbolLink($row[0]),
         number_format($row[1]),
         number_format($row[2]).' us',
         sprintf('%.1f%%', 100 * $row[3]),

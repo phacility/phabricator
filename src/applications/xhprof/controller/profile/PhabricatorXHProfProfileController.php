@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,21 +44,25 @@ class PhabricatorXHProfProfileController
     $request = $this->getRequest();
     $symbol = $request->getStr('symbol');
 
+    $is_framed = $request->getBool('frame');
+
     if ($symbol) {
       $view = new PhabricatorXHProfProfileSymbolView();
-      $view->setProfileData($data);
       $view->setSymbol($symbol);
     } else {
       $view = new PhabricatorXHProfProfileTopLevelView();
-      $view->setProfileData($data);
       $view->setLimit(100);
     }
+
+    $view->setBaseURI($request->getRequestURI()->getPath());
+    $view->setIsFramed($is_framed);
+    $view->setProfileData($data);
 
     return $this->buildStandardPageResponse(
       $view,
       array(
         'title' => 'Profile',
-        'frame' => $request->getBool('frame'),
+        'frame' => $is_framed,
       ));
   }
 }

@@ -19,11 +19,11 @@
 /**
  * @phutil-external-symbol function xhprof_compute_flat_info
  */
-class PhabricatorXHProfProfileTopLevelView extends AphrontView {
+final class PhabricatorXHProfProfileTopLevelView
+  extends PhabricatorXHProfProfileView {
 
   private $profileData;
   private $limit;
-  private $baseURI;
 
   public function setProfileData(array $data) {
     $this->profileData = $data;
@@ -32,11 +32,6 @@ class PhabricatorXHProfProfileTopLevelView extends AphrontView {
 
   public function setLimit($limit) {
     $this->limit = $limit;
-    return $this;
-  }
-
-  public function setBaseURI($uri) {
-    $this->baseURI = $uri;
     return $this;
   }
 
@@ -81,16 +76,9 @@ class PhabricatorXHProfProfileTopLevelView extends AphrontView {
       $flat = array_slice($flat, 0, $this->limit);
     }
 
-    $base_uri = $this->baseURI;
-
     foreach ($flat as $call => $counters) {
       $rows[] = array(
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => $base_uri.'?symbol='.$call,
-          ),
-          phutil_escape_html($call)),
+        $this->renderSymbolLink($call),
         number_format($counters['ct']),
         number_format($counters['wt']).' us',
         sprintf('%.1f%%', 100 * $counters['wt'] / $totals['wt']),
