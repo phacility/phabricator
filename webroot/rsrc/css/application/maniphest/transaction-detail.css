@@ -2,10 +2,6 @@
  * @provides maniphest-transaction-detail-css
  */
 
-.maniphest-trnasaction-list-view {
-  padding: .5em 1.5em;
-}
-
 .maniphest-transaction-detail-container {
   margin: 1em 2em 1.25em;
   background: 0px 2px no-repeat;

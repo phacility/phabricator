@@ -2,11 +2,11 @@
  * @provides differential-revision-comment-css
  */
 
-
 .differential-comment {
-  padding: 3px 6px;
-  margin-bottom: 10px;
-  border: 1px solid transparent;
+  background: 0px 2px no-repeat;
+  margin: 1em 0 1.25em;
+  min-height: 50px;
+  padding: 2px 0px;
 }
 
 .differential-comment-list {
@@ -15,6 +15,17 @@
 
 .differential-add-comment-panel {
   max-width: 1162px;
+}
+
+.differential-comment-detail {
+  border-color: #dddddd;
+  border-width: 1px 10px;
+  border-style: solid;
+  margin-left: 54px;
+}
+
+.differential-comment-detail .hide {
+  display: none;
 }
 
 /* Spooky haunted panel which floats on the bottom of the screen. */
@@ -43,49 +54,32 @@
   display: none;
 }
 
-
 .differential-haunted-panel {
   padding-bottom: 250px;
 }
-
 
 .differential-comment-list .anchor-target {
   background-color: #ffffdd;
   border-color: #ffff00;
 }
 
+.differential-comment-header {
+  background: #f3f3f3;
+  padding: 4px 1em;
+}
+
+.differential-comment-header a {
+  font-weight: bold;
+}
+
 .differential-comment-info {
   color:       #666666;
   float:       right;
   font-size:   11px;
-  margin:      0 0 3px;
-  padding-top: 6px;
-}
-
-.differential-comment-info a {
-  font-weight: bold;
-}
-
-.differential-comment-title {
-  font-weight:         bold;
-  height:              16px;
-  margin:              4px 0em 0em 0em;
-  padding:             4px 0em;
-  position:            relative;
-}
-
-.differential-comment-body {
-  min-height:           56px;
-  padding-left:         62px;
-  background-repeat:    no-repeat;
-  background-position:  6px 0px;
 }
 
 .differential-comment-content {
-  background:          #fbfbfb;
-  border-color:        #c3c3c3;
-  border-style:        solid;
-  border-width:        1px 10px 1px 10px;
+  background:          #fcfcfc;
   clear:               both;
   line-height:         1.4em;
   margin:              0em;
@@ -102,59 +96,45 @@
    width: 81ch;
 }
 
-.differential-comment-nocontent {
-  font-weight: bold;
-}
-
-.differential-comment-action-testplan .differential-comment-content {
+.differential-comment .differential-comment-action-testplan {
   border-color:     #660099;
-  background:       #f6f3ff;
 }
 
-.differential-comment-action-abandon .differential-comment-content {
+.differential-comment .differential-comment-action-abandon {
   border-color:     #222222;
-  background:       #f3f3f3;
 }
 
-.differential-comment-action-accept .differential-comment-content {
+.differential-comment .differential-comment-action-accept {
   border-color:     #009966;
-  background:       #f3fff3;
 }
 
-.differential-comment-action-reject .differential-comment-content {
+.differential-comment .differential-comment-action-reject {
   border-color:     #aa0000;
-  background:       #fff3f3;
 }
 
-.differential-comment-action-rethink .differential-comment-content {
+.differential-comment .differential-comment-action-rethink {
   border-color:     #aa0000;
-  background:       #fff3f3;
 }
 
-.differential-comment-action-commit .differential-comment-content {
+.differential-comment .differential-comment-action-commit {
   border-color:     #006699;
-  background:       #f3f3ff;
 }
 
 
-.differential-comment-action-reclaim .differential-comment-content {
+.differential-comment .differential-comment-action-reclaim {
   border-color:     #0099aa;
-  background:       #f3fff9;
 }
 
-.differential-comment-action-update .differential-comment-content {
+.differential-comment .differential-comment-action-update {
   border-color:     #6699cc;
-  background:       #f3f9ff;
 }
 
-.differential-comment-action-add_reviewers .differential-comment-content {
+.differential-comment .differential-comment-action-add_reviewers {
   border-color:     #aa99cc;
-  background:       #f9f3ff;
 }
 
-.differential-comment-action-request_review .differential-comment-content {
+.differential-comment .differential-comment-action-request_review {
   border-color:     #cc9966;
-  background:       #fff9f3;
 }
 
 .differential-inline-summary th,
@@ -202,9 +182,8 @@
   text-decoration: none;
 }
 
-
 .differential-inline-summary-section {
-  margin: 1em 0 .5em;
+  margin: .75em 0 .5em;
   font-size: 11px;
   border-bottom: 1px solid #dddddd;
   color: #666666;

@@ -155,15 +155,12 @@ final class DifferentialRevisionCommentView extends AphrontView {
           $content.
         '</div>';
     }
+
+    $title = "{$author_link} {$verb} this revision.";
     if (strlen(rtrim($content)) || $this->inlines) {
-      $title = "{$author_link} {$verb} this revision:";
+      $hide_comments_class = null;
     } else {
-      $title = null;
-      $head_content =
-        '<div class="differential-comment-nocontent">'.
-          "<p>{$author_link} {$verb} this revision.</p>".
-        '</div>';
-      $content = null;
+      $hide_comments_class = 'hide';
     }
 
     if ($this->inlines) {
@@ -325,16 +322,16 @@ final class DifferentialRevisionCommentView extends AphrontView {
     return phutil_render_tag(
       'div',
       array(
-        'class' => "differential-comment {$action_class}",
+        'class' => "differential-comment",
         'id'    => $comment_anchor,
+        'style' => $background,
       ),
-      '<div class="differential-comment-head">'.
-        '<span class="differential-comment-info">'.$info.'</span>'.
-        '<span class="differential-comment-title">'.$title.'</span>'.
-        '<div style="clear: both;"></div>'.
-      '</div>'.
-      '<div class="differential-comment-body" style="'.$background.'">'.
-        '<div class="differential-comment-content">'.
+      '<div class="differential-comment-detail '.$action_class.'">'.
+        '<div class="differential-comment-header">'.
+          '<span class="differential-comment-info">'.$info.'</span>'.
+          '<span class="differential-comment-title">'.$title.'</span>'.
+        '</div>'.
+        '<div class="differential-comment-content '.$hide_comments_class.'">'.
           $head_content.
           $metadata_blocks.
           '<div class="differential-comment-core">'.
