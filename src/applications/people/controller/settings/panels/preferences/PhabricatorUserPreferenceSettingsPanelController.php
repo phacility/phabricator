@@ -51,6 +51,14 @@ function helloWorld() {
 }
 EXAMPLE;
 
+    $editor_doc_link = phutil_render_tag(
+      'a',
+      array(
+        'href' => PhabricatorEnv::getDoclink(
+          'article/User_Guide:_Configuring_an_External_Editor.html'),
+      ),
+      'User Guide: Configuring an External Editor');
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setAction('/settings/page/preferences/')
@@ -72,8 +80,9 @@ EXAMPLE;
         ->setName($pref_editor)
         ->setCaption(
           'Link to edit files in external editor. '.
-          '%f is replaced by filename, %l by line number, %r by repository. '.
-          'Example: editor://open/?file=%f&line=%l&repository=%r')
+          '%f is replaced by filename, %l by line number, %r by repository '.
+          'callsign. '.
+          "For documentation, see {$editor_doc_link}.")
         ->setValue($preferences->getPreference($pref_editor)))
       ->appendChild(
         id(new AphrontFormTextControl())

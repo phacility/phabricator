@@ -9,6 +9,7 @@
 phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/people/controller/settings/panels/base');
 phutil_require_module('phabricator', 'applications/people/storage/preferences');
+phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'view/form/base');
 phutil_require_module('phabricator', 'view/form/control/markup');
 phutil_require_module('phabricator', 'view/form/control/select');
