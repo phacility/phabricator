@@ -352,6 +352,7 @@ class HeraldRuleController extends HeraldController {
           $rule->save();
           $rule->saveConditions($conditions);
           $rule->saveActions($actions);
+          $rule->saveEdit($request->getUser()->getPHID());
 //          $rule->saveTransaction();
 
       } catch (AphrontQueryDuplicateKeyException $ex) {

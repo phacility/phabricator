@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,8 +48,14 @@ final class HeraldRuleListView extends AphrontView {
     return $this;
   }
 
+  public function setUser($user) {
+    $this->user = $user;
+    return $this;
+  }
+
   public function render() {
     $rows = array();
+
     foreach ($this->rules as $rule) {
       $owner = $this->handles[$rule->getAuthorPHID()]->renderLink();
 
@@ -59,6 +65,22 @@ final class HeraldRuleListView extends AphrontView {
           'href' => '/herald/rule/'.$rule->getID().'/',
         ),
         phutil_escape_html($rule->getName()));
+
+      $last_edit_date = phabricator_datetime($rule->getDateModified(),
+                                             $this->user);
+
+      $view_edits = phutil_render_tag(
+        'a',
+        array(
+          'href' => '/herald/history/' . $rule->getID() . '/',
+        ),
+        '(View Edits)');
+
+      $last_edited = phutil_render_tag(
+        'span',
+        array(),
+        "Last edited on $last_edit_date ${view_edits}");
+
 
       $delete = javelin_render_tag(
         'a',
@@ -73,6 +95,7 @@ final class HeraldRuleListView extends AphrontView {
         $this->map[$rule->getContentType()],
         $owner,
         $name,
+        $last_edited,
         $delete,
       );
     }
@@ -88,6 +111,7 @@ final class HeraldRuleListView extends AphrontView {
         'Type',
         'Owner',
         'Rule Name',
+        'Last Edited',
         '',
       ));
     $table->setColumnClasses(
@@ -95,6 +119,7 @@ final class HeraldRuleListView extends AphrontView {
         '',
         '',
         'wide wrap pri',
+        '',
         'action'
       ));
 

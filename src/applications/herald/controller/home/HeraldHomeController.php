@@ -63,6 +63,11 @@ class HeraldHomeController extends HeraldController {
         $user->getPHID());
     }
 
+    foreach ($rules as $rule) {
+      $edits = $rule->loadEdits();
+      $rule->attachEdits($edits);
+    }
+
     $need_phids = mpull($rules, 'getAuthorPHID');
     $handles = id(new PhabricatorObjectHandleData($need_phids))
       ->loadHandles();
@@ -72,7 +77,8 @@ class HeraldHomeController extends HeraldController {
       ->setHandles($handles)
       ->setMap($map)
       ->setAllowCreation(true)
-      ->setView($this->view);
+      ->setView($this->view)
+      ->setUser($user);
     $panel = $list_view->render();
 
 
