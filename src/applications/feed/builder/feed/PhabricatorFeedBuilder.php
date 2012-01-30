@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,15 @@
 final class PhabricatorFeedBuilder {
 
   private $stories;
+  private $framed;
 
   public function __construct(array $stories) {
     $this->stories = $stories;
+  }
+
+  public function setFramed($framed) {
+    $this->framed = $framed;
+    return $this;
   }
 
   public function setUser(PhabricatorUser $user) {
@@ -57,6 +63,7 @@ final class PhabricatorFeedBuilder {
     foreach ($stories as $story) {
       $story->setHandles($handles);
       $story->setObjects($objects);
+      $story->setFramed($this->framed);
 
       $date = phabricator_date($story->getEpoch(), $user);
       if ($date == $today) {

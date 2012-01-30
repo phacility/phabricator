@@ -195,15 +195,7 @@ class PhabricatorObjectHandle {
 
 
   public function renderLink() {
-
-    switch ($this->getType()) {
-      case PhabricatorPHIDConstants::PHID_TYPE_USER:
-        $name = $this->getName();
-        break;
-      default:
-        $name = $this->getFullName();
-    }
-
+    $name = $this->getLinkName();
     $class = null;
 
     if ($this->status != PhabricatorObjectHandleStatus::STATUS_OPEN) {
@@ -221,6 +213,17 @@ class PhabricatorObjectHandle {
         'class' => $class,
       ),
       phutil_escape_html($name));
+  }
+
+  public function getLinkName() {
+    switch ($this->getType()) {
+      case PhabricatorPHIDConstants::PHID_TYPE_USER:
+        $name = $this->getName();
+        break;
+      default:
+        $name = $this->getFullName();
+    }
+    return $name;
   }
 
 }

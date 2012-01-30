@@ -42,7 +42,6 @@ class PhabricatorFeedStoryManiphest extends PhabricatorFeedStory {
     $task_phid = $data->getValue('taskPHID');
 
     $objects = $this->getObjects();
-    $handles = $this->getHandles();
     $action = $data->getValue('action');
 
     $view = new PhabricatorFeedStoryView();
@@ -54,7 +53,7 @@ class PhabricatorFeedStoryManiphest extends PhabricatorFeedStory {
         if ($owner_phid) {
           $extra =
             ' to '.
-            '<strong>'.$this->getHandle($owner_phid)->renderLink().'</strong>';
+            $this->linkTo($owner_phid);
         } else {
           $verb = 'placed';
           $extra = ' up for grabs';
@@ -63,9 +62,9 @@ class PhabricatorFeedStoryManiphest extends PhabricatorFeedStory {
     }
 
     $title =
-      '<strong>'.$this->getHandle($author_phid)->renderLink().'</strong>'.
+      $this->linkTo($author_phid).
       " {$verb} task ".
-      '<strong>'.$this->getHandle($task_phid)->renderLink().'</strong>';
+      $this->linkTo($task_phid);
     $title .= $extra;
     $title .= '.';
 
@@ -83,15 +82,8 @@ class PhabricatorFeedStoryManiphest extends PhabricatorFeedStory {
     $view->setEpoch($data->getEpoch());
 
     if ($full_size) {
-      if (!empty($handles[$author_phid])) {
-        $image_uri = $handles[$author_phid]->getImageURI();
-        $view->setImage($image_uri);
-      }
-
-      $content = phutil_escape_html(
-        phutil_utf8_shorten($data->getValue('description'), 128));
-      $content = str_replace("\n", '<br />', $content);
-
+      $view->setImage($this->getHandle($author_phid)->getImageURI());
+      $content = $this->renderSummary($data->getValue('description'));
       $view->appendChild($content);
     } else {
       $view->setOneLineStory(true);

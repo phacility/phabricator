@@ -33,27 +33,16 @@ class PhabricatorFeedStoryStatus extends PhabricatorFeedStory {
   public function renderView() {
     $data = $this->getStoryData();
 
-    $handles = $this->getHandles();
     $author_phid = $data->getAuthorPHID();
-
-    $objects = $this->getObjects();
 
     $view = new PhabricatorFeedStoryView();
 
-    $view->setTitle(
-      '<strong>'.$handles[$author_phid]->renderLink().'</strong>');
+    $view->setTitle($this->linkTo($author_phid));
     $view->setEpoch($data->getEpoch());
+    $view->setImage($this->getHandle($author_phid)->getImageURI());
 
-    if (!empty($handles[$author_phid])) {
-      $image_uri = $handles[$author_phid]->getImageURI();
-      $view->setImage($image_uri);
-    }
-
-    $content = phutil_escape_html($data->getValue('content'));
-    $content = str_replace("\n", '<br />', $content);
-
+    $content = $this->renderSummary($data->getValue('content'), $len = null);
     $view->appendChild($content);
-
 
     return $view;
   }

@@ -36,7 +36,6 @@ class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
   public function renderView() {
     $data = $this->getStoryData();
 
-    $handles = $this->getHandles();
     $author_phid = $data->getAuthorPHID();
 
     $objects = $this->getObjects();
@@ -49,9 +48,9 @@ class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
     $verb = DifferentialAction::getActionPastTenseVerb($action);
 
     $view->setTitle(
-      '<strong>'.$handles[$author_phid]->renderLink().'</strong>'.
-      ' '.$verb.' revision '.
-      '<strong>'.$handles[$revision_phid]->renderLink().'</strong>.');
+      $this->linkTo($author_phid).
+      " {$verb} revision ".
+      $this->linkTo($revision_phid).'.');
     $view->setEpoch($data->getEpoch());
 
     $action = $data->getValue('action');
@@ -66,14 +65,8 @@ class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
     }
 
     if ($full_size) {
-      if (!empty($handles[$author_phid])) {
-        $image_uri = $handles[$author_phid]->getImageURI();
-        $view->setImage($image_uri);
-      }
-
-      $content = phutil_escape_html($data->getValue('feedback_content'));
-      $content = str_replace("\n", '<br />', $content);
-
+      $view->setImage($this->getHandle($author_phid)->getImageURI());
+      $content = $this->renderSummary($data->getValue('feedback_content'));
       $view->appendChild($content);
     } else {
       $view->setOneLineStory(true);

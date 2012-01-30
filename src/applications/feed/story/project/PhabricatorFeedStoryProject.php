@@ -39,23 +39,22 @@ class PhabricatorFeedStoryProject extends PhabricatorFeedStory {
     $type = $data->getValue('type');
     $old = $data->getValue('old');
     $new = $data->getValue('new');
-    $proj = $this->getHandle($data->getValue('projectPHID'));
+    $proj_phid = $data->getValue('projectPHID');
 
     $author_phid = $data->getAuthorPHID();
-    $author = $this->getHandle($author_phid);
 
     switch ($type) {
       case PhabricatorProjectTransactionType::TYPE_NAME:
         if (strlen($old)) {
           $action = 'renamed project '.
-            '<strong>'.$proj->renderLink().'</strong>'.
+            $this->linkTo($proj_phid).
             ' from '.
             '<strong>'.phutil_escape_html($old).'</strong>'.
             ' to '.
             '<strong>'.phutil_escape_html($new).'</strong>.';
         } else {
           $action = 'created project '.
-            '<strong>'.$proj->renderLink().'</strong>'.
+            $this->linkTo($proj_phid).
             ' (as '.
             '<strong>'.phutil_escape_html($new).'</strong>).';
         }
@@ -66,30 +65,30 @@ class PhabricatorFeedStoryProject extends PhabricatorFeedStory {
 
         if ((count($add) == 1) && (count($rem) == 0) &&
             (head($add) == $author_phid)) {
-          $action = 'joined project <strong>'.$proj->renderLink().'</strong>.';
+          $action = 'joined project '.$this->linkTo($proj_phid).'.';
         } else if ((count($add) == 0) && (count($rem) == 1) &&
                    (head($rem) == $author_phid)) {
-          $action = 'left project <strong>'.$proj->renderLink().'</strong>.';
+          $action = 'left project '.$this->linkTo($proj_phid).'.';
         } else if (empty($rem)) {
           $action = 'added members to project '.
-            '<strong>'.$proj->renderLink().'</strong>: '.
+            $this->linkTo($proj_phid).': '.
             $this->renderHandleList($add).'.';
         } else if (empty($add)) {
           $action = 'removed members from project '.
-            '<strong>'.$proj->renderLink().'</strong>: '.
+            $this->linkTo($proj_phid).': '.
             $this->renderHandleList($rem).'.';
         } else {
           $action = 'changed members of project '.
-            '<strong>'.$proj->renderLink().'</strong>, added: '.
+            $this->linkTo($proj_phid).', added: '.
             $this->renderHandleList($add).'; removed: '.
             $this->renderHandleList($rem).'.';
         }
         break;
       default:
-        $action = 'updated project <strong>'.$proj->renderLink().'</strong>.';
+        $action = 'updated project '.$this->linkTo($proj_phid).'.';
         break;
     }
-    $view->setTitle('<strong>'.$author->renderLink().'</strong> '.$action);
+    $view->setTitle($this->linkTo($author_phid).' '.$action);
     $view->setOneLineStory(true);
 
     return $view;

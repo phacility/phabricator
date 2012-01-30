@@ -34,7 +34,6 @@ class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
   public function renderView() {
     $data = $this->getStoryData();
 
-    $handles = $this->getHandles();
     $author_phid = $data->getAuthorPHID();
     $document_phid = $data->getValue('phid');
 
@@ -46,9 +45,9 @@ class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
     $verb = PhrictionActionConstants::getActionPastTenseVerb($action);
 
     $view->setTitle(
-      '<strong>'.$handles[$author_phid]->renderLink().'</strong>'.
-      ' '.$verb.' the document '.
-      '<strong>'.$handles[$document_phid]->renderLink().'</strong>.');
+      $this->linkTo($author_phid).
+      " {$verb} the document ".
+      $this->linkTo($document_phid).'.');
     $view->setEpoch($data->getEpoch());
 
     $action = $data->getValue('action');
@@ -62,14 +61,8 @@ class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
     }
 
     if ($full_size) {
-      if (!empty($handles[$author_phid])) {
-        $image_uri = $handles[$author_phid]->getImageURI();
-        $view->setImage($image_uri);
-      }
-
-      $content = phutil_escape_html($data->getValue('content'));
-      $content = str_replace("\n", '<br />', $content);
-
+      $view->setImage($this->getHandle($author_phid)->getImageURI());
+      $content = $this->renderSummary($data->getValue('content'));
       $view->appendChild($content);
     } else {
       $view->setOneLineStory(true);
