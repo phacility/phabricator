@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,8 +50,10 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
 
     $body = array();
     if ($this->isFirstMailToRecipients()) {
-      $body[] = $this->formatText($revision->getSummary());
-      $body[] = null;
+      if ($revision->getSummary() != '') {
+        $body[] = $this->formatText($revision->getSummary());
+        $body[] = null;
+      }
 
       $body[] = 'TEST PLAN';
       $body[] = $this->formatText($revision->getTestPlan());
