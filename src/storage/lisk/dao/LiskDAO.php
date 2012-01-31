@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,12 +135,37 @@
  * loadAllWhere() returns a list of objects, while loadOneWhere() returns a
  * single object (or null).
  *
+ * = Managing Transactions =
+ *
+ * Lisk uses a transaction stack, so code does not generally need to be aware
+ * of the transactional state of objects to implement correct transaction
+ * semantics:
+ *
+ *   $obj->openTransaction();
+ *     $obj->save();
+ *     $other->save();
+ *     // ...
+ *     $other->openTransaction();
+ *       $other->save();
+ *       $another->save();
+ *     if ($some_condition) {
+ *       $other->saveTransaction();
+ *     } else {
+ *       $other->killTransaction();
+ *     }
+ *     // ...
+ *   $obj->saveTransaction();
+ *
+ * Assuming ##$obj##, ##$other## and ##$another## live on the same database,
+ * this code will work correctly by establishing savepoints.
+ *
  * @task   config  Configuring Lisk
  * @task   load    Loading Objects
  * @task   info    Examining Objects
  * @task   save    Writing Objects
  * @task   hook    Hooks and Callbacks
  * @task   util    Utilities
+ * @task   xaction Managing Transactions
  * @task   isolate Isolation for Unit Testing
  *
  * @group storage
@@ -454,11 +479,16 @@ abstract class LiskDAO {
     $connection = $this->establishConnection('r');
 
     $lock_clause = '';
+/*
+
+    TODO: Restore this?
+
     if ($connection->isReadLocking()) {
       $lock_clause = 'FOR UPDATE';
     } else if ($connection->isWriteLocking()) {
       $lock_clause = 'LOCK IN SHARE MODE';
     }
+*/
 
     $args = func_get_args();
     $args = array_slice($args, 2);
@@ -1162,6 +1192,42 @@ abstract class LiskDAO {
    */
   protected function writeField($field, $value) {
     $this->$field = $value;
+  }
+
+
+/* -(  Manging Transactions  )----------------------------------------------- */
+
+
+  /**
+   * Increase transaction stack depth.
+   *
+   * @return this
+   */
+  public function openTransaction() {
+    $this->establishConnection('w')->openTransaction();
+    return $this;
+  }
+
+
+  /**
+   * Decrease transaction stack depth, saving work.
+   *
+   * @return this
+   */
+  public function saveTransaction() {
+    $this->establishConnection('w')->saveTransaction();
+    return $this;
+  }
+
+
+  /**
+   * Decrease transaction stack depth, discarding work.
+   *
+   * @return this
+   */
+  public function killTransaction() {
+    $this->establishConnection('w')->killTransaction();
+    return $this;
   }
 
 

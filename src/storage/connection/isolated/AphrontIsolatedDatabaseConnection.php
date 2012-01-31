@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,10 @@ class AphrontIsolatedDatabaseConnection extends AphrontDatabaseConnection {
   private $configuration;
   private static $nextInsertID;
   private $insertID;
+  private static $nextTransactionKey = 1;
+  private $transactionKey;
+
+  private $transcript = array();
 
   public function __construct(array $configuration) {
     $this->configuration = $configuration;
@@ -33,6 +37,8 @@ class AphrontIsolatedDatabaseConnection extends AphrontDatabaseConnection {
       // collisions and make them distinctive.
       self::$nextInsertID = 55555000000 + mt_rand(0, 1000);
     }
+
+    $this->transactionKey = 'iso-xaction-'.(self::$nextTransactionKey++);
   }
 
   public function escapeString($string) {
@@ -64,7 +70,7 @@ class AphrontIsolatedDatabaseConnection extends AphrontDatabaseConnection {
   }
 
   public function getTransactionKey() {
-    return 'xaction'; // TODO, probably need to stub this better.
+    return $this->transactionKey;
   }
 
   public function selectAllResults() {
@@ -74,16 +80,34 @@ class AphrontIsolatedDatabaseConnection extends AphrontDatabaseConnection {
   public function executeRawQuery($raw_query) {
 
     // NOTE: "[\s<>K]*" allows any number of (properly escaped) comments to
-    // appear prior to the INSERT/UPDATE/DELETE, since this connection escapes
+    // appear prior to the allowed keyword, since this connection escapes
     // them as "<K>" (above).
-    if (!preg_match('/^[\s<>K]*(INSERT|UPDATE|DELETE)\s*/i', $raw_query)) {
+
+    $keywords = array(
+      'INSERT',
+      'UPDATE',
+      'DELETE',
+      'START',
+      'SAVEPOINT',
+      'COMMIT',
+      'ROLLBACK',
+    );
+    $preg_keywords = array();
+    foreach ($keywords as $key => $word) {
+      $preg_keywords[] = preg_quote($word, '/');
+    }
+    $preg_keywords = implode('|', $preg_keywords);
+
+    if (!preg_match('/^[\s<>K]*('.$preg_keywords.')\s*/i', $raw_query)) {
       $doc_uri = PhabricatorEnv::getDoclink('article/Writing_Unit_Tests.html');
       throw new Exception(
-        "Database isolation currently only supports INSERT, UPDATE and DELETE ".
-        "queries. For more information, see <{$doc_uri}>. You are trying to ".
-        "issue a query which does not begin with INSERT, UPDATE or DELETE: ".
-        "'".$raw_query."'");
+        "Database isolation currently only supports some queries. For more ".
+        "information, see <{$doc_uri}>. You are trying to issue a query which ".
+        "does not begin with an allowed keyword ".
+        "(".implode(', ', $keywords)."): '".$raw_query."'");
     }
+
+    $this->transcript[] = $raw_query;
 
     // NOTE: This method is intentionally simplified for now, since we're only
     // using it to stub out inserts/updates. In the future it will probably need
@@ -97,6 +121,10 @@ class AphrontIsolatedDatabaseConnection extends AphrontDatabaseConnection {
     // against this specific implementation detail.
     $this->insertID = (self::$nextInsertID += mt_rand(1, 10));
     $this->affectedRows = 1;
+  }
+
+  public function getQueryTranscript() {
+    return $this->transcript;
   }
 
 }

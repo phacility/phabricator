@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,13 @@
  */
 
 /**
+ * @task  xaction Transaction Management
  * @group storage
  */
 abstract class AphrontDatabaseConnection {
 
-  private static $transactionStacks             = array();
-  private static $transactionShutdownRegistered = false;
+  private static $transactionStates = array();
+  private $initializingTransactionState;
 
   abstract public function getInsertID();
   abstract public function getAffectedRows();
@@ -47,179 +48,107 @@ abstract class AphrontDatabaseConnection {
     return call_user_func_array('queryfx', $args);
   }
 
-  // TODO: Probably need to reset these when we catch a connection exception
-  // in the transaction stack.
-  protected function &getLockLevels() {
-    static $levels = array();
-    $key = $this->getTransactionKey();
-    if (!isset($levels[$key])) {
-      $levels[$key] = array(
-        'read'  => 0,
-        'write' => 0,
-      );
-    }
 
-    return $levels[$key];
-  }
+/* -(  Transaction Management  )--------------------------------------------- */
 
-  public function isReadLocking() {
-    $levels = &$this->getLockLevels();
-    return ($levels['read'] > 0);
-  }
 
-  public function isWriteLocking() {
-    $levels = &$this->getLockLevels();
-    return ($levels['write'] > 0);
-  }
-
-  public function startReadLocking() {
-    $levels = &$this->getLockLevels();
-    ++$levels['read'];
-    return $this;
-  }
-
-  public function startWriteLocking() {
-    $levels = &$this->getLockLevels();
-    ++$levels['write'];
-    return $this;
-  }
-
-  public function stopReadLocking() {
-    $levels = &$this->getLockLevels();
-    if ($levels['read'] < 1) {
-      throw new Exception('Unable to stop read locking: not read locking.');
-    }
-    --$levels['read'];
-    return $this;
-  }
-
-  public function stopWriteLocking() {
-    $levels = &$this->getLockLevels();
-    if ($levels['write'] < 1) {
-      throw new Exception('Unable to stop read locking: not write locking.');
-    }
-    --$levels['write'];
-    return $this;
-  }
-
-  protected function &getTransactionStack($key) {
-    if (!self::$transactionShutdownRegistered) {
-      self::$transactionShutdownRegistered = true;
-      register_shutdown_function(
-        array(
-          'AphrontDatabaseConnection',
-          'shutdownTransactionStacks',
-        ));
-    }
-
-    if (!isset(self::$transactionStacks[$key])) {
-      self::$transactionStacks[$key] = array();
-    }
-
-    return self::$transactionStacks[$key];
-  }
-
-  public static function shutdownTransactionStacks() {
-    foreach (self::$transactionStacks as $stack) {
-      if ($stack === false) {
-        continue;
-      }
-
-      $count = count($stack);
-      if ($count) {
-        throw new Exception(
-          'Script exited with '.$count.' open transactions! The '.
-          'transactions will be implicitly rolled back. Calls to '.
-          'openTransaction() should always be paired with a call to '.
-          'saveTransaction() or killTransaction(); you have an unpaired '.
-          'call somewhere.',
-          $count);
-      }
-    }
-  }
-
+  /**
+   * Begin a transaction, or set a savepoint if the connection is already
+   * transactional.
+   *
+   * @return this
+   * @task xaction
+   */
   public function openTransaction() {
-    $key = $this->getTransactionKey();
-    $stack = &$this->getTransactionStack($key);
+    $state = $this->getTransactionState();
+    $point = $state->getSavepointName();
+    $depth = $state->increaseDepth();
 
-    $new_transaction = !count($stack);
-
-    // TODO: At least in development, push context information instead of
-    // `true' so we can report (or, at least, guess) where unpaired
-    // transaction calls happened.
-    $stack[] = true;
-
-    end($stack);
-    $key = key($stack);
-
+    $new_transaction = ($depth == 1);
     if ($new_transaction) {
       $this->query('START TRANSACTION');
     } else {
-      $this->query('SAVEPOINT '.$this->getSavepointName($key));
+      $this->query('SAVEPOINT '.$point);
     }
+
+    return $this;
   }
 
-  public function isInsideTransaction() {
-    $key = $this->getTransactionKey();
-    $stack = &$this->getTransactionStack($key);
-    return (bool)count($stack);
-  }
 
+  /**
+   * Commit a transaction, or stage a savepoint for commit once the entire
+   * transaction completes if inside a transaction stack.
+   *
+   * @return this
+   * @task xaction
+   */
   public function saveTransaction() {
-    $key = $this->getTransactionKey();
-    $stack = &$this->getTransactionStack($key);
+    $state = $this->getTransactionState();
+    $depth = $state->decreaseDepth();
 
-    if (!count($stack)) {
-      throw new Exception(
-        "No open transaction! Unable to save transaction, since there ".
-        "isn't one.");
-    }
-
-    array_pop($stack);
-
-    if (!count($stack)) {
+    if ($depth == 0) {
       $this->query('COMMIT');
     }
+
+    return $this;
   }
 
-  public function saveTransactionUnless($cond) {
-    if ($cond) {
-      $this->killTransaction();
-    } else {
-      $this->saveTransaction();
-    }
-  }
 
-  public function saveTransactionIf($cond) {
-    $this->saveTransactionUnless(!$cond);
-  }
-
+  /**
+   * Rollback a transaction, or unstage the last savepoint if inside a
+   * transaction stack.
+   *
+   * @return this
+   */
   public function killTransaction() {
-    $key = $this->getTransactionKey();
-    $stack = &$this->getTransactionStack($key);
+    $state = $this->getTransactionState();
+    $depth = $state->decreaseDepth();
 
-    if (!count($stack)) {
-      throw new Exception(
-        "No open transaction! Unable to kill transaction, since there ".
-        "isn't one.");
-    }
-
-    $count = count($stack);
-
-    end($stack);
-    $key = key($stack);
-    array_pop($stack);
-
-    if (!count($stack)) {
+    if ($depth == 0) {
       $this->query('ROLLBACK');
     } else {
-      $this->query(
-         'ROLLBACK TO SAVEPOINT '.$this->getSavepointName($key)
-        );
+      $this->query('ROLLBACK TO SAVEPOINT '.$state->getSavepointName());
     }
+
+    return $this;
   }
 
-  protected function getSavepointName($key) {
-    return 'LiskSavepoint_'.$key;
+
+  /**
+   * Returns true if the connection is transactional.
+   *
+   * @return bool True if the connection is currently transactional.
+   * @task xaction
+   */
+  public function isInsideTransaction() {
+    if ($this->initializingTransactionState) {
+      return false;
+    }
+    $state = $this->getTransactionState();
+    return ($state->getDepth() > 0);
   }
+
+
+  /**
+   * Get the current @{class:AphrontDatabaseTransactionState} object, or create
+   * one if none exists.
+   *
+   * @return AphrontDatabaseTransactionState Current transaction state.
+   * @task xaction
+   */
+  protected function getTransactionState() {
+
+    // Establishing a connection may be required to get the transaction key,
+    // and may also perform a test for transaction state. While establishing
+    // transaction state, avoid infinite recursion.
+    $this->initializingTransactionState = true;
+      $key = $this->getTransactionKey();
+      if (empty(self::$transactionStates[$key])) {
+        self::$transactionStates[$key] = new AphrontDatabaseTransactionState();
+      }
+    $this->initializingTransactionState = false;
+
+    return self::$transactionStates[$key];
+  }
+
 }

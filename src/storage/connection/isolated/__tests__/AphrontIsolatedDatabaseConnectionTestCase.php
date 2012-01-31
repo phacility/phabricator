@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,27 +30,14 @@ class AphrontIsolatedDatabaseConnectionTestCase
 
   public function testIsolation() {
     $conn = $this->newIsolatedConnection();
-
-    $test_phid = 'PHID-TEST-'.Filesystem::readRandomCharacters(20);
+    $test_phid = $this->generateTestPHID();
 
     queryfx(
       $conn,
       'INSERT INTO phabricator_phid.phid (phid) VALUES (%s)',
       $test_phid);
 
-    try {
-      $real_phid = id(new PhabricatorPHID())->loadOneWhere(
-        'phid = %s',
-        $test_phid);
-      $this->assertEqual(
-        null,
-        $real_phid,
-        'Expect fake PHID to exist only in isolation.');
-    } catch (AphrontQueryConnectionException $ex) {
-      // If we can't connect to the database, conclude that the isolated
-      // connection actually is isolated. Philosophically, this perhaps allows
-      // us to claim this test does not depend on the database?
-    }
+    $this->assertNoSuchPHID($test_phid);
   }
 
   public function testInsertGeneratesID() {
@@ -75,8 +62,103 @@ class AphrontIsolatedDatabaseConnectionTestCase
     queryfx($conn, 'DELETE');
   }
 
+  public function testTransactionStack() {
+    $conn = $this->newIsolatedConnection();
+    $conn->openTransaction();
+      queryfx($conn, 'INSERT');
+    $conn->saveTransaction();
+    $this->assertEqual(
+      array(
+        'START TRANSACTION',
+        'INSERT',
+        'COMMIT',
+      ),
+      $conn->getQueryTranscript());
+
+    $conn = $this->newIsolatedConnection();
+    $conn->openTransaction();
+      queryfx($conn, 'INSERT 1');
+      $conn->openTransaction();
+        queryfx($conn, 'INSERT 2');
+      $conn->killTransaction();
+      $conn->openTransaction();
+        queryfx($conn, 'INSERT 3');
+        $conn->openTransaction();
+          queryfx($conn, 'INSERT 4');
+        $conn->saveTransaction();
+      $conn->saveTransaction();
+      $conn->openTransaction();
+        queryfx($conn, 'INSERT 5');
+      $conn->killTransaction();
+      queryfx($conn, 'INSERT 6');
+    $conn->saveTransaction();
+
+    $this->assertEqual(
+      array(
+        'START TRANSACTION',
+        'INSERT 1',
+        'SAVEPOINT Aphront_Savepoint_1',
+        'INSERT 2',
+        'ROLLBACK TO SAVEPOINT Aphront_Savepoint_1',
+        'SAVEPOINT Aphront_Savepoint_1',
+        'INSERT 3',
+        'SAVEPOINT Aphront_Savepoint_2',
+        'INSERT 4',
+        'SAVEPOINT Aphront_Savepoint_1',
+        'INSERT 5',
+        'ROLLBACK TO SAVEPOINT Aphront_Savepoint_1',
+        'INSERT 6',
+        'COMMIT',
+      ),
+      $conn->getQueryTranscript());
+  }
+
+  public function testTransactionRollback() {
+    $check = array();
+
+    $phid = new PhabricatorPHID();
+    $phid->openTransaction();
+      for ($ii = 0; $ii < 3; $ii++) {
+        $test_phid = $this->generateTestPHID();
+
+        $obj = new PhabricatorPHID();
+        $obj->setPHID($test_phid);
+        $obj->setPHIDType('TEST');
+        $obj->setOwnerPHID('PHID-UNIT-!!!!');
+        $obj->save();
+
+        $check[] = $test_phid;
+      }
+    $phid->killTransaction();
+
+    foreach ($check as $test_phid) {
+      $this->assertNoSuchPHID($test_phid);
+    }
+  }
+
   private function newIsolatedConnection() {
     $config = array();
     return new AphrontIsolatedDatabaseConnection($config);
   }
+
+  private function generateTestPHID() {
+    return 'PHID-TEST-'.Filesystem::readRandomCharacters(20);
+  }
+
+  private function assertNoSuchPHID($phid) {
+    try {
+      $real_phid = id(new PhabricatorPHID())->loadOneWhere(
+        'phid = %s',
+        $phid);
+      $this->assertEqual(
+        null,
+        $real_phid,
+        'Expect fake PHID to exist only in isolation.');
+    } catch (AphrontQueryConnectionException $ex) {
+      // If we can't connect to the database, conclude that the isolated
+      // connection actually is isolated. Philosophically, this perhaps allows
+      // us to claim this test does not depend on the database?
+    }
+  }
+
 }

@@ -21,6 +21,7 @@ phutil_register_library_map(array(
     'AphrontController' => 'aphront/controller',
     'AphrontCrumbsView' => 'view/layout/crumbs',
     'AphrontDatabaseConnection' => 'storage/connection/base',
+    'AphrontDatabaseTransactionState' => 'storage/transaction',
     'AphrontDefaultApplicationConfiguration' => 'aphront/default/configuration',
     'AphrontDefaultApplicationController' => 'aphront/default/controller',
     'AphrontDialogResponse' => 'aphront/response/dialog',

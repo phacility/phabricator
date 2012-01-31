@@ -107,14 +107,15 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
   private function establishConnection() {
     $this->closeConnection();
 
-    $user = $this->getConfiguration('user');
-    $host = $this->getConfiguration('host');
-    $database = $this->getConfiguration('database');
-
     $key = $this->getConnectionCacheKey();
     if (isset(self::$connectionCache[$key])) {
       $this->connection = self::$connectionCache[$key];
       return;
+    }
+
+    if ($this->isInsideTransaction()) {
+      throw new Exception(
+        "Connection was lost inside a transaction! Recovery is impossible.");
     }
 
     $start = microtime(true);
@@ -128,6 +129,11 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
         "About to call mysql_connect(), but the PHP MySQL extension is not ".
         "available!");
     }
+
+    $user = $this->getConfiguration('user');
+    $host = $this->getConfiguration('host');
+    $database = $this->getConfiguration('database');
+
 
     $profiler = PhutilServiceProfiler::getInstance();
     $call_id = $profiler->beginServiceCall(
