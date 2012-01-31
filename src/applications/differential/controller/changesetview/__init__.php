@@ -6,6 +6,8 @@
 
 
 
+phutil_require_module('arcanist', 'unit/result');
+
 phutil_require_module('phabricator', 'aphront/response/400');
 phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'aphront/response/ajax');

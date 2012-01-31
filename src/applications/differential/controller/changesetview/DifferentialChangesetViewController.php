@@ -125,11 +125,37 @@ class DifferentialChangesetViewController extends DifferentialController {
       $changeset = $choice;
     }
 
+    $coverage = null;
+    if ($right->getDiffID()) {
+      $unit = id(new DifferentialDiffProperty())->loadOneWhere(
+        'diffID = %d AND name = %s',
+        $right->getDiffID(),
+        'arc:unit');
+
+      if ($unit) {
+        $coverage = array();
+        foreach ($unit->getData() as $result) {
+          $result_coverage = idx($result, 'coverage');
+          if (!$result_coverage) {
+            continue;
+          }
+          $file_coverage = idx($result_coverage, $right->getFileName());
+          if (!$file_coverage) {
+            continue;
+          }
+          $coverage[] = $file_coverage;
+        }
+
+        $coverage = ArcanistUnitTestResult::mergeCoverage($coverage);
+      }
+    }
+
     $spec = $request->getStr('range');
     list($range_s, $range_e, $mask) =
       DifferentialChangesetParser::parseRangeSpecification($spec);
 
     $parser = new DifferentialChangesetParser();
+    $parser->setCoverage($coverage);
     $parser->setChangeset($changeset);
     $parser->setRenderingReference($rendering_reference);
     $parser->setRenderCacheKey($render_cache_key);

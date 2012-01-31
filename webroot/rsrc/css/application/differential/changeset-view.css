@@ -75,6 +75,27 @@
   background: #aaffaa;
 }
 
+.differential-diff td.cov {
+  width: 12px;
+  padding: 0;
+}
+
+td.cov-U {
+  background: #dd3300;
+}
+
+td.cov-C {
+  background: #0066ff;
+}
+
+td.cov-N {
+  background: #ddeeff;
+}
+
+td.cov-X {
+  background: #aa00aa;
+}
+
 .differential-diff td.show-more,
 .differential-diff td.differential-shield {
   background: #ffffee;
