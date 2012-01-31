@@ -122,3 +122,34 @@ Now, run ##arc liberate## to regenerate the static resource map:
 
 This will automatically create and update ##__init__.php## files, and regenerate
 the static map of the library.
+
+= What You Can Extend And Invoke =
+
+libphutil, Arcanist and Phabricator are strict about extensibility of classes
+and visibility of methods and properties. Most classes are marked ##final##, and
+methods have the minimum required visibility (protected or private). The goal of
+this strictness is to make it clear what you can safely extend, access, and
+invoke, so your code will keep working as the upstream changes.
+
+When developing libraries to work with libphutil, Arcanist and Phabricator, you
+should respect method and property visibility and extend only classes marked
+##@stable##. They are rendered with a large callout in the documentation (for
+example: @{class@libphutil:AbstractDirectedGraph}). These classes are external
+interfaces intended for extension.
+
+If you want to extend a class but it is not marked ##@stable##, here are some
+approaches you can take:
+
+  - Good: If possible, use composition rather than extension to build your
+    feature.
+  - Good: Check the documentation for a better way to accomplish what you're
+    trying to do.
+  - Good: Let us know what your use case is so we can make the class tree more
+    flexible or configurable, or point you at the right way to do whatever
+    you're trying to do, or explain why we don't let you do it.
+  - Discouraged: Send us a patch removing "final" (or turning "protected" or
+    "private" into "public"). We generally will not accept these patches, unless
+    there's a good reason that the current behavior is wrong.
+  - Discouraged: Create an ad-hoc local fork and remove "final" in your copy of
+    the code. This will make it more difficult for you to upgrade in the future.
+  - Discouraged: Use Reflection to violate visibility keywords.
