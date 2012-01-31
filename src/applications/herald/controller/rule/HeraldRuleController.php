@@ -91,6 +91,11 @@ class HeraldRuleController extends HeraldController {
 
       if (!$errors) {
         $uri = '/herald/view/'.$rule->getContentType().'/';
+
+        if ($rule->getRuleType() == HeraldRuleTypeConfig::RULE_TYPE_GLOBAL) {
+          $uri .= 'global/';
+        }
+
         return id(new AphrontRedirectResponse())
           ->setURI($uri);
       }
@@ -134,11 +139,14 @@ class HeraldRuleController extends HeraldController {
           ->setLabel('Rule Name')
           ->setName('name')
           ->setError($e_name)
-          ->setValue($rule->getName()))
-      ->appendChild(
-        id(new AphrontFormMarkupControl())
-          ->setLabel('Owner')
-          ->setValue('<div id="author-input"/>'))
+          ->setValue($rule->getName()));
+
+    if ($rule->getRuleType() == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL) {
+      $form
+        ->appendChild(
+          id(new AphrontFormMarkupControl())
+            ->setLabel('Owner')
+            ->setValue('<div id="author-input"/>'))
       ->appendChild(
         // Build this explicitly so we can add a sigil to it.
         javelin_render_tag(
@@ -147,7 +155,10 @@ class HeraldRuleController extends HeraldController {
             'type'  => 'hidden',
             'name'  => 'author',
             'sigil' => 'author',
-          )))
+          )));
+    }
+
+    $form
       ->appendChild(
         id(new AphrontFormMarkupControl())
           ->setValue(

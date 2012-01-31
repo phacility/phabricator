@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/herald/config/ruletype');
 phutil_require_module('phabricator', 'infrastructure/javelin/markup');
 phutil_require_module('phabricator', 'view/base');
 phutil_require_module('phabricator', 'view/control/table');

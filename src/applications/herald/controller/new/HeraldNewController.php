@@ -41,6 +41,35 @@ class HeraldNewController extends HeraldController {
 
     $rule_type_map = HeraldRuleTypeConfig::getRuleTypeMap();
 
+    // Reorder array to put "personal" first.
+    $rule_type_map = array_select_keys(
+      $rule_type_map,
+      array(
+        HeraldRuleTypeConfig::RULE_TYPE_PERSONAL,
+      )) + $rule_type_map;
+
+    $captions = array(
+      HeraldRuleTypeConfig::RULE_TYPE_PERSONAL =>
+        'Personal rules notify you about events. You own them, but they can '.
+        'only affect you.',
+      HeraldRuleTypeConfig::RULE_TYPE_GLOBAL =>
+        'Global rules notify anyone about events. No one owns them, and '.
+        'anyone can edit them. Usually, Global rules are used to notify '.
+        'mailing lists.',
+    );
+
+    $radio = id(new AphrontFormRadioButtonControl())
+      ->setLabel('Type')
+      ->setName('rule_type')
+      ->setValue(HeraldRuleTypeConfig::RULE_TYPE_PERSONAL);
+
+    foreach ($rule_type_map as $value => $name) {
+      $radio->addButton(
+        $value,
+        $name,
+        idx($captions, $value));
+    }
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setAction('/herald/rule/')
@@ -50,11 +79,7 @@ class HeraldNewController extends HeraldController {
           ->setName('content_type')
           ->setValue($this->contentType)
           ->setOptions($content_type_map))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel('Type')
-          ->setName('rule_type')
-          ->setOptions($rule_type_map))
+      ->appendChild($radio)
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Create Rule')

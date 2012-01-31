@@ -108,20 +108,29 @@
   padding-top: 5px;
 }
 
+table.aphront-form-control-radio-layout,
 table.aphront-form-control-checkbox-layout {
   margin-top: 3px;
   font-size: 13px;
 }
 
+table.aphront-form-control-radio-layout th,
 table.aphront-form-control-checkbox-layout th {
   padding-top: 2px;
   padding-left: 0.35em;
   padding-bottom: 4px;
 }
 
+.aphront-form-control-radio-layout td input,
 .aphront-form-control-checkbox-layout td input {
   margin-top: 4px;
   width: auto;
+}
+
+.aphront-form-radio-caption {
+  font-size: 11px;
+  color: #444444;
+  max-width: 400px;
 }
 
 .aphront-form-input hr {

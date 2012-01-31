@@ -26,7 +26,7 @@ class HeraldHomeController extends HeraldController {
     $this->view = idx($data, 'view');
     $this->global = idx($data, 'global');
     if ($this->global) {
-      $this->setFilter($this->view . '/global');
+      $this->setFilter($this->view.'/global');
     } else {
       $this->setFilter($this->view);
     }
@@ -55,12 +55,13 @@ class HeraldHomeController extends HeraldController {
       $rules = id(new HeraldRule())->loadAllWhere(
         'contentType = %s AND ruleType = %s',
         $this->view,
-        'global');
+        HeraldRuleTypeConfig::RULE_TYPE_GLOBAL);
     } else {
       $rules = id(new HeraldRule())->loadAllWhere(
-        'contentType = %s AND authorPHID = %s',
+        'contentType = %s AND authorPHID = %s AND ruleType = %s',
         $this->view,
-        $user->getPHID());
+        $user->getPHID(),
+        HeraldRuleTypeConfig::RULE_TYPE_PERSONAL);
     }
 
     foreach ($rules as $rule) {
@@ -74,6 +75,7 @@ class HeraldHomeController extends HeraldController {
 
     $list_view = id(new HeraldRuleListView())
       ->setRules($rules)
+      ->setShowOwner(!$this->global)
       ->setHandles($handles)
       ->setMap($map)
       ->setAllowCreation(true)

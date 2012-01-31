@@ -22,6 +22,9 @@ final class HeraldRuleListView extends AphrontView {
   private $map;
   private $view;
   private $allowCreation;
+  private $showOwner = true;
+  private $showType = false;
+  private $user;
 
   public function setRules(array $rules) {
     $this->rules = $rules;
@@ -48,12 +51,25 @@ final class HeraldRuleListView extends AphrontView {
     return $this;
   }
 
+  public function setShowOwner($show_owner) {
+    $this->showOwner = $show_owner;
+    return $this;
+  }
+
+  public function setShowType($show_type) {
+    $this->showType = $show_type;
+    return $this;
+  }
+
   public function setUser($user) {
     $this->user = $user;
     return $this;
   }
 
   public function render() {
+
+    $type_map = HeraldRuleTypeConfig::getRuleTypeMap();
+
     $rows = array();
 
     foreach ($this->rules as $rule) {
@@ -93,6 +109,7 @@ final class HeraldRuleListView extends AphrontView {
 
       $rows[] = array(
         $this->map[$rule->getContentType()],
+        $type_map[$rule->getRuleType()],
         $owner,
         $name,
         $last_edited,
@@ -108,7 +125,8 @@ final class HeraldRuleListView extends AphrontView {
 
     $table->setHeaders(
       array(
-        'Type',
+        'Content Type',
+        'Rule Type',
         'Owner',
         'Rule Name',
         'Last Edited',
@@ -118,9 +136,18 @@ final class HeraldRuleListView extends AphrontView {
       array(
         '',
         '',
+        '',
         'wide wrap pri',
         '',
         'action'
+      ));
+    $table->setColumnVisibility(
+      array(
+        true,
+        $this->showType,
+        $this->showOwner,
+        true,
+        true,
       ));
 
     $panel = new AphrontPanelView();
