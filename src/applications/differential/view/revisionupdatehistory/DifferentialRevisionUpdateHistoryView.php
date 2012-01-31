@@ -88,6 +88,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
     $last_base = null;
     foreach ($data as $row) {
 
+      $diff = $row['obj'];
       $name = phutil_escape_html($row['name']);
       $id   = phutil_escape_html($row['id']);
 
@@ -148,21 +149,22 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
         $class = null;
       }
 
-      if ($row['obj']) {
+      if ($diff) {
         $lint = self::renderDiffLintStar($row['obj']);
         $unit = self::renderDiffUnitStar($row['obj']);
         $lint_message = self::getDiffLintMessage($diff);
         $unit_message = self::getDiffUnitMessage($diff);
         $lint_title = ' title="'.phutil_escape_html($lint_message).'"';
         $unit_title = ' title="'.phutil_escape_html($unit_message).'"';
+        $base = $this->renderBaseRevision($diff);
       } else {
         $lint = null;
         $unit = null;
         $lint_title = null;
         $unit_title = null;
+        $base = null;
       }
 
-      $base = $this->renderBaseRevision($diff);
       if ($last_base !== null && $base !== $last_base) {
         // TODO: Render some kind of notice about rebases.
       }
