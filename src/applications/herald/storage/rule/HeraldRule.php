@@ -31,6 +31,7 @@ class HeraldRule extends HeraldDAO {
   protected $configVersion = 8;
 
   private $ruleApplied = array(); // phids for which this rule has been applied
+  private $invalidOwner = false;
 
   public static function loadAllByContentTypeWithFullData(
     $content_type,
@@ -43,6 +44,8 @@ class HeraldRule extends HeraldDAO {
     if (!$rules) {
       return array();
     }
+
+    self::flagDisabledUserRules($rules);
 
     $rule_ids = mpull($rules, 'getID');
 
@@ -73,6 +76,30 @@ class HeraldRule extends HeraldDAO {
     }
 
     return $rules;
+  }
+
+  private static function flagDisabledUserRules(array $rules) {
+
+    $users = array();
+    foreach ($rules as $rule) {
+      if ($rule->getRuleType() != HeraldRuleTypeConfig::RULE_TYPE_PERSONAL) {
+        continue;
+      }
+      $users[$rule->getAuthorPHID()] = true;
+    }
+
+    $handles = id(new PhabricatorObjectHandleData(array_keys($users)))
+      ->loadHandles();
+
+    foreach ($rules as $key => $rule) {
+      if ($rule->getRuleType() != HeraldRuleTypeConfig::RULE_TYPE_PERSONAL) {
+        continue;
+      }
+      $handle = $handles[$rule->getAuthorPHID()];
+      if (!$handle->isComplete() || $handle->isDisabled()) {
+        $rule->invalidOwner = true;
+      }
+    }
   }
 
   public function getRuleApplied($phid) {
@@ -205,6 +232,10 @@ class HeraldRule extends HeraldDAO {
         $this->getID());
       parent::delete();
 //    $this->saveTransaction();
+  }
+
+  public function hasInvalidOwner() {
+    return $this->invalidOwner;
   }
 
 }

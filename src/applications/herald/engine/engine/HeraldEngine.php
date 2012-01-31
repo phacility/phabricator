@@ -225,12 +225,10 @@ class HeraldEngine {
     } else if (!$conditions) {
       $reason = "Rule failed automatically because it has no conditions.";
       $result = false;
-/* TOOD: Restore this in some form?
-    } else if (!is_fb_employee($rule->getAuthorPHID())) {
-      $reason = "Rule failed automatically because its owner is not an ".
-                "active employee.";
+    } else if ($rule->hasInvalidOwner()) {
+      $reason = "Rule failed automatically because its owner is invalid ".
+                "or disabled.";
       $result = false;
-*/
     } else {
       foreach ($conditions as $condition) {
         $match = $this->doesConditionMatch($rule, $condition, $object);
