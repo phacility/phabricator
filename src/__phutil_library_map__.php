@@ -268,6 +268,7 @@ phutil_register_library_map(array(
     'DiffusionController' => 'applications/diffusion/controller/base',
     'DiffusionDiffController' => 'applications/diffusion/controller/diff',
     'DiffusionDiffQuery' => 'applications/diffusion/query/diff/base',
+    'DiffusionEmptyResultView' => 'applications/diffusion/view/emptyresult',
     'DiffusionFileContent' => 'applications/diffusion/data/filecontent',
     'DiffusionFileContentQuery' => 'applications/diffusion/query/filecontent/base',
     'DiffusionGitBranchQuery' => 'applications/diffusion/query/branch/git',
