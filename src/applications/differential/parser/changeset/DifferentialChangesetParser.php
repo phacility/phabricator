@@ -1397,7 +1397,7 @@ class DifferentialChangesetParser {
           $html[] =
             '<tr class="inline"><th /><td>'.
               $xhp.
-            '</td><th /><td /><td /></tr>';
+            '</td><th /><td /><td class="cov" /></tr>';
         }
       }
       if ($n_num && isset($new_comments[$n_num])) {
@@ -1406,7 +1406,7 @@ class DifferentialChangesetParser {
           $html[] =
             '<tr class="inline"><th /><td /><th /><td>'.
               $xhp.
-            '</td><td /></tr>';
+            '</td><td class="cov" /></tr>';
         }
       }
     }
