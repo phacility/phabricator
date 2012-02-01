@@ -48,13 +48,20 @@ class DifferentialChangesetViewController extends DifferentialController {
     $view = $request->getStr('view');
     if ($view) {
       $changeset->attachHunks($changeset->loadHunks());
-      switch ($view) {
-        case 'new':
-          return $this->buildRawFileResponse($changeset->makeNewFile());
-        case 'old':
-          return $this->buildRawFileResponse($changeset->makeOldFile());
-        default:
-          return new Aphront400Response();
+      $type = $changeset->getFileType();
+      if ($type === DifferentialChangeType::FILE_TEXT) {
+        switch ($view) {
+          case 'new':
+            return $this->buildRawFileResponse($changeset->makeNewFile());
+          case 'old':
+            return $this->buildRawFileResponse($changeset->makeOldFile());
+          default:
+            return new Aphront400Response();
+        }
+      } else if ($type === DifferentialChangeType::FILE_IMAGE ||
+                 $type === DifferentialChangeType::FILE_BINARY) {
+          $phid = idx($changeset->getMetadata(), "$view:binary-phid");
+          return id(new AphrontRedirectResponse())->setURI("/file/info/$phid/");
       }
     }
 
