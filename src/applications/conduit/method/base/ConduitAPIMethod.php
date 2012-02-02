@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ abstract class ConduitAPIMethod {
     $host->setPath('/');
     $host = (string)$host;
 
-    $self = PhabricatorEnv::getProductionURI('/');
+    $self = PhabricatorEnv::getURI('/');
     if ($self !== $host) {
       throw new Exception(
         "Your client is connecting to this install as '{$host}', but it is ".
