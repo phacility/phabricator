@@ -97,7 +97,7 @@ class PhabricatorOwnersDetailController extends PhabricatorOwnersController {
     $path_links = array();
     foreach ($paths as $path) {
       $callsign = $handles[$path->getRepositoryPHID()]->getName();
-      $repo = phutil_escape_html('r'.$callsign);
+      $repo = '<strong>'.phutil_escape_html($callsign).'</strong>';
       $path_link = phutil_render_tag(
         'a',
         array(

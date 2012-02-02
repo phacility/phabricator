@@ -215,7 +215,12 @@ class PhabricatorOwnersListController extends PhabricatorOwnersController {
         $repo = $handles[$path->getRepositoryPHID()]->getName();
         $pkg_paths[$key] =
           '<strong>'.phutil_escape_html($repo).'</strong> '.
-          phutil_escape_html($path->getPath());
+          phutil_render_tag(
+            'a',
+            array(
+              'href' => '/diffusion/'.$repo.'/browse/:'.$path->getPath(),
+            ),
+            phutil_escape_html($path->getPath()));
       }
       $pkg_paths = implode('<br />', $pkg_paths);
 
