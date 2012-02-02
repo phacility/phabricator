@@ -167,6 +167,8 @@ class AphrontDefaultApplicationConfiguration
           'edit/(?P<id>\d+)/$' => 'ManiphestTaskEditController',
           'descriptionchange/(?P<id>\d+)/$' =>
             'ManiphestTaskDescriptionChangeController',
+          'descriptiondiff/$' =>
+            'ManiphestTaskDescriptionDiffController',
           'descriptionpreview/$' =>
             'ManiphestTaskDescriptionPreviewController',
         ),

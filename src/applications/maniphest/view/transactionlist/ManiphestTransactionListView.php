@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,12 @@ class ManiphestTransactionListView extends ManiphestView {
     $last = null;
     $group = array();
     $groups = array();
+    $has_description_transaction = false;
     foreach ($this->transactions as $transaction) {
+      if ($transaction->getTransactionType() ==
+          ManiphestTransactionType::TYPE_DESCRIPTION) {
+        $has_description_transaction = true;
+      }
       if ($last === null) {
         $last = $transaction;
         $group[] = $transaction;
@@ -78,6 +83,16 @@ class ManiphestTransactionListView extends ManiphestView {
     }
     if ($group) {
       $groups[] = $group;
+    }
+
+    if ($has_description_transaction) {
+      require_celerity_resource('differential-changeset-view-css');
+      require_celerity_resource('syntax-highlighting-css');
+      $whitespace_mode = DifferentialChangesetParser::WHITESPACE_SHOW_ALL;
+      Javelin::initBehavior('differential-show-more', array(
+        'uri'         => '/maniphest/task/descriptiondiff/',
+        'whitespace'  => $whitespace_mode,
+      ));
     }
 
     $sequence = 1;

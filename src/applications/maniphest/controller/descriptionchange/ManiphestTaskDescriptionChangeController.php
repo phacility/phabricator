@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ class ManiphestTaskDescriptionChangeController extends ManiphestController {
 
   private $transactionID;
 
-  private function setTransactionID($transaction_id) {
+  protected function setTransactionID($transaction_id) {
     $this->transactionID = $transaction_id;
     return $this;
   }
@@ -37,16 +37,8 @@ class ManiphestTaskDescriptionChangeController extends ManiphestController {
   }
 
   public function processRequest() {
-
     $request = $this->getRequest();
     $user = $request->getUser();
-
-    // this means we're using "show more" on a diff of a description and
-    // should thus use the rendering reference to identify the transaction
-    $ref = $request->getStr('ref');
-    if ($ref) {
-      $this->setTransactionID($ref);
-    }
 
     $transaction_id = $this->getTransactionID();
     $transaction = id(new ManiphestTransaction())->load($transaction_id);

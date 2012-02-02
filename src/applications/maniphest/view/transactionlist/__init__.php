@@ -6,8 +6,12 @@
 
 
 
+phutil_require_module('phabricator', 'applications/differential/parser/changeset');
+phutil_require_module('phabricator', 'applications/maniphest/constants/transactiontype');
 phutil_require_module('phabricator', 'applications/maniphest/view/base');
 phutil_require_module('phabricator', 'applications/maniphest/view/transactiondetail');
+phutil_require_module('phabricator', 'infrastructure/celerity/api');
+phutil_require_module('phabricator', 'infrastructure/javelin/api');
 
 
 phutil_require_source('ManiphestTransactionListView.php');
