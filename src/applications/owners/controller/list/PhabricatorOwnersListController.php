@@ -57,8 +57,10 @@ class PhabricatorOwnersListController extends PhabricatorOwnersController {
             $path->getTableName());
           $where[] = qsprintf(
             $conn_r,
-            'path.path LIKE %~',
-            $request->getStr('path'));
+            'path.path LIKE %~ OR %s LIKE CONCAT(path.path, %s)',
+            $request->getStr('path'),
+            $request->getStr('path'),
+            '%');
         }
 
         if ($request->getArr('owner')) {
