@@ -359,22 +359,22 @@ return array(
   'facebook.application-secret' => null,
 
 
-// -- Github ---------------------------------------------------------------- //
+// -- GitHub ---------------------------------------------------------------- //
 
-  // Can users use Github credentials to login to Phabricator?
+  // Can users use GitHub credentials to login to Phabricator?
   'github.auth-enabled'         => false,
 
-  // Can users use Github credentials to create new Phabricator accounts?
+  // Can users use GitHub credentials to create new Phabricator accounts?
   'github.registration-enabled' => true,
 
-  // Are Github accounts permanently linked to Phabricator accounts, or can
+  // Are GitHub accounts permanently linked to Phabricator accounts, or can
   // the user unlink them?
   'github.auth-permanent'       => false,
 
-  // The Github "Client ID" to use for Github API access.
+  // The GitHub "Client ID" to use for GitHub API access.
   'github.application-id'       => null,
 
-  // The Github "Secret" to use for Github API access.
+  // The GitHub "Secret" to use for GitHub API access.
   'github.application-secret'   => null,
 
 

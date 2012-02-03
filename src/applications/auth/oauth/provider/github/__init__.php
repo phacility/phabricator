@@ -12,4 +12,4 @@ phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phutil', 'utils');
 
 
-phutil_require_source('PhabricatorOAuthProviderGithub.php');
+phutil_require_source('PhabricatorOAuthProviderGitHub.php');
