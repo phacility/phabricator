@@ -166,31 +166,9 @@ class DifferentialRevisionEditor {
   public function save() {
     $revision = $this->getRevision();
 
-// TODO
-//    $revision->openTransaction();
-
     $is_new = $this->isNewRevision();
     if ($is_new) {
-      // These fields aren't nullable; set them to sensible defaults if they
-      // haven't been configured. We're just doing this so we can generate an
-      // ID for the revision if we don't have one already.
-      $revision->setLineCount(0);
-      if ($revision->getStatus() === null) {
-        $revision->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
-      }
-      if ($revision->getTitle() === null) {
-        $revision->setTitle('Untitled Revision');
-      }
-      if ($revision->getAuthorPHID() === null) {
-        $revision->setAuthorPHID($this->getActorPHID());
-      }
-      if ($revision->getSummary() === null) {
-        $revision->setSummary('');
-      }
-      if ($revision->getTestPlan() === null) {
-        $revision->setTestPlan('');
-      }
-      $revision->save();
+      $this->initializeNewRevision($revision);
     }
 
     $revision->loadRelationships();
@@ -205,6 +183,37 @@ class DifferentialRevisionEditor {
       $this->cc = $revision->getCCPHIDs();
     }
 
+    $diff = $this->getDiff();
+    if ($diff) {
+      $revision->setLineCount($diff->getLineCount());
+    }
+
+    // Save the revision, to generate its ID and PHID if it is new. We need
+    // the ID/PHID in order to record them in Herald transcripts, but don't
+    // want to hold a transaction open while running Herald because it is
+    // potentially somewhat slow. The downside is that we may end up with a
+    // saved revision/diff pair without appropriate CCs. We could be better
+    // about this -- for example:
+    //
+    //  - Herald can't affect reviewers, so we could compute them before
+    //    opening the transaction and then save them in the transaction.
+    //  - Herald doesn't *really* need PHIDs to compute its effects, we could
+    //    run it before saving these objects and then hand over the PHIDs later.
+    //
+    // But this should address the problem of orphaned revisions, which is
+    // currently the only problem we experience in practice.
+
+    $revision->openTransaction();
+
+      $revision->save();
+      if ($diff) {
+        $diff->setRevisionID($revision->getID());
+        $diff->save();
+      }
+
+    $revision->saveTransaction();
+
+
     // We're going to build up three dictionaries: $add, $rem, and $stable. The
     // $add dictionary has added reviewers/CCs. The $rem dictionary has
     // reviewers/CCs who have been removed, and the $stable array is
@@ -216,8 +225,6 @@ class DifferentialRevisionEditor {
       'ccs' => array_fill_keys($revision->getCCPHIDs(), true),
     );
 
-    $diff = $this->getDiff();
-
     $xscript_header = null;
     $xscript_uri = null;
 
@@ -226,12 +233,8 @@ class DifferentialRevisionEditor {
       'ccs' => array_fill_keys($this->cc, true),
     );
 
-
     $rem_ccs = array();
     if ($diff) {
-      $diff->setRevisionID($revision->getID());
-      $revision->setLineCount($diff->getLineCount());
-
       $adapter = new HeraldDifferentialRevisionAdapter(
         $revision,
         $diff);
@@ -426,9 +429,6 @@ class DifferentialRevisionEditor {
           $revision->getAuthorPHID(),
         ))
       ->publish();
-
-// TODO
-//    $revision->saveTransaction();
 
 //  TODO: Move this into a worker task thing.
     PhabricatorSearchDifferentialIndexer::indexRevision($revision);
@@ -905,6 +905,28 @@ class DifferentialRevisionEditor {
         'INSERT INTO %T (revisionID, type, hash) VALUES %Q',
         ArcanistDifferentialRevisionHash::TABLE_NAME,
         implode(', ', $sql));
+    }
+  }
+
+  private function initializeNewRevision(DifferentialRevision $revision) {
+    // These fields aren't nullable; set them to sensible defaults if they
+    // haven't been configured. We're just doing this so we can generate an
+    // ID for the revision if we don't have one already.
+    $revision->setLineCount(0);
+    if ($revision->getStatus() === null) {
+      $revision->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
+    }
+    if ($revision->getTitle() === null) {
+      $revision->setTitle('Untitled Revision');
+    }
+    if ($revision->getAuthorPHID() === null) {
+      $revision->setAuthorPHID($this->getActorPHID());
+    }
+    if ($revision->getSummary() === null) {
+      $revision->setSummary('');
+    }
+    if ($revision->getTestPlan() === null) {
+      $revision->setTestPlan('');
     }
   }
 
