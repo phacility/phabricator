@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ abstract class PhabricatorRemarkupRuleObjectName
   public function apply($text) {
     $prefix = $this->getObjectNamePrefix();
     return preg_replace_callback(
-      "@\b{$prefix}(\d+)(?:#(\d+))?\b@",
+      "@\b{$prefix}(\d+)(?:#([-\w\d]+))?\b@",
       array($this, 'markupObjectNameLink'),
       $text);
   }
@@ -37,9 +37,15 @@ abstract class PhabricatorRemarkupRuleObjectName
     $id = $matches[1];
 
     if (isset($matches[2])) {
-      $comment_id = $matches[2];
-      $href = "/{$prefix}{$id}#comment-{$comment_id}";
-      $text = "{$prefix}{$id}#{$comment_id}";
+      $href = $matches[2];
+      $text = $matches[2];
+      if (preg_match('@^(?:comment-)?(\d{1,7})$@', $href, $matches)) {
+        // Maximum length is 7 because 12345678 could be a file hash.
+        $href = "comment-{$matches[1]}";
+        $text = $matches[1];
+      }
+      $href = "/{$prefix}{$id}#{$href}";
+      $text = "{$prefix}{$id}#{$text}";
     } else {
       $href = "/{$prefix}{$id}";
       $text = "{$prefix}{$id}";
