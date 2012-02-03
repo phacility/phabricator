@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,12 @@ class PhabricatorOAuthFailureView extends AphrontView {
   public function render() {
     $request = $this->request;
     $provider = $this->provider;
-    $provider_name = $provider->getProviderName();
+    $provider_name = phutil_escape_html($provider->getProviderName());
 
     $diagnose = null;
 
     $view = new AphrontRequestFailureView();
-    $view->setHeader($provider_name.' Auth Failed');
+    $view->setHeader($provider->getProviderName().' Auth Failed');
     if ($this->request) {
       $view->appendChild(
         '<p>'.

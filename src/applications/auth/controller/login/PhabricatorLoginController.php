@@ -198,14 +198,16 @@ class PhabricatorLoginController extends PhabricatorAuthController {
 
       if ($provider->isProviderRegistrationEnabled()) {
         $title = "Login or Register with {$provider_name}";
-        $body = "Login or register for Phabricator using your ".
-                "{$provider_name} account.";
+        $body = 'Login or register for Phabricator using your '.
+                phutil_escape_html($provider_name).' account.';
         $button = "Login or Register with {$provider_name}";
       } else {
         $title = "Login with {$provider_name}";
-        $body = "Login to your existing Phabricator account using your ".
-                "{$provider_name} account.<br /><br /><strong>You can not use ".
-                "{$provider_name} to register a new account.</strong>";
+        $body = 'Login to your existing Phabricator account using your '.
+                phutil_escape_html($provider_name).' account.<br /><br />'.
+                '<strong>You can not use '.
+                phutil_escape_html($provider_name).' to register a new '.
+                'account.</strong>';
         $button = "Login with {$provider_name}";
       }
 

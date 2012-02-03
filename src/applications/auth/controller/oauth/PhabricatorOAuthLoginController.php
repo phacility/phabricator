@@ -41,7 +41,7 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
       return new Aphront400Response();
     }
 
-    $provider_name = $provider->getProviderName();
+    $provider_name = phutil_escape_html($provider->getProviderName());
     $provider_key = $provider->getProviderKey();
 
     $request = $this->getRequest();
@@ -113,7 +113,7 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
       if (!$request->isDialogFormPost()) {
         $dialog = new AphrontDialogView();
         $dialog->setUser($current_user);
-        $dialog->setTitle('Link '.$provider_name.' Account');
+        $dialog->setTitle('Link '.$provider->getProviderName().' Account');
         $dialog->appendChild(
           '<p>Link your '.$provider_name.' account to your Phabricator '.
           'account?</p>');
@@ -184,7 +184,8 @@ class PhabricatorOAuthLoginController extends PhabricatorAuthController {
     if (!$provider->isProviderRegistrationEnabled()) {
       $dialog = new AphrontDialogView();
       $dialog->setUser($current_user);
-      $dialog->setTitle('No Account Registration With '.$provider_name);
+      $dialog->setTitle('No Account Registration With '.
+        $provider->getProviderName());
       $dialog->appendChild(
         '<p>You can not register a new account using '.$provider_name.'; '.
         'you can only use your '.$provider_name.' account to log into an '.

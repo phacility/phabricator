@@ -52,9 +52,9 @@ class PhabricatorUserOAuthSettingsPanelController
       $form
         ->appendChild(
           '<p class="aphront-form-instructions">There is currently no '.
-          $provider_name.' account linked to your Phabricator account. You '.
-          'can link an account, which will allow you to use it to log into '.
-          'Phabricator.</p>');
+          phutil_escape_html($provider_name).' account linked to your '.
+          'Phabricator account. You can link an account, which will allow you '.
+          'to use it to log into Phabricator.</p>');
 
       $auth_uri = $provider->getAuthURI();
       $client_id = $provider->getClientID();
@@ -80,8 +80,9 @@ class PhabricatorUserOAuthSettingsPanelController
       $form
         ->appendChild(
           '<p class="aphront-form-instructions">Your account is linked with '.
-          'a '.$provider_name.' account. You may use your '.$provider_name.' '.
-          'credentials to log into Phabricator.</p>')
+          'a '.phutil_escape_html($provider_name).' account. You may use your '.
+          phutil_escape_html($provider_name).' credentials to log into '.
+          'Phabricator.</p>')
         ->appendChild(
           id(new AphrontFormStaticControl())
             ->setLabel($provider_name.' ID')
@@ -102,8 +103,9 @@ class PhabricatorUserOAuthSettingsPanelController
           ->setUser($user)
           ->appendChild(
             '<p class="aphront-form-instructions">You may unlink this account '.
-            'from your '.$provider_name.' account. This will prevent you from '.
-            'logging in with your '.$provider_name.' credentials.</p>')
+            'from your '.phutil_escape_html($provider_name).' account. This '.
+            'will prevent you from logging in with your '.
+            phutil_escape_html($provider_name).' credentials.</p>')
           ->appendChild(
             id(new AphrontFormSubmitControl())
               ->addCancelButton('/oauth/'.$provider_key.'/unlink/', $unlink));

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ class PhabricatorOAuthUnlinkController extends PhabricatorAuthController {
         "You may not unlink accounts from this OAuth provider.");
     }
 
-    $provider_name = $provider->getProviderName();
     $provider_key = $provider->getProviderKey();
 
     $oauth_info = id(new PhabricatorUserOAuthInfo())->loadOneWhere(
