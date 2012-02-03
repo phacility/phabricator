@@ -75,7 +75,7 @@ abstract class PhabricatorFeedStory {
     return $this->objects;
   }
 
-  final protected function getStoryData() {
+  final public function getStoryData() {
     return $this->data;
   }
 
