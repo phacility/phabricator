@@ -74,8 +74,8 @@ class AphrontPageView extends AphrontView {
   </head>
   <body class="{$body_classes}">
     {$body}
+    {$tail}
   </body>
-  {$tail}
 </html>
 
 EOHTML;
