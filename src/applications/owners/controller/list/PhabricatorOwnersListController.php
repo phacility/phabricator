@@ -135,6 +135,7 @@ class PhabricatorOwnersListController extends PhabricatorOwnersController {
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setAction('/owners/view/search/')
+      ->setMethod('GET')
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('name')
