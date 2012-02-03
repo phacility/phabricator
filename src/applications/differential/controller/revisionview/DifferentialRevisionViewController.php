@@ -242,6 +242,7 @@ class DifferentialRevisionViewController extends DifferentialController {
     $changeset_view->setRevision($revision);
     $changeset_view->setDiff($target);
     $changeset_view->setRenderingReferences($rendering_references);
+    $changeset_view->setVsMap($vs_map);
     $changeset_view->setWhitespace($whitespace);
     if ($repository) {
       $changeset_view->setRepository($repository, $target);

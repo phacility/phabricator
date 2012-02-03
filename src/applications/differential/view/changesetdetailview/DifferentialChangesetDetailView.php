@@ -23,6 +23,7 @@ class DifferentialChangesetDetailView extends AphrontView {
   private $revisionID;
   private $symbolIndex;
   private $id;
+  private $vsChangesetID;
 
   public function setChangeset($changeset) {
     $this->changeset = $changeset;
@@ -49,6 +50,15 @@ class DifferentialChangesetDetailView extends AphrontView {
       $this->id = celerity_generate_unique_node_id();
     }
     return $this->id;
+  }
+
+  public function setVsChangesetID($vs_changeset_id) {
+    $this->vsChangesetID = $vs_changeset_id;
+    return $this;
+  }
+
+  public function getVsChangesetID() {
+    return $this->vsChangesetID;
   }
 
   public function render() {
@@ -91,7 +101,9 @@ class DifferentialChangesetDetailView extends AphrontView {
       array(
         'sigil' => 'differential-changeset',
         'meta'  => array(
-          'left'  => $this->changeset->getID(),
+          'left'  => nonempty(
+            $this->getVsChangesetID(),
+            $this->changeset->getID()),
           'right' => $this->changeset->getID(),
         ),
         'class' => $class,

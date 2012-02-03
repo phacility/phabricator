@@ -29,6 +29,7 @@ class DifferentialChangesetListView extends AphrontView {
   private $symbolIndexes = array();
   private $repository;
   private $diff;
+  private $vsMap;
 
   public function setChangesets($changesets) {
     $this->changesets = $changesets;
@@ -83,6 +84,15 @@ class DifferentialChangesetListView extends AphrontView {
   public function setWhitespace($whitespace) {
     $this->whitespace = $whitespace;
     return $this;
+  }
+
+  public function setVsMap(array $vs_map) {
+    $this->vsMap = $vs_map;
+    return $this;
+  }
+
+  public function getVsMap() {
+    return $this->vsMap;
   }
 
   public function render() {
@@ -167,6 +177,7 @@ class DifferentialChangesetListView extends AphrontView {
       $detail->setChangeset($changeset);
       $detail->addButton($detail_button);
       $detail->setSymbolIndex(idx($this->symbolIndexes, $key));
+      $detail->setVsChangesetID(idx($this->vsMap, $changeset->getID()));
 
       $uniq_id = celerity_generate_unique_node_id();
       $detail->appendChild(

@@ -87,9 +87,9 @@ JX.behavior('differential-edit-inline-comments', function(config) {
 
       var data = e.getNodeData('differential-changeset');
       if (isOnRight(target)) {
-        changeset = data.left;
-      } else {
         changeset = data.right;
+      } else {
+        changeset = data.left;
       }
 
       updateReticle();
