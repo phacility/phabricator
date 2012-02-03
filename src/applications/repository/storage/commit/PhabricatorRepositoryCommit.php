@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,15 @@ class PhabricatorRepositoryCommit extends PhabricatorRepositoryDAO {
       PhabricatorPHIDConstants::PHID_TYPE_CMIT);
   }
 
+  public function loadCommitData() {
+    if (!$this->getID()) {
+      return null;
+    }
+    return id(new PhabricatorRepositoryCommitData())->loadOneWhere(
+      'commitID = %d',
+      $this->getID());
+  }
+
   public function attachCommitData(PhabricatorRepositoryCommitData $data) {
     $this->commitData = $data;
     return $this;
@@ -47,6 +56,19 @@ class PhabricatorRepositoryCommit extends PhabricatorRepositoryDAO {
       throw new Exception("Attach commit data with attachCommitData() first!");
     }
     return $this->commitData;
+  }
+
+  public function delete() {
+    $data = $this->loadCommitData();
+    $this->openTransaction();
+
+      if ($data) {
+        $data->delete();
+      }
+      $result = parent::delete();
+
+    $this->saveTransaction();
+    return $result;
   }
 
 }
