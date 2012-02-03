@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,8 +73,12 @@ final class AphrontFormView extends AphrontView {
       ->appendChild($this->renderDataInputs())
       ->appendChild($this->renderChildren());
 
-    return javelin_render_tag(
-      'form',
+    if (!$this->user) {
+      throw new Exception('You must pass the user to AphrontFormView.');
+    }
+
+    return phabricator_render_form(
+      $this->user,
       array(
         'action'  => $this->action,
         'method'  => $this->method,
@@ -86,16 +90,8 @@ final class AphrontFormView extends AphrontView {
   }
 
   private function renderDataInputs() {
-    if (!$this->user) {
-      throw new Exception('You must pass the user to AphrontFormView.');
-    }
-
-    $data = $this->data + array(
-      '__form__' => 1,
-      AphrontRequest::getCSRFTokenName() => $this->user->getCSRFToken(),
-    );
     $inputs = array();
-    foreach ($data as $key => $value) {
+    foreach ($this->data as $key => $value) {
       if ($value === null) {
         continue;
       }

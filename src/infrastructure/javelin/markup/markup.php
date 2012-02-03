@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,22 +49,25 @@ function javelin_render_tag(
 
 
 function phabricator_render_form(PhabricatorUser $user, $attributes, $content) {
-  return javelin_render_tag(
-    'form',
-    $attributes,
-    phutil_render_tag(
-      'input',
-      array(
-        'type' => 'hidden',
-        'name' => AphrontRequest::getCSRFTokenName(),
-        'value' => $user->getCSRFToken(),
-      )).
-    phutil_render_tag(
-      'input',
-      array(
-        'type' => 'hidden',
-        'name' => '__form__',
-        'value' => true,
-      )).$content);
+  if (strcasecmp(idx($attributes, 'method'), 'POST') == 0 &&
+      !preg_match('#^(https?:|//)#', idx($attributes, 'action'))) {
+    $content =
+      phutil_render_tag(
+        'input',
+        array(
+          'type' => 'hidden',
+          'name' => AphrontRequest::getCSRFTokenName(),
+          'value' => $user->getCSRFToken(),
+        )).
+      phutil_render_tag(
+        'input',
+        array(
+          'type' => 'hidden',
+          'name' => '__form__',
+          'value' => true,
+        )).
+      $content;
+  }
+  return javelin_render_tag('form', $attributes, $content);
 }
 
