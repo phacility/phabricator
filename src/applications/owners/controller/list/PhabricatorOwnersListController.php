@@ -34,6 +34,13 @@ class PhabricatorOwnersListController extends PhabricatorOwnersController {
     $owner = new PhabricatorOwnersOwner();
     $path = new PhabricatorOwnersPath();
 
+    $repository_phid = '';
+    if ($request->getStr('repository') != '') {
+      $repository_phid = id(new PhabricatorRepository())
+        ->loadOneWhere('callsign = %s', $request->getStr('repository'))
+        ->getPHID();
+    }
+
     switch ($this->view) {
       case 'search':
         $packages = array();
@@ -50,17 +57,29 @@ class PhabricatorOwnersListController extends PhabricatorOwnersController {
             $request->getStr('name'));
         }
 
-        if ($request->getStr('path')) {
+        if ($repository_phid || $request->getStr('path')) {
+
           $join[] = qsprintf(
             $conn_r,
             'JOIN %T path ON path.packageID = p.id',
             $path->getTableName());
-          $where[] = qsprintf(
-            $conn_r,
-            'path.path LIKE %~ OR %s LIKE CONCAT(path.path, %s)',
-            $request->getStr('path'),
-            $request->getStr('path'),
-            '%');
+
+          if ($repository_phid) {
+            $where[] = qsprintf(
+              $conn_r,
+              'path.repositoryPHID = %s',
+              $repository_phid);
+          }
+
+          if ($request->getStr('path')) {
+            $where[] = qsprintf(
+              $conn_r,
+              'path.path LIKE %~ OR %s LIKE CONCAT(path.path, %s)',
+              $request->getStr('path'),
+              $request->getStr('path'),
+              '%');
+          }
+
         }
 
         if ($request->getArr('owner')) {
@@ -132,6 +151,14 @@ class PhabricatorOwnersListController extends PhabricatorOwnersController {
       );
     }
 
+    $callsigns = array('' => '(Any Repository)');
+    $repositories = id(new PhabricatorRepository())
+      ->loadAllWhere('1 = 1 ORDER BY callsign');
+    foreach ($repositories as $repository) {
+      $callsigns[$repository->getCallsign()] =
+        $repository->getCallsign().': '.$repository->getName();
+    }
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setAction('/owners/view/search/')
@@ -148,6 +175,12 @@ class PhabricatorOwnersListController extends PhabricatorOwnersController {
           ->setName('owner')
           ->setLabel('Owner')
           ->setValue($owners_search_value))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setName('repository')
+          ->setLabel('Repository')
+          ->setOptions($callsigns)
+          ->setValue($request->getStr('repository')))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('path')
