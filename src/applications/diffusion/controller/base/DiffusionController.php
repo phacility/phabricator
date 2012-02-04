@@ -97,6 +97,15 @@ abstract class DiffusionController extends PhabricatorController {
           ),
           $name));
     }
+    $nav->addNavItem(
+      phutil_render_tag(
+        'a',
+        array(
+          'href'  => '/owners/view/search/'.
+            '?repository='.phutil_escape_uri($callsign).
+            '&path='.phutil_escape_uri('/'.$drequest->getPath()),
+        ),
+        'Search Owners'));
 
     return $nav;
   }
