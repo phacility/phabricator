@@ -1394,10 +1394,21 @@ class DifferentialChangesetParser {
       if ($o_num && isset($old_comments[$o_num])) {
         foreach ($old_comments[$o_num] as $comment) {
           $xhp = $this->renderInlineComment($comment);
+          $new = '';
+          if ($n_num && isset($new_comments[$n_num])) {
+            foreach ($new_comments[$n_num] as $key => $new_comment) {
+              if ($comment->isCompatible($new_comment)) {
+                $new = $this->renderInlineComment($new_comment);
+                unset($new_comments[$n_num][$key]);
+              }
+            }
+          }
           $html[] =
             '<tr class="inline"><th /><td>'.
               $xhp.
-            '</td><th /><td /><td class="cov" /></tr>';
+            '</td><th /><td>'.
+              $new.
+            '</td><td class="cov" /></tr>';
         }
       }
       if ($n_num && isset($new_comments[$n_num])) {

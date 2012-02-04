@@ -42,4 +42,11 @@ class DifferentialInlineComment extends DifferentialDAO {
     return $this->syntheticAuthor;
   }
 
+  public function isCompatible(DifferentialInlineComment $comment) {
+    return
+      $this->authorPHID === $comment->authorPHID &&
+      $this->syntheticAuthor === $comment->syntheticAuthor &&
+      $this->content === $comment->content;
+  }
+
 }
