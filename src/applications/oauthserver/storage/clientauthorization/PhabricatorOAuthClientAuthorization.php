@@ -17,28 +17,25 @@
  */
 
 /**
- * @group aphront
+ * @group oauthserver
  */
-final class AphrontJSONResponse extends AphrontResponse {
+final class PhabricatorOAuthClientAuthorization
+extends PhabricatorOAuthServerDAO {
 
-  private $content;
+  protected $id;
+  protected $phid;
+  protected $userPHID;
+  protected $clientPHID;
 
-  public function setContent($content) {
-    $this->content = $content;
-    return $this;
+
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_AUX_PHID => true,
+    ) + parent::getConfiguration();
   }
 
-  public function buildResponseString() {
-    $response = $this->encodeJSONForHTTPResponse($this->content);
-    return $this->addJSONShield($response, $use_javelin_shield = false);
+  public function generatePHID() {
+    return PhabricatorPHID::generateNewPHID(
+      PhabricatorPHIDConstants::PHID_TYPE_OASA);
   }
-
-  public function getHeaders() {
-    $headers = array(
-      array('Content-Type', 'application/json'),
-    );
-    $headers = array_merge(parent::getHeaders(), $headers);
-    return $headers;
-  }
-
 }

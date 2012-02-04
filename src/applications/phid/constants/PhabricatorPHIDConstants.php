@@ -37,5 +37,6 @@ final class PhabricatorPHIDConstants {
   const PHID_TYPE_ACMT    = 'ACMT';
   const PHID_TYPE_DRYR    = 'DRYR';
   const PHID_TYPE_DRYL    = 'DRYL';
-
+  const PHID_TYPE_OASC    = 'OASC';
+  const PHID_TYPE_OASA    = 'OASA';
 }

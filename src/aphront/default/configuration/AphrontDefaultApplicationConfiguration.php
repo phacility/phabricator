@@ -151,6 +151,12 @@ class AphrontDefaultApplicationConfiguration
         ),
       ),
 
+      '/oauthserver/' => array(
+        'auth/' => 'PhabricatorOAuthServerAuthController',
+        'token/' => 'PhabricatorOAuthServerTokenController',
+        'test/' => 'PhabricatorOAuthServerTestController',
+      ),
+
       '/xhprof/' => array(
         'profile/(?P<phid>[^/]+)/$' => 'PhabricatorXHProfProfileController',
       ),

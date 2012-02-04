@@ -329,7 +329,7 @@ return array(
   'account.minimum-password-length'  => 8,
 
 
-// --  Facebook  ------------------------------------------------------------ //
+// -- Facebook OAuth -------------------------------------------------------- //
 
   // Can users use Facebook credentials to login to Phabricator?
   'facebook.auth-enabled'       => false,
@@ -348,7 +348,7 @@ return array(
   'facebook.application-secret' => null,
 
 
-// -- GitHub ---------------------------------------------------------------- //
+// -- GitHub OAuth ---------------------------------------------------------- //
 
   // Can users use GitHub credentials to login to Phabricator?
   'github.auth-enabled'         => false,
@@ -367,7 +367,7 @@ return array(
   'github.application-secret'   => null,
 
 
-// -- Google ---------------------------------------------------------------- //
+// -- Google OAuth ---------------------------------------------------------- //
 
   // Can users use Google credentials to login to Phabricator?
   'google.auth-enabled'         => false,
@@ -384,6 +384,30 @@ return array(
 
   // The Google "Client Secret" to use for Google API access.
   'google.application-secret'   => null,
+
+// -- Phabricator OAuth ----------------------------------------------------- //
+
+  // Meta-town -- Phabricator is itself an OAuth Provider
+  // TODO -- T887 -- make this support multiple Phabricator instances!
+
+  // The URI of the Phabricator instance to use as an OAuth server.
+  'phabricator.oauth-uri'            => null,
+
+  // Can users use Phabricator credentials to login to Phabricator?
+  'phabricator.auth-enabled'         => false,
+
+  // Can users use Phabricator credentials to create new Phabricator accounts?
+  'phabricator.registration-enabled' => true,
+
+  // Are Phabricator accounts permanently linked to Phabricator accounts, or can
+  // the user unlink them?
+  'phabricator.auth-permanent'       => false,
+
+  // The Phabricator "Client ID" to use for Phabricator API access.
+  'phabricator.application-id'       => null,
+
+  // The Phabricator "Client Secret" to use for Phabricator API access.
+  'phabricator.application-secret'   => null,
 
 // -- Recaptcha ------------------------------------------------------------- //
 

@@ -84,6 +84,11 @@ abstract class AphrontResponse {
       array('\u003c', '\u003e'),
       $response);
 
+    return $response;
+  }
+
+  protected function addJSONShield($json_response, $use_javelin_shield) {
+
     // Add a shield to prevent "JSON Hijacking" attacks where an attacker
     // requests a JSON response using a normal <script /> tag and then uses
     // Object.prototype.__defineSetter__() or similar to read response data.
@@ -96,7 +101,7 @@ abstract class AphrontResponse {
       ? 'for (;;);'
       : 'for(;;);';
 
-    $response = $shield.$response;
+    $response = $shield.$json_response;
 
     return $response;
   }
