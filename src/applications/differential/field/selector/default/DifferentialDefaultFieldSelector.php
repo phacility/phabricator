@@ -20,7 +20,7 @@ final class DifferentialDefaultFieldSelector
   extends DifferentialFieldSelector {
 
   public function getFieldSpecifications() {
-    return array(
+    $fields = array(
       new DifferentialTitleFieldSpecification(),
       new DifferentialSummaryFieldSpecification(),
       new DifferentialTestPlanFieldSpecification(),
@@ -34,13 +34,27 @@ final class DifferentialDefaultFieldSelector
       new DifferentialCommitsFieldSpecification(),
       new DifferentialDependenciesFieldSpecification(),
       new DifferentialManiphestTasksFieldSpecification(),
-      new DifferentialHostFieldSpecification(),
-      new DifferentialPathFieldSpecification(),
-      new DifferentialArcanistProjectFieldSpecification(),
-      new DifferentialApplyPatchFieldSpecification(),
-      new DifferentialRevisionIDFieldSpecification(),
-      new DifferentialGitSVNIDFieldSpecification(),
     );
+
+    if (PhabricatorEnv::getEnvConfig('differential.show-host-field')) {
+      $fields = array_merge(
+        $fields,
+        array(
+          new DifferentialHostFieldSpecification(),
+          new DifferentialPathFieldSpecification(),
+        ));
+    }
+
+    $fields = array_merge(
+      $fields,
+      array(
+        new DifferentialArcanistProjectFieldSpecification(),
+        new DifferentialApplyPatchFieldSpecification(),
+        new DifferentialRevisionIDFieldSpecification(),
+        new DifferentialGitSVNIDFieldSpecification(),
+      ));
+
+    return $fields;
   }
 
 }

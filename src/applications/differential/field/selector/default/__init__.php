@@ -26,6 +26,7 @@ phutil_require_module('phabricator', 'applications/differential/field/specificat
 phutil_require_module('phabricator', 'applications/differential/field/specification/testplan');
 phutil_require_module('phabricator', 'applications/differential/field/specification/title');
 phutil_require_module('phabricator', 'applications/differential/field/specification/unit');
+phutil_require_module('phabricator', 'infrastructure/env');
 
 
 phutil_require_source('DifferentialDefaultFieldSelector.php');

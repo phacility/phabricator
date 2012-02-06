@@ -597,6 +597,13 @@ return array(
 
   'differential.field-selector' => 'DifferentialDefaultFieldSelector',
 
+  // Differential can show "Host" and "Path" fields on revisions, with
+  // information about the machine and working directory where the change
+  // came from. These fields are disabled by default because they may
+  // occasionally have sensitive information; you can set this to true to
+  // enable them.
+  'differential.show-host-field'  => false,
+
   // If you set this to true, users can "!accept" revisions via email (normally,
   // they can take other actions but can not "!accept"). This action is disabled
   // by default because email authentication can be configured to be very weak,

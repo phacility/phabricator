@@ -166,7 +166,7 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
       }
 
       $id = $revision->getID();
-      $results[] = array(
+      $result = array(
         'id'            => $id,
         'phid'          => $revision->getPHID(),
         'title'         => $revision->getTitle(),
@@ -178,7 +178,6 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
         'statusName'    =>
           ArcanistDifferentialRevisionStatus::getNameForRevisionStatus(
             $revision->getStatus()),
-        'sourcePath'    => $diff->getSourcePath(),
         'branch'        => $diff->getBranch(),
         'summary'       => $revision->getSummary(),
         'testPlan'      => $revision->getTestPlan(),
@@ -188,6 +187,14 @@ class ConduitAPI_differential_query_Method extends ConduitAPIMethod {
         'reviewers'     => array_values($revision->getReviewers()),
         'ccs'           => array_values($revision->getCCPHIDs()),
       );
+
+      // TODO: This is a hacky way to put permissions on this field until we
+      // have first-class support, see T838.
+      if ($revision->getAuthorPHID() == $request->getUser()->getPHID()) {
+        $result['sourcePath'] = $diff->getSourcePath();
+      }
+
+      $results[] = $result;
     }
 
     return $results;
