@@ -89,8 +89,8 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
     foreach ($data as $row) {
 
       $diff = $row['obj'];
-      $name = phutil_escape_html($row['name']);
-      $id   = phutil_escape_html($row['id']);
+      $name = $row['name'];
+      $id   = $row['id'];
 
       $old_class = null;
       $new_class = null;
@@ -172,8 +172,8 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
 
       $rows[] =
         '<tr'.$class.'>'.
-          '<td class="revhistory-name">'.$name.'</td>'.
-          '<td class="revhistory-id">'.$id.'</td>'.
+          '<td class="revhistory-name">'.phutil_escape_html($name).'</td>'.
+          '<td class="revhistory-id">'.phutil_escape_html($id).'</td>'.
           '<td class="revhistory-base">'.phutil_escape_html($base).'</td>'.
           '<td class="revhistory-desc">'.phutil_escape_html($desc).'</td>'.
           '<td class="revhistory-age">'.$age.'</td>'.
