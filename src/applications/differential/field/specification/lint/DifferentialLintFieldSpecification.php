@@ -65,17 +65,17 @@ final class DifferentialLintFieldSpecification
               ),
               $line_link);
           }
-          $message_markup[] =
+          $message_markup[] = hsprintf(
             '<li>'.
-              '<span class="lint-severity-'.phutil_escape_html($severity).'">'.
-                phutil_escape_html(ucwords($severity)).
-              '</span>'.
-              ' '.
-              '('.phutil_escape_html($code).') '.
-              phutil_escape_html($name).
-              ' at line '.$line_link.
-              '<p>'.phutil_escape_html($description).'</p>'.
-            '</li>';
+              '<span class="lint-severity-%s">%s</span> (%s) %s '.
+              'at line '.$line_link.
+              '<p>%s</p>'.
+            '</li>',
+            $severity,
+            ucwords($severity),
+            $code,
+            $name,
+            $description);
         }
         $lint_messages[] =
           '<li class="lint-file-block">'.
