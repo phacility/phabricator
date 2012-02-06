@@ -88,6 +88,7 @@ abstract class AphrontHTTPSink {
     }
 
     foreach ($headers as $header) {
+      list($name, $value) = $header;
       $this->emitHeader($name, $value);
     }
   }
