@@ -147,19 +147,13 @@ try {
 
 $write_guard->dispose();
 
-
-$code = $response->getHTTPResponseCode();
-if ($code != 200) {
-  header("HTTP/1.0 {$code}");
-}
+$sink = new AphrontPHPHTTPSink();
+$sink->writeHTTPStatus($response->getHTTPResponseCode());
 
 $headers = $response->getCacheHeaders();
 $headers = array_merge($headers, $response->getHeaders());
-foreach ($headers as $header) {
-  list($header, $value) = $header;
-  header("{$header}: {$value}");
-}
 
+$sink->writeHeaders($headers);
 
 // TODO: This shouldn't be possible in a production-configured environment.
 if (isset($_REQUEST['__profile__']) &&
@@ -178,11 +172,11 @@ if (isset($_REQUEST['__profile__']) &&
       '<body>'.$profile,
       $response_string);
   } else {
-    echo $profile;
+    $sink->writeData($profile);
   }
 }
 
-echo $response_string;
+$sink->writeData($response_string);
 
 /**
  * @group aphront
