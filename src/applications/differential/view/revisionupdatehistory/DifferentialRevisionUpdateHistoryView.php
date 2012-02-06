@@ -191,9 +191,10 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       ));
 
     $options = array(
-      'ignore-all' => 'Ignore Most',
-      'ignore-trailing' => 'Ignore Trailing',
-      'show-all' => 'Show All',
+      DifferentialChangesetParser::WHITESPACE_IGNORE_ALL => 'Ignore Most',
+      DifferentialChangesetParser::WHITESPACE_IGNORE_TRAILING =>
+        'Ignore Trailing',
+      DifferentialChangesetParser::WHITESPACE_SHOW_ALL => 'Show All',
     );
 
     $select = '<select name="whitespace">';

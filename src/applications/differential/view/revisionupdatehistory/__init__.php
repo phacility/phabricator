@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'applications/differential/constants/lintstatus');
 phutil_require_module('phabricator', 'applications/differential/constants/unitstatus');
+phutil_require_module('phabricator', 'applications/differential/parser/changeset');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'infrastructure/javelin/api');
 phutil_require_module('phabricator', 'infrastructure/javelin/markup');
