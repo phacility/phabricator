@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,18 +21,20 @@
  */
 class PhabricatorSearchController extends PhabricatorSearchBaseController {
 
-  private $id;
+  private $key;
 
   public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
+    $this->key = idx($data, 'key');
   }
 
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    if ($this->id) {
-      $query = id(new PhabricatorSearchQuery())->load($this->id);
+    if ($this->key) {
+      $query = id(new PhabricatorSearchQuery())->loadOneWhere(
+        'queryKey = %s',
+        $this->key);
       if (!$query) {
         return new Aphront404Response();
       }
@@ -64,7 +66,7 @@ class PhabricatorSearchController extends PhabricatorSearchBaseController {
 
         $query->save();
         return id(new AphrontRedirectResponse())
-          ->setURI('/search/'.$query->getID().'/');
+          ->setURI('/search/'.$query->getQueryKey().'/');
       }
     }
 

@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'applications/search/storage/base');
 
+phutil_require_module('phutil', 'filesystem');
 phutil_require_module('phutil', 'utils');
 
 

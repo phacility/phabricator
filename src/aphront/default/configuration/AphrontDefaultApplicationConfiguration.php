@@ -192,7 +192,7 @@ class AphrontDefaultApplicationConfiguration
 
       '/search/' => array(
         '$' => 'PhabricatorSearchController',
-        '(?P<id>\d+)/$' => 'PhabricatorSearchController',
+        '(?P<key>[^/]+)/$' => 'PhabricatorSearchController',
         'attach/(?P<phid>[^/]+)/(?P<type>\w+)/(?:(?P<action>\w+)/)?$'
           => 'PhabricatorSearchAttachController',
         'select/(?P<type>\w+)/$'

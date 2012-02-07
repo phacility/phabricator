@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@
 /**
  * @group search
  */
-class PhabricatorSearchQuery extends PhabricatorSearchDAO {
+final class PhabricatorSearchQuery extends PhabricatorSearchDAO {
 
-  protected $authorPHID;
   protected $query;
   protected $parameters = array();
+  protected $queryKey;
 
   public function getConfiguration() {
     return array(
@@ -40,6 +40,13 @@ class PhabricatorSearchQuery extends PhabricatorSearchDAO {
 
   public function getParameter($parameter, $default = null) {
     return idx($this->parameters, $parameter, $default);
+  }
+
+  public function save() {
+    if (!$this->getQueryKey()) {
+      $this->setQueryKey(Filesystem::readRandomCharacters(12));
+    }
+    return parent::save();
   }
 
 }
