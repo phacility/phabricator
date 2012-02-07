@@ -233,7 +233,7 @@ class ManiphestTransactionDetailView extends ManiphestView {
           'id'    => $anchor_name,
           'href'  => '#'.$anchor_name,
         ),
-        'Comment T'.$any_transaction->getTaskID().'#'.$num);
+        'T'.$any_transaction->getTaskID().'#'.$anchor_name);
       $comment_anchor = 'anchor-'.$anchor_name;
     }
 

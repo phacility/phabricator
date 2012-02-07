@@ -83,7 +83,14 @@ final class DifferentialRevisionCommentListView extends AphrontView {
       $view->setChangesets($this->changesets);
       $view->setTargetDiff($this->target);
       $view->setVersusDiffID($this->versusDiffID);
-      $view->setCommentNumber($num++);
+      if ($comment->getAction() == DifferentialAction::ACTION_SUMMARIZE) {
+        $view->setAnchorName('summary');
+      } elseif ($comment->getAction() == DifferentialAction::ACTION_TESTPLAN) {
+        $view->setAnchorName('test-plan');
+      } else {
+        $view->setAnchorName('comment-'.$num);
+        $num++;
+      }
 
       $html[] = $view->render();
     }
