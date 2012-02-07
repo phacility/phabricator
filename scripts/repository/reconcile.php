@@ -88,8 +88,11 @@ try {
 echo "Verifying commits (this may take some time if the repository is large)";
 $futures = array();
 foreach ($all_commits as $id => $commit) {
+  // NOTE: We use "cat-file -t", not "rev-parse --verify", because
+  // "rev-parse --verify" does not verify that the object actually exists, only
+  // that the name is properly formatted.
   $futures[$id] = $repository->getLocalCommandFuture(
-    'rev-parse --verify %s',
+    'cat-file -t %s',
     $commit->getCommitIdentifier());
 }
 
