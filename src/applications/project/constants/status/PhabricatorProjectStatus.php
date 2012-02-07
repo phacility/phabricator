@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,41 +18,23 @@
 
 final class PhabricatorProjectStatus {
 
-  const UNKNOWN         = 0;
-  const NOT_STARTED     = 1;
-  const IN_PROGRESS     = 2;
-  const REVIEW_PROCESS  = 3;
-  const RELEASED        = 4;
-  const COMPLETED       = 5;
-  const DEFERRED        = 6;
-  const ONGOING         = 7;
-
+  const STATUS_ACTIVE       = 0;
+  const STATUS_ARCHIVED     = 100;
 
   public static function getNameForStatus($status) {
     static $map = array(
-      self::UNKNOWN         => '',
-      self::NOT_STARTED     => 'Not started',
-      self::IN_PROGRESS     => 'In progress',
-      self::ONGOING         => 'Ongoing',
-      self::REVIEW_PROCESS  => 'Review process',
-      self::RELEASED        => 'Released',
-      self::COMPLETED       => 'Completed',
-      self::DEFERRED        => 'Deferred',
+      self::STATUS_ACTIVE     => 'Active',
+      self::STATUS_ARCHIVED   => 'Archived',
     );
 
-    return idx($map, coalesce($status, '?'), $map[self::UNKNOWN]);
+    return idx($map, coalesce($status, '?'), 'Unknown');
   }
 
   public static function getStatusMap() {
     return array(
-      self::UNKNOWN         => 'Who knows?',
-      self::NOT_STARTED     => 'Not started',
-      self::IN_PROGRESS     => 'In progress',
-      self::ONGOING         => 'Ongoing',
-      self::REVIEW_PROCESS  => 'Review process',
-      self::RELEASED        => 'Released',
-      self::COMPLETED       => 'Completed',
-      self::DEFERRED        => 'Deferred',
+      self::STATUS_ACTIVE   => 'Active',
+      self::STATUS_ARCHIVED => 'Archived',
     );
   }
+
 }

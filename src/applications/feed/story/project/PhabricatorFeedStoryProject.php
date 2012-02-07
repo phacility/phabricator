@@ -49,15 +49,28 @@ class PhabricatorFeedStoryProject extends PhabricatorFeedStory {
           $action = 'renamed project '.
             $this->linkTo($proj_phid).
             ' from '.
-            '<strong>'.phutil_escape_html($old).'</strong>'.
+            $this->renderString($old).
             ' to '.
-            '<strong>'.phutil_escape_html($new).'</strong>.';
+            $this->renderString($new).
+            '.';
         } else {
           $action = 'created project '.
             $this->linkTo($proj_phid).
             ' (as '.
-            '<strong>'.phutil_escape_html($new).'</strong>).';
+            $this->renderString($new).
+            ').';
         }
+        break;
+      case PhabricatorProjectTransactionType::TYPE_STATUS:
+        $action = 'changed project '.
+                  $this->linkTo($proj_phid).
+                  ' status from '.
+                  $this->renderString(
+                    PhabricatorProjectStatus::getNameForStatus($old)).
+                  ' to '.
+                  $this->renderString(
+                    PhabricatorProjectStatus::getNameForStatus($new)).
+                  '.';
         break;
       case PhabricatorProjectTransactionType::TYPE_MEMBERS:
         $add = array_diff($new, $old);

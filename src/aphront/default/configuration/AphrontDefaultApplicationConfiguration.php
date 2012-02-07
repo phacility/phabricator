@@ -206,8 +206,6 @@ class AphrontDefaultApplicationConfiguration
         'edit/(?P<id>\d+)/$' => 'PhabricatorProjectProfileEditController',
         'view/(?P<id>\d+)/(?:(?P<page>\w+)/)?$'
           => 'PhabricatorProjectProfileController',
-        'affiliation/(?P<id>\d+)/$'
-          => 'PhabricatorProjectAffiliationEditController',
         'create/$' => 'PhabricatorProjectCreateController',
         'update/(?P<id>\d+)/(?P<action>[^/]+)/$'
           => 'PhabricatorProjectUpdateController',

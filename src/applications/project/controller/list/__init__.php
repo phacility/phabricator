@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'applications/maniphest/query');
+phutil_require_module('phabricator', 'applications/project/constants/status');
 phutil_require_module('phabricator', 'applications/project/controller/base');
 phutil_require_module('phabricator', 'applications/project/query/project');
 phutil_require_module('phabricator', 'applications/project/storage/affiliation');

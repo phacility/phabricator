@@ -21,5 +21,6 @@ final class PhabricatorProjectTransactionType
 
   const TYPE_NAME       = 'name';
   const TYPE_MEMBERS    = 'members';
+  const TYPE_STATUS     = 'status';
 
 }

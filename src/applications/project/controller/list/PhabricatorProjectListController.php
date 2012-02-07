@@ -50,17 +50,22 @@ class PhabricatorProjectListController
 
     $view_phid = $request->getUser()->getPHID();
 
+    $status_filter = PhabricatorProjectQuery::STATUS_ANY;
+
     switch ($this->filter) {
       case 'active':
         $table_header = 'Active Projects';
         $query->setMembers(array($view_phid));
+        $query->withStatus(PhabricatorProjectQuery::STATUS_ACTIVE);
         break;
       case 'owned':
         $table_header = 'Owned Projects';
         $query->setOwners(array($view_phid));
+        $query->withStatus($status_filter);
         break;
       case 'all':
         $table_header = 'All Projects';
+        $query->withStatus($status_filter);
         break;
     }
 
@@ -128,6 +133,8 @@ class PhabricatorProjectListController
             'href' => '/project/view/'.$project->getID().'/',
           ),
           phutil_escape_html($project->getName())),
+        phutil_escape_html(
+          PhabricatorProjectStatus::getNameForStatus($project->getStatus())),
         phutil_escape_html($blurb),
         phutil_escape_html($population),
         phutil_render_tag(
@@ -143,6 +150,7 @@ class PhabricatorProjectListController
     $table->setHeaders(
       array(
         'Project',
+        'Status',
         'Description',
         'Population',
         'Open Tasks',
@@ -150,6 +158,7 @@ class PhabricatorProjectListController
     $table->setColumnClasses(
       array(
         'pri',
+        '',
         'wide',
         '',
         ''

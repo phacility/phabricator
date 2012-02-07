@@ -20,7 +20,7 @@ class PhabricatorProject extends PhabricatorProjectDAO {
 
   protected $name;
   protected $phid;
-  protected $status = PhabricatorProjectStatus::UNKNOWN;
+  protected $status = PhabricatorProjectStatus::STATUS_ACTIVE;
   protected $authorPHID;
   protected $subprojectPHIDs = array();
   protected $phrictionSlug;

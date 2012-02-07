@@ -23,6 +23,13 @@ final class PhabricatorProjectQuery {
   private $owners;
   private $members;
 
+  private $status       = 'status-any';
+  const STATUS_ANY      = 'status-any';
+  const STATUS_OPEN     = 'status-open';
+  const STATUS_CLOSED   = 'status-closed';
+  const STATUS_ACTIVE   = 'status-active';
+  const STATUS_ARCHIVED = 'status-archived';
+
   private $limit;
   private $offset;
 
@@ -35,6 +42,11 @@ final class PhabricatorProjectQuery {
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
+    return $this;
+  }
+
+  public function withStatus($status) {
+    $this->status = $status;
     return $this;
   }
 
@@ -112,6 +124,42 @@ final class PhabricatorProjectQuery {
 
   private function buildWhereClause($conn_r) {
     $where = array();
+
+    if ($this->status != self::STATUS_ANY) {
+      switch ($this->status) {
+        case self::STATUS_OPEN:
+          $where[] = qsprintf(
+            $conn_r,
+            'status IN (%Ld)',
+            array(
+              PhabricatorProjectStatus::STATUS_ACTIVE,
+            ));
+          break;
+        case self::STATUS_CLOSED:
+          $where[] = qsprintf(
+            $conn_r,
+            'status IN (%Ld)',
+            array(
+              PhabricatorProjectStatus::STATUS_ARCHIVED,
+            ));
+          break;
+        case self::STATUS_ACTIVE:
+          $where[] = qsprintf(
+            $conn_r,
+            'status = %d',
+            PhabricatorProjectStatus::STATUS_ACTIVE);
+          break;
+        case self::STATUS_ARCHIVED:
+          $where[] = qsprintf(
+            $conn_r,
+            'status = %d',
+            PhabricatorProjectStatus::STATUS_ARCHIVED);
+          break;
+        default:
+          throw new Exception(
+            "Unknown project status '{$this->status}'!");
+      }
+    }
 
     if ($this->ids) {
       $where[] = qsprintf(

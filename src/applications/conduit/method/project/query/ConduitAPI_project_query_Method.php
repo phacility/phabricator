@@ -26,9 +26,19 @@ final class ConduitAPI_project_query_Method extends ConduitAPI_project_Method {
   }
 
   public function defineParamTypes() {
+
+    $statuses = array(
+      PhabricatorProjectQuery::STATUS_ANY,
+      PhabricatorProjectQuery::STATUS_OPEN,
+      PhabricatorProjectQuery::STATUS_CLOSED,
+      PhabricatorProjectQuery::STATUS_ACTIVE,
+      PhabricatorProjectQuery::STATUS_ARCHIVED,
+    );
+
     return array(
       'ids'               => 'optional list<int>',
       'phids'             => 'optional list<phid>',
+      'status'            => 'optional enum<'.implode(', ', $statuses).'>',
 
       'members'           => 'optional list<phid>',
 
@@ -53,6 +63,11 @@ final class ConduitAPI_project_query_Method extends ConduitAPI_project_Method {
     $ids = $request->getValue('ids');
     if ($ids) {
       $query->withIDs($ids);
+    }
+
+    $status = $request->getValue('status');
+    if ($status) {
+      $query->withStatus($status);
     }
 
     $phids = $request->getValue('phids');

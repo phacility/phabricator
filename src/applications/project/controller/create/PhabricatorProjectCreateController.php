@@ -49,8 +49,6 @@ class PhabricatorProjectCreateController
         $errors[] = $ex->getMessage();
       }
 
-      $project->setStatus(PhabricatorProjectStatus::ONGOING);
-
       $profile->setBlurb($request->getStr('blurb'));
 
       if (!$errors) {

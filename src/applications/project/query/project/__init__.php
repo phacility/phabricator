@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/project/constants/status');
 phutil_require_module('phabricator', 'applications/project/storage/affiliation');
 phutil_require_module('phabricator', 'applications/project/storage/project');
 phutil_require_module('phabricator', 'storage/qsprintf');

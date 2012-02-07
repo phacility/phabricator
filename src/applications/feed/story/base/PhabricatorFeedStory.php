@@ -106,6 +106,10 @@ abstract class PhabricatorFeedStory {
       phutil_escape_html($handle->getLinkName()));
   }
 
+  final protected function renderString($str) {
+    return '<strong>'.phutil_escape_html($str).'</strong>';
+  }
+
   final protected function renderSummary($text, $len = 128) {
     if ($len) {
       $text = phutil_utf8_shorten($text, $len);

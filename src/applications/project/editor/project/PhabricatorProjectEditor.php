@@ -48,12 +48,21 @@ final class PhabricatorProjectEditor {
       $project->setAuthorPHID($user->getPHID());
     }
 
-    foreach ($transactions as $xaction) {
+    foreach ($transactions as $key => $xaction) {
       $type = $xaction->getTransactionType();
 
       $this->setTransactionOldValue($project, $xaction);
-      $this->applyTransactionEffect($project, $xaction);
 
+      if (!$this->transactionHasEffect($xaction)) {
+        unset($transactions[$key]);
+        continue;
+      }
+
+      $this->applyTransactionEffect($project, $xaction);
+    }
+
+    if (!$transactions) {
+      return $this;
     }
 
     try {
@@ -128,6 +137,9 @@ final class PhabricatorProjectEditor {
       case PhabricatorProjectTransactionType::TYPE_NAME:
         $xaction->setOldValue($project->getName());
         break;
+      case PhabricatorProjectTransactionType::TYPE_STATUS:
+        $xaction->setOldValue($project->getStatus());
+        break;
       case PhabricatorProjectTransactionType::TYPE_MEMBERS:
         $affils = $project->loadAffiliations();
         $project->attachAffiliations($affils);
@@ -157,6 +169,9 @@ final class PhabricatorProjectEditor {
         $project->setName($xaction->getNewValue());
         $project->setPhrictionSlug($xaction->getNewValue());
         $this->validateName($project);
+        break;
+      case PhabricatorProjectTransactionType::TYPE_STATUS:
+        $project->setStatus($xaction->getNewValue());
         break;
       case PhabricatorProjectTransactionType::TYPE_MEMBERS:
         $old = array_fill_keys($xaction->getOldValue(), true);
@@ -211,6 +226,11 @@ final class PhabricatorProjectEditor {
       ->setStoryAuthorPHID($xaction->getAuthorPHID())
       ->setRelatedPHIDs($related_phids)
       ->publish();
+  }
+
+  private function transactionHasEffect(
+    PhabricatorProjectTransaction $xaction) {
+    return ($xaction->getOldValue() !== $xaction->getNewValue());
   }
 
 }
