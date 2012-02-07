@@ -87,7 +87,7 @@ class PhabricatorOwnerRelatedListController
     if (!$this->packagePHID) {
        return id(new AphrontErrorView())
         ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setTitle('No package seleted. Please select one from above.');
+        ->setTitle('No package selected. Please select one from above.');
     }
 
     $package = id(new PhabricatorOwnersPackage())->loadOneWhere(
