@@ -42,6 +42,7 @@ final class DifferentialDefaultFieldSelector
         array(
           new DifferentialHostFieldSpecification(),
           new DifferentialPathFieldSpecification(),
+          new DifferentialBranchFieldSpecification(),
         ));
     }
 

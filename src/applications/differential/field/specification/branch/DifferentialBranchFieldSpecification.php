@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-final class DifferentialPathFieldSpecification
+final class DifferentialBranchFieldSpecification
   extends DifferentialFieldSpecification {
 
   public function shouldAppearOnRevisionView() {
@@ -24,18 +24,18 @@ final class DifferentialPathFieldSpecification
   }
 
   public function renderLabelForRevisionView() {
-    return 'Path:';
+    return 'Branch:';
   }
 
   public function renderValueForRevisionView() {
     $diff = $this->getDiff();
 
-    $path = $diff->getSourcePath();
-    if (!$path) {
+    $branch = $diff->getBranch();
+    if ($branch == '') {
       return null;
     }
 
-    return phutil_escape_html($path);
+    return phutil_escape_html($branch);
   }
 
 }
