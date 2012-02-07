@@ -23,7 +23,6 @@
 abstract class AphrontDatabaseConnection {
 
   private static $transactionStates = array();
-  private $initializingTransactionState;
 
   abstract public function getInsertID();
   abstract public function getAffectedRows();
@@ -121,9 +120,6 @@ abstract class AphrontDatabaseConnection {
    * @task xaction
    */
   public function isInsideTransaction() {
-    if ($this->initializingTransactionState) {
-      return false;
-    }
     $state = $this->getTransactionState();
     return ($state->getDepth() > 0);
   }
@@ -137,17 +133,10 @@ abstract class AphrontDatabaseConnection {
    * @task xaction
    */
   protected function getTransactionState() {
-
-    // Establishing a connection may be required to get the transaction key,
-    // and may also perform a test for transaction state. While establishing
-    // transaction state, avoid infinite recursion.
-    $this->initializingTransactionState = true;
-      $key = $this->getTransactionKey();
-      if (empty(self::$transactionStates[$key])) {
-        self::$transactionStates[$key] = new AphrontDatabaseTransactionState();
-      }
-    $this->initializingTransactionState = false;
-
+    $key = $this->getTransactionKey();
+    if (empty(self::$transactionStates[$key])) {
+      self::$transactionStates[$key] = new AphrontDatabaseTransactionState();
+    }
     return self::$transactionStates[$key];
   }
 

@@ -24,6 +24,8 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
   private $config;
   private $connection;
 
+  private $nextError;
+
   private static $connectionCache = array();
 
   public function __construct(array $configuration) {
@@ -111,11 +113,6 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
     if (isset(self::$connectionCache[$key])) {
       $this->connection = self::$connectionCache[$key];
       return;
-    }
-
-    if ($this->isInsideTransaction()) {
-      throw new Exception(
-        "Connection was lost inside a transaction! Recovery is impossible.");
     }
 
     $start = microtime(true);
@@ -245,6 +242,10 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
 
         $profiler->endServiceCall($call_id, array());
 
+        if ($this->nextError) {
+          $result = null;
+        }
+
         if ($result) {
           $this->lastResult = $result;
           break;
@@ -252,23 +253,45 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
 
         $this->throwQueryException($this->connection);
       } catch (AphrontQueryConnectionLostException $ex) {
+        if ($this->isInsideTransaction()) {
+          // Zero out the transaction state to prevent a second exception
+          // ("program exited with open transaction") from being thrown, since
+          // we're about to throw a more relevant/useful one instead.
+          $state = $this->getTransactionState();
+          while ($state->getDepth()) {
+            $state->decreaseDepth();
+          }
+
+          // We can't close the connection before this because
+          // isInsideTransaction() and getTransactionState() depend on the
+          // connection.
+          $this->closeConnection();
+
+          throw $ex;
+        }
+
+        $this->closeConnection();
+
         if (!$retries) {
           throw $ex;
         }
-        if ($this->isInsideTransaction()) {
-          throw $ex;
-        }
+
         $class = get_class($ex);
         $message = $ex->getMessage();
         phlog("Retrying ({$retries}) after {$class}: {$message}");
-        $this->closeConnection();
       }
     }
   }
 
   private function throwQueryException($connection) {
-    $errno = mysql_errno($connection);
-    $error = mysql_error($connection);
+    if ($this->nextError) {
+      $errno = $this->nextError;
+      $error = 'Simulated error.';
+      $this->nextError = null;
+    } else {
+      $errno = mysql_errno($connection);
+      $error = mysql_error($connection);
+    }
 
     switch ($errno) {
       case 2013: // Connection Dropped
@@ -292,6 +315,15 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
         // TODO: 1064 is syntax error, and quite terrible in production.
         throw new AphrontQueryException("#{$errno}: {$error}");
     }
+  }
+
+  /**
+   * Force the next query to fail with a simulated error. This should be used
+   * ONLY for unit tests.
+   */
+  public function simulateErrorOnNextQuery($error) {
+    $this->nextError = $error;
+    return $this;
   }
 
 }
