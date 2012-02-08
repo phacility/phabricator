@@ -9,7 +9,6 @@
 phutil_require_module('phabricator', 'aphront/response/ajax');
 phutil_require_module('phabricator', 'aphront/response/dialog');
 phutil_require_module('phabricator', 'aphront/response/redirect');
-phutil_require_module('phabricator', 'applications/project/constants/status');
 phutil_require_module('phabricator', 'applications/project/constants/transaction');
 phutil_require_module('phabricator', 'applications/project/controller/base');
 phutil_require_module('phabricator', 'applications/project/editor/project');
