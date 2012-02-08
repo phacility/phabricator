@@ -170,7 +170,15 @@ class PhabricatorPasteViewController extends PhabricatorPasteController {
       // And eventually this will highlight a line that you click
       // like diffusion does. Or maybe allow for line comments
       // like differential. Either way it will be better than it is now.
-      $rows[] = '<tr><th>'.$n.'</th>'.
+      $anchor = 'L'.$n;
+      $link = phutil_render_tag(
+        'a',
+        array(
+          'name' => $anchor,
+          'href' => '#'.$anchor,
+        ),
+        $n);
+      $rows[] = '<tr id="'.$anchor.'"><th>'.$link.'</th>'.
         '<td style="white-space: pre-wrap;">'.$line.'</td></tr>';
       ++$n;
     }
