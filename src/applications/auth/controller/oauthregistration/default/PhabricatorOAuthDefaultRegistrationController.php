@@ -121,13 +121,19 @@ class PhabricatorOAuthDefaultRegistrationController
       $error_view->setErrors($errors);
     }
 
+    // Strip the URI down to the path, because otherwise we'll trigger
+    // external CSRF protection (by having a protocol in the form "action")
+    // and generate a form with no CSRF token.
+    $action_uri = new PhutilURI($provider->getRedirectURI());
+    $action_path = $action_uri->getPath();
+
     $form = new AphrontFormView();
     $form
       ->addHiddenInput('token', $provider->getAccessToken())
       ->addHiddenInput('expires', $oauth_info->getTokenExpires())
       ->addHiddenInput('state', $this->getOAuthState())
       ->setUser($request->getUser())
-      ->setAction($provider->getRedirectURI())
+      ->setAction($action_path)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Username')

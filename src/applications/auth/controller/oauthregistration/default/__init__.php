@@ -16,6 +16,7 @@ phutil_require_module('phabricator', 'view/form/control/text');
 phutil_require_module('phabricator', 'view/form/error');
 phutil_require_module('phabricator', 'view/layout/panel');
 
+phutil_require_module('phutil', 'parser/uri');
 phutil_require_module('phutil', 'utils');
 
 
