@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -225,6 +225,7 @@ class ManiphestTaskDetailController extends ManiphestController {
         '</strong>');
     } else if ($workflow == 'create') {
       $context_bar = new AphrontContextBarView();
+      $context_bar->addButton('<label>Create Another:</label>');
       $context_bar->addButton(
          phutil_render_tag(
          'a',
@@ -232,7 +233,15 @@ class ManiphestTaskDetailController extends ManiphestController {
            'href' => '/maniphest/task/create/?template='.$task->getID(),
            'class' => 'green button',
          ),
-        'Create Another Task'));
+        'Similar Task'));
+      $context_bar->addButton(
+         phutil_render_tag(
+         'a',
+         array(
+           'href' => '/maniphest/task/create/',
+           'class' => 'green button',
+         ),
+        'Empty Task'));
       $context_bar->appendChild('New task created.');
     }
 
