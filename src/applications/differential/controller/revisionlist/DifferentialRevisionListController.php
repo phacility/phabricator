@@ -369,26 +369,9 @@ class DifferentialRevisionListController extends DifferentialController {
     $views = array();
     switch ($filter) {
       case 'active':
-        $active = array();
-        $waiting = array();
-
-        // Bucket revisions into $active (revisions you need to do something
-        // about) and $waiting (revisions you're waiting on someone else to do
-        // something about).
-        foreach ($revisions as $revision) {
-          $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
-          $needs_review = ($revision->getStatus() == $status_review);
-          $filter_is_author = ($revision->getAuthorPHID() == $user_phid);
-
-          // If exactly one of "needs review" and "the user is the author" is
-          // true, the user needs to act on it. Otherwise, they're waiting on
-          // it.
-          if ($needs_review ^ $filter_is_author) {
-            $active[] = $revision;
-          } else {
-            $waiting[] = $revision;
-          }
-        }
+        list($active, $waiting) = DifferentialRevisionQuery::splitResponsible(
+          $revisions,
+          $user_phid);
 
         $view = id(new DifferentialRevisionListView())
           ->setRevisions($active)

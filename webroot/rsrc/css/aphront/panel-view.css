@@ -17,6 +17,13 @@
   padding:          2px 0 8px;
 }
 
+.aphront-panel-view-caption {
+  font-size: 11px;
+  color: #666666;
+  margin-top: -0.75em;
+  margin-bottom: 0.75em;
+}
+
 .aphront-panel-view-buttons {
   float: right;
 }

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ class PhabricatorDirectoryCategoryDeleteController
     if ($request->isFormPost()) {
       $category->delete();
       return id(new AphrontRedirectResponse())
-        ->setURI('/directory/category/');
+        ->setURI('/directory/edit/');
     }
 
     $dialog = new AphrontDialogView();
@@ -43,7 +43,7 @@ class PhabricatorDirectoryCategoryDeleteController
     $dialog->setTitle('Really delete this category?');
     $dialog->appendChild("Are you sure you want to delete this category?");
     $dialog->addSubmitButton('Delete');
-    $dialog->addCancelButton('/directory/category/');
+    $dialog->addCancelButton('/directory/edit/');
     $dialog->setSubmitURI($request->getPath());
 
     return id(new AphrontDialogResponse())->setDialog($dialog);

@@ -6,8 +6,6 @@
 
 
 
-phutil_require_module('arcanist', 'differential/constants/revisionstatus');
-
 phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/differential/controller/base');
 phutil_require_module('phabricator', 'applications/differential/query/revision');

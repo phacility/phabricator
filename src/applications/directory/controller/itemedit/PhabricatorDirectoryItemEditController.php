@@ -67,7 +67,7 @@ class PhabricatorDirectoryItemEditController
       if (!$errors) {
         $item->save();
         return id(new AphrontRedirectResponse())
-          ->setURI('/directory/item/');
+          ->setURI('/directory/edit/');
       }
     }
 
@@ -124,7 +124,7 @@ class PhabricatorDirectoryItemEditController
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Save')
-          ->addCancelButton('/directory/item/'));
+          ->addCancelButton('/directory/edit/'));
 
     $panel = new AphrontPanelView();
     if ($item->getID()) {

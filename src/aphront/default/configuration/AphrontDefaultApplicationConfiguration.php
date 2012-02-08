@@ -36,14 +36,14 @@ class AphrontDefaultApplicationConfiguration
         '$'                     => 'PhabricatorDirectoryMainController',
       ),
       '/directory/' => array(
-        'item/$'
-          => 'PhabricatorDirectoryItemListController',
+        '(?P<id>\d+)/$'
+          => 'PhabricatorDirectoryCategoryViewController',
+        'edit/$'
+          => 'PhabricatorDirectoryEditController',
         'item/edit/(?:(?P<id>\d+)/)?$'
           => 'PhabricatorDirectoryItemEditController',
         'item/delete/(?P<id>\d+)/'
           => 'PhabricatorDirectoryItemDeleteController',
-        'category/$'
-          => 'PhabricatorDirectoryCategoryListController',
         'category/edit/(?:(?P<id>\d+)/)?$'
           => 'PhabricatorDirectoryCategoryEditController',
         'category/delete/(?P<id>\d+)/'

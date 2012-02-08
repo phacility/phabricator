@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,71 @@
  * limitations under the License.
  */
 
-class PhabricatorDirectoryItemListController
+final class PhabricatorDirectoryEditController
   extends PhabricatorDirectoryController {
 
   public function processRequest() {
+    $nav = $this->buildNav();
+    $nav->selectFilter('directory/edit', 'directory/edit');
+
+    $nav->appendChild($this->buildCategoryList());
+    $nav->appendChild($this->buildItemList());
+
+    return $this->buildStandardPageResponse(
+      $nav,
+      array(
+        'title' => 'Edit Applications',
+      ));
+  }
+
+  private function buildCategoryList() {
+    $categories = id(new PhabricatorDirectoryCategory())->loadAll();
+    $categories = msort($categories, 'getSequence');
+
+    $rows = array();
+    foreach ($categories as $category) {
+      $rows[] = array(
+        $category->getID(),
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => '/directory/category/edit/'.$category->getID().'/',
+          ),
+          phutil_escape_html($category->getName())),
+        javelin_render_tag(
+          'a',
+          array(
+            'href' => '/directory/category/delete/'.$category->getID().'/',
+            'class' => 'button grey small',
+            'sigil' => 'workflow',
+          ),
+          'Delete'),
+      );
+    }
+
+    $table = new AphrontTableView($rows);
+    $table->setHeaders(
+      array(
+        'ID',
+        'Name',
+        '',
+      ));
+    $table->setColumnClasses(
+      array(
+        null,
+        'wide',
+        'action',
+      ));
+
+    $panel = new AphrontPanelView();
+    $panel->appendChild($table);
+    $panel->setHeader('Directory Categories');
+    $panel->setCreateButton('New Category', '/directory/category/edit/');
+
+    return $panel;
+  }
+
+  private function buildItemList() {
     $items = id(new PhabricatorDirectoryItem())->loadAll();
     $items = msort($items, 'getSortKey');
 
@@ -70,10 +131,6 @@ class PhabricatorDirectoryItemListController
     $panel->setHeader('Directory Items');
     $panel->setCreateButton('New Item', '/directory/item/edit/');
 
-    return $this->buildStandardPageResponse($panel, array(
-      'title' => 'Directory Items',
-      'tab'   => 'items',
-      ));
+    return $panel;
   }
-
 }

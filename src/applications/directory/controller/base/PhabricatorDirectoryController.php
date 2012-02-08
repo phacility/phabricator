@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,33 +26,47 @@ abstract class PhabricatorDirectoryController extends PhabricatorController {
   public function buildStandardPageResponse($view, array $data) {
     $page = $this->buildStandardPageView();
 
-    $page->setApplicationName('Directory');
     $page->setBaseURI('/');
     $page->setTitle(idx($data, 'title'));
 
-    if ($this->getRequest()->getUser()->getIsAdmin()) {
-      $tabs = array(
-        'categories' => array(
-          'href' => '/directory/category/',
-          'name' => 'Categories',
-        ),
-        'items' => array(
-          'href' => '/directory/item/',
-          'name' => 'Items',
-        ),
-      );
-    } else {
-      $tabs = array();
-    }
-
-    $page->setTabs(
-      $tabs,
-      idx($data, 'tab'));
     $page->setGlyph("\xE2\x9A\x92");
     $page->appendChild($view);
 
     $response = new AphrontWebpageResponse();
     return $response->setContent($page->render());
+  }
+
+  public function buildNav() {
+    $user = $this->getRequest()->getUser();
+
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI('/'));
+
+    $nav->addLabel('Phabricator');
+    $nav->addFilter('home', 'Tactical Command', '/');
+    $nav->addSpacer();
+    $nav->addLabel('Applications');
+
+    $categories = $this->loadDirectoryCategories();
+
+    foreach ($categories as $category) {
+      $nav->addFilter(
+        'directory/'.$category->getID(),
+        $category->getName());
+    }
+
+    if ($user->getIsAdmin()) {
+      $nav->addSpacer();
+      $nav->addFilter('directory/edit', 'Edit Applications...');
+    }
+
+    return $nav;
+  }
+
+  protected function loadDirectoryCategories() {
+    $categories = id(new PhabricatorDirectoryCategory())->loadAll();
+    $categories = msort($categories, 'getSequence');
+    return $categories;
   }
 
 }

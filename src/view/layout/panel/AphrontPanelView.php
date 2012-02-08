@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ final class AphrontPanelView extends AphrontView {
 
   private $buttons = array();
   private $header;
+  private $caption;
   private $width;
   private $classes = array();
   private $id;
@@ -66,11 +67,25 @@ final class AphrontPanelView extends AphrontView {
     return $this;
   }
 
+  public function setCaption($caption) {
+    $this->caption = $caption;
+    return $this;
+  }
+
   public function render() {
     if ($this->header !== null) {
       $header = '<h1>'.$this->header.'</h1>';
     } else {
       $header = null;
+    }
+
+    if ($this->caption !== null) {
+      $caption =
+        '<div class="aphront-panel-view-caption">'.
+          $this->caption.
+        '</div>';
+    } else {
+      $caption = null;
     }
 
     $buttons = null;
@@ -97,7 +112,7 @@ final class AphrontPanelView extends AphrontView {
         'class' => implode(' ', $classes),
         'id'    => $this->id,
       ),
-      $buttons.$header.$table);
+      $buttons.$header.$caption.$table);
   }
 
 }
