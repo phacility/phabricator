@@ -135,7 +135,9 @@ final class DifferentialRevisionCommentView extends AphrontView {
 
     $content = $comment->getContent();
     $head_content = null;
+    $hide_comments = true;
     if (strlen(rtrim($content))) {
+      $hide_comments = false;
       $cache = $comment->getCache();
       if (strlen($cache)) {
         $content = $cache;
@@ -156,13 +158,9 @@ final class DifferentialRevisionCommentView extends AphrontView {
     }
 
     $title = "{$author_link} {$verb} this revision.";
-    if (strlen(rtrim($content)) || $this->inlines) {
-      $hide_comments_class = null;
-    } else {
-      $hide_comments_class = 'hide';
-    }
 
     if ($this->inlines) {
+      $hide_comments = false;
       $inline_render = array();
       $inlines = $this->inlines;
       $changesets = $this->changesets;
@@ -310,6 +308,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
     }
 
     if ($metadata_blocks) {
+      $hide_comments = false;
       $metadata_blocks =
         '<div class="differential-comment-metadata">'.
           implode("\n", $metadata_blocks).
@@ -318,6 +317,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
       $metadata_blocks = null;
     }
 
+    $hide_comments_class = ($hide_comments ? 'hide' : '');
     return phutil_render_tag(
       'div',
       array(
