@@ -109,6 +109,12 @@ class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
 
         if ($task_ids) {
           foreach ($task_ids as $task_id) {
+            if ($task_id == 1000) {  
+              $output[1000] = 'T1000: A nanomorph mimetic poly-alloy'	
+	             .'(liquid metal) assassin controlled by Skynet: '	
+               .'http://en.wikipedia.org/wiki/T-1000';	
+              continue;	
+            }
             $task = $this->getConduit()->callMethodSynchronous(
               'maniphest.info',
               array(
