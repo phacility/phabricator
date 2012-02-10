@@ -219,6 +219,10 @@ class PhabricatorOwnersEditController extends PhabricatorOwnersController {
         id(new AphrontFormSelectControl())
           ->setName('auditing')
           ->setLabel('Auditing')
+          ->setCaption('With auditing enabled, all future commits that touch '.
+                       'this package will be reviewed to make sure an owner '.
+                       'of the package is involved and the commit message has '.
+                       'a valid revision, reviewed by, and author.')
           ->setOptions(array(
             'disabled'  => 'Disabled',
             'enabled'   => 'Enabled',

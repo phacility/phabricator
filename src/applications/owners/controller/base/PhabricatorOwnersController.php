@@ -39,6 +39,16 @@ abstract class PhabricatorOwnersController extends PhabricatorController {
     $nav->appendChild($view);
     $page->appendChild($nav);
 
+    $doclink =
+      PhabricatorEnv::getDoclink('article/Owners_Tool_User_Guide.html');
+    $tabs = array(
+      'help' => array(
+        'href' => $doclink,
+        'name' => 'Help',
+      ),
+    );
+    $page->setTabs($tabs, null);
+
     $response = new AphrontWebpageResponse();
     return $response->setContent($page->render());
   }

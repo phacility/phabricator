@@ -1,0 +1,30 @@
+@title Owners Tool User Guide
+@group userguide
+
+Use Owners to define and/or monitor code you care about.
+
+= Packages =
+
+Owners tool allows you to define a code package by specifying a group of paths.
+The package can then be used to monitor the paths. For example, it can be used
+in Herald rules and in the "Related Commits" feature (see below).
+
+= Related Commits =
+
+Once the package is defined, all future commits touching any path defined in
+the package will be recorded as "Related Commits" of the package.
+
+= Commits Needing Attention =
+
+Owners tool enables the owners of the package to monitor the commits that might
+need attention. If "auditing" is enabled for a package, a related commit will
+be marked as "Needing Attention" if
+
+  - it's neither authored nor reviewed by an owner of the package,
+  - no revision found for the commit,
+  - the commit author is not recognized, or
+  - the author or the reviewer specified in the commits don't match the ones in
+  the Differential revision
+
+The owners of the package can accept or specify concern for such commits by
+clicking the "Audit Status" link.
