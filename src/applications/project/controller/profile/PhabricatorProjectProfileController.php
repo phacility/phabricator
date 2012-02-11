@@ -61,7 +61,7 @@ class PhabricatorProjectProfileController
     $external_arrow = "\xE2\x86\x97";
     $tasks_uri = '/maniphest/view/all/?projects='.$project->getPHID();
     $slug = PhrictionDocument::normalizeSlug($project->getName());
-    $phriction_uri = '/w/projects/'.$slug.'/';
+    $phriction_uri = '/w/projects/'.$slug;
 
     $edit_uri = '/project/edit/'.$project->getID().'/';
 
