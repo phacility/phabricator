@@ -123,11 +123,7 @@ class DifferentialChangesetListView extends AphrontView {
       $detail_button = null;
       if ($this->standaloneViews) {
         $detail_uri = new PhutilURI($this->renderURI);
-        $detail_uri->setQueryParams(
-          array(
-            'ref'         => $ref,
-            'whitespace'  => $this->whitespace,
-          ));
+        $detail_uri->setQueryParams(array('ref' => $ref));
 
         $diffusion_uri = null;
         if ($repository) {
@@ -136,7 +132,8 @@ class DifferentialChangesetListView extends AphrontView {
         }
 
         $meta = array(
-          'detailURI'     => (string)$detail_uri,
+          'detailURI'     =>
+            (string)$detail_uri->alter('whitespace', $this->whitespace),
           'diffusionURI'  => $diffusion_uri,
           'containerID'   => $detail->getID(),
         );
@@ -167,7 +164,7 @@ class DifferentialChangesetListView extends AphrontView {
           array(
             'class'   => 'button small grey',
             'meta'    => $meta,
-            'href'    => $detail_uri,
+            'href'    => $meta['detailURI'],
             'target'  => '_blank',
             'sigil'   => 'differential-view-options',
           ),
