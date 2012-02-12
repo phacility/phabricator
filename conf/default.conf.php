@@ -597,8 +597,8 @@ return array(
 
   'differential.field-selector' => 'DifferentialDefaultFieldSelector',
 
-  // Differential can show "Host", "Path" and "Branch" fields on revisions, with
-  // information about the machine, working directory and branch where the
+  // Differential can show "Host" and "Path" fields on revisions, with
+  // information about the machine and working directory where the
   // change came from. These fields are disabled by default because they may
   // occasionally have sensitive information; you can set this to true to
   // enable them.

@@ -42,13 +42,13 @@ final class DifferentialDefaultFieldSelector
         array(
           new DifferentialHostFieldSpecification(),
           new DifferentialPathFieldSpecification(),
-          new DifferentialBranchFieldSpecification(),
         ));
     }
 
     $fields = array_merge(
       $fields,
       array(
+        new DifferentialBranchFieldSpecification(),
         new DifferentialArcanistProjectFieldSpecification(),
         new DifferentialApplyPatchFieldSpecification(),
         new DifferentialRevisionIDFieldSpecification(),
