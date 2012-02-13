@@ -41,9 +41,22 @@ final class AphrontSideNavFilterView extends AphrontView {
   private $baseURI;
   private $selectedFilter = false;
 
-  public function addFilter($key, $name, $uri = null) {
-    $this->items[] = array('filter', $key, $name, 'uri' => $uri);
+  public function addFilter($key, $name, $uri = null, $relative = false) {
+    $this->items[] = array(
+      'filter', $key, $name, 'uri' => $uri, 'relative' => $relative);
     return $this;
+  }
+
+  public function addFilters(array $views) {
+    foreach ($views as $view) {
+      $uri = isset($view['uri']) ? $view['uri'] : null;
+      $relative = isset($view['relative']) ? $view['relative'] : false;
+      $this->addFilter(
+        $view['key'],
+        $view['name'],
+        $uri,
+        $relative);
+    }
   }
 
   public function addLabel($name) {
@@ -59,6 +72,10 @@ final class AphrontSideNavFilterView extends AphrontView {
   public function setBaseURI(PhutilURI $uri) {
     $this->baseURI = $uri;
     return $this;
+  }
+
+  public function getBaseURI() {
+    return $this->baseURI;
   }
 
   public function selectFilter($key, $default) {
@@ -108,7 +125,13 @@ final class AphrontSideNavFilterView extends AphrontView {
             $href->setPath($href->getPath().$key.'/');
             $href = (string)$href;
           } else {
-            $href = $item['uri'];
+            if (empty($item['relative'])) {
+              $href = $item['uri'];
+            } else {
+              $href = clone $this->baseURI;
+              $href->setPath($href->getPath().$item['uri']);
+              $href = (string)$href;
+            }
           }
 
           $view->addNavItem(

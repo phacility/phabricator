@@ -66,24 +66,16 @@ abstract class PhabricatorOwnersController extends PhabricatorController {
                   $package_views);
 
     $base_uri = new PhutilURI('/owners/');
-
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseUri($base_uri);
+
     $nav->addLabel('Packages');
-    foreach ($package_views as $view) {
-      $nav->addFilter($view['key'], $view['name']);
-    }
+    $nav->addFilters($package_views);
+
     $nav->addSpacer();
     $nav->addLabel('Related Commits');
     $related_views = $this->getRelatedViews();
-    foreach ($related_views as $view) {
-      $href = clone $base_uri;
-      $href->setPath($href->getPath().$view['key']);
-      $href = (string)$href;
-      $nav->addFilter($view['key'],
-                      $view['name'],
-                      $href);
-    }
+    $nav->addFilters($related_views);
 
     $filter = $this->getSideNavFilter();
     $nav->selectFilter($filter, 'view/owned');

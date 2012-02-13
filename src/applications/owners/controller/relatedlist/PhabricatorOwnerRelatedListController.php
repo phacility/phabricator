@@ -51,13 +51,13 @@ class PhabricatorOwnerRelatedListController
     $search_view = $this->renderSearchView();
     $list_panel = $this->renderListPanel();
 
-    $side_nav_filter = 'related/view/'.$this->view.$this->getQueryString();
+    $side_nav_filter = 'related/view/'.$this->view;
     $this->setSideNavFilter($side_nav_filter);
 
     return $this->buildStandardPageResponse(
       array(
         $search_view,
-        $list_panel
+        $list_panel,
       ),
       array(
         'title' => 'Related Commits',
@@ -69,7 +69,8 @@ class PhabricatorOwnerRelatedListController
     if ($this->packagePHID) {
       $query = $this->getQueryString();
       foreach ($related_views as &$view) {
-        $view['key'] = $view['key'].$query;
+        $view['uri'] = $view['key'].$query;
+        $view['relative'] = true;
       }
     }
     return $related_views;
