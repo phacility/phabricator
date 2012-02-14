@@ -92,6 +92,7 @@ class HeraldAllRulesController extends HeraldController {
       ->setMap($map)
       ->setShowType(true)
       ->setAllowCreation(false)
+      ->setUser($user)
       ->setView($this->view);
     $panel = $list_view->render();
     $panel->appendChild($pager);
