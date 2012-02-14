@@ -21,37 +21,42 @@ class PhabricatorOwnerRelatedListController
 
   private $request;
   private $user;
+  private $scope;
   private $view;
-  private $packagePHID;
+  private $searchPHID;
   private $auditStatus;
 
   public function willProcessRequest(array $data) {
-    $this->view = idx($data, 'view', 'all');
+    $this->scope = idx($data, 'scope', 'related');
+    $this->view = idx($data, 'view', 'owner');
   }
 
   public function processRequest() {
     $this->request = $this->getRequest();
 
     if ($this->request->isFormPost()) {
-      $package_phids = $this->request->getArr('search_packages');
-      $package_phid = head($package_phids);
+      $phids = $this->request->getArr('search_phids');
+      $phid = head($phids);
       $status = $this->request->getStr('search_status');
       return id(new AphrontRedirectResponse())
         ->setURI(
           $this->request
             ->getRequestURI()
-            ->alter('phid', $package_phid)
+            ->alter('phid', $phid)
             ->alter('status', $status));
     }
 
     $this->user = $this->request->getUser();
-    $this->packagePHID = nonempty($this->request->getStr('phid'), null);
+    $this->searchPHID = nonempty($this->request->getStr('phid'), null);
+    if ($this->view === 'owner' && !$this->searchPHID) {
+      $this->searchPHID = $this->user->getPHID();
+    }
     $this->auditStatus = $this->request->getStr('status', 'needaudit');
 
     $search_view = $this->renderSearchView();
     $list_panel = $this->renderListPanel();
 
-    $side_nav_filter = 'related/view/'.$this->view;
+    $side_nav_filter = $this->scope.'/'.$this->view;
     $this->setSideNavFilter($side_nav_filter);
 
     return $this->buildStandardPageResponse(
@@ -66,11 +71,29 @@ class PhabricatorOwnerRelatedListController
 
   protected function getRelatedViews() {
     $related_views = parent::getRelatedViews();
-    if ($this->packagePHID) {
+    if ($this->searchPHID) {
       $query = $this->getQueryString();
       foreach ($related_views as &$view) {
-        $view['uri'] = $view['key'].$query;
-        $view['relative'] = true;
+        // Pass on the query string to the filter item with the same view.
+        if (preg_match('/'.preg_quote($this->view, '/').'$/', $view['key'])) {
+          $view['uri'] = $view['key'].$query;
+          $view['relative'] = true;
+        }
+      }
+    }
+    return $related_views;
+  }
+
+  protected function getAttentionViews() {
+    $related_views = parent::getAttentionViews();
+    if ($this->searchPHID) {
+      $query = $this->getQueryString();
+      foreach ($related_views as &$view) {
+        // Pass on the query string to the filter item with the same view.
+        if (preg_match('/'.preg_quote($this->view, '/').'$/', $view['key'])) {
+          $view['uri'] = $view['key'].$query;
+          $view['relative'] = true;
+        }
       }
     }
     return $related_views;
@@ -78,31 +101,50 @@ class PhabricatorOwnerRelatedListController
 
   private function getQueryString() {
     $query = null;
-    if ($this->packagePHID) {
-      $query = '/?phid=' . $this->packagePHID;
+    if ($this->searchPHID) {
+      $query = '/?phid='.$this->searchPHID;
     }
     return $query;
   }
 
   private function renderListPanel() {
-    if (!$this->packagePHID) {
+    if (!$this->searchPHID) {
        return id(new AphrontErrorView())
         ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setTitle('No package selected. Please select one from above.');
+        ->setTitle('No search specified. Please add one from above.');
     }
 
-    $package = id(new PhabricatorOwnersPackage())->loadOneWhere(
-      "phid = %s",
-      $this->packagePHID);
-    if ($this->view === 'audit' && !$package->getAuditingEnabled()) {
-      return id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setTitle("Package doesn't have auditing enabled. ".
-                   "Please choose another one.");
+    $package = new PhabricatorOwnersPackage();
+    $owner = new PhabricatorOwnersOwner();
+    $relationship = id(new PhabricatorOwnersPackageCommitRelationship());
+
+    switch ($this->view) {
+      case 'package':
+        $package = $package->loadOneWhere(
+          "phid = %s",
+          $this->searchPHID);
+        if ($this->scope === 'attention' && !$package->getAuditingEnabled()) {
+          return id(new AphrontErrorView())
+            ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+            ->setTitle("Package doesn't have auditing enabled. ".
+                       "Please choose another one.");
+        }
+        $packages = array($package);
+        break;
+      case 'owner':
+        $data = queryfx_all(
+          $package->establishConnection('r'),
+          'SELECT p.* FROM %T p JOIN %T o ON p.id = o.packageID
+            WHERE o.userPHID = %s GROUP BY p.id',
+          $package->getTableName(),
+          $owner->getTableName(),
+          $this->searchPHID);
+        $packages = $package->loadAllFromArray($data);
+        break;
+      default:
+        throw new Exception('view of the page not recognized.');
     }
 
-    $conn_r = id(new PhabricatorOwnersPackageCommitRelationship())
-      ->establishConnection('r');
     $status_arr = $this->getStatusArr();
 
     $offset = $this->request->getInt('offset', 0);
@@ -111,34 +153,39 @@ class PhabricatorOwnerRelatedListController
     $pager->setOffset($offset);
     $pager->setURI($this->request->getRequestURI(), 'offset');
 
-    $data = queryfx_all(
-      $conn_r,
-      'SELECT commitPHID, auditStatus, auditReasons FROM %T
-        WHERE packagePHID = %s AND auditStatus in (%Ls)
-        ORDER BY id DESC
-        LIMIT %d, %d',
-      id(new PhabricatorOwnersPackageCommitRelationship())->getTableName(),
-      $package->getPHID(),
-      $status_arr,
-      $pager->getOffset(),
-      $pager->getPageSize() + 1);
+    $packages = mpull($packages, null, 'getPHID');
+    if ($packages) {
+      $data = queryfx_all(
+        $relationship->establishConnection('r'),
+        'SELECT commitPHID, packagePHID, auditStatus, auditReasons FROM %T
+          WHERE packagePHID in (%Ls) AND auditStatus in (%Ls)
+          ORDER BY id DESC
+          LIMIT %d, %d',
+        $relationship->getTableName(),
+        array_keys($packages),
+        $status_arr,
+        $pager->getOffset(),
+        $pager->getPageSize() + 1);
+    } else {
+      $data = array();
+    }
 
     $data = $pager->sliceResults($data);
     $data = ipull($data, null, 'commitPHID');
 
-    $list_panel = $this->renderCommitTable($data, $package);
+    $list_panel = $this->renderCommitTable($data, $packages);
     $list_panel->appendChild($pager);
 
     return $list_panel;
   }
 
   private function getStatusArr() {
-    switch ($this->view) {
-      case 'all':
+    switch ($this->scope) {
+      case 'related':
         $status_arr =
           array_keys(PhabricatorAuditStatusConstants::getStatusNameMap());
         break;
-      case 'audit':
+      case 'attention':
         switch ($this->auditStatus) {
           case 'needaudit':
             $status_arr =
@@ -173,29 +220,42 @@ class PhabricatorOwnerRelatedListController
   }
 
   private function renderSearchView() {
-    if ($this->packagePHID) {
-      $loader = new PhabricatorObjectHandleData(array($this->packagePHID));
+    if ($this->searchPHID) {
+      $loader = new PhabricatorObjectHandleData(array($this->searchPHID));
       $handles = $loader->loadHandles();
-      $package_handle = $handles[$this->packagePHID];
+      $handle = $handles[$this->searchPHID];
 
-      $view_packages = array(
-        $this->packagePHID => $package_handle->getFullName(),
+      $view_items = array(
+        $this->searchPHID => $handle->getFullName(),
       );
     } else {
-      $view_packages = array();
+      $view_items = array();
+    }
+
+    switch ($this->view) {
+      case 'package':
+        $datasource = '/typeahead/common/packages/';
+        $label = 'Package';
+        break;
+      case 'owner':
+        $datasource = '/typeahead/common/users/';
+        $label = 'Owner';
+        break;
+      default:
+        throw new Exception('view of the page not recognized.');
     }
 
     $search_form = id(new AphrontFormView())
       ->setUser($this->user)
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/packages/')
-          ->setLabel('Package')
-          ->setName('search_packages')
-          ->setValue($view_packages)
+          ->setDatasource($datasource)
+          ->setLabel($label)
+          ->setName('search_phids')
+          ->setValue($view_items)
           ->setLimit(1));
 
-    if ($this->view === 'audit') {
+    if ($this->scope === 'attention') {
       $select_map = array(
         'needaudit' => 'Needs Audit',
         'accepted' => 'Accepted',
@@ -219,58 +279,58 @@ class PhabricatorOwnerRelatedListController
     return $search_view;
   }
 
-  private function renderCommitTable($data, PhabricatorOwnersPackage $package) {
+  private function renderCommitTable($data, array $packages) {
     $commit_phids = array_keys($data);
     $loader = new PhabricatorObjectHandleData($commit_phids);
     $handles = $loader->loadHandles();
     $objects = $loader->loadObjects();
-
-    $owners = id(new PhabricatorOwnersOwner())->loadAllWhere(
-      'packageID = %d',
-      $package->getID());
-    $owners_phids = mpull($owners, 'getUserPHID');
-    if ($this->user->getIsAdmin() ||
-        in_array($this->user->getPHID(), $owners_phids)) {
-      $allowed_to_audit = true;
-    } else {
-      $allowed_to_audit = false;
-    }
 
     $rows = array();
     foreach ($commit_phids as $commit_phid) {
       $handle = $handles[$commit_phid];
       $object = $objects[$commit_phid];
       $commit_data = $object->getCommitData();
+      $relationship = $data[$commit_phid];
+      $package_phid = $relationship['packagePHID'];
+      $package = $packages[$package_phid];
+
       $epoch = $handle->getTimeStamp();
       $date = phabricator_date($epoch, $this->user);
       $time = phabricator_time($epoch, $this->user);
-      $link = phutil_render_tag(
+      $commit_link = phutil_render_tag(
         'a',
         array(
           'href' => $handle->getURI(),
         ),
         phutil_escape_html($handle->getName()));
+
+      $package_link = phutil_render_tag(
+        'a',
+        array(
+          'href' => '/owners/package/'.$package->getID().'/',
+        ),
+        phutil_escape_html($package->getName()));
+
       $row = array(
-        $link,
+        $commit_link,
+        $package_link,
         $date,
         $time,
         phutil_escape_html($commit_data->getSummary()),
       );
 
-      if ($this->view === 'audit') {
-        $relationship = $data[$commit_phid];
+      if ($this->scope === 'attention') {
         $status_link = phutil_escape_html(
           idx(PhabricatorAuditStatusConstants::getStatusNameMap(),
             $relationship['auditStatus']));
-        if ($allowed_to_audit)
-          $status_link = phutil_render_tag(
-            'a',
-            array(
-              'href' => sprintf('/audit/edit/?c-phid=%s&p-phid=%s',
-                idx($relationship, 'commitPHID'),
-                $this->packagePHID),
-            ),
-            $status_link);
+        $status_link = phutil_render_tag(
+          'a',
+          array(
+            'href' => sprintf('/audit/edit/?c-phid=%s&p-phid=%s',
+              idx($relationship, 'commitPHID'),
+              $package_phid),
+          ),
+          $status_link);
 
         $reasons = json_decode($relationship['auditReasons'], true);
         $reasons = array_map('phutil_escape_html', $reasons);
@@ -291,11 +351,12 @@ class PhabricatorOwnerRelatedListController
 
     $headers = array(
       'Commit',
+      'Package',
       'Date',
       'Time',
       'Summary',
     );
-    if ($this->view === 'audit') {
+    if ($this->scope === 'attention') {
       $headers = array_merge(
         $headers,
         array(
@@ -309,10 +370,11 @@ class PhabricatorOwnerRelatedListController
       array(
         '',
         '',
+        '',
         'right',
         'wide',
       );
-    if ($this->view === 'audit') {
+    if ($this->scope === 'attention') {
       $column_classes = array_merge(
         $column_classes,
         array(
@@ -323,15 +385,6 @@ class PhabricatorOwnerRelatedListController
     $commit_table->setColumnClasses($column_classes);
 
     $list_panel = new AphrontPanelView();
-    $list_panel->setHeader('Commits Related to package "'.
-      phutil_render_tag(
-        'a',
-        array(
-          'href' => '/owners/package/'.$package->getID().'/',
-        ),
-        phutil_escape_html($package->getName())).
-      '"'.
-      ($this->view === 'audit' ? ' and need attention' : ''));
     $list_panel->appendChild($commit_table);
 
     return $list_panel;

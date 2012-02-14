@@ -88,7 +88,7 @@ class PhabricatorOwnersDetailController extends PhabricatorOwnersController {
       phutil_render_tag(
         'a',
         array(
-          'href' => '/owners/related/view/all/?phid='.$package->getPHID(),
+          'href' => '/owners/related/package/?phid='.$package->getPHID(),
         ),
         phutil_escape_html('Related Commits'))
     );

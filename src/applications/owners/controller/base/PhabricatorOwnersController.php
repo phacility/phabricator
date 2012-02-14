@@ -77,6 +77,11 @@ abstract class PhabricatorOwnersController extends PhabricatorController {
     $related_views = $this->getRelatedViews();
     $nav->addFilters($related_views);
 
+    $nav->addSpacer();
+    $nav->addLabel('Commits Need Attention');
+    $attention_views = $this->getAttentionViews();
+    $nav->addFilters($attention_views);
+
     $filter = $this->getSideNavFilter();
     $nav->selectFilter($filter, 'view/owned');
 
@@ -89,12 +94,24 @@ abstract class PhabricatorOwnersController extends PhabricatorController {
 
   protected function getRelatedViews() {
     $related_views = array(
-      array('name' => 'Related to Package',
-            'key'  => 'related/view/all'),
-      array('name' => 'Needs Attention',
-            'key'  => 'related/view/audit')
+      array('name' => 'By Package',
+            'key'  => 'related/package'),
+      array('name' => 'By Package Owner',
+            'key'  => 'related/owner'),
           );
 
     return $related_views;
   }
+
+  protected function getAttentionViews() {
+    $attention_views = array(
+      array('name' => 'By Package',
+            'key'  => 'attention/package'),
+      array('name' => 'By Package Owner',
+            'key'  => 'attention/owner'),
+          );
+
+    return $attention_views;
+  }
+
 }
