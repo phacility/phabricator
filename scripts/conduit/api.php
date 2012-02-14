@@ -85,7 +85,7 @@ $response = id(new ConduitAPIResponse())
   ->setResult($result)
   ->setErrorCode($error_code)
   ->setErrorInfo($error_info);
-echo $response->toJSON(), "\n";
+echo json_encode($response->toDictionary()), "\n";
 
 // TODO -- how get $connection_id from SSH?
 $connection_id = null;

@@ -147,6 +147,8 @@ try {
 
 $write_guard->dispose();
 
+// TODO: Share the $sink->writeResponse() pathway here?
+
 $sink = new AphrontPHPHTTPSink();
 $sink->writeHTTPStatus($response->getHTTPResponseCode());
 

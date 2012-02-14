@@ -19,10 +19,9 @@
 /**
  * @group aphront
  */
-final class AphrontAjaxResponse extends AphrontResponse {
+final class AphrontJSONResponse extends AphrontResponse {
 
   private $content;
-  private $error;
 
   public function setContent($content) {
     $this->content = $content;
@@ -30,19 +29,15 @@ final class AphrontAjaxResponse extends AphrontResponse {
   }
 
   public function buildResponseString() {
-    $response = CelerityAPI::getStaticResourceResponse();
-    $object = $response->buildAjaxResponse(
+    $response = $this->encodeJSONForHTTPResponse(
       $this->content,
-      $this->error);
-
-    return $this->encodeJSONForHTTPResponse(
-      $object,
-      $use_javelin_shield = true);
+      $use_javelin_shield = false);
+    return $response;
   }
 
   public function getHeaders() {
     $headers = array(
-      array('Content-Type', 'text/plain; charset=UTF-8'),
+      array('Content-Type', 'application/json'),
     );
     $headers = array_merge(parent::getHeaders(), $headers);
     return $headers;

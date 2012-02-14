@@ -70,6 +70,37 @@ abstract class AphrontResponse {
     return $this;
   }
 
+  protected function encodeJSONForHTTPResponse(
+    array $object,
+    $use_javelin_shield) {
+
+    $response = json_encode($object);
+
+    // Prevent content sniffing attacks by encoding "<" and ">", so browsers
+    // won't try to execute the document as HTML even if they ignore
+    // Content-Type and X-Content-Type-Options. See T865.
+    $response = str_replace(
+      array('<', '>'),
+      array('\u003c', '\u003e'),
+      $response);
+
+    // Add a shield to prevent "JSON Hijacking" attacks where an attacker
+    // requests a JSON response using a normal <script /> tag and then uses
+    // Object.prototype.__defineSetter__() or similar to read response data.
+    // This header causes the browser to loop infinitely instead of handing over
+    // sensitive data.
+
+    // TODO: This is massively stupid: Javelin and Conduit use different
+    // shields.
+    $shield = $use_javelin_shield
+      ? 'for (;;);'
+      : 'for(;;);';
+
+    $response = $shield.$response;
+
+    return $response;
+  }
+
   public function getCacheHeaders() {
     $headers = array();
     if ($this->cacheable) {
@@ -94,7 +125,8 @@ abstract class AphrontResponse {
     // IE has a feature where it may override an explicit Content-Type
     // declaration by inferring a content type. This can be a security risk
     // and we always explicitly transmit the correct Content-Type header, so
-    // prevent IE from using inferred content types.
+    // prevent IE from using inferred content types. This only offers protection
+    // on recent versions of IE; IE6/7 and Opera currently ignore this header.
     $headers[] = array('X-Content-Type-Options', 'nosniff');
 
     return $headers;

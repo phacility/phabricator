@@ -189,7 +189,7 @@ final class CelerityStaticResourceResponse {
     }
   }
 
-  public function renderAjaxResponse($payload, $error = null) {
+  public function buildAjaxResponse($payload, $error = null) {
     $response = array(
       'error'   => $error,
       'payload' => $payload,
@@ -205,9 +205,7 @@ final class CelerityStaticResourceResponse {
       $this->behaviors = array();
     }
 
-    $response = 'for (;;);'.json_encode($response);
     return $response;
   }
-
 
 }

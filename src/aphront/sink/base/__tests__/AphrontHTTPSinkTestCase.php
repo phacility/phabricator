@@ -79,4 +79,20 @@ final class AphrontHTTPSinkTestCase extends PhabricatorTestCase {
     $sink->writeHeaders(array(array($input, 'value')));
   }
 
+  public function testJSONContentSniff() {
+    $response = id(new AphrontJSONResponse())
+      ->setContent(
+        array(
+          'x' => '<iframe>',
+        ));
+    $sink = new AphrontIsolatedHTTPSink();
+    $sink->writeResponse($response);
+
+    $this->assertEqual(
+      'for(;;);{"x":"\u003ciframe\u003e"}',
+      $sink->getEmittedData(),
+      "JSONResponse should prevent content-sniffing attacks.");
+  }
+
+
 }

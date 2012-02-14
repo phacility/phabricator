@@ -105,6 +105,23 @@ abstract class AphrontHTTPSink {
   }
 
 
+  /**
+   * Write an entire @{class:AphrontResponse} to the output.
+   *
+   * @param AphrontResponse The response object to write.
+   * @return void
+   */
+  final public function writeResponse(AphrontResponse $response) {
+    $all_headers = array_merge(
+      $response->getHeaders(),
+      $response->getCacheHeaders());
+
+    $this->writeHTTPStatus($response->getHTTPResponseCode());
+    $this->writeHeaders($all_headers);
+    $this->writeData($response->buildResponseString());
+  }
+
+
 /* -(  Emitting the Response  )---------------------------------------------- */
 
 

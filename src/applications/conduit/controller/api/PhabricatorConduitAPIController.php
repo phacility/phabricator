@@ -194,9 +194,8 @@ class PhabricatorConduitAPIController
           $response->toDictionary());
       case 'json':
       default:
-        return id(new AphrontFileResponse())
-          ->setMimeType('application/json')
-          ->setContent('for(;;);'.$response->toJSON());
+        return id(new AphrontJSONResponse())
+          ->setContent($response->toDictionary());
     }
   }
 

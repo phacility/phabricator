@@ -6,8 +6,11 @@
 
 
 
+phutil_require_module('phabricator', 'aphront/response/json');
 phutil_require_module('phabricator', 'aphront/sink/test');
 phutil_require_module('phabricator', 'infrastructure/testing/testcase');
+
+phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('AphrontHTTPSinkTestCase.php');

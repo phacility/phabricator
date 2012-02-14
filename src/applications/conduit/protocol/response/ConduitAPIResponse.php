@@ -56,8 +56,4 @@ class ConduitAPIResponse {
       'error_info' => $this->getErrorInfo(),
     );
   }
-
-  public function toJSON() {
-    return json_encode($this->toDictionary());
-  }
 }
