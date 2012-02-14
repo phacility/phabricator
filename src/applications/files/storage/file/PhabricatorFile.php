@@ -230,16 +230,8 @@ class PhabricatorFile extends PhabricatorFileDAO {
 
     $name = phutil_escape_uri($this->getName());
 
-    $alt = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
-    if ($alt) {
-      $path = '/file/alt/'.$this->getSecretKey().'/'.$this->getPHID().'/'.$name;
-      $uri = new PhutilURI($alt);
-      $uri->setPath($path);
-
-      return (string)$uri;
-    } else {
-      return '/file/view/'.$this->getPHID().'/'.$name;
-    }
+    $path = '/file/data/'.$this->getSecretKey().'/'.$this->getPHID().'/'.$name;
+    return PhabricatorEnv::getCDNURI($path);
   }
 
   public function getInfoURI() {

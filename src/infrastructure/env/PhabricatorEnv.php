@@ -46,6 +46,16 @@ final class PhabricatorEnv {
     return rtrim($uri, '/').$path;
   }
 
+  public static function getCDNURI($path) {
+    $alt = self::getEnvConfig('security.alternate-file-domain');
+    if (!$alt) {
+      $alt = self::getEnvConfig('phabricator.base-uri');
+    }
+    $uri = new PhutilURI($alt);
+    $uri->setPath($path);
+    return (string)$uri;
+  }
+
   public static function getAllConfigKeys() {
     return self::$env;
   }

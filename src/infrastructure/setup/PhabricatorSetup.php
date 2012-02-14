@@ -117,8 +117,8 @@ class PhabricatorSetup {
     if (!PhabricatorEnv::getEnvConfig('security.alternate-file-domain')) {
       self::write(
         "[WARN] You have not configured 'security.alternate-file-domain'. ".
-        "This may make your installation vulnerable to attack. Make sure ".
-        "you read the documentation for this parameter and understand the ".
+        "This makes your installation vulnerable to attack. Make sure you ".
+        "read the documentation for this parameter and understand the ".
         "consequences of leaving it unconfigured.\n");
     }
 

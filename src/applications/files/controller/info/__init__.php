@@ -6,15 +6,11 @@
 
 
 
-phutil_require_module('phabricator', 'aphront/response/400');
 phutil_require_module('phabricator', 'aphront/response/404');
-phutil_require_module('phabricator', 'aphront/response/file');
-phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/files/controller/base');
 phutil_require_module('phabricator', 'applications/files/storage/file');
 phutil_require_module('phabricator', 'applications/files/storage/transformed');
 phutil_require_module('phabricator', 'applications/people/storage/user');
-phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/form/base');
 phutil_require_module('phabricator', 'view/form/control/static');
@@ -23,8 +19,7 @@ phutil_require_module('phabricator', 'view/layout/panel');
 phutil_require_module('phabricator', 'view/utils');
 
 phutil_require_module('phutil', 'markup');
-phutil_require_module('phutil', 'parser/uri');
 phutil_require_module('phutil', 'utils');
 
 
-phutil_require_source('PhabricatorFileViewController.php');
+phutil_require_source('PhabricatorFileInfoController.php');

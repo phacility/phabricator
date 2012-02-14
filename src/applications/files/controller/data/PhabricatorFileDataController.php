@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorFileAltViewController extends PhabricatorFileController {
+final class PhabricatorFileDataController extends PhabricatorFileController {
 
   private $phid;
   private $key;
@@ -31,16 +31,11 @@ class PhabricatorFileAltViewController extends PhabricatorFileController {
   }
 
   public function processRequest() {
-
-    $alt = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
-    if (!$alt) {
-      return new Aphront400Response();
-    }
-
     $request = $this->getRequest();
 
+    $alt = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
     $alt_domain = id(new PhutilURI($alt))->getDomain();
-    if ($alt_domain != $request->getHost()) {
+    if ($alt_domain && ($alt_domain != $request->getHost())) {
       return new Aphront400Response();
     }
 
@@ -55,14 +50,28 @@ class PhabricatorFileAltViewController extends PhabricatorFileController {
       return new Aphront403Response();
     }
 
-    // It's safe to bypass view restrictions because we know we are being served
-    // off an alternate domain which we will not set cookies on.
-
     $data = $file->loadFileData();
     $response = new AphrontFileResponse();
     $response->setContent($data);
-    $response->setMimeType($file->getMimeType());
     $response->setCacheDurationInSeconds(60 * 60 * 24 * 30);
+
+    $is_view = $file->isViewableInBrowser();
+
+    if ($is_view) {
+      $response->setMimeType($file->getViewableMimeType());
+    } else {
+      if (!$request->isHTTPPost()) {
+        // NOTE: Require POST to download files. We'd rather go full-bore and
+        // do a real CSRF check, but can't currently authenticate users on the
+        // file domain. This should blunt any attacks based on iframes, script
+        // tags, applet tags, etc., at least. Send the user to the "info" page
+        // if they're using some other method.
+        return id(new AphrontRedirectResponse())
+          ->setURI(PhabricatorEnv::getProductionURI($file->getBestURI()));
+      }
+      $response->setMimeType($file->getMimeType());
+      $response->setDownload($file->getName());
+    }
 
     return $response;
   }

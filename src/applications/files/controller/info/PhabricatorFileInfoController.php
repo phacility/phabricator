@@ -16,14 +16,12 @@
  * limitations under the License.
  */
 
-class PhabricatorFileViewController extends PhabricatorFileController {
+final class PhabricatorFileInfoController extends PhabricatorFileController {
 
   private $phid;
-  private $view;
 
   public function willProcessRequest(array $data) {
     $this->phid = $data['phid'];
-    $this->view = $data['view'];
   }
 
   public function processRequest() {
@@ -36,61 +34,6 @@ class PhabricatorFileViewController extends PhabricatorFileController {
       $this->phid);
     if (!$file) {
       return new Aphront404Response();
-    }
-
-    switch ($this->view) {
-      case 'download':
-      case 'view':
-        $data = $file->loadFileData();
-        $response = new AphrontFileResponse();
-        $response->setContent($data);
-        $response->setCacheDurationInSeconds(60 * 60 * 24 * 30);
-
-        if ($this->view == 'view') {
-          if (!$file->isViewableInBrowser()) {
-            return new Aphront400Response();
-          }
-          $download = false;
-        } else {
-          $download = true;
-        }
-
-        if ($download) {
-          if (!$request->isFormPost()) {
-            // Require a POST to download files to hinder attacks where you
-            // <applet src="http://phabricator.example.com/file/..." /> on some
-            // other domain.
-            return id(new AphrontRedirectResponse())
-              ->setURI($file->getInfoURI());
-          }
-        }
-
-        if ($download) {
-          $mime_type = $file->getMimeType();
-        } else {
-          $mime_type = $file->getViewableMimeType();
-        }
-
-        // If an alternate file domain is configured, forbid all views which
-        // don't originate from it.
-        if (!$download) {
-          $alt = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
-          if ($alt) {
-            $domain = id(new PhutilURI($alt))->getDomain();
-            if ($domain != $request->getHost()) {
-              return new Aphront400Response();
-            }
-          }
-        }
-
-        $response->setMimeType($mime_type);
-
-        if ($download) {
-          $response->setDownload($file->getName());
-        }
-        return $response;
-      default:
-        break;
     }
 
     $author_child = null;
@@ -111,11 +54,10 @@ class PhabricatorFileViewController extends PhabricatorFileController {
 
     $submit = new AphrontFormSubmitControl();
 
+    $form->setAction($file->getViewURI());
     if ($file->isViewableInBrowser()) {
-      $form->setAction($file->getViewURI());
       $submit->setValue('View File');
     } else {
-      $form->setAction('/file/download/'.$file->getPHID().'/');
       $submit->setValue('Download File');
     }
 

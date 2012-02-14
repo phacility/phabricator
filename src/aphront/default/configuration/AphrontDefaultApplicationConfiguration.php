@@ -55,12 +55,15 @@ class AphrontDefaultApplicationConfiguration
         'upload/$' => 'PhabricatorFileUploadController',
         'dropupload/$' => 'PhabricatorFileDropUploadController',
         'delete/(?P<id>\d+)/$' => 'PhabricatorFileDeleteController',
-        '(?P<view>info)/(?P<phid>[^/]+)/' => 'PhabricatorFileViewController',
-        '(?P<view>view)/(?P<phid>[^/]+)/' => 'PhabricatorFileViewController',
-        '(?P<view>download)/(?P<phid>[^/]+)/'
-          => 'PhabricatorFileViewController',
+        'info/(?P<phid>[^/]+)/' => 'PhabricatorFileInfoController',
+
+        'data/(?P<key>[^/]+)/(?P<phid>[^/]+)/'
+          => 'PhabricatorFileDataController',
+        // TODO: This is a deprecated version of /data/. Remove it after
+        // old links have had a chance to rot.
         'alt/(?P<key>[^/]+)/(?P<phid>[^/]+)/'
-          => 'PhabricatorFileAltViewController',
+          => 'PhabricatorFileDataController',
+
         'macro/' => array(
           '$' => 'PhabricatorFileMacroListController',
           'edit/(?:(?P<id>\d+)/)?$' => 'PhabricatorFileMacroEditController',
