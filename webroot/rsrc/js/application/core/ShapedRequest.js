@@ -43,7 +43,7 @@ JX.install('PhabricatorShapedRequest', {
 
       if (!waiting && !recent && this.shouldSendRequest(this._last, data)) {
         this._last = data;
-        var request = new JX.Request(this._uri, JX.bind(this, function(r) {
+        this._request = new JX.Request(this._uri, JX.bind(this, function(r) {
           this._callback(r);
 
           this._min = new Date().getTime() + this.getRateLimit();
@@ -53,12 +53,12 @@ JX.install('PhabricatorShapedRequest', {
             this.getRateLimit()
           );
         }));
-        request.listen('finally', JX.bind(this, function() {
+        this._request.listen('finally', JX.bind(this, function() {
           this._request = null;
         }));
-        request.setData(data);
-        request.setTimeout(this.getRequestTimeout());
-        request.send();
+        this._request.setData(data);
+        this._request.setTimeout(this.getRequestTimeout());
+        this._request.send();
       } else {
         this._defer = setTimeout(
           JX.bind(this, this.trigger),
