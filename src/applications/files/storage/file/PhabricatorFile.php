@@ -149,14 +149,9 @@ class PhabricatorFile extends PhabricatorFileDAO {
     if (isset($params['mime-type'])) {
       $file->setMimeType($params['mime-type']);
     } else {
-      try {
-        $tmp = new TempFile();
-        Filesystem::writeFile($tmp, $data);
-        list($stdout) = execx('file -b --mime %s', $tmp);
-        $file->setMimeType($stdout);
-      } catch (Exception $ex) {
-        // Be robust here since we don't really care that much about mime types.
-      }
+      $tmp = new TempFile();
+      Filesystem::writeFile($tmp, $data);
+      $file->setMimeType(Filesystem::getMimeType($tmp));
     }
 
     $file->save();
