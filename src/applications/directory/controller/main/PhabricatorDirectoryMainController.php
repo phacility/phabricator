@@ -102,15 +102,19 @@ class PhabricatorDirectoryMainController
     $user = $this->getRequest()->getUser();
     $user_phid = $user->getPHID();
 
-    $task_query = new ManiphestTaskQuery();
-    $task_query->withStatus(ManiphestTaskQuery::STATUS_OPEN);
-    $task_query->withPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
-    $task_query->withProjects(mpull($projects, 'getPHID'));
-    $task_query->withAnyProject(true);
-    $task_query->setCalculateRows(true);
-    $task_query->setLimit(10);
+    if ($projects) {
+      $task_query = new ManiphestTaskQuery();
+      $task_query->withStatus(ManiphestTaskQuery::STATUS_OPEN);
+      $task_query->withPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
+      $task_query->withProjects(mpull($projects, 'getPHID'));
+      $task_query->withAnyProject(true);
+      $task_query->setCalculateRows(true);
+      $task_query->setLimit(10);
+      $tasks = $task_query->execute();
+    } else {
+      $tasks = array();
+    }
 
-    $tasks = $task_query->execute();
     if ($tasks) {
       $panel = new AphrontPanelView();
       $panel->setHeader('Needs Triage');
