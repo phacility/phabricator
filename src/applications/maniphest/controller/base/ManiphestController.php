@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ abstract class ManiphestController extends PhabricatorController {
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x9A\x93");
     $page->appendChild($view);
+    $page->setSearchDefaultScope(PhabricatorSearchScope::SCOPE_OPEN_TASKS);
 
     $response = new AphrontWebpageResponse();
     return $response->setContent($page->render());

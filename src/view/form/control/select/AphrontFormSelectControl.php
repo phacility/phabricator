@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,27 @@ class AphrontFormSelectControl extends AphrontFormControl {
   }
 
   protected function renderInput() {
-    $options = array();
-    foreach ($this->getOptions() as $value => $label) {
-      $options[] = phutil_render_tag(
+    return self::renderSelectTag(
+      $this->getValue(),
+      $this->getOptions(),
+      array(
+        'name'      => $this->getName(),
+        'disabled'  => $this->getDisabled() ? 'disabled' : null,
+        'id'        => $this->getID(),
+      ));
+  }
+
+  public static function renderSelectTag(
+    $selected,
+    array $options,
+    array $attrs = array()) {
+
+    $option_tags = array();
+    foreach ($options as $value => $label) {
+      $option_tags[] = phutil_render_tag(
         'option',
         array(
-          'selected' => ($value == $this->getValue()) ? 'selected' : null,
+          'selected' => ($value == $selected) ? 'selected' : null,
           'value'    => $value,
         ),
         phutil_escape_html($label));
@@ -47,12 +62,8 @@ class AphrontFormSelectControl extends AphrontFormControl {
 
     return phutil_render_tag(
       'select',
-      array(
-        'name'      => $this->getName(),
-        'disabled'  => $this->getDisabled() ? 'disabled' : null,
-        'id'        => $this->getID(),
-      ),
-      implode("\n", $options));
+      $attrs,
+      implode("\n", $option_tags));
   }
 
 }

@@ -51,6 +51,7 @@ abstract class DiffusionController extends PhabricatorController {
         ),
       ),
       null);
+    $page->setSearchDefaultScope(PhabricatorSearchScope::SCOPE_COMMITS);
 
     $page->appendChild($view);
 

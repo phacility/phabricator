@@ -29,6 +29,7 @@ class PhabricatorStandardPageView extends AphrontPageView {
   private $showChrome = true;
   private $isFrameable = false;
   private $disableConsole;
+  private $searchDefaultScope;
 
   public function setIsAdminInterface($is_admin_interface) {
     $this->isAdminInterface = $is_admin_interface;
@@ -101,6 +102,15 @@ class PhabricatorStandardPageView extends AphrontPageView {
 
   public function getShowChrome() {
     return $this->showChrome;
+  }
+
+  public function setSearchDefaultScope($search_default_scope) {
+    $this->searchDefaultScope = $search_default_scope;
+    return $this;
+  }
+
+  public function getSearchDefaultScope() {
+    return $this->searchDefaultScope;
   }
 
   public function getTitle() {
@@ -279,6 +289,14 @@ class PhabricatorStandardPageView extends AphrontPageView {
               'style'  => 'display: inline',
             ),
             '<input type="text" name="query" />'.
+            ' in '.
+            AphrontFormSelectControl::renderSelectTag(
+              $this->getSearchDefaultScope(),
+              PhabricatorSearchScope::getScopeOptions(),
+              array(
+                'name' => 'scope',
+              )).
+            ' '.
             '<button>Search</button>');
       }
     }

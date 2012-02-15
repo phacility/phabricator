@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ abstract class DifferentialController extends PhabricatorController {
     $page->setGlyph("\xE2\x9A\x99");
     $page->appendChild($view);
     $page->setIsLoggedOut($viewer_is_anonymous);
+    $page->setSearchDefaultScope(PhabricatorSearchScope::SCOPE_OPEN_REVISIONS);
 
     $response = new AphrontWebpageResponse();
     return $response->setContent($page->render());

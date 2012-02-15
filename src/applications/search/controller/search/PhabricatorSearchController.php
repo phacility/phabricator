@@ -44,24 +44,53 @@ class PhabricatorSearchController extends PhabricatorSearchBaseController {
       if ($request->isFormPost()) {
         $query->setQuery($request->getStr('query'));
 
-        if (strlen($request->getStr('type'))) {
-          $query->setParameter('type', $request->getStr('type'));
-        }
+        if ($request->getStr('scope')) {
+          switch ($request->getStr('scope')) {
+            case PhabricatorSearchScope::SCOPE_OPEN_REVISIONS:
+              $query->setParameter('open', 1);
+              $query->setParameter(
+                'type',
+                PhabricatorPHIDConstants::PHID_TYPE_DREV);
+              break;
+            case PhabricatorSearchScope::SCOPE_OPEN_TASKS:
+              $query->setParameter('open', 1);
+              $query->setParameter(
+                'type',
+                PhabricatorPHIDConstants::PHID_TYPE_TASK);
+              break;
+            case PhabricatorSearchScope::SCOPE_WIKI:
+              $query->setParameter(
+                'type',
+                PhabricatorPHIDConstants::PHID_TYPE_WIKI);
+              break;
+            case PhabricatorSearchScope::SCOPE_COMMITS:
+              $query->setParameter(
+                'type',
+                PhabricatorPHIDConstants::PHID_TYPE_CMIT);
+              break;
+            default:
+              break;
+          }
+        } else {
+          if (strlen($request->getStr('type'))) {
+            $query->setParameter('type', $request->getStr('type'));
+          }
 
-        if ($request->getArr('author')) {
-          $query->setParameter('author', $request->getArr('author'));
-        }
+          if ($request->getArr('author')) {
+            $query->setParameter('author', $request->getArr('author'));
+          }
 
-        if ($request->getArr('owner')) {
-          $query->setParameter('owner', $request->getArr('owner'));
-        }
+          if ($request->getArr('owner')) {
+            $query->setParameter('owner', $request->getArr('owner'));
+          }
 
-        if ($request->getInt('open')) {
-          $query->setParameter('open', $request->getInt('open'));
-        }
+          if ($request->getInt('open')) {
+            $query->setParameter('open', $request->getInt('open'));
+          }
 
-        if ($request->getArr('project')) {
-          $query->setParameter('project', $request->getArr('project'));
+          if ($request->getArr('project')) {
+            $query->setParameter('project', $request->getArr('project'));
+          }
         }
 
         $query->save();
@@ -215,7 +244,7 @@ class PhabricatorSearchController extends PhabricatorSearchBaseController {
         $results,
       ),
       array(
-        'title' => 'Results: what',
+        'title' => 'Search Results',
       ));
   }
 

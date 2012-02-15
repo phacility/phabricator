@@ -723,6 +723,7 @@ phutil_register_library_map(array(
     'PhabricatorSearchQuery' => 'applications/search/storage/query',
     'PhabricatorSearchRelationship' => 'applications/search/constants/relationship',
     'PhabricatorSearchResultView' => 'applications/search/view/searchresult',
+    'PhabricatorSearchScope' => 'applications/search/constants/scope',
     'PhabricatorSearchSelectController' => 'applications/search/controller/select',
     'PhabricatorSearchUserIndexer' => 'applications/search/index/indexer/user',
     'PhabricatorSetup' => 'infrastructure/setup',
