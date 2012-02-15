@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,16 +26,23 @@ final class PhabricatorSQLPatchList {
     $finder = new FileFinder($patches_dir);
     $results = $finder->find();
 
+    $versions = array();
     $patches = array();
     foreach ($results as $path) {
       $matches = array();
       if (!preg_match('/(\d+)\..*\.(sql|php)$/', $path, $matches)) {
         continue;
       }
+      $version = (int)$matches[1];
       $patches[] = array(
-        'version' => (int)$matches[1],
+        'version' => $version,
         'path'    => $patches_dir.$path,
       );
+      if (empty($versions[$version])) {
+        $versions[$version] = true;
+      } else {
+        throw new Exception("Two patches have version {$version}!");
+      }
     }
 
     // Files are in some 'random' order returned by the operating system

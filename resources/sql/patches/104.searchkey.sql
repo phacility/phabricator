@@ -10,3 +10,6 @@ UPDATE phabricator_search.search_query
 
 ALTER TABLE phabricator_search.search_query
   ADD UNIQUE KEY (queryKey);
+
+/* NOTE: Accidentally added this as 104, merging. */
+UPDATE phabricator_project.project SET status = IF(status = 5, 100, 0);
