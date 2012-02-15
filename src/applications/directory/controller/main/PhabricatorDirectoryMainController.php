@@ -200,6 +200,7 @@ class PhabricatorDirectoryMainController
 
     $task_query = new ManiphestTaskQuery();
     $task_query->withStatus(ManiphestTaskQuery::STATUS_OPEN);
+    $task_query->setGroupBy(ManiphestTaskQuery::GROUP_PRIORITY);
     $task_query->withOwners(array($user_phid));
     $task_query->setCalculateRows(true);
     $task_query->setLimit(10);
