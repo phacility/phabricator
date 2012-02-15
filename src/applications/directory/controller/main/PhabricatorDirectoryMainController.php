@@ -65,10 +65,6 @@ class PhabricatorDirectoryMainController
     $user = $this->getRequest()->getUser();
     $user_phid = $user->getPHID();
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Unbreak Now!');
-    $panel->setCaption('Open tasks with "Unbreak Now!" priority.');
-
     $task_query = new ManiphestTaskQuery();
     $task_query->withStatus(ManiphestTaskQuery::STATUS_OPEN);
     $task_query->withPriority(ManiphestTaskPriority::PRIORITY_UNBREAK_NOW);
@@ -78,6 +74,9 @@ class PhabricatorDirectoryMainController
     $tasks = $task_query->execute();
 
     if ($tasks) {
+      $panel = new AphrontPanelView();
+      $panel->setHeader('Unbreak Now!');
+      $panel->setCaption('Open tasks with "Unbreak Now!" priority.');
       $panel->addButton(
         phutil_render_tag(
           'a',
@@ -89,8 +88,11 @@ class PhabricatorDirectoryMainController
 
       $panel->appendChild($this->buildTaskListView($tasks));
     } else {
+      $panel = new AphrontMiniPanelView();
       $panel->appendChild(
-        '<p>Nothing appears to be critically broken right now.</p>');
+        '<p><strong>No "Unbreak Now!" Tasks:</strong> '.
+        'Nothing appears to be critically broken right now.</p>');
+      $panel = '<br />'.$panel->render();
     }
 
     return $panel;
@@ -99,12 +101,6 @@ class PhabricatorDirectoryMainController
   private function buildNeedsTriagePanel(array $projects) {
     $user = $this->getRequest()->getUser();
     $user_phid = $user->getPHID();
-
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Needs Triage');
-    $panel->setCaption(
-      'Open tasks with "Needs Triage" priority in '.
-      '<a href="/project/">projects you are a member of</a>.');
 
     $task_query = new ManiphestTaskQuery();
     $task_query->withStatus(ManiphestTaskQuery::STATUS_OPEN);
@@ -116,6 +112,12 @@ class PhabricatorDirectoryMainController
 
     $tasks = $task_query->execute();
     if ($tasks) {
+      $panel = new AphrontPanelView();
+      $panel->setHeader('Needs Triage');
+      $panel->setCaption(
+        'Open tasks with "Needs Triage" priority in '.
+        '<a href="/project/">projects you are a member of</a>.');
+
       $panel->addButton(
         phutil_render_tag(
           'a',
@@ -128,7 +130,11 @@ class PhabricatorDirectoryMainController
           'View All Triage ('.$task_query->getRowCount().") \xC2\xBB"));
       $panel->appendChild($this->buildTaskListView($tasks));
     } else {
-      $panel->appendChild('<p>No tasks in your projects need triage.</p>');
+      $panel = new AphrontMiniPanelView();
+      $panel->appendChild(
+        '<p><strong>No "Needs Triage" Tasks:</strong> '.
+        'No tasks in <a href="/project/">projects you are a member of</a> '.
+        'need triage.</p>');
     }
 
     return $panel;

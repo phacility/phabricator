@@ -87,3 +87,15 @@
   background: #ccffcc;
   border-color: #669966;
 }
+
+.aphront-mini-panel-view {
+  background: #f3f3f3;
+  padding: 4px 2em;
+  margin: 2px 2em;
+  border: 1px solid #e6e6e6;
+}
+
+.aphront-mini-panel-view p {
+  font-size: 11px;
+  color: #666666;
+}
