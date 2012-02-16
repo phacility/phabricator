@@ -32,9 +32,7 @@ class AphrontDefaultApplicationConfiguration
 
   public function getURIMap() {
     return $this->getResourceURIMapRules() + array(
-      '/' => array(
-        '$'                     => 'PhabricatorDirectoryMainController',
-      ),
+      '/(?:(?P<filter>feed)/)?$' => 'PhabricatorDirectoryMainController',
       '/directory/' => array(
         '(?P<id>\d+)/$'
           => 'PhabricatorDirectoryCategoryViewController',
@@ -359,10 +357,7 @@ class AphrontDefaultApplicationConfiguration
           => 'PhabricatorCountdownDeleteController'
       ),
 
-      '/feed/' => array(
-        '$' => 'PhabricatorFeedStreamController',
-        'public/$' => 'PhabricatorFeedPublicStreamController',
-      ),
+      '/feed/public/$' => 'PhabricatorFeedPublicStreamController',
 
       '/V(?P<id>\d+)$'  => 'PhabricatorSlowvotePollController',
       '/vote/' => array(

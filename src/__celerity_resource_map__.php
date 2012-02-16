@@ -1406,7 +1406,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-feed-css' =>
   array(
-    'uri' => '/res/7d1d0015/rsrc/css/application/feed/feed.css',
+    'uri' => '/res/e4bf27b5/rsrc/css/application/feed/feed.css',
     'type' => 'css',
     'requires' =>
     array(

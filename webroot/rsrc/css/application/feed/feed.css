@@ -43,3 +43,14 @@
 .phabricator-feed-story-date-separator {
   margin-top: 2em;
 }
+
+.phabricator-feed-newer-link {
+  float: left;
+  font-weight: bold;
+}
+
+.phabricator-feed-older-link {
+  float: right;
+  font-weight: bold;
+}
+

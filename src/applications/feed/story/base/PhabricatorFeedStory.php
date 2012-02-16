@@ -83,6 +83,10 @@ abstract class PhabricatorFeedStory {
     return $this->getStoryData()->getEpoch();
   }
 
+  final public function getChronologicalKey() {
+    return $this->getStoryData()->getChronologicalKey();
+  }
+
   final protected function renderHandleList(array $phids) {
     $list = array();
     foreach ($phids as $phid) {

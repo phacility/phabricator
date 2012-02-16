@@ -44,6 +44,7 @@ abstract class PhabricatorDirectoryController extends PhabricatorController {
 
     $nav->addLabel('Phabricator');
     $nav->addFilter('home', 'Tactical Command', '/');
+    $nav->addFilter('feed', 'Feed');
     $nav->addSpacer();
     $nav->addLabel('Applications');
 

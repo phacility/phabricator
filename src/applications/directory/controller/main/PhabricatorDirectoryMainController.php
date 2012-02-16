@@ -21,6 +21,10 @@ class PhabricatorDirectoryMainController
 
   private $filter;
 
+  public function willProcessRequest(array $data) {
+    $this->filter = idx($data, 'filter');
+  }
+
   public function shouldRequireAdmin() {
     // These controllers are admin-only by default, but this one is public,
     // so allow non-admin users to view it.
@@ -30,18 +34,29 @@ class PhabricatorDirectoryMainController
   public function processRequest() {
     $user = $this->getRequest()->getUser();
 
+    $nav = $this->buildNav();
+    $this->filter = $nav->selectFilter($this->filter, 'home');
+
     $project_query = new PhabricatorProjectQuery();
     $project_query->setMembers(array($user->getPHID()));
     $projects = $project_query->execute();
 
+    switch ($this->filter) {
+      case 'feed':
+        return $this->buildFeedResponse($nav, $projects);
+      default:
+        return $this->buildMainResponse($nav, $projects);
+    }
+
+  }
+
+  private function buildMainResponse($nav, $projects) {
     $unbreak_panel = $this->buildUnbreakNowPanel();
     $triage_panel = $this->buildNeedsTriagePanel($projects);
     $revision_panel = $this->buildRevisionPanel();
     $tasks_panel = $this->buildTasksPanel();
-    $feed_view = $this->buildFeedView($projects);
+    $feed_view = $this->buildFeedView($projects, $is_full = false);
 
-    $nav = $this->buildNav();
-    $this->filter = $nav->selectFilter($this->filter, 'home');
 
     $content = array(
       $unbreak_panel,
@@ -56,8 +71,17 @@ class PhabricatorDirectoryMainController
     return $this->buildStandardPageResponse(
       $nav,
       array(
-        'title' => 'Directory',
-        'tab'   => 'directory',
+        'title' => 'Phabricator',
+      ));
+  }
+
+  private function buildFeedResponse($nav, $projects) {
+    $view = $this->buildFeedView($projects, $is_full = true);
+    $nav->appendChild($view);
+    return $this->buildStandardPageResponse(
+      $nav,
+      array(
+        'title' => 'Feed',
       ));
   }
 
@@ -252,8 +276,9 @@ class PhabricatorDirectoryMainController
     return $view;
   }
 
-  private function buildFeedView(array $projects) {
-    $user = $this->getRequest()->getUser();
+  private function buildFeedView(array $projects, $is_full) {
+    $request = $this->getRequest();
+    $user = $request->getUser();
     $user_phid = $user->getPHID();
 
     $feed_query = new PhabricatorFeedQuery();
@@ -261,19 +286,77 @@ class PhabricatorDirectoryMainController
       array_merge(
         array($user_phid),
         mpull($projects, 'getPHID')));
+
+    // TODO: All this limit stuff should probably be consolidated into the
+    // feed query?
+
+    $old_link = null;
+    $new_link = null;
+
+    if ($is_full) {
+      $feed_query->setAfter($request->getStr('after'));
+      $feed_query->setBefore($request->getStr('before'));
+      $limit = 500;
+    } else {
+      $limit = 100;
+    }
+
+    // Grab one more story than we intend to display so we can figure out
+    // if we need to render an "Older Posts" link or not (with reasonable
+    // accuracy, at least).
+    $feed_query->setLimit($limit + 1);
     $feed = $feed_query->execute();
+    $extra_row = (count($feed) == $limit + 1);
+
+    if ($is_full) {
+      $have_new = ($request->getStr('before')) ||
+                  ($request->getStr('after') && $extra_row);
+    } else {
+      $have_new = false;
+    }
+
+    $have_old = ($request->getStr('after')) ||
+                ($request->getStr('before') && $extra_row) ||
+                (!$request->getStr('before') &&
+                 !$request->getStr('after') &&
+                 $extra_row);
+    $feed = array_slice($feed, 0, $limit, $preserve_keys = true);
+
+    if ($have_old) {
+      $old_link = phutil_render_tag(
+        'a',
+        array(
+          'href' => '/feed/?before='.end($feed)->getChronologicalKey(),
+          'class' => 'phabricator-feed-older-link',
+        ),
+        "Older Stories \xC2\xBB");
+    }
+    if ($have_new) {
+      $new_link = phutil_render_tag(
+        'a',
+        array(
+          'href' => '/feed/?after='.reset($feed)->getChronologicalKey(),
+          'class' => 'phabricator-feed-newer-link',
+        ),
+        "\xC2\xAB Newer Stories");
+    }
 
     $builder = new PhabricatorFeedBuilder($feed);
     $builder->setUser($user);
     $feed_view = $builder->buildView();
 
-
     return
-      '<div style="padding: 1em 1em;">'.
-        '<h1 style="font-size: 18px; '.
-                   'border-bottom: 1px solid #aaaaaa; '.
-                   'margin: 0 1em;">Feed</h1>'.
+      '<div style="padding: 1em 3em;">'.
+        '<div style="margin: 0 1em;">'.
+          '<h1 style="font-size: 18px; '.
+                     'border-bottom: 1px solid #aaaaaa; '.
+                     'padding: 0;">Feed</h1>'.
+        '</div>'.
         $feed_view->render().
+        '<div class="phabricator-feed-frame">'.
+          $new_link.
+          $old_link.
+        '</div>'.
       '</div>';
   }
 
