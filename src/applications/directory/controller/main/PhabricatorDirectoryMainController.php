@@ -96,7 +96,7 @@ class PhabricatorDirectoryMainController
       $jump = trim($jump);
 
       $help_href = PhabricatorEnv::getDocLink(
-        'articles/Jump_Nav_User_Guide.html');
+        'article/Jump_Nav_User_Guide.html');
 
       $patterns = array(
         '/^help/i'                  => 'uri:'.$help_href,
@@ -460,7 +460,7 @@ class PhabricatorDirectoryMainController
 
     require_celerity_resource('phabricator-jump-nav');
 
-    $doc_href = PhabricatorEnv::getDocLink('articles/Jump_Nav_User_Guide.html');
+    $doc_href = PhabricatorEnv::getDocLink('article/Jump_Nav_User_Guide.html');
     $doc_link = phutil_render_tag(
       'a',
       array(
