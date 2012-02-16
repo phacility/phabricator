@@ -1,0 +1,21 @@
+@title Jump Nav User Guide
+@group userguide
+
+Command reference for the jump nav.
+
+= Overview =
+
+The jump nav provides a quick way to navigate to tools and objects: just type
+a navigational command into the box and press return.
+
+= Supported Commands =
+
+  - **help** - Jump to this document.
+  - **T** - Jump to Maniphest.
+  - **T123** - Jump to Maniphest Task 123.
+  - **D** - Jump to Differential.
+  - **D123** - Jump to Differential Revision 123.
+  - **r** - Jump to Diffusion.
+  - **rXYZ** - Jump to Diffusion Repository XYZ.
+  - **rXYZabcdef** - Jump to Diffusion Commit rXYZabcdef.
+  - **(default)** - Search for input.

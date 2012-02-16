@@ -32,7 +32,8 @@ class AphrontDefaultApplicationConfiguration
 
   public function getURIMap() {
     return $this->getResourceURIMapRules() + array(
-      '/(?:(?P<filter>feed)/)?$' => 'PhabricatorDirectoryMainController',
+      '/(?:(?P<filter>(?:feed|jump))/)?$' =>
+        'PhabricatorDirectoryMainController',
       '/directory/' => array(
         '(?P<id>\d+)/$'
           => 'PhabricatorDirectoryCategoryViewController',

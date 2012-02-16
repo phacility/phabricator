@@ -37,13 +37,24 @@ class PhabricatorDirectoryMainController
     $nav = $this->buildNav();
     $this->filter = $nav->selectFilter($this->filter, 'home');
 
-    $project_query = new PhabricatorProjectQuery();
-    $project_query->setMembers(array($user->getPHID()));
-    $projects = $project_query->execute();
+    switch ($this->filter) {
+      case 'jump':
+        break;
+      case 'home':
+      case 'feed':
+        $project_query = new PhabricatorProjectQuery();
+        $project_query->setMembers(array($user->getPHID()));
+        $projects = $project_query->execute();
+        break;
+      default:
+        throw new Exception("Unknown filter '{$this->filter}'!");
+    }
 
     switch ($this->filter) {
       case 'feed':
         return $this->buildFeedResponse($nav, $projects);
+      case 'jump':
+        return $this->buildJumpResponse($nav);
       default:
         return $this->buildMainResponse($nav, $projects);
     }
@@ -53,6 +64,7 @@ class PhabricatorDirectoryMainController
   private function buildMainResponse($nav, $projects) {
     $unbreak_panel = $this->buildUnbreakNowPanel();
     $triage_panel = $this->buildNeedsTriagePanel($projects);
+    $jump_panel = $this->buildJumpPanel();
     $revision_panel = $this->buildRevisionPanel();
     $tasks_panel = $this->buildTasksPanel();
     $feed_view = $this->buildFeedView($projects, $is_full = false);
@@ -61,6 +73,7 @@ class PhabricatorDirectoryMainController
     $content = array(
       $unbreak_panel,
       $triage_panel,
+      $jump_panel,
       $revision_panel,
       $tasks_panel,
       $feed_view,
@@ -72,6 +85,79 @@ class PhabricatorDirectoryMainController
       $nav,
       array(
         'title' => 'Phabricator',
+      ));
+  }
+
+  private function buildJumpResponse($nav) {
+    $request = $this->getRequest();
+
+    if ($request->isFormPost()) {
+      $jump = $request->getStr('jump');
+      $jump = trim($jump);
+
+      $help_href = PhabricatorEnv::getDocLink(
+        'articles/Jump_Nav_User_Guide.html');
+
+      $patterns = array(
+        '/^help/i'                  => 'uri:'.$help_href,
+        '/^d$/i'                    => 'uri:/differential/',
+        '/^r$/i'                    => 'uri:/diffusion/',
+        '/^t$/i'                    => 'uri:/maniphest/',
+        '/r([A-Z]+)$/'              => 'repository',
+        '/r([A-Z]+)(\S+)$/'         => 'commit',
+        '/^d(\d+)$/i'               => 'revision',
+        '/^t(\d+)$/i'               => 'task',
+
+        // TODO: '/^p$/i'                    => 'uri:/projects/',
+        // TODO: '/^u$/i'                    => 'uri:/people/',
+        // TODO: '/^p\s+(\S+)$/i'            => 'project',
+        // TODO: '/^u\s+(\S+)$/i'            => 'user',
+        // TODO: '/^task:\s+(\S+)/i'         => 'create-task',
+        // TODO: '/^(?:s|symbol)\s+(\S+)/i'  => 'find-symbol',
+      );
+
+
+      foreach ($patterns as $pattern => $effect) {
+        $matches = null;
+        if (preg_match($pattern, $jump, $matches)) {
+          if (!strncmp($effect, 'uri:', 4)) {
+            return id(new AphrontRedirectResponse())
+              ->setURI(substr($effect, 4));
+          } else {
+            switch ($effect) {
+              case 'repository':
+                return id(new AphrontRedirectResponse())
+                  ->setURI('/diffusion/'.$matches[1].'/');
+              case 'commit':
+                return id(new AphrontRedirectResponse())
+                  ->setURI('/'.$matches[0]);
+              case 'revision':
+                return id(new AphrontRedirectResponse())
+                  ->setURI('/D'.$matches[1]);
+              case 'task':
+                return id(new AphrontRedirectResponse())
+                  ->setURI('/T'.$matches[1]);
+              default:
+                throw new Exception("Unknown jump effect '{$effect}'!");
+            }
+          }
+        }
+      }
+
+      $query = new PhabricatorSearchQuery();
+      $query->setQuery($jump);
+      $query->save();
+
+      return id(new AphrontRedirectResponse())
+        ->setURI('/search/'.$query->getQueryKey().'/');
+    }
+
+
+    $nav->appendChild($this->buildJumpPanel());
+    return $this->buildStandardPageResponse(
+      $nav,
+      array(
+        'title' => 'Jump Nav',
       ));
   }
 
@@ -358,6 +444,78 @@ class PhabricatorDirectoryMainController
           $old_link.
         '</div>'.
       '</div>';
+  }
+
+  private function buildJumpPanel() {
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $uniq_id = celerity_generate_unique_node_id();
+
+    Javelin::initBehavior(
+      'phabricator-autofocus',
+      array(
+        'id' => $uniq_id,
+      ));
+
+    require_celerity_resource('phabricator-jump-nav');
+
+    $doc_href = PhabricatorEnv::getDocLink('articles/Jump_Nav_User_Guide.html');
+    $doc_link = phutil_render_tag(
+      'a',
+      array(
+        'href' => $doc_href,
+      ),
+      'Jump Nav Use Guide');
+
+    $jump_input = phutil_render_tag(
+      'input',
+      array(
+        'type'  => 'text',
+        'class' => 'phabricator-jump-nav',
+        'name'  => 'jump',
+        'id'    => $uniq_id,
+      )).
+      phutil_render_tag(
+        'p',
+        array(
+          'class' => 'phabricator-jump-nav-caption',
+        ),
+        'Enter the name of an object like <tt>D123</tt> to quickly jump to '.
+        'it. See '.$doc_link.' or type <tt>help</tt>.');
+
+    $panel = new AphrontPanelView();
+    $panel->appendChild(
+      phabricator_render_form(
+        $user,
+        array(
+          'action' => '/jump/',
+          'method' => 'POST',
+        ),
+        $jump_input));
+
+    $nav_buttons = array(
+      '/maniphest/task/create/' => 'Create a Task',
+      '/file/'       => 'Upload a File',
+      '/paste/'       => 'Create Paste',
+      '/w/'           => 'Browse Wiki',
+      '/diffusion/'   => 'Browse Code',
+    );
+
+    $panel->appendChild('<div class="phabricator-jump-nav-buttons">');
+    foreach ($nav_buttons as $uri => $name) {
+      $panel->appendChild(
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => $uri,
+            'class' => 'button grey',
+          ),
+          phutil_escape_html($name)));
+    }
+    $panel->appendChild('</div>');
+
+    return $panel;
   }
 
 }

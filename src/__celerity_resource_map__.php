@@ -330,17 +330,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/javelin/lib/behavior.js',
   ),
-  0 =>
-  array(
-    'uri' => '/res/b6096fdd/rsrc/js/javelin/lib/__tests__/URI.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-uri',
-      1 => 'javelin-php-serializer',
-    ),
-    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
-  ),
   'javelin-behavior-aphront-basic-tokenizer' =>
   array(
     'uri' => '/res/9be30797/rsrc/js/application/core/behavior-tokenizer.js',
@@ -703,6 +692,17 @@ celerity_register_resource_map(array(
       1 => 'javelin-behavior',
     ),
     'disk' => '/rsrc/js/application/owners/owners-path-editor.js',
+  ),
+  'javelin-behavior-phabricator-autofocus' =>
+  array(
+    'uri' => '/res/2946bb89/rsrc/js/application/core/behavior-autofocus.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+    ),
+    'disk' => '/rsrc/js/application/core/behavior-autofocus.js',
   ),
   'javelin-behavior-phabricator-keyboard-pager' =>
   array(
@@ -1413,6 +1413,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/feed/feed.css',
   ),
+  'phabricator-jump-nav' =>
+  array(
+    'uri' => '/res/69238d2f/rsrc/css/application/directory/phabricator-jump-nav.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/directory/phabricator-jump-nav.css',
+  ),
   'phabricator-keyboard-shortcut' =>
   array(
     'uri' => '/res/beed38cd/rsrc/js/application/core/KeyboardShortcut.js',
@@ -1519,6 +1528,17 @@ celerity_register_resource_map(array(
       2 => 'javelin-request',
     ),
     'disk' => '/rsrc/js/application/core/ShapedRequest.js',
+  ),
+  0 =>
+  array(
+    'uri' => '/res/b6096fdd/rsrc/js/javelin/lib/__tests__/URI.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-uri',
+      1 => 'javelin-php-serializer',
+    ),
+    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
   ),
   'phabricator-slowvote-css' =>
   array(
