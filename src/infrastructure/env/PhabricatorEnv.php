@@ -39,11 +39,19 @@ final class PhabricatorEnv {
   }
 
   public static function getProductionURI($path) {
-    $uri = self::getEnvConfig('phabricator.production-uri');
-    if (!$uri) {
-      $uri = self::getEnvConfig('phabricator.base-uri');
+    // If we're passed a URI which already has a domain, simply return it
+    // unmodified. In particular, files may have URIs which point to a CDN
+    // domain.
+    $uri = new PhutilURI($path);
+    if ($uri->getDomain()) {
+      return $path;
     }
-    return rtrim($uri, '/').$path;
+
+    $production_domain = self::getEnvConfig('phabricator.production-uri');
+    if (!$production_domain) {
+      $production_domain = self::getEnvConfig('phabricator.base-uri');
+    }
+    return rtrim($production_domain, '/').$path;
   }
 
   public static function getCDNURI($path) {
