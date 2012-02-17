@@ -17,7 +17,7 @@
  */
 
 /**
- * Looks for Dxxxx, Txxxx and links to them.
+ * Logs chatter.
  *
  * @group irc
  */
