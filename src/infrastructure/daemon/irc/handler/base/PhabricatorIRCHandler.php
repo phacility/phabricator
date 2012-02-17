@@ -44,7 +44,9 @@ abstract class PhabricatorIRCHandler {
   }
 
   final protected function getURI($path) {
-    return $this->bot->getConfig('conduit.uri').$path;
+    $base_uri = new PhutilURI($this->bot->getConfig('conduit.uri'));
+    $base_uri->setPath($path);
+    return (string)$base_uri;
   }
 
   final protected function isChannelName($name) {

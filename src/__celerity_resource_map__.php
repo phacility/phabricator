@@ -1330,6 +1330,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/herald/PathTypeahead.js',
   ),
+  'phabricator-chatlog-css' =>
+  array(
+    'uri' => '/res/a5aa9eef/rsrc/css/application/chatlog/chatlog.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/chatlog/chatlog.css',
+  ),
   'phabricator-content-source-view-css' =>
   array(
     'uri' => '/res/8c738a93/rsrc/css/application/contentsource/content-source-view.css',
@@ -1508,6 +1517,17 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/core/remarkup.css',
   ),
+  0 =>
+  array(
+    'uri' => '/res/b6096fdd/rsrc/js/javelin/lib/__tests__/URI.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-uri',
+      1 => 'javelin-php-serializer',
+    ),
+    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
+  ),
   'phabricator-search-results-css' =>
   array(
     'uri' => '/res/f8a86e27/rsrc/css/application/search/search-results.css',
@@ -1528,17 +1548,6 @@ celerity_register_resource_map(array(
       2 => 'javelin-request',
     ),
     'disk' => '/rsrc/js/application/core/ShapedRequest.js',
-  ),
-  0 =>
-  array(
-    'uri' => '/res/b6096fdd/rsrc/js/javelin/lib/__tests__/URI.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-uri',
-      1 => 'javelin-php-serializer',
-    ),
-    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
   ),
   'phabricator-slowvote-css' =>
   array(

@@ -6,7 +6,5 @@
 
 
 
-phutil_require_module('phutil', 'parser/uri');
 
-
-phutil_require_source('PhabricatorIRCHandler.php');
+phutil_require_source('PhabricatorChatLogConstants.php');

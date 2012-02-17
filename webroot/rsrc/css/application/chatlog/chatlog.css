@@ -1,0 +1,39 @@
+/**
+ * @provides phabricator-chatlog-css
+ */
+
+.phabricator-chat-log {
+  margin: 1em 2em;
+  font-size: 12px;
+}
+
+.phabricator-chat-log tr.initial {
+  border-top: 4px solid white;
+}
+
+.phabricator-chat-log tr.normal {
+  background: #e9e9e9;
+}
+
+.phabricator-chat-log tr.alternate {
+  background: #f6f6f6;
+}
+
+.phabricator-chat-log td {
+  padding: 2px 4px;
+}
+
+.phabricator-chat-log td.timestamp {
+  white-space: nowrap;
+  color: #666666;
+}
+
+.phabricator-chat-log td.author {
+  white-space: nowrap;
+  text-align: right;
+  font-weight: bold;
+}
+
+.phabricator-chat-log td.message {
+  width: 100%;
+}

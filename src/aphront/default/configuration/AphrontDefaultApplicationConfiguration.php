@@ -401,6 +401,13 @@ class AphrontDefaultApplicationConfiguration
         ),
         'lease/$' => 'DrydockLeaseListController',
       ),
+
+      '/chatlog/' => array(
+        '$' =>
+          'PhabricatorChatLogChannelListController',
+        'channel/(?P<channel>[^/]+)/$' =>
+          'PhabricatorChatLogChannelLogController',
+      ),
     );
   }
 

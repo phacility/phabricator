@@ -57,6 +57,13 @@ final class PhabricatorIRCMessage {
     return null;
   }
 
+  public function getSenderNickname() {
+    $nick = $this->getRawSender();
+    $nick = ltrim($nick, ':');
+    $nick = head(explode('!', $nick));
+    return $nick;
+  }
+
   public function getTarget() {
     switch ($this->getCommand()) {
       case 'PRIVMSG':

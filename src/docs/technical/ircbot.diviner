@@ -50,6 +50,8 @@ the IRC bot. These are the default handlers available:
   - @{class:PhabricatorIRCDifferentialNotificationHandler} This handler posts
     notifications about changes to revisions to IRC to the channels listed in
     ##notification.channels##.
+  - @{class:PhabricatorIRCLogHandler} This handler records chatlogs which can
+    be browsed in the Phabricator web interface.
 
 You can also write your own handlers, by extending
 @{class:PhabricatorIRCHandler}.
