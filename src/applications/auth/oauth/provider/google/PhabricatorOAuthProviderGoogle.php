@@ -40,20 +40,30 @@ class PhabricatorOAuthProviderGoogle extends PhabricatorOAuthProvider {
     return PhabricatorEnv::getEnvConfig('google.registration-enabled');
   }
 
-  public function getRedirectURI() {
-    return PhabricatorEnv::getURI('/oauth/google/login/');
-  }
-
   public function getClientID() {
     return PhabricatorEnv::getEnvConfig('google.application-id');
+  }
+
+  public function renderGetClientIDHelp() {
+    return null;
   }
 
   public function getClientSecret() {
     return PhabricatorEnv::getEnvConfig('google.application-secret');
   }
 
+  public function renderGetClientSecretHelp() {
+    return null;
+  }
+
   public function getAuthURI() {
     return 'https://accounts.google.com/o/oauth2/auth';
+  }
+
+  public function getTestURIs() {
+    return array(
+      'http://www.google.com'
+    );
   }
 
   public function getTokenURI() {

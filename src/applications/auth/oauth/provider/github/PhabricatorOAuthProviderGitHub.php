@@ -40,16 +40,20 @@ class PhabricatorOAuthProviderGitHub extends PhabricatorOAuthProvider {
     return PhabricatorEnv::getEnvConfig('github.registration-enabled');
   }
 
-  public function getRedirectURI() {
-    return PhabricatorEnv::getURI('/oauth/github/login/');
-  }
-
   public function getClientID() {
     return PhabricatorEnv::getEnvConfig('github.application-id');
   }
 
+  public function renderGetClientIDHelp() {
+    return null;
+  }
+
   public function getClientSecret() {
     return PhabricatorEnv::getEnvConfig('github.application-secret');
+  }
+
+  public function renderGetClientSecretHelp() {
+    return null;
   }
 
   public function getAuthURI() {
@@ -58,6 +62,12 @@ class PhabricatorOAuthProviderGitHub extends PhabricatorOAuthProvider {
 
   public function getTokenURI() {
     return 'https://github.com/login/oauth/access_token';
+  }
+
+  public function getTestURIs() {
+    return array(
+      'http://github.com',
+    );
   }
 
   public function getUserInfoURI() {

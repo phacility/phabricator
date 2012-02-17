@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,57 +31,56 @@ class PhabricatorOAuthDiagnosticsController
 
     $provider = $this->provider;
 
-
-
     $auth_enabled   = $provider->isProviderEnabled();
     $client_id      = $provider->getClientID();
     $client_secret  = $provider->getClientSecret();
+    $key            = $provider->getProviderKey();
+    $name           = phutil_escape_html($provider->getProviderName());
 
     $res_ok = '<strong style="color: #00aa00;">OK</strong>';
     $res_no = '<strong style="color: #aa0000;">NO</strong>';
     $res_na = '<strong style="color: #999999;">N/A</strong>';
 
     $results = array();
-
+    $auth_key = $key . '.auth-enabled';
     if (!$auth_enabled) {
-      $results['facebook.auth-enabled'] = array(
+      $results[$auth_key] = array(
         $res_no,
         'false',
-        'Facebook authentication is disabled in the configuration. Edit the '.
-        'environmental configuration to enable "facebook.auth-enabled".');
+        $name . ' authentication is disabled in the configuration. Edit the '.
+        'Phabricator configuration to enable "'.$auth_key.'".');
     } else {
-      $results['facebook.auth-enabled'] = array(
+      $results[$auth_key] = array(
         $res_ok,
         'true',
-        'Facebook authentication is enabled.');
+        $name.' authentication is enabled.');
     }
 
+    $client_id_key = $key. '.application-id';
     if (!$client_id) {
-      $results['facebook.application-id'] = array(
+      $results[$client_id_key] = array(
         $res_no,
         null,
-        'No Facebook Application ID is configured. Edit the environmental '.
+        'No '.$name.' Application ID is configured. Edit the Phabricator '.
         'configuration to specify an application ID in '.
-        '"facebook.application-id". To generate an ID, sign into Facebook, '.
-        'install the "Developer" application, and use it to create a new '.
-        'Facebook application.');
+        '"'.$client_id_key.'". '.$provider->renderGetClientIDHelp());
     } else {
-      $results['facebook.application-id'] = array(
+      $results[$client_id_key] = array(
         $res_ok,
         $client_id,
         'Application ID is set.');
     }
 
+    $client_secret_key = $key.'.application-secret';
     if (!$client_secret) {
-      $results['facebook.application-secret'] = array(
+      $results[$client_secret_key] = array(
         $res_no,
         null,
-        'No Facebook Application secret is configured. Edit the environmental '.
-        'configuration to specify an Application Secret, in '.
-        '"facebook.application-secret". You can find the application secret '.
-        'in the Facebook "Developer" application on Facebook.');
+        'No '.$name.' Application secret is configured. Edit the '.
+        'Phabricator configuration to specify an Application Secret, in '.
+        '"'.$client_secret_key.'". '.$provider->renderGetClientSecretHelp());
     } else {
-      $results['facebook.application-secret'] = array(
+      $results[$client_secret_key] = array(
         $res_ok,
         "It's a secret!",
         'Application secret is set.');
@@ -115,38 +114,24 @@ class PhabricatorOAuthDiagnosticsController
         'Internet seems OK.');
     }
 
-    $facebook = @file_get_contents("http://facebook.com/", false, $timeout);
-    if ($facebook === false) {
-      $results['facebook.com'] = array(
-        $res_no,
-        null,
-        'Unable to make an HTTP request to facebook.com. Facebook may be '.
-        'down or inaccessible.');
-    } else {
-      $results['facebook.com'] = array(
-        $res_ok,
-        null,
-        'Made a request to facebook.com.');
+    $test_uris = $provider->getTestURIs();
+    foreach ($test_uris as $uri) {
+      $success = @file_get_contents($uri, false, $timeout);
+      if ($success === false) {
+        $results[$uri] = array(
+          $res_no,
+          null,
+          "Unable to make an HTTP request to {$uri}. {$name} may be ".
+          'down or inaccessible.');
+      } else {
+        $results[$uri] = array(
+          $res_ok,
+          null,
+          'Made a request to '.$uri.'.');
+      }
     }
 
-    $graph = @file_get_contents(
-      "https://graph.facebook.com/me",
-      false,
-      $timeout);
-    if ($graph === false) {
-      $results['Facebook Graph'] = array(
-        $res_no,
-        null,
-        "Unable to make an HTTPS request to graph.facebook.com. ".
-        "The Facebook graph may be down or inaccessible.");
-    } else {
-      $results['Facebook Graph'] = array(
-        $res_ok,
-        null,
-        'Made a request to graph.facebook.com.');
-    }
-
-    $test_uri = new PhutilURI('https://graph.facebook.com/oauth/access_token');
+    $test_uri = new PhutilURI($provider->getTokenURI());
     $test_uri->setQueryParams(
       array(
         'client_id'       => $client_id,
@@ -162,22 +147,22 @@ class PhabricatorOAuthDiagnosticsController
         null,
         "Unable to perform an application login with your Application ID and ".
         "Application Secret. You may have mistyped or misconfigured them; ".
-        "Facebook may have revoked your authorization; or Facebook may be ".
+        "{$name} may have revoked your authorization; or {$name} may be ".
         "having technical problems.");
     } else {
       if ($token_strict) {
         $results['App Login'] = array(
           $res_ok,
           '(A Valid Token)',
-          "Raw application login to Facebook works.");
+          "Raw application login to {$name} works.");
       } else {
         $data = json_decode($token_value, true);
         if (!is_array($data)) {
           $results['App Login'] = array(
             $res_no,
             $token_value,
-            "Application Login failed but the graph server did not respond ".
-            "with valid JSON error information. Facebook may be experiencing ".
+            "Application Login failed but the provider did not respond ".
+            "with valid JSON error information. {$name} may be experiencing ".
             "technical problems.");
         } else {
           $results['App Login'] = array(
@@ -192,6 +177,7 @@ class PhabricatorOAuthDiagnosticsController
   }
 
   private function renderResults($results) {
+    $provider = $this->provider;
 
     $rows = array();
     foreach ($results as $key => $result) {
@@ -219,20 +205,22 @@ class PhabricatorOAuthDiagnosticsController
         'wide',
       ));
 
+    $title = $provider->getProviderName() . ' Auth Diagnostics';
+
     $panel_view = new AphrontPanelView();
-    $panel_view->setHeader('Facebook Auth Diagnostics');
+    $panel_view->setHeader($title);
     $panel_view->appendChild(
       '<p class="aphront-panel-instructions">These tests may be able to '.
       'help diagnose the root cause of problems you experience with '.
-      'Facebook Authentication. Reload the page to run the tests again.</p>');
+      $provider->getProviderName() .
+      ' Authentication. Reload the page to run the tests again.</p>');
     $panel_view->appendChild($table_view);
 
     return $this->buildStandardPageResponse(
       $panel_view,
       array(
-        'title' => 'Facebook Auth Diagnostics',
+        'title' => $title,
       ));
-
   }
 
 }

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,20 +40,33 @@ class PhabricatorOAuthProviderFacebook extends PhabricatorOAuthProvider {
     return PhabricatorEnv::getEnvConfig('facebook.registration-enabled');
   }
 
-  public function getRedirectURI() {
-    return PhabricatorEnv::getURI('/oauth/facebook/login/');
-  }
-
   public function getClientID() {
     return PhabricatorEnv::getEnvConfig('facebook.application-id');
+  }
+
+  public function renderGetClientIDHelp() {
+    return 'To generate an ID, sign into Facebook, install the "Developer"'.
+           ' application, and use it to create a new Facebook application.';
   }
 
   public function getClientSecret() {
     return PhabricatorEnv::getEnvConfig('facebook.application-secret');
   }
 
+  public function renderGetClientSecretHelp() {
+    return 'You can find the application secret in the Facebook'.
+           ' "Developer" application on Facebook.';
+  }
+
   public function getAuthURI() {
     return 'https://www.facebook.com/dialog/oauth';
+  }
+
+  public function getTestURIs() {
+    return array(
+      'http://facebook.com',
+      'https://graph.facebook.com/me'
+    );
   }
 
   public function getTokenURI() {
