@@ -21,7 +21,6 @@ abstract class PhabricatorOAuthProvider {
   const PROVIDER_FACEBOOK    = 'facebook';
   const PROVIDER_GITHUB      = 'github';
   const PROVIDER_GOOGLE      = 'google';
-  const PROVIDER_PHABRICATOR = 'phabricator';
 
   private $accessToken;
 
@@ -109,9 +108,6 @@ abstract class PhabricatorOAuthProvider {
       case self::PROVIDER_GOOGLE:
         $class = 'PhabricatorOAuthProviderGoogle';
         break;
-      case self::PROVIDER_PHABRICATOR:
-        $class = 'PhabricatorOAuthProviderPhabricator';
-        break;
       default:
         throw new Exception('Unknown OAuth provider.');
     }
@@ -124,7 +120,6 @@ abstract class PhabricatorOAuthProvider {
       self::PROVIDER_FACEBOOK,
       self::PROVIDER_GITHUB,
       self::PROVIDER_GOOGLE,
-      self::PROVIDER_PHABRICATOR,
     );
     $providers = array();
     foreach ($all as $provider) {
