@@ -48,6 +48,7 @@ class PhabricatorRemarkupRuleEmbedFile
     );
 
     if (!empty($matches[2])) {
+      $matches[2] = trim($matches[2], ', ');
       $options = PhutilSimpleOptions::parse($matches[2]) + $options;
     }
 
