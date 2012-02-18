@@ -62,11 +62,17 @@ class PhabricatorDirectoryMainController
   }
 
   private function buildMainResponse($nav, $projects) {
-    $unbreak_panel = $this->buildUnbreakNowPanel();
-    $triage_panel = $this->buildNeedsTriagePanel($projects);
+    if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
+      $unbreak_panel = $this->buildUnbreakNowPanel();
+      $triage_panel = $this->buildNeedsTriagePanel($projects);
+      $tasks_panel = $this->buildTasksPanel();
+    } else {
+      $unbreak_panel = null;
+      $triage_panel = null;
+      $tasks_panel = null;
+    }
     $jump_panel = $this->buildJumpPanel();
     $revision_panel = $this->buildRevisionPanel();
-    $tasks_panel = $this->buildTasksPanel();
     $feed_view = $this->buildFeedView($projects, $is_full = false);
 
 
@@ -494,13 +500,17 @@ class PhabricatorDirectoryMainController
         ),
         $jump_input));
 
-    $nav_buttons = array(
-      '/maniphest/task/create/' => 'Create a Task',
-      '/file/'       => 'Upload a File',
-      '/paste/'       => 'Create Paste',
-      '/w/'           => 'Browse Wiki',
-      '/diffusion/'   => 'Browse Code',
-    );
+    $nav_buttons = array();
+
+    if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
+      $nav_buttons['/maniphest/task/create/'] = 'Create a Task';
+    }
+    $nav_buttons['/file/'] = 'Upload a File';
+    $nav_buttons['/paste/'] = 'Create Paste';
+    if (PhabricatorEnv::getEnvConfig('phriction.enabled')) {
+      $nav_buttons['/w/'] = 'Browse Wiki';
+    }
+    $nav_buttons['/diffusion/'] = 'Browse Code';
 
     $panel->appendChild('<div class="phabricator-jump-nav-buttons">');
     foreach ($nav_buttons as $uri => $name) {

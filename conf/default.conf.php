@@ -623,6 +623,10 @@ return array(
   // Adding Custom Fields" in the documentation for more information.
   'maniphest.custom-task-extensions-class' => 'ManiphestDefaultTaskExtensions',
 
+// -- Phriction ------------------------------------------------------------- //
+
+  'phriction.enabled' => true,
+
 // -- Remarkup -------------------------------------------------------------- //
 
   // If you enable this, linked YouTube videos will be embeded inline. This has
