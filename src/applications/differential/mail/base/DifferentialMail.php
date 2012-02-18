@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,6 +103,11 @@ abstract class DifferentialMail {
     $template->setIsBulk(true);
     $template->setRelatedPHID($this->getRevision()->getPHID());
 
+    $mailtags = $this->getMailTags();
+    if ($mailtags) {
+      $template->setMailTags($mailtags);
+    }
+
     $phids = array();
     foreach ($to_phids as $phid) {
       $phids[$phid] = true;
@@ -132,6 +137,10 @@ abstract class DifferentialMail {
     foreach ($mails as $mail) {
       $mail->saveAndSend();
     }
+  }
+
+  protected function getMailTags() {
+    return array();
   }
 
   protected function getSubjectPrefix() {

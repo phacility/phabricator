@@ -64,6 +64,20 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   }
 
   /**
+   * Set tags (@{class:MetaMTANotificationType} constants) which identify the
+   * content of this mail in a general way. These tags are used to allow users
+   * to opt out of receiving certain types of mail, like updates when a task's
+   * projects change.
+   *
+   * @param list<const> List of @{class:MetaMTANotificationType} constants.
+   * @return this
+   */
+  public function setMailTags(array $tags) {
+    $this->setParam('mailtags', $tags);
+    return $this;
+  }
+
+  /**
    * In Gmail, conversations will be broken if you reply to a thread and the
    * server sends back a response without referencing your Message-ID, even if
    * it references a Message-ID earlier in the thread. To avoid this, use the
@@ -310,8 +324,8 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       $reply_to_name = idx($params, 'reply-to-name', '');
       unset($params['reply-to-name']);
 
-      $add_cc = null;
-      $add_to = null;
+      $add_cc = array();
+      $add_to = array();
 
       foreach ($params as $key => $value) {
         switch ($key) {
@@ -418,12 +432,69 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
             $thread_index = $this->generateThreadIndex($value, $is_first);
             $mailer->addHeader('Thread-Index', $thread_index);
             break;
+          case 'mailtags':
+            // Handled below.
+            break;
           default:
             // Just discard.
         }
       }
 
       $mailer->addHeader('X-Mail-Transport-Agent', 'MetaMTA');
+
+
+      // If the message has mailtags, filter out any recipients who don't want
+      // to receive this type of mail.
+      $mailtags = $this->getParam('mailtags');
+      if ($mailtags && ($add_to || $add_cc)) {
+
+        $tag_header = array();
+        foreach ($mailtags as $mailtag) {
+          $tag_header[] = '<'.$mailtag.'>';
+        }
+        $tag_header = implode(', ', $tag_header);
+        $mailer->addHeader('X-Phabricator-Mail-Tags', $tag_header);
+
+        $exclude = array();
+
+        $all_recipients = array_merge(
+          array_keys($add_to),
+          array_keys($add_cc));
+
+        $all_prefs = id(new PhabricatorUserPreferences())->loadAllWhere(
+          'userPHID in (%Ls)',
+          $all_recipients);
+        $all_prefs = mpull($all_prefs, null, 'getUserPHID');
+
+        foreach ($all_recipients as $recipient) {
+          $prefs = idx($all_prefs, $recipient);
+          if (!$prefs) {
+            continue;
+          }
+
+          $user_mailtags = $prefs->getPreference(
+            PhabricatorUserPreferences::PREFERENCE_MAILTAGS,
+            array());
+
+          // The user must have elected to receive mail for at least one
+          // of the mailtags.
+          $send = false;
+          foreach ($mailtags as $tag) {
+            if (idx($user_mailtags, $tag, true)) {
+              $send = true;
+              break;
+            }
+          }
+
+          if (!$send) {
+            $exclude[$recipient] = true;
+          }
+        }
+
+        $add_to = array_diff_key($add_to, $exclude);
+        $add_cc = array_diff_key($add_cc, $exclude);
+      }
+
 
       if ($add_to) {
         $mailer->addTos($add_to);
@@ -535,7 +606,7 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       if (isset($exclude[$phid])) {
         continue;
       }
-      $emails[] = $handles[$phid]->getEmail();
+      $emails[$phid] = $handles[$phid]->getEmail();
     }
 
     return $emails;

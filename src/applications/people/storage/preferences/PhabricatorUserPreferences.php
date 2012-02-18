@@ -24,6 +24,7 @@ class PhabricatorUserPreferences extends PhabricatorUserDAO {
 
   const PREFERENCE_RE_PREFIX      = 're-prefix';
   const PREFERENCE_NO_SELF_MAIL   = 'self-mail';
+  const PREFERENCE_MAILTAGS       = 'mailtags';
 
   protected $userPHID;
   protected $preferences = array();

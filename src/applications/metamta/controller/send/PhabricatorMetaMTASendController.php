@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ class PhabricatorMetaMTASendController extends PhabricatorMetaMTAController {
       $mail->setSimulatedFailureCount($request->getInt('failures'));
       $mail->setIsHTML($request->getInt('html'));
       $mail->setIsBulk($request->getInt('bulk'));
+      $mail->setMailTags($request->getStrList('mailtags'));
       $mail->save();
       if ($request->getInt('immediately')) {
         $mail->sendNow();
@@ -117,6 +118,12 @@ class PhabricatorMetaMTASendController extends PhabricatorMetaMTAController {
         id(new AphrontFormTextAreaControl())
           ->setLabel('Body')
           ->setName('body'))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel('Mail Tags')
+          ->setName('mailtags')
+          ->setCaption(
+            'Example: <tt>differential-cc, differential-comment</tt>'))
       ->appendChild(
         id(new AphrontFormDragAndDropUploadControl())
           ->setLabel('Attach Files')
