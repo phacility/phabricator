@@ -84,10 +84,11 @@
   line-height:         1.4em;
   margin:              0em;
   padding:             .3em 5px .4em 1.25em;
+  overflow: auto;
 }
 
-.differential-comment-content {
-  overflow: hidden;
+.differential-inline-comment-content {
+  overflow: auto;
 }
 
 .differential-comment-content .phabricator-remarkup .remarkup-code-block,
