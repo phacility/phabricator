@@ -53,6 +53,23 @@
   margin: 1em 0 1em 3em;
 }
 
+.phabricator-remarkup ol {
+  list-style: decimal;
+  margin: 1em 0 1em 3em;
+}
+
+.phabricator-remarkup ul ol,
+.phabricator-remarkup ul ul,
+.phabricator-remarkup ol ol,
+.phabricator-remarkup ol ul {
+  margin: .25em 0 .25em 2em;
+}
+
+.phabricator-remarkup li.phantom-item,
+.phabricator-remarkup li.phantom-item {
+  list-style-type: none;
+}
+
 .phabricator-remarkup h1:first-child,
 .phabricator-remarkup h2:first-child,
 .phabricator-remarkup h3:first-child,

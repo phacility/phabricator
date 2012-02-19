@@ -35,7 +35,7 @@ empty lines:
   = Large Header =
   == Smaller Header ==
   > Quoted Text
-  Use "- " or "* " for list items.
+  Use "- " or "* " for bulleted lists, and "# " for numbered lists.
   Use ``` or indent two spaces for code.
   Use %%% for a literal block.
 
@@ -87,6 +87,28 @@ This produces a list like this:
   - bread
 
 (Note that you need to put a space after the "-" or "*".)
+
+You can make numbered lists with a "#" instead of "-" or "*":
+
+  # Articuno
+  # Zapdos
+  # Moltres
+
+You can also nest lists:
+
+  - Body
+    - Head
+    - Arm
+      - Elbow
+      - Hand
+        # Thumb
+        # Index
+        # Middle
+        # Ring
+        # Pinkie
+    - Leg
+      - Knee
+      - Foot
 
 Make **code blocks** by indenting two spaces:
 
