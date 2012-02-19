@@ -81,7 +81,7 @@ extends PhabricatorOAuthProvider {
   }
 
   public function getUserInfoURI() {
-    return $this->getURI('/api/user.whoami/');
+    return $this->getURI('/api/user.whoami');
   }
 
   public function getMinimumScope() {
@@ -89,7 +89,12 @@ extends PhabricatorOAuthProvider {
   }
 
   public function setUserData($data) {
+    // need to strip the javascript shield from conduit
+    $data = substr($data, 8);
     $data = json_decode($data, true);
+    if (!is_array($data)) {
+      throw new Exception('Invalid user data.');
+    }
     $this->userData = $data['result'];
     return $this;
   }

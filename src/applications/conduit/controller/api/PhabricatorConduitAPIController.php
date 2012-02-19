@@ -247,6 +247,27 @@ class PhabricatorConduitAPIController
       return null;
     }
 
+    // handle oauth
+    $access_token = $request->getStr('access_token');
+    if ($access_token) {
+      $token = id(new PhabricatorOAuthServerAccessToken())
+        ->loadOneWhere('token = %s',
+                       $access_token);
+      if ($token) {
+        // TODO - T888 -- add expiration date and refresh tokens to oauth
+        $user_phid = $token->getUserPHID();
+        if ($user_phid) {
+          $user = id(new PhabricatorUser())
+            ->loadOneWhere('phid = %s',
+                           $user_phid);
+          if ($user) {
+            $api_request->setUser($user);
+            return null;
+          }
+        }
+      }
+    }
+
     // Handle sessionless auth. TOOD: This is super messy.
     if (isset($metadata['authUser'])) {
       $user = id(new PhabricatorUser())->loadOneWhere(
