@@ -109,17 +109,16 @@ class PhabricatorDirectoryMainController
         '/^d$/i'                    => 'uri:/differential/',
         '/^r$/i'                    => 'uri:/diffusion/',
         '/^t$/i'                    => 'uri:/maniphest/',
+        '/^p$/i'                    => 'uri:/project/',
+        '/^u$/i'                    => 'uri:/people/',
         '/r([A-Z]+)$/'              => 'repository',
         '/r([A-Z]+)(\S+)$/'         => 'commit',
         '/^d(\d+)$/i'               => 'revision',
         '/^t(\d+)$/i'               => 'task',
-
-        // TODO: '/^p$/i'                    => 'uri:/projects/',
-        // TODO: '/^u$/i'                    => 'uri:/people/',
-        // TODO: '/^p\s+(\S+)$/i'            => 'project',
-        // TODO: '/^u\s+(\S+)$/i'            => 'user',
-        // TODO: '/^task:\s+(\S+)/i'         => 'create-task',
-        // TODO: '/^(?:s|symbol)\s+(\S+)/i'  => 'find-symbol',
+        '/^p\s+(.+)$/i'            => 'project',
+        '/^u\s+(\S+)$/i'            => 'user',
+        '/^task:\s*(.+)/i'         => 'create-task',
+        '/^(?:s|symbol)\s+(\S+)/i'  => 'find-symbol',
       );
 
 
@@ -143,6 +142,26 @@ class PhabricatorDirectoryMainController
               case 'task':
                 return id(new AphrontRedirectResponse())
                   ->setURI('/T'.$matches[1]);
+              case 'user':
+                return id(new AphrontRedirectResponse())
+                  ->setURI('/p/'.$matches[1].'/');
+              case 'project':
+                $project = PhabricatorProjectQueryUtil
+                  ::findCloselyNamedProject($matches[1]);
+                if ($project) {
+                  return id(new AphrontRedirectResponse())
+                    ->setURI('/project/view/'.$project->getID().'/');
+                } else {
+                    $jump = $matches[1];
+                }
+                break;
+              case 'find-symbol':
+                return id(new AphrontRedirectResponse())
+                  ->setURI('/diffusion/symbol/'.$matches[1].'/?jump=true');
+              case 'create-task':
+                return id(new AphrontRedirectResponse())
+                  ->setURI('/maniphest/task/create/?title='
+                    .phutil_escape_uri($matches[1]));
               default:
                 throw new Exception("Unknown jump effect '{$effect}'!");
             }

@@ -668,6 +668,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectProfileController' => 'applications/project/controller/profile',
     'PhabricatorProjectProfileEditController' => 'applications/project/controller/profileedit',
     'PhabricatorProjectQuery' => 'applications/project/query/project',
+    'PhabricatorProjectQueryUtil' => 'applications/project/query/util',
     'PhabricatorProjectStatus' => 'applications/project/constants/status',
     'PhabricatorProjectSubproject' => 'applications/project/storage/subproject',
     'PhabricatorProjectTransaction' => 'applications/project/storage/transaction',
