@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,6 +138,38 @@ final class DifferentialReviewersFieldSpecification
 
   public function parseValueFromCommitMessage($value) {
     return $this->parseCommitMessageUserList($value);
+  }
+
+  public function shouldAppearOnRevisionList() {
+    return true;
+  }
+
+  public function renderHeaderForRevisionList() {
+    return 'Reviewers';
+  }
+
+  public function renderValueForRevisionList(DifferentialRevision $revision) {
+    $reviewer_phids = $revision->getReviewers();
+    if ($reviewer_phids) {
+      $first = reset($reviewer_phids);
+      if (count($reviewer_phids) > 1) {
+        $suffix = ' (+'.(count($reviewer_phids) - 1).')';
+      } else {
+        $suffix = null;
+      }
+      return $this->getHandle($first)->renderLink().$suffix;
+    } else {
+      return '<em>None</em>';
+    }
+  }
+
+  public function getRequiredHandlePHIDsForRevisionList(
+    DifferentialRevision $revision) {
+    $reviewer_phids = $revision->getReviewers();
+    if ($reviewer_phids) {
+      return array(reset($reviewer_phids));
+    }
+    return array();
   }
 
 }

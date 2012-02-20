@@ -25,6 +25,12 @@ final class DifferentialRevisionListView extends AphrontView {
   private $handles;
   private $user;
   private $noDataString;
+  private $fields;
+
+  public function setFields(array $fields) {
+    $this->fields = $fields;
+    return $this;
+  }
 
   public function setRevisions(array $revisions) {
     $this->revisions = $revisions;
@@ -33,14 +39,12 @@ final class DifferentialRevisionListView extends AphrontView {
 
   public function getRequiredHandlePHIDs() {
     $phids = array();
-    foreach ($this->revisions as $revision) {
-      $phids[] = $revision->getAuthorPHID();
-      $reviewers = $revision->getReviewers();
-      if ($reviewers) {
-        $phids[] = head($reviewers);
+    foreach ($this->fields as $field) {
+      foreach ($this->revisions as $revision) {
+        $phids[] = $field->getRequiredHandlePHIDsForRevisionList($revision);
       }
     }
-    return $phids;
+    return array_mergev($phids);
   }
 
   public function setHandles(array $handles) {
@@ -65,73 +69,54 @@ final class DifferentialRevisionListView extends AphrontView {
       throw new Exception("Call setUser() before render()!");
     }
 
+    foreach ($this->fields as $field) {
+      $field->setUser($this->user);
+      $field->setHandles($this->handles);
+    }
+
     $rows = array();
     foreach ($this->revisions as $revision) {
-      $status = $revision->getStatus();
-      $status =
-        ArcanistDifferentialRevisionStatus::getNameForRevisionStatus($status);
-
-      $reviewer_phids = $revision->getReviewers();
-      if ($reviewer_phids) {
-        $first = reset($reviewer_phids);
-        if (count($reviewer_phids) > 1) {
-          $suffix = ' (+'.(count($reviewer_phids) - 1).')';
-        } else {
-          $suffix = null;
-        }
-        $reviewers = $this->handles[$first]->renderLink().$suffix;
-      } else {
-        $reviewers = '<em>None</em>';
+      $row = array();
+      foreach ($this->fields as $field) {
+        $row[] = $field->renderValueForRevisionList($revision);
       }
+      $rows[] = $row;
+    }
 
-      $link = phutil_render_tag(
-        'a',
-        array(
-          'href' => '/D'.$revision->getID(),
-        ),
-        phutil_escape_html($revision->getTitle()));
-
-      $rows[] = array(
-        'D'.$revision->getID(),
-        $link,
-        phutil_escape_html($status),
-        number_format($revision->getLineCount()),
-        $this->handles[$revision->getAuthorPHID()]->renderLink(),
-        $reviewers,
-        phabricator_datetime($revision->getDateModified(), $user),
-        phabricator_date($revision->getDateCreated(), $user),
-      );
+    $headers = array();
+    $classes = array();
+    foreach ($this->fields as $field) {
+      $headers[] = $field->renderHeaderForRevisionList();
+      $classes[] = $field->getColumnClassForRevisionList();
     }
 
     $table = new AphrontTableView($rows);
-    $table->setHeaders(
-      array(
-        'ID',
-        'Revision',
-        'Status',
-        'Lines',
-        'Author',
-        'Reviewers',
-        'Modified',
-        'Created',
-      ));
-    $table->setColumnClasses(
-      array(
-        null,
-        'wide pri',
-        null,
-        'n',
-        null,
-        null,
-        'right',
-        'right',
-      ));
+    $table->setHeaders($headers);
+    $table->setColumnClasses($classes);
 
     if ($this->noDataString) {
       $table->setNoDataString($this->noDataString);
     }
 
     return $table->render();
+  }
+
+  public static function getDefaultFields() {
+    $selector = DifferentialFieldSelector::newSelector();
+    $fields = $selector->getFieldSpecifications();
+    foreach ($fields as $key => $field) {
+      if (!$field->shouldAppearOnRevisionList()) {
+        unset($fields[$key]);
+      }
+    }
+
+    if (!$fields) {
+      throw new Exception(
+        "Phabricator configuration has no fields that appear on the list ".
+        "interface!");
+    }
+
+    return $selector->sortFieldsForRevisionList($fields);
   }
 
 }

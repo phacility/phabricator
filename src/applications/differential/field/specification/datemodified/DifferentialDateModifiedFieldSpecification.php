@@ -16,22 +16,23 @@
  * limitations under the License.
  */
 
-abstract class DifferentialFieldSelector {
+final class DifferentialDateModifiedFieldSpecification
+  extends DifferentialFieldSpecification {
 
-  final public function __construct() {
-    // <empty>
+  public function shouldAppearOnRevisionList() {
+    return true;
   }
 
-  final public static function newSelector() {
-    $class = PhabricatorEnv::getEnvConfig('differential.field-selector');
-    $selector = newv($class, array());
-    return $selector;
+  public function renderHeaderForRevisionList() {
+    return 'Updated';
   }
 
-  abstract public function getFieldSpecifications();
+  public function getColumnClassForRevisionList() {
+    return 'right';
+  }
 
-  public function sortFieldsForRevisionList(array $fields) {
-    return $fields;
+  public function renderValueForRevisionList(DifferentialRevision $revision) {
+    return phabricator_datetime($revision->getDateModified(), $this->getUser());
   }
 
 }

@@ -292,8 +292,11 @@ class PhabricatorDirectoryMainController
         "View Active Revisions \xC2\xBB"));
 
     if ($active) {
+      $fields =
+
       $revision_view = id(new DifferentialRevisionListView())
         ->setRevisions($active)
+        ->setFields(DifferentialRevisionListView::getDefaultFields())
         ->setUser($user);
       $phids = array_merge(
         array($user_phid),

@@ -54,4 +54,17 @@ final class DifferentialRevisionStatusFieldSpecification
     return '<strong>'.$status.'</strong>'.$next_step;
   }
 
+  public function shouldAppearOnRevisionList() {
+    return true;
+  }
+
+  public function renderHeaderForRevisionList() {
+    return 'Status';
+  }
+
+  public function renderValueForRevisionList(DifferentialRevision $revision) {
+    return ArcanistDifferentialRevisionStatus::getNameForRevisionStatus(
+      $revision->getStatus());
+  }
+
 }
