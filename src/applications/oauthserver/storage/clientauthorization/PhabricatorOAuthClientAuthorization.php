@@ -26,11 +26,14 @@ extends PhabricatorOAuthServerDAO {
   protected $phid;
   protected $userPHID;
   protected $clientPHID;
-
+  protected $scope;
 
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_SERIALIZATION => array(
+        'scope' => self::SERIALIZATION_JSON,
+      ),
     ) + parent::getConfiguration();
   }
 

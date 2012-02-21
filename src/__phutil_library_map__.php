@@ -619,6 +619,7 @@ phutil_register_library_map(array(
     'PhabricatorOAuthServerAuthorizationCode' => 'applications/oauthserver/storage/authorizationcode',
     'PhabricatorOAuthServerClient' => 'applications/oauthserver/storage/client',
     'PhabricatorOAuthServerDAO' => 'applications/oauthserver/storage/base',
+    'PhabricatorOAuthServerScope' => 'applications/oauthserver/scope',
     'PhabricatorOAuthServerTestController' => 'applications/oauthserver/controller/test',
     'PhabricatorOAuthServerTokenController' => 'applications/oauthserver/controller/token',
     'PhabricatorOAuthUnlinkController' => 'applications/auth/controller/unlink',

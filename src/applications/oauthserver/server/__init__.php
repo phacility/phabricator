@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/oauthserver/scope');
 phutil_require_module('phabricator', 'applications/oauthserver/storage/accesstoken');
 phutil_require_module('phabricator', 'applications/oauthserver/storage/authorizationcode');
 phutil_require_module('phabricator', 'applications/oauthserver/storage/clientauthorization');

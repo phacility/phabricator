@@ -9,6 +9,7 @@
 phutil_require_module('phabricator', 'aphront/writeguard');
 phutil_require_module('phabricator', 'applications/auth/controller/base');
 phutil_require_module('phabricator', 'applications/oauthserver/response');
+phutil_require_module('phabricator', 'applications/oauthserver/scope');
 phutil_require_module('phabricator', 'applications/oauthserver/server');
 phutil_require_module('phabricator', 'applications/oauthserver/storage/client');
 phutil_require_module('phabricator', 'view/form/base');

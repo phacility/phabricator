@@ -32,6 +32,7 @@ extends PhabricatorAuthController {
     $client_phid   = $request->getStr('client_id');
     $client_secret = $request->getStr('client_secret');
     $response      = new PhabricatorOAuthResponse();
+    $server        = new PhabricatorOAuthServer();
     if (!$code) {
       return $response->setMalformed(
         'Required parameter code missing.'
@@ -48,6 +49,15 @@ extends PhabricatorAuthController {
       );
     }
 
+    $client = id(new PhabricatorOAuthServerClient())
+      ->loadOneWhere('phid = %s', $client_phid);
+    if (!$client) {
+      return $response->setNotFound(
+        'Client with client_id '.$client_phid.' not found.'
+      );
+    }
+    $server->setClient($client);
+
     $auth_code = id(new PhabricatorOAuthServerAuthorizationCode())
       ->loadOneWhere('code = %s', $code);
     if (!$auth_code) {
@@ -55,9 +65,17 @@ extends PhabricatorAuthController {
         'Authorization code '.$code.' not found.'
       );
     }
+
+    $user_phid = $auth_code->getUserPHID();
     $user = id(new PhabricatorUser())
-      ->loadOneWhere('phid = %s', $auth_code->getUserPHID());
-    $server = new PhabricatorOAuthServer($user);
+      ->loadOneWhere('phid = %s', $user_phid);
+    if (!$user) {
+      return $response->setNotFound(
+        'User with phid '.$user_phid.' not found.'
+      );
+    }
+    $server->setUser($user);
+
     $test_code = new PhabricatorOAuthServerAuthorizationCode();
     $test_code->setClientSecret($client_secret);
     $test_code->setClientPHID($client_phid);
@@ -69,19 +87,15 @@ extends PhabricatorAuthController {
       );
     }
 
-    $client = id(new PhabricatorOAuthServerClient())
-      ->loadOneWhere('phid = %s', $client_phid);
-    if (!$client) {
-      return $response->setNotFound(
-        'Client with client_id '.$client_phid.' not found.'
-      );
-    }
-
     $scope = AphrontWriteGuard::beginScopedUnguardedWrites();
-    $access_token = $server->generateAccessToken($client);
+    $access_token = $server->generateAccessToken();
     if ($access_token) {
       $auth_code->delete();
-      $result = array('access_token' => $access_token->getToken());
+      $result = array(
+         'access_token' => $access_token->getToken(),
+         'token_type'   => 'Bearer',
+         'expires_in'   => PhabricatorOAuthServer::ACCESS_TOKEN_TIMEOUT,
+       );
       return $response->setContent($result);
     }
 

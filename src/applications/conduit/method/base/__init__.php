@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/oauthserver/scope');
 phutil_require_module('phabricator', 'infrastructure/env');
 
 phutil_require_module('phutil', 'parser/uri');

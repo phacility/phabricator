@@ -47,33 +47,50 @@
 final class PhabricatorOAuthServer {
 
   const AUTHORIZATION_CODE_TIMEOUT = 300;
+  const ACCESS_TOKEN_TIMEOUT       = 3600;
 
   private $user;
+  private $client;
 
   /**
    * @group internal
    */
   private function getUser() {
+    if (!$this->user) {
+      throw new Exception('You must setUser before you can getUser!');
+    }
     return $this->user;
   }
 
-  public function __construct(PhabricatorUser $user) {
-    if (!$user) {
-      throw new Exception('Must specify a Phabricator $user to constructor!');
-    }
+  public function setUser(PhabricatorUser $user) {
     $this->user = $user;
+    return $this;
+  }
+
+  /**
+   * @group internal
+   */
+  private function getClient() {
+    if (!$this->client) {
+      throw new Exception('You must setClient before you can getClient!');
+    }
+    return $this->client;
+  }
+
+  public function setClient(PhabricatorOAuthServerClient $client) {
+    $this->client = $client;
+    return $this;
   }
 
   /**
    * @task auth
    */
-  public function userHasAuthorizedClient(
-    PhabricatorOAuthServerClient $client) {
+  public function userHasAuthorizedClient() {
 
     $authorization = id(new PhabricatorOAuthClientAuthorization())->
       loadOneWhere('userPHID = %s AND clientPHID = %s',
                    $this->getUser()->getPHID(),
-                   $client->getPHID());
+                   $this->getClient->getPHID());
 
     if (empty($authorization)) {
       return false;
@@ -85,20 +102,21 @@ final class PhabricatorOAuthServer {
   /**
    * @task auth
    */
-  public function authorizeClient(PhabricatorOAuthServerClient $client) {
+  public function authorizeClient(array $scope) {
     $authorization = new PhabricatorOAuthClientAuthorization();
     $authorization->setUserPHID($this->getUser()->getPHID());
-    $authorization->setClientPHID($client->getPHID());
+    $authorization->setClientPHID($this->getClient()->getPHID());
+    $authorization->setScope($scope);
     $authorization->save();
   }
 
   /**
    * @task auth
    */
-  public function generateAuthorizationCode(
-    PhabricatorOAuthServerClient $client) {
+  public function generateAuthorizationCode() {
 
-    $code = Filesystem::readRandomCharacters(32);
+    $code   = Filesystem::readRandomCharacters(32);
+    $client = $this->getClient();
 
     $authorization_code = new PhabricatorOAuthServerAuthorizationCode();
     $authorization_code->setCode($code);
@@ -113,15 +131,14 @@ final class PhabricatorOAuthServer {
   /**
    * @task token
    */
-  public function generateAccessToken(PhabricatorOAuthServerClient $client) {
+  public function generateAccessToken() {
 
     $token = Filesystem::readRandomCharacters(32);
 
     $access_token = new PhabricatorOAuthServerAccessToken();
     $access_token->setToken($token);
     $access_token->setUserPHID($this->getUser()->getPHID());
-    $access_token->setClientPHID($client->getPHID());
-    $access_token->setDateExpires(0);
+    $access_token->setClientPHID($this->getClient()->getPHID());
     $access_token->save();
 
     return $access_token;
@@ -146,6 +163,44 @@ final class PhabricatorOAuthServer {
     $created_time = $test_code->getDateCreated();
     $must_be_used_by = $created_time + self::AUTHORIZATION_CODE_TIMEOUT;
     return (time() < $must_be_used_by);
+  }
+
+  /**
+   * @task token
+   */
+  public function validateAccessToken(
+    PhabricatorOAuthServerAccessToken $token,
+    $required_scope) {
+
+    $created_time    = $token->getDateCreated();
+    $must_be_used_by = $created_time + self::ACCESS_TOKEN_TIMEOUT;
+    $expired         = time() > $must_be_used_by;
+    $authorization   = id(new PhabricatorOAuthClientAuthorization())
+                         ->loadOneWhere(
+                           'userPHID = %s AND clientPHID = %s',
+                           $token->getUserPHID(),
+                           $token->getClientPHID());
+
+    if (!$authorization) {
+      return false;
+    }
+    $token_scope = $authorization->getScope();
+    if (!isset($token_scope[$required_scope])) {
+      return false;
+    }
+
+    if ($expired) {
+      $valid = false;
+      // check if the scope includes "offline_access", which makes the
+      // token valid despite being expired
+      if (isset(
+        $token_scope[PhabricatorOAuthServerScope::SCOPE_OFFLINE_ACCESS]
+      )) {
+        $valid = true;
+      }
+    }
+
+    return $valid;
   }
 
 }

@@ -49,11 +49,15 @@ extends PhabricatorAuthController {
       );
     }
 
-    if ($server->userHasAuthorizedClient($client)) {
+    $server->setClient($client);
+    if ($server->userHasAuthorizedClient()) {
       $return_auth_code = true;
       $unguarded_write  = AphrontWriteGuard::beginScopedUnguardedWrites();
     } else if ($request->isFormPost()) {
-      $server->authorizeClient($client);
+      // TODO -- T848 (add scope to Phabricator OAuth)
+      // should have some $scope based off of user submission here...!
+      $scope = array(PhabricatorOAuthServerScope::SCOPE_WHOAMI => 1);
+      $server->authorizeClient($scope);
       $return_auth_code = true;
       $unguarded_write  = null;
     } else {
@@ -64,7 +68,7 @@ extends PhabricatorAuthController {
     if ($return_auth_code) {
       // step 1 -- generate authorization code
       $auth_code =
-        $server->generateAuthorizationCode($client);
+        $server->generateAuthorizationCode();
 
       // step 2 -- error or return it
       if (!$auth_code) {
