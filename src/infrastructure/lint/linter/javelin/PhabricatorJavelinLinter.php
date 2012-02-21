@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,11 +130,14 @@ class PhabricatorJavelinLinter extends ArcanistLinter {
       '@^externals/javelin/src/@',
       'webroot/rsrc/js/javelin/',
       $path);
-    $info = $celerity->lookupFileInformation(substr($path, strlen('webroot')));
-
     $need = $external_classes;
 
-    $requires = $info['requires'];
+    $info = $celerity->lookupFileInformation(substr($path, strlen('webroot')));
+    if (!$info) {
+      $info = array();
+    }
+
+    $requires = idx($info, 'requires', array());
 
     foreach ($requires as $key => $name) {
       $symbol_info = $celerity->lookupSymbolInformation($name);
@@ -201,11 +204,16 @@ class PhabricatorJavelinLinter extends ArcanistLinter {
 
   private function getUsedAndInstalledSymbolsForPath($path) {
     list($symbols) = $this->loadSymbols($path);
-
-    $symbols = explode("\n", trim($symbols));
+    $symbols = trim($symbols);
 
     $uses = array();
     $installs = array();
+    if (empty($symbols)) {
+      // This file has no symbols.
+      return array($uses, $installs);
+    }
+
+    $symbols = explode("\n", trim($symbols));
     foreach ($symbols as $line) {
       $matches = null;
       if (!preg_match('/^([?+])([^:]*):(\d+)$/', $line, $matches)) {

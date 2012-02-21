@@ -330,6 +330,30 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/javelin/lib/behavior.js',
   ),
+  'javelin-behavior-aphront-drag-and-drop' =>
+  array(
+    'uri' => '/res/ac21045a/rsrc/js/application/core/behavior-drag-and-drop.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-util',
+      3 => 'phabricator-drag-and-drop-file-upload',
+    ),
+    'disk' => '/rsrc/js/application/core/behavior-drag-and-drop.js',
+  ),
+  0 =>
+  array(
+    'uri' => '/res/b6096fdd/rsrc/js/javelin/lib/__tests__/URI.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-uri',
+      1 => 'javelin-php-serializer',
+    ),
+    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
+  ),
   'javelin-behavior-aphront-basic-tokenizer' =>
   array(
     'uri' => '/res/9be30797/rsrc/js/application/core/behavior-tokenizer.js',
@@ -345,19 +369,6 @@ celerity_register_resource_map(array(
       6 => 'javelin-stratcom',
     ),
     'disk' => '/rsrc/js/application/core/behavior-tokenizer.js',
-  ),
-  'javelin-behavior-aphront-drag-and-drop' =>
-  array(
-    'uri' => '/res/ac21045a/rsrc/js/application/core/behavior-drag-and-drop.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-      2 => 'javelin-util',
-      3 => 'phabricator-drag-and-drop-file-upload',
-    ),
-    'disk' => '/rsrc/js/application/core/behavior-drag-and-drop.js',
   ),
   'javelin-behavior-aphront-drag-and-drop-textarea' =>
   array(
@@ -1517,17 +1528,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/core/remarkup.css',
   ),
-  0 =>
-  array(
-    'uri' => '/res/b6096fdd/rsrc/js/javelin/lib/__tests__/URI.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-uri',
-      1 => 'javelin-php-serializer',
-    ),
-    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
-  ),
   'phabricator-search-results-css' =>
   array(
     'uri' => '/res/f8a86e27/rsrc/css/application/search/search-results.css',
@@ -1735,6 +1735,33 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/application/projects/project-edit.css',
+  ),
+  'raphael-core' =>
+  array(
+    'uri' => '/res/bae05d27/rsrc/js/raphael/raphael.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/js/raphael/raphael.js',
+  ),
+  'raphael-g' =>
+  array(
+    'uri' => '/res/8bbdbea8/rsrc/js/raphael/g.raphael.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/js/raphael/g.raphael.js',
+  ),
+  'raphael-g-line' =>
+  array(
+    'uri' => '/res/54504ae4/rsrc/js/raphael/g.raphael.line.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/js/raphael/g.raphael.line.js',
   ),
   'syntax-highlighting-css' =>
   array(
