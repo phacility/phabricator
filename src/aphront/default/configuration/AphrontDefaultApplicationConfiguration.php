@@ -96,6 +96,7 @@ class AphrontDefaultApplicationConfiguration
       '/differential/' => array(
         '$' => 'DifferentialRevisionListController',
         'filter/(?P<filter>\w+)/$' => 'DifferentialRevisionListController',
+        'stats/(?P<filter>\w+)/$' => 'DifferentialRevisionStatsController',
         'diff/' => array(
           '(?P<id>\d+)/$' => 'DifferentialDiffViewController',
           'create/$' => 'DifferentialDiffCreateController',
