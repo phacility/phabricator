@@ -26,8 +26,10 @@ phutil_require_module('phabricator', 'infrastructure/javelin/api');
 phutil_require_module('phabricator', 'infrastructure/javelin/markup');
 phutil_require_module('phabricator', 'view/layout/minipanel');
 phutil_require_module('phabricator', 'view/layout/panel');
+phutil_require_module('phabricator', 'view/layout/sidenavfilter');
 
 phutil_require_module('phutil', 'markup');
+phutil_require_module('phutil', 'parser/uri');
 phutil_require_module('phutil', 'utils');
 
 

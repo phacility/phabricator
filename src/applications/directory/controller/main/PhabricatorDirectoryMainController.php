@@ -20,9 +20,11 @@ class PhabricatorDirectoryMainController
   extends PhabricatorDirectoryController {
 
   private $filter;
+  private $subfilter;
 
   public function willProcessRequest(array $data) {
     $this->filter = idx($data, 'filter');
+    $this->subfilter = idx($data, 'subfilter');
   }
 
   public function shouldRequireAdmin() {
@@ -73,8 +75,6 @@ class PhabricatorDirectoryMainController
     }
     $jump_panel = $this->buildJumpPanel();
     $revision_panel = $this->buildRevisionPanel();
-    $feed_view = $this->buildFeedView($projects, $is_full = false);
-
 
     $content = array(
       $unbreak_panel,
@@ -82,7 +82,6 @@ class PhabricatorDirectoryMainController
       $jump_panel,
       $revision_panel,
       $tasks_panel,
-      $feed_view,
     );
 
     $nav->appendChild($content);
@@ -187,8 +186,29 @@ class PhabricatorDirectoryMainController
   }
 
   private function buildFeedResponse($nav, $projects) {
-    $view = $this->buildFeedView($projects, $is_full = true);
-    $nav->appendChild($view);
+
+    $subnav = new AphrontSideNavFilterView();
+    $subnav->setBaseURI(new PhutilURI('/feed/'));
+
+    $subnav->addFilter('all',       'All Activity', '/feed/');
+    $subnav->addFilter('projects',  'My Projects');
+
+    $filter = $subnav->selectFilter($this->subfilter, 'all');
+
+    switch ($filter) {
+      case 'all':
+        $phids = array();
+        break;
+      case 'projects':
+        $phids = mpull($projects, 'getPHID');
+        break;
+    }
+
+    $view = $this->buildFeedView($phids);
+    $subnav->appendChild($view);
+
+    $nav->appendChild($subnav);
+
     return $this->buildStandardPageResponse(
       $nav,
       array(
@@ -390,16 +410,15 @@ class PhabricatorDirectoryMainController
     return $view;
   }
 
-  private function buildFeedView(array $projects, $is_full) {
+  private function buildFeedView(array $phids) {
     $request = $this->getRequest();
     $user = $request->getUser();
     $user_phid = $user->getPHID();
 
     $feed_query = new PhabricatorFeedQuery();
-    $feed_query->setFilterPHIDs(
-      array_merge(
-        array($user_phid),
-        mpull($projects, 'getPHID')));
+    if ($phids) {
+      $feed_query->setFilterPHIDs($phids);
+    }
 
     // TODO: All this limit stuff should probably be consolidated into the
     // feed query?
@@ -407,13 +426,9 @@ class PhabricatorDirectoryMainController
     $old_link = null;
     $new_link = null;
 
-    if ($is_full) {
-      $feed_query->setAfter($request->getStr('after'));
-      $feed_query->setBefore($request->getStr('before'));
-      $limit = 500;
-    } else {
-      $limit = 100;
-    }
+    $feed_query->setAfter($request->getStr('after'));
+    $feed_query->setBefore($request->getStr('before'));
+    $limit = 500;
 
     // Grab one more story than we intend to display so we can figure out
     // if we need to render an "Older Posts" link or not (with reasonable
@@ -422,12 +437,8 @@ class PhabricatorDirectoryMainController
     $feed = $feed_query->execute();
     $extra_row = (count($feed) == $limit + 1);
 
-    if ($is_full) {
-      $have_new = ($request->getStr('before')) ||
-                  ($request->getStr('after') && $extra_row);
-    } else {
-      $have_new = false;
-    }
+    $have_new = ($request->getStr('before')) ||
+                ($request->getStr('after') && $extra_row);
 
     $have_old = ($request->getStr('after')) ||
                 ($request->getStr('before') && $extra_row) ||
@@ -440,7 +451,7 @@ class PhabricatorDirectoryMainController
       $old_link = phutil_render_tag(
         'a',
         array(
-          'href' => '/feed/?before='.end($feed)->getChronologicalKey(),
+          'href' => '?before='.end($feed)->getChronologicalKey(),
           'class' => 'phabricator-feed-older-link',
         ),
         "Older Stories \xC2\xBB");
@@ -449,7 +460,7 @@ class PhabricatorDirectoryMainController
       $new_link = phutil_render_tag(
         'a',
         array(
-          'href' => '/feed/?after='.reset($feed)->getChronologicalKey(),
+          'href' => '?after='.reset($feed)->getChronologicalKey(),
           'class' => 'phabricator-feed-newer-link',
         ),
         "\xC2\xAB Newer Stories");
@@ -494,7 +505,7 @@ class PhabricatorDirectoryMainController
       array(
         'href' => $doc_href,
       ),
-      'Jump Nav Use Guide');
+      'Jump Nav User Guide');
 
     $jump_input = phutil_render_tag(
       'input',
