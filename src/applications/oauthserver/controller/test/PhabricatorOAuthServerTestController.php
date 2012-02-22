@@ -20,13 +20,9 @@
  * @group oauthserver
  */
 final class PhabricatorOAuthServerTestController
-extends PhabricatorAuthController {
+extends PhabricatorOAuthServerController {
 
   public function shouldRequireLogin() {
-    return true;
-  }
-
-  public function shouldRequireAdmin() {
     return true;
   }
 
@@ -34,55 +30,40 @@ extends PhabricatorAuthController {
     $request      = $this->getRequest();
     $current_user = $request->getUser();
     $server       = new PhabricatorOAuthServer($current_user);
+    $panels       = array();
+    $results      = array();
 
-    $forms = array();
-    $form = id(new AphrontFormView())
-      ->setUser($current_user)
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-        ->setValue('Create Test Client'))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-        ->setLabel('Name')
-        ->setName('name')
-        ->setValue(''))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-        ->setLabel('Redirect URI')
-        ->setName('redirect_uri')
-        ->setValue(''))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-        ->setValue('Create Client'));
-    $forms[] = $form;
-    $result = array();
+
     if ($request->isFormPost()) {
-      $name         = $request->getStr('name');
-      $redirect_uri = $request->getStr('redirect_uri');
-      $secret       = Filesystem::readRandomCharacters(32);
-      $client       = new PhabricatorOAuthServerClient();
-      $client->setName($name);
-      $client->setSecret($secret);
-      $client->setCreatorPHID($current_user->getPHID());
-      $client->setRedirectURI($redirect_uri);
-      $client->save();
-      $id      = $client->getID();
-      $phid    = $client->getPHID();
-      $name    = phutil_escape_html($name);
-      $results = array();
-      $results[] = "New client named {$name} with secret {$secret}.";
-      $results[] = "Client has id {$id} and phid {$phid}.";
-      $result = implode('<br />', $results);
+      $action = $request->getStr('action');
+      switch ($action) {
+        case 'testclientauthorization':
+          $user_phid   = $current_user->getPHID();
+          $client_phid = $request->getStr('client_phid');
+          $client      = id(new PhabricatorOAuthServerClient)
+            ->loadOneWhere('phid = %s', $client_phid);
+          if (!$client) {
+            throw new Exception('Failed to load client!');
+          }
+          if ($client->getCreatorPHID() != $user_phid ||
+              $current_user->getPHID()  != $user_phid) {
+              throw new Exception(
+                'Only allowed to make test data for yourself '.
+                'for clients you own!'
+              );
+          }
+          // blankclientauthorizations don't get scope
+          $scope = array();
+          $server->setUser($current_user);
+          $server->setClient($client);
+          $authorization = $server->authorizeClient($scope);
+          return id(new AphrontRedirectResponse())
+            ->setURI('/oauthserver/clientauthorization/?edited='.
+                     $authorization->getPHID());
+          break;
+        default:
+          break;
+      }
     }
-    $title = 'Test OAuthServer Stuff';
-    $panel = new AphrontPanelView();
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->setHeader($title);
-    $panel->appendChild($result);
-    $panel->appendChild($forms);
-
-    return $this->buildStandardPageResponse(
-            $panel,
-      array('title' => $title));
   }
 }

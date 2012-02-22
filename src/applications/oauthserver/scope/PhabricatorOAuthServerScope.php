@@ -34,4 +34,48 @@ final class PhabricatorOAuthServerScope {
     );
   }
 
+  static public function getCheckboxControl($current_scopes) {
+    $scopes = self::getScopesDict();
+    $scope_keys = array_keys($scopes);
+    sort($scope_keys);
+
+    $checkboxes = new AphrontFormCheckboxControl();
+    foreach ($scope_keys as $scope) {
+      $checkboxes->addCheckbox(
+        $name = $scope,
+        $value = 1,
+        $label = self::getCheckboxLabel($scope),
+        $checked = isset($current_scopes[$scope])
+      );
+    }
+    $checkboxes->setLabel('Scope');
+
+    return $checkboxes;
+  }
+
+  static private function getCheckboxLabel($scope) {
+    $label = null;
+    switch ($scope) {
+      case self::SCOPE_OFFLINE_ACCESS:
+        $label = 'Make access tokens granted to this client never expire.';
+        break;
+      case self::SCOPE_WHOAMI:
+        $label = 'Read access to Conduit method user.whoami.';
+        break;
+    }
+
+    return $label;
+  }
+
+  static public function getScopesFromRequest(AphrontRequest $request) {
+    $scopes = self::getScopesDict();
+    $requested_scopes = array();
+    foreach ($scopes as $scope => $bit) {
+      if ($request->getBool($scope)) {
+        $requested_scopes[$scope] = 1;
+      }
+    }
+    return $requested_scopes;
+  }
+
 }

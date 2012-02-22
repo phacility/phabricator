@@ -95,7 +95,10 @@ final class AphrontPanelView extends AphrontView {
           implode(" ", $this->buttons).
         '</div>';
     }
-
+    $header_elements =
+      '<div class="aphront-panel-header">'.
+        $buttons.$header.$caption.
+      '</div>';
     $table = $this->renderChildren();
 
     require_celerity_resource('aphront-panel-view-css');
@@ -112,7 +115,7 @@ final class AphrontPanelView extends AphrontView {
         'class' => implode(' ', $classes),
         'id'    => $this->id,
       ),
-      $buttons.$header.$caption.$table);
+      $header_elements.$table);
   }
 
 }

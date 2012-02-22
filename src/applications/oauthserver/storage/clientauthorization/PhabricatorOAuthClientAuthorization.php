@@ -28,6 +28,21 @@ extends PhabricatorOAuthServerDAO {
   protected $clientPHID;
   protected $scope;
 
+  public function getEditURI() {
+    return '/oauthserver/clientauthorization/edit/'.$this->getPHID().'/';
+  }
+
+  public function getDeleteURI() {
+    return '/oauthserver/clientauthorization/delete/'.$this->getPHID().'/';
+  }
+
+  public function getScopeString() {
+    $scope = $this->getScope();
+    $scopes = array_keys($scope);
+    sort($scopes);
+    return implode(', ', $scopes);
+  }
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,

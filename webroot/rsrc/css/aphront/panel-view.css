@@ -11,16 +11,20 @@
   margin: 1em 2em;
 }
 
+.aphront-panel-view .aphront-panel-header {
+  margin: 0 0 1em 0;
+}
+
 .aphront-panel-view h1 {
   font-size:        14px;
   font-weight:      bold;
-  padding:          2px 0 8px;
+  padding:          4px 0 0 0;
 }
 
 .aphront-panel-view-caption {
   font-size: 11px;
   color: #666666;
-  margin-top: -0.75em;
+  margin-top: -0.1em;
   margin-bottom: 0.75em;
 }
 

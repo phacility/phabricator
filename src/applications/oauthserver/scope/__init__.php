@@ -6,5 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'view/form/control/checkbox');
+
 
 phutil_require_source('PhabricatorOAuthServerScope.php');

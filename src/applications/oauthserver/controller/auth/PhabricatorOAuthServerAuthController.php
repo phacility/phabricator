@@ -54,9 +54,7 @@ extends PhabricatorAuthController {
       $return_auth_code = true;
       $unguarded_write  = AphrontWriteGuard::beginScopedUnguardedWrites();
     } else if ($request->isFormPost()) {
-      // TODO -- T848 (add scope to Phabricator OAuth)
-      // should have some $scope based off of user submission here...!
-      $scope = array(PhabricatorOAuthServerScope::SCOPE_WHOAMI => 1);
+      $scope = PhabricatorOAuthServerScope::getScopesFromRequest($request);
       $server->authorizeClient($scope);
       $return_auth_code = true;
       $unguarded_write  = null;
@@ -107,21 +105,28 @@ extends PhabricatorAuthController {
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
     $panel->setHeader($title);
 
-    // TODO -- T848 (add scope to Phabricator OAuth)
-    // generally inform user what this means as this fleshes out
     $description =
       "Do want to authorize {$name} to access your ".
       "Phabricator account data?";
 
+    $desired_scopes = array(
+      PhabricatorOAuthServerScope::SCOPE_WHOAMI => 1,
+      PhabricatorOAuthServerScope::SCOPE_OFFLINE_ACCESS => 1
+    );
     $form = id(new AphrontFormView())
       ->setUser($current_user)
       ->appendChild(
         id(new AphrontFormStaticControl())
-        ->setValue($description))
+        ->setValue($description)
+      )
+      ->appendChild(
+        PhabricatorOAuthServerScope::getCheckboxControl()
+      )
       ->appendChild(
         id(new AphrontFormSubmitControl())
         ->setValue('Authorize')
-        ->addCancelButton('/'));
+        ->addCancelButton('/')
+      );
     // TODO -- T889 (make "cancel" do something more sensible)
 
     $panel->appendChild($form);

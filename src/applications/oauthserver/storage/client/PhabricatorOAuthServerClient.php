@@ -29,6 +29,18 @@ extends PhabricatorOAuthServerDAO {
   protected $redirectURI;
   protected $creatorPHID;
 
+  public function getEditURI() {
+    return '/oauthserver/client/edit/'.$this->getPHID().'/';
+  }
+
+  public function getViewURI() {
+    return '/oauthserver/client/view/'.$this->getPHID().'/';
+  }
+
+  public function getDeleteURI() {
+    return '/oauthserver/client/delete/'.$this->getPHID().'/';
+  }
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,

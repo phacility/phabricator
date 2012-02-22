@@ -108,6 +108,8 @@ final class PhabricatorOAuthServer {
     $authorization->setClientPHID($this->getClient()->getPHID());
     $authorization->setScope($scope);
     $authorization->save();
+
+    return $authorization;
   }
 
   /**

@@ -158,9 +158,24 @@ class AphrontDefaultApplicationConfiguration
       ),
 
       '/oauthserver/' => array(
-        'auth/' => 'PhabricatorOAuthServerAuthController',
-        'token/' => 'PhabricatorOAuthServerTokenController',
-        'test/' => 'PhabricatorOAuthServerTestController',
+        'auth/'          => 'PhabricatorOAuthServerAuthController',
+        'test/'          => 'PhabricatorOAuthServerTestController',
+        'token/'         => 'PhabricatorOAuthServerTokenController',
+        'clientauthorization/' => array(
+          '$' => 'PhabricatorOAuthClientAuthorizationListController',
+          'delete/(?P<phid>[^/]+)/' =>
+            'PhabricatorOAuthClientAuthorizationDeleteController',
+          'edit/(?P<phid>[^/]+)/' =>
+            'PhabricatorOAuthClientAuthorizationEditController',
+        ),
+        'client/' => array(
+          '$'                        => 'PhabricatorOAuthClientListController',
+          'create/$'                 => 'PhabricatorOAuthClientEditController',
+          'delete/(?P<phid>[^/]+)/$' =>
+            'PhabricatorOAuthClientDeleteController',
+          'edit/(?P<phid>[^/]+)/$'   => 'PhabricatorOAuthClientEditController',
+          'view/(?P<phid>[^/]+)/$'   => 'PhabricatorOAuthClientViewController',
+        ),
       ),
 
       '/xhprof/' => array(
