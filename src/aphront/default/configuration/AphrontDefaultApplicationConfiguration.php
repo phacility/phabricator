@@ -34,8 +34,11 @@ class AphrontDefaultApplicationConfiguration
     return $this->getResourceURIMapRules() + array(
       '/(?:(?P<filter>jump)/)?$' =>
         'PhabricatorDirectoryMainController',
-      '/(?:(?P<filter>feed)/)(?:(?P<subfilter>[^/]+)/)?$' =>
-        'PhabricatorDirectoryMainController',
+      '/(?:(?P<filter>feed)/)' => array(
+        'public/$' => 'PhabricatorFeedPublicStreamController',
+        '(?:(?P<subfilter>[^/]+)/)?$' =>
+          'PhabricatorDirectoryMainController',
+      ),
       '/directory/' => array(
         '(?P<id>\d+)/$'
           => 'PhabricatorDirectoryCategoryViewController',
@@ -367,8 +370,6 @@ class AphrontDefaultApplicationConfiguration
         'delete/(?P<id>\d+)/$'
           => 'PhabricatorCountdownDeleteController'
       ),
-
-      '/feed/public/$' => 'PhabricatorFeedPublicStreamController',
 
       '/V(?P<id>\d+)$'  => 'PhabricatorSlowvotePollController',
       '/vote/' => array(
