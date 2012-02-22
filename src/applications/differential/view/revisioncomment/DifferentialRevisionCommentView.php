@@ -127,12 +127,6 @@ final class DifferentialRevisionCommentView extends AphrontView {
 
     $info = implode(' &middot; ', array_filter($info));
 
-    $author = $this->handles[$comment->getAuthorPHID()];
-    $author_link = $author->renderLink();
-
-    $verb = DifferentialAction::getActionPastTenseVerb($comment->getAction());
-    $verb = phutil_escape_html($verb);
-
     $content = $comment->getContent();
     $head_content = null;
     $hide_comments = true;
@@ -156,8 +150,6 @@ final class DifferentialRevisionCommentView extends AphrontView {
           $content.
         '</div>';
     }
-
-    $title = "{$author_link} {$verb} this revision.";
 
     if ($this->inlines) {
       $hide_comments = false;
@@ -282,39 +274,65 @@ final class DifferentialRevisionCommentView extends AphrontView {
       $inline_render = null;
     }
 
+    $author = $this->handles[$comment->getAuthorPHID()];
+    $author_link = $author->renderLink();
+
     $background = null;
     $uri = $author->getImageURI();
     if ($uri) {
       $background = "background-image: url('{$uri}');";
     }
 
-    $metadata_blocks = array();
     $metadata = $comment->getMetadata();
     $added_reviewers = idx(
       $metadata,
       DifferentialComment::METADATA_ADDED_REVIEWERS);
-    if ($added_reviewers) {
-      $reviewers = 'Added reviewers: '.$this->renderHandleList(
-        $added_reviewers);
-      $metadata_blocks[] = $reviewers;
-    }
-
     $added_ccs = idx(
       $metadata,
       DifferentialComment::METADATA_ADDED_CCS);
-    if ($added_ccs) {
-      $ccs = 'Added CCs: '.$this->renderHandleList($added_ccs);
-      $metadata_blocks[] = $ccs;
+
+    $verb = DifferentialAction::getActionPastTenseVerb($comment->getAction());
+    $verb = phutil_escape_html($verb);
+
+    $actions = array();
+    switch ($comment->getAction()) {
+      case DifferentialAction::ACTION_ADDCCS:
+        $actions[] = "{$author_link} added CCs: ".
+          $this->renderHandleList($added_ccs).".";
+        $added_ccs = null;
+        break;
+      case DifferentialAction::ACTION_ADDREVIEWERS:
+        $actions[] = "{$author_link} added reviewers: ".
+          $this->renderHandleList($added_reviewers).".";
+        $added_reviewers = null;
+        break;
+      case DifferentialAction::ACTION_UPDATE:
+        $diff_id = idx($metadata, DifferentialComment::METADATA_DIFF_ID);
+        if ($diff_id) {
+          $diff_link = phutil_render_tag(
+            'a',
+            array(
+              'href' => '/D'.$comment->getRevisionID().'?id='.$diff_id,
+            ),
+            'Diff #'.phutil_escape_html($diff_id));
+          $actions[] = "{$author_link} updated this revision to {$diff_link}.";
+        } else {
+          $actions[] = "{$author_link} {$verb} this revision.";
+        }
+        break;
+      default:
+        $actions[] = "{$author_link} {$verb} this revision.";
+        break;
     }
 
-    if ($metadata_blocks) {
-      $hide_comments = false;
-      $metadata_blocks =
-        '<div class="differential-comment-metadata">'.
-          implode("\n", $metadata_blocks).
-        '</div>';
-    } else {
-      $metadata_blocks = null;
+    if ($added_reviewers) {
+      $actions[] = "{$author_link} added reviewers: ".
+        $this->renderHandleList($added_reviewers).".";
+    }
+
+    if ($added_ccs) {
+      $actions[] = "{$author_link} added CCs: ".
+        $this->renderHandleList($added_ccs).".";
     }
 
     $hide_comments_class = ($hide_comments ? 'hide' : '');
@@ -328,11 +346,12 @@ final class DifferentialRevisionCommentView extends AphrontView {
       '<div class="differential-comment-detail '.$action_class.'">'.
         '<div class="differential-comment-header">'.
           '<span class="differential-comment-info">'.$info.'</span>'.
-          '<span class="differential-comment-title">'.$title.'</span>'.
+          '<span class="differential-comment-title">'.
+            implode('<br />', $actions).
+          '</span>'.
         '</div>'.
         '<div class="differential-comment-content '.$hide_comments_class.'">'.
           $head_content.
-          $metadata_blocks.
           '<div class="differential-comment-core">'.
             $content.
           '</div>'.

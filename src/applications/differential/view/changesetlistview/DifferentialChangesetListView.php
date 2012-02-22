@@ -29,7 +29,7 @@ class DifferentialChangesetListView extends AphrontView {
   private $symbolIndexes = array();
   private $repository;
   private $diff;
-  private $vsMap;
+  private $vsMap = array();
 
   public function setChangesets($changesets) {
     $this->changesets = $changesets;
