@@ -96,19 +96,48 @@ You can make numbered lists with a "#" instead of "-" or "*":
 
 You can also nest lists:
 
+```- Body
+  - Head
+  - Arm
+    - Elbow
+    - Hand
+      # Thumb
+      # Index
+      # Middle
+      # Ring
+      # Pinkie
+  - Leg
+    - Knee
+    - Foot```
+
+...which produces:
+
   - Body
-    - Head
-    - Arm
-      - Elbow
-      - Hand
-        # Thumb
-        # Index
-        # Middle
-        # Ring
-        # Pinkie
-    - Leg
-      - Knee
-      - Foot
+  - Head
+  - Arm
+    - Elbow
+    - Hand
+      # Thumb
+      # Index
+      # Middle
+      # Ring
+      # Pinkie
+  - Leg
+    - Knee
+    - Foot
+
+If you prefer, you can indent lists using multiple characters to show indent
+depth, like this:
+
+```- Tree
+-- Branch
+--- Twig```
+
+As expected, this produces:
+
+- Tree
+-- Branch
+--- Twig
 
 Make **code blocks** by indenting two spaces:
 
