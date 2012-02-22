@@ -70,9 +70,7 @@ abstract class AphrontResponse {
     return $this;
   }
 
-  protected function encodeJSONForHTTPResponse(
-    array $object,
-    $use_javelin_shield) {
+  protected function encodeJSONForHTTPResponse(array $object) {
 
     $response = json_encode($object);
 
