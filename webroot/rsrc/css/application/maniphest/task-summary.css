@@ -20,20 +20,18 @@
 .maniphest-task-summary td.maniphest-task-number {
   font-weight: bold;
   color: #444444;
-  width: 1%;
-  min-width: 80px;
+  width: 60px;
   border-left-width: 3px;
   border-left-style: solid;
 }
 
 .maniphest-task-summary td.maniphest-task-status {
-  width: 6%;
+  width: 80px;
   text-align: center;
-  min-width: 75px;
 }
 
 .maniphest-task-summary td.maniphest-task-owner {
-  width: 11%;
+  width: 100px;
 }
 
 .maniphest-task-summary td.maniphest-task-name {
@@ -43,14 +41,12 @@
 }
 
 .maniphest-task-summary td.maniphest-task-priority {
-  width: 11%;
-  min-width: 120px;
+  width: 80px;
 }
 
 .maniphest-task-summary td.maniphest-task-updated {
   text-align: left;
-  width: 13%;
-  min-width: 160px;
+  width: 180px;
 }
 
 .maniphest-task-summary .pri-bullet {
