@@ -285,6 +285,9 @@ You can embed an image by using braces to refer to it:
 In most interfaces, you can drag-and-drop an image from your computer into the
 text area to upload and reference it.
 
+Some browsers (e.g. Chrome) support uploading an image data just by pasting them
+from clipboard into the text area.
+
 You can set file display options like this:
 
   {F123, layout=left, float, size=full}
