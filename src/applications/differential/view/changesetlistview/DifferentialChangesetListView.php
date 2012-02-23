@@ -106,6 +106,8 @@ class DifferentialChangesetListView extends AphrontView {
         array());
     }
 
+    Javelin::initBehavior('buoyant', array());
+
     $output = array();
     $mapping = array();
     $repository = $this->repository;
