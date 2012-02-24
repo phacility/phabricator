@@ -2,30 +2,12 @@
  * @provides differential-revision-comment-css
  */
 
-.differential-comment {
-  background: 0px 2px no-repeat;
-  margin: 1em 0 1.25em;
-  min-height: 50px;
-  padding: 2px 0px;
-}
-
 .differential-comment-list {
   max-width: 1162px;
 }
 
 .differential-add-comment-panel {
   max-width: 1162px;
-}
-
-.differential-comment-detail {
-  border-color: #dddddd;
-  border-width: 1px 10px;
-  border-style: solid;
-  margin-left: 54px;
-}
-
-.differential-comment-detail .hide {
-  display: none;
 }
 
 /* Spooky haunted panel which floats on the bottom of the screen. */
@@ -63,78 +45,52 @@
   border-color: #ffff00;
 }
 
-.differential-comment-header {
-  background: #f3f3f3;
-  padding: 4px 1em;
-}
-
-.differential-comment-header a {
-  font-weight: bold;
-}
-
-.differential-comment-info {
-  color:       #666666;
-  float:       right;
-  font-size:   11px;
-}
-
-.differential-comment-content {
-  background:          #fcfcfc;
-  clear:               both;
-  line-height:         1.4em;
-  margin:              0em;
-  padding:             .3em 5px .4em 1.25em;
-  overflow: auto;
-}
-
 .differential-inline-comment-content {
   overflow: auto;
 }
 
-.differential-comment-content .phabricator-remarkup .remarkup-code-block,
 .differential-comment-core .phabricator-remarkup .remarkup-code-block {
    width: 88ex;
    width: 81ch;
 }
 
-.differential-comment .differential-comment-action-testplan {
+.phabricator-transaction-view .differential-comment-action-testplan {
   border-color:     #660099;
 }
 
-.differential-comment .differential-comment-action-abandon {
+.phabricator-transaction-view .differential-comment-action-abandon {
   border-color:     #222222;
 }
 
-.differential-comment .differential-comment-action-accept {
+.phabricator-transaction-view .differential-comment-action-accept {
   border-color:     #009966;
 }
 
-.differential-comment .differential-comment-action-reject {
+.phabricator-transaction-view .differential-comment-action-reject {
   border-color:     #aa0000;
 }
 
-.differential-comment .differential-comment-action-rethink {
+.phabricator-transaction-view .differential-comment-action-rethink {
   border-color:     #aa0000;
 }
 
-.differential-comment .differential-comment-action-commit {
+.phabricator-transaction-view .differential-comment-action-commit {
   border-color:     #006699;
 }
 
-
-.differential-comment .differential-comment-action-reclaim {
+.phabricator-transaction-view .differential-comment-action-reclaim {
   border-color:     #0099aa;
 }
 
-.differential-comment .differential-comment-action-update {
+.phabricator-transaction-view .differential-comment-action-update {
   border-color:     #6699cc;
 }
 
-.differential-comment .differential-comment-action-add_reviewers {
+.phabricator-transaction-view .differential-comment-action-add_reviewers {
   border-color:     #aa99cc;
 }
 
-.differential-comment .differential-comment-action-request_review {
+.phabricator-transaction-view .differential-comment-action-request_review {
   border-color:     #cc9966;
 }
 

@@ -2,11 +2,8 @@
  * @provides maniphest-transaction-detail-css
  */
 
-.maniphest-transaction-detail-container {
-  margin: 1em 2em 1.25em;
-  background: 0px 2px no-repeat;
-  min-height: 50px;
-  padding: 2px 0px;
+.maniphest-transaction-list-view {
+  padding: 0 2em;
 }
 
 .maniphest-transaction-list-view .anchor-target {
@@ -14,73 +11,44 @@
   border-color: #ffff00;
 }
 
-.maniphest-transaction-detail-container .upforgrab {
+.phabricator-transaction-view .upforgrab {
   border-color: #cc9966;
 }
 
-.maniphest-transaction-detail-container .reassigned {
+.phabricator-transaction-view .reassigned {
   border-color: #0099aa;
 }
 
-.maniphest-transaction-detail-container .assigned {
+.phabricator-transaction-view .assigned {
   border-color: #0099aa;
 }
 
-.maniphest-transaction-detail-container .claimed {
+.phabricator-transaction-view .claimed {
   border-color: #0099aa;
 }
 
-.maniphest-transaction-detail-container .created {
+.phabricator-transaction-view .created {
   border-color: #660099;
 }
 
-.maniphest-transaction-detail-container .closed {
+.phabricator-transaction-view .closed {
   border-color: #006699;
 }
 
-.maniphest-transaction-detail-container .spited {
+.phabricator-transaction-view .spited {
   border-color: #006699;
 }
 
-.maniphest-transaction-detail-container .reopened {
+.phabricator-transaction-view .reopened {
   border-color: #660099;
 }
 
-.maniphest-transaction-detail-container .unbreaknow {
+.phabricator-transaction-view .unbreaknow {
   border-color: #aa0000;
 }
 
-.maniphest-transaction-detail-container .duplicate {
+.phabricator-transaction-view .duplicate {
   border-color: #333333;
-}
-
-.maniphest-transaction-header {
-  background: #f3f3f3;
-  padding: 4px 1em;
-}
-
-.maniphest-transaction-header a {
-  font-weight: bold;
-}
-
-.maniphest-transaction-detail-view {
-  margin-left: 54px;
-  border-color: #dddddd;
-  border-width: 1px 10px;
-  border-style: solid;
-}
-
-.maniphest-transaction-timestamp {
-  float: right;
-  font-size: 11px;
-  color: #666666;
-}
-
-.maniphest-transaction-comments {
-  border-top: 1px solid #e6e6e6;
-  padding: 4px 1em;
-  background: #fcfcfc;
-  overflow: auto;
 }
 
 .maniphest-change-table {

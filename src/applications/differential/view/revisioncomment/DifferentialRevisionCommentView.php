@@ -95,40 +95,9 @@ final class DifferentialRevisionCommentView extends AphrontView {
 
     $action_class = 'differential-comment-action-'.$action;
 
-    if ($this->preview) {
-      $date = 'COMMENT PREVIEW';
-    } else {
-      $date = phabricator_datetime($comment->getDateCreated(), $this->user);
-    }
-
     $info = array();
 
-    $content_source = new PhabricatorContentSourceView();
-    $content_source->setContentSource($comment->getContentSource());
-    $content_source->setUser($this->user);
-    $info[] = $content_source->render();
-
-    $info[] = $date;
-
-    $comment_anchor = null;
-    $anchor_name = $this->anchorName;
-    if ($anchor_name != '' && !$this->preview) {
-      Javelin::initBehavior('phabricator-watch-anchor');
-      $info[] = phutil_render_tag(
-        'a',
-        array(
-          'name'  => $anchor_name,
-          'id'    => $anchor_name,
-          'href'  => '#'.$anchor_name,
-        ),
-        'D'.$comment->getRevisionID().'#'.$anchor_name);
-      $comment_anchor = 'anchor-'.$anchor_name;
-    }
-
-    $info = implode(' &middot; ', array_filter($info));
-
     $content = $comment->getContent();
-    $head_content = null;
     $hide_comments = true;
     if (strlen(rtrim($content))) {
       $hide_comments = false;
@@ -277,12 +246,6 @@ final class DifferentialRevisionCommentView extends AphrontView {
     $author = $this->handles[$comment->getAuthorPHID()];
     $author_link = $author->renderLink();
 
-    $background = null;
-    $uri = $author->getImageURI();
-    if ($uri) {
-      $background = "background-image: url('{$uri}');";
-    }
-
     $metadata = $comment->getMetadata();
     $added_reviewers = idx(
       $metadata,
@@ -335,29 +298,38 @@ final class DifferentialRevisionCommentView extends AphrontView {
         $this->renderHandleList($added_ccs).".";
     }
 
-    $hide_comments_class = ($hide_comments ? 'hide' : '');
-    return phutil_render_tag(
-      'div',
-      array(
-        'class' => "differential-comment",
-        'id'    => $comment_anchor,
-        'style' => $background,
-      ),
-      '<div class="differential-comment-detail '.$action_class.'">'.
-        '<div class="differential-comment-header">'.
-          '<span class="differential-comment-info">'.$info.'</span>'.
-          '<span class="differential-comment-title">'.
-            implode('<br />', $actions).
-          '</span>'.
+    foreach ($actions as $key => $action) {
+      $actions[$key] = '<div>'.$action.'</div>';
+    }
+
+    $xaction_view = id(new PhabricatorTransactionView())
+      ->setUser($this->user)
+      ->setImageURI($author->getImageURI())
+      ->setContentSource($comment->getContentSource())
+      ->addClass($action_class)
+      ->setActions($actions);
+
+    if ($this->preview) {
+      $xaction_view->setIsPreview($this->preview);
+    } else {
+      $xaction_view->setEpoch($comment->getDateCreated());
+      if ($this->anchorName) {
+        $anchor_name = $this->anchorName;
+        $anchor_text = 'D'.$comment->getRevisionID().'#'.$anchor_name;
+
+        $xaction_view->setAnchor($anchor_name, $anchor_text);
+      }
+    }
+
+    if (!$hide_comments) {
+      $xaction_view->appendChild(
+        '<div class="differential-comment-core">'.
+          $content.
         '</div>'.
-        '<div class="differential-comment-content '.$hide_comments_class.'">'.
-          $head_content.
-          '<div class="differential-comment-core">'.
-            $content.
-          '</div>'.
-          $inline_render.
-        '</div>'.
-      '</div>');
+        $inline_render);
+    }
+
+    return $xaction_view->render();
   }
 
   private function renderHandleList(array $phids) {
