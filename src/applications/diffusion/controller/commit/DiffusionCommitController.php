@@ -87,6 +87,7 @@ class DiffusionCommitController extends DiffusionController {
     }
 
     $content[] = $this->buildAuditTable($commit);
+    $content[] = $this->buildComments($commit);
 
     $change_query = DiffusionPathChangeQuery::newFromDiffusionRequest(
       $drequest);
@@ -309,6 +310,23 @@ class DiffusionCommitController extends DiffusionController {
     $panel->appendChild($view);
 
     return $panel;
+  }
+
+  private function buildComments($commit) {
+    $user = $this->getRequest()->getUser();
+    $comments = id(new PhabricatorAuditComment())->loadAllWhere(
+      'targetPHID = %s ORDER BY dateCreated ASC',
+      $commit->getPHID());
+
+    $view = new DiffusionCommentListView();
+    $view->setUser($user);
+    $view->setComments($comments);
+
+    $phids = $view->getRequiredHandlePHIDs();
+    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $view->setHandles($handles);
+
+    return $view;
   }
 
 }

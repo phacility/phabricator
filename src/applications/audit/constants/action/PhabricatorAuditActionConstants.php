@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@ class PhabricatorAuditActionConstants {
 
   const CONCERN = 'concern';
   const ACCEPT = 'accept';
-  // TODO: enable comment
-  //const COMMENT = 'comment';
+  const COMMENT = 'comment';
 
   public static function getActionNameMap() {
     static $map = array(
-      self::CONCERN => 'Have Concern',
-      self::ACCEPT => 'Accept',
+      self::COMMENT => 'Comment',
+      self::CONCERN => 'Raise Concern',
+      self::ACCEPT  => 'Accept',
     );
 
     return $map;

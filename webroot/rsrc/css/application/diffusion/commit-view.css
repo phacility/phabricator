@@ -34,3 +34,15 @@
 .diffusion-commit-message {
   padding: 8px;
 }
+
+.diffusion-comment-list {
+  margin: 2em;
+}
+
+.phabricator-transaction-view .audit-accept {
+  border-color: #009933;
+}
+
+.phabricator-transaction-view .audit-concern {
+  border-color: #aa0000;
+}

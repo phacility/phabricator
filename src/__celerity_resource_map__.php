@@ -258,7 +258,7 @@ celerity_register_resource_map(array(
   ),
   'diffusion-commit-view-css' =>
   array(
-    'uri' => '/res/bc39d876/rsrc/css/application/diffusion/commit-view.css',
+    'uri' => '/res/d486f79a/rsrc/css/application/diffusion/commit-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1614,6 +1614,17 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/slowvote/slowvote.css',
   ),
+  0 =>
+  array(
+    'uri' => '/res/b6096fdd/rsrc/js/javelin/lib/__tests__/URI.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-uri',
+      1 => 'javelin-php-serializer',
+    ),
+    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
+  ),
   'phabricator-standard-page-view' =>
   array(
     'uri' => '/res/7e09bbfc/rsrc/css/application/base/standard-page-view.css',
@@ -1625,7 +1636,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-transaction-view-css' =>
   array(
-    'uri' => '/res/97f9e8f2/rsrc/css/aphront/transaction.css',
+    'uri' => '/res/731959fb/rsrc/css/aphront/transaction.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1837,30 +1848,9 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/core/syntax.css',
   ),
-  0 =>
-  array(
-    'uri' => '/res/b6096fdd/rsrc/js/javelin/lib/__tests__/URI.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-uri',
-      1 => 'javelin-php-serializer',
-    ),
-    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
-  ),
 ), array(
   'packages' =>
   array(
-    '03ef179e' =>
-    array(
-      'name' => 'diffusion.pkg.css',
-      'symbols' =>
-      array(
-        0 => 'diffusion-commit-view-css',
-      ),
-      'uri' => '/res/pkg/03ef179e/diffusion.pkg.css',
-      'type' => 'css',
-    ),
     '080edee4' =>
     array(
       'name' => 'typeahead.pkg.js',
@@ -1913,6 +1903,16 @@ celerity_register_resource_map(array(
       ),
       'uri' => '/res/pkg/4fbae2af/javelin.pkg.js',
       'type' => 'js',
+    ),
+    '61f9d480' =>
+    array(
+      'name' => 'diffusion.pkg.css',
+      'symbols' =>
+      array(
+        0 => 'diffusion-commit-view-css',
+      ),
+      'uri' => '/res/pkg/61f9d480/diffusion.pkg.css',
+      'type' => 'css',
     ),
     '6a6def05' =>
     array(
@@ -2006,7 +2006,7 @@ celerity_register_resource_map(array(
     'differential-revision-detail-css' => '8152415f',
     'differential-revision-history-css' => '8152415f',
     'differential-table-of-contents-css' => '8152415f',
-    'diffusion-commit-view-css' => '03ef179e',
+    'diffusion-commit-view-css' => '61f9d480',
     'javelin-behavior' => '4fbae2af',
     'javelin-behavior-aphront-basic-tokenizer' => '080edee4',
     'javelin-behavior-aphront-drag-and-drop' => 'c8aaade8',
