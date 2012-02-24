@@ -10,6 +10,7 @@ phutil_require_module('phabricator', 'applications/maniphest/constants/priority'
 phutil_require_module('phabricator', 'applications/maniphest/constants/status');
 phutil_require_module('phabricator', 'applications/maniphest/view/base');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
+phutil_require_module('phabricator', 'infrastructure/javelin/markup');
 phutil_require_module('phabricator', 'view/utils');
 
 phutil_require_module('phutil', 'markup');

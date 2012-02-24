@@ -630,6 +630,36 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/herald/herald-rule-editor.js',
   ),
+  'javelin-behavior-maniphest-batch-editor' =>
+  array(
+    'uri' => '/res/d7b7f061/rsrc/js/application/maniphest/behavior-batch-editor.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-util',
+      3 => 'phabricator-prefab',
+      4 => 'multirow-row-manager',
+      5 => 'javelin-tokenizer',
+      6 => 'javelin-typeahead-preloaded-source',
+      7 => 'javelin-typeahead',
+      8 => 'javelin-json',
+    ),
+    'disk' => '/rsrc/js/application/maniphest/behavior-batch-editor.js',
+  ),
+  'javelin-behavior-maniphest-batch-selector' =>
+  array(
+    'uri' => '/res/398cf8d7/rsrc/js/application/maniphest/behavior-batch-selector.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-stratcom',
+    ),
+    'disk' => '/rsrc/js/application/maniphest/behavior-batch-selector.js',
+  ),
   'javelin-behavior-maniphest-description-preview' =>
   array(
     'uri' => '/res/8acd6f07/rsrc/js/application/maniphest/behavior-task-preview.js',
@@ -1266,6 +1296,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/maniphest/task-detail.css',
   ),
+  'maniphest-batch-editor' =>
+  array(
+    'uri' => '/res/fb15d744/rsrc/css/application/maniphest/batch-editor.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/maniphest/batch-editor.css',
+  ),
   'maniphest-task-edit-css' =>
   array(
     'uri' => '/res/68c7863e/rsrc/css/application/maniphest/task-edit.css',
@@ -1277,7 +1316,7 @@ celerity_register_resource_map(array(
   ),
   'maniphest-task-summary-css' =>
   array(
-    'uri' => '/res/44e5169a/rsrc/css/application/maniphest/task-summary.css',
+    'uri' => '/res/7c52d502/rsrc/css/application/maniphest/task-summary.css',
     'type' => 'css',
     'requires' =>
     array(

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ class ManiphestTaskSummaryView extends ManiphestView {
   private $task;
   private $handles;
   private $user;
+  private $showBatchControls;
 
   public function setTask(ManiphestTask $task) {
     $this->task = $task;
@@ -37,6 +38,11 @@ class ManiphestTaskSummaryView extends ManiphestView {
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
+    return $this;
+  }
+
+  public function setShowBatchControls($show_batch_controls) {
+    $this->showBatchControls = $show_batch_controls;
     return $this;
   }
 
@@ -63,36 +69,58 @@ class ManiphestTaskSummaryView extends ManiphestView {
     $pri_class = idx($classes, $task->getPriority());
     $status_map = ManiphestTaskStatus::getTaskStatusMap();
 
-    return
-      '<table class="maniphest-task-summary">'.
-        '<tr>'.
-          '<td class="maniphest-task-number '.$pri_class.'">'.
-            'T'.$task->getID().
-          '</td>'.
-          '<td class="maniphest-task-status">'.
-            idx($status_map, $task->getStatus(), 'Unknown').
-          '</td>'.
-          '<td class="maniphest-task-owner">'.
-            ($task->getOwnerPHID()
-              ? $handles[$task->getOwnerPHID()]->renderLink()
-              : '<em>None</em>').
-          '</td>'.
-          '<td class="maniphest-task-name">'.
-            phutil_render_tag(
-              'a',
-              array(
-                'href' => '/T'.$task->getID(),
-              ),
-              phutil_escape_html($task->getTitle())).
-          '</td>'.
-          '<td class="maniphest-task-priority">'.
-            ManiphestTaskPriority::getTaskPriorityName($task->getPriority()).
-          '</td>'.
-          '<td class="maniphest-task-updated">'.
-            phabricator_datetime($task->getDateModified(), $this->user).
-          '</td>'.
-        '</tr>'.
-      '</table>';
+    $batch = null;
+    if ($this->showBatchControls) {
+      $batch =
+        '<td class="maniphest-task-batch">'.
+          javelin_render_tag(
+            'input',
+            array(
+              'type'  => 'checkbox',
+              'name'  => 'batch[]',
+              'value' => $task->getID(),
+              'sigil' => 'maniphest-batch',
+            ),
+            null).
+        '</td>';
+    }
+
+    return javelin_render_tag(
+      'table',
+      array(
+        'class' => 'maniphest-task-summary',
+        'sigil' => 'maniphest-task',
+      ),
+      '<tr>'.
+        '<td class="maniphest-task-handle '.$pri_class.'">'.
+        '</td>'.
+        $batch.
+        '<td class="maniphest-task-number">'.
+          'T'.$task->getID().
+        '</td>'.
+        '<td class="maniphest-task-status">'.
+          idx($status_map, $task->getStatus(), 'Unknown').
+        '</td>'.
+        '<td class="maniphest-task-owner">'.
+          ($task->getOwnerPHID()
+            ? $handles[$task->getOwnerPHID()]->renderLink()
+            : '<em>None</em>').
+        '</td>'.
+        '<td class="maniphest-task-name">'.
+          phutil_render_tag(
+            'a',
+            array(
+              'href' => '/T'.$task->getID(),
+            ),
+            phutil_escape_html($task->getTitle())).
+        '</td>'.
+        '<td class="maniphest-task-priority">'.
+          ManiphestTaskPriority::getTaskPriorityName($task->getPriority()).
+        '</td>'.
+        '<td class="maniphest-task-updated">'.
+          phabricator_datetime($task->getDateModified(), $this->user).
+        '</td>'.
+      '</tr>');
   }
 
 }

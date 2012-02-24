@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ class ManiphestTaskListView extends ManiphestView {
   private $tasks;
   private $handles;
   private $user;
+  private $showBatchControls;
 
   public function setTasks(array $tasks) {
     $this->tasks = $tasks;
@@ -40,12 +41,18 @@ class ManiphestTaskListView extends ManiphestView {
     return $this;
   }
 
+  public function setShowBatchControls($show_batch_controls) {
+    $this->showBatchControls = $show_batch_controls;
+    return $this;
+  }
+
   public function render() {
 
     $views = array();
     foreach ($this->tasks as $task) {
       $view = new ManiphestTaskSummaryView();
       $view->setTask($task);
+      $view->setShowBatchControls($this->showBatchControls);
       $view->setUser($this->user);
       $view->setHandles($this->handles);
       $views[] = $view->render();

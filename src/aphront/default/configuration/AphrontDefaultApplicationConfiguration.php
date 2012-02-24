@@ -177,6 +177,7 @@ class AphrontDefaultApplicationConfiguration
         '$' => 'ManiphestTaskListController',
         'view/(?P<view>\w+)/$' => 'ManiphestTaskListController',
         'report/(?:(?P<view>\w+)/)?$' => 'ManiphestReportController',
+        'batch/$' => 'ManiphestBatchEditController',
         'task/' => array(
           'create/$' => 'ManiphestTaskEditController',
           'edit/(?P<id>\d+)/$' => 'ManiphestTaskEditController',
