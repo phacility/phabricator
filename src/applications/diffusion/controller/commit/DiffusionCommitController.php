@@ -86,6 +86,8 @@ class DiffusionCommitController extends DiffusionController {
       $content[] = $detail_panel;
     }
 
+    $content[] = $this->buildAuditTable($commit);
+
     $change_query = DiffusionPathChangeQuery::newFromDiffusionRequest(
       $drequest);
     $changes = $change_query->loadChanges();
@@ -288,6 +290,25 @@ class DiffusionCommitController extends DiffusionController {
       '<table class="diffusion-commit-properties">'.
         implode("\n", $rows).
       '</table>';
+  }
+
+  private function buildAuditTable($commit) {
+    $query = new PhabricatorAuditQuery();
+    $query->withCommitPHIDs(array($commit->getPHID()));
+    $audits = $query->execute();
+
+    $view = new PhabricatorAuditListView();
+    $view->setAudits($audits);
+
+    $phids = $view->getRequiredHandlePHIDs();
+    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $view->setHandles($handles);
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader('Audits');
+    $panel->appendChild($view);
+
+    return $panel;
   }
 
 }

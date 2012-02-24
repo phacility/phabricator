@@ -6,6 +6,8 @@
 
 
 
+phutil_require_module('phabricator', 'applications/audit/query/audit');
+phutil_require_module('phabricator', 'applications/audit/view/list');
 phutil_require_module('phabricator', 'applications/differential/constants/changetype');
 phutil_require_module('phabricator', 'applications/differential/view/changesetlistview');
 phutil_require_module('phabricator', 'applications/diffusion/controller/base');
