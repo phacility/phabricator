@@ -99,7 +99,8 @@
 }
 
 
-.aphront-form-control-static .aphront-form-input {
+.aphront-form-control-static .aphront-form-input,
+.aphront-form-control-markup .aphront-form-input {
   padding-top: 4px;
   font-size: 13px;
 }

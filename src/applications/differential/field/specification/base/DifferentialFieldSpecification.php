@@ -27,6 +27,7 @@
  * @task storage Field Storage
  * @task edit Extending the Revision Edit Interface
  * @task view Extending the Revision View Interface
+ * @task list Extending the Revision List Interface
  * @task conduit Extending the Conduit View Interface
  * @task commit Extending Commit Messages
  * @task load Loading Additional Data
@@ -264,6 +265,59 @@ abstract class DifferentialFieldSpecification {
   }
 
 
+/* -(  Extending the Revision List Interface  )------------------------------ */
+
+
+  /**
+   * Determine if this field should appear in the table on the revision list
+   * interface.
+   *
+   * @return bool True if this field should appear in the table.
+   *
+   * @task list
+   */
+  public function shouldAppearOnRevisionList() {
+    return false;
+  }
+
+
+  /**
+   * Return a column header for revision list tables.
+   *
+   * @return string Column header.
+   *
+   * @task list
+   */
+  public function renderHeaderForRevisionList() {
+    throw new DifferentialFieldSpecificationIncompleteException($this);
+  }
+
+
+  /**
+   * Optionally, return a column class for revision list tables.
+   *
+   * @return string CSS class for table cells.
+   *
+   * @task list
+   */
+  public function getColumnClassForRevisionList() {
+    return null;
+  }
+
+
+  /**
+   * Return a table cell value for revision list tables.
+   *
+   * @param DifferentialRevision The revision to render a value for.
+   * @return string Table cell value.
+   *
+   * @task list
+   */
+  public function renderValueForRevisionList(DifferentialRevision $revision) {
+    throw new DifferentialFieldSpecificationIncompleteException($this);
+  }
+
+
 /* -(  Extending the Conduit Interface  )------------------------------------ */
 
 
@@ -483,6 +537,7 @@ abstract class DifferentialFieldSpecification {
     return array();
   }
 
+
   /**
    * Specify which @{class:PhabricatorObjectHandles} need to be loaded for your
    * field to render correctly on the view interface.
@@ -497,6 +552,25 @@ abstract class DifferentialFieldSpecification {
   public function getRequiredHandlePHIDsForRevisionView() {
     return $this->getRequiredHandlePHIDs();
   }
+
+
+  /**
+   * Specify which @{class:PhabricatorObjectHandles} need to be loaded for your
+   * field to render correctly on the list interface.
+   *
+   * This is a more specific version of @{method:getRequiredHandlePHIDs} which
+   * can be overridden to improve field performance by loading only data you
+   * need.
+   *
+   * @param DifferentialRevision The revision to pull PHIDs for.
+   * @return list List of PHIDs to load handles for.
+   * @task load
+   */
+  public function getRequiredHandlePHIDsForRevisionList(
+    DifferentialRevision $revision) {
+    return array();
+  }
+
 
   /**
    * Specify which @{class:PhabricatorObjectHandles} need to be loaded for your

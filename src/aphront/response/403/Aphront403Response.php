@@ -21,15 +21,28 @@
  */
 class Aphront403Response extends AphrontWebpageResponse {
 
+  private $forbiddenText;
+  public function setForbiddenText($text) {
+    $this->forbiddenText = $text;
+    return $this;
+  }
+  private function getForbiddenText() {
+    return $this->forbiddenText;
+  }
+
   public function getHTTPResponseCode() {
     return 403;
   }
 
   public function buildResponseString() {
+    $forbidden_text = $this->getForbiddenText();
+    if (!$forbidden_text) {
+      $forbidden_text =
+        'You do not have privileges to access the requested page.';
+    }
     $failure = new AphrontRequestFailureView();
     $failure->setHeader('403 Forbidden');
-    $failure->appendChild(
-      '<p>You do not have privileges to access the requested page.</p>');
+    $failure->appendChild('<p>'.$forbidden_text.'</p>');
 
     $view = new PhabricatorStandardPageView();
     $view->setTitle('403 Forbidden');

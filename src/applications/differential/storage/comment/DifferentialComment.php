@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ class DifferentialComment extends DifferentialDAO {
 
   const METADATA_ADDED_REVIEWERS  = 'added-reviewers';
   const METADATA_ADDED_CCS        = 'added-ccs';
+  const METADATA_DIFF_ID          = 'diff-id';
 
   protected $authorPHID;
   protected $revisionID;

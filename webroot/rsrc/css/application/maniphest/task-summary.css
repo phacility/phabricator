@@ -3,37 +3,60 @@
  */
 
 .maniphest-task-summary {
-  border: solid #aaaaaa;
-  border-width: 1px 0;
   width: 100%;
-  margin: 2px 0;
-  border-collapse: separate;
-  border-spacing: 0 0px;
+  margin: 4px 0;
+  border-collapse: collapse;
+
+  font-size: 13px;
+  color: #222222;
 }
 
 .maniphest-task-summary td {
   padding: 4px 0.5%;
-  background: #f0f0f0;
+  background: #f6f6f6;
   white-space: nowrap;
+
+  border-style: solid;
+  border-top-color: #888888;
+  border-bottom-color: #666666;
+  border-width: 1px 0;
+}
+
+.maniphest-batch-selected td {
+  background: #f6ff88;
+}
+
+.maniphest-task-summary td.maniphest-task-handle {
+  padding: 0 6px;
+  width: 1px;
+
+  border-right-width: 1px;
+  border-right-color: #787878;
+}
+
+.maniphest-task-summary td.maniphest-task-batch {
+  width: 30px;
+  text-align: center;
+}
+
+.maniphest-task-summary td.maniphest-task-batch,
+.maniphest-task-summary td.maniphest-task-batch input {
+  cursor: pointer;
 }
 
 .maniphest-task-summary td.maniphest-task-number {
   font-weight: bold;
   color: #444444;
-  width: 1%;
-  min-width: 80px;
-  border-left-width: 3px;
-  border-left-style: solid;
+  width: 60px;
 }
 
 .maniphest-task-summary td.maniphest-task-status {
-  width: 6%;
+  width: 80px;
   text-align: center;
-  min-width: 75px;
 }
 
 .maniphest-task-summary td.maniphest-task-owner {
-  width: 11%;
+  width: 100px;
 }
 
 .maniphest-task-summary td.maniphest-task-name {
@@ -43,14 +66,15 @@
 }
 
 .maniphest-task-summary td.maniphest-task-priority {
-  width: 11%;
-  min-width: 120px;
+  width: 100px;
 }
 
 .maniphest-task-summary td.maniphest-task-updated {
   text-align: left;
-  width: 13%;
-  min-width: 160px;
+  width: 180px;
+  border-right-width: 1px;
+  border-right-style: solid;
+  border-right-color: #787878;
 }
 
 .maniphest-task-summary .pri-bullet {
@@ -58,26 +82,32 @@
 
 .maniphest-task-summary .pri-unbreak {
   border-color: #ff0000;
+  background: #ff0000;
 }
 
 .maniphest-task-summary .pri-triage {
   border-color: #ee00ee;
+  background: #ee00ee;
 }
 
 .maniphest-task-summary .pri-high {
-  border-color: #ff6666;
+  border-color: #ff6622;
+  background: #ff6622;
 }
 
 .maniphest-task-summary .pri-normal {
   border-color: #ffaa66;
+  background: #ffaa66;
 }
 
 .maniphest-task-summary .pri-low {
   border-color: #eecc66;
+  background: #eecc66;
 }
 
 .maniphest-task-summary .pri-wish {
   border-color: #0099ff;
+  background: #0099ff;
 }
 
 .maniphest-task-group-header {
@@ -91,4 +121,43 @@
   padding-right: 2em;
   font-size: 11px;
   color: #666666;
+}
+
+.batch-editor-header {
+  font-size: 11px;
+  color: #666666;
+  padding: 4px 0px;
+  font-weight: bold;
+}
+
+.maniphest-batch-editor {
+  margin: 1em 1em;
+}
+
+.maniphest-batch-editor-layout {
+  width: 100%;
+  border-top: 1px solid #bbbbbb;
+  background: #efefef;
+}
+
+.maniphest-batch-editor-layout td {
+  padding: 6px 8px;
+  white-space: nowrap;
+}
+
+.maniphest-batch-editor-layout a.button,
+.maniphest-batch-editor-layout button {
+  margin: 0px 4px;
+}
+
+.maniphest-batch-editor-layout .batch-select-submit-cell {
+  text-align: right;
+}
+
+#batch-select-status-cell {
+  text-align: right;
+  color: #666666;
+  font-size: 11px;
+  vertical-align: middle;
+  width: 100%;
 }

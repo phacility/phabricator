@@ -35,9 +35,8 @@ final class AphrontAjaxResponse extends AphrontResponse {
       $this->content,
       $this->error);
 
-    return $this->encodeJSONForHTTPResponse(
-      $object,
-      $use_javelin_shield = true);
+    $response_json = $this->encodeJSONForHTTPResponse($object);
+    return $this->addJSONShield($response_json, $use_javelin_shield = true);
   }
 
   public function getHeaders() {

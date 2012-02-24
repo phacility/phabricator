@@ -92,4 +92,16 @@ final class DifferentialRevisionIDFieldSpecification
     return null;
   }
 
+  public function shouldAppearOnRevisionList() {
+    return true;
+  }
+
+  public function renderHeaderForRevisionList() {
+    return 'ID';
+  }
+
+  public function renderValueForRevisionList(DifferentialRevision $revision) {
+    return 'D'.$revision->getID();
+  }
+
 }

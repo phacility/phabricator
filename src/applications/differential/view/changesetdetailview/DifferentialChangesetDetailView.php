@@ -96,6 +96,10 @@ class DifferentialChangesetDetailView extends AphrontView {
     }
 
     $display_filename = $changeset->getDisplayFilename();
+
+    $buoyant_begin = $this->renderBuoyant($display_filename);
+    $buoyant_end   = $this->renderBuoyant(null);
+
     $output = javelin_render_tag(
       'div',
       array(
@@ -109,6 +113,7 @@ class DifferentialChangesetDetailView extends AphrontView {
         'class' => $class,
         'id'    => $id,
       ),
+      $buoyant_begin.
       phutil_render_tag(
         'a',
         array(
@@ -118,9 +123,29 @@ class DifferentialChangesetDetailView extends AphrontView {
       $buttons.
       '<h1>'.phutil_escape_html($display_filename).'</h1>'.
       '<div style="clear: both;"></div>'.
-      $this->renderChildren());
+      $this->renderChildren().
+      $buoyant_end);
+
 
     return $output;
   }
 
+  private function renderBuoyant($text) {
+    return javelin_render_tag(
+      'div',
+      array(
+        'sigil' => 'buoyant',
+        'meta'  => array(
+          'text' => $text,
+        ),
+        'style' => ($text === null)
+          // Current CSS spacing rules cause the "end" anchor to appear too
+          // late in the display document. Shift it up a bit so we drop the
+          // buoyant header sooner. This reduces confusion when using keystroke
+          // navigation.
+          ? 'bottom: 60px; position: absolute;'
+          : null,
+      ),
+      '');
+  }
 }

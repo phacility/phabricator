@@ -32,8 +32,13 @@ class AphrontDefaultApplicationConfiguration
 
   public function getURIMap() {
     return $this->getResourceURIMapRules() + array(
-      '/(?:(?P<filter>(?:feed|jump))/)?$' =>
+      '/(?:(?P<filter>jump)/)?$' =>
         'PhabricatorDirectoryMainController',
+      '/(?:(?P<filter>feed)/)' => array(
+        'public/$' => 'PhabricatorFeedPublicStreamController',
+        '(?:(?P<subfilter>[^/]+)/)?$' =>
+          'PhabricatorDirectoryMainController',
+      ),
       '/directory/' => array(
         '(?P<id>\d+)/$'
           => 'PhabricatorDirectoryCategoryViewController',
@@ -96,6 +101,7 @@ class AphrontDefaultApplicationConfiguration
       '/differential/' => array(
         '$' => 'DifferentialRevisionListController',
         'filter/(?P<filter>\w+)/$' => 'DifferentialRevisionListController',
+        'stats/(?P<filter>\w+)/$' => 'DifferentialRevisionStatsController',
         'diff/' => array(
           '(?P<id>\d+)/$' => 'DifferentialDiffViewController',
           'create/$' => 'DifferentialDiffCreateController',
@@ -151,6 +157,27 @@ class AphrontDefaultApplicationConfiguration
         ),
       ),
 
+      '/oauthserver/' => array(
+        'auth/'          => 'PhabricatorOAuthServerAuthController',
+        'test/'          => 'PhabricatorOAuthServerTestController',
+        'token/'         => 'PhabricatorOAuthServerTokenController',
+        'clientauthorization/' => array(
+          '$' => 'PhabricatorOAuthClientAuthorizationListController',
+          'delete/(?P<phid>[^/]+)/' =>
+            'PhabricatorOAuthClientAuthorizationDeleteController',
+          'edit/(?P<phid>[^/]+)/' =>
+            'PhabricatorOAuthClientAuthorizationEditController',
+        ),
+        'client/' => array(
+          '$'                        => 'PhabricatorOAuthClientListController',
+          'create/$'                 => 'PhabricatorOAuthClientEditController',
+          'delete/(?P<phid>[^/]+)/$' =>
+            'PhabricatorOAuthClientDeleteController',
+          'edit/(?P<phid>[^/]+)/$'   => 'PhabricatorOAuthClientEditController',
+          'view/(?P<phid>[^/]+)/$'   => 'PhabricatorOAuthClientViewController',
+        ),
+      ),
+
       '/xhprof/' => array(
         'profile/(?P<phid>[^/]+)/$' => 'PhabricatorXHProfProfileController',
       ),
@@ -165,6 +192,7 @@ class AphrontDefaultApplicationConfiguration
         '$' => 'ManiphestTaskListController',
         'view/(?P<view>\w+)/$' => 'ManiphestTaskListController',
         'report/(?:(?P<view>\w+)/)?$' => 'ManiphestReportController',
+        'batch/$' => 'ManiphestBatchEditController',
         'task/' => array(
           'create/$' => 'ManiphestTaskEditController',
           'edit/(?P<id>\d+)/$' => 'ManiphestTaskEditController',
@@ -318,8 +346,11 @@ class AphrontDefaultApplicationConfiguration
       ),
 
       '/audit/' => array(
-        '$' => 'PhabricatorAuditEditController',
+        '$' => 'PhabricatorAuditListController',
+        'view/(?P<filter>[^/]+)/$' => 'PhabricatorAuditListController',
+
         'edit/$' => 'PhabricatorAuditEditController',
+        'addcomment/$' => 'PhabricatorAuditAddCommentController',
       ),
 
       '/xhpast/' => array(
@@ -358,8 +389,6 @@ class AphrontDefaultApplicationConfiguration
         'delete/(?P<id>\d+)/$'
           => 'PhabricatorCountdownDeleteController'
       ),
-
-      '/feed/public/$' => 'PhabricatorFeedPublicStreamController',
 
       '/V(?P<id>\d+)$'  => 'PhabricatorSlowvotePollController',
       '/vote/' => array(

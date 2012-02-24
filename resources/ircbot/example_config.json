@@ -9,6 +9,7 @@
     "PhabricatorIRCProtocolHandler",
     "PhabricatorIRCObjectNameHandler",
     "PhabricatorIRCLogHandler",
+    "PhabricatorIRCWhatsNewHandler",
     "PhabricatorIRCDifferentialNotificationHandler"
   ],
 

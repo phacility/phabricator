@@ -70,9 +70,7 @@ abstract class AphrontResponse {
     return $this;
   }
 
-  protected function encodeJSONForHTTPResponse(
-    array $object,
-    $use_javelin_shield) {
+  protected function encodeJSONForHTTPResponse(array $object) {
 
     $response = json_encode($object);
 
@@ -83,6 +81,11 @@ abstract class AphrontResponse {
       array('<', '>'),
       array('\u003c', '\u003e'),
       $response);
+
+    return $response;
+  }
+
+  protected function addJSONShield($json_response, $use_javelin_shield) {
 
     // Add a shield to prevent "JSON Hijacking" attacks where an attacker
     // requests a JSON response using a normal <script /> tag and then uses
@@ -96,7 +99,7 @@ abstract class AphrontResponse {
       ? 'for (;;);'
       : 'for(;;);';
 
-    $response = $shield.$response;
+    $response = $shield.$json_response;
 
     return $response;
   }

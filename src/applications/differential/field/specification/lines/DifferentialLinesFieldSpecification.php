@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,22 @@ final class DifferentialLinesFieldSpecification
   public function renderValueForRevisionView() {
     $diff = $this->getDiff();
     return phutil_escape_html(number_format($diff->getLineCount()));
+  }
+
+  public function shouldAppearOnRevisionList() {
+    return true;
+  }
+
+  public function renderHeaderForRevisionList() {
+    return 'Lines';
+  }
+
+  public function getColumnClassForRevisionList() {
+    return 'n';
+  }
+
+  public function renderValueForRevisionList(DifferentialRevision $revision) {
+    return number_format($revision->getLineCount());
   }
 
 }

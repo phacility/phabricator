@@ -59,6 +59,11 @@ class PhabricatorMarkupEngine {
     ));
   }
 
+  public static function newDiffusionMarkupEngine(array $options = array()) {
+    return self::newMarkupEngine(array(
+    ));
+  }
+
   public static function newProfileMarkupEngine() {
     return self::newMarkupEngine(array(
     ));

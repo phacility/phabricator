@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,21 @@
 abstract class ConduitAPI_user_Method extends ConduitAPIMethod {
 
   protected function buildUserInformationDictionary(PhabricatorUser $user) {
+    $src_phid = $user->getProfileImagePHID();
+    $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $src_phid);
+    if ($file) {
+      $picture = $file->getBestURI();
+    } else {
+      $picture = null;
+    }
+
     return array(
       'phid'      => $user->getPHID(),
       'userName'  => $user->getUserName(),
       'realName'  => $user->getRealName(),
+      'email'     => $user->getEmail(),
+      'image'     => $picture,
+      'uri'       => PhabricatorEnv::getURI('/p/'.$user->getUsername().'/'),
     );
   }
 

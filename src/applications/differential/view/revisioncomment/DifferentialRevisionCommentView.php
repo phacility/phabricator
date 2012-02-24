@@ -95,46 +95,9 @@ final class DifferentialRevisionCommentView extends AphrontView {
 
     $action_class = 'differential-comment-action-'.$action;
 
-    if ($this->preview) {
-      $date = 'COMMENT PREVIEW';
-    } else {
-      $date = phabricator_datetime($comment->getDateCreated(), $this->user);
-    }
-
     $info = array();
 
-    $content_source = new PhabricatorContentSourceView();
-    $content_source->setContentSource($comment->getContentSource());
-    $content_source->setUser($this->user);
-    $info[] = $content_source->render();
-
-    $info[] = $date;
-
-    $comment_anchor = null;
-    $anchor_name = $this->anchorName;
-    if ($anchor_name != '' && !$this->preview) {
-      Javelin::initBehavior('phabricator-watch-anchor');
-      $info[] = phutil_render_tag(
-        'a',
-        array(
-          'name'  => $anchor_name,
-          'id'    => $anchor_name,
-          'href'  => '#'.$anchor_name,
-        ),
-        'D'.$comment->getRevisionID().'#'.$anchor_name);
-      $comment_anchor = 'anchor-'.$anchor_name;
-    }
-
-    $info = implode(' &middot; ', array_filter($info));
-
-    $author = $this->handles[$comment->getAuthorPHID()];
-    $author_link = $author->renderLink();
-
-    $verb = DifferentialAction::getActionPastTenseVerb($comment->getAction());
-    $verb = phutil_escape_html($verb);
-
     $content = $comment->getContent();
-    $head_content = null;
     $hide_comments = true;
     if (strlen(rtrim($content))) {
       $hide_comments = false;
@@ -156,8 +119,6 @@ final class DifferentialRevisionCommentView extends AphrontView {
           $content.
         '</div>';
     }
-
-    $title = "{$author_link} {$verb} this revision.";
 
     if ($this->inlines) {
       $hide_comments = false;
@@ -282,63 +243,93 @@ final class DifferentialRevisionCommentView extends AphrontView {
       $inline_render = null;
     }
 
-    $background = null;
-    $uri = $author->getImageURI();
-    if ($uri) {
-      $background = "background-image: url('{$uri}');";
-    }
+    $author = $this->handles[$comment->getAuthorPHID()];
+    $author_link = $author->renderLink();
 
-    $metadata_blocks = array();
     $metadata = $comment->getMetadata();
     $added_reviewers = idx(
       $metadata,
       DifferentialComment::METADATA_ADDED_REVIEWERS);
-    if ($added_reviewers) {
-      $reviewers = 'Added reviewers: '.$this->renderHandleList(
-        $added_reviewers);
-      $metadata_blocks[] = $reviewers;
-    }
-
     $added_ccs = idx(
       $metadata,
       DifferentialComment::METADATA_ADDED_CCS);
+
+    $verb = DifferentialAction::getActionPastTenseVerb($comment->getAction());
+    $verb = phutil_escape_html($verb);
+
+    $actions = array();
+    switch ($comment->getAction()) {
+      case DifferentialAction::ACTION_ADDCCS:
+        $actions[] = "{$author_link} added CCs: ".
+          $this->renderHandleList($added_ccs).".";
+        $added_ccs = null;
+        break;
+      case DifferentialAction::ACTION_ADDREVIEWERS:
+        $actions[] = "{$author_link} added reviewers: ".
+          $this->renderHandleList($added_reviewers).".";
+        $added_reviewers = null;
+        break;
+      case DifferentialAction::ACTION_UPDATE:
+        $diff_id = idx($metadata, DifferentialComment::METADATA_DIFF_ID);
+        if ($diff_id) {
+          $diff_link = phutil_render_tag(
+            'a',
+            array(
+              'href' => '/D'.$comment->getRevisionID().'?id='.$diff_id,
+            ),
+            'Diff #'.phutil_escape_html($diff_id));
+          $actions[] = "{$author_link} updated this revision to {$diff_link}.";
+        } else {
+          $actions[] = "{$author_link} {$verb} this revision.";
+        }
+        break;
+      default:
+        $actions[] = "{$author_link} {$verb} this revision.";
+        break;
+    }
+
+    if ($added_reviewers) {
+      $actions[] = "{$author_link} added reviewers: ".
+        $this->renderHandleList($added_reviewers).".";
+    }
+
     if ($added_ccs) {
-      $ccs = 'Added CCs: '.$this->renderHandleList($added_ccs);
-      $metadata_blocks[] = $ccs;
+      $actions[] = "{$author_link} added CCs: ".
+        $this->renderHandleList($added_ccs).".";
     }
 
-    if ($metadata_blocks) {
-      $hide_comments = false;
-      $metadata_blocks =
-        '<div class="differential-comment-metadata">'.
-          implode("\n", $metadata_blocks).
-        '</div>';
+    foreach ($actions as $key => $action) {
+      $actions[$key] = '<div>'.$action.'</div>';
+    }
+
+    $xaction_view = id(new PhabricatorTransactionView())
+      ->setUser($this->user)
+      ->setImageURI($author->getImageURI())
+      ->setContentSource($comment->getContentSource())
+      ->addClass($action_class)
+      ->setActions($actions);
+
+    if ($this->preview) {
+      $xaction_view->setIsPreview($this->preview);
     } else {
-      $metadata_blocks = null;
+      $xaction_view->setEpoch($comment->getDateCreated());
+      if ($this->anchorName) {
+        $anchor_name = $this->anchorName;
+        $anchor_text = 'D'.$comment->getRevisionID().'#'.$anchor_name;
+
+        $xaction_view->setAnchor($anchor_name, $anchor_text);
+      }
     }
 
-    $hide_comments_class = ($hide_comments ? 'hide' : '');
-    return phutil_render_tag(
-      'div',
-      array(
-        'class' => "differential-comment",
-        'id'    => $comment_anchor,
-        'style' => $background,
-      ),
-      '<div class="differential-comment-detail '.$action_class.'">'.
-        '<div class="differential-comment-header">'.
-          '<span class="differential-comment-info">'.$info.'</span>'.
-          '<span class="differential-comment-title">'.$title.'</span>'.
+    if (!$hide_comments) {
+      $xaction_view->appendChild(
+        '<div class="differential-comment-core">'.
+          $content.
         '</div>'.
-        '<div class="differential-comment-content '.$hide_comments_class.'">'.
-          $head_content.
-          $metadata_blocks.
-          '<div class="differential-comment-core">'.
-            $content.
-          '</div>'.
-          $inline_render.
-        '</div>'.
-      '</div>');
+        $inline_render);
+    }
+
+    return $xaction_view->render();
   }
 
   private function renderHandleList(array $phids) {

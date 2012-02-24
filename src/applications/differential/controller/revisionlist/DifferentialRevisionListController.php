@@ -366,6 +366,10 @@ class DifferentialRevisionListController extends DifferentialController {
   private function buildViews($filter, $user_phid, array $revisions) {
     $user = $this->getRequest()->getUser();
 
+    $template = id(new DifferentialRevisionListView())
+      ->setUser($user)
+      ->setFields(DifferentialRevisionListView::getDefaultFields());
+
     $views = array();
     switch ($filter) {
       case 'active':
@@ -373,18 +377,16 @@ class DifferentialRevisionListController extends DifferentialController {
           $revisions,
           $user_phid);
 
-        $view = id(new DifferentialRevisionListView())
+        $view = id(clone $template)
           ->setRevisions($active)
-          ->setUser($user)
           ->setNoDataString("You have no active revisions requiring action.");
         $views[] = array(
           'title' => 'Action Required',
           'view'  => $view,
         );
 
-        $view = id(new DifferentialRevisionListView())
+        $view = id(clone $template)
           ->setRevisions($waiting)
-          ->setUser($user)
           ->setNoDataString("You have no active revisions waiting on others.");
         $views[] = array(
           'title' => 'Waiting On Others',
@@ -401,9 +403,8 @@ class DifferentialRevisionListController extends DifferentialController {
           'subscribed'  => 'Revisions by Subscriber',
           'all'         => 'Revisions',
         );
-        $view = id(new DifferentialRevisionListView())
-          ->setRevisions($revisions)
-          ->setUser($user);
+        $view = id(clone $template)
+          ->setRevisions($revisions);
         $views[] = array(
           'title' => idx($titles, $filter),
           'view'  => $view,
@@ -412,6 +413,7 @@ class DifferentialRevisionListController extends DifferentialController {
       default:
         throw new Exception("Unknown filter '{$filter}'!");
     }
+
     return $views;
   }
 

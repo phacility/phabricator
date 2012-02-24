@@ -11,3 +11,6 @@
 
 # NetBeans project files
 /nbproject/ 
+
+# Arcanist scratch directory
+/.arc

@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'applications/conduit/method/user/base');
+phutil_require_module('phabricator', 'applications/oauthserver/scope');
 
 
 phutil_require_source('ConduitAPI_user_whoami_Method.php');

@@ -53,9 +53,33 @@ final class DifferentialDefaultFieldSelector
         new DifferentialApplyPatchFieldSpecification(),
         new DifferentialRevisionIDFieldSpecification(),
         new DifferentialGitSVNIDFieldSpecification(),
+        new DifferentialDateModifiedFieldSpecification(),
+        new DifferentialDateCreatedFieldSpecification(),
       ));
 
     return $fields;
   }
 
+  public function sortFieldsForRevisionList(array $fields) {
+    $map = array();
+    foreach ($fields as $field) {
+      $map[get_class($field)] = $field;
+    }
+
+    $map = array_select_keys(
+      $map,
+      array(
+        'DifferentialRevisionIDFieldSpecification',
+        'DifferentialTitleFieldSpecification',
+        'DifferentialRevisionStatusFieldSpecification',
+        'DifferentialAuthorFieldSpecification',
+        'DifferentialReviewersFieldSpecification',
+        'DifferentialDateModifiedFieldSpecification',
+        'DifferentialDateCreatedFieldSpecification',
+      )) + $map;
+
+    return array_values($map);
+  }
+
 }
+

@@ -143,6 +143,7 @@ abstract class DiffusionController extends PhabricatorController {
 
     $view = id(new DifferentialRevisionListView())
       ->setRevisions($revisions)
+      ->setFields(DifferentialRevisionListView::getDefaultFields())
       ->setUser($this->getRequest()->getUser());
 
     $phids = $view->getRequiredHandlePHIDs();

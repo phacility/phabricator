@@ -44,6 +44,35 @@ class DifferentialCommentMail extends DifferentialMail {
 
   }
 
+  protected function getMailTags() {
+    $comment = $this->getComment();
+    $action = $comment->getAction();
+
+    $tags = array();
+    switch ($action) {
+      case DifferentialAction::ACTION_ADDCCS:
+        $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_CC;
+        break;
+      case DifferentialAction::ACTION_COMMIT:
+        $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMITTED;
+        break;
+    }
+
+    if (strlen(trim($comment->getContent()))) {
+      switch ($action) {
+        case DifferentialAction::ACTION_COMMIT:
+          // Commit comments are auto-generated and not especially interesting,
+          // so don't tag them as having a comment.
+          break;
+        default:
+          $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMENT;
+          break;
+      }
+    }
+
+    return $tags;
+  }
+
   protected function renderSubject() {
     $verb = ucwords($this->getVerb());
     $revision = $this->getRevision();

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,27 @@ class PhabricatorMetaMTAMailingListsController
   extends PhabricatorMetaMTAController {
 
   public function processRequest() {
-    $lists = id(new PhabricatorMetaMTAMailingList())->loadAllWhere(
-      '1 = 1 ORDER BY id DESC LIMIT 100');
+    $request = $this->getRequest();
+    $user = $request->getUser();
+    $offset = $request->getInt('offset', 0);
+
+    $pager = new AphrontPagerView();
+    $pager->setPageSize(1000);
+    $pager->setOffset($offset);
+    $pager->setURI($request->getRequestURI(), 'offset');
+
+    $list = new PhabricatorMetaMTAMailingList();
+    $conn_r = $list->establishConnection('r');
+    $data = queryfx_all(
+      $conn_r,
+      'SELECT * FROM %T
+        ORDER BY name ASC
+        LIMIT %d, %d',
+        $list->getTableName(),
+        $pager->getOffset(), $pager->getPageSize() + 1);
+    $data = $pager->sliceResults($data);
+
+    $lists = $list->loadAllFromArray($data);
 
     $rows = array();
     foreach ($lists as $list) {
@@ -59,6 +78,7 @@ class PhabricatorMetaMTAMailingListsController
     $panel->appendChild($table);
     $panel->setHeader('Mailing Lists');
     $panel->setCreateButton('Add New List', '/mail/lists/edit/');
+    $panel->appendChild($pager);
 
     return $this->buildStandardPageResponse(
       $panel,

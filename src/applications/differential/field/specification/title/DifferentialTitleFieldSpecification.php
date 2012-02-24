@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,6 +84,27 @@ final class DifferentialTitleFieldSpecification
 
   public function parseValueFromCommitMessage($value) {
     return preg_replace('/\s*\n\s*/', ' ', $value);
+  }
+
+  public function shouldAppearOnRevisionList() {
+    return true;
+  }
+
+  public function renderHeaderForRevisionList() {
+    return 'Revision';
+  }
+
+  public function getColumnClassForRevisionList() {
+    return 'wide pri';
+  }
+
+  public function renderValueForRevisionList(DifferentialRevision $revision) {
+    return phutil_render_tag(
+      'a',
+      array(
+        'href' => '/D'.$revision->getID(),
+      ),
+      phutil_escape_html($revision->getTitle()));
   }
 
 }

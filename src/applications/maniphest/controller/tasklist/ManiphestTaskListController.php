@@ -222,20 +222,35 @@ class ManiphestTaskListController extends ManiphestController {
           "Displaying tasks {$cur} - {$max} of {$tot}.".
         '</div>');
 
+      $selector = new AphrontNullView();
+
       foreach ($tasks as $group => $list) {
         $task_list = new ManiphestTaskListView();
+        $task_list->setShowBatchControls(true);
         $task_list->setUser($user);
         $task_list->setTasks($list);
         $task_list->setHandles($handles);
 
         $count = number_format(count($list));
-        $nav->appendChild(
+        $selector->appendChild(
           '<h1 class="maniphest-task-group-header">'.
             phutil_escape_html($group).' ('.$count.')'.
           '</h1>');
-        $nav->appendChild($task_list);
+        $selector->appendChild($task_list);
       }
 
+
+      $selector->appendChild($this->renderBatchEditor());
+
+      $selector = phabricator_render_form(
+        $user,
+        array(
+          'method' => 'POST',
+          'action' => '/maniphest/batch/',
+        ),
+        $selector->render());
+
+      $nav->appendChild($selector);
       $nav->appendChild($pager);
     }
 
@@ -477,6 +492,63 @@ class ManiphestTaskListController extends ManiphestController {
         $name);
     }
     return implode("\n", $links);
+  }
+
+  private function renderBatchEditor() {
+    Javelin::initBehavior(
+      'maniphest-batch-selector',
+      array(
+        'selectAll'   => 'batch-select-all',
+        'selectNone'  => 'batch-select-none',
+        'submit'      => 'batch-select-submit',
+        'status'      => 'batch-select-status-cell',
+      ));
+
+    $select_all = javelin_render_tag(
+      'a',
+      array(
+        'href'        => '#',
+        'mustcapture' => true,
+        'class'       => 'grey button',
+        'id'          => 'batch-select-all',
+      ),
+      'Select All');
+
+    $select_none = javelin_render_tag(
+      'a',
+      array(
+        'href'        => '#',
+        'mustcapture' => true,
+        'class'       => 'grey button',
+        'id'          => 'batch-select-none',
+      ),
+      'Clear Selection');
+
+    $submit = phutil_render_tag(
+      'button',
+      array(
+        'id'          => 'batch-select-submit',
+        'disabled'    => 'disabled',
+        'class'       => 'disabled',
+      ),
+      'Batch Edit Selected Tasks &raquo;');
+
+    return
+      '<div class="maniphest-batch-editor">'.
+        '<div class="batch-editor-header">Batch Task Editor</div>'.
+        '<table class="maniphest-batch-editor-layout">'.
+          '<tr>'.
+            '<td>'.
+              $select_all.
+              $select_none.
+            '</td>'.
+            '<td id="batch-select-status-cell">'.
+              '0 Selected Tasks'.
+            '</td>'.
+            '<td class="batch-select-submit-cell">'.$submit.'</td>'.
+          '</tr>'.
+        '</table>'.
+      '</table>';
   }
 
 }

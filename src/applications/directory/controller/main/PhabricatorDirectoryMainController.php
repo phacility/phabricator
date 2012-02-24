@@ -20,9 +20,11 @@ class PhabricatorDirectoryMainController
   extends PhabricatorDirectoryController {
 
   private $filter;
+  private $subfilter;
 
   public function willProcessRequest(array $data) {
     $this->filter = idx($data, 'filter');
+    $this->subfilter = idx($data, 'subfilter');
   }
 
   public function shouldRequireAdmin() {
@@ -62,13 +64,17 @@ class PhabricatorDirectoryMainController
   }
 
   private function buildMainResponse($nav, $projects) {
-    $unbreak_panel = $this->buildUnbreakNowPanel();
-    $triage_panel = $this->buildNeedsTriagePanel($projects);
+    if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
+      $unbreak_panel = $this->buildUnbreakNowPanel();
+      $triage_panel = $this->buildNeedsTriagePanel($projects);
+      $tasks_panel = $this->buildTasksPanel();
+    } else {
+      $unbreak_panel = null;
+      $triage_panel = null;
+      $tasks_panel = null;
+    }
     $jump_panel = $this->buildJumpPanel();
     $revision_panel = $this->buildRevisionPanel();
-    $tasks_panel = $this->buildTasksPanel();
-    $feed_view = $this->buildFeedView($projects, $is_full = false);
-
 
     $content = array(
       $unbreak_panel,
@@ -76,7 +82,6 @@ class PhabricatorDirectoryMainController
       $jump_panel,
       $revision_panel,
       $tasks_panel,
-      $feed_view,
     );
 
     $nav->appendChild($content);
@@ -103,17 +108,16 @@ class PhabricatorDirectoryMainController
         '/^d$/i'                    => 'uri:/differential/',
         '/^r$/i'                    => 'uri:/diffusion/',
         '/^t$/i'                    => 'uri:/maniphest/',
+        '/^p$/i'                    => 'uri:/project/',
+        '/^u$/i'                    => 'uri:/people/',
         '/r([A-Z]+)$/'              => 'repository',
         '/r([A-Z]+)(\S+)$/'         => 'commit',
         '/^d(\d+)$/i'               => 'revision',
         '/^t(\d+)$/i'               => 'task',
-
-        // TODO: '/^p$/i'                    => 'uri:/projects/',
-        // TODO: '/^u$/i'                    => 'uri:/people/',
-        // TODO: '/^p\s+(\S+)$/i'            => 'project',
-        // TODO: '/^u\s+(\S+)$/i'            => 'user',
-        // TODO: '/^task:\s+(\S+)/i'         => 'create-task',
-        // TODO: '/^(?:s|symbol)\s+(\S+)/i'  => 'find-symbol',
+        '/^p\s+(.+)$/i'            => 'project',
+        '/^u\s+(\S+)$/i'            => 'user',
+        '/^task:\s*(.+)/i'         => 'create-task',
+        '/^(?:s|symbol)\s+(\S+)/i'  => 'find-symbol',
       );
 
 
@@ -137,6 +141,26 @@ class PhabricatorDirectoryMainController
               case 'task':
                 return id(new AphrontRedirectResponse())
                   ->setURI('/T'.$matches[1]);
+              case 'user':
+                return id(new AphrontRedirectResponse())
+                  ->setURI('/p/'.$matches[1].'/');
+              case 'project':
+                $project = PhabricatorProjectQueryUtil
+                  ::findCloselyNamedProject($matches[1]);
+                if ($project) {
+                  return id(new AphrontRedirectResponse())
+                    ->setURI('/project/view/'.$project->getID().'/');
+                } else {
+                    $jump = $matches[1];
+                }
+                break;
+              case 'find-symbol':
+                return id(new AphrontRedirectResponse())
+                  ->setURI('/diffusion/symbol/'.$matches[1].'/?jump=true');
+              case 'create-task':
+                return id(new AphrontRedirectResponse())
+                  ->setURI('/maniphest/task/create/?title='
+                    .phutil_escape_uri($matches[1]));
               default:
                 throw new Exception("Unknown jump effect '{$effect}'!");
             }
@@ -162,8 +186,29 @@ class PhabricatorDirectoryMainController
   }
 
   private function buildFeedResponse($nav, $projects) {
-    $view = $this->buildFeedView($projects, $is_full = true);
-    $nav->appendChild($view);
+
+    $subnav = new AphrontSideNavFilterView();
+    $subnav->setBaseURI(new PhutilURI('/feed/'));
+
+    $subnav->addFilter('all',       'All Activity', '/feed/');
+    $subnav->addFilter('projects',  'My Projects');
+
+    $filter = $subnav->selectFilter($this->subfilter, 'all');
+
+    switch ($filter) {
+      case 'all':
+        $phids = array();
+        break;
+      case 'projects':
+        $phids = mpull($projects, 'getPHID');
+        break;
+    }
+
+    $view = $this->buildFeedView($phids);
+    $subnav->appendChild($view);
+
+    $nav->appendChild($subnav);
+
     return $this->buildStandardPageResponse(
       $nav,
       array(
@@ -286,8 +331,11 @@ class PhabricatorDirectoryMainController
         "View Active Revisions \xC2\xBB"));
 
     if ($active) {
+      $fields =
+
       $revision_view = id(new DifferentialRevisionListView())
         ->setRevisions($active)
+        ->setFields(DifferentialRevisionListView::getDefaultFields())
         ->setUser($user);
       $phids = array_merge(
         array($user_phid),
@@ -362,16 +410,15 @@ class PhabricatorDirectoryMainController
     return $view;
   }
 
-  private function buildFeedView(array $projects, $is_full) {
+  private function buildFeedView(array $phids) {
     $request = $this->getRequest();
     $user = $request->getUser();
     $user_phid = $user->getPHID();
 
     $feed_query = new PhabricatorFeedQuery();
-    $feed_query->setFilterPHIDs(
-      array_merge(
-        array($user_phid),
-        mpull($projects, 'getPHID')));
+    if ($phids) {
+      $feed_query->setFilterPHIDs($phids);
+    }
 
     // TODO: All this limit stuff should probably be consolidated into the
     // feed query?
@@ -379,13 +426,9 @@ class PhabricatorDirectoryMainController
     $old_link = null;
     $new_link = null;
 
-    if ($is_full) {
-      $feed_query->setAfter($request->getStr('after'));
-      $feed_query->setBefore($request->getStr('before'));
-      $limit = 500;
-    } else {
-      $limit = 100;
-    }
+    $feed_query->setAfter($request->getStr('after'));
+    $feed_query->setBefore($request->getStr('before'));
+    $limit = 500;
 
     // Grab one more story than we intend to display so we can figure out
     // if we need to render an "Older Posts" link or not (with reasonable
@@ -394,12 +437,8 @@ class PhabricatorDirectoryMainController
     $feed = $feed_query->execute();
     $extra_row = (count($feed) == $limit + 1);
 
-    if ($is_full) {
-      $have_new = ($request->getStr('before')) ||
-                  ($request->getStr('after') && $extra_row);
-    } else {
-      $have_new = false;
-    }
+    $have_new = ($request->getStr('before')) ||
+                ($request->getStr('after') && $extra_row);
 
     $have_old = ($request->getStr('after')) ||
                 ($request->getStr('before') && $extra_row) ||
@@ -412,7 +451,7 @@ class PhabricatorDirectoryMainController
       $old_link = phutil_render_tag(
         'a',
         array(
-          'href' => '/feed/?before='.end($feed)->getChronologicalKey(),
+          'href' => '?before='.end($feed)->getChronologicalKey(),
           'class' => 'phabricator-feed-older-link',
         ),
         "Older Stories \xC2\xBB");
@@ -421,7 +460,7 @@ class PhabricatorDirectoryMainController
       $new_link = phutil_render_tag(
         'a',
         array(
-          'href' => '/feed/?after='.reset($feed)->getChronologicalKey(),
+          'href' => '?after='.reset($feed)->getChronologicalKey(),
           'class' => 'phabricator-feed-newer-link',
         ),
         "\xC2\xAB Newer Stories");
@@ -466,7 +505,7 @@ class PhabricatorDirectoryMainController
       array(
         'href' => $doc_href,
       ),
-      'Jump Nav Use Guide');
+      'Jump Nav User Guide');
 
     $jump_input = phutil_render_tag(
       'input',
@@ -494,13 +533,17 @@ class PhabricatorDirectoryMainController
         ),
         $jump_input));
 
-    $nav_buttons = array(
-      '/maniphest/task/create/' => 'Create a Task',
-      '/file/'       => 'Upload a File',
-      '/paste/'       => 'Create Paste',
-      '/w/'           => 'Browse Wiki',
-      '/diffusion/'   => 'Browse Code',
-    );
+    $nav_buttons = array();
+
+    if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
+      $nav_buttons['/maniphest/task/create/'] = 'Create a Task';
+    }
+    $nav_buttons['/file/'] = 'Upload a File';
+    $nav_buttons['/paste/'] = 'Create Paste';
+    if (PhabricatorEnv::getEnvConfig('phriction.enabled')) {
+      $nav_buttons['/w/'] = 'Browse Wiki';
+    }
+    $nav_buttons['/diffusion/'] = 'Browse Code';
 
     $panel->appendChild('<div class="phabricator-jump-nav-buttons">');
     foreach ($nav_buttons as $uri => $name) {

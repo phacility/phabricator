@@ -86,6 +86,9 @@ class DiffusionCommitController extends DiffusionController {
       $content[] = $detail_panel;
     }
 
+    $content[] = $this->buildAuditTable($commit);
+    $content[] = $this->buildComments($commit);
+
     $change_query = DiffusionPathChangeQuery::newFromDiffusionRequest(
       $drequest);
     $changes = $change_query->loadChanges();
@@ -213,6 +216,8 @@ class DiffusionCommitController extends DiffusionController {
       $content[] = $change_list;
     }
 
+    $content[] = $this->buildAddCommentView($commit);
+
     return $this->buildStandardPageResponse(
       $content,
       array(
@@ -288,6 +293,80 @@ class DiffusionCommitController extends DiffusionController {
       '<table class="diffusion-commit-properties">'.
         implode("\n", $rows).
       '</table>';
+  }
+
+  private function buildAuditTable($commit) {
+    $query = new PhabricatorAuditQuery();
+    $query->withCommitPHIDs(array($commit->getPHID()));
+    $audits = $query->execute();
+
+    $view = new PhabricatorAuditListView();
+    $view->setAudits($audits);
+
+    $phids = $view->getRequiredHandlePHIDs();
+    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $view->setHandles($handles);
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader('Audits');
+    $panel->appendChild($view);
+
+    return $panel;
+  }
+
+  private function buildComments($commit) {
+    $user = $this->getRequest()->getUser();
+    $comments = id(new PhabricatorAuditComment())->loadAllWhere(
+      'targetPHID = %s ORDER BY dateCreated ASC',
+      $commit->getPHID());
+
+    $view = new DiffusionCommentListView();
+    $view->setUser($user);
+    $view->setComments($comments);
+
+    $phids = $view->getRequiredHandlePHIDs();
+    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $view->setHandles($handles);
+
+    return $view;
+  }
+
+  private function buildAddCommentView($commit) {
+    $user = $this->getRequest()->getUser();
+
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+
+    $form = id(new AphrontFormView())
+      ->setUser($user)
+      ->setAction('/audit/addcomment/')
+      ->addHiddenInput('commit', $commit->getPHID())
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel('Action')
+          ->setName('action')
+          ->setOptions(PhabricatorAuditActionConstants::getActionNameMap()))
+      ->appendChild(
+        id(new AphrontFormTextAreaControl())
+          ->setLabel('Comments')
+          ->setName('content')
+          ->setCaption(phutil_render_tag(
+            'a',
+            array(
+              'href' => PhabricatorEnv::getDoclink(
+                'article/Remarkup_Reference.html'),
+              'tabindex' => '-1',
+              'target' => '_blank',
+            ),
+            'Formatting Reference')))
+      ->appendChild(
+        id(new AphrontFormSubmitControl())
+          ->setValue($is_serious ? 'Submit' : 'Cook the Books'));
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader($is_serious ? 'Audit Commit' : 'Creative Accounting');
+    $panel->appendChild($form);
+
+    return $panel;
   }
 
 }

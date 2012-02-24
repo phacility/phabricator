@@ -19,19 +19,23 @@ formatting text in Remarkup.
 These are inline styles, and can be applied to most text:
 
   **bold** //italic// ##monospaced##
-  D123 T123 rX123   # Link to Objects
-  {D123} {T123}     # Link to Objects (Full Name)
-  {F123}            # Embed Images
-  [[wiki page]]     # Link to Phriction
-  @username         # Mention a user
+  D123 T123 rX123           # Link to Objects
+  {D123} {T123}             # Link to Objects (Full Name)
+  {F123}                    # Embed Images
+  @username                 # Mention a user
+  [[wiki page]]             # Link to Phriction
+  [[wiki page | name]]      # Named link to Phriction
+  http://xyz/               # Link to web
+  [[http://xyz/ | name]]    # Named link to web
+
 
 These are block styles, and must be separated from surrounding text by
 empty lines:
 
-  = Large Header=
+  = Large Header =
   == Smaller Header ==
   > Quoted Text
-  Use "- " or "* " for list items.
+  Use "- " or "* " for bulleted lists, and "# " for numbered lists.
   Use ``` or indent two spaces for code.
   Use %%% for a literal block.
 
@@ -56,6 +60,12 @@ Make **headers** like this:
 
   ===== Very Small Header =====
 
+You can optionally omit the trailing "=" signs -- that is, these are the same:
+
+  == Smaller Header ==
+
+  == Smaller Header
+
 This produces headers like the ones in this document. Make sure you have an
 empty line before and after the header.
 
@@ -77,6 +87,57 @@ This produces a list like this:
   - bread
 
 (Note that you need to put a space after the "-" or "*".)
+
+You can make numbered lists with a "#" instead of "-" or "*":
+
+  # Articuno
+  # Zapdos
+  # Moltres
+
+You can also nest lists:
+
+```- Body
+  - Head
+  - Arm
+    - Elbow
+    - Hand
+      # Thumb
+      # Index
+      # Middle
+      # Ring
+      # Pinkie
+  - Leg
+    - Knee
+    - Foot```
+
+...which produces:
+
+  - Body
+  - Head
+  - Arm
+    - Elbow
+    - Hand
+      # Thumb
+      # Index
+      # Middle
+      # Ring
+      # Pinkie
+  - Leg
+    - Knee
+    - Foot
+
+If you prefer, you can indent lists using multiple characters to show indent
+depth, like this:
+
+```- Tree
+-- Branch
+--- Twig```
+
+As expected, this produces:
+
+- Tree
+-- Branch
+--- Twig
 
 Make **code blocks** by indenting two spaces:
 
@@ -176,6 +237,12 @@ If you have a URI with problematic characters in it, like
 
 This will force the parser to consume the whole URI: <http://comma.org/,>
 
+You can also use create named links, where you choose the displayed text. These
+work within Phabricator or on the internet at large:
+
+  [[/herald/transcript/ | Herald Transcripts]]
+  [[http://www.boring-legal-documents.com/ | exciting legal documents]]
+
 = Linking to Objects =
 
 You can link to Differential revisions, Diffusion commits and Maniphest tasks
@@ -217,6 +284,9 @@ You can embed an image by using braces to refer to it:
 
 In most interfaces, you can drag-and-drop an image from your computer into the
 text area to upload and reference it.
+
+Some browsers (e.g. Chrome) support uploading an image data just by pasting them
+from clipboard into the text area.
 
 You can set file display options like this:
 
@@ -269,12 +339,6 @@ With a pipe (##|##), you can retitle the link. Use this to mislead your
 opponents:
 
   Check out these [[legal/boring_documents/ | exciting legal documents]]!
-
-You can also use this as an explicit syntax for other web links, either within
-Phabricator or on the internet at large:
-
-  [[/herald/transcript/ | Herald Transcripts]]
-  [[http://www.boring-legal-documents.com/ | exciting legal documents]]
 
 = Literal Blocks =
 

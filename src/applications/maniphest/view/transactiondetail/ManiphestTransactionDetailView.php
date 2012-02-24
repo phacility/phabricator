@@ -173,13 +173,10 @@ class ManiphestTransactionDetailView extends ManiphestView {
         ),
         $author->renderLink().' '.$desc.'.'.$full_summary);
     }
-    $descs = implode("\n", $descs);
 
     if ($this->getRenderSummaryOnly()) {
-      return $descs;
+      return implode("\n", $descs);
     }
-
-    $more_classes = implode(' ', $more_classes);
 
     if ($comment_transaction && $comment_transaction->hasComments()) {
       $comments = $comment_transaction->getCache();
@@ -203,58 +200,33 @@ class ManiphestTransactionDetailView extends ManiphestView {
       $comment_block = null;
     }
 
-    if ($this->preview) {
-      $timestamp = 'COMMENT PREVIEW';
-    } else {
-      $timestamp = phabricator_datetime(
-        $transaction->getDateCreated(),
-        $this->user);
-    }
-
-    $info = array();
-
     $source_transaction = nonempty($comment_transaction, $any_transaction);
-    $content_source = new PhabricatorContentSourceView();
-    $content_source->setContentSource($source_transaction->getContentSource());
-    $content_source->setUser($this->user);
-    $info[] = $content_source->render();
 
-    $info[] = $timestamp;
+    $xaction_view = id(new PhabricatorTransactionView())
+      ->setUser($this->user)
+      ->setImageURI($author->getImageURI())
+      ->setContentSource($source_transaction->getContentSource())
+      ->setActions($descs);
 
-    $comment_anchor = null;
-    $num = $this->commentNumber;
-    if ($num && !$this->preview) {
-      Javelin::initBehavior('phabricator-watch-anchor');
-      $anchor_name = 'comment-'.$num;
-      $info[] = javelin_render_tag(
-        'a',
-        array(
-          'name'  => $anchor_name,
-          'id'    => $anchor_name,
-          'href'  => '#'.$anchor_name,
-        ),
-        'T'.$any_transaction->getTaskID().'#'.$anchor_name);
-      $comment_anchor = 'anchor-'.$anchor_name;
+    foreach ($more_classes as $class) {
+      $xaction_view->addClass($class);
     }
 
-    $info = implode(' &middot; ', array_filter($info));
+    if ($this->preview) {
+      $xaction_view->setIsPreview($this->preview);
+    } else {
+      $xaction_view->setEpoch($any_transaction->getDateCreated());
+      if ($this->commentNumber) {
+        $anchor_name = 'comment-'.$this->commentNumber;
+        $anchor_text = 'T'.$any_transaction->getTaskID().'#'.$anchor_name;
 
-    return phutil_render_tag(
-      'div',
-      array(
-        'class' => "maniphest-transaction-detail-container",
-        'style' => "background-image: url('".$author->getImageURI()."')",
-        'id'    => $comment_anchor,
-      ),
-      '<div class="maniphest-transaction-detail-view '.$more_classes.'">'.
-        '<div class="maniphest-transaction-header">'.
-          '<div class="maniphest-transaction-timestamp">'.
-            $info.
-          '</div>'.
-          $descs.
-        '</div>'.
-        $comment_block.
-      '</div>');
+        $xaction_view->setAnchor($anchor_name, $anchor_text);
+      }
+    }
+
+    $xaction_view->appendChild($comment_block);
+
+    return $xaction_view->render();
   }
 
   private function renderSupplementalInfoForEmail($transaction) {

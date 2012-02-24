@@ -190,3 +190,21 @@ a.handle-disabled {
   font-size: 11px;
   font-family: "Verdana";
 }
+
+.buoyant {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  z-index: 8;
+
+  padding: 6px;
+  color: #dddddd;
+  font-size: 11px;
+  opacity: 0.90;
+  width: 100%;
+
+  background: #222222;
+  border-bottom: 1px solid #dfdfdf;
+  cursor: pointer;
+
+}

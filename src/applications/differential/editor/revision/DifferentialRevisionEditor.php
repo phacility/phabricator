@@ -663,7 +663,11 @@ class DifferentialRevisionEditor {
       ->setAuthorPHID($this->getActorPHID())
       ->setRevisionID($revision_id)
       ->setContent($this->getComments())
-      ->setAction('update');
+      ->setAction(DifferentialAction::ACTION_UPDATE)
+      ->setMetadata(
+        array(
+          DifferentialComment::METADATA_DIFF_ID => $this->getDiff()->getID(),
+        ));
 
     if ($this->contentSource) {
       $comment->setContentSource($this->contentSource);

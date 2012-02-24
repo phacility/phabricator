@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -237,6 +237,7 @@ class PhabricatorFileListController extends PhabricatorFileController {
         $rowc[] = '';
       }
 
+      $name = $file->getName();
       $rows[] = array(
         phutil_escape_html('F'.$file->getID()),
         $file->getAuthorPHID()
@@ -247,7 +248,7 @@ class PhabricatorFileListController extends PhabricatorFileController {
           array(
             'href' => $file->getBestURI(),
           ),
-          phutil_escape_html($file->getName())),
+          ($name != '' ? phutil_escape_html($name) : '<em>no name</em>')),
         phutil_escape_html(number_format($file->getByteSize()).' bytes'),
         phutil_render_tag(
           'a',

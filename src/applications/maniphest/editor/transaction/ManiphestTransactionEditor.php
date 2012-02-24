@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -253,6 +253,8 @@ class ManiphestTransactionEditor {
     $prefix = $this->getSubjectPrefix();
     $subject = trim("{$prefix} [{$action}] T{$task_id}: {$title}");
 
+    $mailtags = $this->getMailTags($transactions);
+
     $template = id(new PhabricatorMetaMTAMail())
       ->setSubject($subject)
       ->setFrom($transaction->getAuthorPHID())
@@ -261,6 +263,7 @@ class ManiphestTransactionEditor {
       ->setThreadID($thread_id, $is_create)
       ->setRelatedPHID($task->getPHID())
       ->setIsBulk(true)
+      ->setMailTags($mailtags)
       ->setBody($body);
 
     $mails = $reply_handler->multiplexMail(
@@ -347,6 +350,32 @@ class ManiphestTransactionEditor {
       }
     }
     return $is_create;
+  }
+
+  private function getMailTags(array $transactions) {
+    $tags = array();
+    foreach ($transactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case ManiphestTransactionType::TYPE_CCS:
+          $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_CC;
+          break;
+        case ManiphestTransactionType::TYPE_PROJECTS:
+          $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_PROJECTS;
+          break;
+        case ManiphestTransactionType::TYPE_PRIORITY:
+          $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_PRIORITY;
+          break;
+        default:
+          $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_OTHER;
+          break;
+      }
+
+      if ($xaction->hasComments()) {
+        $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_COMMENT;
+      }
+    }
+
+    return array_unique($tags);
   }
 
 }

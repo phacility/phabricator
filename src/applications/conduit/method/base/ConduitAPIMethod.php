@@ -35,6 +35,11 @@ abstract class ConduitAPIMethod {
     return idx($this->defineErrorTypes(), $error_code, 'Unknown Error');
   }
 
+  public function getRequiredScope() {
+    // by default, conduit methods are not accessible via OAuth
+    return PhabricatorOAuthServerScope::SCOPE_NOT_ACCESSIBLE;
+  }
+
   public function executeMethod(ConduitAPIRequest $request) {
     return $this->execute($request);
   }

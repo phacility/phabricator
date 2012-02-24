@@ -13,6 +13,8 @@ phutil_require_module('phabricator', 'applications/differential/field/specificat
 phutil_require_module('phabricator', 'applications/differential/field/specification/branch');
 phutil_require_module('phabricator', 'applications/differential/field/specification/ccs');
 phutil_require_module('phabricator', 'applications/differential/field/specification/commits');
+phutil_require_module('phabricator', 'applications/differential/field/specification/datecreated');
+phutil_require_module('phabricator', 'applications/differential/field/specification/datemodified');
 phutil_require_module('phabricator', 'applications/differential/field/specification/dependencies');
 phutil_require_module('phabricator', 'applications/differential/field/specification/gitsvnid');
 phutil_require_module('phabricator', 'applications/differential/field/specification/host');
@@ -28,6 +30,8 @@ phutil_require_module('phabricator', 'applications/differential/field/specificat
 phutil_require_module('phabricator', 'applications/differential/field/specification/title');
 phutil_require_module('phabricator', 'applications/differential/field/specification/unit');
 phutil_require_module('phabricator', 'infrastructure/env');
+
+phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('DifferentialDefaultFieldSelector.php');

@@ -43,6 +43,14 @@ class PhabricatorUserEmailPreferenceSettingsPanelController
         $pref_no_self_mail,
         $request->getStr($pref_no_self_mail));
 
+
+      $new_tags = $request->getArr('mailtags');
+      $mailtags = $preferences->getPreference('mailtags', array());
+      foreach ($this->getMailTags() as $key => $label) {
+        $mailtags[$key] = (bool)idx($new_tags, $key, false);
+      }
+      $preferences->setPreference('mailtags', $mailtags);
+
       $preferences->save();
 
       return id(new AphrontRedirectResponse())
@@ -107,8 +115,36 @@ class PhabricatorUserEmailPreferenceSettingsPanelController
 
     $form
       ->appendChild(
+        '<br />'.
+        '<p class="aphront-form-instructions">'.
+          'You can customize what mail you receive from Phabricator here.'.
+        '</p>'.
+        '<p class="aphront-form-instructions">'.
+          '<strong>NOTE:</strong> If an update makes several changes (like '.
+          'adding CCs to a task, closing it, and adding a comment) you will '.
+          'still receive an email as long as at least one of the changes '.
+          'is set to notify you.'.
+        '</p>'
+        );
+
+    $mailtags = $preferences->getPreference('mailtags', array());
+
+    $form
+      ->appendChild(
+        $this->buildMailTagCheckboxes(
+          $this->getDifferentialMailTags(),
+          $mailtags)
+          ->setLabel('Differential'))
+      ->appendChild(
+        $this->buildMailTagCheckboxes(
+          $this->getManiphestMailTags(),
+          $mailtags)
+          ->setLabel('Maniphest'));
+
+    $form
+      ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Save'));
+          ->setValue('Save Preferences'));
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Email Preferences');
@@ -122,4 +158,55 @@ class PhabricatorUserEmailPreferenceSettingsPanelController
           $panel,
         ));
   }
+
+  private function getMailTags() {
+    return array(
+      MetaMTANotificationType::TYPE_DIFFERENTIAL_CC =>
+        "Send me email when a revision's CCs change.",
+      MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMITTED =>
+        "Send me email when a revision is committed.",
+      MetaMTANotificationType::TYPE_MANIPHEST_PROJECTS =>
+        "Send me email when a task's associated projects change.",
+      MetaMTANotificationType::TYPE_MANIPHEST_PRIORITY =>
+        "Send me email when a task's priority changes.",
+      MetaMTANotificationType::TYPE_MANIPHEST_CC =>
+        "Send me email when a task's CCs change.",
+    );
+  }
+
+  private function getManiphestMailTags() {
+    return array_select_keys(
+      $this->getMailTags(),
+      array(
+        MetaMTANotificationType::TYPE_MANIPHEST_PROJECTS,
+        MetaMTANotificationType::TYPE_MANIPHEST_PRIORITY,
+        MetaMTANotificationType::TYPE_MANIPHEST_CC,
+      ));
+  }
+
+  private function getDifferentialMailTags() {
+    return array_select_keys(
+      $this->getMailTags(),
+      array(
+        MetaMTANotificationType::TYPE_DIFFERENTIAL_CC,
+        MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMITTED,
+      ));
+  }
+
+  private function buildMailTagCheckboxes(
+    array $tags,
+    array $prefs) {
+
+    $control = new AphrontFormCheckboxControl();
+    foreach ($tags as $key => $label) {
+      $control->addCheckbox(
+        'mailtags['.$key.']',
+        1,
+        $label,
+        idx($prefs, $key, 1));
+    }
+
+    return $control;
+  }
+
 }

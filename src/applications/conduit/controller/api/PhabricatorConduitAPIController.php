@@ -114,6 +114,7 @@ class PhabricatorConduitAPIController
       $allow_unguarded_writes = false;
       $auth_error = null;
       if ($method_handler->shouldRequireAuthentication()) {
+        $metadata['scope'] = $method_handler->getRequiredScope();
         $auth_error = $this->authenticateUser($api_request, $metadata);
         // If we've explicitly authenticated the user here and either done
         // CSRF validation or are using a non-web authentication mechanism.
@@ -244,6 +245,48 @@ class PhabricatorConduitAPIController
     if ($request->getUser()->getPHID()) {
       $request->validateCSRF();
       $api_request->setUser($request->getUser());
+      return null;
+    }
+
+    // handle oauth
+    // TODO - T897 (make error codes for OAuth more correct to spec)
+    // and T891 (strip shield from Conduit response)
+    $access_token = $request->getStr('access_token');
+    $method_scope = $metadata['scope'];
+    if ($access_token &&
+        $method_scope != PhabricatorOAuthServerScope::SCOPE_NOT_ACCESSIBLE) {
+      $token = id(new PhabricatorOAuthServerAccessToken())
+        ->loadOneWhere('token = %s',
+                       $access_token);
+      if (!$token) {
+        return array(
+          'ERR-INVALID-AUTH',
+          'Access token does not exist.',
+        );
+      }
+
+      $oauth_server = new PhabricatorOAuthServer();
+      $valid = $oauth_server->validateAccessToken($token,
+                                                  $method_scope);
+      if (!$valid) {
+        return array(
+          'ERR-INVALID-AUTH',
+          'Access token is invalid.',
+        );
+      }
+
+      // valid token, so let's log in the user!
+      $user_phid = $token->getUserPHID();
+      $user = id(new PhabricatorUser())
+        ->loadOneWhere('phid = %s',
+                       $user_phid);
+      if (!$user) {
+        return array(
+          'ERR-INVALID-AUTH',
+          'Access token is for invalid user.',
+        );
+      }
+      $api_request->setUser($user);
       return null;
     }
 
