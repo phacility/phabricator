@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -228,53 +228,21 @@ class PhabricatorAuditEditController extends PhabricatorAuditController {
 
   private function saveAuditComments() {
     $action = $this->request->getStr('action');
-    $status_map = PhabricatorAuditActionConstants::getStatusNameMap();
-    $status = idx($status_map, $action, null);
-    if ($status === null) {
-      return $this->buildStandardPageResponse(
-        id(new AphrontErrorView())
-          ->setSeverity(AphrontErrorView::SEVERITY_ERROR)
-          ->setTitle("Action {$action} is invalid."),
-        array(
-          'title' => 'Audit a Commit',
-        ));
+
+    $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
+      'phid = %s',
+      $this->commitPHID);
+    if (!$commit) {
+      throw new Exception("No such commit!");
     }
 
-    id(new PhabricatorAuditComment())
-      ->setActorPHID($this->user->getPHID())
-      ->setTargetPHID($this->commitPHID)
+    $comment = id(new PhabricatorAuditComment())
       ->setAction($action)
-      ->setContent($this->request->getStr('comments'))
-      ->save();
+      ->setContent($this->request->getStr('comments'));
 
-    // Update the audit status for all the relationships <commit, package>
-    // where the package is owned by the user. When a user owns several
-    // packages and a commit touches all of them,It should be good enough for
-    // the user to approve it once to get all the relationships automatically
-    // updated.
-    $owned_packages = id(new PhabricatorOwnersOwner())->loadAllWhere(
-      'userPHID = %s',
-      $this->user->getPHID());
-    $owned_package_ids = mpull($owned_packages, 'getPackageID');
-
-    $conn_r = id(new PhabricatorOwnersPackage())->establishConnection('r');
-    $owned_package_phids = queryfx_all(
-      $conn_r,
-      'SELECT `phid` FROM %T WHERE id IN (%Ld)',
-      id(new PhabricatorOwnersPackage())->getTableName(),
-      $owned_package_ids);
-    $owned_package_phids = ipull($owned_package_phids, 'phid');
-
-    $relationships = id(new PhabricatorOwnersPackageCommitRelationship())
-      ->loadAllWhere(
-        'commitPHID = %s AND packagePHID IN (%Ls)',
-        $this->commitPHID,
-        $owned_package_phids);
-
-    foreach ($relationships as $relationship) {
-      $relationship->setAuditStatus($status);
-      $relationship->save();
-    }
+    $editor = id(new PhabricatorAuditCommentEditor($commit))
+      ->setUser($this->user)
+      ->addComment($comment);
 
     return id(new AphrontRedirectResponse())
       ->setURI(sprintf('/audit/edit/?c-phid=%s&p-phid=%s',

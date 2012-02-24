@@ -26,7 +26,7 @@ class PhabricatorAuditActionConstants {
     static $map = array(
       self::COMMENT => 'Comment',
       self::CONCERN => 'Raise Concern',
-      self::ACCEPT  => 'Accept',
+      self::ACCEPT  => 'Accept Commit',
     );
 
     return $map;
