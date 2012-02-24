@@ -86,6 +86,13 @@
   font-weight: bold;
 }
 
+.differential-lint-block .lint-excuse,
+.differential-unit-block .unit-excuse {
+  background: #808080;
+  color: #ffff66;
+  font-size: 12px;
+}
+
 .differential-keyboard-shortcuts {
   float: right;
 }

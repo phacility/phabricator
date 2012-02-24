@@ -28,7 +28,20 @@ final class DifferentialLintFieldSpecification
   }
 
   public function getRequiredDiffProperties() {
-    return array('arc:lint');
+    return array('arc:lint', 'arc:lint-excuse');
+  }
+
+  private function getLintExcuse() {
+    $excuse = $this->getDiffProperty('arc:lint-excuse');
+    $excuse = phutil_escape_html($excuse);
+    $excuse = nl2br($excuse);
+
+    $excuse_markup = '';
+    if (strlen($excuse)) {
+      $excuse_markup = '<p><strong>Explanation for failure(s): </strong></p>'.
+                       '<span class="lint-excuse">'.$excuse.'</span>';
+    }
+    return $excuse_markup;
   }
 
   public function renderValueForRevisionView() {
@@ -83,8 +96,10 @@ final class DifferentialLintFieldSpecification
             '<ul>'.implode("\n", $message_markup).'</ul>'.
           '</li>';
       }
+      $lexcuse = $this->getLintExcuse();
       $ltail =
         '<div class="differential-lint-block">'.
+          $lexcuse.
           '<ul>'.
             implode("\n", $lint_messages).
           '</ul>'.

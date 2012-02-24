@@ -28,7 +28,20 @@ final class DifferentialUnitFieldSpecification
   }
 
   public function getRequiredDiffProperties() {
-    return array('arc:unit');
+    return array('arc:unit', 'arc:unit-excuse');
+  }
+
+  private function getUnitExcuse() {
+    $excuse = $this->getDiffProperty('arc:unit-excuse');
+    $excuse = phutil_escape_html($excuse);
+    $excuse = nl2br($excuse);
+
+    $excuse_markup = '';
+    if (strlen($excuse)) {
+      $excuse_markup = '<p>Explanation for failure(s): </p>'.
+                       '<span class="unit-excuse">'.$excuse.'</span>';
+    }
+    return $excuse_markup;
   }
 
   public function renderValueForRevisionView() {
@@ -67,9 +80,12 @@ final class DifferentialUnitFieldSpecification
           $postponed_count++;
         }
       }
+
+      $uexcuse = $this->getUnitExcuse();
       if ($unit_messages) {
         $utail =
           '<div class="differential-unit-block">'.
+            $uexcuse.
             '<ul>'.
               implode("\n", $unit_messages).
             '</ul>'.
