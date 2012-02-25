@@ -313,6 +313,19 @@ class DiffusionBrowseFileController extends DiffusionController {
       $range = 1;
     }
 
+    $targ = '';
+    $min_line = 0;
+    $line = $drequest->getLine();
+    if (strpos($line,'-') !== false) {
+      list($min,$max) = explode('-',$line,2);
+      $min_line = min($min, $max);
+      $max_line = max($min, $max);
+    } else if (strlen($line)) {
+      $min_line = $line;
+      $max_line = $line;
+    }
+
+
     foreach ($text_list as $k => $line) {
       if ($needs_blame) {
         // If the line's rev is same as the line above, show empty content
@@ -370,11 +383,13 @@ class DiffusionBrowseFileController extends DiffusionController {
       }
 
       // Highlight the line of interest if needed.
-      if ($n == $drequest->getLine()) {
+      if ($min_line > 0 && ($n >= $min_line && $n <= $max_line)) {
         $tr = '<tr style="background: #ffff00;">';
-        $targ = '<a id="scroll_target"></a>';
-        Javelin::initBehavior('diffusion-jump-to',
-          array('target' => 'scroll_target'));
+        if ($targ == '') {
+          $targ = '<a id="scroll_target"></a>';
+          Javelin::initBehavior('diffusion-jump-to',
+            array('target' => 'scroll_target'));
+        }
       } else {
         $tr = '<tr>';
         $targ = null;
