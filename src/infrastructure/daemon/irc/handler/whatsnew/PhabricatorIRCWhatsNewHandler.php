@@ -23,7 +23,10 @@
  */
 final class PhabricatorIRCWhatsNewHandler extends PhabricatorIRCHandler {
 
+  private $floodblock = 0;
+
   public function receiveMessage(PhabricatorIRCMessage $message) {
+
     switch ($message->getCommand()) {
       case 'PRIVMSG':
         $reply_to = $message->getReplyTo();
@@ -35,6 +38,11 @@ final class PhabricatorIRCWhatsNewHandler extends PhabricatorIRCHandler {
 
         $prompt = '~what( i|\')?s new\?~i';
         if (preg_match($prompt, $message)) {
+          if (time() < $this->floodblock) {
+            return;
+          }
+          $this->floodblock = time() + 60;
+
           $this->getLatest($reply_to);
         }
         break;
@@ -59,15 +67,15 @@ final class PhabricatorIRCWhatsNewHandler extends PhabricatorIRCHandler {
 
       switch ($action['class']) {
         case 'PhabricatorFeedStoryDifferential':
-          array_push($phids,$action['data']['revision_phid']);
+          $phids[] = $action['data']['revision_phid'];
           break;
 
         case 'PhabricatorFeedStoryManiphest':
-          array_push($phids,$action['data']['taskPHID']);
+          $phids[] = $action['data']['taskPHID'];
           break;
 
         default:
-          array_push($phids,$uid);
+          $phids[] = $uid;
           break;
       }
       array_push($phids,$uid);
@@ -120,19 +128,22 @@ final class PhabricatorIRCWhatsNewHandler extends PhabricatorIRCHandler {
 
   public function getRhetoric($input) {
     switch ($input) {
-      case "none":
+      case 'none':
         return 'commented on';
         break;
-      case "update":
+      case 'update':
         return 'updated';
         break;
-      case "create":
+      case 'commit':
+        return 'committed';
+        break;
+      case 'create':
         return 'created';
         break;
-      case "abandon":
+      case 'abandon':
         return 'abandonned';
         break;
-      case "accept":
+      case 'accept':
         return 'accepted';
         break;
       default:
