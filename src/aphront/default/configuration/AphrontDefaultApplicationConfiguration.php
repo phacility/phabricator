@@ -265,7 +265,7 @@ class AphrontDefaultApplicationConfiguration
           'browse/'.
             '(?P<path>.*?)'.
             '(?:[;](?P<commit>[a-z0-9]+))?'.
-            '(?:[$](?P<line>\d+))?'.
+            '(?:[$](?P<line>\d+(?:-\d+)?))?'.
             '$'
               => 'DiffusionBrowseController',
           'diff/'.
