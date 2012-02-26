@@ -546,7 +546,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-differential-show-all-comments' =>
   array(
-    'uri' => '/res/bcc990f0/rsrc/js/application/differential/behavior-show-all-comments.js',
+    'uri' => '/res/eaa12efc/rsrc/js/application/differential/behavior-show-all-comments.js',
     'type' => 'js',
     'requires' =>
     array(

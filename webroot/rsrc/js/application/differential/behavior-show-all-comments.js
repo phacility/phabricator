@@ -10,7 +10,7 @@ JX.behavior('differential-show-all-comments', function(config) {
   var shown = false;
   function reveal(node) {
     if (shown) {
-      return;
+      return false;
     }
     shown = true;
     node = node || JX.DOM.find(
@@ -20,6 +20,7 @@ JX.behavior('differential-show-all-comments', function(config) {
     if (node) {
       JX.DOM.setContent(node, JX.$H(config.markup));
     }
+    return true;
   }
 
   // Reveal the hidden comments if the user clicks "Show All Comments", or if
@@ -33,8 +34,12 @@ JX.behavior('differential-show-all-comments', function(config) {
       'hashchange',
       null,
       function(e) {
-        if (window.location.hash.match(/comment/)) {
-          reveal();
+        if (window.location.hash.match(/comment/) && reveal()) {
+          try {
+            var target = JX.$(window.location.hash.replace(/^#/, ''));
+            window.scrollTo(0, target.offsetTop);
+          } catch (e) {
+          }
         }
       });
   }
