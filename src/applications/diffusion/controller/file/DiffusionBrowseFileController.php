@@ -405,7 +405,6 @@ class DiffusionBrowseFileController extends DiffusionController {
       $l = phutil_render_tag(
         'a',
         array(
-          'class' => 'diffusion-line-link',
           'href' => $uri_path.';'.$uri_rev.'$'.$n.$uri_view,
         ),
         $n);
