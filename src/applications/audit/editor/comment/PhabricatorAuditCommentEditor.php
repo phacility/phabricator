@@ -61,19 +61,34 @@ final class PhabricatorAuditCommentEditor {
 
     // Status may be empty for updates which don't affect status, like
     // "comment".
-    if ($status) {
-      foreach ($relationships as $relationship) {
-        if (empty($audit_phids[$relationship->getPackagePHID()])) {
-          continue;
-        }
+    $have_any_relationship = false;
+    foreach ($relationships as $relationship) {
+      if (empty($audit_phids[$relationship->getPackagePHID()])) {
+        continue;
+      }
+      $have_any_relationship = true;
+      if ($status) {
         $relationship->setAuditStatus($status);
         $relationship->save();
       }
     }
 
+    if (!$have_any_relationship) {
+      // If the user has no current authority over any audit trigger, make a
+      // new one to represent their audit state.
+      $relationship = id(new PhabricatorOwnersPackageCommitRelationship())
+        ->setCommitPHID($commit->getPHID())
+        ->setPackagePHID($user->getPHID())
+        ->setAuditStatus(
+            $status
+              ? $status
+              : PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED)
+        ->setAuditReasons(array("Voluntary Participant"))
+        ->save();
+    }
+
     $this->publishFeedStory($comment, array_keys($audit_phids));
     PhabricatorSearchCommitIndexer::indexCommit($commit);
-
     // TODO: Email.
   }
 
