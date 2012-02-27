@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'applications/audit/controller/base');
+phutil_require_module('phabricator', 'applications/audit/editor/comment');
 phutil_require_module('phabricator', 'applications/audit/query/audit');
 phutil_require_module('phabricator', 'applications/audit/view/list');
 phutil_require_module('phabricator', 'applications/phid/handle/data');

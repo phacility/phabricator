@@ -26,6 +26,7 @@ class HeraldValueTypeConfig {
   const VALUE_RULE                = 'rule';
   const VALUE_REPOSITORY          = 'repository';
   const VALUE_OWNERS_PACKAGE      = 'package';
+  const VALUE_PROJECT             = 'project';
 
   public static function getValueTypeForFieldAndCondition($field, $condition) {
     switch ($condition) {
@@ -89,6 +90,8 @@ class HeraldValueTypeConfig {
         return self::VALUE_EMAIL;
       case HeraldActionConfig::ACTION_NOTHING:
         return self::VALUE_NONE;
+      case HeraldActionConfig::ACTION_AUDIT:
+        return self::VALUE_PROJECT;
       default:
         throw new Exception("Unknown action '{$action}'.");
     }

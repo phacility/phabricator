@@ -26,6 +26,7 @@ class HeraldCommitAdapter extends HeraldObjectAdapter {
   protected $commitData;
 
   protected $emailPHIDs = array();
+  protected $auditMap = array();
 
   protected $affectedPaths;
   protected $affectedRevision;
@@ -48,6 +49,10 @@ class HeraldCommitAdapter extends HeraldObjectAdapter {
 
   public function getEmailPHIDs() {
     return array_keys($this->emailPHIDs);
+  }
+
+  public function getAuditMap() {
+    return $this->auditMap;
   }
 
   public function getHeraldName() {
@@ -185,6 +190,7 @@ class HeraldCommitAdapter extends HeraldObjectAdapter {
   }
 
   public function applyHeraldEffects(array $effects) {
+
     $result = array();
     foreach ($effects as $effect) {
       $action = $effect->getAction();
@@ -196,13 +202,21 @@ class HeraldCommitAdapter extends HeraldObjectAdapter {
             'Great success at doing nothing.');
           break;
         case HeraldActionConfig::ACTION_EMAIL:
-          foreach ($effect->getTarget() as $fbid) {
-            $this->emailPHIDs[$fbid] = true;
+          foreach ($effect->getTarget() as $phid) {
+            $this->emailPHIDs[$phid] = true;
           }
           $result[] = new HeraldApplyTranscript(
             $effect,
             true,
             'Added address to email targets.');
+          break;
+        case HeraldActionConfig::ACTION_AUDIT:
+          foreach ($effect->getTarget() as $phid) {
+            if (empty($this->auditMap[$phid])) {
+              $this->auditMap[$phid] = array();
+            }
+            $this->auditMap[$phid][] = $effect->getRuleID();
+          }
           break;
         default:
           throw new Exception("No rules to handle action '{$action}'.");

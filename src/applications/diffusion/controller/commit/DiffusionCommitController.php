@@ -296,6 +296,8 @@ class DiffusionCommitController extends DiffusionController {
   }
 
   private function buildAuditTable($commit) {
+    $user = $this->getRequest()->getUser();
+
     $query = new PhabricatorAuditQuery();
     $query->withCommitPHIDs(array($commit->getPHID()));
     $audits = $query->execute();
@@ -306,6 +308,8 @@ class DiffusionCommitController extends DiffusionController {
     $phids = $view->getRequiredHandlePHIDs();
     $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
     $view->setHandles($handles);
+    $view->setAuthorityPHIDs(
+      PhabricatorAuditCommentEditor::loadAuditPHIDsForUser($user));
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Audits');

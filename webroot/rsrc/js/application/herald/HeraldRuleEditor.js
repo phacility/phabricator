@@ -222,6 +222,7 @@ JX.install('HeraldRuleEditor', {
         case 'repository':
         case 'tag':
         case 'package':
+        case 'project':
           var tokenizer = this._newTokenizer(type);
           input = tokenizer[0];
           get_fn = tokenizer[1];
@@ -243,13 +244,19 @@ JX.install('HeraldRuleEditor', {
     },
 
     _renderAuthorInput : function() {
-        var tokenizer = this._newTokenizer('email', 1);
-        input = tokenizer[0];
-        set_fn = tokenizer[2];
-        set_fn(this._config.author);
-        this._config.authorGetter = tokenizer[1];
+      var tokenizer = this._newTokenizer('email', 1);
+      input = tokenizer[0];
+      set_fn = tokenizer[2];
+      set_fn(this._config.author);
+      this._config.authorGetter = tokenizer[1];
+      try {
         var author_cell = JX.$('author-input');
         JX.DOM.setContent(author_cell, input);
+      } catch (ex) {
+        // TODO: Get rid of the ownership changing stuff or something?
+        // On global rules, there's no "author" input. Not fixing this
+        // properly because I think I'm going to nuke it soon.
+      }
    },
 
     _renderValueInputForRow : function(row_id) {

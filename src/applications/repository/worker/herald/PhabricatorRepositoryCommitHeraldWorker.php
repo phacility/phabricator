@@ -23,10 +23,6 @@ class PhabricatorRepositoryCommitHeraldWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
-    if ($repository->getDetail('herald-disabled')) {
-      return;
-    }
-
     $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
       'commitID = %d',
       $commit->getID());
@@ -44,8 +40,18 @@ class PhabricatorRepositoryCommitHeraldWorker
     $effects = $engine->applyRules($rules, $adapter);
     $engine->applyEffects($effects, $adapter, $rules);
 
+    $audit_phids = $adapter->getAuditMap();
+    if ($audit_phids) {
+      $this->createAudits($commit, $audit_phids, $rules);
+    }
+
     $email_phids = $adapter->getEmailPHIDs();
     if (!$email_phids) {
+      return;
+    }
+
+    if ($repository->getDetail('herald-disabled')) {
+      // This just means "disable email"; audits are (mostly) idempotent.
       return;
     }
 
@@ -136,5 +142,39 @@ EOBODY;
     }
 
     $mailer->saveAndSend();
+  }
+
+  private function createAudits($commit, $map, $rules) {
+
+    $table = new PhabricatorOwnersPackageCommitRelationship();
+    $rships = $table->loadAllWhere(
+      'commitPHID = %s AND packagePHID IN (%Ls)',
+      $commit->getPHID(),
+      array_keys($map));
+    $rships = mpull($rships, null, 'getPackagePHID');
+
+    $rules = mpull($rules, null, 'getID');
+    foreach ($map as $phid => $rule_ids) {
+      $rship = idx($rships, $phid);
+      if ($rship) {
+        continue;
+      }
+      $reasons = array();
+      foreach ($rule_ids as $id) {
+        $rule_name = '?';
+        if ($rules[$id]) {
+          $rule_name = $rules[$id]->getName();
+        }
+        $reasons[] = 'Herald Rule #'.$id.' "'.$rule_name.'" Triggered Audit';
+      }
+
+      $rship = new PhabricatorOwnersPackageCommitRelationship();
+      $rship->setCommitPHID($commit->getPHID());
+      $rship->setPackagePHID($phid);
+      $rship->setAuditStatus(PhabricatorAuditStatusConstants::AUDIT_REQUIRED);
+      $rship->setAuditReasons($reasons);
+      $rship->save();
+    }
+
   }
 }

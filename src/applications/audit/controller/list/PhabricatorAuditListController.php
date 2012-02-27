@@ -26,13 +26,16 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
 
   public function processRequest() {
     $request = $this->getRequest();
+    $user = $request->getUser();
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI('/audit/view/'));
+    $nav->addLabel('Active');
+    $nav->addFilter('active',  'Need Attention');
     $nav->addLabel('Audits');
-    $nav->addFilter('all', 'All');
+    $nav->addFilter('all',  'All');
 
-    $this->filter = $nav->selectFilter($this->filter, 'all');
+    $this->filter = $nav->selectFilter($this->filter, 'active');
 
     $pager = new AphrontPagerView();
     $pager->setURI($request->getRequestURI(), 'offset');
@@ -40,6 +43,16 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     $query = new PhabricatorAuditQuery();
     $query->setOffset($pager->getOffset());
     $query->setLimit($pager->getPageSize() + 1);
+
+    switch ($this->filter) {
+      case 'all':
+        break;
+      case 'active':
+        $phids = PhabricatorAuditCommentEditor::loadAuditPHIDsForUser($user);
+        $query->withAuditorPHIDs($phids);
+        $query->withStatus(PhabricatorAuditQuery::STATUS_OPEN);
+        break;
+    }
 
     $audits = $query->execute();
     $audits = $pager->sliceResults($audits);

@@ -582,10 +582,7 @@ class HeraldRuleController extends HeraldController {
         'user'        => '/typeahead/common/users/',
         'repository'  => '/typeahead/common/repositories/',
         'package'     => '/typeahead/common/packages/',
-
-/*
-        'tag'         => '/datasource/tag/',
-*/
+        'project'     => '/typeahead/common/projects/',
       ),
       'markup' => $template,
     );

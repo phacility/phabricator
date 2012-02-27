@@ -20,6 +20,7 @@ final class PhabricatorAuditListView extends AphrontView {
 
   private $audits;
   private $handles;
+  private $authorityPHIDs = array();
 
   public function setAudits(array $audits) {
     $this->audits = $audits;
@@ -28,6 +29,11 @@ final class PhabricatorAuditListView extends AphrontView {
 
   public function setHandles(array $handles) {
     $this->handles = $handles;
+    return $this;
+  }
+
+  public function setAuthorityPHIDs(array $phids) {
+    $this->authorityPHIDs = $phids;
     return $this;
   }
 
@@ -49,6 +55,10 @@ final class PhabricatorAuditListView extends AphrontView {
   }
 
   public function render() {
+
+    $authority = array_fill_keys($this->authorityPHIDs, true);
+
+    $rowc = array();
 
     $last = null;
     $rows = array();
@@ -77,6 +87,12 @@ final class PhabricatorAuditListView extends AphrontView {
         phutil_escape_html($status),
         $reasons,
       );
+
+      if (empty($authority[$audit->getPackagePHID()])) {
+        $rowc[] = null;
+      } else {
+        $rowc[] = 'highlighted';
+      }
     }
 
     $table = new AphrontTableView($rows);
@@ -94,7 +110,7 @@ final class PhabricatorAuditListView extends AphrontView {
         '',
         'wide',
       ));
-
+    $table->setRowClasses($rowc);
 
     return $table->render();
   }

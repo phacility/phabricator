@@ -103,7 +103,7 @@ final class PhabricatorAuditCommentEditor {
 
     // The user can audit on behalf of all projects they are a member of.
     $query = new PhabricatorProjectQuery();
-    $query->setMembers(array($user->getPHID));
+    $query->setMembers(array($user->getPHID()));
     $projects = $query->execute();
     foreach ($projects as $project) {
       $phids[$project->getPHID()] = true;

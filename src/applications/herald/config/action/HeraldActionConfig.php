@@ -22,6 +22,7 @@ class HeraldActionConfig {
   const ACTION_REMOVE_CC    = 'remcc';
   const ACTION_EMAIL        = 'email';
   const ACTION_NOTHING      = 'nothing';
+  const ACTION_AUDIT        = 'audit';
 
   public static function getActionMessageMapForRuleType($rule_type) {
     $generic_mappings =
@@ -36,6 +37,7 @@ class HeraldActionConfig {
             self::ACTION_ADD_CC       => 'Add emails to CC',
             self::ACTION_REMOVE_CC    => 'Remove emails from CC',
             self::ACTION_EMAIL        => 'Send an email to',
+            self::ACTION_AUDIT        => 'Trigger an Audit for project',
           );
         break;
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
@@ -44,6 +46,7 @@ class HeraldActionConfig {
             self::ACTION_ADD_CC       => 'CC me',
             self::ACTION_REMOVE_CC    => 'Remove me from CC',
             self::ACTION_EMAIL        => 'Email me',
+            self::ACTION_AUDIT        => 'Trigger an Audit by me',
           );
         break;
       default:
@@ -70,6 +73,7 @@ class HeraldActionConfig {
           $map,
           array(
             self::ACTION_EMAIL,
+            self::ACTION_AUDIT,
             self::ACTION_NOTHING,
           ));
       case HeraldContentTypeConfig::CONTENT_TYPE_MERGE:
@@ -112,6 +116,7 @@ class HeraldActionConfig {
         case HeraldActionConfig::ACTION_EMAIL:
         case HeraldActionConfig::ACTION_ADD_CC:
         case HeraldActionConfig::ACTION_REMOVE_CC:
+        case HeraldActionConfig::ACTION_AUDIT:
           $data[1] = array($author_phid => $author_phid);
           break;
         case HeraldActionConfig::ACTION_NOTHING:

@@ -6,11 +6,13 @@
 
 
 
+phutil_require_module('phabricator', 'applications/audit/constants/status');
 phutil_require_module('phabricator', 'applications/herald/adapter/commit');
 phutil_require_module('phabricator', 'applications/herald/config/contenttype');
 phutil_require_module('phabricator', 'applications/herald/engine/engine');
 phutil_require_module('phabricator', 'applications/herald/storage/rule');
 phutil_require_module('phabricator', 'applications/metamta/storage/mail');
+phutil_require_module('phabricator', 'applications/owners/storage/packagecommitrelationship');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'applications/repository/storage/commitdata');
 phutil_require_module('phabricator', 'applications/repository/worker/base');

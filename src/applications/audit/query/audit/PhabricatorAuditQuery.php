@@ -21,10 +21,25 @@ final class PhabricatorAuditQuery {
   private $offset;
   private $limit;
 
+  private $auditorPHIDs;
   private $commitPHIDs;
+
+  private $status     = 'status-any';
+  const STATUS_ANY    = 'status-any';
+  const STATUS_OPEN   = 'status-open';
 
   public function withCommitPHIDs(array $commit_phids) {
     $this->commitPHIDs = $commit_phids;
+    return $this;
+  }
+
+  public function withAuditorPHIDs(array $auditor_phids) {
+    $this->auditorPHIDs = $auditor_phids;
+    return $this;
+  }
+
+  public function withStatus($status) {
+    $this->status = $status;
     return $this;
   }
 
@@ -65,6 +80,30 @@ final class PhabricatorAuditQuery {
         $conn_r,
         'commitPHID IN (%Ls)',
         $this->commitPHIDs);
+    }
+
+    if ($this->auditorPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'packagePHID IN (%Ls)',
+        $this->auditorPHIDs);
+    }
+
+    $status = $this->status;
+    switch ($status) {
+      case self::STATUS_OPEN:
+        $where[] = qsprintf(
+          $conn_r,
+          'auditStatus in (%Ls)',
+          array(
+            PhabricatorAuditStatusConstants::AUDIT_REQUIRED,
+            PhabricatorAuditStatusConstants::CONCERNED,
+          ));
+        break;
+      case self::STATUS_ANY:
+        break;
+      default:
+        throw new Exception("Unknown status '{$status}'!");
     }
 
     if ($where) {
