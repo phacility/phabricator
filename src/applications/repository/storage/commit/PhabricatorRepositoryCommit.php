@@ -23,6 +23,9 @@ class PhabricatorRepositoryCommit extends PhabricatorRepositoryDAO {
   protected $commitIdentifier;
   protected $epoch;
 
+  // TODO: Add this!
+  // protected $mailKey;
+
   private $commitData;
 
   public function getConfiguration() {
@@ -56,6 +59,11 @@ class PhabricatorRepositoryCommit extends PhabricatorRepositoryDAO {
       throw new Exception("Attach commit data with attachCommitData() first!");
     }
     return $this->commitData;
+  }
+
+  public function getMailKey() {
+    // TODO: Fix properly!
+    return $this->phid;
   }
 
   public function delete() {

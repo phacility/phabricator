@@ -235,6 +235,17 @@ return array(
   // adapter.
   'metamta.differential.attach-patches' => false,
 
+  // Prefix prepended to mail sent by Diffusion.
+  'metamta.diffusion.subject-prefix' => '[Diffusion]',
+
+  // See 'metamta.maniphest.reply-handler-domain'. This does the same thing,
+  // but allows email replies via Diffusion.
+  'metamta.diffusion.reply-handler-domain' => null,
+
+  // See 'metamta.maniphest.reply-handler'. This does the same thing, but
+  // affects Diffusion.
+  'metamta.diffusion.reply-handler' => 'PhabricatorAuditReplyHandler',
+
   // By default, Phabricator generates unique reply-to addresses and sends a
   // separate email to each recipient when you enable reply handling. This is
   // more secure than using "From" to establish user identity, but can mean

@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/audit/editor/comment');
 phutil_require_module('phabricator', 'applications/differential/mail/base');
 phutil_require_module('phabricator', 'applications/maniphest/constants/priority');
 phutil_require_module('phabricator', 'applications/maniphest/editor/transaction');

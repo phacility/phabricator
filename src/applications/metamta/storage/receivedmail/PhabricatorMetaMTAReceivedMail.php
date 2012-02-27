@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     $prefixPattern = ($single_handle_prefix)
       ? preg_quote($single_handle_prefix, '/') . '\+'
       : '';
-    $pattern = "/^{$prefixPattern}((?:D|T)\d+)\+([\w]+)\+([a-f0-9]{16})@/U";
+    $pattern = "/^{$prefixPattern}((?:D|T|C)\d+)\+([\w]+)\+([a-f0-9]{16})@/U";
 
     $ok = preg_match(
       $pattern,
@@ -189,6 +189,9 @@ class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       $handler = $editor->buildReplyHandler($receiver);
     } else if ($receiver instanceof DifferentialRevision) {
       $handler = DifferentialMail::newReplyHandlerForRevision($receiver);
+    } else if ($receiver instanceof PhabricatorRepositoryCommit) {
+      $handler = PhabricatorAuditCommentEditor::newReplyHandlerForCommit(
+        $receiver);
     }
 
     $handler->setActor($user);
@@ -221,6 +224,9 @@ class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
         break;
       case 'D':
         $class_obj = newv('DifferentialRevision', array());
+        break;
+      case 'C':
+        $class_obj = newv('PhabricatorRepositoryCommit', array());
         break;
       default:
         return null;
