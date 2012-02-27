@@ -2,25 +2,23 @@
  * @provides phabricator-jump-nav
  */
 
+.phabricator-jump-nav-form {
+  text-align: center;
+  padding: 0px;
+  margin: 0 2em;
+}
+
 .phabricator-jump-nav {
-  font-size: 18px;
-  width: 98%;
-  padding: .25em 1%;
+  margin-top: -8px;
+  font-size: 16px;
+  width: 100%;
+  padding: 2px 0;
 }
 
 .phabricator-jump-nav-caption {
+  margin-top: 4px;
+  padding-bottom: 4px;
   font-size: 11px;
   color: #666666;
-  margin-top: 4px;
-}
-
-.phabricator-jump-nav-buttons {
-  margin-top: 1em;
-  text-align: center;
-}
-
-.phabricator-jump-nav-buttons a.button {
-  margin-right: .75em;
-  width: 125px;
-  text-align: center;
+  text-align: left;
 }

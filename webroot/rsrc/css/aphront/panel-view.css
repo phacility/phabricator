@@ -11,6 +11,10 @@
   margin: 1em 2em;
 }
 
+.aphront-unpadded-panel-view {
+  padding: 0px;
+}
+
 .aphront-panel-view .aphront-panel-header {
   margin: 0 0 1em 0;
 }
@@ -103,3 +107,4 @@
   font-size: 11px;
   color: #666666;
 }
+
