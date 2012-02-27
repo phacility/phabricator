@@ -16,48 +16,47 @@
  * limitations under the License.
  */
 
-final class PhabricatorAuditAddCommentController
+final class PhabricatorAuditPreviewController
   extends PhabricatorAuditController {
+
+  private $id;
+
+  public function willProcessRequest(array $data) {
+    $this->id = $data['id'];
+  }
 
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    if (!$request->isFormPost()) {
-      return new Aphront403Response();
-    }
-
-    $commit_phid = $request->getStr('commit');
-    $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-      'phid = %s',
-      $commit_phid);
-
+    $commit = id(new PhabricatorRepositoryCommit())->load($this->id);
     if (!$commit) {
       return new Aphront404Response();
     }
 
     $comment = id(new PhabricatorAuditComment())
+      ->setActorPHID($user->getPHID())
+      ->setTargetPHID($commit->getPHID())
       ->setAction($request->getStr('action'))
       ->setContent($request->getStr('content'));
 
-
-    id(new PhabricatorAuditCommentEditor($commit))
+    $view = id(new DiffusionCommentView())
       ->setUser($user)
-      ->addComment($comment);
+      ->setComment($comment)
+      ->setIsPreview(true);
 
-    $phids = array($commit_phid);
+    $phids = $view->getRequiredHandlePHIDs();
     $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
-    $uri = $handles[$commit_phid]->getURI();
+    $view->setHandles($handles);
 
-    $draft = id(new PhabricatorDraft())->loadOneWhere(
-      'authorPHID = %s AND draftKey = %s',
-      $user->getPHID(),
-      'diffusion-audit-'.$commit->getID());
-    if ($draft) {
-      $draft->delete();
-    }
+    id(new PhabricatorDraft())
+      ->setAuthorPHID($comment->getActorPHID())
+      ->setDraftKey('diffusion-audit-'.$this->id)
+      ->setDraft($comment->getContent())
+      ->replace();
 
-    return id(new AphrontRedirectResponse())->setURI($uri);
+    return id(new AphrontAjaxResponse())
+      ->setContent($view->render());
   }
 
 }

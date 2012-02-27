@@ -6,12 +6,11 @@
 
 
 
-phutil_require_module('phabricator', 'aphront/response/403');
 phutil_require_module('phabricator', 'aphront/response/404');
-phutil_require_module('phabricator', 'aphront/response/redirect');
+phutil_require_module('phabricator', 'aphront/response/ajax');
 phutil_require_module('phabricator', 'applications/audit/controller/base');
-phutil_require_module('phabricator', 'applications/audit/editor/comment');
 phutil_require_module('phabricator', 'applications/audit/storage/auditcomment');
+phutil_require_module('phabricator', 'applications/diffusion/view/comment');
 phutil_require_module('phabricator', 'applications/draft/storage/draft');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'applications/repository/storage/commit');
@@ -19,4 +18,4 @@ phutil_require_module('phabricator', 'applications/repository/storage/commit');
 phutil_require_module('phutil', 'utils');
 
 
-phutil_require_source('PhabricatorAuditAddCommentController.php');
+phutil_require_source('PhabricatorAuditPreviewController.php');

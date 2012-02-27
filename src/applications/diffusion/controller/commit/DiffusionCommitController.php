@@ -340,6 +340,16 @@ class DiffusionCommitController extends DiffusionController {
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 
+    $draft = id(new PhabricatorDraft())->loadOneWhere(
+      'authorPHID = %s AND draftKey = %s',
+      $user->getPHID(),
+      'diffusion-audit-'.$commit->getID());
+    if ($draft) {
+      $draft = $draft->getDraft();
+    } else {
+      $draft = null;
+    }
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setAction('/audit/addcomment/')
@@ -348,11 +358,14 @@ class DiffusionCommitController extends DiffusionController {
         id(new AphrontFormSelectControl())
           ->setLabel('Action')
           ->setName('action')
+          ->setID('audit-action')
           ->setOptions(PhabricatorAuditActionConstants::getActionNameMap()))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel('Comments')
           ->setName('content')
+          ->setValue($draft)
+          ->setID('audit-content')
           ->setCaption(phutil_render_tag(
             'a',
             array(
@@ -370,7 +383,28 @@ class DiffusionCommitController extends DiffusionController {
     $panel->setHeader($is_serious ? 'Audit Commit' : 'Creative Accounting');
     $panel->appendChild($form);
 
-    return $panel;
+    require_celerity_resource('phabricator-transaction-view-css');
+
+    Javelin::initBehavior('audit-preview', array(
+      'uri'       => '/audit/preview/'.$commit->getID().'/',
+      'preview'   => 'audit-preview',
+      'content'   => 'audit-content',
+      'action'    => 'audit-action',
+    ));
+
+    $preview_panel =
+      '<div class="aphront-panel-preview">
+        <div id="audit-preview">
+          <div class="aphront-panel-preview-loading-text">
+            Loading preview...
+          </div>
+        </div>
+      </div>';
+
+    $view = new AphrontNullView();
+    $view->appendChild($panel);
+    $view->appendChild($preview_panel);
+    return $view;
   }
 
 }
