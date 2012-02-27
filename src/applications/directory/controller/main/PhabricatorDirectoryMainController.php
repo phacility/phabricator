@@ -73,8 +73,10 @@ class PhabricatorDirectoryMainController
       $triage_panel = null;
       $tasks_panel = null;
     }
+
     $jump_panel = $this->buildJumpPanel();
     $revision_panel = $this->buildRevisionPanel();
+    $audit_panel = $this->buildAuditPanel();
 
     $content = array(
       $unbreak_panel,
@@ -82,6 +84,7 @@ class PhabricatorDirectoryMainController
       $jump_panel,
       $revision_panel,
       $tasks_panel,
+      $audit_panel,
     );
 
     $nav->appendChild($content);
@@ -360,7 +363,6 @@ class PhabricatorDirectoryMainController
     $task_query->withStatus(ManiphestTaskQuery::STATUS_OPEN);
     $task_query->setGroupBy(ManiphestTaskQuery::GROUP_PRIORITY);
     $task_query->withOwners(array($user_phid));
-    $task_query->setCalculateRows(true);
     $task_query->setLimit(10);
 
     $tasks = $task_query->execute();
@@ -377,7 +379,7 @@ class PhabricatorDirectoryMainController
             'href' => '/maniphest/',
             'class' => 'button grey',
           ),
-          "View All Assigned Tasks (".$task_query->getRowCount().") \xC2\xBB"));
+          "View Active Tasks \xC2\xBB"));
       $panel->appendChild($this->buildTaskListView($tasks));
     } else {
       $panel->addButton(
@@ -557,6 +559,52 @@ class PhabricatorDirectoryMainController
           phutil_escape_html($name)));
     }
     $panel->appendChild('</div>');
+
+    return $panel;
+  }
+
+  public function buildAuditPanel() {
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $phids = PhabricatorAuditCommentEditor::loadAuditPHIDsForUser($user);
+
+    $query = new PhabricatorAuditQuery();
+    $query->withAuditorPHIDs($phids);
+    $query->withStatus(PhabricatorAuditQuery::STATUS_OPEN);
+    $query->setLimit(10);
+
+    $audits = $query->execute();
+
+    if (!$audits) {
+      $panel = new AphrontMiniPanelView();
+      $panel->appendChild(
+        '<p>'.
+          '<strong>No Audits:</strong> '.
+          'No commits are waiting for you to audit them.'.
+        '</p>');
+      return $panel;
+    }
+
+    $view = new PhabricatorAuditListView();
+    $view->setAudits($audits);
+
+    $phids = $view->getRequiredHandlePHIDs();
+    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $view->setHandles($handles);
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader('Audits');
+    $panel->setCaption('Commits awaiting your audit.');
+    $panel->appendChild($view);
+      $panel->addButton(
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => '/audit/',
+            'class' => 'button grey',
+          ),
+          "View Active Audits \xC2\xBB"));
 
     return $panel;
   }

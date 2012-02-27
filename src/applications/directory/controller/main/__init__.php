@@ -7,6 +7,9 @@
 
 
 phutil_require_module('phabricator', 'aphront/response/redirect');
+phutil_require_module('phabricator', 'applications/audit/editor/comment');
+phutil_require_module('phabricator', 'applications/audit/query/audit');
+phutil_require_module('phabricator', 'applications/audit/view/list');
 phutil_require_module('phabricator', 'applications/differential/query/revision');
 phutil_require_module('phabricator', 'applications/differential/view/revisionlist');
 phutil_require_module('phabricator', 'applications/directory/controller/base');
