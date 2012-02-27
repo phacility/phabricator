@@ -7,6 +7,8 @@
 
 
 phutil_require_module('phabricator', 'applications/audit/constants/action');
+phutil_require_module('phabricator', 'applications/feed/constants/story');
+phutil_require_module('phabricator', 'applications/feed/publisher');
 phutil_require_module('phabricator', 'applications/owners/storage/owner');
 phutil_require_module('phabricator', 'applications/owners/storage/package');
 phutil_require_module('phabricator', 'applications/owners/storage/packagecommitrelationship');

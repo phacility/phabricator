@@ -71,7 +71,8 @@ final class PhabricatorAuditCommentEditor {
       }
     }
 
-    // TODO: News feed.
+    $this->publishFeedStory($comment, array_keys($audit_phids));
+
     // TODO: Search index.
     // TODO: Email.
   }
@@ -110,6 +111,31 @@ final class PhabricatorAuditCommentEditor {
     }
 
     return array_keys($phids);
+  }
+
+  private function publishFeedStory($comment, array $more_phids) {
+    $commit = $this->commit;
+    $user = $this->user;
+
+    $related_phids = array_merge(
+      array(
+        $user->getPHID(),
+        $commit->getPHID(),
+      ),
+      $more_phids);
+
+    id(new PhabricatorFeedStoryPublisher())
+      ->setRelatedPHIDs($related_phids)
+      ->setStoryAuthorPHID($user->getPHID())
+      ->setStoryTime(time())
+      ->setStoryType(PhabricatorFeedStoryTypeConstants::STORY_AUDIT)
+      ->setStoryData(
+        array(
+          'commitPHID'    => $commit->getPHID(),
+          'action'        => $comment->getAction(),
+          'content'       => $comment->getContent(),
+        ))
+      ->publish();
   }
 
 }

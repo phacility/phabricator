@@ -8,5 +8,7 @@
 
 phutil_require_module('phabricator', 'applications/audit/constants/status');
 
+phutil_require_module('phutil', 'utils');
+
 
 phutil_require_source('PhabricatorAuditActionConstants.php');

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorAuditActionConstants {
+final class PhabricatorAuditActionConstants {
 
   const CONCERN = 'concern';
   const ACCEPT = 'accept';
@@ -30,6 +30,15 @@ class PhabricatorAuditActionConstants {
     );
 
     return $map;
+  }
+
+  public static function getActionPastTenseVerb($action) {
+    static $map = array(
+      self::COMMENT => 'commented on',
+      self::CONCERN => 'raised a concern with',
+      self::ACCEPT  => 'accepted',
+    );
+    return idx($map, $action, 'updated');
   }
 
   public static function getStatusNameMap() {
