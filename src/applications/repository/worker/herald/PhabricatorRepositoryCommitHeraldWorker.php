@@ -144,7 +144,10 @@ EOBODY;
     $mailer->saveAndSend();
   }
 
-  private function createAudits($commit, $map, $rules) {
+  private function createAudits(
+    PhabricatorRepositoryCommit $commit,
+    array $map,
+    array $rules) {
 
     $table = new PhabricatorOwnersPackageCommitRelationship();
     $rships = $table->loadAllWhere(

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,17 @@ class PhabricatorSearchCommitIndexer
       $repository->getPHID(),
       PhabricatorPHIDConstants::PHID_TYPE_REPO,
       $date_created);
+
+    $comments = id(new PhabricatorAuditComment())->loadAllWhere(
+      'targetPHID = %s',
+      $commit->getPHID());
+    foreach ($comments as $comment) {
+      if (strlen($comment->getContent())) {
+        $doc->addField(
+          PhabricatorSearchField::FIELD_COMMENT,
+          $comment->getContent());
+      }
+    }
 
     self::reindexAbstractDocument($doc);
   }

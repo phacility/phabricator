@@ -13,6 +13,7 @@ phutil_require_module('phabricator', 'applications/owners/storage/owner');
 phutil_require_module('phabricator', 'applications/owners/storage/package');
 phutil_require_module('phabricator', 'applications/owners/storage/packagecommitrelationship');
 phutil_require_module('phabricator', 'applications/project/query/project');
+phutil_require_module('phabricator', 'applications/search/index/indexer/repository');
 
 phutil_require_module('phutil', 'utils');
 

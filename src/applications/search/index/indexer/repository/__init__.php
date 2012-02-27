@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/audit/storage/auditcomment');
 phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/repository/storage/commitdata');
 phutil_require_module('phabricator', 'applications/repository/storage/repository');

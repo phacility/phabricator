@@ -72,8 +72,8 @@ final class PhabricatorAuditCommentEditor {
     }
 
     $this->publishFeedStory($comment, array_keys($audit_phids));
+    PhabricatorSearchCommitIndexer::indexCommit($commit);
 
-    // TODO: Search index.
     // TODO: Email.
   }
 
@@ -113,7 +113,10 @@ final class PhabricatorAuditCommentEditor {
     return array_keys($phids);
   }
 
-  private function publishFeedStory($comment, array $more_phids) {
+  private function publishFeedStory(
+    PhabricatorAuditComment $comment,
+    array $more_phids) {
+
     $commit = $this->commit;
     $user = $this->user;
 
