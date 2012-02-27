@@ -77,9 +77,9 @@ class ManiphestTaskListController extends ManiphestController {
       'triage' => true,
     );
 
-    list($status_map, $status_links) = $this->renderStatusLinks();
-    list($grouping, $group_links) = $this->renderGroupLinks();
-    list($order, $order_links) = $this->renderOrderLinks();
+    list($status_map, $status_control) = $this->renderStatusLinks();
+    list($grouping, $group_control) = $this->renderGroupLinks();
+    list($order, $order_control) = $this->renderOrderLinks();
 
     $user_phids = $request->getStr('users');
     if (strlen($user_phids)) {
@@ -150,18 +150,9 @@ class ManiphestTaskListController extends ManiphestController {
         ->setValue($tokens));
 
     $form
-      ->appendChild(
-        id(new AphrontFormToggleButtonsControl())
-          ->setLabel('Status')
-          ->setValue($status_links))
-      ->appendChild(
-        id(new AphrontFormToggleButtonsControl())
-          ->setLabel('Group')
-          ->setValue($group_links))
-      ->appendChild(
-        id(new AphrontFormToggleButtonsControl())
-          ->setLabel('Order')
-          ->setValue($order_links));
+      ->appendChild($status_control)
+      ->appendChild($group_control)
+      ->appendChild($order_control);
 
     $form->appendChild(
       id(new AphrontFormSubmitControl())
@@ -407,15 +398,18 @@ class ManiphestTaskListController extends ManiphestController {
       $status = 'o';
     }
 
-    $button_names = array(
-      'Open'    => 'o',
-      'Closed'  => 'c',
-      'All'     => 'oc',
-    );
+    $status_control = id(new AphrontFormToggleButtonsControl())
+      ->setLabel('Status')
+      ->setValue($status)
+      ->setBaseURI($request->getRequestURI(), 's')
+      ->setButtons(
+        array(
+          'o'   => 'Open',
+          'c'   => 'Closed',
+          'oc'  => 'All',
+        ));
 
-    $status_links = $this->renderFilterLinks($button_names, $status, 's');
-
-    return array($statuses[$status], $status_links);
+    return array($statuses[$status], $status_control);
   }
 
   public function renderOrderLinks() {
@@ -432,15 +426,18 @@ class ManiphestTaskListController extends ManiphestController {
     }
     $order_by = $orders[$order];
 
-    $order_names = array(
-      'Priority'  => 'p',
-      'Updated'   => 'u',
-      'Created'   => 'c',
-    );
+    $order_control = id(new AphrontFormToggleButtonsControl())
+      ->setLabel('Order')
+      ->setValue($order)
+      ->setBaseURI($request->getRequestURI(), 'o')
+      ->setButtons(
+        array(
+          'p' => 'Priority',
+          'u' => 'Updated',
+          'c' => 'Created',
+        ));
 
-    $order_links = $this->renderFilterLinks($order_names, $order, 'o');
-
-    return array($order_by, $order_links);
+    return array($order_by, $order_control);
   }
 
   public function renderGroupLinks() {
@@ -458,40 +455,20 @@ class ManiphestTaskListController extends ManiphestController {
     }
     $group_by = $groups[$group];
 
-    $group_names = array(
-      'Priority'  => 'p',
-      'Owner'     => 'o',
-      'Status'    => 's',
-      'None'      => 'n',
-    );
 
-    $group_links = $this->renderFilterLinks($group_names, $group, 'g');
-
-    return array($group_by, $group_links);
-  }
-
-  private function renderFilterLinks($filter_map, $selected, $uri_param) {
-    $request = $this->getRequest();
-    $uri = $request->getRequestURI();
-
-    $links = array();
-    foreach ($filter_map as $name => $value) {
-      if ($value == $selected) {
-        $more = ' toggle-selected toggle-fixed';
-        $href = null;
-      } else {
-        $more = null;
-        $href = $uri->alter($uri_param, $value);
-      }
-      $links[] = phutil_render_tag(
-        'a',
+    $group_control = id(new AphrontFormToggleButtonsControl())
+      ->setLabel('Group')
+      ->setValue($group)
+      ->setBaseURI($request->getRequestURI(), 'g')
+      ->setButtons(
         array(
-          'class' => 'toggle'.$more,
-          'href'  => $href,
-        ),
-        $name);
-    }
-    return implode("\n", $links);
+          'p' => 'Priority',
+          'o' => 'Owner',
+          's' => 'Status',
+          'n' => 'None',
+        ));
+
+    return array($group_by, $group_control);
   }
 
   private function renderBatchEditor() {

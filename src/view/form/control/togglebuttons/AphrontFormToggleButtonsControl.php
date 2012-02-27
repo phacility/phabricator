@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,51 @@
 
 class AphrontFormToggleButtonsControl extends AphrontFormControl {
 
+  private $baseURI;
+  private $param;
+
+  private $buttons;
+
+  public function setBaseURI(PhutilURI $uri, $param) {
+    $this->baseURI = $uri;
+    $this->param = $param;
+    return $this;
+  }
+
+  public function setButtons(array $buttons) {
+    $this->buttons = $buttons;
+    return $this;
+  }
+
   protected function getCustomControlClass() {
     return 'aphront-form-control-togglebuttons';
   }
 
   protected function renderInput() {
-    return $this->getValue();
+    if (!$this->baseURI) {
+      throw new Exception('Call setBaseURI() before render()!');
+    }
+
+    $selected = $this->getValue();
+
+    $out = array();
+    foreach ($this->buttons as $value => $label) {
+      if ($value == $selected) {
+        $more = ' toggle-selected toggle-fixed';
+      } else {
+        $more = null;
+      }
+
+      $out[] = phutil_render_tag(
+        'a',
+        array(
+          'class' => 'toggle'.$more,
+          'href'  => $this->baseURI->alter($this->param, $value),
+        ),
+        phutil_escape_html($label));
+    }
+
+    return implode('', $out);
   }
 
 }

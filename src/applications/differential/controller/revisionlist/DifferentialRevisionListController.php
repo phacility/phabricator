@@ -312,30 +312,26 @@ class DifferentialRevisionListController extends DifferentialController {
           ->setValue($value)
           ->setLimit(1);
       case 'status':
-        $links = $this->renderToggleButtons(
-          array(
-            'all'  => 'All',
-            'open' => 'Open',
-            'committed' => 'Committed',
-          ),
-          $params['status'],
-          $uri,
-          'status');
         return id(new AphrontFormToggleButtonsControl())
           ->setLabel('Status')
-          ->setValue($links);
+          ->setValue($params['status'])
+          ->setBaseURI($uri, 'status')
+          ->setButtons(
+            array(
+              'all'       => 'All',
+              'open'      => 'Open',
+              'committed' => 'Committed',
+            ));
       case 'order':
-        $links = $this->renderToggleButtons(
-          array(
-            'modified' => 'Modified',
-            'created' => 'Created',
-          ),
-          $params['order'],
-          $uri,
-          'order');
         return id(new AphrontFormToggleButtonsControl())
           ->setLabel('Order')
-          ->setValue($links);
+          ->setValue($params['order'])
+          ->setBaseURI($uri, 'order')
+          ->setButtons(
+            array(
+              'modified'  => 'Modified',
+              'created'   => 'Created',
+            ));
       default:
         throw new Exception("Unknown control '{$control}'!");
     }
@@ -417,23 +413,5 @@ class DifferentialRevisionListController extends DifferentialController {
     return $views;
   }
 
-  private function renderToggleButtons($buttons, $selected, $uri, $param) {
-    $links = array();
-    foreach ($buttons as $value => $name) {
-      if ($value == $selected) {
-        $more = ' toggle-selected toggle-fixed';
-      } else {
-        $more = null;
-      }
-      $links[] = phutil_render_tag(
-        'a',
-        array(
-          'class' => 'toggle'.$more,
-          'href'  => $uri->alter($param, $value),
-        ),
-        phutil_escape_html($name));
-    }
-    return implode('', $links);
-  }
 
 }
