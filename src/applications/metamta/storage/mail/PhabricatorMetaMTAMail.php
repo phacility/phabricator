@@ -171,6 +171,15 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this;
   }
 
+  public function getWorkerTaskID() {
+    return $this->getParam('worker-task');
+  }
+
+  public function setWorkerTaskID($id) {
+    $this->setParam('worker-task', $id);
+    return $this;
+  }
+
   /**
    * Flag that this is an auto-generated bulk message and should have bulk
    * headers added to it if appropriate. Broadly, this means some flavor of
@@ -221,6 +230,19 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     }
 
     return $ret;
+  }
+
+  protected function didWriteData() {
+    parent::didWriteData();
+
+    if (!$this->getWorkerTaskID()) {
+      $mailer_task = new PhabricatorWorkerTask();
+      $mailer_task->setTaskClass('PhabricatorMetaMTAWorker');
+      $mailer_task->setData($this->getID());
+      $mailer_task->save();
+      $this->setWorkerTaskID($mailer_task->getID());
+      $this->save();
+    }
   }
 
 

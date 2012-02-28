@@ -65,8 +65,6 @@ You can get a list of launchable daemons with **phd list**:
 
   - **libphutil test daemons** are not generally useful unless you are
     developing daemon infrastructure or debugging a daemon problem;
-  - **PhabricatorMetaMTADaemon** sends mail in the background, see
-    @{article:Configuring Outbound Email} for details;
   - **PhabricatorTaskmasterDaemon** runs a generic task queue; and
   - **PhabricatorRepository** daemons track repositories, descriptions are
     available in the @{article:Diffusion User Guide}.

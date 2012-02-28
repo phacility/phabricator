@@ -7,9 +7,9 @@
 
 
 phutil_require_module('phabricator', 'applications/metamta/storage/mail');
-phutil_require_module('phabricator', 'infrastructure/daemon/base');
+phutil_require_module('phabricator', 'infrastructure/daemon/workers/worker');
 
 phutil_require_module('phutil', 'utils');
 
 
-phutil_require_source('PhabricatorMetaMTADaemon.php');
+phutil_require_source('PhabricatorMetaMTAWorker.php');
