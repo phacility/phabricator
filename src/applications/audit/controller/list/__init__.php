@@ -6,12 +6,21 @@
 
 
 
+phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/audit/controller/base');
 phutil_require_module('phabricator', 'applications/audit/editor/comment');
 phutil_require_module('phabricator', 'applications/audit/query/audit');
 phutil_require_module('phabricator', 'applications/audit/view/list');
+phutil_require_module('phabricator', 'applications/people/storage/user');
+phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'view/control/pager');
+phutil_require_module('phabricator', 'view/form/base');
+phutil_require_module('phabricator', 'view/form/control/submit');
+phutil_require_module('phabricator', 'view/form/control/togglebuttons');
+phutil_require_module('phabricator', 'view/form/control/tokenizer');
+phutil_require_module('phabricator', 'view/form/error');
+phutil_require_module('phabricator', 'view/layout/listfilter');
 phutil_require_module('phabricator', 'view/layout/panel');
 phutil_require_module('phabricator', 'view/layout/sidenavfilter');
 
