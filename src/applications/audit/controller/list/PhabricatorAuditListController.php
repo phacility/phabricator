@@ -19,7 +19,6 @@
 final class PhabricatorAuditListController extends PhabricatorAuditController {
 
   private $filter;
-
   private $filterStatus;
 
   public function willProcessRequest(array $data) {
@@ -28,10 +27,9 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
 
     if ($request->isFormPost()) {
-      // If the list filter is POST'd, redirect to GET so the page can be
+      // If the list filter is POST'ed, redirect to GET so the page can be
       // bookmarked.
       $uri = $request->getRequestURI();
       $phid = head($request->getArr('phid'));
@@ -291,7 +289,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
       case 'all':
         break;
       default:
-        throw new Exception("Unknown filter '{$filter}'!");
+        throw new Exception("Unknown filter '{$this->filter}'!");
     }
   }
 
