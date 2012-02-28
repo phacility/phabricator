@@ -149,9 +149,15 @@ final class DifferentialAddCommentView extends AphrontView {
           DifferentialLintStatus::LINT_FAIL => 'Lint Failure',
           DifferentialLintStatus::LINT_SKIP => 'Lint Skipped'
         );
-      $content =
-        "<p>This diff has Lint Problems. Make sure you are OK with them ".
-        "before you accept this diff.</p>";
+      if ($diff->getLintStatus() == DifferentialLintStatus::LINT_SKIP) {
+        $content =
+          "<p>This diff was created without running lint. Make sure you are ".
+          "OK with that before you accept this diff.</p>";
+      } else {
+        $content =
+          "<p>This diff has Lint Problems. Make sure you are OK with them ".
+          "before you accept this diff.</p>";
+      }
       $lint_warning = $this->generateWarningView(
         $diff->getLintStatus(),
         $titles,
@@ -172,6 +178,10 @@ final class DifferentialAddCommentView extends AphrontView {
           "<p>This diff has postponed unit tests. The results should be ".
           "coming in soon. You should probably wait for them before accepting ".
           "this diff.</p>";
+      } else if ($diff->getUnitStatus() == DifferentialUnitStatus::UNIT_SKIP) {
+        $content =
+          "<p>Unit tests were skipped when this diff was created. Make sure ".
+          "you are OK with that before you accept this diff.</p>";
       } else {
         $content =
           "<p>This diff has Unit Test Problems. Make sure you are OK with ".
