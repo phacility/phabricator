@@ -263,7 +263,7 @@ class PhabricatorRepository extends PhabricatorRepositoryDAO {
         array_unshift($args, $this->getLocalPath());
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $pattern = "(cd %s && hg {$pattern})";
+        $pattern = "(cd %s && HGPLAIN=1 hg {$pattern})";
         array_unshift($args, $this->getLocalPath());
         break;
       default:
