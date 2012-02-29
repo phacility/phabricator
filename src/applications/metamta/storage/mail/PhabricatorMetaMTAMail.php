@@ -440,8 +440,8 @@ class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         }
       }
 
+      $mailer->addHeader('X-Phabricator-Sent-This-Message', 'Yes');
       $mailer->addHeader('X-Mail-Transport-Agent', 'MetaMTA');
-
 
       // If the message has mailtags, filter out any recipients who don't want
       // to receive this type of mail.
