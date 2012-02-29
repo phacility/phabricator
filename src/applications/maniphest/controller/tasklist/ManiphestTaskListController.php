@@ -100,17 +100,26 @@ class ManiphestTaskListController extends ManiphestController {
     $page = $request->getInt('page');
     $page_size = self::DEFAULT_PAGE_SIZE;
 
-    list($tasks, $handles, $total_count) = $this->loadTasks(
-      $user_phids,
-      $project_phids,
-      $task_ids,
+    $query = new PhabricatorSearchQuery();
+    $query->setQuery('<<maniphest>>');
+    $query->setParameters(
       array(
-        'status'  => $status_map,
-        'group'   => $grouping,
-        'order'   => $order,
-        'offset'  => $page,
-        'limit'   => $page_size,
+        'view'          => $this->view,
+        'userPHIDs'     => $user_phids,
+        'projectPHIDs'  => $project_phids,
+        'taskIDs'       => $task_ids,
+        'group'         => $grouping,
+        'order'         => $order,
+        'offset'        => $page,
+        'limit'         => $page_size,
+        'status'        => $status_map,
       ));
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+    $query->save();
+    unset($unguarded);
+
+    list($tasks, $handles, $total_count) = self::loadTasks($query);
 
     $form = id(new AphrontFormView())
       ->setUser($user)
@@ -231,7 +240,7 @@ class ManiphestTaskListController extends ManiphestController {
       }
 
 
-      $selector->appendChild($this->renderBatchEditor());
+      $selector->appendChild($this->renderBatchEditor($query));
 
       $selector = phabricator_render_form(
         $user,
@@ -252,17 +261,17 @@ class ManiphestTaskListController extends ManiphestController {
       ));
   }
 
-  private function loadTasks(
-    array $user_phids,
-    array $project_phids,
-    array $task_ids,
-    array $dict) {
+  public static function loadTasks(PhabricatorSearchQuery $search_query) {
+
+    $user_phids = $search_query->getParameter('userPHIDs', array());
+    $project_phids = $search_query->getParameter('projectPHIDs', array());
+    $task_ids = $search_query->getParameter('taskIDs', array());
 
     $query = new ManiphestTaskQuery();
     $query->withProjects($project_phids);
     $query->withTaskIDs($task_ids);
 
-    $status = $dict['status'];
+    $status = $search_query->getParameter('status', 'all');
     if (!empty($status['open']) && !empty($status['closed'])) {
       $query->withStatus(ManiphestTaskQuery::STATUS_ANY);
     } else if (!empty($status['open'])) {
@@ -271,7 +280,7 @@ class ManiphestTaskListController extends ManiphestController {
       $query->withStatus(ManiphestTaskQuery::STATUS_CLOSED);
     }
 
-    switch ($this->view) {
+    switch ($search_query->getParameter('view')) {
       case 'action':
         $query->withOwners($user_phids);
         break;
@@ -299,7 +308,7 @@ class ManiphestTaskListController extends ManiphestController {
     $query->setOrderBy(
       idx(
         $order_map,
-        $dict['order'],
+        $search_query->getParameter('order'),
         ManiphestTaskQuery::ORDER_MODIFIED));
 
     $group_map = array(
@@ -310,12 +319,12 @@ class ManiphestTaskListController extends ManiphestController {
     $query->setGroupBy(
       idx(
         $group_map,
-        $dict['group'],
+        $search_query->getParameter('group'),
         ManiphestTaskQuery::GROUP_NONE));
 
     $query->setCalculateRows(true);
-    $query->setLimit($dict['limit']);
-    $query->setOffset($dict['offset']);
+    $query->setLimit($search_query->getParameter('limit'));
+    $query->setOffset($search_query->getParameter('offset'));
 
     $data = $query->execute();
     $total_row_count = $query->getRowCount();
@@ -325,7 +334,7 @@ class ManiphestTaskListController extends ManiphestController {
     $handles = id(new PhabricatorObjectHandleData($handle_phids))
       ->loadHandles();
 
-    switch ($dict['group']) {
+    switch ($search_query->getParameter('group')) {
       case 'priority':
         $data = mgroup($data, 'getPriority');
         krsort($data);
@@ -471,7 +480,7 @@ class ManiphestTaskListController extends ManiphestController {
     return array($group_by, $group_control);
   }
 
-  private function renderBatchEditor() {
+  private function renderBatchEditor(PhabricatorSearchQuery $search_query) {
     Javelin::initBehavior(
       'maniphest-batch-selector',
       array(
@@ -510,6 +519,14 @@ class ManiphestTaskListController extends ManiphestController {
       ),
       'Batch Edit Selected Tasks &raquo;');
 
+    $export = javelin_render_tag(
+      'a',
+      array(
+        'href' => '/maniphest/export/'.$search_query->getQueryKey().'/',
+        'class' => 'grey button',
+      ),
+      'Export Tasks to Excel...');
+
     return
       '<div class="maniphest-batch-editor">'.
         '<div class="batch-editor-header">Batch Task Editor</div>'.
@@ -518,6 +535,9 @@ class ManiphestTaskListController extends ManiphestController {
             '<td>'.
               $select_all.
               $select_none.
+            '</td>'.
+            '<td>'.
+              $export.
             '</td>'.
             '<td id="batch-select-status-cell">'.
               '0 Selected Tasks'.

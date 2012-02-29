@@ -207,6 +207,7 @@ class AphrontDefaultApplicationConfiguration
           'save/' => 'ManiphestTransactionSaveController',
           'preview/(?P<id>\d+)/$' => 'ManiphestTransactionPreviewController',
         ),
+        'export/(?P<key>[^/]+)/$' => 'ManiphestExportController',
       ),
 
       '/T(?P<id>\d+)$' => 'ManiphestTaskDetailController',
