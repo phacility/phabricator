@@ -444,6 +444,7 @@ phutil_register_library_map(array(
     'PhabricatorAuditAddCommentController' => 'applications/audit/controller/addcomment',
     'PhabricatorAuditComment' => 'applications/audit/storage/auditcomment',
     'PhabricatorAuditCommentEditor' => 'applications/audit/editor/comment',
+    'PhabricatorAuditCommitStatusConstants' => 'applications/audit/constants/commitstatus',
     'PhabricatorAuditController' => 'applications/audit/controller/base',
     'PhabricatorAuditDAO' => 'applications/audit/storage/base',
     'PhabricatorAuditEditController' => 'applications/audit/controller/edit',

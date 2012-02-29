@@ -6,11 +6,14 @@
 
 
 
+phutil_require_module('phabricator', 'applications/audit/constants/commitstatus');
+phutil_require_module('phabricator', 'applications/audit/constants/status');
 phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/phid/storage/phid');
 phutil_require_module('phabricator', 'applications/repository/storage/base');
 phutil_require_module('phabricator', 'applications/repository/storage/commitdata');
 
+phutil_require_module('phutil', 'filesystem');
 phutil_require_module('phutil', 'utils');
 
 

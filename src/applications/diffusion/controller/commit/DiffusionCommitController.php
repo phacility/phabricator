@@ -268,6 +268,11 @@ class DiffusionCommitController extends DiffusionController {
       $props['Differential Revision'] = $handles[$revision_phid]->renderLink();
     }
 
+    if ($commit->getAuditStatus()) {
+      $props['Audit'] = PhabricatorAuditCommitStatusConstants::getStatusName(
+        $commit->getAuditStatus());
+    }
+
     $request = $this->getDiffusionRequest();
 
     $contains = DiffusionContainsQuery::newFromDiffusionRequest($request);

@@ -151,9 +151,8 @@ EOBODY;
 
     $table = new PhabricatorOwnersPackageCommitRelationship();
     $rships = $table->loadAllWhere(
-      'commitPHID = %s AND packagePHID IN (%Ls)',
-      $commit->getPHID(),
-      array_keys($map));
+      'commitPHID = %s',
+      $commit->getPHID());
     $rships = mpull($rships, null, 'getPackagePHID');
 
     $rules = mpull($rules, null, 'getID');
@@ -179,5 +178,7 @@ EOBODY;
       $rship->save();
     }
 
+    $commit->updateAuditStatus($rships);
+    $commit->save();
   }
 }

@@ -89,7 +89,11 @@ final class PhabricatorAuditCommentEditor {
               : PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED)
         ->setAuditReasons(array("Voluntary Participant"))
         ->save();
+      $relationships[] = $relationship;
     }
+
+    $commit->updateAuditStatus($relationships);
+    $commit->save();
 
     $this->publishFeedStory($comment, array_keys($audit_phids));
     PhabricatorSearchCommitIndexer::indexCommit($commit);

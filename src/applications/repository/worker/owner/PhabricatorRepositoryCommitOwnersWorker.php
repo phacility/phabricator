@@ -30,11 +30,14 @@ class PhabricatorRepositoryCommitOwnersWorker
       $affected_paths);
 
     if ($affected_packages) {
-      foreach ($affected_packages as $package) {
-        $relationship = id(new PhabricatorOwnersPackageCommitRelationship())
-          ->loadOneWhere('packagePHID=%s AND commitPHID=%s',
-          $package->getPHID(),
+      $rships = id(new PhabricatorOwnersPackageCommitRelationship())
+        ->loadAllWhere(
+          'commitPHID = %s',
           $commit->getPHID());
+      $rships = mpull($rships, null, 'getPackagePHID');
+
+      foreach ($affected_packages as $package) {
+        $relationship = idx($rships, $package->getPHID());
 
         // Don't update relationship if it exists already
         if (!$relationship) {
@@ -59,8 +62,13 @@ class PhabricatorRepositoryCommitOwnersWorker
           $relationship->setAuditStatus($audit_status);
 
           $relationship->save();
+
+          $rships[] = $relationship;
         }
       }
+
+      $commit->updateAuditStatus($rships);
+      $commit->save();
     }
 
     if ($this->shouldQueueFollowupTasks()) {
@@ -90,7 +98,11 @@ class PhabricatorRepositoryCommitOwnersWorker
     }
 
     $revision_id = $data->getCommitDetail('differential.revisionID');
+
     $revision_author_phid = null;
+    $commit_reviewedby_phid = null;
+    $commit_author_phid = null;
+
     if ($revision_id) {
       $revision = id(new DifferentialRevision())->load($revision_id);
       if ($revision) {
