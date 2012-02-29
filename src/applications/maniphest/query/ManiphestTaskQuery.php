@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,10 @@ final class ManiphestTaskQuery {
   private $ownerPHIDs       = array();
   private $includeUnowned   = null;
   private $projectPHIDs     = array();
+  private $xprojectPHIDs    = array();
   private $subscriberPHIDs  = array();
   private $anyProject       = false;
+  private $includeNoProject = null;
 
   private $status           = 'status-any';
   const STATUS_ANY          = 'status-any';
@@ -83,7 +85,19 @@ final class ManiphestTaskQuery {
   }
 
   public function withProjects(array $projects) {
+    $this->includeNoProject = false;
+    foreach ($projects as $k => $phid) {
+      if ($phid == ManiphestTaskOwner::PROJECT_NO_PROJECT) {
+        $this->includeNoProject = true;
+        unset($projects[$k]);
+      }
+    }
     $this->projectPHIDs = $projects;
+    return $this;
+  }
+
+  public function withoutProjects(array $projects) {
+    $this->xprojectPHIDs = $projects;
     return $this;
   }
 
@@ -160,6 +174,7 @@ final class ManiphestTaskQuery {
     $where[] = $this->buildOwnerWhereClause($conn);
     $where[] = $this->buildSubscriberWhereClause($conn);
     $where[] = $this->buildProjectWhereClause($conn);
+    $where[] = $this->buildXProjectWhereClause($conn);
 
     $where = array_filter($where);
     if ($where) {
@@ -170,6 +185,7 @@ final class ManiphestTaskQuery {
 
     $join = array();
     $join[] = $this->buildProjectJoinClause($conn);
+    $join[] = $this->buildXProjectJoinClause($conn);
     $join[] = $this->buildSubscriberJoinClause($conn);
 
     $join = array_filter($join);
@@ -195,7 +211,7 @@ final class ManiphestTaskQuery {
       $group = 'GROUP BY task.id';
 
       if (!$this->anyProject) {
-        $count = ', COUNT(1) projectCount';
+        $count = ', COUNT(project.projectPHID) projectCount';
         $having = qsprintf(
           $conn,
           'HAVING projectCount = %d',
@@ -320,26 +336,61 @@ final class ManiphestTaskQuery {
   }
 
   private function buildProjectWhereClause($conn) {
-    if (!$this->projectPHIDs) {
+    if (!$this->projectPHIDs && !$this->includeNoProject) {
       return null;
     }
 
-    return qsprintf(
-      $conn,
-      'project.projectPHID IN (%Ls)',
-      $this->projectPHIDs);
+    $parts = array();
+    if ($this->projectPHIDs) {
+      $parts[] = qsprintf(
+        $conn,
+        'project.projectPHID in (%Ls)',
+        $this->projectPHIDs);
+    }
+    if ($this->includeNoProject) {
+      $parts[] = qsprintf(
+        $conn,
+        'project.projectPHID IS NULL');
+    }
+
+    return '('.implode(') OR (', $parts).')';
   }
 
   private function buildProjectJoinClause($conn) {
-    if (!$this->projectPHIDs) {
+    if (!$this->projectPHIDs && !$this->includeNoProject) {
       return null;
     }
 
     $project_dao = new ManiphestTaskProject();
     return qsprintf(
       $conn,
-      'JOIN %T project ON project.taskPHID = task.phid',
+      '%Q JOIN %T project ON project.taskPHID = task.phid',
+      ($this->includeNoProject ? 'LEFT' : ''),
       $project_dao->getTableName());
+  }
+
+  private function buildXProjectWhereClause($conn) {
+    if (!$this->xprojectPHIDs) {
+      return null;
+    }
+
+    return qsprintf(
+      $conn,
+      'xproject.projectPHID IS NULL');
+  }
+
+  private function buildXProjectJoinClause($conn) {
+    if (!$this->xprojectPHIDs) {
+      return null;
+    }
+
+    $project_dao = new ManiphestTaskProject();
+    return qsprintf(
+      $conn,
+      'LEFT JOIN %T xproject ON xproject.taskPHID = task.phid
+        AND xproject.projectPHID IN (%Ls)',
+      $project_dao->getTableName(),
+      $this->xprojectPHIDs);
   }
 
   private function buildSubscriberJoinClause($conn) {

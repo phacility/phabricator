@@ -117,6 +117,11 @@ class PhabricatorObjectHandleData {
                 $handle->setFullName('upforgrabs (Up For Grabs)');
                 $handle->setComplete(true);
                 break;
+              case ManiphestTaskOwner::PROJECT_NO_PROJECT:
+                $handle->setName('No Project');
+                $handle->setFullName('noproject (No Project)');
+                $handle->setComplete(true);
+                break;
               default:
                 $handle->setName('Foul Magicks');
                 break;

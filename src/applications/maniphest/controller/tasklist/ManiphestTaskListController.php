@@ -29,6 +29,12 @@ class ManiphestTaskListController extends ManiphestController {
     $this->view = idx($data, 'view');
   }
 
+  private function getArrToStrList($key) {
+    $arr = $this->getRequest()->getArr($key);
+    $arr = implode(',', $arr);
+    return nonempty($arr, null);
+  }
+
   public function processRequest() {
 
     $request = $this->getRequest();
@@ -37,18 +43,15 @@ class ManiphestTaskListController extends ManiphestController {
     if ($request->isFormPost()) {
       // Redirect to GET so URIs can be copy/pasted.
 
-      $user_phids = $request->getArr('set_users');
-      $proj_phids = $request->getArr('set_projects');
       $task_ids   = $request->getStr('set_tasks');
-      $user_phids = implode(',', $user_phids);
-      $proj_phids = implode(',', $proj_phids);
-      $user_phids = nonempty($user_phids, null);
-      $proj_phids = nonempty($proj_phids, null);
       $task_ids   = nonempty($task_ids, null);
 
       $uri = $request->getRequestURI()
-        ->alter('users', $user_phids)
-        ->alter('projects', $proj_phids)
+        ->alter('users',      $this->getArrToStrList('set_users'))
+        ->alter('projects',   $this->getArrToStrList('set_projects'))
+        ->alter('xprojects',  $this->getArrToStrList('set_xprojects'))
+        ->alter('owners',     $this->getArrToStrList('set_owners'))
+        ->alter('authors',    $this->getArrToStrList('set_authors'))
         ->alter('tasks', $task_ids);
 
       return id(new AphrontRedirectResponse())->setURI($uri);
@@ -66,7 +69,8 @@ class ManiphestTaskListController extends ManiphestController {
     $nav->addFilter('alltriage',    'Need Triage');
     $nav->addFilter('all',          'All Tasks');
     $nav->addSpacer();
-    $nav->addFilter('custom',       'Custom');
+    $nav->addLabel('Custom');
+    $nav->addFilter('custom',       'Custom Query');
 
     $this->view = $nav->selectFilter($this->view, 'action');
 
@@ -81,21 +85,12 @@ class ManiphestTaskListController extends ManiphestController {
     list($grouping, $group_control) = $this->renderGroupLinks();
     list($order, $order_control) = $this->renderOrderLinks();
 
-    $user_phids = $request->getStr('users');
-    if (strlen($user_phids)) {
-      $user_phids = explode(',', $user_phids);
-    } else {
-      $user_phids = array($user->getPHID());
-    }
-
-    $project_phids = $request->getStr('projects');
-    if (strlen($project_phids)) {
-      $project_phids = explode(',', $project_phids);
-    } else {
-      $project_phids = array();
-    }
-
+    $user_phids = $request->getStrList('users');
+    $project_phids = $request->getStrList('projects');
+    $exclude_project_phids = $request->getStrList('xprojects');
     $task_ids = $request->getStrList('tasks');
+    $owner_phids = $request->getStrList('owners');
+    $author_phids = $request->getStrList('authors');
 
     $page = $request->getInt('page');
     $page_size = self::DEFAULT_PAGE_SIZE;
@@ -104,15 +99,18 @@ class ManiphestTaskListController extends ManiphestController {
     $query->setQuery('<<maniphest>>');
     $query->setParameters(
       array(
-        'view'          => $this->view,
-        'userPHIDs'     => $user_phids,
-        'projectPHIDs'  => $project_phids,
-        'taskIDs'       => $task_ids,
-        'group'         => $grouping,
-        'order'         => $order,
-        'offset'        => $page,
-        'limit'         => $page_size,
-        'status'        => $status_map,
+        'view'                => $this->view,
+        'userPHIDs'           => $user_phids,
+        'projectPHIDs'        => $project_phids,
+        'excludeProjectPHIDs' => $exclude_project_phids,
+        'ownerPHIDs'          => $owner_phids,
+        'authorPHIDs'         => $author_phids,
+        'taskIDs'             => $task_ids,
+        'group'               => $grouping,
+        'order'               => $order,
+        'offset'              => $page,
+        'limit'               => $page_size,
+        'status'              => $status_map,
       ));
 
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
@@ -145,6 +143,28 @@ class ManiphestTaskListController extends ManiphestController {
           ->setLabel('Task IDs')
           ->setValue(join(',', $task_ids))
       );
+
+      $tokens = array();
+      foreach ($owner_phids as $phid) {
+        $tokens[$phid] = $handles[$phid]->getFullName();
+      }
+      $form->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource('/typeahead/common/searchowner/')
+          ->setName('set_owners')
+          ->setLabel('Owners')
+          ->setValue($tokens));
+
+      $tokens = array();
+      foreach ($author_phids as $phid) {
+        $tokens[$phid] = $handles[$phid]->getFullName();
+      }
+      $form->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource('/typeahead/common/users/')
+          ->setName('set_authors')
+          ->setLabel('Authors')
+          ->setValue($tokens));
     }
 
     $tokens = array();
@@ -153,10 +173,23 @@ class ManiphestTaskListController extends ManiphestController {
     }
     $form->appendChild(
       id(new AphrontFormTokenizerControl())
-        ->setDatasource('/typeahead/common/projects/')
+        ->setDatasource('/typeahead/common/searchproject/')
         ->setName('set_projects')
         ->setLabel('Projects')
         ->setValue($tokens));
+
+    if ($this->view == 'custom') {
+      $tokens = array();
+      foreach ($exclude_project_phids as $phid) {
+        $tokens[$phid] = $handles[$phid]->getFullName();
+      }
+      $form->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource('/typeahead/common/projects/')
+          ->setName('set_xprojects')
+          ->setLabel('Exclude Projects')
+          ->setValue($tokens));
+    }
 
     $form
       ->appendChild($status_control)
@@ -266,10 +299,27 @@ class ManiphestTaskListController extends ManiphestController {
     $user_phids = $search_query->getParameter('userPHIDs', array());
     $project_phids = $search_query->getParameter('projectPHIDs', array());
     $task_ids = $search_query->getParameter('taskIDs', array());
+    $xproject_phids = $search_query->getParameter(
+      'excludeProjectPHIDs',
+      array());
+    $owner_phids = $search_query->getParameter('ownerPHIDs', array());
+    $author_phids = $search_query->getParameter('authorPHIDs', array());
 
     $query = new ManiphestTaskQuery();
     $query->withProjects($project_phids);
     $query->withTaskIDs($task_ids);
+
+    if ($xproject_phids) {
+      $query->withoutProjects($xproject_phids);
+    }
+
+    if ($owner_phids) {
+      $query->withOwners($owner_phids);
+    }
+
+    if ($author_phids) {
+      $query->withAuthors($author_phids);
+    }
 
     $status = $search_query->getParameter('status', 'all');
     if (!empty($status['open']) && !empty($status['closed'])) {
@@ -330,7 +380,13 @@ class ManiphestTaskListController extends ManiphestController {
     $total_row_count = $query->getRowCount();
 
     $handle_phids = mpull($data, 'getOwnerPHID');
-    $handle_phids = array_merge($handle_phids, $project_phids, $user_phids);
+    $handle_phids = array_merge(
+      $handle_phids,
+      $project_phids,
+      $user_phids,
+      $xproject_phids,
+      $owner_phids,
+      $author_phids);
     $handles = id(new PhabricatorObjectHandleData($handle_phids))
       ->loadHandles();
 
