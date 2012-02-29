@@ -69,6 +69,9 @@ final class PhabricatorIRCWhatsNewHandler extends PhabricatorIRCHandler {
         case 'PhabricatorFeedStoryDifferential':
           $phids[] = $action['data']['revision_phid'];
           break;
+        case 'PhabricatorFeedStoryAudit':
+          $phids[] = $action['data']['commitPHID'];
+          break;
 
         case 'PhabricatorFeedStoryManiphest':
           $phids[] = $action['data']['taskPHID'];
@@ -100,6 +103,10 @@ final class PhabricatorIRCWhatsNewHandler extends PhabricatorIRCHandler {
           $rinf = $infs[$action['data']['revision_phid']];
           break;
 
+        case 'PhabricatorFeedStoryAudit':
+          $rinf = $infs[$action['data']['commitPHID']];
+          break;
+
         case 'PhabricatorFeedStoryManiphest':
           $rinf = $infs[$action['data']['taskPHID']];
           break;
@@ -128,6 +135,7 @@ final class PhabricatorIRCWhatsNewHandler extends PhabricatorIRCHandler {
 
   public function getRhetoric($input) {
     switch ($input) {
+      case 'comment':
       case 'none':
         return 'commented on';
         break;
@@ -139,6 +147,9 @@ final class PhabricatorIRCWhatsNewHandler extends PhabricatorIRCHandler {
         break;
       case 'create':
         return 'created';
+        break;
+      case 'concern':
+        return 'raised concern for';
         break;
       case 'abandon':
         return 'abandonned';
