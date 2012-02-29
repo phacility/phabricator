@@ -85,7 +85,9 @@ class ManiphestTaskListController extends ManiphestController {
     list($grouping, $group_control) = $this->renderGroupLinks();
     list($order, $order_control) = $this->renderOrderLinks();
 
-    $user_phids = $request->getStrList('users');
+    $user_phids = $request->getStrList(
+      'users',
+      array($user->getPHID()));
     $project_phids = $request->getStrList('projects');
     $exclude_project_phids = $request->getStrList('xprojects');
     $task_ids = $request->getStrList('tasks');
