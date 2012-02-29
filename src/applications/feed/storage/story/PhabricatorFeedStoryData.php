@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,27 @@ class PhabricatorFeedStoryData extends PhabricatorFeedDAO {
   }
 
   public function getEpoch() {
-    return $this->chronologicalKey >> 32;
+    if (PHP_INT_SIZE < 8) {
+      // We're on a 32-bit machine.
+      if (function_exists('bcadd')) {
+        // Try to use the 'bc' extension.
+        return bcdiv($this->chronologicalKey, bcpow(2,32));
+      } else {
+        // Do the math in MySQL. TODO: If we formalize a bc dependency, get
+        // rid of this.
+        // See: PhabricatorFeedStoryPublisher::generateChronologicalKey()
+        $conn_r = id($this->establishConnection('r'));
+        $result = queryfx_one(
+          $conn_r,
+          // Insert the chronologicalKey as a string since longs don't seem to
+          // be supported by qsprintf and ints get maxed on 32 bit machines.
+          'SELECT (%s >> 32) as N',
+          $this->chronologicalKey);
+        return $result['N'];
+      }
+    } else {
+      return $this->chronologicalKey >> 32;
+    }
   }
 
   public function getValue($key, $default = null) {
