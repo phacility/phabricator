@@ -19,10 +19,12 @@
 final class PhabricatorAuditListController extends PhabricatorAuditController {
 
   private $filter;
+  private $name;
   private $filterStatus;
 
   public function willProcessRequest(array $data) {
     $this->filter = idx($data, 'filter');
+    $this->name   = idx($data, 'name');
   }
 
   public function processRequest() {
@@ -33,10 +35,20 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
       // bookmarked.
       $uri = $request->getRequestURI();
       $phid = head($request->getArr('phid'));
-      if ($phid) {
+      $user = id(new PhabricatorUser())->loadOneWhere(
+        'phid = %s',
+        $phid);
+
+      $uri = $request->getRequestURI();
+      if ($user) {
+        $username = phutil_escape_uri($user->getUsername());
+        $uri = '/audit/view/'.$this->filter.'/'.$username.'/';
+      } else if ($phid) {
+        $uri = $request->getRequestURI();
         $uri = $uri->alter('phid', $phid);
-        return id(new AphrontRedirectResponse())->setURI($uri);
       }
+
+      return id(new AphrontRedirectResponse())->setURI($uri);
     }
 
     $nav = $this->buildNavAndSelectFilter();
@@ -94,7 +106,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
 
     $nav->addLabel('Commits');
     $nav->addFilter('commits', 'All');
-    $nav->addFilter('author', 'By User');
+    $nav->addFilter('author', 'By Author');
     $nav->addFilter('packagecommits', 'By Package');
 
     $this->filter = $nav->selectFilter($this->filter, 'active');
@@ -140,7 +152,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
 
     if ($show_user || $show_project || $show_package) {
       if ($show_user) {
-        $uri = '/typeahead/common/user/';
+        $uri = '/typeahead/common/users/';
         $label = 'User';
       } else if ($show_project) {
         $uri = '/typeahead/common/projects/';
@@ -198,6 +210,14 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
       case 'active':
       case 'author':
         $default = $request->getUser()->getPHID();
+        if ($this->name) {
+          $user = id(new PhabricatorUser())->loadOneWhere(
+            'username = %s',
+            $this->name);
+          if ($user) {
+            $default = $user->getPHID();
+          }
+        }
         break;
     }
 

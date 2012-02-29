@@ -286,10 +286,6 @@ class AphrontDefaultApplicationConfiguration
             'validate/$' => 'DiffusionPathValidateController',
           ),
         ),
-        'author/' => array(
-          '$' => 'DiffusionCommitListController',
-          '(?P<username>\w+)/$' => 'DiffusionCommitListController',
-        ),
         'symbol/(?P<name>[^/]+)/$' => 'DiffusionSymbolController',
       ),
 
@@ -348,7 +344,8 @@ class AphrontDefaultApplicationConfiguration
 
       '/audit/' => array(
         '$' => 'PhabricatorAuditListController',
-        'view/(?P<filter>[^/]+)/$' => 'PhabricatorAuditListController',
+        'view/(?P<filter>[^/]+)/(?:(?P<name>[^/]+)/)?$'
+          => 'PhabricatorAuditListController',
         'edit/$' => 'PhabricatorAuditEditController',
         'addcomment/$' => 'PhabricatorAuditAddCommentController',
         'preview/(?P<id>\d+)/$' => 'PhabricatorAuditPreviewController',

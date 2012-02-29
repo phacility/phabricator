@@ -68,7 +68,7 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
     $nav->addFilter(
       null,
       "Commits {$external_arrow}",
-      '/diffusion/author/'.$user->getUserName().'/');
+      '/audit/view/author/'.phutil_escape_uri($user->getUserName()).'/');
 
     $oauths = id(new PhabricatorUserOAuthInfo())->loadAllWhere(
       'userID = %d',
@@ -160,14 +160,6 @@ class PhabricatorPeopleProfileController extends PhabricatorPeopleController {
 
     $engine = PhabricatorMarkupEngine::newProfileMarkupEngine();
     $blurb = $engine->markupText($blurb);
-    $commit_list =
-      phutil_render_tag(
-        'a',
-        array(
-          'href' => '/diffusion/author/'.
-            phutil_escape_uri($user->getUsername()),
-        ),
-        'Recent Commits');
 
     $viewer = $this->getRequest()->getUser();
 
