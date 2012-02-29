@@ -320,18 +320,6 @@ class PhabricatorOwnerRelatedListController
       );
 
       if ($this->scope === 'attention') {
-        $status_link = phutil_escape_html(
-          idx(PhabricatorAuditStatusConstants::getStatusNameMap(),
-            $relationship['auditStatus']));
-        $status_link = phutil_render_tag(
-          'a',
-          array(
-            'href' => sprintf('/audit/edit/?c-phid=%s&p-phid=%s',
-              idx($relationship, 'commitPHID'),
-              $package_phid),
-          ),
-          $status_link);
-
         $reasons = json_decode($relationship['auditReasons'], true);
         $reasons = array_map('phutil_escape_html', $reasons);
         $reasons = implode($reasons, '<br>');
@@ -339,7 +327,6 @@ class PhabricatorOwnerRelatedListController
         $row = array_merge(
           $row,
           array(
-            $status_link,
             $reasons,
           ));
       }
@@ -360,7 +347,6 @@ class PhabricatorOwnerRelatedListController
       $headers = array_merge(
         $headers,
         array(
-          'Audit Status',
           'Audit Reasons',
         ));
     }
@@ -378,7 +364,6 @@ class PhabricatorOwnerRelatedListController
       $column_classes = array_merge(
         $column_classes,
         array(
-          '',
           '',
         ));
     }
