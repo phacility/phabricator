@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ class ConduitAPI_differential_getcommitmessage_Method extends ConduitAPIMethod {
     return array(
       'revision_id' => 'optional revision_id',
       'fields' => 'optional dict<string, wild>',
-      'edit' => 'optional bool',
+      'edit' => 'optional enum<"edit", "create">',
     );
   }
 
@@ -58,6 +58,7 @@ class ConduitAPI_differential_getcommitmessage_Method extends ConduitAPIMethod {
     $revision->loadRelationships();
 
     $is_edit = $request->getValue('edit');
+    $is_create = ($is_edit == 'create');
 
     $aux_fields = DifferentialFieldSelector::newSelector()
       ->getFieldSpecifications();
@@ -88,7 +89,8 @@ class ConduitAPI_differential_getcommitmessage_Method extends ConduitAPIMethod {
             "correspond to any configured field.");
         }
 
-        if ($aux_field->shouldOverwriteWhenCommitMessageIsEdited()) {
+        if ($is_create ||
+            $aux_field->shouldOverwriteWhenCommitMessageIsEdited()) {
           $aux_field->setValueFromParsedCommitMessage($value);
         }
       }

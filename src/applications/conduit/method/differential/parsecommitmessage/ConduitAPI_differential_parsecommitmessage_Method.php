@@ -28,7 +28,8 @@ class ConduitAPI_differential_parsecommitmessage_Method
 
   public function defineParamTypes() {
     return array(
-      'corpus' => 'required string',
+      'corpus'  => 'required string',
+      'partial' => 'optional bool',
     );
   }
 
@@ -43,6 +44,7 @@ class ConduitAPI_differential_parsecommitmessage_Method
 
   protected function execute(ConduitAPIRequest $request) {
     $corpus = $request->getValue('corpus');
+    $is_partial = $request->getValue('partial');
 
     $aux_fields = DifferentialFieldSelector::newSelector()
       ->getFieldSpecifications();
@@ -74,14 +76,16 @@ class ConduitAPI_differential_parsecommitmessage_Method
       }
     }
 
-    foreach ($aux_fields as $field_key => $aux_field) {
-      try {
-        $aux_field->validateField();
-      } catch (DifferentialFieldValidationException $ex) {
-        $field_label = $aux_field->renderLabelForCommitMessage();
-        $errors[] =
-          "Invalid or missing field '{$field_label}': ".
-          $ex->getMessage();
+    if (!$is_partial) {
+      foreach ($aux_fields as $field_key => $aux_field) {
+        try {
+          $aux_field->validateField();
+        } catch (DifferentialFieldValidationException $ex) {
+          $field_label = $aux_field->renderLabelForCommitMessage();
+          $errors[] =
+            "Invalid or missing field '{$field_label}': ".
+            $ex->getMessage();
+        }
       }
     }
 
