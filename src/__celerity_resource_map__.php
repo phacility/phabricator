@@ -1398,7 +1398,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-app-buttons-css' =>
   array(
-    'uri' => '/res/343f125f/rsrc/css/application/directory/phabricator-app-buttons.css',
+    'uri' => '/res/7d97b5e0/rsrc/css/application/directory/phabricator-app-buttons.css',
     'type' => 'css',
     'requires' =>
     array(
