@@ -9,6 +9,7 @@
 phutil_require_module('phabricator', 'applications/feed/storage/base');
 phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/phid/storage/phid');
+phutil_require_module('phabricator', 'storage/queryfx');
 
 phutil_require_module('phutil', 'utils');
 
