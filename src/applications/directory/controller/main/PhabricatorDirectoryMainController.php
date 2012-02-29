@@ -78,6 +78,7 @@ class PhabricatorDirectoryMainController
     $revision_panel = $this->buildRevisionPanel();
     $app_panel = $this->buildAppPanel();
     $audit_panel = $this->buildAuditPanel();
+    $commit_panel = $this->buildCommitPanel();
 
     $content = array(
       $app_panel,
@@ -87,6 +88,7 @@ class PhabricatorDirectoryMainController
       $revision_panel,
       $tasks_panel,
       $audit_panel,
+      $commit_panel,
     );
 
     $nav->appendChild($content);
@@ -577,6 +579,11 @@ class PhabricatorDirectoryMainController
       '/diffusion/',
       'diffusion');
 
+    $nav_buttons[] = array(
+      'Audit Code',
+      '/audit/',
+      'audit');
+
     $view = new AphrontNullView();
     $view->appendChild('<div class="phabricator-app-buttons">');
     foreach ($nav_buttons as $info) {
@@ -638,13 +645,9 @@ class PhabricatorDirectoryMainController
     $audits = $query->execute();
 
     if (!$audits) {
-      $panel = new AphrontMiniPanelView();
-      $panel->appendChild(
-        '<p>'.
-          '<strong>No Audits:</strong> '.
-          'No commits are waiting for you to audit them.'.
-        '</p>');
-      return $panel;
+      return $this->renderMinipanel(
+        'No Audits',
+        'No commits are waiting for you to audit them.');
     }
 
     $view = new PhabricatorAuditListView();
@@ -666,6 +669,50 @@ class PhabricatorDirectoryMainController
             'class' => 'button grey',
           ),
           "View Active Audits \xC2\xBB"));
+
+    return $panel;
+  }
+
+  public function buildCommitPanel() {
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $phids = array($user->getPHID());
+
+    $query = new PhabricatorAuditCommitQuery();
+    $query->withAuthorPHIDs($phids);
+    $query->withStatus(PhabricatorAuditQuery::STATUS_OPEN);
+    $query->needCommitData(true);
+    $query->setLimit(10);
+
+    $commits = $query->execute();
+
+    if (!$commits) {
+      return $this->renderMinipanel(
+        'No Problem Commits',
+        'No one has raised concerns with your commits.');
+    }
+
+    $view = new PhabricatorAuditCommitListView();
+    $view->setCommits($commits);
+    $view->setUser($user);
+
+    $phids = $view->getRequiredHandlePHIDs();
+    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $view->setHandles($handles);
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader('Problem Commits');
+    $panel->setCaption('Commits which auditors have raised concerns about.');
+    $panel->appendChild($view);
+      $panel->addButton(
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => '/audit/',
+            'class' => 'button grey',
+          ),
+          "View Problem Commits \xC2\xBB"));
 
     return $panel;
   }

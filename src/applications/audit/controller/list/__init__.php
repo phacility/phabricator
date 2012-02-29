@@ -10,6 +10,8 @@ phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/audit/controller/base');
 phutil_require_module('phabricator', 'applications/audit/editor/comment');
 phutil_require_module('phabricator', 'applications/audit/query/audit');
+phutil_require_module('phabricator', 'applications/audit/query/commit');
+phutil_require_module('phabricator', 'applications/audit/view/commitlist');
 phutil_require_module('phabricator', 'applications/audit/view/list');
 phutil_require_module('phabricator', 'applications/people/storage/user');
 phutil_require_module('phabricator', 'applications/phid/constants');
@@ -24,6 +26,7 @@ phutil_require_module('phabricator', 'view/layout/listfilter');
 phutil_require_module('phabricator', 'view/layout/panel');
 phutil_require_module('phabricator', 'view/layout/sidenavfilter');
 
+phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'parser/uri');
 phutil_require_module('phutil', 'utils');
 

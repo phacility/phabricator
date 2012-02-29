@@ -21,6 +21,7 @@ final class PhabricatorAuditListView extends AphrontView {
   private $audits;
   private $handles;
   private $authorityPHIDs = array();
+  private $noDataString;
 
   public function setAudits(array $audits) {
     $this->audits = $audits;
@@ -35,6 +36,15 @@ final class PhabricatorAuditListView extends AphrontView {
   public function setAuthorityPHIDs(array $phids) {
     $this->authorityPHIDs = $phids;
     return $this;
+  }
+
+  public function setNoDataString($no_data_string) {
+    $this->noDataString = $no_data_string;
+    return $this;
+  }
+
+  public function getNoDataString() {
+    return $this->noDataString;
   }
 
   public function getRequiredHandlePHIDs() {
@@ -111,6 +121,10 @@ final class PhabricatorAuditListView extends AphrontView {
         'wide',
       ));
     $table->setRowClasses($rowc);
+
+    if ($this->noDataString) {
+      $table->setNoDataString($this->noDataString);
+    }
 
     return $table->render();
   }
