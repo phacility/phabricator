@@ -40,14 +40,11 @@ class DifferentialInlineCommentEditController extends DifferentialController {
 
     $submit_uri = '/differential/comment/inline/edit/'.$this->revisionID.'/';
 
-    $edit_dialog = new AphrontDialogView();
+    $edit_dialog = new DifferentialInlineCommentEditView();
     $edit_dialog->setUser($user);
     $edit_dialog->setSubmitURI($submit_uri);
 
-    $edit_dialog->addHiddenInput('on_right', $on_right);
-
-    $edit_dialog->addSubmitButton();
-    $edit_dialog->addCancelButton('#');
+    $edit_dialog->setOnRight($on_right);
 
     switch ($op) {
       case 'delete':
@@ -58,13 +55,19 @@ class DifferentialInlineCommentEditController extends DifferentialController {
           return $this->buildEmptyResponse();
         }
 
-        $edit_dialog->setTitle('Really delete this comment?');
-        $edit_dialog->addHiddenInput('id', $inline_id);
-        $edit_dialog->addHiddenInput('op', 'delete');
-        $edit_dialog->appendChild(
-          '<p>Delete this inline comment?</p>');
+        $dialog = new AphrontDialogView();
+        $dialog->setUser($user);
+        $dialog->setSubmitURI($submit_uri);
 
-        return id(new AphrontDialogResponse())->setDialog($edit_dialog);
+        $dialog->setTitle('Really delete this comment?');
+        $dialog->addHiddenInput('id', $inline_id);
+        $dialog->addHiddenInput('op', 'delete');
+        $dialog->appendChild('<p>Delete this inline comment?</p>');
+
+        $dialog->addCancelButton('#');
+        $dialog->addSubmitButton();
+
+        return id(new AphrontDialogResponse())->setDialog($dialog);
       case 'edit':
         $inline = $this->loadInlineCommentForEditing($inline_id);
 
@@ -91,7 +94,8 @@ class DifferentialInlineCommentEditController extends DifferentialController {
           $this->renderTextArea(
             nonempty($text, $inline->getContent())));
 
-        return id(new AphrontDialogResponse())->setDialog($edit_dialog);
+        return id(new AphrontAjaxResponse())
+          ->setContent($edit_dialog->render());
       case 'create':
 
         if (!$request->isFormPost() || !strlen($text)) {
@@ -120,7 +124,6 @@ class DifferentialInlineCommentEditController extends DifferentialController {
 
       case 'reply':
       default:
-
         if ($op == 'reply') {
           $inline = $this->loadInlineComment($inline_id);
           // Override defaults.
@@ -141,7 +144,8 @@ class DifferentialInlineCommentEditController extends DifferentialController {
 
         $edit_dialog->appendChild($this->renderTextArea($text));
 
-        return id(new AphrontDialogResponse())->setDialog($edit_dialog);
+        return id(new AphrontAjaxResponse())
+          ->setContent($edit_dialog->render());
     }
   }
 

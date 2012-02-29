@@ -50,6 +50,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     selecting = false;
     editor = false;
     hideReticle();
+    set_link_state(false);
   });
 
   function isOnRight(node) {
@@ -68,6 +69,10 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       return undefined;
     }
   }
+
+  var set_link_state = function(active) {
+    JX.DOM.alterClass(JX.$(config.stage), 'inline-editor-active', active);
+  };
 
   JX.Stratcom.listen(
     'mousedown',
@@ -148,6 +153,8 @@ JX.behavior('differential-edit-inline-comments', function(config) {
         .setTable(insert.parentNode)
         .start();
 
+      set_link_state(true);
+
       e.kill();
     });
 
@@ -183,9 +190,14 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     });
 
   var action_handler = function(op, e) {
+    e.kill();
+
+    if (editor) {
+      return;
+    }
+
     var node = e.getNode('differential-inline-comment');
     handle_inline_action(node, op);
-    e.kill();
   }
 
   var handle_inline_action = function(node, op) {
@@ -208,6 +220,8 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       .setRow(row)
       .setTable(row.parentNode)
       .start();
+
+    set_link_state(true);
   }
 
   for (var op in {'edit' : 1, 'delete' : 1, 'reply' : 1}) {

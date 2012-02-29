@@ -150,12 +150,13 @@ td.cov-X {
   left:       0px;
 }
 
-.differential-inline-comment {
+.differential-inline-comment,
+.differential-inline-comment-edit {
   background:         #f9f9f1;
   border:             1px solid #aaaa88;
   font-family:        Verdana;
   font-size:          11px;
-  margin:             4px 0px;
+  margin:             6px 0px;
   padding:            8px 10px;
   width:              100%;
   -moz-box-sizing:    border-box;
@@ -208,7 +209,7 @@ td.cov-X {
 
 
 .differential-inline-comment-edit-textarea {
-  width: 100%;
+  width: 99%;
   height: 12em;
 }
 
@@ -279,4 +280,54 @@ td.cov-X {
 
 .differential-inline-undo a {
   font-weight: bold;
+}
+
+.differential-inline-comment-edit {
+  padding: 8px 18px 8px 12px;
+}
+
+.differential-inline-comment-edit-buttons {
+  padding: 2px 0px;
+}
+
+.differential-inline-comment-edit-buttons button {
+  float: right;
+  margin-left: 6px;
+}
+
+.differential-inline-comment-edit-title {
+  font-weight:    bold;
+  color:          #333333;
+  border-bottom:  1px solid #ccccaa;
+  padding-bottom: 2px;
+  margin-bottom:  6px;
+}
+
+/*  When the inline editor is active, disable all the other inline comment links
+    on the page ("Edit", "Reply", "Delete", etc). The goal here is to prevent
+    issues where you open up multiple editors and run into problems with
+    assumptions about modalness. They are disabled explicitly by the JS, but
+    render them in a disabled state as well.
+*/
+.inline-editor-active .differential-inline-comment-links a,
+.inline-editor-active .differential-inline-comment-links a:hover,
+.inline-editor-active .differential-inline-comment-links a:active {
+  color: #888888;
+  cursor: normal;
+  text-decoration: none;
+}
+
+/*  Create a wide band of color behind the inline edit interface so it is easy
+    to find by skimming the page while scrolling.
+*/
+tr.inline-comment-splint {
+  background: #f9f1d5;
+}
+
+tr.differential-inline-hidden {
+  display: none;
+}
+
+tr.differential-inline-loading {
+  opacity: 0.5;
 }

@@ -1,10 +1,11 @@
 /**
  * @provides differential-inline-comment-editor
  * @requires javelin-dom
- *           javelin-workflow
  *           javelin-util
  *           javelin-stratcom
  *           javelin-install
+ *           javelin-request
+ *           javelin-workflow
  */
 
 JX.install('DifferentialInlineCommentEditor', {
@@ -69,6 +70,56 @@ JX.install('DifferentialInlineCommentEditor', {
           });
       }
       JX.DifferentialInlineCommentEditor._activeEditor = this;
+    },
+    _setRowState : function(state) {
+      var is_hidden   = (state == 'hidden');
+      var is_loading  = (state == 'loading');
+      var row = this.getRow();
+      JX.DOM.alterClass(row, 'differential-inline-hidden', is_hidden);
+      JX.DOM.alterClass(row, 'differential-inline-loading', is_loading);
+    },
+    _didContinueWorkflow : function(response) {
+      var drawn = this._draw(JX.$N('div', JX.$H(response)));
+
+      var op = this.getOperation();
+      if (op == 'edit') {
+        this._setRowState('hidden');
+      }
+
+      JX.DOM.find(
+        drawn[0],
+        'textarea',
+        'differential-inline-comment-edit-textarea').focus();
+
+      var oncancel = JX.bind(this, function(e) {
+        e.kill();
+
+        this._didCancelWorkflow();
+
+        if (op == 'edit') {
+          this._setRowState('visible');
+        }
+
+        JX.DOM.remove(drawn[0]);
+      });
+      JX.DOM.listen(drawn[0], 'click', 'inline-edit-cancel', oncancel);
+
+      var onsubmit = JX.bind(this, function(e) {
+        e.kill();
+
+        JX.Workflow.newFromForm(e.getTarget())
+          .setHandler(JX.bind(this, function(response) {
+            JX.DOM.remove(drawn[0]);
+            if (op == 'edit') {
+              this._setRowState('visible');
+            }
+            this._didCompleteWorkflow(response);
+          }))
+          .start();
+
+        JX.DOM.alterClass(drawn[0], 'differential-inline-loading', true);
+      });
+      JX.DOM.listen(drawn[0], 'submit', 'inline-edit-form', onsubmit);
     },
     _didCompleteWorkflow : function(response) {
       var op = this.getOperation();
@@ -151,13 +202,33 @@ JX.install('DifferentialInlineCommentEditor', {
       this._registerUndoListener();
 
       var data = this._buildRequestData();
-      var handler = JX.bind(this, this._didCompleteWorkflow);
-      var close_handler = JX.bind(this, this._didCancelWorkflow);
 
-       new JX.Workflow(this._uri, data)
-        .setHandler(handler)
-        .setCloseHandler(close_handler)
-        .start();
+      var op = this.getOperation();
+
+
+      if (op == 'delete') {
+        this._setRowState('loading');
+        var oncomplete = JX.bind(this, this._didCompleteWorkflow);
+        var onclose = JX.bind(this, function() {
+          this._setRowState('visible');
+          this._didCancelWorkflow();
+        });
+
+        new JX.Workflow(this._uri, data)
+          .setHandler(oncomplete)
+          .setCloseHandler(onclose)
+          .start();
+      } else {
+        var handler = JX.bind(this, this._didContinueWorkflow);
+
+        if (op == 'edit') {
+          this._setRowState('loading');
+        }
+
+        new JX.Request(this._uri, handler)
+          .setData(data)
+          .send();
+      }
 
       return this;
     }

@@ -212,13 +212,17 @@ class DifferentialChangesetListView extends AphrontView {
       Javelin::initBehavior('differential-edit-inline-comments', array(
         'uri' => '/differential/comment/inline/edit/'.$revision->getID().'/',
         'undo_templates' => $undo_templates,
+        'stage' => 'differential-review-stage',
       ));
     }
 
-    return
-      '<div class="differential-review-stage" id="differential-review-stage">'.
-        implode("\n", $output).
-      '</div>';
+    return phutil_render_tag(
+      'div',
+      array(
+        'class' => 'differential-review-stage',
+        'id'    => 'differential-review-stage',
+      ),
+      implode("\n", $output));
   }
 
   /**
