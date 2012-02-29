@@ -49,6 +49,7 @@ class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
           '(D|T|P|V|F)(\d+)'.
           '(?:\b|$)'.
           '@';
+        $pattern_override = '/(^[^\s]+)[,:] [DTPVF]\d+/';
 
         $revision_ids = array();
         $task_ids = array();
@@ -56,8 +57,12 @@ class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
         $commit_names = array();
         $vote_ids = array();
         $file_ids = array();
+        $matches_override = array();
 
         if (preg_match_all($pattern, $message, $matches, PREG_SET_ORDER)) {
+          if (preg_match($pattern_override, $message, $matches_override)) {
+            $reply_to = $matches_override[1];
+          }
           foreach ($matches as $match) {
             switch ($match[1]) {
               case 'D':
