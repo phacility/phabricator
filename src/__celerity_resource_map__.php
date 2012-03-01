@@ -163,7 +163,7 @@ celerity_register_resource_map(array(
   ),
   'differential-changeset-view-css' =>
   array(
-    'uri' => '/res/38f1bef2/rsrc/css/application/differential/changeset-view.css',
+    'uri' => '/res/45e4ad43/rsrc/css/application/differential/changeset-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -268,7 +268,7 @@ celerity_register_resource_map(array(
   ),
   'diffusion-source-css' =>
   array(
-    'uri' => '/res/a8d2834e/rsrc/css/application/diffusion/diffusion-source.css',
+    'uri' => '/res/3b8fa176/rsrc/css/application/diffusion/diffusion-source.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1637,17 +1637,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/slowvote/slowvote.css',
   ),
-  0 =>
-  array(
-    'uri' => '/res/b6096fdd/rsrc/js/javelin/lib/__tests__/URI.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-uri',
-      1 => 'javelin-php-serializer',
-    ),
-    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
-  ),
   'phabricator-standard-page-view' =>
   array(
     'uri' => '/res/7e09bbfc/rsrc/css/application/base/standard-page-view.css',
@@ -1871,6 +1860,17 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/core/syntax.css',
   ),
+  0 =>
+  array(
+    'uri' => '/res/b6096fdd/rsrc/js/javelin/lib/__tests__/URI.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-uri',
+      1 => 'javelin-php-serializer',
+    ),
+    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
+  ),
 ), array(
   'packages' =>
   array(
@@ -1914,25 +1914,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/29e2c5f1/core.pkg.css',
       'type' => 'css',
     ),
-    '46547a92' =>
-    array(
-      'name' => 'core.pkg.js',
-      'symbols' =>
-      array(
-        0 => 'javelin-mask',
-        1 => 'javelin-workflow',
-        2 => 'javelin-behavior-workflow',
-        3 => 'javelin-behavior-aphront-form-disable-on-submit',
-        4 => 'phabricator-keyboard-shortcut-manager',
-        5 => 'phabricator-keyboard-shortcut',
-        6 => 'javelin-behavior-phabricator-keyboard-shortcuts',
-        7 => 'javelin-behavior-refresh-csrf',
-        8 => 'javelin-behavior-phabricator-watch-anchor',
-      ),
-      'uri' => '/res/pkg/46547a92/core.pkg.js',
-      'type' => 'js',
-    ),
-    '4876e7f9' =>
+    '2dc5fb48' =>
     array(
       'name' => 'differential.pkg.css',
       'symbols' =>
@@ -1950,8 +1932,26 @@ celerity_register_resource_map(array(
         10 => 'phabricator-content-source-view-css',
         11 => 'differential-local-commits-view-css',
       ),
-      'uri' => '/res/pkg/4876e7f9/differential.pkg.css',
+      'uri' => '/res/pkg/2dc5fb48/differential.pkg.css',
       'type' => 'css',
+    ),
+    '46547a92' =>
+    array(
+      'name' => 'core.pkg.js',
+      'symbols' =>
+      array(
+        0 => 'javelin-mask',
+        1 => 'javelin-workflow',
+        2 => 'javelin-behavior-workflow',
+        3 => 'javelin-behavior-aphront-form-disable-on-submit',
+        4 => 'phabricator-keyboard-shortcut-manager',
+        5 => 'phabricator-keyboard-shortcut',
+        6 => 'javelin-behavior-phabricator-keyboard-shortcuts',
+        7 => 'javelin-behavior-refresh-csrf',
+        8 => 'javelin-behavior-phabricator-watch-anchor',
+      ),
+      'uri' => '/res/pkg/46547a92/core.pkg.js',
+      'type' => 'js',
     ),
     '4fbae2af' =>
     array(
@@ -2012,23 +2012,23 @@ celerity_register_resource_map(array(
     'aphront-crumbs-view-css' => '29e2c5f1',
     'aphront-dialog-view-css' => '29e2c5f1',
     'aphront-form-view-css' => '29e2c5f1',
-    'aphront-headsup-action-list-view-css' => '4876e7f9',
+    'aphront-headsup-action-list-view-css' => '2dc5fb48',
     'aphront-list-filter-view-css' => '29e2c5f1',
     'aphront-panel-view-css' => '29e2c5f1',
     'aphront-side-nav-view-css' => '29e2c5f1',
     'aphront-table-view-css' => '29e2c5f1',
     'aphront-tokenizer-control-css' => '29e2c5f1',
     'aphront-typeahead-control-css' => '29e2c5f1',
-    'differential-changeset-view-css' => '4876e7f9',
-    'differential-core-view-css' => '4876e7f9',
+    'differential-changeset-view-css' => '2dc5fb48',
+    'differential-core-view-css' => '2dc5fb48',
     'differential-inline-comment-editor' => '79c97d03',
-    'differential-local-commits-view-css' => '4876e7f9',
-    'differential-revision-add-comment-css' => '4876e7f9',
-    'differential-revision-comment-css' => '4876e7f9',
-    'differential-revision-comment-list-css' => '4876e7f9',
-    'differential-revision-detail-css' => '4876e7f9',
-    'differential-revision-history-css' => '4876e7f9',
-    'differential-table-of-contents-css' => '4876e7f9',
+    'differential-local-commits-view-css' => '2dc5fb48',
+    'differential-revision-add-comment-css' => '2dc5fb48',
+    'differential-revision-comment-css' => '2dc5fb48',
+    'differential-revision-comment-list-css' => '2dc5fb48',
+    'differential-revision-detail-css' => '2dc5fb48',
+    'differential-revision-history-css' => '2dc5fb48',
+    'differential-table-of-contents-css' => '2dc5fb48',
     'diffusion-commit-view-css' => '61f9d480',
     'javelin-behavior' => '4fbae2af',
     'javelin-behavior-aphront-basic-tokenizer' => '080edee4',
@@ -2066,14 +2066,14 @@ celerity_register_resource_map(array(
     'javelin-util' => '4fbae2af',
     'javelin-vector' => '4fbae2af',
     'javelin-workflow' => '46547a92',
-    'phabricator-content-source-view-css' => '4876e7f9',
+    'phabricator-content-source-view-css' => '2dc5fb48',
     'phabricator-core-buttons-css' => '29e2c5f1',
     'phabricator-core-css' => '29e2c5f1',
     'phabricator-directory-css' => '29e2c5f1',
     'phabricator-drag-and-drop-file-upload' => '79c97d03',
     'phabricator-keyboard-shortcut' => '46547a92',
     'phabricator-keyboard-shortcut-manager' => '46547a92',
-    'phabricator-object-selector-css' => '4876e7f9',
+    'phabricator-object-selector-css' => '2dc5fb48',
     'phabricator-remarkup-css' => '29e2c5f1',
     'phabricator-shaped-request' => '79c97d03',
     'phabricator-standard-page-view' => '29e2c5f1',

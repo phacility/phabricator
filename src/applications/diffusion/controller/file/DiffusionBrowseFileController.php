@@ -361,8 +361,13 @@ class DiffusionBrowseFileController extends DiffusionController {
               $n,
               $selected,
               'Blame previous revision');
-            $prev_link = '<th style="background: ' . $color .
-              '; width: 2em;">' . $prev_link . '</th>';
+            $prev_link = phutil_render_tag(
+              'th',
+              array(
+                'class' => 'diffusion-wide-link',
+                'style' => 'background: '.$color.'; width: 2em;',
+              ),
+              $prev_link);
           }
 
           if (isset($blame_dict[$rev]['handle'])) {
@@ -409,7 +414,9 @@ class DiffusionBrowseFileController extends DiffusionController {
         ),
         $n);
 
-      $rows[] = $tr.$blame_info.'<th>'.$l.'</th><td>'.$targ.$line.'</td></tr>';
+      $rows[] = $tr.$blame_info.
+        '<th class="diffusion-wide-link">'.$l.'</th>'.
+        '<td>'.$targ.$line.'</td></tr>';
       ++$n;
     }
 

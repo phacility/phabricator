@@ -26,10 +26,6 @@
   overflow:           hidden;
 }
 
-.diffusion-source th a {
-  display: block;
-}
-
 .diffusion-source td {
   letter-spacing:     0.0083334px;
   vertical-align:     top;
@@ -38,6 +34,11 @@
   padding-left:       8px;
   line-height:        16px;
   overflow:           hidden;
+}
+
+.diffusion-wide-link a {
+  /* Give the user a larger click target. */
+  display: block;
 }
 
 .diffusion-browse-type-form {
