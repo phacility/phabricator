@@ -262,6 +262,11 @@ class DifferentialRevisionViewController extends DifferentialController {
 
     $toc_view = new DifferentialDiffTableOfContentsView();
     $toc_view->setChangesets($changesets);
+    if ($repository) {
+      $toc_view->setRepository($repository);
+    }
+    $toc_view->setDiff($target);
+    $toc_view->setUser($user);
     $toc_view->setStandaloneViewLink(empty($visible_changesets));
     $toc_view->setVsMap($vs_map);
     $toc_view->setRevisionID($revision->getID());

@@ -19,6 +19,9 @@
 final class DifferentialDiffTableOfContentsView extends AphrontView {
 
   private $changesets = array();
+  private $repository;
+  private $diff;
+  private $user;
   private $standaloneViewLink = null;
   private $renderURI = '/differential/changeset/';
   private $revisionID;
@@ -26,6 +29,21 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
 
   public function setChangesets($changesets) {
     $this->changesets = $changesets;
+    return $this;
+  }
+
+  public function setRepository(PhabricatorRepository $repository) {
+    $this->repository = $repository;
+    return $this;
+  }
+
+  public function setDiff(DifferentialDiff $diff) {
+    $this->diff = $diff;
+    return $this;
+  }
+
+  public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
     return $this;
   }
 
@@ -57,6 +75,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
     $rows = array();
 
     $changesets = $this->changesets;
+    $paths = array();
     foreach ($changesets as $changeset) {
       $type = $changeset->getChangeType();
       $ftype = $changeset->getFileType();
@@ -125,10 +144,32 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
             '<td class="differential-toc-meta">'.$meta.'</td>'.
           '</tr>';
       }
+      if ($this->diff && $this->repository) {
+        $paths[] =
+          $changeset->getAbsoluteRepositoryPath($this->diff, $this->repository);
+      }
+    }
+
+    $editor_link = null;
+    if ($paths && $this->user) {
+      $editor_link = $this->user->loadEditorLink(
+        implode(' ', $paths),
+        1, // line number
+        $this->repository);
+      if ($editor_link) {
+        $editor_link = phutil_render_tag(
+          'a',
+          array(
+            'href' => $editor_link,
+            'class' => 'button differential-toc-edit-all',
+          ),
+          'Open All in Editor');
+      }
     }
 
     return
       '<div class="differential-toc differential-panel">'.
+        $editor_link.
         '<h1>Table of Contents</h1>'.
         '<table>'.
           implode("\n", $rows).
