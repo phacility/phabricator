@@ -171,8 +171,8 @@ JX.install('DifferentialInlineCommentEditor', {
       var text = textarea.value;
 
       // If the user hasn't edited the text (i.e., no change from original for
-      // 'edit' or no text for 'new' or 'reply'), don't offer them an undo.
-      if (text == (this.getOriginalText() || '')) {
+      // 'edit' or no text at all), don't offer them an undo.
+      if (text == this.getOriginalText() || text == '') {
         return;
       }
 
