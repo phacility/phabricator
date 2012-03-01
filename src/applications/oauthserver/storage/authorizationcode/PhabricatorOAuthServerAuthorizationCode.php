@@ -27,4 +27,5 @@ extends PhabricatorOAuthServerDAO {
   protected $clientPHID;
   protected $clientSecret;
   protected $userPHID;
+  protected $redirectURI;
 }

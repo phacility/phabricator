@@ -78,25 +78,33 @@ extends PhabricatorOAuthClientBaseController {
           ->setForbiddenText($message);
       }
       $submit_button = 'Save OAuth Client';
+      $secret        = null;
     // new client - much simpler
     } else {
-      $client = new PhabricatorOAuthServerClient();
-      $title  = 'Create OAuth Client';
+      $client        = new PhabricatorOAuthServerClient();
+      $title         = 'Create OAuth Client';
       $submit_button = 'Create OAuth Client';
+      $secret        = Filesystem::readRandomCharacters(32);
     }
 
     if ($request->isFormPost()) {
       $redirect_uri = $request->getStr('redirect_uri');
       $client->setName($request->getStr('name'));
       $client->setRedirectURI($redirect_uri);
-      $client->setSecret(Filesystem::readRandomCharacters(32));
+      if ($secret) {
+        $client->setSecret($secret);
+      }
       $client->setCreatorPHID($current_user->getPHID());
       $uri = new PhutilURI($redirect_uri);
-      if (!$this->validateRedirectURI($uri)) {
+      $server = new PhabricatorOAuthServer();
+      if (!$server->validateRedirectURI($uri)) {
         $error = new AphrontErrorView();
         $error->setSeverity(AphrontErrorView::SEVERITY_ERROR);
         $error->setTitle(
-          'Redirect URI must be a fully qualified domain name.'
+          'Redirect URI must be a fully qualified domain name '.
+          'with no fragments. See '.
+          'http://tools.ietf.org/html/draft-ietf-oauth-v2-23#section-3.1.2 '.
+          'for more information on the correct format.'
         );
         $bad_redirect = true;
       } else {
@@ -140,7 +148,7 @@ extends PhabricatorOAuthClientBaseController {
           ->setValue($phid)
         )
         ->appendChild(
-          id(new AphrontFormTextControl())
+          id(new AphrontFormStaticControl())
           ->setLabel('Secret')
           ->setValue($client->getSecret())
         );
@@ -183,15 +191,6 @@ extends PhabricatorOAuthClientBaseController {
       ),
       array('title' => $title)
     );
-  }
-
-  private function validateRedirectURI(PhutilURI $uri) {
-    if (PhabricatorEnv::isValidRemoteWebResource($uri)) {
-      if ($uri->getDomain()) {
-        return true;
-      }
-    }
-    return false;
   }
 
 }

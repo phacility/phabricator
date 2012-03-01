@@ -21,52 +21,68 @@
 */
 final class PhabricatorOAuthResponse extends AphrontResponse {
 
+  private $state;
   private $content;
-  private $uri;
+  private $clientURI;
+  private $error;
+  private $errorDescription;
 
+  private function getState() {
+    return $this->state;
+  }
+  public function setState($state) {
+    $this->state = $state;
+    return $this;
+  }
+
+  private function getContent() {
+    return $this->content;
+  }
   public function setContent($content) {
     $this->content = $content;
     return $this;
   }
-  private function getContent() {
-    return $this->content;
-  }
 
-  private function setURI($uri) {
-    $this->uri = $uri;
+  private function getClientURI() {
+    return $this->clientURI;
+  }
+  public function setClientURI(PhutilURI $uri) {
+    $this->setHTTPResponseCode(302);
+    $this->clientURI = $uri;
     return $this;
   }
-  private function getURI() {
-    return $this->uri;
+  private function getFullURI() {
+    $base_uri     = $this->getClientURI();
+    $query_params = $this->buildResponseDict();
+    foreach ($query_params as $key => $value) {
+      $base_uri->setQueryParam($key, $value);
+    }
+    return $base_uri;
   }
 
-  public function setMalformed($malformed) {
-    if ($malformed) {
+  private function getError() {
+    return $this->error;
+  }
+  public function setError($error) {
+    // errors sometimes redirect to the client (302) but otherwise
+    // the spec says all code 400
+    if (!$this->getClientURI()) {
       $this->setHTTPResponseCode(400);
-      $this->setContent(array('error' => $malformed));
     }
+    $this->error = $error;
     return $this;
   }
 
-  public function setNotFound($not_found) {
-    if ($not_found) {
-      $this->setHTTPResponseCode(404);
-      $this->setContent(array('error' => $not_found));
-    }
-    return $this;
+  private function getErrorDescription() {
+    return $this->errorDescription;
   }
-
-  public function setRedirect(PhutilURI $uri) {
-    if ($uri) {
-      $this->setHTTPResponseCode(302);
-      $this->setURI($uri);
-      $this->setContent(null);
-    }
+  public function setErrorDescription($error_description) {
+    $this->errorDescription = $error_description;
     return $this;
   }
 
   public function __construct() {
-    $this->setHTTPResponseCode(200);
+    $this->setHTTPResponseCode(200);      // assume the best
     return $this;
   }
 
@@ -74,20 +90,34 @@ final class PhabricatorOAuthResponse extends AphrontResponse {
     $headers = array(
       array('Content-Type', 'application/json'),
     );
-    if ($this->getURI()) {
-      $headers[] = array('Location', $this->getURI());
+    if ($this->getClientURI()) {
+      $headers[] = array('Location', $this->getFullURI());
     }
     // TODO -- T844 set headers with X-Auth-Scopes, etc
     $headers = array_merge(parent::getHeaders(), $headers);
     return $headers;
   }
 
-  public function buildResponseString() {
-    $content = $this->getContent();
-    if ($content) {
-      return $this->encodeJSONForHTTPResponse($content);
+  private function buildResponseDict() {
+    if ($this->getError()) {
+      $content = array(
+        'error'             => $this->getError(),
+        'error_description' => $this->getErrorDescription(),
+      );
+      $this->setContent($content);
     }
-    return '';
+
+    $content = $this->getContent();
+    if (!$content) {
+      return '';
+    }
+    if ($this->getState()) {
+      $content['state'] = $this->getState();
+    }
+    return $content;
   }
 
+  public function buildResponseString() {
+    return $this->encodeJSONForHTTPResponse($this->buildResponseDict());
+  }
 }

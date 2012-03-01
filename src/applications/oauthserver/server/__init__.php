@@ -10,6 +10,7 @@ phutil_require_module('phabricator', 'applications/oauthserver/scope');
 phutil_require_module('phabricator', 'applications/oauthserver/storage/accesstoken');
 phutil_require_module('phabricator', 'applications/oauthserver/storage/authorizationcode');
 phutil_require_module('phabricator', 'applications/oauthserver/storage/clientauthorization');
+phutil_require_module('phabricator', 'infrastructure/env');
 
 phutil_require_module('phutil', 'filesystem');
 phutil_require_module('phutil', 'utils');

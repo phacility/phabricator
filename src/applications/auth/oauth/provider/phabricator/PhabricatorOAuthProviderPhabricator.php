@@ -18,9 +18,20 @@
 
 final class PhabricatorOAuthProviderPhabricator
 extends PhabricatorOAuthProvider {
-
   private $userData;
 
+  public function getExtraAuthParameters() {
+    return array(
+      'response_type' => 'code',
+    );
+  }
+
+  public function getExtraTokenParameters() {
+    return array(
+      'grant_type' => 'authorization_code',
+    );
+
+  }
   public function decodeTokenResponse($response) {
     $decoded = json_decode($response, true);
     if (!is_array($decoded)) {
@@ -85,7 +96,7 @@ extends PhabricatorOAuthProvider {
   }
 
   public function getMinimumScope() {
-    return 'email';
+    return 'whoami';
   }
 
   public function setUserData($data) {

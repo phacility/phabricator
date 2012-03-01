@@ -115,6 +115,9 @@ abstract class AphrontResponse {
         'Cache-Control',
         'private, no-cache, no-store, must-revalidate');
       $headers[] = array(
+        'Pragma',
+        'no-cache');
+      $headers[] = array(
         'Expires',
         'Sat, 01 Jan 2000 00:00:00 GMT');
     }

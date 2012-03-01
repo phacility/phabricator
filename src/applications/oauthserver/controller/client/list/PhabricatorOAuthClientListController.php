@@ -47,6 +47,7 @@ extends PhabricatorOAuthClientBaseController {
           phutil_escape_html($client->getName())
         ),
         $client->getPHID(),
+        $client->getSecret(),
         phutil_render_tag(
           'a',
           array(
@@ -88,11 +89,13 @@ extends PhabricatorOAuthClientBaseController {
       array(
         'Client',
         'ID',
+        'Secret',
         'Redirect URI',
         '',
       ));
     $table->setColumnClasses(
       array(
+        '',
         '',
         '',
         '',

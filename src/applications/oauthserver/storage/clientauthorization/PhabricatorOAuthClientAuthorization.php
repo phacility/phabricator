@@ -40,7 +40,7 @@ extends PhabricatorOAuthServerDAO {
     $scope = $this->getScope();
     $scopes = array_keys($scope);
     sort($scopes);
-    return implode(', ', $scopes);
+    return implode(' ', $scopes);
   }
 
   public function getConfiguration() {
