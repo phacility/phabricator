@@ -1,0 +1,32 @@
+/**
+ * @provides maniphest-report-css
+ */
+
+table.aphront-table-view tr.aggregate,
+table.aphront-table-view tr.alt-aggregate {
+  background: #bb5577;
+}
+
+table.aphront-table-view tr.month,
+table.aphront-table-view tr.alt-month {
+  background: #ee77aa;
+}
+
+table.aphront-table-view tr.week,
+table.aphront-table-view tr.alt-week {
+  background: #ffccdd;
+}
+
+span.red {
+  color: #aa0000;
+  font-weight: bold;
+}
+
+span.green {
+  color: #00aa00;
+  font-weight: bold;
+}
+
+.aphront-panel-view-caption p {
+  padding: 6px 0 0;
+}

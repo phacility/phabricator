@@ -35,4 +35,26 @@ abstract class ManiphestController extends PhabricatorController {
     return $response->setContent($page->render());
   }
 
+  protected function buildBaseSideNav() {
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI('/maniphest/view/'));
+    $nav->addLabel('User Tasks');
+    $nav->addFilter('action',       'Assigned');
+    $nav->addFilter('created',      'Created');
+    $nav->addFilter('subscribed',   'Subscribed');
+    $nav->addFilter('triage',       'Need Triage');
+    $nav->addSpacer();
+    $nav->addLabel('All Tasks');
+    $nav->addFilter('alltriage',    'Need Triage');
+    $nav->addFilter('all',          'All Tasks');
+    $nav->addSpacer();
+    $nav->addLabel('Custom');
+    $nav->addFilter('custom',       'Custom Query');
+    $nav->addSpacer();
+    $nav->addLabel('Reports');
+    $nav->addFilter('report',       'Reports', '/maniphest/report/');
+
+    return $nav;
+  }
+
 }

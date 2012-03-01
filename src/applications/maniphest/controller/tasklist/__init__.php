@@ -25,7 +25,6 @@ phutil_require_module('phabricator', 'view/form/control/text');
 phutil_require_module('phabricator', 'view/form/control/togglebuttons');
 phutil_require_module('phabricator', 'view/form/control/tokenizer');
 phutil_require_module('phabricator', 'view/layout/listfilter');
-phutil_require_module('phabricator', 'view/layout/sidenavfilter');
 phutil_require_module('phabricator', 'view/null');
 
 phutil_require_module('phutil', 'markup');

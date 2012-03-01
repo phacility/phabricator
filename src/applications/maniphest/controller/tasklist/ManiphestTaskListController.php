@@ -57,20 +57,7 @@ class ManiphestTaskListController extends ManiphestController {
       return id(new AphrontRedirectResponse())->setURI($uri);
     }
 
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI('/maniphest/view/'));
-    $nav->addLabel('User Tasks');
-    $nav->addFilter('action',       'Assigned');
-    $nav->addFilter('created',      'Created');
-    $nav->addFilter('subscribed',   'Subscribed');
-    $nav->addFilter('triage',       'Need Triage');
-    $nav->addSpacer();
-    $nav->addLabel('All Tasks');
-    $nav->addFilter('alltriage',    'Need Triage');
-    $nav->addFilter('all',          'All Tasks');
-    $nav->addSpacer();
-    $nav->addLabel('Custom');
-    $nav->addFilter('custom',       'Custom Query');
+    $nav = $this->buildBaseSideNav();
 
     $this->view = $nav->selectFilter($this->view, 'action');
 

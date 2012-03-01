@@ -411,6 +411,18 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/core/behavior-buoyant.js',
   ),
+  'javelin-behavior-burn-chart' =>
+  array(
+    'uri' => '/res/ed1bf018/rsrc/js/application/maniphest/behavior-burn-chart.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-vector',
+    ),
+    'disk' => '/rsrc/js/application/maniphest/behavior-burn-chart.js',
+  ),
   'javelin-behavior-countdown-timer' =>
   array(
     'uri' => '/res/5ee9cb13/rsrc/js/application/countdown/timer.js',
@@ -1319,6 +1331,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/maniphest/batch-editor.css',
   ),
+  'maniphest-report-css' =>
+  array(
+    'uri' => '/res/2e633fcf/rsrc/css/application/maniphest/report.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/maniphest/report.css',
+  ),
   'maniphest-task-edit-css' =>
   array(
     'uri' => '/res/68c7863e/rsrc/css/application/maniphest/task-edit.css',
@@ -1637,6 +1658,17 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/slowvote/slowvote.css',
   ),
+  0 =>
+  array(
+    'uri' => '/res/b6096fdd/rsrc/js/javelin/lib/__tests__/URI.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-uri',
+      1 => 'javelin-php-serializer',
+    ),
+    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
+  ),
   'phabricator-standard-page-view' =>
   array(
     'uri' => '/res/7e09bbfc/rsrc/css/application/base/standard-page-view.css',
@@ -1859,17 +1891,6 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/core/syntax.css',
-  ),
-  0 =>
-  array(
-    'uri' => '/res/b6096fdd/rsrc/js/javelin/lib/__tests__/URI.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-uri',
-      1 => 'javelin-php-serializer',
-    ),
-    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
   ),
 ), array(
   'packages' =>

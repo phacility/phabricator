@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,17 @@ final class ManiphestTaskPriority extends ManiphestConstants {
       self::PRIORITY_NORMAL       => 'Normal',
       self::PRIORITY_LOW          => 'Low',
       self::PRIORITY_WISH         => 'Wishlist',
+    );
+  }
+
+  public static function getLoadMap() {
+    return array(
+      self::PRIORITY_UNBREAK_NOW  => 16,
+      self::PRIORITY_TRIAGE       => 8,
+      self::PRIORITY_HIGH         => 4,
+      self::PRIORITY_NORMAL       => 2,
+      self::PRIORITY_LOW          => 1,
+      self::PRIORITY_WISH         => 0,
     );
   }
 

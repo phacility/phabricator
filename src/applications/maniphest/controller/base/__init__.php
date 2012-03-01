@@ -9,7 +9,9 @@
 phutil_require_module('phabricator', 'aphront/response/webpage');
 phutil_require_module('phabricator', 'applications/base/controller/base');
 phutil_require_module('phabricator', 'applications/search/constants/scope');
+phutil_require_module('phabricator', 'view/layout/sidenavfilter');
 
+phutil_require_module('phutil', 'parser/uri');
 phutil_require_module('phutil', 'utils');
 
 
