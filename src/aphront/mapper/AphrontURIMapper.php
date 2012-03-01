@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 /**
  * @group aphront
@@ -47,7 +46,8 @@ final class AphrontURIMapper {
 
   final private function tryRule($rule, $value, $path) {
     $match = null;
-    if (!preg_match('#^'.$rule.'#', $path, $match)) {
+    $pattern = '#^'.$rule.(is_array($value) ? '' : '$').'#';
+    if (!preg_match($pattern, $path, $match)) {
       return array(null, null);
     }
 
