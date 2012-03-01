@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,9 +110,12 @@ abstract class DiffusionFileContentQuery {
           $commit->getEpoch();
       }
 
-      $commits_data = id(new PhabricatorRepositoryCommitData())->loadAllWhere(
-        'commitID IN (%Ls)',
-        mpull($commits, 'getID'));
+      $commits_data = array();
+      if ($commits) {
+        $commits_data = id(new PhabricatorRepositoryCommitData())->loadAllWhere(
+          'commitID IN (%Ls)',
+          mpull($commits, 'getID'));
+      }
 
       $phids = array();
       foreach ($commits_data as $data) {
