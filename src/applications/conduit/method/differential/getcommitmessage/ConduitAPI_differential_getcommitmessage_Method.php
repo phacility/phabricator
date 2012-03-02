@@ -138,7 +138,7 @@ class ConduitAPI_differential_getcommitmessage_Method extends ConduitAPIMethod {
     }
     $commit_message = implode("\n\n", $commit_message);
 
-    return wordwrap($commit_message, 80);
+    return $commit_message;
   }
 
 }
