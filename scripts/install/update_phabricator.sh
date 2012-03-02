@@ -58,7 +58,6 @@ sudo /etc/init.d/httpd start
 # your system.
 
 # $ROOT/phabricator/bin/phd repository-launch-master
-# $ROOT/phabricator/bin/phd launch metamta
 # $ROOT/phabricator/bin/phd launch garbagecollector
 # $ROOT/phabricator/bin/phd launch 4 taskmaster
 # $ROOT/phabricator/bin/phd launch ircbot /config/bot.json
