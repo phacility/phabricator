@@ -192,7 +192,7 @@ class ManiphestTaskDetailController extends ManiphestController {
         '</div>'.
       '</div>';
 
-    require_celerity_resource('mainphest-task-detail-css');
+    require_celerity_resource('maniphest-task-detail-css');
 
     $table = array();
     foreach ($dict as $key => $value) {

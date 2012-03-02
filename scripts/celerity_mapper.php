@@ -2,7 +2,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,10 @@ $package_spec = array(
     'javelin-behavior-phabricator-keyboard-shortcuts',
     'javelin-behavior-refresh-csrf',
     'javelin-behavior-phabricator-watch-anchor',
+    'javelin-behavior-phabricator-autofocus',
+    'phabricator-paste-file-upload',
+    'phabricator-menu-item',
+    'phabricator-dropdown-menu',
   ),
   'core.pkg.css' => array(
     'phabricator-core-css',
@@ -65,9 +69,13 @@ $package_spec = array(
     'aphront-list-filter-view-css',
 
     'phabricator-directory-css',
+    'phabricator-jump-nav',
+    'phabricator-app-buttons-css',
 
     'phabricator-remarkup-css',
     'syntax-highlighting-css',
+    'aphront-pager-view-css',
+    'phabricator-transaction-view-css',
   ),
   'differential.pkg.css' => array(
     'differential-core-view-css',
@@ -101,9 +109,23 @@ $package_spec = array(
     'javelin-behavior-phabricator-object-selector',
 
     'differential-inline-comment-editor',
+    'javelin-behavior-differential-dropdown-menus',
+    'javelin-behavior-buoyant',
   ),
   'diffusion.pkg.css' => array(
     'diffusion-commit-view-css',
+  ),
+  'maniphest.pkg.css' => array(
+    'maniphest-task-summary-css',
+    'maniphest-transaction-detail-css',
+    'maniphest-task-detail-css',
+    'aphront-attached-file-view-css',
+  ),
+  'maniphest.pkg.js' => array(
+    'javelin-behavior-maniphest-batch-selector',
+    'javelin-behavior-maniphest-transaction-controls',
+    'javelin-behavior-maniphest-transaction-preview',
+    'javelin-behavior-maniphest-transaction-expand',
   ),
 );
 
