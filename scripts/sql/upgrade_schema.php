@@ -2,7 +2,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,14 @@ phutil_require_module('phabricator', 'infrastructure/setup/sql');
 define('SCHEMA_VERSION_TABLE_NAME', 'schema_version');
 
 // TODO: getopt() is super terrible, move to something less terrible.
-$options = getopt('fhv:u:p:') + array(
+$options = getopt('fhdv:u:p:m:') + array(
   'v' => null, // Upgrade from specific version
   'u' => null, // Override MySQL User
   'p' => null, // Override MySQL Pass
+  'm' => null, // Specify max version to upgrade to
 );
 
-foreach (array('h', 'f') as $key) {
+foreach (array('h', 'f', 'd') as $key) {
   // By default, these keys are set to 'false' to indicate that the flag was
   // passed.
   if (array_key_exists($key, $options)) {
@@ -40,11 +41,12 @@ foreach (array('h', 'f') as $key) {
   }
 }
 
-if (!empty($options['h']) || ($options['v'] && !is_numeric($options['v']))) {
+if (!empty($options['h']) || ($options['v'] && !is_numeric($options['v']))
+    || ($options['m'] && !is_numeric($options['m']))) {
   usage();
 }
 
-if (empty($options['f'])) {
+if (empty($options['f']) && empty($options['d'])) {
   echo phutil_console_wrap(
     "Before running this script, you should take down the Phabricator web ".
     "interface and stop any running Phabricator daemons.");
@@ -57,6 +59,7 @@ if (empty($options['f'])) {
 
 // Use always the version from the commandline if it is defined
 $next_version = isset($options['v']) ? (int)$options['v'] : null;
+$max_version = isset($options['m']) ? (int)$options['m'] : null;
 
 $conf = DatabaseConfigurationProvider::getConfiguration();
 
@@ -127,8 +130,17 @@ END;
       continue;
     }
 
+    if ($max_version && $patch['version'] > $max_version) {
+      continue;
+    }
+
     $short_name = basename($patch['path']);
     print "Applying patch {$short_name}...\n";
+
+    if (!empty($options['d'])) {
+      $patch_applied = true;
+      continue;
+    }
 
     if ($conn_port) {
       $port = '--port='.(int)$conn_port;
@@ -193,7 +205,11 @@ function usage() {
     "default user.\n".
     "Run 'upgrade_schema.php -v 12' to apply all patches starting from ".
     "version 12. It is very unlikely you need to do this.\n".
+    "Run 'upgrade_schema.php -m 110' to apply all patches up to and ".
+    "including version 110 (but nothing past).\n".
     "Use the -f flag to upgrade noninteractively, without prompting.\n".
+    "Use the -d flag to do a dry run - patches that would be applied ".
+    "will be listed, but not applied.\n".
     "Use the -h flag to show this help.\n";
   exit(1);
 }
