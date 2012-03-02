@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'aphront/response/webpage');
 phutil_require_module('phabricator', 'applications/base/controller/base');
+phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'view/form/error');
 phutil_require_module('phabricator', 'view/layout/sidenavfilter');
 

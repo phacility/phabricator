@@ -54,6 +54,9 @@ extends PhabricatorOAuthClientAuthorizationBaseController {
                                       $current_user);
       $updated = phabricator_datetime($authorization->getDateModified(),
         $current_user);
+      $scope_doc_href = PhabricatorEnv::getDoclink(
+        'article/Using_the_Phabricator_OAuth_Server.html#scopes'
+      );
       $row = array(
         phutil_render_tag(
           'a',
@@ -65,7 +68,7 @@ extends PhabricatorOAuthClientAuthorizationBaseController {
         phutil_render_tag(
           'a',
           array(
-            'href' => 'TODO - link to scope about',
+            'href' => $scope_doc_href,
           ),
           $authorization->getScopeString()
         ),

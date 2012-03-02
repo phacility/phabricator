@@ -47,6 +47,17 @@ extends PhabricatorController {
     $nav->appendChild($view);
 
     $page->appendChild($nav);
+    $doc_href = PhabricatorEnv::getDoclink(
+      'article/Using_the_Phabricator_OAuth_Server.html'
+    );
+    $page->setTabs(
+      array(
+        'help' => array(
+          'name' => 'Help',
+          'href' => $doc_href,
+        ),
+      ),
+      null);
 
     $response = new AphrontWebpageResponse();
     return $response->setContent($page->render());
