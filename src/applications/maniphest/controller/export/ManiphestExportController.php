@@ -29,24 +29,31 @@ final class ManiphestExportController extends ManiphestController {
   }
 
   /**
-   * @phutil-external-symbol class Spreadsheet_Excel_Writer
+   * @phutil-external-symbol class PHPExcel
+   * @phutil-external-symbol class PHPExcel_IOFactory
+   * @phutil-external-symbol class PHPExcel_Style_NumberFormat
    */
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $ok = @include_once 'Spreadsheet/Excel/Writer.php';
+    $ok = @include_once 'PHPExcel.php';
     if (!$ok) {
       $dialog = new AphrontDialogView();
       $dialog->setUser($user);
 
       $dialog->setTitle('Excel Export Not Configured');
       $dialog->appendChild(
-        '<p>This system does not have Spreadsheet_Excel_Writer installed. '.
-        'This software component is required to export tasks to Excel. Have '.
-        'your system administrator install it with:</p>'.
+        '<p>This system does not have PHPExcel installed. This software '.
+        'component is required to export tasks to Excel. Have your system '.
+        'administrator install it from:</p>'.
         '<br />'.
-        '<p><code>$ sudo pear install Spreadsheet_Excel_Writer</code></p>');
+        '<p>'.
+          '<a href="http://www.phpexcel.net/">http://www.phpexcel.net/</a>'.
+        '</p>'.
+        '<br />'.
+        '<p>Your PHP "include_path" needs to be updated to include the '.
+        'PHPExcel Classes/ directory.</p>');
 
       $dialog->addCancelButton('/maniphest/');
       return id(new AphrontDialogResponse())->setDialog($dialog);
@@ -87,33 +94,34 @@ final class ManiphestExportController extends ManiphestController {
       ->loadHandles();
     $handles += $project_handles;
 
-    $workbook = new Spreadsheet_Excel_Writer();
-    $sheet = $workbook->addWorksheet('Exported Maniphest Tasks');
+    $workbook = new PHPExcel();
 
-    $date_format = $workbook->addFormat();
-    $date_format->setNumFormat('M/D/YYYY h:mm AM/PM');
+    $sheet = $workbook->setActiveSheetIndex(0);
+    $sheet->setTitle('Tasks');
 
     $widths = array(
       null,
-      20,
-      null,
       15,
-      20,
-      20,
-      75,
-      40,
+      null,
+      10,
+      15,
+      15,
+      60,
       30,
-      400,
+      20,
+      100,
     );
 
     foreach ($widths as $col => $width) {
       if ($width !== null) {
-        $sheet->setColumn($col, $col, $width);
+        $sheet->getColumnDimension($this->col($col))->setWidth($width);
       }
     }
 
     $status_map = ManiphestTaskStatus::getTaskStatusMap();
     $pri_map = ManiphestTaskPriority::getTaskPriorityMap();
+
+    $date_format = null;
 
     $rows = array();
     $rows[] = array(
@@ -128,21 +136,25 @@ final class ManiphestExportController extends ManiphestController {
       'URI',
       'Description',
     );
-    $formats = array(
-      null,
-      null,
-      null,
-      null,
-      $date_format,
-      $date_format,
-      null,
-      null,
-      null,
-      null,
+
+    $is_date = array(
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
     );
 
-    $header_format = $workbook->addFormat();
-    $header_format->setBold();
+    $header_format = array(
+      'font'  => array(
+        'bold' => true,
+      ),
+    );
 
     foreach ($tasks as $task) {
       $task_owner = null;
@@ -166,28 +178,40 @@ final class ManiphestExportController extends ManiphestController {
         $task->getTitle(),
         $projects,
         PhabricatorEnv::getProductionURI('/T'.$task->getID()),
-        $task->getDescription(),
+        phutil_utf8_shorten($task->getDescription(), 512),
       );
     }
 
     foreach ($rows as $row => $cols) {
       foreach ($cols as $col => $spec) {
+        $cell_name = $this->col($col).($row + 1);
+        $sheet->setCellValue($cell_name, $spec);
+
         if ($row == 0) {
-          $fmt = $header_format;
-        } else {
-          $fmt = $formats[$col];
+          $sheet->getStyle($cell_name)->applyFromArray($header_format);
         }
-        $sheet->write($row, $col, $spec, $fmt);
+
+        if ($is_date[$col]) {
+          $code = PHPExcel_Style_NumberFormat::FORMAT_DATE_YYYYMMDD2;
+          $sheet
+            ->getStyle($cell_name)
+            ->getNumberFormat()
+            ->setFormatCode($code);
+        }
       }
     }
 
+    $writer = PHPExcel_IOFactory::createWriter($workbook, 'Excel2007');
+
     ob_start();
-    $workbook->close();
+    $writer->save('php://output');
     $data = ob_get_clean();
 
+    $mime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
     return id(new AphrontFileResponse())
-      ->setMimeType('application/vnd.ms-excel')
-      ->setDownload('maniphest_tasks_'.date('Ymd').'.xls')
+      ->setMimeType($mime)
+      ->setDownload('maniphest_tasks_'.date('Ymd').'.xlsx')
       ->setContent($data);
   }
 
@@ -196,6 +220,10 @@ final class ManiphestExportController extends ManiphestController {
     $offset = ($seconds_per_day * 25569);
 
     return ($epoch + $offset) / $seconds_per_day;
+  }
+
+  private function col($n) {
+    return chr(ord('A') + $n);
   }
 
 }
