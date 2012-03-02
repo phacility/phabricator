@@ -199,8 +199,6 @@ MANAGE HERALD DIFFERENTIAL RULES
 WHY DID I GET THIS EMAIL?
   {$xscript_uri}
 
-Tip: use the X-Herald-Rules header to filter Herald messages in your client.
-
 EOTEXT;
     }
 
