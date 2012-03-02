@@ -101,10 +101,12 @@ final class DifferentialRevisionStatsView extends AphrontView {
     }
 
     $old_count = 0;
-    foreach ($dates as $age => $cutoff) {
+    foreach (array_reverse($dates) as $age => $cutoff) {
       $weeks = ($now - $cutoff + 0.) / (7 * 60 * 60 * 24);
-      if ($old_count == $counts[$age]) {
-        continue;
+      if ($old_count == $counts[$age] && count($row_array) == 1) {
+        end($row_array);
+        unset($dates[key($row_array)]);
+        $row_array = array();
       }
       $old_count = $counts[$age];
 
