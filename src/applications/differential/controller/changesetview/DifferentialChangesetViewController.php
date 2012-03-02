@@ -130,7 +130,7 @@ class DifferentialChangesetViewController extends DifferentialController {
     }
 
     $coverage = null;
-    if ($right->getDiffID()) {
+    if ($right && $right->getDiffID()) {
       $unit = id(new DifferentialDiffProperty())->loadOneWhere(
         'diffID = %d AND name = %s',
         $right->getDiffID(),
