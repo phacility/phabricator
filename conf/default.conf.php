@@ -231,9 +231,19 @@ return array(
   'metamta.differential.subject-prefix' => '[Differential]',
 
   // Set this to true if you want patches to be attached to mail from
-  // Differential.  This won't work if you are using SendGrid as your mail
+  // Differential. This won't work if you are using SendGrid as your mail
   // adapter.
   'metamta.differential.attach-patches' => false,
+
+  // To include patches in email bodies, set this to a positive integer. Patches
+  // will be inlined if they are at most that many lines. For instance, a value
+  // of 100 means "inline patches if they are no longer than 100 lines". By
+  // default, patches are not inlined.
+  'metamta.differential.inline-patches' => 0,
+
+  // If you enable either of the options above, you can choose what format
+  // patches are sent in. Valid options are 'unified' (like diff -u) or 'git'.
+  'metamta.differential.patch-format'   => 'unified',
 
   // Prefix prepended to mail sent by Diffusion.
   'metamta.diffusion.subject-prefix' => '[Diffusion]',

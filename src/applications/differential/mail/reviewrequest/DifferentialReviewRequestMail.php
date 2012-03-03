@@ -77,41 +77,64 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
       $body[] = null;
     }
 
+    $inline_key = 'metamta.differential.inline-patches';
+    $inline_max_length = PhabricatorEnv::getEnvConfig($inline_key);
+    if ($inline_max_length) {
+      $patch = $this->buildPatch();
+      if (count(explode("\n", $patch)) <= $inline_max_length) {
+        $body[] = 'CHANGE DETAILS';
+        $body[] = $patch;
+      }
+    }
+
     return implode("\n", $body);
   }
 
   protected function buildAttachments() {
     $attachments = array();
+
     if (PhabricatorEnv::getEnvConfig('metamta.differential.attach-patches')) {
-      $revision = $this->getRevision();
-      $revision_id = $revision->getID();
-
-      $diffs = $revision->loadDiffs();
-      $diff_number = count($diffs);
-      $diff = array_pop($diffs);
-
-      $filename = "D{$revision_id}.{$diff_number}.patch";
-
-      $diff->attachChangesets($diff->loadChangesets());
-      // TODO: We could batch this to improve performance.
-      foreach ($diff->getChangesets() as $changeset) {
-        $changeset->attachHunks($changeset->loadHunks());
-      }
-      $diff_dict = $diff->getDiffDict();
-
-      $changes = array();
-      foreach ($diff_dict['changes'] as $changedict) {
-        $changes[] = ArcanistDiffChange::newFromDictionary($changedict);
-      }
-      $bundle = ArcanistBundle::newFromChanges($changes);
-      $unified_diff = $bundle->toUnifiedDiff();
-
       $attachments[] = new PhabricatorMetaMTAAttachment(
-        $unified_diff,
-        $filename,
+        $this->buildPatch(),
+        "D{$revision_id}.{$diff_number}.patch",
         'text/x-patch; charset=utf-8'
       );
     }
+
     return $attachments;
   }
+
+  private function buildPatch() {
+    $revision = $this->getRevision();
+    $revision_id = $revision->getID();
+
+    $diffs = $revision->loadDiffs();
+    $diff_number = count($diffs);
+    $diff = array_pop($diffs);
+
+    $diff->attachChangesets($diff->loadChangesets());
+    // TODO: We could batch this to improve performance.
+    foreach ($diff->getChangesets() as $changeset) {
+      $changeset->attachHunks($changeset->loadHunks());
+    }
+    $diff_dict = $diff->getDiffDict();
+
+    $changes = array();
+    foreach ($diff_dict['changes'] as $changedict) {
+      $changes[] = ArcanistDiffChange::newFromDictionary($changedict);
+    }
+    $bundle = ArcanistBundle::newFromChanges($changes);
+
+    $format = PhabricatorEnv::getEnvConfig('metamta.differential.patch-format');
+    switch ($format) {
+      case 'git':
+        return $bundle->toGitPatch();
+        break;
+      case 'unified':
+      default:
+        return $bundle->toUnifiedDiff();
+        break;
+    }
+  }
+
 }
