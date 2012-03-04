@@ -30,6 +30,8 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
   public function processRequest() {
     $request = $this->getRequest();
 
+    $nav = $this->buildNavAndSelectFilter();
+
     if ($request->isFormPost()) {
       // If the list filter is POST'ed, redirect to GET so the page can be
       // bookmarked.
@@ -51,7 +53,6 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
       return id(new AphrontRedirectResponse())->setURI($uri);
     }
 
-    $nav = $this->buildNavAndSelectFilter();
     $this->filterStatus = $request->getStr('status', 'all');
     $handle = $this->loadHandle();
 
