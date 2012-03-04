@@ -329,7 +329,7 @@ class DifferentialRevisionListController extends DifferentialController {
           ->setBaseURI($uri, 'order')
           ->setButtons(
             array(
-              'modified'  => 'Modified',
+              'modified'  => 'Updated',
               'created'   => 'Created',
             ));
       default:
