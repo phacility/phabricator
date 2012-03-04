@@ -18,7 +18,7 @@ formatting text in Remarkup.
 
 These are inline styles, and can be applied to most text:
 
-  **bold** //italic// ##monospaced##
+  **bold** //italic// ##monospaced## `monospaced`
   D123 T123 rX123           # Link to Objects
   {D123} {T123}             # Link to Objects (Full Name)
   {F123}                    # Embed Images
@@ -46,9 +46,10 @@ Format **basic text styles** like this:
   **bold text**
   //italic text//
   ##monospaced text##
+  `monospaced text`
 
-Those produce **bold text**, //italic text// and ##monospaced text##,
-respectively.
+Those produce **bold text**, //italic text//, ##monospaced text## and
+`monospaced text`, respectively.
 
 = Layout =
 
