@@ -33,11 +33,13 @@ class DifferentialRevisionListController extends DifferentialController {
     $user = $request->getUser();
     $viewer_is_anonymous = !$user->isLoggedIn();
 
-    if ($request->isFormPost()) {
-      $phid_arr = $request->getArr('view_user');
+    $phid_arr = $request->getArr('view_user');
+    if ($phid_arr) {
       $view_target = head($phid_arr);
       return id(new AphrontRedirectResponse())
-        ->setURI($request->getRequestURI()->alter('phid', $view_target));
+        ->setURI($request->getRequestURI()
+          ->alter('phid', $view_target)
+          ->setQueryParam('view_user', null));
     }
 
     $params = array_filter(
@@ -149,6 +151,7 @@ class DifferentialRevisionListController extends DifferentialController {
     }
 
     $filter_form = id(new AphrontFormView())
+      ->setMethod('GET')
       ->setAction('/differential/filter/'.$this->filter.'/')
       ->setUser($user);
     foreach ($controls as $control) {
