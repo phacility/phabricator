@@ -19,6 +19,7 @@
 final class DifferentialReviewersFieldSpecification
   extends DifferentialFieldSpecification {
 
+  private $primaryReviewers = array();
   private $reviewers;
   private $error;
 
@@ -149,15 +150,16 @@ final class DifferentialReviewersFieldSpecification
   }
 
   public function renderValueForRevisionList(DifferentialRevision $revision) {
-    $reviewer_phids = $revision->getReviewers();
-    if ($reviewer_phids) {
-      $first = reset($reviewer_phids);
-      if (count($reviewer_phids) > 1) {
-        $suffix = ' (+'.(count($reviewer_phids) - 1).')';
+    if (isset($this->primaryReviewers[$revision->getID()])) {
+      $primary_reviewer = $this->primaryReviewers[$revision->getID()];
+      $other_reviewers = array_flip($revision->getReviewers());
+      unset($other_reviewers[$primary_reviewer]);
+      if ($other_reviewers) {
+        $suffix = ' (+'.(count($other_reviewers)).')';
       } else {
         $suffix = null;
       }
-      return $this->getHandle($first)->renderLink().$suffix;
+      return $this->getHandle($primary_reviewer)->renderLink().$suffix;
     } else {
       return '<em>None</em>';
     }
@@ -165,9 +167,14 @@ final class DifferentialReviewersFieldSpecification
 
   public function getRequiredHandlePHIDsForRevisionList(
     DifferentialRevision $revision) {
-    $reviewer_phids = $revision->getReviewers();
-    if ($reviewer_phids) {
-      return array(reset($reviewer_phids));
+    $primary_reviewer = $revision->loadReviewedBy();
+    if (!$primary_reviewer) {
+      $reviewer_phids = $revision->getReviewers();
+      $primary_reviewer = reset($reviewer_phids);
+    }
+    if ($primary_reviewer) {
+      $this->primaryReviewers[$revision->getID()] = $primary_reviewer;
+      return array($primary_reviewer);
     }
     return array();
   }
