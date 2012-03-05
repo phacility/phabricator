@@ -386,6 +386,12 @@ class DifferentialCommentEditor {
         throw new Exception('Unsupported action.');
     }
 
+    // Update information about reviewer in charge.
+    if ($action == DifferentialAction::ACTION_ACCEPT ||
+        $action == DifferentialAction::ACTION_REJECT) {
+      $revision->setLastReviewerPHID($actor_phid);
+    }
+
     // Always save the revision (even if we didn't actually change any of its
     // properties) so that it jumps to the top of the revision list when sorted
     // by "updated". Notably, this allows "ping" comments to push it to the

@@ -26,6 +26,7 @@ class DifferentialRevision extends DifferentialDAO {
 
   protected $phid;
   protected $authorPHID;
+  protected $lastReviewerPHID;
 
   protected $dateCommitted;
 
