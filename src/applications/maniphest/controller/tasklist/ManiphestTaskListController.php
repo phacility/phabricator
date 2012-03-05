@@ -219,8 +219,11 @@ class ManiphestTaskListController extends ManiphestController {
 
     require_celerity_resource('maniphest-task-summary-css');
 
+    $list_container = new AphrontNullView();
+    $list_container->appendChild('<div class="maniphest-list-container">');
+
     if (!$have_tasks) {
-      $nav->appendChild(
+      $list_container->appendChild(
         '<h1 class="maniphest-task-group-header">'.
           'No matching tasks.'.
         '</h1>');
@@ -239,7 +242,7 @@ class ManiphestTaskListController extends ManiphestController {
       $max = number_format($max);
       $tot = number_format($tot);
 
-      $nav->appendChild(
+      $list_container->appendChild(
         '<div class="maniphest-total-result-count">'.
           "Displaying tasks {$cur} - {$max} of {$tot}.".
         '</div>');
@@ -272,9 +275,12 @@ class ManiphestTaskListController extends ManiphestController {
         ),
         $selector->render());
 
-      $nav->appendChild($selector);
-      $nav->appendChild($pager);
+      $list_container->appendChild($selector);
+      $list_container->appendChild($pager);
     }
+
+    $list_container->appendChild('</div>');
+    $nav->appendChild($list_container);
 
     return $this->buildStandardPageResponse(
       $nav,

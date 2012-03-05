@@ -12,7 +12,7 @@
 }
 
 .maniphest-task-summary td {
-  padding: 4px 0.5%;
+  padding: 4px 6px;
   background: #f6f6f6;
   white-space: nowrap;
 
@@ -112,7 +112,7 @@
 
 .maniphest-task-group-header {
   font-size: 18px;
-  margin: 1em 14px 0;
+  margin: 1em 0;
   border-bottom: 1px solid #dddddd;
 }
 
@@ -160,4 +160,8 @@
   font-size: 11px;
   vertical-align: middle;
   width: 100%;
+}
+
+.maniphest-list-container {
+  padding: 0 1em;
 }
