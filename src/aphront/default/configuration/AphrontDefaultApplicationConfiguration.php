@@ -328,11 +328,6 @@ class AphrontDefaultApplicationConfiguration
         'new/' => 'PhabricatorOwnersEditController',
         'package/(?P<id>\d+)/' => 'PhabricatorOwnersDetailController',
         'delete/(?P<id>\d+)/' => 'PhabricatorOwnersDeleteController',
-        '(?P<scope>related|attention)/' => array(
-          '' => 'PhabricatorOwnerRelatedListController',
-          '(?P<view>package|owner)/'
-            => 'PhabricatorOwnerRelatedListController',
-        ),
       ),
 
       '/audit/' => array(
