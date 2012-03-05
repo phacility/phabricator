@@ -115,13 +115,18 @@ extends PhabricatorAuthController {
         $scope = PhabricatorOAuthServerScope::scopesListToDict($scope);
       }
 
-      $authorization = $server->userHasAuthorizedClient($scope);
-      if ($authorization) {
+      list($is_authorized,
+           $authorization) = $server->userHasAuthorizedClient($scope);
+      if ($is_authorized) {
         $return_auth_code = true;
         $unguarded_write  = AphrontWriteGuard::beginScopedUnguardedWrites();
       } else if ($request->isFormPost()) {
         $scope = PhabricatorOAuthServerScope::getScopesFromRequest($request);
-        $authorization    = $server->authorizeClient($scope);
+        if ($authorization) {
+          $authorization->setScope($scope)->save();
+        } else {
+          $authorization  = $server->authorizeClient($scope);
+        }
         $return_auth_code = true;
         $unguarded_write  = null;
       } else {
@@ -140,7 +145,7 @@ extends PhabricatorAuthController {
           'scope' => $authorization->getScopeString(),
         );
         $response->setContent($content);
-        return $response->setClientURI($uri);
+        return $response;
       }
       unset($unguarded_write);
     } catch (Exception $e) {
@@ -167,7 +172,12 @@ extends PhabricatorAuthController {
       "Phabricator account data?";
 
     if ($scope) {
-      $desired_scopes = $scope;
+      if ($authorization) {
+        $desired_scopes = array_merge($scope,
+                                      $authorization->getScope());
+      } else {
+        $desired_scopes = $scope;
+      }
       if (!PhabricatorOAuthServerScope::validateScopesDict($desired_scopes)) {
         $response->setError('invalid_scope');
         $response->setErrorDescription(
@@ -182,7 +192,7 @@ extends PhabricatorAuthController {
       );
     }
 
-    $cancel_uri = $this->getClientURI($client, $redirect_uri);
+    $cancel_uri = clone $uri;
     $cancel_params = array(
       'error' => 'access_denied',
       'error_description' =>
@@ -197,7 +207,7 @@ extends PhabricatorAuthController {
         ->setValue($description)
       )
       ->appendChild(
-        PhabricatorOAuthServerScope::getCheckboxControl()
+        PhabricatorOAuthServerScope::getCheckboxControl($desired_scopes)
       )
       ->appendChild(
         id(new AphrontFormSubmitControl())

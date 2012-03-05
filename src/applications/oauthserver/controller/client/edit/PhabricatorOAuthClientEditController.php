@@ -109,6 +109,8 @@ extends PhabricatorOAuthClientBaseController {
         $bad_redirect = true;
       } else {
         $client->save();
+        // refresh the phid in case its a create
+        $phid = $client->getPHID();
         if ($this->isClientEdit()) {
           return id(new AphrontRedirectResponse())
             ->setURI('/oauthserver/client/?edited='.$phid);

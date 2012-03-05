@@ -110,8 +110,14 @@ final class PhabricatorOAuthServerScope {
     return empty($unknown_scopes);
   }
 
-  static public function scopesListToDict($scope_list) {
-    return array_fill_keys($scope_list, 1);
+  /**
+   * Transforms a space-delimited scopes list into a scopes dict. The list
+   * should be validated by @{method:validateScopesList} before
+   * transformation.
+   */
+   static public function scopesListToDict($scope_list) {
+    $scopes = explode(' ', $scope_list);
+    return array_fill_keys($scopes, 1);
   }
 
 }

@@ -84,6 +84,7 @@ final class PhabricatorOAuthServer {
 
   /**
    * @task auth
+   * @return tuple <bool hasAuthorized, ClientAuthorization or null>
    */
   public function userHasAuthorizedClient(array $scope) {
 
@@ -91,6 +92,9 @@ final class PhabricatorOAuthServer {
       loadOneWhere('userPHID = %s AND clientPHID = %s',
                    $this->getUser()->getPHID(),
                    $this->getClient()->getPHID());
+    if (empty($authorization)) {
+      return array(false, null);
+    }
 
     if ($scope) {
       $missing_scope = array_diff_key($scope,
@@ -100,10 +104,10 @@ final class PhabricatorOAuthServer {
     }
 
     if ($missing_scope) {
-      return false;
+      return array(false, $authorization);
     }
 
-    return $authorization;
+    return array(true, $authorization);
   }
 
   /**
