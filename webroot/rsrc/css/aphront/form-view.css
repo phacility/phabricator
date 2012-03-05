@@ -83,6 +83,11 @@
   margin-left: 20%;
 }
 
+/* override for when inside an aphront-panel-view */
+.aphront-panel-view .aphront-form-view h1 {
+  padding: 0em 0em .8em 0em;
+}
+
 .aphront-form-instructions {
   margin: 0.75em 3% 1.25em;
 }
