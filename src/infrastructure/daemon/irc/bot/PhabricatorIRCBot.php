@@ -76,6 +76,12 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
       $conduit_user = idx($config, 'conduit.user');
       $conduit_cert = idx($config, 'conduit.cert');
 
+      // Normalize the path component of the URI so users can enter the
+      // domain without the "/api/" part.
+      $conduit_uri = new PhutilURI($conduit_uri);
+      $conduit_uri->setPath('/api/');
+      $conduit_uri = (string)$conduit_uri;
+
       $conduit = new ConduitClient($conduit_uri);
       $response = $conduit->callMethodSynchronous(
         'conduit.connect',
