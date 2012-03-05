@@ -16,7 +16,7 @@ phutil_require_module('phabricator', 'applications/herald/storage/transcript/app
 phutil_require_module('phabricator', 'applications/owners/query/path');
 phutil_require_module('phabricator', 'applications/owners/storage/owner');
 phutil_require_module('phabricator', 'applications/owners/storage/package');
-phutil_require_module('phabricator', 'applications/owners/storage/packagecommitrelationship');
+phutil_require_module('phabricator', 'applications/repository/storage/auditrequest');
 
 phutil_require_module('phutil', 'utils');
 

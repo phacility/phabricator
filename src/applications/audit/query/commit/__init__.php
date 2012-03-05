@@ -7,7 +7,7 @@
 
 
 phutil_require_module('phabricator', 'applications/audit/constants/commitstatus');
-phutil_require_module('phabricator', 'applications/owners/storage/packagecommitrelationship');
+phutil_require_module('phabricator', 'applications/repository/storage/auditrequest');
 phutil_require_module('phabricator', 'applications/repository/storage/commit');
 phutil_require_module('phabricator', 'applications/repository/storage/commitdata');
 phutil_require_module('phabricator', 'storage/qsprintf');

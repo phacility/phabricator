@@ -51,7 +51,7 @@ final class PhabricatorAuditListView extends AphrontView {
     $phids = array();
     foreach ($this->audits as $audit) {
       $phids[$audit->getCommitPHID()] = true;
-      $phids[$audit->getPackagePHID()] = true;
+      $phids[$audit->getAuditorPHID()] = true;
     }
     return array_keys($phids);
   }
@@ -90,7 +90,7 @@ final class PhabricatorAuditListView extends AphrontView {
       $status_code = $audit->getAuditStatus();
       $status = PhabricatorAuditStatusConstants::getStatusName($status_code);
 
-      $auditor_handle = $this->getHandle($audit->getPackagePHID());
+      $auditor_handle = $this->getHandle($audit->getAuditorPHID());
       $rows[] = array(
         $commit_name,
         $auditor_handle->renderLink(),
@@ -98,7 +98,7 @@ final class PhabricatorAuditListView extends AphrontView {
         $reasons,
       );
 
-      if (empty($authority[$audit->getPackagePHID()])) {
+      if (empty($authority[$audit->getAuditorPHID()])) {
         $rowc[] = null;
       } else {
         $rowc[] = 'highlighted';

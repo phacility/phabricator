@@ -85,13 +85,13 @@ class PhabricatorRepositoryCommit extends PhabricatorRepositoryDAO {
    * Synchronize a commit's overall audit status with the individual audit
    * triggers.
    */
-  public function updateAuditStatus(array $rships) {
+  public function updateAuditStatus(array $requests) {
     $any_concern = false;
     $any_accept = false;
     $any_need = false;
 
-    foreach ($rships as $rship) {
-      switch ($rship->getAuditStatus()) {
+    foreach ($requests as $request) {
+      switch ($request->getAuditStatus()) {
         case PhabricatorAuditStatusConstants::AUDIT_REQUIRED:
           $any_need = true;
           break;

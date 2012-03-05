@@ -173,16 +173,16 @@ EOBODY;
     array $map,
     array $rules) {
 
-    $table = new PhabricatorOwnersPackageCommitRelationship();
-    $rships = $table->loadAllWhere(
+    $table = new PhabricatorRepositoryAuditRequest();
+    $requests = $table->loadAllWhere(
       'commitPHID = %s',
       $commit->getPHID());
-    $rships = mpull($rships, null, 'getPackagePHID');
+    $requests = mpull($requests, null, 'getAuditorPHID');
 
     $rules = mpull($rules, null, 'getID');
     foreach ($map as $phid => $rule_ids) {
-      $rship = idx($rships, $phid);
-      if ($rship) {
+      $request = idx($requests, $phid);
+      if ($request) {
         continue;
       }
       $reasons = array();
@@ -194,15 +194,15 @@ EOBODY;
         $reasons[] = 'Herald Rule #'.$id.' "'.$rule_name.'" Triggered Audit';
       }
 
-      $rship = new PhabricatorOwnersPackageCommitRelationship();
-      $rship->setCommitPHID($commit->getPHID());
-      $rship->setPackagePHID($phid);
-      $rship->setAuditStatus(PhabricatorAuditStatusConstants::AUDIT_REQUIRED);
-      $rship->setAuditReasons($reasons);
-      $rship->save();
+      $request = new PhabricatorRepositoryAuditRequest();
+      $request->setCommitPHID($commit->getPHID());
+      $request->setAuditorPHID($phid);
+      $request->setAuditStatus(PhabricatorAuditStatusConstants::AUDIT_REQUIRED);
+      $request->setAuditReasons($reasons);
+      $request->save();
     }
 
-    $commit->updateAuditStatus($rships);
+    $commit->updateAuditStatus($requests);
     $commit->save();
   }
 }

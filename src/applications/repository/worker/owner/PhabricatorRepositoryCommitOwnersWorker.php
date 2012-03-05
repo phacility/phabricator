@@ -30,44 +30,45 @@ class PhabricatorRepositoryCommitOwnersWorker
       $affected_paths);
 
     if ($affected_packages) {
-      $rships = id(new PhabricatorOwnersPackageCommitRelationship())
+      $requests = id(new PhabricatorRepositoryAuditRequest())
         ->loadAllWhere(
           'commitPHID = %s',
           $commit->getPHID());
-      $rships = mpull($rships, null, 'getPackagePHID');
+      $requests = mpull($requests, null, 'getAuditorPHID');
 
       foreach ($affected_packages as $package) {
-        $relationship = idx($rships, $package->getPHID());
-
-        // Don't update relationship if it exists already
-        if (!$relationship) {
-          if ($package->getAuditingEnabled()) {
-            $reasons = $this->checkAuditReasons($commit, $package);
-            if ($reasons) {
-              $audit_status =
-                PhabricatorAuditStatusConstants::AUDIT_REQUIRED;
-            } else {
-              $audit_status =
-                PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED;
-            }
-          } else {
-            $reasons = array();
-            $audit_status = PhabricatorAuditStatusConstants::NONE;
-          }
-
-          $relationship = new PhabricatorOwnersPackageCommitRelationship();
-          $relationship->setPackagePHID($package->getPHID());
-          $relationship->setCommitPHID($commit->getPHID());
-          $relationship->setAuditReasons($reasons);
-          $relationship->setAuditStatus($audit_status);
-
-          $relationship->save();
-
-          $rships[] = $relationship;
+        $request = idx($requests, $package->getPHID());
+        if ($request) {
+          // Don't update request if it exists already.
+          continue;
         }
+
+        if ($package->getAuditingEnabled()) {
+          $reasons = $this->checkAuditReasons($commit, $package);
+          if ($reasons) {
+            $audit_status =
+              PhabricatorAuditStatusConstants::AUDIT_REQUIRED;
+          } else {
+            $audit_status =
+              PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED;
+          }
+        } else {
+          $reasons = array();
+          $audit_status = PhabricatorAuditStatusConstants::NONE;
+        }
+
+        $relationship = new PhabricatorRepositoryAuditRequest();
+        $relationship->setAuditorPHID($package->getPHID());
+        $relationship->setCommitPHID($commit->getPHID());
+        $relationship->setAuditReasons($reasons);
+        $relationship->setAuditStatus($audit_status);
+
+        $relationship->save();
+
+        $requests[$package->getPHID()] = $relationship;
       }
 
-      $commit->updateAuditStatus($rships);
+      $commit->updateAuditStatus($requests);
       $commit->save();
     }
 

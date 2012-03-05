@@ -54,7 +54,7 @@ final class PhabricatorAuditQuery {
   }
 
   public function execute() {
-    $table = new PhabricatorOwnersPackageCommitRelationship();
+    $table = new PhabricatorRepositoryAuditRequest();
     $conn_r = $table->establishConnection('r');
 
     $where = $this->buildWhereClause($conn_r);
@@ -85,7 +85,7 @@ final class PhabricatorAuditQuery {
     if ($this->auditorPHIDs) {
       $where[] = qsprintf(
         $conn_r,
-        'packagePHID IN (%Ls)',
+        'auditorPHID IN (%Ls)',
         $this->auditorPHIDs);
     }
 

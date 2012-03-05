@@ -7,16 +7,16 @@
 
 
 phutil_require_module('phabricator', 'applications/audit/constants/action');
-phutil_require_module('phabricator', 'applications/feed/constants/story');
-phutil_require_module('phabricator', 'applications/feed/publisher');
 phutil_require_module('phabricator', 'applications/audit/constants/status');
 phutil_require_module('phabricator', 'applications/audit/storage/auditcomment');
+phutil_require_module('phabricator', 'applications/feed/constants/story');
+phutil_require_module('phabricator', 'applications/feed/publisher');
 phutil_require_module('phabricator', 'applications/metamta/storage/mail');
 phutil_require_module('phabricator', 'applications/owners/storage/owner');
 phutil_require_module('phabricator', 'applications/owners/storage/package');
-phutil_require_module('phabricator', 'applications/owners/storage/packagecommitrelationship');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'applications/project/query/project');
+phutil_require_module('phabricator', 'applications/repository/storage/auditrequest');
 phutil_require_module('phabricator', 'applications/search/index/indexer/repository');
 phutil_require_module('phabricator', 'infrastructure/env');
 

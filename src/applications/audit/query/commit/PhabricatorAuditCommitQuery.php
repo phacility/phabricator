@@ -69,11 +69,13 @@ final class PhabricatorAuditCommitQuery {
       // on the same database as the commits. Once they're migrated we can
       // resolve this via JOIN.
 
-      $table = new PhabricatorOwnersPackageCommitRelationship();
+      // TODO: Clean this up now that we've moved the table.
+
+      $table = new PhabricatorRepositoryAuditRequest();
       $conn_r = $table->establishConnection('r');
       $phids = queryfx_all(
         $conn_r,
-        'SELECT DISTINCT commitPHID FROM %T WHERE packagePHID IN (%Ls)
+        'SELECT DISTINCT commitPHID FROM %T WHERE auditorPHID IN (%Ls)
           ORDER BY id DESC %Q',
         $table->getTableName(),
         $this->packagePHIDs,

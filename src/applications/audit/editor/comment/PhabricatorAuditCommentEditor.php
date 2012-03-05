@@ -54,7 +54,7 @@ final class PhabricatorAuditCommentEditor {
     $audit_phids = self::loadAuditPHIDsForUser($this->user);
     $audit_phids = array_fill_keys($audit_phids, true);
 
-    $relationships = id(new PhabricatorOwnersPackageCommitRelationship())
+    $requests = id(new PhabricatorRepositoryAuditRequest())
       ->loadAllWhere(
         'commitPHID = %s',
         $commit->getPHID());
@@ -65,34 +65,34 @@ final class PhabricatorAuditCommentEditor {
 
     // Status may be empty for updates which don't affect status, like
     // "comment".
-    $have_any_relationship = false;
-    foreach ($relationships as $relationship) {
-      if (empty($audit_phids[$relationship->getPackagePHID()])) {
+    $have_any_requests = false;
+    foreach ($requests as $request) {
+      if (empty($audit_phids[$request->getAuditorPHID()])) {
         continue;
       }
-      $have_any_relationship = true;
+      $have_any_requests = true;
       if ($status) {
-        $relationship->setAuditStatus($status);
-        $relationship->save();
+        $request->setAuditStatus($status);
+        $request->save();
       }
     }
 
-    if (!$have_any_relationship) {
+    if (!$have_any_requests) {
       // If the user has no current authority over any audit trigger, make a
       // new one to represent their audit state.
-      $relationship = id(new PhabricatorOwnersPackageCommitRelationship())
+      $request = id(new PhabricatorRepositoryAuditRequest())
         ->setCommitPHID($commit->getPHID())
-        ->setPackagePHID($user->getPHID())
+        ->setAuditorPHID($user->getPHID())
         ->setAuditStatus(
             $status
               ? $status
               : PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED)
         ->setAuditReasons(array("Voluntary Participant"))
         ->save();
-      $relationships[] = $relationship;
+      $requests[] = $request;
     }
 
-    $commit->updateAuditStatus($relationships);
+    $commit->updateAuditStatus($requests);
     $commit->save();
 
     $this->publishFeedStory($comment, array_keys($audit_phids));
