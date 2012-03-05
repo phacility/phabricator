@@ -106,6 +106,18 @@ class PhabricatorRepositoryCommitHeraldWorker
     $why_uri = PhabricatorEnv::getProductionURI(
       '/herald/transcript/'.$xscript_id.'/');
 
+    $reply_handler = PhabricatorAuditCommentEditor::newReplyHandlerForCommit(
+      $commit);
+
+    $reply_instructions = $reply_handler->getReplyHandlerInstructions();
+    if ($reply_instructions) {
+      $reply_instructions =
+        "\n".
+        "REPLY HANDLER ACTIONS\n".
+        "  ".$reply_instructions."\n";
+    }
+
+
     $body = <<<EOBODY
 DESCRIPTION
 {$description}
@@ -118,7 +130,7 @@ DIFFERENTIAL REVISION
 
 AFFECTED FILES
   {$files}
-
+{$reply_instructions}
 MANAGE HERALD COMMIT RULES
   {$manage_uri}
 
@@ -129,19 +141,31 @@ EOBODY;
 
     $subject = "[Herald/Commit] {$commit_name} ({$who}){$name}";
 
-    $mailer = new PhabricatorMetaMTAMail();
-    $mailer->setRelatedPHID($commit->getPHID());
-    $mailer->addTos($email_phids);
-    $mailer->setSubject($subject);
-    $mailer->setBody($body);
-    $mailer->setIsBulk(true);
+    $threading = PhabricatorAuditCommentEditor::getMailThreading(
+      $commit->getPHID());
+    list($thread_id, $thread_topic) = $threading;
 
-    $mailer->addHeader('X-Herald-Rules', $xscript->getXHeraldRulesHeader());
+    $template = new PhabricatorMetaMTAMail();
+    $template->setRelatedPHID($commit->getPHID());
+    $template->setSubject($subject);
+    $template->setBody($body);
+    $template->setThreadID($thread_id, $is_new = true);
+    $template->addHeader('Thread-Topic', $thread_topic);
+    $template->setIsBulk(true);
+
+    $template->addHeader('X-Herald-Rules', $xscript->getXHeraldRulesHeader());
     if ($author_phid) {
-      $mailer->setFrom($author_phid);
+      $template->setFrom($author_phid);
     }
 
-    $mailer->saveAndSend();
+    $mails = $reply_handler->multiplexMail(
+      $template,
+      id(new PhabricatorObjectHandleData($email_phids))->loadHandles(),
+      array());
+
+    foreach ($mails as $mail) {
+      $mail->saveAndSend();
+    }
   }
 
   private function createAudits(

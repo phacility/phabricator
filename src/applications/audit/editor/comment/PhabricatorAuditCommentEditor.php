@@ -185,14 +185,20 @@ final class PhabricatorAuditCommentEditor {
     );
     $verb = idx($map, $comment->getAction(), 'Commented On');
 
+    $reply_handler = self::newReplyHandlerForCommit($commit);
+
     $prefix = PhabricatorEnv::getEnvConfig('metamta.diffusion.subject-prefix');
     $subject = "{$prefix} [{$verb}] {$name}: {$summary}";
-    $thread_id  = '<diffusion-audit-'.$commit->getPHID().'>';
+
+    $threading = self::getMailThreading($commit->getPHID());
+    list($thread_id, $thread_topic) = $threading;
+
     $is_new     = !count($other_comments);
     $body       = $this->renderMailBody(
       $comment,
       "{$name}: {$summary}",
-      $handle);
+      $handle,
+      $reply_handler);
 
     $email_to = array();
 
@@ -212,13 +218,11 @@ final class PhabricatorAuditCommentEditor {
     $template = id(new PhabricatorMetaMTAMail())
       ->setSubject($subject)
       ->setFrom($comment->getActorPHID())
-      ->addHeader('Thread-Topic', 'Diffusion Audit '.$commit->getPHID())
       ->setThreadID($thread_id, $is_new)
+      ->addHeader('Thread-Topic', $thread_topic)
       ->setRelatedPHID($commit->getPHID())
       ->setIsBulk(true)
       ->setBody($body);
-
-    $reply_handler = self::newReplyHandlerForCommit($commit);
 
     $mails = $reply_handler->multiplexMail(
       $template,
@@ -228,6 +232,13 @@ final class PhabricatorAuditCommentEditor {
     foreach ($mails as $mail) {
       $mail->saveAndSend();
     }
+  }
+
+  public static function getMailThreading($phid) {
+    return array(
+      '<diffusion-audit-'.$phid.'>',
+      'Diffusion Audit '.$phid,
+    );
   }
 
   public static function newReplyHandlerForCommit($commit) {
@@ -241,7 +252,8 @@ final class PhabricatorAuditCommentEditor {
   private function renderMailBody(
     PhabricatorAuditComment $comment,
     $cname,
-    PhabricatorObjectHandle $handle) {
+    PhabricatorObjectHandle $handle,
+    PhabricatorMailReplyHandler $reply_handler) {
 
     $commit = $this->commit;
     $user = $this->user;
@@ -258,6 +270,11 @@ final class PhabricatorAuditCommentEditor {
     }
 
     $body[] = "COMMIT\n  ".PhabricatorEnv::getProductionURI($handle->getURI());
+
+    $reply_instructions = $reply_handler->getReplyHandlerInstructions();
+    if ($reply_instructions) {
+      $body[] = "REPLY HANDLER ACTIONS\n  ".$reply_instructions;
+    }
 
     return implode("\n\n", $body)."\n";
   }
