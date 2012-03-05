@@ -4,7 +4,7 @@ ALTER TABLE `phabricator_differential`.`differential_revision`
 UPDATE `phabricator_differential`.`differential_revision`
 SET `lastReviewerPHID` = (
   SELECT `authorPHID`
-  FROM `differential_comment`
+  FROM `phabricator_differential`.`differential_comment`
   WHERE `revisionID` = `differential_revision`.`id`
   AND `action` IN ('accept', 'reject')
   ORDER BY `id` DESC
