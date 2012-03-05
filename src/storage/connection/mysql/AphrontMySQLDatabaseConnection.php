@@ -293,27 +293,32 @@ class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
       $error = mysql_error($connection);
     }
 
+    $exmsg = "#{$errno}: {$error}";
+
     switch ($errno) {
       case 2013: // Connection Dropped
       case 2006: // Gone Away
-        throw new AphrontQueryConnectionLostException("#{$errno}: {$error}");
+        throw new AphrontQueryConnectionLostException($exmsg);
       case 1213: // Deadlock
       case 1205: // Lock wait timeout exceeded
-        throw new AphrontQueryRecoverableException("#{$errno}: {$error}");
+        throw new AphrontQueryRecoverableException($exmsg);
       case 1062: // Duplicate Key
         // NOTE: In some versions of MySQL we get a key name back here, but
         // older versions just give us a key index ("key 2") so it's not
         // portable to parse the key out of the error and attach it to the
         // exception.
-        throw new AphrontQueryDuplicateKeyException("{$errno}: {$error}");
+        throw new AphrontQueryDuplicateKeyException($exmsg);
       case 1044: // Access denied to database
       case 1045: // Access denied (auth)
       case 1142: // Access denied to table
       case 1143: // Access denied to column
-        throw new AphrontQueryAccessDeniedException("#{$errno}: {$error}");
+        throw new AphrontQueryAccessDeniedException($exmsg);
+      case 1146: // No such table
+      case 1154: // Unknown column "..." in field list
+        throw new AphrontQuerySchemaException($exmsg);
       default:
         // TODO: 1064 is syntax error, and quite terrible in production.
-        throw new AphrontQueryException("#{$errno}: {$error}");
+        throw new AphrontQueryException($exmsg);
     }
   }
 

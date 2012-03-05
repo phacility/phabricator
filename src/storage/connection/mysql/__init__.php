@@ -15,6 +15,7 @@ phutil_require_module('phabricator', 'storage/exception/connection');
 phutil_require_module('phabricator', 'storage/exception/connectionlost');
 phutil_require_module('phabricator', 'storage/exception/duplicatekey');
 phutil_require_module('phabricator', 'storage/exception/recoverable');
+phutil_require_module('phabricator', 'storage/exception/schema');
 
 phutil_require_module('phutil', 'error');
 phutil_require_module('phutil', 'serviceprofiler');
