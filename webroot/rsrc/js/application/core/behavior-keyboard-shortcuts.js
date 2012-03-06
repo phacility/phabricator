@@ -28,4 +28,14 @@ JX.behavior('phabricator-keyboard-shortcuts', function(config) {
       workflow.start();
     })
     .register();
+
+    desc = 'Give keyboard focus to the search box.';
+    new JX.KeyboardShortcut('/', desc)
+      .setHandler(function() {
+        var search = JX.$("standard-search-box");
+        search.focus();
+        search.select();
+      })
+      .register();
+
 });

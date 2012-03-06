@@ -20,7 +20,6 @@
  * @group search
  */
 class PhabricatorSearchController extends PhabricatorSearchBaseController {
-
   private $key;
 
   public function willProcessRequest(array $data) {
@@ -42,60 +41,66 @@ class PhabricatorSearchController extends PhabricatorSearchBaseController {
       $query = new PhabricatorSearchQuery();
 
       if ($request->isFormPost()) {
-        $query->setQuery($request->getStr('query'));
-
-        if ($request->getStr('scope')) {
-          switch ($request->getStr('scope')) {
-            case PhabricatorSearchScope::SCOPE_OPEN_REVISIONS:
-              $query->setParameter('open', 1);
-              $query->setParameter(
-                'type',
-                PhabricatorPHIDConstants::PHID_TYPE_DREV);
-              break;
-            case PhabricatorSearchScope::SCOPE_OPEN_TASKS:
-              $query->setParameter('open', 1);
-              $query->setParameter(
-                'type',
-                PhabricatorPHIDConstants::PHID_TYPE_TASK);
-              break;
-            case PhabricatorSearchScope::SCOPE_WIKI:
-              $query->setParameter(
-                'type',
-                PhabricatorPHIDConstants::PHID_TYPE_WIKI);
-              break;
-            case PhabricatorSearchScope::SCOPE_COMMITS:
-              $query->setParameter(
-                'type',
-                PhabricatorPHIDConstants::PHID_TYPE_CMIT);
-              break;
-            default:
-              break;
-          }
+        $query_str = $request->getStr('query');
+        $response = PhabricatorJumpNavHandler::jumpPostResponse($query_str);
+        if ($response) {
+          return $response;
         } else {
-          if (strlen($request->getStr('type'))) {
-            $query->setParameter('type', $request->getStr('type'));
+          $query->setQuery($query_str);
+
+          if ($request->getStr('scope')) {
+            switch ($request->getStr('scope')) {
+              case PhabricatorSearchScope::SCOPE_OPEN_REVISIONS:
+                $query->setParameter('open', 1);
+                $query->setParameter(
+                  'type',
+                  PhabricatorPHIDConstants::PHID_TYPE_DREV);
+                break;
+              case PhabricatorSearchScope::SCOPE_OPEN_TASKS:
+                $query->setParameter('open', 1);
+                $query->setParameter(
+                  'type',
+                  PhabricatorPHIDConstants::PHID_TYPE_TASK);
+                break;
+              case PhabricatorSearchScope::SCOPE_WIKI:
+                $query->setParameter(
+                  'type',
+                  PhabricatorPHIDConstants::PHID_TYPE_WIKI);
+                break;
+              case PhabricatorSearchScope::SCOPE_COMMITS:
+                $query->setParameter(
+                  'type',
+                  PhabricatorPHIDConstants::PHID_TYPE_CMIT);
+                break;
+              default:
+                break;
+            }
+          } else {
+            if (strlen($request->getStr('type'))) {
+              $query->setParameter('type', $request->getStr('type'));
+            }
+
+            if ($request->getArr('author')) {
+              $query->setParameter('author', $request->getArr('author'));
+            }
+
+            if ($request->getArr('owner')) {
+              $query->setParameter('owner', $request->getArr('owner'));
+            }
+
+            if ($request->getInt('open')) {
+              $query->setParameter('open', $request->getInt('open'));
+            }
+
+            if ($request->getArr('project')) {
+              $query->setParameter('project', $request->getArr('project'));
+            }
           }
 
-          if ($request->getArr('author')) {
-            $query->setParameter('author', $request->getArr('author'));
-          }
-
-          if ($request->getArr('owner')) {
-            $query->setParameter('owner', $request->getArr('owner'));
-          }
-
-          if ($request->getInt('open')) {
-            $query->setParameter('open', $request->getInt('open'));
-          }
-
-          if ($request->getArr('project')) {
-            $query->setParameter('project', $request->getArr('project'));
-          }
+          $query->save();
+          return id(new AphrontRedirectResponse())
+            ->setURI('/search/'.$query->getQueryKey().'/');
         }
-
-        $query->save();
-        return id(new AphrontRedirectResponse())
-          ->setURI('/search/'.$query->getQueryKey().'/');
       }
     }
 

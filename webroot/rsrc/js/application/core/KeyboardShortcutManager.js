@@ -122,6 +122,7 @@ JX.install('KeyboardShortcutManager', {
         for (var jj = 0; jj < keys.length; jj++) {
           if (keys[jj] == key) {
             shortcuts[ii].getHandler()(this);
+            e.kill(); // Consume the event
             return;
           }
         }

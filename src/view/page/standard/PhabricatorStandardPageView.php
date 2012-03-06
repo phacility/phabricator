@@ -288,7 +288,7 @@ class PhabricatorStandardPageView extends AphrontPageView {
               'method' => 'post',
               'style'  => 'display: inline',
             ),
-            '<input type="text" name="query" />'.
+            '<input type="text" name="query" id="standard-search-box" />'.
             ' in '.
             AphrontFormSelectControl::renderSelectTag(
               $this->getSearchDefaultScope(),

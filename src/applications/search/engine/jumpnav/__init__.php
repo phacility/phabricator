@@ -6,9 +6,12 @@
 
 
 
+phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/project/storage/project');
+phutil_require_module('phabricator', 'infrastructure/env');
 
+phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
 
 
-phutil_require_source('PhabricatorProjectQueryUtil.php');
+phutil_require_source('PhabricatorJumpNavHandler.php');
