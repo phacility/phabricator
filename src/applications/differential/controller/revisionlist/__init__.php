@@ -6,10 +6,12 @@
 
 
 
+phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/differential/controller/base');
 phutil_require_module('phabricator', 'applications/differential/query/revision');
 phutil_require_module('phabricator', 'applications/differential/view/revisionlist');
+phutil_require_module('phabricator', 'applications/people/storage/user');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'view/control/pager');
 phutil_require_module('phabricator', 'view/form/base');

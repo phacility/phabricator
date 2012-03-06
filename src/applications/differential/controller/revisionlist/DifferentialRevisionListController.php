@@ -19,6 +19,7 @@
 class DifferentialRevisionListController extends DifferentialController {
 
   private $filter;
+  private $username;
 
   public function shouldRequireLogin() {
     return !$this->allowsAnonymousAccess();
@@ -26,6 +27,7 @@ class DifferentialRevisionListController extends DifferentialController {
 
   public function willProcessRequest(array $data) {
     $this->filter = idx($data, 'filter');
+    $this->username = idx($data, 'username');
   }
 
   public function processRequest() {
@@ -33,18 +35,8 @@ class DifferentialRevisionListController extends DifferentialController {
     $user = $request->getUser();
     $viewer_is_anonymous = !$user->isLoggedIn();
 
-    $phid_arr = $request->getArr('view_user');
-    if ($phid_arr) {
-      $view_target = head($phid_arr);
-      return id(new AphrontRedirectResponse())
-        ->setURI($request->getRequestURI()
-          ->alter('phid', $view_target)
-          ->setQueryParam('view_user', null));
-    }
-
     $params = array_filter(
       array(
-        'phid' => $request->getStr('phid'),
         'status' => $request->getStr('status'),
         'order' => $request->getStr('order'),
       ));
@@ -56,8 +48,34 @@ class DifferentialRevisionListController extends DifferentialController {
       $this->filter,
       $default_filter);
 
+    // Redirect from search to canonical URL.
+    $phid_arr = $request->getArr('view_user');
+    if ($phid_arr) {
+      $view_user = id(new PhabricatorUser())
+        ->loadOneWhere('phid = %s', head($phid_arr));
+      if (!$view_user) {
+        return new Aphront404Response();
+      }
+      $uri = id(new PhutilURI('/differential/filter/'.$this->filter.'/'.
+        phutil_escape_uri($view_user->getUserName()).'/'))
+        ->setQueryParams($params);
+      return id(new AphrontRedirectResponse())->setURI($uri);
+    }
+
     $uri = new PhutilURI('/differential/filter/'.$this->filter.'/');
     $uri->setQueryParams($params);
+
+    $username = '';
+    if ($this->username) {
+      $view_user = id(new PhabricatorUser())
+        ->loadOneWhere('userName = %s', $this->username);
+      if (!$view_user) {
+        return new Aphront404Response();
+      }
+      $username = phutil_escape_uri($this->username).'/';
+      $uri->setPath('/differential/filter/'.$this->filter.'/'.$username);
+      $params['phid'] = $view_user->getPHID();
+    }
 
     // Fill in the defaults we'll actually use for calculations if any
     // parameters are missing.
@@ -72,7 +90,7 @@ class DifferentialRevisionListController extends DifferentialController {
       list($filter_name, $display_name) = $filter;
       if ($filter_name) {
         $href = clone $uri;
-        $href->setPath('/differential/filter/'.$filter_name.'/');
+        $href->setPath('/differential/filter/'.$filter_name.'/'.$username);
         if ($filter_name == $this->filter) {
           $class = 'aphront-side-nav-selected';
         } else {
