@@ -97,7 +97,7 @@ final class DifferentialInlineCommentEditView extends AphrontView {
   private function renderBody() {
     $buttons = array();
 
-    $buttons[] = '<button>Submit</button>';
+    $buttons[] = '<button>Ready</button>';
     $buttons[] = javelin_render_tag(
       'button',
       array(
