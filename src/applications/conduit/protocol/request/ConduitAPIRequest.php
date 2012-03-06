@@ -28,8 +28,8 @@ class ConduitAPIRequest {
     $this->params = $params;
   }
 
-  public function getValue($key) {
-    return idx($this->params, $key);
+  public function getValue($key, $default = null) {
+    return coalesce(idx($this->params, $key), $default);
   }
 
   public function getAllParameters() {
