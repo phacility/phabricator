@@ -94,6 +94,12 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
     $attachments = array();
 
     if (PhabricatorEnv::getEnvConfig('metamta.differential.attach-patches')) {
+
+      $revision_id = $this->getRevision()->getID();
+
+      $diffs = $revision->loadDiffs();
+      $diff_number = count($diffs);
+
       $attachments[] = new PhabricatorMetaMTAAttachment(
         $this->buildPatch(),
         "D{$revision_id}.{$diff_number}.patch",
