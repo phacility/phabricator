@@ -18,11 +18,12 @@
 
 final class PhabricatorAuditStatusConstants {
 
-  const NONE = '';
-  const AUDIT_NOT_REQUIRED = 'audit-not-required';
-  const AUDIT_REQUIRED = 'audit-required';
-  const CONCERNED = 'concerned';
-  const ACCEPTED = 'accepted';
+  const NONE                    = '';
+  const AUDIT_NOT_REQUIRED      = 'audit-not-required';
+  const AUDIT_REQUIRED          = 'audit-required';
+  const CONCERNED               = 'concerned';
+  const ACCEPTED                = 'accepted';
+  const AUDIT_REQUESTED         = 'requested';
 
   public static function getStatusNameMap() {
     static $map = array(
@@ -31,6 +32,7 @@ final class PhabricatorAuditStatusConstants {
       self::AUDIT_REQUIRED      => 'Audit Required',
       self::CONCERNED           => 'Concern Raised',
       self::ACCEPTED            => 'Accepted',
+      self::AUDIT_REQUESTED     => 'Audit Requested',
     );
 
     return $map;

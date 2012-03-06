@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'applications/audit/constants/status');
 phutil_require_module('phabricator', 'applications/audit/editor/comment');
+phutil_require_module('phabricator', 'applications/differential/field/specification/base');
 phutil_require_module('phabricator', 'applications/herald/adapter/commit');
 phutil_require_module('phabricator', 'applications/herald/config/contenttype');
 phutil_require_module('phabricator', 'applications/herald/engine/engine');

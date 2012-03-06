@@ -9,6 +9,7 @@
 phutil_require_module('phabricator', 'applications/differential/field/selector/base');
 phutil_require_module('phabricator', 'applications/differential/field/specification/applypatch');
 phutil_require_module('phabricator', 'applications/differential/field/specification/arcanistproject');
+phutil_require_module('phabricator', 'applications/differential/field/specification/auditors');
 phutil_require_module('phabricator', 'applications/differential/field/specification/author');
 phutil_require_module('phabricator', 'applications/differential/field/specification/branch');
 phutil_require_module('phabricator', 'applications/differential/field/specification/ccs');

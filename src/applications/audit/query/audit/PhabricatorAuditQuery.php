@@ -98,6 +98,7 @@ final class PhabricatorAuditQuery {
           array(
             PhabricatorAuditStatusConstants::AUDIT_REQUIRED,
             PhabricatorAuditStatusConstants::CONCERNED,
+            PhabricatorAuditStatusConstants::AUDIT_REQUESTED,
           ));
         break;
       case self::STATUS_ANY:

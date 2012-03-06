@@ -27,6 +27,11 @@ class PhabricatorRepositoryCommitHeraldWorker
       'commitID = %d',
       $commit->getID());
 
+    if (!$data) {
+      // TODO: Permanent failure.
+      return;
+    }
+
     $rules = HeraldRule::loadAllByContentTypeWithFullData(
       HeraldContentTypeConfig::CONTENT_TYPE_COMMIT,
       $commit->getPHID());
@@ -44,6 +49,8 @@ class PhabricatorRepositoryCommitHeraldWorker
     if ($audit_phids) {
       $this->createAudits($commit, $audit_phids, $rules);
     }
+
+    $this->createAuditsFromCommitMessage($commit, $data);
 
     $email_phids = $adapter->getEmailPHIDs();
     if (!$email_phids) {
@@ -173,8 +180,7 @@ EOBODY;
     array $map,
     array $rules) {
 
-    $table = new PhabricatorRepositoryAuditRequest();
-    $requests = $table->loadAllWhere(
+    $requests = id(new PhabricatorRepositoryAuditRequest())->loadAllWhere(
       'commitPHID = %s',
       $commit->getPHID());
     $requests = mpull($requests, null, 'getAuditorPHID');
@@ -205,4 +211,58 @@ EOBODY;
     $commit->updateAuditStatus($requests);
     $commit->save();
   }
+
+
+  /**
+   * Find audit requests in the "Auditors" field if it is present and trigger
+   * explicit audit requests.
+   */
+  private function createAuditsFromCommitMessage(
+    PhabricatorRepositoryCommit $commit,
+    PhabricatorRepositoryCommitData $data) {
+
+    $message = $data->getCommitMessage();
+
+    $matches = null;
+    if (!preg_match('/^Auditors:\s*(.*)$/im', $message, $matches)) {
+      return;
+    }
+
+    $phids = DifferentialFieldSpecification::parseCommitMessageObjectList(
+      $matches[1],
+      $include_mailables = false,
+      $allow_partial = true);
+
+    if (!$phids) {
+      return;
+    }
+
+    $requests = id(new PhabricatorRepositoryAuditRequest())->loadAllWhere(
+      'commitPHID = %s',
+      $commit->getPHID());
+    $requests = mpull($requests, null, 'getAuditorPHID');
+
+    foreach ($phids as $phid) {
+      if (isset($requests[$phid])) {
+        continue;
+      }
+
+      $request = new PhabricatorRepositoryAuditRequest();
+      $request->setCommitPHID($commit->getPHID());
+      $request->setAuditorPHID($phid);
+      $request->setAuditStatus(
+        PhabricatorAuditStatusConstants::AUDIT_REQUESTED);
+      $request->setAuditReasons(
+        array(
+          'Requested by Author',
+        ));
+      $request->save();
+
+      $requests[$phid] = $request;
+    }
+
+    $commit->updateAuditStatus($requests);
+    $commit->save();
+  }
+
 }

@@ -19,7 +19,7 @@
 final class DifferentialReviewersFieldSpecification
   extends DifferentialFieldSpecification {
 
-  private $reviewers;
+  private $reviewers = array();
   private $error;
 
   public function shouldAppearOnRevisionView() {

@@ -55,6 +55,7 @@ final class DifferentialDefaultFieldSelector
         new DifferentialGitSVNIDFieldSpecification(),
         new DifferentialDateModifiedFieldSpecification(),
         new DifferentialDateCreatedFieldSpecification(),
+        new DifferentialAuditorsFieldSpecification(),
       ));
 
     return $fields;

@@ -639,10 +639,17 @@ abstract class DifferentialFieldSpecification {
    * Parse and lookup a list of object names, converting them to PHIDs.
    *
    * @param string Raw list of comma-separated object names.
+   * @param bool   True to include mailing lists.
+   * @param bool   True to make a best effort. By default, an exception is
+   *               thrown if any item is invalid.
    * @return list List of corresponding PHIDs.
    * @task load
    */
-  private function parseCommitMessageObjectList($value, $include_mailables) {
+  public static function parseCommitMessageObjectList(
+    $value,
+    $include_mailables,
+    $allow_partial = false) {
+
     $value = array_unique(array_filter(preg_split('/[\s,]+/', $value)));
     if (!$value) {
       return array();
@@ -652,7 +659,6 @@ abstract class DifferentialFieldSpecification {
 
     $users = id(new PhabricatorUser())->loadAllWhere(
       '((username IN (%Ls)) OR (email IN (%Ls)))
-        AND isDisabled = 0
         AND isSystemAgent = 0',
       $value,
       $value);
@@ -691,14 +697,13 @@ abstract class DifferentialFieldSpecification {
       }
     }
 
-    if ($invalid) {
+    if ($invalid && !$allow_partial) {
       $invalid = implode(', ', $invalid);
       $what = $include_mailables
         ? "users and mailing lists"
         : "users";
       throw new DifferentialFieldParseException(
-        "Commit message references disabled or nonexistent {$what}: ".
-        "{$invalid}.");
+        "Commit message references nonexistent {$what}: {$invalid}.");
     }
 
     return array_unique($results);
