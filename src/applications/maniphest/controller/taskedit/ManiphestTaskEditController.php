@@ -229,6 +229,7 @@ class ManiphestTaskEditController extends ManiphestController {
           $transactions = $event->getValue('transactions');
 
           $editor = new ManiphestTransactionEditor();
+          $editor->setAuxiliaryFields($aux_fields);
           $editor->applyTransactions($task, $transactions);
         }
 
@@ -246,6 +247,7 @@ class ManiphestTaskEditController extends ManiphestController {
           $parent_xaction->setNewValue($new_value);
 
           $editor = new ManiphestTransactionEditor();
+          $editor->setAuxiliaryFields($aux_fields);
           $editor->applyTransactions($parent_task, array($parent_xaction));
 
           $workflow = $parent_task->getID();

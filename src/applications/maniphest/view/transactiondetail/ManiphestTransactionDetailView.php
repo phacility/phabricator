@@ -33,6 +33,17 @@ class ManiphestTransactionDetailView extends ManiphestView {
   private $renderFullSummary;
   private $user;
 
+  private $auxiliaryFields;
+
+  public function setAuxiliaryFields(array $fields) {
+    $this->auxiliaryFields = mpull($fields, null, 'getAuxiliaryKey');
+    return $this;
+  }
+
+  public function getAuxiliaryField($key) {
+    return idx($this->auxiliaryFields, $key);
+  }
+
   public function setTransactionGroup(array $transactions) {
     $this->transactions = $transactions;
     return $this;
@@ -101,6 +112,9 @@ class ManiphestTransactionDetailView extends ManiphestView {
     $comments = null;
     foreach ($this->transactions as $transaction) {
       list($verb, $desc, $classes) = $this->describeAction($transaction);
+      if ($desc === null) {
+        continue;
+      }
       if ($action === null) {
         $action = $verb;
       }
@@ -161,6 +175,9 @@ class ManiphestTransactionDetailView extends ManiphestView {
     $descs = array();
     foreach ($transactions as $transaction) {
       list($verb, $desc, $classes) = $this->describeAction($transaction);
+      if ($desc === null) {
+        continue;
+      }
       $more_classes = array_merge($more_classes, $classes);
       $full_summary = null;
       if ($this->getRenderFullSummary()) {
@@ -503,25 +520,37 @@ class ManiphestTransactionDetailView extends ManiphestView {
         }
         break;
       case ManiphestTransactionType::TYPE_AUXILIARY:
-
-        // TODO: This is temporary and hacky! Allow auxiliary fields to
-        // customize this.
-
-        $old_esc = phutil_escape_html($old);
-        $new_esc = phutil_escape_html($new);
-
         $aux_key = $transaction->getMetadataValue('aux:key');
-        if ($old === null) {
-          $verb = "Set Field";
-          $desc = "set field '{$aux_key}' to '{$new_esc}'";
-        } else if ($new === null) {
-          $verb = "Removed Field";
-          $desc = "removed field '{$aux_key}'";
-        } else {
-          $verb = "Updated Field";
-          $desc = "updated field '{$aux_key}' ".
-                  "from '{$old_esc}' to '{$new_esc}'";
+        $aux_field = $this->getAuxiliaryField($aux_key);
+
+        $verb = null;
+        if ($aux_field) {
+          $verb = $aux_field->renderTransactionEmailVerb($transaction);
         }
+        if ($verb === null) {
+          if ($old === null) {
+            $verb = "Set Field";
+          } else if ($new === null) {
+            $verb = "Removed Field";
+          } else {
+            $verb = "Updated Field";
+          }
+        }
+
+        $desc = null;
+        if ($aux_field) {
+          $use_field = $aux_field;
+        } else {
+          $use_field = id(new ManiphestAuxiliaryFieldDefaultSpecification())
+            ->setFieldType(
+              ManiphestAuxiliaryFieldDefaultSpecification::TYPE_STRING);
+        }
+
+        $desc = $use_field->renderTransactionDescription(
+          $transaction,
+          $this->forEmail
+            ? ManiphestAuxiliaryFieldSpecification::RENDER_TARGET_TEXT
+            : ManiphestAuxiliaryFieldSpecification::RENDER_TARGET_HTML);
 
         break;
       default:

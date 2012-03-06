@@ -26,6 +26,7 @@ class ManiphestTransactionListView extends ManiphestView {
   private $user;
   private $markupEngine;
   private $preview;
+  private $auxiliaryFields;
 
   public function setTransactions(array $transactions) {
     $this->transactions = $transactions;
@@ -49,6 +50,11 @@ class ManiphestTransactionListView extends ManiphestView {
 
   public function setPreview($preview) {
     $this->preview = $preview;
+    return $this;
+  }
+
+  public function setAuxiliaryFields(array $fields) {
+    $this->auxiliaryFields = $fields;
     return $this;
   }
 
@@ -99,6 +105,7 @@ class ManiphestTransactionListView extends ManiphestView {
     foreach ($groups as $group) {
       $view = new ManiphestTransactionDetailView();
       $view->setUser($this->user);
+      $view->setAuxiliaryFields($this->auxiliaryFields);
       $view->setTransactionGroup($group);
       $view->setHandles($this->handles);
       $view->setMarkupEngine($this->markupEngine);

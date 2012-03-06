@@ -466,7 +466,6 @@ class ManiphestTaskDetailController extends ManiphestController {
       ),
     ));
 
-
     Javelin::initBehavior('maniphest-transaction-preview', array(
       'uri'     => '/maniphest/transaction/preview/'.$task->getID().'/',
       'preview' => 'transaction-preview',
@@ -494,6 +493,7 @@ class ManiphestTaskDetailController extends ManiphestController {
     $transaction_view->setTransactions($transactions);
     $transaction_view->setHandles($handles);
     $transaction_view->setUser($user);
+    $transaction_view->setAuxiliaryFields($aux_fields);
     $transaction_view->setMarkupEngine($engine);
 
     return $this->buildStandardPageResponse(

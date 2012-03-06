@@ -8,6 +8,8 @@
 
 phutil_require_module('phabricator', 'aphront/writeguard');
 phutil_require_module('phabricator', 'applications/differential/parser/changeset');
+phutil_require_module('phabricator', 'applications/maniphest/auxiliaryfield/base');
+phutil_require_module('phabricator', 'applications/maniphest/auxiliaryfield/default');
 phutil_require_module('phabricator', 'applications/maniphest/constants/priority');
 phutil_require_module('phabricator', 'applications/maniphest/constants/status');
 phutil_require_module('phabricator', 'applications/maniphest/constants/transactiontype');

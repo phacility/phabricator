@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,6 +176,52 @@ class ManiphestAuxiliaryFieldDefaultSpecification
         return phutil_escape_html($display);
     }
     return parent::renderForDetailView();
+  }
+
+  public function renderTransactionDescription(
+    ManiphestTransaction $transaction,
+    $target) {
+
+    $label = $this->getLabel();
+    $old = $transaction->getOldValue();
+    $new = $transaction->getNewValue();
+
+    switch ($this->getFieldType()) {
+      case self::TYPE_BOOL:
+        if ($new) {
+          $desc = "set field '{$label}' true";
+        } else {
+          $desc = "set field '{$label}' false";
+        }
+        break;
+      case self::TYPE_SELECT:
+        $old_display = idx($this->getSelectOptions(), $old);
+        $new_display = idx($this->getSelectOptions(), $new);
+        if ($old === null) {
+          $desc = "set field '{$label}' to '{$new_display}'";
+        } else {
+          $desc = "changed field '{$label}' ".
+                  "from '{$old_display}' to '{$new_display}'";
+        }
+        break;
+      default:
+        if (!strlen($old)) {
+          if (!strlen($new)) {
+            return null;
+          }
+          $desc = "set field '{$label}' to '{$new}'";
+        } else {
+          $desc = "updated '{$label}' ".
+                  "from '{$old}' to '{$new}'";
+        }
+        break;
+    }
+
+    if ($target == self::RENDER_TARGET_HTML) {
+      $desc = phutil_escape_html($desc);
+    }
+
+    return $desc;
   }
 
 }

@@ -22,6 +22,12 @@
 class ManiphestTransactionEditor {
 
   private $parentMessageID;
+  private $auxiliaryFields = array();
+
+  public function setAuxiliaryFields(array $fields) {
+    $this->auxiliaryFields = $fields;
+    return $this;
+  }
 
   public function setParentMessageID($parent_message_id) {
     $this->parentMessageID = $parent_message_id;
@@ -219,6 +225,7 @@ class ManiphestTransactionEditor {
     $view = new ManiphestTransactionDetailView();
     $view->setTransactionGroup($transactions);
     $view->setHandles($handles);
+    $view->setAuxiliaryFields($this->auxiliaryFields);
     list($action, $body) = $view->renderForEmail($with_date = false);
 
     $is_create = $this->isCreate($transactions);
