@@ -105,6 +105,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
             $revision,
             $committer,
             DifferentialAction::ACTION_COMMIT);
+          $editor->setIsDaemonWorkflow(true);
           $editor->setMessage($message)->save();
         }
       }

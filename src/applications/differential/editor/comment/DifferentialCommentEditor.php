@@ -31,6 +31,8 @@ class DifferentialCommentEditor {
   private $parentMessageID;
   private $contentSource;
 
+  private $isDaemonWorkflow;
+
   public function __construct(
     DifferentialRevision $revision,
     $actor_phid,
@@ -85,6 +87,11 @@ class DifferentialCommentEditor {
 
   public function setContentSource(PhabricatorContentSource $content_source) {
     $this->contentSource = $content_source;
+    return $this;
+  }
+
+  public function setIsDaemonWorkflow($is_daemon) {
+    $this->isDaemonWorkflow = $is_daemon;
     return $this;
   }
 
@@ -321,12 +328,30 @@ class DifferentialCommentEditor {
 
       case DifferentialAction::ACTION_COMMIT:
 
-        // TODO: We allow this from any state because the daemons are
-        // considered authoritative. However, this technically means that anyone
-        // can mark anything committed at any time with the right POST.
-        // Ideally we should set a flag on the editor to tell it whether it
-        // should enforce the web workflow rules (actor must be author and
-        // state must be 'accepted') or the daemon workflow rules (no rules).
+        // NOTE: The daemons can mark things committed from any state. We treat
+        // them as completely authoritative.
+
+        if (!$this->isDaemonWorkflow) {
+          if (!$actor_is_author) {
+            throw new Exception(
+              "You can not mark a revision you don't own as committed.");
+          }
+
+          $status_committed = ArcanistDifferentialRevisionStatus::COMMITTED;
+          $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
+
+          if ($revision_status == $status_committed) {
+            throw new DifferentialActionHasNoEffectException(
+              "You can not mark this revision as committed because it has ".
+              "already been marked as committed.");
+          }
+
+          if ($revision_status != $status_accepted) {
+            throw new DifferentialActionHasNoEffectException(
+              "You can not mark this revision as committed because it is ".
+              "has not been accepted.");
+          }
+        }
 
         $revision
           ->setStatus(ArcanistDifferentialRevisionStatus::COMMITTED);
