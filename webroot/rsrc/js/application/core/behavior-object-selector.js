@@ -73,7 +73,7 @@ JX.behavior('phabricator-object-selector', function(config) {
       'table',
       {className: 'phabricator-object-selector-handle'},
       JX.$N(
-        'tbody',
+        'tr',
         {},
         [JX.$N('th', {}, link), td]));
 
