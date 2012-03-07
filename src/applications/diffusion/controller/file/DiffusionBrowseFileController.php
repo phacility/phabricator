@@ -299,32 +299,29 @@ class DiffusionBrowseFileController extends DiffusionController {
   private function buildDisplayRows($text_list, $rev_list, $blame_dict,
     $needs_blame, DiffusionRequest $drequest, $file_query, $selected) {
     $last_rev = null;
-    $color = null;
+    $color = '#eeeeee';
     $rows = array();
     $n = 1;
     $view = $this->getRequest()->getStr('view');
 
     if ($blame_dict) {
       $epoch_list = ipull($blame_dict, 'epoch');
-      $max = max($epoch_list);
-      $min = min($epoch_list);
-      $range = $max - $min + 1;
-    } else {
-      $range = 1;
+      $epoch_max = max($epoch_list);
+      $epoch_min = min($epoch_list);
+      $epoch_range = $epoch_max - $epoch_min + 1;
     }
 
     $targ = '';
     $min_line = 0;
     $line = $drequest->getLine();
-    if (strpos($line,'-') !== false) {
-      list($min,$max) = explode('-',$line,2);
+    if (strpos($line, '-') !== false) {
+      list($min, $max) = explode('-', $line, 2);
       $min_line = min($min, $max);
       $max_line = max($min, $max);
     } else if (strlen($line)) {
       $min_line = $line;
       $max_line = $line;
     }
-
 
     foreach ($text_list as $k => $line) {
       if ($needs_blame) {
@@ -340,9 +337,11 @@ class DiffusionBrowseFileController extends DiffusionController {
             '<th style="background: '.$color.'"></th>';
         } else {
 
-          $color_number = (int)(0xEE -
-            0xEE * ($blame_dict[$rev]['epoch'] - $min) / $range);
-          $color = sprintf('#%02xee%02x', $color_number, $color_number);
+          if ($blame_dict) {
+            $color_number = (int)(0xEE -
+              0xEE * ($blame_dict[$rev]['epoch'] - $epoch_min) / $epoch_range);
+            $color = sprintf('#%02xee%02x', $color_number, $color_number);
+          }
 
           $revision_link = self::renderRevision(
             $drequest,
