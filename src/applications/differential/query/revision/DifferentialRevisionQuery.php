@@ -39,6 +39,7 @@ final class DifferentialRevisionQuery {
   const STATUS_OPEN       = 'status-open';
   const STATUS_ACCEPTED   = 'status-accepted';
   const STATUS_COMMITTED  = 'status-committed';
+  const STATUS_ABANDONED  = 'status-abandoned';
 
   private $authors = array();
   private $ccs = array();
@@ -655,6 +656,14 @@ final class DifferentialRevisionQuery {
           'status IN (%Ld)',
           array(
             ArcanistDifferentialRevisionStatus::COMMITTED,
+          ));
+        break;
+      case self::STATUS_ABANDONED:
+        $where[] = qsprintf(
+          $conn_r,
+          'status IN (%Ld)',
+          array(
+            ArcanistDifferentialRevisionStatus::ABANDONED,
           ));
         break;
       default:

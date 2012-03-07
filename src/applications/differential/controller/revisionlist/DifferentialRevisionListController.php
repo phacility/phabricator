@@ -342,6 +342,7 @@ class DifferentialRevisionListController extends DifferentialController {
               'all'       => 'All',
               'open'      => 'Open',
               'committed' => 'Committed',
+              'abandoned' => 'Abandoned',
             ));
       case 'order':
         return id(new AphrontFormToggleButtonsControl())
@@ -368,6 +369,8 @@ class DifferentialRevisionListController extends DifferentialController {
           $query->withStatus(DifferentialRevisionQuery::STATUS_OPEN);
         } elseif ($params['status'] == 'committed') {
           $query->withStatus(DifferentialRevisionQuery::STATUS_COMMITTED);
+        } elseif ($params['status'] == 'abandoned') {
+          $query->withStatus(DifferentialRevisionQuery::STATUS_ABANDONED);
         }
         break;
       case 'order':
