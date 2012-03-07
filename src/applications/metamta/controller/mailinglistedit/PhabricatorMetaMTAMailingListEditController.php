@@ -47,6 +47,9 @@ class PhabricatorMetaMTAMailingListEditController
       $list->setEmail($request->getStr('email'));
       $list->setURI($request->getStr('uri'));
 
+      $e_email = null;
+      $e_name = null;
+
       if (!strlen($list->getEmail())) {
         $e_email = 'Required';
         $errors[] = 'Email is required.';
@@ -55,6 +58,9 @@ class PhabricatorMetaMTAMailingListEditController
       if (!strlen($list->getName())) {
         $e_name = 'Required';
         $errors[] = 'Name is required.';
+      } else if (preg_match('/[ ,]/', $list->getName())) {
+        $e_name = 'Invalid';
+        $errors[] = 'Name must not contain spaces or commas.';
       }
 
       if ($list->getURI()) {
@@ -65,9 +71,14 @@ class PhabricatorMetaMTAMailingListEditController
       }
 
       if (!$errors) {
-        $list->save();
-        return id(new AphrontRedirectResponse())
-          ->setURI('/mail/lists/');
+        try {
+          $list->save();
+          return id(new AphrontRedirectResponse())
+            ->setURI('/mail/lists/');
+        } catch (AphrontQueryDuplicateKeyException $ex) {
+          $e_email = 'Duplicate';
+          $errors[] = 'Another mailing list already uses that address.';
+        }
       }
     }
 
