@@ -27,8 +27,25 @@ package {
     private var socket:Socket;
     private var readBuffer:ByteArray;
 
+    private var remoteServer:String;
+    private var remotePort:Number;
+
     public function Aphlict() {
       super();
+
+      ExternalInterface.addCallback('connect', this.externalConnect);
+      ExternalInterface.call(
+        'JX.Stratcom.invoke',
+        'aphlict-component-ready',
+        null,
+        {});
+    }
+
+    public function externalConnect(server:String, port:Number):void {
+      this.externalInvoke('connect');
+
+      this.remoteServer = server;
+      this.remotePort   = port;
 
       this.master = null;
       this.receiver = new AphlictReceiver(this);
@@ -90,25 +107,33 @@ package {
 
       socket.addEventListener(Event.CONNECT,              didConnectSocket);
       socket.addEventListener(Event.CLOSE,                didCloseSocket);
-      socket.addEventListener(IOErrorEvent.IO_ERROR,      didErrorSocket);
       socket.addEventListener(ProgressEvent.SOCKET_DATA,  didReceiveSocket);
 
-      socket.connect('127.0.0.1', 2600);
+      socket.addEventListener(IOErrorEvent.IO_ERROR,      didIOErrorSocket);
+      socket.addEventListener(
+        SecurityErrorEvent.SECURITY_ERROR,
+        didSecurityErrorSocket);
+
+      socket.connect(this.remoteServer, this.remotePort);
 
       this.readBuffer = new ByteArray();
       this.socket = socket;
     }
 
     private function didConnectSocket(event:Event):void {
-      this.log("Connect!");
+      this.externalInvoke('connected');
     }
 
     private function didCloseSocket(event:Event):void {
-      this.log("Close!");
+      this.externalInvoke('close');
     }
 
-    private function didErrorSocket(event:Event):void {
-      this.log("Error!");
+    private function didIOErrorSocket(event:IOErrorEvent):void {
+      this.externalInvoke('error', event.text);
+    }
+
+    private function didSecurityErrorSocket(event:SecurityErrorEvent):void {
+      this.externalInvoke('error', event.text);
     }
 
     private function didReceiveSocket(event:Event):void {
@@ -126,7 +151,7 @@ package {
         var msg_len:Number = parseInt(b.readUTFBytes(8), 10);
         if (b.length >= msg_len + 8) {
           var bytes:String = b.readUTFBytes(msg_len);
-          var data:Object = JSON.deserialize(bytes);
+          var data:Object = vegas.strings.JSON.deserialize(bytes);
           var t:ByteArray = new ByteArray();
           t.writeBytes(b, msg_len + 8);
           this.readBuffer = t;
@@ -150,11 +175,15 @@ package {
     }
 
     public function receiveMessage(msg:Object):void {
-      this.log("Received message!");
+      this.externalInvoke('receive', msg);
     }
 
-    public function log(msg:String):void {
-      ExternalInterface.call('console.log', msg);
+    public function externalInvoke(type:String, object:Object = null):void {
+      ExternalInterface.call('JX.Aphlict.didReceiveEvent', type, object);
+    }
+
+    public function log(message:String):void {
+      ExternalInterface.call('console.log', message);
     }
 
   }

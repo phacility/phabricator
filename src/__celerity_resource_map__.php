@@ -321,6 +321,17 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/herald/herald-test.css',
   ),
+  'javelin-aphlict' =>
+  array(
+    'uri' => '/res/50cae715/rsrc/js/application/aphlict/Aphlict.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-util',
+    ),
+    'disk' => '/rsrc/js/application/aphlict/Aphlict.js',
+  ),
   'javelin-behavior' =>
   array(
     'uri' => '/res/0017f840/rsrc/js/javelin/lib/behavior.js',
@@ -330,6 +341,19 @@ celerity_register_resource_map(array(
       0 => 'javelin-magical-init',
     ),
     'disk' => '/rsrc/js/javelin/lib/behavior.js',
+  ),
+  'javelin-behavior-aphlict-listen' =>
+  array(
+    'uri' => '/res/6388e057/rsrc/js/application/aphlict/behavior-aphlict-listen.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-aphlict',
+      2 => 'javelin-util',
+      3 => 'javelin-stratcom',
+    ),
+    'disk' => '/rsrc/js/application/aphlict/behavior-aphlict-listen.js',
   ),
   'javelin-behavior-aphront-basic-tokenizer' =>
   array(
@@ -1658,17 +1682,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/slowvote/slowvote.css',
   ),
-  0 =>
-  array(
-    'uri' => '/res/b6096fdd/rsrc/js/javelin/lib/__tests__/URI.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-uri',
-      1 => 'javelin-php-serializer',
-    ),
-    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
-  ),
   'phabricator-standard-page-view' =>
   array(
     'uri' => '/res/7e09bbfc/rsrc/css/application/base/standard-page-view.css',
@@ -1891,6 +1904,17 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/core/syntax.css',
+  ),
+  0 =>
+  array(
+    'uri' => '/res/b6096fdd/rsrc/js/javelin/lib/__tests__/URI.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-uri',
+      1 => 'javelin-php-serializer',
+    ),
+    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
   ),
 ), array(
   'packages' =>

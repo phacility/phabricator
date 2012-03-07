@@ -6,7 +6,7 @@ function getFlashPolicy() {
     '<!DOCTYPE cross-domain-policy SYSTEM ' +
       '"http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd">',
     '<cross-domain-policy>',
-    '<allow-access-from domain="*" to-ports="*"/>',
+    '<allow-access-from domain="*" to-ports="2600"/>',
     '</cross-domain-policy>'
   ].join("\n");
 }

@@ -423,6 +423,8 @@ class AphrontDefaultApplicationConfiguration
         'channel/(?P<channel>[^/]+)/' =>
           'PhabricatorChatLogChannelLogController',
       ),
+
+      '/aphlict/' => 'PhabricatorAphlictTestPageController',
     );
   }
 

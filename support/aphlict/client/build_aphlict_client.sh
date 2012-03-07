@@ -17,7 +17,6 @@ set -x
   -output aphlict.swf \
   -default-background-color=0x444444 \
   -default-size=500,500 \
-  -target-player=10.2.0 \
   -warnings=true \
   -debug=true \
   -source-path=$ROOT/externals/vegas/src \
@@ -25,3 +24,5 @@ set -x
   src/Aphlict.as)
 
 mv $BASEDIR/aphlict.swf $ROOT/webroot/rsrc/swf/aphlict.swf
+
+#  -target-player=10.2.0 \
