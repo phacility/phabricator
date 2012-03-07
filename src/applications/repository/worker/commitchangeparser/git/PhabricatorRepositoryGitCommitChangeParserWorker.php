@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,12 +63,21 @@ class PhabricatorRepositoryGitCommitChangeParserWorker
       $old_mode = intval($old_mode, 8);
       $new_mode = intval($new_mode, 8);
 
-      $file_type = DifferentialChangeType::FILE_NORMAL;
-      if ($new_mode & 040000) {
-        $file_type = DifferentialChangeType::FILE_DIRECTORY;
-      } else if ($new_mode & 0120000) {
-        $file_type = DifferentialChangeType::FILE_SYMLINK;
+      switch ($new_mode & 0160000) {
+        case 0160000:
+          $file_type = DifferentialChangeType::FILE_SUBMODULE;
+          break;
+        case 0120000:
+          $file_type = DifferentialChangeType::FILE_SYMLINK;
+          break;
+        case 0040000:
+          $file_type = DifferentialChangeType::FILE_DIRECTORY;
+          break;
+        default:
+          $file_type = DifferentialChangeType::FILE_NORMAL;
+          break;
       }
+
 
       // TODO: We can detect binary changes as git does, through a combination
       // of running 'git check-attr' for stuff like 'binary', 'merge' or 'diff',

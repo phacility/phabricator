@@ -1544,6 +1544,7 @@ class DifferentialChangesetParser {
       DifferentialChangeType::FILE_DIRECTORY  => 'directory',
       DifferentialChangeType::FILE_BINARY     => 'binary file',
       DifferentialChangeType::FILE_SYMLINK    => 'symlink',
+      DifferentialChangeType::FILE_SUBMODULE  => 'submodule',
     );
 
     static $changes = array(

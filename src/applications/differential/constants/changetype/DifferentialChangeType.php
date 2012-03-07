@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ final class DifferentialChangeType {
   const FILE_SYMLINK    = 5;
   const FILE_DELETED    = 6;
   const FILE_NORMAL     = 7;
+  const FILE_SUBMODULE  = 8;
 
   public static function getSummaryCharacterForChangeType($type) {
     static $types = array(
@@ -60,6 +61,7 @@ final class DifferentialChangeType {
       self::FILE_IMAGE      => 'img',
       self::FILE_BINARY     => 'bin',
       self::FILE_SYMLINK    => 'sym',
+      self::FILE_SUBMODULE  => 'sub',
     );
     return idx($names, coalesce($type, '?'), '???');
   }
