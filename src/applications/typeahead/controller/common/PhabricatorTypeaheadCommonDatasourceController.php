@@ -129,6 +129,7 @@ class PhabricatorTypeaheadCommonDatasourceController
           $user->getUsername().' ('.$user->getRealName().')',
           '/p/'.$user->getUsername(),
           $user->getPHID(),
+          $user->getUsername(),
         );
       }
     }
@@ -162,6 +163,7 @@ class PhabricatorTypeaheadCommonDatasourceController
           'r'.$repo->getCallsign().' ('.$repo->getName().')',
           '/diffusion/'.$repo->getCallsign().'/',
           $repo->getPHID(),
+          'r'.$repo->getCallsign(),
         );
       }
     }

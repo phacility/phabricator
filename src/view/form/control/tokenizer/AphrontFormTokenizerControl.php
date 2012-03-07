@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ class AphrontFormTokenizerControl extends AphrontFormControl {
   private $datasource;
   private $disableBehavior;
   private $limit;
+  private $user;
 
   public function setDatasource($datasource) {
     $this->datasource = $datasource;
@@ -41,6 +42,11 @@ class AphrontFormTokenizerControl extends AphrontFormControl {
     return $this;
   }
 
+  public function setUser($user) {
+    $this->user = $user;
+    return $this;
+  }
+
   protected function renderInput() {
     $name = $this->getName();
     $values = nonempty($this->getValue(), array());
@@ -56,6 +62,11 @@ class AphrontFormTokenizerControl extends AphrontFormControl {
     $template->setID($id);
     $template->setValue($values);
 
+    $username = null;
+    if ($this->user) {
+      $username = $this->user->getUsername();
+    }
+
     if (!$this->disableBehavior) {
       Javelin::initBehavior('aphront-basic-tokenizer', array(
         'id'        => $id,
@@ -63,6 +74,7 @@ class AphrontFormTokenizerControl extends AphrontFormControl {
         'value'     => $values,
         'limit'     => $this->limit,
         'ondemand'  => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
+        'username'  => $username,
       ));
     }
 

@@ -86,6 +86,7 @@ final class DifferentialReviewersFieldSpecification
     return id(new AphrontFormTokenizerControl())
       ->setLabel('Reviewers')
       ->setName('reviewers')
+      ->setUser($this->getUser())
       ->setDatasource('/typeahead/common/users/')
       ->setValue($reviewer_map)
       ->setError($this->error);
