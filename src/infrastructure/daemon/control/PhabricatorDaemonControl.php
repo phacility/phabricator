@@ -192,10 +192,7 @@ EOHELP
     // isn't available on the production host, etc. If any of this doesn't work,
     // conduit will throw.
 
-    // We do this here rather than in the daemon since there's an HTTPS + curl
-    // + fork issue of some kind that makes
     $conduit = new ConduitClient(PhabricatorEnv::getURI('/api/'));
-    $conduit->setTimeout(5);
     $conduit->callMethodSynchronous('conduit.ping', array());
   }
 
