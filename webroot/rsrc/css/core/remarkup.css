@@ -46,6 +46,7 @@
   color: #333333;
   background: #ebebeb;
   padding: 0 .25em;
+  white-space: pre-wrap;
 }
 
 .phabricator-remarkup ul {
@@ -91,37 +92,37 @@
 .phabricator-remarkup h1 {
   font-size: 1.625em;
   line-height: 1.625em;
-  margin: .8em0 0 .8em;
+  margin: .8em 0;
 }
 
 .phabricator-remarkup h2 {
   font-size: 1.5em;
   line-height: 1.5em;
-  margin: .75em 0 .75em;
+  margin: .75em 0;
 }
 
 .phabricator-remarkup h3 {
   font-size: 1.375em;
   line-height: 1.375em;
-  margin: .69em 0 .69em;
+  margin: .69em 0;
 }
 
 .phabricator-remarkup h4 {
   font-size: 1.25em;
   line-height: 1.25em;
-  margin: .63em 0 .63em;
+  margin: .63em 0;
 }
 
 .phabricator-remarkup h5 {
   font-size: 1.125em;
   line-height: 1.125em;
-  margin: .56em 0 .56em;
+  margin: .56em 0;
 }
 
 .phabricator-remarkup h6 {
   font-size: 1em;
   line-height: 1em;
-  margin: .5em 0 .5em;
+  margin: .5em 0;
 }
 
 .phabricator-remarkup blockquote {
