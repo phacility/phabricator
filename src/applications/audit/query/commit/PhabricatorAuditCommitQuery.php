@@ -23,7 +23,6 @@ final class PhabricatorAuditCommitQuery {
 
   private $authorPHIDs;
   private $packagePHIDs;
-  private $packageConstraint;
 
   private $needCommitData;
 
@@ -63,39 +62,19 @@ final class PhabricatorAuditCommitQuery {
 
   public function execute() {
 
-    if ($this->packagePHIDs) {
-
-      // TODO: This is an odd, awkward query plan because these rows aren't
-      // on the same database as the commits. Once they're migrated we can
-      // resolve this via JOIN.
-
-      // TODO: Clean this up now that we've moved the table.
-
-      $table = new PhabricatorRepositoryAuditRequest();
-      $conn_r = $table->establishConnection('r');
-      $phids = queryfx_all(
-        $conn_r,
-        'SELECT DISTINCT commitPHID FROM %T WHERE auditorPHID IN (%Ls)
-          ORDER BY id DESC %Q',
-        $table->getTableName(),
-        $this->packagePHIDs,
-        $this->buildLimitClause($conn_r));
-      $this->packageConstraint = ipull($phids, 'commitPHID');
-      $this->limit = null;
-      $this->offset = null;
-    }
-
     $table = new PhabricatorRepositoryCommit();
     $conn_r = $table->establishConnection('r');
 
+    $join  = $this->buildJoinClause($conn_r);
     $where = $this->buildWhereClause($conn_r);
     $order = $this->buildOrderClause($conn_r);
     $limit = $this->buildLimitClause($conn_r);
 
     $data = queryfx_all(
       $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
+      'SELECT c.* FROM %T c %Q %Q %Q %Q',
       $table->getTableName(),
+      $join,
       $where,
       $order,
       $limit);
@@ -121,7 +100,26 @@ final class PhabricatorAuditCommitQuery {
   }
 
   private function buildOrderClause($conn_r) {
-    return 'ORDER BY epoch DESC';
+    return 'ORDER BY c.epoch DESC';
+  }
+
+  private function buildJoinClause($conn_r) {
+    $join = array();
+
+    if ($this->packagePHIDs) {
+      $join[] = qsprintf(
+        $conn_r,
+        'JOIN %T req ON c.phid = req.commitPHID',
+        id(new PhabricatorRepositoryAuditRequest())->getTableName());
+    }
+
+    if ($join) {
+      $join = implode(' ', $join);
+    } else {
+      $join = '';
+    }
+
+    return $join;
   }
 
   private function buildWhereClause($conn_r) {
@@ -130,15 +128,15 @@ final class PhabricatorAuditCommitQuery {
     if ($this->authorPHIDs) {
       $where[] = qsprintf(
         $conn_r,
-        'authorPHID IN (%Ls)',
+        'c.authorPHID IN (%Ls)',
         $this->authorPHIDs);
     }
 
-    if ($this->packageConstraint !== null) {
+    if ($this->packagePHIDs) {
       $where[] = qsprintf(
         $conn_r,
-        'phid IN (%Ls)',
-        $this->packageConstraint);
+        'req.auditorPHID in (%Ls)',
+        $this->packagePHIDs);
     }
 
     $status = $this->status;
@@ -146,7 +144,7 @@ final class PhabricatorAuditCommitQuery {
       case self::STATUS_OPEN:
         $where[] = qsprintf(
           $conn_r,
-          'auditStatus = %s',
+          'c.auditStatus = %s',
           PhabricatorAuditCommitStatusConstants::CONCERN_RAISED);
         break;
       case self::STATUS_ANY:

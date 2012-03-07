@@ -36,7 +36,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
       // If the list filter is POST'ed, redirect to GET so the page can be
       // bookmarked.
       $uri = $request->getRequestURI();
-      $phid = head($request->getArr('phid'));
+      $phid = head($request->getArr('set_phid'));
       $user = id(new PhabricatorUser())->loadOneWhere(
         'phid = %s',
         $phid);
@@ -172,7 +172,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
 
       $form->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setName('phid')
+          ->setName('set_phid')
           ->setLabel($label)
           ->setLimit(1)
           ->setDatasource($uri)
