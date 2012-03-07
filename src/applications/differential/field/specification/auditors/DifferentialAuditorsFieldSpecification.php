@@ -72,7 +72,11 @@ final class DifferentialAuditorsFieldSpecification
   }
 
   public function setValueFromStorage($value) {
-    $this->auditors = json_decode($value, true);
+    $auditors = json_decode($value, true);
+    if (!is_array($auditors)) {
+      $auditors = array();
+    }
+    $this->auditors = $auditors;
     return $this;
   }
 
