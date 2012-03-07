@@ -320,6 +320,14 @@ class DifferentialCommentEditor {
         break;
 
       case DifferentialAction::ACTION_COMMIT:
+
+        // TODO: We allow this from any state because the daemons are
+        // considered authoritative. However, this technically means that anyone
+        // can mark anything committed at any time with the right POST.
+        // Ideally we should set a flag on the editor to tell it whether it
+        // should enforce the web workflow rules (actor must be author and
+        // state must be 'accepted') or the daemon workflow rules (no rules).
+
         $revision
           ->setStatus(ArcanistDifferentialRevisionStatus::COMMITTED);
         break;

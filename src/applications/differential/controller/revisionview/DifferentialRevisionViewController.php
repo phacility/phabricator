@@ -445,6 +445,7 @@ class DifferentialRevisionViewController extends DifferentialController {
           $actions[DifferentialAction::ACTION_ABANDON] = true;
           $actions[DifferentialAction::ACTION_REQUEST] = true;
           $actions[DifferentialAction::ACTION_RETHINK] = true;
+          $actions[DifferentialAction::ACTION_COMMIT] = true;
           break;
         case ArcanistDifferentialRevisionStatus::COMMITTED:
           break;

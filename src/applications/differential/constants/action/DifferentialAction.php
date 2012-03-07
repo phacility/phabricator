@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,7 @@ final class DifferentialAction {
       self::ACTION_RESIGN         => 'Resign as Reviewer',
       self::ACTION_ADDREVIEWERS   => 'Add Reviewers',
       self::ACTION_ADDCCS         => 'Add CCs',
+      self::ACTION_COMMIT         => 'Mark Committed',
     );
 
     if (!empty($verbs[$action])) {
