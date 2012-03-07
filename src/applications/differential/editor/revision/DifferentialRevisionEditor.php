@@ -373,7 +373,7 @@ class DifferentialRevisionEditor {
 
       // Save the changes we made above.
 
-      $diff->setDescription(substr($this->getComments(), 0, 80));
+      $diff->setDescription(preg_replace('/\n.*/s', '', $this->getComments()));
       $diff->save();
 
       $this->updateAffectedPathTable($revision, $diff, $changesets);
