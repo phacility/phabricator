@@ -153,7 +153,8 @@ END;
       require_once $patch['path'];
     } else {
       list($stdout, $stderr) = execx(
-        "mysql --user=%s --password=%s --host=%s {$port} < %s",
+        "mysql --user=%s --password=%s --host=%s {$port} ".
+        "--default-character-set=utf8 < %s",
         $conn_user,
         $conn_pass,
         $conn_bare_hostname,
