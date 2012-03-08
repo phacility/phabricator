@@ -320,6 +320,17 @@ class PhabricatorRepository extends PhabricatorRepositoryDAO {
     }
   }
 
+  public function getPublicRemoteURI() {
+    $uri = new PhutilURI($this->getRemoteURI());
+
+    // Make sure we don't leak anything if this repo is using HTTP Basic Auth
+    // with the credentials in the URI or something zany like that.
+    $uri->setUser(null);
+    $uri->setPass(null);
+
+    return $uri;
+  }
+
   private function isSSHProtocol($protocol) {
     return ($protocol == 'ssh' || $protocol == 'svn+ssh');
   }

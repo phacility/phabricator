@@ -26,6 +26,8 @@ class DiffusionRepositoryController extends DiffusionController {
     $crumbs = $this->buildCrumbs();
     $content[] = $crumbs;
 
+    $content[] = $this->buildPropertiesTable($drequest->getRepository());
+
     $history_query = DiffusionHistoryQuery::newFromDiffusionRequest(
       $drequest);
     $history_query->setLimit(15);
@@ -108,6 +110,43 @@ class DiffusionRepositoryController extends DiffusionController {
       array(
         'title' => $drequest->getRepository()->getName(),
       ));
+  }
+
+  private function buildPropertiesTable(PhabricatorRepository $repository) {
+
+    $properties = array();
+    $properties['Name'] = $repository->getName();
+    $properties['Callsign'] = $repository->getCallsign();
+    $properties['Description'] = $repository->getDetail('description');
+    switch ($repository->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $properties['Clone URI'] = $repository->getPublicRemoteURI();
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $properties['Repository Root'] = $repository->getPublicRemoteURI();
+        break;
+    }
+
+    $rows = array();
+    foreach ($properties as $key => $value) {
+      $rows[] = array(
+        phutil_escape_html($key),
+        phutil_escape_html($value));
+    }
+
+    $table = new AphrontTableView($rows);
+    $table->setColumnClasses(
+      array(
+        'header',
+        'wide',
+      ));
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader('Repository Properties');
+    $panel->appendChild($table);
+
+    return $panel;
   }
 
 }
