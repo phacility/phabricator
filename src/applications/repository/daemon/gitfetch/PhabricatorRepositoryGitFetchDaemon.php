@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ final class PhabricatorRepositoryGitFetchDaemon
     $local_path) {
 
     // This is a local command, but needs credentials.
-    $future = $repository->getRemoteCommandFuture('fetch --all');
+    $future = $repository->getRemoteCommandFuture('fetch --all --prune');
     $future->setCWD($local_path);
     $future->resolvex();
   }
