@@ -193,6 +193,8 @@ abstract class LiskDAO {
   private static $processIsolationLevel = 0;
   private static $__checkedClasses = array();
 
+  private $__ephemeral = false;
+
   /**
    *  Build an empty object.
    *
@@ -779,6 +781,24 @@ abstract class LiskDAO {
 
 
   /**
+   * Make an object read-only.
+   *
+   * Making an object ephemeral indicates that you will be changing state in
+   * such a way that you would never ever want it to be written to back to the
+   * storage.
+   */
+  public function makeEphemeral() {
+    $this->__ephemeral = true;
+    return $this;
+  }
+
+  private function isEphemeralCheck() {
+    if ($this->__ephemeral) {
+      throw new LiskEphemeralObjectException();
+    }
+  }
+
+  /**
    * Persist this object to the database. In most cases, this is the only
    * method you need to call to do writes. If the object has not yet been
    * inserted this will do an insert; if it has, it will do an update.
@@ -805,6 +825,7 @@ abstract class LiskDAO {
    * @task   save
    */
   public function replace() {
+    $this->isEphemeralCheck();
     return $this->insertRecordIntoDatabase('REPLACE');
   }
 
@@ -818,6 +839,7 @@ abstract class LiskDAO {
    *  @task   save
    */
   public function insert() {
+    $this->isEphemeralCheck();
     return $this->insertRecordIntoDatabase('INSERT');
   }
 
@@ -831,6 +853,7 @@ abstract class LiskDAO {
    *  @task   save
    */
   public function update() {
+    $this->isEphemeralCheck();
     $use_locks = $this->getConfigOption(self::CONFIG_OPTIMISTIC_LOCKS);
 
     $this->willSaveObject();
@@ -899,6 +922,7 @@ abstract class LiskDAO {
    * @task   save
    */
   public function delete() {
+    $this->isEphemeralCheck();
     $this->willDelete();
 
     $conn = $this->establishConnection('w');
