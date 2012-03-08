@@ -223,6 +223,7 @@ class PhabricatorObjectHandle {
         break;
       default:
         $name = $this->getFullName();
+        break;
     }
     return $name;
   }

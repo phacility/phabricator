@@ -220,7 +220,7 @@ function phabricator_detect_bad_base_uri() {
     case 'https':
       break;
     default:
-      phabricator_fatal_config_error(
+      return phabricator_fatal_config_error(
         "'phabricator.base-uri' is set to '{$conf}', which is invalid. ".
         "The URI must start with 'http://' or 'https://'.");
   }
