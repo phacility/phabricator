@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,8 @@ abstract class PhabricatorRepositoryPullLocalDaemon
 
     while (true) {
       if (!Filesystem::pathExists($local_path)) {
+        printf("Creating new directory %s for repo %s\n",
+          $local_path, $repository->getName());
         execx('mkdir -p %s', dirname($local_path));
         $this->executeCreate($repository, $local_path);
       } else {
