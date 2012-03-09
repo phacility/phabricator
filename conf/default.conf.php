@@ -90,6 +90,8 @@ return array(
     'phabricator.csrf-key',
     'facebook.application-secret',
     'github.application-secret',
+    'phabricator.mail-key',
+    'security.hmac-key',
   ),
 
 
