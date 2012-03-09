@@ -33,7 +33,6 @@ class PhabricatorRepository extends PhabricatorRepositoryDAO {
   protected $details = array();
 
   private $sshKeyfile;
-  private $actualLocalPath;
 
   public function getConfiguration() {
     return array(
@@ -118,15 +117,7 @@ class PhabricatorRepository extends PhabricatorRepositoryDAO {
   }
 
   public function getLocalPath() {
-    if (!$this->actualLocalPath) {
-      $this->actualLocalPath = $this->getDetail('local-path');
-    }
-    return $this->actualLocalPath;
-  }
-
-  // Lets you move the local-path for this instance
-  public function setLocalPath($path) {
-    $this->actualLocalPath = $path;
+    return $this->getDetail('local-path');
   }
 
   public function execRemoteCommand($pattern /*, $arg, ... */) {
