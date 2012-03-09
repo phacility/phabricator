@@ -28,11 +28,12 @@ extends ConduitAPIMethod {
 
   public function defineParamTypes() {
     return array(
-      'diff_id' => 'required diff_id',
-      'file'    => 'required string',
-      'name'    => 'required string',
-      'result'  => 'required string',
-      'message' => 'required string',
+      'diff_id'   => 'required diff_id',
+      'file'      => 'required string',
+      'name'      => 'required string',
+      'result'    => 'required string',
+      'message'   => 'required string',
+      'coverage'  => 'required map<string, string>',
     );
   }
 
@@ -58,6 +59,7 @@ extends ConduitAPIMethod {
     $name = $request->getValue('name');
     $message = $request->getValue('message');
     $result = $request->getValue('result');
+    $coverage = $request->getValue('coverage', array());
 
     $diff_property = id(new DifferentialDiffProperty())->loadOneWhere(
       'diffID = %d AND name = %s',
@@ -84,6 +86,7 @@ extends ConduitAPIMethod {
         $unit_result['file'] = $file;
         $unit_result['result'] = $result;
         $unit_result['userdata'] = $message;
+        $unit_result['coverage'] = $coverage;
         $unit_status = $result;
         break;
       }
@@ -97,6 +100,7 @@ extends ConduitAPIMethod {
       $unit_result['name'] = $name;
       $unit_result['result'] = $result;
       $unit_result['userdata'] = $message;
+      $unit_result['coverage'] = $coverage;
       $unit_status = $result;
       $unit_results[] = $unit_result;
     }
