@@ -390,6 +390,7 @@ final class ManiphestTaskEditController extends ManiphestController {
           ->setLabel('Assigned To')
           ->setName('assigned_to')
           ->setValue($assigned_value)
+          ->setUser($user)
           ->setDatasource('/typeahead/common/users/')
           ->setLimit(1))
       ->appendChild(
@@ -397,6 +398,7 @@ final class ManiphestTaskEditController extends ManiphestController {
           ->setLabel('CC')
           ->setName('cc')
           ->setValue($cc_value)
+          ->setUser($user)
           ->setDatasource('/typeahead/common/mailable/'))
       ->appendChild(
         id(new AphrontFormSelectControl())

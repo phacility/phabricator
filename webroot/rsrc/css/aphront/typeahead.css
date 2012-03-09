@@ -42,3 +42,7 @@ table.jx-typeahead input {
   font-size: 13px;
   padding: 2px;
 }
+
+input.jx-typeahead-placeholder {
+  color: #888888;
+}

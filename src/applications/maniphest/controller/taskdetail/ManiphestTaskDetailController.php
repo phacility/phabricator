@@ -450,6 +450,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
           'id'       => 'projects-tokenizer',
           'src'      => '/typeahead/common/projects/',
           'ondemand' => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
+          'placeholder' => 'Type a project name...',
         ),
         ManiphestTransactionType::TYPE_OWNER => array(
           'id'       => 'assign-tokenizer',
@@ -457,11 +458,13 @@ final class ManiphestTaskDetailController extends ManiphestController {
           'value'    => $default_claim,
           'limit'    => 1,
           'ondemand' => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
+          'placeholder' => 'Type a user name...',
         ),
         ManiphestTransactionType::TYPE_CCS => array(
           'id'       => 'cc-tokenizer',
           'src'      => '/typeahead/common/mailable/',
           'ondemand' => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
+          'placeholder' => 'Type a user or mailing list...',
         ),
       ),
     ));
