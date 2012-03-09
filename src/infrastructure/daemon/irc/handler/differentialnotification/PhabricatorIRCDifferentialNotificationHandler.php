@@ -30,6 +30,7 @@ class PhabricatorIRCDifferentialNotificationHandler
 
   public function runBackgroundTasks() {
     $iterator = new PhabricatorTimelineIterator('ircdiffx', array('difx'));
+    $show = $this->getConfig('notification.actions');
 
     if (!$this->skippedOldEvents) {
       // Since we only want to post notifications about new events, skip
@@ -44,7 +45,7 @@ class PhabricatorIRCDifferentialNotificationHandler
 
     foreach ($iterator as $event) {
       $data = $event->getData();
-      if (!$data) {
+      if (!$data || ($show !== null && !in_array($data['action'], $show))) {
         continue;
       }
 
