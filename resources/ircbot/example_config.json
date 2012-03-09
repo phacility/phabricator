@@ -10,12 +10,17 @@
     "PhabricatorIRCObjectNameHandler",
     "PhabricatorIRCLogHandler",
     "PhabricatorIRCWhatsNewHandler",
-    "PhabricatorIRCDifferentialNotificationHandler"
+    "PhabricatorIRCDifferentialNotificationHandler",
+    "PhabricatorIRCMacroHandler"
   ],
 
   "conduit.uri" : null,
   "conduit.user" : null,
   "conduit.cert" : null,
+
+  "macro.size" : 48,
+  "macro.sleep" : 0.25,
+  "macro.aspect" : 0.66,
 
   "notification.channels" : ["#phabot-test"]
 }
