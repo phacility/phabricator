@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DiffusionCommitController extends DiffusionController {
+final class DiffusionCommitController extends DiffusionController {
 
   const CHANGES_LIMIT = 100;
 

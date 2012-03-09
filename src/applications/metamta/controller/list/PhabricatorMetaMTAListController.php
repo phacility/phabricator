@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-class PhabricatorMetaMTAListController extends PhabricatorMetaMTAController {
+final class PhabricatorMetaMTAListController
+  extends PhabricatorMetaMTAController {
 
   public function processRequest() {
     // Get a page of mails together with pager.

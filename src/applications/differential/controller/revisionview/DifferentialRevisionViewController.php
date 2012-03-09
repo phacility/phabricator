@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DifferentialRevisionViewController extends DifferentialController {
+final class DifferentialRevisionViewController extends DifferentialController {
 
   private $revisionID;
 

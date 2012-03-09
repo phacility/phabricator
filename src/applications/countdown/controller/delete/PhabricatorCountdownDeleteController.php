@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorCountdownDeleteController
+final class PhabricatorCountdownDeleteController
   extends PhabricatorCountdownController {
 
   public function willProcessRequest(array $data) {

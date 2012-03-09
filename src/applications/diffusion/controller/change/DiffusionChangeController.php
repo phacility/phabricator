@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DiffusionChangeController extends DiffusionController {
+final class DiffusionChangeController extends DiffusionController {
 
   public function processRequest() {
     $drequest = $this->diffusionRequest;

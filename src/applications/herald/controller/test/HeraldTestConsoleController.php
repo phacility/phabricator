@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class HeraldTestConsoleController extends HeraldController {
+final class HeraldTestConsoleController extends HeraldController {
 
   public function getFilter() {
     return 'test';

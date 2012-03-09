@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-class PhabricatorOAuthLoginController extends PhabricatorAuthController {
+final class PhabricatorOAuthLoginController
+  extends PhabricatorAuthController {
 
   private $provider;
   private $userID;

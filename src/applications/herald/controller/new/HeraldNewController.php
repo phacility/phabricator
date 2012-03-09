@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class HeraldNewController extends HeraldController {
+final class HeraldNewController extends HeraldController {
 
   private $contentType;
 

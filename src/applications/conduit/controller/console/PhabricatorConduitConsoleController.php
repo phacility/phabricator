@@ -19,7 +19,7 @@
 /**
  * @group conduit
  */
-class PhabricatorConduitConsoleController
+final class PhabricatorConduitConsoleController
   extends PhabricatorConduitController {
 
   private $method;

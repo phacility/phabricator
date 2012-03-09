@@ -19,7 +19,8 @@
 /**
  * @group maniphest
  */
-class ManiphestTaskDescriptionChangeController extends ManiphestController {
+final class ManiphestTaskDescriptionChangeController
+  extends ManiphestController {
 
   private $transactionID;
 
@@ -33,12 +34,16 @@ class ManiphestTaskDescriptionChangeController extends ManiphestController {
   }
 
   public function willProcessRequest(array $data) {
-    $this->setTransactionID($data['id']);
+    $this->setTransactionID(idx($data, 'id'));
   }
 
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
+
+    if (!$this->getTransactionID()) {
+      $this->setTransactionID($this->getRequest()->getStr('ref'));
+    }
 
     $transaction_id = $this->getTransactionID();
     $transaction = id(new ManiphestTransaction())->load($transaction_id);

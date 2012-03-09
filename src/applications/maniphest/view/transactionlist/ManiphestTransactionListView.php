@@ -96,7 +96,7 @@ class ManiphestTransactionListView extends ManiphestView {
       require_celerity_resource('syntax-highlighting-css');
       $whitespace_mode = DifferentialChangesetParser::WHITESPACE_SHOW_ALL;
       Javelin::initBehavior('differential-show-more', array(
-        'uri'         => '/maniphest/task/descriptiondiff/',
+        'uri'         => '/maniphest/task/descriptionchange/',
         'whitespace'  => $whitespace_mode,
       ));
     }

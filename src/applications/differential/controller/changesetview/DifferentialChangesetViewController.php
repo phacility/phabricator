@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DifferentialChangesetViewController extends DifferentialController {
+final class DifferentialChangesetViewController extends DifferentialController {
 
 
   public function shouldRequireLogin() {

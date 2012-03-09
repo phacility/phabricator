@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class HeraldRuleEditHistoryController extends HeraldController {
+final class HeraldRuleEditHistoryController extends HeraldController {
 
   private $id;
 

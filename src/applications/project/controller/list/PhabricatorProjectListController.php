@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorProjectListController
+final class PhabricatorProjectListController
   extends PhabricatorProjectController {
 
   private $filter;

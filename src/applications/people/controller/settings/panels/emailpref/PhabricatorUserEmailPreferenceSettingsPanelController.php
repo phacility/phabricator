@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorUserEmailPreferenceSettingsPanelController
+final class PhabricatorUserEmailPreferenceSettingsPanelController
   extends PhabricatorUserSettingsPanelController {
 
   public function processRequest() {

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorRepositoryArcanistProjectEditController
+final class PhabricatorRepositoryArcanistProjectEditController
   extends PhabricatorRepositoryController {
 
   private $id;

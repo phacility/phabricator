@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorDirectoryMainController
+final class PhabricatorDirectoryMainController
   extends PhabricatorDirectoryController {
 
   private $filter;

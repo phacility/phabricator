@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class HeraldRuleController extends HeraldController {
+final class HeraldRuleController extends HeraldController {
 
   private $id;
   private $filter;

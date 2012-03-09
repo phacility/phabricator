@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorProjectUpdateController
+final class PhabricatorProjectUpdateController
   extends PhabricatorProjectController {
 
   private $id;

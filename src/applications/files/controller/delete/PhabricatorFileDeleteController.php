@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorFileDeleteController extends PhabricatorFileController {
+final class PhabricatorFileDeleteController extends PhabricatorFileController {
 
   private $id;
 

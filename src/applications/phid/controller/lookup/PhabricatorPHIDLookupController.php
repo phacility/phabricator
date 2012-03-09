@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorPHIDLookupController
+final class PhabricatorPHIDLookupController
   extends PhabricatorPHIDController {
 
   public function processRequest() {

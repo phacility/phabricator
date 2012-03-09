@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-class PhabricatorPeopleEditController extends PhabricatorPeopleController {
+final class PhabricatorPeopleEditController
+  extends PhabricatorPeopleController {
 
   public function shouldRequireAdmin() {
     return true;

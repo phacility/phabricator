@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-class DifferentialCommentPreviewController extends DifferentialController {
+final class DifferentialCommentPreviewController
+  extends DifferentialController {
 
   private $id;
 

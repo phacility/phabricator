@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorOAuthDiagnosticsController
+final class PhabricatorOAuthDiagnosticsController
   extends PhabricatorAuthController {
 
   public function shouldRequireLogin() {

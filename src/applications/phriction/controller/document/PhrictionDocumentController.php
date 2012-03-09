@@ -19,7 +19,7 @@
 /**
  * @group phriction
  */
-class PhrictionDocumentController
+final class PhrictionDocumentController
   extends PhrictionController {
 
   private $slug;

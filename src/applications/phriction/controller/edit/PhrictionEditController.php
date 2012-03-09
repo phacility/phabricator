@@ -19,7 +19,7 @@
 /**
  * @group phriction
  */
-class PhrictionEditController
+final class PhrictionEditController
   extends PhrictionController {
 
   private $id;

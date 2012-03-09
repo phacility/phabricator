@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-class PhabricatorLoginValidateController extends PhabricatorAuthController {
+final class PhabricatorLoginValidateController
+  extends PhabricatorAuthController {
 
   public function shouldRequireLogin() {
     return false;

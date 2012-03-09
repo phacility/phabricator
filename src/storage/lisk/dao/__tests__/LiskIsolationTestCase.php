@@ -43,12 +43,18 @@ class LiskIsolationTestCase extends PhabricatorTestCase {
     $dao->save();
     $dao->makeEphemeral();
 
-    $this->assertException(
-      'LiskEphemeralObjectException',
-      function() use ($dao) {
-        $dao->save();
-      }
-    );
+    $this->tryTestCases(
+      array(
+        $dao,
+      ),
+      array(
+        false,
+      ),
+      array($this, 'saveDAO'));
+  }
+
+  public function saveDAO($dao) {
+    $dao->save();
   }
 
   public function testIsolationContainment() {

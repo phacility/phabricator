@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-class PhabricatorMetaMTAViewController extends PhabricatorMetaMTAController {
+final class PhabricatorMetaMTAViewController
+  extends PhabricatorMetaMTAController {
 
   private $id;
 

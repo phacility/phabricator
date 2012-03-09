@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-class PhabricatorFileTransformController extends PhabricatorFileController {
+final class PhabricatorFileTransformController
+  extends PhabricatorFileController {
 
   private $transform;
   private $phid;

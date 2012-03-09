@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-class PhabricatorUserSettingsController extends PhabricatorPeopleController {
+final class PhabricatorUserSettingsController
+  extends PhabricatorPeopleController {
 
   private $page;
   private $pages;

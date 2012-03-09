@@ -19,7 +19,7 @@
 /**
  * @group phriction
  */
-class PhrictionDocumentPreviewController
+final class PhrictionDocumentPreviewController
   extends PhrictionController {
 
   public function processRequest() {

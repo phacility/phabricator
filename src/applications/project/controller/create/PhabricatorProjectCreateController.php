@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorProjectCreateController
+final class PhabricatorProjectCreateController
   extends PhabricatorProjectController {
 
 

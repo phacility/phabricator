@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DifferentialRevisionListController extends DifferentialController {
+final class DifferentialRevisionListController extends DifferentialController {
 
   private $filter;
   private $username;

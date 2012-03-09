@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorPasteViewController extends PhabricatorPasteController {
+final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
   private $id;
 

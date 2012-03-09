@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorMetaMTASendGridReceiveController
+final class PhabricatorMetaMTASendGridReceiveController
   extends PhabricatorMetaMTAController {
 
   public function shouldRequireLogin() {

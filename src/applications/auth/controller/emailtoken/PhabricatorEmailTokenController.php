@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-class PhabricatorEmailTokenController extends PhabricatorAuthController {
+final class PhabricatorEmailTokenController
+  extends PhabricatorAuthController {
 
   private $token;
 

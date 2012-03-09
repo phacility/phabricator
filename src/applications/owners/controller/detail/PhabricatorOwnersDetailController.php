@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-class PhabricatorOwnersDetailController extends PhabricatorOwnersController {
+final class PhabricatorOwnersDetailController
+  extends PhabricatorOwnersController {
 
   private $id;
   private $package;

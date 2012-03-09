@@ -19,7 +19,7 @@
 /**
  * @group conduit
  */
-class PhabricatorConduitAPIController
+final class PhabricatorConduitAPIController
   extends PhabricatorConduitController {
 
   public function shouldRequireLogin() {

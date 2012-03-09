@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorProjectProfileEditController
+final class PhabricatorProjectProfileEditController
   extends PhabricatorProjectController {
 
   public function willProcessRequest(array $data) {

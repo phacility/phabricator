@@ -19,7 +19,8 @@
 /**
  * @group maniphest
  */
-class ManiphestTaskDescriptionPreviewController extends ManiphestController {
+final class ManiphestTaskDescriptionPreviewController
+  extends ManiphestController {
 
   public function processRequest() {
 

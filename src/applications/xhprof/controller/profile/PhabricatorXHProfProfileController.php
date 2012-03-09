@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorXHProfProfileController
+final class PhabricatorXHProfProfileController
   extends PhabricatorXHProfController {
 
   private $phid;

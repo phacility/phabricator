@@ -19,7 +19,7 @@
 /**
  * @group maniphest
  */
-class ManiphestTaskEditController extends ManiphestController {
+final class ManiphestTaskEditController extends ManiphestController {
 
   private $id;
 

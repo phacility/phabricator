@@ -19,7 +19,7 @@
 /**
  * @group maniphest
  */
-class ManiphestTaskListController extends ManiphestController {
+final class ManiphestTaskListController extends ManiphestController {
 
   const DEFAULT_PAGE_SIZE = 1000;
 

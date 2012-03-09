@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DiffusionBrowseFileController extends DiffusionController {
+final class DiffusionBrowseFileController extends DiffusionController {
 
   // Image types we want to display inline using <img> tags
   protected $imageTypes = array(

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class HeraldTranscriptController extends HeraldController {
+final class HeraldTranscriptController extends HeraldController {
 
   const FILTER_AFFECTED = 'affected';
   const FILTER_OWNED    = 'owned';

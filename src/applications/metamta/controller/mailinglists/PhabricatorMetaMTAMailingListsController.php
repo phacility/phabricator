@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorMetaMTAMailingListsController
+final class PhabricatorMetaMTAMailingListsController
   extends PhabricatorMetaMTAController {
 
   public function processRequest() {

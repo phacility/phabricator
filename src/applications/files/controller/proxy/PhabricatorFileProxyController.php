@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorFileProxyController extends PhabricatorFileController {
+final class PhabricatorFileProxyController extends PhabricatorFileController {
 
   private $uri;
 

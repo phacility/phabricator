@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorMetaMTAMailingListEditController
+final class PhabricatorMetaMTAMailingListEditController
   extends PhabricatorMetaMTAController {
 
   private $id;

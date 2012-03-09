@@ -16,7 +16,9 @@
  * limitations under the License.
  */
 
-class PhabricatorFileMacroListController extends PhabricatorFileController {
+final class PhabricatorFileMacroListController
+  extends PhabricatorFileController {
+
   public function processRequest() {
 
     $request = $this->getRequest();

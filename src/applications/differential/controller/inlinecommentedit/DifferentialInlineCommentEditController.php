@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-class DifferentialInlineCommentEditController extends DifferentialController {
+final class DifferentialInlineCommentEditController
+  extends DifferentialController {
 
   private $revisionID;
 

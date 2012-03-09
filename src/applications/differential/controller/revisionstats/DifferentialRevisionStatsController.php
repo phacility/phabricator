@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DifferentialRevisionStatsController extends DifferentialController {
+final class DifferentialRevisionStatsController extends DifferentialController {
   private $filter;
 
   public function shouldRequireLogin() {

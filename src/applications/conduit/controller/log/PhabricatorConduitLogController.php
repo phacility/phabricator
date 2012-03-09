@@ -19,7 +19,8 @@
 /**
  * @group conduit
  */
-class PhabricatorConduitLogController extends PhabricatorConduitController {
+final class PhabricatorConduitLogController
+  extends PhabricatorConduitController {
 
   public function processRequest() {
     $request = $this->getRequest();

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorOAuthUnlinkController extends PhabricatorAuthController {
+final class PhabricatorOAuthUnlinkController extends PhabricatorAuthController {
 
   private $provider;
 

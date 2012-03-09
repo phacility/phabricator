@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-class PhabricatorOwnersListController extends PhabricatorOwnersController {
+final class PhabricatorOwnersListController
+  extends PhabricatorOwnersController {
 
   protected $view;
 

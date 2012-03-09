@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorDirectoryCategoryEditController
+final class PhabricatorDirectoryCategoryEditController
   extends PhabricatorDirectoryController {
 
   private $id;

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorOAuthDefaultRegistrationController
+final class PhabricatorOAuthDefaultRegistrationController
   extends PhabricatorOAuthRegistrationController {
 
   public function processRequest() {

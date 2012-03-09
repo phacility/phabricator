@@ -19,7 +19,9 @@
 /**
  * @group search
  */
-class PhabricatorSearchController extends PhabricatorSearchBaseController {
+final class PhabricatorSearchController
+  extends PhabricatorSearchBaseController {
+
   private $key;
 
   public function willProcessRequest(array $data) {

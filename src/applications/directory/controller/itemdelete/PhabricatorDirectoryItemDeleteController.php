@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorDirectoryItemDeleteController
+final class PhabricatorDirectoryItemDeleteController
   extends PhabricatorDirectoryController {
 
   public function willProcessRequest(array $data) {

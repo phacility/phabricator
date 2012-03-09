@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorWorkerTaskUpdateController
+final class PhabricatorWorkerTaskUpdateController
   extends PhabricatorDaemonController {
 
   private $id;

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DifferentialDiffViewController extends DifferentialController {
+final class DifferentialDiffViewController extends DifferentialController {
 
   private $id;
 

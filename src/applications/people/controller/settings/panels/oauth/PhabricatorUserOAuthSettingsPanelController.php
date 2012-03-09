@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorUserOAuthSettingsPanelController
+final class PhabricatorUserOAuthSettingsPanelController
   extends PhabricatorUserSettingsPanelController {
 
   private $provider;

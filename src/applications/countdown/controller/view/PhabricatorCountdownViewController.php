@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorCountdownViewController
+final class PhabricatorCountdownViewController
   extends PhabricatorCountdownController {
 
   private $id;

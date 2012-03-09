@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DifferentialCommentSaveController extends DifferentialController {
+final class DifferentialCommentSaveController extends DifferentialController {
 
   public function processRequest() {
     $request = $this->getRequest();

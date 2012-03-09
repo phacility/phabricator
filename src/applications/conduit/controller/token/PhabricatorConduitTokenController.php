@@ -19,7 +19,8 @@
 /**
  * @group conduit
  */
-class PhabricatorConduitTokenController extends PhabricatorConduitController {
+final class PhabricatorConduitTokenController
+  extends PhabricatorConduitController {
 
   public function processRequest() {
 

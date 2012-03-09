@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorTypeaheadCommonDatasourceController
+final class PhabricatorTypeaheadCommonDatasourceController
   extends PhabricatorTypeaheadDatasourceController {
 
   public function willProcessRequest(array $data) {

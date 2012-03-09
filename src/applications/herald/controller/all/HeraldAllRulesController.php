@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class HeraldAllRulesController extends HeraldController {
+final class HeraldAllRulesController extends HeraldController {
 
   private $view;
   private $viewPHID;

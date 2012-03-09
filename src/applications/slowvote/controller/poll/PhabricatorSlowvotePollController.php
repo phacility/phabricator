@@ -19,7 +19,7 @@
 /**
  * @group slowvote
  */
-class PhabricatorSlowvotePollController
+final class PhabricatorSlowvotePollController
   extends PhabricatorSlowvoteController {
 
   private $id;

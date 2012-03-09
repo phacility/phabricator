@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorFileListController extends PhabricatorFileController {
+final class PhabricatorFileListController extends PhabricatorFileController {
   private $filter;
 
   private $showUploader;
