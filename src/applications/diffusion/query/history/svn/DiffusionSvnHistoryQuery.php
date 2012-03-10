@@ -29,9 +29,9 @@ final class DiffusionSvnHistoryQuery extends DiffusionHistoryQuery {
 
     $paths = queryfx_all(
       $conn_r,
-      'SELECT id, path FROM %T WHERE path IN (%Ls)',
+      'SELECT id, path FROM %T WHERE pathHash IN (%Ls)',
       PhabricatorRepository::TABLE_PATH,
-      array('/'.trim($path, '/')));
+      array(md5('/'.trim($path, '/'))));
     $paths = ipull($paths, 'id', 'path');
     $path_id = $paths['/'.trim($path, '/')];
 

@@ -128,9 +128,9 @@ abstract class DiffusionHistoryQuery {
     $path_normal = DiffusionPathIDQuery::normalizePath($path);
     $paths = queryfx_all(
       $conn_r,
-      'SELECT id, path FROM %T WHERE path IN (%Ls)',
+      'SELECT id, path FROM %T WHERE pathHash IN (%Ls)',
       PhabricatorRepository::TABLE_PATH,
-      array($path_normal));
+      array(md5($path_normal)));
     $paths = ipull($paths, 'id', 'path');
     $path_id = idx($paths, $path_normal);
 

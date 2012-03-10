@@ -39,11 +39,11 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
       foreach (array_chunk($missing_paths, 128) as $path_chunk) {
         $sql = array();
         foreach ($path_chunk as $path) {
-          $sql[] = qsprintf($conn_w, '(%s)', $path);
+          $sql[] = qsprintf($conn_w, '(%s, %s)', $path, md5($path));
         }
         queryfx(
           $conn_w,
-          'INSERT IGNORE INTO %T (path) VALUES %Q',
+          'INSERT IGNORE INTO %T (path, pathHash) VALUES %Q',
           PhabricatorRepository::TABLE_PATH,
           implode(', ', $sql));
       }
@@ -61,9 +61,9 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
     foreach (array_chunk($paths, 128) as $path_chunk) {
       $chunk_map = queryfx_all(
         $conn_w,
-        'SELECT path, id FROM %T WHERE path IN (%Ls)',
+        'SELECT path, id FROM %T WHERE pathHash IN (%Ls)',
         PhabricatorRepository::TABLE_PATH,
-        $path_chunk);
+        array_map('md5', $path_chunk));
       foreach ($chunk_map as $row) {
         $result_map[$row['path']] = $row['id'];
       }

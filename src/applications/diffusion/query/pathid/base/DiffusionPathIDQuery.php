@@ -36,9 +36,9 @@ final class DiffusionPathIDQuery {
 
     $paths = queryfx_all(
       $repository->establishConnection('r'),
-      'SELECT * FROM %T WHERE path IN (%Ls)',
+      'SELECT * FROM %T WHERE pathHash IN (%Ls)',
       PhabricatorRepository::TABLE_PATH,
-      array_keys($path_normal_map));
+      array_map('md5', array_keys($path_normal_map)));
     $paths = ipull($paths, 'id', 'path');
 
     $result = array();

@@ -94,6 +94,7 @@ final class PhabricatorUserSSHKeysSettingsPanelController
           } else {
             $key->setKeyType($type);
             $key->setKeyBody($body);
+            $key->setKeyHash(md5($body));
             $key->setKeyComment($comment);
 
             $e_key = null;
