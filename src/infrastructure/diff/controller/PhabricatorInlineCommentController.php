@@ -201,6 +201,8 @@ abstract class PhabricatorInlineCommentController
     $edit_dialog->setUser($user);
     $edit_dialog->setSubmitURI($request->getRequestURI());
     $edit_dialog->setOnRight($this->getIsOnRight());
+    $edit_dialog->setNumber($this->getLineNumber());
+    $edit_dialog->setLength($this->getLineLength());
 
     return $edit_dialog;
   }

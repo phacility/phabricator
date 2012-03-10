@@ -23,6 +23,8 @@ final class DifferentialInlineCommentEditView extends AphrontView {
   private $uri;
   private $title;
   private $onRight;
+  private $number;
+  private $length;
 
   public function addHiddenInput($key, $value) {
     $this->inputs[] = array($key, $value);
@@ -47,6 +49,16 @@ final class DifferentialInlineCommentEditView extends AphrontView {
   public function setOnRight($on_right) {
     $this->onRight = $on_right;
     $this->addHiddenInput('on_right', $on_right);
+    return $this;
+  }
+
+  public function setNumber($number) {
+    $this->number = $number;
+    return $this;
+  }
+
+  public function setLength($length) {
+    $this->length = $length;
     return $this;
   }
 
@@ -107,19 +119,27 @@ final class DifferentialInlineCommentEditView extends AphrontView {
       'Cancel');
 
     $buttons = implode('', $buttons);
-    return
-      '<div class="differential-inline-comment-edit">'.
-        '<div class="differential-inline-comment-edit-title">'.
-          phutil_escape_html($this->title).
-        '</div>'.
-        '<div class="differential-inline-comment-edit-body">'.
-          $this->renderChildren().
-        '</div>'.
-        '<div class="differential-inline-comment-edit-buttons">'.
-          $buttons.
-          '<div style="clear: both;"></div>'.
-        '</div>'.
-      '</div>';
+    return javelin_render_tag(
+      'div',
+      array(
+        'class' => 'differential-inline-comment-edit',
+        'sigil' => 'differential-inline-comment',
+        'meta' => array(
+          'on_right' => $this->onRight,
+          'number' => $this->number,
+          'length' => $this->length,
+        ),
+      ),
+      '<div class="differential-inline-comment-edit-title">'.
+        phutil_escape_html($this->title).
+      '</div>'.
+      '<div class="differential-inline-comment-edit-body">'.
+        $this->renderChildren().
+      '</div>'.
+      '<div class="differential-inline-comment-edit-buttons">'.
+        $buttons.
+        '<div style="clear: both;"></div>'.
+      '</div>');
   }
 
 }

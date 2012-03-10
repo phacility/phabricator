@@ -162,10 +162,6 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     ['mouseover', 'mouseout'],
     'differential-inline-comment',
     function(e) {
-      if (selecting || editor) {
-        return;
-      }
-
       if (e.getType() == 'mouseout') {
         hideReticle();
       } else {
@@ -215,6 +211,8 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       .setTemplates(config.undo_templates)
       .setOperation(op)
       .setID(data.id)
+      .setLineNumber(data.number)
+      .setLength(data.length)
       .setOnRight(data.on_right)
       .setOriginalText(original)
       .setRow(row)
