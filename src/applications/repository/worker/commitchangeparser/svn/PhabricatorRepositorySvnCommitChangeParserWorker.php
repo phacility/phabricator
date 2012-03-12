@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -723,8 +723,8 @@ class PhabricatorRepositorySvnCommitChangeParserWorker
           }
           break;
         case 'xml':
-          $expect = '<?xml version="1.0"?>';
-          if ($line !== $expect) {
+          $expect = '/<?xml version="1.0".*?>/';
+          if (!preg_match($expect, $line)) {
             throw new Exception("Expected '{$expect}', got {$line}.");
           }
           $mode = 'list';
