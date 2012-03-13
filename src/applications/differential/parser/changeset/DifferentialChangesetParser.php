@@ -1714,4 +1714,49 @@ class DifferentialChangesetParser {
     return array($range_s, $range_e, $mask);
   }
 
+  /**
+   * Render "modified coverage" information; test coverage on modified lines.
+   * This synthesizes diff information with unit test information into a useful
+   * indicator of how well tested a change is.
+   */
+  public function renderModifiedCoverage() {
+    $na = '<em>-</em>';
+
+    if (!$this->coverage) {
+      return $na;
+    }
+
+    $covered = 0;
+    $not_covered = 0;
+
+    foreach ($this->new as $k => $new) {
+      if (!$new['line']) {
+        continue;
+      }
+
+      if (!$new['type']) {
+        continue;
+      }
+
+      if (empty($this->coverage[$new['line'] - 1])) {
+        continue;
+      }
+
+      switch ($this->coverage[$new['line']]) {
+        case 'C':
+          $covered++;
+          break;
+        case 'U':
+          $not_covered++;
+          break;
+      }
+    }
+
+    if (!$covered && !$not_covered) {
+      return $na;
+    }
+
+    return sprintf('%d%%', 100 * ($covered / ($covered + $not_covered)));
+  }
+
 }

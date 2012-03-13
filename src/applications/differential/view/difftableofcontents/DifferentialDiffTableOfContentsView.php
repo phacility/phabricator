@@ -26,6 +26,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
   private $renderURI = '/differential/changeset/';
   private $revisionID;
   private $whitespace;
+  private $unitTestData;
 
   public function setChangesets($changesets) {
     $this->changesets = $changesets;
@@ -39,6 +40,11 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
 
   public function setDiff(DifferentialDiff $diff) {
     $this->diff = $diff;
+    return $this;
+  }
+
+  public function setUnitTestData($unit_test_data) {
+    $this->unitTestData = $unit_test_data;
     return $this;
   }
 
@@ -73,6 +79,23 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
     require_celerity_resource('differential-table-of-contents-css');
 
     $rows = array();
+
+    $coverage = array();
+    if ($this->unitTestData) {
+      $coverage_by_file = array();
+      foreach ($this->unitTestData as $result) {
+        $test_coverage = idx($result, 'coverage');
+        if (!$test_coverage) {
+          continue;
+        }
+        foreach ($test_coverage as $file => $results) {
+          $coverage_by_file[$file][] = $results;
+        }
+      }
+      foreach ($coverage_by_file as $file => $coverages) {
+        $coverage[$file] = ArcanistUnitTestResult::mergeCoverage($coverages);
+      }
+    }
 
     $changesets = $this->changesets;
     $paths = array();
@@ -129,6 +152,20 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
           ? null
           : '<span title="Properties Changed">M</span>';
 
+      $fname = $changeset->getFilename();
+      $cov  = $this->renderCoverage($coverage, $fname);
+      if ($cov === null) {
+        $mcov = $cov = '<em>-</em>';
+      } else {
+        $mcov = phutil_render_tag(
+          'div',
+          array(
+            'id' => 'differential-mcoverage-'.md5($fname),
+            'class' => 'differential-mcoverage-loading',
+          ),
+          'Loading...');
+      }
+
       $rows[] =
         '<tr>'.
           '<td class="differential-toc-char" title='.$chartitle.'>'.$char.
@@ -136,6 +173,8 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
           '<td class="differential-toc-prop">'.$pchar.'</td>'.
           '<td class="differential-toc-ftype">'.$desc.'</td>'.
           '<td class="differential-toc-file">'.$link.$lines.'</td>'.
+          '<td class="differential-toc-cov">'.$cov.'</td>'.
+          '<td class="differential-toc-mcov">'.$mcov.'</td>'.
         '</tr>';
       if ($meta) {
         $rows[] =
@@ -172,10 +211,35 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
         $editor_link.
         '<h1>Table of Contents</h1>'.
         '<table>'.
+          '<tr>'.
+            '<th></th>'.
+            '<th></th>'.
+            '<th></th>'.
+            '<th>Path</th>'.
+            '<th class="differential-toc-cov">Coverage (All)</th>'.
+            '<th class="differential-toc-mcov">Coverage (Touched)</th>'.
+          '</tr>'.
           implode("\n", $rows).
         '</table>'.
       '</div>';
   }
+
+  private function renderCoverage(array $coverage, $file) {
+    $info = idx($coverage, $file);
+    if (!$info) {
+      return null;
+    }
+
+    $not_covered = substr_count($info, 'U');
+    $covered     = substr_count($info, 'C');
+
+    if (!$not_covered && !$covered) {
+      return null;
+    }
+
+    return sprintf('%d%%', 100 * ($covered / ($covered + $not_covered)));
+  }
+
 
   private function renderChangesetLink(DifferentialChangeset $changeset) {
     $display_file = $changeset->getDisplayFilename();

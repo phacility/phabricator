@@ -6,6 +6,8 @@
 
 
 
+phutil_require_module('arcanist', 'unit/result');
+
 phutil_require_module('phabricator', 'applications/differential/constants/changetype');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'view/base');

@@ -49,3 +49,34 @@
 .diff-star-skip {
   color: #ff00aa;
 }
+
+.differential-toc table {
+  width: 100%;
+}
+
+.differential-toc table td.differential-toc-cov,
+.differential-toc table td.differential-toc-mcov {
+  width: 120px;
+  text-align: right;
+  padding-right: 6px;
+}
+
+.differential-toc table th {
+  color: #666666;
+  font-size: 11px;
+  padding: 0 4px 4px;
+  white-space: nowrap;
+}
+
+.differential-toc table th.differential-toc-cov,
+.differential-toc table th.differential-toc-mcov {
+  text-align: right;
+}
+
+.differential-toc table td em {
+  color: #666666;
+}
+
+.differential-mcoverage-loading {
+  color: #888888;
+}
