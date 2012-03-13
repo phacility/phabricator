@@ -53,6 +53,9 @@ final class DiffusionDiffController extends DiffusionController {
     $output = $parser->render($range_s, $range_e, $mask);
 
     return id(new AphrontAjaxResponse())
-      ->setContent($output);
+      ->setContent(
+        array(
+          'changeset' => $output,
+        ));
   }
 }

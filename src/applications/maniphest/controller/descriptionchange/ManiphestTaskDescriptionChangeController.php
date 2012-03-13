@@ -72,7 +72,10 @@ final class ManiphestTaskDescriptionChangeController
     $view->setRenderFullSummary(true);
     $view->setRangeSpecification($request->getStr('range'));
 
-    return id(new AphrontAjaxResponse())->setContent($view->render());
+    return id(new AphrontAjaxResponse())->setContent(
+      array(
+        'changeset' => $view->render(),
+      ));
   }
 
 }

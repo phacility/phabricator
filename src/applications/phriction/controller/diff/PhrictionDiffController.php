@@ -93,7 +93,10 @@ final class PhrictionDiffController
     $output = $parser->render($range_s, $range_e, $mask);
 
     if ($request->isAjax()) {
-      return id(new AphrontAjaxResponse())->setContent($output);
+      return id(new AphrontAjaxResponse())->setContent(
+        array(
+          'changeset' => $output,
+        ));
     }
 
     require_celerity_resource('differential-changeset-view-css');
