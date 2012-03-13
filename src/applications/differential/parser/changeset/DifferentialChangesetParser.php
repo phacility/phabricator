@@ -1742,7 +1742,7 @@ class DifferentialChangesetParser {
         continue;
       }
 
-      switch ($this->coverage[$new['line']]) {
+      switch ($this->coverage[$new['line'] - 1]) {
         case 'C':
           $covered++;
           break;
