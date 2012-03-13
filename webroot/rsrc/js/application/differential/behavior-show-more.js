@@ -10,7 +10,7 @@
 JX.behavior('differential-show-more', function(config) {
 
   function onresponse(context, response) {
-    var div = JX.$N('div', {}, JX.$H(response));
+    var div = JX.$N('div', {}, JX.$H(response.changeset));
     var root = context.parentNode;
     copyRows(root, div, context);
     root.removeChild(context);

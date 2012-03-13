@@ -81,11 +81,11 @@
 }
 
 td.cov-U {
-  background: #dd3300;
+  background: #dd8866;
 }
 
 td.cov-C {
-  background: #0066ff;
+  background: #66bbff;
 }
 
 td.cov-N {
@@ -94,6 +94,18 @@ td.cov-N {
 
 td.cov-X {
   background: #aa00aa;
+}
+
+.differential-diff td.source-cov-C {
+  background: #cceeff;
+}
+
+.differential-diff td.source-cov-U {
+  background: #ffbb99;
+}
+
+.differential-diff td.source-cov-N {
+  background: #f3f6ff;
 }
 
 .differential-diff td.show-more,

@@ -191,6 +191,8 @@ class DifferentialChangesetListView extends AphrontView {
       $mapping[$uniq_id] = $ref;
     }
 
+    require_celerity_resource('aphront-tooltip-css');
+
     Javelin::initBehavior('differential-populate', array(
       'registry'    => $mapping,
       'whitespace'  => $this->whitespace,
