@@ -1,0 +1,24 @@
+/**
+ * @provides aphront-tooltip-css
+ */
+
+.jx-tooltip-container {
+  position: absolute;
+  z-index: 18;
+}
+
+.jx-tooltip {
+  background: #222222;
+  color: #e8e8e8;
+  font-size: 11px;
+  padding: 4px;
+  overflow: hidden;
+}
+
+.jx-tooltip-align-E {
+  padding-left: 3px;
+}
+
+.jx-tooltip-align-N {
+  padding-bottom: 3px;
+}
