@@ -146,7 +146,9 @@ final class PhabricatorTypeaheadCommonDatasourceController
     }
 
     if ($need_projs) {
-      $projs = id(new PhabricatorProject())->loadAll();
+      $projs = id(new PhabricatorProject())->loadAllWhere(
+        'status != %d',
+        PhabricatorProjectStatus::STATUS_ARCHIVED);
       foreach ($projs as $proj) {
         $data[] = array(
           $proj->getName(),
