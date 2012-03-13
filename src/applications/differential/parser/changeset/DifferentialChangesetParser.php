@@ -66,7 +66,11 @@ class DifferentialChangesetParser {
 
   const WHITESPACE_SHOW_ALL         = 'show-all';
   const WHITESPACE_IGNORE_TRAILING  = 'ignore-trailing';
+
+  // TODO: This is now "Ignore Most" in the UI.
   const WHITESPACE_IGNORE_ALL       = 'ignore-all';
+
+  const WHITESPACE_IGNORE_FORCE     = 'ignore-force';
 
   /**
    * Configure which Changeset comments added to the right side of the visible
@@ -395,6 +399,12 @@ class DifferentialChangesetParser {
         }
         $new[$k]['text'] = idx($new_text, $desc['line']);
 
+        if ($this->whitespaceMode == self::WHITESPACE_IGNORE_FORCE) {
+          // Under forced ignore mode, ignore even internal whitespace
+          // changes.
+          continue;
+        }
+
         // If there's a corresponding "old" text and the line is marked as
         // unchanged, test if there are internal whitespace changes between
         // non-whitespace characters, e.g. spaces added to a string or spaces
@@ -700,6 +710,7 @@ class DifferentialChangesetParser {
     switch ($whitespace_mode) {
       case self::WHITESPACE_SHOW_ALL:
       case self::WHITESPACE_IGNORE_TRAILING:
+      case self::WHITESPACE_IGNORE_FORCE:
         break;
       default:
         $whitespace_mode = self::WHITESPACE_IGNORE_ALL;
@@ -715,10 +726,15 @@ class DifferentialChangesetParser {
         $changeset->getFileType() == DifferentialChangeType::FILE_SYMLINK) {
       if ($skip_cache || !$this->loadCache()) {
 
-        $ignore_all = ($this->whitespaceMode == self::WHITESPACE_IGNORE_ALL);
+        $ignore_all = (($whitespace_mode == self::WHITESPACE_IGNORE_ALL) ||
+                       ($whitespace_mode == self::WHITESPACE_IGNORE_FORCE));
 
-        if ($ignore_all && $changeset->getWhitespaceMatters()) {
-          $ignore_all = false;
+        $force_ignore = ($whitespace_mode == self::WHITESPACE_IGNORE_FORCE);
+
+        if (!$force_ignore) {
+          if ($ignore_all && $changeset->getWhitespaceMatters()) {
+            $ignore_all = false;
+          }
         }
 
         // The "ignore all whitespace" algorithm depends on rediffing the
