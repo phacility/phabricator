@@ -195,8 +195,9 @@ function setup_aphront_basics() {
   ini_set('include_path', $libraries_root.':'.ini_get('include_path'));
   @include_once $root.'libphutil/src/__phutil_library_init__.php';
   if (!@constant('__LIBPHUTIL__')) {
-    echo "ERROR: Unable to load libphutil. Update your PHP 'include_path' to ".
-         "include the parent directory of libphutil/.\n";
+    echo "ERROR: Unable to load libphutil. Put libphutil/ next to ".
+         "phabricator/, or update your PHP 'include_path' to include ".
+         "the parent directory of libphutil/.\n";
     exit(1);
   }
 
