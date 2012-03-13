@@ -41,8 +41,10 @@ final class ManiphestTaskDescriptionChangeController
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    $is_show_more = false;
     if (!$this->getTransactionID()) {
       $this->setTransactionID($this->getRequest()->getStr('ref'));
+      $is_show_more = true;
     }
 
     $transaction_id = $this->getTransactionID();
@@ -72,10 +74,12 @@ final class ManiphestTaskDescriptionChangeController
     $view->setRenderFullSummary(true);
     $view->setRangeSpecification($request->getStr('range'));
 
-    return id(new AphrontAjaxResponse())->setContent(
-      array(
-        'changeset' => $view->render(),
-      ));
+    if ($is_show_more) {
+      return id(new PhabricatorChangesetResponse())
+        ->setRenderedChangeset($view->render());
+    } else {
+      return id(new AphrontAjaxResponse())->setContent($view->render());
+    }
   }
 
 }

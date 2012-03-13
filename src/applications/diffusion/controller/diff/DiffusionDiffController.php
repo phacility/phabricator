@@ -52,10 +52,7 @@ final class DiffusionDiffController extends DiffusionController {
       DifferentialChangesetParser::parseRangeSpecification($spec);
     $output = $parser->render($range_s, $range_e, $mask);
 
-    return id(new AphrontAjaxResponse())
-      ->setContent(
-        array(
-          'changeset' => $output,
-        ));
+    return id(new PhabricatorChangesetResponse())
+      ->setRenderedChangeset($output);
   }
 }

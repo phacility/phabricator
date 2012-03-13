@@ -13,6 +13,7 @@ phutil_require_module('phabricator', 'applications/maniphest/storage/transaction
 phutil_require_module('phabricator', 'applications/maniphest/view/transactiondetail');
 phutil_require_module('phabricator', 'applications/markup/engine');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
+phutil_require_module('phabricator', 'infrastructure/diff/response');
 
 phutil_require_module('phutil', 'utils');
 

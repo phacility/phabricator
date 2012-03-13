@@ -211,14 +211,13 @@ final class DifferentialChangesetViewController extends DifferentialController {
     $mcov = $parser->renderModifiedCoverage();
 
     if ($request->isAjax()) {
-      $content = array(
-        'coverage'  => array(
-          'differential-mcoverage-'.md5($changeset->getFilename()) => $mcov,
-        ),
-        'changeset' => $output,
+      $coverage = array(
+        'differential-mcoverage-'.md5($changeset->getFilename()) => $mcov,
       );
-      return id(new AphrontAjaxResponse())
-        ->setContent($content);
+
+      return id(new PhabricatorChangesetResponse())
+        ->setRenderedChangeset($output)
+        ->setCoverage($coverage);
     }
 
     Javelin::initBehavior('differential-show-more', array(
