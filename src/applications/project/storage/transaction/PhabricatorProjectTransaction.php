@@ -19,7 +19,7 @@
 /**
  * @group project
  */
-class PhabricatorProjectTransaction extends PhabricatorProjectDAO {
+final class PhabricatorProjectTransaction extends PhabricatorProjectDAO {
 
   protected $projectID;
   protected $authorPHID;

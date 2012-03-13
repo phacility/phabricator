@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorJavelinLinter extends ArcanistLinter {
+final class PhabricatorJavelinLinter extends ArcanistLinter {
 
   private $symbols = array();
 

@@ -19,7 +19,7 @@
 /**
  * @group search
  */
-class PhabricatorSearchCommitIndexer
+final class PhabricatorSearchCommitIndexer
   extends PhabricatorSearchDocumentIndexer {
 
   public static function indexCommit(PhabricatorRepositoryCommit $commit) {

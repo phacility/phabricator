@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class HeraldRepetitionPolicyConfig {
+final class HeraldRepetitionPolicyConfig {
   const FIRST   = 'first';  // only execute the first time (no repeating)
   const EVERY   = 'every';  // repeat every time
 

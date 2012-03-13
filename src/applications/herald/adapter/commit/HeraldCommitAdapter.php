@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class HeraldCommitAdapter extends HeraldObjectAdapter {
+final class HeraldCommitAdapter extends HeraldObjectAdapter {
 
   protected $diff;
   protected $revision;

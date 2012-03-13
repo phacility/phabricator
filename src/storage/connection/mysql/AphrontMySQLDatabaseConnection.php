@@ -19,7 +19,7 @@
 /**
  * @group storage
  */
-class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
+final class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
 
   private $config;
   private $connection;

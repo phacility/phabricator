@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class HeraldFieldConfig {
+final class HeraldFieldConfig {
 
   const FIELD_TITLE                  = 'title';
   const FIELD_BODY                   = 'body';

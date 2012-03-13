@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorRepositoryGitCommitMessageParserWorker
+final class PhabricatorRepositoryGitCommitMessageParserWorker
   extends PhabricatorRepositoryCommitMessageParserWorker {
 
   public function parseCommit(

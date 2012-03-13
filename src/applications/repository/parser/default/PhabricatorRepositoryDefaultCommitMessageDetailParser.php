@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * TODO: Facebook extends this (I think?), but should it?
+ */
 class PhabricatorRepositoryDefaultCommitMessageDetailParser
   extends PhabricatorRepositoryCommitMessageDetailParser {
 

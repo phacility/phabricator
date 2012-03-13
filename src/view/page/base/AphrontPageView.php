@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class AphrontPageView extends AphrontView {
+abstract class AphrontPageView extends AphrontView {
 
   private $title;
 

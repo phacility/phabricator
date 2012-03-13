@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorProject extends PhabricatorProjectDAO {
+final class PhabricatorProject extends PhabricatorProjectDAO {
 
   protected $name;
   protected $phid;

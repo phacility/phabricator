@@ -19,7 +19,7 @@
 /**
  * @group maniphest
  */
-class ManiphestTransactionEditor {
+final class ManiphestTransactionEditor {
 
   private $parentMessageID;
   private $auxiliaryFields = array();

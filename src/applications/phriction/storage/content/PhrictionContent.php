@@ -19,7 +19,7 @@
 /**
  * @group phriction
  */
-class PhrictionContent extends PhrictionDAO {
+final class PhrictionContent extends PhrictionDAO {
 
   protected $id;
   protected $documentID;

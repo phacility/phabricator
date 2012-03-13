@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorRepositoryGitCommitDiscoveryDaemon
+final class PhabricatorRepositoryGitCommitDiscoveryDaemon
   extends PhabricatorRepositoryCommitDiscoveryDaemon {
 
   protected function discoverCommits() {

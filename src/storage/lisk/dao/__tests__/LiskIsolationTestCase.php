@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class LiskIsolationTestCase extends PhabricatorTestCase {
+final class LiskIsolationTestCase extends PhabricatorTestCase {
 
   public function testIsolatedWrites() {
     $dao = new LiskIsolationTestDAO();

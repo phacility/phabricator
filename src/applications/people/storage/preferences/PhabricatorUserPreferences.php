@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorUserPreferences extends PhabricatorUserDAO {
+final class PhabricatorUserPreferences extends PhabricatorUserDAO {
 
   const PREFERENCE_MONOSPACED     = 'monospaced';
   const PREFERENCE_EDITOR         = 'editor';

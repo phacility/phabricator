@@ -21,7 +21,7 @@
  * @phutil-external-symbol function recaptcha_get_html
  * @phutil-external-symbol function recaptcha_check_answer
  */
-class AphrontFormRecaptchaControl extends AphrontFormControl {
+final class AphrontFormRecaptchaControl extends AphrontFormControl {
 
   protected function getCustomControlClass() {
     return 'aphront-form-control-recaptcha';

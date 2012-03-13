@@ -19,7 +19,7 @@
 /**
  * See #394445 for an explanation of why this thing even exists.
  */
-class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
+final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
   const STATUS_QUEUE = 'queued';
   const STATUS_SENT  = 'sent';

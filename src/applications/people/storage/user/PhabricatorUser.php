@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorUser extends PhabricatorUserDAO {
+final class PhabricatorUser extends PhabricatorUserDAO {
 
   const SESSION_TABLE = 'phabricator_session';
   const NAMETOKEN_TABLE = 'user_nametoken';

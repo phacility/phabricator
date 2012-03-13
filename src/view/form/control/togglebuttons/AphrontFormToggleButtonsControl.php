@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class AphrontFormToggleButtonsControl extends AphrontFormControl {
+final class AphrontFormToggleButtonsControl extends AphrontFormControl {
 
   private $baseURI;
   private $param;

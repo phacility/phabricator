@@ -19,7 +19,7 @@
 /**
  * @group markup
  */
-class PhabricatorRemarkupRuleImageMacro
+final class PhabricatorRemarkupRuleImageMacro
   extends PhutilRemarkupRule {
 
   const RANDOM_IMAGE_NAME = 'randomon';

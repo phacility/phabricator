@@ -19,7 +19,7 @@
 /**
  * @group maniphest
  */
-class ManiphestTransactionDetailView extends ManiphestView {
+final class ManiphestTransactionDetailView extends ManiphestView {
 
   private $transactions;
   private $handles;

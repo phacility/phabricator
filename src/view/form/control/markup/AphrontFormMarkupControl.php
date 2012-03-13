@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class AphrontFormMarkupControl extends AphrontFormControl {
+final class AphrontFormMarkupControl extends AphrontFormControl {
 
   protected function getCustomControlClass() {
     return 'aphront-form-control-markup';

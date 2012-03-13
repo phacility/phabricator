@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorUserSSHKey extends PhabricatorUserDAO {
+final class PhabricatorUserSSHKey extends PhabricatorUserDAO {
 
   protected $userPHID;
   protected $name;

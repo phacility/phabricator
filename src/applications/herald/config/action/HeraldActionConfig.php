@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class HeraldActionConfig {
+final class HeraldActionConfig {
 
   const ACTION_ADD_CC       = 'addcc';
   const ACTION_REMOVE_CC    = 'remcc';

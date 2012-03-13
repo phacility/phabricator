@@ -19,7 +19,8 @@
 /**
  * @group storage
  */
-class AphrontIsolatedDatabaseConnection extends AphrontDatabaseConnection {
+final class AphrontIsolatedDatabaseConnection
+  extends AphrontDatabaseConnection {
 
   private $configuration;
   private static $nextInsertID;

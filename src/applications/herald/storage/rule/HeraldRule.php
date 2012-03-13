@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class HeraldRule extends HeraldDAO {
+final class HeraldRule extends HeraldDAO {
 
   const TABLE_RULE_APPLIED = 'herald_ruleapplied';
 

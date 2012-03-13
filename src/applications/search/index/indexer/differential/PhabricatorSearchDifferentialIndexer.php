@@ -19,7 +19,7 @@
 /**
  * @group search
  */
-class PhabricatorSearchDifferentialIndexer
+final class PhabricatorSearchDifferentialIndexer
   extends PhabricatorSearchDocumentIndexer {
 
   public static function indexRevision(DifferentialRevision $rev) {

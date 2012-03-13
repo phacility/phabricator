@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class AphrontFormSelectControl extends AphrontFormControl {
+final class AphrontFormSelectControl extends AphrontFormControl {
 
   protected function getCustomControlClass() {
     return 'aphront-form-control-select';

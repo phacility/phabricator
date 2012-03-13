@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class HeraldRuleTypeConfig {
+final class HeraldRuleTypeConfig {
 
   const RULE_TYPE_GLOBAL = 'global';
   const RULE_TYPE_PERSONAL = 'personal';

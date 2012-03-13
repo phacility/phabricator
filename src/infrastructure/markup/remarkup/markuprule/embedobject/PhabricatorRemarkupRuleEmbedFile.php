@@ -19,7 +19,7 @@
 /**
  * @group markup
  */
-class PhabricatorRemarkupRuleEmbedFile
+final class PhabricatorRemarkupRuleEmbedFile
   extends PhutilRemarkupRule {
 
   public function apply($text) {

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class HeraldConditionConfig {
+final class HeraldConditionConfig {
 
   const CONDITION_CONTAINS        = 'contains';
   const CONDITION_NOT_CONTAINS    = '!contains';

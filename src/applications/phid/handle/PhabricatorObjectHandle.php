@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorObjectHandle {
+final class PhabricatorObjectHandle {
 
   private $uri;
   private $phid;

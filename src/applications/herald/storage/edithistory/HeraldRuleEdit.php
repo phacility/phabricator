@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class HeraldRuleEdit extends HeraldDAO {
+final class HeraldRuleEdit extends HeraldDAO {
 
   protected $editorPHID;
   protected $ruleID;

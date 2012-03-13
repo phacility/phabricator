@@ -19,7 +19,7 @@
 /**
  * @group irc
  */
-class PhabricatorIRCDifferentialNotificationHandler
+final class PhabricatorIRCDifferentialNotificationHandler
   extends PhabricatorIRCHandler {
 
   private $skippedOldEvents;

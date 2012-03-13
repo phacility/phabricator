@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class HeraldEngine {
+final class HeraldEngine {
 
   protected $rules = array();
   protected $results = array();

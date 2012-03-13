@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorRepositoryCommit extends PhabricatorRepositoryDAO {
+final class PhabricatorRepositoryCommit extends PhabricatorRepositoryDAO {
 
   protected $repositoryID;
   protected $phid;

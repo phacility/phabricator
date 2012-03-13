@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorObjectHandleData {
+final class PhabricatorObjectHandleData {
 
   private $phids;
 

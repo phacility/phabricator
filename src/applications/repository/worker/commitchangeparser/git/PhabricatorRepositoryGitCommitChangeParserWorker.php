@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorRepositoryGitCommitChangeParserWorker
+final class PhabricatorRepositoryGitCommitChangeParserWorker
   extends PhabricatorRepositoryCommitChangeParserWorker {
 
   protected function parseCommit(

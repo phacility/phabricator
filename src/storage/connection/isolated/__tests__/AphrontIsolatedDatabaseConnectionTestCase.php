@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class AphrontIsolatedDatabaseConnectionTestCase
+final class AphrontIsolatedDatabaseConnectionTestCase
   extends PhabricatorTestCase {
 
   protected function getPhabricatorTestCaseConfiguration() {

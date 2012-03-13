@@ -19,7 +19,7 @@
 /**
  * @group maniphest
  */
-class ManiphestTaskListView extends ManiphestView {
+final class ManiphestTaskListView extends ManiphestView {
 
   private $tasks;
   private $handles;

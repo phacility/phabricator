@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorSetup {
+final class PhabricatorSetup {
 
   public static function runSetup() {
     header("Content-Type: text/plain");

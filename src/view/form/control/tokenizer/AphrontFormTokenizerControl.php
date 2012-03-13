@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class AphrontFormTokenizerControl extends AphrontFormControl {
+final class AphrontFormTokenizerControl extends AphrontFormControl {
 
   private $datasource;
   private $disableBehavior;

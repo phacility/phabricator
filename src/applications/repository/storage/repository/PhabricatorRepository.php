@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorRepository extends PhabricatorRepositoryDAO {
+final class PhabricatorRepository extends PhabricatorRepositoryDAO {
 
   const TABLE_PATH = 'repository_path';
   const TABLE_PATHCHANGE = 'repository_pathchange';

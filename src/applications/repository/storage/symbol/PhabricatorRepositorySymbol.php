@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
  * limitations under the License.
  */
 
-
 /**
  * Records information about symbol locations in a codebase, like where classes
  * and functions are defined.
@@ -25,7 +24,7 @@
  *
  * @group diffusion
  */
-class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
+final class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
 
   protected $arcanistProjectID;
   protected $symbolName;

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorUserLog extends PhabricatorUserDAO {
+final class PhabricatorUserLog extends PhabricatorUserDAO {
 
   const ACTION_LOGIN          = 'login';
   const ACTION_LOGOUT         = 'logout';

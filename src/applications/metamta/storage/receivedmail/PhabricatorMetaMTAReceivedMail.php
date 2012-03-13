@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
+final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
 
   protected $headers = array();
   protected $bodies = array();

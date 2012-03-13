@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorStandardPageView extends AphrontPageView {
+final class PhabricatorStandardPageView extends AphrontPageView {
 
   private $baseURI;
   private $applicationName;

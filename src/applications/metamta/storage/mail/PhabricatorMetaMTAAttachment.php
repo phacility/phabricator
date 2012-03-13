@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorMetaMTAAttachment {
+final class PhabricatorMetaMTAAttachment {
   protected $data;
   protected $filename;
   protected $mimetype;

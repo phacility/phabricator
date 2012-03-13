@@ -21,7 +21,7 @@
  *
  * @group irc
  */
-class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
+final class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
 
   /**
    * Map of PHIDs to the last mention of them (as an epoch timestamp); prevents

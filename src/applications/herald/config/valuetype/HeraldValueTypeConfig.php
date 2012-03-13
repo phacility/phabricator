@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class HeraldValueTypeConfig {
+final class HeraldValueTypeConfig {
 
   const VALUE_TEXT                = 'text';
   const VALUE_NONE                = 'none';

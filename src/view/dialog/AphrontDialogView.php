@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class AphrontDialogView extends AphrontView {
+final class AphrontDialogView extends AphrontView {
 
   private $title;
   private $submitButton;

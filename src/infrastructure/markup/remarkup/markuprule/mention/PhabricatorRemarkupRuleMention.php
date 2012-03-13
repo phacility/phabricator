@@ -19,7 +19,7 @@
 /**
  * @group markup
  */
-class PhabricatorRemarkupRuleMention
+final class PhabricatorRemarkupRuleMention
   extends PhutilRemarkupRule {
 
   const KEY_RULE_MENTION          = 'rule.mention';
