@@ -19,7 +19,7 @@
 /**
  * @group aphront
  */
-class Aphront404Response extends AphrontWebpageResponse {
+final class Aphront404Response extends AphrontWebpageResponse {
 
   public function getHTTPResponseCode() {
     return 404;

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DifferentialRevisionListData {
+final class DifferentialRevisionListData {
 
   const QUERY_OPEN_OWNED               = 'open';
   const QUERY_OPEN_REVIEWER            = 'reviewer';

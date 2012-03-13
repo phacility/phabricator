@@ -19,7 +19,7 @@
 /**
  * @group aphront
  */
-class Aphront403Response extends AphrontWebpageResponse {
+final class Aphront403Response extends AphrontWebpageResponse {
 
   private $forbiddenText;
   public function setForbiddenText($text) {

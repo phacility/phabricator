@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DrydockDAO extends PhabricatorLiskDAO {
+abstract class DrydockDAO extends PhabricatorLiskDAO {
 
   public function getApplicationName() {
     return 'drydock';

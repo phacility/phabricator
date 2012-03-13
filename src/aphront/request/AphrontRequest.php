@@ -22,7 +22,7 @@
  *
  * @group aphront
  */
-class AphrontRequest {
+final class AphrontRequest {
 
   const TYPE_AJAX = '__ajax__';
   const TYPE_FORM = '__form__';

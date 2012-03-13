@@ -19,7 +19,8 @@
 /**
  * @group conduit
  */
-class ConduitAPI_differential_updaterevision_Method extends ConduitAPIMethod {
+final class ConduitAPI_differential_updaterevision_Method
+  extends ConduitAPIMethod {
 
   public function getMethodDescription() {
     return "Update a Differential revision.";

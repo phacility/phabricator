@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DifferentialRevision extends DifferentialDAO {
+final class DifferentialRevision extends DifferentialDAO {
 
   protected $title;
   protected $status;

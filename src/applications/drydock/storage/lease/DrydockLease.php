@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DrydockLease extends DrydockDAO {
+final class DrydockLease extends DrydockDAO {
 
   protected $phid;
   protected $resourceID;

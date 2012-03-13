@@ -19,7 +19,7 @@
 /**
  * @group aphront
  */
-class AphrontFileResponse extends AphrontResponse {
+final class AphrontFileResponse extends AphrontResponse {
 
   private $content;
   private $mimeType;

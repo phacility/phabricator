@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@
 /**
  * @group conduit
  */
-class ConduitAPI_differential_getcommitpaths_Method extends ConduitAPIMethod {
+final class ConduitAPI_differential_getcommitpaths_Method
+  extends ConduitAPIMethod {
 
   public function getMethodDescription() {
     return "Query which paths should be included when committing a ".

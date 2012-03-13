@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorFeedStoryData extends PhabricatorFeedDAO {
+final class PhabricatorFeedStoryData extends PhabricatorFeedDAO {
 
   protected $phid;
 

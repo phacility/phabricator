@@ -19,7 +19,7 @@
 /**
  * @group console
  */
-class DarkConsoleServicesPlugin extends DarkConsolePlugin {
+final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
 
   protected $observations;
 

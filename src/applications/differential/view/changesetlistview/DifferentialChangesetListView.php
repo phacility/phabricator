@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DifferentialChangesetListView extends AphrontView {
+final class DifferentialChangesetListView extends AphrontView {
 
   private $changesets = array();
   private $references = array();

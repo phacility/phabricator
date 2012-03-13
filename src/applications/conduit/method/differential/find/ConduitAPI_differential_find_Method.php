@@ -19,7 +19,7 @@
 /**
  * @group conduit
  */
-class ConduitAPI_differential_find_Method extends ConduitAPIMethod {
+final class ConduitAPI_differential_find_Method extends ConduitAPIMethod {
 
   public function getMethodDescription() {
     return "Query Differential revisions which match certain criteria.";

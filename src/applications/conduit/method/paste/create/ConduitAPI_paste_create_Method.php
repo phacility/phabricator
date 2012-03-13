@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 /**
  * @group conduit
  */
-class ConduitAPI_paste_create_Method extends ConduitAPI_paste_Method {
+final class ConduitAPI_paste_create_Method extends ConduitAPI_paste_Method {
 
   public function getMethodDescription() {
     return 'Create a new paste.';

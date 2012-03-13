@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DifferentialChangesetDetailView extends AphrontView {
+final class DifferentialChangesetDetailView extends AphrontView {
 
   private $changeset;
   private $buttons = array();

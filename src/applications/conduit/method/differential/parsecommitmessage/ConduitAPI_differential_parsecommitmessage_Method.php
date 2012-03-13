@@ -19,7 +19,7 @@
 /**
  * @group conduit
  */
-class ConduitAPI_differential_parsecommitmessage_Method
+final class ConduitAPI_differential_parsecommitmessage_Method
   extends ConduitAPIMethod {
 
   public function getMethodDescription() {

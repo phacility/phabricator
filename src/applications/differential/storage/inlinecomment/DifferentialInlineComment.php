@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DifferentialInlineComment extends DifferentialDAO {
+final class DifferentialInlineComment extends DifferentialDAO {
 
   protected $revisionID;
   protected $commentID;

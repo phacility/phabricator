@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DifferentialComment extends DifferentialDAO {
+final class DifferentialComment extends DifferentialDAO {
 
   const METADATA_ADDED_REVIEWERS  = 'added-reviewers';
   const METADATA_ADDED_CCS        = 'added-ccs';

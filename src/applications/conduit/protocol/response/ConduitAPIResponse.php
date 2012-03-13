@@ -19,7 +19,7 @@
 /**
  * @group conduit
  */
-class ConduitAPIResponse {
+final class ConduitAPIResponse {
 
   private $result;
   private $errorCode;

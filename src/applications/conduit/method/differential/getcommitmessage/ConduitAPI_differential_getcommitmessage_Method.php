@@ -19,7 +19,8 @@
 /**
  * @group conduit
  */
-class ConduitAPI_differential_getcommitmessage_Method extends ConduitAPIMethod {
+final class ConduitAPI_differential_getcommitmessage_Method
+  extends ConduitAPIMethod {
 
   public function getMethodDescription() {
     return "Retrieve Differential commit messages or message templates.";

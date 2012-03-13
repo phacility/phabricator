@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
+final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
 
   public function getRequiredHandlePHIDs() {
     $data = $this->getStoryData();

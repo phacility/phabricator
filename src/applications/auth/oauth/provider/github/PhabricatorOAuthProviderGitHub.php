@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorOAuthProviderGitHub extends PhabricatorOAuthProvider {
+final class PhabricatorOAuthProviderGitHub extends PhabricatorOAuthProvider {
 
   private $userData;
 

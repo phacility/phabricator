@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DifferentialCommentMail extends DifferentialMail {
+final class DifferentialCommentMail extends DifferentialMail {
 
   protected $changedByCommit;
 

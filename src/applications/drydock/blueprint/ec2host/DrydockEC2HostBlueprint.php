@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DrydockEC2HostBlueprint extends DrydockRemoteHostBlueprint {
+final class DrydockEC2HostBlueprint extends DrydockRemoteHostBlueprint {
 
   public function canAllocateResources() {
     return true;

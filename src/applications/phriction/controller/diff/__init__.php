@@ -7,7 +7,6 @@
 
 
 phutil_require_module('phabricator', 'aphront/response/404');
-phutil_require_module('phabricator', 'aphront/response/ajax');
 phutil_require_module('phabricator', 'applications/differential/parser/changeset');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'applications/phriction/constants/changetype');
@@ -16,6 +15,7 @@ phutil_require_module('phabricator', 'applications/phriction/storage/content');
 phutil_require_module('phabricator', 'applications/phriction/storage/document');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'infrastructure/diff/engine');
+phutil_require_module('phabricator', 'infrastructure/diff/response');
 phutil_require_module('phabricator', 'infrastructure/javelin/api');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/layout/crumbs');

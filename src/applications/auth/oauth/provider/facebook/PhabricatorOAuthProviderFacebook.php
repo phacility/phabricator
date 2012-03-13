@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorOAuthProviderFacebook extends PhabricatorOAuthProvider {
+final class PhabricatorOAuthProviderFacebook extends PhabricatorOAuthProvider {
 
   private $userData;
 

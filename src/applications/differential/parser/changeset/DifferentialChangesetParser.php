@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DifferentialChangesetParser {
+final class DifferentialChangesetParser {
 
   protected $visible      = array();
   protected $new          = array();

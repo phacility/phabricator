@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DifferentialDiff extends DifferentialDAO {
+final class DifferentialDiff extends DifferentialDAO {
 
   protected $revisionID;
   protected $authorPHID;

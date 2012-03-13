@@ -19,7 +19,7 @@
 /**
  * @group aphront
  */
-class AphrontPlainTextResponse extends AphrontResponse {
+final class AphrontPlainTextResponse extends AphrontResponse {
 
   public function setContent($content) {
     $this->content = $content;

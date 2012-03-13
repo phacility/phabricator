@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 // TODO: This has some minor code duplication vs the Git request that could be
 // shared.
-class DiffusionMercurialRequest extends DiffusionRequest {
+final class DiffusionMercurialRequest extends DiffusionRequest {
 
   protected function initializeFromAphrontRequestDictionary(array $data) {
     parent::initializeFromAphrontRequestDictionary($data);

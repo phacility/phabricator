@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorFile extends PhabricatorFileDAO {
+final class PhabricatorFile extends PhabricatorFileDAO {
 
   const STORAGE_FORMAT_RAW  = 'raw';
 

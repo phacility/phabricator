@@ -169,7 +169,6 @@ phutil_register_library_map(array(
     'ConduitAPI_user_info_Method' => 'applications/conduit/method/user/info',
     'ConduitAPI_user_whoami_Method' => 'applications/conduit/method/user/whoami',
     'ConduitException' => 'applications/conduit/protocol/exception',
-    'DarkConsole' => 'aphront/console/api',
     'DarkConsoleConfigPlugin' => 'aphront/console/plugin/config',
     'DarkConsoleController' => 'aphront/console/controller',
     'DarkConsoleCore' => 'aphront/console/core',

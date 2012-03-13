@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DifferentialCommentEditor {
+final class DifferentialCommentEditor {
 
   protected $revision;
   protected $actorPHID;

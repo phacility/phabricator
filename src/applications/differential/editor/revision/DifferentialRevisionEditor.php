@@ -21,7 +21,7 @@
  * reviewers, diffs, and CCs. Unlike simple edits, these changes trigger
  * complicated email workflows.
  */
-class DifferentialRevisionEditor {
+final class DifferentialRevisionEditor {
 
   protected $revision;
   protected $actorPHID;

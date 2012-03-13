@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DifferentialChangeset extends DifferentialDAO {
+final class DifferentialChangeset extends DifferentialDAO {
 
   protected $diffID;
   protected $oldFile;

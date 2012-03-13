@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * TODO: Is this concrete-extensible?
+ */
 class DrydockRemoteHostBlueprint extends DrydockBlueprint {
 
   public function getType() {

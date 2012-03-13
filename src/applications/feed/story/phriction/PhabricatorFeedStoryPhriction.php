@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
+final class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
 
   public function getRequiredHandlePHIDs() {
     return array(

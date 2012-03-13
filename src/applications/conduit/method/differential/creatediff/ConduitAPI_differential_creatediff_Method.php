@@ -19,7 +19,7 @@
 /**
  * @group conduit
  */
-class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
+final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
 
   public function getMethodDescription() {
     return "Create a new Differential diff.";

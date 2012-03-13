@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorOAuthFailureView extends AphrontView {
+final class PhabricatorOAuthFailureView extends AphrontView {
 
   private $request;
   private $provider;

@@ -19,7 +19,8 @@
 /**
  * @group conduit
  */
-class ConduitAPI_differential_markcommitted_Method extends ConduitAPIMethod {
+final class ConduitAPI_differential_markcommitted_Method
+  extends ConduitAPIMethod {
 
   public function getMethodDescription() {
     return "Mark Differential revisions as committed.";

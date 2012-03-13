@@ -19,7 +19,7 @@
 /**
  * @group conduit
  */
-class ConduitAPIRequest {
+final class ConduitAPIRequest {
 
   protected $params;
   private $user;

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class DrydockResource extends DrydockDAO {
+final class DrydockResource extends DrydockDAO {
 
   protected $id;
   protected $phid;

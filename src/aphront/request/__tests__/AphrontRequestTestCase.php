@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class AphrontRequestTestCase extends PhabricatorTestCase {
+final class AphrontRequestTestCase extends PhabricatorTestCase {
 
   public function testRequestDataAccess() {
     $r = new AphrontRequest('http://example.com/', '/');

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-class PhabricatorOAuthProviderGoogle extends PhabricatorOAuthProvider {
+final class PhabricatorOAuthProviderGoogle extends PhabricatorOAuthProvider {
 
   private $userData;
 

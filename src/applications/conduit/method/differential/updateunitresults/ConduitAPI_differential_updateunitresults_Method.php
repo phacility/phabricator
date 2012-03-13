@@ -19,8 +19,8 @@
 /**
  * @group conduit
  */
-class ConduitAPI_differential_updateunitresults_Method
-extends ConduitAPIMethod {
+final class ConduitAPI_differential_updateunitresults_Method
+  extends ConduitAPIMethod {
 
   public function getMethodDescription() {
     return "Update arc unit results for a postponed test.";
