@@ -422,6 +422,9 @@ class DifferentialChangesetParser {
             // whitespace changes. Mark this line changed.
             $old[$k]['type'] = '-';
             $new[$k]['type'] = '+';
+
+            // Re-mark this line for intraline diffing.
+            unset($skip_intra[$k]);
           }
         }
       }
