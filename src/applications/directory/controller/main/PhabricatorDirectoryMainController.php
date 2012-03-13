@@ -576,9 +576,11 @@ final class PhabricatorDirectoryMainController
     $query = new PhabricatorAuditQuery();
     $query->withAuditorPHIDs($phids);
     $query->withStatus(PhabricatorAuditQuery::STATUS_OPEN);
+    $query->needCommitData(true);
     $query->setLimit(10);
 
     $audits = $query->execute();
+    $commits = $query->getCommits();
 
     if (!$audits) {
       return $this->renderMinipanel(
@@ -588,6 +590,7 @@ final class PhabricatorDirectoryMainController
 
     $view = new PhabricatorAuditListView();
     $view->setAudits($audits);
+    $view->setCommits($commits);
 
     $phids = $view->getRequiredHandlePHIDs();
     $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();

@@ -21,6 +21,7 @@ final class PhabricatorAuditCommitQuery {
   private $offset;
   private $limit;
 
+  private $commitPHIDs;
   private $authorPHIDs;
   private $packagePHIDs;
 
@@ -37,6 +38,11 @@ final class PhabricatorAuditCommitQuery {
 
   public function withPackagePHIDs(array $phids) {
     $this->packagePHIDs = $phids;
+    return $this;
+  }
+
+  public function withCommitPHIDs(array $phids) {
+    $this->commitPHIDs = $phids;
     return $this;
   }
 
@@ -124,6 +130,13 @@ final class PhabricatorAuditCommitQuery {
 
   private function buildWhereClause($conn_r) {
     $where = array();
+
+    if ($this->commitPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'c.phid IN (%Ls)',
+        $this->commitPHIDs);
+    }
 
     if ($this->authorPHIDs) {
       $where[] = qsprintf(

@@ -22,6 +22,7 @@ final class PhabricatorAuditListView extends AphrontView {
   private $handles;
   private $authorityPHIDs = array();
   private $noDataString;
+  private $commits;
 
   public function setAudits(array $audits) {
     $this->audits = $audits;
@@ -47,6 +48,11 @@ final class PhabricatorAuditListView extends AphrontView {
     return $this->noDataString;
   }
 
+  public function setCommits(array $commits) {
+    $this->commits = mpull($commits, null, 'getPHID');
+    return $this;
+  }
+
   public function getRequiredHandlePHIDs() {
     $phids = array();
     foreach ($this->audits as $audit) {
@@ -64,6 +70,19 @@ final class PhabricatorAuditListView extends AphrontView {
     return $handle;
   }
 
+  private function getCommitDescription($phid) {
+    if ($this->commits === null) {
+      return null;
+    }
+
+    $commit = idx($this->commits, $phid);
+    if (!$commit) {
+      return null;
+    }
+
+    return $commit->getCommitData()->getSummary();
+  }
+
   public function render() {
 
     $authority = array_fill_keys($this->authorityPHIDs, true);
@@ -76,8 +95,10 @@ final class PhabricatorAuditListView extends AphrontView {
       $commit_phid = $audit->getCommitPHID();
       if ($last == $commit_phid) {
         $commit_name = null;
+        $commit_desc = null;
       } else {
         $commit_name = $this->getHandle($commit_phid)->renderLink();
+        $commit_desc = $this->getCommitDescription($commit_phid);
         $last = $commit_phid;
       }
 
@@ -93,6 +114,7 @@ final class PhabricatorAuditListView extends AphrontView {
       $auditor_handle = $this->getHandle($audit->getAuditorPHID());
       $rows[] = array(
         $commit_name,
+        phutil_escape_html($commit_desc),
         $auditor_handle->renderLink(),
         phutil_escape_html($status),
         $reasons,
@@ -109,6 +131,7 @@ final class PhabricatorAuditListView extends AphrontView {
     $table->setHeaders(
       array(
         'Commit',
+        'Description',
         'Auditor',
         'Status',
         'Details',
@@ -116,11 +139,20 @@ final class PhabricatorAuditListView extends AphrontView {
     $table->setColumnClasses(
       array(
         'pri',
+        (($this->commits === null) ? '' : 'wide'),
         '',
         '',
-        'wide',
+        (($this->commits === null) ? 'wide' : ''),
       ));
     $table->setRowClasses($rowc);
+    $table->setColumnVisibility(
+      array(
+        true,
+        ($this->commits !== null),
+        true,
+        true,
+        true,
+      ));
 
     if ($this->noDataString) {
       $table->setNoDataString($this->noDataString);

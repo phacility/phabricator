@@ -24,9 +24,14 @@ final class PhabricatorAuditQuery {
   private $auditorPHIDs;
   private $commitPHIDs;
 
+  private $needCommits;
+  private $needCommitData;
+
   private $status     = 'status-any';
   const STATUS_ANY    = 'status-any';
   const STATUS_OPEN   = 'status-open';
+
+  private $commits;
 
   public function withCommitPHIDs(array $commit_phids) {
     $this->commitPHIDs = $commit_phids;
@@ -53,23 +58,58 @@ final class PhabricatorAuditQuery {
     return $this;
   }
 
+  public function needCommits($need) {
+    $this->needCommits = $need;
+    return $this;
+  }
+
+  public function needCommitData($need) {
+    $this->needCommitData = $need;
+    return $this;
+  }
+
   public function execute() {
     $table = new PhabricatorRepositoryAuditRequest();
     $conn_r = $table->establishConnection('r');
 
     $where = $this->buildWhereClause($conn_r);
+    $order = $this->buildOrderClause($conn_r);
     $limit = $this->buildLimitClause($conn_r);
 
     $data = queryfx_all(
       $conn_r,
-      'SELECT * FROM %T %Q %Q',
+      'SELECT * FROM %T %Q %Q %Q',
       $table->getTableName(),
       $where,
+      $order,
       $limit);
 
     $audits = $table->loadAllFromArray($data);
-    return $audits;
 
+    if ($this->needCommits || $this->needCommitData) {
+      $phids = mpull($audits, 'getCommitPHID', 'getCommitPHID');
+      if ($phids) {
+        $cquery = new PhabricatorAuditCommitQuery();
+        $cquery->needCommitData($this->needCommitData);
+        $cquery->withCommitPHIDs(array_keys($phids));
+        $commits = $cquery->execute();
+      } else {
+        $commits = array();
+      }
+      $this->commits = $commits;
+    }
+
+    return $audits;
+  }
+
+  public function getCommits() {
+    if ($this->commits === null) {
+      throw new Exception(
+        "Call needCommits() or needCommitData() and then execute() the query ".
+        "before calling getCommits()!");
+    }
+
+    return $this->commits;
   }
 
   private function buildWhereClause($conn_r) {
@@ -126,6 +166,10 @@ final class PhabricatorAuditQuery {
     } else {
       return '';
     }
+  }
+
+  private function buildOrderClause($conn_r) {
+    return 'ORDER BY id DESC';
   }
 
 }
