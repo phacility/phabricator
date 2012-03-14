@@ -26,7 +26,7 @@ final class DifferentialInlineCommentView extends AphrontView {
   private $editable;
   private $preview;
 
-  public function setInlineComment(DifferentialInlineComment $comment) {
+  public function setInlineComment(PhabricatorInlineCommentInterface $comment) {
     $this->inlineComment = $comment;
     return $this;
   }
@@ -94,7 +94,7 @@ final class DifferentialInlineCommentView extends AphrontView {
     }
 
     $is_draft = false;
-    if (!$inline->getCommentID() && !$is_synthetic) {
+    if ($inline->isDraft() && !$is_synthetic) {
       $links[] = 'Not Submitted Yet';
       $is_draft = true;
     }

@@ -309,6 +309,7 @@ phutil_register_library_map(array(
     'DiffusionHistoryQuery' => 'applications/diffusion/query/history/base',
     'DiffusionHistoryTableView' => 'applications/diffusion/view/historytable',
     'DiffusionHomeController' => 'applications/diffusion/controller/home',
+    'DiffusionInlineCommentController' => 'applications/diffusion/controller/inline',
     'DiffusionLastModifiedController' => 'applications/diffusion/controller/lastmodified',
     'DiffusionLastModifiedQuery' => 'applications/diffusion/query/lastmodified/base',
     'DiffusionMercurialBranchQuery' => 'applications/diffusion/query/branch/mercurial',
@@ -456,6 +457,7 @@ phutil_register_library_map(array(
     'PhabricatorAuditCommitStatusConstants' => 'applications/audit/constants/commitstatus',
     'PhabricatorAuditController' => 'applications/audit/controller/base',
     'PhabricatorAuditDAO' => 'applications/audit/storage/base',
+    'PhabricatorAuditInlineComment' => 'applications/audit/storage/inlinecommment',
     'PhabricatorAuditListController' => 'applications/audit/controller/list',
     'PhabricatorAuditListView' => 'applications/audit/view/list',
     'PhabricatorAuditPreviewController' => 'applications/audit/controller/preview',
@@ -590,6 +592,8 @@ phutil_register_library_map(array(
     'PhabricatorIRCWhatsNewHandler' => 'infrastructure/daemon/irc/handler/whatsnew',
     'PhabricatorImageTransformer' => 'applications/files/transform',
     'PhabricatorInfrastructureTestCase' => 'infrastructure/__tests__',
+    'PhabricatorInlineCommentController' => 'infrastructure/diff/controller',
+    'PhabricatorInlineCommentInterface' => 'infrastructure/diff/interface/inline',
     'PhabricatorJavelinLinter' => 'infrastructure/lint/linter/javelin',
     'PhabricatorJumpNavHandler' => 'applications/search/engine/jumpnav',
     'PhabricatorLintEngine' => 'infrastructure/lint/engine',
@@ -1097,7 +1101,7 @@ phutil_register_library_map(array(
     'DifferentialHostFieldSpecification' => 'DifferentialFieldSpecification',
     'DifferentialHunk' => 'DifferentialDAO',
     'DifferentialInlineComment' => 'DifferentialDAO',
-    'DifferentialInlineCommentEditController' => 'DifferentialController',
+    'DifferentialInlineCommentEditController' => 'PhabricatorInlineCommentController',
     'DifferentialInlineCommentEditView' => 'AphrontView',
     'DifferentialInlineCommentPreviewController' => 'DifferentialController',
     'DifferentialInlineCommentView' => 'AphrontView',
@@ -1157,6 +1161,7 @@ phutil_register_library_map(array(
     'DiffusionHistoryController' => 'DiffusionController',
     'DiffusionHistoryTableView' => 'DiffusionView',
     'DiffusionHomeController' => 'DiffusionController',
+    'DiffusionInlineCommentController' => 'PhabricatorInlineCommentController',
     'DiffusionLastModifiedController' => 'DiffusionController',
     'DiffusionMercurialBranchQuery' => 'DiffusionBranchQuery',
     'DiffusionMercurialBrowseQuery' => 'DiffusionBrowseQuery',
@@ -1260,6 +1265,7 @@ phutil_register_library_map(array(
     'PhabricatorAuditCommitListView' => 'AphrontView',
     'PhabricatorAuditController' => 'PhabricatorController',
     'PhabricatorAuditDAO' => 'PhabricatorLiskDAO',
+    'PhabricatorAuditInlineComment' => 'PhabricatorAuditDAO',
     'PhabricatorAuditListController' => 'PhabricatorAuditController',
     'PhabricatorAuditListView' => 'AphrontView',
     'PhabricatorAuditPreviewController' => 'PhabricatorAuditController',
@@ -1371,6 +1377,7 @@ phutil_register_library_map(array(
     'PhabricatorIRCProtocolHandler' => 'PhabricatorIRCHandler',
     'PhabricatorIRCWhatsNewHandler' => 'PhabricatorIRCHandler',
     'PhabricatorInfrastructureTestCase' => 'PhabricatorTestCase',
+    'PhabricatorInlineCommentController' => 'PhabricatorController',
     'PhabricatorJavelinLinter' => 'ArcanistLinter',
     'PhabricatorLintEngine' => 'PhutilLintEngine',
     'PhabricatorLiskDAO' => 'LiskDAO',
@@ -1628,5 +1635,13 @@ phutil_register_library_map(array(
   ),
   'requires_interface' =>
   array(
+    'DifferentialInlineComment' =>
+    array(
+      0 => 'PhabricatorInlineCommentInterface',
+    ),
+    'PhabricatorAuditInlineComment' =>
+    array(
+      0 => 'PhabricatorInlineCommentInterface',
+    ),
   ),
 ));

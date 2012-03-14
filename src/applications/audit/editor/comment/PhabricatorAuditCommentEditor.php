@@ -21,6 +21,8 @@ final class PhabricatorAuditCommentEditor {
   private $commit;
   private $user;
 
+  private $attachInlineComments;
+
   public function __construct(PhabricatorRepositoryCommit $commit) {
     $this->commit = $commit;
     return $this;
@@ -28,6 +30,11 @@ final class PhabricatorAuditCommentEditor {
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
+    return $this;
+  }
+
+  public function setAttachInlineComments($attach_inline_comments) {
+    $this->attachInlineComments = $attach_inline_comments;
     return $this;
   }
 
@@ -40,10 +47,26 @@ final class PhabricatorAuditCommentEditor {
       'targetPHID = %s',
       $commit->getPHID());
 
+    $inline_comments = array();
+    if ($this->attachInlineComments) {
+      $inline_comments = id(new PhabricatorAuditInlineComment())->loadAllWhere(
+        'authorPHID = %s AND commitPHID = %s
+          AND auditCommentID IS NULL',
+        $user->getPHID(),
+        $commit->getPHID());
+    }
+
     $comment
       ->setActorPHID($user->getPHID())
       ->setTargetPHID($commit->getPHID())
       ->save();
+
+    if ($inline_comments) {
+      foreach ($inline_comments as $inline) {
+        $inline->setAuditCommentID($comment->getID());
+        $inline->save();
+      }
+    }
 
     // When a user submits an audit comment, we update all the audit requests
     // they have authority over to reflect the most recent status. The general

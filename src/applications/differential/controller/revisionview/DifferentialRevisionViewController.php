@@ -237,10 +237,14 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $changeset_view = new DifferentialChangesetListView();
     $changeset_view->setChangesets($visible_changesets);
-    $changeset_view->setEditable(!$viewer_is_anonymous);
+
+    if (!$viewer_is_anonymous) {
+      $changeset_view->setInlineCommentControllerURI(
+        '/differential/comment/inline/edit/'.$revision->getID().'/');
+    }
+
     $changeset_view->setStandaloneViews(true);
     $changeset_view->setUser($user);
-    $changeset_view->setRevision($revision);
     $changeset_view->setDiff($target);
     $changeset_view->setRenderingReferences($rendering_references);
     $changeset_view->setVsMap($vs_map);

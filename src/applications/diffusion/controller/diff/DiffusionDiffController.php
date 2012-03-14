@@ -33,6 +33,7 @@ final class DiffusionDiffController extends DiffusionController {
   public function processRequest() {
     $drequest = $this->getDiffusionRequest();
     $request = $this->getRequest();
+    $user = $request->getUser();
 
     $diff_query = DiffusionDiffQuery::newFromDiffusionRequest($drequest);
     $changeset = $diff_query->loadChangeset();
@@ -44,8 +45,33 @@ final class DiffusionDiffController extends DiffusionController {
     $parser = new DifferentialChangesetParser();
     $parser->setChangeset($changeset);
     $parser->setRenderingReference($diff_query->getRenderingReference());
+
+    $pquery = new DiffusionPathIDQuery(array($changeset->getFilename()));
+    $ids = $pquery->loadPathIDs();
+    $path_id = $ids[$changeset->getFilename()];
+
+    $parser->setLeftSideCommentMapping($path_id, false);
+    $parser->setRightSideCommentMapping($path_id, true);
+
     $parser->setWhitespaceMode(
       DifferentialChangesetParser::WHITESPACE_SHOW_ALL);
+
+    $inlines = id(new PhabricatorAuditInlineComment())->loadAllWhere(
+      'commitPHID = %s AND pathID = %d AND
+        (authorPHID = %s OR auditCommentID IS NOT NULL)',
+      $drequest->loadCommit()->getPHID(),
+      $path_id,
+      $user->getPHID());
+
+    if ($inlines) {
+      foreach ($inlines as $inline) {
+        $parser->parseInlineComment($inline);
+      }
+
+      $phids = mpull($inlines, 'getAuthorPHID');
+      $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+      $parser->setHandles($handles);
+    }
 
     $spec = $request->getStr('range');
     list($range_s, $range_e, $mask) =

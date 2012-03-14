@@ -199,11 +199,25 @@ final class DiffusionCommitController extends DiffusionController {
         $references[$key] = $reference;
       }
 
+      // TOOD: Some parts of the views still rely on properties of the
+      // DifferentialChangeset. Make the objects ephemeral to make sure we don't
+      // accidentally save them, and then set their ID to the appropriate ID for
+      // this application (the path IDs).
+      $pquery = new DiffusionPathIDQuery(mpull($changesets, 'getFilename'));
+      $path_ids = $pquery->loadPathIDs();
+      foreach ($changesets as $changeset) {
+        $changeset->makeEphemeral();
+        $changeset->setID($path_ids[$changeset->getFilename()]);
+      }
+
       $change_list = new DifferentialChangesetListView();
       $change_list->setChangesets($changesets);
       $change_list->setRenderingReferences($references);
       $change_list->setRenderURI('/diffusion/'.$callsign.'/diff/');
       $change_list->setUser($user);
+
+      $change_list->setInlineCommentControllerURI(
+        '/diffusion/inline/'.phutil_escape_uri($commit->getPHID()).'/');
 
       // TODO: This is pretty awkward, unify the CSS between Diffusion and
       // Differential better.

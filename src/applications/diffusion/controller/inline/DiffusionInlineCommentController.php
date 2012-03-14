@@ -16,36 +16,47 @@
  * limitations under the License.
  */
 
-final class DifferentialInlineCommentEditController
+final class DiffusionInlineCommentController
   extends PhabricatorInlineCommentController {
 
-  private $revisionID;
+  private $commitPHID;
 
   public function willProcessRequest(array $data) {
-    $this->revisionID = $data['id'];
+    $this->commitPHID = $data['phid'];
   }
 
   protected function createComment() {
 
-    // Verify revision and changeset correspond to actual objects.
-    $revision_id = $this->revisionID;
-    $changeset_id = $this->getChangesetID();
+    // Verify commit and path correspond to actual objects.
+    $commit_phid = $this->commitPHID;
+    $path_id = $this->getChangesetID();
 
-    if (!id(new DifferentialRevision())->load($revision_id)) {
-      throw new Exception("Invalid revision ID!");
+    $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
+      'phid = %s',
+      $commit_phid);
+    if (!$commit) {
+      throw new Exception("Invalid commit ID!");
     }
 
-    if (!id(new DifferentialChangeset())->load($changeset_id)) {
-      throw new Exception("Invalid changeset ID!");
+    // TODO: Write a real PathQuery object?
+
+    $path = queryfx_one(
+      id(new PhabricatorRepository())->establishConnection('r'),
+      'SELECT path FROM %T WHERE id = %d',
+      PhabricatorRepository::TABLE_PATH,
+      $path_id);
+
+    if (!$path) {
+      throw new Exception("Invalid path ID!");
     }
 
-    return id(new DifferentialInlineComment())
-      ->setRevisionID($revision_id)
-      ->setChangesetID($changeset_id);
+    return id(new PhabricatorAuditInlineComment())
+      ->setCommitPHID($commit_phid)
+      ->setPathID($path_id);
   }
 
   protected function loadComment($id) {
-    return id(new DifferentialInlineComment())->load($id);
+    return id(new PhabricatorAuditInlineComment())->load($id);
   }
 
   protected function loadCommentForEdit($id) {
@@ -61,7 +72,7 @@ final class DifferentialInlineCommentEditController
 
   private function canEditInlineComment(
     PhabricatorUser $user,
-    DifferentialInlineComment $inline) {
+    PhabricatorAuditInlineComment $inline) {
 
     // Only the author may edit a comment.
     if ($inline->getAuthorPHID() != $user->getPHID()) {
@@ -69,12 +80,12 @@ final class DifferentialInlineCommentEditController
     }
 
     // Saved comments may not be edited.
-    if ($inline->getCommentID()) {
+    if ($inline->getAuditCommentID()) {
       return false;
     }
 
     // Inline must be attached to the active revision.
-    if ($inline->getRevisionID() != $this->revisionID) {
+    if ($inline->getCommitPHID() != $this->commitPHID) {
       return false;
     }
 

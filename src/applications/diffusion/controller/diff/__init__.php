@@ -7,10 +7,13 @@
 
 
 phutil_require_module('phabricator', 'aphront/response/404');
+phutil_require_module('phabricator', 'applications/audit/storage/inlinecommment');
 phutil_require_module('phabricator', 'applications/differential/parser/changeset');
 phutil_require_module('phabricator', 'applications/diffusion/controller/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/diff/base');
+phutil_require_module('phabricator', 'applications/diffusion/query/pathid/base');
 phutil_require_module('phabricator', 'applications/diffusion/request/base');
+phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'infrastructure/diff/response');
 
 phutil_require_module('phutil', 'utils');

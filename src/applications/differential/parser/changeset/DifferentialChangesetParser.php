@@ -250,7 +250,9 @@ final class DifferentialChangesetParser {
     }
   }
 
-  public function parseInlineComment(DifferentialInlineComment $comment) {
+  public function parseInlineComment(
+    PhabricatorInlineCommentInterface $comment) {
+
     // Parse only comments which are actually visible.
     if ($this->isCommentVisibleOnRenderedDiff($comment)) {
       $this->comments[] = $comment;
@@ -1067,11 +1069,11 @@ final class DifferentialChangesetParser {
    * taking into consideration which halves of which changesets will actually
    * be shown.
    *
-   * @param DifferentialInlineComment Comment to test for visibility.
+   * @param PhabricatorInlineCommentInterface Comment to test for visibility.
    * @return bool True if the comment is visible on the rendered diff.
    */
   private function isCommentVisibleOnRenderedDiff(
-    DifferentialInlineComment $comment) {
+    PhabricatorInlineCommentInterface $comment) {
 
     $changeset_id = $comment->getChangesetID();
     $is_new = $comment->getIsNewFile();
@@ -1095,11 +1097,12 @@ final class DifferentialChangesetParser {
    * Note that the comment must appear somewhere on the rendered changeset, as
    * per isCommentVisibleOnRenderedDiff().
    *
-   * @param DifferentialInlineComment Comment to test for display location.
+   * @param PhabricatorInlineCommentInterface Comment to test for display
+   *              location.
    * @return bool True for right, false for left.
    */
   private function isCommentOnRightSideWhenDisplayed(
-    DifferentialInlineComment $comment) {
+    PhabricatorInlineCommentInterface $comment) {
 
     if (!$this->isCommentVisibleOnRenderedDiff($comment)) {
       throw new Exception("Comment is not visible on changeset!");
@@ -1444,12 +1447,13 @@ final class DifferentialChangesetParser {
     return implode('', $html);
   }
 
-  private function renderInlineComment(DifferentialInlineComment $comment) {
+  private function renderInlineComment(
+    PhabricatorInlineCommentInterface $comment) {
 
     $user = $this->user;
     $edit = $user &&
             ($comment->getAuthorPHID() == $user->getPHID()) &&
-            (!$comment->getCommentID());
+            ($comment->isDraft());
 
     $on_right = $this->isCommentOnRightSideWhenDisplayed($comment);
 

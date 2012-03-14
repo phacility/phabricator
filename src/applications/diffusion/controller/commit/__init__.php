@@ -18,6 +18,7 @@ phutil_require_module('phabricator', 'applications/diffusion/controller/base');
 phutil_require_module('phabricator', 'applications/diffusion/data/pathchange');
 phutil_require_module('phabricator', 'applications/diffusion/query/contains/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/pathchange/base');
+phutil_require_module('phabricator', 'applications/diffusion/query/pathid/base');
 phutil_require_module('phabricator', 'applications/diffusion/view/commentlist');
 phutil_require_module('phabricator', 'applications/diffusion/view/commitchangetable');
 phutil_require_module('phabricator', 'applications/draft/storage/draft');

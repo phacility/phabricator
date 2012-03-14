@@ -272,6 +272,7 @@ class AphrontDefaultApplicationConfiguration
             '(?:[;](?P<commit>[a-z0-9]+))?'
               => 'DiffusionLastModifiedController',
         ),
+        'inline/(?P<phid>[^/]+)/' => 'DiffusionInlineCommentController',
         'services/' => array(
           'path/' => array(
             'complete/' => 'DiffusionPathCompleteController',

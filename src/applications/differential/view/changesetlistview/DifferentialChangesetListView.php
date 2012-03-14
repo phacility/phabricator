@@ -20,8 +20,7 @@ final class DifferentialChangesetListView extends AphrontView {
 
   private $changesets = array();
   private $references = array();
-  private $editable;
-  private $revision;
+  private $inlineURI;
   private $renderURI = '/differential/changeset/';
   private $whitespace;
   private $standaloneViews;
@@ -36,8 +35,8 @@ final class DifferentialChangesetListView extends AphrontView {
     return $this;
   }
 
-  public function setEditable($editable) {
-    $this->editable = $editable;
+  public function setInlineCommentControllerURI($uri) {
+    $this->inlineURI = $uri;
     return $this;
   }
 
@@ -48,11 +47,6 @@ final class DifferentialChangesetListView extends AphrontView {
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
-    return $this;
-  }
-
-  public function setRevision(DifferentialRevision $revision) {
-    $this->revision = $revision;
     return $this;
   }
 
@@ -114,7 +108,7 @@ final class DifferentialChangesetListView extends AphrontView {
     foreach ($changesets as $key => $changeset) {
       $file = $changeset->getFilename();
       $class = 'differential-changeset';
-      if (!$this->editable) {
+      if (!$this->inlineURI) {
         $class .= ' differential-changeset-noneditable';
       }
 
@@ -206,15 +200,13 @@ final class DifferentialChangesetListView extends AphrontView {
 
     Javelin::initBehavior('differential-comment-jump', array());
 
-    if ($this->editable) {
-
+    if ($this->inlineURI) {
       $undo_templates = $this->renderUndoTemplates();
 
-      $revision = $this->revision;
       Javelin::initBehavior('differential-edit-inline-comments', array(
-        'uri' => '/differential/comment/inline/edit/'.$revision->getID().'/',
-        'undo_templates' => $undo_templates,
-        'stage' => 'differential-review-stage',
+        'uri'             => $this->inlineURI,
+        'undo_templates'  => $undo_templates,
+        'stage'           => 'differential-review-stage',
       ));
     }
 

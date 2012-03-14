@@ -16,13 +16,13 @@
  * limitations under the License.
  */
 
-final class DifferentialInlineComment
-  extends DifferentialDAO
+final class PhabricatorAuditInlineComment
+  extends PhabricatorAuditDAO
   implements PhabricatorInlineCommentInterface {
 
-  protected $revisionID;
-  protected $changesetID;
-  protected $commentID;
+  protected $commitPHID;
+  protected $pathID;
+  protected $auditCommentID;
 
   protected $authorPHID;
   protected $isNewFile;
@@ -60,21 +60,20 @@ final class DifferentialInlineComment
   }
 
   public function isDraft() {
-    return !$this->getCommentID();
+    return !$this->getAuditCommentID();
+  }
+
+  public function setChangesetID($id) {
+    return $this->setPathID($id);
+  }
+
+  public function getChangesetID() {
+    return $this->getPathID();
   }
 
   // NOTE: We need to provide implementations so we conform to the shared
   // interface; these are all trivial and just explicit versions of the Lisk
   // defaults.
-
-  public function setChangesetID($id) {
-    $this->writeField('changesetID', $id);
-    return $this;
-  }
-
-  public function getChangesetID() {
-    return $this->readField('changesetID');
-  }
 
   public function setIsNewFile($is_new) {
     $this->writeField('isNewFile', $is_new);

@@ -43,6 +43,7 @@ final class PhabricatorAuditAddCommentController
 
     id(new PhabricatorAuditCommentEditor($commit))
       ->setUser($user)
+      ->setAttachInlineComments(true)
       ->addComment($comment);
 
     $phids = array($commit_phid);
