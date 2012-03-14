@@ -531,6 +531,12 @@ return array(
     'image/png'   => 'image/png',
     'image/gif'   => 'image/gif',
     'text/plain'  => 'text/plain; charset=utf-8',
+
+    // ".ico" favicon files, which have mime type diversity. See:
+    // http://en.wikipedia.org/wiki/ICO_(file_format)#MIME_type
+    'image/x-ico'               => 'image/x-icon',
+    'image/x-icon'              => 'image/x-icon',
+    'image/vnd.microsoft.icon'  => 'image/x-icon',
   ),
 
   // Phabricator can proxy images from other servers so you can paste the URI
