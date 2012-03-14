@@ -84,6 +84,23 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
     require_celerity_resource('diffusion-source-css');
 
+    $edit_button = '';
+    $user = $request->getUser();
+    if ($user) {
+      $line = 1;
+      $repository = $this->getDiffusionRequest()->getRepository();
+      $editor_link = $user->loadEditorLink($path, $line, $repository);
+      if ($editor_link) {
+        $edit_button = phutil_render_tag(
+          'a',
+          array(
+            'href' => $editor_link,
+            'class' => 'button',
+          ),
+          'Edit');
+      }
+    }
+
     $view_select_panel = new AphrontPanelView();
     $view_select_form = phutil_render_tag(
       'form',
@@ -93,26 +110,9 @@ final class DiffusionBrowseFileController extends DiffusionController {
         'class'  => 'diffusion-browse-type-form',
       ),
       $select.
-      '<button>View</button>');
+      ' <button>View</button> '.
+      $edit_button);
     $view_select_panel->appendChild($view_select_form);
-
-    $user = $request->getUser();
-    if ($user) {
-      $line = 1;
-      $repository = $this->getDiffusionRequest()->getRepository();
-      $editor_link = $user->loadEditorLink($path, $line, $repository);
-      if ($editor_link) {
-        $view_select_panel->addButton(
-          phutil_render_tag(
-            'a',
-            array(
-              'href' => $editor_link,
-              'class' => 'button',
-            ),
-            'Edit'
-          ));
-      }
-    }
 
     $view_select_panel->appendChild('<div style="clear: both;"></div>');
 
