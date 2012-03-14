@@ -202,8 +202,6 @@ final class DifferentialChangesetParser {
         $char = $line[0];
         if ($char == ' ') {
           $types[$line_index] = null;
-        } else if ($char == '\\' && $line_index > 0) {
-          $types[$line_index] = $types[$line_index - 1];
         } else {
           $types[$line_index] = $char;
         }
@@ -229,6 +227,10 @@ final class DifferentialChangesetParser {
         'text'  => (string)substr($lines[$cursor], 1),
         'line'  => $new_line,
       );
+      if ($type == '\\' && $cursor > 1) {
+        $type = $types[$cursor - 1];
+        $data['text'] = ltrim($data['text']);
+      }
       switch ($type) {
         case '+':
           $this->new[] = $data;
@@ -1336,7 +1338,9 @@ final class DifferentialChangesetParser {
         $o_text = isset($this->oldRender[$ii]) ? $this->oldRender[$ii] : null;
         $o_attr = null;
         if ($this->old[$ii]['type']) {
-          if (empty($this->new[$ii])) {
+          if ($this->old[$ii]['type'] == '\\') {
+            $o_attr = ' class="comment"';
+          } elseif (empty($this->new[$ii])) {
             $o_attr = ' class="old old-full"';
           } else {
             $o_attr = ' class="old"';
@@ -1367,7 +1371,9 @@ final class DifferentialChangesetParser {
         $n_cov = '<td class="cov '.$cov_class.'"></td>';
 
         if ($this->new[$ii]['type']) {
-          if (empty($this->old[$ii])) {
+          if ($this->new[$ii]['type'] == '\\') {
+            $n_attr = ' class="comment"';
+          } elseif (empty($this->old[$ii])) {
             $n_attr = ' class="new new-full"';
           } else {
             $n_attr = ' class="new"';

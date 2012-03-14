@@ -75,6 +75,10 @@
   background: #aaffaa;
 }
 
+.differential-diff td.comment {
+  background: #dddddd;
+}
+
 .differential-diff td.cov {
   width: 12px;
   padding: 0;
