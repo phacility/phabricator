@@ -32,6 +32,9 @@ final class PhabricatorUserProfileSettingsPanelController
       $profile->setUserPHID($user->getPHID());
     }
 
+    $supported_formats = PhabricatorFile::getTransformableImageFormats();
+
+    $e_image = null;
     $errors = array();
     if ($request->isFormPost()) {
       $profile->setTitle($request->getStr('title'));
@@ -65,9 +68,10 @@ final class PhabricatorUserProfileSettingsPanelController
               $max_height = 50);
             $user->setProfileImagePHID($small_xformed->getPHID());
           } else {
+            $e_image = 'Not Supported';
             $errors[] =
-              'Only valid image files (jpg, jpeg, png or gif) '.
-              'will be accepted.';
+              'This server only supports these image formats: '.
+              implode(', ', $supported_formats).'.';
           }
         }
       }
@@ -148,7 +152,9 @@ final class PhabricatorUserProfileSettingsPanelController
       ->appendChild(
         id(new AphrontFormFileControl())
           ->setLabel('Change Image')
-          ->setName('image'))
+          ->setName('image')
+          ->setError($e_image)
+          ->setCaption('Supported formats: '.implode(', ', $supported_formats)))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Save')

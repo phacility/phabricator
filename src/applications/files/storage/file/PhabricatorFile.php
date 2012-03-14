@@ -286,6 +286,24 @@ final class PhabricatorFile extends PhabricatorFileDAO {
     }
   }
 
+  public static function getTransformableImageFormats() {
+    $supported = array();
+
+    if (function_exists('imagejpeg')) {
+      $supported[] = 'jpg';
+    }
+
+    if (function_exists('imagepng')) {
+      $supported[] = 'png';
+    }
+
+    if (function_exists('imagegif')) {
+      $supported[] = 'gif';
+    }
+
+    return $supported;
+  }
+
   protected function instantiateStorageEngine() {
     $engines = id(new PhutilSymbolLoader())
       ->setType('class')

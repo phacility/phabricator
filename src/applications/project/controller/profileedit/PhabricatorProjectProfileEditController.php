@@ -52,7 +52,11 @@ final class PhabricatorProjectProfileEditController
     $affiliations = $project->loadAffiliations();
     $affiliations = mpull($affiliations, null, 'getUserPHID');
 
+    $supported_formats = PhabricatorFile::getTransformableImageFormats();
+
     $e_name = true;
+    $e_image = null;
+
     $errors = array();
     $state = null;
     if ($request->isFormPost()) {
@@ -106,9 +110,10 @@ final class PhabricatorProjectProfileEditController
               $y = 50);
             $profile->setProfileImagePHID($xformed->getPHID());
           } else {
+            $e_image = 'Not Supported';
             $errors[] =
-              'Only valid image files (jpg, jpeg, png or gif) '.
-              'will be accepted.';
+              'This server only supports these image formats: '.
+              implode(', ', $supported_formats).'.';
           }
         }
       }
@@ -249,7 +254,9 @@ final class PhabricatorProjectProfileEditController
       ->appendChild(
         id(new AphrontFormFileControl())
           ->setLabel('Change Image')
-          ->setName('image'))
+          ->setName('image')
+          ->setError($e_image)
+          ->setCaption('Supported formats: '.implode(', ', $supported_formats)))
       ->appendChild(
         '<h1>Resources</h1>'.
         '<input type="hidden" name="resources" id="resources" />'.
