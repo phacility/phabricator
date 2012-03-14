@@ -662,7 +662,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-files-drag-and-drop' =>
   array(
-    'uri' => '/res/0e84cc42/rsrc/js/application/core/behavior-files-drag-and-drop.js',
+    'uri' => '/res/3a7a2a8a/rsrc/js/application/core/behavior-files-drag-and-drop.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1145,6 +1145,17 @@ celerity_register_resource_map(array(
       3 => 'javelin-uri',
     ),
     'disk' => '/rsrc/js/javelin/lib/Resource.js',
+  ),
+  0 =>
+  array(
+    'uri' => '/res/b6096fdd/rsrc/js/javelin/lib/__tests__/URI.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-uri',
+      1 => 'javelin-php-serializer',
+    ),
+    'disk' => '/rsrc/js/javelin/lib/__tests__/URI.js',
   ),
   'javelin-stratcom' =>
   array(

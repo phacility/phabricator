@@ -35,20 +35,15 @@ JX.behavior('files-drag-and-drop', function(config) {
 
     pending--;
     if (pending == 0) {
-      // If whatever the user dropped in has finished uploading, either send
-      // them to the file itself (if they uploaded only one) or to their
-      // uploads (if they uploaded several).
+      // If whatever the user dropped in has finished uploading, send them to
+      // their uploads.
       var uri;
-      if (files.length == 1) {
-        uri = JX.$U(files[0].uri);
-      } else {
-        uri = JX.$U(config.browseURI);
-        var ids = [];
-        for (var ii = 0; ii < files.length; ii++) {
-          ids.push(files[ii].id);
-        }
-        uri.setQueryParam('h', ids.join('-'));
+      uri = JX.$U(config.browseURI);
+      var ids = [];
+      for (var ii = 0; ii < files.length; ii++) {
+        ids.push(files[ii].id);
       }
+      uri.setQueryParam('h', ids.join('-'));
 
       // Reset so if you hit 'back' into the bfcache the page is still in a
       // sensible state.
