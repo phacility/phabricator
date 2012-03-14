@@ -145,6 +145,12 @@ For nginx, use a configuration like this:
     }
   }
 
+= Upgrading Schema =
+
+Now, it's time for you to upgrade the database schema -- see
+@{article:Upgrading Schema}. You'll also need to do this after you update the
+code in the future.
+
 = Setup =
 
 Now, restart your webserver and navigate to whichever subdomain you set up. You
@@ -189,12 +195,6 @@ To actually configure your install, edit your ##custom/myconfig.conf.php## file
 and override values from either the ##'production'## or ##'development'##
 configurations. You should not edit the builtin configurations directly because
 that will make upgrading Phabricator more difficult in the future.
-
-= Upgrading Schema =
-
-After you have configured Phabricator, you need to upgrade the database
-schema -- see @{article:Upgrading Schema}. You'll also need to do this after you
-update the code in the future.
 
 = Next Steps =
 
