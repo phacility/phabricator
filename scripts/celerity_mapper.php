@@ -191,8 +191,12 @@ foreach ($file_map as $path => $info) {
   $provides = array_filter($provides);
   $requires = array_filter($requires);
 
+  if (!$provides) {
+    // Tests and documentation-only JS is permitted to @provide no targets.
+    continue;
+  }
+
   if (count($provides) > 1) {
-    // NOTE: Documentation-only JS is permitted to @provide no targets.
     throw new Exception(
       "File {$path} must @provide at most one Celerity target.");
   }
