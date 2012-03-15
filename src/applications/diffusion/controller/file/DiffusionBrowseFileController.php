@@ -337,10 +337,14 @@ final class DiffusionBrowseFileController extends DiffusionController {
             '<th style="background: '.$color.'"></th>';
         } else {
 
+          $revision_time = null;
           if ($blame_dict) {
             $color_number = (int)(0xEE -
               0xEE * ($blame_dict[$rev]['epoch'] - $epoch_min) / $epoch_range);
             $color = sprintf('#%02xee%02x', $color_number, $color_number);
+            $revision_time = phabricator_datetime(
+              $blame_dict[$rev]['epoch'],
+              $this->getRequest()->getUser());
           }
 
           $revision_link = self::renderRevision(
@@ -376,8 +380,8 @@ final class DiffusionBrowseFileController extends DiffusionController {
           }
           $blame_info =
             $prev_link .
-            '<th style="background: '.$color.
-              '; width: 12em;">'.$revision_link.'</th>'.
+            '<th style="background: '.$color.'; width: 12em;" title="'.
+            phutil_escape_html($revision_time).'">'.$revision_link.'</th>'.
             '<th style="background: '.$color.'; width: 12em'.
               '; font-weight: normal; color: #333;">'.$author_link.'</th>';
           $last_rev = $rev;

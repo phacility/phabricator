@@ -13,6 +13,7 @@ phutil_require_module('phabricator', 'applications/markup/syntax');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'infrastructure/javelin/api');
 phutil_require_module('phabricator', 'view/layout/panel');
+phutil_require_module('phabricator', 'view/utils');
 
 phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
