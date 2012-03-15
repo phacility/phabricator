@@ -215,7 +215,7 @@ final class DifferentialInlineCommentView extends AphrontView {
       '<div class="differential-inline-comment-head">'.
         $anchor.
         $links.
-        '<span class="differential-inline-comment-line">'.$line.'</span>'.
+        ' <span class="differential-inline-comment-line">'.$line.'</span> '.
         phutil_escape_html($author).
       '</div>'.
       '<div class="differential-inline-comment-content">'.
