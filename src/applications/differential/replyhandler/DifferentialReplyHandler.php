@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-final class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
+class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
 
   private $receivedMail;
 
