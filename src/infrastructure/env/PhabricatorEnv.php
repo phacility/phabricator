@@ -22,12 +22,27 @@
 final class PhabricatorEnv {
   private static $env;
 
+  private static $requiredClasses = array(
+    'metamta.differential.reply-handler' => 'PhabricatorMailReplyHandler',
+  );
+
   public static function setEnvConfig(array $config) {
     self::$env = $config;
   }
 
   public static function getEnvConfig($key, $default = null) {
     return idx(self::$env, $key, $default);
+  }
+
+  public static function newObjectFromConfig($key, $args = array()) {
+    $class = self::getEnvConfig($key);
+    $object = newv($class, $args);
+    $instanceof = idx(self::$requiredClasses, $key);
+    if (!($object instanceof $instanceof)) {
+      throw new Exception("Config setting '$key' must be an instance of ".
+        "'$instanceof', is '".get_class($object)."'.");
+    }
+    return $object;
   }
 
   public static function envConfigExists($key) {

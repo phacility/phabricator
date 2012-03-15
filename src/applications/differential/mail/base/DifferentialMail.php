@@ -215,16 +215,10 @@ EOTEXT;
   }
 
   public function getReplyHandler() {
-    if ($this->replyHandler) {
-      return $this->replyHandler;
+    if (!$this->replyHandler) {
+      $this->replyHandler =
+        self::newReplyHandlerForRevision($this->getRevision());
     }
-
-    $handler_class = PhabricatorEnv::getEnvConfig(
-      'metamta.differential.reply-handler');
-
-    $reply_handler = self::newReplyHandlerForRevision($this->getRevision());
-
-    $this->replyHandler = $reply_handler;
 
     return $this->replyHandler;
   }
@@ -232,10 +226,8 @@ EOTEXT;
   public static function newReplyHandlerForRevision(
     DifferentialRevision $revision) {
 
-    $handler_class = PhabricatorEnv::getEnvConfig(
+    $reply_handler = PhabricatorEnv::newObjectFromConfig(
       'metamta.differential.reply-handler');
-
-    $reply_handler = newv($handler_class, array());
     $reply_handler->setMailReceiver($revision);
 
     return $reply_handler;
