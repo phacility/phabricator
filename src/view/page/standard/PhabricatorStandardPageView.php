@@ -160,10 +160,18 @@ final class PhabricatorStandardPageView extends AphrontPageView {
         'header'    => AphrontRequest::getCSRFHeaderName(),
         'current'   => $current_token,
       ));
+
+    $pref_shortcut = PhabricatorUserPreferences::PREFERENCE_SEARCH_SHORTCUT;
+    if ($user) {
+      $shortcut = $user->loadPreferences()->getPreference($pref_shortcut, 1);
+    } else {
+      $shortcut = 1;
+    }
     Javelin::initBehavior(
       'phabricator-keyboard-shortcuts',
       array(
         'helpURI' => '/help/keyboardshortcut/',
+        'search_shortcut' => $shortcut,
       ));
 
     if ($console) {

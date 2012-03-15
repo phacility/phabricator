@@ -16,6 +16,7 @@ phutil_require_module('phabricator', 'applications/people/controller/settings/pa
 phutil_require_module('phabricator', 'applications/people/controller/settings/panels/password');
 phutil_require_module('phabricator', 'applications/people/controller/settings/panels/preferences');
 phutil_require_module('phabricator', 'applications/people/controller/settings/panels/profile');
+phutil_require_module('phabricator', 'applications/people/controller/settings/panels/search');
 phutil_require_module('phabricator', 'applications/people/controller/settings/panels/sshkeys');
 phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'view/layout/sidenavfilter');

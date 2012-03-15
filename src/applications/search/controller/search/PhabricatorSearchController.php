@@ -44,7 +44,13 @@ final class PhabricatorSearchController
 
       if ($request->isFormPost()) {
         $query_str = $request->getStr('query');
-        $response = PhabricatorJumpNavHandler::jumpPostResponse($query_str);
+
+        $pref_jump = PhabricatorUserPreferences::PREFERENCE_SEARCHBAR_JUMP;
+        if ($user && $user->loadPreferences()->getPreference($pref_jump, 1)) {
+          $response = PhabricatorJumpNavHandler::jumpPostResponse($query_str);
+        } else {
+          $response = null;
+        }
         if ($response) {
           return $response;
         } else {

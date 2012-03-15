@@ -62,6 +62,9 @@ final class PhabricatorUserSettingsController
         $delegate = new PhabricatorUserPreferenceSettingsPanelController(
           $request);
         break;
+      case 'search':
+        $delegate = new PhabricatorUserSearchSettingsPanelController($request);
+        break;
       default:
         $delegate = new PhabricatorUserOAuthSettingsPanelController($request);
         $delegate->setOAuthProvider($oauth_providers[$this->page]);
@@ -110,6 +113,7 @@ final class PhabricatorUserSettingsController
     $sidenav->addSpacer();
     $sidenav->addLabel('Application Settings');
     $sidenav->addFilter('preferences', 'Display Preferences');
+    $sidenav->addFilter('search', 'Search Preferences');
 
     $items = array();
     foreach ($oauth_providers as $provider) {
