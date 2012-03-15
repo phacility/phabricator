@@ -46,7 +46,8 @@ final class PhabricatorSearchController
         $query_str = $request->getStr('query');
 
         $pref_jump = PhabricatorUserPreferences::PREFERENCE_SEARCHBAR_JUMP;
-        if ($user && $user->loadPreferences()->getPreference($pref_jump, 1)) {
+        if ($request->getStr('jump') != 'no' &&
+            $user && $user->loadPreferences()->getPreference($pref_jump, 1)) {
           $response = PhabricatorJumpNavHandler::jumpPostResponse($query_str);
         } else {
           $response = null;
@@ -156,6 +157,14 @@ final class PhabricatorSearchController
     $search_form
       ->setUser($user)
       ->setAction('/search/')
+      ->appendChild(
+        phutil_render_tag(
+          'input',
+          array(
+            'type' => 'hidden',
+            'name' => 'jump',
+            'value' => 'no',
+          )))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Search')
