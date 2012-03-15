@@ -114,7 +114,10 @@ final class DifferentialCCsFieldSpecification
 
     $names = array();
     foreach ($this->ccs as $phid) {
-      $names[] = $this->getHandle($phid)->getName();
+      $handle = $this->getHandle($phid);
+      if ($handle->isComplete()) {
+        $names[] = $handle->getName();
+      }
     }
     return implode(', ', $names);
   }
