@@ -228,7 +228,7 @@ final class PhabricatorDirectoryMainController
         array(
           // TODO: This should filter to just your projects' need-triage
           // tasks?
-          'href' => '/maniphest/view/alltriage/',
+          'href' => '/maniphest/view/projecttriage/',
           'class' => 'grey button',
         ),
         "View All Triage \xC2\xBB"));

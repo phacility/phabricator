@@ -44,6 +44,10 @@ abstract class ManiphestController extends PhabricatorController {
     $nav->addFilter('subscribed',   'Subscribed');
     $nav->addFilter('triage',       'Need Triage');
     $nav->addSpacer();
+    $nav->addLabel('User Projects');
+    $nav->addFilter('projecttriage','Need Triage');
+    $nav->addFilter('projectall',   'All Tasks');
+    $nav->addSpacer();
     $nav->addLabel('All Tasks');
     $nav->addFilter('alltriage',    'Need Triage');
     $nav->addFilter('all',          'All Tasks');

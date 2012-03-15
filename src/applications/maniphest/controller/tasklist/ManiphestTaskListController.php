@@ -66,6 +66,8 @@ final class ManiphestTaskListController extends ManiphestController {
       'created' => true,
       'subscribed' => true,
       'triage' => true,
+      'projecttriage' => true,
+      'projectall' => true,
     );
 
     list($status_map, $status_control) = $this->renderStatusLinks();
@@ -75,7 +77,14 @@ final class ManiphestTaskListController extends ManiphestController {
     $user_phids = $request->getStrList(
       'users',
       array($user->getPHID()));
-    $project_phids = $request->getStrList('projects');
+    if ($this->view == 'projecttriage' || $this->view == 'projectall') {
+      $project_query = new PhabricatorProjectQuery();
+      $project_query->setMembers($user_phids);
+      $projects = $project_query->execute();
+      $project_phids = mpull($projects, 'getPHID');
+    } else {
+      $project_phids = $request->getStrList('projects');
+    }
     $exclude_project_phids = $request->getStrList('xprojects');
     $task_ids = $request->getStrList('tasks');
     $owner_phids = $request->getStrList('owners');
@@ -160,12 +169,14 @@ final class ManiphestTaskListController extends ManiphestController {
     foreach ($project_phids as $phid) {
       $tokens[$phid] = $handles[$phid]->getFullName();
     }
-    $form->appendChild(
-      id(new AphrontFormTokenizerControl())
-        ->setDatasource('/typeahead/common/searchproject/')
-        ->setName('set_projects')
-        ->setLabel('Projects')
-        ->setValue($tokens));
+    if ($this->view != 'projectall' && $this->view != 'projecttriage') {
+      $form->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource('/typeahead/common/searchproject/')
+          ->setName('set_projects')
+          ->setLabel('Projects')
+          ->setValue($tokens));
+    }
 
     if ($this->view == 'custom') {
       $tokens = array();
@@ -343,6 +354,13 @@ final class ManiphestTaskListController extends ManiphestController {
         $query->withPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
         break;
       case 'all':
+        break;
+      case 'projecttriage':
+        $query->withPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
+        $query->withAnyProject(true);
+        break;
+      case 'projectall':
+        $query->withAnyProject(true);
         break;
     }
 
