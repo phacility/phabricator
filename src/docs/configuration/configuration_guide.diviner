@@ -89,7 +89,7 @@ this:
     RewriteEngine on
     RewriteRule ^/rsrc/(.*)     -                       [L,QSA]
     RewriteRule ^/favicon.ico   -                       [L,QSA]
-    RewriteRule ^(.*)$          /index.php?__path__=$1  [L,QSA]
+    RewriteRule ^(.*)$          /index.php?__path__=$1  [B,L,QSA]
 
     # This will use the config file you set up in the previous step. If you
     # called it something other than 'myconfig', put that here.
