@@ -105,7 +105,8 @@ final class DifferentialDiffViewController extends DifferentialController {
     $changesets = msort($changesets, 'getSortKey');
 
     $table_of_contents = id(new DifferentialDiffTableOfContentsView())
-      ->setChangesets($changesets);
+      ->setChangesets($changesets)
+      ->setVisibleChangesets($changesets);
 
     $refs = array();
     foreach ($changesets as $changeset) {

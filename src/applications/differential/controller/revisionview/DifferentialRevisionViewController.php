@@ -267,6 +267,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $toc_view = new DifferentialDiffTableOfContentsView();
     $toc_view->setChangesets($changesets);
+    $toc_view->setVisibleChangesets($visible_changesets);
     $toc_view->setUnitTestData(idx($props, 'arc:unit', array()));
     if ($repository) {
       $toc_view->setRepository($repository);

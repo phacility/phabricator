@@ -19,6 +19,7 @@
 final class DifferentialDiffTableOfContentsView extends AphrontView {
 
   private $changesets = array();
+  private $visibleChangesets = array();
   private $repository;
   private $diff;
   private $user;
@@ -30,6 +31,11 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
 
   public function setChangesets($changesets) {
     $this->changesets = $changesets;
+    return $this;
+  }
+
+  public function setVisibleChangesets($visible_changesets) {
+    $this->visibleChangesets = $visible_changesets;
     return $this;
   }
 
@@ -99,7 +105,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
 
     $changesets = $this->changesets;
     $paths = array();
-    foreach ($changesets as $changeset) {
+    foreach ($changesets as $id => $changeset) {
       $type = $changeset->getChangeType();
       $ftype = $changeset->getFileType();
       $link = $this->renderChangesetLink($changeset);
@@ -163,7 +169,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
             'id' => 'differential-mcoverage-'.md5($fname),
             'class' => 'differential-mcoverage-loading',
           ),
-          'Loading...');
+          (isset($this->visibleChangesets[$id]) ? 'Loading...' : '?'));
       }
 
       $rows[] =
