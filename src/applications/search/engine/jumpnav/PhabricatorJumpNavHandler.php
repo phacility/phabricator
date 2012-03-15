@@ -24,6 +24,8 @@ final class PhabricatorJumpNavHandler {
 
     $patterns = array(
       '/^help/i'                  => 'uri:'.$help_href,
+      '/^a$/i'                    => 'uri:/audit/',
+      '/^f$/i'                    => 'uri:/feed/',
       '/^d$/i'                    => 'uri:/differential/',
       '/^r$/i'                    => 'uri:/diffusion/',
       '/^t$/i'                    => 'uri:/maniphest/',
