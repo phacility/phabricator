@@ -484,13 +484,17 @@ final class DifferentialChangesetParser {
 
     $old_corpus = array();
     foreach ($this->old as $o) {
-      $old_corpus[] = $o['text'];
+      if ($o['type'] != '\\') {
+        $old_corpus[] = $o['text'];
+      }
     }
     $old_corpus_block = implode("\n", $old_corpus);
 
     $new_corpus = array();
     foreach ($this->new as $n) {
-      $new_corpus[] = $n['text'];
+      if ($n['type'] != '\\') {
+        $new_corpus[] = $n['text'];
+      }
     }
     $new_corpus_block = implode("\n", $new_corpus);
 
@@ -1339,6 +1343,7 @@ final class DifferentialChangesetParser {
         $o_attr = null;
         if ($this->old[$ii]['type']) {
           if ($this->old[$ii]['type'] == '\\') {
+            $o_text = $this->old[$ii]['text'];
             $o_attr = ' class="comment"';
           } elseif (empty($this->new[$ii])) {
             $o_attr = ' class="old old-full"';
@@ -1372,6 +1377,7 @@ final class DifferentialChangesetParser {
 
         if ($this->new[$ii]['type']) {
           if ($this->new[$ii]['type'] == '\\') {
+            $n_text = $this->old[$ii]['text'];
             $n_attr = ' class="comment"';
           } elseif (empty($this->old[$ii])) {
             $n_attr = ' class="new new-full"';
