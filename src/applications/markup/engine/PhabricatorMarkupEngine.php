@@ -106,6 +106,7 @@ class PhabricatorMarkupEngine {
 
     $rules = array();
     $rules[] = new PhutilRemarkupRuleEscapeRemarkup();
+    $rules[] = new PhutilRemarkupRuleMonospace();
 
     $custom_rule_classes = $options['custom-inline'];
     if ($custom_rule_classes) {
@@ -143,7 +144,6 @@ class PhabricatorMarkupEngine {
     $rules[] = new PhabricatorRemarkupRuleMention();
 
     $rules[] = new PhutilRemarkupRuleEscapeHTML();
-    $rules[] = new PhutilRemarkupRuleMonospace();
     $rules[] = new PhutilRemarkupRuleBold();
     $rules[] = new PhutilRemarkupRuleItalic();
 
