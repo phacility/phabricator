@@ -1942,111 +1942,6 @@ celerity_register_resource_map(array(
 ), array(
   'packages' =>
   array(
-    '1cb6883c' =>
-    array(
-      'name' => 'differential.pkg.css',
-      'symbols' =>
-      array(
-        0 => 'differential-core-view-css',
-        1 => 'differential-changeset-view-css',
-        2 => 'differential-revision-detail-css',
-        3 => 'differential-revision-history-css',
-        4 => 'differential-table-of-contents-css',
-        5 => 'differential-revision-comment-css',
-        6 => 'differential-revision-add-comment-css',
-        7 => 'differential-revision-comment-list-css',
-        8 => 'phabricator-object-selector-css',
-        9 => 'aphront-headsup-action-list-view-css',
-        10 => 'phabricator-content-source-view-css',
-        11 => 'differential-local-commits-view-css',
-      ),
-      'uri' => '/res/pkg/1cb6883c/differential.pkg.css',
-      'type' => 'css',
-    ),
-    '2af849fb' =>
-    array(
-      'name' => 'typeahead.pkg.js',
-      'symbols' =>
-      array(
-        0 => 'javelin-typeahead',
-        1 => 'javelin-typeahead-normalizer',
-        2 => 'javelin-typeahead-source',
-        3 => 'javelin-typeahead-preloaded-source',
-        4 => 'javelin-typeahead-ondemand-source',
-        5 => 'javelin-tokenizer',
-        6 => 'javelin-behavior-aphront-basic-tokenizer',
-      ),
-      'uri' => '/res/pkg/2af849fb/typeahead.pkg.js',
-      'type' => 'js',
-    ),
-    '31d4b993' =>
-    array(
-      'name' => 'differential.pkg.js',
-      'symbols' =>
-      array(
-        0 => 'phabricator-drag-and-drop-file-upload',
-        1 => 'phabricator-shaped-request',
-        2 => 'javelin-behavior-differential-feedback-preview',
-        3 => 'javelin-behavior-differential-edit-inline-comments',
-        4 => 'javelin-behavior-differential-populate',
-        5 => 'javelin-behavior-differential-show-more',
-        6 => 'javelin-behavior-differential-diff-radios',
-        7 => 'javelin-behavior-differential-accept-with-errors',
-        8 => 'javelin-behavior-differential-comment-jump',
-        9 => 'javelin-behavior-differential-add-reviewers-and-ccs',
-        10 => 'javelin-behavior-differential-keyboard-navigation',
-        11 => 'javelin-behavior-aphront-drag-and-drop',
-        12 => 'javelin-behavior-aphront-drag-and-drop-textarea',
-        13 => 'javelin-behavior-phabricator-object-selector',
-        14 => 'differential-inline-comment-editor',
-        15 => 'javelin-behavior-differential-dropdown-menus',
-        16 => 'javelin-behavior-buoyant',
-      ),
-      'uri' => '/res/pkg/31d4b993/differential.pkg.js',
-      'type' => 'js',
-    ),
-    '4fbae2af' =>
-    array(
-      'name' => 'javelin.pkg.js',
-      'symbols' =>
-      array(
-        0 => 'javelin-util',
-        1 => 'javelin-install',
-        2 => 'javelin-event',
-        3 => 'javelin-stratcom',
-        4 => 'javelin-behavior',
-        5 => 'javelin-request',
-        6 => 'javelin-vector',
-        7 => 'javelin-dom',
-        8 => 'javelin-json',
-        9 => 'javelin-uri',
-      ),
-      'uri' => '/res/pkg/4fbae2af/javelin.pkg.js',
-      'type' => 'js',
-    ),
-    '61f9d480' =>
-    array(
-      'name' => 'diffusion.pkg.css',
-      'symbols' =>
-      array(
-        0 => 'diffusion-commit-view-css',
-      ),
-      'uri' => '/res/pkg/61f9d480/diffusion.pkg.css',
-      'type' => 'css',
-    ),
-    31583232 =>
-    array(
-      'name' => 'maniphest.pkg.css',
-      'symbols' =>
-      array(
-        0 => 'maniphest-task-summary-css',
-        1 => 'maniphest-transaction-detail-css',
-        2 => 'maniphest-task-detail-css',
-        3 => 'aphront-attached-file-view-css',
-      ),
-      'uri' => '/res/pkg/31583232/maniphest.pkg.css',
-      'type' => 'css',
-    ),
     '78e8854e' =>
     array(
       'name' => 'core.pkg.css',
@@ -2075,19 +1970,6 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/78e8854e/core.pkg.css',
       'type' => 'css',
     ),
-    '86fc0b0c' =>
-    array(
-      'name' => 'maniphest.pkg.js',
-      'symbols' =>
-      array(
-        0 => 'javelin-behavior-maniphest-batch-selector',
-        1 => 'javelin-behavior-maniphest-transaction-controls',
-        2 => 'javelin-behavior-maniphest-transaction-preview',
-        3 => 'javelin-behavior-maniphest-transaction-expand',
-      ),
-      'uri' => '/res/pkg/86fc0b0c/maniphest.pkg.js',
-      'type' => 'js',
-    ),
     'c18634d0' =>
     array(
       'name' => 'core.pkg.js',
@@ -2108,6 +1990,124 @@ celerity_register_resource_map(array(
         12 => 'phabricator-dropdown-menu',
       ),
       'uri' => '/res/pkg/c18634d0/core.pkg.js',
+      'type' => 'js',
+    ),
+    '1cb6883c' =>
+    array(
+      'name' => 'differential.pkg.css',
+      'symbols' =>
+      array(
+        0 => 'differential-core-view-css',
+        1 => 'differential-changeset-view-css',
+        2 => 'differential-revision-detail-css',
+        3 => 'differential-revision-history-css',
+        4 => 'differential-table-of-contents-css',
+        5 => 'differential-revision-comment-css',
+        6 => 'differential-revision-add-comment-css',
+        7 => 'differential-revision-comment-list-css',
+        8 => 'phabricator-object-selector-css',
+        9 => 'aphront-headsup-action-list-view-css',
+        10 => 'phabricator-content-source-view-css',
+        11 => 'differential-local-commits-view-css',
+      ),
+      'uri' => '/res/pkg/1cb6883c/differential.pkg.css',
+      'type' => 'css',
+    ),
+    '31d4b993' =>
+    array(
+      'name' => 'differential.pkg.js',
+      'symbols' =>
+      array(
+        0 => 'phabricator-drag-and-drop-file-upload',
+        1 => 'phabricator-shaped-request',
+        2 => 'javelin-behavior-differential-feedback-preview',
+        3 => 'javelin-behavior-differential-edit-inline-comments',
+        4 => 'javelin-behavior-differential-populate',
+        5 => 'javelin-behavior-differential-show-more',
+        6 => 'javelin-behavior-differential-diff-radios',
+        7 => 'javelin-behavior-differential-accept-with-errors',
+        8 => 'javelin-behavior-differential-comment-jump',
+        9 => 'javelin-behavior-differential-add-reviewers-and-ccs',
+        10 => 'javelin-behavior-differential-keyboard-navigation',
+        11 => 'javelin-behavior-aphront-drag-and-drop',
+        12 => 'javelin-behavior-aphront-drag-and-drop-textarea',
+        13 => 'javelin-behavior-phabricator-object-selector',
+        14 => 'differential-inline-comment-editor',
+        15 => 'javelin-behavior-differential-dropdown-menus',
+        16 => 'javelin-behavior-buoyant',
+      ),
+      'uri' => '/res/pkg/31d4b993/differential.pkg.js',
+      'type' => 'js',
+    ),
+    '61f9d480' =>
+    array(
+      'name' => 'diffusion.pkg.css',
+      'symbols' =>
+      array(
+        0 => 'diffusion-commit-view-css',
+      ),
+      'uri' => '/res/pkg/61f9d480/diffusion.pkg.css',
+      'type' => 'css',
+    ),
+    '4fbae2af' =>
+    array(
+      'name' => 'javelin.pkg.js',
+      'symbols' =>
+      array(
+        0 => 'javelin-util',
+        1 => 'javelin-install',
+        2 => 'javelin-event',
+        3 => 'javelin-stratcom',
+        4 => 'javelin-behavior',
+        5 => 'javelin-request',
+        6 => 'javelin-vector',
+        7 => 'javelin-dom',
+        8 => 'javelin-json',
+        9 => 'javelin-uri',
+      ),
+      'uri' => '/res/pkg/4fbae2af/javelin.pkg.js',
+      'type' => 'js',
+    ),
+    31583232 =>
+    array(
+      'name' => 'maniphest.pkg.css',
+      'symbols' =>
+      array(
+        0 => 'maniphest-task-summary-css',
+        1 => 'maniphest-transaction-detail-css',
+        2 => 'maniphest-task-detail-css',
+        3 => 'aphront-attached-file-view-css',
+      ),
+      'uri' => '/res/pkg/31583232/maniphest.pkg.css',
+      'type' => 'css',
+    ),
+    '86fc0b0c' =>
+    array(
+      'name' => 'maniphest.pkg.js',
+      'symbols' =>
+      array(
+        0 => 'javelin-behavior-maniphest-batch-selector',
+        1 => 'javelin-behavior-maniphest-transaction-controls',
+        2 => 'javelin-behavior-maniphest-transaction-preview',
+        3 => 'javelin-behavior-maniphest-transaction-expand',
+      ),
+      'uri' => '/res/pkg/86fc0b0c/maniphest.pkg.js',
+      'type' => 'js',
+    ),
+    '2af849fb' =>
+    array(
+      'name' => 'typeahead.pkg.js',
+      'symbols' =>
+      array(
+        0 => 'javelin-typeahead',
+        1 => 'javelin-typeahead-normalizer',
+        2 => 'javelin-typeahead-source',
+        3 => 'javelin-typeahead-preloaded-source',
+        4 => 'javelin-typeahead-ondemand-source',
+        5 => 'javelin-tokenizer',
+        6 => 'javelin-behavior-aphront-basic-tokenizer',
+      ),
+      'uri' => '/res/pkg/2af849fb/typeahead.pkg.js',
       'type' => 'js',
     ),
   ),

@@ -276,7 +276,7 @@ $runtime_map = var_export($runtime_map, true);
 $runtime_map = preg_replace('/\s+$/m', '', $runtime_map);
 $runtime_map = preg_replace('/array \(/', 'array(', $runtime_map);
 
-ksort($package_map['packages']);
+$package_map['packages'] = isort($package_map['packages'], 'name');
 ksort($package_map['reverse']);
 $package_map = var_export($package_map, true);
 $package_map = preg_replace('/\s+$/m', '', $package_map);
