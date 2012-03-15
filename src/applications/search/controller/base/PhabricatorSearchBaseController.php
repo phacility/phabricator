@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ abstract class PhabricatorSearchBaseController extends PhabricatorController {
     $page->setApplicationName('Search');
     $page->setBaseURI('/search/');
     $page->setTitle(idx($data, 'title'));
-    $page->setGlyph("(?)");
+    $page->setGlyph("\xC2\xBF");
     $page->appendChild($view);
 
     $response = new AphrontWebpageResponse();
