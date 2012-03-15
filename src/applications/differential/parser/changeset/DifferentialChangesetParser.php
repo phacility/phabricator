@@ -1377,7 +1377,7 @@ final class DifferentialChangesetParser {
 
         if ($this->new[$ii]['type']) {
           if ($this->new[$ii]['type'] == '\\') {
-            $n_text = $this->old[$ii]['text'];
+            $n_text = $this->new[$ii]['text'];
             $n_attr = ' class="comment"';
           } elseif (empty($this->old[$ii])) {
             $n_attr = ' class="new new-full"';
