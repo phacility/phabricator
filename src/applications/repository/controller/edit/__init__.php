@@ -20,6 +20,7 @@ phutil_require_module('phabricator', 'view/form/control/submit');
 phutil_require_module('phabricator', 'view/form/control/text');
 phutil_require_module('phabricator', 'view/form/control/textarea');
 phutil_require_module('phabricator', 'view/form/error');
+phutil_require_module('phabricator', 'view/form/inset');
 phutil_require_module('phabricator', 'view/layout/panel');
 phutil_require_module('phabricator', 'view/layout/sidenav');
 

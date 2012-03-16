@@ -258,11 +258,9 @@ final class PhabricatorProjectProfileEditController
           ->setError($e_image)
           ->setCaption('Supported formats: '.implode(', ', $supported_formats)))
       ->appendChild(
-        '<h1>Resources</h1>'.
-        '<input type="hidden" name="resources" id="resources" />'.
-        '<div class="aphront-form-inset">'.
-          '<div style="float: right;">'.
-            javelin_render_tag(
+        id(new AphrontFormInsetView())
+          ->setTitle('Resources')
+          ->setRightButton(javelin_render_tag(
               'a',
               array(
                 'href' => '#',
@@ -270,18 +268,15 @@ final class PhabricatorProjectProfileEditController
                 'sigil' => 'add-resource',
                 'mustcapture' => true,
               ),
-              'Add New Resource').
-          '</div>'.
-          '<p></p>'.
-          '<div style="clear: both;"></div>'.
-          javelin_render_tag(
+              'Add New Resource'))
+          ->addHiddenInput('resources', 'resources')
+          ->setContent(javelin_render_tag(
             'table',
             array(
               'sigil' => 'resources',
               'class' => 'project-resource-table',
             ),
-            '').
-        '</div>')
+            '')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton('/project/view/'.$project->getID().'/')

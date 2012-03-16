@@ -389,28 +389,25 @@ final class PhabricatorRepositoryEditController
 
     $form
       ->appendChild(
-        '<h1>Basics</h1><div class="aphront-form-inset">')
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel('Repository Name')
-          ->setValue($repository->getName()))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setName('tracking')
-          ->setLabel('Tracking')
-          ->setOptions(array(
-            'disabled'  => 'Disabled',
-            'enabled'   => 'Enabled',
-          ))
-          ->setValue(
-            $repository->isTracked()
+        id(new AphrontFormInsetView())
+          ->setTitle('Basics')
+          ->appendChild(id(new AphrontFormStaticControl())
+            ->setLabel('Repository Name')
+            ->setValue($repository->getName()))
+          ->appendChild(id(new AphrontFormSelectControl())
+            ->setName('tracking')
+            ->setLabel('Tracking')
+            ->setOptions(array(
+                'disabled'  => 'Disabled',
+                'enabled'   => 'Enabled',
+                ))
+            ->setValue(
+              $repository->isTracked()
               ? 'enabled'
-              : 'disabled'))
-      ->appendChild('</div>');
+              : 'disabled')));
 
-    $form->appendChild(
-      '<h1>Remote URI</h1>'.
-      '<div class="aphront-form-inset">');
+    $inset = new AphrontFormInsetView();
+    $inset->setTitle('Remote URI');
 
     $clone_command = null;
     $fetch_command = null;
@@ -435,7 +432,7 @@ final class PhabricatorRepositoryEditController
           'Enter the URI to clone this repository from. It should look '.
           'something like <tt>ssh://user@host.com/hg/example</tt>';
       }
-      $form->appendChild(
+      $inset->appendChild(
         '<p class="aphront-form-instructions">'.$instructions.'</p>');
     } else if ($is_svn) {
       $instructions =
@@ -444,12 +441,12 @@ final class PhabricatorRepositoryEditController
         'the value in the <tt>Repository Root</tt> field. It should be a URI '.
         'and look like <tt>http://svn.example.org/svn/</tt> or '.
         '<tt>svn+ssh://svn.example.com/svnroot/</tt>';
-      $form->appendChild(
+      $inset->appendChild(
         '<p class="aphront-form-instructions">'.$instructions.'</p>');
       $uri_label = 'Repository Root';
     }
 
-    $form
+    $inset
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('uri')
@@ -458,14 +455,14 @@ final class PhabricatorRepositoryEditController
           ->setValue($repository->getDetail('remote-uri'))
           ->setError($e_uri));
 
-    $form->appendChild(
+    $inset->appendChild(
       '<div class="aphront-form-instructions">'.
         'If you want to connect to this repository over SSH, enter the '.
         'username and private key to use. You can leave these fields blank if '.
         'the repository does not use SSH.'.
       '</div>');
 
-    $form
+    $inset
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('ssh-login')
@@ -490,7 +487,7 @@ final class PhabricatorRepositoryEditController
             'look for a private key.'));
 
     if ($has_http_support) {
-      $form
+      $inset
         ->appendChild(
           '<div class="aphront-form-instructions">'.
             'If you want to connect to this repository over HTTP Basic Auth, '.
@@ -509,7 +506,7 @@ final class PhabricatorRepositoryEditController
             ->setValue($repository->getDetail('http-pass')));
     }
 
-    $form
+    $inset
       ->appendChild(
         '<div class="aphront-form-important">'.
           'To test your authentication configuration, <strong>save this '.
@@ -523,33 +520,32 @@ final class PhabricatorRepositoryEditController
           'from it.'.
         '</div>');
 
-    $form->appendChild('</div>');
+    $form->appendChild($inset);
 
-    $form->appendChild(
-      '<h1>Importing Repository Information</h1>'.
-      '<div class="aphront-form-inset">');
+    $inset = new AphrontFormInsetView();
+    $inset->setTitle('Repository Information');
 
     if ($has_local) {
-      $form->appendChild(
+      $inset->appendChild(
         '<p class="aphront-form-instructions">Select a path on local disk '.
         'which the daemons should <tt>'.$clone_command.'</tt> the repository '.
         'into. This must be readable and writable by the daemons, and '.
         'readable by the webserver. The daemons will <tt>'.$fetch_command.
         '</tt> and keep this repository up to date.</p>');
-      $form->appendChild(
+      $inset->appendChild(
         id(new AphrontFormTextControl())
           ->setName('path')
           ->setLabel('Local Path')
           ->setValue($repository->getDetail('local-path'))
           ->setError($e_path));
     } else if ($is_svn) {
-      $form->appendChild(
+      $inset->appendChild(
         '<p class="aphront-form-instructions">If you only want to parse one '.
         'subpath of the repository, specify it here, relative to the '.
         'repository root (e.g., <tt>trunk/</tt> or <tt>projects/wheel/</tt>). '.
         'If you want to parse multiple subdirectories, create a separate '.
         'Phabricator repository for each one.</p>');
-      $form->appendChild(
+      $inset->appendChild(
         id(new AphrontFormTextControl())
           ->setName('svn-subpath')
           ->setLabel('Subpath')
@@ -561,7 +557,7 @@ final class PhabricatorRepositoryEditController
       $branch_filter_str = implode(
         ', ',
         array_keys($repository->getDetail('branch-filter', array())));
-      $form
+      $inset
         ->appendChild(
           id(new AphrontFormTextControl())
             ->setName('branch-filter')
@@ -573,7 +569,7 @@ final class PhabricatorRepositoryEditController
               'Example: <tt>master, release</tt>'));
     }
 
-    $form
+    $inset
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('frequency')
@@ -583,11 +579,10 @@ final class PhabricatorRepositoryEditController
             'Number of seconds daemon should sleep between requests. Larger '.
             'numbers reduce load but also decrease responsiveness.'));
 
-    $form->appendChild('</div>');
+    $form->appendChild($inset);
 
-    $form->appendChild(
-      '<h1>Application Configuration</h1>'.
-      '<div class="aphront-form-inset">');
+    $inset = new AphrontFormInsetView();
+    $inset->setTitle('Application Configuration');
 
     if ($has_branches) {
 
@@ -598,7 +593,7 @@ final class PhabricatorRepositoryEditController
         $default_branch_name = 'master';
       }
 
-      $form
+      $inset
         ->appendChild(
           id(new AphrontFormTextControl())
             ->setName('default-branch')
@@ -612,7 +607,7 @@ final class PhabricatorRepositoryEditController
               'Default branch to show in Diffusion.'));
     }
 
-    $form
+    $inset
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('default-owners-path')
@@ -623,7 +618,7 @@ final class PhabricatorRepositoryEditController
               '/'))
           ->setCaption('Default path in Owners tool.'));
 
-    $form
+    $inset
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setName('herald-disabled')
@@ -643,7 +638,7 @@ final class PhabricatorRepositoryEditController
       ->selectSymbolsWithoutLoading();
     $parsers = ipull($parsers, 'name', 'name');
 
-    $form
+    $inset
       ->appendChild(
         '<p class="aphront-form-instructions">If you extend the commit '.
         'message format, you can provide a new parser which will extract '.
@@ -661,7 +656,7 @@ final class PhabricatorRepositoryEditController
               'PhabricatorRepositoryDefaultCommitMessageDetailParser')));
 
     if ($is_svn) {
-      $form
+      $inset
         ->appendChild(
           id(new AphrontFormTextControl())
             ->setName('uuid')
@@ -670,7 +665,7 @@ final class PhabricatorRepositoryEditController
             ->setCaption('Repository UUID from <tt>svn info</tt>.'));
     }
 
-    $form->appendChild('</div>');
+    $form->appendChild($inset);
 
     $form
       ->appendChild(

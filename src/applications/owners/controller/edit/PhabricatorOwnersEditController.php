@@ -233,10 +233,10 @@ final class PhabricatorOwnersEditController
               ? 'enabled'
               : 'disabled'))
       ->appendChild(
-        '<h1>Paths</h1>'.
-        '<div class="aphront-form-inset" id="path-editor">'.
-          '<div style="float: right;">'.
-            javelin_render_tag(
+        id(new AphrontFormInsetView())
+          ->setTitle('Paths')
+          ->addDivAttributes(array('id' => 'path-editor'))
+          ->setRightButton(javelin_render_tag(
               'a',
               array(
                 'href' => '#',
@@ -244,19 +244,16 @@ final class PhabricatorOwnersEditController
                 'sigil' => 'addpath',
                 'mustcapture' => true,
               ),
-              'Add New Path').
-          '</div>'.
-          '<p>Specify the files and directories which comprise this '.
-          'package.</p>'.
-          '<div style="clear: both;"></div>'.
-          javelin_render_tag(
-            'table',
-            array(
-              'class' => 'owners-path-editor-table',
-              'sigil' => 'paths',
-            ),
-            '').
-        '</div>')
+              'Add New Path'))
+          ->setDescription('Specify the files and directories which comprise '.
+                           'this package.')
+          ->setContent(javelin_render_tag(
+              'table',
+              array(
+                'class' => 'owners-path-editor-table',
+                'sigil' => 'paths',
+              ),
+              '')))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel('Description')

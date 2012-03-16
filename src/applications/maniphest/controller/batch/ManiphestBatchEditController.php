@@ -104,10 +104,9 @@ final class ManiphestBatchEditController extends ManiphestController {
     $form->appendChild('<p>These tasks will be edited:</p>');
     $form->appendChild($list);
     $form->appendChild(
-      '<h1>Actions</h1>'.
-      '<div class="aphront-form-inset">'.
-        '<div style="float: right;">'.
-          javelin_render_tag(
+      id(new AphrontFormInsetView())
+        ->setTitle('Actions')
+        ->setRightButton(javelin_render_tag(
             'a',
             array(
               'href' => '#',
@@ -115,17 +114,14 @@ final class ManiphestBatchEditController extends ManiphestController {
               'sigil' => 'add-action',
               'mustcapture' => true,
             ),
-            'Add Another Action').
-        '</div>'.
-        '<div style="clear: both;"></div>'.
-        javelin_render_tag(
+            'Add Another Action'))
+        ->setContent(javelin_render_tag(
           'table',
           array(
             'sigil' => 'maniphest-batch-actions',
             'class' => 'maniphest-batch-actions-table',
           ),
-          '').
-      '</div>')
+          '')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Update Tasks')

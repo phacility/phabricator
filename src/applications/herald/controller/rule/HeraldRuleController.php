@@ -165,34 +165,31 @@ final class HeraldRuleController extends HeraldController {
             "This <strong>${rule_type_name}</strong> rule triggers for " .
             "<strong>${content_type_name}</strong>."))
       ->appendChild(
-        '<h1>Conditions</h1>'.
-        '<div class="aphront-form-inset">'.
-          '<div style="float: right;">'.
-            javelin_render_tag(
-              'a',
-              array(
-                'href' => '#',
-                'class' => 'button green',
-                'sigil' => 'create-condition',
-                'mustcapture' => true,
-              ),
-              'Create New Condition').
-          '</div>'.
-          '<p>When '.$must_match_selector.' these conditions are met:</p>'.
-          '<div style="clear: both;"></div>'.
-          javelin_render_tag(
+        id(new AphrontFormInsetView())
+          ->setTitle('Conditions')
+          ->setRightButton(javelin_render_tag(
+            'a',
+            array(
+              'href' => '#',
+              'class' => 'button green',
+              'sigil' => 'create-condition',
+              'mustcapture' => true
+            ),
+            'Create New Condition'))
+          ->setDescription(
+            'When '.$must_match_selector .
+            ' these conditions are met:')
+          ->setContent(javelin_render_tag(
             'table',
             array(
               'sigil' => 'rule-conditions',
-              'class' => 'herald-condition-table',
+              'class' => 'herald-condition-table'
             ),
-            '').
-        '</div>')
+            '')))
       ->appendChild(
-        '<h1>Action</h1>'.
-        '<div class="aphront-form-inset">'.
-          '<div style="float: right;">'.
-          javelin_render_tag(
+        id(new AphrontFormInsetView())
+          ->setTitle('Action')
+          ->setRightButton(javelin_render_tag(
             'a',
             array(
               'href' => '#',
@@ -200,20 +197,16 @@ final class HeraldRuleController extends HeraldController {
               'sigil' => 'create-action',
               'mustcapture' => true,
             ),
-            'Create New Action').
-          '</div>'.
-          '<p>'.
-            'Take these actions '.$repetition_selector.' this rule matches:'.
-          '</p>'.
-          '<div style="clear: both;"></div>'.
-          javelin_render_tag(
-            'table',
-            array(
-              'sigil' => 'rule-actions',
-              'class' => 'herald-action-table',
-            ),
-            '').
-        '</div>')
+            'Create New Action'))
+          ->setDescription('Take these actions '.$repetition_selector.
+            ' this rule matches:')
+          ->setContent(javelin_render_tag(
+              'table',
+              array(
+                'sigil' => 'rule-actions',
+                'class' => 'herald-action-table',
+              ),
+              '')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Save Rule')
