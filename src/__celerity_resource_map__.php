@@ -839,6 +839,17 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/core/behavior-object-selector.js',
   ),
+  'javelin-behavior-phabricator-oncopy' =>
+  array(
+    'uri' => '/res/70b9b75e/rsrc/js/application/core/behavior-oncopy.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+    ),
+    'disk' => '/rsrc/js/application/core/behavior-oncopy.js',
+  ),
   'javelin-behavior-phabricator-tooltips' =>
   array(
     'uri' => '/res/49f92a92/rsrc/js/application/core/behavior-tooltip.js',

@@ -1417,7 +1417,10 @@ final class DifferentialChangesetParser {
           '<th'.$o_id.'>'.$o_num.'</th>'.
           '<td'.$o_attr.'>'.$o_text.'</td>'.
           '<th'.$n_id.'>'.$n_num.'</th>'.
-          '<td'.$n_attr.'>'.$n_text.'</td>'.
+          // NOTE: This is a unicode zero-width space, which we use as a hint
+          // when intercepting 'copy' events to make sure sensible text ends
+          // up on the clipboard. See the 'phabricator-oncopy' behavior.
+          '<td'.$n_attr.'>'."\xE2\x80\x8B".$n_text.'</td>'.
           $n_cov.
         '</tr>';
 
