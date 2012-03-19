@@ -269,7 +269,14 @@ final class PhabricatorProjectProfileEditController
                 'mustcapture' => true,
               ),
               'Add New Resource'))
-          ->addHiddenInput('resources', 'resources')
+          ->appendChild(
+            phutil_render_tag(
+              'input',
+              array(
+                'type' => 'hidden',
+                'name' => 'resources',
+                'id'   => 'resources',
+              )))
           ->setContent(javelin_render_tag(
             'table',
             array(
