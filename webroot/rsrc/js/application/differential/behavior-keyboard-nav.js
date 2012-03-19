@@ -220,10 +220,11 @@ JX.behavior('differential-keyboard-navigation', function(config) {
     })
     .register();
 
-
-  new JX.KeyboardShortcut('z', 'Haunt / unhaunt comment panel.')
-    .setHandler(haunt)
-    .register();
+  if (config.haunt) {
+    new JX.KeyboardShortcut('z', 'Haunt / unhaunt comment panel.')
+      .setHandler(haunt)
+      .register();
+  }
 
 });
 

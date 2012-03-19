@@ -359,6 +359,13 @@ final class DiffusionCommitController extends DiffusionController {
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 
+    Javelin::initBehavior(
+      'differential-keyboard-navigation',
+      array(
+        // TODO: Make this comment panel hauntable
+        'haunt' => null,
+      ));
+
     $draft = id(new PhabricatorDraft())->loadOneWhere(
       'authorPHID = %s AND draftKey = %s',
       $user->getPHID(),
