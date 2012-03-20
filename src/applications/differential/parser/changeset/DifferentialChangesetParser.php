@@ -54,6 +54,7 @@ final class DifferentialChangesetParser {
   private $lineWidth = 80;
   private $isTopLevel;
   private $coverage;
+  private $markupEngine;
 
   const CACHE_VERSION = 4;
 

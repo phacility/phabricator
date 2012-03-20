@@ -45,6 +45,8 @@ final class DiffusionDiffController extends DiffusionController {
     $parser = new DifferentialChangesetParser();
     $parser->setChangeset($changeset);
     $parser->setRenderingReference($diff_query->getRenderingReference());
+    $parser->setMarkupEngine(
+      PhabricatorMarkupEngine::newDiffusionMarkupEngine());
 
     $pquery = new DiffusionPathIDQuery(array($changeset->getFilename()));
     $ids = $pquery->loadPathIDs();
