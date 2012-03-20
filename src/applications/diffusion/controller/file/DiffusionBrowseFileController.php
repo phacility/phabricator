@@ -403,22 +403,27 @@ final class DiffusionBrowseFileController extends DiffusionController {
         $targ = null;
       }
 
-      // Create the row display.
-      $uri_path = $drequest->getUriPath();
-      $uri_rev  = $drequest->getStableCommitName();
-      $uri_view = $view
-        ? '?view='.$view
-        : null;
+      $href = $drequest->generateURI(
+        array(
+          'action' => 'browse',
+          'stable' => true,
+        ));
+      $href = (string)$href;
 
-      $l = phutil_render_tag(
+      $query_params = null;
+      if ($view) {
+        $query_params = '?view='.$view;
+      }
+
+      $link = phutil_render_tag(
         'a',
         array(
-          'href' => $uri_path.';'.$uri_rev.'$'.$n.$uri_view,
+          'href' => $href.'$'.$n.$query_params,
         ),
         $n);
 
       $rows[] = $tr.$blame_info.
-        '<th class="diffusion-wide-link">'.$l.'</th>'.
+        '<th class="diffusion-wide-link">'.$link.'</th>'.
         '<td>'.$targ.$line.'</td></tr>';
       ++$n;
     }

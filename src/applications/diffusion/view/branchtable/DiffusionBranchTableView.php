@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,18 +29,18 @@ final class DiffusionBranchTableView extends DiffusionView {
     $drequest = $this->getDiffusionRequest();
     $current_branch = $drequest->getBranch();
 
-    $callsign = $drequest->getRepository()->getCallsign();
-
     $rows = array();
     $rowc = array();
     foreach ($this->branches as $branch) {
-      $branch_uri = $drequest->getBranchURIComponent($branch->getName());
-
       $rows[] = array(
         phutil_render_tag(
           'a',
           array(
-            'href' => "/diffusion/{$callsign}/repository/{$branch_uri}",
+            'href' => $drequest->generateURI(
+              array(
+                'action' => 'branch',
+                'branch' => $branch->getName(),
+              )),
           ),
           phutil_escape_html($branch->getName())),
         self::linkCommit(

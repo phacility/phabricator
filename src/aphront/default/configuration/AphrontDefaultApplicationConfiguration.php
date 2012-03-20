@@ -247,30 +247,13 @@ class AphrontDefaultApplicationConfiguration
         '' => 'DiffusionHomeController',
         '(?P<callsign>[A-Z]+)/' => array(
           '' => 'DiffusionRepositoryController',
-          'repository/'.
-            '(?P<path>[^/]+)/'
-              => 'DiffusionRepositoryController',
-          'change/'.
-            '(?P<path>.*?)'.
-            '(?:[;](?P<commit>[a-z0-9]+))?'
-              => 'DiffusionChangeController',
-          'history/'.
-            '(?P<path>.*?)'.
-            '(?:[;](?P<commit>[a-z0-9]+))?'
-              => 'DiffusionHistoryController',
-          'browse/'.
-            '(?P<path>.*?)'.
-            '(?:[;](?P<commit>[a-z0-9]+))?'.
-            '(?:[$](?P<line>\d+(?:-\d+)?))?'
-              => 'DiffusionBrowseController',
-          'diff/'.
-            '(?P<path>.*?)'.
-            '(?:[;](?P<commit>[a-z0-9]+))?'
-              => 'DiffusionDiffController',
-          'lastmodified/'.
-            '(?P<path>.*?)'.
-            '(?:[;](?P<commit>[a-z0-9]+))?'
-              => 'DiffusionLastModifiedController',
+
+          'repository/(?P<dblob>.*)'    => 'DiffusionRepositoryController',
+          'change/(?P<dblob>.*)'        => 'DiffusionChangeController',
+          'history/(?P<dblob>.*)'       => 'DiffusionHistoryController',
+          'browse/(?P<dblob>.*)'        => 'DiffusionBrowseController',
+          'lastmodified/(?P<dblob>.*)'  => 'DiffusionLastModifiedController',
+          'diff/'                       => 'DiffusionDiffController',
         ),
         'inline/(?P<phid>[^/]+)/' => 'DiffusionInlineCommentController',
         'services/' => array(

@@ -19,15 +19,12 @@
 final class DiffusionDiffController extends DiffusionController {
 
   public function willProcessRequest(array $data) {
-    $request = $this->getRequest();
-    if ($request->getStr('ref')) {
-      $parts = explode(';', $request->getStr('ref'));
-      $data['path'] = idx($parts, 0);
-      $data['commit'] = idx($parts, 1);
-    }
+    $data = $data + array(
+      'dblob' => $this->getRequest()->getStr('ref'),
+    );
+    $drequest = DiffusionRequest::newFromAphrontRequestDictionary($data);
 
-    $this->diffusionRequest = DiffusionRequest::newFromAphrontRequestDictionary(
-      $data);
+    $this->diffusionRequest = $drequest;
   }
 
   public function processRequest() {

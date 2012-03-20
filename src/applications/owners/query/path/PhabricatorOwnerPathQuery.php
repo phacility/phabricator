@@ -22,7 +22,12 @@ final class PhabricatorOwnerPathQuery {
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
-    $drequest = self::buildDiffusionRequest($repository, $commit);
+    $drequest = DiffusionRequest::newFromAphrontRequestDictionary(
+      array(
+        'repository'  => $repository,
+        'commit'      => $commit->getCommitIdentifier(),
+      ));
+
     $path_query = DiffusionPathChangeQuery::newFromDiffusionRequest(
       $drequest);
     $paths = $path_query->loadChanges();
@@ -36,17 +41,6 @@ final class PhabricatorOwnerPathQuery {
       $result[] = $basic_path;
     }
     return $result;
-  }
-
-  private static function buildDiffusionRequest(
-    PhabricatorRepository $repository,
-    PhabricatorRepositoryCommit $commit) {
-
-    return DiffusionRequest::newFromAphrontRequestDictionary(
-      array(
-        'callsign'  => $repository->getCallsign(),
-        'commit'    => $commit->getCommitIdentifier(),
-      ));
   }
 
 }

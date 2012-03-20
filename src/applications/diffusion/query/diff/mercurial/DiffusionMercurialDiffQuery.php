@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,10 +51,10 @@ final class DiffusionMercurialDiffQuery extends DiffusionDiffQuery {
     $changesets = $diff->getChangesets();
     $changeset = reset($changesets);
 
-    $this->renderingReference =
-      $drequest->getBranchURIComponent($drequest->getBranch()).
-      $drequest->getPath().';'.
-      $drequest->getCommit();
+    $this->renderingReference = $drequest->generateURI(
+      array(
+        'action' => 'rendering-ref',
+      ));
 
     return $changeset;
   }

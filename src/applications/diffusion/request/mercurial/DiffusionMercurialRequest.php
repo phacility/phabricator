@@ -16,28 +16,17 @@
  * limitations under the License.
  */
 
-// TODO: This has some minor code duplication vs the Git request that could be
-// shared.
+/**
+ * @group diffusion
+ */
 final class DiffusionMercurialRequest extends DiffusionRequest {
 
-  protected function initializeFromAphrontRequestDictionary(array $data) {
-    parent::initializeFromAphrontRequestDictionary($data);
+  protected function getSupportsBranches() {
+    return true;
+  }
 
-    $path = $this->path;
-    $parts = explode('/', $path);
-
-    $branch = array_shift($parts);
-    if ($branch != ':') {
-      $this->branch = $this->decodeBranchName($branch);
-    }
-
-    foreach ($parts as $key => $part) {
-      if ($part == '..') {
-        unset($parts[$key]);
-      }
-    }
-
-    $this->path = implode('/', $parts);
+  protected function didInitialize() {
+    return;
   }
 
   public function getBranch() {
@@ -50,11 +39,6 @@ final class DiffusionMercurialRequest extends DiffusionRequest {
     throw new Exception("Unable to determine branch!");
   }
 
-  public function getUriPath() {
-    return '/diffusion/'.$this->getCallsign().'/browse/'.
-      $this->getBranchURIComponent($this->branch).$this->path;
-  }
-
   public function getCommit() {
     if ($this->commit) {
       return $this->commit;
@@ -64,18 +48,6 @@ final class DiffusionMercurialRequest extends DiffusionRequest {
 
   public function getStableCommitName() {
     return substr($this->stableCommitName, 0, 16);
-  }
-
-  public function getBranchURIComponent($branch) {
-    return $this->encodeBranchName($branch).'/';
-  }
-
-  private function decodeBranchName($branch) {
-    return str_replace(':', '/', $branch);
-  }
-
-  private function encodeBranchName($branch) {
-    return str_replace('/', ':', $branch);
   }
 
 }

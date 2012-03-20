@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,12 @@ final class DiffusionGitDiffQuery extends DiffusionDiffQuery {
     $drequest = $this->getRequest();
     $repository = $drequest->getRepository();
 
-    if (!$drequest->getRawCommit()) {
-      $effective_commit = $this->getEffectiveCommit();
-      if (!$effective_commit) {
-        return null;
-      }
-      // TODO: This side effect is kind of skethcy.
-      $drequest->setCommit($effective_commit);
-    } else {
-      $effective_commit = $drequest->getCommit();
+    $effective_commit = $this->getEffectiveCommit();
+    if (!$effective_commit) {
+      return null;
     }
+    // TODO: This side effect is kind of skethcy.
+    $drequest->setCommit($effective_commit);
 
     $options = array(
       '-M',
@@ -72,6 +68,10 @@ final class DiffusionGitDiffQuery extends DiffusionDiffQuery {
       }
     }
 
+    if (!$raw_diff) {
+      return null;
+    }
+
     $parser = new ArcanistDiffParser();
 
     $try_encoding = $repository->getDetail('encoding');
@@ -86,10 +86,10 @@ final class DiffusionGitDiffQuery extends DiffusionDiffQuery {
     $changesets = $diff->getChangesets();
     $changeset = reset($changesets);
 
-    $this->renderingReference =
-      $drequest->getBranchURIComponent($drequest->getBranch()).
-      $drequest->getPath().';'.
-      $drequest->getCommit();
+    $this->renderingReference = $drequest->generateURI(
+      array(
+        'action' => 'rendering-ref',
+      ));
 
     return $changeset;
   }

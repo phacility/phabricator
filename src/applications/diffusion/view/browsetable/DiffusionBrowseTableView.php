@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,13 +120,13 @@ final class DiffusionBrowseTableView extends DiffusionView {
           'author'    => celerity_generate_unique_node_id(),
           'details'   => celerity_generate_unique_node_id(),
         );
-        $uri =
-          '/diffusion/'.$repository->getCallsign().'/lastmodified/'.
-          $request->getBranchURIComponent($request->getBranch()).
-          $base_path.$path->getPath();
-        if ($request->getRawCommit()) {
-          $uri .= ';'.$request->getRawCommit();
-        }
+
+        $uri = (string)$request->generateURI(
+          array(
+            'action' => 'lastmodified',
+            'path'   => $base_path.$path->getPath(),
+          ));
+
         $need_pull[$uri] = $dict;
         foreach ($dict as $k => $uniq) {
           $dict[$k] = '<span id="'.$uniq.'"></span>';

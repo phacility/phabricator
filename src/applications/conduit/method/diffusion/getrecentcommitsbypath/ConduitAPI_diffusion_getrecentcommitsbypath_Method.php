@@ -45,13 +45,13 @@ final class ConduitAPI_diffusion_getrecentcommitsbypath_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $results = array();
+    $drequest = DiffusionRequest::newFromDictionary(
+      array(
+        'callsign'  => $request->getValue('callsign'),
+        'path'      => $request->getValue('path'),
+      ));
 
-    $history = DiffusionHistoryQuery::newFromDiffusionRequest(
-      DiffusionRequest::newFromAphrontRequestDictionary(
-        $request->getAllParameters()
-      )
-    )
+    $history = DiffusionHistoryQuery::newFromDiffusionRequest($drequest)
     ->setLimit(self::RESULT_LIMIT)
     ->needDirectChanges(true)
     ->needChildChanges(true)

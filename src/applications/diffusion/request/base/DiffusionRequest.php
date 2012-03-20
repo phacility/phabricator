@@ -17,10 +17,16 @@
  */
 
 /**
- * TODO: This might need to be concrete-extensible, but straighten out the
- * class hierarchy here.
+ * Contains logic to parse Diffusion requests, which have a complicated URI
+ * structure.
+ *
+ *
+ * @task new Creating Requests
+ * @task uri Managing Diffusion URIs
+ *
+ * @group diffusion
  */
-class DiffusionRequest {
+abstract class DiffusionRequest {
 
   protected $callsign;
   protected $path;
@@ -33,60 +39,152 @@ class DiffusionRequest {
   protected $repositoryCommitData;
   protected $stableCommitName;
 
+  abstract protected function getSupportsBranches();
+  abstract protected function didInitialize();
+
+
+/* -(  Creating Requests  )-------------------------------------------------- */
+
+
+  /**
+   * Create a new synthetic request from a parameter dictionary. If you need
+   * a @{class:DiffusionRequest} object in order to issue a DiffusionQuery, you
+   * can use this method to build one.
+   *
+   * Parameters are:
+   *
+   *   - `callsign` Repository callsign. Provide this or `repository`.
+   *   - `repository` Repository object. Provide this or `callsign`.
+   *   - `branch` Optional, branch name.
+   *   - `path` Optional, file path.
+   *   - `commit` Optional, commit identifier.
+   *   - `line` Optional, line range.
+   *
+   * @param   map                 See documentation.
+   * @return  DiffusionRequest    New request object.
+   * @task new
+   */
+  final public static function newFromDictionary(array $data) {
+    if (isset($data['repository']) && isset($data['callsign'])) {
+      throw new Exception(
+        "Specify 'repository' or 'callsign', but not both.");
+    } else if (!isset($data['repository']) && !isset($data['callsign'])) {
+      throw new Exception(
+        "One of 'repository' and 'callsign' is required.");
+    }
+
+    if (isset($data['repository'])) {
+      $object = self::newFromRepository($data['repository']);
+    } else {
+      $object = self::newFromCallsign($data['callsign']);
+    }
+    $object->initializeFromDictionary($data);
+    return $object;
+  }
+
+
+  /**
+   * Create a new request from an Aphront request dictionary. This is an
+   * internal method that you generally should not call directly; instead,
+   * call @{method:newFromDictionary}.
+   *
+   * @param   map                 Map of Aphront request data.
+   * @return  DiffusionRequest    New request object.
+   * @task new
+   */
+  final public static function newFromAphrontRequestDictionary(array $data) {
+    $callsign = phutil_unescape_uri_path_component(idx($data, 'callsign'));
+    $object = self::newFromCallsign($callsign);
+
+    $use_branches = $object->getSupportsBranches();
+    $parsed = self::parseRequestBlob(idx($data, 'dblob'), $use_branches);
+
+    $object->initializeFromDictionary($parsed);
+    return $object;
+  }
+
+
+  /**
+   * Internal.
+   *
+   * @task new
+   */
   final private function __construct() {
     // <private>
   }
 
-  final public static function newFromAphrontRequestDictionary(array $data) {
 
-    $vcs = null;
-    $repository = null;
-    $callsign = idx($data, 'callsign');
-    if ($callsign) {
-      $repository = id(new PhabricatorRepository())->loadOneWhere(
-        'callsign = %s',
-        $callsign);
-      if (!$repository) {
-        throw new Exception("No such repository '{$callsign}'.");
-      }
-      $vcs = $repository->getVersionControlSystem();
+  /**
+   * Internal. Use @{method:newFromDictionary}, not this method.
+   *
+   * @param   string              Repository callsign.
+   * @return  DiffusionRequest    New request object.
+   * @task new
+   */
+  final private static function newFromCallsign($callsign) {
+    $repository = id(new PhabricatorRepository())->loadOneWhere(
+      'callsign = %s',
+      $callsign);
+
+    if (!$repository) {
+      throw new Exception("No such repository '{$callsign}'.");
     }
 
-    switch ($vcs) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        $class = 'DiffusionGitRequest';
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        $class = 'DiffusionSvnRequest';
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $class = 'DiffusionMercurialRequest';
-        break;
-      default:
-        $class = 'DiffusionRequest';
-        break;
+    return self::newFromRepository($repository);
+  }
+
+
+  /**
+   * Internal. Use @{method:newFromDictionary}, not this method.
+   *
+   * @param   PhabricatorRepository   Repository object.
+   * @return  DiffusionRequest        New request object.
+   * @task new
+   */
+  final private static function newFromRepository(
+    PhabricatorRepository $repository) {
+
+    $map = array(
+      PhabricatorRepositoryType::REPOSITORY_TYPE_GIT => 'DiffusionGitRequest',
+      PhabricatorRepositoryType::REPOSITORY_TYPE_SVN => 'DiffusionSvnRequest',
+      PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL =>
+        'DiffusionMercurialRequest',
+    );
+
+    $class = idx($map, $repository->getVersionControlSystem());
+
+    if (!$class) {
+      throw new Exception("Unknown version control system!");
     }
 
     $object = new $class();
 
-    $object->callsign   = $callsign;
     $object->repository = $repository;
-    $object->line       = idx($data, 'line');
-    $object->commit     = idx($data, 'commit');
-    $object->path       = idx($data, 'path');
-
-    $object->initializeFromAphrontRequestDictionary($data);
+    $object->callsign   = $repository->getCallsign();
 
     return $object;
   }
 
-  protected function initializeFromAphrontRequestDictionary(array $data) {
 
+  /**
+   * Internal. Use @{method:newFromDictionary}, not this method.
+   *
+   * @param map Map of parsed data.
+   * @return void
+   * @task new
+   */
+  final private function initializeFromDictionary(array $data) {
+    $this->path       = idx($data, 'path');
+    $this->commit     = idx($data, 'commit');
+    $this->line       = idx($data, 'line');
+
+    if ($this->getSupportsBranches()) {
+      $this->branch = idx($data, 'branch');
+    }
+
+    $this->didInitialize();
   }
 
-  protected function parsePath($path) {
-    $this->path = $path;
-  }
 
   public function getRepository() {
     return $this->repository;
@@ -98,10 +196,6 @@ class DiffusionRequest {
 
   public function getPath() {
     return $this->path;
-  }
-
-  public function getUriPath() {
-    return '/diffusion/'.$this->getCallsign().'/browse/'.$this->path;
   }
 
   public function getLine() {
@@ -166,12 +260,204 @@ class DiffusionRequest {
     return $this;
   }
 
-  public function getCommitURIComponent($commit) {
-    return $commit;
+/* -(  Managing Diffusion URIs  )-------------------------------------------- */
+
+
+  /**
+   * Generate a Diffusion URI using this request to provide defaults. See
+   * @{method:generateDiffusionURI} for details. This method is the same, but
+   * preserves the request parameters if they are not overridden.
+   *
+   * @param   map         See @{method:generateDiffusionURI}.
+   * @return  PhutilURI   Generated URI.
+   * @task uri
+   */
+  public function generateURI(array $params) {
+    if (empty($params['stable'])) {
+      $default_commit = $this->getRawCommit();
+    } else {
+      $default_commit = $this->getStableCommitName();
+    }
+
+    $params += array(
+      'callsign'  => $this->getCallsign(),
+      'path'      => $this->getPath(),
+      'branch'    => $this->getBranch(),
+      'commit'    => $default_commit,
+    );
+    return self::generateDiffusionURI($params);
   }
 
-  public function getBranchURIComponent($branch) {
-    return $branch;
+
+  /**
+   * Generate a Diffusion URI from a parameter map. Applies the correct encoding
+   * and formatting to the URI. Parameters are:
+   *
+   *   - `action` One of `history`, `browse`, `change`, `lastmodified`,
+   *     `branch` or `revision-ref`. The action specified by the URI.
+   *   - `callsign` Repository callsign.
+   *   - `branch` Optional if action is not `branch`, branch name.
+   *   - `path` Optional, path to file.
+   *   - `commit` Optional, commit identifier.
+   *   - `line` Optional, line range.
+   *   - `params` Optional, query parameters.
+   *
+   * The function generates the specified URI and returns it.
+   *
+   * @param   map         See documentation.
+   * @return  PhutilURI   Generated URI.
+   * @task uri
+   */
+  public static function generateDiffusionURI(array $params) {
+    $action = idx($params, 'action');
+
+    $callsign = idx($params, 'callsign');
+    $path     = idx($params, 'path');
+    $branch   = idx($params, 'branch');
+    $commit   = idx($params, 'commit');
+    $line     = idx($params, 'line');
+
+    if (strlen($callsign)) {
+      $callsign = phutil_escape_uri_path_component($callsign).'/';
+    }
+
+    if (strlen($branch)) {
+      $branch = phutil_escape_uri_path_component($branch).'/';
+    }
+
+    if (strlen($path)) {
+      $path = str_replace(array(';', '$'), array(';;', '$$'), $path);
+      $path = phutil_escape_uri($path);
+    }
+
+    $path = "{$branch}{$path}";
+
+    if (strlen($commit)) {
+      $commit = ';'.phutil_escape_uri($commit);
+    }
+
+    if (strlen($line)) {
+      $line = '$'.phutil_escape_uri($line);
+    }
+
+    $req_callsign = false;
+    $req_branch   = false;
+
+    switch ($action) {
+      case 'history':
+      case 'browse':
+      case 'change':
+      case 'lastmodified':
+        $req_callsign = true;
+        break;
+      case 'branch':
+        $req_callsign = true;
+        $req_branch = true;
+        break;
+    }
+
+    if ($req_callsign && !strlen($callsign)) {
+      throw new Exception(
+        "Diffusion URI action '{$action}' requires callsign!");
+    }
+
+    if ($req_branch && !strlen($branch)) {
+      throw new Exception(
+        "Diffusion URI action '{$action}' requires brnach!");
+    }
+
+    switch ($action) {
+      case 'change':
+      case 'history':
+      case 'browse':
+      case 'lastmodified':
+        $uri = "/diffusion/{$callsign}{$action}/{$path}{$commit}{$line}";
+        break;
+      case 'branch':
+        $uri = "/diffusion/{$callsign}repository/{$path}";
+        break;
+      case 'rendering-ref':
+        // This isn't a real URI per se, it's passed as a query parameter to
+        // the ajax changeset stuff but then we parse it back out as though
+        // it came from a URI.
+        $uri = "{$path}{$commit}";
+        break;
+      default:
+        throw new Exception("Unknown Diffusion URI action '{$action}'!");
+    }
+
+    if ($action == 'rendering-ref') {
+      return $uri;
+    }
+
+    $uri = new PhutilURI($uri);
+    if (idx($params, 'params')) {
+      $uri->setQueryParams($params['params']);
+    }
+
+    return $uri;
+  }
+
+
+  /**
+   * Internal. Public only for unit tests.
+   *
+   * Parse the request URI into components.
+   *
+   * @param   string  URI blob.
+   * @param   bool    True if this VCS supports branches.
+   * @return  map     Parsed URI.
+   *
+   * @task uri
+   */
+  public static function parseRequestBlob($blob, $supports_branches) {
+    $result = array(
+      'branch'  => null,
+      'path'    => null,
+      'commit'  => null,
+      'line'    => null,
+    );
+
+    $matches = null;
+
+    if ($supports_branches) {
+      // Consume the front part of the URI, up to the first "/". This is the
+      // path-component encoded branch name.
+      if (preg_match('@^([^/]+)/@', $blob, $matches)) {
+        $result['branch'] = phutil_unescape_uri_path_component($matches[1]);
+        $blob = substr($blob, strlen($matches[1]) + 1);
+      }
+    }
+
+    // Consume the back part of the URI, up to the first "$". Use a negative
+    // lookbehind to prevent matching '$$'. We double the '$' symbol when
+    // encoding so that files with names like "money/$100" will survive.
+    if (preg_match('@(?<![$])[$]([\d-]+)$@', $blob, $matches)) {
+      $result['line'] = $matches[1];
+      $blob = substr($blob, 0, -(strlen($matches[1]) + 1));
+    }
+
+    // Consume the commit name, stopping on ';;'.
+    if (preg_match('@(?<!;);([a-z0-9]+)$@', $blob, $matches)) {
+      $result['commit'] = $matches[1];
+      $blob = substr($blob, 0, -(strlen($matches[1]) + 1));
+    }
+
+    // Un-double our delimiter characters.
+    if (strlen($blob)) {
+      $result['path'] = str_replace(array(';;', '$$'), array(';', '$'), $blob);
+    }
+
+    $parts = explode('/', $result['path']);
+    foreach ($parts as $part) {
+      // Prevent any hyjinx since we're ultimately shipping this to the
+      // filesystem under a lot of workflows.
+      if ($part == '..') {
+        throw new Exception("Invalid path URI.");
+      }
+    }
+
+    return $result;
   }
 
 }

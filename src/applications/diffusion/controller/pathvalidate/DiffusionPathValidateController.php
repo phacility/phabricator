@@ -36,10 +36,10 @@ final class DiffusionPathValidateController extends DiffusionController {
     $path = $request->getStr('path');
     $path = ltrim($path, '/');
 
-    $drequest = DiffusionRequest::newFromAphrontRequestDictionary(
+    $drequest = DiffusionRequest::newFromDictionary(
       array(
-        'callsign'  => $repository->getCallsign(),
-        'path'      => ':/'.$path,
+        'repository'  => $repository,
+        'path'        => $path,
       ));
 
     $browse_query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);

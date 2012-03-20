@@ -20,6 +20,13 @@ final class DiffusionCommitController extends DiffusionController {
 
   const CHANGES_LIMIT = 100;
 
+  public function willProcessRequest(array $data) {
+    // This controller doesn't use blob/path stuff, just pass the dictionary
+    // in directly instead of using the AphrontRequest parsing mechanism.
+    $drequest = DiffusionRequest::newFromDictionary($data);
+    $this->diffusionRequest = $drequest;
+  }
+
   public function processRequest() {
     $drequest = $this->getDiffusionRequest();
     $request = $this->getRequest();
@@ -192,11 +199,11 @@ final class DiffusionCommitController extends DiffusionController {
           }
         }
 
-        $branch = $drequest->getBranchURIComponent(
-          $drequest->getBranch());
-        $filename = $changeset->getFilename();
-        $reference = "{$branch}{$filename};".$drequest->getCommit();
-        $references[$key] = $reference;
+        $references[$key] = $drequest->generateURI(
+          array(
+            'action' => 'rendering-ref',
+            'path'   => $changeset->getFilename(),
+          ));
       }
 
       // TOOD: Some parts of the views still rely on properties of the

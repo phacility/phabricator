@@ -45,18 +45,13 @@ final class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
   }
 
   public function getURI() {
-    $repo = $this->getRepository();
-    $file = $this->getPath();
-    $line = $this->getLineNumber();
-
-    $drequest = DiffusionRequest::newFromAphrontRequestDictionary(
+    return DiffusionRequest::generateDiffusionURI(
       array(
-        'callsign' => $repo->getCallsign(),
+        'action'    => 'browse',
+        'callsign'  => $this->getRepository()->getCallsign(),
+        'path'      => $this->getPath(),
+        'line'      => $this->getLineNumber(),
       ));
-    $branch = $drequest->getBranchURIComponent($drequest->getBranch());
-    $file = $branch.ltrim($file, '/');
-
-    return '/diffusion/'.$repo->getCallsign().'/browse/'.$file.'$'.$line;
   }
 
   public function getPath() {

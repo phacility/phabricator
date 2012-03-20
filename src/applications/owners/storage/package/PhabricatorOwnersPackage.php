@@ -188,10 +188,10 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO {
         foreach ($paths as $path => $ignored) {
           $path = ltrim($path, '/');
           // build query to validate path
-          $drequest = DiffusionRequest::newFromAphrontRequestDictionary(
+          $drequest = DiffusionRequest::newFromDictionary(
             array(
-              'callsign' => $repository->getCallsign(),
-              'path'     => ':/'.$path,
+              'repository'  => $repository,
+              'path'        => $path,
             ));
           $query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);
           $query->needValidityOnly(true);
