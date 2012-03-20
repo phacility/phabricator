@@ -108,7 +108,8 @@ final class ManiphestReportController extends ManiphestController {
 
     $data = queryfx_all(
       $conn,
-      'SELECT x.newValue, x.dateCreated FROM %T x %Q WHERE transactionType = %s
+      'SELECT x.oldValue, x.newValue, x.dateCreated FROM %T x %Q
+        WHERE transactionType = %s
         ORDER BY x.dateCreated ASC',
       $table->getTableName(),
       $joins,
@@ -117,8 +118,29 @@ final class ManiphestReportController extends ManiphestController {
     $stats = array();
     $day_buckets = array();
 
-    foreach ($data as $row) {
-      $is_close = $row['newValue'];
+    $open_tasks = array();
+
+    foreach ($data as $key => $row) {
+
+      // NOTE: Hack to avoid json_decode().
+      $oldv = trim($row['oldValue'], '"');
+      $newv = trim($row['newValue'], '"');
+
+      $old_is_open = ($oldv === (string)ManiphestTaskStatus::STATUS_OPEN);
+      $new_is_open = ($newv === (string)ManiphestTaskStatus::STATUS_OPEN);
+
+      $is_open  = ($new_is_open && !$old_is_open);
+      $is_close = ($old_is_open && !$new_is_open);
+
+      $data[$key]['_is_open'] = $is_open;
+      $data[$key]['_is_close'] = $is_close;
+
+      if (!$is_open && !$is_close) {
+        // This is either some kind of bogus event, or a resolution change
+        // (e.g., resolved -> invalid). Just skip it.
+        continue;
+      }
+
       $day_bucket = __phabricator_format_local_time(
         $row['dateCreated'],
         $user,
@@ -286,7 +308,7 @@ final class ManiphestReportController extends ManiphestController {
       ),
       '');
 
-    list($open_x, $close_x, $open_y, $close_y) = $this->buildSeries($data);
+    list($burn_x, $burn_y) = $this->buildSeries($data);
 
     require_celerity_resource('raphael-core');
     require_celerity_resource('raphael-g');
@@ -295,12 +317,10 @@ final class ManiphestReportController extends ManiphestController {
     Javelin::initBehavior('burn-chart', array(
       'hardpoint' => $id,
       'x' => array(
-        $open_x,
-        $close_x,
+        $burn_x,
       ),
       'y' => array(
-        $open_y,
-        $close_y,
+        $burn_y,
       ),
     ));
 
@@ -308,40 +328,21 @@ final class ManiphestReportController extends ManiphestController {
   }
 
   private function buildSeries(array $data) {
-    $open_count = 0;
-    $close_count = 0;
+    $out = array();
 
-    $open_x = array();
-    $open_y = array();
-    $close_x = array();
-    $close_y = array();
-
-    $start = (int)idx(head($data), 'dateCreated', time());
-
-    $open_x[] = $start;
-    $open_y[] = $open_count;
-    $close_x[] = $start;
-    $close_y[] = $close_count;
-
+    $counter = 0;
     foreach ($data as $row) {
       $t = (int)$row['dateCreated'];
-      if ($row['newValue']) {
-        ++$close_count;
-        $close_x[] = $t;
-        $close_y[] = $close_count;
-      } else {
-        ++$open_count;
-        $open_x[] = $t;
-        $open_y[] = $open_count;
+      if ($row['_is_close']) {
+        --$counter;
+        $out[$t] = $counter;
+      } else if ($row['_is_open']) {
+        ++$counter;
+        $out[$t] = $counter;
       }
     }
 
-    $close_x[] = time();
-    $close_y[] = $close_count;
-    $open_x[] = time();
-    $open_y[] = $open_count;
-
-    return array($open_x, $close_x, $open_y, $close_y);
+    return array(array_keys($out), array_values($out));
   }
 
   private function formatBurnRow($label, $info) {

@@ -7,6 +7,7 @@
 
 JX.behavior('burn-chart', function(config) {
 
+
   var h = JX.$(config.hardpoint);
   var p = JX.$V(h);
   var d = JX.Vector.getDim(h);
@@ -25,7 +26,7 @@ JX.behavior('burn-chart', function(config) {
       axis: "0 0 1 1",
       shade: true,
       gutter: 1,
-      colors: ['#d00', '#090']
+      colors: ['#d06']
     });
 
 
@@ -45,12 +46,7 @@ JX.behavior('burn-chart', function(config) {
     }
   }
 
-  // Get rid of the green shading below closed tasks.
-
-  l.shades[1].attr({fill: '#fff', opacity: 1});
-
   l.hoverColumn(function() {
-
 
     var open = 0;
     for (var ii = 0; ii < config.x[0].length; ii++) {
@@ -60,23 +56,13 @@ JX.behavior('burn-chart', function(config) {
       open = config.y[0][ii];
     }
 
-    var closed = 0;
-    for (var ii = 0; ii < config.x[1].length; ii++) {
-      if (config.x[1][ii] > this.axis) {
-        break;
-      }
-      closed = config.y[1][ii];
-    }
-
-
     var date  = new Date(parseInt(this.axis, 10) * 1000).toLocaleDateString();
-    var total = open + " Total Tasks";
-    var pain = (open - closed) + " Open Tasks";
+    var total = open + " Open Tasks";
 
     var tag = r.tag(
       this.x,
       this.y[0],
-      [date, total, pain].join("\n"),
+      [date, total].join("\n"),
       180,
       24);
     tag

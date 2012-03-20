@@ -441,7 +441,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-burn-chart' =>
   array(
-    'uri' => '/res/ed1bf018/rsrc/js/application/maniphest/behavior-burn-chart.js',
+    'uri' => '/res/053cffd4/rsrc/js/application/maniphest/behavior-burn-chart.js',
     'type' => 'js',
     'requires' =>
     array(
