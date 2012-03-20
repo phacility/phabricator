@@ -3,6 +3,7 @@
  * @requires javelin-behavior
  *           javelin-workflow
  *           javelin-json
+ *           javelin-dom
  *           phabricator-keyboard-shortcut
  */
 
