@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'aphront/response/404');
+phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/audit/storage/inlinecommment');
 phutil_require_module('phabricator', 'applications/differential/parser/changeset');
 phutil_require_module('phabricator', 'applications/diffusion/controller/base');

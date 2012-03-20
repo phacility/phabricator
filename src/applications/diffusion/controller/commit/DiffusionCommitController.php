@@ -223,6 +223,14 @@ final class DiffusionCommitController extends DiffusionController {
       $change_list->setRenderURI('/diffusion/'.$callsign.'/diff/');
       $change_list->setUser($user);
 
+      $change_list->setStandaloneURI(
+        '/diffusion/'.$callsign.'/diff/');
+      $change_list->setRawFileURIs(
+        // TODO: Implement this, somewhat tricky if there's an octopus merge
+        // or whatever?
+        null,
+        '/diffusion/'.$callsign.'/diff/?view=r');
+
       $change_list->setInlineCommentControllerURI(
         '/diffusion/inline/'.phutil_escape_uri($commit->getPHID()).'/');
 

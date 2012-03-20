@@ -41,27 +41,37 @@ JX.behavior('differential-dropdown-menus', function(config) {
 
     var reveal_item = new JX.PhabricatorMenuItem('', show_more);
 
-    var diffusion_item = link_to('Browse in Diffusion', data.diffusionURI);
-    if (!data.diffusionURI) {
-      diffusion_item.setDisabled(true);
+    var diffusion_item;
+    if (data.diffusionURI) {
+      // Show this only if we have a link, since when this appears in Diffusion
+      // it is otherwise potentially confusing.
+      diffusion_item = link_to('Browse in Diffusion', data.diffusionURI);
     }
 
     var menu = new JX.PhabricatorDropdownMenu(buttons[ii])
-      .addItem(reveal_item)
-      .addItem(diffusion_item)
-      .addItem(link_to('View Standalone', data.detailURI));
+      .addItem(reveal_item);
+
+    if (diffusion_item) {
+      menu.addItem(diffusion_item);
+    }
+
+    menu.addItem(link_to('View Standalone', data.standaloneURI));
+
     if (data.leftURI) {
       menu.addItem(link_to('Show Raw File (Left)', data.leftURI));
     }
+
     if (data.rightURI) {
       menu.addItem(link_to('Show Raw File (Right)', data.rightURI));
     }
+
     if (data.editor) {
       menu.addItem(new JX.PhabricatorMenuItem(
         'Open in Editor',
         JX.bind(null, location.assign, data.editor), // Open in the same window.
         data.editor));
     }
+
     if (data.editorConfigure) {
       menu.addItem(link_to('Configure Editor', data.editorConfigure));
     }

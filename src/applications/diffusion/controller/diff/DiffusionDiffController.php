@@ -32,6 +32,31 @@ final class DiffusionDiffController extends DiffusionController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    if (!$request->isAjax()) {
+
+      // This request came out of the dropdown menu, either "View Standalone"
+      // or "View Raw File".
+
+      $view = $request->getStr('view');
+      if ($view == 'r') {
+        $uri = $drequest->generateURI(
+          array(
+            'action' => 'browse',
+            'params' => array(
+              'view' => 'raw',
+            ),
+          ));
+      } else {
+        $uri = $drequest->generateURI(
+          array(
+            'action'  => 'change',
+          ));
+      }
+
+      return id(new AphrontRedirectResponse())->setURI($uri);
+    }
+
+
     $diff_query = DiffusionDiffQuery::newFromDiffusionRequest($drequest);
     $changeset = $diff_query->loadChangeset();
 

@@ -243,7 +243,11 @@ final class DifferentialRevisionViewController extends DifferentialController {
         '/differential/comment/inline/edit/'.$revision->getID().'/');
     }
 
-    $changeset_view->setStandaloneViews(true);
+    $changeset_view->setStandaloneURI('/differential/changeset/');
+    $changeset_view->setRawFileURIs(
+      '/differential/changeset/?view=old',
+      '/differential/changeset/?view=new');
+
     $changeset_view->setUser($user);
     $changeset_view->setDiff($target);
     $changeset_view->setRenderingReferences($rendering_references);
