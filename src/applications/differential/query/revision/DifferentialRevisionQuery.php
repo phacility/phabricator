@@ -42,6 +42,7 @@ final class DifferentialRevisionQuery {
   const STATUS_ABANDONED  = 'status-abandoned';
 
   private $authors = array();
+  private $draftAuthors = array();
   private $ccs = array();
   private $reviewers = array();
   private $revIDs = array();
@@ -104,6 +105,18 @@ final class DifferentialRevisionQuery {
    */
   public function withAuthors(array $author_phids) {
     $this->authors = $author_phids;
+    return $this;
+  }
+
+  /**
+   * Filter results to revisions with comments authored bythe given PHIDs
+   *
+   * @param array List of PHIDs of authors
+   * @return this
+   * @task config
+   */
+  public function withDraftRepliesByAuthors(array $author_phids) {
+    $this->draftAuthors = $author_phids;
     return $this;
   }
 
@@ -561,6 +574,14 @@ final class DifferentialRevisionQuery {
         $this->responsibles);
     }
 
+    if ($this->draftAuthors) {
+      $joins[] = qsprintf(
+        $conn_r,
+        'JOIN %T inline_comment ON inline_comment.revisionID = r.id '.
+        'AND inline_comment.commentID is NULL',
+        id(new DifferentialInlineComment())->getTableName());
+    }
+
     $joins = implode(' ', $joins);
 
     return $joins;
@@ -594,6 +615,12 @@ final class DifferentialRevisionQuery {
         $this->authors);
     }
 
+    if ($this->draftAuthors) {
+      $where[] = qsprintf(
+        $conn_r,
+        'inline_comment.authorPHID IN (%Ls)',
+        $this->draftAuthors);
+    }
     if ($this->revIDs) {
       $where[] = qsprintf(
         $conn_r,

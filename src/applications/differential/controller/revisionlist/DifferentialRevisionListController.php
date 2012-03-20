@@ -219,6 +219,7 @@ final class DifferentialRevisionListController extends DifferentialController {
       array('revisions',  'Revisions'),
       array('reviews',    'Reviews'),
       array('subscribed', 'Subscribed'),
+      array('drafts',     'Draft Reviews'),
       array(null,         'All Revisions'),
       array('all',        'All'),
     );
@@ -248,6 +249,7 @@ final class DifferentialRevisionListController extends DifferentialController {
       'revisions'   => true,
       'reviews'     => true,
       'subscribed'  => true,
+      'drafts'      => true,
       'all'         => false,
     );
     if (!isset($requires[$filter])) {
@@ -262,6 +264,7 @@ final class DifferentialRevisionListController extends DifferentialController {
       'revisions'   => true,
       'reviews'     => true,
       'subscribed'  => true,
+      'drafts'      => true,
       'all'         => true,
     );
     if (!isset($allows[$filter])) {
@@ -276,6 +279,7 @@ final class DifferentialRevisionListController extends DifferentialController {
       'revisions'   => array('phid', 'status', 'order'),
       'reviews'     => array('phid', 'status', 'order'),
       'subscribed'  => array('phid', 'status', 'order'),
+      'drafts'      => array('phid', 'status', 'order'),
       'all'         => array('status', 'order'),
     );
     if (!isset($controls[$filter])) {
@@ -303,6 +307,9 @@ final class DifferentialRevisionListController extends DifferentialController {
         break;
       case 'subscribed':
         $query->withSubscribers(array($user_phid));
+        break;
+      case 'drafts':
+        $query->withDraftRepliesByAuthors(array($user_phid));
         break;
       case 'all':
         break;
@@ -416,6 +423,7 @@ final class DifferentialRevisionListController extends DifferentialController {
       case 'revisions':
       case 'reviews':
       case 'subscribed':
+      case 'drafts':
       case 'all':
         $titles = array(
           'revisions'   => 'Revisions by Author',
