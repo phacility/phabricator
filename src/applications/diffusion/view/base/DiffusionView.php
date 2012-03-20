@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,7 +124,8 @@ abstract class DiffusionView extends AphrontView {
 
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        $commit_name = substr($commit, 0, 16);
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $commit_name = substr($commit, 0, 12);
         break;
       default:
         $commit_name = $commit;

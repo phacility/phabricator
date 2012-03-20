@@ -8,7 +8,6 @@
 
 phutil_require_module('phabricator', 'applications/diffusion/query/lastmodified/base');
 phutil_require_module('phabricator', 'applications/repository/storage/commit');
-phutil_require_module('phabricator', 'applications/repository/storage/commitdata');
 
 phutil_require_module('phutil', 'utils');
 

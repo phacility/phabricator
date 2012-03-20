@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,20 +28,20 @@ final class DiffusionMercurialLastModifiedQuery
     // TODO: Share some of this with History query.
     list($hash) = $repository->execxLocalCommand(
       'log --template %s --limit 1 --branch %s --rev %s:0 -- %s',
-      '{node}\\n',
+      '{node}',
       $drequest->getBranch(),
       $drequest->getCommit(),
       nonempty(ltrim($path, '/'), '.'));
-    $hash = trim($hash);
 
     $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
       'repositoryID = %d AND commitIdentifier = %s',
       $repository->getID(),
       $hash);
+
     if ($commit) {
-      $commit_data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
-        'commitID = %d',
-        $commit->getID());
+      $commit_data = $commit->loadCommitData();
+    } else {
+      $commit_data = null;
     }
 
     return array($commit, $commit_data);
