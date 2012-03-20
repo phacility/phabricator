@@ -325,6 +325,7 @@ phutil_register_library_map(array(
     'DiffusionPathChangeQuery' => 'applications/diffusion/query/pathchange/base',
     'DiffusionPathCompleteController' => 'applications/diffusion/controller/pathcomplete',
     'DiffusionPathIDQuery' => 'applications/diffusion/query/pathid/base',
+    'DiffusionPathQuery' => 'applications/diffusion/query/path',
     'DiffusionPathQueryTestCase' => 'applications/diffusion/query/pathid/base/__tests__',
     'DiffusionPathValidateController' => 'applications/diffusion/controller/pathvalidate',
     'DiffusionQuery' => 'applications/diffusion/query/base',

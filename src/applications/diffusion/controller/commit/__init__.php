@@ -11,12 +11,14 @@ phutil_require_module('phabricator', 'applications/audit/constants/commitstatus'
 phutil_require_module('phabricator', 'applications/audit/editor/comment');
 phutil_require_module('phabricator', 'applications/audit/query/audit');
 phutil_require_module('phabricator', 'applications/audit/storage/auditcomment');
+phutil_require_module('phabricator', 'applications/audit/storage/inlinecommment');
 phutil_require_module('phabricator', 'applications/audit/view/list');
 phutil_require_module('phabricator', 'applications/differential/constants/changetype');
 phutil_require_module('phabricator', 'applications/differential/view/changesetlistview');
 phutil_require_module('phabricator', 'applications/diffusion/controller/base');
 phutil_require_module('phabricator', 'applications/diffusion/data/pathchange');
 phutil_require_module('phabricator', 'applications/diffusion/query/contains/base');
+phutil_require_module('phabricator', 'applications/diffusion/query/path');
 phutil_require_module('phabricator', 'applications/diffusion/query/pathchange/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/pathid/base');
 phutil_require_module('phabricator', 'applications/diffusion/request/base');

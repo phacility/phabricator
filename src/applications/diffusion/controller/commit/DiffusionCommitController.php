@@ -350,9 +350,25 @@ final class DiffusionCommitController extends DiffusionController {
       'targetPHID = %s ORDER BY dateCreated ASC',
       $commit->getPHID());
 
+    $inlines = id(new PhabricatorAuditInlineComment())->loadAllWhere(
+      'commitPHID = %s AND auditCommentID IS NOT NULL',
+      $commit->getPHID());
+
+    $path_ids = mpull($inlines, 'getPathID');
+
+    $path_map = array();
+    if ($path_ids) {
+      $path_map = id(new DiffusionPathQuery())
+        ->withPathIDs($path_ids)
+        ->execute();
+      $path_map = ipull($path_map, 'path', 'id');
+    }
+
     $view = new DiffusionCommentListView();
     $view->setUser($user);
     $view->setComments($comments);
+    $view->setInlineComments($inlines);
+    $view->setPathMap($path_map);
 
     $phids = $view->getRequiredHandlePHIDs();
     $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();

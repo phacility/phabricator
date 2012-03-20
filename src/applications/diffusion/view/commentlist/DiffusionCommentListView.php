@@ -20,6 +20,8 @@ final class DiffusionCommentListView extends AphrontView {
 
   private $user;
   private $comments;
+  private $inlineComments = array();
+  private $pathMap = array();
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
@@ -31,10 +33,23 @@ final class DiffusionCommentListView extends AphrontView {
     return $this;
   }
 
+  public function setInlineComments(array $inline_comments) {
+    $this->inlineComments = $inline_comments;
+    return $this;
+  }
+
+  public function setPathMap(array $path_map) {
+    $this->pathMap = $path_map;
+    return $this;
+  }
+
   public function getRequiredHandlePHIDs() {
     $phids = array();
     foreach ($this->comments as $comment) {
       $phids[$comment->getActorPHID()] = true;
+    }
+    foreach ($this->inlineComments as $comment) {
+      $phids[$comment->getAuthorPHID()] = true;
     }
     return array_keys($phids);
   }
@@ -44,17 +59,23 @@ final class DiffusionCommentListView extends AphrontView {
     return $this;
   }
 
-
   public function render() {
+
+    $inline_comments = mgroup($this->inlineComments, 'getAuditCommentID');
 
     $num = 1;
 
     $comments = array();
     foreach ($this->comments as $comment) {
+
+      $inlines = idx($inline_comments, $comment->getID(), array());
+
       $view = id(new DiffusionCommentView())
         ->setComment($comment)
+        ->setInlineComments($inlines)
         ->setCommentNumber($num)
         ->setHandles($this->handles)
+        ->setPathMap($this->pathMap)
         ->setUser($this->user);
 
       $comments[] = $view->render();
