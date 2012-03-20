@@ -4,7 +4,6 @@
  *           javelin-dom
  *           javelin-request
  *           javelin-util
- *           javelin-stratcom
  */
 
 JX.behavior('phabricator-object-selector', function(config) {
@@ -15,7 +14,7 @@ JX.behavior('phabricator-object-selector', function(config) {
   for (var k in handles) {
     phids[k] = true;
   }
-  var attach_list = {};
+  var button_list = {};
   var query_timer = null;
   var query_delay = 50;
 
@@ -32,7 +31,7 @@ JX.behavior('phabricator-object-selector', function(config) {
     }
 
     var display = [];
-    attach_list = {};
+    button_list = {};
     for (var k in r) {
       handles[r[k].phid] = r[k];
       display.push(renderHandle(r[k], true));
@@ -62,37 +61,44 @@ JX.behavior('phabricator-object-selector', function(config) {
 
   function renderHandle(h, attach) {
 
-    var link = JX.$N(
+    var view_object_link = JX.$N(
       'a',
-      {href : h.uri, target : '_blank'},
+      {href: h.uri, target: '_blank'},
+      "\u2197");
+
+    var select_object_link = JX.$N(
+      'a',
+      {href: '#', sigil: 'object-attacher'},
       h.name);
 
-    var td = JX.$N('td');
+    var select_object_button = JX.$N(
+      'a',
+      {href: '#', sigil: 'object-attacher', className: 'button small grey'},
+      attach ? 'Select' : 'Remove');
+
+    var cells = [
+      JX.$N('td', {}, view_object_link),
+      JX.$N('th', {}, select_object_link),
+      JX.$N('td', {}, select_object_button),
+    ];
 
     var table = JX.$N(
       'table',
-      {className: 'phabricator-object-selector-handle'},
+      {className: 'phabricator-object-selector-handle'});
+
+    table.appendChild(
       JX.$N(
         'tr',
-        {},
-        [JX.$N('th', {}, link), td]));
+        {sigil: 'object-attach-row', meta: {handle: h, table:table}},
+        cells));
 
-    var btn = JX.$N(
-      'a',
-      {className: 'button small grey'},
-      attach ? 'Select' : 'Remove');
-
-    JX.Stratcom.addSigil(btn, 'object-attach-button');
-    JX.Stratcom.addData(btn, {handle : h, table : table});
     if (attach) {
-      attach_list[h.phid] = btn;
+      button_list[h.phid] = select_object_button;
       if (h.phid in phids) {
-        JX.DOM.alterClass(btn, 'disabled', true);
-        btn.disabled = true;
+        JX.DOM.alterClass(select_object_button, 'disabled', true);
+        select_object_button.disabled = true;
       }
     }
-
-    JX.DOM.setContent(td, btn);
 
     return table;
   }
@@ -115,18 +121,19 @@ JX.behavior('phabricator-object-selector', function(config) {
   JX.DOM.listen(
     JX.$(config.results),
     'click',
-    'object-attach-button',
+    'object-attacher',
     function(e) {
       e.kill();
-      var button = e.getNode('object-attach-button');
-      if (button.disabled) {
+
+      var data = e.getNodeData('object-attach-row');
+      var phid = data.handle.phid;
+      if (phids[phid]) {
         return;
       }
 
-      var data = e.getNodeData('object-attach-button');
-      phids[data.handle.phid] = true;
-      JX.DOM.alterClass(button, 'disabled', true);
-      button.disabled = true;
+      phids[phid] = true;
+      JX.DOM.alterClass(button_list[phid], 'disabled', true);
+      button_list[phid].disabled = true;
 
       redrawAttached();
     });
@@ -134,21 +141,16 @@ JX.behavior('phabricator-object-selector', function(config) {
   JX.DOM.listen(
     JX.$(config.current),
     'click',
-    'object-attach-button',
+    'object-attacher',
     function(e) {
       e.kill();
-      var button = e.getNode('object-attach-button');
-      if (button.disabled) {
-        return;
-      }
 
-      var data = e.getNodeData('object-attach-button');
-      delete phids[data.handle.phid];
+      var data = e.getNodeData('object-attach-row');
+      var phid = data.handle.phid;
 
-      if (attach_list[data.handle.phid]) {
-        JX.DOM.alterClass(attach_list[data.handle.phid], 'disabled', false);
-        attach_list[data.handle.phid].disabled = false;
-      }
+      delete phids[phid];
+      JX.DOM.alterClass(button_list[phid], 'disabled', false);
+      button_list[phid].disabled = false;
 
       redrawAttached();
     });

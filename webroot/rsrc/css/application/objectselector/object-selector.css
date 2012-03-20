@@ -48,11 +48,15 @@ td.phabricator-object-selector-search-text {
 }
 
 .phabricator-object-selector-handle th {
-  padding: 4px 1em;
   font-weight: bold;
   vertical-align: middle;
   width: 100%;
   overflow: hidden;
+}
+
+.phabricator-object-selector-handle th a {
+  display: block;
+  padding: 4px 1em;
 }
 
 .phabricator-object-selector-header {
