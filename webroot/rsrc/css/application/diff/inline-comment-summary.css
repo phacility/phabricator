@@ -1,0 +1,55 @@
+/**
+ * @provides inline-comment-summary-css
+ */
+
+.phabricator-inline-summary {
+  margin: .75em 0 .5em;
+  font-size: 11px;
+  border-bottom: 1px solid #dddddd;
+  color: #666666;
+}
+
+.phabricator-inline-summary-table {
+  width: 100%;
+}
+
+.phabricator-inline-summary-table th {
+  padding: 6px 0px;
+  color: #444444;
+}
+
+.phabricator-inline-summary-table td  {
+  padding: 0px 4px 6px;
+  white-space: nowrap;
+}
+
+.phabricator-inline-summary-table td.inline-line-number {
+  padding-left: 0px;
+  width: 100px;
+}
+
+.phabricator-inline-summary-table td.inline-which-diff {
+  color: #666666;
+  width: 120px;
+}
+
+.phabricator-inline-summary-table td.inline-summary-content {
+  vertical-align: top;
+  white-space: normal;
+}
+
+/* NOTE: These two rules provide a larger hit target for clicking line numbers
+   (by letting you click the entire cell) and a visual indicator that you're on
+   target (by highlighting the entire cell). */
+
+.phabricator-inline-summary-table td.inline-line-number a.num {
+  padding-left: 16px;
+  display: block;
+  font-weight: bold;
+}
+
+.phabricator-inline-summary-table td.inline-line-number a.num:hover {
+  background: #3b5998;
+  color: white;
+  text-decoration: none;
+}

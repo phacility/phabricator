@@ -120,127 +120,9 @@ final class DifferentialRevisionCommentView extends AphrontView {
         '</div>';
     }
 
-    if ($this->inlines) {
+    $inline_render = $this->renderInlineComments();
+    if ($inline_render) {
       $hide_comments = false;
-      $inline_render = array();
-      $inlines = $this->inlines;
-      $changesets = $this->changesets;
-      $inlines_by_changeset = mgroup($inlines, 'getChangesetID');
-      $inlines_by_changeset = array_select_keys(
-        $inlines_by_changeset,
-        array_keys($this->changesets));
-      $inline_render[] = '<table class="differential-inline-summary">';
-      foreach ($inlines_by_changeset as $changeset_id => $inlines) {
-        $changeset = $changesets[$changeset_id];
-        $inlines = msort($inlines, 'getLineNumber');
-        $inline_render[] =
-          '<tr>'.
-            '<th colspan="3">'.
-              phutil_escape_html($changeset->getFilename()).
-            '</th>'.
-          '</tr>';
-        foreach ($inlines as $inline) {
-          if (!$inline->getLineLength()) {
-            $lines = $inline->getLineNumber();
-          } else {
-            $lines = $inline->getLineNumber()."\xE2\x80\x93".
-                     ($inline->getLineNumber() + $inline->getLineLength());
-          }
-
-          $on_target = ($this->target) &&
-                       ($this->target->getID() == $changeset->getDiffID());
-
-          $is_visible = false;
-          if ($inline->getIsNewFile()) {
-            // This comment is on the right side of the versus diff, and visible
-            // on the left side of the page.
-            if ($this->versusDiffID) {
-              if ($changeset->getDiffID() == $this->versusDiffID) {
-                $is_visible = true;
-              }
-            }
-
-            // This comment is on the right side of the target diff, and visible
-            // on the right side of the page.
-            if ($on_target) {
-              $is_visible = true;
-            }
-          } else {
-            // Ths comment is on the left side of the target diff, and visible
-            // on the left side of the page.
-            if (!$this->versusDiffID) {
-              if ($on_target) {
-                $is_visible = true;
-              }
-            }
-
-            // TODO: We still get one edge case wrong here, when we have a
-            // versus diff and the file didn't exist in the old version. The
-            // comment is visible because we show the left side of the target
-            // diff when there's no corresponding file in the versus diff, but
-            // we incorrectly link it off-page.
-          }
-
-          $where = null;
-          if ($is_visible) {
-            $lines = phutil_render_tag(
-              'a',
-              array(
-                'href'    => '#inline-'.$inline->getID(),
-                'class'   => 'num',
-              ),
-              $lines);
-          } else {
-            $diff_id = $changeset->getDiffID();
-            $lines = phutil_render_tag(
-              'a',
-              array(
-                'href'    => '?id='.$diff_id.'#inline-'.$inline->getID(),
-                'class'   => 'num',
-                'target'  => '_blank',
-              ),
-              $lines." \xE2\x86\x97");
-            $where = '(On Diff #'.$diff_id.')';
-          }
-
-          $inline_content = $inline->getContent();
-          if (strlen($inline_content)) {
-            $inline_cache = $inline->getCache();
-            if ($inline_cache) {
-              $inline_content = $inline_cache;
-            } else {
-              $inline_content = $this->markupEngine->markupText(
-                $inline_content);
-              if ($inline->getID()) {
-                $inline->setCache($inline_content);
-                $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-                $inline->save();
-                unset($unguarded);
-              }
-            }
-          }
-
-          $inline_render[] =
-            '<tr>'.
-              '<td class="inline-line-number">'.$lines.'</td>'.
-              '<td class="inline-which-diff">'.$where.'</td>'.
-              '<td>'.
-                '<div class="phabricator-remarkup">'.
-                  $inline_content.
-                '</div>'.
-              '</td>'.
-            '</tr>';
-        }
-      }
-      $inline_render[] = '</table>';
-      $inline_render = implode("\n", $inline_render);
-      $inline_render =
-        '<div class="differential-inline-summary-section">'.
-          'Inline Comments'.
-        '</div>'.
-        $inline_render;
-    } else {
-      $inline_render = null;
     }
 
     $author = $this->handles[$comment->getAuthorPHID()];
@@ -326,7 +208,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
         '<div class="differential-comment-core">'.
           $content.
         '</div>'.
-        $inline_render);
+        $this->renderSingleView($inline_render));
     }
 
     return $xaction_view->render();
@@ -339,5 +221,81 @@ final class DifferentialRevisionCommentView extends AphrontView {
     }
     return implode(', ', $result);
   }
+
+  private function renderInlineComments() {
+    if (!$this->inlines) {
+      return null;
+    }
+
+    $inlines = $this->inlines;
+    $changesets = $this->changesets;
+    $inlines_by_changeset = mgroup($inlines, 'getChangesetID');
+    $inlines_by_changeset = array_select_keys(
+      $inlines_by_changeset,
+      array_keys($this->changesets));
+
+    $view = new PhabricatorInlineSummaryView();
+    foreach ($inlines_by_changeset as $changeset_id => $inlines) {
+      $changeset = $changesets[$changeset_id];
+      $items = array();
+      foreach ($inlines as $inline) {
+
+        $on_target = ($this->target) &&
+                     ($this->target->getID() == $changeset->getDiffID());
+
+        $is_visible = false;
+        if ($inline->getIsNewFile()) {
+          // This comment is on the right side of the versus diff, and visible
+          // on the left side of the page.
+          if ($this->versusDiffID) {
+            if ($changeset->getDiffID() == $this->versusDiffID) {
+              $is_visible = true;
+            }
+          }
+
+          // This comment is on the right side of the target diff, and visible
+          // on the right side of the page.
+          if ($on_target) {
+            $is_visible = true;
+          }
+        } else {
+          // Ths comment is on the left side of the target diff, and visible
+          // on the left side of the page.
+          if (!$this->versusDiffID) {
+            if ($on_target) {
+              $is_visible = true;
+            }
+          }
+
+          // TODO: We still get one edge case wrong here, when we have a
+          // versus diff and the file didn't exist in the old version. The
+          // comment is visible because we show the left side of the target
+          // diff when there's no corresponding file in the versus diff, but
+          // we incorrectly link it off-page.
+        }
+
+        $item = array(
+          'id'      => $inline->getID(),
+          'line'    => $inline->getLineNumber(),
+          'length'  => $inline->getLineLength(),
+          'content' => PhabricatorInlineSummaryView::renderCommentContent(
+            $inline,
+            $this->markupEngine),
+        );
+
+        if (!$is_visible) {
+          $diff_id = $changeset->getDiffID();
+          $item['where'] = '(On Diff #'.$diff_id.')';
+          $item['href']  = '?id='.$diff_id.'#inline-'.$inline->getID();
+        }
+
+        $items[] = $item;
+      }
+      $view->addCommentGroup($changeset->getFilename(), $items);
+    }
+
+    return $view;
+  }
+
 
 }
