@@ -120,7 +120,7 @@ final class PhabricatorAuditCommentEditor {
 
     $this->publishFeedStory($comment, array_keys($audit_phids));
     PhabricatorSearchCommitIndexer::indexCommit($commit);
-    $this->sendMail($comment, $other_comments);
+    $this->sendMail($comment, $other_comments, $inline_comments);
   }
 
 
@@ -189,7 +189,8 @@ final class PhabricatorAuditCommentEditor {
 
   private function sendMail(
     PhabricatorAuditComment $comment,
-    array $other_comments) {
+    array $other_comments,
+    array $inline_comments) {
     $commit = $this->commit;
 
     $data = $commit->loadCommitData();
@@ -221,7 +222,8 @@ final class PhabricatorAuditCommentEditor {
       $comment,
       "{$name}: {$summary}",
       $handle,
-      $reply_handler);
+      $reply_handler,
+      $inline_comments);
 
     $email_to = array();
 
@@ -276,7 +278,8 @@ final class PhabricatorAuditCommentEditor {
     PhabricatorAuditComment $comment,
     $cname,
     PhabricatorObjectHandle $handle,
-    PhabricatorMailReplyHandler $reply_handler) {
+    PhabricatorMailReplyHandler $reply_handler,
+    array $inline_comments) {
 
     $commit = $this->commit;
     $user = $this->user;
@@ -292,7 +295,36 @@ final class PhabricatorAuditCommentEditor {
       $body[] = $comment->getContent();
     }
 
+    if ($inline_comments) {
+      $block = array();
+
+      $path_map = id(new DiffusionPathQuery())
+        ->withPathIDs(mpull($inline_comments, 'getPathID'))
+        ->execute();
+      $path_map = ipull($path_map, 'path', 'id');
+
+      foreach ($inline_comments as $inline) {
+        $path = idx($path_map, $inline->getPathID());
+        if ($path === null) {
+          continue;
+        }
+
+        $start = $inline->getLineNumber();
+        $len   = $inline->getLineLength();
+        if ($len) {
+          $range = $start.'-'.($start + $len);
+        } else {
+          $range = $start;
+        }
+
+        $content = $inline->getContent();
+        $block[] = "{$path}:{$range} {$content}";
+      }
+      $body[] = "INLINE COMMENTS\n  ".implode("\n  ", $block);
+    }
+
     $body[] = "COMMIT\n  ".PhabricatorEnv::getProductionURI($handle->getURI());
+
 
     $reply_instructions = $reply_handler->getReplyHandlerInstructions();
     if ($reply_instructions) {

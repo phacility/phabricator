@@ -10,6 +10,7 @@ phutil_require_module('phabricator', 'applications/audit/constants/action');
 phutil_require_module('phabricator', 'applications/audit/constants/status');
 phutil_require_module('phabricator', 'applications/audit/storage/auditcomment');
 phutil_require_module('phabricator', 'applications/audit/storage/inlinecommment');
+phutil_require_module('phabricator', 'applications/diffusion/query/path');
 phutil_require_module('phabricator', 'applications/feed/constants/story');
 phutil_require_module('phabricator', 'applications/feed/publisher');
 phutil_require_module('phabricator', 'applications/metamta/storage/mail');
