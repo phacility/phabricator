@@ -22,6 +22,19 @@
   white-space: nowrap;
 }
 
+.aphront-table-view th a,
+.aphront-table-view th a:hover,
+.aphront-table-view th a:link {
+  padding: 4px 8px;
+  color: white;
+  display: block;
+  text-decoration: none;
+}
+
+.aphront-table-view th a:hover {
+  background: #3366aa;
+}
+
 .aphront-table-view td.header {
   padding:          4px 8px;
   background:       #3b5998;
@@ -35,6 +48,14 @@
   padding:          4px 8px;
   font-size:        11px;
   white-space:      nowrap;
+}
+
+.aphront-table-view td.sorted-column {
+  background: #f6f6fd;
+}
+
+.aphront-table-view tr.alt td.sorted-column {
+  background: #e0e0ef;
 }
 
 .aphront-table-view td.action {
@@ -106,3 +127,21 @@ span.single-display-line-content {
   max-height: 64px;
 }
 
+.aphront-table-view th.aphront-table-view-sortable {
+  padding: 0;
+}
+
+.aphront-table-view-sort-glyph {
+  float: right;
+  padding-left: 8px;
+  color: #6677bb;
+}
+
+th a:hover .aphront-table-view-sort-glyph {
+  color: #ffffff;
+}
+
+.aphront-table-view-sortable-selected .aphront-table-view-sort-glyph {
+  display: block;
+  color: white;
+}
