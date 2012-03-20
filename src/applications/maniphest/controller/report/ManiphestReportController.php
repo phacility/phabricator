@@ -371,6 +371,8 @@ final class ManiphestReportController extends ManiphestController {
 
     $tasks = $query->execute();
 
+    $recently_closed = $this->loadRecentlyClosedTasks();
+
     $date = phabricator_date(time(), $user);
 
     switch ($this->view) {
@@ -378,6 +380,11 @@ final class ManiphestReportController extends ManiphestController {
         $result = mgroup($tasks, 'getOwnerPHID');
         $leftover = idx($result, '', array());
         unset($result['']);
+
+        $result_closed = mgroup($recently_closed, 'getOwnerPHID');
+        $leftover_closed = idx($result_closed, '', array());
+        unset($result_closed['']);
+
         $leftover_name = phutil_render_tag(
           'a',
           array(
@@ -390,6 +397,7 @@ final class ManiphestReportController extends ManiphestController {
         break;
       case 'project':
         $result = array();
+        $leftover = array();
         foreach ($tasks as $task) {
           $phids = $task->getProjectPHIDs();
           if ($phids) {
@@ -400,6 +408,20 @@ final class ManiphestReportController extends ManiphestController {
             $leftover[] = $task;
           }
         }
+
+        $result_closed = array();
+        $leftover_closed = array();
+        foreach ($recently_closed as $task) {
+          $phids = $task->getProjectPHIDs();
+          if ($phids) {
+            foreach ($phids as $project_phid) {
+              $result_closed[$project_phid][] = $task;
+            }
+          } else {
+            $leftover_closed[] = $task;
+          }
+        }
+
         $leftover_name = phutil_render_tag(
           'a',
           array(
@@ -418,6 +440,9 @@ final class ManiphestReportController extends ManiphestController {
 
     $order = $request->getStr('order', 'name');
 
+    require_celerity_resource('aphront-tooltip-css');
+    Javelin::initBehavior('phabricator-tooltips', array());
+
     $rows = array();
     $pri_total = array();
     foreach (array_merge($handles, array(null)) as $handle) {
@@ -429,11 +454,14 @@ final class ManiphestReportController extends ManiphestController {
             'href' => $link.$handle->getPHID(),
           ),
           phutil_escape_html($handle->getName()));
+        $closed = idx($result_closed, $handle->getPHID(), array());
       } else {
         $tasks = $leftover;
         $name  = $leftover_name;
+        $closed = $leftover_closed;
       }
 
+      $taskv = $tasks;
       $tasks = mgroup($tasks, 'getPriority');
 
       $row = array();
@@ -449,6 +477,31 @@ final class ManiphestReportController extends ManiphestController {
         $total += $n;
       }
       $row[] = number_format($total);
+
+      $row[] = $this->renderOldest($taskv);
+
+      $normal_or_better = array();
+      foreach ($taskv as $id => $task) {
+        if ($task->getPriority() < ManiphestTaskPriority::PRIORITY_NORMAL) {
+          continue;
+        }
+        $normal_or_better[$id] = $task;
+      }
+
+      $row[] = $this->renderOldest($normal_or_better);
+
+      if ($closed) {
+        $task_ids = implode(',', mpull($closed, 'getID'));
+        $row[] = phutil_render_tag(
+          'a',
+          array(
+            'href' => '/maniphest/view/custom/?s=oc&tasks='.$task_ids,
+            'target' => '_blank',
+          ),
+          phutil_escape_html(number_format(count($closed))));
+      } else {
+        $row[] = '-';
+      }
 
       switch ($order) {
         case 'total':
@@ -470,11 +523,37 @@ final class ManiphestReportController extends ManiphestController {
 
     $cname = array($col_header);
     $cclass = array('pri right wide');
-    foreach (ManiphestTaskPriority::getTaskPriorityMap() as $pri => $label) {
+    $pri_map = ManiphestTaskPriority::getTaskBriefPriorityMap();
+    foreach ($pri_map as $pri => $label) {
       $cname[] = $label;
       $cclass[] = 'n';
     }
     $cname[] = 'Total';
+    $cclass[] = 'n';
+    $cname[] = javelin_render_tag(
+      'span',
+      array(
+        'sigil' => 'has-tooltip',
+        'meta'  => array(
+          'tip' => 'Oldest open task.',
+          'size' => 200,
+        ),
+      ),
+      'Oldest (All)');
+    $cclass[] = 'n';
+    $cname[] = javelin_render_tag(
+      'span',
+      array(
+        'sigil' => 'has-tooltip',
+        'meta'  => array(
+          'tip' => 'Oldest open task, excluding those with Low or Wishlist '.
+                   'priority.',
+          'size' => 200,
+        ),
+      ),
+      'Oldest (Pri)');
+    $cclass[] = 'n';
+    $cname[] = 'Closed Last 7d';
     $cclass[] = 'n';
 
     $table = new AphrontTableView($rows);
@@ -503,6 +582,73 @@ final class ManiphestReportController extends ManiphestController {
     $filter->appendChild($form);
 
     return array($filter, $panel);
+  }
+
+
+  /**
+   * Load all the tasks that have been recently closed.
+   */
+  private function loadRecentlyClosedTasks() {
+    $recent_window = (60 * 60 * 24 * 7);
+
+    $table = new ManiphestTask();
+    $xtable = new ManiphestTransaction();
+    $conn_r = $table->establishConnection('r');
+
+    $tasks = queryfx_all(
+      $conn_r,
+      'SELECT t.* FROM %T t JOIN %T x ON x.taskID = t.id
+        WHERE t.status != 0
+        AND x.oldValue IN (null, %s, %s)
+        AND x.newValue NOT IN (%s, %s)
+        AND t.dateModified >= %d
+        AND x.dateCreated >= %d',
+      $table->getTableName(),
+      $xtable->getTableName(),
+
+      // TODO: Gross. This table is not meant to be queried like this. Build
+      // real stats tables.
+      json_encode((int)ManiphestTaskStatus::STATUS_OPEN),
+      json_encode((string)ManiphestTaskStatus::STATUS_OPEN),
+      json_encode((int)ManiphestTaskStatus::STATUS_OPEN),
+      json_encode((string)ManiphestTaskStatus::STATUS_OPEN),
+
+      (time() - $recent_window),
+      (time() - $recent_window));
+
+    return id(new ManiphestTask())->loadAllFromArray($tasks);
+  }
+
+  private function renderOldest(array $tasks) {
+    $oldest = null;
+    foreach ($tasks as $id => $task) {
+      if (($oldest === null) ||
+          ($task->getDateCreated() < $tasks[$oldest]->getDateCreated())) {
+        $oldest = $id;
+      }
+    }
+
+    if ($oldest === null) {
+      return '-';
+    }
+
+    $oldest = $tasks[$oldest];
+
+    $age = (time() - $oldest->getDateCreated());
+    $age = number_format($age / (24 * 60 * 60)).' d';
+    $age = phutil_escape_html($age);
+
+    return javelin_render_tag(
+      'a',
+      array(
+        'href'  => '/T'.$oldest->getID(),
+        'sigil' => 'has-tooltip',
+        'meta'  => array(
+          'tip' => 'T'.$oldest->getID().': '.$oldest->getTitle(),
+        ),
+        'target' => '_blank',
+      ),
+      $age);
   }
 
 }

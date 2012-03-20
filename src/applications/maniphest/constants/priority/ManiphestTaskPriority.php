@@ -39,6 +39,18 @@ final class ManiphestTaskPriority extends ManiphestConstants {
     );
   }
 
+  public static function getTaskBriefPriorityMap() {
+    return array(
+      self::PRIORITY_UNBREAK_NOW  => 'Unbreak!',
+      self::PRIORITY_TRIAGE       => 'Triage',
+      self::PRIORITY_HIGH         => 'High',
+      self::PRIORITY_NORMAL       => 'Normal',
+      self::PRIORITY_LOW          => 'Low',
+      self::PRIORITY_WISH         => 'Wish',
+    );
+  }
+
+
   public static function getLoadMap() {
     return array(
       self::PRIORITY_UNBREAK_NOW  => 16,
