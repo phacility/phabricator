@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,13 +70,15 @@ final class DiffusionGitBrowseQuery extends DiffusionBrowseQuery {
     }
 
     list($stdout) = $repository->execxLocalCommand(
-      'ls-tree -l %s:%s',
+      'ls-tree -z -l %s:%s',
       $commit,
       $path);
 
     $results = array();
-    foreach (explode("\n", rtrim($stdout)) as $line) {
-      list($mode, $type, $hash, $size, $name) = preg_split('/\s+/', $line);
+    foreach (explode("\0", rtrim($stdout)) as $line) {
+      // NOTE: Limit to 5 components so we parse filenames with spaces in them
+      // correctly.
+      list($mode, $type, $hash, $size, $name) = preg_split('/\s+/', $line, 5);
       if ($type == 'tree') {
         $file_type = DifferentialChangeType::FILE_DIRECTORY;
       } else {
