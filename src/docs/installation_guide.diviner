@@ -19,6 +19,9 @@ Phabricator is a LAMP application suite, so you basically need LAMP:
   - **MySQL**: You need MySQL.
   - **PHP**: You need PHP 5.2 or newer.
 
+NOTE: The command line interface to Phabricator, "Arcanist", //does// work on
+Windows. For instructions, see @{article:Arcanist User Guide: Windows}.
+
 You'll probably also need a **domain name** and you'll certainly need
 **a computer** with a connection to **the internet**.
 

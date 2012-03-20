@@ -1,0 +1,38 @@
+@title Arcanist User Guide: Windows
+@group userguide
+
+Explains how to install Arcanist on Windows.
+
+= Overview =
+
+Arcanist runs on Windows, either in `cmd.exe` or the Git Bash environments.
+However, it will take a little effort to get working. This document explains
+what you need to do in order to get it running.
+
+NOTE: Windows support is relatively new and incomplete, file bugs when you run
+into issues.
+
+= Required Components =
+
+You need to install:
+
+  - Arcanist itself, see @{article:Arcanist User Guide}.
+  - PHP
+  - SVN, Git, or Mercurial.
+
+Then, configure:
+
+  - Your PATH environmental variable should include `arcanist/bin`, the `php`
+    directory, and the directory where your VCS command lives. When you type
+    `php`, `arc`, or (for example) `git` from the command line, they should all
+    do something.
+  - Your EDITOR environmental variable should point at some valid CLI editor,
+    like the Git Bash `vim`. (Under `cmd.exe`, you need to point to the actual
+    `vim.exe`, not just the `bin/vim` symlink which runs it under Git Bash
+    since `cmd.exe` does not know how to run the symlink.)
+
+You can set environmental variables somewhere in the `Advanced` tab of the
+`System` control panel.
+
+Now you should be able to run `arc` normally (either from `cmd.exe` or
+Git Bash) and it should work more-or-less properly.
