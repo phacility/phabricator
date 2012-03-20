@@ -539,6 +539,19 @@ return array(
     'image/vnd.microsoft.icon'  => 'image/x-icon',
   ),
 
+  // List of mime types which can be used as the source for an <img /> tag.
+  // This should be a subset of 'files.viewable-mime-types' and exclude files
+  // like text.
+  'files.image-mime-types' => array(
+    'image/jpeg'                => true,
+    'image/jpg'                 => true,
+    'image/png'                 => true,
+    'image/gif'                 => true,
+    'image/x-ico'               => true,
+    'image/x-icon'              => true,
+    'image/vnd.microsoft.icon'  => true,
+  ),
+
   // Phabricator can proxy images from other servers so you can paste the URI
   // to a funny picture of a cat into the comment box and have it show up as an
   // image. However, this means the webserver Phabricator is running on will

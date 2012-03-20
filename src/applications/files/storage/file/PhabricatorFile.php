@@ -26,6 +26,7 @@ final class PhabricatorFile extends PhabricatorFileDAO {
   protected $byteSize;
   protected $authorPHID;
   protected $secretKey;
+  protected $contentHash;
 
   protected $storageEngine;
   protected $storageFormat;
@@ -138,6 +139,7 @@ final class PhabricatorFile extends PhabricatorFileDAO {
     $file->setName($file_name);
     $file->setByteSize(strlen($data));
     $file->setAuthorPHID($authorPHID);
+    $file->setContentHash(PhabricatorHash::digest($data));
 
     $file->setStorageEngine($engine_identifier);
     $file->setStorageHandle($data_handle);
@@ -252,6 +254,16 @@ final class PhabricatorFile extends PhabricatorFileDAO {
 
   public function isViewableInBrowser() {
     return ($this->getViewableMimeType() !== null);
+  }
+
+  public function isViewableImage() {
+    if (!$this->isViewableInBrowser()) {
+      return false;
+    }
+
+    $mime_map = PhabricatorEnv::getEnvConfig('files.image-mime-types');
+    $mime_type = $this->getMimeType();
+    return idx($mime_map, $mime_type);
   }
 
   public function isTransformableImage() {

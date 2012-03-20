@@ -315,7 +315,7 @@ final class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
       case 1143: // Access denied to column
         throw new AphrontQueryAccessDeniedException($exmsg);
       case 1146: // No such table
-      case 1154: // Unknown column "..." in field list
+      case 1054: // Unknown column "..." in field list
         throw new AphrontQuerySchemaException($exmsg);
       default:
         // TODO: 1064 is syntax error, and quite terrible in production.
