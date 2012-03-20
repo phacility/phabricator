@@ -378,6 +378,7 @@ final class ManiphestTaskListController extends ManiphestController {
       'priority'  => ManiphestTaskQuery::GROUP_PRIORITY,
       'owner'     => ManiphestTaskQuery::GROUP_OWNER,
       'status'    => ManiphestTaskQuery::GROUP_STATUS,
+      'project'   => ManiphestTaskQuery::GROUP_PROJECT,
     );
     $query->setGroupBy(
       idx(
@@ -392,6 +393,15 @@ final class ManiphestTaskListController extends ManiphestController {
     $data = $query->execute();
     $total_row_count = $query->getRowCount();
 
+    $project_group_phids = array();
+    if ($search_query->getParameter('group') == 'project') {
+      foreach ($data as $task) {
+        foreach ($task->getProjectPHIDs() as $phid) {
+          $project_group_phids[] = $phid;
+        }
+      }
+    }
+
     $handle_phids = mpull($data, 'getOwnerPHID');
     $handle_phids = array_merge(
       $handle_phids,
@@ -399,14 +409,14 @@ final class ManiphestTaskListController extends ManiphestController {
       $user_phids,
       $xproject_phids,
       $owner_phids,
-      $author_phids);
+      $author_phids,
+      $project_group_phids);
     $handles = id(new PhabricatorObjectHandleData($handle_phids))
       ->loadHandles();
 
     switch ($search_query->getParameter('group')) {
       case 'priority':
         $data = mgroup($data, 'getPriority');
-        krsort($data);
 
         // If we have invalid priorities, they'll all map to "???". Merge
         // arrays to prevent them from overwriting each other.
@@ -423,7 +433,6 @@ final class ManiphestTaskListController extends ManiphestController {
         break;
       case 'status':
         $data = mgroup($data, 'getStatus');
-        ksort($data);
 
         $out = array();
         foreach ($data as $status => $tasks) {
@@ -451,6 +460,26 @@ final class ManiphestTaskListController extends ManiphestController {
         }
 
         ksort($data);
+        break;
+      case 'project':
+        $grouped = array();
+        foreach ($data as $task) {
+          $phids = $task->getProjectPHIDs();
+          if ($project_phids) {
+            // If the user is filtering on "Bugs", don't show a "Bugs" group
+            // with every result since that's silly (the query also does this
+            // on the backend).
+            $phids = array_diff($phids, $project_phids);
+          }
+          if ($phids) {
+            foreach ($phids as $phid) {
+              $grouped[$handles[$phid]->getName()][$task->getID()] = $task;
+            }
+          } else {
+            $grouped['No Project'][$task->getID()] = $task;
+          }
+        }
+        $data = $grouped;
         break;
       default:
         $data = array(
@@ -527,6 +556,7 @@ final class ManiphestTaskListController extends ManiphestController {
       'p' => 'priority',
       's' => 'status',
       'o' => 'owner',
+      'j' => 'project',
     );
     if (empty($groups[$group])) {
       $group = 'p';
@@ -543,6 +573,7 @@ final class ManiphestTaskListController extends ManiphestController {
           'p' => 'Priority',
           'o' => 'Owner',
           's' => 'Status',
+          'j' => 'Project',
           'n' => 'None',
         ));
 

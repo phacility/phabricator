@@ -46,6 +46,7 @@ final class ManiphestTaskQuery {
   const GROUP_PRIORITY      = 'group-priority';
   const GROUP_OWNER         = 'group-owner';
   const GROUP_STATUS        = 'group-status';
+  const GROUP_PROJECT       = 'group-project';
 
   private $orderBy          = 'order-modified';
   const ORDER_PRIORITY      = 'order-priority';
@@ -224,6 +225,11 @@ final class ManiphestTaskQuery {
     $offset = (int)nonempty($this->offset, 0);
     $limit  = (int)nonempty($this->limit, self::DEFAULT_PAGE_SIZE);
 
+    if ($this->groupBy == self::GROUP_PROJECT) {
+      $limit  = PHP_INT_MAX;
+      $offset = 0;
+    }
+
     $data = queryfx_all(
       $conn,
       'SELECT %Q * %Q FROM %T task %Q %Q %Q %Q %Q LIMIT %d, %d',
@@ -247,7 +253,13 @@ final class ManiphestTaskQuery {
       $this->rowCount = null;
     }
 
-    return $task_dao->loadAllFromArray($data);
+    $tasks = $task_dao->loadAllFromArray($data);
+
+    if ($this->groupBy == self::GROUP_PROJECT) {
+      $tasks = $this->applyGroupByProject($tasks);
+    }
+
+    return $tasks;
   }
 
   private function buildTaskIDsWhereClause($conn) {
@@ -420,6 +432,10 @@ final class ManiphestTaskQuery {
       case self::GROUP_STATUS:
         $order[] = 'status';
         break;
+      case self::GROUP_PROJECT:
+        // NOTE: We have to load the entire result set and apply this grouping
+        // in the PHP process for now.
+        break;
       default:
         throw new Exception("Unknown group query '{$this->groupBy}'!");
     }
@@ -459,5 +475,70 @@ final class ManiphestTaskQuery {
     return 'ORDER BY '.implode(', ', $order);
   }
 
+
+  /**
+   * To get paging to work for "group by project", we need to do a bunch of
+   * server-side magic since there's currently no way to sort by project name on
+   * the database.
+   *
+   * TODO: Move this all to the database.
+   */
+  private function applyGroupByProject(array $tasks) {
+
+    $project_phids = array();
+    foreach ($tasks as $task) {
+      foreach ($task->getProjectPHIDs() as $phid) {
+        $project_phids[$phid] = true;
+      }
+    }
+
+    $handles = id(new PhabricatorObjectHandleData(array_keys($project_phids)))
+      ->loadHandles();
+
+    $max = 1;
+    foreach ($handles as $handle) {
+      $max = max($max, strlen($handle->getName()));
+    }
+
+    $items = array();
+    $ii = 0;
+    foreach ($tasks as $key => $task) {
+      $phids = $task->getProjectPHIDs();
+      if ($this->projectPHIDs) {
+        $phids = array_diff($phids, $this->projectPHIDs);
+      }
+      if ($phids) {
+        foreach ($phids as $phid) {
+          $items[] = array(
+            'key' => $key,
+            'seq' => sprintf(
+              '%'.$max.'s%d',
+              $handles[$phid]->getName(),
+              $ii),
+          );
+        }
+      } else {
+        // Sort "no project" tasks first.
+        $items[] = array(
+          'key' => $key,
+          'seq' => '',
+        );
+      }
+      ++$ii;
+    }
+
+    $items = isort($items, 'seq');
+    $items = array_slice(
+      $items,
+      nonempty($this->offset),
+      nonempty($this->limit, self::DEFAULT_PAGE_SIZE));
+
+    $result = array();
+    foreach ($items as $item) {
+      $result[] = $tasks[$item['key']];
+    }
+
+    return $result;
+  }
 
 }
