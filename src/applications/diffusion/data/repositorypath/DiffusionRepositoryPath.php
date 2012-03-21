@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,24 @@
 
 final class DiffusionRepositoryPath {
 
+  private $fullPath;
   private $path;
   private $hash;
   private $fileType;
   private $fileSize;
+  private $externalURI;
 
   private $lastModifiedCommit;
   private $lastCommitData;
+
+  public function setFullPath($full_path) {
+    $this->fullPath = $full_path;
+    return $this;
+  }
+
+  public function getFullPath() {
+    return $this->fullPath;
+  }
 
   final public function setPath($path) {
     $this->path = $path;
@@ -80,6 +91,15 @@ final class DiffusionRepositoryPath {
 
   final public function getFileSize() {
     return $this->fileSize;
+  }
+
+  final public function setExternalURI($external_uri) {
+    $this->externalURI = $external_uri;
+    return $this;
+  }
+
+  final public function getExternalURI() {
+    return $this->externalURI;
   }
 
 }

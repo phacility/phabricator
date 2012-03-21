@@ -377,6 +377,10 @@ abstract class DiffusionRequest {
       case 'branch':
         $uri = "/diffusion/{$callsign}repository/{$path}";
         break;
+      case 'external':
+        $commit = ltrim($commit, ';');
+        $uri = "/diffusion/external/{$commit}/";
+        break;
       case 'rendering-ref':
         // This isn't a real URI per se, it's passed as a query parameter to
         // the ajax changeset stuff but then we parse it back out as though

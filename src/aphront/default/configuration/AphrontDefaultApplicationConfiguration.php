@@ -263,6 +263,7 @@ class AphrontDefaultApplicationConfiguration
           ),
         ),
         'symbol/(?P<name>[^/]+)/' => 'DiffusionSymbolController',
+        'external/' => 'DiffusionExternalController',
       ),
 
       '/daemon/' => array(

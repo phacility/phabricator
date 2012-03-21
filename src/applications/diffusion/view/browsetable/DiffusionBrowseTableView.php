@@ -86,22 +86,41 @@ final class DiffusionBrowseTableView extends DiffusionView {
     $rows = array();
     foreach ($this->paths as $path) {
 
-      if ($path->getFileType() == DifferentialChangeType::FILE_DIRECTORY) {
+      $file_type = $path->getFileType();
+      if ($file_type == DifferentialChangeType::FILE_DIRECTORY) {
         $browse_text = $path->getPath().'/';
         $dir_slash = '/';
 
         $browse_link = '<strong>'.$this->linkBrowse(
           $base_path.$path->getPath().$dir_slash,
           array(
-            'text' => $browse_text,
+            'html' => $this->renderPathIcon(
+              'dir',
+              $browse_text),
           )).'</strong>';
+      } else if ($file_type == DifferentialChangeType::FILE_SUBMODULE) {
+        $browse_text = $path->getPath().'/';
+        $browse_link =
+          '<strong>'.
+            $this->linkExternal(
+              $path->getHash(),
+              $path->getExternalURI(),
+              $this->renderPathIcon(
+                'ext',
+                $browse_text)).
+          '</strong>';
       } else {
+        if ($file_type == DifferentialChangeType::FILE_SYMLINK) {
+          $type = 'link';
+        } else {
+          $type = 'file';
+        }
         $browse_text = $path->getPath();
         $dir_slash = null;
         $browse_link = $this->linkBrowse(
           $base_path.$path->getPath().$dir_slash,
           array(
-            'text' => $browse_text,
+            'html' => $this->renderPathIcon($type, $browse_text),
           ));
       }
 
@@ -170,6 +189,18 @@ final class DiffusionBrowseTableView extends DiffusionView {
         'wide',
       ));
     return $view->render();
+  }
+
+  private function renderPathIcon($type, $text) {
+
+    require_celerity_resource('diffusion-icons-css');
+
+    return phutil_render_tag(
+      'span',
+      array(
+        'class' => 'diffusion-path-icon diffusion-path-icon-'.$type,
+      ),
+      phutil_escape_html($text));
   }
 
 }

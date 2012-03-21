@@ -275,6 +275,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/diffusion/commit-view.css',
   ),
+  'diffusion-icons-css' =>
+  array(
+    'uri' => '/res/2633e4b7/rsrc/css/application/diffusion/diffusion-icons.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/diffusion/diffusion-icons.css',
+  ),
   'diffusion-source-css' =>
   array(
     'uri' => '/res/5f5ac1d6/rsrc/css/application/diffusion/diffusion-source.css',

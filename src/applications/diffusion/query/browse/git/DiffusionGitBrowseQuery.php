@@ -74,24 +74,62 @@ final class DiffusionGitBrowseQuery extends DiffusionBrowseQuery {
       $commit,
       $path);
 
+    $submodules = array();
+
     $results = array();
     foreach (explode("\0", rtrim($stdout)) as $line) {
+
       // NOTE: Limit to 5 components so we parse filenames with spaces in them
       // correctly.
       list($mode, $type, $hash, $size, $name) = preg_split('/\s+/', $line, 5);
-      if ($type == 'tree') {
-        $file_type = DifferentialChangeType::FILE_DIRECTORY;
-      } else {
-        $file_type = DifferentialChangeType::FILE_NORMAL;
-      }
 
       $result = new DiffusionRepositoryPath();
+
+      if ($type == 'tree') {
+        $file_type = DifferentialChangeType::FILE_DIRECTORY;
+      } else if ($type == 'commit') {
+        $file_type = DifferentialChangeType::FILE_SUBMODULE;
+        $submodules[] = $result;
+      } else {
+        $mode = intval($mode, 8);
+        if (($mode & 0120000) == 0120000) {
+          $file_type = DifferentialChangeType::FILE_SYMLINK;
+        } else {
+          $file_type = DifferentialChangeType::FILE_NORMAL;
+        }
+      }
+
+      $result->setFullPath($path.$name);
       $result->setPath($name);
       $result->setHash($hash);
       $result->setFileType($file_type);
       $result->setFileSize($size);
 
       $results[] = $result;
+    }
+
+    // If we identified submodules, lookup the module info at this commit to
+    // find their source URIs.
+
+    if ($submodules) {
+      list($module_info) = $repository->execxLocalCommand(
+        'show %s:.gitmodules',
+        $commit);
+      $module_info = parse_ini_string(
+        $module_info,
+        $process_sections = true,
+        $scanner_mode = INI_SCANNER_RAW);
+
+      foreach ($submodules as $path) {
+        foreach ($module_info as $section) {
+          if (empty($section['path']) || empty($section['url'])) {
+            continue;
+          }
+          if ($section['path'] == $path->getFullPath()) {
+            $path->setExternalURI($section['url']);
+          }
+        }
+      }
     }
 
     return $results;

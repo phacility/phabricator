@@ -79,11 +79,29 @@ abstract class DiffusionView extends AphrontView {
         'path'   => $path,
       ));
 
-    if (isset($details['text'])) {
+    if (isset($details['html'])) {
+      $text = $details['html'];
+    } else if (isset($details['text'])) {
       $text = phutil_escape_html($details['text']);
     } else {
       $text = 'Browse';
     }
+
+    return phutil_render_tag(
+      'a',
+      array(
+        'href' => $href,
+      ),
+      $text);
+  }
+
+  final public function linkExternal($hash, $uri, $text) {
+    $href = id(new PhutilURI('/diffusion/external/'))
+      ->setQueryParams(
+        array(
+          'uri' => $uri,
+          'id'  => $hash,
+        ));
 
     return phutil_render_tag(
       'a',
