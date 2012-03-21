@@ -363,7 +363,7 @@ abstract class DiffusionRequest {
 
     if ($req_branch && !strlen($branch)) {
       throw new Exception(
-        "Diffusion URI action '{$action}' requires brnach!");
+        "Diffusion URI action '{$action}' requires branch!");
     }
 
     switch ($action) {
