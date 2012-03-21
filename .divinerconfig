@@ -1,6 +1,6 @@
 {
   "name" : "Phabricator",
-  "src_base" : "https://secure.phabricator.com/diffusion/P/browse/origin:master",
+  "src_base" : "https://secure.phabricator.com/diffusion/P/browse/master",
   "groups" : {
     "intro" : "Introduction",
     "config" : "Configuration",
@@ -30,4 +30,3 @@
     ["DivinerXHPEngine", {}]
   ]
 }
-

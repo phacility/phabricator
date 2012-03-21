@@ -523,11 +523,11 @@ class AphrontDefaultApplicationConfiguration
 
     $browse = array(
       'arcanist' =>
-        $host.'/diffusion/ARC/browse/origin:master/src/',
+        $host.'/diffusion/ARC/browse/master/src/',
       'phutil' =>
-        $host.'/diffusion/PHU/browse/origin:master/src/',
+        $host.'/diffusion/PHU/browse/master/src/',
       'phabricator' =>
-        $host.'/diffusion/P/browse/origin:master/src/',
+        $host.'/diffusion/P/browse/master/src/',
     );
 
     $rows = array();

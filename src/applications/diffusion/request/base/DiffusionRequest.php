@@ -326,6 +326,7 @@ abstract class DiffusionRequest {
     }
 
     if (strlen($path)) {
+      $path = ltrim($path, '/');
       $path = str_replace(array(';', '$'), array(';;', '$$'), $path);
       $path = phutil_escape_uri($path);
     }

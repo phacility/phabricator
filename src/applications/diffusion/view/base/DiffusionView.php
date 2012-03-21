@@ -74,7 +74,7 @@ abstract class DiffusionView extends AphrontView {
   final public function linkBrowse($path, array $details = array()) {
 
     $href = $this->getDiffusionRequest()->generateURI(
-      array(
+      $details + array(
         'action' => 'browse',
         'path'   => $path,
       ));
