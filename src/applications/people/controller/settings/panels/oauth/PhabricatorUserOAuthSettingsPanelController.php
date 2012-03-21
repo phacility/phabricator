@@ -27,24 +27,24 @@ final class PhabricatorUserOAuthSettingsPanelController
   }
 
   public function processRequest() {
-
-    $request = $this->getRequest();
-    $user = $request->getUser();
-    $provider = $this->provider;
-
-    $notice = null;
-
+    $request       = $this->getRequest();
+    $user          = $request->getUser();
+    $provider      = $this->provider;
+    $notice        = null;
     $provider_name = $provider->getProviderName();
-    $provider_key = $provider->getProviderKey();
+    $provider_key  = $provider->getProviderKey();
 
     $oauth_info = id(new PhabricatorUserOAuthInfo())->loadOneWhere(
       'userID = %d AND oauthProvider = %s',
       $user->getID(),
       $provider->getProviderKey());
 
+    if ($request->isFormPost() && $oauth_info) {
+      $notice = $this->refreshProfileImage($oauth_info);
+    }
+
     $form = new AphrontFormView();
-    $form
-      ->setUser($user);
+    $form->setUser($user);
 
     $forms = array();
     $forms[] = $form;
@@ -86,15 +86,22 @@ final class PhabricatorUserOAuthSettingsPanelController
         ->appendChild(
           id(new AphrontFormStaticControl())
             ->setLabel($provider_name.' ID')
-            ->setValue($oauth_info->getOAuthUID()))
+            ->setValue($oauth_info->getOAuthUID())
+          )
         ->appendChild(
           id(new AphrontFormStaticControl())
             ->setLabel($provider_name.' Name')
-            ->setValue($oauth_info->getAccountName()))
+            ->setValue($oauth_info->getAccountName())
+          )
         ->appendChild(
           id(new AphrontFormStaticControl())
             ->setLabel($provider_name.' URI')
-            ->setValue($oauth_info->getAccountURI()));
+            ->setValue($oauth_info->getAccountURI())
+          )
+        ->appendChild(
+          id(new AphrontFormSubmitControl())
+            ->setValue('Refresh Profile Image from '.$provider_name)
+          );
 
       if (!$provider->isProviderLinkPermanent()) {
         $unlink = 'Unlink '.$provider_name.' Account';
@@ -157,7 +164,7 @@ final class PhabricatorUserOAuthSettingsPanelController
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
     foreach ($forms as $name => $form) {
       if ($name) {
-        $panel->appendChild('<br /><br /><h1>'.$name.'</h1>');
+        $panel->appendChild('<br /><h1>'.$name.'</h1><br />');
       }
       $panel->appendChild($form);
     }
@@ -168,5 +175,46 @@ final class PhabricatorUserOAuthSettingsPanelController
           $notice,
           $panel,
         ));
+  }
+
+  private function refreshProfileImage(PhabricatorUserOAuthInfo $oauth_info) {
+    $user         = $this->getRequest()->getUser();
+    $provider     = $this->provider;
+    $error        = false;
+    $userinfo_uri = new PhutilURI($provider->getUserInfoURI());
+    try {
+      $userinfo_uri->setQueryParams(
+        array(
+          'access_token' => $oauth_info->getToken(),
+        ));
+      $user_data = @file_get_contents($userinfo_uri);
+      $provider->setUserData($user_data);
+      $image = $provider->retrieveUserProfileImage();
+      if ($image) {
+        $file = PhabricatorFile::newFromFileData(
+          $image,
+          array(
+            'name' => $provider->getProviderKey().'-profile.jpg',
+            'authorPHID' => $user->getPHID(),
+          ));
+        $user->setProfileImagePHID($file->getPHID());
+        $user->save();
+      } else {
+        $error = 'Unable to retrive image.';
+      }
+    } catch (Exception $e) {
+      $error = 'Unable to save image.';
+    }
+    $notice = new AphrontErrorView();
+    if ($error) {
+      $notice
+        ->setTitle('Error Refreshing Profile Picture')
+        ->setErrors(array($error));
+    } else {
+      $notice
+        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+        ->setTitle('Successfully Refreshed Profile Picture');
+    }
+    return $notice;
   }
 }
