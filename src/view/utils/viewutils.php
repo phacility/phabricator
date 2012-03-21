@@ -20,7 +20,7 @@ function phabricator_date($epoch, $user) {
   return __phabricator_format_local_time(
     $epoch,
     $user,
-    'M j Y');
+    __phabricator_date_format($epoch));
 }
 
 function phabricator_on_relative_date($epoch, $user) {
@@ -61,7 +61,16 @@ function phabricator_datetime($epoch, $user) {
   return __phabricator_format_local_time(
     $epoch,
     $user,
-    'M j Y, g:i A');
+    __phabricator_date_format($epoch).', g:i A');
+}
+
+function __phabricator_date_format($epoch) {
+  $format = 'M j Y';
+  $now = time();
+  if ($epoch <= $now && $epoch > $now - 30 * 24 * 60 * 60) {
+    $format = 'D, M j';
+  }
+  return $format;
 }
 
 /**
