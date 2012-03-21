@@ -143,6 +143,8 @@ final class ManiphestBatchEditController extends ManiphestController {
 
     // TODO: Set content source to "batch edit".
 
+    $project_xaction = null;
+
     $xactions = array();
     foreach ($actions as $action) {
       $value = $action['value'];
@@ -152,7 +154,20 @@ final class ManiphestBatchEditController extends ManiphestController {
 
           $is_remove = ($action['action'] == 'remove_project');
 
-          $current = array_fill_keys($task->getProjectPHIDs(), true);
+          // We want to roll up all of the add and remove actions into a single
+          // transaction so we don't restore removed projects or remove added
+          // projects in subsequent transactions. If we've already made some
+          // modification to a task's projects, use that as the starting point.
+          // Otherwise, start with the value on the task.
+
+          if ($project_xaction) {
+            $xaction = $project_xaction;
+            $current = $xaction->getNewValue();
+          } else {
+            $current = $task->getProjectPHIDs();
+          }
+
+          $current = array_fill_keys($current, true);
           $value   = array_fill_keys($value, true);
 
           $new = $current;
@@ -178,11 +193,20 @@ final class ManiphestBatchEditController extends ManiphestController {
             break;
           }
 
+          // If this is the first project-related transaction, create a new
+          // transaction object and populate it with appropriate defaults.
+
+          if (!$project_xaction) {
+            $xaction = clone $template;
+            $xaction->setTransactionType(
+              ManiphestTransactionType::TYPE_PROJECTS);
+
+            $xactions[] = $xaction;
+            $project_xaction = $xaction;
+          }
+
           $new = array_keys($new);
-          $xaction = clone $template;
-          $xaction->setTransactionType(ManiphestTransactionType::TYPE_PROJECTS);
           $xaction->setNewValue($new);
-          $xactions[] = $xaction;
           break;
       }
     }
