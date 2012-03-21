@@ -68,7 +68,7 @@ final class DiffusionSymbolController extends DiffusionController {
         if ($request->getStr('type') == 'function') {
           if (in_array($this->name, idx(get_defined_functions(), 'internal'))) {
             return id(new AphrontRedirectResponse())
-              ->setURI('http://www.php.net/'.$this->name);
+              ->setURI('http://www.php.net/function.'.$this->name);
           }
         }
       }
