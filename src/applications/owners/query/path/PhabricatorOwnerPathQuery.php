@@ -22,7 +22,7 @@ final class PhabricatorOwnerPathQuery {
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
-    $drequest = DiffusionRequest::newFromAphrontRequestDictionary(
+    $drequest = DiffusionRequest::newFromDictionary(
       array(
         'repository'  => $repository,
         'commit'      => $commit->getCommitIdentifier(),
