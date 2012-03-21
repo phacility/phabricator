@@ -35,7 +35,8 @@ JX.install('Prefab', {
      * Build a Phabricator tokenizer out of a configuration with application
      * sorting, datasource and placeholder rules.
      *
-     *   - `id` Root tokenizer ID.
+     *   - `id` Root tokenizer ID (alternatively, pass `root`).
+     *   - `root` Root tokenizer node (replaces `id`).
      *   - `src` Datasource URI.
      *   - `ondemand` Optional, use an ondemand source.
      *   - `value` Optional, initial value.
@@ -45,7 +46,7 @@ JX.install('Prefab', {
      *
      */
     buildTokenizer : function(config) {
-      var root = JX.$(config.id);
+      var root = config.root || JX.$(config.id);
 
       var datasource;
       if (config.ondemand) {

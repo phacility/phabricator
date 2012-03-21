@@ -7,6 +7,9 @@
 
 
 phutil_require_module('phabricator', 'aphront/response/redirect');
+phutil_require_module('phabricator', 'applications/maniphest/constants/owner');
+phutil_require_module('phabricator', 'applications/maniphest/constants/priority');
+phutil_require_module('phabricator', 'applications/maniphest/constants/status');
 phutil_require_module('phabricator', 'applications/maniphest/constants/transactiontype');
 phutil_require_module('phabricator', 'applications/maniphest/controller/base');
 phutil_require_module('phabricator', 'applications/maniphest/editor/transaction');

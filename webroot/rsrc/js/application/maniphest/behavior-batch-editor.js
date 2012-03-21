@@ -5,9 +5,6 @@
  *           javelin-util
  *           phabricator-prefab
  *           multirow-row-manager
- *           javelin-tokenizer
- *           javelin-typeahead-preloaded-source
- *           javelin-typeahead
  *           javelin-json
  */
 
@@ -25,29 +22,64 @@ JX.behavior('maniphest-batch-editor', function(config) {
     var action_select = JX.Prefab.renderSelect(
       {
         'add_project': 'Add Projects',
-        'remove_project' : 'Remove Projects'/*,
+        'remove_project' : 'Remove Projects',
         'priority': 'Change Priority',
-        'add_comment': 'Comment',
         'status': 'Open / Close',
-        'assign': 'Assign'*/
+        'add_comment': 'Comment',
+        'assign': 'Assign'
       });
 
-    var tokenizer = build_tokenizer(config.sources.project)
+    var proj_tokenizer = build_tokenizer(config.sources.project);
+    var owner_tokenizer = build_tokenizer(config.sources.owner);
 
-    var r = [];
-    r.push([null, action_select]);
-    r.push(['batch-editor-input', tokenizer.template]);
+    var priority_select = JX.Prefab.renderSelect(config.priorityMap);
+    var status_select = JX.Prefab.renderSelect(config.statusMap);
+    var comment_input = JX.$N('input', {style: {width: '100%'}});
 
-    for (var ii = 0; ii < r.length; ii++) {
-      r[ii] = JX.$N('td', {className : r[ii][0]}, r[ii][1]);
-    }
+    var cell = JX.$N('td', {className: 'batch-editor-input'});
+    var vfunc = null;
+
+    function update() {
+      switch (action_select.value) {
+        case 'add_project':
+        case 'remove_project':
+          JX.DOM.setContent(cell, proj_tokenizer.template);
+          vfunc = function() {
+            return JX.keys(proj_tokenizer.object.getTokens());
+          };
+          break;
+        case 'assign':
+          JX.DOM.setContent(cell, owner_tokenizer.template);
+          vfunc = function() {
+            return JX.keys(owner_tokenizer.object.getTokens());
+          };
+          break;
+        case 'add_comment':
+          JX.DOM.setContent(cell, comment_input);
+          vfunc = function() {
+            return comment_input.value;
+          };
+          break;
+        case 'priority':
+          JX.DOM.setContent(cell, priority_select);
+          vfunc = function() { return priority_select.value; };
+          break;
+        case 'status':
+          JX.DOM.setContent(cell, status_select);
+          vfunc = function() { return status_select.value; };
+          break;
+      }
+    };
+
+    JX.DOM.listen(action_select, 'change', null, update);
+    update();
 
     return {
-      nodes : r,
+      nodes : [JX.$N('td', {}, action_select), cell],
       dataCallback : function() {
         return {
           action: action_select.value,
-          value: JX.keys(tokenizer.object.getTokens())
+          value: vfunc()
         };
       }
     };
@@ -95,18 +127,18 @@ JX.behavior('maniphest-batch-editor', function(config) {
       delete action_rows[row_id];
     });
 
-  function build_tokenizer(source) {
+  function build_tokenizer(tconfig) {
     var template = JX.$N('div', JX.$H(config.tokenizerTemplate)).firstChild;
     template.id = '';
-    var datasource = new JX.TypeaheadPreloadedSource(source);
-    var typeahead = new JX.Typeahead(template);
-    typeahead.setDatasource(datasource);
-    var tokenizer = new JX.Tokenizer(template);
-    tokenizer.setTypeahead(typeahead);
-    tokenizer.start();
+
+    var build_config = JX.copy({}, tconfig);
+    build_config.root = template;
+
+    var built = JX.Prefab.buildTokenizer(build_config);
+    built.tokenizer.start();
 
     return {
-      object: tokenizer,
+      object: built.tokenizer,
       template: template
     };
   }
