@@ -35,7 +35,11 @@ final class ManiphestReportController extends ManiphestController {
       $uri = $request->getRequestURI();
 
       $project = head($request->getArr('set_project'));
+      $project = nonempty($project, null);
       $uri = $uri->alter('project', $project);
+
+      $window = $request->getStr('set_window');
+      $uri = $uri->alter('window', $window);
 
       return id(new AphrontRedirectResponse())->setURI($uri);
     }
@@ -281,21 +285,7 @@ final class ManiphestReportController extends ManiphestController {
       );
     }
 
-    $form = id(new AphrontFormView())
-      ->setUser($user)
-      ->appendChild(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/projects/')
-          ->setLabel('Project')
-          ->setLimit(1)
-          ->setName('set_project')
-          ->setValue($tokens))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue('Filter By Project'));
-
-    $filter = new AphrontListFilterView();
-    $filter->appendChild($form);
+    $filter = $this->renderReportFilters($tokens, $has_window = false);
 
     $id = celerity_generate_unique_node_id();
     $chart = phutil_render_tag(
@@ -325,6 +315,45 @@ final class ManiphestReportController extends ManiphestController {
     ));
 
     return array($filter, $chart, $panel);
+  }
+
+  private function renderReportFilters(array $tokens, $has_window) {
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+
+    $form = id(new AphrontFormView())
+      ->setUser($user)
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource('/typeahead/common/searchproject/')
+          ->setLabel('Project')
+          ->setLimit(1)
+          ->setName('set_project')
+          ->setValue($tokens));
+
+    if ($has_window) {
+      list($window_str, $ignored, $window_error) = $this->getWindow();
+      $form
+        ->appendChild(
+          id(new AphrontFormTextControl())
+            ->setLabel('"Recently" Means')
+            ->setName('set_window')
+            ->setCaption(
+              'Configure the cutoff for the "Recently Closed" column.')
+            ->setValue($window_str)
+            ->setError($window_error));
+    }
+
+    $form
+      ->appendChild(
+        id(new AphrontFormSubmitControl())
+          ->setValue('Filter By Project'));
+
+    $filter = new AphrontListFilterView();
+    $filter->appendChild($form);
+
+    return $filter;
   }
 
   private function buildSeries(array $data) {
@@ -366,8 +395,19 @@ final class ManiphestReportController extends ManiphestController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
+
     $query = id(new ManiphestTaskQuery())
       ->withStatus(ManiphestTaskQuery::STATUS_OPEN);
+
+    $project_phid = $request->getStr('project');
+    $project_handle = null;
+    if ($project_phid) {
+      $phids = array($project_phid);
+      $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+      $project_handle = $handles[$project_phid];
+
+      $query->withProjects($phids);
+    }
 
     $tasks = $query->execute();
 
@@ -439,6 +479,7 @@ final class ManiphestReportController extends ManiphestController {
     $handles = msort($handles, 'getName');
 
     $order = $request->getStr('order', 'name');
+    list($order, $reverse) = AphrontTableView::parseSort($order);
 
     require_celerity_resource('aphront-tooltip-css');
     Javelin::initBehavior('phabricator-tooltips', array());
@@ -447,6 +488,12 @@ final class ManiphestReportController extends ManiphestController {
     $pri_total = array();
     foreach (array_merge($handles, array(null)) as $handle) {
       if ($handle) {
+        if (($project_handle) &&
+            ($project_handle->getPHID() == $handle->getPHID())) {
+          // If filtering by, e.g., "bugs", don't show a "bugs" group.
+          continue;
+        }
+
         $tasks = idx($result, $handle->getPHID(), array());
         $name = phutil_render_tag(
           'a',
@@ -478,7 +525,8 @@ final class ManiphestReportController extends ManiphestController {
       }
       $row[] = number_format($total);
 
-      $row[] = $this->renderOldest($taskv);
+      list($link, $oldest_all) = $this->renderOldest($taskv);
+      $row[] = $link;
 
       $normal_or_better = array();
       foreach ($taskv as $id => $task) {
@@ -488,7 +536,8 @@ final class ManiphestReportController extends ManiphestController {
         $normal_or_better[$id] = $task;
       }
 
-      $row[] = $this->renderOldest($normal_or_better);
+      list($link, $oldest_pri) = $this->renderOldest($normal_or_better);
+      $row[] = $link;
 
       if ($closed) {
         $task_ids = implode(',', mpull($closed, 'getID'));
@@ -507,6 +556,15 @@ final class ManiphestReportController extends ManiphestController {
         case 'total':
           $row['sort'] = $total;
           break;
+        case 'oldest-all':
+          $row['sort'] = $oldest_all;
+          break;
+        case 'oldest-pri':
+          $row['sort'] = $oldest_pri;
+          break;
+        case 'closed':
+          $row['sort'] = count($closed);
+          break;
         case 'name':
         default:
           $row['sort'] = $handle ? $handle->getName() : '~';
@@ -519,6 +577,9 @@ final class ManiphestReportController extends ManiphestController {
     $rows = isort($rows, 'sort');
     foreach ($rows as $k => $row) {
       unset($rows[$k]['sort']);
+    }
+    if ($reverse) {
+      $rows = array_reverse($rows);
     }
 
     $cname = array($col_header);
@@ -553,33 +614,53 @@ final class ManiphestReportController extends ManiphestController {
       ),
       'Oldest (Pri)');
     $cclass[] = 'n';
-    $cname[] = 'Closed Last 7d';
+
+    list($ignored, $window_epoch) = $this->getWindow();
+    $cname[] = javelin_render_tag(
+      'span',
+      array(
+        'sigil' => 'has-tooltip',
+        'meta'  => array(
+          'tip'  => 'Closed after '.phabricator_datetime($window_epoch, $user),
+          'size' => 260
+        ),
+      ),
+      'Recently Closed');
     $cclass[] = 'n';
 
     $table = new AphrontTableView($rows);
     $table->setHeaders($cname);
     $table->setColumnClasses($cclass);
+    $table->makeSortable(
+      $request->getRequestURI(),
+      'order',
+      $order,
+      $reverse,
+      array(
+        'name',
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        'total',
+        'oldest-all',
+        'oldest-pri',
+        'closed',
+      ));
 
     $panel = new AphrontPanelView();
     $panel->setHeader($header);
     $panel->appendChild($table);
 
-    $form = id(new AphrontFormView())
-      ->setUser($user)
-      ->appendChild(
-        id(new AphrontFormToggleButtonsControl())
-          ->setLabel('Order')
-          ->setValue($order)
-          ->setBaseURI($request->getRequestURI(), 'order')
-          ->setButtons(
-            array(
-              'name'  => 'Name',
-              'total' => 'Total',
-            )));
-
-
-    $filter = new AphrontListFilterView();
-    $filter->appendChild($form);
+    $tokens = array();
+    if ($project_handle) {
+      $tokens = array(
+        $project_handle->getPHID() => $project_handle->getFullName(),
+      );
+    }
+    $filter = $this->renderReportFilters($tokens, $has_window = true);
 
     return array($filter, $panel);
   }
@@ -589,7 +670,7 @@ final class ManiphestReportController extends ManiphestController {
    * Load all the tasks that have been recently closed.
    */
   private function loadRecentlyClosedTasks() {
-    $recent_window = (60 * 60 * 24 * 7);
+    list($ignored, $window_epoch) = $this->getWindow();
 
     $table = new ManiphestTask();
     $xtable = new ManiphestTransaction();
@@ -613,10 +694,53 @@ final class ManiphestReportController extends ManiphestController {
       json_encode((int)ManiphestTaskStatus::STATUS_OPEN),
       json_encode((string)ManiphestTaskStatus::STATUS_OPEN),
 
-      (time() - $recent_window),
-      (time() - $recent_window));
+      $window_epoch,
+      $window_epoch);
 
     return id(new ManiphestTask())->loadAllFromArray($tasks);
+  }
+
+  /**
+   * Parse the "Recently Means" filter into:
+   *
+   *    - A string representation, like "12 AM 7 days ago" (default);
+   *    - a locale-aware epoch representation; and
+   *    - a possible error.
+   */
+  private function getWindow() {
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $window_str = $this->getRequest()->getStr('window', '12 AM 7 days ago');
+
+    $error = null;
+    $window_epoch = null;
+
+    // Do locale-aware parsing so that the user's timezone is assumed for
+    // time windows like "3 PM", rather than assuming the server timezone.
+
+    $timezone = new DateTimeZone($user->getTimezoneIdentifier());
+    try {
+      $date = new DateTime($window_str, $timezone);
+      $window_epoch = $date->format('U');
+    } catch (Exception $e) {
+      $error = 'Invalid';
+      $window_epoch = time() - (60 * 60 * 24 * 7);
+    }
+
+    // If the time ends up in the future, convert it to the corresponding time
+    // and equal distance in the past. This is so users can type "6 days" (which
+    // means "6 days from now") and get the behavior of "6 days ago", rather
+    // than no results (because the window epoch is in the future). This might
+    // be a little confusing because it casues "tomorrow" to mean "yesterday"
+    // and "2022" (or whatever) to mean "ten years ago", but these inputs are
+    // nonsense anyway.
+
+    if ($window_epoch > time()) {
+      $window_epoch = time() - ($window_epoch - time());
+    }
+
+    return array($window_str, $window_epoch, $error);
   }
 
   private function renderOldest(array $tasks) {
@@ -634,11 +758,10 @@ final class ManiphestReportController extends ManiphestController {
 
     $oldest = $tasks[$oldest];
 
-    $age = (time() - $oldest->getDateCreated());
-    $age = number_format($age / (24 * 60 * 60)).' d';
-    $age = phutil_escape_html($age);
+    $raw_age = (time() - $oldest->getDateCreated());
+    $age = number_format($raw_age / (24 * 60 * 60)).' d';
 
-    return javelin_render_tag(
+    $link = javelin_render_tag(
       'a',
       array(
         'href'  => '/T'.$oldest->getID(),
@@ -648,7 +771,9 @@ final class ManiphestReportController extends ManiphestController {
         ),
         'target' => '_blank',
       ),
-      $age);
+      phutil_escape_html($age));
+
+    return array($link, $raw_age);
   }
 
 }
