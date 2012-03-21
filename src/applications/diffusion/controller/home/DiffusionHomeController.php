@@ -127,7 +127,7 @@ final class DiffusionHomeController extends DiffusionController {
         'Repository',
         'Description',
         'VCS',
-        'Size',
+        'Commits',
         'Last',
         'Date',
         'Time',
