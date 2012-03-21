@@ -45,10 +45,13 @@ final class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
   }
 
   public function getURI() {
-    return DiffusionRequest::generateDiffusionURI(
+    $request = DiffusionRequest::newFromDictionary(
+      array(
+        'repository'  => $this->getRepository(),
+      ));
+    return $request->generateURI(
       array(
         'action'    => 'browse',
-        'callsign'  => $this->getRepository()->getCallsign(),
         'path'      => $this->getPath(),
         'line'      => $this->getLineNumber(),
       ));

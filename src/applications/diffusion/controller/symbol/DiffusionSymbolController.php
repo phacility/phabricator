@@ -145,7 +145,6 @@ final class DiffusionSymbolController extends DiffusionController {
         '',
         '',
         '',
-        'n'
       ));
     $table->setNoDataString(
       "No matching symbol could be found in any indexed project.");
