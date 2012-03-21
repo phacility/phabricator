@@ -284,10 +284,8 @@ final class ManiphestTransactionEditor {
   }
 
   public function buildReplyHandler(ManiphestTask $task) {
-    $handler_class = PhabricatorEnv::getEnvConfig(
+    $handler_object = PhabricatorEnv::newObjectFromConfig(
       'metamta.maniphest.reply-handler');
-
-    $handler_object = newv($handler_class, array());
     $handler_object->setMailReceiver($task);
 
     return $handler_object;

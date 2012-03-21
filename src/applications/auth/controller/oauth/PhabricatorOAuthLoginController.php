@@ -206,9 +206,8 @@ final class PhabricatorOAuthLoginController
       return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
-    $class = PhabricatorEnv::getEnvConfig('controller.oauth-registration');
-    PhutilSymbolLoader::loadClass($class);
-    $controller = newv($class, array($this->getRequest()));
+    $key = 'controller.oauth-registration';
+    $controller = PhabricatorEnv::newObjectFromConfig($key);
 
     $controller->setOAuthProvider($provider);
     $controller->setOAuthInfo($oauth_info);

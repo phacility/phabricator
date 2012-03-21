@@ -106,9 +106,7 @@ $path = $_REQUEST['__path__'];
 switch ($host) {
   default:
     $config_key = 'aphront.default-application-configuration-class';
-    $config_class = PhabricatorEnv::getEnvConfig($config_key);
-    PhutilSymbolLoader::loadClass($config_class);
-    $application = newv($config_class, array());
+    $application = PhabricatorEnv::newObjectFromConfig($config_key);
     break;
 }
 

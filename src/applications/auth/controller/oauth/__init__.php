@@ -20,7 +20,6 @@ phutil_require_module('phabricator', 'view/dialog');
 
 phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'parser/uri');
-phutil_require_module('phutil', 'symbols');
 phutil_require_module('phutil', 'utils');
 
 

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,7 @@ abstract class PhabricatorSearchEngineSelector {
   abstract public function newEngine();
 
   final public static function newSelector() {
-    $class = PhabricatorEnv::getEnvConfig('search.engine-selector');
-    return newv($class, array());
+    return PhabricatorEnv::newObjectFromConfig('search.engine-selector');
   }
 
 }

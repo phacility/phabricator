@@ -247,9 +247,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
 
   public function buildDefaultMailer() {
-    $class_name = PhabricatorEnv::getEnvConfig('metamta.mail-adapter');
-    PhutilSymbolLoader::loadClass($class_name);
-    return newv($class_name, array());
+    return PhabricatorEnv::newObjectFromConfig('metamta.mail-adapter');
   }
 
   /**

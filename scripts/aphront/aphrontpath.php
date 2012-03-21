@@ -30,8 +30,7 @@ $url = parse_url($argv[1]);
 $path = '/'.(isset($url['path']) ? ltrim($url['path'], '/') : '');
 
 $config_key = 'aphront.default-application-configuration-class';
-$config_class = PhabricatorEnv::getEnvConfig($config_key);
-$application = newv($config_class, array());
+$application = PhabricatorEnv::newObjectFromConfig($config_key);
 $mapper = new AphrontURIMapper($application->getURIMap());
 
 list($controller) = $mapper->mapPath($path);

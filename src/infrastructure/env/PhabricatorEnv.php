@@ -23,7 +23,17 @@ final class PhabricatorEnv {
   private static $env;
 
   private static $requiredClasses = array(
+    'metamta.mail-adapter' => 'PhabricatorMailImplementationAdapter',
+    'metamta.maniphest.reply-handler' => 'PhabricatorMailReplyHandler',
     'metamta.differential.reply-handler' => 'PhabricatorMailReplyHandler',
+    'metamta.diffusion.reply-handler' => 'PhabricatorMailReplyHandler',
+    'storage.engine-selector' => 'PhabricatorFileStorageEngineSelector',
+    'search.engine-selector' => 'PhabricatorSearchEngineSelector',
+    'differential.field-selector' => 'DifferentialFieldSelector',
+    'maniphest.custom-task-extensions-class' => 'ManiphestTaskExtensions',
+    'aphront.default-application-configuration-class' =>
+      'AphrontApplicationConfiguration',
+    'controller.oauth-registration' => 'PhabricatorOAuthRegistrationController',
   );
 
   public static function setEnvConfig(array $config) {

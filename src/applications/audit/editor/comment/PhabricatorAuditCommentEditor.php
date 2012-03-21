@@ -267,9 +267,8 @@ final class PhabricatorAuditCommentEditor {
   }
 
   public static function newReplyHandlerForCommit($commit) {
-    $handler_class = PhabricatorEnv::getEnvConfig(
+    $reply_handler = PhabricatorEnv::newObjectFromConfig(
       'metamta.diffusion.reply-handler');
-    $reply_handler = newv($handler_class, array());
     $reply_handler->setMailReceiver($commit);
     return $reply_handler;
   }

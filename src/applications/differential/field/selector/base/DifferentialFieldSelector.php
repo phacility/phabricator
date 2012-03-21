@@ -23,9 +23,7 @@ abstract class DifferentialFieldSelector {
   }
 
   final public static function newSelector() {
-    $class = PhabricatorEnv::getEnvConfig('differential.field-selector');
-    $selector = newv($class, array());
-    return $selector;
+    return PhabricatorEnv::newObjectFromConfig('differential.field-selector');
   }
 
   abstract public function getFieldSpecifications();

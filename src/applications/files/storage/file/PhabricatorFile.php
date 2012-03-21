@@ -84,8 +84,7 @@ final class PhabricatorFile extends PhabricatorFileDAO {
 
   public static function newFromFileData($data, array $params = array()) {
 
-    $selector_class = PhabricatorEnv::getEnvConfig('storage.engine-selector');
-    $selector = newv($selector_class, array());
+    $selector = PhabricatorEnv::newObjectFromConfig('storage.engine-selector');
 
     $engines = $selector->selectStorageEngines($data, $params);
     if (!$engines) {
