@@ -279,12 +279,17 @@ abstract class DiffusionRequest {
       $default_commit = $this->getStableCommitName();
     }
 
-    $params += array(
+    $defaults = array(
       'callsign'  => $this->getCallsign(),
       'path'      => $this->getPath(),
       'branch'    => $this->getBranch(),
       'commit'    => $default_commit,
     );
+    foreach ($defaults as $key => $val) {
+      if (!isset($params[$key])) { // Overwrite NULL.
+        $params[$key] = $val;
+      }
+    }
     return self::generateDiffusionURI($params);
   }
 
