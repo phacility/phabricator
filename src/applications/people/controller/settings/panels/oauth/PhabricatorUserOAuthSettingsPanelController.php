@@ -182,13 +182,15 @@ final class PhabricatorUserOAuthSettingsPanelController
     $provider     = $this->provider;
     $error        = false;
     $userinfo_uri = new PhutilURI($provider->getUserInfoURI());
+    $token        = $oauth_info->getToken();
     try {
       $userinfo_uri->setQueryParams(
         array(
-          'access_token' => $oauth_info->getToken(),
+          'access_token' => $token,
         ));
       $user_data = @file_get_contents($userinfo_uri);
       $provider->setUserData($user_data);
+      $provider->setAccessToken($token);
       $image = $provider->retrieveUserProfileImage();
       if ($image) {
         $file = PhabricatorFile::newFromFileData(
