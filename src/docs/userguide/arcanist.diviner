@@ -1,11 +1,12 @@
 @title Arcanist User Guide
 @group userguide
 
-Guide to Arcanist, a command-line tool for code review and revision management.
+Guide to Arcanist, a command-line interface to Phabricator.
 
-Arcanists glues together several other tools, like Differential and lint. It
-also serves as the CLI to Phabricator, and is used to get changesets into
-Differential for review.
+Arcanists provides command-line access to many Phabricator tools (like
+Differential, Files, and Paste), integrates with static analysis ("lint") and
+unit tests, and manages common workflows like getting changes into Differential
+for review.
 
 A detailed command reference is available by running ##arc help##. This
 document provides a high level overview of common workflows.
@@ -30,13 +31,18 @@ Arcanist allows you to do things like:
   - download a patch from Differential with ##arc export##
   - update Git commit messages after review with ##arc amend##
   - commit SVN changes with ##arc commit##
-  - merge Git and Mercurial changes with ##arc merge##
+  - push Git changes with ##arc land##
   - view enhanced information about Git branches with ##arc branch##
 
 Once you've configured lint and unit test integration, you can also:
 
   - check your code for syntax and style errors with ##arc lint##
   - run unit tests that cover your changes with ##arc unit##
+
+Arcanist integrates with other tools:
+
+  - upload and download files with ##arc upload## and ##arc download##
+  - create and view pastes with ##arc paste##
 
 Arcanist has some advanced features as well, you can:
 
@@ -53,14 +59,61 @@ SVN repositories.
 
 = Installing Arcanist =
 
-Arcanist is meant to be installed on your local machine or development server,
-i.e. whatever machine you're editing code on. It runs on Linux and Mac OS X;
-To install it, clone it and libphutil off github:
+Arcanist is meant to be installed on your local machine or development server --
+whatever machine you're editing code on. It runs on Linux, Mac OS X, and
+Windows (see @{article:Arcanist User Guide: Windows}).
 
-  somewhere/ $ git clone git://github.com/facebook/libphutil.git
-  somewhere/ $ git clone git://github.com/facebook/arcanist.git
+Arcanist is written in PHP, so you need to install the PHP CLI first if you
+don't already have it. Arcanist should run on PHP 5.2 and newer. If you don't
+have PHP installed, you can download it from <http://www.php.net/>.
 
-Now add ##somewhere/arcanist/bin/arc## to your path.
+To install Arcanist, pick an install directory and clone the code from GitHub:
+
+  some_install_path/ $ git clone git://github.com/facebook/libphutil.git
+  some_install_path/ $ git clone git://github.com/facebook/arcanist.git
+
+This should leave you with a directory structure like this
+
+  some_install_path/    # Wherever you chose to install it.
+    arcanist/           # Arcanist-specific code and libraries.
+    libphutil/          # A shared library Arcanist depends upon.
+
+Now add ##some_install_path/arcanist/bin/## to your PATH environment variable.
+When you type "arc", you should see something like this:
+
+  Usage Exception: No command provided. Try 'arc help'.
+
+If you get that far, you've done things correctly. If you get an error or have
+trouble getting this far, see these detailed guides:
+
+  - On Windows: @{Arcanist User Guide: Windows}
+  - On Mac OS X: @{Arcanist User Guide: Mac OS X}
+
+The code changes quickly, so remember to update regularly, by running
+`git pull` on the two directories:
+
+  some_install_path/arcanist/ $ git pull
+  some_install_path/libphutil/ $ git pull
+
+== Installing Arcanist for a Team ==
+
+Arcanist changes quickly and doesn't currently have an auto-update mechanism,
+so it can be something of a headache to get it installed and keep people up to
+date. Here are some approaches you might be able to use:
+
+  - Facebook does most development on development servers, which have a standard
+    environment and NFS mounts. Arcanist and libphutil themselves live on an
+    NFS mount, and the default `.bashrc` adds them to the PATH. Updating the
+    mount source updates everyone's versions, and new employees have a working
+    `arc` when they first log in.
+  - Another common approach is to write an install script as an action into
+    existing build scripts, so users can run `make install-arc` or
+    `ant install-arc` or similar.
+  - In general, if this sucks and is causing you pain, let us know (see
+    @{article:Give Feedback! Get Support!}). We're planning to improve this at
+    some point, but it's somewhat complicated to get right. While it can take a
+    little time to set up, we aren't getting feedback that it's a persistent
+    pain point, so it hasn't been a priority.
 
 == Installing Tab Completion ==
 

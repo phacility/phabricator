@@ -50,3 +50,52 @@ Other options include:
   - **copyright_holder**: used by @{class@arcanist:ArcanistLicenseLinter} to
     apply license notices to source files.
   - **phutil_libraries**: map of additional Phutil libraries to load at startup.
+    See below for details about path resolution, or see
+    @{article:libphutil Libraries User Guide} for a general introduction to
+    libphutil libraries.
+
+= How Libraries Are Located =
+
+If you specify an external library to load, like 'examplelib', and use a
+relative path like this:
+
+  {
+    ...
+    "load_libraries": {
+      "examplelib" : "examplelib/src"
+    },
+    ...
+  }
+
+...arc looks for it by trying these paths:
+
+  - `path/to/root/examplelib/src/` First, arc looks in the project's root
+    directory (where the .arcconfig lives) to see if the library is part of
+    the project. This makes it easy to just put project-specific code in a
+    project.
+  - `path/to/root/../examplelib/src/` Next, arc looks //next to// the project's
+    root directory to see if the library is in a sibling directory. If you
+    work with several repositories, this makes it easy to put all the `arc`
+    code in one repository and just check it out in the same directory as
+    everything else.
+  - `php/include/path/examplelib/src` Finally, arc falls back to PHP, which
+    will look in paths described in the `include_path` php.ini setting. This
+    allows you to install libraries in some global location if you prefer.
+
+You can alternately supply an absolute path, like `/var/arc/examplelib/src`, but
+then everyone will need to install the library at that exact location.
+
+NOTE: Specify the path to the directory which includes
+`__phutil_library_init__.php`. For example, if your init file is in
+`examplelib/src/__phutil_library_init__.php`, specify `examplelib/src`,
+not just `examplelib/`.
+
+The general intent here is:
+
+  - Put project-specific code in some directory in the project, like
+    `support/arc/src/`.
+  - Put shared code (e.g., which enforces general coding standards or hooks
+    up to unit tests or whatever) in a separate repository and check it out
+    next to other repositories.
+  - Or put everything in some standard location and add it to `include_path`.
+
