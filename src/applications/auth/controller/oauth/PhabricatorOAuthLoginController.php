@@ -207,7 +207,9 @@ final class PhabricatorOAuthLoginController
     }
 
     $key = 'controller.oauth-registration';
-    $controller = PhabricatorEnv::newObjectFromConfig($key);
+    $controller = PhabricatorEnv::newObjectFromConfig(
+      $key,
+      array($this->getRequest()));
 
     $controller->setOAuthProvider($provider);
     $controller->setOAuthInfo($oauth_info);
