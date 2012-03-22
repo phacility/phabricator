@@ -53,6 +53,11 @@ final class PhabricatorTypeaheadCommonDatasourceController
         $need_users = true;
         $need_lists = true;
         break;
+      case 'allmailable':
+        $need_users = true;
+        $need_all_users = true;
+        $need_lists = true;
+        break;
       case 'projects':
         $need_projs = true;
         break;

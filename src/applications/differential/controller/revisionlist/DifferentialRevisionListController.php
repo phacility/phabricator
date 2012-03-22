@@ -53,12 +53,20 @@ final class DifferentialRevisionListController extends DifferentialController {
     if ($phid_arr) {
       $view_user = id(new PhabricatorUser())
         ->loadOneWhere('phid = %s', head($phid_arr));
-      if (!$view_user) {
-        return new Aphront404Response();
+
+      $base_uri = '/differential/filter/'.$this->filter.'/';
+      if ($view_user) {
+        // This is a user, so generate a pretty URI.
+        $uri = $base_uri.phutil_escape_uri($view_user->getUserName()).'/';
+      } else {
+        // We're assuming this is a mailing list, generate an ugly URI.
+        $uri = $base_uri;
+        $params['phid'] = head($phid_arr);
       }
-      $uri = id(new PhutilURI('/differential/filter/'.$this->filter.'/'.
-        phutil_escape_uri($view_user->getUserName()).'/'))
-        ->setQueryParams($params);
+
+      $uri = new PhutilURI($uri);
+      $uri->setQueryParams($params);
+
       return id(new AphrontRedirectResponse())->setURI($uri);
     }
 
@@ -75,6 +83,11 @@ final class DifferentialRevisionListController extends DifferentialController {
       $username = phutil_escape_uri($this->username).'/';
       $uri->setPath('/differential/filter/'.$this->filter.'/'.$username);
       $params['phid'] = $view_user->getPHID();
+    } else {
+      $phid = $request->getStr('phid');
+      if (strlen($phid)) {
+        $params['phid'] = $phid;
+      }
     }
 
     // Fill in the defaults we'll actually use for calculations if any
@@ -278,7 +291,7 @@ final class DifferentialRevisionListController extends DifferentialController {
       'active'      => array('phid'),
       'revisions'   => array('phid', 'status', 'order'),
       'reviews'     => array('phid', 'status', 'order'),
-      'subscribed'  => array('phid', 'status', 'order'),
+      'subscribed'  => array('subscriber', 'status', 'order'),
       'drafts'      => array('phid', 'status', 'order'),
       'all'         => array('status', 'order'),
     );
@@ -325,6 +338,7 @@ final class DifferentialRevisionListController extends DifferentialController {
     PhutilURI $uri,
     array $params) {
     switch ($control) {
+      case 'subscriber':
       case 'phid':
         $view_phid = $params['phid'];
         $value = array();
@@ -333,9 +347,18 @@ final class DifferentialRevisionListController extends DifferentialController {
             $view_phid => $handles[$view_phid]->getFullName(),
           );
         }
+
+        if ($control == 'subscriber') {
+          $source = '/typeahead/common/allmailable/';
+          $label = 'View Subscriber';
+        } else {
+          $source = '/typeahead/common/accounts/';
+          $label  = 'View User';
+        }
+
         return id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/users/')
-          ->setLabel('View User')
+          ->setDatasource($source)
+          ->setLabel($label)
           ->setName('view_user')
           ->setValue($value)
           ->setLimit(1);
@@ -369,6 +392,7 @@ final class DifferentialRevisionListController extends DifferentialController {
   private function applyControlToQuery($control, $query, array $params) {
     switch ($control) {
       case 'phid':
+      case 'subscriber':
         // Already applied by query construction.
         break;
       case 'status':
