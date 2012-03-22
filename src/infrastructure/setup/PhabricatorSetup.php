@@ -734,6 +734,22 @@ final class PhabricatorSetup {
       self::write("[OKAY] Mail configuration OKAY\n");
     }
 
+    self::writeHeader('CONFIG CLASSES');
+    foreach (PhabricatorEnv::getRequiredClasses() as $key => $class) {
+      if (!PhabricatorEnv::getEnvConfig($key)) {
+        self::writeNote("'$key' is not set.");
+      } else {
+        try {
+          PhabricatorEnv::newObjectFromConfig($key);
+        } catch (Exception $ex) {
+          self::writeFailure();
+          self::write("Setup failure! ".$ex->getMessage());
+          return;
+        }
+      }
+    }
+    self::write("[OKAY] Config classes OKAY\n");
+
     self::writeHeader('SUCCESS!');
     self::write(
       "Congratulations! Your setup seems mostly correct, or at least fairly ".

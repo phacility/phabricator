@@ -22,21 +22,6 @@
 final class PhabricatorEnv {
   private static $env;
 
-  private static $requiredClasses = array(
-    'metamta.mail-adapter' => 'PhabricatorMailImplementationAdapter',
-    'metamta.maniphest.reply-handler' => 'PhabricatorMailReplyHandler',
-    'metamta.differential.reply-handler' => 'PhabricatorMailReplyHandler',
-    'metamta.diffusion.reply-handler' => 'PhabricatorMailReplyHandler',
-    'storage.engine-selector' => 'PhabricatorFileStorageEngineSelector',
-    'search.engine-selector' => 'PhabricatorSearchEngineSelector',
-    'differential.field-selector' => 'DifferentialFieldSelector',
-    'maniphest.custom-task-extensions-class' => 'ManiphestTaskExtensions',
-    'aphront.default-application-configuration-class' =>
-      'AphrontApplicationConfiguration',
-    'controller.oauth-registration' => 'PhabricatorOAuthRegistrationController',
-    'differential.attach-task-class' => 'DifferentialTasksAttacher',
-  );
-
   public static function setEnvConfig(array $config) {
     self::$env = $config;
   }
@@ -48,12 +33,30 @@ final class PhabricatorEnv {
   public static function newObjectFromConfig($key, $args = array()) {
     $class = self::getEnvConfig($key);
     $object = newv($class, $args);
-    $instanceof = idx(self::$requiredClasses, $key);
+    $instanceof = idx(self::getRequiredClasses(), $key);
     if (!($object instanceof $instanceof)) {
       throw new Exception("Config setting '$key' must be an instance of ".
         "'$instanceof', is '".get_class($object)."'.");
     }
     return $object;
+  }
+
+  public static function getRequiredClasses() {
+    return array(
+      'metamta.mail-adapter' => 'PhabricatorMailImplementationAdapter',
+      'metamta.maniphest.reply-handler' => 'PhabricatorMailReplyHandler',
+      'metamta.differential.reply-handler' => 'PhabricatorMailReplyHandler',
+      'metamta.diffusion.reply-handler' => 'PhabricatorMailReplyHandler',
+      'storage.engine-selector' => 'PhabricatorFileStorageEngineSelector',
+      'search.engine-selector' => 'PhabricatorSearchEngineSelector',
+      'differential.field-selector' => 'DifferentialFieldSelector',
+      'maniphest.custom-task-extensions-class' => 'ManiphestTaskExtensions',
+      'aphront.default-application-configuration-class' =>
+        'AphrontApplicationConfiguration',
+      'controller.oauth-registration' =>
+        'PhabricatorOAuthRegistrationController',
+      'differential.attach-task-class' => 'DifferentialTasksAttacher',
+    );
   }
 
   public static function envConfigExists($key) {
