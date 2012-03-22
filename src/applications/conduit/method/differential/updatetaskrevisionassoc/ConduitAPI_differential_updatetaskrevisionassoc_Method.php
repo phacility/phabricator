@@ -57,18 +57,16 @@ final class ConduitAPI_differential_updatetaskrevisionassoc_Method
       $new_rev_phids = array();
     }
 
-    $task_class = PhabricatorEnv::getEnvConfig(
-      'differential.attach-task-class');
-    if (!$task_class) {
+    try {
+      $task_attacher = PhabricatorEnv::newObjectFromConfig(
+        'differential.attach-task-class');
+      $task_attacher->updateTaskRevisionAssoc(
+        $task_phid,
+        $orig_rev_phids,
+        $new_rev_phids);
+    } catch (ReflectionException $ex) {
       throw new ConduitException('ERR_NO_TASKATTACHER_DEFINED');
     }
-
-    PhutilSymbolLoader::loadClass($task_class);
-    $task_attacher = newv($task_class, array());
-    $task_attacher->updateTaskRevisionAssoc(
-      $task_phid,
-      $orig_rev_phids,
-      $new_rev_phids);
   }
 
 }

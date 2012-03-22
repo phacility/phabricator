@@ -10,8 +10,5 @@ phutil_require_module('phabricator', 'applications/conduit/method/base');
 phutil_require_module('phabricator', 'applications/conduit/protocol/exception');
 phutil_require_module('phabricator', 'infrastructure/env');
 
-phutil_require_module('phutil', 'symbols');
-phutil_require_module('phutil', 'utils');
-
 
 phutil_require_source('ConduitAPI_differential_updatetaskrevisionassoc_Method.php');

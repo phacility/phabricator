@@ -34,6 +34,7 @@ final class PhabricatorEnv {
     'aphront.default-application-configuration-class' =>
       'AphrontApplicationConfiguration',
     'controller.oauth-registration' => 'PhabricatorOAuthRegistrationController',
+    'differential.attach-task-class' => 'DifferentialTasksAttacher',
   );
 
   public static function setEnvConfig(array $config) {
