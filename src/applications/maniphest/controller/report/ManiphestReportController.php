@@ -753,7 +753,7 @@ final class ManiphestReportController extends ManiphestController {
     }
 
     if ($oldest === null) {
-      return '-';
+      return array('-', 0);
     }
 
     $oldest = $tasks[$oldest];

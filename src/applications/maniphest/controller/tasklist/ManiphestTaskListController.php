@@ -452,14 +452,14 @@ final class ManiphestTaskListController extends ManiphestController {
             $out['Unassigned'] = $tasks;
           }
         }
-        if (isset($out['Unassigned'])) {
-          // If any tasks are unassigned, move them to the front of the list.
-          $data = array('Unassigned' => $out['Unassigned']) + $out;
-        } else {
-          $data = $out;
-        }
 
+        $data = $out;
         ksort($data);
+
+        // Move "Unassigned" to the top of the list.
+        if (isset($data['Unassigned'])) {
+          $data = array('Unassigned' => $out['Unassigned']) + $out;
+        }
         break;
       case 'project':
         $grouped = array();
@@ -480,6 +480,14 @@ final class ManiphestTaskListController extends ManiphestController {
           }
         }
         $data = $grouped;
+        ksort($data);
+
+        // Move "No Project" to the end of the list.
+        if (isset($data['No Project'])) {
+          $noproject = $data['No Project'];
+          unset($data['No Project']);
+          $data += array('No Project' => $noproject);
+        }
         break;
       default:
         $data = array(
