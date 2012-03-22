@@ -58,19 +58,16 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
   }
 
   public function getDiffusionBrowseURIForPath($path) {
-    switch ($this->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $branch = '/'.$this->getDetail('default-branch');
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        $branch = null;
-        break;
-      default:
-        throw new Exception("Unknown VCS.");
-    }
+    $drequest = DiffusionRequest::newFromDictionary(
+      array(
+        'repository' => $this,
+        'path'       => $path,
+      ));
 
-    return '/diffusion/'.$this->getCallsign().'/browse'.$branch.$path;
+    return $drequest->generateURI(
+      array(
+        'action' => 'browse',
+      ));
   }
 
   public static function newPhutilURIFromGitURI($raw_uri) {
