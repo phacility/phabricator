@@ -228,7 +228,7 @@ final class DifferentialChangesetParser {
         'text'  => (string)substr($lines[$cursor], 1),
         'line'  => $new_line,
       );
-      if ($type == '\\' && $cursor > 1) {
+      if ($type == '\\') {
         $type = $types[$cursor - 1];
         $data['text'] = ltrim($data['text']);
       }
@@ -338,9 +338,14 @@ final class DifferentialChangesetParser {
             break;
         }
         if ($similar) {
-          $o_desc['type'] = null;
-          $n_desc['type'] = null;
-          $skip_intra[count($old)] = true;
+          if ($o_desc['type'] == '\\') {
+            // These are similar because they're "No newline at end of file"
+            // comments.
+          } else {
+            $o_desc['type'] = null;
+            $n_desc['type'] = null;
+            $skip_intra[count($old)] = true;
+          }
         } else {
           $changed = true;
         }

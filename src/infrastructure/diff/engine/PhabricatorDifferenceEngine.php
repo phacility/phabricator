@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,14 +127,38 @@ final class PhabricatorDifferenceEngine {
       foreach ($entire_file as $k => $line) {
         $entire_file[$k] = ' '.$line;
       }
+
       $len = count($entire_file);
       $entire_file = implode("\n", $entire_file);
+
+      // TODO: If both files were identical but missing newlines, we probably
+      // get this wrong. Unclear if it ever matters.
 
       // This is a bit hacky but the diff parser can handle it.
       $diff = "--- {$old_name}\n".
               "+++ {$new_name}\n".
               "@@ -1,{$len} +1,{$len} @@\n".
               $entire_file."\n";
+    } else {
+      if ($this->ignoreWhitespace) {
+
+        // Under "-bw", `diff` is inconsistent about emitting "\ No newline
+        // at end of file". For instance, a long file with a change in the
+        // middle will emit a contextless "\ No newline..." at the end if a
+        // newline is removed, but not if one is added. A file with a change
+        // at the end will emit the "old" "\ No newline..." block only, even
+        // if the newline was not removed. Since we're ostensibly ignoring
+        // whitespace changes, just drop these lines if they appear anywhere
+        // in the diff.
+
+        $lines = explode("\n", rtrim($diff));
+        foreach ($lines as $key => $line) {
+          if (isset($line[0]) && $line[0] == '\\') {
+            unset($lines[$key]);
+          }
+        }
+        $diff = implode("\n", $lines);
+      }
     }
 
     return $diff;
