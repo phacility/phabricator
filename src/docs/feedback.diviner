@@ -1,0 +1,59 @@
+@title Give Feedback! Get Support!
+@group intro
+
+How to give us feedback, report bugs, and request features, and get support for
+problems with Phabricator.
+
+= Overview =
+
+We'd love to hear your feedback about Phabricator, whether it's good or bad. We
+stay on top of bug reports and fix many of them within a day or two (and
+sometimes within hours). The Phabricator roadmap is determined in large part by
+user feedback and feature requests. Your feedback matters, will often have an
+immediate short-term impact, and the project leads are actively listening to it.
+
+We also try to provide a very high level of free support. If you have trouble
+with anything or just don't understand how something works, ask us! We're happy
+to help, and it's usually valuable for us because we can prevent the problem
+in the code (or document it better) so future users don't hit it.
+
+Some day we will no doubt grow callous and distant, but for now the community
+is small enough that we can provide a high level of service and support to
+everyone and still have plenty of time to write code.
+
+If you're in the SF bay area, we're also happy to come onsite and help you set
+things up, answer any questions you might have, or just hang out and tell
+Facebook war stories.
+
+The best ways to provide feedback are:
+
+= Maniphest =
+
+The best way to report bugs and request features is through
+[[http://secure.phabricator.com/maniphest/task/create/ | Maniphest]]. Just file
+the bug/request and we'll handle everything else. (If it's time-sensitive or
+blocking you, feel free to assign it to `epriestley`.) Feel free to file support
+requests, general questions, or random feedback this way, too.
+
+= GitHub Issues =
+
+You can also use
+[[https://github.com/facebook/phabricator/issues/new | GitHub Issues]] if you
+prefer.
+
+= IRC =
+
+We're active in #phabricator on FreeNode, and it's the best place to ask
+questions and get support.
+
+= Email =
+
+You can email us at `btrahan@phacility.com` and `epriestley@phacility.com`.
+
+= Next Steps =
+
+Continue by:
+
+  - Filing a bug of feature request in
+    [[http://secure.phabricator.com/maniphest/task/create/ | Maniphest]]; or
+  - contributing to Phabricator with @{article:Contibutor Introduction}.

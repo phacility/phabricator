@@ -1,0 +1,68 @@
+@title Differential User Guide
+@group userguide
+
+Guide to the Differential (pre-push code review) tool and workflow.
+
+= Overview =
+
+Phabricator supports two code review workflows, "review" (pre-push) and
+"audit" (post-push). To understand the differences between the two, see
+@{article:User Guide: Review vs Audit}.
+
+This document summarizes the pre-push "review" workflow implemented by the tool
+//Differential//.
+
+= How Review Works =
+
+Code review in Phabricator is a lightweight, asynchronous web-based process. If
+you are familiar with GitHub, it is similar to how pull requests work:
+
+  - An author prepares a change to a codebase, then sends it for review. They
+    specify who they want to review it (additional users may be notified as
+    well, see below). The change itself is called a "Differential Revision".
+  - The reviewers receive an email asking them to review the change.
+  - The reviewers inspect the change and either discuss it, approve it, or
+    request changes (e.g., if they identify problems or bugs).
+  - In response to feedback, the author may update the change (e.g., fixing
+    the bugs or addressing the problems).
+  - Once everything is satisfied, some reviewer accepts the change and the
+    author pushes it to the upstream.
+
+The Differential home screen shows two sets of revisions:
+
+  - **Action Required** is revisions you are the author of or a reviewer for,
+    which you need to review, revise, or push.
+  - **Waiting on Others** is revisions you are the author of or a reviewer for,
+    which someone else needs to review, revise, or push.
+
+= Creating Revisions =
+
+The preferred way to create revisions in Differential is with `arc`
+(see @{article:Arcanist User Guide}). You can also create revisions from the
+web interface, by navigating to Differential, pressing the "Create Revision"
+button, and pasting a diff in.
+
+= Herald Rules =
+
+If you're interested in keeping track of changes to certain parts of a codebase
+(e.g., maybe changes to a feature or changes in a certain language, or there's
+just some intern who you don't trust) you can write a Herald rule to
+automatically CC you on any revisions which match rules (like content, author,
+files affected, etc.)
+
+= Differential Tips =
+
+  - You can leave inline comments by clicking the line numbers in the diff.
+  - You can leave a comment across multiple lines by dragging across the line
+    numbers.
+  - Inline comments are initially saved as drafts. They are not submitted until
+    you submit a comment at the bottom of the page.
+  - Press "?" to view keyboard shortcuts.
+
+= Next Steps =
+
+  - Read the FAQ at @{article:Differential User Guide: FAQ}; or
+  - learn about handling large changesets at
+    @{article:Differential User Guide: Large Changes}; or
+  - learn about test plans at @{article:Differential User Guide: Test Plans}; or
+  - learn more about Herald at @{article:Herald User Guide}.

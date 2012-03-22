@@ -1,0 +1,107 @@
+@title Audit User Guide
+@group userguide
+
+Guide to the Audit (post-push code review) tool and workflow.
+
+= Overview =
+
+Phabricator supports two code review workflows, "review" (pre-push) and
+"audit" (post-push). To understand the differences between the two, see
+@{article:User Guide: Review vs Audit}.
+
+This document summarizes the post-push "audit" workflow implemented by the
+creatively-named //Audit// tool.
+
+NOTE: The audit workflow is new, give us feedback about it! See
+@{article:Give Feedback! Get Support!}.
+
+= How Audit Works =
+
+Using auditing allows you to push and deploy code without waiting for code
+review, while still doing code review eventually. The Audit tool primarily keeps
+track of two things:
+
+  - **Commits** and their audit state (like "Not Audited", "Approved", or
+    "Concern Raised").
+  - **Audit Requests** which ask a user (or some other entity) to audit a
+    commit. These can be triggered in a number of ways (see below).
+
+In the Audit tool's home screen (at `/audit/`) and on the homepage you can see
+commits and requests that require your action:
+
+  - **Required Audits** are open audit requests that require you, a project
+    you are a member of, or a package you own to audit a commit. An audit
+    request is closed when you approve the associated commit.
+  - **Problem Commits** are commits you authored which someone has raised a
+    concern about in audit. Problem commits go away when you satisfy all the
+    auditors and get them to "Approve" the commit.
+
+For example:
+
+  - Evan creates commit `abcdef1234` and pushes it to the remote.
+  - This triggers an audit request to Bob through some mechanism (see below for
+    a description of trigger mechanisms).
+  - Later, Bob logs into Phabricator and sees the audit request on his homepage.
+  - Bob clicks through and examines the commit. He notices a problem, so he
+    selects "Raise Concern" and describes the issue in a comment.
+  - Evan receives an email that Bob has raised a concern about his commit. He
+    opts not to deal with it immediately.
+  - Later, Evan logs into Phabricator and sees the commit on his homepage
+    under "Problem Commits".
+  - Evan resolves the issue somehow (e.g., by discussing it with Bob, or fixing
+    it in another commit).
+  - Now satisfied, Bob "Accepts" the original commit.
+  - This causes the request to disappear from Bob's queue, and the commit to
+    disappear from Evan's queue.
+
+= Audit Triggers =
+
+Audit requests can be triggered in a number of ways:
+
+  - If you put `Auditors: username1, username2` in your commit message, it will
+    trigger an audit request to those users when you push it to a tracked
+    branch.
+  - You can create rules in Herald that trigger audits based on properties
+    of the commit -- like the files it touches, the text of the change, the
+    author, etc.
+  - You can create an audit request for yourself by commenting on any commit.
+  - You can create an Owners package and select "Enable Auditing" (this is an
+    advanced feature which is only likely to be useful for very large teams).
+
+= Audits in Small Teams =
+
+If you have a small team and don't need complicated trigger rules, you can set
+up a simple audit workflow like this:
+
+  - Create a new Project, "Code Audits".
+  - Create a new global Herald rule for Commits, which triggers an audit by
+    the "Code Audits" project for every commit where "Differential Revision"
+    "does not exist" (this will allow you to transition partly or fully to
+    review later if you want).
+  - Have every engineer join the "Code Audits" project.
+
+This way, everyone will see an audit request for every commit, but it will be
+dismissed if anyone approves it. Effectively, this enforces the rule "every
+commit should have //someone// look at it".
+
+Once your team gets bigger, you can refine this ruleset so that developers see
+only changes that are relevant to them.
+
+= Audit Tips =
+
+  - When viewing a commit, audit requests you are responsible for are
+    highlighted. You are responsible for a request if it's a user request
+    and you're that user, or if it's a project request and you're a member
+    of the project, or if it's a package request and you're a package owner.
+    Any action you take will update the state of all the requests you're
+    responsible for.
+  - You can leave inline comments by clicking the line numbers in the diff.
+  - You can leave a comment across multiple lines by dragging across the line
+    numbers.
+  - Inline comments are initially saved as drafts. They are not submitted until
+    you submit a comment at the bottom of the page.
+  - Press "?" to view keyboard shortcuts.
+
+= Next Steps =
+
+  - Learn more about Herald at @{article:Herald User Guide}.

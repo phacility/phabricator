@@ -40,3 +40,23 @@ If authors are being jerks about this (making sweeping changes as soon as they
 get an accept), solve the problem socially by telling them to stop being jerks.
 Unless you've configured additional layers of enforcement, there's nothing
 stopping them from silently changing the code before pushing it, anyway.
+
+= How can I enable syntax highlighting? =
+
+You need to install and configure **Pygments**. Consult the configuration file
+for instructions.
+
+= What do the whitespace options mean? =
+
+Most of these are pretty straightforward, but "Ignore Most" is not:
+
+  - **Show All**: Show all whitespace.
+  - **Ignore Trailing**: Ignore changes which only affect trailing whitespace.
+  - **Ignore Most**: Ignore changes which only affect leading or trailing
+    whitespace (but not whitespace changes between non-whitespace characters)
+    in files which are not marked as having significant whitespace.
+    In those files, show whitespace changes. By default, Python (.py) and
+    Haskell (.lhs, .hs) are marked as having significant whitespace, but this
+    can be changed in the `differential.whitespace-matters` configuration
+    setting.
+  - **Ignore All**: Ignore all whitespace changes in all files.
