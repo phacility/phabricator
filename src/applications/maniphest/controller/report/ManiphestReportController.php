@@ -433,7 +433,7 @@ final class ManiphestReportController extends ManiphestController {
           '(Up For Grabs)');
         $col_header = 'User';
         $header = 'Open Tasks by User and Priority ('.$date.')';
-        $link = '/maniphest/?users=';
+        $base_link = '/maniphest/?users=';
         break;
       case 'project':
         $result = array();
@@ -470,7 +470,7 @@ final class ManiphestReportController extends ManiphestController {
           '(No Project)');
         $col_header = 'Project';
         $header = 'Open Tasks by Project and Priority ('.$date.')';
-        $link = '/maniphest/view/all/?projects=';
+        $base_link = '/maniphest/view/all/?projects=';
         break;
     }
 
@@ -498,7 +498,7 @@ final class ManiphestReportController extends ManiphestController {
         $name = phutil_render_tag(
           'a',
           array(
-            'href' => $link.$handle->getPHID(),
+            'href' => $base_link.$handle->getPHID(),
           ),
           phutil_escape_html($handle->getName()));
         $closed = idx($result_closed, $handle->getPHID(), array());
