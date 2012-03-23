@@ -64,23 +64,27 @@ final class PhabricatorRepositoryCommitHeraldWorker
 
     $xscript = $engine->getTranscript();
 
-    $commit_name = $adapter->getHeraldName();
     $revision = $adapter->loadDifferentialRevision();
-
-    $name = null;
     if ($revision) {
-      $name = ' '.$revision->getTitle();
+      $name = $revision->getTitle();
+    } else {
+      $name = $data->getSummary();
     }
 
     $author_phid = $data->getCommitDetail('authorPHID');
     $reviewer_phid = $data->getCommitDetail('reviewerPHID');
 
-    $phids = array_filter(array($author_phid, $reviewer_phid));
+    $phids = array_filter(
+      array(
+        $author_phid,
+        $reviewer_phid,
+        $commit->getPHID(),
+      ));
 
-    $handles = array();
-    if ($phids) {
-      $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
-    }
+    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+
+    $commit_handle = $handles[$commit->getPHID()];
+    $commit_name = $commit_handle->getName();
 
     if ($author_phid) {
       $author_name = $handles[$author_phid]->getName();
@@ -98,7 +102,7 @@ final class PhabricatorRepositoryCommitHeraldWorker
 
     $description = $data->getCommitMessage();
 
-    $details = PhabricatorEnv::getProductionURI('/'.$commit_name);
+    $commit_uri = PhabricatorEnv::getProductionURI($commit_handle->getURI());
     $differential = $revision
       ? PhabricatorEnv::getProductionURI('/D'.$revision->getID())
       : 'No revision.';
@@ -130,7 +134,7 @@ DESCRIPTION
 {$description}
 
 DETAILS
-  {$details}
+  {$commit_uri}
 
 DIFFERENTIAL REVISION
   {$differential}
@@ -146,7 +150,7 @@ WHY DID I GET THIS EMAIL?
 
 EOBODY;
 
-    $subject = "[Herald/Commit] {$commit_name} ({$who}){$name}";
+    $subject = "[Herald/Commit] {$commit_name} ({$who}) {$name}";
 
     $threading = PhabricatorAuditCommentEditor::getMailThreading(
       $commit->getPHID());
