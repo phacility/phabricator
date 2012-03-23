@@ -45,11 +45,27 @@ final class PhabricatorRemarkupRuleEmbedFile
       'size'    => 'thumb',
       'layout'  => 'left',
       'float'   => false,
+      'name'    => null,
     );
 
     if (!empty($matches[2])) {
       $matches[2] = trim($matches[2], ', ');
       $options = PhutilSimpleOptions::parse($matches[2]) + $options;
+    }
+
+    $file_name = coalesce($options['name'], $file->getName());
+
+    if (!$file->isViewableImage() || $options['layout'] == 'link') {
+      // If a file isn't in image, just render a link to it.
+      $link = phutil_render_tag(
+        'a',
+        array(
+          'href'    => $file->getBestURI(),
+          'target'  => '_blank',
+          'class'   => 'phabricator-remarkup-embed-layout-link',
+        ),
+        phutil_escape_html($file_name));
+      return $this->getEngine()->storeText($link);
     }
 
     switch ($options['size']) {

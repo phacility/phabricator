@@ -296,10 +296,13 @@ You can set file display options like this:
 
 Valid options are:
 
-  - **layout** left (default), center, right, inline
+  - **layout** left (default), center, right, inline, link (render a link
+    instead of a thumbnail for images)
   - **float** If layout is set to left or right, the image will be floated so
     text wraps around it.
   - **size** thumb (default), full
+  - **name** with `layout=link` or for non-images, use this name for the link
+    text
 
 = Embedding Media =
 

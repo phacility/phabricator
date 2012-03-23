@@ -204,6 +204,11 @@
   margin: .5em 1em 0;
 }
 
+.phabricator-remarkup-embed-layout-link {
+  padding-left: 20px;
+  background: url(/rsrc/image/icon/fatcow/page_white_put.png) 0 0 no-repeat;
+}
+
 .phabricator-remarkup-embed-float-left {
   float: left;
   margin: .5em 1em 0;
@@ -211,4 +216,10 @@
 
 img.phabricator-remarkup-embed-image {
   display: inline;
+  border: 2px solid white;
+  background: white;
+
+  box-shadow: 1px 1px 6px rgba(0,0,0,.5);
+  -moz-box-shadow: 1px 1px 6px rgba(0,0,0,.5);
+  -webkit-box-shadow: 1px 1px 6px rgba(0,0,0,.5);
 }
