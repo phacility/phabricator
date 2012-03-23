@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,14 @@ final class DiffusionMercurialHistoryQuery extends DiffusionHistoryQuery {
 
     $repository = $drequest->getRepository();
     $path = $drequest->getPath();
-    $commit_hash = $drequest->getCommit();
+    $commit_hash = $drequest->getStableCommitName();
 
     $path = DiffusionPathIDQuery::normalizePath($path);
+
+    // NOTE: Using '' as a default path produces the correct behavior if HEAD
+    // is a merge commit; using '.' does not (the merge commit is not included
+    // in the log).
+    $default_path = '';
 
     list($stdout) = $repository->execxLocalCommand(
       'log --template %s --limit %d --branch %s --rev %s:0 -- %s',
@@ -33,7 +38,7 @@ final class DiffusionMercurialHistoryQuery extends DiffusionHistoryQuery {
       ($this->getOffset() + $this->getLimit()), // No '--skip' in Mercurial.
       $drequest->getBranch(),
       $commit_hash,
-      nonempty(ltrim($path, '/'), '.'));
+      nonempty(ltrim($path, '/'), $default_path));
 
     $hashes = explode("\n", $stdout);
     $hashes = array_filter($hashes);

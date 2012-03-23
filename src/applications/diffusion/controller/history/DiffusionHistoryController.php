@@ -37,18 +37,6 @@ final class DiffusionHistoryController extends DiffusionController {
 
     $history = $history_query->loadHistory();
 
-    $phids = array();
-    foreach ($history as $item) {
-      $data = $item->getCommitData();
-      if ($data) {
-        if ($data->getCommitDetail('authorPHID')) {
-          $phids[$data->getCommitDetail('authorPHID')] = true;
-        }
-      }
-    }
-    $phids = array_keys($phids);
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
-
     $pager = new AphrontPagerView();
     $pager->setPageSize($page_size);
     $pager->setOffset($offset);
@@ -87,8 +75,11 @@ final class DiffusionHistoryController extends DiffusionController {
 
     $history_table = new DiffusionHistoryTableView();
     $history_table->setDiffusionRequest($drequest);
-    $history_table->setHandles($handles);
     $history_table->setHistory($history);
+
+    $phids = $history_table->getRequiredHandlePHIDs();
+    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $history_table->setHandles($handles);
 
     $history_panel = new AphrontPanelView();
     $history_panel->setHeader('History');

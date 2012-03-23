@@ -16,31 +16,17 @@
  * limitations under the License.
  */
 
-abstract class DiffusionHistoryQuery extends DiffusionQuery {
+abstract class DiffusionMergedCommitsQuery extends DiffusionQuery {
 
-  private $limit = 100;
-  private $offset = 0;
-
-  protected $needDirectChanges;
-  protected $needChildChanges;
+  private $limit = PHP_INT_MAX;
 
   final public static function newFromDiffusionRequest(
     DiffusionRequest $request) {
 
-    return parent::newQueryObject(__CLASS__, $request);
+    return self::newQueryObject(__CLASS__, $request);
   }
 
-  final public function needDirectChanges($direct) {
-    $this->needDirectChanges = $direct;
-    return $this;
-  }
-
-  final public function needChildChanges($child) {
-    $this->needChildChanges = $child;
-    return $this;
-  }
-
-  final public function loadHistory() {
+  final public function loadMergedCommits() {
     return $this->executeQuery();
   }
 
@@ -51,15 +37,6 @@ abstract class DiffusionHistoryQuery extends DiffusionQuery {
 
   final public function getLimit() {
     return $this->limit;
-  }
-
-  final public function setOffset($offset) {
-    $this->offset = $offset;
-    return $this;
-  }
-
-  final public function getOffset() {
-    return $this->offset;
   }
 
 }

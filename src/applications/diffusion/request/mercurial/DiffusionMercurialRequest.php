@@ -47,7 +47,17 @@ final class DiffusionMercurialRequest extends DiffusionRequest {
   }
 
   public function getStableCommitName() {
-    return substr($this->stableCommitName, 0, 16);
+    if (!$this->stableCommitName) {
+      if ($this->commit) {
+        $this->stableCommitName = $this->commit;
+      } else {
+        list($this->stableCommitName) = $this->repository->execxLocalCommand(
+          'log --template=%s --rev %s',
+          '{node}',
+          $this->getBranch());
+      }
+    }
+    return $this->stableCommitName;
   }
 
 }

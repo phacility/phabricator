@@ -9,4 +9,4 @@
 phutil_require_module('phabricator', 'applications/diffusion/query/base');
 
 
-phutil_require_source('DiffusionHistoryQuery.php');
+phutil_require_source('DiffusionMergedCommitsQuery.php');

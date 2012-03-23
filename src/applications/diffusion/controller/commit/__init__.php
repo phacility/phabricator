@@ -18,12 +18,14 @@ phutil_require_module('phabricator', 'applications/differential/view/changesetli
 phutil_require_module('phabricator', 'applications/diffusion/controller/base');
 phutil_require_module('phabricator', 'applications/diffusion/data/pathchange');
 phutil_require_module('phabricator', 'applications/diffusion/query/contains/base');
+phutil_require_module('phabricator', 'applications/diffusion/query/mergedcommits/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/path');
 phutil_require_module('phabricator', 'applications/diffusion/query/pathchange/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/pathid/base');
 phutil_require_module('phabricator', 'applications/diffusion/request/base');
 phutil_require_module('phabricator', 'applications/diffusion/view/commentlist');
 phutil_require_module('phabricator', 'applications/diffusion/view/commitchangetable');
+phutil_require_module('phabricator', 'applications/diffusion/view/historytable');
 phutil_require_module('phabricator', 'applications/draft/storage/draft');
 phutil_require_module('phabricator', 'applications/markup/engine');
 phutil_require_module('phabricator', 'applications/phid/handle/data');

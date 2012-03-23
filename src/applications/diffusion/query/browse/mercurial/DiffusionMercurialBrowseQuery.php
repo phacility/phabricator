@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ final class DiffusionMercurialBrowseQuery extends DiffusionBrowseQuery {
     $repository = $drequest->getRepository();
 
     $path = $drequest->getPath();
-    $commit = $drequest->getCommit();
+    $commit = $drequest->getStableCommitName();
 
     // TODO: This is a really really awful mess but Mercurial doesn't offer
     // an equivalent of "git ls-files -- directory". If it's any comfort, this

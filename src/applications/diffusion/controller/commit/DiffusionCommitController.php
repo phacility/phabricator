@@ -100,6 +100,8 @@ final class DiffusionCommitController extends DiffusionController {
       $drequest);
     $changes = $change_query->loadChanges();
 
+    $content[] = $this->buildMergesTable($commit);
+
     $original_changes_count = count($changes);
     if ($request->getStr('show_all') !== 'true' &&
         $original_changes_count > self::CHANGES_LIMIT) {
@@ -463,5 +465,44 @@ final class DiffusionCommitController extends DiffusionController {
     $view->appendChild($preview_panel);
     return $view;
   }
+
+  private function buildMergesTable(PhabricatorRepositoryCommit $commit) {
+    $drequest = $this->getDiffusionRequest();
+
+    $limit = 50;
+
+    $merge_query = DiffusionMergedCommitsQuery::newFromDiffusionRequest(
+      $drequest);
+    $merge_query->setLimit($limit + 1);
+    $merges = $merge_query->loadMergedCommits();
+
+    if (!$merges) {
+      return null;
+    }
+
+    $caption = null;
+    if (count($merges) > $limit) {
+      $merges = array_slice($merges, 0, $limit);
+      $caption =
+        "This commit merges more than {$limit} changes. Only the first ".
+        "{$limit} are shown.";
+    }
+
+    $history_table = new DiffusionHistoryTableView();
+    $history_table->setDiffusionRequest($drequest);
+    $history_table->setHistory($merges);
+
+    $phids = $history_table->getRequiredHandlePHIDs();
+    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $history_table->setHandles($handles);
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader('Merged Changes');
+    $panel->setCaption($caption);
+    $panel->appendChild($history_table);
+
+    return $panel;
+  }
+
 
 }

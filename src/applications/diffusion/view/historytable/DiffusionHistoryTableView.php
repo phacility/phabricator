@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,19 @@ final class DiffusionHistoryTableView extends DiffusionView {
   public function setHandles(array $handles) {
     $this->handles = $handles;
     return $this;
+  }
+
+  public function getRequiredHandlePHIDs() {
+    $phids = array();
+    foreach ($this->history as $item) {
+      $data = $item->getCommitData();
+      if ($data) {
+        if ($data->getCommitDetail('authorPHID')) {
+          $phids[$data->getCommitDetail('authorPHID')] = true;
+        }
+      }
+    }
+    return array_keys($phids);
   }
 
   public function render() {
