@@ -9,4 +9,4 @@
 phutil_require_module('phabricator', 'applications/diffusion/query/contains/base');
 
 
-phutil_require_source('DiffusionSVNContainsQuery.php');
+phutil_require_source('DiffusionSvnContainsQuery.php');
