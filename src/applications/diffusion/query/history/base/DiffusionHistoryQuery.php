@@ -23,6 +23,9 @@ abstract class DiffusionHistoryQuery extends DiffusionQuery {
 
   protected $needDirectChanges;
   protected $needChildChanges;
+  protected $needParents;
+
+  protected $parents = array();
 
   final public static function newFromDiffusionRequest(
     DiffusionRequest $request) {
@@ -38,6 +41,18 @@ abstract class DiffusionHistoryQuery extends DiffusionQuery {
   final public function needChildChanges($child) {
     $this->needChildChanges = $child;
     return $this;
+  }
+
+  final public function needParents($parents) {
+    $this->needParents = $parents;
+    return $this;
+  }
+
+  final public function getParents() {
+    if (!$this->needParents) {
+      throw new Exception('Specify needParents() before calling getParents()!');
+    }
+    return $this->parents;
   }
 
   final public function loadHistory() {

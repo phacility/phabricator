@@ -33,18 +33,56 @@ final class DiffusionMercurialHistoryQuery extends DiffusionHistoryQuery {
     $default_path = '';
 
     list($stdout) = $repository->execxLocalCommand(
-      'log --template %s --limit %d --branch %s --rev %s:0 -- %s',
-      '{node}\\n',
+      'log --debug --template %s --limit %d --branch %s --rev %s:0 -- %s',
+      '{node};{parents}\\n',
       ($this->getOffset() + $this->getLimit()), // No '--skip' in Mercurial.
       $drequest->getBranch(),
       $commit_hash,
       nonempty(ltrim($path, '/'), $default_path));
 
-    $hashes = explode("\n", $stdout);
-    $hashes = array_filter($hashes);
-    $hashes = array_slice($hashes, $this->getOffset());
+    $lines = explode("\n", trim($stdout));
+    $lines = array_slice($lines, $this->getOffset());
 
-    return $this->loadHistoryForCommitIdentifiers($hashes);
+    $hash_list = array();
+    $parent_map = array();
+
+    $last = null;
+    foreach (array_reverse($lines) as $line) {
+      list($hash, $parents) = explode(';', $line);
+      $parents = trim($parents);
+      if (!$parents) {
+        if ($last === null) {
+          $parent_map[$hash] = array('...');
+        } else {
+          $parent_map[$hash] = array($last);
+        }
+      } else {
+        $parents = preg_split('/\s+/', $parents);
+        foreach ($parents as $parent) {
+          list($plocal, $phash) = explode(':', $parent);
+          if (!preg_match('/^0+$/', $phash)) {
+            $parent_map[$hash][] = $phash;
+          }
+        }
+        // This may happen for the zeroth commit in repository, both hashes
+        // are "000000000...".
+        if (empty($parent_map[$hash])) {
+          $parent_map[$hash] = array('...');
+        }
+      }
+
+      // The rendering code expects the first commit to be "mainline", like
+      // Git. Flip the order so it does the right thing.
+      $parent_map[$hash] = array_reverse($parent_map[$hash]);
+
+      $hash_list[] = $hash;
+      $last = $hash;
+    }
+
+    $hash_list = array_reverse($hash_list);
+    $this->parents = $parent_map;
+
+    return $this->loadHistoryForCommitIdentifiers($hash_list);
   }
 
 }

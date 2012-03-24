@@ -31,6 +31,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $history_query = DiffusionHistoryQuery::newFromDiffusionRequest(
       $drequest);
     $history_query->setLimit(15);
+    $history_query->needParents(true);
     $history = $history_query->loadHistory();
 
     $browse_query = DiffusionBrowseQuery::newFromDiffusionRequest($drequest);
@@ -63,6 +64,8 @@ final class DiffusionRepositoryController extends DiffusionController {
     $history_table->setDiffusionRequest($drequest);
     $history_table->setHandles($handles);
     $history_table->setHistory($history);
+    $history_table->setParents($history_query->getParents());
+    $history_table->setIsHead(true);
 
     $callsign = $drequest->getRepository()->getCallsign();
     $all = phutil_render_tag(

@@ -127,6 +127,16 @@ span.single-display-line-content {
   max-height: 64px;
 }
 
+.aphront-table-view td.threads {
+  font-family: monospace;
+  white-space: pre;
+  padding: 0;
+}
+
+.aphront-table-view td.threads canvas {
+  display: block;
+}
+
 .aphront-table-view th.aphront-table-view-sortable {
   padding: 0;
 }

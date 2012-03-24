@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,18 +29,28 @@ final class DiffusionGitHistoryQuery extends DiffusionHistoryQuery {
       'log '.
         '--skip=%d '.
         '-n %d '.
-        '--abbrev=40 '.
-        '--pretty=format:%%H '.
-        '%s -- %s',
+        '--pretty=format:%s '.
+        '%s -- %C',
       $this->getOffset(),
       $this->getLimit(),
+      '%H:%P',
       $commit_hash,
-      $path);
+      // Git omits merge commits if the path is provided, even if it is empty.
+      (strlen($path) ? csprintf('%s', $path) : ''));
 
-    $hashes = explode("\n", $stdout);
-    $hashes = array_filter($hashes);
+    $hash_list = array();
+    $parent_map = array();
 
-    return $this->loadHistoryForCommitIdentifiers($hashes);
+    $lines = explode("\n", trim($stdout));
+    foreach ($lines as $line) {
+      list($hash, $parents) = explode(":", $line);
+      $hash_list[] = $hash;
+      $parent_map[$hash] = preg_split('/\s+/', $parents);
+    }
+
+    $this->parents = $parent_map;
+
+    return $this->loadHistoryForCommitIdentifiers($hash_list);
   }
 
 }

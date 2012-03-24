@@ -8,5 +8,7 @@
 
 phutil_require_module('phabricator', 'applications/diffusion/query/history/base');
 
+phutil_require_module('phutil', 'xsprintf/csprintf');
+
 
 phutil_require_source('DiffusionGitHistoryQuery.php');

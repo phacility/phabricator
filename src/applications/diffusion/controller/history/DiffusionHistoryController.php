@@ -35,6 +35,11 @@ final class DiffusionHistoryController extends DiffusionController {
       $history_query->needChildChanges(true);
     }
 
+    $show_graph = !strlen($drequest->getPath());
+    if ($show_graph) {
+      $history_query->needParents(true);
+    }
+
     $history = $history_query->loadHistory();
 
     $pager = new AphrontPagerView();
@@ -80,6 +85,11 @@ final class DiffusionHistoryController extends DiffusionController {
     $phids = $history_table->getRequiredHandlePHIDs();
     $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
     $history_table->setHandles($handles);
+
+    if ($show_graph) {
+      $history_table->setParents($history_query->getParents());
+      $history_table->setIsHead($offset == 0);
+    }
 
     $history_panel = new AphrontPanelView();
     $history_panel->setHeader('History');
