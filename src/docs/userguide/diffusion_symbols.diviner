@@ -27,6 +27,12 @@ Phabricator includes a script which can identify symbols in PHP projects:
 
   ./scripts/symbols/generate_php_symbols.php
 
+Phabricator also includes a script which can identify symbols in any
+programming language that has classes and/or functions, and is supported by
+Exuberant Ctags (http://ctags.sourceforge.net):
+
+  ./scripts/symbols/generate_ctags_symbols.php
+
 If you want to identify symbols from another language, you need to write a
 script which can export them (for example, maybe by parsing a ##ctags## file).
 
