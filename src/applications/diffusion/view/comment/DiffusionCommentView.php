@@ -127,7 +127,7 @@ final class DiffusionCommentView extends AphrontView {
     $comment = $this->comment;
     $engine = $this->getEngine();
 
-    if (!strlen($comment->getContent())) {
+    if (!strlen($comment->getContent()) && empty($this->inlineComments)) {
       return null;
     } else {
       return
