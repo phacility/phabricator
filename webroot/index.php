@@ -20,6 +20,14 @@ $__start__ = microtime(true);
 
 error_reporting(E_ALL | E_STRICT);
 
+$required_version = '5.2.0';
+if (version_compare(PHP_VERSION, $required_version) < 0) {
+  phabricator_fatal_config_error(
+    "You are running PHP version '".PHP_VERSION."', which is older than ".
+    "the minimum version, '{$required_version}'. Update to at least ".
+    "'{$required_version}'.");
+}
+
 phabricator_detect_insane_memory_limit();
 
 ini_set('memory_limit', -1);
