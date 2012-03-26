@@ -83,10 +83,11 @@
   background-position: 0 0;
 }
 
-.phabricator-logo a:hover {
+.phabricator-logo a.logo-standard:hover {
   background-position: -220px -40px;
 }
 
+.phabricator-logo a.logo-custom:hover,
 .phabricator-logo-with-custom a.logo-standard:hover {
   background-position: 0 -40px;
 }
