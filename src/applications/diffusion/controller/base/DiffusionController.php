@@ -253,7 +253,7 @@ abstract class DiffusionController extends PhabricatorController {
         array(
           'href' => $drequest->generateURI(
             array(
-              'path' => null,
+              'path' => '',
             ) + $uri_params),
         ),
         $view_name);

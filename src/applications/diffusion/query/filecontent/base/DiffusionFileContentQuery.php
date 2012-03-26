@@ -16,41 +16,14 @@
  * limitations under the License.
  */
 
-abstract class DiffusionFileContentQuery {
+abstract class DiffusionFileContentQuery extends DiffusionQuery {
 
-  private $request;
   private $needsBlame;
   private $fileContent;
 
-  final private function __construct() {
-    // <private>
-  }
-
   final public static function newFromDiffusionRequest(
     DiffusionRequest $request) {
-
-    $repository = $request->getRepository();
-
-    switch ($repository->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        $class = 'DiffusionGitFileContentQuery';
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $class = 'DiffusionMercurialFileContentQuery';
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        $class = 'DiffusionSvnFileContentQuery';
-        break;
-      default:
-        throw new Exception("Unsupported VCS!");
-    }
-
-    PhutilSymbolLoader::loadClass($class);
-    $query = new $class();
-
-    $query->request = $request;
-
-    return $query;
+    return parent::newQueryObject(__CLASS__, $request);
   }
 
   public function getSupportsBlameOnBlame() {
@@ -63,15 +36,9 @@ abstract class DiffusionFileContentQuery {
     throw new Exception("Unsupported VCS!");
   }
 
-  final protected function getRequest() {
-    return $this->request;
-  }
-
   final public function loadFileContent() {
     $this->fileContent = $this->executeQuery();
   }
-
-  abstract protected function executeQuery();
 
   final public function getRawData() {
     return $this->fileContent->getCorpus();
