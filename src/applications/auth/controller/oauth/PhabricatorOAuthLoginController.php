@@ -206,9 +206,8 @@ final class PhabricatorOAuthLoginController
       return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
-    $key = 'controller.oauth-registration';
     $controller = PhabricatorEnv::newObjectFromConfig(
-      $key,
+      'controller.oauth-registration',
       array($this->getRequest()));
 
     $controller->setOAuthProvider($provider);
