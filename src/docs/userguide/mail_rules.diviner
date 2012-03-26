@@ -62,7 +62,10 @@ The headers Phabricator adds to mail are:
     are reviewing, versus revisions you are explicitly CC'd on or CC'd as
     a result of Herald rules.
   - ##X-Differential-CCs##: this is attached to Differential mail and shows
-    the explicit CCs on the revision.
+    the CCs on the revision.
+  - ##X-Differential-Explicit-CCs##: this is attached to Differential mail and
+    shows the explicit CCs on the revision (those that were added by humans,
+    not by Herald).
   - ##X-Phabricator-Mail-Tags##: this is attached to some mail and has
     a list of descriptors about the mail. (This is fairly new and subject
     to some change.)

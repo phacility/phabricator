@@ -116,6 +116,33 @@ abstract class DifferentialMail {
         $template->addHeader(
           'X-Differential-CCs',
           '<'.implode('>, <', $revision->getCCPHIDs()).'>');
+
+        // Determine explicit CCs (those added by humans) and put them in a
+        // header so users can differentiate between Herald CCs and human CCs.
+
+        $relation_subscribed = DifferentialRevision::RELATION_SUBSCRIBED;
+        $raw = $revision->getRawRelations($relation_subscribed);
+
+        $reason_phids = ipull($raw, 'reasonPHID');
+        $reason_handles = id(new PhabricatorObjectHandleData($reason_phids))
+          ->loadHandles();
+
+        $explicit_cc = array();
+        foreach ($raw as $relation) {
+          if (!$relation['reasonPHID']) {
+            continue;
+          }
+          $type = $reason_handles[$relation['reasonPHID']]->getType();
+          if ($type == PhabricatorPHIDConstants::PHID_TYPE_USER) {
+            $explicit_cc[] = $relation['objectPHID'];
+          }
+        }
+
+        if ($explicit_cc) {
+          $template->addHeader(
+            'X-Differential-Explicit-CCs',
+            '<'.implode('>, <', $explicit_cc).'>');
+        }
       }
     }
 

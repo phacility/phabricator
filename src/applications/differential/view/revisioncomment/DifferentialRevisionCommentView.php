@@ -131,10 +131,12 @@ final class DifferentialRevisionCommentView extends AphrontView {
     $metadata = $comment->getMetadata();
     $added_reviewers = idx(
       $metadata,
-      DifferentialComment::METADATA_ADDED_REVIEWERS);
+      DifferentialComment::METADATA_ADDED_REVIEWERS,
+      array());
     $added_ccs = idx(
       $metadata,
-      DifferentialComment::METADATA_ADDED_CCS);
+      DifferentialComment::METADATA_ADDED_CCS,
+      array());
 
     $verb = DifferentialAction::getActionPastTenseVerb($comment->getAction());
     $verb = phutil_escape_html($verb);
