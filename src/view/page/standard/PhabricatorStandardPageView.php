@@ -356,13 +356,30 @@ final class PhabricatorStandardPageView extends AphrontPageView {
       $admin_class = 'phabricator-admin-page-view';
     }
 
+    $custom_logo = null;
+    $with_custom = null;
+    $custom_conf = PhabricatorEnv::getEnvConfig('phabricator.custom.logo');
+    if ($custom_conf) {
+      $with_custom = 'phabricator-logo-with-custom';
+      $custom_logo = phutil_render_tag(
+        'a',
+        array(
+          'class' => 'logo-custom',
+          'href' => $custom_conf,
+        ),
+        ' ');
+    }
+
     $header_chrome = null;
     $footer_chrome = null;
     if ($this->getShowChrome()) {
       $header_chrome =
         '<table class="phabricator-standard-header">'.
           '<tr>'.
-            '<td class="phabricator-logo"><a href="/"> </a></td>'.
+            '<td class="phabricator-logo '.$with_custom.'">'.
+              $custom_logo.
+              '<a class="logo-standard" href="/"> </a>'.
+            '</td>'.
             '<td>'.
               '<table class="phabricator-primary-navigation">'.
                 '<tr>'.

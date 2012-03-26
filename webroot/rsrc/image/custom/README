@@ -1,0 +1,3 @@
+To customize your Phabricator install's appearance, create a 240x80 PNG like
+the examples in this folder, name it "custom.png" in this folder, and then set
+'phabricator.custom.logo' to a link URI.
