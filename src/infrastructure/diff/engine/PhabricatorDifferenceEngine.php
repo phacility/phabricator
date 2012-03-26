@@ -151,7 +151,7 @@ final class PhabricatorDifferenceEngine {
         // whitespace changes, just drop these lines if they appear anywhere
         // in the diff.
 
-        $lines = explode("\n", rtrim($diff));
+        $lines = explode("\n", $diff);
         foreach ($lines as $key => $line) {
           if (isset($line[0]) && $line[0] == '\\') {
             unset($lines[$key]);
