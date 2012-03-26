@@ -71,8 +71,7 @@
 }
 
 .phabricator-logo a.logo-standard {
-  background: url(/rsrc/image/phabricator_logo.png) no-repeat 0 0;
-  background-position-left: 220px;
+  background: url(/rsrc/image/phabricator_logo.png) no-repeat -220px 0;
 }
 
 .phabricator-admin-page-view .phabricator-logo a.logo-standard {
@@ -81,11 +80,14 @@
 
 .phabricator-logo-with-custom a.logo-standard {
   padding-left: 220px;
-  background-position-left: 0;
+  background-position: 0 0;
 }
 
-
 .phabricator-logo a:hover {
+  background-position: -220px -40px;
+}
+
+.phabricator-logo-with-custom a.logo-standard:hover {
   background-position: 0 -40px;
 }
 
