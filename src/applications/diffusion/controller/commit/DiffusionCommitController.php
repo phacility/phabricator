@@ -20,6 +20,8 @@ final class DiffusionCommitController extends DiffusionController {
 
   const CHANGES_LIMIT = 100;
 
+  private $auditAuthorityPHIDs;
+
   public function willProcessRequest(array $data) {
     // This controller doesn't use blob/path stuff, just pass the dictionary
     // in directly instead of using the AphrontRequest parsing mechanism.
@@ -50,6 +52,7 @@ final class DiffusionCommitController extends DiffusionController {
     }
 
     $commit_data = $drequest->loadCommitData();
+    $commit->attachCommitData($commit_data);
 
     $is_foreign = $commit_data->getCommitDetail('foreign-svn-stub');
     if ($is_foreign) {
@@ -93,7 +96,14 @@ final class DiffusionCommitController extends DiffusionController {
       $content[] = $detail_panel;
     }
 
-    $content[] = $this->buildAuditTable($commit);
+    $query = new PhabricatorAuditQuery();
+    $query->withCommitPHIDs(array($commit->getPHID()));
+    $audit_requests = $query->execute();
+
+    $this->auditAuthorityPHIDs =
+      PhabricatorAuditCommentEditor::loadAuditPHIDsForUser($user);
+
+    $content[] = $this->buildAuditTable($commit, $audit_requests);
     $content[] = $this->buildComments($commit);
 
     $change_query = DiffusionPathChangeQuery::newFromDiffusionRequest(
@@ -247,7 +257,7 @@ final class DiffusionCommitController extends DiffusionController {
       $content[] = $change_list;
     }
 
-    $content[] = $this->buildAddCommentView($commit);
+    $content[] = $this->buildAddCommentView($commit, $audit_requests);
 
     return $this->buildStandardPageResponse(
       $content,
@@ -331,21 +341,19 @@ final class DiffusionCommitController extends DiffusionController {
       '</table>';
   }
 
-  private function buildAuditTable($commit) {
+  private function buildAuditTable($commit, $audits) {
     $user = $this->getRequest()->getUser();
-
-    $query = new PhabricatorAuditQuery();
-    $query->withCommitPHIDs(array($commit->getPHID()));
-    $audits = $query->execute();
 
     $view = new PhabricatorAuditListView();
     $view->setAudits($audits);
+    $view->setCommits(array($commit));
+    $view->setUser($user);
+    $view->setShowDescriptions(false);
 
     $phids = $view->getRequiredHandlePHIDs();
     $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
     $view->setHandles($handles);
-    $view->setAuthorityPHIDs(
-      PhabricatorAuditCommentEditor::loadAuditPHIDsForUser($user));
+    $view->setAuthorityPHIDs($this->auditAuthorityPHIDs);
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Audits');
@@ -387,7 +395,7 @@ final class DiffusionCommitController extends DiffusionController {
     return $view;
   }
 
-  private function buildAddCommentView($commit) {
+  private function buildAddCommentView($commit, array $audit_requests) {
     $user = $this->getRequest()->getUser();
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
@@ -409,6 +417,8 @@ final class DiffusionCommitController extends DiffusionController {
       $draft = null;
     }
 
+    $actions = $this->getAuditActions($commit, $audit_requests);
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setAction('/audit/addcomment/')
@@ -418,7 +428,7 @@ final class DiffusionCommitController extends DiffusionController {
           ->setLabel('Action')
           ->setName('action')
           ->setID('audit-action')
-          ->setOptions(PhabricatorAuditActionConstants::getActionNameMap()))
+          ->setOptions($actions))
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel('Comments')
@@ -464,6 +474,80 @@ final class DiffusionCommitController extends DiffusionController {
     $view->appendChild($panel);
     $view->appendChild($preview_panel);
     return $view;
+  }
+
+
+  /**
+   * Return a map of available audit actions for rendering into a <select />.
+   * This shows the user valid actions, and does not show nonsense/invalid
+   * actions (like closing an already-closed commit, or resigning from a commit
+   * you have no association with).
+   */
+  private function getAuditActions(
+    PhabricatorRepositoryCommit $commit,
+    array $audit_requests) {
+    $user = $this->getRequest()->getUser();
+
+    $user_is_author = ($commit->getAuthorPHID() == $user->getPHID());
+
+    $user_request = null;
+    foreach ($audit_requests as $audit_request) {
+      if ($audit_request->getAuditorPHID() == $user->getPHID()) {
+        $user_request = $audit_request;
+        break;
+      }
+    }
+
+    $actions = array();
+    $actions[PhabricatorAuditActionConstants::COMMENT] = true;
+
+    // We allow you to accept your own commits. A use case here is that you
+    // notice an issue with your own commit and "Raise Concern" as an indicator
+    // to other auditors that you're on top of the issue, then later resolve it
+    // and "Accept". You can not accept on behalf of projects or packages,
+    // however.
+    $actions[PhabricatorAuditActionConstants::ACCEPT]  = true;
+    $actions[PhabricatorAuditActionConstants::CONCERN] = true;
+
+
+    // To resign, a user must have authority on some request and not be the
+    // commit's author.
+    if (!$user_is_author) {
+      $may_resign = false;
+      foreach ($audit_requests as $request) {
+        if (empty($this->auditAuthorityPHIDs[$request->getAuditorPHID()])) {
+          continue;
+        }
+        $may_resign = true;
+        break;
+      }
+
+      // If the user has already resigned, don't show "Resign...".
+      $status_resigned = PhabricatorAuditStatusConstants::RESIGNED;
+      if ($user_request) {
+        if ($user_request->getAuditStatus() == $status_resigned) {
+          $may_resign = false;
+        }
+      }
+
+      if ($may_resign) {
+        $actions[PhabricatorAuditActionConstants::RESIGN] = true;
+      }
+    }
+
+    $status_concern = PhabricatorAuditCommitStatusConstants::CONCERN_RAISED;
+    $concern_raised = ($commit->getAuditStatus() == $status_concern);
+
+    if ($user_is_author && $concern_raised) {
+      $actions[PhabricatorAuditActionConstants::CLOSE] = true;
+    }
+
+    foreach ($actions as $constant => $ignored) {
+      $actions[$constant] =
+        PhabricatorAuditActionConstants::getActionName($constant);
+    }
+
+    return $actions;
   }
 
   private function buildMergesTable(PhabricatorRepositoryCommit $commit) {

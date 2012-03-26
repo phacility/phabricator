@@ -9,6 +9,7 @@
 phutil_require_module('phabricator', 'applications/audit/constants/status');
 phutil_require_module('phabricator', 'applications/audit/query/commit');
 phutil_require_module('phabricator', 'applications/repository/storage/auditrequest');
+phutil_require_module('phabricator', 'applications/repository/storage/commit');
 phutil_require_module('phabricator', 'storage/qsprintf');
 phutil_require_module('phabricator', 'storage/queryfx');
 

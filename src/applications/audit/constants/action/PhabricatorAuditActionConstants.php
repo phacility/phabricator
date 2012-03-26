@@ -18,18 +18,27 @@
 
 final class PhabricatorAuditActionConstants {
 
-  const CONCERN = 'concern';
-  const ACCEPT = 'accept';
-  const COMMENT = 'comment';
+  const CONCERN   = 'concern';
+  const ACCEPT    = 'accept';
+  const COMMENT   = 'comment';
+  const RESIGN    = 'resign';
+  const CLOSE     = 'close';
 
   public static function getActionNameMap() {
     static $map = array(
       self::COMMENT => 'Comment',
       self::CONCERN => 'Raise Concern',
       self::ACCEPT  => 'Accept Commit',
+      self::RESIGN  => 'Resign from Audit',
+      self::CLOSE   => 'Close Audit',
     );
 
     return $map;
+  }
+
+  public static function getActionName($constant) {
+    $map = self::getActionNameMap();
+    return idx($map, $constant, 'Unknown');
   }
 
   public static function getActionPastTenseVerb($action) {
@@ -37,17 +46,10 @@ final class PhabricatorAuditActionConstants {
       self::COMMENT => 'commented on',
       self::CONCERN => 'raised a concern with',
       self::ACCEPT  => 'accepted',
+      self::RESIGN  => 'resigned from',
+      self::CLOSE   => 'closed',
     );
     return idx($map, $action, 'updated');
-  }
-
-  public static function getStatusNameMap() {
-    static $map = array(
-      self::CONCERN => PhabricatorAuditStatusConstants::CONCERNED,
-      self::ACCEPT => PhabricatorAuditStatusConstants::ACCEPTED,
-    );
-
-    return $map;
   }
 
 }

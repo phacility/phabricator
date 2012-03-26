@@ -576,6 +576,7 @@ final class PhabricatorDirectoryMainController
     $query = new PhabricatorAuditQuery();
     $query->withAuditorPHIDs($phids);
     $query->withStatus(PhabricatorAuditQuery::STATUS_OPEN);
+    $query->withAwaitingUser($user);
     $query->needCommitData(true);
     $query->setLimit(10);
 

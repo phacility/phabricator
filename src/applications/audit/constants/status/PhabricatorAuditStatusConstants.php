@@ -24,6 +24,8 @@ final class PhabricatorAuditStatusConstants {
   const CONCERNED               = 'concerned';
   const ACCEPTED                = 'accepted';
   const AUDIT_REQUESTED         = 'requested';
+  const RESIGNED                = 'resigned';
+  const CLOSED                  = 'closed';
 
   public static function getStatusNameMap() {
     static $map = array(
@@ -33,6 +35,8 @@ final class PhabricatorAuditStatusConstants {
       self::CONCERNED           => 'Concern Raised',
       self::ACCEPTED            => 'Accepted',
       self::AUDIT_REQUESTED     => 'Audit Requested',
+      self::RESIGNED            => 'Resigned',
+      self::CLOSED              => 'Closed',
     );
 
     return $map;
@@ -40,6 +44,18 @@ final class PhabricatorAuditStatusConstants {
 
   public static function getStatusName($code) {
     return idx(self::getStatusNameMap(), $code, 'Unknown');
+  }
+
+  public static function getOpenStatusConstants() {
+    return array(
+      self::AUDIT_REQUIRED,
+      self::AUDIT_REQUESTED,
+      self::CONCERNED,
+    );
+  }
+
+  public static function isOpenStatus($status) {
+    return in_array($status, self::getOpenStatusConstants());
   }
 
 }

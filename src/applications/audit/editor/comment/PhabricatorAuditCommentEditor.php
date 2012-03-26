@@ -83,36 +83,102 @@ final class PhabricatorAuditCommentEditor {
         $commit->getPHID());
 
     $action = $comment->getAction();
-    $status_map = PhabricatorAuditActionConstants::getStatusNameMap();
-    $status = idx($status_map, $action, null);
 
-    // Status may be empty for updates which don't affect status, like
-    // "comment".
-    $have_any_requests = false;
-    foreach ($requests as $request) {
-      if (empty($audit_phids[$request->getAuditorPHID()])) {
-        continue;
-      }
-      $have_any_requests = true;
-      if ($status) {
-        $request->setAuditStatus($status);
-        $request->save();
-      }
-    }
 
-    if (!$have_any_requests) {
+    // TODO: We should validate the action, currently we allow anyone to, e.g.,
+    // close an audit if they muck with form parameters. I'll followup with this
+    // and handle the no-effect cases (e.g., closing and already-closed audit).
+
+
+    $user_is_author = ($user->getPHID() == $commit->getAuthorPHID());
+
+    if ($action == PhabricatorAuditActionConstants::CLOSE) {
+      // "Close" means wipe out all the concerns.
+      $concerned_status = PhabricatorAuditStatusConstants::CONCERNED;
+      foreach ($requests as $request) {
+        if ($request->getAuditStatus() == $concerned_status) {
+          $request->setAuditStatus(PhabricatorAuditStatusConstants::CLOSED);
+          $request->save();
+        }
+      }
+    } else {
+      $have_any_requests = false;
+      foreach ($requests as $request) {
+        if (empty($audit_phids[$request->getAuditorPHID()])) {
+          continue;
+        }
+
+        $request_is_for_user = ($request->getAuditorPHID() == $user->getPHID());
+
+        $have_any_requests = true;
+        $new_status = null;
+        switch ($action) {
+          case PhabricatorAuditActionConstants::COMMENT:
+            // Comments don't change audit statuses.
+            break;
+          case PhabricatorAuditActionConstants::ACCEPT:
+            if (!$user_is_author || $request_is_for_user) {
+              // When modifying your own commits, you act only on behalf of
+              // yourself, not your packages/projects -- the idea being that
+              // you can't accept your own commits.
+              $new_status = PhabricatorAuditStatusConstants::ACCEPTED;
+            }
+            break;
+          case PhabricatorAuditActionConstants::CONCERN:
+            if (!$user_is_author || $request_is_for_user) {
+              // See above.
+              $new_status = PhabricatorAuditStatusConstants::CONCERNED;
+            }
+            break;
+          case PhabricatorAuditActionConstants::RESIGN:
+            // NOTE: Resigning resigns ONLY your user request, not the requests
+            // of any projects or packages you are a member of.
+            if ($request_is_for_user) {
+              $new_status = PhabricatorAuditStatusConstants::RESIGNED;
+            }
+            break;
+          default:
+            throw new Exception("Unknown action '{$action}'!");
+        }
+        if ($new_status !== null) {
+          $request->setAuditStatus($new_status);
+          $request->save();
+        }
+      }
+
       // If the user has no current authority over any audit trigger, make a
       // new one to represent their audit state.
-      $request = id(new PhabricatorRepositoryAuditRequest())
-        ->setCommitPHID($commit->getPHID())
-        ->setAuditorPHID($user->getPHID())
-        ->setAuditStatus(
-            $status
-              ? $status
-              : PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED)
-        ->setAuditReasons(array("Voluntary Participant"))
-        ->save();
-      $requests[] = $request;
+      if (!$have_any_requests) {
+        $new_status = null;
+        switch ($action) {
+          case PhabricatorAuditActionConstants::COMMENT:
+            $new_status = PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED;
+            break;
+          case PhabricatorAuditActionConstants::ACCEPT:
+            $new_status = PhabricatorAuditStatusConstants::ACCEPTED;
+            break;
+          case PhabricatorAuditActionConstants::CONCERN:
+            $new_status = PhabricatorAuditStatusConstants::CONCERNED;
+            break;
+          case PhabricatorAuditActionConstants::RESIGN:
+            // If you're on an audit because of a package, we write an explicit
+            // resign row to remove it from your queue.
+            $new_status = PhabricatorAuditStatusConstants::RESIGNED;
+            break;
+          case PhabricatorAuditActionConstants::CLOSE:
+            // Impossible to reach this block with 'close'.
+          default:
+            throw new Exception("Unknown or invalid action '{$action}'!");
+        }
+
+        $request = id(new PhabricatorRepositoryAuditRequest())
+          ->setCommitPHID($commit->getPHID())
+          ->setAuditorPHID($user->getPHID())
+          ->setAuditStatus($new_status)
+          ->setAuditReasons(array("Voluntary Participant"))
+          ->save();
+        $requests[] = $request;
+      }
     }
 
     $commit->updateAuditStatus($requests);
@@ -206,6 +272,8 @@ final class PhabricatorAuditCommentEditor {
     $map = array(
       PhabricatorAuditActionConstants::CONCERN  => 'Raised Concern',
       PhabricatorAuditActionConstants::ACCEPT   => 'Accepted',
+      PhabricatorAuditActionConstants::RESIGN   => 'Resigned',
+      PhabricatorAuditActionConstants::CLOSE    => 'Closed',
     );
     $verb = idx($map, $comment->getAction(), 'Commented On');
 

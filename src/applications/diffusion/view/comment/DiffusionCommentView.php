@@ -110,19 +110,11 @@ final class DiffusionCommentView extends AphrontView {
     $author = $this->getHandle($comment->getActorPHID());
     $author_link = $author->renderLink();
 
+    $action = $comment->getAction();
+    $verb = PhabricatorAuditActionConstants::getActionPastTenseVerb($action);
+
     $actions = array();
-    switch ($comment->getAction()) {
-      case PhabricatorAuditActionConstants::ACCEPT:
-        $actions[] = "{$author_link} accepted this commit.";
-        break;
-      case PhabricatorAuditActionConstants::CONCERN:
-        $actions[] = "{$author_link} raised concerns with this commit.";
-        break;
-      case PhabricatorAuditActionConstants::COMMENT:
-      default:
-        $actions[] = "{$author_link} commented on this commit.";
-        break;
-    }
+    $actions[] = "{$author_link} ".phutil_escape_html($verb)." this commit.";
 
     foreach ($actions as $key => $action) {
       $actions[$key] = '<div>'.$action.'</div>';
@@ -135,11 +127,15 @@ final class DiffusionCommentView extends AphrontView {
     $comment = $this->comment;
     $engine = $this->getEngine();
 
-    return
-      '<div class="phabricator-remarkup">'.
-        $engine->markupText($comment->getContent()).
-        $this->renderSingleView($this->renderInlines()).
-      '</div>';
+    if (!strlen($comment->getContent())) {
+      return null;
+    } else {
+      return
+        '<div class="phabricator-remarkup">'.
+          $engine->markupText($comment->getContent()).
+          $this->renderSingleView($this->renderInlines()).
+        '</div>';
+    }
   }
 
   private function renderInlines() {

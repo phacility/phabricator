@@ -27,6 +27,8 @@ final class PhabricatorAuditQuery {
   private $needCommits;
   private $needCommitData;
 
+  private $awaitingUser;
+
   private $status     = 'status-any';
   const STATUS_ANY    = 'status-any';
   const STATUS_OPEN   = 'status-open';
@@ -40,6 +42,11 @@ final class PhabricatorAuditQuery {
 
   public function withAuditorPHIDs(array $auditor_phids) {
     $this->auditorPHIDs = $auditor_phids;
+    return $this;
+  }
+
+  public function withAwaitingUser(PhabricatorUser $user) {
+    $this->awaitingUser = $user;
     return $this;
   }
 
@@ -72,14 +79,16 @@ final class PhabricatorAuditQuery {
     $table = new PhabricatorRepositoryAuditRequest();
     $conn_r = $table->establishConnection('r');
 
+    $joins = $this->buildJoinClause($conn_r);
     $where = $this->buildWhereClause($conn_r);
     $order = $this->buildOrderClause($conn_r);
     $limit = $this->buildLimitClause($conn_r);
 
     $data = queryfx_all(
       $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
+      'SELECT req.* FROM %T req %Q %Q %Q %Q',
       $table->getTableName(),
+      $joins,
       $where,
       $order,
       $limit);
@@ -112,21 +121,62 @@ final class PhabricatorAuditQuery {
     return $this->commits;
   }
 
+  private function buildJoinClause($conn_r) {
+
+    $joins = array();
+
+    if ($this->awaitingUser) {
+      // Join the request table on the awaiting user's requests, so we can
+      // filter out package and project requests which the user has resigned
+      // from.
+      $joins[] = qsprintf(
+        $conn_r,
+        'LEFT JOIN %T awaiting ON req.commitPHID = awaiting.commitPHID AND
+          awaiting.auditorPHID = %s',
+        id(new PhabricatorRepositoryAuditRequest())->getTableName(),
+        $this->awaitingUser->getPHID());
+
+      // Join the commit table so we can get the commit author into the result
+      // row and filter by it later.
+      $joins[] = qsprintf(
+        $conn_r,
+        'JOIN %T commit ON req.commitPHID = commit.phid',
+        id(new PhabricatorRepositoryCommit())->getTableName());
+    }
+
+    if ($joins) {
+      return implode(' ', $joins);
+    } else {
+      return '';
+    }
+  }
+
   private function buildWhereClause($conn_r) {
     $where = array();
 
     if ($this->commitPHIDs) {
       $where[] = qsprintf(
         $conn_r,
-        'commitPHID IN (%Ls)',
+        'req.commitPHID IN (%Ls)',
         $this->commitPHIDs);
     }
 
     if ($this->auditorPHIDs) {
       $where[] = qsprintf(
         $conn_r,
-        'auditorPHID IN (%Ls)',
+        'req.auditorPHID IN (%Ls)',
         $this->auditorPHIDs);
+    }
+
+    if ($this->awaitingUser) {
+      // Exclude package and project audits associated with commits where
+      // the user is the author.
+      $where[] = qsprintf(
+        $conn_r,
+        '(commit.authorPHID IS NULL OR commit.authorPHID != %s)
+          OR (req.auditorPHID = %s)',
+        $this->awaitingUser->getPHID(),
+        $this->awaitingUser->getPHID());
     }
 
     $status = $this->status;
@@ -134,12 +184,14 @@ final class PhabricatorAuditQuery {
       case self::STATUS_OPEN:
         $where[] = qsprintf(
           $conn_r,
-          'auditStatus in (%Ls)',
-          array(
-            PhabricatorAuditStatusConstants::AUDIT_REQUIRED,
-            PhabricatorAuditStatusConstants::CONCERNED,
-            PhabricatorAuditStatusConstants::AUDIT_REQUESTED,
-          ));
+          'req.auditStatus in (%Ls)',
+          PhabricatorAuditStatusConstants::getOpenStatusConstants());
+        if ($this->awaitingUser) {
+          $where[] = qsprintf(
+            $conn_r,
+            'awaiting.auditStatus IS NULL OR awaiting.auditStatus != %s',
+            PhabricatorAuditStatusConstants::RESIGNED);
+        }
         break;
       case self::STATUS_ANY:
         break;
@@ -169,7 +221,7 @@ final class PhabricatorAuditQuery {
   }
 
   private function buildOrderClause($conn_r) {
-    return 'ORDER BY id DESC';
+    return 'ORDER BY req.id DESC';
   }
 
 }

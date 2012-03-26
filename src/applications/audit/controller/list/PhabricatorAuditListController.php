@@ -301,6 +301,8 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
       $query->setLimit($pager->getPageSize() + 1);
     }
 
+    $awaiting = null;
+
     $phids = null;
     switch ($this->filter) {
       case 'user':
@@ -312,6 +314,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
           throw new Exception("Invalid user!");
         }
         $phids = PhabricatorAuditCommentEditor::loadAuditPHIDsForUser($obj);
+        $awaiting = $obj;
         break;
       case 'project':
       case 'package':
@@ -325,6 +328,10 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
 
     if ($phids) {
       $query->withAuditorPHIDs($phids);
+    }
+
+    if ($awaiting) {
+      $query->withAwaitingUser($awaiting);
     }
 
     switch ($this->filter) {

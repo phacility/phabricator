@@ -12,6 +12,7 @@ phutil_require_module('phabricator', 'infrastructure/diff/view/inline');
 phutil_require_module('phabricator', 'view/base');
 phutil_require_module('phabricator', 'view/layout/transaction');
 
+phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
 
 
