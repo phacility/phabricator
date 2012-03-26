@@ -216,7 +216,7 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
     $symbols = explode("\n", trim($symbols));
     foreach ($symbols as $line) {
       $matches = null;
-      if (!preg_match('/^([?+])([^:]*):(\d+)$/', $line, $matches)) {
+      if (!preg_match('/^([?+\*])([^:]*):(\d+)$/', $line, $matches)) {
         throw new Exception(
           "Received malformed output from `javelinsymbols`.");
       }
