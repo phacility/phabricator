@@ -58,25 +58,26 @@ abstract class DiffusionQuery {
 /* -(  Query Utilities  )---------------------------------------------------- */
 
 
-  final protected function loadHistoryForCommitIdentifiers(array $identifiers) {
+  final protected function loadCommitsByIdentifiers(array $identifiers) {
     if (!$identifiers) {
       return array();
     }
 
     $commits = array();
     $commit_data = array();
-    $path_changes = array();
 
     $drequest = $this->getRequest();
     $repository = $drequest->getRepository();
-
-    $path = $drequest->getPath();
 
     $commits = id(new PhabricatorRepositoryCommit())->loadAllWhere(
       'repositoryID = %d AND commitIdentifier IN (%Ls)',
         $repository->getID(),
       $identifiers);
     $commits = mpull($commits, null, 'getCommitIdentifier');
+
+    // Reorder the commits in identifier order so we preserve nth-parent
+    // relationships when the identifiers are the parents of a merge commit.
+    $commits = array_select_keys($commits, $identifiers);
 
     if (!$commits) {
       return array();
@@ -86,6 +87,27 @@ abstract class DiffusionQuery {
       'commitID in (%Ld)',
       mpull($commits, 'getID'));
     $commit_data = mpull($commit_data, null, 'getCommitID');
+
+    foreach ($commits as $commit) {
+      if (idx($commit_data, $commit->getID())) {
+        $commit->attachCommitData($commit_data[$commit->getID()]);
+      }
+    }
+
+    return $commits;
+  }
+
+  final protected function loadHistoryForCommitIdentifiers(array $identifiers) {
+    if (!$identifiers) {
+      return array();
+    }
+
+    $drequest = $this->getRequest();
+    $repository = $drequest->getRepository();
+    $commits = self::loadCommitsByIdentifiers($identifiers);
+
+
+    $path = $drequest->getPath();
 
     $conn_r = $repository->establishConnection('r');
 
@@ -113,9 +135,10 @@ abstract class DiffusionQuery {
       $commit = idx($commits, $identifier);
       if ($commit) {
         $item->setCommit($commit);
-        $data = idx($commit_data, $commit->getID());
-        if ($data) {
-          $item->setCommitData($data);
+        try {
+          $item->setCommitData($commit->getCommitData());
+        } catch (Exception $ex) {
+          // Ignore, commit just doesn't have data.
         }
         $change = idx($path_changes, $commit->getID());
         if ($change) {

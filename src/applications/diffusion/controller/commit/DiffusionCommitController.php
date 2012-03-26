@@ -74,22 +74,29 @@ final class DiffusionCommitController extends DiffusionController {
       require_celerity_resource('diffusion-commit-view-css');
       require_celerity_resource('phabricator-remarkup-css');
 
-      $property_table = $this->renderPropertyTable($commit, $commit_data);
+      $parent_query = DiffusionCommitParentsQuery::newFromDiffusionRequest(
+        $drequest);
+      $parents = $parent_query->loadParents();
+
+      $property_table = $this->renderPropertyTable(
+        $commit,
+        $commit_data,
+        $parents);
+
+      $detail_panel->setHeader('Revision Detail');
+      $detail_panel->addButton(
+        '<div class="diffusion-commit-dateline">'.
+          'r'.$callsign.$commit->getCommitIdentifier().
+          ' &middot; '.
+          phabricator_datetime($commit->getEpoch(), $user).
+        '</div>');
 
       $detail_panel->appendChild(
-        '<div class="diffusion-commit-view">'.
-          '<div class="diffusion-commit-dateline">'.
-            'r'.$callsign.$commit->getCommitIdentifier().
-            ' &middot; '.
-            phabricator_datetime($commit->getEpoch(), $user).
-          '</div>'.
-          '<h1>Revision Detail</h1>'.
-          '<div class="diffusion-commit-details">'.
-            $property_table.
-            '<hr />'.
-            '<div class="diffusion-commit-message phabricator-remarkup">'.
-              $engine->markupText($commit_data->getCommitMessage()).
-            '</div>'.
+        '<div class="diffusion-commit-details">'.
+          $property_table.
+          '<hr />'.
+          '<div class="diffusion-commit-message phabricator-remarkup">'.
+            $engine->markupText($commit_data->getCommitMessage()).
           '</div>'.
         '</div>');
 
@@ -268,7 +275,8 @@ final class DiffusionCommitController extends DiffusionController {
 
   private function renderPropertyTable(
     PhabricatorRepositoryCommit $commit,
-    PhabricatorRepositoryCommitData $data) {
+    PhabricatorRepositoryCommitData $data,
+    array $parents) {
 
     $phids = array();
     if ($data->getCommitDetail('authorPHID')) {
@@ -279,6 +287,11 @@ final class DiffusionCommitController extends DiffusionController {
     }
     if ($data->getCommitDetail('differential.revisionPHID')) {
       $phids[] = $data->getCommitDetail('differential.revisionPHID');
+    }
+    if ($parents) {
+      foreach ($parents as $parent) {
+        $phids[] = $parent->getPHID();
+      }
     }
 
     $handles = array();
@@ -312,6 +325,14 @@ final class DiffusionCommitController extends DiffusionController {
     if ($commit->getAuditStatus()) {
       $props['Audit'] = PhabricatorAuditCommitStatusConstants::getStatusName(
         $commit->getAuditStatus());
+    }
+
+    if ($parents) {
+      $parent_links = array();
+      foreach ($parents as $parent) {
+        $parent_links[] = $handles[$parent->getPHID()]->renderLink();
+      }
+      $props['Parents'] = implode(' &middot; ', $parent_links);
     }
 
     $request = $this->getDiffusionRequest();

@@ -20,6 +20,7 @@ phutil_require_module('phabricator', 'applications/diffusion/controller/base');
 phutil_require_module('phabricator', 'applications/diffusion/data/pathchange');
 phutil_require_module('phabricator', 'applications/diffusion/query/contains/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/mergedcommits/base');
+phutil_require_module('phabricator', 'applications/diffusion/query/parents/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/path');
 phutil_require_module('phabricator', 'applications/diffusion/query/pathchange/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/pathid/base');
