@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'applications/chatlog/storage/event');
+phutil_require_module('phabricator', 'infrastructure/query/offsetpaged');
 phutil_require_module('phabricator', 'storage/qsprintf');
 phutil_require_module('phabricator', 'storage/queryfx');
 

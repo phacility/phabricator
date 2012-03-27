@@ -27,13 +27,19 @@ final class PhabricatorChatLogChannelLogController
 
   public function processRequest() {
 
-    $request = $this->getRequest();
-    $user = $request->getUser();
+    $request     = $this->getRequest();
+    $user        = $request->getUser();
+    $offset      = $request->getInt('offset', 0);
+    $page_size   = 1000;
+    $pager       = new AphrontPagerView();
+    $request_uri = $request->getRequestURI();
+    $pager->setURI($request_uri, 'offset');
+    $pager->setPageSize($page_size);
+    $pager->setOffset($offset);
 
     $query = new PhabricatorChatLogQuery();
     $query->withChannels(array($this->channel));
-    $query->setLimit(1000);
-    $logs = $query->execute();
+    $logs = $query->executeWithPager($pager);
 
     require_celerity_resource('phabricator-chatlog-css');
 
@@ -78,7 +84,10 @@ final class PhabricatorChatLogChannelLogController
 
 
     return $this->buildStandardPageResponse(
-      implode("\n", $out),
+      array(
+        implode("\n", $out),
+        $pager
+      ),
       array(
         'title' => 'Channel Log',
       ));

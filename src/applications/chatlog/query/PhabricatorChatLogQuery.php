@@ -16,35 +16,20 @@
  * limitations under the License.
  */
 
-final class PhabricatorChatLogQuery {
-
+final class PhabricatorChatLogQuery extends PhabricatorOffsetPagedQuery {
   private $channels;
-
-  private $limit;
 
   public function withChannels(array $channels) {
     $this->channels = $channels;
     return $this;
   }
 
-  public function setLimit($limit) {
-    $this->limit = $limit;
-    return $this;
-  }
-
   public function execute() {
-    $table = new PhabricatorChatLogEvent();
+    $table  = new PhabricatorChatLogEvent();
     $conn_r = $table->establishConnection('r');
 
     $where_clause = $this->buildWhereClause($conn_r);
-
-    $limit_clause = '';
-    if ($this->limit) {
-      $limit_clause = qsprintf(
-        $conn_r,
-        'LIMIT %d',
-        $this->limit);
-    }
+    $limit_clause = $this->buildLimitClause($conn_r);
 
     $data = queryfx_all(
       $conn_r,
@@ -76,5 +61,4 @@ final class PhabricatorChatLogQuery {
 
     return $where;
   }
-
 }

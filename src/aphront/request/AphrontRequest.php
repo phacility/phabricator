@@ -303,7 +303,8 @@ final class AphrontRequest {
   final public function getRequestURI() {
     $get = $_GET;
     unset($get['__path__']);
-    return id(new PhutilURI($this->getPath()))->setQueryParams($get);
+    $path = phutil_escape_uri($this->getPath());
+    return id(new PhutilURI($path))->setQueryParams($get);
   }
 
   final public function isDialogFormPost() {
