@@ -26,10 +26,19 @@ phutil_require_module('phutil', 'future/exec');
 PhutilServiceProfiler::installEchoListener();
 
 $allocator = new DrydockAllocator();
-$allocator->setResourceType('host');
+$allocator->makeSynchronous();
+$allocator->setResourceType('webroot');
 $lease = $allocator->allocate();
 
 $lease->waitUntilActive();
+
+
+$cmd = $lease->getInterface('webroot');
+echo "URI: ".$cmd->getURI()."\n";
+
+$lease->release();
+
+die("Done.\n");
 
 $i_file = $lease->getInterface('command');
 

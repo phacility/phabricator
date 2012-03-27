@@ -398,6 +398,7 @@ class AphrontDefaultApplicationConfiguration
           'edit/(?P<id>\d+)/' => 'DrydockhostEditController',
         ),
         'lease/' => 'DrydockLeaseListController',
+        'log/' => 'DrydockLogController',
       ),
 
       '/chatlog/' => array(

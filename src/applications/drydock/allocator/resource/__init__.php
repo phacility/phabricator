@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/drydock/allocator/worker');
 phutil_require_module('phabricator', 'applications/drydock/constants/leasestatus');
 phutil_require_module('phabricator', 'applications/drydock/storage/lease');
 phutil_require_module('phabricator', 'infrastructure/daemon/workers/storage/task');

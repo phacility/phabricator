@@ -36,6 +36,15 @@ final class DrydockLease extends DrydockDAO {
     ) + parent::getConfiguration();
   }
 
+  public function setAttribute($key, $value) {
+    $this->attributes[$key] = $value;
+    return $this;
+  }
+
+  public function getAttribute($key, $default = null) {
+    return idx($this->attributes, $key, $default);
+  }
+
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorPHIDConstants::PHID_TYPE_DRYL);
@@ -87,6 +96,7 @@ final class DrydockLease extends DrydockDAO {
   }
 
   public function waitUntilActive() {
+    $this->reload();
     while (true) {
       switch ($this->status) {
         case DrydockLeaseStatus::STATUS_ACTIVE:

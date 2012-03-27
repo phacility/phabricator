@@ -9,7 +9,7 @@
 phutil_require_module('phabricator', 'applications/drydock/blueprint/remotehost');
 phutil_require_module('phabricator', 'applications/drydock/constants/resourcestatus');
 phutil_require_module('phabricator', 'applications/drydock/interface/command/ssh');
-phutil_require_module('phabricator', 'applications/drydock/storage/resource');
+phutil_require_module('phabricator', 'applications/drydock/storage/lease');
 phutil_require_module('phabricator', 'infrastructure/env');
 
 phutil_require_module('phutil', 'future/aws/ec2');

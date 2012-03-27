@@ -22,16 +22,8 @@ final class DrydockEC2HostBlueprint extends DrydockRemoteHostBlueprint {
     return true;
   }
 
-  public function allocateResource() {
-
-    echo "ALLOCATING EC2 HOST!\n";
-
-    $resource = new DrydockResource();
-    $resource->setBlueprintClass(get_class($this));
-    $resource->setType($this->getType());
-    $resource->setStatus(DrydockResourceStatus::STATUS_PENDING);
-    $resource->setName('EC2 Host');
-    $resource->save();
+  public function executeAllocateResource() {
+    $resource = $this->newResourceTemplate('EC2 Host');
 
     $resource->setStatus(DrydockResourceStatus::STATUS_ALLOCATING);
     $resource->save();
@@ -49,7 +41,9 @@ final class DrydockEC2HostBlueprint extends DrydockRemoteHostBlueprint {
 
     $instance_id = (string)$xml->instancesSet[0]->item[0]->instanceId[0];
 
-    echo "instance id: ".$instance_id."\n";
+    $this->log('Started Instance: {$instance_id}');
+    $resource->setAttribute('instance.id', $instance_id);
+    $resource->save();
 
     $n = 1;
     do {
@@ -59,25 +53,23 @@ final class DrydockEC2HostBlueprint extends DrydockRemoteHostBlueprint {
           'InstanceId.1' => $instance_id,
         ));
 
-      var_dump($xml);
-
       $instance = $xml->reservationSet[0]->item[0]->instancesSet[0]->item[0];
 
       $state = (string)$instance->instanceState[0]->name;
-
-      echo "State = {$state}\n";
 
       if ($state == 'pending') {
         sleep(min($n++, 15));
       } else if ($state == 'running') {
         break;
       } else {
-        // TODO: Communicate this failure.
+        $this->log("EC2 host reported in unknown state '{$state}'.");
+
         $resource->setStatus(DrydockResourceStatus::STATUS_BROKEN);
         $resource->save();
       }
     } while (true);
 
+    $this->log('Waiting for Init');
 
     $n = 1;
     do {
@@ -86,8 +78,6 @@ final class DrydockEC2HostBlueprint extends DrydockRemoteHostBlueprint {
         array(
           'InstanceId' => $instance_id,
         ));
-
-      var_dump($xml);
 
       $item = $xml->instanceStatusSet[0]->item[0];
 
@@ -101,16 +91,14 @@ final class DrydockEC2HostBlueprint extends DrydockRemoteHostBlueprint {
                  ($instance_status == 'ok')) {
         break;
       } else {
-        // TODO: Communicate this failure.
+        $this->log(
+          "EC2 system and instance status in bad states: ".
+          "'{$system_status}', '{$instance_status}'.");
+
         $resource->setStatus(DrydockResourceStatus::STATUS_BROKEN);
         $resource->save();
       }
     } while (true);
-
-    // TODO: This is a fuzz factor because sshd doesn't come up immediately
-    // once EC2 reports the machine reachable. Validate that SSH is actually
-    // responsive.
-    sleep(120);
 
     $resource->setAttributes(
       array(
@@ -119,6 +107,24 @@ final class DrydockEC2HostBlueprint extends DrydockRemoteHostBlueprint {
         'ssh-keyfile'   => '/Users/epriestley/.ssh/id_ec2w',
       ));
     $resource->setName($resource->getName().' ('.$instance->dnsName.')');
+    $resource->save();
+
+    $this->log('Waiting for SSH');
+
+    // SSH isn't immediately responsive, so wait for it to actually come up.
+    $cmd = $this->getInterface($resource, new DrydockLease(), 'command');
+    $n = 1;
+    do {
+      list($err) = $cmd->exec('true');
+      if ($err) {
+        sleep(min($n++, 15));
+      } else {
+        break;
+      }
+    } while (true);
+
+    $this->log('SSH OK');
+
     $resource->setStatus(DrydockResourceStatus::STATUS_OPEN);
     $resource->save();
 

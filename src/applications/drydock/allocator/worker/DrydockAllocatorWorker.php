@@ -40,7 +40,6 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
       $resource = head($candidates);
     } else {
       $blueprints = DrydockBlueprint::getAllBlueprintsForResource($type);
-
       foreach ($blueprints as $key => $blueprint) {
         if (!$blueprint->canAllocateResources()) {
           unset($blueprints[$key]);
@@ -52,11 +51,11 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
         $lease->setStatus(DrydockLeaseStatus::STATUS_BROKEN);
         $lease->save();
 
-/* TODO
-        $lease->updateLog(
+        DrydockBlueprint::writeLog(
+          null,
+          $lease,
           "There are no resources of type '{$type}' available, and no ".
           "blueprints which can allocate new ones.");
-*/
 
         return;
       }
@@ -65,12 +64,16 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
       shuffle($blueprints);
 
       $blueprint = head($blueprints);
+
+      if (isset($data['synchronous'])) {
+        $blueprint->makeSynchronous();
+      }
+
       $resource = $blueprint->allocateResource();
     }
 
-    $lease->setResourceID($resource->getID());
-    $lease->setStatus(DrydockLeaseStatus::STATUS_ACTIVE);
-    $lease->save();
+    $blueprint = $resource->getBlueprint();
+    $blueprint->acquireLease($resource, $lease);
   }
 
 }

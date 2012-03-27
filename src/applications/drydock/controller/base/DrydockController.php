@@ -43,28 +43,14 @@ abstract class DrydockController extends PhabricatorController {
   }
 
   final protected function buildSideNav($selected) {
-    $items = array(
-      'resourcelist' => array(
-        'href' => '/drydock/resource/',
-        'name' =>  'Resources',
-      ),
-      'leaselist' => array(
-        'href' => '/drydock/lease/',
-        'name' => 'Leases',
-      ),
-    );
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI('/drydock/'));
+    $nav->addFilter('resource', 'Resources');
+    $nav->addFilter('lease',    'Leases');
+    $nav->addSpacer();
+    $nav->addFilter('log',      'Logs');
 
-    $nav = new AphrontSideNavView();
-    foreach ($items as $key => $info) {
-      $nav->addNavItem(
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => $info['href'],
-            'class' => ($key == $selected ? 'aphront-side-nav-selected' : null),
-          ),
-          phutil_escape_html($info['name'])));
-    }
+    $nav->selectFilter($selected, 'resource');
 
     return $nav;
   }

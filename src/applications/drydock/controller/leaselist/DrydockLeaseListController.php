@@ -22,7 +22,7 @@ final class DrydockLeaseListController extends DrydockController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $nav = $this->buildSideNav('leaselist');
+    $nav = $this->buildSideNav('lease');
 
     $pager = new AphrontPagerView();
     $pager->setURI(new PhutilURI('/drydock/lease/'), 'page');

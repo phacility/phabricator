@@ -6,6 +6,12 @@
 
 
 
+phutil_require_module('phabricator', 'applications/drydock/allocator/resource');
+phutil_require_module('phabricator', 'applications/drydock/constants/leasestatus');
+phutil_require_module('phabricator', 'applications/drydock/constants/resourcestatus');
+phutil_require_module('phabricator', 'applications/drydock/storage/log');
+phutil_require_module('phabricator', 'applications/drydock/storage/resource');
+
 phutil_require_module('phutil', 'symbols');
 phutil_require_module('phutil', 'utils');
 

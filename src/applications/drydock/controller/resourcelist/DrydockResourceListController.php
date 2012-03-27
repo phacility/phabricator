@@ -22,7 +22,7 @@ final class DrydockResourceListController extends DrydockController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $nav = $this->buildSideNav('resourcelist');
+    $nav = $this->buildSideNav('resource');
 
     $pager = new AphrontPagerView();
     $pager->setURI(new PhutilURI('/drydock/resource/'), 'page');

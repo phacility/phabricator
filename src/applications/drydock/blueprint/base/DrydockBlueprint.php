@@ -18,18 +18,112 @@
 
 abstract class DrydockBlueprint {
 
+  private $activeLease;
+  private $activeResource;
+  private $synchronous;
+
+  final public function makeSynchronous() {
+    $this->synchronous = true;
+  }
+
   abstract public function getType();
   abstract public function getInterface(
     DrydockResource $resource,
     DrydockLease $lease,
     $type);
 
+  protected function executeAcquireLease(
+    DrydockResource $resource,
+    DrydockLease $lease) {
+    return;
+  }
+
+  protected function getAllocator($type) {
+    $allocator = new DrydockAllocator();
+    if ($this->synchronous) {
+      $allocator->makeSynchronous();
+    }
+    $allocator->setResourceType($type);
+
+    return $allocator;
+  }
+
+  final public function acquireLease(
+    DrydockResource $resource,
+    DrydockLease $lease) {
+
+    $this->activeResource   = $resource;
+    $this->activeLease      = $lease;
+
+    $this->log('Acquiring Lease');
+    try {
+      $this->executeAcquireLease($resource, $lease);
+    } catch (Exception $ex) {
+      $this->logException($ex);
+      $this->activeResource   = null;
+      $this->activeLease      = null;
+
+      throw $ex;
+    }
+
+    $lease->setResourceID($resource->getID());
+    $lease->setStatus(DrydockLeaseStatus::STATUS_ACTIVE);
+    $lease->save();
+
+    $this->activeResource   = null;
+    $this->activeLease      = null;
+  }
+
+  protected function logException(Exception $ex) {
+    $this->log($ex->getMessage());
+  }
+
+  protected function log($message) {
+    self::writeLog(
+      $this->activeResource,
+      $this->activeLease,
+      $message);
+  }
+
+  public static function writeLog(
+    DrydockResource $resource = null,
+    DrydockLease $lease = null,
+    $message) {
+
+    $log = id(new DrydockLog())
+      ->setEpoch(time())
+      ->setMessage($message);
+
+    if ($resource) {
+      $log->setResourceID($resource->getID());
+    }
+
+    if ($lease) {
+      $log->setLeaseID($lease->getID());
+    }
+
+    $log->save();
+  }
+
   public function canAllocateResources() {
     return false;
   }
 
-  public function allocateResource() {
+  protected function executeAllocateResource() {
     throw new Exception("This blueprint can not allocate resources!");
+  }
+
+  final public function allocateResource() {
+    try {
+      $resource = $this->executeAllocateResource();
+    } catch (Exception $ex) {
+      $this->logException($ex);
+      $this->activeResource = null;
+
+      throw $ex;
+    }
+
+    return $resource;
   }
 
   public static function getAllBlueprints() {
@@ -57,5 +151,20 @@ abstract class DrydockBlueprint {
     }
     return idx($groups, $type, array());
   }
+
+  protected function newResourceTemplate($name) {
+    $resource = new DrydockResource();
+    $resource->setBlueprintClass(get_class($this));
+    $resource->setType($this->getType());
+    $resource->setStatus(DrydockResourceStatus::STATUS_PENDING);
+    $resource->setName($name);
+    $resource->save();
+
+    $this->activeResource = $resource;
+    $this->log('New Template');
+
+    return $resource;
+  }
+
 
 }

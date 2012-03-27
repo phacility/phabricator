@@ -29,7 +29,6 @@ final class DrydockResource extends DrydockDAO {
   protected $capabilities = array();
   protected $ownerPHID;
 
-
   private $blueprint;
 
   public function getConfiguration() {
@@ -49,6 +48,11 @@ final class DrydockResource extends DrydockDAO {
 
   public function getAttribute($key, $default = null) {
     return idx($this->attributes, $key, $default);
+  }
+
+  public function setAttribute($key, $value) {
+    $this->attributes[$key] = $value;
+    return $this;
   }
 
   public function getCapability($key, $default = null) {
