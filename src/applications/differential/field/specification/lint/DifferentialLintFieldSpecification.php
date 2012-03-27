@@ -197,4 +197,32 @@ final class DifferentialLintFieldSpecification
     return "Show Full Lint Results (".implode(', ', $show).")";
   }
 
+  public function renderWarningBoxForRevisionAccept() {
+    $diff = $this->getDiff();
+    $lint_warning = null;
+    if ($diff->getLintStatus() >= DifferentialLintStatus::LINT_WARN) {
+      $titles =
+        array(
+          DifferentialLintStatus::LINT_WARN => 'Lint Warning',
+          DifferentialLintStatus::LINT_FAIL => 'Lint Failure',
+          DifferentialLintStatus::LINT_SKIP => 'Lint Skipped'
+        );
+      if ($diff->getLintStatus() == DifferentialLintStatus::LINT_SKIP) {
+        $content =
+          "<p>This diff was created without running lint. Make sure you are ".
+          "OK with that before you accept this diff.</p>";
+      } else {
+        $content =
+          "<p>This diff has Lint Problems. Make sure you are OK with them ".
+          "before you accept this diff.</p>";
+      }
+      $lint_warning = id(new AphrontErrorView())
+        ->setSeverity(AphrontErrorView::SEVERITY_ERROR)
+        ->setWidth(AphrontErrorView::WIDTH_WIDE)
+        ->appendChild($content)
+        ->setTitle(idx($titles, $diff->getLintStatus(), 'Warning'));
+    }
+    return $lint_warning;
+  }
+
 }

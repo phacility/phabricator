@@ -265,6 +265,18 @@ abstract class DifferentialFieldSpecification {
   }
 
 
+  /**
+   * Return a markup block representing a warning to display with the comment
+   * box when preparing to accept a diff. A return value of null indicates no
+   * warning box should be displayed for this field.
+   *
+   * @return string|null Display markup for warning box, or null for no warning
+   */
+  public function renderWarningBoxForRevisionAccept() {
+    return null;
+  }
+
+
 /* -(  Extending the Revision List Interface  )------------------------------ */
 
 

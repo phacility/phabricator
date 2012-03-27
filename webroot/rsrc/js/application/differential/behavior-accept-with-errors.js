@@ -23,6 +23,5 @@ JX.behavior('differential-accept-with-errors', function(config) {
     }
   }
 
-  toggleWarning(config.unit_warning);
-  toggleWarning(config.lint_warning);
+  toggleWarning(config.warnings);
 });

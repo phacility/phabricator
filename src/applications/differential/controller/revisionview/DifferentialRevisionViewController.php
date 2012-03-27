@@ -312,6 +312,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
       $comment_form = new DifferentialAddCommentView();
       $comment_form->setRevision($revision);
+      $comment_form->setAuxFields($aux_fields);
       $comment_form->setActions($this->getRevisionCommentActions($revision));
       $comment_form->setActionURI('/differential/comment/save/');
       $comment_form->setUser($user);

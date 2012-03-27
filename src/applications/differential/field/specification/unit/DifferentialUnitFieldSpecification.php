@@ -182,4 +182,38 @@ final class DifferentialUnitFieldSpecification
     return "Show Full Unit Results (".implode(', ', $show).")";
   }
 
+  public function renderWarningBoxForRevisionAccept() {
+    $diff = $this->getDiff();
+    $unit_warning = null;
+    if ($diff->getUnitStatus() >= DifferentialUnitStatus::UNIT_WARN) {
+      $titles =
+        array(
+          DifferentialUnitStatus::UNIT_WARN => 'Unit Tests Warning',
+          DifferentialUnitStatus::UNIT_FAIL => 'Unit Tests Failure',
+          DifferentialUnitStatus::UNIT_SKIP => 'Unit Tests Skipped',
+          DifferentialUnitStatus::UNIT_POSTPONED => 'Unit Tests Postponed'
+        );
+      if ($diff->getUnitStatus() == DifferentialUnitStatus::UNIT_POSTPONED) {
+        $content =
+          "<p>This diff has postponed unit tests. The results should be ".
+          "coming in soon. You should probably wait for them before accepting ".
+          "this diff.</p>";
+      } else if ($diff->getUnitStatus() == DifferentialUnitStatus::UNIT_SKIP) {
+        $content =
+          "<p>Unit tests were skipped when this diff was created. Make sure ".
+          "you are OK with that before you accept this diff.</p>";
+      } else {
+        $content =
+          "<p>This diff has Unit Test Problems. Make sure you are OK with ".
+          "them before you accept this diff.</p>";
+      }
+      $unit_warning = id(new AphrontErrorView())
+        ->setSeverity(AphrontErrorView::SEVERITY_ERROR)
+        ->setWidth(AphrontErrorView::WIDTH_WIDE)
+        ->appendChild($content)
+        ->setTitle(idx($titles, $diff->getUnitStatus(), 'Warning'));
+    }
+    return $unit_warning;
+  }
+
 }

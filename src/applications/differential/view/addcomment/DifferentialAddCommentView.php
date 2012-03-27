@@ -23,9 +23,16 @@ final class DifferentialAddCommentView extends AphrontView {
   private $actionURI;
   private $user;
   private $draft;
+  private $auxFields;
 
   public function setRevision($revision) {
     $this->revision = $revision;
+    return $this;
+  }
+
+  public function setAuxFields(array $aux_fields) {
+    assert_instances_of($aux_fields, 'DifferentialFieldSpecification');
+    $this->auxFields = $aux_fields;
     return $this;
   }
 
@@ -144,66 +151,15 @@ final class DifferentialAddCommentView extends AphrontView {
       ));
 
     $diff = $revision->loadActiveDiff();
+    $warnings = mpull($this->auxFields, 'renderWarningBoxForRevisionAccept');
     $lint_warning = null;
     $unit_warning = null;
-    if ($diff->getLintStatus() >= DifferentialLintStatus::LINT_WARN) {
-      $titles =
-        array(
-          DifferentialLintStatus::LINT_WARN => 'Lint Warning',
-          DifferentialLintStatus::LINT_FAIL => 'Lint Failure',
-          DifferentialLintStatus::LINT_SKIP => 'Lint Skipped'
-        );
-      if ($diff->getLintStatus() == DifferentialLintStatus::LINT_SKIP) {
-        $content =
-          "<p>This diff was created without running lint. Make sure you are ".
-          "OK with that before you accept this diff.</p>";
-      } else {
-        $content =
-          "<p>This diff has Lint Problems. Make sure you are OK with them ".
-          "before you accept this diff.</p>";
-      }
-      $lint_warning = $this->generateWarningView(
-        $diff->getLintStatus(),
-        $titles,
-        'lint-warning',
-        $content);
-    }
-
-    if ($diff->getUnitStatus() >= DifferentialUnitStatus::UNIT_WARN) {
-      $titles =
-        array(
-          DifferentialUnitStatus::UNIT_WARN => 'Unit Tests Warning',
-          DifferentialUnitStatus::UNIT_FAIL => 'Unit Tests Failure',
-          DifferentialUnitStatus::UNIT_SKIP => 'Unit Tests Skipped',
-          DifferentialUnitStatus::UNIT_POSTPONED => 'Unit Tests Postponed'
-        );
-      if ($diff->getUnitStatus() == DifferentialUnitStatus::UNIT_POSTPONED) {
-        $content =
-          "<p>This diff has postponed unit tests. The results should be ".
-          "coming in soon. You should probably wait for them before accepting ".
-          "this diff.</p>";
-      } else if ($diff->getUnitStatus() == DifferentialUnitStatus::UNIT_SKIP) {
-        $content =
-          "<p>Unit tests were skipped when this diff was created. Make sure ".
-          "you are OK with that before you accept this diff.</p>";
-      } else {
-        $content =
-          "<p>This diff has Unit Test Problems. Make sure you are OK with ".
-          "them before you accept this diff.</p>";
-      }
-      $unit_warning = $this->generateWarningView(
-        $diff->getUnitStatus(),
-        $titles,
-        'unit-warning',
-        $content);
-    }
 
     Javelin::initBehavior(
       'differential-accept-with-errors',
       array(
         'select' => 'comment-action',
-        'lint_warning' => $lint_warning ? 'lint-warning' : null,
-        'unit_warning' => $unit_warning ? 'unit-warning' : null,
+        'warnings' => 'warnings',
       ));
 
     $rev_id = $revision->getID();
@@ -226,6 +182,14 @@ final class DifferentialAddCommentView extends AphrontView {
 
     $panel_view = new AphrontPanelView();
     $panel_view->appendChild($form);
+    $warning_container = '<div id="warnings">';
+    foreach ($warnings as $warning) {
+      if ($warning) {
+        $warning_container .= $warning->render();
+      }
+    }
+    $warning_container .= '</div>';
+    $panel_view->appendChild($warning_container);
     if ($lint_warning) {
       $panel_view->appendChild($lint_warning);
     }
