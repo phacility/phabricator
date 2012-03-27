@@ -347,3 +347,17 @@ tr.differential-inline-hidden {
 tr.differential-inline-loading {
   opacity: 0.5;
 }
+
+
+/*  In the document, the anchor is positioned inside the inline comment, but
+    this makes the browser jump into the comment so the top isn't visible.
+    Instead, artificially position it a bit above the comment so we'll jump a
+    bit before the comment. This allows us to see the entire comment (and
+    generally the commented-on lines, at least in the case of one or two-line
+    comments) after the jump.
+*/
+.differential-inline-comment-anchor {
+  position: absolute;
+  display: block;
+  margin-top: -72px;
+}
