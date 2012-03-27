@@ -6,9 +6,7 @@
 
 
 
-phutil_require_module('phabricator', 'applications/repository/constants/repositorytype');
-
-phutil_require_module('phutil', 'symbols');
+phutil_require_module('phabricator', 'applications/diffusion/query/base');
 
 
 phutil_require_source('DiffusionLastModifiedQuery.php');

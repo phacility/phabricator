@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,11 @@ final class DiffusionSvnLastModifiedQuery extends DiffusionLastModifiedQuery {
     $history_query->needChildChanges(true);
     $history_query->needDirectChanges(true);
     $history_array = $history_query->loadHistory();
+
+    if (!$history_array) {
+      return array(null, null);
+    }
+
     $history = reset($history_array);
 
     return array($history->getCommit(), $history->getCommitData());

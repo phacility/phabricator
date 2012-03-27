@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,44 +16,13 @@
  * limitations under the License.
  */
 
-abstract class DiffusionDiffQuery {
+abstract class DiffusionDiffQuery extends DiffusionQuery {
 
-  private $request;
   protected $renderingReference;
-
-  final private function __construct() {
-    // <private>
-  }
 
   final public static function newFromDiffusionRequest(
     DiffusionRequest $request) {
-
-    $repository = $request->getRepository();
-
-    switch ($repository->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        $class = 'DiffusionGitDiffQuery';
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $class = 'DiffusionMercurialDiffQuery';
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        $class = 'DiffusionSvnDiffQuery';
-        break;
-      default:
-        throw new Exception("Unsupported VCS!");
-    }
-
-    PhutilSymbolLoader::loadClass($class);
-    $query = new $class();
-
-    $query->request = $request;
-
-    return $query;
-  }
-
-  final protected function getRequest() {
-    return $this->request;
+    return parent::newQueryObject(__CLASS__, $request);
   }
 
   final public function getRenderingReference() {
@@ -63,8 +32,6 @@ abstract class DiffusionDiffQuery {
   final public function loadChangeset() {
     return $this->executeQuery();
   }
-
-  abstract protected function executeQuery();
 
   protected function getEffectiveCommit() {
     $drequest = $this->getRequest();
