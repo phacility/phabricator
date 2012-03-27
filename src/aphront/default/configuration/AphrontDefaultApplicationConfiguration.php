@@ -409,6 +409,13 @@ class AphrontDefaultApplicationConfiguration
       ),
 
       '/aphlict/' => 'PhabricatorAphlictTestPageController',
+
+      '/flag/' => array(
+        '' => 'PhabricatorFlagListController',
+        'view/(?P<view>[^/]+)/' => 'PhabricatorFlagListController',
+        'edit/(?P<phid>[^/]+)/' => 'PhabricatorFlagEditController',
+        'delete/(?P<id>\d+)/' => 'PhabricatorFlagDeleteController',
+      ),
     );
   }
 

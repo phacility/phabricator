@@ -253,6 +253,27 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $action->setClass('action-edit');
     $actions[] = $action;
 
+    require_celerity_resource('phabricator-flag-css');
+    $flag = PhabricatorFlagQuery::loadUserFlag($user, $task->getPHID());
+    if ($flag) {
+      $class = PhabricatorFlagColor::getCSSClass($flag->getColor());
+      $color = PhabricatorFlagColor::getColorName($flag->getColor());
+
+      $action = new AphrontHeadsupActionView();
+      $action->setClass('flag-clear '.$class);
+      $action->setURI('/flag/delete/'.$flag->getID().'/');
+      $action->setName('Remove '.$color.' Flag');
+      $action->setWorkflow(true);
+      $actions[] = $action;
+    } else {
+      $action = new AphrontHeadsupActionView();
+      $action->setClass('phabricator-flag-ghost');
+      $action->setURI('/flag/edit/'.$task->getPHID().'/');
+      $action->setName('Flag Task');
+      $action->setWorkflow(true);
+      $actions[] = $action;
+    }
+
     require_celerity_resource('phabricator-object-selector-css');
     require_celerity_resource('javelin-behavior-phabricator-object-selector');
 

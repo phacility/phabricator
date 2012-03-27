@@ -17,6 +17,8 @@ phutil_require_module('phabricator', 'applications/differential/view/revisionlis
 phutil_require_module('phabricator', 'applications/directory/controller/base');
 phutil_require_module('phabricator', 'applications/feed/builder/feed');
 phutil_require_module('phabricator', 'applications/feed/query');
+phutil_require_module('phabricator', 'applications/flag/query/flag');
+phutil_require_module('phabricator', 'applications/flag/view/list');
 phutil_require_module('phabricator', 'applications/maniphest/constants/priority');
 phutil_require_module('phabricator', 'applications/maniphest/query');
 phutil_require_module('phabricator', 'applications/maniphest/view/tasklist');

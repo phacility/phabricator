@@ -358,7 +358,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
   }
 
   private function getRevisionActions(DifferentialRevision $revision) {
-    $viewer_phid = $this->getRequest()->getUser()->getPHID();
+    $user = $this->getRequest()->getUser();
+    $viewer_phid = $user->getPHID();
     $viewer_is_owner = ($revision->getAuthorPHID() == $viewer_phid);
     $viewer_is_reviewer = in_array($viewer_phid, $revision->getReviewers());
     $viewer_is_cc = in_array($viewer_phid, $revision->getCCPHIDs());
@@ -378,6 +379,28 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     if (!$viewer_is_anonymous) {
+
+      require_celerity_resource('phabricator-flag-css');
+
+      $flag = PhabricatorFlagQuery::loadUserFlag($user, $revision_phid);
+      if ($flag) {
+        $class = PhabricatorFlagColor::getCSSClass($flag->getColor());
+        $color = PhabricatorFlagColor::getColorName($flag->getColor());
+        $links[] = array(
+          'class' => 'flag-clear '.$class,
+          'href'  => '/flag/delete/'.$flag->getID().'/',
+          'name'  => phutil_escape_html('Remove '.$color.' Flag'),
+          'sigil' => 'workflow',
+        );
+      } else {
+        $links[] = array(
+          'class' => 'flag-add phabricator-flag-ghost',
+          'href'  => '/flag/edit/'.$revision_phid.'/',
+          'name'  => 'Flag Revision',
+          'sigil' => 'workflow',
+        );
+      }
+
       if (!$viewer_is_owner && !$viewer_is_reviewer) {
         $action = $viewer_is_cc ? 'rem' : 'add';
         $links[] = array(
