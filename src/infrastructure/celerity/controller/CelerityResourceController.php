@@ -81,6 +81,7 @@ final class CelerityResourceController extends AphrontController {
     }
 
     $response = new AphrontFileResponse();
+    $data = $this->minifyData($data, $type);
     $response->setContent($data);
     switch ($type) {
       case 'css':
@@ -99,6 +100,44 @@ final class CelerityResourceController extends AphrontController {
     $response->setLastModified(time());
 
     return $response;
+  }
+
+  private function minifyData($data, $type) {
+    if (!PhabricatorEnv::getEnvConfig('celerity.minify')) {
+      return $data;
+    }
+
+    switch ($type) {
+      case 'css':
+        // Remove comments.
+        $data = preg_replace('@/\*.*?\*/@s', '', $data);
+        // Remove whitespace around symbols.
+        $data = preg_replace('@\s*([{}:;,])\s+@', '\1', $data);
+        // Remove unnecessary semicolons.
+        $data = preg_replace('@;}@', '}', $data);
+        // Replace #rrggbb with #rgb when possible.
+        $data = preg_replace(
+          '@#([a-f0-9])\1([a-f0-9])\2([a-f0-9])\3@i',
+          '#\1\2\3',
+          $data);
+        $data = trim($data);
+        break;
+      case 'js':
+        $root = dirname(phutil_get_library_root('phabricator'));
+        $bin = $root.'/externals/javelin/support/jsxmin/jsxmin';
+
+        if (@file_exists($bin)) {
+          $future = new ExecFuture("{$bin} __DEV__:0");
+          $future->write($data);
+          list($err, $result) = $future->resolve();
+          if (!$err) {
+            $data = $result;
+          }
+        }
+        break;
+    }
+
+    return $data;
   }
 
 }

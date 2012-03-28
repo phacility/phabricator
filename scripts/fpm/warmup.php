@@ -48,6 +48,9 @@ function __warmup__() {
   $loader = new PhutilSymbolLoader();
   $loader->selectAndLoadSymbols();
 
+  // Force load of the Celerity map.
+  CelerityResourceMap::getInstance();
+
   define('__WARMUP__', true);
 }
 

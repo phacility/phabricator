@@ -789,6 +789,10 @@ return array(
   // settings are the defaults.)
   'celerity.force-disk-reads' => false,
 
+  // Minify static resources by removing whitespace and comments. You should
+  // enable this in production, but disable it in development.
+  'celerity.minify' => false,
+
   // You can respond to various application events by installing listeners,
   // which will receive callbacks when interesting things occur. Specify a list
   // of classes which extend PhabricatorEventListener here.
