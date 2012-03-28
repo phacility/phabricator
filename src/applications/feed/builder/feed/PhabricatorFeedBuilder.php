@@ -59,16 +59,12 @@ final class PhabricatorFeedBuilder {
     require_celerity_resource('phabricator-feed-css');
 
     $last_date = null;
-    $today = phabricator_date(time(), $user);
     foreach ($stories as $story) {
       $story->setHandles($handles);
       $story->setObjects($objects);
       $story->setFramed($this->framed);
 
-      $date = phabricator_date($story->getEpoch(), $user);
-      if ($date == $today) {
-        $date = 'Today';
-      }
+      $date = ucfirst(phabricator_relative_date($story->getEpoch(), $user));
 
       if ($date !== $last_date) {
         if ($last_date !== null) {

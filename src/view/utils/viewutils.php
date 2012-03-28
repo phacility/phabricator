@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,33 @@ function phabricator_date($epoch, $user) {
     $epoch,
     $user,
     'M j Y');
+}
+
+function phabricator_on_relative_date($epoch, $user) {
+  return phabricator_relative_date($epoch, $user, true);
+}
+
+function phabricator_relative_date($epoch, $user, $on = false) {
+  static $today;
+  static $yesterday;
+
+  if (!$today || !$yesterday) {
+    $now = time();
+    $today = phabricator_date($now, $user);
+    $yesterday = phabricator_date($now - 86400, $user);
+  }
+
+  $date = phabricator_date($epoch, $user);
+
+  if ($date === $today) {
+    return 'today';
+  }
+
+  if ($date === $yesterday) {
+    return 'yesterday';
+  }
+
+  return (($on ? 'on ' : '').$date);
 }
 
 function phabricator_time($epoch, $user) {
