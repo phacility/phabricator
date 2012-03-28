@@ -784,7 +784,7 @@ abstract class LiskDAO {
    * Make an object read-only.
    *
    * Making an object ephemeral indicates that you will be changing state in
-   * such a way that you would never ever want it to be written to back to the
+   * such a way that you would never ever want it to be written back to the
    * storage.
    */
   public function makeEphemeral() {
