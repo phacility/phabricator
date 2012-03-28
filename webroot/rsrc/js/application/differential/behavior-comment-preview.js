@@ -47,7 +47,27 @@ JX.behavior('differential-feedback-preview', function(config) {
 
   function refreshInlinePreview() {
     new JX.Request(config.inlineuri, function(r) {
-        JX.DOM.setContent(JX.$(config.inline), JX.$H(r));
+        var inline = JX.$(config.inline);
+
+        JX.DOM.setContent(inline, JX.$H(r));
+
+        // Go through the previews and activate any "View" links where the
+        // actual comment appears in the document.
+
+        var links = JX.DOM.scry(
+          inline,
+          'a',
+          'differential-inline-preview-jump');
+        for (var ii = 0; ii < links.length; ii++) {
+          var data = JX.Stratcom.getData(links[ii]);
+          try {
+            JX.$(data.anchor);
+            links[ii].href = '#' + data.anchor;
+            JX.DOM.setContent(links[ii], 'View');
+          } catch (ignored) {
+            // This inline comment isn't visible, e.g. on some other diff.
+          }
+        }
       })
       .setTimeout(5000)
       .send();

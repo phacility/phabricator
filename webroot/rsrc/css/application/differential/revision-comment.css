@@ -10,8 +10,14 @@
   max-width: 1162px;
 }
 
-/* Spooky haunted panel which floats on the bottom of the screen. */
-.differential-haunted-panel .differential-add-comment-panel {
+/*  Spooky haunted panel which floats on the bottom of the screen.
+    Haunt modes are:
+
+      - Mode 1: Just the comment box.
+      - Mode 2: Comment box, comment preview, and inline comment previews.
+*/
+.differential-haunt-mode-1 .differential-add-comment-panel,
+.differential-haunt-mode-2 .differential-add-comment-panel {
   position: fixed;
   width: 100%;
   bottom: 0;
@@ -28,15 +34,20 @@
 
 }
 
-.differential-haunted-panel .differential-add-comment-panel h1 {
+.differential-haunt-mode-2 .differential-add-comment-panel {
+  max-height: 75%;
+}
+
+.differential-haunt-mode-1 .differential-add-comment-panel h1,
+.differential-haunt-mode-2 .differential-add-comment-panel h1 {
   display: none;
 }
 
-.differential-haunted-panel .aphront-panel-preview {
+.differential-haunt-mode-1 .aphront-panel-preview {
   display: none;
 }
 
-.differential-haunted-panel {
+.differential-haunt-mode-1 {
   padding-bottom: 250px;
 }
 
