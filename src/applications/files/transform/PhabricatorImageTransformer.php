@@ -23,8 +23,7 @@ final class PhabricatorImageTransformer {
     $x,
     $y) {
 
-    $data = $file->loadFileData();
-    $image = $this->crudelyScaleTo($data, $x, $y);
+    $image = $this->crudelyScaleTo($file, $x, $y);
 
     return PhabricatorFile::newFromFileData(
       $image,
@@ -39,8 +38,7 @@ final class PhabricatorImageTransformer {
     $min_y,
     $max_y) {
 
-    $data = $file->loadFileData();
-    $image = $this->crudelyCropTo($data, $x, $min_y, $max_y);
+    $image = $this->crudelyCropTo($file, $x, $min_y, $max_y);
 
     return PhabricatorFile::newFromFileData(
       $image,
@@ -49,7 +47,8 @@ final class PhabricatorImageTransformer {
       ));
   }
 
-  private function crudelyCropTo($data, $x, $min_y, $max_y) {
+  private function crudelyCropTo(PhabricatorFile $file, $x, $min_y, $max_y) {
+    $data = $file->loadFileData();
     $img = imagecreatefromstring($data);
     $sx = imagesx($img);
     $sy = imagesy($img);
@@ -68,18 +67,19 @@ final class PhabricatorImageTransformer {
       $x,
       $scaled_y);
 
-    return $this->saveImageDataInAnyFormat($img);
+    return $this->saveImageDataInAnyFormat($img, $file->getMimeType());
   }
 
   /**
    * Very crudely scale an image up or down to an exact size.
    */
-  private function crudelyScaleTo($data, $dx, $dy) {
+  private function crudelyScaleTo(PhabricatorFile $file, $dx, $dy) {
+    $data = $file->loadFileData();
     $src = imagecreatefromstring($data);
 
     $dst = $this->applyScaleTo($src, $dx, $dy);
 
-    return $this->saveImageDataInAnyFormat($dst);
+    return $this->saveImageDataInAnyFormat($dst, $file->getMimeType());
   }
 
   private function applyScaleTo($src, $dx, $dy) {
@@ -105,7 +105,26 @@ final class PhabricatorImageTransformer {
     return $dst;
   }
 
-  private function saveImageDataInAnyFormat($data) {
+  private function saveImageDataInAnyFormat($data, $preferred_mime = '') {
+    switch ($preferred_mime) {
+      case 'image/jpg':
+      case 'image/jpeg':
+        if (function_exists('imagejpeg')) {
+          ob_start();
+          imagejpeg($data);
+          return ob_get_clean();
+        }
+        break;
+      case 'image/gif': // GIF doesn't support true color.
+      case 'image/png':
+        if (function_exists('imagepng')) {
+          ob_start();
+          imagepng($data);
+          return ob_get_clean();
+        }
+        break;
+    }
+
     $img = null;
 
     if (function_exists('imagejpeg')) {
