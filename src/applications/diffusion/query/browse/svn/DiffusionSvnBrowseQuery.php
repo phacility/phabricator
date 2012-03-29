@@ -171,11 +171,13 @@ final class DiffusionSvnBrowseQuery extends DiffusionBrowseQuery {
     $results = array();
     foreach ($browse as $file) {
 
-      $file_path = $file['pathName'];
-      $file_path = ltrim(substr($file_path, strlen($path_normal)), '/');
+      $full_path = $file['pathName'];
+      $file_path = ltrim(substr($full_path, strlen($path_normal)), '/');
+      $full_path = ltrim($full_path, '/');
 
       $result = new DiffusionRepositoryPath();
       $result->setPath($file_path);
+      $result->setFullPath($full_path);
 //      $result->setHash($hash);
       $result->setFileType($file['fileType']);
 //      $result->setFileSize($size);
