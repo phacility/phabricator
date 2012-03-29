@@ -301,8 +301,8 @@ final class PhabricatorAuditCommentEditor {
     }
 
     $email_cc = array();
-    foreach ($other_comments as $comment) {
-      $email_cc[] = $comment->getActorPHID();
+    foreach ($other_comments as $other_comment) {
+      $email_cc[] = $other_comment->getActorPHID();
     }
 
     $phids = array_merge($email_to, $email_cc);
