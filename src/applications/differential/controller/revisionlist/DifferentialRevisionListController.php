@@ -452,15 +452,17 @@ final class DifferentialRevisionListController extends DifferentialController {
             ->needHandles(true)
             ->execute();
 
-          $view = id(new PhabricatorFlagListView())
-            ->setFlags($flags)
-            ->setUser($user);
+          if ($flags) {
+            $view = id(new PhabricatorFlagListView())
+              ->setFlags($flags)
+              ->setUser($user);
 
-          $views[] = array(
-            'title'   => 'Flagged Revisions',
-            'view'    => $view,
-            'special' => true,
-          );
+            $views[] = array(
+              'title'   => 'Flagged Revisions',
+              'view'    => $view,
+              'special' => true,
+            );
+          }
         }
 
         $view = id(clone $template)
