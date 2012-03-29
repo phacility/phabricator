@@ -129,7 +129,7 @@ final class ConduitAPI_differential_getcommitmessage_Method
             array("\r\n", "\r"),
             array("\n",   "\n"),
             $value);
-          if (strpos($value, "\n") !== false || substr($value, 0, 2) === "  ") {
+          if (strpos($value, "\n") !== false || substr($value, 0, 2) === '  ') {
             $commit_message[] = "{$label}:\n{$value}";
           } else {
             $commit_message[] = "{$label}: {$value}";
