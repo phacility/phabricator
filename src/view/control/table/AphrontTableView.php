@@ -103,13 +103,13 @@ final class AphrontTableView extends AphrontView {
   public function render() {
     require_celerity_resource('aphront-table-view-css');
 
-    $class = $this->className;
-    if ($class !== null) {
-      $class = ' class="aphront-table-view '.$class.'"';
+    $table_class = $this->className;
+    if ($table_class !== null) {
+      $table_class = ' class="aphront-table-view '.$table_class.'"';
     } else {
-      $class = ' class="aphront-table-view"';
+      $table_class = ' class="aphront-table-view"';
     }
-    $table = array('<table'.$class.'>');
+    $table = array('<table'.$table_class.'>');
 
     $col_classes = array();
     foreach ($this->columnClasses as $key => $class) {

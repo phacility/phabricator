@@ -65,8 +65,8 @@ final class CelerityResourceController extends AphrontController {
 
       try {
         $data = array();
-        foreach ($paths as $path) {
-          $data[] = Filesystem::readFile($root.'/webroot/'.$path);
+        foreach ($paths as $package_path) {
+          $data[] = Filesystem::readFile($root.'/webroot/'.$package_path);
         }
         $data = implode("\n\n", $data);
       } catch (Exception $ex) {

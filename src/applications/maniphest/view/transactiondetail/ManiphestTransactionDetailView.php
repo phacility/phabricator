@@ -266,9 +266,9 @@ final class ManiphestTransactionDetailView extends ManiphestView {
           PhabricatorPHIDConstants::PHID_TYPE_FILE,
         );
 
-        foreach ($attach_types as $type) {
-          $old = array_keys(idx($old_raw, $type, array()));
-          $new = array_keys(idx($new_raw, $type, array()));
+        foreach ($attach_types as $attach_type) {
+          $old = array_keys(idx($old_raw, $attach_type, array()));
+          $new = array_keys(idx($new_raw, $attach_type, array()));
           if ($old != $new) {
             break;
           }
@@ -285,7 +285,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
         }
         $links = implode("\n", $links);
 
-        switch ($type) {
+        switch ($attach_type) {
           case PhabricatorPHIDConstants::PHID_TYPE_DREV:
             $title = 'ATTACHED REVISIONS';
             break;
@@ -469,9 +469,9 @@ final class ManiphestTransactionDetailView extends ManiphestView {
         foreach (array(
           PhabricatorPHIDConstants::PHID_TYPE_DREV,
           PhabricatorPHIDConstants::PHID_TYPE_TASK,
-          PhabricatorPHIDConstants::PHID_TYPE_FILE) as $type) {
-          $old = array_keys(idx($old_raw, $type, array()));
-          $new = array_keys(idx($new_raw, $type, array()));
+          PhabricatorPHIDConstants::PHID_TYPE_FILE) as $attach_type) {
+          $old = array_keys(idx($old_raw, $attach_type, array()));
+          $new = array_keys(idx($new_raw, $attach_type, array()));
           if ($old != $new) {
             break;
           }
@@ -483,7 +483,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
         $add_desc = $this->renderHandles($added);
         $rem_desc = $this->renderHandles($removed);
 
-        switch ($type) {
+        switch ($attach_type) {
           case PhabricatorPHIDConstants::PHID_TYPE_DREV:
             $singular = 'Differential Revision';
             $plural = 'Differential Revisions';

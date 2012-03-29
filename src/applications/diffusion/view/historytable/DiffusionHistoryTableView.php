@@ -248,10 +248,10 @@ final class DiffusionHistoryTableView extends DiffusionView {
         // Try to find the other parent(s) in our existing threads. If we find
         // them, split to that thread.
 
-        foreach ($threads as $n => $thread_commit) {
+        foreach ($threads as $idx => $thread_commit) {
           if ($thread_commit == $parent) {
             $found = true;
-            $splits[] = $n;
+            $splits[] = $idx;
           }
         }
 
