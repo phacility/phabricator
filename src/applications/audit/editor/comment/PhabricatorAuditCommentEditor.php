@@ -202,9 +202,9 @@ final class PhabricatorAuditCommentEditor {
     $phids[$user->getPHID()] = true;
 
     // The user can audit on behalf of all packages they own.
-    $owned_packages = id(new PhabricatorOwnersOwner())->loadAllWhere(
-      'userPHID = %s',
+    $owned_packages = PhabricatorOwnersOwner::loadAffiliatedPackages(
       $user->getPHID());
+
     if ($owned_packages) {
       $packages = id(new PhabricatorOwnersPackage())->loadAllWhere(
         'id IN (%Ld)',

@@ -929,6 +929,7 @@ phutil_register_library_map(array(
   ),
   'function' =>
   array(
+    '__phabricator_date_format' => 'view/utils',
     '__phabricator_format_local_time' => 'view/utils',
     '_qsprintf_check_scalar_type' => 'storage/qsprintf',
     '_qsprintf_check_type' => 'storage/qsprintf',
@@ -939,8 +940,12 @@ phutil_register_library_map(array(
     'phabricator_datetime' => 'view/utils',
     'phabricator_format_relative_time' => 'view/utils',
     'phabricator_format_units_generic' => 'view/utils',
+    'phabricator_on_relative_date' => 'view/utils',
+    'phabricator_relative_date' => 'view/utils',
     'phabricator_render_form' => 'infrastructure/javelin/markup',
     'phabricator_time' => 'view/utils',
+    'phid_get_type' => 'applications/phid/utils',
+    'phid_group_by_type' => 'applications/phid/utils',
     'qsprintf' => 'storage/qsprintf',
     'queryfx' => 'storage/queryfx',
     'queryfx_all' => 'storage/queryfx',

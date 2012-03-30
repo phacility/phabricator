@@ -126,10 +126,8 @@ final class PhabricatorRepositoryCommitOwnersWorker
       $reasons[] = "No Revision Specified";
     }
 
-    $owners = id(new PhabricatorOwnersOwner())->loadAllWhere(
-      'packageID = %d',
-      $package->getID());
-    $owners_phids = mpull($owners, 'getUserPHID');
+    $owners_phids = PhabricatorOwnersOwner::loadAffiliatedUserPHIDs(
+      array($package->getID()));
 
     if (!($commit_author_phid && in_array($commit_author_phid, $owners_phids) ||
         $commit_reviewedby_phid && in_array($commit_reviewedby_phid,

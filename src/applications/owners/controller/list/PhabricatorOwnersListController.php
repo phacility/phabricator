@@ -171,7 +171,7 @@ final class PhabricatorOwnersListController
           ->setValue($request->getStr('name')))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/users/')
+          ->setDatasource('/typeahead/common/usersorprojects/')
           ->setLimit(1)
           ->setName('owner')
           ->setLabel('Owner')

@@ -105,6 +105,7 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
 
     $map = array(
       'users'           => 'Type a user name...',
+      'usersorprojects' => 'Type a user or project name...',
       'searchowner'     => 'Type a user name...',
       'accounts'        => 'Type a user name...',
       'mailable'        => 'Type a user or mailing list...',

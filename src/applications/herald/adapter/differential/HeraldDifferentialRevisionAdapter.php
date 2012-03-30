@@ -217,8 +217,8 @@ final class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
         return mpull($packages, 'getPHID');
       case HeraldFieldConfig::FIELD_AFFECTED_PACKAGE_OWNER:
         $packages = $this->loadAffectedPackages();
-        $owners = PhabricatorOwnersOwner::loadAllForPackages($packages);
-        return mpull($owners, 'getUserPHID');
+        return PhabricatorOwnersOwner::loadAffiliatedUserPHIDs(
+          mpull($packages, 'getID'));
       default:
         throw new Exception("Invalid field '{$field}'.");
     }

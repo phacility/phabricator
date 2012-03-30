@@ -7,6 +7,10 @@
 
 
 phutil_require_module('phabricator', 'applications/owners/storage/base');
+phutil_require_module('phabricator', 'applications/phid/constants');
+phutil_require_module('phabricator', 'applications/phid/utils');
+phutil_require_module('phabricator', 'applications/project/query/project');
+phutil_require_module('phabricator', 'applications/project/storage/affiliation');
 
 phutil_require_module('phutil', 'utils');
 
