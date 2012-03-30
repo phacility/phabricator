@@ -504,7 +504,7 @@ final class ManiphestTaskQuery {
     $ii = 0;
     foreach ($tasks as $key => $task) {
       $phids = $task->getProjectPHIDs();
-      if ($this->projectPHIDs) {
+      if (!$this->anyProject && $this->projectPHIDs) {
         $phids = array_diff($phids, $this->projectPHIDs);
       }
       if ($phids) {

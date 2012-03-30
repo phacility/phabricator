@@ -301,7 +301,7 @@ final class ManiphestTaskListController extends ManiphestController {
   }
 
   public static function loadTasks(PhabricatorSearchQuery $search_query) {
-
+    $any_project = false;
     $user_phids = $search_query->getParameter('userPHIDs', array());
     $project_phids = $search_query->getParameter('projectPHIDs', array());
     $task_ids = $search_query->getParameter('taskIDs', array());
@@ -357,12 +357,14 @@ final class ManiphestTaskListController extends ManiphestController {
         break;
       case 'projecttriage':
         $query->withPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
-        $query->withAnyProject(true);
+        $any_project = true;
         break;
       case 'projectall':
-        $query->withAnyProject(true);
+        $any_project = true;
         break;
     }
+
+    $query->withAnyProject($any_project);
 
     $order_map = array(
       'priority'  => ManiphestTaskQuery::ORDER_PRIORITY,
@@ -465,7 +467,7 @@ final class ManiphestTaskListController extends ManiphestController {
         $grouped = array();
         foreach ($data as $task) {
           $phids = $task->getProjectPHIDs();
-          if ($project_phids) {
+          if ($project_phids && $any_project !== true) {
             // If the user is filtering on "Bugs", don't show a "Bugs" group
             // with every result since that's silly (the query also does this
             // on the backend).
