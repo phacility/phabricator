@@ -19,13 +19,11 @@
 final class HeraldNewController extends HeraldController {
 
   private $contentType;
-
-  public function getFilter() {
-    return 'new';
-  }
+  private $ruleType;
 
   public function willProcessRequest(array $data) {
     $this->contentType = idx($data, 'type');
+    $this->ruleType = idx($data, 'rule_type');
   }
 
   public function processRequest() {
@@ -40,6 +38,9 @@ final class HeraldNewController extends HeraldController {
     }
 
     $rule_type_map = HeraldRuleTypeConfig::getRuleTypeMap();
+    if (empty($rule_type_map[$this->ruleType])) {
+      $this->ruleType = HeraldRuleTypeConfig::RULE_TYPE_PERSONAL;
+    }
 
     // Reorder array to put "personal" first.
     $rule_type_map = array_select_keys(
@@ -61,7 +62,7 @@ final class HeraldNewController extends HeraldController {
     $radio = id(new AphrontFormRadioButtonControl())
       ->setLabel('Type')
       ->setName('rule_type')
-      ->setValue(HeraldRuleTypeConfig::RULE_TYPE_PERSONAL);
+      ->setValue($this->ruleType);
 
     foreach ($rule_type_map as $value => $name) {
       $radio->addButton(
@@ -90,8 +91,12 @@ final class HeraldNewController extends HeraldController {
     $panel->setWidth(AphrontPanelView::WIDTH_FULL);
     $panel->appendChild($form);
 
+    $nav = $this->renderNav();
+    $nav->selectFilter('new');
+    $nav->appendChild($panel);
+
     return $this->buildStandardPageResponse(
-      $panel,
+      $nav,
       array(
         'title' => 'Create Herald Rule',
       ));

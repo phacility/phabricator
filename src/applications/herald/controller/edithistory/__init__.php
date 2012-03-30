@@ -6,11 +6,12 @@
 
 
 
-phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'applications/herald/controller/base');
-phutil_require_module('phabricator', 'applications/herald/storage/rule');
+phutil_require_module('phabricator', 'applications/herald/query/log');
 phutil_require_module('phabricator', 'applications/herald/view/edithistory');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
+phutil_require_module('phabricator', 'view/control/pager');
+phutil_require_module('phabricator', 'view/layout/panel');
 
 phutil_require_module('phutil', 'utils');
 

@@ -21,13 +21,6 @@ final class HeraldRuleController extends HeraldController {
   private $id;
   private $filter;
 
-  public function getFilter() {
-    return $this->filter;
-  }
-  public function setFilter($filter) {
-    $this->filter = 'view/'.$filter;
-  }
-
   public function willProcessRequest(array $data) {
     $this->id = (int)idx($data, 'id');
   }
@@ -65,13 +58,13 @@ final class HeraldRuleController extends HeraldController {
       }
       $rule->setRuleType($rule_type);
     }
-    $this->setFilter($rule->getContentType());
 
     $local_version = id(new HeraldRule())->getConfigVersion();
     if ($rule->getConfigVersion() > $local_version) {
       throw new Exception(
         "This rule was created with a newer version of Herald. You can not ".
-        "view or edit it in this older version. Try dev or wait for a push.");
+        "view or edit it in this older version. Upgrade your Phabricator ".
+        "deployment.");
     }
 
     // Upgrade rule version to our version, since we might add newly-defined
@@ -88,16 +81,11 @@ final class HeraldRuleController extends HeraldController {
     $errors = array();
     if ($request->isFormPost() && $request->getStr('save')) {
       list($e_name, $errors) = $this->saveRule($rule, $request);
-
       if (!$errors) {
-        $uri = '/herald/view/'.$rule->getContentType().'/';
-
-        if ($rule->getRuleType() == HeraldRuleTypeConfig::RULE_TYPE_GLOBAL) {
-          $uri .= 'global/';
-        }
-
-        return id(new AphrontRedirectResponse())
-          ->setURI($uri);
+        $uri = '/herald/view/'.
+          $rule->getContentType().'/'.
+          $rule->getRuleType().'/';
+        return id(new AphrontRedirectResponse())->setURI($uri);
       }
     }
 
@@ -109,8 +97,8 @@ final class HeraldRuleController extends HeraldController {
       $error_view = null;
     }
 
-    $must_match_selector = $this->getMustMatchSelector($rule);
-    $repetition_selector = $this->getRepetitionSelector($rule);
+    $must_match_selector = $this->renderMustMatchSelector($rule);
+    $repetition_selector = $this->renderRepetitionSelector($rule);
 
     $handles = $this->loadHandles($rule);
 
@@ -126,7 +114,8 @@ final class HeraldRuleController extends HeraldController {
       ->addHiddenInput('rule_type', $rule->getRuleType())
       ->addHiddenInput('save', 1)
       ->appendChild(
-        // Build this explicitly so we can add a sigil to it.
+        // Build this explicitly (instead of using addHiddenInput())
+        // so we can add a sigil to it.
         javelin_render_tag(
           'input',
           array(
@@ -140,23 +129,6 @@ final class HeraldRuleController extends HeraldController {
           ->setName('name')
           ->setError($e_name)
           ->setValue($rule->getName()));
-
-    if ($rule->getRuleType() == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL) {
-      $form
-        ->appendChild(
-          id(new AphrontFormMarkupControl())
-            ->setLabel('Owner')
-            ->setValue('<div id="author-input"/>'))
-      ->appendChild(
-        // Build this explicitly so we can add a sigil to it.
-        javelin_render_tag(
-          'input',
-          array(
-            'type'  => 'hidden',
-            'name'  => 'author',
-            'sigil' => 'author',
-          )));
-    }
 
     $form
       ->appendChild(
@@ -215,15 +187,24 @@ final class HeraldRuleController extends HeraldController {
     $this->setupEditorBehavior($rule, $handles);
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Edit Herald Rule');
+    $panel->setHeader(
+      $rule->getID()
+        ? 'Edit Herald Rule'
+        : 'Create Herald Rule');
     $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
     $panel->appendChild($form);
 
-    return $this->buildStandardPageResponse(
+    $nav = $this->renderNav();
+    $nav->selectFilter(
+      'view/'.$rule->getContentType().'/'.$rule->getRuleType());
+    $nav->appendChild(
       array(
         $error_view,
         $panel,
-      ),
+      ));
+
+    return $this->buildStandardPageResponse(
+      $nav,
       array(
         'title' => 'Edit Rule',
       ));
@@ -231,9 +212,9 @@ final class HeraldRuleController extends HeraldController {
 
   private function canEditRule($rule, $user) {
     return
-      $user->getIsAdmin() ||
-      $rule->getRuleType() == HeraldRuleTypeConfig::RULE_TYPE_GLOBAL ||
-      $rule->getAuthorPHID() == $user->getPHID();
+      ($user->getIsAdmin()) ||
+      ($rule->getRuleType() == HeraldRuleTypeConfig::RULE_TYPE_GLOBAL) ||
+      ($rule->getAuthorPHID() == $user->getPHID());
   }
 
   private function saveRule($rule, $request) {
@@ -322,11 +303,6 @@ final class HeraldRuleController extends HeraldController {
       $conditions[] = $obj;
     }
 
-    $author = $request->getStr('author');
-    if ($author) {
-      $rule->setAuthorPHID($author);
-    }
-
     $actions = array();
     foreach ($data['actions'] as $action) {
       if ($action === null) {
@@ -351,13 +327,14 @@ final class HeraldRuleController extends HeraldController {
     if (!$errors) {
       try {
 
-// TODO
-//          $rule->openTransaction();
+        $edit_action = $rule->getID() ? 'edit' : 'create';
+
+        $rule->openTransaction();
           $rule->save();
           $rule->saveConditions($conditions);
           $rule->saveActions($actions);
-          $rule->saveEdit($request->getUser()->getPHID());
-//          $rule->saveTransaction();
+          $rule->logEdit($request->getUser()->getPHID(), $edit_action);
+        $rule->saveTransaction();
 
       } catch (AphrontQueryDuplicateKeyException $ex) {
         $e_name = "Not Unique";
@@ -413,14 +390,9 @@ final class HeraldRuleController extends HeraldController {
       }
     }
 
-    $all_rules = id(new HeraldRule())->loadAllWhere(
-      'authorPHID = %s AND contentType = %s',
-      $rule->getAuthorPHID(),
-      $rule->getContentType());
+    $all_rules = $this->loadRulesThisRuleMayDependUpon($rule);
     $all_rules = mpull($all_rules, 'getName', 'getID');
     asort($all_rules);
-    unset($all_rules[$rule->getID()]);
-
 
     $config_info = array();
     $config_info['fields']
@@ -468,7 +440,6 @@ final class HeraldRuleController extends HeraldController {
 
   private function loadHandles($rule) {
     $phids = array();
-    $phids[] = $rule->getAuthorPHID();
 
     foreach ($rule->getActions() as $action) {
       if (!is_array($action->getTarget())) {
@@ -491,79 +462,60 @@ final class HeraldRuleController extends HeraldController {
       }
     }
 
-    $phids += array($rule->getAuthorPHID());
-    $handles = id(new PhabricatorObjectHandleData($phids))
-      ->loadHandles();
-    return $handles;
+    $phids[] = $rule->getAuthorPHID();
+
+    return id(new PhabricatorObjectHandleData($phids))->loadHandles();
   }
 
-  private function getMustMatchSelector($rule) {
-    $options = array(
-      'all' => 'all of',
-      'any' => 'any of',
-    );
 
-    $selected = $rule->getMustMatchAll() ? 'all' : 'any';
-
-    $must_match = array();
-    foreach ($options as $key => $option) {
-      $must_match[] = phutil_render_tag(
-        'option',
-        array(
-          'selected' => ($selected == $key) ? 'selected' : null,
-          'value' => $key,
-        ),
-        phutil_escape_html($option));
-    }
-    $must_match =
-      '<select name="must_match">' .
-      implode("\n", $must_match) .
-      '</select>';
-    return $must_match;
+  /**
+   * Render the selector for the "When (all of | any of) these conditions are
+   * met:" element.
+   */
+  private function renderMustMatchSelector($rule) {
+    return AphrontFormSelectControl::renderSelectTag(
+      $rule->getMustMatchAll() ? 'all' : 'any',
+      array(
+        'all' => 'all of',
+        'any' => 'any of',
+      ),
+      array(
+        'name' => 'must_match',
+      ));
   }
 
-  private function getRepetitionSelector($rule) {
+
+  /**
+   * Render the selector for "Take these actions (every time | only the first
+   * time) this rule matches..." element.
+   */
+  private function renderRepetitionSelector($rule) {
     // Make the selector for choosing how often this rule should be repeated
     $repetition_policy = HeraldRepetitionPolicyConfig::toString(
-      $rule->getRepetitionPolicy()
-    );
+      $rule->getRepetitionPolicy());
     $repetition_options = HeraldRepetitionPolicyConfig::getMapForContentType(
-      $rule->getContentType()
-    );
+      $rule->getContentType());
 
     if (empty($repetition_options)) {
       // default option is 'every time'
       $repetition_selector = idx(
         HeraldRepetitionPolicyConfig::getMap(),
-        HeraldRepetitionPolicyConfig::EVERY
-      );
+        HeraldRepetitionPolicyConfig::EVERY);
       return $repetition_selector;
     } else if (count($repetition_options) == 1) {
       // if there's only 1 option, just pick it for the user
       $repetition_selector = reset($repetition_options);
       return $repetition_selector;
     } else {
-      // give the user all the options for this rule type
-      $tags = array();
-
-      foreach ($repetition_options as $name => $option) {
-        $tags[] = phutil_render_tag(
-          'option',
-          array(
-            'selected' => ($repetition_policy == $name) ? 'selected' : null,
-            'value' => $name,
-          ),
-          phutil_escape_html($option)
-        );
-      }
-
-      $repetition_selector =
-        '<select name="repetition_policy">' .
-        implode("\n", $tags) .
-        '</select>';
-      return $repetition_selector;
+      return AphrontFormSelectControl::renderSelectTag(
+        $repetition_policy,
+        $repetition_options,
+        array(
+          'name' => 'repetition_policy',
+        ));
     }
   }
+
 
   protected function buildTokenizerTemplates() {
     $template = new AphrontTokenizerTemplateView();
@@ -580,4 +532,33 @@ final class HeraldRuleController extends HeraldController {
       'markup' => $template,
     );
   }
+
+
+  /**
+   * Load rules for the "Another Herald rule..." condition dropdown, which
+   * allows one rule to depend upon the success or failure of another rule.
+   */
+  private function loadRulesThisRuleMayDependUpon(HeraldRule $rule) {
+    // Any rule can depend on a global rule.
+    $all_rules = id(new HeraldRuleQuery())
+      ->withRuleTypes(array(HeraldRuleTypeConfig::RULE_TYPE_GLOBAL))
+      ->withContentTypes(array($rule->getContentType()))
+      ->execute();
+
+    if ($rule->getRuleType() == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL) {
+      // Personal rules may depend upon your other personal rules.
+      $all_rules += id(new HeraldRuleQuery())
+        ->withRuleTypes(array(HeraldRuleTypeConfig::RULE_TYPE_PERSONAL))
+        ->withContentTypes(array($rule->getContentType()))
+        ->withAuthorPHIDs(array($rule->getAuthorPHID()))
+        ->execute();
+    }
+
+    // A rule can not depend upon itself.
+    unset($all_rules[$rule->getID()]);
+
+    return $all_rules;
+  }
+
+
 }

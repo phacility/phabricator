@@ -163,23 +163,13 @@ final class HeraldRule extends HeraldDAO {
     return $edits;
   }
 
-  public function attachEdits(array $edits) {
-    $this->edits = $edits;
-    return $this;
-  }
-
-  public function getEdits() {
-    if ($this->edits === null) {
-      throw new Exception("Attach edits before accessing them!");
-    }
-    return $this->edits;
-  }
-
-  public function saveEdit($editor_phid) {
-    $edit = new HeraldRuleEdit();
-    $edit->setRuleID($this->getID());
-    $edit->setEditorPHID($editor_phid);
-    $edit->save();
+  public function logEdit($editor_phid, $action) {
+    id(new HeraldRuleEdit())
+      ->setRuleID($this->getID())
+      ->setRuleName($this->getName())
+      ->setEditorPHID($editor_phid)
+      ->setAction($action)
+      ->save();
   }
 
   public function saveConditions(array $conditions) {

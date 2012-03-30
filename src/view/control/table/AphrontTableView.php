@@ -237,7 +237,7 @@ final class AphrontTableView extends AphrontView {
         ++$row_num;
       }
     } else {
-      $colspan = max(count($headers), 1);
+      $colspan = max(count(array_filter($visibility)), 1);
       $table[] =
         '<tr class="no-data"><td colspan="'.$colspan.'">'.
           coalesce($this->noDataString, 'No data available.').

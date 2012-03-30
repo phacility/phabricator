@@ -26,10 +26,6 @@ final class HeraldTranscriptController extends HeraldController {
   private $filter;
   private $handles;
 
-  public function getFilter() {
-    return 'transcript';
-  }
-
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
     $map = $this->getFilterMap();
@@ -69,6 +65,15 @@ final class HeraldTranscriptController extends HeraldController {
         ->loadHandles();
       $this->handles = $handles;
 
+      if ($xscript->getDryRun()) {
+        $notice = new AphrontErrorView();
+        $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+        $notice->setTitle('Dry Run');
+        $notice->appendChild(
+          'This was a dry run to test Herald rules, no actions were executed.');
+        $nav->appendChild($notice);
+      }
+
       $apply_xscript_panel = $this->buildApplyTranscriptPanel(
         $xscript);
       $nav->appendChild($apply_xscript_panel);
@@ -82,21 +87,12 @@ final class HeraldTranscriptController extends HeraldController {
       $nav->appendChild($object_xscript_panel);
     }
 
-/*
-
-  TODO
-
-    $notice = null;
-    if ($xscript->getDryRun()) {
-      $notice =
-        <tools:notice title="Dry Run">
-          This was a dry run to test Herald rules, no actions were executed.
-        </tools:notice>;
-    }
-*/
+    $main_nav = $this->renderNav();
+    $main_nav->selectFilter('transcript');
+    $main_nav->appendChild($nav);
 
     return $this->buildStandardPageResponse(
-      $nav,
+      $main_nav,
       array(
         'title' => 'Transcript',
       ));

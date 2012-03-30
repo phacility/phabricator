@@ -18,10 +18,6 @@
 
 final class HeraldTranscriptListController extends HeraldController {
 
-  public function getFilter() {
-    return 'transcript';
-  }
-
   public function processRequest() {
 
     $request = $this->getRequest();
@@ -41,12 +37,15 @@ final class HeraldTranscriptListController extends HeraldController {
         $phid);
     }
 
-    $offset = $request->getInt('offset', 0);
-    $page_size = 100;
+    $pager = new AphrontPagerView();
+    $pager->setOffset($request->getInt('offset'));
+    $pager->setURI($request->getRequestURI(), 'offset');
+
     $limit_clause = qsprintf(
       $conn_r,
       'LIMIT %d, %d',
-      $offset, $page_size + 1);
+      $pager->getOffset(),
+      $pager->getPageSize() + 1);
 
     $data = queryfx_all(
       $conn_r,
@@ -58,39 +57,7 @@ final class HeraldTranscriptListController extends HeraldController {
       $where_clause,
       $limit_clause);
 
-    $pager = new AphrontPagerView();
-    $pager->getPageSize($page_size);
-    $pager->setHasMorePages(count($data) == $page_size + 1);
-    $pager->setOffset($offset);
-    $pager->setURI($request->getRequestURI(), 'offset');
-
-    /*
-
-    $conn_r = smc_get_db('cdb.herald', 'r');
-
-    $page_size = 100;
-
-    $pager = new SimplePager();
-    $pager->setPageSize($page_size);
-    $pager->setOffset((((int)$request->getInt('page')) - 1) * $page_size);
-    $pager->order('id', array('id'));
-
-
-    $fbid = $request->getInt('fbid');
-    if ($fbid) {
-      $filter = qsprintf(
-        $conn_r,
-        'WHERE objectID = %d',
-        $fbid);
-    } else {
-      $filter = '';
-    }
-
-    $data = $pager->select(
-      $conn_r,
-      'id, objectID, time, duration, dryRun FROM transcript %Q',
-      $filter);
-*/
+    $data = $pager->sliceResults($data);
 
     // Render the table.
     $handles = array();
@@ -103,8 +70,8 @@ final class HeraldTranscriptListController extends HeraldController {
     $rows = array();
     foreach ($data as $xscript) {
       $rows[] = array(
-        phabricator_date($xscript['time'],$user),
-        phabricator_time($xscript['time'],$user),
+        phabricator_date($xscript['time'], $user),
+        phabricator_time($xscript['time'], $user),
         $handles[$xscript['objectPHID']]->renderLink(),
         $xscript['dryRun'] ? 'Yes' : '',
         number_format((int)(1000 * $xscript['duration'])).' ms',
@@ -144,8 +111,12 @@ final class HeraldTranscriptListController extends HeraldController {
     $panel->appendChild($table);
     $panel->appendChild($pager);
 
+    $nav = $this->renderNav();
+    $nav->selectFilter('transcript');
+    $nav->appendChild($panel);
+
     return $this->buildStandardPageResponse(
-      $panel,
+      $nav,
       array(
         'title' => 'Herald Transcripts',
         'tab' => 'transcripts',

@@ -78,7 +78,7 @@ final class AphrontSideNavFilterView extends AphrontView {
     return $this->baseURI;
   }
 
-  public function selectFilter($key, $default) {
+  public function selectFilter($key, $default = null) {
     $this->selectedFilter = $default;
     if ($key !== null) {
       foreach ($this->items as $item) {

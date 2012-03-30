@@ -9,7 +9,8 @@
 phutil_require_module('phabricator', 'aphront/response/400');
 phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'aphront/response/dialog');
-phutil_require_module('phabricator', 'aphront/response/redirect');
+phutil_require_module('phabricator', 'aphront/response/reload');
+phutil_require_module('phabricator', 'applications/herald/config/ruletype');
 phutil_require_module('phabricator', 'applications/herald/controller/base');
 phutil_require_module('phabricator', 'applications/herald/storage/rule');
 phutil_require_module('phabricator', 'view/dialog');

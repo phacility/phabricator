@@ -282,19 +282,14 @@ class AphrontDefaultApplicationConfiguration
 
       '/herald/' => array(
         '' => 'HeraldHomeController',
-        'view/(?P<view>[^/]+)/' => array(
-          '' => 'HeraldHomeController',
-          '(?P<global>global)/' => 'HeraldHomeController'
-        ),
-        'new/(?:(?P<type>[^/]+)/)?' => 'HeraldNewController',
+        'view/(?P<content_type>[^/]+)/(?:(?P<rule_type>[^/]+)/)?'
+          => 'HeraldHomeController',
+        'new/(?:(?P<type>[^/]+)/(?:(?P<rule_type>[^/]+)/)?)?'
+          => 'HeraldNewController',
         'rule/(?:(?P<id>\d+)/)?' => 'HeraldRuleController',
-        'history/(?P<id>\d+)/' => 'HeraldRuleEditHistoryController',
+        'history/(?:(?P<id>\d+)/)?' => 'HeraldRuleEditHistoryController',
         'delete/(?P<id>\d+)/' => 'HeraldDeleteController',
         'test/' => 'HeraldTestConsoleController',
-        'all/' => array(
-          '' => 'HeraldAllRulesController',
-          'view/(?P<view>[^/]+)/' => 'HeraldAllRulesController',
-        ),
         'transcript/' => 'HeraldTranscriptListController',
         'transcript/(?P<id>\d+)/(?:(?P<filter>\w+)/)?'
           => 'HeraldTranscriptController',

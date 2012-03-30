@@ -17,13 +17,12 @@
  */
 
 final class HeraldRuleListView extends AphrontView {
+
   private $rules;
   private $handles;
-  private $map;
-  private $view;
-  private $allowCreation;
-  private $showOwner = true;
-  private $showType = false;
+
+  private $showAuthor;
+  private $showRuleType;
   private $user;
 
   public function setRules(array $rules) {
@@ -36,28 +35,13 @@ final class HeraldRuleListView extends AphrontView {
     return $this;
   }
 
-  public function setMap($map) {
-    $this->map = $map;
+  public function setShowAuthor($show_author) {
+    $this->showAuthor = $show_author;
     return $this;
   }
 
-  public function setView($view) {
-    $this->view = $view;
-    return $this;
-  }
-
-  public function setAllowCreation($allow_creation) {
-    $this->allowCreation = $allow_creation;
-    return $this;
-  }
-
-  public function setShowOwner($show_owner) {
-    $this->showOwner = $show_owner;
-    return $this;
-  }
-
-  public function setShowType($show_type) {
-    $this->showType = $show_type;
+  public function setShowRuleType($show_rule_type) {
+    $this->showRuleType = $show_rule_type;
     return $this;
   }
 
@@ -73,7 +57,12 @@ final class HeraldRuleListView extends AphrontView {
     $rows = array();
 
     foreach ($this->rules as $rule) {
-      $owner = $this->handles[$rule->getAuthorPHID()]->renderLink();
+
+      if ($rule->getRuleType() == HeraldRuleTypeConfig::RULE_TYPE_GLOBAL) {
+        $author = null;
+      } else {
+        $author = $this->handles[$rule->getAuthorPHID()]->renderLink();
+      }
 
       $name = phutil_render_tag(
         'a',
@@ -82,21 +71,12 @@ final class HeraldRuleListView extends AphrontView {
         ),
         phutil_escape_html($rule->getName()));
 
-      $last_edit_date = phabricator_datetime($rule->getDateModified(),
-                                             $this->user);
-
-      $view_edits = phutil_render_tag(
+      $edit_log = phutil_render_tag(
         'a',
         array(
-          'href' => '/herald/history/' . $rule->getID() . '/',
+          'href' => '/herald/history/'.$rule->getID().'/',
         ),
-        '(View Edits)');
-
-      $last_edited = phutil_render_tag(
-        'span',
-        array(),
-        "Last edited on $last_edit_date ${view_edits}");
-
+        'View Edit Log');
 
       $delete = javelin_render_tag(
         'a',
@@ -108,60 +88,42 @@ final class HeraldRuleListView extends AphrontView {
         'Delete');
 
       $rows[] = array(
-        $this->map[$rule->getContentType()],
         $type_map[$rule->getRuleType()],
-        $owner,
+        $author,
         $name,
-        $last_edited,
+        $edit_log,
         $delete,
       );
     }
 
-    $rules_for = phutil_escape_html($this->map[$this->view]);
-
     $table = new AphrontTableView($rows);
-    $table->setNoDataString(
-      "No matching subscription rules for {$rules_for}.");
+    $table->setNoDataString("No matching rules.");
 
     $table->setHeaders(
       array(
-        'Content Type',
         'Rule Type',
-        'Owner',
+        'Author',
         'Rule Name',
-        'Last Edited',
+        'Edit Log',
         '',
       ));
     $table->setColumnClasses(
       array(
         '',
         '',
-        '',
-        'wide wrap pri',
+        'wide pri',
         '',
         'action'
       ));
     $table->setColumnVisibility(
       array(
+        $this->showRuleType,
+        $this->showAuthor,
         true,
-        $this->showType,
-        $this->showOwner,
         true,
         true,
       ));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader("Herald Rules for {$rules_for}");
-
-    if ($this->allowCreation) {
-      $panel->setCreateButton(
-        'Create New Herald Rule',
-        '/herald/new/'.$this->view.'/');
-    }
-
-    $panel->appendChild($table);
-
-    return $panel;
-
+    return $table->render();
   }
 }

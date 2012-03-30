@@ -21,35 +21,45 @@ final class HeraldRuleEditHistoryController extends HeraldController {
   private $id;
 
   public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
+    $this->id = idx($data, 'id');
   }
 
   public function processRequest() {
-    $rule = id(new HeraldRule())->load($this->id);
-    if ($rule === null) {
-      return new Aphront404Response();
+    $request = $this->getRequest();
+
+    $edit_query = new HeraldEditLogQuery();
+    if ($this->id) {
+      $edit_query->withRuleIDs(array($this->id));
     }
 
-    $edits = $rule->loadEdits();
-    $rule->attachEdits($edits);
+    $pager = new AphrontPagerView();
+    $pager->setURI($request->getRequestURI(), 'offset');
+    $pager->setOffset($request->getStr('offset'));
+
+    $edits = $edit_query->executeWithPager($pager);
 
     $need_phids = mpull($edits, 'getEditorPHID');
     $handles = id(new PhabricatorObjectHandleData($need_phids))
       ->loadHandles();
 
     $list_view = id(new HeraldRuleEditHistoryView())
-      ->setRule($rule)
+      ->setEdits($edits)
       ->setHandles($handles)
       ->setUser($this->getRequest()->getUser());
 
+    $panel = new AphrontPanelView();
+    $panel->setHeader('Edit History');
+    $panel->appendChild($list_view);
+
+    $nav = $this->renderNav();
+    $nav->selectFilter('history');
+    $nav->appendChild($panel);
+
     return $this->buildStandardPageResponse(
-      $list_view->render(),
+      $nav,
       array(
         'title' => 'Rule Edit History',
       ));
   }
 
-  public function getFilter() {
-    return;
-  }
 }

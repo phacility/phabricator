@@ -24,6 +24,11 @@ final class PhabricatorObjectHandleData {
     $this->phids = array_unique($phids);
   }
 
+  public static function loadOneHandle($phid) {
+    $handles = id(new PhabricatorObjectHandleData(array($phid)))->loadHandles();
+    return $handles[$phid];
+  }
+
   public function loadObjects() {
     $types = array();
     foreach ($this->phids as $phid) {

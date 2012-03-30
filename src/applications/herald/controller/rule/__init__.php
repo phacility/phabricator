@@ -16,6 +16,7 @@ phutil_require_module('phabricator', 'applications/herald/config/repetitionpolic
 phutil_require_module('phabricator', 'applications/herald/config/ruletype');
 phutil_require_module('phabricator', 'applications/herald/config/valuetype');
 phutil_require_module('phabricator', 'applications/herald/controller/base');
+phutil_require_module('phabricator', 'applications/herald/query/rule');
 phutil_require_module('phabricator', 'applications/herald/storage/condition');
 phutil_require_module('phabricator', 'applications/herald/storage/rule');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
@@ -25,13 +26,13 @@ phutil_require_module('phabricator', 'infrastructure/javelin/markup');
 phutil_require_module('phabricator', 'view/control/tokenizer');
 phutil_require_module('phabricator', 'view/form/base');
 phutil_require_module('phabricator', 'view/form/control/markup');
+phutil_require_module('phabricator', 'view/form/control/select');
 phutil_require_module('phabricator', 'view/form/control/submit');
 phutil_require_module('phabricator', 'view/form/control/text');
 phutil_require_module('phabricator', 'view/form/error');
 phutil_require_module('phabricator', 'view/form/inset');
 phutil_require_module('phabricator', 'view/layout/panel');
 
-phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
 
 

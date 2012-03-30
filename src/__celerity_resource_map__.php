@@ -304,7 +304,7 @@ celerity_register_resource_map(array(
   ),
   'herald-css' =>
   array(
-    'uri' => '/res/ed5556e6/rsrc/css/application/herald/herald.css',
+    'uri' => '/res/5051f3ab/rsrc/css/application/herald/herald.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -313,7 +313,7 @@ celerity_register_resource_map(array(
   ),
   'herald-rule-editor' =>
   array(
-    'uri' => '/res/745c9d43/rsrc/js/application/herald/HeraldRuleEditor.js',
+    'uri' => '/res/209ed8c4/rsrc/js/application/herald/HeraldRuleEditor.js',
     'type' => 'js',
     'requires' =>
     array(

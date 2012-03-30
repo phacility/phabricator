@@ -28,48 +28,6 @@ abstract class HeraldController extends PhabricatorController {
 
     $doclink = PhabricatorEnv::getDoclink('article/Herald_User_Guide.html');
 
-    $nav = new AphrontSideNavFilterView();
-    $nav
-      ->setBaseURI(new PhutilURI('/herald/'))
-      ->addLabel('My Rules')
-      ->addFilter('new', 'Create Rule');
-    $rules_map = HeraldContentTypeConfig::getContentTypeMap();
-    $first_filter = null;
-    foreach ($rules_map as $key => $value) {
-      $nav->addFilter('view/'.$key, $value);
-      if (!$first_filter) {
-        $first_filter = 'view/'.$key;
-      }
-    }
-    $nav
-      ->addSpacer()
-      ->addLabel('Global Rules');
-    foreach ($rules_map as $key => $value) {
-      $nav->addFilter("view/${key}/global", $value);
-    }
-
-    $nav
-      ->addSpacer()
-      ->addLabel('Utilities')
-      ->addFilter('test',       'Test Console')
-      ->addFilter('transcript', 'Transcripts');
-
-    $user = $this->getRequest()->getUser();
-    if ($user->getIsAdmin()) {
-      $nav
-        ->addSpacer()
-        ->addLabel('Admin');
-      $view_PHID = nonempty($this->getRequest()->getStr('phid'), null);
-      foreach ($rules_map as $key => $value) {
-        $nav
-          ->addFilter('all/view/'.$key, $value);
-      }
-    }
-
-    $nav->selectFilter($this->getFilter(), $first_filter);
-    $nav->appendChild($view);
-    $page->appendChild($nav);
-
     $tabs = array(
       'help' => array(
         'href' => $doclink,
@@ -78,10 +36,49 @@ abstract class HeraldController extends PhabricatorController {
     );
     $page->setTabs($tabs, null);
 
+    $page->appendChild($view);
+    $page->setIsAdminInterface(idx($data, 'admin'));
+
     $response = new AphrontWebpageResponse();
     return $response->setContent($page->render());
-
   }
 
-  abstract function getFilter();
+  protected function renderNav() {
+    $nav = id(new AphrontSideNavFilterView())
+      ->setBaseURI(new PhutilURI('/herald/'))
+      ->addLabel('My Rules')
+      ->addFilter('new', 'Create Rule');
+
+    $rules_map = HeraldContentTypeConfig::getContentTypeMap();
+    foreach ($rules_map as $key => $value) {
+      $nav->addFilter("view/{$key}/personal", $value);
+    }
+
+    $nav
+      ->addSpacer()
+      ->addLabel('Global Rules');
+
+    foreach ($rules_map as $key => $value) {
+      $nav->addFilter("view/{$key}/global", $value);
+    }
+
+    $nav
+      ->addSpacer()
+      ->addLabel('Utilities')
+      ->addFilter('test',       'Test Console')
+      ->addFilter('transcript', 'Transcripts')
+      ->addFilter('history',    'Edit Log');
+
+    if ($this->getRequest()->getUser()->getIsAdmin()) {
+      $nav
+        ->addSpacer()
+        ->addLabel('Admin');
+      foreach ($rules_map as $key => $value) {
+        $nav->addFilter("view/{$key}/all", $value);
+      }
+    }
+
+    return $nav;
+  }
+
 }
