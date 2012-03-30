@@ -49,8 +49,10 @@ final class HeraldDeleteController extends HeraldController {
     }
 
     if ($request->isFormPost()) {
-      $rule->logEdit($user->getPHID(), 'delete');
-      $rule->delete();
+      $rule->openTransaction();
+        $rule->logEdit($user->getPHID(), 'delete');
+        $rule->delete();
+      $rule->saveTransaction();
       return id(new AphrontReloadResponse())->setURI('/herald/');
     }
 
