@@ -13,6 +13,7 @@ phutil_require_module('phabricator', 'applications/differential/constants/action
 phutil_require_module('phabricator', 'applications/differential/controller/base');
 phutil_require_module('phabricator', 'applications/differential/field/selector/base');
 phutil_require_module('phabricator', 'applications/differential/parser/changeset');
+phutil_require_module('phabricator', 'applications/differential/query/revision');
 phutil_require_module('phabricator', 'applications/differential/storage/auxiliaryfield');
 phutil_require_module('phabricator', 'applications/differential/storage/changeset');
 phutil_require_module('phabricator', 'applications/differential/storage/comment');
@@ -26,7 +27,9 @@ phutil_require_module('phabricator', 'applications/differential/view/localcommit
 phutil_require_module('phabricator', 'applications/differential/view/primarypane');
 phutil_require_module('phabricator', 'applications/differential/view/revisioncommentlist');
 phutil_require_module('phabricator', 'applications/differential/view/revisiondetail');
+phutil_require_module('phabricator', 'applications/differential/view/revisionlist');
 phutil_require_module('phabricator', 'applications/differential/view/revisionupdatehistory');
+phutil_require_module('phabricator', 'applications/diffusion/query/pathid/base');
 phutil_require_module('phabricator', 'applications/draft/storage/draft');
 phutil_require_module('phabricator', 'applications/flag/constants/color');
 phutil_require_module('phabricator', 'applications/flag/query/flag');

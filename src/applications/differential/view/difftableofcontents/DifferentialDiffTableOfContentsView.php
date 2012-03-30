@@ -278,4 +278,5 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
       ),
       phutil_escape_html($display_file));
   }
+
 }

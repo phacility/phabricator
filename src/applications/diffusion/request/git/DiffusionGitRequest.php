@@ -26,64 +26,18 @@ final class DiffusionGitRequest extends DiffusionRequest {
   }
 
   protected function didInitialize() {
-    if ($this->repository) {
-      $repository = $this->repository;
-
-      // TODO: This is not terribly efficient and does not produce terribly
-      // good error messages, but it seems better to put error handling code
-      // here than to try to do it in every query.
-
-      $branch = $this->getBranch();
-
-      // TODO: Here, particularly, we should give the user a specific error
-      // message to indicate whether they've typed in some bogus branch and/or
-      // followed a bad link, or misconfigured the default branch in the
-      // Repository tool.
-      list($this->stableCommitName) = $repository->execxLocalCommand(
-        'rev-parse --verify %s/%s',
-        DiffusionBranchInformation::DEFAULT_GIT_REMOTE,
-        $branch);
-
-      if ($this->commit) {
-        list($commit) = $repository->execxLocalCommand(
-          'rev-parse --verify %s',
-          $this->commit);
-
-        // Beyond verifying them, expand commit short forms to full 40-character
-        // hashes.
-        $this->commit = trim($commit);
-
-        // If we have a commit, overwrite the branch commit with the more
-        // specific commit.
-        $this->stableCommitName = $this->commit;
-
-/*
-
-  TODO: Unclear if this is actually a good idea or not; it breaks commit views
-  at the very least.
-
-        list($contains) = $repository->execxLocalCommand(
-          'branch --contains %s',
-          $this->commit);
-        $contains = array_filter(explode("\n", $contains));
-        $found = false;
-        foreach ($contains as $containing_branch) {
-          $containing_branch = trim($containing_branch, "* \n");
-          if ($containing_branch == $branch) {
-            $found = true;
-            break;
-          }
-        }
-        if (!$found) {
-          throw new Exception(
-            "Commit does not exist on this branch!");
-        }
-*/
-
-      }
+    if (!$this->commit) {
+      return;
     }
 
+    // Expand commit short forms to full 40-character hashes. This does not
+    // verify them, --verify exits with return code 0 for anything that
+    // looks like a valid hash.
 
+    list($commit) = $this->getRepository()->execxLocalCommand(
+      'rev-parse --verify %s',
+      $this->commit);
+    $this->commit = trim($commit);
   }
 
   public function getBranch() {
@@ -105,6 +59,18 @@ final class DiffusionGitRequest extends DiffusionRequest {
   }
 
   public function getStableCommitName() {
+    if (!$this->stableCommitName) {
+      if ($this->commit) {
+        $this->stableCommitName = $this->commit;
+      } else {
+        $branch = $this->getBranch();
+        list($stdout) = $this->getRepository()->execxLocalCommand(
+          'rev-parse --verify %s/%s',
+          DiffusionBranchInformation::DEFAULT_GIT_REMOTE,
+          $branch);
+        $this->stableCommitName = trim($stdout);
+      }
+    }
     return substr($this->stableCommitName, 0, 16);
   }
 

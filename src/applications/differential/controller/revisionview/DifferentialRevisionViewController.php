@@ -269,6 +269,16 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $local_view->setUser($user);
     $local_view->setLocalCommits(idx($props, 'local:commits'));
 
+    $other_revisions = $this->loadOtherRevisions(
+      $changesets,
+      $target,
+      $repository);
+
+    $other_view = null;
+    if ($other_revisions) {
+      $other_view = $this->renderOtherRevisions($other_revisions);
+    }
+
     $toc_view = new DifferentialDiffTableOfContentsView();
     $toc_view->setChangesets($changesets);
     $toc_view->setVisibleChangesets($visible_changesets);
@@ -320,6 +330,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
         $warning.
         $local_view->render().
         $toc_view->render().
+        $other_view.
         $changeset_view->render());
     if ($comment_form) {
       $page_pane->appendChild($comment_form->render());
@@ -708,5 +719,65 @@ final class DifferentialRevisionViewController extends DifferentialController {
     return $symbol_indexes;
   }
 
+  private function loadOtherRevisions($changesets, $target, $repository) {
+    if (!$repository) {
+      return array();
+    }
+
+    $paths = array();
+    foreach ($changesets as $changeset) {
+      $paths[] = $changeset->getAbsoluteRepositoryPath(
+        $target,
+        $repository);
+    }
+
+    if (!$paths) {
+      return array();
+    }
+
+    $path_map = id(new DiffusionPathIDQuery($paths))->loadPathIDs();
+
+    if (!$path_map) {
+      return array();
+    }
+
+    $query = id(new DifferentialRevisionQuery())
+      ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
+      ->setOrder(DifferentialRevisionQuery::ORDER_PATH_MODIFIED)
+      ->setLimit(10)
+      ->needRelationships(true);
+
+    foreach ($path_map as $path => $path_id) {
+      $query->withPath($repository->getID(), $path_id);
+    }
+
+    $results = $query->execute();
+
+    // Strip out *this* revision.
+    foreach ($results as $key => $result) {
+      if ($result->getID() == $this->revisionID) {
+        unset($results[$key]);
+      }
+    }
+
+    return $results;
+  }
+
+  private function renderOtherRevisions(array $revisions) {
+    $view = id(new DifferentialRevisionListView())
+      ->setRevisions($revisions)
+      ->setFields(DifferentialRevisionListView::getDefaultFields())
+      ->setUser($this->getRequest()->getUser());
+
+    $phids = $view->getRequiredHandlePHIDs();
+    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $view->setHandles($handles);
+
+    return
+      '<div class="differential-panel">'.
+        '<h1>Open Revisions Affecting These Files</h1>'.
+        $view->render().
+      '</div>';
+  }
 
 }
