@@ -217,6 +217,15 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
             }
             $this->auditMap[$phid][] = $effect->getRuleID();
           }
+          $result[] = new HeraldApplyTranscript(
+            $effect,
+            true,
+            'Triggered an audit.');
+          break;
+        case HeraldActionConfig::ACTION_FLAG:
+          $result[] = parent::applyFlagEffect(
+            $effect,
+            $this->commit->getPHID());
           break;
         default:
           throw new Exception("No rules to handle action '{$action}'.");

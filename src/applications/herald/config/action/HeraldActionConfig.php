@@ -23,36 +23,40 @@ final class HeraldActionConfig {
   const ACTION_EMAIL        = 'email';
   const ACTION_NOTHING      = 'nothing';
   const ACTION_AUDIT        = 'audit';
+  const ACTION_FLAG         = 'flag';
 
   public static function getActionMessageMapForRuleType($rule_type) {
-    $generic_mappings =
-      array(
-        self::ACTION_NOTHING      => 'Do nothing',
-      );
+    $generic_mappings = array(
+      self::ACTION_NOTHING      => 'Do nothing',
+      self::ACTION_ADD_CC       => 'Add emails to CC',
+      self::ACTION_REMOVE_CC    => 'Remove emails from CC',
+      self::ACTION_EMAIL        => 'Send an email to',
+      self::ACTION_AUDIT        => 'Trigger an Audit',
+      self::ACTION_FLAG         => 'Mark with flag',
+    );
 
     switch ($rule_type) {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
-        $specific_mappings =
-          array(
-            self::ACTION_ADD_CC       => 'Add emails to CC',
-            self::ACTION_REMOVE_CC    => 'Remove emails from CC',
-            self::ACTION_EMAIL        => 'Send an email to',
-            self::ACTION_AUDIT        => 'Trigger an Audit for project',
-          );
+        $specific_mappings = array(
+          self::ACTION_AUDIT        => 'Trigger an Audit for project',
+        );
         break;
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
-        $specific_mappings =
-          array(
-            self::ACTION_ADD_CC       => 'CC me',
-            self::ACTION_REMOVE_CC    => 'Remove me from CC',
-            self::ACTION_EMAIL        => 'Email me',
-            self::ACTION_AUDIT        => 'Trigger an Audit by me',
-          );
+        $specific_mappings = array(
+          self::ACTION_ADD_CC       => 'CC me',
+          self::ACTION_REMOVE_CC    => 'Remove me from CC',
+          self::ACTION_EMAIL        => 'Email me',
+          self::ACTION_AUDIT        => 'Trigger an Audit by me',
+        );
+        break;
+      case null:
+        $specific_mappings = array();
+        // Use generic mappings, used on transcript.
         break;
       default:
         throw new Exception("Unknown rule type '${rule_type}'");
     }
-    return $generic_mappings + $specific_mappings;
+    return $specific_mappings + $generic_mappings;
   }
 
   public static function getActionMessageMap($content_type,
@@ -66,6 +70,7 @@ final class HeraldActionConfig {
             self::ACTION_ADD_CC,
             self::ACTION_REMOVE_CC,
             self::ACTION_EMAIL,
+            self::ACTION_FLAG,
             self::ACTION_NOTHING,
           ));
       case HeraldContentTypeConfig::CONTENT_TYPE_COMMIT:
@@ -74,6 +79,7 @@ final class HeraldActionConfig {
           array(
             self::ACTION_EMAIL,
             self::ACTION_AUDIT,
+            self::ACTION_FLAG,
             self::ACTION_NOTHING,
           ));
       case HeraldContentTypeConfig::CONTENT_TYPE_MERGE:
@@ -118,6 +124,13 @@ final class HeraldActionConfig {
         case HeraldActionConfig::ACTION_REMOVE_CC:
         case HeraldActionConfig::ACTION_AUDIT:
           $data[1] = array($author_phid => $author_phid);
+          break;
+        case HeraldActionConfig::ACTION_FLAG:
+          // Make sure flag color is valid; set to blue if not.
+          $color_map = PhabricatorFlagColor::getColorNameMap();
+          if (empty($color_map[$data[1]])) {
+            $data[1] = PhabricatorFlagColor::COLOR_BLUE;
+          }
           break;
         case HeraldActionConfig::ACTION_NOTHING:
           break;

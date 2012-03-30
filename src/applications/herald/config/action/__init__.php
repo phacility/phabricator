@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/flag/constants/color');
 phutil_require_module('phabricator', 'applications/herald/config/contenttype');
 phutil_require_module('phabricator', 'applications/herald/config/ruletype');
 phutil_require_module('phabricator', 'applications/herald/storage/action');

@@ -27,6 +27,7 @@ final class HeraldValueTypeConfig {
   const VALUE_REPOSITORY          = 'repository';
   const VALUE_OWNERS_PACKAGE      = 'package';
   const VALUE_PROJECT             = 'project';
+  const VALUE_FLAG_COLOR          = 'flagcolor';
 
   public static function getValueTypeForFieldAndCondition($field, $condition) {
     switch ($condition) {
@@ -78,22 +79,35 @@ final class HeraldValueTypeConfig {
   }
 
   public static function getValueTypeForAction($action, $rule_type) {
-    // users can't change targets for personal rule actions
-    if ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL) {
-      return self::VALUE_NONE;
-    }
+    $is_personal = ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_PERSONAL);
 
-    switch ($action) {
-      case HeraldActionConfig::ACTION_ADD_CC:
-      case HeraldActionConfig::ACTION_REMOVE_CC:
-      case HeraldActionConfig::ACTION_EMAIL:
-        return self::VALUE_EMAIL;
-      case HeraldActionConfig::ACTION_NOTHING:
-        return self::VALUE_NONE;
-      case HeraldActionConfig::ACTION_AUDIT:
-        return self::VALUE_PROJECT;
-      default:
-        throw new Exception("Unknown action '{$action}'.");
+    if ($is_personal) {
+      switch ($action) {
+        case HeraldActionConfig::ACTION_ADD_CC:
+        case HeraldActionConfig::ACTION_REMOVE_CC:
+        case HeraldActionConfig::ACTION_EMAIL:
+        case HeraldActionConfig::ACTION_NOTHING:
+        case HeraldActionConfig::ACTION_AUDIT:
+          return self::VALUE_NONE;
+        case HeraldActionConfig::ACTION_FLAG:
+          return self::VALUE_FLAG_COLOR;
+        default:
+          throw new Exception("Unknown or invalid action '{$action}'.");
+      }
+    } else {
+      switch ($action) {
+        case HeraldActionConfig::ACTION_ADD_CC:
+        case HeraldActionConfig::ACTION_REMOVE_CC:
+        case HeraldActionConfig::ACTION_EMAIL:
+          return self::VALUE_EMAIL;
+        case HeraldActionConfig::ACTION_NOTHING:
+          return self::VALUE_NONE;
+        case HeraldActionConfig::ACTION_AUDIT:
+          return self::VALUE_PROJECT;
+        case HeraldActionConfig::ACTION_FLAG:
+        default:
+          throw new Exception("Unknown or invalid action '{$action}'.");
+      }
     }
   }
 }

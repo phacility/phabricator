@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'aphront/response/redirect');
+phutil_require_module('phabricator', 'applications/flag/constants/color');
 phutil_require_module('phabricator', 'applications/herald/config/action');
 phutil_require_module('phabricator', 'applications/herald/config/condition');
 phutil_require_module('phabricator', 'applications/herald/config/contenttype');

@@ -6,5 +6,14 @@
 
 
 
+phutil_require_module('phabricator', 'applications/flag/query/flag');
+phutil_require_module('phabricator', 'applications/flag/storage/flag');
+phutil_require_module('phabricator', 'applications/herald/storage/rule');
+phutil_require_module('phabricator', 'applications/herald/storage/transcript/apply');
+phutil_require_module('phabricator', 'applications/people/storage/user');
+phutil_require_module('phabricator', 'applications/phid/handle/data');
+
+phutil_require_module('phutil', 'utils');
+
 
 phutil_require_source('HeraldObjectAdapter.php');

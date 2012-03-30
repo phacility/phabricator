@@ -225,6 +225,8 @@ final class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
   }
 
   public function applyHeraldEffects(array $effects) {
+    assert_instances_of($effects, 'HeraldEffect');
+
     $result = array();
     if ($this->explicitCCs) {
       $effect = new HeraldEffect();
@@ -251,6 +253,11 @@ final class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
             $effect,
             true,
             'OK, did nothing.');
+          break;
+        case HeraldActionConfig::ACTION_FLAG:
+          $result[] = parent::applyFlagEffect(
+            $effect,
+            $this->revision->getPHID());
           break;
         case HeraldActionConfig::ACTION_EMAIL:
         case HeraldActionConfig::ACTION_ADD_CC:

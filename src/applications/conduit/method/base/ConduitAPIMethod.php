@@ -86,11 +86,15 @@ abstract class ConduitAPIMethod {
       return;
     }
 
-    $host = new PhutilURI($host);
-    $host->setPath('/');
-    $host = (string)$host;
+    // NOTE: Compare domains only so we aren't sensitive to port specification
+    // or omission.
 
-    $self = PhabricatorEnv::getURI('/');
+    $host = new PhutilURI($host);
+    $host = $host->getDomain();
+
+    $self = new PhutilURI(PhabricatorEnv::getURI('/'));
+    $self = $self->getDomain();
+
     if ($self !== $host) {
       throw new Exception(
         "Your client is connecting to this install as '{$host}', but it is ".

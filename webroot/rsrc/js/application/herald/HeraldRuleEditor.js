@@ -188,7 +188,6 @@ JX.install('HeraldRuleEditor', {
         JX.Stratcom.addSigil(node, 'action-target');
       }
 
-
       var old_type = this._actionTypes[row_id];
       if (old_type == type || !old_type) {
         set_fn(this._getActionTarget(row_id));
@@ -225,6 +224,12 @@ JX.install('HeraldRuleEditor', {
           input = '';
           get_fn = JX.bag;
           set_fn = JX.bag;
+          break;
+        case 'flagcolor':
+          input = this._renderSelect(this._config.template.colors);
+          get_fn = function() { return input.value; };
+          set_fn = function(v) { input.value = v; };
+          set_fn(this._config.template.defaultColor);
           break;
         default:
           input = JX.$N('input');

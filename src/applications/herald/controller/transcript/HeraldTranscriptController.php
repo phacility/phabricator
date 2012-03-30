@@ -289,24 +289,29 @@ final class HeraldTranscriptController extends HeraldController {
   private function buildApplyTranscriptPanel($xscript) {
     $handles = $this->handles;
 
-    $action_names = HeraldActionConfig::getActionMessageMapForRuleType(
-      HeraldRuleTypeConfig::RULE_TYPE_GLOBAL);
+    $action_names = HeraldActionConfig::getActionMessageMapForRuleType(null);
 
     $rows = array();
     foreach ($xscript->getApplyTranscripts() as $apply_xscript) {
-      // TODO: Hacks, this is an approximate guess at the target type.
-      $target = (array)$apply_xscript->getTarget();
-      if (!$target) {
-        if ($apply_xscript->getAction() == HeraldActionConfig::ACTION_NOTHING) {
+
+      $target = $apply_xscript->getTarget();
+      switch ($apply_xscript->getAction()) {
+        case HeraldActionConfig::ACTION_NOTHING:
           $target = '';
-        } else {
-          $target = '<empty>';
-        }
-      } else {
-        foreach ($target as $k => $phid) {
-          $target[$k] = $handles[$phid]->getName();
-        }
-        $target = implode("\n", $target);
+          break;
+        case HeraldActionConfig::ACTION_FLAG:
+          $target = PhabricatorFlagColor::getColorName($target);
+          break;
+        default:
+          if ($target) {
+            foreach ($target as $k => $phid) {
+              $target[$k] = $handles[$phid]->getName();
+            }
+            $target = implode("\n", $target);
+          } else {
+            $target = '<empty>';
+          }
+          break;
       }
       $target = phutil_escape_html($target);
 

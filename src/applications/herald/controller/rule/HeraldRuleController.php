@@ -378,14 +378,22 @@ final class HeraldRuleController extends HeraldController {
       $serial_actions = array();
       foreach ($rule->getActions() as $action) {
 
-        $target_map = array();
-        foreach ((array)$action->getTarget() as $fbid) {
-          $target_map[$fbid] = $handles[$fbid]->getName();
+        switch ($action->getAction()) {
+          case HeraldActionConfig::ACTION_FLAG:
+            $current_value = $action->getTarget();
+            break;
+          default:
+            $target_map = array();
+            foreach ((array)$action->getTarget() as $fbid) {
+              $target_map[$fbid] = $handles[$fbid]->getName();
+            }
+            $current_value = $target_map;
+            break;
         }
 
         $serial_actions[] = array(
           $action->getAction(),
-          $target_map,
+          $current_value,
         );
       }
     }
@@ -431,6 +439,8 @@ final class HeraldRuleController extends HeraldController {
         'actions' => (object)$serial_actions,
         'template' => $this->buildTokenizerTemplates() + array(
           'rules' => $all_rules,
+          'colors' => PhabricatorFlagColor::getColorNameMap(),
+          'defaultColor' => PhabricatorFlagColor::COLOR_BLUE,
         ),
         'author' => array($rule->getAuthorPHID() =>
                           $handles[$rule->getAuthorPHID()]->getName()),
