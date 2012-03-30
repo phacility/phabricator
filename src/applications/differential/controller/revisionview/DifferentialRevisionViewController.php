@@ -322,9 +322,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $page_pane = id(new DifferentialPrimaryPaneView())
       ->setLineWidthFromChangesets($changesets)
       ->setID($pane_id)
-      ->appendChild($reviewer_warning)
       ->appendChild(
-        $revision_detail->render().
         $comment_view->render().
         $diff_history->render().
         $warning.
@@ -336,7 +334,11 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $page_pane->appendChild($comment_form->render());
     }
     return $this->buildStandardPageResponse(
-      $page_pane,
+      array(
+        $reviewer_warning,
+        $revision_detail,
+        $page_pane,
+      ),
       array(
         'title' => 'D'.$revision->getID().' '.$revision->getTitle(),
       ));
@@ -446,11 +448,13 @@ final class DifferentialRevisionViewController extends DifferentialController {
         );
       }
 
-      $links[] = array(
-        'class' => 'transcripts-metamta',
-        'name'  => 'MetaMTA Transcripts',
-        'href'  => "/mail/?phid={$revision_phid}",
-      );
+      if ($user->getIsAdmin()) {
+        $links[] = array(
+          'class' => 'transcripts-metamta',
+          'name'  => 'MetaMTA Transcripts',
+          'href'  => "/mail/?phid={$revision_phid}",
+        );
+      }
 
       $links[] = array(
         'class' => 'transcripts-herald',

@@ -30,10 +30,8 @@ final class ManiphestTaskDescriptionPreviewController
     $engine = PhabricatorMarkupEngine::newManiphestMarkupEngine();
 
     $content =
-      '<div class="maniphest-task-description">'.
-        '<div class="phabricator-remarkup">'.
-          $engine->markupText($description).
-        '</div>'.
+      '<div class="phabricator-remarkup">'.
+        $engine->markupText($description).
       '</div>';
 
     return id(new AphrontAjaxResponse())

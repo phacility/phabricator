@@ -2,32 +2,6 @@
  * @provides differential-revision-detail-css
  */
 
-.differential-revision-properties {
-  font-size: 12px;
-  width:    100%;
-  table-layout: fixed;
-}
-
-.differential-revision-properties tt {
-  letter-spacing: 1.1px;
-}
-
-.differential-revision-properties th {
-  font-weight:    bold;
-  width:          120px;
-  text-align:     right;
-  padding:        3px 4px 3px 3px;
-  color:          #333333;
-}
-
-.differential-revision-properties td {
-  padding: 3px 2px;
-}
-
-.differential-revision-detail-core {
-  margin-right: 265px;
-}
-
 .differential-unit-block,
 .differential-lint-block {
   padding: .5em;
@@ -91,8 +65,4 @@
   background: #808080;
   color: #ffff66;
   font-size: 12px;
-}
-
-.differential-keyboard-shortcuts {
-  float: right;
 }

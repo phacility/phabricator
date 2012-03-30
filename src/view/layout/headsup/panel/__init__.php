@@ -8,11 +8,10 @@
 
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'view/base');
-phutil_require_module('phabricator', 'view/layout/headsup/action');
-phutil_require_module('phabricator', 'view/layout/headsup/actionlist');
-phutil_require_module('phabricator', 'view/layout/headsup/panel');
+phutil_require_module('phabricator', 'view/widget/keyboardshortcuts');
 
+phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
 
 
-phutil_require_source('DifferentialRevisionDetailView.php');
+phutil_require_source('AphrontHeadsupView.php');

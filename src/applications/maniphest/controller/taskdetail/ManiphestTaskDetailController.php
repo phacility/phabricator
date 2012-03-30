@@ -185,28 +185,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $dict['Files'] = implode('', $views);
     }
 
-    $dict['Description'] =
-      '<div class="maniphest-task-description">'.
-        '<div class="phabricator-remarkup">'.
-          $engine->markupText($task->getDescription()).
-        '</div>'.
-      '</div>';
-
-    require_celerity_resource('maniphest-task-detail-css');
-
-    $table = array();
-    foreach ($dict as $key => $value) {
-      $table[] =
-        '<tr>'.
-          '<th>'.phutil_escape_html($key).':</th>'.
-          '<td>'.$value.'</td>'.
-        '</tr>';
-    }
-    $table =
-      '<table class="maniphest-task-properties">'.
-        implode("\n", $table).
-      '</table>';
-
     $context_bar = null;
 
     if ($parent_task) {
@@ -308,20 +286,16 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $action_list = new AphrontHeadsupActionListView();
     $action_list->setActions($actions);
 
-    $panel =
-      '<div class="maniphest-panel">'.
-        $action_list->render().
-        '<div class="maniphest-task-detail-core">'.
-          '<h1>'.
-            '<span class="aphront-headsup-object-name">'.
-              phutil_escape_html('T'.$task->getID()).
-            '</span>'.
-            ' '.
-            phutil_escape_html($task->getTitle()).
-          '</h1>'.
-          $table.
-        '</div>'.
-      '</div>';
+    $headsup_panel = new AphrontHeadsupView();
+    $headsup_panel->setObjectName('T'.$task->getID());
+    $headsup_panel->setHeader($task->getTitle());
+    $headsup_panel->setActionList($action_list);
+    $headsup_panel->setProperties($dict);
+
+    $headsup_panel->appendChild(
+      '<div class="phabricator-remarkup">'.
+        $engine->markupText($task->getDescription()).
+      '</div>');
 
     $transaction_types = ManiphestTransactionType::getTransactionTypeMap();
     $resolution_types = ManiphestTaskStatus::getTaskStatusMap();
@@ -523,7 +497,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     return $this->buildStandardPageResponse(
       array(
         $context_bar,
-        $panel,
+        $headsup_panel,
         $transaction_view,
         $comment_panel,
         $preview_panel,

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,23 +50,14 @@ final class DifferentialRevisionDetailView extends AphrontView {
 
     $revision = $this->revision;
 
-    $rows = array();
+    $dict = array();
     foreach ($this->auxiliaryFields as $field) {
       $value = $field->renderValueForRevisionView();
       if (strlen($value)) {
-        $label = $field->renderLabelForRevisionView();
-        $rows[] =
-          '<tr>'.
-            '<th>'.$label.'</th>'.
-            '<td>'.$value.'</td>'.
-          '</tr>';
+        $label = rtrim($field->renderLabelForRevisionView(), ':');
+        $dict[$label] = $value;
       }
     }
-
-    $properties =
-      '<table class="differential-revision-properties">'.
-        implode("\n", $rows).
-      '</table>';
 
     $actions = array();
     foreach ($this->actions as $action) {
@@ -83,22 +74,14 @@ final class DifferentialRevisionDetailView extends AphrontView {
     $action_list = new AphrontHeadsupActionListView();
     $action_list->setActions($actions);
 
-    return
-      '<div class="differential-revision-detail differential-panel">'.
-        $action_list->render().
-        '<div class="differential-keyboard-shortcuts">'.
-          id(new AphrontKeyboardShortcutsAvailableView())->render().
-        '</div>'.
-        '<div class="differential-revision-detail-core">'.
-          '<h1>'.
-            '<span class="aphront-headsup-object-name">'.
-              phutil_escape_html('D'.$revision->getID()).
-            '</span>'.
-            ' '.
-            phutil_escape_html($revision->getTitle()).'</h1>'.
-          $properties.
-        '</div>'.
-        '<div style="clear: both;"></div>'.
-      '</div>';
+    $action_panel = new AphrontHeadsupView();
+    $action_panel->setActionList($action_list);
+    $action_panel->setHasKeyboardShortcuts(true);
+    $action_panel->setProperties($dict);
+
+    $action_panel->setObjectName('D'.$revision->getID());
+    $action_panel->setHeader($revision->getTitle());
+
+    return $action_panel->render();
   }
 }

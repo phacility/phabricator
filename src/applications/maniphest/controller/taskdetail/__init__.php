@@ -36,6 +36,7 @@ phutil_require_module('phabricator', 'view/layout/contextbar');
 phutil_require_module('phabricator', 'view/layout/filepreview');
 phutil_require_module('phabricator', 'view/layout/headsup/action');
 phutil_require_module('phabricator', 'view/layout/headsup/actionlist');
+phutil_require_module('phabricator', 'view/layout/headsup/panel');
 phutil_require_module('phabricator', 'view/layout/panel');
 
 phutil_require_module('phutil', 'markup');

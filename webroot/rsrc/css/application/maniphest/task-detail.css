@@ -41,8 +41,3 @@
 .maniphest-task-detail-core {
   margin-right: 265px;
 }
-
-.maniphest-task-detail-core .create-button-container {
-  float:right;
-  margin-top:-0.5em;
-}
