@@ -546,6 +546,10 @@ final class DifferentialRevisionEditor {
     array $add_phids,
     $reason_phid) {
 
+    $dont_add = $revision->getReviewers();
+    $dont_add[] = $revision->getAuthorPHID();
+    $add_phids = array_diff($add_phids, $dont_add);
+
     return self::alterRelationships(
       $revision,
       $stable_phids,

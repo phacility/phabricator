@@ -431,9 +431,7 @@ final class DifferentialCommentEditor {
     // top of the action list.
     $revision->save();
 
-    if ($action != DifferentialAction::ACTION_RESIGN &&
-        $this->actorPHID != $revision->getAuthorPHID() &&
-        !in_array($this->actorPHID, $revision->getReviewers())) {
+    if ($action != DifferentialAction::ACTION_RESIGN) {
       DifferentialRevisionEditor::addCC(
         $revision,
         $this->actorPHID,
