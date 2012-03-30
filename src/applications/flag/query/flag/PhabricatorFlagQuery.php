@@ -68,7 +68,7 @@ final class PhabricatorFlagQuery {
     return id(new PhabricatorFlag())->loadOneWhere(
       'ownerPHID = %s AND type = %s AND objectPHID = %s',
       $user->getPHID(),
-      PhabricatorObjectHandleData::lookupType($object_phid),
+      phid_get_type($object_phid),
       $object_phid);
   }
 

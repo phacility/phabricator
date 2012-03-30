@@ -32,7 +32,7 @@ final class PhabricatorObjectHandleData {
   public function loadObjects() {
     $types = array();
     foreach ($this->phids as $phid) {
-      $type = self::lookupType($phid);
+      $type = phid_get_type($phid);
       $types[$type][] = $phid;
     }
 
@@ -98,11 +98,7 @@ final class PhabricatorObjectHandleData {
 
   public function loadHandles() {
 
-    $types = array();
-    foreach ($this->phids as $phid) {
-      $type = self::lookupType($phid);
-      $types[$type][] = $phid;
-    }
+    $types = phid_group_by_type($this->phids);
 
     $handles = array();
 
@@ -497,13 +493,4 @@ final class PhabricatorObjectHandleData {
 
     return $handles;
   }
-
-  public static function lookupType($phid) {
-    $matches = null;
-    if (preg_match('/^PHID-([^-]{4})-/', $phid, $matches)) {
-      return $matches[1];
-    }
-    return PhabricatorPHIDConstants::PHID_TYPE_UNKNOWN;
-  }
-
 }
