@@ -45,6 +45,7 @@ final class DiffusionBrowseController extends DiffusionController {
       $empty_result = new DiffusionEmptyResultView();
       $empty_result->setDiffusionRequest($drequest);
       $empty_result->setBrowseQuery($browse_query);
+      $empty_result->setView($this->getRequest()->getStr('view'));
       $content[] = $empty_result;
 
     } else {

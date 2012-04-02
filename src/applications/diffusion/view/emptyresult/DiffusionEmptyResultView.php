@@ -19,9 +19,14 @@
 final class DiffusionEmptyResultView extends DiffusionView {
 
   private $browseQuery;
+  private $view;
 
   public function setBrowseQuery($browse_query) {
     $this->browseQuery = $browse_query;
+  }
+
+  public function setView($view) {
+    $this->view = $view;
   }
 
   public function render() {
@@ -59,6 +64,7 @@ final class DiffusionEmptyResultView extends DiffusionView {
           array(
             'text' => 'existed',
             'commit' => $existed,
+            'params' => array('view' => $this->view),
           )
         );
 
