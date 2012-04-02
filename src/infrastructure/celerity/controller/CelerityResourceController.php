@@ -107,6 +107,12 @@ final class CelerityResourceController extends AphrontController {
       return $data;
     }
 
+    // Some resources won't survive minification (like Raphael.js), and are
+    // marked so as not to be minified.
+    if (strpos($data, '@'.'do-not-minify') !== false) {
+      return $data;
+    }
+
     switch ($type) {
       case 'css':
         // Remove comments.

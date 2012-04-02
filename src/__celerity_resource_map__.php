@@ -1970,7 +1970,7 @@ celerity_register_resource_map(array(
   ),
   'raphael-core' =>
   array(
-    'uri' => '/res/bae05d27/rsrc/js/raphael/raphael.js',
+    'uri' => '/res/3f48575a/rsrc/js/raphael/raphael.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1979,7 +1979,7 @@ celerity_register_resource_map(array(
   ),
   'raphael-g' =>
   array(
-    'uri' => '/res/8bbdbea8/rsrc/js/raphael/g.raphael.js',
+    'uri' => '/res/b07e5245/rsrc/js/raphael/g.raphael.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1988,7 +1988,7 @@ celerity_register_resource_map(array(
   ),
   'raphael-g-line' =>
   array(
-    'uri' => '/res/54504ae4/rsrc/js/raphael/g.raphael.line.js',
+    'uri' => '/res/a59c8556/rsrc/js/raphael/g.raphael.line.js',
     'type' => 'js',
     'requires' =>
     array(

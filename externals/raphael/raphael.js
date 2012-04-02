@@ -1,5 +1,6 @@
 /**
  * @provides raphael-core
+ * @do-not-minify
  */
 // ┌─────────────────────────────────────────────────────────────────────┐ \\
 // │ Raphaël 2.0.1 - JavaScript Vector Library                           │ \\
