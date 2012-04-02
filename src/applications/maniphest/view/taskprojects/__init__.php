@@ -12,6 +12,7 @@ phutil_require_module('phabricator', 'infrastructure/javelin/api');
 phutil_require_module('phabricator', 'infrastructure/javelin/markup');
 
 phutil_require_module('phutil', 'markup');
+phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('ManiphestTaskProjectsView.php');

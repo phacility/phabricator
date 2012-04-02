@@ -1722,7 +1722,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-project-tag-css' =>
   array(
-    'uri' => '/res/c0a3c26b/rsrc/css/application/projects/project-tag.css',
+    'uri' => '/res/6b0a5223/rsrc/css/application/projects/project-tag.css',
     'type' => 'css',
     'requires' =>
     array(

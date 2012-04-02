@@ -42,7 +42,8 @@ final class ManiphestTaskProjectsView extends ManiphestView {
           'href'  => $handle->getURI(),
           'class' => 'phabricator-project-tag',
         ),
-        phutil_escape_html($handle->getName()));
+        phutil_escape_html(
+          phutil_utf8_shorten($handle->getName(), 24)));
     }
 
     if (count($this->handles) > 2) {
@@ -60,7 +61,7 @@ final class ManiphestTaskProjectsView extends ManiphestView {
           'class' => 'phabricator-project-tag',
           'sigil' => 'has-tooltip',
           'meta'  => array(
-            'tip' => phutil_escape_html(implode(', ', $all)),
+            'tip' => implode(', ', $all),
             'size' => 200,
           ),
         ),
