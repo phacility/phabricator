@@ -41,6 +41,8 @@ final class ManiphestTransactionEditor {
     $email_to = array();
     $email_to[] = $task->getOwnerPHID();
 
+    $pri_changed = $this->isCreate($transactions);
+
     foreach ($transactions as $key => $transaction) {
       $type = $transaction->getTransactionType();
       $new = $transaction->getNewValue();
@@ -151,6 +153,7 @@ final class ManiphestTransactionEditor {
             break;
           case ManiphestTransactionType::TYPE_PRIORITY:
             $task->setPriority($new);
+            $pri_changed = true;
             break;
           case ManiphestTransactionType::TYPE_ATTACH:
             $task->setAttached($new);
@@ -176,6 +179,13 @@ final class ManiphestTransactionEditor {
         $transaction->setNewValue($new);
       }
 
+    }
+
+    if ($pri_changed) {
+      $subpriority = ManiphestTransactionEditor::getNextSubpriority(
+        $task->getPriority(),
+        null);
+      $task->setSubpriority($subpriority);
     }
 
     $task->save();
@@ -382,5 +392,28 @@ final class ManiphestTransactionEditor {
 
     return array_unique($tags);
   }
+
+  public static function getNextSubpriority($pri, $sub) {
+
+    if ($sub === null) {
+      $next = id(new ManiphestTask())->loadOneWhere(
+        'priority = %d ORDER BY subpriority ASC LIMIT 1',
+        $pri);
+      if ($next) {
+        return $next->getSubpriority() - ((double)(2 << 16));
+      }
+    } else {
+      $next = id(new ManiphestTask())->loadOneWhere(
+        'priority = %d AND subpriority > %s ORDER BY subpriority ASC LIMIT 1',
+        $pri,
+        $sub);
+      if ($next) {
+        return ($sub + $next->getSubpriority()) / 2;
+      }
+    }
+
+    return (double)(2 << 32);
+  }
+
 
 }

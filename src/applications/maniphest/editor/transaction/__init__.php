@@ -11,6 +11,7 @@ phutil_require_module('phabricator', 'applications/feed/publisher');
 phutil_require_module('phabricator', 'applications/maniphest/constants/action');
 phutil_require_module('phabricator', 'applications/maniphest/constants/status');
 phutil_require_module('phabricator', 'applications/maniphest/constants/transactiontype');
+phutil_require_module('phabricator', 'applications/maniphest/storage/task');
 phutil_require_module('phabricator', 'applications/maniphest/view/transactiondetail');
 phutil_require_module('phabricator', 'applications/metamta/constants/notificationtype');
 phutil_require_module('phabricator', 'applications/metamta/storage/mail');

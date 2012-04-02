@@ -443,6 +443,7 @@ final class ManiphestTaskQuery {
     switch ($this->orderBy) {
       case self::ORDER_PRIORITY:
         $order[] = 'priority';
+        $order[] = 'subpriority';
         $order[] = 'dateModified';
         break;
       case self::ORDER_CREATED:
@@ -463,6 +464,7 @@ final class ManiphestTaskQuery {
 
     foreach ($order as $k => $column) {
       switch ($column) {
+        case 'subpriority':
         case 'ownerOrdering':
           $order[$k] = "task.{$column} ASC";
           break;

@@ -776,6 +776,21 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/maniphest/behavior-project-create.js',
   ),
+  'javelin-behavior-maniphest-subpriority-editor' =>
+  array(
+    'uri' => '/res/7d669df7/rsrc/js/application/maniphest/behavior-subpriorityeditor.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-magical-init',
+      2 => 'javelin-dom',
+      3 => 'javelin-vector',
+      4 => 'javelin-stratcom',
+      5 => 'javelin-workflow',
+    ),
+    'disk' => '/rsrc/js/application/maniphest/behavior-subpriorityeditor.js',
+  ),
   'javelin-behavior-maniphest-transaction-controls' =>
   array(
     'uri' => '/res/62465554/rsrc/js/application/maniphest/behavior-transaction-controls.js',
@@ -1436,7 +1451,7 @@ celerity_register_resource_map(array(
   ),
   'maniphest-task-summary-css' =>
   array(
-    'uri' => '/res/ddb926e4/rsrc/css/application/maniphest/task-summary.css',
+    'uri' => '/res/d03e96a4/rsrc/css/application/maniphest/task-summary.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -2133,7 +2148,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/4fbae2af/javelin.pkg.js',
       'type' => 'js',
     ),
-    '8315b569' =>
+    '826b7ac2' =>
     array(
       'name' => 'maniphest.pkg.css',
       'symbols' =>
@@ -2143,7 +2158,7 @@ celerity_register_resource_map(array(
         2 => 'maniphest-task-detail-css',
         3 => 'aphront-attached-file-view-css',
       ),
-      'uri' => '/res/pkg/8315b569/maniphest.pkg.css',
+      'uri' => '/res/pkg/826b7ac2/maniphest.pkg.css',
       'type' => 'css',
     ),
     '86fc0b0c' =>
@@ -2178,7 +2193,7 @@ celerity_register_resource_map(array(
   ),
   'reverse' =>
   array(
-    'aphront-attached-file-view-css' => '8315b569',
+    'aphront-attached-file-view-css' => '826b7ac2',
     'aphront-crumbs-view-css' => '61493db4',
     'aphront-dialog-view-css' => '61493db4',
     'aphront-form-view-css' => '61493db4',
@@ -2244,9 +2259,9 @@ celerity_register_resource_map(array(
     'javelin-util' => '4fbae2af',
     'javelin-vector' => '4fbae2af',
     'javelin-workflow' => '21d01ed8',
-    'maniphest-task-detail-css' => '8315b569',
-    'maniphest-task-summary-css' => '8315b569',
-    'maniphest-transaction-detail-css' => '8315b569',
+    'maniphest-task-detail-css' => '826b7ac2',
+    'maniphest-task-summary-css' => '826b7ac2',
+    'maniphest-transaction-detail-css' => '826b7ac2',
     'phabricator-app-buttons-css' => '61493db4',
     'phabricator-content-source-view-css' => '18be02e0',
     'phabricator-core-buttons-css' => '61493db4',

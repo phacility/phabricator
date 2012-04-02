@@ -260,34 +260,65 @@ final class ManiphestTaskListController extends ManiphestController {
 
       $selector = new AphrontNullView();
 
+      $group = $query->getParameter('group');
+      $order = $query->getParameter('order');
+      $is_draggable =
+        ($group == 'priority') ||
+        ($group == 'none' && $order == 'priority');
+
+      $lists = new AphrontNullView();
+      $lists->appendChild('<div style="padding: 0em 1em;">');
       foreach ($tasks as $group => $list) {
         $task_list = new ManiphestTaskListView();
         $task_list->setShowBatchControls(true);
+        if ($is_draggable) {
+          $task_list->setShowSubpriorityControls(true);
+        }
         $task_list->setUser($user);
         $task_list->setTasks($list);
         $task_list->setHandles($handles);
 
         $count = number_format(count($list));
-        $selector->appendChild(
-          '<h1 class="maniphest-task-group-header">'.
-            phutil_escape_html($group).' ('.$count.')'.
-          '</h1>');
-        $selector->appendChild($task_list);
+
+        $lists->appendChild(
+          javelin_render_tag(
+            'h1',
+            array(
+              'class' => 'maniphest-task-group-header',
+              'sigil' => 'task-group',
+              'meta'  => array(
+                'priority' => head($list)->getPriority(),
+              ),
+            ),
+            phutil_escape_html($group).' ('.$count.')'));
+
+        $lists->appendChild($task_list);
       }
+      $lists->appendChild('</div>');
+      $selector->appendChild($lists);
 
 
       $selector->appendChild($this->renderBatchEditor($query));
 
+      $form_id = celerity_generate_unique_node_id();
       $selector = phabricator_render_form(
         $user,
         array(
           'method' => 'POST',
           'action' => '/maniphest/batch/',
+          'id'     => $form_id,
         ),
         $selector->render());
 
       $list_container->appendChild($selector);
       $list_container->appendChild($pager);
+
+      Javelin::initBehavior(
+        'maniphest-subpriority-editor',
+        array(
+          'root'  => $form_id,
+          'uri'   =>  '/maniphest/subpriority/',
+        ));
     }
 
     $list_container->appendChild('</div>');

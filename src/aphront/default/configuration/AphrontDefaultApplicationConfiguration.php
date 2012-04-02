@@ -206,6 +206,7 @@ class AphrontDefaultApplicationConfiguration
           'preview/(?P<id>\d+)/' => 'ManiphestTransactionPreviewController',
         ),
         'export/(?P<key>[^/]+)/' => 'ManiphestExportController',
+        'subpriority/' => 'ManiphestSubpriorityController',
       ),
 
       '/T(?P<id>\d+)' => 'ManiphestTaskDetailController',

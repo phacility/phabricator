@@ -25,6 +25,7 @@ final class ManiphestTaskListView extends ManiphestView {
   private $handles;
   private $user;
   private $showBatchControls;
+  private $showSubpriorityControls;
 
   public function setTasks(array $tasks) {
     $this->tasks = $tasks;
@@ -46,6 +47,11 @@ final class ManiphestTaskListView extends ManiphestView {
     return $this;
   }
 
+  public function setShowSubpriorityControls($show_subpriority_controls) {
+    $this->showSubpriorityControls = $show_subpriority_controls;
+    return $this;
+  }
+
   public function render() {
 
     $views = array();
@@ -53,6 +59,7 @@ final class ManiphestTaskListView extends ManiphestView {
       $view = new ManiphestTaskSummaryView();
       $view->setTask($task);
       $view->setShowBatchControls($this->showBatchControls);
+      $view->setShowSubpriorityControls($this->showSubpriorityControls);
       $view->setUser($this->user);
       $view->setHandles($this->handles);
       $views[] = $view->render();

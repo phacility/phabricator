@@ -5,7 +5,7 @@
 .maniphest-task-summary {
   width: 100%;
   margin: 4px 0;
-  border-collapse: collapse;
+  border-collapse: separate;
 
   font-size: 12px;
   color: #222222;
@@ -42,6 +42,7 @@
   padding-right: 0px;
   width: 16px;
   text-align: center;
+  overflow: hidden;
 }
 
 .maniphest-task-summary td.maniphest-task-batch,
@@ -70,9 +71,9 @@
 }
 
 .maniphest-task-summary td.maniphest-task-name {
-  overflow: hidden;
   font-weight: bold;
   white-space: normal;
+  overflow: hidden;
 }
 
 .maniphest-task-summary td.maniphest-task-projects {
@@ -95,32 +96,32 @@
 
 .maniphest-task-summary .pri-unbreak {
   border-color: #ff0000;
-  background: #ff0000;
+  background-color: #ff0000;
 }
 
 .maniphest-task-summary .pri-triage {
   border-color: #ee00ee;
-  background: #ee00ee;
+  background-color: #ee00ee;
 }
 
 .maniphest-task-summary .pri-high {
   border-color: #ff6622;
-  background: #ff6622;
+  background-color: #ff6622;
 }
 
 .maniphest-task-summary .pri-normal {
   border-color: #ffaa66;
-  background: #ffaa66;
+  background-color: #ffaa66;
 }
 
 .maniphest-task-summary .pri-low {
   border-color: #eecc66;
-  background: #eecc66;
+  background-color: #eecc66;
 }
 
 .maniphest-task-summary .pri-wish {
   border-color: #0099ff;
-  background: #0099ff;
+  background-color: #0099ff;
 }
 
 .maniphest-task-group-header {
@@ -177,4 +178,27 @@
 
 .maniphest-list-container {
   padding: 0 1em;
+}
+
+td.maniphest-active-handle {
+  cursor: move;
+  background-image: url('/rsrc/image/grippy_texture.png');
+  background-position: 3px 0px;
+  background-repeat: repeat-y;
+}
+
+.maniphest-subpriority-target {
+  position: relative;
+  border: 1px dashed #aaaaaa;
+  background: #f9f9f9;
+}
+
+.maniphest-task-loading {
+  opacity: 0.5;
+}
+
+.maniphest-task-dragging {
+  position: relative;
+  opacity: 0.5;
+  z-index: 5;
 }
