@@ -107,14 +107,6 @@ final class PhabricatorImageTransformer {
 
   private function saveImageDataInAnyFormat($data, $preferred_mime = '') {
     switch ($preferred_mime) {
-      case 'image/jpg':
-      case 'image/jpeg':
-        if (function_exists('imagejpeg')) {
-          ob_start();
-          imagejpeg($data);
-          return ob_get_clean();
-        }
-        break;
       case 'image/gif': // GIF doesn't support true color.
       case 'image/png':
         if (function_exists('imagepng')) {
