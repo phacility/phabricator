@@ -372,7 +372,10 @@ final class PhabricatorDirectoryMainController
   private function buildTaskListView(array $tasks) {
     $user = $this->getRequest()->getUser();
 
-    $phids = array_filter(mpull($tasks, 'getOwnerPHID'));
+    $phids = array_merge(
+      array_filter(mpull($tasks, 'getOwnerPHID')),
+      array_mergev(mpull($tasks, 'getProjectPHIDs')));
+
     $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
 
     $view = new ManiphestTaskListView();

@@ -7,19 +7,23 @@
   margin: 4px 0;
   border-collapse: collapse;
 
-  font-size: 13px;
+  font-size: 12px;
   color: #222222;
 }
 
 .maniphest-task-summary td {
-  padding: 4px 6px;
-  background: #f6f6f6;
+  padding: 5px 3px;
+  background: #f9f9f9;
   white-space: nowrap;
 
   border-style: solid;
   border-top-color: #888888;
   border-bottom-color: #666666;
   border-width: 1px 0;
+}
+
+.maniphest-task-summary td em {
+  color: #888888;
 }
 
 .maniphest-batch-selected td {
@@ -35,7 +39,8 @@
 }
 
 .maniphest-task-summary td.maniphest-task-batch {
-  width: 30px;
+  padding-right: 0px;
+  width: 16px;
   text-align: center;
 }
 
@@ -44,14 +49,19 @@
   cursor: pointer;
 }
 
+.maniphest-task-summary td.maniphest-task-batch input {
+  margin: 0;
+}
+
 .maniphest-task-summary td.maniphest-task-number {
   font-weight: bold;
   color: #444444;
-  width: 60px;
+  width: 70px;
+  text-align: right;
 }
 
 .maniphest-task-summary td.maniphest-task-status {
-  width: 80px;
+  width: 60px;
   text-align: center;
 }
 
@@ -65,13 +75,16 @@
   white-space: normal;
 }
 
-.maniphest-task-summary td.maniphest-task-priority {
-  width: 100px;
+.maniphest-task-summary td.maniphest-task-projects {
+  width: 180px;
+  text-align: right;
+  white-space: normal;
 }
 
 .maniphest-task-summary td.maniphest-task-updated {
-  text-align: left;
-  width: 180px;
+  text-align: right;
+  width: 85px;
+  padding-right: 8px;
   border-right-width: 1px;
   border-right-style: solid;
   border-right-color: #787878;

@@ -85,6 +85,12 @@ final class ManiphestTaskSummaryView extends ManiphestView {
         '</td>';
     }
 
+    $projects_view = new ManiphestTaskProjectsView();
+    $projects_view->setHandles(
+      array_select_keys(
+        $this->handles,
+        $task->getProjectPHIDs()));
+
     return javelin_render_tag(
       'table',
       array(
@@ -114,11 +120,11 @@ final class ManiphestTaskSummaryView extends ManiphestView {
             ),
             phutil_escape_html($task->getTitle())).
         '</td>'.
-        '<td class="maniphest-task-priority">'.
-          ManiphestTaskPriority::getTaskPriorityName($task->getPriority()).
+        '<td class="maniphest-task-projects">'.
+          $projects_view->render().
         '</td>'.
         '<td class="maniphest-task-updated">'.
-          phabricator_datetime($task->getDateModified(), $this->user).
+          phabricator_date($task->getDateModified(), $this->user).
         '</td>'.
       '</tr>');
   }
