@@ -6,6 +6,6 @@ ALTER TABLE phabricator_maniphest.maniphest_task
 
 /* Seed the subpriority column with reasonable values that keep order stable. */
 UPDATE phabricator_maniphest.maniphest_task
-  SET subpriority = dateModified;
+  SET subpriority = (UNIX_TIMESTAMP() - dateModified);
 
 
