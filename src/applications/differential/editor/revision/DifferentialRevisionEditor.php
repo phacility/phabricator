@@ -461,13 +461,16 @@ final class DifferentialRevisionEditor {
       $mail[] = $message;
     }
 
-    // If you were added as a reviewer and a CC, just give you the reviewer
-    // email. We could go to greater lengths to prevent this, but there's
-    // bunch of stuff with list subscriptions anyway. You can still get two
-    // emails, but only if a revision is updated and you are added as a reviewer
-    // at the same time a list you are on is added as a CC, which is rare and
-    // reasonable.
-    $add['ccs'] = array_diff_key($add['ccs'], $add['rev']);
+    // If we added CCs, we want to send them an email, but only if they were not
+    // already a reviewer and were not added as one (in these cases, they got
+    // a "NewDiff" mail, either in the past or just a moment ago). You can still
+    // get two emails, but only if a revision is updated and you are added as a
+    // reviewer at the same time a list you are on is added as a CC, which is
+    // rare and reasonable.
+
+    $implied_ccs = self::getImpliedCCs($revision);
+    $implied_ccs = array_fill_keys($implied_ccs, true);
+    $add['ccs'] = array_diff_key($add['ccs'], $implied_ccs);
 
     if (!$is_new && $add['ccs']) {
       $mail[] = id(new DifferentialCCWelcomeMail(
@@ -546,8 +549,7 @@ final class DifferentialRevisionEditor {
     array $add_phids,
     $reason_phid) {
 
-    $dont_add = $revision->getReviewers();
-    $dont_add[] = $revision->getAuthorPHID();
+    $dont_add = self::getImpliedCCs($revision);
     $add_phids = array_diff($add_phids, $dont_add);
 
     return self::alterRelationships(
@@ -559,6 +561,11 @@ final class DifferentialRevisionEditor {
       DifferentialRevision::RELATION_SUBSCRIBED);
   }
 
+  private static function getImpliedCCs(DifferentialRevision $revision) {
+    return array_merge(
+      $revision->getReviewers(),
+      array($revision->getAuthorPHID()));
+  }
 
   public static function alterReviewers(
     DifferentialRevision $revision,
