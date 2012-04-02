@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,12 @@ final class PhabricatorMetaMTAEmailBodyParser {
     // Outlook danish
     $body = preg_replace(
       '/^\s*-----Oprindelig Meddelelse-----.*?/msU',
+      '',
+      $body);
+
+    // HTC Mail application (mobile)
+    $body = preg_replace(
+      '/^\s*Sent from my HTC smartphone.*?/msU',
       '',
       $body);
 
