@@ -27,7 +27,7 @@
   color: #444444;
 }
 
-.phabricator-remarkup .remarkup-code-block code {
+.phabricator-remarkup .remarkup-code-block pre {
   background: #fdfae7;
   border: 1px solid #f5e178;
   display: block;
