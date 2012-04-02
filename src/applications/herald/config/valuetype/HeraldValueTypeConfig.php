@@ -105,6 +105,7 @@ final class HeraldValueTypeConfig {
         case HeraldActionConfig::ACTION_AUDIT:
           return self::VALUE_PROJECT;
         case HeraldActionConfig::ACTION_FLAG:
+          return self::VALUE_FLAG_COLOR;
         default:
           throw new Exception("Unknown or invalid action '{$action}'.");
       }
