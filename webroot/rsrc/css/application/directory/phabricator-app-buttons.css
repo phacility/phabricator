@@ -52,15 +52,14 @@ a.phabricator-button-caption:visited {
   text-align: center;
   font-size: 11px;
   padding: 3px 0;
-
-  color: #444444;
-
-/*
   font-weight: bold;
-  color: #ffffff;
-  text-shadow: black 1px 1px 2px;
-*/
 }
+
+.phabricator-app-subtitle {
+  color: #888888;
+  font-weight: normal;
+}
+
 
 .app-icon {
   position: relative;

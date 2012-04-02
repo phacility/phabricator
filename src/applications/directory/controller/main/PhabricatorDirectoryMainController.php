@@ -523,13 +523,15 @@ final class PhabricatorDirectoryMainController
     $nav_buttons[] = array(
       'Differential',
       '/differential/',
-      'differential');
+      'differential',
+      'Code Reviews');
 
     if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
       $nav_buttons[] = array(
         'Maniphest',
         '/maniphest/',
-        'maniphest');
+        'maniphest',
+        'Tasks');
       $nav_buttons[] = array(
         'Create Task',
         '/maniphest/task/create/',
@@ -539,34 +541,47 @@ final class PhabricatorDirectoryMainController
     $nav_buttons[] = array(
       'Upload File',
       '/file/',
-      'upload-file');
+      'upload-file',
+      'Share Files');
     $nav_buttons[] = array(
       'Create Paste',
       '/paste/',
-      'create-paste');
+      'create-paste',
+      'Share Text');
 
 
     if (PhabricatorEnv::getEnvConfig('phriction.enabled')) {
       $nav_buttons[] = array(
-        'Browse Wiki',
+        'Phriction',
         '/w/',
-        'phriction');
+        'phriction',
+        'Browse Wiki');
     }
 
     $nav_buttons[] = array(
-      'Browse Code',
+      'Diffusion',
       '/diffusion/',
-      'diffusion');
+      'diffusion',
+      'Browse Code');
 
     $nav_buttons[] = array(
-      'Audit Code',
+      'Audit',
       '/audit/',
-      'audit');
+      'audit',
+      'Audit Code');
 
     $view = new AphrontNullView();
     $view->appendChild('<div class="phabricator-app-buttons">');
     foreach ($nav_buttons as $info) {
-      list($name, $uri, $icon) = $info;
+      // Subtitle is optional.
+      list($name, $uri, $icon, $subtitle) = array_merge($info, array(null));
+
+      if ($subtitle) {
+        $subtitle =
+          '<div class="phabricator-app-subtitle">'.
+            phutil_escape_html($subtitle).
+          '</div>';
+      }
 
       $button = phutil_render_tag(
         'a',
@@ -586,7 +601,7 @@ final class PhabricatorDirectoryMainController
           'href' => $uri,
           'class' => 'phabricator-button-caption',
         ),
-        phutil_escape_html($name));
+        phutil_escape_html($name).$subtitle);
 
       $view->appendChild(
         '<div class="phabricator-app-button">'.
