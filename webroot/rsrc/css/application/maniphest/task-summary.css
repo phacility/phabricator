@@ -180,6 +180,10 @@
   padding: 0 1em;
 }
 
+.maniphest-group-container {
+  padding: 0 1em 1em;
+}
+
 td.maniphest-active-handle {
   cursor: move;
   background-image: url('/rsrc/image/grippy_texture.png');

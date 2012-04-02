@@ -778,7 +778,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-maniphest-subpriority-editor' =>
   array(
-    'uri' => '/res/7d669df7/rsrc/js/application/maniphest/behavior-subpriorityeditor.js',
+    'uri' => '/res/5e02f19a/rsrc/js/application/maniphest/behavior-subpriorityeditor.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1451,7 +1451,7 @@ celerity_register_resource_map(array(
   ),
   'maniphest-task-summary-css' =>
   array(
-    'uri' => '/res/d03e96a4/rsrc/css/application/maniphest/task-summary.css',
+    'uri' => '/res/6e55a34a/rsrc/css/application/maniphest/task-summary.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -2148,7 +2148,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/4fbae2af/javelin.pkg.js',
       'type' => 'js',
     ),
-    '826b7ac2' =>
+    'f45e0b15' =>
     array(
       'name' => 'maniphest.pkg.css',
       'symbols' =>
@@ -2158,7 +2158,7 @@ celerity_register_resource_map(array(
         2 => 'maniphest-task-detail-css',
         3 => 'aphront-attached-file-view-css',
       ),
-      'uri' => '/res/pkg/826b7ac2/maniphest.pkg.css',
+      'uri' => '/res/pkg/f45e0b15/maniphest.pkg.css',
       'type' => 'css',
     ),
     '86fc0b0c' =>
@@ -2193,7 +2193,7 @@ celerity_register_resource_map(array(
   ),
   'reverse' =>
   array(
-    'aphront-attached-file-view-css' => '826b7ac2',
+    'aphront-attached-file-view-css' => 'f45e0b15',
     'aphront-crumbs-view-css' => '61493db4',
     'aphront-dialog-view-css' => '61493db4',
     'aphront-form-view-css' => '61493db4',
@@ -2259,9 +2259,9 @@ celerity_register_resource_map(array(
     'javelin-util' => '4fbae2af',
     'javelin-vector' => '4fbae2af',
     'javelin-workflow' => '21d01ed8',
-    'maniphest-task-detail-css' => '826b7ac2',
-    'maniphest-task-summary-css' => '826b7ac2',
-    'maniphest-transaction-detail-css' => '826b7ac2',
+    'maniphest-task-detail-css' => 'f45e0b15',
+    'maniphest-task-summary-css' => 'f45e0b15',
+    'maniphest-transaction-detail-css' => 'f45e0b15',
     'phabricator-app-buttons-css' => '61493db4',
     'phabricator-content-source-view-css' => '18be02e0',
     'phabricator-core-buttons-css' => '61493db4',

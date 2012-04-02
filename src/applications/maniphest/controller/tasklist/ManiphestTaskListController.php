@@ -267,7 +267,7 @@ final class ManiphestTaskListController extends ManiphestController {
         ($group == 'none' && $order == 'priority');
 
       $lists = new AphrontNullView();
-      $lists->appendChild('<div style="padding: 0em 1em;">');
+      $lists->appendChild('<div class="maniphest-group-container">');
       foreach ($tasks as $group => $list) {
         $task_list = new ManiphestTaskListView();
         $task_list->setShowBatchControls(true);
