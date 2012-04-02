@@ -106,19 +106,26 @@ final class PhabricatorSearchResultView extends AphrontView {
 
     $query = $this->query->getQuery();
 
-    $query = preg_split("/\s+/", $query);
+    $quoted_regexp = '/"([^"]*)"/';
+    $matches = array(1 => array());
+    preg_match_all($quoted_regexp, $query, $matches);
+    $quoted_queries = $matches[1];
+    $query = preg_replace($quoted_regexp, '', $query);
+
+    $query = preg_split('/\s+[+|]?/', $query);
     $query = array_filter($query);
+    $query = array_merge($query, $quoted_queries);
     $str = phutil_escape_html($str);
     foreach ($query as $word) {
       $word = phutil_escape_html($word);
+      $word = preg_quote($word, '/');
+      $word = preg_replace('/\\\\\*$/', '\w*', $word);
       $str = preg_replace(
-        '/(?:^|\b)('.preg_quote($word, '/').')(?:\b|$)/i',
+        '/(?:^|\b)('.$word.')(?:\b|$)/i',
         '<strong>\1</strong>',
         $str);
     }
     return $str;
   }
-
-
 
 }
