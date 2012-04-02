@@ -240,7 +240,7 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
     }
   }
 
-  public function __destroy() {
+  public function __destruct() {
     $this->write("QUIT Goodbye.\r\n");
     fclose($this->socket);
   }

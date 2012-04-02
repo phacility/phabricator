@@ -929,8 +929,7 @@ phutil_register_library_map(array(
   ),
   'function' =>
   array(
-    '__phabricator_date_format' => 'view/utils',
-    '__phabricator_format_local_time' => 'view/utils',
+    '_phabricator_date_format' => 'view/utils',
     '_qsprintf_check_scalar_type' => 'storage/qsprintf',
     '_qsprintf_check_type' => 'storage/qsprintf',
     'celerity_generate_unique_node_id' => 'infrastructure/celerity/api',
@@ -938,6 +937,7 @@ phutil_register_library_map(array(
     'javelin_render_tag' => 'infrastructure/javelin/markup',
     'phabricator_date' => 'view/utils',
     'phabricator_datetime' => 'view/utils',
+    'phabricator_format_local_time' => 'view/utils',
     'phabricator_format_relative_time' => 'view/utils',
     'phabricator_format_units_generic' => 'view/utils',
     'phabricator_on_relative_date' => 'view/utils',

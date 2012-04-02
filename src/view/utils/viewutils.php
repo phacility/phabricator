@@ -17,10 +17,10 @@
  */
 
 function phabricator_date($epoch, $user) {
-  return __phabricator_format_local_time(
+  return phabricator_format_local_time(
     $epoch,
     $user,
-    __phabricator_date_format($epoch));
+    _phabricator_date_format($epoch));
 }
 
 function phabricator_on_relative_date($epoch, $user) {
@@ -51,20 +51,20 @@ function phabricator_relative_date($epoch, $user, $on = false) {
 }
 
 function phabricator_time($epoch, $user) {
-  return __phabricator_format_local_time(
+  return phabricator_format_local_time(
     $epoch,
     $user,
     'g:i A');
 }
 
 function phabricator_datetime($epoch, $user) {
-  return __phabricator_format_local_time(
+  return phabricator_format_local_time(
     $epoch,
     $user,
-    __phabricator_date_format($epoch).', g:i A');
+    _phabricator_date_format($epoch).', g:i A');
 }
 
-function __phabricator_date_format($epoch) {
+function _phabricator_date_format($epoch) {
   $format = 'M j Y';
   $now = time();
   if ($epoch <= $now && $epoch > $now - 30 * 24 * 60 * 60) {
@@ -74,7 +74,7 @@ function __phabricator_date_format($epoch) {
 }
 
 /**
- * Internal date rendering method. Do not call this directly; instead, call
+ * This function does not usually need to be called directly. Instead, call
  * @{function:phabricator_date}, @{function:phabricator_time}, or
  * @{function:phabricator_datetime}.
  *
@@ -83,7 +83,7 @@ function __phabricator_date_format($epoch) {
  * @param string Date format, as per DateTime class.
  * @return string Formatted, local date/time.
  */
-function __phabricator_format_local_time($epoch, $user, $format) {
+function phabricator_format_local_time($epoch, $user, $format) {
   if (!$epoch) {
     // If we're missing date information for something, the DateTime class will
     // throw an exception when we try to construct an object. Since this is a

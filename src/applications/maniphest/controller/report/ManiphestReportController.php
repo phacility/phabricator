@@ -145,7 +145,7 @@ final class ManiphestReportController extends ManiphestController {
         continue;
       }
 
-      $day_bucket = __phabricator_format_local_time(
+      $day_bucket = phabricator_format_local_time(
         $row['dateCreated'],
         $user,
         'z');
@@ -179,7 +179,7 @@ final class ManiphestReportController extends ManiphestController {
     foreach ($stats as $bucket => $info) {
       $epoch = $day_buckets[$bucket];
 
-      $week_bucket = __phabricator_format_local_time(
+      $week_bucket = phabricator_format_local_time(
         $epoch,
         $user,
         'W');
@@ -195,14 +195,14 @@ final class ManiphestReportController extends ManiphestController {
         $last_week_epoch = $epoch;
       }
 
-      $month_bucket = __phabricator_format_local_time(
+      $month_bucket = phabricator_format_local_time(
         $epoch,
         $user,
         'm');
       if ($month_bucket != $last_month) {
         if ($month) {
           $rows[] = $this->formatBurnRow(
-            __phabricator_format_local_time($last_month_epoch, $user, 'F, Y'),
+            phabricator_format_local_time($last_month_epoch, $user, 'F, Y'),
             $month);
           $rowc[] = 'month';
         }
