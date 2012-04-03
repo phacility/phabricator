@@ -34,7 +34,7 @@ final class DifferentialPrimaryPaneView extends AphrontView {
   public function setLineWidthFromChangesets(array $changesets) {
     assert_instances_of($changesets, 'DifferentialChangeset');
     if (empty($changesets)) {
-      return;
+      return $this;
     }
 
     $max = 1;
