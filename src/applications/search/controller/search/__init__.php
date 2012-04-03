@@ -8,9 +8,13 @@
 
 phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'aphront/response/redirect');
+phutil_require_module('phabricator', 'applications/differential/storage/revision');
+phutil_require_module('phabricator', 'applications/maniphest/storage/task');
 phutil_require_module('phabricator', 'applications/people/storage/preferences');
 phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
+phutil_require_module('phabricator', 'applications/repository/storage/commit');
+phutil_require_module('phabricator', 'applications/repository/storage/repository');
 phutil_require_module('phabricator', 'applications/search/constants/scope');
 phutil_require_module('phabricator', 'applications/search/controller/base');
 phutil_require_module('phabricator', 'applications/search/engine/jumpnav');

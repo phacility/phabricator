@@ -230,6 +230,41 @@ final class PhabricatorSearchController
 
       $results = $pager->sliceResults($results);
 
+      if (!$request->getInt('page')) {
+        $jump = null;
+        $query_str = $query->getQuery();
+        $match = null;
+        if (preg_match('/^r([A-Z]+)(\S*)$/', $query_str, $match)) {
+          $repository = id(new PhabricatorRepository())
+            ->loadOneWhere('callsign = %s', $match[1]);
+          if ($match[2] == '') {
+            $jump = $repository;
+          } elseif ($repository) {
+            $jump = id(new PhabricatorRepositoryCommit())->loadOneWhere(
+              'repositoryID = %d AND commitIdentifier = %s',
+              $repository->getID(),
+              $match[2]);
+            if (!$jump) {
+              try {
+                $jump = id(new PhabricatorRepositoryCommit())->loadOneWhere(
+                  'repositoryID = %d AND commitIdentifier LIKE %>',
+                  $repository->getID(),
+                  $match[2]);
+              } catch (AphrontQueryCountException $ex) {
+                // Ambiguous, no jump.
+              }
+            }
+          }
+        } elseif (preg_match('/^d(\d+)$/i', $query_str, $match)) {
+          $jump = id(new DifferentialRevision())->load($match[1]);
+        } elseif (preg_match('/^t(\d+)$/i', $query_str, $match)) {
+          $jump = id(new ManiphestTask())->load($match[1]);
+        }
+        if ($jump) {
+          array_unshift($results, $jump->getPHID());
+        }
+      }
+
       if ($results) {
 
         $loader = new PhabricatorObjectHandleData($results);
