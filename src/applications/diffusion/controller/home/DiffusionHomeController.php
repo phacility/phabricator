@@ -63,7 +63,7 @@ final class DiffusionHomeController extends DiffusionController {
     $repositories = $repository->loadAll();
     foreach ($repositories as $key => $repo) {
       if (!$repo->isTracked()) {
-        unset($repo[$key]);
+        unset($repositories[$key]);
       }
     }
 
