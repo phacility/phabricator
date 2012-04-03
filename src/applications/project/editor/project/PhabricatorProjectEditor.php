@@ -157,6 +157,7 @@ final class PhabricatorProjectEditor {
       default:
         throw new Exception("Unknown transaction type '{$type}'!");
     }
+    return $this;
   }
 
   private function applyTransactionEffect(

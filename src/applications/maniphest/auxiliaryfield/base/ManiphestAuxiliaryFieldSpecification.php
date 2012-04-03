@@ -31,6 +31,7 @@ abstract class ManiphestAuxiliaryFieldSpecification {
 
   public function setLabel($val) {
     $this->label = $val;
+    return $this;
   }
 
   public function getLabel() {
@@ -39,6 +40,7 @@ abstract class ManiphestAuxiliaryFieldSpecification {
 
   public function setAuxiliaryKey($val) {
     $this->auxiliaryKey = $val;
+    return $this;
   }
 
   public function getAuxiliaryKey() {
@@ -47,6 +49,7 @@ abstract class ManiphestAuxiliaryFieldSpecification {
 
   public function setCaption($val) {
     $this->caption = $val;
+    return $this;
   }
 
   public function getCaption() {
@@ -55,6 +58,7 @@ abstract class ManiphestAuxiliaryFieldSpecification {
 
   public function setValue($val) {
     $this->value = $val;
+    return $this;
   }
 
   public function getValue() {
@@ -69,9 +73,9 @@ abstract class ManiphestAuxiliaryFieldSpecification {
     return false;
   }
 
-  public function setType($val)
-  {
+  public function setType($val) {
     $this->type = $val;
+    return $this;
   }
 
   public function getType() {

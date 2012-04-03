@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,6 +79,7 @@ final class CelerityResourceMap {
 
   public function setPackageMap($package_map) {
     $this->packageMap = $package_map;
+    return $this;
   }
 
   public function packageResources(array $resolved_map) {

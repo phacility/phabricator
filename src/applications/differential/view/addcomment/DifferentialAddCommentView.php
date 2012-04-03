@@ -36,10 +36,12 @@ final class DifferentialAddCommentView extends AphrontView {
 
   public function setActionURI($uri) {
     $this->actionURI = $uri;
+    return $this;
   }
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
+    return $this;
   }
 
   public function setDraft($draft) {

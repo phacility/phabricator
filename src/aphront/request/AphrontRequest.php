@@ -289,6 +289,8 @@ final class AphrontRequest {
       $base_domain,
       $is_secure,
       $http_only = true);
+
+    return $this;
   }
 
   final public function setUser($user) {

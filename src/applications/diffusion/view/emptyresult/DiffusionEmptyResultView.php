@@ -23,10 +23,12 @@ final class DiffusionEmptyResultView extends DiffusionView {
 
   public function setBrowseQuery($browse_query) {
     $this->browseQuery = $browse_query;
+    return $this;
   }
 
   public function setView($view) {
     $this->view = $view;
+    return $this;
   }
 
   public function render() {

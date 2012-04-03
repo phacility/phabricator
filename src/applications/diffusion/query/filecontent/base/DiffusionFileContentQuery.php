@@ -109,6 +109,7 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
 
   public function setNeedsBlame($needs_blame) {
     $this->needsBlame = $needs_blame;
+    return $this;
   }
 
   public function getNeedsBlame() {

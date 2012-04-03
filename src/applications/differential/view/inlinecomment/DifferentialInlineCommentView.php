@@ -58,6 +58,7 @@ final class DifferentialInlineCommentView extends AphrontView {
 
   public function setPreview($preview) {
     $this->preview = $preview;
+    return $this;
   }
 
   public function render() {
