@@ -41,7 +41,6 @@ final class PhabricatorFeedStoryManiphest extends PhabricatorFeedStory {
     $owner_phid = $data->getValue('ownerPHID');
     $task_phid = $data->getValue('taskPHID');
 
-    $objects = $this->getObjects();
     $action = $data->getValue('action');
 
     $view = new PhabricatorFeedStoryView();

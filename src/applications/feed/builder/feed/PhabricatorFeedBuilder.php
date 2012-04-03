@@ -44,14 +44,11 @@ final class PhabricatorFeedBuilder {
     $stories = $this->stories;
 
     $handles = array();
-    $objects = array();
     if ($stories) {
       $handle_phids = array_mergev(mpull($stories, 'getRequiredHandlePHIDs'));
       $object_phids = array_mergev(mpull($stories, 'getRequiredObjectPHIDs'));
       $handles = id(new PhabricatorObjectHandleData($handle_phids))
         ->loadHandles();
-      $objects = id(new PhabricatorObjectHandleData($object_phids))
-        ->loadObjects();
     }
 
     $null_view = new AphrontNullView();
@@ -61,7 +58,6 @@ final class PhabricatorFeedBuilder {
     $last_date = null;
     foreach ($stories as $story) {
       $story->setHandles($handles);
-      $story->setObjects($objects);
       $story->setFramed($this->framed);
 
       $date = ucfirst(phabricator_relative_date($story->getEpoch(), $user));

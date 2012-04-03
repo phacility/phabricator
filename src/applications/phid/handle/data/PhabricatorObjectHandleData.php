@@ -36,7 +36,7 @@ final class PhabricatorObjectHandleData {
       $types[$type][] = $phid;
     }
 
-    $objects = array_fill_keys($this->phids, null);
+    $objects = array();
     foreach ($types as $type => $phids) {
       switch ($type) {
         case PhabricatorPHIDConstants::PHID_TYPE_USER:

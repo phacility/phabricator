@@ -275,7 +275,7 @@ final class PhabricatorSearchController
           $view = new PhabricatorSearchResultView();
           $view->setHandle($handle);
           $view->setQuery($query);
-          $view->setObject($objects[$phid]);
+          $view->setObject(idx($objects, $phid));
           $results[] = $view->render();
         }
         $results =

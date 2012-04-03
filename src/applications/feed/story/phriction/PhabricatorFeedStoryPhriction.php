@@ -37,8 +37,6 @@ final class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
     $author_phid = $data->getAuthorPHID();
     $document_phid = $data->getValue('phid');
 
-    $objects = $this->getObjects();
-
     $view = new PhabricatorFeedStoryView();
 
     $action = $data->getValue('action');
