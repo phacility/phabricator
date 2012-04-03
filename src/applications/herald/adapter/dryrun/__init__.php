@@ -9,5 +9,7 @@
 phutil_require_module('phabricator', 'applications/herald/adapter/base');
 phutil_require_module('phabricator', 'applications/herald/storage/transcript/apply');
 
+phutil_require_module('phutil', 'utils');
+
 
 phutil_require_source('HeraldDryRunAdapter.php');

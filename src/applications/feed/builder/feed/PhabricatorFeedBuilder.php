@@ -22,6 +22,7 @@ final class PhabricatorFeedBuilder {
   private $framed;
 
   public function __construct(array $stories) {
+    assert_instances_of($stories, 'PhabricatorFeedStory');
     $this->stories = $stories;
   }
 

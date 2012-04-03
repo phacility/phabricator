@@ -183,6 +183,7 @@ EOBODY;
     PhabricatorRepositoryCommit $commit,
     array $map,
     array $rules) {
+    assert_instances_of($rules, 'HeraldRule');
 
     $requests = id(new PhabricatorRepositoryAuditRequest())->loadAllWhere(
       'commitPHID = %s',

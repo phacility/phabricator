@@ -75,6 +75,8 @@ abstract class PhabricatorMailReplyHandler {
     PhabricatorMetaMTAMail $mail_template,
     array $to_handles,
     array $cc_handles) {
+    assert_instances_of($to_handles, 'PhabricatorObjectHandle');
+    assert_instances_of($cc_handles, 'PhabricatorObjectHandle');
 
     $result = array();
 
@@ -149,6 +151,7 @@ abstract class PhabricatorMailReplyHandler {
   }
 
   protected function formatPHIDList(array $handles) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
     $list = array();
     foreach ($handles as $handle) {
       $list[] = '<'.$handle->getPHID().'>';

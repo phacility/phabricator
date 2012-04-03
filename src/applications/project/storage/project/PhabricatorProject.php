@@ -63,6 +63,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO {
   }
 
   public function attachAffiliations(array $affiliations) {
+    assert_instances_of($affiliations, 'PhabricatorProjectAffiliation');
     $this->affiliations = $affiliations;
     return $this;
   }

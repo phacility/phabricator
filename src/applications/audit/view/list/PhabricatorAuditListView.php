@@ -27,11 +27,13 @@ final class PhabricatorAuditListView extends AphrontView {
   private $showDescriptions = true;
 
   public function setAudits(array $audits) {
+    assert_instances_of($audits, 'PhabricatorRepositoryAuditRequest');
     $this->audits = $audits;
     return $this;
   }
 
   public function setHandles(array $handles) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
     return $this;
   }
@@ -51,6 +53,7 @@ final class PhabricatorAuditListView extends AphrontView {
   }
 
   public function setCommits(array $commits) {
+    assert_instances_of($commits, 'PhabricatorRepositoryCommit');
     $this->commits = mpull($commits, null, 'getPHID');
     return $this;
   }

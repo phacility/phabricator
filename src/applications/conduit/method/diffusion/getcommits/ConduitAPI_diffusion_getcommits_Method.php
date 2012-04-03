@@ -156,6 +156,7 @@ final class ConduitAPI_diffusion_getcommits_Method
    * Retrieve primary commit information for all referenced commits.
    */
   private function queryCommitInformation(array $commits, array $repos) {
+    assert_instances_of($repos, 'PhabricatorRepository');
     $conn_r = id(new PhabricatorRepositoryCommit())->establishConnection('r');
     $repos = mpull($repos, null, 'getID');
 

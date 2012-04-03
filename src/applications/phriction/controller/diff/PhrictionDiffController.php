@@ -233,6 +233,7 @@ final class PhrictionDiffController
   }
 
   private function renderComparisonTable(array $content) {
+    assert_instances_of($content, 'PhrictionContent');
 
     $user = $this->getRequest()->getUser();
 

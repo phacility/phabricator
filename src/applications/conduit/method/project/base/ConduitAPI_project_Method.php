@@ -27,6 +27,7 @@ abstract class ConduitAPI_project_Method extends ConduitAPIMethod {
   }
 
   protected function buildProjectInfoDictionaries(array $projects) {
+    assert_instances_of($projects, 'PhabricatorProject');
     if (!$projects) {
       return array();
     }

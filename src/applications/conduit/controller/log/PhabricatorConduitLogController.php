@@ -67,6 +67,9 @@ final class PhabricatorConduitLogController
   }
 
   private function renderCallTable(array $calls, array $conns) {
+    assert_instances_of($calls, 'PhabricatorConduitMethodCallLog');
+    assert_instances_of($conns, 'PhabricatorConduitConnectionLog');
+
     $user = $this->getRequest()->getUser();
 
     $rows = array();

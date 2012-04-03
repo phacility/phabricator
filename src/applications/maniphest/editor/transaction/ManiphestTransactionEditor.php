@@ -25,6 +25,7 @@ final class ManiphestTransactionEditor {
   private $auxiliaryFields = array();
 
   public function setAuxiliaryFields(array $fields) {
+    assert_instances_of($fields, 'ManiphestAuxiliaryFieldSpecification');
     $this->auxiliaryFields = $fields;
     return $this;
   }
@@ -34,7 +35,8 @@ final class ManiphestTransactionEditor {
     return $this;
   }
 
-  public function applyTransactions($task, array $transactions) {
+  public function applyTransactions(ManiphestTask $task, array $transactions) {
+    assert_instances_of($transactions, 'ManiphestTransaction');
 
     $email_cc = $task->getCCPHIDs();
 
@@ -302,6 +304,8 @@ final class ManiphestTransactionEditor {
   }
 
   private function publishFeedStory(ManiphestTask $task, array $transactions) {
+    assert_instances_of($transactions, 'ManiphestTransaction');
+
     $actions = array(ManiphestAction::ACTION_UPDATE);
     $comments = null;
     foreach ($transactions as $transaction) {
@@ -355,6 +359,7 @@ final class ManiphestTransactionEditor {
   }
 
   private function isCreate(array $transactions) {
+    assert_instances_of($transactions, 'ManiphestTransaction');
     $is_create = false;
     foreach ($transactions as $transaction) {
       $type = $transaction->getTransactionType();
@@ -368,6 +373,8 @@ final class ManiphestTransactionEditor {
   }
 
   private function getMailTags(array $transactions) {
+    assert_instances_of($transactions, 'ManiphestTransaction');
+
     $tags = array();
     foreach ($transactions as $xaction) {
       switch ($xaction->getTransactionType()) {

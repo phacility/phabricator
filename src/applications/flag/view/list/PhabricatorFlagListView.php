@@ -22,6 +22,7 @@ final class PhabricatorFlagListView extends AphrontView {
   private $user;
 
   public function setFlags(array $flags) {
+    assert_instances_of($flags, 'PhabricatorFlag');
     $this->flags = $flags;
     return $this;
   }

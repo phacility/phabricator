@@ -321,7 +321,6 @@ final class ManiphestReportController extends ManiphestController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->appendChild(
@@ -744,6 +743,7 @@ final class ManiphestReportController extends ManiphestController {
   }
 
   private function renderOldest(array $tasks) {
+    assert_instances_of($tasks, 'ManiphestTask');
     $oldest = null;
     foreach ($tasks as $id => $task) {
       if (($oldest === null) ||

@@ -172,6 +172,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
   }
 
   protected function buildTaskInfoDictionaries(array $tasks) {
+    assert_instances_of($tasks, 'ManiphestTask');
     if (!$tasks) {
       return array();
     }

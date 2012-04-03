@@ -120,6 +120,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
    * committed or abandoned revision as a last resort.
    */
   private function identifyBestRevision(array $revisions) {
+    assert_instances_of($revisions, 'DifferentialRevision');
     // get the simplest, common case out of the way
     if (count($revisions) == 1) {
       return reset($revisions);
@@ -165,6 +166,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
    * updated time.   This is ostensibly the most recent revision.
    */
   private function identifyMostRecentRevision(array $revisions) {
+    assert_instances_of($revisions, 'DifferentialRevision');
     $revisions = msort($revisions, 'getDateModified');
     return end($revisions);
   }

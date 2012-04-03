@@ -100,6 +100,7 @@ final class DifferentialRevisionEditor {
   }
 
   public function setAuxiliaryFields(array $auxiliary_fields) {
+    assert_instances_of($auxiliary_fields, 'DifferentialAuxiliaryField');
     $this->auxiliaryFields = $auxiliary_fields;
     return $this;
   }

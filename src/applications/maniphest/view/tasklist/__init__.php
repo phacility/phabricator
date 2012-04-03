@@ -9,5 +9,7 @@
 phutil_require_module('phabricator', 'applications/maniphest/view/base');
 phutil_require_module('phabricator', 'applications/maniphest/view/tasksummary');
 
+phutil_require_module('phutil', 'utils');
+
 
 phutil_require_source('ManiphestTaskListView.php');

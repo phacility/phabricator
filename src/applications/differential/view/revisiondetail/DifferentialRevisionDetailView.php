@@ -39,6 +39,7 @@ final class DifferentialRevisionDetailView extends AphrontView {
   }
 
   public function setAuxiliaryFields(array $fields) {
+    assert_instances_of($fields, 'DifferentialAuxiliaryField');
     $this->auxiliaryFields = $fields;
     return $this;
   }

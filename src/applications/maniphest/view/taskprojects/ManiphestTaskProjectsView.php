@@ -24,6 +24,7 @@ final class ManiphestTaskProjectsView extends ManiphestView {
   private $handles;
 
   public function setHandles(array $handles) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
     return $this;
   }

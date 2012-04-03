@@ -190,6 +190,7 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
   }
 
   public function applyHeraldEffects(array $effects) {
+    assert_instances_of($effects, 'HeraldEffect');
 
     $result = array();
     foreach ($effects as $effect) {

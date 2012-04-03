@@ -204,6 +204,7 @@ final class PhabricatorOwnersListController
   }
 
   private function renderPackageTable(array $packages, $header, $nodata) {
+    assert_instances_of($packages, 'PhabricatorOwnersPackage');
 
     if ($packages) {
       $package_ids = mpull($packages, 'getID');

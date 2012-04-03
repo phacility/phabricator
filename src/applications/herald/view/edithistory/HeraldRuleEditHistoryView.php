@@ -31,6 +31,7 @@ final class HeraldRuleEditHistoryView extends AphrontView {
   }
 
   public function setHandles(array $handles) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
     return $this;
   }

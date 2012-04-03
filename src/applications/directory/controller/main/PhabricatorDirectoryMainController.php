@@ -63,7 +63,9 @@ final class PhabricatorDirectoryMainController
 
   }
 
-  private function buildMainResponse($nav, $projects) {
+  private function buildMainResponse($nav, array $projects) {
+    assert_instances_of($projects, 'PhabricatorProject');
+
     if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
       $unbreak_panel = $this->buildUnbreakNowPanel();
       $triage_panel = $this->buildNeedsTriagePanel($projects);
@@ -131,7 +133,8 @@ final class PhabricatorDirectoryMainController
       ));
   }
 
-  private function buildFeedResponse($nav, $projects) {
+  private function buildFeedResponse($nav, array $projects) {
+    assert_instances_of($projects, 'PhabricatorProject');
 
     $subnav = new AphrontSideNavFilterView();
     $subnav->setBaseURI(new PhutilURI('/feed/'));
@@ -234,6 +237,8 @@ final class PhabricatorDirectoryMainController
   }
 
   private function buildNeedsTriagePanel(array $projects) {
+    assert_instances_of($projects, 'PhabricatorProject');
+
     $user = $this->getRequest()->getUser();
     $user_phid = $user->getPHID();
 
@@ -368,8 +373,8 @@ final class PhabricatorDirectoryMainController
     return $panel;
   }
 
-
   private function buildTaskListView(array $tasks) {
+    assert_instances_of($tasks, 'ManiphestTask');
     $user = $this->getRequest()->getUser();
 
     $phids = array_merge(

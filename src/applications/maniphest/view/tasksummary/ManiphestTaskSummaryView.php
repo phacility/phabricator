@@ -33,6 +33,7 @@ final class ManiphestTaskSummaryView extends ManiphestView {
   }
 
   public function setHandles(array $handles) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
     return $this;
   }

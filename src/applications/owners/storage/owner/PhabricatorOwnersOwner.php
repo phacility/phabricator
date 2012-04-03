@@ -28,6 +28,7 @@ final class PhabricatorOwnersOwner extends PhabricatorOwnersDAO {
   }
 
   public static function loadAllForPackages(array $packages) {
+    assert_instances_of($packages, 'PhabricatorOwnersPackage');
     if (!$packages) {
       return array();
     }

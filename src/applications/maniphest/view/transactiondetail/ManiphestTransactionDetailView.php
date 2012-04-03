@@ -36,6 +36,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
   private $auxiliaryFields;
 
   public function setAuxiliaryFields(array $fields) {
+    assert_instances_of($fields, 'ManiphestAuxiliaryFieldSpecification');
     $this->auxiliaryFields = mpull($fields, null, 'getAuxiliaryKey');
     return $this;
   }
@@ -45,11 +46,13 @@ final class ManiphestTransactionDetailView extends ManiphestView {
   }
 
   public function setTransactionGroup(array $transactions) {
+    assert_instances_of($transactions, 'ManiphestTransaction');
     $this->transactions = $transactions;
     return $this;
   }
 
   public function setHandles(array $handles) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
     return $this;
   }

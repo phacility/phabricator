@@ -86,6 +86,8 @@ final class PhabricatorRepositoryCommit extends PhabricatorRepositoryDAO {
    * triggers.
    */
   public function updateAuditStatus(array $requests) {
+    assert_instances_of($requests, 'PhabricatorRepositoryAuditRequest');
+
     $any_concern = false;
     $any_accept = false;
     $any_need = false;

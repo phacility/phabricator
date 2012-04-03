@@ -129,6 +129,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   }
 
   public function setAttachments(array $attachments) {
+    assert_instances_of($attachments, 'PhabricatorMetaMTAAttachment');
     $this->setParam('attachments', $attachments);
     return $this;
   }
@@ -614,6 +615,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     array $phids,
     array $handles,
     array $exclude) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
 
     $emails = array();
     foreach ($phids as $phid) {

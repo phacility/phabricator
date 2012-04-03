@@ -486,6 +486,7 @@ final class ManiphestTaskQuery {
    * TODO: Move this all to the database.
    */
   private function applyGroupByProject(array $tasks) {
+    assert_instances_of($tasks, 'ManiphestTask');
 
     $project_phids = array();
     foreach ($tasks as $task) {

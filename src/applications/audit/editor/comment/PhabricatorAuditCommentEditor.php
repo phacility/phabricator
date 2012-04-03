@@ -257,6 +257,9 @@ final class PhabricatorAuditCommentEditor {
     PhabricatorAuditComment $comment,
     array $other_comments,
     array $inline_comments) {
+    assert_instances_of($other_comments, 'PhabricatorAuditComment');
+    assert_instances_of($inline_comments, 'PhabricatorAuditInlineComment');
+
     $commit = $this->commit;
 
     $data = $commit->loadCommitData();
@@ -347,6 +350,7 @@ final class PhabricatorAuditCommentEditor {
     PhabricatorObjectHandle $handle,
     PhabricatorMailReplyHandler $reply_handler,
     array $inline_comments) {
+    assert_instances_of($inline_comments, 'PhabricatorAuditInlineComment');
 
     $commit = $this->commit;
     $user = $this->user;

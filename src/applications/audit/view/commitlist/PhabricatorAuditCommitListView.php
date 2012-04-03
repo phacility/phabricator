@@ -34,11 +34,13 @@ final class PhabricatorAuditCommitListView extends AphrontView {
   }
 
   public function setCommits(array $commits) {
+    assert_instances_of($commits, 'PhabricatorRepositoryCommit');
     $this->commits = $commits;
     return $this;
   }
 
   public function setHandles(array $handles) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
     return $this;
   }

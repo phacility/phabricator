@@ -26,11 +26,13 @@ final class HeraldRuleListView extends AphrontView {
   private $user;
 
   public function setRules(array $rules) {
+    assert_instances_of($rules, 'HeraldRule');
     $this->rules = $rules;
     return $this;
   }
 
   public function setHandles(array $handles) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
     return $this;
   }

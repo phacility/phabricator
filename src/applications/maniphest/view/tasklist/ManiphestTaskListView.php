@@ -28,11 +28,13 @@ final class ManiphestTaskListView extends ManiphestView {
   private $showSubpriorityControls;
 
   public function setTasks(array $tasks) {
+    assert_instances_of($tasks, 'ManiphestTask');
     $this->tasks = $tasks;
     return $this;
   }
 
   public function setHandles(array $handles) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
     return $this;
   }

@@ -40,6 +40,7 @@ final class HeraldEngine {
   }
 
   public function applyRules(array $rules, HeraldObjectAdapter $object) {
+    assert_instances_of($rules, 'HeraldRule');
     $t_start = microtime(true);
 
     $rules = mpull($rules, null, 'getID');
@@ -122,6 +123,8 @@ final class HeraldEngine {
     array $effects,
     HeraldObjectAdapter $object,
     array $rules) {
+    assert_instances_of($effects, 'HeraldEffect');
+    assert_instances_of($rules, 'HeraldRule');
 
     $this->transcript->setDryRun($object instanceof HeraldDryRunAdapter);
 

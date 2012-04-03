@@ -23,6 +23,7 @@ final class PhabricatorDaemonLogEventsView extends AphrontView {
   private $user;
 
   public function setEvents(array $events) {
+    assert_instances_of($events, 'PhabricatorDaemonLogEvent');
     $this->events = $events;
     return $this;
   }

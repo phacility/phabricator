@@ -208,6 +208,9 @@ final class PhabricatorSlowvotePollController
   }
 
   private function renderComments(array $comments, array $handles) {
+    assert_instances_of($comments, 'PhabricatorSlowvoteComment');
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
+
     $viewer = $this->getRequest()->getUser();
 
     $engine = PhabricatorMarkupEngine::newSlowvoteMarkupEngine();
@@ -253,6 +256,7 @@ final class PhabricatorSlowvotePollController
     PhabricatorSlowvotePoll $poll,
     array $viewer_choices,
     PhabricatorSlowvoteOption $option) {
+    assert_instances_of($viewer_choices, 'PhabricatorSlowvoteChoice');
 
     $id = $option->getID();
     switch ($poll->getMethod()) {
@@ -325,6 +329,8 @@ final class PhabricatorSlowvotePollController
     PhabricatorSlowvotePoll $poll,
     array $choices,
     array $chosen) {
+    assert_instances_of($choices, 'PhabricatorSlowvoteChoice');
+    assert_instances_of($chosen, 'PhabricatorSlowvoteChoice');
 
     switch ($poll->getMethod()) {
       case PhabricatorSlowvotePoll::METHOD_PLURALITY:
@@ -357,6 +363,12 @@ final class PhabricatorSlowvotePollController
     array $comments_by_option,
     array $handles,
     array $objects) {
+    assert_instances_of($options, 'PhabricatorSlowvoteOption');
+    assert_instances_of($choices, 'PhabricatorSlowvoteChoice');
+    assert_instances_of($comments, 'PhabricatorSlowvoteComment');
+    assert_instances_of($viewer_choices, 'PhabricatorSlowvoteChoice');
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
+    assert_instances_of($objects, 'PhabricatorLiskDAO');
 
     $viewer_phid = $this->getRequest()->getUser()->getPHID();
 
