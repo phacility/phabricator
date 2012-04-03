@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 /**
  * Query symbol information (class and function names and location), returning
@@ -222,6 +221,7 @@ final class DiffusionSymbolQuery {
    * @task internal
    */
   private function loadPaths(array $symbols) {
+    assert_instances_of($symbols, 'PhabricatorRepositorySymbol');
     $path_map = queryfx_all(
       id(new PhabricatorRepository())->establishConnection('r'),
       'SELECT * FROM %T WHERE id IN (%Ld)',
@@ -238,6 +238,7 @@ final class DiffusionSymbolQuery {
    * @task internal
    */
   private function loadArcanistProjects(array $symbols) {
+    assert_instances_of($symbols, 'PhabricatorRepositorySymbol');
     $projects = id(new PhabricatorRepositoryArcanistProject())->loadAllWhere(
       'id IN (%Ld)',
       mpull($symbols, 'getArcanistProjectID'));
@@ -252,6 +253,8 @@ final class DiffusionSymbolQuery {
    * @task internal
    */
   private function loadRepositories(array $symbols) {
+    assert_instances_of($symbols, 'PhabricatorRepositorySymbol');
+
     $projects = mpull($symbols, 'getArcanistProject');
     $projects = array_filter($projects);
 

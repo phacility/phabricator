@@ -21,6 +21,7 @@ final class DiffusionCommitChangeTableView extends DiffusionView {
   private $pathChanges;
 
   public function setPathChanges(array $path_changes) {
+    assert_instances_of($path_changes, 'DiffusionPathChange');
     $this->pathChanges = $path_changes;
     return $this;
   }

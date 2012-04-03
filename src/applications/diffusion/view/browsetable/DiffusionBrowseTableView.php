@@ -27,6 +27,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
   }
 
   public function setHandles(array $handles) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
     return $this;
   }
@@ -36,6 +37,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
     array $handles,
     PhabricatorRepositoryCommit $commit = null,
     PhabricatorRepositoryCommitData $data = null) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
 
     if ($commit) {
       $epoch = $commit->getEpoch();

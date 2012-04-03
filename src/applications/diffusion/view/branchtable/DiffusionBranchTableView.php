@@ -21,6 +21,7 @@ final class DiffusionBranchTableView extends DiffusionView {
   private $branches;
 
   public function setBranches(array $branches) {
+    assert_instances_of($branches, 'DiffusionBranchInformation');
     $this->branches = $branches;
     return $this;
   }

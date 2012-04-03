@@ -267,6 +267,7 @@ final class DiffusionCommitController extends DiffusionController {
     PhabricatorRepositoryCommit $commit,
     PhabricatorRepositoryCommitData $data,
     array $parents) {
+    assert_instances_of($parents, 'PhabricatorRepositoryCommit');
     $user = $this->getRequest()->getUser();
 
     $phids = array();
@@ -347,7 +348,10 @@ final class DiffusionCommitController extends DiffusionController {
     return $props;
   }
 
-  private function buildAuditTable($commit, $audits) {
+  private function buildAuditTable(
+    PhabricatorRepositoryCommit $commit,
+    array $audits) {
+    assert_instances_of($audits, 'PhabricatorRepositoryAuditRequest');
     $user = $this->getRequest()->getUser();
 
     $view = new PhabricatorAuditListView();
@@ -369,7 +373,7 @@ final class DiffusionCommitController extends DiffusionController {
     return $panel;
   }
 
-  private function buildComments($commit) {
+  private function buildComments(PhabricatorRepositoryCommit $commit) {
     $user = $this->getRequest()->getUser();
     $comments = id(new PhabricatorAuditComment())->loadAllWhere(
       'targetPHID = %s ORDER BY dateCreated ASC',
@@ -402,7 +406,10 @@ final class DiffusionCommitController extends DiffusionController {
     return $view;
   }
 
-  private function buildAddCommentView($commit, array $audit_requests) {
+  private function buildAddCommentView(
+    PhabricatorRepositoryCommit $commit,
+    array $audit_requests) {
+    assert_instances_of($audit_requests, 'PhabricatorRepositoryAuditRequest');
     $user = $this->getRequest()->getUser();
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
@@ -493,6 +500,7 @@ final class DiffusionCommitController extends DiffusionController {
   private function getAuditActions(
     PhabricatorRepositoryCommit $commit,
     array $audit_requests) {
+    assert_instances_of($audit_requests, 'PhabricatorRepositoryAuditRequest');
     $user = $this->getRequest()->getUser();
 
     $user_is_author = ($commit->getAuthorPHID() == $user->getPHID());

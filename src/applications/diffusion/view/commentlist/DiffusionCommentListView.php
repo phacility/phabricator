@@ -29,11 +29,13 @@ final class DiffusionCommentListView extends AphrontView {
   }
 
   public function setComments(array $comments) {
+    assert_instances_of($comments, 'PhabricatorAuditComment');
     $this->comments = $comments;
     return $this;
   }
 
   public function setInlineComments(array $inline_comments) {
+    assert_instances_of($inline_comments, 'PhabricatorAuditInlineComment');
     $this->inlineComments = $inline_comments;
     return $this;
   }
@@ -55,6 +57,7 @@ final class DiffusionCommentListView extends AphrontView {
   }
 
   public function setHandles(array $handles) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
     return $this;
   }

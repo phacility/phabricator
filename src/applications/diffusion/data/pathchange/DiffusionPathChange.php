@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,6 +135,7 @@ final class DiffusionPathChange {
   }
 
   final public static function convertToArcanistChanges(array $changes) {
+    assert_instances_of($changes, 'DiffusionPathChange');
     $direct = array();
     $result = array();
     foreach ($changes as $path) {
@@ -158,6 +159,7 @@ final class DiffusionPathChange {
   }
 
   final public static function convertToDifferentialChangesets(array $changes) {
+    assert_instances_of($changes, 'DiffusionPathChange');
     $arcanist_changes = self::convertToArcanistChanges($changes);
     $diff = DifferentialDiff::newFromRawChanges($arcanist_changes);
     return $diff->getChangesets();

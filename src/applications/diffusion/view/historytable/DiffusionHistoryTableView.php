@@ -24,11 +24,13 @@ final class DiffusionHistoryTableView extends DiffusionView {
   private $parents;
 
   public function setHistory(array $history) {
+    assert_instances_of($history, 'DiffusionPathChange');
     $this->history = $history;
     return $this;
   }
 
   public function setHandles(array $handles) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
     return $this;
   }

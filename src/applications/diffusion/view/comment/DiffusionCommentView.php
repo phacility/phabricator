@@ -45,6 +45,7 @@ final class DiffusionCommentView extends AphrontView {
   }
 
   public function setHandles(array $handles) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
     return $this;
   }
@@ -55,6 +56,7 @@ final class DiffusionCommentView extends AphrontView {
   }
 
   public function setInlineComments(array $inline_comments) {
+    assert_instances_of($inline_comments, 'PhabricatorAuditInlineComment');
     $this->inlineComments = $inline_comments;
     return $this;
   }
