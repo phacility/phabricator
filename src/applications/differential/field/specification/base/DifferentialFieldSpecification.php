@@ -658,8 +658,7 @@ abstract class DifferentialFieldSpecification {
     $object_map = array();
 
     $users = id(new PhabricatorUser())->loadAllWhere(
-      '((username IN (%Ls)) OR (email IN (%Ls)))
-        AND isSystemAgent = 0',
+      '(username IN (%Ls)) OR (email IN (%Ls))',
       $value,
       $value);
 
