@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ final class DifferentialAuxiliaryField extends DifferentialDAO {
   public static function loadFromStorage(
     DifferentialRevision $revision,
     array $aux_fields) {
+    assert_instances_of($aux_fields, 'DifferentialFieldSpecification');
 
     $storage_keys = array_filter(mpull($aux_fields, 'getStorageKey'));
     $field_data = array();

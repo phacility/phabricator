@@ -35,6 +35,8 @@ final class DifferentialCommentMail extends DifferentialMail {
     DifferentialComment $comment,
     array $changesets,
     array $inline_comments) {
+    assert_instances_of($changesets, 'DifferentialChangeset');
+    assert_instances_of($inline_comments, 'PhabricatorInlineCommentInterface');
 
     $this->setRevision($revision);
     $this->setActorHandle($actor);

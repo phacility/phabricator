@@ -56,7 +56,7 @@ final class DiffusionCommentView extends AphrontView {
   }
 
   public function setInlineComments(array $inline_comments) {
-    assert_instances_of($inline_comments, 'PhabricatorAuditInlineComment');
+    assert_instances_of($inline_comments, 'PhabricatorInlineCommentInterface');
     $this->inlineComments = $inline_comments;
     return $this;
   }

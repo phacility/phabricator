@@ -61,6 +61,7 @@ guidelines, you probably don't need to read this super thoroughly.
   - Prefer class constants over defines.
   - Avoid naked class properties; instead, define accessors.
   - Use exceptions for error conditions.
+  - Use type hints, use `assert_instances_of()` for arrays holding objects.
 
 = Examples =
 

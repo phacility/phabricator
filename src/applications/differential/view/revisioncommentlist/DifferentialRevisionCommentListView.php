@@ -27,21 +27,25 @@ final class DifferentialRevisionCommentListView extends AphrontView {
   private $versusDiffID;
 
   public function setComments(array $comments) {
+    assert_instances_of($comments, 'DifferentialComment');
     $this->comments = $comments;
     return $this;
   }
 
   public function setInlineComments(array $inline_comments) {
+    assert_instances_of($inline_comments, 'PhabricatorInlineCommentInterface');
     $this->inlines = $inline_comments;
     return $this;
   }
 
   public function setHandles(array $handles) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
     return $this;
   }
 
   public function setChangesets(array $changesets) {
+    assert_instances_of($changesets, 'DifferentialChangeset');
     $this->changesets = $changesets;
     return $this;
   }

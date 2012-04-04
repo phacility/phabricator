@@ -33,6 +33,7 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
     DifferentialRevision $revision,
     PhabricatorObjectHandle $actor,
     array $changesets) {
+    assert_instances_of($changesets, 'DifferentialChangeset');
 
     $this->setRevision($revision);
     $this->setActorHandle($actor);

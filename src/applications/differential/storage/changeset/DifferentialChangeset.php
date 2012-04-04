@@ -58,6 +58,7 @@ final class DifferentialChangeset extends DifferentialDAO {
   }
 
   public function attachHunks(array $hunks) {
+    assert_instances_of($hunks, 'DifferentialHunk');
     $this->hunks = $hunks;
     return $this;
   }

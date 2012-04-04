@@ -28,11 +28,13 @@ final class DifferentialRevisionListView extends AphrontView {
   private $fields;
 
   public function setFields(array $fields) {
+    assert_instances_of($fields, 'DifferentialFieldSpecification');
     $this->fields = $fields;
     return $this;
   }
 
   public function setRevisions(array $revisions) {
+    assert_instances_of($revisions, 'DifferentialRevision');
     $this->revisions = $revisions;
     return $this;
   }
@@ -48,6 +50,7 @@ final class DifferentialRevisionListView extends AphrontView {
   }
 
   public function setHandles(array $handles) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
     return $this;
   }

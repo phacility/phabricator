@@ -29,6 +29,7 @@ abstract class DifferentialFieldSelector {
   abstract public function getFieldSpecifications();
 
   public function sortFieldsForRevisionList(array $fields) {
+    assert_instances_of($fields, 'DifferentialFieldSpecification');
     return $fields;
   }
 

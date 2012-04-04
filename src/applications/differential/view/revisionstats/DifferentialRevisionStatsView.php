@@ -25,14 +25,17 @@ final class DifferentialRevisionStatsView extends AphrontView {
   private $user;
 
   public function setRevisions(array $revisions) {
+    assert_instances_of($revisions, 'DifferentialRevision');
     $this->revisions = $revisions;
     return $this;
   }
 
   public function setComments(array $comments) {
+    assert_instances_of($comments, 'DifferentialComment');
     $this->comments = $comments;
     return $this;
   }
+
   public function setUser($user) {
     $this->user = $user;
     return $this;

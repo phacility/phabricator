@@ -55,6 +55,7 @@ final class DifferentialDiff extends DifferentialDAO {
   }
 
   public function attachChangesets(array $changesets) {
+    assert_instances_of($changesets, 'DifferentialChangeset');
     $this->changesets = $changesets;
     return $this;
   }
@@ -107,6 +108,7 @@ final class DifferentialDiff extends DifferentialDAO {
   }
 
   public static function newFromRawChanges(array $changes) {
+    assert_instances_of($changes, 'ArcanistDiffChange');
     $diff = new DifferentialDiff();
 
     $lines = 0;

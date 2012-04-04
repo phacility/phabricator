@@ -546,6 +546,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
   }
 
   private function loadInlineComments(array $comments, array &$changesets) {
+    assert_instances_of($comments, 'DifferentialComment');
+    assert_instances_of($changesets, 'DifferentialChangeset');
 
     $inline_comments = array();
 
@@ -585,7 +587,12 @@ final class DifferentialRevisionViewController extends DifferentialController {
     return $inline_comments;
   }
 
-  private function loadChangesetsAndVsMap(array $diffs, $diff_vs, $target) {
+  private function loadChangesetsAndVsMap(
+    array $diffs,
+    $diff_vs,
+    DifferentialDiff $target) {
+    assert_instances_of($diffs, 'DifferentialDiff');
+
     $load_ids = array();
     if ($diff_vs) {
       $load_ids[] = $diff_vs;
@@ -695,6 +702,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     DifferentialDiff $target,
     PhabricatorRepositoryArcanistProject $arc_project,
     array $visible_changesets) {
+    assert_instances_of($visible_changesets, 'DifferentialChangeset');
 
     $engine = PhabricatorSyntaxHighlighter::newEngine();
 
@@ -768,6 +776,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
   }
 
   private function renderOtherRevisions(array $revisions) {
+    assert_instances_of($revisions, 'DifferentialRevision');
+
     $view = id(new DifferentialRevisionListView())
       ->setRevisions($revisions)
       ->setFields(DifferentialRevisionListView::getDefaultFields())

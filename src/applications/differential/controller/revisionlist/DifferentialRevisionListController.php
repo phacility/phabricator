@@ -344,6 +344,7 @@ final class DifferentialRevisionListController extends DifferentialController {
     array $handles,
     PhutilURI $uri,
     array $params) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
     switch ($control) {
       case 'subscriber':
       case 'phid':
@@ -422,6 +423,8 @@ final class DifferentialRevisionListController extends DifferentialController {
   }
 
   private function buildViews($filter, $user_phid, array $revisions) {
+    assert_instances_of($revisions, 'DifferentialRevision');
+
     $user = $this->getRequest()->getUser();
 
     $template = id(new DifferentialRevisionListView())

@@ -750,6 +750,7 @@ final class DifferentialRevisionQuery {
   }
 
   private function loadRelationships($conn_r, array $revisions) {
+    assert_instances_of($revisions, 'DifferentialRevision');
     $relationships = queryfx_all(
       $conn_r,
       'SELECT * FROM %T WHERE revisionID in (%Ld) ORDER BY sequence',
@@ -766,6 +767,7 @@ final class DifferentialRevisionQuery {
   }
 
   private function loadCommitPHIDs($conn_r, array $revisions) {
+    assert_instances_of($revisions, 'DifferentialRevision');
     $commit_phids = queryfx_all(
       $conn_r,
       'SELECT * FROM %T WHERE revisionID IN (%Ld)',
@@ -780,6 +782,8 @@ final class DifferentialRevisionQuery {
   }
 
   private function loadDiffIDs($conn_r, array $revisions) {
+    assert_instances_of($revisions, 'DifferentialRevision');
+
     $diff_table = new DifferentialDiff();
 
     $diff_ids = queryfx_all(
@@ -798,6 +802,8 @@ final class DifferentialRevisionQuery {
   }
 
   private function loadActiveDiffs($conn_r, array $revisions) {
+    assert_instances_of($revisions, 'DifferentialRevision');
+
     $diff_table = new DifferentialDiff();
 
     $load_ids = array();

@@ -35,6 +35,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
   }
 
   public function setHandles(array $handles) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
     return $this;
   }
@@ -50,11 +51,13 @@ final class DifferentialRevisionCommentView extends AphrontView {
   }
 
   public function setInlineComments(array $inline_comments) {
+    assert_instances_of($inline_comments, 'PhabricatorInlineCommentInterface');
     $this->inlines = $inline_comments;
     return $this;
   }
 
   public function setChangesets(array $changesets) {
+    assert_instances_of($changesets, 'DifferentialChangeset');
     // Ship these in sorted by getSortKey() and keyed by ID... or else!
     $this->changesets = $changesets;
     return $this;

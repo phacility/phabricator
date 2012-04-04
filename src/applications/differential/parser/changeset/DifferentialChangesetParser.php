@@ -169,6 +169,7 @@ final class DifferentialChangesetParser {
   }
 
   public function setHandles(array $handles) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
     return $this;
   }
@@ -1173,6 +1174,9 @@ final class DifferentialChangesetParser {
     $feedback_mask,
     array $old_comments,
     array $new_comments) {
+    foreach (array_merge($old_comments, $new_comments) as $comments) {
+      assert_instances_of($comments, 'PhabricatorInlineCommentInterface');
+    }
 
     $context_not_available = null;
     if ($this->missingOld || $this->missingNew) {

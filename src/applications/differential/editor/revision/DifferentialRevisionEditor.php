@@ -761,6 +761,7 @@ final class DifferentialRevisionEditor {
     DifferentialRevision $revision,
     DifferentialDiff $diff,
     array $changesets) {
+    assert_instances_of($changesets, 'DifferentialChangeset');
 
     $project = $diff->loadArcanistProject();
     if (!$project) {

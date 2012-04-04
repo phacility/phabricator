@@ -62,6 +62,8 @@ final class DifferentialDefaultFieldSelector
   }
 
   public function sortFieldsForRevisionList(array $fields) {
+    assert_instances_of($fields, 'DifferentialFieldSpecification');
+
     $map = array();
     foreach ($fields as $field) {
       $map[get_class($field)] = $field;

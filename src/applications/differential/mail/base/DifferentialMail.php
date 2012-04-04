@@ -343,6 +343,7 @@ EOTEXT;
   }
 
   public function setInlineComments(array $inline_comments) {
+    assert_instances_of($inline_comments, 'PhabricatorInlineCommentInterface');
     $this->inlineComments = $inline_comments;
     return $this;
   }
@@ -388,6 +389,7 @@ EOTEXT;
   }
 
   protected function renderHandleList(array $handles, array $phids) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
     $names = array();
     foreach ($phids as $phid) {
       $names[] = $handles[$phid]->getName();
