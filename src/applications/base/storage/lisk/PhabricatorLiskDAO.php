@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,55 @@
  * limitations under the License.
  */
 
-
+/**
+ * @task edges  Managing Edges
+ * @task config Configuring Storage
+ */
 abstract class PhabricatorLiskDAO extends LiskDAO {
 
+  private $edges = array();
+
+
+/* -(  Managing Edges  )----------------------------------------------------- */
+
+
+  /**
+   * @task edges
+   */
+  public function attachEdges(array $edges) {
+    foreach ($edges as $type => $type_edges) {
+      $this->edges[$type] = $type_edges;
+    }
+    return $this;
+  }
+
+
+  /**
+   * @task edges
+   */
+  public function getEdges($type) {
+    $edges = idx($this->edges, $type);
+    if ($edges === null) {
+      throw new Exception("Call attachEdges() before getEdges()!");
+    }
+    return $edges;
+  }
+
+
+  /**
+   * @task edges
+   */
+  public function getEdgePHIDs($type) {
+    return ipull($this->getEdges($type), 'dst');
+  }
+
+
+/* -(  Configuring Storage  )------------------------------------------------ */
+
+
+  /**
+   * @task config
+   */
   public function establishLiveConnection($mode) {
     $conf_provider = PhabricatorEnv::getEnvConfig(
       'mysql.configuration_provider', 'DatabaseConfigurationProvider');
@@ -34,6 +80,9 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
       ));
   }
 
+  /**
+   * @task config
+   */
   public function getTableName() {
     $str = 'phabricator';
     $len = strlen($str);
@@ -54,5 +103,8 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
     }
   }
 
+  /**
+   * @task config
+   */
   abstract public function getApplicationName();
 }

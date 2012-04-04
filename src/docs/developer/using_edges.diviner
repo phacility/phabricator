@@ -1,0 +1,31 @@
+@title Using Edges
+@group developer
+
+Guide to the Edges infrastructure.
+
+= Overview =
+
+Edges are a generic way of storing a relationship between two objects (like
+a Task and its attached files). If you are familiar with the Facebook
+associations framework, Phabricator Edges are substantially similar.
+
+An edge is defined by a source PHID (the edge origin), a destination PHID
+(the edge destination) and an edge type (which describes the relationship,
+like "is subscribed to" or "has attached file").
+
+Every edge is directional, and stored alongside the source object. Some edges
+are configured to automatically write an inverse edge, effectively building
+a bidirectional relationship. The strength of storing relationships like this
+is that they work when databases are partitioned or sharded.
+
+= Reading Edges =
+
+You can load edges with @{class:PhabricatorEdgeQuery}.
+
+= Writing Edges =
+
+You can edit edges with @{class:PhabricatorEdgeEditor}.
+
+= Edges and Lisk =
+
+@{class:PhabricatorLiskDAO} includes some builtin support for edges.
