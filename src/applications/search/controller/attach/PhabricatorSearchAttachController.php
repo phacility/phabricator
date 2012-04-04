@@ -116,6 +116,7 @@ final class PhabricatorSearchAttachController
         'all'      => 'All '.$strings['target_plural_noun'],
       ))
       ->setSelectedFilter($strings['selected'])
+      ->setExcluded($this->phid)
       ->setCancelURI($handle->getURI())
       ->setSearchURI('/search/select/'.$attach_type.'/')
       ->setTitle($strings['title'])

@@ -54,6 +54,8 @@ final class PhabricatorSearchSelectController
         break;
     }
 
+    $query->setParameter('exclude', $request->getStr('exclude'));
+
     $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
     $results = $engine->executeSearch($query);
 

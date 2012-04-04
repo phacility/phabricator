@@ -202,6 +202,11 @@ final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
       }
     }
 
+    $exclude = $query->getParameter('exclude');
+    if ($exclude) {
+      $where[] = qsprintf($conn_r, 'document.phid != %s', $exclude);
+    }
+
     if ($query->getParameter('type')) {
       if (strlen($q)) {
         // TODO: verify that this column actually does something useful in query

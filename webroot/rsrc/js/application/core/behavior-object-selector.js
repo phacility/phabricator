@@ -113,6 +113,7 @@ JX.behavior('phabricator-object-selector', function(config) {
     new JX.Request(config.uri, JX.bind(null, onreceive, ++n))
       .setData({
         filter: JX.$(config.filter).value,
+        exclude: config.exclude,
         query: JX.$(config.query).value
       })
       .send();
