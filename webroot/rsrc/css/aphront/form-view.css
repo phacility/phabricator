@@ -167,3 +167,123 @@ table.aphront-form-control-checkbox-layout th {
   background: #99ff99;
   border-color: #669966;
 }
+
+.calendar-button {
+  padding: 11px;
+  right: -30px;
+  top: -3px;
+
+  background: url(/rsrc/image/icon/fatcow/calendar_edit.png)
+    no-repeat center center;
+  z-index: 2;
+  position: absolute;
+  border: 1px solid transparent;
+}
+
+.aphront-form-date-container {
+  position: relative;
+  display: inline;
+}
+
+.aphront-form-date-container select{
+  margin: 2px;
+}
+
+.fancy-datepicker {
+  position: absolute;
+  top: -10px;
+  right: -8px;
+  width: 240px;
+  padding-bottom: 6em;
+}
+
+.fancy-datepicker-core {
+  padding: 1px;
+  font-size: 11px;
+  font-family: Verdana;
+  text-align: center;
+}
+
+.fancy-datepicker-core .month-table,
+.fancy-datepicker-core .day-table {
+  margin: 0 auto;
+  border-collapse: separate;
+  border-spacing: 1px;
+  width: 100%;
+}
+
+.fancy-datepicker-core .month-table {
+  margin-bottom: 6px;
+}
+
+.fancy-datepicker-core .month-table td.lrbutton {
+  width: 20%;
+}
+
+.fancy-datepicker-core .month-table td {
+  padding: 4px;
+  font-weight: bold;
+  color: #444444;
+}
+
+.fancy-datepicker-core .month-table td.lrbutton {
+  background: #e6e6e6;
+  border: 1px solid;
+  border-color: #a6a6a6 #969696 #868686 #a6a6a6;
+}
+
+.fancy-datepicker-core .day-table td {
+  overflow: hidden;
+  background: #f6f6f6;
+  vertical-align: center;
+  text-align: center;
+  border: 1px solid #d6d6d6;
+  padding: 4px 0;
+}
+
+.fancy-datepicker-core .day-table td.day-placeholder {
+  border-color: transparent;
+  background: transparent;
+}
+
+.fancy-datepicker-core .day-table td.weekend {
+  color: #666666;
+  border-color: #e6e6e6;
+}
+
+.fancy-datepicker-core .day-table td.day-name {
+  background: transparent;
+  border: 1px transparent;
+  vertical-align: bottom;
+  color: #888888;
+}
+
+.fancy-datepicker-core .day-table td.today {
+  background: #eeee99;
+  border-color: #aaaa66;
+}
+
+.fancy-datepicker-core .day-table td.datepicker-selected {
+  background: #0099ff;
+  border-color: #0066cc;
+}
+
+.fancy-datepicker-core td {
+  cursor: pointer;
+}
+
+.fancy-datepicker-core td.novalue {
+  cursor: inherit;
+}
+
+.picker-open .calendar-button,
+.fancy-datepicker-core {
+  background-color: white;
+  border: 1px solid #777777;
+
+  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.25);
+}
+
+.picker-open .calendar-button {
+  border-left: 1px solid white;
+}

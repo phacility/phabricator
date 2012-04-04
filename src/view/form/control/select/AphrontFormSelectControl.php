@@ -60,7 +60,7 @@ final class AphrontFormSelectControl extends AphrontFormControl {
         phutil_escape_html($label));
     }
 
-    return phutil_render_tag(
+    return javelin_render_tag(
       'select',
       $attrs,
       implode("\n", $option_tags));

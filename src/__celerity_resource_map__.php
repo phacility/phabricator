@@ -72,7 +72,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-form-view-css' =>
   array(
-    'uri' => '/res/38bc1599/rsrc/css/aphront/form-view.css',
+    'uri' => '/res/aec38c95/rsrc/css/aphront/form-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -698,6 +698,18 @@ celerity_register_resource_map(array(
       0 => 'javelin-dom',
     ),
     'disk' => '/rsrc/js/application/core/behavior-error-log.js',
+  ),
+  'javelin-behavior-fancy-datepicker' =>
+  array(
+    'uri' => '/res/b2d89e4c/rsrc/js/application/core/behavior-fancy-datepicker.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-util',
+      2 => 'javelin-dom',
+    ),
+    'disk' => '/rsrc/js/application/core/behavior-fancy-datepicker.js',
   ),
   'javelin-behavior-files-drag-and-drop' =>
   array(
@@ -2022,7 +2034,7 @@ celerity_register_resource_map(array(
 ), array(
   'packages' =>
   array(
-    '943d4357' =>
+    '803864a4' =>
     array(
       'name' => 'core.pkg.css',
       'symbols' =>
@@ -2047,7 +2059,7 @@ celerity_register_resource_map(array(
         17 => 'aphront-pager-view-css',
         18 => 'phabricator-transaction-view-css',
       ),
-      'uri' => '/res/pkg/943d4357/core.pkg.css',
+      'uri' => '/res/pkg/803864a4/core.pkg.css',
       'type' => 'css',
     ),
     '21d01ed8' =>
@@ -2194,17 +2206,17 @@ celerity_register_resource_map(array(
   'reverse' =>
   array(
     'aphront-attached-file-view-css' => 'f45e0b15',
-    'aphront-crumbs-view-css' => '943d4357',
-    'aphront-dialog-view-css' => '943d4357',
-    'aphront-form-view-css' => '943d4357',
+    'aphront-crumbs-view-css' => '803864a4',
+    'aphront-dialog-view-css' => '803864a4',
+    'aphront-form-view-css' => '803864a4',
     'aphront-headsup-action-list-view-css' => '18be02e0',
-    'aphront-list-filter-view-css' => '943d4357',
-    'aphront-pager-view-css' => '943d4357',
-    'aphront-panel-view-css' => '943d4357',
-    'aphront-side-nav-view-css' => '943d4357',
-    'aphront-table-view-css' => '943d4357',
-    'aphront-tokenizer-control-css' => '943d4357',
-    'aphront-typeahead-control-css' => '943d4357',
+    'aphront-list-filter-view-css' => '803864a4',
+    'aphront-pager-view-css' => '803864a4',
+    'aphront-panel-view-css' => '803864a4',
+    'aphront-side-nav-view-css' => '803864a4',
+    'aphront-table-view-css' => '803864a4',
+    'aphront-tokenizer-control-css' => '803864a4',
+    'aphront-typeahead-control-css' => '803864a4',
     'differential-changeset-view-css' => '18be02e0',
     'differential-core-view-css' => '18be02e0',
     'differential-inline-comment-editor' => 'b2139675',
@@ -2262,23 +2274,23 @@ celerity_register_resource_map(array(
     'maniphest-task-detail-css' => 'f45e0b15',
     'maniphest-task-summary-css' => 'f45e0b15',
     'maniphest-transaction-detail-css' => 'f45e0b15',
-    'phabricator-app-buttons-css' => '943d4357',
+    'phabricator-app-buttons-css' => '803864a4',
     'phabricator-content-source-view-css' => '18be02e0',
-    'phabricator-core-buttons-css' => '943d4357',
-    'phabricator-core-css' => '943d4357',
-    'phabricator-directory-css' => '943d4357',
+    'phabricator-core-buttons-css' => '803864a4',
+    'phabricator-core-css' => '803864a4',
+    'phabricator-directory-css' => '803864a4',
     'phabricator-drag-and-drop-file-upload' => 'b2139675',
     'phabricator-dropdown-menu' => '21d01ed8',
-    'phabricator-jump-nav' => '943d4357',
+    'phabricator-jump-nav' => '803864a4',
     'phabricator-keyboard-shortcut' => '21d01ed8',
     'phabricator-keyboard-shortcut-manager' => '21d01ed8',
     'phabricator-menu-item' => '21d01ed8',
     'phabricator-object-selector-css' => '18be02e0',
     'phabricator-paste-file-upload' => '21d01ed8',
-    'phabricator-remarkup-css' => '943d4357',
+    'phabricator-remarkup-css' => '803864a4',
     'phabricator-shaped-request' => 'b2139675',
-    'phabricator-standard-page-view' => '943d4357',
-    'phabricator-transaction-view-css' => '943d4357',
-    'syntax-highlighting-css' => '943d4357',
+    'phabricator-standard-page-view' => '803864a4',
+    'phabricator-transaction-view-css' => '803864a4',
+    'syntax-highlighting-css' => '803864a4',
   ),
 ));
