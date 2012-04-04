@@ -745,7 +745,7 @@ final class PhabricatorSetup {
           if (!$r->isSubclassOf($instanceof)) {
             throw new Exception(
               "Config setting '$key' must be an instance of '$instanceof'.");
-          } elseif (!$r->isInstantiable()) {
+          } else if (!$r->isInstantiable()) {
             throw new Exception("Config setting '$key' must be instantiable.");
           }
         } catch (Exception $ex) {

@@ -1355,7 +1355,7 @@ final class DifferentialChangesetParser {
           if ($this->old[$ii]['type'] == '\\') {
             $o_text = $this->old[$ii]['text'];
             $o_attr = ' class="comment"';
-          } elseif (empty($this->new[$ii])) {
+          } else if (empty($this->new[$ii])) {
             $o_attr = ' class="old old-full"';
           } else {
             $o_attr = ' class="old"';
@@ -1389,7 +1389,7 @@ final class DifferentialChangesetParser {
           if ($this->new[$ii]['type'] == '\\') {
             $n_text = $this->new[$ii]['text'];
             $n_attr = ' class="comment"';
-          } elseif (empty($this->old[$ii])) {
+          } else if (empty($this->old[$ii])) {
             $n_attr = ' class="new new-full"';
           } else {
             $n_attr = ' class="new"';

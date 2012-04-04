@@ -239,7 +239,7 @@ final class PhabricatorSearchController
             ->loadOneWhere('callsign = %s', $match[1]);
           if ($match[2] == '') {
             $jump = $repository;
-          } elseif ($repository) {
+          } else if ($repository) {
             $jump = id(new PhabricatorRepositoryCommit())->loadOneWhere(
               'repositoryID = %d AND commitIdentifier = %s',
               $repository->getID(),
@@ -255,9 +255,9 @@ final class PhabricatorSearchController
               }
             }
           }
-        } elseif (preg_match('/^d(\d+)$/i', $query_str, $match)) {
+        } else if (preg_match('/^d(\d+)$/i', $query_str, $match)) {
           $jump = id(new DifferentialRevision())->load($match[1]);
-        } elseif (preg_match('/^t(\d+)$/i', $query_str, $match)) {
+        } else if (preg_match('/^t(\d+)$/i', $query_str, $match)) {
           $jump = id(new ManiphestTask())->load($match[1]);
         }
         if ($jump) {

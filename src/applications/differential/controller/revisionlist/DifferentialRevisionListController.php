@@ -406,9 +406,9 @@ final class DifferentialRevisionListController extends DifferentialController {
       case 'status':
         if ($params['status'] == 'open') {
           $query->withStatus(DifferentialRevisionQuery::STATUS_OPEN);
-        } elseif ($params['status'] == 'committed') {
+        } else if ($params['status'] == 'committed') {
           $query->withStatus(DifferentialRevisionQuery::STATUS_COMMITTED);
-        } elseif ($params['status'] == 'abandoned') {
+        } else if ($params['status'] == 'abandoned') {
           $query->withStatus(DifferentialRevisionQuery::STATUS_ABANDONED);
         }
         break;
