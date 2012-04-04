@@ -18,19 +18,39 @@
 
 final class AphrontFormTextControl extends AphrontFormControl {
 
+  private $disableAutocomplete;
+  private $sigil;
+
+  public function setDisableAutocomplete($disable) {
+    $this->disableAutocomplete = $disable;
+    return $this;
+  }
+  private function getDisableAutocomplete() {
+    return $this->disableAutocomplete;
+  }
+  public function getSigil() {
+    return $this->sigil;
+  }
+  public function setSigil($sigil) {
+    $this->sigil = $sigil;
+    return $this;
+  }
+
   protected function getCustomControlClass() {
     return 'aphront-form-control-text';
   }
 
   protected function renderInput() {
-    return phutil_render_tag(
+    return javelin_render_tag(
       'input',
       array(
-        'type'      => 'text',
-        'name'      => $this->getName(),
-        'value'     => $this->getValue(),
-        'disabled'  => $this->getDisabled() ? 'disabled' : null,
-        'id'        => $this->getID(),
+        'type'         => 'text',
+        'name'         => $this->getName(),
+        'value'        => $this->getValue(),
+        'disabled'     => $this->getDisabled() ? 'disabled' : null,
+        'autocomplete' => $this->getDisableAutocomplete() ? 'off' : null,
+        'id'           => $this->getID(),
+        'sigil'        => $this->getSigil(),
       ));
   }
 

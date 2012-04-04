@@ -6,9 +6,8 @@
 
 
 
+phutil_require_module('phabricator', 'infrastructure/javelin/markup');
 phutil_require_module('phabricator', 'view/form/control/base');
-
-phutil_require_module('phutil', 'markup');
 
 
 phutil_require_source('AphrontFormTextControl.php');

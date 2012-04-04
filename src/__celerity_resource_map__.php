@@ -993,6 +993,19 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/repository/repository-crossreference.js',
   ),
+  'javelin-behavior-stripe-payment-form' =>
+  array(
+    'uri' => '/res/b77a4b16/rsrc/js/application/phortune/behavior-stripe-payment-form.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-json',
+      3 => 'stripe-core',
+    ),
+    'disk' => '/rsrc/js/application/phortune/behavior-stripe-payment-form.js',
+  ),
   'javelin-behavior-view-placeholder' =>
   array(
     'uri' => '/res/5b89bdf5/rsrc/js/javelin/ext/view/ViewPlaceholder.js',
@@ -2021,6 +2034,24 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/js/raphael/g.raphael.line.js',
+  ),
+  'stripe-core' =>
+  array(
+    'uri' => '/res/3b0f0ad4/rsrc/js/stripe/stripe_core.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/js/stripe/stripe_core.js',
+  ),
+  'stripe-payment-form-css' =>
+  array(
+    'uri' => '/res/e2358ded/rsrc/css/application/phortune/stripe-payment-form.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/phortune/stripe-payment-form.css',
   ),
   'syntax-highlighting-css' =>
   array(

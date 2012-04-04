@@ -1,0 +1,8 @@
+/**
+ * @provides stripe-payment-form-css
+ */
+
+.credit-card-logos {
+  background: url(/rsrc/image/credit_cards.png) no-repeat 0px 2px;
+  height: 32px;
+}

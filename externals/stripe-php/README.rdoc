@@ -1,0 +1,20 @@
+= Installation
+
+Obtain the latest version of the Stripe PHP bindings with:
+
+    git clone https://github.com/stripe/stripe-php
+
+To get started, add the following to your PHP script:
+
+    require_once("/path/to/stripe-php/lib/Stripe.php");
+
+Simple usage looks like:
+
+    Stripe::setApiKey('d8e8fca2dc0f896fd7cb4cb0031ba249');
+    $myCard = array('number' => '4242424242424242', 'exp_month' => 5, 'exp_year' => 2015);
+    $charge = Stripe_Charge::create(array('card' => $myCard, 'amount' => 2000, 'currency' => 'usd'));
+    echo $charge;
+
+= Documentation
+
+Please see https://stripe.com/api for up-to-date documentation.

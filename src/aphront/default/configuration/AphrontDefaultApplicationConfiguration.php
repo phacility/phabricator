@@ -412,6 +412,12 @@ class AphrontDefaultApplicationConfiguration
         'edit/(?P<phid>[^/]+)/' => 'PhabricatorFlagEditController',
         'delete/(?P<id>\d+)/' => 'PhabricatorFlagDeleteController',
       ),
+
+      '/phortune/' => array(
+        'stripe/' => array(
+          'testpaymentform/' => 'PhortuneStripeTestPaymentFormController',
+        ),
+      ),
     );
   }
 
