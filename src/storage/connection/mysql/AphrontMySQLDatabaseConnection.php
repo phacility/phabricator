@@ -38,7 +38,7 @@ final class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
   }
 
   public function escapeColumnName($name) {
-    return '`'.str_replace('`', '\\`', $name).'`';
+    return '`'.str_replace('`', '``', $name).'`';
   }
 
   public function escapeMultilineComment($comment) {
