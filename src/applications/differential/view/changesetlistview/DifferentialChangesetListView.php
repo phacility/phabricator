@@ -256,7 +256,8 @@ final class DifferentialChangesetListView extends AphrontView {
         $changeset->getAbsoluteRepositoryPath($this->diff, $repository),
         '/');
       $line = 1; // TODO: get first changed line
-      $editor_link = $user->loadEditorLink($path, $line, $repository);
+      $callsign = $repository->getCallsign();
+      $editor_link = $user->loadEditorLink($path, $line, $callsign);
       if ($editor_link) {
         $meta['editor'] = $editor_link;
       } else {

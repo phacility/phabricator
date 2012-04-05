@@ -200,7 +200,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
       $editor_link = $this->user->loadEditorLink(
         implode(' ', $paths),
         1, // line number
-        $this->repository);
+        $this->repository->getCallsign());
       if ($editor_link) {
         $editor_link = phutil_render_tag(
           'a',

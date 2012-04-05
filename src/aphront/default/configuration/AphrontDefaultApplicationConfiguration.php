@@ -445,8 +445,14 @@ class AphrontDefaultApplicationConfiguration
     $class    = phutil_escape_html(get_class($ex));
     $message  = phutil_escape_html($ex->getMessage());
 
+    $user = $this->getRequest()->getUser();
+    if (!$user) {
+      // If we hit an exception very early, we won't have a user.
+      $user = new PhabricatorUser();
+    }
+
     if (PhabricatorEnv::getEnvConfig('phabricator.show-stack-traces')) {
-      $trace = $this->renderStackTrace($ex->getTrace());
+      $trace = $this->renderStackTrace($ex->getTrace(), $user);
     } else {
       $trace = null;
     }
@@ -456,12 +462,6 @@ class AphrontDefaultApplicationConfiguration
         '<div class="exception-message">'.$message.'</div>'.
         $trace.
       '</div>';
-
-    $user = $this->getRequest()->getUser();
-    if (!$user) {
-      // If we hit an exception very early, we won't have a user.
-      $user = new PhabricatorUser();
-    }
 
     $dialog = new AphrontDialogView();
     $dialog
@@ -525,20 +525,17 @@ class AphrontDefaultApplicationConfiguration
       ));
   }
 
-  private function renderStackTrace($trace) {
+  private function renderStackTrace($trace, PhabricatorUser $user) {
 
     $libraries = PhutilBootloader::getInstance()->getAllLibraries();
 
     // TODO: Make this configurable?
-    $host = 'https://secure.phabricator.com';
+    $path = 'https://secure.phabricator.com/diffusion/%s/browse/master/src/';
 
-    $browse = array(
-      'arcanist' =>
-        $host.'/diffusion/ARC/browse/master/src/',
-      'phutil' =>
-        $host.'/diffusion/PHU/browse/master/src/',
-      'phabricator' =>
-        $host.'/diffusion/P/browse/master/src/',
+    $callsigns = array(
+      'arcanist' => 'ARC',
+      'phutil' => 'PHU',
+      'phabricator' => 'P',
     );
 
     $rows = array();
@@ -565,14 +562,22 @@ class AphrontDefaultApplicationConfiguration
       }
 
       if ($file) {
-        if (isset($browse[$lib])) {
+        if (isset($callsigns[$lib])) {
+          $attrs = array(
+            'href' => $user->loadEditorLink(
+              '/src/'.$relative,
+              $part['line'],
+              $callsigns[$lib]),
+            'title' => $file,
+          );
+          if (!$attrs['href']) {
+            $attrs['href'] = sprintf($path, $callsigns[$lib]).
+              $relative.'$'.$part['line'];
+            $attrs['target'] = '_blank';
+          }
           $file_name = phutil_render_tag(
             'a',
-            array(
-              'href' => $browse[$lib].$relative.'$'.$part['line'],
-              'title' => $file,
-              'target' => '_blank',
-            ),
+            $attrs,
             phutil_escape_html($relative));
         } else {
           $file_name = phutil_render_tag(

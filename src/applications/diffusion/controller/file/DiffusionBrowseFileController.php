@@ -221,7 +221,8 @@ final class DiffusionBrowseFileController extends DiffusionController {
     $path = $drequest->getPath();
     $line = 1;
 
-    $editor_link = $user->loadEditorLink($path, $line, $repository);
+    $callsign = $repository->getCallsign();
+    $editor_link = $user->loadEditorLink($path, $line, $callsign);
     if (!$editor_link) {
       return null;
     }

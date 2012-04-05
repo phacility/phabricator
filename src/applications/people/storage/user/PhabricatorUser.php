@@ -413,16 +413,14 @@ final class PhabricatorUser extends PhabricatorUserDAO {
     return $preferences;
   }
 
-  public function loadEditorLink($path,
-                                 $line,
-                                 PhabricatorRepository $repository) {
+  public function loadEditorLink($path, $line, $callsign) {
     $editor = $this->loadPreferences()->getPreference(
       PhabricatorUserPreferences::PREFERENCE_EDITOR);
     if ($editor) {
       return strtr($editor, array(
         '%f' => phutil_escape_uri($path),
         '%l' => phutil_escape_uri($line),
-        '%r' => phutil_escape_uri($repository->getCallsign()),
+        '%r' => phutil_escape_uri($callsign),
       ));
     }
   }
