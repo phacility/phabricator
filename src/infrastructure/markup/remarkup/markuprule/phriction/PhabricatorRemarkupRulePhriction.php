@@ -33,40 +33,18 @@ final class PhabricatorRemarkupRulePhriction
 
     $slug = trim($matches[1]);
     $name = trim(idx($matches, 2, $slug));
+    $name = explode('/', trim($name, '/'));
+    $name = end($name);
 
-    // If whatever is being linked to begins with "/" or has "://", treat it
-    // as a URI instead of a wiki page.
-    $is_uri = preg_match('@(^/)|(://)@', $slug);
-
-    if ($is_uri) {
-      $protocols = $this->getEngine()->getConfig(
-        'uri.allowed-protocols',
-        array());
-      $protocol = id(new PhutilURI($slug))->getProtocol();
-      if (!idx($protocols, $protocol)) {
-        // Don't treat this as a URI if it's not an allowed protocol.
-        $is_uri = false;
-      }
-    }
-
-    if ($is_uri) {
-      $uri = $slug;
-      // Leave the name unchanged, i.e. link the whole URI if there's no
-      // explicit name.
-    } else {
-      $name = explode('/', trim($name, '/'));
-      $name = end($name);
-
-      $slug = PhrictionDocument::normalizeSlug($slug);
-      $uri  = PhrictionDocument::getSlugURI($slug);
-    }
+    $slug = PhrictionDocument::normalizeSlug($slug);
+    $uri  = PhrictionDocument::getSlugURI($slug);
 
     return $this->getEngine()->storeText(
       phutil_render_tag(
         'a',
         array(
           'href'  => $uri,
-          'class' => $is_uri ? null : 'phriction-link',
+          'class' => 'phriction-link',
         ),
         phutil_escape_html($name)));
   }
