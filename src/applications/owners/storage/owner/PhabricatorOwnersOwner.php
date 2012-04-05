@@ -44,6 +44,9 @@ final class PhabricatorOwnersOwner extends PhabricatorOwnersDAO {
   // Loads all user phids affiliated with a set of packages. This includes both
   // user owners and all members of any project owners
   public static function loadAffiliatedUserPHIDs(array $package_ids) {
+    if (!$package_ids) {
+      return array();
+    }
     $owners = id(new PhabricatorOwnersOwner())->loadAllWhere(
       'packageID IN (%Ls)',
       $package_ids);
