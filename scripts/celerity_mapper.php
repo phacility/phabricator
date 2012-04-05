@@ -118,7 +118,6 @@ $package_spec = array(
   'maniphest.pkg.css' => array(
     'maniphest-task-summary-css',
     'maniphest-transaction-detail-css',
-    'maniphest-task-detail-css',
     'aphront-attached-file-view-css',
   ),
   'maniphest.pkg.js' => array(
