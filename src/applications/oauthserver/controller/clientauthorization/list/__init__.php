@@ -7,9 +7,10 @@
 
 
 phutil_require_module('phabricator', 'applications/oauthserver/controller/clientauthorization/base');
+phutil_require_module('phabricator', 'applications/oauthserver/query/clientauthorization');
 phutil_require_module('phabricator', 'applications/oauthserver/storage/client');
-phutil_require_module('phabricator', 'applications/oauthserver/storage/clientauthorization');
 phutil_require_module('phabricator', 'infrastructure/env');
+phutil_require_module('phabricator', 'view/control/pager');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/form/error');
 phutil_require_module('phabricator', 'view/layout/panel');

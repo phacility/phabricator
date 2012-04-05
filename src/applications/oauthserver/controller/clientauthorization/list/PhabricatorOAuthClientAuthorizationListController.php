@@ -27,12 +27,20 @@ extends PhabricatorOAuthClientAuthorizationBaseController {
   }
 
   public function processRequest() {
-    $title          = 'OAuth Client Authorizations';
-    $request        = $this->getRequest();
-    $current_user   = $request->getUser();
-    $authorizations = id(new PhabricatorOAuthClientAuthorization())
-      ->loadAllWhere('userPHID = %s',
-                     $current_user->getPHID());
+    $title        = 'OAuth Client Authorizations';
+    $request      = $this->getRequest();
+    $current_user = $request->getUser();
+    $offset       = $request->getInt('offset', 0);
+    $page_size    = 100;
+    $pager        = new AphrontPagerView();
+    $request_uri  = $request->getRequestURI();
+    $pager->setURI($request_uri, 'offset');
+    $pager->setPageSize($page_size);
+    $pager->setOffset($offset);
+
+    $query = new PhabricatorOAuthClientAuthorizationQuery();
+    $query->withUserPHIDs(array($current_user->getPHID()));
+    $authorizations = $query->executeWithPager($pager);
 
     $client_authorizations = mpull($authorizations, null, 'getClientPHID');
     $client_phids          = array_keys($client_authorizations);
@@ -101,8 +109,10 @@ extends PhabricatorOAuthClientAuthorizationBaseController {
     $panel = $this->buildClientAuthorizationList($rows, $rowc, $title);
 
     return $this->buildStandardPageResponse(
-      array($this->getNoticeView(),
-            $panel),
+      array(
+        $this->getNoticeView(),
+        $panel->appendChild($pager),
+      ),
       array('title' => $title)
     );
   }

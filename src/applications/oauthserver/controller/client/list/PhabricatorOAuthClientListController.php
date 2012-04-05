@@ -30,9 +30,17 @@ extends PhabricatorOAuthClientBaseController {
     $title        = 'OAuth Clients';
     $request      = $this->getRequest();
     $current_user = $request->getUser();
-    $clients      = id(new PhabricatorOAuthServerClient())
-      ->loadAllWhere('creatorPHID = %s',
-                     $current_user->getPHID());
+    $offset       = $request->getInt('offset', 0);
+    $page_size    = 100;
+    $pager        = new AphrontPagerView();
+    $request_uri  = $request->getRequestURI();
+    $pager->setURI($request_uri, 'offset');
+    $pager->setPageSize($page_size);
+    $pager->setOffset($offset);
+
+    $query = new PhabricatorOAuthServerClientQuery();
+    $query->withCreatorPHIDs(array($current_user->getPHID()));
+    $clients = $query->executeWithPager($pager);
 
     $rows      = array();
     $rowc      = array();
@@ -76,8 +84,10 @@ extends PhabricatorOAuthClientBaseController {
     $panel = $this->buildClientList($rows, $rowc, $title);
 
     return $this->buildStandardPageResponse(
-      array($this->getNoticeView(),
-            $panel),
+      array(
+        $this->getNoticeView(),
+        $panel->appendChild($pager)
+      ),
       array('title' => $title)
     );
   }

@@ -16,16 +16,20 @@
  * limitations under the License.
  */
 
-final class PhabricatorChatLogQuery extends PhabricatorOffsetPagedQuery {
-  private $channels;
+final class PhabricatorOAuthServerClientQuery
+extends PhabricatorOffsetPagedQuery {
+  private $creatorPHIDs;
 
-  public function withChannels(array $channels) {
-    $this->channels = $channels;
+  public function withCreatorPHIDs(array $phids) {
+    $this->creatorPHIDs = $phids;
     return $this;
+  }
+  private function getCreatorPHIDs() {
+    return $this->creatorPHIDs;
   }
 
   public function execute() {
-    $table  = new PhabricatorChatLogEvent();
+    $table  = new PhabricatorOAuthServerClient();
     $conn_r = $table->establishConnection('r');
 
     $where_clause = $this->buildWhereClause($conn_r);
@@ -33,24 +37,22 @@ final class PhabricatorChatLogQuery extends PhabricatorOffsetPagedQuery {
 
     $data = queryfx_all(
       $conn_r,
-      'SELECT * FROM %T e %Q ORDER BY epoch ASC %Q',
+      'SELECT * FROM %T client %Q %Q',
       $table->getTableName(),
       $where_clause,
       $limit_clause);
 
-    $logs = $table->loadAllFromArray($data);
-
-    return $logs;
+    return $table->loadAllFromArray($data);
   }
 
   private function buildWhereClause($conn_r) {
     $where = array();
 
-    if ($this->channels) {
+    if ($this->getCreatorPHIDs()) {
       $where[] = qsprintf(
         $conn_r,
-        'channel IN (%Ls)',
-        $this->channels);
+        'creatorPHID IN (%Ls)',
+        $this->getCreatorPHIDs());
     }
 
     return $this->formatWhereClause($where);
