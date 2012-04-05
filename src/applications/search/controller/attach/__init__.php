@@ -19,6 +19,9 @@ phutil_require_module('phabricator', 'applications/phid/graph');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'applications/search/controller/base');
 phutil_require_module('phabricator', 'applications/search/editor/attach');
+phutil_require_module('phabricator', 'infrastructure/edges/constants/config');
+phutil_require_module('phabricator', 'infrastructure/edges/editor/edge');
+phutil_require_module('phabricator', 'infrastructure/edges/query/edge');
 phutil_require_module('phabricator', 'view/control/objectselector');
 
 phutil_require_module('phutil', 'utils');

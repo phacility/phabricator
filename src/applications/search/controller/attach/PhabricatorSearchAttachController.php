@@ -29,6 +29,7 @@ final class PhabricatorSearchAttachController
   const ACTION_ATTACH       = 'attach';
   const ACTION_MERGE        = 'merge';
   const ACTION_DEPENDENCIES = 'dependencies';
+  const ACTION_EDGE         = 'edge';
 
   public function willProcessRequest(array $data) {
     $this->phid = $data['phid'];
@@ -64,6 +65,16 @@ final class PhabricatorSearchAttachController
         case self::ACTION_MERGE:
           return $this->performMerge($object, $handle, $phids);
 
+        case self::ACTION_EDGE:
+          $edge_type = $this->getEdgeType($object_type, $attach_type);
+
+          $editor = id(new PhabricatorEdgeEditor());
+          foreach ($phids as $phid) {
+            $editor->addEdge($this->phid, $edge_type, $phid);
+          }
+          $editor->save();
+
+          return id(new AphrontReloadResponse())->setURI($handle->getURI());
         case self::ACTION_DEPENDENCIES:
         case self::ACTION_ATTACH:
           $two_way = true;
@@ -93,6 +104,13 @@ final class PhabricatorSearchAttachController
         case self::ACTION_ATTACH:
         case self::ACTION_DEPENDENCIES:
           $phids = $object->getAttachedPHIDs($attach_type);
+          break;
+        case self::ACTION_EDGE:
+          $edge_type = $this->getEdgeType($object_type, $attach_type);
+
+          $phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+            $this->phid,
+            $edge_type);
           break;
         default:
           $phids = array();
@@ -202,9 +220,14 @@ final class PhabricatorSearchAttachController
         $noun = 'Tasks';
         $selected = 'assigned';
         break;
+      case PhabricatorPHIDConstants::PHID_TYPE_CMIT:
+        $noun = 'Commits';
+        $selected = 'created';
+        break;
     }
 
     switch ($this->action) {
+      case self::ACTION_EDGE:
       case self::ACTION_ATTACH:
         $dialog_title = "Manage Attached {$noun}";
         $header_text = "Currently Attached {$noun}";
@@ -270,6 +293,26 @@ final class PhabricatorSearchAttachController
         "You can not create a dependency on '{$which}' because it ".
         "would create a circular dependency: {$names}.");
     }
+  }
+
+  private function getEdgeType($src_type, $dst_type) {
+    $t_cmit = PhabricatorPHIDConstants::PHID_TYPE_CMIT;
+    $t_task = PhabricatorPHIDConstants::PHID_TYPE_TASK;
+
+    $map = array(
+      $t_cmit => array(
+        $t_task => PhabricatorEdgeConfig::TYPE_COMMIT_HAS_TASK,
+      ),
+      $t_task => array(
+        $t_cmit => PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT,
+      ),
+    );
+
+    if (empty($map[$src_type][$dst_type])) {
+      throw new Exception("Unknown edge type!");
+    }
+
+    return $map[$src_type][$dst_type];
   }
 
 }

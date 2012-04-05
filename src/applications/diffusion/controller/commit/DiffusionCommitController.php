@@ -270,7 +270,11 @@ final class DiffusionCommitController extends DiffusionController {
     assert_instances_of($parents, 'PhabricatorRepositoryCommit');
     $user = $this->getRequest()->getUser();
 
-    $phids = array();
+    $task_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $commit->getPHID(),
+      PhabricatorEdgeConfig::TYPE_COMMIT_HAS_TASK);
+
+    $phids = $task_phids;
     if ($data->getCommitDetail('authorPHID')) {
       $phids[] = $data->getCommitDetail('authorPHID');
     }
@@ -333,6 +337,7 @@ final class DiffusionCommitController extends DiffusionController {
       $props['Parents'] = implode(' &middot; ', $parent_links);
     }
 
+
     $request = $this->getDiffusionRequest();
 
     $contains = DiffusionContainsQuery::newFromDiffusionRequest($request);
@@ -343,6 +348,15 @@ final class DiffusionCommitController extends DiffusionController {
       $branches = implode(', ', array_keys($branches));
       $branches = phutil_escape_html($branches);
       $props['Branches'] = $branches;
+    }
+
+    if ($task_phids) {
+      $task_list = array();
+      foreach ($task_phids as $phid) {
+        $task_list[] = $handles[$phid]->renderLink();
+      }
+      $task_list = implode('<br />', $task_list);
+      $props['Tasks'] = $task_list;
     }
 
     return $props;
@@ -634,17 +648,12 @@ final class DiffusionCommitController extends DiffusionController {
     require_celerity_resource('phabricator-object-selector-css');
     require_celerity_resource('javelin-behavior-phabricator-object-selector');
 
-    /*
-      TODO: Implement this.
-
     $action = new AphrontHeadsupActionView();
     $action->setName('Edit Maniphest Tasks');
-    $action->setURI('/search/attach/'.$commit->getPHID().'/TASK/');
+    $action->setURI('/search/attach/'.$commit->getPHID().'/TASK/edge/');
     $action->setWorkflow(true);
     $action->setClass('attach-maniphest');
     $actions[] = $action;
-
-    */
 
     if ($user->getIsAdmin()) {
       $action = new AphrontHeadsupActionView();

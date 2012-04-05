@@ -51,7 +51,11 @@ final class ManiphestTaskDetailController extends ManiphestController {
       'taskID = %d ORDER BY id ASC',
       $task->getID());
 
-    $phids = array();
+    $commit_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $task->getPHID(),
+      PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT);
+
+    $phids = array_fill_keys($commit_phids, true);
     foreach ($transactions as $transaction) {
       foreach ($transaction->extractPHIDs() as $phid) {
         $phids[$phid] = true;
@@ -166,6 +170,15 @@ final class ManiphestTaskDetailController extends ManiphestController {
       }
       $rev_links = implode('<br />', $rev_links);
       $dict['Revisions'] = $rev_links;
+    }
+
+    if ($commit_phids) {
+      $commit_links = array();
+      foreach ($commit_phids as $phid) {
+        $commit_links[] = $handles[$phid]->renderLink();
+      }
+      $commit_links = implode('<br />', $commit_links);
+      $dict['Commits'] = $commit_links;
     }
 
     $file_infos = idx($attached, PhabricatorPHIDConstants::PHID_TYPE_FILE);

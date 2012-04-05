@@ -93,6 +93,24 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
 
 
   /**
+   * Convenience method for loading destination PHIDs with one source and one
+   * edge type. Equivalent to building a full query, but simplifies a common
+   * use case.
+   *
+   * @param phid  Source PHID.
+   * @param const Edge type.
+   * @return list<phid> List of destination PHIDs.
+   */
+  public static function loadDestinationPHIDs($src_phid, $edge_type) {
+    $edges = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs(array($src_phid))
+      ->withEdgeTypes(array($edge_type))
+      ->execute();
+    return array_keys($edges[$src_phid][$edge_type]);
+  }
+
+
+  /**
    * Load specified edges.
    *
    * @task exec
