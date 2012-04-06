@@ -74,8 +74,8 @@ final class DiffusionSymbolController extends DiffusionController {
             }
             break;
           case 'class':
-            if (class_exists($this->name) ||
-                in_array($this->name, get_declared_interfaces())) {
+            if (class_exists($this->name, false) ||
+                interface_exists($this->name, false)) {
               if (id(new ReflectionClass($this->name))->isInternal()) {
                 return id(new AphrontRedirectResponse())
                   ->setURI('http://www.php.net/class.'.$this->name);
