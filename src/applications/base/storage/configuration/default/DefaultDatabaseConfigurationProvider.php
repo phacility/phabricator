@@ -16,14 +16,13 @@
  * limitations under the License.
  */
 
-/**
- * TODO: Can we final this?
- */
-class DatabaseConfigurationProvider {
+final class DefaultDatabaseConfigurationProvider
+  implements DatabaseConfigurationProvider {
+
   private $dao;
   private $mode;
 
-  public function __construct(LiskDAO $dao, $mode) {
+  public function __construct(LiskDAO $dao = null, $mode = 'r') {
     $this->dao = $dao;
     $this->mode = $mode;
   }
@@ -41,25 +40,14 @@ class DatabaseConfigurationProvider {
   }
 
   public function getDatabase() {
+    if (!$this->getDao()) {
+      return null;
+    }
     return 'phabricator_'.$this->getDao()->getApplicationName();
   }
 
   final protected function getDao() {
     return $this->dao;
-  }
-
-  final protected function getMode() {
-    return $this->mode;
-  }
-
-  public static function getConfiguration() {
-    // Get DB info. Note that we are using a dummy PhabricatorUser object in
-    // creating the DatabaseConfigurationProvider, which is not used at all.
-    $conf_provider = PhabricatorEnv::getEnvConfig(
-      'mysql.configuration_provider', 'DatabaseConfigurationProvider');
-    PhutilSymbolLoader::loadClass($conf_provider);
-    $conf = newv($conf_provider, array(new PhabricatorUser(), 'r'));
-    return $conf;
   }
 
 }

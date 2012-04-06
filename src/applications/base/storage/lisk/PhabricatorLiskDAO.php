@@ -66,10 +66,9 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
    * @task config
    */
   public function establishLiveConnection($mode) {
-    $conf_provider = PhabricatorEnv::getEnvConfig(
-      'mysql.configuration_provider', 'DatabaseConfigurationProvider');
-    PhutilSymbolLoader::loadClass($conf_provider);
-    $conf = newv($conf_provider, array($this, $mode));
+    $conf = PhabricatorEnv::newObjectFromConfig(
+      'mysql.configuration-provider',
+      array($this, $mode));
 
     return PhabricatorEnv::newObjectFromConfig(
       'mysql.implementation',

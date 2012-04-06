@@ -106,6 +106,10 @@ return array(
 
 // --  MySQL  --------------------------------------------------------------- //
 
+  // Class providing database configuration. It must implement
+  // DatabaseConfigurationProvider.
+  'mysql.configuration-provider' => 'DefaultDatabaseConfigurationProvider',
+
   // The username to use when connecting to MySQL.
   'mysql.user' => 'root',
 

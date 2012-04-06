@@ -61,7 +61,7 @@ if (empty($options['f']) && empty($options['d'])) {
 $next_version = isset($options['v']) ? (int)$options['v'] : null;
 $max_version = isset($options['m']) ? (int)$options['m'] : null;
 
-$conf = DatabaseConfigurationProvider::getConfiguration();
+$conf = PhabricatorEnv::newObjectFromConfig('mysql.configuration-provider');
 
 if ($options['u']) {
   $conn_user = $options['u'];

@@ -57,6 +57,7 @@ final class PhabricatorEnv {
         'PhabricatorOAuthRegistrationController',
       'mysql.implementation' => 'AphrontMySQLDatabaseConnectionBase',
       'differential.attach-task-class' => 'DifferentialTasksAttacher',
+      'mysql.configuration-provider' => 'DatabaseConfigurationProvider',
     );
   }
 

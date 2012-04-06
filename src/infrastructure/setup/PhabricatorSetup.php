@@ -455,7 +455,7 @@ final class PhabricatorSetup {
 
     self::writeHeader("MySQL DATABASE & STORAGE CONFIGURATION");
 
-    $conf = DatabaseConfigurationProvider::getConfiguration();
+    $conf = PhabricatorEnv::newObjectFromConfig('mysql.configuration-provider');
     $conn_user = $conf->getUser();
     $conn_pass = $conf->getPassword();
     $conn_host = $conf->getHost();

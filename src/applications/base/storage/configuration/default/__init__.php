@@ -6,10 +6,8 @@
 
 
 
+phutil_require_module('phabricator', 'applications/base/storage/configuration/base');
 phutil_require_module('phabricator', 'infrastructure/env');
-phutil_require_module('phabricator', 'storage/lisk/dao');
-
-phutil_require_module('phutil', 'utils');
 
 
-phutil_require_source('PhabricatorLiskDAO.php');
+phutil_require_source('DefaultDatabaseConfigurationProvider.php');
