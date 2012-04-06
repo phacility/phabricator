@@ -218,7 +218,8 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
     }
 
     return
-      '<div class="differential-toc differential-panel">'.
+      '<div id="differential-review-toc" '.
+        'class="differential-toc differential-panel">'.
         $editor_link.
         '<h1>Table of Contents</h1>'.
         '<table>'.

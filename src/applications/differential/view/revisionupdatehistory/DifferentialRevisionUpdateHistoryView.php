@@ -215,7 +215,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
     return
       '<div class="differential-revision-history differential-panel">'.
         '<h1>Revision Update History</h1>'.
-        '<form>'.
+        '<form action="#differential-review-toc">'.
           '<table class="differential-revision-history-table">'.
             '<tr>'.
               '<th>Diff</th>'.
