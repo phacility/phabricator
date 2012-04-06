@@ -258,7 +258,7 @@ final class PhabricatorDirectoryMainController
       return $this->renderMiniPanel(
         'No "Needs Triage" Tasks',
         'No tasks in <a href="/project/">projects you are a member of</a> '.
-        'need triage.</p>');
+        'need triage.');
     }
 
     $panel = new AphrontPanelView();
