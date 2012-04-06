@@ -9,7 +9,7 @@
 phutil_require_module('phabricator', 'applications/base/storage/configuration');
 phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'infrastructure/setup/sql');
-phutil_require_module('phabricator', 'storage/connection/mysql');
+phutil_require_module('phabricator', 'storage/connection/mysql/mysql');
 phutil_require_module('phabricator', 'storage/queryfx');
 
 phutil_require_module('phutil', 'filesystem');

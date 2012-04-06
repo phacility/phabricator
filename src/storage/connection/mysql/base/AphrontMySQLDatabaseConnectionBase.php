@@ -19,7 +19,8 @@
 /**
  * @group storage
  */
-final class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
+abstract class AphrontMySQLDatabaseConnectionBase
+  extends AphrontDatabaseConnection {
 
   private $configuration;
   private $connection;
@@ -28,13 +29,14 @@ final class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
 
   private static $connectionCache = array();
 
+  abstract protected function connect();
+  abstract protected function rawQuery($raw_query);
+  abstract protected function fetchAssoc($result);
+  abstract protected function getErrorCode($connection);
+  abstract protected function getErrorDescription($connection);
+
   public function __construct(array $configuration) {
     $this->configuration  = $configuration;
-  }
-
-  public function escapeString($string) {
-    $this->requireConnection();
-    return mysql_real_escape_string($string, $this->connection);
   }
 
   public function escapeColumnName($name) {
@@ -85,7 +87,7 @@ final class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
     return $value;
   }
 
-  private function getConfiguration($key, $default = null) {
+  protected function getConfiguration($key, $default = null) {
     return idx($this->configuration, $key, $default);
   }
 
@@ -105,7 +107,6 @@ final class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
     return "{$user}:{$host}:{$database}";
   }
 
-
   private function establishConnection() {
     $this->closeConnection();
 
@@ -117,17 +118,6 @@ final class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
 
     $start = microtime(true);
 
-    if (!function_exists('mysql_connect')) {
-      // We have to '@' the actual call since it can spew all sorts of silly
-      // noise, but it will also silence fatals caused by not having MySQL
-      // installed, which has bitten me on three separate occasions. Make sure
-      // such failures are explicit and loud.
-      throw new Exception(
-        "About to call mysql_connect(), but the PHP MySQL extension is not ".
-        "available!");
-    }
-
-    $user = $this->getConfiguration('user');
     $host = $this->getConfiguration('host');
     $database = $this->getConfiguration('database');
 
@@ -143,32 +133,10 @@ final class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
     $retries = max(1, PhabricatorEnv::getEnvConfig('mysql.connection-retries'));
     while ($retries--) {
       try {
-        $conn = @mysql_connect(
-          $host,
-          $user,
-          $this->getConfiguration('pass'),
-          $new_link = true,
-          $flags = 0);
-
-        if (!$conn) {
-          $errno = mysql_errno();
-          $error = mysql_error();
-          throw new AphrontQueryConnectionException(
-            "Attempt to connect to {$user}@{$host} failed with error ".
-            "#{$errno}: {$error}.", $errno);
-        }
-
-        if ($database !== null) {
-          $ret = @mysql_select_db($database, $conn);
-          if (!$ret) {
-            $this->throwQueryException($conn);
-          }
-          mysql_set_charset('utf8', $conn);
-        }
-
+        $conn = $this->connect();
         $profiler->endServiceCall($call_id, array());
         break;
-      } catch (Exception $ex) {
+      } catch (AphrontQueryException $ex) {
         if ($retries && $ex->getCode() == 2003) {
           $class = get_class($ex);
           $message = $ex->getMessage();
@@ -184,19 +152,7 @@ final class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
     $this->connection = $conn;
   }
 
-  public function getInsertID() {
-    return mysql_insert_id($this->requireConnection());
-  }
-
-  public function getAffectedRows() {
-    return mysql_affected_rows($this->requireConnection());
-  }
-
-  protected function getTransactionKey() {
-    return (int)$this->requireConnection();
-  }
-
-  private function requireConnection() {
+  protected function requireConnection() {
     if (!$this->connection) {
       $this->establishConnection();
     }
@@ -209,7 +165,7 @@ final class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
     if ($res == null) {
       throw new Exception('No query result to fetch from!');
     }
-    while (($row = mysql_fetch_assoc($res)) !== false) {
+    while (($row = $this->fetchAssoc($res))) {
       $result[] = $row;
     }
     return $result;
@@ -239,7 +195,7 @@ final class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
             'write'   => $is_write,
           ));
 
-        $result = @mysql_query($raw_query, $this->connection);
+        $result = $this->rawQuery($raw_query);
 
         $profiler->endServiceCall($call_id, array());
 
@@ -284,14 +240,14 @@ final class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
     }
   }
 
-  private function throwQueryException($connection) {
+  protected function throwQueryException($connection) {
     if ($this->nextError) {
       $errno = $this->nextError;
       $error = 'Simulated error.';
       $this->nextError = null;
     } else {
-      $errno = mysql_errno($connection);
-      $error = mysql_error($connection);
+      $errno = $this->getErrorCode($connection);
+      $error = $this->getErrorDescription($connection);
     }
 
     $exmsg = "#{$errno}: {$error}";
