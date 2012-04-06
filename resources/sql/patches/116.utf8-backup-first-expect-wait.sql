@@ -1125,7 +1125,7 @@ ALTER TABLE `phabricator_user`.`user_sshkey`
   MODIFY `userPHID` varchar(64) CHARACTER SET binary,
   MODIFY `name` varchar(255) CHARACTER SET binary,
   MODIFY `keyType` varchar(255) CHARACTER SET binary,
-  MODIFY `keyBody` varchar(32768) CHARACTER SET binary,
+  MODIFY `keyBody` text CHARACTER SET binary,
   MODIFY `keyHash` varchar(32) CHARACTER SET binary,
   MODIFY `keyComment` varchar(255) CHARACTER SET binary;
 ALTER TABLE `phabricator_user`.`user_sshkey`
@@ -1133,7 +1133,7 @@ ALTER TABLE `phabricator_user`.`user_sshkey`
   MODIFY `userPHID` varchar(64) COLLATE utf8_bin NOT NULL,
   MODIFY `name` varchar(255) COLLATE utf8_general_ci,
   MODIFY `keyType` varchar(255) COLLATE utf8_general_ci,
-  MODIFY `keyBody` varchar(32768) COLLATE utf8_bin,
+  MODIFY `keyBody` text COLLATE utf8_bin,
   MODIFY `keyHash` varchar(32) COLLATE utf8_bin NOT NULL,
   MODIFY `keyComment` varchar(255) COLLATE utf8_general_ci;
 
