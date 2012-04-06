@@ -71,19 +71,8 @@ abstract class AphrontMySQLDatabaseConnectionBase
   }
 
   public function escapeStringForLikeClause($value) {
+    $value = addcslashes($value, '\%_');
     $value = $this->escapeString($value);
-    // Ideally the query shouldn't be modified after safely escaping it,
-    // but we need to escape _ and % within LIKE terms.
-    $value = str_replace(
-      // Even though we've already escaped, we need to replace \ with \\
-      // because MYSQL unescapes twice inside a LIKE clause. See note
-      // at mysql.com. However, if the \ is being used to escape a single
-      // quote ('), then the \ should not be escaped. Thus, after all \
-      // are replaced with \\, we need to revert instances of \\' back to
-      // \'.
-      array('\\',   '\\\\\'', '_',  '%'),
-      array('\\\\', '\\\'',   '\_', '\%'),
-      $value);
     return $value;
   }
 
