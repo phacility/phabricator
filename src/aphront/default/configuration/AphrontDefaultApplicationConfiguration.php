@@ -572,7 +572,8 @@ class AphrontDefaultApplicationConfiguration
           );
           if (!$attrs['href']) {
             $attrs['href'] = sprintf($path, $callsigns[$lib]).
-              $relative.'$'.$part['line'];
+              str_replace(DIRECTORY_SEPARATOR, '/', $relative).
+              '$'.$part['line'];
             $attrs['target'] = '_blank';
           }
           $file_name = phutil_render_tag(
