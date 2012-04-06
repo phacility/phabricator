@@ -163,7 +163,7 @@ final class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
           if (!$ret) {
             $this->throwQueryException($conn);
           }
-          mysql_set_charset('utf8');
+          mysql_set_charset('utf8', $conn);
         }
 
         $profiler->endServiceCall($call_id, array());
