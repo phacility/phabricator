@@ -34,9 +34,6 @@ final class DiffusionCommitChangeTableView extends DiffusionView {
     // TODO: Copy Away and Move Away are rendered junkily still.
 
     foreach ($this->pathChanges as $change) {
-      $change_verb = DifferentialChangeType::getFullNameForChangeType(
-        $change->getChangeType());
-
       $path = $change->getPath();
       $hash = substr(md5($path), 0, 8);
       if ($change->getFileType() == DifferentialChangeType::FILE_DIRECTORY) {
