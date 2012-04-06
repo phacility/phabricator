@@ -198,7 +198,9 @@ function setup_aphront_basics() {
     $root = $_SERVER['PHUTIL_LIBRARY_ROOT'];
   }
 
-  ini_set('include_path', $libraries_root.':'.ini_get('include_path'));
+  ini_set(
+    'include_path',
+    $libraries_root.PATH_SEPARATOR.ini_get('include_path'));
   @include_once $root.'libphutil/src/__phutil_library_init__.php';
   if (!@constant('__LIBPHUTIL__')) {
     echo "ERROR: Unable to load libphutil. Put libphutil/ next to ".

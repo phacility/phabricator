@@ -20,7 +20,9 @@ error_reporting(E_ALL | E_STRICT);
 ini_set('display_errors', 1);
 
 $include_path = ini_get('include_path');
-ini_set('include_path', $include_path.':'.dirname(__FILE__).'/../../');
+ini_set(
+  'include_path',
+  $include_path.PATH_SEPARATOR.dirname(__FILE__).'/../../');
 @include_once 'libphutil/scripts/__init_script__.php';
 if (!@constant('__LIBPHUTIL__')) {
   echo "ERROR: Unable to load libphutil. Update your PHP 'include_path' to ".
@@ -33,9 +35,6 @@ phutil_load_library(dirname(__FILE__).'/../src/');
 // NOTE: This is dangerous in general, but we know we're in a script context and
 // are not vulnerable to CSRF.
 AphrontWriteGuard::allowDangerousUnguardedWrites(true);
-
-$include_path = ini_get('include_path');
-ini_set('include_path', $include_path.':'.dirname(__FILE__).'/../../');
 
 require_once dirname(dirname(__FILE__)).'/conf/__init_conf__.php';
 

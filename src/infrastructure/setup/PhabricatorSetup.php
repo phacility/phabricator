@@ -233,8 +233,8 @@ final class PhabricatorSetup {
     // unreasonable and we don't need it from Apache, so do an explicit test
     // for CLI availability.
     list($err, $stdout, $stderr) = exec_manual(
-      '%s/scripts/setup/pcntl_available.php',
-      $root);
+      'php %s',
+      "{$root}/scripts/setup/pcntl_available.php");
     if ($err) {
       self::writeFailure();
       self::write("Unable to execute scripts/setup/pcntl_available.php to ".
