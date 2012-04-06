@@ -20,7 +20,7 @@ $__start__ = microtime(true);
 
 error_reporting(E_ALL | E_STRICT);
 
-$required_version = '5.2.0';
+$required_version = '5.2.3';
 if (version_compare(PHP_VERSION, $required_version) < 0) {
   phabricator_fatal_config_error(
     "You are running PHP version '".PHP_VERSION."', which is older than ".
