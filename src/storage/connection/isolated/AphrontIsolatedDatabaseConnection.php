@@ -70,7 +70,7 @@ final class AphrontIsolatedDatabaseConnection
     return $this->affectedRows;
   }
 
-  public function getTransactionKey() {
+  protected function getTransactionKey() {
     return $this->transactionKey;
   }
 

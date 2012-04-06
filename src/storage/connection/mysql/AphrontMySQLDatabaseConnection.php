@@ -192,7 +192,7 @@ final class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
     return mysql_affected_rows($this->requireConnection());
   }
 
-  public function getTransactionKey() {
+  protected function getTransactionKey() {
     return (int)$this->requireConnection();
   }
 
