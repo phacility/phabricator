@@ -75,9 +75,12 @@ final class PhabricatorSetup {
         $open_arcanist = false;
       }
 
-      $open_urandom = @fopen('/dev/urandom', 'r');
-      if (!$open_urandom) {
-        self::write("Unable to open /dev/urandom!\n");
+      $open_urandom = false;
+      try {
+        Filesystem::readRandomBytes(1);
+        $open_urandom = true;
+      } catch (FilesystemException $ex) {
+        self::write($ex->getMessage()."\n");
       }
 
       try {
