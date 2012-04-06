@@ -141,11 +141,7 @@ final class PhabricatorTransactionView extends AphrontView {
   }
 
   private function renderTransactionActions() {
-    $actions = implode('', $this->actions);
-    return
-      '<span class="phabricator-transaction-actions">'.
-        $actions.
-      '</span>';
+    return implode('', $this->actions);
   }
 
   private function renderTransactionStyle() {
