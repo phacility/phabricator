@@ -10,7 +10,7 @@
 *.swp
 
 # NetBeans project files
-/nbproject/ 
+/nbproject/
 
 # Arcanist scratch directory
 /.arc
