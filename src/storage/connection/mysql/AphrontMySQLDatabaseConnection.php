@@ -21,7 +21,7 @@
  */
 final class AphrontMySQLDatabaseConnection extends AphrontDatabaseConnection {
 
-  private $config;
+  private $configuration;
   private $connection;
 
   private $nextError;
