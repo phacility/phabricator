@@ -150,8 +150,13 @@ JX.behavior('phabricator-object-selector', function(config) {
       var phid = data.handle.phid;
 
       delete phids[phid];
-      JX.DOM.alterClass(button_list[phid], 'disabled', false);
-      button_list[phid].disabled = false;
+
+      // NOTE: We may not have a button in the button list, if this result is
+      // not visible in the current search results.
+      if (button_list[phid]) {
+        JX.DOM.alterClass(button_list[phid], 'disabled', false);
+        button_list[phid].disabled = false;
+      }
 
       redrawAttached();
     });
