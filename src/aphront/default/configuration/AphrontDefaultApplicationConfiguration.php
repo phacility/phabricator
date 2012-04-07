@@ -563,14 +563,16 @@ class AphrontDefaultApplicationConfiguration
 
       if ($file) {
         if (isset($callsigns[$lib])) {
-          $attrs = array(
-            'href' => $user->loadEditorLink(
+          $attrs = array('title' => $file);
+          try {
+            $attrs['href'] = $user->loadEditorLink(
               '/src/'.$relative,
               $part['line'],
-              $callsigns[$lib]),
-            'title' => $file,
-          );
-          if (!$attrs['href']) {
+              $callsigns[$lib]);
+          } catch (Exception $ex) {
+            // The database can be inaccessible.
+          }
+          if (empty($attrs['href'])) {
             $attrs['href'] = sprintf($path, $callsigns[$lib]).
               str_replace(DIRECTORY_SEPARATOR, '/', $relative).
               '$'.$part['line'];
