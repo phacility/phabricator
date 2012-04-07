@@ -127,4 +127,4 @@ to your ##.bashrc##, ##.profile## or similar:
 Continue by:
 
   - learning how to use `arc` to send changes for review with
-    {@article:Arcanist User Guide: arc diff}.
+    @{article:Arcanist User Guide: arc diff}.

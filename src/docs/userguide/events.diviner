@@ -19,7 +19,7 @@ things might not be completely stable.
 This event is dispatched before a task is edited, and allows you to respond to
 or alter the edit. Data available on this event:
 
-  - ##task## The {@class:ManiphestTask} being edited.
+  - ##task## The @{class:ManiphestTask} being edited.
   - ##transactions## The list of edits (objects of class
     @{class:ManiphestTransaction}) being applied.
   - ##new## A boolean indicating if this task is being created.
@@ -31,7 +31,7 @@ or alter the edit. Data available on this event:
 This event is dispatched before Differential sends an email, and allows you to
 edit the message that will be sent.  Data available on this event:
 
-  - ##mail## The {@class:PhabricatorMetaMTAMail} being edited.
+  - ##mail## The @{class:PhabricatorMetaMTAMail} being edited.
 
 == PhabricatorEventType::TYPE_DIFFERENTIAL_WILLMARKGENERATED ==
 
