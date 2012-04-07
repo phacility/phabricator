@@ -45,7 +45,7 @@ been accepted, you can commit it like this:
 
   $ arc commit
 
-== Git ==
+= Git =
 
 In Git, `arc diff` sends **all commits in a range** for review. By default,
 this range is:
