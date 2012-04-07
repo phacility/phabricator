@@ -21,7 +21,11 @@ final class PhabricatorInlineSummaryView extends AphrontView {
   private $groups = array();
 
   public function addCommentGroup($name, array $items) {
-    $this->groups[$name] = $items;
+    if (!isset($this->groups[$name])) {
+      $this->groups[$name] = $items;
+    } else {
+      $this->groups[$name] = array_merge($this->groups[$name], $items);
+    }
     return $this;
   }
 
