@@ -215,7 +215,7 @@ final class DiffusionCommitController extends DiffusionController {
           ));
       }
 
-      // TOOD: Some parts of the views still rely on properties of the
+      // TODO: Some parts of the views still rely on properties of the
       // DifferentialChangeset. Make the objects ephemeral to make sure we don't
       // accidentally save them, and then set their ID to the appropriate ID for
       // this application (the path IDs).
