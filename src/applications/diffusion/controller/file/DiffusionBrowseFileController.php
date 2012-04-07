@@ -80,9 +80,9 @@ final class DiffusionBrowseFileController extends DiffusionController {
   }
 
   private function buildCorpus($selected,
-                               $file_query,
+                               DiffusionFileContentQuery $file_query,
                                $needs_blame,
-                               $drequest,
+                               DiffusionRequest $drequest,
                                $path,
                                $data) {
 
@@ -236,8 +236,15 @@ final class DiffusionBrowseFileController extends DiffusionController {
       'Edit');
   }
 
-  private function buildDisplayRows($text_list, $rev_list, $blame_dict,
-    $needs_blame, DiffusionRequest $drequest, $file_query, $selected) {
+  private function buildDisplayRows(
+    array $text_list,
+    array $rev_list,
+    array $blame_dict,
+    $needs_blame,
+    DiffusionRequest $drequest,
+    DiffusionFileContentQuery $file_query,
+    $selected) {
+
     $last_rev = null;
     $color = '#eeeeee';
     $rows = array();
