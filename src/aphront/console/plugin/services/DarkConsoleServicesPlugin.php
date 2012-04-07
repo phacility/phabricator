@@ -55,7 +55,9 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
       // For each SELECT query, go issue an EXPLAIN on it so we can flag stuff
       // causing table scans, etc.
       if (preg_match('/^\s*SELECT\b/i', $entry['query'])) {
-        $conn = new AphrontMySQLDatabaseConnection($entry['config']);
+        $conn = PhabricatorEnv::newObjectFromConfig(
+          'mysql.implementation',
+          array($entry['config']));
         try {
           $explain = queryfx_all(
             $conn,

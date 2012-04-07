@@ -473,12 +473,15 @@ final class PhabricatorSetup {
 
     ini_set('mysql.connect_timeout', 2);
 
-    $conn_raw = new AphrontMySQLDatabaseConnection(
+    $conn_raw = PhabricatorEnv::newObjectFromConfig(
+      'mysql.implementation',
       array(
-        'user'      => $conn_user,
-        'pass'      => $conn_pass,
-        'host'      => $conn_host,
-        'database'  => null,
+        array(
+          'user'      => $conn_user,
+          'pass'      => $conn_pass,
+          'host'      => $conn_host,
+          'database'  => null,
+        ),
       ));
 
     try {

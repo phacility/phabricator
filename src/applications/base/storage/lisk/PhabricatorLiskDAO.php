@@ -71,12 +71,15 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
     PhutilSymbolLoader::loadClass($conf_provider);
     $conf = newv($conf_provider, array($this, $mode));
 
-    return new AphrontMySQLDatabaseConnection(
+    return PhabricatorEnv::newObjectFromConfig(
+      'mysql.implementation',
       array(
-        'user'      => $conf->getUser(),
-        'pass'      => $conf->getPassword(),
-        'host'      => $conf->getHost(),
-        'database'  => $conf->getDatabase(),
+        array(
+          'user'      => $conf->getUser(),
+          'pass'      => $conf->getPassword(),
+          'host'      => $conf->getHost(),
+          'database'  => $conf->getDatabase(),
+        ),
       ));
   }
 

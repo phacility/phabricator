@@ -46,11 +46,6 @@ if (!$env) {
     "is one of 'development', 'production', or a custom environment.");
 }
 
-if (!function_exists('mysql_connect')) {
-  phabricator_fatal_config_error(
-    "The PHP MySQL extension is not installed. This extension is required.");
-}
-
 if (!isset($_REQUEST['__path__'])) {
   phabricator_fatal_config_error(
     "__path__ is not set. Your rewrite rules are not configured correctly.");

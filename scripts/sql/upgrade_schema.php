@@ -83,12 +83,15 @@ if ($uri->getPort()) {
   $conn_bare_hostname = $conn_host;
 }
 
-$conn = new AphrontMySQLDatabaseConnection(
+$conn = PhabricatorEnv::newObjectFromConfig(
+  'mysql.implementation',
   array(
-    'user'      => $conn_user,
-    'pass'      => $conn_pass,
-    'host'      => $conn_host,
-    'database'  => null,
+    array(
+      'user'      => $conn_user,
+      'pass'      => $conn_pass,
+      'host'      => $conn_host,
+      'database'  => null,
+    ),
   ));
 
 try {
