@@ -170,12 +170,9 @@ JX.behavior('differential-edit-inline-comments', function(config) {
         var data = e.getNodeData('differential-inline-comment');
         var change = e.getNodeData('differential-changeset');
 
-        var prefix;
-        if (data.on_right) {
-          prefix = 'C' + (change.left) + 'NL';
-        } else {
-          prefix = 'C' + (change.right) + 'OL';
-        }
+        var id_part  = data.on_right ? change.right : change.left;
+        var new_part = isNewFile(e.getTarget()) ? 'N' : 'O';
+        var prefix = 'C' + id_part + new_part + 'L';
 
         origin = JX.$(prefix + data.number);
         target = JX.$(prefix + (parseInt(data.number, 10) +
