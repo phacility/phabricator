@@ -230,6 +230,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
     $detail = new DifferentialChangesetDetailView();
     $detail->setChangeset($changeset);
     $detail->appendChild($output);
+    $detail->setVsChangesetID($left_source);
 
     $detail->setRevisionID($request->getInt('revision_id'));
 
