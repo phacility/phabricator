@@ -1,0 +1,154 @@
+@title Arcanist User Guide: arc diff
+@group userguide
+
+Guide to running `arc diff`.
+
+= Overview =
+
+This article assumes you have `arc` installed and running; if not, see
+@{article:Arcanist User Guide} for help getting it set up.
+
+This document is intended for users of `arc diff`, and is a practical
+guide to using it to send changes for review. If you are installing and
+configuring Phabricator, make sure to read the more comprehensive information in
+@{article:Arcanist User Guide: Configuring a New Project}.
+
+While `arc` has a large number of commands that interface with various
+Phabricator applications, the primary use of `arc` is to send changes for
+review in Differential (for more information on Differential, see
+@{article:Differential User Guide}). If you aren't familiar with Differential,
+it may be instructive to read that article first to understand the big picture
+of how the code review workflow works.
+
+You send changes for review by running `arc diff`. The rest of this document
+explains how to use `arc diff`, and how the entire review workflow operates for
+different version control systems.
+
+= Subversion =
+
+In Subversion, `arc diff` sends the **uncommitted changes in the working copy**
+for review.
+
+To **create a revision** in SVN:
+
+  $ nano source_code.c # Make changes.
+  $ arc diff
+
+This will prompt you for information about the revision. To later **update an
+existing revision**, just do the same thing:
+
+  $ nano source_code.c # Make more changes.
+  $ arc diff
+
+This time, `arc` will prompt you to update the revision. Once your revision has
+been accepted, you can commit it like this:
+
+  $ arc commit
+
+== Git ==
+
+In Git, `arc diff` sends **all commits in a range** for review. By default,
+this range is:
+
+  `git merge-base origin/master HEAD`..HEAD
+
+That's a fancy way of saying "all the commits on the current branch that
+you haven't pushed yet". So, to **create a revision** in Git, run:
+
+  $ nano source_code.c  # Make changes.
+  $ git commit          # Commit changes.
+  $ arc diff            # Creates a new revision out of ALL unpushed commits on
+                        # this branch.
+
+Since it uses **all** the commits on the branch, you can make several commits
+before sending your changes for review if you prefer.
+
+You can specify a different commit range instead by running:
+
+  $ arc diff <commit>
+
+This means to use the range:
+
+  `git merge-base <commit> HEAD`..HEAD
+
+However, this is a relatively advanced feature. The default is usually correct
+if you aren't creating branches-on-branches, juggling remotes, etc.
+
+To **update a revision**, just do the same thing:
+
+  $ nano source_code.c  # Make more changes.
+  $ git commit          # Commit them.
+  $ arc diff            # This prompts you to update revision information.
+
+When your revision has been accepted, you can usually push it like this:
+
+  $ arc land <branch>   # Merges <branch> into master and pushes.
+
+`arc land` makes some assumptions about your workflow which might not be
+true. Consult the documentation before you use it. You should also look at
+`arc amend`, which may fit your workflow better.
+
+= Mercurial =
+
+In Mercurial, `arc diff` sends **all commits in a range** for review. By
+default, this range is changes between the first non-outgoing parent of any
+revision in history and the directory state. This is a fancy way of saying
+"every outgoing change since the last merge". It includes any uncommitted
+changes in the working copy, although you will be prompted to include these.
+
+To **create a revision** in Mercurial, run:
+
+  $ nano source_code.c  # Make changes.
+  $ hg commit           # Commit changes.
+  $ arc diff            # Creates a new revision out of ALL outgoing commits
+                        # on this branch since the last merge.
+
+Since it uses **all** the outgoing commits on the branch, you can make several
+commits before sending your changes for review if you prefer.
+
+You can specify a different commit range instead by running:
+
+  $ arc diff <commit>
+
+This means to use the range from that commit to the directory state. However,
+this is an advanced feature and the default is usually correct.
+
+To **update a revision**, just do the same thing:
+
+  $ nano source_code.c  # Make changes.
+  $ hg commit           # Commit changes.
+  $ arc diff            # This prompts you to update revision information.
+
+When your revision has been accepted, push it normally. (`arc` does not have
+push integration in Mercurial because it can't force merges and thus can't
+guarantee it will be able to do anything useful.)
+
+= General Information =
+
+This information is not unique to a specific version control system.
+
+== Force Diff Only ==
+
+You can create just a diff (rather than a revision) with `--only` (or
+`--preview`, but this disables other features). You can later use it to create
+or update a revision from the web UI.
+
+== Other Diff Sources ==
+
+You can create a diff out of an arbitrary patch file by using `--raw` and piping
+it to stdin. In most cases this will only create a diff, not a revision. You
+can use the web UI to create or update a revision.
+
+== Force Create / Update ==
+
+`arc` uses information about the working copy (like the path, branch name, local
+commit hashes, and local tree hashes, depending on which version control system
+you are using) to figure out whether you intend to create or update a revision.
+If it guesses incorrectly, you can force it to either create or update a
+revision with:
+
+  $ arc diff --create             # Force "create".
+  $ arc diff --update <revision>  # Force "update".
+
+You can figure out what `arc` believes to be in the working copy with `arc
+which`.

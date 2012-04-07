@@ -44,15 +44,48 @@ Other options include:
   - **arcanist_configuration**: the name of a subclass of
     @{class@arcanist:ArcanistConfiguration} which can add new command flags for
     this project or provide entirely new commands.
-  - **remote_hooks_installed**: tells Arcanist that you've set up remote hooks
-    in the master repository (see @{article:Arcanist User Guide: Repository
-    Hooks}).
   - **copyright_holder**: used by @{class@arcanist:ArcanistLicenseLinter} to
     apply license notices to source files.
+  - **immutable_history**: controls how `arc diff` behaves in Git. See below.
   - **phutil_libraries**: map of additional Phutil libraries to load at startup.
     See below for details about path resolution, or see
     @{article:libphutil Libraries User Guide} for a general introduction to
     libphutil libraries.
+
+= Immutable History =
+
+There are a lot of ways to use git, and Arcanist is flexible enough to handle
+several of them. Git workflows divide into two major groups based on your
+**doctrine of history mutability**.
+
+Choose a **history mutability doctrine** by setting ##"immutable_history"## in
+your ##.arcconfig##. Valid values are ##true## to enforce a **conservative
+history mutability doctrine** or ##false## to enforce a **liberal history
+mutability doctrine**. The default is ##false##.
+
+A **liberal history mutability doctrine** means you rewrite local history. You
+develop in feature branches, but squash or amend before pushing by using ##git
+commit --amend## or ##git rebase -i##. Generally, one idea in the remote is
+represented by one commit.
+
+A **conservative history mutability doctrine** means that you do not rewrite
+local history. This is similar to how Mercurial works. You develop in feature
+branches and push them without squashing commits. You do not use ##git commit
+--amend## or ##git rebase -i##. Generally, one idea in the remote is represented
+by many commits.
+
+Practically, these are the differences you'll see based on your setting:
+
+  - **Mutable**
+    - `arc diff` will prompt you to amend lint changes into HEAD.
+    - `arc diff` will amend the commit message in HEAD after creating a
+      revision.
+    - `arc land` will default to the `--squash` strategy.
+  - **Immutable**
+    - `arc diff` will abort if it makes lint changes.
+    - `arc diff` will not amend the commit message in HEAD after creating a
+      revision.
+    - `arc land` will default to the `--merge` strategy.
 
 = How Libraries Are Located =
 

@@ -36,10 +36,10 @@ final class DifferentialRevisionStatusFieldSpecification
     if ($status == ArcanistDifferentialRevisionStatus::ACCEPTED) {
       switch ($diff->getSourceControlSystem()) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-          $next_step = '<tt>arc merge</tt>';
+          $next_step = '<tt>hg push</tt>';
           break;
         case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-          $next_step = '<tt>arc amend</tt> or <tt>arc merge</tt>';
+          $next_step = '<tt>arc land</tt>';
           break;
         case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
           $next_step = '<tt>arc commit</tt>';
