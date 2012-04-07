@@ -129,15 +129,16 @@ This information is not unique to a specific version control system.
 
 == Force Diff Only ==
 
-You can create just a diff (rather than a revision) with `--only` (or
-`--preview`, but this disables other features). You can later use it to create
+You can create just a diff (rather than a revision) with `--preview` (or
+`--only`, but this disables other features). You can later use it to create
 or update a revision from the web UI.
 
 == Other Diff Sources ==
 
 You can create a diff out of an arbitrary patch file by using `--raw` and piping
 it to stdin. In most cases this will only create a diff, not a revision. You
-can use the web UI to create or update a revision.
+can use the web UI to create a revision from the diff, or update an existing
+revision.
 
 == Force Create / Update ==
 
