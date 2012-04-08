@@ -4,11 +4,28 @@
 
 .aphront-error-view {
   margin: 1em auto;
-  padding: 1em;
 
-  -webkit-box-shadow: 2px 2px 2px #999;
-  -mox-box-shadow:    2px 2px 2px #999;
-  box-shadow:         2px 2px 2px #999;
+  -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  -mox-box-shadow:    1px 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow:         1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.aphront-error-view-body {
+  padding: 0.5em 1em;
+  font-size: 12px;
+  line-height: 1.6em;
+}
+
+.aphront-error-view h1 {
+  font-size: 13px;
+  padding: 0.5em 1em;
+  font-weight: bold;
+  color: #333333;
+}
+
+.aphront-error-view-body ul {
+  margin: 0.2em 0 0.2em 2em;
+  list-style: disc;
 }
 
 .aphront-error-width-default {
@@ -25,16 +42,28 @@
 
 .aphront-error-severity-error {
   border: 1px solid #aa0000;
-  background: #f9b9bc;
+  background: #fff3f3;
+}
+
+.aphront-error-severity-error h1 {
+  background: #ffe3e3;
 }
 
 .aphront-error-severity-warning {
   border: 1px solid #888800;
-  background: #ffffdd;
+  background: #ffffee;
+}
+
+.aphront-error-severity-warning h1 {
+  background: #ffffcc;
 }
 
 .aphront-error-severity-notice {
   border: 1px solid #000088;
+  background: #f3f3ff;
+}
+
+.aphront-error-severity-notice h1 {
   background: #e3e3ff;
 }
 
@@ -47,6 +76,8 @@
   -webkit-box-shadow: 0px 0px 0px #000;
   -mox-box-shadow:    0px 0px 0px #000;
   box-shadow:         0px 0px 0px #000;
-
 }
 
+.aphront-error-severity-nodata h1 {
+  background: #e3e3e3;
+}

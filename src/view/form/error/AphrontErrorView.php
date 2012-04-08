@@ -99,7 +99,12 @@ final class AphrontErrorView extends AphrontView {
           'class' => 'aphront-error-view '.$more_classes,
         ),
         $title.
-        $this->renderChildren().
-        $list);
+        phutil_render_tag(
+          'div',
+          array(
+            'class' => 'aphront-error-view-body',
+          ),
+          $this->renderChildren().
+          $list));
   }
 }
