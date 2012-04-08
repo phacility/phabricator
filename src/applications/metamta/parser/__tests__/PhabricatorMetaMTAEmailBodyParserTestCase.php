@@ -22,13 +22,15 @@ final class PhabricatorMetaMTAEmailBodyParserTestCase
   public function testQuotedTextStripping() {
     $bodies = $this->getEmailBodies();
     foreach ($bodies as $body) {
-      $parser = new PhabricatorMetaMTAEmailBodyParser($body);
-      $stripped = $parser->stripQuotedText();
+      $parser = new PhabricatorMetaMTAEmailBodyParser();
+      $stripped = $parser->stripTextBody($body);
       $this->assertEqual("OKAY", $stripped);
     }
   }
 
   private function getEmailBodies() {
+    $trailing_space = ' ';
+
     return array(
 <<<EOEMAIL
 OKAY
@@ -86,6 +88,21 @@ To: <somebody@somewhere.com>
 Subject: Some Text Date: Mon, Apr 2, 2012 1:42 pm
 > ...
 EOEMAIL
+,
+<<<EOEMAIL
+OKAY
+
+--{$trailing_space}
+Abraham Lincoln
+Supreme Galactic Emperor
+EOEMAIL
+,
+<<<EOEMAIL
+OKAY
+
+Sent from my iPhone
+EOEMAIL
+,
     );
   }
 

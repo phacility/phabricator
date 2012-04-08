@@ -205,8 +205,8 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
   public function getCleanTextBody() {
     $body = idx($this->bodies, 'text');
 
-    $parser = new PhabricatorMetaMTAEmailBodyParser($body);
-    return $parser->stripQuotedText();
+    $parser = new PhabricatorMetaMTAEmailBodyParser();
+    return $parser->stripTextBody($body);
   }
 
   public static function loadReceiverObject($receiver_name) {

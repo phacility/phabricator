@@ -18,13 +18,11 @@
 
 final class PhabricatorMetaMTAEmailBodyParser {
 
-  public function __construct($corpus) {
-    $this->corpus = $corpus;
+  public function stripTextBody($body) {
+    return $this->stripSignature($this->stripQuotedText($body));
   }
 
-  public function stripQuotedText() {
-    $body = $this->corpus;
-
+  private function stripQuotedText($body) {
     $body = preg_replace(
       '/^\s*On\b.*\bwrote:.*?/msU',
       '',
@@ -42,9 +40,26 @@ final class PhabricatorMetaMTAEmailBodyParser {
       '',
       $body);
 
+    return rtrim($body);
+  }
+
+  private function stripSignature($body) {
+    // Quasi-"standard" delimiter, for lols see:
+    //   https://bugzilla.mozilla.org/show_bug.cgi?id=58406
+    $body = preg_replace(
+      '/^-- +$.*/sm',
+      '',
+      $body);
+
     // HTC Mail application (mobile)
     $body = preg_replace(
-      '/^\s*Sent from my HTC smartphone.*?/msU',
+      '/^\s*^Sent from my HTC smartphone.*/sm',
+      '',
+      $body);
+
+    // Apple iPhone
+    $body = preg_replace(
+      '/^\s*^Sent from my iPhone\s*$.*/sm',
       '',
       $body);
 
