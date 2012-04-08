@@ -124,8 +124,8 @@ class PhabricatorMarkupEngine {
       $rules[] = new PhabricatorRemarkupRuleYoutube();
     }
 
-    $rules[] = new PhabricatorRemarkupRulePhriction();
     $rules[] = new PhutilRemarkupRuleHyperlink();
+    $rules[] = new PhabricatorRemarkupRulePhriction();
 
     $rules[] = new PhabricatorRemarkupRuleDifferentialHandle();
     $rules[] = new PhabricatorRemarkupRuleManiphestHandle();
