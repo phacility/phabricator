@@ -489,7 +489,7 @@ class PHPMailerLite {
 
       // Choose the mailer and send through it
       switch($this->Mailer) {
-        
+
         case 'amazon-ses':
           $toArr = array();
           foreach($this->to as $t) {
@@ -1483,6 +1483,13 @@ class PHPMailerLite {
   }
 
   /**
+   * NOTE: Phabricator patch to remove use of "/e". See D2147.
+   */
+  private function encodeQCallback(array $matches) {
+    return '='.sprintf('%02X', ord($matches[1]));
+  }
+
+  /**
    * Encode string to q encoding.
    * @link http://tools.ietf.org/html/rfc2047
    * @param string $str the text to encode
@@ -1491,21 +1498,32 @@ class PHPMailerLite {
    * @return string
    */
   public function EncodeQ ($str, $position = 'text') {
+
+    // NOTE: Phabricator patch to remove use of "/e". See D2147.
+
     // There should not be any EOL in the string
     $encoded = preg_replace('/[\r\n]*/', '', $str);
 
     switch (strtolower($position)) {
       case 'phrase':
-        $encoded = preg_replace("/([^A-Za-z0-9!*+\/ -])/e", "'='.sprintf('%02X', ord('\\1'))", $encoded);
+        $encoded = preg_replace_callback(
+          "/([^A-Za-z0-9!*+\/ -])/",
+          array($this, 'encodeQCallback'),
+          $encoded);
         break;
       case 'comment':
-        $encoded = preg_replace("/([\(\)\"])/e", "'='.sprintf('%02X', ord('\\1'))", $encoded);
+        $encoded = preg_replace(
+          "/([\(\)\"])/",
+          array($this, 'encodeQCallback'),
+          $encoded);
+        break;
       case 'text':
       default:
         // Replace every high ascii, control =, ? and _ characters
-        //TODO using /e (equivalent to eval()) is probably not a good idea
-        $encoded = preg_replace('/([\000-\011\013\014\016-\037\075\077\137\177-\377])/e',
-              "'='.sprintf('%02X', ord('\\1'))", $encoded);
+        $encoded = preg_replace(
+          '/([\000-\011\013\014\016-\037\075\077\137\177-\377])/',
+          array($this, 'encodeQCallback'),
+          $encoded);
         break;
     }
 
