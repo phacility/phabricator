@@ -144,7 +144,43 @@ phutil_require_module('phutil', 'parser/docblock');
 
 $root = Filesystem::resolvePath($argv[1]);
 
-echo "Finding static resources...\n";
+$resource_hash = PhabricatorEnv::getEnvConfig('celerity.resource-hash');
+$runtime_map = array();
+
+echo "Finding raw static resources...\n";
+$raw_files = id(new FileFinder($root))
+  ->withType('f')
+  ->withSuffix('png')
+  ->withSuffix('jpg')
+  ->withSuffix('gif')
+  ->withSuffix('swf')
+  ->withFollowSymlinks(true)
+  ->setGenerateChecksums(true)
+  ->find();
+
+echo "Processing ".count($raw_files)." files";
+foreach ($raw_files as $path => $hash) {
+  echo ".";
+  $path = '/'.Filesystem::readablePath($path, $root);
+  $type = CelerityResourceTransformer::getResourceType($path);
+
+  $hash = md5($hash.$path.$resource_hash);
+  $uri  = '/res/'.substr($hash, 0, 8).$path;
+
+  $runtime_map[$path] = array(
+    'hash' => $hash,
+    'uri'  => $uri,
+    'disk' => $path,
+    'type' => $type,
+  );
+}
+echo "\n";
+
+$xformer = id(new CelerityResourceTransformer())
+  ->setMinify(false)
+  ->setRawResourceMap($runtime_map);
+
+echo "Finding transformable static resources...\n";
 $files = id(new FileFinder($root))
   ->withType('f')
   ->withSuffix('js')
@@ -155,26 +191,31 @@ $files = id(new FileFinder($root))
 
 echo "Processing ".count($files)." files";
 
-$resource_hash = PhabricatorEnv::getEnvConfig('celerity.resource-hash');
-
 $file_map = array();
-foreach ($files as $path => $hash) {
+foreach ($files as $path => $raw_hash) {
   echo ".";
-  $name = '/'.Filesystem::readablePath($path, $root);
-  $file_map[$name] = array(
-    'hash' => md5($hash.$name.$resource_hash),
+  $path = '/'.Filesystem::readablePath($path, $root);
+  $data = Filesystem::readFile($root.$path);
+
+  $data = $xformer->transformResource($path, $data);
+  $hash = md5($data);
+  $hash = md5($hash.$path.$resource_hash);
+
+  $file_map[$path] = array(
+    'hash' => $hash,
     'disk' => $path,
   );
 }
 echo "\n";
 
-$runtime_map = array();
 $resource_graph = array();
 $hash_map = array();
 
 $parser = new PhutilDocblockParser();
 foreach ($file_map as $path => $info) {
-  $data = Filesystem::readFile($info['disk']);
+  $type = CelerityResourceTransformer::getResourceType($path);
+
+  $data = Filesystem::readFile($root.$info['disk']);
   $matches = array();
   $ok = preg_match('@/[*][*].*?[*]/@s', $data, $matches);
   if (!$ok) {
@@ -201,11 +242,6 @@ foreach ($file_map as $path => $info) {
   }
 
   $provides = reset($provides);
-
-  $type = 'js';
-  if (preg_match('/\.css$/', $path)) {
-    $type = 'css';
-  }
 
   $uri = '/res/'.substr($info['hash'], 0, 8).$path;
 

@@ -8,13 +8,14 @@
 
 phutil_require_module('phabricator', 'aphront/controller');
 phutil_require_module('phabricator', 'aphront/response/304');
+phutil_require_module('phabricator', 'aphront/response/400');
 phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'aphront/response/file');
 phutil_require_module('phabricator', 'infrastructure/celerity/map');
+phutil_require_module('phabricator', 'infrastructure/celerity/transformer');
 phutil_require_module('phabricator', 'infrastructure/env');
 
 phutil_require_module('phutil', 'filesystem');
-phutil_require_module('phutil', 'future/exec');
 phutil_require_module('phutil', 'moduleutils');
 
 

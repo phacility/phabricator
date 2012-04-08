@@ -1,0 +1,8 @@
+minify=1
+~~~~~~
+.rule {
+  color: #aabbcc; /* Colorful! */
+}
+.rule2 {margin :1px ;}
+~~~~~~
+.rule{color:#abc}.rule2{margin:1px}

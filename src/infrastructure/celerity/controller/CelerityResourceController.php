@@ -38,11 +38,17 @@ final class CelerityResourceController extends AphrontController {
   public function processRequest() {
     $path = $this->path;
 
-    // Sanity checking to keep this from exposing anything sensitive.
-    $path = preg_replace('@(//|\\.\\.)@', '', $path);
-    $matches = null;
-    if (!preg_match('/\.(css|js)$/', $path, $matches)) {
-      throw new Exception("Only CSS and JS resources may be served.");
+    // Sanity checking to keep this from exposing anything sensitive, since it
+    // ultimately boils down to disk reads.
+    if (preg_match('@(//|\.\.)@', $path)) {
+      return new Aphront400Response();
+    }
+
+    $type = CelerityResourceTransformer::getResourceType($path);
+    $type_map = $this->getSupportedResourceTypes();
+
+    if (empty($type_map[$type])) {
+      throw new Exception("Only static resources may be served.");
     }
 
     if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) &&
@@ -51,8 +57,6 @@ final class CelerityResourceController extends AphrontController {
       // field since we never change what resource is served by a given URI.
       return $this->makeResponseCacheable(new Aphront304Response());
     }
-
-    $type = $matches[1];
 
     $root = dirname(phutil_get_library_root('phabricator'));
 
@@ -80,19 +84,27 @@ final class CelerityResourceController extends AphrontController {
       }
     }
 
-    $response = new AphrontFileResponse();
-    $data = $this->minifyData($data, $type);
-    $response->setContent($data);
-    switch ($type) {
-      case 'css':
-        $response->setMimeType("text/css; charset=utf-8");
-        break;
-      case 'js':
-        $response->setMimeType("text/javascript; charset=utf-8");
-        break;
-    }
+    $xformer = new CelerityResourceTransformer();
+    $xformer->setMinify(PhabricatorEnv::getEnvConfig('celerity.minify'));
+    $xformer->setCelerityMap(CelerityResourceMap::getInstance());
 
+    $data = $xformer->transformResource($path, $data);
+
+    $response = new AphrontFileResponse();
+    $response->setContent($data);
+    $response->setMimeType($type_map[$type]);
     return $this->makeResponseCacheable($response);
+  }
+
+  private function getSupportedResourceTypes() {
+    return array(
+      'css' => 'text/css; charset=utf-8',
+      'js'  => 'text/javascript; charset=utf-8',
+      'png' => 'image/png',
+      'gif' => 'image/gif',
+      'jpg' => 'image/jpg',
+      'swf' => 'application/x-shockwave-flash',
+    );
   }
 
   private function makeResponseCacheable(AphrontResponse $response) {
@@ -100,50 +112,6 @@ final class CelerityResourceController extends AphrontController {
     $response->setLastModified(time());
 
     return $response;
-  }
-
-  private function minifyData($data, $type) {
-    if (!PhabricatorEnv::getEnvConfig('celerity.minify')) {
-      return $data;
-    }
-
-    // Some resources won't survive minification (like Raphael.js), and are
-    // marked so as not to be minified.
-    if (strpos($data, '@'.'do-not-minify') !== false) {
-      return $data;
-    }
-
-    switch ($type) {
-      case 'css':
-        // Remove comments.
-        $data = preg_replace('@/\*.*?\*/@s', '', $data);
-        // Remove whitespace around symbols.
-        $data = preg_replace('@\s*([{}:;,])\s+@', '\1', $data);
-        // Remove unnecessary semicolons.
-        $data = preg_replace('@;}@', '}', $data);
-        // Replace #rrggbb with #rgb when possible.
-        $data = preg_replace(
-          '@#([a-f0-9])\1([a-f0-9])\2([a-f0-9])\3@i',
-          '#\1\2\3',
-          $data);
-        $data = trim($data);
-        break;
-      case 'js':
-        $root = dirname(phutil_get_library_root('phabricator'));
-        $bin = $root.'/externals/javelin/support/jsxmin/jsxmin';
-
-        if (@file_exists($bin)) {
-          $future = new ExecFuture("{$bin} __DEV__:0");
-          $future->write($data);
-          list($err, $result) = $future->resolve();
-          if (!$err) {
-            $data = $result;
-          }
-        }
-        break;
-    }
-
-    return $data;
   }
 
 }

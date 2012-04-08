@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'infrastructure/celerity/map');
 phutil_require_module('phabricator', 'infrastructure/celerity/response');
 
 

@@ -1,0 +1,22 @@
+~~~~~~
+.rule1 {
+  background-image: url(/rsrc/example.png);
+}
+.rule2 {
+  background-image: url(/some/unknown/resource.jpg);
+}
+.rule3 {
+  background-image: url(
+    /rsrc/example.png
+  );
+}
+~~~~~~
+.rule1 {
+  background-image: url(/res/hash/example.png);
+}
+.rule2 {
+  background-image: url(/some/unknown/resource.jpg);
+}
+.rule3 {
+  background-image: url(/res/hash/example.png);
+}

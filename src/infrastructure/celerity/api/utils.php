@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 /**
  * Include a CSS or JS static resource by name. This function records a
@@ -57,3 +56,22 @@ function celerity_generate_unique_node_id() {
   return 'UQ'.$block.'_'.($uniq++);
 }
 
+
+/**
+ * Get the versioned URI for a raw resource, like an image.
+ *
+ * @param   string  Path to the raw image.
+ * @return  string  Versioned path to the image, if one is available.
+ *
+ * @group celerity
+ */
+function celerity_get_resource_uri($resource) {
+  $map = CelerityResourceMap::getInstance();
+
+  $info = $map->lookupFileInformation($resource);
+  if ($info) {
+    return $info['uri'];
+  } else {
+    return $resource;
+  }
+}

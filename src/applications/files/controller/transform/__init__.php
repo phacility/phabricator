@@ -14,6 +14,7 @@ phutil_require_module('phabricator', 'applications/files/controller/base');
 phutil_require_module('phabricator', 'applications/files/storage/file');
 phutil_require_module('phabricator', 'applications/files/storage/transformed');
 phutil_require_module('phabricator', 'applications/files/transform');
+phutil_require_module('phabricator', 'infrastructure/celerity/api');
 
 phutil_require_module('phutil', 'utils');
 

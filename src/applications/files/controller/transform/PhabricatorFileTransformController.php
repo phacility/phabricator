@@ -106,7 +106,9 @@ final class PhabricatorFileTransformController
         throw new Exception("Unsupported transformation type!");
     }
 
-    $path = "/rsrc/image/icon/fatcow/thumbnails/{$prefix}{$suffix}.png";
+    $path = celerity_get_resource_uri(
+      "/rsrc/image/icon/fatcow/thumbnails/{$prefix}{$suffix}.png");
+
     return id(new AphrontRedirectResponse())
       ->setURI($path);
   }

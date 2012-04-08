@@ -424,7 +424,9 @@ class AphrontDefaultApplicationConfiguration
   protected function getResourceURIMapRules() {
     return array(
       '/res/' => array(
-        '(?P<package>pkg/)?(?P<hash>[a-f0-9]{8})/(?P<path>.+\.(?:css|js))'
+        '(?P<package>pkg/)?'.
+        '(?P<hash>[a-f0-9]{8})/'.
+        '(?P<path>.+\.(?:css|js|jpg|png|swf|gif))'
           => 'CelerityResourceController',
       ),
     );
