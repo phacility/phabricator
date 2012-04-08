@@ -2,7 +2,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,35 @@
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
-phutil_require_module('phutil', 'console');
+$args = new PhutilArgumentParser($argv);
+$args->setSynopsis(<<<EOSYNOPSIS
+**import_project_symbols.php** [__options__] __project_name__ < symbols
 
-if ($argc !== 2) {
-  echo phutil_console_format(
-    "usage: import_project_symbols.php __project_name__ < __symbol_file__\n");
-  exit(1);
+  Import project symbols (symbols are read from stdin).
+EOSYNOPSIS
+  );
+$args->parseStandardArguments();
+$args->parse(
+  array(
+    array(
+      'name'      => 'ignore-duplicates',
+      'help'      => 'Ignore duplicate symbols, choosing one at random. By '.
+                     'default, this script throws if given duplicate '.
+                     'symbols.',
+    ),
+    array(
+      'name'      => 'more',
+      'wildcard'  => true,
+    ),
+  ));
+
+$ignore_duplicates = $args->getArg('ignore-duplicates');
+$more = $args->getArg('more');
+if (count($more) !== 1) {
+  $args->printHelpAndExit();
 }
 
-$project_name = $argv[1];
+$project_name = head($more);
 $project = id(new PhabricatorRepositoryArcanistProject())->loadOneWhere(
   'name = %s',
   $project_name);
@@ -64,17 +84,22 @@ foreach ($input as $key => $line) {
   list($all, $name, $type, $lang, $line_number, $path) = $matches;
 
   if (isset($map[$name][$type][$lang])) {
-    $previous = $map[$name][$type][$lang] + 1;
-    throw new Exception(
-      "Line #{$line_no} of input is invalid. It specifies a duplicate symbol ".
-      "(same name, language, and type) which has already been defined ".
-      "elsewhere. You must preprocess the symbol list to remove duplicates ".
-      "and choose exactly one master definition for each symbol. This symbol ".
-      "was previously defined on line #{$previous}.\n\n".
-      "Line #{$line_no}:\n".
-      $line."\n\n".
-      "Line #{$previous}:\n".
-      $input[$previous - 1]);
+    if ($ignore_duplicates) {
+      echo "Ignoring duplicate definition of '{$name}' on line {$line_no}.\n";
+    } else {
+      $previous = $map[$name][$type][$lang] + 1;
+      throw new Exception(
+        "Line #{$line_no} of input is invalid. It specifies a duplicate ".
+        "symbol (same name, language, and type) which has already been ".
+        "defined elsewhere. You must preprocess the symbol list to remove ".
+        "duplicates and choose exactly one master definition for each ".
+        "symbol, or specify --ignore-duplicates. This symbol was previously ".
+        "defined on line #{$previous}.\n\n".
+        "Line #{$line_no}:\n".
+        $line."\n\n".
+        "Line #{$previous}:\n".
+        $input[$previous - 1]);
+    }
   } else {
     $map[$name][$type][$lang] = $key;
   }
