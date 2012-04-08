@@ -148,7 +148,7 @@ final class ManiphestReportController extends ManiphestController {
       $day_bucket = phabricator_format_local_time(
         $row['dateCreated'],
         $user,
-        'z');
+        'Yz');
       $day_buckets[$day_bucket] = $row['dateCreated'];
       if (empty($stats[$day_bucket])) {
         $stats[$day_bucket] = array(
