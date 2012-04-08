@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,7 +96,8 @@ final class PhabricatorS3FileStorageEngine
   private function getBucketName() {
     $bucket = PhabricatorEnv::getEnvConfig('storage.s3.bucket');
     if (!$bucket) {
-      throw new Exception("No 'storage.s3.bucket' specified!");
+      throw new PhabricatorFileStorageConfigurationException(
+        "No 'storage.s3.bucket' specified!");
     }
     return $bucket;
   }
@@ -114,7 +115,7 @@ final class PhabricatorS3FileStorageEngine
     $secret_key = PhabricatorEnv::getEnvConfig('amazon-s3.secret-key');
 
     if (!$access_key || !$secret_key) {
-      throw new Exception(
+      throw new PhabricatorFileStorageConfigurationException(
         "Specify 'amazon-s3.access-key' and 'amazon-s3.secret-key'!");
     }
 

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ final class PhabricatorLocalDiskFileStorageEngine
     $root = PhabricatorEnv::getEnvConfig('storage.local-disk.path');
 
     if (!$root || $root == '/' || $root[0] != '/') {
-      throw new Exception(
+      throw new PhabricatorFileStorageConfigurationException(
         "Malformed local disk storage root. You must provide an absolute ".
         "path, and can not use '/' as the root.");
     }

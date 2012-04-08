@@ -74,6 +74,7 @@
   font-size: 14px;
   background: #efefef;
   padding: 1em;
+  white-space: pre-wrap;
 }
 
 .aphront-exception-dialog .exception-trace {

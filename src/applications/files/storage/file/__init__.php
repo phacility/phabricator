@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/files/exception/configuration');
 phutil_require_module('phabricator', 'applications/files/exception/upload');
 phutil_require_module('phabricator', 'applications/files/storage/base');
 phutil_require_module('phabricator', 'applications/phid/constants');
@@ -14,6 +15,7 @@ phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'infrastructure/util/hash');
 
 phutil_require_module('phutil', 'error');
+phutil_require_module('phutil', 'error/aggregate');
 phutil_require_module('phutil', 'filesystem');
 phutil_require_module('phutil', 'filesystem/tempfile');
 phutil_require_module('phutil', 'markup');

@@ -604,6 +604,7 @@ phutil_register_library_map(array(
     'PhabricatorFileProxyImage' => 'applications/files/storage/proxyimage',
     'PhabricatorFileSideNavView' => 'applications/files/view/sidenav',
     'PhabricatorFileStorageBlob' => 'applications/files/storage/storageblob',
+    'PhabricatorFileStorageConfigurationException' => 'applications/files/exception/configuration',
     'PhabricatorFileStorageEngine' => 'applications/files/engine/base',
     'PhabricatorFileStorageEngineSelector' => 'applications/files/engineselector/base',
     'PhabricatorFileTransformController' => 'applications/files/controller/transform',
