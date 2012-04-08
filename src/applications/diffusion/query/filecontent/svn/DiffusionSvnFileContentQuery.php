@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,6 @@
  */
 
 final class DiffusionSvnFileContentQuery extends DiffusionFileContentQuery {
-
-  public function getSupportsBlameOnBlame() {
-    return true;
-  }
-
-  public function getPrevRev($rev) {
-    return max($rev - 1, 0);
-  }
 
   protected function executeQuery() {
     $drequest = $this->getRequest();

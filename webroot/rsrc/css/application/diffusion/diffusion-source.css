@@ -4,7 +4,6 @@
 
 .diffusion-source {
   margin: 1em 0 2em;
-  table-layout: fixed;
   width: 100%;
   font-family: "Monaco", Consolas, monospace;
   font-size: 10px;
@@ -12,35 +11,46 @@
 
 .diffusion-source th {
   text-align:         right;
-  padding:            2px 6px;
-  width:              44px;
   vertical-align:     top;
   background:         #eeeeee;
   color:              #888888;
   border-style:       solid;
   border-width:       0px 1px;
   border-color:       #eeeeee #999999 #eeeeee #dddddd;
-  font-weight:        bold;
   font-family:        "Verdana";
   font-size:          11px;
-  overflow:           hidden;
 }
 
 .diffusion-source td {
   letter-spacing:     0.0083334px;
   vertical-align:     top;
-  white-space:        pre;
+  white-space:        pre-wrap;
   padding-bottom:     1px;
   padding-left:       8px;
   line-height:        16px;
-  overflow:           hidden;
-}
-
-.diffusion-wide-link a {
-  /* Give the user a larger click target. */
-  display: block;
+  width:              100%;
 }
 
 .diffusion-browse-type-form {
   float: right;
+}
+
+.diffusion-blame-link,
+.diffusion-rev-link,
+.diffusion-author-link {
+  white-space: nowrap;
+}
+
+.diffusion-blame-link a,
+.diffusion-rev-link a,
+.diffusion-author-link a,
+.diffusion-line-link a {
+  /* Give the user a larger click target. */
+  display:      block;
+  padding:      2px 8px;
+  font-weight:  bold;
+}
+
+.diffusion-author-link span {
+  padding:      2px 8px;
 }

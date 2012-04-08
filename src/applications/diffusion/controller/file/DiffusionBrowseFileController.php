@@ -23,11 +23,17 @@ final class DiffusionBrowseFileController extends DiffusionController {
   public function processRequest() {
 
     $request = $this->getRequest();
-
     $drequest = $this->getDiffusionRequest();
+
+    $before = $request->getStr('before');
+    if ($before) {
+      return $this->buildBeforeResponse($before);
+    }
+
     $path = $drequest->getPath();
     $selected = $request->getStr('view');
     $needs_blame = ($selected == 'blame' || $selected == 'plainblame');
+
     $file_query = DiffusionFileContentQuery::newFromDiffusionRequest(
       $this->diffusionRequest);
     $file_query->setNeedsBlame($needs_blame);
@@ -99,8 +105,6 @@ final class DiffusionBrowseFileController extends DiffusionController {
       }
     }
 
-
-    // TODO: blame of blame.
     switch ($selected) {
       case 'plain':
         $style =
@@ -166,7 +170,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
         $corpus = phutil_render_tag(
           'div',
           array(
-            'style' => 'padding: 0pt 2em;',
+            'style' => 'padding: 0 2em;',
           ),
           $corpus_table);
 
@@ -245,20 +249,13 @@ final class DiffusionBrowseFileController extends DiffusionController {
     DiffusionFileContentQuery $file_query,
     $selected) {
 
-    $last_rev = null;
-    $color = '#eeeeee';
-    $rows = array();
-    $n = 1;
-    $view = $this->getRequest()->getStr('view');
-
     if ($blame_dict) {
-      $epoch_list = ipull($blame_dict, 'epoch');
-      $epoch_max = max($epoch_list);
-      $epoch_min = min($epoch_list);
-      $epoch_range = $epoch_max - $epoch_min + 1;
+      $epoch_list  = ipull($blame_dict, 'epoch');
+      $epoch_min   = min($epoch_list);
+      $epoch_max   = max($epoch_list);
+      $epoch_range = ($epoch_max - $epoch_min) + 1;
     }
 
-    $targ = '';
     $min_line = 0;
     $line = $drequest->getLine();
     if (strpos($line, '-') !== false) {
@@ -270,109 +267,219 @@ final class DiffusionBrowseFileController extends DiffusionController {
       $max_line = $line;
     }
 
+    $display = array();
+
+    $line_number = 1;
+    $last_rev = null;
+    $color = null;
     foreach ($text_list as $k => $line) {
+      $display_line = array(
+        'color'       => null,
+        'epoch'       => null,
+        'commit'      => null,
+        'author'      => null,
+        'target'      => null,
+        'highlighted' => null,
+        'line'        => $line_number,
+        'data'        => $line,
+      );
+
       if ($needs_blame) {
         // If the line's rev is same as the line above, show empty content
         // with same color; otherwise generate blame info. The newer a change
-        // is, the darker the color.
-        $rev = $rev_list[$k];
+        // is, the more saturated the color.
+
+        // TODO: SVN doesn't always give us blame for the last line, if empty?
+        // Bug with our stuff or with SVN?
+        $rev = idx($rev_list, $k, $last_rev);
+
         if ($last_rev == $rev) {
-          $blame_info =
-            ($file_query->getSupportsBlameOnBlame() ?
-              '<th style="background: '.$color.'; width: 2em;"></th>' : '').
-            '<th style="background: '.$color.'; width: 9em;"></th>'.
-            '<th style="background: '.$color.'"></th>';
+          $display_line['color'] = $color;
         } else {
+          $blame = $blame_dict[$rev];
 
-          $revision_time = null;
-          if ($blame_dict) {
-            $color_number = (int)(0xEE -
-              0xEE * ($blame_dict[$rev]['epoch'] - $epoch_min) / $epoch_range);
-            $color = sprintf('#%02xee%02x', $color_number, $color_number);
-            $revision_time = phabricator_datetime(
-              $blame_dict[$rev]['epoch'],
-              $this->getRequest()->getUser());
-          }
+          $color_ratio = ($blame['epoch'] - $epoch_min) / $epoch_range;
 
-          $revision_link = self::renderRevision(
-            $drequest,
-            substr($rev, 0, 7));
+          $color_value = 0xF6 * (1.0 - $color_ratio);
+          $color = sprintf(
+            '#%02x%02x%02x',
+            $color_value,
+            0xF6,
+            $color_value);
 
-          if (!$file_query->getSupportsBlameOnBlame()) {
-            $prev_link = '';
-          } else {
-            $prev_rev = $file_query->getPrevRev($rev);
-            $path = $drequest->getPath();
-            $prev_link = self::renderBrowse(
-              $drequest,
-              $path,
-              "\xC2\xAB",
-              $prev_rev,
-              $n,
-              $selected,
-              'Blame previous revision');
-            $prev_link = phutil_render_tag(
-              'th',
-              array(
-                'class' => 'diffusion-wide-link',
-                'style' => 'background: '.$color.'; width: 2em;',
-              ),
-              $prev_link);
-          }
+          $display_line['epoch'] = $blame['epoch'];
+          $display_line['color'] = $color;
+          $display_line['commit'] = $rev;
 
           if (isset($blame_dict[$rev]['handle'])) {
             $author_link = $blame_dict[$rev]['handle']->renderLink();
           } else {
-            $author_link = phutil_escape_html($blame_dict[$rev]['author']);
+            $author_link = phutil_render_tag(
+              'span',
+              array(
+              ),
+              phutil_escape_html($blame_dict[$rev]['author']));
           }
-          $blame_info =
-            $prev_link .
-            '<th style="background: '.$color.'; width: 12em;" title="'.
-            phutil_escape_html($revision_time).'">'.$revision_link.'</th>'.
-            '<th style="background: '.$color.'; width: 12em'.
-              '; font-weight: normal; color: #333;">'.$author_link.'</th>';
+          $display_line['author'] = $author_link;
+
           $last_rev = $rev;
         }
-      } else {
-        $blame_info = null;
       }
 
-      // Highlight the line of interest if needed.
-      if ($min_line > 0 && ($n >= $min_line && $n <= $max_line)) {
-        $tr = '<tr style="background: #ffff00;">';
-        if ($targ == '') {
-          $targ = '<a id="scroll_target"></a>';
-          Javelin::initBehavior('diffusion-jump-to',
-            array('target' => 'scroll_target'));
+      if ($min_line) {
+        if ($line_number == $min_line) {
+          $display_line['target'] = true;
         }
-      } else {
-        $tr = '<tr>';
-        $targ = null;
+        if ($line_number >= $min_line && $line_number <= $max_line) {
+          $display_line['highlighted'] = true;
+        }
       }
 
-      $href = $drequest->generateURI(
+      $display[] = $display_line;
+      ++$line_number;
+    }
+
+    $commits = id(new PhabricatorAuditCommitQuery())
+      ->withIdentifiers(
+        $drequest->getRepository()->getID(),
+        array_filter(ipull($display, 'commit')))
+      ->needCommitData(true)
+      ->execute();
+    $commits = mpull($commits, null, 'getCommitIdentifier');
+
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $rows = array();
+    foreach ($display as $line) {
+
+      $line_href = $drequest->generateURI(
         array(
-          'action' => 'browse',
-          'stable' => true,
+          'action'  => 'browse',
+          'line'    => $line['line'],
+          'stable'  => true,
         ));
-      $href = (string)$href;
 
-      $query_params = null;
-      if ($view) {
-        $query_params = '?view='.$view;
+      $line_href->setQueryParams($request->getRequestURI()->getQueryParams());
+
+      $blame = array();
+      if ($line['color']) {
+        $color = $line['color'];
+
+        $before_link = null;
+        $commit_link = null;
+        if (idx($line, 'commit')) {
+          $commit = $line['commit'];
+
+          $summary = 'Unknown';
+          if (idx($commits, $commit)) {
+            $summary = $commits[$commit]->getCommitData()->getSummary();
+          }
+
+          $tooltip = phabricator_date(
+            $line['epoch'],
+            $user)." \xC2\xB7 ".$summary;
+
+          Javelin::initBehavior('phabricator-tooltips', array());
+          require_celerity_resource('aphront-tooltip-css');
+
+          $commit_link = javelin_render_tag(
+            'a',
+            array(
+              'href' => $drequest->generateURI(
+                array(
+                  'action' => 'commit',
+                  'commit' => $line['commit'],
+                )),
+              'sigil' => 'has-tooltip',
+              'meta'  => array(
+                'tip'   => $tooltip,
+                'align' => 'E',
+                'size'  => 600,
+              ),
+            ),
+            phutil_escape_html(phutil_utf8_shorten($line['commit'], 9, '')));
+
+          $before_link = javelin_render_tag(
+            'a',
+            array(
+              'href'  => $line_href->alter('before', $commit),
+              'sigil' => 'has-tooltip',
+              'meta'  => array(
+                'tip'     => 'Skip Past This Commit',
+                'align'   => 'E',
+                'size'    => 300,
+              ),
+            ),
+            "\xC2\xAB");
+        }
+
+        $blame[] = phutil_render_tag(
+          'th',
+          array(
+            'class' => 'diffusion-blame-link',
+            'style' => 'background: '.$color,
+          ),
+          $before_link);
+
+        $blame[] = phutil_render_tag(
+          'th',
+          array(
+            'class' => 'diffusion-rev-link',
+            'style' => 'background: '.$color,
+          ),
+          $commit_link);
+
+        $blame[] = phutil_render_tag(
+          'th',
+          array(
+            'class' => 'diffusion-author-link',
+            'style' => 'background: '.$color,
+          ),
+          idx($line, 'author'));
       }
 
-      $link = phutil_render_tag(
+      $line_link = phutil_render_tag(
         'a',
         array(
-          'href' => $href.'$'.$n.$query_params,
+          'href' => $line_href,
         ),
-        $n);
+        phutil_escape_html($line['line']));
 
-      $rows[] = $tr.$blame_info.
-        '<th class="diffusion-wide-link">'.$link.'</th>'.
-        '<td>'.$targ.$line.'</td></tr>';
-      ++$n;
+      $blame[] = phutil_render_tag(
+        'th',
+        array(
+          'class' => 'diffusion-line-link',
+          'style' => isset($color) ? 'background: '.$color : null,
+        ),
+        $line_link);
+
+      $blame = implode('', $blame);
+
+      if ($line['target']) {
+        Javelin::initBehavior(
+          'diffusion-jump-to',
+          array(
+            'target' => 'scroll_target',
+          ));
+        $anchor_text = '<a id="scroll_target"></a>';
+      } else {
+        $anchor_text = null;
+      }
+
+      $line_text = phutil_render_tag(
+        'td',
+        array(
+        ),
+        $anchor_text.$line['data']);
+
+      $rows[] = phutil_render_tag(
+        'tr',
+        array(
+          'style' => ($line['highlighted'] ? 'background: #ffff00;' : null),
+        ),
+        $blame.
+        $line_text);
     }
 
     return $rows;
@@ -493,5 +600,34 @@ final class DiffusionBrowseFileController extends DiffusionController {
     return $panel;
   }
 
+  private function buildBeforeResponse($before) {
+    $request = $this->getRequest();
+    $drequest = $this->getDiffusionRequest();
+
+    $before_req = DiffusionRequest::newFromDictionary(
+      array(
+        'repository' => $drequest->getRepository(),
+        'commit'     => $before,
+      ));
+
+    $query = DiffusionCommitParentsQuery::newFromDiffusionRequest($before_req);
+    $parents = $query->loadParents();
+    $parent = head($parents);
+
+    // NOTE: If they get back to the very first commit, we just keep them there.
+    // We could maybe show a message or something.
+
+    $before_uri = $drequest->generateURI(
+      array(
+        'action'    => 'browse',
+        'commit'    => $parent ? $parent->getCommitIdentifier() : $before,
+        'line'      => $drequest->getLine(),
+      ));
+
+    $before_uri->setQueryParams($request->getRequestURI()->getQueryParams());
+    $before_uri = $before_uri->alter('before', null);
+
+    return id(new AphrontRedirectResponse())->setURI($before_uri);
+  }
 
 }

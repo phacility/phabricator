@@ -6,9 +6,9 @@
 
 
 
+phutil_require_module('phabricator', 'applications/audit/query/commit');
 phutil_require_module('phabricator', 'applications/diffusion/query/base');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
-phutil_require_module('phabricator', 'applications/repository/storage/commit');
 phutil_require_module('phabricator', 'applications/repository/storage/commitdata');
 
 phutil_require_module('phutil', 'utils');

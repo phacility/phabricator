@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,19 @@ final class DiffusionMercurialFileContentQuery
     $path = $drequest->getPath();
     $commit = $drequest->getCommit();
 
-    list($corpus) = $repository->execxLocalCommand(
-      'cat --rev %s -- %s',
-      $commit,
-      $path);
+    if ($this->getNeedsBlame()) {
+      // NOTE: We're using "--number" instead of "--changeset" because there is
+      // no way to get "--changeset" to show us the full commit hashes.
+      list($corpus) = $repository->execxLocalCommand(
+        'annotate --user --number --rev %s -- %s',
+        $commit,
+        $path);
+    } else {
+      list($corpus) = $repository->execxLocalCommand(
+        'cat --rev %s -- %s',
+        $commit,
+        $path);
+    }
 
     $file_content = new DiffusionFileContent();
     $file_content->setCorpus($corpus);
@@ -37,11 +46,45 @@ final class DiffusionMercurialFileContentQuery
     return $file_content;
   }
 
-
   protected function tokenizeLine($line) {
-    // TODO: Support blame.
-    throw new Exception(
-      "Diffusion does not currently support blame for Mercurial.");
+    $matches = null;
+
+    preg_match(
+      '/^(.*?)\s+([0-9]+): (.*)$/',
+      $line,
+      $matches);
+
+    return array($matches[2], $matches[1], $matches[3]);
+  }
+
+  /**
+   * Convert local revision IDs into full commit identifier hashes.
+   */
+  protected function processRevList(array $rev_list) {
+    $drequest = $this->getRequest();
+    $repository = $drequest->getRepository();
+
+    $revs = array_unique($rev_list);
+    foreach ($revs as $key => $rev) {
+      $revs[$key] = '--rev '.(int)$rev;
+    }
+
+    list($stdout) = $repository->execxLocalCommand(
+      'log --template=%s %C',
+      '{rev} {node}\\n',
+      implode(' ', $revs));
+
+    $map = array();
+    foreach (explode("\n", trim($stdout)) as $line) {
+      list($rev, $node) = explode(' ', $line);
+      $map[$rev] = $node;
+    }
+
+    foreach ($rev_list as $k => $rev) {
+      $rev_list[$k] = $map[$rev];
+    }
+
+    return $rev_list;
   }
 
 }

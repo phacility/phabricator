@@ -348,6 +348,7 @@ abstract class DiffusionRequest {
 
     $req_callsign = false;
     $req_branch   = false;
+    $req_commit   = false;
 
     switch ($action) {
       case 'history':
@@ -360,6 +361,10 @@ abstract class DiffusionRequest {
         $req_callsign = true;
         $req_branch = true;
         break;
+      case 'commit':
+        $req_callsign = true;
+        $req_commit = true;
+        break;
     }
 
     if ($req_callsign && !strlen($callsign)) {
@@ -370,6 +375,11 @@ abstract class DiffusionRequest {
     if ($req_branch && !strlen($branch)) {
       throw new Exception(
         "Diffusion URI action '{$action}' requires branch!");
+    }
+
+    if ($req_commit && !strlen($commit)) {
+      throw new Exception(
+        "Diffusion URI action '{$action}' requires commit!");
     }
 
     switch ($action) {
@@ -391,6 +401,11 @@ abstract class DiffusionRequest {
         // the ajax changeset stuff but then we parse it back out as though
         // it came from a URI.
         $uri = "{$path}{$commit}";
+        break;
+      case 'commit':
+        $commit = ltrim($commit, ';');
+        $callsign = rtrim($callsign, '/');
+        $uri = "/r{$callsign}{$commit}";
         break;
       default:
         throw new Exception("Unknown Diffusion URI action '{$action}'!");

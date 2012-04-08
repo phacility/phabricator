@@ -24,6 +24,7 @@ final class PhabricatorAuditCommitQuery {
   private $commitPHIDs;
   private $authorPHIDs;
   private $packagePHIDs;
+  private $identifiers = array();
 
   private $needCommitData;
 
@@ -48,6 +49,11 @@ final class PhabricatorAuditCommitQuery {
 
   public function withStatus($status) {
     $this->status = $status;
+    return $this;
+  }
+
+  public function withIdentifiers($repository_id, array $identifiers) {
+    $this->identifiers[] = array($repository_id, $identifiers);
     return $this;
   }
 
@@ -150,6 +156,23 @@ final class PhabricatorAuditCommitQuery {
         $conn_r,
         'req.auditorPHID in (%Ls)',
         $this->packagePHIDs);
+    }
+
+    if ($this->identifiers) {
+      $clauses = array();
+      foreach ($this->identifiers as $spec) {
+        list($repository_id, $identifiers) = $spec;
+        if ($identifiers) {
+          $clauses[] = qsprintf(
+            $conn_r,
+            'c.repositoryID = %d AND c.commitIdentifier IN (%Ls)',
+            $repository_id,
+            $identifiers);
+        }
+      }
+      if ($clauses) {
+        $where[] = '('.implode(') OR (', $clauses).')';
+      }
     }
 
     $status = $this->status;

@@ -26,16 +26,6 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
     return parent::newQueryObject(__CLASS__, $request);
   }
 
-  public function getSupportsBlameOnBlame() {
-    return false;
-  }
-
-  public function getPrevRev($rev) {
-    // TODO: support git once the 'parent' info of a commit is saved
-    // to the database.
-    throw new Exception("Unsupported VCS!");
-  }
-
   final public function loadFileContent() {
     $this->fileContent = $this->executeQuery();
   }
@@ -54,11 +44,20 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
     if (!$this->getNeedsBlame()) {
       $text_list = explode("\n", rtrim($raw_data));
     } else {
+      $lines = array();
       foreach (explode("\n", rtrim($raw_data)) as $k => $line) {
-        list($rev_id, $author, $text) = $this->tokenizeLine($line);
+        $lines[$k] = $this->tokenizeLine($line);
 
+        list($rev_id, $author, $text) = $lines[$k];
         $text_list[$k] = $text;
         $rev_list[$k] = $rev_id;
+      }
+
+      $rev_list = $this->processRevList($rev_list);
+
+      foreach ($lines as $k => $line) {
+        list($rev_id, $author, $text) = $line;
+        $rev_id = $rev_list[$k];
 
         if (!isset($blame_dict[$rev_id]) &&
             !isset($blame_dict[$rev_id]['author'] )) {
@@ -68,9 +67,11 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
 
       $repository = $this->getRequest()->getRepository();
 
-      $commits = id(new PhabricatorRepositoryCommit())->loadAllWhere(
-        'repositoryID = %d AND commitIdentifier IN (%Ls)', $repository->getID(),
-        array_unique($rev_list));
+      $commits = id(new PhabricatorAuditCommitQuery())
+        ->withIdentifiers(
+          $repository->getID(),
+          array_unique($rev_list))
+        ->execute();
 
       foreach ($commits as $commit) {
         $blame_dict[$commit->getCommitIdentifier()]['epoch'] =
@@ -114,5 +115,9 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
 
   public function getNeedsBlame() {
     return $this->needsBlame;
+  }
+
+  protected function processRevList(array $rev_list) {
+    return $rev_list;
   }
 }
