@@ -142,21 +142,28 @@ final class PhabricatorDirectoryMainController
     $subnav->addFilter('all',       'All Activity', '/feed/');
     $subnav->addFilter('projects',  'My Projects');
 
+    $nav->appendChild($subnav);
+
     $filter = $subnav->selectFilter($this->subfilter, 'all');
 
     switch ($filter) {
       case 'all':
-        $phids = array();
+        $view = $this->buildFeedView(array());
         break;
       case 'projects':
-        $phids = mpull($projects, 'getPHID');
+        if ($projects) {
+          $phids = mpull($projects, 'getPHID');
+          $view = $this->buildFeedView($phids);
+        } else {
+          $view = new AphrontErrorView();
+          $view->setSeverity(AphrontErrorView::SEVERITY_NODATA);
+          $view->setTitle('No Projects');
+          $view->appendChild('You have not joined any projects.');
+        }
         break;
     }
 
-    $view = $this->buildFeedView($phids);
     $subnav->appendChild($view);
-
-    $nav->appendChild($subnav);
 
     return $this->buildStandardPageResponse(
       $nav,
