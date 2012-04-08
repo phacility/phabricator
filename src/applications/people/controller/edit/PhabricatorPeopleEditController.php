@@ -243,7 +243,8 @@ final class PhabricatorPeopleEditController
           ->setName('email')
           ->setDisabled($is_immutable)
           ->setValue($user->getEmail())
-          ->setError($e_email));
+          ->setError($e_email))
+      ->appendChild($this->getRoleInstructions());
 
     if (!$user->getID()) {
       $form
@@ -367,6 +368,7 @@ final class PhabricatorPeopleEditController
     }
 
     $form
+      ->appendChild($this->getRoleInstructions())
       ->appendChild(
         id(new AphrontFormCheckboxControl())
           ->addCheckbox(
@@ -438,6 +440,23 @@ final class PhabricatorPeopleEditController
     $panel->appendChild($form);
 
     return array($panel);
+  }
+
+  private function getRoleInstructions() {
+    $roles_link = phutil_render_tag(
+      'a',
+      array(
+        'href'   => PhabricatorEnv::getDoclink(
+          'article/User_Guide:_Account_Roles.html'),
+        'target' => '_blank',
+      ),
+      'User Guide: Account Roles');
+
+    return
+      '<p class="aphront-form-instructions">'.
+        'For a detailed explanation of account roles, see '.
+        $roles_link.'.'.
+      '</p>';
   }
 
 }
