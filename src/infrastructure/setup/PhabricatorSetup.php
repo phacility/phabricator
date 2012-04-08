@@ -498,9 +498,22 @@ final class PhabricatorSetup {
       return;
     }
 
+    $engines = queryfx_all($conn_raw, 'SHOW ENGINES');
+    $engines = ipull($engines, 'Engine', 'Engine');
+    if (empty($engines['InnoDB'])) {
+      self::writeFailure();
+      self::write(
+        "Setup failure! The 'InnoDB' engine is not available. Enable ".
+        "InnoDB in your MySQL configuration. If you already created tables, ".
+        "MySQL incorrectly used some other engine. You need to convert ".
+        "them or drop and reinitialize them.");
+      return;
+    } else {
+      self::write(" okay  InnoDB is available.\n");
+    }
+
     $databases = queryfx_all($conn_raw, 'SHOW DATABASES');
-    $databases = ipull($databases, 'Database');
-    $databases = array_fill_keys($databases, true);
+    $databases = ipull($databases, 'Database', 'Database');
     if (empty($databases['phabricator_meta_data'])) {
       self::writeFailure();
       self::write(
