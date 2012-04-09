@@ -31,8 +31,8 @@ If you are installing on Ubuntu or an RedHat derivative, there are install
 scripts available which should handle most of the things discussed in this
 document for you:
 
-  - **RedHat Derivatives**: <http://phabricator.com/rsrc/install/install_rhel-derivs.sh>
-  - **Ubuntu**: <http://phabricator.com/rsrc/install/install_ubuntu.sh>
+  - **RedHat Derivatives**: <http://www.phabricator.com/rsrc/install/install_rhel-derivs.sh>
+  - **Ubuntu**: <http://www.phabricator.com/rsrc/install/install_ubuntu.sh>
 
 If those work for you, you can skip directly to the
 @{article:Configuration Guide}. These scripts are also available in the
@@ -121,7 +121,7 @@ See <https://bugs.php.net/bug.php?id=59747> for more information.
 Since Phabricator is under active development, you should update frequently.
 You can use a script similar to this one to automate the process:
 
-  http://phabricator.com/rsrc/install/update_phabricator.sh
+  http://www.phabricator.com/rsrc/install/update_phabricator.sh
 
 = Next Steps =
 

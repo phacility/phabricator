@@ -828,7 +828,7 @@ final class PhabricatorSetup {
   public static function writeDoc($doc) {
     self::write(
       "\n".
-      '    http://phabricator.com/docs/phabricator/'.$doc.
+      '    http://www.phabricator.com/docs/phabricator/'.$doc.
       "\n\n");
   }
 

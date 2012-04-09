@@ -100,7 +100,7 @@ final class PhabricatorEnv {
   }
 
   public static function getDoclink($resource) {
-    return 'http://phabricator.com/docs/phabricator/'.$resource;
+    return 'http://www.phabricator.com/docs/phabricator/'.$resource;
   }
 
 
