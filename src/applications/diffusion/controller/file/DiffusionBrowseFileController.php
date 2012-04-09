@@ -250,7 +250,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
     $selected) {
 
     if ($blame_dict) {
-      $epoch_list  = ipull($blame_dict, 'epoch');
+      $epoch_list  = ipull(ifilter($blame_dict, 'epoch'), 'epoch');
       $epoch_min   = min($epoch_list);
       $epoch_max   = max($epoch_list);
       $epoch_range = ($epoch_max - $epoch_min) + 1;
@@ -298,27 +298,30 @@ final class DiffusionBrowseFileController extends DiffusionController {
         } else {
           $blame = $blame_dict[$rev];
 
-          $color_ratio = ($blame['epoch'] - $epoch_min) / $epoch_range;
+          if (!isset($blame['epoch'])) {
+            $color = '#ffd'; // Render as warning.
+          } else {
+            $color_ratio = ($blame['epoch'] - $epoch_min) / $epoch_range;
+            $color_value = 0xF6 * (1.0 - $color_ratio);
+            $color = sprintf(
+              '#%02x%02x%02x',
+              $color_value,
+              0xF6,
+              $color_value);
+          }
 
-          $color_value = 0xF6 * (1.0 - $color_ratio);
-          $color = sprintf(
-            '#%02x%02x%02x',
-            $color_value,
-            0xF6,
-            $color_value);
-
-          $display_line['epoch'] = $blame['epoch'];
+          $display_line['epoch'] = idx($blame, 'epoch');
           $display_line['color'] = $color;
           $display_line['commit'] = $rev;
 
-          if (isset($blame_dict[$rev]['handle'])) {
-            $author_link = $blame_dict[$rev]['handle']->renderLink();
+          if (isset($blame['handle'])) {
+            $author_link = $blame['handle']->renderLink();
           } else {
             $author_link = phutil_render_tag(
               'span',
               array(
               ),
-              phutil_escape_html($blame_dict[$rev]['author']));
+              phutil_escape_html($blame['author']));
           }
           $display_line['author'] = $author_link;
 

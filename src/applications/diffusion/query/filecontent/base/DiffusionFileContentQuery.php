@@ -59,8 +59,7 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
         list($rev_id, $author, $text) = $line;
         $rev_id = $rev_list[$k];
 
-        if (!isset($blame_dict[$rev_id]) &&
-            !isset($blame_dict[$rev_id]['author'] )) {
+        if (!isset($blame_dict[$rev_id])) {
           $blame_dict[$rev_id]['author'] = $author;
         }
       }
