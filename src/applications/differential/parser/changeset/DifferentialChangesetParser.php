@@ -1186,7 +1186,7 @@ final class DifferentialChangesetParser {
           'sigil' => 'context-target',
         ),
         '<td colspan="5" class="show-more">'.
-            'Context not available.'.
+          'Context not available.'.
         '</td>');
     }
 
