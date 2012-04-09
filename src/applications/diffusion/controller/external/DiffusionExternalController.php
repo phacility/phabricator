@@ -52,8 +52,7 @@ final class DiffusionExternalController extends DiffusionController {
       }
 
       arsort($matches);
-      reset($matches);
-      $best_match = key($matches);
+      $best_match = head_key($matches);
 
       if ($best_match) {
         $repository = $repositories[$best_match];

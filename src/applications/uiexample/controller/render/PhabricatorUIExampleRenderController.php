@@ -41,8 +41,7 @@ final class PhabricatorUIExampleRenderController
     }
 
     if (!$selected) {
-      reset($classes);
-      $selected = key($classes);
+      $selected = head_key($classes);
     }
 
     $nav = new AphrontSideNavView();

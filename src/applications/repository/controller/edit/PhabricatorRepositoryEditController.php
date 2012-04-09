@@ -46,8 +46,7 @@ final class PhabricatorRepositoryEditController
     $this->repository = $repository;
 
     if (!isset($views[$this->view])) {
-      reset($views);
-      $this->view = key($views);
+      $this->view = head_key($views);
     }
 
     $nav = new AphrontSideNavView();

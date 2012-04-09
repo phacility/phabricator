@@ -33,8 +33,8 @@ final class PhabricatorRepositorySvnCommitDiscoveryDaemon
       $uri);
 
     $results = $this->parseSVNLogXML($xml);
-    $commit = key($results);
-    $epoch  = reset($results);
+    $commit = head_key($results);
+    $epoch  = head($results);
 
     if ($this->isKnownCommit($commit)) {
       return false;

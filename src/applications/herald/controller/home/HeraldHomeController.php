@@ -46,7 +46,7 @@ final class HeraldHomeController extends HeraldController {
 
     $content_type_map = HeraldContentTypeConfig::getContentTypeMap();
     if (empty($content_type_map[$this->contentType])) {
-      $this->contentType = key($content_type_map);
+      $this->contentType = head_key($content_type_map);
     }
     $content_desc = $content_type_map[$this->contentType];
 

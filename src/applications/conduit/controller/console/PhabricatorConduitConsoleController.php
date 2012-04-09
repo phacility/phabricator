@@ -34,7 +34,7 @@ final class PhabricatorConduitConsoleController
 
     $methods = $this->getAllMethods();
     if (empty($methods[$this->method])) {
-      $this->method = key($methods);
+      $this->method = head_key($methods);
     }
     $this->setFilter('method/'.$this->method);
 

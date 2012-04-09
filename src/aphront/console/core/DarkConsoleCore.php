@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,8 +92,7 @@ final class DarkConsoleCore {
     $visible  = $user->getConsoleVisible();
 
     if (!isset($plugins[$selected])) {
-      reset($plugins);
-      $selected = key($plugins);
+      $selected = head_key($plugins);
     }
 
     $tabs = array();

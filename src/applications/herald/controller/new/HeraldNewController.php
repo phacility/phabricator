@@ -33,8 +33,7 @@ final class HeraldNewController extends HeraldController {
 
     $content_type_map = HeraldContentTypeConfig::getContentTypeMap();
     if (empty($content_type_map[$this->contentType])) {
-      reset($content_type_map);
-      $this->contentType = key($content_type_map);
+      $this->contentType = head_key($content_type_map);
     }
 
     $rule_type_map = HeraldRuleTypeConfig::getRuleTypeMap();

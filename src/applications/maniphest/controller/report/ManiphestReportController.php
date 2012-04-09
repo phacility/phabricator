@@ -173,7 +173,7 @@ final class ManiphestReportController extends ManiphestController {
     $week = null;
     $month = null;
 
-    $last = key($stats) - 1;
+    $last = last_key($stats) - 1;
     $period = $template;
 
     foreach ($stats as $bucket => $info) {
@@ -182,7 +182,7 @@ final class ManiphestReportController extends ManiphestController {
       $week_bucket = phabricator_format_local_time(
         $epoch,
         $user,
-        'W');
+        'YW');
       if ($week_bucket != $last_week) {
         if ($week) {
           $rows[] = $this->formatBurnRow(
@@ -198,7 +198,7 @@ final class ManiphestReportController extends ManiphestController {
       $month_bucket = phabricator_format_local_time(
         $epoch,
         $user,
-        'm');
+        'Ym');
       if ($month_bucket != $last_month) {
         if ($month) {
           $rows[] = $this->formatBurnRow(
