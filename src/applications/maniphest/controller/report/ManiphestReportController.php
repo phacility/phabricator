@@ -424,15 +424,15 @@ final class ManiphestReportController extends ManiphestController {
         $leftover_closed = idx($result_closed, '', array());
         unset($result_closed['']);
 
+        $base_link = '/maniphest/?users=';
         $leftover_name = phutil_render_tag(
           'a',
           array(
-            'href' => '/maniphest/?users=PHID-!!!!-UP-FOR-GRABS',
+            'href' => $base_link.ManiphestTaskOwner::OWNER_UP_FOR_GRABS,
           ),
-          '(Up For Grabs)');
+          '<em>(Up For Grabs)</em>');
         $col_header = 'User';
         $header = 'Open Tasks by User and Priority ('.$date.')';
-        $base_link = '/maniphest/?users=';
         break;
       case 'project':
         $result = array();
@@ -461,15 +461,15 @@ final class ManiphestReportController extends ManiphestController {
           }
         }
 
+        $base_link = '/maniphest/view/all/?projects=';
         $leftover_name = phutil_render_tag(
           'a',
           array(
-            'href' => '/maniphest/view/all/?projects=PHID-!!!!-NO_PROJECT',
+            'href' => $base_link.ManiphestTaskOwner::PROJECT_NO_PROJECT,
           ),
-          '(No Project)');
+          '<em>(No Project)</em>');
         $col_header = 'Project';
         $header = 'Open Tasks by Project and Priority ('.$date.')';
-        $base_link = '/maniphest/view/all/?projects=';
         break;
     }
 
