@@ -45,10 +45,14 @@
 .diffusion-rev-link a,
 .diffusion-author-link a,
 .diffusion-line-link a {
-  /* Give the user a larger click target. */
-  display:      block;
   padding:      2px 8px;
   font-weight:  bold;
+}
+
+.diffusion-blame-link a,
+.diffusion-line-link a {
+  /* Give the user a larger click target. */
+  display:      block;
 }
 
 .diffusion-author-link span {
