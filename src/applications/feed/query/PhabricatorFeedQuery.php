@@ -92,8 +92,8 @@ final class PhabricatorFeedQuery {
       'SELECT story.* FROM %T ref
         JOIN %T story ON ref.chronologicalKey = story.chronologicalKey
         %Q
-        GROUP BY story.chronologicalKey
-        ORDER BY story.chronologicalKey %Q
+        GROUP BY ref.chronologicalKey
+        ORDER BY ref.chronologicalKey %Q
         LIMIT %d',
       $ref_table->getTableName(),
       $story_table->getTableName(),
