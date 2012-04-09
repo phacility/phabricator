@@ -7,6 +7,10 @@
   padding: 1em;
 }
 
+.phabricator-chromeless-page .phabricator-feed-frame {
+  width: auto;
+}
+
 .phabricator-feed-story {
   padding-left: 64px;
   margin: .5em 0 1em;
