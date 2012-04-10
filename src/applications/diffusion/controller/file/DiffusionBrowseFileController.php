@@ -342,13 +342,14 @@ final class DiffusionBrowseFileController extends DiffusionController {
       ++$line_number;
     }
 
-    $commits = id(new PhabricatorAuditCommitQuery())
-      ->withIdentifiers(
-        $drequest->getRepository()->getID(),
-        array_filter(ipull($display, 'commit')))
-      ->needCommitData(true)
-      ->execute();
-    $commits = mpull($commits, null, 'getCommitIdentifier');
+    $commits = array_filter(ipull($display, 'commit'));
+    if ($commits) {
+      $commits = id(new PhabricatorAuditCommitQuery())
+        ->withIdentifiers($drequest->getRepository()->getID(), $commits)
+        ->needCommitData(true)
+        ->execute();
+      $commits = mpull($commits, null, 'getCommitIdentifier');
+    }
 
     $request = $this->getRequest();
     $user = $request->getUser();
