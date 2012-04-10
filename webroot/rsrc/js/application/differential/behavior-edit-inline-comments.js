@@ -172,7 +172,8 @@ JX.behavior('differential-edit-inline-comments', function(config) {
         var change = e.getNodeData('differential-changeset');
 
         var id_part  = data.on_right ? change.right : change.left;
-        var new_part = isNewFile(comment) ? 'N' : 'O';
+        var th = comment.parentNode.previousSibling;
+        var new_part = isNewFile(th) ? 'N' : 'O';
         var prefix = 'C' + id_part + new_part + 'L';
 
         origin = JX.$(prefix + data.number);
