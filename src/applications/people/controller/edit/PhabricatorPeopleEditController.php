@@ -447,7 +447,7 @@ final class PhabricatorPeopleEditController
       'a',
       array(
         'href'   => PhabricatorEnv::getDoclink(
-          'article/User_Guide:_Account_Roles.html'),
+          'article/User_Guide_Account_Roles.html'),
         'target' => '_blank',
       ),
       'User Guide: Account Roles');

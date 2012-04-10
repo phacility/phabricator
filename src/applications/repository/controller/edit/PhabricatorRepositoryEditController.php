@@ -119,7 +119,7 @@ final class PhabricatorRepositoryEditController
     }
 
     $encoding_doc_link = PhabricatorEnv::getDoclink(
-        'article/User_Guide:_UTF-8_and_Character_Encoding.html');
+        'article/User_Guide_UTF-8_and_Character_Encoding.html');
 
     $form = new AphrontFormView();
     $form

@@ -55,7 +55,7 @@ EXAMPLE;
       'a',
       array(
         'href' => PhabricatorEnv::getDoclink(
-          'article/User_Guide:_Configuring_an_External_Editor.html'),
+          'article/User_Guide_Configuring_an_External_Editor.html'),
       ),
       'User Guide: Configuring an External Editor');
 
