@@ -20,7 +20,7 @@ final class DifferentialChangesetDetailView extends AphrontView {
 
   private $changeset;
   private $buttons = array();
-  private $revisionID;
+  private $editable;
   private $symbolIndex;
   private $id;
   private $vsChangesetID;
@@ -35,8 +35,8 @@ final class DifferentialChangesetDetailView extends AphrontView {
     return $this;
   }
 
-  public function setRevisionID($revision_id) {
-    $this->revisionID = $revision_id;
+  public function setEditable($editable) {
+    $this->editable = $editable;
     return $this;
   }
 
@@ -67,15 +67,9 @@ final class DifferentialChangesetDetailView extends AphrontView {
 
     Javelin::initBehavior('phabricator-oncopy', array());
 
-    if ($this->revisionID) {
-      $edit = true;
-    } else {
-      $edit = false;
-    }
-
     $changeset = $this->changeset;
     $class = 'differential-changeset';
-    if (!$edit) {
+    if (!$this->editable) {
       $class .= ' differential-changeset-immutable';
     }
 

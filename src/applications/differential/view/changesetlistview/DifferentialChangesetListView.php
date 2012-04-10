@@ -128,6 +128,7 @@ final class DifferentialChangesetListView extends AphrontView {
       $detail->addButton($view_options);
       $detail->setSymbolIndex(idx($this->symbolIndexes, $key));
       $detail->setVsChangesetID(idx($this->vsMap, $changeset->getID()));
+      $detail->setEditable(true);
 
       $uniq_id = celerity_generate_unique_node_id();
       $detail->appendChild(

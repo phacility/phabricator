@@ -487,7 +487,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-table-view-css' =>
   array(
-    'uri' => '/res/cbc7ab3a/rsrc/css/aphront/table-view.css',
+    'uri' => '/res/3237398a/rsrc/css/aphront/table-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -524,7 +524,7 @@ celerity_register_resource_map(array(
   ),
   'differential-changeset-view-css' =>
   array(
-    'uri' => '/res/238f435d/rsrc/css/application/differential/changeset-view.css',
+    'uri' => '/res/56207509/rsrc/css/application/differential/changeset-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -638,7 +638,7 @@ celerity_register_resource_map(array(
   ),
   'diffusion-source-css' =>
   array(
-    'uri' => '/res/bedea304/rsrc/css/application/diffusion/diffusion-source.css',
+    'uri' => '/res/e133cfdb/rsrc/css/application/diffusion/diffusion-source.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -2399,7 +2399,7 @@ celerity_register_resource_map(array(
 ), array(
   'packages' =>
   array(
-    '9ca700e9' =>
+    'dba9e1de' =>
     array(
       'name' => 'core.pkg.css',
       'symbols' =>
@@ -2424,7 +2424,7 @@ celerity_register_resource_map(array(
         17 => 'aphront-pager-view-css',
         18 => 'phabricator-transaction-view-css',
       ),
-      'uri' => '/res/pkg/9ca700e9/core.pkg.css',
+      'uri' => '/res/pkg/dba9e1de/core.pkg.css',
       'type' => 'css',
     ),
     '21d01ed8' =>
@@ -2449,7 +2449,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/21d01ed8/core.pkg.js',
       'type' => 'js',
     ),
-    '216b9542' =>
+    'e7780f43' =>
     array(
       'name' => 'differential.pkg.css',
       'symbols' =>
@@ -2467,7 +2467,7 @@ celerity_register_resource_map(array(
         10 => 'phabricator-content-source-view-css',
         11 => 'differential-local-commits-view-css',
       ),
-      'uri' => '/res/pkg/216b9542/differential.pkg.css',
+      'uri' => '/res/pkg/e7780f43/differential.pkg.css',
       'type' => 'css',
     ),
     17105732 =>
@@ -2570,27 +2570,27 @@ celerity_register_resource_map(array(
   'reverse' =>
   array(
     'aphront-attached-file-view-css' => '8db30c56',
-    'aphront-crumbs-view-css' => '9ca700e9',
-    'aphront-dialog-view-css' => '9ca700e9',
-    'aphront-form-view-css' => '9ca700e9',
-    'aphront-headsup-action-list-view-css' => '216b9542',
-    'aphront-list-filter-view-css' => '9ca700e9',
-    'aphront-pager-view-css' => '9ca700e9',
-    'aphront-panel-view-css' => '9ca700e9',
-    'aphront-side-nav-view-css' => '9ca700e9',
-    'aphront-table-view-css' => '9ca700e9',
-    'aphront-tokenizer-control-css' => '9ca700e9',
-    'aphront-typeahead-control-css' => '9ca700e9',
-    'differential-changeset-view-css' => '216b9542',
-    'differential-core-view-css' => '216b9542',
+    'aphront-crumbs-view-css' => 'dba9e1de',
+    'aphront-dialog-view-css' => 'dba9e1de',
+    'aphront-form-view-css' => 'dba9e1de',
+    'aphront-headsup-action-list-view-css' => 'e7780f43',
+    'aphront-list-filter-view-css' => 'dba9e1de',
+    'aphront-pager-view-css' => 'dba9e1de',
+    'aphront-panel-view-css' => 'dba9e1de',
+    'aphront-side-nav-view-css' => 'dba9e1de',
+    'aphront-table-view-css' => 'dba9e1de',
+    'aphront-tokenizer-control-css' => 'dba9e1de',
+    'aphront-typeahead-control-css' => 'dba9e1de',
+    'differential-changeset-view-css' => 'e7780f43',
+    'differential-core-view-css' => 'e7780f43',
     'differential-inline-comment-editor' => '17105732',
-    'differential-local-commits-view-css' => '216b9542',
-    'differential-revision-add-comment-css' => '216b9542',
-    'differential-revision-comment-css' => '216b9542',
-    'differential-revision-comment-list-css' => '216b9542',
-    'differential-revision-detail-css' => '216b9542',
-    'differential-revision-history-css' => '216b9542',
-    'differential-table-of-contents-css' => '216b9542',
+    'differential-local-commits-view-css' => 'e7780f43',
+    'differential-revision-add-comment-css' => 'e7780f43',
+    'differential-revision-comment-css' => 'e7780f43',
+    'differential-revision-comment-list-css' => 'e7780f43',
+    'differential-revision-detail-css' => 'e7780f43',
+    'differential-revision-history-css' => 'e7780f43',
+    'differential-table-of-contents-css' => 'e7780f43',
     'diffusion-commit-view-css' => '4ccda8a6',
     'javelin-behavior' => '4fbae2af',
     'javelin-behavior-aphront-basic-tokenizer' => '2af849fb',
@@ -2637,23 +2637,23 @@ celerity_register_resource_map(array(
     'javelin-workflow' => '21d01ed8',
     'maniphest-task-summary-css' => '8db30c56',
     'maniphest-transaction-detail-css' => '8db30c56',
-    'phabricator-app-buttons-css' => '9ca700e9',
-    'phabricator-content-source-view-css' => '216b9542',
-    'phabricator-core-buttons-css' => '9ca700e9',
-    'phabricator-core-css' => '9ca700e9',
-    'phabricator-directory-css' => '9ca700e9',
+    'phabricator-app-buttons-css' => 'dba9e1de',
+    'phabricator-content-source-view-css' => 'e7780f43',
+    'phabricator-core-buttons-css' => 'dba9e1de',
+    'phabricator-core-css' => 'dba9e1de',
+    'phabricator-directory-css' => 'dba9e1de',
     'phabricator-drag-and-drop-file-upload' => '17105732',
     'phabricator-dropdown-menu' => '21d01ed8',
-    'phabricator-jump-nav' => '9ca700e9',
+    'phabricator-jump-nav' => 'dba9e1de',
     'phabricator-keyboard-shortcut' => '21d01ed8',
     'phabricator-keyboard-shortcut-manager' => '21d01ed8',
     'phabricator-menu-item' => '21d01ed8',
-    'phabricator-object-selector-css' => '216b9542',
+    'phabricator-object-selector-css' => 'e7780f43',
     'phabricator-paste-file-upload' => '21d01ed8',
-    'phabricator-remarkup-css' => '9ca700e9',
+    'phabricator-remarkup-css' => 'dba9e1de',
     'phabricator-shaped-request' => '17105732',
-    'phabricator-standard-page-view' => '9ca700e9',
-    'phabricator-transaction-view-css' => '9ca700e9',
-    'syntax-highlighting-css' => '9ca700e9',
+    'phabricator-standard-page-view' => 'dba9e1de',
+    'phabricator-transaction-view-css' => 'dba9e1de',
+    'syntax-highlighting-css' => 'dba9e1de',
   ),
 ));

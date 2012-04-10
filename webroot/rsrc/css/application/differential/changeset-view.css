@@ -47,6 +47,7 @@
   vertical-align:     top;
   background:         #eeeeee;
   color:              #888888;
+  cursor:             pointer;
   border-style:       solid;
   border-width:       0px 1px;
   border-color:       #eeeeee #999999 #eeeeee #dddddd;
@@ -54,6 +55,10 @@
   font-family:        "Verdana";
   font-size:          11px;
   overflow:           hidden;
+}
+
+.differential-changeset-immutable .differential-diff th {
+  cursor: auto;
 }
 
 .differential-diff td.old {
