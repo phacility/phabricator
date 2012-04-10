@@ -112,6 +112,16 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
     return $attachments;
   }
 
+  public function loadFileByPHID($phid) {
+    $file = id(new PhabricatorFile())->loadOneWhere(
+      'phid = %s',
+      $phid);
+    if (!$file) {
+      return null;
+    }
+    return $file->loadFileData();
+  }
+
   private function buildPatch() {
     $revision = $this->getRevision();
     $revision_id = $revision->getID();
@@ -132,6 +142,8 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
       $changes[] = ArcanistDiffChange::newFromDictionary($changedict);
     }
     $bundle = ArcanistBundle::newFromChanges($changes);
+
+    $bundle->setLoadFileDataCallback(array($this, 'loadFileByPHID'));
 
     $format = PhabricatorEnv::getEnvConfig('metamta.differential.patch-format');
     switch ($format) {
