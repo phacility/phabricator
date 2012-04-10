@@ -21,6 +21,8 @@
  */
 abstract class ManiphestController extends PhabricatorController {
 
+  private $defaultQuery;
+
   public function buildStandardPageResponse($view, array $data) {
     $page = $this->buildStandardPageView();
 
@@ -38,6 +40,29 @@ abstract class ManiphestController extends PhabricatorController {
   protected function buildBaseSideNav() {
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI('/maniphest/view/'));
+
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $custom = id(new ManiphestSavedQuery())->loadAllWhere(
+      'userPHID = %s ORDER BY isDefault DESC, name ASC',
+      $user->getPHID());
+
+    if ($custom) {
+      $nav->addLabel('Saved Queries');
+      foreach ($custom as $query) {
+        if ($query->getIsDefault()) {
+          $this->defaultQuery = $query;
+        }
+        $nav->addFilter(
+          'Q:'.$query->getQueryKey(),
+          $query->getName(),
+          '/maniphest/view/custom/?key='.$query->getQueryKey());
+      }
+      $nav->addFilter('saved',  'Edit...', '/maniphest/custom/');
+      $nav->addSpacer();
+    }
+
     $nav->addLabel('User Tasks');
     $nav->addFilter('action',       'Assigned');
     $nav->addFilter('created',      'Created');
@@ -59,6 +84,10 @@ abstract class ManiphestController extends PhabricatorController {
     $nav->addFilter('report',       'Reports', '/maniphest/report/');
 
     return $nav;
+  }
+
+  protected function getDefaultQuery() {
+    return $this->defaultQuery;
   }
 
 }

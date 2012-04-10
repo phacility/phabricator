@@ -207,6 +207,11 @@ class AphrontDefaultApplicationConfiguration
         ),
         'export/(?P<key>[^/]+)/' => 'ManiphestExportController',
         'subpriority/' => 'ManiphestSubpriorityController',
+        'custom/' => array(
+          '' => 'ManiphestSavedQueryListController',
+          'edit/(?:(?P<id>\d+)/)?' => 'ManiphestSavedQueryEditController',
+          'delete/(?P<id>\d+)/'   => 'ManiphestSavedQueryDeleteController',
+        ),
       ),
 
       '/T(?P<id>\d+)' => 'ManiphestTaskDetailController',

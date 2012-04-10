@@ -137,6 +137,11 @@ span.single-display-line-content {
   display: block;
 }
 
+.aphront-table-view td.radio {
+  text-align: center;
+  padding: 2px 4px 0px;
+}
+
 .aphront-table-view th.aphront-table-view-sortable {
   padding: 0;
 }

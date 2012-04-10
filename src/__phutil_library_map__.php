@@ -449,6 +449,10 @@ phutil_register_library_map(array(
     'ManiphestExportController' => 'applications/maniphest/controller/export',
     'ManiphestReplyHandler' => 'applications/maniphest/replyhandler',
     'ManiphestReportController' => 'applications/maniphest/controller/report',
+    'ManiphestSavedQuery' => 'applications/maniphest/storage/savedquery',
+    'ManiphestSavedQueryDeleteController' => 'applications/maniphest/controller/savedquerydelete',
+    'ManiphestSavedQueryEditController' => 'applications/maniphest/controller/savedqueryedit',
+    'ManiphestSavedQueryListController' => 'applications/maniphest/controller/savedquerylist',
     'ManiphestSubpriorityController' => 'applications/maniphest/controller/subpriority',
     'ManiphestTask' => 'applications/maniphest/storage/task',
     'ManiphestTaskAuxiliaryStorage' => 'applications/maniphest/storage/auxiliary',
@@ -1135,7 +1139,6 @@ phutil_register_library_map(array(
     'DarkConsoleRequestPlugin' => 'DarkConsolePlugin',
     'DarkConsoleServicesPlugin' => 'DarkConsolePlugin',
     'DarkConsoleXHProfPlugin' => 'DarkConsolePlugin',
-    'DefaultDatabaseConfigurationProvider' => 'DatabaseConfigurationProvider',
     'DifferentialActionHasNoEffectException' => 'DifferentialException',
     'DifferentialAddCommentView' => 'AphrontView',
     'DifferentialAffectedPath' => 'DifferentialDAO',
@@ -1332,6 +1335,10 @@ phutil_register_library_map(array(
     'ManiphestExportController' => 'ManiphestController',
     'ManiphestReplyHandler' => 'PhabricatorMailReplyHandler',
     'ManiphestReportController' => 'ManiphestController',
+    'ManiphestSavedQuery' => 'ManiphestDAO',
+    'ManiphestSavedQueryDeleteController' => 'ManiphestController',
+    'ManiphestSavedQueryEditController' => 'ManiphestController',
+    'ManiphestSavedQueryListController' => 'ManiphestController',
     'ManiphestSubpriorityController' => 'ManiphestController',
     'ManiphestTask' => 'ManiphestDAO',
     'ManiphestTaskAuxiliaryStorage' => 'ManiphestDAO',
@@ -1756,6 +1763,10 @@ phutil_register_library_map(array(
   ),
   'requires_interface' =>
   array(
+    'DefaultDatabaseConfigurationProvider' =>
+    array(
+      0 => 'DatabaseConfigurationProvider',
+    ),
     'DifferentialInlineComment' =>
     array(
       0 => 'PhabricatorInlineCommentInterface',
