@@ -51,6 +51,7 @@ final class DifferentialRevisionQuery {
   private $subscribers = array();
   private $responsibles = array();
   private $branches = array();
+  private $arcanistProjectPHIDs = array();
 
   private $order            = 'order-modified';
   const ORDER_MODIFIED      = 'order-modified';
@@ -245,6 +246,20 @@ final class DifferentialRevisionQuery {
 
 
   /**
+   * Filter results to only return revisions with a given set of arcanist
+   * projects.
+   *
+   * @param array List of project PHIDs.
+   * @return this
+   * @task config
+   */
+  public function withArcanistProjectPHIDs(array $arc_project_phids) {
+    $this->arcanistProjectPHIDs = $arc_project_phids;
+    return $this;
+  }
+
+
+  /**
    * Set result ordering. Provide a class constant, such as
    * ##DifferentialRevisionQuery::ORDER_CREATED##.
    *
@@ -368,12 +383,9 @@ final class DifferentialRevisionQuery {
         $this->loadCommitPHIDs($conn_r, $revisions);
       }
 
-      $need_active = $this->needActiveDiffs ||
-                     $this->branches;
-
+      $need_active = $this->needActiveDiffs;
       $need_ids = $need_active ||
                   $this->needDiffIDs;
-
 
       if ($need_ids) {
         $this->loadDiffIDs($conn_r, $revisions);
@@ -381,31 +393,6 @@ final class DifferentialRevisionQuery {
 
       if ($need_active) {
         $this->loadActiveDiffs($conn_r, $revisions);
-      }
-
-      if ($this->branches) {
-
-        // TODO: We could filter this in SQL instead and might get better
-        // performance in some cases.
-
-        $branch_map = array_fill_keys($this->branches, true);
-        foreach ($revisions as $key => $revision) {
-          $diff = $revision->getActiveDiff();
-          if (!$diff) {
-            unset($revisions[$key]);
-            continue;
-          }
-
-          // TODO: Old arc uploaded the wrong branch name for Mercurial (i.e.,
-          // with a trailing "\n"). Once the arc version gets bumped, do a
-          // migration and remove this.
-          $branch = trim($diff->getBranch());
-
-          if (!$diff || empty($branch_map[$branch])) {
-            unset($revisions[$key]);
-            continue;
-          }
-        }
       }
     }
 
@@ -431,7 +418,9 @@ final class DifferentialRevisionQuery {
         !$this->authors &&
         !$this->revIDs &&
         !$this->commitHashes &&
-        !$this->phids) {
+        !$this->phids &&
+        !$this->branches &&
+        !$this->arcanistProjectPHIDs) {
       return true;
     }
     return false;
@@ -654,6 +643,20 @@ final class DifferentialRevisionQuery {
         $conn_r,
         '(responsibles_rel.objectPHID IS NOT NULL OR r.authorPHID IN (%Ls))',
         $this->responsibles);
+    }
+
+    if ($this->branches) {
+      $where[] = qsprintf(
+        $conn_r,
+        'r.branchName in (%Ls)',
+        $this->branches);
+    }
+
+    if ($this->arcanistProjectPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'r.arcanistProjectPHID in (%Ls)',
+        $this->arcanistProjectPHIDs);
     }
 
     switch ($this->status) {

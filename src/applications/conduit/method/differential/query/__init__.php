@@ -12,7 +12,10 @@ phutil_require_module('arcanist', 'differential/constants/revisionstatus');
 phutil_require_module('phabricator', 'applications/conduit/method/base');
 phutil_require_module('phabricator', 'applications/conduit/protocol/exception');
 phutil_require_module('phabricator', 'applications/differential/query/revision');
+phutil_require_module('phabricator', 'applications/repository/storage/arcanistproject');
 phutil_require_module('phabricator', 'infrastructure/env');
+
+phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('ConduitAPI_differential_query_Method.php');

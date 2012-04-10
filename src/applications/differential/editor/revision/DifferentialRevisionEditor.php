@@ -206,7 +206,13 @@ final class DifferentialRevisionEditor {
 
     $revision->openTransaction();
 
+      if ($diff) {
+        $revision->setBranchName($diff->getBranch());
+        $revision->setArcanistProjectPHID($diff->getArcanistProjectPHID());
+      }
+
       $revision->save();
+
       if ($diff) {
         $diff->setRevisionID($revision->getID());
         $diff->save();

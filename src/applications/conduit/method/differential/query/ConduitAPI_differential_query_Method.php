@@ -62,6 +62,7 @@ final class ConduitAPI_differential_query_Method
       'subscribers'       => 'optional list<phid>',
       'responsibleUsers'  => 'optional list<phid>',
       'branches'          => 'optional list<string>',
+      'arcanistProjects'  => 'optional list<string>',
     );
   }
 
@@ -89,6 +90,7 @@ final class ConduitAPI_differential_query_Method
     $subscribers        = $request->getValue('subscribers');
     $responsible_users  = $request->getValue('responsibleUsers');
     $branches           = $request->getValue('branches');
+    $arc_projects       = $request->getValue('arcanistProjects');
 
     $query = new DifferentialRevisionQuery();
     if ($authors) {
@@ -150,6 +152,19 @@ final class ConduitAPI_differential_query_Method
     }
     if ($branches) {
       $query->withBranches($branches);
+    }
+    if ($arc_projects) {
+      // This is sort of special-cased, but don't make arc do an extra round
+      // trip.
+      $projects = id(new PhabricatorRepositoryArcanistProject())
+        ->loadAllWhere(
+          'name in (%Ls)',
+          $arc_projects);
+      if (!$projects) {
+        return array();
+      }
+
+      $query->withArcanistProjectPHIDs(mpull($projects, 'getPHID'));
     }
 
     $query->needRelationships(true);

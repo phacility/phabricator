@@ -35,11 +35,14 @@ final class DifferentialRevision extends DifferentialDAO {
   protected $unsubscribed = array();
 
   protected $mailKey;
+  protected $branchName;
+  protected $arcanistProjectPHID;
 
   private $relationships;
   private $commits;
   private $activeDiff = false;
   private $diffIDs;
+
 
   const RELATIONSHIP_TABLE    = 'differential_relationship';
   const TABLE_COMMIT          = 'differential_commit';
