@@ -36,7 +36,7 @@ final class PhabricatorRemarkupRulePhriction
     $name = explode('/', trim($name, '/'));
     $name = end($name);
 
-    $slug = PhrictionDocument::normalizeSlug($slug);
+    $slug = PhabricatorSlug::normalize($slug);
     $uri  = PhrictionDocument::getSlugURI($slug);
 
     return $this->getEngine()->storeText(

@@ -15,6 +15,7 @@ phutil_require_module('phabricator', 'applications/phriction/storage/content');
 phutil_require_module('phabricator', 'applications/phriction/storage/document');
 phutil_require_module('phabricator', 'applications/project/storage/project');
 phutil_require_module('phabricator', 'applications/search/index/indexer/phriction');
+phutil_require_module('phabricator', 'infrastructure/util/slug');
 
 phutil_require_module('phutil', 'utils');
 

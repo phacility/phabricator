@@ -35,7 +35,7 @@ final class PhrictionHistoryController
 
     $document = id(new PhrictionDocument())->loadOneWhere(
       'slug = %s',
-      PhrictionDocument::normalizeSlug($this->slug));
+      PhabricatorSlug::normalize($this->slug));
 
     if (!$document) {
       return new Aphront404Response();

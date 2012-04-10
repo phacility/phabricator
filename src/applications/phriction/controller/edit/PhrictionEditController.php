@@ -54,7 +54,7 @@ final class PhrictionEditController
 
     } else {
       $slug = $request->getStr('slug');
-      $slug = PhrictionDocument::normalizeSlug($slug);
+      $slug = PhabricatorSlug::normalize($slug);
       if (!$slug) {
         return new Aphront404Response();
       }
@@ -72,7 +72,7 @@ final class PhrictionEditController
         $content  = new PhrictionContent();
         $content->setSlug($slug);
 
-        $default_title = PhrictionDocument::getDefaultSlugTitle($slug);
+        $default_title = PhabricatorSlug::getDefaultTitle($slug);
         $content->setTitle($default_title);
       }
     }

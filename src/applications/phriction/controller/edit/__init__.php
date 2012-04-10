@@ -16,6 +16,7 @@ phutil_require_module('phabricator', 'applications/phriction/storage/document');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'infrastructure/javelin/api');
+phutil_require_module('phabricator', 'infrastructure/util/slug');
 phutil_require_module('phabricator', 'view/form/base');
 phutil_require_module('phabricator', 'view/form/control/static');
 phutil_require_module('phabricator', 'view/form/control/submit');

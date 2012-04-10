@@ -9,8 +9,7 @@
 phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/phid/storage/phid');
 phutil_require_module('phabricator', 'applications/phriction/storage/base');
-
-phutil_require_module('phutil', 'utils');
+phutil_require_module('phabricator', 'infrastructure/util/slug');
 
 
 phutil_require_source('PhrictionDocument.php');

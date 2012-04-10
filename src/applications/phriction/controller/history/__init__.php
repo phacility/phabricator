@@ -12,6 +12,7 @@ phutil_require_module('phabricator', 'applications/phriction/constants/changetyp
 phutil_require_module('phabricator', 'applications/phriction/controller/base');
 phutil_require_module('phabricator', 'applications/phriction/storage/content');
 phutil_require_module('phabricator', 'applications/phriction/storage/document');
+phutil_require_module('phabricator', 'infrastructure/util/slug');
 phutil_require_module('phabricator', 'view/control/pager');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/layout/crumbs');

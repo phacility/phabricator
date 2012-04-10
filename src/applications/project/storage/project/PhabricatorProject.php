@@ -82,7 +82,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO {
     // 'hack_slash' instead of 'hack/slash').
 
     $slug = str_replace('/', ' ', $slug);
-    $slug = PhrictionDocument::normalizeSlug($slug);
+    $slug = PhabricatorSlug::normalize($slug);
     $this->phrictionSlug = $slug;
     return $this;
   }

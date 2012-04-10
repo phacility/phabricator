@@ -46,7 +46,7 @@ final class ConduitAPI_phriction_history_Method
     $slug = $request->getValue('slug');
     $doc = id(new PhrictionDocument())->loadOneWhere(
       'slug = %s',
-      PhrictionDocument::normalizeSlug($slug));
+      PhabricatorSlug::normalize($slug));
     if (!$doc) {
       throw new ConduitException('ERR-BAD-DOCUMENT');
     }

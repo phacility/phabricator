@@ -21,58 +21,6 @@
  */
 final class PhrictionDocumentTestCase extends PhabricatorTestCase {
 
-  public function testSlugNormalization() {
-    $slugs = array(
-      ''                  => '/',
-      '/'                 => '/',
-      '//'                => '/',
-      '&&&'               => '/',
-      '/derp/'            => 'derp/',
-      'derp'              => 'derp/',
-      'derp//derp'        => 'derp/derp/',
-      'DERP//DERP'        => 'derp/derp/',
-      'a B c'             => 'a_b_c/',
-    );
-
-    foreach ($slugs as $slug => $normal) {
-      $this->assertEqual(
-        $normal,
-        PhrictionDocument::normalizeSlug($slug),
-        "Normalization of '{$slug}'");
-    }
-  }
-
-  public function testSlugAncestry() {
-    $slugs = array(
-      '/'                   => array(),
-      'pokemon/'            => array('/'),
-      'pokemon/squirtle/'   => array('/', 'pokemon/'),
-    );
-
-    foreach ($slugs as $slug => $ancestry) {
-      $this->assertEqual(
-        $ancestry,
-        PhrictionDocument::getSlugAncestry($slug),
-        "Ancestry of '{$slug}'");
-    }
-  }
-
-  public function testSlugDepth() {
-    $slugs = array(
-      '/'       => 0,
-      'a/'      => 1,
-      'a/b/'    => 2,
-      'a////b/' => 2,
-    );
-
-    foreach ($slugs as $slug => $depth) {
-      $this->assertEqual(
-        $depth,
-        PhrictionDocument::getSlugDepth($slug),
-        "Depth of '{$slug}'");
-    }
-  }
-
   public function testProjectSlugs() {
     $slugs = array(
       '/'                   => false,

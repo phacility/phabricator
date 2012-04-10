@@ -61,65 +61,9 @@ final class PhrictionDocument extends PhrictionDAO {
     }
   }
 
-  public static function normalizeSlug($slug) {
-
-    // TODO: We need to deal with unicode at some point, this is just a very
-    // basic proof-of-concept implementation.
-
-    $slug = strtolower($slug);
-    $slug = preg_replace('@/+@', '/', $slug);
-    $slug = trim($slug, '/');
-    $slug = preg_replace('@[^a-z0-9/]+@', '_', $slug);
-    $slug = trim($slug, '_');
-
-    return $slug.'/';
-  }
-
-  public static function getDefaultSlugTitle($slug) {
-    $parts = explode('/', trim($slug, '/'));
-    $default_title = end($parts);
-    $default_title = str_replace('_', ' ', $default_title);
-    $default_title = ucwords($default_title);
-    $default_title = nonempty($default_title, 'Untitled Document');
-    return $default_title;
-  }
-
-  public static function getSlugAncestry($slug) {
-    $slug = self::normalizeSlug($slug);
-
-    if ($slug == '/') {
-      return array();
-    }
-
-    $ancestors = array(
-      '/',
-    );
-
-    $slug = explode('/', $slug);
-    array_pop($slug);
-    array_pop($slug);
-
-    $accumulate = '';
-    foreach ($slug as $part) {
-      $accumulate .= $part.'/';
-      $ancestors[] = $accumulate;
-    }
-
-    return $ancestors;
-  }
-
-  public static function getSlugDepth($slug) {
-    $slug = self::normalizeSlug($slug);
-    if ($slug == '/') {
-      return 0;
-    } else {
-      return substr_count($slug, '/');
-    }
-  }
-
   public function setSlug($slug) {
-    $this->slug   = self::normalizeSlug($slug);
-    $this->depth  = self::getSlugDepth($slug);
+    $this->slug   = PhabricatorSlug::normalize($slug);
+    $this->depth  = PhabricatorSlug::getDepth($slug);
     return $this;
   }
 
@@ -136,7 +80,7 @@ final class PhrictionDocument extends PhrictionDAO {
   }
 
   public static function isProjectSlug($slug) {
-    $slug = self::normalizeSlug($slug);
+    $slug = PhabricatorSlug::normalize($slug);
     $prefix = 'projects/';
     if ($slug == $prefix) {
       // The 'projects/' document is not itself a project slug.
@@ -150,7 +94,7 @@ final class PhrictionDocument extends PhrictionDAO {
       throw new Exception("Slug '{$slug}' is not a project slug!");
     }
 
-    $slug = self::normalizeSlug($slug);
+    $slug = PhabricatorSlug::normalize($slug);
     $parts = explode('/', $slug);
     return $parts[1].'/';
   }

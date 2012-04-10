@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'applications/phriction/storage/document');
+phutil_require_module('phabricator', 'infrastructure/util/slug');
 
 phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'markup/engine/remarkup/markuprule/base');

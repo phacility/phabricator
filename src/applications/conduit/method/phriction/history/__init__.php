@@ -10,6 +10,7 @@ phutil_require_module('phabricator', 'applications/conduit/method/phriction/base
 phutil_require_module('phabricator', 'applications/conduit/protocol/exception');
 phutil_require_module('phabricator', 'applications/phriction/storage/content');
 phutil_require_module('phabricator', 'applications/phriction/storage/document');
+phutil_require_module('phabricator', 'infrastructure/util/slug');
 
 phutil_require_module('phutil', 'utils');
 
