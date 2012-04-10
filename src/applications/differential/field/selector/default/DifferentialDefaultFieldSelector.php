@@ -23,26 +23,30 @@ final class DifferentialDefaultFieldSelector
     $fields = array(
       new DifferentialTitleFieldSpecification(),
       new DifferentialSummaryFieldSpecification(),
-      new DifferentialTestPlanFieldSpecification(),
-      new DifferentialRevisionStatusFieldSpecification(),
-      new DifferentialAuthorFieldSpecification(),
-      new DifferentialReviewersFieldSpecification(),
-      new DifferentialReviewedByFieldSpecification(),
-      new DifferentialCCsFieldSpecification(),
-      new DifferentialUnitFieldSpecification(),
-      new DifferentialLintFieldSpecification(),
-      new DifferentialCommitsFieldSpecification(),
-      new DifferentialDependenciesFieldSpecification(),
-      new DifferentialManiphestTasksFieldSpecification(),
     );
 
+    if (PhabricatorEnv::getEnvConfig('differential.show-test-plan-field')) {
+      $fields[] = new DifferentialTestPlanFieldSpecification();
+    }
+
+    $fields = array_merge(
+      $fields,
+      array(
+        new DifferentialRevisionStatusFieldSpecification(),
+        new DifferentialAuthorFieldSpecification(),
+        new DifferentialReviewersFieldSpecification(),
+        new DifferentialReviewedByFieldSpecification(),
+        new DifferentialCCsFieldSpecification(),
+        new DifferentialUnitFieldSpecification(),
+        new DifferentialLintFieldSpecification(),
+        new DifferentialCommitsFieldSpecification(),
+        new DifferentialDependenciesFieldSpecification(),
+        new DifferentialManiphestTasksFieldSpecification(),
+      ));
+
     if (PhabricatorEnv::getEnvConfig('differential.show-host-field')) {
-      $fields = array_merge(
-        $fields,
-        array(
-          new DifferentialHostFieldSpecification(),
-          new DifferentialPathFieldSpecification(),
-        ));
+      $fields[] = new DifferentialHostFieldSpecification();
+      $fields[] = new DifferentialPathFieldSpecification();
     }
 
     $fields = array_merge(

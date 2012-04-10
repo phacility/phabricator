@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,9 @@ final class DifferentialTestPlanFieldSpecification
   extends DifferentialFieldSpecification {
 
   private $plan;
-  private $error = true;
+
+  // NOTE: This means "uninitialized".
+  private $error = false;
 
   public function shouldAppearOnEdit() {
     return true;
@@ -37,6 +39,14 @@ final class DifferentialTestPlanFieldSpecification
   }
 
   public function renderEditControl() {
+    if ($this->error === false) {
+      if ($this->isRequired()) {
+        $this->error = true;
+      } else {
+        $this->error = null;
+      }
+    }
+
     return id(new AphrontFormTextAreaControl())
       ->setLabel('Test Plan')
       ->setName('testplan')
@@ -49,10 +59,12 @@ final class DifferentialTestPlanFieldSpecification
   }
 
   public function validateField() {
-    if (!strlen($this->plan)) {
-      $this->error = 'Required';
-      throw new DifferentialFieldValidationException(
-        "You must provide a test plan.");
+    if ($this->isRequired()) {
+      if (!strlen($this->plan)) {
+        $this->error = 'Required';
+        throw new DifferentialFieldValidationException(
+          "You must provide a test plan.");
+      }
     }
   }
 
@@ -83,6 +95,10 @@ final class DifferentialTestPlanFieldSpecification
 
   public function parseValueFromCommitMessage($value) {
     return $value;
+  }
+
+  private function isRequired() {
+    return PhabricatorEnv::getEnvConfig('differential.require-test-plan-field');
   }
 
 }

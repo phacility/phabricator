@@ -675,6 +675,18 @@ return array(
   // enable them.
   'differential.show-host-field'  => false,
 
+  // Differential has a required "Test Plan" field by default, which requires
+  // authors to fill out information about how they verified the correctness of
+  // their changes when sending code for review. If you'd prefer not to use
+  // this field, you can disable it here. You can also make it optional
+  // (instead of required) below.
+  'differential.show-test-plan-field' => true,
+
+  // Differential has a required "Test Plan" field by default. You can make it
+  // optional by setting this to false. You can also completely remove it above,
+  // if you prefer.
+  'differential.require-test-plan-field' => true,
+
   // If you set this to true, users can "!accept" revisions via email (normally,
   // they can take other actions but can not "!accept"). This action is disabled
   // by default because email authentication can be configured to be very weak,
