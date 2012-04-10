@@ -418,6 +418,7 @@ final class PhabricatorUser extends PhabricatorUserDAO {
       PhabricatorUserPreferences::PREFERENCE_EDITOR);
     if ($editor) {
       return strtr($editor, array(
+        '%%' => '%',
         '%f' => phutil_escape_uri($path),
         '%l' => phutil_escape_uri($line),
         '%r' => phutil_escape_uri($callsign),

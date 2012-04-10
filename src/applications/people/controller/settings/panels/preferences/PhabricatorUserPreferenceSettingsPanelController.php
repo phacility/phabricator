@@ -81,7 +81,7 @@ EXAMPLE;
         ->setCaption(
           'Link to edit files in external editor. '.
           '%f is replaced by filename, %l by line number, %r by repository '.
-          'callsign. '.
+          'callsign, %% by literal %. '.
           "For documentation, see {$editor_doc_link}.")
         ->setValue($preferences->getPreference($pref_editor)))
       ->appendChild(
