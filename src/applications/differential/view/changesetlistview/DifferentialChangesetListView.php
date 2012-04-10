@@ -228,7 +228,7 @@ final class DifferentialChangesetListView extends AphrontView {
     $repository = $this->repository;
     if ($repository) {
       $meta['diffusionURI'] = (string)$repository->getDiffusionBrowseURIForPath(
-        $changeset->getAbsoluteRepositoryPath($this->diff, $repository));
+        $changeset->getAbsoluteRepositoryPath($repository, $this->diff));
     }
 
     $change = $changeset->getChangeType();
@@ -253,7 +253,7 @@ final class DifferentialChangesetListView extends AphrontView {
     $user = $this->user;
     if ($user && $repository) {
       $path = ltrim(
-        $changeset->getAbsoluteRepositoryPath($this->diff, $repository),
+        $changeset->getAbsoluteRepositoryPath($repository, $this->diff),
         '/');
       $line = 1; // TODO: get first changed line
       $callsign = $repository->getCallsign();

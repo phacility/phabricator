@@ -148,11 +148,11 @@ final class DifferentialChangeset extends DifferentialDAO {
   }
 
   public function getAbsoluteRepositoryPath(
-    DifferentialDiff $diff,
-    PhabricatorRepository $repository) {
+    PhabricatorRepository $repository,
+    DifferentialDiff $diff = null) {
 
     $base = '/';
-    if ($diff->getSourceControlPath()) {
+    if ($diff && $diff->getSourceControlPath()) {
       $base = id(new PhutilURI($diff->getSourceControlPath()))->getPath();
     }
 

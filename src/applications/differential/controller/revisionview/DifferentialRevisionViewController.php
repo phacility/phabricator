@@ -731,7 +731,12 @@ final class DifferentialRevisionViewController extends DifferentialController {
     return $symbol_indexes;
   }
 
-  private function loadOtherRevisions($changesets, $target, $repository) {
+  private function loadOtherRevisions(
+    array $changesets,
+    DifferentialDiff $target,
+    PhabricatorRepository $repository) {
+    assert_instances_of($changesets, 'DifferentialChangeset');
+
     if (!$repository) {
       return array();
     }
@@ -739,8 +744,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $paths = array();
     foreach ($changesets as $changeset) {
       $paths[] = $changeset->getAbsoluteRepositoryPath(
-        $target,
-        $repository);
+        $repository,
+        $target);
     }
 
     if (!$paths) {

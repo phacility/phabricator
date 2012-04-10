@@ -196,7 +196,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
       }
       if ($this->diff && $this->repository) {
         $paths[] =
-          $changeset->getAbsoluteRepositoryPath($this->diff, $this->repository);
+          $changeset->getAbsoluteRepositoryPath($this->repository, $this->diff);
       }
     }
 

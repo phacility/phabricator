@@ -135,7 +135,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldObjectAdapter {
 
     $diff = $this->diff;
 
-    return $changeset->getAbsoluteRepositoryPath($diff, $repository);
+    return $changeset->getAbsoluteRepositoryPath($repository, $diff);
   }
 
   protected function loadContentDictionary() {
