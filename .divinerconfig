@@ -1,6 +1,6 @@
 {
   "name" : "Phabricator",
-  "src_base" : "https://secure.phabricator.com/diffusion/P/browse/master",
+  "src_link" : "https://secure.phabricator.com/diffusion/P/browse/master/%f$%l",
   "groups" : {
     "intro" : "Introduction",
     "config" : "Configuration",
