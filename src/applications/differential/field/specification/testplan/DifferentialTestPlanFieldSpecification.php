@@ -19,7 +19,7 @@
 final class DifferentialTestPlanFieldSpecification
   extends DifferentialFieldSpecification {
 
-  private $plan;
+  private $plan = '';
 
   // NOTE: This means "uninitialized".
   private $error = false;
@@ -29,7 +29,7 @@ final class DifferentialTestPlanFieldSpecification
   }
 
   protected function didSetRevision() {
-    $this->plan = $this->getRevision()->getTestPlan();
+    $this->plan = (string)$this->getRevision()->getTestPlan();
   }
 
   public function setValueFromRequest(AphrontRequest $request) {
@@ -77,7 +77,7 @@ final class DifferentialTestPlanFieldSpecification
   }
 
   public function setValueFromParsedCommitMessage($value) {
-    $this->plan = $value;
+    $this->plan = (string)$value;
     return $this;
   }
 
