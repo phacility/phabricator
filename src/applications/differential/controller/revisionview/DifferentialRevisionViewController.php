@@ -269,10 +269,14 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $local_view->setUser($user);
     $local_view->setLocalCommits(idx($props, 'local:commits'));
 
-    $other_revisions = $this->loadOtherRevisions(
-      $changesets,
-      $target,
-      $repository);
+    if ($repository) {
+      $other_revisions = $this->loadOtherRevisions(
+        $changesets,
+        $target,
+        $repository);
+    } else {
+      $other_revisions = array();
+    }
 
     $other_view = null;
     if ($other_revisions) {
@@ -736,10 +740,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
     DifferentialDiff $target,
     PhabricatorRepository $repository) {
     assert_instances_of($changesets, 'DifferentialChangeset');
-
-    if (!$repository) {
-      return array();
-    }
 
     $paths = array();
     foreach ($changesets as $changeset) {
