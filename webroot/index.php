@@ -97,7 +97,12 @@ foreach (PhabricatorEnv::getEnvConfig('load-libraries') as $library) {
 }
 
 if (PhabricatorEnv::getEnvConfig('phabricator.setup')) {
-  PhabricatorSetup::runSetup();
+  try {
+    PhabricatorSetup::runSetup();
+  } catch (Exception $ex) {
+    echo "EXCEPTION!\n";
+    echo $ex;
+  }
   return;
 }
 
