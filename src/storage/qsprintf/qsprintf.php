@@ -72,7 +72,7 @@
  *
  * @group storage
  */
-function qsprintf($conn, $pattern/*, ... */) {
+function qsprintf(AphrontDatabaseConnection $conn, $pattern/*, ... */) {
   $args = func_get_args();
   array_shift($args);
   return xsprintf('xsprintf_query', $conn, $args);
@@ -81,7 +81,7 @@ function qsprintf($conn, $pattern/*, ... */) {
 /**
  * @group storage
  */
-function vqsprintf($conn, $pattern, array $argv) {
+function vqsprintf(AphrontDatabaseConnection $conn, $pattern, array $argv) {
   array_unshift($argv, $pattern);
   return xsprintf('xsprintf_query', $conn, $argv);
 }

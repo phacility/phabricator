@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ function queryfx(AphrontDatabaseConnection $conn, $sql/*, ... */) {
 /**
  * @group storage
  */
-function vqueryfx($conn, $sql, $argv) {
+function vqueryfx(AphrontDatabaseConnection $conn, $sql, array $argv) {
   array_unshift($argv, $conn, $sql);
   call_user_func_array('queryfx', $argv);
 }
@@ -36,7 +36,7 @@ function vqueryfx($conn, $sql, $argv) {
 /**
  * @group storage
  */
-function queryfx_all($conn, $sql/*, ... */) {
+function queryfx_all(AphrontDatabaseConnection $conn, $sql/*, ... */) {
   $argv = func_get_args();
   call_user_func_array('queryfx', $argv);
   return $conn->selectAllResults();
@@ -45,7 +45,7 @@ function queryfx_all($conn, $sql/*, ... */) {
 /**
  * @group storage
  */
-function queryfx_one($conn, $sql/*, ... */) {
+function queryfx_one(AphrontDatabaseConnection $conn, $sql/*, ... */) {
   $argv = func_get_args();
   $ret = call_user_func_array('queryfx_all', $argv);
   if (count($ret) > 1) {
@@ -60,7 +60,7 @@ function queryfx_one($conn, $sql/*, ... */) {
 /**
  * @group storage
  */
-function vqueryfx_all($conn, $sql, array $argv) {
+function vqueryfx_all(AphrontDatabaseConnection $conn, $sql, array $argv) {
   array_unshift($argv, $conn, $sql);
   call_user_func_array('queryfx', $argv);
   return $conn->selectAllResults();
