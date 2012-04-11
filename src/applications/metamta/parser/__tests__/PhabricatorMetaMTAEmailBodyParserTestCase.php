@@ -80,6 +80,22 @@ EOEMAIL
 <<<EOEMAIL
 OKAY
 
+-----oprindelig meddelelse-----
+
+> ...
+EOEMAIL
+,
+<<<EOEMAIL
+OKAY
+
+-----original message-----
+
+> ...
+EOEMAIL
+,
+<<<EOEMAIL
+OKAY
+
 Sent from my HTC smartphone on the Now Network from Sprint!
 
 -Reply message ----- From: "somebody (someone)" <
