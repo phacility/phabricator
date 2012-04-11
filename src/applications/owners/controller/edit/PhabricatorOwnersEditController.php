@@ -41,7 +41,6 @@ final class PhabricatorOwnersEditController
 
     $e_name = true;
     $e_primary = true;
-    $e_owners = true;
 
     $errors = array();
 
@@ -86,13 +85,6 @@ final class PhabricatorOwnersEditController
         $errors[] = 'Package must have a primary owner.';
       } else {
         $e_primary = null;
-      }
-
-      if (!$owners) {
-        $e_owners = 'Required';
-        $errors[] = 'Package must have at least one owner.';
-      } else {
-        $e_owners = null;
       }
 
       if (!$path_refs) {
@@ -214,8 +206,7 @@ final class PhabricatorOwnersEditController
           ->setDatasource('/typeahead/common/usersorprojects/')
           ->setLabel('Owners')
           ->setName('owners')
-          ->setValue($token_all_owners)
-          ->setError($e_owners))
+          ->setValue($token_all_owners))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setName('auditing')
