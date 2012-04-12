@@ -233,7 +233,7 @@ function help() {
         --all __repository_phid__
             Reparse all commits in the specified repository. These modes queue
             parsers into the task queue, you must run taskmasters to actually
-            do the parses them.
+            do the parses.
 
     __which_parts__: which parts of the thing to reparse
 
