@@ -202,7 +202,7 @@ final class PhabricatorUserOAuthSettingsPanelController
         $user->setProfileImagePHID($file->getPHID());
         $user->save();
       } else {
-        $error = 'Unable to retrive image.';
+        $error = 'Unable to retrieve image.';
       }
     } catch (Exception $e) {
       $error = 'Unable to save image.';
