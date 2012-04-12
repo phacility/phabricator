@@ -167,12 +167,11 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       } else {
         root = e.getNode('differential-changeset');
 
-        var comment = e.getNode('differential-inline-comment');
-        var data = JX.Stratcom.getData(comment);
+        var data = e.getNodeData('differential-inline-comment');
         var change = e.getNodeData('differential-changeset');
 
         var id_part  = data.on_right ? change.right : change.left;
-        var th = comment.parentNode.previousSibling;
+        var th = e.getNode('tag:td').previousSibling;
         var new_part = isNewFile(th) ? 'N' : 'O';
         var prefix = 'C' + id_part + new_part + 'L';
 
