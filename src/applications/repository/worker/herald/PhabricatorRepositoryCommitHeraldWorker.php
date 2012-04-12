@@ -150,7 +150,10 @@ WHY DID I GET THIS EMAIL?
 
 EOBODY;
 
-    $subject = "[Herald/Commit] {$commit_name} ({$who}) {$name}";
+    $prefix = PhabricatorEnv::getEnvConfig('metamta.diffusion.subject-prefix');
+
+    $subject = trim("{$prefix} {$commit_name}: {$name}");
+    $vary_subject = trim("{$prefix} [Commit] {$commit_name}: {$name}");
 
     $threading = PhabricatorAuditCommentEditor::getMailThreading(
       $commit->getPHID());
@@ -159,6 +162,7 @@ EOBODY;
     $template = new PhabricatorMetaMTAMail();
     $template->setRelatedPHID($commit->getPHID());
     $template->setSubject($subject);
+    $template->setVarySubject($subject);
     $template->setBody($body);
     $template->setThreadID($thread_id, $is_new = true);
     $template->addHeader('Thread-Topic', $thread_topic);

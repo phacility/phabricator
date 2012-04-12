@@ -75,13 +75,9 @@ final class DifferentialCommentMail extends DifferentialMail {
     return $tags;
   }
 
-  protected function renderSubject() {
+  protected function renderVarySubject() {
     $verb = ucwords($this->getVerb());
-    $revision = $this->getRevision();
-    $title = $revision->getTitle();
-    $id = $revision->getID();
-    $subject = "[{$verb}] D{$id}: {$title}";
-    return $subject;
+    return "[{$verb}] ".$this->renderSubject();
   }
 
   protected function getVerb() {

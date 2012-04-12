@@ -283,12 +283,12 @@ final class PhabricatorAuditCommentEditor {
     $reply_handler = self::newReplyHandlerForCommit($commit);
 
     $prefix = PhabricatorEnv::getEnvConfig('metamta.diffusion.subject-prefix');
-    $subject = "{$prefix} [{$verb}] {$name}: {$summary}";
+    $subject = "{$prefix} {$name}: {$summary}";
+    $vary_subject = "{$prefix} [{$verb}] {$name}: {$summary}";
 
     $threading = self::getMailThreading($commit->getPHID());
     list($thread_id, $thread_topic) = $threading;
 
-    $is_new     = !count($other_comments);
     $body       = $this->renderMailBody(
       $comment,
       "{$name}: {$summary}",
@@ -311,8 +311,13 @@ final class PhabricatorAuditCommentEditor {
     $phids = array_merge($email_to, $email_cc);
     $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
 
+    // NOTE: Always set $is_new to false, because the "first" mail in the
+    // thread is the Herald notification of the commit.
+    $is_new = false;
+
     $template = id(new PhabricatorMetaMTAMail())
       ->setSubject($subject)
+      ->setVarySubject($subject)
       ->setFrom($comment->getActorPHID())
       ->setThreadID($thread_id, $is_new)
       ->addHeader('Thread-Topic', $thread_topic)
@@ -332,7 +337,7 @@ final class PhabricatorAuditCommentEditor {
 
   public static function getMailThreading($phid) {
     return array(
-      '<diffusion-audit-'.$phid.'>',
+      'diffusion-audit-'.$phid,
       'Diffusion Audit '.$phid,
     );
   }

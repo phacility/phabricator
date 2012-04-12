@@ -80,22 +80,26 @@ abstract class PhabricatorMailReplyHandler {
 
     $result = array();
 
-    // If private replies are not supported, simply send one email to all
-    // recipients and CCs. This covers cases where we have no reply handler,
-    // or we have a public reply handler.
-    if (!$this->supportsPrivateReplies()) {
-      $mail = clone $mail_template;
-      $mail->addTos(mpull($to_handles, 'getPHID'));
-      $mail->addCCs(mpull($cc_handles, 'getPHID'));
+    // If MetaMTA is configured to always multiplex, skip the single-email
+    // case.
+    if (!PhabricatorMetaMTAMail::shouldMultiplexAllMail()) {
+      // If private replies are not supported, simply send one email to all
+      // recipients and CCs. This covers cases where we have no reply handler,
+      // or we have a public reply handler.
+      if (!$this->supportsPrivateReplies()) {
+        $mail = clone $mail_template;
+        $mail->addTos(mpull($to_handles, 'getPHID'));
+        $mail->addCCs(mpull($cc_handles, 'getPHID'));
 
-      if ($this->supportsPublicReplies()) {
-        $reply_to = $this->getPublicReplyHandlerEmailAddress();
-        $mail->setReplyTo($reply_to);
+        if ($this->supportsPublicReplies()) {
+          $reply_to = $this->getPublicReplyHandlerEmailAddress();
+          $mail->setReplyTo($reply_to);
+        }
+
+        $result[] = $mail;
+
+        return $result;
       }
-
-      $result[] = $mail;
-
-      return $result;
     }
 
     // Merge all the recipients together. TODO: We could keep the CCs as real

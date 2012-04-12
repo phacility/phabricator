@@ -36,6 +36,10 @@ final class DifferentialExceptionMail extends DifferentialMail {
     return "Exception: unable to process your mail request.";
   }
 
+  protected function renderVarySubject() {
+    return $this->renderSubject();
+  }
+
   protected function buildBody() {
     $exception = $this->exception;
     $original_body = $this->originalBody;

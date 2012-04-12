@@ -149,6 +149,11 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this;
   }
 
+  public function setVarySubject($subject) {
+    $this->setParam('vary-subject', $subject);
+    return $this;
+  }
+
   public function setBody($body) {
     $this->setParam('body', $body);
     return $this;
@@ -395,23 +400,44 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
             $mailer->setBody($value);
             break;
           case 'subject':
+            // Only try to use preferences if everything is multiplexed, so we
+            // get consistent behavior.
+            $use_prefs = self::shouldMultiplexAllMail();
+
+            $prefs = null;
+            if ($use_prefs) {
+              $to = idx($params, 'to', array());
+              $user = id(new PhabricatorUser())->loadOneWhere(
+                'phid = %s',
+                head($to));
+              if ($user) {
+                $prefs = $user->loadPreferences();
+              }
+            }
+
+            $alt_subject = idx($params, 'vary-subject');
+            if ($alt_subject) {
+              $use_subject = PhabricatorEnv::getEnvConfig(
+                'metamta.vary-subjects');
+
+              if ($prefs) {
+                $use_subject = $prefs->getPreference(
+                  PhabricatorUserPreferences::PREFERENCE_VARY_SUBJECT,
+                  $use_subject);
+              }
+
+              if ($use_subject) {
+                $value = $alt_subject;
+              }
+            }
+
             if ($is_threaded) {
               $add_re = PhabricatorEnv::getEnvConfig('metamta.re-prefix');
 
-              // If this message has a single recipient, respect their "Re:"
-              // preference. Otherwise, use the global setting.
-
-              $to = idx($params, 'to', array());
-              $cc = idx($params, 'cc', array());
-              if (count($to) == 1 && count($cc) == 0) {
-                $user = id(new PhabricatorUser())->loadOneWhere(
-                  'phid = %s',
-                  head($to));
-                if ($user) {
-                  $prefs = $user->loadPreferences();
-                  $pref_key = PhabricatorUserPreferences::PREFERENCE_RE_PREFIX;
-                  $add_re = $prefs->getPreference($pref_key, $add_re);
-                }
+              if ($prefs) {
+                $add_re = $prefs->getPreference(
+                  PhabricatorUserPreferences::PREFERENCE_RE_PREFIX,
+                  $add_re);
               }
 
               if ($add_re) {
@@ -434,6 +460,14 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
             }
             break;
           case 'thread-id':
+
+            // NOTE: Gmail freaks out about In-Reply-To and References which
+            // aren't in the form "<string@domain.tld>"; this is also required
+            // by RFC 2822, although some clients are more liberal in what they
+            // accept.
+            $domain = PhabricatorEnv::getEnvConfig('metamta.domain');
+            $value = '<'.$value.'@'.$domain.'>';
+
             if ($is_first && $mailer->supportsMessageIDHeader()) {
               $mailer->addHeader('Message-ID',  $value);
             } else {
@@ -455,6 +489,9 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
             break;
           case 'mailtags':
             // Handled below.
+            break;
+          case 'vary-subject':
+            // Handled above.
             break;
           default:
             // Just discard.
@@ -632,6 +669,10 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     }
 
     return $emails;
+  }
+
+  public static function shouldMultiplexAllMail() {
+    return PhabricatorEnv::getEnvConfig('metamta.one-mail-per-recipient');
   }
 
 }

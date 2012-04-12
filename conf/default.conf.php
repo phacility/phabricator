@@ -145,6 +145,35 @@ return array(
   // Domain used to generate Message-IDs.
   'metamta.domain'              => 'example.com',
 
+  // When a message is sent to multiple recipients (for example, several
+  // reviewers on a code review), Phabricator can either deliver one email to
+  // everyone (e.g., "To: alincoln, usgrant, htaft") or separate emails to each
+  // user (e.g., "To: alincoln", "To: usgrant", "To: htaft"). The major
+  // advantages and disadvantages of each approach are:
+  //
+  //   - One mail to everyone:
+  //     - Recipients can see To/Cc at a glance.
+  //     - If you use mailing lists, you won't get duplicate mail if you're
+  //       a normal recipient and also Cc'd on a mailing list.
+  //     - Getting threading to work properly is harder, and probably requires
+  //       making mail less useful by turning off options.
+  //     - Sometimes people will "Reply All" and everyone will get two mails,
+  //       one from the user and one from Phabricator turning their mail into
+  //       a comment.
+  //     - Not supported with a private reply-to address.
+  //   - One mail to each user:
+  //     - Recipients need to look in the mail body to see To/Cc.
+  //     - If you use mailing lists, recipients may sometimes get duplicate
+  //       mail.
+  //     - Getting threading to work properly is easier, and threading settings
+  //       can be customzied by each user.
+  //     - "Reply All" no longer spams all other users.
+  //     - Required if private reply-to addresses are configured.
+  //
+  // In the code, splitting one outbound email into one-per-recipient is
+  // sometimes referred to as "multiplexing".
+  'metamta.one-mail-per-recipient'  => true,
+
   // When a user takes an action which generates an email notification (like
   // commenting on a Differential revision), Phabricator can either send that
   // mail "From" the user's email address (like "alincoln@logcabin.com") or
@@ -165,6 +194,7 @@ return array(
   //      off since the risk in turning it on is that your outgoing mail will
   //      mostly never arrive.
   'metamta.can-send-as-user'    => false,
+
 
   // Adapter class to use to transmit mail to the MTA. The default uses
   // PHPMailerLite, which will invoke "sendmail". This is appropriate
@@ -329,8 +359,17 @@ return array(
 
   // Mail.app on OS X Lion won't respect threading headers unless the subject
   // is prefixed with "Re:". If you enable this option, Phabricator will add
-  // "Re:" to the subject line of all mail which is expected to thread.
+  // "Re:" to the subject line of all mail which is expected to thread. If
+  // you've set 'metamta.one-mail-per-recipient', users can override this
+  // setting in their preferences.
   'metamta.re-prefix' => false,
+
+  // If true, allow MetaMTA to change mail subjects to put text like
+  // '[Accepted]' and '[Commented]' in them. This makes subjects more useful,
+  // but might break threading on some clients. If you've set
+  // 'metamta.one-mail-per-recipient', users can override this setting in their
+  // preferences.
+  'metamta.vary-subjects' => true,
 
 
 // -- Auth ------------------------------------------------------------------ //

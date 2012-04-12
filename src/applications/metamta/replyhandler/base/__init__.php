@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/metamta/storage/mail');
 phutil_require_module('phabricator', 'applications/metamta/storage/receivedmail');
 phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'infrastructure/env');

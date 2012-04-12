@@ -34,7 +34,14 @@ abstract class DifferentialMail {
   protected $replyHandler;
   protected $parentMessageID;
 
-  abstract protected function renderSubject();
+  protected function renderSubject() {
+    $revision = $this->getRevision();
+    $title = $revision->getTitle();
+    $id = $revision->getID();
+    return "D{$id}: {$title}";
+  }
+
+  abstract protected function renderVarySubject();
   abstract protected function renderBody();
 
   public function setActorHandle($actor_handle) {
@@ -70,10 +77,11 @@ abstract class DifferentialMail {
       throw new Exception('No "To:" users provided!');
     }
 
-    $cc_phids    = $this->getCCPHIDs();
-    $subject     = $this->buildSubject();
-    $body        = $this->buildBody();
-    $attachments = $this->buildAttachments();
+    $cc_phids     = $this->getCCPHIDs();
+    $subject      = $this->buildSubject();
+    $vary_subject = $this->buildVarySubject();
+    $body         = $this->buildBody();
+    $attachments  = $this->buildAttachments();
 
     $template = new PhabricatorMetaMTAMail();
     $actor_handle = $this->getActorHandle();
@@ -85,6 +93,7 @@ abstract class DifferentialMail {
 
     $template
       ->setSubject($subject)
+      ->setVarySubject($vary_subject)
       ->setBody($body)
       ->setIsHTML($this->shouldMarkMailAsHTML())
       ->setParentMessageID($this->parentMessageID)
@@ -195,6 +204,10 @@ abstract class DifferentialMail {
 
   protected function buildSubject() {
     return trim($this->getSubjectPrefix().' '.$this->renderSubject());
+  }
+
+  protected function buildVarySubject() {
+    return trim($this->getSubjectPrefix().' '.$this->renderVarySubject());
   }
 
   protected function shouldMarkMailAsHTML() {
@@ -320,8 +333,7 @@ EOTEXT;
 
   protected function getThreadID() {
     $phid = $this->getRevision()->getPHID();
-    $domain = PhabricatorEnv::getEnvConfig('metamta.domain');
-    return "<differential-rev-{$phid}-req@{$domain}>";
+    return "differential-rev-{$phid}-req";
   }
 
   public function setComment($comment) {

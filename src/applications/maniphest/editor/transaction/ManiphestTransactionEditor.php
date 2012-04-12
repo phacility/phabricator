@@ -266,16 +266,18 @@ final class ManiphestTransactionEditor {
         "  ".$reply_instructions."\n";
     }
 
-    $thread_id = '<maniphest-task-'.$task->getPHID().'>';
+    $thread_id = 'maniphest-task-'.$task->getPHID();
     $task_id = $task->getID();
     $title = $task->getTitle();
     $prefix = $this->getSubjectPrefix();
-    $subject = trim("{$prefix} [{$action}] T{$task_id}: {$title}");
+    $subject = trim("{$prefix} T{$task_id}: {$title}");
+    $vary_subject = trim("{$prefix} [{$action}] T{$task_id}: {$title}");
 
     $mailtags = $this->getMailTags($transactions);
 
     $template = id(new PhabricatorMetaMTAMail())
       ->setSubject($subject)
+      ->setVarySubject($vary_subject)
       ->setFrom($transaction->getAuthorPHID())
       ->setParentMessageID($this->parentMessageID)
       ->addHeader('Thread-Topic', 'Maniphest Task '.$task->getID())

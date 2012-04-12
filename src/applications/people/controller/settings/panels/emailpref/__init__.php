@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/metamta/constants/notificationtype');
+phutil_require_module('phabricator', 'applications/metamta/storage/mail');
 phutil_require_module('phabricator', 'applications/people/controller/settings/panels/base');
 phutil_require_module('phabricator', 'applications/people/storage/preferences');
 phutil_require_module('phabricator', 'infrastructure/env');

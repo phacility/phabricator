@@ -18,9 +18,8 @@
 
 final class DifferentialCCWelcomeMail extends DifferentialReviewRequestMail {
 
-  protected function renderSubject() {
-    $revision = $this->getRevision();
-    return 'Added to CC: '.$revision->getTitle();
+  protected function renderVarySubject() {
+    return '[Added to CC] '.$this->renderSubject();
   }
 
   protected function renderBody() {
