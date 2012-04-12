@@ -499,8 +499,10 @@ final class PhabricatorSetup {
     }
 
     $engines = queryfx_all($conn_raw, 'SHOW ENGINES');
-    $engines = ipull($engines, 'Engine', 'Engine');
-    if (empty($engines['InnoDB'])) {
+    $engines = ipull($engines, 'Support', 'Engine');
+
+    $innodb = idx($engines, 'InnoDB');
+    if ($innodb != 'YES' && $innodb != 'DEFAULT') {
       self::writeFailure();
       self::write(
         "Setup failure! The 'InnoDB' engine is not available. Enable ".
