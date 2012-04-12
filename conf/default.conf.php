@@ -489,6 +489,16 @@ return array(
   // The Phabricator "Client Secret" to use for Phabricator API access.
   'phabricator.application-secret'   => null,
 
+// -- Disqus Comments ------------------------------------------------------- //
+
+  // Should Phame users have Disqus comment widget, and if so what's the
+  // website shortname to use? For example, secure.phabricator.org uses
+  // "phabricator", which we registered with Disqus. If you aren't familiar
+  // with Disqus, see:
+  // Disqus quick start guide - http://docs.disqus.com/help/4/
+  // Information on shortnames - http://docs.disqus.com/help/68/
+  'disqus.shortname'            => null,
+
 // -- Recaptcha ------------------------------------------------------------- //
 
   // Is Recaptcha enabled? If disabled, captchas will not appear. You should

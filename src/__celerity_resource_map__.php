@@ -1281,6 +1281,19 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/core/behavior-watch-anchor.js',
   ),
+  'javelin-behavior-phame-post-preview' =>
+  array(
+    'uri' => '/res/ac4c503a/rsrc/js/application/phame/phame-post-preview.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-util',
+      3 => 'phabricator-shaped-request',
+    ),
+    'disk' => '/rsrc/js/application/phame/phame-post-preview.js',
+  ),
   'javelin-behavior-phriction-document-preview' =>
   array(
     'uri' => '/res/f1665ecd/rsrc/js/application/phriction/phriction-document-preview.js',

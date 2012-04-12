@@ -1,0 +1,18 @@
+@title Phame User Guide
+@group userguide
+
+Journal about your thoughts and feelings. Share with others. Profit.
+
+= Overview =
+
+Phame is a simple blogging platform. You can write drafts which only you can
+see. Later, you can publish these drafts as posts which anyone can see.
+
+= Comment Widgets =
+
+Phame supports comment widgets from Facebook and Disqus. The adminstrator
+of the Phabricator instance must properly configure Phabricator to enable
+this functionality.
+
+NOTE: Phame is extremely new and very basic for now. Give us feedback on
+what you'd like to see improve!

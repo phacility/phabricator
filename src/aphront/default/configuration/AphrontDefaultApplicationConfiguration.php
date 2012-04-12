@@ -385,6 +385,28 @@ class AphrontDefaultApplicationConfiguration
         'diff/(?P<id>\d+)/' => 'PhrictionDiffController',
       ),
 
+      '/phame/' => array(
+        ''                          => 'PhamePostListController',
+        'post/' => array(
+          ''                        => 'PhamePostListController',
+          'delete/(?P<phid>[^/]+)/' => 'PhamePostDeleteController',
+          'edit/(?P<phid>[^/]+)/'   => 'PhamePostEditController',
+          'new/'                    => 'PhamePostEditController',
+          'preview/'                => 'PhamePostPreviewController',
+          'view/(?P<phid>[^/]+)/'   => 'PhamePostViewController',
+        ),
+        'draft/' => array(
+          ''                        => 'PhameDraftListController',
+          'new/'                    => 'PhamePostEditController',
+        ),
+        'posts/' => array(
+          ''                        => 'PhamePostListController',
+          '(?P<bloggername>\w+)/'   => 'PhamePostListController',
+          '(?P<bloggername>\w+)/(?P<phametitle>.+/)'
+                                    => 'PhamePostViewController',
+        ),
+      ),
+
       '/calendar/' => array(
         '' => 'PhabricatorCalendarBrowseController',
       ),
