@@ -159,33 +159,43 @@ class PhabricatorRepositorySvnCommitChangeParserWorker
               }
             } else {
               $type = DifferentialChangeType::TYPE_DELETE;
-              $file_type = $path_file_types[$path];
+            }
+            $file_type = $path_file_types[$path];
 
-              if ($file_type == DifferentialChangeType::FILE_DIRECTORY) {
-                // Bad. Child paths aren't enumerated in "svn log" so we need
-                // to go fishing.
+            if ($file_type == DifferentialChangeType::FILE_DIRECTORY) {
+              // Bad. Child paths aren't enumerated in "svn log" so we need
+              // to go fishing.
 
-                $list = $this->lookupRecursiveFileList(
-                  $repository,
-                  $lookup[$path]);
+              $list = $this->lookupRecursiveFileList(
+                $repository,
+                $lookup[$path]);
 
-                foreach ($list as $deleted_path => $path_file_type) {
-                  $deleted_path = rtrim($path.'/'.$deleted_path, '/');
-                  if (!empty($raw_paths[$deleted_path])) {
-                    // We somehow learned about this deletion explicitly?
-                    // TODO: Unclear how this is possible.
-                    continue;
-                  }
-                  $effects[$deleted_path] = array(
-                    'rawPath'         => $deleted_path,
-                    'rawTargetPath'   => null,
-                    'rawTargetCommit' => null,
-                    'rawDirect'       => true,
-
-                    'changeType'      => $type,
-                    'fileType'        => $path_file_type,
-                  );
+              foreach ($list as $deleted_path => $path_file_type) {
+                $deleted_path = rtrim($path.'/'.$deleted_path, '/');
+                if (!empty($raw_paths[$deleted_path])) {
+                  // We somehow learned about this deletion explicitly?
+                  // TODO: Unclear how this is possible.
+                  continue;
                 }
+                $effect_type = $type;
+                $effect_target_path = null;
+                if (isset($copied_or_moved_map[$deleted_path])) {
+                  $effect_target_path = $path;
+                  if (count($copied_or_moved_map[$deleted_path]) > 1) {
+                    $effect_type = DifferentialChangeType::TYPE_MULTICOPY;
+                  } else {
+                    $effect_type = DifferentialChangeType::TYPE_MOVE_AWAY;
+                  }
+                }
+                $effects[$deleted_path] = array(
+                  'rawPath'         => $deleted_path,
+                  'rawTargetPath'   => $effect_target_path,
+                  'rawTargetCommit' => null,
+                  'rawDirect'       => true,
+
+                  'changeType'      => $effect_type,
+                  'fileType'        => $path_file_type,
+                );
               }
             }
             break;
@@ -217,7 +227,8 @@ class PhabricatorRepositorySvnCommitChangeParserWorker
               }
 
               if ($source_file_type != DifferentialChangeType::FILE_DIRECTORY) {
-                if (isset($raw_paths[$copy_from])) {
+                if (isset($raw_paths[$copy_from]) ||
+                    isset($effects[$copy_from])) {
                   break;
                 }
                 $effects[$copy_from] = array(
