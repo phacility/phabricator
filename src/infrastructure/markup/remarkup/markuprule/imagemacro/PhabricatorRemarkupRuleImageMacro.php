@@ -22,52 +22,25 @@
 final class PhabricatorRemarkupRuleImageMacro
   extends PhutilRemarkupRule {
 
-  const RANDOM_IMAGE_NAME = 'randomon';
   private $images = array();
-  private $hash = 0;
 
   public function __construct() {
     $rows = id(new PhabricatorFileImageMacro())->loadAll();
     foreach ($rows as $row) {
       $this->images[$row->getName()] = $row->getFilePHID();
     }
-    $this->images[self::RANDOM_IMAGE_NAME] = '';
-    $this->hash = 0;
   }
 
   public function apply($text) {
     return preg_replace_callback(
-      '@\b([a-zA-Z0-9_\-]+)\b@',
+      '@^([a-zA-Z0-9_\-]+)$@m',
       array($this, 'markupImageMacro'),
       $text);
   }
 
-  /**
-   * Silly function for generating some 'randomness' based on the
-   * words in the text
-   */
-  private function updateHash($word) {
-    // Simple Jenkins hash
-    for ($ii = 0; $ii < strlen($word); $ii++) {
-      $this->hash += ord($word[$ii]);
-      $this->hash += ($this->hash << 10);
-      $this->hash ^= ($this->hash >> 6);
-    }
-  }
-
   public function markupImageMacro($matches) {
-    // Update the hash that is used for defining each 'randomon' image. This way
-    // each 'randomon' image will be different, but they won't change when the
-    // text is updated.
-    $this->updateHash($matches[1]);
-
     if (array_key_exists($matches[1], $this->images)) {
-      if ($matches[1] === self::RANDOM_IMAGE_NAME) {
-        $keys = array_keys($this->images);
-        $phid = $this->images[$keys[$this->hash % count($this->images)]];
-      } else {
-        $phid = $this->images[$matches[1]];
-      }
+      $phid = $this->images[$matches[1]];
 
       $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $phid);
       if ($file) {
