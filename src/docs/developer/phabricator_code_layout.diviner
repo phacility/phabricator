@@ -72,7 +72,7 @@ For ##Derp##, these classes could be something like:
    present the data to the user via one or more View classes.
  - **DerpEditor**:  business logic for workflows that change one or more
    Storage objects. Editor classes are only necessary for particularly 
-   complicated edits and should be used pragmatically verus Storage objects.
+   complicated edits and should be used pragmatically versus Storage objects.
  - **DerpException**: exceptions used in the ##Derp## application.
  - **DerpQuery**: query one or more storage objects for pertinent ##Derp##
    application data.  @{class:PhabricatorOffsetPagedQuery} is particularly
