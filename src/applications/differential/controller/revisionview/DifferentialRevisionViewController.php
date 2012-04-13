@@ -174,7 +174,9 @@ final class DifferentialRevisionViewController extends DifferentialController {
           phutil_render_tag(
             'a',
             array(
-              'href' => $request_uri->alter('large', 'true'),
+              'href' => $request_uri
+                ->alter('large', 'true')
+                ->setFragment('differential-review-toc'),
             ),
             'Show All Files Inline').
         "</strong>");
