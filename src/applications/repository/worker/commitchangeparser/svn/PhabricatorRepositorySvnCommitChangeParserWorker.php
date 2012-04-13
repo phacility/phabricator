@@ -277,7 +277,8 @@ class PhabricatorRepositorySvnCommitChangeParserWorker
                     }
                   }
 
-                  if (empty($raw_paths[$full_from])) {
+                  if (empty($raw_paths[$full_from]) &&
+                      empty($effects[$full_from])) {
                     if ($other_type == DifferentialChangeType::TYPE_COPY_AWAY) {
                       $effects[$full_from] = array(
                         'rawPath'         => $full_from,
