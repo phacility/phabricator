@@ -158,9 +158,9 @@ final class PhabricatorDaemonConsoleController
     return $this->buildStandardPageResponse(
       array(
         $daemon_panel,
-        $leased_panel,
-        $queued_panel,
         $cursor_panel,
+        $queued_panel,
+        $leased_panel,
       ),
       array(
         'title' => 'Console',
