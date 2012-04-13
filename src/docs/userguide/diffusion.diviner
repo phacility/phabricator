@@ -145,3 +145,10 @@ parse commit messages.
 
 TODO: This is an advanced feature which doesn't currently have documentation and
 isn't terribly stable.
+
+= Next Steps =
+
+  - Learn about creating a symbol index at 
+    @{article:Diffusion User Guide: Symbol Indexes}; or
+  - give us feedback at @{article:Give Feedback! Get Support!}.
+ 
