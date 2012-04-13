@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,12 +39,12 @@ final class PhabricatorSyntaxHighlighter {
   public static function highlightWithFilename($filename, $source) {
     $engine = self::newEngine();
     $language = $engine->getLanguageFromFilename($filename);
-    return $engine->getHighlightFuture($language, $source)->resolve();
+    return $engine->highlightSource($language, $source);
   }
 
   public static function highlightWithLanguage($language, $source) {
     $engine = self::newEngine();
-    return $engine->getHighlightFuture($language, $source)->resolve();
+    return $engine->highlightSource($language, $source);
   }
 
 

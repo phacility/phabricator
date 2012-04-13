@@ -55,8 +55,9 @@ final class DifferentialChangesetParser {
   private $isTopLevel;
   private $coverage;
   private $markupEngine;
+  private $highlightErrors;
 
-  const CACHE_VERSION = 4;
+  const CACHE_VERSION = 5;
 
   const ATTR_GENERATED  = 'attr:generated';
   const ATTR_DELETED    = 'attr:deleted';
@@ -503,7 +504,7 @@ final class DifferentialChangesetParser {
         $new_corpus[] = $n['text'];
       }
     }
-    $new_corpus_block = implode("\n", $new_corpus);
+    $new_corpus_block = implode("\n", $old_corpus);
 
     $old_future = $this->getHighlightFuture($old_corpus_block);
     $new_future = $this->getHighlightFuture($new_corpus_block);
@@ -511,18 +512,31 @@ final class DifferentialChangesetParser {
       'old' => $old_future,
       'new' => $new_future,
     );
+    $corpus_blocks = array(
+      'old' => $old_corpus_block,
+      'new' => $new_corpus_block,
+    );
+    $this->highlightErrors = false;
     foreach (Futures($futures) as $key => $future) {
       try {
+        try {
+          $highlighted = $future->resolve();
+        } catch (PhutilSyntaxHighlighterException $ex) {
+          $this->highlightErrors = true;
+          $highlighted = id(new PhutilDefaultSyntaxHighlighter())
+            ->getHighlightFuture($corpus_blocks[$key])
+            ->resolve();
+        }
         switch ($key) {
           case 'old':
             $this->oldRender = $this->processHighlightedSource(
               $this->old,
-              $future->resolve());
+              $highlighted);
             break;
           case 'new':
             $this->newRender = $this->processHighlightedSource(
               $this->new,
-              $future->resolve());
+              $highlighted);
             break;
         }
       } catch (Exception $ex) {
@@ -630,6 +644,10 @@ final class DifferentialChangesetParser {
   }
 
   public function saveCache() {
+    if ($this->highlightErrors) {
+      return false;
+    }
+
     $render_cache_key = $this->getRenderCacheKey();
     if (!$render_cache_key) {
       return false;

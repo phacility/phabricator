@@ -25,6 +25,7 @@ phutil_require_module('phutil', 'error');
 phutil_require_module('phutil', 'events/engine');
 phutil_require_module('phutil', 'future');
 phutil_require_module('phutil', 'markup');
+phutil_require_module('phutil', 'markup/syntax/highlighter/default');
 phutil_require_module('phutil', 'utils');
 
 
