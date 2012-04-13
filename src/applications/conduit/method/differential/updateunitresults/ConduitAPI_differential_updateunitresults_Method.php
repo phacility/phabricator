@@ -33,7 +33,7 @@ final class ConduitAPI_differential_updateunitresults_Method
       'name'      => 'required string',
       'result'    => 'required string',
       'message'   => 'required string',
-      'coverage'  => 'required map<string, string>',
+      'coverage'  => 'map<string, string>',
     );
   }
 
@@ -124,15 +124,16 @@ final class ConduitAPI_differential_updateunitresults_Method
         DifferentialUnitTestResult::RESULT_FAIL =>
           DifferentialUnitStatus::UNIT_FAIL,
         DifferentialUnitTestResult::RESULT_SKIP =>
-          DifferentialUnitStatus::UNIT_SKIP,
+          DifferentialUnitStatus::UNIT_OKAY,
         DifferentialUnitTestResult::RESULT_POSTPONED =>
           DifferentialUnitStatus::UNIT_POSTPONED);
 
     if ($diff->getUnitStatus() == DifferentialUnitStatus::UNIT_POSTPONED) {
+      $status_code =
+        idx($status_codes, $unit_status, DifferentialUnitStatus::UNIT_NONE);
       if ($postponed_count == 0 ||
-          $unit_status != DifferentialUnitTestResult::RESULT_PASS) {
-        $diff->setUnitStatus(
-          idx($status_codes, $unit_status, DifferentialUnitStatus::UNIT_NONE));
+          $status_code != DifferentialUnitStatus::UNIT_OKAY) {
+        $diff->setUnitStatus($status_code);
         $diff->save();
       }
     }
