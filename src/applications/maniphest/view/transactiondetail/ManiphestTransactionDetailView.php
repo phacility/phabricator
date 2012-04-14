@@ -358,13 +358,14 @@ final class ManiphestTransactionDetailView extends ManiphestView {
         }
         break;
       case ManiphestTransactionType::TYPE_CCS:
-        if ($this->preview) {
+        $added   = array_diff($new, $old);
+        $removed = array_diff($old, $new);
+        // can only add in preview so just show placeholder if nothing to add
+        if ($this->preview && empty($added)) {
           $verb = 'Changed CC';
           $desc = 'changed CCs..';
           break;
         }
-        $added = array_diff($new, $old);
-        $removed = array_diff($old, $new);
         if ($added && !$removed) {
           $verb = 'Added CC';
           if (count($added) == 1) {
@@ -386,13 +387,14 @@ final class ManiphestTransactionDetailView extends ManiphestView {
         }
         break;
       case ManiphestTransactionType::TYPE_PROJECTS:
-        if ($this->preview) {
+        $added   = array_diff($new, $old);
+        $removed = array_diff($old, $new);
+        // can only add in preview so just show placeholder if nothing to add
+        if ($this->preview && empty($added)) {
           $verb = 'Changed Projects';
           $desc = 'changed projects..';
           break;
         }
-        $added = array_diff($new, $old);
-        $removed = array_diff($old, $new);
         if ($added && !$removed) {
           $verb = 'Added Project';
           if (count($added) == 1) {

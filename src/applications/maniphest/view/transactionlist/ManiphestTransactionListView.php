@@ -61,6 +61,13 @@ final class ManiphestTransactionListView extends ManiphestView {
     return $this;
   }
 
+  private function getAuxiliaryFields() {
+    if (empty($this->auxiliaryFields)) {
+      return array();
+    }
+    return $this->auxiliaryFields;
+  }
+
   public function render() {
 
     $views = array();
@@ -108,7 +115,7 @@ final class ManiphestTransactionListView extends ManiphestView {
     foreach ($groups as $group) {
       $view = new ManiphestTransactionDetailView();
       $view->setUser($this->user);
-      $view->setAuxiliaryFields($this->auxiliaryFields);
+      $view->setAuxiliaryFields($this->getAuxiliaryFields());
       $view->setTransactionGroup($group);
       $view->setHandles($this->handles);
       $view->setMarkupEngine($this->markupEngine);

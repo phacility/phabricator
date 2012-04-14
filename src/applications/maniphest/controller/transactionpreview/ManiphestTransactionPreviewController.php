@@ -51,7 +51,6 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
     $draft->setDraft($comments);
     $draft->save();
 
-    $phids = array($user->getPHID());
 
     $action = $request->getStr('action');
 
@@ -61,23 +60,63 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
     $transaction->setTransactionType($action);
 
     $value = $request->getStr('value');
+    // grab phids for handles and set transaction values based on action and
+    // value (empty or control-specific format) coming in from the wire
     switch ($action) {
-      case ManiphestTransactionType::TYPE_OWNER:
-        if (!$value) {
-          $value = $user->getPHID();
-        }
-        $phids[] = $value;
-        break;
       case ManiphestTransactionType::TYPE_PRIORITY:
         $transaction->setOldValue($task->getPriority());
+        $transaction->setNewValue($value);
+        break;
+      case ManiphestTransactionType::TYPE_OWNER:
+        if ($value) {
+          $value = current(json_decode($value));
+          $phids = array($value);
+        } else {
+          $phids = array();
+        }
+        $transaction->setNewValue($value);
+        break;
+      case ManiphestTransactionType::TYPE_CCS:
+        if ($value) {
+          $value = json_decode($value);
+          $phids = $value;
+          foreach ($task->getCCPHIDs() as $cc_phid) {
+            $phids[] = $cc_phid;
+            $value[] = $cc_phid;
+          }
+          $transaction->setNewValue($value);
+        } else {
+          $phids = array();
+          $transaction->setNewValue(array());
+        }
+        $transaction->setOldValue($task->getCCPHIDs());
+        break;
+      case ManiphestTransactionType::TYPE_PROJECTS:
+        if ($value) {
+          $value = json_decode($value);
+          $phids = $value;
+          foreach ($task->getProjectPHIDs() as $project_phid) {
+            $phids[] = $project_phid;
+            $value[] = $project_phid;
+          }
+          $transaction->setNewValue($value);
+        } else {
+          $phids = array();
+          $transaction->setNewValue(array());
+        }
+        $transaction->setOldValue($task->getProjectPHIDs());
+        break;
+      default:
+        $phids = array();
+        $transaction->setNewValue($value);
         break;
     }
-    $transaction->setNewValue($value);
+    $phids[] = $user->getPHID();
 
     $handles = id(new PhabricatorObjectHandleData($phids))
       ->loadHandles();
 
-    $transactions = array();
+    $transactions   = array();
     $transactions[] = $transaction;
 
     $engine = PhabricatorMarkupEngine::newManiphestMarkupEngine();

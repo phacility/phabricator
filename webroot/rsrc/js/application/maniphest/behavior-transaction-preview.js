@@ -3,6 +3,8 @@
  * @requires javelin-behavior
  *           javelin-dom
  *           javelin-util
+ *           javelin-json
+ *           javelin-stratcom
  *           phabricator-shaped-request
  */
 
@@ -24,10 +26,18 @@ JX.behavior('maniphest-transaction-preview', function(config) {
       var input = ([]
         .concat(JX.DOM.scry(control, 'select'))
         .concat(JX.DOM.scry(control, 'input')))[0];
-      value = input.value;
-      if (JX.DOM.isType(input, 'input') && input.type != 'hidden') {
-        // Avoid reading 'value' out of the tokenizer free text input.
-        value = null;
+      if (JX.DOM.isType(input, 'input')) {
+        // Avoid reading 'value'(s) out of the tokenizer free text input.
+        if (input.type != 'hidden') {
+          value = null;
+        // Get the tokenizer and all that delicious data
+        } else {
+          var tokenizer_dom = JX.$(config.tokenizers[selected].id);
+          var tokenizer     = JX.Stratcom.getData(tokenizer_dom).tokenizer;
+          value = JX.JSON.stringify(JX.keys(tokenizer.getTokens()));
+        }
+      } else {
+        value = input.value;
       }
     } catch (_ignored_) {
       // Ignored.

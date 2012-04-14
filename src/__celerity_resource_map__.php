@@ -1173,14 +1173,16 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-maniphest-transaction-preview' =>
   array(
-    'uri' => '/res/44e86555/rsrc/js/application/maniphest/behavior-transaction-preview.js',
+    'uri' => '/res/855c9f0c/rsrc/js/application/maniphest/behavior-transaction-preview.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-behavior',
       1 => 'javelin-dom',
       2 => 'javelin-util',
-      3 => 'phabricator-shaped-request',
+      3 => 'javelin-json',
+      4 => 'javelin-stratcom',
+      5 => 'phabricator-shaped-request',
     ),
     'disk' => '/rsrc/js/application/maniphest/behavior-transaction-preview.js',
   ),
@@ -2550,7 +2552,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/8db30c56/maniphest.pkg.css',
       'type' => 'css',
     ),
-    '86fc0b0c' =>
+    '2055a702' =>
     array(
       'name' => 'maniphest.pkg.js',
       'symbols' =>
@@ -2560,7 +2562,7 @@ celerity_register_resource_map(array(
         2 => 'javelin-behavior-maniphest-transaction-preview',
         3 => 'javelin-behavior-maniphest-transaction-expand',
       ),
-      'uri' => '/res/pkg/86fc0b0c/maniphest.pkg.js',
+      'uri' => '/res/pkg/2055a702/maniphest.pkg.js',
       'type' => 'js',
     ),
     '2af849fb' =>
@@ -2621,10 +2623,10 @@ celerity_register_resource_map(array(
     'javelin-behavior-differential-keyboard-navigation' => '270dd507',
     'javelin-behavior-differential-populate' => '270dd507',
     'javelin-behavior-differential-show-more' => '270dd507',
-    'javelin-behavior-maniphest-batch-selector' => '86fc0b0c',
-    'javelin-behavior-maniphest-transaction-controls' => '86fc0b0c',
-    'javelin-behavior-maniphest-transaction-expand' => '86fc0b0c',
-    'javelin-behavior-maniphest-transaction-preview' => '86fc0b0c',
+    'javelin-behavior-maniphest-batch-selector' => '2055a702',
+    'javelin-behavior-maniphest-transaction-controls' => '2055a702',
+    'javelin-behavior-maniphest-transaction-expand' => '2055a702',
+    'javelin-behavior-maniphest-transaction-preview' => '2055a702',
     'javelin-behavior-phabricator-autofocus' => '21d01ed8',
     'javelin-behavior-phabricator-keyboard-shortcuts' => '21d01ed8',
     'javelin-behavior-phabricator-object-selector' => '270dd507',

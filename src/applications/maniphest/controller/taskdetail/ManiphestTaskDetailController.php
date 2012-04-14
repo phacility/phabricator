@@ -450,39 +450,42 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ManiphestTransactionType::TYPE_ATTACH   => 'file',
     );
 
-    Javelin::initBehavior('maniphest-transaction-controls', array(
-      'select' => 'transaction-action',
-      'controlMap' => $control_map,
-      'tokenizers' => array(
-        ManiphestTransactionType::TYPE_PROJECTS => array(
-          'id'       => 'projects-tokenizer',
-          'src'      => '/typeahead/common/projects/',
-          'ondemand' => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
-          'placeholder' => 'Type a project name...',
-        ),
-        ManiphestTransactionType::TYPE_OWNER => array(
-          'id'       => 'assign-tokenizer',
-          'src'      => '/typeahead/common/users/',
-          'value'    => $default_claim,
-          'limit'    => 1,
-          'ondemand' => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
-          'placeholder' => 'Type a user name...',
-        ),
-        ManiphestTransactionType::TYPE_CCS => array(
-          'id'       => 'cc-tokenizer',
-          'src'      => '/typeahead/common/mailable/',
-          'ondemand' => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
-          'placeholder' => 'Type a user or mailing list...',
-        ),
+    $tokenizer_map = array(
+      ManiphestTransactionType::TYPE_PROJECTS => array(
+        'id'          => 'projects-tokenizer',
+        'src'         => '/typeahead/common/projects/',
+        'ondemand'    => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
+        'placeholder' => 'Type a project name...',
       ),
+      ManiphestTransactionType::TYPE_OWNER => array(
+        'id'          => 'assign-tokenizer',
+        'src'         => '/typeahead/common/users/',
+        'value'       => $default_claim,
+        'limit'       => 1,
+        'ondemand'    => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
+        'placeholder' => 'Type a user name...',
+      ),
+      ManiphestTransactionType::TYPE_CCS => array(
+        'id'          => 'cc-tokenizer',
+        'src'         => '/typeahead/common/mailable/',
+        'ondemand'    => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
+        'placeholder' => 'Type a user or mailing list...',
+      ),
+    );
+
+    Javelin::initBehavior('maniphest-transaction-controls', array(
+      'select'     => 'transaction-action',
+      'controlMap' => $control_map,
+      'tokenizers' => $tokenizer_map,
     ));
 
     Javelin::initBehavior('maniphest-transaction-preview', array(
-      'uri'     => '/maniphest/transaction/preview/'.$task->getID().'/',
-      'preview' => 'transaction-preview',
-      'comments' => 'transaction-comments',
-      'action'   => 'transaction-action',
-      'map'      => $control_map,
+      'uri'        => '/maniphest/transaction/preview/'.$task->getID().'/',
+      'preview'    => 'transaction-preview',
+      'comments'   => 'transaction-comments',
+      'action'     => 'transaction-action',
+      'map'        => $control_map,
+      'tokenizers' => $tokenizer_map,
     ));
 
     $comment_panel = new AphrontPanelView();
