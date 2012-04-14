@@ -9,10 +9,11 @@
 phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'applications/files/storage/file');
 phutil_require_module('phabricator', 'applications/paste/controller/base');
+phutil_require_module('phabricator', 'applications/paste/query/paste');
 phutil_require_module('phabricator', 'applications/paste/storage/paste');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'infrastructure/env');
-phutil_require_module('phabricator', 'view/control/pager');
+phutil_require_module('phabricator', 'view/control/idpager');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/form/base');
 phutil_require_module('phabricator', 'view/form/control/select');

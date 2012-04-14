@@ -9,6 +9,9 @@
 phutil_require_module('phabricator', 'applications/paste/storage/base');
 phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/phid/storage/phid');
+phutil_require_module('phabricator', 'applications/policy/constants/capability');
+phutil_require_module('phabricator', 'applications/policy/constants/policy');
+phutil_require_module('phabricator', 'applications/policy/interface/policy');
 
 
 phutil_require_source('PhabricatorPaste.php');

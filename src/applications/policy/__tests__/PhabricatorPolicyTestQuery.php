@@ -16,18 +16,25 @@
  * limitations under the License.
  */
 
-abstract class PhabricatorQuery {
+/**
+ * Configurable test query for implementing Policy unit tests.
+ */
+final class PhabricatorPolicyTestQuery
+  extends PhabricatorPolicyQuery {
 
-  abstract public function execute();
+  private $results;
 
-  final protected function formatWhereClause(array $parts) {
-    $parts = array_filter($parts);
+  public function setResults(array $results) {
+    $this->results = $results;
+    return $this;
+  }
 
-    if (!$parts) {
-      return '';
-    }
+  public function loadPage() {
+    return $this->results;
+  }
 
-    return 'WHERE ('.implode(') AND (', $parts).')';
+  public function nextPage(array $page) {
+    return null;
   }
 
 }

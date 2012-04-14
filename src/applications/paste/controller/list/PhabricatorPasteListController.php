@@ -24,10 +24,6 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
   private $paste;
   private $pasteText;
 
-  private $offset;
-  private $pageSize;
-  private $author;
-
   private function setFilter($filter) {
     $this->filter = $filter;
     return $this;
@@ -40,6 +36,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     $this->errorView = $error_view;
     return $this;
   }
+
   private function getErrorView() {
     return $this->errorView;
   }
@@ -68,40 +65,19 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     return $this->pasteText;
   }
 
-  private function setOffset($offset) {
-    $this->offset = $offset;
-    return $this;
-  }
-  private function getOffset() {
-    return $this->offset;
-  }
-
-  private function setPageSize($page_size) {
-    $this->pageSize = $page_size;
-    return $this;
-  }
-  private function getPageSize() {
-    return $this->pageSize;
-  }
-
-  private function setAuthor($author) {
-    $this->author = $author;
-    return $this;
-  }
-  private function getAuthor() {
-    return $this->author;
-  }
-
   public function willProcessRequest(array $data) {
     $this->setFilter(idx($data, 'filter', 'create'));
   }
 
   public function processRequest() {
-
     $request = $this->getRequest();
     $user = $request->getUser();
-    $paste_list = array();
-    $pager = null;
+
+    $pager = new AphrontIDPagerView();
+    $pager->readFromRequest($request);
+
+    $query = new PhabricatorPasteQuery();
+    $query->setViewer($user);
 
     switch ($this->getFilter()) {
       case 'create':
@@ -111,22 +87,18 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
         if ($created_paste_redirect) {
           return $created_paste_redirect;
         }
-        // if we didn't succeed or we weren't trying, load just a few
-        // recent pastes with NO pagination
-        $this->setOffset(0);
-        $this->setPageSize(10);
-        list($paste_list, $pager) = $this->loadPasteList();
-        break;
 
+        $query->setLimit(10);
+        $paste_list = $query->execute();
+
+        $pager = null;
+        break;
       case 'my':
-        $this->setAuthor($user->getPHID());
-        $this->setOffset($request->getInt('page', 0));
-        list($paste_list, $pager) = $this->loadPasteList();
+        $query->withAuthorPHIDs(array($user->getPHID()));
+        $paste_list = $query->executeWithPager($pager);
         break;
-
       case 'all':
-        $this->setOffset($request->getInt('page', 0));
-        list($paste_list, $pager) = $this->loadPasteList();
+        $paste_list = $query->executeWithPager($pager);
         break;
     }
 
@@ -171,23 +143,18 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
           ),
           'See all Pastes');
         $header = "Recent Pastes &middot; {$see_all}";
-        $side_nav->appendChild($this->renderPasteList($paste_list,
-                                                      $header,
-                                                      $pager = null));
         break;
       case 'my':
         $header = 'Your Pastes';
-        $side_nav->appendChild($this->renderPasteList($paste_list,
-                                                      $header,
-                                                      $pager));
         break;
       case 'all':
         $header = 'All Pastes';
-        $side_nav->appendChild($this->renderPasteList($paste_list,
-                                                      $header,
-                                                      $pager));
         break;
     }
+
+    $side_nav->appendChild(
+      $this->renderPasteList($paste_list, $header, $pager));
+
 
     return $this->buildStandardPageResponse(
       $side_nav,
@@ -282,30 +249,66 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     $this->setPaste($new_paste);
   }
 
-  private function loadPasteList() {
+  private function renderCreatePaste() {
     $request = $this->getRequest();
+    $user = $request->getUser();
 
-    $pager = new AphrontPagerView();
-    $pager->setOffset($this->getOffset());
-    if ($this->getPageSize()) {
-      $pager->setPageSize($this->getPageSize());
-    }
+    $new_paste = $this->getPaste();
 
-    if ($this->getAuthor()) {
-      $pastes = id(new PhabricatorPaste())->loadAllWhere(
-        'authorPHID = %s ORDER BY id DESC LIMIT %d, %d',
-        $this->getAuthor(),
-        $pager->getOffset(),
-        $pager->getPageSize() + 1);
-    } else {
-      $pastes = id(new PhabricatorPaste())->loadAllWhere(
-        '1 = 1 ORDER BY id DESC LIMIT %d, %d',
-        $pager->getOffset(),
-        $pager->getPageSize() + 1);
-    }
+    $form = new AphrontFormView();
 
-    $pastes = $pager->sliceResults($pastes);
-    $pager->setURI($request->getRequestURI(), 'page');
+    $available_languages = PhabricatorEnv::getEnvConfig(
+      'pygments.dropdown-choices');
+    asort($available_languages);
+    $language_select = id(new AphrontFormSelectControl())
+      ->setLabel('Language')
+      ->setName('language')
+      ->setValue($new_paste->getLanguage())
+      ->setOptions($available_languages);
+
+    $form
+      ->setUser($user)
+      ->setAction($request->getRequestURI()->getPath())
+      ->addHiddenInput('parent', $new_paste->getParentPHID())
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel('Title')
+          ->setValue($new_paste->getTitle())
+          ->setName('title'))
+      ->appendChild($language_select)
+      ->appendChild(
+        id(new AphrontFormTextAreaControl())
+          ->setLabel('Text')
+          ->setError($this->getErrorText())
+          ->setValue($this->getPasteText())
+          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
+          ->setName('text'))
+
+    /* TODO: Doesn't have any useful options yet.
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setLabel('Visible To')
+          ->setUser($user)
+          ->setValue(
+            $new_paste->getPolicy(PhabricatorPolicyCapability::CAN_VIEW))
+          ->setName('policy'))
+    */
+
+      ->appendChild(
+        id(new AphrontFormSubmitControl())
+          ->addCancelButton('/paste/')
+          ->setValue('Create Paste'));
+
+    $create_panel = new AphrontPanelView();
+    $create_panel->setWidth(AphrontPanelView::WIDTH_FULL);
+    $create_panel->setHeader('Create a Paste');
+    $create_panel->appendChild($form);
+
+    return $create_panel;
+  }
+
+  private function renderPasteList(array $pastes, $header, $pager) {
+    assert_instances_of($pastes, 'PhabricatorPaste');
 
     $phids = mpull($pastes, 'getAuthorPHID');
     $handles = array();
@@ -318,8 +321,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     if ($phids) {
       $files = id(new PhabricatorFile())->loadAllWhere(
         'phid in (%Ls)',
-        $phids
-      );
+        $phids);
       if ($files) {
         $file_uris = mpull($files, 'getBestURI', 'getPHID');
       }
@@ -363,59 +365,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
       );
     }
 
-    return array($paste_list_rows, $pager);
-  }
 
-  private function renderCreatePaste() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $new_paste = $this->getPaste();
-
-    $form = new AphrontFormView();
-
-    $available_languages = PhabricatorEnv::getEnvConfig(
-      'pygments.dropdown-choices');
-    asort($available_languages);
-    $language_select = id(new AphrontFormSelectControl())
-      ->setLabel('Language')
-      ->setName('language')
-      ->setValue($new_paste->getLanguage())
-      ->setOptions($available_languages);
-
-    $form
-      ->setUser($user)
-      ->setAction($request->getRequestURI()->getPath())
-      ->addHiddenInput('parent', $new_paste->getParentPHID())
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel('Title')
-          ->setValue($new_paste->getTitle())
-          ->setName('title'))
-      ->appendChild($language_select)
-      ->appendChild(
-        id(new AphrontFormTextAreaControl())
-          ->setLabel('Text')
-          ->setError($this->getErrorText())
-          ->setValue($this->getPasteText())
-          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
-          ->setName('text'))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->addCancelButton('/paste/')
-        ->setValue('Create Paste'));
-
-    $create_panel = new AphrontPanelView();
-    $create_panel->setWidth(AphrontPanelView::WIDTH_FULL);
-    $create_panel->setHeader('Create a Paste');
-    $create_panel->appendChild($form);
-
-    return $create_panel;
-  }
-
-  private function renderPasteList($paste_list_rows,
-                                   $header,
-                                   $pager = null) {
     $table = new AphrontTableView($paste_list_rows);
     $table->setHeaders(
       array(

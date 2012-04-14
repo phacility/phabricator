@@ -29,7 +29,11 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $paste = id(new PhabricatorPaste())->load($this->id);
+    $paste = id(new PhabricatorPasteQuery())
+      ->setViewer($user)
+      ->withPasteIDs(array($this->id))
+      ->executeOne();
+
     if (!$paste) {
       return new Aphront404Response();
     }

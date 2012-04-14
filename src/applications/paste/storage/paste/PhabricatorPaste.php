@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-final class PhabricatorPaste extends PhabricatorPasteDAO {
+final class PhabricatorPaste extends PhabricatorPasteDAO
+  implements PhabricatorPolicyInterface {
 
   protected $phid;
   protected $title;
@@ -34,6 +35,20 @@ final class PhabricatorPaste extends PhabricatorPasteDAO {
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorPHIDConstants::PHID_TYPE_PSTE);
+  }
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::POLICY_USER;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $user) {
+    return ($user->getPHID() == $this->getAuthorPHID());
   }
 
 }

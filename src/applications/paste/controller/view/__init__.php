@@ -11,6 +11,7 @@ phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'applications/files/storage/file');
 phutil_require_module('phabricator', 'applications/markup/syntax');
 phutil_require_module('phabricator', 'applications/paste/controller/base');
+phutil_require_module('phabricator', 'applications/paste/query/paste');
 phutil_require_module('phabricator', 'applications/paste/storage/paste');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'infrastructure/javelin/api');

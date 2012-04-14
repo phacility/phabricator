@@ -16,18 +16,10 @@
  * limitations under the License.
  */
 
-abstract class PhabricatorQuery {
+final class PhabricatorPolicies extends PhabricatorPolicyConstants {
 
-  abstract public function execute();
-
-  final protected function formatWhereClause(array $parts) {
-    $parts = array_filter($parts);
-
-    if (!$parts) {
-      return '';
-    }
-
-    return 'WHERE ('.implode(') AND (', $parts).')';
-  }
+  const POLICY_PUBLIC   = 'public';
+  const POLICY_USER     = 'users';
+  const POLICY_NOONE    = 'no-one';
 
 }
