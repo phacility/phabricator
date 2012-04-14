@@ -50,13 +50,6 @@ abstract class PhabricatorController extends AphrontController {
         $phsid);
       if ($info) {
         $user->loadFromArray($info);
-      } else {
-        // The session cookie is invalid, so clear it.
-        $request->clearCookie('phusr');
-        $request->clearCookie('phsid');
-        throw new Exception(
-          "Your login session is invalid. Try logging in again. If that ".
-          "doesn't work, clear your browser cookies.");
       }
     }
 
