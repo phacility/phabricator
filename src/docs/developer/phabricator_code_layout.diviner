@@ -16,7 +16,7 @@ The Phabricator infrastructure knows where a given controller class lives on
 disk from a cache file the Arcanist phutil mapper generates. This mapping 
 should be updated whenever new classes or files are added:
 
-  /path/to/arcanist/scripts/phutil_mapper.php /path/to/phabricator/src
+  arc liberate /path/to/phabricator/src
 
 Finally, a given controller class will map to an application which will have 
 most of its code in standardized subdirectories and classes.
@@ -118,11 +118,12 @@ corresponding classes
  - **DerpViewController**: typically extends ##DerpBaseController## and displays
    a single ##Derp##.
 
-NOTE: each directory will have a class file with an ##__init__.php## or 
-subdirectories; never both.
+Some especially awesome directories might have a ##__tests__## subdirectory 
+containing all pertinent unit test code for the class.
 
 = Next Steps =
 
  - Learn about @{article:Adding New CSS and JS}; or
  - learn about the @{class:LiskDAO}; or
+ - learn about @{article:Writing Unit Tests}; or
  - learn how to contribute (see @{article:Contributor Introduction}).
