@@ -111,9 +111,13 @@ abstract class PhabricatorMailReplyHandler {
     // This grouping is just so we can use the public reply-to for any
     // recipients without a private reply-to, e.g. mailing lists.
     $groups = array();
-    foreach ($recipients as $recipient) {
-      $private = $this->getPrivateReplyHandlerEmailAddress($recipient);
-      $groups[$private][] = $recipient;
+    if ($this->supportsPrivateReplies) {
+      foreach ($recipients as $recipient) {
+        $private = $this->getPrivateReplyHandlerEmailAddress($recipient);
+        $groups[$private][] = $recipient;
+      }
+    } else {
+      $groups[''] = array($recipients):
     }
 
     // When multiplexing mail, explicitly include To/Cc information in the
