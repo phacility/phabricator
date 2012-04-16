@@ -117,7 +117,7 @@ abstract class PhabricatorMailReplyHandler {
         $groups[$private][] = $recipient;
       }
     } else {
-      $groups[''] =$recipients;
+      $groups[''] = $recipients;
     }
 
     // When multiplexing mail, explicitly include To/Cc information in the
