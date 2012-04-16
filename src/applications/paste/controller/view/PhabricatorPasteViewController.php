@@ -149,6 +149,9 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
     Javelin::initBehavior('phabricator-oncopy', array());
     $rows = $this->buildDisplayRows($text_list);
 
+    // TODO: Split the "one-up source listing" view into its own class and
+    // share it properly between Paste and Diffusion.
+
     $corpus_table = phutil_render_tag(
       'table',
       array(
@@ -183,7 +186,13 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
           'href' => '#'.$anchor,
         ),
         $n);
-      $rows[] = '<tr id="'.$anchor.'"><th>'.$link.'</th>'.
+      $link = phutil_render_tag(
+        'th',
+        array(
+          'class' => 'diffusion-line-link',
+        ),
+        $link);
+      $rows[] = '<tr id="'.$anchor.'">'.$link.
         '<td style="white-space: pre-wrap;">'.
         // NOTE: See the 'phabricator-oncopy' behavior.
         "\xE2\x80\x8B".

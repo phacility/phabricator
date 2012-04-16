@@ -354,6 +354,8 @@ final class DiffusionBrowseFileController extends DiffusionController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    Javelin::initBehavior('phabricator-oncopy', array());
+
     $rows = array();
     foreach ($display as $line) {
 
@@ -475,7 +477,9 @@ final class DiffusionBrowseFileController extends DiffusionController {
         'td',
         array(
         ),
-        $anchor_text.$line['data']);
+        $anchor_text.
+        "\xE2\x80\x8B". // NOTE: See phabricator-oncopy behavior.
+        $line['data']);
 
       $rows[] = phutil_render_tag(
         'tr',

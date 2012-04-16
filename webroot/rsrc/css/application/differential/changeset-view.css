@@ -55,6 +55,12 @@
   font-family:        "Verdana";
   font-size:          11px;
   overflow:           hidden;
+
+  -moz-user-select:     -moz-none;
+  -khtml-user-select:   none;
+  -webkit-user-select:  none;
+  -ms-user-select:      none;
+  user-select:          none;
 }
 
 .differential-changeset-immutable .differential-diff th {
