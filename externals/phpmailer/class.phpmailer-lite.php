@@ -1512,7 +1512,7 @@ class PHPMailerLite {
           $encoded);
         break;
       case 'comment':
-        $encoded = preg_replace(
+        $encoded = preg_replace_callback(
           "/([\(\)\"])/",
           array($this, 'encodeQCallback'),
           $encoded);
@@ -1520,7 +1520,7 @@ class PHPMailerLite {
       case 'text':
       default:
         // Replace every high ascii, control =, ? and _ characters
-        $encoded = preg_replace(
+        $encoded = preg_replace_callback(
           '/([\000-\011\013\014\016-\037\075\077\137\177-\377])/',
           array($this, 'encodeQCallback'),
           $encoded);
