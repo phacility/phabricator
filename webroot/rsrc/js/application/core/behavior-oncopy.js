@@ -61,7 +61,7 @@ JX.behavior('phabricator-oncopy', function() {
         position: 'absolute',
         left:     '-10000px'
       };
-      var pre = JX.$N('pre', style, result);
+      var pre = JX.$N('pre', {style: style}, result);
       document.body.appendChild(pre);
 
       // Select the text in the <pre>.
@@ -70,7 +70,7 @@ JX.behavior('phabricator-oncopy', function() {
       selection.removeAllRanges();
       selection.addRange(range);
 
-      setTimeout(function() { JX.DOM.remove(pre) }, 0);
+      setTimeout(function() { JX.DOM.remove(pre); }, 0);
 
       // TODO: I tried to restore the old selection range but it doesn't seem
       // to work or give me any errors. So you lose your selection when you
