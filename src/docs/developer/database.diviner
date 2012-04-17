@@ -1,0 +1,126 @@
+@title Database Schema
+@group developer
+
+This document describes key components of the database schema and should answer
+questions like how to store new types of data.
+
+= Database System =
+
+Phabricator uses MySQL with InnoDB engine. The only exception is the
+`search_documentfield` table which uses MyISAM because MySQL doesn't support
+fulltext search in InnoDB.
+
+Let us know if you need to use other database system: @{article:Give Feedback!
+Get Support!}.
+
+= PHP Drivers =
+
+Phabricator supports [[ http://www.php.net/book.mysql | MySQL ]] and
+[[ http://www.php.net/book.mysqli | MySQLi ]] PHP extensions. Most installations
+use MySQL but MySQLi should work equally well.
+
+= Databases =
+
+Each Phabricator application has its own database. The names are prefixed by
+`phabricator_`. This design has two advantages:
+
+* Each database is easier to comprehend and to maintain.
+* We don't do cross-database joins so each database can live on its own machine
+  which is useful for load-balancing.
+
+= Connections =
+
+Phabricator specifies if it will use any opened connection just for reading or
+also for writing. This allows opening write connections to master and read
+connections to slave in master/slave replication. It is useful for
+load-balancing.
+
+= Tables =
+
+Each table name is prefixed by its application. For example, Differential
+revisions are stored in database `phabricator_differential` and table
+`differential_revision`. This duplicity allows easy recognition of the table in
+DarkConsole (see @{article:Using DarkConsole}) and other places.
+
+The exception is tables which share the same schema over different databases
+such as `edge`.
+
+We use lower-case table names with words separated by underscores.
+
+= Column Names =
+
+Phabricator uses camelCase names for columns. The main advantage is that they
+directly map to properties in PHP classes.
+
+Don't use MySQL reserved words (such as `order`) for column names.
+
+= Data Types =
+
+Phabricator uses `int unsigned` columns for storing dates instead of `date` or
+`datetime`. We don't need to care about time-zones in both MySQL and PHP because
+of it. The other reason is that PHP internally uses numbers for storing dates.
+
+Phabricator uses UTF-8 encoding for storing all text data. We use
+`utf8_general_ci` collation for free-text and `utf8_bin` for identifiers.
+
+= JSON =
+
+Some data don't require structured access - you don't need to filter or order by
+them. We store these data as text fields in JSON format. This approach has
+several advantages:
+
+* If we decide to add another unstructured field then we don't need to alter the
+  table (which is slow for big tables in MySQL).
+* Table structure is not cluttered by fields which could be unused most of the
+  time.
+
+An example of such usage can be found in column
+`differential_diffproperty.data`.
+
+= Primary Keys =
+
+Most tables have auto-increment column named `id`. However creating such column
+is not required for tables which are not usually directly referenced (such as
+tables expressing M:N relations). Example of such table is
+`differential_relationship`.
+
+= Indexes =
+
+Create all indexes necessary for fast query execution in most cases. Don't
+create indexes which are not used. You can analyze queries @{article:Using
+DarkConsole}.
+
+= Foreign Keys =
+
+We don't use InnoDB's foreign keys because our application is so great that
+no inconsistencies can arise. It will just slow us down.
+
+= PHIDs =
+
+Each globally referencable object in Phabricator has its associated PHID
+(Phabricator ID) which serves as a global identifier. We use PHIDs for
+referencing data in different databases. PHIDs are stored in table `phid`.
+
+We use both autoincrementing IDs and global PHIDs because each is useful in
+different contexts. Autoincrementing IDs are chronologically ordered and allow
+us to construct short, human-readable object names (like D2258) and URIs. Global
+PHIDs allow us to represent relationships between different types of objects in
+a homogenous way.
+
+= Advanced Features =
+
+We don't use MySQL advanced features such as triggers, stored procedures or
+events because we like expressing the application logic in PHP more than in SQL.
+Some of these features (especially triggers) can also cause big confusion.
+
+Avoiding these advanced features is also good for supporting other database
+systems (which we don't support anyway).
+
+= Schema Denormalization =
+
+Phabricator uses schema denormalization for performance reasons sparingly. Try
+to avoid it if possible.
+
+= See Also =
+
+* @{class:LiskDAO}
