@@ -56,9 +56,11 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
         $body[] = null;
       }
 
-      $body[] = 'TEST PLAN';
-      $body[] = $this->formatText($revision->getTestPlan());
-      $body[] = null;
+      if ($revision->getTestPlan() != '') {
+        $body[] = 'TEST PLAN';
+        $body[] = $this->formatText($revision->getTestPlan());
+        $body[] = null;
+      }
     } else {
       if (strlen($this->getComments())) {
         $body[] = $this->formatText($this->getComments());
