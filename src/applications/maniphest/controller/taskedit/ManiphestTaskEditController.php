@@ -214,11 +214,13 @@ final class ManiphestTaskEditController extends ManiphestController {
         }
 
         if ($transactions) {
+          $is_new = !$task->getID();
+
           $event = new PhabricatorEvent(
             PhabricatorEventType::TYPE_MANIPHEST_WILLEDITTASK,
             array(
               'task'          => $task,
-              'new'           => !$task->getID(),
+              'new'           => $is_new,
               'transactions'  => $transactions,
             ));
           $event->setUser($user);
@@ -231,7 +233,19 @@ final class ManiphestTaskEditController extends ManiphestController {
           $editor = new ManiphestTransactionEditor();
           $editor->setAuxiliaryFields($aux_fields);
           $editor->applyTransactions($task, $transactions);
+
+          $event = new PhabricatorEvent(
+            PhabricatorEventType::TYPE_MANIPHEST_DIDEDITTASK,
+            array(
+              'task'          => $task,
+              'new'           => $is_new,
+              'transactions'  => $transactions,
+            ));
+          $event->setUser($user);
+          $event->setAphrontRequest($request);
+          PhutilEventEngine::dispatchEvent($event);
         }
+
 
         if ($parent_task) {
           $type_task = PhabricatorPHIDConstants::PHID_TYPE_TASK;

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
 final class PhabricatorEventType extends PhutilEventType {
 
   const TYPE_MANIPHEST_WILLEDITTASK = 'maniphest.willEditTask';
+  const TYPE_MANIPHEST_DIDEDITTASK = 'maniphest.didEditTask';
   const TYPE_DIFFERENTIAL_WILLSENDMAIL = 'differential.willSendMail';
   const TYPE_DIFFERENTIAL_WILLMARKGENERATED = 'differential.willMarkGenerated';
 
