@@ -104,3 +104,7 @@
 .phabricator-transaction-view .differential-comment-action-request_review {
   border-color:     #cc9966;
 }
+
+.phabricator-transaction-view .differential-comment-action-claim {
+  border-color:     #000000;
+}

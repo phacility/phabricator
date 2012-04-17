@@ -67,7 +67,7 @@ final class DifferentialCommentEditor {
     return $this->changedByCommit;
   }
 
-  public function setAddedReviewers($added_reviewers) {
+  public function setAddedReviewers(array $added_reviewers) {
     $this->addedReviewers = $added_reviewers;
     return $this;
   }
@@ -101,7 +101,6 @@ final class DifferentialCommentEditor {
     $actor_phid = $this->actorPHID;
     $actor = id(new PhabricatorUser())->loadOneWhere('PHID = %s', $actor_phid);
     $actor_is_author = ($actor_phid == $revision->getAuthorPHID());
-    $actor_is_admin = $actor->getIsAdmin();
     $revision_status = $revision->getStatus();
 
     $revision->loadRelationships();
@@ -147,7 +146,7 @@ final class DifferentialCommentEditor {
         break;
 
       case DifferentialAction::ACTION_ABANDON:
-        if (!($actor_is_author || $actor_is_admin)) {
+        if (!$actor_is_author) {
           throw new Exception('You can only abandon your own revisions.');
         }
 
@@ -363,7 +362,6 @@ final class DifferentialCommentEditor {
         if ($added_reviewers) {
           $key = DifferentialComment::METADATA_ADDED_REVIEWERS;
           $metadata[$key] = $added_reviewers;
-
         } else {
           $user_tried_to_add = count($this->getAddedReviewers());
           if ($user_tried_to_add == 0) {
@@ -414,6 +412,32 @@ final class DifferentialCommentEditor {
               "authors, reviewers or CCs.");
           }
         }
+        break;
+      case DifferentialAction::ACTION_CLAIM:
+        if ($actor_is_author) {
+          throw new Exception("You can not commandeer your own revision.");
+        }
+
+        switch ($revision_status) {
+          case ArcanistDifferentialRevisionStatus::COMMITTED:
+            throw new DifferentialActionHasNoEffectException(
+              "You can not commandeer this revision because it has ".
+              "already been committed.");
+            break;
+        }
+
+        $this->setAddedReviewers(array($revision->getAuthorPHID()));
+
+        // NOTE: Set the new author PHID before calling addReviewers(), since it
+        // doesn't permit the author to become a reviewer.
+        $revision->setAuthorPHID($actor_phid);
+
+        $added_reviewers = $this->addReviewers();
+        if ($added_reviewers) {
+          $key = DifferentialComment::METADATA_ADDED_REVIEWERS;
+          $metadata[$key] = $added_reviewers;
+        }
+
         break;
       default:
         throw new Exception('Unsupported action.');
