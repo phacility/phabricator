@@ -504,7 +504,7 @@ final class DifferentialChangesetParser {
         $new_corpus[] = $n['text'];
       }
     }
-    $new_corpus_block = implode("\n", $old_corpus);
+    $new_corpus_block = implode("\n", $new_corpus);
 
     $old_future = $this->getHighlightFuture($old_corpus_block);
     $new_future = $this->getHighlightFuture($new_corpus_block);
