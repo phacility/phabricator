@@ -501,6 +501,9 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       $mailer->addHeader('X-Phabricator-Sent-This-Message', 'Yes');
       $mailer->addHeader('X-Mail-Transport-Agent', 'MetaMTA');
 
+      // Some clients respect this to suppress OOF and other auto-responses.
+      $mailer->addHeader('X-Auto-Response-Suppress', 'All');
+
       // If the message has mailtags, filter out any recipients who don't want
       // to receive this type of mail.
       $mailtags = $this->getParam('mailtags');
