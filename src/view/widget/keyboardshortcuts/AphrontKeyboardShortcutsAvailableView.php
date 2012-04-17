@@ -20,12 +20,9 @@ final class AphrontKeyboardShortcutsAvailableView extends AphrontView {
 
   public function render() {
     return
-      '<table class="keyboard-shortcuts-available">'.
-        '<tr>'.
-          '<th>Press <strong>?</strong> to show keyboard shortcuts.</th>'.
-          '<td></td>'.
-        '</tr>'.
-      '</table>';
+      '<div class="keyboard-shortcuts-available">'.
+        'Press <strong>?</strong> to show keyboard shortcuts.'.
+      '</div>';
   }
 
 }
