@@ -1579,10 +1579,13 @@ final class DifferentialChangesetParser {
     $props  = $this->renderPropertyChangeHeader($this->changeset);
     $table = null;
     if ($contents) {
-      $table =
-        '<table class="differential-diff remarkup-code PhabricatorMonospaced">'.
-          $contents.
-        '</table>';
+      $table = javelin_render_tag(
+        'table',
+        array(
+          'class' => 'differential-diff remarkup-code PhabricatorMonospaced',
+          'sigil' => 'differential-diff',
+        ),
+        $contents);
     }
 
     if (!$table && !$props) {

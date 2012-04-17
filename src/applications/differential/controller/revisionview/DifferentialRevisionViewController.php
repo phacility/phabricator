@@ -324,6 +324,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       array(
         'haunt' => $pane_id,
       ));
+    Javelin::initBehavior('differential-user-select');
 
     $page_pane = id(new DifferentialPrimaryPaneView())
       ->setLineWidthFromChangesets($changesets)
