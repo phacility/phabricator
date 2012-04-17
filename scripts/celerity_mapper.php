@@ -53,6 +53,10 @@ $package_spec = array(
     'phabricator-paste-file-upload',
     'phabricator-menu-item',
     'phabricator-dropdown-menu',
+    'javelin-behavior-phabricator-oncopy',
+    'phabricator-tooltip',
+    'javelin-behavior-phabricator-tooltips',
+    'phabricator-prefab',
   ),
   'core.pkg.css' => array(
     'phabricator-core-css',
@@ -76,6 +80,10 @@ $package_spec = array(
     'syntax-highlighting-css',
     'aphront-pager-view-css',
     'phabricator-transaction-view-css',
+    'aphront-tooltip-css',
+    'aphront-headsup-view-css',
+    'phabricator-flag-css',
+    'aphront-error-view-css',
   ),
   'differential.pkg.css' => array(
     'differential-core-view-css',
@@ -90,6 +98,7 @@ $package_spec = array(
     'aphront-headsup-action-list-view-css',
     'phabricator-content-source-view-css',
     'differential-local-commits-view-css',
+    'inline-comment-summary-css',
   ),
   'differential.pkg.js' => array(
     'phabricator-drag-and-drop-file-upload',
@@ -107,6 +116,7 @@ $package_spec = array(
     'javelin-behavior-aphront-drag-and-drop',
     'javelin-behavior-aphront-drag-and-drop-textarea',
     'javelin-behavior-phabricator-object-selector',
+    'javelin-behavior-repository-crossreference',
 
     'differential-inline-comment-editor',
     'javelin-behavior-differential-dropdown-menus',
@@ -114,17 +124,25 @@ $package_spec = array(
   ),
   'diffusion.pkg.css' => array(
     'diffusion-commit-view-css',
+    'diffusion-icons-css',
+  ),
+  'diffusion.pkg.js' => array(
+    'javelin-behavior-diffusion-pull-lastmodified',
+    'javelin-behavior-diffusion-commit-graph',
+    'javelin-behavior-audit-preview',
   ),
   'maniphest.pkg.css' => array(
     'maniphest-task-summary-css',
     'maniphest-transaction-detail-css',
     'aphront-attached-file-view-css',
+    'phabricator-project-tag-css',
   ),
   'maniphest.pkg.js' => array(
     'javelin-behavior-maniphest-batch-selector',
     'javelin-behavior-maniphest-transaction-controls',
     'javelin-behavior-maniphest-transaction-preview',
     'javelin-behavior-maniphest-transaction-expand',
+    'javelin-behavior-maniphest-subpriority-editor',
   ),
 );
 
