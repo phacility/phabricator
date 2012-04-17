@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'applications/policy/constants/policy');
+phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'view/form/control/base');
 phutil_require_module('phabricator', 'view/form/control/select');
 

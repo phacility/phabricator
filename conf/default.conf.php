@@ -69,6 +69,18 @@ return array(
   'phabricator.custom.logo'   => null,
 
 
+// -- Access Policies ------------------------------------------------------- //
+
+  // Phabricator allows you to set the visibility of objects (like repositories
+  // and source code) to "Public", which means anyone on the internet can see
+  // them, even without being logged in. This is great for open source, but
+  // some installs may never want to make anything public, so this policy is
+  // disabled by default. You can enable it here, which will let you set the
+  // policy for objects to "Public". With this option disabled, the most open
+  // policy is "All Users", which means users must be logged in to view things.
+  'policy.allow-public'         => false,
+
+
 // -- DarkConsole ----------------------------------------------------------- //
 
   // DarkConsole is a administrative debugging/profiling tool built into

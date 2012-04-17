@@ -10,6 +10,7 @@ phutil_require_module('phabricator', 'applications/people/storage/user');
 phutil_require_module('phabricator', 'applications/policy/constants/capability');
 phutil_require_module('phabricator', 'applications/policy/constants/policy');
 phutil_require_module('phabricator', 'applications/policy/interface/policy');
+phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'infrastructure/query/policy/base');
 phutil_require_module('phabricator', 'infrastructure/testing/testcase');
 

@@ -21,26 +21,37 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
   /**
    * Verify that any user can view an object with POLICY_PUBLIC.
    */
-  public function testPublicPolicy() {
-    $viewer = new PhabricatorUser();
+  public function testPublicPolicyEnabled() {
+    $env = PhabricatorEnv::beginScopedEnv();
+    $env->overrideEnvConfig('policy.allow-public', true);
 
-    $object = new PhabricatorPolicyTestObject();
-    $object->setCapabilities(
+    $this->expectVisibility(
+      $this->buildObject(PhabricatorPolicies::POLICY_PUBLIC),
       array(
-        PhabricatorPolicyCapability::CAN_VIEW,
-      ));
-    $object->setPolicies(
+        'public'  => true,
+        'user'    => true,
+        'admin'   => true,
+      ),
+      'Public Policy (Enabled in Config)');
+  }
+
+
+  /**
+   * Verify that POLICY_PUBLIC is interpreted as POLICY_USER when public
+   * policies are disallowed.
+   */
+  public function testPublicPolicyDisabled() {
+    $env = PhabricatorEnv::beginScopedEnv();
+    $env->overrideEnvConfig('policy.allow-public', false);
+
+    $this->expectVisibility(
+      $this->buildObject(PhabricatorPolicies::POLICY_PUBLIC),
       array(
-        PhabricatorPolicyCapability::CAN_VIEW =>
-          PhabricatorPolicies::POLICY_PUBLIC,
-      ));
-
-    $query = new PhabricatorPolicyTestQuery();
-    $query->setResults(array($object));
-    $query->setViewer($viewer);
-    $result = $query->executeOne();
-
-    $this->assertEqual($object, $result, 'Policy: Public');
+        'public'  => false,
+        'user'    => true,
+        'admin'   => true,
+      ),
+      'Public Policy (Disabled in Config)');
   }
 
 
@@ -49,41 +60,29 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
    * logged-out users can not.
    */
   public function testUsersPolicy() {
-    $viewer = new PhabricatorUser();
-
-    $object = new PhabricatorPolicyTestObject();
-    $object->setCapabilities(
+    $this->expectVisibility(
+      $this->buildObject(PhabricatorPolicies::POLICY_USER),
       array(
-        PhabricatorPolicyCapability::CAN_VIEW,
-      ));
-    $object->setPolicies(
+        'public'  => false,
+        'user'    => true,
+        'admin'   => true,
+      ),
+      'User Policy');
+  }
+
+
+  /**
+   * Verify that only administrators can view an object with POLICY_ADMIN.
+   */
+  public function testAdminPolicy() {
+    $this->expectVisibility(
+      $this->buildObject(PhabricatorPolicies::POLICY_ADMIN),
       array(
-        PhabricatorPolicyCapability::CAN_VIEW =>
-          PhabricatorPolicies::POLICY_USER,
-      ));
-
-    $query = new PhabricatorPolicyTestQuery();
-    $query->setResults(array($object));
-    $query->setViewer($viewer);
-
-    $caught = null;
-    try {
-      $query->executeOne();
-    } catch (PhabricatorPolicyException $ex) {
-      $caught = $ex;
-    }
-
-    $this->assertEqual(
-      true,
-      ($caught instanceof PhabricatorPolicyException),
-      'Policy: Users rejects logged out users.');
-
-    $viewer->setPHID(1);
-    $result = $query->executeOne();
-    $this->assertEqual(
-      $object,
-      $result,
-      'Policy: Users');
+        'public'  => false,
+        'user'    => false,
+        'admin'   => true,
+      ),
+      'Admin Policy');
   }
 
 
@@ -91,8 +90,59 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
    * Verify that no one can view an object with POLICY_NOONE.
    */
   public function testNoOnePolicy() {
-     $viewer = new PhabricatorUser();
+    $this->expectVisibility(
+      $this->buildObject(PhabricatorPolicies::POLICY_NOONE),
+      array(
+        'public'  => false,
+        'user'    => false,
+        'admin'   => false,
+      ),
+      'No One Policy');
 
+  }
+
+
+  /**
+   * Test an object for visibility across multiple user specifications.
+   */
+  private function expectVisibility(
+    PhabricatorPolicyTestObject $object,
+    array $map,
+    $description) {
+
+    foreach ($map as $spec => $expect) {
+      $viewer = $this->buildUser($spec);
+
+      $query = new PhabricatorPolicyTestQuery();
+      $query->setResults(array($object));
+      $query->setViewer($viewer);
+
+      $caught = null;
+      try {
+        $result = $query->executeOne();
+      } catch (PhabricatorPolicyException $ex) {
+        $caught = $ex;
+      }
+
+      if ($expect) {
+        $this->assertEqual(
+          $object,
+          $result,
+          "{$description} with user {$spec} should succeed.");
+      } else {
+        $this->assertEqual(
+          true,
+          $caught instanceof PhabricatorPolicyException,
+          "{$description} with user {$spec} should fail.");
+      }
+    }
+  }
+
+
+  /**
+   * Build a test object to spec.
+   */
+  private function buildObject($policy) {
     $object = new PhabricatorPolicyTestObject();
     $object->setCapabilities(
       array(
@@ -100,39 +150,34 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
       ));
     $object->setPolicies(
       array(
-        PhabricatorPolicyCapability::CAN_VIEW =>
-          PhabricatorPolicies::POLICY_NOONE,
+        PhabricatorPolicyCapability::CAN_VIEW => $policy,
       ));
 
-    $query = new PhabricatorPolicyTestQuery();
-    $query->setResults(array($object));
-    $query->setViewer($viewer);
+    return $object;
+  }
 
-    $caught = null;
-    try {
-      $query->executeOne();
-    } catch (PhabricatorPolicyException $ex) {
-      $caught = $ex;
+
+  /**
+   * Build a test user to spec.
+   */
+  private function buildUser($spec) {
+    $user = new PhabricatorUser();
+
+    switch ($spec) {
+      case 'public':
+        break;
+      case 'user':
+        $user->setPHID(1);
+        break;
+      case 'admin':
+        $user->setPHID(1);
+        $user->setIsAdmin(true);
+        break;
+      default:
+        throw new Exception("Unknown user spec '{$spec}'.");
     }
 
-    $this->assertEqual(
-      true,
-      ($caught instanceof PhabricatorPolicyException),
-      'Policy: No One rejects logged out users.');
-
-    $viewer->setPHID(1);
-
-    $caught = null;
-    try {
-      $query->executeOne();
-    } catch (PhabricatorPolicyException $ex) {
-      $caught = $ex;
-    }
-
-    $this->assertEqual(
-      true,
-      ($caught instanceof PhabricatorPolicyException),
-      'Policy: No One rejects logged-in users.');
+    return $user;
   }
 
 }

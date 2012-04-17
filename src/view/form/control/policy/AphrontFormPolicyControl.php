@@ -32,9 +32,30 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
   }
 
   private function getOptions() {
-    return array(
-      PhabricatorPolicies::POLICY_USER => 'All Users',
-    );
+    $show_public = PhabricatorEnv::getEnvConfig('policy.allow-public');
+
+    if ($this->getValue() == PhabricatorPolicies::POLICY_PUBLIC) {
+      // If the object already has a "public" policy, show the option in
+      // the dropdown even if it will be enforced as "users", so we don't
+      // change the policy just because the config is changing.
+      $show_public = true;
+    }
+
+    $options = array();
+
+    if ($show_public) {
+      $options[PhabricatorPolicies::POLICY_PUBLIC] = 'Public';
+    }
+
+    $options[PhabricatorPolicies::POLICY_USER] = 'All Users';
+
+    if ($this->user->getIsAdmin()) {
+      $options[PhabricatorPolicies::POLICY_ADMIN] = 'Administrators';
+    }
+
+    $options[PhabricatorPolicies::POLICY_NOONE] = 'No One';
+
+    return $options;
   }
 
   protected function renderInput() {

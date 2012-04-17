@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'applications/policy/constants/policy');
 phutil_require_module('phabricator', 'applications/policy/exception/base');
+phutil_require_module('phabricator', 'infrastructure/env');
 
 phutil_require_module('phutil', 'utils');
 

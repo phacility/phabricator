@@ -67,12 +67,27 @@ final class PhabricatorPolicyFilter {
 
       $policy = $object->getPolicy($capability);
 
+      // If the object is set to "public" but that policy is disabled for this
+      // install, restrict the policy to "user".
+      if ($policy == PhabricatorPolicies::POLICY_PUBLIC) {
+        if (!PhabricatorEnv::getEnvConfig('policy.allow-public')) {
+          $policy = PhabricatorPolicies::POLICY_USER;
+        }
+      }
+
       switch ($policy) {
         case PhabricatorPolicies::POLICY_PUBLIC:
           $filtered[$key] = $object;
           break;
         case PhabricatorPolicies::POLICY_USER:
           if ($viewer->getPHID()) {
+            $filtered[$key] = $object;
+          } else {
+            $this->rejectObject($object, $policy);
+          }
+          break;
+        case PhabricatorPolicies::POLICY_ADMIN:
+          if ($viewer->getIsAdmin()) {
             $filtered[$key] = $object;
           } else {
             $this->rejectObject($object, $policy);
@@ -102,6 +117,9 @@ final class PhabricatorPolicyFilter {
         break;
       case PhabricatorPolicies::POLICY_USER:
         $who = "To view this object, you must be logged in.";
+        break;
+      case PhabricatorPolicies::POLICY_ADMIN:
+        $who = "To view this object, you must be an administrator.";
         break;
       case PhabricatorPolicies::POLICY_NOONE:
         $who = "No one can view this object.";
