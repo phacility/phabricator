@@ -354,6 +354,11 @@ EOTEXT;
     return $this->changesets;
   }
 
+  protected function getManiphestTaskPHIDs() {
+    return $this->getRevision()->getAttachedPHIDs(
+      PhabricatorPHIDConstants::PHID_TYPE_TASK);
+  }
+
   public function setInlineComments(array $inline_comments) {
     assert_instances_of($inline_comments, 'PhabricatorInlineCommentInterface');
     $this->inlineComments = $inline_comments;
