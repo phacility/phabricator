@@ -842,6 +842,7 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryType' => 'applications/repository/constants/repositorytype',
     'PhabricatorS3FileStorageEngine' => 'applications/files/engine/s3',
     'PhabricatorSQLPatchList' => 'infrastructure/setup/sql',
+    'PhabricatorScopedEnv' => 'infrastructure/env',
     'PhabricatorSearchAbstractDocument' => 'applications/search/index/abstractdocument',
     'PhabricatorSearchAttachController' => 'applications/search/controller/attach',
     'PhabricatorSearchBaseController' => 'applications/search/controller/base',

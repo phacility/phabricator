@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,10 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
    * not rely on external resources like databases, and should not produce
    * side effects.
    */
-  const PHABRICATOR_TESTCONFIG_ISOLATE_LISK = 'isolate-lisk';
+  const PHABRICATOR_TESTCONFIG_ISOLATE_LISK     = 'isolate-lisk';
 
   private $configuration;
+  private $env;
 
   protected function getPhabricatorTestCaseConfiguration() {
     return array();
@@ -38,7 +39,7 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
 
   private function getComputedConfiguration() {
     return $this->getPhabricatorTestCaseConfiguration() + array(
-      self::PHABRICATOR_TESTCONFIG_ISOLATE_LISK => true,
+      self::PHABRICATOR_TESTCONFIG_ISOLATE_LISK     => true,
     );
   }
 
@@ -51,6 +52,8 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
     if ($config[self::PHABRICATOR_TESTCONFIG_ISOLATE_LISK]) {
       LiskDAO::beginIsolateAllLiskEffectsToCurrentProcess();
     }
+
+    $this->env = PhabricatorEnv::beginScopedEnv();
   }
 
   protected function didRunTests() {
@@ -58,6 +61,14 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
 
     if ($config[self::PHABRICATOR_TESTCONFIG_ISOLATE_LISK]) {
       LiskDAO::endIsolateAllLiskEffectsToCurrentProcess();
+    }
+
+    try {
+      unset($this->env);
+    } catch (Exception $ex) {
+      throw new Exception(
+        "Some test called PhabricatorEnv::beginScopedEnv(), but is still ".
+        "holding a reference to the scoped environment!");
     }
   }
 

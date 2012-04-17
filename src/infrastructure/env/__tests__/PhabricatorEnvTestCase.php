@@ -53,4 +53,56 @@ final class PhabricatorEnvTestCase extends PhabricatorTestCase {
         "Valid remote resource: {$uri}");
     }
   }
+
+  public function testOverrides() {
+    $outer = PhabricatorEnv::beginScopedEnv();
+      $outer->overrideEnvConfig('test.value', 1);
+      $this->assertEqual(1, PhabricatorEnv::getEnvConfig('test.value'));
+
+      $inner = PhabricatorEnv::beginScopedEnv();
+        $inner->overrideEnvConfig('test.value', 2);
+        $this->assertEqual(2, PhabricatorEnv::getEnvConfig('test.value'));
+      unset($inner);
+
+      $this->assertEqual(1, PhabricatorEnv::getEnvConfig('test.value'));
+    unset($outer);
+  }
+
+  public function testOverrideOrder() {
+    $outer = PhabricatorEnv::beginScopedEnv();
+    $middle = PhabricatorEnv::beginScopedEnv();
+    $inner = PhabricatorEnv::beginScopedEnv();
+
+    $caught = null;
+    try {
+      unset($middle);
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
+
+    $this->assertEqual(
+      true,
+      $caught instanceof Exception,
+      "Destroying a scoped environment which is not on the top of the stack ".
+      "should throw.");
+
+    $caught = null;
+    try {
+      unset($inner);
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
+
+    $this->assertEqual(
+      true,
+      $caught instanceof Exception,
+      "Destroying a scoped environment which is not on the top of the stack ".
+      "should throw.");
+
+    // Although we popped the other two out-of-order, we still expect to end
+    // up in the right state after handling the exceptions, so this should
+    // execute without issues.
+    unset($outer);
+  }
+
 }

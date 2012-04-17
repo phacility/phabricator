@@ -8,6 +8,7 @@
 
 phutil_require_module('arcanist', 'unit/engine/phutil/testcase');
 
+phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'storage/lisk/dao');
 
 phutil_require_module('phutil', 'moduleutils');
