@@ -265,22 +265,9 @@ final class PhabricatorObjectHandleData {
               // In case where the repository for the commit was deleted,
               // we don't have have info about the repository anymore.
               if ($repository) {
-                $vcs = $repository->getVersionControlSystem();
-
-                $type_git = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
-                $type_hg = PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL;
-
-                $is_git = ($vcs == $type_git);
-                $is_hg = ($vcs == $type_hg);
-                if ($is_git || $is_hg) {
-                  $short_identifier = substr($commit_identifier, 0, 12);
-                } else {
-                  $short_identifier = $commit_identifier;
-                }
-
-                $handle->setName('r'.$callsign.$short_identifier);
+                $name = $repository->formatCommitName($commit_identifier);
+                $handle->setName($name);
               } else {
-
                 $handle->setName('Commit '.'r'.$callsign.$commit_identifier);
               }
 

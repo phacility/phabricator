@@ -57,7 +57,7 @@ function phabricator_time($epoch, $user) {
     'g:i A');
 }
 
-function phabricator_datetime($epoch, $user) {
+  function phabricator_datetime($epoch, $user) {
   return phabricator_format_local_time(
     $epoch,
     $user,
@@ -103,7 +103,16 @@ function phabricator_format_local_time($epoch, $user, $format) {
   // constructor, it ignores it if the date string includes timezone
   // information. Further, it treats epoch timestamps ("@946684800") as having
   // a UTC timezone. Set the timezone explicitly after constructing the object.
-  $date = new DateTime('@'.$epoch);
+  try {
+    $date = new DateTime('@'.$epoch);
+  } catch (Exception $ex) {
+    // NOTE: DateTime throws an empty exception if the format is invalid,
+    // just replace it with a useful one.
+    throw new Exception(
+      "Construction of a DateTime() with epoch '{$epoch}' ".
+      "raised an exception.");
+  }
+
   $date->setTimeZone($zone);
 
   return $date->format($format);

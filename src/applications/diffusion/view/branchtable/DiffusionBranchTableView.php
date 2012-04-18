@@ -39,7 +39,7 @@ final class DiffusionBranchTableView extends DiffusionView {
           array(
             'href' => $drequest->generateURI(
               array(
-                'action' => 'branch',
+                'action' => 'browse',
                 'branch' => $branch->getName(),
               )),
           ),
@@ -64,6 +64,7 @@ final class DiffusionBranchTableView extends DiffusionView {
       ));
     $view->setColumnClasses(
       array(
+        'pri',
         'wide',
       ));
     $view->setRowClasses($rowc);

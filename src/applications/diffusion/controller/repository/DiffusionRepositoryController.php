@@ -93,6 +93,8 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $content[] = $browse_panel;
 
+    $content[] = $this->buildTagListTable($drequest);
+
     if ($drequest->getBranch() !== null) {
       $branch_query = DiffusionBranchQuery::newFromDiffusionRequest($drequest);
       $branches = $branch_query->loadBranches();
@@ -148,6 +150,39 @@ final class DiffusionRepositoryController extends DiffusionController {
     $panel = new AphrontPanelView();
     $panel->setHeader('Repository Properties');
     $panel->appendChild($table);
+
+    return $panel;
+  }
+
+  private function buildTagListTable(DiffusionRequest $drequest) {
+    $query = DiffusionTagListQuery::newFromDiffusionRequest($drequest);
+    $query->setLimit(25);
+    $tags = $query->loadTags();
+
+    if (!$tags) {
+      return null;
+    }
+
+    $commits = id(new PhabricatorAuditCommitQuery())
+      ->withIdentifiers(
+        $drequest->getRepository()->getID(),
+        mpull($tags, 'getCommitIdentifier'))
+      ->needCommitData(true)
+      ->execute();
+
+    $view = new DiffusionTagListView();
+    $view->setDiffusionRequest($drequest);
+    $view->setTags($tags);
+    $view->setUser($this->getRequest()->getUser());
+    $view->setCommits($commits);
+
+    $phids = $view->getRequiredHandlePHIDs();
+    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $view->setHandles($handles);
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader('Tags');
+    $panel->appendChild($view);
 
     return $panel;
   }

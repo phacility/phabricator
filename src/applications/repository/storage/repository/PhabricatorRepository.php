@@ -358,4 +358,21 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
     return true;
   }
 
+  public function formatCommitName($commit_identifier) {
+    $vcs = $this->getVersionControlSystem();
+
+    $type_git = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
+    $type_hg = PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL;
+
+    $is_git = ($vcs == $type_git);
+    $is_hg = ($vcs == $type_hg);
+    if ($is_git || $is_hg) {
+      $short_identifier = substr($commit_identifier, 0, 12);
+    } else {
+      $short_identifier = $commit_identifier;
+    }
+
+    return 'r'.$this->getCallsign().$short_identifier;
+  }
+
 }
