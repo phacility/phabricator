@@ -202,7 +202,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
 
     if ($request->isAjax()) {
       // TODO: This is sort of lazy, the effect is just to not render "Edit"
-      // links on the "standalone view".
+      // and "Reply" links on the "standalone view".
       $parser->setUser($request->getUser());
     }
 

@@ -1497,6 +1497,7 @@ final class DifferentialChangesetParser {
     $edit = $user &&
             ($comment->getAuthorPHID() == $user->getPHID()) &&
             ($comment->isDraft());
+    $allow_reply = (bool)$this->user;
 
     $on_right = $this->isCommentOnRightSideWhenDisplayed($comment);
 
@@ -1506,6 +1507,7 @@ final class DifferentialChangesetParser {
       ->setHandles($this->handles)
       ->setMarkupEngine($this->markupEngine)
       ->setEditable($edit)
+      ->setAllowReply($allow_reply)
       ->render();
   }
 

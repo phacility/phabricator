@@ -25,6 +25,7 @@ final class DifferentialInlineCommentView extends AphrontView {
   private $markupEngine;
   private $editable;
   private $preview;
+  private $allowReply;
 
   public function setInlineComment(PhabricatorInlineCommentInterface $comment) {
     $this->inlineComment = $comment;
@@ -59,6 +60,11 @@ final class DifferentialInlineCommentView extends AphrontView {
 
   public function setPreview($preview) {
     $this->preview = $preview;
+    return $this;
+  }
+
+  public function setAllowReply($allow_reply) {
+    $this->allowReply = $allow_reply;
     return $this;
   }
 
@@ -120,21 +126,25 @@ final class DifferentialInlineCommentView extends AphrontView {
         ),
         'Next');
 
-      if (!$is_synthetic) {
+      if ($this->allowReply) {
 
-        // NOTE: No product reason why you can't reply to these, but the reply
-        // mechanism currently sends the inline comment ID to the server, not
-        // file/line information, and synthetic comments don't have an inline
-        // comment ID.
+        if (!$is_synthetic) {
 
-        $links[] = javelin_render_tag(
-          'a',
-          array(
-            'href'        => '#',
-            'mustcapture' => true,
-            'sigil'       => 'differential-inline-reply',
-          ),
-          'Reply');
+          // NOTE: No product reason why you can't reply to these, but the reply
+          // mechanism currently sends the inline comment ID to the server, not
+          // file/line information, and synthetic comments don't have an inline
+          // comment ID.
+
+          $links[] = javelin_render_tag(
+            'a',
+            array(
+              'href'        => '#',
+              'mustcapture' => true,
+              'sigil'       => 'differential-inline-reply',
+            ),
+            'Reply');
+        }
+
       }
     }
 
