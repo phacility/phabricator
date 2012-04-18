@@ -69,12 +69,13 @@ final class PhabricatorXHProfProfileSymbolView
       '',
       '',
     );
-    $rows[] = array(
-      $this->renderSymbolLink($symbol),
-      $flat[$symbol]['ct'],
-      $flat[$symbol]['wt'],
-      '100%',
-    );
+    $rows[] = $this->formatRow(
+      array(
+        $symbol,
+        $flat[$symbol]['ct'],
+        $flat[$symbol]['wt'],
+        1.0,
+      ));
 
     $rows[] = array(
       'Parent Calls',
@@ -83,12 +84,13 @@ final class PhabricatorXHProfProfileSymbolView
       '',
     );
     foreach ($parents as $key => $name) {
-      $rows[] = array(
-        $this->renderSymbolLink($name),
-        $data[$key]['ct'],
-        $data[$key]['wt'],
-        '',
-      );
+      $rows[] = $this->formatRow(
+        array(
+          $name,
+          $data[$key]['ct'],
+          $data[$key]['wt'],
+          '',
+        ));
     }
 
 
@@ -109,7 +111,9 @@ final class PhabricatorXHProfProfileSymbolView
     }
     $child_rows = isort($child_rows, 2);
     $child_rows = array_reverse($child_rows);
-    $rows = array_merge($rows, $this->formatRows($child_rows));
+    $rows = array_merge(
+      $rows,
+      array_map(array($this, 'formatRow'), $child_rows));
 
     $table = new AphrontTableView($rows);
     $table->setHeaders(
@@ -134,17 +138,13 @@ final class PhabricatorXHProfProfileSymbolView
     return $panel->render();
   }
 
-  private function formatRows($rows) {
-    $result = array();
-    foreach ($rows as $row) {
-      $result[] = array(
-        $this->renderSymbolLink($row[0]),
-        number_format($row[1]),
-        number_format($row[2]).' us',
-        sprintf('%.1f%%', 100 * $row[3]),
-      );
-    }
-    return $result;
+  private function formatRow(array $row) {
+    return array(
+      $this->renderSymbolLink($row[0]),
+      number_format($row[1]),
+      number_format($row[2]).' us',
+      ($row[3] != '' ? sprintf('%.1f%%', 100 * $row[3]) : ''),
+    );
   }
 
 }
