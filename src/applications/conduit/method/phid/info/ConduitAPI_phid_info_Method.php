@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,14 @@
  */
 final class ConduitAPI_phid_info_Method
   extends ConduitAPI_phid_Method {
+
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_DEPRECATED;
+  }
+
+  public function getMethodStatusDescription() {
+    return "Replaced by 'phid.query'.";
+  }
 
   public function getMethodDescription() {
     return "Retrieve information about an arbitrary PHID.";

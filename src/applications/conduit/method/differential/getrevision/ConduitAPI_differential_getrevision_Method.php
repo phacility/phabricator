@@ -22,6 +22,14 @@
 final class ConduitAPI_differential_getrevision_Method
   extends ConduitAPIMethod {
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_DEPRECATED;
+  }
+
+  public function getMethodStatusDescription() {
+    return "Replaced by 'differential.query'.";
+  }
+
   public function getMethodDescription() {
     return "Load the content of a revision from Differential.";
   }

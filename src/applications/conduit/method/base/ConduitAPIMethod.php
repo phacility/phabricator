@@ -17,9 +17,15 @@
  */
 
 /**
+ *
+ * @task  status  Method Status
  * @group conduit
  */
 abstract class ConduitAPIMethod {
+
+  const METHOD_STATUS_STABLE      = 'stable';
+  const METHOD_STATUS_UNSTABLE    = 'unstable';
+  const METHOD_STATUS_DEPRECATED  = 'deprecated';
 
   abstract public function getMethodDescription();
   abstract public function defineParamTypes();
@@ -29,6 +35,30 @@ abstract class ConduitAPIMethod {
 
   public function __construct() {
 
+  }
+
+  /**
+   * Get the status for this method (e.g., stable, unstable or deprecated).
+   * Should return a METHOD_STATUS_* constant. By default, methods are
+   * "stable".
+   *
+   * @return const  METHOD_STATUS_* constant.
+   * @task status
+   */
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_STABLE;
+  }
+
+  /**
+   * Optional description to supplement the method status. In particular, if
+   * a method is deprecated, you can return a string here describing the reason
+   * for deprecation and stable alternatives.
+   *
+   * @return string|null  Description of the method status, if available.
+   * @task status
+   */
+  public function getMethodStatusDescription() {
+    return null;
   }
 
   public function getErrorDescription($error_code) {

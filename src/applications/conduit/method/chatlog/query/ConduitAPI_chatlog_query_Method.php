@@ -22,8 +22,12 @@
 final class ConduitAPI_chatlog_query_Method
   extends ConduitAPI_chatlog_Method {
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_UNSTABLE;
+  }
+
   public function getMethodDescription() {
-    return "(Unstable!) Retrieve chatter.";
+    return "Retrieve chatter.";
   }
 
   public function defineParamTypes() {

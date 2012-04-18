@@ -18,6 +18,10 @@
 
 final class ConduitAPI_remarkup_process_Method extends ConduitAPIMethod {
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_UNSTABLE;
+  }
+
   public function getMethodDescription() {
     return 'Process text through remarkup in phabricator context.';
   }

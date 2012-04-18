@@ -51,8 +51,16 @@ abstract class PhabricatorConduitController extends PhabricatorController {
         $nav->addLabel($group);
         foreach ($methods as $method) {
           $method_name = $method['full_name'];
+
+          $display_name = $method_name;
+          switch ($method['status']) {
+            case ConduitAPIMethod::METHOD_STATUS_DEPRECATED:
+              $display_name = '('.$display_name.')';
+              break;
+          }
+
           $nav->addFilter('method/'.$method_name,
-            $method_name);
+            $display_name);
           if (!$first_filter) {
             $first_filter = 'method/'.$method_name;
           }
@@ -103,23 +111,42 @@ abstract class PhabricatorConduitController extends PhabricatorController {
     return array_values(ipull($classes, 'name'));
   }
 
-
   private function getMethodFilters() {
     $classes = $this->getAllMethodImplementationClasses();
     $method_names = array();
     foreach ($classes as $method_class) {
       $method_name = ConduitAPIMethod::getAPIMethodNameFromClassName(
         $method_class);
-      $parts = explode('.', $method_name);
-      $method_names[] = array(
+      $group_name = head(explode('.', $method_name));
+
+      $status = newv($method_class, array())->getMethodStatus();
+
+      $key = sprintf(
+        '%02d %s %s',
+        $this->getOrderForMethodStatus($status),
+        $group_name,
+        $method_name);
+
+      $method_names[$key] = array(
         'full_name'   => $method_name,
-        'group_name'  => reset($parts),
+        'group_name'  => $group_name,
+        'status'      => $status,
       );
     }
+    ksort($method_names);
     $method_names = igroup($method_names, 'group_name');
     ksort($method_names);
 
     return $method_names;
+  }
+
+  private function getOrderForMethodStatus($status) {
+    $map = array(
+      ConduitAPIMethod::METHOD_STATUS_STABLE      => 0,
+      ConduitAPIMethod::METHOD_STATUS_UNSTABLE    => 1,
+      ConduitAPIMethod::METHOD_STATUS_DEPRECATED  => 2,
+    );
+    return idx($map, $status, 0);
   }
 
 }

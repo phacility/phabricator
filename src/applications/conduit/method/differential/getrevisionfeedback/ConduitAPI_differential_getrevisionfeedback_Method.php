@@ -22,6 +22,14 @@
 final class ConduitAPI_differential_getrevisionfeedback_Method
   extends ConduitAPIMethod {
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_DEPRECATED;
+  }
+
+  public function getMethodStatusDescription() {
+    return "Replaced by 'differential.getrevisioncomments'.";
+  }
+
   public function getMethodDescription() {
     return "Retrieve Differential Revision Feedback.";
   }

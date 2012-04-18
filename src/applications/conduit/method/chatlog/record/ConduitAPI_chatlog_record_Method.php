@@ -22,8 +22,12 @@
 final class ConduitAPI_chatlog_record_Method
   extends ConduitAPI_chatlog_Method {
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_UNSTABLE;
+  }
+
   public function getMethodDescription() {
-    return "(Unstable!) Record chatter.";
+    return "Record chatter.";
   }
 
   public function defineParamTypes() {

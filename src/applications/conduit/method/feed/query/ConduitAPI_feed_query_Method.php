@@ -21,8 +21,12 @@
  */
 final class ConduitAPI_feed_query_Method extends ConduitAPIMethod {
 
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_UNSTABLE;
+  }
+
   public function getMethodDescription() {
-    return "(UNSTABLE!!) Query the feed for stories";
+    return "Query the feed for stories";
   }
 
   private function getDefaultLimit() {
