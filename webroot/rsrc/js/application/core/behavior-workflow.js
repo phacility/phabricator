@@ -29,6 +29,10 @@ JX.behavior('workflow', function() {
       if (e.getNode('workflow') !== e.getTarget()) {
         return;
       }
+      var raw = e.getRawEvent();
+      if (raw.altKey || raw.ctrlKey || raw.metaKey || raw.shiftKey) {
+        return;
+      }
       e.prevent();
       JX.Workflow.newFromLink(e.getTarget()).start();
     });
