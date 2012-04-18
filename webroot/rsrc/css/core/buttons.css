@@ -80,6 +80,7 @@ input.inputaux,
 a.grey,
 a.grey:visited,
 a.button.disabled,
+button[disabled], /* Set by JX.Workflow. */
 button.disabled {
   background-color: #e4e5e5;
   background-position: 0 -250px;
