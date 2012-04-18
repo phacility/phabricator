@@ -2120,7 +2120,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-remarkup-css' =>
   array(
-    'uri' => '/res/fb10d329/rsrc/css/core/remarkup.css',
+    'uri' => '/res/3add9f99/rsrc/css/core/remarkup.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -2414,7 +2414,7 @@ celerity_register_resource_map(array(
 ), array(
   'packages' =>
   array(
-    88304571 =>
+    '9c4e265b' =>
     array(
       'name' => 'core.pkg.css',
       'symbols' =>
@@ -2443,7 +2443,7 @@ celerity_register_resource_map(array(
         21 => 'phabricator-flag-css',
         22 => 'aphront-error-view-css',
       ),
-      'uri' => '/res/pkg/88304571/core.pkg.css',
+      'uri' => '/res/pkg/9c4e265b/core.pkg.css',
       'type' => 'css',
     ),
     'c6c80d56' =>
@@ -2610,20 +2610,20 @@ celerity_register_resource_map(array(
   'reverse' =>
   array(
     'aphront-attached-file-view-css' => '7839ae2d',
-    'aphront-crumbs-view-css' => '88304571',
-    'aphront-dialog-view-css' => '88304571',
-    'aphront-error-view-css' => '88304571',
-    'aphront-form-view-css' => '88304571',
+    'aphront-crumbs-view-css' => '9c4e265b',
+    'aphront-dialog-view-css' => '9c4e265b',
+    'aphront-error-view-css' => '9c4e265b',
+    'aphront-form-view-css' => '9c4e265b',
     'aphront-headsup-action-list-view-css' => '1138d3d1',
-    'aphront-headsup-view-css' => '88304571',
-    'aphront-list-filter-view-css' => '88304571',
-    'aphront-pager-view-css' => '88304571',
-    'aphront-panel-view-css' => '88304571',
-    'aphront-side-nav-view-css' => '88304571',
-    'aphront-table-view-css' => '88304571',
-    'aphront-tokenizer-control-css' => '88304571',
-    'aphront-tooltip-css' => '88304571',
-    'aphront-typeahead-control-css' => '88304571',
+    'aphront-headsup-view-css' => '9c4e265b',
+    'aphront-list-filter-view-css' => '9c4e265b',
+    'aphront-pager-view-css' => '9c4e265b',
+    'aphront-panel-view-css' => '9c4e265b',
+    'aphront-side-nav-view-css' => '9c4e265b',
+    'aphront-table-view-css' => '9c4e265b',
+    'aphront-tokenizer-control-css' => '9c4e265b',
+    'aphront-tooltip-css' => '9c4e265b',
+    'aphront-typeahead-control-css' => '9c4e265b',
     'differential-changeset-view-css' => '1138d3d1',
     'differential-core-view-css' => '1138d3d1',
     'differential-inline-comment-editor' => 'e4ddcab5',
@@ -2689,15 +2689,15 @@ celerity_register_resource_map(array(
     'javelin-workflow' => 'c6c80d56',
     'maniphest-task-summary-css' => '7839ae2d',
     'maniphest-transaction-detail-css' => '7839ae2d',
-    'phabricator-app-buttons-css' => '88304571',
+    'phabricator-app-buttons-css' => '9c4e265b',
     'phabricator-content-source-view-css' => '1138d3d1',
-    'phabricator-core-buttons-css' => '88304571',
-    'phabricator-core-css' => '88304571',
-    'phabricator-directory-css' => '88304571',
+    'phabricator-core-buttons-css' => '9c4e265b',
+    'phabricator-core-css' => '9c4e265b',
+    'phabricator-directory-css' => '9c4e265b',
     'phabricator-drag-and-drop-file-upload' => 'e4ddcab5',
     'phabricator-dropdown-menu' => 'c6c80d56',
-    'phabricator-flag-css' => '88304571',
-    'phabricator-jump-nav' => '88304571',
+    'phabricator-flag-css' => '9c4e265b',
+    'phabricator-jump-nav' => '9c4e265b',
     'phabricator-keyboard-shortcut' => 'c6c80d56',
     'phabricator-keyboard-shortcut-manager' => 'c6c80d56',
     'phabricator-menu-item' => 'c6c80d56',
@@ -2705,11 +2705,11 @@ celerity_register_resource_map(array(
     'phabricator-paste-file-upload' => 'c6c80d56',
     'phabricator-prefab' => 'c6c80d56',
     'phabricator-project-tag-css' => '7839ae2d',
-    'phabricator-remarkup-css' => '88304571',
+    'phabricator-remarkup-css' => '9c4e265b',
     'phabricator-shaped-request' => 'e4ddcab5',
-    'phabricator-standard-page-view' => '88304571',
+    'phabricator-standard-page-view' => '9c4e265b',
     'phabricator-tooltip' => 'c6c80d56',
-    'phabricator-transaction-view-css' => '88304571',
-    'syntax-highlighting-css' => '88304571',
+    'phabricator-transaction-view-css' => '9c4e265b',
+    'syntax-highlighting-css' => '9c4e265b',
   ),
 ));

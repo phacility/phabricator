@@ -37,7 +37,7 @@
   font-family: "Monaco", monospace;
 }
 
-.phabricator-remarkup code.remarkup-counterexample {
+.phabricator-remarkup pre.remarkup-counterexample {
   border: 1px solid #aa0000;
   background-color: #ffaaaa;
 }
