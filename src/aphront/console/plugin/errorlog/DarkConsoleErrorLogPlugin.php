@@ -75,17 +75,21 @@ final class DarkConsoleErrorLogPlugin extends DarkConsolePlugin {
           $line .= $entry['class'].'::';
         }
         $line .= idx($entry, 'function', '');
-        $onclick = '';
+        $href = null;
         if (isset($entry['file'])) {
           $line .= ' called at ['.$entry['file'].':'.$entry['line'].']';
-          $onclick = jsprintf(
-            'open_file(%s, %d)', $entry['file'], $entry['line']);
+          try {
+            $user = $this->getRequest()->getUser();
+            $href = $user->loadEditorLink($entry['file'], $entry['line'], '');
+          } catch (Exception $ex) {
+            // The database can be inaccessible.
+          }
         }
 
         $details .= phutil_render_tag(
           'a',
           array(
-            'onclick' => $onclick,
+            'href' => $href,
           ),
           phutil_escape_html($line));
         $details .= "\n";

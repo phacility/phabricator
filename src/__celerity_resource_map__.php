@@ -388,7 +388,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-dark-console-css' =>
   array(
-    'uri' => '/res/1a9f84bb/rsrc/css/aphront/dark-console.css',
+    'uri' => '/res/4965d970/rsrc/css/aphront/dark-console.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1034,7 +1034,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-error-log' =>
   array(
-    'uri' => '/res/a5cb42a5/rsrc/js/application/core/behavior-error-log.js',
+    'uri' => '/res/f46289e9/rsrc/js/application/core/behavior-error-log.js',
     'type' => 'js',
     'requires' =>
     array(

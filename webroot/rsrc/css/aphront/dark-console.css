@@ -13,6 +13,10 @@
   z-index:        1;
 }
 
+.dark-console a:link {
+  color: inherit;
+}
+
 .dark-console-tabs {
   width:        180px;
   background:   #222222;
