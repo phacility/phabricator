@@ -7,6 +7,12 @@ JX.behavior('aphront-form-disable-on-submit', function(config) {
 
   var restore = [];
   var root = null;
+  var new_tab = false;
+
+  JX.Stratcom.listen('click', 'tag:button', function(e) {
+    var raw = e.getRawEvent();
+    new_tab = (raw.altKey || raw.ctrlKey || raw.metaKey || raw.shiftKey);
+  });
 
   JX.Stratcom.listen('submit', 'tag:form', function(e) {
     if (e.getNode('workflow')) {
@@ -16,6 +22,15 @@ JX.behavior('aphront-form-disable-on-submit', function(config) {
     }
 
     root = e.getNode('tag:form');
+
+    // Open the form to a new tab in Firefox explicitly (automatic in Chrome).
+    // We render some buttons as links so users may be confused that the links
+    // don't open to new tabs with Ctrl+click as normal links.
+    root.target = (new_tab ? '_blank' : '');
+    if (new_tab) {
+      return;
+    }
+
     if (root._disabled) {
       e.kill();
     }
