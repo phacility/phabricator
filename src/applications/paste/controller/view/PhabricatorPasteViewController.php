@@ -48,13 +48,13 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
     $corpus = $this->buildCorpus($paste, $file);
     $paste_panel = new AphrontPanelView();
 
+    $author_phid = $paste->getAuthorPHID();
+    $header = 'Viewing Paste '.$paste->getID().' by '.
+      PhabricatorObjectHandleData::loadOneHandle($author_phid)->renderLink();
     if (strlen($paste->getTitle())) {
-      $paste_panel->setHeader(
-        'Viewing Paste '.$paste->getID().' - '.
-        phutil_escape_html($paste->getTitle()));
-    } else {
-      $paste_panel->setHeader('Viewing Paste '.$paste->getID());
+      $header .= ' - '.phutil_escape_html($paste->getTitle());
     }
+    $paste_panel->setHeader($header);
 
     $paste_panel->setWidth(AphrontPanelView::WIDTH_FULL);
     $paste_panel->addButton(

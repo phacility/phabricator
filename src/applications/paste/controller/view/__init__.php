@@ -13,6 +13,7 @@ phutil_require_module('phabricator', 'applications/markup/syntax');
 phutil_require_module('phabricator', 'applications/paste/controller/base');
 phutil_require_module('phabricator', 'applications/paste/query/paste');
 phutil_require_module('phabricator', 'applications/paste/storage/paste');
+phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'infrastructure/javelin/api');
 phutil_require_module('phabricator', 'view/control/table');
