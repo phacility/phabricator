@@ -255,7 +255,7 @@ final class PhabricatorOAuthLoginController
       'code'          => $code,
     ) + $provider->getExtraTokenParameters();
 
-    $post_data = http_build_query($query_data);
+    $post_data = http_build_query($query_data, '', '&');
     $post_length = strlen($post_data);
 
     $stream_context = stream_context_create(
