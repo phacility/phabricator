@@ -54,5 +54,8 @@ final class PhabricatorRepositorySvnCommitMessageParserWorker
     return array();
   }
 
+  protected function getDateCommitted(PhabricatorRepositoryCommit $commit) {
+    return $commit->getEpoch();
+  }
 
 }

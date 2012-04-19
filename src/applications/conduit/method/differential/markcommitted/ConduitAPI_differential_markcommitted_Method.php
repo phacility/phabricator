@@ -68,10 +68,6 @@ final class ConduitAPI_differential_markcommitted_Method
       DifferentialAction::ACTION_COMMIT);
     $editor->save();
 
-    $revision->setStatus(ArcanistDifferentialRevisionStatus::COMMITTED);
-    $revision->setDateCommitted(time());
-    $revision->save();
-
     return;
   }
 

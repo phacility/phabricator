@@ -95,6 +95,12 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
         if ($revision->getStatus() !=
             ArcanistDifferentialRevisionStatus::COMMITTED) {
+
+          $date_committed = $this->getDateCommitted($commit);
+          if ($date_committed) {
+            $revision->setDateCommitted($date_committed);
+          }
+
           $message = null;
           $committer = $data->getCommitDetail('authorPHID');
           if (!$committer) {
@@ -110,6 +116,10 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         }
       }
     }
+  }
+
+  protected function getDateCommitted(PhabricatorRepositoryCommit $commit) {
+    return null;
   }
 
   /**

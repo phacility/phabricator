@@ -352,6 +352,10 @@ final class DifferentialCommentEditor {
           }
         }
 
+        if (!$revision->getDateCommitted()) {
+          $revision->setDateCommitted(time());
+        }
+
         $revision
           ->setStatus(ArcanistDifferentialRevisionStatus::COMMITTED);
         break;

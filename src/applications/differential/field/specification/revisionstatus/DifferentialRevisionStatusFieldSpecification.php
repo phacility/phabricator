@@ -32,7 +32,8 @@ final class DifferentialRevisionStatusFieldSpecification
     $diff = $this->getDiff();
 
     $status = $revision->getStatus();
-    $next_step = null;
+    $info = null;
+
     if ($status == ArcanistDifferentialRevisionStatus::ACCEPTED) {
       switch ($diff->getSourceControlSystem()) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
@@ -46,12 +47,17 @@ final class DifferentialRevisionStatusFieldSpecification
           break;
       }
       if ($next_step) {
-        $next_step = ' &middot; Next step: '.$next_step;
+        $info = ' &middot; Next step: '.$next_step;
       }
+
+    } else if ($status == ArcanistDifferentialRevisionStatus::CLOSED) {
+      $committed = $revision->getDateCommitted();
+      $info = ' ('.phabricator_datetime($committed, $this->getUser()).')';
     }
+
     $status =
       ArcanistDifferentialRevisionStatus::getNameForRevisionStatus($status);
-    return '<strong>'.$status.'</strong>'.$next_step;
+    return '<strong>'.$status.'</strong>'.$info;
   }
 
   public function shouldAppearOnRevisionList() {

@@ -649,6 +649,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
     foreach ($aux_fields as $key => $aux_field) {
       if (!$aux_field->shouldAppearOnRevisionView()) {
         unset($aux_fields[$key]);
+      } else {
+        $aux_field->setUser($this->getRequest()->getUser());
       }
     }
 
