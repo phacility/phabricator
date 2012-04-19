@@ -347,8 +347,8 @@ final class DifferentialCommentEditor {
 
           if ($revision_status != $status_accepted) {
             throw new DifferentialActionHasNoEffectException(
-              "You can not mark this revision as committed because it is ".
-              "has not been accepted.");
+              "You can not mark this revision as committed because it has ".
+              "not been accepted.");
           }
         }
 
