@@ -40,6 +40,13 @@ final class PhabricatorUserProfileSettingsPanelController
       $profile->setTitle($request->getStr('title'));
       $profile->setBlurb($request->getStr('blurb'));
 
+      $sex = $request->getStr('sex');
+      if (in_array($sex, array('m', 'f'))) {
+        $user->setSex($sex);
+      } else {
+        $user->setSex(null);
+      }
+
       if (!empty($_FILES['image'])) {
         $err = idx($_FILES['image'], 'error');
         if ($err != UPLOAD_ERR_NO_FILE) {
@@ -110,6 +117,12 @@ final class PhabricatorUserProfileSettingsPanelController
     }
     $profile_uri = PhabricatorEnv::getURI('/p/'.$user->getUsername().'/');
 
+    $sexes = array(
+      '' => 'Unknown',
+      'm' => 'Male',
+      'f' => 'Female',
+    );
+
     $form = new AphrontFormView();
     $form
       ->setUser($request->getUser())
@@ -121,6 +134,12 @@ final class PhabricatorUserProfileSettingsPanelController
           ->setName('title')
           ->setValue($profile->getTitle())
           ->setCaption('Serious business title.'))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setOptions($sexes)
+          ->setLabel('Sex')
+          ->setName('sex')
+          ->setValue($user->getSex()))
       ->appendChild(
         id(new AphrontFormMarkupControl())
           ->setLabel('Profile URI')

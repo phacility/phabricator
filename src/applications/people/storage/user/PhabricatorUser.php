@@ -25,6 +25,7 @@ final class PhabricatorUser extends PhabricatorUserDAO {
   protected $userName;
   protected $realName;
   protected $email;
+  protected $sex;
   protected $passwordSalt;
   protected $passwordHash;
   protected $profileImagePHID;
