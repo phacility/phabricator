@@ -22,11 +22,11 @@ final class DiffusionGitTagListQuery extends DiffusionTagListQuery {
     $drequest = $this->getRequest();
     $repository = $drequest->getRepository();
 
-    $limit = $this->getLimit();
+    $count = $this->getOffset() + $this->getLimit();
 
     list($stdout) = $repository->execxLocalCommand(
       'for-each-ref %C --sort=-creatordate --format=%s refs/tags',
-      $limit ? '--count='.(int)$limit : null,
+      $count ? '--count='.(int)$count : null,
       '%(objectname) %(objecttype) %(refname) %(*objectname) %(*objecttype) '.
         '%(subject)%01%(creator)'
     );
@@ -65,6 +65,11 @@ final class DiffusionGitTagListQuery extends DiffusionTagListQuery {
       $tag->setType('git/'.$objecttype);
 
       $tags[] = $tag;
+    }
+
+    $offset = $this->getOffset();
+    if ($offset) {
+      $tags = array_slice($tags, $offset);
     }
 
     return $tags;

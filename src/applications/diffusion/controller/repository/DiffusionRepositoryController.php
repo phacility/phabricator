@@ -155,13 +155,18 @@ final class DiffusionRepositoryController extends DiffusionController {
   }
 
   private function buildTagListTable(DiffusionRequest $drequest) {
+    $tag_limit = 25;
+
     $query = DiffusionTagListQuery::newFromDiffusionRequest($drequest);
-    $query->setLimit(25);
+    $query->setLimit($tag_limit + 1);
     $tags = $query->loadTags();
 
     if (!$tags) {
       return null;
     }
+
+    $more_tags = (count($tags) > $tag_limit);
+    $tags = array_slice($tags, 0, $tag_limit);
 
     $commits = id(new PhabricatorAuditCommitQuery())
       ->withIdentifiers(
@@ -182,6 +187,22 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Tags');
+
+    if ($more_tags) {
+      $panel->setCaption('Showing the '.$tag_limit.' most recent tags.');
+    }
+
+    $panel->addButton(
+      phutil_render_tag(
+        'a',
+        array(
+          'href' => $drequest->generateURI(
+            array(
+              'action' => 'tags',
+            )),
+          'class' => 'grey button',
+        ),
+        "Show All Tags \xC2\xBB"));
     $panel->appendChild($view);
 
     return $panel;

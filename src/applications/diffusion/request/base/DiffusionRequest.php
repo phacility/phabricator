@@ -355,6 +355,7 @@ abstract class DiffusionRequest {
       case 'browse':
       case 'change':
       case 'lastmodified':
+      case 'tags':
         $req_callsign = true;
         break;
       case 'branch':
@@ -387,6 +388,7 @@ abstract class DiffusionRequest {
       case 'history':
       case 'browse':
       case 'lastmodified':
+      case 'tags':
         $uri = "/diffusion/{$callsign}{$action}/{$path}{$commit}{$line}";
         break;
       case 'branch':

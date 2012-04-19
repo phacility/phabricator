@@ -260,6 +260,7 @@ class AphrontDefaultApplicationConfiguration
           'browse/(?P<dblob>.*)'        => 'DiffusionBrowseController',
           'lastmodified/(?P<dblob>.*)'  => 'DiffusionLastModifiedController',
           'diff/'                       => 'DiffusionDiffController',
+          'tags/(?P<dblob>.*)'          => 'DiffusionTagListController',
         ),
         'inline/(?P<phid>[^/]+)/' => 'DiffusionInlineCommentController',
         'services/' => array(

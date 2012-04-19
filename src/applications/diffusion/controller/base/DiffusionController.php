@@ -161,6 +161,12 @@ abstract class DiffusionController extends PhabricatorController {
 
   private function buildCrumbList(array $spec = array()) {
 
+    $spec = $spec + array(
+      'commit'  => null,
+      'tags'    => null,
+      'view'    => null,
+    );
+
     $crumb_list = array();
 
     // On the home page, we don't have a DiffusionRequest.
@@ -187,14 +193,14 @@ abstract class DiffusionController extends PhabricatorController {
     $callsign = $repository->getCallsign();
     $repository_name = phutil_escape_html($repository->getName()).' Repository';
 
-    if (empty($spec['commit'])) {
+    if (!$spec['commit'] && !$spec['tags']) {
       $branch_name = $drequest->getBranch();
       if ($branch_name) {
         $repository_name .= ' ('.phutil_escape_html($branch_name).')';
       }
     }
 
-    if (empty($spec['view']) && empty($spec['commit'])) {
+    if (!$spec['view'] && !$spec['commit'] && !$spec['tags']) {
       $crumb_list[] = $repository_name;
       return $crumb_list;
     }
@@ -207,8 +213,13 @@ abstract class DiffusionController extends PhabricatorController {
       $repository_name);
 
     $raw_commit = $drequest->getRawCommit();
-    if (isset($spec['commit'])) {
+    if ($spec['commit']) {
       $crumb_list[] = "r{$callsign}{$raw_commit}";
+      return $crumb_list;
+    }
+
+    if ($spec['tags']) {
+      $crumb_list[] = 'Tags';
       return $crumb_list;
     }
 
