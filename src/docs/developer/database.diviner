@@ -63,6 +63,10 @@ of it. The other reason is that PHP internally uses numbers for storing dates.
 Phabricator uses UTF-8 encoding for storing all text data. We use
 `utf8_general_ci` collation for free-text and `utf8_bin` for identifiers.
 
+We don't use the `enum` data type because each change to the list of possible
+values requires altering the table (which is slow with big tables). We use
+numbers (or short strings in some cases) mapped to PHP constants instead.
+
 = JSON =
 
 Some data don't require structured access - you don't need to filter or order by
