@@ -26,6 +26,28 @@ final class PhabricatorUserOAuthSettingsPanelController
     return $this;
   }
 
+  private function prepareAuthForm(AphrontFormView $form) {
+    $provider = $this->provider;
+
+    $auth_uri = $provider->getAuthURI();
+    $client_id = $provider->getClientID();
+    $redirect_uri = $provider->getRedirectURI();
+    $minimum_scope = $provider->getMinimumScope();
+
+    $form
+      ->setAction($auth_uri)
+      ->setMethod('GET')
+      ->addHiddenInput('redirect_uri', $redirect_uri)
+      ->addHiddenInput('client_id', $client_id)
+      ->addHiddenInput('scope', $minimum_scope);
+
+    foreach ($provider->getExtraAuthParameters() as $key => $value) {
+      $form->addHiddenInput($key, $value);
+    }
+
+    return $form;
+  }
+
   public function processRequest() {
     $request       = $this->getRequest();
     $user          = $request->getUser();
@@ -56,27 +78,15 @@ final class PhabricatorUserOAuthSettingsPanelController
           'Phabricator account. You can link an account, which will allow you '.
           'to use it to log into Phabricator.</p>');
 
-      $auth_uri = $provider->getAuthURI();
-      $client_id = $provider->getClientID();
-      $redirect_uri = $provider->getRedirectURI();
-      $minimum_scope  = $provider->getMinimumScope();
-
-      $form
-        ->setAction($auth_uri)
-        ->setMethod('GET')
-        ->addHiddenInput('redirect_uri', $redirect_uri)
-        ->addHiddenInput('client_id', $client_id)
-        ->addHiddenInput('scope', $minimum_scope);
-
-      foreach ($provider->getExtraAuthParameters() as $key => $value) {
-        $form->addHiddenInput($key, $value);
-      }
+      $this->prepareAuthForm($form);
 
       $form
         ->appendChild(
           id(new AphrontFormSubmitControl())
             ->setValue('Link '.$provider_name." Account \xC2\xBB"));
     } else {
+      $expires = $oauth_info->getTokenExpires();
+
       $form
         ->appendChild(
           '<p class="aphront-form-instructions">Your account is linked with '.
@@ -97,11 +107,14 @@ final class PhabricatorUserOAuthSettingsPanelController
           id(new AphrontFormStaticControl())
             ->setLabel($provider_name.' URI')
             ->setValue($oauth_info->getAccountURI())
-          )
-        ->appendChild(
+          );
+
+      if (!$expires || $expires > time()) {
+        $form->appendChild(
           id(new AphrontFormSubmitControl())
             ->setValue('Refresh Profile Image from '.$provider_name)
           );
+      }
 
       if (!$provider->isProviderLinkPermanent()) {
         $unlink = 'Unlink '.$provider_name.' Account';
@@ -119,15 +132,14 @@ final class PhabricatorUserOAuthSettingsPanelController
         $forms['Unlink Account'] = $unlink_form;
       }
 
-      $expires = $oauth_info->getTokenExpires();
       if ($expires) {
         if ($expires <= time()) {
-          $expires = "Expired";
+          $expires_text = "Expired";
         } else {
-          $expires = phabricator_datetime($expires, $user);
+          $expires_text = phabricator_datetime($expires, $user);
         }
       } else {
-        $expires = 'No Information Available';
+        $expires_text = 'No Information Available';
       }
 
       $scope = $oauth_info->getTokenScope();
@@ -150,11 +162,20 @@ final class PhabricatorUserOAuthSettingsPanelController
         ->appendChild(
           id(new AphrontFormStaticControl())
             ->setLabel('Expires')
-            ->setValue($expires))
+            ->setValue($expires_text))
         ->appendChild(
           id(new AphrontFormStaticControl())
             ->setLabel('Scope')
             ->setValue($scope));
+
+      if ($expires <= time()) {
+        $this->prepareAuthForm($token_form);
+        $token_form
+          ->appendChild(
+            id(new AphrontFormSubmitControl())
+              ->setValue('Refresh '.$provider_name.' Token')
+            );
+      }
 
       $forms['Account Token Information'] = $token_form;
     }

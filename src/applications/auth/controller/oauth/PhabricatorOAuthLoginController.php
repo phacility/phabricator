@@ -91,6 +91,7 @@ final class PhabricatorOAuthLoginController
 
           return id(new AphrontDialogResponse())->setDialog($dialog);
         } else {
+          $this->saveOAuthInfo($oauth_info); // Refresh token.
           return id(new AphrontRedirectResponse())
             ->setURI('/settings/page/'.$provider_key.'/');
         }
