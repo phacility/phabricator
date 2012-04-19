@@ -49,14 +49,6 @@ final class DifferentialChangeset extends DifferentialDAO {
     return $this->getAddLines() + $this->getDelLines();
   }
 
-  public function getFileType() {
-    return $this->fileType;
-  }
-
-  public function getChangeType() {
-    return $this->changeType;
-  }
-
   public function attachHunks(array $hunks) {
     assert_instances_of($hunks, 'DifferentialHunk');
     $this->hunks = $hunks;
