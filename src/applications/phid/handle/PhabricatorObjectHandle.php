@@ -139,7 +139,7 @@ final class PhabricatorObjectHandle {
 
   /**
    * Set whether or not the underlying object is complete. See
-   * @{method:getComplete} for an explanation of what it means to be complete.
+   * @{method:isComplete} for an explanation of what it means to be complete.
    *
    * @param bool True if the handle represents a complete object.
    * @return this
@@ -169,7 +169,7 @@ final class PhabricatorObjectHandle {
 
   /**
    * Set whether or not the underlying object is disabled. See
-   * @{method:getDisabled} for an explanation of what it means to be disabled.
+   * @{method:isDisabled} for an explanation of what it means to be disabled.
    *
    * @param bool True if the handle represents a disabled object.
    * @return this
