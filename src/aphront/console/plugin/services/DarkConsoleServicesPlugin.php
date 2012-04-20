@@ -92,6 +92,10 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
                 $cur_badness = 3;
                 $cur_reason = 'Ref';
                 break;
+              case 'fulltext':
+                $cur_badness = 3;
+                $cur_reason = 'Fulltext';
+                break;
               case 'ALL':
                 if (preg_match('/Using where/', $table['Extra'])) {
                   if ($table['rows'] < 256 && !empty($table['possible_keys'])) {
