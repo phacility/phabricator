@@ -23,6 +23,9 @@ final class PhabricatorDefaultSearchEngineSelector
   extends PhabricatorSearchEngineSelector {
 
   public function newEngine() {
+    if (PhabricatorEnv::getEnvConfig('search.elastic.host')) {
+      return new PhabricatorSearchEngineElastic();
+    }
     return new PhabricatorSearchEngineMySQL();
   }
 }

@@ -687,6 +687,10 @@ return array(
 
 // -- Search ---------------------------------------------------------------- //
 
+  // Phabricator supports Elastic Search; to use it, specify a host like
+  // 'http://elastic.example.com:9200/' here.
+  'search.elastic.host'     => null,
+
   // Phabricator uses a search engine selector to choose which search engine
   // to use when indexing and reconstructing documents, and when executing
   // queries. You can override the engine selector to provide a new selector

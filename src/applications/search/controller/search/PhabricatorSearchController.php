@@ -226,8 +226,6 @@ final class PhabricatorSearchController
 
       $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
       $results = $engine->executeSearch($query);
-      $results = ipull($results, 'phid');
-
       $results = $pager->sliceResults($results);
 
       if (!$request->getInt('page')) {
