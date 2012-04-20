@@ -288,7 +288,7 @@ final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
     $hits = queryfx_all(
       $conn_r,
       'SELECT
-          document.phid,
+          document.phid
         FROM %T document
           %Q
           %Q
