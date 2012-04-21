@@ -18,11 +18,11 @@ phutil_require_module('phabricator', 'applications/repository/storage/repository
 phutil_require_module('phabricator', 'applications/search/constants/scope');
 phutil_require_module('phabricator', 'applications/search/controller/base');
 phutil_require_module('phabricator', 'applications/search/engine/jumpnav');
+phutil_require_module('phabricator', 'applications/search/index/abstractdocument');
 phutil_require_module('phabricator', 'applications/search/selector/base');
 phutil_require_module('phabricator', 'applications/search/storage/query');
 phutil_require_module('phabricator', 'applications/search/view/searchresult');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
-phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'view/control/pager');
 phutil_require_module('phabricator', 'view/form/base');
 phutil_require_module('phabricator', 'view/form/control/select');

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,23 +23,19 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
 
     $type = $doc->getDocumentType();
     $phid = $doc->getPHID();
+    $handle = PhabricatorObjectHandleData::loadOneHandle($phid);
 
     $spec = array(
-      'phid'          => $phid,
-      'type'          => $type,
       'title'         => $doc->getDocumentTitle(),
-      'dateCreated'   => date('c', $doc->getDocumentCreated()),
-      'dateModified'  => date('c', $doc->getDocumentModified()),
+      'url'           => PhabricatorEnv::getProductionURI($handle->getURI()),
+      'dateCreated'   => $doc->getDocumentCreated(),
+      '_timestamp'    => $doc->getDocumentModified(),
       'field'         => array(),
       'relationship'  => array(),
     );
 
     foreach ($doc->getFieldData() as $field) {
-      list($ftype, $corpus, $aux_phid) = $field;
-      $spec['field'][$ftype][] = array(
-        'corpus'  => $corpus,
-        'aux'     => $aux_phid,
-      );
+      $spec['field'][] = array_combine(array('type', 'corpus', 'aux'), $field);
     }
 
     foreach ($doc->getRelationshipData() as $relationship) {
@@ -47,7 +43,7 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
       $spec['relationship'][$rtype][] = array(
         'phid'      => $to_phid,
         'phidType'  => $to_type,
-        'when'      => date('c', $time),
+        'when'      => $time,
       );
     }
 
@@ -58,39 +54,25 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
   }
 
   public function reconstructDocument($phid) {
+    $type = phid_get_type($phid);
 
-    $response = $this->executeRequest(
-      '/phabricator/_search',
-      array(
-        'query' => array(
-          'ids' => array(
-            'values' => array(
-              $phid,
-            ),
-          ),
-        ),
-      ),
-      $is_write = false);
+    $response = $this->executeRequest("/phabricator/{$type}/{$phid}", array());
 
-    $hit = $response['hits']['hits'][0]['_source'];
-    if (!$hit) {
+    if (empty($response['exists'])) {
       return null;
     }
 
-    $doc = new PhabricatorSearchAbstractDocument();
-    $doc->setPHID($hit['phid']);
-    $doc->setDocumentType($hit['type']);
-    $doc->setDocumentTitle($hit['title']);
-    $doc->setDocumentCreated(strtotime($hit['dateCreated']));
-    $doc->setDocumentModified(strtotime($hit['dateModified']));
+    $hit = $response['_source'];
 
-    foreach ($hit['field'] as $ftype => $fdefs) {
-      foreach ($fdefs as $fdef) {
-        $doc->addField(
-          $ftype,
-          $fdef['corpus'],
-          $fdef['aux']);
-      }
+    $doc = new PhabricatorSearchAbstractDocument();
+    $doc->setPHID($phid);
+    $doc->setDocumentType($response['_type']);
+    $doc->setDocumentTitle($hit['title']);
+    $doc->setDocumentCreated($hit['dateCreated']);
+    $doc->setDocumentModified($hit['_timestamp']);
+
+    foreach ($hit['field'] as $fdef) {
+      $doc->addField($fdef['type'], $fdef['corpus'], $fdef['aux']);
     }
 
     foreach ($hit['relationship'] as $rtype => $rships) {
@@ -99,7 +81,7 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
           $rtype,
           $rship['phid'],
           $rship['phidType'],
-          strtotime($rship['when']));
+          $rship['when']);
       }
     }
 
@@ -108,35 +90,96 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
 
   public function executeSearch(PhabricatorSearchQuery $query) {
 
-    $spec = array(
-      'text' => array(
-        '_all' => $query->getQuery(),
-      ),
-    );
+    $spec = array();
+    $filter = array();
+
+    if ($query->getQuery()) {
+      $spec[] = array(
+        'field' => array(
+          'field.corpus' => $query->getQuery(),
+        ),
+      );
+    }
+
+    $exclude = $query->getParameter('exclude');
+    if ($exclude) {
+      $filter[] = array(
+        'not' => array(
+          'ids' => array(
+            'values' => array($exclude),
+          ),
+        ),
+      );
+    }
 
     $type = $query->getParameter('type');
     if ($type) {
       $uri = "/phabricator/{$type}/_search";
     } else {
-      $uri = "/phabricator/_search";
+      // Don't use '/phabricator/_search' for the case that there is something
+      // else in the index (for example if 'phabricator' is only an alias to
+      // some bigger index).
+      $types = PhabricatorSearchAbstractDocument::getSupportedTypes();
+      $uri = '/phabricator/' . implode(',', array_keys($types)) . '/_search';
     }
 
-    $response = $this->executeRequest(
-      $uri,
-      array(
-        'query' => $spec,
-      ),
-      $is_write = false);
-
-    $phids = array();
-    foreach ($response['hits']['hits'] as $hit) {
-      $phids[] = $hit['_id'];
+    $rel_mapping = array(
+      'author' => PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR,
+      'open' => PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
+      'owner' => PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
+      'project' => PhabricatorSearchRelationship::RELATIONSHIP_PROJECT,
+      'repository' => PhabricatorSearchRelationship::RELATIONSHIP_REPOSITORY,
+    );
+    foreach ($rel_mapping as $name => $field) {
+      $param = $query->getParameter($name);
+      if (is_array($param)) {
+        $should = array();
+        foreach ($param as $val) {
+          $should[] = array(
+            'text' => array(
+              "relationship.{$field}.phid" => array(
+                'query' => $val,
+                'type' => 'phrase',
+              ),
+            ),
+          );
+        }
+        $spec[] = array('bool' => array('should' => $should));
+      } else if ($param) {
+        $filter[] = array(
+          'exists' => array(
+            'field' => "relationship.{$field}.phid",
+          ),
+        );
+      }
     }
 
+    if ($spec) {
+      $spec = array('query' => array('bool' => array('must' => $spec)));
+    }
+
+    if ($filter) {
+      $filter = array('filter' => array('and' => $filter));
+      if ($spec) {
+        $spec = array(
+          'query' => array(
+            'filtered' => $spec + $filter,
+          ),
+        );
+      } else {
+        $spec = $filter;
+      }
+    }
+
+    $spec['from'] = (int)$query->getParameter('offset', 0);
+    $spec['size'] = (int)$query->getParameter('limit', 0);
+    $response = $this->executeRequest($uri, $spec);
+
+    $phids = ipull($response['hits']['hits'], '_id');
     return $phids;
   }
 
-  private function executeRequest($path, array $data, $is_write) {
+  private function executeRequest($path, array $data, $is_write = false) {
     $uri = PhabricatorEnv::getEnvConfig('search.elastic.host');
     $uri = new PhutilURI($uri);
     $data = json_encode($data);

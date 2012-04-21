@@ -6,6 +6,9 @@
 
 
 
+phutil_require_module('phabricator', 'applications/phid/handle/data');
+phutil_require_module('phabricator', 'applications/phid/utils');
+phutil_require_module('phabricator', 'applications/search/constants/relationship');
 phutil_require_module('phabricator', 'applications/search/engine/base');
 phutil_require_module('phabricator', 'applications/search/index/abstractdocument');
 phutil_require_module('phabricator', 'infrastructure/env');
@@ -13,6 +16,7 @@ phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phutil', 'future/http/http');
 phutil_require_module('phutil', 'future/http/https');
 phutil_require_module('phutil', 'parser/uri');
+phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('PhabricatorSearchEngineElastic.php');

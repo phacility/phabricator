@@ -305,7 +305,12 @@ final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
     return ipull($hits, 'phid');
   }
 
-  protected function joinRelationship($conn, $query, $field, $type) {
+  protected function joinRelationship(
+    AphrontDatabaseConnection $conn,
+    PhabricatorSearchQuery $query,
+    $field,
+    $type) {
+
     $phids = $query->getParameter($field, array());
     if (!$phids) {
       return null;

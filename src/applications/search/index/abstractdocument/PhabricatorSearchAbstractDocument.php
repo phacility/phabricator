@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,17 @@ final class PhabricatorSearchAbstractDocument {
   private $documentModified;
   private $fields = array();
   private $relationships = array();
+
+  public static function getSupportedTypes() {
+    $more = PhabricatorEnv::getEnvConfig('search.more-document-types', array());
+    return array(
+      PhabricatorPHIDConstants::PHID_TYPE_DREV => 'Differential Revisions',
+      PhabricatorPHIDConstants::PHID_TYPE_CMIT => 'Repository Commits',
+      PhabricatorPHIDConstants::PHID_TYPE_TASK => 'Maniphest Tasks',
+      PhabricatorPHIDConstants::PHID_TYPE_WIKI => 'Phriction Documents',
+      PhabricatorPHIDConstants::PHID_TYPE_USER => 'Phabricator Users',
+    ) + $more;
+  }
 
   public function setPHID($phid) {
     $this->phid = $phid;

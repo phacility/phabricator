@@ -113,16 +113,9 @@ final class PhabricatorSearchController
       }
     }
 
-    $more = PhabricatorEnv::getEnvConfig('search.more-document-types', array());
-
     $options = array(
       '' => 'All Documents',
-      PhabricatorPHIDConstants::PHID_TYPE_DREV => 'Differential Revisions',
-      PhabricatorPHIDConstants::PHID_TYPE_CMIT => 'Repository Commits',
-      PhabricatorPHIDConstants::PHID_TYPE_TASK => 'Maniphest Tasks',
-      PhabricatorPHIDConstants::PHID_TYPE_WIKI => 'Phriction Documents',
-      PhabricatorPHIDConstants::PHID_TYPE_USER => 'Phabricator Users',
-    ) + $more;
+    ) + PhabricatorSearchAbstractDocument::getSupportedTypes();
 
     $status_options = array(
       0 => 'Open and Closed Documents',

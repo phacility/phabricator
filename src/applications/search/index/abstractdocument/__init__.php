@@ -6,7 +6,9 @@
 
 
 
+phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/search/constants/field');
+phutil_require_module('phabricator', 'infrastructure/env');
 
 
 phutil_require_source('PhabricatorSearchAbstractDocument.php');
