@@ -59,7 +59,7 @@ final class PhabricatorSearchSelectController
     $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
     $results = $engine->executeSearch($query);
 
-    $phids = array_fill_keys(ipull($results, 'phid'), true);
+    $phids = array_fill_keys($results, true);
     $phids += $this->queryObjectNames($query_str);
 
     $phids = array_keys($phids);
