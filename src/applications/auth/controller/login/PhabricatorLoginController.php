@@ -64,9 +64,11 @@ final class PhabricatorLoginController
       ));
     }
 
-    $next_uri = $this->getRequest()->getPath();
-    if ($next_uri == '/login/') {
+    $next_uri_path = $this->getRequest()->getPath();
+    if ($next_uri_path == '/login/') {
       $next_uri = '/';
+    } else {
+      $next_uri = $this->getRequest()->getRequestURI();
     }
 
     if (!$request->isFormPost()) {
