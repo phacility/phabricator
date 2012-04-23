@@ -49,6 +49,18 @@ final class DiffusionCommentListView extends AphrontView {
     $phids = array();
     foreach ($this->comments as $comment) {
       $phids[$comment->getActorPHID()] = true;
+      $metadata = $comment->getMetaData();
+
+      $ccs_key = PhabricatorAuditComment::METADATA_ADDED_CCS;
+      $added_ccs = idx($metadata, $ccs_key, array());
+      foreach ($added_ccs as $cc) {
+        $phids[$cc] = true;
+      }
+      $auditors_key = PhabricatorAuditComment::METADATA_ADDED_AUDITORS;
+      $added_auditors = idx($metadata, $auditors_key, array());
+      foreach ($added_auditors as $auditor) {
+        $phids[$auditor] = true;
+      }
     }
     foreach ($this->inlineComments as $comment) {
       $phids[$comment->getAuthorPHID()] = true;

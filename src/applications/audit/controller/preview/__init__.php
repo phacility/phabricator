@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'aphront/response/ajax');
+phutil_require_module('phabricator', 'applications/audit/constants/action');
 phutil_require_module('phabricator', 'applications/audit/controller/base');
 phutil_require_module('phabricator', 'applications/audit/storage/auditcomment');
 phutil_require_module('phabricator', 'applications/diffusion/view/comment');

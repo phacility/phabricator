@@ -23,6 +23,8 @@ final class PhabricatorAuditActionConstants {
   const COMMENT   = 'comment';
   const RESIGN    = 'resign';
   const CLOSE     = 'close';
+  const ADD_CCS = 'add_ccs';
+  const ADD_AUDITORS = 'add_auditors';
 
   public static function getActionNameMap() {
     static $map = array(
@@ -31,6 +33,8 @@ final class PhabricatorAuditActionConstants {
       self::ACCEPT  => 'Accept Commit',
       self::RESIGN  => 'Resign from Audit',
       self::CLOSE   => 'Close Audit',
+      self::ADD_CCS => 'Add CCs',
+      self::ADD_AUDITORS => 'Add Auditors',
     );
 
     return $map;
@@ -48,6 +52,8 @@ final class PhabricatorAuditActionConstants {
       self::ACCEPT  => 'accepted',
       self::RESIGN  => 'resigned from',
       self::CLOSE   => 'closed',
+      self::ADD_CCS => 'added CCs to',
+      self::ADD_AUDITORS => 'added auditors to',
     );
     return idx($map, $action, 'updated');
   }

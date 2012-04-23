@@ -115,8 +115,27 @@ final class DiffusionCommentView extends AphrontView {
     $action = $comment->getAction();
     $verb = PhabricatorAuditActionConstants::getActionPastTenseVerb($action);
 
+    $metadata = $comment->getMetadata();
+    $added_auditors = idx(
+      $metadata,
+      PhabricatorAuditComment::METADATA_ADDED_AUDITORS,
+      array());
+    $added_ccs = idx(
+      $metadata,
+      PhabricatorAuditComment::METADATA_ADDED_CCS,
+      array());
+
     $actions = array();
-    $actions[] = "{$author_link} ".phutil_escape_html($verb)." this commit.";
+    if ($action == PhabricatorAuditActionConstants::ADD_CCS) {
+      $rendered_ccs = $this->renderHandleList($added_ccs);
+      $actions[] = "{$author_link} added CCs: {$rendered_ccs}.";
+    } else if ($action == PhabricatorAuditActionConstants::ADD_AUDITORS) {
+      $rendered_auditors = $this->renderHandleList($added_auditors);
+      $actions[] = "{$author_link} added auditors: ".
+        "{$rendered_auditors}.";
+    } else {
+      $actions[] = "{$author_link} ".phutil_escape_html($verb)." this commit.";
+    }
 
     foreach ($actions as $key => $action) {
       $actions[$key] = '<div>'.$action.'</div>';
@@ -177,6 +196,14 @@ final class DiffusionCommentView extends AphrontView {
       $this->engine = PhabricatorMarkupEngine::newDiffusionMarkupEngine();
     }
     return $this->engine;
+  }
+
+  private function renderHandleList(array $phids) {
+    $result = array();
+    foreach ($phids as $phid) {
+      $result[] = $this->handles[$phid]->renderLink();
+    }
+    return implode(', ', $result);
   }
 
   private function renderClasses() {

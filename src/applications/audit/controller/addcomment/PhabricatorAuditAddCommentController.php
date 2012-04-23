@@ -36,17 +36,24 @@ final class PhabricatorAuditAddCommentController
       return new Aphront404Response();
     }
 
+    $phids = array($commit_phid);
+
+    $action = $request->getStr('action');
+
     $comment = id(new PhabricatorAuditComment())
-      ->setAction($request->getStr('action'))
+      ->setAction($action)
       ->setContent($request->getStr('content'));
 
+    $auditors = $request->getArr('auditors');
+    $ccs = $request->getArr('ccs');
 
     id(new PhabricatorAuditCommentEditor($commit))
       ->setUser($user)
       ->setAttachInlineComments(true)
+      ->addAuditors($auditors)
+      ->addCCs($ccs)
       ->addComment($comment);
 
-    $phids = array($commit_phid);
     $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
     $uri = $handles[$commit_phid]->getURI();
 

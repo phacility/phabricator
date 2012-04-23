@@ -26,6 +26,7 @@ final class PhabricatorAuditStatusConstants {
   const AUDIT_REQUESTED         = 'requested';
   const RESIGNED                = 'resigned';
   const CLOSED                  = 'closed';
+  const CC                      = 'cc';
 
   public static function getStatusNameMap() {
     static $map = array(
@@ -37,6 +38,7 @@ final class PhabricatorAuditStatusConstants {
       self::AUDIT_REQUESTED     => 'Audit Requested',
       self::RESIGNED            => 'Resigned',
       self::CLOSED              => 'Closed',
+      self::CC                  => "Was CC'd",
     );
 
     return $map;

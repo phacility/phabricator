@@ -34,18 +34,40 @@ final class PhabricatorAuditPreviewController
       return new Aphront404Response();
     }
 
+    $action = $request->getStr('action');
+
     $comment = id(new PhabricatorAuditComment())
       ->setActorPHID($user->getPHID())
       ->setTargetPHID($commit->getPHID())
-      ->setAction($request->getStr('action'))
+      ->setAction($action)
       ->setContent($request->getStr('content'));
+
+    $phids = array(
+      $user->getPHID(),
+      $commit->getPHID(),
+    );
+
+    $auditors = $request->getStrList('auditors');
+    if ($action == PhabricatorAuditActionConstants::ADD_AUDITORS && $auditors) {
+      $comment->setMetadata(array(
+        PhabricatorAuditComment::METADATA_ADDED_AUDITORS => $auditors));
+      $phids = array_merge($phids, $auditors);
+    }
+
+    $ccs = $request->getStrList('ccs');
+    if ($action == PhabricatorAuditActionConstants::ADD_CCS && $ccs) {
+      $comment->setMetadata(array(
+        PhabricatorAuditComment::METADATA_ADDED_CCS => $ccs));
+      $phids = array_merge($phids, $ccs);
+    }
 
     $view = id(new DiffusionCommentView())
       ->setUser($user)
       ->setComment($comment)
       ->setIsPreview(true);
 
-    $phids = $view->getRequiredHandlePHIDs();
+    $phids = array_merge($phids, $view->getRequiredHandlePHIDs());
+
     $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
     $view->setHandles($handles);
 

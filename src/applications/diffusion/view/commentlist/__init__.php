@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/audit/storage/auditcomment');
 phutil_require_module('phabricator', 'applications/diffusion/view/comment');
 phutil_require_module('phabricator', 'view/base');
 

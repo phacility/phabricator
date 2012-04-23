@@ -459,6 +459,22 @@ final class DiffusionCommitController extends DiffusionController {
           ->setID('audit-action')
           ->setOptions($actions))
       ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel('Add Auditors')
+          ->setName('auditors')
+          ->setControlID('add-auditors')
+          ->setControlStyle('display: none')
+          ->setID('add-auditors-tokenizer')
+          ->setDisableBehavior(true))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel('Add CCs')
+          ->setName('ccs')
+          ->setControlID('add-ccs')
+          ->setControlStyle('display: none')
+          ->setID('add-ccs-tokenizer')
+          ->setDisableBehavior(true))
+      ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel('Comments')
           ->setName('content')
@@ -483,11 +499,37 @@ final class DiffusionCommitController extends DiffusionController {
 
     require_celerity_resource('phabricator-transaction-view-css');
 
-    Javelin::initBehavior('audit-preview', array(
+    Javelin::initBehavior(
+      'differential-add-reviewers-and-ccs',
+      array(
+        'dynamic' => array(
+          'add-auditors-tokenizer' => array(
+            'actions' => array('add_auditors' => 1),
+            'src' => '/typeahead/common/users/',
+            'row' => 'add-auditors',
+            'ondemand' => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
+            'placeholder' => 'Type a user name...',
+          ),
+          'add-ccs-tokenizer' => array(
+            'actions' => array('add_ccs' => 1),
+            'src' => '/typeahead/common/mailable/',
+            'row' => 'add-ccs',
+            'ondemand' => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
+            'placeholder' => 'Type a user or mailing list...',
+          ),
+        ),
+        'select' => 'audit-action',
+      ));
+
+    Javelin::initBehavior('differential-feedback-preview', array(
       'uri'       => '/audit/preview/'.$commit->getID().'/',
       'preview'   => 'audit-preview',
       'content'   => 'audit-content',
       'action'    => 'audit-action',
+      'previewTokenizers' => array(
+        'auditors' => 'add-auditors-tokenizer',
+        'ccs'      => 'add-ccs-tokenizer',
+      ),
     ));
 
     $preview_panel =
@@ -530,6 +572,8 @@ final class DiffusionCommitController extends DiffusionController {
 
     $actions = array();
     $actions[PhabricatorAuditActionConstants::COMMENT] = true;
+    $actions[PhabricatorAuditActionConstants::ADD_CCS] = true;
+    $actions[PhabricatorAuditActionConstants::ADD_AUDITORS] = true;
 
     // We allow you to accept your own commits. A use case here is that you
     // notice an issue with your own commit and "Raise Concern" as an indicator
