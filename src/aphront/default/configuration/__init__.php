@@ -17,6 +17,7 @@ phutil_require_module('phabricator', 'applications/people/storage/user');
 phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/dialog');
+phutil_require_module('phabricator', 'view/form/error');
 phutil_require_module('phabricator', 'view/page/standard');
 
 phutil_require_module('phutil', 'error');

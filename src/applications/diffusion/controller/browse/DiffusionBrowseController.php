@@ -33,6 +33,17 @@ final class DiffusionBrowseController extends DiffusionController {
         'view'   => 'browse',
       ));
 
+    if ($drequest->getTagContent()) {
+      $title = 'Tag: '.$drequest->getSymbolicCommit();
+
+      $tag_view = new AphrontPanelView();
+      $tag_view->setHeader(phutil_escape_html($title));
+      $tag_view->appendChild(
+        $this->markupText($drequest->getTagContent()));
+
+      $content[] = $tag_view;
+    }
+
     if (!$results) {
 
       if ($browse_query->getReasonForEmptyResultSet() ==
@@ -88,16 +99,7 @@ final class DiffusionBrowseController extends DiffusionController {
           $readme_content = nl2br($readme_content);
         } else {
           // Markup extensionless files as remarkup so we get links and such.
-
-          $engine = PhabricatorMarkupEngine::newDiffusionMarkupEngine();
-          $readme_content = $engine->markupText($readme_content);
-
-          $readme_content = phutil_render_tag(
-            'div',
-            array(
-              'class' => 'phabricator-remarkup',
-            ),
-            $readme_content);
+          $readme_content = $this->markupText($readme_content);
         }
 
         $readme_panel = new AphrontPanelView();
@@ -126,8 +128,25 @@ final class DiffusionBrowseController extends DiffusionController {
     return $this->buildStandardPageResponse(
       $nav,
       array(
-        'title' => basename($drequest->getPath()),
+        'title' => array(
+          nonempty(basename($drequest->getPath()), '/'),
+          $drequest->getRepository()->getCallsign().' Repository',
+        ),
       ));
+  }
+
+  private function markupText($text) {
+    $engine = PhabricatorMarkupEngine::newDiffusionMarkupEngine();
+    $text = $engine->markupText($text);
+
+    $text = phutil_render_tag(
+      'div',
+      array(
+        'class' => 'phabricator-remarkup',
+      ),
+      $text);
+
+    return $text;
   }
 
 }

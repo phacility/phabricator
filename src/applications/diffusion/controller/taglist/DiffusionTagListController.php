@@ -29,17 +29,33 @@ final class DiffusionTagListController extends DiffusionController {
     $pager->setURI($request->getRequestURI(), 'offset');
     $pager->setOffset($request->getInt('offset'));
 
-    $query = DiffusionTagListQuery::newFromDiffusionRequest($drequest);
-    $query->setOffset($pager->getOffset());
-    $query->setLimit($pager->getPageSize() + 1);
-    $tags = $query->loadTags();
+    if ($drequest->getRawCommit()) {
+      $is_commit = true;
+
+      $query = DiffusionCommitTagsQuery::newFromDiffusionRequest($drequest);
+      $query->setOffset($pager->getOffset());
+      $query->setLimit($pager->getPageSize() + 1);
+      $tags = $query->loadTags();
+    } else {
+      $is_commit = false;
+
+      $query = DiffusionTagListQuery::newFromDiffusionRequest($drequest);
+      $query->setOffset($pager->getOffset());
+      $query->setLimit($pager->getPageSize() + 1);
+      $tags = $query->loadTags();
+    }
+
     $tags = $pager->sliceResults($tags);
 
     $content = null;
     if (!$tags) {
       $content = new AphrontErrorView();
       $content->setTitle('No Tags');
-      $content->appendChild('This repository has no tags.');
+      if ($is_commit) {
+        $content->appendChild('This commit has no tags.');
+      } else {
+        $content->appendChild('This repository has no tags.');
+      }
       $content->setSeverity(AphrontErrorView::SEVERITY_NODATA);
     } else {
       $commits = id(new PhabricatorAuditCommitQuery())
@@ -69,7 +85,11 @@ final class DiffusionTagListController extends DiffusionController {
 
     return $this->buildStandardPageResponse(
       array(
-        $this->buildCrumbs(array('tags' => true)),
+        $this->buildCrumbs(
+          array(
+            'tags'    => true,
+            'commit'  => $drequest->getRawCommit(),
+          )),
         $content,
       ),
       array(

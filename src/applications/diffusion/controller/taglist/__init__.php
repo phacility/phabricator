@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'applications/audit/query/commit');
 phutil_require_module('phabricator', 'applications/diffusion/controller/base');
+phutil_require_module('phabricator', 'applications/diffusion/query/committags/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/taglist/base');
 phutil_require_module('phabricator', 'applications/diffusion/view/taglist');
 phutil_require_module('phabricator', 'applications/phid/handle/data');

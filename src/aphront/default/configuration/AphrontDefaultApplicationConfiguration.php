@@ -504,6 +504,22 @@ class AphrontDefaultApplicationConfiguration
       return $response;
     }
 
+    if ($ex instanceof AphrontUsageException) {
+      $error = new AphrontErrorView();
+      $error->setTitle(phutil_escape_html($ex->getTitle()));
+      $error->appendChild(phutil_escape_html($ex->getMessage()));
+
+      $view = new PhabricatorStandardPageView();
+      $view->setRequest($this->getRequest());
+      $view->appendChild($error);
+
+      $response = new AphrontWebpageResponse();
+      $response->setContent($view->render());
+
+      return $response;
+    }
+
+
     // Always log the unhandled exception.
     phlog($ex);
 

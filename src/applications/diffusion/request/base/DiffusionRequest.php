@@ -31,8 +31,11 @@ abstract class DiffusionRequest {
   protected $callsign;
   protected $path;
   protected $line;
+  protected $symbolicCommit;
   protected $commit;
   protected $branch;
+  protected $commitType = 'commit';
+  protected $tagContent;
 
   protected $repository;
   protected $repositoryCommit;
@@ -174,9 +177,10 @@ abstract class DiffusionRequest {
    * @task new
    */
   final private function initializeFromDictionary(array $data) {
-    $this->path       = idx($data, 'path');
-    $this->commit     = idx($data, 'commit');
-    $this->line       = idx($data, 'line');
+    $this->path           = idx($data, 'path');
+    $this->symbolicCommit = idx($data, 'commit');
+    $this->commit         = idx($data, 'commit');
+    $this->line           = idx($data, 'line');
 
     if ($this->getSupportsBranches()) {
       $this->branch = idx($data, 'branch');
@@ -206,8 +210,16 @@ abstract class DiffusionRequest {
     return $this->commit;
   }
 
+  public function getSymbolicCommit() {
+    return $this->symbolicCommit;
+  }
+
   public function getBranch() {
     return $this->branch;
+  }
+
+  public function getTagContent() {
+    return $this->tagContent;
   }
 
   public function loadCommit() {

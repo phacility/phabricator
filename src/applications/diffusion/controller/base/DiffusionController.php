@@ -213,13 +213,27 @@ abstract class DiffusionController extends PhabricatorController {
       $repository_name);
 
     $raw_commit = $drequest->getRawCommit();
-    if ($spec['commit']) {
-      $crumb_list[] = "r{$callsign}{$raw_commit}";
+
+    if ($spec['tags']) {
+      if ($spec['commit']) {
+        $crumb_list[] = "Tags for ".phutil_render_tag(
+          'a',
+          array(
+            'href' => $drequest->generateURI(
+              array(
+                'action' => 'commit',
+                'commit' => $raw_commit,
+              )),
+          ),
+          phutil_escape_html("r{$callsign}{$raw_commit}"));
+      } else {
+        $crumb_list[] = 'Tags';
+      }
       return $crumb_list;
     }
 
-    if ($spec['tags']) {
-      $crumb_list[] = 'Tags';
+    if ($spec['commit']) {
+      $crumb_list[] = "r{$callsign}{$raw_commit}";
       return $crumb_list;
     }
 

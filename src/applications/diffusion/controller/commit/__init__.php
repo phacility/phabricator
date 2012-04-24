@@ -18,6 +18,7 @@ phutil_require_module('phabricator', 'applications/differential/constants/change
 phutil_require_module('phabricator', 'applications/differential/view/changesetlistview');
 phutil_require_module('phabricator', 'applications/diffusion/controller/base');
 phutil_require_module('phabricator', 'applications/diffusion/data/pathchange');
+phutil_require_module('phabricator', 'applications/diffusion/query/committags/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/contains/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/mergedcommits/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/parents/base');
