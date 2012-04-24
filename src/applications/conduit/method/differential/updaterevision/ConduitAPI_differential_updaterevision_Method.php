@@ -44,7 +44,7 @@ final class ConduitAPI_differential_updaterevision_Method
       'ERR_BAD_DIFF' => 'Bad diff ID.',
       'ERR_BAD_REVISION' => 'Bad revision ID.',
       'ERR_WRONG_USER' => 'You are not the author of this revision.',
-      'ERR_COMMITTED' => 'This revision has already been committed.',
+      'ERR_CLOSED' => 'This revision has already been closed.',
     );
   }
 
@@ -63,9 +63,8 @@ final class ConduitAPI_differential_updaterevision_Method
       throw new ConduitException('ERR_WRONG_USER');
     }
 
-    if ($revision->getStatus() ==
-        ArcanistDifferentialRevisionStatus::COMMITTED) {
-      throw new ConduitException('ERR_COMMITTED');
+    if ($revision->getStatus() == ArcanistDifferentialRevisionStatus::CLOSED) {
+      throw new ConduitException('ERR_CLOSED');
     }
 
     $content_source = PhabricatorContentSource::newForSource(

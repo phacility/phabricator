@@ -36,7 +36,7 @@ $args->setSynopsis(<<<EOSYNOPSIS
       2. Put all their identifiers (commit hashes in git/hg, revision
          numbers in svn) into a file, one per line.
       3. Pipe that file into this script with relevant arguments.
-      4. Revisions marked "committed" by those commits will be
+      4. Revisions marked "closed" by those commits will be
          restored to their previous state.
 
 EOSYNOPSIS
@@ -90,7 +90,7 @@ if (!$commits) {
 
 $commit_phids = mpull($commits, 'getPHID', 'getPHID');
 
-echo "Looking up revisions marked 'committed' by these commits...\n";
+echo "Looking up revisions marked 'closed' by these commits...\n";
 $revision_ids = queryfx_all(
   id(new DifferentialRevision())->establishConnection('r'),
   'SELECT DISTINCT revisionID from %T WHERE commitPHID IN (%Ls)',
@@ -104,7 +104,7 @@ if (!$revision_ids) {
   return;
 }
 
-$status_committed = ArcanistDifferentialRevisionStatus::COMMITTED;
+$status_closed = ArcanistDifferentialRevisionStatus::CLOSED;
 
 $revisions = array();
 $map = array();
@@ -114,8 +114,8 @@ if ($revision_ids) {
     echo "Assessing revision D{$revision_id}...\n";
     $revision = id(new DifferentialRevision())->load($revision_id);
 
-    if ($revision->getStatus() != $status_committed) {
-      echo "Revision is not 'committed', skipping.\n";
+    if ($revision->getStatus() != $status_closed) {
+      echo "Revision is not 'closed', skipping.\n";
     }
 
     $assoc_commits = queryfx_all(

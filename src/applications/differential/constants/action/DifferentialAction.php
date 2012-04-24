@@ -18,7 +18,7 @@
 
 final class DifferentialAction {
 
-  const ACTION_COMMIT         = 'commit';
+  const ACTION_CLOSE          = 'commit';
   const ACTION_COMMENT        = 'none';
   const ACTION_ACCEPT         = 'accept';
   const ACTION_REJECT         = 'reject';
@@ -42,7 +42,7 @@ final class DifferentialAction {
       self::ACTION_REJECT         => 'requested changes to',
       self::ACTION_RETHINK        => 'planned changes to',
       self::ACTION_ABANDON        => 'abandoned',
-      self::ACTION_COMMIT         => 'committed',
+      self::ACTION_CLOSE          => 'closed',
       self::ACTION_REQUEST        => 'requested a review of',
       self::ACTION_RECLAIM        => 'reclaimed',
       self::ACTION_UPDATE         => 'updated',
@@ -74,7 +74,7 @@ final class DifferentialAction {
       self::ACTION_RESIGN         => 'Resign as Reviewer',
       self::ACTION_ADDREVIEWERS   => 'Add Reviewers',
       self::ACTION_ADDCCS         => 'Add CCs',
-      self::ACTION_COMMIT         => 'Mark Committed',
+      self::ACTION_CLOSE          => 'Close Revision',
       self::ACTION_CLAIM          => 'Commandeer Revision',
     );
 

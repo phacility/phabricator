@@ -266,7 +266,7 @@ You can also generate full-name references to some objects by using braces:
   {T123}        # Link to Maniphest task T123 with the full name
 
 These references will also show when an object changes state (for instance, a
-task is closed or a revision is committed).
+task or revision is closed).
 
 = Quoting Text =
 

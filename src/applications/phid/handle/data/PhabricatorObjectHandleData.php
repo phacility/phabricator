@@ -222,7 +222,7 @@ final class PhabricatorObjectHandleData {
               $handle->setComplete(true);
 
               $status = $rev->getStatus();
-              if (($status == ArcanistDifferentialRevisionStatus::COMMITTED) ||
+              if (($status == ArcanistDifferentialRevisionStatus::CLOSED) ||
                   ($status == ArcanistDifferentialRevisionStatus::ABANDONED)) {
                 $closed = PhabricatorObjectHandleStatus::STATUS_CLOSED;
                 $handle->setStatus($closed);

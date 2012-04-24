@@ -94,7 +94,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
           $commit->getPHID());
 
         if ($revision->getStatus() !=
-            ArcanistDifferentialRevisionStatus::COMMITTED) {
+            ArcanistDifferentialRevisionStatus::CLOSED) {
 
           $date_committed = $this->getDateCommitted($commit);
           if ($date_committed) {
@@ -105,12 +105,12 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
           $committer = $data->getCommitDetail('authorPHID');
           if (!$committer) {
             $committer = $revision->getAuthorPHID();
-            $message = 'Change committed by '.$data->getAuthorName().'.';
+            $message = 'Closed by '.$data->getAuthorName().'.';
           }
           $editor = new DifferentialCommentEditor(
             $revision,
             $committer,
-            DifferentialAction::ACTION_COMMIT);
+            DifferentialAction::ACTION_CLOSE);
           $editor->setIsDaemonWorkflow(true);
           $editor->setMessage($message)->save();
         }
@@ -127,7 +127,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
    * This function identifies the "best" revision from such a set.  Typically,
    * there is only one revision found.   Otherwise, we try to pick an accepted
    * revision first, followed by an open revision, and otherwise we go with a
-   * committed or abandoned revision as a last resort.
+   * closed or abandoned revision as a last resort.
    */
   private function identifyBestRevision(array $revisions) {
     assert_instances_of($revisions, 'DifferentialRevision');
@@ -153,7 +153,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         // default is a wtf? here
         default:
         case ArcanistDifferentialRevisionStatus::ABANDONED:
-        case ArcanistDifferentialRevisionStatus::COMMITTED:
+        case ArcanistDifferentialRevisionStatus::CLOSED:
           $third_choice[] = $revision;
           break;
       }

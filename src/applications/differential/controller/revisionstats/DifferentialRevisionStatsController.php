@@ -101,7 +101,7 @@ final class DifferentialRevisionStatsController extends DifferentialController {
     $side_nav->setBaseURI(id(new PhutilURI('/differential/stats/'))
                           ->alter('phid', $params['phid']));
     foreach (array(
-               DifferentialAction::ACTION_COMMIT,
+               DifferentialAction::ACTION_CLOSE,
                DifferentialAction::ACTION_ACCEPT,
                DifferentialAction::ACTION_REJECT,
                DifferentialAction::ACTION_UPDATE,
@@ -112,7 +112,7 @@ final class DifferentialRevisionStatsController extends DifferentialController {
     }
     $this->filter =
       $side_nav->selectFilter($this->filter,
-                              DifferentialAction::ACTION_COMMIT);
+                              DifferentialAction::ACTION_CLOSE);
 
     $panels = array();
     $handles = id(new PhabricatorObjectHandleData(array($params['phid'])))

@@ -43,7 +43,7 @@ final class PhabricatorSearchDifferentialIndexer
       PhabricatorPHIDConstants::PHID_TYPE_USER,
       $rev->getDateCreated());
 
-    if ($rev->getStatus() != ArcanistDifferentialRevisionStatus::COMMITTED &&
+    if ($rev->getStatus() != ArcanistDifferentialRevisionStatus::CLOSED &&
         $rev->getStatus() != ArcanistDifferentialRevisionStatus::ABANDONED) {
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
@@ -81,7 +81,7 @@ final class PhabricatorSearchDifferentialIndexer
     $rev->loadRelationships();
 
     // If a revision needs review, the owners are the reviewers. Otherwise, the
-    // owner is the author (e.g., accepted, rejected, committed).
+    // owner is the author (e.g., accepted, rejected, closed).
     if ($rev->getStatus() == ArcanistDifferentialRevisionStatus::NEEDS_REVIEW) {
       foreach ($rev->getReviewers() as $phid) {
         $doc->addRelationship(

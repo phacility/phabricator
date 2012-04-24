@@ -54,7 +54,7 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
     $action = $data->getValue('action');
     switch ($action) {
       case DifferentialAction::ACTION_CREATE:
-      case DifferentialAction::ACTION_COMMIT:
+      case DifferentialAction::ACTION_CLOSE:
         $full_size = true;
         break;
       default:

@@ -210,7 +210,7 @@ final class DifferentialRevision extends DifferentialDAO {
     $reviewer = null;
 
     if ($this->status == ArcanistDifferentialRevisionStatus::ACCEPTED ||
-        $this->status == ArcanistDifferentialRevisionStatus::COMMITTED) {
+        $this->status == ArcanistDifferentialRevisionStatus::CLOSED) {
       $comments = $this->loadComments();
       foreach ($comments as $comment) {
         $action = $comment->getAction();

@@ -42,7 +42,7 @@ class PhabricatorRepositoryDefaultCommitMessageDetailParser
 
       // NOTE: We now accept ONLY full URIs because if we accept numeric IDs
       // then anyone importing the Phabricator repository will have their
-      // first few thousand revisions marked committed. This does mean that
+      // first few thousand revisions marked closed. This does mean that
       // some older revisions won't re-parse correctly, but that shouldn't
       // really affect anyone. If necessary, an install can extend the parser
       // and restore the older, more-liberal parsing fairly easily.

@@ -150,10 +150,10 @@ final class DifferentialCommentEditor {
           throw new Exception('You can only abandon your own revisions.');
         }
 
-        if ($revision_status == ArcanistDifferentialRevisionStatus::COMMITTED) {
+        if ($revision_status == ArcanistDifferentialRevisionStatus::CLOSED) {
           throw new DifferentialActionHasNoEffectException(
             "You can not abandon this revision because it has already ".
-            "been committed.");
+            "been closed.");
         }
 
         if ($revision_status == ArcanistDifferentialRevisionStatus::ABANDONED) {
@@ -183,10 +183,10 @@ final class DifferentialCommentEditor {
               throw new DifferentialActionHasNoEffectException(
                 "You can not accept this revision because it has been ".
                 "abandoned.");
-            case ArcanistDifferentialRevisionStatus::COMMITTED:
+            case ArcanistDifferentialRevisionStatus::CLOSED:
               throw new DifferentialActionHasNoEffectException(
                 "You can not accept this revision because it has already ".
-                "been committed.");
+                "been closed.");
             default:
               throw new Exception(
                 "Unexpected revision state '{$revision_status}'!");
@@ -225,10 +225,10 @@ final class DifferentialCommentEditor {
             throw new DifferentialActionHasNoEffectException(
               "You can not request review of this revision because it has ".
               "been abandoned.");
-          case ArcanistDifferentialRevisionStatus::COMMITTED:
+          case ArcanistDifferentialRevisionStatus::CLOSED:
             throw new DifferentialActionHasNoEffectException(
               "You can not request review of this revision because it has ".
-              "already been committed.");
+              "already been closed.");
           default:
             throw new Exception(
               "Unexpected revision state '{$revision_status}'!");
@@ -260,10 +260,10 @@ final class DifferentialCommentEditor {
             throw new DifferentialActionHasNoEffectException(
               "You can not request changes to this revision because it has ".
               "been abandoned.");
-          case ArcanistDifferentialRevisionStatus::COMMITTED:
+          case ArcanistDifferentialRevisionStatus::CLOSED:
             throw new DifferentialActionHasNoEffectException(
               "You can not request changes to this revision because it has ".
-              "already been committed.");
+              "already been closed.");
           default:
             throw new Exception(
               "Unexpected revision state '{$revision_status}'!");
@@ -297,10 +297,10 @@ final class DifferentialCommentEditor {
             throw new DifferentialActionHasNoEffectException(
               "You can not plan changes to this revision because it has ".
               "been abandoned.");
-          case ArcanistDifferentialRevisionStatus::COMMITTED:
+          case ArcanistDifferentialRevisionStatus::CLOSED:
             throw new DifferentialActionHasNoEffectException(
               "You can not plan changes to this revision because it has ".
-              "already been committed.");
+              "already been closed.");
           default:
             throw new Exception(
               "Unexpected revision state '{$revision_status}'!");
@@ -325,30 +325,30 @@ final class DifferentialCommentEditor {
           ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
         break;
 
-      case DifferentialAction::ACTION_COMMIT:
+      case DifferentialAction::ACTION_CLOSE:
 
-        // NOTE: The daemons can mark things committed from any state. We treat
+        // NOTE: The daemons can mark things closed from any state. We treat
         // them as completely authoritative.
 
         if (!$this->isDaemonWorkflow) {
           if (!$actor_is_author) {
             throw new Exception(
-              "You can not mark a revision you don't own as committed.");
+              "You can not mark a revision you don't own as closed.");
           }
 
-          $status_committed = ArcanistDifferentialRevisionStatus::COMMITTED;
+          $status_closed = ArcanistDifferentialRevisionStatus::CLOSED;
           $status_accepted = ArcanistDifferentialRevisionStatus::ACCEPTED;
 
-          if ($revision_status == $status_committed) {
+          if ($revision_status == $status_closed) {
             throw new DifferentialActionHasNoEffectException(
-              "You can not mark this revision as committed because it has ".
-              "already been marked as committed.");
+              "You can not mark this revision as closed because it has ".
+              "already been marked as closed.");
           }
 
           if ($revision_status != $status_accepted) {
             throw new DifferentialActionHasNoEffectException(
-              "You can not mark this revision as committed because it has ".
-              "not been accepted.");
+              "You can not mark this revision as closed because it is ".
+              "has not been accepted.");
           }
         }
 
@@ -356,8 +356,7 @@ final class DifferentialCommentEditor {
           $revision->setDateCommitted(time());
         }
 
-        $revision
-          ->setStatus(ArcanistDifferentialRevisionStatus::COMMITTED);
+        $revision->setStatus(ArcanistDifferentialRevisionStatus::CLOSED);
         break;
 
       case DifferentialAction::ACTION_ADDREVIEWERS:
@@ -423,10 +422,10 @@ final class DifferentialCommentEditor {
         }
 
         switch ($revision_status) {
-          case ArcanistDifferentialRevisionStatus::COMMITTED:
+          case ArcanistDifferentialRevisionStatus::CLOSED:
             throw new DifferentialActionHasNoEffectException(
               "You can not commandeer this revision because it has ".
-              "already been committed.");
+              "already been closed.");
             break;
         }
 

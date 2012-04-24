@@ -34,7 +34,7 @@ final class ConduitAPI_differential_query_Method
       DifferentialRevisionQuery::STATUS_ANY,
       DifferentialRevisionQuery::STATUS_OPEN,
       DifferentialRevisionQuery::STATUS_ACCEPTED,
-      DifferentialRevisionQuery::STATUS_COMMITTED,
+      DifferentialRevisionQuery::STATUS_CLOSED,
     );
     $status_types = implode(', ', $status_types);
 

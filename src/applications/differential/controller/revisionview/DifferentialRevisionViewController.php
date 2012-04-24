@@ -499,9 +499,9 @@ final class DifferentialRevisionViewController extends DifferentialController {
           $actions[DifferentialAction::ACTION_ABANDON] = true;
           $actions[DifferentialAction::ACTION_REQUEST] = true;
           $actions[DifferentialAction::ACTION_RETHINK] = true;
-          $actions[DifferentialAction::ACTION_COMMIT] = true;
+          $actions[DifferentialAction::ACTION_CLOSE] = true;
           break;
-        case ArcanistDifferentialRevisionStatus::COMMITTED:
+        case ArcanistDifferentialRevisionStatus::CLOSED:
           break;
         case ArcanistDifferentialRevisionStatus::ABANDONED:
           $actions[DifferentialAction::ACTION_RECLAIM] = true;
@@ -523,11 +523,11 @@ final class DifferentialRevisionViewController extends DifferentialController {
           $actions[DifferentialAction::ACTION_RESIGN] =
             $viewer_is_reviewer && !$viewer_did_accept;
           break;
-        case ArcanistDifferentialRevisionStatus::COMMITTED:
+        case ArcanistDifferentialRevisionStatus::CLOSED:
         case ArcanistDifferentialRevisionStatus::ABANDONED:
           break;
       }
-      if ($status != ArcanistDifferentialRevisionStatus::COMMITTED) {
+      if ($status != ArcanistDifferentialRevisionStatus::CLOSED) {
         $actions[DifferentialAction::ACTION_CLAIM] = true;
       }
     }

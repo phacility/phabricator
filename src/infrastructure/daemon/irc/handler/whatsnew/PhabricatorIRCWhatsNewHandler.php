@@ -143,7 +143,7 @@ final class PhabricatorIRCWhatsNewHandler extends PhabricatorIRCHandler {
         return 'updated';
         break;
       case 'commit':
-        return 'committed';
+        return 'closed';
         break;
       case 'create':
         return 'created';

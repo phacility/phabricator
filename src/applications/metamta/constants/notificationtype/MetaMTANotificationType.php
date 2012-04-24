@@ -19,7 +19,7 @@
 final class MetaMTANotificationType
   extends MetaMTAConstants {
 
-  const TYPE_DIFFERENTIAL_COMMITTED   = 'differential-committed';
+  const TYPE_DIFFERENTIAL_CLOSED      = 'differential-committed';
   const TYPE_DIFFERENTIAL_CC          = 'differential-cc';
   const TYPE_DIFFERENTIAL_COMMENT     = 'differential-comment';
 

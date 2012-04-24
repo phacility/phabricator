@@ -55,14 +55,14 @@ final class DifferentialCommentMail extends DifferentialMail {
       case DifferentialAction::ACTION_ADDCCS:
         $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_CC;
         break;
-      case DifferentialAction::ACTION_COMMIT:
-        $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMITTED;
+      case DifferentialAction::ACTION_CLOSE:
+        $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_CLOSED;
         break;
     }
 
     if (strlen(trim($comment->getContent()))) {
       switch ($action) {
-        case DifferentialAction::ACTION_COMMIT:
+        case DifferentialAction::ACTION_CLOSE:
           // Commit comments are auto-generated and not especially interesting,
           // so don't tag them as having a comment.
           break;
@@ -179,7 +179,7 @@ final class DifferentialCommentMail extends DifferentialMail {
       }
     }
 
-    if ($status == ArcanistDifferentialRevisionStatus::COMMITTED) {
+    if ($status == ArcanistDifferentialRevisionStatus::CLOSED) {
       $phids = $revision->loadCommitPHIDs();
       if ($phids) {
         $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();

@@ -388,12 +388,12 @@ final class DifferentialRevisionEditor {
       $this->updateAffectedPathTable($revision, $diff, $changesets);
       $this->updateRevisionHashTable($revision, $diff);
 
-      // An updated diff should require review, as long as it's not committed
+      // An updated diff should require review, as long as it's not closed
       // or accepted. The "accepted" status is "sticky" to encourage courtesy
       // re-diffs after someone accepts with minor changes/suggestions.
 
       $status = $revision->getStatus();
-      if ($status != ArcanistDifferentialRevisionStatus::COMMITTED &&
+      if ($status != ArcanistDifferentialRevisionStatus::CLOSED &&
           $status != ArcanistDifferentialRevisionStatus::ACCEPTED) {
         $revision->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
       }

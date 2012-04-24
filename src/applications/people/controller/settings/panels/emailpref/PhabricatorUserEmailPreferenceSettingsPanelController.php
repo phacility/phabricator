@@ -204,8 +204,8 @@ final class PhabricatorUserEmailPreferenceSettingsPanelController
     return array(
       MetaMTANotificationType::TYPE_DIFFERENTIAL_CC =>
         "Send me email when a revision's CCs change.",
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMITTED =>
-        "Send me email when a revision is committed.",
+      MetaMTANotificationType::TYPE_DIFFERENTIAL_CLOSED =>
+        "Send me email when a revision is closed.",
       MetaMTANotificationType::TYPE_MANIPHEST_PROJECTS =>
         "Send me email when a task's associated projects change.",
       MetaMTANotificationType::TYPE_MANIPHEST_PRIORITY =>
@@ -230,7 +230,7 @@ final class PhabricatorUserEmailPreferenceSettingsPanelController
       $this->getMailTags(),
       array(
         MetaMTANotificationType::TYPE_DIFFERENTIAL_CC,
-        MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMITTED,
+        MetaMTANotificationType::TYPE_DIFFERENTIAL_CLOSED,
       ));
   }
 

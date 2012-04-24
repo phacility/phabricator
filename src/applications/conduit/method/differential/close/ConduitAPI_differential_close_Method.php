@@ -18,26 +18,17 @@
 
 /**
  * @group conduit
- * @deprecated
  */
-final class ConduitAPI_differential_markcommitted_Method
+final class ConduitAPI_differential_close_Method
   extends ConduitAPIMethod {
 
-  public function getMethodStatus() {
-    return self::METHOD_STATUS_DEPRECATED;
-  }
-
-  public function getMethodStatusDescription() {
-    return "Replaced by 'differential.close'.";
-  }
-
   public function getMethodDescription() {
-    return "Mark a revision closed.";
+    return "Close a Differential revision.";
   }
 
   public function defineParamTypes() {
     return array(
-      'revision_id' => 'required revision_id',
+      'revisionID' => 'required int',
     );
   }
 
@@ -52,7 +43,7 @@ final class ConduitAPI_differential_markcommitted_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $id = $request->getValue('revision_id');
+    $id = $request->getValue('revisionID');
 
     $revision = id(new DifferentialRevision())->load($id);
     if (!$revision) {
@@ -60,6 +51,11 @@ final class ConduitAPI_differential_markcommitted_Method
     }
 
     if ($revision->getStatus() == ArcanistDifferentialRevisionStatus::CLOSED) {
+      // This can occur if someone runs 'close-revision' and hits a race, or
+      // they have a remote hook installed but don't have the
+      // 'remote_hook_installed' flag set, or similar. In any case, just treat
+      // it as a no-op rather than adding another "X closed this revision"
+      // message to the revision comments.
       return;
     }
 
@@ -70,6 +66,12 @@ final class ConduitAPI_differential_markcommitted_Method
       $request->getUser()->getPHID(),
       DifferentialAction::ACTION_CLOSE);
     $editor->save();
+
+    $revision->setStatus(ArcanistDifferentialRevisionStatus::CLOSED);
+    $revision->setDateCommitted(time());
+    $revision->save();
+
+    return;
   }
 
 }
