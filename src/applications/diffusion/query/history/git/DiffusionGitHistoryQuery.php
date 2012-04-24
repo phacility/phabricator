@@ -38,10 +38,14 @@ final class DiffusionGitHistoryQuery extends DiffusionHistoryQuery {
       // Git omits merge commits if the path is provided, even if it is empty.
       (strlen($path) ? csprintf('%s', $path) : ''));
 
+    $lines = explode("\n", trim($stdout));
+    $lines = array_filter($lines);
+    if (!$lines) {
+      return array();
+    }
+
     $hash_list = array();
     $parent_map = array();
-
-    $lines = explode("\n", trim($stdout));
     foreach ($lines as $line) {
       list($hash, $parents) = explode(":", $line);
       $hash_list[] = $hash;

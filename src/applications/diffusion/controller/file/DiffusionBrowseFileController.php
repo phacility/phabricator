@@ -69,6 +69,39 @@ final class DiffusionBrowseFileController extends DiffusionController {
         'path'   => true,
         'view'   => 'browse',
       ));
+
+    $follow  = $request->getStr('follow');
+    if ($follow) {
+      $notice = new AphrontErrorView();
+      $notice->setSeverity(AphrontErrorView::SEVERITY_WARNING);
+      $notice->setTitle('Unable to Continue');
+      switch ($follow) {
+        case 'first':
+          $notice->appendChild(
+            "Unable to continue tracing the history of this file because ".
+            "this commit is the first commit in the repository.");
+          break;
+        case 'created':
+          $notice->appendChild(
+            "Unable to continue tracing the history of this file because ".
+            "this commit created the file.");
+          break;
+      }
+      $content[] = $notice;
+    }
+
+    $renamed = $request->getStr('renamed');
+    if ($renamed) {
+      $notice = new AphrontErrorView();
+      $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+      $notice->setTitle('File Renamed');
+      $notice->appendChild(
+        "File history passes through a rename from '".
+        phutil_escape_html($drequest->getPath())."' to '".
+        phutil_escape_html($renamed)."'.");
+      $content[] = $notice;
+    }
+
     $content[] = $view_select_panel;
     $content[] = $corpus;
     $content[] = $this->buildOpenRevisions();
@@ -612,30 +645,82 @@ final class DiffusionBrowseFileController extends DiffusionController {
     $request = $this->getRequest();
     $drequest = $this->getDiffusionRequest();
 
-    $before_req = DiffusionRequest::newFromDictionary(
-      array(
-        'repository' => $drequest->getRepository(),
-        'commit'     => $before,
-      ));
+    // NOTE: We need to get the grandparent so we can capture filename changes
+    // in the parent.
 
-    $query = DiffusionCommitParentsQuery::newFromDiffusionRequest($before_req);
-    $parents = $query->loadParents();
-    $parent = head($parents);
+    $parent = $this->loadParentRevisionOf($before);
+    $old_filename = null;
+    $was_created = false;
+    if ($parent) {
+      $grandparent = $this->loadParentRevisionOf(
+        $parent->getCommitIdentifier());
 
-    // NOTE: If they get back to the very first commit, we just keep them there.
-    // We could maybe show a message or something.
+      if ($grandparent) {
+        $rename_query = DiffusionRenameHistoryQuery::newFromDiffusionRequest(
+          $drequest);
+        $rename_query->setOldCommit($grandparent->getCommitIdentifier());
+        $old_filename = $rename_query->loadOldFilename();
+        $was_created = $rename_query->getWasCreated();
+      }
+    }
+
+    $follow = null;
+    if ($was_created) {
+      // If the file was created in history, that means older commits won't
+      // have it. Since we know it existed at 'before', it must have been
+      // created then; jump there.
+      $target_commit = $before;
+      $follow = 'created';
+    } else if ($parent) {
+      // If we found a parent, jump to it. This is the normal case.
+      $target_commit = $parent->getCommitIdentifier();
+    } else {
+      // If there's no parent, this was probably created in the initial commit?
+      // And the "was_created" check will fail because we can't identify the
+      // grandparent. Keep the user at 'before'.
+      $target_commit = $before;
+      $follow = 'first';
+    }
+
+    $path = $drequest->getPath();
+    $renamed = null;
+    if ($old_filename !== null &&
+        $old_filename !== $path) {
+      $renamed = $path;
+      $path = $old_filename;
+    }
 
     $before_uri = $drequest->generateURI(
       array(
         'action'    => 'browse',
-        'commit'    => $parent ? $parent->getCommitIdentifier() : $before,
-        'line'      => $drequest->getLine(),
+        'commit'    => $target_commit,
+        // If there's a follow error, drop the line so the user sees the
+        // message.
+        'line'      => $follow ? null : $drequest->getLine(),
+        'path'      => $path,
       ));
 
     $before_uri->setQueryParams($request->getRequestURI()->getQueryParams());
     $before_uri = $before_uri->alter('before', null);
+    $before_uri = $before_uri->alter('renamed', $renamed);
+    $before_uri = $before_uri->alter('follow', $follow);
 
     return id(new AphrontRedirectResponse())->setURI($before_uri);
+  }
+
+  private function loadParentRevisionOf($commit) {
+    $drequest = $this->getDiffusionRequest();
+
+    $before_req = DiffusionRequest::newFromDictionary(
+      array(
+        'repository' => $drequest->getRepository(),
+        'commit'     => $commit,
+      ));
+
+    $query = DiffusionCommitParentsQuery::newFromDiffusionRequest($before_req);
+    $parents = $query->loadParents();
+
+    return head($parents);
   }
 
 }

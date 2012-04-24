@@ -14,6 +14,7 @@ phutil_require_module('phabricator', 'applications/audit/query/commit');
 phutil_require_module('phabricator', 'applications/diffusion/controller/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/filecontent/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/parents/base');
+phutil_require_module('phabricator', 'applications/diffusion/query/renamehistory/base');
 phutil_require_module('phabricator', 'applications/diffusion/request/base');
 phutil_require_module('phabricator', 'applications/files/storage/file');
 phutil_require_module('phabricator', 'applications/markup/syntax');
@@ -22,6 +23,7 @@ phutil_require_module('phabricator', 'infrastructure/javelin/api');
 phutil_require_module('phabricator', 'infrastructure/javelin/markup');
 phutil_require_module('phabricator', 'infrastructure/util/hash');
 phutil_require_module('phabricator', 'view/form/control/select');
+phutil_require_module('phabricator', 'view/form/error');
 phutil_require_module('phabricator', 'view/layout/panel');
 phutil_require_module('phabricator', 'view/utils');
 
