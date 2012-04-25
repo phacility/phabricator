@@ -22,6 +22,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
   private $handles = array();
 
   public function setPaths(array $paths) {
+    assert_instances_of($paths, 'DiffusionRepositoryPath');
     $this->paths = $paths;
     return $this;
   }
