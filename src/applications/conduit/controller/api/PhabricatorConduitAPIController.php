@@ -125,6 +125,20 @@ final class PhabricatorConduitAPIController
         }
       }
 
+      $access_log = PhabricatorAccessLog::getLog();
+      if ($access_log) {
+        $conduit_username = '-';
+        $conduit_user = $api_request->getUser();
+        if ($conduit_user && $conduit_user->getPHID()) {
+          $conduit_username = $conduit_user->getUsername();
+        }
+        $access_log->setData(
+          array(
+            'u' => $conduit_username,
+            'm' => $method,
+          ));
+      }
+
       if ($method_handler->shouldAllowUnguardedWrites()) {
         $allow_unguarded_writes = true;
       }

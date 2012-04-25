@@ -81,6 +81,45 @@ return array(
   'policy.allow-public'         => false,
 
 
+// -- Logging --------------------------------------------------------------- //
+
+  // To enable the Phabricator access log, specify a path here. The Phabricator
+  // access log can provide more detailed information about Phabricator access
+  // than normal HTTP access logs (for instance, it can show logged-in users,
+  // controllers, and other application data). If not set, no log will be
+  // written.
+  //
+  // Make sure the PHP process can write to the log!
+  'log.access.path'             => null,
+
+  // Format for the access log. If not set, the default format will be used:
+  //
+  //  "[%D]\t%h\t%u\t%M\t%C\t%m\t%U\t%c\t%T"
+  //
+  // Available variables are:
+  //
+  //  - %c The HTTP response code.
+  //  - %C The controller which handled the request.
+  //  - %D The request date.
+  //  - %e Epoch timestamp.
+  //  - %h The webserver's host name.
+  //  - %p The PID of the server process.
+  //  - %R The HTTP referrer.
+  //  - %r The remote IP.
+  //  - %T The request duration, in microseconds.
+  //  - %U The request path.
+  //  - %u The logged-in user, if one is logged in.
+  //  - %M The HTTP method.
+  //  - %m For conduit, the Conduit method which was invoked.
+  //
+  // If a variable isn't available (for example, %m appears in the file format
+  // but the request is not a Conduit request), it will be rendered as "-".
+  //
+  // Note that the default format is subject to change in the future, so if you
+  // rely on the log's format, specify it explicitly.
+  'log.access.format'           => null,
+
+
 // -- DarkConsole ----------------------------------------------------------- //
 
   // DarkConsole is a administrative debugging/profiling tool built into

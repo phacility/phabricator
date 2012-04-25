@@ -501,6 +501,7 @@ phutil_register_library_map(array(
     'MetaMTAConstants' => 'applications/metamta/constants/base',
     'MetaMTANotificationType' => 'applications/metamta/constants/notificationtype',
     'Phabricator404Controller' => 'applications/base/controller/404',
+    'PhabricatorAccessLog' => 'infrastructure/accesslog',
     'PhabricatorAphlictTestPageController' => 'applications/notifications/controller/test',
     'PhabricatorAuditActionConstants' => 'applications/audit/constants/action',
     'PhabricatorAuditAddCommentController' => 'applications/audit/controller/addcomment',

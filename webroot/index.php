@@ -71,6 +71,18 @@ try {
   phutil_require_module('phabricator', 'infrastructure/env');
   PhabricatorEnv::setEnvConfig($conf);
 
+  // This is the earliest we can get away with this, we need env config first.
+  PhabricatorAccessLog::init();
+  $access_log = PhabricatorAccessLog::getLog();
+  if ($access_log) {
+    $access_log->setData(
+      array(
+        'R' => idx($_SERVER, 'HTTP_REFERER', '-'),
+        'r' => idx($_SERVER, 'REMOTE_ADDR', '-'),
+        'M' => idx($_SERVER, 'REQUEST_METHOD', '-'),
+      ));
+  }
+
   phutil_require_module('phabricator', 'aphront/console/plugin/xhprof/api');
   DarkConsoleXHProfPluginAPI::hookProfiler();
 
@@ -129,8 +141,27 @@ PhabricatorEventEngine::initialize();
 
 $application->setRequest($request);
 list($controller, $uri_data) = $application->buildController();
+
+if ($access_log) {
+  $access_log->setData(
+    array(
+      'U' => (string)$request->getRequestURI()->getPath(),
+      'C' => get_class($controller),
+    ));
+}
+
 try {
   $response = $controller->willBeginExecution();
+
+  if ($access_log) {
+    if ($request->getUser() && $request->getUser()->getPHID()) {
+      $access_log->setData(
+        array(
+          'u' => $request->getUser()->getUserName(),
+        ));
+    }
+  }
+
   if (!$response) {
     $controller->willProcessRequest($uri_data);
     $response = $controller->processRequest();
@@ -148,6 +179,9 @@ try {
   $response_string = $response->buildResponseString();
 } catch (Exception $ex) {
   $write_guard->dispose();
+  if ($access_log) {
+    $access_log->write();
+  }
   phabricator_fatal('[Rendering Exception] '.$ex->getMessage());
 }
 
@@ -185,6 +219,15 @@ if (isset($_REQUEST['__profile__']) &&
 }
 
 $sink->writeData($response_string);
+
+if ($access_log) {
+  $access_log->setData(
+    array(
+      'c' => $response->getHTTPResponseCode(),
+      'T' => (int)(1000000 * (microtime(true) - $__start__)),
+    ));
+  $access_log->write();
+}
 
 /**
  * @group aphront
@@ -304,6 +347,15 @@ function phabricator_shutdown() {
 }
 
 function phabricator_fatal($msg) {
+  $log = PhabricatorAccessLog::getLog();
+  if ($log) {
+    $log->setData(
+      array(
+        'c' => 500,
+      ));
+    $log->write();
+  }
+
   header(
     'Content-Type: text/plain; charset=utf-8',
     $replace = true,
@@ -314,3 +366,4 @@ function phabricator_fatal($msg) {
 
   exit(1);
 }
+
