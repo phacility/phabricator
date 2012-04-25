@@ -352,9 +352,14 @@ final class DiffusionCommitController extends DiffusionController {
     }
 
 
-    $tags = $this->renderTags($request);
+    $tags = $this->buildTags($request);
     if ($tags) {
       $props['Tags'] = $tags;
+    }
+
+    $refs = $this->buildRefs($request);
+    if ($refs) {
+      $props['Refs'] = $refs;
     }
 
     if ($task_phids) {
@@ -726,7 +731,7 @@ final class DiffusionCommitController extends DiffusionController {
     return $action_list;
   }
 
-  private function renderTags(DiffusionRequest $request) {
+  private function buildTags(DiffusionRequest $request) {
     $tag_limit = 10;
 
     $tag_query = DiffusionCommitTagsQuery::newFromDiffusionRequest($request);
@@ -769,6 +774,25 @@ final class DiffusionCommitController extends DiffusionController {
     $tag_links = implode(', ', $tag_links);
 
     return $tag_links;
+  }
+
+  private function buildRefs(DiffusionRequest $request) {
+    // Not turning this into a proper Query class since it's pretty simple,
+    // one-off, and Git-specific.
+
+    $type_git = PhabricatorRepositoryType::REPOSITORY_TYPE_GIT;
+
+    $repository = $request->getRepository();
+    if ($repository->getVersionControlSystem() != $type_git) {
+      return null;
+    }
+
+    list($stdout) = $repository->execxLocalCommand(
+      'log --format=%s -n 1 %s --',
+      '%d',
+      $request->getCommit());
+
+    return trim($stdout, "() \n");
   }
 
 }
