@@ -25,6 +25,7 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
     $phid = $doc->getPHID();
     $handle = PhabricatorObjectHandleData::loadOneHandle($phid);
 
+    // URL is not used internally but it can be useful externally.
     $spec = array(
       'title'         => $doc->getDocumentTitle(),
       'url'           => PhabricatorEnv::getProductionURI($handle->getURI()),
@@ -144,6 +145,8 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
             ),
           );
         }
+        // We couldn't solve it by minimum_number_should_match because it can
+        // match multiple owners without matching author.
         $spec[] = array('bool' => array('should' => $should));
       } else if ($param) {
         $filter[] = array(
