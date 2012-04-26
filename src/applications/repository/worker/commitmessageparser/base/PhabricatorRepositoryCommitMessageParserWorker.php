@@ -96,10 +96,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         if ($revision->getStatus() !=
             ArcanistDifferentialRevisionStatus::CLOSED) {
 
-          $date_committed = $this->getDateCommitted($commit);
-          if ($date_committed) {
-            $revision->setDateCommitted($date_committed);
-          }
+          $revision->setDateCommitted($commit->getEpoch());
 
           $message = null;
           $committer = $data->getCommitDetail('authorPHID');
@@ -116,10 +113,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         }
       }
     }
-  }
-
-  protected function getDateCommitted(PhabricatorRepositoryCommit $commit) {
-    return null;
   }
 
   /**

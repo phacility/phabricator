@@ -119,7 +119,7 @@ final class PhabricatorRepositoryGitCommitDiscoveryDaemon
     while (true) {
       $target = array_pop($insert);
       list($epoch) = $repository->execxLocalCommand(
-        'log -n1 --pretty="%%at" %s',
+        'log -n1 --pretty="%%ct" %s',
         $target);
       $epoch = trim($epoch);
 
