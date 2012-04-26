@@ -80,6 +80,10 @@
   background: #ffaaaa;
 }
 
+.differential-diff td.new-copy {
+  background: #ffffaa;
+}
+
 .differential-diff td.new-full,
 .differential-diff td.new span.bright {
   background: #aaffaa;

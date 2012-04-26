@@ -1277,6 +1277,8 @@ final class DifferentialChangesetParser {
       ? 'N'
       : 'O';
 
+    $copy_lines = idx($this->changeset->getMetadata(), 'copy:lines', array());
+
     for ($ii = $range_start; $ii < $range_start + $range_len; $ii++) {
       if (empty($mask[$ii])) {
         // If we aren't going to show this line, we've just entered a gap.
@@ -1407,6 +1409,19 @@ final class DifferentialChangesetParser {
           if ($this->new[$ii]['type'] == '\\') {
             $n_text = $this->new[$ii]['text'];
             $n_attr = ' class="comment"';
+          } else if (isset($copy_lines[$n_num])) {
+            list($orig_file, $orig_line) = $copy_lines[$n_num];
+            if ($orig_file == '') {
+              $title = "line {$orig_line}";
+            } else {
+              $title =
+                basename($orig_file).
+                ":{$orig_line} in dir ".
+                dirname('/'.$orig_file);
+            }
+            $n_attr =
+              ' class="new new-copy"'.
+              ' title="Copied from '.phutil_escape_html($title).'"';
           } else if (empty($this->old[$ii])) {
             $n_attr = ' class="new new-full"';
           } else {

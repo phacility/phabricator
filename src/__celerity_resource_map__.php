@@ -14,6 +14,13 @@ celerity_register_resource_map(array(
     'disk' => '/rsrc/image/apps.png',
     'type' => 'png',
   ),
+  '/rsrc/image/avatar.png' =>
+  array(
+    'hash' => '1c5f255071537f05406adee86717ff27',
+    'uri' => '/res/1c5f2550/rsrc/image/avatar.png',
+    'disk' => '/rsrc/image/avatar.png',
+    'type' => 'png',
+  ),
   '/rsrc/image/credit_cards.png' =>
   array(
     'hash' => '681448de424ea159b6ea68af04c046ae',
@@ -524,7 +531,7 @@ celerity_register_resource_map(array(
   ),
   'differential-changeset-view-css' =>
   array(
-    'uri' => '/res/00dcf176/rsrc/css/application/differential/changeset-view.css',
+    'uri' => '/res/5c7db62d/rsrc/css/application/differential/changeset-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -2484,7 +2491,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/0c96375e/core.pkg.js',
       'type' => 'js',
     ),
-    'a841d960' =>
+    '1715d060' =>
     array(
       'name' => 'differential.pkg.css',
       'symbols' =>
@@ -2503,7 +2510,7 @@ celerity_register_resource_map(array(
         11 => 'differential-local-commits-view-css',
         12 => 'inline-comment-summary-css',
       ),
-      'uri' => '/res/pkg/a841d960/differential.pkg.css',
+      'uri' => '/res/pkg/1715d060/differential.pkg.css',
       'type' => 'css',
     ),
     70509835 =>
@@ -2626,7 +2633,7 @@ celerity_register_resource_map(array(
     'aphront-dialog-view-css' => '9c4e265b',
     'aphront-error-view-css' => '9c4e265b',
     'aphront-form-view-css' => '9c4e265b',
-    'aphront-headsup-action-list-view-css' => 'a841d960',
+    'aphront-headsup-action-list-view-css' => '1715d060',
     'aphront-headsup-view-css' => '9c4e265b',
     'aphront-list-filter-view-css' => '9c4e265b',
     'aphront-pager-view-css' => '9c4e265b',
@@ -2636,19 +2643,19 @@ celerity_register_resource_map(array(
     'aphront-tokenizer-control-css' => '9c4e265b',
     'aphront-tooltip-css' => '9c4e265b',
     'aphront-typeahead-control-css' => '9c4e265b',
-    'differential-changeset-view-css' => 'a841d960',
-    'differential-core-view-css' => 'a841d960',
+    'differential-changeset-view-css' => '1715d060',
+    'differential-core-view-css' => '1715d060',
     'differential-inline-comment-editor' => '70509835',
-    'differential-local-commits-view-css' => 'a841d960',
-    'differential-revision-add-comment-css' => 'a841d960',
-    'differential-revision-comment-css' => 'a841d960',
-    'differential-revision-comment-list-css' => 'a841d960',
-    'differential-revision-detail-css' => 'a841d960',
-    'differential-revision-history-css' => 'a841d960',
-    'differential-table-of-contents-css' => 'a841d960',
+    'differential-local-commits-view-css' => '1715d060',
+    'differential-revision-add-comment-css' => '1715d060',
+    'differential-revision-comment-css' => '1715d060',
+    'differential-revision-comment-list-css' => '1715d060',
+    'differential-revision-detail-css' => '1715d060',
+    'differential-revision-history-css' => '1715d060',
+    'differential-table-of-contents-css' => '1715d060',
     'diffusion-commit-view-css' => 'c8ce2d88',
     'diffusion-icons-css' => 'c8ce2d88',
-    'inline-comment-summary-css' => 'a841d960',
+    'inline-comment-summary-css' => '1715d060',
     'javelin-behavior' => '8a5de8a3',
     'javelin-behavior-aphront-basic-tokenizer' => '97f65640',
     'javelin-behavior-aphront-drag-and-drop' => '70509835',
@@ -2702,7 +2709,7 @@ celerity_register_resource_map(array(
     'maniphest-task-summary-css' => '7839ae2d',
     'maniphest-transaction-detail-css' => '7839ae2d',
     'phabricator-app-buttons-css' => '9c4e265b',
-    'phabricator-content-source-view-css' => 'a841d960',
+    'phabricator-content-source-view-css' => '1715d060',
     'phabricator-core-buttons-css' => '9c4e265b',
     'phabricator-core-css' => '9c4e265b',
     'phabricator-directory-css' => '9c4e265b',
@@ -2713,7 +2720,7 @@ celerity_register_resource_map(array(
     'phabricator-keyboard-shortcut' => '0c96375e',
     'phabricator-keyboard-shortcut-manager' => '0c96375e',
     'phabricator-menu-item' => '0c96375e',
-    'phabricator-object-selector-css' => 'a841d960',
+    'phabricator-object-selector-css' => '1715d060',
     'phabricator-paste-file-upload' => '0c96375e',
     'phabricator-prefab' => '0c96375e',
     'phabricator-project-tag-css' => '7839ae2d',
