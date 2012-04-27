@@ -351,6 +351,7 @@ abstract class DiffusionRequest {
     $path = "{$branch}{$path}";
 
     if (strlen($commit)) {
+      $commit = str_replace('$', '$$', $commit);
       $commit = ';'.phutil_escape_uri($commit);
     }
 
@@ -471,20 +472,30 @@ abstract class DiffusionRequest {
     // Consume the back part of the URI, up to the first "$". Use a negative
     // lookbehind to prevent matching '$$'. We double the '$' symbol when
     // encoding so that files with names like "money/$100" will survive.
-    if (preg_match('@(?<![$])[$]([\d-]+)$@', $blob, $matches)) {
+    $pattern = '@(?:(?:^|[^$])(?:[$][$])*)[$]([\d-]+)$@';
+    if (preg_match($pattern, $blob, $matches)) {
       $result['line'] = $matches[1];
       $blob = substr($blob, 0, -(strlen($matches[1]) + 1));
     }
 
-    // Consume the commit name, stopping on ';;'.
-    if (preg_match('@(?<!;);([a-z0-9]+)$@', $blob, $matches)) {
+    // We've consumed the line number if it exists, so unescape "$" in the
+    // rest of the string.
+    $blob = str_replace('$$', '$', $blob);
+
+    // Consume the commit name, stopping on ';;'. We allow any character to
+    // appear in commits names, as they can sometimes be symbolic names (like
+    // tag names or refs).
+    if (preg_match('@(?:(?:^|[^;])(?:;;)*);([^;].*)$@', $blob, $matches)) {
       $result['commit'] = $matches[1];
       $blob = substr($blob, 0, -(strlen($matches[1]) + 1));
     }
 
-    // Un-double our delimiter characters.
+    // We've consumed the commit if it exists, so unescape ";" in the rest
+    // of the string.
+    $blob = str_replace(';;', ';', $blob);
+
     if (strlen($blob)) {
-      $result['path'] = str_replace(array(';;', '$$'), array(';', '$'), $blob);
+      $result['path'] = $blob;
     }
 
     $parts = explode('/', $result['path']);

@@ -62,7 +62,7 @@ final class DiffusionTagListView extends DiffusionView {
           'href' => $drequest->generateURI(
             array(
               'action' => 'browse',
-              'commit' => $tag->getCommitIdentifier(),
+              'commit' => $tag->getName(),
             )),
         ),
         phutil_escape_html($tag->getName()));

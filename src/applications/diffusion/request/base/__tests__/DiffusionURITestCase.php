@@ -39,6 +39,22 @@ final class DiffusionURITestCase extends ArcanistPhutilTestCase {
       'a%252Fb/' => array(
         'branch'  => 'a/b',
       ),
+      'branch/path/;Version-1_0_0' => array(
+        'branch' => 'branch',
+        'path'   => 'path/',
+        'commit' => 'Version-1_0_0',
+      ),
+      'branch/path/;$$moneytag$$' => array(
+        'branch' => 'branch',
+        'path'   => 'path/',
+        'commit' => '$moneytag$',
+      ),
+      'branch/path/semicolon;;;;;$$;;semicolon;;$$$$$100' => array(
+        'branch' => 'branch',
+        'path'   => 'path/semicolon;;',
+        'commit' => '$;;semicolon;;$$',
+        'line'   => '100',
+      ),
     );
 
     foreach ($map as $input => $expect) {
