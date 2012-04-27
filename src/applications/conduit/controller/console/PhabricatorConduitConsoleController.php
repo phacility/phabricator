@@ -25,7 +25,7 @@ final class PhabricatorConduitConsoleController
   private $method;
 
   public function willProcessRequest(array $data) {
-    $this->method = idx($data, 'method');
+    $this->method = $data['method'];
   }
 
   public function processRequest() {
@@ -34,7 +34,7 @@ final class PhabricatorConduitConsoleController
 
     $methods = $this->getAllMethods();
     if (empty($methods[$this->method])) {
-      $this->method = head_key($methods);
+      return new Aphront404Response();
     }
     $this->setFilter('method/'.$this->method);
 
@@ -45,7 +45,7 @@ final class PhabricatorConduitConsoleController
     $reason = $method_object->getMethodStatusDescription();
 
     $status_view = null;
-    if ($status != 'stable') {
+    if ($status != ConduitAPIMethod::METHOD_STATUS_STABLE) {
       $status_view = new AphrontErrorView();
       switch ($status) {
         case ConduitAPIMethod::METHOD_STATUS_DEPRECATED:
@@ -141,7 +141,7 @@ final class PhabricatorConduitConsoleController
         $panel,
       ),
       array(
-        'title' => 'Conduit Console',
+        'title' => 'Conduit Console - '.$this->method,
       ));
   }
 

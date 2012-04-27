@@ -45,7 +45,6 @@ abstract class PhabricatorConduitController extends PhabricatorController {
 
       $nav = new AphrontSideNavFilterView();
       $nav->setBaseURI(new PhutilURI('/conduit/'));
-      $first_filter = null;
       $method_filters = $this->getMethodFilters();
       foreach ($method_filters as $group => $methods) {
         $nav->addLabel($group);
@@ -61,16 +60,10 @@ abstract class PhabricatorConduitController extends PhabricatorController {
 
           $nav->addFilter('method/'.$method_name,
             $display_name);
-          if (!$first_filter) {
-            $first_filter = 'method/'.$method_name;
-          }
         }
         $nav->addSpacer();
       }
-      $nav->addLabel('Utilities');
-      $nav->addFilter('log', 'Logs');
-      $nav->addFilter('token', 'Token');
-      $nav->selectFilter($this->getFilter(), $first_filter);
+      $nav->selectFilter($this->getFilter());
       $nav->appendChild($view);
       $body = $nav;
     } else {
@@ -81,7 +74,6 @@ abstract class PhabricatorConduitController extends PhabricatorController {
     $response = new AphrontWebpageResponse();
     return $response->setContent($page->render());
   }
-
 
   private function getFilter() {
     return $this->filter;
@@ -111,7 +103,7 @@ abstract class PhabricatorConduitController extends PhabricatorController {
     return array_values(ipull($classes, 'name'));
   }
 
-  private function getMethodFilters() {
+  protected function getMethodFilters() {
     $classes = $this->getAllMethodImplementationClasses();
     $method_names = array();
     foreach ($classes as $method_class) {
@@ -119,7 +111,8 @@ abstract class PhabricatorConduitController extends PhabricatorController {
         $method_class);
       $group_name = head(explode('.', $method_name));
 
-      $status = newv($method_class, array())->getMethodStatus();
+      $method_object = newv($method_class, array());
+      $status = $method_object->getMethodStatus();
 
       $key = sprintf(
         '%02d %s %s',
@@ -131,6 +124,7 @@ abstract class PhabricatorConduitController extends PhabricatorController {
         'full_name'   => $method_name,
         'group_name'  => $group_name,
         'status'      => $status,
+        'description' => $method_object->getMethodDescription(),
       );
     }
     ksort($method_names);

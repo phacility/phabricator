@@ -57,7 +57,6 @@ final class PhabricatorConduitTokenController
       '<p class="aphront-form-instructions">arc will then complete the '.
       'install process for you.</p>');
 
-    $this->setFilter('token');
     $this->setShowSideNav(false);
 
     return $this->buildStandardPageResponse(

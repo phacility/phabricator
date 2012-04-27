@@ -89,7 +89,7 @@ class AphrontDefaultApplicationConfiguration
       '/p/(?P<username>\w+)/(?:(?P<page>\w+)/)?'
         => 'PhabricatorPeopleProfileController',
       '/conduit/' => array(
-        '' => 'PhabricatorConduitConsoleController',
+        '' => 'PhabricatorConduitListController',
         'method/(?P<method>[^/]+)/' => 'PhabricatorConduitConsoleController',
         'log/' => 'PhabricatorConduitLogController',
         'log/view/(?P<view>[^/]+)/' => 'PhabricatorConduitLogController',

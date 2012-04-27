@@ -57,7 +57,7 @@ final class PhabricatorConduitLogController
     $panel->appendChild($table);
     $panel->appendChild($pager);
 
-    $this->setFilter('log');
+    $this->setShowSideNav(false);
 
     return $this->buildStandardPageResponse(
       $panel,
