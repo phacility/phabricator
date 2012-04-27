@@ -10,6 +10,8 @@ phutil_require_module('phabricator', 'applications/differential/constants/change
 phutil_require_module('phabricator', 'applications/diffusion/data/repositorypath');
 phutil_require_module('phabricator', 'applications/diffusion/query/browse/base');
 
+phutil_require_module('phutil', 'filesystem');
+phutil_require_module('phutil', 'filesystem/tempfile');
 phutil_require_module('phutil', 'utils');
 
 

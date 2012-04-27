@@ -112,22 +112,33 @@ final class DiffusionGitBrowseQuery extends DiffusionBrowseQuery {
     // find their source URIs.
 
     if ($submodules) {
-      list($module_info) = $repository->execxLocalCommand(
-        'show %s:.gitmodules',
+
+      // NOTE: We need to read the file out of git and write it to a temporary
+      // location because "git config -f" doesn't accept a "commit:path"-style
+      // argument.
+      list($contents) = $repository->execxLocalCommand(
+        'cat-file blob %s:.gitmodules',
         $commit);
-      $module_info = parse_ini_string(
-        $module_info,
-        $process_sections = true,
-        $scanner_mode = INI_SCANNER_RAW);
+
+      $tmp = new TempFile();
+      Filesystem::writeFile($tmp, $contents);
+      list($module_info) = $repository->execxLocalCommand(
+        'config -l -f %s',
+        $tmp);
+
+      $dict = array();
+      $lines = explode("\n", trim($module_info));
+      foreach ($lines as $line) {
+        list($key, $value) = explode('=', $line, 2);
+        $parts = explode('.', $key);
+        $dict[$key] = $value;
+      }
 
       foreach ($submodules as $path) {
-        foreach ($module_info as $section) {
-          if (empty($section['path']) || empty($section['url'])) {
-            continue;
-          }
-          if ($section['path'] == $path->getFullPath()) {
-            $path->setExternalURI($section['url']);
-          }
+        $full_path = $path->getFullPath();
+        $key = $dict['submodule.'.$full_path.'.url'];
+        if (isset($dict[$key])) {
+          $path->setExternalURI($key);
         }
       }
     }
