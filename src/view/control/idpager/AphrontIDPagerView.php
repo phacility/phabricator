@@ -87,7 +87,8 @@ final class AphrontIDPagerView extends AphrontView {
 
   final public function sliceResults(array $results) {
     if (count($results) > $this->getPageSize()) {
-      $results = array_slice($results, 0, $this->getPageSize(), true);
+      $offset = ($this->beforeID ? count($results) - $this->getPageSize() : 0);
+      $results = array_slice($results, $offset, $this->getPageSize(), true);
     }
     return $results;
   }
