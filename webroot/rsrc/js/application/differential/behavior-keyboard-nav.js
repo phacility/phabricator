@@ -197,6 +197,14 @@ JX.behavior('differential-keyboard-navigation', function(config) {
     .register();
 
 
+  new JX.KeyboardShortcut('t', 'Jump to the table of contents.')
+    .setHandler(function(manager) {
+      var toc = JX.$('differential-review-toc');
+      manager.scrollTo(toc);
+    })
+    .register();
+
+
   function inline_op(node, op) {
     if (!JX.DOM.scry(node, 'a', 'differential-inline-' + op)) {
       // No link for this operation, e.g. editing a comment you can't edit.
