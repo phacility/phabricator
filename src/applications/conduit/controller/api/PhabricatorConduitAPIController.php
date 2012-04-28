@@ -113,6 +113,7 @@ final class PhabricatorConduitAPIController
 
       $allow_unguarded_writes = false;
       $auth_error = null;
+      $conduit_username = '-';
       if ($method_handler->shouldRequireAuthentication()) {
         $metadata['scope'] = $method_handler->getRequiredScope();
         $auth_error = $this->authenticateUser($api_request, $metadata);
@@ -123,15 +124,15 @@ final class PhabricatorConduitAPIController
         if (isset($metadata['actAsUser'])) {
           $this->actAsUser($api_request, $metadata['actAsUser']);
         }
-      }
 
-      $access_log = PhabricatorAccessLog::getLog();
-      if ($access_log) {
-        $conduit_username = '-';
         $conduit_user = $api_request->getUser();
         if ($conduit_user && $conduit_user->getPHID()) {
           $conduit_username = $conduit_user->getUsername();
         }
+      }
+
+      $access_log = PhabricatorAccessLog::getLog();
+      if ($access_log) {
         $access_log->setData(
           array(
             'u' => $conduit_username,
