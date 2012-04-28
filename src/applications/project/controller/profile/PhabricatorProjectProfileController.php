@@ -49,7 +49,7 @@ final class PhabricatorProjectProfileController
     if ($file) {
       $picture = $file->getBestURI();
     } else {
-      $picture = null;
+      $picture = PhabricatorUser::getDefaultProfileImageURI();
     }
 
     $members = mpull($project->loadAffiliations(), null, 'getUserPHID');

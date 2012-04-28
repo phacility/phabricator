@@ -169,6 +169,9 @@ final class PhabricatorObjectHandleData {
               $img_uri = idx($images, $user->getProfileImagePHID());
               if ($img_uri) {
                 $handle->setImageURI($img_uri);
+              } else {
+                $handle->setImageURI(
+                  PhabricatorUser::getDefaultProfileImageURI());
               }
             }
             $handles[$phid] = $handle;

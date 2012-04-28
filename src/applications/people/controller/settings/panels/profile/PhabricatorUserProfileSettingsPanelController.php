@@ -107,14 +107,7 @@ final class PhabricatorUserProfileSettingsPanelController
       }
     }
 
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'phid = %s',
-      $user->getProfileImagePHID());
-    if ($file) {
-      $img_src = $file->getBestURI();
-    } else {
-      $img_src = null;
-    }
+    $img_src = $user->loadProfileImageURI();
     $profile_uri = PhabricatorEnv::getURI('/p/'.$user->getUsername().'/');
 
     $sexes = array(

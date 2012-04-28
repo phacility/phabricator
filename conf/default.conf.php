@@ -31,10 +31,6 @@ return array(
   // you through setting up Phabricator.
   'phabricator.setup'           => false,
 
-  // The default PHID for users who haven't uploaded a profile image. It should
-  // be 50x50px.
-  'user.default-profile-image-phid' => 'PHID-FILE-4d61229816cfe6f2b2a3',
-
 // -- IMPORTANT! Security! -------------------------------------------------- //
 
   // IMPORTANT: By default, Phabricator serves files from the same domain the

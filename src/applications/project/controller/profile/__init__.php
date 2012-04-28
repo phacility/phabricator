@@ -12,6 +12,7 @@ phutil_require_module('phabricator', 'applications/feed/query');
 phutil_require_module('phabricator', 'applications/files/storage/file');
 phutil_require_module('phabricator', 'applications/maniphest/query');
 phutil_require_module('phabricator', 'applications/maniphest/view/tasksummary');
+phutil_require_module('phabricator', 'applications/people/storage/user');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
 phutil_require_module('phabricator', 'applications/project/controller/base');
 phutil_require_module('phabricator', 'applications/project/storage/profile');

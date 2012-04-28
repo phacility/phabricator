@@ -116,13 +116,7 @@ final class PhabricatorPeopleProfileController
         throw new Exception("Unknown page '{$this->page}'!");
     }
 
-    $src_phid = $user->getProfileImagePHID();
-    $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $src_phid);
-    if ($file) {
-      $picture = $file->getBestURI();
-    } else {
-      $picture = null;
-    }
+    $picture = $user->loadProfileImageURI();
 
     $header = new PhabricatorProfileHeaderView();
     $header

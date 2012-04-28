@@ -22,9 +22,4 @@ final class PhabricatorProjectProfile extends PhabricatorProjectDAO {
   protected $blurb;
   protected $profileImagePHID;
 
-  public function getProfileImagePHID() {
-    return nonempty(
-        $this->profileImagePHID,
-        PhabricatorEnv::getEnvConfig('user.default-profile-image-phid'));
-  }
 }

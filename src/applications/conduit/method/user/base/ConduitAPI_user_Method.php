@@ -22,20 +22,12 @@
 abstract class ConduitAPI_user_Method extends ConduitAPIMethod {
 
   protected function buildUserInformationDictionary(PhabricatorUser $user) {
-    $src_phid = $user->getProfileImagePHID();
-    $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $src_phid);
-    if ($file) {
-      $picture = $file->getBestURI();
-    } else {
-      $picture = null;
-    }
-
     return array(
       'phid'      => $user->getPHID(),
       'userName'  => $user->getUserName(),
       'realName'  => $user->getRealName(),
       'email'     => $user->getEmail(),
-      'image'     => $picture,
+      'image'     => $user->loadProfileImageURI(),
       'uri'       => PhabricatorEnv::getURI('/p/'.$user->getUsername().'/'),
     );
   }

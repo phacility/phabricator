@@ -7,9 +7,6 @@
 
 
 phutil_require_module('phabricator', 'applications/project/storage/base');
-phutil_require_module('phabricator', 'infrastructure/env');
-
-phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('PhabricatorProjectProfile.php');

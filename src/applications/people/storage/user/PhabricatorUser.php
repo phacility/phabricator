@@ -45,10 +45,6 @@ final class PhabricatorUser extends PhabricatorUserDAO {
 
   protected function readField($field) {
     switch ($field) {
-      case 'profileImagePHID':
-        return nonempty(
-          $this->profileImagePHID,
-          PhabricatorEnv::getEnvConfig('user.default-profile-image-phid'));
       case 'timezoneIdentifier':
         // If the user hasn't set one, guess the server's time.
         return nonempty(
@@ -521,6 +517,21 @@ EOBODY;
 
   public static function validateUsername($username) {
     return (bool)preg_match('/^[a-zA-Z0-9]+$/', $username);
+  }
+
+  public static function getDefaultProfileImageURI() {
+    return celerity_get_resource_uri('/rsrc/image/avatar.png');
+  }
+
+  public function loadProfileImageURI() {
+    $src_phid = $this->getProfileImagePHID();
+
+    $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $src_phid);
+    if ($file) {
+      return $file->getBestURI();
+    }
+
+    return self::getDefaultProfileImageURI();
   }
 
 }
