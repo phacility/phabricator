@@ -106,6 +106,9 @@ abstract class DiffusionQuery {
     $repository = $drequest->getRepository();
     $commits = self::loadCommitsByIdentifiers($identifiers);
 
+    if (!$commits) {
+      return array();
+    }
 
     $path = $drequest->getPath();
 
