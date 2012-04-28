@@ -65,7 +65,8 @@ final class PhabricatorFileMacroListController
     $rows = array();
     foreach ($macros as $macro) {
       $file_phid = $macro->getFilePHID();
-      $file = $files_map[$file_phid];
+      $file = idx($files_map, $file_phid);
+
       $author_link = isset($author_phids[$file_phid])
         ? $handles[$author_phids[$file_phid]]->renderLink()
         : null;
@@ -82,13 +83,13 @@ final class PhabricatorFileMacroListController
         phutil_render_tag(
           'a',
           array(
-            'href'    => $file->getBestURI(),
+            'href'    => $file ? $file->getBestURI() : null,
             'target'  => '_blank',
           ),
           phutil_render_tag(
             'img',
             array(
-              'src' => $file->getBestURI(),
+              'src' => $file ? $file->getBestURI() : null,
             ))),
         javelin_render_tag(
           'a',
