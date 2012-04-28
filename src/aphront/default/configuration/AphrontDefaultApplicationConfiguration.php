@@ -32,26 +32,12 @@ class AphrontDefaultApplicationConfiguration
 
   public function getURIMap() {
     return $this->getResourceURIMapRules() + array(
-      '/(?:(?P<filter>jump)/)?' =>
+      '/(?:(?P<filter>(?:jump|apps))/)?' =>
         'PhabricatorDirectoryMainController',
       '/(?:(?P<filter>feed)/)' => array(
         'public/' => 'PhabricatorFeedPublicStreamController',
         '(?:(?P<subfilter>[^/]+)/)?' =>
           'PhabricatorDirectoryMainController',
-      ),
-      '/directory/' => array(
-        '(?P<id>\d+)/'
-          => 'PhabricatorDirectoryCategoryViewController',
-        'edit/'
-          => 'PhabricatorDirectoryEditController',
-        'item/edit/(?:(?P<id>\d+)/)?'
-          => 'PhabricatorDirectoryItemEditController',
-        'item/delete/(?P<id>\d+)/'
-          => 'PhabricatorDirectoryItemDeleteController',
-        'category/edit/(?:(?P<id>\d+)/)?'
-          => 'PhabricatorDirectoryCategoryEditController',
-        'category/delete/(?P<id>\d+)/'
-          => 'PhabricatorDirectoryCategoryDeleteController',
       ),
       '/file/' => array(
         '' => 'PhabricatorFileListController',

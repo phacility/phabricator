@@ -18,11 +18,6 @@
 
 abstract class PhabricatorDirectoryController extends PhabricatorController {
 
-  public function shouldRequireAdmin() {
-    // Most controllers here are admin-only, so default to locking them down.
-    return true;
-  }
-
   public function buildStandardPageResponse($view, array $data) {
     $page = $this->buildStandardPageView();
 
@@ -47,28 +42,9 @@ abstract class PhabricatorDirectoryController extends PhabricatorController {
     $nav->addFilter('jump', 'Jump Nav');
     $nav->addFilter('feed', 'Feed');
     $nav->addSpacer();
-    $nav->addLabel('Applications');
-
-    $categories = $this->loadDirectoryCategories();
-
-    foreach ($categories as $category) {
-      $nav->addFilter(
-        'directory/'.$category->getID(),
-        $category->getName());
-    }
-
-    if ($user->getIsAdmin()) {
-      $nav->addSpacer();
-      $nav->addFilter('directory/edit', 'Edit Applications...');
-    }
+    $nav->addFilter('apps', 'More Stuff');
 
     return $nav;
-  }
-
-  protected function loadDirectoryCategories() {
-    $categories = id(new PhabricatorDirectoryCategory())->loadAll();
-    $categories = msort($categories, 'getSequence');
-    return $categories;
   }
 
 }

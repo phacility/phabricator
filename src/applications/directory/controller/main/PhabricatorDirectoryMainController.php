@@ -27,12 +27,6 @@ final class PhabricatorDirectoryMainController
     $this->subfilter = idx($data, 'subfilter');
   }
 
-  public function shouldRequireAdmin() {
-    // These controllers are admin-only by default, but this one is public,
-    // so allow non-admin users to view it.
-    return false;
-  }
-
   public function processRequest() {
     $user = $this->getRequest()->getUser();
 
@@ -41,6 +35,7 @@ final class PhabricatorDirectoryMainController
 
     switch ($this->filter) {
       case 'jump':
+      case 'apps':
         break;
       case 'home':
       case 'feed':
@@ -57,6 +52,8 @@ final class PhabricatorDirectoryMainController
         return $this->buildFeedResponse($nav, $projects);
       case 'jump':
         return $this->buildJumpResponse($nav);
+      case 'apps':
+        return $this->buildAppsResponse($nav);
       default:
         return $this->buildMainResponse($nav, $projects);
     }
@@ -725,6 +722,168 @@ final class PhabricatorDirectoryMainController
           "View Problem Commits \xC2\xBB"));
 
     return $panel;
+  }
+
+  public function buildAppsResponse(AphrontSideNavFilterView $nav) {
+    $user = $this->getRequest()->getUser();
+
+    $apps = array(
+      array(
+        '/repository/',
+        'Repositories',
+        'Configure tracked source code repositories.',
+      ),
+      array(
+        '/herald/',
+        'Herald',
+        'Create notification rules. Watch for danger!',
+      ),
+      array(
+        '/file/',
+        'Files',
+        'Upload and download files. Blob store for Pokemon pictures.',
+      ),
+      array(
+        '/project/',
+        'Projects',
+        'Group stuff into big piles.',
+      ),
+      array(
+        '/vote/',
+        'Slowvote',
+        'Create polls. Design by committee.',
+      ),
+      array(
+        '/countdown/',
+        'Countdown',
+        'Count down to events. Utilize the full capabilities of your ALU.',
+      ),
+      array(
+        '/people/',
+        'People',
+        'User directory. Sort of a social utility.',
+      ),
+      array(
+        '/owners/',
+        'Owners',
+        'Keep track of who owns code. Adopt today!',
+      ),
+      array(
+        '/conduit/',
+        'Conduit API Console',
+        'Web console for Conduit API.',
+      ),
+      array(
+        '/daemon/',
+        'Daemon Console',
+        'Offline process management.',
+      ),
+      array(
+        '/mail/',
+        'MetaMTA',
+        'Manage mail delivery. Yo dawg, we heard you like MTAs.',
+        array(
+          'admin' => true,
+        ),
+      ),
+      array(
+        '/phid/',
+        'PHID Manager',
+        'Debugging tool for PHIDs.',
+      ),
+      array(
+        '/xhpast/',
+        'XHPAST',
+        'Web interface to PHP AST tool. Lex XHP AST & CTS FYI, LOL.',
+      ),
+      array(
+        'http://www.phabricator.com/docs/phabricator/',
+        'Phabricator Ducks',
+        'Oops, that should say "Docs".',
+        array(
+          'new' => true,
+        ),
+      ),
+      array(
+        'http://www.phabricator.com/docs/arcanist/',
+        'Arcanist Docs',
+        'Words have never been so finely crafted.',
+        array(
+          'new' => true,
+        ),
+      ),
+      array(
+        'http://www.phabricator.com/docs/libphutil/',
+        'libphutil Docs',
+        'Soothing prose; seductive poetry.',
+        array(
+          'new' => true,
+        ),
+      ),
+      array(
+        'http://www.phabricator.com/docs/javelin/',
+        'Javelin Docs',
+        'O, what noble scribe hath penned these words?',
+        array(
+          'new' => true,
+        ),
+      ),
+      array(
+        '/uiexample/',
+        'UI Examples',
+        'Phabricator UI elements. A gallery of modern art.',
+        array(
+          'new' => true,
+        ),
+      ),
+    );
+
+    $out = array();
+    foreach ($apps as $app) {
+      if (empty($app[3])) {
+        $app[3] = array();
+      }
+      $app[3] += array(
+        'admin' => false,
+        'new'   => false,
+      );
+      list($href, $name, $desc, $options) = $app;
+
+      if ($options['admin'] && !$user->getIsAdmin()) {
+        continue;
+      }
+
+      $link = phutil_render_tag(
+        'a',
+        array(
+          'href'    => $href,
+          'target'  => $options['new'] ? '_blank' : null,
+        ),
+        phutil_escape_html($name));
+
+
+
+      $out[] =
+        '<div class="aphront-directory-item">'.
+          '<h1>'.$link.'</h1>'.
+          '<p>'.phutil_escape_html($desc).'</p>'.
+        '</div>';
+    }
+
+    require_celerity_resource('phabricator-directory-css');
+
+    $out =
+      '<div class="aphront-directory-list">'.
+        implode("\n", $out).
+      '</div>';
+
+    $nav->appendChild($out);
+
+    return $this->buildStandardPageResponse(
+      $nav,
+      array(
+        'title' => 'More Stuff',
+      ));
   }
 
 }
