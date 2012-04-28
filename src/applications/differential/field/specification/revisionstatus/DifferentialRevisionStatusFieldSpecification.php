@@ -33,9 +33,10 @@ final class DifferentialRevisionStatusFieldSpecification
 
     $status = $revision->getStatus();
     $info = null;
+    $vcs = $diff->getSourceControlSystem();
 
     if ($status == ArcanistDifferentialRevisionStatus::ACCEPTED) {
-      switch ($diff->getSourceControlSystem()) {
+      switch ($vcs) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
           $next_step = '<tt>hg push</tt>';
           break;
@@ -52,7 +53,18 @@ final class DifferentialRevisionStatusFieldSpecification
 
     } else if ($status == ArcanistDifferentialRevisionStatus::CLOSED) {
       $committed = $revision->getDateCommitted();
-      $info = ' ('.phabricator_datetime($committed, $this->getUser()).')';
+      switch ($vcs) {
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+          $verb = 'Pushed';
+          break;
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+          $verb = 'Committed';
+          break;
+      }
+      $when = phabricator_datetime($committed, $this->getUser());
+
+      $info = " ({$verb} {$when})";
     }
 
     $status =
