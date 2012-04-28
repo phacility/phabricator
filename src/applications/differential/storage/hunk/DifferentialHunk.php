@@ -25,6 +25,23 @@ final class DifferentialHunk extends DifferentialDAO {
   protected $newOffset;
   protected $newLen;
 
+  public function getAddedLines() {
+    $lines = array();
+    $n = $this->newOffset;
+    foreach (explode("\n", $this->changes) as $diff_line) {
+      if ($diff_line == '' || $diff_line[0] == '\\') {
+        continue;
+      }
+      if ($diff_line[0] == '+') {
+        $lines[$n] = substr($diff_line, 1);
+      }
+      if ($diff_line[0] != '-') {
+        $n++;
+      }
+    }
+    return $lines;
+  }
+
   public function makeNewFile() {
     return $this->makeContent($exclude = '-');
   }

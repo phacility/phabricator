@@ -151,7 +151,73 @@ final class DifferentialDiff extends DifferentialDAO {
     }
     $diff->setLineCount($lines);
 
+    $diff->detectCopiedCode();
+
     return $diff;
+  }
+
+  private function detectCopiedCode($min_width = 40, $min_lines = 3) {
+    $map = array();
+    $files = array();
+    foreach ($this->changesets as $changeset) {
+      $file = $changeset->getFilename();
+      foreach ($changeset->getHunks() as $hunk) {
+        $line = $hunk->getOldOffset();
+        foreach (explode("\n", $hunk->makeOldFile()) as $code) {
+          $files[$file][$line] = $code;
+          if (strlen($code) >= $min_width) {
+            $map[$code][] = array($file, $line);
+          }
+          $line++;
+        }
+      }
+    }
+
+    foreach ($this->changesets as $changeset) {
+      $copies = array();
+      foreach ($changeset->getHunks() as $hunk) {
+        $added = $hunk->getAddedLines();
+        for (reset($added); list($line, $code) = each($added); next($added)) {
+          if (isset($map[$code])) { // We found a long matching line.
+            $lengths = array();
+            $max_offsets = array();
+            foreach ($map[$code] as $val) { // Explore all candidates.
+              list($file, $orig_line) = $val;
+              $lengths["$orig_line:$file"] = 1;
+              // Search also backwards for short lines.
+              foreach (array(-1, 1) as $direction) {
+                $offset = $direction;
+                $orig_code = idx($files[$file], $orig_line + $offset);
+                while (!isset($copies[$line + $offset]) &&
+                    isset($added[$line + $offset]) &&
+                    $orig_code === $added[$line + $offset]) {
+                  $lengths["$orig_line:$file"]++;
+                  $offset += $direction;
+                }
+              }
+              // ($offset - 1) contains number of forward matching lines.
+              $max_offsets["$orig_line:$file"] = $offset - 1;
+            }
+            $length = max($lengths); // Choose longest candidate.
+            $val = array_search($length, $lengths);
+            $offset = $max_offsets[$val];
+            list($orig_line, $file) = explode(':', $val, 2);
+            $save_file = ($file == $changeset->getFilename() ? '' : $file);
+            for ($i = $length; $i--; ) {
+              $copies[$line + $offset - $i] = ($length < $min_lines
+                ? array() // Ignore short blocks.
+                : array($save_file, $orig_line + $offset - $i));
+            }
+            for ($i = 0; $i < $offset; $i++) {
+              next($added);
+            }
+          }
+        }
+      }
+      $metadata = $changeset->getMetadata();
+      $metadata['copy:lines'] = array_filter($copies);
+      $changeset->setMetadata($metadata);
+    }
   }
 
   public function getDiffDict() {
