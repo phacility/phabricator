@@ -187,10 +187,10 @@ final class DifferentialDiff extends DifferentialDAO {
               // Search also backwards for short lines.
               foreach (array(-1, 1) as $direction) {
                 $offset = $direction;
-                $orig_code = idx($files[$file], $orig_line + $offset);
                 while (!isset($copies[$line + $offset]) &&
                     isset($added[$line + $offset]) &&
-                    $orig_code === $added[$line + $offset]) {
+                    idx($files[$file], $orig_line + $offset) ===
+                      $added[$line + $offset]) {
                   $lengths["$orig_line:$file"]++;
                   $offset += $direction;
                 }

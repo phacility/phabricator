@@ -33,7 +33,7 @@ final class DifferentialHunk extends DifferentialDAO {
         continue;
       }
       if ($diff_line[0] == '+') {
-        $lines[$n] = substr($diff_line, 1);
+        $lines[$n] = (string)substr($diff_line, 1); // substr('+', 1) === false
       }
       if ($diff_line[0] != '-') {
         $n++;
