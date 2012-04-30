@@ -86,7 +86,7 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
   /**
    * @task config
    */
-  public function establishLiveConnection($mode) {
+  public static function getStorageNamespace() {
     $namespace = end(self::$namespaceStack);
     if (!strlen($namespace)) {
       $namespace = self::getDefaultStorageNamespace();
@@ -94,6 +94,14 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
     if (!strlen($namespace)) {
       throw new Exception("No storage namespace configured!");
     }
+    return $namespace;
+  }
+
+  /**
+   * @task config
+   */
+  public function establishLiveConnection($mode) {
+    $namespace = self::getStorageNamespace();
 
     $conf = PhabricatorEnv::newObjectFromConfig(
       'mysql.configuration-provider',
@@ -140,6 +148,6 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
   abstract public function getApplicationName();
 
   protected function getConnectionNamespace() {
-    return self::$namespace.'_'.$this->getApplicationName();
+    return self::getStorageNamespace().'_'.$this->getApplicationName();
   }
 }
