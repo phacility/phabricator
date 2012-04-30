@@ -21,7 +21,11 @@
  */
 interface DatabaseConfigurationProvider {
 
-  public function __construct(LiskDAO $dao = null, $mode = 'r');
+  public function __construct(
+    LiskDAO $dao = null,
+    $mode = 'r',
+    $namespace = 'phabricator');
+
   public function getUser();
   public function getPassword();
   public function getHost();

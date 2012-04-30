@@ -519,31 +519,12 @@ final class PhabricatorSetup {
     if (empty($databases['phabricator_meta_data'])) {
       self::writeFailure();
       self::write(
-        "Setup failure! You haven't loaded the 'initialize.sql' file into ".
-        "MySQL. This file initializes necessary databases. See this guide for ".
-        "instructions:\n");
+        "Setup failure! You haven't run 'bin/storage upgrade'. See this ".
+        "article for instructions:\n");
       self::writeDoc('article/Configuration_Guide.html');
       return;
     } else {
       self::write(" okay  Databases have been initialized.\n");
-    }
-
-    $schema_version = queryfx_one(
-      $conn_raw,
-      'SELECT version FROM phabricator_meta_data.schema_version');
-    $schema_version = idx($schema_version, 'version', 'null');
-
-    $expect = PhabricatorSQLPatchList::getExpectedSchemaVersion();
-    if ($schema_version != $expect) {
-      self::writeFailure();
-      self::write(
-        "Setup failure! You haven't upgraded your database schema to the ".
-        "latest version. Expected version is '{$expect}', but your local ".
-        "version is '{$schema_version}'. See this guide for instructions:\n");
-      self::writeDoc('article/Upgrading_Schema.html');
-      return;
-    } else {
-      self::write(" okay  Database schema are up to date (v{$expect}).\n");
     }
 
     $index_min_length = queryfx_one(

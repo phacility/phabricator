@@ -49,7 +49,7 @@ $ROOT/phabricator/bin/phd stop
 sudo /etc/init.d/httpd stop
 
 # Upgrade the database schema.
-$ROOT/phabricator/scripts/sql/upgrade_schema.php -f
+$ROOT/phabricator/bin/storage upgrade --force
 
 # Restart apache.
 sudo /etc/init.d/httpd start

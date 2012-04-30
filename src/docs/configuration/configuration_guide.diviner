@@ -8,17 +8,6 @@ This document contains basic configuration instructions for Phabricator.
 This document assumes you've already installed all the components you need.
 If you haven't, see @{article:Installation Guide}.
 
-= Configuring MySQL =
-
-Get MySQL running and verify you can connect to it. Consult the MySQL
-documentation for help. When MySQL works, you need to load the Phabricator
-schemata into it. First, load the initial database schema.
-
-  mysql -uroot < path/to/phabricator/resources/sql/init/initialize.sql
-
-After this you need to upgrade the schema (see @{article:Upgrading Schema}),
-but you need to finish the rest of the configuration first.
-
 = Configuring Phabricator =
 
 Create a new file here:
@@ -58,6 +47,43 @@ in the file:
 For the last line, you can also use ##'development'## instead of
 ##'production'## if you are planning to develop Phabricator itself. This will
 turn on some debugging features.
+
+= PHABRICATOR_ENV Environment Variable =
+
+When running Phabricator scripts, they will ask you to set the `PHABRICATOR_ENV`
+environment variable to point at your config. If you put your script in
+`custom/myconfig.conf.php`, you can identify the config with
+`custom/myconfig`, like this:
+
+  $ PHABRICATOR_ENV=custom/myconfig ./some_phabricator_command
+
+NOTE: Make sure you put 'PHABRICATOR_ENV=...' at the beginning of the line, not
+in the middle. The shell won't parse environmental variables declared after the
+command. You can also ##export PHABRICATOR_ENV=...## in your ~/.bashrc or
+~/.profile or similar, depending on which shell you use and how your system is
+configured.
+
+= Storage: Configuring MySQL =
+
+Get MySQL running and verify you can connect to it. Consult the MySQL
+documentation for help. When MySQL works, you need to load the Phabricator
+schemata into it. To do this, run:
+
+  phabricator/ $ ./bin/storage upgrade
+
+If your configuration uses an unprivileged user to connect to the database, you
+may have to override the default user so the schema changes can be applied with
+root or some other admin user:
+
+  phabricator/ $ ./bin/storage upgrade --user <user> --password <password>
+
+You can avoid the prompt the script issues by passing the ##--force## flag (for
+example, if you are scripting the upgrade process).
+
+  phabricator/ $ ./bin/storage upgrade --force
+
+NOTE: When you update Phabricator, run `storage upgrade` again to apply any
+new updates.
 
 = Webserver: Configuring Apache =
 
@@ -145,12 +171,6 @@ For nginx, use a configuration like this:
     }
   }
 
-= Upgrading Schema =
-
-Now, it's time for you to upgrade the database schema -- see
-@{article:Upgrading Schema}. You'll also need to do this after you update the
-code in the future.
-
 = Setup =
 
 Now, restart your webserver and navigate to whichever subdomain you set up. You
@@ -200,7 +220,6 @@ that will make upgrading Phabricator more difficult in the future.
 
 Continue by:
 
-  - upgrading the database schema with @{article:Upgrading Schema}; or
   - setting up your admin account and login/registration with
     @{article:Configuring Accounts and Registration}; or
   - configuring where uploaded fils and attachments will be stored with

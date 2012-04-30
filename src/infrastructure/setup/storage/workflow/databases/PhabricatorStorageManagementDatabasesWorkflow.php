@@ -16,19 +16,24 @@
  * limitations under the License.
  */
 
-/**
- * @group storage
- */
-final class AphrontQuerySchemaException extends AphrontQueryException {
+final class PhabricatorStorageManagementDatabasesWorkflow
+  extends PhabricatorStorageManagementWorkflow {
 
-  public function __construct($message) {
-    $message .=
-      "\n\n".
-      "NOTE: This usually indicates that the MySQL schema has not been ".
-      "properly upgraded. Run 'bin/storage upgrade' to ensure your ".
-      "schema is up to date.";
+  public function didConstruct() {
+    $this
+      ->setName('databases')
+      ->setExamples('**databases** [__options__]')
+      ->setSynopsis('List Phabricator databases.');
+  }
 
-    parent::__construct($message);
+  public function execute(PhutilArgumentParser $args) {
+    $api = $this->getAPI();
+    $patches = $this->getPatches();
+
+    $databases = $api->getDatabaseList($patches);
+    echo implode("\n", $databases)."\n";
+
+    return 0;
   }
 
 }

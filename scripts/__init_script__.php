@@ -42,7 +42,17 @@ $env = isset($_SERVER['PHABRICATOR_ENV'])
   ? $_SERVER['PHABRICATOR_ENV']
   : getenv('PHABRICATOR_ENV');
 if (!$env) {
-  echo "Define PHABRICATOR_ENV before running this script.\n";
+  phutil_require_module('phutil', 'console');
+  echo phutil_console_wrap(
+    phutil_console_format(
+      "**ERROR**: PHABRICATOR_ENV Not Set\n\n".
+      "Define the __PHABRICATOR_ENV__ environment variable before running ".
+      "this script. You can do it on the command line like this:\n\n".
+      "  $ PHABRICATOR_ENV=__custom/myconfig__ %s ...\n\n".
+      "Replace __custom/myconfig__ with the path to your configuration file. ".
+      "For more information, see the 'Configuration Guide' in the ".
+      "Phabricator documentation.\n\n",
+      $argv[0]));
   exit(1);
 }
 

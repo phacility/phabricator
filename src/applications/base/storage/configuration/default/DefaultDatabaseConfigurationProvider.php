@@ -21,10 +21,16 @@ final class DefaultDatabaseConfigurationProvider
 
   private $dao;
   private $mode;
+  private $namespace;
 
-  public function __construct(LiskDAO $dao = null, $mode = 'r') {
+  public function __construct(
+    LiskDAO $dao = null,
+    $mode = 'r',
+    $namespace = 'phabricator') {
+
     $this->dao = $dao;
     $this->mode = $mode;
+    $this->namespace = $namespace;
   }
 
   public function getUser() {
@@ -43,7 +49,7 @@ final class DefaultDatabaseConfigurationProvider
     if (!$this->getDao()) {
       return null;
     }
-    return 'phabricator_'.$this->getDao()->getApplicationName();
+    return $this->namespace.'_'.$this->getDao()->getApplicationName();
   }
 
   final protected function getDao() {

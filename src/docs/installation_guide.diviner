@@ -118,8 +118,17 @@ See <https://bugs.php.net/bug.php?id=59747> for more information.
 
 = Updating Phabricator =
 
-Since Phabricator is under active development, you should update frequently.
-You can use a script similar to this one to automate the process:
+Since Phabricator is under active development, you should update frequently. To
+update Phabricator:
+
+  - Stop the webserver.
+  - Run `git pull && git submodule update --init` in `libphutil/`,
+    `arcanist/` and `phabricator/`.
+  - Run `phabricator/bin/storage upgrade`.
+  - Restart the webserver.
+
+For more details, see @{article:Configuration Guide}. You can use a script
+similar to this one to automate the process:
 
   http://www.phabricator.com/rsrc/install/update_phabricator.sh
 

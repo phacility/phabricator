@@ -23,6 +23,7 @@
 abstract class PhabricatorLiskDAO extends LiskDAO {
 
   private $edges = array();
+  private static $namespace = 'phabricator';
 
 
 /* -(  Managing Edges  )----------------------------------------------------- */
@@ -61,6 +62,13 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
 
 /* -(  Configuring Storage  )------------------------------------------------ */
 
+  /**
+   * @task config
+   */
+  public static function setApplicationNamespace($namespace) {
+    self::$namespace = $namespace;
+  }
+
 
   /**
    * @task config
@@ -68,7 +76,7 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
   public function establishLiveConnection($mode) {
     $conf = PhabricatorEnv::newObjectFromConfig(
       'mysql.configuration-provider',
-      array($this, $mode));
+      array($this, $mode, self::$namespace));
 
     return PhabricatorEnv::newObjectFromConfig(
       'mysql.implementation',
