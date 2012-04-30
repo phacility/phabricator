@@ -176,10 +176,12 @@ final class PhabricatorStorageManagementAPI {
     $queries = preg_split('/;\s+/', $sql);
     $queries = array_filter($queries);
 
+    $conn = $this->getConn('meta_data', $select_database = false);
+
     foreach ($queries as $query) {
       $query = str_replace('{$NAMESPACE}', $this->namespace, $query);
       queryfx(
-        $this->getConn('meta_data', $select_database = false),
+        $conn,
         '%Q',
         $query);
     }
