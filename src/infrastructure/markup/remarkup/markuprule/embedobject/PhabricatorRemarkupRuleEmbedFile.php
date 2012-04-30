@@ -68,24 +68,25 @@ final class PhabricatorRemarkupRuleEmbedFile
       return $this->getEngine()->storeText($link);
     }
 
+    $attrs = array(
+      'class' => 'phabricator-remarkup-embed-image',
+    );
+
     switch ($options['size']) {
       case 'full':
-        $src_uri = $file->getBestURI();
+        $attrs['src'] = $file->getBestURI();
         $link = null;
         break;
       case 'thumb':
       default:
-        $src_uri = $file->getThumb160x120URI();
+        $attrs['src'] = $file->getThumb160x120URI();
+        $attrs['width'] = 160;
+        $attrs['height'] = 120;
         $link = $file->getBestURI();
         break;
     }
 
-    $embed = phutil_render_tag(
-      'img',
-      array(
-        'src' => $src_uri,
-        'class' => 'phabricator-remarkup-embed-image',
-      ));
+    $embed = phutil_render_tag('img', $attrs);
 
     if ($link) {
       $embed = phutil_render_tag(
