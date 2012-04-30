@@ -719,6 +719,13 @@ return array(
   // fits within configured limits.
   'storage.engine-selector' => 'PhabricatorDefaultFileStorageEngineSelector',
 
+  // Phabricator puts databases in a namespace, which defualts to "phabricator"
+  // -- for instance, the Differential database is named
+  // "phabricator_differential" by default. You can change this namespace if you
+  // want. Normally, you should not do this unless you are developing
+  // Phabricator and using namespaces to separate multiple sandbox datasets.
+  'storage.default-namespace'    => 'phabricator',
+
 
 // -- Search ---------------------------------------------------------------- //
 

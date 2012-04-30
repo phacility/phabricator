@@ -25,7 +25,7 @@ final class PhabricatorStorageManagementAPI {
 
   public function setNamespace($namespace) {
     $this->namespace = $namespace;
-    PhabricatorLiskDAO::setApplicationNamespace($namespace);
+    PhabricatorLiskDAO::pushStorageNamespace($namespace);
     return $this;
   }
 

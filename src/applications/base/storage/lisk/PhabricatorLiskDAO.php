@@ -23,7 +23,7 @@
 abstract class PhabricatorLiskDAO extends LiskDAO {
 
   private $edges = array();
-  private static $namespace = 'phabricator';
+  private static $namespaceStack = array();
 
 
 /* -(  Managing Edges  )----------------------------------------------------- */
@@ -65,18 +65,39 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
   /**
    * @task config
    */
-  public static function setApplicationNamespace($namespace) {
-    self::$namespace = $namespace;
+  public static function pushStorageNamespace($namespace) {
+    self::$namespaceStack[] = $namespace;
   }
 
+  /**
+   * @task config
+   */
+  public static function popStorageNamespace($namespace) {
+    array_pop(self::$namespaceStack);
+  }
+
+  /**
+   * @task config
+   */
+  public static function getDefaultStorageNamespace() {
+    return PhabricatorEnv::getEnvConfig('storage.default-namespace');
+  }
 
   /**
    * @task config
    */
   public function establishLiveConnection($mode) {
+    $namespace = end(self::$namespaceStack);
+    if (!strlen($namespace)) {
+      $namespace = self::getDefaultStorageNamespace();
+    }
+    if (!strlen($namespace)) {
+      throw new Exception("No storage namespace configured!");
+    }
+
     $conf = PhabricatorEnv::newObjectFromConfig(
       'mysql.configuration-provider',
-      array($this, $mode, self::$namespace));
+      array($this, $mode, $namespace));
 
     return PhabricatorEnv::newObjectFromConfig(
       'mysql.implementation',

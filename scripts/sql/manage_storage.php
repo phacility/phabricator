@@ -40,7 +40,7 @@ $conf = PhabricatorEnv::newObjectFromConfig('mysql.configuration-provider');
 $default_user       = $conf->getUser();
 $default_password   = $conf->getPassword();
 $default_host       = $conf->getHost();
-$default_namespace  = 'phabricator';
+$default_namespace  = PhabricatorLiskDAO::getDefaultStorageNamespace();
 
 try {
   $args->parsePartial(
