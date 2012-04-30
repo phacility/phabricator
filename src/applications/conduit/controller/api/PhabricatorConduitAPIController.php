@@ -125,9 +125,11 @@ final class PhabricatorConduitAPIController
           $this->actAsUser($api_request, $metadata['actAsUser']);
         }
 
-        $conduit_user = $api_request->getUser();
-        if ($conduit_user && $conduit_user->getPHID()) {
-          $conduit_username = $conduit_user->getUsername();
+        if ($auth_error === null) {
+          $conduit_user = $api_request->getUser();
+          if ($conduit_user && $conduit_user->getPHID()) {
+            $conduit_username = $conduit_user->getUsername();
+          }
         }
       }
 
