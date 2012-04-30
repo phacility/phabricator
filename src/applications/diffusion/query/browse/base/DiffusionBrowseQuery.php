@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,6 +91,67 @@ abstract class DiffusionBrowseQuery {
   final public function needValidityOnly($need_validity_only) {
     $this->validityOnly = $need_validity_only;
     return $this;
+  }
+
+  final public function renderReadme(array $results) {
+    $drequest = $this->getRequest();
+
+    $readme = null;
+    foreach ($results as $result) {
+      $path = $result->getPath();
+      if (preg_match('/^readme(|\.txt|\.remarkup|\.rainbow)$/i', $path)) {
+        $readme = $result;
+        break;
+      }
+    }
+
+    if (!$readme) {
+      return null;
+    }
+
+    $readme_request = DiffusionRequest::newFromDictionary(
+      array(
+        'repository'  => $drequest->getRepository(),
+        'commit'      => $drequest->getStableCommitName(),
+        'path'        => $readme->getFullPath(),
+      ));
+
+    $content_query = DiffusionFileContentQuery::newFromDiffusionRequest(
+      $readme_request);
+    $content_query->loadFileContent();
+    $readme_content = $content_query->getRawData();
+
+
+    if (preg_match('/\\.txt$/', $readme->getPath())) {
+      $readme_content = phutil_escape_html($readme_content);
+      $readme_content = nl2br($readme_content);
+
+      $class = null;
+    } else if (preg_match('/\\.rainbow$/', $readme->getPath())) {
+      $highlighter = new PhutilRainbowSyntaxHighlighter();
+      $readme_content = $highlighter
+        ->getHighlightFuture($readme_content)
+        ->resolve();
+      $readme_content = nl2br($readme_content);
+
+      require_celerity_resource('syntax-highlighting-css');
+      $class = 'remarkup-code';
+    } else {
+      // Markup extensionless files as remarkup so we get links and such.
+      $engine = PhabricatorMarkupEngine::newDiffusionMarkupEngine();
+      $readme_content = $engine->markupText($readme_content);
+
+      $class = 'phabricator-remarkup';
+    }
+
+    $readme_content = phutil_render_tag(
+      'div',
+      array(
+        'class' => $class,
+      ),
+      $readme_content);
+
+    return $readme_content;
   }
 
   abstract protected function executeQuery();

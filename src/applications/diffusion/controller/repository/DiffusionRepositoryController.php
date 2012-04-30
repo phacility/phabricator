@@ -110,6 +110,14 @@ final class DiffusionRepositoryController extends DiffusionController {
       $content[] = $branch_panel;
     }
 
+    $readme = $browse_query->renderReadme($browse_results);
+    if ($readme) {
+      $panel = new AphrontPanelView();
+      $panel->setHeader('README');
+      $panel->appendChild($readme);
+      $content[] = $panel;
+    }
+
     return $this->buildStandardPageResponse(
       $content,
       array(

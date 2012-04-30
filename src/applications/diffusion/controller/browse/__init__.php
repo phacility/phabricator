@@ -9,8 +9,6 @@
 phutil_require_module('phabricator', 'applications/diffusion/controller/base');
 phutil_require_module('phabricator', 'applications/diffusion/controller/file');
 phutil_require_module('phabricator', 'applications/diffusion/query/browse/base');
-phutil_require_module('phabricator', 'applications/diffusion/query/filecontent/base');
-phutil_require_module('phabricator', 'applications/diffusion/request/base');
 phutil_require_module('phabricator', 'applications/diffusion/view/browsetable');
 phutil_require_module('phabricator', 'applications/diffusion/view/emptyresult');
 phutil_require_module('phabricator', 'applications/markup/engine');
