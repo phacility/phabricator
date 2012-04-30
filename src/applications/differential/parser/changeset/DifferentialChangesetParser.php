@@ -1410,18 +1410,19 @@ final class DifferentialChangesetParser {
             $n_text = $this->new[$ii]['text'];
             $n_attr = ' class="comment"';
           } else if (isset($copy_lines[$n_num])) {
-            list($orig_file, $orig_line) = $copy_lines[$n_num];
+            list($orig_file, $orig_line, $orig_type) = $copy_lines[$n_num];
+            $title = ($orig_type == '-' ? 'Moved' : 'Copied').' from ';
             if ($orig_file == '') {
-              $title = "line {$orig_line}";
+              $title .= "line {$orig_line}";
             } else {
-              $title =
+              $title .=
                 basename($orig_file).
                 ":{$orig_line} in dir ".
                 dirname('/'.$orig_file);
             }
+            $class = ($orig_type == '-' ? 'new-move' : 'new-copy');
             $n_attr =
-              ' class="new new-copy"'.
-              ' title="Copied from '.phutil_escape_html($title).'"';
+              ' class="'.$class.'" title="'.phutil_escape_html($title).'"';
           } else if (empty($this->old[$ii])) {
             $n_attr = ' class="new new-full"';
           } else {

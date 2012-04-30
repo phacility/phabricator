@@ -156,19 +156,25 @@ final class DifferentialDiff extends DifferentialDAO {
     return $diff;
   }
 
-  private function detectCopiedCode($min_width = 40, $min_lines = 3) {
+  public function detectCopiedCode($min_width = 40, $min_lines = 3) {
     $map = array();
     $files = array();
+    $types = array();
     foreach ($this->changesets as $changeset) {
       $file = $changeset->getFilename();
       foreach ($changeset->getHunks() as $hunk) {
         $line = $hunk->getOldOffset();
-        foreach (explode("\n", $hunk->makeOldFile()) as $code) {
-          $files[$file][$line] = $code;
-          if (strlen($code) >= $min_width) {
-            $map[$code][] = array($file, $line);
+        foreach (explode("\n", $hunk->getChanges()) as $code) {
+          $type = (isset($code[0]) ? $code[0] : '');
+          if ($type == '-' || $type == ' ') {
+            $code = (string)substr($code, 1);
+            $files[$file][$line] = $code;
+            $types[$file][$line] = $type;
+            if (strlen($code) >= $min_width) {
+              $map[$code][] = array($file, $line);
+            }
+            $line++;
           }
-          $line++;
         }
       }
     }
@@ -179,11 +185,10 @@ final class DifferentialDiff extends DifferentialDAO {
         $added = $hunk->getAddedLines();
         for (reset($added); list($line, $code) = each($added); next($added)) {
           if (isset($map[$code])) { // We found a long matching line.
-            $lengths = array();
-            $max_offsets = array();
+            $best_length = 0;
             foreach ($map[$code] as $val) { // Explore all candidates.
               list($file, $orig_line) = $val;
-              $lengths["$orig_line:$file"] = 1;
+              $length = 1;
               // Search also backwards for short lines.
               foreach (array(-1, 1) as $direction) {
                 $offset = $direction;
@@ -191,24 +196,28 @@ final class DifferentialDiff extends DifferentialDAO {
                     isset($added[$line + $offset]) &&
                     idx($files[$file], $orig_line + $offset) ===
                       $added[$line + $offset]) {
-                  $lengths["$orig_line:$file"]++;
+                  $length++;
                   $offset += $direction;
                 }
               }
-              // ($offset - 1) contains number of forward matching lines.
-              $max_offsets["$orig_line:$file"] = $offset - 1;
+              if ($length > $best_length ||
+                  ($length == $best_length && // Prefer moves.
+                   idx($types[$file], $orig_line) == '-')) {
+                $best_length = $length;
+                // ($offset - 1) contains number of forward matching lines.
+                $best_offset = $offset - 1;
+                $best_file = $file;
+                $best_line = $orig_line;
+              }
             }
-            $length = max($lengths); // Choose longest candidate.
-            $val = array_search($length, $lengths);
-            $offset = $max_offsets[$val];
-            list($orig_line, $file) = explode(':', $val, 2);
-            $save_file = ($file == $changeset->getFilename() ? '' : $file);
-            for ($i = $length; $i--; ) {
-              $copies[$line + $offset - $i] = ($length < $min_lines
+            $file = ($best_file == $changeset->getFilename() ? '' : $best_file);
+            for ($i = $best_length; $i--; ) {
+              $type = idx($types[$best_file], $best_line + $best_offset - $i);
+              $copies[$line + $best_offset - $i] = ($best_length < $min_lines
                 ? array() // Ignore short blocks.
-                : array($save_file, $orig_line + $offset - $i));
+                : array($file, $best_line + $best_offset - $i, $type));
             }
-            for ($i = 0; $i < $offset; $i++) {
+            for ($i = 0; $i < $best_offset; $i++) {
               next($added);
             }
           }

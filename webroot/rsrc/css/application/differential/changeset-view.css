@@ -84,6 +84,10 @@
   background: #ffffaa;
 }
 
+.differential-diff td.new-move {
+  background: #ffddaa;
+}
+
 .differential-diff td.new-full,
 .differential-diff td.new span.bright {
   background: #aaffaa;
