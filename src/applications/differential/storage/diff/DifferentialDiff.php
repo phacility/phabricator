@@ -156,7 +156,7 @@ final class DifferentialDiff extends DifferentialDAO {
     return $diff;
   }
 
-  public function detectCopiedCode($min_width = 40, $min_lines = 3) {
+  public function detectCopiedCode($min_width = 30, $min_lines = 3) {
     $map = array();
     $files = array();
     $types = array();
@@ -167,7 +167,7 @@ final class DifferentialDiff extends DifferentialDAO {
         foreach (explode("\n", $hunk->getChanges()) as $code) {
           $type = (isset($code[0]) ? $code[0] : '');
           if ($type == '-' || $type == ' ') {
-            $code = (string)substr($code, 1);
+            $code = trim(substr($code, 1));
             $files[$file][$line] = $code;
             $types[$file][$line] = $type;
             if (strlen($code) >= $min_width) {
@@ -182,7 +182,7 @@ final class DifferentialDiff extends DifferentialDAO {
     foreach ($this->changesets as $changeset) {
       $copies = array();
       foreach ($changeset->getHunks() as $hunk) {
-        $added = $hunk->getAddedLines();
+        $added = array_map('trim', $hunk->getAddedLines());
         for (reset($added); list($line, $code) = each($added); next($added)) {
           if (isset($map[$code])) { // We found a long matching line.
             $best_length = 0;
