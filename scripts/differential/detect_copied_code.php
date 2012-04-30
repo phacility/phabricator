@@ -29,17 +29,19 @@ list(, $from, $to) = $argv;
 for ($diff_id = $from; $diff_id <= $to; $diff_id++) {
   echo "Processing $diff_id";
   $diff = id(new DifferentialDiff())->load($diff_id);
-  $diff->attachChangesets($diff->loadChangesets());
-  $orig_copy = array();
-  foreach ($diff->getChangesets() as $i => $changeset) {
-    $orig_copy[$i] = idx((array)$changeset->getMetadata(), 'copy:lines');
-    $changeset->attachHunks($changeset->loadHunks());
-  }
-  $diff->detectCopiedCode();
-  foreach ($diff->getChangesets() as $i => $changeset) {
-    if (idx($changeset->getMetadata(), 'copy:lines') || $orig_copy[$i]) {
-      echo ".";
-      $changeset->save();
+  if ($diff) {
+    $diff->attachChangesets($diff->loadChangesets());
+    $orig_copy = array();
+    foreach ($diff->getChangesets() as $i => $changeset) {
+      $orig_copy[$i] = idx((array)$changeset->getMetadata(), 'copy:lines');
+      $changeset->attachHunks($changeset->loadHunks());
+    }
+    $diff->detectCopiedCode();
+    foreach ($diff->getChangesets() as $i => $changeset) {
+      if (idx($changeset->getMetadata(), 'copy:lines') || $orig_copy[$i]) {
+        echo ".";
+        $changeset->save();
+      }
     }
   }
   echo "\n";
