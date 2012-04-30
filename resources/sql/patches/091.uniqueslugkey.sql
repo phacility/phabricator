@@ -1,2 +1,2 @@
-ALTER TABLE phabricator_project.project
+ALTER TABLE {$NAMESPACE}_project.project
   ADD UNIQUE KEY (phrictionSlug);

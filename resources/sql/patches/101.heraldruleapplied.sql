@@ -1,2 +1,2 @@
-ALTER TABLE phabricator_herald.herald_ruleapplied
+ALTER TABLE {$NAMESPACE}_herald.herald_ruleapplied
   ADD KEY (phid);

@@ -1,6 +1,6 @@
-CREATE DATABASE phabricator_flag COLLATE utf8_general_ci;
 
-CREATE TABLE phabricator_flag.flag (
+
+CREATE TABLE {$NAMESPACE}_flag.flag (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   ownerPHID varchar(64) COLLATE utf8_bin NOT NULL,
   type varchar(4) COLLATE utf8_bin NOT NULL,

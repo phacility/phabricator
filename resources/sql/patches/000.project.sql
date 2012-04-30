@@ -1,5 +1,5 @@
-create database phabricator_project;
-create table phabricator_project.project (
+
+create table {$NAMESPACE}_project.project (
   id int unsigned not null auto_increment primary key,
   name varchar(255) not null,
   unique key (name),
@@ -8,7 +8,7 @@ create table phabricator_project.project (
   dateCreated int unsigned not null,
   dateModified int unsigned not null
 );
-create table phabricator_project.project_profile (
+create table {$NAMESPACE}_project.project_profile (
   id int unsigned not null auto_increment primary key,
   projectPHID varchar(64) binary not null,
   unique key (projectPHID),
@@ -17,7 +17,7 @@ create table phabricator_project.project_profile (
   dateCreated int unsigned not null,
   dateModified int unsigned not null
 );
-create table phabricator_project.project_affiliation (
+create table {$NAMESPACE}_project.project_affiliation (
   id int unsigned not null auto_increment primary key,
   projectPHID varchar(64) binary not null,
   userPHID varchar(64) binary not null,

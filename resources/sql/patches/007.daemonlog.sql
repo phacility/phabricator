@@ -1,6 +1,6 @@
-create database phabricator_daemon;
 
-create table phabricator_daemon.daemon_log (
+
+create table {$NAMESPACE}_daemon.daemon_log (
   id int unsigned not null auto_increment primary key,
   daemon varchar(255) not null,
   host varchar(255) not null,
@@ -10,7 +10,7 @@ create table phabricator_daemon.daemon_log (
   dateModified int unsigned not null
 );
 
-create table phabricator_daemon.daemon_logevent (
+create table {$NAMESPACE}_daemon.daemon_logevent (
   id int unsigned not null auto_increment primary key,
   logID int unsigned not null,
   logType varchar(4) not null,

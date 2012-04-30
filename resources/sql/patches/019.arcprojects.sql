@@ -1,4 +1,4 @@
-CREATE TABLE phabricator_repository.repository_arcanistproject (
+CREATE TABLE {$NAMESPACE}_repository.repository_arcanistproject (
   id int unsigned not null auto_increment primary key,
   phid varchar(64) binary not null,
   unique key(phid),
@@ -7,11 +7,11 @@ CREATE TABLE phabricator_repository.repository_arcanistproject (
   repositoryID int unsigned
 );
 
-ALTER TABLE phabricator_repository.repository
+ALTER TABLE {$NAMESPACE}_repository.repository
   ADD uuid varchar(64) binary;
 
-ALTER TABLE phabricator_differential.differential_diff
+ALTER TABLE {$NAMESPACE}_differential.differential_diff
   CHANGE arcanistProject arcanistProjectPHID varchar(64) binary;
 
-ALTER TABLE phabricator_differential.differential_diff
+ALTER TABLE {$NAMESPACE}_differential.differential_diff
   ADD repositoryUUID varchar(64) binary;

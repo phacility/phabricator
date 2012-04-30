@@ -1,6 +1,6 @@
-ALTER TABLE `phabricator_oauth_server`.`oauth_server_oauthclientauthorization`
+ALTER TABLE `{$NAMESPACE}_oauth_server`.`oauth_server_oauthclientauthorization`
   ADD `scope` text NOT NULL;
 
-ALTER TABLE `phabricator_oauth_server`.`oauth_server_oauthserveraccesstoken`
+ALTER TABLE `{$NAMESPACE}_oauth_server`.`oauth_server_oauthserveraccesstoken`
   DROP `dateExpires`;
 

@@ -1,11 +1,11 @@
-ALTER TABLE phabricator_differential.differential_comment
+ALTER TABLE {$NAMESPACE}_differential.differential_comment
   ADD metadata LONGBLOB NOT NULL;
 
-UPDATE phabricator_differential.differential_comment
+UPDATE {$NAMESPACE}_differential.differential_comment
   SET metadata = '{}' WHERE metadata = '';
 
-ALTER TABLE phabricator_maniphest.maniphest_transaction
+ALTER TABLE {$NAMESPACE}_maniphest.maniphest_transaction
   ADD metadata LONGBLOB NOT NULL;
 
-UPDATE phabricator_maniphest.maniphest_transaction
+UPDATE {$NAMESPACE}_maniphest.maniphest_transaction
   SET metadata = '{}' WHERE metadata = '';

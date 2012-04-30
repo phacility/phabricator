@@ -1,2 +1,2 @@
-ALTER TABLE phabricator_maniphest.maniphest_transaction
+ALTER TABLE {$NAMESPACE}_maniphest.maniphest_transaction
   ADD KEY (taskID);

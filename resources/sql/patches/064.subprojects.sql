@@ -1,9 +1,9 @@
-ALTER TABLE phabricator_project.project
+ALTER TABLE {$NAMESPACE}_project.project
   ADD subprojectPHIDs longblob NOT NULL;
-UPDATE phabricator_project.project
+UPDATE {$NAMESPACE}_project.project
   SET subprojectPHIDs = '[]';
 
-CREATE TABLE phabricator_project.project_subproject (
+CREATE TABLE {$NAMESPACE}_project.project_subproject (
   projectPHID varchar(64) BINARY NOT NULL,
   subprojectPHID varchar(64) BINARY NOT NULL,
   PRIMARY KEY (subprojectPHID, projectPHID),

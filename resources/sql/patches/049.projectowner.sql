@@ -1,2 +1,2 @@
-ALTER TABLE phabricator_project.project_affiliation
+ALTER TABLE {$NAMESPACE}_project.project_affiliation
   ADD isOwner bool NOT NULL;

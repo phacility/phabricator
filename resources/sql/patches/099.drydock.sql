@@ -1,6 +1,6 @@
-CREATE DATABASE IF NOT EXISTS phabricator_drydock;
 
-CREATE TABLE phabricator_drydock.drydock_resource (
+
+CREATE TABLE {$NAMESPACE}_drydock.drydock_resource (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   phid VARCHAR(64) BINARY NOT NULL,
   name VARCHAR(255) NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE phabricator_drydock.drydock_resource (
   UNIQUE KEY (phid)
 ) ENGINE=InnoDB;
 
-CREATE TABLE phabricator_drydock.drydock_lease (
+CREATE TABLE {$NAMESPACE}_drydock.drydock_lease (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   phid VARCHAR(64) BINARY NOT NULL,
   resourceID INT UNSIGNED,

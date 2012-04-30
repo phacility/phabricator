@@ -1,2 +1,2 @@
-ALTER TABLE phabricator_differential.differential_inlinecomment
+ALTER TABLE {$NAMESPACE}_differential.differential_inlinecomment
   ADD KEY (revisionID, authorPHID);

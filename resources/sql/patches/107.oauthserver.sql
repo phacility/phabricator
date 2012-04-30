@@ -1,6 +1,6 @@
-CREATE DATABASE IF NOT EXISTS `phabricator_oauth_server`;
 
-CREATE TABLE `phabricator_oauth_server`.`oauth_server_oauthserverclient` (
+
+CREATE TABLE `{$NAMESPACE}_oauth_server`.`oauth_server_oauthserverclient` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `phid` varchar(64) BINARY NOT NULL,
   `name` varchar(255) NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE `phabricator_oauth_server`.`oauth_server_oauthserverclient` (
   UNIQUE KEY `phid` (`phid`)
 ) ENGINE=InnoDB;
 
-CREATE TABLE `phabricator_oauth_server`.`oauth_server_oauthclientauthorization` (
+CREATE TABLE `{$NAMESPACE}_oauth_server`.`oauth_server_oauthclientauthorization` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `phid` varchar(64) BINARY NOT NULL,
   `userPHID` varchar(64) BINARY NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE `phabricator_oauth_server`.`oauth_server_oauthclientauthorization` 
   UNIQUE KEY `userPHID` (`userPHID`,`clientPHID`)
 ) ENGINE=InnoDB;
 
-CREATE TABLE `phabricator_oauth_server`.`oauth_server_oauthserverauthorizationcode` (
+CREATE TABLE `{$NAMESPACE}_oauth_server`.`oauth_server_oauthserverauthorizationcode` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `code` varchar(32) NOT NULL,
   `clientPHID` varchar(64) BINARY NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE `phabricator_oauth_server`.`oauth_server_oauthserverauthorizationco
   UNIQUE KEY `code` (`code`)
 ) ENGINE=InnoDB;
 
-CREATE TABLE `phabricator_oauth_server`.`oauth_server_oauthserveraccesstoken` (
+CREATE TABLE `{$NAMESPACE}_oauth_server`.`oauth_server_oauthserveraccesstoken` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `token` varchar(32) NOT NULL,
   `userPHID` varchar(64) BINARY NOT NULL,

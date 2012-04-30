@@ -1,2 +1,2 @@
-ALTER TABLE phabricator_differential.differential_diff
+ALTER TABLE {$NAMESPACE}_differential.differential_diff
   CHANGE sourceControlpath sourceControlPath varchar(255);

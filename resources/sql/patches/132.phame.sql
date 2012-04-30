@@ -1,6 +1,6 @@
-CREATE DATABASE IF NOT EXISTS `phabricator_phame` COLLATE utf8_general_ci;
 
-CREATE TABLE `phabricator_phame`.`phame_post` (
+
+CREATE TABLE `{$NAMESPACE}_phame`.`phame_post` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `phid` VARCHAR(64) BINARY NOT NULL COLLATE utf8_bin,
   `bloggerPHID` VARCHAR(64) BINARY NOT NULL COLLATE utf8_bin,

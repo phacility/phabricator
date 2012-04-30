@@ -1,1 +1,1 @@
-DROP TABLE phabricator_repository.repository_githubnotification;
+DROP TABLE {$NAMESPACE}_repository.repository_githubnotification;

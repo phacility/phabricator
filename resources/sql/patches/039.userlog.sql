@@ -1,4 +1,4 @@
-CREATE TABLE phabricator_user.user_log (
+CREATE TABLE {$NAMESPACE}_user.user_log (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   actorPHID varchar(64) BINARY,
   key(actorPHID, dateCreated),
@@ -14,14 +14,14 @@ CREATE TABLE phabricator_user.user_log (
   key(dateCreated)
 );
 
-ALTER TABLE phabricator_user.user_log
+ALTER TABLE {$NAMESPACE}_user.user_log
   ADD remoteAddr varchar(16) NOT NULL;
 
-ALTER TABLE phabricator_user.user_log
+ALTER TABLE {$NAMESPACE}_user.user_log
   ADD KEY (remoteAddr, dateCreated);
 
-ALTER TABLE phabricator_user.user_log
+ALTER TABLE {$NAMESPACE}_user.user_log
   ADD session varchar(40);
 
-ALTER TABLE phabricator_user.user_log
+ALTER TABLE {$NAMESPACE}_user.user_log
   ADD KEY (session, dateCreated);

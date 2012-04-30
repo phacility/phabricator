@@ -1,4 +1,4 @@
-CREATE TABLE phabricator_repository.repository_symbol (
+CREATE TABLE {$NAMESPACE}_repository.repository_symbol (
   arcanistProjectID INT UNSIGNED NOT NULL,
   symbolName varchar(128) NOT NULL,
   KEY (symbolName),

@@ -1,2 +1,2 @@
-ALTER TABLE phabricator_user.user ADD UNIQUE KEY (phid);
-ALTER TABLE phabricator_user.phabricator_session ADD UNIQUE KEY (sessionKey);
+ALTER TABLE {$NAMESPACE}_user.user ADD UNIQUE KEY (phid);
+ALTER TABLE {$NAMESPACE}_user.phabricator_session ADD UNIQUE KEY (sessionKey);

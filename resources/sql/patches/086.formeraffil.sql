@@ -1,1 +1,1 @@
-ALTER TABLE phabricator_project.project_affiliation DROP status;
+ALTER TABLE {$NAMESPACE}_project.project_affiliation DROP status;

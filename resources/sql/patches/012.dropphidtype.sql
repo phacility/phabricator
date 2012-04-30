@@ -1,1 +1,1 @@
-DROP TABLE phabricator_phid.phid_type;
+DROP TABLE {$NAMESPACE}_phid.phid_type;

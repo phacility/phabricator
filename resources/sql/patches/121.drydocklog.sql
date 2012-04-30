@@ -1,4 +1,4 @@
-CREATE TABLE phabricator_drydock.drydock_log (
+CREATE TABLE {$NAMESPACE}_drydock.drydock_log (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   resourceID INT UNSIGNED,
   leaseID INT UNSIGNED,

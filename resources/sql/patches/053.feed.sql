@@ -1,6 +1,6 @@
-CREATE DATABASE IF NOT EXISTS phabricator_feed;
 
-CREATE TABLE phabricator_feed.feed_storydata (
+
+CREATE TABLE {$NAMESPACE}_feed.feed_storydata (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   phid VARCHAR(64) BINARY NOT NULL,
   UNIQUE KEY (phid),
@@ -13,7 +13,7 @@ CREATE TABLE phabricator_feed.feed_storydata (
   dateModified INT UNSIGNED NOT NULL
 );
 
-CREATE TABLE phabricator_feed.feed_storyreference (
+CREATE TABLE {$NAMESPACE}_feed.feed_storyreference (
   objectPHID varchar(64) BINARY NOT NULL,
   chronologicalKey BIGINT UNSIGNED NOT NULL,
   UNIQUE KEY (objectPHID, chronologicalKey),

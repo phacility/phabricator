@@ -1,4 +1,4 @@
-CREATE TABLE phabricator_differential.differential_affectedpath (
+CREATE TABLE {$NAMESPACE}_differential.differential_affectedpath (
   repositoryID INT UNSIGNED NOT NULL,
   pathID INT UNSIGNED NOT NULL,
   epoch INT UNSIGNED NOT NULL,

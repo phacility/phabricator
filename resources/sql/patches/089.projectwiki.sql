@@ -1,2 +1,2 @@
-ALTER TABLE phabricator_project.project
-  ADD phrictionSlug varchar(512);
+ALTER TABLE {$NAMESPACE}_project.project
+  ADD phrictionSlug varchar(128);

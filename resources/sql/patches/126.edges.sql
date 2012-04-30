@@ -1,4 +1,4 @@
-CREATE TABLE phabricator_maniphest.edge (
+CREATE TABLE {$NAMESPACE}_maniphest.edge (
   src VARCHAR(64) NOT NULL COLLATE utf8_bin,
   type VARCHAR(64) NOT NULL COLLATE utf8_bin,
   dst VARCHAR(64) NOT NULL COLLATE utf8_bin,
@@ -9,14 +9,14 @@ CREATE TABLE phabricator_maniphest.edge (
   KEY (src, type, dateCreated, seq)
 ) ENGINE=InnoDB, COLLATE utf8_general_ci;
 
-CREATE TABLE phabricator_maniphest.edgedata (
+CREATE TABLE {$NAMESPACE}_maniphest.edgedata (
   id INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
   data LONGTEXT NOT NULL COLLATE utf8_bin
 ) ENGINE=InnoDB, COLLATE utf8_general_ci;
 
 
 
-CREATE TABLE phabricator_repository.edge (
+CREATE TABLE {$NAMESPACE}_repository.edge (
   src VARCHAR(64) NOT NULL COLLATE utf8_bin,
   type VARCHAR(64) NOT NULL COLLATE utf8_bin,
   dst VARCHAR(64) NOT NULL COLLATE utf8_bin,
@@ -27,14 +27,14 @@ CREATE TABLE phabricator_repository.edge (
   KEY (src, type, dateCreated, seq)
 ) ENGINE=InnoDB, COLLATE utf8_general_ci;
 
-CREATE TABLE phabricator_repository.edgedata (
+CREATE TABLE {$NAMESPACE}_repository.edgedata (
   id INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
   data LONGTEXT NOT NULL COLLATE utf8_bin
 ) ENGINE=InnoDB, COLLATE utf8_general_ci;
 
 
 
-CREATE TABLE phabricator_differential.edge (
+CREATE TABLE {$NAMESPACE}_differential.edge (
   src VARCHAR(64) NOT NULL COLLATE utf8_bin,
   type VARCHAR(64) NOT NULL COLLATE utf8_bin,
   dst VARCHAR(64) NOT NULL COLLATE utf8_bin,
@@ -45,14 +45,14 @@ CREATE TABLE phabricator_differential.edge (
   KEY (src, type, dateCreated, seq)
 ) ENGINE=InnoDB, COLLATE utf8_general_ci;
 
-CREATE TABLE phabricator_differential.edgedata (
+CREATE TABLE {$NAMESPACE}_differential.edgedata (
   id INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
   data LONGTEXT NOT NULL COLLATE utf8_bin
 ) ENGINE=InnoDB, COLLATE utf8_general_ci;
 
 
 
-CREATE TABLE phabricator_file.edge (
+CREATE TABLE {$NAMESPACE}_file.edge (
   src VARCHAR(64) NOT NULL COLLATE utf8_bin,
   type VARCHAR(64) NOT NULL COLLATE utf8_bin,
   dst VARCHAR(64) NOT NULL COLLATE utf8_bin,
@@ -63,14 +63,14 @@ CREATE TABLE phabricator_file.edge (
   KEY (src, type, dateCreated, seq)
 ) ENGINE=InnoDB, COLLATE utf8_general_ci;
 
-CREATE TABLE phabricator_file.edgedata (
+CREATE TABLE {$NAMESPACE}_file.edgedata (
   id INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
   data LONGTEXT NOT NULL COLLATE utf8_bin
 ) ENGINE=InnoDB, COLLATE utf8_general_ci;
 
 
 
-CREATE TABLE phabricator_user.edge (
+CREATE TABLE {$NAMESPACE}_user.edge (
   src VARCHAR(64) NOT NULL COLLATE utf8_bin,
   type VARCHAR(64) NOT NULL COLLATE utf8_bin,
   dst VARCHAR(64) NOT NULL COLLATE utf8_bin,
@@ -81,14 +81,14 @@ CREATE TABLE phabricator_user.edge (
   KEY (src, type, dateCreated, seq)
 ) ENGINE=InnoDB, COLLATE utf8_general_ci;
 
-CREATE TABLE phabricator_user.edgedata (
+CREATE TABLE {$NAMESPACE}_user.edgedata (
   id INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
   data LONGTEXT NOT NULL COLLATE utf8_bin
 ) ENGINE=InnoDB, COLLATE utf8_general_ci;
 
 
 
-CREATE TABLE phabricator_project.edge (
+CREATE TABLE {$NAMESPACE}_project.edge (
   src VARCHAR(64) NOT NULL COLLATE utf8_bin,
   type VARCHAR(64) NOT NULL COLLATE utf8_bin,
   dst VARCHAR(64) NOT NULL COLLATE utf8_bin,
@@ -99,14 +99,14 @@ CREATE TABLE phabricator_project.edge (
   KEY (src, type, dateCreated, seq)
 ) ENGINE=InnoDB, COLLATE utf8_general_ci;
 
-CREATE TABLE phabricator_project.edgedata (
+CREATE TABLE {$NAMESPACE}_project.edgedata (
   id INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
   data LONGTEXT NOT NULL COLLATE utf8_bin
 ) ENGINE=InnoDB, COLLATE utf8_general_ci;
 
 
 
-CREATE TABLE phabricator_metamta.edge (
+CREATE TABLE {$NAMESPACE}_metamta.edge (
   src VARCHAR(64) NOT NULL COLLATE utf8_bin,
   type VARCHAR(64) NOT NULL COLLATE utf8_bin,
   dst VARCHAR(64) NOT NULL COLLATE utf8_bin,
@@ -117,7 +117,7 @@ CREATE TABLE phabricator_metamta.edge (
   KEY (src, type, dateCreated, seq)
 ) ENGINE=InnoDB, COLLATE utf8_general_ci;
 
-CREATE TABLE phabricator_metamta.edgedata (
+CREATE TABLE {$NAMESPACE}_metamta.edgedata (
   id INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
   data LONGTEXT NOT NULL COLLATE utf8_bin
 ) ENGINE=InnoDB, COLLATE utf8_general_ci;

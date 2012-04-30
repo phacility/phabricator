@@ -1,12 +1,12 @@
 /* Patch 060 neglected to make this an AUTO_INCREMENT PRIMARY KEY */
-ALTER TABLE phabricator_phriction.phriction_document
+ALTER TABLE {$NAMESPACE}_phriction.phriction_document
   CHANGE id id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY;
 
 /* Needs to be initially nullable for insert when documents are created. */
-ALTER TABLE phabricator_phriction.phriction_document
+ALTER TABLE {$NAMESPACE}_phriction.phriction_document
   CHANGE contentID contentID INT UNSIGNED;
 
-CREATE TABLE phabricator_phriction.phriction_content (
+CREATE TABLE {$NAMESPACE}_phriction.phriction_content (
   id INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
   documentID INT UNSIGNED NOT NULL,
   version INT UNSIGNED NOT NULL,

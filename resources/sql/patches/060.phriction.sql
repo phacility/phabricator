@@ -1,6 +1,6 @@
-CREATE DATABASE IF NOT EXISTS phabricator_phriction;
 
-CREATE TABLE phabricator_phriction.phriction_document (
+
+CREATE TABLE {$NAMESPACE}_phriction.phriction_document (
   id INT UNSIGNED NOT NULL,
   phid VARCHAR(64) BINARY NOT NULL,
   UNIQUE KEY (phid),

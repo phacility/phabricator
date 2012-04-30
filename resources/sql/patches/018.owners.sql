@@ -1,6 +1,6 @@
-CREATE DATABASE IF NOT EXISTS phabricator_owners;
 
-CREATE TABLE phabricator_owners.owners_package (
+
+CREATE TABLE {$NAMESPACE}_owners.owners_package (
   id int unsigned not null auto_increment primary key,
   phid varchar(64) binary not null,
   unique key(phid),
@@ -10,7 +10,7 @@ CREATE TABLE phabricator_owners.owners_package (
   primaryOwnerPHID varchar(64) binary
 );
 
-CREATE TABLE phabricator_owners.owners_owner (
+CREATE TABLE {$NAMESPACE}_owners.owners_owner (
   id int unsigned not null auto_increment primary key,
   packageID int unsigned not null,
   userPHID varchar(64) binary not null,
@@ -18,7 +18,7 @@ CREATE TABLE phabricator_owners.owners_owner (
   KEY(userPHID)
 );
 
-CREATE TABLE phabricator_owners.owners_path (
+CREATE TABLE {$NAMESPACE}_owners.owners_path (
   id int unsigned not null auto_increment primary key,
   packageID int unsigned not null,
   key(packageID),

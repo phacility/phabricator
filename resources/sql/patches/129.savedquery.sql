@@ -1,4 +1,4 @@
-CREATE TABLE phabricator_maniphest.maniphest_savedquery (
+CREATE TABLE {$NAMESPACE}_maniphest.maniphest_savedquery (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   userPHID varchar(64) COLLATE utf8_bin NOT NULL,
   queryKey varchar(64) COLLATE utf8_bin NOT NULL,

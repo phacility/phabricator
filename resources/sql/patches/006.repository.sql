@@ -1,4 +1,4 @@
-create table phabricator_repository.repository_commitdata (
+create table {$NAMESPACE}_repository.repository_commitdata (
   id int unsigned not null auto_increment primary key,
   commitID int unsigned not null,
   authorName varchar(255) not null,
@@ -7,17 +7,17 @@ create table phabricator_repository.repository_commitdata (
   key (authorName)
 );
 
-ALTER TABLE phabricator_worker.worker_task drop priority;
-ALTER TABLE phabricator_worker.worker_task drop key leaseOwner;
-ALTER TABLE phabricator_worker.worker_task add key (leaseOwner(16));
+ALTER TABLE {$NAMESPACE}_worker.worker_task drop priority;
+ALTER TABLE {$NAMESPACE}_worker.worker_task drop key leaseOwner;
+ALTER TABLE {$NAMESPACE}_worker.worker_task add key (leaseOwner(16));
 
-create table phabricator_repository.repository_path (
+create table {$NAMESPACE}_repository.repository_path (
   id int unsigned not null auto_increment primary key,
-  path varchar(512) binary not null,
+  path varchar(128) binary not null,
   unique key (path)
 );
 
-create table phabricator_repository.repository_pathchange (
+create table {$NAMESPACE}_repository.repository_pathchange (
   repositoryID int unsigned NOT NULL,
   pathID int unsigned NOT NULL,
   commitID int unsigned NOT NULL,
@@ -31,7 +31,7 @@ create table phabricator_repository.repository_pathchange (
   key (repositoryID, pathID, commitSequence)
 );
 
-create table phabricator_repository.repository_filesystem (
+create table {$NAMESPACE}_repository.repository_filesystem (
   repositoryID int unsigned not null,
   parentID int unsigned not null,
   svnCommit int unsigned not null,
@@ -41,16 +41,16 @@ create table phabricator_repository.repository_filesystem (
   primary key (repositoryID, parentID, svnCommit, pathID)
 );
 
-alter table phabricator_repository.repository_filesystem add key (repositoryID, svnCommit);
+alter table {$NAMESPACE}_repository.repository_filesystem add key (repositoryID, svnCommit);
 
-truncate phabricator_repository.repository_commit;
-alter table phabricator_repository.repository_commit
+truncate {$NAMESPACE}_repository.repository_commit;
+alter table {$NAMESPACE}_repository.repository_commit
   change repositoryPHID repositoryID int unsigned not null;
-alter table phabricator_repository.repository_commit drop key repositoryPHID;
-alter table phabricator_repository.repository_commit add unique key
+alter table {$NAMESPACE}_repository.repository_commit drop key repositoryPHID;
+alter table {$NAMESPACE}_repository.repository_commit add unique key
   (repositoryID, commitIdentifier(16));
-alter table phabricator_repository.repository_commit add key
+alter table {$NAMESPACE}_repository.repository_commit add key
   (repositoryID, epoch);
 
-alter table phabricator_repository.repository_filesystem
+alter table {$NAMESPACE}_repository.repository_filesystem
   add key (repositoryID, pathID, svnCommit);

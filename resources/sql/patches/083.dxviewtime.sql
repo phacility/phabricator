@@ -1,1 +1,1 @@
-DROP TABLE phabricator_differential.differential_viewtime;
+DROP TABLE {$NAMESPACE}_differential.differential_viewtime;

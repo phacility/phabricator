@@ -1,13 +1,13 @@
-ALTER TABLE phabricator_worker.worker_task
+ALTER TABLE {$NAMESPACE}_worker.worker_task
   ADD dataID int unsigned;
 
-ALTER TABLE phabricator_worker.worker_task
+ALTER TABLE {$NAMESPACE}_worker.worker_task
   ADD UNIQUE KEY (dataID);
 
-UPDATE phabricator_worker.worker_task t,
-       phabricator_worker.worker_taskdata d
+UPDATE {$NAMESPACE}_worker.worker_task t,
+       {$NAMESPACE}_worker.worker_taskdata d
   SET t.dataID = d.id
   WHERE d.taskID = t.id;
 
-ALTER TABLE phabricator_worker.worker_taskdata
+ALTER TABLE {$NAMESPACE}_worker.worker_taskdata
   DROP taskID;

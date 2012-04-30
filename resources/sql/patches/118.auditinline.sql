@@ -1,4 +1,4 @@
-CREATE TABLE phabricator_audit.audit_inlinecomment (
+CREATE TABLE {$NAMESPACE}_audit.audit_inlinecomment (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   authorPHID varchar(64) COLLATE utf8_bin NOT NULL,
   commitPHID varchar(64) COLLATE utf8_bin NOT NULL,

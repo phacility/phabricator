@@ -1,4 +1,4 @@
-create table phabricator_maniphest.maniphest_taskauxiliarystorage 
+create table {$NAMESPACE}_maniphest.maniphest_taskauxiliarystorage 
     (id int unsigned not null auto_increment primary key,
     taskPHID varchar(64) binary not null, 
     name varchar(255) not null, 

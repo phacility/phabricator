@@ -1,4 +1,4 @@
-CREATE TABLE phabricator_project.project_transaction (
+CREATE TABLE {$NAMESPACE}_project.project_transaction (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   projectID INT UNSIGNED NOT NULL,
   authorPHID VARCHAR(64) BINARY NOT NULL,

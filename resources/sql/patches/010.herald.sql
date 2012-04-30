@@ -1,13 +1,13 @@
-CREATE DATABASE IF NOT EXISTS phabricator_herald;
 
-CREATE TABLE phabricator_herald.herald_action (
+
+CREATE TABLE {$NAMESPACE}_herald.herald_action (
   id int unsigned not null auto_increment primary key,
   ruleID int unsigned not null,
   action varchar(255) not null,
   target text not null
 );
 
-CREATE TABLE phabricator_herald.herald_rule (
+CREATE TABLE {$NAMESPACE}_herald.herald_rule (
   id int unsigned not null auto_increment primary key,
   name varchar(255) not null,
   authorPHID varchar(64) binary not null,
@@ -19,7 +19,7 @@ CREATE TABLE phabricator_herald.herald_rule (
   unique key (authorPHID, name)
 );
 
-CREATE TABLE phabricator_herald.herald_condition (
+CREATE TABLE {$NAMESPACE}_herald.herald_condition (
   id int unsigned not null auto_increment primary key,
   ruleID int unsigned not null,
   fieldName varchar(255) not null,
@@ -27,7 +27,7 @@ CREATE TABLE phabricator_herald.herald_condition (
   value text not null
 );
 
-CREATE TABLE phabricator_herald.herald_transcript (
+CREATE TABLE {$NAMESPACE}_herald.herald_transcript (
   id int unsigned not null auto_increment primary key,
   phid varchar(64) binary not null,
   time int unsigned not null,

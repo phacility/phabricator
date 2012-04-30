@@ -1,4 +1,4 @@
-CREATE TABLE phabricator_conduit.conduit_certificatetoken (
+CREATE TABLE {$NAMESPACE}_conduit.conduit_certificatetoken (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   userPHID VARCHAR(64) BINARY NOT NULL,
   token VARCHAR(64),
@@ -6,7 +6,7 @@ CREATE TABLE phabricator_conduit.conduit_certificatetoken (
   dateModified INT UNSIGNED NOT NULL
 );
 
-ALTER TABLE phabricator_conduit.conduit_certificatetoken
+ALTER TABLE {$NAMESPACE}_conduit.conduit_certificatetoken
   ADD UNIQUE KEY (userPHID);
-ALTER TABLE phabricator_conduit.conduit_certificatetoken
+ALTER TABLE {$NAMESPACE}_conduit.conduit_certificatetoken
   ADD UNIQUE KEY (token);

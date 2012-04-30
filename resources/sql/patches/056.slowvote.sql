@@ -1,6 +1,6 @@
-CREATE DATABASE IF NOT EXISTS phabricator_slowvote;
 
-CREATE TABLE phabricator_slowvote.slowvote_poll (
+
+CREATE TABLE {$NAMESPACE}_slowvote.slowvote_poll (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   question VARCHAR(255) NOT NULL,
   phid VARCHAR(64) BINARY NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE phabricator_slowvote.slowvote_poll (
   dateModified INT UNSIGNED NOT NULL
 );
 
-CREATE TABLE phabricator_slowvote.slowvote_option (
+CREATE TABLE {$NAMESPACE}_slowvote.slowvote_option (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   pollID INT UNSIGNED NOT NULL,
   KEY (pollID),
@@ -22,7 +22,7 @@ CREATE TABLE phabricator_slowvote.slowvote_option (
   dateModified INT UNSIGNED NOT NULL
 );
 
-CREATE TABLE phabricator_slowvote.slowvote_comment (
+CREATE TABLE {$NAMESPACE}_slowvote.slowvote_comment (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   pollID INT UNSIGNED NOT NULL,
   UNIQUE KEY (pollID, authorPHID),
@@ -32,7 +32,7 @@ CREATE TABLE phabricator_slowvote.slowvote_comment (
   dateModified INT UNSIGNED NOT NULL
 );
 
-CREATE TABLE phabricator_slowvote.slowvote_choice (
+CREATE TABLE {$NAMESPACE}_slowvote.slowvote_choice (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   pollID INT UNSIGNED NOT NULL,
   KEY (pollID),
@@ -42,9 +42,3 @@ CREATE TABLE phabricator_slowvote.slowvote_choice (
   dateCreated INT UNSIGNED NOT NULL,
   dateModified INT UNSIGNED NOT NULL
 );
-
-INSERT INTO phabricator_directory.directory_item
-  (name, description, href, categoryID, sequence, dateCreated, dateModified)
-VALUES
-  ("Slowvote", "Design by committee.", "/vote/", 5, 250,
-    UNIX_TIMESTAMP(), UNIX_TIMESTAMP());

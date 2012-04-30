@@ -1,10 +1,10 @@
-ALTER TABLE phabricator_differential.differential_revision
+ALTER TABLE {$NAMESPACE}_differential.differential_revision
   ADD mailKey VARCHAR(40) binary NOT NULL;
 
-ALTER TABLE phabricator_maniphest.maniphest_task
+ALTER TABLE {$NAMESPACE}_maniphest.maniphest_task
   ADD mailKey VARCHAR(40) binary NOT NULL;
 
-CREATE TABLE phabricator_metamta.metamta_receivedmail (
+CREATE TABLE {$NAMESPACE}_metamta.metamta_receivedmail (
   id int unsigned not null primary key auto_increment,
   headers longblob not null,
   bodies longblob not null,

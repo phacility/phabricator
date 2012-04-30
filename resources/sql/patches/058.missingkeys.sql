@@ -1,11 +1,11 @@
-ALTER TABLE phabricator_file.file
+ALTER TABLE {$NAMESPACE}_file.file
   ADD UNIQUE KEY (phid);
 
-ALTER TABLE phabricator_project.project
+ALTER TABLE {$NAMESPACE}_project.project
   ADD UNIQUE KEY (phid);
 
-ALTER TABLE phabricator_herald.herald_condition
+ALTER TABLE {$NAMESPACE}_herald.herald_condition
   ADD KEY (ruleID);
 
-ALTER TABLE phabricator_herald.herald_action
+ALTER TABLE {$NAMESPACE}_herald.herald_action
   ADD KEY (ruleID);

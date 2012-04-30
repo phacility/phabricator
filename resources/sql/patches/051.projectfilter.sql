@@ -1,4 +1,4 @@
-CREATE TABLE phabricator_maniphest.maniphest_taskproject (
+CREATE TABLE {$NAMESPACE}_maniphest.maniphest_taskproject (
   taskPHID varchar(64) BINARY NOT NULL,
   projectPHID varchar(64) BINARY NOT NULL,
   PRIMARY KEY (projectPHID, taskPHID),

@@ -1,4 +1,4 @@
-CREATE TABLE phabricator_repository.repository_auditrequest (
+CREATE TABLE {$NAMESPACE}_repository.repository_auditrequest (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   auditorPHID varchar(64) BINARY NOT NULL,
   commitPHID varchar(64) BINARY NOT NULL,
@@ -8,9 +8,9 @@ CREATE TABLE phabricator_repository.repository_auditrequest (
   KEY (auditorPHID, auditStatus)
 ) ENGINE=InnoDB;
 
-INSERT INTO phabricator_repository.repository_auditrequest
+INSERT INTO {$NAMESPACE}_repository.repository_auditrequest
     (auditorPHID, commitPHID, auditStatus, auditReasons)
   SELECT packagePHID, commitPHID, auditStatus, auditReasons
-    FROM phabricator_owners.owners_packagecommitrelationship;
+    FROM {$NAMESPACE}_owners.owners_packagecommitrelationship;
 
-DROP TABLE phabricator_owners.owners_packagecommitrelationship;
+DROP TABLE {$NAMESPACE}_owners.owners_packagecommitrelationship;

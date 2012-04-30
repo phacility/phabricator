@@ -1,2 +1,2 @@
-ALTER TABLE `phabricator_search`.`search_document`
+ALTER TABLE `{$NAMESPACE}_search`.`search_document`
   ADD INDEX `documentCreated` (`documentCreated`);
