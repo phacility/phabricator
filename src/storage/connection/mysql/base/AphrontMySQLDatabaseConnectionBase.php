@@ -27,8 +27,6 @@ abstract class AphrontMySQLDatabaseConnectionBase
 
   private $nextError;
 
-  private static $connectionCache = array();
-
   abstract protected function connect();
   abstract protected function rawQuery($raw_query);
   abstract protected function fetchAssoc($result);
@@ -83,33 +81,14 @@ abstract class AphrontMySQLDatabaseConnectionBase
   private function closeConnection() {
     if ($this->connection) {
       $this->connection = null;
-      $key = $this->getConnectionCacheKey();
-      unset(self::$connectionCache[$key]);
     }
-  }
-
-  private function getConnectionCacheKey() {
-    $user = $this->getConfiguration('user');
-    $host = $this->getConfiguration('host');
-    $database = $this->getConfiguration('database');
-
-    return "{$user}:{$host}:{$database}";
   }
 
   private function establishConnection() {
-    $this->closeConnection();
-
-    $key = $this->getConnectionCacheKey();
-    if (isset(self::$connectionCache[$key])) {
-      $this->connection = self::$connectionCache[$key];
-      return;
-    }
-
     $start = microtime(true);
 
     $host = $this->getConfiguration('host');
     $database = $this->getConfiguration('database');
-
 
     $profiler = PhutilServiceProfiler::getInstance();
     $call_id = $profiler->beginServiceCall(
@@ -137,7 +116,6 @@ abstract class AphrontMySQLDatabaseConnectionBase
       }
     }
 
-    self::$connectionCache[$key] = $conn;
     $this->connection = $conn;
   }
 

@@ -138,4 +138,8 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
    * @task config
    */
   abstract public function getApplicationName();
+
+  protected function getConnectionNamespace() {
+    return self::$namespace.'_'.$this->getApplicationName();
+  }
 }

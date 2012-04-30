@@ -37,6 +37,10 @@ final class LiskIsolationTestDAO extends LiskDAO {
       "resource!");
   }
 
+  public function getConnectionNamespace() {
+    return 'test';
+  }
+
   public function getTableName() {
     return 'test';
   }

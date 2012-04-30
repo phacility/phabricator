@@ -159,6 +159,7 @@
  * Assuming ##$obj##, ##$other## and ##$another## live on the same database,
  * this code will work correctly by establishing savepoints.
  *
+ * @task   conn    Managing Connections
  * @task   config  Configuring Lisk
  * @task   load    Loading Objects
  * @task   info    Examining Objects
@@ -187,13 +188,14 @@ abstract class LiskDAO {
   const IDS_PHID                    = 'ids-phid';
   const IDS_MANUAL                  = 'ids-manual';
 
-  private $__connections            = array();
   private $__dirtyFields            = array();
   private $__missingFields          = array();
   private static $processIsolationLevel = 0;
   private static $__checkedClasses = array();
 
   private $__ephemeral = false;
+
+  private static $connections       = array();
 
   /**
    *  Build an empty object.
@@ -235,7 +237,65 @@ abstract class LiskDAO {
     }
   }
 
+
+/* -(  Managing Connections  )----------------------------------------------- */
+
+
+  /**
+   * Establish a live connection to a database service. This method should
+   * return a new connection. Lisk handles connection caching and management;
+   * do not perform caching deeper in the stack.
+   *
+   * @param string Mode, either 'r' (reading) or 'w' (reading and writing).
+   * @return AphrontDatabaseConnection New database connection.
+   * @task conn
+   */
   abstract protected function establishLiveConnection($mode);
+
+
+  /**
+   * Return a namespace for this object's connections in the connection cache.
+   * Generally, the database name is appropriate. Two connections are considered
+   * equivalent if they have the same connection namespace and mode.
+   *
+   * @return string Connection namespace for cache
+   * @task conn
+   */
+  abstract protected function getConnectionNamespace();
+
+
+  /**
+   * Get an existing, cached connection for this object.
+   *
+   * @param mode Connection mode.
+   * @return AprontDatabaseConnection|null  Connection, if it exists in cache.
+   * @task conn
+   */
+  protected function getEstablishedConnection($mode) {
+    $key = $this->getConnectionNamespace().':'.$mode;
+    if (isset(self::$connections[$key])) {
+      return self::$connections[$key];
+    }
+    return null;
+  }
+
+
+  /**
+   * Store a connection in the connection cache.
+   *
+   * @param mode Connection mode.
+   * @param AphrontDatabaseConnection Connection to cache.
+   * @return this
+   * @task conn
+   */
+  protected function setEstablishedConnection(
+    $mode,
+    AphrontDatabaseConnection $connection) {
+
+    $key = $this->getConnectionNamespace().':'.$mode;
+    self::$connections[$key] = $connection;
+    return $this;
+  }
 
 
 /* -(  Configuring Lisk  )--------------------------------------------------- */
@@ -739,20 +799,26 @@ abstract class LiskDAO {
 
     if (self::shouldIsolateAllLiskEffectsToCurrentProcess()) {
       $mode = 'isolate-'.$mode;
-      if (!isset($this->__connections[$mode])) {
-        $this->__connections[$mode] = $this->establishIsolatedConnection($mode);
+
+      $connection = $this->getEstablishedConnection($mode);
+      if (!$connection) {
+        $connection = $this->establishIsolatedConnection($mode);
+        $this->setEstablishedConnection($mode, $connection);
       }
-      return $this->__connections[$mode];
+
+      return $connection;
     }
 
     // TODO There is currently no protection on 'r' queries against writing
     // or on 'w' queries against reading
 
-    if (!isset($this->__connections[$mode])) {
-      $this->__connections[$mode] = $this->establishLiveConnection($mode);
+    $connection = $this->getEstablishedConnection($mode);
+    if (!$connection) {
+      $connection = $this->establishLiveConnection($mode);
+      $this->setEstablishedConnection($mode, $connection);
     }
 
-    return $this->__connections[$mode];
+    return $connection;
   }
 
 
