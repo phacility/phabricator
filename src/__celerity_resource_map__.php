@@ -987,6 +987,18 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/differential/behavior-show-all-comments.js',
   ),
+  'javelin-behavior-differential-show-field-details' =>
+  array(
+    'uri' => '/res/1dfd4d10/rsrc/js/application/differential/behavior-show-field-details.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-dom',
+    ),
+    'disk' => '/rsrc/js/application/differential/behavior-show-field-details.js',
+  ),
   'javelin-behavior-differential-show-more' =>
   array(
     'uri' => '/res/e92c5272/rsrc/js/application/differential/behavior-show-more.js',

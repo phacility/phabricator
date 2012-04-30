@@ -52,6 +52,8 @@ final class DifferentialLintFieldSpecification
     $lmsg = DifferentialRevisionUpdateHistoryView::getDiffLintMessage($diff);
     $ldata = $this->getDiffProperty('arc:lint');
     $ltail = null;
+    $have_details = false;
+
     if ($ldata) {
       $ldata = igroup($ldata, 'path');
       $lint_messages = array();
@@ -78,11 +80,20 @@ final class DifferentialLintFieldSpecification
               ),
               $line_link);
           }
+          if ($description != '') {
+            $have_details = true;
+          }
           $message_markup[] = hsprintf(
             '<li>'.
               '<span class="lint-severity-%s">%s</span> (%s) %s '.
               'at line '.$line_link.
-              '<p>%s</p>'.
+              javelin_render_tag(
+                'div',
+                array(
+                  'sigil' => 'differential-field-detail',
+                  'style' => 'display: none;',
+                ),
+                '%s').
             '</li>',
             $severity,
             ucwords($severity),
@@ -104,6 +115,17 @@ final class DifferentialLintFieldSpecification
             implode("\n", $lint_messages).
           '</ul>'.
         '</div>';
+    }
+
+    Javelin::initBehavior('differential-show-field-details');
+    if ($have_details) {
+      $lmsg .= ' - '.javelin_render_tag(
+        'a',
+        array(
+          'href' => '#details',
+          'sigil' => 'differential-show-field-details',
+        ),
+        'Details');
     }
 
     return $lstar.' '.$lmsg.$ltail;

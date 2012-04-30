@@ -53,6 +53,7 @@ final class DifferentialUnitFieldSpecification
     $postponed_count = 0;
     $udata = $this->getDiffProperty('arc:unit');
     $utail = null;
+    $have_details = false;
 
     if ($udata) {
       $unit_messages = array();
@@ -66,6 +67,10 @@ final class DifferentialUnitFieldSpecification
           $userdata = phutil_utf8_shorten(idx($test, 'userdata'), 512);
           $userdata = $engine->markupText($userdata);
 
+          if ($userdata != '') {
+            $have_details = true;
+          }
+
           $unit_messages[] =
             '<li>'.
               '<span class="unit-result-'.phutil_escape_html($result).'">'.
@@ -73,7 +78,13 @@ final class DifferentialUnitFieldSpecification
               '</span>'.
               ' '.
               phutil_escape_html($name).
-              '<p>'.$userdata.'</p>'.
+              javelin_render_tag(
+                'div',
+                array(
+                  'sigil' => 'differential-field-detail',
+                  'style' => 'display: none;',
+                ),
+                $userdata).
             '</li>';
 
         } else if ($result == DifferentialUnitTestResult::RESULT_POSTPONED) {
@@ -96,6 +107,17 @@ final class DifferentialUnitFieldSpecification
     if ($postponed_count > 0 &&
         $diff->getUnitStatus() == DifferentialUnitStatus::UNIT_POSTPONED) {
       $umsg = $postponed_count.' '.$umsg;
+    }
+
+    Javelin::initBehavior('differential-show-field-details');
+    if ($have_details) {
+      $umsg .= ' - '.javelin_render_tag(
+        'a',
+        array(
+          'href' => '#details',
+          'sigil' => 'differential-show-field-details',
+        ),
+        'Details');
     }
 
     return $ustar.' '.$umsg.$utail;

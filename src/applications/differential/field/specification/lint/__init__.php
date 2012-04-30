@@ -8,6 +8,8 @@
 
 phutil_require_module('phabricator', 'applications/differential/field/specification/base');
 phutil_require_module('phabricator', 'applications/differential/view/revisionupdatehistory');
+phutil_require_module('phabricator', 'infrastructure/javelin/api');
+phutil_require_module('phabricator', 'infrastructure/javelin/markup');
 
 phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
