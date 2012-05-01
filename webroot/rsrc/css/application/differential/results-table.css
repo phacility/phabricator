@@ -1,0 +1,79 @@
+/**
+ * @provides differential-results-table-css
+ */
+
+table.differential-results-table {
+  border-collapse: separate;
+  border-spacing: 1px;
+  width: 100%;
+  font-size: 11px;
+  background: #fcfcec;
+}
+
+.differential-results-table th {
+  font-weight: bold;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  padding: 2px 4px;
+  margin: 0;
+  width: 70px;
+}
+
+.differential-results-table td {
+  padding: 2px 8px;
+  margin: 0;
+  vertical-align: middle;
+}
+
+.differential-results-table tr.differential-results-row-star th,
+.differential-results-table tr.differential-results-row-star td {
+  font-size: 12px;
+  font-weight: bold;
+  background: #dfdfcf;
+}
+
+
+.differential-results-table tr.differential-results-row-section th {
+  font-weight: bold;
+  padding-top: 4px;
+  text-align: left;
+}
+
+.differential-results-table tr.differential-results-row-excuse th {
+  background: #3399ff;
+}
+
+.differential-results-table tr.differential-results-row-excuse td {
+  padding-top: 1em;
+  padding-right: 1em;
+  padding-bottom: 1em;
+}
+
+.differential-results-table tr.differential-results-row-red th {
+  background: #ff4422;
+}
+
+.differential-results-table tr.differential-results-row-yellow th {
+  background: #ffdd66;
+}
+
+.differential-results-table tr.differential-results-row-green th {
+  background: #22dd44;
+}
+
+.differential-results-table tr.differential-results-row-blue th {
+  background: #88bbff;
+}
+
+
+.differential-results-table tr.differential-results-row-details td {
+  color: #888888;
+}
+
+.differential-results-table tr.differential-results-row-show th {
+  padding: 4px;
+  color: #888888;
+  font-weight: bold;
+  background: #dfdfcf;
+}

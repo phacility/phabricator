@@ -5,27 +5,36 @@
  *           javelin-dom
  */
 
-JX.behavior('differential-show-field-details', function() {
+JX.behavior('differential-show-field-details', function(config) {
 
   JX.Stratcom.listen(
     'click',
-    'differential-show-field-details',
+    ['differential-results-row-show', 'tag:a'],
     function(e) {
-      var node = e.getNode('tag:td');
-      var data = JX.Stratcom.getData(node);
-      var details = JX.DOM.scry(
-        node,
-        'div',
-        'differential-field-detail');
-      for (var i=0; i < details.length; i++) {
-        if (!data.detailsShown) {
-          JX.DOM.show(details[i]);
-        } else {
-          JX.DOM.hide(details[i]);
-        }
-      }
-      data.detailsShown = !data.detailsShown;
-      e.kill();
+      toggle(e, true);
     });
+
+  JX.Stratcom.listen(
+    'click',
+    ['differential-results-row-hide', 'tag:a'],
+    function(e) {
+      toggle(e, false);
+    });
+
+  function toggle(e, show) {
+    e.kill();
+
+    var f = show ? JX.DOM.show : JX.DOM.hide;
+    var g = show ? JX.DOM.hide : JX.DOM.show;
+
+    var table = e.getNode('differential-results-table');
+    var rows  = JX.DOM.scry(table, 'tr', 'differential-results-row-toggle');
+    for (var ii = 0; ii < rows.length; ii++) {
+      f(rows[ii]);
+    }
+
+    g(JX.DOM.find(table, 'tr', 'differential-results-row-show'));
+    f(JX.DOM.find(table, 'tr', 'differential-results-row-hide'));
+  }
 
 });

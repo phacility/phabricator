@@ -32,33 +32,50 @@ final class DifferentialLintFieldSpecification
   }
 
   private function getLintExcuse() {
-    $excuse = $this->getDiffProperty('arc:lint-excuse');
-    $excuse = phutil_escape_html($excuse);
-    $excuse = nl2br($excuse);
-
-    $excuse_markup = '';
-    if (strlen($excuse)) {
-      $excuse_markup = '<p><strong>Explanation for failure(s): </strong></p>'.
-                       '<span class="lint-excuse">'.$excuse.'</span>';
-    }
-    return $excuse_markup;
+    return $this->getDiffProperty('arc:lint-excuse');
   }
 
   public function renderValueForRevisionView() {
     $diff = $this->getDiff();
-    $path_changesets = mpull($diff->loadChangesets(), 'getId', 'getFilename');
+    $path_changesets = mpull($diff->loadChangesets(), 'getID', 'getFilename');
 
     $lstar = DifferentialRevisionUpdateHistoryView::renderDiffLintStar($diff);
     $lmsg = DifferentialRevisionUpdateHistoryView::getDiffLintMessage($diff);
     $ldata = $this->getDiffProperty('arc:lint');
     $ltail = null;
-    $have_details = false;
+
+    $rows = array();
+
+    $rows[] = array(
+      'style'     => 'star',
+      'name'      => $lstar,
+      'value'     => $lmsg,
+      'show'      => true,
+    );
+
+    $excuse = $this->getLintExcuse();
+    if ($excuse) {
+      $rows[] = array(
+        'style'   => 'excuse',
+        'name'    => 'Excuse',
+        'value'   => nl2br(phutil_escape_html($excuse)),
+        'show'    => true,
+      );
+    }
+
+    $show_limit = 10;
+    $hidden = array();
 
     if ($ldata) {
       $ldata = igroup($ldata, 'path');
-      $lint_messages = array();
       foreach ($ldata as $path => $messages) {
-        $message_markup = array();
+
+        $rows[] = array(
+          'style' => 'section',
+          'name'  => phutil_escape_html($path),
+          'show'  => $show_limit,
+        );
+
         foreach ($messages as $message) {
           $path = idx($message, 'path');
           $line = idx($message, 'line');
@@ -69,7 +86,7 @@ final class DifferentialLintFieldSpecification
           $name = idx($message, 'name');
           $description = idx($message, 'description');
 
-          $line_link = phutil_escape_html($line);
+          $line_link = 'line '.phutil_escape_html($line);
           if (isset($path_changesets[$path])) {
             // TODO: Create standalone links for large diffs. Logic is in
             // DifferentialDiffTableOfContentsView::renderChangesetLink().
@@ -80,54 +97,104 @@ final class DifferentialLintFieldSpecification
               ),
               $line_link);
           }
-          if ($description != '') {
-            $have_details = true;
+
+          if ($show_limit) {
+            --$show_limit;
+            $show = true;
+          } else {
+            $show = false;
+            if (empty($hidden[$severity])) {
+              $hidden[$severity] = 0;
+            }
+            $hidden[$severity]++;
           }
-          $message_markup[] = hsprintf(
-            '<li>'.
-              '<span class="lint-severity-%s">%s</span> (%s) %s '.
-              'at line '.$line_link.
-              javelin_render_tag(
-                'div',
-                array(
-                  'sigil' => 'differential-field-detail',
-                  'style' => 'display: none;',
-                ),
-                '%s').
-            '</li>',
-            $severity,
-            ucwords($severity),
-            $code,
-            $name,
-            $description);
+
+          $rows[] = array(
+            'style' => $this->getSeverityStyle($severity),
+            'name'  => phutil_escape_html(ucwords($severity)),
+            'value' => hsprintf(
+              "(%s) %s at {$line_link}",
+              $code,
+              $name),
+            'show'  => $show,
+          );
+
+          if (strlen($description)) {
+            $rows[] = array(
+              'style' => 'details',
+              'value' => nl2br(phutil_escape_html($description)),
+              'show'  => false,
+            );
+            if (empty($hidden['details'])) {
+              $hidden['details'] = 0;
+            }
+            $hidden['details']++;
+          }
         }
-        $lint_messages[] =
-          '<li class="lint-file-block">'.
-            'Lint for <strong>'.phutil_escape_html($path).'</strong>'.
-            '<ul>'.implode("\n", $message_markup).'</ul>'.
-          '</li>';
       }
-      $lexcuse = $this->getLintExcuse();
-      $ltail =
-        '<div class="differential-lint-block">'.
-          $lexcuse.
-          '<ul>'.
-            implode("\n", $lint_messages).
-          '</ul>'.
-        '</div>';
     }
 
-    Javelin::initBehavior('differential-show-field-details');
-    if ($have_details) {
-      $lmsg .= ' - '.javelin_render_tag(
-        'a',
-        array(
-          'href' => '#details',
-          'sigil' => 'differential-show-field-details',
-        ),
-        'Details');
-    }
+    $show_string = $this->renderShowString($hidden);
 
-    return $lstar.' '.$lmsg.$ltail;
+    $view = new DifferentialResultsTableView();
+    $view->setRows($rows);
+    $view->setShowMoreString($show_string);
+
+    return $view->render();
   }
+
+  private function getSeverityStyle($severity) {
+    $map = array(
+      ArcanistLintSeverity::SEVERITY_ERROR      => 'red',
+      ArcanistLintSeverity::SEVERITY_WARNING    => 'yellow',
+      ArcanistLintSeverity::SEVERITY_AUTOFIX    => 'yellow',
+      ArcanistLintSeverity::SEVERITY_ADVICE     => 'yellow',
+    );
+    return idx($map, $severity);
+  }
+
+  private function renderShowString(array $hidden) {
+    if (!$hidden) {
+      return null;
+    }
+
+    // Reorder hidden things by severity.
+    $hidden = array_select_keys(
+      $hidden,
+      array(
+        ArcanistLintSeverity::SEVERITY_ERROR,
+        ArcanistLintSeverity::SEVERITY_WARNING,
+        ArcanistLintSeverity::SEVERITY_AUTOFIX,
+        ArcanistLintSeverity::SEVERITY_ADVICE,
+        'details',
+      )) + $hidden;
+
+    $singular = array(
+      ArcanistLintSeverity::SEVERITY_ERROR    => 'Error',
+      ArcanistLintSeverity::SEVERITY_WARNING  => 'Warning',
+      ArcanistLintSeverity::SEVERITY_AUTOFIX  => 'Auto-Fix',
+      ArcanistLintSeverity::SEVERITY_ADVICE   => 'Advice',
+      'details'                               => 'Detail',
+    );
+
+    $plural = array(
+      ArcanistLintSeverity::SEVERITY_ERROR    => 'Errors',
+      ArcanistLintSeverity::SEVERITY_WARNING  => 'Warnings',
+      ArcanistLintSeverity::SEVERITY_AUTOFIX  => 'Auto-Fixes',
+      ArcanistLintSeverity::SEVERITY_ADVICE   => 'Advice',
+      'details'                               => 'Details',
+    );
+
+    $show = array();
+    foreach ($hidden as $key => $value) {
+      if ($value == 1) {
+        $show[] = $value.' '.idx($singular, $key);
+      } else {
+        $show[] = $value.' '.idx($plural, $key);
+      }
+    }
+
+    return "Show Full Lint Results (".implode(', ', $show).")";
+  }
+
 }

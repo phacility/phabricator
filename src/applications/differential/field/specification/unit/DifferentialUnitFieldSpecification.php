@@ -32,16 +32,7 @@ final class DifferentialUnitFieldSpecification
   }
 
   private function getUnitExcuse() {
-    $excuse = $this->getDiffProperty('arc:unit-excuse');
-    $excuse = phutil_escape_html($excuse);
-    $excuse = nl2br($excuse);
-
-    $excuse_markup = '';
-    if (strlen($excuse)) {
-      $excuse_markup = '<p>Explanation for failure(s): </p>'.
-                       '<span class="unit-excuse">'.$excuse.'</span>';
-    }
-    return $excuse_markup;
+    return $this->getDiffProperty('arc:unit-excuse');
   }
 
   public function renderValueForRevisionView() {
@@ -50,77 +41,145 @@ final class DifferentialUnitFieldSpecification
     $ustar = DifferentialRevisionUpdateHistoryView::renderDiffUnitStar($diff);
     $umsg = DifferentialRevisionUpdateHistoryView::getDiffUnitMessage($diff);
 
-    $postponed_count = 0;
-    $udata = $this->getDiffProperty('arc:unit');
-    $utail = null;
-    $have_details = false;
+    $rows = array();
 
+    $rows[] = array(
+      'style' => 'star',
+      'name'  => $ustar,
+      'value' => $umsg,
+      'show'  => true,
+    );
+
+    $excuse = $this->getUnitExcuse();
+    if ($excuse) {
+      $rows[] = array(
+        'style' => 'excuse',
+        'name'  => 'Excuse',
+        'value' => nl2br(phutil_escape_html($excuse)),
+        'show'  => true,
+      );
+    }
+
+    $show_limit = 10;
+    $hidden = array();
+
+    $udata = $this->getDiffProperty('arc:unit');
     if ($udata) {
-      $unit_messages = array();
+      $sort_map = array(
+        ArcanistUnitTestResult::RESULT_BROKEN     => 0,
+        ArcanistUnitTestResult::RESULT_FAIL       => 1,
+        ArcanistUnitTestResult::RESULT_UNSOUND    => 2,
+        ArcanistUnitTestResult::RESULT_SKIP       => 3,
+        ArcanistUnitTestResult::RESULT_POSTPONED  => 4,
+        ArcanistUnitTestResult::RESULT_PASS       => 5,
+      );
+
+      foreach ($udata as $key => $test) {
+        $udata[$key]['sort'] = idx($sort_map, idx($test, 'result'));
+      }
+      $udata = isort($udata, 'sort');
+
       foreach ($udata as $test) {
-        $name = idx($test, 'name');
         $result = idx($test, 'result');
 
-        if ($result != DifferentialUnitTestResult::RESULT_POSTPONED &&
-            $result != DifferentialUnitTestResult::RESULT_PASS) {
-          $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
-          $userdata = phutil_utf8_shorten(idx($test, 'userdata'), 512);
-          $userdata = $engine->markupText($userdata);
+        $default_hide = false;
+        switch ($result) {
+          case ArcanistUnitTestResult::RESULT_POSTPONED:
+          case ArcanistUnitTestResult::RESULT_PASS:
+            $default_hide = true;
+            break;
+        }
 
-          if ($userdata != '') {
-            $have_details = true;
+        if ($show_limit && !$default_hide) {
+          --$show_limit;
+          $show = true;
+        } else {
+          $show = false;
+          if (empty($hidden[$result])) {
+            $hidden[$result] = 0;
           }
+          $hidden[$result]++;
+        }
 
-          $unit_messages[] =
-            '<li>'.
-              '<span class="unit-result-'.phutil_escape_html($result).'">'.
-                phutil_escape_html(ucwords($result)).
-              '</span>'.
-              ' '.
-              phutil_escape_html($name).
-              javelin_render_tag(
-                'div',
-                array(
-                  'sigil' => 'differential-field-detail',
-                  'style' => 'display: none;',
-                ),
-                $userdata).
-            '</li>';
+        $rows[] = array(
+          'style' => $this->getResultStyle($result),
+          'name'  => phutil_escape_html(ucwords($result)),
+          'value' => phutil_escape_html(idx($test, 'name')),
+          'show'  => $show,
+        );
 
-        } else if ($result == DifferentialUnitTestResult::RESULT_POSTPONED) {
-          $postponed_count++;
+        $userdata = idx($test, 'userdata');
+        if ($userdata) {
+          $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
+          $userdata = $engine->markupText($userdata);
+          $rows[] = array(
+            'style' => 'details',
+            'value' => $userdata,
+            'show'  => false,
+          );
+          if (empty($hidden['details'])) {
+            $hidden['details'] = 0;
+          }
+          $hidden['details']++;
         }
       }
-
-      $uexcuse = $this->getUnitExcuse();
-      if ($unit_messages) {
-        $utail =
-          '<div class="differential-unit-block">'.
-            $uexcuse.
-            '<ul>'.
-              implode("\n", $unit_messages).
-            '</ul>'.
-          '</div>';
-      }
     }
 
-    if ($postponed_count > 0 &&
-        $diff->getUnitStatus() == DifferentialUnitStatus::UNIT_POSTPONED) {
-      $umsg = $postponed_count.' '.$umsg;
+    $show_string = $this->renderShowString($hidden);
+
+    $view = new DifferentialResultsTableView();
+    $view->setRows($rows);
+    $view->setShowMoreString($show_string);
+
+    return $view->render();
+  }
+
+  private function getResultStyle($result) {
+    $map = array(
+      ArcanistUnitTestResult::RESULT_PASS       => 'green',
+      ArcanistUnitTestResult::RESULT_FAIL       => 'red',
+      ArcanistUnitTestResult::RESULT_SKIP       => 'blue',
+      ArcanistUnitTestResult::RESULT_BROKEN     => 'red',
+      ArcanistUnitTestResult::RESULT_UNSOUND    => 'yellow',
+      ArcanistUnitTestResult::RESULT_POSTPONED  => 'blue',
+    );
+    return idx($map, $result);
+  }
+
+  private function renderShowString(array $hidden) {
+    if (!$hidden) {
+      return null;
     }
 
-    Javelin::initBehavior('differential-show-field-details');
-    if ($have_details) {
-      $umsg .= ' - '.javelin_render_tag(
-        'a',
-        array(
-          'href' => '#details',
-          'sigil' => 'differential-show-field-details',
-        ),
-        'Details');
+    // Reorder hidden things by severity.
+    $hidden = array_select_keys(
+      $hidden,
+      array(
+        ArcanistUnitTestResult::RESULT_BROKEN,
+        ArcanistUnitTestResult::RESULT_FAIL,
+        ArcanistUnitTestResult::RESULT_UNSOUND,
+        ArcanistUnitTestResult::RESULT_SKIP,
+        ArcanistUnitTestResult::RESULT_POSTPONED,
+        ArcanistUnitTestResult::RESULT_PASS,
+        'details',
+      )) + $hidden;
+
+    $noun = array(
+      ArcanistUnitTestResult::RESULT_BROKEN     => 'Broken',
+      ArcanistUnitTestResult::RESULT_FAIL       => 'Failed',
+      ArcanistUnitTestResult::RESULT_UNSOUND    => 'Unsound',
+      ArcanistUnitTestResult::RESULT_SKIP       => 'Skipped',
+      ArcanistUnitTestResult::RESULT_POSTPONED  => 'Postponed',
+      ArcanistUnitTestResult::RESULT_PASS       => 'Passed',
+      'details'                                 => 'Details',
+    );
+
+    $show = array();
+    foreach ($hidden as $key => $value) {
+      $show[] = $value.' '.idx($noun, $key);
     }
 
-    return $ustar.' '.$umsg.$utail;
+    return "Show Full Unit Results (".implode(', ', $show).")";
   }
 
 }

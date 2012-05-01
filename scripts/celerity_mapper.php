@@ -88,7 +88,7 @@ $package_spec = array(
   'differential.pkg.css' => array(
     'differential-core-view-css',
     'differential-changeset-view-css',
-    'differential-revision-detail-css',
+    'differential-results-table-css',
     'differential-revision-history-css',
     'differential-table-of-contents-css',
     'differential-revision-comment-css',
