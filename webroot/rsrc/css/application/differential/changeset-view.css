@@ -379,3 +379,16 @@ tr.differential-inline-loading {
   display: block;
   margin-top: -72px;
 }
+
+.differential-loading a {
+  color: #3b5998;
+}
+
+.differential-loading {
+  color: #999966;
+  background: #ffffee;
+  border: 1px solid #ccccaa;
+  padding: 1em;
+  text-align: center;
+  font-size: 11px;
+}

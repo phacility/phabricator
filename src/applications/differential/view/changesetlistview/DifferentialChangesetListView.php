@@ -19,6 +19,7 @@
 final class DifferentialChangesetListView extends AphrontView {
 
   private $changesets = array();
+  private $visibleChangesets = array();
   private $references = array();
   private $inlineURI;
   private $renderURI = '/differential/changeset/';
@@ -36,6 +37,11 @@ final class DifferentialChangesetListView extends AphrontView {
 
   public function setChangesets($changesets) {
     $this->changesets = $changesets;
+    return $this;
+  }
+
+  public function setVisibleChangesets($visible_changesets) {
+    $this->visibleChangesets = $visible_changesets;
     return $this;
   }
 
@@ -130,17 +136,33 @@ final class DifferentialChangesetListView extends AphrontView {
       $detail->setVsChangesetID(idx($this->vsMap, $changeset->getID()));
       $detail->setEditable(true);
 
-      $uniq_id = celerity_generate_unique_node_id();
+      $uniq_id = 'diff-'.$changeset->getAnchorName();
+      if (isset($this->visibleChangesets[$key])) {
+        $load = 'Loading...';
+        $mapping[$uniq_id] = $ref;
+      } else {
+        $load = javelin_render_tag(
+          'a',
+          array(
+            'href' => '#'.$uniq_id,
+            'meta' => array(
+              'id' => $uniq_id,
+              'ref' => $ref,
+              'kill' => true,
+            ),
+            'sigil' => 'differential-load',
+            'mustcapture' => true,
+          ),
+          'Load');
+      }
       $detail->appendChild(
         phutil_render_tag(
           'div',
           array(
             'id' => $uniq_id,
           ),
-          '<div class="differential-loading">Loading...</div>'));
+          '<div class="differential-loading">'.$load.'</div>'));
       $output[] = $detail->render();
-
-      $mapping[$uniq_id] = $ref;
     }
 
     require_celerity_resource('aphront-tooltip-css');

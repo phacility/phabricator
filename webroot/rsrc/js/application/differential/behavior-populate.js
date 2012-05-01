@@ -38,6 +38,26 @@ JX.behavior('differential-populate', function(config) {
   var highlight_class = null;
 
   JX.Stratcom.listen(
+    'click',
+    'differential-load',
+    function(e) {
+      var meta = e.getNodeData('differential-load');
+      JX.DOM.setContent(
+        JX.$(meta.id),
+        JX.$H('<div class="differential-loading">Loading...</div>'));
+      var data = {
+        ref : meta.ref,
+        whitespace : config.whitespace
+      };
+      new JX.Workflow(config.uri, data)
+        .setHandler(JX.bind(null, onresponse, meta.id))
+        .start();
+      if (meta.kill) {
+        e.kill();
+      }
+    });
+
+  JX.Stratcom.listen(
     ['mouseover', 'mouseout'],
     ['differential-changeset', 'tag:td'],
     function(e) {

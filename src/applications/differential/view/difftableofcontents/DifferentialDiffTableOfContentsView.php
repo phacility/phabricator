@@ -20,10 +20,10 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
 
   private $changesets = array();
   private $visibleChangesets = array();
+  private $references = array();
   private $repository;
   private $diff;
   private $user;
-  private $standaloneViewLink = null;
   private $renderURI = '/differential/changeset/';
   private $revisionID;
   private $whitespace;
@@ -36,6 +36,11 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
 
   public function setVisibleChangesets($visible_changesets) {
     $this->visibleChangesets = $visible_changesets;
+    return $this;
+  }
+
+  public function setRenderingReferences(array $references) {
+    $this->references = $references;
     return $this;
   }
 
@@ -56,11 +61,6 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
-    return $this;
-  }
-
-  public function setStandaloneViewLink($standalone_view_link) {
-    $this->standaloneViewLink = $standalone_view_link;
     return $this;
   }
 
@@ -108,7 +108,8 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
     foreach ($changesets as $id => $changeset) {
       $type = $changeset->getChangeType();
       $ftype = $changeset->getFileType();
-      $link = $this->renderChangesetLink($changeset);
+      $ref = idx($this->references, $id);
+      $link = $this->renderChangesetLink($changeset, $ref);
 
       if (DifferentialChangeType::isOldLocationChangeType($type)) {
         $away = $changeset->getAwayPaths();
@@ -253,34 +254,18 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
   }
 
 
-  private function renderChangesetLink(DifferentialChangeset $changeset) {
+  private function renderChangesetLink(DifferentialChangeset $changeset, $ref) {
     $display_file = $changeset->getDisplayFilename();
 
-    if ($this->standaloneViewLink) {
-      $id = $changeset->getID();
-      $vs_id = idx($this->vsMap, $id);
-
-      $ref = $vs_id ? $id.'/'.$vs_id : $id;
-      $detail_uri = new PhutilURI($this->renderURI);
-      $detail_uri->setQueryParams(
-        array(
-          'ref'         => $ref,
-          'whitespace'  => $this->whitespace,
-          'revision_id' => $this->revisionID,
-        ));
-
-      return phutil_render_tag(
-        'a',
-        array(
-          'href' => $detail_uri,
-          'target'  => '_blank',
-        ),
-        phutil_escape_html($display_file));
-    }
-    return phutil_render_tag(
+    return javelin_render_tag(
       'a',
       array(
         'href' => '#'.$changeset->getAnchorName(),
+        'meta' => array(
+          'id' => 'diff-'.$changeset->getAnchorName(),
+          'ref' => $ref,
+        ),
+        'sigil' => 'differential-load',
       ),
       phutil_escape_html($display_file));
   }

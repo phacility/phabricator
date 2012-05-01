@@ -115,6 +115,7 @@ final class DifferentialDiffViewController extends DifferentialController {
 
     $details = id(new DifferentialChangesetListView())
       ->setChangesets($changesets)
+      ->setVisibleChangesets($changesets)
       ->setRenderingReferences($refs)
       ->setStandaloneURI('/differential/changeset/')
       ->setUser($request->getUser());

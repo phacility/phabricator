@@ -238,7 +238,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $comment_view->setVersusDiffID($diff_vs);
 
     $changeset_view = new DifferentialChangesetListView();
-    $changeset_view->setChangesets($visible_changesets);
+    $changeset_view->setChangesets($changesets);
+    $changeset_view->setVisibleChangesets($visible_changesets);
 
     if (!$viewer_is_anonymous) {
       $changeset_view->setInlineCommentControllerURI(
@@ -288,13 +289,13 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $toc_view = new DifferentialDiffTableOfContentsView();
     $toc_view->setChangesets($changesets);
     $toc_view->setVisibleChangesets($visible_changesets);
+    $toc_view->setRenderingReferences($rendering_references);
     $toc_view->setUnitTestData(idx($props, 'arc:unit', array()));
     if ($repository) {
       $toc_view->setRepository($repository);
     }
     $toc_view->setDiff($target);
     $toc_view->setUser($user);
-    $toc_view->setStandaloneViewLink(empty($visible_changesets));
     $toc_view->setVsMap($vs_map);
     $toc_view->setRevisionID($revision->getID());
     $toc_view->setWhitespace($whitespace);

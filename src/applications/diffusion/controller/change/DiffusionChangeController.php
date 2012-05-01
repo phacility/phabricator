@@ -32,12 +32,13 @@ final class DiffusionChangeController extends DiffusionController {
     }
 
     $callsign = $drequest->getRepository()->getCallsign();
+    $changesets = array(
+      0 => $changeset,
+    );
 
     $changeset_view = new DifferentialChangesetListView();
-    $changeset_view->setChangesets(
-      array(
-        0 => $changeset,
-      ));
+    $changeset_view->setChangesets($changesets);
+    $changeset_view->setVisibleChangesets($changesets);
     $changeset_view->setRenderingReferences(
       array(
         0 => $diff_query->getRenderingReference(),

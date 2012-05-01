@@ -232,6 +232,7 @@ final class DiffusionCommitController extends DiffusionController {
 
       $change_list = new DifferentialChangesetListView();
       $change_list->setChangesets($changesets);
+      $change_list->setVisibleChangesets($changesets);
       $change_list->setRenderingReferences($references);
       $change_list->setRenderURI('/diffusion/'.$callsign.'/diff/');
       $change_list->setRepository($repository);
