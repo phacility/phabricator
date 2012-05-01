@@ -131,7 +131,6 @@ extends PhameController {
       $notice = null;
     }
 
-    $page_title = $this->getPhameTitle();
     $page = id(new PhamePostDetailView())
       ->setUser($user)
       ->setRequestURI($request->getRequestURI())
@@ -145,7 +144,7 @@ extends PhameController {
         $page,
       ),
       array(
-        'title'   => $page_title,
+        'title'   => $post->getTitle(),
       ));
   }
 }
