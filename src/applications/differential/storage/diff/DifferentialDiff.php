@@ -85,6 +85,11 @@ final class DifferentialDiff extends DifferentialDAO {
       $this->getArcanistProjectPHID());
   }
 
+  public function getBackingVersionControlSystem() {
+    $repository = $this->loadArcanistProject()->loadRepository();
+    return $repository->getVersionControlSystem();
+  }
+
   public function save() {
 // TODO: sort out transactions
 //    $this->openTransaction();

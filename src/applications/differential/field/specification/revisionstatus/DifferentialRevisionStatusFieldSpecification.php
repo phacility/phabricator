@@ -33,19 +33,24 @@ final class DifferentialRevisionStatusFieldSpecification
 
     $status = $revision->getStatus();
     $info = null;
-    $vcs = $diff->getSourceControlSystem();
+    $local_vcs = $diff->getSourceControlSystem();
+    $backing_vcs = $diff->getBackingVersionControlSystem();
 
     if ($status == ArcanistDifferentialRevisionStatus::ACCEPTED) {
-      switch ($vcs) {
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-          $next_step = '<tt>hg push</tt>';
-          break;
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-          $next_step = '<tt>arc land</tt>';
-          break;
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-          $next_step = '<tt>arc commit</tt>';
-          break;
+      if ($local_vcs == $backing_vcs) {
+        switch ($local_vcs) {
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+            $next_step = '<tt>hg push</tt>';
+            break;
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+            $next_step = '<tt>arc land</tt>';
+            break;
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+            $next_step = '<tt>arc commit</tt>';
+            break;
+        }
+      } else {
+        $next_step = '<tt>arc amend</tt>';
       }
       if ($next_step) {
         $info = ' &middot; Next step: '.$next_step;
@@ -53,7 +58,7 @@ final class DifferentialRevisionStatusFieldSpecification
 
     } else if ($status == ArcanistDifferentialRevisionStatus::CLOSED) {
       $committed = $revision->getDateCommitted();
-      switch ($vcs) {
+      switch ($backing_vcs) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
         case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
           $verb = 'Pushed';
