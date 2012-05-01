@@ -98,6 +98,19 @@ abstract class PhabricatorOAuthProvider {
     return $this->accessToken;
   }
 
+  /**
+   * Often used within setUserData to make sure $data is not completely
+   * junk. More granular validations of data might be necessary depending on
+   * the provider and are generally encouraged.
+   */
+  final protected function validateUserData($data) {
+    if (empty($data) || !is_array($data)) {
+      throw new PhabricatorOAuthProviderException();
+    }
+
+    return true;
+  }
+
   public static function newProvider($which) {
     switch ($which) {
       case self::PROVIDER_FACEBOOK:

@@ -713,6 +713,7 @@ phutil_register_library_map(array(
     'PhabricatorOAuthFailureView' => 'applications/auth/view/oauthfailure',
     'PhabricatorOAuthLoginController' => 'applications/auth/controller/oauth',
     'PhabricatorOAuthProvider' => 'applications/auth/oauth/provider/base',
+    'PhabricatorOAuthProviderException' => 'applications/auth/oauth/provider/exception',
     'PhabricatorOAuthProviderFacebook' => 'applications/auth/oauth/provider/facebook',
     'PhabricatorOAuthProviderGitHub' => 'applications/auth/oauth/provider/github',
     'PhabricatorOAuthProviderGoogle' => 'applications/auth/oauth/provider/google',

@@ -87,7 +87,14 @@ final class PhabricatorOAuthProviderGoogle extends PhabricatorOAuthProvider {
   }
 
   public function setUserData($data) {
-    $xml = new SimpleXMLElement($data);
+    // SimpleXMLElement will throw if $data is unusably malformed, which to
+    // us is just a provider issue
+    try {
+      $xml = new SimpleXMLElement($data);
+    } catch (Exception $e) {
+      throw new PhabricatorOAuthProviderException();
+    }
+
     $id = (string)$xml->id;
     $this->userData = array(
       'id'      => $id,

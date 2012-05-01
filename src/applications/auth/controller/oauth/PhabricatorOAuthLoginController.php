@@ -64,8 +64,12 @@ final class PhabricatorOAuthLoginController
         'access_token' => $this->accessToken,
       ));
 
-    $user_data = @file_get_contents($userinfo_uri);
-    $provider->setUserData($user_data);
+    try {
+      $user_data = @file_get_contents($userinfo_uri);
+      $provider->setUserData($user_data);
+    } catch (PhabricatorOAuthProviderException $e) {
+      return $this->buildErrorResponse(new PhabricatorOAuthFailureView());
+    }
     $provider->setAccessToken($this->accessToken);
 
     $user_id = $provider->retrieveUserID();

@@ -102,11 +102,9 @@ extends PhabricatorOAuthProvider {
   public function setUserData($data) {
     // need to strip the javascript shield from conduit
     $data = substr($data, 8);
-    $data = json_decode($data, true);
-    if (!is_array($data)) {
-      throw new Exception('Invalid user data.');
-    }
-    $this->userData = $data['result'];
+    $data = idx(json_decode($data, true), 'result');
+    $this->validateUserData($data);
+    $this->userData = $data;
     return $this;
   }
 

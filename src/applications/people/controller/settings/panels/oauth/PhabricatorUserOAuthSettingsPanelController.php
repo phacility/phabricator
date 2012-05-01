@@ -226,7 +226,12 @@ final class PhabricatorUserOAuthSettingsPanelController
         $error = 'Unable to retrieve image.';
       }
     } catch (Exception $e) {
-      $error = 'Unable to save image.';
+      if ($e instanceof PhabricatorOAuthProviderException) {
+        $error = sprintf('Unable to retrieve image from %s',
+                         $provider->getProviderName());
+      } else {
+        $error = 'Unable to save image.';
+      }
     }
     $notice = new AphrontErrorView();
     if ($error) {
