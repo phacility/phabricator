@@ -26,6 +26,7 @@
 final class PhabricatorScopedEnv {
 
   private $key;
+  private $isPopped = false;
 
 /* -(  Overriding Environment Configuration  )------------------------------- */
 
@@ -66,7 +67,10 @@ final class PhabricatorScopedEnv {
    * @task internal
    */
   public function __destruct() {
-    PhabricatorEnv::popEnvironment($this->key);
+    if (!$this->isPopped) {
+      PhabricatorEnv::popEnvironment($this->key);
+      $this->isPopped = true;
+    }
   }
 
 }

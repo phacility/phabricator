@@ -62,9 +62,15 @@ final class PhabricatorEnvTestCase extends PhabricatorTestCase {
       $inner = PhabricatorEnv::beginScopedEnv();
         $inner->overrideEnvConfig('test.value', 2);
         $this->assertEqual(2, PhabricatorEnv::getEnvConfig('test.value'));
+      if (phutil_is_hiphop_runtime()) {
+        $inner->__destruct();
+      }
       unset($inner);
 
       $this->assertEqual(1, PhabricatorEnv::getEnvConfig('test.value'));
+    if (phutil_is_hiphop_runtime()) {
+      $outer->__destruct();
+    }
     unset($outer);
   }
 
@@ -75,6 +81,9 @@ final class PhabricatorEnvTestCase extends PhabricatorTestCase {
 
     $caught = null;
     try {
+      if (phutil_is_hiphop_runtime()) {
+        $middle->__destruct();
+      }
       unset($middle);
     } catch (Exception $ex) {
       $caught = $ex;
@@ -88,6 +97,9 @@ final class PhabricatorEnvTestCase extends PhabricatorTestCase {
 
     $caught = null;
     try {
+      if (phutil_is_hiphop_runtime()) {
+        $inner->__destruct();
+      }
       unset($inner);
     } catch (Exception $ex) {
       $caught = $ex;
@@ -102,6 +114,9 @@ final class PhabricatorEnvTestCase extends PhabricatorTestCase {
     // Although we popped the other two out-of-order, we still expect to end
     // up in the right state after handling the exceptions, so this should
     // execute without issues.
+    if (phutil_is_hiphop_runtime()) {
+      $outer->__destruct();
+    }
     unset($outer);
   }
 
