@@ -52,15 +52,18 @@ final class PhabricatorSearchDifferentialIndexer
         time());
     }
 
-    $comments = id(new DifferentialInlineComment())->loadAllWhere(
-      'revisionID = %d AND commentID is not null',
+    $comments = id(new DifferentialComment())->loadAllWhere(
+      'revisionID = %d',
+      $rev->getID());
+
+    $inlines = id(new DifferentialInlineComment())->loadAllWhere(
+      'revisionID = %d AND commentID IS NOT NULL',
       $rev->getID());
 
     $touches = array();
 
-    foreach ($comments as $comment) {
+    foreach (array_merge($comments, $inlines) as $comment) {
       if (strlen($comment->getContent())) {
-        // TODO: we should also index inline comments.
         $doc->addField(
           PhabricatorSearchField::FIELD_COMMENT,
           $comment->getContent());

@@ -8,6 +8,7 @@
 
 phutil_require_module('arcanist', 'differential/constants/revisionstatus');
 
+phutil_require_module('phabricator', 'applications/differential/storage/comment');
 phutil_require_module('phabricator', 'applications/differential/storage/inlinecomment');
 phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
