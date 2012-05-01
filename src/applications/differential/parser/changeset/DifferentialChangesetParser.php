@@ -486,10 +486,6 @@ final class DifferentialChangesetParser {
       }
     }
 
-    // NOTE: Micro-optimize a couple of ipull()s here since it gives us a
-    // 10% performance improvement for certain types of large diffs like
-    // Phriction changes.
-
     $old_corpus = array();
     foreach ($this->old as $o) {
       if ($o['type'] != '\\') {
@@ -505,6 +501,36 @@ final class DifferentialChangesetParser {
       }
     }
     $new_corpus_block = implode("\n", $new_corpus);
+
+    $generated_guess = (strpos($new_corpus_block, '@'.'generated') !== false);
+
+    if (!$generated_guess) {
+      $config_key = 'differential.generated-paths';
+      $generated_path_regexps = PhabricatorEnv::getEnvConfig($config_key);
+      foreach ($generated_path_regexps as $regexp) {
+        if (preg_match($regexp, $this->changeset->getFilename())) {
+          $generated_guess = true;
+          break;
+        }
+      }
+    }
+
+    $event = new PhabricatorEvent(
+      PhabricatorEventType::TYPE_DIFFERENTIAL_WILLMARKGENERATED,
+      array(
+        'corpus' => $new_corpus_block,
+        'is_generated' => $generated_guess
+      )
+    );
+    PhutilEventEngine::dispatchEvent($event);
+
+    $generated = $event->getValue('is_generated');
+    $this->specialAttributes[self::ATTR_GENERATED] = $generated;
+
+    if ($this->isTopLevel && !$this->comments &&
+        ($this->isGenerated() || $this->isUnchanged() || $this->isDeleted())) {
+      return;
+    }
 
     $old_future = $this->getHighlightFuture($old_corpus_block);
     $new_future = $this->getHighlightFuture($new_corpus_block);
@@ -553,32 +579,6 @@ final class DifferentialChangesetParser {
       $this->newRender,
       ipull($this->intra, 1),
       $new_corpus);
-
-    $generated_guess = (strpos($new_corpus_block, '@'.'generated') !== false);
-
-    if (!$generated_guess) {
-      $config_key = 'differential.generated-paths';
-      $generated_path_regexps = PhabricatorEnv::getEnvConfig($config_key);
-      foreach ($generated_path_regexps as $regexp) {
-        if (preg_match($regexp, $this->changeset->getFilename())) {
-          $generated_guess = true;
-          break;
-        }
-      }
-    }
-
-    $event = new PhabricatorEvent(
-      PhabricatorEventType::TYPE_DIFFERENTIAL_WILLMARKGENERATED,
-      array(
-        'corpus' => $new_corpus_block,
-        'is_generated' => $generated_guess
-      )
-    );
-    PhutilEventEngine::dispatchEvent($event);
-
-    $generated = $event->getValue('is_generated');
-
-    $this->specialAttributes[self::ATTR_GENERATED] = $generated;
   }
 
   public function loadCache() {
@@ -615,6 +615,11 @@ final class DifferentialChangesetParser {
     }
 
     if ($data['cacheVersion'] !== self::CACHE_VERSION) {
+      return false;
+    }
+
+    // Someone displays contents of a partially cached shielded file.
+    if (!isset($data['newRender']) && (!$this->isTopLevel || $this->comments)) {
       return false;
     }
 
@@ -862,10 +867,48 @@ final class DifferentialChangesetParser {
     // requests.
     $this->isTopLevel = (($range_start === null) && ($range_len === null));
 
-
     $this->highlightEngine = PhabricatorSyntaxHighlighter::newEngine();
 
-    $this->tryCacheStuff();
+    $shield = null;
+    if ($this->isTopLevel && !$this->comments &&
+        !($this->isGenerated() || $this->isUnchanged() || $this->isDeleted()) &&
+        $this->changeset->getAffectedLineCount() > 2500) {
+      $lines = number_format($this->changeset->getAffectedLineCount());
+      $shield = $this->renderShield(
+        "This file has a very large number of changes ({$lines} lines).",
+        true);
+    } else {
+
+      $this->tryCacheStuff();
+
+      if ($this->isTopLevel && !$this->comments) {
+        if ($this->isGenerated()) {
+          $shield = $this->renderShield(
+            "This file contains generated code, which does not normally need ".
+            "to be reviewed.",
+            true);
+        } else if ($this->isUnchanged()) {
+          if ($this->isWhitespaceOnly()) {
+            $shield = $this->renderShield(
+              "This file was changed only by adding or removing trailing ".
+              "whitespace.",
+              false);
+          } else {
+            $shield = $this->renderShield(
+              "The contents of this file were not changed.",
+              false);
+          }
+        } else if ($this->isDeleted()) {
+          $shield = $this->renderShield(
+            "This file was completely deleted.",
+            true);
+        }
+      }
+    }
+
+    if ($shield) {
+      return $this->renderChangesetTable($this->changeset, $shield);
+    }
 
     $feedback_mask = array();
 
@@ -1002,40 +1045,6 @@ final class DifferentialChangesetParser {
       case DifferentialChangeType::FILE_BINARY:
         $output = $this->renderChangesetTable($this->changeset, null);
         return $output;
-    }
-
-    $shield = null;
-    if ($this->isTopLevel && !$this->comments) {
-      if ($this->isGenerated()) {
-        $shield = $this->renderShield(
-          "This file contains generated code, which does not normally need ".
-          "to be reviewed.",
-          true);
-      } else if ($this->isUnchanged()) {
-        if ($this->isWhitespaceOnly()) {
-          $shield = $this->renderShield(
-            "This file was changed only by adding or removing trailing ".
-            "whitespace.",
-            false);
-        } else {
-          $shield = $this->renderShield(
-            "The contents of this file were not changed.",
-            false);
-        }
-      } else if ($this->isDeleted()) {
-        $shield = $this->renderShield(
-          "This file was completely deleted.",
-          true);
-      } else if ($this->changeset->getAffectedLineCount() > 2500) {
-        $lines = number_format($this->changeset->getAffectedLineCount());
-        $shield = $this->renderShield(
-          "This file has a very large number of changes ({$lines} lines).",
-          true);
-      }
-    }
-
-    if ($shield) {
-      return $this->renderChangesetTable($this->changeset, $shield);
     }
 
     $old_comments = array();
