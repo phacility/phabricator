@@ -72,7 +72,7 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
   /**
    * @task config
    */
-  public static function popStorageNamespace($namespace) {
+  public static function popStorageNamespace() {
     array_pop(self::$namespaceStack);
   }
 

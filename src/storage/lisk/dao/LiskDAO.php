@@ -190,7 +190,8 @@ abstract class LiskDAO {
 
   private $__dirtyFields            = array();
   private $__missingFields          = array();
-  private static $processIsolationLevel = 0;
+  private static $processIsolationLevel       = 0;
+  private static $transactionIsolationLevel   = 0;
   private static $__checkedClasses = array();
 
   private $__ephemeral = false;
@@ -809,12 +810,22 @@ abstract class LiskDAO {
       return $connection;
     }
 
+    if (self::shouldIsolateAllLiskEffectsToTransactions()) {
+      // If we're doing fixture transaction isolation, force the mode to 'w'
+      // so we always get the same connection for reads and writes, and thus
+      // can see the writes inside the transaction.
+      $mode = 'w';
+    }
+
     // TODO There is currently no protection on 'r' queries against writing
     // or on 'w' queries against reading
 
     $connection = $this->getEstablishedConnection($mode);
     if (!$connection) {
       $connection = $this->establishLiveConnection($mode);
+      if (self::shouldIsolateAllLiskEffectsToTransactions()) {
+        $connection->openTransaction();
+      }
       $this->setEstablishedConnection($mode, $connection);
     }
 
@@ -1356,6 +1367,44 @@ abstract class LiskDAO {
     return new AphrontIsolatedDatabaseConnection($config);
   }
 
+  /**
+   * @task isolate
+   */
+  public static function beginIsolateAllLiskEffectsToTransactions() {
+    if (self::$transactionIsolationLevel === 0) {
+      self::closeAllConnections();
+    }
+    self::$transactionIsolationLevel++;
+  }
+
+  /**
+   * @task isolate
+   */
+  public static function endIsolateAllLiskEffectsToTransactions() {
+    self::$transactionIsolationLevel--;
+    if (self::$transactionIsolationLevel < 0) {
+      throw new Exception(
+        "Lisk transaction isolation level was reduced below 0.");
+    } else if (self::$transactionIsolationLevel == 0) {
+      foreach (self::$connections as $key => $conn) {
+        if ($conn) {
+          $conn->killTransaction();
+        }
+      }
+      self::closeAllConnections();
+    }
+  }
+
+  /**
+   * @task isolate
+   */
+  public static function shouldIsolateAllLiskEffectsToTransactions() {
+    return (bool)self::$transactionIsolationLevel;
+  }
+
+  public static function closeAllConnections() {
+    self::$connections = array();
+  }
 
 /* -(  Utilities  )---------------------------------------------------------- */
 

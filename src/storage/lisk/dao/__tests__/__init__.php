@@ -6,11 +6,15 @@
 
 
 
+phutil_require_module('phabricator', 'applications/people/storage/user');
 phutil_require_module('phabricator', 'applications/phid/storage/phid');
 phutil_require_module('phabricator', 'infrastructure/testing/testcase');
 phutil_require_module('phabricator', 'storage/lisk/dao');
 
+phutil_require_module('phutil', 'utils');
 
+
+phutil_require_source('LiskFixtureTestCase.php');
 phutil_require_source('LiskIsolationTestCase.php');
 phutil_require_source('LiskIsolationTestDAO.php');
 phutil_require_source('LiskIsolationTestDAOException.php');
