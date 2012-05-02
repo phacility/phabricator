@@ -6,6 +6,8 @@
 
 
 
+phutil_require_module('phabricator', 'aphront/response/redirect');
+phutil_require_module('phabricator', 'aphront/writeguard');
 phutil_require_module('phabricator', 'applications/audit/constants/action');
 phutil_require_module('phabricator', 'applications/audit/constants/commitstatus');
 phutil_require_module('phabricator', 'applications/audit/constants/status');
@@ -25,11 +27,13 @@ phutil_require_module('phabricator', 'applications/diffusion/query/parents/base'
 phutil_require_module('phabricator', 'applications/diffusion/query/path');
 phutil_require_module('phabricator', 'applications/diffusion/query/pathchange/base');
 phutil_require_module('phabricator', 'applications/diffusion/query/pathid/base');
+phutil_require_module('phabricator', 'applications/diffusion/query/rawdiff/base');
 phutil_require_module('phabricator', 'applications/diffusion/request/base');
 phutil_require_module('phabricator', 'applications/diffusion/view/commentlist');
 phutil_require_module('phabricator', 'applications/diffusion/view/commitchangetable');
 phutil_require_module('phabricator', 'applications/diffusion/view/historytable');
 phutil_require_module('phabricator', 'applications/draft/storage/draft');
+phutil_require_module('phabricator', 'applications/files/storage/file');
 phutil_require_module('phabricator', 'applications/flag/constants/color');
 phutil_require_module('phabricator', 'applications/flag/query/flag');
 phutil_require_module('phabricator', 'applications/markup/engine');
@@ -41,6 +45,7 @@ phutil_require_module('phabricator', 'infrastructure/edges/constants/config');
 phutil_require_module('phabricator', 'infrastructure/edges/query/edge');
 phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'infrastructure/javelin/api');
+phutil_require_module('phabricator', 'infrastructure/util/hash');
 phutil_require_module('phabricator', 'storage/queryfx');
 phutil_require_module('phabricator', 'view/form/base');
 phutil_require_module('phabricator', 'view/form/control/select');

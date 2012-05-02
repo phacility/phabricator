@@ -54,6 +54,10 @@
   background-image: url(/rsrc/image/icon/tango/upload.png);
 }
 
+.aphront-headsup-action-list .action-download {
+  background-image: url(/rsrc/image/icon/tango/go-down.png);
+}
+
 .aphront-headsup-action-list .transcripts-metamta {
   background-image: url(/rsrc/image/icon/tango/log.png);
 }

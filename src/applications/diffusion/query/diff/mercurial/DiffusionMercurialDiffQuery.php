@@ -29,13 +29,8 @@ final class DiffusionMercurialDiffQuery extends DiffusionDiffQuery {
     // TODO: This side effect is kind of skethcy.
     $drequest->setCommit($effective_commit);
 
-    $path = $drequest->getPath();
-
-    list($raw_diff) = $repository->execxLocalCommand(
-      'diff -U %d --git --change %s -- %s',
-      65535,
-      $effective_commit,
-      $path);
+    $query = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest);
+    $raw_diff = $query->loadRawDiff();
 
     $parser = new ArcanistDiffParser();
 

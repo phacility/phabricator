@@ -645,6 +645,7 @@ return array(
     'image/png'   => 'image/png',
     'image/gif'   => 'image/gif',
     'text/plain'  => 'text/plain; charset=utf-8',
+    'text/x-diff' => 'text/plain; charset=utf-8',
 
     // ".ico" favicon files, which have mime type diversity. See:
     // http://en.wikipedia.org/wiki/ICO_(file_format)#MIME_type

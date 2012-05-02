@@ -34,6 +34,10 @@ final class DiffusionCommitController extends DiffusionController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    if ($request->getStr('diff')) {
+      return $this->buildRawDiffResponse($drequest);
+    }
+
     $callsign = $drequest->getRepository()->getCallsign();
 
     $content = array();
@@ -676,7 +680,8 @@ final class DiffusionCommitController extends DiffusionController {
   private function renderHeadsupActionList(
     PhabricatorRepositoryCommit $commit) {
 
-    $user = $this->getRequest()->getUser();
+    $request = $this->getRequest();
+    $user = $request->getUser();
 
     $actions = array();
 
@@ -723,6 +728,12 @@ final class DiffusionCommitController extends DiffusionController {
     $action->setName('Herald Transcripts');
     $action->setURI('/herald/transcript/?phid='.$commit->getPHID());
     $action->setClass('transcripts-herald');
+    $actions[] = $action;
+
+    $action = new AphrontHeadsupActionView();
+    $action->setName('Download Raw Diff');
+    $action->setURI($request->getRequestURI()->alter('diff', true));
+    $action->setClass('action-download');
     $actions[] = $action;
 
     $action_list = new AphrontHeadsupActionListView();
@@ -793,6 +804,31 @@ final class DiffusionCommitController extends DiffusionController {
       $request->getCommit());
 
     return trim($stdout, "() \n");
+  }
+
+  private function buildRawDiffResponse(DiffusionRequest $drequest) {
+    $raw_query = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest);
+    $raw_diff  = $raw_query->loadRawDiff();
+
+    $hash = PhabricatorHash::digest($raw_diff);
+
+    $file = id(new PhabricatorFile())->loadOneWhere(
+      'contentHash = %s LIMIT 1',
+      $hash);
+    if (!$file) {
+      // We're just caching the data; this is always safe.
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+
+      $file = PhabricatorFile::newFromFileData(
+        $raw_diff,
+        array(
+          'name' => $drequest->getCommit().'.diff',
+        ));
+
+      unset($unguarded);
+    }
+
+    return id(new AphrontRedirectResponse())->setURI($file->getBestURI());
   }
 
 }
