@@ -71,44 +71,31 @@ final class PhabricatorOAuthProviderGoogle extends PhabricatorOAuthProvider {
   }
 
   public function getUserInfoURI() {
-    return 'https://www.google.com/m8/feeds/contacts/default/full';
+    return 'https://www.googleapis.com/oauth2/v1/userinfo';
   }
 
   public function getMinimumScope() {
-    // This is the Google contacts API, which is apparently the best way to get
-    // the user ID / login / email since Google doesn't apparently have a
-    // more generic "user.info" sort of call (or, if it does, I couldn't find
-    // it). This is sort of terrifying since it lets Phabricator read your whole
-    // address book and possibly your physical address and such, so it would
-    // be really nice to find a way to restrict this scope to something less
-    // crazily permissive. But users will click anything and the dialog isn't
-    // very scary, so whatever.
-    return 'https://www.google.com/m8/feeds';
+    $scopes = array(
+      'https://www.googleapis.com/auth/userinfo.email',
+      'https://www.googleapis.com/auth/userinfo.profile',
+    );
+
+    return implode(' ', $scopes);
   }
 
   public function setUserData($data) {
-    // SimpleXMLElement will throw if $data is unusably malformed, which to
-    // us is just a provider issue
-    try {
-      $xml = new SimpleXMLElement($data);
-    } catch (Exception $e) {
-      throw new PhabricatorOAuthProviderException();
-    }
+    $data = json_decode($data, true);
+    $this->validateUserData($data);
 
-    $id = (string)$xml->id;
-    $this->userData = array(
-      'id'      => $id,
-      'email'   => (string)$xml->author[0]->email,
-      'real'    => (string)$xml->author[0]->name,
+    // Guess account name from email address, this is just a hint anyway.
+    $data['account'] = head(explode('@', $data['email']));
 
-      // Guess account name from email address, this is just a hint anyway.
-      'account' => head(explode('@', $id)),
-    );
+    $this->userData = $data;
     return $this;
   }
 
   public function retrieveUserID() {
-    return $this->userData['id'];
+    return $this->userData['email'];
   }
 
   public function retrieveUserEmail() {
@@ -130,7 +117,7 @@ final class PhabricatorOAuthProviderGoogle extends PhabricatorOAuthProvider {
   }
 
   public function retrieveUserRealName() {
-    return $this->userData['real'];
+    return $this->userData['name'];
   }
 
   public function getExtraAuthParameters() {

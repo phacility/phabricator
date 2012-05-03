@@ -7,7 +7,6 @@
 
 
 phutil_require_module('phabricator', 'applications/auth/oauth/provider/base');
-phutil_require_module('phabricator', 'applications/auth/oauth/provider/exception');
 phutil_require_module('phabricator', 'infrastructure/env');
 
 phutil_require_module('phutil', 'utils');
