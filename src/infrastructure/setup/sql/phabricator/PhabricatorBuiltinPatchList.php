@@ -855,6 +855,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('holidays.sql'),
       ),
+      'userstatus.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('userstatus.sql'),
+      ),
     );
   }
 
