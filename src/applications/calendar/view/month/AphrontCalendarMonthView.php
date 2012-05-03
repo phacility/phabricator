@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,16 @@ final class AphrontCalendarMonthView extends AphrontView {
   private $user;
   private $month;
   private $year;
+  private $holidays = array();
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
+    return $this;
+  }
+
+  public function setHolidays(array $holidays) {
+    assert_instances_of($holidays, 'PhabricatorCalendarHoliday');
+    $this->holidays = mpull($holidays, null, 'getDay');
     return $this;
   }
 
@@ -51,9 +58,16 @@ final class AphrontCalendarMonthView extends AphrontView {
     }
 
     foreach ($days as $day) {
+      $holiday = idx($this->holidays, $day->format('Y-m-d'));
+      $class = 'aphront-calendar-day-of-month';
+      $weekday = $day->format('w');
+      if ($holiday || $weekday == 0 || $weekday == 6) {
+        $class .= ' aphront-calendar-not-work-day';
+      }
       $markup[] =
-        '<div class="aphront-calendar-day-of-month">'.
+        '<div class="'.$class.'">'.
           $day->format('j').
+          ($holiday ? '<br />'.phutil_escape_html($holiday->getName()) : '').
         '</div>';
     }
 

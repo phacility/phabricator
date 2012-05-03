@@ -39,6 +39,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'name'  => 'audit',
         'after' => array( /* First Patch */ ),
       ),
+      'db.calendar' => array(
+        'type'  => 'db',
+        'name'  => 'calendar',
+      ),
       'db.chatlog' => array(
         'type'  => 'db',
         'name'  => 'chatlog',
@@ -846,6 +850,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('137.auditmetadata.sql'),
         'legacy'  => 137,
+      ),
+      'holidays.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('holidays.sql'),
       ),
     );
   }

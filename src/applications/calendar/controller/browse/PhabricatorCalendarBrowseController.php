@@ -22,11 +22,18 @@ final class PhabricatorCalendarBrowseController
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
+    $year = idate('Y');
+
+    $holidays = id(new PhabricatorCalendarHoliday())->loadAllWhere(
+      'day BETWEEN %s AND %s',
+      "{$year}-01-01",
+      "{$year}-12-31");
 
     $months = array();
     for ($ii = 1; $ii <= 12; $ii++) {
-      $month_view = new AphrontCalendarMonthView($ii, 2011);
+      $month_view = new AphrontCalendarMonthView($ii, $year);
       $month_view->setUser($user);
+      $month_view->setHolidays($holidays);
       $months[] = '<div style="padding: 2em;">';
       $months[] = $month_view;
       $months[] = '</div>';

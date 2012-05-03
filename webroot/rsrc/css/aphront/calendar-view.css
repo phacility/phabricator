@@ -39,3 +39,7 @@ table.aphront-calendar-view td div {
   text-align: right;
   color: #666666;
 }
+
+.aphront-calendar-not-work-day {
+  background-color: #fdfae7;
+}

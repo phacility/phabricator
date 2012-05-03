@@ -7,7 +7,10 @@
 
 
 phutil_require_module('phabricator', 'applications/calendar/controller/base');
+phutil_require_module('phabricator', 'applications/calendar/storage/holiday');
 phutil_require_module('phabricator', 'applications/calendar/view/month');
+
+phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('PhabricatorCalendarBrowseController.php');
