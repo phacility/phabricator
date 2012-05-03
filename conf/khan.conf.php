@@ -19,7 +19,7 @@ return array(
   'metamta.domain'          => 'phabricator.khanacademy.org',
 
   // This apparently avoids some cookie-based attacks.
-  'security.alternate-file-domain'  => 'phabricator-files.khanacademy.org',
+  'security.alternate-file-domain'  => 'http://phabricator-files.khanacademy.org/',
 
   // Timezone for khan academy.
   'phabricator.timezone'    => 'America/Los_Angeles',
