@@ -143,6 +143,11 @@
   background: #e6f3ff;
 }
 
+.phabricator-remarkup-mention-disabled {
+  font-weight: bold;
+  background: #dddddd;
+}
+
 .aphront-panel-preview .phabricator-remarkup-mention-unknown {
   font-weight: bold;
   background: #ffaaaa;

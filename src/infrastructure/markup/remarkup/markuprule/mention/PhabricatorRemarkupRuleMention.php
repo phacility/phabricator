@@ -82,7 +82,9 @@ final class PhabricatorRemarkupRuleMention
     $user_table = new PhabricatorUser();
     $real_user_names = queryfx_all(
       $user_table->establishConnection('r'),
-      'SELECT username, phid, realName FROM %T WHERE username IN (%Ls)',
+      'SELECT username, phid, realName, isDisabled
+        FROM %T
+        WHERE username IN (%Ls)',
       $user_table->getTableName(),
       $usernames);
 
@@ -99,9 +101,13 @@ final class PhabricatorRemarkupRuleMention
 
     foreach ($metadata as $username => $tokens) {
       $exists = isset($actual_users[$username]);
-      $class = $exists
-        ? 'phabricator-remarkup-mention-exists'
-        : 'phabricator-remarkup-mention-unknown';
+      if (!$exists) {
+        $class = 'phabricator-remarkup-mention-unknown';
+      } else if ($actual_users[$username]['isDisabled']) {
+        $class = 'phabricator-remarkup-mention-disabled';
+      } else {
+        $class = 'phabricator-remarkup-mention-exists';
+      }
 
       if ($exists) {
         $tag = phutil_render_tag(
