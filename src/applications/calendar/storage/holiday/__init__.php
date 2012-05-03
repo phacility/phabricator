@@ -8,5 +8,7 @@
 
 phutil_require_module('phabricator', 'applications/calendar/storage/base');
 
+phutil_require_module('phutil', 'utils');
+
 
 phutil_require_source('PhabricatorCalendarHoliday.php');
