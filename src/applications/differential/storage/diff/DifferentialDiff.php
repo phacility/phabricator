@@ -91,6 +91,9 @@ final class DifferentialDiff extends DifferentialDAO {
       return null;
     }
     $repository = $arcanist_project->loadRepository();
+    if (!$repository) {
+      return null;
+    }
     return $repository->getVersionControlSystem();
   }
 

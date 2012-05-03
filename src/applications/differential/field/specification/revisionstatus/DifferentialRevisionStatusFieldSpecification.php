@@ -35,6 +35,9 @@ final class DifferentialRevisionStatusFieldSpecification
     $info = null;
     $local_vcs = $diff->getSourceControlSystem();
     $backing_vcs = $diff->getBackingVersionControlSystem();
+    if (!$backing_vcs) {
+      $backing_vcs = $local_vcs;
+    }
 
     if ($status == ArcanistDifferentialRevisionStatus::ACCEPTED) {
       if ($local_vcs == $backing_vcs) {
