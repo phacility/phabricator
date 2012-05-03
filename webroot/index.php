@@ -347,13 +347,15 @@ function phabricator_shutdown() {
 }
 
 function phabricator_fatal($msg) {
-  $log = PhabricatorAccessLog::getLog();
-  if ($log) {
-    $log->setData(
-      array(
-        'c' => 500,
-      ));
-    $log->write();
+  if (class_exists('PhabricatorAccessLog', false)) {
+    $log = PhabricatorAccessLog::getLog();
+    if ($log) {
+      $log->setData(
+        array(
+          'c' => 500,
+        ));
+      $log->write();
+    }
   }
 
   header(
