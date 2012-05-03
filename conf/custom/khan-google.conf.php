@@ -16,4 +16,4 @@ return array(
   'google.application-id' => 'CLIENT ID GOES HERE',
   'google.application-secret' => 'CLIENT SECRET GOES HERE',
 
-)
+);

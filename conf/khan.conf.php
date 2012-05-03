@@ -31,4 +31,4 @@ return array(
   'google.registration-enabled' => true,
 
 ) + phabricator_read_config_file('production')
-  + phabricator_read_config_file('custom/khan-google.conf.php')
+  + phabricator_read_config_file('custom/khan-google.conf.php');
