@@ -8,7 +8,10 @@ return array(
   //   logo='http://phabricator.khanacademy.org/favicon.ico'
   //   [click next]
   //   your site='[https://]phabriactor.khanacademy.org'
+
   // This will lead to a page with a client id, and client secret.
+  // You should add that information here, and also update secrets.py
+  // with it.
 
   'google.application-id' => 'CLIENT ID GOES HERE',
   'google.application-secret' => 'CLIENT SECRET GOES HERE',
