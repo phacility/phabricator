@@ -171,6 +171,36 @@ For nginx, use a configuration like this:
     }
   }
 
+= Webserver: Configuring lighttpd =
+
+For lighttpd, add a section like this to your lighttpd.conf:
+
+  $HTTP["host"] =~ "phabricator(\.example\.com)?" {
+      server.document-root = "/path/to/phabricator/webroot"
+      url.rewrite-once = (
+          "^(/rsrc/.*)$" => "$1",
+          "^(/favicon.ico)$" => "$1",
+          # This simulates QSA ("query string append") mode in apache
+          "^(/[^?]*)\?(.*)" => "/index.php?__path__=$1&$2",
+          "^(/.*)$" => "/index.php?__path__=$1",
+      )
+      setenv.add-environment = (
+         "PHABRICATOR_ENV" => "custom/myconfig",
+      )
+  }
+
+You should also ensure the following modules are listed in your
+server.modules list:
+
+  mod_fastcgi
+  mod_rewrite
+  mod_setenv
+
+Finally, you should run the following commands to enable php support:
+
+  $ sudo apt-get install php5-cgi  # for ubuntu; other distros should be similar
+  $ sudo lighty-enable-mod fastcgi-php
+
 = Setup =
 
 Now, restart your webserver and navigate to whichever subdomain you set up. You
