@@ -246,7 +246,8 @@ final class PhabricatorFileListController extends PhabricatorFileController {
         phutil_render_tag(
           'a',
           array(
-            'href' => $file->getBestURI(),
+            // Don't use $file->getBestURI() to improve discoverability of /F.
+            'href' => '/F'.$file->getID(),
           ),
           ($name != '' ? phutil_escape_html($name) : '<em>no name</em>')),
         phutil_escape_html(number_format($file->getByteSize()).' bytes'),

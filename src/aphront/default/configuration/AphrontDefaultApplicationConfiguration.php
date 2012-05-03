@@ -39,6 +39,7 @@ class AphrontDefaultApplicationConfiguration
         '(?:(?P<subfilter>[^/]+)/)?' =>
           'PhabricatorDirectoryMainController',
       ),
+      '/F(?P<id>\d+)' => 'PhabricatorFileShortcutController',
       '/file/' => array(
         '' => 'PhabricatorFileListController',
         'filter/(?P<filter>\w+)/' => 'PhabricatorFileListController',
