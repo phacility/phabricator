@@ -538,7 +538,7 @@ celerity_register_resource_map(array(
   ),
   'differential-changeset-view-css' =>
   array(
-    'uri' => '/res/a352da17/rsrc/css/application/differential/changeset-view.css',
+    'uri' => '/res/4ce438cd/rsrc/css/application/differential/changeset-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -2510,7 +2510,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/0c96375e/core.pkg.js',
       'type' => 'js',
     ),
-    '59d298c3' =>
+    '2debe0e0' =>
     array(
       'name' => 'differential.pkg.css',
       'symbols' =>
@@ -2529,7 +2529,7 @@ celerity_register_resource_map(array(
         11 => 'differential-local-commits-view-css',
         12 => 'inline-comment-summary-css',
       ),
-      'uri' => '/res/pkg/59d298c3/differential.pkg.css',
+      'uri' => '/res/pkg/2debe0e0/differential.pkg.css',
       'type' => 'css',
     ),
     '5b7b36d7' =>
@@ -2652,7 +2652,7 @@ celerity_register_resource_map(array(
     'aphront-dialog-view-css' => '2b054c5c',
     'aphront-error-view-css' => '2b054c5c',
     'aphront-form-view-css' => '2b054c5c',
-    'aphront-headsup-action-list-view-css' => '59d298c3',
+    'aphront-headsup-action-list-view-css' => '2debe0e0',
     'aphront-headsup-view-css' => '2b054c5c',
     'aphront-list-filter-view-css' => '2b054c5c',
     'aphront-pager-view-css' => '2b054c5c',
@@ -2662,19 +2662,19 @@ celerity_register_resource_map(array(
     'aphront-tokenizer-control-css' => '2b054c5c',
     'aphront-tooltip-css' => '2b054c5c',
     'aphront-typeahead-control-css' => '2b054c5c',
-    'differential-changeset-view-css' => '59d298c3',
-    'differential-core-view-css' => '59d298c3',
+    'differential-changeset-view-css' => '2debe0e0',
+    'differential-core-view-css' => '2debe0e0',
     'differential-inline-comment-editor' => '5b7b36d7',
-    'differential-local-commits-view-css' => '59d298c3',
-    'differential-results-table-css' => '59d298c3',
-    'differential-revision-add-comment-css' => '59d298c3',
-    'differential-revision-comment-css' => '59d298c3',
-    'differential-revision-comment-list-css' => '59d298c3',
-    'differential-revision-history-css' => '59d298c3',
-    'differential-table-of-contents-css' => '59d298c3',
+    'differential-local-commits-view-css' => '2debe0e0',
+    'differential-results-table-css' => '2debe0e0',
+    'differential-revision-add-comment-css' => '2debe0e0',
+    'differential-revision-comment-css' => '2debe0e0',
+    'differential-revision-comment-list-css' => '2debe0e0',
+    'differential-revision-history-css' => '2debe0e0',
+    'differential-table-of-contents-css' => '2debe0e0',
     'diffusion-commit-view-css' => 'c8ce2d88',
     'diffusion-icons-css' => 'c8ce2d88',
-    'inline-comment-summary-css' => '59d298c3',
+    'inline-comment-summary-css' => '2debe0e0',
     'javelin-behavior' => '8a5de8a3',
     'javelin-behavior-aphront-basic-tokenizer' => '97f65640',
     'javelin-behavior-aphront-drag-and-drop' => '5b7b36d7',
@@ -2728,7 +2728,7 @@ celerity_register_resource_map(array(
     'maniphest-task-summary-css' => '7839ae2d',
     'maniphest-transaction-detail-css' => '7839ae2d',
     'phabricator-app-buttons-css' => '2b054c5c',
-    'phabricator-content-source-view-css' => '59d298c3',
+    'phabricator-content-source-view-css' => '2debe0e0',
     'phabricator-core-buttons-css' => '2b054c5c',
     'phabricator-core-css' => '2b054c5c',
     'phabricator-directory-css' => '2b054c5c',
@@ -2739,7 +2739,7 @@ celerity_register_resource_map(array(
     'phabricator-keyboard-shortcut' => '0c96375e',
     'phabricator-keyboard-shortcut-manager' => '0c96375e',
     'phabricator-menu-item' => '0c96375e',
-    'phabricator-object-selector-css' => '59d298c3',
+    'phabricator-object-selector-css' => '2debe0e0',
     'phabricator-paste-file-upload' => '0c96375e',
     'phabricator-prefab' => '0c96375e',
     'phabricator-project-tag-css' => '7839ae2d',

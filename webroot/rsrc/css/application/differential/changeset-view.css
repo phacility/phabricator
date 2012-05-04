@@ -118,15 +118,18 @@ td.cov-X {
   background: #aa00aa;
 }
 
-.differential-diff td.source-cov-C {
+.differential-diff td.source-cov-C,
+.differential-diff td.source-cov-C span.bright {
   background: #cceeff;
 }
 
-.differential-diff td.source-cov-U {
+.differential-diff td.source-cov-U,
+.differential-diff td.source-cov-U span.bright {
   background: #ffbb99;
 }
 
-.differential-diff td.source-cov-N {
+.differential-diff td.source-cov-N,
+.differential-diff td.source-cov-N span.bright {
   background: #f3f6ff;
 }
 
