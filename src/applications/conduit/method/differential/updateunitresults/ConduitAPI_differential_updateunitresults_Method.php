@@ -33,7 +33,7 @@ final class ConduitAPI_differential_updateunitresults_Method
       'name'      => 'required string',
       'result'    => 'required string',
       'message'   => 'required string',
-      'coverage'  => 'map<string, string>',
+      'coverage'  => 'optional map<string, string>',
     );
   }
 
