@@ -85,4 +85,6 @@ application (##/file/##) and uploading files.
 
 Continue by:
 
+  - configuring file size upload limits with
+    @{article:Configuring File Upload Limits}; or
   - returning to the @{article:Configuration Guide}.

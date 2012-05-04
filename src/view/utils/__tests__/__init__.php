@@ -12,3 +12,4 @@ phutil_require_module('phabricator', 'view/utils');
 
 
 phutil_require_source('PhabricatorLocalTimeTestCase.php');
+phutil_require_source('PhabricatorUnitsTestCase.php');

@@ -720,6 +720,20 @@ return array(
   // fits within configured limits.
   'storage.engine-selector' => 'PhabricatorDefaultFileStorageEngineSelector',
 
+  // Set the size of the largest file a user may upload. This is used to render
+  // text like "Maximum file size: 10MB" on interfaces where users can upload
+  // files, and files larger than this size will be rejected.
+  //
+  // Specify this limit in bytes, or using a "K", "M", or "G" suffix.
+  //
+  // NOTE: Setting this to a large size is NOT sufficient to allow users to
+  // upload large files. You must also configure a number of other settings. To
+  // configure file upload limits, consult the article "Configuring File Upload
+  // Limits" in the documentation. Once you've configured some limit across all
+  // levels of the server, you can set this limit to an appropriate value and
+  // the UI will then reflect the actual configured limit.
+  'storage.upload-size-limit'   => null,
+
   // Phabricator puts databases in a namespace, which defualts to "phabricator"
   // -- for instance, the Differential database is named
   // "phabricator_differential" by default. You can change this namespace if you

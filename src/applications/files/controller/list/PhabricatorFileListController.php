@@ -306,6 +306,8 @@ final class PhabricatorFileListController extends PhabricatorFileController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    $limit_text = PhabricatorFileUploadView::renderUploadLimit();
+
     if ($this->useBasicUploader()) {
 
       $upload_panel = new PhabricatorFileUploadView();
@@ -319,6 +321,7 @@ final class PhabricatorFileListController extends PhabricatorFileController {
 
       $upload_panel = new AphrontPanelView();
       $upload_panel->setHeader('Upload Files');
+      $upload_panel->setCaption($limit_text);
       $upload_panel->setCreateButton('Basic Uploader',
         $request->getRequestURI()->setQueryParam('basic_uploader', true)
       );

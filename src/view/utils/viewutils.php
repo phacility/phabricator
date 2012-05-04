@@ -126,6 +126,60 @@ function phabricator_format_relative_time($duration) {
     $precision = 0);
 }
 
+
+/**
+ * Format a byte count for human consumption, e.g. "10MB" instead of
+ * "10000000".
+ *
+ * @param int Number of bytes.
+ * @return string Human-readable description.
+ */
+function phabricator_format_bytes($bytes) {
+  return phabricator_format_units_generic(
+    $bytes,
+    // NOTE: Using the SI version of these units rather than the 1024 version.
+    array(1000, 1000, 1000, 1000, 1000),
+    array('B', 'KB', 'MB', 'GB', 'TB', 'PB'),
+    $precision = 0);
+}
+
+
+/**
+ * Parse a human-readable byte description (like "6MB") into an integer.
+ *
+ * @param string  Human-readable description.
+ * @return int    Number of represented bytes.
+ */
+function phabricator_parse_bytes($input) {
+  $bytes = trim($input);
+  if (!strlen($bytes)) {
+    return null;
+  }
+
+  // NOTE: Assumes US-centric numeral notation.
+  $bytes = preg_replace('/[ ,]/', '', $bytes);
+
+  $matches = null;
+  if (!preg_match('/^(?:\d+(?:[.]\d+)?)([kmgtp]?)b?$/i', $bytes, $matches)) {
+    throw new Exception("Unable to parse byte size '{$input}'!");
+  }
+
+  $scale = array(
+    'k' => 1000,
+    'm' => 1000 * 1000,
+    'g' => 1000 * 1000 * 1000,
+    't' => 1000 * 1000 * 1000 * 1000,
+  );
+
+  $bytes = (float)$bytes;
+  if ($matches[1]) {
+    $bytes *= $scale[strtolower($matches[1])];
+  }
+
+  return (int)$bytes;
+}
+
+
 function phabricator_format_units_generic(
   $n,
   array $scales,
@@ -144,7 +198,7 @@ function phabricator_format_units_generic(
 
   $scale = array_shift($scales);
   $label = array_shift($labels);
-  while ($n > $scale && count($labels)) {
+  while ($n >= $scale && count($labels)) {
     $remainder += ($n % $scale) * $accum;
     $n /= $scale;
     $accum *= $scale;

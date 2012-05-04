@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,8 @@ final class PhabricatorFileUploadView extends AphrontView {
         id(new AphrontFormFileControl())
           ->setLabel('File')
           ->setName('file')
-          ->setError(true))
+          ->setError(true)
+          ->setCaption(self::renderUploadLimit()))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Name')
@@ -62,6 +63,27 @@ final class PhabricatorFileUploadView extends AphrontView {
     $panel->setWidth(AphrontPanelView::WIDTH_FULL);
 
     return $panel->render();
+  }
+
+  public static function renderUploadLimit() {
+    $limit = PhabricatorEnv::getEnvConfig('storage.upload-size-limit');
+    $limit = phabricator_parse_bytes($limit);
+    if ($limit) {
+      $formatted = phabricator_format_bytes($limit);
+      return 'Maximum file size: '.phutil_escape_html($formatted);
+    }
+
+    $doc_href = PhabricatorEnv::getDocLink(
+      'articles/Configuring_File_Upload_Limits.html');
+    $doc_link = phutil_render_tag(
+      'a',
+      array(
+        'href'    => $doc_href,
+        'target'  => '_blank',
+      ),
+      'Configuring File Upload Limits');
+
+    return 'Upload limit is not configured, see '.$doc_link.'.';
   }
 }
 
