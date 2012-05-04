@@ -19,33 +19,30 @@
 /**
  * @group conduit
  */
-final class ConduitAPI_user_addstatus_Method extends ConduitAPI_user_Method {
+final class ConduitAPI_user_removestatus_Method extends ConduitAPI_user_Method {
 
   public function getMethodStatus() {
     return self::METHOD_STATUS_UNSTABLE;
   }
 
   public function getMethodDescription() {
-    return "Add status information to the logged-in user.";
+    return "Delete status information of the logged-in user.";
   }
 
   public function defineParamTypes() {
     return array(
       'fromEpoch' => 'required int',
       'toEpoch' => 'required int',
-      'status' => 'required enum<away, sporadic>',
     );
   }
 
   public function defineReturnType() {
-    return 'void';
+    return 'int';
   }
 
   public function defineErrorTypes() {
     return array(
       'ERR-BAD-EPOCH' => "'toEpoch' must be bigger than 'fromEpoch'.",
-      'ERR-OVERLAP' =>
-        'There must be no status in any part of the specified epoch.',
     );
   }
 
@@ -58,31 +55,32 @@ final class ConduitAPI_user_addstatus_Method extends ConduitAPI_user_Method {
       throw new ConduitException('ERR-BAD-EPOCH');
     }
 
-    // TODO: This SELECT should have LOCK IN SHARE MODE and be in transaction
-    // with the next INSERT.
     $overlap = id(new PhabricatorUserStatus())->loadAllWhere(
       'userPHID = %s AND dateFrom < %d AND dateTo > %d',
       $user_phid,
       $to,
       $from);
-    if ($overlap) {
-      throw new ConduitException('ERR-OVERLAP');
+    foreach ($overlap as $status) {
+      if ($status->getDateFrom() < $from) {
+        if ($status->getDateTo() > $to) {
+          // Split the interval.
+          id(new PhabricatorUserStatus())
+            ->setUserPHID($user_phid)
+            ->setDateFrom($to)
+            ->setDateTo($status->getDateTo())
+            ->setStatus($status->getStatus())
+            ->save();
+        }
+        $status->setDateTo($from);
+        $status->save();
+      } else if ($status->getDateTo() > $to) {
+        $status->setDateFrom($to);
+        $status->save();
+      } else {
+        $status->delete();
+      }
     }
-
-    switch ($request->getValue('status')) {
-      case 'sporadic':
-        $status = PhabricatorUserStatus::STATUS_SPORADIC;
-        break;
-      default:
-        $status = PhabricatorUserStatus::STATUS_AWAY;
-        break;
-    }
-    id(new PhabricatorUserStatus())
-      ->setUserPHID($user_phid)
-      ->setDateFrom($from)
-      ->setDateTo($to)
-      ->setStatus($status)
-      ->save();
+    return count($overlap);
   }
 
 }
