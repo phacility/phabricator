@@ -11,6 +11,7 @@ phutil_require_module('phabricator', 'applications/phid/storage/phid');
 phutil_require_module('phabricator', 'infrastructure/testing/testcase');
 phutil_require_module('phabricator', 'storage/lisk/dao');
 
+phutil_require_module('phutil', 'filesystem');
 phutil_require_module('phutil', 'utils');
 
 

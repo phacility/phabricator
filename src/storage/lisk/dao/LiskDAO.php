@@ -817,10 +817,20 @@ abstract class LiskDAO {
       $mode = 'w';
     }
 
-    // TODO There is currently no protection on 'r' queries against writing
-    // or on 'w' queries against reading
+    // TODO: There is currently no protection on 'r' queries against writing.
 
-    $connection = $this->getEstablishedConnection($mode);
+    $connection = null;
+    if ($mode == 'r') {
+      // If we're requesting a read connection but already have a write
+      // connection, reuse the write connection so that reads can take place
+      // inside transactions.
+      $connection = $this->getEstablishedConnection('w');
+    }
+
+    if (!$connection) {
+      $connection = $this->getEstablishedConnection($mode);
+    }
+
     if (!$connection) {
       $connection = $this->establishLiveConnection($mode);
       if (self::shouldIsolateAllLiskEffectsToTransactions()) {

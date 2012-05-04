@@ -66,4 +66,40 @@ final class LiskFixtureTestCase extends PhabricatorTestCase {
       count(id(new PhabricatorUser())->loadAll()));
   }
 
+  public function testReadableTransactions() {
+    // TODO: When we have semi-durable fixtures, use those instead. This is
+    // extremely hacky.
+
+    LiskDAO::endIsolateAllLiskEffectsToTransactions();
+    try {
+
+      $phid = 'PHID-TEST-'.Filesystem::readRandomCharacters(32);
+
+      $obj = new PhabricatorPHID();
+      $obj->openTransaction();
+
+        $obj->setPHID($phid);
+        $obj->setPHIDType('TEST');
+        $obj->save();
+
+        $loaded = id(new PhabricatorPHID())->loadOneWhere(
+          'phid = %s',
+          $phid);
+
+      $obj->killTransaction();
+
+      $this->assertEqual(
+        true,
+        ($loaded !== null),
+        "Reads inside transactions should have transaction visibility.");
+
+      LiskDAO::beginIsolateAllLiskEffectsToTransactions();
+    } catch (Exception $ex) {
+      LiskDAO::beginIsolateAllLiskEffectsToTransactions();
+      throw $ex;
+    }
+  }
+
+
+
 }
