@@ -55,7 +55,11 @@ final class ConduitAPI_user_removestatus_Method extends ConduitAPI_user_Method {
       throw new ConduitException('ERR-BAD-EPOCH');
     }
 
-    $overlap = id(new PhabricatorUserStatus())->loadAllWhere(
+    $table = new PhabricatorUserStatus();
+    $table->openTransaction();
+    $table->beginReadLocking();
+
+    $overlap = $table->loadAllWhere(
       'userPHID = %s AND dateFrom < %d AND dateTo > %d',
       $user_phid,
       $to,
@@ -80,6 +84,9 @@ final class ConduitAPI_user_removestatus_Method extends ConduitAPI_user_Method {
         $status->delete();
       }
     }
+
+    $table->endReadLocking();
+    $table->saveTransaction();
     return count($overlap);
   }
 

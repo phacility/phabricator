@@ -58,14 +58,18 @@ final class ConduitAPI_user_addstatus_Method extends ConduitAPI_user_Method {
       throw new ConduitException('ERR-BAD-EPOCH');
     }
 
-    // TODO: This SELECT should have LOCK IN SHARE MODE and be in transaction
-    // with the next INSERT.
-    $overlap = id(new PhabricatorUserStatus())->loadAllWhere(
+    $table = new PhabricatorUserStatus();
+    $table->openTransaction();
+    $table->beginWriteLocking();
+
+    $overlap = $table->loadAllWhere(
       'userPHID = %s AND dateFrom < %d AND dateTo > %d',
       $user_phid,
       $to,
       $from);
     if ($overlap) {
+      $table->endWriteLocking();
+      $table->killTransaction();
       throw new ConduitException('ERR-OVERLAP');
     }
 
@@ -83,6 +87,9 @@ final class ConduitAPI_user_addstatus_Method extends ConduitAPI_user_Method {
       ->setDateTo($to)
       ->setStatus($status)
       ->save();
+
+    $table->endWriteLocking();
+    $table->saveTransaction();
   }
 
 }
