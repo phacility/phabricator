@@ -94,6 +94,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
 
   public function getRemoteURI() {
     $raw_uri = $this->getDetail('remote-uri');
+    if (!$raw_uri) {
+      return null;
+    }
 
     $vcs = $this->getVersionControlSystem();
     $is_git = ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_GIT);
@@ -326,6 +329,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
     $uri->setPass(null);
 
     return $uri;
+  }
+
+  public function getURI() {
+    return '/diffusion/'.$this->getCallsign().'/';
   }
 
   private function isSSHProtocol($protocol) {
