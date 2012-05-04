@@ -10,7 +10,7 @@ return array(
   'phabricator.base-uri' => 'http://phabricator.khanacademy.org/',
 
   // Allow, but don't require, a user to say how they did testing.
-  'differential.require-test-plan-field' => true,
+  'differential.require-test-plan-field' => false,
 
   // Allow logins via google.
   'google.auth-enabled' => true,
