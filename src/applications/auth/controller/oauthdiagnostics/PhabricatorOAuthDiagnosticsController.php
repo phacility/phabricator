@@ -131,44 +131,46 @@ final class PhabricatorOAuthDiagnosticsController
       }
     }
 
-    $test_uri = new PhutilURI($provider->getTokenURI());
-    $test_uri->setQueryParams(
-      array(
-        'client_id'       => $client_id,
-        'client_secret'   => $client_secret,
-        'grant_type'      => 'client_credentials',
-      ));
+    if ($provider->shouldDiagnoseAppLogin()) {
+      $test_uri = new PhutilURI($provider->getTokenURI());
+      $test_uri->setQueryParams(
+        array(
+          'client_id'       => $client_id,
+          'client_secret'   => $client_secret,
+          'grant_type'      => 'client_credentials',
+        ));
 
-    $token_value  = @file_get_contents($test_uri, false, $timeout);
-    $token_strict = @file_get_contents($test_uri, false, $timeout_strict);
-    if ($token_value === false) {
-      $results['App Login'] = array(
-        $res_no,
-        null,
-        "Unable to perform an application login with your Application ID and ".
-        "Application Secret. You may have mistyped or misconfigured them; ".
-        "{$name} may have revoked your authorization; or {$name} may be ".
-        "having technical problems.");
-    } else {
-      if ($token_strict) {
+      $token_value  = @file_get_contents($test_uri, false, $timeout);
+      $token_strict = @file_get_contents($test_uri, false, $timeout_strict);
+      if ($token_value === false) {
         $results['App Login'] = array(
-          $res_ok,
-          '(A Valid Token)',
-          "Raw application login to {$name} works.");
+          $res_no,
+          null,
+          "Unable to perform an application login with your Application ID ".
+          "and Application Secret. You may have mistyped or misconfigured ".
+          "them; {$name} may have revoked your authorization; or {$name} may ".
+          "be having technical problems.");
       } else {
-        $data = json_decode($token_value, true);
-        if (!is_array($data)) {
+        if ($token_strict) {
           $results['App Login'] = array(
-            $res_no,
-            $token_value,
-            "Application Login failed but the provider did not respond ".
-            "with valid JSON error information. {$name} may be experiencing ".
-            "technical problems.");
+            $res_ok,
+            '(A Valid Token)',
+            "Raw application login to {$name} works.");
         } else {
-          $results['App Login'] = array(
-            $res_no,
-            null,
-            "Application Login failed with error: ".$token_value);
+          $data = json_decode($token_value, true);
+          if (!is_array($data)) {
+            $results['App Login'] = array(
+              $res_no,
+              $token_value,
+              "Application Login failed but the provider did not respond ".
+              "with valid JSON error information. {$name} may be experiencing ".
+              "technical problems.");
+          } else {
+            $results['App Login'] = array(
+              $res_no,
+              null,
+              "Application Login failed with error: ".$token_value);
+          }
         }
       }
     }

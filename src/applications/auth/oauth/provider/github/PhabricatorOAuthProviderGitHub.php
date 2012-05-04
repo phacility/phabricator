@@ -118,4 +118,8 @@ final class PhabricatorOAuthProviderGitHub extends PhabricatorOAuthProvider {
     return idx($this->userData, 'name');
   }
 
+  public function shouldDiagnoseAppLogin() {
+    return true;
+  }
+
 }

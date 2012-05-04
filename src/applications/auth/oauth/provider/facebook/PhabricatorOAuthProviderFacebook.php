@@ -118,4 +118,8 @@ final class PhabricatorOAuthProviderFacebook extends PhabricatorOAuthProvider {
     return $this->userData['name'];
   }
 
+  public function shouldDiagnoseAppLogin() {
+    return true;
+  }
+
 }

@@ -45,6 +45,14 @@ abstract class PhabricatorOAuthProvider {
     return array();
   }
 
+  /**
+   * If the provider supports application login, the diagnostics page can try
+   * to test it. Most providers do not support this (Facebook does).
+   */
+  public function shouldDiagnoseAppLogin() {
+    return false;
+  }
+
   abstract public function getTokenURI();
 
   /**
