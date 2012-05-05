@@ -17,10 +17,12 @@
  */
 
 $__start__ = microtime(true);
+$access_log = null;
 
 error_reporting(E_ALL | E_STRICT);
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && !$_POST) {
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && !$_POST &&
+    isset($_REQUEST['__file__'])) {
   $size = ini_get('post_max_size');
   phabricator_fatal(
     "Request size exceeds PHP 'post_max_size' ('{$size}').");
@@ -353,15 +355,14 @@ function phabricator_shutdown() {
 }
 
 function phabricator_fatal($msg) {
-  if (class_exists('PhabricatorAccessLog', false)) {
-    $log = PhabricatorAccessLog::getLog();
-    if ($log) {
-      $log->setData(
-        array(
-          'c' => 500,
-        ));
-      $log->write();
-    }
+
+  global $access_log;
+  if ($access_log) {
+    $access_log->setData(
+      array(
+        'c' => 500,
+      ));
+    $access_log->write();
   }
 
   header(
