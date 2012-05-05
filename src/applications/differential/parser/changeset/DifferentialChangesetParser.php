@@ -998,12 +998,12 @@ final class DifferentialChangesetParser {
           $html_old[] =
             '<tr class="inline"><th /><td>'.
               $xhp.
-            '</td><th /><td /></tr>';
+            '</td><th /><td colspan="2" /></tr>';
         }
         foreach ($new_comments as $comment) {
           $xhp = $this->renderInlineComment($comment);
           $html_new[] =
-            '<tr class="inline"><th /><td /><th /><td>'.
+            '<tr class="inline"><th /><td /><th /><td colspan="2">'.
               $xhp.
             '</td></tr>';
         }
@@ -1031,6 +1031,7 @@ final class DifferentialChangesetParser {
               '</div>'.
             '</td>'.
             $th_new.
+            '<td class="copy differential-new-image"></td>'.
             '<td class="differential-new-image">'.
               '<div class="differential-image-stage">'.
                 $cur.
@@ -1188,7 +1189,7 @@ final class DifferentialChangesetParser {
       array(
         'sigil' => 'context-target',
       ),
-      '<td class="differential-shield" colspan="5">'.
+      '<td class="differential-shield" colspan="6">'.
         phutil_escape_html($message).
         $more.
       '</td>');
@@ -1212,7 +1213,7 @@ final class DifferentialChangesetParser {
         array(
           'sigil' => 'context-target',
         ),
-        '<td colspan="5" class="show-more">'.
+        '<td colspan="6" class="show-more">'.
           'Context not available.'.
         '</td>');
     }
@@ -1366,7 +1367,7 @@ final class DifferentialChangesetParser {
           array(
             'sigil' => 'context-target',
           ),
-          '<td colspan="5" class="show-more">'.
+          '<td colspan="6" class="show-more">'.
             implode(' &bull; ', $contents).
           '</td>');
 
@@ -1396,6 +1397,7 @@ final class DifferentialChangesetParser {
         $o_attr = null;
       }
 
+      $n_copy = '<td class="copy"></td>';
 
       if (isset($this->new[$ii])) {
         $n_num  = $this->new[$ii]['line'];
@@ -1417,8 +1419,17 @@ final class DifferentialChangesetParser {
         if ($this->new[$ii]['type']) {
           if ($this->new[$ii]['type'] == '\\') {
             $n_text = $this->new[$ii]['text'];
-            $n_attr = ' class="comment"';
-          } else if (isset($copy_lines[$n_num])) {
+            $n_class = 'comment';
+          } else if (empty($this->old[$ii])) {
+            $n_class = 'new new-full';
+          } else {
+            $n_class = 'new';
+          }
+          $n_attr = ' class="'.$n_class.'"';
+
+          if ($this->new[$ii]['type'] == '\\' || !isset($copy_lines[$n_num])) {
+            $n_copy = '<td class="copy '.$n_class.'"></td>';
+          } else {
             list($orig_file, $orig_line, $orig_type) = $copy_lines[$n_num];
             $title = ($orig_type == '-' ? 'Moved' : 'Copied').' from ';
             if ($orig_file == '') {
@@ -1430,12 +1441,15 @@ final class DifferentialChangesetParser {
                 dirname('/'.$orig_file);
             }
             $class = ($orig_type == '-' ? 'new-move' : 'new-copy');
-            $n_attr =
-              ' class="'.$class.'" title="'.phutil_escape_html($title).'"';
-          } else if (empty($this->old[$ii])) {
-            $n_attr = ' class="new new-full"';
-          } else {
-            $n_attr = ' class="new"';
+            $n_copy = javelin_render_tag(
+              'td',
+              array(
+                'meta' => array(
+                  'msg' => $title,
+                ),
+                'class' => 'copy '.$class,
+              ),
+              '');
           }
         }
       } else {
@@ -1470,6 +1484,7 @@ final class DifferentialChangesetParser {
           '<th'.$o_id.'>'.$o_num.'</th>'.
           '<td'.$o_attr.'>'.$o_text.'</td>'.
           '<th'.$n_id.'>'.$n_num.'</th>'.
+          $n_copy.
           // NOTE: This is a unicode zero-width space, which we use as a hint
           // when intercepting 'copy' events to make sure sensible text ends
           // up on the clipboard. See the 'phabricator-oncopy' behavior.
@@ -1496,7 +1511,7 @@ final class DifferentialChangesetParser {
           $html[] =
             '<tr class="inline"><th /><td>'.
               $xhp.
-            '</td><th /><td>'.
+            '</td><th /><td colspan="2">'.
               $new.
             '</td><td class="cov" /></tr>';
         }
@@ -1505,7 +1520,7 @@ final class DifferentialChangesetParser {
         foreach ($new_comments[$n_num] as $comment) {
           $xhp = $this->renderInlineComment($comment);
           $html[] =
-            '<tr class="inline"><th /><td /><th /><td>'.
+            '<tr class="inline"><th /><td /><th /><td colspan="2">'.
               $xhp.
             '</td><td class="cov" /></tr>';
         }

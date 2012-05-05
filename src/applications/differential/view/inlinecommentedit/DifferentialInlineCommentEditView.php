@@ -70,7 +70,7 @@ final class DifferentialInlineCommentEditView extends AphrontView {
       throw new Exception("Call setUser() before render()!");
     }
 
-    $content = '<th></th><td>'.phabricator_render_form(
+    $content = phabricator_render_form(
       $this->user,
       array(
         'action'    => $this->uri,
@@ -78,13 +78,12 @@ final class DifferentialInlineCommentEditView extends AphrontView {
         'sigil'     => 'inline-edit-form',
       ),
       $this->renderInputs().
-      $this->renderBody()).'</td>';
-    $other = '<th></th><td></td>';
+      $this->renderBody());
 
     if ($this->onRight) {
-      $core = $other.$content;
+      $core = '<th></th><td></td><th></th><td colspan="2">'.$content.'</td>';
     } else {
-      $core = $content.$other;
+      $core = '<th></th><td>'.$content.'</td><th></th><td colspan="2"></td>';
     }
 
     return '<table><tr class="inline-comment-splint">'.$core.'</tr></table>';

@@ -34,6 +34,9 @@ JX.behavior('differential-edit-inline-comments', function(config) {
 
     var pos = JX.$V(top).add(1 + JX.Vector.getDim(target).x, 0);
     var dim = JX.Vector.getDim(code).add(-4, 0);
+    if (isOnRight(target)) {
+      dim.x += JX.Vector.getDim(code.nextSibling).x;
+    }
     dim.y = (JX.$V(bot).y - pos.y) + JX.Vector.getDim(bot).y;
 
     pos.setPos(reticle);
