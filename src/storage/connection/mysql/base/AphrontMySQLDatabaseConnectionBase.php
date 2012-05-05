@@ -225,7 +225,7 @@ abstract class AphrontMySQLDatabaseConnectionBase
         throw new AphrontQueryConnectionLostException($exmsg);
       case 1213: // Deadlock
       case 1205: // Lock wait timeout exceeded
-        throw new AphrontQueryRecoverableException($exmsg);
+        throw new AphrontQueryDeadlockException($exmsg);
       case 1062: // Duplicate Key
         // NOTE: In some versions of MySQL we get a key name back here, but
         // older versions just give us a key index ("key 2") so it's not

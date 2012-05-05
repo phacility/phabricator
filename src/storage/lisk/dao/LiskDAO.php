@@ -542,16 +542,11 @@ abstract class LiskDAO {
     $connection = $this->establishConnection('r');
 
     $lock_clause = '';
-/*
-
-    TODO: Restore this?
-
     if ($connection->isReadLocking()) {
       $lock_clause = 'FOR UPDATE';
     } else if ($connection->isWriteLocking()) {
       $lock_clause = 'LOCK IN SHARE MODE';
     }
-*/
 
     $args = func_get_args();
     $args = array_slice($args, 2);
@@ -1342,7 +1337,73 @@ abstract class LiskDAO {
   }
 
 
+  /**
+   * Begins read-locking selected rows with SELECT ... FOR UPDATE, so that
+   * other connections can not read them (this is an enormous oversimplification
+   * of FOR UPDATE semantics; consult the MySQL documentation for details). To
+   * end read locking, call @{method:endReadLocking}. For example:
+   *
+   *   $beach->openTransaction();
+   *     $beach->beginReadLocking();
+   *
+   *       $beach->reload();
+   *       $beach->setGrainsOfSand($beach->getGrainsOfSand() + 1);
+   *       $beach->save();
+   *
+   *     $beach->endReadLocking();
+   *   $beach->saveTransaction();
+   *
+   * @return this
+   * @task xaction
+   */
+  public function beginReadLocking() {
+    $this->establishConnection('w')->beginReadLocking();
+    return $this;
+  }
+
+
+  /**
+   * Ends read-locking that began at an earlier @{method:beginReadLocking} call.
+   *
+   * @return this
+   * @task xaction
+   */
+  public function endReadLocking() {
+    $this->establishConnection('w')->endReadLocking();
+    return $this;
+  }
+
+  /**
+   * Begins write-locking selected rows with SELECT ... LOCK IN SHARE MODE, so
+   * that other connections can not update or delete them (this is an
+   * oversimplification of LOCK IN SHARE MODE semantics; consult the
+   * MySQL documentation for details). To end write locking, call
+   * @{method:endWriteLocking}.
+   *
+   * @return this
+   * @task xaction
+   */
+  public function beginWriteLocking() {
+    $this->establishConnection('w')->beginWriteLocking();
+    return $this;
+  }
+
+
+  /**
+   * Ends write-locking that began at an earlier @{method:beginWriteLocking}
+   * call.
+   *
+   * @return this
+   * @task xaction
+   */
+  public function endWriteLocking() {
+    $this->establishConnection('w')->endWriteLocking();
+    return $this;
+  }
+
+
 /* -(  Isolation  )---------------------------------------------------------- */
+
 
   /**
    * @task isolate

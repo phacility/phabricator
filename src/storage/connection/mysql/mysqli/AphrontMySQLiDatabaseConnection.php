@@ -36,10 +36,6 @@ final class AphrontMySQLiDatabaseConnection
     return $this->requireConnection()->affected_rows;
   }
 
-  protected function getTransactionKey() {
-    return spl_object_hash($this->requireConnection());
-  }
-
   protected function connect() {
     if (!class_exists('mysqli', false)) {
       throw new Exception(

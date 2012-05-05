@@ -25,8 +25,6 @@ final class AphrontIsolatedDatabaseConnection
   private $configuration;
   private static $nextInsertID;
   private $insertID;
-  private static $nextTransactionKey = 1;
-  private $transactionKey;
 
   private $transcript = array();
 
@@ -38,8 +36,6 @@ final class AphrontIsolatedDatabaseConnection
       // collisions and make them distinctive.
       self::$nextInsertID = 55555000000 + mt_rand(0, 1000);
     }
-
-    $this->transactionKey = 'iso-xaction-'.(self::$nextTransactionKey++);
   }
 
   public function escapeString($string) {
@@ -68,10 +64,6 @@ final class AphrontIsolatedDatabaseConnection
 
   public function getAffectedRows() {
     return $this->affectedRows;
-  }
-
-  protected function getTransactionKey() {
-    return $this->transactionKey;
   }
 
   public function selectAllResults() {

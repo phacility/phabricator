@@ -22,13 +22,12 @@
  */
 abstract class AphrontDatabaseConnection {
 
-  private static $transactionStates = array();
+  private $transactionState;
 
   abstract public function getInsertID();
   abstract public function getAffectedRows();
   abstract public function selectAllResults();
   abstract public function executeRawQuery($raw_query);
-  abstract protected function getTransactionKey();
 
   abstract public function escapeString($string);
   abstract public function escapeColumnName($string);
@@ -133,11 +132,62 @@ abstract class AphrontDatabaseConnection {
    * @task xaction
    */
   protected function getTransactionState() {
-    $key = $this->getTransactionKey();
-    if (empty(self::$transactionStates[$key])) {
-      self::$transactionStates[$key] = new AphrontDatabaseTransactionState();
+    if (!$this->transactionState) {
+      $this->transactionState = new AphrontDatabaseTransactionState();
     }
-    return self::$transactionStates[$key];
+    return $this->transactionState;
+  }
+
+
+  /**
+   * @task xaction
+   */
+  public function beginReadLocking() {
+    $this->getTransactionState()->beginReadLocking();
+    return $this;
+  }
+
+
+  /**
+   * @task xaction
+   */
+  public function endReadLocking() {
+    $this->getTransactionState()->endReadLocking();
+    return $this;
+  }
+
+
+  /**
+   * @task xaction
+   */
+  public function isReadLocking() {
+    return $this->getTransactionState()->isReadLocking();
+  }
+
+
+  /**
+   * @task xaction
+   */
+  public function beginWriteLocking() {
+    $this->getTransactionState()->beginWriteLocking();
+    return $this;
+  }
+
+
+  /**
+   * @task xaction
+   */
+  public function endWriteLocking() {
+    $this->getTransactionState()->endWriteLocking();
+    return $this;
+  }
+
+
+  /**
+   * @task xaction
+   */
+  public function isWriteLocking() {
+    return $this->getTransactionState()->isWriteLocking();
   }
 
 }
