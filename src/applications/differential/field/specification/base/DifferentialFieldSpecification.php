@@ -672,8 +672,7 @@ abstract class DifferentialFieldSpecification {
     $object_map = array();
 
     $users = id(new PhabricatorUser())->loadAllWhere(
-      '(username IN (%Ls)) OR (email IN (%Ls))',
-      $value,
+      '(username IN (%Ls))',
       $value);
 
     $user_map = mpull($users, 'getPHID', 'getUsername');

@@ -94,7 +94,7 @@ final class PhabricatorUserSettingsController
       ->addFilter('profile', 'Profile')
       ->addSpacer()
       ->addLabel('Email')
-      ->addFilter('email', 'Email Address')
+      ->addFilter('email', 'Email Addresses')
       ->addFilter('emailpref', 'Email Preferences')
       ->addSpacer()
       ->addLabel('Authentication');

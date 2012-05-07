@@ -274,9 +274,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     $from = idx($this->headers, 'from');
     $from = $this->getRawEmailAddress($from);
 
-    $user = id(new PhabricatorUser())->loadOneWhere(
-      'email = %s',
-      $from);
+    $user = PhabricatorUser::loadOneWithEmailAddress($from);
 
     // If Phabricator is configured to allow "Reply-To" authentication, try
     // the "Reply-To" address if we failed to match the "From" address.
@@ -287,9 +285,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       $reply_to = idx($this->headers, 'reply-to');
       $reply_to = $this->getRawEmailAddress($reply_to);
       if ($reply_to) {
-        $user = id(new PhabricatorUser())->loadOneWhere(
-          'email = %s',
-          $reply_to);
+        $user = PhabricatorUser::loadOneWithEmailAddress($reply_to);
       }
     }
 

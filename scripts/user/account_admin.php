@@ -55,6 +55,8 @@ if (!$user) {
   }
   $user = new PhabricatorUser();
   $user->setUsername($username);
+
+  $is_new = true;
 } else {
   $original = clone $user;
 
@@ -66,6 +68,8 @@ if (!$user) {
     echo "Cancelled.\n";
     exit(1);
   }
+
+  $is_new = false;
 }
 
 $user_realname = $user->getRealName();
@@ -79,30 +83,28 @@ $realname = nonempty(
   $user_realname);
 $user->setRealName($realname);
 
-$user_email = $user->getEmail();
-if (strlen($user_email)) {
-  $email_prompt = ' ['.$user_email.']';
-} else {
-  $email_prompt = '';
-}
+// When creating a new user we prompt for an email address; when editing an
+// existing user we just skip this because it would be quite involved to provide
+// a reasonable CLI interface for editing multiple addresses and managing email
+// verification and primary addresses.
 
-do {
-  $email = nonempty(
-    phutil_console_prompt("Enter user email address{$email_prompt}:"),
-    $user_email);
-  $duplicate = id(new PhabricatorUser())->loadOneWhere(
-    'email = %s',
-    $email);
-  if ($duplicate && $duplicate->getID() != $user->getID()) {
-    $duplicate_username = $duplicate->getUsername();
-    echo "ERROR: There is already a user with that email address ".
-         "({$duplicate_username}). Each user must have a unique email ".
-         "address.\n";
-  } else {
-    break;
-  }
-} while (true);
-$user->setEmail($email);
+$new_email = null;
+if ($is_new) {
+  do {
+    $email = phutil_console_prompt("Enter user email address:");
+    $duplicate = id(new PhabricatorUserEmail())->loadOneWhere(
+      'address = %s',
+      $email);
+    if ($duplicate) {
+      echo "ERROR: There is already a user with that email address. ".
+           "Each user must have a unique email address.\n";
+    } else {
+      break;
+    }
+  } while (true);
+
+  $new_email = $email;
+}
 
 $changed_pass = false;
 // This disables local echo, so the user's password is not shown as they type
@@ -126,7 +128,9 @@ $tpl = "%12s   %-30s   %-30s\n";
 printf($tpl, null, 'OLD VALUE', 'NEW VALUE');
 printf($tpl, 'Username', $original->getUsername(), $user->getUsername());
 printf($tpl, 'Real Name', $original->getRealName(), $user->getRealName());
-printf($tpl, 'Email', $original->getEmail(), $user->getEmail());
+if ($new_email) {
+  printf($tpl, 'Email', '', $new_email);
+}
 printf($tpl, 'Password', null,
   ($changed_pass !== false)
     ? 'Updated'
@@ -151,6 +155,15 @@ if ($changed_pass !== false) {
   // component of the password hash.
   $user->setPassword($changed_pass);
   $user->save();
+}
+
+if ($new_email) {
+  id(new PhabricatorUserEmail())
+    ->setUserPHID($user->getPHID())
+    ->setAddress($new_email)
+    ->setIsVerified(1)
+    ->setIsPrimary(1)
+    ->save();
 }
 
 echo "Saved changes.\n";

@@ -859,6 +859,18 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('userstatus.sql'),
       ),
+      'emailtable.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('emailtable.sql'),
+      ),
+      'emailtableport.sql' => array(
+        'type'    => 'php',
+        'name'    => $this->getPatchPath('emailtableport.php'),
+      ),
+      'emailtableremove.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('emailtableremove.sql'),
+      ),
     );
   }
 

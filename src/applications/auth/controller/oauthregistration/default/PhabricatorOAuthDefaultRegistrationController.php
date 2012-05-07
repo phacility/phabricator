@@ -33,7 +33,8 @@ final class PhabricatorOAuthDefaultRegistrationController
 
     $user->setUsername($provider->retrieveUserAccountName());
     $user->setRealName($provider->retrieveUserRealName());
-    $user->setEmail($provider->retrieveUserEmail());
+
+    $new_email = $provider->retrieveUserEmail();
 
     if ($request->isFormPost()) {
 
@@ -49,9 +50,9 @@ final class PhabricatorOAuthDefaultRegistrationController
         $e_username = null;
       }
 
-      if ($user->getEmail() === null) {
-        $user->setEmail($request->getStr('email'));
-        if (!strlen($user->getEmail())) {
+      if (!$new_email) {
+        $new_email = trim($request->getStr('email'));
+        if (!$new_email) {
           $e_email = 'Required';
           $errors[] = 'Email is required.';
         } else {
@@ -84,12 +85,29 @@ final class PhabricatorOAuthDefaultRegistrationController
         try {
           $user->save();
 
+          // NOTE: We don't verify OAuth email addresses by default because
+          // OAuth providers might associate email addresses with accounts that
+          // haven't actually verified they own them. We could selectively
+          // auto-verify some providers that we trust here, but the stakes for
+          // verifying an email address are high because having a corporate
+          // address at a company is sometimes the key to the castle.
+
+          $new_email = id(new PhabricatorUserEmail())
+            ->setUserPHID($user->getPHID())
+            ->setAddress($new_email)
+            ->setIsPrimary(1)
+            ->setIsVerified(0)
+            ->save();
+
           $oauth_info->setUserID($user->getID());
           $oauth_info->save();
 
           $session_key = $user->establishSession('web');
           $request->setCookie('phusr', $user->getUsername());
           $request->setCookie('phsid', $session_key);
+
+          $new_email->sendVerificationEmail($user);
+
           return id(new AphrontRedirectResponse())->setURI('/');
         } catch (AphrontQueryDuplicateKeyException $exception) {
 
@@ -97,9 +115,9 @@ final class PhabricatorOAuthDefaultRegistrationController
             'userName = %s',
             $user->getUserName());
 
-          $same_email = id(new PhabricatorUser())->loadOneWhere(
-            'email = %s',
-            $user->getEmail());
+          $same_email = id(new PhabricatorUserEmail())->loadOneWhere(
+            'address = %s',
+            $new_email);
 
           if ($same_username) {
             $e_username = 'Duplicate';

@@ -31,7 +31,7 @@ class AphrontRedirectResponse extends AphrontResponse {
   }
 
   public function getURI() {
-    return $this->uri;
+    return (string)$this->uri;
   }
 
   public function getHeaders() {

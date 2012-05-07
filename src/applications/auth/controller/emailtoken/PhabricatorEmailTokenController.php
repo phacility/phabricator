@@ -55,11 +55,31 @@ final class PhabricatorEmailTokenController
     $token = $this->token;
     $email = $request->getStr('email');
 
-    $target_user = id(new PhabricatorUser())->loadOneWhere(
-      'email = %s',
+    // NOTE: We need to bind verification to **addresses**, not **users**,
+    // because we verify addresses when they're used to login this way, and if
+    // we have a user-based verification you can:
+    //
+    //  - Add some address you do not own;
+    //  - request a password reset;
+    //  - change the URI in the email to the address you don't own;
+    //  - login via the email link; and
+    //  - get a "verified" address you don't control.
+
+    $target_email = id(new PhabricatorUserEmail())->loadOneWhere(
+      'address = %s',
       $email);
 
-    if (!$target_user || !$target_user->validateEmailToken($token)) {
+    $target_user = null;
+    if ($target_email) {
+      $target_user = id(new PhabricatorUser())->loadOneWhere(
+        'phid = %s',
+        $target_email->getUserPHID());
+    }
+
+    if (!$target_email ||
+        !$target_user  ||
+        !$target_user->validateEmailToken($target_email, $token)) {
+
       $view = new AphrontRequestFailureView();
       $view->setHeader('Unable to Login');
       $view->appendChild(
@@ -71,19 +91,32 @@ final class PhabricatorEmailTokenController
         '<div class="aphront-failure-continue">'.
           '<a class="button" href="/login/email/">Send Another Email</a>'.
         '</div>');
+
       return $this->buildStandardPageResponse(
         $view,
         array(
-          'title' => 'Email Sent',
+          'title' => 'Login Failure',
         ));
     }
+
+    // Verify email so that clicking the link in the "Welcome" email is good
+    // enough, without requiring users to go through a second round of email
+    // verification.
+
+    $target_email->setIsVerified(1);
+    $target_email->save();
 
     $session_key = $target_user->establishSession('web');
     $request->setCookie('phusr', $target_user->getUsername());
     $request->setCookie('phsid', $session_key);
 
     if (PhabricatorEnv::getEnvConfig('account.editable')) {
-      $next = '/settings/page/password/?token='.$token;
+      $next = (string)id(new PhutilURI('/settings/page/password/'))
+        ->setQueryParams(
+          array(
+            'token' => $token,
+            'email' => $email,
+          ));
     } else {
       $next = '/';
     }

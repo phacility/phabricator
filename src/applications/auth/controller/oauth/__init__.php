@@ -13,6 +13,7 @@ phutil_require_module('phabricator', 'aphront/writeguard');
 phutil_require_module('phabricator', 'applications/auth/controller/base');
 phutil_require_module('phabricator', 'applications/auth/oauth/provider/base');
 phutil_require_module('phabricator', 'applications/auth/view/oauthfailure');
+phutil_require_module('phabricator', 'applications/people/storage/email');
 phutil_require_module('phabricator', 'applications/people/storage/user');
 phutil_require_module('phabricator', 'applications/people/storage/useroauthinfo');
 phutil_require_module('phabricator', 'infrastructure/env');

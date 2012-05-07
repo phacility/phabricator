@@ -113,9 +113,7 @@ final class PhabricatorLoginController
           $username_or_email);
 
         if (!$user) {
-          $user = id(new PhabricatorUser())->loadOneWhere(
-            'email = %s',
-            $username_or_email);
+          $user = PhabricatorUser::loadOneWithEmailAddress($username_or_email);
         }
 
         if (!$errors) {

@@ -108,6 +108,11 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this;
   }
 
+  public function addRawTos(array $raw_email) {
+    $this->setParam('raw-to', $raw_email);
+    return $this;
+  }
+
   public function addCCs(array $phids) {
     $phids = array_unique($phids);
     $this->setParam('cc', $phids);
@@ -367,8 +372,11 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
               $handles,
               $exclude);
             if ($emails) {
-              $add_to = $emails;
+              $add_to = array_merge($add_to, $emails);
             }
+            break;
+          case 'raw-to':
+            $add_to = array_merge($add_to, $value);
             break;
           case 'cc':
             $emails = $this->getDeliverableEmailsFromHandles(

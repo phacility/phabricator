@@ -11,6 +11,7 @@ phutil_require_module('arcanist', 'differential/constants/revisionstatus');
 phutil_require_module('phabricator', 'applications/files/storage/file');
 phutil_require_module('phabricator', 'applications/maniphest/constants/owner');
 phutil_require_module('phabricator', 'applications/maniphest/constants/status');
+phutil_require_module('phabricator', 'applications/people/storage/email');
 phutil_require_module('phabricator', 'applications/people/storage/user');
 phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/phid/handle');

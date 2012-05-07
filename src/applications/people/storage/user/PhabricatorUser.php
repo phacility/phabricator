@@ -24,7 +24,6 @@ final class PhabricatorUser extends PhabricatorUserDAO {
   protected $phid;
   protected $userName;
   protected $realName;
-  protected $email;
   protected $sex;
   protected $passwordSalt;
   protected $passwordHash;
@@ -360,17 +359,30 @@ final class PhabricatorUser extends PhabricatorUserDAO {
       $session_key);
   }
 
-  private function generateEmailToken($offset = 0) {
+  private function generateEmailToken(
+    PhabricatorUserEmail $email,
+    $offset = 0) {
+
+    $key = implode(
+      '-',
+      array(
+        PhabricatorEnv::getEnvConfig('phabricator.csrf-key'),
+        $this->getPHID(),
+        $email->getVerificationCode(),
+      ));
+
     return $this->generateToken(
       time() + ($offset * self::EMAIL_CYCLE_FREQUENCY),
       self::EMAIL_CYCLE_FREQUENCY,
-      PhabricatorEnv::getEnvConfig('phabricator.csrf-key').$this->getEmail(),
+      $key,
       self::EMAIL_TOKEN_LENGTH);
   }
 
-  public function validateEmailToken($token) {
+  public function validateEmailToken(
+    PhabricatorUserEmail $email,
+    $token) {
     for ($ii = -1; $ii <= 1; $ii++) {
-      $valid = $this->generateEmailToken($ii);
+      $valid = $this->generateEmailToken($email, $ii);
       if ($token == $valid) {
         return true;
       }
@@ -378,11 +390,32 @@ final class PhabricatorUser extends PhabricatorUserDAO {
     return false;
   }
 
-  public function getEmailLoginURI() {
-    $token = $this->generateEmailToken();
+  public function getEmailLoginURI(PhabricatorUserEmail $email = null) {
+    if (!$email) {
+      $email = $this->loadPrimaryEmail();
+      if (!$email) {
+        throw new Exception("User has no primary email!");
+      }
+    }
+    $token = $this->generateEmailToken($email);
     $uri = PhabricatorEnv::getProductionURI('/login/etoken/'.$token.'/');
     $uri = new PhutilURI($uri);
-    return $uri->alter('email', $this->getEmail());
+    return $uri->alter('email', $email->getAddress());
+  }
+
+  public function loadPrimaryEmailAddress() {
+    $email = $this->loadPrimaryEmail();
+    if (!$email) {
+      throw new Exception("User has no primary email address!");
+    }
+    return $email->getAddress();
+  }
+
+  public function loadPrimaryEmail() {
+    return id(new PhabricatorUserEmail())->loadOneWhere(
+      'userPHID = %s AND isPrimary = %d',
+      $this->getPHID(),
+      1);
   }
 
   public function loadPreferences() {
@@ -532,6 +565,18 @@ EOBODY;
     }
 
     return self::getDefaultProfileImageURI();
+  }
+
+  public static function loadOneWithEmailAddress($address) {
+    $email = id(new PhabricatorUserEmail())->loadOneWhere(
+      'address = %s',
+      $address);
+    if (!$email) {
+      return null;
+    }
+    return id(new PhabricatorUser())->loadOneWhere(
+      'phid = %s',
+      $email->getUserPHID());
   }
 
 }

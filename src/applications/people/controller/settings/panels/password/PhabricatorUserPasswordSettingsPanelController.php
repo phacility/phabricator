@@ -40,10 +40,16 @@ final class PhabricatorUserPasswordSettingsPanelController
     // the workflow from a password reset email.
 
     $token = $request->getStr('token');
+
+    $valid_token = false;
     if ($token) {
-      $valid_token = $user->validateEmailToken($token);
-    } else {
-      $valid_token = false;
+      $email_address = $request->getStr('email');
+      $email = id(new PhabricatorUserEmail())->loadOneWhere(
+        'address = %s',
+        $email_address);
+      if ($email) {
+        $valid_token = $user->validateEmailToken($email, $token);
+      }
     }
 
     $e_old = true;

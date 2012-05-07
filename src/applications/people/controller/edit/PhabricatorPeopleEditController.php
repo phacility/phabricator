@@ -123,13 +123,20 @@ final class PhabricatorPeopleEditController
 
     $welcome_checked = true;
 
+    $new_email = null;
+
     $request = $this->getRequest();
     if ($request->isFormPost()) {
       $welcome_checked = $request->getInt('welcome');
 
       if (!$user->getID()) {
         $user->setUsername($request->getStr('username'));
-        $user->setEmail($request->getStr('email'));
+
+        $new_email = $request->getStr('email');
+        if (!strlen($new_email)) {
+          $errors[] = 'Email is required.';
+          $e_email = 'Required';
+        }
 
         if ($request->getStr('role') == 'agent') {
           $user->setIsSystemAgent(true);
@@ -154,13 +161,6 @@ final class PhabricatorPeopleEditController
         $e_realname = null;
       }
 
-      if (!strlen($user->getEmail())) {
-        $errors[] = 'Email is required.';
-        $e_email = 'Required';
-      } else {
-        $e_email = null;
-      }
-
       if (!$errors) {
         try {
           $is_new = !$user->getID();
@@ -168,6 +168,14 @@ final class PhabricatorPeopleEditController
           $user->save();
 
           if ($is_new) {
+
+            $email = id(new PhabricatorUserEmail())
+              ->setUserPHID($user->getPHID())
+              ->setAddress($new_email)
+              ->setIsPrimary(1)
+              ->setIsVerified(0)
+              ->save();
+
             $log = PhabricatorUserLog::newLog(
               $admin,
               $user,
@@ -187,8 +195,8 @@ final class PhabricatorPeopleEditController
 
           $same_username = id(new PhabricatorUser())
             ->loadOneWhere('username = %s', $user->getUsername());
-          $same_email = id(new PhabricatorUser())
-            ->loadOneWhere('email = %s', $user->getEmail());
+          $same_email = id(new PhabricatorUserEmail())
+            ->loadOneWhere('address = %s', $new_email);
 
           if ($same_username) {
             $e_username = 'Duplicate';
@@ -236,15 +244,19 @@ final class PhabricatorPeopleEditController
           ->setLabel('Real Name')
           ->setName('realname')
           ->setValue($user->getRealName())
-          ->setError($e_realname))
-      ->appendChild(
+          ->setError($e_realname));
+
+    if (!$user->getID()) {
+      $form->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Email')
           ->setName('email')
           ->setDisabled($is_immutable)
-          ->setValue($user->getEmail())
-          ->setError($e_email))
-      ->appendChild($this->getRoleInstructions());
+          ->setValue($new_email)
+          ->setError($e_email));
+    }
+
+    $form->appendChild($this->getRoleInstructions());
 
     if (!$user->getID()) {
       $form

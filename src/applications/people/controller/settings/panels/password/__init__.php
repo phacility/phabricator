@@ -10,6 +10,7 @@ phutil_require_module('phabricator', 'aphront/response/400');
 phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'aphront/writeguard');
 phutil_require_module('phabricator', 'applications/people/controller/settings/panels/base');
+phutil_require_module('phabricator', 'applications/people/storage/email');
 phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'view/form/base');
 phutil_require_module('phabricator', 'view/form/control/password');

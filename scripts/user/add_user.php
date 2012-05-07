@@ -50,19 +50,25 @@ if ($existing_user) {
     "There is already a user with the username '{$username}'!");
 }
 
-$existing_user = id(new PhabricatorUser())->loadOneWhere(
-  'email = %s',
+$existing_email = id(new PhabricatorUserEmail())->loadOneWhere(
+  'address = %s',
   $email);
-if ($existing_user) {
+if ($existing_email) {
   throw new Exception(
     "There is already a user with the email '{$email}'!");
 }
 
 $user = new PhabricatorUser();
 $user->setUsername($username);
-$user->setEmail($email);
 $user->setRealname($realname);
 $user->save();
+
+$email_object = id(new PhabricatorUserEmail())
+  ->setUserPHID($user->getPHID())
+  ->setAddress($email)
+  ->setIsVerified(1)
+  ->setIsPrimary(1)
+  ->save();
 
 $user->sendWelcomeEmail($admin);
 

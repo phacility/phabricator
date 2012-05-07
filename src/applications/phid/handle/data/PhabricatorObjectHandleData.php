@@ -149,6 +149,13 @@ final class PhabricatorObjectHandleData {
             $images = mpull($images, 'getBestURI', 'getPHID');
           }
 
+          // TODO: This probably should not be part of Handles anymore, only
+          // MetaMTA actually uses it.
+          $emails = id(new PhabricatorUserEmail())->loadAllWhere(
+            'userPHID IN (%Ls) AND isPrimary = 1',
+            $phids);
+          $emails = mpull($emails, 'getAddress', 'getUserPHID');
+
           foreach ($phids as $phid) {
             $handle = new PhabricatorObjectHandle();
             $handle->setPHID($phid);
@@ -159,7 +166,7 @@ final class PhabricatorObjectHandleData {
               $user = $users[$phid];
               $handle->setName($user->getUsername());
               $handle->setURI('/p/'.$user->getUsername().'/');
-              $handle->setEmail($user->getEmail());
+              $handle->setEmail(idx($emails, $phid));
               $handle->setFullName(
                 $user->getUsername().' ('.$user->getRealName().')');
               $handle->setAlternateID($user->getID());

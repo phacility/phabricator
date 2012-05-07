@@ -176,8 +176,8 @@ final class PhabricatorOAuthLoginController
 
     $oauth_email = $provider->retrieveUserEmail();
     if ($oauth_email) {
-      $known_email = id(new PhabricatorUser())
-        ->loadOneWhere('email = %s', $oauth_email);
+      $known_email = id(new PhabricatorUserEmail())
+        ->loadOneWhere('address = %s', $oauth_email);
       if ($known_email) {
         $dialog = new AphrontDialogView();
         $dialog->setUser($current_user);
