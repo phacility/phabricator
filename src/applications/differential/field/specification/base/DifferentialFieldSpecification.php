@@ -684,8 +684,6 @@ abstract class DifferentialFieldSpecification {
       $object_map[strtolower($username)] = $phid;
     }
 
-    $object_map += mpull($users, 'getPHID', 'getEmail');
-
     if ($include_mailables) {
       $mailables = id(new PhabricatorMetaMTAMailingList())->loadAllWhere(
         '(email IN (%Ls)) OR (name IN (%Ls))',
