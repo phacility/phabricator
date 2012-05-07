@@ -47,7 +47,7 @@ final class PhabricatorPeopleEditController
 
     $views = array(
       'basic'     => 'Basic Information',
-      'role'      => 'Edit Role',
+      'role'      => 'Edit Roles',
       'cert'      => 'Conduit Certificate',
     );
 
@@ -269,13 +269,28 @@ final class PhabricatorPeopleEditController
               'Send "Welcome to Phabricator" email.',
               $welcome_checked));
     } else {
+      $roles = array();
+
+      if ($user->getIsSystemAgent()) {
+        $roles[] = 'System Agent';
+      }
+      if ($user->getIsAdmin()) {
+        $roles[] = 'Admin';
+      }
+      if ($user->getIsDisabled()) {
+        $roles[] = 'Disabled';
+      }
+
+      if (!$roles) {
+        $roles[] = 'Normal User';
+      }
+
+      $roles = implode(', ', $roles);
+
       $form->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel('Role')
-          ->setValue(
-            $user->getIsSystemAgent()
-              ? 'System Agent'
-              : 'Normal User'));
+          ->setLabel('Roles')
+          ->setValue($roles));
     }
 
     $form
@@ -374,7 +389,7 @@ final class PhabricatorPeopleEditController
           ->addCheckbox(
             'is_admin',
             1,
-            'Admin: wields absolute power.',
+            'Administrator',
             $user->getIsAdmin())
           ->setDisabled($is_self))
       ->appendChild(
@@ -382,9 +397,17 @@ final class PhabricatorPeopleEditController
           ->addCheckbox(
             'is_disabled',
             1,
-            'Disabled: can not login.',
+            'Disabled',
             $user->getIsDisabled())
-          ->setDisabled($is_self));
+          ->setDisabled($is_self))
+      ->appendChild(
+        id(new AphrontFormCheckboxControl())
+          ->addCheckbox(
+            'is_agent',
+            1,
+            'System Agent (Bot/Script User)',
+            $user->getIsSystemAgent())
+          ->setDisabled(true));
 
     if (!$is_self) {
       $form

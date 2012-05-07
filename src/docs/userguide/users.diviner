@@ -44,6 +44,11 @@ for them. System agents:
   - **can not review diffs or own tasks**;
   - **do not appear in CC tokenzers**.
 
+Currently, the **System Agent** role for an account can not be changed after the
+account is created. This prevents administrators form changing a normal user
+into a system agent, retrieving their Conduit certificate, and then changing
+them back (which would allow administrators to gain other users' credentials).
+
 = Disabled Users =
 
 **Disabled Users** are accounts that are no longer active. Generally, when
