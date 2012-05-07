@@ -7,10 +7,12 @@
 
 
 phutil_require_module('phabricator', 'applications/repository/constants/repositorytype');
-phutil_require_module('phabricator', 'applications/repository/daemon/base');
+phutil_require_module('phabricator', 'applications/repository/storage/repository');
+phutil_require_module('phabricator', 'infrastructure/daemon/base');
 
+phutil_require_module('phutil', 'error');
 phutil_require_module('phutil', 'filesystem');
-phutil_require_module('phutil', 'future/exec');
+phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('PhabricatorRepositoryPullLocalDaemon.php');

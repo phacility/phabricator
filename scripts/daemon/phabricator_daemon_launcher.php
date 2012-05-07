@@ -2,7 +2,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,34 +49,29 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
     exit($err);
 
   case 'repository-launch-readonly':
-    $need_launch = phd_load_tracked_repositories_of_type('git');
+    $need_launch = phd_load_tracked_repositories();
     if (!$need_launch) {
       echo "There are no repositories with tracking enabled.\n";
-    } else {
-      will_launch($control);
-
-      foreach ($need_launch as $repository) {
-        $name = $repository->getName();
-        $callsign = $repository->getCallsign();
-        $desc = "'{$name}' ({$callsign})";
-        $phid = $repository->getPHID();
-
-        echo "Launching 'git fetch' daemon on the {$desc} repository...\n";
-        $control->launchDaemon(
-          'PhabricatorRepositoryGitFetchDaemon',
-          array(
-            $phid,
-          ));
-      }
+      exit(0);
     }
+
+    will_launch($control);
+    $control->launchDaemon(
+      'PhabricatorRepositoryPullLocalDaemon',
+      array());
     break;
 
   case 'repository-launch-master':
     $need_launch = phd_load_tracked_repositories();
     if (!$need_launch) {
       echo "There are no repositories with tracking enabled.\n";
+      exit(1);
     } else {
       will_launch($control);
+
+      $control->launchDaemon(
+        'PhabricatorRepositoryPullLocalDaemon',
+        array());
 
       foreach ($need_launch as $repository) {
         $name = $repository->getName();
@@ -86,12 +81,6 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
 
         switch ($repository->getVersionControlSystem()) {
           case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-            echo "Launching 'git fetch' daemon on the {$desc} repository...\n";
-            $control->launchDaemon(
-              'PhabricatorRepositoryGitFetchDaemon',
-              array(
-                $phid,
-              ));
             echo "Launching discovery daemon on the {$desc} repository...\n";
             $control->launchDaemon(
               'PhabricatorRepositoryGitCommitDiscoveryDaemon',
@@ -108,12 +97,6 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
               ));
             break;
           case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-            echo "Launching 'hg pull' daemon on the {$desc} repository...\n";
-            $control->launchDaemon(
-              'PhabricatorRepositoryMercurialPullDaemon',
-              array(
-                $phid,
-              ));
             echo "Launching discovery daemon on the {$desc} repository...\n";
             $control->launchDaemon(
               'PhabricatorRepositoryMercurialCommitDiscoveryDaemon',
@@ -222,18 +205,6 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
   default:
     $err = $control->executeHelpCommand();
     exit($err);
-}
-
-function phd_load_tracked_repositories_of_type($type) {
-  $repositories = phd_load_tracked_repositories();
-
-  foreach ($repositories as $key => $repository) {
-    if ($repository->getVersionControlSystem() != $type) {
-      unset($repositories[$key]);
-    }
-  }
-
-  return $repositories;
 }
 
 function phd_load_tracked_repositories() {

@@ -382,4 +382,20 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
     return 'r'.$this->getCallsign().$short_identifier;
   }
 
+  public static function loadAllByPHIDOrCallsign(array $names) {
+    $repositories = array();
+    foreach ($names as $name) {
+      $repo = id(new PhabricatorRepository())->loadOneWhere(
+        'phid = %s OR callsign = %s',
+        $name,
+        $name);
+      if (!$repo) {
+        throw new Exception(
+          "No repository with PHID or callsign '{$name}' exists!");
+      }
+      $repositories[$repo->getID()] = $repo;
+    }
+    return $repositories;
+  }
+
 }
