@@ -65,7 +65,7 @@ JX.behavior('differential-populate', function(config) {
 
       // NOTE: Using className is not best practice, but the diff UI is perf
       // sensitive.
-      if (!t.className.match(/cov|copy/)) {
+      if (!t.className.match(/cov/)) {
         return;
       }
 
@@ -78,8 +78,6 @@ JX.behavior('differential-populate', function(config) {
       } else {
         highlight_class = null;
         var msg;
-        var align = 'E';
-        var sibling = 'previousSibling';
         if (t.className.match(/cov-C/)) {
           msg = 'Covered';
           highlight_class = 'source-cov-C';
@@ -89,22 +87,14 @@ JX.behavior('differential-populate', function(config) {
         } else if (t.className.match(/cov-N/)) {
           msg = 'Not Executable';
           highlight_class = 'source-cov-N';
-        } else {
-          var match = /new-copy|new-move/.exec(t.className);
-          if (match) {
-            align = 'N'; // TODO: 'W'
-            sibling = 'nextSibling';
-            msg = JX.Stratcom.getData(t).msg;
-            highlight_class = match[0];
-          }
         }
 
         if (msg) {
-          JX.Tooltip.show(t, 120, align, msg);
+          JX.Tooltip.show(t, 120, 'E', msg);
         }
 
         if (highlight_class) {
-          highlighted = t[sibling];
+          highlighted = t.previousSibling;
           JX.DOM.alterClass(highlighted, highlight_class, true);
         }
       }

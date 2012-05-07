@@ -80,24 +80,17 @@
   background: #ffaaaa;
 }
 
-.differential-diff td.new-full,
-.differential-diff td.new span.bright {
-  background: #aaffaa;
-}
-
-.differential-diff td.copy {
-  width: 6px;
-  padding: 0;
-}
-
-.differential-diff td.new-copy,
-.differential-diff td.new-copy span.bright {
+.differential-diff td.new-copy {
   background: #ffffaa;
 }
 
-.differential-diff td.new-move,
-.differential-diff td.new-move span.bright {
-  background: #eeee44;
+.differential-diff td.new-move {
+  background: #ffddaa;
+}
+
+.differential-diff td.new-full,
+.differential-diff td.new span.bright {
+  background: #aaffaa;
 }
 
 .differential-diff td.comment {

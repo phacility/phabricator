@@ -1396,7 +1396,6 @@ final class DifferentialChangesetParser {
         $o_attr = null;
       }
 
-      $n_copy = '<td class="copy"></td>';
 
       if (isset($this->new[$ii])) {
         $n_num  = $this->new[$ii]['line'];
@@ -1418,17 +1417,8 @@ final class DifferentialChangesetParser {
         if ($this->new[$ii]['type']) {
           if ($this->new[$ii]['type'] == '\\') {
             $n_text = $this->new[$ii]['text'];
-            $n_class = 'comment';
-          } else if (empty($this->old[$ii])) {
-            $n_class = 'new new-full';
-          } else {
-            $n_class = 'new';
-          }
-          $n_attr = ' class="'.$n_class.'"';
-
-          if ($this->new[$ii]['type'] == '\\' || !isset($copy_lines[$n_num])) {
-            $n_copy = '<td class="copy '.$n_class.'"></td>';
-          } else {
+            $n_attr = ' class="comment"';
+          } else if (isset($copy_lines[$n_num])) {
             list($orig_file, $orig_line, $orig_type) = $copy_lines[$n_num];
             $title = ($orig_type == '-' ? 'Moved' : 'Copied').' from ';
             if ($orig_file == '') {
@@ -1440,15 +1430,12 @@ final class DifferentialChangesetParser {
                 dirname('/'.$orig_file);
             }
             $class = ($orig_type == '-' ? 'new-move' : 'new-copy');
-            $n_copy = javelin_render_tag(
-              'td',
-              array(
-                'meta' => array(
-                  'msg' => $title,
-                ),
-                'class' => 'copy '.$class,
-              ),
-              '');
+            $n_attr =
+              ' class="'.$class.'" title="'.phutil_escape_html($title).'"';
+          } else if (empty($this->old[$ii])) {
+            $n_attr = ' class="new new-full"';
+          } else {
+            $n_attr = ' class="new"';
           }
         }
       } else {
@@ -1483,7 +1470,6 @@ final class DifferentialChangesetParser {
           '<th'.$o_id.'>'.$o_num.'</th>'.
           '<td'.$o_attr.'>'.$o_text.'</td>'.
           '<th'.$n_id.'>'.$n_num.'</th>'.
-          $n_copy.
           // NOTE: This is a unicode zero-width space, which we use as a hint
           // when intercepting 'copy' events to make sure sensible text ends
           // up on the clipboard. See the 'phabricator-oncopy' behavior.
