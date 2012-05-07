@@ -43,7 +43,7 @@ foreach ($emails as $phid => $email) {
     $etable->getTableName(),
     $phid,
     $email,
-    PhabricatorFile::readRandomCharacters(24));
+    Filessytem::readRandomCharacters(24));
 }
 
 echo "Done.\n";
