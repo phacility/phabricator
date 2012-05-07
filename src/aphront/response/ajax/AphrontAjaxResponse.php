@@ -29,6 +29,11 @@ final class AphrontAjaxResponse extends AphrontResponse {
     return $this;
   }
 
+  public function setError($error) {
+    $this->error = $error;
+    return $this;
+  }
+
   public function buildResponseString() {
     $response = CelerityAPI::getStaticResourceResponse();
     $object = $response->buildAjaxResponse(

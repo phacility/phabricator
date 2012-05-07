@@ -13,6 +13,7 @@ phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/phid/storage/phid');
 phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'infrastructure/util/hash');
+phutil_require_module('phabricator', 'view/utils');
 
 phutil_require_module('phutil', 'error');
 phutil_require_module('phutil', 'error/aggregate');

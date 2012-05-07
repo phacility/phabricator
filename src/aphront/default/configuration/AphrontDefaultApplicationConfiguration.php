@@ -455,10 +455,32 @@ class AphrontDefaultApplicationConfiguration
   }
 
   public function handleException(Exception $ex) {
+    $request = $this->getRequest();
+
+    // For Conduit requests, return a Conduit response.
+    if ($request->isConduit()) {
+      $response = new ConduitAPIResponse();
+      $response->setErrorCode(get_class($ex));
+      $response->setErrorInfo($ex->getMessage());
+
+      return id(new AphrontJSONResponse())
+        ->setContent($response->toDictionary());
+    }
+
+    // For non-workflow requests, return a Ajax response.
+    if ($request->isAjax() && !$request->isJavelinWorkflow()) {
+      $response = new AphrontAjaxResponse();
+      $response->setError(
+        array(
+          'code' => get_class($ex),
+          'info' => $ex->getMessage(),
+        ));
+      return $response;
+    }
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 
-    $user = $this->getRequest()->getUser();
+    $user = $request->getUser();
     if (!$user) {
       // If we hit an exception very early, we won't have a user.
       $user = new PhabricatorUser();

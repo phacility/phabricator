@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,10 @@ final class PhabricatorFileUploadException extends Exception {
         "Unable to write file: failed to write to temporary directory.",
       UPLOAD_ERR_EXTENSION =>
         "Unable to upload: a PHP extension stopped the upload.",
+
+      -1000 =>
+        "Uploaded file exceeds limit in Phabricator ".
+        "'storage.upload-size-limit' configuration.",
     );
 
     $message = idx($map, $code, "Upload failed: unknown error.");

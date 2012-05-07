@@ -29,7 +29,7 @@ final class PhabricatorFileDropUploadController
     $data = file_get_contents('php://input');
     $name = $request->getStr('name');
 
-    $file = PhabricatorFile::newFromFileData(
+    $file = PhabricatorFile::newFromXHRUpload(
       $data,
       array(
         'name' => $request->getStr('name'),

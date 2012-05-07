@@ -66,6 +66,8 @@ final class PhabricatorFile extends PhabricatorFileDAO {
       throw new Exception("File size disagrees with uploaded size.");
     }
 
+    self::validateFileSize(strlen($file_data));
+
     return $file_data;
   }
 
@@ -82,8 +84,24 @@ final class PhabricatorFile extends PhabricatorFileDAO {
     return self::newFromFileData($file_data, $params);
   }
 
-  public static function newFromFileData($data, array $params = array()) {
+  public static function newFromXHRUpload($data, array $params = array()) {
+    self::validateFileSize(strlen($data));
+    return self::newFromFileData($data, $params);
+  }
 
+  private static function validateFileSize($size) {
+    $limit = PhabricatorEnv::getEnvConfig('storage.upload-size-limit');
+    if (!$limit) {
+      return;
+    }
+
+    $limit = phabricator_parse_bytes($limit);
+    if ($size > $limit) {
+      throw new PhabricatorFileUploadException(-1000);
+    }
+  }
+
+  public static function newFromFileData($data, array $params = array()) {
     $selector = PhabricatorEnv::newObjectFromConfig('storage.engine-selector');
 
     $engines = $selector->selectStorageEngines($data, $params);
