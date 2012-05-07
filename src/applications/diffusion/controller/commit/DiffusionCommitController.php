@@ -604,8 +604,10 @@ final class DiffusionCommitController extends DiffusionController {
     // commit's author.
     if (!$user_is_author) {
       $may_resign = false;
+
+      $authority_map = array_fill_keys($this->auditAuthorityPHIDs, true);
       foreach ($audit_requests as $request) {
-        if (empty($this->auditAuthorityPHIDs[$request->getAuditorPHID()])) {
+        if (empty($authority_map[$request->getAuditorPHID()])) {
           continue;
         }
         $may_resign = true;
