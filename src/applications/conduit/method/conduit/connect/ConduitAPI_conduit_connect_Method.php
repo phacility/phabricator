@@ -86,7 +86,7 @@ final class ConduitAPI_conduit_connect_Method extends ConduitAPIMethod {
 
     switch ($client) {
       case 'arc':
-        $server_version = 3;
+        $server_version = 4;
         switch ($client_version) {
           case $server_version:
             break;

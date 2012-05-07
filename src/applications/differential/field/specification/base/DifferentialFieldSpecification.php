@@ -431,6 +431,8 @@ abstract class DifferentialFieldSpecification {
    * message, return true. If the authoritative value should always be used,
    * return false. By default, fields can not be overwritten.
    *
+   * arc will only attempt to overwrite field values if run with "--verbatim".
+   *
    * @return bool True to indicate the field is save to overwrite.
    * @task commit
    */

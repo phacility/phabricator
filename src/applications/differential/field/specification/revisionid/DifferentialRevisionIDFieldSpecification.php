@@ -47,7 +47,7 @@ final class DifferentialRevisionIDFieldSpecification
   }
 
   public function renderValueForCommitMessage($is_edit) {
-    if ($is_edit || !$this->id) {
+    if (!$this->id) {
       return null;
     }
     return PhabricatorEnv::getProductionURI('/D'.$this->id);
