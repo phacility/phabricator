@@ -8,6 +8,9 @@
 
 phutil_require_module('phabricator', 'applications/diffusion/query/browse/base');
 phutil_require_module('phabricator', 'applications/diffusion/request/base');
+phutil_require_module('phabricator', 'applications/owners/mail/create');
+phutil_require_module('phabricator', 'applications/owners/mail/delete');
+phutil_require_module('phabricator', 'applications/owners/mail/modify');
 phutil_require_module('phabricator', 'applications/owners/storage/base');
 phutil_require_module('phabricator', 'applications/owners/storage/owner');
 phutil_require_module('phabricator', 'applications/owners/storage/path');

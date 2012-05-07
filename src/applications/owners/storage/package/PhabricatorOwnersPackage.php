@@ -26,6 +26,9 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO {
 
   private $unsavedOwners;
   private $unsavedPaths;
+  private $actorPHID;
+  private $oldPrimaryOwnerPHID;
+  private $oldAuditingEnabled;
 
   public function getConfiguration() {
     return array(
@@ -47,6 +50,33 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO {
   public function attachUnsavedPaths(array $paths) {
     $this->unsavedPaths = $paths;
     return $this;
+  }
+
+  public function attachActorPHID($actor_phid) {
+    $this->actorPHID = $actor_phid;
+    return $this;
+  }
+
+  public function getActorPHID() {
+    return $this->actorPHID;
+  }
+
+  public function attachOldPrimaryOwnerPHID($old_primary) {
+    $this->oldPrimaryOwnerPHID = $old_primary;
+    return $this;
+  }
+
+  public function getOldPrimaryOwnerPHID() {
+    return $this->oldPrimaryOwnerPHID;
+  }
+
+  public function attachOldAuditingEnabled($auditing_enabled) {
+    $this->oldAuditingEnabled = $auditing_enabled;
+    return $this;
+  }
+
+  public function getOldAuditingEnabled() {
+    return $this->oldAuditingEnabled;
   }
 
   public function loadOwners() {
@@ -143,21 +173,36 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO {
 
   public function save() {
 
-    // TODO: Transactions!
+    if ($this->getID()) {
+      $is_new = false;
+    } else {
+      $is_new = true;
+    }
+
+    $this->openTransaction();
 
     $ret = parent::save();
 
+    $add_owners = array();
+    $remove_owners = array();
+    $all_owners = array();
     if ($this->unsavedOwners) {
       $new_owners = array_fill_keys($this->unsavedOwners, true);
       $cur_owners = array();
       foreach ($this->loadOwners() as $owner) {
         if (empty($new_owners[$owner->getUserPHID()])) {
+          $remove_owners[$owner->getUserPHID()] = true;
           $owner->delete();
           continue;
         }
         $cur_owners[$owner->getUserPHID()] = true;
       }
+
       $add_owners = array_diff_key($new_owners, $cur_owners);
+      $all_owners = array_mergev(array(
+        array($this->getPrimaryOwnerPHID() => true),
+        $new_owners,
+        $remove_owners));
       foreach ($add_owners as $phid => $ignored) {
         $owner = new PhabricatorOwnersOwner();
         $owner->setPackageID($this->getID());
@@ -167,15 +212,21 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO {
       unset($this->unsavedOwners);
     }
 
+    $add_paths = array();
+    $remove_paths = array();
+    $touched_repos = array();
     if ($this->unsavedPaths) {
       $new_paths = igroup($this->unsavedPaths, 'repositoryPHID', 'path');
       $cur_paths = $this->loadPaths();
       foreach ($cur_paths as $key => $path) {
         if (empty($new_paths[$path->getRepositoryPHID()][$path->getPath()])) {
+          $touched_repos[$path->getRepositoryPHID()] = true;
+          $remove_paths[$path->getRepositoryPHID()][$path->getPath()] = true;
           $path->delete();
           unset($cur_paths[$key]);
         }
       }
+
       $cur_paths = mgroup($cur_paths, 'getRepositoryPHID', 'getPath');
       foreach ($new_paths as $repository_phid => $paths) {
         // get repository object for path validation
@@ -215,6 +266,8 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO {
             $path = '/'.$path;
           }
           if (empty($cur_paths[$repository_phid][$path]) && $valid) {
+            $touched_repos[$repository_phid] = true;
+            $add_paths[$repository_phid][$path] = true;
             $obj = new PhabricatorOwnersPath();
             $obj->setPackageID($this->getID());
             $obj->setRepositoryPHID($repository_phid);
@@ -226,17 +279,45 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO {
       unset($this->unsavedPaths);
     }
 
+    $this->saveTransaction();
+
+    if ($is_new) {
+      $mail = new PackageCreateMail($this);
+    } else {
+      $mail = new PackageModifyMail(
+        $this,
+        array_keys($add_owners),
+        array_keys($remove_owners),
+        array_keys($all_owners),
+        array_keys($touched_repos),
+        $add_paths,
+        $remove_paths);
+    }
+    $mail->send();
+
     return $ret;
   }
 
   public function delete() {
+    $mails = id(new PackageDeleteMail($this))->prepareMails();
+
+    $this->openTransaction();
     foreach ($this->loadOwners() as $owner) {
       $owner->delete();
     }
     foreach ($this->loadPaths() as $path) {
       $path->delete();
     }
-    return parent::delete();
+
+    $ret = parent::delete();
+
+    $this->saveTransaction();
+
+    foreach ($mails as $mail) {
+      $mail->saveAndSend();
+    }
+
+    return $ret;
   }
 
   private static function splitPath($path) {

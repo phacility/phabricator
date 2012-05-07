@@ -47,10 +47,12 @@ final class PhabricatorOwnersEditController
     if ($request->isFormPost()) {
       $package->setName($request->getStr('name'));
       $package->setDescription($request->getStr('description'));
+      $old_auditing_enabled = $package->getAuditingEnabled();
       $package->setAuditingEnabled($request->getStr('auditing') === 'enabled');
 
       $primary = $request->getArr('primary');
       $primary = reset($primary);
+      $old_primary = $package->getPrimaryOwnerPHID();
       $package->setPrimaryOwnerPHID($primary);
 
       $owners = $request->getArr('owners');
@@ -94,6 +96,9 @@ final class PhabricatorOwnersEditController
       if (!$errors) {
         $package->attachUnsavedOwners($owners);
         $package->attachUnsavedPaths($path_refs);
+        $package->attachOldAuditingEnabled($old_auditing_enabled);
+        $package->attachOldPrimaryOwnerPHID($old_primary);
+        $package->attachActorPHID($user->getPHID());
         try {
           $package->save();
           return id(new AphrontRedirectResponse())

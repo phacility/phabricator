@@ -356,6 +356,14 @@ return array(
   // affects Diffusion.
   'metamta.diffusion.reply-handler' => 'PhabricatorAuditReplyHandler',
 
+  // Prefix prepended to mail sent by Package.
+  'metamta.package.subject-prefix' => '[Package]',
+
+  // See 'metamta.maniphest.reply-handler'. This does similar thing for package
+  // except that it only supports sending out mail and doesn't handle incoming
+  // email.
+  'metamta.package.reply-handler' => 'OwnersPackageReplyHandler',
+
   // By default, Phabricator generates unique reply-to addresses and sends a
   // separate email to each recipient when you enable reply handling. This is
   // more secure than using "From" to establish user identity, but can mean
