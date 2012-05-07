@@ -85,7 +85,7 @@ final class PhabricatorPeopleQuery extends PhabricatorOffsetPagedQuery {
 
     if ($this->usernames) {
       $where[] = qsprintf($conn_r,
-                          'userName IN (%Ls)',
+                          'user.userName IN (%Ls)',
                           $this->usernames);
     }
     if ($this->emails) {
@@ -95,17 +95,17 @@ final class PhabricatorPeopleQuery extends PhabricatorOffsetPagedQuery {
     }
     if ($this->realnames) {
       $where[] = qsprintf($conn_r,
-                          'realName IN (%Ls)',
+                          'user.realName IN (%Ls)',
                           $this->realnames);
     }
     if ($this->phids) {
       $where[] = qsprintf($conn_r,
-                          'phid IN (%Ls)',
+                          'user.phid IN (%Ls)',
                           $this->phids);
     }
     if ($this->ids) {
       $where[] = qsprintf($conn_r,
-                          'id IN (%Ld)',
+                          'user.id IN (%Ld)',
                           $this->ids);
     }
 
