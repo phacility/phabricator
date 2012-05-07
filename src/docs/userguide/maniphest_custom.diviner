@@ -53,6 +53,10 @@ the field. These options are available:
     show next to the checkbox.
   - **checkbox-value**: If type is set to **bool**, the value to show on
     the detail view when the checkbox is selected.
+  - **copy**: When a user creates a task, the UI gives them an option to
+    "Create Another Similar Task". Some fields from the original task are copied
+    into the new task, while others are not; by default, fields are not copied.
+    If you want this field to be copied, specify `true` for the `copy` property.
 
 = Advanced Field Customization =
 
@@ -63,7 +67,7 @@ rendering logic, you can do so with a little work:
     your specialized rendering, validation, storage, etc., logic.
   - Extend @{class:ManiphestTaskExtensions} and return a list of fields which
     includes your custom field objects.
-  - Set 'maniphest.custom-extensions' to the name of your new extensions
+  - Set `maniphest.custom-extensions` to the name of your new extensions
     class.
 
 This is relatively advanced but should give you significant flexibility in

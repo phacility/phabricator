@@ -92,6 +92,20 @@ abstract class ManiphestAuxiliaryFieldSpecification {
 
 
   /**
+   * When the user creates a task, the UI prompts them to "Create another
+   * similar task". This copies some fields (e.g., Owner and CCs) but not other
+   * fields (e.g., description). If this custom field should also be copied,
+   * return true from this method.
+   *
+   * @return bool True to copy the default value from the template task when
+   *              creating a new similar task.
+   */
+  public function shouldCopyWhenCreatingSimilarTask() {
+    return false;
+  }
+
+
+  /**
    * Render a verb to appear in email titles when a transaction involving this
    * field occurs. Specifically, Maniphest emails are formatted like this:
    *

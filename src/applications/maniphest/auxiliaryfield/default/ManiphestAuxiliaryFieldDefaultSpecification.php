@@ -29,6 +29,7 @@ class ManiphestAuxiliaryFieldDefaultSpecification
   private $checkboxLabel;
   private $checkboxValue;
   private $error;
+  private $shouldCopyWhenCreatingSimilarTask;
 
   const TYPE_SELECT = 'select';
   const TYPE_STRING = 'string';
@@ -178,6 +179,7 @@ class ManiphestAuxiliaryFieldDefaultSpecification
     return parent::renderForDetailView();
   }
 
+
   public function renderTransactionDescription(
     ManiphestTransaction $transaction,
     $target) {
@@ -222,6 +224,15 @@ class ManiphestAuxiliaryFieldDefaultSpecification
     }
 
     return $desc;
+  }
+
+  public function setShouldCopyWhenCreatingSimilarTask($copy) {
+    $this->shouldCopyWhenCreatingSimilarTask = $copy;
+    return $this;
+  }
+
+  public function shouldCopyWhenCreatingSimilarTask() {
+    return $this->shouldCopyWhenCreatingSimilarTask;
   }
 
 }

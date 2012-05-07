@@ -277,6 +277,15 @@ final class ManiphestTaskEditController extends ManiphestController {
           ->setURI($redirect_uri);
       }
     } else {
+      if ($aux_fields) {
+        $task->loadAndAttachAuxiliaryAttributes();
+        foreach ($aux_fields as $aux_field) {
+          $aux_key = $aux_field->getAuxiliaryKey();
+          $value = $task->getAuxiliaryAttribute($aux_key);
+          $aux_field->setValueFromStorage($value);
+        }
+      }
+
       if (!$task->getID()) {
         $task->setCCPHIDs(array(
           $user->getPHID(),
@@ -287,6 +296,19 @@ final class ManiphestTaskEditController extends ManiphestController {
             $task->setCCPHIDs($template_task->getCCPHIDs());
             $task->setProjectPHIDs($template_task->getProjectPHIDs());
             $task->setOwnerPHID($template_task->getOwnerPHID());
+
+            if ($aux_fields) {
+              $template_task->loadAndAttachAuxiliaryAttributes();
+              foreach ($aux_fields as $aux_field) {
+                if (!$aux_field->shouldCopyWhenCreatingSimilarTask()) {
+                  continue;
+                }
+
+                $aux_key = $aux_field->getAuxiliaryKey();
+                $value = $template_task->getAuxiliaryAttribute($aux_key);
+                $aux_field->setValueFromStorage($value);
+              }
+            }
           }
         }
       }
@@ -438,16 +460,6 @@ final class ManiphestTaskEditController extends ManiphestController {
           ->setDatasource('/typeahead/common/projects/'));
 
     if ($aux_fields) {
-
-      if (!$request->isFormPost()) {
-        $task->loadAndAttachAuxiliaryAttributes();
-        foreach ($aux_fields as $aux_field) {
-          $aux_key = $aux_field->getAuxiliaryKey();
-          $value = $task->getAuxiliaryAttribute($aux_key);
-          $aux_field->setValueFromStorage($value);
-        }
-      }
-
       foreach ($aux_fields as $aux_field) {
         if ($aux_field->isRequired() &&
             !$aux_field->getError() &&
