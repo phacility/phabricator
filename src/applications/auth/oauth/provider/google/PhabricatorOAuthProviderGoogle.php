@@ -70,6 +70,10 @@ final class PhabricatorOAuthProviderGoogle extends PhabricatorOAuthProvider {
     return 'https://accounts.google.com/o/oauth2/token';
   }
 
+  protected function getTokenExpiryKey() {
+    return 'expires_in';
+  }
+
   public function getUserInfoURI() {
     return 'https://www.googleapis.com/oauth2/v1/userinfo';
   }

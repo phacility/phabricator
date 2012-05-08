@@ -146,6 +146,9 @@ return array(
     'phabricator.csrf-key',
     'facebook.application-secret',
     'github.application-secret',
+    'google.application-secret',
+    'phabricator.application-secret',
+    'disqus.application-secret',
     'phabricator.mail-key',
     'security.hmac-key',
   ),
@@ -511,6 +514,25 @@ return array(
 
   // The Google "Client Secret" to use for Google API access.
   'google.application-secret'   => null,
+
+// -- Disqus OAuth ---------------------------------------------------------- //
+
+  // Can users use Disqus credentials to login to Phabricator?
+  'disqus.auth-enabled'         => false,
+
+  // Can users use Disqus credentials to create new Phabricator accounts?
+  'disqus.registration-enabled' => true,
+
+  // Are Disqus accounts permanently linked to Phabricator accounts, or can
+  // the user unlink them?
+  'disqus.auth-permanent'       => false,
+
+  // The Disqus "Client ID" to use for Disqus API access.
+  'disqus.application-id'       => null,
+
+  // The Disqus "Client Secret" to use for Disqus API access.
+  'disqus.application-secret'   => null,
+
 
 // -- Phabricator OAuth ----------------------------------------------------- //
 

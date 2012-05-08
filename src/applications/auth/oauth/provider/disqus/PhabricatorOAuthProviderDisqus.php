@@ -16,32 +16,32 @@
  * limitations under the License.
  */
 
-final class PhabricatorOAuthProviderGitHub extends PhabricatorOAuthProvider {
+final class PhabricatorOAuthProviderDisqus extends PhabricatorOAuthProvider {
 
   private $userData;
 
   public function getProviderKey() {
-    return self::PROVIDER_GITHUB;
+    return self::PROVIDER_DISQUS;
   }
 
   public function getProviderName() {
-    return 'GitHub';
+    return 'Disqus';
   }
 
   public function isProviderEnabled() {
-    return PhabricatorEnv::getEnvConfig('github.auth-enabled');
+    return PhabricatorEnv::getEnvConfig('disqus.auth-enabled');
   }
 
   public function isProviderLinkPermanent() {
-    return PhabricatorEnv::getEnvConfig('github.auth-permanent');
+    return PhabricatorEnv::getEnvConfig('disqus.auth-permanent');
   }
 
   public function isProviderRegistrationEnabled() {
-    return PhabricatorEnv::getEnvConfig('github.registration-enabled');
+    return PhabricatorEnv::getEnvConfig('disqus.registration-enabled');
   }
 
   public function getClientID() {
-    return PhabricatorEnv::getEnvConfig('github.application-id');
+    return PhabricatorEnv::getEnvConfig('disqus.application-id');
   }
 
   public function renderGetClientIDHelp() {
@@ -49,7 +49,7 @@ final class PhabricatorOAuthProviderGitHub extends PhabricatorOAuthProvider {
   }
 
   public function getClientSecret() {
-    return PhabricatorEnv::getEnvConfig('github.application-secret');
+    return PhabricatorEnv::getEnvConfig('disqus.application-secret');
   }
 
   public function renderGetClientSecretHelp() {
@@ -57,34 +57,51 @@ final class PhabricatorOAuthProviderGitHub extends PhabricatorOAuthProvider {
   }
 
   public function getAuthURI() {
-    return 'https://github.com/login/oauth/authorize';
+    return 'https://disqus.com/api/oauth/2.0/authorize/';
   }
 
   public function getTokenURI() {
-    return 'https://github.com/login/oauth/access_token';
+    return 'https://disqus.com/api/oauth/2.0/access_token/';
   }
 
   protected function getTokenExpiryKey() {
-    // github access tokens do not have time-based expiry
-    return null;
+    return 'expires_in';
+  }
+
+  public function getExtraAuthParameters() {
+    return array(
+      'response_type' => 'code',
+    );
+  }
+
+  public function getExtraTokenParameters() {
+    return array(
+      'grant_type' => 'authorization_code',
+    );
+  }
+
+  public function decodeTokenResponse($response) {
+    return json_decode($response, true);
   }
 
   public function getTestURIs() {
     return array(
-      'http://github.com',
+      'http://disqus.com',
+      $this->getUserInfoURI(),
     );
   }
 
   public function getUserInfoURI() {
-    return 'https://github.com/api/v2/json/user/show';
+    return 'https://disqus.com/api/3.0/users/details.json?'.
+           'api_key='.$this->getClientID();
   }
 
   public function getMinimumScope() {
-    return null;
+    return 'read';
   }
 
   public function setUserData($data) {
-    $data = idx(json_decode($data, true), 'user');
+    $data = idx(json_decode($data, true), 'response');
     $this->validateUserData($data);
     $this->userData = $data;
     return $this;
@@ -99,24 +116,22 @@ final class PhabricatorOAuthProviderGitHub extends PhabricatorOAuthProvider {
   }
 
   public function retrieveUserAccountName() {
-    return $this->userData['login'];
+    return $this->userData['username'];
   }
 
   public function retrieveUserProfileImage() {
-    $id = $this->userData['gravatar_id'];
-    if ($id) {
-      $uri = 'http://www.gravatar.com/avatar/'.$id.'?s=50';
-      return @file_get_contents($uri);
+    $avatar = idx($this->userData, 'avatar');
+    if ($avatar) {
+      $uri = idx($avatar, 'permalink');
+      if ($uri) {
+        return @file_get_contents($uri);
+      }
     }
     return null;
   }
 
   public function retrieveUserAccountURI() {
-    $username = $this->retrieveUserAccountName();
-    if ($username) {
-      return 'https://github.com/'.$username;
-    }
-    return null;
+    return idx($this->userData, 'profileUrl');
   }
 
   public function retrieveUserRealName() {
@@ -126,5 +141,4 @@ final class PhabricatorOAuthProviderGitHub extends PhabricatorOAuthProvider {
   public function shouldDiagnoseAppLogin() {
     return true;
   }
-
 }

@@ -73,6 +73,10 @@ final class PhabricatorOAuthProviderFacebook extends PhabricatorOAuthProvider {
     return 'https://graph.facebook.com/oauth/access_token';
   }
 
+  protected function getTokenExpiryKey() {
+    return 'expires';
+  }
+
   public function getUserInfoURI() {
     return 'https://graph.facebook.com/me';
   }

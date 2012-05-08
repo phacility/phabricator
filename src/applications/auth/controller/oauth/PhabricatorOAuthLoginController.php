@@ -59,10 +59,7 @@ final class PhabricatorOAuthLoginController
     }
 
     $userinfo_uri = new PhutilURI($provider->getUserInfoURI());
-    $userinfo_uri->setQueryParams(
-      array(
-        'access_token' => $this->accessToken,
-      ));
+    $userinfo_uri->setQueryParam('access_token', $this->accessToken);
 
     try {
       $user_data = @file_get_contents($userinfo_uri);
@@ -129,9 +126,10 @@ final class PhabricatorOAuthLoginController
           hsprintf(
             '<p>Link your %s account to your Phabricator account?</p>',
             $provider_name));
-        $dialog->addHiddenInput('token', $provider->getAccessToken());
+        $dialog->addHiddenInput('confirm_token', $provider->getAccessToken());
         $dialog->addHiddenInput('expires', $oauth_info->getTokenExpires());
         $dialog->addHiddenInput('state', $this->oauthState);
+        $dialog->addHiddenInput('scope', $oauth_info->getTokenScope());
         $dialog->addSubmitButton('Link Accounts');
         $dialog->addCancelButton('/settings/page/'.$provider_key.'/');
 
@@ -238,18 +236,18 @@ final class PhabricatorOAuthLoginController
   private function retrieveAccessToken(PhabricatorOAuthProvider $provider) {
     $request = $this->getRequest();
 
-    $token = $request->getStr('token');
+    $token = $request->getStr('confirm_token');
     if ($token) {
       $this->tokenExpires = $request->getInt('expires');
-      $this->accessToken = $token;
-      $this->oauthState = $request->getStr('state');
+      $this->accessToken  = $token;
+      $this->oauthState   = $request->getStr('state');
       return null;
     }
 
-    $client_id        = $provider->getClientID();
-    $client_secret    = $provider->getClientSecret();
-    $redirect_uri     = $provider->getRedirectURI();
-    $auth_uri         = $provider->getTokenURI();
+    $client_id      = $provider->getClientID();
+    $client_secret  = $provider->getClientSecret();
+    $redirect_uri   = $provider->getRedirectURI();
+    $auth_uri       = $provider->getTokenURI();
 
     $code = $request->getStr('code');
     $query_data = array(
@@ -294,12 +292,9 @@ final class PhabricatorOAuthLoginController
       return $this->buildErrorResponse(new PhabricatorOAuthFailureView());
     }
 
-    if (idx($data, 'expires')) {
-      $this->tokenExpires = time() + $data['expires'];
-    }
-
-    $this->accessToken = $token;
-    $this->oauthState = $request->getStr('state');
+    $this->tokenExpires = $provider->getTokenExpiryFromArray($data);
+    $this->accessToken  = $token;
+    $this->oauthState   = $request->getStr('state');
 
     return null;
   }
@@ -311,16 +306,24 @@ final class PhabricatorOAuthLoginController
       $provider->getProviderKey(),
       $provider->retrieveUserID());
 
+    $scope = $this->getRequest()->getStr('scope');
+
     if (!$oauth_info) {
       $oauth_info = new PhabricatorUserOAuthInfo();
       $oauth_info->setOAuthProvider($provider->getProviderKey());
       $oauth_info->setOAuthUID($provider->retrieveUserID());
+      // some providers don't tell you what scope you got, so default
+      // to the minimum Phabricator requires rather than assuming no scope
+      if (!$scope) {
+        $scope = $provider->getMinimumScope();
+      }
     }
 
     $oauth_info->setAccountURI($provider->retrieveUserAccountURI());
     $oauth_info->setAccountName($provider->retrieveUserAccountName());
     $oauth_info->setToken($provider->getAccessToken());
     $oauth_info->setTokenStatus(PhabricatorUserOAuthInfo::TOKEN_STATUS_GOOD);
+    $oauth_info->setTokenScope($scope);
 
     // If we have out-of-date expiration info, just clear it out. Then replace
     // it with good info if the provider gave it to us.
@@ -341,7 +344,4 @@ final class PhabricatorOAuthLoginController
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
     $info->save();
   }
-
-
-
 }

@@ -91,6 +91,10 @@ extends PhabricatorOAuthProvider {
     return $this->getURI('/oauthserver/token/');
   }
 
+  protected function getTokenExpiryKey() {
+    return 'expires_in';
+  }
+
   public function getUserInfoURI() {
     return $this->getURI('/api/user.whoami');
   }
