@@ -99,9 +99,18 @@ final class DiffusionRepositoryController extends DiffusionController {
       $branch_query = DiffusionBranchQuery::newFromDiffusionRequest($drequest);
       $branches = $branch_query->loadBranches();
 
+      $commits = id(new PhabricatorAuditCommitQuery())
+      ->withIdentifiers(
+        $drequest->getRepository()->getID(),
+        mpull($branches, 'getHeadCommitIdentifier'))
+      ->needCommitData(true)
+      ->execute();
+
       $branch_table = new DiffusionBranchTableView();
       $branch_table->setDiffusionRequest($drequest);
       $branch_table->setBranches($branches);
+      $branch_table->setCommits($commits);
+      $branch_table->setUser($this->getRequest()->getUser());
 
       $branch_panel = new AphrontPanelView();
       $branch_panel->setHeader('Branches');
