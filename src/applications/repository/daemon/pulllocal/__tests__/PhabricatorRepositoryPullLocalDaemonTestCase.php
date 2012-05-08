@@ -16,10 +16,10 @@
  * limitations under the License.
  */
 
-final class PhabricatorRepositoryGitCommitDiscoveryDaemonTestCase
+final class PhabricatorRepositoryPullLocalDaemonTestCase
   extends PhabricatorTestCase {
 
-  public function testVerifySameGitOrigin() {
+  public function testExecuteGitVerifySameOrigin() {
     $cases = array(
       array(
         'ssh://user@domain.com/path.git',
@@ -94,7 +94,7 @@ final class PhabricatorRepositoryGitCommitDiscoveryDaemonTestCase
 
       $ex = null;
       try {
-        PhabricatorRepositoryGitCommitDiscoveryDaemon::verifySameGitOrigin(
+        PhabricatorRepositoryPullLocalDaemon::executeGitverifySameOrigin(
           $remote,
           $config,
           '(a test case)');

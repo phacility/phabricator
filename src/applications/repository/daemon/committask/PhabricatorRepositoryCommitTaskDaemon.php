@@ -17,7 +17,7 @@
  */
 
 final class PhabricatorRepositoryCommitTaskDaemon
-  extends PhabricatorRepositoryDaemon {
+  extends PhabricatorDaemon {
 
   final public function run() {
     do {

@@ -6,12 +6,20 @@
 
 
 
+phutil_require_module('arcanist', 'repository/parser/mercurial');
+
+phutil_require_module('phabricator', 'applications/diffusion/data/branch');
+phutil_require_module('phabricator', 'applications/diffusion/query/branch/git');
 phutil_require_module('phabricator', 'applications/repository/constants/repositorytype');
+phutil_require_module('phabricator', 'applications/repository/storage/commit');
 phutil_require_module('phabricator', 'applications/repository/storage/repository');
 phutil_require_module('phabricator', 'infrastructure/daemon/base');
+phutil_require_module('phabricator', 'infrastructure/daemon/timeline/storage/event');
+phutil_require_module('phabricator', 'storage/queryfx');
 
 phutil_require_module('phutil', 'error');
 phutil_require_module('phutil', 'filesystem');
+phutil_require_module('phutil', 'parser/argument/parser');
 phutil_require_module('phutil', 'utils');
 
 

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,11 @@ final class DiffusionSvnHistoryQuery extends DiffusionHistoryQuery {
       PhabricatorRepository::TABLE_PATH,
       array(md5('/'.trim($path, '/'))));
     $paths = ipull($paths, 'id', 'path');
-    $path_id = $paths['/'.trim($path, '/')];
+    $path_id = idx($paths, '/'.trim($path, '/'));
+
+    if (!$path_id) {
+      return array();
+    }
 
     $filter_query = '';
     if ($this->needDirectChanges) {

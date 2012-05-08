@@ -6,8 +6,8 @@
 
 
 
-phutil_require_module('phabricator', 'applications/repository/daemon/commitdiscovery/git');
+phutil_require_module('phabricator', 'applications/repository/daemon/pulllocal');
 phutil_require_module('phabricator', 'infrastructure/testing/testcase');
 
 
-phutil_require_source('PhabricatorRepositoryGitCommitDiscoveryDaemonTestCase.php');
+phutil_require_source('PhabricatorRepositoryPullLocalDaemonTestCase.php');

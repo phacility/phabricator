@@ -63,6 +63,8 @@ final class PhabricatorRepositoryEditController
           phutil_escape_html($name)));
     }
 
+    $nav->appendChild($this->renderDaemonNotice());
+
     $this->sideNav = $nav;
 
     switch ($this->view) {
@@ -345,9 +347,7 @@ final class PhabricatorRepositoryEditController
       $error_view = new AphrontErrorView();
       $error_view->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
       $error_view->setTitle('Changes Saved');
-      $error_view->appendChild(
-        'Tracking changes were saved. You may need to restart the daemon '.
-        'before changes will take effect.');
+      $error_view->appendChild('Tracking changes were saved.');
     } else if (!$repository->isTracked()) {
       $error_view = new AphrontErrorView();
       $error_view->setSeverity(AphrontErrorView::SEVERITY_WARNING);

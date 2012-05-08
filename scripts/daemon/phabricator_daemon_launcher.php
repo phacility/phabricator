@@ -52,13 +52,20 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
     $need_launch = phd_load_tracked_repositories();
     if (!$need_launch) {
       echo "There are no repositories with tracking enabled.\n";
-      exit(0);
+      exit(1);
     }
 
     will_launch($control);
+
+    echo "Launching PullLocal daemon in readonly mode...\n";
+
     $control->launchDaemon(
       'PhabricatorRepositoryPullLocalDaemon',
-      array());
+      array(
+        '--no-discovery',
+      ));
+
+    echo "Done.\n";
     break;
 
   case 'repository-launch-master':
@@ -66,55 +73,24 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
     if (!$need_launch) {
       echo "There are no repositories with tracking enabled.\n";
       exit(1);
-    } else {
-      will_launch($control);
-
-      $control->launchDaemon(
-        'PhabricatorRepositoryPullLocalDaemon',
-        array());
-
-      foreach ($need_launch as $repository) {
-        $name = $repository->getName();
-        $callsign = $repository->getCallsign();
-        $desc = "'{$name}' ({$callsign})";
-        $phid = $repository->getPHID();
-
-        switch ($repository->getVersionControlSystem()) {
-          case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-            echo "Launching discovery daemon on the {$desc} repository...\n";
-            $control->launchDaemon(
-              'PhabricatorRepositoryGitCommitDiscoveryDaemon',
-              array(
-                $phid,
-              ));
-            break;
-          case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-            echo "Launching discovery daemon on the {$desc} repository...\n";
-            $control->launchDaemon(
-              'PhabricatorRepositorySvnCommitDiscoveryDaemon',
-              array(
-                $phid,
-              ));
-            break;
-          case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-            echo "Launching discovery daemon on the {$desc} repository...\n";
-            $control->launchDaemon(
-              'PhabricatorRepositoryMercurialCommitDiscoveryDaemon',
-              array(
-                $phid,
-              ));
-            break;
-
-        }
-      }
-
-      echo "Launching CommitTask daemon...\n";
-      $control->launchDaemon(
-        'PhabricatorRepositoryCommitTaskDaemon',
-        array());
-
-      echo "Done.\n";
     }
+
+    will_launch($control);
+
+    echo "Launching PullLocal daemon in master mode...\n";
+    $control->launchDaemon(
+      'PhabricatorRepositoryPullLocalDaemon',
+      array());
+
+    echo "Launching CommitTask daemon...\n";
+    $control->launchDaemon(
+      'PhabricatorRepositoryCommitTaskDaemon',
+      array());
+
+    echo "NOTE: Make sure you run some taskmaster daemons too, e.g. ".
+         "with 'phd launch 4 taskmaster'.\n";
+
+    echo "Done.\n";
     break;
 
   case 'launch':

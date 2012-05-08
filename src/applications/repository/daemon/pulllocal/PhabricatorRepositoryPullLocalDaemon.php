@@ -24,7 +24,12 @@
  * responsible for only some repositories, you can launch it with a list of
  * PHIDs or callsigns:
  *
- *   ./phd launch repositorypulllocal X Q Z
+ *   ./phd launch repositorypulllocal -- X Q Z
+ *
+ * You can also launch a daemon which is responsible for all //but// one or
+ * more repositories:
+ *
+ *   ./phd launch repositorypulllocal -- --not A --not B
  *
  * If you have a very large number of repositories and some aren't being pulled
  * as frequently as you'd like, you can either change the pull frequency of
@@ -40,6 +45,8 @@
 final class PhabricatorRepositoryPullLocalDaemon
   extends PhabricatorDaemon {
 
+  private static $commitCache = array();
+
 
 /* -(  Pulling Repositories  )----------------------------------------------- */
 
@@ -48,14 +55,45 @@ final class PhabricatorRepositoryPullLocalDaemon
    * @task pull
    */
   public function run() {
+    $argv = $this->getArgv();
+    array_unshift($argv, __CLASS__);
+    $args = new PhutilArgumentParser($argv);
+    $args->parse(
+      array(
+        array(
+          'name'      => 'no-discovery',
+          'help'      => 'Pull only, without discovering commits.',
+        ),
+        array(
+          'name'      => 'not',
+          'param'     => 'repository',
+          'repeat'    => true,
+          'help'      => 'Do not pull __repository__.',
+        ),
+        array(
+          'name'      => 'repositories',
+          'wildcard'  => true,
+          'help'      => 'Pull specific __repositories__ instead of all.',
+        ),
+      ));
+
+    $no_discovery   = $args->getArg('no-discovery');
+    $repo_names     = $args->getArg('repositories', array());
+    $exclude_names  = $args->getArg('not', array());
 
     // Each repository has an individual pull frequency; after we pull it,
     // wait that long to pull it again. When we start up, try to pull everything
     // serially.
     $retry_after = array();
 
+    $min_sleep = 15;
+
     while (true) {
-      $repositories = $this->loadRepositories();
+      $repositories = $this->loadRepositories($repo_names);
+      if ($exclude_names) {
+        $exclude = $this->loadRepositories($exclude_names);
+        $repositories = array_diff_key($repositories, $exclude);
+      }
 
       // Shuffle the repositories, then re-key the array since shuffle()
       // discards keys. This is mostly for startup, we'll use soft priorities
@@ -79,22 +117,41 @@ final class PhabricatorRepositoryPullLocalDaemon
 
       foreach ($repositories as $id => $repository) {
         $after = idx($retry_after, $id, 0);
-        if ($after >= time()) {
+        if ($after > time()) {
+          continue;
+        }
+
+        $tracked = $repository->isTracked();
+        if (!$tracked) {
           continue;
         }
 
         try {
           self::pullRepository($repository);
-          $sleep_for = $repository->getDetail('pull-frequency', 15);
+
+          if (!$no_discovery) {
+            // TODO: It would be nice to discover only if we pulled something,
+            // but this isn't totally trivial.
+            self::discoverRepository($repository);
+          }
+
+          $sleep_for = $repository->getDetail('pull-frequency', $min_sleep);
           $retry_after[$id] = time() + $sleep_for;
         } catch (Exception $ex) {
-          $retry_after[$id] = time() + 15;
+          $retry_after[$id] = time() + $min_sleep;
           phlog($ex);
         }
+
+        $this->stillWorking();
       }
 
-      $sleep_until = max(min($retry_after), time() + 15);
-      sleep($sleep_until - time());
+      if ($retry_after) {
+        $sleep_until = max(min($retry_after), time() + $min_sleep);
+      } else {
+        $sleep_until = time() + $min_sleep;
+      }
+
+      $this->sleep($sleep_until - time());
     }
   }
 
@@ -102,12 +159,11 @@ final class PhabricatorRepositoryPullLocalDaemon
   /**
    * @task pull
    */
-  protected function loadRepositories() {
-    $argv = $this->getArgv();
-    if (!count($argv)) {
+  protected function loadRepositories(array $names) {
+    if (!count($names)) {
       return id(new PhabricatorRepository())->loadAll();
     } else {
-      return PhabricatorRepository::loadAllByPHIDOrCallsign($argv);
+      return PhabricatorRepository::loadAllByPHIDOrCallsign($names);
     }
   }
 
@@ -116,11 +172,6 @@ final class PhabricatorRepositoryPullLocalDaemon
    * @task pull
    */
   public static function pullRepository(PhabricatorRepository $repository) {
-    $tracked = $repository->isTracked();
-    if (!$tracked) {
-      return;
-    }
-
     $vcs = $repository->getVersionControlSystem();
 
     $is_svn = ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_SVN);
@@ -153,18 +204,125 @@ final class PhabricatorRepositoryPullLocalDaemon
       }
 
       if ($is_git) {
-        self::executeGitCreate($repository, $local_path);
+        return self::executeGitCreate($repository, $local_path);
       } else if ($is_hg) {
-        self::executeHgCreate($repository, $local_path);
+        return self::executeHgCreate($repository, $local_path);
       }
     } else {
       if ($is_git) {
-        self::executeGitUpdate($repository, $local_path);
+        return self::executeGitUpdate($repository, $local_path);
       } else if ($is_hg) {
-        self::executeHgUpdate($repository, $local_path);
+        return self::executeHgUpdate($repository, $local_path);
       }
     }
   }
+
+  public static function discoverRepository(PhabricatorRepository $repository) {
+    $vcs = $repository->getVersionControlSystem();
+    switch ($vcs) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        return self::executeGitDiscover($repository);
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        return self::executeSvnDiscover($repository);
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        return self::executeHgDiscover($repository);
+      default:
+        throw new Exception("Unknown VCS '{$vcs}'!");
+    }
+  }
+
+
+  private static function isKnownCommit(
+    PhabricatorRepository $repository,
+    $target) {
+
+    if (self::getCache($repository, $target)) {
+      return true;
+    }
+
+    $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
+      'repositoryID = %s AND commitIdentifier = %s',
+      $repository->getID(),
+      $target);
+
+    if (!$commit) {
+      return false;
+    }
+
+    self::setCache($repository, $target);
+    while (count(self::$commitCache) > 2048) {
+      array_shift(self::$commitCache);
+    }
+
+    return true;
+  }
+
+  private static function recordCommit(
+    PhabricatorRepository $repository,
+    $commit_identifier,
+    $epoch) {
+
+    $commit = new PhabricatorRepositoryCommit();
+    $commit->setRepositoryID($repository->getID());
+    $commit->setCommitIdentifier($commit_identifier);
+    $commit->setEpoch($epoch);
+
+    try {
+      $commit->save();
+      $event = new PhabricatorTimelineEvent(
+        'cmit',
+        array(
+          'id' => $commit->getID(),
+        ));
+      $event->recordEvent();
+
+      queryfx(
+        $repository->establishConnection('w'),
+        'INSERT INTO %T (repositoryID, size, lastCommitID, epoch)
+          VALUES (%d, 1, %d, %d)
+          ON DUPLICATE KEY UPDATE
+            size = size + 1,
+            lastCommitID =
+              IF(VALUES(epoch) > epoch, VALUES(lastCommitID), lastCommitID),
+            epoch = IF(VALUES(epoch) > epoch, VALUES(epoch), epoch)',
+        PhabricatorRepository::TABLE_SUMMARY,
+        $repository->getID(),
+        $commit->getID(),
+        $epoch);
+
+      self::setCache($repository, $commit_identifier);
+    } catch (AphrontQueryDuplicateKeyException $ex) {
+      // Ignore. This can happen because we discover the same new commit
+      // more than once when looking at history, or because of races or
+      // data inconsistency or cosmic radiation; in any case, we're still
+      // in a good state if we ignore the failure.
+      self::setCache($repository, $commit_identifier);
+    }
+  }
+
+  private static function setCache(
+    PhabricatorRepository $repository,
+    $commit_identifier) {
+
+    $key = self::getCacheKey($repository, $commit_identifier);
+    self::$commitCache[$key] = true;
+  }
+
+  private static function getCache(
+    PhabricatorRepository $repository,
+    $commit_identifier) {
+
+    $key = self::getCacheKey($repository, $commit_identifier);
+    return idx(self::$commitCache, $key, false);
+  }
+
+  private static function getCacheKey(
+    PhabricatorRepository $repository,
+    $commit_identifier) {
+
+    return $repository->getID().':'.$commit_identifier;
+  }
+
 
 
 /* -(  Git Implementation  )------------------------------------------------- */
@@ -249,6 +407,147 @@ final class PhabricatorRepositoryPullLocalDaemon
   }
 
 
+  /**
+   * @task git
+   */
+  private static function executeGitDiscover(
+    PhabricatorRepository $repository) {
+
+    list($remotes) = $repository->execxLocalCommand(
+      'remote show -n origin');
+
+    $matches = null;
+    if (!preg_match('/^\s*Fetch URL:\s*(.*?)\s*$/m', $remotes, $matches)) {
+      throw new Exception(
+        "Expected 'Fetch URL' in 'git remote show -n origin'.");
+    }
+
+    self::executeGitverifySameOrigin(
+      $matches[1],
+      $repository->getRemoteURI(),
+      $repository->getLocalPath());
+
+    list($stdout) = $repository->execxLocalCommand(
+      'branch -r --verbose --no-abbrev');
+
+    $branches = DiffusionGitBranchQuery::parseGitRemoteBranchOutput(
+      $stdout,
+      $only_this_remote = DiffusionBranchInformation::DEFAULT_GIT_REMOTE);
+
+    $tracked_something = false;
+    foreach ($branches as $name => $commit) {
+      if (!$repository->shouldTrackBranch($name)) {
+        continue;
+      }
+
+      $tracked_something = true;
+
+      if (self::isKnownCommit($repository, $commit)) {
+        continue;
+      } else {
+        self::executeGitDiscoverCommit($repository, $commit);
+      }
+    }
+
+    if (!$tracked_something) {
+      $repo_name = $repository->getName();
+      $repo_callsign = $repository->getCallsign();
+      throw new Exception(
+        "Repository r{$repo_callsign} '{$repo_name}' has no tracked branches! ".
+        "Verify that your branch filtering settings are correct.");
+    }
+  }
+
+
+  /**
+   * @task git
+   */
+  private static function executeGitDiscoverCommit(
+    PhabricatorRepository $repository,
+    $commit) {
+
+    $discover = array($commit);
+    $insert = array($commit);
+
+    $seen_parent = array();
+
+    while (true) {
+      $target = array_pop($discover);
+      list($parents) = $repository->execxLocalCommand(
+        'log -n1 --pretty="%%P" %s',
+        $target);
+      $parents = array_filter(explode(' ', trim($parents)));
+      foreach ($parents as $parent) {
+        if (isset($seen_parent[$parent])) {
+          // We end up in a loop here somehow when we parse Arcanist if we
+          // don't do this. TODO: Figure out why and draw a pretty diagram
+          // since it's not evident how parsing a DAG with this causes the
+          // loop to stop terminating.
+          continue;
+        }
+        $seen_parent[$parent] = true;
+        if (!self::isKnownCommit($repository, $parent)) {
+          $discover[] = $parent;
+          $insert[] = $parent;
+        }
+      }
+      if (empty($discover)) {
+        break;
+      }
+    }
+
+    while (true) {
+      $target = array_pop($insert);
+      list($epoch) = $repository->execxLocalCommand(
+        'log -n1 --pretty="%%ct" %s',
+        $target);
+      $epoch = trim($epoch);
+
+      self::recordCommit($repository, $target, $epoch);
+
+      if (empty($insert)) {
+        break;
+      }
+    }
+  }
+
+
+  /**
+   * @task git
+   */
+  public static function executeGitVerifySameOrigin($remote, $expect, $where) {
+    $remote_uri = PhabricatorRepository::newPhutilURIFromGitURI($remote);
+    $expect_uri = PhabricatorRepository::newPhutilURIFromGitURI($expect);
+
+    $remote_path = $remote_uri->getPath();
+    $expect_path = $expect_uri->getPath();
+
+    $remote_match = self::executeGitNormalizePath($remote_path);
+    $expect_match = self::executeGitNormalizePath($expect_path);
+
+    if ($remote_match != $expect_match) {
+      throw new Exception(
+        "Working copy at '{$where}' has a mismatched origin URL. It has ".
+        "origin URL '{$remote}' (with remote path '{$remote_path}'), but the ".
+        "configured URL '{$expect}' (with remote path '{$expect_path}') is ".
+        "expected. Refusing to proceed because this may indicate that the ".
+        "working copy is actually some other repository.");
+    }
+  }
+
+
+  /**
+   * @task git
+   */
+  private static function executeGitNormalizePath($path) {
+    // Strip away trailing "/" and ".git", so similar paths correctly match.
+
+    $path = rtrim($path, '/');
+    $path = preg_replace('/\.git$/', '', $path);
+    return $path;
+  }
+
+
 /* -(  Mercurial Implementation  )------------------------------------------- */
 
 
@@ -304,6 +603,179 @@ final class PhabricatorRepositoryPullLocalDaemon
         throw $ex;
       }
     }
+  }
+
+  private static function executeHgDiscover(PhabricatorRepository $repository) {
+    // NOTE: "--debug" gives us 40-character hashes.
+    list($stdout) = $repository->execxLocalCommand('--debug branches');
+
+    $branches = ArcanistMercurialParser::parseMercurialBranches($stdout);
+    $got_something = false;
+    foreach ($branches as $name => $branch) {
+      $commit = $branch['rev'];
+      if (self::isKnownCommit($repository, $commit)) {
+        continue;
+      } else {
+        self::executeHgDiscoverCommit($repository, $commit);
+        $got_something = true;
+      }
+    }
+
+    return $got_something;
+  }
+
+  private static function executeHgDiscoverCommit(
+    PhabricatorRepository $repository,
+    $commit) {
+
+    $discover = array($commit);
+    $insert = array($commit);
+
+    $seen_parent = array();
+
+    // For all the new commits at the branch heads, walk backward until we find
+    // only commits we've aleady seen.
+    while (true) {
+      $target = array_pop($discover);
+      list($stdout) = $repository->execxLocalCommand(
+        'parents --rev %s --template %s',
+        $target,
+        '{node}\n');
+      $parents = array_filter(explode("\n", trim($stdout)));
+      foreach ($parents as $parent) {
+        if (isset($seen_parent[$parent])) {
+          continue;
+        }
+        $seen_parent[$parent] = true;
+        if (!self::isKnownCommit($repository, $parent)) {
+          $discover[] = $parent;
+          $insert[] = $parent;
+        }
+      }
+      if (empty($discover)) {
+        break;
+      }
+    }
+
+    while (true) {
+      $target = array_pop($insert);
+      list($stdout) = $repository->execxLocalCommand(
+        'log --rev %s --template %s',
+        $target,
+        '{date|rfc822date}');
+      $epoch = strtotime($stdout);
+
+      self::recordCommit($repository, $target, $epoch);
+
+      if (empty($insert)) {
+        break;
+      }
+    }
+  }
+
+
+/* -(  Subversion Implementation  )------------------------------------------ */
+
+
+  private static function executeSvnDiscover(
+    PhabricatorRepository $repository) {
+
+    $uri = self::executeSvnGetBaseSVNLogURI($repository);
+
+    list($xml) = $repository->execxRemoteCommand(
+      'log --xml --quiet --limit 1 %s@HEAD',
+      $uri);
+
+    $results = self::executeSvnParseLogXML($xml);
+    $commit = head_key($results);
+    $epoch  = head($results);
+
+    if (self::isKnownCommit($repository, $commit)) {
+      return false;
+    }
+
+    self::executeSvnDiscoverCommit($repository, $commit, $epoch);
+    return true;
+  }
+
+  private static function executeSvnDiscoverCommit(
+    PhabricatorRepository $repository,
+    $commit,
+    $epoch) {
+
+    $uri = self::executeSvnGetBaseSVNLogURI($repository);
+
+    $discover = array(
+      $commit => $epoch,
+    );
+    $upper_bound = $commit;
+
+    $limit = 1;
+    while ($upper_bound > 1 &&
+           !self::isKnownCommit($repository, $upper_bound)) {
+      // Find all the unknown commits on this path. Note that we permit
+      // importing an SVN subdirectory rather than the entire repository, so
+      // commits may be nonsequential.
+      list($err, $xml, $stderr) = $repository->execRemoteCommand(
+        ' log --xml --quiet --limit %d %s@%d',
+        $limit,
+        $uri,
+        $upper_bound - 1);
+      if ($err) {
+        if (preg_match('/(path|File) not found/', $stderr)) {
+          // We've gone all the way back through history and this path was not
+          // affected by earlier commits.
+          break;
+        } else {
+          throw new Exception("svn log error #{$err}: {$stderr}");
+        }
+      }
+      $discover += self::executeSvnParseLogXML($xml);
+
+      $upper_bound = min(array_keys($discover));
+
+      // Discover 2, 4, 8, ... 256 logs at a time. This allows us to initially
+      // import large repositories fairly quickly, while pulling only as much
+      // data as we need in the common case (when we've already imported the
+      // repository and are just grabbing one commit at a time).
+      $limit = min($limit * 2, 256);
+    }
+
+    // NOTE: We do writes only after discovering all the commits so that we're
+    // never left in a state where we've missed commits -- if the discovery
+    // script terminates it can always resume and restore the import to a good
+    // state. This is also why we sort the discovered commits so we can do
+    // writes forward from the smallest one.
+
+    ksort($discover);
+    foreach ($discover as $commit => $epoch) {
+      self::recordCommit($repository, $commit, $epoch);
+    }
+  }
+
+  private static function executeSvnParseLogXML($xml) {
+    $xml = phutil_utf8ize($xml);
+
+    $result = array();
+
+    $log = new SimpleXMLElement($xml);
+    foreach ($log->logentry as $entry) {
+      $commit = (int)$entry['revision'];
+      $epoch  = (int)strtotime((string)$entry->date[0]);
+      $result[$commit] = $epoch;
+    }
+
+    return $result;
+  }
+
+
+  private static function executeSvnGetBaseSVNLogURI(
+    PhabricatorRepository $repository) {
+
+    $uri = $repository->getDetail('remote-uri');
+    $subpath = $repository->getDetail('svn-subpath');
+
+    return $uri.$subpath;
   }
 
 }
