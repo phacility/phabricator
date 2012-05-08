@@ -139,6 +139,30 @@ final class PhabricatorAuditCommentEditor {
           $request->save();
         }
       }
+    } else if ($action == PhabricatorAuditActionConstants::RESIGN) {
+      // "Resign" has unusual rules for writing user rows, only affects the
+      // user row (never package/project rows), and always affects the user
+      // row (other actions don't, if they were able to affect a package/project
+      // row).
+      $user_request = null;
+      foreach ($requests as $request) {
+        if ($request->getAuditorPHID() == $user->getPHID()) {
+          $user_request = $request;
+          break;
+        }
+      }
+      if (!$user_request) {
+        $user_request = id(new PhabricatorRepositoryAuditRequest())
+          ->setCommitPHID($commit->getPHID())
+          ->setAuditorPHID($user->getPHID())
+          ->setAuditReasons(array("Resigned"));
+      }
+
+      $user_request
+        ->setAuditStatus(PhabricatorAuditStatusConstants::RESIGNED)
+        ->save();
+
+      $requests[] = $user_request;
     } else {
       $have_any_requests = false;
       foreach ($requests as $request) {
@@ -170,13 +194,6 @@ final class PhabricatorAuditCommentEditor {
               $new_status = PhabricatorAuditStatusConstants::CONCERNED;
             }
             break;
-          case PhabricatorAuditActionConstants::RESIGN:
-            // NOTE: Resigning resigns ONLY your user request, not the requests
-            // of any projects or packages you are a member of.
-            if ($request_is_for_user) {
-              $new_status = PhabricatorAuditStatusConstants::RESIGNED;
-            }
-            break;
           default:
             throw new Exception("Unknown action '{$action}'!");
         }
@@ -201,11 +218,6 @@ final class PhabricatorAuditCommentEditor {
             break;
           case PhabricatorAuditActionConstants::CONCERN:
             $new_status = PhabricatorAuditStatusConstants::CONCERNED;
-            break;
-          case PhabricatorAuditActionConstants::RESIGN:
-            // If you're on an audit because of a package, we write an explicit
-            // resign row to remove it from your queue.
-            $new_status = PhabricatorAuditStatusConstants::RESIGNED;
             break;
           case PhabricatorAuditActionConstants::CLOSE:
             // Impossible to reach this block with 'close'.
