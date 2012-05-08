@@ -39,6 +39,17 @@ final class DiffusionBranchTableView extends DiffusionView {
           array(
             'href' => $drequest->generateURI(
               array(
+                'action' => 'history',
+                'branch' => $branch->getName(),
+              ))
+          ),
+          'History'
+        ),
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => $drequest->generateURI(
+              array(
                 'action' => 'browse',
                 'branch' => $branch->getName(),
               )),
@@ -59,11 +70,13 @@ final class DiffusionBranchTableView extends DiffusionView {
     $view = new AphrontTableView($rows);
     $view->setHeaders(
       array(
+        'History',
         'Branch',
         'Head',
       ));
     $view->setColumnClasses(
       array(
+        '',
         'pri',
         'wide',
       ));
