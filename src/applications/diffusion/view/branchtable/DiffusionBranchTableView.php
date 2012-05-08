@@ -31,6 +31,11 @@ final class DiffusionBranchTableView extends DiffusionView {
     return $this;
   }
 
+  public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
+    return $this;
+  }
+
   public function render() {
     $drequest = $this->getDiffusionRequest();
     $current_branch = $drequest->getBranch();
@@ -39,18 +44,15 @@ final class DiffusionBranchTableView extends DiffusionView {
     $rowc = array();
     foreach ($this->branches as $branch) {
       $commit = idx($this->commits, $branch->getHeadCommitIdentifier());
+      if ($commit) {
+        $details = $commit->getCommitData()->getCommitMessage();
+        $details = idx(explode("\n", $details), 0);
+        $details = substr($details, 0, 80);
 
-      $details = $commit->getCommitData()->getCommitMessage();
-      $details = idx(explode("\n", $details), 0);
-      $details = substr($details, 0, 80);
-
-      $epoch = $commit->getEpoch();
-      if ($epoch) {
-        $date = date('M j, Y', $epoch);
-        $time = date('g:i A', $epoch);
+        $datetime = phabricator_datetime($commit->getEpoch(), $this->user);
       } else {
-        $date = null;
-        $time = null;
+        $datetime = null;
+        $details = null;
       }
 
       $rows[] = array(
@@ -78,8 +80,7 @@ final class DiffusionBranchTableView extends DiffusionView {
         self::linkCommit(
           $drequest->getRepository(),
           $branch->getHeadCommitIdentifier()),
-        $date,
-        $time,
+        $datetime,
         AphrontTableView::renderSingleDisplayLine(
           phutil_escape_html($details))
         // TODO: etc etc
@@ -97,8 +98,7 @@ final class DiffusionBranchTableView extends DiffusionView {
         'History',
         'Branch',
         'Head',
-        'Date',
-        'Time',
+        'Modified',
         'Details',
       ));
     $view->setColumnClasses(
@@ -107,7 +107,6 @@ final class DiffusionBranchTableView extends DiffusionView {
         'pri',
         '',
         '',
-        'right',
         'wide',
       ));
     $view->setRowClasses($rowc);

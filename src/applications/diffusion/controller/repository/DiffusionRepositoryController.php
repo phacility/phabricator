@@ -110,6 +110,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       $branch_table->setDiffusionRequest($drequest);
       $branch_table->setBranches($branches);
       $branch_table->setCommits($commits);
+      $branch_table->setUser($this->getRequest()->getUser());
 
       $branch_panel = new AphrontPanelView();
       $branch_panel->setHeader('Branches');
