@@ -26,6 +26,11 @@ final class DiffusionBranchTableView extends DiffusionView {
     return $this;
   }
 
+  public function setCommits(array $commits) {
+    $this->commits = mpull($commits, null, 'getCommitIdentifier');
+    return $this;
+  }
+
   public function render() {
     $drequest = $this->getDiffusionRequest();
     $current_branch = $drequest->getBranch();
@@ -33,6 +38,21 @@ final class DiffusionBranchTableView extends DiffusionView {
     $rows = array();
     $rowc = array();
     foreach ($this->branches as $branch) {
+      $commit = idx($this->commits, $branch->getHeadCommitIdentifier());
+
+      $details = $commit->getCommitData()->getCommitMessage();
+      $details = idx(explode("\n", $details), 0);
+      $details = substr($details, 0, 80);
+
+      $epoch = $commit->getEpoch();
+      if ($epoch) {
+        $date = date('M j, Y', $epoch);
+        $time = date('g:i A', $epoch);
+      } else {
+        $date = null;
+        $time = null;
+      }
+
       $rows[] = array(
         phutil_render_tag(
           'a',
@@ -47,6 +67,10 @@ final class DiffusionBranchTableView extends DiffusionView {
         self::linkCommit(
           $drequest->getRepository(),
           $branch->getHeadCommitIdentifier()),
+        $date,
+        $time,
+        AphrontTableView::renderSingleDisplayLine(
+          phutil_escape_html($details))
         // TODO: etc etc
       );
       if ($branch->getName() == $current_branch) {
@@ -61,10 +85,16 @@ final class DiffusionBranchTableView extends DiffusionView {
       array(
         'Branch',
         'Head',
+        'Date',
+        'Time',
+        'Details',
       ));
     $view->setColumnClasses(
       array(
         'pri',
+        '',
+        '',
+        'right',
         'wide',
       ));
     $view->setRowClasses($rowc);
