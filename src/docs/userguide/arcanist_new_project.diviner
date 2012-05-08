@@ -3,6 +3,49 @@
 
 Explains how to configure Arcanist projects with ##.arcconfig## files.
 
+= Overview =
+
+You can run `arc` commands that require a working copy in any Git, Subversion
+or Mercurial working copy, but some features won't work unless you set up an
+`.arcconfig` file to configure settings for the project. Creating this file is
+easy and only takes a few minutes.
+
+Without `.arcconfig`:
+
+  - You will need to set a default Phabricator URI with
+    `arc set-config default <uri>`, or specify an explicit URI
+    with `--conduit-uri` each time you run a command.
+  - You will not be able to run linters through arc unless you pass `--engine`
+    explicitly.
+  - You will not be able to customize certain linter parameters even with
+    `--engine`.
+  - You will not be able to run unit tests through arc unless you pass
+    `--engine` explicitly.
+  - You will not be able to trigger lint and unit integration through
+    `arc diff`.
+  - You will not be able to put Git working copies into immutable history mode
+    (see below).
+  - You will not be able to specify a repository encoding. UTF-8 will be assumed
+    if you do not pass `--encoding`.
+  - You will not be able to add plugins to arc to modify existing workflows or
+    add new ones.
+  - You will not be able to load additional libraries unless you specify them
+    explicitly with `--load-phutil-library`.
+  - Symbol index integration, which allows users to click function or class
+    names in Differential and jump to their definitions, will not work.
+  - `arc patch` will be unable to detect that you are applying changes to the
+    wrong project.
+  - In Subversion, `arc` will be unable to determine the canonical root
+    of a project, and will assume it is the working directory (in Subversion
+    prior to 1.7) or the root of the checkout (in Subversion after 1.7). This
+    means the paths of files in diffs won't be anchored to the same place,
+    and will have different amounts of path context, which may be confusing for
+    reviewers and will sometimes prevent patches from applying properly if they
+    are applied against a different directory than they were generated from.
+  - In Subversion, `arc` will be unable to guess that you intend to update
+    an existing revision; you must use `--update` explicitly or `--preview`
+    and attach diffs via the web interface.
+
 = .arcconfig Basics =
 
 Arcanist uses ##.arcconfig## files to determine a number of things about project
