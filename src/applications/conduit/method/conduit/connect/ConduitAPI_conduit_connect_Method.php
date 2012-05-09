@@ -52,7 +52,10 @@ final class ConduitAPI_conduit_connect_Method extends ConduitAPIMethod {
   public function defineErrorTypes() {
     return array(
       "ERR-BAD-VERSION" =>
-        "Client/server version mismatch. Update your client.",
+        "Client/server version mismatch. Upgrade your server or downgrade ".
+        "your client.",
+      "NEW-ARC-VERSION" =>
+        "Client/server version mismatch. Upgrade your client.",
       "ERR-UNKNOWN-CLIENT" =>
         "Client is unknown.",
       "ERR-INVALID-USER" =>
@@ -91,17 +94,20 @@ final class ConduitAPI_conduit_connect_Method extends ConduitAPIMethod {
           case $server_version:
             break;
           default:
-            $ex = new ConduitException('ERR-BAD-VERSION');
-
             if ($server_version < $client_version) {
-              $upgrade = "Upgrade your Phabricator install.";
+              $ex = new ConduitException('ERR-BAD-VERSION');
+              $ex->setErrorDescription(
+                "Your 'arc' client version is '{$client_version}', which ".
+                "is newer than the server version, '{$server_version}'. ".
+                "Upgrade your Phabricator install.");
             } else {
-              $upgrade = "Upgrade your 'arc' client.";
+              $ex = new ConduitException('NEW-ARC-VERSION');
+              $ex->setErrorDescription(
+                "A new version of arc is available! You need to upgrade ".
+                "to connect to this server (you are running version ".
+                "{$client_version}, the server is running version ".
+                "{$server_version}).");
             }
-
-            $ex->setErrorDescription(
-              "Your 'arc' client version is '{$client_version}', but this ".
-              "server expects version '{$server_version}'. {$upgrade}");
             throw $ex;
         }
         break;
