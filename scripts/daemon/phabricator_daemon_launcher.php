@@ -61,7 +61,7 @@ switch ($command) {
       echo phutil_console_wrap(
         "phd start: Unable to start daemons because daemons are already ".
         "running.\n".
-        "You can view running daemons with 'phd list'.\n".
+        "You can view running daemons with 'phd status'.\n".
         "You can stop running daemons with 'phd stop'.\n".
         "You can use 'phd restart' to stop all daemons before starting new ".
         "daemons.\n");
