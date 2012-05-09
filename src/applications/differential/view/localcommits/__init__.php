@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
 phutil_require_module('phabricator', 'view/base');
+phutil_require_module('phabricator', 'view/layout/more');
 phutil_require_module('phabricator', 'view/utils');
 
 phutil_require_module('phutil', 'markup');

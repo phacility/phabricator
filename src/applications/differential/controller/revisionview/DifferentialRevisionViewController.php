@@ -300,6 +300,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $toc_view->setRevisionID($revision->getID());
     $toc_view->setWhitespace($whitespace);
 
+    $comment_form = null;
     if (!$viewer_is_anonymous) {
       $draft = id(new PhabricatorDraft())->loadOneWhere(
         'authorPHID = %s AND draftKey = %s',

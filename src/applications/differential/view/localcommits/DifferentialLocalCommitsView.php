@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,9 +95,24 @@ final class DifferentialLocalCommitsView extends AphrontView {
         idx($commit, 'author'));
       $row[] = '<td>'.phutil_escape_html($author).'</td>';
 
+      $message = idx($commit, 'message');
+
       $summary = idx($commit, 'summary');
-      $summary = phutil_utf8_shorten($summary, 60);
-      $row[] = '<td class="summary">'.phutil_escape_html($summary).'</td>';
+      $summary = phutil_utf8_shorten($summary, 80);
+
+      $view = new AphrontMoreView();
+      $view->setSome(phutil_escape_html($summary));
+
+      if ($message && (trim($summary) != trim($message))) {
+        $view->setMore(nl2br(phutil_escape_html($message)));
+      }
+
+      $row[] = phutil_render_tag(
+        'td',
+        array(
+          'class' => 'summary',
+        ),
+        $view->render());
 
       $date = nonempty(
         idx($commit, 'date'),
