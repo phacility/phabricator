@@ -152,6 +152,18 @@ final class PhabricatorDaemonControl {
 
 **COMMAND REFERENCE**
 
+        **start**
+            Start the normal collection of daemons that Phabricator uses. This
+            is appropriate for most installs. If you want to customize what
+            is launched, you can use **launch** for fine-grained control.
+
+        **restart**
+            Stop all running daemons, then start a standard loadout.
+
+        **stop** [PID ...]
+            Stop all running daemons if no PIDs are given, or a particular
+            PID or set of PIDs, if they are supplied.
+
         **launch** [__n__] __daemon__ [argv ...]
         **debug** __daemon__ [argv ...]
             Start a daemon (or n copies of a daemon).
@@ -164,22 +176,14 @@ final class PhabricatorDaemonControl {
         **status**
             List running daemons.
 
-        **stop** [PID ...]
-            Stop all running daemons if no PIDs are given, or a particular
-            PID or set of PIDs, if they are supplied.
-
         **help**
             Show this help.
 
         **repository-launch-master**
-            Launches daemons to update and parse all tracked repositories. You
-            must also launch Taskmaster daemons, either on the same machine or
-            elsewhere. You should launch a master only one machine. For other
-            machines, launch a 'readonly'.
+            DEPRECATED. Use 'phd start'.
 
         **repository-launch-readonly**
-            Launches daemons to 'git pull' tracked git repositories so they
-            stay up to date.
+            DEPRECATED. Use 'phd launch pulllocal --no-discovery'.
 
 EOHELP
     );
@@ -301,7 +305,7 @@ EOHELP
       ->selectSymbolsWithoutLoading();
   }
 
-  protected function loadRunningDaemons() {
+  public function loadRunningDaemons() {
     $results = array();
 
     $pid_dir = $this->getControlDirectory('pid');

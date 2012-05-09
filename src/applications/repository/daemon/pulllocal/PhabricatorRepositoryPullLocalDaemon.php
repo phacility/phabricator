@@ -269,12 +269,15 @@ final class PhabricatorRepositoryPullLocalDaemon
 
     try {
       $commit->save();
+
       $event = new PhabricatorTimelineEvent(
         'cmit',
         array(
           'id' => $commit->getID(),
         ));
       $event->recordEvent();
+
+      self::insertTask($repository, $commit);
 
       queryfx(
         $repository->establishConnection('w'),
@@ -299,6 +302,35 @@ final class PhabricatorRepositoryPullLocalDaemon
       self::setCache($repository, $commit_identifier);
     }
   }
+
+  private static function insertTask(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommmit $commit) {
+
+    $vcs = $repository->getVersionControlSystem();
+    switch ($vcs) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        $class = 'PhabricatorRepositoryGitCommitMessageParserWorker';
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $class = 'PhabricatorRepositorySvnCommitMessageParserWorker';
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $class = 'PhabricatorRepositoryMercurialCommitMessageParserWorker';
+        break;
+      default:
+        throw new Exception("Unknown repository type '{$vcs}'!");
+    }
+
+    $task = new PhabricatorWorkerTask();
+    $task->setTaskClass($class);
+    $task->setData(
+      array(
+        'commitID' => $commit->getID(),
+      ));
+    $task->save();
+  }
+
 
   private static function setCache(
     PhabricatorRepository $repository,

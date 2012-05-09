@@ -43,16 +43,17 @@ The primary goal of callsigns is to namespace commits to SVN repositories: if
 you use multiple SVN repositories, each repository has a revision 1, revision 2,
 etc., so referring to them by number alone is ambiguous. However, even for Git
 they impart additional information to human readers and allow parsers to detect
-that something is a commit name with high probability.
+that something is a commit name with high probability (and allow distinguishing
+between multiple copies of a repository).
 
 Diffusion uses this callsign and information about the commit itself to generate
 a commit name, like "rE12345" or "rP28146171ce1278f2375e3646a1e1ea3fd56fc5a3".
 The "r" stands for "revision". It is followed by the repository callsign, and
-then a VCS-specific commit identifier (for SVN, the commit number; for Git, the
-commit hash). When writing the name of a Git commit you may abbreviate the hash,
-but note that hash collisions are probable for short prefix lengths. See this
-post on the LKML for a historical explanation of Git's occasional internal use
-of 7-character hashes:
+then a VCS-specific commit identifier (for SVN, the commit number; for Git and
+Mercurial, the commit hash). When writing the name of a Git commit you may
+abbreviate the hash, but note that hash collisions are probable for short prefix
+lengths. See this post on the LKML for a historical explanation of Git's
+occasional internal use of 7-character hashes:
 
   https://lkml.org/lkml/2010/10/28/287
 
@@ -84,8 +85,8 @@ tracking in Diffusion.
 Most of the options in the **Tracking** tab should be self-explanatory or are
 safe to leave at their defaults. In broad strokes, Diffusion tracks SVN
 repositories by issuing an "svn log" command periodically against the remote to
-look for new commits. It tracks Git repositories by cloning a local copy and
-issuing "git fetch" periodically.
+look for new commits. It tracks Git and Mercurial repositories by cloning a
+local copy and issuing `git fetch` or `hg pull` periodically.
 
 Once you've configured everything (and made sure **Tracking** is set to
 "Enabled"), you can launch the daemons to begin actually tracking the
@@ -93,20 +94,15 @@ repository.
 
 = Running Diffusion Daemons =
 
-For an introduction to Phabricator daemons, see
-@{article:Managing Daemons with phd}. To actually track repositories, you need
-to:
+In most cases, it is sufficient to run:
 
-  - run ##phd repository-launch-master## on one machine;
-  - run at least one @{class:PhabricatorTaskmasterDaemon} with
-    ##phd launch taskmaster##. You should probably launch a few of these
-    somewhere. They are generic workers which run many different kinds of
-    background tasks, so if you already have some running you don't need to
-    launch more. However, if you are importing a very large repository, import
-    rate will primarily be a function of how many taskmasters you are running so
-    you may want to launch a bunch of them; and
-  - if you have multiple web frontends and have tracked Git repositories, run
-    ##phd repository-launch-readonly## on each web frontend.
+  phabricator/bin/ $ ./phd start
+
+...to start the daemons. For a more in-depth explanation of `phd` and daemons,
+see @{article:Managing Daemons with phd}.
+
+NOTE: If you have an unusually large install with multiple web frontends, see
+notes in @{article:Managing Daemons with phd}.
 
 You can use the Daemon Console to monitor the daemons and their progress
 importing the repository. Small repositories should import quickly, while
@@ -116,39 +112,32 @@ discovering commits in Facebook's 350,000-commit primary repository, and about
 should begin appearing in Diffusion within a few minutes for all but the
 largest repositories.
 
-In detail, Diffusion uses several daemons to track, parse and import
-repositories:
+== Tuning Daemons ==
 
-  - **PhabricatorRepositoryGitFetchDaemon**: periodically runs "git fetch" to
-    keep git repositories up to date
-  - **PhabricatorRepositoryGitCommitDiscoveryDaemon**: periodically looks for
-    new commits and imports them
-  - **PhabricatorRepositorySvnCommitDiscoveryDaemon**: periodically runs
-    "svn log" to look for new commits and import them
-  - **PhabricatorRepositoryCommitTaskDaemon**: creates tasks to parse and
-    import newly discovered commits
+By default, Phabricator launches one daemon to pull and discover all of the
+tracked repositories. This works well for a small number of repositories or
+a large number of relatively inactive repositories, but might benefit from
+tuning in some cases. The daemon makes a rough effort to respect pull
+frequencies defined in repository configuration, but may not be able to import
+new commits very quickly if you have a large number of repositories (as it is
+blocked waiting on I/O from other repositories). If you want to provide lower
+commit import latency for some repositories, you can launch additional
+dedicated daemons:
 
-The ##repository-launch-master## command just chooses the right daemons to
-launch based on which repositories you've configured to be tracked. If you add
-new repositories in the future, you should stop all the daemons and rerun
-##repository-launch-master##.
+For example, if you want low latency on the repositories with callsigns
+`A` and `B`, but don't care about latency for the other repositories, you could
+launch two daemons like this:
 
-If you run Phabricator with multiple web frontends, have your deployment script
-do a ##phd stop## and ##phd repository-launch-readonly## when it deploys. It is
-very unlikely you are impacted by this unless you are one of the largest
-installs in the world.
+  phabricator/bin $ ./phd launch RepositoryPullLocal -- A B
+  phabricator/bin $ ./phd launch RepositoryPullLocal -- --not A --not B
 
-= Building New Parsers =
-
-You can add new classes which will extend or enhance Diffusion's ability to
-parse commit messages.
-
-TODO: This is an advanced feature which doesn't currently have documentation and
-isn't terribly stable.
+The first one will work only on `A` and `B`, and should be able to import
+commits with low latency more reliably. The second one will work on all other
+repositories.
 
 = Next Steps =
 
-  - Learn about creating a symbol index at 
+  - Learn about creating a symbol index at
     @{article:Diffusion User Guide: Symbol Indexes}; or
+  - understand daemons in detail with @{article:Managing Daemons with phd}; or
   - give us feedback at @{article:Give Feedback! Get Support!}.
- 

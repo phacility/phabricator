@@ -15,6 +15,7 @@ phutil_require_module('phabricator', 'applications/repository/storage/commit');
 phutil_require_module('phabricator', 'applications/repository/storage/repository');
 phutil_require_module('phabricator', 'infrastructure/daemon/base');
 phutil_require_module('phabricator', 'infrastructure/daemon/timeline/storage/event');
+phutil_require_module('phabricator', 'infrastructure/daemon/workers/storage/task');
 phutil_require_module('phabricator', 'storage/queryfx');
 
 phutil_require_module('phutil', 'error');

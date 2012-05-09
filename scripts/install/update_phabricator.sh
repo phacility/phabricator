@@ -57,9 +57,7 @@ sudo /etc/init.d/httpd start
 # Restart daemons. Customize this to start whatever daemons you're running on
 # your system.
 
-# $ROOT/phabricator/bin/phd repository-launch-master
-# $ROOT/phabricator/bin/phd launch garbagecollector
-# $ROOT/phabricator/bin/phd launch 4 taskmaster
+$ROOT/phabricator/bin/phd start
 # $ROOT/phabricator/bin/phd launch ircbot /config/bot.json
 
 

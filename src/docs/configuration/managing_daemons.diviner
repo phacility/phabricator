@@ -6,17 +6,17 @@ Explains Phabricator daemons and the daemon control program ##phd##.
 = Overview =
 
 Phabricator uses daemons (background processing scripts) to handle a number of
-tasks, like:
+tasks:
 
-  - tracking repositories and discovering new commits;
-  - sending mail;
-  - updating objects in the search index; and
-  - custom tasks you define.
+  - tracking repositories, discovering new commits, and importing and parsing
+    commits;
+  - sending email; and
+  - collecting garbage, like old logs and caches.
 
 Daemons are started and stopped with **phd** (the **Ph**abricator **D**aemon
 launcher). Daemons can be monitored via a web console.
 
-You do not need to run daemons for most parts of Phabricator to work, but a few
+You do not need to run daemons for most parts of Phabricator to work, but some
 features (principally, repository tracking with Diffusion) require them and
 several features will benefit in performance or stability if you configure
 daemons.
@@ -33,22 +33,24 @@ a list of commands, run ##phd help##:
 
 Generally, you will use:
 
-  - **phd launch** to launch daemons;
-  - **phd debug** to debug problems with daemons;
+  - **phd start** to launch all daemons;
+  - **phd restart** to restart all daemons;
   - **phd status** to get a list of running daemons; and
   - **phd stop** to stop all daemons.
 
-NOTE: When you upgrade Phabricator or change configuration, you should restart
-the daemons by stopping and relaunching them.
+If you want finer-grained control, you can use:
 
-NOTE: When you **launch** a daemon, you can type any unique substring of its
-name, so **phd launch metamta** will work correctly.
+  - **phd launch** to launch individual daemons; and
+  - **phd debug** to debug problems with daemons.
+
+NOTE: When you upgrade Phabricator or change configuration, you should restart
+the daemons by running `phd restart`.
 
 = Daemon Console =
 
 You can view status and debugging information for daemons in the Daemon Console
 via the web interface. Go to ##/daemon/## in your install or click
-**Daemon Console** from the homepage.
+**Daemon Console** from "More Stuff".
 
 The Daemon Console shows a list of all the daemons that have ever launched, and
 allows you to view log information for them. If you have issues with daemons,
@@ -56,7 +58,7 @@ you may be able to find error information that will help you resolve the problem
 in the console.
 
 NOTE: The easiest way to figure out what's wrong with a daemon is usually to use
-**phd debug** to launch it instead of **phd launch**. This will run it without
+**phd debug** to launch it instead of **phd start**. This will run it without
 daemonizing it, so you can see output in your console.
 
 = Available Daemons =
@@ -65,7 +67,72 @@ You can get a list of launchable daemons with **phd list**:
 
   - **libphutil test daemons** are not generally useful unless you are
     developing daemon infrastructure or debugging a daemon problem;
-  - **PhabricatorTaskmasterDaemon** runs a generic task queue; and
-  - **PhabricatorRepository** daemons track repositories, descriptions are
-    available in the @{article:Diffusion User Guide}.
+  - **PhabricatorTaskmasterDaemon** performs work from a task queue;
+  - **PhabricatorRepositoryPullLocalDaemon** daemons track repositories, for
+    more information see @{article:Diffusion User Guide}; and
   - **PhabricatorGarbageCollectorDaemon** cleans up old logs and caches.
+
+= Debugging and Tuning =
+
+In most cases, **phd start** handles launching all the daemons you need.
+However, you may want to use more granular daemon controls to debug daemons,
+launch custom daemons, or launch special daemons like the IRC bot.
+
+To debug a daemon, use `phd debug`:
+
+  phabricator/bin/ $ ./phd debug <daemon>
+
+You can pass arguments like this (normal arguments are passed to the daemon
+control mechanism, not to the daemon itself):
+
+  phabricator/bin/ $ ./phd debug <daemon> -- --flavor apple
+
+In debug mode, daemons do not daemonize, and they print additional debugging
+output to the console. This should make it easier to debug problems. You can
+terminate the daemon with `^C`.
+
+To launch a nonstandard daemon, use `phd launch`:
+
+  phabricator/bin/ $ ./phd launch <daemon>
+
+This daemon will daemonize and run normally.
+
+== General Tips ==
+
+  - You can set the number of taskmasters that `phd start` starts in the config.
+    If you have a task backlog, try increasing it.
+  - When you `phd launch` or `phd debug` a daemon, you can type any unique
+    substring of its name, so `phd launch pull` will work correctly.
+  - `phd stop` and `phd restart` stop **all** of the daemons on the machine, not
+    just those started with `phd start`. If you're writing a restart script,
+    have it launch any custom daemons explicitly after `phd restart`.
+  - You can write your own daemons and manage them with `phd` by extending
+    @{class:PhabricatorDaemon}. See @{article: libphutil Libraries User Guide}.
+  - See @{article:Diffusion User Guide} for details about tuning the repository
+    daemon.
+
+== Multiple Machines ==
+
+If you have multiple machines, you should use `phd launch` to tweak which
+daemons launch, and split daemons across machines like this:
+
+  - `PhabricatorRepositoryPullLocalDaemon`: Run one copy on any machine.
+    On each web frontend which is not running a normal copy, run a copy
+    with the `--no-discovery` flag.
+  - `PhabricatorGarbageCollectorDaemon`: Run one copy on any machine.
+  - `PhabricatorTaskmasterDaemon`: Run as many copies as you need to keep
+    tasks from backing up. You can run them all on one machine or split them
+    across machines.
+
+A gratuitously wasteful install might have a dedicated daemon machine which
+runs `phd start` with a large pool of taskmasters set in the config, and then
+runs `phd launch PhabricatorRepositoryPullLocalDaemon --no-discovery` on each
+web server. This is grossly excessive in normal cases.
+
+= Next Steps =
+
+Continue by:
+
+  - learning about the repository daemon with @{article:Diffusion User Guide};
+    or
+  - writing your own daemons with @{article: libphutil Libraries User Guide}.

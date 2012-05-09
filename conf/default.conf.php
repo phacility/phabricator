@@ -937,6 +937,11 @@ return array(
   // track running daemons.
   'phd.pid-directory' => '/var/tmp/phd',
 
+  // Number of "TaskMaster" daemons that "phd start" should start. You can
+  // raise this if you have a task backlog, or explicitly launch more with
+  // "phd launch <N> taskmaster".
+  'phd.start-taskmasters' => 4,
+
   // This value is an input to the hash function when building resource hashes.
   // It has no security value, but if you accidentally poison user caches (by
   // pushing a bad patch or having something go wrong with a CDN, e.g.) you can

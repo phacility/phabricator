@@ -34,7 +34,8 @@ function must_have_extension($ext) {
   }
 }
 
-switch (isset($argv[1]) ? $argv[1] : 'help') {
+$command = isset($argv[1]) ? $argv[1] : 'help';
+switch ($command) {
   case 'list':
     $err = $control->executeListCommand();
     exit($err);
@@ -48,7 +49,45 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
     $err = $control->executeStopCommand($pass_argv);
     exit($err);
 
-  case 'repository-launch-readonly':
+  case 'restart':
+    $err = $control->executeStopCommand(array());
+    if ($err) {
+      exit($err);
+    }
+    /* Fall Through */
+  case 'start':
+    $running = $control->loadRunningDaemons();
+    if ($running) {
+      echo phutil_console_wrap(
+        "phd start: Unable to start daemons because daemons are already ".
+        "running.\n".
+        "You can view running daemons with 'phd list'.\n".
+        "You can stop running daemons with 'phd stop'.\n".
+        "You can use 'phd restart' to stop all daemons before starting new ".
+        "daemons.\n");
+      exit(1);
+    }
+
+    $daemons = array(
+      array('PhabricatorRepositoryPullLocalDaemon', array()),
+      array('PhabricatorGarbageCollectorDaemon', array()),
+    );
+
+    $taskmasters = PhabricatorEnv::getEnvConfig('phd.start-taskmasters');
+    for ($ii = 0; $ii < $taskmasters; $ii++) {
+      $daemons[] = array('PhabricatorTaskmasterDaemon', array());
+    }
+
+    will_launch($control);
+    foreach ($daemons as $spec) {
+      list($name, $argv) = $spec;
+      echo "Launching '{$name}'...\n";
+      $control->launchDaemon($name, $argv);
+    }
+
+    echo "Done.\n";
+    break;
+
     $need_launch = phd_load_tracked_repositories();
     if (!$need_launch) {
       echo "There are no repositories with tracking enabled.\n";
@@ -68,7 +107,16 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
     echo "Done.\n";
     break;
 
+  case 'repository-launch-readonly':
   case 'repository-launch-master':
+    if ($command == 'repository-launch-readonly') {
+      $daemon_args = array(
+        '--no-discovery',
+      );
+    } else {
+      $daemon_args = array();
+    }
+
     $need_launch = phd_load_tracked_repositories();
     if (!$need_launch) {
       echo "There are no repositories with tracking enabled.\n";
@@ -77,18 +125,12 @@ switch (isset($argv[1]) ? $argv[1] : 'help') {
 
     will_launch($control);
 
-    echo "Launching PullLocal daemon in master mode...\n";
+    echo "Launching PullLocal daemon...\n";
     $control->launchDaemon(
       'PhabricatorRepositoryPullLocalDaemon',
-      array());
+      $daemon_args);
 
-    echo "Launching CommitTask daemon...\n";
-    $control->launchDaemon(
-      'PhabricatorRepositoryCommitTaskDaemon',
-      array());
-
-    echo "NOTE: Make sure you run some taskmaster daemons too, e.g. ".
-         "with 'phd launch 4 taskmaster'.\n";
+    echo "NOTE: '{$command}' is deprecated. Consult the documentation.\n";
 
     echo "Done.\n";
     break;
