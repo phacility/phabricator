@@ -305,7 +305,7 @@ final class PhabricatorRepositoryPullLocalDaemon
 
   private static function insertTask(
     PhabricatorRepository $repository,
-    PhabricatorRepositoryCommmit $commit) {
+    PhabricatorRepositoryCommit $commit) {
 
     $vcs = $repository->getVersionControlSystem();
     switch ($vcs) {
