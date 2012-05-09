@@ -147,7 +147,7 @@ final class PhabricatorOAuthDefaultRegistrationController
 
     $form = new AphrontFormView();
     $form
-      ->addHiddenInput('token', $provider->getAccessToken())
+      ->addHiddenInput('confirm_token', $provider->getAccessToken())
       ->addHiddenInput('expires', $oauth_info->getTokenExpires())
       ->addHiddenInput('state', $this->getOAuthState())
       ->setUser($request->getUser())
