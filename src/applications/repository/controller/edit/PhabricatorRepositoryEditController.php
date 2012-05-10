@@ -249,6 +249,10 @@ final class PhabricatorRepositoryEditController
       }
 
       $repository->setDetail(
+        'disable-autoclose',
+        $request->getStr('autoclose') == 'disabled' ? true : false);
+
+      $repository->setDetail(
         'pull-frequency',
         max(1, $request->getInt('frequency')));
 
@@ -605,6 +609,22 @@ final class PhabricatorRepositoryEditController
             ->setCaption(
               'Default branch to show in Diffusion.'));
     }
+
+    $inset
+      ->appendChild(id(new AphrontFormSelectControl())
+        ->setName('autoclose')
+        ->setLabel('Autoclose')
+        ->setOptions(array(
+            'enabled'   => 'Enabled: Automatically Close Pushed Revisions',
+            'disabled'  => 'Disabled: Ignore Pushed Revisions',
+            ))
+        ->setCaption(
+          "Automatically close Differential revisions which are pushed to ".
+          "this repository.")
+        ->setValue(
+          $repository->getDetail('disable-autoclose', false)
+          ? 'disabled'
+          : 'enabled'));
 
     $inset
       ->appendChild(

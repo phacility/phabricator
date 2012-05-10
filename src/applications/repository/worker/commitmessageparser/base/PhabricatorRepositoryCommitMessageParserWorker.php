@@ -93,9 +93,11 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
           $revision->getID(),
           $commit->getPHID());
 
-        if ($revision->getStatus() !=
-            ArcanistDifferentialRevisionStatus::CLOSED) {
+        $status_closed = ArcanistDifferentialRevisionStatus::CLOSED;
+        $should_close = ($revision->getStatus() != $status_closed) &&
+                        (!$repository->getDetail('disable-autoclose', false));
 
+        if ($should_close) {
           $revision->setDateCommitted($commit->getEpoch());
 
           $message = null;
