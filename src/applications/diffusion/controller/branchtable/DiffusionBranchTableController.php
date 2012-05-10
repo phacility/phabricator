@@ -32,8 +32,7 @@ final class DiffusionBranchTableController extends DiffusionController {
     // TODO: Add support for branches that contain commit
     $query = DiffusionBranchQuery::newFromDiffusionRequest($drequest);
     $query->setOffset($pager->getOffset());
-    // we add 2 here, because of removed HEAD branch
-    $query->setLimit($pager->getPageSize() + 2);
+    $query->setLimit($pager->getPageSize() + 1);
     $branches = $query->loadBranches();
 
     $branches = $pager->sliceResults($branches);

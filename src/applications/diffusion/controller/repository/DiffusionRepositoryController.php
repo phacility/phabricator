@@ -154,8 +154,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       $limit = 15;
 
       $branch_query = DiffusionBranchQuery::newFromDiffusionRequest($drequest);
-      // we add 2 here, because of removed HEAD branch
-      $branch_query->setLimit($limit + 2);
+      $branch_query->setLimit($limit + 1);
       $branches = $branch_query->loadBranches();
 
       if (!$branches) {
@@ -182,20 +181,20 @@ final class DiffusionRepositoryController extends DiffusionController {
       $panel->setHeader('Branches');
 
       if ($more_branches) {
-        $panel->setCaption('Showing the ' . $limit . ' most recent branches.');
+        $panel->setCaption('Showing ' . $limit . ' branches.');
       }
 
       $panel->addButton(
-          phutil_render_tag(
-              'a',
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => $drequest->generateURI(
               array(
-                  'href' => $drequest->generateURI(
-                      array(
-                          'action' => 'branches',
-                      )),
-                  'class' => 'grey button',
-              ),
-              "Show All Branches \xC2\xBB"));
+                'action' => 'branches',
+              )),
+            'class' => 'grey button',
+          ),
+          "Show All Branches \xC2\xBB"));
 
       $panel->appendChild($table);
 

@@ -21,7 +21,10 @@ final class DiffusionGitBranchQuery extends DiffusionBranchQuery {
   protected function executeQuery() {
     $drequest = $this->getRequest();
     $repository = $drequest->getRepository();
-    $count = $this->getOffset() + $this->getLimit();
+
+    // We need to add 1 in case we pick up HEAD.
+
+    $count = $this->getOffset() + $this->getLimit() + 1;
 
     list($stdout) = $repository->execxLocalCommand(
       'for-each-ref %C --sort=-creatordate --format=%s refs/remotes',
@@ -48,6 +51,13 @@ final class DiffusionGitBranchQuery extends DiffusionBranchQuery {
     $offset = $this->getOffset();
     if ($offset) {
       $branches = array_slice($branches, $offset);
+    }
+
+    // We might have too many even after offset slicing, if there was no HEAD
+    // for some reason.
+    $limit = $this->getLimit();
+    if ($limit) {
+      $branches = array_slice($branches, 0, $limit);
     }
 
     return $branches;

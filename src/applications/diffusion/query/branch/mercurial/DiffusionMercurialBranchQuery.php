@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ final class DiffusionMercurialBranchQuery extends DiffusionBranchQuery {
     $repository = $drequest->getRepository();
 
     list($stdout) = $repository->execxLocalCommand(
-      'branches');
+      '--debug branches');
     $branch_info = ArcanistMercurialParser::parseMercurialBranches($stdout);
 
     $branches = array();
@@ -32,6 +32,14 @@ final class DiffusionMercurialBranchQuery extends DiffusionBranchQuery {
       $branch->setName($name);
       $branch->setHeadCommitIdentifier($info['rev']);
       $branches[] = $branch;
+    }
+
+    if ($this->getOffset()) {
+      $branches = array_slice($branches, $this->getOffset());
+    }
+
+    if ($this->getLimit()) {
+      $branches = array_slice($branches, 0, $this->getLimit());
     }
 
     return $branches;
