@@ -123,6 +123,47 @@ When your revision has been accepted, push it normally. (`arc` does not have
 push integration in Mercurial because it can't force merges and thus can't
 guarantee it will be able to do anything useful.)
 
+= Pushing and Closing Revisions =
+
+After changes have been accepted, you generally push them and close the
+revision. `arc` has several workflows which help with this, by:
+
+  - squashing or merging changes from a feature branch into a master branch
+    (if relevant);
+  - formatting a good commit message with all the information from Differential;
+    and
+  - automatically closing the revision.
+
+You don't need to use any of these workflows: you can just run `git push`,
+`hg push` or `svn commit` and then manually close the revision from the web.
+However, these workflows can make common development strategies more convenient,
+and give you better commit messages in the repository. The workflows `arc`
+supports are:
+
+  - `arc land`: Works in Git if you develop in feature branches. Does a merge
+    or squash-merge from your feature branch into some master branch, provides
+    a detailed commit message, pushes master, and then deletes your branch.
+  - `arc amend`: Works in Git if you can't use `arc land`. Amends HEAD with
+    a detailed commit message.
+  - `arc commit`: Works in Subversion. Runs `svn commit` with a detailed commit
+    message.
+  - `arc close-revision`: Works anywhere, closes a revision from the CLI
+    without going through the web UI.
+
+You can use `arc help <command>` for detailed help with any of these.
+Differential will make a guess about a next step on accepted revisions, but it
+may not be the best next step for your workflow.
+
+Phabricator will also automatically close revisions, if the changes are pushed
+to a repository that is tracked in Diffusion. Specifically, it will close
+revisions based on commit and tree hashes, and `Differential Revision`
+identifiers in commit messages. (You can disable this feature by disabling
+"Autoclose" in the Repository configuration.)
+
+If you push to an untracked repository (or `arc` can't figure out that it's
+tracked), `arc land`, `arc amend` and `arc commit` will implicitly run `arc
+close-revision`.
+
 = General Information =
 
 This information is not unique to a specific version control system.
