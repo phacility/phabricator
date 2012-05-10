@@ -95,29 +95,7 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $content[] = $this->buildTagListTable($drequest);
 
-    if ($drequest->getBranch() !== null) {
-      $branch_query = DiffusionBranchQuery::newFromDiffusionRequest($drequest);
-      $branches = $branch_query->loadBranches();
-
-      $commits = id(new PhabricatorAuditCommitQuery())
-      ->withIdentifiers(
-        $drequest->getRepository()->getID(),
-        mpull($branches, 'getHeadCommitIdentifier'))
-      ->needCommitData(true)
-      ->execute();
-
-      $branch_table = new DiffusionBranchTableView();
-      $branch_table->setDiffusionRequest($drequest);
-      $branch_table->setBranches($branches);
-      $branch_table->setCommits($commits);
-      $branch_table->setUser($this->getRequest()->getUser());
-
-      $branch_panel = new AphrontPanelView();
-      $branch_panel->setHeader('Branches');
-      $branch_panel->appendChild($branch_table);
-
-      $content[] = $branch_panel;
-    }
+    $content[] = $this->buildBranchListTable($drequest);
 
     $readme = $browse_query->renderReadme($browse_results);
     if ($readme) {
@@ -171,8 +149,64 @@ final class DiffusionRepositoryController extends DiffusionController {
     return $panel;
   }
 
+  private function buildBranchListTable(DiffusionRequest $drequest) {
+    if ($drequest->getBranch() !== null) {
+      $limit = 15;
+
+      $branch_query = DiffusionBranchQuery::newFromDiffusionRequest($drequest);
+      // we add 2 here, because of removed HEAD branch
+      $branch_query->setLimit($limit + 2);
+      $branches = $branch_query->loadBranches();
+
+      if (!$branches) {
+          return null;
+      }
+
+      $more_branches = (count($branches) > $limit);
+      $branches = array_slice($branches, 0, $limit);
+
+      $commits = id(new PhabricatorAuditCommitQuery())
+        ->withIdentifiers(
+          $drequest->getRepository()->getID(),
+          mpull($branches, 'getHeadCommitIdentifier'))
+        ->needCommitData(true)
+        ->execute();
+
+      $table = new DiffusionBranchTableView();
+      $table->setDiffusionRequest($drequest);
+      $table->setBranches($branches);
+      $table->setCommits($commits);
+      $table->setUser($this->getRequest()->getUser());
+
+      $panel = new AphrontPanelView();
+      $panel->setHeader('Branches');
+
+      if ($more_branches) {
+        $panel->setCaption('Showing the ' . $limit . ' most recent branches.');
+      }
+
+      $panel->addButton(
+          phutil_render_tag(
+              'a',
+              array(
+                  'href' => $drequest->generateURI(
+                      array(
+                          'action' => 'branches',
+                      )),
+                  'class' => 'grey button',
+              ),
+              "Show All Branches \xC2\xBB"));
+
+      $panel->appendChild($table);
+
+      return $panel;
+    }
+
+    return null;
+  }
+
   private function buildTagListTable(DiffusionRequest $drequest) {
-    $tag_limit = 25;
+    $tag_limit = 15;
 
     $query = DiffusionTagListQuery::newFromDiffusionRequest($drequest);
     $query->setLimit($tag_limit + 1);

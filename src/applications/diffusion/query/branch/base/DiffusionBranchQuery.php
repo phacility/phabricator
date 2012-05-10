@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,26 @@
 abstract class DiffusionBranchQuery {
 
   private $request;
+  private $limit;
+  private $offset;
+
+  public function setOffset($offset) {
+    $this->offset = $offset;
+    return $this;
+  }
+
+  public function getOffset() {
+    return $this->offset;
+  }
+
+  public function setLimit($limit) {
+    $this->limit = $limit;
+    return $this;
+  }
+
+  protected function getLimit() {
+    return $this->limit;
+  }
 
   final private function __construct() {
     // <private>

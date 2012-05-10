@@ -248,6 +248,7 @@ class AphrontDefaultApplicationConfiguration
           'lastmodified/(?P<dblob>.*)'  => 'DiffusionLastModifiedController',
           'diff/'                       => 'DiffusionDiffController',
           'tags/(?P<dblob>.*)'          => 'DiffusionTagListController',
+          'branches/(?P<dblob>.*)'      => 'DiffusionBranchTableController',
         ),
         'inline/(?P<phid>[^/]+)/' => 'DiffusionInlineCommentController',
         'services/' => array(
