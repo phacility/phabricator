@@ -75,20 +75,37 @@ abstract class DiffusionQuery {
       $identifiers);
     $commits = mpull($commits, null, 'getCommitIdentifier');
 
-    // Reorder the commits in identifier order so we preserve nth-parent
-    // relationships when the identifiers are the parents of a merge commit.
-    $commits = array_select_keys($commits, $identifiers);
+    // Build empty commit objects for every commit, so we can show unparsed
+    // commits in history views as "unparsed" instead of not showing them. This
+    // makes the process of importing and parsing commits much clearer to the
+    // user.
 
-    if (!$commits) {
-      return array();
+    $commit_list = array();
+    foreach ($identifiers as $identifier) {
+      $commit_obj = idx($commits, $identifier);
+      if (!$commit_obj) {
+        $commit_obj = new PhabricatorRepositoryCommit();
+        $commit_obj->setRepositoryID($repository->getID());
+        $commit_obj->setCommitIdentifier($identifier);
+        $commit_obj->setIsUnparsed(true);
+        $commit_obj->makeEphemeral();
+      }
+      $commit_list[$identifier] = $commit_obj;
+    }
+    $commits = $commit_list;
+
+    $commit_ids = array_filter(mpull($commits, 'getID'));
+    if ($commit_ids) {
+      $commit_data = id(new PhabricatorRepositoryCommitData())->loadAllWhere(
+        'commitID in (%Ld)',
+        $commit_ids);
+      $commit_data = mpull($commit_data, null, 'getCommitID');
     }
 
-    $commit_data = id(new PhabricatorRepositoryCommitData())->loadAllWhere(
-      'commitID in (%Ld)',
-      mpull($commits, 'getID'));
-    $commit_data = mpull($commit_data, null, 'getCommitID');
-
     foreach ($commits as $commit) {
+      if (!$commit->getID()) {
+        continue;
+      }
       if (idx($commit_data, $commit->getID())) {
         $commit->attachCommitData($commit_data[$commit->getID()]);
       }
@@ -123,13 +140,18 @@ abstract class DiffusionQuery {
     $paths = ipull($paths, 'id', 'path');
     $path_id = idx($paths, $path_normal);
 
-    $path_changes = queryfx_all(
-      $conn_r,
-      'SELECT * FROM %T WHERE commitID IN (%Ld) AND pathID = %d',
-      PhabricatorRepository::TABLE_PATHCHANGE,
-      mpull($commits, 'getID'),
-      $path_id);
-    $path_changes = ipull($path_changes, null, 'commitID');
+    $commit_ids = array_filter(mpull($commits, 'getID'));
+
+    $path_changes = array();
+    if ($path_id && $commit_ids) {
+      $path_changes = queryfx_all(
+        $conn_r,
+        'SELECT * FROM %T WHERE commitID IN (%Ld) AND pathID = %d',
+        PhabricatorRepository::TABLE_PATHCHANGE,
+        $commit_ids,
+        $path_id);
+      $path_changes = ipull($path_changes, null, 'commitID');
+    }
 
     $history = array();
     foreach ($identifiers as $identifier) {

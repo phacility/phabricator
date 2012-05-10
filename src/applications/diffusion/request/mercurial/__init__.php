@@ -8,5 +8,7 @@
 
 phutil_require_module('phabricator', 'applications/diffusion/request/base');
 
+phutil_require_module('phutil', 'filesystem');
+
 
 phutil_require_source('DiffusionMercurialRequest.php');

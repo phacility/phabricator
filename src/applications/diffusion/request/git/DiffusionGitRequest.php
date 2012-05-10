@@ -26,13 +26,19 @@ final class DiffusionGitRequest extends DiffusionRequest {
   }
 
   protected function didInitialize() {
+    $repository = $this->getRepository();
+
+    if (!Filesystem::pathExists($repository->getLocalPath())) {
+      $this->raiseCloneException();
+    }
+
     if (!$this->commit) {
       return;
     }
 
     // Expand short commit names and verify
 
-    $future = $this->getRepository()->getLocalCommandFuture(
+    $future = $repository->getLocalCommandFuture(
       'cat-file --batch');
     $future->write($this->commit);
     list($stdout) = $future->resolvex();

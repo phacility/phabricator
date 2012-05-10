@@ -27,6 +27,16 @@ final class PhabricatorRepositoryCommit extends PhabricatorRepositoryDAO {
   protected $auditStatus = PhabricatorAuditCommitStatusConstants::NONE;
 
   private $commitData;
+  private $isUnparsed;
+
+  public function setIsUnparsed($is_unparsed) {
+    $this->isUnparsed = $is_unparsed;
+    return $this;
+  }
+
+  public function getIsUnparsed() {
+    return $this->isUnparsed;
+  }
 
   public function getConfiguration() {
     return array(

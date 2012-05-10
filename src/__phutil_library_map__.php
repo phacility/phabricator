@@ -374,6 +374,7 @@ phutil_register_library_map(array(
     'DiffusionRepositoryPath' => 'applications/diffusion/data/repositorypath',
     'DiffusionRepositoryTag' => 'applications/diffusion/tag',
     'DiffusionRequest' => 'applications/diffusion/request/base',
+    'DiffusionSetupException' => 'applications/diffusion/exception/setup',
     'DiffusionSvnBrowseQuery' => 'applications/diffusion/query/browse/svn',
     'DiffusionSvnCommitParentsQuery' => 'applications/diffusion/query/parents/svn',
     'DiffusionSvnCommitTagsQuery' => 'applications/diffusion/query/committags/svn',

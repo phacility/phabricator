@@ -26,6 +26,12 @@ final class DiffusionMercurialRequest extends DiffusionRequest {
   }
 
   protected function didInitialize() {
+    $repository = $this->getRepository();
+
+    if (!Filesystem::pathExists($repository->getLocalPath())) {
+      $this->raiseCloneException();
+    }
+
     return;
   }
 
@@ -33,9 +39,11 @@ final class DiffusionMercurialRequest extends DiffusionRequest {
     if ($this->branch) {
       return $this->branch;
     }
+
     if ($this->repository) {
       return $this->repository->getDetail('default-branch', 'default');
     }
+
     throw new Exception("Unable to determine branch!");
   }
 
