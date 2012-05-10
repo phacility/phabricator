@@ -40,6 +40,7 @@ final class DifferentialRevisionStatusFieldSpecification
     }
 
     if ($status == ArcanistDifferentialRevisionStatus::ACCEPTED) {
+      $next_step = null;
       if ($local_vcs == $backing_vcs) {
         switch ($local_vcs) {
           case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
@@ -58,21 +59,24 @@ final class DifferentialRevisionStatusFieldSpecification
       if ($next_step) {
         $info = ' &middot; Next step: '.$next_step;
       }
-
     } else if ($status == ArcanistDifferentialRevisionStatus::CLOSED) {
       $committed = $revision->getDateCommitted();
-      switch ($backing_vcs) {
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-          $verb = 'Pushed';
-          break;
-        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-          $verb = 'Committed';
-          break;
+      if ($committed) {
+        $verb = null;
+        switch ($backing_vcs) {
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+            $verb = 'Pushed';
+            break;
+          case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+            $verb = 'Committed';
+            break;
+        }
+        if ($verb) {
+          $when = phabricator_datetime($committed, $this->getUser());
+          $info = " ({$verb} {$when})";
+        }
       }
-      $when = phabricator_datetime($committed, $this->getUser());
-
-      $info = " ({$verb} {$when})";
     }
 
     $status =
