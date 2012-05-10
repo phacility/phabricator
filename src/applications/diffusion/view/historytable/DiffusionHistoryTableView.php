@@ -93,6 +93,17 @@ final class DiffusionHistoryTableView extends DiffusionView {
         $author = phutil_escape_html($history->getAuthorName());
       }
 
+      $commit = $history->getCommit();
+      if ($commit && !$commit->getIsUnparsed() && $data) {
+        $change = $this->linkChange(
+          $history->getChangeType(),
+          $history->getFileType(),
+          $path = null,
+          $history->getCommitIdentifier());
+      } else {
+        $change = "<em>Importing\xE2\x80\xA6</em>";
+      }
+
       $rows[] = array(
         $this->linkBrowse(
           $drequest->getPath(),
@@ -103,11 +114,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
         self::linkCommit(
           $drequest->getRepository(),
           $history->getCommitIdentifier()),
-        $this->linkChange(
-          $history->getChangeType(),
-          $history->getFileType(),
-          null,
-          $history->getCommitIdentifier()),
+        $change,
         $date,
         $time,
         $author,

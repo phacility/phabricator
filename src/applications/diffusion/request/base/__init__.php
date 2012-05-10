@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/diffusion/exception/setup');
 phutil_require_module('phabricator', 'applications/repository/constants/repositorytype');
 phutil_require_module('phabricator', 'applications/repository/storage/commit');
 phutil_require_module('phabricator', 'applications/repository/storage/commitdata');

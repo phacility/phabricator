@@ -510,4 +510,16 @@ abstract class DiffusionRequest {
     return $result;
   }
 
+  protected function raiseCloneException() {
+    $host = php_uname('n');
+    $callsign = $this->getRepository()->getCallsign();
+    throw new DiffusionSetupException(
+      "The working copy for this repository ('{$callsign}') hasn't been ".
+      "cloned yet on this machine ('{$host}'). Make sure you've started the ".
+      "Phabricator daemons. If this problem persists for longer than a clone ".
+      "should take, check the daemon logs (in the Daemon Console) to see if ".
+      "there were errors cloning the repository. Consult the 'Diffusion User ".
+      "Guide' in the documentation for help setting up repositories.");
+  }
+
 }
