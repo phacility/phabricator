@@ -88,29 +88,11 @@ switch ($command) {
     echo "Done.\n";
     break;
 
-    $need_launch = phd_load_tracked_repositories();
-    if (!$need_launch) {
-      echo "There are no repositories with tracking enabled.\n";
-      exit(1);
-    }
-
-    will_launch($control);
-
-    echo "Launching PullLocal daemon in readonly mode...\n";
-
-    $control->launchDaemon(
-      'PhabricatorRepositoryPullLocalDaemon',
-      array(
-        '--no-discovery',
-      ));
-
-    echo "Done.\n";
-    break;
-
   case 'repository-launch-readonly':
   case 'repository-launch-master':
     if ($command == 'repository-launch-readonly') {
       $daemon_args = array(
+        '--',
         '--no-discovery',
       );
     } else {
