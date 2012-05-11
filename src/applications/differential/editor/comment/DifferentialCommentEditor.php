@@ -452,6 +452,9 @@ final class DifferentialCommentEditor {
       $revision->setLastReviewerPHID($actor_phid);
     }
 
+    // TODO: Call beginReadLocking() prior to loading the revision.
+    $revision->openTransaction();
+
     // Always save the revision (even if we didn't actually change any of its
     // properties) so that it jumps to the top of the revision list when sorted
     // by "updated". Notably, this allows "ping" comments to push it to the
@@ -521,6 +524,8 @@ final class DifferentialCommentEditor {
         $comment->save();
       }
     }
+
+    $revision->saveTransaction();
 
     $phids = array($this->actorPHID);
     $handles = id(new PhabricatorObjectHandleData($phids))
