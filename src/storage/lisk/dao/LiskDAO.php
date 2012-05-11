@@ -43,7 +43,8 @@
  *
  * To create new Lisk objects, extend @{class:LiskDAO} and implement
  * @{method:establishLiveConnection}. It should return an
- * AphrontDatabaseConnection; this will tell Lisk where to save your objects.
+ * @{class:AphrontDatabaseConnection}; this will tell Lisk where to save your
+ * objects.
  *
  *   class Dog extends LiskDAO {
  *
@@ -57,6 +58,7 @@
  *
  * Now, you should create your table:
  *
+ *   lang=sql
  *   CREATE TABLE dog (
  *     id int unsigned not null auto_increment primary key,
  *     name varchar(32) not null,
@@ -65,17 +67,17 @@
  *     dateModified int unsigned not null
  *   );
  *
- * For each property in your class, add a column with the same name to the
- * table (see getConfiguration() for information about changing this mapping).
+ * For each property in your class, add a column with the same name to the table
+ * (see @{method:getConfiguration} for information about changing this mapping).
  * Additionally, you should create the three columns `id`,  `dateCreated` and
  * `dateModified`. Lisk will automatically manage these, using them to implement
  * autoincrement IDs and timestamps. If you do not want to use these features,
- * see getConfiguration() for information on disabling them. At a bare minimum,
- * you must normally have an `id` column which is a primary or unique key with a
- * numeric type, although you can change its name by overriding getIDKey() or
- * disable it entirely by overriding getIDKey() to return null. Note that many
- * methods rely on a single-part primary key and will no longer work (they will
- * throw) if you disable it.
+ * see @{method:getConfiguration} for information on disabling them. At a bare
+ * minimum, you must normally have an `id` column which is a primary or unique
+ * key with a numeric type, although you can change its name by overriding
+ * @{method:getIDKey} or disable it entirely by overriding @{method:getIDKey} to
+ * return null. Note that many methods rely on a single-part primary key and
+ * will no longer work (they will throw) if you disable it.
  *
  * As you add more properties to your class in the future, remember to add them
  * to the database table as well.
@@ -88,7 +90,7 @@
  *
  * = Creating, Retrieving, Updating, and Deleting =
  *
- * To create and persist a Lisk object, use save():
+ * To create and persist a Lisk object, use @{method:save}:
  *
  *   $dog = id(new Dog())
  *     ->setName('Sawyer')
@@ -96,26 +98,27 @@
  *     ->save();
  *
  * Note that **Lisk automatically builds getters and setters for all of your
- * object's properties** via __call(). If you want to add custom behavior to
- * your getters or setters, you can do so by overriding the readField and
- * writeField methods.
+ * object's protected properties** via @{method:__call}. If you want to add
+ * custom behavior to your getters or setters, you can do so by overriding the
+ * @{method:readField} and @{method:writeField} methods.
  *
- * Calling save() will persist the object to the database. After calling
- * save(), you can call getID() to retrieve the object's ID.
+ * Calling @{method:save} will persist the object to the database. After calling
+ * @{method:save}, you can call @{method:getID} to retrieve the object's ID.
  *
- * To load objects by ID, use the load() method:
+ * To load objects by ID, use the @{method:load} method:
  *
  *   $dog = id(new Dog())->load($id);
  *
  * This will load the Dog record with ID $id into $dog, or ##null## if no such
- * record exists (load() is an instance method rather than a static method
- * because PHP does not support late static binding, at least until PHP 5.3).
+ * record exists (@{method:load} is an instance method rather than a static
+ * method because PHP does not support late static binding, at least until PHP
+ * 5.3).
  *
  * To update an object, change its properties and save it:
  *
  *   $dog->setBreed('Lab')->save();
  *
- * To delete an object, call delete():
+ * To delete an object, call @{method:delete}:
  *
  *   $dog->delete();
  *
@@ -124,7 +127,7 @@
  * = Queries =
  *
  * Often, you want to load a bunch of objects, or execute a more specialized
- * query. Use loadAllWhere() or loadOneWhere() to do this:
+ * query. Use @{method:loadAllWhere} or @{method:loadOneWhere} to do this:
  *
  *   $pugs = $dog->loadAllWhere('breed = %s', 'Pug');
  *   $sawyer = $dog->loadOneWhere('name = %s', 'Sawyer');
@@ -132,8 +135,8 @@
  * These methods work like @{function:queryfx}, but only take half of a query
  * (the part after the WHERE keyword). Lisk will handle the connection, columns,
  * and object construction; you are responsible for the rest of it.
- * loadAllWhere() returns a list of objects, while loadOneWhere() returns a
- * single object (or null).
+ * @{method:loadAllWhere} returns a list of objects, while
+ * @{method:loadOneWhere} returns a single object (or `null`).
  *
  * = Managing Transactions =
  *
@@ -158,6 +161,9 @@
  *
  * Assuming ##$obj##, ##$other## and ##$another## live on the same database,
  * this code will work correctly by establishing savepoints.
+ *
+ * Selects whose data are used later in the transaction should be included in
+ * @{method:beginReadLocking} or @{method:beginWriteLocking} block.
  *
  * @task   conn    Managing Connections
  * @task   config  Configuring Lisk

@@ -111,6 +111,12 @@ us to construct short, human-readable object names (like D2258) and URIs. Global
 PHIDs allow us to represent relationships between different types of objects in
 a homogenous way.
 
+= Transactions =
+
+Transactional code should be written using transactions. Example of such code is
+inserting multiple records where one doesn't make sense without the other or
+selecting data later used for update. See chapter in @{class:LiskDAO}.
+
 = Advanced Features =
 
 We don't use MySQL advanced features such as triggers, stored procedures or

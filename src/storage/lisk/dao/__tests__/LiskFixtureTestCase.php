@@ -34,7 +34,6 @@ final class LiskFixtureTestCase extends PhabricatorTestCase {
     id(new PhabricatorUser())
       ->setUserName('alincoln')
       ->setRealName('Abraham Lincoln')
-      ->setEmail('alincoln@example.com')
       ->save();
   }
 
@@ -46,7 +45,6 @@ final class LiskFixtureTestCase extends PhabricatorTestCase {
     id(new PhabricatorUser())
       ->setUserName('ugrant')
       ->setRealName('Ulysses S. Grant')
-      ->setEmail('ugrant@example.com')
       ->save();
   }
 
@@ -58,7 +56,6 @@ final class LiskFixtureTestCase extends PhabricatorTestCase {
     id(new PhabricatorUser())
       ->setUserName('gwashington')
       ->setRealName('George Washington')
-      ->setEmail('gwashington@example.com')
       ->save();
 
     $this->assertEqual(
