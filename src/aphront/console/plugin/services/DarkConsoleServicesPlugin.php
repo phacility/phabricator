@@ -247,6 +247,10 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
           $info = $row['method'];
           $info = phutil_escape_html($info);
           break;
+        case 'http':
+          $info = $row['uri'];
+          $info = phutil_escape_html($info);
+          break;
         default:
           $info = '-';
           break;
