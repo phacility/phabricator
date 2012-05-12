@@ -78,6 +78,7 @@ final class DiffusionMercurialBrowseQuery extends DiffusionBrowseQuery {
       $result = new DiffusionRepositoryPath();
       $result->setPath($key);
       $result->setFileType($type);
+      $result->setFullPath(ltrim($match_against.'/', '/').$key);
 
       $results[$key] = $result;
     }

@@ -665,15 +665,15 @@ final class PhabricatorRepositoryPullLocalDaemon
 
     $seen_parent = array();
 
-    // For all the new commits at the branch heads, walk backward until we find
-    // only commits we've aleady seen.
-    while (true) {
+    $stream = new PhabricatorMercurialGraphStream($repository);
+
+    // For all the new commits at the branch heads, walk backward until we
+    // find only commits we've aleady seen.
+    while ($discover) {
       $target = array_pop($discover);
-      list($stdout) = $repository->execxLocalCommand(
-        'parents --rev %s --template %s',
-        $target,
-        '{node}\n');
-      $parents = array_filter(explode("\n", trim($stdout)));
+
+      $parents = $stream->getParents($target);
+
       foreach ($parents as $parent) {
         if (isset($seen_parent[$parent])) {
           continue;
@@ -684,24 +684,11 @@ final class PhabricatorRepositoryPullLocalDaemon
           $insert[] = $parent;
         }
       }
-      if (empty($discover)) {
-        break;
-      }
     }
 
-    while (true) {
-      $target = array_pop($insert);
-      list($stdout) = $repository->execxLocalCommand(
-        'log --rev %s --template %s',
-        $target,
-        '{date|rfc822date}');
-      $epoch = strtotime($stdout);
-
+    foreach ($insert as $target) {
+      $epoch = $stream->getCommitDate($target);
       self::recordCommit($repository, $target, $epoch);
-
-      if (empty($insert)) {
-        break;
-      }
     }
   }
 

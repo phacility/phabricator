@@ -20,8 +20,10 @@ phutil_require_module('phabricator', 'storage/queryfx');
 
 phutil_require_module('phutil', 'error');
 phutil_require_module('phutil', 'filesystem');
+phutil_require_module('phutil', 'filesystem/linesofalarge/execfuture');
 phutil_require_module('phutil', 'parser/argument/parser');
 phutil_require_module('phutil', 'utils');
 
 
+phutil_require_source('PhabricatorMercurialGraphStream.php');
 phutil_require_source('PhabricatorRepositoryPullLocalDaemon.php');
