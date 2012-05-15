@@ -303,7 +303,7 @@ final class PhabricatorEnv {
       'metamta.maniphest.reply-handler' => 'PhabricatorMailReplyHandler',
       'metamta.differential.reply-handler' => 'PhabricatorMailReplyHandler',
       'metamta.diffusion.reply-handler' => 'PhabricatorMailReplyHandler',
-      'metamta.package.reply-handler' => 'OwnersPackageReplyHandler',
+      'metamta.package.reply-handler' => 'PhabricatorMailReplyHandler',
       'storage.engine-selector' => 'PhabricatorFileStorageEngineSelector',
       'search.engine-selector' => 'PhabricatorSearchEngineSelector',
       'differential.field-selector' => 'DifferentialFieldSelector',
