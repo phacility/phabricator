@@ -15,7 +15,7 @@ phutil_require_module('phabricator', 'storage/qsprintf');
 phutil_require_module('phabricator', 'storage/queryfx');
 
 phutil_require_module('phutil', 'filesystem');
-phutil_require_module('phutil', 'filesystem/linesofalargefile');
+phutil_require_module('phutil', 'filesystem/linesofalarge/file');
 phutil_require_module('phutil', 'filesystem/tempfile');
 phutil_require_module('phutil', 'future/exec');
 phutil_require_module('phutil', 'utils');

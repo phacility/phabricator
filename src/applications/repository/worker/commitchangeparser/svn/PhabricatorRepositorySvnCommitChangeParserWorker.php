@@ -701,10 +701,9 @@ class PhabricatorRepositorySvnCommitChangeParserWorker
   }
 
   private function parseRecursiveListFileData($file_path) {
-    $map = array();
-
-    $mode = 'xml';
-    $done = false;
+    $map   = array();
+    $mode  = 'xml';
+    $done  = false;
     $entry = null;
     foreach (new LinesOfALargeFile($file_path) as $lno => $line) {
       switch ($mode) {
