@@ -439,8 +439,7 @@ final class DifferentialRevisionListController extends DifferentialController {
           $user_phid);
 
         $view = id(clone $template)
-          ->setRevisions($active)
-          ->setNoDataString("You have no active revisions requiring action.");
+          ->setRevisions($active);
         $views[] = array(
           'title' => 'Action Required',
           'view'  => $view,
@@ -469,8 +468,7 @@ final class DifferentialRevisionListController extends DifferentialController {
         }
 
         $view = id(clone $template)
-          ->setRevisions($waiting)
-          ->setNoDataString("You have no active revisions waiting on others.");
+          ->setRevisions($waiting);
         $views[] = array(
           'title' => 'Waiting On Others',
           'view'  => $view,

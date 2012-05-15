@@ -24,8 +24,8 @@ final class DifferentialRevisionListView extends AphrontView {
   private $revisions;
   private $handles;
   private $user;
-  private $noDataString;
   private $fields;
+  const NO_DATA_STRING = 'No revisions found.';
 
   public function setFields(array $fields) {
     assert_instances_of($fields, 'DifferentialFieldSpecification');
@@ -57,11 +57,6 @@ final class DifferentialRevisionListView extends AphrontView {
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
-    return $this;
-  }
-
-  public function setNoDataString($no_data_string) {
-    $this->noDataString = $no_data_string;
     return $this;
   }
 
@@ -97,9 +92,7 @@ final class DifferentialRevisionListView extends AphrontView {
     $table->setHeaders($headers);
     $table->setColumnClasses($classes);
 
-    if ($this->noDataString) {
-      $table->setNoDataString($this->noDataString);
-    }
+    $table->setNoDataString(DifferentialRevisionListView::NO_DATA_STRING);
 
     return $table->render();
   }
