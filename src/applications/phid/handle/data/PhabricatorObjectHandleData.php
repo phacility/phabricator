@@ -171,7 +171,8 @@ final class PhabricatorObjectHandleData {
                 $user->getUsername().' ('.$user->getRealName().')');
               $handle->setAlternateID($user->getID());
               $handle->setComplete(true);
-              $handle->setDisabled($user->getIsDisabled());
+              $handle->setDisabled($user->getIsDisabled() ||
+                                   $user->getIsSystemAgent());
 
               $img_uri = idx($images, $user->getProfileImagePHID());
               if ($img_uri) {
