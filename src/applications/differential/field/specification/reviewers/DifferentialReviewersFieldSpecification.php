@@ -35,17 +35,7 @@ final class DifferentialReviewersFieldSpecification
   }
 
   public function renderValueForRevisionView() {
-    $reviewer_phids = $this->getReviewerPHIDs();
-    if (!$reviewer_phids) {
-      return '<em>None</em>';
-    }
-
-    $links = array();
-    foreach ($reviewer_phids as $reviewer_phid) {
-      $links[] = $this->getHandle($reviewer_phid)->renderLink();
-    }
-
-    return implode(', ', $links);
+    return $this->renderUserList($this->getReviewerPHIDs());
   }
 
   private function getReviewerPHIDs() {

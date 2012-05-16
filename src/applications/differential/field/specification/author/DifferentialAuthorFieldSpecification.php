@@ -32,10 +32,7 @@ final class DifferentialAuthorFieldSpecification
   }
 
   public function renderValueForRevisionView() {
-    $author_phid = $this->getAuthorPHID();
-    $handle = $this->getHandle($author_phid);
-
-    return $handle->renderLink();
+    return $this->renderUserList(array($this->getAuthorPHID()));
   }
 
   private function getAuthorPHID() {

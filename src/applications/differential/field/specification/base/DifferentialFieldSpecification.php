@@ -266,6 +266,45 @@ abstract class DifferentialFieldSpecification {
 
 
   /**
+   * Load users, their current statuses and return a markup with links to the
+   * user profiles and information about their current status.
+   *
+   * @return string Display markup.
+   * @task view
+   */
+  public function renderUserList(array $user_phids) {
+    if (!$user_phids) {
+      return '<em>None</em>';
+    }
+
+    $statuses = id(new PhabricatorUserStatus())->loadAllWhere(
+      'userPHID IN (%Ls) AND UNIX_TIMESTAMP() BETWEEN dateFrom AND dateTo',
+      $user_phids);
+    $statuses = mpull($statuses, null, 'getUserPHID');
+
+    $links = array();
+    foreach ($user_phids as $user_phid) {
+      $handle = $this->getHandle($user_phid);
+      $extra = null;
+      $status = idx($statuses, $handle->getPHID());
+      if ($handle->isDisabled()) {
+        $extra = ' <strong>(disabled)</strong>';
+      } else if ($status) {
+        $until = phabricator_date($status->getDateTo(), $this->getUser());
+        if ($status->getStatus() == PhabricatorUserStatus::STATUS_SPORADIC) {
+          $extra = ' <strong title="until '.$until.'">(sporadic)</strong>';
+        } else {
+          $extra = ' <strong title="until '.$until.'">(away)</strong>';
+        }
+      }
+      $links[] = $handle->renderLink().$extra;
+    }
+
+    return implode(', ', $links);
+  }
+
+
+  /**
    * Return a markup block representing a warning to display with the comment
    * box when preparing to accept a diff. A return value of null indicates no
    * warning box should be displayed for this field.

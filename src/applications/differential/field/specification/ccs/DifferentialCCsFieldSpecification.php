@@ -34,17 +34,7 @@ final class DifferentialCCsFieldSpecification
   }
 
   public function renderValueForRevisionView() {
-    $cc_phids = $this->getCCPHIDs();
-    if (!$cc_phids) {
-      return '<em>None</em>';
-    }
-
-    $links = array();
-    foreach ($cc_phids as $cc_phid) {
-      $links[] = $this->getHandle($cc_phid)->renderLink();
-    }
-
-    return implode(', ', $links);
+    return $this->renderUserList($this->getCCPHIDs());
   }
 
   private function getCCPHIDs() {
