@@ -156,6 +156,9 @@ final class PhabricatorObjectHandleData {
             $phids);
           $emails = mpull($emails, 'getAddress', 'getUserPHID');
 
+          $statuses = id(new PhabricatorUserStatus())->loadCurrentStatuses(
+            $phids);
+
           foreach ($phids as $phid) {
             $handle = new PhabricatorObjectHandle();
             $handle->setPHID($phid);
@@ -171,6 +174,9 @@ final class PhabricatorObjectHandleData {
                 $user->getUsername().' ('.$user->getRealName().')');
               $handle->setAlternateID($user->getID());
               $handle->setComplete(true);
+              if (isset($statuses[$phid])) {
+                $handle->setStatus($statuses[$phid]->getTextStatus());
+              }
               $handle->setDisabled($user->getIsDisabled() ||
                                    $user->getIsSystemAgent());
 

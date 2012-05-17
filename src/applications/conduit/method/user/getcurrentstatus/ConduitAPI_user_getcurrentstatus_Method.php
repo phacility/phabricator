@@ -46,8 +46,7 @@ final class ConduitAPI_user_getcurrentstatus_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $statuses = id(new PhabricatorUserStatus())->loadAllWhere(
-      'userPHID IN (%Ls) AND UNIX_TIMESTAMP() BETWEEN dateFrom AND dateTo',
+    $statuses = id(new PhabricatorUserStatus())->loadCurrentStatuses(
       $request->getValue('userPHIDs'));
 
     $return = array();

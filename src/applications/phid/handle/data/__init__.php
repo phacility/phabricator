@@ -13,6 +13,7 @@ phutil_require_module('phabricator', 'applications/maniphest/constants/owner');
 phutil_require_module('phabricator', 'applications/maniphest/constants/status');
 phutil_require_module('phabricator', 'applications/people/storage/email');
 phutil_require_module('phabricator', 'applications/people/storage/user');
+phutil_require_module('phabricator', 'applications/people/storage/userstatus');
 phutil_require_module('phabricator', 'applications/phid/constants');
 phutil_require_module('phabricator', 'applications/phid/handle');
 phutil_require_module('phabricator', 'applications/phid/handle/const/status');

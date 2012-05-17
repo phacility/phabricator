@@ -187,6 +187,16 @@ td.phabricator-login-details {
   text-decoration: line-through;
 }
 
+.aphront-table-view a.handle-status-away {
+  border-left: 2px solid #aa0000;
+  padding-left: .25em;
+}
+
+.aphront-table-view a.handle-status-sporadic {
+  border-left: 2px solid #ffdd33;
+  padding-left: .25em;
+}
+
 a.handle-disabled {
   background: #999999;
   color: #cccccc;

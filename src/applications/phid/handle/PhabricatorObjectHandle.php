@@ -27,7 +27,7 @@ final class PhabricatorObjectHandle {
   private $imageURI;
   private $timestamp;
   private $alternateID;
-  private $status = 'open';
+  private $status = PhabricatorObjectHandleStatus::STATUS_OPEN;
   private $complete;
   private $disabled;
 
@@ -197,13 +197,16 @@ final class PhabricatorObjectHandle {
   public function renderLink() {
     $name = $this->getLinkName();
     $class = null;
+    $title = null;
 
     if ($this->status != PhabricatorObjectHandleStatus::STATUS_OPEN) {
       $class .= ' handle-status-'.$this->status;
+      $title = $this->status;
     }
 
     if ($this->disabled) {
       $class .= ' handle-disabled';
+      $title = 'disabled'; // Overwrite status.
     }
 
     return phutil_render_tag(
@@ -211,6 +214,7 @@ final class PhabricatorObjectHandle {
       array(
         'href'  => $this->getURI(),
         'class' => $class,
+        'title' => $title,
       ),
       phutil_escape_html($name));
   }

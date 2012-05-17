@@ -49,4 +49,11 @@ final class PhabricatorUserStatus extends PhabricatorUserDAO {
     return $this->setStatus($statuses[$status]);
   }
 
+  public function loadCurrentStatuses($user_phids) {
+    $statuses = $this->loadAllWhere(
+      'userPHID IN (%Ls) AND UNIX_TIMESTAMP() BETWEEN dateFrom AND dateTo',
+      $user_phids);
+    return mpull($statuses, null, 'getUserPHID');
+  }
+
 }

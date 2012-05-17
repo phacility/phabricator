@@ -127,11 +127,10 @@ final class PhabricatorPeopleProfileController
     if ($user->getIsDisabled()) {
       $header->setStatus('Disabled');
     } else {
-      $status = id(new PhabricatorUserStatus())->loadOneWhere(
-        'userPHID = %s AND UNIX_TIMESTAMP() BETWEEN dateFrom AND dateTo',
-        $user->getPHID());
-      if ($status) {
-        $header->setStatus($status->getStatusDescription());
+      $statuses = id(new PhabricatorUserStatus())->loadCurrentStatuses(
+        array($user->getPHID()));
+      if ($statuses) {
+        $header->setStatus(reset($statuses)->getStatusDescription());
       }
     }
 

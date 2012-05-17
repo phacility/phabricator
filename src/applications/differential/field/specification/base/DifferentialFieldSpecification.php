@@ -277,10 +277,8 @@ abstract class DifferentialFieldSpecification {
       return '<em>None</em>';
     }
 
-    $statuses = id(new PhabricatorUserStatus())->loadAllWhere(
-      'userPHID IN (%Ls) AND UNIX_TIMESTAMP() BETWEEN dateFrom AND dateTo',
+    $statuses = id(new PhabricatorUserStatus())->loadCurrentStatuses(
       $user_phids);
-    $statuses = mpull($statuses, null, 'getUserPHID');
 
     $links = array();
     foreach ($user_phids as $user_phid) {
