@@ -175,7 +175,7 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
     }
 
     $spec['from'] = (int)$query->getParameter('offset', 0);
-    $spec['size'] = (int)$query->getParameter('limit', 0);
+    $spec['size'] = (int)$query->getParameter('limit', 25);
     $response = $this->executeRequest($uri, $spec);
 
     $phids = ipull($response['hits']['hits'], '_id');
