@@ -39,7 +39,10 @@ final class PhabricatorIRCMacroHandler extends PhabricatorIRCHandler {
     $macros = $this->getConduit()->callMethodSynchronous(
       'macro.query',
       array());
-
+    // gotta bail if we failed to fetch the macros
+    if ($macros === null) {
+      return false;
+    }
     $this->macros = $macros;
 
     $regexp = array();
