@@ -35,6 +35,15 @@ final class PhabricatorUserStatus extends PhabricatorUserDAO {
     return self::$statusTexts[$this->status];
   }
 
+  public function getStatusDescription(PhabricatorUser $viewer) {
+    $until = phabricator_date($this->dateTo, $viewer);
+    if ($this->status == PhabricatorUserStatus::STATUS_SPORADIC) {
+      return 'Sporadic until '.$until;
+    } else {
+      return 'Away until '.$until;
+    }
+  }
+
   public function setTextStatus($status) {
     $statuses = array_flip(self::$statusTexts);
     return $this->setStatus($statuses[$status]);

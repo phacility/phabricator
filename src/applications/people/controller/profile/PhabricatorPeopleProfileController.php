@@ -124,6 +124,17 @@ final class PhabricatorPeopleProfileController
       ->setName($user->getUserName().' ('.$user->getRealName().')')
       ->setDescription($profile->getTitle());
 
+    if ($user->getIsDisabled()) {
+      $header->setStatus('Disabled');
+    } else {
+      $status = id(new PhabricatorUserStatus())->loadOneWhere(
+        'userPHID = %s AND UNIX_TIMESTAMP() BETWEEN dateFrom AND dateTo',
+        $user->getPHID());
+      if ($status) {
+        $header->setStatus($status->getStatusDescription());
+      }
+    }
+
     $header->appendChild($nav);
     $nav->appendChild(
       '<div style="padding: 1em;">'.$content.'</div>');

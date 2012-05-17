@@ -22,6 +22,7 @@ final class PhabricatorProfileHeaderView extends AphrontView {
   protected $profileName;
   protected $profileDescription;
   protected $profileActions = array();
+  protected $profileStatus;
 
   public function setProfilePicture($picture) {
     $this->profilePicture = $picture;
@@ -43,6 +44,11 @@ final class PhabricatorProfileHeaderView extends AphrontView {
     return $this;
   }
 
+  public function setStatus($status) {
+    $this->profileStatus = $status;
+    return $this;
+  }
+
   public function render() {
     require_celerity_resource('phabricator-profile-header-css');
 
@@ -55,6 +61,14 @@ final class PhabricatorProfileHeaderView extends AphrontView {
           'style' => 'background-image: url('.$this->profilePicture.');',
         ),
         '');
+    }
+
+    $description = phutil_escape_html($this->profileDescription);
+    if ($this->profileStatus != '') {
+      $description =
+        '<strong>'.phutil_escape_html($this->profileStatus).'</strong>'.
+        ($description != '' ? ' &mdash; ' : '').
+        $description;
     }
 
     return
@@ -72,7 +86,7 @@ final class PhabricatorProfileHeaderView extends AphrontView {
         </tr>
         <tr>
           <td class="profile-header-description">'.
-            phutil_escape_html($this->profileDescription).
+            $description.
           '</td>
         </tr>
       </table>'.

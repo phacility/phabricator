@@ -7,6 +7,7 @@
 
 
 phutil_require_module('phabricator', 'applications/people/storage/base');
+phutil_require_module('phabricator', 'view/utils');
 
 
 phutil_require_source('PhabricatorUserStatus.php');
