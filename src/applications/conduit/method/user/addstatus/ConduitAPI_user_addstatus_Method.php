@@ -73,19 +73,11 @@ final class ConduitAPI_user_addstatus_Method extends ConduitAPI_user_Method {
       throw new ConduitException('ERR-OVERLAP');
     }
 
-    switch ($request->getValue('status')) {
-      case 'sporadic':
-        $status = PhabricatorUserStatus::STATUS_SPORADIC;
-        break;
-      default:
-        $status = PhabricatorUserStatus::STATUS_AWAY;
-        break;
-    }
     id(new PhabricatorUserStatus())
       ->setUserPHID($user_phid)
       ->setDateFrom($from)
       ->setDateTo($to)
-      ->setStatus($status)
+      ->setTextStatus($request->getValue('status'))
       ->save();
 
     $table->endWriteLocking();
