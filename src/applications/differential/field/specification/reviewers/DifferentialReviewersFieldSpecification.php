@@ -140,7 +140,7 @@ final class DifferentialReviewersFieldSpecification
   }
 
   public function renderValueForRevisionList(DifferentialRevision $revision) {
-    $primary_reviewer = $this->getPrimaryReviewer($revision);
+    $primary_reviewer = $revision->getPrimaryReviewer();
     if ($primary_reviewer) {
       $other_reviewers = array_flip($revision->getReviewers());
       unset($other_reviewers[$primary_reviewer]);
@@ -157,19 +157,11 @@ final class DifferentialReviewersFieldSpecification
 
   public function getRequiredHandlePHIDsForRevisionList(
     DifferentialRevision $revision) {
-    $primary_reviewer = $this->getPrimaryReviewer($revision);
+    $primary_reviewer = $revision->getPrimaryReviewer();
     if ($primary_reviewer) {
       return array($primary_reviewer);
     }
     return array();
-  }
-
-  private function getPrimaryReviewer(DifferentialRevision $revision) {
-    $primary_reviewer = $revision->getLastReviewerPHID();
-    if (!$primary_reviewer) {
-      $primary_reviewer = head($revision->getReviewers());
-    }
-    return $primary_reviewer;
   }
 
 }

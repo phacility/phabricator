@@ -206,6 +206,13 @@ final class DifferentialRevision extends DifferentialDAO {
     return array_keys($this->getUnsubscribed());
   }
 
+  public function getPrimaryReviewer() {
+    if (!$this->lastReviewerPHID) {
+      return head($this->getReviewers());
+    }
+    return $this->lastReviewerPHID;
+  }
+
   public function loadReviewedBy() {
     $reviewer = null;
 
