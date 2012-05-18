@@ -301,14 +301,14 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
               $value = array($value);
             }
             foreach (array_filter($value) as $phid) {
-              $phids[] = $phid;
+              $type = phid_get_type($phid);
+              $phids[$phid] = $type;
             }
             break;
         }
       }
 
-      $handles = id(new PhabricatorObjectHandleData($phids))
-        ->loadHandles();
+      $this->loadEmailAndNameDataFromPHIDs($phids);
 
       $exclude = array();
 
@@ -335,14 +335,13 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         }
 
         if (!PhabricatorEnv::getEnvConfig('metamta.can-send-as-user')) {
-          $handle = $handles[$from];
           if (empty($params['reply-to'])) {
-            $params['reply-to'] = $handle->getEmail();
-            $params['reply-to-name'] = $handle->getFullName();
+            $params['reply-to'] = $phids[$from]['email'];
+            $params['reply-to-name'] = $phids[$from]['name'];
           }
           $mailer->setFrom(
             $default,
-            $handle->getFullName());
+            $phids[$from]['name']);
           unset($params['from']);
         }
       }
@@ -361,30 +360,24 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       foreach ($params as $key => $value) {
         switch ($key) {
           case 'from':
-            $mailer->setFrom($handles[$value]->getEmail());
+            $mailer->setFrom($phids[$from]['email']);
             break;
           case 'reply-to':
             $mailer->addReplyTo($value, $reply_to_name);
             break;
           case 'to':
-            $emails = $this->getDeliverableEmailsFromHandles(
-              $value,
-              $handles,
-              $exclude);
-            if ($emails) {
-              $add_to = array_merge($add_to, $emails);
+            $to_emails = $this->filterSendable($value, $phids, $exclude);
+            if ($to_emails) {
+              $add_to = array_merge($add_to, $to_emails);
             }
             break;
           case 'raw-to':
             $add_to = array_merge($add_to, $value);
             break;
           case 'cc':
-            $emails = $this->getDeliverableEmailsFromHandles(
-              $value,
-              $handles,
-              $exclude);
-            if ($emails) {
-              $add_cc = $emails;
+            $cc_emails = $this->filterSendable($value, $phids, $exclude);
+            if ($cc_emails) {
+              $add_cc = $cc_emails;
             }
             break;
           case 'headers':
@@ -659,27 +652,81 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return base64_encode($base);
   }
 
-  private function getDeliverableEmailsFromHandles(
-    array $phids,
-    array $handles,
-    array $exclude) {
-    assert_instances_of($handles, 'PhabricatorObjectHandle');
+  private function loadEmailAndNameDataFromPHIDs(array &$phids) {
+    $users = array();
+    $mlsts = array();
+    // first iteration - group by types to do data fetches
+    foreach ($phids as $phid => $type) {
+      switch ($type) {
+        case PhabricatorPHIDConstants::PHID_TYPE_USER:
+          $users[] = $phid;
+          break;
+        case PhabricatorPHIDConstants::PHID_TYPE_MLST:
+          $mlsts[] = $phid;
+          break;
+      }
+    }
+    $user_emails = array();
+    if ($users) {
+      $user_emails = id(new PhabricatorUserEmail())->loadAllWhere(
+        'userPHID IN (%Ls) AND isPrimary = 1', $users);
+      $users = id(new PhabricatorUser())->loadAllWhere(
+        'phid IN (%Ls)', $users);
+      $user_emails = mpull($user_emails, null, 'getUserPHID');
+      $users = mpull($users, null, 'getPHID');
+    }
+    if ($mlsts) {
+      $mlsts = id(new PhabricatorMetaMTAMailingList())->loadAllWhere(
+        'phid IN (%Ls)', $mlsts);
+      $mlsts = mpull($mlsts, null, 'getPHID');
+    }
 
-    $emails = array();
-    foreach ($phids as $phid) {
-      if ($handles[$phid]->isDisabled()) {
-        continue;
+    // second iteration - create entries for each phid
+    $default = PhabricatorEnv::getEnvConfig('metamta.default-address');
+    foreach ($phids as $phid => &$value) {
+      $name = '';
+      $email = $default;
+      $is_mailable = false;
+      switch ($value) {
+        case PhabricatorPHIDConstants::PHID_TYPE_USER:
+          $user = $users[$phid];
+          if ($user) {
+            $name = $user->getFullName();
+            $is_mailable = !$user->getIsDisabled()
+                        && !$user->getIsSystemAgent();
+          }
+          $email = $user_emails[$phid] ?
+                   $user_emails[$phid]->getAddress() :
+                   $default;
+          break;
+        case PhabricatorPHIDConstants::PHID_TYPE_MLST:
+          $mlst = $mlsts[$phid];
+          if ($mlst) {
+            $name = $mlst->getName();
+            $email = $mlst->getEmail();
+            $is_mailable = true;
+          }
+          break;
       }
-      if (!$handles[$phid]->isComplete()) {
-        continue;
-      }
+      $value = array(
+        'name' => $name,
+        'email' => $email,
+        'mailable' => $is_mailable,
+      );
+    }
+  }
+
+  private function filterSendable($value, $phids, $exclude) {
+    $result = array();
+    foreach ($value as $phid) {
       if (isset($exclude[$phid])) {
         continue;
       }
-      $emails[$phid] = $handles[$phid]->getEmail();
+      if (isset($phids[$phid]) && $phids[$phid]['mailable']) {
+        $result[$phid] = $phids[$phid]['email'];
+      }
     }
-
-    return $emails;
+    return $result;
   }
 
   public static function shouldMultiplexAllMail() {

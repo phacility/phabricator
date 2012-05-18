@@ -149,16 +149,6 @@ final class PhabricatorObjectHandleData {
             $images = mpull($images, 'getBestURI', 'getPHID');
           }
 
-          // TODO: This probably should not be part of Handles anymore, only
-          // MetaMTA actually uses it.
-          $emails = id(new PhabricatorUserEmail())->loadAllWhere(
-            'userPHID IN (%Ls) AND isPrimary = 1',
-            $phids);
-          $emails = mpull($emails, 'getAddress', 'getUserPHID');
-
-          $statuses = id(new PhabricatorUserStatus())->loadCurrentStatuses(
-            $phids);
-
           foreach ($phids as $phid) {
             $handle = new PhabricatorObjectHandle();
             $handle->setPHID($phid);
@@ -169,7 +159,6 @@ final class PhabricatorObjectHandleData {
               $user = $users[$phid];
               $handle->setName($user->getUsername());
               $handle->setURI('/p/'.$user->getUsername().'/');
-              $handle->setEmail(idx($emails, $phid));
               $handle->setFullName(
                 $user->getUsername().' ('.$user->getRealName().')');
               $handle->setAlternateID($user->getID());
@@ -177,8 +166,7 @@ final class PhabricatorObjectHandleData {
               if (isset($statuses[$phid])) {
                 $handle->setStatus($statuses[$phid]->getTextStatus());
               }
-              $handle->setDisabled($user->getIsDisabled() ||
-                                   $user->getIsSystemAgent());
+              $handle->setDisabled($user->getIsDisabled());
 
               $img_uri = idx($images, $user->getProfileImagePHID());
               if ($img_uri) {
@@ -208,7 +196,6 @@ final class PhabricatorObjectHandleData {
               $handle->setName('Unknown Mailing List');
             } else {
               $list = $lists[$phid];
-              $handle->setEmail($list->getEmail());
               $handle->setName($list->getName());
               $handle->setURI($list->getURI());
               $handle->setFullName($list->getName());

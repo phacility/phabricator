@@ -581,6 +581,10 @@ EOBODY;
     return self::getDefaultProfileImageURI();
   }
 
+  public function getFullName() {
+    return $this->getUsername().' ('.$this->getRealName().')';
+  }
+
   public static function loadOneWithEmailAddress($address) {
     $email = id(new PhabricatorUserEmail())->loadOneWhere(
       'address = %s',

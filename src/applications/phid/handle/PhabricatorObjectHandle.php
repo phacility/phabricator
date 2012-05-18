@@ -88,15 +88,6 @@ final class PhabricatorObjectHandle {
     return $this->type;
   }
 
-  public function setEmail($email) {
-    $this->email = $email;
-    return $this;
-  }
-
-  public function getEmail() {
-    return $this->email;
-  }
-
   public function setImageURI($uri) {
     $this->imageURI = $uri;
     return $this;
