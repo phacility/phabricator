@@ -113,7 +113,7 @@ If so, you can download the source and build it with:
   $ make
   $ sudo make install
 
-You may also need to add "##extension=xhprof.so#" to your php.ini.
+You may also need to add "##extension=xhprof.so##" to your php.ini.
 
 See <https://bugs.php.net/bug.php?id=59747> for more information.
 
