@@ -26,18 +26,19 @@ final class ConduitAPI_maniphest_update_Method
     return "Update an existing Maniphest task.";
   }
 
+  public function defineErrorTypes() {
+    return array(
+      'ERR-BAD-TASK'          => 'No such maniphest task exists.',
+      'ERR-INVALID-PARAMETER' => 'Missing or malformed parameter.'
+    );
+  }
+
   public function defineParamTypes() {
     return $this->getTaskFields($is_new = false);
   }
 
   public function defineReturnType() {
     return 'nonempty dict';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-      'ERR-BAD-TASK'  => 'No such task exists.',
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {

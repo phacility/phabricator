@@ -36,6 +36,7 @@ final class ConduitAPI_maniphest_createtask_Method
 
   public function defineErrorTypes() {
     return array(
+      'ERR-INVALID-PARAMETER' => 'Missing or malformed parameter.'
     );
   }
 

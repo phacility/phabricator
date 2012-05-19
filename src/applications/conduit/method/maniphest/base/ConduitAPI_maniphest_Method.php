@@ -21,6 +21,12 @@
  */
 abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
 
+  public function defineErrorTypes() {
+    return array(
+      'ERR-INVALID-PARAMETER' => 'Missing or malformed parameter.'
+    );
+  }
+
   protected function buildTaskInfoDictionary(ManiphestTask $task) {
     $results = $this->buildTaskInfoDictionaries(array($task));
     return idx($results, $task->getPHID());
@@ -88,32 +94,54 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
 
       $status = $request->getValue('status');
       if ($status !== null) {
+        $valid_statuses = ManiphestTaskStatus::getTaskStatusMap();
+        if (!isset($valid_statuses[$status])) {
+          throw id(new ConduitException('ERR-INVALID-PARAMETER'))
+            ->setErrorDescription('Status set to invalid value.');
+        }
         $changes[ManiphestTransactionType::TYPE_STATUS] = $status;
       }
     }
 
     $priority = $request->getValue('priority');
     if ($priority !== null) {
+      $valid_priorities = ManiphestTaskPriority::getTaskPriorityMap();
+      if (!isset($valid_priorities[$priority])) {
+        throw id(new ConduitException('ERR-INVALID-PARAMETER'))
+          ->setErrorDescription('Priority set to invalid value.');
+      }
       $changes[ManiphestTransactionType::TYPE_PRIORITY] = $priority;
     }
 
     $owner_phid = $request->getValue('ownerPHID');
     if ($owner_phid !== null) {
+      $this->validatePHIDList(array($owner_phid),
+                              PhabricatorPHIDConstants::PHID_TYPE_USER,
+                              'ownerPHID');
       $changes[ManiphestTransactionType::TYPE_OWNER] = $owner_phid;
     }
 
     $ccs = $request->getValue('ccPHIDs');
     if ($ccs !== null) {
+      $this->validatePHIDList($ccs,
+                              PhabricatorPHIDConstants::PHID_TYPE_USER,
+                              'ccPHIDS');
       $changes[ManiphestTransactionType::TYPE_CCS] = $ccs;
     }
 
     $project_phids = $request->getValue('projectPHIDs');
     if ($project_phids !== null) {
+      $this->validatePHIDList($project_phids,
+                              PhabricatorPHIDConstants::PHID_TYPE_PROJ,
+                              'projectPHIDS');
       $changes[ManiphestTransactionType::TYPE_PROJECTS] = $project_phids;
     }
 
     $file_phids = $request->getValue('filePHIDs');
     if ($file_phids !== null) {
+      $this->validatePHIDList($file_phids,
+                              PhabricatorPHIDConstants::PHID_TYPE_FILE,
+                              'filePHIDS');
       $file_map = array_fill_keys($file_phids, true);
       $attached = $task->getAttached();
       $attached[PhabricatorPHIDConstants::PHID_TYPE_FILE] = $file_map;
@@ -221,6 +249,26 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
     }
 
     return $result;
+  }
+
+  /**
+   * Note this is a temporary stop gap since its easy to make malformed Tasks.
+   * Long-term, the values set in @{method:defineParamTypes} will be used to
+   * validate data implicitly within the larger Conduit application.
+   *
+   * TODO -- remove this in favor of generalized Conduit hotness
+   */
+  private function validatePHIDList(array $phid_list, $phid_type, $field) {
+    $phid_groups = phid_group_by_type($phid_list);
+    unset($phid_groups[$phid_type]);
+    if (!empty($phid_groups)) {
+      throw id(new ConduitException('ERR-INVALID-PARAMETER'))
+        ->setErrorDescription(
+          'One or more PHIDs were invalid for '.$field.'.'
+      );
+    }
+
+    return true;
   }
 
 }
