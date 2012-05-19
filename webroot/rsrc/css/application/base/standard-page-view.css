@@ -187,14 +187,19 @@ td.phabricator-login-details {
   text-decoration: line-through;
 }
 
-.aphront-table-view a.handle-status-away {
-  border-left: 2px solid #aa0000;
-  padding-left: .25em;
+a.handle-status-away,
+a.handle-status-sporadic {
+  padding-left: 12px;
+  background-repeat: no-repeat;
+  background-position: -4px center;
 }
 
-.aphront-table-view a.handle-status-sporadic {
-  border-left: 2px solid #ffdd33;
-  padding-left: .25em;
+a.handle-status-away {
+  background-image: url(/rsrc/image/icon/fatcow/bullet_red.png);
+}
+
+a.handle-status-sporadic {
+  background-image: url(/rsrc/image/icon/fatcow/bullet_orange.png);
 }
 
 a.handle-disabled {
