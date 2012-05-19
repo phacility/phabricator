@@ -97,9 +97,7 @@ final class PhrictionListController
       array(
         '',
         'wide pri',
-        '',
         'right',
-        '',
         'right',
       ));
 
