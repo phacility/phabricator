@@ -243,7 +243,8 @@ abstract class DiffusionRequest {
         $commit->getID());
       if (!$data) {
         $data = new PhabricatorRepositoryCommitData();
-        $data->setCommitMessage('(This commit has not fully parsed yet.)');
+        $data->setCommitMessage(
+          '(This commit has not been fully parsed yet.)');
       }
       $this->repositoryCommitData = $data;
     }
