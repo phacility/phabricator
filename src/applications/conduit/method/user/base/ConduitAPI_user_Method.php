@@ -21,14 +21,24 @@
  */
 abstract class ConduitAPI_user_Method extends ConduitAPIMethod {
 
-  protected function buildUserInformationDictionary(PhabricatorUser $user) {
-    return array(
+  protected function buildUserInformationDictionary(
+    PhabricatorUser $user,
+    PhabricatorUserStatus $current_status = null) {
+
+    $return = array(
       'phid'      => $user->getPHID(),
       'userName'  => $user->getUserName(),
       'realName'  => $user->getRealName(),
       'image'     => $user->loadProfileImageURI(),
       'uri'       => PhabricatorEnv::getURI('/p/'.$user->getUsername().'/'),
     );
+
+    if ($current_status) {
+      $return['currentStatus'] = $current_status->getTextStatus();
+      $return['currentStatusUntil'] = $current_status->getDateTo();
+    }
+
+    return $return;
   }
 
 }

@@ -64,7 +64,7 @@ final class ConduitAPI_user_query_Method
       $query->withUsernames($usernames);
     }
     if ($emails) {
-      // TODO -- validate emails and maybs
+      // TODO -- validate emails and maybe
       // throw new ConduitException('ERR-INVALID-PARAMETER');
       $query->withEmails($emails);
     }
@@ -85,9 +85,14 @@ final class ConduitAPI_user_query_Method
     }
     $users = $query->execute();
 
+    $statuses = id(new PhabricatorUserStatus())->loadCurrentStatuses(
+      mpull($users, 'getPHID'));
+
     $results = array();
     foreach ($users as $user) {
-      $results[] = $this->buildUserInformationDictionary($user);
+      $results[] = $this->buildUserInformationDictionary(
+        $user,
+        idx($statuses, $user->getPHID()));
     }
     return $results;
   }
