@@ -68,9 +68,17 @@ final class PhabricatorSearchAttachController
         case self::ACTION_EDGE:
           $edge_type = $this->getEdgeType($object_type, $attach_type);
 
+          $old_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+            $this->phid,
+            $edge_type);
+          $add_phids = $phids;
+          $rem_phids = array_diff($old_phids, $add_phids);
           $editor = id(new PhabricatorEdgeEditor());
-          foreach ($phids as $phid) {
+          foreach ($add_phids as $phid) {
             $editor->addEdge($this->phid, $edge_type, $phid);
+          }
+          foreach ($rem_phids as $phid) {
+            $editor->removeEdge($this->phid, $edge_type, $phid);
           }
           $editor->save();
 
