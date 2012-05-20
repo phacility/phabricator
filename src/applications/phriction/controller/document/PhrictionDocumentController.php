@@ -50,21 +50,25 @@ final class PhrictionDocumentController
     $version_note = null;
 
     if (!$document) {
-      $create_uri = '/phriction/edit/?slug='.$slug;
 
-      $page_content =
-        '<div class="phriction-content">'.
-          '<em>No content here!</em><br />'.
-          'No document found at <tt>'.phutil_escape_html($slug).'</tt>. '.
-          'You can <strong>'.
-          phutil_render_tag(
-            'a',
-            array(
-              'href' => $create_uri,
-            ),
-            'create a new document').'</strong>.'.
-        '</div>';
-      $page_title = 'Page Not Found';
+      if (PhrictionDocument::isProjectSlug($slug)) {
+        $project = id(new PhabricatorProject())->loadOneWhere(
+          'phrictionSlug = %s',
+          PhrictionDocument::getProjectSlugIdentifier($slug));
+        if (!$project) {
+          return new Aphront404Response();
+        }
+      }
+      $create_uri = '/phriction/edit/?slug='.$slug;
+      $create_sentence =
+        'You can <strong>'.
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => $create_uri,
+          ),
+          'create a new document').
+          '</strong>.';
       $button = phutil_render_tag(
         'a',
         array(
@@ -72,6 +76,14 @@ final class PhrictionDocumentController
           'class' => 'green button',
         ),
         'Create Page');
+
+      $page_content =
+        '<div class="phriction-content">'.
+          '<em>No content here!</em><br />'.
+          'No document found at <tt>'.phutil_escape_html($slug).'</tt>. '.
+          $create_sentence.
+        '</div>';
+      $page_title = 'Page Not Found';
       $buttons = $button;
     } else {
       $version = $request->getInt('v');

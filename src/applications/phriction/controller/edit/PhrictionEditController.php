@@ -66,6 +66,14 @@ final class PhrictionEditController
       if ($document) {
         $content = id(new PhrictionContent())->load($document->getContentID());
       } else {
+        if (PhrictionDocument::isProjectSlug($slug)) {
+          $project = id(new PhabricatorProject())->loadOneWhere(
+            'phrictionSlug = %s',
+            PhrictionDocument::getProjectSlugIdentifier($slug));
+          if (!$project) {
+            return new Aphront404Response();
+          }
+        }
         $document = new PhrictionDocument();
         $document->setSlug($slug);
 
