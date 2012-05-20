@@ -83,7 +83,7 @@ final class DiffusionGitRequest extends DiffusionRequest {
       return $this->branch;
     }
     if ($this->repository) {
-      return $this->repository->getDetail('default-branch', 'master');
+      return $this->repository->getDefaultBranch();
     }
     throw new Exception("Unable to determine branch!");
   }

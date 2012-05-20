@@ -588,23 +588,12 @@ final class PhabricatorRepositoryEditController
     $inset->setTitle('Application Configuration');
 
     if ($has_branches) {
-
-      $default_branch_name = null;
-      if ($is_mercurial) {
-        $default_branch_name = 'default';
-      } else if ($is_git) {
-        $default_branch_name = 'master';
-      }
-
       $inset
         ->appendChild(
           id(new AphrontFormTextControl())
             ->setName('default-branch')
             ->setLabel('Default Branch')
-            ->setValue(
-              $repository->getDetail(
-                'default-branch',
-                $default_branch_name))
+            ->setValue($repository->getDefaultBranch())
             ->setError($e_branch)
             ->setCaption(
               'Default branch to show in Diffusion.'));
