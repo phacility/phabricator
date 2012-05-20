@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/diffusion/request/base');
 phutil_require_module('phabricator', 'applications/owners/controller/base');
 phutil_require_module('phabricator', 'applications/owners/storage/owner');
 phutil_require_module('phabricator', 'applications/owners/storage/package');

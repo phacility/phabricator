@@ -39,10 +39,21 @@ final class PhabricatorOwnersDetailController
     $paths = $package->loadPaths();
     $owners = $package->loadOwners();
 
-    $phids = array();
+    $repository_phids = array();
     foreach ($paths as $path) {
-      $phids[$path->getRepositoryPHID()] = true;
+      $repository_phids[$path->getRepositoryPHID()] = true;
     }
+
+    if ($repository_phids) {
+      $repositories = id(new PhabricatorRepository())->loadAllWhere(
+        'phid in (%Ls)',
+        array_keys($repository_phids));
+      $repositories = mpull($repositories, null, 'getPHID');
+    } else {
+      $repositories = array();
+    }
+
+    $phids = array();
     foreach ($owners as $owner) {
       $phids[$owner->getUserPHID()] = true;
     }
@@ -86,15 +97,25 @@ final class PhabricatorOwnersDetailController
 
     $path_links = array();
     foreach ($paths as $path) {
-      $callsign = $handles[$path->getRepositoryPHID()]->getName();
-      $repo = '<strong>'.phutil_escape_html($callsign).'</strong>';
+      $repo = $repositories[$path->getRepositoryPHID()];
+      $drequest = DiffusionRequest::newFromDictionary(
+        array(
+          'repository' => $repo,
+          'path'       => $path->getPath(),
+      ));
+      $href = $drequest->generateURI(
+        array(
+          'action' => 'browse'
+        ));
+      $repo_name = '<strong>'.phutil_escape_html($repo->getName()).
+                   '</strong>';
       $path_link = phutil_render_tag(
         'a',
         array(
-          'href' => '/diffusion/'.$callsign.'/browse/:'.$path->getPath(),
+          'href' => (string) $href,
         ),
         phutil_escape_html($path->getPath()));
-      $path_links[] = $repo.' '.$path_link;
+      $path_links[] = $repo_name.' '.$path_link;
     }
     $path_links = implode('<br />', $path_links);
     $rows[] = array(
