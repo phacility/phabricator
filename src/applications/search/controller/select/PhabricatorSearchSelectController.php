@@ -80,10 +80,10 @@ final class PhabricatorSearchSelectController
     $pattern = null;
     switch ($this->type) {
       case PhabricatorPHIDConstants::PHID_TYPE_TASK:
-        $pattern = '/\bT(\d+)\b/';
+        $pattern = '/\bT(\d+)\b/i';
         break;
       case PhabricatorPHIDConstants::PHID_TYPE_DREV:
-        $pattern = '/\bD(\d+)\b/';
+        $pattern = '/\bD(\d+)\b/i';
         break;
     }
 
