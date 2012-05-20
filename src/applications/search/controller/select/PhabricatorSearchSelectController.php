@@ -55,6 +55,7 @@ final class PhabricatorSearchSelectController
     }
 
     $query->setParameter('exclude', $request->getStr('exclude'));
+    $query->setParameter('limit', 100);
 
     $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
     $results = $engine->executeSearch($query);
