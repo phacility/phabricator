@@ -418,7 +418,7 @@ abstract class DiffusionRequest {
         // This isn't a real URI per se, it's passed as a query parameter to
         // the ajax changeset stuff but then we parse it back out as though
         // it came from a URI.
-        $uri = "{$path}{$commit}";
+        $uri = rawurldecode("{$path}{$commit}");
         break;
       case 'commit':
         $commit = ltrim($commit, ';');
