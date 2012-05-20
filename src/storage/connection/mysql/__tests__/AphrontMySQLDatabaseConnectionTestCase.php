@@ -27,7 +27,7 @@ final class AphrontMySQLDatabaseConnectionTestCase
   }
 
   public function testConnectionFailures() {
-    $conn = id(new PhabricatorPHID())->establishConnection('r');
+    $conn = id(new HarbormasterScratchTable())->establishConnection('r');
 
     queryfx($conn, 'SELECT 1');
 

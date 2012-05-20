@@ -83,6 +83,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'  => 'db',
         'name'  => 'flag',
       ),
+      'db.harbormaster' => array(
+        'type'  => 'db',
+        'name'  => 'harbormaster',
+      ),
       'db.herald' => array(
         'type'  => 'db',
         'name'  => 'herald',
@@ -114,10 +118,6 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       'db.phame' => array(
         'type'  => 'db',
         'name'  => 'phame',
-      ),
-      'db.phid' => array(
-        'type'  => 'db',
-        'name'  => 'phid',
       ),
       'db.phriction' => array(
         'type'  => 'db',
@@ -870,6 +870,14 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       'emailtableremove.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('emailtableremove.sql'),
+      ),
+      'phiddrop.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('phiddrop.sql'),
+      ),
+      'testdatabase.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('testdatabase.sql'),
       ),
     );
   }

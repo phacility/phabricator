@@ -16,20 +16,10 @@
  * limitations under the License.
  */
 
-final class PhabricatorPHID {
+abstract class HarbormasterDAO extends PhabricatorLiskDAO {
 
-  protected $phid;
-  protected $phidType;
-  protected $ownerPHID;
-  protected $parentPHID;
-
-  public static function generateNewPHID($type) {
-    if (!$type) {
-      throw new Exception("Can not generate PHID with no type.");
-    }
-
-    $uniq = Filesystem::readRandomCharacters(20);
-    return 'PHID-'.$type.'-'.$uniq;
+  public function getApplicationName() {
+    return 'harbormaster';
   }
 
 }

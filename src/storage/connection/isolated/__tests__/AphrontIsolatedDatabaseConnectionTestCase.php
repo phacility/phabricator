@@ -29,15 +29,10 @@ final class AphrontIsolatedDatabaseConnectionTestCase
   }
 
   public function testIsolation() {
-    $conn = $this->newIsolatedConnection();
-    $test_phid = $this->generateTestPHID();
-
+    // This will fail if the connection isn't isolated.
     queryfx(
-      $conn,
-      'INSERT INTO phabricator_phid.phid (phid) VALUES (%s)',
-      $test_phid);
-
-    $this->assertNoSuchPHID($test_phid);
+      $this->newIsolatedConnection(),
+      'INSERT INVALID SYNTAX');
   }
 
   public function testInsertGeneratesID() {
@@ -116,23 +111,21 @@ final class AphrontIsolatedDatabaseConnectionTestCase
   public function testTransactionRollback() {
     $check = array();
 
-    $phid = new PhabricatorPHID();
+    $phid = new HarbormasterScratchTable();
     $phid->openTransaction();
       for ($ii = 0; $ii < 3; $ii++) {
-        $test_phid = $this->generateTestPHID();
+        $key = $this->generateTestData();
 
-        $obj = new PhabricatorPHID();
-        $obj->setPHID($test_phid);
-        $obj->setPHIDType('TEST');
-        $obj->setOwnerPHID('PHID-UNIT-!!!!');
+        $obj = new HarbormasterScratchTable();
+        $obj->setData($key);
         $obj->save();
 
-        $check[] = $test_phid;
+        $check[] = $key;
       }
     $phid->killTransaction();
 
-    foreach ($check as $test_phid) {
-      $this->assertNoSuchPHID($test_phid);
+    foreach ($check as $key) {
+      $this->assertNoSuchRow($key);
     }
   }
 
@@ -141,19 +134,19 @@ final class AphrontIsolatedDatabaseConnectionTestCase
     return new AphrontIsolatedDatabaseConnection($config);
   }
 
-  private function generateTestPHID() {
-    return 'PHID-TEST-'.Filesystem::readRandomCharacters(20);
+  private function generateTestData() {
+    return Filesystem::readRandomCharacters(20);
   }
 
-  private function assertNoSuchPHID($phid) {
+  private function assertNoSuchRow($data) {
     try {
-      $real_phid = id(new PhabricatorPHID())->loadOneWhere(
-        'phid = %s',
-        $phid);
+      $row = id(new HarbormasterScratchTable())->loadOneWhere(
+        'data = %s',
+        $data);
       $this->assertEqual(
         null,
-        $real_phid,
-        'Expect fake PHID to exist only in isolation.');
+        $row,
+        'Expect fake row to exist only in isolation.');
     } catch (AphrontQueryConnectionException $ex) {
       // If we can't connect to the database, conclude that the isolated
       // connection actually is isolated. Philosophically, this perhaps allows

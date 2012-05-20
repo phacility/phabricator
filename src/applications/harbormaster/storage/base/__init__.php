@@ -9,4 +9,4 @@
 phutil_require_module('phabricator', 'applications/base/storage/lisk');
 
 
-phutil_require_source('PhabricatorPHIDDAO.php');
+phutil_require_source('HarbormasterDAO.php');
