@@ -8,9 +8,12 @@
 
 phutil_require_module('phabricator', 'aphront/console/plugin/xhprof/api');
 phutil_require_module('phabricator', 'applications/xhprof/view/base');
+phutil_require_module('phabricator', 'infrastructure/javelin/api');
+phutil_require_module('phabricator', 'infrastructure/javelin/markup');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/layout/panel');
 
+phutil_require_module('phutil', 'markup');
 phutil_require_module('phutil', 'utils');
 
 

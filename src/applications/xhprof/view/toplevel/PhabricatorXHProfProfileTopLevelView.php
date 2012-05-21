@@ -24,6 +24,7 @@ final class PhabricatorXHProfProfileTopLevelView
 
   private $profileData;
   private $limit;
+  private $file;
 
   public function setProfileData(array $data) {
     $this->profileData = $data;
@@ -32,6 +33,11 @@ final class PhabricatorXHProfProfileTopLevelView
 
   public function setLimit($limit) {
     $this->limit = $limit;
+    return $this;
+  }
+
+  public function setFile(PhabricatorFile $file) {
+    $this->file = $file;
     return $this;
   }
 
@@ -87,14 +93,38 @@ final class PhabricatorXHProfProfileTopLevelView
       );
     }
 
+    Javelin::initBehavior('phabricator-tooltips');
+
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
         'Symbol',
         'Count',
-        'Incl Wall Time',
+        javelin_render_tag(
+          'span',
+          array(
+            'sigil' => 'has-tooltip',
+            'meta'  => array(
+              'tip' => 'Total wall time spent in this function and all of '.
+                       'its children (chilren are other functions it called '.
+                       'while executing).',
+              'size' => 200,
+            ),
+          ),
+          'Wall Time (Inclusive)'),
         '%',
-        'Excl Wall Time',
+        javelin_render_tag(
+          'span',
+          array(
+            'sigil' => 'has-tooltip',
+            'meta'  => array(
+              'tip' => 'Wall time spent in this function, excluding time '.
+                       'spent in children (children are other functions it '.
+                       'called while executing).',
+              'size' => 200,
+            ),
+          ),
+          'Wall Time (Exclusive)'),
         '%',
       ));
     $table->setColumnClasses(
@@ -109,6 +139,18 @@ final class PhabricatorXHProfProfileTopLevelView
 
     $panel = new AphrontPanelView();
     $panel->setHeader('XHProf Profile');
+
+    if ($this->file) {
+      $panel->addButton(
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => $this->file->getBestURI(),
+            'class' => 'green button',
+          ),
+          'Download .xhprof Profile'));
+    }
+
     $panel->appendChild($table);
 
     return $panel->render();
