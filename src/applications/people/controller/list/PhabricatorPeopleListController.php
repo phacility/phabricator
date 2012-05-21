@@ -37,22 +37,29 @@ final class PhabricatorPeopleListController
     $pager->setCount($count);
     $pager->setURI($request->getRequestURI(), 'page');
 
-    $users = id(new PhabricatorUser())->loadAllWhere(
-      '1 = 1 ORDER BY id DESC LIMIT %d, %d',
-      $pager->getOffset(),
-      $pager->getPageSize());
+    $users = id(new PhabricatorPeopleQuery())
+      ->needPrimaryEmail(true)
+      ->executeWithPager($pager);
 
     $rows = array();
     foreach ($users as $user) {
-
-      $status = '';
-      if ($user->getIsDisabled()) {
-        $status = 'Disabled';
-      } else if ($user->getIsAdmin()) {
-        $status = 'Admin';
+      if ($user->getPrimaryEmail()->getIsVerified()) {
+        $email = 'Verified';
       } else {
-        $status = '-';
+        $email = 'Unverified';
       }
+
+      $status = array();
+      if ($user->getIsDisabled()) {
+        $status[] = 'Disabled';
+      }
+      if ($user->getIsAdmin()) {
+        $status[] = 'Admin';
+      }
+      if ($user->getIsSystemAgent()) {
+        $status[] = 'System Agent';
+      }
+      $status = implode(', ', $status);
 
       $rows[] = array(
         phabricator_date($user->getDateCreated(), $viewer),
@@ -65,6 +72,7 @@ final class PhabricatorPeopleListController
           phutil_escape_html($user->getUserName())),
         phutil_escape_html($user->getRealName()),
         $status,
+        $email,
         phutil_render_tag(
           'a',
           array(
@@ -82,7 +90,8 @@ final class PhabricatorPeopleListController
         'Time',
         'Username',
         'Real Name',
-        'Status',
+        'Roles',
+        'Email',
         '',
       ));
     $table->setColumnClasses(
@@ -92,6 +101,7 @@ final class PhabricatorPeopleListController
         'pri',
         'wide',
         null,
+        null,
         'action',
       ));
     $table->setColumnVisibility(
@@ -100,6 +110,7 @@ final class PhabricatorPeopleListController
         true,
         true,
         true,
+        $is_admin,
         $is_admin,
         $is_admin,
       ));

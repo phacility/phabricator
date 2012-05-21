@@ -23,6 +23,8 @@ final class PhabricatorPeopleQuery extends PhabricatorOffsetPagedQuery {
   private $phids;
   private $ids;
 
+  private $needPrimaryEmail;
+
   public function withIds(array $ids) {
     $this->ids = $ids;
     return $this;
@@ -44,6 +46,11 @@ final class PhabricatorPeopleQuery extends PhabricatorOffsetPagedQuery {
     return $this;
   }
 
+  public function needPrimaryEmail($need) {
+    $this->needPrimaryEmail = $need;
+    return $this;
+  }
+
   public function execute() {
     $table  = new PhabricatorUser();
     $conn_r = $table->establishConnection('r');
@@ -61,6 +68,16 @@ final class PhabricatorPeopleQuery extends PhabricatorOffsetPagedQuery {
       $limit_clause);
 
     $users = $table->loadAllFromArray($data);
+
+    if ($users && $this->needPrimaryEmail) {
+      $emails = id(new PhabricatorUserEmail())->loadAllWhere(
+        'userPHID IN (%Ls)',
+        mpull($users, 'getPHID'));
+      $emails = mpull($emails, null, 'getUserPHID');
+      foreach ($users as $user) {
+        $user->attachPrimaryEmail($emails[$user->getPHID()]);
+      }
+    }
 
     return $users;
   }

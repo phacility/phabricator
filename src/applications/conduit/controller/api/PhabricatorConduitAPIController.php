@@ -261,8 +261,9 @@ final class PhabricatorConduitAPIController
 
     if ($request->getUser()->getPHID()) {
       $request->validateCSRF();
-      $api_request->setUser($request->getUser());
-      return null;
+      return $this->validateAuthenticatedUser(
+        $api_request,
+        $request->getUser());
     }
 
     // handle oauth
@@ -303,8 +304,9 @@ final class PhabricatorConduitAPIController
           'Access token is for invalid user.',
         );
       }
-      $api_request->setUser($user);
-      return null;
+      return $this->validateAuthenticatedUser(
+        $api_request,
+        $user);
     }
 
     // Handle sessionless auth. TOOD: This is super messy.
@@ -327,8 +329,9 @@ final class PhabricatorConduitAPIController
           'Authentication is invalid.',
         );
       }
-      $api_request->setUser($user);
-      return null;
+      return $this->validateAuthenticatedUser(
+        $api_request,
+        $user);
     }
 
     $session_key = idx($metadata, 'sessionKey');
@@ -364,7 +367,36 @@ final class PhabricatorConduitAPIController
       );
     }
 
-    $api_request->setUser($user);
+    return $this->validateAuthenticatedUser(
+      $api_request,
+      $user);
+  }
+
+  private function validateAuthenticatedUser(
+    ConduitAPIRequest $request,
+    PhabricatorUser $user) {
+
+    if ($user->getIsDisabled()) {
+      return array(
+        'ERR-USER-DISABLED',
+        'User is disabled.');
+    }
+
+    if (PhabricatorEnv::getEnvConfig('auth.require-email-verification')) {
+      $email = $user->loadPrimaryEmail();
+      if (!$email) {
+        return array(
+          'ERR-USER-NOEMAIL',
+          'User has no primary email address.');
+      }
+      if (!$email->getIsVerified()) {
+        return array(
+          'ERR-USER-UNVERIFIED',
+          'User has unverified email address.');
+      }
+    }
+
+    $request->setUser($user);
     return null;
   }
 

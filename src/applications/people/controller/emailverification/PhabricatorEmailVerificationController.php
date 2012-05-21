@@ -25,6 +25,12 @@ final class PhabricatorEmailVerificationController
     $this->code = $data['code'];
   }
 
+  public function shouldRequireEmailVerification() {
+    // Since users need to be able to hit this endpoint in order to verify
+    // email, we can't ever require email verification here.
+    return false;
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
@@ -34,6 +40,14 @@ final class PhabricatorEmailVerificationController
       $user->getPHID(),
       $this->code);
 
+    $home_link = phutil_render_tag(
+      'a',
+      array(
+        'href' => '/',
+      ),
+      'Continue to Phabricator');
+    $home_link = '<br /><p><strong>'.$home_link.'</strong></p>';
+
     $settings_link = phutil_render_tag(
       'a',
       array(
@@ -41,6 +55,7 @@ final class PhabricatorEmailVerificationController
       ),
       'Return to Email Settings');
     $settings_link = '<br /><p><strong>'.$settings_link.'</strong></p>';
+
 
     if (!$email) {
       $content = id(new AphrontErrorView())
@@ -68,6 +83,7 @@ final class PhabricatorEmailVerificationController
         ->setTitle('Address Verified')
         ->appendChild(
           '<p>This email address has now been verified. Thanks!</p>'.
+          $home_link.
           $settings_link);
     }
 

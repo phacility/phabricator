@@ -23,6 +23,11 @@ final class PhabricatorLogoutController
     return true;
   }
 
+  public function shouldRequireEmailVerification() {
+    // Allow unverified users to logout.
+    return false;
+  }
+
   public function shouldRequireEnabledUser() {
     // Allow disabled users to logout.
     return false;

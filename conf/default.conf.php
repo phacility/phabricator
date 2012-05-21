@@ -453,6 +453,10 @@ return array(
   // disabled.
   'auth.sshkeys.enabled'        => false,
 
+  // If true, email addresses must be verified (by clicking a link in an
+  // email) before a user can login. By default, verification is optional.
+  'auth.require-email-verification' => false,
+
 
 // -- Accounts -------------------------------------------------------------- //
 

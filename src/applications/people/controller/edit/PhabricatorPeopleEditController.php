@@ -254,6 +254,14 @@ final class PhabricatorPeopleEditController
           ->setDisabled($is_immutable)
           ->setValue($new_email)
           ->setError($e_email));
+    } else {
+      $form->appendChild(
+        id(new AphrontFormStaticControl())
+          ->setLabel('Email')
+          ->setValue(
+              $user->loadPrimaryEmail()->getIsVerified()
+                ? 'Verified'
+                : 'Unverified'));
     }
 
     $form->appendChild($this->getRoleInstructions());

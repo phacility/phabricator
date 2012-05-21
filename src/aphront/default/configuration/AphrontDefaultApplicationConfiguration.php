@@ -133,6 +133,7 @@ class AphrontDefaultApplicationConfiguration
         'etoken/(?P<token>\w+)/' => 'PhabricatorEmailTokenController',
         'refresh/' => 'PhabricatorRefreshCSRFController',
         'validate/' => 'PhabricatorLoginValidateController',
+        'mustverify/' => 'PhabricatorMustVerifyEmailController',
       ),
 
       '/logout/' => 'PhabricatorLogoutController',

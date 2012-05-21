@@ -41,6 +41,7 @@ final class PhabricatorUser extends PhabricatorUserDAO {
   protected $isDisabled = 0;
 
   private $preferences = null;
+  private $primaryEmail;
 
   protected function readField($field) {
     switch ($field) {
@@ -416,6 +417,19 @@ final class PhabricatorUser extends PhabricatorUserDAO {
       'userPHID = %s AND isPrimary = %d',
       $this->getPHID(),
       1);
+  }
+
+  public function attachPrimaryEmail(PhabricatorUserEmail $email) {
+    $this->primaryEmail = $email;
+    return $this;
+  }
+
+  public function getPrimaryEmail() {
+    if ($this->primaryEmail === null) {
+      throw new Exception(
+        "Call attachPrimaryEmail() before getPrimaryEmail()!");
+    }
+    return $this->primaryEmail;
   }
 
   public function loadPreferences() {
