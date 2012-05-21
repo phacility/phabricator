@@ -13,6 +13,7 @@
   font-size: 11px;
   padding: 4px;
   overflow: hidden;
+  white-space: pre-wrap;
 }
 
 .jx-tooltip-align-E {

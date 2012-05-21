@@ -8,7 +8,10 @@
 
 phutil_require_module('phabricator', 'applications/calendar/controller/base');
 phutil_require_module('phabricator', 'applications/calendar/storage/holiday');
+phutil_require_module('phabricator', 'applications/calendar/view/event');
 phutil_require_module('phabricator', 'applications/calendar/view/month');
+phutil_require_module('phabricator', 'applications/people/storage/userstatus');
+phutil_require_module('phabricator', 'applications/phid/handle/data');
 
 phutil_require_module('phutil', 'utils');
 
