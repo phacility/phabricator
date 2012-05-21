@@ -48,11 +48,16 @@ final class PhabricatorConduitAPIController
 
     try {
 
-      if (!class_exists($method_class)) {
+      $ok = false;
+      try {
+        $ok = class_exists($method_class);
+      } catch (Exception $ex) {
+        // Discard, we provide a more specific exception below.
+      }
+
+      if (!$ok) {
         throw new Exception(
-          "Unable to load the implementation class for method '{$method}'. ".
-          "You may have misspelled the method, need to define ".
-          "'{$method_class}', or need to run 'arc build'.");
+          "Conduit method '{$method}' does not exist.");
       }
 
       $class_info = new ReflectionClass($method_class);

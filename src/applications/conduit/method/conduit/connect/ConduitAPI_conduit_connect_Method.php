@@ -89,26 +89,31 @@ final class ConduitAPI_conduit_connect_Method extends ConduitAPIMethod {
 
     switch ($client) {
       case 'arc':
-        $server_version = 4;
-        switch ($client_version) {
-          case $server_version:
-            break;
-          default:
-            if ($server_version < $client_version) {
-              $ex = new ConduitException('ERR-BAD-VERSION');
-              $ex->setErrorDescription(
-                "Your 'arc' client version is '{$client_version}', which ".
-                "is newer than the server version, '{$server_version}'. ".
-                "Upgrade your Phabricator install.");
-            } else {
-              $ex = new ConduitException('NEW-ARC-VERSION');
-              $ex->setErrorDescription(
-                "A new version of arc is available! You need to upgrade ".
-                "to connect to this server (you are running version ".
-                "{$client_version}, the server is running version ".
-                "{$server_version}).");
-            }
-            throw $ex;
+        $server_version = 5;
+        $supported_versions = array(
+          $server_version => true,
+          // NOTE: Version 5 of the server can support either version 4 or
+          // version 5 of the client; the breaking change was the introduction
+          // of a "user.query" call in client version 5.
+          4               => true,
+        );
+
+        if (empty($supported_versions[$client_version])) {
+          if ($server_version < $client_version) {
+            $ex = new ConduitException('ERR-BAD-VERSION');
+            $ex->setErrorDescription(
+              "Your 'arc' client version is '{$client_version}', which ".
+              "is newer than the server version, '{$server_version}'. ".
+              "Upgrade your Phabricator install.");
+          } else {
+            $ex = new ConduitException('NEW-ARC-VERSION');
+            $ex->setErrorDescription(
+              "A new version of arc is available! You need to upgrade ".
+              "to connect to this server (you are running version ".
+              "{$client_version}, the server is running version ".
+              "{$server_version}).");
+          }
+          throw $ex;
         }
         break;
       default:
