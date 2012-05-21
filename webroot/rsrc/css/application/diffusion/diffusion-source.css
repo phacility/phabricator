@@ -49,6 +49,10 @@
   font-weight:  bold;
 }
 
+.diffusion-author-link a {
+  padding-left: 12px;
+}
+
 .diffusion-blame-link a,
 .diffusion-line-link a {
   /* Give the user a larger click target. */

@@ -187,6 +187,7 @@ td.phabricator-login-details {
   text-decoration: line-through;
 }
 
+a.handle-disabled,
 a.handle-status-away,
 a.handle-status-sporadic {
   padding-left: 12px;
@@ -203,8 +204,7 @@ a.handle-status-sporadic {
 }
 
 a.handle-disabled {
-  background: #999999;
-  color: #cccccc;
+  background-image: url(/rsrc/image/icon/fatcow/bullet_black.png);
 }
 
 .PhabricatorMonospaced {
