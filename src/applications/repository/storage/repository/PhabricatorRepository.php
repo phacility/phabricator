@@ -347,6 +347,20 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
     return $this->getDetail('tracking-enabled', false);
   }
 
+  public function getDefaultBranch() {
+    $default = $this->getDetail('default-branch');
+    if (strlen($default)) {
+      return $default;
+    }
+
+    $default_branches = array(
+      PhabricatorRepositoryType::REPOSITORY_TYPE_GIT        => 'master',
+      PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL  => 'default',
+    );
+
+    return idx($default_branches, $this->getVersionControlSystem());
+  }
+
   public function shouldTrackBranch($branch) {
     $vcs = $this->getVersionControlSystem();
 

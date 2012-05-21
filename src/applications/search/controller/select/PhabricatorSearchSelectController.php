@@ -55,6 +55,7 @@ final class PhabricatorSearchSelectController
     }
 
     $query->setParameter('exclude', $request->getStr('exclude'));
+    $query->setParameter('limit', 100);
 
     $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
     $results = $engine->executeSearch($query);
@@ -80,10 +81,10 @@ final class PhabricatorSearchSelectController
     $pattern = null;
     switch ($this->type) {
       case PhabricatorPHIDConstants::PHID_TYPE_TASK:
-        $pattern = '/\bT(\d+)\b/';
+        $pattern = '/\bT(\d+)\b/i';
         break;
       case PhabricatorPHIDConstants::PHID_TYPE_DREV:
-        $pattern = '/\bD(\d+)\b/';
+        $pattern = '/\bD(\d+)\b/i';
         break;
     }
 

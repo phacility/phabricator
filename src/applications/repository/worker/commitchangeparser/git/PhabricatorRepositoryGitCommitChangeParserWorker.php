@@ -73,7 +73,7 @@ final class PhabricatorRepositoryGitCommitChangeParserWorker
       }
       list($old_mode, $new_mode,
            $old_hash, $new_hash,
-           $more_stuff) = preg_split('/ +/', $line);
+           $more_stuff) = preg_split('/ +/', $line, 5);
 
       // We may only have two pieces here.
       list($action, $src_path, $dst_path) = array_merge(

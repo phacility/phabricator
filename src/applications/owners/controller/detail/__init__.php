@@ -9,9 +9,11 @@
 phutil_require_module('phabricator', 'aphront/response/404');
 phutil_require_module('phabricator', 'applications/audit/query/commit');
 phutil_require_module('phabricator', 'applications/audit/view/commitlist');
+phutil_require_module('phabricator', 'applications/diffusion/request/base');
 phutil_require_module('phabricator', 'applications/owners/controller/base');
 phutil_require_module('phabricator', 'applications/owners/storage/package');
 phutil_require_module('phabricator', 'applications/phid/handle/data');
+phutil_require_module('phabricator', 'applications/repository/storage/repository');
 phutil_require_module('phabricator', 'infrastructure/javelin/markup');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/layout/panel');

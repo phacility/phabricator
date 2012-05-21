@@ -29,38 +29,35 @@ final class LiskFixtureTestCase extends PhabricatorTestCase {
     // If the user from either test persists, the other test will fail.
     $this->assertEqual(
       0,
-      count(id(new PhabricatorUser())->loadAll()));
+      count(id(new HarbormasterScratchTable())->loadAll()));
 
-    id(new PhabricatorUser())
-      ->setUserName('alincoln')
-      ->setRealName('Abraham Lincoln')
+    id(new HarbormasterScratchTable())
+      ->setData('alincoln')
       ->save();
   }
 
   public function testTransactionalIsolation2of2() {
     $this->assertEqual(
       0,
-      count(id(new PhabricatorUser())->loadAll()));
+      count(id(new HarbormasterScratchTable())->loadAll()));
 
-    id(new PhabricatorUser())
-      ->setUserName('ugrant')
-      ->setRealName('Ulysses S. Grant')
+    id(new HarbormasterScratchTable())
+      ->setData('ugrant')
       ->save();
   }
 
   public function testFixturesBasicallyWork() {
     $this->assertEqual(
       0,
-      count(id(new PhabricatorUser())->loadAll()));
+      count(id(new HarbormasterScratchTable())->loadAll()));
 
-    id(new PhabricatorUser())
-      ->setUserName('gwashington')
-      ->setRealName('George Washington')
+    id(new HarbormasterScratchTable())
+      ->setData('gwashington')
       ->save();
 
     $this->assertEqual(
       1,
-      count(id(new PhabricatorUser())->loadAll()));
+      count(id(new HarbormasterScratchTable())->loadAll()));
   }
 
   public function testReadableTransactions() {
@@ -70,18 +67,17 @@ final class LiskFixtureTestCase extends PhabricatorTestCase {
     LiskDAO::endIsolateAllLiskEffectsToTransactions();
     try {
 
-      $phid = 'PHID-TEST-'.Filesystem::readRandomCharacters(32);
+      $data = Filesystem::readRandomCharacters(32);
 
-      $obj = new PhabricatorPHID();
+      $obj = new HarbormasterScratchTable();
       $obj->openTransaction();
 
-        $obj->setPHID($phid);
-        $obj->setPHIDType('TEST');
+        $obj->setData($data);
         $obj->save();
 
-        $loaded = id(new PhabricatorPHID())->loadOneWhere(
-          'phid = %s',
-          $phid);
+        $loaded = id(new HarbormasterScratchTable())->loadOneWhere(
+          'data = %s',
+          $data);
 
       $obj->killTransaction();
 
