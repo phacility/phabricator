@@ -103,8 +103,9 @@ final class PhabricatorRepositoryMercurialCommitChangeParserWorker
 
     $away = array();
     foreach ($changes as $path => $change) {
-      if ($path['targetPath']) {
-        $away[$path['targetPath']][] = $path;
+	  $targetPath = $change['targetPath'];
+      if ($targetPath) {
+        $away[$targetPath][] = $path;
       }
     }
 
