@@ -56,7 +56,7 @@ final class DiffusionGitRawDiffQuery extends DiffusionRawDiffQuery {
       list($parents) = $repository->execxLocalCommand(
         'log --format=%s %s --',
         '%P', // "parents"
-        $effective_commit);
+        $commit);
 
       if (strlen(trim($parents))) {
         throw $ex;
