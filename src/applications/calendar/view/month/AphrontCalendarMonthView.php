@@ -69,6 +69,8 @@ final class AphrontCalendarMonthView extends AphrontView {
       $markup[] = $empty_box;
     }
 
+    $show_events = array();
+
     foreach ($days as $day) {
       $holiday = idx($this->holidays, $day->format('Y-m-d'));
       $class = 'aphront-calendar-day';
@@ -80,18 +82,27 @@ final class AphrontCalendarMonthView extends AphrontView {
       $day->setTime(0, 0, 0);
       $epoch_start = $day->format('U');
 
-      $day->setTime(23, 59, 59);
+      $day->setTime(24, 0, 0);
       $epoch_end = $day->format('U');
 
-      $show_events = array();
+      if ($weekday == 0) {
+        $show_events = array();
+      } else {
+        $show_events = array_fill_keys(
+          array_keys($show_events),
+          '<div class="aphront-calendar-event aphront-calendar-event-empty">'.
+            '&nbsp;'.
+          '</div>');
+      }
+
       foreach ($events as $event) {
-        if ($event->getEpochStart() > $epoch_end) {
+        if ($event->getEpochStart() >= $epoch_end) {
           // This list is sorted, so we can stop looking.
           break;
         }
-        if ($event->getEpochStart() <= $epoch_end &&
-            $event->getEpochEnd() >= $epoch_start) {
-          $show_events[] = $this->renderEvent(
+        if ($event->getEpochStart() < $epoch_end &&
+            $event->getEpochEnd() > $epoch_start) {
+          $show_events[$event->getUserPHID()] = $this->renderEvent(
             $event,
             $day,
             $epoch_start,
@@ -101,18 +112,19 @@ final class AphrontCalendarMonthView extends AphrontView {
 
       $holiday_markup = null;
       if ($holiday) {
+        $name = phutil_escape_html($holiday->getName());
         $holiday_markup =
-          '<div class="aphront-calendar-holiday">'.
-            phutil_escape_html($holiday->getName()).
+          '<div class="aphront-calendar-holiday" title="'.$name.'">'.
+            $name.
           '</div>';
       }
 
       $markup[] =
         '<div class="'.$class.'">'.
-          $holiday_markup.
           '<div class="aphront-calendar-date-number">'.
             $day->format('j').
           '</div>'.
+          $holiday_markup.
           implode("\n", $show_events).
         '</div>';
     }
@@ -213,7 +225,7 @@ final class AphrontCalendarMonthView extends AphrontView {
 
     if ($event_end > $epoch_end) {
       $classes[] = 'aphront-calendar-event-continues-after';
-      $when[] = 'Ends '.phabricator_datetime($event_start, $user);
+      $when[] = 'Ends '.phabricator_datetime($event_end, $user);
     } else {
       $when[] = 'Ends at '.phabricator_time($event_end, $user);
     }

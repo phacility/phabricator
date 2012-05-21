@@ -18,10 +18,20 @@
 
 final class AphrontCalendarEventView extends AphrontView {
 
+  private $userPHID;
   private $name;
   private $epochStart;
   private $epochEnd;
   private $description;
+
+  public function setUserPHID($user_phid) {
+    $this->userPHID = $user_phid;
+    return $this;
+  }
+
+  public function getUserPHID() {
+    return $this->userPHID;
+  }
 
   public function setName($name) {
     $this->name = $name;

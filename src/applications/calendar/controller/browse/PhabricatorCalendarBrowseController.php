@@ -51,6 +51,7 @@ final class PhabricatorCalendarBrowseController
 
       $name_text = $handles[$status->getUserPHID()]->getName();
       $status_text = $status->getTextStatus();
+      $event->setUserPHID($status->getUserPHID());
       $event->setName("{$name_text} ({$status_text})");
       $event->setDescription($status->getStatusDescription($user));
       $month_view->addEvent($event);

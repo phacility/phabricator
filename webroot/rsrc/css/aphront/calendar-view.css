@@ -36,9 +36,10 @@ table.aphront-calendar-view td div.aphront-calendar-day {
 }
 
 .aphront-calendar-holiday {
-  float: left;
   color: #666666;
   padding: .5em;
+  max-height: 1em;
+  overflow: hidden;
 }
 
 .aphront-calendar-date-number {
@@ -81,6 +82,11 @@ table.aphront-calendar-view td div.aphront-calendar-day {
 
   width: 90%;
   overflow: hidden;
+}
+
+.aphront-calendar-event-empty {
+  border-color: transparent;
+  background: transparent;
 }
 
 .aphront-calendar-event-text {
