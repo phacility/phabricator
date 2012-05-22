@@ -7,11 +7,14 @@
 
 
 phutil_require_module('phabricator', 'applications/conduit/method/base');
-phutil_require_module('phabricator', 'applications/conduit/method/owners/query');
 phutil_require_module('phabricator', 'applications/conduit/protocol/exception');
 phutil_require_module('phabricator', 'applications/owners/storage/owner');
+phutil_require_module('phabricator', 'applications/owners/storage/package');
+phutil_require_module('phabricator', 'applications/phid/constants');
+phutil_require_module('phabricator', 'applications/phid/utils');
+phutil_require_module('phabricator', 'applications/repository/storage/repository');
 
 phutil_require_module('phutil', 'utils');
 
 
-phutil_require_source('ConduitAPI_path_getowners_Method.php');
+phutil_require_source('ConduitAPI_owners_query_Method.php');

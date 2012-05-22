@@ -21,6 +21,15 @@
  */
 final class ConduitAPI_path_getowners_Method extends ConduitAPIMethod {
 
+  // This conduit call is deprecated
+  public function getMethodStatus() {
+      return self::METHOD_STATUS_DEPRECATED;
+  }
+
+  public function getMethodStatusDescription() {
+      return "Replaced by 'owners.query'.";
+  }
+
   public function getMethodDescription() {
     return "Find the Owners package that contains a given path.";
   }
@@ -50,16 +59,11 @@ final class ConduitAPI_path_getowners_Method extends ConduitAPIMethod {
   }
 
   protected function execute(ConduitAPIRequest $request) {
+    $packages = ConduitAPI_owners_query_Method::queryByPath(
+      $request->getValue('repositoryCallsign'),
+      $request->getValue('path')
+    );
 
-    $repository = id(new PhabricatorRepository())->loadOneWhere('callsign = %s',
-      $request->getValue('repositoryCallsign'));
-
-    if (empty($repository)) {
-      throw new ConduitException('ERR_REP_NOT_FOUND');
-    }
-
-    $packages = PhabricatorOwnersPackage::loadOwningPackages(
-      $repository, $request->getValue('path'));
     if (empty($packages)) {
       throw new ConduitException('ERR_PATH_NOT_FOUND');
     }
@@ -79,5 +83,4 @@ final class ConduitAPI_path_getowners_Method extends ConduitAPIMethod {
 
     return $result;
   }
-
 }
