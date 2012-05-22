@@ -32,8 +32,9 @@ final class DiffusionMercurialHistoryQuery extends DiffusionHistoryQuery {
     // in the log).
     $default_path = '';
 
+    // NOTE: --branch used to be called --only-branch; use -b for compatibility.
     list($stdout) = $repository->execxLocalCommand(
-      'log --debug --template %s --limit %d --branch %s --rev %s:0 -- %s',
+      'log --debug --template %s --limit %d -b %s --rev %s:0 -- %s',
       '{node};{parents}\\n',
       ($this->getOffset() + $this->getLimit()), // No '--skip' in Mercurial.
       $drequest->getBranch(),
