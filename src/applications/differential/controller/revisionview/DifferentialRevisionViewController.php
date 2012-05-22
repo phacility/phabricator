@@ -50,13 +50,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $diff_vs = $request->getInt('vs');
 
-    $target = end($diffs);
     $target_id = $request->getInt('id');
-    if ($target_id) {
-      if (isset($diffs[$target_id])) {
-        $target = $diffs[$target_id];
-      }
-    }
+    $target = idx($diffs, $target_id, end($diffs));
 
     $target_manual = $target;
     if (!$target_id) {
@@ -67,7 +62,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
       }
     }
 
-    $diffs = mpull($diffs, null, 'getID');
     if (empty($diffs[$diff_vs])) {
       $diff_vs = null;
     }
@@ -80,8 +74,14 @@ final class DifferentialRevisionViewController extends DifferentialController {
         'arc:unit',
       ));
 
+    $arc_project = $target->loadArcanistProject();
+    $repository = ($arc_project ? $arc_project->loadRepository() : null);
+
     list($changesets, $vs_map, $rendering_references) =
-      $this->loadChangesetsAndVsMap($diffs, $diff_vs, $target);
+      $this->loadChangesetsAndVsMap(
+        $target,
+        idx($diffs, $diff_vs),
+        $repository);
 
     $comments = $revision->loadComments();
     $comments = array_merge(
@@ -221,16 +221,12 @@ final class DifferentialRevisionViewController extends DifferentialController {
       'whitespace',
       DifferentialChangesetParser::WHITESPACE_IGNORE_ALL);
 
-    $arc_project = $target_manual->loadArcanistProject();
-
     if ($arc_project) {
       $symbol_indexes = $this->buildSymbolIndexes(
         $arc_project,
         $visible_changesets);
-      $repository = $arc_project->loadRepository();
     } else {
       $symbol_indexes = array();
-      $repository = null;
     }
 
     $revision_detail->setActions($actions);
@@ -304,7 +300,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
     $toc_view->setDiff($target);
     $toc_view->setUser($user);
-    $toc_view->setVsMap($vs_map);
     $toc_view->setRevisionID($revision->getID());
     $toc_view->setWhitespace($whitespace);
 
@@ -601,14 +596,13 @@ final class DifferentialRevisionViewController extends DifferentialController {
   }
 
   private function loadChangesetsAndVsMap(
-    array $diffs,
-    $diff_vs,
-    DifferentialDiff $target) {
-    assert_instances_of($diffs, 'DifferentialDiff');
+    DifferentialDiff $target,
+    DifferentialDiff $diff_vs = null,
+    PhabricatorRepository $repository = null) {
 
     $load_ids = array();
     if ($diff_vs) {
-      $load_ids[] = $diff_vs;
+      $load_ids[] = $diff_vs->getID();
     }
     $load_ids[] = $target->getID();
 
@@ -628,10 +622,14 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $vs_map = array();
     if ($diff_vs) {
-      $vs_changesets = idx($changeset_groups, $diff_vs, array());
-      $vs_changesets = mpull($vs_changesets, null, 'getFilename');
+      $vs_changesets = array();
+      $vs_id = $diff_vs->getID();
+      foreach (idx($changeset_groups, $vs_id, array()) as $changeset) {
+        $path = $changeset->getAbsoluteRepositoryPath($repository, $diff_vs);
+        $vs_changesets[$path] = $changeset;
+      }
       foreach ($changesets as $key => $changeset) {
-        $file = $changeset->getFilename();
+        $file = $changeset->getAbsoluteRepositoryPath($repository, $target);
         if (isset($vs_changesets[$file])) {
           $vs_map[$changeset->getID()] = $vs_changesets[$file]->getID();
           $refs[$changeset->getID()] =

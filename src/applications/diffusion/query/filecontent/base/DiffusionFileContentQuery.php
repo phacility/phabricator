@@ -27,7 +27,7 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
   }
 
   final public function loadFileContent() {
-    $this->fileContent = $this->executeQuery();
+    return $this->fileContent = $this->executeQuery();
   }
 
   final public function getRawData() {

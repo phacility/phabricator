@@ -134,7 +134,7 @@ final class DifferentialCommentMail extends DifferentialMail {
 
     if ($this->getChangedByCommit()) {
       $body[] = 'CHANGED PRIOR TO COMMIT';
-      $body[] = '  This revision was updated prior to commit.';
+      $body[] = '  '.$this->getChangedByCommit();
       $body[] = null;
     }
 

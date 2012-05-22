@@ -109,6 +109,10 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
           $message = 'Closed by '.$data->getAuthorName().'.';
         }
 
+        if ($commit_is_new) {
+          $diff = $this->attachToRevision($revision, $committer);
+        }
+
         $status_closed = ArcanistDifferentialRevisionStatus::CLOSED;
         $should_close = ($revision->getStatus() != $status_closed) &&
                         (!$repository->getDetail('disable-autoclose', false));
@@ -120,12 +124,22 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
             $committer,
             DifferentialAction::ACTION_CLOSE);
           $editor->setIsDaemonWorkflow(true);
+
+          if ($commit_is_new) {
+            $vs_diff = $this->loadChangedByCommit($diff);
+            if ($vs_diff) {
+              $changed_by_commit = PhabricatorEnv::getProductionURI(
+                '/D'.$revision->getID().
+                '?vs='.$vs_diff->getID().
+                '&id='.$diff->getID().
+                '#differential-review-toc');
+              $editor->setChangedByCommit($changed_by_commit);
+            }
+          }
+
           $editor->setMessage($message)->save();
         }
 
-        if ($commit_is_new) {
-          $this->attachToRevision($revision, $committer);
-        }
       }
     }
   }
@@ -156,13 +170,100 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         $this->repository->getCallsign().
         $this->commit->getCommitIdentifier());
 
+    // TODO: This is not correct in SVN where one repository can have multiple
+    // Arcanist projects.
+    $arcanist_project = id(new PhabricatorRepositoryArcanistProject())
+      ->loadOneWhere('repositoryID = %d LIMIT 1', $this->repository->getID());
+    if ($arcanist_project) {
+      $diff->setArcanistProjectPHID($arcanist_project->getPHID());
+    }
+
     $parents = DiffusionCommitParentsQuery::newFromDiffusionRequest($drequest)
       ->loadParents();
     if ($parents) {
       $diff->setSourceControlBaseRevision(head_key($parents));
     }
 
-    $diff->save();
+    // TODO: Attach binary files.
+
+    return $diff->save();
+  }
+
+  private function loadChangedByCommit(DifferentialDiff $diff) {
+    $repository = $this->repository;
+
+    $vs_changesets = array();
+    $vs_diff = id(new DifferentialDiff())->loadOneWhere(
+      'revisionID = %d AND creationMethod != %s ORDER BY id DESC LIMIT 1',
+      $diff->getRevisionID(),
+      'commit');
+    foreach ($vs_diff->loadChangesets() as $changeset) {
+      $path = $changeset->getAbsoluteRepositoryPath($repository, $vs_diff);
+      $vs_changesets[$path] = $changeset;
+    }
+
+    $changesets = array();
+    foreach ($diff->getChangesets() as $changeset) {
+      $path = $changeset->getAbsoluteRepositoryPath($repository, $diff);
+      $changesets[$path] = $changeset;
+    }
+
+    if (array_fill_keys(array_keys($changesets), true) !=
+        array_fill_keys(array_keys($vs_changesets), true)) {
+      return $vs_diff;
+    }
+
+    $hunks = id(new DifferentialHunk())->loadAllWhere(
+      'changesetID IN (%Ld)',
+      mpull($vs_changesets, 'getID'));
+    $hunks = mgroup($hunks, 'getChangesetID');
+    foreach ($vs_changesets as $changeset) {
+      $changeset->attachHunks(idx($hunks, $changeset->getID(), array()));
+    }
+
+    $file_phids = array();
+    foreach ($vs_changesets as $changeset) {
+      $metadata = $changeset->getMetadata();
+      $file_phid = idx($metadata, 'new:binary-phid');
+      if ($file_phid) {
+        $file_phids[$file_phid] = $file_phid;
+      }
+    }
+
+    $files = array();
+    if ($file_phids) {
+      $files = id(new PhabricatorFile())->loadAllWhere(
+        'phid IN (%Ls)',
+        $file_phids);
+      $files = mpull($files, null, 'getPHID');
+    }
+
+    foreach ($changesets as $path => $changeset) {
+      $vs_changeset = $vs_changesets[$path];
+
+      $file_phid = idx($vs_changeset->getMetadata(), 'new:binary-phid');
+      if ($file_phid) {
+        if (!isset($files[$file_phid])) {
+          return $vs_diff;
+        }
+        $drequest = DiffusionRequest::newFromDictionary(array(
+          'repository' => $this->repository,
+          'commit' => $this->commit->getCommitIdentifier(),
+          'path' => $path,
+        ));
+        $corpus = DiffusionFileContentQuery::newFromDiffusionRequest($drequest)
+          ->loadFileContent()
+          ->getCorpus();
+        if ($files[$file_phid]->loadFileData() != $corpus) {
+          return $vs_diff;
+        }
+      } else if ($changeset->makeChangesWithContext() !=
+          $vs_changeset->makeChangesWithContext()) {
+        return $vs_diff;
+      }
+    }
+
+    return null;
   }
 
   /**

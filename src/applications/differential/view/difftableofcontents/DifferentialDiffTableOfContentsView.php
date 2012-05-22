@@ -64,11 +64,6 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
     return $this;
   }
 
-  public function setVsMap(array $vs_map) {
-    $this->vsMap = $vs_map;
-    return $this;
-  }
-
   public function setRevisionID($revision_id) {
     $this->revisionID = $revision_id;
     return $this;

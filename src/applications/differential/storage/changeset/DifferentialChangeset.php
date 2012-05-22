@@ -135,12 +135,27 @@ final class DifferentialChangeset extends DifferentialDAO {
     return implode("\n", $file);
   }
 
+  public function makeChangesWithContext($num_lines = 3) {
+    $with_context = array();
+    foreach ($this->getHunks() as $hunk) {
+      $context = array();
+      $changes = explode("\n", $hunk->getChanges());
+      foreach ($changes as $l => $line) {
+        if ($line[0] == '+' || $line[0] == '-') {
+          $context += array_fill($l - $num_lines, $l + $num_lines, true);
+        }
+      }
+      $with_context[] = array_intersect_key($changes, $context);
+    }
+    return call_user_func('array_merge', $with_context);
+  }
+
   public function getAnchorName() {
     return substr(md5($this->getFilename()), 0, 8);
   }
 
   public function getAbsoluteRepositoryPath(
-    PhabricatorRepository $repository,
+    PhabricatorRepository $repository = null,
     DifferentialDiff $diff = null) {
 
     $base = '/';
@@ -151,8 +166,8 @@ final class DifferentialChangeset extends DifferentialDAO {
     $path = $this->getFilename();
     $path = rtrim($base, '/').'/'.ltrim($path, '/');
 
-    $vcs = $repository->getVersionControlSystem();
-    if ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_SVN) {
+    $svn = PhabricatorRepositoryType::REPOSITORY_TYPE_SVN;
+    if ($repository && $repository->getVersionControlSystem() == $svn) {
       $prefix = $repository->getDetail('remote-uri');
       $prefix = id(new PhutilURI($prefix))->getPath();
       if (!strncmp($path, $prefix, strlen($prefix))) {
