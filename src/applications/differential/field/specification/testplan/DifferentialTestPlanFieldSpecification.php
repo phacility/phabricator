@@ -89,6 +89,16 @@ final class DifferentialTestPlanFieldSpecification
     return 'Test Plan';
   }
 
+  public function getSupportedCommitMessageLabels() {
+    return array(
+      'Test Plan',
+      'Testplan',
+      'Tested',
+      'Tests',
+    );
+  }
+
+
   public function renderValueForCommitMessage($is_edit) {
     return $this->plan;
   }
