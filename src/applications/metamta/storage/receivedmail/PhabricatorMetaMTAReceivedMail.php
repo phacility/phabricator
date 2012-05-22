@@ -55,6 +55,19 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
   }
 
   public function processReceivedMail() {
+
+    // If Phabricator sent the mail, always drop it immediately. This prevents
+    // loops where, e.g., the public bug address is also a user email address
+    // and creating a bug sends them an email, which loops.
+    $is_phabricator_mail = idx(
+      $this->headers,
+      'x-phabricator-sent-this-message');
+    if ($is_phabricator_mail) {
+      $message = "Ignoring email with 'X-Phabricator-Sent-This-Message' ".
+                 "header to avoid loops.";
+      return $this->setMessage($message)->save();
+    }
+
     $to = idx($this->headers, 'to');
     $to = $this->getRawEmailAddress($to);
 
