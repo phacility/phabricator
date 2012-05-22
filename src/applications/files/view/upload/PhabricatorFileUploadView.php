@@ -74,7 +74,7 @@ final class PhabricatorFileUploadView extends AphrontView {
     }
 
     $doc_href = PhabricatorEnv::getDocLink(
-      'articles/Configuring_File_Upload_Limits.html');
+      'article/Configuring_File_Upload_Limits.html');
     $doc_link = phutil_render_tag(
       'a',
       array(
