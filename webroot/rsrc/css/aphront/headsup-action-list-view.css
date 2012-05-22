@@ -2,11 +2,6 @@
  * @provides aphront-headsup-action-list-view-css
  */
 
-.aphront-headsup-object-name {
-  color: #666666;
-  margin-right: 0.25em;
-}
-
 .aphront-headsup-action-list {
   float:        right;
   width:        250px;
