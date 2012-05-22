@@ -58,6 +58,15 @@ final class DifferentialRevisionViewController extends DifferentialController {
       }
     }
 
+    $target_manual = $target;
+    if (!$target_id) {
+      foreach ($diffs as $diff) {
+        if ($diff->getCreationMethod() != 'commit') {
+          $target_manual = $diff;
+        }
+      }
+    }
+
     $diffs = mpull($diffs, null, 'getID');
     if (empty($diffs[$diff_vs])) {
       $diff_vs = null;
@@ -65,7 +74,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     list($aux_fields, $props) = $this->loadAuxiliaryFieldsAndProperties(
       $revision,
-      $target,
+      $target_manual,
       array(
         'local:commits',
         'arc:unit',
@@ -205,18 +214,17 @@ final class DifferentialRevisionViewController extends DifferentialController {
         newv($custom_renderer_class, array());
       $actions = array_merge(
         $actions,
-        $custom_renderer->generateActionLinks($revision, $target));
+        $custom_renderer->generateActionLinks($revision, $target_manual));
     }
 
     $whitespace = $request->getStr(
       'whitespace',
       DifferentialChangesetParser::WHITESPACE_IGNORE_ALL);
 
-    $arc_project = $target->loadArcanistProject();
+    $arc_project = $target_manual->loadArcanistProject();
 
     if ($arc_project) {
       $symbol_indexes = $this->buildSymbolIndexes(
-        $target,
         $arc_project,
         $visible_changesets);
       $repository = $arc_project->loadRepository();
@@ -704,7 +712,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
   }
 
   private function buildSymbolIndexes(
-    DifferentialDiff $target,
     PhabricatorRepositoryArcanistProject $arc_project,
     array $visible_changesets) {
     assert_instances_of($visible_changesets, 'DifferentialChangeset');

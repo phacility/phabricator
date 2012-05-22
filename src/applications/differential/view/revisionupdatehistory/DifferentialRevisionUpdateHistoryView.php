@@ -24,7 +24,8 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
   private $selectedWhitespace;
   private $user;
 
-  public function setDiffs($diffs) {
+  public function setDiffs(array $diffs) {
+    assert_instances_of($diffs, 'DifferentialDiff');
     $this->diffs = $diffs;
     return $this;
   }
