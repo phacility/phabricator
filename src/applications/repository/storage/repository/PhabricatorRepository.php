@@ -228,6 +228,25 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
           throw new Exception(
             "No support for HTTP Basic Auth in this version control system.");
       }
+    } else if ($this->shouldUseSVNProtocol()) {
+      switch ($this->getVersionControlSystem()) {
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+            $pattern =
+              "svn ".
+              "--non-interactive ".
+              "--no-auth-cache ".
+              "--username %s ".
+              "--password %s ".
+              $pattern;
+            array_unshift(
+              $args,
+              $this->getDetail('http-login'),
+              $this->getDetail('http-pass'));
+            break;
+        default:
+          throw new Exception(
+            "SVN protocol is SVN only.");
+      }
     } else {
       switch ($this->getVersionControlSystem()) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
@@ -320,6 +339,17 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
     }
   }
 
+  public function shouldUseSVNProtocol() {
+    $uri = new PhutilURI($this->getRemoteURI());
+    $protocol = $uri->getProtocol();
+    if ($this->isSVNProtocol($protocol)) {
+      return (bool)$this->getDetail('http-login');
+    } else {
+      return false;
+    }
+  }
+
+
   public function getPublicRemoteURI() {
     $uri = new PhutilURI($this->getRemoteURI());
 
@@ -341,6 +371,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
 
   private function isHTTPProtocol($protocol) {
     return ($protocol == 'http' || $protocol == 'https');
+  }
+
+  private function isSVNProtocol($protocol) {
+    return ($protocol == 'svn');
   }
 
   public function isTracked() {

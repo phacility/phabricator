@@ -231,7 +231,7 @@ final class PhabricatorRepositoryEditController
     $has_branches       = ($is_git || $is_mercurial);
     $has_local          = ($is_git || $is_mercurial);
     $has_branch_filter  = ($is_git);
-    $has_http_support   = $is_svn;
+    $has_auth_support   = $is_svn;
 
     if ($request->isFormPost()) {
       $tracking = ($request->getStr('tracking') == 'enabled' ? true : false);
@@ -442,8 +442,9 @@ final class PhabricatorRepositoryEditController
         'Enter the <strong>Repository Root</strong> for this SVN repository. '.
         'You can figure this out by running <tt>svn info</tt> and looking at '.
         'the value in the <tt>Repository Root</tt> field. It should be a URI '.
-        'and look like <tt>http://svn.example.org/svn/</tt> or '.
-        '<tt>svn+ssh://svn.example.com/svnroot/</tt>';
+        'and look like <tt>http://svn.example.org/svn/</tt>, '.
+        '<tt>svn+ssh://svn.example.com/svnroot/</tt>, or '.
+        '<tt>svn://svn.example.net/svn/</tt>';
       $inset->appendChild(
         '<p class="aphront-form-instructions">'.$instructions.'</p>');
       $uri_label = 'Repository Root';
@@ -489,23 +490,25 @@ final class PhabricatorRepositoryEditController
             '...specify a path on disk where the daemon should '.
             'look for a private key.'));
 
-    if ($has_http_support) {
+    if ($has_auth_support) {
       $inset
         ->appendChild(
           '<div class="aphront-form-instructions">'.
-            'If you want to connect to this repository over HTTP Basic Auth, '.
+            'If you want to connect to this repository with a username and '.
+            'password, such as over HTTP Basic Auth or SVN with SASL, '.
             'enter the username and password to use. You can leave these '.
-            'fields blank if the repository does not use HTTP Basic Auth.'.
+            'fields blank if the repository does not use a username and '.
+            'password for authentication.'.
           '</div>')
         ->appendChild(
           id(new AphrontFormTextControl())
             ->setName('http-login')
-            ->setLabel('HTTP Basic Login')
+            ->setLabel('Username')
             ->setValue($repository->getDetail('http-login')))
         ->appendChild(
           id(new AphrontFormPasswordControl())
             ->setName('http-pass')
-            ->setLabel('HTTP Basic Password')
+            ->setLabel('Password')
             ->setValue($repository->getDetail('http-pass')));
     }
 
