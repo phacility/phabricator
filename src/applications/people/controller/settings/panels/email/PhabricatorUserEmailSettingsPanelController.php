@@ -51,50 +51,60 @@ final class PhabricatorUserEmailSettingsPanelController
     }
 
     $emails = id(new PhabricatorUserEmail())->loadAllWhere(
-      'userPHID = %s',
+      'userPHID = %s ORDER BY address',
       $user->getPHID());
 
     $rowc = array();
     $rows = array();
     foreach ($emails as $email) {
 
+      $button_verify = javelin_render_tag(
+        'a',
+        array(
+          'class' => 'button small grey',
+          'href'  => $uri->alter('verify', $email->getID()),
+          'sigil' => 'workflow',
+        ),
+        'Verify');
+
+      $button_make_primary = javelin_render_tag(
+        'a',
+        array(
+          'class' => 'button small grey',
+          'href'  => $uri->alter('primary', $email->getID()),
+          'sigil' => 'workflow',
+        ),
+        'Make Primary');
+
+      $button_remove = javelin_render_tag(
+        'a',
+        array(
+          'class'   => 'button small grey',
+          'href'    => $uri->alter('delete', $email->getID()),
+          'sigil'   => 'workflow'
+        ),
+        'Remove');
+
+      $button_primary = phutil_render_tag(
+        'a',
+        array(
+          'class' => 'button small disabled',
+        ),
+        'Primary');
+
+      if (!$email->getIsVerified()) {
+        $action = $button_verify;
+      } else if ($email->getIsPrimary()) {
+        $action = $button_primary;
+      } else {
+        $action = $button_make_primary;
+      }
+
       if ($email->getIsPrimary()) {
-        $action = phutil_render_tag(
-          'a',
-          array(
-            'class' => 'button small disabled',
-          ),
-          'Primary');
-        $remove = $action;
+        $remove = $button_primary;
         $rowc[] = 'highlighted';
       } else {
-        if ($email->getIsVerified()) {
-          $action = javelin_render_tag(
-            'a',
-            array(
-              'class' => 'button small grey',
-              'href'  => $uri->alter('primary', $email->getID()),
-              'sigil' => 'workflow',
-            ),
-            'Make Primary');
-        } else {
-          $action = javelin_render_tag(
-            'a',
-            array(
-              'class' => 'button small grey',
-              'href'  => $uri->alter('verify', $email->getID()),
-              'sigil' => 'workflow',
-            ),
-            'Verify');
-        }
-        $remove = javelin_render_tag(
-          'a',
-          array(
-            'class'   => 'button small grey',
-            'href'    => $uri->alter('delete', $email->getID()),
-            'sigil'   => 'workflow'
-          ),
-          'Remove');
+        $remove = $button_remove;
         $rowc[] = null;
       }
 
