@@ -82,6 +82,15 @@ class PhabricatorRepositoryDefaultCommitMessageDetailParser
       unset($details['authorPHID']);
     }
 
+    if (isset($details['committer'])) {
+      $committer_phid = $this->resolveUserPHID($details['committer']);
+      if ($committer_phid) {
+        $details['committerPHID'] = $committer_phid;
+      } else {
+        unset($details['committerPHID']);
+      }
+    }
+
     $data->setCommitDetails($details);
   }
 

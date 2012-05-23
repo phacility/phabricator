@@ -43,6 +43,9 @@ final class DiffusionHistoryTableView extends DiffusionView {
         if ($data->getCommitDetail('authorPHID')) {
           $phids[$data->getCommitDetail('authorPHID')] = true;
         }
+        if ($data->getCommitDetail('committerPHID')) {
+          $phids[$data->getCommitDetail('committerPHID')] = true;
+        }
       }
     }
     return array_keys($phids);
@@ -82,9 +85,11 @@ final class DiffusionHistoryTableView extends DiffusionView {
       }
 
       $data = $history->getCommitData();
-      $author_phid = null;
+      $author_phid = $committer = $committer_phid = null;
       if ($data) {
         $author_phid = $data->getCommitDetail('authorPHID');
+        $committer_phid = $data->getCommitDetail('committerPHID');
+        $committer = $data->getCommitDetail('committer');
       }
 
       if ($author_phid && isset($handles[$author_phid])) {
@@ -92,6 +97,18 @@ final class DiffusionHistoryTableView extends DiffusionView {
       } else {
         $author = phutil_escape_html($history->getAuthorName());
       }
+
+      if ($committer) {
+        if ($committer_phid && isset($handles[$committer_phid])) {
+          $committer = $handles[$committer_phid]->renderLink();
+        } else {
+          $committer = phutil_escape_html($committer);
+        }
+      }
+      else {
+        $committer = $author;
+      }
+
 
       $commit = $history->getCommit();
       if ($commit && !$commit->getIsUnparsed() && $data) {
@@ -118,6 +135,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
         $date,
         $time,
         $author,
+        $committer,
         AphrontTableView::renderSingleDisplayLine(
           phutil_escape_html($history->getSummary())),
         // TODO: etc etc
@@ -134,6 +152,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
         'Date',
         'Time',
         'Author',
+        'Committer',
         'Details',
       ));
     $view->setColumnClasses(
@@ -144,6 +163,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
         '',
         '',
         'right',
+        '',
         '',
         'wide',
       ));

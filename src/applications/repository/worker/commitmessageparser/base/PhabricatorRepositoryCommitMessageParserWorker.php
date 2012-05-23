@@ -23,7 +23,9 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit);
 
-  final protected function updateCommitData($author, $message) {
+  final protected function updateCommitData($author, $message,
+    $committer = null) {
+
     $commit = $this->commit;
 
     $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
@@ -35,6 +37,12 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     $data->setCommitID($commit->getID());
     $data->setAuthorName($author);
     $data->setCommitMessage($message);
+
+    if ($committer) {
+      $details = $data->getCommitDetails();
+      $details['committer'] = $committer;
+      $data->setCommitDetails($details);
+    }
 
     $repository = $this->repository;
     $detail_parser = $repository->getDetail(

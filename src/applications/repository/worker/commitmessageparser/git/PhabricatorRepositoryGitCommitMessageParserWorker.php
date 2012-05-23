@@ -26,17 +26,23 @@ final class PhabricatorRepositoryGitCommitMessageParserWorker
     // NOTE: %B was introduced somewhat recently in git's history, so pull
     // commit message information with %s and %b instead.
     list($info) = $repository->execxLocalCommand(
-      "log -n 1 --encoding='UTF-8' --pretty=format:%%an%%x00%%s%%n%%n%%b %s",
+      "log -n 1 --encoding='UTF-8' " .
+      "--pretty=format:%%cn%%x00%%an%%x00%%s%%n%%n%%b %s",
       $commit->getCommitIdentifier());
 
-    list($author, $message) = explode("\0", $info);
+    list($committer, $author, $message) = explode("\0", $info);
 
     // Make sure these are valid UTF-8.
+    $committer = phutil_utf8ize($committer);
     $author = phutil_utf8ize($author);
     $message = phutil_utf8ize($message);
     $message = trim($message);
 
-    $this->updateCommitData($author, $message);
+    if ($committer == $author) {
+      $committer = null;
+    }
+
+    $this->updateCommitData($author, $message, $committer);
 
     if ($this->shouldQueueFollowupTasks()) {
       $task = new PhabricatorWorkerTask();

@@ -287,6 +287,9 @@ final class DiffusionCommitController extends DiffusionController {
     if ($data->getCommitDetail('reviewerPHID')) {
       $phids[] = $data->getCommitDetail('reviewerPHID');
     }
+    if ($data->getCommitDetail('committerPHID')) {
+      $phids[] = $data->getCommitDetail('committerPHID');
+    }
     if ($data->getCommitDetail('differential.revisionPHID')) {
       $phids[] = $data->getCommitDetail('differential.revisionPHID');
     }
@@ -329,6 +332,17 @@ final class DiffusionCommitController extends DiffusionController {
     } else if ($reviewer_name) {
       $props['Reviewer'] = phutil_escape_html($reviewer_name);
     }
+
+    $committer = $data->getCommitDetail('committer');
+    if ($committer) {
+      $committer_phid = $data->getCommitDetail('committerPHID');
+      if ($data->getCommitDetail('committerPHID')) {
+        $props['Committer'] = $handles[$committer_phid]->renderLink();
+      } else {
+        $props['Committer'] = phutil_escape_html($committer);
+      }
+    }
+
 
     $revision_phid = $data->getCommitDetail('differential.revisionPHID');
     if ($revision_phid) {

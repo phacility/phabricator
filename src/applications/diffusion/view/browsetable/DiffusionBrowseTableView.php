@@ -60,11 +60,25 @@ final class DiffusionBrowseTableView extends DiffusionView {
       } else {
         $author = phutil_escape_html($data->getAuthorName());
       }
+
+      $committer = $data->getCommitDetail('committer');
+      if ($committer) {
+        $committer_phid = $data->getCommitDetail('committerPHID');
+        if ($committer_phid && isset($handles[$committer_phid])) {
+          $committer = $handles[$committer_phid]->renderLink();
+        } else {
+          $committer = phutil_escape_html($data->getCommitDetail('committer'));
+        }
+      } else {
+        $committer = $author;
+      }
+
       $details = AphrontTableView::renderSingleDisplayLine(
         phutil_escape_html($data->getSummary()));
     } else {
       $author = '';
       $details = '';
+      $committer = '';
     }
 
     return array(
@@ -72,6 +86,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
       'date'      => $date,
       'time'      => $time,
       'author'    => $author,
+      'committer' => $committer,
       'details'   => $details,
     );
   }
@@ -140,6 +155,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
           'date'      => celerity_generate_unique_node_id(),
           'time'      => celerity_generate_unique_node_id(),
           'author'    => celerity_generate_unique_node_id(),
+          'committer' => celerity_generate_unique_node_id(),
           'details'   => celerity_generate_unique_node_id(),
         );
 
@@ -162,6 +178,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         $dict['date'],
         $dict['time'],
         $dict['author'],
+        $dict['committer'],
         $dict['details'],
       );
     }
@@ -179,6 +196,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         'Date',
         'Time',
         'Author',
+        'Committer',
         'Details',
       ));
     $view->setColumnClasses(
@@ -188,6 +206,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         '',
         '',
         'right',
+        '',
         '',
         'wide',
       ));

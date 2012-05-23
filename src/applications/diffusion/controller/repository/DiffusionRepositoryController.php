@@ -45,6 +45,9 @@ final class DiffusionRepositoryController extends DiffusionController {
         if ($data->getCommitDetail('authorPHID')) {
           $phids[$data->getCommitDetail('authorPHID')] = true;
         }
+        if ($data->getCommitDetail('committerPHID')) {
+          $phids[$data->getCommitDetail('committerPHID')] = true;
+        }
       }
     }
 
@@ -53,6 +56,9 @@ final class DiffusionRepositoryController extends DiffusionController {
       if ($data) {
         if ($data->getCommitDetail('authorPHID')) {
           $phids[$data->getCommitDetail('authorPHID')] = true;
+        }
+        if ($data->getCommitDetail('committerPHID')) {
+          $phids[$data->getCommitDetail('committerPHID')] = true;
         }
       }
     }
