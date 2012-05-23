@@ -63,6 +63,9 @@ are no longer paying the overhead of issuing hundreds of extra queries. This
 will perform much better (although, as with all performance changes, you should
 verify this claim by measuring it).
 
+See also @{method:LiskDAO::loadRelatives} method which provides an abstraction
+to prevent this problem.
+
 = Detecting the Problem =
 
 Beyond reasoning about it while figuring out how to load the data you need, the
