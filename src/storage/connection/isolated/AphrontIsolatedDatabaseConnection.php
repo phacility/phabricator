@@ -112,7 +112,8 @@ final class AphrontIsolatedDatabaseConnection
     // the relationship between objects, not their exact insertion order. This
     // guarantees that IDs are unique but makes it impossible to hard-code tests
     // against this specific implementation detail.
-    $this->insertID = (self::$nextInsertID += mt_rand(1, 10));
+    self::$nextInsertID += mt_rand(1, 10);
+    $this->insertID = self::$nextInsertID;
     $this->affectedRows = 1;
   }
 
