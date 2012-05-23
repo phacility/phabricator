@@ -364,8 +364,10 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
   private function getImplicitComments(DifferentialRevision $revision) {
 
+    $diff = $revision->loadActiveDiff();
+
     $template = new DifferentialComment();
-    $template->setAuthorPHID($revision->getAuthorPHID());
+    $template->setAuthorPHID($diff->getAuthorPHID());
     $template->setRevisionID($revision->getID());
     $template->setDateCreated($revision->getDateCreated());
 
