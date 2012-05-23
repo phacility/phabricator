@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,4 +18,14 @@
 
 final class DifferentialFieldParseException extends Exception {
 
+  private $partialParse;
+
+  public function __construct($message, $partial_parse = null) {
+    parent::__construct($message);
+    $this->partialParse = $partial_parse;
+  }
+
+  public function getPartialParse() {
+    return $this->partialParse;
+  }
 }

@@ -750,7 +750,8 @@ abstract class DifferentialFieldSpecification {
         ? "users and mailing lists"
         : "users";
       throw new DifferentialFieldParseException(
-        "Commit message references nonexistent {$what}: {$invalid}.");
+        "Commit message references nonexistent {$what}: {$invalid}.",
+        array_unique($results));
     }
 
     return array_unique($results);
