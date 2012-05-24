@@ -239,7 +239,8 @@ final class AphrontRequest {
         "certain type of login hijacking attack. However, the token can ".
         "become invalid if you leave a page open for more than six hours ".
         "without a connection to the internet. To fix this problem: reload ".
-        "the page, and then resubmit it.\n\n".
+        "the page, and then resubmit it. All data inserted to the form will ".
+        "be lost in some browsers so copy them somewhere before reloading.\n\n".
         $more_info);
     }
 
