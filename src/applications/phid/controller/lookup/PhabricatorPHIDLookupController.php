@@ -45,7 +45,6 @@ final class PhabricatorPHIDLookupController
             phutil_escape_html($handle->getPHID()),
             phutil_escape_html($handle->getType()),
             phutil_escape_html($handle->getName()),
-            phutil_escape_html($handle->getEmail()),
             $link,
           );
         }
@@ -56,12 +55,10 @@ final class PhabricatorPHIDLookupController
             'PHID',
             'Type',
             'Name',
-            'Email',
             'URI',
           ));
         $table->setColumnClasses(
           array(
-            null,
             null,
             null,
             null,
@@ -87,7 +84,6 @@ final class PhabricatorPHIDLookupController
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setName('phids')
-//          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT) TODO
           ->setCaption('Enter PHIDs separated by spaces or commas.'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
