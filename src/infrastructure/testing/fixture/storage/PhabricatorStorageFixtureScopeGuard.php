@@ -32,9 +32,12 @@ final class PhabricatorStorageFixtureScopeGuard {
       $this->name);
 
     PhabricatorLiskDAO::pushStorageNamespace($name);
+
+    // Destructor is not called with fatal error.
+    register_shutdown_function(array($this, 'destroy'));
   }
 
-  public function __destruct() {
+  public function destroy() {
     PhabricatorLiskDAO::popStorageNamespace();
 
     execx(
