@@ -25,12 +25,24 @@ abstract class ConduitAPI_user_Method extends ConduitAPIMethod {
     PhabricatorUser $user,
     PhabricatorUserStatus $current_status = null) {
 
+    $roles = array();
+    if ($user->getIsDisabled()) {
+      $roles[] = 'disabled';
+    }
+    if ($user->getIsSystemAgent()) {
+      $roles[] = 'agent';
+    }
+    if ($user->getIsAdmin()) {
+      $roles[] = 'admin';
+    }
+
     $return = array(
       'phid'      => $user->getPHID(),
       'userName'  => $user->getUserName(),
       'realName'  => $user->getRealName(),
       'image'     => $user->loadProfileImageURI(),
       'uri'       => PhabricatorEnv::getURI('/p/'.$user->getUsername().'/'),
+      'roles'     => $roles,
     );
 
     if ($current_status) {
