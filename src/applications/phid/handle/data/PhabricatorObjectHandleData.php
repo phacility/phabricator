@@ -149,6 +149,9 @@ final class PhabricatorObjectHandleData {
             $images = mpull($images, 'getBestURI', 'getPHID');
           }
 
+          $statuses = id(new PhabricatorUserStatus())->loadCurrentStatuses(
+            $phids);
+
           foreach ($phids as $phid) {
             $handle = new PhabricatorObjectHandle();
             $handle->setPHID($phid);
