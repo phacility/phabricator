@@ -1,1 +1,1 @@
-DROP TABLE {$NAMESPACE}_phid.phid_type;
+/* This database was later removed entirely. */

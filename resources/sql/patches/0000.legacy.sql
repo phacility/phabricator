@@ -389,37 +389,6 @@ CREATE TABLE `metamta_mailinglist` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
-
-
-
-
-
-USE `{$NAMESPACE}_phid`;
-
-
-
-
-
-DROP TABLE IF EXISTS `phid`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `phid` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `phid` varchar(64) CHARACTER SET latin1 COLLATE latin1_bin NOT NULL,
-  `phidType` varchar(4) CHARACTER SET latin1 COLLATE latin1_bin DEFAULT NULL,
-  `parentPHID` varchar(64) DEFAULT NULL,
-  `ownerPHID` varchar(64) DEFAULT NULL,
-  `dateCreated` int(10) unsigned NOT NULL,
-  `dateModified` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `phid` (`phid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
-
-
-
-
 DROP TABLE IF EXISTS `phid_type`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;

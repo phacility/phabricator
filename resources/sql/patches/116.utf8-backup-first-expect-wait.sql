@@ -682,22 +682,6 @@ ALTER TABLE `{$NAMESPACE}_pastebin`.`pastebin_paste`
 
 
 
-ALTER DATABASE `{$NAMESPACE}_phid` COLLATE utf8_general_ci;
-
-ALTER TABLE `{$NAMESPACE}_phid`.`phid`
-  MODIFY `phid` varchar(64) CHARACTER SET binary,
-  MODIFY `phidType` varchar(4) CHARACTER SET binary,
-  MODIFY `parentPHID` varchar(64) CHARACTER SET binary,
-  MODIFY `ownerPHID` varchar(64) CHARACTER SET binary;
-ALTER TABLE `{$NAMESPACE}_phid`.`phid`
-  COLLATE utf8_general_ci,
-  MODIFY `phid` varchar(64) COLLATE utf8_bin NOT NULL,
-  MODIFY `phidType` varchar(4) COLLATE utf8_bin,
-  MODIFY `parentPHID` varchar(64) COLLATE utf8_general_ci,
-  MODIFY `ownerPHID` varchar(64) COLLATE utf8_general_ci;
-
-
-
 ALTER DATABASE `{$NAMESPACE}_phriction` COLLATE utf8_general_ci;
 
 ALTER TABLE `{$NAMESPACE}_phriction`.`phriction_content`
