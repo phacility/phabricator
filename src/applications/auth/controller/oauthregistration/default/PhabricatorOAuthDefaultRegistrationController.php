@@ -83,7 +83,6 @@ final class PhabricatorOAuthDefaultRegistrationController
         }
 
         try {
-          $user->save();
 
           // NOTE: We don't verify OAuth email addresses by default because
           // OAuth providers might associate email addresses with accounts that
@@ -92,12 +91,14 @@ final class PhabricatorOAuthDefaultRegistrationController
           // verifying an email address are high because having a corporate
           // address at a company is sometimes the key to the castle.
 
-          $new_email = id(new PhabricatorUserEmail())
-            ->setUserPHID($user->getPHID())
+
+          $email_obj = id(new PhabricatorUserEmail())
             ->setAddress($new_email)
-            ->setIsPrimary(1)
-            ->setIsVerified(0)
-            ->save();
+            ->setIsVerified(0);
+
+          id(new PhabricatorUserEditor())
+            ->setActor($user)
+            ->createNewUser($user, $email_obj);
 
           $oauth_info->setUserID($user->getID());
           $oauth_info->save();
@@ -106,7 +107,7 @@ final class PhabricatorOAuthDefaultRegistrationController
           $request->setCookie('phusr', $user->getUsername());
           $request->setCookie('phsid', $session_key);
 
-          $new_email->sendVerificationEmail($user);
+          $email_obj->sendVerificationEmail($user);
 
           return id(new AphrontRedirectResponse())->setURI('/');
         } catch (AphrontQueryDuplicateKeyException $exception) {

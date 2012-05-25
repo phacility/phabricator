@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'applications/conduit/method/user/base');
 phutil_require_module('phabricator', 'applications/conduit/protocol/exception');
+phutil_require_module('phabricator', 'applications/people/editor');
 phutil_require_module('phabricator', 'applications/people/storage/user');
 
 phutil_require_module('phutil', 'utils');

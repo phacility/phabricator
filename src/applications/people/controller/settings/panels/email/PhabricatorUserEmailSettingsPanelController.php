@@ -175,13 +175,14 @@ final class PhabricatorUserEmailSettingsPanelController
 
       if (!$errors) {
         $object = id(new PhabricatorUserEmail())
-          ->setUserPHID($user->getPHID())
           ->setAddress($email)
-          ->setIsVerified(0)
-          ->setIsPrimary(0);
+          ->setIsVerified(0);
 
         try {
-          $object->save();
+
+          id(new PhabricatorUserEditor())
+            ->setActor($user)
+            ->addEmail($user, $object);
 
           $object->sendVerificationEmail($user);
 
@@ -245,7 +246,11 @@ final class PhabricatorUserEmailSettingsPanelController
     }
 
     if ($request->isFormPost()) {
-      $email->delete();
+
+      id(new PhabricatorUserEditor())
+        ->setActor($user)
+        ->removeEmail($user, $email);
+
       return id(new AphrontRedirectResponse())->setURI($uri);
     }
 
@@ -314,21 +319,9 @@ final class PhabricatorUserEmailSettingsPanelController
 
     if ($request->isFormPost()) {
 
-      // TODO: Transactions!
-
-      $email->setIsPrimary(1);
-
-      $old_primary = $user->loadPrimaryEmail();
-      if ($old_primary) {
-        $old_primary->setIsPrimary(0);
-        $old_primary->save();
-      }
-      $email->save();
-
-      if ($old_primary) {
-        $old_primary->sendOldPrimaryEmail($user, $email);
-      }
-      $email->sendNewPrimaryEmail($user);
+      id(new PhabricatorUserEditor())
+        ->setActor($user)
+        ->changePrimaryEmail($user, $email);
 
       return id(new AphrontRedirectResponse())->setURI($uri);
     }

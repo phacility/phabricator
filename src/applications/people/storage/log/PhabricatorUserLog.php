@@ -24,12 +24,19 @@ final class PhabricatorUserLog extends PhabricatorUserDAO {
   const ACTION_RESET_PASSWORD = 'reset-pass';
 
   const ACTION_CREATE         = 'create';
+  const ACTION_EDIT           = 'edit';
 
   const ACTION_ADMIN          = 'admin';
   const ACTION_DISABLE        = 'disable';
 
   const ACTION_CONDUIT_CERTIFICATE = 'conduit-cert';
   const ACTION_CONDUIT_CERTIFICATE_FAILURE = 'conduit-cert-fail';
+
+  const ACTION_EMAIL_PRIMARY    = 'email-primary';
+  const ACTION_EMAIL_REMOVE     = 'email-remove';
+  const ACTION_EMAIL_ADD        = 'email-add';
+
+  const ACTION_CHANGE_PASSWORD  = 'change-password';
 
   protected $actorPHID;
   protected $userPHID;
@@ -75,7 +82,7 @@ final class PhabricatorUserLog extends PhabricatorUserDAO {
 
   public function save() {
     if (!$this->remoteAddr) {
-      $this->remoteAddr = idx($_SERVER, 'REMOTE_ADDR');
+      $this->remoteAddr = idx($_SERVER, 'REMOTE_ADDR', '');
     }
     if (!$this->session) {
       $this->setSession(idx($_COOKIE, 'phsid'));

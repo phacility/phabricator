@@ -956,6 +956,7 @@ phutil_register_library_map(array(
     'PhabricatorUserAccountSettingsPanelController' => 'applications/people/controller/settings/panels/account',
     'PhabricatorUserConduitSettingsPanelController' => 'applications/people/controller/settings/panels/conduit',
     'PhabricatorUserDAO' => 'applications/people/storage/base',
+    'PhabricatorUserEditor' => 'applications/people/editor',
     'PhabricatorUserEmail' => 'applications/people/storage/email',
     'PhabricatorUserEmailPreferenceSettingsPanelController' => 'applications/people/controller/settings/panels/emailpref',
     'PhabricatorUserEmailSettingsPanelController' => 'applications/people/controller/settings/panels/email',

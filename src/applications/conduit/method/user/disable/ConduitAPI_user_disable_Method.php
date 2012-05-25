@@ -44,7 +44,8 @@ final class ConduitAPI_user_disable_Method
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    if (!$request->getUser()->getIsAdmin()) {
+    $actor = $request->getUser();
+    if (!$actor->getIsAdmin()) {
       throw new ConduitException('ERR-PERMISSIONS');
     }
 
@@ -59,8 +60,9 @@ final class ConduitAPI_user_disable_Method
     }
 
     foreach ($users as $user) {
-      $user->setIsDisabled(true);
-      $user->save();
+      id(new PhabricatorUserEditor())
+        ->setActor($actor)
+        ->disableUser($user, true);
     }
   }
 

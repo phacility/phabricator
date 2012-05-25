@@ -165,22 +165,18 @@ final class PhabricatorPeopleEditController
         try {
           $is_new = !$user->getID();
 
-          $user->save();
-
-          if ($is_new) {
-
+          if (!$is_new) {
+            id(new PhabricatorUserEditor())
+              ->setActor($admin)
+              ->updateUser($user);
+          } else {
             $email = id(new PhabricatorUserEmail())
-              ->setUserPHID($user->getPHID())
               ->setAddress($new_email)
-              ->setIsPrimary(1)
-              ->setIsVerified(0)
-              ->save();
+              ->setIsVerified(0);
 
-            $log = PhabricatorUserLog::newLog(
-              $admin,
-              $user,
-              PhabricatorUserLog::ACTION_CREATE);
-            $log->save();
+            id(new PhabricatorUserEditor())
+              ->setActor($admin)
+              ->createNewUser($user, $email);
 
             if ($welcome_checked) {
               $user->sendWelcomeEmail($admin);
@@ -255,13 +251,17 @@ final class PhabricatorPeopleEditController
           ->setValue($new_email)
           ->setError($e_email));
     } else {
+      $email = $user->loadPrimaryEmail();
+      if ($email) {
+        $status = $email->getIsVerified() ? 'Verified' : 'Unverified';
+      } else {
+        $status = 'No Email Address';
+      }
+
       $form->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel('Email')
-          ->setValue(
-              $user->loadPrimaryEmail()->getIsVerified()
-                ? 'Verified'
-                : 'Unverified'));
+          ->setValue($status));
     }
 
     $form->appendChild($this->getRoleInstructions());
@@ -354,31 +354,21 @@ final class PhabricatorPeopleEditController
         $new_admin = (bool)$request->getBool('is_admin');
         $old_admin = (bool)$user->getIsAdmin();
         if ($new_admin != $old_admin) {
-          $log = clone $log_template;
-          $log->setAction(PhabricatorUserLog::ACTION_ADMIN);
-          $log->setOldValue($old_admin);
-          $log->setNewValue($new_admin);
-          $user->setIsAdmin($new_admin);
-          $logs[] = $log;
+          id(new PhabricatorUserEditor())
+            ->setActor($admin)
+            ->makeAdminUser($user, $new_admin);
         }
 
         $new_disabled = (bool)$request->getBool('is_disabled');
         $old_disabled = (bool)$user->getIsDisabled();
         if ($new_disabled != $old_disabled) {
-          $log = clone $log_template;
-          $log->setAction(PhabricatorUserLog::ACTION_DISABLE);
-          $log->setOldValue($old_disabled);
-          $log->setNewValue($new_disabled);
-          $user->setIsDisabled($new_disabled);
-          $logs[] = $log;
+          id(new PhabricatorUserEditor())
+            ->setActor($admin)
+            ->disableUser($user, $new_disabled);
         }
       }
 
       if (!$errors) {
-        $user->save();
-        foreach ($logs as $log) {
-          $log->save();
-        }
         return id(new AphrontRedirectResponse())
           ->setURI($request->getRequestURI()->alter('saved', 'true'));
       }

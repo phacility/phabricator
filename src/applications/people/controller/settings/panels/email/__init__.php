@@ -11,6 +11,7 @@ phutil_require_module('phabricator', 'aphront/response/dialog');
 phutil_require_module('phabricator', 'aphront/response/redirect');
 phutil_require_module('phabricator', 'aphront/response/reload');
 phutil_require_module('phabricator', 'applications/people/controller/settings/panels/base');
+phutil_require_module('phabricator', 'applications/people/editor');
 phutil_require_module('phabricator', 'applications/people/storage/email');
 phutil_require_module('phabricator', 'infrastructure/javelin/markup');
 phutil_require_module('phabricator', 'view/control/table');

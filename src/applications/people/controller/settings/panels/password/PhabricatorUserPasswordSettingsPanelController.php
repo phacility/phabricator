@@ -79,13 +79,16 @@ final class PhabricatorUserPasswordSettingsPanelController
       }
 
       if (!$errors) {
-        $user->setPassword($pass);
         // This write is unguarded because the CSRF token has already
         // been checked in the call to $request->isFormPost() and
         // the CSRF token depends on the password hash, so when it
         // is changed here the CSRF token check will fail.
         $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-        $user->save();
+
+          id(new PhabricatorUserEditor())
+            ->setActor($user)
+            ->changePassword($user, $pass);
+
         unset($unguarded);
 
         if ($valid_token) {
