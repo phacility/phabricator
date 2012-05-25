@@ -772,13 +772,13 @@ abstract class LiskDAO {
    * a homework.
    *
    * The method also supports retrieving referenced objects, for example authors
-   * of all diffs:
+   * of all diffs (using shortcut @{method:loadOneRelative}):
    *
    *   foreach ($diffs as $diff) {
-   *     $author = head($diff->loadRelatives(
+   *     $author = $diff->loadOneRelative(
    *       new PhabricatorUser(),
    *       'phid',
-   *       'getAuthorPHID'));
+   *       'getAuthorPHID');
    *     // Do something with author.
    *   }
    *
@@ -789,11 +789,11 @@ abstract class LiskDAO {
    * meaning). This is intentional to avoid mistakes with using data from one
    * row in retrieving other rows. Example of a correct usage:
    *
-   *   $status = head($author->loadRelatives(
+   *   $status = $author->loadOneRelative(
    *     new PhabricatorUserStatus(),
    *     'userPHID',
    *     'getPHID',
-   *     '(UNIX_TIMESTAMP() BETWEEN dateFrom AND dateTo)'));
+   *     '(UNIX_TIMESTAMP() BETWEEN dateFrom AND dateTo)');
    *
    * @param  LiskDAO  Type of objects to load.
    * @param  string   Name of the column in target table.
@@ -820,6 +820,43 @@ abstract class LiskDAO {
       $key_method,
       $where);
     return idx($relatives, $this->$key_method(), array());
+  }
+
+  /**
+   * Load referenced row. See @{method:loadRelatives} for details.
+   *
+   * @param  LiskDAO  Type of objects to load.
+   * @param  string   Name of the column in target table.
+   * @param  string   Method name in this table.
+   * @param  string   Additional constraints on returned rows. It supports no
+   *                  placeholders and requires putting the WHERE part into
+   *                  parentheses. It's not possible to use LIMIT.
+   * @return LiskDAO  Object of type $object or null if there's no such object.
+   *
+   * @task   load
+   */
+  final public function loadOneRelative(
+    LiskDAO $object,
+    $foreign_column,
+    $key_method = 'getID',
+    $where = '') {
+
+    $relatives = $this->loadRelatives(
+      $object,
+      $foreign_column,
+      $key_method,
+      $where);
+
+    if (!$relatives) {
+      return null;
+    }
+
+    if (count($relatives) > 1) {
+      throw new AphrontQueryCountException(
+        "More than 1 result from loadOneRelative()!");
+    }
+
+    return reset($relatives);
   }
 
   final public function putInSet(LiskDAOSet $set) {

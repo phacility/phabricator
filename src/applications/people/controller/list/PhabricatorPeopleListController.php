@@ -43,7 +43,8 @@ final class PhabricatorPeopleListController
 
     $rows = array();
     foreach ($users as $user) {
-      if ($user->getPrimaryEmail()->getIsVerified()) {
+      $primary_email = $user->loadPrimaryEmail();
+      if ($primary_email && $primary_email->getIsVerified()) {
         $email = 'Verified';
       } else {
         $email = 'Unverified';

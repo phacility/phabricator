@@ -67,23 +67,11 @@ final class PhabricatorPeopleQuery extends PhabricatorOffsetPagedQuery {
       $where_clause,
       $limit_clause);
 
-    $users = $table->loadAllFromArray($data);
-
-    if ($users && $this->needPrimaryEmail) {
-      $emails = id(new PhabricatorUserEmail())->loadAllWhere(
-        'userPHID IN (%Ls)',
-        mpull($users, 'getPHID'));
-      $emails = mpull($emails, null, 'getUserPHID');
-      foreach ($users as $user) {
-        // Fail gracefully if we have data integrity problems.
-        if (empty($emails[$user->getPHID()])) {
-          $user->attachPrimaryEmail(new PhabricatorUserEmail());
-        } else {
-          $user->attachPrimaryEmail($emails[$user->getPHID()]);
-        }
-      }
+    if ($this->needPrimaryEmail) {
+      $table->putInSet(new LiskDAOSet());
     }
 
+    $users = $table->loadAllFromArray($data);
     return $users;
   }
 

@@ -9,10 +9,9 @@
 phutil_require_module('phabricator', 'applications/people/storage/email');
 phutil_require_module('phabricator', 'applications/people/storage/user');
 phutil_require_module('phabricator', 'infrastructure/query/offsetpaged');
+phutil_require_module('phabricator', 'storage/lisk/dao');
 phutil_require_module('phabricator', 'storage/qsprintf');
 phutil_require_module('phabricator', 'storage/queryfx');
-
-phutil_require_module('phutil', 'utils');
 
 
 phutil_require_source('PhabricatorPeopleQuery.php');

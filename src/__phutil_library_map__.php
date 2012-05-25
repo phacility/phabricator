@@ -471,6 +471,7 @@ phutil_register_library_map(array(
     'JavelinViewExample' => 'applications/uiexample/examples/client',
     'JavelinViewExampleServerView' => 'applications/uiexample/examples/client',
     'LiskDAO' => 'storage/lisk/dao',
+    'LiskDAOSet' => 'storage/lisk/dao',
     'LiskEphemeralObjectException' => 'storage/lisk/dao',
     'LiskFixtureTestCase' => 'storage/lisk/dao/__tests__',
     'LiskIsolationTestCase' => 'storage/lisk/dao/__tests__',
