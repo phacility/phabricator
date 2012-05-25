@@ -58,15 +58,13 @@ final class DifferentialRevisionViewController extends DifferentialController {
       }
     }
 
-    foreach ($diffs as $diff) {
-      if ($diff->getCreationMethod() != 'commit') {
-        $last_manual = $diff;
-      }
-    }
-
     $target_manual = $target;
     if (!$target_id) {
-      $target_manual = $last_manual;
+      foreach ($diffs as $diff) {
+        if ($diff->getCreationMethod() != 'commit') {
+          $target_manual = $diff;
+        }
+      }
     }
 
     $diffs = mpull($diffs, null, 'getID');
@@ -87,7 +85,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $comments = $revision->loadComments();
     $comments = array_merge(
-      $this->getImplicitComments($revision, $last_manual),
+      $this->getImplicitComments($revision, reset($diffs)),
       $comments);
 
     $all_changesets = $changesets;
