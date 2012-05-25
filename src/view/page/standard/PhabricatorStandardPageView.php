@@ -179,7 +179,8 @@ final class PhabricatorStandardPageView extends AphrontPageView {
       Javelin::initBehavior(
         'dark-console',
         array(
-          'uri' => '/~/',
+          'uri'         => '/~/',
+          'request_uri' => $request ? (string) $request->getRequestURI() : '/',
         ));
 
       // Change this to initBehavior when there is some behavior to initialize

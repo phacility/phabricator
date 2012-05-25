@@ -105,7 +105,6 @@ final class DarkConsoleErrorLogPlugin extends DarkConsolePlugin {
 
     return '<div>'.
       '<div>'.$table->render().'</div>'.
-      '<div class="dark-console-panel-error-separator"></div>'.
       '<pre class="PhabricatorMonospaced">'.
       $details.'</pre>'.
       '</div>';

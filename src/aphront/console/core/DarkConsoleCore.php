@@ -155,7 +155,61 @@ final class DarkConsoleCore {
         $console);
     }
 
-    return "\n\n\n\n".$console."\n\n\n\n";
+    if ($request->isAjax()) {
+
+      // for ajax this HTML gets updated on the client
+      $request_history = null;
+
+    } else {
+
+      $request_table_header =
+        '<div class="dark-console-panel-request-log-separator"></div>';
+
+      $rows = array();
+
+      $table = new AphrontTableView($rows);
+      $table->setHeaders(
+        array(
+          'Sequence',
+          'Type',
+          'URI',
+        ));
+      $table->setColumnClasses(
+        array(
+          '',
+          '',
+          'wide',
+        ));
+
+      $request_table = $request_table_header . $table->render();
+      $request_history = javelin_render_tag(
+        'table',
+        array(
+          'class' => 'dark-console dark-console-request-log',
+          'sigil' => 'dark-console-request-log',
+          'style' => $visible ? '' : 'display: none;',
+        ),
+        '<tr>'.
+          '<th class="dark-console-tabs">'.
+            javelin_render_tag(
+              'a',
+              array(
+                'class' => 'dark-console-tab dark-console-tab-selected',
+              ),
+              'Request Log').
+          '</th>'.
+          '<td>'.
+            javelin_render_tag(
+              'div',
+              array(
+                'class' => 'dark-console-panel',
+              ),
+              $request_table).
+          '</td>'.
+        '</tr>');
+    }
+
+    return "\n\n\n\n".$console.$request_history."\n\n\n\n";
   }
 }
 

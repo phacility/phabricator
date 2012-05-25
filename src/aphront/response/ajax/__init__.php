@@ -8,6 +8,7 @@
 
 phutil_require_module('phabricator', 'aphront/response/base');
 phutil_require_module('phabricator', 'infrastructure/celerity/api');
+phutil_require_module('phabricator', 'infrastructure/javelin/api');
 
 
 phutil_require_source('AphrontAjaxResponse.php');

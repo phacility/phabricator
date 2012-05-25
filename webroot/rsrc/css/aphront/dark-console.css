@@ -8,7 +8,6 @@
   width:          100%;
   font-family:    "Verdana";
   font-size:      11px;
-  border-bottom:  2px solid #000000;
   position:       relative;
   z-index:        1;
 }
@@ -71,6 +70,10 @@ a.dark-console-tab-selected {
   background: #666666;
 }
 
+.dark-console .aphront-table-view tr.highlight {
+  background: #001A66;
+}
+
 .dark-console .aphront-table-view tr.no-data td {
   color: #dddddd;
 }
@@ -82,13 +85,6 @@ a.dark-console-tab-selected {
 
 .dark-console-panel-error-details {
   display: none;
-}
-
-.dark-console-panel-error-separator {
-    background-color: #e8e8e8;
-    border-bottom: 1px solid #b7b7b7;
-    border-top: 1px solid #b7b7b7;
-    height: 2px;
 }
 
 .explain-sev-1 {
@@ -156,3 +152,16 @@ a.dark-console-tab-selected {
   padding: 1.5em 2em;
   font-style: italic;
 }
+
+.dark-console-request-log {
+  border-bottom:  2px solid #000000;
+}
+
+.dark-console-panel-request-log-separator {
+    background-color: #e8e8e8;
+    border-bottom: 1px solid #b7b7b7;
+    border-top: 1px solid #b7b7b7;
+    height: 2px;
+}
+
+

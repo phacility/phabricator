@@ -23,6 +23,7 @@ final class AphrontAjaxResponse extends AphrontResponse {
 
   private $content;
   private $error;
+  private $disableConsole;
 
   public function setContent($content) {
     $this->content = $content;
@@ -34,7 +35,32 @@ final class AphrontAjaxResponse extends AphrontResponse {
     return $this;
   }
 
+  public function setDisableConsole($disable) {
+    $this->disableConsole = $disable;
+    return $this;
+  }
+
+  private function getConsole() {
+    if ($this->disableConsole) {
+      $console = null;
+    } else {
+      $request = $this->getRequest();
+      $console = $request->getApplicationConfiguration()->getConsole();
+    }
+    return $console;
+  }
+
   public function buildResponseString() {
+    $console = $this->getConsole();
+    if ($console) {
+      Javelin::initBehavior(
+        'dark-console-ajax',
+        array(
+          'console' => $console->render($this->getRequest()),
+          'uri'     => (string) $this->getRequest()->getRequestURI(),
+        ));
+    }
+
     $response = CelerityAPI::getStaticResourceResponse();
     $object = $response->buildAjaxResponse(
       $this->content,
