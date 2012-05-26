@@ -65,6 +65,8 @@ final class PhabricatorUserEditor {
     // Always set a new user's email address to primary.
     $email->setIsPrimary(1);
 
+    $this->willAddEmail($email);
+
     $user->openTransaction();
       $user->save();
 
@@ -241,6 +243,8 @@ final class PhabricatorUserEditor {
     $email->setIsPrimary(0);
     $email->setUserPHID($user->getPHID());
 
+    $this->willAddEmail($email);
+
     $user->openTransaction();
       $user->beginWriteLocking();
 
@@ -388,6 +392,22 @@ final class PhabricatorUserEditor {
       throw new Exception("User edit requires actor!");
     }
     return $this->actor;
+  }
+
+
+  /**
+   * @task internal
+   */
+  private function willAddEmail(PhabricatorUserEmail $email) {
+
+    // Hard check before write to prevent creation of disallowed email
+    // addresses. Normally, the application does checks and raises more
+    // user friendly errors for us, but we omit the courtesy checks on some
+    // pathways like administrative scripts for simplicity.
+
+    if (!PhabricatorUserEmail::isAllowedAddress($email->getAddress())) {
+      throw new Exception(PhabricatorUserEmail::describeAllowedAddresses());
+    }
   }
 
 }

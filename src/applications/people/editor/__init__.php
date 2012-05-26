@@ -6,6 +6,7 @@
 
 
 
+phutil_require_module('phabricator', 'applications/people/storage/email');
 phutil_require_module('phabricator', 'applications/people/storage/log');
 
 

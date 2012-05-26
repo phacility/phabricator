@@ -171,6 +171,9 @@ final class PhabricatorUserEmailSettingsPanelController
       if (!strlen($email)) {
         $e_email = 'Required';
         $errors[] = 'Email is required.';
+      } else if (!PhabricatorUserEmail::isAllowedAddress($email)) {
+        $e_email = 'Invalid';
+        $errors[] = PhabricatorUserEmail::describeAllowedAddresses();
       }
 
       if (!$errors) {
@@ -216,6 +219,7 @@ final class PhabricatorUserEmailSettingsPanelController
           ->setLabel('Email')
           ->setName('email')
           ->setValue($request->getStr('email'))
+          ->setCaption(PhabricatorUserEmail::describeAllowedAddresses())
           ->setError($e_email));
 
     $dialog = id(new AphrontDialogView())

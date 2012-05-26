@@ -31,9 +31,7 @@ abstract class PhabricatorController extends AphrontController {
   }
 
   public function shouldRequireEmailVerification() {
-    $config_key = 'auth.require-email-verification';
-
-    $need_verify = PhabricatorEnv::getEnvConfig($config_key);
+    $need_verify = PhabricatorUserEmail::isEmailVerificationRequired();
     $need_login = $this->shouldRequireLogin();
 
     return ($need_login && $need_verify);
@@ -79,6 +77,11 @@ abstract class PhabricatorController extends AphrontController {
       }
     }
 
+    if ($this->shouldRequireLogin() && !$user->getPHID()) {
+      $login_controller = newv('PhabricatorLoginController', array($request));
+      return $this->delegateToController($login_controller);
+    }
+
     if ($this->shouldRequireEmailVerification()) {
       $email = $user->loadPrimaryEmail();
       if (!$email) {
@@ -91,11 +94,6 @@ abstract class PhabricatorController extends AphrontController {
           array($request));
         return $this->delegateToController($verify_controller);
       }
-    }
-
-    if ($this->shouldRequireLogin() && !$user->getPHID()) {
-      $login_controller = newv('PhabricatorLoginController', array($request));
-      return $this->delegateToController($login_controller);
     }
 
     if ($this->shouldRequireAdmin() && !$user->getIsAdmin()) {

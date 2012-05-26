@@ -454,8 +454,27 @@ return array(
   'auth.sshkeys.enabled'        => false,
 
   // If true, email addresses must be verified (by clicking a link in an
-  // email) before a user can login. By default, verification is optional.
+  // email) before a user can login. By default, verification is optional
+  // unless 'auth.email-domains' is nonempty (see below).
   'auth.require-email-verification' => false,
+
+  // You can restrict allowed email addresses to certain domains (like
+  // "yourcompany.com") by setting a list of allowed domains here. Users will
+  // only be allowed to register using email addresses at one of the domains,
+  // and will only be able to add new email addresses for these domains. If
+  // you configure this, it implies 'auth.require-email-verification'.
+  //
+  // To configure email domains, set a list of domains like this:
+  //
+  //   array(
+  //     'yourcompany.com',
+  //     'yourcompany.co.uk',
+  //   )
+  //
+  // You should omit the "@" from domains. Note that the domain must match
+  // exactly. If you allow "yourcompany.com", that permits "joe@yourcompany.com"
+  // but rejects "joe@mail.yourcompany.com".
+  'auth.email-domains' => array(),
 
 
 // -- Accounts -------------------------------------------------------------- //

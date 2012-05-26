@@ -11,6 +11,7 @@ phutil_require_module('phabricator', 'applications/people/storage/base');
 phutil_require_module('phabricator', 'infrastructure/env');
 
 phutil_require_module('phutil', 'filesystem');
+phutil_require_module('phutil', 'parser/emailaddress');
 phutil_require_module('phutil', 'utils');
 
 

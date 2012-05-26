@@ -17,7 +17,8 @@
  */
 
 /**
- * @task email Email About Email
+ * @task restrictions   Domain Restrictions
+ * @task email          Email About Email
  */
 final class PhabricatorUserEmail extends PhabricatorUserDAO {
 
@@ -36,6 +37,61 @@ final class PhabricatorUserEmail extends PhabricatorUserDAO {
       $this->setVerificationCode(Filesystem::readRandomCharacters(24));
     }
     return parent::save();
+  }
+
+
+/* -(  Domain Restrictions  )------------------------------------------------ */
+
+
+  /**
+   * @task restrictions
+   */
+  public static function isAllowedAddress($address) {
+    $allowed_domains = PhabricatorEnv::getEnvConfig('auth.email-domains');
+    if (!$allowed_domains) {
+      return true;
+    }
+
+    $addr_obj = new PhutilEmailAddress($address);
+
+    $domain = $addr_obj->getDomainName();
+    if (!$domain) {
+      return false;
+    }
+
+    return in_array($domain, $allowed_domains);
+  }
+
+
+  /**
+   * @task restrictions
+   */
+  public static function describeAllowedAddresses() {
+    $domains = PhabricatorEnv::getEnvConfig('auth.email-domains');
+    if (!$domains) {
+      return null;
+    }
+
+    if (count($domains) == 1) {
+      return 'Email address must be @'.head($domains);
+    } else {
+      return 'Email address must be at one of: '.
+        implode(', ', $domains);
+    }
+  }
+
+
+  /**
+   * Check if this install requires email verification.
+   *
+   * @return bool True if email addresses must be verified.
+   *
+   * @task restrictions
+   */
+  public static function isEmailVerificationRequired() {
+    // NOTE: Configuring required email domains implies required verification.
+    return PhabricatorEnv::getEnvConfig('auth.require-email-verification') ||
+           PhabricatorEnv::getEnvConfig('auth.email-domains');
   }
 
 

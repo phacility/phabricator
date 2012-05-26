@@ -16,9 +16,9 @@ phutil_require_module('phabricator', 'applications/conduit/storage/methodcalllog
 phutil_require_module('phabricator', 'applications/oauthserver/scope');
 phutil_require_module('phabricator', 'applications/oauthserver/server');
 phutil_require_module('phabricator', 'applications/oauthserver/storage/accesstoken');
+phutil_require_module('phabricator', 'applications/people/storage/email');
 phutil_require_module('phabricator', 'applications/people/storage/user');
 phutil_require_module('phabricator', 'infrastructure/accesslog');
-phutil_require_module('phabricator', 'infrastructure/env');
 phutil_require_module('phabricator', 'storage/queryfx');
 phutil_require_module('phabricator', 'view/control/table');
 phutil_require_module('phabricator', 'view/layout/panel');

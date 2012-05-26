@@ -136,6 +136,9 @@ final class PhabricatorPeopleEditController
         if (!strlen($new_email)) {
           $errors[] = 'Email is required.';
           $e_email = 'Required';
+        } else if (!PhabricatorUserEmail::isAllowedAddress($new_email)) {
+          $e_email = 'Invalid';
+          $errors[] = PhabricatorUserEmail::describeAllowedAddresses();
         }
 
         if ($request->getStr('role') == 'agent') {
@@ -249,6 +252,7 @@ final class PhabricatorPeopleEditController
           ->setName('email')
           ->setDisabled($is_immutable)
           ->setValue($new_email)
+          ->setCaption(PhabricatorUserEmail::describeAllowedAddresses())
           ->setError($e_email));
     } else {
       $email = $user->loadPrimaryEmail();

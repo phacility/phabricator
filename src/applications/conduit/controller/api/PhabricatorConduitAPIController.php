@@ -387,7 +387,7 @@ final class PhabricatorConduitAPIController
         'User is disabled.');
     }
 
-    if (PhabricatorEnv::getEnvConfig('auth.require-email-verification')) {
+    if (PhabricatorUserEmail::isEmailVerificationRequired()) {
       $email = $user->loadPrimaryEmail();
       if (!$email) {
         return array(
