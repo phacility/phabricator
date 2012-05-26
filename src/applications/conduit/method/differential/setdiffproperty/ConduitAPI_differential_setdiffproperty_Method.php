@@ -47,7 +47,7 @@ final class ConduitAPI_differential_setdiffproperty_Method
   private static function updateLintStatus($diff_id, array $results) {
     $diff = id(new DifferentialDiff())->load($diff_id);
     if (!$diff) {
-      throw new ConduitException('ERR_BAD_DIFF');
+      throw new ConduitException('ERR_NOT_FOUND');
     }
 
     $has_error = false;
