@@ -39,12 +39,18 @@ JX.behavior('dark-console', function(config) {
   new JX.KeyboardShortcut('`', desc)
     .setHandler(function(manager) {
       var console = JX.DOM.find(document.body, 'table', 'dark-console');
+      var requestLog = JX.DOM.find(
+        document.body,
+        'table',
+        'dark-console-request-log');
 
       config.visible = !config.visible;
       if (config.visible) {
         JX.DOM.show(console);
+        JX.DOM.show(requestLog);
       } else {
         JX.DOM.hide(console);
+        JX.DOM.hide(requestLog);
       }
 
       new JX.Request(config.uri, JX.bag)

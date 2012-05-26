@@ -882,7 +882,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-dark-console' =>
   array(
-    'uri' => '/res/d2518cbf/rsrc/js/application/core/behavior-dark-console.js',
+    'uri' => '/res/9cc84023/rsrc/js/application/core/behavior-dark-console.js',
     'type' => 'js',
     'requires' =>
     array(
