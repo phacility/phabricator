@@ -39,9 +39,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     $data->setCommitMessage($message);
 
     if ($committer) {
-      $details = $data->getCommitDetails();
-      $details['committer'] = $committer;
-      $data->setCommitDetails($details);
+      $data->setCommitDetail('committer', $committer);
     }
 
     $repository = $this->repository;
@@ -60,8 +58,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       $commit->setAuthorPHID($author_phid);
       $commit->save();
     }
-
-    $data->save();
 
     $conn_w = id(new DifferentialRevision())->establishConnection('w');
 
@@ -128,6 +124,8 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
           if ($commit_is_new) {
             $vs_diff = $this->loadChangedByCommit($diff);
             if ($vs_diff) {
+              $data->setCommitDetail('vsDiff', $vs_diff->getID());
+
               $changed_by_commit = PhabricatorEnv::getProductionURI(
                 '/D'.$revision->getID().
                 '?vs='.$vs_diff->getID().
@@ -142,6 +140,8 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
       }
     }
+
+    $data->save();
   }
 
   private function attachToRevision(

@@ -48,4 +48,9 @@ final class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
     return idx($this->commitDetails, $key, $default);
   }
 
+  public function setCommitDetail($key, $value) {
+    $this->commitDetails[$key] = $value;
+    return $this;
+  }
+
 }

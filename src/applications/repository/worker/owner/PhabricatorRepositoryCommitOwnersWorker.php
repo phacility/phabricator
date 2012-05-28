@@ -93,6 +93,10 @@ final class PhabricatorRepositoryCommitOwnersWorker
 
     $reasons = array();
 
+    if ($data->getCommitDetail('vsDiff')) {
+      $reasons[] = "Changed After Revision Was Accepted";
+    }
+
     $commit_author_phid = $data->getCommitDetail('authorPHID');
     if (!$commit_author_phid) {
       $reasons[] = "Commit Author Not Recognized";
