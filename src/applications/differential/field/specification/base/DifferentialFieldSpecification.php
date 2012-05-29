@@ -569,7 +569,7 @@ abstract class DifferentialFieldSpecification {
 
 
   /**
-   * Specify which @{class:PhabricatorObjectHandles} need to be loaded for your
+   * Specify which @{class:PhabricatorObjectHandle}s need to be loaded for your
    * field to render correctly.
    *
    * This is a convenience method which makes the handles available on all
@@ -590,7 +590,7 @@ abstract class DifferentialFieldSpecification {
 
 
   /**
-   * Specify which @{class:PhabricatorObjectHandles} need to be loaded for your
+   * Specify which @{class:PhabricatorObjectHandle}s need to be loaded for your
    * field to render correctly on the view interface.
    *
    * This is a more specific version of @{method:getRequiredHandlePHIDs} which
@@ -606,7 +606,7 @@ abstract class DifferentialFieldSpecification {
 
 
   /**
-   * Specify which @{class:PhabricatorObjectHandles} need to be loaded for your
+   * Specify which @{class:PhabricatorObjectHandle}s need to be loaded for your
    * field to render correctly on the list interface.
    *
    * This is a more specific version of @{method:getRequiredHandlePHIDs} which
@@ -624,7 +624,7 @@ abstract class DifferentialFieldSpecification {
 
 
   /**
-   * Specify which @{class:PhabricatorObjectHandles} need to be loaded for your
+   * Specify which @{class:PhabricatorObjectHandle}s need to be loaded for your
    * field to render correctly on the edit interface.
    *
    * This is a more specific version of @{method:getRequiredHandlePHIDs} which
@@ -639,7 +639,7 @@ abstract class DifferentialFieldSpecification {
   }
 
   /**
-   * Specify which @{class:PhabricatorObjectHandles} need to be loaded for your
+   * Specify which @{class:PhabricatorObjectHandle}s need to be loaded for your
    * field to render correctly on the commit message interface.
    *
    * This is a more specific version of @{method:getRequiredHandlePHIDs} which
