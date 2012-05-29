@@ -86,13 +86,12 @@ final class DifferentialLintFieldSpecification
           $name = idx($message, 'name');
           $description = idx($message, 'description');
 
-          $line_link = 'line '.phutil_escape_html($line);
+          $line_link = 'line '.intval($line);
           if (isset($path_changesets[$path])) {
-            // TODO: Load very large diff before linking to line.
             $line_link = phutil_render_tag(
               'a',
               array(
-                'href' => '#C'.$path_changesets[$path].'NL'.$line,
+                'href' => '#C'.$path_changesets[$path].'NL'.max(1, $line),
               ),
               $line_link);
           }

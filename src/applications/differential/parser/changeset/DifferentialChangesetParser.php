@@ -1086,6 +1086,7 @@ final class DifferentialChangesetParser {
       foreach ($this->comments as $comment) {
         $final = $comment->getLineNumber() +
                  $comment->getLineLength();
+        $final = max(1, $final);
         if ($this->isCommentOnRightSideWhenDisplayed($comment)) {
           $new_comments[$final][] = $comment;
         } else {
