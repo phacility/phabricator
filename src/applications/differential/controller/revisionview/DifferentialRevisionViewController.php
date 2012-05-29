@@ -71,6 +71,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $target_manual,
       array(
         'local:commits',
+        'arc:lint',
         'arc:unit',
       ));
 
@@ -177,8 +178,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $warning->setSeverity(AphrontErrorView::SEVERITY_WARNING);
       $warning->setWidth(AphrontErrorView::WIDTH_WIDE);
       $warning->appendChild(
-        "<p>This diff is very large and affects {$count} files. Use ".
-        "Table of Contents to open files in a standalone view. ".
+        "<p>This diff is very large and affects {$count} files. Load ".
+        "each file individually. ".
         "<strong>".
           phutil_render_tag(
             'a',
@@ -192,6 +193,23 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $warning = $warning->render();
 
       $visible_changesets = array();
+      foreach ($inlines as $inline) {
+        $changeset_id = $inline->getChangesetID();
+        if (isset($changesets[$changeset_id])) {
+          $visible_changesets[$changeset_id] = $changesets[$changeset_id];
+        }
+      }
+
+      if (!empty($props['arc:lint'])) {
+        $changeset_paths = mpull($changesets, null, 'getFilename');
+        foreach ($props['arc:lint'] as $lint) {
+          $changeset = idx($changeset_paths, $lint['path']);
+          if ($changeset) {
+            $visible_changesets[$changeset->getID()] = $changeset;
+          }
+        }
+      }
+
     } else {
       $warning = null;
       $visible_changesets = $changesets;

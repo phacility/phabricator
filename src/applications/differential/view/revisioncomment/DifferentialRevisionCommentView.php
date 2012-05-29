@@ -294,7 +294,6 @@ final class DifferentialRevisionCommentView extends AphrontView {
           $item['href'] =
             'D'.$this->comment->getRevisionID().
             '?id='.$diff_id.
-            '&large=true'.
             '#inline-'.$inline->getID();
         }
 
