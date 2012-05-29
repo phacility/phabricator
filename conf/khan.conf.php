@@ -9,6 +9,11 @@ return array(
   // Use "https://" if you have SSL. See below for some notes.
   'phabricator.base-uri' => 'http://phabricator.khanacademy.org/',
 
+  // Only allow people at khanacademy.org to register.
+  'auth.email-domains' => array(
+    'khanacademy.org',
+  ),		       
+
   // Allow, but don't require, a user to say how they did testing.
   'differential.require-test-plan-field' => false,
 
