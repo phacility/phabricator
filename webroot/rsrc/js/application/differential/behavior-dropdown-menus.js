@@ -10,25 +10,24 @@
 
 JX.behavior('differential-dropdown-menus', function(config) {
 
-  function build_menu(button, data) {
-
-    function show_more() {
-      var container = JX.$(data.containerID);
-      var nodes = JX.DOM.scry(container, 'tr', 'context-target');
-      for (var ii = 0; ii < nodes.length; ii++) {
-        var show = JX.DOM.scry(nodes[ii], 'a', 'show-more');
-        for (var jj = 0; jj < show.length; jj++) {
-          if (JX.Stratcom.getData(show[jj]).type != 'all') {
-            continue;
-          }
-          var event_data = {
-            context : nodes[ii],
-            show : show[jj]
-          };
-          JX.Stratcom.invoke('differential-reveal-context', null, event_data);
+  function show_more(container) {
+    var nodes = JX.DOM.scry(container, 'tr', 'context-target');
+    for (var ii = 0; ii < nodes.length; ii++) {
+      var show = JX.DOM.scry(nodes[ii], 'a', 'show-more');
+      for (var jj = 0; jj < show.length; jj++) {
+        if (JX.Stratcom.getData(show[jj]).type != 'all') {
+          continue;
         }
+        var event_data = {
+          context : nodes[ii],
+          show : show[jj]
+        };
+        JX.Stratcom.invoke('differential-reveal-context', null, event_data);
       }
     }
+  }
+
+  function build_menu(button, data) {
 
     function link_to(name, uri) {
       var item = new JX.PhabricatorMenuItem(
@@ -39,7 +38,9 @@ JX.behavior('differential-dropdown-menus', function(config) {
       return item;
     }
 
-    var reveal_item = new JX.PhabricatorMenuItem('', show_more);
+    var reveal_item = new JX.PhabricatorMenuItem('', function () {
+      show_more(JX.$(data.containerID));
+    });
 
     var diffusion_item;
     if (data.diffusionURI) {
@@ -99,5 +100,19 @@ JX.behavior('differential-dropdown-menus', function(config) {
   for (var ii = 0; ii < buttons.length; ii++) {
     build_menu(buttons[ii], JX.Stratcom.getData(buttons[ii]));
   }
+
+  JX.Stratcom.listen(
+    'click',
+    'differential-reveal-all',
+    function(e) {
+      var containers = JX.DOM.scry(
+        JX.$('differential-review-stage'),
+        'div',
+        'differential-changeset');
+      for (var i=0; i < containers.length; i++) {
+        show_more(containers[i]);
+      }
+      e.kill();
+    });
 
 });

@@ -24,8 +24,10 @@
   color: #444444;
 }
 
+.differential-toc-reveal-all,
 .differential-toc-edit-all {
   float: right;
+  margin-left: .25em;
 }
 
 .diff-star-none {

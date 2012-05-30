@@ -213,10 +213,21 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
       }
     }
 
+    $reveal_link = javelin_render_tag(
+      'a',
+      array(
+        'sigil' => 'differential-reveal-all',
+        'mustcapture' => true,
+        'class' => 'button differential-toc-reveal-all',
+      ),
+      'Show All Context'
+    );
+
     return
       '<div id="differential-review-toc" '.
         'class="differential-toc differential-panel">'.
         $editor_link.
+        $reveal_link.
         '<h1>Table of Contents</h1>'.
         '<table>'.
           '<tr>'.
