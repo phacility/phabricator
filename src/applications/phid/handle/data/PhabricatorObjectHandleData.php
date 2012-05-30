@@ -40,7 +40,7 @@ final class PhabricatorObjectHandleData {
     foreach ($types as $type => $phids) {
       switch ($type) {
         case PhabricatorPHIDConstants::PHID_TYPE_USER:
-          $user_dao = newv('PhabricatorUser', array());
+          $user_dao = new PhabricatorUser();
           $users = $user_dao->loadAllWhere(
             'phid in (%Ls)',
             $phids);
@@ -49,13 +49,13 @@ final class PhabricatorObjectHandleData {
           }
           break;
         case PhabricatorPHIDConstants::PHID_TYPE_CMIT:
-          $commit_dao = newv('PhabricatorRepositoryCommit', array());
+          $commit_dao = new PhabricatorRepositoryCommit();
           $commits = $commit_dao->loadAllWhere(
             'phid IN (%Ls)',
             $phids);
           $commit_data = array();
           if ($commits) {
-            $data_dao = newv('PhabricatorRepositoryCommitData', array());
+            $data_dao = new PhabricatorRepositoryCommitData();
             $commit_data = $data_dao->loadAllWhere(
               'commitID IN (%Ld)',
               mpull($commits, 'getID'));
@@ -73,7 +73,7 @@ final class PhabricatorObjectHandleData {
           }
           break;
         case PhabricatorPHIDConstants::PHID_TYPE_TASK:
-          $task_dao = newv('ManiphestTask', array());
+          $task_dao = new ManiphestTask();
           $tasks = $task_dao->loadAllWhere(
             'phid IN (%Ls)',
             $phids);
@@ -82,7 +82,7 @@ final class PhabricatorObjectHandleData {
           }
           break;
         case PhabricatorPHIDConstants::PHID_TYPE_DREV:
-          $revision_dao = newv('DifferentialRevision', array());
+          $revision_dao = new DifferentialRevision();
           $revisions = $revision_dao->loadAllWhere(
             'phid IN (%Ls)',
             $phids);
@@ -131,9 +131,7 @@ final class PhabricatorObjectHandleData {
           }
           break;
         case PhabricatorPHIDConstants::PHID_TYPE_USER:
-          $class = 'PhabricatorUser';
-          PhutilSymbolLoader::loadClass($class);
-          $object = newv($class, array());
+          $object = new PhabricatorUser();
 
           $users = $object->loadAllWhere('phid IN (%Ls)', $phids);
           $users = mpull($users, null, 'getPHID');
@@ -183,10 +181,7 @@ final class PhabricatorObjectHandleData {
           }
           break;
         case PhabricatorPHIDConstants::PHID_TYPE_MLST:
-          $class = 'PhabricatorMetaMTAMailingList';
-
-          PhutilSymbolLoader::loadClass($class);
-          $object = newv($class, array());
+          $object = new PhabricatorMetaMTAMailingList();
 
           $lists = $object->loadAllWhere('phid IN (%Ls)', $phids);
           $lists = mpull($lists, null, 'getPHID');
@@ -208,9 +203,7 @@ final class PhabricatorObjectHandleData {
           }
           break;
         case PhabricatorPHIDConstants::PHID_TYPE_DREV:
-          $class = 'DifferentialRevision';
-          PhutilSymbolLoader::loadClass($class);
-          $object = newv($class, array());
+          $object = new DifferentialRevision();
 
           $revs = $object->loadAllWhere('phid in (%Ls)', $phids);
           $revs = mpull($revs, null, 'getPHID');
@@ -240,9 +233,7 @@ final class PhabricatorObjectHandleData {
           }
           break;
         case PhabricatorPHIDConstants::PHID_TYPE_CMIT:
-          $class = 'PhabricatorRepositoryCommit';
-          PhutilSymbolLoader::loadClass($class);
-          $object = newv($class, array());
+          $object = new PhabricatorRepositoryCommit();
 
           $commits = $object->loadAllWhere('phid in (%Ls)', $phids);
           $commits = mpull($commits, null, 'getPHID');
@@ -287,9 +278,7 @@ final class PhabricatorObjectHandleData {
           }
           break;
         case PhabricatorPHIDConstants::PHID_TYPE_TASK:
-          $class = 'ManiphestTask';
-          PhutilSymbolLoader::loadClass($class);
-          $object = newv($class, array());
+          $object = new ManiphestTask();
 
           $tasks = $object->loadAllWhere('phid in (%Ls)', $phids);
           $tasks = mpull($tasks, null, 'getPHID');
@@ -316,9 +305,7 @@ final class PhabricatorObjectHandleData {
           }
           break;
         case PhabricatorPHIDConstants::PHID_TYPE_FILE:
-          $class = 'PhabricatorFile';
-          PhutilSymbolLoader::loadClass($class);
-          $object = newv($class, array());
+          $object = new PhabricatorFile();
 
           $files = $object->loadAllWhere('phid IN (%Ls)', $phids);
           $files = mpull($files, null, 'getPHID');
@@ -339,9 +326,7 @@ final class PhabricatorObjectHandleData {
           }
           break;
         case PhabricatorPHIDConstants::PHID_TYPE_PROJ:
-          $class = 'PhabricatorProject';
-          PhutilSymbolLoader::loadClass($class);
-          $object = newv($class, array());
+          $object = new PhabricatorProject();
 
           $projects = $object->loadAllWhere('phid IN (%Ls)', $phids);
           $projects = mpull($projects, null, 'getPHID');
@@ -362,9 +347,7 @@ final class PhabricatorObjectHandleData {
           }
           break;
         case PhabricatorPHIDConstants::PHID_TYPE_REPO:
-          $class = 'PhabricatorRepository';
-          PhutilSymbolLoader::loadClass($class);
-          $object = newv($class, array());
+          $object = new PhabricatorRepository();
 
           $repositories = $object->loadAllWhere('phid in (%Ls)', $phids);
           $repositories = mpull($repositories, null, 'getPHID');
@@ -385,9 +368,7 @@ final class PhabricatorObjectHandleData {
           }
           break;
         case PhabricatorPHIDConstants::PHID_TYPE_OPKG:
-          $class = 'PhabricatorOwnersPackage';
-          PhutilSymbolLoader::loadClass($class);
-          $object = newv($class, array());
+          $object = new PhabricatorOwnersPackage();
 
           $packages = $object->loadAllWhere('phid in (%Ls)', $phids);
           $packages = mpull($packages, null, 'getPHID');
@@ -408,7 +389,7 @@ final class PhabricatorObjectHandleData {
           }
           break;
         case PhabricatorPHIDConstants::PHID_TYPE_APRJ:
-          $project_dao = newv('PhabricatorRepositoryArcanistProject', array());
+          $project_dao = new PhabricatorRepositoryArcanistProject();
 
           $projects = $project_dao->loadAllWhere(
             'phid IN (%Ls)',
@@ -429,8 +410,8 @@ final class PhabricatorObjectHandleData {
           }
           break;
         case PhabricatorPHIDConstants::PHID_TYPE_WIKI:
-          $document_dao = newv('PhrictionDocument', array());
-          $content_dao  = newv('PhrictionContent', array());
+          $document_dao = new PhrictionDocument();
+          $content_dao  = new PhrictionContent();
 
           $conn = $document_dao->establishConnection('r');
           $documents = queryfx_all(
@@ -467,7 +448,6 @@ final class PhabricatorObjectHandleData {
           }
 
           if ($loader) {
-            PhutilSymbolLoader::loadClass($loader);
             $object = newv($loader, array());
             $handles += $object->loadHandles($phids);
             break;

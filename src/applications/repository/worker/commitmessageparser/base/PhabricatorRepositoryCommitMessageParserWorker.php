@@ -48,7 +48,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       'PhabricatorRepositoryDefaultCommitMessageDetailParser');
 
     if ($detail_parser) {
-      PhutilSymbolLoader::loadClass($detail_parser);
       $parser_obj = newv($detail_parser, array($commit, $data));
       $parser_obj->parseCommitDetails();
     }

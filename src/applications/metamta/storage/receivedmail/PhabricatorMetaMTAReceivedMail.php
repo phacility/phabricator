@@ -233,13 +233,13 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     $class_obj = null;
     switch ($receiver_type) {
       case 'T':
-        $class_obj = newv('ManiphestTask', array());
+        $class_obj = new ManiphestTask();
         break;
       case 'D':
-        $class_obj = newv('DifferentialRevision', array());
+        $class_obj = new DifferentialRevision();
         break;
       case 'C':
-        $class_obj = newv('PhabricatorRepositoryCommit', array());
+        $class_obj = new PhabricatorRepositoryCommit();
         break;
       default:
         return null;

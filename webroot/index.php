@@ -76,7 +76,6 @@ try {
   $conf = phabricator_read_config_file($env);
   $conf['phabricator.env'] = $env;
 
-  phutil_require_module('phabricator', 'infrastructure/env');
   PhabricatorEnv::setEnvConfig($conf);
 
   // This is the earliest we can get away with this, we need env config first.
@@ -91,10 +90,7 @@ try {
       ));
   }
 
-  phutil_require_module('phabricator', 'aphront/console/plugin/xhprof/api');
   DarkConsoleXHProfPluginAPI::hookProfiler();
-
-  phutil_require_module('phabricator', 'aphront/console/plugin/errorlog/api');
 
   PhutilErrorHandler::initialize();
 
@@ -106,8 +102,6 @@ $tz = PhabricatorEnv::getEnvConfig('phabricator.timezone');
 if ($tz) {
   date_default_timezone_set($tz);
 }
-phutil_require_module('phabricator', 'aphront/console/plugin/errorlog/api');
-phutil_require_module('phutil', 'error');
 
 PhutilErrorHandler::setErrorListener(
   array('DarkConsoleErrorLogPluginAPI', 'handleErrors'));

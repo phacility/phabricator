@@ -20,9 +20,6 @@
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
-phutil_require_module('phutil', 'console');
-phutil_require_module('phutil', 'future/exec');
-
 PhutilServiceProfiler::installEchoListener();
 
 $allocator = new DrydockAllocator();

@@ -51,17 +51,14 @@ abstract class DiffusionBranchQuery {
 
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        $class = 'DiffusionGitBranchQuery';
+        $query = new DiffusionGitBranchQuery();
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $class = 'DiffusionMercurialBranchQuery';
+        $query = new DiffusionMercurialBranchQuery();
         break;
       default:
         throw new Exception("Unsupported VCS!");
     }
-
-    PhutilSymbolLoader::loadClass($class);
-    $query = new $class();
 
     $query->request = $request;
 

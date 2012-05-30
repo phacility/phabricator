@@ -227,7 +227,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
       // TODO: build a better version of the action links and deprecate the
       // whole DifferentialRevisionDetailRenderer class.
-      PhutilSymbolLoader::loadClass($custom_renderer_class);
       $custom_renderer =
         newv($custom_renderer_class, array());
       $actions = array_merge(

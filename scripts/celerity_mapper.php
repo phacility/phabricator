@@ -155,11 +155,6 @@ if ($argc != 2) {
   exit(1);
 }
 
-phutil_require_module('phutil', 'filesystem');
-phutil_require_module('phutil', 'filesystem/filefinder');
-phutil_require_module('phutil', 'future/exec');
-phutil_require_module('phutil', 'parser/docblock');
-
 $root = Filesystem::resolvePath($argv[1]);
 
 $resource_hash = PhabricatorEnv::getEnvConfig('celerity.resource-hash');

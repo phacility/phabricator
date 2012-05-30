@@ -20,8 +20,6 @@
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
-phutil_require_module('phutil', 'console');
-
 if (ctags_check_executable() == false) {
   echo phutil_console_format(
     "Could not find Exuberant ctags. Make sure it is installed and\n".

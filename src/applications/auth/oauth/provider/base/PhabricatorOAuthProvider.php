@@ -155,7 +155,6 @@ abstract class PhabricatorOAuthProvider {
       default:
         throw new Exception('Unknown OAuth provider.');
     }
-    PhutilSymbolLoader::loadClass($class);
     return newv($class, array());
   }
 

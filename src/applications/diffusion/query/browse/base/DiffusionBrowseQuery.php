@@ -44,20 +44,17 @@ abstract class DiffusionBrowseQuery {
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         // TODO: Verify local-path?
-        $class = 'DiffusionGitBrowseQuery';
+        $query = new DiffusionGitBrowseQuery();
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        $class = 'DiffusionMercurialBrowseQuery';
+        $query = new DiffusionMercurialBrowseQuery();
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        $class = 'DiffusionSvnBrowseQuery';
+        $query = new DiffusionSvnBrowseQuery();
         break;
       default:
         throw new Exception("Unsupported VCS!");
     }
-
-    PhutilSymbolLoader::loadClass($class);
-    $query = new $class();
 
     $query->request = $request;
 

@@ -2,7 +2,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,6 @@ if ($argc > 1) {
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 require_once $root.'/externals/mimemailparser/MimeMailParser.class.php';
-
-phutil_require_module(
-  'phabricator',
-  'applications/metamta/storage/receivedmail');
-phutil_require_module(
-  'phabricator',
-  'applications/files/storage/file');
 
 $parser = new MimeMailParser();
 $parser->setText(file_get_contents('php://stdin'));

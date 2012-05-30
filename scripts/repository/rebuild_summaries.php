@@ -2,7 +2,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,6 @@
 
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
-
-phutil_require_module('phutil', 'symbols');
-PhutilSymbolLoader::loadClass('PhabricatorRepository');
-PhutilSymbolLoader::loadClass('PhabricatorRepositoryCommit');
 
 $commit = new PhabricatorRepositoryCommit();
 

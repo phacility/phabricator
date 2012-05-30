@@ -20,7 +20,6 @@
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
-phutil_require_module('phabricator', 'infrastructure/daemon/control');
 $control = new PhabricatorDaemonControl();
 
 must_have_extension('pcntl');
@@ -208,10 +207,6 @@ switch ($command) {
 }
 
 function phd_load_tracked_repositories() {
-  phutil_require_module(
-    'phabricator',
-    'applications/repository/storage/repository');
-
   $repositories = id(new PhabricatorRepository())->loadAll();
   foreach ($repositories as $key => $repository) {
     if (!$repository->isTracked()) {

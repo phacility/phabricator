@@ -33,6 +33,9 @@ final class PhabricatorMailImplementationAmazonSESAdapter
     return false;
   }
 
+  /**
+   * @phutil-external-symbol class SimpleEmailService
+   */
   public function executeSend($body) {
     $key = PhabricatorEnv::getEnvConfig('amazon-ses.access-key');
     $secret = PhabricatorEnv::getEnvConfig('amazon-ses.secret-key');
@@ -41,7 +44,7 @@ final class PhabricatorMailImplementationAmazonSESAdapter
     $root = dirname($root);
     require_once $root.'/externals/amazon-ses/ses.php';
 
-    $service = newv('SimpleEmailService', array($key, $secret));
+    $service = new SimpleEmailService($key, $secret);
     $service->enableUseExceptions(true);
     return $service->sendRawEmail($body);
   }

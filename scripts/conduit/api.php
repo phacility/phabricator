@@ -20,8 +20,6 @@
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
-phutil_require_module('phutil', 'console');
-
 $time_start = microtime(true);
 
 if ($argc !== 3) {

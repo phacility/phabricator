@@ -58,8 +58,7 @@ final class PhabricatorSetup {
       // of security so warn even if things look OK.
 
       try {
-        phutil_require_module('phutil', 'utils');
-        $open_libphutil = true;
+        $open_libphutil = class_exists('Future');
       } catch (Exception $ex) {
         $message = $ex->getMessage();
         self::write("Unable to load modules from libphutil: {$message}\n");
@@ -67,8 +66,7 @@ final class PhabricatorSetup {
       }
 
       try {
-        phutil_require_module('arcanist', 'workflow/base');
-        $open_arcanist = true;
+        $open_arcanist = class_exists('ArcanistDiffParser');
       } catch (Exception $ex) {
         $message = $ex->getMessage();
         self::write("Unable to load modules from Arcanist: {$message}\n");

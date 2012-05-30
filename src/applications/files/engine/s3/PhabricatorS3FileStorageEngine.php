@@ -106,6 +106,7 @@ final class PhabricatorS3FileStorageEngine
    * Create a new S3 API object.
    *
    * @task internal
+   * @phutil-external-symbol class S3
    */
   private function newS3API() {
     $libroot = dirname(phutil_get_library_root('phabricator'));
@@ -119,13 +120,7 @@ final class PhabricatorS3FileStorageEngine
         "Specify 'amazon-s3.access-key' and 'amazon-s3.secret-key'!");
     }
 
-    $s3 = newv(
-      'S3',
-      array(
-        $access_key,
-        $secret_key,
-        $use_ssl = true,
-      ));
+    $s3 = new S3($access_key, $secret_key, $use_ssl = true);
 
     $s3->setExceptions(true);
 

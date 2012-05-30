@@ -42,7 +42,6 @@ $env = isset($_SERVER['PHABRICATOR_ENV'])
   ? $_SERVER['PHABRICATOR_ENV']
   : getenv('PHABRICATOR_ENV');
 if (!$env) {
-  phutil_require_module('phutil', 'console');
   echo phutil_console_wrap(
     phutil_console_format(
       "**ERROR**: PHABRICATOR_ENV Not Set\n\n".
@@ -59,7 +58,6 @@ if (!$env) {
 $conf = phabricator_read_config_file($env);
 $conf['phabricator.env'] = $env;
 
-phutil_require_module('phabricator', 'infrastructure/env');
 PhabricatorEnv::setEnvConfig($conf);
 
 phutil_load_library('arcanist/src');

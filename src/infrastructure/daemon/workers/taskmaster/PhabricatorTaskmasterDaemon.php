@@ -79,8 +79,8 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
           $data = idx($task_data, $task->getID());
           $class = $task->getTaskClass();
           try {
-            PhutilSymbolLoader::loadClass($class);
-            if (!is_subclass_of($class, 'PhabricatorWorker')) {
+            if (!class_exists($class) ||
+                !is_subclass_of($class, 'PhabricatorWorker')) {
               throw new Exception(
                 "Task class '{$class}' does not extend PhabricatorWorker.");
             }

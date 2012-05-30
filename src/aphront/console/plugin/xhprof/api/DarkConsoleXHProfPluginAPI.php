@@ -70,7 +70,6 @@ final class DarkConsoleXHProfPluginAPI {
       $data = xhprof_disable();
       $data = serialize($data);
       $file_class = 'PhabricatorFile';
-      PhutilSymbolLoader::loadClass($file_class);
 
       // Since these happen on GET we can't do guarded writes.
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();

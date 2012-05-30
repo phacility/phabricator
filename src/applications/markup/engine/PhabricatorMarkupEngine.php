@@ -118,7 +118,6 @@ class PhabricatorMarkupEngine {
     $custom_rule_classes = $options['custom-inline'];
     if ($custom_rule_classes) {
       foreach ($custom_rule_classes as $custom_rule_class) {
-        PhutilSymbolLoader::loadClass($custom_rule_class);
         $rules[] = newv($custom_rule_class, array());
       }
     }
@@ -167,7 +166,6 @@ class PhabricatorMarkupEngine {
     $custom_block_rule_classes = $options['custom-block'];
     if ($custom_block_rule_classes) {
       foreach ($custom_block_rule_classes as $custom_block_rule_class) {
-        PhutilSymbolLoader::loadClass($custom_block_rule_class);
         $blocks[] = newv($custom_block_rule_class, array());
       }
     }

@@ -20,8 +20,6 @@
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
-phutil_require_module('phutil', 'console');
-
 $is_all = false;
 $reparse_message = false;
 $reparse_change = false;

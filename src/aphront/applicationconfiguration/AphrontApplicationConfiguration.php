@@ -74,7 +74,6 @@ abstract class AphrontApplicationConfiguration {
       return $this->build404Controller();
     }
 
-    PhutilSymbolLoader::loadClass($controller_class);
     $controller = newv($controller_class, array($request));
 
     return array($controller, $uri_data);

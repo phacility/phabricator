@@ -20,9 +20,6 @@
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
-phutil_require_module('phutil', 'console');
-phutil_require_module('phutil', 'future/exec');
-
 if (empty($argv[1])) {
   echo "usage: test_connection.php <repository_callsign>\n";
   exit(1);

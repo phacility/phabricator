@@ -63,9 +63,8 @@ abstract class PhabricatorController extends AphrontController {
     $request->setUser($user);
 
     if ($user->getIsDisabled() && $this->shouldRequireEnabledUser()) {
-      $disabled_user_controller = newv(
-        'PhabricatorDisabledUserController',
-        array($request));
+      $disabled_user_controller = new PhabricatorDisabledUserController(
+        $request);
       return $this->delegateToController($disabled_user_controller);
     }
 
@@ -78,7 +77,7 @@ abstract class PhabricatorController extends AphrontController {
     }
 
     if ($this->shouldRequireLogin() && !$user->getPHID()) {
-      $login_controller = newv('PhabricatorLoginController', array($request));
+      $login_controller = new PhabricatorLoginController($request);
       return $this->delegateToController($login_controller);
     }
 
@@ -89,9 +88,7 @@ abstract class PhabricatorController extends AphrontController {
           "No primary email address associated with this account!");
       }
       if (!$email->getIsVerified()) {
-        $verify_controller = newv(
-          'PhabricatorMustVerifyEmailController',
-          array($request));
+        $verify_controller = new PhabricatorMustVerifyEmailController($request);
         return $this->delegateToController($verify_controller);
       }
     }
