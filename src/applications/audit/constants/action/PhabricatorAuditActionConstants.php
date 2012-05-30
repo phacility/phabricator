@@ -29,8 +29,8 @@ final class PhabricatorAuditActionConstants {
   public static function getActionNameMap() {
     static $map = array(
       self::COMMENT => 'Comment',
-      self::CONCERN => 'Raise Concern',
-      self::ACCEPT  => 'Accept Commit',
+      self::CONCERN => "Raise Concern \xE2\x9C\x98",
+      self::ACCEPT  => "Accept Commit \xE2\x9C\x94",
       self::RESIGN  => 'Resign from Audit',
       self::CLOSE   => 'Close Audit',
       self::ADD_CCS => 'Add CCs',
