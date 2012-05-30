@@ -23,9 +23,11 @@ final class DiffusionSvnRawDiffQuery extends DiffusionRawDiffQuery {
     $repository = $drequest->getRepository();
 
     $commit = $drequest->getCommit();
+    $root = phutil_get_library_root('phabricator');
 
     $future = $repository->getRemoteCommandFuture(
-      'diff --diff-cmd diff -x -U%d -c %d %s%s@',
+      'diff --diff-cmd %s -x -U%d -c %d %s%s@',
+      $root.'/../scripts/repository/binary_safe_diff.sh',
       $this->getLinesOfContext(),
       $commit,
       $repository->getRemoteURI(),
