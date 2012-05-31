@@ -973,6 +973,11 @@ return array(
   // "phd launch <N> taskmaster".
   'phd.start-taskmasters' => 4,
 
+  // Path to custom celerity resource map. Absolute or relative to
+  // 'phabricator/src'. Defaults to '__celerity_resource_map__.php'.
+  // See also `scripts/celerity_mapper.php`.
+  'celerity.resource-path' => null,
+
   // This value is an input to the hash function when building resource hashes.
   // It has no security value, but if you accidentally poison user caches (by
   // pushing a bad patch or having something go wrong with a CDN, e.g.) you can

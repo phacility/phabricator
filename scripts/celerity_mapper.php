@@ -149,27 +149,54 @@ $package_spec = array(
 
 require_once dirname(__FILE__).'/__init_script__.php';
 
-if ($argc != 2) {
-  $self = basename($argv[0]);
-  echo "usage: {$self} <webroot>\n";
-  exit(1);
-}
+$args = new PhutilArgumentParser($argv);
+$args->setTagline('map static resources');
+$args->setSynopsis(
+  "**celerity_mapper.php** [--output __path__] [--with-custom] <webroot>");
+$args->parse(
+  array(
+    array(
+      'name'     => 'output',
+      'param'    => 'path',
+      'default'  => '../src/__celerity_resource_map__.php',
+      'help'     => "Set the path for resource map. It is usually useful for ".
+                    "'celerity.resource-path' configuration.",
+    ),
+    array(
+      'name'     => 'with-custom',
+      'help'     => 'Include resources in <webroot>/rsrc/custom/.',
+    ),
+    array(
+      'name'     => 'webroot',
+      'wildcard' => true,
+    ),
+  ));
 
-$root = Filesystem::resolvePath($argv[1]);
+$root = $args->getArg('webroot');
+if (count($root) != 1 || !is_dir(reset($root))) {
+  $args->printHelpAndExit();
+}
+$root = Filesystem::resolvePath(reset($root));
+
+$celerity_path = Filesystem::resolvePath($args->getArg('output'), $root);
+$with_custom = $args->getArg('with-custom');
 
 $resource_hash = PhabricatorEnv::getEnvConfig('celerity.resource-hash');
 $runtime_map = array();
 
 echo "Finding raw static resources...\n";
-$raw_files = id(new FileFinder($root))
+$finder = id(new FileFinder($root))
   ->withType('f')
   ->withSuffix('png')
   ->withSuffix('jpg')
   ->withSuffix('gif')
   ->withSuffix('swf')
   ->withFollowSymlinks(true)
-  ->setGenerateChecksums(true)
-  ->find();
+  ->setGenerateChecksums(true);
+if (!$with_custom) {
+  $finder->excludePath('./rsrc/custom');
+}
+$raw_files = $finder->find();
 
 echo "Processing ".count($raw_files)." files";
 foreach ($raw_files as $path => $hash) {
@@ -194,13 +221,16 @@ $xformer = id(new CelerityResourceTransformer())
   ->setRawResourceMap($runtime_map);
 
 echo "Finding transformable static resources...\n";
-$files = id(new FileFinder($root))
+$finder = id(new FileFinder($root))
   ->withType('f')
   ->withSuffix('js')
   ->withSuffix('css')
   ->withFollowSymlinks(true)
-  ->setGenerateChecksums(true)
-  ->find();
+  ->setGenerateChecksums(true);
+if (!$with_custom) {
+  $finder->excludePath('./rsrc/custom');
+}
+$files = $finder->find();
 
 echo "Processing ".count($files)." files";
 
@@ -345,7 +375,5 @@ celerity_register_resource_map({$runtime_map}, {$package_map});
 EOFILE;
 
 echo "Writing map...\n";
-Filesystem::writeFile(
-  $root.'/../src/__celerity_resource_map__.php',
-  $resource_map);
+Filesystem::writeFile($celerity_path, $resource_map);
 echo "Done.\n";
