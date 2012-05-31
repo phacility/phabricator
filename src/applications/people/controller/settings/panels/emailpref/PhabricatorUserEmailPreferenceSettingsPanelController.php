@@ -143,7 +143,7 @@ final class PhabricatorUserEmailPreferenceSettingsPanelController
             ->setLabel('Vary Subjects')
             ->setName($pref_vary)
             ->setCaption(
-              'This option adds more information email subjects, but may '.
+              'This option adds more information to email subjects, but may '.
               'break threading in some clients.')
             ->setOptions(
               array(
