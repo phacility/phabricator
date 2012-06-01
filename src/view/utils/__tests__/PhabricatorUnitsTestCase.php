@@ -18,6 +18,9 @@
 
 final class PhabricatorUnitsTestCase extends PhabricatorTestCase {
 
+  // NOTE: Keep tests below PHP_INT_MAX on 32-bit systems, since if you write
+  // larger numeric literals they'll evaluate to nonsense.
+
   public function testByteFormatting() {
     $tests = array(
       1               => '1 B',
@@ -26,7 +29,6 @@ final class PhabricatorUnitsTestCase extends PhabricatorTestCase {
       10000000        => '10 MB',
       100000000       => '100 MB',
       1000000000      => '1 GB',
-      1000000000000   => '1 TB',
       999             => '999 B',
     );
 
@@ -48,7 +50,6 @@ final class PhabricatorUnitsTestCase extends PhabricatorTestCase {
       '1KB'           => 1000,
       '1MB'           => 1000000,
       '1GB'           => 1000000000,
-      '1TB'           => 1000000000000,
       '1.5M'          => 1500000,
       '1 000'         => 1000,
       '1,234.56 KB'   => 1234560,
