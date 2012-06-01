@@ -9,7 +9,8 @@ Arcanist ships with a number of linters which you may want to reuse in whole
 or in part in other projects. This document explains how to customize existing
 linters for use in new engines.
 
-First, you should set up a custom engine by following the steps in
+First, you should set up an engine by following the instructions in
+@{article:Arcanist User Guide: Lint} and possibly
 @{article:Arcanist User Guide: Customizing Lint, Unit Tests and Workflows}.
 Then, follow this guide to customize linters.
 
@@ -17,7 +18,7 @@ Then, follow this guide to customize linters.
 
 You should customize linters by configuring or composing them, not by extending
 them -- their implementations are not necessarily stable. If a linter's
-configuration options aren't flexible enough to meet your needs, a patch
+configuration options aren't flexible enough to meet your needs, sending a patch
 which improves its configurability is better than one that makes it
 nonfinal.
 

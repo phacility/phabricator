@@ -5,7 +5,7 @@ Explains how to build new classes to control how Arcanist behaves.
 
 = Overview =
 
-Arcanist has some basic configuration options available in the ##.arcconfig##
+Arcanist has some basic configuration options available in the `.arcconfig`
 file (see @{article:Arcanist User Guide: Configuring a New Project}), but it
 can't handle everything. If you want to customize Arcanist at a deeper level,
 you need to build new classes. For instance:
@@ -19,16 +19,16 @@ you need to build new classes. For instance:
     @{class@arcanist:ArcanistConfiguration}.
 
 Arcanist works through a sort of dependency-injection approach. For example,
-Arcanist does not run lint rules by default, but you can set **lint_engine**
-in your ##.arcconfig## to the name of a class which extends
+Arcanist does not run lint rules by default, but you can set `lint.engine`
+in your `.arcconfig` to the name of a class which extends
 @{class@arcanist:ArcanistLintEngine}. When running from inside your project,
 Arcanist will load this class and call methods on it in order to run lint. To
 make this work, you need to do three things:
 
   - actually write the class;
   - add the library where the class exists to your ##.arcconfig##;
-  - add the class name to your ##.arcconfig## as the **lint_engine**,
-    **unit_engine**, or **arcanist_configuration**.
+  - add the class name to your ##.arcconfig## as the **lint.engine**,
+    **unit.engine**, or **arcanist_configuration**.
 
 = Create a libphutil Library =
 
@@ -38,12 +38,12 @@ then make the library loadable by adding it to your ##.arcconfig## like this:
 
   {
     // ...
-    "phutil_libraries" : {
+    "phutil_libraries" : [
       // ...
-      "library-a" : "/path/to/my/library", // Absolute path
-      "library-b" : "support/arcanist",    // Relative path in this project
+      "/path/to/my/library", // Absolute path
+      "support/arcanist",    // Relative path in this project
       // ...
-    }
+    ]
     // ...
   }
 
@@ -67,7 +67,7 @@ the appropriate configuration value.
 
   {
     // ...
-    "lint_engine" : "CustomArcanistLintEngine",
+    "lint.engine" : "CustomArcanistLintEngine",
     // ...
   }
 
