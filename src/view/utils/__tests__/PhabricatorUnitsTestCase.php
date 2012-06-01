@@ -62,4 +62,79 @@ final class PhabricatorUnitsTestCase extends PhabricatorTestCase {
     }
   }
 
+  public function testDetailedDurationFormatting() {
+    $expected_zero = 'now';
+
+    $tests = array (
+       12095939 => '19 w, 6 d',
+      -12095939 => '19 w, 6 d ago',
+
+        3380521 => '5 w, 4 d',
+       -3380521 => '5 w, 4 d ago',
+
+              0 => $expected_zero,
+    );
+
+    foreach ($tests as $duration => $expect) {
+      $this->assertEqual(
+        $expect,
+        phabricator_format_relative_time_detailed($duration),
+        'phabricator_format_relative_time_detailed('.$duration.')');
+    }
+
+
+    $tests = array(
+      3380521   => array(
+        -1 => '5 w',
+         0 => '5 w',
+         1 => '5 w',
+         2 => '5 w, 4 d',
+         3 => '5 w, 4 d, 3 h',
+         4 => '5 w, 4 d, 3 h, 2 m',
+         5 => '5 w, 4 d, 3 h, 2 m, 1 s',
+         6 => '5 w, 4 d, 3 h, 2 m, 1 s',
+      ),
+
+      -3380521  => array(
+        -1 => '5 w ago',
+         0 => '5 w ago',
+         1 => '5 w ago',
+         2 => '5 w, 4 d ago',
+         3 => '5 w, 4 d, 3 h ago',
+         4 => '5 w, 4 d, 3 h, 2 m ago',
+         5 => '5 w, 4 d, 3 h, 2 m, 1 s ago',
+         6 => '5 w, 4 d, 3 h, 2 m, 1 s ago',
+      ),
+
+      0        => array(
+        -1 => $expected_zero,
+         0 => $expected_zero,
+         1 => $expected_zero,
+         2 => $expected_zero,
+         3 => $expected_zero,
+         4 => $expected_zero,
+         5 => $expected_zero,
+         6 => $expected_zero,
+      ),
+    );
+
+    foreach ($tests as $duration => $sub_tests) {
+      if (is_array($sub_tests)) {
+        foreach ($sub_tests as $levels => $expect) {
+          $this->assertEqual(
+            $expect,
+            phabricator_format_relative_time_detailed($duration, $levels),
+            'phabricator_format_relative_time_detailed('.$duration.',
+              '.$levels.')');
+        }
+      } else {
+        $expect = $sub_tests;
+        $this->assertEqual(
+          $expect,
+          phabricator_format_relative_time_detailed($duration),
+          'phabricator_format_relative_time_detailed('.$duration.')');
+
+      }
+    }
+  }
 }
