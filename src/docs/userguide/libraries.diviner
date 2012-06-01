@@ -120,8 +120,7 @@ Now, run ##arc liberate## to regenerate the static resource map:
 
   libcustom/ $ arc liberate src/
 
-This will automatically create and update ##__init__.php## files, and regenerate
-the static map of the library.
+This will automatically regenerate the static map of the library.
 
 = What You Can Extend And Invoke =
 
