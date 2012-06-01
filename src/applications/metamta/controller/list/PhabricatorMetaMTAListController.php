@@ -69,12 +69,20 @@ final class PhabricatorMetaMTAListController
     // Render the details table.
     $rows = array();
     foreach ($mails as $mail) {
+      $next_retry = $mail->getNextRetry() - time();
+      if ($next_retry <= 0) {
+        $next_retry = "None";
+      } else {
+        $next_retry = phabricator_format_relative_time_detailed($next_retry);
+      }
+
       $rows[] = array(
         PhabricatorMetaMTAMail::getReadableStatus($mail->getStatus()),
         $mail->getRetryCount(),
-        ($mail->getNextRetry() - time()).' s',
+        $next_retry,
         phabricator_datetime($mail->getDateCreated(), $user),
-        (time() - $mail->getDateModified()).' s',
+        phabricator_format_relative_time_detailed(
+          time() - $mail->getDateModified()),
         phutil_escape_html($mail->getSubject()),
         phutil_render_tag(
           'a',

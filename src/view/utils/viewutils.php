@@ -126,6 +126,55 @@ function phabricator_format_relative_time($duration) {
     $precision = 0);
 }
 
+/**
+ * Format a relative time (duration) into weeks, days, hours, minutes,
+ * seconds, but unlike phabricator_format_relative_time, does so for more than
+ * just the largest unit.
+ *
+ * @param int Duration in seconds.
+ * @param int Levels to render - will render the three highest levels, ie:
+ *            5 h, 37 m, 1 s
+ * @return string Human-readable description.
+ */
+function phabricator_format_relative_time_detailed($duration, $levels = 2) {
+  if ($duration == 0) {
+    return 'now';
+  }
+  $levels = max(1, min($levels, 5));
+  $remainder = 0;
+
+  $is_negative = false;
+  if ($duration < 0) {
+    $is_negative = true;
+    $duration = abs($duration);
+  }
+
+  $this_level = 1;
+  $detailed_relative_time = phabricator_format_units_generic(
+    $duration,
+    array(60, 60, 24, 7),
+    array('s', 'm', 'h', 'd', 'w'),
+    $precision = 0,
+    $remainder);
+  $duration = $remainder;
+
+  while ($remainder > 0 && $this_level < $levels) {
+    $detailed_relative_time .= ', '.phabricator_format_units_generic(
+      $duration,
+      array(60, 60, 24, 7),
+      array('s', 'm', 'h', 'd', 'w'),
+      $precision = 0,
+      $remainder);
+    $duration = $remainder;
+    $this_level++;
+  };
+
+  if ($is_negative) {
+    $detailed_relative_time .= ' ago';
+  }
+
+  return $detailed_relative_time;
+}
 
 /**
  * Format a byte count for human consumption, e.g. "10MB" instead of
