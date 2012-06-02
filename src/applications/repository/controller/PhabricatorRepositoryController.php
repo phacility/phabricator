@@ -46,11 +46,6 @@ abstract class PhabricatorRepositoryController extends PhabricatorController {
   }
 
   protected function renderDaemonNotice() {
-    $daemon_running = $this->isPullDaemonRunningOnThisMachine();
-    if ($daemon_running) {
-      return null;
-    }
-
     $documentation = phutil_render_tag(
       'a',
       array(
@@ -59,14 +54,34 @@ abstract class PhabricatorRepositoryController extends PhabricatorController {
       ),
       'Diffusion User Guide');
 
+    $common =
+      "Without this daemon, Phabricator will not be able to import or update ".
+      "repositories. For instructions on starting the daemon, see ".
+      "<strong>{$documentation}</strong>.";
+
+    try {
+      $daemon_running = $this->isPullDaemonRunningOnThisMachine();
+      if ($daemon_running) {
+        return null;
+      }
+      $title = "Repository Daemon Not Running";
+      $message =
+        "<p>The repository daemon is not running on this machine. ".
+        "{$common}</p>";
+    } catch (CommandException $ex) {
+      $title = "Unable To Verify Repository Daemon";
+      $message =
+        "<p>Unable to determine if the repository daemon is running on this ".
+        "machine. {$common}</p>".
+        "<p><strong>Exception:</strong> ".
+          phutil_escape_html($ex->getMessage()).
+        "</p>";
+    }
+
     $view = new AphrontErrorView();
     $view->setSeverity(AphrontErrorView::SEVERITY_WARNING);
-    $view->setTitle('Repository Daemon Not Running');
-    $view->appendChild(
-      "<p>The repository daemon is not running on this machine. Without this ".
-      "daemon, Phabricator will not be able to import or update repositories. ".
-      "For instructions on starting the daemon, see ".
-      "<strong>{$documentation}</strong>.</p>");
+    $view->setTitle($title);
+    $view->appendChild($message);
 
     return $view;
   }
