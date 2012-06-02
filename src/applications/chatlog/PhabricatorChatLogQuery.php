@@ -16,35 +16,49 @@
  * limitations under the License.
  */
 
-final class PhabricatorChatLogQuery extends PhabricatorOffsetPagedQuery {
+final class PhabricatorChatLogQuery extends PhabricatorIDPagedPolicyQuery {
+
   private $channels;
+  private $maximumEpoch;
 
   public function withChannels(array $channels) {
     $this->channels = $channels;
     return $this;
   }
 
-  public function execute() {
+  public function withMaximumEpoch($epoch) {
+    $this->maximumEpoch = $epoch;
+    return $this;
+  }
+
+  public function loadPage() {
     $table  = new PhabricatorChatLogEvent();
     $conn_r = $table->establishConnection('r');
 
-    $where_clause = $this->buildWhereClause($conn_r);
-    $limit_clause = $this->buildLimitClause($conn_r);
-
     $data = queryfx_all(
       $conn_r,
-      'SELECT * FROM %T e %Q ORDER BY epoch ASC %Q',
+      'SELECT * FROM %T e %Q %Q %Q',
       $table->getTableName(),
-      $where_clause,
-      $limit_clause);
+      $this->buildWhereClause($conn_r),
+      $this->buildOrderClause($conn_r),
+      $this->buildLimitClause($conn_r));
 
     $logs = $table->loadAllFromArray($data);
 
-    return $logs;
+    return $this->processResults($logs);
   }
 
   private function buildWhereClause($conn_r) {
     $where = array();
+
+    $where[] = $this->buildPagingClause($conn_r);
+
+    if ($this->maximumEpoch) {
+      $where[] = qsprintf(
+        $conn_r,
+        'epoch <= %d',
+        $this->maximumEpoch);
+    }
 
     if ($this->channels) {
       $where[] = qsprintf(

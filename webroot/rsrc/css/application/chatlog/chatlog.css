@@ -2,38 +2,64 @@
  * @provides phabricator-chatlog-css
  */
 
+.phabricator-chat-log-panel {
+  margin: 1em auto;
+  width: 80em;
+}
+
 .phabricator-chat-log {
-  margin: 1em 2em;
   font-size: 12px;
-}
-
-.phabricator-chat-log tr.initial {
-  border-top: 4px solid white;
-}
-
-.phabricator-chat-log tr.normal {
-  background: #e9e9e9;
-}
-
-.phabricator-chat-log tr.alternate {
-  background: #f6f6f6;
+  width: 100%;
+  border: 1px solid #bbbbbb;
 }
 
 .phabricator-chat-log td {
-  padding: 2px 4px;
+  padding: 4px 8px;
+}
+
+.phabricator-chat-log tr {
+  background: #fafafa;
+}
+
+.phabricator-chat-log tr td.author {
+  background: #dfdfdf;
+}
+
+.phabricator-chat-log tr.alternate {
+  background: #e9e9e9;
+}
+
+.phabricator-chat-log tr.alternate td.author {
+  background: #d9d9d9;
+}
+
+.phabricator-chat-log tr.highlight td {
+  background: #ffff88;
+}
+
+.phabricator-chat-log tr.highlight td.author {
+  background: #eeee88;
 }
 
 .phabricator-chat-log td.timestamp {
   white-space: nowrap;
-  color: #666666;
+  text-align: right;
+  width: 12em;
+}
+
+.phabricator-chat-log td.timestamp a {
+  color: #555555;
+  font-size: 11px;
 }
 
 .phabricator-chat-log td.author {
   white-space: nowrap;
   text-align: right;
   font-weight: bold;
+  width: 12em;
+  color: #555555;
 }
 
 .phabricator-chat-log td.message {
-  width: 100%;
+  white-space: pre-wrap;
 }

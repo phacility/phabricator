@@ -1542,9 +1542,13 @@ phutil_register_library_map(array(
     'PhabricatorChatLogChannelLogController' => 'PhabricatorChatLogController',
     'PhabricatorChatLogController' => 'PhabricatorController',
     'PhabricatorChatLogDAO' => 'PhabricatorLiskDAO',
-    'PhabricatorChatLogEvent' => 'PhabricatorChatLogDAO',
+    'PhabricatorChatLogEvent' =>
+    array(
+      0 => 'PhabricatorChatLogDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
     'PhabricatorChatLogEventType' => 'PhabricatorChatLogConstants',
-    'PhabricatorChatLogQuery' => 'PhabricatorOffsetPagedQuery',
+    'PhabricatorChatLogQuery' => 'PhabricatorIDPagedPolicyQuery',
     'PhabricatorConduitAPIController' => 'PhabricatorConduitController',
     'PhabricatorConduitCertificateToken' => 'PhabricatorConduitDAO',
     'PhabricatorConduitConnectionLog' => 'PhabricatorConduitDAO',
