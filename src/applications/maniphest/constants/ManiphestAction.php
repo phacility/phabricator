@@ -19,7 +19,7 @@
 /**
  * @group maniphest
  */
-final class ManiphestAction extends PhrictionConstants {
+final class ManiphestAction extends ManiphestConstants {
 
   const ACTION_CREATE   = 'create';
   const ACTION_CLOSE    = 'close';
