@@ -378,8 +378,12 @@ final class DifferentialRevisionViewController extends DifferentialController {
     DifferentialRevision $revision,
     DifferentialDiff $diff) {
 
+    $author_phid = nonempty(
+      $diff->getAuthorPHID(),
+      $revision->getAuthorPHID());
+
     $template = new DifferentialComment();
-    $template->setAuthorPHID($diff->getAuthorPHID());
+    $template->setAuthorPHID($author_phid);
     $template->setRevisionID($revision->getID());
     $template->setDateCreated($revision->getDateCreated());
 
