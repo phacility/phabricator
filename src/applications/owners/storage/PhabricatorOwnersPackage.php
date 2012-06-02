@@ -199,10 +199,10 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO {
       }
 
       $add_owners = array_diff_key($new_owners, $cur_owners);
-      $all_owners = array_mergev(array(
+      $all_owners = array_merge(
         array($this->getPrimaryOwnerPHID() => true),
         $new_owners,
-        $remove_owners));
+        $remove_owners);
       foreach ($add_owners as $phid => $ignored) {
         $owner = new PhabricatorOwnersOwner();
         $owner->setPackageID($this->getID());

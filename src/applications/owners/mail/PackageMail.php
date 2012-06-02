@@ -89,11 +89,10 @@ abstract class PackageMail {
     $paths = $package->loadPaths();
     $this->paths = mgroup($paths, 'getRepositoryPHID', 'getPath');
 
-    $phids = array_mergev(array(
+    $phids = array_merge(
       $this->mailTo,
       array($package->getActorPHID()),
-      array_keys($this->paths),
-    ));
+      array_keys($this->paths));
     $this->handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
   }
 

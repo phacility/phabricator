@@ -69,13 +69,12 @@ final class PackageModifyMail extends PackageMail {
   protected function loadData() {
     $this->mailTo = $this->allOwners;
 
-    $phids = array_mergev(array(
+    $phids = array_merge(
       $this->allOwners,
       $this->touchedRepos,
       array(
         $this->getPackage()->getActorPHID(),
-      ),
-    ));
+      ));
     $this->handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
   }
 
