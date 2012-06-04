@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,9 @@ final class PhabricatorDefaultSearchEngineSelector
   extends PhabricatorSearchEngineSelector {
 
   public function newEngine() {
-    if (PhabricatorEnv::getEnvConfig('search.elastic.host')) {
-      return new PhabricatorSearchEngineElastic();
+    $elastic_host = PhabricatorEnv::getEnvConfig('search.elastic.host');
+    if ($elastic_host) {
+      return new PhabricatorSearchEngineElastic($elastic_host);
     }
     return new PhabricatorSearchEngineMySQL();
   }

@@ -17,6 +17,11 @@
  */
 
 final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
+  private $uri;
+
+  public function __construct($uri) {
+    $this->uri = $uri;
+  }
 
   public function reindexAbstractDocument(
     PhabricatorSearchAbstractDocument $doc) {
@@ -183,8 +188,7 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
   }
 
   private function executeRequest($path, array $data, $is_write = false) {
-    $uri = PhabricatorEnv::getEnvConfig('search.elastic.host');
-    $uri = new PhutilURI($uri);
+    $uri = new PhutilURI($this->uri);
     $data = json_encode($data);
 
     $uri->setPath($path);
