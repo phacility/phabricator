@@ -834,7 +834,7 @@ return array(
     '/.*/'      => 80,
   ),
 
-  // List of file regexps were whitespace is meaningful and should not
+  // List of file regexps where whitespace is meaningful and should not
   // use 'ignore-all' by default
   'differential.whitespace-matters' => array(
     '/\.py$/',
