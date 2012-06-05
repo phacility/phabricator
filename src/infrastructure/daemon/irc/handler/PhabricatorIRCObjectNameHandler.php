@@ -100,11 +100,15 @@ final class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
 
         if ($revision_ids) {
           $revisions = $this->getConduit()->callMethodSynchronous(
-            'differential.find',
+            'differential.query',
             array(
               'query' => 'revision-ids',
-              'guids' => $revision_ids,
+              'ids'   => $revision_ids,
             ));
+          $revisions = array_select_keys(
+            ipull($revisions, null, 'id'),
+            $revision_ids
+          );
           foreach ($revisions as $revision) {
             $output[$revision['phid']] =
               'D'.$revision['id'].' '.$revision['name'].' - '.
