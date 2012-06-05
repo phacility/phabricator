@@ -68,13 +68,16 @@ final class PhabricatorUserEditor {
     $this->willAddEmail($email);
 
     $user->openTransaction();
-      $user->save();
-
-      $email->setUserPHID($user->getPHID());
-
       try {
+        $user->save();
+        $email->setUserPHID($user->getPHID());
         $email->save();
       } catch (AphrontQueryDuplicateKeyException $ex) {
+        // We might have written the user but failed to write the email; if
+        // so, erase the IDs we attached.
+        $user->setID(null);
+        $user->setPHID(null);
+
         $user->killTransaction();
         throw $ex;
       }

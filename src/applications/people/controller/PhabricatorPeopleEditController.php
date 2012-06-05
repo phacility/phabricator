@@ -139,6 +139,8 @@ final class PhabricatorPeopleEditController
         } else if (!PhabricatorUserEmail::isAllowedAddress($new_email)) {
           $e_email = 'Invalid';
           $errors[] = PhabricatorUserEmail::describeAllowedAddresses();
+        } else {
+          $e_email = null;
         }
 
         if ($request->getStr('role') == 'agent') {
