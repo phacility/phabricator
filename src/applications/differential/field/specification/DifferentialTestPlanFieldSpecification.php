@@ -107,6 +107,18 @@ final class DifferentialTestPlanFieldSpecification
     return $value;
   }
 
+  public function renderValueForMail($phase) {
+    if ($phase != DifferentialMailPhase::WELCOME) {
+      return null;
+    }
+
+    if ($this->plan == '') {
+      return null;
+    }
+
+    return "TEST PLAN\n".preg_replace('/^/m', '  ', $this->plan);
+  }
+
   private function isRequired() {
     return PhabricatorEnv::getEnvConfig('differential.require-test-plan-field');
   }

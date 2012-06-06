@@ -268,6 +268,7 @@ phutil_register_library_map(array(
     'DifferentialLintStatus' => 'applications/differential/constants/DifferentialLintStatus.php',
     'DifferentialLocalCommitsView' => 'applications/differential/view/DifferentialLocalCommitsView.php',
     'DifferentialMail' => 'applications/differential/mail/DifferentialMail.php',
+    'DifferentialMailPhase' => 'applications/differential/constants/DifferentialMailPhase.php',
     'DifferentialManiphestTasksFieldSpecification' => 'applications/differential/field/specification/DifferentialManiphestTasksFieldSpecification.php',
     'DifferentialNewDiffMail' => 'applications/differential/mail/DifferentialNewDiffMail.php',
     'DifferentialPathFieldSpecification' => 'applications/differential/field/specification/DifferentialPathFieldSpecification.php',

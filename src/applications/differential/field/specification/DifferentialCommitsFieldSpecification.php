@@ -50,7 +50,7 @@ final class DifferentialCommitsFieldSpecification
     return $revision->getCommitPHIDs();
   }
 
-  public function renderValueForMail() {
+  public function renderValueForMail($phase) {
     $revision = $this->getRevision();
 
     if ($revision->getStatus() != ArcanistDifferentialRevisionStatus::CLOSED) {

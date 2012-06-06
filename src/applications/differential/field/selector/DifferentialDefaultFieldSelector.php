@@ -99,9 +99,11 @@ final class DifferentialDefaultFieldSelector
     $map = array_select_keys(
       $map,
       array(
+        'DifferentialReviewersFieldSpecification',
         'DifferentialSummaryFieldSpecification',
         'DifferentialTestPlanFieldSpecification',
         'DifferentialRevisionIDFieldSpecification',
+        'DifferentialManiphestTasksFieldSpecification',
         'DifferentialBranchFieldSpecification',
         'DifferentialCommitsFieldSpecification',
       )) + $map;

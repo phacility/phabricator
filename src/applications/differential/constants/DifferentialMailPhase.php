@@ -16,22 +16,10 @@
  * limitations under the License.
  */
 
-final class DifferentialCCWelcomeMail extends DifferentialReviewRequestMail {
+final class DifferentialMailPhase {
 
-  protected function renderVarySubject() {
-    return '[Added to CC] '.$this->renderSubject();
-  }
+  const WELCOME = 1;
+  const UPDATE = 2;
+  const COMMENT = 3;
 
-  protected function renderBody() {
-
-    $actor = $this->getActorName();
-    $name  = $this->getRevision()->getTitle();
-    $body = array();
-
-    $body[] = "{$actor} added you to the CC list for the revision \"{$name}\".";
-
-    $body[] = $this->renderReviewRequestBody();
-
-    return implode("\n", $body);
-  }
 }

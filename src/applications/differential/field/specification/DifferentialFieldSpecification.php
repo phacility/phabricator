@@ -375,11 +375,12 @@ abstract class DifferentialFieldSpecification {
    * Return plain text to render in e-mail messages. The text may span
    * multiple lines.
    *
+   * @return int One of DifferentialMailPhase constants.
    * @return string|null Plain text, or null for no message.
    *
    * @task mail
    */
-  public function renderValueForMail() {
+  public function renderValueForMail($phase) {
     return null;
   }
 

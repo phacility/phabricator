@@ -40,47 +40,21 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
     $this->setChangesets($changesets);
   }
 
-  protected function renderReviewersLine() {
-    $reviewers = $this->getRevision()->getReviewers();
-    $handles = id(new PhabricatorObjectHandleData($reviewers))->loadHandles();
-    return 'Reviewers: '.$this->renderHandleList($handles, $reviewers);
-  }
-
   protected function renderReviewRequestBody() {
     $revision = $this->getRevision();
 
     $body = array();
-    if ($this->isFirstMailToRecipients()) {
-      if ($revision->getSummary() != '') {
-        $body[] = $this->formatText($revision->getSummary());
-        $body[] = null;
-      }
-
-      if ($revision->getTestPlan() != '') {
-        $body[] = 'TEST PLAN';
-        $body[] = $this->formatText($revision->getTestPlan());
-        $body[] = null;
-      }
-    } else {
+    if (!$this->isFirstMailToRecipients()) {
       if (strlen($this->getComments())) {
         $body[] = $this->formatText($this->getComments());
         $body[] = null;
       }
     }
 
-    $body[] = $this->renderRevisionDetailLink();
-    $body[] = null;
-
-    $task_phids = $this->getManiphestTaskPHIDs();
-    if ($task_phids) {
-      $handles = id(new PhabricatorObjectHandleData($task_phids))
-        ->loadHandles();
-      $body[] = 'MANIPHEST TASKS';
-      foreach ($handles as $handle) {
-        $body[] = '  '.PhabricatorEnv::getProductionURI($handle->getURI());
-      }
-      $body[] = null;
-    }
+    $phase = ($this->isFirstMailToRecipients() ?
+      DifferentialMailPhase::WELCOME :
+      DifferentialMailPhase::UPDATE);
+    $body[] = $this->renderAuxFields($phase);
 
     $changesets = $this->getChangesets();
     if ($changesets) {

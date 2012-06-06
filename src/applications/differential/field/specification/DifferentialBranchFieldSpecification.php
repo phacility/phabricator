@@ -38,7 +38,7 @@ final class DifferentialBranchFieldSpecification
     return phutil_escape_html($branch);
   }
 
-  public function renderValueForMail() {
+  public function renderValueForMail($phase) {
     $status = $this->getRevision()->getStatus();
 
     if ($status != ArcanistDifferentialRevisionStatus::NEEDS_REVISION &&

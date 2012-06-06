@@ -164,4 +164,22 @@ final class DifferentialReviewersFieldSpecification
     return array();
   }
 
+  public function renderValueForMail($phase) {
+    if ($phase == DifferentialMailPhase::COMMENT) {
+      return null;
+    }
+
+    if (!$this->reviewers) {
+      return null;
+    }
+
+    $handles = id(new PhabricatorObjectHandleData($this->reviewers))
+      ->loadHandles();
+    $handles = array_select_keys(
+      $handles,
+      array($this->getRevision()->getPrimaryReviewer())) + $handles;
+    $names = mpull($handles, 'getName');
+    return 'Reviewers: '.implode(', ', $names);
+  }
+
 }

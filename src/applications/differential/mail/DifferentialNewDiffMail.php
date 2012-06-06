@@ -44,8 +44,6 @@ final class DifferentialNewDiffMail extends DifferentialReviewRequestMail {
     } else {
       $body[] = "{$actor} updated the revision \"{$name}\".";
     }
-    $body[] = $this->renderReviewersLine();
-    $body[] = null;
 
     $body[] = $this->renderReviewRequestBody();
 

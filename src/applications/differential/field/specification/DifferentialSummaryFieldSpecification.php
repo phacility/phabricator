@@ -74,4 +74,16 @@ final class DifferentialSummaryFieldSpecification
     return (string)$value;
   }
 
+  public function renderValueForMail($phase) {
+    if ($phase != DifferentialMailPhase::WELCOME) {
+      return null;
+    }
+
+    if ($this->summary == '') {
+      return null;
+    }
+
+    return $this->summary;
+  }
+
 }

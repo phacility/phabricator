@@ -161,18 +161,7 @@ final class DifferentialCommentMail extends DifferentialMail {
       $body[] = null;
     }
 
-    $selector = DifferentialFieldSelector::newSelector();
-    $aux_fields = $selector->sortFieldsForMail(
-      $selector->getFieldSpecifications());
-
-    foreach ($aux_fields as $field) {
-      $field->setRevision($this->getRevision());
-      $text = $field->renderValueForMail();
-      if ($text !== null) {
-        $body[] = $text;
-        $body[] = null;
-      }
-    }
+    $body[] = $this->renderAuxFields(DifferentialMailPhase::COMMENT);
 
     return implode("\n", $body);
   }

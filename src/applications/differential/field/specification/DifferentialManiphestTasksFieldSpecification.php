@@ -156,4 +156,23 @@ final class DifferentialManiphestTasksFieldSpecification
     return $task_phids;
   }
 
+  public function renderValueForMail($phase) {
+    if ($phase == DifferentialMailPhase::COMMENT) {
+      return null;
+    }
+
+    if (!$this->maniphestTasks) {
+      return null;
+    }
+
+    $handles = id(new PhabricatorObjectHandleData($this->maniphestTasks))
+      ->loadHandles();
+    $body = array();
+    $body[] = 'MANIPHEST TASKS';
+    foreach ($handles as $handle) {
+      $body[] = '  '.PhabricatorEnv::getProductionURI($handle->getURI());
+    }
+    return implode("\n", $body);
+  }
+
 }

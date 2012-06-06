@@ -354,11 +354,6 @@ EOTEXT;
     return $this->changesets;
   }
 
-  protected function getManiphestTaskPHIDs() {
-    return $this->getRevision()->getAttachedPHIDs(
-      PhabricatorPHIDConstants::PHID_TYPE_TASK);
-  }
-
   public function setInlineComments(array $inline_comments) {
     assert_instances_of($inline_comments, 'PhabricatorInlineCommentInterface');
     $this->inlineComments = $inline_comments;
@@ -367,6 +362,24 @@ EOTEXT;
 
   public function getInlineComments() {
     return $this->inlineComments;
+  }
+
+  protected function renderAuxFields($phase) {
+    $selector = DifferentialFieldSelector::newSelector();
+    $aux_fields = $selector->sortFieldsForMail(
+      $selector->getFieldSpecifications());
+
+    $body = array();
+    foreach ($aux_fields as $field) {
+      $field->setRevision($this->getRevision());
+      $text = $field->renderValueForMail($phase);
+      if ($text !== null) {
+        $body[] = $text;
+        $body[] = null;
+      }
+    }
+
+    return implode("\n", $body);
   }
 
   public function renderRevisionDetailLink() {
