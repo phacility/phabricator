@@ -65,7 +65,7 @@ final class PhabricatorOAuthDefaultRegistrationController
         $errors[] = 'Username is required.';
       } else if (!PhabricatorUser::validateUsername($username)) {
         $e_username = 'Invalid';
-        $errors[] = 'Username must consist of only numbers and letters.';
+        $errors[] = PhabricatorUser::describeValidUsername();
       } else {
         $e_username = null;
       }

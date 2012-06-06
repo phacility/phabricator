@@ -153,7 +153,7 @@ final class PhabricatorPeopleEditController
         $errors[] = "Username is required.";
         $e_username = 'Required';
       } else if (!PhabricatorUser::validateUsername($user->getUsername())) {
-        $errors[] = "Username must consist of only numbers and letters.";
+        $errors[] = PhabricatorUser::describeValidUsername();
         $e_username = 'Invalid';
       } else {
         $e_username = null;

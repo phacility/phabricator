@@ -549,8 +549,13 @@ EOBODY;
       ->saveAndSend();
   }
 
+  public static function describeValidUsername() {
+    return 'Usernames must contain only numbers, letters, period, underscore '.
+           'and hyphen, and can not end with a period.';
+  }
+
   public static function validateUsername($username) {
-    return (bool)preg_match('/^[a-zA-Z0-9]+$/', $username);
+    return (bool)preg_match('/^[a-zA-Z0-9._-]*[a-zA-Z0-9_-]$/', $username);
   }
 
   public static function getDefaultProfileImageURI() {

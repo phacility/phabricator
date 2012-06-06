@@ -28,12 +28,13 @@ final class PhabricatorRemarkupRuleMention
   const KEY_MENTIONED = 'phabricator.mentioned-user-phids';
 
 
-  // NOTE: Negative lookahead for period prevents us from picking up email
-  // addresses, while allowing constructs like "@tomo, lol". The negative
-  // lookbehind for a word character prevents us from matching "mail@lists"
-  // while allowing "@tomo/@mroch". The negative lookahead prevents us from
-  // matching "@joe.com" while allowing us to match "hey, @joe.".
-  const REGEX = '/(?<!\w)@([a-zA-Z0-9]+)\b(?![.]\w)/';
+  // NOTE: The negative lookbehind prevents matches like "mail@lists", while
+  // allowing constructs like "@tomo/@mroch". Since we now allow periods in
+  // usernames, we can't resonably distinguish that "@company.com" isn't a
+  // username, so we'll incorrectly pick it up, but there's little to be done
+  // about that. We forbid terminal periods so that we can correctly capture
+  // "@joe" instead of "@joe." in "Hey, @joe.".
+  const REGEX = '/(?<!\w)@([a-zA-Z0-9._-]*[a-zA-Z0-9_-])/';
 
   public function apply($text) {
     return preg_replace_callback(

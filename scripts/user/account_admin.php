@@ -29,8 +29,8 @@ if (!strlen($username)) {
 }
 
 if (!PhabricatorUser::validateUsername($username)) {
-  echo "The username '{$username}' is invalid. Usernames must consist of only ".
-       "numbers and letters.\n";
+  $valid = PhabricatorUser::describeValidUsername();
+  echo "The username '{$username}' is invalid. {$valid}\n";
   exit(1);
 }
 

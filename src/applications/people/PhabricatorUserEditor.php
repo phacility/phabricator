@@ -62,6 +62,11 @@ final class PhabricatorUserEditor {
       throw new Exception("Email has already been created!");
     }
 
+    if (!PhabricatorUser::validateUsername($user->getUsername())) {
+      $valid = PhabricatorUser::describeValidUsername();
+      throw new Exception("Username is invalid! {$valid}");
+    }
+
     // Always set a new user's email address to primary.
     $email->setIsPrimary(1);
 
