@@ -41,23 +41,24 @@ final class PhabricatorPeopleEditController
       if (!$user) {
         return new Aphront404Response();
       }
+      $base_uri = '/people/edit/'.$user->getID().'/';
     } else {
       $user = new PhabricatorUser();
+      $base_uri = '/people/edit/';
     }
 
-    $views = array(
-      'basic'     => 'Basic Information',
-      'role'      => 'Edit Roles',
-      'cert'      => 'Conduit Certificate',
-    );
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI($base_uri));
+    $nav->addFilter('basic', 'Basic Information');
+    $nav->addFilter('role',  'Edit Roles');
+    $nav->addFilter('cert',  'Conduit Certificate');
+    $nav->addSpacer();
+    $nav->addFilter('rename', 'Change Username');
 
     if (!$user->getID()) {
-      $view = 'basic';
-    } else if (isset($views[$this->view])) {
-      $view = $this->view;
-    } else {
-      $view = 'basic';
+      $this->view = 'basic';
     }
+    $view = $nav->selectFilter($this->view, 'basic');
 
     $content = array();
 
@@ -79,6 +80,11 @@ final class PhabricatorPeopleEditController
       case 'cert':
         $response = $this->processCertificateRequest($user);
         break;
+      case 'rename':
+        $response = $this->processRenameRequest($user);
+        break;
+      default:
+        return new Aphront404Response();
     }
 
     if ($response instanceof AphrontResponse) {
@@ -88,21 +94,8 @@ final class PhabricatorPeopleEditController
     $content[] = $response;
 
     if ($user->getID()) {
-      $side_nav = new AphrontSideNavView();
-      $side_nav->appendChild($content);
-      foreach ($views as $key => $name) {
-        $side_nav->addNavItem(
-          phutil_render_tag(
-            'a',
-            array(
-              'href' => '/people/edit/'.$user->getID().'/'.$key.'/',
-              'class' => ($key == $view)
-                ? 'aphront-side-nav-selected'
-                : null,
-            ),
-            phutil_escape_html($name)));
-      }
-      $content = $side_nav;
+      $nav->appendChild($content);
+      $content = $nav;
     }
 
     return $this->buildStandardPageResponse(
@@ -444,7 +437,6 @@ final class PhabricatorPeopleEditController
     $request = $this->getRequest();
     $admin = $request->getUser();
 
-
     $form = new AphrontFormView();
     $form
       ->setUser($admin)
@@ -480,6 +472,100 @@ final class PhabricatorPeopleEditController
 
     return array($panel);
   }
+
+  private function processRenameRequest(PhabricatorUser $user) {
+    $request = $this->getRequest();
+    $admin = $request->getUser();
+
+    $e_username = true;
+    $username = $user->getUsername();
+
+    $errors = array();
+    if ($request->isFormPost()) {
+
+      $username = $request->getStr('username');
+      if (!strlen($username)) {
+        $e_username = 'Required';
+        $errors[] = 'New username is required.';
+      } else if ($username == $user->getUsername()) {
+        $e_username = 'Invalid';
+        $errors[] = 'New username must be different from old username.';
+      } else if (!PhabricatorUser::validateUsername($username)) {
+        $e_username = 'Invalid';
+        $errors[] = PhabricatorUser::describeValidUsername();
+      }
+
+      if (!$errors) {
+        try {
+
+          id(new PhabricatorUserEditor())
+            ->setActor($admin)
+            ->changeUsername($user, $username);
+
+          return id(new AphrontRedirectResponse())
+            ->setURI($request->getRequestURI()->alter('saved', true));
+        } catch (AphrontQueryDuplicateKeyException $ex) {
+          $e_username = 'Not Unique';
+          $errors[] = 'Another user already has that username.';
+        }
+      }
+    }
+
+    if ($errors) {
+      $errors = id(new AphrontErrorView())
+        ->setTitle('Form Errors')
+        ->setErrors($errors);
+    } else {
+      $errors = null;
+    }
+
+    $form = new AphrontFormView();
+    $form
+      ->setUser($admin)
+      ->setAction($request->getRequestURI())
+      ->appendChild(
+        '<p class="aphront-form-instructions">'.
+          '<strong>Be careful when renaming users!</strong> '.
+          'The old username will no longer be tied to the user, so anything '.
+          'which uses it (like old commit messages) will no longer associate '.
+          'correctly. And if you give a user a username which some other user '.
+          'used to have, username lookups will begin returning the wrong '.
+          'user.'.
+        '</p>'.
+        '<p class="aphront-form-instructions">'.
+          'It is generally safe to rename newly created users (and test users '.
+          'and so on), but less safe to rename established users and unsafe '.
+          'to reissue a username.'.
+        '</p>'.
+        '<p class="aphront-form-instructions">'.
+          'Users who rely on password auth will need to reset their password '.
+          'after their username is changed (their username is part of the '.
+          'salt in the password hash). They will receive an email with '.
+          'instructions on how to do this.'.
+        '</p>')
+      ->appendChild(
+        id(new AphrontFormStaticControl())
+          ->setLabel('Old Username')
+          ->setValue($user->getUsername()))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel('New Username')
+          ->setValue($username)
+          ->setName('username')
+          ->setError($e_username))
+      ->appendChild(
+        id(new AphrontFormSubmitControl())
+          ->setValue('Change Username'));
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader('Change Username');
+    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->appendChild($form);
+
+    return array($errors, $panel);
+  }
+
+
 
   private function getRoleInstructions() {
     $roles_link = phutil_render_tag(

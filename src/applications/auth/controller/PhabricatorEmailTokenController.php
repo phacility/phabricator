@@ -36,22 +36,6 @@ final class PhabricatorEmailTokenController
       return new Aphront400Response();
     }
 
-    if ($request->getUser()->getPHID()) {
-      $view = new AphrontRequestFailureView();
-      $view->setHeader('Already Logged In');
-      $view->appendChild(
-        '<p>You are already logged in.</p>');
-      $view->appendChild(
-        '<div class="aphront-failure-continue">'.
-          '<a class="button" href="/">Return Home</a>'.
-        '</div>');
-      return $this->buildStandardPageResponse(
-        $view,
-        array(
-          'title' => 'Already Logged In',
-        ));
-    }
-
     $token = $this->token;
     $email = $request->getStr('email');
 
@@ -103,10 +87,12 @@ final class PhabricatorEmailTokenController
     // enough, without requiring users to go through a second round of email
     // verification.
 
-    $target_email->setIsVerified(1);
-    $target_email->save();
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $target_email->setIsVerified(1);
+      $target_email->save();
+      $session_key = $target_user->establishSession('web');
+    unset($unguarded);
 
-    $session_key = $target_user->establishSession('web');
     $request->setCookie('phusr', $target_user->getUsername());
     $request->setCookie('phsid', $session_key);
 

@@ -148,6 +148,49 @@ final class PhabricatorUserEditor {
   }
 
 
+  /**
+   * @task edit
+   */
+  public function changeUsername(PhabricatorUser $user, $username) {
+    $actor = $this->requireActor();
+
+    if (!$user->getID()) {
+      throw new Exception("User has not been created yet!");
+    }
+
+    if (!PhabricatorUser::validateUsername($username)) {
+      $valid = PhabricatorUser::describeValidUsername();
+      throw new Exception("Username is invalid! {$valid}");
+    }
+
+    $old_username = $user->getUsername();
+
+    $user->openTransaction();
+      $user->reload();
+      $user->setUsername($username);
+
+      try {
+        $user->save();
+      } catch (AphrontQueryDuplicateKeyException $ex) {
+        $user->setUsername($old_username);
+        $user->killTransaction();
+        throw $ex;
+      }
+
+      $log = PhabricatorUserLog::newLog(
+        $this->actor,
+        $user,
+        PhabricatorUserLog::ACTION_CHANGE_USERNAME);
+      $log->setOldValue($old_username);
+      $log->setNewValue($username);
+      $log->save();
+
+    $user->saveTransaction();
+
+    $user->sendUsernameChangeEmail($actor, $old_username);
+  }
+
+
 /* -(  Editing Roles  )------------------------------------------------------ */
 
 

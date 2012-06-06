@@ -37,6 +37,7 @@ final class PhabricatorUserLog extends PhabricatorUserDAO {
   const ACTION_EMAIL_ADD        = 'email-add';
 
   const ACTION_CHANGE_PASSWORD  = 'change-password';
+  const ACTION_CHANGE_USERNAME  = 'change-username';
 
   protected $actorPHID;
   protected $userPHID;
