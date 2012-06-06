@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,36 @@ final class DifferentialCommitsFieldSpecification
   private function getCommitPHIDs() {
     $revision = $this->getRevision();
     return $revision->getCommitPHIDs();
+  }
+
+  public function renderValueForMail() {
+    $revision = $this->getRevision();
+
+    if ($revision->getStatus() != ArcanistDifferentialRevisionStatus::CLOSED) {
+      return null;
+    }
+
+    $phids = $revision->loadCommitPHIDs();
+    if (!$phids) {
+      return null;
+    }
+
+    $body = array();
+    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    if (count($handles) == 1) {
+      $body[] = "COMMIT";
+    } else {
+      // This is unlikely to ever happen since we'll send this mail the
+      // first time we discover a commit, but it's not impossible if data
+      // was migrated, etc.
+      $body[] = "COMMITS";
+    }
+
+    foreach ($handles as $handle) {
+      $body[] = '  '.PhabricatorEnv::getProductionURI($handle->getURI());
+    }
+
+    return implode("\n", $body);
   }
 
 }

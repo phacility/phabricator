@@ -38,4 +38,21 @@ final class DifferentialBranchFieldSpecification
     return phutil_escape_html($branch);
   }
 
+  public function renderValueForMail() {
+    $status = $this->getRevision()->getStatus();
+
+    if ($status != ArcanistDifferentialRevisionStatus::NEEDS_REVISION &&
+        $status != ArcanistDifferentialRevisionStatus::ACCEPTED) {
+      return null;
+    }
+
+    $diff = $this->getRevision()->loadActiveDiff();
+    if ($diff) {
+      $branch = $diff->getBranch();
+      if ($branch) {
+        return "BRANCH\n  $branch";
+      }
+    }
+  }
+
 }

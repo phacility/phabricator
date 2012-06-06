@@ -33,4 +33,9 @@ abstract class DifferentialFieldSelector {
     return $fields;
   }
 
+  public function sortFieldsForMail(array $fields) {
+    assert_instances_of($fields, 'DifferentialFieldSpecification');
+    return $fields;
+  }
+
 }

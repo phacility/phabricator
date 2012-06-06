@@ -88,5 +88,26 @@ final class DifferentialDefaultFieldSelector
     return array_values($map);
   }
 
+  public function sortFieldsForMail(array $fields) {
+    assert_instances_of($fields, 'DifferentialFieldSpecification');
+
+    $map = array();
+    foreach ($fields as $field) {
+      $map[get_class($field)] = $field;
+    }
+
+    $map = array_select_keys(
+      $map,
+      array(
+        'DifferentialSummaryFieldSpecification',
+        'DifferentialTestPlanFieldSpecification',
+        'DifferentialRevisionIDFieldSpecification',
+        'DifferentialBranchFieldSpecification',
+        'DifferentialCommitsFieldSpecification',
+      )) + $map;
+
+    return array_values($map);
+  }
+
 }
 

@@ -104,4 +104,9 @@ final class DifferentialRevisionIDFieldSpecification
     return 'D'.$revision->getID();
   }
 
+  public function renderValueForMail() {
+    $uri = PhabricatorEnv::getProductionURI('/D'.$this->id);
+    return "REVISION DETAIL\n  {$uri}";
+  }
+
 }

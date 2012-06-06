@@ -28,6 +28,7 @@
  * @task edit Extending the Revision Edit Interface
  * @task view Extending the Revision View Interface
  * @task list Extending the Revision List Interface
+ * @task mail Extending the E-mail Interface
  * @task conduit Extending the Conduit View Interface
  * @task commit Extending Commit Messages
  * @task load Loading Additional Data
@@ -364,6 +365,22 @@ abstract class DifferentialFieldSpecification {
    */
   public function renderValueForRevisionList(DifferentialRevision $revision) {
     throw new DifferentialFieldSpecificationIncompleteException($this);
+  }
+
+
+/* -(  Extending the E-mail Interface  )------------------------------------- */
+
+
+  /**
+   * Return plain text to render in e-mail messages. The text may span
+   * multiple lines.
+   *
+   * @return string|null Plain text, or null for no message.
+   *
+   * @task mail
+   */
+  public function renderValueForMail() {
+    return null;
   }
 
 

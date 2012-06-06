@@ -161,40 +161,15 @@ final class DifferentialCommentMail extends DifferentialMail {
       $body[] = null;
     }
 
-    $body[] = $this->renderRevisionDetailLink();
-    $body[] = null;
+    $selector = DifferentialFieldSelector::newSelector();
+    $aux_fields = $selector->sortFieldsForMail(
+      $selector->getFieldSpecifications());
 
-    $revision = $this->getRevision();
-    $status = $revision->getStatus();
-
-    if ($status == ArcanistDifferentialRevisionStatus::NEEDS_REVISION ||
-        $status == ArcanistDifferentialRevisionStatus::ACCEPTED) {
-      $diff = $revision->loadActiveDiff();
-      if ($diff) {
-        $branch = $diff->getBranch();
-        if ($branch) {
-          $body[] = "BRANCH\n  $branch";
-          $body[] = null;
-        }
-      }
-    }
-
-    if ($status == ArcanistDifferentialRevisionStatus::CLOSED) {
-      $phids = $revision->loadCommitPHIDs();
-      if ($phids) {
-        $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
-        if (count($handles) == 1) {
-          $body[] = "COMMIT";
-        } else {
-          // This is unlikely to ever happen since we'll send this mail the
-          // first time we discover a commit, but it's not impossible if data
-          // was migrated, etc.
-          $body[] = "COMMITS";
-        }
-
-        foreach ($handles as $handle) {
-          $body[] = '  '.PhabricatorEnv::getProductionURI($handle->getURI());
-        }
+    foreach ($aux_fields as $field) {
+      $field->setRevision($this->getRevision());
+      $text = $field->renderValueForMail();
+      if ($text !== null) {
+        $body[] = $text;
         $body[] = null;
       }
     }
