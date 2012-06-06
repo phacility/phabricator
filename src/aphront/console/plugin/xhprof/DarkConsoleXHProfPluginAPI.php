@@ -34,7 +34,7 @@ final class DarkConsoleXHProfPluginAPI {
     // stuff loaded yet so we can't just phutil_get_library_root() our way
     // to victory.
     $root = __FILE__;
-    for ($ii = 0; $ii < 7; $ii++) {
+    for ($ii = 0; $ii < 6; $ii++) {
       $root = dirname($root);
     }
 
