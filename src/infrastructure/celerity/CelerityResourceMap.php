@@ -35,12 +35,13 @@ final class CelerityResourceMap {
     if (empty(self::$instance)) {
       self::$instance = new CelerityResourceMap();
       $root = phutil_get_library_root('phabricator');
-      $path = PhabricatorEnv::getEnvConfig(
-        'celerity.resource-map',
-        '__celerity_resource_map__.php');
+
+      $path = PhabricatorEnv::getEnvConfig('celerity.resource-path');
       $ok = include_once Filesystem::resolvePath($path, $root);
       if (!$ok) {
-        throw new Exception("Failed to load Celerity resource map!");
+        throw new Exception(
+          "Failed to load Celerity resource map! Check the ".
+          "'celerity.resource-path' setting in your configuration.");
       }
     }
     return self::$instance;

@@ -152,6 +152,10 @@ if ($access_log) {
     ));
 }
 
+// If execution throws an exception and then trying to render that exception
+// throws another exception, we want to show the original exception, as it is
+// likely the root cause of the rendering exception.
+$original_exception = null;
 try {
   $response = $controller->willBeginExecution();
 
@@ -172,6 +176,7 @@ try {
   $response = id(new AphrontRedirectResponse())
     ->setURI($ex->getURI());
 } catch (Exception $ex) {
+  $original_exception = $ex;
   $response = $application->handleException($ex);
 }
 
@@ -183,6 +188,14 @@ try {
   $write_guard->dispose();
   if ($access_log) {
     $access_log->write();
+  }
+  if ($original_exception) {
+    $ex = new PhutilAggregateException(
+      "Multiple exceptions during processing and rendering.",
+      array(
+        $original_exception,
+        $ex,
+      ));
   }
   phabricator_fatal('[Rendering Exception] '.$ex->getMessage());
 }
