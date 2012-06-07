@@ -98,17 +98,20 @@ final class DiffusionHistoryTableView extends DiffusionView {
         $author = phutil_escape_html($history->getAuthorName());
       }
 
-      if ($committer) {
+      $different_committer = false;
+      if ($committer_phid) {
+        $different_committer = ($committer_phid != $author_phid);
+      } else if ($committer != '') {
+        $different_committer = ($committer != $history->getAuthorName());
+      }
+      if ($different_committer) {
         if ($committer_phid && isset($handles[$committer_phid])) {
           $committer = $handles[$committer_phid]->renderLink();
         } else {
           $committer = phutil_escape_html($committer);
         }
+        $author .= '/'.$committer;
       }
-      else {
-        $committer = $author;
-      }
-
 
       $commit = $history->getCommit();
       if ($commit && !$commit->getIsUnparsed() && $data) {
@@ -135,7 +138,6 @@ final class DiffusionHistoryTableView extends DiffusionView {
         $date,
         $time,
         $author,
-        $committer,
         AphrontTableView::renderSingleDisplayLine(
           phutil_escape_html($history->getSummary())),
         // TODO: etc etc
@@ -151,8 +153,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
         'Change',
         'Date',
         'Time',
-        'Author',
-        'Committer',
+        'Author/Committer',
         'Details',
       ));
     $view->setColumnClasses(
@@ -163,7 +164,6 @@ final class DiffusionHistoryTableView extends DiffusionView {
         '',
         '',
         'right',
-        '',
         '',
         'wide',
       ));
