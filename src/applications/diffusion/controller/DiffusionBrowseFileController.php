@@ -32,6 +32,10 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
     $path = $drequest->getPath();
     $selected = $request->getStr('view');
+    // If requested without a view, assume that blame is required (see T1278).
+    if (!$selected) {
+      $selected = 'blame';
+    }
     $needs_blame = ($selected == 'blame' || $selected == 'plainblame');
 
     $file_query = DiffusionFileContentQuery::newFromDiffusionRequest(
@@ -220,10 +224,10 @@ final class DiffusionBrowseFileController extends DiffusionController {
     $select = AphrontFormSelectControl::renderSelectTag(
       $request->getStr('view'),
       array(
-        'highlighted'   => 'View as Highlighted Text',
         'blame'         => 'View as Highlighted Text with Blame',
-        'plain'         => 'View as Plain Text',
+        'highlighted'   => 'View as Highlighted Text',
         'plainblame'    => 'View as Plain Text with Blame',
+        'plain'         => 'View as Plain Text',
         'raw'           => 'View as raw document',
       ),
       array(
