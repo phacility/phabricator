@@ -44,18 +44,33 @@ final class DiffusionGitRenameHistoryQuery
       list($action, $info) = explode(' ', $line, 2);
       switch ($action) {
         case 'rename':
-          // rename path/to/file/{old.ext => new.ext} (86%)
+          // We support these cases:
+          // rename README => README.txt (100%)
+          // rename src/README => README (100%)
+          // rename src/{README => README.txt} (100%)
+          // rename {resources => rsrc}/README (100%)
+          // rename src/{aphront => }/README (100%)
+          // rename src/{ => aphront}/README (100%)
+          // rename src/{docs => ducks}/README (100%)
           $matches = null;
           $ok = preg_match(
-            '/^(.*){(.*) => (.*)} \([0-9%]+\)$/',
+            '/^(.*){(.*) => (.*)}(.*) \([0-9%]+\)$/',
             $info,
             $matches);
-          if (!$ok) {
-            throw new Exception(
-              "Unparseable git log --summary line: {$line}.");
+          if ($ok) {
+            $name = $matches[1].ltrim($matches[2].$matches[4], '/');
+          } else {
+            $ok = preg_match(
+              '/^(.*) => (.*) \([0-9%]+\)$/',
+              $info,
+              $matches);
+            if (!$ok) {
+              throw new Exception(
+                "Unparseable git log --summary line: {$line}.");
+            }
+            $name = $matches[1];
           }
 
-          $name = $matches[1].$matches[2];
           break;
         case 'create':
           // create mode 100644 <filename>
