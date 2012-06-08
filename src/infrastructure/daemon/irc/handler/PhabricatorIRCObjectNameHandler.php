@@ -111,7 +111,7 @@ final class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
           );
           foreach ($revisions as $revision) {
             $output[$revision['phid']] =
-              'D'.$revision['id'].' '.$revision['name'].' - '.
+              'D'.$revision['id'].' '.$revision['title'].' - '.
               $revision['uri'];
           }
         }
