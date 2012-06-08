@@ -18,9 +18,19 @@
 
 final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
   private $uri;
+  private $timeout;
 
   public function __construct($uri) {
     $this->uri = $uri;
+  }
+
+  public function setTimeout($timeout) {
+    $this->timeout = $timeout;
+    return $this;
+  }
+
+  public function getTimeout() {
+    return $this->timeout;
   }
 
   public function reindexAbstractDocument(
@@ -204,6 +214,10 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
       $future->setMethod('PUT');
     } else {
       $future->setMethod('GET');
+    }
+
+    if ($this->getTimeout()) {
+      $future->setTimeout($this->getTimeout());
     }
 
     list($body) = $future->resolvex();
