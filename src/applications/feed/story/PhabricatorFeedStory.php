@@ -19,7 +19,7 @@
 abstract class PhabricatorFeedStory {
 
   private $data;
-
+  private $hasViewed;
   private $handles;
   private $framed;
 
@@ -31,6 +31,15 @@ abstract class PhabricatorFeedStory {
 
   public function getRequiredHandlePHIDs() {
     return array();
+  }
+
+  public function setHasViewed($has_viewed) {
+    $this->hasViewed = $has_viewed;
+    return $this;
+  }
+
+  public function getHasViewed() {
+    return $this->hasViewed;
   }
 
   public function getRequiredObjectPHIDs() {

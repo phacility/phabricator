@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,20 @@ final class PhabricatorFeedStoryPublisher {
   private $storyData;
   private $storyTime;
   private $storyAuthorPHID;
+  private $primaryObjectPHID;
+  private $subscribedPHIDs;
 
   public function setRelatedPHIDs(array $phids) {
     $this->relatedPHIDs = $phids;
+    return $this;
+  }
+
+  public function setSubscribedPHIDs(array $phids) {
+    $this->subscribedPHIDs = $phids;
+    return $this;
+  }
+  public function setPrimaryObjectPHID($phid) {
+    $this->primaryObjectPHID = $phid;
     return $this;
   }
 
@@ -85,9 +96,43 @@ final class PhabricatorFeedStoryPublisher {
       $ref->getTableName(),
       implode(', ', $sql));
 
+    if (PhabricatorEnv::getEnvConfig('notification.enabled')) {
+      $this->insertNotifications($chrono_key);
+    }
     return $story;
   }
 
+
+  private function insertNotifications($chrono_key) {
+    if (!$this->primaryObjectPHID) {
+      throw
+        new Exception("Call setPrimaryObjectPHID() before Publishing!");
+    }
+    if ($this->subscribedPHIDs) {
+      $notif = new PhabricatorFeedStoryNotification();
+      $sql = array();
+      $conn = $notif->establishConnection('w');
+
+      foreach (array_unique($this->subscribedPHIDs) as $user_phid) {
+        $sql[] = qsprintf(
+          $conn,
+          '(%s, %s, %s, %d)',
+          $this->primaryObjectPHID,
+          $user_phid,
+          $chrono_key,
+          0);
+      }
+
+      queryfx(
+        $conn,
+        'INSERT INTO %T
+       (primaryObjectPHID, userPHID, chronologicalKey, hasViewed)
+       VALUES %Q',
+        $notif->getTableName(),
+        implode(', ', $sql));
+    }
+
+  }
   /**
    * We generate a unique chronological key for each story type because we want
    * to be able to page through the stream with a cursor (i.e., select stories

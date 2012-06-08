@@ -314,7 +314,8 @@ final class ManiphestTransactionEditor {
       if ($transaction->hasComments()) {
         $comments = $transaction->getComments();
       }
-      switch ($transaction->getTransactionType()) {
+      $type = $transaction->getTransactionType();
+      switch ($type) {
         case ManiphestTransactionType::TYPE_OWNER:
           $actions[] = ManiphestAction::ACTION_ASSIGN;
           break;
@@ -323,6 +324,8 @@ final class ManiphestTransactionEditor {
             $actions[] = ManiphestAction::ACTION_CLOSE;
           } else if ($this->isCreate($transactions)) {
             $actions[] = ManiphestAction::ACTION_CREATE;
+          } else {
+            $actions[] = ManiphestAction::ACTION_REOPEN;
           }
           break;
         default:
@@ -334,6 +337,7 @@ final class ManiphestTransactionEditor {
     $owner_phid = $task->getOwnerPHID();
     $actor_phid = head($transactions)->getAuthorPHID();
     $author_phid = $task->getAuthorPHID();
+
 
     id(new PhabricatorFeedStoryPublisher())
       ->setStoryType(PhabricatorFeedStoryTypeConstants::STORY_MANIPHEST)
@@ -357,6 +361,17 @@ final class ManiphestTransactionEditor {
               $owner_phid,
             )),
           $task->getProjectPHIDs()))
+      ->setPrimaryObjectPHID($task->getPHID())
+      ->setSubscribedPHIDs(
+        array_merge(
+          array_filter(
+            array(
+              $author_phid,
+              $owner_phid,
+              $actor_phid
+                  )
+                       ),
+          $task->getCCPHIDs()))
       ->publish();
   }
 

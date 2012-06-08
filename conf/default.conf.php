@@ -179,6 +179,8 @@ return array(
   // extend AphrontMySQLDatabaseConnectionBase.
   'mysql.implementation' => 'AphrontMySQLDatabaseConnection',
 
+// -- Notifications ----//
+  'notification.enabled' => false,
 
 // -- Email ----------------------------------------------------------------- //
 

@@ -421,8 +421,7 @@ class AphrontDefaultApplicationConfiguration
           'PhabricatorChatLogChannelLogController',
       ),
 
-      '/aphlict/' => 'PhabricatorAphlictTestPageController',
-
+      '/notification/test/' => 'PhabricatorNotificationTestController',
       '/flag/' => array(
         '' => 'PhabricatorFlagListController',
         'view/(?P<view>[^/]+)/' => 'PhabricatorFlagListController',
