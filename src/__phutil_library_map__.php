@@ -1479,7 +1479,7 @@ phutil_register_library_map(array(
     'LiskIsolationTestCase' => 'PhabricatorTestCase',
     'LiskIsolationTestDAO' => 'LiskDAO',
     'LiskIsolationTestDAOException' => 'Exception',
-    'ManiphestAction' => 'ManiphestConstants',
+    'ManiphestAction' => 'PhrictionConstants',
     'ManiphestAuxiliaryFieldDefaultSpecification' => 'ManiphestAuxiliaryFieldSpecification',
     'ManiphestAuxiliaryFieldTypeException' => 'Exception',
     'ManiphestAuxiliaryFieldValidationException' => 'Exception',

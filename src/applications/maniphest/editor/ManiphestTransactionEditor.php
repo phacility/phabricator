@@ -329,6 +329,7 @@ final class ManiphestTransactionEditor {
           }
           break;
         default:
+          $actions[] = $type;
           break;
       }
     }

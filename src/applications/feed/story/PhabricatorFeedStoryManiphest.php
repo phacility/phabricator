@@ -95,16 +95,29 @@ final class PhabricatorFeedStoryManiphest
     $actor_link = $this->linkTo($actor_phid);
     $task_link = $this->linkTo($task_phid);
     $owner_link = $this->linkTo($owner_phid);
+
     $verb = ManiphestAction::getActionPastTenseVerb($action);
 
+    if (($action == ManiphestAction::ACTION_ASSIGN
+        || $action == ManiphestAction::ACTION_REASSIGN)
+        && !$owner_phid) {
+      //double assignment since the action is diff in this case
+      $verb = $action = 'placed up for grabs';
+    }
     $one_line = "{$actor_link} {$verb} {$task_link}";
 
     switch ($action) {
     case ManiphestAction::ACTION_ASSIGN:
+    case ManiphestAction::ACTION_REASSIGN:
       $one_line .= " to {$owner_link}";
       break;
-    default:
+    case ManiphestAction::ACTION_DESCRIPTION:
+      $one_line .= " to {$description}";
       break;
+    }
+
+    if ($comments) {
+      $one_line .= " \"{$comments}\"";
     }
 
     return $one_line;
