@@ -105,6 +105,7 @@ final class DifferentialDefaultFieldSelector
         'DifferentialRevisionIDFieldSpecification',
         'DifferentialManiphestTasksFieldSpecification',
         'DifferentialBranchFieldSpecification',
+        'DifferentialArcanistProjectFieldSpecification',
         'DifferentialCommitsFieldSpecification',
       )) + $map;
 

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,24 @@ final class DifferentialArcanistProjectFieldSpecification
   private function getArcanistProjectPHID() {
     $diff = $this->getDiff();
     return $diff->getArcanistProjectPHID();
+  }
+
+  public function renderValueForMail($phase) {
+    $status = $this->getRevision()->getStatus();
+
+    if ($status != ArcanistDifferentialRevisionStatus::NEEDS_REVISION &&
+        $status != ArcanistDifferentialRevisionStatus::ACCEPTED) {
+      return null;
+    }
+
+    $diff = $this->getRevision()->loadActiveDiff();
+    if ($diff) {
+      $phid = $diff->getArcanistProjectPHID();
+      if ($phid) {
+        $handle = PhabricatorObjectHandleData::loadOneHandle($phid);
+        return "ARCANIST PROJECT\n  ".$handle->getName();
+      }
+    }
   }
 
 }
