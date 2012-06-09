@@ -437,6 +437,12 @@ final class DifferentialRevisionEditor {
           $revision->getPHID(),
           $revision->getAuthorPHID(),
         ))
+      ->setPrimaryObjectPHID($revision->getPHID())
+      ->setSubscribedPHIDs(
+        array_merge(
+          array($revision->getAuthorPHID()),
+          $revision->getReviewers(),
+          $revision->getCCPHIDs()))
       ->publish();
 
 //  TODO: Move this into a worker task thing.

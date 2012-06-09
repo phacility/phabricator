@@ -36,19 +36,10 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
   public function renderView() {
     $data = $this->getStoryData();
 
-    $author_phid = $data->getAuthorPHID();
-
     $view = new PhabricatorFeedStoryView();
 
-    $revision_phid = $data->getValue('revision_phid');
-
-    $action = $data->getValue('action');
-    $verb = DifferentialAction::getActionPastTenseVerb($action);
-
-    $view->setTitle(
-      $this->linkTo($author_phid).
-      " {$verb} revision ".
-      $this->linkTo($revision_phid).'.');
+    $line = $this->getLineForData($data);
+    $view->setTitle($line);
     $view->setEpoch($data->getEpoch());
 
     $action = $data->getValue('action');
@@ -63,7 +54,7 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
     }
 
     if ($full_size) {
-      $view->setImage($this->getHandle($author_phid)->getImageURI());
+      $view->setImage($this->getHandle($data->getAuthorPHID())->getImageURI());
       $content = $this->renderSummary($data->getValue('feedback_content'));
       $view->appendChild($content);
     } else {
@@ -73,4 +64,37 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
     return $view;
   }
 
+  public function renderNotificationView() {
+    $data = $this->getStoryData();
+
+    $view = new PhabricatorNotificationStoryView();
+
+    $view->setTitle($this->getLineForData($data));
+    $view->setEpoch($data->getEpoch());
+    $view->setViewed($this->getHasViewed());
+
+    return $view;
+  }
+
+  private function getLineForData($data) {
+    $actor_phid = $data->getAuthorPHID();
+    $owner_phid = $data->getValue('revision_author_phid');
+    $revision_phid = $data->getValue('revision_phid');
+    $action = $data->getValue('action');
+    $comments = $data->getValue('feedback_content');
+
+    $actor_link = $this->linkTo($actor_phid);
+    $revision_link = $this->linkTo($revision_phid);
+    $owner_link = $this->linkTo($owner_phid);
+
+    $verb = DifferentialAction::getActionPastTenseVerb($action);
+
+    $one_line = "{$actor_link} {$verb} revision {$revision_link}";
+
+    if ($comments) {
+      $one_line .= " \"{$comments}\"";
+    }
+
+    return $one_line;
+  }
 }

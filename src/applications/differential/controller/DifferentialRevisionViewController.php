@@ -363,6 +363,10 @@ final class DifferentialRevisionViewController extends DifferentialController {
     if ($comment_form) {
       $page_pane->appendChild($comment_form->render());
     }
+
+    PhabricatorFeedStoryNotification::updateObjectNotificationViews(
+      $user, $revision->getPHID());
+
     return $this->buildStandardPageResponse(
       array(
         $reviewer_warning,
