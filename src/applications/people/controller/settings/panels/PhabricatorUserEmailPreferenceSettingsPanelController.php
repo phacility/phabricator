@@ -123,36 +123,46 @@ final class PhabricatorUserEmailPreferenceSettingsPanelController
           ->setValue($preferences->getPreference($pref_no_self_mail, 0)));
 
     if (PhabricatorMetaMTAMail::shouldMultiplexAllMail()) {
-      $form
-        ->appendChild(
-          id(new AphrontFormSelectControl())
-            ->setLabel('Add "Re:" Prefix')
-            ->setName($pref_re_prefix)
-            ->setCaption(
-              'Enable this option to fix threading in Mail.app on OS X Lion, '.
-              'or if you like "Re:" in your email subjects.')
-            ->setOptions(
-              array(
-                'default'   => 'Use Server Default ('.$re_prefix_default.')',
-                'true'      => 'Enable "Re:" prefix',
-                'false'     => 'Disable "Re:" prefix',
-              ))
-            ->setValue($re_prefix_value))
-        ->appendChild(
-          id(new AphrontFormSelectControl())
-            ->setLabel('Vary Subjects')
-            ->setName($pref_vary)
-            ->setCaption(
-              'This option adds more information to email subjects, but may '.
-              'break threading in some clients.')
-            ->setOptions(
-              array(
-                'default'   => 'Use Server Default ('.$vary_default.')',
-                'true'      => 'Vary Subjects',
-                'false'     => 'Do Not Vary Subjects',
-              ))
-            ->setValue($vary_value));
+      $re_control = id(new AphrontFormSelectControl())
+        ->setName($pref_re_prefix)
+        ->setOptions(
+          array(
+            'default'   => 'Use Server Default ('.$re_prefix_default.')',
+            'true'      => 'Enable "Re:" prefix',
+            'false'     => 'Disable "Re:" prefix',
+          ))
+        ->setValue($re_prefix_value);
+
+      $vary_control = id(new AphrontFormSelectControl())
+        ->setName($pref_vary)
+        ->setOptions(
+          array(
+            'default'   => 'Use Server Default ('.$vary_default.')',
+            'true'      => 'Vary Subjects',
+            'false'     => 'Do Not Vary Subjects',
+          ))
+        ->setValue($vary_value);
+    } else {
+      $re_control = id(new AphrontFormStaticControl())
+        ->setValue('Server Default ('.$re_prefix_default.')');
+
+      $vary_control = id(new AphrontFormStaticControl())
+        ->setValue('Server Default ('.$vary_default.')');
     }
+
+    $form
+      ->appendChild(
+        $re_control
+          ->setLabel('Add "Re:" Prefix')
+          ->setCaption(
+            'Enable this option to fix threading in Mail.app on OS X Lion, '.
+            'or if you like "Re:" in your email subjects.'))
+      ->appendChild(
+        $vary_control
+          ->setLabel('Vary Subjects')
+          ->setCaption(
+            'This option adds more information to email subjects, but may '.
+            'break threading in some clients.'));
 
     $form
       ->appendChild(
