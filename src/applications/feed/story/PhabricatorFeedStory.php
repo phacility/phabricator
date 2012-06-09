@@ -28,6 +28,7 @@ abstract class PhabricatorFeedStory {
   }
 
   abstract public function renderView();
+  abstract public function renderNotificationView();
 
   public function getRequiredHandlePHIDs() {
     return array();

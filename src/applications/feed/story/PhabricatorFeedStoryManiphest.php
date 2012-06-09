@@ -70,7 +70,6 @@ final class PhabricatorFeedStoryManiphest
 
     $view = new PhabricatorNotificationStoryView();
 
-    $view->setEpoch($data->getEpoch());
     $view->setTitle($this->getLineForData($data));
     $view->setEpoch($data->getEpoch());
     $view->setViewed($this->getHasViewed());

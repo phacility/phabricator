@@ -369,9 +369,7 @@ final class ManiphestTransactionEditor {
             array(
               $author_phid,
               $owner_phid,
-              $actor_phid
-                  )
-                       ),
+              $actor_phid)),
           $task->getCCPHIDs()))
       ->publish();
   }
