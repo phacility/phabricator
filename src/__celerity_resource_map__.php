@@ -1648,7 +1648,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-request' =>
   array(
-    'uri' => '/res/1fe7cbad/rsrc/js/javelin/lib/Request.js',
+    'uri' => '/res/f256e263/rsrc/js/javelin/lib/Request.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2627,7 +2627,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/5e68be89/diffusion.pkg.js',
       'type' => 'js',
     ),
-    '5b44c659' =>
+    '6fb20113' =>
     array(
       'name' => 'javelin.pkg.js',
       'symbols' =>
@@ -2643,7 +2643,7 @@ celerity_register_resource_map(array(
         8 => 'javelin-json',
         9 => 'javelin-uri',
       ),
-      'uri' => '/res/pkg/5b44c659/javelin.pkg.js',
+      'uri' => '/res/pkg/6fb20113/javelin.pkg.js',
       'type' => 'js',
     ),
     '7839ae2d' =>
@@ -2720,7 +2720,7 @@ celerity_register_resource_map(array(
     'diffusion-commit-view-css' => 'c8ce2d88',
     'diffusion-icons-css' => 'c8ce2d88',
     'inline-comment-summary-css' => '32f461a4',
-    'javelin-behavior' => '5b44c659',
+    'javelin-behavior' => '6fb20113',
     'javelin-behavior-aphront-basic-tokenizer' => '97f65640',
     'javelin-behavior-aphront-drag-and-drop' => '86f654e2',
     'javelin-behavior-aphront-drag-and-drop-textarea' => '86f654e2',
@@ -2753,22 +2753,22 @@ celerity_register_resource_map(array(
     'javelin-behavior-refresh-csrf' => '0c96375e',
     'javelin-behavior-repository-crossreference' => '86f654e2',
     'javelin-behavior-workflow' => '0c96375e',
-    'javelin-dom' => '5b44c659',
-    'javelin-event' => '5b44c659',
-    'javelin-install' => '5b44c659',
-    'javelin-json' => '5b44c659',
+    'javelin-dom' => '6fb20113',
+    'javelin-event' => '6fb20113',
+    'javelin-install' => '6fb20113',
+    'javelin-json' => '6fb20113',
     'javelin-mask' => '0c96375e',
-    'javelin-request' => '5b44c659',
-    'javelin-stratcom' => '5b44c659',
+    'javelin-request' => '6fb20113',
+    'javelin-stratcom' => '6fb20113',
     'javelin-tokenizer' => '97f65640',
     'javelin-typeahead' => '97f65640',
     'javelin-typeahead-normalizer' => '97f65640',
     'javelin-typeahead-ondemand-source' => '97f65640',
     'javelin-typeahead-preloaded-source' => '97f65640',
     'javelin-typeahead-source' => '97f65640',
-    'javelin-uri' => '5b44c659',
-    'javelin-util' => '5b44c659',
-    'javelin-vector' => '5b44c659',
+    'javelin-uri' => '6fb20113',
+    'javelin-util' => '6fb20113',
+    'javelin-vector' => '6fb20113',
     'javelin-workflow' => '0c96375e',
     'maniphest-task-summary-css' => '7839ae2d',
     'maniphest-transaction-detail-css' => '7839ae2d',
