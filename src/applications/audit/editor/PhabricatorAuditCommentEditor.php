@@ -394,8 +394,6 @@ final class PhabricatorAuditCommentEditor {
     $reply_handler = self::newReplyHandlerForCommit($commit);
 
     $prefix = PhabricatorEnv::getEnvConfig('metamta.diffusion.subject-prefix');
-    $subject = "{$prefix} {$name}: {$summary}";
-    $vary_subject = "{$prefix} [{$verb}] {$name}: {$summary}";
 
     $threading = self::getMailThreading($commit->getPHID());
     list($thread_id, $thread_topic) = $threading;
@@ -434,8 +432,9 @@ final class PhabricatorAuditCommentEditor {
     $is_new = false;
 
     $template = id(new PhabricatorMetaMTAMail())
-      ->setSubject($subject)
-      ->setVarySubject($subject)
+      ->setSubject("{$name}: {$summary}")
+      ->setSubjectPrefix($prefix)
+      ->setVarySubjectPrefix("[{$verb}]")
       ->setFrom($comment->getActorPHID())
       ->setThreadID($thread_id, $is_new)
       ->addHeader('Thread-Topic', $thread_topic)

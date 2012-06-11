@@ -181,15 +181,13 @@ abstract class PackageMail {
     $package = $this->getPackage();
     $prefix = PhabricatorEnv::getEnvConfig('metamta.package.subject-prefix');
     $verb = $this->getVerb();
-    $package_title = $this->renderPackageTitle();
-    $subject = trim("{$prefix} {$package_title}");
-    $vary_subject = trim("{$prefix} [{$verb}] {$package_title}");
     $threading = $this->getMailThreading();
     list($thread_id, $thread_topic) = $threading;
 
     $template = id(new PhabricatorMetaMTAMail())
-      ->setSubject($subject)
-      ->setVarySubject($vary_subject)
+      ->setSubject($this->renderPackageTitle())
+      ->setSubjectPrefix($prefix)
+      ->setVarySubjectPrefix("[{$verb}]")
       ->setFrom($package->getActorPHID())
       ->setThreadID($thread_id, $this->isNewThread())
       ->addHeader('Thread-Topic', $thread_topic)

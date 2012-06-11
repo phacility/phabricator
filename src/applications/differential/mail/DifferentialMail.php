@@ -41,7 +41,7 @@ abstract class DifferentialMail {
     return "D{$id}: {$title}";
   }
 
-  abstract protected function renderVarySubject();
+  abstract protected function renderVaryPrefix();
   abstract protected function renderBody();
 
   public function setActorHandle($actor_handle) {
@@ -78,8 +78,6 @@ abstract class DifferentialMail {
     }
 
     $cc_phids     = $this->getCCPHIDs();
-    $subject      = $this->buildSubject();
-    $vary_subject = $this->buildVarySubject();
     $body         = $this->buildBody();
     $attachments  = $this->buildAttachments();
 
@@ -92,8 +90,9 @@ abstract class DifferentialMail {
     }
 
     $template
-      ->setSubject($subject)
-      ->setVarySubject($vary_subject)
+      ->setSubject($this->renderSubject())
+      ->setSubjectPrefix($this->getSubjectPrefix())
+      ->setVarySubjectPrefix($this->renderVaryPrefix())
       ->setBody($body)
       ->setIsHTML($this->shouldMarkMailAsHTML())
       ->setParentMessageID($this->parentMessageID)
@@ -200,14 +199,6 @@ abstract class DifferentialMail {
 
   protected function getSubjectPrefix() {
     return PhabricatorEnv::getEnvConfig('metamta.differential.subject-prefix');
-  }
-
-  protected function buildSubject() {
-    return trim($this->getSubjectPrefix().' '.$this->renderSubject());
-  }
-
-  protected function buildVarySubject() {
-    return trim($this->getSubjectPrefix().' '.$this->renderVarySubject());
   }
 
   protected function shouldMarkMailAsHTML() {
