@@ -94,7 +94,7 @@ final class PhabricatorJumpNavHandler {
   private static function findCloselyNamedProject($name) {
     $project = id(new PhabricatorProject())->loadOneWhere(
       'name = %s',
-      name);
+      $name);
     if ($project) {
       return $project;
     } else { // no exact match, try a fuzzy match

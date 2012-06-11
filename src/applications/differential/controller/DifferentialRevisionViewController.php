@@ -278,7 +278,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $changeset_view->setVsMap($vs_map);
     $changeset_view->setWhitespace($whitespace);
     if ($repository) {
-      $changeset_view->setRepository($repository, $target);
+      $changeset_view->setRepository($repository);
     }
     $changeset_view->setSymbolIndexes($symbol_indexes);
 

@@ -97,7 +97,7 @@ final class HeraldActionConfig {
             self::ACTION_NOTHING,
           ));
       default:
-        throw new Exception("Unknown content type '{$type}'.");
+        throw new Exception("Unknown content type '{$content_type}'.");
     }
   }
 

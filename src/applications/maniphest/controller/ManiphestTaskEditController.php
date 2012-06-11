@@ -327,7 +327,7 @@ final class ManiphestTaskEditController extends ManiphestController {
     $phids = array_unique($phids);
 
     $handles = id(new PhabricatorObjectHandleData($phids))
-      ->loadHandles($phids);
+      ->loadHandles();
 
     $tvalues = mpull($handles, 'getFullName', 'getPHID');
 

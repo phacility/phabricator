@@ -345,8 +345,9 @@ final class PhabricatorProjectProfileController
   }
 
   private function renderSubprojectTable(
-    PhabricatorObjectHandleData $handles,
-    $subprojects_phids) {
+    array $handles,
+    array $subprojects_phids) {
+    assert_instances_of($handles, 'PhabricatorObjectHandle');
 
     $rows = array();
     foreach ($subprojects_phids as $subproject_phid) {

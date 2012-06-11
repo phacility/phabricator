@@ -29,7 +29,7 @@ extends PhabricatorOAuthServerController {
   public function processRequest() {
     $request      = $this->getRequest();
     $current_user = $request->getUser();
-    $server       = new PhabricatorOAuthServer($current_user);
+    $server       = new PhabricatorOAuthServer();
     $panels       = array();
     $results      = array();
 
