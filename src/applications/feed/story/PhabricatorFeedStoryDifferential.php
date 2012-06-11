@@ -81,7 +81,6 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
     $owner_phid = $data->getValue('revision_author_phid');
     $revision_phid = $data->getValue('revision_phid');
     $action = $data->getValue('action');
-    $comments = $data->getValue('feedback_content');
 
     $actor_link = $this->linkTo($actor_phid);
     $revision_link = $this->linkTo($revision_phid);
@@ -90,10 +89,6 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
     $verb = DifferentialAction::getActionPastTenseVerb($action);
 
     $one_line = "{$actor_link} {$verb} revision {$revision_link}";
-
-    if ($comments) {
-      $one_line .= " \"{$comments}\"";
-    }
 
     return $one_line;
   }
