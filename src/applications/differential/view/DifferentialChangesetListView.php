@@ -112,6 +112,8 @@ final class DifferentialChangesetListView extends AphrontView {
 
     Javelin::initBehavior('buoyant', array());
 
+    Javelin::initBehavior('differential-toggle-files', array());
+
     $output = array();
     $mapping = array();
     foreach ($changesets as $key => $changeset) {

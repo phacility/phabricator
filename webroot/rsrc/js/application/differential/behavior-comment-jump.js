@@ -19,6 +19,9 @@ JX.behavior('differential-comment-jump', function(config) {
           break;
         }
       }
+      JX.Stratcom.invoke('differential-toggle-file-request', null, {
+        element: jumpto,
+      });
       JX.DOM.scrollTo(jumpto);
       e.kill();
     });
