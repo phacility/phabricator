@@ -49,12 +49,13 @@ final class DiffusionGitTagListQuery extends DiffusionTagListQuery {
 
       $matches = null;
       if (!preg_match('/^(.*) ([0-9]+) ([0-9+-]+)$/', $creator, $matches)) {
-        throw new Exception(
-          "Unparseable output from 'git for-each-ref': {$line}");
+        // It's possible a tag doesn't have a creator (tagger)
+        $author = null;
+        $epoch = null;
+      } else {
+        $author = $matches[1];
+        $epoch  = $matches[2];
       }
-
-      $author = $matches[1];
-      $epoch  = $matches[2];
 
       $tag = new DiffusionRepositoryTag();
       $tag->setAuthor($author);
