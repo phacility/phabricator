@@ -371,6 +371,54 @@ final class PhabricatorStandardPageView extends AphrontPageView {
         ' ');
     }
 
+    $notification_header = '';
+    $notification_dropdown = '';
+
+    if (PhabricatorEnv::getEnvConfig('notification.enabled') &&
+      $user->isLoggedIn()) {
+      $aphlict_object_id = 'aphlictswfobject';
+
+      $aphlict_content = phutil_render_tag(
+        'object',
+        array(
+          'classid' => 'clsid:d27cdb6e-ae6d-11cf-96b8-444553540000',
+              ),
+        '<param name="movie" value="/rsrc/swf/aphlict.swf" />'.
+        '<param name="allowScriptAccess" value="always" />'.
+        '<param name="wmode" value="opaque" />'.
+        '<embed src="/rsrc/swf/aphlict.swf" wmode="opaque" id="'.
+        $aphlict_object_id.'"></embed>');
+
+      Javelin::initBehavior('aphlict-dropdown', array());
+
+
+      $notification_indicator =
+        javelin_render_tag(
+          'td',
+          array(
+            'sigil' => 'aphlict-indicator',
+            'id' => 'phabricator-notification-indicator',
+          ),
+          id(new PhabricatorFeedStoryNotification)
+            ->countUnread($user));
+
+      $notification_header =
+        $notification_indicator.
+        '<td>'.
+        '<div style="height:1px; width:1px;">'.
+        $aphlict_content.
+        '</div>'.
+        '</td>';
+      $notification_dropdown =
+        javelin_render_tag(
+          'div',
+          array(
+            'sigil' => 'aphlict-dropdown',
+            'id'    =>  'phabricator-notification-dropdown',
+                ),
+          '');
+    }
+
     $header_chrome = null;
     $footer_chrome = null;
     if ($this->getShowChrome()) {
@@ -400,8 +448,10 @@ final class PhabricatorStandardPageView extends AphrontPageView {
             '<td class="phabricator-login-details">'.
               $login_stuff.
             '</td>'.
+            $notification_header.
           '</tr>'.
-        '</table>';
+        '</table>'.
+        $notification_dropdown;
       $footer_chrome =
         '<div class="phabricator-page-foot">'.
           $foot_links.

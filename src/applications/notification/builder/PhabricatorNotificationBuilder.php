@@ -39,6 +39,7 @@ final class PhabricatorNotificationBuilder {
 
     $null_view = new AphrontNullView();
 
+    //TODO ADD NOTIFICATIONS HEADER
     foreach ($stories as $story) {
       $story->setHandles($handles);
       $view = $story->renderNotificationView();
