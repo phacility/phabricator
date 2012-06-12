@@ -39,6 +39,7 @@ JX.behavior('aphlict-listen', function(config) {
     + '<param name="movie" value="/rsrc/swf/aphlict.swf" />'
     + '<param name="allowScriptAccess" value="always" />'
     + '<param name="wmode" value="opaque" />'
-    + '<embed src="/rsrc/swf/aphlict.swf" wmode="opaque" id="aphlictswfobject">'
+    + '<embed src="/rsrc/swf/aphlict.swf" wmode="opaque"'
+      + 'width="0" height="0" id="aphlictswfobject">'
     + '</embed></object>'; //Evan sanctioned
 });
