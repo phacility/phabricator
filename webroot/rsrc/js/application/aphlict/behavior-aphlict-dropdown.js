@@ -12,9 +12,6 @@ JX.behavior('aphlict-dropdown', function(config) {
   var indicator = JX.$('phabricator-notification-indicator');
   var visible = false;
 
-
-  JX.DOM.hide(dropdown);
-
   //populate panel
   (new JX.Request('/notification/panel/',
     function(response) {

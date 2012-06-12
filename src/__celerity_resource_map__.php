@@ -758,7 +758,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-aphlict-dropdown' =>
   array(
-    'uri' => '/res/d0025c08/rsrc/js/application/aphlict/behavior-aphlict-dropdown.js',
+    'uri' => '/res/40c65741/rsrc/js/application/aphlict/behavior-aphlict-dropdown.js',
     'type' => 'js',
     'requires' =>
     array(

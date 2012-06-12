@@ -414,8 +414,9 @@ final class PhabricatorStandardPageView extends AphrontPageView {
           'div',
           array(
             'sigil' => 'aphlict-dropdown',
-            'id'    =>  'phabricator-notification-dropdown',
-                ),
+            'id'    => 'phabricator-notification-dropdown',
+            'style' => 'display: none',
+          ),
           '');
     }
 
