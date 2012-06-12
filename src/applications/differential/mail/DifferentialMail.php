@@ -96,7 +96,7 @@ abstract class DifferentialMail {
       ->setBody($body)
       ->setIsHTML($this->shouldMarkMailAsHTML())
       ->setParentMessageID($this->parentMessageID)
-      ->addHeader('Thread-Topic', $this->getRevision()->getTitle());
+      ->addHeader('Thread-Topic', $this->getThreadTopic());
 
     $template->setAttachments($attachments);
 
@@ -325,6 +325,11 @@ EOTEXT;
   protected function getThreadID() {
     $phid = $this->getRevision()->getPHID();
     return "differential-rev-{$phid}-req";
+  }
+
+  protected function getThreadTopic() {
+    $phid = $this->getRevision()->getPHID();
+    return "Differential Revision {$phid}";
   }
 
   public function setComment($comment) {
