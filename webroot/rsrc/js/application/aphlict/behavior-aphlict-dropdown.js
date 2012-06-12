@@ -19,11 +19,13 @@ JX.behavior('aphlict-dropdown', function(config) {
     }
 
     request = new JX.Request('/notification/panel/', function(response) {
-      indicator.textContent = '' + response.number;
+      JX.DOM.setContent(indicator, response.number);
       if (response.number == 0) {
-        indicator.style.fontWeight = "";
+        JX.DOM.alterClass(indicator,
+          "phabricator-notification-indicator-unread", false);
       } else {
-        indicator.style.fontWeight = "bold";
+        JX.DOM.alterClass(indicator,
+          "phabricator-notification-indicator-unread", true);
       }
       JX.DOM.setContent(dropdown, JX.$H(response.content));
       request = null;

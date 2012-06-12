@@ -258,6 +258,10 @@ a.handle-disabled {
   background-color: #0089d9;
 }
 
+.phabricator-notification-indicator-unread {
+  font-weight: bold;
+}
+
 #phabricator-notification-dropdown {
 
   word-wrap: break-word;
