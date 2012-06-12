@@ -380,8 +380,8 @@ celerity_register_resource_map(array(
   ),
   '/rsrc/swf/aphlict.swf' =>
   array(
-    'hash' => '1ca0c776448792b23edd38ab0bb9c0c2',
-    'uri' => '/res/1ca0c776/rsrc/swf/aphlict.swf',
+    'hash' => '4b9a9d83bebaf254f3790e87b45c1f92',
+    'uri' => '/res/4b9a9d83/rsrc/swf/aphlict.swf',
     'disk' => '/rsrc/swf/aphlict.swf',
     'type' => 'swf',
   ),
@@ -758,7 +758,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-aphlict-dropdown' =>
   array(
-    'uri' => '/res/40c65741/rsrc/js/application/aphlict/behavior-aphlict-dropdown.js',
+    'uri' => '/res/8cf4375f/rsrc/js/application/aphlict/behavior-aphlict-dropdown.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -772,7 +772,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-aphlict-listen' =>
   array(
-    'uri' => '/res/7f4bc63b/rsrc/js/application/aphlict/behavior-aphlict-listen.js',
+    'uri' => '/res/80ce64ae/rsrc/js/application/aphlict/behavior-aphlict-listen.js',
     'type' => 'js',
     'requires' =>
     array(
