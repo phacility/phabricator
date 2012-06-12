@@ -60,9 +60,14 @@ final class PhabricatorOAuthLoginController
 
     $userinfo_uri = new PhutilURI($provider->getUserInfoURI());
     $userinfo_uri->setQueryParam('access_token', $this->accessToken);
+    $userinfo_uri = (string)$userinfo_uri;
 
     try {
       $user_data = @file_get_contents($userinfo_uri);
+      if ($user_data === false) {
+        throw new PhabricatorOAuthProviderException(
+          "Request to '{$userinfo_uri}' failed!");
+      }
       $provider->setUserData($user_data);
     } catch (PhabricatorOAuthProviderException $e) {
       return $this->buildErrorResponse(new PhabricatorOAuthFailureView());

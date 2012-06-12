@@ -71,12 +71,12 @@ final class PhabricatorOAuthProviderGitHub extends PhabricatorOAuthProvider {
 
   public function getTestURIs() {
     return array(
-      'http://github.com',
+      'http://api.github.com',
     );
   }
 
   public function getUserInfoURI() {
-    return 'https://github.com/api/v2/json/user/show';
+    return 'https://api.github.com/user';
   }
 
   public function getMinimumScope() {
@@ -84,7 +84,7 @@ final class PhabricatorOAuthProviderGitHub extends PhabricatorOAuthProvider {
   }
 
   public function setUserData($data) {
-    $data = idx(json_decode($data, true), 'user');
+    $data = json_decode($data, true);
     $this->validateUserData($data);
     $this->userData = $data;
     return $this;
@@ -103,9 +103,8 @@ final class PhabricatorOAuthProviderGitHub extends PhabricatorOAuthProvider {
   }
 
   public function retrieveUserProfileImage() {
-    $id = $this->userData['gravatar_id'];
-    if ($id) {
-      $uri = 'http://www.gravatar.com/avatar/'.$id.'?s=50';
+    $uri = idx($this->userData, 'avatar_url');
+    if ($uri) {
       return @file_get_contents($uri);
     }
     return null;
