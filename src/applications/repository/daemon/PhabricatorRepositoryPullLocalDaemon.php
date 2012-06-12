@@ -67,13 +67,11 @@ final class PhabricatorRepositoryPullLocalDaemon
         array(
           'name'      => 'not',
           'param'     => 'repository',
-          'default'   => array(),
           'repeat'    => true,
           'help'      => 'Do not pull __repository__.',
         ),
         array(
           'name'      => 'repositories',
-          'default'   => array(),
           'wildcard'  => true,
           'help'      => 'Pull specific __repositories__ instead of all.',
         ),
