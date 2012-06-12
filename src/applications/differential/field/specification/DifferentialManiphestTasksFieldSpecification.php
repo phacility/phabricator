@@ -149,8 +149,7 @@ final class DifferentialManiphestTasksFieldSpecification
       }
       $invalid = implode(', ', $invalid);
       throw new DifferentialFieldParseException(
-        "Commit message references nonexistent {$what}: {$invalid}.",
-        $task_phids);
+        "Commit message references nonexistent {$what}: {$invalid}.");
     }
 
     return $task_phids;

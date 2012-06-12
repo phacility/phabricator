@@ -18,14 +18,4 @@
 
 final class DifferentialFieldParseException extends Exception {
 
-  private $partialParse;
-
-  public function __construct($message, $partial_parse = null) {
-    parent::__construct($message);
-    $this->partialParse = $partial_parse;
-  }
-
-  public function getPartialParse() {
-    return $this->partialParse;
-  }
 }
