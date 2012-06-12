@@ -266,7 +266,7 @@ EOTEXT;
 
 
   protected function formatText($text) {
-    $text = explode("\n", $text);
+    $text = explode("\n", rtrim($text));
     foreach ($text as &$line) {
       $line = rtrim('  '.$line);
     }
