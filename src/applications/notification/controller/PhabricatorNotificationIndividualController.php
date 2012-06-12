@@ -16,36 +16,27 @@
  * limitations under the License.
  */
 
-final class PhabricatorNotificationPanelController
+final class PhabricatorNotificationIndividualController
   extends PhabricatorNotificationController {
 
   public function processRequest() {
-
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $query = new PhabricatorNotificationQuery();
-    $query->setUserPHID($user->getPHID());
-    $query->setLimit(15);
+    $chron_key = $request->getStr('key');
+    $story = id(new PhabricatorFeedStoryNotification())
+      ->loadOneWhere('userPHID = %s AND chronologicalKey = %s',
+                     $user->getPHID(),
+                     $chron_key);
 
-    $stories = $query->execute();
-
-    $builder = new PhabricatorNotificationBuilder($stories);
-    $notifications_view = $builder->buildView();
-
-    $num_unconsumed = 0;
-    foreach ($stories as $story) {
-      if (!$story->getHasViewed()) {
-        $num_unconsumed++;
-      }
+    if ($story == null) {
+      $json = array( "pertinent" => false );
+    } else {
+      $json = array(
+        "pertinent" => true,
+        "primaryObjectPHID" => $story->getPrimaryObjectPHID(),
+      );
     }
-
-    $json = array(
-      "content" => $stories ?
-        $notifications_view->render() :
-        "<b>You currently have no notifications<b>",
-      "number" => $num_unconsumed,
-    );
 
     return id(new AphrontAjaxResponse())->setContent($json);
   }

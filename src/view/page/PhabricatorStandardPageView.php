@@ -376,18 +376,19 @@ final class PhabricatorStandardPageView extends AphrontPageView {
 
     if (PhabricatorEnv::getEnvConfig('notification.enabled') &&
       $user->isLoggedIn()) {
+
       $aphlict_object_id = 'aphlictswfobject';
 
-      $aphlict_content = phutil_render_tag(
-        'object',
+      $server_uri = new PhutilURI(PhabricatorEnv::getURI(''));
+      $server_domain = $server_uri->getDomain();
+
+      Javelin::initBehavior(
+        'aphlict-listen',
         array(
-          'classid' => 'clsid:d27cdb6e-ae6d-11cf-96b8-444553540000',
-              ),
-        '<param name="movie" value="/rsrc/swf/aphlict.swf" />'.
-        '<param name="allowScriptAccess" value="always" />'.
-        '<param name="wmode" value="opaque" />'.
-        '<embed src="/rsrc/swf/aphlict.swf" wmode="opaque" id="'.
-        $aphlict_object_id.'"></embed>');
+          'id'           => $aphlict_object_id,
+          'server'       => $server_domain,
+          'port'         => 2600,
+        ));
 
       Javelin::initBehavior('aphlict-dropdown', array());
 
@@ -405,8 +406,7 @@ final class PhabricatorStandardPageView extends AphrontPageView {
       $notification_header =
         $notification_indicator.
         '<td>'.
-        '<div style="height:1px; width:1px;">'.
-        $aphlict_content.
+        '<div id="aphlictswf-container" style="height:1px; width:1px;">'.
         '</div>'.
         '</td>';
       $notification_dropdown =

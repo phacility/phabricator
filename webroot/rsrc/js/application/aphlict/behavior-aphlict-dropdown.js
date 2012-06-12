@@ -11,13 +11,28 @@ JX.behavior('aphlict-dropdown', function(config) {
   var dropdown = JX.$('phabricator-notification-dropdown');
   var indicator = JX.$('phabricator-notification-indicator');
   var visible = false;
+  var request = null;
+
+  function refresh() {
+    if (request) { //already fetching
+      return;
+    }
+
+    request = new JX.Request('/notification/panel/', function(response) {
+      indicator.textContent = '' + response.number;
+      if (response.number == 0) {
+        indicator.style.fontWeight = "";
+      } else {
+        indicator.style.fontWeight = "bold";
+      }
+      JX.DOM.setContent(dropdown, JX.$H(response.content));
+      request = null;
+    });
+    request.send();
+  }
 
   //populate panel
-  (new JX.Request('/notification/panel/',
-    function(response) {
-      JX.DOM.setContent(dropdown, JX.$H(response.content));
-    })).send();
-
+  refresh();
 
   JX.Stratcom.listen(
     'click',
@@ -48,4 +63,5 @@ JX.behavior('aphlict-dropdown', function(config) {
     }
   )
 
+  JX.Stratcom.listen('notification-panel-update', null, refresh);
 });

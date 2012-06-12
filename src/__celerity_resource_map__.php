@@ -772,7 +772,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-aphlict-listen' =>
   array(
-    'uri' => '/res/6388e057/rsrc/js/application/aphlict/behavior-aphlict-listen.js',
+    'uri' => '/res/7f4bc63b/rsrc/js/application/aphlict/behavior-aphlict-listen.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -780,6 +780,7 @@ celerity_register_resource_map(array(
       1 => 'javelin-aphlict',
       2 => 'javelin-util',
       3 => 'javelin-stratcom',
+      4 => 'javelin-behavior-aphlict-dropdown',
     ),
     'disk' => '/rsrc/js/application/aphlict/behavior-aphlict-listen.js',
   ),

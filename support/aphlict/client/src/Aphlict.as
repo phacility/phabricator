@@ -7,22 +7,11 @@ package {
   import flash.events.*;
   import flash.external.ExternalInterface;
 
-  import com.phabricator.*;
-
   import vegas.strings.JSON;
 
   public class Aphlict extends Sprite {
 
     private var client:String;
-
-    private var master:LocalConnection;
-    private var recv:LocalConnection;
-    private var send:LocalConnection;
-
-    private var receiver:AphlictReceiver;
-    private var loyalUntil:Number = 0;
-    private var subjects:Array;
-    private var frequency:Number = 100;
 
     private var socket:Socket;
     private var readBuffer:ByteArray;
@@ -47,60 +36,10 @@ package {
       this.remoteServer = server;
       this.remotePort   = port;
 
-      this.master = null;
-      this.receiver = new AphlictReceiver(this);
-      this.subjects = [];
-
-      this.send = new LocalConnection();
-
-      this.recv = new LocalConnection();
-      this.recv.client = this.receiver;
-      for (var ii:Number = 0; ii < 32; ii++) {
-        try {
-          this.recv.connect('aphlict_subject_' + ii);
-          this.client = 'aphlict_subject_' + ii;
-        } catch (x:Error) {
-          // Some other Aphlict client is holding that ID.
-        }
-      }
-
-      if (!this.client) {
-        // Too many clients open already, just exit.
-        return;
-      }
-
-      this.usurp();
+      this.connectToServer();
+      return;
     }
 
-    private function usurp():void {
-      if (this.master) {
-        for (var ii:Number = 0; ii < this.subjects.length; ii++) {
-          if (this.subjects[ii] == this.client) {
-            continue;
-          }
-          this.send.send(this.subjects[ii], 'remainLoyal');
-        }
-      } else if (this.loyalUntil < new Date().getTime()) {
-        var recv:LocalConnection = new LocalConnection();
-        recv.client = this.receiver;
-        try {
-          recv.connect('aphlict_master');
-          this.master = recv;
-          this.subjects = [this.client];
-
-          this.connectToServer();
-
-        } catch (x:Error) {
-          // Can't become the master.
-        }
-
-        if (!this.master) {
-          this.send.send('aphlict_master', 'becomeLoyal', this.client);
-          this.remainLoyal();
-        }
-      }
-      setTimeout(this.usurp, this.frequency);
-    }
 
     public function connectToServer():void {
       var socket:Socket = new Socket();
@@ -156,22 +95,12 @@ package {
           t.writeBytes(b, msg_len + 8);
           this.readBuffer = t;
 
-          for (var ii:Number = 0; ii < this.subjects.length; ii++) {
-            this.send.send(this.subjects[ii], 'receiveMessage', data);
-          }
+          this.receiveMessage(data);
         } else {
           break;
         }
       } while (true);
 
-    }
-
-    public function remainLoyal():void {
-      this.loyalUntil = new Date().getTime() + (2 * this.frequency);
-    }
-
-    public function becomeLoyal(subject:String):void {
-      this.subjects.push(subject);
     }
 
     public function receiveMessage(msg:Object):void {

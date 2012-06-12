@@ -98,6 +98,7 @@ final class PhabricatorFeedStoryPublisher {
 
     if (PhabricatorEnv::getEnvConfig('notification.enabled')) {
       $this->insertNotifications($chrono_key);
+      $this->sendNotification($chrono_key);
     }
     return $story;
   }
@@ -136,6 +137,17 @@ final class PhabricatorFeedStoryPublisher {
       implode(', ', $sql));
   }
 
+  private function sendNotification($chrono_key) {
+    $aphlict_url = 'http://127.0.0.1:22281/push?'; //TODO: make configurable
+    $future = new HTTPFuture($aphlict_url, array(
+      "key" => (string)$chrono_key,
+      // TODO: fix. \r\n appears to be appended to the final value here.
+      //       this is a temporary workaround
+      "nothing" => "",
+    ));
+    $future->setMethod('POST');
+    $future->resolve();
+  }
 
   /**
    * We generate a unique chronological key for each story type because we want
