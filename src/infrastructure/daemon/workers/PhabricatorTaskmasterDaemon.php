@@ -36,12 +36,12 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
       $rows = $conn_w->getAffectedRows();
 
       if (!$rows) {
-        $rows = queryfx(
+        queryfx(
           $conn_w,
           'UPDATE %T SET leaseOwner = %s, leaseExpires = UNIX_TIMESTAMP() + 15
             WHERE leaseExpires < UNIX_TIMESTAMP() LIMIT 1',
-            $task_table->getTableName(),
-            $lease_ownership_name);
+          $task_table->getTableName(),
+          $lease_ownership_name);
         $rows = $conn_w->getAffectedRows();
       }
 

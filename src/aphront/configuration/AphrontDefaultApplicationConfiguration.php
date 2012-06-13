@@ -422,6 +422,9 @@ class AphrontDefaultApplicationConfiguration
       ),
 
       '/notification/test/' => 'PhabricatorNotificationTestController',
+      '/notification/panel/' => 'PhabricatorNotificationPanelController',
+      '/notification/individual/'
+            => 'PhabricatorNotificationIndividualController',
       '/flag/' => array(
         '' => 'PhabricatorFlagListController',
         'view/(?P<view>[^/]+)/' => 'PhabricatorFlagListController',

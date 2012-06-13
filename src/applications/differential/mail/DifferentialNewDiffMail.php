@@ -18,7 +18,7 @@
 
 final class DifferentialNewDiffMail extends DifferentialReviewRequestMail {
 
-  protected function renderVarySubject() {
+  protected function renderVaryPrefix() {
     $revision = $this->getRevision();
     $line_count = $revision->getLineCount();
     $lines = ($line_count == 1 ? "1 line" : "{$line_count} lines");
@@ -29,7 +29,7 @@ final class DifferentialNewDiffMail extends DifferentialReviewRequestMail {
       $verb = 'Updated';
     }
 
-    return "[{$verb}, {$lines}] ".$this->renderSubject();
+    return "[{$verb}, {$lines}]";
   }
 
   protected function renderBody() {

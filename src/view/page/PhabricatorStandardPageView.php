@@ -371,6 +371,55 @@ final class PhabricatorStandardPageView extends AphrontPageView {
         ' ');
     }
 
+    $notification_header = '';
+    $notification_dropdown = '';
+
+    if (PhabricatorEnv::getEnvConfig('notification.enabled') &&
+      $user->isLoggedIn()) {
+
+      $aphlict_object_id = 'aphlictswfobject';
+
+      $server_uri = new PhutilURI(PhabricatorEnv::getURI(''));
+      $server_domain = $server_uri->getDomain();
+
+      Javelin::initBehavior(
+        'aphlict-listen',
+        array(
+          'id'           => $aphlict_object_id,
+          'server'       => $server_domain,
+          'port'         => 2600,
+        ));
+
+      Javelin::initBehavior('aphlict-dropdown', array());
+
+
+      $notification_indicator =
+        javelin_render_tag(
+          'td',
+          array(
+            'sigil' => 'aphlict-indicator',
+            'id' => 'phabricator-notification-indicator',
+          ),
+          id(new PhabricatorFeedStoryNotification)
+            ->countUnread($user));
+
+      $notification_header =
+        $notification_indicator.
+        '<td>'.
+        '<div id="aphlictswf-container" style="height:1px; width:1px;">'.
+        '</div>'.
+        '</td>';
+      $notification_dropdown =
+        javelin_render_tag(
+          'div',
+          array(
+            'sigil' => 'aphlict-dropdown',
+            'id'    => 'phabricator-notification-dropdown',
+            'style' => 'display: none',
+          ),
+          '');
+    }
+
     $header_chrome = null;
     $footer_chrome = null;
     if ($this->getShowChrome()) {
@@ -400,8 +449,10 @@ final class PhabricatorStandardPageView extends AphrontPageView {
             '<td class="phabricator-login-details">'.
               $login_stuff.
             '</td>'.
+            $notification_header.
           '</tr>'.
-        '</table>';
+        '</table>'.
+        $notification_dropdown;
       $footer_chrome =
         '<div class="phabricator-page-foot">'.
           $foot_links.

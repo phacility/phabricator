@@ -40,24 +40,22 @@ final class PhabricatorFeedStoryManiphest
 
     $view = new PhabricatorFeedStoryView();
 
+    $line = $this->getLineForData($data);
+    $view->setTitle($line);
     $view->setEpoch($data->getEpoch());
 
-    $action = $this->getLineForData($data);
-    $view->setTitle($action);
-    $view->setEpoch($data->getEpoch());
-
-
+    $action = $data->getValue('action');
     switch ($action) {
-    case ManiphestAction::ACTION_CREATE:
-      $full_size = true;
-      break;
-    default:
-      $full_size = false;
-      break;
+      case ManiphestAction::ACTION_CREATE:
+        $full_size = true;
+        break;
+      default:
+        $full_size = false;
+        break;
     }
 
     if ($full_size) {
-      $view->setImage($this->getHandle($this->getAuthorPHID())->getImageURI());
+      $view->setImage($this->getHandle($data->getAuthorPHID())->getImageURI());
       $content = $this->renderSummary($data->getValue('description'));
       $view->appendChild($content);
     } else {
@@ -67,13 +65,11 @@ final class PhabricatorFeedStoryManiphest
     return $view;
   }
 
-
   public function renderNotificationView() {
     $data = $this->getStoryData();
 
     $view = new PhabricatorNotificationStoryView();
 
-    $view->setEpoch($data->getEpoch());
     $view->setTitle($this->getLineForData($data));
     $view->setEpoch($data->getEpoch());
     $view->setViewed($this->getHasViewed());
@@ -107,13 +103,13 @@ final class PhabricatorFeedStoryManiphest
     $one_line = "{$actor_link} {$verb} {$task_link}";
 
     switch ($action) {
-    case ManiphestAction::ACTION_ASSIGN:
-    case ManiphestAction::ACTION_REASSIGN:
-      $one_line .= " to {$owner_link}";
-      break;
-    case ManiphestAction::ACTION_DESCRIPTION:
-      $one_line .= " to {$description}";
-      break;
+      case ManiphestAction::ACTION_ASSIGN:
+      case ManiphestAction::ACTION_REASSIGN:
+        $one_line .= " to {$owner_link}";
+        break;
+      case ManiphestAction::ACTION_DESCRIPTION:
+        $one_line .= " to {$description}";
+        break;
     }
 
     if ($comments) {

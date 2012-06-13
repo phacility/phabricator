@@ -98,41 +98,57 @@ final class PhabricatorFeedStoryPublisher {
 
     if (PhabricatorEnv::getEnvConfig('notification.enabled')) {
       $this->insertNotifications($chrono_key);
+      $this->sendNotification($chrono_key);
     }
     return $story;
   }
 
 
   private function insertNotifications($chrono_key) {
+    if (!$this->subscribedPHIDs) {
+      return;
+    }
+
     if (!$this->primaryObjectPHID) {
-      throw
-        new Exception("Call setPrimaryObjectPHID() before Publishing!");
+      throw new Exception(
+        "You must call setPrimaryObjectPHID() if you setSubscribedPHIDs()!");
     }
-    if ($this->subscribedPHIDs) {
-      $notif = new PhabricatorFeedStoryNotification();
-      $sql = array();
-      $conn = $notif->establishConnection('w');
 
-      foreach (array_unique($this->subscribedPHIDs) as $user_phid) {
-        $sql[] = qsprintf(
-          $conn,
-          '(%s, %s, %s, %d)',
-          $this->primaryObjectPHID,
-          $user_phid,
-          $chrono_key,
-          0);
-      }
+    $notif = new PhabricatorFeedStoryNotification();
+    $sql = array();
+    $conn = $notif->establishConnection('w');
 
-      queryfx(
+    foreach (array_unique($this->subscribedPHIDs) as $user_phid) {
+      $sql[] = qsprintf(
         $conn,
-        'INSERT INTO %T
-       (primaryObjectPHID, userPHID, chronologicalKey, hasViewed)
-       VALUES %Q',
-        $notif->getTableName(),
-        implode(', ', $sql));
+        '(%s, %s, %s, %d)',
+        $this->primaryObjectPHID,
+        $user_phid,
+        $chrono_key,
+        0);
     }
 
+    queryfx(
+      $conn,
+      'INSERT INTO %T
+     (primaryObjectPHID, userPHID, chronologicalKey, hasViewed)
+     VALUES %Q',
+      $notif->getTableName(),
+      implode(', ', $sql));
   }
+
+  private function sendNotification($chrono_key) {
+    $aphlict_url = 'http://127.0.0.1:22281/push?'; //TODO: make configurable
+    $future = new HTTPFuture($aphlict_url, array(
+      "key" => (string)$chrono_key,
+      // TODO: fix. \r\n appears to be appended to the final value here.
+      //       this is a temporary workaround
+      "nothing" => "",
+    ));
+    $future->setMethod('POST');
+    $future->resolve();
+  }
+
   /**
    * We generate a unique chronological key for each story type because we want
    * to be able to page through the stream with a cursor (i.e., select stories

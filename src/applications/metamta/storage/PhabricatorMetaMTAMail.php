@@ -154,8 +154,13 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this;
   }
 
-  public function setVarySubject($subject) {
-    $this->setParam('vary-subject', $subject);
+  public function setSubjectPrefix($prefix) {
+    $this->setParam('subject-prefix', $prefix);
+    return $this;
+  }
+
+  public function setVarySubjectPrefix($prefix) {
+    $this->setParam('vary-subject-prefix', $prefix);
     return $this;
   }
 
@@ -416,21 +421,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
               }
             }
 
-            $alt_subject = idx($params, 'vary-subject');
-            if ($alt_subject) {
-              $use_subject = PhabricatorEnv::getEnvConfig(
-                'metamta.vary-subjects');
-
-              if ($prefs) {
-                $use_subject = $prefs->getPreference(
-                  PhabricatorUserPreferences::PREFERENCE_VARY_SUBJECT,
-                  $use_subject);
-              }
-
-              if ($use_subject) {
-                $value = $alt_subject;
-              }
-            }
+            $subject = array();
 
             if ($is_threaded) {
               $add_re = PhabricatorEnv::getEnvConfig('metamta.re-prefix');
@@ -442,11 +433,31 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
               }
 
               if ($add_re) {
-                $value = 'Re: '.$value;
+                $subject[] = 'Re:';
               }
             }
 
-            $mailer->setSubject($value);
+            $subject[] = trim(idx($params, 'subject-prefix'));
+
+            $vary_prefix = idx($params, 'vary-subject-prefix');
+            if ($vary_prefix != '') {
+              $use_subject = PhabricatorEnv::getEnvConfig(
+                'metamta.vary-subjects');
+
+              if ($prefs) {
+                $use_subject = $prefs->getPreference(
+                  PhabricatorUserPreferences::PREFERENCE_VARY_SUBJECT,
+                  $use_subject);
+              }
+
+              if ($use_subject) {
+                $subject[] = $vary_prefix;
+              }
+            }
+
+            $subject[] = $value;
+
+            $mailer->setSubject(implode(' ', array_filter($subject)));
             break;
           case 'is-html':
             if ($value) {
@@ -491,7 +502,8 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
           case 'mailtags':
             // Handled below.
             break;
-          case 'vary-subject':
+          case 'subject-prefix':
+          case 'vary-subject-prefix':
             // Handled above.
             break;
           default:

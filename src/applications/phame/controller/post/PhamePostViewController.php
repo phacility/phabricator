@@ -94,10 +94,6 @@ extends PhameController {
     } else if ($this->getBloggerName() && $this->getPhameTitle()) {
       $phame_title = $this->getPhameTitle();
       $phame_title = PhabricatorSlug::normalize($phame_title);
-      if ($phame_title != $this->getPhameTitle()) {
-        $uri = $post->getViewURI($this->getBloggerName());
-        return id(new AphrontRedirectResponse())->setURI($uri);
-      }
       $blogger = id(new PhabricatorUser())->loadOneWhere(
         'username = %s',
         $this->getBloggerName());
@@ -107,7 +103,11 @@ extends PhameController {
       $post = id(new PhamePost())->loadOneWhere(
         'bloggerPHID = %s AND phameTitle = %s',
         $blogger->getPHID(),
-        $this->getPhameTitle());
+        $phame_title);
+      if ($post && $phame_title != $this->getPhameTitle()) {
+        $uri = $post->getViewURI($this->getBloggerName());
+        return id(new AphrontRedirectResponse())->setURI($uri);
+      }
     }
 
     if (!$post) {

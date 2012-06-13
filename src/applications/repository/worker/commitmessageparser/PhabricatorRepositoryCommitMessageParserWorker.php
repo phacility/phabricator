@@ -98,10 +98,16 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         $commit_is_new = $conn_w->getAffectedRows();
 
         $message = null;
-        $committer = $data->getCommitDetail('authorPHID');
+        $name = $data->getCommitDetail('committer');
+        if ($name !== null) {
+          $committer = $data->getCommitDetail('committerPHID');
+        } else {
+          $committer = $data->getCommitDetail('authorPHID');
+          $name = $data->getAuthorName();
+        }
         if (!$committer) {
           $committer = $revision->getAuthorPHID();
-          $message = 'Closed by '.$data->getAuthorName().'.';
+          $message = 'Closed by '.$name.'.';
         }
 
         if ($commit_is_new) {

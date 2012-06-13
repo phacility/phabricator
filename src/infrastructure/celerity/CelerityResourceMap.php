@@ -37,7 +37,7 @@ final class CelerityResourceMap {
       $root = phutil_get_library_root('phabricator');
 
       $path = PhabricatorEnv::getEnvConfig('celerity.resource-path');
-      $ok = include_once Filesystem::resolvePath($path, $root);
+      $ok = include_once $root.'/'.$path;
       if (!$ok) {
         throw new Exception(
           "Failed to load Celerity resource map! Check the ".

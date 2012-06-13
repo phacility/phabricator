@@ -354,4 +354,4 @@ To place text in a literal block use "%%%":
   %%%
 
 Remarkup will not process the text inside of literal blocks (other than to
-escape HTML, linkify URLs, and preserve line breaks).
+escape HTML and preserve line breaks).

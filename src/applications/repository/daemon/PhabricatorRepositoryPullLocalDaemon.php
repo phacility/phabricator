@@ -78,8 +78,8 @@ final class PhabricatorRepositoryPullLocalDaemon
       ));
 
     $no_discovery   = $args->getArg('no-discovery');
-    $repo_names     = $args->getArg('repositories', array());
-    $exclude_names  = $args->getArg('not', array());
+    $repo_names     = $args->getArg('repositories');
+    $exclude_names  = $args->getArg('not');
 
     // Each repository has an individual pull frequency; after we pull it,
     // wait that long to pull it again. When we start up, try to pull everything

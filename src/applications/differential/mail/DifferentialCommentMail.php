@@ -75,9 +75,9 @@ final class DifferentialCommentMail extends DifferentialMail {
     return $tags;
   }
 
-  protected function renderVarySubject() {
+  protected function renderVaryPrefix() {
     $verb = ucwords($this->getVerb());
-    return "[{$verb}] ".$this->renderSubject();
+    return "[{$verb}]";
   }
 
   protected function getVerb() {

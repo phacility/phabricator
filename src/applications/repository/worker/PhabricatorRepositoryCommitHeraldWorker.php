@@ -152,17 +152,15 @@ EOBODY;
 
     $prefix = PhabricatorEnv::getEnvConfig('metamta.diffusion.subject-prefix');
 
-    $subject = trim("{$prefix} {$commit_name}: {$name}");
-    $vary_subject = trim("{$prefix} [Commit] {$commit_name}: {$name}");
-
     $threading = PhabricatorAuditCommentEditor::getMailThreading(
       $commit->getPHID());
     list($thread_id, $thread_topic) = $threading;
 
     $template = new PhabricatorMetaMTAMail();
     $template->setRelatedPHID($commit->getPHID());
-    $template->setSubject($subject);
-    $template->setVarySubject($subject);
+    $template->setSubject("{$commit_name}: {$name}");
+    $template->setSubjectPrefix($prefix);
+    $template->setVarySubjectPrefix("[Commit]");
     $template->setBody($body);
     $template->setThreadID($thread_id, $is_new = true);
     $template->addHeader('Thread-Topic', $thread_topic);

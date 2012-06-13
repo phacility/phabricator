@@ -575,6 +575,12 @@ final class DifferentialCommentEditor {
           $this->actorPHID,
           $revision->getAuthorPHID(),
         ))
+      ->setPrimaryObjectPHID($revision->getPHID())
+      ->setSubscribedPHIDs(
+        array_merge(
+          array($revision->getAuthorPHID()),
+          $revision->getReviewers(),
+          $revision->getCCPHIDs()))
       ->publish();
 
     // TODO: Move to a daemon?

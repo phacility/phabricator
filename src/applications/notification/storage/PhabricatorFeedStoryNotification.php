@@ -54,4 +54,22 @@ final class PhabricatorFeedStoryNotification extends PhabricatorFeedDAO {
     }
   }
 
+  /* should only be called when notifications are enabled */
+  public function countUnread(
+    PhabricatorUser $user) {
+
+      $conn = $this->establishConnection('r');
+
+      $data = queryfx_one(
+        $conn,
+        "SELECT COUNT(*) as count
+         FROM %T
+         WHERE userPHID = %s
+           AND hasViewed=0",
+        $this->getTableName(),
+        $user->getPHID());
+
+      return $data['count'];
+  }
+
 }

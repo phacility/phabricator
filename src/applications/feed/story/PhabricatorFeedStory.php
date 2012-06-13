@@ -29,6 +29,12 @@ abstract class PhabricatorFeedStory {
 
   abstract public function renderView();
 
+//  TODO: Make abstract once all subclasses implement it.
+  public function renderNotificationView() {
+    return id(new PhabricatorFeedStoryUnknown($this->data))
+      ->renderNotificationView();
+  }
+
   public function getRequiredHandlePHIDs() {
     return array();
   }

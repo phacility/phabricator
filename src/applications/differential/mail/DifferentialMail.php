@@ -41,7 +41,7 @@ abstract class DifferentialMail {
     return "D{$id}: {$title}";
   }
 
-  abstract protected function renderVarySubject();
+  abstract protected function renderVaryPrefix();
   abstract protected function renderBody();
 
   public function setActorHandle($actor_handle) {
@@ -78,8 +78,6 @@ abstract class DifferentialMail {
     }
 
     $cc_phids     = $this->getCCPHIDs();
-    $subject      = $this->buildSubject();
-    $vary_subject = $this->buildVarySubject();
     $body         = $this->buildBody();
     $attachments  = $this->buildAttachments();
 
@@ -92,12 +90,13 @@ abstract class DifferentialMail {
     }
 
     $template
-      ->setSubject($subject)
-      ->setVarySubject($vary_subject)
+      ->setSubject($this->renderSubject())
+      ->setSubjectPrefix($this->getSubjectPrefix())
+      ->setVarySubjectPrefix($this->renderVaryPrefix())
       ->setBody($body)
       ->setIsHTML($this->shouldMarkMailAsHTML())
       ->setParentMessageID($this->parentMessageID)
-      ->addHeader('Thread-Topic', $this->getRevision()->getTitle());
+      ->addHeader('Thread-Topic', $this->getThreadTopic());
 
     $template->setAttachments($attachments);
 
@@ -202,14 +201,6 @@ abstract class DifferentialMail {
     return PhabricatorEnv::getEnvConfig('metamta.differential.subject-prefix');
   }
 
-  protected function buildSubject() {
-    return trim($this->getSubjectPrefix().' '.$this->renderSubject());
-  }
-
-  protected function buildVarySubject() {
-    return trim($this->getSubjectPrefix().' '.$this->renderVarySubject());
-  }
-
   protected function shouldMarkMailAsHTML() {
     return false;
   }
@@ -275,7 +266,7 @@ EOTEXT;
 
 
   protected function formatText($text) {
-    $text = explode("\n", $text);
+    $text = explode("\n", rtrim($text));
     foreach ($text as &$line) {
       $line = rtrim('  '.$line);
     }
@@ -334,6 +325,11 @@ EOTEXT;
   protected function getThreadID() {
     $phid = $this->getRevision()->getPHID();
     return "differential-rev-{$phid}-req";
+  }
+
+  protected function getThreadTopic() {
+    $phid = $this->getRevision()->getPHID();
+    return "Differential Revision {$phid}";
   }
 
   public function setComment($comment) {

@@ -33,11 +33,11 @@ final class DifferentialExceptionMail extends DifferentialMail {
   }
 
   protected function renderSubject() {
-    return "Exception: unable to process your mail request.";
+    return "Exception: unable to process your mail request";
   }
 
-  protected function renderVarySubject() {
-    return $this->renderSubject();
+  protected function renderVaryPrefix() {
+    return '';
   }
 
   protected function buildBody() {

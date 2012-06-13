@@ -25,8 +25,8 @@ final class DifferentialDiffContentMail extends DifferentialMail {
     $this->content = $content;
   }
 
-  protected function renderVarySubject() {
-    return '[Content] '.$this->renderSubject();
+  protected function renderVaryPrefix() {
+    return '[Content]';
   }
 
   protected function renderBody() {
