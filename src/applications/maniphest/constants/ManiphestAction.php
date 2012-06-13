@@ -19,7 +19,7 @@
 /**
  * @group maniphest
  */
-final class ManiphestAction extends PhrictionConstants {
+final class ManiphestAction extends ManiphestConstants {
   /* These actions must be determined when the story
      is generated and thus are new */
   const ACTION_CREATE      = 'create';
