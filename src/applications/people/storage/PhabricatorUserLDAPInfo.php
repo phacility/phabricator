@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
-final class DifferentialFieldParseException extends Exception {
-
+final class PhabricatorUserLDAPInfo extends PhabricatorUserDAO {
+    protected $userID;
+    protected $ldapUsername;
 }

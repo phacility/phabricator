@@ -548,6 +548,27 @@ return array(
   // The Google "Client Secret" to use for Google API access.
   'google.application-secret'   => null,
 
+// -- LDAP Auth ----------------------------------------------------- //
+  // Enable ldap auth
+  'ldap.auth-enabled'         => false,
+
+  // The LDAP server hostname
+  'ldap.hostname' => '',
+
+  // The LDAP base domain name
+  'ldap.base_dn' => '',
+
+  // The attribute to be regarded as 'username'. Has to be unique
+  'ldap.search_attribute' => '',
+
+  // The attribute(s) to be regarded as 'real name'.
+  // If more then one attribute is supplied the values of the attributes in
+  // the array will be joined
+  'ldap.real_name_attributes' => array(),
+
+  // The LDAP version
+  'ldap.version' => 3,
+
 // -- Disqus OAuth ---------------------------------------------------------- //
 
   // Can users use Disqus credentials to login to Phabricator?

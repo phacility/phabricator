@@ -69,12 +69,11 @@ final class ConduitAPI_differential_parsecommitmessage_Method
       $field = $aux_fields[$field_key];
       try {
         $fields[$field_key] = $field->parseValueFromCommitMessage($field_value);
+        $field->setValueFromParsedCommitMessage($fields[$field_key]);
       } catch (DifferentialFieldParseException $ex) {
         $field_label = $field->renderLabelForCommitMessage();
         $errors[] = "Error parsing field '{$field_label}': ".$ex->getMessage();
-        $fields[$field_key] = $ex->getPartialParse();
       }
-      $field->setValueFromParsedCommitMessage($fields[$field_key]);
     }
 
     if (!$is_partial) {

@@ -883,6 +883,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('testdatabase.sql'),
       ),
+      'ldapinfo.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('ldapinfo.sql'),
+      ),
     );
   }
 

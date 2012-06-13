@@ -65,6 +65,9 @@ final class PhabricatorUserSettingsController
       case 'search':
         $delegate = new PhabricatorUserSearchSettingsPanelController($request);
         break;
+      case 'ldap':
+        $delegate = new PhabricatorUserLDAPSettingsPanelController($request);
+        break;
       default:
         $delegate = new PhabricatorUserOAuthSettingsPanelController($request);
         $delegate->setOAuthProvider($oauth_providers[$this->page]);
@@ -123,6 +126,11 @@ final class PhabricatorUserSettingsController
       $key = $provider->getProviderKey();
       $name = $provider->getProviderName();
       $items[$key] = $name.' Account';
+    }
+
+    $ldap_provider = new PhabricatorLDAPProvider();
+    if ($ldap_provider->isProviderEnabled()) {
+      $items['ldap'] = 'LDAP Account';
     }
 
     if ($items) {
