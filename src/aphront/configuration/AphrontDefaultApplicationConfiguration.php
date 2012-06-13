@@ -73,7 +73,7 @@ class AphrontDefaultApplicationConfiguration
         'edit/(?:(?P<id>\d+)/(?:(?P<view>\w+)/)?)?'
           => 'PhabricatorPeopleEditController',
       ),
-      '/p/(?P<username>\w+)/(?:(?P<page>\w+)/)?'
+      '/p/(?P<username>[\w._-]+)/(?:(?P<page>\w+)/)?'
         => 'PhabricatorPeopleProfileController',
       '/conduit/' => array(
         '' => 'PhabricatorConduitListController',

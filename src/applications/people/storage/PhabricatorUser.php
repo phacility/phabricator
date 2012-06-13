@@ -595,6 +595,13 @@ EOBODY;
   }
 
   public static function validateUsername($username) {
+    // NOTE: If you update this, make sure to update:
+    //
+    //  - Remarkup rule for @mentions.
+    //  - Routing rule for "/p/username/".
+    //  - Unit tests, obviously.
+    //  - describeValidUsername() method, above.
+
     return (bool)preg_match('/^[a-zA-Z0-9._-]*[a-zA-Z0-9_-]$/', $username);
   }
 
