@@ -20,7 +20,8 @@ JX.behavior('repository-crossreference', function(config) {
       var target = e.getTarget();
       var map = {nc : 'class', nf : 'function'};
       if (JX.DOM.isNode(target, 'span') && (target.className in map)) {
-        var uri = JX.$U('/diffusion/symbol/' + target.innerHTML + '/');
+        var symbol = target.textContent || target.innerText;
+        var uri = JX.$U('/diffusion/symbol/' + symbol + '/');
         uri.addQueryParams({
           type : map[target.className],
           lang : config.lang,
