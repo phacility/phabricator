@@ -146,6 +146,11 @@ class AphrontDefaultApplicationConfiguration
         ),
       ),
 
+      '/ldap/' => array(
+        'login/' => 'PhabricatorLDAPLoginController',
+        'unlink/'    => 'PhabricatorLDAPUnlinkController',
+      ),
+
       '/oauthserver/' => array(
         'auth/'          => 'PhabricatorOAuthServerAuthController',
         'test/'          => 'PhabricatorOAuthServerTestController',
