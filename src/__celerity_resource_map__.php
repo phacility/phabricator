@@ -1332,6 +1332,18 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/core/behavior-keyboard-shortcuts.js',
   ),
+  'javelin-behavior-phabricator-notification-example' =>
+  array(
+    'uri' => '/res/0b8fadf5/rsrc/js/application/uiexample/notification-example.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'phabricator-notification',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-behavior',
+    ),
+    'disk' => '/rsrc/js/application/uiexample/notification-example.js',
+  ),
   'javelin-behavior-phabricator-object-selector' =>
   array(
     'uri' => '/res/0c4b0d82/rsrc/js/application/core/behavior-object-selector.js',
@@ -2145,6 +2157,27 @@ celerity_register_resource_map(array(
       1 => 'javelin-dom',
     ),
     'disk' => '/rsrc/js/application/core/DropdownMenuItem.js',
+  ),
+  'phabricator-notification' =>
+  array(
+    'uri' => '/res/8497d4b2/rsrc/js/application/core/Notification.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-install',
+      1 => 'javelin-dom',
+      2 => 'javelin-stratcom',
+    ),
+    'disk' => '/rsrc/js/application/core/Notification.js',
+  ),
+  'phabricator-notification-css' =>
+  array(
+    'uri' => '/res/423a14d1/rsrc/css/aphront/notification.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/aphront/notification.css',
   ),
   'phabricator-object-selector-css' =>
   array(

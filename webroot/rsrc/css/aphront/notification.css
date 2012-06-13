@@ -1,0 +1,24 @@
+/**
+ * @provides phabricator-notification-css
+ */
+
+.jx-notification-container {
+  position: fixed;
+
+  bottom: 24px;
+  left: 24px;
+  width: 240px;
+  padding: 8px 16px;
+
+  font-size: 11px;
+  overflow: hidden;
+
+  background: #f3f6ff;
+  color: #444444;
+  border: 1px solid #afbfcf;
+
+  cursor: pointer;
+
+  border-radius: 3px;
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.25);
+}
