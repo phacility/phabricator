@@ -60,6 +60,11 @@ $conf['phabricator.env'] = $env;
 
 PhabricatorEnv::setEnvConfig($conf);
 
+$translation = PhabricatorEnv::newObjectFromConfig('translation.provider');
+PhutilTranslator::getInstance()
+  ->setLanguage($translation->getLanguage())
+  ->addTranslations($translation->getTranslations());
+
 phutil_load_library('arcanist/src');
 
 foreach (PhabricatorEnv::getEnvConfig('load-libraries') as $library) {

@@ -167,28 +167,27 @@ final class DifferentialLintFieldSpecification
         'details',
       )) + $hidden;
 
-    $singular = array(
-      ArcanistLintSeverity::SEVERITY_ERROR    => 'Error',
-      ArcanistLintSeverity::SEVERITY_WARNING  => 'Warning',
-      ArcanistLintSeverity::SEVERITY_AUTOFIX  => 'Auto-Fix',
-      ArcanistLintSeverity::SEVERITY_ADVICE   => 'Advice',
-      'details'                               => 'Detail',
-    );
-
-    $plural = array(
-      ArcanistLintSeverity::SEVERITY_ERROR    => 'Errors',
-      ArcanistLintSeverity::SEVERITY_WARNING  => 'Warnings',
-      ArcanistLintSeverity::SEVERITY_AUTOFIX  => 'Auto-Fixes',
-      ArcanistLintSeverity::SEVERITY_ADVICE   => 'Advice',
-      'details'                               => 'Details',
-    );
-
     $show = array();
     foreach ($hidden as $key => $value) {
-      if ($value == 1) {
-        $show[] = $value.' '.idx($singular, $key);
-      } else {
-        $show[] = $value.' '.idx($plural, $key);
+      switch ($key) {
+        case ArcanistLintSeverity::SEVERITY_ERROR:
+          $show[] = pht('%d Error(s)', $value);
+          break;
+        case ArcanistLintSeverity::SEVERITY_WARNING:
+          $show[] = pht('%d Warning(s)', $value);
+          break;
+        case ArcanistLintSeverity::SEVERITY_AUTOFIX:
+          $show[] = pht('%d Auto-Fix(es)', $value);
+          break;
+        case ArcanistLintSeverity::SEVERITY_ADVICE:
+          $show[] = pht('%d Advice(s)', $value);
+          break;
+        case 'details':
+          $show[] = pht('%d Detail(s)', $value);
+          break;
+        default:
+          $show[] = $value;
+          break;
       }
     }
 

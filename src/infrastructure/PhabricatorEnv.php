@@ -299,6 +299,7 @@ final class PhabricatorEnv {
    */
   public static function getRequiredClasses() {
     return array(
+      'translation.provider' => 'PhabricatorTranslation',
       'metamta.mail-adapter' => 'PhabricatorMailImplementationAdapter',
       'metamta.maniphest.reply-handler' => 'PhabricatorMailReplyHandler',
       'metamta.differential.reply-handler' => 'PhabricatorMailReplyHandler',

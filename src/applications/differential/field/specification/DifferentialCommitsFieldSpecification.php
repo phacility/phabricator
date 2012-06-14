@@ -64,14 +64,7 @@ final class DifferentialCommitsFieldSpecification
 
     $body = array();
     $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
-    if (count($handles) == 1) {
-      $body[] = "COMMIT";
-    } else {
-      // This is unlikely to ever happen since we'll send this mail the
-      // first time we discover a commit, but it's not impossible if data
-      // was migrated, etc.
-      $body[] = "COMMITS";
-    }
+    $body[] = pht('COMMIT(S)', count($handles));
 
     foreach ($handles as $handle) {
       $body[] = '  '.PhabricatorEnv::getProductionURI($handle->getURI());

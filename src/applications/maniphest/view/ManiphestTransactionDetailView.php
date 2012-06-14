@@ -407,7 +407,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
           if (count($removed) == 1) {
             $desc = 'removed project '.$this->renderHandles($removed);
           } else {
-            $desc = 'removed projectss: '.$this->renderHandles($removed);
+            $desc = 'removed projects: '.$this->renderHandles($removed);
           }
         } else {
           $verb = 'Changed Projects';
@@ -488,40 +488,21 @@ final class ManiphestTransactionDetailView extends ManiphestView {
         $add_desc = $this->renderHandles($added);
         $rem_desc = $this->renderHandles($removed);
 
-        switch ($attach_type) {
-          case PhabricatorPHIDConstants::PHID_TYPE_DREV:
-            $singular = 'Differential Revision';
-            $plural = 'Differential Revisions';
-            break;
-          case PhabricatorPHIDConstants::PHID_TYPE_FILE:
-            $singular = 'file';
-            $plural = 'files';
-            break;
-          case PhabricatorPHIDConstants::PHID_TYPE_TASK:
-            $singular = 'Maniphest Task';
-            $plural = 'Maniphest Tasks';
-            $dependency = true;
-            break;
-        }
-
         if ($added && !$removed) {
           $verb = 'Attached';
-          if (count($added) == 1) {
-            $desc = 'attached '.$singular.': '.$add_desc;
-          } else {
-            $desc = 'attached '.$plural.': '.$add_desc;
-          }
+          $desc = 'attached '.$this->getAttachName($attach_type, count($added));
         } else if ($removed && !$added) {
           $verb = 'Detached';
-          if (count($removed) == 1) {
-            $desc = 'detached '.$singular.': '.$rem_desc;
-          } else {
-            $desc = 'detached '.$plural.': '.$rem_desc;
-          }
+          $desc =
+            'detached '.
+            $this->getAttachName($attach_type, count($removed));
         } else {
           $verb = 'Changed Attached';
-          $desc = 'changed attached '.$plural.', added: '.$add_desc.'; '.
-                                              'removed: '.$rem_desc;
+          $desc =
+            'changed attached '.
+            $this->getAttachName($attach_type, count($added) + count($removed)).
+            ', added: '.$add_desc.'; '.
+            'removed: '.$rem_desc;
         }
         break;
       case ManiphestTransactionType::TYPE_AUXILIARY:
@@ -563,6 +544,17 @@ final class ManiphestTransactionDetailView extends ManiphestView {
     }
 
     return array($verb, $desc, $classes);
+  }
+
+  private function getAttachName($attach_type, $count) {
+    switch ($attach_type) {
+      case PhabricatorPHIDConstants::PHID_TYPE_DREV:
+        return pht('Differential Revision(s)', $count);
+      case PhabricatorPHIDConstants::PHID_TYPE_FILE:
+        return pht('file(s)', $count);
+      case PhabricatorPHIDConstants::PHID_TYPE_TASK:
+        return pht('Maniphest Task(s)', $count);
+    }
   }
 
   private function renderFullSummary($transaction) {

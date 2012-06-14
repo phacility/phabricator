@@ -122,6 +122,11 @@ if (PhabricatorEnv::getEnvConfig('phabricator.setup')) {
 
 phabricator_detect_bad_base_uri();
 
+$translation = PhabricatorEnv::newObjectFromConfig('translation.provider');
+PhutilTranslator::getInstance()
+  ->setLanguage($translation->getLanguage())
+  ->addTranslations($translation->getTranslations());
+
 $host = $_SERVER['HTTP_HOST'];
 $path = $_REQUEST['__path__'];
 
