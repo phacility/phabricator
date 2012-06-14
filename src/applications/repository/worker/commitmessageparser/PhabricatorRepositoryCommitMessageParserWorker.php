@@ -116,7 +116,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
         $status_closed = ArcanistDifferentialRevisionStatus::CLOSED;
         $should_close = ($revision->getStatus() != $status_closed) &&
-                        (!$repository->getDetail('disable-autoclose', false));
+                        $repository->shouldAutocloseCommit($commit, $data);
 
         if ($should_close) {
           $revision->setDateCommitted($commit->getEpoch());

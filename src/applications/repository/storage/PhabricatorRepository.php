@@ -395,7 +395,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
     return idx($default_branches, $this->getVersionControlSystem());
   }
 
-  public function shouldTrackBranch($branch) {
+  private function isBranchInFilter($branch, $filter_key) {
     $vcs = $this->getVersionControlSystem();
 
     $is_git = ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_GIT);
@@ -403,14 +403,40 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
     $use_filter = ($is_git);
 
     if ($use_filter) {
-      $filter = $this->getDetail('branch-filter', array());
-      if ($filter && !isset($filter[$branch])) {
+      $filter = $this->getDetail($filter_key, array());
+      if ($filter && empty($filter[$branch])) {
         return false;
       }
     }
 
-    // By default, track all branches.
+    // By default, all branches pass.
     return true;
+  }
+
+  public function shouldTrackBranch($branch) {
+    return $this->isBranchInFilter($branch, 'branch-filter');
+  }
+
+  public function shouldAutocloseBranch($branch) {
+    return $this->isBranchInFilter($branch, 'close-commits-filter');
+  }
+
+  public function shouldAutocloseCommit(
+    PhabricatorRepositoryCommit $commit,
+    PhabricatorRepositoryCommitData $data) {
+
+    if ($this->getDetail('disable-autoclose', false)) {
+      return false;
+    }
+
+    $branches = $data->getCommitDetail('seenOnBranches', array());
+    foreach ($branches as $branch) {
+      if ($this->shouldAutocloseBranch($branch)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   public function formatCommitName($commit_identifier) {

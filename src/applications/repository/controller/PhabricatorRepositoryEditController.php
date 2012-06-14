@@ -246,6 +246,11 @@ final class PhabricatorRepositoryEditController
         $branch_filter = array_fill_keys($branch_filter, true);
 
         $repository->setDetail('branch-filter', $branch_filter);
+
+        $close_commits_filter = $request->getStrList('close-commits-filter');
+        $close_commits_filter = array_fill_keys($close_commits_filter, true);
+
+        $repository->setDetail('close-commits-filter', $close_commits_filter);
       }
 
       $repository->setDetail(
@@ -611,12 +616,27 @@ final class PhabricatorRepositoryEditController
             'disabled'  => 'Disabled: Ignore Pushed Revisions',
             ))
         ->setCaption(
-          "Automatically close Differential revisions which are pushed to ".
-          "this repository.")
+          "Automatically close Differential revisions when associated commits ".
+          "are pushed to this repository.")
         ->setValue(
           $repository->getDetail('disable-autoclose', false)
           ? 'disabled'
           : 'enabled'));
+
+    if ($has_branch_filter) {
+      $close_commits_filter_str = implode(
+          ', ',
+          array_keys($repository->getDetail('close-commits-filter', array())));
+      $inset
+        ->appendChild(
+          id(new AphrontFormTextControl())
+            ->setName('close-commits-filter')
+            ->setLabel('Autoclose Branches')
+            ->setValue($close_commits_filter_str)
+            ->setCaption(
+              'Optional list of branches which can trigger autoclose. '.
+              'If left empty, all branches trigger autoclose.'));
+    }
 
     $inset
       ->appendChild(

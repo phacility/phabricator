@@ -198,8 +198,6 @@ final class PhabricatorRepositoryPullLocalDaemon
     if (!Filesystem::pathExists($local_path)) {
       $dirname = dirname($local_path);
       if (!Filesystem::pathExists($dirname)) {
-        echo "Creating new directory '{$dirname}' ".
-             "for repository '{$callsign}'.\n";
         Filesystem::createDirectory($dirname, 0755, $recursive = true);
       }
 
@@ -257,6 +255,36 @@ final class PhabricatorRepositoryPullLocalDaemon
     return true;
   }
 
+  private static function isKnownCommitOnBranch(
+    PhabricatorRepository $repository,
+    $target,
+    $branch,
+    $any_autoclose_branch = false) {
+
+    $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
+      'repositoryID = %s AND commitIdentifier = %s',
+      $repository->getID(),
+      $target);
+
+    $data = $commit->loadCommitData();
+    if (!$data) {
+      return false;
+    }
+
+    if ($any_autoclose_branch) {
+      if ($repository->shouldAutocloseCommit($commit, $data)) {
+        return true;
+      }
+    }
+
+    $branches = $data->getCommitDetail('seenOnBranches', array());
+    if (in_array($branch, $branches)) {
+      return true;
+    }
+
+    return false;
+  }
+
   private static function recordCommit(
     PhabricatorRepository $repository,
     $commit_identifier,
@@ -303,9 +331,40 @@ final class PhabricatorRepositoryPullLocalDaemon
     }
   }
 
+  private static function updateCommit(
+    PhabricatorRepository $repository,
+    $commit_identifier,
+    $branch) {
+
+    $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
+      'repositoryID = %s AND commitIdentifier = %s',
+      $repository->getID(),
+      $commit_identifier);
+
+    $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
+      'commitID = %d',
+      $commit->getID());
+    if (!$data) {
+      $data = new PhabricatorRepositoryCommitData();
+      $data->setCommitID($commit->getID());
+    }
+    $branches = $data->getCommitDetail('seenOnBranches', array());
+    $branches[] = $branch;
+    $data->setCommitDetail('seenOnBranches', $branches);
+    $data->save();
+
+    self::insertTask(
+      $repository,
+      $commit,
+      array(
+        'only' => true
+      ));
+  }
+
   private static function insertTask(
     PhabricatorRepository $repository,
-    PhabricatorRepositoryCommit $commit) {
+    PhabricatorRepositoryCommit $commit,
+    $data = array()) {
 
     $vcs = $repository->getVersionControlSystem();
     switch ($vcs) {
@@ -324,10 +383,9 @@ final class PhabricatorRepositoryPullLocalDaemon
 
     $task = new PhabricatorWorkerTask();
     $task->setTaskClass($class);
-    $task->setData(
-      array(
-        'commitID' => $commit->getID(),
-      ));
+    $data['commitID'] = $commit->getID();
+
+    $task->setData($data);
     $task->save();
   }
 
@@ -467,6 +525,7 @@ final class PhabricatorRepositoryPullLocalDaemon
       $only_this_remote = DiffusionBranchInformation::DEFAULT_GIT_REMOTE);
 
     $tracked_something = false;
+    $found_something = false;
     foreach ($branches as $name => $commit) {
       if (!$repository->shouldTrackBranch($name)) {
         continue;
@@ -488,6 +547,22 @@ final class PhabricatorRepositoryPullLocalDaemon
         "Repository r{$repo_callsign} '{$repo_name}' has no tracked branches! ".
         "Verify that your branch filtering settings are correct.");
     }
+
+    foreach ($branches as $name => $commit) {
+      if (!$repository->shouldTrackBranch($name)) {
+        continue;
+      }
+
+      if (!$repository->shouldAutocloseBranch($name)) {
+        continue;
+      }
+
+      if (self::isKnownCommitOnBranch($repository, $commit, $name, true)) {
+        continue;
+      }
+
+      self::executeGitDiscoverCommit($repository, $commit, $name);
+    }
   }
 
 
@@ -496,7 +571,8 @@ final class PhabricatorRepositoryPullLocalDaemon
    */
   private static function executeGitDiscoverCommit(
     PhabricatorRepository $repository,
-    $commit) {
+    $commit,
+    $branch = null) {
 
     $discover = array($commit);
     $insert = array($commit);
@@ -518,7 +594,12 @@ final class PhabricatorRepositoryPullLocalDaemon
           continue;
         }
         $seen_parent[$parent] = true;
-        if (!self::isKnownCommit($repository, $parent)) {
+        if ($branch !== null) {
+          $known = self::isKnownCommitOnBranch($repository, $parent, $branch);
+        } else {
+          $known = self::isKnownCommit($repository, $parent);
+        }
+        if (!$known) {
           $discover[] = $parent;
           $insert[] = $parent;
         }
@@ -535,7 +616,11 @@ final class PhabricatorRepositoryPullLocalDaemon
         $target);
       $epoch = trim($epoch);
 
-      self::recordCommit($repository, $target, $epoch);
+      if ($branch !== null) {
+        self::updateCommit($repository, $target, $branch);
+      } else {
+        self::recordCommit($repository, $target, $epoch);
+      }
 
       if (empty($insert)) {
         break;
