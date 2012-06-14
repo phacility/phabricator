@@ -115,7 +115,9 @@ final class PhrictionDocumentController
         $project = id(new PhabricatorProject())->loadOneWhere(
           'phrictionSlug = %s',
           PhrictionDocument::getProjectSlugIdentifier($slug));
-        $project_phid = $project->getPHID();
+        if ($project) {
+          $project_phid = $project->getPHID();
+        }
       }
 
       $phids = array_filter(
