@@ -397,7 +397,7 @@ final class PhabricatorStandardPageView extends AphrontPageView {
         array(
           'id'           => $aphlict_object_id,
           'server'       => $server_domain,
-          'port'         => 2600,
+          'port'         => 22280,
           'pageObjects' => $this->pageObjects,
         ));
 

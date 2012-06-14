@@ -737,7 +737,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-aphlict' =>
   array(
-    'uri' => '/res/50cae715/rsrc/js/application/aphlict/Aphlict.js',
+    'uri' => '/res/c0b9e53f/rsrc/js/application/aphlict/Aphlict.js',
     'type' => 'js',
     'requires' =>
     array(

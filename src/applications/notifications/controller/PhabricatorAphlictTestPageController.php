@@ -39,7 +39,7 @@ final class PhabricatorAphlictTestPageController
       array(
         'id'      => $object_id,
         'server'  => '127.0.0.1',
-        'port'    => 2600,
+        'port'    => 22280,
       ));
 
     return $this->buildStandardPageResponse(
