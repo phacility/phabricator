@@ -26,7 +26,7 @@ final class PhabricatorMailImplementationTestAdapter
   private $guts = array();
   private $config;
 
-  public function __construct(array $config) {
+  public function __construct(array $config = array()) {
     $this->config = $config;
   }
 
