@@ -19,6 +19,7 @@
 final class DifferentialRevision extends DifferentialDAO {
 
   protected $title;
+  protected $originalTitle;
   protected $status;
 
   protected $summary;
@@ -58,6 +59,14 @@ final class DifferentialRevision extends DifferentialDAO {
         'unsubscribed'  => self::SERIALIZATION_JSON,
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function setTitle($title) {
+    $this->title = $title;
+    if (!$this->getID()) {
+      $this->originalTitle = $title;
+    }
+    return $this;
   }
 
   public function loadCommitPHIDs() {

@@ -24,7 +24,7 @@ abstract class PackageMail {
   protected $paths;
   protected $mailTo;
 
-  public function __construct($package) {
+  public function __construct(PhabricatorOwnersPackage $package) {
     $this->package = $package;
   }
 
@@ -206,7 +206,7 @@ abstract class PackageMail {
   private function getMailThreading() {
     return array(
       'package-'.$this->getPackage()->getPHID(),
-      'package '.$this->getPackage()->getPHID(),
+      'Package '.$this->getPackage()->getOriginalName(),
     );
   }
 

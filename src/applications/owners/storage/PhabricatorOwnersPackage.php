@@ -20,6 +20,7 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO {
 
   protected $phid;
   protected $name;
+  protected $originalName;
   protected $auditingEnabled;
   protected $description;
   protected $primaryOwnerPHID;
@@ -77,6 +78,14 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO {
 
   public function getOldAuditingEnabled() {
     return $this->oldAuditingEnabled;
+  }
+
+  public function setName($name) {
+    $this->name = $name;
+    if (!$this->getID()) {
+      $this->originalName = $name;
+    }
+    return $this;
   }
 
   public function loadOwners() {
