@@ -145,7 +145,7 @@ For nginx, use a configuration like this:
       }
     }
 
-    location ~ \.php$ {
+    location /index.php {
       fastcgi_pass   localhost:9000;
       fastcgi_index   index.php;
 
