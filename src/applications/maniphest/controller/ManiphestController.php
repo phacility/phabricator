@@ -30,6 +30,7 @@ abstract class ManiphestController extends PhabricatorController {
     $page->setBaseURI('/maniphest/');
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x9A\x93");
+    $page->appendPageObjects(idx($data, 'pageObjects', array()));
     $page->appendChild($view);
     $page->setSearchDefaultScope(PhabricatorSearchScope::SCOPE_OPEN_TASKS);
 

@@ -5,10 +5,12 @@
  *           javelin-util
  *           javelin-stratcom
  *           javelin-behavior-aphlict-dropdown
+ *           phabricator-notification
  */
 
 JX.behavior('aphlict-listen', function(config) {
   function onready() {
+
     var client = new JX.Aphlict(config.id, config.server, config.port)
       .setHandler(function(type, message) {
         if (message) {
@@ -16,6 +18,14 @@ JX.behavior('aphlict-listen', function(config) {
             var request = new JX.Request('/notification/individual/',
               function(response) {
                 if (response.pertinent) {
+                  if (config.pageObjects.indexOf(response.primaryObjectPHID)
+                    > -1) {
+                    var notification = new JX.Notification()
+                      .setContent('Page updated. Please refresh.')
+                      .setDuration(0) // never timeout
+                      .show();
+                  }
+
                   JX.Stratcom.invoke('notification-panel-update', null, {});
                 }
               });

@@ -30,6 +30,7 @@ final class PhabricatorStandardPageView extends AphrontPageView {
   private $isFrameable = false;
   private $disableConsole;
   private $searchDefaultScope;
+  private $pageObjects = array();
 
   public function setIsAdminInterface($is_admin_interface) {
     $this->isAdminInterface = $is_admin_interface;
@@ -113,6 +114,12 @@ final class PhabricatorStandardPageView extends AphrontPageView {
     return $this->searchDefaultScope;
   }
 
+  public function appendPageObjects(array $objs) {
+    foreach ($objs as $obj) {
+      $this->pageObjects[] = $obj;
+    }
+  }
+
   public function getTitle() {
     $use_glyph = true;
     $request = $this->getRequest();
@@ -142,6 +149,9 @@ final class PhabricatorStandardPageView extends AphrontPageView {
     require_celerity_resource('phabricator-core-css');
     require_celerity_resource('phabricator-core-buttons-css');
     require_celerity_resource('phabricator-standard-page-view');
+    if (PhabricatorEnv::getEnvConfig('notification.enabled')) {
+      require_celerity_resource('phabricator-notification-css');
+    }
 
     $current_token = null;
     $request = $this->getRequest();
@@ -388,6 +398,7 @@ final class PhabricatorStandardPageView extends AphrontPageView {
           'id'           => $aphlict_object_id,
           'server'       => $server_domain,
           'port'         => 2600,
+          'pageObjects' => $this->pageObjects,
         ));
 
       Javelin::initBehavior('aphlict-dropdown', array());
