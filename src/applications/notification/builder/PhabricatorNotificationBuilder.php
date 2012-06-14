@@ -46,10 +46,6 @@ final class PhabricatorNotificationBuilder {
       $null_view->appendChild($view);
     }
 
-    return id(new AphrontNullView())->appendChild(
-      '<div class="phabricator-notification-frame">'.
-        $null_view->render().
-      '</div>');
-
+    return $null_view;
   }
 }

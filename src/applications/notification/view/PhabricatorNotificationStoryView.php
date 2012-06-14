@@ -40,26 +40,20 @@ extends PhabricatorNotificationView {
 
   public function render() {
 
-    $title = $this->title;
+    $classes = array(
+      'phabricator-notification',
+    );
+
     if (!$this->viewed) {
-      $title = '<b>'.$title.'</b>';
+      $classes[] = 'phabricator-notification-unread';
     }
-
-    $head = phutil_render_tag(
-      'div',
-      array(
-        'class' => 'phabricator-notification-story-head',
-      ),
-      nonempty($title, 'Untitled Story'));
-
 
     return phutil_render_tag(
       'div',
       array(
-        'class' =>
-          'phabricator-notification '.
-          'phabricator-notification-story-one-line'),
-      $head);
+        'class' => implode(' ', $classes),
+      ),
+      $this->title);
   }
 
 }
