@@ -31,6 +31,9 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
 
   public function willLintPaths(array $paths) {
 
+    $root = dirname(phutil_get_library_root('phabricator'));
+    require_once $root.'/scripts/__init_script__.php';
+
     if ($this->haveSymbolsBinary === null) {
       $binary = $this->getSymbolsBinaryPath();
       $this->haveSymbolsBinary = Filesystem::pathExists($binary);

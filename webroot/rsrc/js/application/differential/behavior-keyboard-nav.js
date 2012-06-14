@@ -14,6 +14,8 @@ JX.behavior('differential-keyboard-navigation', function(config) {
   var selection_begin = null;
   var selection_end = null;
 
+  var refreshFocus = function() {};
+
   function init() {
     if (changesets) {
       return;
@@ -30,6 +32,12 @@ JX.behavior('differential-keyboard-navigation', function(config) {
     var start = null;
     var type;
     var ii;
+
+    // Don't show code blocks inside a collapsed file.
+    var diff = JX.DOM.scry(changesets[cursor], 'table', 'differential-diff');
+    if (diff.length == 1 && JX.Stratcom.getData(diff[0]).hidden) {
+      return blocks;
+    }
 
     function push() {
       if (start) {
@@ -122,7 +130,9 @@ JX.behavior('differential-keyboard-navigation', function(config) {
           selection_end = blocks[focus][1];
 
           manager.scrollTo(selection_begin);
-          manager.focusOn(selection_begin, selection_end);
+          (refreshFocus = function() {
+            manager.focusOn(selection_begin, selection_end);
+          })();
 
           return;
         } else {
@@ -148,6 +158,16 @@ JX.behavior('differential-keyboard-navigation', function(config) {
     'differential-inline-comment-update',
     function() {
       changesets = null;
+    });
+  // Same thing when a file is hidden or shown; don't want to highlight
+  // invisible code.
+  JX.Stratcom.listen(
+    'differential-toggle-file-toggled',
+    null,
+    function() {
+      changesets = null;
+      init();
+      refreshFocus();
     });
 
   var haunt_mode = 0;
@@ -201,6 +221,18 @@ JX.behavior('differential-keyboard-navigation', function(config) {
     .setHandler(function(manager) {
       var toc = JX.$('differential-review-toc');
       manager.scrollTo(toc);
+    })
+    .register();
+
+
+  new JX.KeyboardShortcut('h', 'Collapse or expand the file display.')
+    .setHandler(function(manager) {
+      if (!changesets || !changesets[cursor]) {
+        return;
+      }
+      JX.Stratcom.invoke('differential-toggle-file', null, {
+        diff: JX.DOM.scry(changesets[cursor], 'table', 'differential-diff'),
+      });
     })
     .register();
 

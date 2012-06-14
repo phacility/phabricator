@@ -30,6 +30,7 @@ final class PhabricatorStandardPageView extends AphrontPageView {
   private $isFrameable = false;
   private $disableConsole;
   private $searchDefaultScope;
+  private $pageObjects = array();
 
   public function setIsAdminInterface($is_admin_interface) {
     $this->isAdminInterface = $is_admin_interface;
@@ -113,6 +114,12 @@ final class PhabricatorStandardPageView extends AphrontPageView {
     return $this->searchDefaultScope;
   }
 
+  public function appendPageObjects(array $objs) {
+    foreach ($objs as $obj) {
+      $this->pageObjects[] = $obj;
+    }
+  }
+
   public function getTitle() {
     $use_glyph = true;
     $request = $this->getRequest();
@@ -142,6 +149,9 @@ final class PhabricatorStandardPageView extends AphrontPageView {
     require_celerity_resource('phabricator-core-css');
     require_celerity_resource('phabricator-core-buttons-css');
     require_celerity_resource('phabricator-standard-page-view');
+    if (PhabricatorEnv::getEnvConfig('notification.enabled')) {
+      require_celerity_resource('phabricator-notification-css');
+    }
 
     $current_token = null;
     $request = $this->getRequest();
@@ -371,8 +381,9 @@ final class PhabricatorStandardPageView extends AphrontPageView {
         ' ');
     }
 
-    $notification_header = '';
+    $notification_indicator = '';
     $notification_dropdown = '';
+    $notification_container = '';
 
     if (PhabricatorEnv::getEnvConfig('notification.enabled') &&
       $user->isLoggedIn()) {
@@ -387,28 +398,50 @@ final class PhabricatorStandardPageView extends AphrontPageView {
         array(
           'id'           => $aphlict_object_id,
           'server'       => $server_domain,
-          'port'         => 2600,
+          'port'         => 22280,
+          'pageObjects' => $this->pageObjects,
         ));
 
       Javelin::initBehavior('aphlict-dropdown', array());
 
 
-      $notification_indicator =
-        javelin_render_tag(
-          'td',
-          array(
-            'sigil' => 'aphlict-indicator',
-            'id' => 'phabricator-notification-indicator',
-          ),
-          id(new PhabricatorFeedStoryNotification)
-            ->countUnread($user));
+      $notification_count = id(new PhabricatorFeedStoryNotification())
+        ->countUnread($user);
 
-      $notification_header =
-        $notification_indicator.
-        '<td>'.
-        '<div id="aphlictswf-container" style="height:1px; width:1px;">'.
-        '</div>'.
-        '</td>';
+      $indicator_classes = array(
+        'phabricator-notification-indicator',
+      );
+      if ($notification_count) {
+        $indicator_classes[] = 'phabricator-notification-indicator-unread';
+      }
+
+      $notification_indicator = javelin_render_tag(
+        'div',
+        array(
+          'id'    => 'phabricator-notification-indicator',
+          'class' => implode(' ', $indicator_classes),
+        ),
+        $notification_count);
+
+      $notification_indicator = javelin_render_tag(
+        'div',
+        array(
+          'id'    => 'phabricator-notification-menu',
+          'class' => 'phabricator-icon-menu icon-menu-notifications',
+          'sigil' => 'aphlict-indicator',
+        ),
+        $notification_indicator);
+
+      $notification_indicator = javelin_render_tag(
+        'td',
+        array(
+          'class' => 'phabricator-icon-menu-cell',
+        ),
+        $notification_indicator);
+
+      $notification_container =
+        '<div id="aphlictswf-container" style="height:0px; width:0px;">'.
+        '</div>';
       $notification_dropdown =
         javelin_render_tag(
           'div',
@@ -430,6 +463,7 @@ final class PhabricatorStandardPageView extends AphrontPageView {
               $custom_logo.
               '<a class="logo-standard" href="/"> </a>'.
             '</td>'.
+            $notification_indicator.
             '<td>'.
               '<table class="phabricator-primary-navigation">'.
                 '<tr>'.
@@ -449,10 +483,10 @@ final class PhabricatorStandardPageView extends AphrontPageView {
             '<td class="phabricator-login-details">'.
               $login_stuff.
             '</td>'.
-            $notification_header.
           '</tr>'.
         '</table>'.
-        $notification_dropdown;
+        $notification_dropdown.
+        $notification_container;
       $footer_chrome =
         '<div class="phabricator-page-foot">'.
           $foot_links.

@@ -328,8 +328,9 @@ EOTEXT;
   }
 
   protected function getThreadTopic() {
-    $phid = $this->getRevision()->getPHID();
-    return "Differential Revision {$phid}";
+    $id = $this->getRevision()->getID();
+    $title = $this->getRevision()->getOriginalTitle();
+    return "D{$id}: {$title}";
   }
 
   public function setComment($comment) {

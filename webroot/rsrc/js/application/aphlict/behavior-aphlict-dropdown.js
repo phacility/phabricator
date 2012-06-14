@@ -1,15 +1,16 @@
 /**
  * @provides javelin-behavior-aphlict-dropdown
  * @requires javelin-behavior
- *           javelin-aphlict
- *           javelin-util
  *           javelin-request
  *           javelin-stratcom
+ *           javelin-vector
+ *           javelin-dom
  */
 
 JX.behavior('aphlict-dropdown', function(config) {
   var dropdown = JX.$('phabricator-notification-dropdown');
   var indicator = JX.$('phabricator-notification-indicator');
+  var menu = JX.$('phabricator-notification-menu');
   var visible = false;
   var request = null;
 
@@ -52,16 +53,22 @@ JX.behavior('aphlict-dropdown', function(config) {
 
 
   JX.DOM.listen(
-    indicator,
+    menu,
     'click',
     null,
     function(e) {
-      if(visible) {
+      if (visible) {
         JX.DOM.hide(dropdown);
       } else {
+        var p = JX.$V(menu);
+        p.y = null;
+        p.x -= 6;
+        p.setPos(dropdown);
+
         JX.DOM.show(dropdown);
       }
       visible = !visible;
+      e.kill();
     }
   )
 

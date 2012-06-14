@@ -278,7 +278,7 @@ final class ManiphestTransactionEditor {
       ->setVarySubjectPrefix("[{$action}]")
       ->setFrom($transaction->getAuthorPHID())
       ->setParentMessageID($this->parentMessageID)
-      ->addHeader('Thread-Topic', 'Maniphest Task '.$task->getPHID())
+      ->addHeader('Thread-Topic', "T{$task_id}: ".$task->getOriginalTitle())
       ->setThreadID($thread_id, $is_create)
       ->setRelatedPHID($task->getPHID())
       ->setIsBulk(true)

@@ -395,7 +395,9 @@ final class PhabricatorAuditCommentEditor {
 
     $prefix = PhabricatorEnv::getEnvConfig('metamta.diffusion.subject-prefix');
 
-    $threading = self::getMailThreading($commit->getPHID());
+    $repository = id(new PhabricatorRepository())
+      ->load($commit->getRepositoryID());
+    $threading = self::getMailThreading($repository, $commit);
     list($thread_id, $thread_topic) = $threading;
 
     $body       = $this->renderMailBody(
@@ -452,10 +454,13 @@ final class PhabricatorAuditCommentEditor {
     }
   }
 
-  public static function getMailThreading($phid) {
+  public static function getMailThreading(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit) {
+
     return array(
-      'diffusion-audit-'.$phid,
-      'Diffusion Audit '.$phid,
+      'diffusion-audit-'.$commit->getPHID(),
+      'Commit r'.$repository->getCallsign().$commit->getCommitIdentifier(),
     );
   }
 

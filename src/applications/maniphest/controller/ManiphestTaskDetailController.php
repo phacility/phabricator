@@ -523,6 +523,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ),
       array(
         'title' => 'T'.$task->getID().' '.$task->getTitle(),
+        'pageObjects' => array($task->getPHID()),
       ));
   }
 

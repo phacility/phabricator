@@ -1,3 +1,49 @@
+/**
+ * Notification server. Launch with:
+ *
+ *   sudo node aphlict_server.js --user=aphlict
+ *
+ * You can also specify `port`, `admin` and `log`.
+ */
+
+var config = parse_command_line_arguments(process.argv);
+
+function parse_command_line_arguments(argv) {
+  var config = {
+    port : 22280,
+    admin : 22281,
+    user : null,
+    log: '/var/log/aphlict.log'
+  };
+
+  for (var ii = 2; ii < argv.length; ii++) {
+    var arg = argv[ii];
+    var matches = arg.match(/^--([^=]+)=(.*)$/);
+    if (!matches) {
+      throw new Error("Unknown argument '"+arg+"'!");
+    }
+    if (!(matches[1] in config)) {
+      throw new Error("Unknown argument '"+matches[1]+"'!");
+    }
+    config[matches[1]] = matches[2];
+  }
+
+  config.port = parseInt(config.port, 10);
+  config.admin = parseInt(config.admin, 10);
+
+  return config;
+}
+
+if (process.getuid() != 0) {
+  console.log(
+    "ERROR: "+
+    "This server must be run as root because it needs to bind to privileged "+
+    "port 843 to start a Flash policy server. It will downgrade to run as a "+
+    "less-privileged user after binding if you pass a user in the command "+
+    "line arguments with '--user=alincoln'.");
+  process.exit(1);
+}
+
 var net = require('net');
 var http  = require('http');
 var url = require('url');
@@ -5,7 +51,7 @@ var querystring = require('querystring');
 var fs = require('fs');
 
 // set up log file
-logfile = fs.createWriteStream('/var/log/aphlict.log',
+var logfile = fs.createWriteStream(config.log,
         { flags: 'a',
           encoding: null,
           mode: 0666 });
@@ -23,7 +69,7 @@ function getFlashPolicy() {
     '<!DOCTYPE cross-domain-policy SYSTEM ' +
       '"http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd">',
     '<cross-domain-policy>',
-    '<allow-access-from domain="*" to-ports="2600"/>',
+    '<allow-access-from domain="*" to-ports="'+config.port+'"/>',
     '</cross-domain-policy>'
   ].join('\n');
 }
@@ -97,16 +143,20 @@ var send_server = net.createServer(function(socket) {
   });
 
   socket.on('error', function (e) {
-    console.log('Uncaught error in send server: ' + e);
+    log('Uncaught error in send server: ' + e);
   });
-}).listen(2600);
+}).listen(config.port);
 
 
+var messages_out = 0;
+var messages_in = 0;
+var start_time = new Date().getTime();
 
 var receive_server = http.createServer(function(request, response) {
   response.writeHead(200, {'Content-Type' : 'text/plain'});
 
-  if (request.method == 'POST') { // Only pay attention to POST requests
+  // Publishing a notification.
+  if (request.method == 'POST') {
     var body = '';
 
     request.on('data', function (data) {
@@ -114,24 +164,52 @@ var receive_server = http.createServer(function(request, response) {
     });
 
     request.on('end', function () {
+      ++messages_in;
+
       var data = querystring.parse(body);
       log('notification: ' + JSON.stringify(data));
       broadcast(data);
       response.end();
     });
+  } else if (request.url == '/status/') {
+    request.on('end', function() {
+      var status = {
+        'uptime': (new Date().getTime() - start_time),
+        'clients.active': current_connections,
+        'clients.total': generate_id.current_id || 0,
+        'messages.in': messages_in,
+        'messages.out': messages_out,
+        'log': config.log
+      };
+
+      response.write(JSON.stringify(status));
+      response.end();
+    });
+  } else {
+    response.statusCode = 400;
+    response.write('400 Bad Request');
+    response.end();
   }
-}).listen(22281, '127.0.0.1');
+
+}).listen(config.admin, '127.0.0.1');
 
 function broadcast(data) {
-  for(var client_id in clients) {
+  for (var client_id in clients) {
     try {
       write_json(clients[client_id], data);
-      log(' wrote to client ' + client_id);
+      ++messages_out;
+      log('wrote to client ' + client_id);
     } catch (error) {
       delete clients[client_id];
       current_connections--;
-      log(' ERROR: could not write to client ' + client_id);
+      log('ERROR: could not write to client ' + client_id);
     }
   }
+}
+
+// If we're configured to drop permissions, get rid of them now that we've
+// bound to the ports we need and opened logfiles.
+if (config.user) {
+  process.setuid(config.user);
 }
 

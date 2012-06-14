@@ -556,6 +556,12 @@ final class ManiphestTaskEditController extends ManiphestController {
         'uri'       => '/maniphest/task/descriptionpreview/',
       ));
 
+    if ($task->getID()) {
+      $page_objects = array( $task->getPHID() );
+    } else {
+      $page_objects = array();
+    }
+
     return $this->buildStandardPageResponse(
       array(
         $error_view,
@@ -564,6 +570,7 @@ final class ManiphestTaskEditController extends ManiphestController {
       ),
       array(
         'title' => $header_name,
+        'pageObjects' => $page_objects,
       ));
   }
 }

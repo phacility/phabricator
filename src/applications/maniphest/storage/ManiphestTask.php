@@ -31,6 +31,7 @@ final class ManiphestTask extends ManiphestDAO {
   protected $subpriority;
 
   protected $title;
+  protected $originalTitle;
   protected $description;
   protected $originalEmailSource;
   protected $mailKey;
@@ -104,6 +105,14 @@ final class ManiphestTask extends ManiphestDAO {
     }
     $this->auxiliaryAttributes[$key] = $val;
     $this->auxiliaryDirty[$key] = true;
+    return $this;
+  }
+
+  public function setTitle($title) {
+    $this->title = $title;
+    if (!$this->getID()) {
+      $this->originalTitle = $title;
+    }
     return $this;
   }
 

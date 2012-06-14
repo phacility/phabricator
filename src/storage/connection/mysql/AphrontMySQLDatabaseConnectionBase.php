@@ -199,10 +199,6 @@ abstract class AphrontMySQLDatabaseConnectionBase
         if (!$retries) {
           throw $ex;
         }
-
-        $class = get_class($ex);
-        $message = $ex->getMessage();
-        phlog("Retrying ({$retries}) after {$class}: {$message}");
       }
     }
   }

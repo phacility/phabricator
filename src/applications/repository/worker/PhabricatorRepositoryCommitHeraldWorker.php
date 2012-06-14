@@ -153,7 +153,8 @@ EOBODY;
     $prefix = PhabricatorEnv::getEnvConfig('metamta.diffusion.subject-prefix');
 
     $threading = PhabricatorAuditCommentEditor::getMailThreading(
-      $commit->getPHID());
+      $repository,
+      $commit);
     list($thread_id, $thread_topic) = $threading;
 
     $template = new PhabricatorMetaMTAMail();

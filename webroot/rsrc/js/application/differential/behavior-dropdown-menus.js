@@ -52,6 +52,13 @@ JX.behavior('differential-dropdown-menus', function(config) {
     var menu = new JX.PhabricatorDropdownMenu(buttons[ii])
       .addItem(reveal_item);
 
+    var visible_item = new JX.PhabricatorMenuItem('', function () {
+      JX.Stratcom.invoke('differential-toggle-file', null, {
+        diff: JX.DOM.scry(JX.$(data.containerID), 'table', 'differential-diff'),
+      });
+    });
+    menu.addItem(visible_item);
+
     if (diffusion_item) {
       menu.addItem(diffusion_item);
     }
@@ -92,6 +99,14 @@ JX.behavior('differential-dropdown-menus', function(config) {
         } else {
           reveal_item.setDisabled(true);
           reveal_item.setName('Entire File Shown');
+        }
+
+        var diff = JX.DOM.find(JX.$(data.containerID),
+                               'table', 'differential-diff');
+        if (JX.Stratcom.getData(diff).hidden) {
+          visible_item.setName('Expand File');
+        } else {
+          visible_item.setName('Collapse File');
         }
       });
   }

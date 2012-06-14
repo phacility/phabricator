@@ -7,7 +7,7 @@
 /**
  * Simple JS API for the Flash Aphlict client. Example usage:
  *
- *   var aphlict = new JX.Aphlict('aphlict_swf', '127.0.0.1', 2600)
+ *   var aphlict = new JX.Aphlict('aphlict_swf', '127.0.0.1', 22280)
  *     .setHandler(function(type, message) {
  *       JX.log("Got " + type + " event!")
  *     })
