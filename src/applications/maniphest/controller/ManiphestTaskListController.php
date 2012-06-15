@@ -46,13 +46,17 @@ final class ManiphestTaskListController extends ManiphestController {
       $task_ids   = $request->getStr('set_tasks');
       $task_ids   = nonempty($task_ids, null);
 
+      $search_text = $request->getStr('set_search');
+      $search_text = nonempty($search_text, null);
+
       $uri = $request->getRequestURI()
         ->alter('users',      $this->getArrToStrList('set_users'))
         ->alter('projects',   $this->getArrToStrList('set_projects'))
         ->alter('xprojects',  $this->getArrToStrList('set_xprojects'))
         ->alter('owners',     $this->getArrToStrList('set_owners'))
         ->alter('authors',    $this->getArrToStrList('set_authors'))
-        ->alter('tasks', $task_ids);
+        ->alter('tasks', $task_ids)
+        ->alter('search', $search_text);
 
       return id(new AphrontRedirectResponse())->setURI($uri);
     }
@@ -99,6 +103,8 @@ final class ManiphestTaskListController extends ManiphestController {
 
     // Extract information we need to render the filters from the query.
 
+    $search_text    = $query->getParameter('fullTextSearch');
+
     $user_phids     = $query->getParameter('userPHIDs', array());
     $task_ids       = $query->getParameter('taskIDs', array());
     $owner_phids    = $query->getParameter('ownerPHIDs', array());
@@ -143,6 +149,12 @@ final class ManiphestTaskListController extends ManiphestController {
     }
 
     if ($this->view == 'custom') {
+      $form->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName('set_search')
+          ->setLabel('Search')
+          ->setValue($search_text)
+      );
       $form->appendChild(
         id(new AphrontFormTextControl())
           ->setName('set_tasks')
@@ -355,6 +367,7 @@ final class ManiphestTaskListController extends ManiphestController {
 
   public static function loadTasks(PhabricatorSearchQuery $search_query) {
     $any_project = false;
+    $search_text = $search_query->getParameter('fullTextSearch');
     $user_phids = $search_query->getParameter('userPHIDs', array());
     $project_phids = $search_query->getParameter('projectPHIDs', array());
     $task_ids = $search_query->getParameter('taskIDs', array());
@@ -418,6 +431,8 @@ final class ManiphestTaskListController extends ManiphestController {
     }
 
     $query->withAnyProject($any_project);
+
+    $query->withFullTextSearch($search_text);
 
     $order_map = array(
       'priority'  => ManiphestTaskQuery::ORDER_PRIORITY,
@@ -649,6 +664,8 @@ final class ManiphestTaskListController extends ManiphestController {
     $owner_phids = $request->getStrList('owners');
     $author_phids = $request->getStrList('authors');
 
+    $search_string = $request->getStr('search');
+
     $page = $request->getInt('offset');
     $page_size = self::DEFAULT_PAGE_SIZE;
 
@@ -656,6 +673,7 @@ final class ManiphestTaskListController extends ManiphestController {
     $query->setQuery('<<maniphest>>');
     $query->setParameters(
       array(
+        'fullTextSearch'      => $search_string,
         'view'                => $this->view,
         'userPHIDs'           => $user_phids,
         'projectPHIDs'        => $project_phids,
