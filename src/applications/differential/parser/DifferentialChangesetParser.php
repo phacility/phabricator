@@ -48,6 +48,9 @@ final class DifferentialChangesetParser {
   private $rightSideChangesetID;
   private $rightSideAttachesToNewFile;
 
+  private $originalLeft;
+  private $originalRight;
+
   private $renderingReference;
   private $isSubparser;
 
@@ -106,6 +109,73 @@ final class DifferentialChangesetParser {
     $this->leftSideChangesetID = $id;
     $this->leftSideAttachesToNewFile = $is_new;
     return $this;
+  }
+
+  public function setOriginals(
+    DifferentialChangeset $left,
+    DifferentialChangeset $right) {
+
+    $this->originalLeft = $left;
+    $this->originalRight = $right;
+  }
+
+  public function diffOriginals() {
+    $engine = new PhabricatorDifferenceEngine();
+    $changeset = $engine->generateChangesetFromFileContent(
+      implode('', mpull($this->originalLeft->getHunks(), 'getChanges')),
+      implode('', mpull($this->originalRight->getHunks(), 'getChanges')));
+
+    // Put changes side by side.
+    $olds = array();
+    $news = array();
+    foreach ($changeset->getHunks() as $hunk) {
+      $n_old = $hunk->getOldOffset();
+      $n_new = $hunk->getNewOffset();
+      $changes = rtrim($hunk->getChanges(), "\n");
+      foreach (explode("\n", $changes) as $line) {
+        $type = $line[1]; // Change type in the original diff.
+        if ($line[0] == ' ') {
+          // Use the same key for lines that are next to each other.
+          $key = max(last_key($olds), last_key($news)) + 1;
+          $olds[$key] = null;
+          $news[$key] = null;
+          $n_old++;
+          $n_new++;
+        } else if ($line[0] == '-') {
+          $olds[] = array($n_old, $type);
+          $n_old++;
+        } else if ($line[0] == '+') {
+          $news[] = array($n_new, $type);
+          $n_new++;
+        }
+      }
+    }
+
+    $offsets_old = $this->originalLeft->computeOffsets();
+    $offsets_new = $this->originalRight->computeOffsets();
+
+    // Highlight lines that were add on each side or removed on the other side.
+    $highlight_old = array();
+    $highlight_new = array();
+    $last = max(last_key($olds), last_key($news));
+    for ($i = 0; $i <= $last; $i++) {
+      if (isset($olds[$i])) {
+        list($n, $type) = $olds[$i];
+        if ($type == '+' ||
+            ($type == ' ' && isset($news[$i]) && $news[$i][1] == '-')) {
+          $highlight_old[] = $offsets_old[$n];
+        }
+      }
+      if (isset($news[$i])) {
+        list($n, $type) = $news[$i];
+        if ($type == '+' ||
+            ($type == ' ' && isset($olds[$i]) && $olds[$i][1] == '-')) {
+          $highlight_new[] = $offsets_new[$n];
+        }
+      }
+    }
+
+    return array($highlight_old, $highlight_new);
   }
 
   /**
@@ -269,8 +339,6 @@ final class DifferentialChangesetParser {
 
     $old = array();
     $new = array();
-
-    $n = 0;
 
     $this->old = array_reverse($this->old);
     $this->new = array_reverse($this->new);
@@ -1290,6 +1358,12 @@ final class DifferentialChangesetParser {
 
     $copy_lines = idx($this->changeset->getMetadata(), 'copy:lines', array());
 
+    if ($this->originalLeft && $this->originalRight) {
+      list($highlight_old, $highlight_new) = $this->diffOriginals();
+      $highlight_old = array_flip($highlight_old);
+      $highlight_new = array_flip($highlight_new);
+    }
+
     for ($ii = $range_start; $ii < $range_start + $range_len; $ii++) {
       if (empty($mask[$ii])) {
         // If we aren't going to show this line, we've just entered a gap.
@@ -1386,6 +1460,8 @@ final class DifferentialChangesetParser {
           if ($this->old[$ii]['type'] == '\\') {
             $o_text = $this->old[$ii]['text'];
             $o_attr = ' class="comment"';
+          } else if ($this->originalLeft && !isset($highlight_old[$o_num])) {
+            $o_attr = ' class="old-rebase"';
           } else if (empty($this->new[$ii])) {
             $o_attr = ' class="old old-full"';
           } else {
@@ -1421,6 +1497,8 @@ final class DifferentialChangesetParser {
           if ($this->new[$ii]['type'] == '\\') {
             $n_text = $this->new[$ii]['text'];
             $n_class = 'comment';
+          } else if ($this->originalRight && !isset($highlight_new[$n_num])) {
+            $n_class = 'new-rebase';
           } else if (empty($this->old[$ii])) {
             $n_class = 'new new-full';
           } else {

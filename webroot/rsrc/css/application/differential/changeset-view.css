@@ -75,6 +75,14 @@
   background:   #d0ffd0;
 }
 
+.differential-diff td.old-rebase {
+  background: #ffeeee;
+}
+
+.differential-diff td.new-rebase {
+  background: #eeffee;
+}
+
 .differential-diff td.old-full,
 .differential-diff td.old span.bright {
   background: #ffaaaa;
