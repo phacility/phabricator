@@ -1,0 +1,148 @@
+@title Arcanist User Guide: Commit Ranges
+@group userguide
+
+Explains how commit ranges work in Arcanist.
+
+= Overview =
+
+//In Subversion, `arc` commands always operate on the uncommitted changes in the
+working copy. If you use Subversion, this document is not relevant to you.//
+
+In Git and Mercurial, many `arc` commands (notably, `arc diff`) operate on a
+range of commits beginning with some commit you specify and ending with the
+working copy state.
+
+Since the end of the range is fixed (the working copy state), you only need to
+specify the beginning of the range. This is called the "base commit". You can do
+this explicitly when you run commands:
+
+  $ arc diff HEAD^ # git: just the most recent commit
+  $ arc diff .^    #  hg: just the most recent commit
+
+You can also configure `arc` so it defaults to some base commit, or figures out
+the base commit using a (potentially sophisticated) ruleset.
+
+NOTE: This document describes a new mechanism for determining base commits. It
+is subject to change. There are currently several other mechanisms available as
+well, mentioned in other documents. As this mechanism matures, it should replace
+other mechanisms and defaults.
+
+= Configuring Base Commit Rules =
+
+Base commit rule configuration may be more complicated than you expect. This is
+because people use many different workflows in Git and Mercurial, and have very
+different expectations about what base commit `arc` should pick when run. To
+make matters worse, some of the most common ways of thinking about which commits
+represent a change are incompatible when selecting defaults.
+
+Historically, we tried to use a number of heuristics and simpler approaches to
+determine the base commit, but there is so much diversity in how people think
+about version control and what they expect to happen that some users were always
+unhappy.
+
+Although ruleset configuration is fairly complex, it's powerful enough that you
+should be able to get exactly the behavior you want.
+
+To determine the base commit, `arc` processes //rules// one at a time until it
+gets a match (a rule which identifies a valid commit). The first match is the
+base commit that is used to determine the beginning of the commit range.
+
+A //rule// looks like this:
+
+  arc:upstream
+
+A rule may //match//, meaning that it identifies some valid commit in the
+working copy, or //fail//, meaning that it does not identify a valid commit. For
+instance, the rule `arc:upstream` will //match// if the current Git branch
+tracks an upstream branch, but //fail// if the current Git branch does not track
+an upstream branch. When a rule fails, processing continues with the next rule.
+Some rules can never match but produce useful side effects instead. These are
+described below.
+
+A //ruleset// is a comma-separated list of rules:
+
+  arc:upstream, arc:prompt
+
+`arc` reads four rulesets:
+
+  # `args`, specified with `--base <ruleset>` on the command line when you run
+    a command. This ruleset is processed first.
+  # `local`, specified with `arc set-config --local base <ruleset>`. This
+    ruleset is local to the working copy where it is set, and is processed
+    second.
+  # `project`, specified by setting the "base" key in `.arcconfig`. This
+    ruleset is bound to the project where it is configured, and is processed
+    third.
+  # `global`, specified with `arc set-config base <ruleset>`. This ruleset is
+    global for the current user, and is processed last.
+
+The rules in each ruleset are processed one at a time until a valid base commit
+is found. Valid rules are listed below. In this list, "*" means "any string".
+
+  - `git:*` Use the specified symbolic commit, if it exists.
+  - `git:merge-base(*)` Use the merge-base of HEAD and the specified symbolic
+    commit, if it exists.
+  - `arc:upstream` Use the merge-base of the current branch's upstream and
+    HEAD, if it exists.
+  - `arc:prompt` Prompt the user to provide a commit.
+  - `arc:empty` Use the empty state (as though the repository were completely
+    empty, the range will include every commit that is an ancestor of the
+    working copy).
+
+Rules are also available which change the processing order of rulesets:
+
+  - `arc:args`, `arc:local`, `arc:project`, `arc:global` Stop processing the
+    current ruleset and begin processing the specified ruleset. The current
+    ruleset will resume processing after the specified ruleset is exhausted.
+  - `arc:yield` Stop processing the current ruleset and begin processing the
+    next ruleset. The current ruleset will resume processing after other
+    rulesets have processed or when it next appears in the processing order,
+    whichever comes first.
+  - `arc:halt` Stops processing all rules. This will cause the command you ran
+    to fail, but can be used to avoid running rules which would otherwise
+    be processed later.
+
+Additionally, there are some rules which are probably useful mostly for testing
+or debugging rulesets:
+
+  - `arc:verbose` Turns on verbose logging of rule processing.
+  - `arc:skip` This rule has no effect.
+  - `literal:*` Use the specified commit literally. Almost certainly wrong in
+    production rules.
+
+= Examples =
+
+Diff against `origin/master` if it exists, and prompt if it doesn't:
+
+  git:merge-base(origin/master), arc:prompt
+
+Diff against the upstream if it exists, or just use the last commit if it
+doesn't:
+
+  arc:upstream, git:HEAD^
+
+As a user, ignore project rules and always use my rules:
+
+  (local) arc:global, arc:halt
+
+As a project maintainer, respect user rules over project rules:
+
+  (project) arc:yield, <defaults>
+
+Debug your rules:
+
+  $ arc diff --base arc:verbose
+
+Understand rules processing:
+
+  $ arc which
+  $ arc which --base '<ruleset>'
+  $ arc which --base 'arc:verbose, <ruleset>'
+
+= Next Steps =
+
+Continue by:
+
+  - learning about `arc diff` in more detail with
+    @{article:Arcanist User Guide: arc diff}; or
+  - returning to @{article:Arcanist User Guide}.

@@ -86,14 +86,13 @@ When you type "arc", you should see something like this:
 If you get that far, you've done things correctly. If you get an error or have
 trouble getting this far, see these detailed guides:
 
-  - On Windows: @{Arcanist User Guide: Windows}
-  - On Mac OS X: @{Arcanist User Guide: Mac OS X}
+  - On Windows: @{article:Arcanist User Guide: Windows}
+  - On Mac OS X: @{article:Arcanist User Guide: Mac OS X}
 
-The code changes quickly, so remember to update regularly, by running
-`git pull` on the two directories:
+You can later upgrade Arcanist and libphutil to the latest versions with
+`arc upgrade`:
 
-  some_install_path/arcanist/ $ git pull
-  some_install_path/libphutil/ $ git pull
+  $ arc upgrade
 
 == Installing Arcanist for a Team ==
 
