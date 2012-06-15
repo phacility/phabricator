@@ -379,15 +379,6 @@ EOTEXT;
     return implode("\n", $body);
   }
 
-  public function renderRevisionDetailLink() {
-    $uri = $this->getRevisionURI();
-    return "REVISION DETAIL\n  {$uri}";
-  }
-
-  public function getRevisionURI() {
-    return PhabricatorEnv::getProductionURI('/D'.$this->getRevision()->getID());
-  }
-
   public function setIsFirstMailToRecipients($first) {
     $this->isFirstMailToRecipients = $first;
     return $this;
