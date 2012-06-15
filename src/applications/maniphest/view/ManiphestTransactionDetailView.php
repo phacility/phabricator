@@ -490,12 +490,16 @@ final class ManiphestTransactionDetailView extends ManiphestView {
 
         if ($added && !$removed) {
           $verb = 'Attached';
-          $desc = 'attached '.$this->getAttachName($attach_type, count($added));
+          $desc =
+            'attached '.
+            $this->getAttachName($attach_type, count($added)).': '.
+            $add_desc;
         } else if ($removed && !$added) {
           $verb = 'Detached';
           $desc =
             'detached '.
-            $this->getAttachName($attach_type, count($removed));
+            $this->getAttachName($attach_type, count($removed)).': '.
+            $rem_desc;
         } else {
           $verb = 'Changed Attached';
           $desc =
