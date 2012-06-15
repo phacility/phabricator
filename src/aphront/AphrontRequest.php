@@ -154,7 +154,7 @@ final class AphrontRequest {
       return $default;
     }
     $list = $this->getStr($name);
-    $list = preg_split('/[,\n]/', $list);
+    $list = preg_split('/[\s,]/', $list);
     $list = array_map('trim', $list);
     $list = array_filter($list, 'strlen');
     $list = array_values($list);
