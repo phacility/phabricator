@@ -1908,7 +1908,11 @@ phutil_register_library_map(array(
     'PhabricatorUIPagerExample' => 'PhabricatorUIExample',
     'PhabricatorUITooltipExample' => 'PhabricatorUIExample',
     'PhabricatorUnitsTestCase' => 'PhabricatorTestCase',
-    'PhabricatorUser' => 'PhabricatorUserDAO',
+    'PhabricatorUser' =>
+    array(
+      0 => 'PhabricatorUserDAO',
+      1 => 'PhutilPerson',
+    ),
     'PhabricatorUserAccountSettingsPanelController' => 'PhabricatorUserSettingsPanelController',
     'PhabricatorUserConduitSettingsPanelController' => 'PhabricatorUserSettingsPanelController',
     'PhabricatorUserDAO' => 'PhabricatorLiskDAO',

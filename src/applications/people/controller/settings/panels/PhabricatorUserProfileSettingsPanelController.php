@@ -41,11 +41,15 @@ final class PhabricatorUserProfileSettingsPanelController
       $profile->setBlurb($request->getStr('blurb'));
 
       $sex = $request->getStr('sex');
-      if (in_array($sex, array('m', 'f'))) {
+      $sexes = array(PhutilPerson::SEX_MALE, PhutilPerson::SEX_FEMALE);
+      if (in_array($sex, $sexes)) {
         $user->setSex($sex);
       } else {
         $user->setSex(null);
       }
+
+      // Checked in runtime.
+      $user->setTranslation($request->getStr('translation'));
 
       if (!empty($_FILES['image'])) {
         $err = idx($_FILES['image'], 'error');
@@ -111,10 +115,26 @@ final class PhabricatorUserProfileSettingsPanelController
     $profile_uri = PhabricatorEnv::getURI('/p/'.$user->getUsername().'/');
 
     $sexes = array(
-      '' => 'Unknown',
-      'm' => 'Male',
-      'f' => 'Female',
+      PhutilPerson::SEX_UNKNOWN => 'Unknown',
+      PhutilPerson::SEX_MALE => 'Male',
+      PhutilPerson::SEX_FEMALE => 'Female',
     );
+
+    $translations = array();
+    $symbols = id(new PhutilSymbolLoader())
+      ->setType('class')
+      ->setAncestorClass('PhabricatorTranslation')
+      ->setConcreteOnly(true)
+      ->selectAndLoadSymbols();
+    foreach ($symbols as $symbol) {
+      $class = $symbol['name'];
+      $translations[$class] = newv($class, array())->getName();
+    }
+    asort($translations);
+    $default = PhabricatorEnv::newObjectFromConfig('translation.provider');
+    $translations = array(
+      '' => 'Sever Default ('.$default->getName().')',
+    ) + $translations;
 
     $form = new AphrontFormView();
     $form
@@ -133,6 +153,12 @@ final class PhabricatorUserProfileSettingsPanelController
           ->setLabel('Sex')
           ->setName('sex')
           ->setValue($user->getSex()))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setOptions($translations)
+          ->setLabel('Translation')
+          ->setName('translation')
+          ->setValue($user->getTranslation()))
       ->appendChild(
         id(new AphrontFormMarkupControl())
           ->setLabel('Profile URI')
