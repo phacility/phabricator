@@ -36,13 +36,13 @@ final class DifferentialAction {
   const ACTION_CLAIM          = 'claim';
 
   public static function getActionPastTenseVerb($action) {
-    static $verbs = array(
+    $verbs = array(
       self::ACTION_COMMENT        => 'commented on',
       self::ACTION_ACCEPT         => 'accepted',
       self::ACTION_REJECT         => 'requested changes to',
       self::ACTION_RETHINK        => 'planned changes to',
       self::ACTION_ABANDON        => 'abandoned',
-      self::ACTION_CLOSE          => 'closed',
+      self::ACTION_CLOSE          => pht('closed'),
       self::ACTION_REQUEST        => 'requested a review of',
       self::ACTION_RECLAIM        => 'reclaimed',
       self::ACTION_UPDATE         => 'updated',
