@@ -353,9 +353,14 @@ final class ManiphestTaskQuery {
     // fulltext search, and then use that to limit the rest of the search
     $fulltext_query = new PhabricatorSearchQuery();
     $fulltext_query->setQuery($this->fullTextSearch);
+    $fulltext_query->setParameter('limit', PHP_INT_MAX);
 
     $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
     $fulltext_results = $engine->executeSearch($fulltext_query);
+
+    if (empty($fulltext_results)) {
+      $fulltext_results = array(null);
+    }
 
     return qsprintf(
       $conn,
