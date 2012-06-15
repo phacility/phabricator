@@ -53,5 +53,13 @@ return array(
   // This apparently avoids some cookie-based attacks.
   'security.alternate-file-domain'  => 'http://phabricator-files.khanacademy.org/',
 
+  // pygments doesn't know .q files are sql.  We add that.  (The
+  // .arcconfig comes default.conf; I'm not sure if read_config does
+  // merging on sub-arrays properly, so I just repeat it to be safe.)
+  'syntax.filemap' => array(
+    '@\.arcconfig$@' => 'js',
+    '@\.q$@' => 'mysql',
+  ),
+
 ) + phabricator_read_config_file('custom/khan-google.conf.php')
   + phabricator_read_config_file('production');
