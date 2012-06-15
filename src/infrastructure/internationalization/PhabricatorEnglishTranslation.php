@@ -16,42 +16,11 @@
  * limitations under the License.
  */
 
-final class PhabricatorEnglishTranslation extends PhabricatorTranslation {
-
-  public function getLanguage() {
-    return 'en';
-  }
+final class PhabricatorEnglishTranslation
+  extends PhabricatorBaseEnglishTranslation {
 
   public function getName() {
     return 'English';
-  }
-
-  public function getTranslations() {
-    return array(
-      'Differential Revision(s)' => array(
-        'Differential Revision',
-        'Differential Revisions',
-      ),
-      'file(s)' => array('file', 'files'),
-      'Maniphest Task(s)' => array('Maniphest Task', 'Maniphest Tasks'),
-
-      'Please fix these errors and try again.' => array(
-        'Please fix this error and try again.',
-        'Please fix these errors and try again.',
-      ),
-
-      '%d Error(s)' => array('%d Error', '%d Errors'),
-      '%d Warning(s)' => array('%d Warning', '%d Warnings'),
-      '%d Auto-Fix(es)' => array('%d Auto-Fix', '%d Auto-Fixes'),
-      '%d Advice(s)' => array('%d Advice', '%d Pieces of Advice'),
-      '%d Detail(s)' => array('%d Detail', '%d Details'),
-
-      '(%d line(s))' => array('(%d line)', '(%d lines)'),
-
-      'COMMIT(S)' => array('COMMIT', 'COMMITS'),
-
-      '%d line(s)' => array('%d line', '%d lines'),
-    );
   }
 
 }
