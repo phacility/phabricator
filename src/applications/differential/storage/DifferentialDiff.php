@@ -251,6 +251,7 @@ final class DifferentialDiff extends DifferentialDAO {
       'sourceControlSystem' => $this->getSourceControlSystem(),
       'branch' => $this->getBranch(),
       'creationMethod' => $this->getCreationMethod(),
+      'description' => $this->getDescription(),
       'unitStatus' => $this->getUnitStatus(),
       'lintStatus' => $this->getLintStatus(),
       'changes' => array(),
