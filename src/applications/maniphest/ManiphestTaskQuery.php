@@ -34,6 +34,8 @@ final class ManiphestTaskQuery {
   private $anyProject       = false;
   private $includeNoProject = null;
 
+  private $fullTextSearch   = '';
+
   private $status           = 'status-any';
   const STATUS_ANY          = 'status-any';
   const STATUS_OPEN         = 'status-open';
@@ -117,6 +119,11 @@ final class ManiphestTaskQuery {
     return $this;
   }
 
+  public function withFullTextSearch($fulltext_search) {
+    $this->fullTextSearch = $fulltext_search;
+    return $this;
+  }
+
   public function setGroupBy($group) {
     $this->groupBy = $group;
     return $this;
@@ -176,6 +183,7 @@ final class ManiphestTaskQuery {
     $where[] = $this->buildSubscriberWhereClause($conn);
     $where[] = $this->buildProjectWhereClause($conn);
     $where[] = $this->buildXProjectWhereClause($conn);
+    $where[] = $this->buildFullTextWhereClause($conn);
 
     $where = array_filter($where);
     if ($where) {
@@ -334,6 +342,25 @@ final class ManiphestTaskQuery {
         'ownerPHID IN (%Ls)',
         $this->ownerPHIDs);
     }
+  }
+
+  private function buildFullTextWhereClause($conn) {
+    if (!$this->fullTextSearch) {
+      return null;
+    }
+
+    // In doing a fulltext search, we first find all the PHIDs that match the
+    // fulltext search, and then use that to limit the rest of the search
+    $fulltext_query = new PhabricatorSearchQuery();
+    $fulltext_query->setQuery($this->fullTextSearch);
+
+    $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
+    $fulltext_results = $engine->executeSearch($fulltext_query);
+
+    return qsprintf(
+      $conn,
+      'phid IN (%Ls)',
+      $fulltext_results);
   }
 
   private function buildSubscriberWhereClause($conn) {
