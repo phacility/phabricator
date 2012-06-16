@@ -227,8 +227,10 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
       // TODO: build a better version of the action links and deprecate the
       // whole DifferentialRevisionDetailRenderer class.
-      $custom_renderer =
-        newv($custom_renderer_class, array());
+      $custom_renderer = newv($custom_renderer_class, array());
+      if ($diff_vs) {
+        $custom_renderer->setVSDiff($diffs[$diff_vs]);
+      }
       $actions = array_merge(
         $actions,
         $custom_renderer->generateActionLinks($revision, $target_manual));
