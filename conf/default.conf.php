@@ -65,6 +65,13 @@ return array(
   'phabricator.custom.logo'   => null,
 
 
+// -- Internationalization -------------------------------------------------- //
+
+  // This allows customizing texts used in Phabricator. The class must extend
+  // PhabricatorTranslation.
+  'translation.provider' => 'PhabricatorEnglishTranslation',
+
+
 // -- Access Policies ------------------------------------------------------- //
 
   // Phabricator allows you to set the visibility of objects (like repositories

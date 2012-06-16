@@ -891,6 +891,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('threadtopic.sql'),
       ),
+      'usertranslation.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('usertranslation.sql'),
+      ),
     );
   }
 

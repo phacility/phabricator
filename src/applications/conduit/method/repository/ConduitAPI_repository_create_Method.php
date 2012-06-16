@@ -36,24 +36,25 @@ final class ConduitAPI_repository_create_Method
 
   public function defineParamTypes() {
     return array(
-      'name'          => 'required string',
-      'vcs'           => 'required enum<git, hg, svn>',
-      'callsign'      => 'required string',
-      'encoding'      => 'optional string',
-      'tracking'      => 'optional bool',
-      'uri'           => 'optional string',
-      'sshUser'       => 'optional string',
-      'sshKey'        => 'optional string',
-      'sshKeyFile'    => 'optional string',
-      'httpUser'      => 'optional string',
-      'httpPassword'  => 'optional string',
-      'localPath'     => 'optional string',
-      'svnSubpath'    => 'optional string',
-      'branchFilter'  => 'optional list<string>',
-      'pullFrequency' => 'optional int',
-      'defaultBranch' => 'optional string',
-      'heraldEnabled' => 'optional bool',
-      'svnUUID'       => 'optional string',
+      'name'                => 'required string',
+      'vcs'                 => 'required enum<git, hg, svn>',
+      'callsign'            => 'required string',
+      'encoding'            => 'optional string',
+      'tracking'            => 'optional bool',
+      'uri'                 => 'optional string',
+      'sshUser'             => 'optional string',
+      'sshKey'              => 'optional string',
+      'sshKeyFile'          => 'optional string',
+      'httpUser'            => 'optional string',
+      'httpPassword'        => 'optional string',
+      'localPath'           => 'optional string',
+      'svnSubpath'          => 'optional string',
+      'branchFilter'        => 'optional list<string>',
+      'closeCommitsFilter'  => 'optional list<string>',
+      'pullFrequency'       => 'optional int',
+      'defaultBranch'       => 'optional string',
+      'heraldEnabled'       => 'optional bool',
+      'svnUUID'             => 'optional string',
     );
   }
 
@@ -111,6 +112,9 @@ final class ConduitAPI_repository_create_Method
       'local-path'        => $request->getValue('localPath'),
       'branch-filter'     => array_fill_keys(
         $request->getValue('branchFilter', array()),
+        true),
+      'close-commits-filter' => array_fill_keys(
+        $request->getValue('closeCommitsFilter', array()),
         true),
       'pull-frequency'    => $request->getValue('pullFrequency'),
       'default-branch'    => $request->getValue('defaultBranch'),

@@ -60,6 +60,17 @@ abstract class PhabricatorController extends AphrontController {
       }
     }
 
+    $translation = $user->getTranslation();
+    if ($translation &&
+        $translation != PhabricatorEnv::getEnvConfig('translation.provider') &&
+        class_exists($translation) &&
+        is_subclass_of($translation, 'PhabricatorTranslation')) {
+      $translation = newv($translation, array());
+      PhutilTranslator::getInstance()
+        ->setLanguage($translation->getLanguage())
+        ->addTranslations($translation->getTranslations());
+    }
+
     $request->setUser($user);
 
     if ($user->getIsDisabled() && $this->shouldRequireEnabledUser()) {

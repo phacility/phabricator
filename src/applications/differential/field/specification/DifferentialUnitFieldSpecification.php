@@ -171,12 +171,15 @@ final class DifferentialUnitFieldSpecification
       ArcanistUnitTestResult::RESULT_SKIP       => 'Skipped',
       ArcanistUnitTestResult::RESULT_POSTPONED  => 'Postponed',
       ArcanistUnitTestResult::RESULT_PASS       => 'Passed',
-      'details'                                 => 'Details',
     );
 
     $show = array();
     foreach ($hidden as $key => $value) {
-      $show[] = $value.' '.idx($noun, $key);
+      if ($key == 'details') {
+        $show[] = pht('%d Detail(s)', $value);
+      } else {
+        $show[] = $value.' '.idx($noun, $key);
+      }
     }
 
     return "Show Full Unit Results (".implode(', ', $show).")";

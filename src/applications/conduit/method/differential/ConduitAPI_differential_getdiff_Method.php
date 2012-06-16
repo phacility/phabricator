@@ -70,10 +70,11 @@ final class ConduitAPI_differential_getdiff_Method extends ConduitAPIMethod {
       throw new ConduitException('ERR_BAD_DIFF');
     }
 
-    $diff->attachChangesets($diff->loadChangesets());
-    // TODO: We could batch this to improve performance.
+    $diff->attachChangesets(
+      $diff->loadRelatives(new DifferentialChangeset(), 'diffID'));
     foreach ($diff->getChangesets() as $changeset) {
-      $changeset->attachHunks($changeset->loadHunks());
+      $changeset->attachHunks(
+        $changeset->loadRelatives(new DifferentialHunk(), 'changesetID'));
     }
 
     $basic_dict = $diff->getDiffDict();

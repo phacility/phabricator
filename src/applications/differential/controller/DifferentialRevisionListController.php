@@ -379,7 +379,7 @@ final class DifferentialRevisionListController extends DifferentialController {
             array(
               'all'       => 'All',
               'open'      => 'Open',
-              'closed'    => 'Closed',
+              'closed'    => pht('Closed'),
               'abandoned' => 'Abandoned',
             ));
       case 'order':

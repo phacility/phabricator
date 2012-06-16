@@ -28,6 +28,7 @@ final class PhabricatorUserLog extends PhabricatorUserDAO {
 
   const ACTION_ADMIN          = 'admin';
   const ACTION_DISABLE        = 'disable';
+  const ACTION_DELETE         = 'delete';
 
   const ACTION_CONDUIT_CERTIFICATE = 'conduit-cert';
   const ACTION_CONDUIT_CERTIFICATE_FAILURE = 'conduit-cert-fail';

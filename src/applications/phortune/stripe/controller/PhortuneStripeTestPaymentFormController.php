@@ -144,11 +144,9 @@ extends PhortuneStripeBaseController {
     }
 
     // append a helpful "fix this" to the messages to be displayed to the user
-    if (count($messages) == 1) {
-      $messages[] = 'Please fix this error and try again.';
-    } else {
-      $messages[] = 'Please fix these errors and try again.';
-    }
+    $messages[] = pht(
+      'Please fix these errors and try again.',
+      count($messages));
 
     return array(
       $card_number_error,

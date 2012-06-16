@@ -64,8 +64,6 @@ final class ConduitAPI_user_query_Method
       $query->withUsernames($usernames);
     }
     if ($emails) {
-      // TODO -- validate emails and maybe
-      // throw new ConduitException('ERR-INVALID-PARAMETER');
       $query->withEmails($emails);
     }
     if ($realnames) {

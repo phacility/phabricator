@@ -36,6 +36,13 @@ abstract class ConduitAPI_user_Method extends ConduitAPIMethod {
       $roles[] = 'admin';
     }
 
+    $primary = $user->loadPrimaryEmail();
+    if ($primary && $primary->getIsVerified()) {
+      $roles[] = 'verified';
+    } else {
+      $roles[] = 'unverified';
+    }
+
     $return = array(
       'phid'      => $user->getPHID(),
       'userName'  => $user->getUserName(),

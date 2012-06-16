@@ -54,6 +54,7 @@ final class PhabricatorPeopleEditController
     $nav->addFilter('cert',  'Conduit Certificate');
     $nav->addSpacer();
     $nav->addFilter('rename', 'Change Username');
+    $nav->addFilter('delete', 'Delete User');
 
     if (!$user->getID()) {
       $this->view = 'basic';
@@ -82,6 +83,9 @@ final class PhabricatorPeopleEditController
         break;
       case 'rename':
         $response = $this->processRenameRequest($user);
+        break;
+      case 'delete':
+        $response = $this->processDeleteRequest($user);
         break;
       default:
         return new Aphront404Response();
@@ -231,8 +235,7 @@ final class PhabricatorPeopleEditController
           ->setName('username')
           ->setValue($user->getUsername())
           ->setError($e_username)
-          ->setDisabled($is_immutable)
-          ->setCaption('Usernames are permanent and can not be changed later!'))
+          ->setDisabled($is_immutable))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Real Name')
@@ -565,7 +568,93 @@ final class PhabricatorPeopleEditController
     return array($errors, $panel);
   }
 
+  private function processDeleteRequest(PhabricatorUser $user) {
+    $request = $this->getRequest();
+    $admin = $request->getUser();
 
+    if ($user->getPHID() == $admin->getPHID()) {
+      $error = new AphrontErrorView();
+      $error->setTitle('You Shall Journey No Farther');
+      $error->appendChild(
+        '<p>As you stare into the gaping maw of the abyss, something holds '.
+        'you back.</p>'.
+        '<p>You can not delete your own account.</p>');
+      return $error;
+    }
+
+    $e_username = true;
+    $username = null;
+
+    $errors = array();
+    if ($request->isFormPost()) {
+
+      $username = $request->getStr('username');
+      if (!strlen($username)) {
+        $e_username = 'Required';
+        $errors[] = 'You must type the username to confirm deletion.';
+      } else if ($username != $user->getUsername()) {
+        $e_username = 'Invalid';
+        $errors[] = 'You must type the username correctly.';
+      }
+
+      if (!$errors) {
+        id(new PhabricatorUserEditor())
+          ->setActor($admin)
+          ->deleteUser($user);
+
+        return id(new AphrontRedirectResponse())->setURI('/people/');
+      }
+    }
+
+    if ($errors) {
+      $errors = id(new AphrontErrorView())
+        ->setTitle('Form Errors')
+        ->setErrors($errors);
+    } else {
+      $errors = null;
+    }
+
+    $form = new AphrontFormView();
+    $form
+      ->setUser($admin)
+      ->setAction($request->getRequestURI())
+      ->appendChild(
+        '<p class="aphront-form-instructions">'.
+          '<strong>Be careful when deleting users!</strong> '.
+          'If this user interacted with anything, it is generally better '.
+          'to disable them, not delete them. If you delete them, it will '.
+          'no longer be possible to search for their objects, for example, '.
+          'and you will lose other information about their history. Disabling '.
+          'them instead will prevent them from logging in but not destroy '.
+          'any of their data.'.
+        '</p>'.
+        '<p class="aphront-form-instructions">'.
+          'It is generally safe to delete newly created users (and test users '.
+          'and so on), but less safe to delete established users. If '.
+          'possible, disable them instead.'.
+        '</p>')
+      ->appendChild(
+        id(new AphrontFormStaticControl())
+          ->setLabel('Username')
+          ->setValue($user->getUsername()))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel('Confirm')
+          ->setValue($username)
+          ->setName('username')
+          ->setCaption("Type the username again to confirm deletion.")
+          ->setError($e_username))
+      ->appendChild(
+        id(new AphrontFormSubmitControl())
+          ->setValue('Delete User'));
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader('Delete User');
+    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
+    $panel->appendChild($form);
+
+    return array($errors, $panel);
+  }
 
   private function getRoleInstructions() {
     $roles_link = phutil_render_tag(

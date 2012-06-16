@@ -147,7 +147,7 @@ final class DifferentialChangeset extends DifferentialDAO {
       }
       $with_context[] = array_intersect_key($changes, $context);
     }
-    return call_user_func('array_merge', $with_context);
+    return array_mergev($with_context);
   }
 
   public function getAnchorName() {

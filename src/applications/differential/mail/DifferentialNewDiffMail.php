@@ -21,7 +21,7 @@ final class DifferentialNewDiffMail extends DifferentialReviewRequestMail {
   protected function renderVaryPrefix() {
     $revision = $this->getRevision();
     $line_count = $revision->getLineCount();
-    $lines = ($line_count == 1 ? "1 line" : "{$line_count} lines");
+    $lines = pht('%d line(s)', $line_count);
 
     if ($this->isFirstMailToRecipients()) {
       $verb = 'Request';

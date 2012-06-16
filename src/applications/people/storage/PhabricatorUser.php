@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-final class PhabricatorUser extends PhabricatorUserDAO {
+final class PhabricatorUser extends PhabricatorUserDAO implements PhutilPerson {
 
   const SESSION_TABLE = 'phabricator_session';
   const NAMETOKEN_TABLE = 'user_nametoken';
@@ -25,6 +25,7 @@ final class PhabricatorUser extends PhabricatorUserDAO {
   protected $userName;
   protected $realName;
   protected $sex;
+  protected $translation;
   protected $passwordSalt;
   protected $passwordHash;
   protected $profileImagePHID;
@@ -88,6 +89,11 @@ final class PhabricatorUser extends PhabricatorUserDAO {
       $this->setPasswordHash($hash);
     }
     return $this;
+  }
+
+  // To satisfy PhutilPerson.
+  public function getSex() {
+    return $this->sex;
   }
 
   public function isLoggedIn() {
@@ -622,6 +628,10 @@ EOBODY;
 
   public function getFullName() {
     return $this->getUsername().' ('.$this->getRealName().')';
+  }
+
+  public function __toString() {
+    return $this->getUsername();
   }
 
   public static function loadOneWithEmailAddress($address) {

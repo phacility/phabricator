@@ -137,10 +137,8 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
       $line_count = $changeset->getAffectedLineCount();
       if ($line_count == 0) {
         $lines = null;
-      } else if ($line_count == 1) {
-        $lines = ' (1 line)';
       } else {
-        $lines = ' ('.$line_count.' lines)';
+        $lines = ' '.pht('(%d line(s))', $line_count);
       }
 
       $char = DifferentialChangeType::getSummaryCharacterForChangeType($type);
