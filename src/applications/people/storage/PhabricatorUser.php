@@ -96,6 +96,19 @@ final class PhabricatorUser extends PhabricatorUserDAO implements PhutilPerson {
     return $this->sex;
   }
 
+  public function getTranslation() {
+    try {
+      if ($this->translation &&
+          class_exists($this->translation) &&
+          is_subclass_of($this->translation, 'PhabricatorTranslation')) {
+        return $this->translation;
+      }
+    } catch (PhutilMissingSymbolException $ex) {
+      return null;
+    }
+    return null;
+  }
+
   public function isLoggedIn() {
     return !($this->getPHID() === null);
   }

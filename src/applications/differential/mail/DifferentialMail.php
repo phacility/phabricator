@@ -78,7 +78,6 @@ abstract class DifferentialMail {
     }
 
     $cc_phids     = $this->getCCPHIDs();
-    $body         = $this->buildBody();
     $attachments  = $this->buildAttachments();
 
     $template = new PhabricatorMetaMTAMail();
@@ -90,10 +89,6 @@ abstract class DifferentialMail {
     }
 
     $template
-      ->setSubject($this->renderSubject())
-      ->setSubjectPrefix($this->getSubjectPrefix())
-      ->setVarySubjectPrefix($this->renderVaryPrefix())
-      ->setBody($body)
       ->setIsHTML($this->shouldMarkMailAsHTML())
       ->setParentMessageID($this->parentMessageID)
       ->addHeader('Thread-Topic', $this->getThreadTopic());
@@ -172,25 +167,62 @@ abstract class DifferentialMail {
     $phids = array_keys($phids);
 
     $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $objects = id(new PhabricatorObjectHandleData($phids))->loadObjects();
 
-    $event = new PhabricatorEvent(
-      PhabricatorEventType::TYPE_DIFFERENTIAL_WILLSENDMAIL,
-      array(
-        'mail' => $template,
-      )
-    );
-    PhutilEventEngine::dispatchEvent($event);
+    $to_handles = array_select_keys($handles, $to_phids);
+    $cc_handles = array_select_keys($handles, $cc_phids);
 
-    $template = $event->getValue('mail');
+    $this->prepareBody();
 
-    $mails = $reply_handler->multiplexMail(
-      $template,
-      array_select_keys($handles, $to_phids),
-      array_select_keys($handles, $cc_phids));
+    $mails = $reply_handler->multiplexMail($template, $to_handles, $cc_handles);
 
-    foreach ($mails as $mail) {
-      $mail->saveAndSend();
+    $original_translator = PhutilTranslator::getInstance();
+    if (!PhabricatorMetaMTAMail::shouldMultiplexAllMail()) {
+      $translation = PhabricatorEnv::newObjectFromConfig(
+        'translation.provider');
+      $translator = id(new PhutilTranslator())
+        ->setLanguage($translation->getLanguage())
+        ->addTranslations($translation->getTranslations());
     }
+
+    try {
+      foreach ($mails as $mail) {
+        if (PhabricatorMetaMTAMail::shouldMultiplexAllMail()) {
+          $translation = newv($mail->getTranslation($objects), array());
+          $translator = id(new PhutilTranslator())
+            ->setLanguage($translation->getLanguage())
+            ->addTranslations($translation->getTranslations());
+          PhutilTranslator::setInstance($translator);
+        }
+
+        $body =
+          $this->buildBody()."\n".
+          $reply_handler->getRecipientsSummary($to_handles, $cc_handles);
+
+        $mail
+          ->setSubject($this->renderSubject())
+          ->setSubjectPrefix($this->getSubjectPrefix())
+          ->setVarySubjectPrefix($this->renderVaryPrefix())
+          ->setBody($body);
+
+        $event = new PhabricatorEvent(
+          PhabricatorEventType::TYPE_DIFFERENTIAL_WILLSENDMAIL,
+          array(
+            'mail' => $mail,
+          )
+        );
+        PhutilEventEngine::dispatchEvent($event);
+        $mail = $event->getValue('mail');
+
+        $mail->saveAndSend();
+      }
+
+    } catch (Exception $ex) {
+      PhutilTranslator::setInstance($original_translator);
+      throw $ex;
+    }
+
+    PhutilTranslator::setInstance($original_translator);
   }
 
   protected function getMailTags() {
@@ -203,6 +235,17 @@ abstract class DifferentialMail {
 
   protected function shouldMarkMailAsHTML() {
     return false;
+  }
+
+  /**
+   * @{method:buildBody} is called once for each e-mail recipient to allow
+   * translating text to his language. This method can be used to load data that
+   * don't need translation and use them later in @{method:buildBody}.
+   *
+   * @param
+   * @return
+   */
+  protected function prepareBody() {
   }
 
   protected function buildBody() {
@@ -369,6 +412,8 @@ EOTEXT;
     $body = array();
     foreach ($aux_fields as $field) {
       $field->setRevision($this->getRevision());
+      // TODO: Introduce and use getRequiredHandlePHIDsForMail() and load all
+      // handles in prepareBody().
       $text = $field->renderValueForMail($phase);
       if ($text !== null) {
         $body[] = $text;
