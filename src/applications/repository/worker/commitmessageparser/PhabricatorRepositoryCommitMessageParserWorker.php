@@ -97,47 +97,64 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
           $commit->getPHID());
         $commit_is_new = $conn_w->getAffectedRows();
 
-        $message = null;
-        $name = $data->getCommitDetail('committer');
-        if ($name !== null) {
-          $committer = $data->getCommitDetail('committerPHID');
+        $committer_phid = $data->getCommitDetail('committerPHID');
+        if ($committer_phid) {
+          $handle = PhabricatorObjectHandleData::loadOneHandle($committer_phid);
+          $committer_name = '@'.$handle->getName();
         } else {
-          $committer = $data->getCommitDetail('authorPHID');
-          $name = $data->getAuthorName();
-        }
-        if (!$committer) {
-          $committer = $revision->getAuthorPHID();
-          $message = 'Closed by '.$name.'.';
+          $committer_name = $data->getCommitDetail('committer');
         }
 
-        if ($commit_is_new) {
-          $diff = $this->attachToRevision($revision, $committer);
+        $author_phid = $data->getCommitDetail('authorPHID');
+        if ($author_phid) {
+          $handle = PhabricatorObjectHandleData::loadOneHandle($author_phid);
+          $author_name = '@'.$handle->getName();
+        } else {
+          $author_name = $data->getAuthorName();
         }
+
+        $commit_name = $repository->formatCommitName(
+          $commit->getCommitIdentifier());
+
+        $info = array();
+        $info[] = "authored by {$author_name}";
+        if ($committer_name && ($committer_name != $author_name)) {
+          $info[] = "committed by {$committer_name}";
+        }
+        $info = implode(', ', $info);
+
+        $message = "Closed by commit {$commit_name} ({$info}).";
+
+        $actor_phid = nonempty(
+          $committer_phid,
+          $author_phid,
+          $revision->getAuthorPHID());
 
         $status_closed = ArcanistDifferentialRevisionStatus::CLOSED;
-        $should_close = ($revision->getStatus() != $status_closed) &&
+        $should_close = $commit_is_new &&
+                        ($revision->getStatus() != $status_closed) &&
                         $repository->shouldAutocloseCommit($commit, $data);
 
         if ($should_close) {
+          $diff = $this->attachToRevision($revision, $actor_phid);
+
           $revision->setDateCommitted($commit->getEpoch());
           $editor = new DifferentialCommentEditor(
             $revision,
-            $committer,
+            $actor_phid,
             DifferentialAction::ACTION_CLOSE);
           $editor->setIsDaemonWorkflow(true);
 
-          if ($commit_is_new) {
-            $vs_diff = $this->loadChangedByCommit($diff);
-            if ($vs_diff) {
-              $data->setCommitDetail('vsDiff', $vs_diff->getID());
+          $vs_diff = $this->loadChangedByCommit($diff);
+          if ($vs_diff) {
+            $data->setCommitDetail('vsDiff', $vs_diff->getID());
 
-              $changed_by_commit = PhabricatorEnv::getProductionURI(
-                '/D'.$revision->getID().
-                '?vs='.$vs_diff->getID().
-                '&id='.$diff->getID().
-                '#differential-review-toc');
-              $editor->setChangedByCommit($changed_by_commit);
-            }
+            $changed_by_commit = PhabricatorEnv::getProductionURI(
+              '/D'.$revision->getID().
+              '?vs='.$vs_diff->getID().
+              '&id='.$diff->getID().
+              '#differential-review-toc');
+            $editor->setChangedByCommit($changed_by_commit);
           }
 
           $editor->setMessage($message)->save();
@@ -151,7 +168,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
   private function attachToRevision(
     DifferentialRevision $revision,
-    $committer) {
+    $actor_phid) {
 
     $drequest = DiffusionRequest::newFromDictionary(array(
       'repository' => $this->repository,
@@ -164,7 +181,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     $changes = id(new ArcanistDiffParser())->parseDiff($raw_diff);
     $diff = DifferentialDiff::newFromRawChanges($changes)
       ->setRevisionID($revision->getID())
-      ->setAuthorPHID($committer)
+      ->setAuthorPHID($actor_phid)
       ->setCreationMethod('commit')
       ->setSourceControlSystem($this->repository->getVersionControlSystem())
       ->setLintStatus(DifferentialLintStatus::LINT_SKIP)
