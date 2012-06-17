@@ -66,7 +66,7 @@ final class PhabricatorJumpNavHandler {
               return id(new AphrontRedirectResponse())
                 ->setURI('/p/'.$matches[1].'/');
             case 'project':
-              $project = static::findCloselyNamedProject($matches[1]);
+              $project = self::findCloselyNamedProject($matches[1]);
               if ($project) {
                 return id(new AphrontRedirectResponse())
                   ->setURI('/project/view/'.$project->getID().'/');
