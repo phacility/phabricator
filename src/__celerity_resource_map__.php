@@ -1355,13 +1355,14 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-phabricator-notification-example' =>
   array(
-    'uri' => '/res/0b8fadf5/rsrc/js/application/uiexample/notification-example.js',
+    'uri' => '/res/df97e4b3/rsrc/js/application/uiexample/notification-example.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'phabricator-notification',
       1 => 'javelin-stratcom',
       2 => 'javelin-behavior',
+      3 => 'javelin-uri',
     ),
     'disk' => '/rsrc/js/application/uiexample/notification-example.js',
   ),
@@ -2181,19 +2182,20 @@ celerity_register_resource_map(array(
   ),
   'phabricator-notification' =>
   array(
-    'uri' => '/res/253b3262/rsrc/js/application/core/Notification.js',
+    'uri' => '/res/cacd79f1/rsrc/js/application/core/Notification.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-install',
       1 => 'javelin-dom',
       2 => 'javelin-stratcom',
+      3 => 'javelin-util',
     ),
     'disk' => '/rsrc/js/application/core/Notification.js',
   ),
   'phabricator-notification-css' =>
   array(
-    'uri' => '/res/423a14d1/rsrc/css/aphront/notification.css',
+    'uri' => '/res/7452322a/rsrc/css/aphront/notification.css',
     'type' => 'css',
     'requires' =>
     array(
