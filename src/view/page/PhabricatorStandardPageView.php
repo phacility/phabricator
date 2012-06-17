@@ -391,16 +391,20 @@ final class PhabricatorStandardPageView extends AphrontPageView {
 
       $aphlict_object_id = 'aphlictswfobject';
 
-      $server_uri = new PhutilURI(PhabricatorEnv::getURI(''));
-      $server_domain = $server_uri->getDomain();
+      $client_uri = PhabricatorEnv::getEnvConfig('notification.client-uri');
+      $client_uri = new PhutilURI($client_uri);
+      if ($client_uri->getDomain() == 'localhost') {
+        $this_host = new PhutilURI($this->getRequest()->getHost());
+        $client_uri->setDomain($this_host->getDomain());
+      }
 
       Javelin::initBehavior(
         'aphlict-listen',
         array(
           'id'           => $aphlict_object_id,
-          'server'       => $server_domain,
-          'port'         => 22280,
-          'pageObjects' => $this->pageObjects,
+          'server'       => $client_uri->getDomain(),
+          'port'         => $client_uri->getPort(),
+          'pageObjects'  => $this->pageObjects,
         ));
 
       Javelin::initBehavior('aphlict-dropdown', array());

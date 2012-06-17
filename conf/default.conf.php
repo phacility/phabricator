@@ -186,8 +186,19 @@ return array(
   // extend AphrontMySQLDatabaseConnectionBase.
   'mysql.implementation' => 'AphrontMySQLDatabaseConnection',
 
-// -- Notifications ----//
+
+// -- Notifications --------------------------------------------------------- //
+
   'notification.enabled' => false,
+
+  // Client port for the realtime server to listen on, and for realtime clients
+  // to connect to. Use "localhost" if you are running the notification server
+  // on the same host as the web server.
+  'notification.client-uri'   => 'http://localhost:22280/',
+
+  // URI and port for the notification root server.
+  'notification.server-uri'   => 'http://localhost:22281/',
+
 
 // -- Email ----------------------------------------------------------------- //
 

@@ -303,6 +303,10 @@ a.handle-disabled {
   padding: 6px 6px;
 }
 
+.no-notifications {
+  color: #999999;
+}
+
 .phabricator-notification-unread {
   background: #aacfef;
 }
