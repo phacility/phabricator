@@ -404,11 +404,10 @@ final class PhabricatorStandardPageView extends AphrontPageView {
           'id'           => $aphlict_object_id,
           'server'       => $client_uri->getDomain(),
           'port'         => $client_uri->getPort(),
-          'pageObjects'  => $this->pageObjects,
+          'pageObjects'  => array_fill_keys($this->pageObjects, true),
         ));
 
       Javelin::initBehavior('aphlict-dropdown', array());
-
 
       $notification_count = id(new PhabricatorFeedStoryNotification())
         ->countUnread($user);
