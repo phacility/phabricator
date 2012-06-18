@@ -310,3 +310,10 @@ a.handle-disabled {
 .phabricator-notification-unread {
   background: #aacfef;
 }
+
+.view-all-notifications {
+  text-align: center;
+  font-weight: bold;
+  background: #eeeeee;
+  border-top: 1px solid #dddddd;
+}

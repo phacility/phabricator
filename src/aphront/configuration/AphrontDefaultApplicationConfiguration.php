@@ -427,6 +427,7 @@ class AphrontDefaultApplicationConfiguration
       ),
 
       '/notification/' => array(
+        '' => 'PhabricatorNotificationListController',
         'panel/' => 'PhabricatorNotificationPanelController',
         'individual/' => 'PhabricatorNotificationIndividualController',
         'status/' => 'PhabricatorNotificationStatusController',

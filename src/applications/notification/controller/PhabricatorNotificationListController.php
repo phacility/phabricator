@@ -16,53 +16,41 @@
  * limitations under the License.
  */
 
-final class PhabricatorNotificationPanelController
+final class PhabricatorNotificationListController
   extends PhabricatorNotificationController {
 
   public function processRequest() {
-
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    $pager = new AphrontPagerView();
+    $pager->setURI($request->getRequestURI(), 'offset');
+    $pager->setOffset($request->getInt('offset'));
+
     $query = new PhabricatorNotificationQuery();
     $query->setUserPHID($user->getPHID());
-    $query->setLimit(15);
+    $notifications = $query->executeWithPager($pager);
 
-    $stories = $query->execute();
-
-    $num_unconsumed = 0;
-    if ($stories) {
-      $builder = new PhabricatorNotificationBuilder($stories);
-      $notifications_view = $builder->buildView();
-
-      foreach ($stories as $story) {
-        if (!$story->getHasViewed()) {
-          $num_unconsumed++;
-        }
-      }
-      $content = $notifications_view->render();
+    if ($notifications) {
+      $builder = new PhabricatorNotificationBuilder($notifications);
+      $view = $builder->buildView();
     } else {
-      $content =
+      $view =
         '<div class="phabricator-notification no-notifications">'.
           'You have no notifications.'.
         '</div>';
     }
 
-    $content .=
-      '<div class="phabricator-notification view-all-notifications">'.
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => '/notification/',
-          ),
-          'View All Notifications').
-      '</div>';
+    $panel = new AphrontPanelView();
+    $panel->setHeader('Notifications');
+    $panel->appendChild($view);
+    $panel->appendChild($pager);
 
-    $json = array(
-      'content' => $content,
-      'number'  => $num_unconsumed,
-    );
-
-    return id(new AphrontAjaxResponse())->setContent($json);
+    return $this->buildStandardPageResponse(
+      $panel,
+      array(
+        'title' => 'Notifications',
+      ));
   }
+
 }

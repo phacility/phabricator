@@ -16,29 +16,20 @@
  * limitations under the License.
  */
 
-final class PhabricatorNotificationQuery {
+final class PhabricatorNotificationQuery extends PhabricatorOffsetPagedQuery {
 
-  private $limit = 100;
   private $userPHID;
-
-
-  public function setLimit($limit) {
-    $this->limit = $limit;
-    return $this;
-  }
 
   public function setUserPHID($user_phid) {
     $this->userPHID = $user_phid;
     return $this;
   }
 
-
   public function execute() {
     if (!$this->userPHID) {
       throw new Exception("Call setUser() before executing the query");
     }
 
-    //TODO throw an exception if no user
     $story_table = new PhabricatorFeedStoryData();
     $notification_table = new PhabricatorFeedStoryNotification();
 
@@ -49,12 +40,12 @@ final class PhabricatorNotificationQuery {
       "SELECT story.*, notif.hasViewed FROM %T notif
          JOIN %T story ON notif.chronologicalKey = story.chronologicalKey
          WHERE notif.userPHID = %s
-         ORDER BY notif.chronologicalKey desc
-         LIMIT %d",
+         ORDER BY notif.chronologicalKey DESC
+         %Q",
       $notification_table->getTableName(),
       $story_table->getTableName(),
       $this->userPHID,
-      $this->limit);
+      $this->buildLimitClause($conn));
 
     $viewed_map = ipull($data, 'hasViewed', 'chronologicalKey');
     $data = $story_table->loadAllFromArray($data);
