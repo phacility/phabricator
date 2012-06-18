@@ -199,6 +199,16 @@ return array(
   // URI and port for the notification root server.
   'notification.server-uri'   => 'http://localhost:22281/',
 
+  // The server must be started as root so it can bind to privileged ports, but
+  // if you specify a user here it will drop permissions after binding.
+  'notification.user'         => null,
+
+  // Location where the server should log to.
+  'notification.log'          => '/var/log/aphlict.log',
+
+  // PID file to use.
+  'notification.pidfile'      => '/var/run/aphlict.pid',
+
 
 // -- Email ----------------------------------------------------------------- //
 
