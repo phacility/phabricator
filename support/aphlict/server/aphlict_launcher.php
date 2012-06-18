@@ -162,7 +162,7 @@ if ($foreground) {
   exit($err);
 } else {
   while (true) {
-    $g_future = new ExecFuture('%C', $command);
+    $g_future = new ExecFuture('exec %C', $command);
     $g_future->resolve();
 
     // If the server exited, wait a couple of seconds and restart it.
