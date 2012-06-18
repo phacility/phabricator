@@ -119,7 +119,7 @@ final class PhabricatorIRCMacroHandler extends PhabricatorIRCHandler {
   }
 
   public function rasterize($macro, $size, $aspect) {
-    $image = @file_get_contents($macro['uri']);
+    $image = HTTPSFuture::loadContent($macro['uri']);
     if (!$image) {
       return false;
     }

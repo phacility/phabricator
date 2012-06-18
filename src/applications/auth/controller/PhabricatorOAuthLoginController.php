@@ -63,7 +63,7 @@ final class PhabricatorOAuthLoginController
     $userinfo_uri = (string)$userinfo_uri;
 
     try {
-      $user_data = @file_get_contents($userinfo_uri);
+      $user_data = HTTPSFuture::loadContent($userinfo_uri);
       if ($user_data === false) {
         throw new PhabricatorOAuthProviderException(
           "Request to '{$userinfo_uri}' failed!");
@@ -262,34 +262,13 @@ final class PhabricatorOAuthLoginController
       'code'          => $code,
     ) + $provider->getExtraTokenParameters();
 
-    $post_data = http_build_query($query_data, '', '&');
-    $post_length = strlen($post_data);
-
-    $stream_context = stream_context_create(
-      array(
-        'http' => array(
-          'method'  => 'POST',
-          'header'  =>
-            "Content-Type: application/x-www-form-urlencoded\r\n".
-            "Content-Length: {$post_length}\r\n",
-          'content' => $post_data,
-        ),
-      ));
-
-    $stream = fopen($auth_uri, 'r', false, $stream_context);
-
-    $response = false;
-    $meta = null;
-    if ($stream) {
-      $meta = stream_get_meta_data($stream);
-      $response = stream_get_contents($stream);
-      fclose($stream);
-    }
-
-    if ($response === false) {
+    $future = new HTTPSFuture($auth_uri, $query_data);
+    $future->setMethod('POST');
+    try {
+      list($response) = $future->resolvex();
+    } catch (Exception $ex) {
       return $this->buildErrorResponse(new PhabricatorOAuthFailureView());
     }
-
     $data = $provider->decodeTokenResponse($response);
 
     $token = idx($data, 'access_token');

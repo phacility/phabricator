@@ -105,7 +105,7 @@ final class PhabricatorOAuthProviderGitHub extends PhabricatorOAuthProvider {
   public function retrieveUserProfileImage() {
     $uri = idx($this->userData, 'avatar_url');
     if ($uri) {
-      return @file_get_contents($uri);
+      return HTTPSFuture::loadContent($uri);
     }
     return null;
   }

@@ -86,21 +86,9 @@ final class PhabricatorOAuthDiagnosticsController
         'Application secret is set.');
     }
 
-    $timeout = stream_context_create(
-      array(
-        'http' => array(
-          'ignore_errors' => true,
-          'timeout'       => 5,
-        ),
-      ));
-    $timeout_strict = stream_context_create(
-      array(
-        'http' => array(
-          'timeout'       => 5,
-        ),
-      ));
+    $timeout = 5;
 
-    $internet = @file_get_contents("http://google.com/", false, $timeout);
+    $internet = HTTPSFuture::loadContent("http://google.com/", $timeout);
     if ($internet === false) {
       $results['internet'] = array(
         $res_no,
@@ -116,7 +104,7 @@ final class PhabricatorOAuthDiagnosticsController
 
     $test_uris = $provider->getTestURIs();
     foreach ($test_uris as $uri) {
-      $success = @file_get_contents($uri, false, $timeout);
+      $success = HTTPSFuture::loadContent($uri, $timeout);
       if ($success === false) {
         $results[$uri] = array(
           $res_no,
@@ -140,22 +128,23 @@ final class PhabricatorOAuthDiagnosticsController
           'grant_type'      => 'client_credentials',
         ));
 
-      $token_value  = @file_get_contents($test_uri, false, $timeout);
-      $token_strict = @file_get_contents($test_uri, false, $timeout_strict);
-      if ($token_value === false) {
+      $future = new HTTPSFuture($test_uri);
+      $future->setTimeout($timeout);
+      try {
+        list($body) = $future->resolvex();
         $results['App Login'] = array(
-          $res_no,
-          null,
-          "Unable to perform an application login with your Application ID ".
-          "and Application Secret. You may have mistyped or misconfigured ".
-          "them; {$name} may have revoked your authorization; or {$name} may ".
-          "be having technical problems.");
-      } else {
-        if ($token_strict) {
+          $res_ok,
+          '(A Valid Token)',
+          "Raw application login to {$name} works.");
+      } catch (Exception $ex) {
+        if ($ex instanceof HTTPFutureResponseStatusCURL) {
           $results['App Login'] = array(
-            $res_ok,
-            '(A Valid Token)',
-            "Raw application login to {$name} works.");
+            $res_no,
+            null,
+            "Unable to perform an application login with your Application ID ".
+            "and Application Secret. You may have mistyped or misconfigured ".
+            "them; {$name} may have revoked your authorization; or {$name} ".
+            "may be having technical problems.");
         } else {
           $data = json_decode($token_value, true);
           if (!is_array($data)) {

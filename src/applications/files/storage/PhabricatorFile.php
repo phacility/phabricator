@@ -203,14 +203,9 @@ final class PhabricatorFile extends PhabricatorFileDAO {
         return null;
     }
 
-    $timeout = stream_context_create(
-      array(
-        'http' => array(
-          'timeout' => 5,
-        ),
-      ));
+    $timeout = 5;
 
-    $file_data = @file_get_contents($uri, false, $timeout);
+    $file_data = HTTPSFuture::loadContent($uri, $timeout);
     if ($file_data === false) {
       return null;
     }
