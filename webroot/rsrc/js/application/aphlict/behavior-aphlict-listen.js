@@ -45,9 +45,14 @@ JX.behavior('aphlict-listen', function(config) {
 
     JX.Stratcom.invoke('notification-panel-update', null, {});
 
+    // Show the notification itself.
+    new JX.Notification()
+      .setContent(JX.$H(response.content))
+      .show();
+
+
     // If the notification affected an object on this page, show a
     // permanent reload notification if we aren't already.
-
     if ((response.primaryObjectPHID in config.pageObjects) &&
         !showing_reload) {
       var reload = new JX.Notification()

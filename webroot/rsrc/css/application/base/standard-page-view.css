@@ -307,7 +307,7 @@ a.handle-disabled {
   color: #999999;
 }
 
-.phabricator-notification-unread {
+#phabricator-notification-dropdown .phabricator-notification-unread {
   background: #aacfef;
 }
 

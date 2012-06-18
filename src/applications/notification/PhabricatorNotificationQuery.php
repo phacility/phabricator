@@ -19,9 +19,15 @@
 final class PhabricatorNotificationQuery extends PhabricatorOffsetPagedQuery {
 
   private $userPHID;
+  private $keys;
 
   public function setUserPHID($user_phid) {
     $this->userPHID = $user_phid;
+    return $this;
+  }
+
+  public function withKeys(array $keys) {
+    $this->keys = $keys;
     return $this;
   }
 
@@ -37,17 +43,19 @@ final class PhabricatorNotificationQuery extends PhabricatorOffsetPagedQuery {
 
     $data = queryfx_all(
       $conn,
-      "SELECT story.*, notif.hasViewed FROM %T notif
+      "SELECT story.*, notif.primaryObjectPHID, notif.hasViewed FROM %T notif
          JOIN %T story ON notif.chronologicalKey = story.chronologicalKey
-         WHERE notif.userPHID = %s
+         %Q
          ORDER BY notif.chronologicalKey DESC
          %Q",
       $notification_table->getTableName(),
       $story_table->getTableName(),
-      $this->userPHID,
+      $this->buildWhereClause($conn),
       $this->buildLimitClause($conn));
 
     $viewed_map = ipull($data, 'hasViewed', 'chronologicalKey');
+    $primary_map = ipull($data, 'primaryObjectPHID', 'chronologicalKey');
+
     $data = $story_table->loadAllFromArray($data);
 
     $stories = array();
@@ -64,9 +72,31 @@ final class PhabricatorNotificationQuery extends PhabricatorOffsetPagedQuery {
       }
       $story = newv($class, array($story_data));
       $story->setHasViewed($viewed_map[$story->getChronologicalKey()]);
+      $story->setPrimaryObjectPHID($primary_map[$story->getChronologicalKey()]);
       $stories[] = $story;
     }
 
     return $stories;
   }
+
+  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+    $where = array();
+
+    if ($this->userPHID) {
+      $where[] = qsprintf(
+        $conn_r,
+        'notif.userPHID = %s',
+        $this->userPHID);
+    }
+
+    if ($this->keys) {
+      $where[] = qsprintf(
+        $conn_r,
+        'notif.chronologicalKey IN (%Ls)',
+        $this->keys);
+    }
+
+    return $this->formatWhereClause($where);
+  }
+
 }
