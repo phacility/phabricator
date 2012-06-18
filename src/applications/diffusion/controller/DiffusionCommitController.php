@@ -162,6 +162,7 @@ final class DiffusionCommitController extends DiffusionController {
     } else {
       $change_panel = new AphrontPanelView();
       $change_panel->setHeader("Changes (".number_format($count).")");
+      $change_panel->setID('differential-review-toc');
 
       if ($count !== $original_changes_count) {
         $show_all_button = phutil_render_tag(
