@@ -262,23 +262,27 @@ final class PhabricatorOwnersListController
       $pkg_paths = idx($paths, $package->getID(), array());
       foreach ($pkg_paths as $key => $path) {
         $repo = $repositories[$path->getRepositoryPHID()];
-        $drequest = DiffusionRequest::newFromDictionary(
-          array(
-            'repository' => $repo,
-            'path'       => $path->getPath(),
-          ));
-        $href = $drequest->generateURI(
-          array(
-            'action' => 'browse',
-          ));
-        $pkg_paths[$key] =
-          '<strong>'.phutil_escape_html($repo->getName()).'</strong> '.
-          phutil_render_tag(
-            'a',
+        if ($repo) {
+          $drequest = DiffusionRequest::newFromDictionary(
             array(
-              'href' => (string) $href,
-            ),
-            phutil_escape_html($path->getPath()));
+              'repository' => $repo,
+              'path'       => $path->getPath(),
+            ));
+          $href = $drequest->generateURI(
+            array(
+              'action' => 'browse',
+            ));
+          $pkg_paths[$key] =
+            '<strong>'.phutil_escape_html($repo->getName()).'</strong> '.
+            phutil_render_tag(
+              'a',
+              array(
+                'href' => (string) $href,
+              ),
+              phutil_escape_html($path->getPath()));
+        } else {
+          $pkg_paths[$key] = phutil_escape_html($path->getPath());
+        }
       }
       $pkg_paths = implode('<br />', $pkg_paths);
 
