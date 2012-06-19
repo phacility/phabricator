@@ -101,12 +101,22 @@ JX.behavior('differential-dropdown-menus', function(config) {
           reveal_item.setName('Entire File Shown');
         }
 
-        var diff = JX.DOM.find(JX.$(data.containerID),
+        var diffs = JX.DOM.scry(JX.$(data.containerID),
                                'table', 'differential-diff');
-        if (JX.Stratcom.getData(diff).hidden) {
-          visible_item.setName('Expand File');
+        if (diffs.length > 1) {
+          JX.$E(
+            'More than one node with sigil "differential-diff" was found in "'+
+            data.containerID+'."');
+        } else if (diffs.length == 1) {
+          diff = diffs[0];
+          if (JX.Stratcom.getData(diff).hidden) {
+            visible_item.setName('Expand File');
+          } else {
+            visible_item.setName('Collapse File');
+          }
         } else {
-          visible_item.setName('Collapse File');
+          // Do nothing when there is no diff shown in the table. For example,
+          // the file is binary.
         }
       });
   }
