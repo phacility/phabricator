@@ -1587,13 +1587,13 @@ final class DifferentialChangesetParser {
         if ($oval === null) {
           $oval = '<em>null</em>';
         } else {
-          $oval = phutil_escape_html($oval);
+          $oval = nl2br(phutil_escape_html($oval));
         }
 
         if ($nval === null) {
           $nval = '<em>null</em>';
         } else {
-          $nval = phutil_escape_html($nval);
+          $nval = nl2br(phutil_escape_html($nval));
         }
 
         $rows[] =
