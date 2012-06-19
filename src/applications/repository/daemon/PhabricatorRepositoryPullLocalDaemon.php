@@ -255,11 +255,9 @@ final class PhabricatorRepositoryPullLocalDaemon
     return true;
   }
 
-  private static function isKnownCommitOnBranch(
+  private static function isKnownCommitOnAnyAutocloseBranch(
     PhabricatorRepository $repository,
-    $target,
-    $branch,
-    $any_autoclose_branch = false) {
+    $target) {
 
     $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
       'repositoryID = %s AND commitIdentifier = %s',
@@ -271,14 +269,7 @@ final class PhabricatorRepositoryPullLocalDaemon
       return false;
     }
 
-    if ($any_autoclose_branch) {
-      if ($repository->shouldAutocloseCommit($commit, $data)) {
-        return true;
-      }
-    }
-
-    $branches = $data->getCommitDetail('seenOnBranches', array());
-    if (in_array($branch, $branches)) {
+    if ($repository->shouldAutocloseCommit($commit, $data)) {
       return true;
     }
 
@@ -525,7 +516,6 @@ final class PhabricatorRepositoryPullLocalDaemon
       $only_this_remote = DiffusionBranchInformation::DEFAULT_GIT_REMOTE);
 
     $tracked_something = false;
-    $found_something = false;
     foreach ($branches as $name => $commit) {
       if (!$repository->shouldTrackBranch($name)) {
         continue;
@@ -557,7 +547,7 @@ final class PhabricatorRepositoryPullLocalDaemon
         continue;
       }
 
-      if (self::isKnownCommitOnBranch($repository, $commit, $name, true)) {
+      if (self::isKnownCommitOnAnyAutocloseBranch($repository, $commit)) {
         continue;
       }
 
@@ -595,7 +585,9 @@ final class PhabricatorRepositoryPullLocalDaemon
         }
         $seen_parent[$parent] = true;
         if ($branch !== null) {
-          $known = self::isKnownCommitOnBranch($repository, $parent, $branch);
+          $known = self::isKnownCommitOnAnyAutocloseBranch(
+            $repository,
+            $parent);
         } else {
           $known = self::isKnownCommit($repository, $parent);
         }
