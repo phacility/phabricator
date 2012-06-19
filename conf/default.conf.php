@@ -1024,6 +1024,16 @@ return array(
   // "phd launch <N> taskmaster".
   'phd.start-taskmasters' => 4,
 
+  // Launch daemons in "verbose" mode by default. This creates a lot of output,
+  // but can help debug issues. Daemons launched in debug mode with "phd debug"
+  // are always launched in verbose mode. See also 'phd.trace'.
+  'phd.verbose' => false,
+
+  // Launch daemons in "trace" mode by default. This creates an ENORMOUS amount
+  // of output, but can help debug issues. Daemons launched in debug mode with
+  // "phd debug" are always launched in trace mdoe. See also 'phd.verbose'.
+  'phd.trace' => false,
+
   // Path to custom celerity resource map relative to 'phabricator/src'.
   // See also `scripts/celerity_mapper.php`.
   'celerity.resource-path' => '__celerity_resource_map__.php',
