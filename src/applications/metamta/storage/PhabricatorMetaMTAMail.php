@@ -119,6 +119,28 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this;
   }
 
+  public function getTranslation(array $objects) {
+    $default_translation = PhabricatorEnv::getEnvConfig('translation.provider');
+    $return = null;
+    $recipients = array_merge(
+      idx($this->parameters, 'to', array()),
+      idx($this->parameters, 'cc', array()));
+    foreach (array_select_keys($objects, $recipients) as $object) {
+      $translation = null;
+      if ($object instanceof PhabricatorUser) {
+        $translation = $object->getTranslation();
+      }
+      if (!$translation) {
+        $translation = $default_translation;
+      }
+      if ($return && $translation != $return) {
+        return $default_translation;
+      }
+      $return = $translation;
+    }
+    return $return;
+  }
+
   public function addHeader($name, $value) {
     $this->parameters['headers'][$name] = $value;
     return $this;

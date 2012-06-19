@@ -7,6 +7,9 @@
 
   bottom: 24px;
   left: 24px;
+}
+
+.jx-notification {
   width: 240px;
   padding: 8px 16px;
 
@@ -21,4 +24,10 @@
 
   border-radius: 3px;
   box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.25);
+  margin-top: 4px;
+}
+
+.jx-notification-alert {
+  background: #ffffa0;
+  border: 1px solid #aaaa60;
 }

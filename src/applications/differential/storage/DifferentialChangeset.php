@@ -89,25 +89,24 @@ final class DifferentialChangeset extends DifferentialDAO {
   }
 
   public function save() {
-// TODO: Sort out transactions
-//    $this->openTransaction();
+    $this->openTransaction();
       $ret = parent::save();
       foreach ($this->unsavedHunks as $hunk) {
         $hunk->setChangesetID($this->getID());
         $hunk->save();
       }
-//    $this->saveTransaction();
+    $this->saveTransaction();
     return $ret;
   }
 
   public function delete() {
-//    $this->openTransaction();
+    $this->openTransaction();
       foreach ($this->loadHunks() as $hunk) {
         $hunk->delete();
       }
       $this->_hunks = array();
     $ret = parent::delete();
-//    $this->saveTransaction();
+    $this->saveTransaction();
     return $ret;
   }
 
@@ -142,7 +141,7 @@ final class DifferentialChangeset extends DifferentialDAO {
       $changes = explode("\n", $hunk->getChanges());
       foreach ($changes as $l => $line) {
         if ($line[0] == '+' || $line[0] == '-') {
-          $context += array_fill($l - $num_lines, $l + $num_lines, true);
+          $context += array_fill($l - $num_lines, 2 * $num_lines + 1, true);
         }
       }
       $with_context[] = array_intersect_key($changes, $context);

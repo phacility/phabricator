@@ -111,7 +111,7 @@ final class PhabricatorOAuthProviderFacebook extends PhabricatorOAuthProvider {
 
   public function retrieveUserProfileImage() {
     $uri = 'https://graph.facebook.com/me/picture?access_token=';
-    return @file_get_contents($uri.$this->getAccessToken());
+    return HTTPSFuture::loadContent($uri.$this->getAccessToken());
   }
 
   public function retrieveUserAccountURI() {

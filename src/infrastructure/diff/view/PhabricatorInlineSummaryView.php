@@ -78,11 +78,9 @@ final class PhabricatorInlineSummaryView extends AphrontView {
         }
       }
 
-      $cols = $has_where ? 3 : 2;
-
       $rows[] =
         '<tr>'.
-          '<th colspan="'.$cols.'">'.
+          '<th colspan="3">'.
             phutil_escape_html($group).
           '</th>'.
         '</tr>';
@@ -123,6 +121,7 @@ final class PhabricatorInlineSummaryView extends AphrontView {
 
         $where = idx($item, 'where');
 
+        $colspan = ($has_where ? '' : ' colspan="2"');
         $rows[] =
           '<tr>'.
             '<td class="inline-line-number">'.$lines.'</td>'.
@@ -131,7 +130,7 @@ final class PhabricatorInlineSummaryView extends AphrontView {
                 phutil_escape_html($where).
               '</td>'
               : null).
-            '<td class="inline-summary-content">'.
+            '<td class="inline-summary-content"'.$colspan.'>'.
               '<div class="phabricator-remarkup">'.
                 $item['content'].
               '</div>'.

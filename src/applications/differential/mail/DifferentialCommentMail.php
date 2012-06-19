@@ -20,6 +20,9 @@ final class DifferentialCommentMail extends DifferentialMail {
 
   protected $changedByCommit;
 
+  private $addedReviewers;
+  private $addedCCs;
+
   public function setChangedByCommit($changed_by_commit) {
     $this->changedByCommit = $changed_by_commit;
     return $this;
@@ -87,20 +90,11 @@ final class DifferentialCommentMail extends DifferentialMail {
     return $verb;
   }
 
-  protected function renderBody() {
-
-    $comment = $this->getComment();
-
-    $actor = $this->getActorName();
-    $name  = $this->getRevision()->getTitle();
-    $verb  = $this->getVerb();
-
-    $body  = array();
-
-    $body[] = "{$actor} has {$verb} the revision \"{$name}\".";
+  protected function prepareBody() {
+    parent::prepareBody();
 
     // If the commented added reviewers or CCs, list them explicitly.
-    $meta = $comment->getMetadata();
+    $meta = $this->getComment()->getMetadata();
     $m_reviewers = idx(
       $meta,
       DifferentialComment::METADATA_ADDED_REVIEWERS,
@@ -113,15 +107,31 @@ final class DifferentialCommentMail extends DifferentialMail {
     if ($load) {
       $handles = id(new PhabricatorObjectHandleData($load))->loadHandles();
       if ($m_reviewers) {
-        $body[] = 'Added Reviewers: '.$this->renderHandleList(
-          $handles,
-          $m_reviewers);
+        $this->addedReviewers = $this->renderHandleList($handles, $m_reviewers);
       }
       if ($m_cc) {
-        $body[] = 'Added CCs: '.$this->renderHandleList(
-          $handles,
-          $m_cc);
+        $this->addedCCs = $this->renderHandleList($handles, $m_cc);
       }
+    }
+  }
+
+  protected function renderBody() {
+
+    $comment = $this->getComment();
+
+    $actor = $this->getActorName();
+    $name  = $this->getRevision()->getTitle();
+    $verb  = $this->getVerb();
+
+    $body  = array();
+
+    $body[] = "{$actor} has {$verb} the revision \"{$name}\".";
+
+    if ($this->addedReviewers) {
+      $body[] = 'Added Reviewers: '.$this->addedReviewers;
+    }
+    if ($this->addedCCs) {
+      $body[] = 'Added CCs: '.$this->addedCCs;
     }
 
     $body[] = null;

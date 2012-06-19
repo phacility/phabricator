@@ -39,88 +39,32 @@ final class PhabricatorConduitAPIController
 
     $method = $this->method;
 
-    $method_class = ConduitAPIMethod::getClassNameFromAPIMethodName($method);
     $api_request = null;
 
     $log = new PhabricatorConduitMethodCallLog();
     $log->setMethod($method);
-    $metadata = array();
 
     try {
 
-      $ok = false;
-      try {
-        $ok = class_exists($method_class);
-      } catch (Exception $ex) {
-        // Discard, we provide a more specific exception below.
-      }
-
-      if (!$ok) {
-        throw new Exception(
-          "Conduit method '{$method}' does not exist.");
-      }
-
-      $class_info = new ReflectionClass($method_class);
-      if ($class_info->isAbstract()) {
-        throw new Exception(
-          "Method '{$method}' is not valid; the implementation is an abstract ".
-          "base class.");
-      }
-
-      $method_handler = newv($method_class, array());
-
-      if (isset($_REQUEST['params']) && is_array($_REQUEST['params'])) {
-        $params_post = $request->getArr('params');
-        foreach ($params_post as $key => $value) {
-          if ($value == '') {
-            // Interpret empty string null (e.g., the user didn't type anything
-            // into the box).
-            $value = 'null';
-          }
-          $decoded_value = json_decode($value, true);
-          if ($decoded_value === null && strtolower($value) != 'null') {
-            // When json_decode() fails, it returns null. This almost certainly
-            // indicates that a user was using the web UI and didn't put quotes
-            // around a string value. We can either do what we think they meant
-            // (treat it as a string) or fail. For now, err on the side of
-            // caution and fail. In the future, if we make the Conduit API
-            // actually do type checking, it might be reasonable to treat it as
-            // a string if the parameter type is string.
-            throw new Exception(
-              "The value for parameter '{$key}' is not valid JSON. All ".
-              "parameters must be encoded as JSON values, including strings ".
-              "(which means you need to surround them in double quotes). ".
-              "Check your syntax. Value was: {$value}");
-          }
-          $params_post[$key] = $decoded_value;
-        }
-        $params = $params_post;
-      } else {
-        $params_json = $request->getStr('params');
-        if (!strlen($params_json)) {
-          $params = array();
-        } else {
-          $params = json_decode($params_json, true);
-          if (!is_array($params)) {
-            throw new Exception(
-              "Invalid parameter information was passed to method ".
-              "'{$method}', could not decode JSON serialization.");
-          }
-        }
-      }
-
+      $params = $this->decodeConduitParams($request);
       $metadata = idx($params, '__conduit__', array());
       unset($params['__conduit__']);
 
+      $call = new ConduitCall($method, $params);
+
       $result = null;
+
+      // TODO: Straighten out the auth pathway here. We shouldn't be creating
+      // a ConduitAPIRequest at this level, but some of the auth code expects
+      // it. Landing a halfway version of this to unblock T945.
 
       $api_request = new ConduitAPIRequest($params);
 
       $allow_unguarded_writes = false;
       $auth_error = null;
       $conduit_username = '-';
-      if ($method_handler->shouldRequireAuthentication()) {
-        $metadata['scope'] = $method_handler->getRequiredScope();
+      if ($call->shouldRequireAuthentication()) {
+        $metadata['scope'] = $call->getRequiredScope();
         $auth_error = $this->authenticateUser($api_request, $metadata);
         // If we've explicitly authenticated the user here and either done
         // CSRF validation or are using a non-web authentication mechanism.
@@ -135,6 +79,7 @@ final class PhabricatorConduitAPIController
           if ($conduit_user && $conduit_user->getPHID()) {
             $conduit_username = $conduit_user->getUsername();
           }
+          $call->setUser($api_request->getUser());
         }
       }
 
@@ -147,7 +92,7 @@ final class PhabricatorConduitAPIController
           ));
       }
 
-      if ($method_handler->shouldAllowUnguardedWrites()) {
+      if ($call->shouldAllowUnguardedWrites()) {
         $allow_unguarded_writes = true;
       }
 
@@ -157,7 +102,7 @@ final class PhabricatorConduitAPIController
         }
 
         try {
-          $result = $method_handler->executeMethod($api_request);
+          $result = $call->execute();
           $error_code = null;
           $error_info = null;
         } catch (ConduitException $ex) {
@@ -166,7 +111,7 @@ final class PhabricatorConduitAPIController
           if ($ex->getErrorDescription()) {
             $error_info = $ex->getErrorDescription();
           } else {
-            $error_info = $method_handler->getErrorDescription($error_code);
+            $error_info = $call->getErrorDescription($error_code);
           }
         }
         if ($allow_unguarded_writes) {
@@ -475,4 +420,61 @@ final class PhabricatorConduitAPIController
     return $value;
   }
 
+  private function decodeConduitParams(AphrontRequest $request) {
+
+    // Look for parameters from the Conduit API Console, which are encoded
+    // as HTTP POST parameters in an array, e.g.:
+    //
+    //   params[name]=value&params[name2]=value2
+    //
+    // The fields are individually JSON encoded, since we require users to
+    // enter JSON so that we avoid type ambiguity.
+
+    $params = $request->getArr('params', null);
+    if ($params !== null) {
+      foreach ($params as $key => $value) {
+        if ($value == '') {
+          // Interpret empty string null (e.g., the user didn't type anything
+          // into the box).
+          $value = 'null';
+        }
+        $decoded_value = json_decode($value, true);
+        if ($decoded_value === null && strtolower($value) != 'null') {
+          // When json_decode() fails, it returns null. This almost certainly
+          // indicates that a user was using the web UI and didn't put quotes
+          // around a string value. We can either do what we think they meant
+          // (treat it as a string) or fail. For now, err on the side of
+          // caution and fail. In the future, if we make the Conduit API
+          // actually do type checking, it might be reasonable to treat it as
+          // a string if the parameter type is string.
+          throw new Exception(
+            "The value for parameter '{$key}' is not valid JSON. All ".
+            "parameters must be encoded as JSON values, including strings ".
+            "(which means you need to surround them in double quotes). ".
+            "Check your syntax. Value was: {$value}");
+        }
+        $params[$key] = $decoded_value;
+      }
+
+      return $params;
+    }
+
+    // Otherwise, look for a single parameter called 'params' which has the
+    // entire param dictionary JSON encoded. This is the usual case for remote
+    // requests.
+
+    $params_json = $request->getStr('params');
+    if (!strlen($params_json)) {
+      $params = array();
+    } else {
+      $params = json_decode($params_json, true);
+      if (!is_array($params)) {
+        throw new Exception(
+          "Invalid parameter information was passed to method ".
+          "'{$method}', could not decode JSON serialization.");
+      }
+    }
+
+    return $params;
+  }
 }

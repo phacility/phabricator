@@ -155,8 +155,8 @@ final class PhabricatorSetup {
       'iconv',
 
       // There is a chance we might not need this, but some configurations (like
-      // Amazon SES) will require it. Just mark it 'required' since it's widely
-      // available and relatively core.
+      // OAuth or Amazon SES) will require it. Just mark it 'required' since
+      // it's widely available and relatively core.
       'curl',
     );
     foreach ($extensions as $extension) {

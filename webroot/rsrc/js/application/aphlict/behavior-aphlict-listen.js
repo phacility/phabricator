@@ -2,39 +2,68 @@
  * @provides javelin-behavior-aphlict-listen
  * @requires javelin-behavior
  *           javelin-aphlict
- *           javelin-util
  *           javelin-stratcom
- *           javelin-behavior-aphlict-dropdown
+ *           javelin-request
+ *           javelin-uri
+ *           javelin-dom
  *           phabricator-notification
  */
 
 JX.behavior('aphlict-listen', function(config) {
+
+  var showing_reload = false;
+
   function onready() {
-
     var client = new JX.Aphlict(config.id, config.server, config.port)
-      .setHandler(function(type, message) {
-        if (message) {
-          if (type == 'receive') {
-            var request = new JX.Request('/notification/individual/',
-              function(response) {
-                if (response.pertinent) {
-                  if (config.pageObjects.indexOf(response.primaryObjectPHID)
-                    > -1) {
-                    var notification = new JX.Notification()
-                      .setContent('Page updated. Please refresh.')
-                      .setDuration(0) // never timeout
-                      .show();
-                  }
-
-                  JX.Stratcom.invoke('notification-panel-update', null, {});
-                }
-              });
-            request.addData({ "key": message.key });
-            request.send();
-          }
-        }
-      })
+      .setHandler(onaphlictmessage)
       .start();
+  }
+
+
+  // Respond to a notification from the Aphlict notification server. We send
+  // a request to Phabricator to get notification details.
+  function onaphlictmessage(type, message) {
+    if (!message) {
+      return;
+    }
+
+    if (type != 'receive') {
+      return;
+    }
+
+    var request = new JX.Request('/notification/individual/', onnotification)
+      .addData({key: message.key})
+      .send();
+  }
+
+
+  // Respond to a response from Phabricator about a specific notification.
+  function onnotification(response) {
+    if (!response.pertinent) {
+      return;
+    }
+
+    JX.Stratcom.invoke('notification-panel-update', null, {});
+
+    // Show the notification itself.
+    new JX.Notification()
+      .setContent(JX.$H(response.content))
+      .show();
+
+
+    // If the notification affected an object on this page, show a
+    // permanent reload notification if we aren't already.
+    if ((response.primaryObjectPHID in config.pageObjects) &&
+        !showing_reload) {
+      var reload = new JX.Notification()
+        .setContent('Page updated, click to reload.')
+        .setClassName('jx-notification-alert')
+        .setDuration(0);
+      reload.listen('activate', function(e) { JX.$U().go(); })
+      reload.show();
+
+      showing_reload = true;
+    }
   }
 
 

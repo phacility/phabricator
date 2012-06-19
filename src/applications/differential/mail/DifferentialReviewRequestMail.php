@@ -20,6 +20,8 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
 
   protected $comments;
 
+  private $patch;
+
   public function setComments($comments) {
     $this->comments = $comments;
     return $this;
@@ -38,6 +40,19 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
     $this->setRevision($revision);
     $this->setActorHandle($actor);
     $this->setChangesets($changesets);
+  }
+
+  protected function prepareBody() {
+    parent::prepareBody();
+
+    $inline_max_length = PhabricatorEnv::getEnvConfig(
+      'metamta.differential.inline-patches');
+    if ($inline_max_length) {
+      $patch = $this->buildPatch();
+      if (count(explode("\n", $patch)) <= $inline_max_length) {
+        $this->patch = $patch;
+      }
+    }
   }
 
   protected function renderReviewRequestBody() {
@@ -65,14 +80,9 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
       $body[] = null;
     }
 
-    $inline_key = 'metamta.differential.inline-patches';
-    $inline_max_length = PhabricatorEnv::getEnvConfig($inline_key);
-    if ($inline_max_length) {
-      $patch = $this->buildPatch();
-      if (count(explode("\n", $patch)) <= $inline_max_length) {
-        $body[] = 'CHANGE DETAILS';
-        $body[] = $patch;
-      }
+    if ($this->patch) {
+      $body[] = 'CHANGE DETAILS';
+      $body[] = $this->patch;
     }
 
     return implode("\n", $body);
@@ -110,14 +120,9 @@ abstract class DifferentialReviewRequestMail extends DifferentialMail {
   }
 
   private function buildPatch() {
-    $revision = $this->getRevision();
-    $revision_id = $revision->getID();
+    $diff = new DifferentialDiff();
 
-    $diffs = $revision->loadDiffs();
-    $diff_number = count($diffs);
-    $diff = array_pop($diffs);
-
-    $diff->attachChangesets($diff->loadChangesets());
+    $diff->attachChangesets($this->getChangesets());
     // TODO: We could batch this to improve performance.
     foreach ($diff->getChangesets() as $changeset) {
       $changeset->attachHunks($changeset->loadHunks());

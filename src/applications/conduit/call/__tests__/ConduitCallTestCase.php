@@ -16,22 +16,28 @@
  * limitations under the License.
  */
 
-abstract class PhabricatorNotificationsController
-  extends PhabricatorController {
+final class ConduitCallTestCase extends PhabricatorTestCase {
 
-  public function buildStandardPageResponse($view, array $data) {
+  public function testConduitPing() {
+    $call = new ConduitCall('conduit.ping', array());
+    $result = $call->execute();
 
-    $page = $this->buildStandardPageView();
-
-    $page->setApplicationName('Notifications');
-    $page->setBaseURI('/notifications/');
-    $page->setTitle(idx($data, 'title'));
-    $page->setGlyph('!');
-    $page->appendChild($view);
-
-    $response = new AphrontWebpageResponse();
-    return $response->setContent($page->render());
-
+    $this->assertEqual(false, empty($result));
   }
 
+  public function testConduitAuth() {
+    $call = new ConduitCall('user.whoami', array());
+
+    $caught = null;
+    try {
+      $result = $call->execute();
+    } catch (ConduitException $ex) {
+      $caught = $ex;
+    }
+
+    $this->assertEqual(
+      true,
+      ($caught instanceof ConduitException),
+      "user.whoami should require authentication");
+  }
 }

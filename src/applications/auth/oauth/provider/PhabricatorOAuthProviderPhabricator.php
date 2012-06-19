@@ -126,7 +126,7 @@ extends PhabricatorOAuthProvider {
 
   public function retrieveUserProfileImage() {
     $uri = $this->userData['image'];
-    return @file_get_contents($uri);
+    return HTTPSFuture::loadContent($uri);
   }
 
   public function retrieveUserAccountURI() {

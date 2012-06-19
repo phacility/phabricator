@@ -23,21 +23,27 @@ final class PhabricatorNotificationIndividualController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $chron_key = $request->getStr('key');
-    $story = id(new PhabricatorFeedStoryNotification())
-      ->loadOneWhere('userPHID = %s AND chronologicalKey = %s',
-                     $user->getPHID(),
-                     $chron_key);
+    $stories = id(new PhabricatorNotificationQuery())
+      ->setUserPHID($user->getPHID())
+      ->withKeys(array($request->getStr('key')))
+      ->execute();
 
-    if ($story == null) {
-      $json = array( "pertinent" => false );
-    } else {
-      $json = array(
-        "pertinent" => true,
-        "primaryObjectPHID" => $story->getPrimaryObjectPHID(),
-      );
+    if (!$stories) {
+      return id(new AphrontAjaxResponse())->setContent(
+        array(
+          'pertinent' => false,
+        ));
     }
 
-    return id(new AphrontAjaxResponse())->setContent($json);
+    $builder = new PhabricatorNotificationBuilder($stories);
+    $content = $builder->buildView()->render();
+
+    $response = array(
+      'pertinent'         => true,
+      'primaryObjectPHID' => head($stories)->getPrimaryObjectPHID(),
+      'content'           => $content,
+    );
+
+    return id(new AphrontAjaxResponse())->setContent($response);
   }
 }

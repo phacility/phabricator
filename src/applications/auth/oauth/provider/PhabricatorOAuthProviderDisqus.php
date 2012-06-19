@@ -124,7 +124,7 @@ final class PhabricatorOAuthProviderDisqus extends PhabricatorOAuthProvider {
     if ($avatar) {
       $uri = idx($avatar, 'permalink');
       if ($uri) {
-        return @file_get_contents($uri);
+        return HTTPSFuture::loadContent($uri);
       }
     }
     return null;

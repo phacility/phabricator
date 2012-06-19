@@ -203,23 +203,13 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
 
     $uri->setPath($path);
 
-    $protocol = $uri->getProtocol();
-    if ($protocol == 'https') {
-      $future = new HTTPSFuture($uri, $data);
-    } else {
-      $future = new HTTPFuture($uri, $data);
-    }
-
+    $future = new HTTPSFuture($uri, $data);
     if ($is_write) {
       $future->setMethod('PUT');
-    } else {
-      $future->setMethod('GET');
     }
-
     if ($this->getTimeout()) {
       $future->setTimeout($this->getTimeout());
     }
-
     list($body) = $future->resolvex();
 
     if ($is_write) {

@@ -71,6 +71,22 @@ abstract class PhabricatorMailReplyHandler {
     return null;
   }
 
+  final public function getRecipientsSummary(
+    array $to_handles,
+    array $cc_handles) {
+    assert_instances_of($to_handles, 'PhabricatorObjectHandle');
+    assert_instances_of($cc_handles, 'PhabricatorObjectHandle');
+
+    $body = '';
+    if ($to_handles) {
+      $body .= "To: ".implode(', ', mpull($to_handles, 'getName'))."\n";
+    }
+    if ($cc_handles) {
+      $body .= "Cc: ".implode(', ', mpull($cc_handles, 'getName'))."\n";
+    }
+    return $body;
+  }
+
   final public function multiplexMail(
     PhabricatorMetaMTAMail $mail_template,
     array $to_handles,
@@ -115,13 +131,12 @@ abstract class PhabricatorMailReplyHandler {
     $body = $mail_template->getBody();
     $body .= "\n";
     if ($to_handles) {
-      $body .= "To: ".implode(', ', mpull($to_handles, 'getName'))."\n";
       $add_headers['X-Phabricator-To'] = $this->formatPHIDList($to_handles);
     }
     if ($cc_handles) {
-      $body .= "Cc: ".implode(', ', mpull($cc_handles, 'getName'))."\n";
       $add_headers['X-Phabricator-Cc'] = $this->formatPHIDList($cc_handles);
     }
+    $body .= $this->getRecipientsSummary($to_handles, $cc_handles);
 
     foreach ($recipients as $recipient) {
       $mail = clone $mail_template;

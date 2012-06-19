@@ -303,6 +303,17 @@ a.handle-disabled {
   padding: 6px 6px;
 }
 
-.phabricator-notification-unread {
+.no-notifications {
+  color: #999999;
+}
+
+#phabricator-notification-dropdown .phabricator-notification-unread {
   background: #aacfef;
+}
+
+.view-all-notifications {
+  text-align: center;
+  font-weight: bold;
+  background: #eeeeee;
+  border-top: 1px solid #dddddd;
 }

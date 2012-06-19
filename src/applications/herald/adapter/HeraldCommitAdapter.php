@@ -175,13 +175,13 @@ final class HeraldCommitAdapter extends HeraldObjectAdapter {
       case HeraldFieldConfig::FIELD_DIFFERENTIAL_REVIEWERS:
         $revision = $this->loadDifferentialRevision();
         if (!$revision) {
-          return null;
+          return array();
         }
         return $revision->getReviewers();
       case HeraldFieldConfig::FIELD_DIFFERENTIAL_CCS:
         $revision = $this->loadDifferentialRevision();
         if (!$revision) {
-          return null;
+          return array();
         }
         return $revision->getCCPHIDs();
       default:

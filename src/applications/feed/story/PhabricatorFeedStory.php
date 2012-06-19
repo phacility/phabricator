@@ -22,6 +22,16 @@ abstract class PhabricatorFeedStory {
   private $hasViewed;
   private $handles;
   private $framed;
+  private $primaryObjectPHID;
+
+  public function setPrimaryObjectPHID($primary_object_phid) {
+    $this->primaryObjectPHID = $primary_object_phid;
+    return $this;
+  }
+
+  public function getPrimaryObjectPHID() {
+    return $this->primaryObjectPHID;
+  }
 
   final public function __construct(PhabricatorFeedStoryData $data) {
     $this->data = $data;

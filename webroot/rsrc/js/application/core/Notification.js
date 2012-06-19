@@ -2,6 +2,7 @@
  * @requires javelin-install
  *           javelin-dom
  *           javelin-stratcom
+ *           javelin-util
  * @provides phabricator-notification
  * @javelin
  */
@@ -22,29 +23,37 @@ JX.install('Notification', {
   members : {
     show : function() {
       var self = JX.Notification;
+      self._show(this);
 
-      self.close();
-      self._installListener();
-      self._active = this;
-
-      var container = JX.$N(
+      if (this.getDuration()) {
+        setTimeout(JX.bind(self, self._hide, this), this.getDuration());
+      }
+    },
+    _render : function() {
+      return JX.$N(
         'div',
         {
-          className: 'jx-notification-container',
+          className: 'jx-notification ' + this.getClassName(),
           sigil: 'jx-notification'
         },
         this.getContent());
-      document.body.appendChild(container);
-
-      self._container = container;
-
-      if (this.getDuration()) {
-        self._timeout = setTimeout(self.close, this.getDuration());
-      }
     }
   },
 
   properties : {
+
+    /**
+     * Optional class name(s) to add to the rendered notification.
+     *
+     * @param string Class name(s).
+     */
+    className : null,
+
+    /**
+     * Notification content.
+     *
+     * @param mixed Content.
+     */
     content : null,
 
     /**
@@ -54,12 +63,42 @@ JX.install('Notification', {
      * @param int Notification duration, in milliseconds.
      */
     duration : 12000
+
   },
 
   statics : {
     _container : null,
     _listening : false,
-    _active : null,
+    _active : [],
+    _show : function(notification) {
+      var self = JX.Notification;
+
+      self._installListener();
+      self._active.push({
+        object: notification,
+        render: notification._render()
+      });
+
+      // Don't show more than a few notifications at once because it's silly.
+      while (self._active.length > 5) {
+        self._hide(self._active[0].object);
+      }
+
+      self._redraw();
+    },
+    _hide : function(notification) {
+      var self = JX.Notification;
+
+      for (var ii = 0; ii < self._active.length; ii++) {
+        if (self._active[ii].object === notification) {
+          notification.invoke('close');
+          self._active.splice(ii, 1);
+          break;
+        }
+      }
+
+      self._redraw();
+    },
     _installListener : function() {
       var self = JX.Notification;
 
@@ -78,27 +117,46 @@ JX.install('Notification', {
           // the activate event for the active notification and dismiss it if it
           // isn't handled.
 
-          var activation = self._active.invoke('activate');
-          if (activation.getPrevented()) {
-            return;
+          var target = e.getNode('jx-notification');
+          for (var ii = 0; ii < self._active.length; ii++) {
+            var n = self._active[ii];
+            if (n.render === target) {
+              var activation = n.object.invoke('activate');
+              if (!activation.getPrevented()) {
+                self._hide(n.object);
+              }
+              return;
+            }
           }
 
-          self.close();
         });
     },
-    close : function() {
+    _redraw : function() {
       var self = JX.Notification;
 
-      if (self._container) {
-        JX.DOM.remove(self._container);
-        self._container = null;
-
-        self._active.invoke('close');
-        self._active = null;
+      if (!self._active.length) {
+        if (self._container) {
+          JX.DOM.remove(self._container);
+          self._container = null;
+        }
+        return;
       }
 
-      self._timeout && clearTimeout(self._timeout);
-      self._timeout = null;
+      if (!self._container) {
+        self._container = JX.$N(
+          'div',
+          {
+            className: 'jx-notification-container'
+          });
+        document.body.appendChild(self._container);
+      }
+
+      var notifications = [];
+      for (var ii = 0; ii < self._active.length; ii++) {
+        notifications.push(self._active[ii].render);
+      }
+
+      JX.DOM.setContent(self._container, notifications);
     }
   }
 

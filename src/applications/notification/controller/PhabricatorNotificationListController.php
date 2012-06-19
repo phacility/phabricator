@@ -16,38 +16,41 @@
  * limitations under the License.
  */
 
-final class PhabricatorNotificationTestController
+final class PhabricatorNotificationListController
   extends PhabricatorNotificationController {
 
   public function processRequest() {
-
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    $pager = new AphrontPagerView();
+    $pager->setURI($request->getRequestURI(), 'offset');
+    $pager->setOffset($request->getInt('offset'));
+
     $query = new PhabricatorNotificationQuery();
     $query->setUserPHID($user->getPHID());
+    $notifications = $query->executeWithPager($pager);
 
-    $stories = $query->execute();
-
-    $builder = new PhabricatorNotificationBuilder($stories);
-    $notifications_view = $builder->buildView();
-
-    $num_unconsumed = 0;
-
-    foreach ($stories as $story) {
-      if (!$story->getHasViewed()) {
-        $num_unconsumed++;
-      }
-
+    if ($notifications) {
+      $builder = new PhabricatorNotificationBuilder($notifications);
+      $view = $builder->buildView();
+    } else {
+      $view =
+        '<div class="phabricator-notification no-notifications">'.
+          'You have no notifications.'.
+        '</div>';
     }
 
-    $json = array(
-      $notifications_view->render()
-    );
-
+    $panel = new AphrontPanelView();
+    $panel->setHeader('Notifications');
+    $panel->appendChild($view);
+    $panel->appendChild($pager);
 
     return $this->buildStandardPageResponse(
-      $json,
-      array('title' => 'Notification Test Page'));
+      $panel,
+      array(
+        'title' => 'Notifications',
+      ));
   }
+
 }

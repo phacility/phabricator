@@ -661,6 +661,26 @@ final class ManiphestTaskListController extends ManiphestController {
 
     $exclude_project_phids = $request->getStrList('xprojects');
     $task_ids = $request->getStrList('tasks');
+
+    if ($task_ids) {
+      // We only need the integer portion of each task ID, so get rid of any
+      // non-numeric elements
+      $numeric_task_ids = array();
+
+      foreach ($task_ids as $task_id) {
+        $task_id = preg_replace('/[a-zA-Z]+/', '', $task_id);
+        if (!empty($task_id)) {
+          $numeric_task_ids[] = $task_id;
+        }
+      }
+
+      if (empty($numeric_task_ids)) {
+        $numeric_task_ids = array(null);
+      }
+
+      $task_ids = $numeric_task_ids;
+    }
+
     $owner_phids = $request->getStrList('owners');
     $author_phids = $request->getStrList('authors');
 

@@ -426,10 +426,13 @@ class AphrontDefaultApplicationConfiguration
           'PhabricatorChatLogChannelLogController',
       ),
 
-      '/notification/test/' => 'PhabricatorNotificationTestController',
-      '/notification/panel/' => 'PhabricatorNotificationPanelController',
-      '/notification/individual/'
-            => 'PhabricatorNotificationIndividualController',
+      '/notification/' => array(
+        '' => 'PhabricatorNotificationListController',
+        'panel/' => 'PhabricatorNotificationPanelController',
+        'individual/' => 'PhabricatorNotificationIndividualController',
+        'status/' => 'PhabricatorNotificationStatusController',
+      ),
+
       '/flag/' => array(
         '' => 'PhabricatorFlagListController',
         'view/(?P<view>[^/]+)/' => 'PhabricatorFlagListController',

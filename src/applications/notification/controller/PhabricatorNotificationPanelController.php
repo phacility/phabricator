@@ -30,21 +30,37 @@ final class PhabricatorNotificationPanelController
 
     $stories = $query->execute();
 
-    $builder = new PhabricatorNotificationBuilder($stories);
-    $notifications_view = $builder->buildView();
-
     $num_unconsumed = 0;
-    foreach ($stories as $story) {
-      if (!$story->getHasViewed()) {
-        $num_unconsumed++;
+    if ($stories) {
+      $builder = new PhabricatorNotificationBuilder($stories);
+      $notifications_view = $builder->buildView();
+
+      foreach ($stories as $story) {
+        if (!$story->getHasViewed()) {
+          $num_unconsumed++;
+        }
       }
+      $content = $notifications_view->render();
+    } else {
+      $content =
+        '<div class="phabricator-notification no-notifications">'.
+          'You have no notifications.'.
+        '</div>';
     }
 
+    $content .=
+      '<div class="phabricator-notification view-all-notifications">'.
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => '/notification/',
+          ),
+          'View All Notifications').
+      '</div>';
+
     $json = array(
-      "content" => $stories ?
-        $notifications_view->render() :
-        "<b>You currently have no notifications<b>",
-      "number" => $num_unconsumed,
+      'content' => $content,
+      'number'  => $num_unconsumed,
     );
 
     return id(new AphrontAjaxResponse())->setContent($json);
