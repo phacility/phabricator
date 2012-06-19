@@ -98,24 +98,31 @@ final class DifferentialDiff extends DifferentialDAO {
   }
 
   public function save() {
-// TODO: sort out transactions
-//    $this->openTransaction();
+    $this->openTransaction();
       $ret = parent::save();
       foreach ($this->unsavedChangesets as $changeset) {
         $changeset->setDiffID($this->getID());
         $changeset->save();
       }
-//    $this->saveTransaction();
+    $this->saveTransaction();
     return $ret;
   }
 
   public function delete() {
-//    $this->openTransaction();
+    $this->openTransaction();
       foreach ($this->loadChangesets() as $changeset) {
         $changeset->delete();
       }
+
+      $properties = id(new DifferentialDiffProperty())->loadAllWhere(
+        'diffID = %d',
+        $this->getID());
+      foreach ($properties as $prop) {
+        $prop->delete();
+      }
+
       $ret = parent::delete();
-//    $this->saveTransaction();
+    $this->saveTransaction();
     return $ret;
   }
 

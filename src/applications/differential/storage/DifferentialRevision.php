@@ -171,6 +171,60 @@ final class DifferentialRevision extends DifferentialDAO {
     return parent::save();
   }
 
+  public function delete() {
+    $this->openTransaction();
+      $diffs = $this->loadDiffs();
+      foreach ($diffs as $diff) {
+        $diff->delete();
+      }
+
+      $conn_w = $this->establishConnection('w');
+
+      queryfx(
+        $conn_w,
+        'DELETE FROM %T WHERE revisionID = %d',
+        self::RELATIONSHIP_TABLE,
+        $this->getID());
+
+      queryfx(
+        $conn_w,
+        'DELETE FROM %T WHERE revisionID = %d',
+        self::TABLE_COMMIT,
+        $this->getID());
+
+      $comments = id(new DifferentialComment())->loadAllWhere(
+        'revisionID = %d',
+        $this->getID());
+      foreach ($comments as $comment) {
+        $comment->delete();
+      }
+
+      $inlines = id(new DifferentialInlineComment())->loadAllWhere(
+        'revisionID = %d',
+        $this->getID());
+      foreach ($inlines as $inline) {
+        $inline->delete();
+      }
+
+      $fields = id(new DifferentialAuxiliaryField())->loadAllWhere(
+        'revisionPHID = %s',
+        $this->getPHID());
+      foreach ($fields as $field) {
+        $field->delete();
+      }
+
+      $paths = id(new DifferentialAffectedPath())->loadAllWhere(
+        'revisionID = %d',
+        $this->getID());
+      foreach ($paths as $path) {
+        $path->delete();
+      }
+
+      $result = parent::delete();
+    $this->saveTransaction();
+    return $result;
+  }
+
   public function loadRelationships() {
     if (!$this->getID()) {
       $this->relationships = array();

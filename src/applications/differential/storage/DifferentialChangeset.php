@@ -89,25 +89,24 @@ final class DifferentialChangeset extends DifferentialDAO {
   }
 
   public function save() {
-// TODO: Sort out transactions
-//    $this->openTransaction();
+    $this->openTransaction();
       $ret = parent::save();
       foreach ($this->unsavedHunks as $hunk) {
         $hunk->setChangesetID($this->getID());
         $hunk->save();
       }
-//    $this->saveTransaction();
+    $this->saveTransaction();
     return $ret;
   }
 
   public function delete() {
-//    $this->openTransaction();
+    $this->openTransaction();
       foreach ($this->loadHunks() as $hunk) {
         $hunk->delete();
       }
       $this->_hunks = array();
     $ret = parent::delete();
-//    $this->saveTransaction();
+    $this->saveTransaction();
     return $ret;
   }
 
