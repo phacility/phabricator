@@ -142,11 +142,7 @@ final class DifferentialManiphestTasksFieldSpecification
     }
 
     if ($invalid) {
-      if (count($invalid) > 1) {
-        $what = 'Maniphest Tasks';
-      } else {
-        $what = 'Maniphest Task';
-      }
+      $what = pht('Maniphest Task(s)', count($invalid));
       $invalid = implode(', ', $invalid);
       throw new DifferentialFieldParseException(
         "Commit message references nonexistent {$what}: {$invalid}.");
