@@ -48,9 +48,7 @@ final class ConduitAPI_differential_query_Method
       'authors'           => 'optional list<phid>',
       'ccs'               => 'optional list<phid>',
       'reviewers'         => 'optional list<phid>',
-      // TODO: Implement this, it needs to accept a repository ID in addition
-      // to a path so the signature needs to be a little more complicated.
-      // 'paths'          => 'optional list<pair<...>>',
+      'paths'             => 'optional list<pair<callsign, path>>',
       'commitHashes'      => 'optional list<pair<enum<'.
                              $hash_types.'>, string>>',
       'status'            => 'optional enum<'.$status_types.'>',
@@ -82,6 +80,7 @@ final class ConduitAPI_differential_query_Method
     $reviewers          = $request->getValue('reviewers');
     $status             = $request->getValue('status');
     $order              = $request->getValue('order');
+    $path_pairs         = $request->getValue('paths');
     $commit_hashes      = $request->getValue('commitHashes');
     $limit              = $request->getValue('limit');
     $offset             = $request->getValue('offset');
@@ -102,17 +101,47 @@ final class ConduitAPI_differential_query_Method
     if ($reviewers) {
       $query->withReviewers($reviewers);
     }
-/* TODO: Implement.
-    $paths     = $request->getValue('paths');
-    if ($paths) {
-      foreach ($paths as $path) {
 
-        // (Lookup the repository IDs.)
+    if ($path_pairs) {
+      $paths = array();
+      foreach ($path_pairs as $pair) {
+        list($callsign, $path) = $pair;
+        $paths[] = $path;
+      }
 
-        $query->withPath($repository_id, $path);
+      $path_map = id(new DiffusionPathIDQuery($paths))->loadPathIDs();
+      if (count($path_map) != count($paths)) {
+        $unknown_paths = array();
+        foreach ($paths as $p) {
+          if (!idx($path_map, $p)) {
+            $unknown_paths[] = $p;
+          }
+        }
+        throw id(new ConduitException('ERR-INVALID-PARAMETER'))
+          ->setErrorDescription(
+            'Unknown paths: '.implode(', ', $unknown_paths));
+      }
+
+      $repos = array();
+      foreach ($path_pairs as $pair) {
+        list($callsign, $path) = $pair;
+        if (!idx($repos, $callsign)) {
+          $repos[$callsign] = id(new PhabricatorRepository())->loadOneWhere(
+            'callsign = %s',
+            $callsign);
+
+          if (!$repos[$callsign]) {
+            throw id(new ConduitException('ERR-INVALID-PARAMETER'))
+              ->setErrorDescription(
+                'Unknown repo callsign: '.$callsign);
+          }
+        }
+        $repo = $repos[$callsign];
+
+        $query->withPath($repo->getID(), idx($path_map, $path));
       }
     }
- */
+
     if ($commit_hashes) {
       $hash_types = ArcanistDifferentialRevisionHash::getTypes();
       foreach ($commit_hashes as $info) {
