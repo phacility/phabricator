@@ -418,6 +418,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
   }
 
   public function shouldAutocloseBranch($branch) {
+    if ($this->getDetail('disable-autoclose', false)) {
+      return false;
+    }
+
     return $this->isBranchInFilter($branch, 'close-commits-filter');
   }
 
