@@ -56,7 +56,7 @@ In most cases, the defaults are appropriate, except that you should set
 
 == Verifying Server Status ==
 
-Access `/notifications/status/` to verify the server is operational. You should
+Access `/notification/status/` to verify the server is operational. You should
 see a table showing stats like "uptime" and connection/message counts if the
 server is working. If it isn't working, you should see an error.
 
