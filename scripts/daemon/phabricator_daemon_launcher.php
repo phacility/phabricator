@@ -56,7 +56,11 @@ switch ($command) {
     /* Fall Through */
   case 'start':
     $running = $control->loadRunningDaemons();
-    if ($running) {
+    // "running" might not mean actually running so much as was running at
+    // some point. ergo, do a quick grouping and only barf if daemons are
+    // *actually* running.
+    $running_dict = mgroup($running, 'isRunning');
+    if (!empty($running_dict[true])) {
       echo phutil_console_wrap(
         "phd start: Unable to start daemons because daemons are already ".
         "running.\n".
