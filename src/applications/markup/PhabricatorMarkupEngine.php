@@ -41,10 +41,6 @@ class PhabricatorMarkupEngine {
 
   public static function newPhrictionMarkupEngine() {
     return self::newMarkupEngine(array(
-      // Disable image macros on the wiki since they're less useful, we don't
-      // cache documents, and the module is prohibitively expensive for large
-      // documents.
-      'macros' => false,
       'header.generate-toc' => true,
     ));
   }
