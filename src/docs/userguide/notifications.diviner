@@ -1,0 +1,83 @@
+@title Notifications User Guide: Setup and Configuration
+@group userguide
+
+Guide to setting up notifications.
+
+= Overview =
+
+Phabricator can be configured to notify users when events happen in real time,
+so they'll get a message in their browser window if something has happened or
+the object they're looking at has been updated.
+
+NOTE: This feature is new and still needs some work.
+
+= Enabling Notifications =
+
+To enable notifications, set `notification.enabled` to `true` in your
+configuration. This will enable the notification menu in the menu bar, and
+notifications will be published when users take actions.
+
+NOTE: This setting will be turned on for everyone soon.
+
+= Running the Aphlict Server =
+
+Phabricator implements realtime notifications using a Node.js server called
+"Aphlict". To run it:
+
+  - Install node.js.
+  - Run `bin/aphlict` (this script must be run as root).
+
+Since the script needs `PHABRICATOR_ENV` to be defined, you may need to use
+the `-E` flag to `sudo` to preserve the environment if you have
+`PHABRICATOR_ENV` defined in your `.bashrc` or similar:
+
+  phabricator/ $ sudo -E ./bin/aphlict
+
+The server must be able to listen on port **843** and port **22280** for Aphlict
+to work. You can change the latter port in the `notification.client-uri` config,
+but port 843 is used by Flash and can not be changed. In particular, if you're
+running in EC2, you need to unblock both of these ports in the server's security
+group configuration.
+
+You may want to adjust these settings:
+
+  - `notification.client-uri` Externally-facing host and port that browsers will
+    connect to in order to listen for notifications.
+  - `notification.server-uri` Internally-facing host and port that Phabricator
+    will connect to in order to publish notifications.
+  - `notification.log` Log file location for the server.
+  - `notification.user` Non-root user to drop permissions to after binding to
+    privileged ports.
+  - `notification.pid` Pidfile location used to stop any running server when
+    aphlict is restarted.
+
+In most cases, the defaults are appropriate, except that you should set
+`notification.user` to some valid user so Aphlict isn't running as root.
+
+== Verifying Server Status ==
+
+Access `/notifications/status/` to verify the server is operational. You should
+see a table showing stats like "uptime" and connection/message counts if the
+server is working. If it isn't working, you should see an error.
+
+== Testing the Server ==
+
+The easiest way to test the server is to open a Maniphest Task or Differential
+Revision in two browser windows at the same time, then comment on it with one.
+You should get a notification in the other window.
+
+NOTE: This will stop working soon, since we'll soon stop delivering
+notifications about your own actions. We'll provide an alternate way to test
+operation when this stops working.
+
+== Debugging Server Problems ==
+
+You can run `aphlict` in the foreground to get output to your console:
+
+  phabricator/ $ ./bin/aphlict --foreground
+
+This may help identify and resolve problems.
+
+The server also generates a log, by default in `/var/log/aphlict.log`. You can
+change this location by changing `notification.log` in your configuration. The
+log may contain information useful in resolving issues.

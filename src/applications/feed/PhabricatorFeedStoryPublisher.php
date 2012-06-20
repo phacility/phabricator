@@ -138,15 +138,16 @@ final class PhabricatorFeedStoryPublisher {
   }
 
   private function sendNotification($chrono_key) {
-    $aphlict_url = 'http://127.0.0.1:22281/push?'; //TODO: make configurable
-    $future = new HTTPFuture($aphlict_url, array(
-      "key" => (string)$chrono_key,
-      // TODO: fix. \r\n appears to be appended to the final value here.
-      //       this is a temporary workaround
-      "nothing" => "",
-    ));
-    $future->setMethod('POST');
-    $future->resolve();
+    $server_uri = PhabricatorEnv::getEnvConfig('notification.server-uri');
+
+    $data = array(
+      'key' => (string)$chrono_key,
+    );
+
+    id(new HTTPSFuture($server_uri, $data))
+      ->setMethod('POST')
+      ->setTimeout(1)
+      ->resolve();
   }
 
   /**
