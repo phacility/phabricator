@@ -52,13 +52,15 @@ final class PhabricatorRepositoryCommitHeraldWorker
 
     $this->createAuditsFromCommitMessage($commit, $data);
 
-    $email_phids = $adapter->getEmailPHIDs();
-    if (!$email_phids) {
+    if ($repository->getDetail('herald-disabled')) {
+      // This just means "disable email"; audits are (mostly) idempotent.
       return;
     }
 
-    if ($repository->getDetail('herald-disabled')) {
-      // This just means "disable email"; audits are (mostly) idempotent.
+    $this->publishFeedStory($repository, $commit, $data);
+
+    $email_phids = $adapter->getEmailPHIDs();
+    if (!$email_phids) {
       return;
     }
 
@@ -271,6 +273,45 @@ EOBODY;
 
     $commit->updateAuditStatus($requests);
     $commit->save();
+  }
+
+  private function publishFeedStory(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit,
+    PhabricatorRepositoryCommitData $data) {
+
+    if (time() > $commit->getEpoch() + (24 * 60 * 60)) {
+      // Don't publish stories that are more than 24 hours old, to avoid
+      // ridiculous levels of feed spam if a repository is imported without
+      // disabling feed publishing.
+      return;
+    }
+
+    $author_phid = $commit->getAuthorPHID();
+    $committer_phid = $data->getCommitDetail('committerPHID');
+
+    $publisher = new PhabricatorFeedStoryPublisher();
+    $publisher->setStoryType(PhabricatorFeedStoryTypeConstants::STORY_COMMIT);
+    $publisher->setStoryData(
+      array(
+        'commitPHID'    => $commit->getPHID(),
+        'summary'       => $data->getSummary(),
+        'authorName'    => $data->getAuthorName(),
+        'authorPHID'    => $author_phid,
+        'committerName' => $data->getCommitDetail('committer'),
+        'committerPHID' => $committer_phid,
+      ));
+    $publisher->setStoryTime($commit->getEpoch());
+    $publisher->setRelatedPHIDs(
+      array_filter(
+        array(
+          $author_phid,
+          $committer_phid,
+        )));
+    if ($author_phid) {
+      $publisher->setStoryAuthorPHID($author_phid);
+    }
+    $publisher->publish();
   }
 
 }
