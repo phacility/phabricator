@@ -30,16 +30,9 @@ final class PhabricatorNotificationPanelController
 
     $stories = $query->execute();
 
-    $num_unconsumed = 0;
     if ($stories) {
       $builder = new PhabricatorNotificationBuilder($stories);
       $notifications_view = $builder->buildView();
-
-      foreach ($stories as $story) {
-        if (!$story->getHasViewed()) {
-          $num_unconsumed++;
-        }
-      }
       $content = $notifications_view->render();
     } else {
       $content =
@@ -58,9 +51,12 @@ final class PhabricatorNotificationPanelController
           'View All Notifications').
       '</div>';
 
+    $unread_count = id(new PhabricatorFeedStoryNotification())
+      ->countUnread($user);
+
     $json = array(
       'content' => $content,
-      'number'  => $num_unconsumed,
+      'number'  => $unread_count,
     );
 
     return id(new AphrontAjaxResponse())->setContent($json);
