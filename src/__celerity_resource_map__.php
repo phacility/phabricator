@@ -49,20 +49,6 @@ celerity_register_resource_map(array(
     'disk' => '/rsrc/image/custom/example_template.png',
     'type' => 'png',
   ),
-  '/rsrc/image/facebook/icon/fatcow/speedometer.png' =>
-  array(
-    'hash' => '3345a7ba5b3c99dbfa3a922a16756815',
-    'uri' => '/res/3345a7ba/rsrc/image/facebook/icon/fatcow/speedometer.png',
-    'disk' => '/rsrc/image/facebook/icon/fatcow/speedometer.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/facebook/icon/sandcastle.png' =>
-  array(
-    'hash' => '496a1c2e91ccb8332435491a7bbfa67d',
-    'uri' => '/res/496a1c2e/rsrc/image/facebook/icon/sandcastle.png',
-    'disk' => '/rsrc/image/facebook/icon/sandcastle.png',
-    'type' => 'png',
-  ),
   '/rsrc/image/grippy_texture.png' =>
   array(
     'hash' => 'a8945e12ceeaddd5b491a8d81cfa19c1',
@@ -701,69 +687,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/diffusion/diffusion-source.css',
   ),
-  'facebook-differential-core-view-css' =>
-  array(
-    'uri' => '/res/6053fa4a/rsrc/css/facebook/application/differential/core.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/facebook/application/differential/core.css',
-  ),
-  'facebook-example-css' =>
-  array(
-    'uri' => '/res/6ba49cd8/rsrc/css/facebook/application/example/example.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/facebook/application/example/example.css',
-  ),
-  'facebook-example-js' =>
-  array(
-    'uri' => '/res/31058d06/rsrc/js/facebook/application/example/example.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/js/facebook/application/example/example.js',
-  ),
-  'facebook-releeph-branch' =>
-  array(
-    'uri' => '/res/6b7eea98/rsrc/css/facebook/application/releeph/releeph-branch.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/facebook/application/releeph/releeph-branch.css',
-  ),
-  'facebook-releeph-core' =>
-  array(
-    'uri' => '/res/c3027f71/rsrc/css/facebook/application/releeph/releeph-core.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/facebook/application/releeph/releeph-core.css',
-  ),
-  'facebook-releeph-project' =>
-  array(
-    'uri' => '/res/497c0c11/rsrc/css/facebook/application/releeph/releeph-project.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/facebook/application/releeph/releeph-project.css',
-  ),
-  'facebook-releeph-request-typeahead-css' =>
-  array(
-    'uri' => '/res/2f4bab97/rsrc/css/facebook/application/releeph/request-typeahead.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/facebook/application/releeph/request-typeahead.css',
-  ),
   'files-css' =>
   array(
     'uri' => '/res/a265a77d/rsrc/css/application/files/files.css',
@@ -856,7 +779,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-aphlict-listen' =>
   array(
-    'uri' => '/res/da96a861/rsrc/js/application/aphlict/behavior-aphlict-listen.js',
+    'uri' => '/res/c716b386/rsrc/js/application/aphlict/behavior-aphlict-listen.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -866,7 +789,8 @@ celerity_register_resource_map(array(
       3 => 'javelin-request',
       4 => 'javelin-uri',
       5 => 'javelin-dom',
-      6 => 'phabricator-notification',
+      6 => 'javelin-json',
+      7 => 'phabricator-notification',
     ),
     'disk' => '/rsrc/js/application/aphlict/behavior-aphlict-listen.js',
   ),
@@ -1238,25 +1162,6 @@ celerity_register_resource_map(array(
       0 => 'javelin-dom',
     ),
     'disk' => '/rsrc/js/application/core/behavior-error-log.js',
-  ),
-  'javelin-behavior-facebook-releeph-request-typeahead' =>
-  array(
-    'uri' => '/res/585eff76/rsrc/js/facebook/application/releeph/request-typeahead.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-util',
-      2 => 'javelin-dom',
-      3 => 'javelin-typeahead',
-      4 => 'javelin-tokenizer',
-      5 => 'javelin-typeahead-preloaded-source',
-      6 => 'javelin-typeahead-ondemand-source',
-      7 => 'javelin-dom',
-      8 => 'javelin-stratcom',
-      9 => 'javelin-util',
-    ),
-    'disk' => '/rsrc/js/facebook/application/releeph/request-typeahead.js',
   ),
   'javelin-behavior-fancy-datepicker' =>
   array(
@@ -2292,7 +2197,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-notification-css' =>
   array(
-    'uri' => '/res/7452322a/rsrc/css/aphront/notification.css',
+    'uri' => '/res/1ed48691/rsrc/css/aphront/notification.css',
     'type' => 'css',
     'requires' =>
     array(

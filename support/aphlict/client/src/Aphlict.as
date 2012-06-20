@@ -37,7 +37,6 @@ package {
       this.remotePort   = port;
 
       this.connectToServer();
-      return;
     }
 
 

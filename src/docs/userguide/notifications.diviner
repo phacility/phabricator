@@ -76,7 +76,8 @@ You can run `aphlict` in the foreground to get output to your console:
 
   phabricator/ $ ./bin/aphlict --foreground
 
-This may help identify and resolve problems.
+You can set `notification.debug` in your configuration to get additional
+output in your browser.
 
 The server also generates a log, by default in `/var/log/aphlict.log`. You can
 change this location by changing `notification.log` in your configuration. The

@@ -209,6 +209,9 @@ return array(
   // PID file to use.
   'notification.pidfile'      => '/var/run/aphlict.pid',
 
+  // Enable this option to get additional debug output in the browser.
+  'notification.debug'        => false,
+
 
 // -- Email ----------------------------------------------------------------- //
 

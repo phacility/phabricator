@@ -31,3 +31,8 @@
   background: #ffffa0;
   border: 1px solid #aaaa60;
 }
+
+.jx-notification-debug {
+  background: #ffa0ff;
+  border: 1px solid #aa60aa;
+}

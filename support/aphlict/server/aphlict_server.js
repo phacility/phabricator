@@ -51,17 +51,25 @@ var querystring = require('querystring');
 var fs = require('fs');
 
 // set up log file
-var logfile = fs.createWriteStream(config.log,
-        { flags: 'a',
-          encoding: null,
-          mode: 0666 });
-logfile.write('----- ' + (new Date()).toLocaleString() + ' -----\n');
+var logfile = fs.createWriteStream(
+  config.log,
+  {
+    flags: 'a',
+    encoding: null,
+    mode: 0666
+  });
 
 function log(str) {
-    console.log(str);
-    logfile.write(str + '\n');
+  console.log(str);
+  logfile.write(str + '\n');
 }
 
+process.on('uncaughtException', function (err) {
+  log("\n<<< UNCAUGHT EXCEPTION! >>>\n\n" + err);
+  process.exit(1);
+});
+
+log('----- ' + (new Date()).toLocaleString() + ' -----\n');
 
 function getFlashPolicy() {
   return [
@@ -75,15 +83,15 @@ function getFlashPolicy() {
 }
 
 net.createServer(function(socket) {
-  socket.on('data', function() {
-    socket.write(getFlashPolicy() + '\0');
-  });
+  socket.write(getFlashPolicy() + '\0');
+  socket.end();
+
+  log('[' + socket.remoteAddress + '] Sent Flash Policy');
 
   socket.on('error', function (e) {
     log('Error in policy server: ' + e);
   });
 }).listen(843);
-
 
 
 function write_json(socket, data) {
@@ -118,32 +126,33 @@ function generate_id() {
 
 var send_server = net.createServer(function(socket) {
   var client_id = generate_id();
+  var client_name = '[' + socket.remoteAddress + '] [#' + client_id + '] ';
 
   socket.on('connect', function() {
     clients[client_id] = socket;
     current_connections++;
-    log(client_id + ': connected\t\t('
+    log(client_name + 'connected\t\t('
         + current_connections + ' current connections)');
   });
 
   socket.on('close', function() {
     delete clients[client_id];
     current_connections--;
-    log(client_id + ': closed\t\t('
+    log(client_name + 'closed\t\t('
         + current_connections + ' current connections)');
   });
 
   socket.on('timeout', function() {
-    log(client_id + ': timed out!');
+    log(client_name + 'timed out!');
   });
 
   socket.on('end', function() {
-    log(client_id + ': ended the connection');
+    log(client_name + 'ended the connection');
     // node automatically closes half-open connections
   });
 
   socket.on('error', function (e) {
-    log('Uncaught error in send server: ' + e);
+    log(cliient_name + 'Uncaught error in send server: ' + e);
   });
 }).listen(config.port);
 
