@@ -241,6 +241,7 @@ return array(
   //       one from the user and one from Phabricator turning their mail into
   //       a comment.
   //     - Not supported with a private reply-to address.
+  //     - Mails are sent in the server default translation.
   //   - One mail to each user:
   //     - Recipients need to look in the mail body to see To/Cc.
   //     - If you use mailing lists, recipients may sometimes get duplicate
@@ -249,6 +250,7 @@ return array(
   //       can be customzied by each user.
   //     - "Reply All" no longer spams all other users.
   //     - Required if private reply-to addresses are configured.
+  //     - Mails are sent in the language of user preference.
   //
   // In the code, splitting one outbound email into one-per-recipient is
   // sometimes referred to as "multiplexing".
