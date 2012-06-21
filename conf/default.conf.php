@@ -71,6 +71,11 @@ return array(
   // PhabricatorTranslation.
   'translation.provider' => 'PhabricatorEnglishTranslation',
 
+  // You can use 'translation.override' if you don't want to create a full
+  // translation to give users an option for switching to it and you just want
+  // to override some strings in the default translation.
+  'translation.override' => array(),
+
 
 // -- Access Policies ------------------------------------------------------- //
 
