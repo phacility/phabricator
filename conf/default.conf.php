@@ -685,8 +685,15 @@ return array(
   // addresses.
   'phabricator.mail-key'        => '5ce3e7e8787f6e40dfae861da315a5cdf1018f12',
 
-  // Version string displayed in the footer. You probably should leave this
-  // alone.
+  // Version string displayed in the footer. You can generate this value from
+  // Git log or from the current date in the deploy with a script like this:
+  //
+  // git log -n1 --pretty=%h > version.txt
+  //
+  // You can then use this generated value like this:
+  //
+  // 'phabricator.version' =>
+  //   file_get_contents(dirname(__FILE__).'/version.txt'),
   'phabricator.version'         => 'UNSTABLE',
 
   // PHP requires that you set a timezone in your php.ini before using date
