@@ -369,7 +369,7 @@ final class PhabricatorSetup {
         "timezone. Either set 'date.timezone' in your php.ini or ".
         "'phabricator.timezone' in your Phabricator configuration. See the ".
         "PHP documentation for a list of supported timezones:\n\n".
-        "http://us.php.net/manual/en/timezones.php\n");
+        "http://www.php.net/manual/en/timezones.php\n");
       return;
     } else {
       self::write(" okay  Timezone '{$timezone}' configured.\n");
