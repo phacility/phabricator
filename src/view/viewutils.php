@@ -218,6 +218,7 @@ function phabricator_parse_bytes($input) {
     'm' => 1000 * 1000,
     'g' => 1000 * 1000 * 1000,
     't' => 1000 * 1000 * 1000 * 1000,
+    'p' => 1000 * 1000 * 1000 * 1000 * 1000,
   );
 
   $bytes = (float)$bytes;

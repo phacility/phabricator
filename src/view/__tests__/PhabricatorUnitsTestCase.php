@@ -61,6 +61,11 @@ final class PhabricatorUnitsTestCase extends PhabricatorTestCase {
         phabricator_parse_bytes($input),
         'phabricator_parse_bytes('.$input.')');
     }
+
+    $this->tryTestCases(
+      array('string' => 'string'),
+      array(false),
+      'phabricator_parse_bytes');
   }
 
   public function testDetailedDurationFormatting() {
