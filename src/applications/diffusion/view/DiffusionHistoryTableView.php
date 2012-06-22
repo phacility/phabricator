@@ -19,6 +19,7 @@
 final class DiffusionHistoryTableView extends DiffusionView {
 
   private $history;
+  private $revisions = array();
   private $handles = array();
   private $isHead;
   private $parents;
@@ -26,6 +27,18 @@ final class DiffusionHistoryTableView extends DiffusionView {
   public function setHistory(array $history) {
     assert_instances_of($history, 'DiffusionPathChange');
     $this->history = $history;
+    return $this;
+  }
+
+  public function loadRevisions() {
+    $commit_phids = array();
+    foreach ($this->history as $item) {
+      if ($item->getCommit()) {
+        $commit_phids[] = $item->getCommit()->getPHID();
+      }
+    }
+    $this->revisions = id(new DifferentialRevision())
+      ->loadIDsByCommitPHIDs($commit_phids);
     return $this;
   }
 
@@ -134,6 +147,9 @@ final class DiffusionHistoryTableView extends DiffusionView {
         self::linkCommit(
           $drequest->getRepository(),
           $history->getCommitIdentifier()),
+        ($commit ?
+          self::linkRevision(idx($this->revisions, $commit->getPHID())) :
+          null),
         $change,
         $date,
         $time,
@@ -150,6 +166,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
         'Browse',
         '',
         'Commit',
+        'Revision',
         'Change',
         'Date',
         'Time',
@@ -160,6 +177,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
       array(
         '',
         'threads',
+        'n',
         'n',
         '',
         '',

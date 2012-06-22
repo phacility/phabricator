@@ -388,20 +388,13 @@ final class DiffusionBrowseFileController extends DiffusionController {
       $commits = mpull($commits, null, 'getCommitIdentifier');
     }
 
-    $revision_ids = array();
+    $revision_ids = id(new DifferentialRevision())
+      ->loadIDsByCommitPHIDs(mpull($commits, 'getPHID'));
     $revisions = array();
-    if ($commits) {
-      $revision_ids = queryfx_all(
-        id(new DifferentialRevision())->establishConnection('r'),
-        'SELECT * FROM %T WHERE commitPHID IN (%Ls)',
-        DifferentialRevision::TABLE_COMMIT,
-        mpull($commits, 'getPHID'));
-      if ($revision_ids) {
-        $revision_ids = ipull($revision_ids, 'revisionID', 'commitPHID');
-        $revisions = id(new DifferentialRevision())->loadAllWhere(
-          'id IN (%Ld)',
-          $revision_ids);
-      }
+    if ($revision_ids) {
+      $revisions = id(new DifferentialRevision())->loadAllWhere(
+        'id IN (%Ld)',
+        $revision_ids);
     }
 
     $request = $this->getRequest();

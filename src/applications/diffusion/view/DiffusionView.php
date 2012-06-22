@@ -134,4 +134,17 @@ abstract class DiffusionView extends AphrontView {
       $commit_name);
   }
 
+  final public static function linkRevision($id) {
+    if (!$id) {
+      return null;
+    }
+
+    return phutil_render_tag(
+      'a',
+      array(
+        'href' => "/D{$id}",
+      ),
+      "D{$id}");
+  }
+
 }
