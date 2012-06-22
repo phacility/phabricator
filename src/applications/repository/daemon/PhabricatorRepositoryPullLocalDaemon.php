@@ -329,8 +329,7 @@ final class PhabricatorRepositoryPullLocalDaemon
   private static function updateCommit(
     PhabricatorRepository $repository,
     $commit_identifier,
-    $branch,
-    $exists) {
+    $branch) {
 
     $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
       'repositoryID = %s AND commitIdentifier = %s',
@@ -349,14 +348,12 @@ final class PhabricatorRepositoryPullLocalDaemon
     $data->setCommitDetail('seenOnBranches', $branches);
     $data->save();
 
-    if (!$exists) {
-      self::insertTask(
-        $repository,
-        $commit,
-        array(
-          'only' => true
-        ));
-    }
+    self::insertTask(
+      $repository,
+      $commit,
+      array(
+        'only' => true
+      ));
   }
 
   private static function insertTask(
@@ -615,17 +612,10 @@ final class PhabricatorRepositoryPullLocalDaemon
         $target);
       $epoch = trim($epoch);
 
-      $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-        'repositoryID = %s AND commitIdentifier = %s',
-        $repository->getID(),
-        $target);
-
-      if (!$commit) {
-        self::recordCommit($repository, $target, $epoch);
-      }
-
       if ($branch !== null) {
-        self::updateCommit($repository, $target, $branch, $commit);
+        self::updateCommit($repository, $target, $branch);
+      } else {
+        self::recordCommit($repository, $target, $epoch);
       }
 
       if (empty($insert)) {
