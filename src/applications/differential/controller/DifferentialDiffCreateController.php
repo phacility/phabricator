@@ -23,25 +23,23 @@ final class DifferentialDiffCreateController extends DifferentialController {
     $request = $this->getRequest();
 
     if ($request->isFormPost()) {
-      $parser = new ArcanistDiffParser();
       $diff = null;
       try {
         $diff = PhabricatorFile::readUploadedFileData($_FILES['diff-file']);
       } catch (Exception $ex) {
         $diff = $request->getStr('diff');
       }
-      $changes = $parser->parseDiff($diff);
-      $diff = DifferentialDiff::newFromRawChanges($changes);
 
-      $diff->setLintStatus(DifferentialLintStatus::LINT_SKIP);
-      $diff->setUnitStatus(DifferentialLintStatus::LINT_SKIP);
+      $call = new ConduitCall(
+        'differential.createrawdiff',
+        array(
+          'diff' => $diff,
+          ));
+      $call->setUser($request->getUser());
+      $result = $call->execute();
 
-      $diff->setAuthorPHID($request->getUser()->getPHID());
-      $diff->setCreationMethod('web');
-      $diff->save();
-
-      return id(new AphrontRedirectResponse())
-        ->setURI('/differential/diff/'.$diff->getID().'/');
+      $path = id(new PhutilURI($result['uri']))->getPath();
+      return id(new AphrontRedirectResponse())->setURI($path);
     }
 
     $form = new AphrontFormView();

@@ -431,6 +431,7 @@ class AphrontDefaultApplicationConfiguration
         'panel/' => 'PhabricatorNotificationPanelController',
         'individual/' => 'PhabricatorNotificationIndividualController',
         'status/' => 'PhabricatorNotificationStatusController',
+        'clear/' => 'PhabricatorNotificationClearController',
       ),
 
       '/flag/' => array(

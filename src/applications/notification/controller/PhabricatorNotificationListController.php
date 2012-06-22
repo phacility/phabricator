@@ -43,6 +43,15 @@ final class PhabricatorNotificationListController
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Notifications');
+    $panel->addButton(
+      javelin_render_tag(
+        'a',
+        array(
+          'href'  => '/notification/clear/',
+          'class' => 'button',
+          'sigil' => 'workflow',
+        ),
+        'Mark All Read'));
     $panel->appendChild($view);
     $panel->appendChild($pager);
 

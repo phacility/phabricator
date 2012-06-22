@@ -208,57 +208,59 @@ EOHELP
         "Daemon '{$daemon}' is not loaded, misspelled or abstract.");
     }
 
-    $pid_dir = $this->getControlDirectory('pid');
-    $log_dir = $this->getControlDirectory('log').'/daemons.log';
-
     $libphutil_root = dirname(phutil_get_library_root('phutil'));
     $launch_daemon = $libphutil_root.'/scripts/daemon/';
+
+    foreach ($argv as $key => $arg) {
+      $argv[$key] = escapeshellarg($arg);
+    }
+
+    $flags = array();
+    if ($debug || PhabricatorEnv::getEnvConfig('phd.trace')) {
+      $flags[] = '--trace';
+    }
+
+    if ($debug || PhabricatorEnv::getEnvConfig('phd.verbose')) {
+      $flags[] = '--verbose';
+    }
+
+    if (!$debug) {
+      $flags[] = '--daemonize';
+    }
+
+    $bootloader = PhutilBootloader::getInstance();
+    foreach ($bootloader->getAllLibraries() as $library) {
+      if ($library == 'phutil') {
+        // No need to load libphutil, it's necessarily loaded implicitly by the
+        // daemon itself.
+        continue;
+      }
+      $flags[] = csprintf(
+        '--load-phutil-library=%s',
+        phutil_get_library_root($library));
+    }
+
+    $flags[] = csprintf('--conduit-uri=%s', PhabricatorEnv::getURI('/api/'));
+
+    if (!$debug) {
+      $log_dir = $this->getControlDirectory('log').'/daemons.log';
+      $flags[] = csprintf('--log=%s', $log_dir);
+    }
+
+    $pid_dir = $this->getControlDirectory('pid');
 
     // TODO: This should be a much better user experience.
     Filesystem::assertExists($pid_dir);
     Filesystem::assertIsDirectory($pid_dir);
     Filesystem::assertWritable($pid_dir);
 
-    foreach ($argv as $key => $arg) {
-      $argv[$key] = escapeshellarg($arg);
-    }
-
-    $bootloader = PhutilBootloader::getInstance();
-    $all_libraries = $bootloader->getAllLibraries();
-
-    $non_default_libraries = array_diff(
-      $all_libraries,
-      array('phutil', 'phabricator'));
-
-    $extra_libraries = array();
-    foreach ($non_default_libraries as $library) {
-      $extra_libraries[] = csprintf(
-        '--load-phutil-library=%s',
-        phutil_get_library_root($library));
-    }
+    $flags[] = csprintf('--phd=%s', $pid_dir);
 
     $command = csprintf(
-      "./launch_daemon.php ".
-        "%s ".
-        "--load-phutil-library=%s ".
-        "%C ".
-        "--conduit-uri=%s ".
-        "--phd=%s ".
-        ($debug ? '--trace ' : '--daemonize '),
+      './launch_daemon.php %s %C %C',
       $daemon,
-      phutil_get_library_root('phabricator'),
-      implode(' ', $extra_libraries),
-      PhabricatorEnv::getURI('/api/'),
-      $pid_dir);
-
-    if (!$debug) {
-      // If we're running "phd debug", send output straight to the console
-      // instead of to a logfile.
-      $command = csprintf("%C --log=%s", $command, $log_dir);
-    }
-
-    // Append the daemon's argv.
-    $command = csprintf("%C %C", $command, implode(' ', $argv));
+      implode(' ', $flags),
+      implode(' ', $argv));
 
     if ($debug) {
       // Don't terminate when the user sends ^C; it will be sent to the

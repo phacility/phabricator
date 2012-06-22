@@ -394,9 +394,12 @@ final class PhabricatorStandardPageView extends AphrontPageView {
       $client_uri = PhabricatorEnv::getEnvConfig('notification.client-uri');
       $client_uri = new PhutilURI($client_uri);
       if ($client_uri->getDomain() == 'localhost') {
-        $this_host = new PhutilURI($this->getRequest()->getHost());
+        $this_host = $this->getRequest()->getHost();
+        $this_host = new PhutilURI('http://'.$this_host.'/');
         $client_uri->setDomain($this_host->getDomain());
       }
+
+      $enable_debug = PhabricatorEnv::getEnvConfig('notification.debug');
 
       Javelin::initBehavior(
         'aphlict-listen',
@@ -404,6 +407,7 @@ final class PhabricatorStandardPageView extends AphrontPageView {
           'id'           => $aphlict_object_id,
           'server'       => $client_uri->getDomain(),
           'port'         => $client_uri->getPort(),
+          'debug'        => $enable_debug,
           'pageObjects'  => array_fill_keys($this->pageObjects, true),
         ));
 

@@ -60,11 +60,6 @@ $conf['phabricator.env'] = $env;
 
 PhabricatorEnv::setEnvConfig($conf);
 
-$translation = PhabricatorEnv::newObjectFromConfig('translation.provider');
-PhutilTranslator::getInstance()
-  ->setLanguage($translation->getLanguage())
-  ->addTranslations($translation->getTranslations());
-
 phutil_load_library('arcanist/src');
 
 foreach (PhabricatorEnv::getEnvConfig('load-libraries') as $library) {
@@ -78,3 +73,8 @@ $tz = PhabricatorEnv::getEnvConfig('phabricator.timezone');
 if ($tz) {
   date_default_timezone_set($tz);
 }
+
+$translation = PhabricatorEnv::newObjectFromConfig('translation.provider');
+PhutilTranslator::getInstance()
+  ->setLanguage($translation->getLanguage())
+  ->addTranslations($translation->getTranslations());

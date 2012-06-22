@@ -653,16 +653,18 @@ final class PhabricatorRepositoryEditController
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setName('herald-disabled')
-          ->setLabel('Herald Enabled')
+          ->setLabel('Herald/Feed Enabled')
           ->setValue($repository->getDetail('herald-disabled', 0))
           ->setOptions(
             array(
-              0 => 'Enabled - Send Email',
-              1 => 'Disabled - Do Not Send Email',
+              0 => 'Enabled - Send Email and Publish Stories',
+              1 => 'Disabled - Do Not Send Email or Publish Stories',
             ))
           ->setCaption(
-            'You can temporarily disable Herald commit notifications when '.
-            'reparsing a repository or importing a new repository.'));
+            'You can disable Herald commit notifications and feed stories '.
+            'for this repository. This can be useful when initially importing '.
+            'a repository. Feed stories are never published about commits '.
+            'that are more than 24 hours old.'));
 
     $parsers = id(new PhutilSymbolLoader())
       ->setAncestorClass('PhabricatorRepositoryCommitMessageDetailParser')

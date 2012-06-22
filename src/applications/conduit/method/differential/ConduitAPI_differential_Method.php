@@ -16,16 +16,20 @@
  * limitations under the License.
  */
 
-final class PhabricatorFeedStoryTypeConstants
-  extends PhabricatorFeedConstants {
+/**
+ * @group conduit
+ */
+abstract class ConduitAPI_differential_Method extends ConduitAPIMethod {
 
-  const STORY_UNKNOWN       = 'PhabricatorFeedStoryUnknown';
-  const STORY_STATUS        = 'PhabricatorFeedStoryStatus';
-  const STORY_DIFFERENTIAL  = 'PhabricatorFeedStoryDifferential';
-  const STORY_PHRICTION     = 'PhabricatorFeedStoryPhriction';
-  const STORY_MANIPHEST     = 'PhabricatorFeedStoryManiphest';
-  const STORY_PROJECT       = 'PhabricatorFeedStoryProject';
-  const STORY_AUDIT         = 'PhabricatorFeedStoryAudit';
-  const STORY_COMMIT        = 'PhabricatorFeedStoryCommit';
+  protected function buildDiffInfoDictionary(DifferentialDiff $diff) {
+    $uri = '/differential/diff/'.$diff->getID().'/';
+    $uri = PhabricatorEnv::getProductionURI($uri);
+
+    return array(
+      'id'  => $diff->getID(),
+      'uri' => $uri,
+    );
+  }
+
 
 }

@@ -209,6 +209,9 @@ return array(
   // PID file to use.
   'notification.pidfile'      => '/var/run/aphlict.pid',
 
+  // Enable this option to get additional debug output in the browser.
+  'notification.debug'        => false,
+
 
 // -- Email ----------------------------------------------------------------- //
 
@@ -241,6 +244,7 @@ return array(
   //       one from the user and one from Phabricator turning their mail into
   //       a comment.
   //     - Not supported with a private reply-to address.
+  //     - Mails are sent in the server default translation.
   //   - One mail to each user:
   //     - Recipients need to look in the mail body to see To/Cc.
   //     - If you use mailing lists, recipients may sometimes get duplicate
@@ -249,6 +253,7 @@ return array(
   //       can be customzied by each user.
   //     - "Reply All" no longer spams all other users.
   //     - Required if private reply-to addresses are configured.
+  //     - Mails are sent in the language of user preference.
   //
   // In the code, splitting one outbound email into one-per-recipient is
   // sometimes referred to as "multiplexing".
@@ -680,8 +685,15 @@ return array(
   // addresses.
   'phabricator.mail-key'        => '5ce3e7e8787f6e40dfae861da315a5cdf1018f12',
 
-  // Version string displayed in the footer. You probably should leave this
-  // alone.
+  // Version string displayed in the footer. You can generate this value from
+  // Git log or from the current date in the deploy with a script like this:
+  //
+  // git log -n1 --pretty=%h > version.txt
+  //
+  // You can then use this generated value like this:
+  //
+  // 'phabricator.version' =>
+  //   file_get_contents(dirname(__FILE__).'/version.txt'),
   'phabricator.version'         => 'UNSTABLE',
 
   // PHP requires that you set a timezone in your php.ini before using date
@@ -1023,6 +1035,16 @@ return array(
   // raise this if you have a task backlog, or explicitly launch more with
   // "phd launch <N> taskmaster".
   'phd.start-taskmasters' => 4,
+
+  // Launch daemons in "verbose" mode by default. This creates a lot of output,
+  // but can help debug issues. Daemons launched in debug mode with "phd debug"
+  // are always launched in verbose mode. See also 'phd.trace'.
+  'phd.verbose' => false,
+
+  // Launch daemons in "trace" mode by default. This creates an ENORMOUS amount
+  // of output, but can help debug issues. Daemons launched in debug mode with
+  // "phd debug" are always launched in trace mdoe. See also 'phd.verbose'.
+  'phd.trace' => false,
 
   // Path to custom celerity resource map relative to 'phabricator/src'.
   // See also `scripts/celerity_mapper.php`.
