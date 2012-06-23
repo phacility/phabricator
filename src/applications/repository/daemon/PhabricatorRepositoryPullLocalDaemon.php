@@ -264,6 +264,10 @@ final class PhabricatorRepositoryPullLocalDaemon
       $repository->getID(),
       $target);
 
+    if (!$commit) {
+      return false;
+    }
+
     $data = $commit->loadCommitData();
     if (!$data) {
       return false;

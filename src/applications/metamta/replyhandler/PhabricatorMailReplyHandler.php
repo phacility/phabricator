@@ -118,24 +118,24 @@ abstract class PhabricatorMailReplyHandler {
       }
     }
 
+    $tos = mpull($to_handles, null, 'getPHID');
+    $ccs = mpull($cc_handles, null, 'getPHID');
+
     // Merge all the recipients together. TODO: We could keep the CCs as real
     // CCs and send to a "noreply@domain.com" type address, but keep it simple
     // for now.
-    $recipients = mpull($to_handles, null, 'getPHID') +
-                  mpull($cc_handles, null, 'getPHID');
+    $recipients = $tos + $ccs;
 
     // When multiplexing mail, explicitly include To/Cc information in the
     // message body and headers.
-    $add_headers = array();
+
+    $mail_template = clone $mail_template;
+
+    $mail_template->addPHIDHeaders('X-Phabricator-To', array_keys($tos));
+    $mail_template->addPHIDHeaders('X-Phabricator-Cc', array_keys($ccs));
 
     $body = $mail_template->getBody();
     $body .= "\n";
-    if ($to_handles) {
-      $add_headers['X-Phabricator-To'] = $this->formatPHIDList($to_handles);
-    }
-    if ($cc_handles) {
-      $add_headers['X-Phabricator-Cc'] = $this->formatPHIDList($cc_handles);
-    }
     $body .= $this->getRecipientsSummary($to_handles, $cc_handles);
 
     foreach ($recipients as $recipient) {
@@ -143,9 +143,6 @@ abstract class PhabricatorMailReplyHandler {
       $mail->addTos(array($recipient->getPHID()));
 
       $mail->setBody($body);
-      foreach ($add_headers as $header => $value) {
-        $mail->addHeader($header, $value);
-      }
 
       $reply_to = null;
       if (!$reply_to && $this->supportsPrivateReplies()) {
@@ -164,15 +161,6 @@ abstract class PhabricatorMailReplyHandler {
     }
 
     return $result;
-  }
-
-  protected function formatPHIDList(array $handles) {
-    assert_instances_of($handles, 'PhabricatorObjectHandle');
-    $list = array();
-    foreach ($handles as $handle) {
-      $list[] = '<'.$handle->getPHID().'>';
-    }
-    return implode(', ', $list);
   }
 
   protected function getDefaultPublicReplyHandlerEmailAddress($prefix) {

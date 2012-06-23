@@ -388,6 +388,15 @@ final class DiffusionBrowseFileController extends DiffusionController {
       $commits = mpull($commits, null, 'getCommitIdentifier');
     }
 
+    $revision_ids = id(new DifferentialRevision())
+      ->loadIDsByCommitPHIDs(mpull($commits, 'getPHID'));
+    $revisions = array();
+    if ($revision_ids) {
+      $revisions = id(new DifferentialRevision())->loadAllWhere(
+        'id IN (%Ld)',
+        $revision_ids);
+    }
+
     $request = $this->getRequest();
     $user = $request->getUser();
 
@@ -411,6 +420,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
         $before_link = null;
         $commit_link = null;
+        $revision_link = null;
         if (idx($line, 'commit')) {
           $commit = $line['commit'];
 
@@ -443,6 +453,31 @@ final class DiffusionBrowseFileController extends DiffusionController {
             ),
             phutil_escape_html(phutil_utf8_shorten($line['commit'], 9, '')));
 
+          $revision_id = idx($revision_ids, $commits[$commit]->getPHID());
+          if ($revision_id) {
+            $revision = idx($revisions, $revision_id);
+            if (!$revision) {
+              $tooltip = '(Invalid revision)';
+            } else {
+              $tooltip =
+                phabricator_date($revision->getDateModified(), $user).
+                " \xC2\xB7 ".
+                $revision->getTitle();
+            }
+            $revision_link = javelin_render_tag(
+              'a',
+              array(
+                'href' => '/D'.$revision_id,
+                'sigil' => 'has-tooltip',
+                'meta'  => array(
+                  'tip'   => $tooltip,
+                  'align' => 'E',
+                  'size'  => 600,
+                ),
+              ),
+              'D'.$revision_id);
+          }
+
           $before_link = javelin_render_tag(
             'a',
             array(
@@ -472,6 +507,14 @@ final class DiffusionBrowseFileController extends DiffusionController {
             'style' => 'background: '.$color,
           ),
           $commit_link);
+
+        $blame[] = phutil_render_tag(
+          'th',
+          array(
+            'class' => 'diffusion-rev-link',
+            'style' => 'background: '.$color,
+          ),
+          $revision_link);
 
         $blame[] = phutil_render_tag(
           'th',

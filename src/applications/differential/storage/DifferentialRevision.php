@@ -69,6 +69,18 @@ final class DifferentialRevision extends DifferentialDAO {
     return $this;
   }
 
+  public function loadIDsByCommitPHIDs($phids) {
+    if (!$phids) {
+      return array();
+    }
+    $revision_ids = queryfx_all(
+      $this->establishConnection('r'),
+      'SELECT * FROM %T WHERE commitPHID IN (%Ls)',
+      self::TABLE_COMMIT,
+      $phids);
+    return ipull($revision_ids, 'revisionID', 'commitPHID');
+  }
+
   public function loadCommitPHIDs() {
     if (!$this->getID()) {
       return ($this->commits = array());

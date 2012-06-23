@@ -70,6 +70,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $history_table->setDiffusionRequest($drequest);
     $history_table->setHandles($handles);
     $history_table->setHistory($history);
+    $history_table->loadRevisions();
     $history_table->setParents($history_query->getParents());
     $history_table->setIsHead(true);
 

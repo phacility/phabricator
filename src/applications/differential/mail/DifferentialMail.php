@@ -110,15 +110,26 @@ abstract class DifferentialMail {
           'X-Differential-Author',
           '<'.$revision->getAuthorPHID().'>');
       }
-      if ($revision->getReviewers()) {
+
+      $reviewer_phids = $revision->getReviewers();
+      if ($reviewer_phids) {
+        // Add several headers to support e-mail clients which are not able to
+        // create rules using regular expressions or wildcards (namely Outlook).
+        $template->addPHIDHeaders('X-Differential-Reviewer', $reviewer_phids);
+
+        // Add it also as a list to allow matching of the first reviewer and
+        // also for backwards compatibility.
         $template->addHeader(
           'X-Differential-Reviewers',
-          '<'.implode('>, <', $revision->getReviewers()).'>');
+          '<'.implode('>, <', $reviewer_phids).'>');
       }
-      if ($revision->getCCPHIDs()) {
+
+      $cc_phids = $revision->getCCPHIDs();
+      if ($cc_phids) {
+        $template->addPHIDHeaders('X-Differential-CC', $cc_phids);
         $template->addHeader(
           'X-Differential-CCs',
-          '<'.implode('>, <', $revision->getCCPHIDs()).'>');
+          '<'.implode('>, <', $cc_phids).'>');
 
         // Determine explicit CCs (those added by humans) and put them in a
         // header so users can differentiate between Herald CCs and human CCs.
@@ -142,6 +153,7 @@ abstract class DifferentialMail {
         }
 
         if ($explicit_cc) {
+          $template->addPHIDHeaders('X-Differential-Explicit-CC', $explicit_cc);
           $template->addHeader(
             'X-Differential-Explicit-CCs',
             '<'.implode('>, <', $explicit_cc).'>');

@@ -433,6 +433,17 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
       return false;
     }
 
+    switch ($this->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        return true;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        return true;
+      default:
+        throw new Exception("Unrecognized version control system.");
+    }
+
     $branches = $data->getCommitDetail('seenOnBranches', array());
     foreach ($branches as $branch) {
       if ($this->shouldAutocloseBranch($branch)) {

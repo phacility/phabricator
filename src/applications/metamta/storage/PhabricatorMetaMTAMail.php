@@ -141,8 +141,15 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $return;
   }
 
+  public function addPHIDHeaders($name, array $phids) {
+    foreach ($phids as $phid) {
+      $this->addHeader($name, '<'.$phid.'>');
+    }
+    return $this;
+  }
+
   public function addHeader($name, $value) {
-    $this->parameters['headers'][$name] = $value;
+    $this->parameters['headers'][] = array($name, $value);
     return $this;
   }
 
@@ -408,7 +415,9 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
             }
             break;
           case 'headers':
-            foreach ($value as $header_key => $header_value) {
+            foreach ($value as $pair) {
+              list($header_key, $header_value) = $pair;
+
               // NOTE: If we have \n in a header, SES rejects the email.
               $header_value = str_replace("\n", " ", $header_value);
 

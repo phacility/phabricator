@@ -2197,7 +2197,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-notification-css' =>
   array(
-    'uri' => '/res/1ed48691/rsrc/css/aphront/notification.css',
+    'uri' => '/res/77e8c821/rsrc/css/aphront/notification.css',
     'type' => 'css',
     'requires' =>
     array(

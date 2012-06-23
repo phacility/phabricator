@@ -23,4 +23,10 @@ final class PhabricatorEnglishTranslation
     return 'English';
   }
 
+  public function getTranslations() {
+    return
+      PhabricatorEnv::getEnvConfig('translation.override') +
+      parent::getTranslations();
+  }
+
 }

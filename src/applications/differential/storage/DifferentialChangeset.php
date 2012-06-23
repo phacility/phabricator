@@ -105,7 +105,14 @@ final class DifferentialChangeset extends DifferentialDAO {
         $hunk->delete();
       }
       $this->_hunks = array();
-    $ret = parent::delete();
+
+      queryfx(
+        $this->establishConnection('w'),
+        'DELETE FROM %T WHERE id = %d',
+        self::TABLE_CACHE,
+        $this->getID());
+
+      $ret = parent::delete();
     $this->saveTransaction();
     return $ret;
   }

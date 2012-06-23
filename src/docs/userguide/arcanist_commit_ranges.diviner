@@ -82,8 +82,13 @@ is found. Valid rules are listed below. In this list, "*" means "any string".
   - `git:*` Use the specified symbolic commit, if it exists.
   - `git:merge-base(*)` Use the merge-base of HEAD and the specified symbolic
     commit, if it exists.
+  - `hg:*` Use the specified symbolc commit, if it exists.
+  - `hg:gca(*)` Use the greatest common ancestor of `.` and the specified
+     symbolic commit, if it exists.
   - `arc:upstream` Use the merge-base of the current branch's upstream and
-    HEAD, if it exists.
+     HEAD, if it exists. (git-only)
+  - `arc:outgoing` Use the most recent non-outgoing ancestor of the working
+     copy parent. (hg-only)
   - `arc:prompt` Prompt the user to provide a commit.
   - `arc:empty` Use the empty state (as though the repository were completely
     empty, the range will include every commit that is an ancestor of the
