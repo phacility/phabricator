@@ -336,6 +336,13 @@ final class PhabricatorRepositoryPullLocalDaemon
       $repository->getID(),
       $commit_identifier);
 
+    if (!$commit) {
+      // This can happen if the phabricator DB doesn't have the commit info,
+      // or the commit is so big that phabricator couldn't parse it. In this
+      // case we just ignore it.
+      return;
+    }
+
     $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
       'commitID = %d',
       $commit->getID());
