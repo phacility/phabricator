@@ -76,12 +76,14 @@ final class PhabricatorLoginController
     }
 
     $password_auth = PhabricatorEnv::getEnvConfig('auth.password-auth-enabled');
+    $ldap_provider = new PhabricatorLDAPProvider();
+    $ldap_auth = $ldap_provider->isProviderEnabled();
 
     $forms = array();
 
 
     $errors = array();
-    if ($password_auth) {
+    if ($password_auth || $ldap_auth) {
       $require_captcha = false;
       $e_captcha = true;
       $username_or_email = $request->getCookie('phusr');
@@ -156,40 +158,41 @@ final class PhabricatorLoginController
         $error_view->setErrors($errors);
       }
 
-      $form = new AphrontFormView();
-      $form
-        ->setUser($request->getUser())
-        ->setAction('/login/')
-        ->appendChild(
-          id(new AphrontFormTextControl())
-            ->setLabel('Username/Email')
-            ->setName('username_or_email')
-            ->setValue($username_or_email))
-        ->appendChild(
-          id(new AphrontFormPasswordControl())
-            ->setLabel('Password')
-            ->setName('password')
-            ->setCaption(
-              '<a href="/login/email/">'.
-                'Forgot your password? / Email Login</a>'));
+      if($password_auth) {
+        $form = new AphrontFormView();
+        $form
+          ->setUser($request->getUser())
+          ->setAction('/login/')
+          ->appendChild(
+            id(new AphrontFormTextControl())
+              ->setLabel('Username/Email')
+              ->setName('username_or_email')
+              ->setValue($username_or_email))
+          ->appendChild(
+            id(new AphrontFormPasswordControl())
+              ->setLabel('Password')
+              ->setName('password')
+              ->setCaption(
+                '<a href="/login/email/">'.
+                  'Forgot your password? / Email Login</a>'));
 
-      if ($require_captcha) {
-        $form->appendChild(
-          id(new AphrontFormRecaptchaControl())
-            ->setError($e_captcha));
+        if ($require_captcha) {
+          $form->appendChild(
+            id(new AphrontFormRecaptchaControl())
+              ->setError($e_captcha));
+        }
+
+        $form
+          ->appendChild(
+            id(new AphrontFormSubmitControl())
+              ->setValue('Login'));
+
+
+//      $panel->setCreateButton('Register New Account', '/login/register/');
+        $forms['Phabricator Login'] = $form;
       }
 
-      $form
-        ->appendChild(
-          id(new AphrontFormSubmitControl())
-            ->setValue('Login'));
-
-
-  //    $panel->setCreateButton('Register New Account', '/login/register/');
-      $forms['Phabricator Login'] = $form;
-
-      $ldap_provider = new PhabricatorLDAPProvider();
-      if ($ldap_provider->isProviderEnabled()) {
+      if ($ldap_auth) {
         $ldap_form = new AphrontFormView();
         $ldap_form
           ->setUser($request->getUser())
