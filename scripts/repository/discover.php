@@ -46,6 +46,9 @@ $repos = PhabricatorRepository::loadAllByPHIDOrCallsign($repo_names);
 foreach ($repos as $repo) {
   $callsign = $repo->getCallsign();
   echo "Discovering '{$callsign}'...\n";
-  PhabricatorRepositoryPullLocalDaemon::discoverRepository($repo);
+
+  $daemon = new PhabricatorRepositoryPullLocalDaemon(array());
+  $daemon->setVerbose(true);
+  $daemon->discoverRepository($repo);
 }
 echo "Done.\n";
