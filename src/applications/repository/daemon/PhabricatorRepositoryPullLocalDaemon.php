@@ -46,6 +46,12 @@ final class PhabricatorRepositoryPullLocalDaemon
   extends PhabricatorDaemon {
 
   private $commitCache = array();
+  private $repair;
+
+  public function setRepair($repair) {
+    $this->repair = $repair;
+    return $this;
+  }
 
 
 /* -(  Pulling Repositories  )----------------------------------------------- */
@@ -238,6 +244,13 @@ final class PhabricatorRepositoryPullLocalDaemon
       return true;
     }
 
+    if ($this->repair) {
+      // In repair mode, rediscover the entire repository, ignoring the
+      // database state. We can hit the local cache above, but if we miss it
+      // stop the script from going to the database cache.
+      return false;
+    }
+
     $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
       'repositoryID = %s AND commitIdentifier = %s',
       $repository->getID(),
@@ -315,6 +328,12 @@ final class PhabricatorRepositoryPullLocalDaemon
         $repository->getID(),
         $commit->getID(),
         $epoch);
+
+      if ($this->repair) {
+        // Normally, the query should throw a duplicate key exception. If we
+        // reach this in repair mode, we've actually performed a repair.
+        $this->log("Repaired commit '%s'.", $commit_identifier);
+      }
 
       $this->setCache($repository, $commit_identifier);
     } catch (AphrontQueryDuplicateKeyException $ex) {

@@ -22,13 +22,18 @@ final class PhabricatorRepositoryManagementDiscoverWorkflow
   public function didConstruct() {
     $this
       ->setName('discover')
-      ->setExamples('**discover** __repository__ ...')
+      ->setExamples('**discover** [__options__] __repository__ ...')
       ->setSynopsis('Discover __repository__, named by callsign or PHID.')
       ->setArguments(
         array(
           array(
             'name'        => 'verbose',
             'help'        => 'Show additional debugging information.',
+          ),
+          array(
+            'name'        => 'repair',
+            'help'        => 'Repair a repository with gaps in commit '.
+                             'history.',
           ),
           array(
             'name'        => 'repos',
@@ -52,6 +57,7 @@ final class PhabricatorRepositoryManagementDiscoverWorkflow
 
       $daemon = new PhabricatorRepositoryPullLocalDaemon(array());
       $daemon->setVerbose($args->getArg('verbose'));
+      $daemon->setRepair($args->getArg('repair'));
       $daemon->discoverRepository($repo);
     }
 
