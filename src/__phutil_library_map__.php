@@ -684,6 +684,7 @@ phutil_register_library_map(array(
     'PhabricatorFlagQuery' => 'applications/flag/query/PhabricatorFlagQuery.php',
     'PhabricatorFormExample' => 'applications/uiexample/examples/PhabricatorFormExample.php',
     'PhabricatorGarbageCollectorDaemon' => 'infrastructure/daemon/PhabricatorGarbageCollectorDaemon.php',
+    'PhabricatorGitGraphStream' => 'applications/repository/daemon/PhabricatorGitGraphStream.php',
     'PhabricatorGoodForNothingWorker' => 'infrastructure/daemon/workers/worker/PhabricatorGoodForNothingWorker.php',
     'PhabricatorHandleObjectSelectorDataView' => 'applications/phid/handle/view/PhabricatorHandleObjectSelectorDataView.php',
     'PhabricatorHash' => 'infrastructure/util/PhabricatorHash.php',

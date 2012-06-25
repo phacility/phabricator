@@ -614,12 +614,11 @@ final class PhabricatorRepositoryPullLocalDaemon
 
     $seen_parent = array();
 
+    $stream = new PhabricatorGitGraphStream($repository, $commit);
+
     while (true) {
       $target = array_pop($discover);
-      list($parents) = $repository->execxLocalCommand(
-        'log -n1 --pretty="%%P" %s',
-        $target);
-      $parents = array_filter(explode(' ', trim($parents)));
+      $parents = $stream->getParents($target);
       foreach ($parents as $parent) {
         if (isset($seen_parent[$parent])) {
           // We end up in a loop here somehow when we parse Arcanist if we
@@ -656,9 +655,7 @@ final class PhabricatorRepositoryPullLocalDaemon
 
     while (true) {
       $target = array_pop($insert);
-      list($epoch) = $repository->execxLocalCommand(
-        'log -n1 --pretty="%%ct" %s',
-        $target);
+      $epoch = $stream->getCommitDate($target);
       $epoch = trim($epoch);
 
       if ($branch !== null) {
