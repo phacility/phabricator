@@ -217,7 +217,17 @@ final class PhabricatorUserOAuthSettingsPanelController
             'name' => $provider->getProviderKey().'-profile.jpg',
             'authorPHID' => $user->getPHID(),
           ));
-        $user->setProfileImagePHID($file->getPHID());
+
+        $xformer = new PhabricatorImageTransformer();
+
+        // Resize OAuth image to a reasonable size
+        $small_xformed = $xformer->executeProfileTransform(
+          $file,
+          $width = 50,
+          $min_height = 50,
+          $max_height = 50);
+
+        $user->setProfileImagePHID($small_xformed->getPHID());
         $user->save();
       } else {
         $error = 'Unable to retrieve image.';
