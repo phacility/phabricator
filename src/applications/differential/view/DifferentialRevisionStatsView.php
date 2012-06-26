@@ -68,7 +68,7 @@ final class DifferentialRevisionStatsView extends AphrontView {
                '1 year', '18 months',
                '2 years', '3 years', '4 years', '5 years',
              ) as $age) {
-      $dates[$age] = strtotime($age . ' ago 24:00');
+      $dates[$age] = strtotime($age . ' ago 23:59:59');
       $counts[$age] = 0;
       $lines[$age] = 0;
       $count_active[$age] = 0;
