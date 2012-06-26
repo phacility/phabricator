@@ -22,7 +22,7 @@ final class PhabricatorFileUploadException extends Exception {
     $map = array(
       UPLOAD_ERR_INI_SIZE =>
         "Uploaded file is too large: file is larger than the ".
-        "'upload_max_size' setting in php.ini.",
+        "'upload_max_filesize' setting in php.ini.",
       UPLOAD_ERR_FORM_SIZE =>
         "File is too large.",
       UPLOAD_ERR_PARTIAL =>
