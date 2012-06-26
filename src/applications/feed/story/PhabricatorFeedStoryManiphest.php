@@ -26,13 +26,13 @@ final class PhabricatorFeedStoryManiphest
         $this->getStoryData()->getAuthorPHID(),
         $data->getValue('taskPHID'),
         $data->getValue('ownerPHID'),
-            ));
+      ));
   }
 
   public function getRequiredObjectPHIDs() {
     return array(
       $this->getStoryData()->getAuthorPHID(),
-                 );
+    );
   }
 
   public function renderView() {
@@ -78,42 +78,31 @@ final class PhabricatorFeedStoryManiphest
   }
 
   private function getLineForData($data) {
-    $actor_phid = $data->getAuthorPHID();
-    $owner_phid = $data->getValue('ownerPHID');
-    $task_phid = $data->getValue('taskPHID');
     $action = $data->getValue('action');
-    $description = $data->getValue('description');
-    $comments = phutil_escape_html(
-      phutil_utf8_shorten(
-        $data->getValue('comments'),
-        140));
 
+    $actor_phid = $data->getAuthorPHID();
     $actor_link = $this->linkTo($actor_phid);
+
+    $task_phid = $data->getValue('taskPHID');
     $task_link = $this->linkTo($task_phid);
+
+    $owner_phid = $data->getValue('ownerPHID');
     $owner_link = $this->linkTo($owner_phid);
 
     $verb = ManiphestAction::getActionPastTenseVerb($action);
 
-    if (($action == ManiphestAction::ACTION_ASSIGN
-        || $action == ManiphestAction::ACTION_REASSIGN)
-        && !$owner_phid) {
-      //double assignment since the action is diff in this case
-      $verb = $action = 'placed up for grabs';
-    }
-    $one_line = "{$actor_link} {$verb} {$task_link}";
-
     switch ($action) {
       case ManiphestAction::ACTION_ASSIGN:
       case ManiphestAction::ACTION_REASSIGN:
-        $one_line .= " to {$owner_link}";
+        if ($owner_phid) {
+          $one_line = "{$actor_link} {$verb} to {$owner_link}";
+        } else {
+          $one_line = "{$actor_link} placed {$task_link} up for grabs";
+        }
         break;
-      case ManiphestAction::ACTION_DESCRIPTION:
-        $one_line .= " to {$description}";
+      default:
+        $one_line = "{$actor_link} {$verb} {$task_link}";
         break;
-    }
-
-    if ($comments) {
-      $one_line .= " \"{$comments}\"";
     }
 
     return $one_line;

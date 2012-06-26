@@ -1,4 +1,3 @@
-#!/usr/bin/env php
 <?php
 
 /*
@@ -17,8 +16,11 @@
  * limitations under the License.
  */
 
-echo
-  "This script has moved. All repository management is now performed through ".
-  "'bin/repository'. Use this command instead:\n\n".
-  "    phabricator/ $ ./bin/repository discover ...\n";
-exit(1);
+abstract class PhabricatorRepositoryManagementWorkflow
+  extends PhutilArgumentWorkflow {
+
+  public function isExecutable() {
+    return true;
+  }
+
+}

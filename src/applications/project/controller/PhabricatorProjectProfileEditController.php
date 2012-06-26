@@ -33,10 +33,11 @@ final class PhabricatorProjectProfileEditController
       return new Aphront404Response();
     }
     $profile = $project->loadProfile();
-
     if (empty($profile)) {
       $profile = new PhabricatorProjectProfile();
     }
+
+    $img_src = $profile->loadProfileImageURI();
 
     if ($project->getSubprojectPHIDs()) {
       $phids = $project->getSubprojectPHIDs();
@@ -93,7 +94,10 @@ final class PhabricatorProjectProfileEditController
         $e_name = null;
       }
 
-      if (!empty($_FILES['image'])) {
+      $default_image = $request->getExists('default_image');
+      if ($default_image) {
+        $profile->setProfileImagePHID(null);
+      } else if (!empty($_FILES['image'])) {
         $err = idx($_FILES['image'], 'error');
         if ($err != UPLOAD_ERR_NO_FILE) {
           $file = PhabricatorFile::newFromPHPUpload(
@@ -252,7 +256,16 @@ final class PhabricatorProjectProfileEditController
           ->setName('set_subprojects')
           ->setValue($subprojects))
       ->appendChild(
-        id(new AphrontFormFileControl())
+        id(new AphrontFormMarkupControl())
+          ->setLabel('Profile Image')
+          ->setValue(
+            phutil_render_tag(
+              'img',
+              array(
+                'src' => $img_src,
+              ))))
+      ->appendChild(
+        id(new AphrontFormImageControl())
           ->setLabel('Change Image')
           ->setName('image')
           ->setError($e_image)

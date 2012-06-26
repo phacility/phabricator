@@ -43,6 +43,7 @@ final class DifferentialRevision extends DifferentialDAO {
   private $commits;
   private $activeDiff = false;
   private $diffIDs;
+  private $hashes;
 
 
   const RELATIONSHIP_TABLE    = 'differential_relationship';
@@ -308,4 +309,17 @@ final class DifferentialRevision extends DifferentialDAO {
 
     return $reviewer;
   }
+
+  public function getHashes() {
+    if ($this->hashes === null) {
+      throw new Exception("Call attachHashes() before getHashes()!");
+    }
+    return $this->hashes;
+  }
+
+  public function attachHashes(array $hashes) {
+    $this->hashes = $hashes;
+    return $this;
+  }
+
 }

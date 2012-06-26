@@ -26,7 +26,7 @@ final class PhabricatorRemarkupRuleYoutube
     $this->uri = new PhutilURI($text);
 
     if ($this->uri->getDomain() &&
-        preg_match('/youtube\.com$/', $this->uri->getDomain())) {
+        preg_match('/(^|\.)youtube\.com$/', $this->uri->getDomain())) {
       return $this->markupYoutubeLink();
     }
 

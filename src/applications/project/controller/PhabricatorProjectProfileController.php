@@ -40,17 +40,7 @@ final class PhabricatorProjectProfileController
       $profile = new PhabricatorProjectProfile();
     }
 
-    $src_phid = $profile->getProfileImagePHID();
-    if (!$src_phid) {
-      $src_phid = $user->getProfileImagePHID();
-    }
-    $file = id(new PhabricatorFile())->loadOneWhere('phid = %s',
-                                                    $src_phid);
-    if ($file) {
-      $picture = $file->getBestURI();
-    } else {
-      $picture = PhabricatorUser::getDefaultProfileImageURI();
-    }
+    $picture = $profile->loadProfileImageURI();
 
     $members = mpull($project->loadAffiliations(), null, 'getUserPHID');
 

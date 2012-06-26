@@ -200,6 +200,7 @@ final class ConduitAPI_differential_query_Method
     $query->needCommitPHIDs(true);
     $query->needDiffIDs(true);
     $query->needActiveDiffs(true);
+    $query->needHashes(true);
 
     $revisions = $query->execute();
 
@@ -231,6 +232,7 @@ final class ConduitAPI_differential_query_Method
         'commits'       => $revision->getCommitPHIDs(),
         'reviewers'     => array_values($revision->getReviewers()),
         'ccs'           => array_values($revision->getCCPHIDs()),
+        'hashes'        => $revision->getHashes(),
       );
 
       // TODO: This is a hacky way to put permissions on this field until we
