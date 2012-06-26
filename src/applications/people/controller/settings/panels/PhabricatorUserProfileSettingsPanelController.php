@@ -51,7 +51,11 @@ final class PhabricatorUserProfileSettingsPanelController
       // Checked in runtime.
       $user->setTranslation($request->getStr('translation'));
 
-      if (!empty($_FILES['image'])) {
+      $default_image = $request->getExists('default_image');
+      if ($default_image) {
+        $profile->setProfileImagePHID(null);
+        $user->setProfileImagePHID(null);
+      } else if (!empty($_FILES['image'])) {
         $err = idx($_FILES['image'], 'error');
         if ($err != UPLOAD_ERR_NO_FILE) {
           $file = PhabricatorFile::newFromPHPUpload(
@@ -188,7 +192,7 @@ final class PhabricatorUserProfileSettingsPanelController
                 'src' => $img_src,
               ))))
       ->appendChild(
-        id(new AphrontFormFileControl())
+        id(new AphrontFormImageControl())
           ->setLabel('Change Image')
           ->setName('image')
           ->setError($e_image)
