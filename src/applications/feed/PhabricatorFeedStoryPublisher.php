@@ -74,7 +74,7 @@ final class PhabricatorFeedStoryPublisher {
     $story = new PhabricatorFeedStoryData();
     $story->setStoryType($this->storyType);
     $story->setStoryData($this->storyData);
-    $story->setAuthorPHID($this->storyAuthorPHID);
+    $story->setAuthorPHID((string)$this->storyAuthorPHID);
     $story->setChronologicalKey($chrono_key);
     $story->save();
 
