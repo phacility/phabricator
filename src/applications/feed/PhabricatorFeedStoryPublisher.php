@@ -61,10 +61,6 @@ final class PhabricatorFeedStoryPublisher {
   }
 
   public function publish() {
-    if (!$this->relatedPHIDs) {
-      throw new Exception("There are no PHIDs related to this story!");
-    }
-
     if (!$this->storyType) {
       throw new Exception("Call setStoryType() before publishing!");
     }
@@ -78,23 +74,25 @@ final class PhabricatorFeedStoryPublisher {
     $story->setChronologicalKey($chrono_key);
     $story->save();
 
-    $ref = new PhabricatorFeedStoryReference();
+    if ($this->relatedPHIDs) {
+      $ref = new PhabricatorFeedStoryReference();
 
-    $sql = array();
-    $conn = $ref->establishConnection('w');
-    foreach (array_unique($this->relatedPHIDs) as $phid) {
-      $sql[] = qsprintf(
+      $sql = array();
+      $conn = $ref->establishConnection('w');
+      foreach (array_unique($this->relatedPHIDs) as $phid) {
+        $sql[] = qsprintf(
+          $conn,
+          '(%s, %s)',
+          $phid,
+          $chrono_key);
+      }
+
+      queryfx(
         $conn,
-        '(%s, %s)',
-        $phid,
-        $chrono_key);
+        'INSERT INTO %T (objectPHID, chronologicalKey) VALUES %Q',
+        $ref->getTableName(),
+        implode(', ', $sql));
     }
-
-    queryfx(
-      $conn,
-      'INSERT INTO %T (objectPHID, chronologicalKey) VALUES %Q',
-      $ref->getTableName(),
-      implode(', ', $sql));
 
     if (PhabricatorEnv::getEnvConfig('notification.enabled')) {
       $this->insertNotifications($chrono_key);
