@@ -192,6 +192,24 @@ final class PhabricatorOAuthLoginController
             'accounts, log in to your Phabricator account and then go to '.
             'Settings.</p>',
             $provider_name));
+
+        $user = id(new PhabricatorUser())
+          ->loadOneWhere('phid = %s', $known_email->getUserPHID());
+        $oauth_infos = id(new PhabricatorUserOAuthInfo())
+          ->loadAllWhere('userID = %d', $user->getID());
+        if ($oauth_infos) {
+          $providers = array();
+          foreach ($oauth_infos as $info) {
+            $provider = $info->getOAuthProvider();
+            $providers[] = PhabricatorOAuthProvider::newProvider($provider)
+              ->getProviderName();
+          }
+          $dialog->appendChild(
+            hsprintf(
+              '<p>The account is associated with: %s.</p>',
+              implode(', ', $providers)));
+        }
+
         $dialog->addCancelButton('/login/');
 
         return id(new AphrontDialogResponse())->setDialog($dialog);
