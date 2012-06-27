@@ -1081,12 +1081,16 @@ return array(
   // of classes which extend PhabricatorEventListener here.
   'events.listeners'  => array(),
 
-// -- Pygments -------------------------------------------------------------- //
+// -- Syntax Highlighting --------------------------------------------------- //
 
-  // Phabricator can highlight PHP by default, but if you want syntax
-  // highlighting for other languages you should install the python package
-  // 'Pygments', make sure the 'pygmentize' script is available in the
-  // $PATH of the webserver, and then enable this.
+  // Phabricator can highlight PHP by default and use Pygments for other
+  // languages if enabled. You can provide a custom highlighter engine by
+  // extending class PhutilSyntaxHighlighterEngine.
+  'syntax-highlighter.engine' => 'PhutilDefaultSyntaxHighlighterEngine',
+
+  // If you want syntax highlighting for other languages than PHP then you can
+  // install the python package 'Pygments', make sure the 'pygmentize' script is
+  //  available in the $PATH of the webserver, and then enable this.
   'pygments.enabled'            => false,
 
   // In places that we display a dropdown to syntax-highlight code,

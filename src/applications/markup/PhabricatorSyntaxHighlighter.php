@@ -22,7 +22,7 @@
 final class PhabricatorSyntaxHighlighter {
 
   public static function newEngine() {
-    $engine = new PhutilDefaultSyntaxHighlighterEngine();
+    $engine = PhabricatorEnv::newObjectFromConfig('syntax-highlighter.engine');
 
     $config = array(
       'pygments.enabled' => PhabricatorEnv::getEnvConfig('pygments.enabled'),

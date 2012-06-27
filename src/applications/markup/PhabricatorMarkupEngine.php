@@ -90,6 +90,8 @@ class PhabricatorMarkupEngine {
       'macros'        => true,
       'uri.allowed-protocols' => PhabricatorEnv::getEnvConfig(
         'uri.allowed-protocols'),
+      'syntax-highlighter.engine' => PhabricatorEnv::getEnvConfig(
+        'syntax-highlighter.engine'),
     );
   }
 
@@ -106,6 +108,9 @@ class PhabricatorMarkupEngine {
       $options['uri.allowed-protocols']);
     $engine->setConfig('differential.diff', $options['differential.diff']);
     $engine->setConfig('header.generate-toc', $options['header.generate-toc']);
+    $engine->setConfig(
+      'syntax-highlighter.engine',
+      $options['syntax-highlighter.engine']);
 
     $rules = array();
     $rules[] = new PhutilRemarkupRuleEscapeRemarkup();
