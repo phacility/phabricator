@@ -136,6 +136,10 @@ final class DifferentialRevisionCommentView extends AphrontView {
       $metadata,
       DifferentialComment::METADATA_ADDED_REVIEWERS,
       array());
+    $removed_reviewers = idx(
+      $metadata,
+      DifferentialComment::METADATA_REMOVED_REVIEWERS,
+      array());
     $added_ccs = idx(
       $metadata,
       DifferentialComment::METADATA_ADDED_CCS,
@@ -178,6 +182,11 @@ final class DifferentialRevisionCommentView extends AphrontView {
     if ($added_reviewers) {
       $actions[] = "{$author_link} added reviewers: ".
         $this->renderHandleList($added_reviewers).".";
+    }
+
+    if ($removed_reviewers) {
+      $actions[] = "{$author_link} removed reviewers: ".
+        $this->renderHandleList($removed_reviewers).".";
     }
 
     if ($added_ccs) {
