@@ -264,6 +264,7 @@ phutil_register_library_map(array(
     'DifferentialGitSVNIDFieldSpecification' => 'applications/differential/field/specification/DifferentialGitSVNIDFieldSpecification.php',
     'DifferentialHostFieldSpecification' => 'applications/differential/field/specification/DifferentialHostFieldSpecification.php',
     'DifferentialHunk' => 'applications/differential/storage/DifferentialHunk.php',
+    'DifferentialHunkTestCase' => 'applications/differential/storage/__tests__/DifferentialHunkTestCase.php',
     'DifferentialInlineComment' => 'applications/differential/storage/DifferentialInlineComment.php',
     'DifferentialInlineCommentEditController' => 'applications/differential/controller/DifferentialInlineCommentEditController.php',
     'DifferentialInlineCommentEditView' => 'applications/differential/view/DifferentialInlineCommentEditView.php',
@@ -1326,6 +1327,7 @@ phutil_register_library_map(array(
     'DifferentialGitSVNIDFieldSpecification' => 'DifferentialFieldSpecification',
     'DifferentialHostFieldSpecification' => 'DifferentialFieldSpecification',
     'DifferentialHunk' => 'DifferentialDAO',
+    'DifferentialHunkTestCase' => 'ArcanistPhutilTestCase',
     'DifferentialInlineComment' =>
     array(
       0 => 'DifferentialDAO',
