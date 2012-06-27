@@ -147,8 +147,8 @@ final class DifferentialDiff extends DifferentialDAO {
           $changeset->addUnsavedHunk($dhunk);
           $add_lines += $hunk->getAddLines();
           $del_lines += $hunk->getDelLines();
-          $lines += $add_lines + $del_lines;
         }
+        $lines += $add_lines + $del_lines;
       } else {
         // This happens when you add empty files.
         $changeset->attachHunks(array());
