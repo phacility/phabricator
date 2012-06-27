@@ -957,11 +957,14 @@ abstract class LiskDAO {
   /**
    * Get or build the database connection for this object.
    *
+   * @param  string 'r' for read, 'w' for read/write.
+   * @param  bool True to force a new connection. The connection will not
+   *              be retrieved from or saved into the connection cache.
    * @return LiskDatabaseConnection   Lisk connection object.
    *
    * @task   info
    */
-  public function establishConnection($mode) {
+  public function establishConnection($mode, $force_new = false) {
     if ($mode != 'r' && $mode != 'w') {
       throw new Exception("Unknown mode '{$mode}', should be 'r' or 'w'.");
     }
@@ -988,15 +991,17 @@ abstract class LiskDAO {
     // TODO: There is currently no protection on 'r' queries against writing.
 
     $connection = null;
-    if ($mode == 'r') {
-      // If we're requesting a read connection but already have a write
-      // connection, reuse the write connection so that reads can take place
-      // inside transactions.
-      $connection = $this->getEstablishedConnection('w');
-    }
+    if (!$force_new) {
+      if ($mode == 'r') {
+        // If we're requesting a read connection but already have a write
+        // connection, reuse the write connection so that reads can take place
+        // inside transactions.
+        $connection = $this->getEstablishedConnection('w');
+      }
 
-    if (!$connection) {
-      $connection = $this->getEstablishedConnection($mode);
+      if (!$connection) {
+        $connection = $this->getEstablishedConnection($mode);
+      }
     }
 
     if (!$connection) {
@@ -1004,7 +1009,9 @@ abstract class LiskDAO {
       if (self::shouldIsolateAllLiskEffectsToTransactions()) {
         $connection->openTransaction();
       }
-      $this->setEstablishedConnection($mode, $connection);
+      if (!$force_new) {
+        $this->setEstablishedConnection($mode, $connection);
+      }
     }
 
     return $connection;
