@@ -133,6 +133,13 @@ final class PhabricatorRepositoryPullLocalDaemon
         }
 
         try {
+          $callsign = $repository->getCallsign();
+          $this->log("Updating repository '{$callsign}'.");
+
+          $lock_name = get_class($this).':'.$callsign;
+          $lock = PhabricatorGlobalLock::newLock($lock_name);
+          $lock->lock();
+
           $this->pullRepository($repository);
 
           if (!$no_discovery) {
@@ -141,8 +148,13 @@ final class PhabricatorRepositoryPullLocalDaemon
             $this->discoverRepository($repository);
           }
 
+          $lock->unlock();
+
           $sleep_for = $repository->getDetail('pull-frequency', $min_sleep);
           $retry_after[$id] = time() + $sleep_for;
+        } catch (PhutilLockException $ex) {
+          $retry_after[$id] = time() + $min_sleep;
+          $this->log("Failed to acquire lock.");
         } catch (Exception $ex) {
           $retry_after[$id] = time() + $min_sleep;
           phlog($ex);
