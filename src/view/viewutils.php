@@ -54,21 +54,21 @@ function phabricator_time($epoch, $user) {
   return phabricator_format_local_time(
     $epoch,
     $user,
-    pht('g:i A'));
+    'g:i A');
 }
 
-function phabricator_datetime($epoch, $user) {
+  function phabricator_datetime($epoch, $user) {
   return phabricator_format_local_time(
     $epoch,
     $user,
-    pht('%s, g:i A', _phabricator_date_format($epoch)));
+    _phabricator_date_format($epoch).', g:i A');
 }
 
 function _phabricator_date_format($epoch) {
-  $format = pht('M j Y');
+  $format = 'M j Y';
   $now = time();
   if ($epoch <= $now && $epoch > $now - 30 * 24 * 60 * 60) {
-    $format = pht('D, M j');
+    $format = 'D, M j';
   }
   return $format;
 }
@@ -115,7 +115,7 @@ function phabricator_format_local_time($epoch, $user, $format) {
 
   $date->setTimeZone($zone);
 
-  return PhutilTranslator::getInstance()->translateDate($format, $date);
+  return $date->format($format);
 }
 
 function phabricator_format_relative_time($duration) {
