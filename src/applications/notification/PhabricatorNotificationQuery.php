@@ -16,10 +16,19 @@
  * limitations under the License.
  */
 
+/**
+ * @task config Configuring the Query
+ * @task exec   Query Execution
+ */
 final class PhabricatorNotificationQuery extends PhabricatorOffsetPagedQuery {
 
   private $userPHID;
   private $keys;
+  private $unread;
+
+
+/* -(  Configuring the Query  )---------------------------------------------- */
+
 
   public function setUserPHID($user_phid) {
     $this->userPHID = $user_phid;
@@ -30,6 +39,26 @@ final class PhabricatorNotificationQuery extends PhabricatorOffsetPagedQuery {
     $this->keys = $keys;
     return $this;
   }
+
+
+  /**
+   * Filter results by read/unread status. Note that `true` means to return
+   * only unread notifications, while `false` means to return only //read//
+   * notifications. The default is `null`, which returns both.
+   *
+   * @param mixed True or false to filter results by read status. Null to remove
+   *              the filter.
+   * @return this
+   * @task config
+   */
+  public function withUnread($unread) {
+    $this->unread = $unread;
+    return $this;
+  }
+
+
+/* -(  Query Execution  )---------------------------------------------------- */
+
 
   public function execute() {
     if (!$this->userPHID) {
@@ -87,6 +116,13 @@ final class PhabricatorNotificationQuery extends PhabricatorOffsetPagedQuery {
         $conn_r,
         'notif.userPHID = %s',
         $this->userPHID);
+    }
+
+    if ($this->unread !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'notif.hasViewed = %d',
+        (int)!$this->unread);
     }
 
     if ($this->keys) {

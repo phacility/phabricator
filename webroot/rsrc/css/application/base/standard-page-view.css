@@ -301,12 +301,18 @@ a.handle-disabled {
 
 .phabricator-notification {
   padding: 6px 6px;
+  margin: 1px 0;
 }
 
 .no-notifications {
   color: #999999;
 }
 
+.phabricator-notification-list {
+  font-size: 11px;
+}
+
+.phabricator-notification-list .phabricator-notification-unread,
 #phabricator-notification-dropdown .phabricator-notification-unread {
   background: #aacfef;
 }

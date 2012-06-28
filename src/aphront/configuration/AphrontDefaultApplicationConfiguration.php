@@ -427,7 +427,8 @@ class AphrontDefaultApplicationConfiguration
       ),
 
       '/notification/' => array(
-        '' => 'PhabricatorNotificationListController',
+        '(?:(?P<filter>all|unread)/)?'
+          => 'PhabricatorNotificationListController',
         'panel/' => 'PhabricatorNotificationPanelController',
         'individual/' => 'PhabricatorNotificationIndividualController',
         'status/' => 'PhabricatorNotificationStatusController',
