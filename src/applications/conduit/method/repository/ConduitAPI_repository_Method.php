@@ -29,6 +29,7 @@ abstract class ConduitAPI_repository_Method extends ConduitAPIMethod {
       'uri'         => PhabricatorEnv::getProductionURI($repository->getURI()),
       'remoteURI'   => (string)$repository->getPublicRemoteURI(),
       'tracking'    => $repository->getDetail('tracking-enabled'),
+      'description' => $repository->getDetail('description'),
     );
   }
 
