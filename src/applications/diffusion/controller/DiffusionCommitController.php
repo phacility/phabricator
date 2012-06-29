@@ -361,16 +361,10 @@ final class DiffusionCommitController extends DiffusionController {
 
     $request = $this->getDiffusionRequest();
 
-    $contains = DiffusionContainsQuery::newFromDiffusionRequest($request);
-    $branches = $contains->loadContainingBranches();
-
+    $branches = $this->buildBranches($request);
     if ($branches) {
-      // TODO: Separate these into 'tracked' and other; link tracked branches.
-      $branches = implode(', ', array_keys($branches));
-      $branches = phutil_escape_html($branches);
       $props['Branches'] = $branches;
     }
-
 
     $tags = $this->buildTags($request);
     if ($tags) {
@@ -379,7 +373,7 @@ final class DiffusionCommitController extends DiffusionController {
 
     $refs = $this->buildRefs($request);
     if ($refs) {
-      $props['Refs'] = $refs;
+      $props['References'] = $refs;
     }
 
     if ($task_phids) {
@@ -761,6 +755,32 @@ final class DiffusionCommitController extends DiffusionController {
     return $action_list;
   }
 
+  private function buildBranches(DiffusionRequest $request) {
+
+    $branch_query = DiffusionContainsQuery::newFromDiffusionRequest($request);
+    $branches = $branch_query->loadContainingBranches();
+
+    if (!$branches) {
+      return null;
+    }
+
+    $branch_links = array();
+    foreach ($branches as $branch => $commit) {
+      $branch_links[] = phutil_render_tag(
+        'a',
+        array(
+          'href' => $request->generateURI(
+            array(
+              'action'  => 'browse',
+              'branch'  => $branch,
+            )),
+        ),
+        phutil_escape_html($branch));
+    }
+    $branch_links = implode(', ', $branch_links);
+    return $branch_links;
+  }
+
   private function buildTags(DiffusionRequest $request) {
     $tag_limit = 10;
 
@@ -822,7 +842,27 @@ final class DiffusionCommitController extends DiffusionController {
       '%d',
       $request->getCommit());
 
-    return trim($stdout, "() \n");
+    // %d, gives a weird output format
+    // similar to (remote/one, remote/two, remote/three)
+    $refs = trim($stdout, "() \n");
+    $refs = explode(',', $refs);
+    $refs = array_map('trim', $refs);
+
+    $ref_links = array();
+    foreach ($refs as $ref) {
+      $ref_links[] = phutil_render_tag(
+        'a',
+        array(
+          'href' => $request->generateURI(
+            array(
+              'action'  => 'browse',
+              'branch'  => $ref,
+            )),
+        ),
+        phutil_escape_html($ref));
+    }
+    $ref_links = implode(', ', $ref_links);
+    return $ref_links;
   }
 
   private function buildRawDiffResponse(DiffusionRequest $drequest) {
