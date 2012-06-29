@@ -136,19 +136,19 @@ final class PhabricatorRepositoryPullLocalDaemon
           $callsign = $repository->getCallsign();
           $this->log("Updating repository '{$callsign}'.");
 
-          $lock_name = get_class($this).':'.$callsign;
-          $lock = PhabricatorGlobalLock::newLock($lock_name);
-          $lock->lock();
-
           $this->pullRepository($repository);
 
           if (!$no_discovery) {
+            $lock_name = get_class($this).':'.$callsign;
+            $lock = PhabricatorGlobalLock::newLock($lock_name);
+            $lock->lock();
+
             // TODO: It would be nice to discover only if we pulled something,
             // but this isn't totally trivial.
             $this->discoverRepository($repository);
-          }
 
-          $lock->unlock();
+            $lock->unlock();
+          }
 
           $sleep_for = $repository->getDetail('pull-frequency', $min_sleep);
           $retry_after[$id] = time() + $sleep_for;
