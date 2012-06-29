@@ -40,6 +40,11 @@ final class ManiphestTaskQuery {
   const STATUS_ANY          = 'status-any';
   const STATUS_OPEN         = 'status-open';
   const STATUS_CLOSED       = 'status-closed';
+  const STATUS_RESOLVED     = 'status-resolved';
+  const STATUS_WONTFIX      = 'status-wontfix';
+  const STATUS_INVALID      = 'status-invalid';
+  const STATUS_SPITE        = 'status-spite';
+  const STATUS_DUPLICATE    = 'status-duplicate';
 
   private $priority         = null;
 
@@ -282,6 +287,15 @@ final class ManiphestTaskQuery {
   }
 
   private function buildStatusWhereClause($conn) {
+
+    static $map = array(
+      self::STATUS_RESOLVED   => ManiphestTaskStatus::STATUS_CLOSED_RESOLVED,
+      self::STATUS_WONTFIX    => ManiphestTaskStatus::STATUS_CLOSED_WONTFIX,
+      self::STATUS_INVALID    => ManiphestTaskStatus::STATUS_CLOSED_INVALID,
+      self::STATUS_SPITE      => ManiphestTaskStatus::STATUS_CLOSED_SPITE,
+      self::STATUS_DUPLICATE  => ManiphestTaskStatus::STATUS_CLOSED_DUPLICATE,
+    );
+
     switch ($this->status) {
       case self::STATUS_ANY:
         return null;
@@ -290,7 +304,14 @@ final class ManiphestTaskQuery {
       case self::STATUS_CLOSED:
         return 'status > 0';
       default:
-        throw new Exception("Unknown status query '{$this->status}'!");
+        $constant = idx($map, $this->status);
+        if (!$constant) {
+          throw new Exception("Unknown status query '{$this->status}'!");
+        }
+        return qsprintf(
+          $conn,
+          'status = %d',
+          $constant);
     }
   }
 
