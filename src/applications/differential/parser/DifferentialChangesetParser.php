@@ -165,14 +165,14 @@ final class DifferentialChangesetParser {
       if (isset($olds[$i])) {
         list($n, $type) = $olds[$i];
         if ($type == '+' ||
-            ($type == ' ' && isset($news[$i]) && $news[$i][1] == '-')) {
+            ($type == ' ' && isset($news[$i]) && $news[$i][1] != ' ')) {
           $highlight_old[] = $offsets_old[$n];
         }
       }
       if (isset($news[$i])) {
         list($n, $type) = $news[$i];
         if ($type == '+' ||
-            ($type == ' ' && isset($olds[$i]) && $olds[$i][1] == '-')) {
+            ($type == ' ' && isset($olds[$i]) && $olds[$i][1] != ' ')) {
           $highlight_new[] = $offsets_new[$n];
         }
       }
