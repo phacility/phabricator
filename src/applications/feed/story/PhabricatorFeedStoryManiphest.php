@@ -95,7 +95,11 @@ final class PhabricatorFeedStoryManiphest
       case ManiphestAction::ACTION_ASSIGN:
       case ManiphestAction::ACTION_REASSIGN:
         if ($owner_phid) {
-          $one_line = "{$actor_link} {$verb} to {$owner_link}";
+          if ($owner_phid == $actor_phid) {
+            $one_line = "{$actor_link} claimed {$task_link}";
+          } else {
+            $one_line = "{$actor_link} {$verb} {$task_link} to {$owner_link}";
+          }
         } else {
           $one_line = "{$actor_link} placed {$task_link} up for grabs";
         }
