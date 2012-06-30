@@ -34,6 +34,7 @@ final class DifferentialDiff extends DifferentialDAO {
   protected $lineCount;
 
   protected $branch;
+  protected $bookmark;
 
   protected $parentRevisionID;
   protected $arcanistProjectPHID;
@@ -257,6 +258,7 @@ final class DifferentialDiff extends DifferentialDAO {
       'sourceControlPath' => $this->getSourceControlPath(),
       'sourceControlSystem' => $this->getSourceControlSystem(),
       'branch' => $this->getBranch(),
+      'bookmark' => $this->getBookmark(),
       'creationMethod' => $this->getCreationMethod(),
       'description' => $this->getDescription(),
       'unitStatus' => $this->getUnitStatus(),
