@@ -133,19 +133,22 @@ final class DifferentialChangesetParser {
       $n_new = $hunk->getNewOffset();
       $changes = rtrim($hunk->getChanges(), "\n");
       foreach (explode("\n", $changes) as $line) {
-        $type = $line[1]; // Change type in the original diff.
-        if ($line[0] == ' ') {
+        $diff_type = $line[0]; // Change type in diff of diffs.
+        $orig_type = $line[1]; // Change type in the original diff.
+        if ($diff_type == ' ') {
           // Use the same key for lines that are next to each other.
           $key = max(last_key($olds), last_key($news)) + 1;
           $olds[$key] = null;
           $news[$key] = null;
+        } else if ($diff_type == '-') {
+          $olds[] = array($n_old, $orig_type);
+        } else if ($diff_type == '+') {
+          $news[] = array($n_new, $orig_type);
+        }
+        if (($diff_type == '-' || $diff_type == ' ') && $orig_type != '-') {
           $n_old++;
-          $n_new++;
-        } else if ($line[0] == '-') {
-          $olds[] = array($n_old, $type);
-          $n_old++;
-        } else if ($line[0] == '+') {
-          $news[] = array($n_new, $type);
+        }
+        if (($diff_type == '+' || $diff_type == ' ') && $orig_type != '-') {
           $n_new++;
         }
       }
