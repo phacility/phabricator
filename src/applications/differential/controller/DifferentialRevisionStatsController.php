@@ -19,10 +19,6 @@
 final class DifferentialRevisionStatsController extends DifferentialController {
   private $filter;
 
-  public function shouldRequireLogin() {
-    return true;
-  }
-
   private function loadRevisions($phid) {
     $table = new DifferentialRevision();
     $conn_r = $table->establishConnection('r');
