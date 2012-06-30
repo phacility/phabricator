@@ -845,12 +845,11 @@ final class DiffusionCommitController extends DiffusionController {
     // %d, gives a weird output format
     // similar to (remote/one, remote/two, remote/three)
     $refs = trim($stdout, "() \n");
-    $refs = explode(',', $refs);
-    $refs = array_map('trim', $refs);
-
     if (!$refs) {
         return null;
     }
+    $refs = explode(',', $refs);
+    $refs = array_map('trim', $refs);
 
     $ref_links = array();
     foreach ($refs as $ref) {
