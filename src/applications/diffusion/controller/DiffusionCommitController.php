@@ -848,6 +848,10 @@ final class DiffusionCommitController extends DiffusionController {
     $refs = explode(',', $refs);
     $refs = array_map('trim', $refs);
 
+    if (!$refs) {
+        return null;
+    }
+
     $ref_links = array();
     foreach ($refs as $ref) {
       $ref_links[] = phutil_render_tag(
