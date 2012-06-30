@@ -251,6 +251,10 @@ a.handle-disabled {
   width: 60px;
 }
 
+.phabricator-admin-page-view .icon-menu-notifications {
+  background: url(/rsrc/image/notification_menu_admin.png);
+}
+
 .icon-menu-notifications {
   background: url(/rsrc/image/notification_menu.png);
 }
