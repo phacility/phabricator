@@ -111,4 +111,19 @@ final class PhabricatorFeedStoryManiphest
 
     return $one_line;
   }
+
+  public function getNotificationAggregations() {
+    $class = get_class($this);
+    $phid  = $this->getStoryData()->getValue('taskPHID');
+    $read  = (int)$this->getHasViewed();
+
+    // Don't aggregate updates separated by more than 2 hours.
+    $block = (int)($this->getEpoch() / (60 * 60 * 2));
+
+    return array(
+      "{$class}:{$phid}:{$read}:{$block}"
+        => 'PhabricatorFeedStoryManiphestAggregate',
+    );
+  }
+
 }
