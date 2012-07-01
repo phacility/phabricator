@@ -139,4 +139,8 @@ abstract class PhabricatorFeedStory {
     return $text;
   }
 
+  public function getNotificationAggregations() {
+    return array();
+  }
+
 }
