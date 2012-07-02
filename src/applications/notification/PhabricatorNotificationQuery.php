@@ -85,24 +85,10 @@ final class PhabricatorNotificationQuery extends PhabricatorOffsetPagedQuery {
     $viewed_map = ipull($data, 'hasViewed', 'chronologicalKey');
     $primary_map = ipull($data, 'primaryObjectPHID', 'chronologicalKey');
 
-    $data = $story_table->loadAllFromArray($data);
-
-    $stories = array();
-
-    foreach ($data as $story_data) {
-      $class = $story_data->getStoryType();
-      try {
-        if (!class_exists($class) ||
-          !is_subclass_of($class, 'PhabricatorFeedStory')) {
-            $class = 'PhabricatorFeedStoryUnknown';
-        }
-      } catch (PhutilMissingSymbolException $ex) {
-        $class = 'PhabricatorFeedStoryUnknown';
-      }
-      $story = newv($class, array($story_data));
-      $story->setHasViewed($viewed_map[$story->getChronologicalKey()]);
-      $story->setPrimaryObjectPHID($primary_map[$story->getChronologicalKey()]);
-      $stories[] = $story;
+    $stories = PhabricatorFeedStory::loadAllFromRows($data);
+    foreach ($stories as $key => $story) {
+      $story->setHasViewed($viewed_map[$key]);
+      $story->setPrimaryObjectPHID($primary_map[$key]);
     }
 
     return $stories;

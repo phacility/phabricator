@@ -107,26 +107,7 @@ final class PhabricatorFeedQuery {
       $data = array_reverse($data);
     }
 
-    $data = $story_table->loadAllFromArray($data);
-
-    $stories = array();
-    foreach ($data as $story_data) {
-      $class = $story_data->getStoryType();
-
-      try {
-        if (!class_exists($class) ||
-            !is_subclass_of($class, 'PhabricatorFeedStory')) {
-          $class = 'PhabricatorFeedStoryUnknown';
-        }
-      } catch (PhutilMissingSymbolException $ex) {
-        // If the class can't be loaded, libphutil will throw an exception.
-        // Render the story using the unknown story view.
-        $class = 'PhabricatorFeedStoryUnknown';
-      }
-
-      $stories[] = newv($class, array($story_data));
-    }
-
-    return $stories;
+    return PhabricatorFeedStory::loadAllFromRows($data);
   }
+
 }

@@ -16,6 +16,13 @@
  * limitations under the License.
  */
 
+/**
+ * Manages rendering and aggregation of a story. A story is an event (like a
+ * user adding a comment) which may be represented in different forms on
+ * different channels (like feed, notifications and realtime alerts).
+ *
+ * @task load Loading Stories
+ */
 abstract class PhabricatorFeedStory {
 
   private $data;
@@ -23,6 +30,50 @@ abstract class PhabricatorFeedStory {
   private $handles;
   private $framed;
   private $primaryObjectPHID;
+
+
+/* -(  Loading Stories  )---------------------------------------------------- */
+
+
+  /**
+   * Given @{class:PhabricatorFeedStoryData} rows, load them into objects and
+   * construct appropriate @{class:PhabricatorFeedStory} wrappers for each
+   * data row.
+   *
+   * @param list<dict>  List of @{class:PhabricatorFeedStoryData} rows from the
+   *                    database.
+   * @return list<PhabricatorFeedStory>   List of @{class:PhabricatorFeedStory}
+   *                                      objects.
+   * @task load
+   */
+  public static function loadAllFromRows(array $rows) {
+    $stories = array();
+
+    $data = id(new PhabricatorFeedStoryData())->loadAllFromArray($rows);
+    foreach ($data as $story_data) {
+      $class = $story_data->getStoryType();
+
+      $ok = false;
+      try {
+        $ok = is_subclass_of($class, 'PhabricatorFeedStory');
+      } catch (PhutilMissingSymbolException $ex) {
+        $ok = false;
+      }
+
+      // If the story type isn't a valid class or isn't a subclass of
+      // PhabricatorFeedStory, load it as PhabricatorFeedStoryUnknown.
+
+      if (!$ok) {
+        $class = 'PhabricatorFeedStoryUnknown';
+      }
+
+      $key = $story_data->getChronologicalKey();
+      $stories[$key] = newv($class, array($story_data));
+    }
+
+    return $stories;
+  }
+
 
   public function setPrimaryObjectPHID($primary_object_phid) {
     $this->primaryObjectPHID = $primary_object_phid;
