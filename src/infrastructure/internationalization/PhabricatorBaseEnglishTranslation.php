@@ -48,6 +48,24 @@ abstract class PhabricatorBaseEnglishTranslation
       'COMMIT(S)' => array('COMMIT', 'COMMITS'),
 
       '%d line(s)' => array('%d line', '%d lines'),
+
+      'added %d commit(s): %s' => array(
+        'added commits: %2$s',
+        'added commit: %2$s',
+      ),
+
+      'removed %d commit(s): %s' => array(
+        'removed commits: %2$s',
+        'removed commit: %2$s',
+      ),
+
+      'changed %d commit(s), added %d: %s; removed %d: %s' =>
+        'changed commits, added: %3$s; removed: %5$s',
+
+      'ATTACHED %d COMMIT(S)' => array(
+        'ATTACHED COMMITS',
+        'ATTACHED COMMIT',
+      ),
     );
   }
 

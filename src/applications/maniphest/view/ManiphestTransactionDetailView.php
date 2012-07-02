@@ -298,6 +298,23 @@ final class ManiphestTransactionDetailView extends ManiphestView {
         }
 
         return $title."\n".$links;
+      case ManiphestTransactionType::TYPE_EDGE:
+        $add = array_diff_key($new, $old);
+        if (!$add) {
+          break;
+        }
+
+        $links = array();
+        foreach ($add as $phid => $ignored) {
+          $handle = $handles[$phid];
+          $links[] = '  '.PhabricatorEnv::getProductionURI($handle->getURI());
+        }
+        $links = implode("\n", $links);
+
+        $edge_type = $transaction->getMetadataValue('edge:type');
+        $title = $this->getEdgeEmailTitle($edge_type, $add);
+
+        return $title."\n".$links;
       default:
         break;
     }
@@ -384,6 +401,23 @@ final class ManiphestTransactionDetailView extends ManiphestView {
           $verb = 'Changed CC';
           $desc = 'changed CCs, added: '.$this->renderHandles($added).'; '.
                              'removed: '.$this->renderHandles($removed);
+        }
+        break;
+      case ManiphestTransactionType::TYPE_EDGE:
+        $edge_type = $transaction->getMetadataValue('edge:type');
+
+        $add = array_diff_key($new, $old);
+        $rem = array_diff_key($old, $new);
+
+        if ($add && !$rem) {
+          $verb = $this->getEdgeAddVerb($edge_type);
+          $desc = $this->getEdgeAddList($edge_type, $add);
+        } else if ($rem && !$add) {
+          $verb = $this->getEdgeRemVerb($edge_type);
+          $desc = $this->getEdgeRemList($edge_type, $rem);
+        } else {
+          $verb = $this->getEdgeEditVerb($edge_type);
+          $desc = $this->getEdgeEditList($edge_type, $add, $rem);
         }
         break;
       case ManiphestTransactionType::TYPE_PROJECTS:
@@ -550,17 +584,6 @@ final class ManiphestTransactionDetailView extends ManiphestView {
     return array($verb, $desc, $classes);
   }
 
-  private function getAttachName($attach_type, $count) {
-    switch ($attach_type) {
-      case PhabricatorPHIDConstants::PHID_TYPE_DREV:
-        return pht('Differential Revision(s)', $count);
-      case PhabricatorPHIDConstants::PHID_TYPE_FILE:
-        return pht('file(s)', $count);
-      case PhabricatorPHIDConstants::PHID_TYPE_TASK:
-        return pht('Maniphest Task(s)', $count);
-    }
-  }
-
   private function renderFullSummary($transaction) {
     switch ($transaction->getTransactionType()) {
       case ManiphestTransactionType::TYPE_DESCRIPTION:
@@ -623,6 +646,130 @@ final class ManiphestTransactionDetailView extends ManiphestView {
       return '"'.$string.'"';
     } else {
       return '"'.phutil_escape_html($string).'"';
+    }
+  }
+
+
+/* -(  Strings  )------------------------------------------------------------ */
+
+
+  /**
+   * @task strings
+   */
+  private function getAttachName($attach_type, $count) {
+    switch ($attach_type) {
+      case PhabricatorPHIDConstants::PHID_TYPE_DREV:
+        return pht('Differential Revision(s)', $count);
+      case PhabricatorPHIDConstants::PHID_TYPE_FILE:
+        return pht('file(s)', $count);
+      case PhabricatorPHIDConstants::PHID_TYPE_TASK:
+        return pht('Maniphest Task(s)', $count);
+    }
+  }
+
+  private function getEdgeEmailTitle($type, $count) {
+    switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
+        return pht('ATTACHED %d COMMIT(S)', $count);
+      default:
+        return pht('ATTACHED %d OBJECT(S)', $count);
+    }
+  }
+
+
+  /**
+   * @task strings
+   */
+  private function getEdgeAddVerb($type) {
+    switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
+        return pht('Added Commit');
+      default:
+        return pht('Added Object');
+    }
+  }
+
+
+  /**
+   * @task strings
+   */
+  private function getEdgeRemVerb($type) {
+    switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
+        return pht('Removed Commit');
+      default:
+        return pht('Removed Object');
+    }
+  }
+
+
+  /**
+   * @task strings
+   */
+  private function getEdgeEditVerb($type) {
+    switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
+        return pht('Changed Commits');
+      default:
+        return pht('Changed Objects');
+    }
+  }
+
+
+  /**
+   * @task strings
+   */
+  private function getEdgeAddList($type, array $add) {
+    $list = $this->renderHandles(array_keys($add));
+
+    switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
+        return pht('added %d commit(s): %s', $add, $list);
+      default:
+        return pht('added %d object(s): %s', $add, $list);
+    }
+  }
+
+
+  /**
+   * @task strings
+   */
+  private function getEdgeRemList($type, array $rem) {
+    $list = $this->renderHandles(array_keys($rem));
+
+    switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
+        return pht('removed %d commit(s): %s', $rem, $list);
+      default:
+        return pht('removed %d object(s): %s', $rem, $list);
+    }
+  }
+
+
+  /**
+   * @task strings
+   */
+  private function getEdgeEditList($type, array $add, array $rem) {
+    $add_list = $this->renderHandles(array_keys($add));
+    $rem_list = $this->renderHandles(array_keys($rem));
+
+    switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
+        return pht(
+          'changed %d commit(s), added %d: %s; removed %d: %s',
+          count($add) + count($rem),
+          $add,
+          $add_list,
+          $rem,
+          $rem_list);
+      default:
+        return pht(
+          'changed %d object(s), added %d: %s; removed %d: %s',
+          count($add) + count($rem),
+          $add,
+          $add_list,
+          $rem,
+          $rem_list);
     }
   }
 
