@@ -204,15 +204,18 @@ final class PhabricatorPeopleProfileController
   }
 
   private function renderUserFeed(PhabricatorUser $user) {
+    $viewer = $this->getRequest()->getUser();
+
     $query = new PhabricatorFeedQuery();
     $query->setFilterPHIDs(
       array(
         $user->getPHID(),
       ));
+    $query->setViewer($viewer);
     $stories = $query->execute();
 
     $builder = new PhabricatorFeedBuilder($stories);
-    $builder->setUser($this->getRequest()->getUser());
+    $builder->setUser($viewer);
     $view = $builder->buildView();
 
     return

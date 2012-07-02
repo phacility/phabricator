@@ -65,13 +65,13 @@ abstract class PhabricatorIDPagedPolicyQuery extends PhabricatorPolicyQuery {
     if ($this->beforeID) {
       return qsprintf(
         $conn_r,
-        '%C > %s',
+        '%Q > %s',
         $this->getPagingColumn(),
         $this->beforeID);
     } else if ($this->afterID) {
       return qsprintf(
         $conn_r,
-        '%C < %s',
+        '%Q < %s',
         $this->getPagingColumn(),
         $this->afterID);
     }
@@ -83,12 +83,12 @@ abstract class PhabricatorIDPagedPolicyQuery extends PhabricatorPolicyQuery {
     if ($this->beforeID) {
       return qsprintf(
         $conn_r,
-        'ORDER BY %C ASC',
+        'ORDER BY %Q ASC',
         $this->getPagingColumn());
     } else {
       return qsprintf(
         $conn_r,
-        'ORDER BY %C DESC',
+        'ORDER BY %Q DESC',
         $this->getPagingColumn());
     }
   }

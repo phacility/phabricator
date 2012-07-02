@@ -1010,6 +1010,9 @@ return array(
   // pages using iframes. These feeds are completely public, and a login is not
   // required to view them! This is intended for things like open source
   // projects that want to expose an activity feed on the project homepage.
+  //
+  // NOTE: You must also set `policy.allow-public` to true for this setting
+  // to work properly.
   'feed.public' => false,
 
 
@@ -1019,6 +1022,7 @@ return array(
   // EC2 credentials here.
   'amazon-ec2.access-key'   => null,
   'amazon-ec2.secret-key'   => null,
+
 
 // -- Customization --------------------------------------------------------- //
 

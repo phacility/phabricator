@@ -23,7 +23,7 @@
  *
  * @task load Loading Stories
  */
-abstract class PhabricatorFeedStory {
+abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
 
   private $data;
   private $hasViewed;
@@ -74,6 +74,21 @@ abstract class PhabricatorFeedStory {
     return $stories;
   }
 
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorEnv::getEnvConfig('feed.public')
+      ? PhabricatorPolicies::POLICY_PUBLIC
+      : PhabricatorPolicies::POLICY_USER;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
+  }
 
   public function setPrimaryObjectPHID($primary_object_phid) {
     $this->primaryObjectPHID = $primary_object_phid;

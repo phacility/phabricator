@@ -16,98 +16,74 @@
  * limitations under the License.
  */
 
-final class PhabricatorFeedQuery {
+final class PhabricatorFeedQuery extends PhabricatorIDPagedPolicyQuery {
 
   private $filterPHIDs;
-  private $limit = 100;
-  private $after;
-  private $before;
 
   public function setFilterPHIDs(array $phids) {
     $this->filterPHIDs = $phids;
     return $this;
   }
 
-  public function setLimit($limit) {
-    $this->limit = $limit;
-    return $this;
-  }
+  public function loadPage() {
 
-  public function setAfter($after) {
-    $this->after = $after;
-    return $this;
-  }
-
-  public function setBefore($before) {
-    $this->before = $before;
-    return $this;
-  }
-
-  public function execute() {
-
-    $ref_table = new PhabricatorFeedStoryReference();
     $story_table = new PhabricatorFeedStoryData();
-
     $conn = $story_table->establishConnection('r');
 
+    $data = queryfx_all(
+      $conn,
+      'SELECT story.* FROM %T story %Q %Q %Q %Q %Q',
+      $story_table->getTableName(),
+      $this->buildJoinClause($conn),
+      $this->buildWhereClause($conn),
+      $this->buildGroupClause($conn),
+      $this->buildOrderClause($conn),
+      $this->buildLimitClause($conn));
+
+    $results = PhabricatorFeedStory::loadAllFromRows($data);
+
+    return $this->processResults($results);
+  }
+
+  private function buildJoinClause(AphrontDatabaseConnection $conn_r) {
+    // NOTE: We perform this join unconditionally (even if we have no filter
+    // PHIDs) to omit rows which have no story references. These story data
+    // rows are notifications or realtime alerts.
+
+    $ref_table = new PhabricatorFeedStoryReference();
+    return qsprintf(
+      $conn_r,
+      'JOIN %T ref ON ref.chronologicalKey = story.chronologicalKey',
+      $ref_table->getTableName());
+  }
+
+  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
+
     if ($this->filterPHIDs) {
       $where[] = qsprintf(
-        $conn,
+        $conn_r,
         'ref.objectPHID IN (%Ls)',
         $this->filterPHIDs);
     }
 
-    // For "before" queries, we can just add a constraint to the WHERE clause.
-    // For "after" queries, we must also reverse the result ordering, since
-    // otherwise we'll always grab the first page of results if there's a limit.
-    // After MySQL applies the limit, we reverse the page in PHP (below) to
-    // ensure consistent ordering.
+    $where[] = $this->buildPagingClause($conn_r);
 
-    $order = 'DESC';
+    return $this->formatWhereClause($where);
+  }
 
-    if ($this->after) {
-      $where[] = qsprintf(
-        $conn,
-        'ref.chronologicalKey > %s',
-        $this->after);
-      $order = 'ASC';
-    }
+  private function buildGroupClause(AphrontDatabaseConnection $conn_r) {
+    return qsprintf(
+      $conn_r,
+      'GROUP BY ref.chronologicalKey');
+  }
 
-    if ($this->before) {
-      $where[] = qsprintf(
-        $conn,
-        'ref.chronologicalKey < %s',
-        $this->before);
-    }
+  protected function getPagingColumn() {
+    return 'ref.chronologicalKey';
+  }
 
-    if ($where) {
-      $where = 'WHERE ('.implode(') AND (', $where).')';
-    } else {
-      $where = '';
-    }
-
-    $data = queryfx_all(
-      $conn,
-      'SELECT story.* FROM %T ref
-        JOIN %T story ON ref.chronologicalKey = story.chronologicalKey
-        %Q
-        GROUP BY ref.chronologicalKey
-        ORDER BY ref.chronologicalKey %Q
-        LIMIT %d',
-      $ref_table->getTableName(),
-      $story_table->getTableName(),
-      $where,
-      $order,
-      $this->limit);
-
-    if ($order != 'DESC') {
-      // If we did order ASC to pull 'after' data, reverse the result set so
-      // that stories are returned in a consistent (descending) order.
-      $data = array_reverse($data);
-    }
-
-    return PhabricatorFeedStory::loadAllFromRows($data);
+  protected function getPagingValue($item) {
+    return $item->getChronologicalKey();
   }
 
 }
