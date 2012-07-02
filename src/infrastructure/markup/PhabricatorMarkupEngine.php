@@ -51,6 +51,15 @@ class PhabricatorMarkupEngine {
     ));
   }
 
+  public static function newFeedMarkupEngine() {
+    return self::newMarkupEngine(
+      array(
+        'macros'      => false,
+        'fileproxy'   => false,
+        'youtube'     => false,
+
+      ));
+  }
 
   public static function newDifferentialMarkupEngine(array $options = array()) {
     return self::newMarkupEngine(array(
