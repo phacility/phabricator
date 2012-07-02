@@ -138,6 +138,11 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       }
       $return = $translation;
     }
+
+    if (!$return) {
+      $return = $default_translation;
+    }
+
     return $return;
   }
 
