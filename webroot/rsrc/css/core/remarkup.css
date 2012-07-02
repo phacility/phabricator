@@ -228,3 +228,21 @@ img.phabricator-remarkup-embed-image {
   -moz-box-shadow: 1px 1px 6px rgba(0,0,0,.5);
   -webkit-box-shadow: 1px 1px 6px rgba(0,0,0,.5);
 }
+
+.phabricator-remarkup table.remarkup-table {
+  border-collapse:  separate;
+  border-spacing:   1px;
+  background:       #d3d3d3;
+  margin:           1em;
+}
+
+.phabricator-remarkup table.remarkup-table th {
+  font-weight: bold;
+  padding: 3px 6px;
+  background: #e3e3e3;
+}
+
+.phabricator-remarkup table.remarkup-table td {
+  background: #ffffff;
+  padding: 3px 6px;
+}
