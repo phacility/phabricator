@@ -74,6 +74,7 @@ final class PhabricatorSearchAttachController
           $add_phids = $phids;
           $rem_phids = array_diff($old_phids, $add_phids);
           $editor = id(new PhabricatorEdgeEditor());
+          $editor->setUser($user);
           foreach ($add_phids as $phid) {
             $editor->addEdge($this->phid, $edge_type, $phid);
           }

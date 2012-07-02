@@ -58,6 +58,8 @@ final class ManiphestTransaction extends ManiphestDAO {
         $phids[] = $this->getOldValue();
         $phids[] = $this->getNewValue();
         break;
+      case ManiphestTransactionType::TYPE_EDGE:
+        return array_keys($this->getOldValue() + $this->getNewValue());
       case ManiphestTransactionType::TYPE_ATTACH:
         $old = $this->getOldValue();
         $new = $this->getNewValue();

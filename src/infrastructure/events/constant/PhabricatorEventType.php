@@ -23,4 +23,7 @@ final class PhabricatorEventType extends PhutilEventType {
   const TYPE_DIFFERENTIAL_WILLSENDMAIL = 'differential.willSendMail';
   const TYPE_DIFFERENTIAL_WILLMARKGENERATED = 'differential.willMarkGenerated';
 
+  const TYPE_EDGE_WILLEDITEDGES     = 'edge.willEditEdges';
+  const TYPE_EDGE_DIDEDITEDGES      = 'edge.didEditEdges';
+
 }

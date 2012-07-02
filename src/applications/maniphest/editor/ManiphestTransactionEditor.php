@@ -69,6 +69,9 @@ final class ManiphestTransactionEditor {
         case ManiphestTransactionType::TYPE_PRIORITY:
           $old = $task->getPriority();
           break;
+        case ManiphestTransactionType::TYPE_EDGE:
+          $old = $transaction->getOldValue();
+          break;
         case ManiphestTransactionType::TYPE_ATTACH:
           $old = $task->getAttached();
           break;
@@ -172,6 +175,10 @@ final class ManiphestTransactionEditor {
           case ManiphestTransactionType::TYPE_AUXILIARY:
             $aux_key = $transaction->getMetadataValue('aux:key');
             $task->setAuxiliaryAttribute($aux_key, $new);
+            break;
+          case ManiphestTransactionType::TYPE_EDGE:
+            // Edge edits are accomplished through PhabricatorEdgeEditor, which
+            // has authority.
             break;
           default:
             throw new Exception('Unknown action type.');

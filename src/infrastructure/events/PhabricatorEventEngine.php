@@ -26,6 +26,8 @@ final class PhabricatorEventEngine {
 
     // Register the DarkConosole event logger.
     id(new DarkConsoleEventPluginAPI())->register();
+    id(new ManiphestEdgeEventListener())->register();
+
   }
 
 }

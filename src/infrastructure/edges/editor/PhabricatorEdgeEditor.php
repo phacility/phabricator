@@ -28,6 +28,7 @@
  *
  *    id(new PhabricatorEdgeEditor())
  *      ->addEdge($src, $type, $dst)
+ *      ->setUser($user)
  *      ->save();
  *
  * @task edit     Editing Edges
@@ -38,6 +39,12 @@ final class PhabricatorEdgeEditor {
   private $addEdges = array();
   private $remEdges = array();
   private $openTransactions = array();
+  private $user;
+
+  public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
+    return $this;
+  }
 
 
 /* -(  Editing Edges  )------------------------------------------------------ */
@@ -111,11 +118,19 @@ final class PhabricatorEdgeEditor {
 
     $this->writeEdgeData();
 
+    static $id = 0;
+    $id++;
+
+    $this->sendEvent($id, PhabricatorEventType::TYPE_EDGE_WILLEDITEDGES);
+
     // NOTE: Removes first, then adds, so that "remove + add" is a useful
     // operation meaning "overwrite".
 
     $this->executeRemoves();
     $this->executeAdds();
+
+    $this->sendEvent($id, PhabricatorEventType::TYPE_EDGE_DIDEDITEDGES);
+
 
     $this->saveTransactions();
   }
@@ -136,11 +151,15 @@ final class PhabricatorEdgeEditor {
       $data['data'] = $options['data'];
     }
 
+    $src_type = phid_get_type($src);
+    $dst_type = phid_get_type($dst);
+
     $specs = array();
     $specs[] = array(
       'src'       => $src,
-      'src_type'  => phid_get_type($src),
+      'src_type'  => $src_type,
       'dst'       => $dst,
+      'dst_type'  => $dst_type,
       'type'      => $type,
       'data'      => $data,
     );
@@ -156,8 +175,9 @@ final class PhabricatorEdgeEditor {
 
       $specs[] = array(
         'src'       => $dst,
-        'src_type'  => phid_get_type($dst),
+        'src_type'  => $dst_type,
         'dst'       => $src,
+        'dst_type'  => $src_type,
         'type'      => $inverse,
         'data'      => $data,
       );
@@ -305,6 +325,18 @@ final class PhabricatorEdgeEditor {
       $conn_w->saveTransaction();
       unset($this->openTransactions[$key]);
     }
+  }
+
+  private function sendEvent($edit_id, $event_type) {
+    $event = new PhabricatorEvent(
+      $event_type,
+      array(
+        'id'    => $edit_id,
+        'add'   => $this->addEdges,
+        'rem'   => $this->remEdges,
+      ));
+    $event->setUser($this->user);
+    PhutilEventEngine::dispatchEvent($event);
   }
 
 }
