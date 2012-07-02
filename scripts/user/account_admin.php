@@ -136,7 +136,7 @@ printf(
   $tpl,
   'Admin',
   $original->getIsAdmin() ? 'Y' : 'N',
-  $user->getIsAdmin() ? 'Y' : 'N');
+  $set_admin ? 'Y' : 'N');
 
 echo "\n";
 
