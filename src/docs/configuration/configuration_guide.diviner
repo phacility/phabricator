@@ -252,7 +252,7 @@ Continue by:
 
   - setting up your admin account and login/registration with
     @{article:Configuring Accounts and Registration}; or
-  - configuring where uploaded fils and attachments will be stored with
+  - configuring where uploaded files and attachments will be stored with
     @{article:Configuring File Storage}; or
   - configuring Phabricator so it can send mail with
     @{article:Configuring Outbound Email}; or
