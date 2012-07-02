@@ -269,16 +269,6 @@ final class PhabricatorRepositoryPullLocalDaemon
       $target);
 
     if (!$commit) {
-      $callsign = $repository->getCallsign();
-
-      $console = PhutilConsole::getConsole();
-      $console->writeErr(
-        "WARNING: Repository '%s' is missing commits ('%s' is missing from ".
-        "history). Run '%s' to repair the repository.\n",
-        $callsign,
-        $target,
-        "bin/repository discover --repair {$callsign}");
-
       return false;
     }
 
@@ -300,6 +290,16 @@ final class PhabricatorRepositoryPullLocalDaemon
       $target);
 
     if (!$commit) {
+      $callsign = $repository->getCallsign();
+
+      $console = PhutilConsole::getConsole();
+      $console->writeErr(
+        "WARNING: Repository '%s' is missing commits ('%s' is missing from ".
+        "history). Run '%s' to repair the repository.\n",
+        $callsign,
+        $target,
+        "bin/repository discover --repair {$callsign}");
+
       return false;
     }
 
