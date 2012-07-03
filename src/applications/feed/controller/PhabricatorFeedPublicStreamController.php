@@ -33,6 +33,7 @@ final class PhabricatorFeedPublicStreamController
 
     $query = new PhabricatorFeedQuery();
     $query->setViewer($viewer);
+    $query->setLimit(100);
     $stories = $query->execute();
 
     $builder = new PhabricatorFeedBuilder($stories);

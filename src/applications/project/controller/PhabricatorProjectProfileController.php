@@ -78,6 +78,7 @@ final class PhabricatorProjectProfileController
           array(
             $project->getPHID(),
           ));
+        $query->setLimit(50);
         $query->setViewer($this->getRequest()->getUser());
         $stories = $query->execute();
 
@@ -245,6 +246,7 @@ final class PhabricatorProjectProfileController
     $query = new PhabricatorFeedQuery();
     $query->setFilterPHIDs(array($project->getPHID()));
     $query->setViewer($this->getRequest()->getUser());
+    $query->setLimit(100);
     $stories = $query->execute();
 
     if (!$stories) {

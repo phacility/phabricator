@@ -211,6 +211,7 @@ final class PhabricatorPeopleProfileController
       array(
         $user->getPHID(),
       ));
+    $query->setLimit(100);
     $query->setViewer($viewer);
     $stories = $query->execute();
 
