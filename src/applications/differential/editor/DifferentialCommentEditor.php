@@ -111,6 +111,8 @@ final class DifferentialCommentEditor {
     $actor_phid = $this->actorPHID;
     $actor = id(new PhabricatorUser())->loadOneWhere('PHID = %s', $actor_phid);
     $actor_is_author = ($actor_phid == $revision->getAuthorPHID());
+    $allow_self_accept = PhabricatorEnv::getEnvConfig(
+        'differential.allow-self-accept', false);
     $revision_status = $revision->getStatus();
 
     $revision->loadRelationships();
@@ -176,7 +178,7 @@ final class DifferentialCommentEditor {
         break;
 
       case DifferentialAction::ACTION_ACCEPT:
-        if ($actor_is_author) {
+        if ($actor_is_author && !$allow_self_accept) {
           throw new Exception('You can not accept your own revision.');
         }
         if (($revision_status !=
