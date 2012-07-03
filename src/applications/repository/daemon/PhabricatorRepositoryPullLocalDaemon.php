@@ -374,6 +374,15 @@ final class PhabricatorRepositoryPullLocalDaemon
       }
 
       $this->setCache($repository, $commit_identifier);
+
+      PhutilEventEngine::dispatchEvent(
+        new PhabricatorEvent(
+          PhabricatorEventType::TYPE_DIFFUSION_DIDDISCOVERCOMMIT,
+          array(
+            'repository'  => $repository,
+            'commit'      => $commit,
+          )));
+
     } catch (AphrontQueryDuplicateKeyException $ex) {
       $commit->killTransaction();
       // Ignore. This can happen because we discover the same new commit

@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group events
+ */
 final class PhabricatorEventEngine {
 
   public static function initialize() {

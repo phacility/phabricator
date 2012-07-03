@@ -16,6 +16,10 @@
  * limitations under the License.
  */
 
+
+/**
+ * @group events
+ */
 final class PhabricatorEvent extends PhutilEvent {
 
   private $user;
