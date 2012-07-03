@@ -139,13 +139,19 @@ final class PhabricatorRepositoryPullLocalDaemon
           $this->pullRepository($repository);
 
           if (!$no_discovery) {
+            // TODO: It would be nice to discover only if we pulled something,
+            // but this isn't totally trivial.
+
             $lock_name = get_class($this).':'.$callsign;
             $lock = PhabricatorGlobalLock::newLock($lock_name);
             $lock->lock();
 
-            // TODO: It would be nice to discover only if we pulled something,
-            // but this isn't totally trivial.
-            $this->discoverRepository($repository);
+            try {
+              $this->discoverRepository($repository);
+            } catch (Exception $ex) {
+              $lock->unlock();
+              throw $ex;
+            }
 
             $lock->unlock();
           }
