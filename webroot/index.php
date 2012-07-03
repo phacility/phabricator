@@ -78,6 +78,13 @@ try {
 
   PhabricatorEnv::setEnvConfig($conf);
 
+  // This needs to be done before we create the log, because
+  // PhabricatorAccessLog::getLog() calls date()
+  $tz = PhabricatorEnv::getEnvConfig('phabricator.timezone');
+  if ($tz) {
+    date_default_timezone_set($tz);
+  }
+
   // This is the earliest we can get away with this, we need env config first.
   PhabricatorAccessLog::init();
   $access_log = PhabricatorAccessLog::getLog();
@@ -96,11 +103,6 @@ try {
 
 } catch (Exception $ex) {
   phabricator_fatal("[Initialization Exception] ".$ex->getMessage());
-}
-
-$tz = PhabricatorEnv::getEnvConfig('phabricator.timezone');
-if ($tz) {
-  date_default_timezone_set($tz);
 }
 
 PhutilErrorHandler::setErrorListener(
