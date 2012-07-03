@@ -536,13 +536,18 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $viewer_did_accept = ($viewer_phid === $revision->loadReviewedBy());
     $status = $revision->getStatus();
 
+    $allow_self_accept = PhabricatorEnv::getEnvConfig(
+        'differential.allow-self-accept', false);
+
     if ($viewer_is_owner) {
       switch ($status) {
         case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
+          $actions[DifferentialAction::ACTION_ACCEPT] = $allow_self_accept;
           $actions[DifferentialAction::ACTION_ABANDON] = true;
           $actions[DifferentialAction::ACTION_RETHINK] = true;
           break;
         case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
+          $actions[DifferentialAction::ACTION_ACCEPT] = $allow_self_accept;
           $actions[DifferentialAction::ACTION_ABANDON] = true;
           $actions[DifferentialAction::ACTION_REQUEST] = true;
           break;
