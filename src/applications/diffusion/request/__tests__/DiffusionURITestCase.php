@@ -55,6 +55,12 @@ final class DiffusionURITestCase extends ArcanistPhutilTestCase {
         'commit' => '$;;semicolon;;$$',
         'line'   => '100',
       ),
+      'branch/path.ext;abc$3-5,7-12,14' => array(
+        'branch'  => 'branch',
+        'path'    => 'path.ext',
+        'commit'  => 'abc',
+        'line'    => '3-5,7-12,14',
+      ),
     );
 
     foreach ($map as $input => $expect) {
@@ -139,6 +145,13 @@ final class DiffusionURITestCase extends ArcanistPhutilTestCase {
         'action'    => 'rendering-ref',
         'path'      => 'path/to/file.ext',
         'commit'    => 'abc',
+      ),
+      '/diffusion/A/browse/branch/path.ext$3-5%2C7-12%2C14' => array(
+        'action'    => 'browse',
+        'callsign'  => 'A',
+        'branch'    => 'branch',
+        'path'      => 'path.ext',
+        'line'      => '3-5,7-12,14',
       ),
     );
 

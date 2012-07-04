@@ -293,15 +293,22 @@ final class DiffusionBrowseFileController extends DiffusionController {
       $epoch_range = ($epoch_max - $epoch_min) + 1;
     }
 
-    $min_line = 0;
-    $line = $drequest->getLine();
-    if (strpos($line, '-') !== false) {
-      list($min, $max) = explode('-', $line, 2);
-      $min_line = min($min, $max);
-      $max_line = max($min, $max);
-    } else if (strlen($line)) {
-      $min_line = $line;
-      $max_line = $line;
+    $line_arr = array();
+    $line_str = $drequest->getLine();
+    $ranges = explode(',', $line_str);
+    foreach ($ranges as $range) {
+      if (strpos($range, '-') !== false) {
+        list($min, $max) = explode('-', $range, 2);
+        $line_arr[] = array(
+          'min' => min($min, $max),
+          'max' => max($min, $max),
+        );
+      } else if (strlen($range)) {
+        $line_arr[] = array(
+          'min' => $range,
+          'max' => $range,
+        );
+      }
     }
 
     $display = array();
@@ -366,12 +373,15 @@ final class DiffusionBrowseFileController extends DiffusionController {
         }
       }
 
-      if ($min_line) {
-        if ($line_number == $min_line) {
+      if ($line_arr) {
+        if ($line_number == $line_arr[0]['min']) {
           $display_line['target'] = true;
         }
-        if ($line_number >= $min_line && $line_number <= $max_line) {
-          $display_line['highlighted'] = true;
+        foreach ($line_arr as $range) {
+          if ($line_number >= $range['min'] &&
+              $line_number <= $range['max']) {
+            $display_line['highlighted'] = true;
+          }
         }
       }
 
