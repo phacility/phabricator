@@ -130,6 +130,16 @@ final class PhabricatorPeopleListController
             'class' => 'button green',
           ),
           'Create New Account'));
+      if (PhabricatorEnv::getEnvConfig('ldap.auth-enabled')) {
+        $panel->addButton(
+          phutil_render_tag(
+            'a',
+            array(
+              'href' => '/people/ldap',
+              'class' => 'button green'
+            ),
+            'Import from Ldap'));
+      }
     }
 
     return $this->buildStandardPageResponse($panel, array(

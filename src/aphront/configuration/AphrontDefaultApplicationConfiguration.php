@@ -72,6 +72,7 @@ class AphrontDefaultApplicationConfiguration
         'logs/' => 'PhabricatorPeopleLogsController',
         'edit/(?:(?P<id>\d+)/(?:(?P<view>\w+)/)?)?'
           => 'PhabricatorPeopleEditController',
+        'ldap/' => 'PhabricatorPeopleLdapController',
       ),
       '/p/(?P<username>[\w._-]+)/(?:(?P<page>\w+)/)?'
         => 'PhabricatorPeopleProfileController',
