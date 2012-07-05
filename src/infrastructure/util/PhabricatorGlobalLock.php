@@ -63,7 +63,7 @@ final class PhabricatorGlobalLock extends PhutilLock {
 
 /* -(  Implementation  )----------------------------------------------------- */
 
-  protected function doLock() {
+  protected function doLock($wait) {
     $conn = $this->conn;
     if (!$conn) {
       // NOTE: Using the 'repository' database somewhat arbitrarily, mostly
@@ -87,9 +87,9 @@ final class PhabricatorGlobalLock extends PhutilLock {
 
     $result = queryfx_one(
       $conn,
-      'SELECT GET_LOCK(%s, %d)',
+      'SELECT GET_LOCK(%s, %f)',
       'phabricator:'.$this->lockname,
-      0);
+      $wait);
 
     $ok = head($result);
     if (!$ok) {
