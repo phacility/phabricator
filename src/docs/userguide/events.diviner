@@ -206,10 +206,12 @@ If you're having problems with your listener, try these steps:
     events instead, to test that your listener reacts to them properly. You
     might have to use fake data, but this gives you an easy way to test the
     at least the basics.
+  - For scripts, you can run under `--trace` to see which events are emitted
+    and how many handlers are listening to each event.
 
 = Next Steps =
 
 Continue by:
 
   - taking a look at @{class:PhabricatorExampleEventListener}; or
-  - building a library with @{article:@{article:libphutil Libraries User Guide}.
+  - building a library with @{article:libphutil Libraries User Guide}.
