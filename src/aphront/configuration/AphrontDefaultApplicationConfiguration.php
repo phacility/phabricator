@@ -381,9 +381,9 @@ class AphrontDefaultApplicationConfiguration
       ),
 
       '/phame/' => array(
-        ''                          => 'PhamePostListController',
+        ''                          => 'PhameAllBloggersPostListController',
         'post/' => array(
-          ''                        => 'PhamePostListController',
+          ''                        => 'PhameUserPostListController',
           'delete/(?P<phid>[^/]+)/' => 'PhamePostDeleteController',
           'edit/(?P<phid>[^/]+)/'   => 'PhamePostEditController',
           'new/'                    => 'PhamePostEditController',
@@ -395,8 +395,8 @@ class AphrontDefaultApplicationConfiguration
           'new/'                    => 'PhamePostEditController',
         ),
         'posts/' => array(
-          ''                        => 'PhamePostListController',
-          '(?P<bloggername>\w+)/'   => 'PhamePostListController',
+          ''                        => 'PhameUserPostListController',
+          '(?P<bloggername>\w+)/'   => 'PhameBloggerPostListController',
           '(?P<bloggername>\w+)/(?P<phametitle>.+/)'
                                     => 'PhamePostViewController',
         ),

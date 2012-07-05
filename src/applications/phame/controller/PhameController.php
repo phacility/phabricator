@@ -60,8 +60,9 @@ abstract class PhameController extends PhabricatorController {
   }
 
   private function renderSideNavFilterView($filter) {
+    $base_uri = new PhutilURI('/phame/');
     $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI('/phame/'));
+    $nav->setBaseURI($base_uri);
     $nav->addLabel('Drafts');
     $nav->addFilter('post/new',
                     'New Draft');
@@ -71,12 +72,16 @@ abstract class PhameController extends PhabricatorController {
     $nav->addLabel('Posts');
     $nav->addFilter('post',
                     'My Posts');
+    $nav->addFilter('everyone',
+                    'Everyone',
+                    $base_uri);
     foreach ($this->getSideNavExtraPostFilters() as $post_filter) {
       $nav->addFilter($post_filter['key'],
-                      $post_filter['name']);
+                      $post_filter['name'],
+                      idx($post_filter, 'uri'));
     }
 
-    $nav->selectFilter($filter, 'post');
+    $nav->selectFilter($filter);
 
     return $nav;
   }

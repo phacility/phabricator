@@ -60,6 +60,12 @@ extends PhameController {
       return $filters;
   }
 
+  public function shouldRequireLogin() {
+    // TODO -- get policy logic going
+    // return PhabricatorEnv::getEnvConfig('policy.allow-public');
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->setPostPHID(idx($data, 'phid'));
     $this->setPhameTitle(idx($data, 'phametitle'));
