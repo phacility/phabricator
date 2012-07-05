@@ -116,29 +116,39 @@ final class DiffusionGitBrowseQuery extends DiffusionBrowseQuery {
       // NOTE: We need to read the file out of git and write it to a temporary
       // location because "git config -f" doesn't accept a "commit:path"-style
       // argument.
-      list($contents) = $repository->execxLocalCommand(
+
+      // NOTE: This file may not exist, e.g. because the commit author removed
+      // it when they added the submodule. See T1448. If it's not present, just
+      // show the submodule without enriching it. If ".gitmodules" was removed
+      // it seems to partially break submodules, but the repository as a whole
+      // continues to work fine and we've seen at least two cases of this in
+      // the wild.
+
+      list($err, $contents) = $repository->execLocalCommand(
         'cat-file blob %s:.gitmodules',
         $commit);
 
-      $tmp = new TempFile();
-      Filesystem::writeFile($tmp, $contents);
-      list($module_info) = $repository->execxLocalCommand(
-        'config -l -f %s',
-        $tmp);
+      if (!$err) {
+        $tmp = new TempFile();
+        Filesystem::writeFile($tmp, $contents);
+        list($module_info) = $repository->execxLocalCommand(
+          'config -l -f %s',
+          $tmp);
 
-      $dict = array();
-      $lines = explode("\n", trim($module_info));
-      foreach ($lines as $line) {
-        list($key, $value) = explode('=', $line, 2);
-        $parts = explode('.', $key);
-        $dict[$key] = $value;
-      }
+        $dict = array();
+        $lines = explode("\n", trim($module_info));
+        foreach ($lines as $line) {
+          list($key, $value) = explode('=', $line, 2);
+          $parts = explode('.', $key);
+          $dict[$key] = $value;
+        }
 
-      foreach ($submodules as $path) {
-        $full_path = $path->getFullPath();
-        $key = $dict['submodule.'.$full_path.'.url'];
-        if (isset($dict[$key])) {
-          $path->setExternalURI($key);
+        foreach ($submodules as $path) {
+          $full_path = $path->getFullPath();
+          $key = 'submodule.'.$full_path.'.url';
+          if (isset($dict[$key])) {
+            $path->setExternalURI($dict[$key]);
+          }
         }
       }
     }
