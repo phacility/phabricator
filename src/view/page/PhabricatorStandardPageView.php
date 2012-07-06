@@ -209,32 +209,30 @@ final class PhabricatorStandardPageView extends AphrontPageView {
     }
 
     $response = CelerityAPI::getStaticResourceResponse();
+
+    $monospaced = PhabricatorEnv::getEnvConfig('style.monospace');
+
+    $request = $this->getRequest();
+    if ($request) {
+      $user = $request->getUser();
+      if ($user) {
+        $monospaced = nonempty(
+          $user->loadPreferences()->getPreference(
+            PhabricatorUserPreferences::PREFERENCE_MONOSPACED),
+          $monospaced);
+      }
+    }
+
     $head =
       '<script type="text/javascript">'.
         $framebust.
         'window.__DEV__=1;'.
       '</script>'.
       $response->renderResourcesOfType('css').
+      '<style type="text/css">'.
+        '.PhabricatorMonospaced { font: '.$monospaced.'; }'.
+      '</style>'.
       $response->renderSingleResource('javelin-magical-init');
-
-    $request = $this->getRequest();
-    if ($request) {
-      $user = $request->getUser();
-      if ($user) {
-        $monospaced = $user->loadPreferences()->getPreference(
-          PhabricatorUserPreferences::PREFERENCE_MONOSPACED
-        );
-
-        if (strlen($monospaced)) {
-          $head .=
-            '<style type="text/css">'.
-            '.PhabricatorMonospaced { font: '.
-            $monospaced.
-            ' !important; }'.
-            '</style>';
-        }
-      }
-    }
 
     return $head;
   }

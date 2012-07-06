@@ -1154,4 +1154,9 @@ return array(
     '@\.arcconfig$@' => 'js',
   ),
 
+  // Set the default monospaced font style for users who haven't set a custom
+  // style.
+  'style.monospace' => '10px "Menlo", "Consolas", "Monaco", monospace',
+
+
 );

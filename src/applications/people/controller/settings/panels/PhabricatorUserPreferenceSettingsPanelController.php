@@ -59,6 +59,9 @@ EXAMPLE;
       ),
       'User Guide: Configuring an External Editor');
 
+    $font_default = PhabricatorEnv::getEnvConfig('style.monospace');
+    $font_default = phutil_escape_html($font_default);
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setAction('/settings/page/preferences/')
@@ -90,8 +93,7 @@ EXAMPLE;
         ->setName($pref_monospaced)
         ->setCaption(
           'Overrides default fonts in tools like Differential. '.
-          '(Default: 10px "Menlo", "Consolas", "Monaco", '.
-          'monospace)')
+          '(Default: '.$font_default.')')
         ->setValue($preferences->getPreference($pref_monospaced)))
       ->appendChild(
         id(new AphrontFormMarkupControl())
