@@ -899,6 +899,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('differentialbookmarks.sql'),
       ),
+      'harbormasterobject.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('harbormasterobject.sql'),
+      ),
     );
   }
 
