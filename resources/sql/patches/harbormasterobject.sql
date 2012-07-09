@@ -4,7 +4,7 @@ CREATE TABLE {$NAMESPACE}_harbormaster.harbormaster_object (
   name VARCHAR(255) COLLATE utf8_general_ci,
   dateCreated INT UNSIGNED NOT NULL,
   dateModified INT UNSIGNED NOT NULL
-);
+) ENGINE=InnoDB, COLLATE utf8_general_ci;
 
 CREATE TABLE {$NAMESPACE}_harbormaster.edge (
   src VARCHAR(64) NOT NULL COLLATE utf8_bin,
