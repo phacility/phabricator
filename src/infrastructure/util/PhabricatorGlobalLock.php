@@ -35,6 +35,10 @@
  *      do_contentious_things();
  *    $lock->unlock();
  *
+ * NOTE: This lock is not completely global; it is namespaced to the active
+ * storage namespace so that unit tests running in separate table namespaces
+ * are isolated from one another.
+ *
  * @task construct  Constructing Locks
  * @task impl       Implementation
  */
@@ -48,7 +52,8 @@ final class PhabricatorGlobalLock extends PhutilLock {
 
 
   public static function newLock($name) {
-    $full_name = 'global:'.$name;
+    $namespace = PhabricatorLiskDAO::getStorageNamespace();
+    $full_name = 'global:'.$namespace.':'.$name;
 
     $lock = self::getLock($full_name);
     if (!$lock) {
