@@ -872,23 +872,11 @@ final class DiffusionCommitController extends DiffusionController {
     $raw_query = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest);
     $raw_diff  = $raw_query->loadRawDiff();
 
-    $hash = PhabricatorHash::digest($raw_diff);
-
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'contentHash = %s LIMIT 1',
-      $hash);
-    if (!$file) {
-      // We're just caching the data; this is always safe.
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-
-      $file = PhabricatorFile::newFromFileData(
-        $raw_diff,
-        array(
-          'name' => $drequest->getCommit().'.diff',
-        ));
-
-      unset($unguarded);
-    }
+    $file = PhabricatorFile::buildFromFileDataOrHash(
+      $raw_diff,
+      array(
+        'name' => $drequest->getCommit().'.diff',
+      ));
 
     return id(new AphrontRedirectResponse())->setURI($file->getBestURI());
   }

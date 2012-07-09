@@ -940,49 +940,36 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $vcs = $repository ? $repository->getVersionControlSystem() : null;
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
         $raw_diff = $bundle->toGitPatch();
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
       default:
         $raw_diff = $bundle->toUnifiedDiff();
         break;
     }
 
-    $hash = PhabricatorHash::digest($raw_diff);
+    $request_uri = $this->getRequest()->getRequestURI();
 
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'contentHash = %s LIMIT 1',
-      $hash);
-
-    if (!$file) {
-      $request_uri = $this->getRequest()->getRequestURI();
-
-      // this ends up being something like
-      //   D123.diff
-      // or the verbose
-      //   D123.vs123.id123.whitespaceignore-all.diff
-      // lame but nice to include these options
-      $file_name = ltrim($request_uri->getPath(), '/') . '.';
-      foreach ($request_uri->getQueryParams() as $key => $value) {
-        if ($key == 'download') {
-          continue;
-        }
-        $file_name .= $key . $value . '.';
+    // this ends up being something like
+    //   D123.diff
+    // or the verbose
+    //   D123.vs123.id123.whitespaceignore-all.diff
+    // lame but nice to include these options
+    $file_name = ltrim($request_uri->getPath(), '/').'.';
+    foreach ($request_uri->getQueryParams() as $key => $value) {
+      if ($key == 'download') {
+        continue;
       }
-      $file_name .= 'diff';
-
-      // We're just caching the data; this is always safe.
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-
-      $file = PhabricatorFile::newFromFileData(
-        $raw_diff,
-        array(
-          'name' => $file_name,
-        ));
-
-      unset($unguarded);
+      $file_name .= $key.$value.'.';
     }
+    $file_name .= 'diff';
+
+    $file = PhabricatorFile::buildFromFileDataOrHash(
+      $raw_diff,
+      array(
+        'name' => $file_name,
+      ));
 
     return id(new AphrontRedirectResponse())->setURI($file->getBestURI());
 

@@ -639,25 +639,11 @@ final class DiffusionBrowseFileController extends DiffusionController {
   }
 
   private function loadFileForData($path, $data) {
-    $hash = PhabricatorHash::digest($data);
-
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'contentHash = %s LIMIT 1',
-      $hash);
-    if (!$file) {
-      // We're just caching the data; this is always safe.
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-
-      $file = PhabricatorFile::newFromFileData(
-        $data,
-        array(
-          'name' => basename($path),
-        ));
-
-      unset($unguarded);
-    }
-
-    return $file;
+    return PhabricatorFile::buildFromFileDataOrHash(
+      $data,
+      array(
+        'name' => basename($path),
+      ));
   }
 
   private function buildRawResponse($path, $data) {
