@@ -135,7 +135,7 @@ final class PhabricatorPeopleListController
           phutil_render_tag(
             'a',
             array(
-              'href' => '/people/ldap',
+              'href' => '/people/ldap/',
               'class' => 'button green'
             ),
             'Import from Ldap'));

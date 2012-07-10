@@ -25,47 +25,16 @@ final class PhabricatorPeopleLdapController
 
   private $view;
 
-  public function willProcessRequest(array $data) {
-    $this->view = idx($data, 'view');
-  }
-
   public function processRequest() {
 
     $request = $this->getRequest();
     $admin = $request->getUser();
 
-    $base_uri = '/people/edit/';
-
     $content = array();
 
-
-    $response = $this->processBasicRequest();
-
-    if ($response instanceof AphrontResponse) {
-      return $response;
-    }
-
-    $content[] = $response;
-
-
-    return $this->buildStandardPageResponse(
-      $content,
-      array(
-        'title' => 'Import Ldap Users',
-      ));
-  }
-
-  /**
-   * Displays a ldap login form, as we need to auth before we can search
-   */
-  private function processBasicRequest() {
-    $panels = array();
-
-    $request = $this->getRequest();
-
-    $admin = $request->getUser();
-
     $form = id(new AphrontFormView())
+      ->setAction($request->getRequestURI()
+        ->alter('search', 'true')->alter('import', null))
       ->setUser($admin)
       ->appendChild(
         id(new AphrontFormTextControl())
@@ -74,12 +43,12 @@ final class PhabricatorPeopleLdapController
       ->appendChild(
         id(new AphrontFormPasswordControl())
         ->setLabel('Password')
-        ->setName('password')) 
+        ->setName('password'))
       ->appendChild(
         id(new AphrontFormTextControl())
         ->setLabel('LDAP query')
+        ->setCaption('A filter such as (objectClass=*)')
         ->setName('query'))
-      ->setAction($request->getRequestURI()->alter('search', 'true')->alter('import', null))
       ->appendChild(
         id(new AphrontFormSubmitControl())
         ->setValue('Search'));
@@ -88,38 +57,41 @@ final class PhabricatorPeopleLdapController
     $panel->setHeader('Import Ldap Users');
     $panel->appendChild($form);
 
-    
-    if($request->getStr('import')) {
-      $panels[] = $this->processImportRequest($request);
-    }
-    
-    $panels[] = $panel;
 
-    if($request->getStr('search')) {
-      $panels[] = $this->processSearchRequest($request);
+    if ($request->getStr('import')) {
+      $content[] = $this->processImportRequest($request);
     }
 
-    return $panels;
+    $content[] = $panel;
 
+    if ($request->getStr('search')) {
+      $content[] = $this->processSearchRequest($request);
+    }
+
+    return $this->buildStandardPageResponse(
+      $content,
+      array(
+        'title' => 'Import Ldap Users',
+      ));
   }
 
   private function processImportRequest($request) {
     $admin = $request->getUser();
-    $usernames = $request->getArr('usernames'); 
-    $emails = $request->getArr('email'); 
-    $names = $request->getArr('name'); 
-    
+    $usernames = $request->getArr('usernames');
+    $emails = $request->getArr('email');
+    $names = $request->getArr('name');
+
     $panel = new AphrontErrorView();
     $panel->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
     $panel->setTitle("Import Successful");
-    $errors = array("Successfully imported users from ldap"); 
+    $errors = array("Successfully imported users from LDAP");
 
 
-    foreach($usernames as $username) {
+    foreach ($usernames as $username) {
       $user = new PhabricatorUser();
       $user->setUsername($username);
       $user->setRealname($names[$username]);
-      
+
       $email_obj = id(new PhabricatorUserEmail())
         ->setAddress($emails[$username])
         ->setIsVerified(1);
@@ -127,19 +99,19 @@ final class PhabricatorPeopleLdapController
         id(new PhabricatorUserEditor())
           ->setActor($admin)
           ->createNewUser($user, $email_obj);
-	
+
         $ldap_info = new PhabricatorUserLDAPInfo();
         $ldap_info->setLDAPUsername($username);
         $ldap_info->setUserID($user->getID());
         $ldap_info->save();
-        $errors[] = 'Succesfully added ' . $username;
+        $errors[] = 'Successfully added ' . $username;
       } catch (Exception $ex) {
         $errors[] = 'Failed to add ' . $username . ' ' . $ex->getMessage();
       }
-    }    
+    }
 
     $panel->setErrors($errors);
-    return $panel; 
+    return $panel;
 
   }
 
@@ -153,10 +125,10 @@ final class PhabricatorPeopleLdapController
     $search   = $request->getStr('query');
 
     try {
-      $ldapProvider = new PhabricatorLDAPProvider();
-      $ldapProvider->auth($username, $password);
-      $results = $ldapProvider->search($search);
-      foreach($results as $key => $result) {
+      $ldap_provider = new PhabricatorLDAPProvider();
+      $ldap_provider->auth($username, $password);
+      $results = $ldap_provider->search($search);
+      foreach ($results as $key => $result) {
         $results[$key][] = $this->renderUserInputs($result);
       }
 
@@ -172,7 +144,8 @@ final class PhabricatorPeopleLdapController
           '',
         ));
       $form->appendChild($table);
-      $form->setAction($request->getRequestURI()->alter('import', 'true')->alter('search', null))
+      $form->setAction($request->getRequestURI()
+        ->alter('import', 'true')->alter('search', null))
         ->appendChild(
           id(new AphrontFormSubmitControl())
           ->setValue('Import'));
@@ -188,15 +161,15 @@ final class PhabricatorPeopleLdapController
     return $panel;
 
   }
-   
+
   private function renderUserInputs($user) {
         $username = $user[0];
-	$inputs =  phutil_render_tag(
+        $inputs =  phutil_render_tag(
           'input',
           array(
             'type' => 'checkbox',
             'name' => 'usernames[]',
-            'value' =>$username, 
+            'value' =>$username,
           ),
           '');
 
@@ -205,16 +178,16 @@ final class PhabricatorPeopleLdapController
           array(
             'type' => 'hidden',
             'name' => "email[$username]",
-            'value' =>$user[1], 
+            'value' =>$user[1],
           ),
           '');
- 
+
 	$inputs .=  phutil_render_tag(
           'input',
           array(
             'type' => 'hidden',
             'name' => "name[$username]",
-            'value' =>$user[2], 
+            'value' =>$user[2],
           ),
           '');
 
