@@ -57,7 +57,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
     return $this;
   }
 
-  public function setMarkupEngine(PhutilMarkupEngine $engine) {
+  public function setMarkupEngine(PhabricatorMarkupEngine $engine) {
     $this->markupEngine = $engine;
     return $this;
   }
@@ -199,22 +199,12 @@ final class ManiphestTransactionDetailView extends ManiphestView {
     }
 
     if ($comment_transaction && $comment_transaction->hasComments()) {
-      $comments = $comment_transaction->getCache();
-      if (!strlen($comments)) {
-        $comments = $comment_transaction->getComments();
-        if (strlen($comments)) {
-          $comments = $this->markupEngine->markupText($comments);
-          $comment_transaction->setCache($comments);
-          if ($comment_transaction->getID() && !$this->preview) {
-            $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-            $comment_transaction->save();
-            unset($unguarded);
-          }
-        }
-      }
+      $comment_block = $this->markupEngine->getOutput(
+        $comment_transaction,
+        ManiphestTransaction::MARKUP_FIELD_BODY);
       $comment_block =
         '<div class="maniphest-transaction-comments phabricator-remarkup">'.
-          $comments.
+          $comment_block.
         '</div>';
     } else {
       $comment_block = null;

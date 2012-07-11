@@ -119,7 +119,9 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
     $transactions   = array();
     $transactions[] = $transaction;
 
-    $engine = PhabricatorMarkupEngine::newManiphestMarkupEngine();
+    $engine = new PhabricatorMarkupEngine();
+    $engine->addObject($transaction, ManiphestTransaction::MARKUP_FIELD_BODY);
+    $engine->process();
 
     $transaction_view = new ManiphestTransactionListView();
     $transaction_view->setTransactions($transactions);

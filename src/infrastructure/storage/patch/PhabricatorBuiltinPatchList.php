@@ -911,6 +911,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('markupcache.sql'),
       ),
+      'maniphestxcache.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('maniphestxcache.sql'),
+      ),
     );
   }
 

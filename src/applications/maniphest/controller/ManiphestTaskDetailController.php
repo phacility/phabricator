@@ -88,8 +88,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $handles = id(new PhabricatorObjectHandleData($phids))
       ->loadHandles();
 
-    $engine = PhabricatorMarkupEngine::newManiphestMarkupEngine();
-
     $dict = array();
     $dict['Status'] =
       '<strong>'.
@@ -305,9 +303,18 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $headsup_panel->setActionList($action_list);
     $headsup_panel->setProperties($dict);
 
+    $engine = new PhabricatorMarkupEngine();
+    $engine->addObject($task, ManiphestTask::MARKUP_FIELD_DESCRIPTION);
+    foreach ($transactions as $xaction) {
+      if ($xaction->hasComments()) {
+        $engine->addObject($xaction, ManiphestTransaction::MARKUP_FIELD_BODY);
+      }
+    }
+    $engine->process();
+
     $headsup_panel->appendChild(
       '<div class="phabricator-remarkup">'.
-        $engine->markupText($task->getDescription()).
+        $engine->getOutput($task, ManiphestTask::MARKUP_FIELD_DESCRIPTION).
       '</div>');
 
     $transaction_types = ManiphestTransactionType::getTransactionTypeMap();

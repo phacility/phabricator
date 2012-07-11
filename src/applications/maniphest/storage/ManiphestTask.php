@@ -19,7 +19,10 @@
 /**
  * @group maniphest
  */
-final class ManiphestTask extends ManiphestDAO {
+final class ManiphestTask extends ManiphestDAO
+  implements PhabricatorMarkupInterface {
+
+  const MARKUP_FIELD_DESCRIPTION = 'markup:desc';
 
   protected $phid;
   protected $authorPHID;
@@ -212,6 +215,54 @@ final class ManiphestTask extends ManiphestDAO {
         $table->getTableName(),
         implode(', ', $sql));
     }
+  }
+
+
+/* -(  Markup Interface  )--------------------------------------------------- */
+
+
+  /**
+   * @task markup
+   */
+  public function getMarkupFieldKey($field) {
+    $hash = PhabricatorHash::digest($this->getMarkupText($field));
+    $id = $this->getID();
+    return "maniphest:T{$id}:{$field}:{$hash}";
+  }
+
+
+  /**
+   * @task markup
+   */
+  public function getMarkupText($field) {
+    return $this->getDescription();
+  }
+
+
+  /**
+   * @task markup
+   */
+  public function newMarkupEngine($field) {
+    return PhabricatorMarkupEngine::newManiphestMarkupEngine();
+  }
+
+
+  /**
+   * @task markup
+   */
+  public function didMarkupText(
+    $field,
+    $output,
+    PhutilMarkupEngine $engine) {
+    return $output;
+  }
+
+
+  /**
+   * @task markup
+   */
+  public function shouldUseMarkupCache($field) {
+    return (bool)$this->getID();
   }
 
 }
