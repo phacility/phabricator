@@ -463,7 +463,11 @@ final class DiffusionBrowseFileController extends DiffusionController {
             ),
             phutil_escape_html(phutil_utf8_shorten($line['commit'], 9, '')));
 
-          $revision_id = idx($revision_ids, $commits[$commit]->getPHID());
+          $revision_id = null;
+          if (idx($commits, $commit)) {
+            $revision_id = idx($revision_ids, $commits[$commit]->getPHID());
+          }
+
           if ($revision_id) {
             $revision = idx($revisions, $revision_id);
             if (!$revision) {
