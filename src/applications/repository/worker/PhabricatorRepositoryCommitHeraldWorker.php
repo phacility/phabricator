@@ -130,6 +130,9 @@ final class PhabricatorRepositoryCommitHeraldWorker
         "  ".$reply_instructions."\n";
     }
 
+    $template = new PhabricatorMetaMTAMail();
+
+    $inline_patch_text = $this->buildPatch($template, $repository, $commit);
 
     $body = <<<EOBODY
 DESCRIPTION
@@ -149,7 +152,7 @@ MANAGE HERALD COMMIT RULES
 
 WHY DID I GET THIS EMAIL?
   {$why_uri}
-
+{$inline_patch_text}
 EOBODY;
 
     $prefix = PhabricatorEnv::getEnvConfig('metamta.diffusion.subject-prefix');
@@ -159,7 +162,6 @@ EOBODY;
       $commit);
     list($thread_id, $thread_topic) = $threading;
 
-    $template = new PhabricatorMetaMTAMail();
     $template->setRelatedPHID($commit->getPHID());
     $template->setSubject("{$commit_name}: {$name}");
     $template->setSubjectPrefix($prefix);
@@ -312,6 +314,101 @@ EOBODY;
       $publisher->setStoryAuthorPHID($author_phid);
     }
     $publisher->publish();
+  }
+
+  private function buildPatch(
+    PhabricatorMetaMTAMail $template,
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit) {
+
+    $attach_key = 'metamta.diffusion.attach-patches';
+    $inline_key = 'metamta.diffusion.inline-patches';
+
+    $attach_patches = PhabricatorEnv::getEnvConfig($attach_key);
+    $inline_patches = PhabricatorEnv::getEnvConfig($inline_key);
+
+    if (!$attach_patches && !$inline_patches) {
+      return;
+    }
+
+    $encoding = $repository->getDetail('encoding', 'utf-8');
+
+    $result = null;
+    $patch_error = null;
+
+    try {
+      $raw_patch = $this->loadRawPatchText($repository, $commit);
+      if ($attach_patches) {
+        $commit_name = $repository->formatCommitName(
+          $commit->getCommitIdentifier());
+
+        $template->addAttachment(
+          new PhabricatorMetaMTAAttachment(
+            $raw_patch,
+            $commit_name.'.patch',
+            'text/x-patch; charset='.$encoding));
+      }
+    } catch (Exception $ex) {
+      phlog($ex);
+      $patch_error = 'Unable to generate: '.$ex->getMessage();
+    }
+
+    if ($patch_error) {
+      $result = $patch_error;
+    } else if ($inline_patches) {
+      $len = substr_count($raw_patch, "\n");
+      if ($len <= $inline_patches) {
+        // We send email as utf8, so we need to convert the text to utf8 if
+        // we can.
+        if (strtolower($encoding) != 'utf-8' &&
+            function_exists('mb_convert_encoding')) {
+          $raw_patch = mb_convert_encoding($raw_patch, 'utf-8', $encoding);
+        }
+        $result = phutil_utf8ize($raw_patch);
+      }
+    }
+
+    if ($result) {
+      $result = "\nPATCH\n\n{$result}\n";
+    }
+
+    return $result;
+  }
+
+  private function loadRawPatchText(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit) {
+
+    $drequest = DiffusionRequest::newFromDictionary(
+      array(
+        'repository'  => $repository,
+        'commit'      => $commit->getCommitIdentifier(),
+      ));
+
+    $raw_query = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest);
+    $raw_query->setLinesOfContext(3);
+
+    $time_key = 'metamta.diffusion.time-limit';
+    $byte_key = 'metamta.diffusion.byte-limit';
+    $time_limit = PhabricatorEnv::getEnvConfig($time_key);
+    $byte_limit = PhabricatorEnv::getEnvConfig($byte_key);
+
+    if ($time_limit) {
+      $raw_query->setTimeout($time_limit);
+    }
+
+    $raw_diff = $raw_query->loadRawDiff();
+
+    $size = strlen($raw_diff);
+    if ($byte_limit && $size > $byte_limit) {
+      $pretty_size = phabricator_format_bytes($size);
+      $pretty_limit = phabricator_format_bytes($byte_limit);
+      throw new Exception(
+        "Patch size of {$pretty_size} exceeds configured byte size limit of ".
+        "{$pretty_limit}.");
+    }
+
+    return $raw_diff;
   }
 
 }

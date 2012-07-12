@@ -396,6 +396,26 @@ return array(
   // affects Diffusion.
   'metamta.diffusion.reply-handler' => 'PhabricatorAuditReplyHandler',
 
+  // Set this to true if you want patches to be attached to commit notifications
+  // from Diffusion. This won't work with SendGrid.
+  'metamta.diffusion.attach-patches' => false,
+
+  // To include patches in Diffusion email bodies, set this to a positive
+  // integer. Patches will be inlined if they are at most that many lines.
+  // By default, patches are not inlined.
+  'metamta.diffusion.inline-patches' => 0,
+
+  // If you've enabled attached patches or inline patches for commit emails, you
+  // can establish a hard byte limit on their size. You should generally set
+  // reasonable byte and time limits (defaults are 1MB and 60 seconds) to avoid
+  // sending ridiculously enormous email for changes like "importing an external
+  // library" or "accidentally committed this full-length movie as text".
+  'metamta.diffusion.byte-limit'     => 1024 * 1024,
+
+  // If you've enabled attached patches or inline patches for commit emails, you
+  // can establish a hard time limit on generating them.
+  'metamta.diffusion.time-limit'     => 60,
+
   // Prefix prepended to mail sent by Package.
   'metamta.package.subject-prefix' => '[Package]',
 
