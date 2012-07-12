@@ -27,12 +27,53 @@ Then, configure:
     `php`, `arc`, or (for example) `git` from the command line, they should all
     do something.
   - Your EDITOR environmental variable should point at some valid CLI editor,
-    like the Git Bash `vim`. (Under `cmd.exe`, you need to point to the actual
-    `vim.exe`, not just the `bin/vim` symlink which runs it under Git Bash
-    since `cmd.exe` does not know how to run the symlink.)
+    like the Git Bash `vim`. You can set this in `arc` if you prefer.
+    See below for details.
 
 You can set environmental variables somewhere in the `Advanced` tab of the
 `System` control panel.
 
 Now you should be able to run `arc` normally (either from `cmd.exe` or
 Git Bash) and it should work more-or-less properly.
+
+= Configuring an Editor =
+
+NOTE: You **can not** use Notepad as your editor, because it does not have a
+blocking mode. You can use GitPad instead.
+
+Some arc workflows prompt you to edit large blocks of text using a text editor.
+You can configure various programs for this purpose, depending on which text
+editor you prefer. Some editors that will work are:
+
+  - [[ http://notepad-plus-plus.org/ | Notepad++ ]], a good all-around editor.
+  - **vim**, which comes with Git Bash.
+  - [[ https://github.com/github/gitpad | GitPad ]], which allows you to use
+    Notepad as your editor.
+
+Other editors may also work, but they must have a blocking edit mode.
+
+To configure an editor, either set the `EDITOR` environmental variable to point
+at it, or run:
+
+  $ arc set-config editor "\"C:\path\to\some\editor.exe\""
+
+NOTE: Note the use of quotes. Paths with spaces in them must be quoted, and
+these quotes must be escaped when passed to `arc set-config`, as in the examples
+below.
+
+Specifically, you can use this command for **Notepad++** (adjusting the path for
+your machine):
+
+  name=Notepad++
+  $ arc set-config editor "\"C:\Program Files (x86)\Notepad++\notepad++.exe\" -multiInst -nosession"
+
+And this command for Vim (you may need to adjust the path):
+
+  name=vim
+  $ arc set-config editor "\"C:\Program Files (x86)\Git\share\vim\vim73\vim.exe\""
+
+And this for GitPad (you may need to adjust the path):
+
+  name=GitPad
+  $ arc set-config editor "\"C:\Users\yourusername\AppData\Roaming\GitPad\GitPad.exe\""
+
