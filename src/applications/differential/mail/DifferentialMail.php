@@ -124,7 +124,6 @@ abstract class DifferentialMail {
           '<'.implode('>, <', $reviewer_phids).'>');
       }
 
-      $cc_phids = $revision->getCCPHIDs();
       if ($cc_phids) {
         $template->addPHIDHeaders('X-Differential-CC', $cc_phids);
         $template->addHeader(
