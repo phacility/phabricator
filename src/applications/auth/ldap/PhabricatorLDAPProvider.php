@@ -111,10 +111,17 @@ final class PhabricatorLDAPProvider {
       throw new Exception('Username and/or password can not be empty');
     }
 
-    $result = ldap_bind($this->getConnection(),
-              $this->getSearchAttribute() . '=' . $username . ',' .
-              $this->getBaseDN(),
-              $password);
+    $activeDirectoryDomain =
+      PhabricatorEnv::getEnvConfig('ldap.activedirectory_domain');
+
+    if ($activeDirectoryDomain) {
+      $dn = $username . '@' . $activeDirectoryDomain;
+    } else {
+      $dn = $this->getSearchAttribute() . '=' . $username . ',' .
+            $this->getBaseDN();
+    }
+
+    $result = ldap_bind($this->getConnection(), $dn, $password);
 
     if (!$result) {
       throw new Exception('Bad username/password.');
@@ -176,6 +183,7 @@ final class PhabricatorLDAPProvider {
     for($i = 0; $i < $entries['count']; $i++) {
       $row = array();
       $entry = $entries[$i];
+
       // Get username, email and realname 
       $username = $entry[$this->getSearchAttribute()][0];
       if(empty($username)) {

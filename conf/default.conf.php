@@ -624,6 +624,10 @@ return array(
   // the array will be joined
   'ldap.real_name_attributes' => array(),
 
+  // A domain name to use when authenticating against Active Directory
+  // (e.g. 'example.com')
+  'ldap.activedirectory_domain' => '',
+
   // The LDAP version
   'ldap.version' => 3,
 
