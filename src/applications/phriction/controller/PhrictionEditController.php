@@ -103,10 +103,12 @@ final class PhrictionEditController
     require_celerity_resource('phriction-document-css');
 
     $e_title = true;
+    $notes = null;
     $errors = array();
 
     if ($request->isFormPost()) {
       $title = $request->getStr('title');
+      $notes = $request->getStr('description');
 
       if (!strlen($title)) {
         $e_title = 'Required';
@@ -115,12 +117,27 @@ final class PhrictionEditController
         $e_title = null;
       }
 
+      if ($document->getID()) {
+        if ($content->getTitle() == $title &&
+            $content->getContent() == $request->getStr('content')) {
+
+          $dialog = new AphrontDialogView();
+          $dialog->setUser($user);
+          $dialog->setTitle('No Edits');
+          $dialog->appendChild(
+            '<p>You did not make any changes to the document.</p>');
+          $dialog->addCancelButton($request->getRequestURI());
+
+          return id(new AphrontDialogResponse())->setDialog($dialog);
+        }
+      }
+
       if (!count($errors)) {
         $editor = id(PhrictionDocumentEditor::newForSlug($document->getSlug()))
           ->setUser($user)
           ->setTitle($title)
           ->setContent($request->getStr('content'))
-          ->setDescription($request->getStr('description'));
+          ->setDescription($notes);
 
         $editor->save();
 
@@ -195,6 +212,7 @@ final class PhrictionEditController
 
     $form = id(new AphrontFormView())
       ->setUser($user)
+      ->setWorkflow(true)
       ->setAction($request->getRequestURI()->getPath())
       ->addHiddenInput('slug', $document->getSlug())
       ->addHiddenInput('nodraft', $request->getBool('nodraft'))
@@ -220,7 +238,7 @@ final class PhrictionEditController
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Edit Notes')
-          ->setValue($content->getDescription())
+          ->setValue($notes)
           ->setError(null)
           ->setName('description'))
       ->appendChild(
