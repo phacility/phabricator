@@ -323,6 +323,11 @@ final class PhabricatorStandardPageView extends AphrontPageView {
     $version = PhabricatorEnv::getEnvConfig('phabricator.version');
     $foot_links[] = phutil_escape_html('Phabricator '.$version);
 
+    $foot_links[] =
+      '<a href="https://secure.phabricator.com/maniphest/task/create/">'.
+        'Report a Bug'.
+      '</a>';
+
     if (PhabricatorEnv::getEnvConfig('darkconsole.enabled') &&
        !PhabricatorEnv::getEnvConfig('darkconsole.always-on')) {
       if ($console) {
