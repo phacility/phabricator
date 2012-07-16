@@ -22,7 +22,7 @@
 final class PhabricatorRemarkupRuleImageMacro
   extends PhutilRemarkupRule {
 
-  private $images = array();
+  private $images;
 
   public function apply($text) {
     return preg_replace_callback(
