@@ -21,6 +21,7 @@ final class DiffusionCommitController extends DiffusionController {
   const CHANGES_LIMIT = 100;
 
   private $auditAuthorityPHIDs;
+  private $highlightedAudits;
 
   public function willProcessRequest(array $data) {
     // This controller doesn't use blob/path stuff, just pass the dictionary
@@ -119,9 +120,23 @@ final class DiffusionCommitController extends DiffusionController {
       $changes = array_slice($changes, 0, self::CHANGES_LIMIT);
     }
 
+    $owners_paths = array();
+    if ($this->highlightedAudits) {
+      $packages = id(new PhabricatorOwnersPackage())->loadAllWhere(
+        'phid IN (%Ls)',
+        mpull($this->highlightedAudits, 'getAuditorPHID'));
+      if ($packages) {
+        $owners_paths = id(new PhabricatorOwnersPath())->loadAllWhere(
+          'repositoryPHID = %s AND packageID IN (%Ld)',
+          $repository->getPHID(),
+          mpull($packages, 'getID'));
+      }
+    }
+
     $change_table = new DiffusionCommitChangeTableView();
     $change_table->setDiffusionRequest($drequest);
     $change_table->setPathChanges($changes);
+    $change_table->setOwnersPaths($owners_paths);
 
     $count = count($changes);
 
@@ -404,6 +419,7 @@ final class DiffusionCommitController extends DiffusionController {
     $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
     $view->setHandles($handles);
     $view->setAuthorityPHIDs($this->auditAuthorityPHIDs);
+    $this->highlightedAudits = $view->getHighlightedAudits();
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Audits');
