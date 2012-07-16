@@ -442,8 +442,8 @@ abstract class LiskDAO {
    * @task   load
    */
   public function load($id) {
-    if (!($id = (int)$id)) {
-      throw new Exception("Bogus ID provided to load().");
+    if (!$id || (!is_int($id) && !ctype_digit($id))) {
+      return null;
     }
 
     return $this->loadOneWhere(
