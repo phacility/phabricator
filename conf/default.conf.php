@@ -1177,6 +1177,7 @@ return array(
     // '@\\.([^.]+)\\.bak$@' => 1,
 
     '@\.arcconfig$@' => 'js',
+    '@\.divinerconfig$@' => 'js',
   ),
 
   // Set the default monospaced font style for users who haven't set a custom
