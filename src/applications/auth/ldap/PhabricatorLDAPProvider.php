@@ -53,7 +53,7 @@ final class PhabricatorLDAPProvider {
   public function retrieveUserEmail() {
     return $this->userData['mail'][0];
   }
-  
+
   public function retrieveUserRealName() {
     return $this->retrieveUserRealNameFromData($this->userData);
   }
@@ -106,9 +106,9 @@ final class PhabricatorLDAPProvider {
     return $this->userData;
   }
 
-  public function auth($username, $password) {
-    if (strlen(trim($username)) == 0 || strlen(trim($password)) == 0) {
-      throw new Exception('Username and/or password can not be empty');
+  public function auth($username, PhutilOpaqueEnvelope $password) {
+    if (strlen(trim($username)) == 0) {
+      throw new Exception('Username can not be empty');
     }
 
     $activeDirectoryDomain =
@@ -121,10 +121,17 @@ final class PhabricatorLDAPProvider {
             $this->getBaseDN();
     }
 
-    $result = ldap_bind($this->getConnection(), $dn, $password);
+    $conn = $this->getConnection();
+
+    // NOTE: It is very important we suppress any messages that occur here,
+    // because it logs passwords if it reaches an error log of any sort.
+    DarkConsoleErrorLogPluginAPI::enableDiscardMode();
+    $result = @ldap_bind($conn, $dn, $password->openEnvelope());
+    DarkConsoleErrorLogPluginAPI::disableDiscardMode();
 
     if (!$result) {
-      throw new Exception('Bad username/password.');
+      throw new Exception(
+        "LDAP Error #".ldap_errno($conn).": ".ldap_error($conn));
     }
 
     $this->userData = $this->getUser($username);
@@ -184,14 +191,14 @@ final class PhabricatorLDAPProvider {
       $row = array();
       $entry = $entries[$i];
 
-      // Get username, email and realname 
+      // Get username, email and realname
       $username = $entry[$this->getSearchAttribute()][0];
       if(empty($username)) {
         continue;
       }
       $row[] = $username;
       $row[] = $entry['mail'][0];
-      $row[] = $this->retrieveUserRealNameFromData($entry);      
+      $row[] = $this->retrieveUserRealNameFromData($entry);
 
 
       $rows[] = $row;

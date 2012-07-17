@@ -37,9 +37,8 @@ final class PhabricatorLDAPLoginController extends PhabricatorAuthController {
 
     if ($request->isFormPost()) {
       try {
-        $this->provider->auth($request->getStr('username'),
-          $request->getStr('password'));
-
+        $envelope = new PhutilOpaqueEnvelope($request->getStr('password'));
+        $this->provider->auth($request->getStr('username'), $envelope);
       } catch (Exception $e) {
         $errors[] = $e->getMessage();
       }

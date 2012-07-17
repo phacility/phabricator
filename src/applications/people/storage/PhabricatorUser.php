@@ -74,18 +74,18 @@ final class PhabricatorUser extends PhabricatorUserDAO implements PhutilPerson {
       PhabricatorPHIDConstants::PHID_TYPE_USER);
   }
 
-  public function setPassword($password) {
+  public function setPassword(PhutilOpaqueEnvelope $envelope) {
     if (!$this->getPHID()) {
       throw new Exception(
         "You can not set a password for an unsaved user because their PHID ".
         "is a salt component in the password hash.");
     }
 
-    if (!strlen($password)) {
+    if (!strlen($envelope->openEnvelope())) {
       $this->setPasswordHash('');
     } else {
       $this->setPasswordSalt(md5(mt_rand()));
-      $hash = $this->hashPassword($password);
+      $hash = $this->hashPassword($envelope);
       $this->setPasswordHash($hash);
     }
     return $this;
@@ -129,26 +129,26 @@ final class PhabricatorUser extends PhabricatorUserDAO implements PhutilPerson {
     return Filesystem::readRandomCharacters(255);
   }
 
-  public function comparePassword($password) {
-    if (!strlen($password)) {
+  public function comparePassword(PhutilOpaqueEnvelope $envelope) {
+    if (!strlen($envelope->openEnvelope())) {
       return false;
     }
     if (!strlen($this->getPasswordHash())) {
       return false;
     }
-    $password = $this->hashPassword($password);
-    return ($password === $this->getPasswordHash());
+    $password_hash = $this->hashPassword($envelope);
+    return ($password_hash === $this->getPasswordHash());
   }
 
-  private function hashPassword($password) {
-    $password = $this->getUsername().
-                $password.
-                $this->getPHID().
-                $this->getPasswordSalt();
+  private function hashPassword(PhutilOpaqueEnvelope $envelope) {
+    $hash = $this->getUsername().
+            $envelope->openEnvelope().
+            $this->getPHID().
+            $this->getPasswordSalt();
     for ($ii = 0; $ii < 1000; $ii++) {
-      $password = md5($password);
+      $hash = md5($hash);
     }
-    return $password;
+    return $hash;
   }
 
   const CSRF_CYCLE_FREQUENCY  = 3600;
