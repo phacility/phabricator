@@ -103,8 +103,8 @@ final class DarkConsoleXHProfPlugin extends DarkConsolePlugin {
 
 
   public function willShutdown() {
-    if (isset($_REQUEST['__profile__']) &&
-        $_REQUEST['__profile__'] != 'all') {
+    if (DarkConsoleXHProfPluginAPI::isProfilerRequested() &&
+        (DarkConsoleXHProfPluginAPI::isProfilerRequested() !== 'all')) {
       $this->xhprofID = DarkConsoleXHProfPluginAPI::stopProfiler();
     }
   }

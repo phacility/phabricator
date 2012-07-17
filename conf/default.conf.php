@@ -1199,4 +1199,21 @@ return array(
   'style.monospace' => '10px "Menlo", "Consolas", "Monaco", monospace',
 
 
+// -- Debugging ------------------------------------------------------------- //
+
+  // Enable this to change HTTP redirects into normal pages with a link to the
+  // redirection target. For example, after you submit a form you'll get a page
+  // saying "normally, you'd be redirected...". This is useful to examine
+  // service or profiler information on write pathways, or debug redirects. It
+  // also makes the UX horrible for normal use, so you should enable it only
+  // when debugging.
+  //
+  // NOTE: This does not currently work for forms with Javascript "workflow",
+  // since the redirect happens in Javascript.
+  'debug.stop-on-redirect'    => false,
+
+  // Enable this to always profile every page. This is very slow! You should
+  // only enable it when debugging.
+  'debug.profile-every-request'  => false,
+
 );

@@ -220,8 +220,8 @@ $headers = array_merge($headers, $response->getHeaders());
 $sink->writeHeaders($headers);
 
 // TODO: This shouldn't be possible in a production-configured environment.
-if (isset($_REQUEST['__profile__']) &&
-    ($_REQUEST['__profile__'] == 'all')) {
+if (DarkConsoleXHProfPluginAPI::isProfilerRequested() &&
+    DarkConsoleXHProfPluginAPI::isProfilerRequested() === 'all') {
   $profile = DarkConsoleXHProfPluginAPI::stopProfiler();
   $profile =
     '<div style="text-align: center; background: #ff00ff; padding: 1em;
