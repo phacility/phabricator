@@ -111,49 +111,29 @@ final class PhabricatorRepositoryCommitHeraldWorker
 
     $files = $adapter->loadAffectedPaths();
     sort($files);
-    $files = implode("\n  ", $files);
+    $files = implode("\n", $files);
 
     $xscript_id = $xscript->getID();
 
-    $manage_uri = PhabricatorEnv::getProductionURI('/herald/view/commits/');
-    $why_uri = PhabricatorEnv::getProductionURI(
-      '/herald/transcript/'.$xscript_id.'/');
+    $manage_uri = '/herald/view/commits/';
+    $why_uri = '/herald/transcript/'.$xscript_id.'/';
 
     $reply_handler = PhabricatorAuditCommentEditor::newReplyHandlerForCommit(
       $commit);
-
-    $reply_instructions = $reply_handler->getReplyHandlerInstructions();
-    if ($reply_instructions) {
-      $reply_instructions =
-        "\n".
-        "REPLY HANDLER ACTIONS\n".
-        "  ".$reply_instructions."\n";
-    }
 
     $template = new PhabricatorMetaMTAMail();
 
     $inline_patch_text = $this->buildPatch($template, $repository, $commit);
 
-    $body = <<<EOBODY
-DESCRIPTION
-{$description}
-
-DETAILS
-  {$commit_uri}
-
-DIFFERENTIAL REVISION
-  {$differential}
-
-AFFECTED FILES
-  {$files}
-{$reply_instructions}
-MANAGE HERALD COMMIT RULES
-  {$manage_uri}
-
-WHY DID I GET THIS EMAIL?
-  {$why_uri}
-{$inline_patch_text}
-EOBODY;
+    $body = new PhabricatorMetaMTAMailBody();
+    $body->addRawSection($description);
+    $body->addTextSection(pht('DETAILS'), $commit_uri);
+    $body->addTextSection(pht('DIFFERENTIAL REVISION'), $differential);
+    $body->addTextSection(pht('AFFECTED FILES'), $files);
+    $body->addReplySection($reply_handler->getReplyHandlerInstructions());
+    $body->addHeraldSection($manage_uri, $why_uri);
+    $body->addRawSection($inline_patch_text);
+    $body = $body->render();
 
     $prefix = PhabricatorEnv::getEnvConfig('metamta.diffusion.subject-prefix');
 
@@ -369,7 +349,7 @@ EOBODY;
     }
 
     if ($result) {
-      $result = "\nPATCH\n\n{$result}\n";
+      $result = "PATCH\n\n{$result}\n";
     }
 
     return $result;
