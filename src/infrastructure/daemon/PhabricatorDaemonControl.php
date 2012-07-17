@@ -41,9 +41,10 @@ final class PhabricatorDaemonControl {
 
     if (!$daemons) {
       echo "There are no running Phabricator daemons.\n";
-      return 0;
+      return 1;
     }
 
+    $status = 0;
     printf(
       "%-5s\t%-24s\t%s\n",
       "PID",
@@ -52,6 +53,7 @@ final class PhabricatorDaemonControl {
     foreach ($daemons as $daemon) {
       $name = $daemon->getName();
       if (!$daemon->isRunning()) {
+        $status = 2;
         $name = '<DEAD> '.$name;
         if ($daemon->getPIDFile()) {
           Filesystem::remove($daemon->getPIDFile());
@@ -66,7 +68,7 @@ final class PhabricatorDaemonControl {
         $name);
     }
 
-    return 0;
+    return $status;
   }
 
   public function executeStopCommand($pids = null) {
