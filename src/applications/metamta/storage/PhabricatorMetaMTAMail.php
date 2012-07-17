@@ -606,16 +606,22 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       }
 
 
+      $empty_to =
+        PhabricatorEnv::getEnvConfig('metamta.placeholder-to-recipient');
+      if ($empty_to !== null && !$add_to) {
+        $mailer->addTos(array($empty_to));
+      }
       if ($add_to) {
         $mailer->addTos($add_to);
-        if ($add_cc) {
+      }
+      if ($add_cc) {
+        if ($empty_to !== null) {
           $mailer->addCCs($add_cc);
+        } else {
+          $mailer->addTos($add_cc);
         }
-      } else if ($add_cc) {
-        // If we have CC addresses but no "to" address, promote the CCs to
-        // "to".
-        $mailer->addTos($add_cc);
-      } else {
+      }
+      if (!$add_to && !$add_cc) {
         $this->setStatus(self::STATUS_VOID);
         $this->setMessage(
           "Message has no valid recipients: all To/CC are disabled or ".

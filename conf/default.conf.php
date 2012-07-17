@@ -266,6 +266,12 @@ return array(
   // sometimes referred to as "multiplexing".
   'metamta.one-mail-per-recipient'  => true,
 
+  // When sending a message that has no To recipient (i.e. all recipients
+  // are CC'd, for example when multiplexing mail), set the To field to the
+  // following value. If no value is set, messages with no To will have
+  // their CCs upgraded to To.
+  'metamta.placeholder-to-recipient' => null,
+
   // When a user takes an action which generates an email notification (like
   // commenting on a Differential revision), Phabricator can either send that
   // mail "From" the user's email address (like "alincoln@logcabin.com") or
