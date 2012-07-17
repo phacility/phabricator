@@ -78,12 +78,16 @@ abstract class PhabricatorMailReplyHandler {
     assert_instances_of($cc_handles, 'PhabricatorObjectHandle');
 
     $body = '';
-    if ($to_handles) {
-      $body .= "To: ".implode(', ', mpull($to_handles, 'getName'))."\n";
+
+    if (PhabricatorEnv::getEnvConfig('metamta.recipients.show-hints')) {
+      if ($to_handles) {
+        $body .= "To: ".implode(', ', mpull($to_handles, 'getName'))."\n";
+      }
+      if ($cc_handles) {
+        $body .= "Cc: ".implode(', ', mpull($cc_handles, 'getName'))."\n";
+      }
     }
-    if ($cc_handles) {
-      $body .= "Cc: ".implode(', ', mpull($cc_handles, 'getName'))."\n";
-    }
+
     return $body;
   }
 

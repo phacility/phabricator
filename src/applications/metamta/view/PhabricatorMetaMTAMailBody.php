@@ -72,12 +72,17 @@ final class PhabricatorMetaMTAMailBody {
    * @task compose
    */
   public function addHeraldSection($rules_uri, $xscript_uri) {
+    if (!PhabricatorEnv::getEnvConfig('metamta.herald.show-hints')) {
+      return $this;
+    }
+
     $this->addTextSection(
       pht('MANAGE HERALD RULES'),
       PhabricatorEnv::getProductionURI($rules_uri));
     $this->addTextSection(
       pht('WHY DID I GET THIS EMAIL?'),
       PhabricatorEnv::getProductionURI($xscript_uri));
+
     return $this;
   }
 
@@ -90,9 +95,15 @@ final class PhabricatorMetaMTAMailBody {
    * @task compose
    */
   public function addReplySection($instructions) {
-    if (strlen($instructions)) {
-      $this->addTextSection(pht('REPLY HANDLER ACTIONS'), $instructions);
+    if (!PhabricatorEnv::getEnvConfig('metamta.reply.show-hints')) {
+      return $this;
     }
+    if (!strlen($instructions)) {
+      return $this;
+    }
+
+    $this->addTextSection(pht('REPLY HANDLER ACTIONS'), $instructions);
+
     return $this;
   }
 

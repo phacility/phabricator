@@ -466,6 +466,20 @@ return array(
   // address will be stored in an 'From Email' field on the task.
   'metamta.maniphest.default-public-author' => null,
 
+  // You can disable the Herald hints in email if users prefer smaller messages.
+  // These are the links under the headers "MANAGE HERALD RULES" and
+  // "WHY DID I GET THIS EMAIL?". If you set this to true, they will not appear
+  // in any mail. Users can still navigate to the links via the web interface.
+  'metamta.herald.show-hints' => true,
+
+  // You can disable the hints under "REPLY HANDLER ACTIONS" if users prefer
+  // smaller messages. The actions themselves will still work properly.
+  'metamta.reply.show-hints' => true,
+
+  // You can disable the "To:" and "Cc:" footers in mail if users prefer
+  // smaller messages.
+  'metamta.recipients.show-hints' => true,
+
   // If this option is enabled, Phabricator will add a "Precedence: bulk"
   // header to transactional mail (e.g., Differential, Maniphest and Herald
   // notifications). This may improve the behavior of some auto-responder

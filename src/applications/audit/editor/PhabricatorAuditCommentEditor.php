@@ -486,12 +486,9 @@ final class PhabricatorAuditCommentEditor {
     $verb = PhabricatorAuditActionConstants::getActionPastTenseVerb(
       $comment->getAction());
 
-    $body = array();
-    $body[] = "{$name} {$verb} commit {$cname}.";
-
-    if ($comment->getContent()) {
-      $body[] = $comment->getContent();
-    }
+    $body = new PhabricatorMetaMTAMailBody();
+    $body->addRawSection("{$name} {$verb} commit {$cname}.");
+    $body->addRawSection($comment->getContent());
 
     if ($inline_comments) {
       $block = array();
@@ -518,18 +515,16 @@ final class PhabricatorAuditCommentEditor {
         $content = $inline->getContent();
         $block[] = "{$path}:{$range} {$content}";
       }
-      $body[] = "INLINE COMMENTS\n  ".implode("\n  ", $block);
+
+      $body->addTextSection(pht('INLINE COMMENTS'), implode("\n", $block));
     }
 
-    $body[] = "COMMIT\n  ".PhabricatorEnv::getProductionURI($handle->getURI());
+    $body->addTextSection(
+      pht('COMMIT'),
+      PhabricatorEnv::getProductionURI($handle->getURI()));
+    $body->addReplySection($reply_handler->getReplyHandlerInstructions());
 
-
-    $reply_instructions = $reply_handler->getReplyHandlerInstructions();
-    if ($reply_instructions) {
-      $body[] = "REPLY HANDLER ACTIONS\n  ".$reply_instructions;
-    }
-
-    return implode("\n\n", $body)."\n";
+    return $body->render();
   }
 
 }
