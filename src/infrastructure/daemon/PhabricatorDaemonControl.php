@@ -55,9 +55,6 @@ final class PhabricatorDaemonControl {
       if (!$daemon->isRunning()) {
         $status = 2;
         $name = '<DEAD> '.$name;
-        if ($daemon->getPIDFile()) {
-          Filesystem::remove($daemon->getPIDFile());
-        }
       }
       printf(
         "%5s\t%-24s\t%s\n",
