@@ -54,7 +54,7 @@ final class PhabricatorPeopleLdapController
         ->setValue('Search'));
 
     $panel = new AphrontPanelView();
-    $panel->setHeader('Import Ldap Users');
+    $panel->setHeader('Import LDAP Users');
     $panel->appendChild($form);
 
 
@@ -126,7 +126,8 @@ final class PhabricatorPeopleLdapController
 
     try {
       $ldap_provider = new PhabricatorLDAPProvider();
-      $ldap_provider->auth($username, $password);
+      $envelope = new PhutilOpaqueEnvelope($password);
+      $ldap_provider->auth($username, $envelope);
       $results = $ldap_provider->search($search);
       foreach ($results as $key => $result) {
         $results[$key][] = $this->renderUserInputs($result);
@@ -141,7 +142,7 @@ final class PhabricatorPeopleLdapController
           'Username',
           'Email',
           'RealName',
-          '',
+          'Import?',
         ));
       $form->appendChild($table);
       $form->setAction($request->getRequestURI()
@@ -163,35 +164,35 @@ final class PhabricatorPeopleLdapController
   }
 
   private function renderUserInputs($user) {
-        $username = $user[0];
-        $inputs =  phutil_render_tag(
-          'input',
-          array(
-            'type' => 'checkbox',
-            'name' => 'usernames[]',
-            'value' =>$username,
-          ),
-          '');
+    $username = $user[0];
+    $inputs =  phutil_render_tag(
+      'input',
+      array(
+        'type' => 'checkbox',
+        'name' => 'usernames[]',
+        'value' =>$username,
+      ),
+      '');
 
-	$inputs .=  phutil_render_tag(
-          'input',
-          array(
-            'type' => 'hidden',
-            'name' => "email[$username]",
-            'value' =>$user[1],
-          ),
-          '');
+    $inputs .=  phutil_render_tag(
+      'input',
+      array(
+        'type' => 'hidden',
+        'name' => "email[$username]",
+        'value' =>$user[1],
+      ),
+      '');
 
-	$inputs .=  phutil_render_tag(
-          'input',
-          array(
-            'type' => 'hidden',
-            'name' => "name[$username]",
-            'value' =>$user[2],
-          ),
-          '');
+    $inputs .=  phutil_render_tag(
+      'input',
+      array(
+        'type' => 'hidden',
+        'name' => "name[$username]",
+        'value' =>$user[2],
+      ),
+      '');
 
-        return $inputs;
-
+    return $inputs;
   }
+
 }

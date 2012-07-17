@@ -117,8 +117,11 @@ final class PhabricatorLDAPProvider {
     if ($activeDirectoryDomain) {
       $dn = $username . '@' . $activeDirectoryDomain;
     } else {
-      $dn = $this->getSearchAttribute() . '=' . $username . ',' .
-            $this->getBaseDN();
+      $dn = ldap_sprintf(
+        '%Q=%s,%Q',
+        $this->getSearchAttribute(),
+        $username,
+        $this->getBaseDN());
     }
 
     $conn = $this->getConnection();
@@ -139,15 +142,21 @@ final class PhabricatorLDAPProvider {
   }
 
   private function getUser($username) {
-    $result = ldap_search($this->getConnection(), $this->getBaseDN(),
-              $this->getSearchAttribute() . '=' . $username);
+    $conn = $this->getConnection();
+
+    $query = ldap_sprintf(
+      '%Q=%S',
+      $this->getSearchAttribute(),
+      $username);
+
+    $result = ldap_search($conn, $this->getBaseDN(), $query);
 
     if (!$result) {
       throw new Exception('Search failed. Please check your LDAP and HTTP '.
         'logs for more information.');
     }
 
-    $entries = ldap_get_entries($this->getConnection(), $result);
+    $entries = ldap_get_entries($conn, $result);
 
     if ($entries === false) {
       throw new Exception('Could not get entries');
