@@ -173,7 +173,8 @@ final class PhabricatorDaemonControl {
             List available daemons.
 
         **status**
-            List running daemons.
+            List running daemons. This command will exit with a non-zero exit
+            status if any daemons are not running.
 
         **help**
             Show this help.
