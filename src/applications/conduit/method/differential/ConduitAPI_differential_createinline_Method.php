@@ -20,7 +20,7 @@
  * @group conduit
  */
 final class ConduitAPI_differential_createinline_Method
-  extends ConduitAPIMethod {
+  extends ConduitAPI_differential_Method {
 
   public function getMethodDescription() {
     return "Add an inline comment to a Differential revision.";
@@ -32,9 +32,9 @@ final class ConduitAPI_differential_createinline_Method
       'diffID'     => 'optional diffid',
       'filePath'   => 'required string',
       'isNewFile'  => 'required bool',
-      'lineStart'  => 'required int',
-      'lineCount'  => 'optional int',
-      'message'    => 'required string',
+      'lineNumber' => 'required int',
+      'lineLength' => 'optional int',
+      'content'    => 'required string',
     );
   }
 
@@ -106,25 +106,16 @@ final class ConduitAPI_differential_createinline_Method
       ->setRevisionID($rid)
       ->setChangesetID($cid)
       ->setAuthorPHID($request->getUser()->getPHID())
-      ->setContent($request->getValue('message'))
+      ->setContent($request->getValue('content'))
       ->setIsNewFile($request->getValue('isNewFile'))
-      ->setLineNumber($request->getValue('lineStart'))
-      ->setLineLength($request->getValue('lineCount', 0))
+      ->setLineNumber($request->getValue('lineNumber'))
+      ->setLineLength($request->getValue('lineLength', 0))
       ->save();
 
     // Load everything again, just to be safe.
     $changeset = id(new DifferentialChangeset())
       ->load($inline->getChangesetID());
-    return array(
-      'filePath' => ($inline->getIsNewFile() ?
-        $changeset->getFilename() :
-        $changeset->getOldFile()),
-      'isNewFile' => $inline->getIsNewFile(),
-      'lineNumber' => $inline->getLineNumber(),
-      'lineLength' => $inline->getLineLength(),
-      'diffID' => $changeset->getDiffID(),
-      'content' => $inline->getContent(),
-    );
+    return $this->buildInlineInfoDictionary($inline, $changeset);
   }
 
 }
