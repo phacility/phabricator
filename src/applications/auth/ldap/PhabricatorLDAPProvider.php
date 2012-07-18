@@ -49,6 +49,10 @@ final class PhabricatorLDAPProvider {
   public function getLDAPVersion() {
     return PhabricatorEnv::getEnvConfig('ldap.version');
   }
+  
+  public function getLDAPReferrals() {
+    return PhabricatorEnv::getEnvConfig('ldap.referrals');
+  }
 
   public function retrieveUserEmail() {
     return $this->userData['mail'][0];
@@ -97,6 +101,8 @@ final class PhabricatorLDAPProvider {
 
       ldap_set_option($this->connection, LDAP_OPT_PROTOCOL_VERSION,
         $this->getLDAPVersion());
+      ldap_set_option($this->connection, LDAP_OPT_REFERRALS, 
+       $this->getLDAPReferrals());
     }
 
     return $this->connection;
