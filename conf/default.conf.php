@@ -154,6 +154,8 @@ return array(
   'darkconsole.config-mask'     => array(
     'mysql.pass',
     'amazon-ses.secret-key',
+    'amazon-s3.secret-key',
+    'sendgrid.api-key',
     'recaptcha.private-key',
     'phabricator.csrf-key',
     'facebook.application-secret',
