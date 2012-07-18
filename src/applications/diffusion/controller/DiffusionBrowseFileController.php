@@ -31,11 +31,20 @@ final class DiffusionBrowseFileController extends DiffusionController {
     }
 
     $path = $drequest->getPath();
+
     $selected = $request->getStr('view');
-    // If requested without a view, assume that blame is required (see T1278).
+    $preferences = $request->getUser()->loadPreferences();
     if (!$selected) {
-      $selected = 'blame';
+      $selected = $preferences->getPreference(
+        PhabricatorUserPreferences::PREFERENCE_DIFFUSION_VIEW,
+        'highlighted');
+    } else if ($request->isFormPost() && $selected != 'raw') {
+      $preferences->setPreference(
+        PhabricatorUserPreferences::PREFERENCE_DIFFUSION_VIEW,
+        $selected);
+      $preferences->save();
     }
+
     $needs_blame = ($selected == 'blame' || $selected == 'plainblame');
 
     $file_query = DiffusionFileContentQuery::newFromDiffusionRequest(
@@ -60,7 +69,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
     require_celerity_resource('diffusion-source-css');
 
     if ($this->corpusType == 'text') {
-      $view_select_panel = $this->renderViewSelectPanel();
+      $view_select_panel = $this->renderViewSelectPanel($selected);
     } else {
       $view_select_panel = null;
     }
@@ -217,17 +226,17 @@ final class DiffusionBrowseFileController extends DiffusionController {
     return $corpus;
   }
 
-  private function renderViewSelectPanel() {
+  private function renderViewSelectPanel($selected) {
 
     $request = $this->getRequest();
 
     $select = AphrontFormSelectControl::renderSelectTag(
-      $request->getStr('view'),
+      $selected,
       array(
-        'blame'         => 'View as Highlighted Text with Blame',
         'highlighted'   => 'View as Highlighted Text',
-        'plainblame'    => 'View as Plain Text with Blame',
+        'blame'         => 'View as Highlighted Text with Blame',
         'plain'         => 'View as Plain Text',
+        'plainblame'    => 'View as Plain Text with Blame',
         'raw'           => 'View as raw document',
       ),
       array(
@@ -235,11 +244,11 @@ final class DiffusionBrowseFileController extends DiffusionController {
       ));
 
     $view_select_panel = new AphrontPanelView();
-    $view_select_form = phutil_render_tag(
-      'form',
+    $view_select_form = phabricator_render_form(
+      $request->getUser(),
       array(
-        'action' => $request->getRequestURI(),
-        'method' => 'get',
+        'action' => $request->getRequestURI()->alter('view', null),
+        'method' => 'post',
         'class'  => 'diffusion-browse-type-form',
       ),
       $select.
@@ -420,9 +429,8 @@ final class DiffusionBrowseFileController extends DiffusionController {
           'action'  => 'browse',
           'line'    => $line['line'],
           'stable'  => true,
+          'params'  => array('view' => $selected),
         ));
-
-      $line_href->setQueryParams($request->getRequestURI()->getQueryParams());
 
       $blame = array();
       if ($line['color']) {
