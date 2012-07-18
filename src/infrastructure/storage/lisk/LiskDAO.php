@@ -302,9 +302,18 @@ abstract class LiskDAO {
    */
   protected function setEstablishedConnection(
     $mode,
-    AphrontDatabaseConnection $connection) {
+    AphrontDatabaseConnection $connection,
+    $force_unique = false) {
 
     $key = $this->getConnectionNamespace().':'.$mode;
+
+    if ($force_unique) {
+      $key .= ':unique';
+      while (isset(self::$connections[$key])) {
+        $key .= '!';
+      }
+    }
+
     self::$connections[$key] = $connection;
     return $this;
   }
@@ -433,8 +442,8 @@ abstract class LiskDAO {
    * @task   load
    */
   public function load($id) {
-    if (!($id = (int)$id)) {
-      throw new Exception("Bogus ID provided to load().");
+    if (!$id || (!is_int($id) && !ctype_digit($id))) {
+      return null;
     }
 
     return $this->loadOneWhere(
@@ -483,7 +492,7 @@ abstract class LiskDAO {
    *
    * @task   load
    */
-  public function loadAllWhere($pattern/*, $arg, $arg, $arg ... */) {
+  public function loadAllWhere($pattern/* , $arg, $arg, $arg ... */) {
     $args = func_get_args();
     array_unshift($args, null);
     $data = call_user_func_array(
@@ -503,7 +512,7 @@ abstract class LiskDAO {
    *
    * @task   load
    */
-  public function loadColumnsWhere(array $columns, $pattern/*, $args... */) {
+  public function loadColumnsWhere(array $columns, $pattern/* , $args... */) {
     if (!$this->getConfigOption(self::CONFIG_PARTIAL_OBJECTS)) {
       throw new BadMethodCallException(
         "This class does not support partial objects.");
@@ -528,7 +537,7 @@ abstract class LiskDAO {
    *
    * @task   load
    */
-  public function loadOneWhere($pattern/*, $arg, $arg, $arg ... */) {
+  public function loadOneWhere($pattern/* , $arg, $arg, $arg ... */) {
     $args = func_get_args();
     array_unshift($args, null);
     $data = call_user_func_array(
@@ -549,7 +558,7 @@ abstract class LiskDAO {
   }
 
 
-  protected function loadRawDataWhere($columns, $pattern/*, $args... */) {
+  protected function loadRawDataWhere($columns, $pattern/* , $args... */) {
     $connection = $this->establishConnection('r');
 
     $lock_clause = '';
@@ -1009,9 +1018,10 @@ abstract class LiskDAO {
       if (self::shouldIsolateAllLiskEffectsToTransactions()) {
         $connection->openTransaction();
       }
-      if (!$force_new) {
-        $this->setEstablishedConnection($mode, $connection);
-      }
+      $this->setEstablishedConnection(
+        $mode,
+        $connection,
+        $force_unique = $force_new);
     }
 
     return $connection;

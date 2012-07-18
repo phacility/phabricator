@@ -30,6 +30,8 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
   const PREFERENCE_SEARCHBAR_JUMP  = 'searchbar-jump';
   const PREFERENCE_SEARCH_SHORTCUT = 'search-shortcut';
 
+  const PREFERENCE_DIFFUSION_VIEW  = 'diffusion-view';
+
   protected $userPHID;
   protected $preferences = array();
 

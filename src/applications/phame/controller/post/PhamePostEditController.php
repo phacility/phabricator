@@ -99,7 +99,7 @@ extends PhameController {
       $post = id(new PhamePost())
         ->setBloggerPHID($user->getPHID())
         ->setVisibility(PhamePost::VISIBILITY_DRAFT);
-      $cancel_uri    = '/phame';
+      $cancel_uri    = '/phame/';
       $submit_button = 'Create Post';
       $delete_button = null;
       $page_title    = 'Create Post';

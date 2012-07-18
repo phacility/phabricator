@@ -16,41 +16,268 @@
  * limitations under the License.
  */
 
-class PhabricatorMarkupEngine {
+/**
+ * Manages markup engine selection, configuration, application, caching and
+ * pipelining.
+ *
+ * @{class:PhabricatorMarkupEngine} can be used to render objects which
+ * implement @{interface:PhabricatorMarkupInterface} in a batched, cache-aware
+ * way. For example, if you have a list of comments written in remarkup (and
+ * the objects implement the correct interface) you can render them by first
+ * building an engine and adding the fields with @{method:addObject}.
+ *
+ *   $field  = 'field:body'; // Field you want to render. Each object exposes
+ *                           // one or more fields of markup.
+ *
+ *   $engine = new PhabricatorMarkupEngine();
+ *   foreach ($comments as $comment) {
+ *     $engine->addObject($comment, $field);
+ *   }
+ *
+ * Now, call @{method:process} to perform the actual cache/rendering
+ * step. This is a heavyweight call which does batched data access and
+ * transforms the markup into output.
+ *
+ *   $engine->process();
+ *
+ * Finally, do something with the results:
+ *
+ *   $results = array();
+ *   foreach ($comments as $comment) {
+ *     $results[] = $engine->getOutput($comment, $field);
+ *   }
+ *
+ * If you have a single object to render, you can use the convenience method
+ * @{method:renderOneObject}.
+ *
+ * @task markup Markup Pipeline
+ * @task engine Engine Construction
+ */
+final class PhabricatorMarkupEngine {
 
-  public static function extractPHIDsFromMentions(array $content_blocks) {
-    $mentions = array();
+  private $objects = array();
 
-    $engine = self::newDifferentialMarkupEngine();
 
-    foreach ($content_blocks as $content_block) {
-      $engine->markupText($content_block);
-      $phids = $engine->getTextMetadata(
-        PhabricatorRemarkupRuleMention::KEY_MENTIONED,
-        array());
-      $mentions += $phids;
-    }
+/* -(  Markup Pipeline  )---------------------------------------------------- */
 
-    return $mentions;
+
+  /**
+   * Convenience method for pushing a single object through the markup
+   * pipeline.
+   *
+   * @param PhabricatorMarkupInterface  The object to render.
+   * @param string                      The field to render.
+   * @return string                     Marked up output.
+   * @task markup
+   */
+  public static function renderOneObject(
+    PhabricatorMarkupInterface $object,
+    $field) {
+    return id(new PhabricatorMarkupEngine())
+      ->addObject($object, $field)
+      ->process()
+      ->getOutput($object, $field);
   }
 
+
+  /**
+   * Queue an object for markup generation when @{method:process} is
+   * called. You can retrieve the output later with @{method:getOutput}.
+   *
+   * @param PhabricatorMarkupInterface  The object to render.
+   * @param string                      The field to render.
+   * @return this
+   * @task markup
+   */
+  public function addObject(PhabricatorMarkupInterface $object, $field) {
+    $key = $this->getMarkupFieldKey($object, $field);
+    $this->objects[$key] = array(
+      'object' => $object,
+      'field'  => $field,
+    );
+
+    return $this;
+  }
+
+
+  /**
+   * Process objects queued with @{method:addObject}. You can then retrieve
+   * the output with @{method:getOutput}.
+   *
+   * @return this
+   * @task markup
+   */
+  public function process() {
+    $keys = array();
+    foreach ($this->objects as $key => $info) {
+      if (!isset($info['markup'])) {
+        $keys[] = $key;
+      }
+    }
+
+    if (!$keys) {
+      return;
+    }
+
+    $objects = array_select_keys($this->objects, $keys);
+
+    // Build all the markup engines. We need an engine for each field whether
+    // we have a cache or not, since we still need to postprocess the cache.
+    $engines = array();
+    foreach ($objects as $key => $info) {
+      $engines[$key] = $info['object']->newMarkupEngine($info['field']);
+    }
+
+    // Load or build the preprocessor caches.
+    $blocks = $this->loadPreprocessorCaches($engines, $objects);
+
+    // Finalize the output.
+    foreach ($objects as $key => $info) {
+      $data = $blocks[$key]->getCacheData();
+      $engine = $engines[$key];
+      $field = $info['field'];
+      $object = $info['object'];
+
+      $output = $engine->postprocessText($data);
+      $output = $object->didMarkupText($field, $output, $engine);
+      $this->objects[$key]['output'] = $output;
+    }
+
+    return $this;
+  }
+
+
+  /**
+   * Get the output of markup processing for a field queued with
+   * @{method:addObject}. Before you can call this method, you must call
+   * @{method:process}.
+   *
+   * @param PhabricatorMarkupInterface  The object to retrieve.
+   * @param string                      The field to retrieve.
+   * @return string                     Processed output.
+   * @task markup
+   */
+  public function getOutput(PhabricatorMarkupInterface $object, $field) {
+    $key = $this->getMarkupFieldKey($object, $field);
+
+    if (empty($this->objects[$key])) {
+      throw new Exception(
+        "Call addObject() before getOutput() (key = '{$key}').");
+    }
+
+    if (!isset($this->objects[$key]['output'])) {
+      throw new Exception(
+        "Call process() before getOutput().");
+    }
+
+    return $this->objects[$key]['output'];
+  }
+
+
+  /**
+   * @task markup
+   */
+  private function getMarkupFieldKey(
+    PhabricatorMarkupInterface $object,
+    $field) {
+    return $object->getMarkupFieldKey($field);
+  }
+
+
+  /**
+   * @task markup
+   */
+  private function loadPreprocessorCaches(array $engines, array $objects) {
+    $blocks = array();
+
+    $use_cache = array();
+    foreach ($objects as $key => $info) {
+      if ($info['object']->shouldUseMarkupCache($info['field'])) {
+        $use_cache[$key] = true;
+      }
+    }
+
+    if ($use_cache) {
+      $blocks = id(new PhabricatorMarkupCache())->loadAllWhere(
+        'cacheKey IN (%Ls)',
+        array_keys($use_cache));
+      $blocks = mpull($blocks, null, 'getCacheKey');
+    }
+
+    foreach ($objects as $key => $info) {
+      if (isset($blocks[$key])) {
+        // If we already have a preprocessing cache, we don't need to rebuild
+        // it.
+        continue;
+      }
+
+      $text = $info['object']->getMarkupText($info['field']);
+      $data = $engines[$key]->preprocessText($text);
+
+      // NOTE: This is just debugging information to help sort out cache issues.
+      // If one machine is misconfigured and poisoning caches you can use this
+      // field to hunt it down.
+
+      $metadata = array(
+        'host' => php_uname('n'),
+      );
+
+      $blocks[$key] = id(new PhabricatorMarkupCache())
+        ->setCacheKey($key)
+        ->setCacheData($data)
+        ->setMetadata($metadata);
+
+      if (isset($use_cache[$key])) {
+        // This is just filling a cache and always safe, even on a read pathway.
+        $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+          try {
+            $blocks[$key]->save();
+          } catch (AphrontQueryDuplicateKeyException $ex) {
+            // Ignore this, we just raced to write the cache.
+          }
+        unset($unguarded);
+      }
+    }
+
+    return $blocks;
+  }
+
+
+/* -(  Engine Construction  )------------------------------------------------ */
+
+
+  /**
+   * @task engine
+   */
   public static function newManiphestMarkupEngine() {
     return self::newMarkupEngine(array(
     ));
   }
 
+
+  /**
+   * @task engine
+   */
   public static function newPhrictionMarkupEngine() {
     return self::newMarkupEngine(array(
       'header.generate-toc' => true,
     ));
   }
 
+
+  /**
+   * @task engine
+   */
   public static function newPhameMarkupEngine() {
     return self::newMarkupEngine(array(
       'macros' => false,
     ));
   }
 
+
+  /**
+   * @task engine
+   */
   public static function newFeedMarkupEngine() {
     return self::newMarkupEngine(
       array(
@@ -61,6 +288,10 @@ class PhabricatorMarkupEngine {
       ));
   }
 
+
+  /**
+   * @task engine
+   */
   public static function newDifferentialMarkupEngine(array $options = array()) {
     return self::newMarkupEngine(array(
       'custom-inline' => PhabricatorEnv::getEnvConfig(
@@ -71,21 +302,37 @@ class PhabricatorMarkupEngine {
     ));
   }
 
+
+  /**
+   * @task engine
+   */
   public static function newDiffusionMarkupEngine(array $options = array()) {
     return self::newMarkupEngine(array(
     ));
   }
 
+
+  /**
+   * @task engine
+   */
   public static function newProfileMarkupEngine() {
     return self::newMarkupEngine(array(
     ));
   }
 
+
+  /**
+   * @task engine
+   */
   public static function newSlowvoteMarkupEngine() {
     return self::newMarkupEngine(array(
     ));
   }
 
+
+  /**
+   * @task engine
+   */
   private static function getMarkupEngineDefaultConfiguration() {
     return array(
       'pygments'      => PhabricatorEnv::getEnvConfig('pygments.enabled'),
@@ -104,6 +351,10 @@ class PhabricatorMarkupEngine {
     );
   }
 
+
+  /**
+   * @task engine
+   */
   private static function newMarkupEngine(array $options) {
 
     $options += self::getMarkupEngineDefaultConfiguration();
@@ -196,6 +447,22 @@ class PhabricatorMarkupEngine {
     $engine->setBlockRules($blocks);
 
     return $engine;
+  }
+
+  public static function extractPHIDsFromMentions(array $content_blocks) {
+    $mentions = array();
+
+    $engine = self::newDifferentialMarkupEngine();
+
+    foreach ($content_blocks as $content_block) {
+      $engine->markupText($content_block);
+      $phids = $engine->getTextMetadata(
+        PhabricatorRemarkupRuleMention::KEY_MENTIONED,
+        array());
+      $mentions += $phids;
+    }
+
+    return $mentions;
   }
 
 }

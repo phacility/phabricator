@@ -32,6 +32,7 @@
  *      ->save();
  *
  * @task edit     Editing Edges
+ * @task cycles   Cycle Prevention
  * @task internal Internals
  */
 final class PhabricatorEdgeEditor {
@@ -113,26 +114,61 @@ final class PhabricatorEdgeEditor {
    */
   public function save() {
 
-    // NOTE: We write edge data first, before doing any transactions, since
-    // it's OK if we just leave it hanging out in space unattached to anything.
+    $cycle_types = $this->getPreventCyclesEdgeTypes();
 
-    $this->writeEdgeData();
+    $locks = array();
+    $caught = null;
+    try {
 
-    static $id = 0;
-    $id++;
+      // NOTE: We write edge data first, before doing any transactions, since
+      // it's OK if we just leave it hanging out in space unattached to
+      // anything.
+      $this->writeEdgeData();
 
-    $this->sendEvent($id, PhabricatorEventType::TYPE_EDGE_WILLEDITEDGES);
+      // If we're going to perform cycle detection, lock the edge type before
+      // doing edits.
+      if ($cycle_types) {
+        $src_phids = ipull($this->addEdges, 'src');
+        foreach ($cycle_types as $cycle_type) {
+          $key = 'edge.cycle:'.$cycle_type;
+          $locks[] = PhabricatorGlobalLock::newLock($key)->lock(15);
+        }
+      }
 
-    // NOTE: Removes first, then adds, so that "remove + add" is a useful
-    // operation meaning "overwrite".
+      static $id = 0;
+      $id++;
 
-    $this->executeRemoves();
-    $this->executeAdds();
+      $this->sendEvent($id, PhabricatorEventType::TYPE_EDGE_WILLEDITEDGES);
 
-    $this->sendEvent($id, PhabricatorEventType::TYPE_EDGE_DIDEDITEDGES);
+      // NOTE: Removes first, then adds, so that "remove + add" is a useful
+      // operation meaning "overwrite".
+
+      $this->executeRemoves();
+      $this->executeAdds();
+
+      foreach ($cycle_types as $cycle_type) {
+        $this->detectCycles($src_phids, $cycle_type);
+      }
+
+      $this->sendEvent($id, PhabricatorEventType::TYPE_EDGE_DIDEDITEDGES);
+
+      $this->saveTransactions();
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
 
 
-    $this->saveTransactions();
+    if ($caught) {
+      $this->killTransactions();
+    }
+
+    foreach ($locks as $lock) {
+      $lock->unlock();
+    }
+
+    if ($caught) {
+      throw $caught;
+    }
   }
 
 
@@ -327,6 +363,13 @@ final class PhabricatorEdgeEditor {
     }
   }
 
+  private function killTransactions() {
+    foreach ($this->openTransactions as $key => $conn_w) {
+      $conn_w->killTransaction();
+      unset($this->openTransactions[$key]);
+    }
+  }
+
   private function sendEvent($edit_id, $event_type) {
     $event = new PhabricatorEvent(
       $event_type,
@@ -337,6 +380,60 @@ final class PhabricatorEdgeEditor {
       ));
     $event->setUser($this->user);
     PhutilEventEngine::dispatchEvent($event);
+  }
+
+
+/* -(  Cycle Prevention  )--------------------------------------------------- */
+
+
+  /**
+   * Get a list of all edge types which are being added, and which we should
+   * prevent cycles on.
+   *
+   * @return list<const> List of edge types which should have cycles prevented.
+   * @task cycle
+   */
+  private function getPreventCyclesEdgeTypes() {
+    $edge_types = array();
+    foreach ($this->addEdges as $edge) {
+      $edge_types[$edge['type']] = true;
+    }
+    foreach ($edge_types as $type => $ignored) {
+      if (!PhabricatorEdgeConfig::shouldPreventCycles($type)) {
+        unset($edge_types[$type]);
+      }
+    }
+    return array_keys($edge_types);
+  }
+
+
+  /**
+   * Detect graph cycles of a given edge type. If the edit introduces a cycle,
+   * a @{class:PhabricatorEdgeCycleException} is thrown with details.
+   *
+   * @return void
+   * @task cycle
+   */
+  private function detectCycles(array $phids, $edge_type) {
+    // For simplicity, we just seed the graph with the affected nodes rather
+    // than seeding it with their edges. To do this, we just add synthetic
+    // edges from an imaginary '<seed>' node to the known edges.
+
+
+    $graph = id(new PhabricatorEdgeGraph())
+      ->setEdgeType($edge_type)
+      ->addNodes(
+        array(
+          '<seed>' => $phids,
+        ))
+      ->loadGraph();
+
+    foreach ($phids as $phid) {
+      $cycle = $graph->detectCycles($phid);
+      if ($cycle) {
+        throw new PhabricatorEdgeCycleException($edge_type, $cycle);
+      }
+    }
   }
 
 }

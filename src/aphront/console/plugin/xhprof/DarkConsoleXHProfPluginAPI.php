@@ -29,6 +29,18 @@ final class DarkConsoleXHProfPluginAPI {
     return extension_loaded('xhprof');
   }
 
+  public static function isProfilerRequested() {
+    if (!empty($_REQUEST['__profile__'])) {
+      return $_REQUEST['__profile__'];
+    }
+
+    if (PhabricatorEnv::getEnvConfig('debug.profile-every-request')) {
+      return PhabricatorEnv::getEnvConfig('debug.profile-every-request');
+    }
+
+    return false;
+  }
+
   public static function includeXHProfLib() {
     // TODO: this is incredibly stupid, but we may not have Phutil metamodule
     // stuff loaded yet so we can't just phutil_get_library_root() our way
@@ -41,8 +53,9 @@ final class DarkConsoleXHProfPluginAPI {
     require_once $root.'/externals/xhprof/xhprof_lib.php';
   }
 
+
   public static function hookProfiler() {
-    if (empty($_REQUEST['__profile__'])) {
+    if (!self::isProfilerRequested()) {
       return;
     }
 
@@ -71,17 +84,41 @@ final class DarkConsoleXHProfPluginAPI {
       $data = serialize($data);
       $file_class = 'PhabricatorFile';
 
-      // Since these happen on GET we can't do guarded writes.
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      // Since these happen on GET we can't do guarded writes. These also
+      // sometimes happen after we've disposed of the write guard; in this
+      // case we need to disable the whole mechanism.
 
-      $file = call_user_func(
-        array($file_class, 'newFromFileData'),
-        $data,
-        array(
-          'mime-type' => 'application/xhprof',
-          'name'      => 'profile.xhprof',
-        ));
-      return $file->getPHID();
+      $use_scope = AphrontWriteGuard::isGuardActive();
+      if ($use_scope) {
+        $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      } else {
+        AphrontWriteGuard::allowDangerousUnguardedWrites(true);
+      }
+
+      $caught = null;
+      try {
+        $file = call_user_func(
+          array($file_class, 'newFromFileData'),
+          $data,
+          array(
+            'mime-type' => 'application/xhprof',
+            'name'      => 'profile.xhprof',
+          ));
+      } catch (Exception $ex) {
+        $caught = $ex;
+      }
+
+      if ($use_scope) {
+        unset($unguarded);
+      } else {
+        AphrontWriteGuard::allowDangerousUnguardedWrites(false);
+      }
+
+      if ($caught) {
+        throw $caught;
+      } else {
+        return $file->getPHID();
+      }
     } else {
       return null;
     }

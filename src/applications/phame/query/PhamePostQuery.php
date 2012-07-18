@@ -19,12 +19,24 @@
 final class PhamePostQuery extends PhabricatorOffsetPagedQuery {
 
   private $bloggerPHID;
+  private $withoutBloggerPHID;
   private $visibility;
 
+  /**
+   * Mutually exlusive with @{method:withoutBloggerPHID}.
+   *
+   * @{method:withBloggerPHID} wins because being positive and inclusive is
+   * cool.
+   */
   public function withBloggerPHID($blogger_phid) {
     $this->bloggerPHID = $blogger_phid;
     return $this;
   }
+  public function withoutBloggerPHID($blogger_phid) {
+    $this->withoutBloggerPHID = $blogger_phid;
+    return $this;
+  }
+
   public function withVisibility($visibility) {
     $this->visibility = $visibility;
     return $this;
@@ -59,6 +71,12 @@ final class PhamePostQuery extends PhabricatorOffsetPagedQuery {
         $conn_r,
         'bloggerPHID = %s',
         $this->bloggerPHID
+      );
+    } else if ($this->withoutBloggerPHID) {
+      $where[] = qsprintf(
+        $conn_r,
+        'bloggerPHID != %s',
+        $this->withoutBloggerPHID
       );
     }
 

@@ -217,8 +217,11 @@ abstract class AphrontMySQLDatabaseConnectionBase
 
     switch ($errno) {
       case 2013: // Connection Dropped
-      case 2006: // Gone Away
         throw new AphrontQueryConnectionLostException($exmsg);
+      case 2006: // Gone Away
+        $more = "This error may occur if your MySQL 'wait_timeout' ".
+                "or 'max_allowed_packet' configuration values are set too low.";
+        throw new AphrontQueryConnectionLostException("{$exmsg}\n\n{$more}");
       case 1213: // Deadlock
       case 1205: // Lock wait timeout exceeded
         throw new AphrontQueryDeadlockException($exmsg);

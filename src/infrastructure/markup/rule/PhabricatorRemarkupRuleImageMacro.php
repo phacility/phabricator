@@ -22,14 +22,7 @@
 final class PhabricatorRemarkupRuleImageMacro
   extends PhutilRemarkupRule {
 
-  private $images = array();
-
-  public function __construct() {
-    $rows = id(new PhabricatorFileImageMacro())->loadAll();
-    foreach ($rows as $row) {
-      $this->images[$row->getName()] = $row->getFilePHID();
-    }
-  }
+  private $images;
 
   public function apply($text) {
     return preg_replace_callback(
@@ -39,6 +32,14 @@ final class PhabricatorRemarkupRuleImageMacro
   }
 
   public function markupImageMacro($matches) {
+    if ($this->images === null) {
+      $this->images = array();
+      $rows = id(new PhabricatorFileImageMacro())->loadAll();
+      foreach ($rows as $row) {
+        $this->images[$row->getName()] = $row->getFilePHID();
+      }
+    }
+
     if (array_key_exists($matches[1], $this->images)) {
       $phid = $this->images[$matches[1]];
 

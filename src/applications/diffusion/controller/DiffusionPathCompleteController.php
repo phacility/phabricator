@@ -34,15 +34,12 @@ final class DiffusionPathCompleteController extends DiffusionController {
     }
 
     $query_path = $request->getStr('q');
-    $query_path = ltrim($query_path, '/');
     if (preg_match('@/$@', $query_path)) {
       $query_dir = $query_path;
     } else {
-      $query_dir = dirname($query_path);
-      if ($query_dir == '.') {
-        $query_dir = '';
-      }
+      $query_dir = dirname($query_path).'/';
     }
+    $query_dir = ltrim($query_dir, '/');
 
     $drequest = DiffusionRequest::newFromDictionary(
       array(

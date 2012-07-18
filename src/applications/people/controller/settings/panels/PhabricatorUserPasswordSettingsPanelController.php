@@ -59,7 +59,8 @@ final class PhabricatorUserPasswordSettingsPanelController
     $errors = array();
     if ($request->isFormPost()) {
       if (!$valid_token) {
-        if (!$user->comparePassword($request->getStr('old_pw'))) {
+        $envelope = new PhutilOpaqueEnvelope($request->getStr('old_pw'));
+        if (!$user->comparePassword($envelope)) {
           $errors[] = 'The old password you entered is incorrect.';
           $e_old = 'Invalid';
         }
@@ -85,9 +86,10 @@ final class PhabricatorUserPasswordSettingsPanelController
         // is changed here the CSRF token check will fail.
         $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
 
+          $envelope = new PhutilOpaqueEnvelope($pass);
           id(new PhabricatorUserEditor())
             ->setActor($user)
-            ->changePassword($user, $pass);
+            ->changePassword($user, $envelope);
 
         unset($unguarded);
 

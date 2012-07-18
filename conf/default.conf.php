@@ -396,6 +396,26 @@ return array(
   // affects Diffusion.
   'metamta.diffusion.reply-handler' => 'PhabricatorAuditReplyHandler',
 
+  // Set this to true if you want patches to be attached to commit notifications
+  // from Diffusion. This won't work with SendGrid.
+  'metamta.diffusion.attach-patches' => false,
+
+  // To include patches in Diffusion email bodies, set this to a positive
+  // integer. Patches will be inlined if they are at most that many lines.
+  // By default, patches are not inlined.
+  'metamta.diffusion.inline-patches' => 0,
+
+  // If you've enabled attached patches or inline patches for commit emails, you
+  // can establish a hard byte limit on their size. You should generally set
+  // reasonable byte and time limits (defaults are 1MB and 60 seconds) to avoid
+  // sending ridiculously enormous email for changes like "importing an external
+  // library" or "accidentally committed this full-length movie as text".
+  'metamta.diffusion.byte-limit'     => 1024 * 1024,
+
+  // If you've enabled attached patches or inline patches for commit emails, you
+  // can establish a hard time limit on generating them.
+  'metamta.diffusion.time-limit'     => 60,
+
   // Prefix prepended to mail sent by Package.
   'metamta.package.subject-prefix' => '[Package]',
 
@@ -445,6 +465,20 @@ return array(
   // a task, even if the sender is not a system user. The original email
   // address will be stored in an 'From Email' field on the task.
   'metamta.maniphest.default-public-author' => null,
+
+  // You can disable the Herald hints in email if users prefer smaller messages.
+  // These are the links under the headers "MANAGE HERALD RULES" and
+  // "WHY DID I GET THIS EMAIL?". If you set this to true, they will not appear
+  // in any mail. Users can still navigate to the links via the web interface.
+  'metamta.herald.show-hints' => true,
+
+  // You can disable the hints under "REPLY HANDLER ACTIONS" if users prefer
+  // smaller messages. The actions themselves will still work properly.
+  'metamta.reply.show-hints' => true,
+
+  // You can disable the "To:" and "Cc:" footers in mail if users prefer
+  // smaller messages.
+  'metamta.recipients.show-hints' => true,
 
   // If this option is enabled, Phabricator will add a "Precedence: bulk"
   // header to transactional mail (e.g., Differential, Maniphest and Herald
@@ -548,6 +582,9 @@ return array(
   // The Facebook "Application Secret" to use for Facebook API access.
   'facebook.application-secret' => null,
 
+  // Should Phabricator reject requests made by users with
+  // Secure Browsing disabled?
+  'facebook.require-https-auth' => false,
 
 // -- GitHub OAuth ---------------------------------------------------------- //
 
@@ -603,6 +640,10 @@ return array(
   // If more then one attribute is supplied the values of the attributes in
   // the array will be joined
   'ldap.real_name_attributes' => array(),
+
+  // A domain name to use when authenticating against Active Directory
+  // (e.g. 'example.com')
+  'ldap.activedirectory_domain' => '',
 
   // The LDAP version
   'ldap.version' => 3,
@@ -1007,6 +1048,7 @@ return array(
   'gcdaemon.ttl.herald-transcripts'         => 30 * (24 * 60 * 60),
   'gcdaemon.ttl.daemon-logs'                =>  7 * (24 * 60 * 60),
   'gcdaemon.ttl.differential-parse-cache'   => 14 * (24 * 60 * 60),
+  'gcdaemon.ttl.markup-cache'               => 30 * (24 * 60 * 60),
 
 
 // -- Feed ------------------------------------------------------------------ //
@@ -1152,6 +1194,29 @@ return array(
     // '@\\.([^.]+)\\.bak$@' => 1,
 
     '@\.arcconfig$@' => 'js',
+    '@\.divinerconfig$@' => 'js',
   ),
+
+  // Set the default monospaced font style for users who haven't set a custom
+  // style.
+  'style.monospace' => '10px "Menlo", "Consolas", "Monaco", monospace',
+
+
+// -- Debugging ------------------------------------------------------------- //
+
+  // Enable this to change HTTP redirects into normal pages with a link to the
+  // redirection target. For example, after you submit a form you'll get a page
+  // saying "normally, you'd be redirected...". This is useful to examine
+  // service or profiler information on write pathways, or debug redirects. It
+  // also makes the UX horrible for normal use, so you should enable it only
+  // when debugging.
+  //
+  // NOTE: This does not currently work for forms with Javascript "workflow",
+  // since the redirect happens in Javascript.
+  'debug.stop-on-redirect'    => false,
+
+  // Enable this to always profile every page. This is very slow! You should
+  // only enable it when debugging.
+  'debug.profile-every-request'  => false,
 
 );

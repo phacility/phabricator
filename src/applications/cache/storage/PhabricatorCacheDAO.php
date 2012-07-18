@@ -16,14 +16,10 @@
  * limitations under the License.
  */
 
-/**
- * @group phame
- */
-final class PhamePostListController
-  extends PhamePostListBaseController {
+abstract class PhabricatorCacheDAO extends PhabricatorLiskDAO {
 
-  public function processRequest() {
-    $this->setIsDraft(false);
-    return parent::processRequest();
+  public function getApplicationName() {
+    return 'cache';
   }
+
 }

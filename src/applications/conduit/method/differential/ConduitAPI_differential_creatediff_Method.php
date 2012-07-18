@@ -41,9 +41,9 @@ final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
       'arcanistProject'           => 'optional string',
       'repositoryUUID'            => 'optional string',
       'lintStatus'                =>
-        'required enum<none, skip, okay, warn, fail>',
+        'required enum<none, skip, okay, warn, fail, postponed>',
       'unitStatus'                =>
-        'required enum<none, skip, okay, warn, fail>',
+        'required enum<none, skip, okay, warn, fail, postponed>',
     );
   }
 
@@ -120,6 +120,9 @@ final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
         break;
       case 'fail':
         $diff->setLintStatus(DifferentialLintStatus::LINT_FAIL);
+        break;
+      case 'postponed':
+        $diff->setLintStatus(DifferentialLintStatus::LINT_POSTPONED);
         break;
       case 'none':
       default:

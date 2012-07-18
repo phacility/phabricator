@@ -93,6 +93,23 @@ final class LiskFixtureTestCase extends PhabricatorTestCase {
     }
   }
 
+  public function testGarbageLoadCalls() {
+    $obj = new HarbormasterObject();
+    $obj->save();
+    $id = $obj->getID();
+
+    $load = new HarbormasterObject();
+
+    $this->assertEqual(null, $load->load(0));
+    $this->assertEqual(null, $load->load(-1));
+    $this->assertEqual(null, $load->load(9999));
+    $this->assertEqual(null, $load->load(''));
+    $this->assertEqual(null, $load->load('cow'));
+    $this->assertEqual(null, $load->load($id."cow"));
+
+    $this->assertEqual(true, (bool)$load->load((int)$id));
+    $this->assertEqual(true, (bool)$load->load((string)$id));
+  }
 
 
 }

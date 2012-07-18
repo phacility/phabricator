@@ -137,7 +137,7 @@ final class PhabricatorUserProfileSettingsPanelController
     asort($translations);
     $default = PhabricatorEnv::newObjectFromConfig('translation.provider');
     $translations = array(
-      '' => 'Sever Default ('.$default->getName().')',
+      '' => 'Server Default ('.$default->getName().')',
     ) + $translations;
 
     $form = new AphrontFormView();

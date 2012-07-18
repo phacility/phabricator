@@ -24,6 +24,8 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_TASK_HAS_COMMIT  = 1;
   const TYPE_COMMIT_HAS_TASK  = 2;
 
+  const TYPE_TEST_NO_CYCLE    = 9000;
+
   public static function getInverse($edge_type) {
     static $map = array(
       self::TYPE_TASK_HAS_COMMIT => self::TYPE_COMMIT_HAS_TASK,
@@ -31,6 +33,13 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
     );
 
     return idx($map, $edge_type);
+  }
+
+  public static function shouldPreventCycles($edge_type) {
+    static $map = array(
+      self::TYPE_TEST_NO_CYCLE  => true,
+    );
+    return isset($map[$edge_type]);
   }
 
   public static function establishConnection($phid_type, $conn_type) {
@@ -43,6 +52,7 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       PhabricatorPHIDConstants::PHID_TYPE_PROJ  => 'PhabricatorProject',
       PhabricatorPHIDConstants::PHID_TYPE_MLST  =>
         'PhabricatorMetaMTAMailingList',
+      PhabricatorPHIDConstants::PHID_TYPE_TOBJ  => 'HarbormasterObject',
     );
 
     $class = idx($class_map, $phid_type);

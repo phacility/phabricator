@@ -25,6 +25,7 @@ final class PhabricatorIRCProtocolHandler extends PhabricatorIRCHandler {
 
   public function receiveMessage(PhabricatorIRCMessage $message) {
     switch ($message->getCommand()) {
+      case '422': // Error - no MOTD
       case '376': // End of MOTD
         $join = $this->getConfig('join');
         if (!$join) {

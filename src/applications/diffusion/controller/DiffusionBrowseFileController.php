@@ -31,11 +31,20 @@ final class DiffusionBrowseFileController extends DiffusionController {
     }
 
     $path = $drequest->getPath();
+
     $selected = $request->getStr('view');
-    // If requested without a view, assume that blame is required (see T1278).
+    $preferences = $request->getUser()->loadPreferences();
     if (!$selected) {
-      $selected = 'blame';
+      $selected = $preferences->getPreference(
+        PhabricatorUserPreferences::PREFERENCE_DIFFUSION_VIEW,
+        'highlighted');
+    } else if ($request->isFormPost() && $selected != 'raw') {
+      $preferences->setPreference(
+        PhabricatorUserPreferences::PREFERENCE_DIFFUSION_VIEW,
+        $selected);
+      $preferences->save();
     }
+
     $needs_blame = ($selected == 'blame' || $selected == 'plainblame');
 
     $file_query = DiffusionFileContentQuery::newFromDiffusionRequest(
@@ -60,7 +69,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
     require_celerity_resource('diffusion-source-css');
 
     if ($this->corpusType == 'text') {
-      $view_select_panel = $this->renderViewSelectPanel();
+      $view_select_panel = $this->renderViewSelectPanel($selected);
     } else {
       $view_select_panel = null;
     }
@@ -217,17 +226,17 @@ final class DiffusionBrowseFileController extends DiffusionController {
     return $corpus;
   }
 
-  private function renderViewSelectPanel() {
+  private function renderViewSelectPanel($selected) {
 
     $request = $this->getRequest();
 
     $select = AphrontFormSelectControl::renderSelectTag(
-      $request->getStr('view'),
+      $selected,
       array(
-        'blame'         => 'View as Highlighted Text with Blame',
         'highlighted'   => 'View as Highlighted Text',
-        'plainblame'    => 'View as Plain Text with Blame',
+        'blame'         => 'View as Highlighted Text with Blame',
         'plain'         => 'View as Plain Text',
+        'plainblame'    => 'View as Plain Text with Blame',
         'raw'           => 'View as raw document',
       ),
       array(
@@ -235,11 +244,11 @@ final class DiffusionBrowseFileController extends DiffusionController {
       ));
 
     $view_select_panel = new AphrontPanelView();
-    $view_select_form = phutil_render_tag(
-      'form',
+    $view_select_form = phabricator_render_form(
+      $request->getUser(),
       array(
-        'action' => $request->getRequestURI(),
-        'method' => 'get',
+        'action' => $request->getRequestURI()->alter('view', null),
+        'method' => 'post',
         'class'  => 'diffusion-browse-type-form',
       ),
       $select.
@@ -293,15 +302,22 @@ final class DiffusionBrowseFileController extends DiffusionController {
       $epoch_range = ($epoch_max - $epoch_min) + 1;
     }
 
-    $min_line = 0;
-    $line = $drequest->getLine();
-    if (strpos($line, '-') !== false) {
-      list($min, $max) = explode('-', $line, 2);
-      $min_line = min($min, $max);
-      $max_line = max($min, $max);
-    } else if (strlen($line)) {
-      $min_line = $line;
-      $max_line = $line;
+    $line_arr = array();
+    $line_str = $drequest->getLine();
+    $ranges = explode(',', $line_str);
+    foreach ($ranges as $range) {
+      if (strpos($range, '-') !== false) {
+        list($min, $max) = explode('-', $range, 2);
+        $line_arr[] = array(
+          'min' => min($min, $max),
+          'max' => max($min, $max),
+        );
+      } else if (strlen($range)) {
+        $line_arr[] = array(
+          'min' => $range,
+          'max' => $range,
+        );
+      }
     }
 
     $display = array();
@@ -366,12 +382,15 @@ final class DiffusionBrowseFileController extends DiffusionController {
         }
       }
 
-      if ($min_line) {
-        if ($line_number == $min_line) {
+      if ($line_arr) {
+        if ($line_number == $line_arr[0]['min']) {
           $display_line['target'] = true;
         }
-        if ($line_number >= $min_line && $line_number <= $max_line) {
-          $display_line['highlighted'] = true;
+        foreach ($line_arr as $range) {
+          if ($line_number >= $range['min'] &&
+              $line_number <= $range['max']) {
+            $display_line['highlighted'] = true;
+          }
         }
       }
 
@@ -410,9 +429,8 @@ final class DiffusionBrowseFileController extends DiffusionController {
           'action'  => 'browse',
           'line'    => $line['line'],
           'stable'  => true,
+          'params'  => array('view' => $selected),
         ));
-
-      $line_href->setQueryParams($request->getRequestURI()->getQueryParams());
 
       $blame = array();
       if ($line['color']) {
@@ -453,7 +471,11 @@ final class DiffusionBrowseFileController extends DiffusionController {
             ),
             phutil_escape_html(phutil_utf8_shorten($line['commit'], 9, '')));
 
-          $revision_id = idx($revision_ids, $commits[$commit]->getPHID());
+          $revision_id = null;
+          if (idx($commits, $commit)) {
+            $revision_id = idx($revision_ids, $commits[$commit]->getPHID());
+          }
+
           if ($revision_id) {
             $revision = idx($revisions, $revision_id);
             if (!$revision) {
@@ -629,25 +651,11 @@ final class DiffusionBrowseFileController extends DiffusionController {
   }
 
   private function loadFileForData($path, $data) {
-    $hash = PhabricatorHash::digest($data);
-
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'contentHash = %s LIMIT 1',
-      $hash);
-    if (!$file) {
-      // We're just caching the data; this is always safe.
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-
-      $file = PhabricatorFile::newFromFileData(
-        $data,
-        array(
-          'name' => basename($path),
-        ));
-
-      unset($unguarded);
-    }
-
-    return $file;
+    return PhabricatorFile::buildFromFileDataOrHash(
+      $data,
+      array(
+        'name' => basename($path),
+      ));
   }
 
   private function buildRawResponse($path, $data) {

@@ -45,6 +45,13 @@ final class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
   }
 
   public function getURI() {
+    if (!$this->repository) {
+      // This symbol is in the index, but we don't know which Repository it's
+      // part of. Usually this means the Arcanist Project hasn't been linked
+      // to a Repository. We can't generate a URI, so just fail.
+      return null;
+    }
+
     $request = DiffusionRequest::newFromDictionary(
       array(
         'repository'  => $this->getRepository(),

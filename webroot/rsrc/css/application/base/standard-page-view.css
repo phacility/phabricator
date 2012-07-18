@@ -207,11 +207,6 @@ a.handle-disabled {
   background-image: url(/rsrc/image/icon/fatcow/bullet_black.png);
 }
 
-.PhabricatorMonospaced {
-  font-family:        "Menlo", "Consolas", "Monaco", monospace;
-  font-size:          10px;
-}
-
 .aphront-developer-error-callout {
   padding: 2em;
   background: #aa0000;

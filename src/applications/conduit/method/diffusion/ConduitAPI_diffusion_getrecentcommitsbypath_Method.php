@@ -22,7 +22,7 @@
 final class ConduitAPI_diffusion_getrecentcommitsbypath_Method
   extends ConduitAPIMethod {
 
-  const RESULT_LIMIT = 10;
+  const DEFAULT_LIMIT = 10;
 
   public function getMethodDescription() {
     return "Get commit identifiers for recent commits affecting a given path.";
@@ -32,6 +32,7 @@ final class ConduitAPI_diffusion_getrecentcommitsbypath_Method
     return array(
       'callsign' => 'required string',
       'path' => 'required string',
+      'limit' => 'optional int',
     );
   }
 
@@ -51,8 +52,13 @@ final class ConduitAPI_diffusion_getrecentcommitsbypath_Method
         'path'      => $request->getValue('path'),
       ));
 
+    $limit = nonempty(
+      $request->getValue('limit'),
+      self::DEFAULT_LIMIT
+    );
+
     $history = DiffusionHistoryQuery::newFromDiffusionRequest($drequest)
-    ->setLimit(self::RESULT_LIMIT)
+    ->setLimit($limit)
     ->needDirectChanges(true)
     ->needChildChanges(true)
     ->loadHistory();

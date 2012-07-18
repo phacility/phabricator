@@ -155,6 +155,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'  => 'db',
         'name'  => 'xhpastview',
       ),
+      'db.cache' => array(
+        'type'  => 'db',
+        'name'  => 'cache',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
@@ -898,6 +902,18 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       'differentialbookmarks.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('differentialbookmarks.sql'),
+      ),
+      'harbormasterobject.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('harbormasterobject.sql'),
+      ),
+      'markupcache.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('markupcache.sql'),
+      ),
+      'maniphestxcache.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('maniphestxcache.sql'),
       ),
     );
   }

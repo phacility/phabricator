@@ -22,8 +22,34 @@
 final class PhameDraftListController
   extends PhamePostListBaseController {
 
+  public function shouldRequireLogin() {
+    return true;
+  }
+
+  protected function getSideNavFilter() {
+    return 'draft';
+  }
+
+  protected function isDraft() {
+    return true;
+  }
+
   public function processRequest() {
-    $this->setIsDraft(true);
-    return parent::processRequest();
+    $user = $this->getRequest()->getUser();
+    $phid = $user->getPHID();
+
+    $query = new PhamePostQuery();
+    $query->withBloggerPHID($phid);
+    $query->withVisibility(PhamePost::VISIBILITY_DRAFT);
+    $this->setPhamePostQuery($query);
+
+    $actions = array('view', 'edit');
+    $this->setActions($actions);
+
+    $this->setPageTitle('My Drafts');
+
+    $this->setShowSideNav(true);
+
+    return $this->buildPostListPageResponse();
   }
 }

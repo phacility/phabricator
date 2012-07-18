@@ -222,6 +222,10 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     return $parser->stripTextBody($body);
   }
 
+  public function getRawTextBody() {
+    return idx($this->bodies, 'text');
+  }
+
   public static function loadReceiverObject($receiver_name) {
     if (!$receiver_name) {
       return null;

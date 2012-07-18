@@ -240,16 +240,17 @@ final class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
         'name' => $symbol,
       ));
 
+    $default_uri = $this->getURI('/diffusion/symbol/'.$symbol.'/');
+
     if (count($results) > 1) {
-      $uri = $this->getURI('/diffusion/symbol/'.$symbol.'/');
-      $response = "Multiple symbols named '{$symbol}': {$uri}";
+      $response = "Multiple symbols named '{$symbol}': {$default_uri}";
     } else if (count($results) == 1) {
       $result = head($results);
       $response =
         $result['type'].' '.
         $result['name'].' '.
         '('.$result['language'].'): '.
-        $result['uri'];
+        nonempty($result['uri'], $default_uri);
     } else {
       $response = "No symbol '{$symbol}' found anywhere.";
     }
