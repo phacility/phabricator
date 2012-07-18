@@ -582,6 +582,9 @@ return array(
   // The Facebook "Application Secret" to use for Facebook API access.
   'facebook.application-secret' => null,
 
+  // Should Phabricator reject requests made by users with
+  // Secure Browsing disabled?
+  'facebook.require-https-auth' => false,
 
 // -- GitHub OAuth ---------------------------------------------------------- //
 

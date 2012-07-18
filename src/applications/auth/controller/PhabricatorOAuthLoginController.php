@@ -70,7 +70,7 @@ final class PhabricatorOAuthLoginController
       }
       $provider->setUserData($user_data);
     } catch (PhabricatorOAuthProviderException $e) {
-      return $this->buildErrorResponse(new PhabricatorOAuthFailureView());
+      return $this->buildErrorResponse(new PhabricatorOAuthFailureView(), $e);
     }
     $provider->setAccessToken($this->accessToken);
 
@@ -243,11 +243,17 @@ final class PhabricatorOAuthLoginController
     return $this->delegateToController($controller);
   }
 
-  private function buildErrorResponse(PhabricatorOAuthFailureView $view) {
+  private function buildErrorResponse(PhabricatorOAuthFailureView $view,
+    Exception $e = null) {
+
     $provider = $this->provider;
 
     $provider_name = $provider->getProviderName();
     $view->setOAuthProvider($provider);
+
+    if ($e) {
+      $view->setException($e);
+    }
 
     return $this->buildStandardPageResponse(
       $view,

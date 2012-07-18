@@ -20,6 +20,7 @@ final class PhabricatorOAuthFailureView extends AphrontView {
 
   private $request;
   private $provider;
+  private $exception;
 
   public function setRequest(AphrontRequest $request) {
     $this->request = $request;
@@ -28,6 +29,11 @@ final class PhabricatorOAuthFailureView extends AphrontView {
 
   public function setOAuthProvider($provider) {
     $this->provider = $provider;
+    return $this;
+  }
+
+  public function setException(Exception $e) {
+    $this->exception = $e;
     return $this;
   }
 
@@ -53,6 +59,11 @@ final class PhabricatorOAuthFailureView extends AphrontView {
         hsprintf(
           '<p><strong>Error Reason:</strong> %s</p>',
           $request->getStr('error_reason')));
+    } else if ($this->exception) {
+      $view->appendChild(
+        hsprintf(
+          '<p><strong>Error Details:</strong> %s</p>',
+          $this->exception->getMessage()));
     } else {
       // TODO: We can probably refine this.
       $view->appendChild(
