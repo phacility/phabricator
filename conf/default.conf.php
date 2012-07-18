@@ -655,6 +655,11 @@ return array(
 
   // The LDAP version
   'ldap.version' => 3,
+  
+  // LDAP Referrals Option
+  // Whether referrals should be followed by the client
+  // Should be set to 0 if you use Windows 2003 AD
+  'ldap.referrals' => 1,
 
 // -- Disqus OAuth ---------------------------------------------------------- //
 
