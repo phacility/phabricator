@@ -157,7 +157,8 @@ final class DifferentialChangesetParser {
     $offsets_old = $this->originalLeft->computeOffsets();
     $offsets_new = $this->originalRight->computeOffsets();
 
-    // Highlight lines that were add on each side or removed on the other side.
+    // Highlight lines that were added on each side or removed on the other
+    // side.
     $highlight_old = array();
     $highlight_new = array();
     $last = max(last_key($olds), last_key($news));

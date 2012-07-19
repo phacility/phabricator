@@ -31,7 +31,6 @@ final class DifferentialChangesetParserTestCase extends ArcanistPhutilTestCase {
       "+a\n x\n-c" => array(array(), array()),
       "+aa\n b\n-c" => array(array(1), array(11)),
       " b\n-c" => array(array(1), array()),
-      " x\n-c" => array(array(1), array()),
       "+a\n b\n c" => array(array(), array(13)),
       "+a\n x\n c" => array(array(), array(13)),
     );
