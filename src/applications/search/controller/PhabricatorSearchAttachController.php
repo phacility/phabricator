@@ -104,7 +104,7 @@ final class PhabricatorSearchAttachController
             $editor->attachObjects(
               $attach_type,
               $phids,
-              $two_way = false);
+              $two_way = true);
 
             return id(new AphrontReloadResponse())->setURI($handle->getURI());
           default:

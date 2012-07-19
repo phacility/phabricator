@@ -180,7 +180,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $revs = idx($attached, PhabricatorPHIDConstants::PHID_TYPE_DREV);
     if ($revs) {
       $dict['Revisions'] = $this->renderHandleList(
-        array_select_keys($handles, $revs));
+        array_select_keys($handles, array_keys($revs)));
     }
 
     if ($commit_phids) {
