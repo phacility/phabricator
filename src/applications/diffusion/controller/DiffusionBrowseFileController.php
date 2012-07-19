@@ -43,6 +43,9 @@ final class DiffusionBrowseFileController extends DiffusionController {
         PhabricatorUserPreferences::PREFERENCE_DIFFUSION_VIEW,
         $selected);
       $preferences->save();
+
+      return id(new AphrontRedirectResponse())
+        ->setURI($request->getRequestURI()->alter('view', $selected));
     }
 
     $needs_blame = ($selected == 'blame' || $selected == 'plainblame');
