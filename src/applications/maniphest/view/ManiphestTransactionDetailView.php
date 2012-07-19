@@ -661,7 +661,8 @@ final class ManiphestTransactionDetailView extends ManiphestView {
   /**
    * @task strings
    */
-  private function getEdgeEmailTitle($type, $count) {
+  private function getEdgeEmailTitle($type, array $list) {
+    $count = count($list);
     switch ($type) {
       case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
         return pht('DEPENDS ON %d TASK(S)', $count);
@@ -731,16 +732,17 @@ final class ManiphestTransactionDetailView extends ManiphestView {
    */
   private function getEdgeAddList($type, array $add) {
     $list = $this->renderHandles(array_keys($add));
+    $count = count($add);
 
     switch ($type) {
       case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
-        return pht('added %d dependencie(s): %s', $add, $list);
+        return pht('added %d dependencie(s): %s', $count, $list);
       case PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK:
-        return pht('added %d dependent task(s): %s', $add, $list);
+        return pht('added %d dependent task(s): %s', $count, $list);
       case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
-        return pht('added %d commit(s): %s', $add, $list);
+        return pht('added %d commit(s): %s', $count, $list);
       default:
-        return pht('added %d object(s): %s', $add, $list);
+        return pht('added %d object(s): %s', $count, $list);
     }
   }
 
@@ -750,16 +752,17 @@ final class ManiphestTransactionDetailView extends ManiphestView {
    */
   private function getEdgeRemList($type, array $rem) {
     $list = $this->renderHandles(array_keys($rem));
+    $count = count($rem);
 
     switch ($type) {
       case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
-        return pht('removed %d dependencie(s): %s', $rem, $list);
+        return pht('removed %d dependencie(s): %s', $count, $list);
       case PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK:
-        return pht('removed %d dependent task(s): %s', $rem, $list);
+        return pht('removed %d dependent task(s): %s', $count, $list);
       case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
-        return pht('removed %d commit(s): %s', $rem, $list);
+        return pht('removed %d commit(s): %s', $count, $list);
       default:
-        return pht('removed %d object(s): %s', $rem, $list);
+        return pht('removed %d object(s): %s', $count, $list);
     }
   }
 
@@ -770,39 +773,41 @@ final class ManiphestTransactionDetailView extends ManiphestView {
   private function getEdgeEditList($type, array $add, array $rem) {
     $add_list = $this->renderHandles(array_keys($add));
     $rem_list = $this->renderHandles(array_keys($rem));
+    $add_count = count($add_list);
+    $rem_count = count($rem_list);
 
     switch ($type) {
       case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
         return pht(
           'changed %d dependencie(s), added %d: %s; removed %d: %s',
-          count($add) + count($rem),
-          $add,
+          $add_count + $rem_count,
+          $add_count,
           $add_list,
-          $rem,
+          $rem_count,
           $rem_list);
       case PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK:
         return pht(
           'changed %d dependent task(s), added %d: %s; removed %d: %s',
-          count($add) + count($rem),
-          $add,
+          $add_count + $rem_count,
+          $add_count,
           $add_list,
-          $rem,
+          $rem_count,
           $rem_list);
       case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
         return pht(
           'changed %d commit(s), added %d: %s; removed %d: %s',
-          count($add) + count($rem),
-          $add,
+          $add_count + $rem_count,
+          $add_count,
           $add_list,
-          $rem,
+          $rem_count,
           $rem_list);
       default:
         return pht(
           'changed %d object(s), added %d: %s; removed %d: %s',
-          count($add) + count($rem),
-          $add,
+          $add_count + $rem_count,
+          $add_count,
           $add_list,
-          $rem,
+          $rem_count,
           $rem_list);
     }
   }

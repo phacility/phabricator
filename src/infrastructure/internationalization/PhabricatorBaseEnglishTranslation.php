@@ -50,41 +50,41 @@ abstract class PhabricatorBaseEnglishTranslation
       '%d line(s)' => array('%d line', '%d lines'),
 
       'added %d commit(s): %s' => array(
-        'added commits: %2$s',
         'added commit: %2$s',
+        'added commits: %2$s',
       ),
 
       'removed %d commit(s): %s' => array(
-        'removed commits: %2$s',
         'removed commit: %2$s',
+        'removed commits: %2$s',
       ),
 
       'changed %d commit(s), added %d: %s; removed %d: %s' =>
         'changed commits, added: %3$s; removed: %5$s',
 
       'ATTACHED %d COMMIT(S)' => array(
-        'ATTACHED COMMITS',
         'ATTACHED COMMIT',
+        'ATTACHED COMMITS',
       ),
 
       'added %d dependencie(s): %s' => array(
-        'added dependencies: %2$s',
         'added dependency: %2$s',
+        'added dependencies: %2$s',
       ),
 
       'added %d dependent task(s): %s' => array(
-        'added dependent tasks: %2$s',
         'added dependent task: %2$s',
+        'added dependent tasks: %2$s',
       ),
 
       'removed %d dependencie(s): %s' => array(
-        'removed dependencies: %2$s',
         'removed dependency: %2$s',
+        'removed dependencies: %2$s',
       ),
 
       'removed %d dependent task(s): %s' => array(
-        'removed dependent tasks: %2$s',
         'removed dependent task: %2$s',
+        'removed dependent tasks: %2$s',
       ),
 
       'changed %d dependencie(s), added %d: %s; removed %d: %s' =>
@@ -94,13 +94,13 @@ abstract class PhabricatorBaseEnglishTranslation
         'changed dependent tasks, added: %3$s; removed: %5$s',
 
       'DEPENDENT %d TASK(s)' => array(
-        'DEPENDENT TASKS',
         'DEPENDENT TASK',
+        'DEPENDENT TASKS',
       ),
 
       'DEPENDS ON %d TASK(S)' => array(
-        'DEPENDS ON TASKS',
         'DEPENDS ON TASK',
+        'DEPENDS ON TASKS',
       ),
 
     );
