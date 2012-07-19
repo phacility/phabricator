@@ -52,7 +52,7 @@ final class PhabricatorEdgeEditor {
 
   /**
    * Add a new edge (possibly also adding its inverse). Changes take effect when
-   * you call @{method:save()}. If the edge already exists, it will not be
+   * you call @{method:save}. If the edge already exists, it will not be
    * overwritten. Removals queued with @{method:removeEdge} are executed before
    * adds, so the effect of removing and adding the same edge is to overwrite
    * any existing edge.
@@ -81,7 +81,7 @@ final class PhabricatorEdgeEditor {
 
   /**
    * Remove an edge (possibly also removing its inverse). Changes take effect
-   * when you call @{method:save()}. If an edge does not exist, the removal
+   * when you call @{method:save}. If an edge does not exist, the removal
    * will be ignored. Edges are added after edges are removed, so the effect of
    * a remove plus an add is to overwrite.
    *
