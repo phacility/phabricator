@@ -53,9 +53,10 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
     foreach ($data as $story_data) {
       $class = $story_data->getStoryType();
 
-      $ok = false;
       try {
-        $ok = is_subclass_of($class, 'PhabricatorFeedStory');
+        $ok =
+          class_exists($class) &&
+          is_subclass_of($class, 'PhabricatorFeedStory');
       } catch (PhutilMissingSymbolException $ex) {
         $ok = false;
       }
