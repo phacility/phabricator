@@ -657,8 +657,16 @@ final class ManiphestTransactionDetailView extends ManiphestView {
     }
   }
 
+
+  /**
+   * @task strings
+   */
   private function getEdgeEmailTitle($type, $count) {
     switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
+        return pht('DEPENDS ON %d TASK(S)', $count);
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK:
+        return pht('DEPENDENT %d TASK(s)', $count);
       case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
         return pht('ATTACHED %d COMMIT(S)', $count);
       default:
@@ -672,6 +680,10 @@ final class ManiphestTransactionDetailView extends ManiphestView {
    */
   private function getEdgeAddVerb($type) {
     switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
+        return pht('Added Dependency');
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK:
+        return pht('Added Dependent Task');
       case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
         return pht('Added Commit');
       default:
@@ -685,6 +697,10 @@ final class ManiphestTransactionDetailView extends ManiphestView {
    */
   private function getEdgeRemVerb($type) {
     switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
+        return pht('Removed Dependency');
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK:
+        return pht('Removed Dependent Task');
       case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
         return pht('Removed Commit');
       default:
@@ -698,6 +714,10 @@ final class ManiphestTransactionDetailView extends ManiphestView {
    */
   private function getEdgeEditVerb($type) {
     switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
+        return pht('Changed Dependencies');
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK:
+        return pht('Changed Dependent Tasks');
       case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
         return pht('Changed Commits');
       default:
@@ -713,6 +733,10 @@ final class ManiphestTransactionDetailView extends ManiphestView {
     $list = $this->renderHandles(array_keys($add));
 
     switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
+        return pht('added %d dependencie(s): %s', $add, $list);
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK:
+        return pht('added %d dependent task(s): %s', $add, $list);
       case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
         return pht('added %d commit(s): %s', $add, $list);
       default:
@@ -728,6 +752,10 @@ final class ManiphestTransactionDetailView extends ManiphestView {
     $list = $this->renderHandles(array_keys($rem));
 
     switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
+        return pht('removed %d dependencie(s): %s', $rem, $list);
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK:
+        return pht('removed %d dependent task(s): %s', $rem, $list);
       case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
         return pht('removed %d commit(s): %s', $rem, $list);
       default:
@@ -744,6 +772,22 @@ final class ManiphestTransactionDetailView extends ManiphestView {
     $rem_list = $this->renderHandles(array_keys($rem));
 
     switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
+        return pht(
+          'changed %d dependencie(s), added %d: %s; removed %d: %s',
+          count($add) + count($rem),
+          $add,
+          $add_list,
+          $rem,
+          $rem_list);
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK:
+        return pht(
+          'changed %d dependent task(s), added %d: %s; removed %d: %s',
+          count($add) + count($rem),
+          $add,
+          $add_list,
+          $rem,
+          $rem_list);
       case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
         return pht(
           'changed %d commit(s), added %d: %s; removed %d: %s',

@@ -915,6 +915,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('maniphestxcache.sql'),
       ),
+      'migrate-maniphest-dependencies.php' => array(
+        'type'    => 'php',
+        'name'    => $this->getPatchPath('migrate-maniphest-dependencies.php'),
+      ),
     );
   }
 

@@ -66,6 +66,43 @@ abstract class PhabricatorBaseEnglishTranslation
         'ATTACHED COMMITS',
         'ATTACHED COMMIT',
       ),
+
+      'added %d dependencie(s): %s' => array(
+        'added dependencies: %2$s',
+        'added dependency: %2$s',
+      ),
+
+      'added %d dependent task(s): %s' => array(
+        'added dependent tasks: %2$s',
+        'added dependent task: %2$s',
+      ),
+
+      'removed %d dependencie(s): %s' => array(
+        'removed dependencies: %2$s',
+        'removed dependency: %2$s',
+      ),
+
+      'removed %d dependent task(s): %s' => array(
+        'removed dependent tasks: %2$s',
+        'removed dependent task: %2$s',
+      ),
+
+      'changed %d dependencie(s), added %d: %s; removed %d: %s' =>
+        'changed dependencies, added: %3$s; removed: %5$s',
+
+      'changed %d dependent task(s), added %d: %s; removed %d: %s',
+        'changed dependent tasks, added: %3$s; removed: %5$s',
+
+      'DEPENDENT %d TASK(s)' => array(
+        'DEPENDENT TASKS',
+        'DEPENDENT TASK',
+      ),
+
+      'DEPENDS ON %d TASK(S)' => array(
+        'DEPENDS ON TASKS',
+        'DEPENDS ON TASK',
+      ),
+
     );
   }
 

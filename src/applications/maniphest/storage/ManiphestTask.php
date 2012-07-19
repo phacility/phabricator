@@ -60,6 +60,18 @@ final class ManiphestTask extends ManiphestDAO
     ) + parent::getConfiguration();
   }
 
+  public function loadDependsOnTaskPHIDs() {
+    return PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $this->getPHID(),
+      PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK);
+  }
+
+  public function loadDependedOnByTaskPHIDs() {
+    return PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $this->getPHID(),
+      PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK);
+  }
+
   public function getAttachedPHIDs($type) {
     return array_keys(idx($this->attached, $type, array()));
   }

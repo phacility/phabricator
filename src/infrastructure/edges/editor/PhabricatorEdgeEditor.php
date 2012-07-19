@@ -41,6 +41,7 @@ final class PhabricatorEdgeEditor {
   private $remEdges = array();
   private $openTransactions = array();
   private $user;
+  private $suppressEvents;
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
@@ -370,7 +371,26 @@ final class PhabricatorEdgeEditor {
     }
   }
 
+  /**
+   * Suppress edge edit events. This prevents listeners from making updates in
+   * response to edits, and is primarily useful when performing migrations. You
+   * should not normally need to use it.
+   *
+   * @param bool True to supress events related to edits.
+   * @return this
+   * @task internal
+   */
+  public function setSuppressEvents($suppress) {
+    $this->suppressEvents = $suppress;
+    return $this;
+  }
+
+
   private function sendEvent($edit_id, $event_type) {
+    if ($this->suppressEvents) {
+      return;
+    }
+
     $event = new PhabricatorEvent(
       $event_type,
       array(
@@ -435,5 +455,6 @@ final class PhabricatorEdgeEditor {
       }
     }
   }
+
 
 }

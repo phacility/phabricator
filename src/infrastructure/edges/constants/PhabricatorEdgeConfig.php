@@ -21,15 +21,20 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TABLE_NAME_EDGE       = 'edge';
   const TABLE_NAME_EDGEDATA   = 'edgedata';
 
-  const TYPE_TASK_HAS_COMMIT  = 1;
-  const TYPE_COMMIT_HAS_TASK  = 2;
+  const TYPE_TASK_HAS_COMMIT            = 1;
+  const TYPE_COMMIT_HAS_TASK            = 2;
+  const TYPE_TASK_DEPENDS_ON_TASK       = 3;
+  const TYPE_TASK_DEPENDED_ON_BY_TASK   = 4;
 
-  const TYPE_TEST_NO_CYCLE    = 9000;
+  const TYPE_TEST_NO_CYCLE              = 9000;
 
   public static function getInverse($edge_type) {
     static $map = array(
       self::TYPE_TASK_HAS_COMMIT => self::TYPE_COMMIT_HAS_TASK,
       self::TYPE_COMMIT_HAS_TASK => self::TYPE_TASK_HAS_COMMIT,
+
+      self::TYPE_TASK_DEPENDS_ON_TASK => self::TYPE_TASK_DEPENDED_ON_BY_TASK,
+      self::TYPE_TASK_DEPENDED_ON_BY_TASK => self::TYPE_TASK_DEPENDS_ON_TASK,
     );
 
     return idx($map, $edge_type);
@@ -37,7 +42,8 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   public static function shouldPreventCycles($edge_type) {
     static $map = array(
-      self::TYPE_TEST_NO_CYCLE  => true,
+      self::TYPE_TEST_NO_CYCLE          => true,
+      self::TYPE_TASK_DEPENDS_ON_TASK   => true,
     );
     return isset($map[$edge_type]);
   }
