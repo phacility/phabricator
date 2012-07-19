@@ -652,10 +652,10 @@ return array(
   // A domain name to use when authenticating against Active Directory
   // (e.g. 'example.com')
   'ldap.activedirectory_domain' => '',
-
+  
   // The LDAP version
   'ldap.version' => 3,
-  
+
   // LDAP Referrals Option
   // Whether referrals should be followed by the client
   // Should be set to 0 if you use Windows 2003 AD
