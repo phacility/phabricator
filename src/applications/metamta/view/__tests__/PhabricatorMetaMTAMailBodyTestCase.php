@@ -83,7 +83,7 @@ EOTEXT;
 
   private function assertEmail($expect, $herald_hints, $reply_hints) {
     $env = PhabricatorEnv::beginScopedEnv();
-    $env->overrideEnvConfig('phabricator.base-uri', 'http://test.com/');
+    $env->overrideEnvConfig('phabricator.production-uri', 'http://test.com/');
     $env->overrideEnvConfig('metamta.herald.show-hints', $herald_hints);
     $env->overrideEnvConfig('metamta.reply.show-hints', $reply_hints);
 
