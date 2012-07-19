@@ -119,7 +119,6 @@ final class PhabricatorSearchAttachController
       } else {
         switch ($this->action) {
           case self::ACTION_ATTACH:
-          case self::ACTION_DEPENDENCIES:
             $phids = $object->getAttachedPHIDs($attach_type);
             break;
           default:
@@ -274,6 +273,7 @@ final class PhabricatorSearchAttachController
   private function getEdgeType($src_type, $dst_type) {
     $t_cmit = PhabricatorPHIDConstants::PHID_TYPE_CMIT;
     $t_task = PhabricatorPHIDConstants::PHID_TYPE_TASK;
+    $t_drev = PhabricatorPHIDConstants::PHID_TYPE_DREV;
 
     $map = array(
       $t_cmit => array(
@@ -282,6 +282,9 @@ final class PhabricatorSearchAttachController
       $t_task => array(
         $t_cmit => PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT,
         $t_task => PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK,
+      ),
+      $t_drev => array(
+        $t_drev => PhabricatorEdgeConfig::TYPE_DREV_DEPENDS_ON_DREV,
       ),
     );
 
