@@ -68,12 +68,18 @@ abstract class PhameController extends PhabricatorController {
                     'New Draft');
     $nav->addFilter('draft',
                     'My Drafts');
+    foreach ($this->getSideNavExtraDraftFilters() as $draft_filter) {
+      $nav->addFilter($draft_filter['key'],
+                      $draft_filter['name'],
+                      idx($draft_filter, 'uri'));
+    }
+
     $nav->addSpacer();
     $nav->addLabel('Posts');
     $nav->addFilter('post',
                     'My Posts');
-    $nav->addFilter('everyone',
-                    'Everyone',
+    $nav->addFilter('post/all',
+                    'All Posts',
                     $base_uri);
     foreach ($this->getSideNavExtraPostFilters() as $post_filter) {
       $nav->addFilter($post_filter['key'],
@@ -81,16 +87,59 @@ abstract class PhameController extends PhabricatorController {
                       idx($post_filter, 'uri'));
     }
 
+    $nav->addSpacer();
+    $nav->addLabel('Blogs');
+    foreach ($this->getSideNavBlogFilters() as $blog_filter) {
+      $nav->addFilter($blog_filter['key'],
+                      $blog_filter['name'],
+                      idx($blog_filter, 'uri'));
+    }
+
     $nav->selectFilter($filter);
 
     return $nav;
   }
 
+  protected function getSideNavExtraDraftFilters() {
+    return array();
+  }
+
   protected function getSideNavExtraPostFilters() {
     return array();
   }
+
+  protected function getSideNavBlogFilters() {
+    return array(
+      array(
+        'key'  => 'blog',
+        'name' => 'My Blogs',
+      ),
+      array(
+        'key'  => 'blog/all',
+        'name' => 'All Blogs',
+      ),
+    );
+  }
+
   protected function getSideNavFilter() {
     return 'post';
   }
 
+  protected function getPager() {
+    $request   = $this->getRequest();
+    $pager     = new AphrontPagerView();
+    $page_size = 50;
+    $pager->setURI($request->getRequestURI(), 'offset');
+    $pager->setPageSize($page_size);
+    $pager->setOffset($request->getInt('offset'));
+
+    return $pager;
+  }
+
+  protected function buildNoticeView() {
+    $notice_view = id(new AphrontErrorView())
+      ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+      ->setTitle('Meta thoughts and feelings');
+    return $notice_view;
+  }
 }

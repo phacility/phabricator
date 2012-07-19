@@ -19,27 +19,15 @@
 /**
  * @group phame
  */
-final class PhameDraftListController
-  extends PhamePostListBaseController {
-
-  public function shouldRequireLogin() {
-    return true;
-  }
-
-  protected function getSideNavFilter() {
-    return 'draft';
-  }
-
-  protected function isDraft() {
-    return true;
-  }
+final class PhameUserBlogListController
+  extends PhameBlogListBaseController {
 
   protected function getNoticeView() {
     $request = $this->getRequest();
 
     if ($request->getExists('deleted')) {
       $notice_view = $this->buildNoticeView()
-        ->appendChild('Deleted draft successfully.');
+        ->appendChild('Successfully deleted blog.');
     } else {
       $notice_view = null;
     }
@@ -47,22 +35,31 @@ final class PhameDraftListController
     return $notice_view;
   }
 
+  protected function getSideNavFilter() {
+    return 'blog';
+  }
+
   public function processRequest() {
     $user = $this->getRequest()->getUser();
     $phid = $user->getPHID();
 
-    $query = new PhamePostQuery();
-    $query->withBloggerPHID($phid);
-    $query->withVisibility(PhamePost::VISIBILITY_DRAFT);
-    $this->setPhamePostQuery($query);
+    $blog_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $phid,
+      PhabricatorEdgeConfig::TYPE_BLOGGER_HAS_BLOG
+    );
 
-    $actions = array('view', 'edit');
-    $this->setActions($actions);
+    $blogs = id(new PhameBlogQuery())
+      ->withPHIDs($blog_phids)
+      ->needBloggers(true)
+      ->executeWithPager($this->getPager());
 
-    $this->setPageTitle('My Drafts');
+    $this->setBlogs($blogs);
+
+    $this->setPageTitle('My Blogs');
 
     $this->setShowSideNav(true);
 
-    return $this->buildPostListPageResponse();
+    return $this->buildBlogListPageResponse();
   }
+
 }

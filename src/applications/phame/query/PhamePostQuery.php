@@ -16,11 +16,16 @@
  * limitations under the License.
  */
 
+/**
+ * @group phame
+ */
 final class PhamePostQuery extends PhabricatorOffsetPagedQuery {
 
   private $bloggerPHID;
   private $withoutBloggerPHID;
+  private $phameTitle;
   private $visibility;
+  private $phids;
 
   /**
    * Mutually exlusive with @{method:withoutBloggerPHID}.
@@ -37,8 +42,18 @@ final class PhamePostQuery extends PhabricatorOffsetPagedQuery {
     return $this;
   }
 
+  public function withPhameTitle($phame_title) {
+    $this->phameTitle = $phame_title;
+    return $this;
+  }
+
   public function withVisibility($visibility) {
     $this->visibility = $visibility;
+    return $this;
+  }
+
+  public function withPHIDs($phids) {
+    $this->phids = $phids;
     return $this;
   }
 
@@ -52,7 +67,7 @@ final class PhamePostQuery extends PhabricatorOffsetPagedQuery {
 
     $data = queryfx_all(
       $conn_r,
-      'SELECT * FROM %T e %Q %Q %Q',
+      'SELECT * FROM %T p %Q %Q %Q',
       $table->getTableName(),
       $where_clause,
       $order_clause,
@@ -66,6 +81,14 @@ final class PhamePostQuery extends PhabricatorOffsetPagedQuery {
   private function buildWhereClause($conn_r) {
     $where = array();
 
+    if ($this->phids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'phid IN (%Ls)',
+        $this->phids
+      );
+    }
+
     if ($this->bloggerPHID) {
       $where[] = qsprintf(
         $conn_r,
@@ -77,6 +100,14 @@ final class PhamePostQuery extends PhabricatorOffsetPagedQuery {
         $conn_r,
         'bloggerPHID != %s',
         $this->withoutBloggerPHID
+      );
+    }
+
+    if ($this->phameTitle) {
+      $where[] = qsprintf(
+        $conn_r,
+        'phameTitle = %s',
+        $this->phameTitle
       );
     }
 

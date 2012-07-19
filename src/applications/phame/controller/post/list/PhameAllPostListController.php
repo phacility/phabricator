@@ -19,7 +19,7 @@
 /**
  * @group phame
  */
-final class PhameAllBloggersPostListController
+final class PhameAllPostListController
   extends PhamePostListBaseController {
 
   public function shouldRequireLogin() {
@@ -27,7 +27,7 @@ final class PhameAllBloggersPostListController
   }
 
   protected function getSideNavFilter() {
-    return 'everyone';
+    return 'post/all';
   }
 
   protected function getNoticeView() {
@@ -65,9 +65,7 @@ final class PhameAllBloggersPostListController
       'If you need more help try the '.$guide_link.'.',
     );
 
-    $notice_view = id(new AphrontErrorView())
-      ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-      ->setTitle('Meta thoughts and feelings');
+    $notice_view = $this->buildNoticeView();
     foreach ($notices as $notice) {
       $notice_view->appendChild('<p>'.$notice.'</p>');
     }
@@ -84,7 +82,7 @@ final class PhameAllBloggersPostListController
 
     $this->setActions(array('view'));
 
-    $page_title = 'Posts by Everyone';
+    $page_title = 'All Posts';
     $this->setPageTitle($page_title);
 
     $this->setShowSideNav(true);

@@ -924,6 +924,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'name'    => $this->getPatchPath(
           'migrate-differential-dependencies.php'),
       ),
+      'phameblog.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('phameblog.sql'),
+      ),
     );
   }
 

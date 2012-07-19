@@ -32,47 +32,54 @@ extends PhameController {
     return $this->phid;
   }
 
-  protected function getSideNavFilter() {
-    return 'post/delete/'.$this->getPostPHID();
-  }
-
-  protected function getSideNavExtraPostFilters() {
-    $filters = array(
-      array('key'  => $this->getSideNavFilter(),
-            'name' => 'Delete Post')
-    );
-
-    return $filters;
-  }
-
   public function willProcessRequest(array $data) {
     $phid = $data['phid'];
     $this->setPostPHID($phid);
   }
 
   public function processRequest() {
-    $request = $this->getRequest();
-    $user    = $request->getUser();
-    $post    = id(new PhamePost())->loadOneWhere(
-      'phid = %s',
-      $this->getPostPHID());
+    $request   = $this->getRequest();
+    $user      = $request->getUser();
+    $post_phid = $this->getPostPHID();
+    $posts     = id(new PhamePostQuery())
+      ->withPHIDs(array($post_phid))
+      ->execute();
+    $post      = reset($posts);
     if (empty($post)) {
       return new Aphront404Response();
     }
     if ($post->getBloggerPHID() != $user->getPHID()) {
       return new Aphront403Response();
     }
-    $edit_uri = $post->getEditURI();
+    $post_noun = $post->getHumanName();
 
     if ($request->isFormPost()) {
+      $edge_type = PhabricatorEdgeConfig::TYPE_POST_HAS_BLOG;
+      $edges     = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(array($post_phid))
+        ->withEdgeTypes(array($edge_type))
+        ->execute();
+
+      $blog_edges = $edges[$post_phid][$edge_type];
+      $blog_phids = array_keys($blog_edges);
+      $editor     = id(new PhabricatorEdgeEditor());
+      $editor->setUser($user);
+      foreach ($blog_phids as $phid) {
+        $editor->removeEdge($post_phid, $edge_type, $phid);
+      }
+      $editor->save();
+
       $post->delete();
-      return id(new AphrontRedirectResponse())->setURI('/phame/?deleted');
+      return id(new AphrontRedirectResponse())
+        ->setURI('/phame/'.$post_noun.'/?deleted');
     }
 
-    $dialog = id(new AphrontDialogView())
+    $edit_uri = $post->getEditURI();
+    $dialog   = id(new AphrontDialogView())
       ->setUser($user)
-      ->setTitle('Delete post?')
-      ->appendChild('Really delete this post? It will be gone forever.')
+      ->setTitle('Delete '.$post_noun.'?')
+      ->appendChild('Really delete this '.$post_noun.'? '.
+                    'It will be gone forever.')
       ->addSubmitButton('Delete')
       ->addCancelButton($edit_uri);
 

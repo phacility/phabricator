@@ -31,38 +31,13 @@ final class PhameUserPostListController
   }
 
   protected function getNoticeView() {
-    $user = $this->getRequest()->getUser();
+    $request = $this->getRequest();
 
-    $new_link = phutil_render_tag(
-      'a',
-      array(
-        'href' => '/phame/post/new/',
-        'class' => 'button green',
-      ),
-      'write another blog post'
-    );
-
-    $pretty_uri = PhabricatorEnv::getProductionURI(
-      '/phame/posts/'.$user->getUserName().'/');
-    $pretty_link = phutil_render_tag(
-      'a',
-      array(
-        'href' => (string) $pretty_uri
-      ),
-      (string) $pretty_uri
-    );
-
-    $notices = array(
-      'Seek even more phame and '.$new_link,
-      'Published posts also appear at the awesome, world-accessible '.
-      'URI: '.$pretty_link
-    );
-
-    $notice_view = id(new AphrontErrorView())
-      ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-      ->setTitle('Meta thoughts and feelings');
-    foreach ($notices as $notice) {
-      $notice_view->appendChild('<p>'.$notice.'</p>');
+    if ($request->getExists('deleted')) {
+      $notice_view = $this->buildNoticeView()
+        ->appendChild('Deleted post successfully.');
+    } else {
+      $notice_view = null;
     }
 
     return $notice_view;

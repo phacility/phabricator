@@ -54,17 +54,6 @@ abstract class PhamePostListBaseController
     return false;
   }
 
-  protected function getPager() {
-    $request   = $this->getRequest();
-    $pager     = new AphrontPagerView();
-    $page_size = 50;
-    $pager->setURI($request->getRequestURI(), 'offset');
-    $pager->setPageSize($page_size);
-    $pager->setOffset($request->getInt('offset'));
-
-    return $pager;
-  }
-
   protected function getNoticeView() {
     return null;
   }
@@ -102,7 +91,7 @@ abstract class PhamePostListBaseController
         $pager
       ),
       array(
-        'title'   => $this->getPageTitle(),
+        'title' => $this->getPageTitle(),
       ));
   }
 }

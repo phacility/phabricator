@@ -30,6 +30,11 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_DREV_DEPENDS_ON_DREV       = 5;
   const TYPE_DREV_DEPENDED_ON_BY_DREV   = 6;
 
+  const TYPE_BLOG_HAS_POST              = 7;
+  const TYPE_POST_HAS_BLOG              = 8;
+  const TYPE_BLOG_HAS_BLOGGER           = 9;
+  const TYPE_BLOGGER_HAS_BLOG           = 10;
+
   const TYPE_TEST_NO_CYCLE              = 9000;
 
   public static function getInverse($edge_type) {
@@ -42,6 +47,11 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
       self::TYPE_DREV_DEPENDS_ON_DREV => self::TYPE_DREV_DEPENDED_ON_BY_DREV,
       self::TYPE_DREV_DEPENDED_ON_BY_DREV => self::TYPE_DREV_DEPENDS_ON_DREV,
+
+      self::TYPE_BLOG_HAS_POST    => self::TYPE_POST_HAS_BLOG,
+      self::TYPE_POST_HAS_BLOG    => self::TYPE_BLOG_HAS_POST,
+      self::TYPE_BLOG_HAS_BLOGGER => self::TYPE_BLOGGER_HAS_BLOG,
+      self::TYPE_BLOGGER_HAS_BLOG => self::TYPE_BLOG_HAS_BLOGGER,
     );
 
     return idx($map, $edge_type);
@@ -67,6 +77,8 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       PhabricatorPHIDConstants::PHID_TYPE_MLST  =>
         'PhabricatorMetaMTAMailingList',
       PhabricatorPHIDConstants::PHID_TYPE_TOBJ  => 'HarbormasterObject',
+      PhabricatorPHIDConstants::PHID_TYPE_BLOG  => 'PhameBlog',
+      PhabricatorPHIDConstants::PHID_TYPE_POST  => 'PhamePost',
     );
 
     $class = idx($class_map, $phid_type);
@@ -78,6 +90,5 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
     return newv($class, array())->establishConnection($conn_type);
   }
-
 
 }
