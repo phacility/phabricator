@@ -103,6 +103,24 @@ abstract class PhabricatorBaseEnglishTranslation
         'DEPENDS ON TASKS',
       ),
 
+      'DIFFERENTIAL %d REVISION(S)' => array(
+        'DIFFERENTIAL REVISION',
+        'DIFFERENTIAL REVISIONS',
+      ),
+
+      'added %d revision(s): %s' => array(
+        'added revision: %2$s',
+        'added revisions: %2$s',
+      ),
+
+      'removed %d revision(s): %s' => array(
+        'removed revision: %2$s',
+        'removed revisions: %2$s',
+      ),
+
+      'changed %d revision(s), added %d: %s; removed %d: %s' =>
+        'changed revisions, added %3$s; removed %5$s',
+
     );
   }
 

@@ -248,22 +248,13 @@ final class ManiphestTaskEditController extends ManiphestController {
 
 
         if ($parent_task) {
-          $type_task = PhabricatorPHIDConstants::PHID_TYPE_TASK;
-
-          // NOTE: It's safe to simply apply this transaction without doing
-          // cycle detection because we know the new task has no children.
-          $new_value = $parent_task->getAttached();
-          $new_value[$type_task][$task->getPHID()] = array();
-
-          $parent_xaction = clone $template;
-          $attach_type = ManiphestTransactionType::TYPE_ATTACH;
-          $parent_xaction->setTransactionType($attach_type);
-          $parent_xaction->setNewValue($new_value);
-
-          $editor = new ManiphestTransactionEditor();
-          $editor->setAuxiliaryFields($aux_fields);
-          $editor->applyTransactions($parent_task, array($parent_xaction));
-
+          id(new PhabricatorEdgeEditor())
+            ->setUser($user)
+            ->addEdge(
+              $parent_task->getPHID(),
+              PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK,
+              $task->getPHID())
+            ->save();
           $workflow = $parent_task->getID();
         }
 

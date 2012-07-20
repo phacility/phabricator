@@ -814,7 +814,6 @@ phutil_register_library_map(array(
     'PhabricatorOAuthServerTestController' => 'applications/oauthserver/controller/PhabricatorOAuthServerTestController.php',
     'PhabricatorOAuthServerTokenController' => 'applications/oauthserver/controller/PhabricatorOAuthServerTokenController.php',
     'PhabricatorOAuthUnlinkController' => 'applications/auth/controller/PhabricatorOAuthUnlinkController.php',
-    'PhabricatorObjectAttachmentEditor' => 'applications/search/editor/PhabricatorObjectAttachmentEditor.php',
     'PhabricatorObjectHandle' => 'applications/phid/PhabricatorObjectHandle.php',
     'PhabricatorObjectHandleConstants' => 'applications/phid/handle/const/PhabricatorObjectHandleConstants.php',
     'PhabricatorObjectHandleData' => 'applications/phid/handle/PhabricatorObjectHandleData.php',

@@ -54,6 +54,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $e_commit = PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT;
     $e_dep_on = PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK;
     $e_dep_by = PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK;
+    $e_rev    = PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV;
 
     $phid = $task->getPHID();
 
@@ -64,12 +65,14 @@ final class ManiphestTaskDetailController extends ManiphestController {
           $e_commit,
           $e_dep_on,
           $e_dep_by,
+          $e_rev,
         ));
     $edges = $query->execute();
 
     $commit_phids = array_keys($edges[$phid][$e_commit]);
     $dep_on_tasks = array_keys($edges[$phid][$e_dep_on]);
     $dep_by_tasks = array_keys($edges[$phid][$e_dep_by]);
+    $revs         = array_keys($edges[$phid][$e_rev]);
 
     $phids = array_fill_keys($query->getDestinationPHIDs(), true);
 
@@ -177,10 +180,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
         array_select_keys($handles, $dep_on_tasks));
     }
 
-    $revs = idx($attached, PhabricatorPHIDConstants::PHID_TYPE_DREV);
     if ($revs) {
       $dict['Revisions'] = $this->renderHandleList(
-        array_select_keys($handles, array_keys($revs)));
+        array_select_keys($handles, $revs));
     }
 
     if ($commit_phids) {

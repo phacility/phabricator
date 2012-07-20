@@ -60,6 +60,7 @@ final class PhabricatorSearchAttachController
     switch ($this->action) {
       case self::ACTION_EDGE:
       case self::ACTION_DEPENDENCIES:
+      case self::ACTION_ATTACH:
         $edge_type = $this->getEdgeType($object_type, $attach_type);
         break;
     }
@@ -93,23 +94,7 @@ final class PhabricatorSearchAttachController
 
         return id(new AphrontReloadResponse())->setURI($handle->getURI());
       } else {
-        switch ($this->action) {
-          case self::ACTION_MERGE:
-            return $this->performMerge($object, $handle, $phids);
-          case self::ACTION_ATTACH:
-            $editor = new PhabricatorObjectAttachmentEditor(
-              $object_type,
-              $object);
-            $editor->setUser($this->getRequest()->getUser());
-            $editor->attachObjects(
-              $attach_type,
-              $phids,
-              $two_way = true);
-
-            return id(new AphrontReloadResponse())->setURI($handle->getURI());
-          default:
-            throw new Exception("Unsupported attach action.");
-        }
+        return $this->performMerge($object, $handle, $phids);
       }
     } else {
       if ($edge_type) {
@@ -117,14 +102,8 @@ final class PhabricatorSearchAttachController
           $this->phid,
           $edge_type);
       } else {
-        switch ($this->action) {
-          case self::ACTION_ATTACH:
-            $phids = $object->getAttachedPHIDs($attach_type);
-            break;
-          default:
-            $phids = array();
-            break;
-        }
+        // This is a merge.
+        $phids = array();
       }
     }
 
@@ -282,9 +261,11 @@ final class PhabricatorSearchAttachController
       $t_task => array(
         $t_cmit => PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT,
         $t_task => PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK,
+        $t_drev => PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV,
       ),
       $t_drev => array(
         $t_drev => PhabricatorEdgeConfig::TYPE_DREV_DEPENDS_ON_DREV,
+        $t_task => PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK,
       ),
     );
 

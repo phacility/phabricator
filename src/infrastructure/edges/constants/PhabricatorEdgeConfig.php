@@ -35,6 +35,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_BLOG_HAS_BLOGGER           = 9;
   const TYPE_BLOGGER_HAS_BLOG           = 10;
 
+  const TYPE_TASK_HAS_RELATED_DREV      = 11;
+  const TYPE_DREV_HAS_RELATED_TASK      = 12;
+
   const TYPE_TEST_NO_CYCLE              = 9000;
 
   public static function getInverse($edge_type) {
@@ -52,6 +55,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       self::TYPE_POST_HAS_BLOG    => self::TYPE_BLOG_HAS_POST,
       self::TYPE_BLOG_HAS_BLOGGER => self::TYPE_BLOGGER_HAS_BLOG,
       self::TYPE_BLOGGER_HAS_BLOG => self::TYPE_BLOG_HAS_BLOGGER,
+
+      self::TYPE_TASK_HAS_RELATED_DREV => self::TYPE_DREV_HAS_RELATED_TASK,
+      self::TYPE_DREV_HAS_RELATED_TASK => self::TYPE_TASK_HAS_RELATED_DREV,
     );
 
     return idx($map, $edge_type);

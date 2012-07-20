@@ -623,7 +623,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
     $links = array();
     foreach ($phids as $phid) {
       if ($this->forEmail) {
-        $links[] = $this->handles[$phid]->getName();
+        $links[] = $this->handles[$phid]->getFullName();
       } else {
         $links[] = $this->handles[$phid]->renderLink();
       }
@@ -664,6 +664,8 @@ final class ManiphestTransactionDetailView extends ManiphestView {
   private function getEdgeEmailTitle($type, array $list) {
     $count = count($list);
     switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV:
+        return pht('DIFFERENTIAL %d REVISION(S)', $count);
       case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
         return pht('DEPENDS ON %d TASK(S)', $count);
       case PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK:
@@ -681,6 +683,8 @@ final class ManiphestTransactionDetailView extends ManiphestView {
    */
   private function getEdgeAddVerb($type) {
     switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV:
+        return pht('Added Revision');
       case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
         return pht('Added Dependency');
       case PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK:
@@ -698,6 +702,8 @@ final class ManiphestTransactionDetailView extends ManiphestView {
    */
   private function getEdgeRemVerb($type) {
     switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV:
+        return pht('Removed Revision');
       case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
         return pht('Removed Dependency');
       case PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK:
@@ -715,6 +721,8 @@ final class ManiphestTransactionDetailView extends ManiphestView {
    */
   private function getEdgeEditVerb($type) {
     switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV:
+        return pht('Changed Revisions');
       case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
         return pht('Changed Dependencies');
       case PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK:
@@ -735,6 +743,8 @@ final class ManiphestTransactionDetailView extends ManiphestView {
     $count = count($add);
 
     switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV:
+        return pht('added %d revision(s): %s', $count, $list);
       case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
         return pht('added %d dependencie(s): %s', $count, $list);
       case PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK:
@@ -755,6 +765,8 @@ final class ManiphestTransactionDetailView extends ManiphestView {
     $count = count($rem);
 
     switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV:
+        return pht('removed %d revision(s): %s', $count, $list);
       case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
         return pht('removed %d dependencie(s): %s', $count, $list);
       case PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK:
@@ -777,6 +789,14 @@ final class ManiphestTransactionDetailView extends ManiphestView {
     $rem_count = count($rem_list);
 
     switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV:
+        return pht(
+          'changed %d revision(s), added %d: %s; removed %d: %s',
+          $add_count + $rem_count,
+          $add_count,
+          $add_list,
+          $rem_count,
+          $rem_list);
       case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
         return pht(
           'changed %d dependencie(s), added %d: %s; removed %d: %s',

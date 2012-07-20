@@ -928,6 +928,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('phameblog.sql'),
       ),
+      'migrate-maniphest-revisions.php' => array(
+        'type'    => 'php',
+        'name'    => $this->getPatchPath('migrate-maniphest-revisions.php'),
+      ),
     );
   }
 
