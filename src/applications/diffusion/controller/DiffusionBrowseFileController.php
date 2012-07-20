@@ -210,6 +210,38 @@ final class DiffusionBrowseFileController extends DiffusionController {
         $rows = $this->buildDisplayRows($text_list, $rev_list, $blame_dict,
           $needs_blame, $drequest, $file_query, $selected);
 
+        $id = celerity_generate_unique_node_id();
+
+        $projects = $drequest->loadArcanistProjects();
+        $langs = array();
+        foreach ($projects as $project) {
+          $ls = $project->getSymbolIndexLanguages();
+          if (!$ls) {
+            continue;
+          }
+          $dep_projects = $project->getSymbolIndexProjects();
+          $dep_projects = mpull($dep_projects, 'getPHID');
+          $dep_projects[] = $project->getPHID();
+          foreach ($ls as $lang) {
+            if (!isset($langs[$lang])) {
+              $langs[$lang] = array();
+            }
+            $langs[$lang] += $dep_projects + array($project);
+          }
+        }
+
+        $lang = last(explode('.', $drequest->getPath()));
+
+        if (isset($langs[$lang])) {
+          Javelin::initBehavior(
+            'repository-crossreference',
+            array(
+              'container' => $id,
+              'lang' => $lang,
+              'projects' => $langs[$lang],
+            ));
+        }
+
         $corpus_table = phutil_render_tag(
           'table',
           array(
@@ -220,6 +252,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
           'div',
           array(
             'style' => 'padding: 0 2em;',
+            'id' => $id,
           ),
           $corpus_table);
 

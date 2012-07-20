@@ -41,6 +41,7 @@ abstract class DiffusionRequest {
   protected $repositoryCommit;
   protected $repositoryCommitData;
   protected $stableCommitName;
+  protected $arcanistProjects;
 
   abstract protected function getSupportsBranches();
   abstract protected function didInitialize();
@@ -233,6 +234,16 @@ abstract class DiffusionRequest {
       $this->repositoryCommit = $commit;
     }
     return $this->repositoryCommit;
+  }
+
+  public function loadArcanistProjects() {
+    if (empty($this->arcanistProjects)) {
+      $projects = id(new PhabricatorRepositoryArcanistProject())->loadAllWhere(
+        'repositoryID = %d',
+        $this->getRepository()->getID());
+      $this->arcanistProjects = $projects;
+    }
+    return $this->arcanistProjects;
   }
 
   public function loadCommitData() {
