@@ -1668,6 +1668,19 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/projects/behavior-project-create.js',
   ),
+  'javelin-behavior-punchcard' =>
+  array(
+    'uri' => '/res/2d086de7/rsrc/js/application/people/behavior_punchcard.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-vector',
+      3 => 'raphael-g-dot',
+    ),
+    'disk' => '/rsrc/js/application/people/behavior_punchcard.js',
+  ),
   'javelin-behavior-refresh-csrf' =>
   array(
     'uri' => '/res/88beba4c/rsrc/js/application/core/behavior-refresh-csrf.js',
@@ -2884,6 +2897,17 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/js/raphael/g.raphael.js',
+  ),
+  'raphael-g-dot' =>
+  array(
+    'uri' => '/res/12eb50ec/rsrc/js/raphael/g.raphael.dot.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'raphael-core',
+      1 => 'raphael-g',
+    ),
+    'disk' => '/rsrc/js/raphael/g.raphael.dot.js',
   ),
   'raphael-g-line' =>
   array(
