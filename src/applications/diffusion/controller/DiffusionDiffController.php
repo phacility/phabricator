@@ -65,6 +65,7 @@ final class DiffusionDiffController extends DiffusionController {
     }
 
     $parser = new DifferentialChangesetParser();
+    $parser->setUser($user);
     $parser->setChangeset($changeset);
     $parser->setRenderingReference($diff_query->getRenderingReference());
     $parser->setMarkupEngine(

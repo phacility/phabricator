@@ -264,7 +264,7 @@ final class DiffusionCommitController extends DiffusionController {
         '/diffusion/'.$callsign.'/diff/?view=r');
 
       $change_list->setInlineCommentControllerURI(
-        '/diffusion/inline/'.phutil_escape_uri($commit->getPHID()).'/');
+        '/diffusion/inline/edit/'.phutil_escape_uri($commit->getPHID()).'/');
 
       // TODO: This is pretty awkward, unify the CSS between Diffusion and
       // Differential better.
@@ -580,6 +580,8 @@ final class DiffusionCommitController extends DiffusionController {
         'auditors' => 'add-auditors-tokenizer',
         'ccs'      => 'add-ccs-tokenizer',
       ),
+      'inline'     => 'inline-comment-preview',
+      'inlineuri'  => '/diffusion/inline/preview/'.$commit->getPHID().'/',
     ));
 
     $preview_panel =
@@ -588,6 +590,8 @@ final class DiffusionCommitController extends DiffusionController {
           <div class="aphront-panel-preview-loading-text">
             Loading preview...
           </div>
+        </div>
+        <div id="inline-comment-preview">
         </div>
       </div>';
 

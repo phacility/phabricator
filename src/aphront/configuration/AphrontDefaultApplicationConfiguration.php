@@ -257,7 +257,11 @@ class AphrontDefaultApplicationConfiguration
           'tags/(?P<dblob>.*)'          => 'DiffusionTagListController',
           'branches/(?P<dblob>.*)'      => 'DiffusionBranchTableController',
         ),
-        'inline/(?P<phid>[^/]+)/' => 'DiffusionInlineCommentController',
+        'inline/' => array(
+          'edit/(?P<phid>[^/]+)/'    => 'DiffusionInlineCommentController',
+          'preview/(?P<phid>[^/]+)/' =>
+            'DiffusionInlineCommentPreviewController',
+        ),
         'services/' => array(
           'path/' => array(
             'complete/' => 'DiffusionPathCompleteController',

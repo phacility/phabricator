@@ -16,24 +16,23 @@
  * limitations under the License.
  */
 
-final class DifferentialInlineCommentPreviewController
-extends PhabricatorInlineCommentPreviewController {
+final class DiffusionInlineCommentPreviewController
+  extends PhabricatorInlineCommentPreviewController {
 
-  private $revisionID;
+  private $commitPHID;
 
   public function willProcessRequest(array $data) {
-    $this->revisionID = $data['id'];
+    $this->commitPHID = $data['phid'];
   }
 
   protected function loadInlineComments() {
     $user = $this->getRequest()->getUser();
 
-    $inlines = id(new DifferentialInlineComment())->loadAllWhere(
-      'authorPHID = %s AND revisionID = %d AND commentID IS NULL',
+    $inlines = id(new PhabricatorAuditInlineComment())->loadAllWhere(
+      'authorPHID = %s AND commitPHID = %s AND auditCommentID IS NULL',
       $user->getPHID(),
-      $this->revisionID);
+      $this->commitPHID);
 
     return $inlines;
   }
-
 }
