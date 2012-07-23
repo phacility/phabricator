@@ -145,7 +145,7 @@ $application->setPath($path);
 $application->willBuildRequest();
 $request = $application->buildRequest();
 
-$write_guard = new AphrontWriteGuard($request);
+$write_guard = new AphrontWriteGuard(array($request, 'validateCSRF'));
 PhabricatorEventEngine::initialize();
 
 $application->setRequest($request);

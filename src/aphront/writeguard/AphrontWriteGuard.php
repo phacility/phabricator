@@ -51,7 +51,7 @@ final class AphrontWriteGuard {
   private static $instance;
   private static $allowUnguardedWrites = false;
 
-  private $request;
+  private $callback;
   private $allowDepth = 0;
 
 
@@ -63,18 +63,23 @@ final class AphrontWriteGuard {
    * active at a time. You must explicitly call @{method:dispose} when you are
    * done with a write guard:
    *
-   *    $guard = new AphrontWriteGuard();
+   *    $guard = new AphrontWriteGuard($callback);
    *    // ...
    *    $guard->dispose();
    *
    * Normally, you do not need to manage guards yourself -- the Aphront stack
    * handles it for you.
    *
-   * @param   AphrontRequest  Request to read CSRF token information from.
+   * This class accepts a callback, which will be invoked when a write is
+   * attempted. The callback should validate the presence of a CSRF token in
+   * the request, or abort the request (e.g., by throwing an exception) if a
+   * valid token isn't present.
+   *
+   * @param   callable CSRF callback.
    * @return  this
    * @task    manage
    */
-  public function __construct(AphrontRequest $request) {
+  public function __construct($callback) {
     if (self::$instance) {
       throw new Exception(
         "An AphrontWriteGuard already exists. Dispose of the previous guard ".
@@ -86,7 +91,7 @@ final class AphrontWriteGuard {
         "unguarded writes unconditionally. This is not allowed and indicates ".
         "a serious error.");
     }
-    $this->request = $request;
+    $this->callback = $callback;
     self::$instance = $this;
   }
 
@@ -154,9 +159,8 @@ final class AphrontWriteGuard {
     }
 
     $instance = self::$instance;
-
     if ($instance->allowDepth == 0) {
-      $instance->request->validateCSRF();
+      call_user_func($instance->callback);
     }
   }
 
@@ -256,6 +260,8 @@ final class AphrontWriteGuard {
 
   /**
    * When the object is destroyed, make sure @{method:dispose} was called.
+   *
+   * @task internal
    */
   public function __destruct() {
     if (isset(self::$instance)) {
