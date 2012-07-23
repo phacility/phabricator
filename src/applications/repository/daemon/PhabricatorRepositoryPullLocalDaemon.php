@@ -724,11 +724,8 @@ final class PhabricatorRepositoryPullLocalDaemon
    * @task git
    */
   public static function executeGitVerifySameOrigin($remote, $expect, $where) {
-    $remote_uri = PhabricatorRepository::newPhutilURIFromGitURI($remote);
-    $expect_uri = PhabricatorRepository::newPhutilURIFromGitURI($expect);
-
-    $remote_path = $remote_uri->getPath();
-    $expect_path = $expect_uri->getPath();
+    $remote_path = self::getPathFromGitURI($remote);
+    $expect_path = self::getPathFromGitURI($expect);
 
     $remote_match = self::executeGitNormalizePath($remote_path);
     $expect_match = self::executeGitNormalizePath($expect_path);
@@ -743,14 +740,28 @@ final class PhabricatorRepositoryPullLocalDaemon
     }
   }
 
+  private static function getPathFromGitURI($raw_uri) {
+    $uri = new PhutilURI($raw_uri);
+    if ($uri->getProtocol()) {
+      return $uri->getPath();
+    }
+
+    $uri = new PhutilGitURI($raw_uri);
+    if ($uri->getDomain()) {
+      return $uri->getPath();
+    }
+
+    return $raw_uri;
+  }
+
 
   /**
    * @task git
    */
   private static function executeGitNormalizePath($path) {
-    // Strip away trailing "/" and ".git", so similar paths correctly match.
+    // Strip away "/" and ".git", so similar paths correctly match.
 
-    $path = rtrim($path, '/');
+    $path = trim($path, '/');
     $path = preg_replace('/\.git$/', '', $path);
     return $path;
   }

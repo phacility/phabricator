@@ -70,99 +70,88 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
       ));
   }
 
-  public static function newPhutilURIFromGitURI($raw_uri) {
-    $uri = new PhutilURI($raw_uri);
-    if (!$uri->getProtocol()) {
-      if (strpos($raw_uri, '/') === 0) {
-        // If the URI starts with a '/', it's an implicit file:// URI on the
-        // local disk.
-        $uri = new PhutilURI('file://'.$raw_uri);
-      } else if (strpos($raw_uri, ':') !== false) {
-        // If there's no protocol (git implicit SSH) but the URI has a colon,
-        // it's a git implicit SSH URI. Reformat the URI to be a normal URI.
-        // These git URIs look like "user@domain.com:path" instead of
-        // "ssh://user@domain/path".
-        list($domain, $path) = explode(':', $raw_uri, 2);
-        $uri = new PhutilURI('ssh://'.$domain.'/'.$path);
-      } else {
-        throw new Exception("The Git URI '{$raw_uri}' could not be parsed.");
-      }
-    }
-
-    return $uri;
-  }
-
   public function getRemoteURI() {
     $raw_uri = $this->getDetail('remote-uri');
     if (!$raw_uri) {
       return null;
     }
 
-    $vcs = $this->getVersionControlSystem();
-    $is_git = ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_GIT);
-
-    if ($is_git) {
-      $uri = self::newPhutilURIFromGitURI($raw_uri);
-    } else {
-      $uri = new PhutilURI($raw_uri);
+    if (strpos($raw_uri, '/') === 0) {
+      // If the URI starts with a '/', it's an implicit file:// URI on the
+      // local disk.
+      $uri = new PhutilURI('file://'.$raw_uri);
+      return (string)$uri;
     }
 
-    if ($this->isSSHProtocol($uri->getProtocol())) {
+    $uri = new PhutilURI($raw_uri);
+    if ($uri->getProtocol()) {
+      if ($this->isSSHProtocol($uri->getProtocol())) {
+        if ($this->getSSHLogin()) {
+          $uri->setUser($this->getSSHLogin());
+        }
+      }
+      return (string)$uri;
+    }
+
+    $uri = new PhutilGitURI($raw_uri);
+    if ($uri->getDomain()) {
       if ($this->getSSHLogin()) {
         $uri->setUser($this->getSSHLogin());
       }
+      return (string)$uri;
     }
 
-    return (string)$uri;
+    throw new Exception(
+      "Repository remote URI '{$raw_uri}' could not be parsed!");
   }
 
   public function getLocalPath() {
     return $this->getDetail('local-path');
   }
 
-  public function execRemoteCommand($pattern /*, $arg, ... */) {
+  public function execRemoteCommand($pattern /* , $arg, ... */) {
     $args = func_get_args();
     $args = $this->formatRemoteCommand($args);
     return call_user_func_array('exec_manual', $args);
   }
 
-  public function execxRemoteCommand($pattern /*, $arg, ... */) {
+  public function execxRemoteCommand($pattern /* , $arg, ... */) {
     $args = func_get_args();
     $args = $this->formatRemoteCommand($args);
     return call_user_func_array('execx', $args);
   }
 
-  public function getRemoteCommandFuture($pattern /*, $arg, ... */) {
+  public function getRemoteCommandFuture($pattern /* , $arg, ... */) {
     $args = func_get_args();
     $args = $this->formatRemoteCommand($args);
     return newv('ExecFuture', $args);
   }
 
-  public function passthruRemoteCommand($pattern /*, $arg, ... */) {
+  public function passthruRemoteCommand($pattern /* , $arg, ... */) {
     $args = func_get_args();
     $args = $this->formatRemoteCommand($args);
     return call_user_func_array('phutil_passthru', $args);
   }
 
-  public function execLocalCommand($pattern /*, $arg, ... */) {
+  public function execLocalCommand($pattern /* , $arg, ... */) {
     $args = func_get_args();
     $args = $this->formatLocalCommand($args);
     return call_user_func_array('exec_manual', $args);
   }
 
-  public function execxLocalCommand($pattern /*, $arg, ... */) {
+  public function execxLocalCommand($pattern /* , $arg, ... */) {
     $args = func_get_args();
     $args = $this->formatLocalCommand($args);
     return call_user_func_array('execx', $args);
   }
 
-  public function getLocalCommandFuture($pattern /*, $arg, ... */) {
+  public function getLocalCommandFuture($pattern /* , $arg, ... */) {
     $args = func_get_args();
     $args = $this->formatLocalCommand($args);
     return newv('ExecFuture', $args);
 
   }
-  public function passthruLocalCommand($pattern /*, $arg, ... */) {
+  public function passthruLocalCommand($pattern /* , $arg, ... */) {
     $args = func_get_args();
     $args = $this->formatLocalCommand($args);
     return call_user_func_array('phutil_passthru', $args);
