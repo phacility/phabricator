@@ -220,7 +220,6 @@ final class DiffusionBrowseFileController extends DiffusionController {
             continue;
           }
           $dep_projects = $project->getSymbolIndexProjects();
-          $dep_projects = mpull($dep_projects, 'getPHID');
           $dep_projects[] = $project->getPHID();
           foreach ($ls as $lang) {
             if (!isset($langs[$lang])) {
