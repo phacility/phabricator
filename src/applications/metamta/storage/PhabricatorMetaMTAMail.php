@@ -448,12 +448,23 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
             $prefs = null;
             if ($use_prefs) {
-              $to = idx($params, 'to', array());
-              $user = id(new PhabricatorUser())->loadOneWhere(
-                'phid = %s',
-                head($to));
-              if ($user) {
-                $prefs = $user->loadPreferences();
+
+              // If multiplexing is enabled, some recipients will be in "Cc"
+              // rather than "To". We'll move them to "To" later (or supply a
+              // dummy "To") but need to look for the recipient in either the
+              // "To" or "Cc" fields here.
+              $target_phid = head(idx($params, 'to', array()));
+              if (!$target_phid) {
+                $target_phid = head(idx($params, 'cc', array()));
+              }
+
+              if ($target_phid) {
+                $user = id(new PhabricatorUser())->loadOneWhere(
+                  'phid = %s',
+                  $target_phid);
+                if ($user) {
+                  $prefs = $user->loadPreferences();
+                }
               }
             }
 
