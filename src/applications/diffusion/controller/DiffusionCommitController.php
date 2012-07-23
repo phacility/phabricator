@@ -149,6 +149,7 @@ final class DiffusionCommitController extends DiffusionController {
         'r'.$callsign.$commit->getCommitIdentifier());
     }
 
+    $pane_id = null;
     if ($bad_commit) {
       $error_panel = new AphrontErrorView();
       $error_panel->setWidth(AphrontErrorView::WIDTH_WIDE);
@@ -268,15 +269,21 @@ final class DiffusionCommitController extends DiffusionController {
       // TODO: This is pretty awkward, unify the CSS between Diffusion and
       // Differential better.
       require_celerity_resource('differential-core-view-css');
-      $change_list =
-        '<div class="differential-primary-pane">'.
-          $change_list->render().
-        '</div>';
+      $pane_id = celerity_generate_unique_node_id();
+      $add_comment_view = $this->renderAddCommentPanel($commit,
+                                                       $audit_requests,
+                                                       $pane_id);
+      $main_pane = phutil_render_tag(
+        'div',
+        array(
+          'class' => 'differential-primary-pane',
+          'id'    => $pane_id
+        ),
+        $change_list->render().
+        $add_comment_view);
 
-      $content[] = $change_list;
+      $content[] = $main_pane;
     }
-
-    $content[] = $this->buildAddCommentView($commit, $audit_requests);
 
     return $this->buildStandardPageResponse(
       $content,
@@ -462,9 +469,10 @@ final class DiffusionCommitController extends DiffusionController {
     return $view;
   }
 
-  private function buildAddCommentView(
+  private function renderAddCommentPanel(
     PhabricatorRepositoryCommit $commit,
-    array $audit_requests) {
+    array $audit_requests,
+    $pane_id = null) {
     assert_instances_of($audit_requests, 'PhabricatorRepositoryAuditRequest');
     $user = $this->getRequest()->getUser();
 
@@ -473,8 +481,7 @@ final class DiffusionCommitController extends DiffusionController {
     Javelin::initBehavior(
       'differential-keyboard-navigation',
       array(
-        // TODO: Make this comment panel hauntable
-        'haunt' => null,
+        'haunt' => $pane_id,
       ));
 
     $draft = id(new PhabricatorDraft())->loadOneWhere(
@@ -537,6 +544,8 @@ final class DiffusionCommitController extends DiffusionController {
     $panel = new AphrontPanelView();
     $panel->setHeader($is_serious ? 'Audit Commit' : 'Creative Accounting');
     $panel->appendChild($form);
+    $panel->addClass('aphront-panel-accent');
+    $panel->addClass('aphront-panel-flush');
 
     require_celerity_resource('phabricator-transaction-view-css');
 
@@ -574,7 +583,7 @@ final class DiffusionCommitController extends DiffusionController {
     ));
 
     $preview_panel =
-      '<div class="aphront-panel-preview">
+      '<div class="aphront-panel-preview aphront-panel-flush">
         <div id="audit-preview">
           <div class="aphront-panel-preview-loading-text">
             Loading preview...
@@ -582,12 +591,15 @@ final class DiffusionCommitController extends DiffusionController {
         </div>
       </div>';
 
-    $view = new AphrontNullView();
-    $view->appendChild($panel);
-    $view->appendChild($preview_panel);
-    return $view;
+    return
+      phutil_render_tag(
+        'div',
+        array(
+          'class' => 'differential-add-comment-panel',
+        ),
+        $panel->render().
+        $preview_panel);
   }
-
 
   /**
    * Return a map of available audit actions for rendering into a <select />.
