@@ -619,11 +619,15 @@ final class ManiphestTransactionDetailView extends ManiphestView {
       'show details');
   }
 
-  private function renderHandles($phids) {
+  private function renderHandles($phids, $full = false) {
     $links = array();
     foreach ($phids as $phid) {
       if ($this->forEmail) {
-        $links[] = $this->handles[$phid]->getFullName();
+        if ($full) {
+          $links[] = $this->handles[$phid]->getFullName();
+        } else {
+          $links[] = $this->handles[$phid]->getName();
+        }
       } else {
         $links[] = $this->handles[$phid]->renderLink();
       }
@@ -739,7 +743,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
    * @task strings
    */
   private function getEdgeAddList($type, array $add) {
-    $list = $this->renderHandles(array_keys($add));
+    $list = $this->renderHandles(array_keys($add), $full = true);
     $count = count($add);
 
     switch ($type) {
@@ -761,7 +765,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
    * @task strings
    */
   private function getEdgeRemList($type, array $rem) {
-    $list = $this->renderHandles(array_keys($rem));
+    $list = $this->renderHandles(array_keys($rem), $full = true);
     $count = count($rem);
 
     switch ($type) {
@@ -783,8 +787,8 @@ final class ManiphestTransactionDetailView extends ManiphestView {
    * @task strings
    */
   private function getEdgeEditList($type, array $add, array $rem) {
-    $add_list = $this->renderHandles(array_keys($add));
-    $rem_list = $this->renderHandles(array_keys($rem));
+    $add_list = $this->renderHandles(array_keys($add), $full = true);
+    $rem_list = $this->renderHandles(array_keys($rem), $full = true);
     $add_count = count($add_list);
     $rem_count = count($rem_list);
 
