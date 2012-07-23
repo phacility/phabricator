@@ -6,12 +6,12 @@ plan.
 
 = Overview =
 
-When you send a revision for review in Differential you must include a test
-plan. A test plan is a repeatable list of steps which document what you have
-done to verify the behavior of a change. A good test plan convinces a reviewer
-that you have been thorough in making sure your change works as intended and
-has enough detail to allow someone unfamiliar with your change to verify its
-behavior.
+When you send a revision for review in Differential you must include a test plan
+(this can be disabled or made optional in the config). A test plan is a
+repeatable list of steps which document what you have done to verify the
+behavior of a change. A good test plan convinces a reviewer that you have been
+thorough in making sure your change works as intended and has enough detail to
+allow someone unfamiliar with your change to verify its behavior.
 
 This document has some common things to think about when developing or reviewing
 a test plan. Some of these suggestions might not be applicable to the software
@@ -28,8 +28,9 @@ you are writing; they are adapted from Facebook's internal documentation.
     thrift, or databases? Are you adding new cachekeys or queries? Will
     this change add a lot of load to services?
   - **Performance:** How does your change affect performance? **NOTE**: If
-    your change is a performance-motivated change, you should include profiles
-    in your test plan proving that you have improved performance.
+    your change is a performance-motivated change, you should include
+    measurements, profiles or other data in your test plan proving that you have
+    improved performance.
   - **Unit Tests:** Is your change adequately covered by unit tests? Could you
     improve test coverage? If you're fixing a bug, did you add a test to prevent
     it from happening again? Are the unit tests testing just the code in
@@ -41,7 +42,7 @@ you are writing; they are adapted from Facebook's internal documentation.
     order of some function from ##f(a, b)## to ##f(b, a)## and a new callsite is
     introduced in the meantime, could it go unnoticed? How bad would that be?
     (Because of this risk, you should almost never make parameter order
-    changes.)
+    changes in weakly typed languages like PHP and Javascript.)
   - **Revert Plan:** If your change needs to be reverted and you aren't around,
     are any special steps or considerations that the reverter needs to know
     about? If there are, make sure they're adequately described in the "Revert
