@@ -33,13 +33,6 @@ class ConduitAPI_maniphest_query_Method
 
   public function defineParamTypes() {
 
-    $orders = array(
-      ManiphestTaskQuery::ORDER_PRIORITY,
-      ManiphestTaskQuery::ORDER_CREATED,
-      ManiphestTaskQuery::ORDER_MODIFIED,
-    );
-    $orders = implode(', ', $orders);
-
     $statuses = array(
       ManiphestTaskQuery::STATUS_ANY,
       ManiphestTaskQuery::STATUS_OPEN,
@@ -52,14 +45,22 @@ class ConduitAPI_maniphest_query_Method
     );
     $statuses = implode(', ', $statuses);
 
+    $orders = array(
+      ManiphestTaskQuery::ORDER_PRIORITY,
+      ManiphestTaskQuery::ORDER_CREATED,
+      ManiphestTaskQuery::ORDER_MODIFIED,
+    );
+    $orders = implode(', ', $orders);
+
     return array(
       'ownerPHIDs'        => 'optional list',
       'authorPHIDs'       => 'optional list',
       'projectPHIDs'      => 'optional list',
       'ccPHIDs'           => 'optional list',
+      'fullText'          => 'optional string',
 
-      'order'             => 'optional enum<'.$orders.'>',
       'status'            => 'optional enum<'.$statuses.'>',
+      'order'             => 'optional enum<'.$orders.'>',
 
       'limit'             => 'optional int',
       'offset'            => 'optional int',
@@ -98,14 +99,19 @@ class ConduitAPI_maniphest_query_Method
       $query->withSubscribers($ccs);
     }
 
-    $order = $request->getValue('order');
-    if ($order) {
-      $query->setOrderBy($order);
+    $full_text = $request->getValue('fullText');
+    if ($full_text) {
+      $query->withFullTextSearch($full_text);
     }
 
     $status = $request->getValue('status');
     if ($status) {
       $query->withStatus($status);
+    }
+
+    $order = $request->getValue('order');
+    if ($order) {
+      $query->setOrderBy($order);
     }
 
     $limit = $request->getValue('limit');
