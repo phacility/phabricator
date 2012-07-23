@@ -108,6 +108,17 @@ final class AphrontWriteGuard {
   }
 
 
+  /**
+   * Determine if there is an active write guard.
+   *
+   * @return bool
+   * @task manage
+   */
+  public static function isGuardActive() {
+    return (bool)self::$instance;
+  }
+
+
 /* -(  Protecting Writes  )-------------------------------------------------- */
 
 

@@ -95,7 +95,11 @@ final class PhabricatorFeedStoryManiphest
       case ManiphestAction::ACTION_ASSIGN:
       case ManiphestAction::ACTION_REASSIGN:
         if ($owner_phid) {
-          $one_line = "{$actor_link} {$verb} to {$owner_link}";
+          if ($owner_phid == $actor_phid) {
+            $one_line = "{$actor_link} claimed {$task_link}";
+          } else {
+            $one_line = "{$actor_link} {$verb} {$task_link} to {$owner_link}";
+          }
         } else {
           $one_line = "{$actor_link} placed {$task_link} up for grabs";
         }
@@ -107,4 +111,19 @@ final class PhabricatorFeedStoryManiphest
 
     return $one_line;
   }
+
+  public function getNotificationAggregations() {
+    $class = get_class($this);
+    $phid  = $this->getStoryData()->getValue('taskPHID');
+    $read  = (int)$this->getHasViewed();
+
+    // Don't aggregate updates separated by more than 2 hours.
+    $block = (int)($this->getEpoch() / (60 * 60 * 2));
+
+    return array(
+      "{$class}:{$phid}:{$read}:{$block}"
+        => 'PhabricatorFeedStoryManiphestAggregate',
+    );
+  }
+
 }

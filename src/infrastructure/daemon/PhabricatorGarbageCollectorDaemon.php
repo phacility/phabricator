@@ -46,7 +46,7 @@ final class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
 
       if ($now < $start || $now > ($start + $run_for)) {
         if ($just_ran) {
-          echo "Stopped garbage collector.\n";
+          $this->log("Stopped garbage collector.");
           $just_ran = false;
         }
         // The configuration says we can't collect garbage right now, so
@@ -56,27 +56,26 @@ final class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
       }
 
       if (!$just_ran) {
-        echo "Started garbage collector.\n";
+        $this->log("Started garbage collector.");
         $just_ran = true;
       }
 
       $n_herald = $this->collectHeraldTranscripts();
       $n_daemon = $this->collectDaemonLogs();
       $n_parse  = $this->collectParseCaches();
+      $n_markup = $this->collectMarkupCaches();
 
       $collected = array(
         'Herald Transcript'           => $n_herald,
         'Daemon Log'                  => $n_daemon,
         'Differential Parse Cache'    => $n_parse,
+        'Markup Cache'                => $n_markup,
       );
       $collected = array_filter($collected);
 
       foreach ($collected as $thing => $count) {
-        if ($thing == 'Daemon Log' && !$this->getTraceMode()) {
-          continue;
-        }
         $count = number_format($count);
-        echo "Garbage collected {$count} '{$thing}' objects.\n";
+        $this->log("Garbage collected {$count} '{$thing}' objects.");
       }
 
       $total = array_sum($collected);
@@ -149,6 +148,25 @@ final class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
       $conn_w,
       'DELETE FROM %T WHERE dateCreated < %d LIMIT 100',
       DifferentialChangeset::TABLE_CACHE,
+      time() - $ttl);
+
+    return $conn_w->getAffectedRows();
+  }
+
+  private function collectMarkupCaches() {
+    $key = 'gcdaemon.ttl.markup-cache';
+    $ttl = PhabricatorEnv::getEnvConfig($key);
+    if ($ttl <= 0) {
+      return 0;
+    }
+
+    $table = new PhabricatorMarkupCache();
+    $conn_w = $table->establishConnection('w');
+
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T WHERE dateCreated < %d LIMIT 100',
+      $table->getTableName(),
       time() - $ttl);
 
     return $conn_w->getAffectedRows();

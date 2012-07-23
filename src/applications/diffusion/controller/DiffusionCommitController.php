@@ -21,6 +21,7 @@ final class DiffusionCommitController extends DiffusionController {
   const CHANGES_LIMIT = 100;
 
   private $auditAuthorityPHIDs;
+  private $highlightedAudits;
 
   public function willProcessRequest(array $data) {
     // This controller doesn't use blob/path stuff, just pass the dictionary
@@ -119,9 +120,23 @@ final class DiffusionCommitController extends DiffusionController {
       $changes = array_slice($changes, 0, self::CHANGES_LIMIT);
     }
 
+    $owners_paths = array();
+    if ($this->highlightedAudits) {
+      $packages = id(new PhabricatorOwnersPackage())->loadAllWhere(
+        'phid IN (%Ls)',
+        mpull($this->highlightedAudits, 'getAuditorPHID'));
+      if ($packages) {
+        $owners_paths = id(new PhabricatorOwnersPath())->loadAllWhere(
+          'repositoryPHID = %s AND packageID IN (%Ld)',
+          $repository->getPHID(),
+          mpull($packages, 'getID'));
+      }
+    }
+
     $change_table = new DiffusionCommitChangeTableView();
     $change_table->setDiffusionRequest($drequest);
     $change_table->setPathChanges($changes);
+    $change_table->setOwnersPaths($owners_paths);
 
     $count = count($changes);
 
@@ -361,16 +376,10 @@ final class DiffusionCommitController extends DiffusionController {
 
     $request = $this->getDiffusionRequest();
 
-    $contains = DiffusionContainsQuery::newFromDiffusionRequest($request);
-    $branches = $contains->loadContainingBranches();
-
+    $branches = $this->buildBranches($request);
     if ($branches) {
-      // TODO: Separate these into 'tracked' and other; link tracked branches.
-      $branches = implode(', ', array_keys($branches));
-      $branches = phutil_escape_html($branches);
       $props['Branches'] = $branches;
     }
-
 
     $tags = $this->buildTags($request);
     if ($tags) {
@@ -379,7 +388,7 @@ final class DiffusionCommitController extends DiffusionController {
 
     $refs = $this->buildRefs($request);
     if ($refs) {
-      $props['Refs'] = $refs;
+      $props['References'] = $refs;
     }
 
     if ($task_phids) {
@@ -410,6 +419,7 @@ final class DiffusionCommitController extends DiffusionController {
     $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
     $view->setHandles($handles);
     $view->setAuthorityPHIDs($this->auditAuthorityPHIDs);
+    $this->highlightedAudits = $view->getHighlightedAudits();
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Audits');
@@ -761,6 +771,32 @@ final class DiffusionCommitController extends DiffusionController {
     return $action_list;
   }
 
+  private function buildBranches(DiffusionRequest $request) {
+
+    $branch_query = DiffusionContainsQuery::newFromDiffusionRequest($request);
+    $branches = $branch_query->loadContainingBranches();
+
+    if (!$branches) {
+      return null;
+    }
+
+    $branch_links = array();
+    foreach ($branches as $branch => $commit) {
+      $branch_links[] = phutil_render_tag(
+        'a',
+        array(
+          'href' => $request->generateURI(
+            array(
+              'action'  => 'browse',
+              'branch'  => $branch,
+            )),
+        ),
+        phutil_escape_html($branch));
+    }
+    $branch_links = implode(', ', $branch_links);
+    return $branch_links;
+  }
+
   private function buildTags(DiffusionRequest $request) {
     $tag_limit = 10;
 
@@ -822,30 +858,41 @@ final class DiffusionCommitController extends DiffusionController {
       '%d',
       $request->getCommit());
 
-    return trim($stdout, "() \n");
+    // %d, gives a weird output format
+    // similar to (remote/one, remote/two, remote/three)
+    $refs = trim($stdout, "() \n");
+    if (!$refs) {
+        return null;
+    }
+    $refs = explode(',', $refs);
+    $refs = array_map('trim', $refs);
+
+    $ref_links = array();
+    foreach ($refs as $ref) {
+      $ref_links[] = phutil_render_tag(
+        'a',
+        array(
+          'href' => $request->generateURI(
+            array(
+              'action'  => 'browse',
+              'branch'  => $ref,
+            )),
+        ),
+        phutil_escape_html($ref));
+    }
+    $ref_links = implode(', ', $ref_links);
+    return $ref_links;
   }
 
   private function buildRawDiffResponse(DiffusionRequest $drequest) {
     $raw_query = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest);
     $raw_diff  = $raw_query->loadRawDiff();
 
-    $hash = PhabricatorHash::digest($raw_diff);
-
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'contentHash = %s LIMIT 1',
-      $hash);
-    if (!$file) {
-      // We're just caching the data; this is always safe.
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-
-      $file = PhabricatorFile::newFromFileData(
-        $raw_diff,
-        array(
-          'name' => $drequest->getCommit().'.diff',
-        ));
-
-      unset($unguarded);
-    }
+    $file = PhabricatorFile::buildFromFileDataOrHash(
+      $raw_diff,
+      array(
+        'name' => $drequest->getCommit().'.diff',
+      ));
 
     return id(new AphrontRedirectResponse())->setURI($file->getBestURI());
   }

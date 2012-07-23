@@ -41,6 +41,7 @@ abstract class DiffusionRequest {
   protected $repositoryCommit;
   protected $repositoryCommitData;
   protected $stableCommitName;
+  protected $arcanistProjects;
 
   abstract protected function getSupportsBranches();
   abstract protected function didInitialize();
@@ -233,6 +234,16 @@ abstract class DiffusionRequest {
       $this->repositoryCommit = $commit;
     }
     return $this->repositoryCommit;
+  }
+
+  public function loadArcanistProjects() {
+    if (empty($this->arcanistProjects)) {
+      $projects = id(new PhabricatorRepositoryArcanistProject())->loadAllWhere(
+        'repositoryID = %d',
+        $this->getRepository()->getID());
+      $this->arcanistProjects = $projects;
+    }
+    return $this->arcanistProjects;
   }
 
   public function loadCommitData() {
@@ -475,7 +486,7 @@ abstract class DiffusionRequest {
     // Consume the back part of the URI, up to the first "$". Use a negative
     // lookbehind to prevent matching '$$'. We double the '$' symbol when
     // encoding so that files with names like "money/$100" will survive.
-    $pattern = '@(?:(?:^|[^$])(?:[$][$])*)[$]([\d-]+)$@';
+    $pattern = '@(?:(?:^|[^$])(?:[$][$])*)[$]([\d-,]+)$@';
     if (preg_match($pattern, $blob, $matches)) {
       $result['line'] = $matches[1];
       $blob = substr($blob, 0, -(strlen($matches[1]) + 1));

@@ -162,7 +162,7 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
       $exception_mail = new DifferentialExceptionMail(
         $this->getMailReceiver(),
         $ex,
-        $body);
+        $this->receivedMail->getRawTextBody());
 
       $exception_mail->setToPHIDs(array($this->getActor()->getPHID()));
       $exception_mail->send();

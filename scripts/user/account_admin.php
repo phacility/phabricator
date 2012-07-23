@@ -136,7 +136,7 @@ printf(
   $tpl,
   'Admin',
   $original->getIsAdmin() ? 'Y' : 'N',
-  $user->getIsAdmin() ? 'Y' : 'N');
+  $set_admin ? 'Y' : 'N');
 
 echo "\n";
 
@@ -166,7 +166,8 @@ $user->openTransaction();
   $editor->makeAdminUser($user, $set_admin);
 
   if ($changed_pass !== false) {
-    $editor->changePassword($user, $changed_pass);
+    $envelope = new PhutilOpaqueEnvelope($changed_pass);
+    $editor->changePassword($user, $envelope);
   }
 
 $user->saveTransaction();

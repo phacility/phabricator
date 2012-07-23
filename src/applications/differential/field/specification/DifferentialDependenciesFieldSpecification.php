@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,9 +46,9 @@ final class DifferentialDependenciesFieldSpecification
   }
 
   private function getDependentRevisionPHIDs() {
-    $revision = $this->getRevision();
-    return $revision->getAttachedPHIDs(
-      PhabricatorPHIDConstants::PHID_TYPE_DREV);
+    return PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $this->getRevision()->getPHID(),
+      PhabricatorEdgeConfig::TYPE_DREV_DEPENDS_ON_DREV);
   }
 
 }

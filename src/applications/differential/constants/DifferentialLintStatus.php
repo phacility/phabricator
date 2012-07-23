@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,5 +23,6 @@ final class DifferentialLintStatus {
   const LINT_WARN             = 2;
   const LINT_FAIL             = 3;
   const LINT_SKIP             = 4;
+  const LINT_POSTPONED        = 5;
 
 }

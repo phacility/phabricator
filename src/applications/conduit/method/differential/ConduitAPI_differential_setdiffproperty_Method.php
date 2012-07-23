@@ -44,10 +44,35 @@ final class ConduitAPI_differential_setdiffproperty_Method
     );
   }
 
-  private static function updateLintStatus($diff_id, array $results) {
+  private static function updateLintStatus($diff_id) {
+
     $diff = id(new DifferentialDiff())->load($diff_id);
     if (!$diff) {
       throw new ConduitException('ERR_NOT_FOUND');
+    }
+
+    // Load the postponed linters attached to this diff.
+    $postponed_linters_property = id(
+      new DifferentialDiffProperty())->loadOneWhere(
+        'diffID = %d AND name = %s',
+        $diff_id,
+        'arc:lint-postponed');
+    if ($postponed_linters_property) {
+      $postponed_linters = $postponed_linters_property->getData();
+    } else {
+      $postponed_linters = array();
+    }
+
+    // Load the lint messages currenty attached to the diff
+    $messages_property = id(new DifferentialDiffProperty())->loadOneWhere(
+      'diffID = %d AND name = %s',
+      $diff_id,
+      'arc:lint'
+    );
+    if ($messages_property) {
+      $results = $messages_property->getData();
+    } else {
+      $results = array();
     }
 
     $has_error = false;
@@ -66,6 +91,8 @@ final class ConduitAPI_differential_setdiffproperty_Method
       $diff->setLintStatus(DifferentialLintStatus::LINT_FAIL);
     } else if ($has_warning) {
       $diff->setLintStatus(DifferentialLintStatus::LINT_WARN);
+    } else if (!empty($postponed_linters)) {
+      $diff->setLintStatus(DifferentialLintStatus::LINT_POSTPONED);
     } else if ($results &&
                $diff->getLintStatus() === DifferentialLintStatus::LINT_NONE) {
       $diff->setLintStatus(DifferentialLintStatus::LINT_OKAY);
@@ -80,8 +107,8 @@ final class ConduitAPI_differential_setdiffproperty_Method
 
     self::updateDiffProperty($diff_id, $name, $data);
 
-    if ($name === 'arc:lint') {
-      self::updateLintStatus($diff_id, $data);
+    if ($name === 'arc:lint' || $name == 'arc:lint-postponed') {
+      self::updateLintStatus($diff_id);
     }
 
     return;

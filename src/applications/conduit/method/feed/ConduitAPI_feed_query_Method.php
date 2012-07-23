@@ -88,7 +88,8 @@ final class ConduitAPI_feed_query_Method extends ConduitAPIMethod {
     $query = id(new PhabricatorFeedQuery())
       ->setLimit($limit)
       ->setFilterPHIDs($filter_phids)
-      ->setAfter($after);
+      ->setViewer($user)
+      ->setAfterID($after);
     $stories = $query->execute();
 
     if ($stories) {

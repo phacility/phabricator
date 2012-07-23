@@ -401,55 +401,16 @@ final class PhabricatorDirectoryMainController
     $user_phid = $user->getPHID();
 
     $feed_query = new PhabricatorFeedQuery();
+    $feed_query->setViewer($user);
     if ($phids) {
       $feed_query->setFilterPHIDs($phids);
     }
 
-    // TODO: All this limit stuff should probably be consolidated into the
-    // feed query?
+    $pager = new AphrontIDPagerView();
+    $pager->readFromRequest($request);
+    $pager->setPageSize(200);
 
-    $old_link = null;
-    $new_link = null;
-
-    $feed_query->setAfter($request->getStr('after'));
-    $feed_query->setBefore($request->getStr('before'));
-    $limit = 500;
-
-    // Grab one more story than we intend to display so we can figure out
-    // if we need to render an "Older Posts" link or not (with reasonable
-    // accuracy, at least).
-    $feed_query->setLimit($limit + 1);
-    $feed = $feed_query->execute();
-    $extra_row = (count($feed) == $limit + 1);
-
-    $have_new = ($request->getStr('before')) ||
-                ($request->getStr('after') && $extra_row);
-
-    $have_old = ($request->getStr('after')) ||
-                ($request->getStr('before') && $extra_row) ||
-                (!$request->getStr('before') &&
-                 !$request->getStr('after') &&
-                 $extra_row);
-    $feed = array_slice($feed, 0, $limit, $preserve_keys = true);
-
-    if ($have_old) {
-      $old_link = phutil_render_tag(
-        'a',
-        array(
-          'href' => '?before='.end($feed)->getChronologicalKey(),
-          'class' => 'phabricator-feed-older-link',
-        ),
-        "Older Stories \xC2\xBB");
-    }
-    if ($have_new) {
-      $new_link = phutil_render_tag(
-        'a',
-        array(
-          'href' => '?after='.reset($feed)->getChronologicalKey(),
-          'class' => 'phabricator-feed-newer-link',
-        ),
-        "\xC2\xAB Newer Stories");
-    }
+    $feed = $feed_query->executeWithPager($pager);
 
     $builder = new PhabricatorFeedBuilder($feed);
     $builder->setUser($user);
@@ -464,8 +425,7 @@ final class PhabricatorDirectoryMainController
         '</div>'.
         $feed_view->render().
         '<div class="phabricator-feed-frame">'.
-          $new_link.
-          $old_link.
+          $pager->render().
         '</div>'.
       '</div>';
   }

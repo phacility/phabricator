@@ -221,12 +221,14 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       'commit');
     foreach ($vs_diff->loadChangesets() as $changeset) {
       $path = $changeset->getAbsoluteRepositoryPath($repository, $vs_diff);
+      $path = ltrim($path, '/');
       $vs_changesets[$path] = $changeset;
     }
 
     $changesets = array();
     foreach ($diff->getChangesets() as $changeset) {
       $path = $changeset->getAbsoluteRepositoryPath($repository, $diff);
+      $path = ltrim($path, '/');
       $changesets[$path] = $changeset;
     }
 

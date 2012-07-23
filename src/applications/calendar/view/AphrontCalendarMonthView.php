@@ -72,6 +72,8 @@ final class AphrontCalendarMonthView extends AphrontView {
     $show_events = array();
 
     foreach ($days as $day) {
+      $day_number = $day->format('j');
+
       $holiday = idx($this->holidays, $day->format('Y-m-d'));
       $class = 'aphront-calendar-day';
       $weekday = $day->format('w');
@@ -82,7 +84,7 @@ final class AphrontCalendarMonthView extends AphrontView {
       $day->setTime(0, 0, 0);
       $epoch_start = $day->format('U');
 
-      $day->setTime(24, 0, 0);
+      $day->modify('+1 day');
       $epoch_end = $day->format('U');
 
       if ($weekday == 0) {
@@ -104,7 +106,6 @@ final class AphrontCalendarMonthView extends AphrontView {
             $event->getEpochEnd() > $epoch_start) {
           $show_events[$event->getUserPHID()] = $this->renderEvent(
             $event,
-            $day,
             $epoch_start,
             $epoch_end);
         }
@@ -122,7 +123,7 @@ final class AphrontCalendarMonthView extends AphrontView {
       $markup[] =
         '<div class="'.$class.'">'.
           '<div class="aphront-calendar-date-number">'.
-            $day->format('j').
+            $day_number.
           '</div>'.
           $holiday_markup.
           implode("\n", $show_events).
@@ -203,7 +204,6 @@ final class AphrontCalendarMonthView extends AphrontView {
 
   private function renderEvent(
     AphrontCalendarEventView $event,
-    DateTime $day,
     $epoch_start,
     $epoch_end) {
 

@@ -20,7 +20,7 @@
  * @group conduit
  */
 final class ConduitAPI_differential_getrevisioncomments_Method
-  extends ConduitAPIMethod {
+  extends ConduitAPI_differential_Method {
 
   public function getMethodDescription() {
     return "Retrieve Differential Revision Comments.";
@@ -81,23 +81,10 @@ final class ConduitAPI_differential_getrevisioncomments_Method
       if ($with_inlines) {
         $result['inlines'] = array();
         foreach (idx($inlines, $comment->getID(), array()) as $inline) {
-          $file_path = null;
-          $diff_id = null;
           $changeset = idx($changesets, $inline->getChangesetID());
-          if ($changeset) {
-            $file_path = ($inline->getIsNewFile() ?
-              $changeset->getFilename() :
-              $changeset->getOldFile());
-            $diff_id = $changeset->getDiffID();
-          }
-          $result['inlines'][] = array(
-            'filePath' => $file_path,
-            'isNewFile' => $inline->getIsNewFile(),
-            'lineNumber' => $inline->getLineNumber(),
-            'lineLength' => $inline->getLineLength(),
-            'diffID' => $diff_id,
-            'content' => $inline->getContent(),
-          );
+          $result['inlines'][] = $this->buildInlineInfoDictionary(
+            $inline,
+            $changeset);
         }
         // TODO: Put synthetic inlines without an attached comment somewhere.
       }

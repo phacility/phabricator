@@ -49,26 +49,34 @@ final class PhabricatorLDAPProvider {
   public function getLDAPVersion() {
     return PhabricatorEnv::getEnvConfig('ldap.version');
   }
+  
+  public function getLDAPReferrals() {
+    return PhabricatorEnv::getEnvConfig('ldap.referrals');
+  }
 
   public function retrieveUserEmail() {
     return $this->userData['mail'][0];
   }
 
   public function retrieveUserRealName() {
+    return $this->retrieveUserRealNameFromData($this->userData);
+  }
+
+  public function retrieveUserRealNameFromData($data) {
     $name_attributes = PhabricatorEnv::getEnvConfig(
         'ldap.real_name_attributes');
 
     $real_name = '';
     if (is_array($name_attributes)) {
       foreach ($name_attributes AS $attribute) {
-        if (isset($this->userData[$attribute][0])) {
-          $real_name .= $this->userData[$attribute][0] . ' ';
+        if (isset($data[$attribute][0])) {
+          $real_name .= $data[$attribute][0] . ' ';
         }
       }
 
       trim($real_name);
-    } else if (isset($this->userData[$name_attributes][0])) {
-      $real_name = $this->userData[$name_attributes][0];
+    } else if (isset($data[$name_attributes][0])) {
+      $real_name = $data[$name_attributes][0];
     }
 
     if ($real_name == '') {
@@ -93,6 +101,8 @@ final class PhabricatorLDAPProvider {
 
       ldap_set_option($this->connection, LDAP_OPT_PROTOCOL_VERSION,
         $this->getLDAPVersion());
+      ldap_set_option($this->connection, LDAP_OPT_REFERRALS, 
+       $this->getLDAPReferrals());
     }
 
     return $this->connection;
@@ -102,18 +112,35 @@ final class PhabricatorLDAPProvider {
     return $this->userData;
   }
 
-  public function auth($username, $password) {
-    if (strlen(trim($username)) == 0 || strlen(trim($password)) == 0) {
-      throw new Exception('Username and/or password can not be empty');
+  public function auth($username, PhutilOpaqueEnvelope $password) {
+    if (strlen(trim($username)) == 0) {
+      throw new Exception('Username can not be empty');
     }
 
-    $result = ldap_bind($this->getConnection(),
-              $this->getSearchAttribute() . '=' . $username . ',' .
-              $this->getBaseDN(),
-              $password);
+    $activeDirectoryDomain =
+      PhabricatorEnv::getEnvConfig('ldap.activedirectory_domain');
+
+    if ($activeDirectoryDomain) {
+      $dn = $username . '@' . $activeDirectoryDomain;
+    } else {
+      $dn = ldap_sprintf(
+        '%Q=%s,%Q',
+        $this->getSearchAttribute(),
+        $username,
+        $this->getBaseDN());
+    }
+
+    $conn = $this->getConnection();
+
+    // NOTE: It is very important we suppress any messages that occur here,
+    // because it logs passwords if it reaches an error log of any sort.
+    DarkConsoleErrorLogPluginAPI::enableDiscardMode();
+    $result = @ldap_bind($conn, $dn, $password->openEnvelope());
+    DarkConsoleErrorLogPluginAPI::disableDiscardMode();
 
     if (!$result) {
-      throw new Exception('Bad username/password.');
+      throw new Exception(
+        "LDAP Error #".ldap_errno($conn).": ".ldap_error($conn));
     }
 
     $this->userData = $this->getUser($username);
@@ -121,15 +148,21 @@ final class PhabricatorLDAPProvider {
   }
 
   private function getUser($username) {
-    $result = ldap_search($this->getConnection(), $this->getBaseDN(),
-              $this->getSearchAttribute() . '=' . $username);
+    $conn = $this->getConnection();
+
+    $query = ldap_sprintf(
+      '%Q=%S',
+      $this->getSearchAttribute(),
+      $username);
+
+    $result = ldap_search($conn, $this->getBaseDN(), $query);
 
     if (!$result) {
       throw new Exception('Search failed. Please check your LDAP and HTTP '.
         'logs for more information.');
     }
 
-    $entries = ldap_get_entries($this->getConnection(), $result);
+    $entries = ldap_get_entries($conn, $result);
 
     if ($entries === false) {
       throw new Exception('Could not get entries');
@@ -145,5 +178,48 @@ final class PhabricatorLDAPProvider {
     }
 
     return $entries[0];
+  }
+
+  public function search($query) {
+    $result = ldap_search($this->getConnection(), $this->getBaseDN(),
+              $query);
+
+    if (!$result) {
+      throw new Exception('Search failed. Please check your LDAP and HTTP '.
+        'logs for more information.');
+    }
+
+    $entries = ldap_get_entries($this->getConnection(), $result);
+
+    if ($entries === false) {
+      throw new Exception('Could not get entries');
+    }
+
+    if ($entries['count'] == 0) {
+      throw new Exception('No results found');
+    }
+
+
+    $rows = array();
+
+    for($i = 0; $i < $entries['count']; $i++) {
+      $row = array();
+      $entry = $entries[$i];
+
+      // Get username, email and realname
+      $username = $entry[$this->getSearchAttribute()][0];
+      if(empty($username)) {
+        continue;
+      }
+      $row[] = $username;
+      $row[] = $entry['mail'][0];
+      $row[] = $this->retrieveUserRealNameFromData($entry);
+
+
+      $rows[] = $row;
+    }
+
+    return $rows;
+
   }
 }

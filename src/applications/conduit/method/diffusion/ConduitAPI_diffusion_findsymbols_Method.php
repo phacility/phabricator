@@ -70,15 +70,21 @@ final class ConduitAPI_diffusion_findsymbols_Method
 
     $results = $query->execute();
 
+
     $response = array();
     foreach ($results as $result) {
+      $uri = $result->getURI();
+      if ($uri) {
+        $uri = PhabricatorEnv::getProductionURI($uri);
+      }
+
       $response[] = array(
         'name'        => $result->getSymbolName(),
         'type'        => $result->getSymbolType(),
         'language'    => $result->getSymbolLanguage(),
         'path'        => $result->getPath(),
         'line'        => $result->getLineNumber(),
-        'uri'         => PhabricatorEnv::getProductionURI($result->getURI()),
+        'uri'         => $uri,
       );
     }
 

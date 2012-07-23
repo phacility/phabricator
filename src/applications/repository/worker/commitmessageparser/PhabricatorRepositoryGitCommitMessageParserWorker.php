@@ -25,14 +25,26 @@ final class PhabricatorRepositoryGitCommitMessageParserWorker
 
     // NOTE: %B was introduced somewhat recently in git's history, so pull
     // commit message information with %s and %b instead.
+    // Even though we pass --encoding here, git doesn't always succeed, so
+    // we try a little harder, since git *does* tell us what the actual encoding
+    // is correctly (unless it doesn't; encoding is sometimes empty).
     list($info) = $repository->execxLocalCommand(
       "log -n 1 --encoding='UTF-8' " .
-      "--pretty=format:%%cn%%x00%%an%%x00%%s%%n%%n%%b %s",
+      "--pretty=format:%%e%%x00%%cn%%x00%%an%%x00%%s%%n%%n%%b %s",
       $commit->getCommitIdentifier());
 
-    list($committer, $author, $message) = explode("\0", $info);
+    list($encoding, $committer, $author, $message) = explode("\0", $info);
 
-    // Make sure these are valid UTF-8.
+    // See note above - git doesn't always convert the encoding correctly.
+    if (strlen($encoding) && strtoupper($encoding) != "UTF-8") {
+      if (function_exists('mb_convert_encoding')) {
+        $message = mb_convert_encoding($message, "UTF-8", $encoding);
+        $author = mb_convert_encoding($author, "UTF-8", $encoding);
+        $committer = mb_convert_encoding($committer, "UTF-8", $encoding);
+      }
+    }
+
+    // Make completely sure these are valid UTF-8.
     $committer = phutil_utf8ize($committer);
     $author = phutil_utf8ize($author);
     $message = phutil_utf8ize($message);

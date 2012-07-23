@@ -72,6 +72,7 @@ class AphrontDefaultApplicationConfiguration
         'logs/' => 'PhabricatorPeopleLogsController',
         'edit/(?:(?P<id>\d+)/(?:(?P<view>\w+)/)?)?'
           => 'PhabricatorPeopleEditController',
+        'ldap/' => 'PhabricatorPeopleLdapController',
       ),
       '/p/(?P<username>[\w._-]+)/(?:(?P<page>\w+)/)?'
         => 'PhabricatorPeopleProfileController',
@@ -381,9 +382,9 @@ class AphrontDefaultApplicationConfiguration
       ),
 
       '/phame/' => array(
-        ''                          => 'PhamePostListController',
+        ''                          => 'PhameAllPostListController',
         'post/' => array(
-          ''                        => 'PhamePostListController',
+          ''                        => 'PhameUserPostListController',
           'delete/(?P<phid>[^/]+)/' => 'PhamePostDeleteController',
           'edit/(?P<phid>[^/]+)/'   => 'PhamePostEditController',
           'new/'                    => 'PhamePostEditController',
@@ -394,9 +395,17 @@ class AphrontDefaultApplicationConfiguration
           ''                        => 'PhameDraftListController',
           'new/'                    => 'PhamePostEditController',
         ),
+        'blog/' => array(
+          ''                         => 'PhameUserBlogListController',
+          'all/'                     => 'PhameAllBlogListController',
+          'new/'                     => 'PhameBlogEditController',
+          'delete/(?P<phid>[^/]+)/'  => 'PhameBlogDeleteController',
+          'edit/(?P<phid>[^/]+)/'    => 'PhameBlogEditController',
+          'view/(?P<phid>[^/]+)/'    => 'PhameBlogViewController',
+        ),
         'posts/' => array(
-          ''                        => 'PhamePostListController',
-          '(?P<bloggername>\w+)/'   => 'PhamePostListController',
+          ''                        => 'PhameUserPostListController',
+          '(?P<bloggername>\w+)/'   => 'PhameBloggerPostListController',
           '(?P<bloggername>\w+)/(?P<phametitle>.+/)'
                                     => 'PhamePostViewController',
         ),
@@ -427,7 +436,8 @@ class AphrontDefaultApplicationConfiguration
       ),
 
       '/notification/' => array(
-        '' => 'PhabricatorNotificationListController',
+        '(?:(?P<filter>all|unread)/)?'
+          => 'PhabricatorNotificationListController',
         'panel/' => 'PhabricatorNotificationPanelController',
         'individual/' => 'PhabricatorNotificationIndividualController',
         'status/' => 'PhabricatorNotificationStatusController',
@@ -629,6 +639,11 @@ class AphrontDefaultApplicationConfiguration
 
     $libraries = PhutilBootloader::getInstance()->getAllLibraries();
 
+    $version = PhabricatorEnv::getEnvConfig('phabricator.version');
+    if (preg_match('/[^a-f0-9]/i', $version)) {
+      $version = '';
+    }
+
     // TODO: Make this configurable?
     $path = 'https://secure.phabricator.com/diffusion/%s/browse/master/src/';
 
@@ -675,6 +690,7 @@ class AphrontDefaultApplicationConfiguration
           if (empty($attrs['href'])) {
             $attrs['href'] = sprintf($path, $callsigns[$lib]).
               str_replace(DIRECTORY_SEPARATOR, '/', $relative).
+              ($version && $lib == 'phabricator' ? ';'.$version : '').
               '$'.$part['line'];
             $attrs['target'] = '_blank';
           }

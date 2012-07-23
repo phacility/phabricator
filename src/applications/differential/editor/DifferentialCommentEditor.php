@@ -26,6 +26,7 @@ final class DifferentialCommentEditor {
   protected $message;
   protected $changedByCommit;
   protected $addedReviewers = array();
+  protected $removedReviewers = array();
   private $addedCCs = array();
 
   private $parentMessageID;
@@ -76,6 +77,15 @@ final class DifferentialCommentEditor {
     return $this->addedReviewers;
   }
 
+  public function setRemovedReviewers(array $removeded_reviewers) {
+    $this->removedReviewers = $removeded_reviewers;
+    return $this;
+  }
+
+  public function getRemovedReviewers() {
+    return $this->removedReviewers;
+  }
+
   public function setAddedCCs($added_ccs) {
     $this->addedCCs = $added_ccs;
     return $this;
@@ -101,6 +111,8 @@ final class DifferentialCommentEditor {
     $actor_phid = $this->actorPHID;
     $actor = id(new PhabricatorUser())->loadOneWhere('PHID = %s', $actor_phid);
     $actor_is_author = ($actor_phid == $revision->getAuthorPHID());
+    $allow_self_accept = PhabricatorEnv::getEnvConfig(
+        'differential.allow-self-accept', false);
     $revision_status = $revision->getStatus();
 
     $revision->loadRelationships();
@@ -166,7 +178,7 @@ final class DifferentialCommentEditor {
         break;
 
       case DifferentialAction::ACTION_ACCEPT:
-        if ($actor_is_author) {
+        if ($actor_is_author && !$allow_self_accept) {
           throw new Exception('You can not accept your own revision.');
         }
         if (($revision_status !=
@@ -234,7 +246,7 @@ final class DifferentialCommentEditor {
               "Unexpected revision state '{$revision_status}'!");
         }
 
-        $added_reviewers = $this->addReviewers();
+        list($added_reviewers, $ignored) = $this->alterReviewers();
         if ($added_reviewers) {
           $key = DifferentialComment::METADATA_ADDED_REVIEWERS;
           $metadata[$key] = $added_reviewers;
@@ -360,7 +372,7 @@ final class DifferentialCommentEditor {
         break;
 
       case DifferentialAction::ACTION_ADDREVIEWERS:
-        $added_reviewers = $this->addReviewers();
+        list($added_reviewers, $ignored) = $this->alterReviewers();
 
         if ($added_reviewers) {
           $key = DifferentialComment::METADATA_ADDED_REVIEWERS;
@@ -430,15 +442,21 @@ final class DifferentialCommentEditor {
         }
 
         $this->setAddedReviewers(array($revision->getAuthorPHID()));
+        $this->setRemovedReviewers(array($actor_phid));
 
         // NOTE: Set the new author PHID before calling addReviewers(), since it
         // doesn't permit the author to become a reviewer.
         $revision->setAuthorPHID($actor_phid);
 
-        $added_reviewers = $this->addReviewers();
+        list($added_reviewers, $removed_reviewers) = $this->alterReviewers();
         if ($added_reviewers) {
           $key = DifferentialComment::METADATA_ADDED_REVIEWERS;
           $metadata[$key] = $added_reviewers;
+        }
+
+        if ($removed_reviewers) {
+          $key = DifferentialComment::METADATA_REMOVED_REVIEWERS;
+          $metadata[$key] = $removed_reviewers;
         }
 
         break;
@@ -613,32 +631,41 @@ final class DifferentialCommentEditor {
     return $ccs;
   }
 
-  private function addReviewers() {
+  private function alterReviewers() {
     $revision = $this->revision;
     $added_reviewers = $this->getAddedReviewers();
+    $removed_reviewers = $this->getRemovedReviewers();
     $reviewer_phids = $revision->getReviewers();
 
+    $reviewer_phids_map = array_fill_keys($reviewer_phids, true);
     foreach ($added_reviewers as $k => $user_phid) {
       if ($user_phid == $revision->getAuthorPHID()) {
         unset($added_reviewers[$k]);
       }
-      if (!empty($reviewer_phids[$user_phid])) {
+      if (isset($reviewer_phids_map[$user_phid])) {
         unset($added_reviewers[$k]);
       }
     }
 
+    foreach ($removed_reviewers as $k => $user_phid) {
+      if (!isset($reviewer_phids_map[$user_phid])) {
+        unset($removed_reviewers[$k]);
+      }
+    }
+
     $added_reviewers = array_unique($added_reviewers);
+    $removed_reviewers = array_unique($removed_reviewers);
 
     if ($added_reviewers) {
       DifferentialRevisionEditor::alterReviewers(
         $revision,
         $reviewer_phids,
-        $rem = array(),
+        $removed_reviewers,
         $added_reviewers,
         $this->actorPHID);
     }
 
-    return $added_reviewers;
+    return array($added_reviewers, $removed_reviewers);
   }
 
 }

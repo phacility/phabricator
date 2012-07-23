@@ -93,7 +93,7 @@ nothing (the default).
 
 To configure GitHub OAuth, create a new GitHub Application:
 
-https://github.com/account/applications/new
+https://github.com/settings/applications/new
 
 You should set these things in your application:
 
@@ -115,11 +115,6 @@ set these keys:
     accounts.
   - **github.auth-permanent**: set to ##true## to prevent unlinking Phabricator
     accounts from GitHub accounts.
-
-Note that you can see a list of your GitHub applications here, although it's not
-immediately clear how to get there via the UI:
-
-https://github.com/account/applications/
 
 = Configuring Google OAuth =
 

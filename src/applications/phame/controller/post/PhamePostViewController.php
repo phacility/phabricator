@@ -60,6 +60,12 @@ extends PhameController {
       return $filters;
   }
 
+  public function shouldRequireLogin() {
+    // TODO -- get policy logic going
+    // return PhabricatorEnv::getEnvConfig('policy.allow-public');
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->setPostPHID(idx($data, 'phid'));
     $this->setPhameTitle(idx($data, 'phametitle'));
@@ -77,18 +83,18 @@ extends PhameController {
         return new Aphront404Response();
       }
 
-      $post = id(new PhamePost())->loadOneWhere(
-        'phid = %s',
-        $post_phid);
+      $posts = id(new PhamePostQuery())
+        ->withPHIDs(array($post_phid))
+        ->execute();
+      $post = reset($posts);
 
       if ($post) {
         $this->setPhameTitle($post->getPhameTitle());
-      }
-
-      $blogger = id(new PhabricatorUser())->loadOneWhere(
-        'phid = %s', $post->getBloggerPHID());
-      if (!$blogger) {
-        return new Aphront404Response();
+        $blogger = id(new PhabricatorUser())->loadOneWhere(
+          'phid = %s', $post->getBloggerPHID());
+        if (!$blogger) {
+          return new Aphront404Response();
+        }
       }
 
     } else if ($this->getBloggerName() && $this->getPhameTitle()) {
@@ -100,10 +106,12 @@ extends PhameController {
       if (!$blogger) {
         return new Aphront404Response();
       }
-      $post = id(new PhamePost())->loadOneWhere(
-        'bloggerPHID = %s AND phameTitle = %s',
-        $blogger->getPHID(),
-        $phame_title);
+      $posts = id(new PhamePostQuery())
+        ->withBloggerPHID($blogger->getPHID())
+        ->withPhameTitle($phame_title)
+        ->execute();
+      $post = reset($posts);
+
       if ($post && $phame_title != $this->getPhameTitle()) {
         $uri = $post->getViewURI($this->getBloggerName());
         return id(new AphrontRedirectResponse())->setURI($uri);
@@ -120,13 +128,24 @@ extends PhameController {
     }
 
     if ($post->isDraft()) {
-      $notice = id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+      $notice = $this->buildNoticeView()
         ->setTitle('You are previewing a draft.')
         ->setErrors(array(
           'Only you can see this draft until you publish it.',
           'If you chose a comment widget it will show up when you publish.',
         ));
+    } else if ($request->getExists('saved')) {
+      $new_link = phutil_render_tag(
+        'a',
+        array(
+          'href' => '/phame/post/new/',
+          'class' => 'button green',
+        ),
+        'write another blog post'
+      );
+      $notice = $this->buildNoticeView()
+        ->appendChild('<p>Saved post successfully.</p>')
+        ->appendChild('Seek even more phame and '.$new_link);
     } else {
       $notice = null;
     }

@@ -16,11 +16,25 @@
  * limitations under the License.
  */
 
+/**
+ * For detailed explanations of these events, see
+ * @{article:Events User Guide: Installing Event Listeners}.
+ *
+ * @group events
+ */
 final class PhabricatorEventType extends PhutilEventType {
 
-  const TYPE_MANIPHEST_WILLEDITTASK = 'maniphest.willEditTask';
-  const TYPE_MANIPHEST_DIDEDITTASK = 'maniphest.didEditTask';
-  const TYPE_DIFFERENTIAL_WILLSENDMAIL = 'differential.willSendMail';
+  const TYPE_MANIPHEST_WILLEDITTASK         = 'maniphest.willEditTask';
+  const TYPE_MANIPHEST_DIDEDITTASK          = 'maniphest.didEditTask';
+
+  const TYPE_DIFFERENTIAL_WILLSENDMAIL      = 'differential.willSendMail';
   const TYPE_DIFFERENTIAL_WILLMARKGENERATED = 'differential.willMarkGenerated';
+
+  const TYPE_DIFFUSION_DIDDISCOVERCOMMIT    = 'diffusion.didDiscoverCommit';
+
+  const TYPE_EDGE_WILLEDITEDGES             = 'edge.willEditEdges';
+  const TYPE_EDGE_DIDEDITEDGES              = 'edge.didEditEdges';
+
+  const TYPE_TEST_DIDRUNTEST                = 'test.didRunTest';
 
 }

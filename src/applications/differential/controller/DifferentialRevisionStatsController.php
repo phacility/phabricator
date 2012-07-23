@@ -19,10 +19,6 @@
 final class DifferentialRevisionStatsController extends DifferentialController {
   private $filter;
 
-  public function shouldRequireLogin() {
-    return true;
-  }
-
   private function loadRevisions($phid) {
     $table = new DifferentialRevision();
     $conn_r = $table->establishConnection('r');
@@ -71,6 +67,20 @@ final class DifferentialRevisionStatsController extends DifferentialController {
 
     return $table->loadAllFromArray($rows);
   }
+
+  private function loadDiffs(array $revisions) {
+    if (!$revisions) {
+      return array();
+    }
+
+    $diff_teml = new DifferentialDiff();
+    $diffs = $diff_teml->loadAllWhere(
+      'revisionID in (%Ld)',
+      array_keys($revisions)
+    );
+    return $diffs;
+  }
+
   public function willProcessRequest(array $data) {
     $this->filter = idx($data, 'filter');
   }
@@ -131,13 +141,16 @@ final class DifferentialRevisionStatsController extends DifferentialController {
 
     $comments = $this->loadComments($params['phid']);
     $revisions = $this->loadRevisions($params['phid']);
+    $diffs = $this->loadDiffs($revisions);
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Differential rate analysis');
     $panel->appendChild(
       id(new DifferentialRevisionStatsView())
       ->setComments($comments)
+      ->setFilter($this->filter)
       ->setRevisions($revisions)
+      ->setDiffs($diffs)
       ->setUser($user));
     $panels[] = $panel;
 

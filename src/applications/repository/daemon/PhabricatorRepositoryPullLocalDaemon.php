@@ -133,16 +133,34 @@ final class PhabricatorRepositoryPullLocalDaemon
         }
 
         try {
+          $callsign = $repository->getCallsign();
+          $this->log("Updating repository '{$callsign}'.");
+
           $this->pullRepository($repository);
 
           if (!$no_discovery) {
             // TODO: It would be nice to discover only if we pulled something,
             // but this isn't totally trivial.
-            $this->discoverRepository($repository);
+
+            $lock_name = get_class($this).':'.$callsign;
+            $lock = PhabricatorGlobalLock::newLock($lock_name);
+            $lock->lock();
+
+            try {
+              $this->discoverRepository($repository);
+            } catch (Exception $ex) {
+              $lock->unlock();
+              throw $ex;
+            }
+
+            $lock->unlock();
           }
 
           $sleep_for = $repository->getDetail('pull-frequency', $min_sleep);
           $retry_after[$id] = time() + $sleep_for;
+        } catch (PhutilLockException $ex) {
+          $retry_after[$id] = time() + $min_sleep;
+          $this->log("Failed to acquire lock.");
         } catch (Exception $ex) {
           $retry_after[$id] = time() + $min_sleep;
           phlog($ex);
@@ -278,6 +296,16 @@ final class PhabricatorRepositoryPullLocalDaemon
       $target);
 
     if (!$commit) {
+      $callsign = $repository->getCallsign();
+
+      $console = PhutilConsole::getConsole();
+      $console->writeErr(
+        "WARNING: Repository '%s' is missing commits ('%s' is missing from ".
+        "history). Run '%s' to repair the repository.\n",
+        $callsign,
+        $target,
+        "bin/repository discover --repair {$callsign}");
+
       return false;
     }
 
@@ -296,15 +324,25 @@ final class PhabricatorRepositoryPullLocalDaemon
   private function recordCommit(
     PhabricatorRepository $repository,
     $commit_identifier,
-    $epoch) {
+    $epoch,
+    $branch = null) {
 
     $commit = new PhabricatorRepositoryCommit();
     $commit->setRepositoryID($repository->getID());
     $commit->setCommitIdentifier($commit_identifier);
     $commit->setEpoch($epoch);
 
+    $data = new PhabricatorRepositoryCommitData();
+    if ($branch) {
+      $data->setCommitDetail('seenOnBranches', array($branch));
+    }
+
     try {
-      $commit->save();
+      $commit->openTransaction();
+        $commit->save();
+        $data->setCommitID($commit->getID());
+        $data->save();
+      $commit->saveTransaction();
 
       $event = new PhabricatorTimelineEvent(
         'cmit',
@@ -332,11 +370,21 @@ final class PhabricatorRepositoryPullLocalDaemon
       if ($this->repair) {
         // Normally, the query should throw a duplicate key exception. If we
         // reach this in repair mode, we've actually performed a repair.
-        $this->log("Repaired commit '%s'.", $commit_identifier);
+        $this->log("Repaired commit '{$commit_identifier}'.");
       }
 
       $this->setCache($repository, $commit_identifier);
+
+      PhutilEventEngine::dispatchEvent(
+        new PhabricatorEvent(
+          PhabricatorEventType::TYPE_DIFFUSION_DIDDISCOVERCOMMIT,
+          array(
+            'repository'  => $repository,
+            'commit'      => $commit,
+          )));
+
     } catch (AphrontQueryDuplicateKeyException $ex) {
+      $commit->killTransaction();
       // Ignore. This can happen because we discover the same new commit
       // more than once when looking at history, or because of races or
       // data inconsistency or cosmic radiation; in any case, we're still
@@ -565,7 +613,7 @@ final class PhabricatorRepositoryPullLocalDaemon
       }
 
       $this->log("Looking for new commits.");
-      $this->executeGitDiscoverCommit($repository, $commit);
+      $this->executeGitDiscoverCommit($repository, $commit, $name, false);
     }
 
     if (!$tracked_something) {
@@ -596,7 +644,7 @@ final class PhabricatorRepositoryPullLocalDaemon
       }
 
       $this->log("Looking for new autoclose commits.");
-      $this->executeGitDiscoverCommit($repository, $commit, $name);
+      $this->executeGitDiscoverCommit($repository, $commit, $name, true);
     }
   }
 
@@ -607,7 +655,8 @@ final class PhabricatorRepositoryPullLocalDaemon
   private function executeGitDiscoverCommit(
     PhabricatorRepository $repository,
     $commit,
-    $branch = null) {
+    $branch,
+    $autoclose) {
 
     $discover = array($commit);
     $insert = array($commit);
@@ -628,7 +677,7 @@ final class PhabricatorRepositoryPullLocalDaemon
           continue;
         }
         $seen_parent[$parent] = true;
-        if ($branch !== null) {
+        if ($autoclose) {
           $known = $this->isKnownCommitOnAnyAutocloseBranch(
             $repository,
             $parent);
@@ -647,10 +696,10 @@ final class PhabricatorRepositoryPullLocalDaemon
     }
 
     $n = count($insert);
-    if ($branch !== null) {
+    if ($autoclose) {
       $this->log("Found {$n} new autoclose commits on branch '{$branch}'.");
     } else {
-      $this->log("Found {$n} new commits.");
+      $this->log("Found {$n} new commits on branch '{$branch}'.");
     }
 
     while (true) {
@@ -658,10 +707,10 @@ final class PhabricatorRepositoryPullLocalDaemon
       $epoch = $stream->getCommitDate($target);
       $epoch = trim($epoch);
 
-      if ($branch !== null) {
+      if ($autoclose) {
         $this->updateCommit($repository, $target, $branch);
       } else {
-        $this->recordCommit($repository, $target, $epoch);
+        $this->recordCommit($repository, $target, $epoch, $branch);
       }
 
       if (empty($insert)) {

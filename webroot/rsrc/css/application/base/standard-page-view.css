@@ -207,11 +207,6 @@ a.handle-disabled {
   background-image: url(/rsrc/image/icon/fatcow/bullet_black.png);
 }
 
-.PhabricatorMonospaced {
-  font-family:        "Menlo", "Consolas", "Monaco", monospace;
-  font-size:          10px;
-}
-
 .aphront-developer-error-callout {
   padding: 2em;
   background: #aa0000;
@@ -249,6 +244,10 @@ a.handle-disabled {
 
 .phabricator-icon-menu-cell {
   width: 60px;
+}
+
+.phabricator-admin-page-view .icon-menu-notifications {
+  background: url(/rsrc/image/notification_menu_admin.png);
 }
 
 .icon-menu-notifications {
@@ -301,12 +300,18 @@ a.handle-disabled {
 
 .phabricator-notification {
   padding: 6px 6px;
+  margin: 1px 0;
 }
 
 .no-notifications {
   color: #999999;
 }
 
+.phabricator-notification-list {
+  font-size: 11px;
+}
+
+.phabricator-notification-list .phabricator-notification-unread,
 #phabricator-notification-dropdown .phabricator-notification-unread {
   background: #aacfef;
 }

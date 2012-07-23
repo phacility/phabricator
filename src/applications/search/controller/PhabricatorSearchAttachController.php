@@ -56,73 +56,54 @@ final class PhabricatorSearchAttachController
       return new Aphront404Response();
     }
 
+    $edge_type = null;
+    switch ($this->action) {
+      case self::ACTION_EDGE:
+      case self::ACTION_DEPENDENCIES:
+      case self::ACTION_ATTACH:
+        $edge_type = $this->getEdgeType($object_type, $attach_type);
+        break;
+    }
+
     if ($request->isFormPost()) {
       $phids = explode(';', $request->getStr('phids'));
       $phids = array_filter($phids);
       $phids = array_values($phids);
 
-      switch ($this->action) {
-        case self::ACTION_MERGE:
-          return $this->performMerge($object, $handle, $phids);
+      if ($edge_type) {
+        $old_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+          $this->phid,
+          $edge_type);
+        $add_phids = $phids;
+        $rem_phids = array_diff($old_phids, $add_phids);
 
-        case self::ACTION_EDGE:
-          $edge_type = $this->getEdgeType($object_type, $attach_type);
+        $editor = id(new PhabricatorEdgeEditor());
+        $editor->setUser($user);
+        foreach ($add_phids as $phid) {
+          $editor->addEdge($this->phid, $edge_type, $phid);
+        }
+        foreach ($rem_phids as $phid) {
+          $editor->removeEdge($this->phid, $edge_type, $phid);
+        }
 
-          $old_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-            $this->phid,
-            $edge_type);
-          $add_phids = $phids;
-          $rem_phids = array_diff($old_phids, $add_phids);
-          $editor = id(new PhabricatorEdgeEditor());
-          foreach ($add_phids as $phid) {
-            $editor->addEdge($this->phid, $edge_type, $phid);
-          }
-          foreach ($rem_phids as $phid) {
-            $editor->removeEdge($this->phid, $edge_type, $phid);
-          }
+        try {
           $editor->save();
+        } catch (PhabricatorEdgeCycleException $ex) {
+          $this->raiseGraphCycleException($ex);
+        }
 
-          return id(new AphrontReloadResponse())->setURI($handle->getURI());
-        case self::ACTION_DEPENDENCIES:
-        case self::ACTION_ATTACH:
-          $two_way = true;
-          if ($this->action == self::ACTION_DEPENDENCIES) {
-            $two_way = false;
-            $this->detectGraphCycles(
-              $object,
-              $attach_type,
-              $phids);
-          }
-
-          $editor = new PhabricatorObjectAttachmentEditor(
-            $object_type,
-            $object);
-          $editor->setUser($this->getRequest()->getUser());
-          $editor->attachObjects(
-            $attach_type,
-            $phids,
-            $two_way);
-
-          return id(new AphrontReloadResponse())->setURI($handle->getURI());
-        default:
-          throw new Exception("Unsupported attach action.");
+        return id(new AphrontReloadResponse())->setURI($handle->getURI());
+      } else {
+        return $this->performMerge($object, $handle, $phids);
       }
     } else {
-      switch ($this->action) {
-        case self::ACTION_ATTACH:
-        case self::ACTION_DEPENDENCIES:
-          $phids = $object->getAttachedPHIDs($attach_type);
-          break;
-        case self::ACTION_EDGE:
-          $edge_type = $this->getEdgeType($object_type, $attach_type);
-
-          $phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-            $this->phid,
-            $edge_type);
-          break;
-        default:
-          $phids = array();
-          break;
+      if ($edge_type) {
+        $phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+          $this->phid,
+          $edge_type);
+      } else {
+        // This is a merge.
+        $phids = array();
       }
     }
 
@@ -268,44 +249,10 @@ final class PhabricatorSearchAttachController
     );
   }
 
-  private function detectGraphCycles(
-    $object,
-    $attach_type,
-    array $phids) {
-
-    // Detect graph cycles.
-    $graph = new PhabricatorObjectGraph();
-    $graph->setEdgeType($attach_type);
-    $graph->addNodes(array(
-      $object->getPHID() => $phids,
-    ));
-    $graph->loadGraph();
-
-    foreach ($phids as $phid) {
-      $cycle = $graph->detectCycles($phid);
-      if (!$cycle) {
-        continue;
-      }
-
-      // TODO: Improve this behavior so it's not all-or-nothing?
-
-      $handles = id(new PhabricatorObjectHandleData($cycle))
-        ->loadHandles();
-      $names = array();
-      foreach ($cycle as $cycle_phid) {
-        $names[] = $handles[$cycle_phid]->getFullName();
-      }
-      $names = implode(" \xE2\x86\x92 ", $names);
-      $which = $handles[$phid]->getFullName();
-      throw new Exception(
-        "You can not create a dependency on '{$which}' because it ".
-        "would create a circular dependency: {$names}.");
-    }
-  }
-
   private function getEdgeType($src_type, $dst_type) {
     $t_cmit = PhabricatorPHIDConstants::PHID_TYPE_CMIT;
     $t_task = PhabricatorPHIDConstants::PHID_TYPE_TASK;
+    $t_drev = PhabricatorPHIDConstants::PHID_TYPE_DREV;
 
     $map = array(
       $t_cmit => array(
@@ -313,14 +260,35 @@ final class PhabricatorSearchAttachController
       ),
       $t_task => array(
         $t_cmit => PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT,
+        $t_task => PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK,
+        $t_drev => PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV,
+      ),
+      $t_drev => array(
+        $t_drev => PhabricatorEdgeConfig::TYPE_DREV_DEPENDS_ON_DREV,
+        $t_task => PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK,
       ),
     );
 
     if (empty($map[$src_type][$dst_type])) {
-      throw new Exception("Unknown edge type!");
+      return null;
     }
 
     return $map[$src_type][$dst_type];
+  }
+
+  private function raiseGraphCycleException(PhabricatorEdgeCycleException $ex) {
+    $cycle = $ex->getCycle();
+
+    $handles = id(new PhabricatorObjectHandleData($cycle))
+      ->loadHandles();
+    $names = array();
+    foreach ($cycle as $cycle_phid) {
+      $names[] = $handles[$cycle_phid]->getFullName();
+    }
+    $names = implode(" \xE2\x86\x92 ", $names);
+    throw new Exception(
+      "You can not create that dependency, because it would create a ".
+      "circular dependency: {$names}.");
   }
 
 }

@@ -74,7 +74,9 @@ A //ruleset// is a comma-separated list of rules:
     ruleset is bound to the project where it is configured, and is processed
     third.
   # `global`, specified with `arc set-config base <ruleset>`. This ruleset is
-    global for the current user, and is processed last.
+    global for the current user, and is processed fourth.
+  # `system`, specified in a system-wide configuration file. This ruleset is
+    global for all users on the system, and is processed last.
 
 The rules in each ruleset are processed one at a time until a valid base commit
 is found. Valid rules are listed below. In this list, "*" means "any string".
@@ -82,13 +84,28 @@ is found. Valid rules are listed below. In this list, "*" means "any string".
   - `git:*` Use the specified symbolic commit, if it exists.
   - `git:merge-base(*)` Use the merge-base of HEAD and the specified symbolic
     commit, if it exists.
-  - `hg:*` Use the specified symbolc commit, if it exists.
+  - `git:branch-unique(*)` Attempt to select changes unique to this branch (that
+    is, changes between the branch point and HEAD). This rule is complicated and
+    has limitations, see below for a detailed description.
+  - `hg:*` Use the specified symbolic commit, if it exists.
   - `hg:gca(*)` Use the greatest common ancestor of `.` and the specified
      symbolic commit, if it exists.
   - `arc:upstream` Use the merge-base of the current branch's upstream and
      HEAD, if it exists. (git-only)
   - `arc:outgoing` Use the most recent non-outgoing ancestor of the working
      copy parent. (hg-only)
+  - `arc:exec(*)` Execute the specified command. The command should determine
+    the base revision to use and print it to stdout, then exit with return code
+    0. If the command exits with another return code, the rule will fail. The
+    command will be executed with the root directory of the working copy as the
+    current working directory.
+  - `arc:bookmark` Use the most recent non-outgoing ancestor of the working
+     copy parent or the most recent bookmark, whichever is more recent. This
+     rule is complicated and has limitations, see below for a detailed
+     description.
+  - `arc:amended` Use the current commit (`HEAD` in Git, or `.` in Mercurial) if
+    it has been amended to include a "Differential Revision:" field. Otherwise,
+    fail.
   - `arc:prompt` Prompt the user to provide a commit.
   - `arc:empty` Use the empty state (as though the repository were completely
     empty, the range will include every commit that is an ancestor of the
@@ -96,9 +113,10 @@ is found. Valid rules are listed below. In this list, "*" means "any string".
 
 Rules are also available which change the processing order of rulesets:
 
-  - `arc:args`, `arc:local`, `arc:project`, `arc:global` Stop processing the
-    current ruleset and begin processing the specified ruleset. The current
-    ruleset will resume processing after the specified ruleset is exhausted.
+  - `arc:args`, `arc:local`, `arc:project`, `arc:global`, `arc:system` Stop
+    processing the current ruleset and begin processing the specified ruleset.
+    The current ruleset will resume processing after the specified ruleset is
+    exhausted.
   - `arc:yield` Stop processing the current ruleset and begin processing the
     next ruleset. The current ruleset will resume processing after other
     rulesets have processed or when it next appears in the processing order,
@@ -143,6 +161,140 @@ Understand rules processing:
   $ arc which
   $ arc which --base '<ruleset>'
   $ arc which --base 'arc:verbose, <ruleset>'
+
+= Detailed Rule Descriptions =
+
+Some rules have complex operation, described here in more detail. These rules
+are advanced features for expert users wishing to optimize their workflow and
+save a little typing. You do not need to understand the behavior of these rules
+to use `arc` (you can always specify a base commit explicitly).
+
+== git:branch-unique(*) ==
+
+This rule only works in Git.
+
+This rule tries to find commits that are unique to the current branch. It is
+most likely to be useful if you develop using one branch per feature, update
+changes by amending commits (instead of stacking commits) and merge changes by
+rebasing (instead of merging).
+
+The rule operates by first determining the merge-base of the specified commit
+and HEAD, if it exists. If no such commit exists, the rule fails. If such a
+commit exists, the rule counts how many branches contain HEAD, then walks from
+HEAD to the merge-base commit, counting how many branches contain each commit.
+It stops when it finds a commit which appears on more branches than HEAD,
+or when it reaches the merge-base commit.
+
+This rule works well for trees that look like this:
+
+  |   *  Commit B1, on branch "subfeature" (HEAD)
+  |  /
+  | *    Commit A1, on branch "feature"
+  |/
+  *      Commit M1, on branch "master"
+  |
+
+This tree represents using feature branches to develop one feature ("feature"),
+and then creating a sub-branch to develop a dependent feature ("subfeature").
+
+Normally, if you run `arc diff` on branch "subfeature" (with HEAD at `B1`), a
+rule like  `arc:merge-base(master)` will select `M1` as the base commit and thus
+incorrectly include `A1` in the commit range.
+
+For trees like this, `git:branch-unique(master)` will instead select `A1` as the
+base commit (because it is the first commit between `B1` and `M1` which appears
+on more branches than `B1` -- `B1` appears on only "subfeature" while `A1`
+appears on "subfeature" and "feature") and include only `B1` in the commit
+range.
+
+The rule will also do the right thing when run from "feature" in this case.
+
+However, this rule will select the wrong commit range in some cases. For
+instance, it will do the wrong thing in this tree:
+
+  |
+  | *    Commit A2, on branch "feature" (HEAD)
+  | |
+  | | *  Commit B1, on branch "subfeature"
+  | |/
+  | *    Commit A1, on branch "feature"
+  |/
+  *      Commit M1, on branch "master"
+  |
+
+This tree represents making another commit (`A2`) on "feature", on top of `A1`.
+
+Here, when `arc diff` is run from branch "feature" (with HEAD at `A2`), this
+rule will incorrectly select only `A2` because `A2` (which is HEAD) appears on
+one branch ("feature") while `A1` appears on two branches ("feature",
+"subfeature").
+
+You can avoid this problem by amending changes into `A1` instead of adding new
+commits, or by rebasing "subfeature" before running `arc diff`.
+
+This rule will also select the wrong commit range in a tree like this:
+
+  |
+  | *    Commit A1', on branch "feature", created by amending A1
+  | |
+  | | *  Commit B1, on branch "subfeature" (HEAD)
+  | |/
+  | o    Commit A1, no longer on "feature" but still on "subfeature"
+  |/
+  *      Commit M1, on branch "master"
+  |
+
+This tree represents amending `A1` without rebasing "subfeature", so that `A1`
+is no longer on "feature" (replaced with `A1'`) but still on "subfeature". In
+this case, running `arc diff` from "subfeature" will incorrectly select both
+`B1` and `A1`, because they now are contained by the same number of branches.
+
+You can avoid this problem by rebasing sub-branches before running `arc diff`,
+or by using a rule like `arc:amended` before `git:branch-unique(*)`.
+
+== arc:bookmark ==
+
+This rule only works in Mercurial.
+
+This rule finds outgoing changes, but stops when it encounters a bookmark. It is
+most likely to be useful if you use one bookmark per feature.
+
+This rule operates like `arc:outgoing`, but then walks the commits between
+`.` and the selected base commit. It stops when it encounters a bookmark. For
+example, if you have a tree like this:
+
+  |
+  | *  C4 (outgoing, bookmark: stripes)
+  | |
+  | *  C3 (outgoing, bookmark: zebra)
+  | |
+  | *  C2 (outgoing, no bookmark)
+  |/
+  *    C1 (pushed, no bookmark)
+  |
+
+When run from `C4`, this rule will select just `C4`, stopping on `C3` because
+it has a different bookmark. When run from `C3`, it will select `C2` and `C3`.
+
+However, this rule will select the wrong commit range in some cases (for
+example, if the "zebra" bookmark has moved on, the rule will no longer stop on
+`C3` and will select `C2`, `C3` and `C4` when run from `C4).
+
+== arc:exec(*) ==
+
+This rule runs some external script or shell command. It is intended for
+advanced users who want specialized behavior that can't be expressed with other
+rules.
+
+To use this rule, provide some script or shell command. For example:
+
+  arc:exec(git merge-base origin/master HEAD)
+  arc:exec(/path/to/some/script.sh)
+
+The command will be executed with the working copy as its working directory,
+and passed no arguments. To //match//, it should print the name of a base commit
+on stdout and then exit with return code 0. To //fail//, it should exit with
+any other return code.
 
 = Next Steps =
 

@@ -119,7 +119,10 @@ final class PhabricatorLoginController
         if (!$errors) {
           // Perform username/password tests only if we didn't get rate limited
           // by the CAPTCHA.
-          if (!$user || !$user->comparePassword($request->getStr('password'))) {
+
+          $envelope = new PhutilOpaqueEnvelope($request->getStr('password'));
+
+          if (!$user || !$user->comparePassword($envelope)) {
             $errors[] = 'Bad username/password.';
           }
         }

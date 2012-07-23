@@ -118,6 +118,17 @@ final class DifferentialInlineCommentEditView extends AphrontView {
       'Cancel');
 
     $buttons = implode('', $buttons);
+
+    $formatting = phutil_render_tag(
+      'a',
+      array(
+        'href' => PhabricatorEnv::getDoclink(
+          'article/Remarkup_Reference.html'),
+        'tabindex' => '-1',
+        'target' => '_blank',
+      ),
+      'Formatting Reference');
+
     return javelin_render_tag(
       'div',
       array(
@@ -136,6 +147,7 @@ final class DifferentialInlineCommentEditView extends AphrontView {
         $this->renderChildren().
       '</div>'.
       '<div class="differential-inline-comment-edit-buttons">'.
+        $formatting.
         $buttons.
         '<div style="clear: both;"></div>'.
       '</div>');
