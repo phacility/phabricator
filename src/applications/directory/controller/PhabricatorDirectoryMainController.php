@@ -619,6 +619,7 @@ final class PhabricatorDirectoryMainController
     $view = new PhabricatorAuditListView();
     $view->setAudits($audits);
     $view->setCommits($commits);
+    $view->setUser($user);
 
     $phids = $view->getRequiredHandlePHIDs();
     $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
