@@ -23,12 +23,10 @@ Phabricator can also send outbound email in two ways:
   - immediately, when messages are generated (default); or
   - in the background, via a daemon.
 
-Sending mail in the background requires more configuration, but will greatly
-improve the performance of the application if your mail handler is slow. Note
-that Amazon SES commonly takes 1-2 seconds per email. If you use SES,
-**strongly consider** configuring the daemon. You should also configure the
-daemon if commenting on Revisions or Tasks feels slow, as it may significantly
-improve performance.
+Sending mail in the background requires that you be running the Phabricator
+daemons, but can greatly improve the performance of the application if your mail
+handler is slow. For more information on using daemons, see
+@{article:Managing Daemons with phd}.
 
 = Basics =
 

@@ -303,13 +303,11 @@ return array(
   'metamta.mail-adapter'        =>
     'PhabricatorMailImplementationPHPMailerLiteAdapter',
 
-  // When email is sent, try to hand it off to the MTA immediately. This may
-  // be worth disabling if your MTA infrastructure is slow or unreliable. If you
-  // disable this option, you must run the 'metamta_mta.php' daemon or mail
-  // won't be handed off to the MTA. If you're using Amazon SES it can be a
-  // little slugish sometimes so it may be worth disabling this and moving to
-  // the daemon after you've got your install up and running. If you have a
-  // properly configured local MTA it should not be necessary to disable this.
+  // When email is sent, try to hand it off to the MTA immediately instead of
+  // queueing it for delivery by the daemons. If you are running the Phabricator
+  // daemons with "phd start", you should disable this to provide a (sometimes
+  // substantial) performance boost. It's on by default to make setup and
+  // configuration a little easier.
   'metamta.send-immediately'    => true,
 
   // If you're using Amazon SES to send email, provide your AWS access key
@@ -652,7 +650,7 @@ return array(
   // A domain name to use when authenticating against Active Directory
   // (e.g. 'example.com')
   'ldap.activedirectory_domain' => '',
-  
+
   // The LDAP version
   'ldap.version' => 3,
 
