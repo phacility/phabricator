@@ -1,10 +1,9 @@
 {
   "project_id" : "phabricator",
   "conduit_uri" : "https://secure.phabricator.com/api/",
-  "lint_engine" : "PhabricatorLintEngine",
-  "unit_engine" : "PhutilUnitTestEngine",
+  "lint.engine" : "PhabricatorLintEngine",
+  "unit.engine" : "PhutilUnitTestEngine",
   "copyright_holder" : "Facebook, Inc.",
-  "remote_hooks_installed" : true,
   "phutil_libraries" : {
     "phabricator" : "src/"
   },
