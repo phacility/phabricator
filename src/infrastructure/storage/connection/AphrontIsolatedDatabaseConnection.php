@@ -96,12 +96,10 @@ final class AphrontIsolatedDatabaseConnection
     $preg_keywords = implode('|', $preg_keywords);
 
     if (!preg_match('/^[\s<>K]*('.$preg_keywords.')\s*/i', $raw_query)) {
-      $doc_uri = PhabricatorEnv::getDoclink('article/Writing_Unit_Tests.html');
-      throw new Exception(
-        "Database isolation currently only supports some queries. For more ".
-        "information, see <{$doc_uri}>. You are trying to issue a query which ".
-        "does not begin with an allowed keyword ".
-        "(".implode(', ', $keywords)."): '".$raw_query."'");
+      throw new AphrontQueryNotSupportedException(
+        "Database isolation currently only supports some queries. You are ".
+        "trying to issue a query which does not begin with an allowed ".
+        "keyword (".implode(', ', $keywords)."): '".$raw_query."'");
     }
 
     $this->transcript[] = $raw_query;

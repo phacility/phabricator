@@ -52,11 +52,12 @@ final class AphrontMySQLDatabaseConnection
     $user = $this->getConfiguration('user');
     $host = $this->getConfiguration('host');
     $database = $this->getConfiguration('database');
+    $pass = $this->getConfiguration('pass');
 
     $conn = @mysql_connect(
       $host,
       $user,
-      $this->getConfiguration('pass'),
+      $pass,
       $new_link = true,
       $flags = 0);
 

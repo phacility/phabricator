@@ -19,6 +19,6 @@
 /**
  * @group storage
  */
-final class AphrontQuerySchemaException extends AphrontQueryException {
+final class AphrontQueryNotSupportedException extends AphrontQueryException {
 
 }

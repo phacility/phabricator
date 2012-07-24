@@ -50,11 +50,12 @@ final class AphrontMySQLiDatabaseConnection
     $user = $this->getConfiguration('user');
     $host = $this->getConfiguration('host');
     $database = $this->getConfiguration('database');
+    $pass = $this->getConfiguration('pass');
 
     $conn = @new mysqli(
       $host,
       $user,
-      $this->getConfiguration('pass'),
+      $pass,
       $database);
 
     $errno = $conn->connect_errno;

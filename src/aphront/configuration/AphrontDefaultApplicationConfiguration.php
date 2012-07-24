@@ -565,6 +565,14 @@ class AphrontDefaultApplicationConfiguration
     $class    = phutil_escape_html(get_class($ex));
     $message  = phutil_escape_html($ex->getMessage());
 
+    if ($ex instanceof AphrontQuerySchemaException) {
+      $message .=
+        "\n\n".
+        "NOTE: This usually indicates that the MySQL schema has not been ".
+        "properly upgraded. Run 'bin/storage upgrade' to ensure your ".
+        "schema is up to date.";
+    }
+
     if (PhabricatorEnv::getEnvConfig('phabricator.show-stack-traces')) {
       $trace = $this->renderStackTrace($ex->getTrace(), $user);
     } else {

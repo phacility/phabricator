@@ -101,7 +101,7 @@ abstract class AphrontMySQLDatabaseConnectionBase
         'database'  => $database,
       ));
 
-    $retries = max(1, PhabricatorEnv::getEnvConfig('mysql.connection-retries'));
+    $retries = max(1, $this->getConfiguration('retries', 3));
     while ($retries--) {
       try {
         $conn = $this->connect();
@@ -143,7 +143,7 @@ abstract class AphrontMySQLDatabaseConnectionBase
 
   public function executeRawQuery($raw_query) {
     $this->lastResult = null;
-    $retries = max(1, PhabricatorEnv::getEnvConfig('mysql.connection-retries'));
+    $retries = max(1, $this->getConfiguration('retries', 3));
     while ($retries--) {
       try {
         $this->requireConnection();

@@ -107,6 +107,7 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
       'mysql.configuration-provider',
       array($this, $mode, $namespace));
 
+    $retries = PhabricatorEnv::getEnvConfig('mysql.connection-retries');
     return PhabricatorEnv::newObjectFromConfig(
       'mysql.implementation',
       array(
@@ -115,6 +116,7 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
           'pass'      => $conf->getPassword(),
           'host'      => $conf->getHost(),
           'database'  => $conf->getDatabase(),
+          'retries'   => $retries,
         ),
       ));
   }
