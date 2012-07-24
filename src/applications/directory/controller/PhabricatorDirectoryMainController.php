@@ -105,24 +105,22 @@ final class PhabricatorDirectoryMainController
   private function buildJumpResponse($nav) {
     $request = $this->getRequest();
 
-    if ($request->isFormPost()) {
-      $jump = $request->getStr('jump');
+    $jump = $request->getStr('jump');
 
-      $response = PhabricatorJumpNavHandler::jumpPostResponse($jump);
-      if ($response) {
-        return $response;
-      } else {
-        $query = new PhabricatorSearchQuery();
-        $query->setQuery($jump);
-        $query->save();
+    $response = PhabricatorJumpNavHandler::jumpPostResponse($jump);
+    if ($response) {
+      return $response;
+    } else if ($request->isFormPost()) {
+      $query = new PhabricatorSearchQuery();
+      $query->setQuery($jump);
+      $query->save();
 
-        return id(new AphrontRedirectResponse())
-          ->setURI('/search/'.$query->getQueryKey().'/');
-      }
+      return id(new AphrontRedirectResponse())
+        ->setURI('/search/'.$query->getQueryKey().'/');
     }
 
 
-    $nav->appendChild($this->buildJumpPanel());
+    $nav->appendChild($this->buildJumpPanel($jump));
     return $this->buildStandardPageResponse(
       $nav,
       array(
@@ -430,7 +428,7 @@ final class PhabricatorDirectoryMainController
       '</div>';
   }
 
-  private function buildJumpPanel() {
+  private function buildJumpPanel($query=null) {
     $request = $this->getRequest();
     $user = $request->getUser();
 
@@ -459,6 +457,7 @@ final class PhabricatorDirectoryMainController
         'class' => 'phabricator-jump-nav',
         'name'  => 'jump',
         'id'    => $uniq_id,
+        'value' => $query,
       ));
     $jump_caption = phutil_render_tag(
       'p',
