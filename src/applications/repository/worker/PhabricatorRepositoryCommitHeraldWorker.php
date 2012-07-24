@@ -222,7 +222,7 @@ final class PhabricatorRepositoryCommitHeraldWorker
 
     $matches = null;
     if (!preg_match('/^Auditors:\s*(.*)$/im', $message, $matches)) {
-      return;
+      return array();
     }
 
     $phids = DifferentialFieldSpecification::parseCommitMessageObjectList(
@@ -231,7 +231,7 @@ final class PhabricatorRepositoryCommitHeraldWorker
       $allow_partial = true);
 
     if (!$phids) {
-      return;
+      return array();
     }
 
     $requests = id(new PhabricatorRepositoryAuditRequest())->loadAllWhere(
