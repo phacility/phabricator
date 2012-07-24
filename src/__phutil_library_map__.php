@@ -1079,13 +1079,10 @@ phutil_register_library_map(array(
     'PhrictionEditController' => 'applications/phriction/controller/PhrictionEditController.php',
     'PhrictionHistoryController' => 'applications/phriction/controller/PhrictionHistoryController.php',
     'PhrictionListController' => 'applications/phriction/controller/PhrictionListController.php',
-    'QueryFormattingTestCase' => 'infrastructure/storage/query/__tests__/QueryFormattingTestCase.php',
   ),
   'function' =>
   array(
     '_phabricator_date_format' => 'view/viewutils.php',
-    '_qsprintf_check_scalar_type' => 'infrastructure/storage/query/qsprintf.php',
-    '_qsprintf_check_type' => 'infrastructure/storage/query/qsprintf.php',
     'celerity_generate_unique_node_id' => 'infrastructure/celerity/api.php',
     'celerity_get_resource_uri' => 'infrastructure/celerity/api.php',
     'celerity_register_resource_map' => 'infrastructure/celerity/map.php',
@@ -1104,15 +1101,7 @@ phutil_register_library_map(array(
     'phabricator_time' => 'view/viewutils.php',
     'phid_get_type' => 'applications/phid/utils.php',
     'phid_group_by_type' => 'applications/phid/utils.php',
-    'qsprintf' => 'infrastructure/storage/query/qsprintf.php',
-    'queryfx' => 'infrastructure/storage/query/queryfx.php',
-    'queryfx_all' => 'infrastructure/storage/query/queryfx.php',
-    'queryfx_one' => 'infrastructure/storage/query/queryfx.php',
     'require_celerity_resource' => 'infrastructure/celerity/api.php',
-    'vqsprintf' => 'infrastructure/storage/query/qsprintf.php',
-    'vqueryfx' => 'infrastructure/storage/query/queryfx.php',
-    'vqueryfx_all' => 'infrastructure/storage/query/queryfx.php',
-    'xsprintf_query' => 'infrastructure/storage/query/qsprintf.php',
   ),
   'xmap' =>
   array(
@@ -2058,6 +2047,5 @@ phutil_register_library_map(array(
     'PhrictionEditController' => 'PhrictionController',
     'PhrictionHistoryController' => 'PhrictionController',
     'PhrictionListController' => 'PhrictionController',
-    'QueryFormattingTestCase' => 'PhabricatorTestCase',
   ),
 ));
