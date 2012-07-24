@@ -38,6 +38,10 @@ final class AphrontIsolatedDatabaseConnection
     }
   }
 
+  public function close() {
+    return;
+  }
+
   public function escapeString($string) {
     return '<S>';
   }

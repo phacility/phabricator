@@ -32,14 +32,23 @@ abstract class AphrontMySQLDatabaseConnectionBase
   abstract protected function fetchAssoc($result);
   abstract protected function getErrorCode($connection);
   abstract protected function getErrorDescription($connection);
+  abstract protected function closeConnection();
 
   public function __construct(array $configuration) {
     $this->configuration  = $configuration;
   }
 
+  public function close() {
+    if ($this->connection) {
+      $this->closeConnection();
+      $this->connection = null;
+    }
+  }
+
   public function escapeColumnName($name) {
     return '`'.str_replace('`', '``', $name).'`';
   }
+
 
   public function escapeMultilineComment($comment) {
     // These can either terminate a comment, confuse the hell out of the parser,
@@ -76,12 +85,6 @@ abstract class AphrontMySQLDatabaseConnectionBase
 
   protected function getConfiguration($key, $default = null) {
     return idx($this->configuration, $key, $default);
-  }
-
-  private function closeConnection() {
-    if ($this->connection) {
-      $this->connection = null;
-    }
   }
 
   private function establishConnection() {
@@ -189,12 +192,12 @@ abstract class AphrontMySQLDatabaseConnectionBase
           // We can't close the connection before this because
           // isInsideTransaction() and getTransactionState() depend on the
           // connection.
-          $this->closeConnection();
+          $this->close();
 
           throw $ex;
         }
 
-        $this->closeConnection();
+        $this->close();
 
         if (!$retries) {
           throw $ex;

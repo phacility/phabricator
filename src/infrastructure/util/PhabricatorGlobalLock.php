@@ -110,11 +110,8 @@ final class PhabricatorGlobalLock extends PhutilLock {
       'SELECT RELEASE_LOCK(%s)',
       'phabricator:'.$this->lockname);
 
-    // TODO: There's no explicit close() method on connections right now. Once
-    // we have one, we could close the connection here. Since we don't have
-    // such a method, we need to keep the connection around in case lock() is
-    // called again, so that long-running daemons don't gradually open
-    // an unbounded number of connections.
+    $this->conn->close();
+    $this->conn = null;
   }
 
 }

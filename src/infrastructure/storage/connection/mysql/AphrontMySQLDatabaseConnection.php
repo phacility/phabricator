@@ -34,6 +34,10 @@ final class AphrontMySQLDatabaseConnection
     return mysql_affected_rows($this->requireConnection());
   }
 
+  protected function closeConnection() {
+    mysql_close($this->requireConnection());
+  }
+
   protected function connect() {
     if (!function_exists('mysql_connect')) {
       // We have to '@' the actual call since it can spew all sorts of silly

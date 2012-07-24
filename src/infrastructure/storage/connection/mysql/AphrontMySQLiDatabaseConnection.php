@@ -36,6 +36,10 @@ final class AphrontMySQLiDatabaseConnection
     return $this->requireConnection()->affected_rows;
   }
 
+  protected function closeConnection() {
+    $this->requireConnection()->close();
+  }
+
   protected function connect() {
     if (!class_exists('mysqli', false)) {
       throw new Exception(

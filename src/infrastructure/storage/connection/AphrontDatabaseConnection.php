@@ -28,19 +28,20 @@ abstract class AphrontDatabaseConnection {
   abstract public function getAffectedRows();
   abstract public function selectAllResults();
   abstract public function executeRawQuery($raw_query);
+  abstract public function close();
 
   abstract public function escapeString($string);
   abstract public function escapeColumnName($string);
   abstract public function escapeMultilineComment($string);
   abstract public function escapeStringForLikeClause($string);
 
-  public function queryData($pattern/*, $arg, $arg, ... */) {
+  public function queryData($pattern/* , $arg, $arg, ... */) {
     $args = func_get_args();
     array_unshift($args, $this);
     return call_user_func_array('queryfx_all', $args);
   }
 
-  public function query($pattern/*, $arg, $arg, ... */) {
+  public function query($pattern/* , $arg, $arg, ... */) {
     $args = func_get_args();
     array_unshift($args, $this);
     return call_user_func_array('queryfx', $args);
