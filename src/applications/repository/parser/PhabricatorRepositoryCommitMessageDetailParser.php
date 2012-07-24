@@ -69,6 +69,10 @@ abstract class PhabricatorRepositoryCommitMessageDetailParser {
 
     $display_name = $email->getDisplayName();
     if ($display_name) {
+      $phid = $this->findUserByUserName($display_name);
+      if ($phid) {
+        return $phid;
+      }
       $phid = $this->findUserByRealName($display_name);
       if ($phid) {
         return $phid;

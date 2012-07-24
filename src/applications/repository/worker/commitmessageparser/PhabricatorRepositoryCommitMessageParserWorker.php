@@ -52,8 +52,19 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       $parser_obj->parseCommitDetails();
     }
 
-    $author_phid = $data->getCommitDetail('authorPHID');
-    if ($author_phid) {
+    $author_phid = $this->lookupUser(
+      $commit,
+      $data->getAuthorName(),
+      $data->getCommitDetail('authorPHID'));
+    $data->setCommitDetail('authorPHID', $author_phid);
+
+    $committer_phid = $this->lookupUser(
+      $commit,
+      $data->getCommitDetail('committer'),
+      $data->getCommitDetail('committerPHID'));
+    $data->setCommitDetail('committerPHID', $committer_phid);
+
+    if ($author_phid != $commit->getAuthorPHID()) {
       $commit->setAuthorPHID($author_phid);
       $commit->save();
     }
@@ -348,4 +359,27 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     $revisions = msort($revisions, 'getDateModified');
     return end($revisions);
   }
+
+  /**
+   * Emit an event so installs can do custom lookup of commit authors who may
+   * not be naturally resolvable.
+   */
+  private function lookupUser(
+    PhabricatorRepositoryCommit $commit,
+    $query,
+    $guess) {
+
+    $type = PhabricatorEventType::TYPE_DIFFUSION_LOOKUPUSER;
+    $data = array(
+      'commit'  => $commit,
+      'query'   => $query,
+      'result'  => $guess,
+    );
+
+    $event = new PhabricatorEvent($type, $data);
+    PhutilEventEngine::dispatchEvent($event);
+
+    return $event->getValue('result');
+  }
+
 }
