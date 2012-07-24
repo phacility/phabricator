@@ -52,7 +52,11 @@ final class AphrontMySQLDatabaseConnection
     $user = $this->getConfiguration('user');
     $host = $this->getConfiguration('host');
     $database = $this->getConfiguration('database');
+
     $pass = $this->getConfiguration('pass');
+    if ($pass instanceof PhutilOpaqueEnvelope) {
+      $pass = $pass->openEnvelope();
+    }
 
     $conn = @mysql_connect(
       $host,

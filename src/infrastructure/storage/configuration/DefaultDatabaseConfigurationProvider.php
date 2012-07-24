@@ -38,7 +38,7 @@ final class DefaultDatabaseConfigurationProvider
   }
 
   public function getPassword() {
-    return PhabricatorEnv::getEnvConfig('mysql.pass');
+    return new PhutilOpaqueEnvelope(PhabricatorEnv::getEnvConfig('mysql.pass'));
   }
 
   public function getHost() {

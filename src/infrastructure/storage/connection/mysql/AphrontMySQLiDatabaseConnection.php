@@ -50,7 +50,11 @@ final class AphrontMySQLiDatabaseConnection
     $user = $this->getConfiguration('user');
     $host = $this->getConfiguration('host');
     $database = $this->getConfiguration('database');
+
     $pass = $this->getConfiguration('pass');
+    if ($pass instanceof PhutilOpaqueEnvelope) {
+      $pass = $pass->openEnvelope();
+    }
 
     $conn = @new mysqli(
       $host,
