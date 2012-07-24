@@ -321,8 +321,6 @@ final class PhabricatorDirectoryMainController
         ),
         "View Active Revisions \xC2\xBB"));
 
-    $fields =
-
     $revision_view = id(new DifferentialRevisionListView())
       ->setRevisions($active)
       ->setFields(DifferentialRevisionListView::getDefaultFields())
