@@ -55,8 +55,14 @@ if (!$env) {
 }
 
 if (!isset($_REQUEST['__path__'])) {
-  phabricator_fatal_config_error(
-    "__path__ is not set. Your rewrite rules are not configured correctly.");
+  if (php_sapi_name() == 'cli-server') {
+    // Compatibility with PHP 5.4+ built-in web server.
+    $url = parse_url($_SERVER['REQUEST_URI']);
+    $_REQUEST['__path__'] = $url['path'];
+  } else {
+    phabricator_fatal_config_error(
+      "__path__ is not set. Your rewrite rules are not configured correctly.");
+  }
 }
 
 if (get_magic_quotes_gpc()) {
