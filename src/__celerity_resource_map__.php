@@ -939,6 +939,19 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/core/behavior-dark-console-ajax.js',
   ),
+  'javelin-behavior-device' =>
+  array(
+    'uri' => '/res/bec84986/rsrc/js/application/core/behavior-device.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-dom',
+      3 => 'javelin-vector',
+    ),
+    'disk' => '/rsrc/js/application/core/behavior-device.js',
+  ),
   'javelin-behavior-differential-accept-with-errors' =>
   array(
     'uri' => '/res/ba5144c5/rsrc/js/application/differential/behavior-accept-with-errors.js',

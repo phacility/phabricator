@@ -223,7 +223,18 @@ final class PhabricatorStandardPageView extends AphrontPageView {
       }
     }
 
+    $viewport_tag = null;
+    if (PhabricatorEnv::getEnvConfig('preview.viewport-meta-tag')) {
+      $viewport_tag = phutil_render_tag(
+        'meta',
+        array(
+          'name' => 'viewport',
+          'content' => 'width=device-width, initial-scale=1, maximum-scale=1',
+        ));
+    }
+
     $head =
+      $viewport_tag.
       '<script type="text/javascript">'.
         $framebust.
         'window.__DEV__=1;'.
@@ -514,14 +525,37 @@ final class PhabricatorStandardPageView extends AphrontPageView {
         '</div>';
     }
 
+    Javelin::initBehavior('device', array('id' => 'base-page'));
+    $agent = idx($_SERVER, 'HTTP_USER_AGENT');
+
+    // Try to guess the device resolution based on UA strings to avoid a flash
+    // of incorrectly-styled content.
+    $device_guess = 'device-desktop';
+    if (preg_match('/iPhone|iPod/', $agent)) {
+      $device_guess = 'device-phone';
+    } else if (preg_match('/iPad/', $agent)) {
+      $device_guess = 'device-tablet';
+    }
+
+    $classes = array(
+      'phabricator-standard-page',
+      $admin_class,
+      $device_guess,
+    );
+    $classes = implode(' ', $classes);
+
     return
       ($console ? '<darkconsole />' : null).
       $developer_warning.
-      '<div class="phabricator-standard-page '.$admin_class.'">'.
+      phutil_render_tag(
+        'div',
+        array(
+          'id' => 'base-page',
+          'class' => $classes,
+        ),
         $header_chrome.
         $this->bodyContent.
-        '<div style="clear: both;"></div>'.
-      '</div>'.
+        '<div style="clear: both;"></div>').
       $footer_chrome;
   }
 

@@ -1230,4 +1230,12 @@ return array(
   // only enable it when debugging.
   'debug.profile-every-request'  => false,
 
+
+// -- Previews  ------------------------------------------------------------- //
+
+  // Turn on to enable the "viewport" meta tag. This is a preview feature which
+  // will improve the usability of Phabricator on phones and tablets once it
+  // is ready.
+  'preview.viewport-meta-tag' => false,
+
 );
