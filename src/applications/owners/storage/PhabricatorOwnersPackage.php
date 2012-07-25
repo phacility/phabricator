@@ -185,8 +185,8 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO {
     }
     $ids = array_keys($ids);
 
-    $packages = $package->loadAllWhere('id in (%Ld)', array_keys($ids));
-    $packages = array_select_keys($packages, array_keys($ids));
+    $packages = $package->loadAllWhere('id in (%Ld)', $ids);
+    $packages = array_select_keys($packages, $ids);
 
     return $packages;
   }
