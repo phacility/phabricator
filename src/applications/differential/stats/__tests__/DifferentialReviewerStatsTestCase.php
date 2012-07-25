@@ -19,13 +19,11 @@
 final class DifferentialReviewerStatsTestCase extends PhabricatorTestCase {
 
   public function testReviewerStats() {
-    $revw = DifferentialRevision::RELATION_REVIEWER;
-
     $revision = new DifferentialRevision();
     $revision->setDateCreated(1);
     $revision->attachRelationships(array(
-      array('relation' => $revw, 'objectPHID' => 'R1'),
-      array('relation' => $revw, 'objectPHID' => 'R3'),
+      $this->newReviewer('R1'),
+      $this->newReviewer('R3'),
     ));
 
     $comments = array(
@@ -69,12 +67,7 @@ final class DifferentialReviewerStatsTestCase extends PhabricatorTestCase {
   public function testReviewerStatsSince() {
     $revision = new DifferentialRevision();
     $revision->setDateCreated(1);
-    $revision->attachRelationships(array(
-      array(
-        'relation' => DifferentialRevision::RELATION_REVIEWER,
-        'objectPHID' => 'R',
-      ),
-    ));
+    $revision->attachRelationships(array($this->newReviewer('R')));
 
     $comments = array(
       $this->newComment(2, 'R', DifferentialAction::ACTION_REJECT),
@@ -93,21 +86,23 @@ final class DifferentialReviewerStatsTestCase extends PhabricatorTestCase {
   public function testReviewerStatsRequiresReview() {
     $revision = new DifferentialRevision();
     $revision->setDateCreated(1);
-    $revision->attachRelationships(array(
-      array(
-        'relation' => DifferentialRevision::RELATION_REVIEWER,
-        'objectPHID' => 'R',
-      ),
-    ));
+    $revision->attachRelationships(array($this->newReviewer('R')));
 
     $comments = array();
 
     $stats = new DifferentialReviewerStats();
-    $stats->setNow(2);
+    $stats->setUntil(2);
     list($reviewed, $not_reviewed) = $stats->computeTimes($revision, $comments);
 
     $this->assertEqual(array(), $reviewed);
     $this->assertEqual(array('R' => array(2 - 1)), $not_reviewed);
+  }
+
+  private function newReviewer($phid) {
+    return array(
+      'relation' => DifferentialRevision::RELATION_REVIEWER,
+      'objectPHID' => $phid,
+    );
   }
 
   private function newComment($date, $author, $action, $metadata = array()) {

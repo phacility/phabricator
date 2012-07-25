@@ -18,18 +18,21 @@
 
 final class DifferentialReviewerStats {
   private $since = 0;
-  private $now;
+  private $until;
 
   public function setSince($value) {
     $this->since = $value;
     return $this;
   }
 
-  public function setNow($value) {
-    $this->now = $value;
+  public function setUntil($value) {
+    $this->until = $value;
     return $this;
   }
 
+  /**
+   * @return array($reviewed, $not_reviewed)
+   */
   public function computeTimes(
     DifferentialRevision $revision,
     array $comments) {
@@ -103,7 +106,7 @@ final class DifferentialReviewerStats {
         }
       }
 
-      // TODO: Respect workdays.
+      // TODO: Respect workdays and status away.
 
       if ($old_status != $status) {
         if ($status == ArcanistDifferentialRevisionStatus::NEEDS_REVIEW) {
@@ -123,15 +126,117 @@ final class DifferentialReviewerStats {
     }
 
     if ($status == ArcanistDifferentialRevisionStatus::NEEDS_REVIEW) {
-      $now = ($this->now !== null ? $this->now : time());
-      if ($now >= $this->since) {
+      $date = ($this->until !== null ? $this->until : time());
+      if ($date >= $this->since) {
         foreach ($reviewers as $phid => $start) {
-          $not_reviewed[$phid][] = $now - $start;
+          $not_reviewed[$phid][] = $date - $start;
         }
       }
     }
 
     return array($reviewed, $not_reviewed);
+  }
+
+  public function loadAvgs() {
+    $limit = 1000;
+    $conn_r = id(new DifferentialRevision())->establishConnection('r');
+
+    $sums = array();
+    $counts = array();
+    $all_not_reviewed = array();
+
+    $last_id = 0;
+    do {
+      $where = '';
+      if ($this->until !== null) {
+        $where .= qsprintf(
+          $conn_r,
+          ' AND dateCreated < %d',
+          $this->until);
+      }
+      if ($this->since) {
+        $where .= qsprintf(
+          $conn_r,
+          ' AND (dateModified > %d OR status = %s)',
+          $this->since,
+          ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
+      }
+      $revisions = id(new DifferentialRevision())->loadAllWhere(
+        'id > %d%Q ORDER BY id LIMIT %d',
+        $last_id,
+        $where,
+        $limit);
+
+      if (!$revisions) {
+        break;
+      }
+      $last_id = last_key($revisions);
+
+      $relations = queryfx_all(
+        $conn_r,
+        'SELECT * FROM %T WHERE revisionID IN (%Ld) AND relation = %s',
+        DifferentialRevision::RELATIONSHIP_TABLE,
+        array_keys($revisions),
+        DifferentialRevision::RELATION_REVIEWER);
+      $relations = igroup($relations, 'revisionID');
+
+      $where = '';
+      if ($this->until !== null) {
+        $where = qsprintf(
+          $conn_r,
+          ' AND dateCreated < %d',
+          $this->until);
+      }
+      $all_comments = id(new DifferentialComment())->loadAllWhere(
+        'revisionID IN (%Ld)%Q ORDER BY revisionID, id',
+        array_keys($revisions),
+        $where);
+      $all_comments = mgroup($all_comments, 'getRevisionID');
+
+      foreach ($revisions as $id => $revision) {
+        $revision->attachRelationships(idx($relations, $id, array()));
+        $comments = idx($all_comments, $id, array());
+
+        list($reviewed, $not_reviewed) =
+          $this->computeTimes($revision, $comments);
+
+        foreach ($reviewed as $phid => $times) {
+          $sums[$phid] = idx($sums, $phid, 0) + array_sum($times);
+          $counts[$phid] = idx($counts, $phid, 0) + count($times);
+        }
+
+        foreach ($not_reviewed as $phid => $times) {
+          $all_not_reviewed[$phid][] = $times;
+        }
+      }
+    } while (count($revisions) >= $limit);
+
+    foreach ($all_not_reviewed as $phid => $not_reviewed) {
+      if (!array_key_exists($phid, $counts)) {
+        // If the person didn't make any reviews than take maximum time because
+        // he is at least that slow.
+        $sums[$phid] = max(array_map('max', $not_reviewed));
+        $counts[$phid] = 1;
+        continue;
+      }
+      $avg = $sums[$phid] / $counts[$phid];
+      foreach ($not_reviewed as $times) {
+        foreach ($times as $time) {
+          // Don't shorten the average time just because the reviewer was lucky
+          // to be in a group with someone faster.
+          if ($time > $avg) {
+            $sums[$phid] += $time;
+            $counts[$phid]++;
+          }
+        }
+      }
+    }
+
+    $avgs = array();
+    foreach ($sums as $phid => $sum) {
+      $avgs[$phid] = $sum / $counts[$phid];
+    }
+    return $avgs;
   }
 
 }
