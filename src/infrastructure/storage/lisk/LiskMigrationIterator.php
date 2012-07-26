@@ -29,49 +29,32 @@
  *
  * @task storage
  */
-final class LiskMigrationIterator implements Iterator {
+final class LiskMigrationIterator extends PhutilBufferedIterator {
 
   private $object;
   private $cursor;
-  private $data;
 
   public function __construct(LiskDAO $object) {
     $this->object = $object;
   }
 
-  public function rewind() {
+  protected function didRewind() {
     $this->cursor = 0;
-    $this->data = array();
-    $this->next();
-  }
-
-  public function valid() {
-    if (!$this->data) {
-      $this->next();
-    }
-    return (bool)$this->data;
-  }
-
-  public function current() {
-    return end($this->data);
   }
 
   public function key() {
     return $this->current()->getID();
   }
 
-  public function next() {
-    if ($this->data) {
-      return array_pop($this->data);
-    }
-    $this->data = $this->object->loadAllWhere(
+  protected function loadPage() {
+    $results = $this->object->loadAllWhere(
       'id > %d ORDER BY id ASC LIMIT %d',
       $this->cursor,
-      100);
-    if ($this->data) {
-      $this->cursor = last($this->data)->getID();
-      $this->data = array_reverse($this->data);
+      $this->getPageSize());
+    if ($results) {
+      $this->cursor = last($results)->getID();
     }
+    return $results;
   }
 
 }
