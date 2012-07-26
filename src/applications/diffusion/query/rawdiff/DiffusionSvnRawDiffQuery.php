@@ -25,10 +25,16 @@ final class DiffusionSvnRawDiffQuery extends DiffusionRawDiffQuery {
     $commit = $drequest->getCommit();
     $arc_root = phutil_get_library_root('arcanist');
 
+    $against = $this->getAgainstCommit();
+    if ($against === null) {
+      $against = $commit - 1;
+    }
+
     $future = $repository->getRemoteCommandFuture(
-      'diff --diff-cmd %s -x -U%d -c %d %s%s@',
+      'diff --diff-cmd %s -x -U%d -r %d:%d %s%s@',
       $arc_root.'/../scripts/repository/binary_safe_diff.sh',
       $this->getLinesOfContext(),
+      $against,
       $commit,
       $repository->getRemoteURI(),
       $drequest->getPath());
