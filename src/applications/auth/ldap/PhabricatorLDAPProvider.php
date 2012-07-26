@@ -17,6 +17,10 @@
  */
 
 final class PhabricatorLDAPProvider {
+  // http://www.php.net/manual/en/function.ldap-errno.php#20665 states
+  // that the number could be 31 or 49, in testing it has always been 49
+  const LDAP_INVALID_CREDENTIALS = 49;
+
   private $userData;
   private $connection;
 
@@ -44,6 +48,10 @@ final class PhabricatorLDAPProvider {
 
   public function getSearchAttribute() {
     return PhabricatorEnv::getEnvConfig('ldap.search_attribute');
+  }
+
+  public function getUsernameAttribute() {
+    return PhabricatorEnv::getEnvConfig('ldap.username-attribute');
   }
 
   public function getLDAPVersion() {
@@ -112,10 +120,31 @@ final class PhabricatorLDAPProvider {
     return $this->userData;
   }
 
+  private function invalidLDAPUserErrorMessage($errno, $errmsg) {
+    return "LDAP Error #".$errno.": ".$errmsg;
+  }
+
   public function auth($username, PhutilOpaqueEnvelope $password) {
     if (strlen(trim($username)) == 0) {
       throw new Exception('Username can not be empty');
     }
+
+    if (PhabricatorEnv::getEnvConfig('ldap.search-first')) {
+      // To protect against people phishing for accounts we catch the
+      // exception and present the default exception that would be presented
+      // in the case of a failed bind.
+      try {
+        $user = $this->getUser($this->getUsernameAttribute(), $username);
+        $username = $user[$this->getSearchAttribute()][0];
+      } catch (PhabricatorLDAPUnknownUserException $e) {
+        throw new Exception(
+          $this->invalidLDAPUserErrorMessage(
+            self::LDAP_INVALID_CREDENTIALS,
+            ldap_err2str(self::LDAP_INVALID_CREDENTIALS)));
+      }
+    }
+
+    $conn = $this->getConnection();
 
     $activeDirectoryDomain =
       PhabricatorEnv::getEnvConfig('ldap.activedirectory_domain');
@@ -130,8 +159,6 @@ final class PhabricatorLDAPProvider {
         $this->getBaseDN());
     }
 
-    $conn = $this->getConnection();
-
     // NOTE: It is very important we suppress any messages that occur here,
     // because it logs passwords if it reaches an error log of any sort.
     DarkConsoleErrorLogPluginAPI::enableDiscardMode();
@@ -140,19 +167,21 @@ final class PhabricatorLDAPProvider {
 
     if (!$result) {
       throw new Exception(
-        "LDAP Error #".ldap_errno($conn).": ".ldap_error($conn));
+        $this->invalidLDAPUserErrorMessage(
+          ldap_errno($conn),
+          ldap_error($conn)));
     }
 
-    $this->userData = $this->getUser($username);
+    $this->userData = $this->getUser($this->getSearchAttribute(), $username);
     return $this->userData;
   }
 
-  private function getUser($username) {
+  private function getUser($attribute, $username) {
     $conn = $this->getConnection();
 
     $query = ldap_sprintf(
       '%Q=%S',
-      $this->getSearchAttribute(),
+      $attribute,
       $username);
 
     $result = ldap_search($conn, $this->getBaseDN(), $query);
@@ -170,11 +199,11 @@ final class PhabricatorLDAPProvider {
 
     if ($entries['count'] > 1) {
       throw new Exception('Found more then one user with this ' .
-        $this->getSearchAttribute());
+        $attribute);
     }
 
     if ($entries['count'] == 0) {
-      throw new Exception('Could not find user');
+      throw new PhabricatorLDAPUnknownUserException('Could not find user');
     }
 
     return $entries[0];
