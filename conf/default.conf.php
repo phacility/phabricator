@@ -648,7 +648,7 @@ return array(
   'ldap.search-first'         => false,
 
   // The attribute to search for if you have to search for a user
-  'ldap.username_attribute' => '',
+  'ldap.username-attribute' => '',
 
   // The attribute(s) to be regarded as 'real name'.
   // If more then one attribute is supplied the values of the attributes in
