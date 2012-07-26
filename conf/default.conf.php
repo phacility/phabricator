@@ -642,6 +642,14 @@ return array(
   // The attribute to be regarded as 'username'. Has to be unique
   'ldap.search_attribute' => '',
 
+  // Perform a search to find a user
+  // Many LDAP installations do not have the username in the dn, if this is
+  // true for you set this to true and configure the username_attribute below
+  'ldap.search-first'         => false,
+
+  // The attribute to search for if you have to search for a user
+  'ldap.username-attribute' => '',
+
   // The attribute(s) to be regarded as 'real name'.
   // If more then one attribute is supplied the values of the attributes in
   // the array will be joined
