@@ -33,7 +33,7 @@ final class AphrontFormImageControl extends AphrontFormControl {
           'name'  => $this->getName(),
           'class' => 'image',
         )).
-      '<span>-or-</span>'.
+      '<div style="clear: both;">'.
       phutil_render_tag(
         'input',
         array(
@@ -47,7 +47,8 @@ final class AphrontFormImageControl extends AphrontFormControl {
         array(
           'for' => $id,
         ),
-        'Use Default Image');
+        'Use Default Image instead').
+      '</div>';
   }
 
 }
