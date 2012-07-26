@@ -58,7 +58,7 @@ phutil_register_library_map(array(
     'AphrontHeadsupActionView' => 'view/layout/headsup/AphrontHeadsupActionView.php',
     'AphrontHeadsupView' => 'view/layout/headsup/AphrontHeadsupView.php',
     'AphrontIDPagerView' => 'view/control/AphrontIDPagerView.php',
-    'AphrontIsolatedDatabaseConnectionTestCase' => 'infrastructure/storage/connection/__tests__/AphrontIsolatedDatabaseConnectionTestCase.php',
+    'AphrontIsolatedDatabaseConnectionTestCase' => 'infrastructure/storage/__tests__/AphrontIsolatedDatabaseConnectionTestCase.php',
     'AphrontIsolatedHTTPSink' => 'aphront/sink/AphrontIsolatedHTTPSink.php',
     'AphrontJSONResponse' => 'aphront/response/AphrontJSONResponse.php',
     'AphrontJavelinView' => 'view/AphrontJavelinView.php',
@@ -66,7 +66,7 @@ phutil_register_library_map(array(
     'AphrontListFilterView' => 'view/layout/AphrontListFilterView.php',
     'AphrontMiniPanelView' => 'view/layout/AphrontMiniPanelView.php',
     'AphrontMoreView' => 'view/layout/AphrontMoreView.php',
-    'AphrontMySQLDatabaseConnectionTestCase' => 'infrastructure/storage/connection/__tests__/AphrontMySQLDatabaseConnectionTestCase.php',
+    'AphrontMySQLDatabaseConnectionTestCase' => 'infrastructure/storage/__tests__/AphrontMySQLDatabaseConnectionTestCase.php',
     'AphrontNullView' => 'view/AphrontNullView.php',
     'AphrontPHPHTTPSink' => 'aphront/sink/AphrontPHPHTTPSink.php',
     'AphrontPageView' => 'view/page/AphrontPageView.php',
@@ -1081,6 +1081,7 @@ phutil_register_library_map(array(
     'PhrictionEditController' => 'applications/phriction/controller/PhrictionEditController.php',
     'PhrictionHistoryController' => 'applications/phriction/controller/PhrictionHistoryController.php',
     'PhrictionListController' => 'applications/phriction/controller/PhrictionListController.php',
+    'QueryFormattingTestCase' => 'infrastructure/storage/__tests__/QueryFormattingTestCase.php',
   ),
   'function' =>
   array(
@@ -2050,5 +2051,6 @@ phutil_register_library_map(array(
     'PhrictionEditController' => 'PhrictionController',
     'PhrictionHistoryController' => 'PhrictionController',
     'PhrictionListController' => 'PhrictionController',
+    'QueryFormattingTestCase' => 'PhabricatorTestCase',
   ),
 ));
