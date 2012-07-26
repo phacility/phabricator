@@ -941,40 +941,35 @@ final class DifferentialChangesetParser {
 
     $this->highlightEngine = PhabricatorSyntaxHighlighter::newEngine();
 
+    $this->tryCacheStuff();
+
     $shield = null;
-    if ($this->isTopLevel && !$this->comments &&
-        !($this->isGenerated() || $this->isUnchanged() || $this->isDeleted()) &&
-        $this->changeset->getAffectedLineCount() > 2500) {
-      $lines = number_format($this->changeset->getAffectedLineCount());
-      $shield = $this->renderShield(
-        "This file has a very large number of changes ({$lines} lines).",
-        true);
-    } else {
-
-      $this->tryCacheStuff();
-
-      if ($this->isTopLevel && !$this->comments) {
-        if ($this->isGenerated()) {
+    if ($this->isTopLevel && !$this->comments) {
+      if ($this->isGenerated()) {
+        $shield = $this->renderShield(
+          "This file contains generated code, which does not normally need ".
+          "to be reviewed.",
+          true);
+      } else if ($this->isUnchanged()) {
+        if ($this->isWhitespaceOnly()) {
           $shield = $this->renderShield(
-            "This file contains generated code, which does not normally need ".
-            "to be reviewed.",
-            true);
-        } else if ($this->isUnchanged()) {
-          if ($this->isWhitespaceOnly()) {
-            $shield = $this->renderShield(
-              "This file was changed only by adding or removing trailing ".
-              "whitespace.",
-              false);
-          } else {
-            $shield = $this->renderShield(
-              "The contents of this file were not changed.",
-              false);
-          }
-        } else if ($this->isDeleted()) {
+            "This file was changed only by adding or removing trailing ".
+            "whitespace.",
+            false);
+        } else {
           $shield = $this->renderShield(
-            "This file was completely deleted.",
-            true);
+            "The contents of this file were not changed.",
+            false);
         }
+      } else if ($this->isDeleted()) {
+        $shield = $this->renderShield(
+          "This file was completely deleted.",
+          true);
+      } else if ($this->changeset->getAffectedLineCount() > 2500) {
+        $lines = number_format($this->changeset->getAffectedLineCount());
+        $shield = $this->renderShield(
+          "This file has a very large number of changes ({$lines} lines).",
+          true);
       }
     }
 
