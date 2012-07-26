@@ -55,15 +55,15 @@ A rule may //match//, meaning that it identifies some valid commit in the
 working copy, or //fail//, meaning that it does not identify a valid commit. For
 instance, the rule `arc:upstream` will //match// if the current Git branch
 tracks an upstream branch, but //fail// if the current Git branch does not track
-an upstream branch. When a rule fails, processing continues with the next rule.
-Some rules can never match but produce useful side effects instead. These are
-described below.
+an upstream branch, or the working copy isn't a Git working copy. When a rule
+fails, processing continues with the next rule. Some rules can never match but
+produce useful side effects instead. These are described below.
 
 A //ruleset// is a comma-separated list of rules:
 
   arc:upstream, arc:prompt
 
-`arc` reads four rulesets:
+`arc` reads five rulesets:
 
   # `args`, specified with `--base <ruleset>` on the command line when you run
     a command. This ruleset is processed first.
@@ -278,7 +278,7 @@ it has a different bookmark. When run from `C3`, it will select `C2` and `C3`.
 
 However, this rule will select the wrong commit range in some cases (for
 example, if the "zebra" bookmark has moved on, the rule will no longer stop on
-`C3` and will select `C2`, `C3` and `C4` when run from `C4).
+`C3` and will select `C2`, `C3` and `C4` when run from `C4`).
 
 == arc:exec(*) ==
 

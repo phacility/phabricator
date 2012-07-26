@@ -84,9 +84,9 @@ Phabricator. For example, you might write this file to
 
   {
     "project_id" : "libcustom",
-    "phutil_libraries" : {
-      "phabricator" : "phabricator/src/"
-    }
+    "load" : [
+      "phabricator/src/"
+    ]
   }
 
 For details on creating a ##.arcconfig##, see
