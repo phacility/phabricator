@@ -46,6 +46,10 @@ final class PhabricatorLDAPProvider {
     return PhabricatorEnv::getEnvConfig('ldap.search_attribute');
   }
 
+  public function getUsernameAttribute() {
+    return PhabricatorEnv::getEnvConfig('ldap.username_attribute');
+  }
+
   public function getLDAPVersion() {
     return PhabricatorEnv::getEnvConfig('ldap.version');
   }
@@ -117,6 +121,13 @@ final class PhabricatorLDAPProvider {
       throw new Exception('Username can not be empty');
     }
 
+    if (PhabricatorEnv::getEnvConfig('ldap.search-first')) {
+      $user = $this->getUser($this->getUsernameAttribute(), $username);
+      $username = $user[($this->getSearchAttribute())][0];
+    }
+
+    $conn = $this->getConnection();
+
     $activeDirectoryDomain =
       PhabricatorEnv::getEnvConfig('ldap.activedirectory_domain');
 
@@ -130,8 +141,6 @@ final class PhabricatorLDAPProvider {
         $this->getBaseDN());
     }
 
-    $conn = $this->getConnection();
-
     // NOTE: It is very important we suppress any messages that occur here,
     // because it logs passwords if it reaches an error log of any sort.
     DarkConsoleErrorLogPluginAPI::enableDiscardMode();
@@ -143,16 +152,16 @@ final class PhabricatorLDAPProvider {
         "LDAP Error #".ldap_errno($conn).": ".ldap_error($conn));
     }
 
-    $this->userData = $this->getUser($username);
+    $this->userData = $this->getUser($this->getSearchAttribute(), $username);
     return $this->userData;
   }
 
-  private function getUser($username) {
+  private function getUser($attribute, $username) {
     $conn = $this->getConnection();
 
     $query = ldap_sprintf(
       '%Q=%S',
-      $this->getSearchAttribute(),
+      $attribute,
       $username);
 
     $result = ldap_search($conn, $this->getBaseDN(), $query);
@@ -170,7 +179,7 @@ final class PhabricatorLDAPProvider {
 
     if ($entries['count'] > 1) {
       throw new Exception('Found more then one user with this ' .
-        $this->getSearchAttribute());
+        $attribute);
     }
 
     if ($entries['count'] == 0) {
