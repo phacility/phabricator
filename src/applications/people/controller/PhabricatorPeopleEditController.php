@@ -179,10 +179,10 @@ final class PhabricatorPeopleEditController
             id(new PhabricatorUserEditor())
               ->setActor($admin)
               ->createNewUser($user, $email);
+          }
 
-            if ($welcome_checked) {
-              $user->sendWelcomeEmail($admin);
-            }
+          if ($welcome_checked) {
+            $user->sendWelcomeEmail($admin);
           }
 
           $response = id(new AphrontRedirectResponse())
@@ -264,6 +264,15 @@ final class PhabricatorPeopleEditController
         id(new AphrontFormStaticControl())
           ->setLabel('Email')
           ->setValue($status));
+
+      $form->appendChild(
+        id(new AphrontFormCheckboxControl())
+        ->addCheckbox(
+          'welcome',
+          1,
+          'Re-send "Welcome to Phabricator" email.',
+          false));
+
     }
 
     $form->appendChild($this->getRoleInstructions());
