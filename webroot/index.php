@@ -91,6 +91,14 @@ try {
     date_default_timezone_set($tz);
   }
 
+  // Append any paths to $PATH if we need to.
+  $paths = PhabricatorEnv::getEnvConfig('environment.append-paths');
+  if (!empty($paths)) {
+    $current_env_path = getenv('PATH');
+    $new_env_paths = implode(':', $paths);
+    putenv('PATH='.$current_env_path.':'.$new_env_paths);
+  }
+
   // This is the earliest we can get away with this, we need env config first.
   PhabricatorAccessLog::init();
   $access_log = PhabricatorAccessLog::getLog();
