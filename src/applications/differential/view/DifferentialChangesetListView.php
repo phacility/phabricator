@@ -132,9 +132,14 @@ final class DifferentialChangesetListView extends AphrontView {
         $ref,
         $changeset);
 
+      $prefs = $this->user->loadPreferences();
+      $pref_symbols = $prefs->getPreference(
+        PhabricatorUserPreferences::PREFERENCE_DIFFUSION_SYMBOLS);
       $detail->setChangeset($changeset);
       $detail->addButton($view_options);
-      $detail->setSymbolIndex(idx($this->symbolIndexes, $key));
+      if ($pref_symbols != 'disabled') {
+        $detail->setSymbolIndex(idx($this->symbolIndexes, $key));
+      }
       $detail->setVsChangesetID(idx($this->vsMap, $changeset->getID()));
       $detail->setEditable(true);
 
