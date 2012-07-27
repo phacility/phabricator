@@ -121,6 +121,11 @@ abstract class PhabricatorBaseEnglishTranslation
       'changed %d revision(s), added %d: %s; removed %d: %s' =>
         'changed revisions, added %3$s; removed %5$s',
 
+      'There are %d raw fact(s) in storage.' => array(
+        'There is %d raw fact in storage.',
+        'There are %d raw facts in storage.',
+      ),
+
     );
   }
 
