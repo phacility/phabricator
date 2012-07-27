@@ -1246,4 +1246,14 @@ return array(
   // is ready.
   'preview.viewport-meta-tag' => false,
 
+// -- Environment  ---------------------------------------------------------- //
+
+  // Phabricator occasionally shells out to other binaries on the server.
+  // An example of this is the "pygmentize" command, used to syntax-highlight
+  // code written in languages other than PHP. By default, it is assumed that
+  // these binaries are in the $PATH of the user running Phabricator (normally
+  // 'apache', 'httpd', or 'nobody'). Here you can add extra directories to
+  // the $PATH environment variable, for when these binaries are in non-standard
+  // locations.
+  'environment.append-paths' => array(),
 );
