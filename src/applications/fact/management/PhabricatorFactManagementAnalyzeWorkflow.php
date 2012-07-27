@@ -41,6 +41,8 @@ final class PhabricatorFactManagementAnalyzeWorkflow
       $daemon->processIterator($iterator);
     }
 
+    $daemon->processAggregates();
+
     return 0;
   }
 

@@ -463,6 +463,10 @@ class AphrontDefaultApplicationConfiguration
 
       '/emailverify/(?P<code>[^/]+)/' =>
         'PhabricatorEmailVerificationController',
+
+      '/fact/' => array(
+        '' => 'PhabricatorFactHomeController',
+      ),
     );
   }
 

@@ -31,6 +31,7 @@ final class PhabricatorFactManagementStatusWorkflow
 
     $map = array(
       'raw' => new PhabricatorFactRaw(),
+      'agg' => new PhabricatorFactAggregate(),
     );
 
     foreach ($map as $type => $table) {
@@ -47,6 +48,9 @@ final class PhabricatorFactManagementStatusWorkflow
       switch ($type) {
         case 'raw':
           $desc = pht('There are %d raw fact(s) in storage.', $n);
+          break;
+        case 'agg':
+          $desc = pht('There are %d aggregate fact(s) in storage.', $n);
           break;
       }
 

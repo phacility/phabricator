@@ -16,36 +16,23 @@
  * limitations under the License.
  */
 
-abstract class PhabricatorFactEngine {
-
-  final public static function loadAllEngines() {
-    $classes = id(new PhutilSymbolLoader())
-      ->setAncestorClass(__CLASS__)
-      ->setConcreteOnly(true)
-      ->selectAndLoadSymbols();
-
-    $objects = array();
-    foreach ($classes as $class) {
-      $objects[] = newv($class['name'], array());
-    }
-
-    return $objects;
-  }
-
-  public function shouldComputeRawFactsForObject(PhabricatorLiskDAO $object) {
-    return false;
-  }
-
-  public function computeRawFactsForObject(PhabricatorLiskDAO $object) {
-    return array();
-  }
+/**
+ * Engine that records the time facts were last updated.
+ */
+final class PhabricatorFactLastUpdatedEngine extends PhabricatorFactEngine {
 
   public function shouldComputeAggregateFacts() {
-    return false;
+    return true;
   }
 
   public function computeAggregateFacts() {
-    return array();
+    $facts = array();
+
+    $facts[] = id(new PhabricatorFactAggregate())
+      ->setFactType('updated')
+      ->setValueX(time());
+
+    return $facts;
   }
 
 }

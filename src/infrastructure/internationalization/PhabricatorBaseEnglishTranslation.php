@@ -126,6 +126,11 @@ abstract class PhabricatorBaseEnglishTranslation
         'There are %d raw facts in storage.',
       ),
 
+      'There are %d aggregate fact(s) in storage.' => array(
+        'There is %d aggregate fact in storage.',
+        'There are %d aggregate facts in storage.',
+      ),
+
     );
   }
 

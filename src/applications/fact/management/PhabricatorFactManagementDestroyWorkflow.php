@@ -40,6 +40,7 @@ final class PhabricatorFactManagementDestroyWorkflow
 
     $tables = array();
     $tables[] = new PhabricatorFactRaw();
+    $tables[] = new PhabricatorFactAggregate();
     foreach ($tables as $table) {
       $conn = $table->establishConnection('w');
       $name = $table->getTableName();

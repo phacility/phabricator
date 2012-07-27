@@ -54,6 +54,22 @@ final class PhabricatorFactDaemon extends PhabricatorDaemon {
     return $result;
   }
 
+  public function processAggregates() {
+    $facts = $this->computeAggregateFacts();
+    $this->updateAggregateFacts($facts);
+  }
+
+  private function computeAggregateFacts() {
+    $facts = array();
+    foreach ($this->engines as $engine) {
+      if (!$engine->shouldComputeAggregateFacts()) {
+        continue;
+      }
+      $facts[] = $engine->computeAggregateFacts();
+    }
+    return array_mergev($facts);
+  }
+
   private function computeRawFacts(PhabricatorLiskDAO $object) {
     $facts = array();
     foreach ($this->engines as $engine) {
@@ -116,6 +132,36 @@ final class PhabricatorFactDaemon extends PhabricatorDaemon {
       }
 
     $table->saveTransaction();
+  }
+
+  private function updateAggregateFacts(array $facts) {
+    if (!$facts) {
+      return;
+    }
+
+    $table = new PhabricatorFactAggregate();
+    $conn = $table->establishConnection('w');
+    $table_name = $table->getTableName();
+
+    $sql = array();
+    foreach ($facts as $fact) {
+      $sql[] = qsprintf(
+        $conn,
+        '(%s, %s, %d)',
+        $fact->getFactType(),
+        $fact->getObjectPHID(),
+        $fact->getValueX());
+    }
+
+    foreach (array_chunk($sql, 256) as $chunk) {
+      queryfx(
+        $conn,
+        'INSERT INTO %T (factType, objectPHID, valueX) VALUES %Q
+          ON DUPLICATE KEY UPDATE valueX = VALUES(valueX)',
+        $table_name,
+        implode(', ', $chunk));
+    }
+
   }
 
 }

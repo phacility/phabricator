@@ -41,4 +41,31 @@ final class PhabricatorFactCountEngine extends PhabricatorFactEngine {
     return $facts;
   }
 
+  public function shouldComputeAggregateFacts() {
+    return true;
+  }
+
+  public function computeAggregateFacts() {
+    $table = new PhabricatorFactRaw();
+    $table_name = $table->getTableName();
+    $conn = $table->establishConnection('r');
+
+    $counts = queryfx_all(
+      $conn,
+      'SELECT factType, count(*) N FROM %T WHERE factType LIKE %>
+        GROUP BY factType',
+      $table_name,
+      'N:');
+
+    $facts = array();
+    foreach ($counts as $count) {
+      $facts[] = id(new PhabricatorFactAggregate())
+        ->setFactType('+'.$count['factType'])
+        ->setValueX($count['N']);
+    }
+
+    return $facts;
+  }
+
+
 }
