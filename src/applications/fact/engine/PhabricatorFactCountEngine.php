@@ -21,6 +21,24 @@
  */
 final class PhabricatorFactCountEngine extends PhabricatorFactEngine {
 
+  public function getFactSpecs(array $fact_types) {
+    $results = array();
+    foreach ($fact_types as $type) {
+      if (!strncmp($type, '+N:', 3)) {
+        if ($type == '+N:*') {
+          $name = 'Total Objects';
+        } else {
+          $name = 'Total Objects of type '.substr($type, 3);
+        }
+
+        $results[] = id(new PhabricatorFactSimpleSpec($type))
+          ->setName($name)
+          ->setUnit(PhabricatorFactSimpleSpec::UNIT_COUNT);
+      }
+    }
+    return $results;
+  }
+
   public function shouldComputeRawFactsForObject(PhabricatorLiskDAO $object) {
     return true;
   }

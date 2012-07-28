@@ -638,6 +638,8 @@ phutil_register_library_map(array(
     'PhabricatorFactManagementStatusWorkflow' => 'applications/fact/management/PhabricatorFactManagementStatusWorkflow.php',
     'PhabricatorFactManagementWorkflow' => 'applications/fact/management/PhabricatorFactManagementWorkflow.php',
     'PhabricatorFactRaw' => 'applications/fact/storage/PhabricatorFactRaw.php',
+    'PhabricatorFactSimpleSpec' => 'applications/fact/spec/PhabricatorFactSimpleSpec.php',
+    'PhabricatorFactSpec' => 'applications/fact/spec/PhabricatorFactSpec.php',
     'PhabricatorFactUpdateIterator' => 'applications/fact/extract/PhabricatorFactUpdateIterator.php',
     'PhabricatorFeedBuilder' => 'applications/feed/builder/PhabricatorFeedBuilder.php',
     'PhabricatorFeedConstants' => 'applications/feed/constants/PhabricatorFeedConstants.php',

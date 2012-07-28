@@ -21,6 +21,18 @@
  */
 final class PhabricatorFactLastUpdatedEngine extends PhabricatorFactEngine {
 
+  public function getFactSpecs(array $fact_types) {
+    $results = array();
+    foreach ($fact_types as $type) {
+      if ($type == 'updated') {
+        $results[] = id(new PhabricatorFactSimpleSpec($type))
+          ->setName('Facts Last Updated')
+          ->setUnit(PhabricatorFactSimpleSpec::UNIT_EPOCH);
+      }
+    }
+    return $results;
+  }
+
   public function shouldComputeAggregateFacts() {
     return true;
   }

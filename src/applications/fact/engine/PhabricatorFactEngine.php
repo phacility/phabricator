@@ -32,6 +32,10 @@ abstract class PhabricatorFactEngine {
     return $objects;
   }
 
+  public function getFactSpecs(array $fact_types) {
+    return array();
+  }
+
   public function shouldComputeRawFactsForObject(PhabricatorLiskDAO $object) {
     return false;
   }

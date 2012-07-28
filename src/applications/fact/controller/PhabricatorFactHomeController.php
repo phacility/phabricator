@@ -19,17 +19,32 @@
 final class PhabricatorFactHomeController extends PhabricatorFactController {
 
   public function processRequest() {
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $types = array(
+      '+N:*',
+      '+N:DREV',
+      'updated',
+    );
+
+    $engines = PhabricatorFactEngine::loadAllEngines();
+    $specs = PhabricatorFactSpec::newSpecsForFactTypes($engines, $types);
 
     $facts = id(new PhabricatorFactAggregate())->loadAllWhere(
-      'factType LIKE %> OR factType = %s',
-      '+N:',
-      'updated');
+      'factType IN (%Ls)',
+      $types);
 
     $rows = array();
     foreach ($facts as $fact) {
+      $spec = $specs[$fact->getFactType()];
+
+      $name = $spec->getName();
+      $value = $spec->formatValueForDisplay($user, $fact->getValueX());
+
       $rows[] = array(
-        phutil_escape_html($fact->getFactType()),
-        (int)$fact->getValueX(),
+        phutil_escape_html($name),
+        phutil_escape_html($value),
       );
     }
 
