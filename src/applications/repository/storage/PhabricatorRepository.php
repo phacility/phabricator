@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @task uri Repository URI Management
+ */
 final class PhabricatorRepository extends PhabricatorRepositoryDAO {
 
   const TABLE_PATH = 'repository_path';
@@ -68,41 +71,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
       array(
         'action' => 'browse',
       ));
-  }
-
-  public function getRemoteURI() {
-    $raw_uri = $this->getDetail('remote-uri');
-    if (!$raw_uri) {
-      return null;
-    }
-
-    if (strpos($raw_uri, '/') === 0) {
-      // If the URI starts with a '/', it's an implicit file:// URI on the
-      // local disk.
-      $uri = new PhutilURI('file://'.$raw_uri);
-      return (string)$uri;
-    }
-
-    $uri = new PhutilURI($raw_uri);
-    if ($uri->getProtocol()) {
-      if ($this->isSSHProtocol($uri->getProtocol())) {
-        if ($this->getSSHLogin()) {
-          $uri->setUser($this->getSSHLogin());
-        }
-      }
-      return (string)$uri;
-    }
-
-    $uri = new PhutilGitURI($raw_uri);
-    if ($uri->getDomain()) {
-      if ($this->getSSHLogin()) {
-        $uri->setUser($this->getSSHLogin());
-      }
-      return (string)$uri;
-    }
-
-    throw new Exception(
-      "Repository remote URI '{$raw_uri}' could not be parsed!");
   }
 
   public function getLocalPath() {
@@ -308,62 +276,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
     return (string)$this->sshKeyfile;
   }
 
-  public function shouldUseSSH() {
-    $uri = new PhutilURI($this->getRemoteURI());
-    $protocol = $uri->getProtocol();
-    if ($this->isSSHProtocol($protocol)) {
-      return (bool)$this->getSSHKeyfile();
-    } else {
-      return false;
-    }
-  }
-
-  public function shouldUseHTTP() {
-    $uri = new PhutilURI($this->getRemoteURI());
-    $protocol = $uri->getProtocol();
-    if ($this->isHTTPProtocol($protocol)) {
-      return (bool)$this->getDetail('http-login');
-    } else {
-      return false;
-    }
-  }
-
-  public function shouldUseSVNProtocol() {
-    $uri = new PhutilURI($this->getRemoteURI());
-    $protocol = $uri->getProtocol();
-    if ($this->isSVNProtocol($protocol)) {
-      return (bool)$this->getDetail('http-login');
-    } else {
-      return false;
-    }
-  }
-
-
-  public function getPublicRemoteURI() {
-    $uri = new PhutilURI($this->getRemoteURI());
-
-    // Make sure we don't leak anything if this repo is using HTTP Basic Auth
-    // with the credentials in the URI or something zany like that.
-    $uri->setUser(null);
-    $uri->setPass(null);
-
-    return $uri;
-  }
-
   public function getURI() {
     return '/diffusion/'.$this->getCallsign().'/';
-  }
-
-  private function isSSHProtocol($protocol) {
-    return ($protocol == 'ssh' || $protocol == 'svn+ssh');
-  }
-
-  private function isHTTPProtocol($protocol) {
-    return ($protocol == 'http' || $protocol == 'https');
-  }
-
-  private function isSVNProtocol($protocol) {
-    return ($protocol == 'svn');
   }
 
   public function isTracked() {
@@ -474,6 +388,162 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
       $repositories[$repo->getID()] = $repo;
     }
     return $repositories;
+  }
+
+/* -(  Repository URI Management  )------------------------------------------ */
+
+
+  /**
+   * Get the remote URI for this repository.
+   *
+   * @return string
+   * @task uri
+   */
+  public function getRemoteURI() {
+    return (string)$this->getRemoteURIObject();
+  }
+
+
+  /**
+   * Get the remote URI for this repository, without authentication information.
+   *
+   * @return string Repository URI.
+   * @task uri
+   */
+  public function getPublicRemoteURI() {
+    $uri = $this->getURIObject();
+
+    // Make sure we don't leak anything if this repo is using HTTP Basic Auth
+    // with the credentials in the URI or something zany like that.
+
+    if ($uri instanceof PhutilGitURI) {
+      $uri->setUser(null);
+    } else {
+      $uri->setUser(null);
+      $uri->setPass(null);
+    }
+
+    return (string)$uri;
+  }
+
+
+  /**
+   * Get the protocol for the repository's remote.
+   *
+   * @return string Protocol, like "ssh" or "git".
+   * @task uri
+   */
+  public function getRemoteProtocol() {
+    $uri = $this->getRemoteURIObject();
+
+    if ($uri instanceof PhutilGitURI) {
+      return 'ssh';
+    } else {
+      return $uri->getProtocol();
+    }
+  }
+
+
+  /**
+   * Get a parsed object representation of the repository's remote URI. This
+   * may be a normal URI (returned as a @{class:PhutilURI}) or a git URI
+   * (returned as a @{class:PhutilGitURI}).
+   *
+   * @return wild A @{class:PhutilURI} or @{class:PhutilGitURI}.
+   * @task uri
+   */
+  private function getRemoteURIObject() {
+    $raw_uri = $this->getDetail('remote-uri');
+    if (!$raw_uri) {
+      return new PhutilURI('');
+    }
+
+    if (!strncmp($raw_uri, '/', 1)) {
+      return new PhutilURI('file://'.$raw_uri);
+    }
+
+    $uri = new PhutilURI($raw_uri);
+    if ($uri->getProtocol()) {
+      if ($this->isSSHProtocol($uri->getProtocol())) {
+        if ($this->getSSHLogin()) {
+          $uri->setUser($this->getSSHLogin());
+        }
+      }
+      return $uri;
+    }
+
+    $uri = new PhutilGitURI($raw_uri);
+    if ($uri->getDomain()) {
+      if ($this->getSSHLogin()) {
+        $uri->setUser($this->getSSHLogin());
+      }
+      return $uri;
+    }
+
+    throw new Exception("Remote URI '{$raw_uri}' could not be parsed!");
+  }
+
+
+  /**
+   * Determine if we should connect to the remote using SSH flags and
+   * credentials.
+   *
+   * @return bool True to use the SSH protocol.
+   * @task uri
+   */
+  private function shouldUseSSH() {
+    $protocol = $this->getRemoteProtocol();
+    if ($this->isSSHProtocol($protocol)) {
+      return (bool)$this->getSSHKeyfile();
+    } else {
+      return false;
+    }
+  }
+
+
+  /**
+   * Determine if we should connect to the remote using HTTP flags and
+   * credentials.
+   *
+   * @return bool True to use the HTTP protocol.
+   * @task uri
+   */
+  private function shouldUseHTTP() {
+    $protocol = $this->getRemoteProtocol();
+    if ($protocol == 'http' || $protocol == 'https') {
+      return (bool)$this->getDetail('http-login');
+    } else {
+      return false;
+    }
+  }
+
+
+  /**
+   * Determine if we should connect to the remote using SVN flags and
+   * credentials.
+   *
+   * @return bool True to use the SVN protocol.
+   * @task uri
+   */
+  private function shouldUseSVNProtocol() {
+    $protocol = $this->getRemoteProtocol();
+    if ($protocol == 'svn') {
+      return (bool)$this->getDetail('http-login');
+    } else {
+      return false;
+    }
+  }
+
+
+  /**
+   * Determine if a protocol is SSH or SSH-like.
+   *
+   * @param string A protocol string, like "http" or "ssh".
+   * @return bool True if the protocol is SSH-like.
+   * @task uri
+   */
+  private function isSSHProtocol($protocol) {
+    return ($protocol == 'ssh' || $protocol == 'svn+ssh');
   }
 
 }
