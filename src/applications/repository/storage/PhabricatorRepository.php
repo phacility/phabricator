@@ -411,7 +411,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
    * @task uri
    */
   public function getPublicRemoteURI() {
-    $uri = $this->getURIObject();
+    $uri = $this->getRemoteURIObject();
 
     // Make sure we don't leak anything if this repo is using HTTP Basic Auth
     // with the credentials in the URI or something zany like that.
