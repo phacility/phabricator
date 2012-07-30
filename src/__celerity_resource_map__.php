@@ -1462,7 +1462,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-placeholder' =>
   array(
-    'uri' => '/res/7dc26990/rsrc/js/application/core/behavior-placeholder.js',
+    'uri' => '/res/85f097cb/rsrc/js/application/core/behavior-placeholder.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1525,6 +1525,18 @@ celerity_register_resource_map(array(
       3 => 'stripe-core',
     ),
     'disk' => '/rsrc/js/application/phortune/behavior-stripe-payment-form.js',
+  ),
+  'javelin-behavior-toggle-class' =>
+  array(
+    'uri' => '/res/35b86b96/rsrc/js/application/core/behavior-toggle-class.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-dom',
+    ),
+    'disk' => '/rsrc/js/application/core/behavior-toggle-class.js',
   ),
   'javelin-behavior-view-placeholder' =>
   array(
@@ -2383,7 +2395,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-ui-example-css' =>
   array(
-    'uri' => '/res/0cef078b/rsrc/css/application/uiexample/example.css',
+    'uri' => '/res/376ab671/rsrc/css/application/uiexample/example.css',
     'type' => 'css',
     'requires' =>
     array(
