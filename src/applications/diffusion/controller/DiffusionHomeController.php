@@ -121,7 +121,24 @@ final class DiffusionHomeController extends DiffusionController {
       );
     }
 
+    $repository_tool_uri = PhabricatorEnv::getProductionURI('/repository/');
+    $repository_tool     = phutil_render_tag('a',
+                                             array(
+                                               'href' => $repository_tool_uri,
+                                             ),
+                                             'repository tool');
+    $no_repositories_txt = 'This instance of Phabricator does not have any '.
+                           'configured repositories. ';
+    if ($user->getIsAdmin()) {
+      $no_repositories_txt .= 'To setup one or more repositories, visit the '.
+                              $repository_tool.'.';
+    } else {
+      $no_repositories_txt .= 'Ask an administrator to setup one or more '.
+                              'repositories via the '.$repository_tool.'.';
+    }
+
     $table = new AphrontTableView($rows);
+    $table->setNoDataString($no_repositories_txt);
     $table->setHeaders(
       array(
         'Repository',
