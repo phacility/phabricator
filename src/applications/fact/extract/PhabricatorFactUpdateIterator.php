@@ -25,21 +25,21 @@ final class PhabricatorFactUpdateIterator extends PhutilBufferedIterator {
 
   private $cursor;
   private $object;
-  private $start;
+  private $position;
   private $ignoreUpdatesDuration = 15;
 
   public function __construct(LiskDAO $object) {
     $this->object = $object;
-    $this->start = '0:0';
+    $this->position = '0:0';
   }
 
   public function setPosition($position) {
-    $this->start = $position;
+    $this->position = $position;
     return $this;
   }
 
   protected function didRewind() {
-    $this->cursor = $this->start;
+    $this->cursor = $this->position;
   }
 
   protected function getCursorFromObject($object) {
