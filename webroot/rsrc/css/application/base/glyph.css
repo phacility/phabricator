@@ -1,0 +1,73 @@
+/**
+ * @provides phabricator-glyph-css
+ */
+
+.glyph {
+  background-size: 260px auto;
+  background-image: url(/rsrc/image/glyph_sprite.png);
+}
+
+
+.glyph-profile {
+  background-position: 0 0;
+}
+
+.glyph-profile-active {
+  background-position: 0 -56px;
+}
+
+.glyph-profile:hover {
+  background-position: 0 -112px;
+}
+
+
+.glyph-settings {
+  background-position: -56px 0;
+}
+
+.glyph-settings-active {
+  background-position: -56px -56px;
+}
+
+.glyph-settings:hover {
+  background-position: -56px -112px;
+}
+
+
+.glyph-logout {
+  background-position: -112px 0;
+}
+
+.glyph-logout-active {
+  background-position: -112px -56px;
+}
+
+.glyph-logout:hover {
+  background-position: -112px -112px;
+}
+
+
+.glyph-notification {
+  background-position: -168px 0;
+}
+
+.glyph-notification-active {
+  background-position: -168px -56px;
+}
+
+.glyph-notification:hover {
+  background-position: -168px -112px;
+}
+
+
+.glyph-menu {
+  background-position: -224px 0;
+}
+
+.glyph-menu-active {
+  background-position: -224px -56px;
+}
+
+.glyph-menu:hover {
+  background-position: -224px -112px;
+}
