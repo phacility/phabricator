@@ -35,6 +35,18 @@ final class PhabricatorFactCountEngine extends PhabricatorFactEngine {
           ->setName($name)
           ->setUnit(PhabricatorFactSimpleSpec::UNIT_COUNT);
       }
+
+      if (!strncmp($type, 'N:', 2)) {
+        if ($type == 'N:*') {
+          $name = 'Objects';
+        } else {
+          $name = 'Objects of type '.substr($type, 2);
+        }
+        $results[] = id(new PhabricatorFactSimpleSpec($type))
+          ->setName($name)
+          ->setUnit(PhabricatorFactSimpleSpec::UNIT_COUNT);
+      }
+
     }
     return $results;
   }
@@ -53,6 +65,7 @@ final class PhabricatorFactCountEngine extends PhabricatorFactEngine {
       $facts[] = id(new PhabricatorFactRaw())
         ->setFactType($fact_type)
         ->setObjectPHID($phid)
+        ->setValueX(1)
         ->setEpoch($object->getDateCreated());
     }
 
@@ -70,7 +83,7 @@ final class PhabricatorFactCountEngine extends PhabricatorFactEngine {
 
     $counts = queryfx_all(
       $conn,
-      'SELECT factType, count(*) N FROM %T WHERE factType LIKE %>
+      'SELECT factType, SUM(valueX) N FROM %T WHERE factType LIKE %>
         GROUP BY factType',
       $table_name,
       'N:');

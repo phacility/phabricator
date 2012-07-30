@@ -464,10 +464,7 @@ class AphrontDefaultApplicationConfiguration
       '/emailverify/(?P<code>[^/]+)/' =>
         'PhabricatorEmailVerificationController',
 
-      '/fact/' => array(
-        '' => 'PhabricatorFactHomeController',
-      ),
-    );
+    ) + $this->getApplicationRoutes();
   }
 
   protected function getResourceURIMapRules() {
@@ -479,6 +476,15 @@ class AphrontDefaultApplicationConfiguration
           => 'CelerityResourceController',
       ),
     );
+  }
+
+  private function getApplicationRoutes() {
+    $applications = PhabricatorApplication::getAllInstalledApplications();
+    $routes = array();
+    foreach ($applications as $application) {
+      $routes += $application->getRoutes();
+    }
+    return $routes;
   }
 
   public function buildRequest() {

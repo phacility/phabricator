@@ -304,7 +304,7 @@ final class ManiphestReportController extends ManiphestController {
     require_celerity_resource('raphael-g');
     require_celerity_resource('raphael-g-line');
 
-    Javelin::initBehavior('burn-chart', array(
+    Javelin::initBehavior('line-chart', array(
       'hardpoint' => $id,
       'x' => array(
         $burn_x,
@@ -312,6 +312,7 @@ final class ManiphestReportController extends ManiphestController {
       'y' => array(
         $burn_y,
       ),
+      'xformat' => 'epoch',
     ));
 
     return array($filter, $chart, $panel);

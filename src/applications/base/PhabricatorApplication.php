@@ -18,6 +18,7 @@
 
 /**
  * @task  info  Application Information
+ * @task  uri   URI Routing
  * @task  fact  Fact Integration
  * @task  meta  Application Management
  * @group apps
@@ -34,6 +35,14 @@ abstract class PhabricatorApplication {
 
   public function isEnabled() {
     return true;
+  }
+
+
+/* -(  Application Information  )-------------------------------------------- */
+
+
+  public function getRoutes() {
+    return array();
   }
 
 

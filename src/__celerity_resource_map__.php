@@ -1219,6 +1219,18 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/herald/herald-rule-editor.js',
   ),
+  'javelin-behavior-line-chart' =>
+  array(
+    'uri' => '/res/653743c8/rsrc/js/application/maniphest/behavior-line-chart.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-vector',
+    ),
+    'disk' => '/rsrc/js/application/maniphest/behavior-line-chart.js',
+  ),
   'javelin-behavior-maniphest-batch-editor' =>
   array(
     'uri' => '/res/d22661be/rsrc/js/application/maniphest/behavior-batch-editor.js',
