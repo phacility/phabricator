@@ -23,7 +23,57 @@ final class PhabricatorFactDaemon extends PhabricatorDaemon {
   const RAW_FACT_BUFFER_LIMIT = 128;
 
   public function run() {
-    throw new Exception("This daemon doesn't do anything yet!");
+    $this->setEngines(PhabricatorFactEngine::loadAllEngines());
+    while (true) {
+      $iterators = $this->getAllApplicationIterators();
+      foreach ($iterators as $iterator_name => $iterator) {
+        $this->processIteratorWithCursor($iterator_name, $iterator);
+      }
+      $this->processAggregates();
+
+      $this->log("Zzz...");
+      $this->sleep(60 * 5);
+    }
+  }
+
+  public static function getAllApplicationIterators() {
+    $apps = PhabricatorApplication::getAllInstalledApplications();
+
+    $iterators = array();
+    foreach ($apps as $app) {
+      foreach ($app->getFactObjectsForAnalysis() as $object) {
+        $iterator = new PhabricatorFactUpdateIterator($object);
+        $iterators[get_class($object)] = $iterator;
+      }
+    }
+
+    return $iterators;
+  }
+
+  public function processIteratorWithCursor($iterator_name, $iterator) {
+    $this->log("Processing cursor '{$iterator_name}'.");
+
+    $cursor = id(new PhabricatorFactCursor())->loadOneWhere(
+      'name = %s',
+      $iterator_name);
+    if (!$cursor) {
+      $cursor = new PhabricatorFactCursor();
+      $cursor->setName($iterator_name);
+      $position = null;
+    } else {
+      $position = $cursor->getPosition();
+    }
+
+    if ($position) {
+      $iterator->setPosition($position);
+    }
+
+    $new_cursor_position = $this->processIterator($iterator);
+
+    if ($new_cursor_position) {
+      $cursor->setPosition($new_cursor_position);
+      $cursor->save();
+    }
   }
 
   public function setEngines(array $engines) {
@@ -38,7 +88,9 @@ final class PhabricatorFactDaemon extends PhabricatorDaemon {
 
     $raw_facts = array();
     foreach ($iterator as $key => $object) {
-      $raw_facts[$object->getPHID()] = $this->computeRawFacts($object);
+      $phid = $object->getPHID();
+      $this->log("Processing {$phid}...");
+      $raw_facts[$phid] = $this->computeRawFacts($object);
       if (count($raw_facts) > self::RAW_FACT_BUFFER_LIMIT) {
         $this->updateRawFacts($raw_facts);
         $raw_facts = array();
@@ -55,6 +107,8 @@ final class PhabricatorFactDaemon extends PhabricatorDaemon {
   }
 
   public function processAggregates() {
+    $this->log("Processing aggregates.");
+
     $facts = $this->computeAggregateFacts();
     $this->updateAggregateFacts($facts);
   }

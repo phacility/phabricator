@@ -36,6 +36,7 @@ $workflows = array(
   new PhabricatorFactManagementAnalyzeWorkflow(),
   new PhabricatorFactManagementStatusWorkflow(),
   new PhabricatorFactManagementListWorkflow(),
+  new PhabricatorFactManagementCursorsWorkflow(),
   new PhutilHelpArgumentWorkflow(),
 );
 
