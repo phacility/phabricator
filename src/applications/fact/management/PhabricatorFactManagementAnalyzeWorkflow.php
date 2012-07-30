@@ -29,7 +29,7 @@ final class PhabricatorFactManagementAnalyzeWorkflow
             'name'    => 'iterator',
             'param'   => 'name',
             'repeat'  => true,
-            'help'    => 'Process only __iterator__.',
+            'help'    => 'Process only iterator __name__.',
           ),
           array(
             'name'    => 'all',
