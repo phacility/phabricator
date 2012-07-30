@@ -183,7 +183,7 @@ final class PhabricatorDaemonControl {
             DEPRECATED. Use 'phd start'.
 
         **repository-launch-readonly**
-            DEPRECATED. Use 'phd launch pulllocal --no-discovery'.
+            DEPRECATED. Use 'phd launch pulllocal -- --no-discovery'.
 
 EOHELP
     );
