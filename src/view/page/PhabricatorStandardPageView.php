@@ -381,20 +381,6 @@ final class PhabricatorStandardPageView extends AphrontPageView {
       $admin_class = 'phabricator-admin-page-view';
     }
 
-    $custom_logo = null;
-    $with_custom = null;
-    $custom_conf = PhabricatorEnv::getEnvConfig('phabricator.custom.logo');
-    if ($custom_conf) {
-      $with_custom = 'phabricator-logo-with-custom';
-      $custom_logo = phutil_render_tag(
-        'a',
-        array(
-          'class' => 'logo-custom',
-          'href' => $custom_conf,
-        ),
-        ' ');
-    }
-
     $notification_indicator = '';
     $notification_dropdown = '';
     $notification_container = '';
@@ -481,8 +467,7 @@ final class PhabricatorStandardPageView extends AphrontPageView {
       $header_chrome =
         '<table class="phabricator-standard-header">'.
           '<tr>'.
-            '<td class="phabricator-logo '.$with_custom.'">'.
-              $custom_logo.
+            '<td class="phabricator-logo">'.
               '<a class="logo-standard" href="/"> </a>'.
             '</td>'.
             $notification_indicator.

@@ -56,15 +56,6 @@ return array(
   'security.hmac-key' => '[D\t~Y7eNmnQGJ;rnH6aF;m2!vJ8@v8C=Cs:aQS\.Qw',
 
 
-// -- Customization --------------------------------------------------------- //
-
-  // If you want to use a custom logo (e.g., for your company or organization),
-  // copy 'webroot/rsrc/image/custom/example_template.png' to
-  // 'webroot/rsrc/image/custom/custom.png' and set this to the URI you want it
-  // to link to (like http://www.yourcompany.com/).
-  'phabricator.custom.logo'   => null,
-
-
 // -- Internationalization -------------------------------------------------- //
 
   // This allows customizing texts used in Phabricator. The class must extend

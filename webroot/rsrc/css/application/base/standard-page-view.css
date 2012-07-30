@@ -53,10 +53,6 @@
   width: 220px;
 }
 
-.phabricator-logo-with-custom {
-  width: 440px;
-}
-
 .phabricator-logo a {
   display: block;
   width: 220px;
@@ -65,10 +61,6 @@
   margin: 0;
 }
 
-.phabricator-logo a.logo-custom {
-  position: absolute;
-  background: url(/rsrc/image/custom/custom.png) no-repeat 0 0;
-}
 
 .phabricator-logo a.logo-standard {
   background: url(/rsrc/image/phabricator_logo.png) no-repeat -220px 0;
@@ -78,18 +70,8 @@
   background-image: url(/rsrc/image/phabricator_logo_admin.png);
 }
 
-.phabricator-logo-with-custom a.logo-standard {
-  padding-left: 220px;
-  background-position: 0 0;
-}
-
 .phabricator-logo a.logo-standard:hover {
   background-position: -220px -40px;
-}
-
-.phabricator-logo a.logo-custom:hover,
-.phabricator-logo-with-custom a.logo-standard:hover {
-  background-position: 0 -40px;
 }
 
 .phabricator-primary-navigation td {
