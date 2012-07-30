@@ -110,7 +110,9 @@ final class DifferentialChangesetListView extends AphrontView {
 
     $changesets = $this->changesets;
 
-    Javelin::initBehavior('buoyant', array());
+    // TODO: Restore this once we make it through the redesign, it has funky
+    // interactions with things and there are various reports that it's slow.
+    // Javelin::initBehavior('buoyant', array());
 
     Javelin::initBehavior('differential-toggle-files', array());
 

@@ -37,4 +37,19 @@ final class PhabricatorSearchScope {
     );
   }
 
+  public static function getScopePlaceholder($scope) {
+    switch ($scope) {
+      case self::SCOPE_OPEN_TASKS:
+        return pht('Search Open Tasks');
+      case self::SCOPE_WIKI:
+        return pht('Search Wiki Documents');
+      case self::SCOPE_OPEN_REVISIONS:
+        return pht('Search Open Revisions');
+      case self::SCOPE_COMMITS:
+        return pht('Search Commits');
+      default:
+        return pht('Search');
+    }
+  }
+
 }

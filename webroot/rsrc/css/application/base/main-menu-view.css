@@ -1,0 +1,301 @@
+/**
+ * @provides phabricator-main-menu-view
+ */
+
+
+/* - Main Menu -----------------------------------------------------------------
+
+  Main menu at the top of every page that has chrome. It reacts to resolution
+  changes in order to behave reasonably on tablets and phones.
+
+*/
+
+.phabricator-main-menu {
+  background: #33393d;
+  position: relative;
+  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  height: 44px;
+}
+
+.phabricator-main-menu a:hover {
+  text-decoration: none;
+}
+
+.device-desktop .phabricator-main-menu {
+  text-align: right;
+  padding-right: 12px;
+  position: fixed;
+  width: 100%;
+  z-index: 6;
+  top: 0;
+}
+
+.device-desktop .phabricator-standard-page-body {
+  margin-top: 44px;
+}
+
+
+/* - Main Menu Group -----------------------------------------------------------
+
+  Container representing a single item on the main menu. For desktops these lay
+  out horizontally; on phones they switch to vertical.
+
+*/
+
+.device-desktop .phabricator-main-menu-group {
+  display: inline-block;
+  text-align: left;
+  height: 44px;
+}
+
+.device-tablet .phabricator-main-menu-group,
+.device-phone .phabricator-main-menu-group {
+  clear: both;
+  width: 100%;
+  overflow: hidden;
+  border-bottom: 1px solid #33393d;
+  display: block;
+}
+
+
+/* - Logo ----------------------------------------------------------------------
+
+  The "Phabricator" logo group in the main menu. On tablet and phone devices,
+  this shows a "reveal" button to expand/collapse the rest of the menu.
+
+*/
+
+.phabricator-main-menu-group-logo {
+  float: left;
+}
+
+.phabricator-main-menu-logo {
+  display: inline-block;
+  height: 44px;
+  width: 180px;
+  margin-right: 12px;
+  background: 12px 9px url(/rsrc/image/logo_grey.png) no-repeat;
+}
+
+.phabricator-main-menu-logo span {
+  display: none;
+}
+
+
+/* - Expand/Collapse Button ----------------------------------------------------
+
+  On phones, the menu switches to a vertical layout and uses a button to expand
+  or collapse the items.
+
+*/
+
+.phabricator-main-menu-expand-button {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  display: block;
+  width: 40px;
+  height: 28px;
+  text-align: center;
+  background: #22292d url(/rsrc/image/lines.png) no-repeat 8px 6px;
+  border-radius: 6px;
+
+  border: 1px solid #111111;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                    0 1px 0 rgba(255, 255, 255, 0.075);
+}
+
+.device-desktop .phabricator-main-menu-expand-button {
+  display: none;
+}
+
+.device-tablet .phabricator-main-menu-expand-button,
+.device-phone .phabricator-main-menu-expand-button {
+  display: block;
+}
+
+.phabricator-main-menu-expand-button span {
+  display: none;
+}
+
+.phabricator-main-menu-reveal .phabricator-main-menu-expand-button {
+  background-color: #55595d;
+}
+
+
+/* - Icon Menus ----------------------------------------------------------------
+
+  These are the small icons for actions like "Settings" and "Log Out" which
+  appear on the right side of the main menu. On tablets and phones these layout
+  vertically.
+
+*/
+
+.phabricator-main-menu-icon {
+  width: 26px;
+  height: 26px;
+  margin: 9px;
+  display: inline-block;
+  background-repeat: no-repeat;
+  position: relative;
+  overflow: hidden;
+}
+
+.device-desktop .phabricator-main-menu-icon-label {
+  display: none;
+}
+
+.device-tablet .phabricator-main-menu-icon-label,
+.device-phone .phabricator-main-menu-icon-label {
+  font-weight: bold;
+  color: #ffffff;
+  margin-left: 40px;
+  height: 26px;
+  margin: 15px 9px 3px 60px;
+  display: block;
+}
+
+.device-tablet .phabricator-main-menu-icon,
+.device-phone .phabricator-main-menu-icon {
+  font-weight: bold;
+  color: white;
+  text-decoration: none;
+  border: 0;
+  margin-left: 24px;
+  position: absolute;
+}
+
+
+/* - Search --------------------------------------------------------------------
+
+  The main search input in the menu bar.
+
+*/
+
+.device-desktop .phabricator-main-menu-search {
+  width: 220px;
+}
+
+.phabricator-main-menu-search-container {
+  padding: 10px 0;
+  position: relative;
+  height: 24px;
+}
+
+.device-desktop .phabricator-main-menu-search-container {
+  margin: 0 8px 0 50px;
+}
+
+.device-tablet .phabricator-main-menu-search-container,
+.device-phone .phabricator-main-menu-search-container {
+  margin: 0 18px 0 60px;
+}
+
+.phabricator-main-menu-search input {
+  outline: 0;
+  margin: 0;
+
+  width: 100%;
+  right: 0;
+  position: absolute;
+
+  border: 1px solid #333333;
+  border-radius: 12px;
+  background: #727272;
+  height: 12px;
+  line-height: 12px;
+  box-shadow: 0px 1px 1px rgba(128, 128, 128, 0.25);
+  padding: 6px 32px 6px 10px;
+}
+
+.phabricator-main-menu-search input:focus {
+  background: #c9c9c9;
+}
+
+.phabricator-main-menu-search input.jx-placeholder {
+  color: #aaaaaa;
+}
+
+.phabricator-main-menu-search button {
+  position: absolute;
+  color: transparent;
+  background: transparent 5px 6px url(/rsrc/image/search.png) no-repeat;
+  border: none;
+  outline: none;
+  box-shadow: none;
+
+  height: 20px;
+  width: 20px;
+  top: 11px;
+  right: 6px;
+}
+
+
+/* - Collapsible ---------------------------------------------------------------
+
+  By default, groups are collapsible, which means they'll be hidden on phones
+  and respond to the menu toggle button.
+
+*/
+
+.device-tablet .phabricator-main-menu-collapsible,
+.device-phone .phabricator-main-menu-collapsible {
+  background: #44494d;
+  display: none;
+}
+
+.phabricator-main-menu-reveal {
+  height: auto;
+}
+
+.device-tablet .phabricator-main-menu-reveal .phabricator-main-menu-collapsible,
+.device-phone .phabricator-main-menu-reveal .phabricator-main-menu-collapsible {
+  display: block;
+}
+
+
+/* - Alert ---------------------------------------------------------------------
+
+  Alert menus are like icon menus but don't obey collapse rules.
+
+*/
+
+.phabricator-main-menu-alert {
+  display: inline-block;
+  position: relative;
+}
+
+.phabricator-main-menu-alert-item {
+  width: 26px;
+  height: 26px;
+  margin: 9px;
+  display: block;
+}
+
+.phabricator-main-menu-alert-indicator {
+  display: none;
+}
+
+.phabricator-main-menu-alert-indicator-unread {
+  position: absolute;
+  display: block;
+
+  right: 0px;
+  top: 2px;
+  padding: 1px 4px 2px;
+
+  background: #dd3333;
+
+  border: 1px solid #aa0000;
+  font-size: 11px;
+
+  box-shadow: 0px 0px 6px rgba(255, 255, 255, 0.5);
+  border-radius: 6px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.phabricator-main-menu-alert-item-notification {
+  background: url(/rsrc/image/bolt.png) no-repeat;
+}

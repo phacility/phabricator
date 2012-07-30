@@ -20,7 +20,6 @@ JX.behavior('aphlict-listen', function(config) {
       .start();
   }
 
-
   // Respond to a notification from the Aphlict notification server. We send
   // a request to Phabricator to get notification details.
   function onaphlictmessage(type, message) {
@@ -80,12 +79,12 @@ JX.behavior('aphlict-listen', function(config) {
   JX.Stratcom.listen('aphlict-component-ready', null, onready);
 
   // Add Flash object to page
-  JX.$("aphlictswf-container").innerHTML =
+  JX.$(config.containerID).innerHTML =
     '<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000">'
     + '<param name="movie" value="/rsrc/swf/aphlict.swf" />'
     + '<param name="allowScriptAccess" value="always" />'
     + '<param name="wmode" value="opaque" />'
     + '<embed src="/rsrc/swf/aphlict.swf" wmode="opaque"'
-      + 'width="0" height="0" id="aphlictswfobject">'
+      + 'width="0" height="0" id="' + config.id + '">'
     + '</embed></object>'; //Evan sanctioned
 });
