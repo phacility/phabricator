@@ -304,3 +304,11 @@ a.handle-disabled {
   background: #eeeeee;
   border-top: 1px solid #dddddd;
 }
+
+
+/**
+ * Placeholder text added to inputs by the "placeholder" behavior.
+ */
+.jx-placeholder {
+  color: #888888;
+}
