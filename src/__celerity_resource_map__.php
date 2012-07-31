@@ -1137,6 +1137,19 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/differential/behavior-user-select.js',
   ),
+  'javelin-behavior-diffusion-commit-branches' =>
+  array(
+    'uri' => '/res/e6ae17a6/rsrc/js/application/diffusion/behavior-commit-branches.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-util',
+      3 => 'javelin-request',
+    ),
+    'disk' => '/rsrc/js/application/diffusion/behavior-commit-branches.js',
+  ),
   'javelin-behavior-diffusion-commit-graph' =>
   array(
     'uri' => '/res/cfe336e8/rsrc/js/application/diffusion/behavior-commit-graph.js',

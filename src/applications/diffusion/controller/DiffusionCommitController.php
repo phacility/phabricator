@@ -383,15 +383,17 @@ final class DiffusionCommitController extends DiffusionController {
 
     $request = $this->getDiffusionRequest();
 
-    $branches = $this->buildBranches($request);
-    if ($branches) {
-      $props['Branches'] = $branches;
-    }
+    $props['Branches'] = '<span id="commit-branches">Unknown</span>';
+    $props['Tags'] = '<span id="commit-tags">Unknown</span>';
 
-    $tags = $this->buildTags($request);
-    if ($tags) {
-      $props['Tags'] = $tags;
-    }
+    $callsign = $request->getRepository()->getCallsign();
+    $root = '/diffusion/'.$callsign.'/commit/'.$commit->getCommitIdentifier();
+    Javelin::initBehavior(
+      'diffusion-commit-branches',
+      array(
+        $root.'/branches/' => 'commit-branches',
+        $root.'/tags/' => 'commit-tags',
+      ));
 
     $refs = $this->buildRefs($request);
     if ($refs) {
@@ -785,77 +787,6 @@ final class DiffusionCommitController extends DiffusionController {
     $action_list->setActions($actions);
 
     return $action_list;
-  }
-
-  private function buildBranches(DiffusionRequest $request) {
-
-    $branch_query = DiffusionContainsQuery::newFromDiffusionRequest($request);
-    $branches = $branch_query->loadContainingBranches();
-
-    if (!$branches) {
-      return null;
-    }
-
-    $branch_links = array();
-    foreach ($branches as $branch => $commit) {
-      $branch_links[] = phutil_render_tag(
-        'a',
-        array(
-          'href' => $request->generateURI(
-            array(
-              'action'  => 'browse',
-              'branch'  => $branch,
-            )),
-        ),
-        phutil_escape_html($branch));
-    }
-    $branch_links = implode(', ', $branch_links);
-    return $branch_links;
-  }
-
-  private function buildTags(DiffusionRequest $request) {
-    $tag_limit = 10;
-
-    $tag_query = DiffusionCommitTagsQuery::newFromDiffusionRequest($request);
-    $tag_query->setLimit($tag_limit + 1);
-    $tags = $tag_query->loadTags();
-
-    if (!$tags) {
-      return null;
-    }
-
-    $has_more_tags = (count($tags) > $tag_limit);
-    $tags = array_slice($tags, 0, $tag_limit);
-
-    $tag_links = array();
-    foreach ($tags as $tag) {
-      $tag_links[] = phutil_render_tag(
-        'a',
-        array(
-          'href' => $request->generateURI(
-            array(
-              'action'  => 'browse',
-              'commit'  => $tag->getName(),
-            )),
-        ),
-        phutil_escape_html($tag->getName()));
-    }
-
-    if ($has_more_tags) {
-      $tag_links[] = phutil_render_tag(
-        'a',
-        array(
-          'href' => $request->generateURI(
-            array(
-              'action'  => 'tags',
-            )),
-        ),
-        "More tags\xE2\x80\xA6");
-    }
-
-    $tag_links = implode(', ', $tag_links);
-
-    return $tag_links;
   }
 
   private function buildRefs(DiffusionRequest $request) {

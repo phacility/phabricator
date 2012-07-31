@@ -256,6 +256,11 @@ class AphrontDefaultApplicationConfiguration
           'diff/'                       => 'DiffusionDiffController',
           'tags/(?P<dblob>.*)'          => 'DiffusionTagListController',
           'branches/(?P<dblob>.*)'      => 'DiffusionBranchTableController',
+
+          'commit/(?P<commit>[a-z0-9]+)/branches/'
+            => 'DiffusionCommitBranchesController',
+          'commit/(?P<commit>[a-z0-9]+)/tags/'
+            => 'DiffusionCommitTagsController',
         ),
         'inline/' => array(
           'edit/(?P<phid>[^/]+)/'    => 'DiffusionInlineCommentController',
