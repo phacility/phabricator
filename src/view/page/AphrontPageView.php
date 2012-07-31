@@ -62,11 +62,9 @@ abstract class AphrontPageView extends AphrontView {
     $this->willRenderPage();
 
     $title = phutil_escape_html($this->getTitle());
+    $head  = $this->getHead();
     $body  = $this->getBody();
     $tail  = $this->getTail();
-    // NOTE: Render HEAD last so we can pick up resources required by the other
-    // parts.
-    $head  = $this->getHead();
 
     $body_classes = $this->getBodyClasses();
 

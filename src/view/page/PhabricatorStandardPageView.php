@@ -24,6 +24,7 @@ final class PhabricatorStandardPageView extends AphrontPageView {
   private $selectedTab;
   private $glyph;
   private $bodyContent;
+  private $menuContent;
   private $request;
   private $isAdminInterface;
   private $showChrome = true;
@@ -168,6 +169,7 @@ final class PhabricatorStandardPageView extends AphrontPageView {
         'header'    => AphrontRequest::getCSRFHeaderName(),
         'current'   => $current_token,
       ));
+    Javelin::initBehavior('device', array('id' => 'base-page'));
 
     if ($console) {
       require_celerity_resource('aphront-dark-console-css');
@@ -182,6 +184,7 @@ final class PhabricatorStandardPageView extends AphrontPageView {
       require_celerity_resource('javelin-behavior-error-log');
     }
 
+    $this->menuContent = $this->renderMainMenu();
     $this->bodyContent = $this->renderChildren();
   }
 
@@ -361,7 +364,7 @@ final class PhabricatorStandardPageView extends AphrontPageView {
     $header_chrome = null;
     $footer_chrome = null;
     if ($this->getShowChrome()) {
-      $header_chrome = $this->renderMainMenu();
+      $header_chrome = $this->menuContent;
       $footer_chrome =
         '<div class="phabricator-page-foot">'.
           $foot_links.
@@ -378,7 +381,6 @@ final class PhabricatorStandardPageView extends AphrontPageView {
         '</div>';
     }
 
-    Javelin::initBehavior('device', array('id' => 'base-page'));
     $agent = idx($_SERVER, 'HTTP_USER_AGENT');
 
     // Try to guess the device resolution based on UA strings to avoid a flash
@@ -450,7 +452,7 @@ final class PhabricatorStandardPageView extends AphrontPageView {
           'id' => $aphlict_container_id,
           'style' => 'position: absolute; width: 0; height: 0;',
         ),
-        'asdb');
+        '');
     }
 
     $response = CelerityAPI::getStaticResourceResponse();
