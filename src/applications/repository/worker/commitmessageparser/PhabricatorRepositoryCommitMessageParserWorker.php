@@ -292,9 +292,27 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         if ($files[$file_phid]->loadFileData() != $corpus) {
           return $vs_diff;
         }
-      } else if ($changeset->makeChangesWithContext() !=
-          $vs_changeset->makeChangesWithContext()) {
-        return $vs_diff;
+      } else {
+        $context = implode("\n", $changeset->makeChangesWithContext());
+        $vs_context = implode("\n", $vs_changeset->makeChangesWithContext());
+
+        // We couldn't just compare $context and $vs_context because following
+        // diffs will be considered different:
+        //
+        //   -(empty line)
+        //   -echo 'test';
+        //    (empty line)
+        //
+        //    (empty line)
+        //   -echo "test";
+        //   -(empty line)
+
+        $hunk = id(new DifferentialHunk())->setChanges($context);
+        $vs_hunk = id(new DifferentialHunk())->setChanges($vs_context);
+        if ($hunk->makeOldFile() != $vs_hunk->makeOldFile() ||
+            $hunk->makeNewFile() != $vs_hunk->makeNewFile()) {
+          return $vs_diff;
+        }
       }
     }
 
