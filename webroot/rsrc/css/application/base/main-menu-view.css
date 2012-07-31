@@ -31,8 +31,14 @@
   top: 0;
 }
 
-.device-desktop .phabricator-standard-page-body {
-  margin-top: 44px;
+.phabricator-main-menu-spacer {
+  display: none;
+}
+
+.device-desktop .phabricator-main-menu-spacer {
+  height: 44px;
+  position: relative;
+  display: block;
 }
 
 
