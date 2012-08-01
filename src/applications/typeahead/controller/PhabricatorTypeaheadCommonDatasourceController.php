@@ -134,7 +134,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
         $conn_r = id(new PhabricatorUser())->establishConnection('r');
         $ids = queryfx_all(
           $conn_r,
-          'SELECT DISTINCT userID FROM %T WHERE token LIKE %> OR 1 = 1',
+          'SELECT DISTINCT userID FROM %T WHERE token LIKE %>',
           PhabricatorUser::NAMETOKEN_TABLE,
           $query);
         $ids = ipull($ids, 'userID');
