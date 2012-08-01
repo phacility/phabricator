@@ -40,11 +40,13 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $need_upforgrabs = false;
     $need_arcanist_projects = false;
     $need_noproject = false;
+    $need_symbols = false;
     switch ($this->type) {
       case 'mainsearch':
         $need_users = true;
         $need_applications = true;
         $need_rich_data = true;
+        $need_symbols = true;
         break;
       case 'searchowner':
         $need_users = true;
@@ -238,9 +240,70 @@ final class PhabricatorTypeaheadCommonDatasourceController
       }
     }
 
+    if ($need_symbols) {
+      $symbols = id(new DiffusionSymbolQuery())
+        ->setNamePrefix($query)
+        ->setLimit(15)
+        ->needArcanistProjects(true)
+        ->needRepositories(true)
+        ->needPaths(true)
+        ->execute();
+      foreach ($symbols as $symbol) {
+        $lang = $symbol->getSymbolLanguage();
+        $name = $symbol->getSymbolName();
+        $type = $symbol->getSymbolType();
+        $proj = $symbol->getArcanistProject()->getName();
+
+        $results[] = id(new PhabricatorTypeaheadResult())
+          ->setName($name)
+          ->setURI($symbol->getURI())
+          ->setPHID(md5($symbol->getURI())) // Just needs to be unique.
+          ->setDisplayName($symbol->getName())
+          ->setDisplayType(strtoupper($lang).' '.ucwords($type).' ('.$proj.')')
+          ->setPriorityType('symb');
+      }
+    }
+
     $content = mpull($results, 'getWireFormat');
 
-    return id(new AphrontAjaxResponse())->setContent($content);
+    if ($request->isAjax()) {
+      return id(new AphrontAjaxResponse())->setContent($content);
+    }
+
+    // If there's a non-Ajax request to this endpoint, show results in a tabular
+    // format to make it easier to debug typeahead output.
+
+    $rows = array();
+    foreach ($results as $result) {
+      $wire = $result->getWireFormat();
+      foreach ($wire as $k => $v) {
+        $wire[$k] = phutil_escape_html($v);
+      }
+      $rows[] = $wire;
+    }
+
+    $table = new AphrontTableView($rows);
+    $table->setHeaders(
+      array(
+        'Name',
+        'URI',
+        'PHID',
+        'Priority',
+        'Display Name',
+        'Display Type',
+        'Image URI',
+        'Priority Type',
+      ));
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader('Typeahead Results');
+    $panel->appendChild($table);
+
+    return $this->buildStandardPageResponse(
+      $panel,
+      array(
+        'title' => 'Typeahead Results',
+      ));
   }
 
 }

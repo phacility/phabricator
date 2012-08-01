@@ -53,7 +53,8 @@ JX.behavior('phabricator-search-typeahead', function(config) {
     var type_priority = {
       // TODO: Put jump nav hits like "D123" first.
       'apps' : 2,
-      'user' : 3
+      'user' : 3,
+      'symb' : 4
     };
 
     var tokens = this.tokenize(value);
@@ -85,9 +86,31 @@ JX.behavior('phabricator-search-typeahead', function(config) {
 
       return cmp(u, v);
     });
+
+    // If we have more results than fit, limit each type of result to 3, so
+    // we show 3 applications, then 3 users, etc.
+    var type_count = 0;
+    var current_type = null;
+    for (var ii = 0; ii < list.length; ii++) {
+      if (list.length <= config.limit) {
+        break;
+      }
+      if (list[ii].type != current_type) {
+        current_type = list[ii].type;
+        type_count = 1;
+      } else {
+        type_count++;
+        if (type_count > 3) {
+          list.splice(ii, 1);
+          ii--;
+        }
+      }
+    }
+
   };
 
   datasource.setSortHandler(JX.bind(datasource, sort_handler));
+  datasource.setMaximumResultCount(config.limit);
 
   var typeahead = new JX.Typeahead(JX.$(config.id), JX.$(config.input));
   typeahead.setDatasource(datasource);

@@ -1477,6 +1477,7 @@ phutil_register_library_map(array(
     'DiffusionSvnRequest' => 'DiffusionRequest',
     'DiffusionSvnTagListQuery' => 'DiffusionTagListQuery',
     'DiffusionSymbolController' => 'DiffusionController',
+    'DiffusionSymbolQuery' => 'PhabricatorOffsetPagedQuery',
     'DiffusionTagListController' => 'DiffusionController',
     'DiffusionTagListQuery' => 'DiffusionQuery',
     'DiffusionTagListView' => 'DiffusionView',

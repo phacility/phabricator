@@ -1462,7 +1462,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-phabricator-search-typeahead' =>
   array(
-    'uri' => '/res/f552b264/rsrc/js/application/core/behavior-search-typeahead.js',
+    'uri' => '/res/046ab274/rsrc/js/application/core/behavior-search-typeahead.js',
     'type' => 'js',
     'requires' =>
     array(

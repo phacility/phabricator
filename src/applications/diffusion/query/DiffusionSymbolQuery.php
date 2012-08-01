@@ -27,7 +27,7 @@
  *
  * @group diffusion
  */
-final class DiffusionSymbolQuery {
+final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
 
   private $namePrefix;
   private $name;
@@ -35,8 +35,6 @@ final class DiffusionSymbolQuery {
   private $projectIDs;
   private $language;
   private $type;
-
-  private $limit = 20;
 
   private $needPaths;
   private $needArcanistProject;
@@ -94,15 +92,6 @@ final class DiffusionSymbolQuery {
   /**
    * @task config
    */
-  public function setLimit($limit) {
-    $this->limit = $limit;
-    return $this;
-  }
-
-
-  /**
-   * @task config
-   */
   public function needPaths($need_paths) {
     $this->needPaths = $need_paths;
     return $this;
@@ -145,55 +134,13 @@ final class DiffusionSymbolQuery {
     $symbol = new PhabricatorRepositorySymbol();
     $conn_r = $symbol->establishConnection('r');
 
-    $where = array();
-    if ($this->name) {
-      $where[] = qsprintf(
-        $conn_r,
-        'symbolName = %s',
-        $this->name);
-    }
-
-    if ($this->namePrefix) {
-      $where[] = qsprintf(
-        $conn_r,
-        'symbolName LIKE %>',
-        $this->namePrefix);
-    }
-
-    if ($this->projectIDs) {
-      $where[] = qsprintf(
-        $conn_r,
-        'arcanistProjectID IN (%Ld)',
-        $this->projectIDs);
-    }
-
-    $where = 'WHERE ('.implode(') AND (', $where).')';
-
     $data = queryfx_all(
       $conn_r,
-      'SELECT * FROM %T %Q',
+      'SELECT * FROM %T %Q %Q %Q',
       $symbol->getTableName(),
-      $where);
-
-    // Our ability to match up symbol types and languages probably isn't all
-    // that great, so use them as hints for ranking rather than hard
-    // requirements. TODO: Is this really the right choice?
-    foreach ($data as $key => $row) {
-      $score = 0;
-      if ($this->language && $row['symbolLanguage'] == $this->language) {
-        $score += 2;
-      }
-      if ($this->type && $row['symbolType'] == $this->type) {
-        $score += 1;
-      }
-      $data[$key]['score'] = $score;
-      $data[$key]['id'] = $key;
-    }
-
-    $data = isort($data, 'score');
-    $data = array_reverse($data);
-
-    $data = array_slice($data, 0, $this->limit);
+      $this->buildWhereClause($conn_r),
+      $this->buildOrderClause($conn_r),
+      $this->buildLimitClause($conn_r));
 
     $symbols = $symbol->loadAllFromArray($data);
 
@@ -215,6 +162,54 @@ final class DiffusionSymbolQuery {
 
 
 /* -(  Internals  )---------------------------------------------------------- */
+
+
+  /**
+   * @task internal
+   */
+  private function buildOrderClause($conn_r) {
+    return qsprintf(
+      $conn_r,
+      'ORDER BY symbolName ASC');
+  }
+
+
+  /**
+   * @task internal
+   */
+  private function buildWhereClause($conn_r) {
+    $where = array();
+
+    if ($this->name) {
+      $where[] = qsprintf(
+        $conn_r,
+        'symbolName = %s',
+        $this->name);
+    }
+
+    if ($this->namePrefix) {
+      $where[] = qsprintf(
+        $conn_r,
+        'symbolName LIKE %>',
+        $this->namePrefix);
+    }
+
+    if ($this->projectIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'arcanistProjectID IN (%Ld)',
+        $this->projectIDs);
+    }
+
+    if ($this->language) {
+      $where[] = qsprintf(
+        $conn_r,
+        'symbolLanguage = %s',
+        $this->language);
+    }
+
+    return $this->formatWhereClause($where);
+  }
 
 
   /**

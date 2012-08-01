@@ -75,7 +75,7 @@ final class PhabricatorTypeaheadResult {
       $this->priorityString,
       $this->displayName,
       $this->displayType,
-      $this->imageURI,
+      $this->imageURI ? (string)$this->imageURI : null,
       $this->priorityType,
     );
     while (end($data) === null) {
