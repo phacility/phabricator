@@ -119,11 +119,3 @@ a.handle-disabled {
   cursor: pointer;
 
 }
-
-/**
- * Placeholder text added to inputs by the "placeholder" behavior.
- */
-.jx-placeholder {
-  color: #888888;
-}
-

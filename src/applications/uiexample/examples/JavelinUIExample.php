@@ -30,34 +30,6 @@ final class JavelinUIExample extends PhabricatorUIExample {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    // placeholder
-
-    $placeholder_id = celerity_generate_unique_node_id();
-
-    Javelin::initBehavior(
-      'placeholder',
-      array(
-        'id'    => $placeholder_id,
-        'text'  => 'This is a placeholder',
-      ));
-
-    $form = id(new AphrontFormView())
-      ->setUser($user)
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel('Placeholder')
-          ->setID($placeholder_id))
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->setValue('Submit'));
-
-    $panel = new AphrontPanelView();
-    $panel->setHeader('A Form');
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->appendChild($form);
-
-
-
     // toggle-class
 
     $container_id  = celerity_generate_unique_node_id();
@@ -105,6 +77,6 @@ final class JavelinUIExample extends PhabricatorUIExample {
       ),
       $button_red.$button_blue);
 
-    return array($panel, $div);
+    return array($div);
   }
 }
