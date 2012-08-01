@@ -33,6 +33,19 @@ final class DiffusionBrowseTableView extends DiffusionView {
     return $this;
   }
 
+  private static function renderName($name) {
+    $email = new PhutilEmailAddress($name);
+    if ($email->getDisplayName() || $email->getDomainName()) {
+      return phutil_render_tag(
+        'span',
+        array(
+          'title' => $email->getAddress(),
+        ),
+        phutil_escape_html($email->getDisplayName()));
+    }
+    return phutil_escape_html($name);
+  }
+
   public static function renderLastModifiedColumns(
     PhabricatorRepository $repository,
     array $handles,
@@ -58,7 +71,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
       if ($author_phid && isset($handles[$author_phid])) {
         $author = $handles[$author_phid]->renderLink();
       } else {
-        $author = phutil_escape_html($data->getAuthorName());
+        $author = self::renderName($data->getAuthorName());
       }
 
       $committer = $data->getCommitDetail('committer');
@@ -67,7 +80,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         if ($committer_phid && isset($handles[$committer_phid])) {
           $committer = $handles[$committer_phid]->renderLink();
         } else {
-          $committer = phutil_escape_html($data->getCommitDetail('committer'));
+          $committer = self::renderName($data->getCommitDetail('committer'));
         }
       } else {
         $committer = $author;
