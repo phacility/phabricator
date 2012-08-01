@@ -30,15 +30,35 @@ abstract class PhabricatorApplication {
 
 
   public function getName() {
-    return substr(__CLASS__, strlen('PhabricatorApplication'));
+    return substr(get_class($this), strlen('PhabricatorApplication'));
+  }
+
+  public function getShortDescription() {
+    return $this->getName().' Application';
   }
 
   public function isEnabled() {
     return true;
   }
 
+  public function getPHID() {
+    return 'PHID-APPS-'.get_class($this);
+  }
 
-/* -(  Application Information  )-------------------------------------------- */
+  public function getTypeaheadURI() {
+    return $this->getBaseURI();
+  }
+
+  public function getBaseURI() {
+    return null;
+  }
+
+  public function getIconURI() {
+    return PhabricatorUser::getDefaultProfileImageURI();
+  }
+
+
+/* -(  URI Routing  )-------------------------------------------------------- */
 
 
   public function getRoutes() {

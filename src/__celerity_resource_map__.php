@@ -1439,6 +1439,21 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/core/behavior-oncopy.js',
   ),
+  'javelin-behavior-phabricator-search-typeahead' =>
+  array(
+    'uri' => '/res/9ceffb09/rsrc/js/application/core/behavior-search-typeahead.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-typeahead-ondemand-source',
+      2 => 'javelin-typeahead',
+      3 => 'javelin-dom',
+      4 => 'javelin-uri',
+      5 => 'javelin-stratcom',
+    ),
+    'disk' => '/rsrc/js/application/core/behavior-search-typeahead.js',
+  ),
   'javelin-behavior-phabricator-tooltips' =>
   array(
     'uri' => '/res/49f92a92/rsrc/js/application/core/behavior-tooltip.js',
@@ -2263,7 +2278,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-main-menu-view' =>
   array(
-    'uri' => '/res/795788ca/rsrc/css/application/base/main-menu-view.css',
+    'uri' => '/res/5bae3234/rsrc/css/application/base/main-menu-view.css',
     'type' => 'css',
     'requires' =>
     array(

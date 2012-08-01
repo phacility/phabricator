@@ -42,6 +42,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
   public function render() {
     $user = $this->user;
 
+    $target_id  = celerity_generate_unique_node_id();
     $search_id = $this->getID();
 
     $input = phutil_render_tag(
@@ -49,16 +50,28 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
       array(
         'type' => 'text',
         'name' => 'query',
-        'id'   => $search_id,
+        'id' => $search_id,
+        'autocomplete' => 'off',
       ));
 
     $scope = $this->scope;
 
-    Javelin::initBehavior(
-      'placeholder',
+    $target = javelin_render_tag(
+      'div',
       array(
-        'id' => $search_id,
-        'text' => PhabricatorSearchScope::getScopePlaceholder($scope),
+        'id'    => $target_id,
+        'class' => 'phabricator-main-menu-search-target',
+      ),
+      '');
+
+    Javelin::initBehavior(
+      'phabricator-search-typeahead',
+      array(
+        'id'          => $target_id,
+        'input'       => $search_id,
+        'src'         => '/typeahead/common/mainsearch/',
+        'limit'       => 10,
+        'placeholder' => PhabricatorSearchScope::getScopePlaceholder($scope),
       ));
 
     $scope_input = phutil_render_tag(
@@ -79,6 +92,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
         $input.
         '<button>Search</button>'.
         $scope_input.
+        $target.
       '</div>');
 
     $group = new PhabricatorMainMenuGroupView();

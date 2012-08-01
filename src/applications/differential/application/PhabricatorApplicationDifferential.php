@@ -24,5 +24,13 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
     );
   }
 
+  public function getBaseURI() {
+    return '/differential/';
+  }
+
+  public function getShortDescription() {
+    return 'Code Review Application';
+  }
+
 }
 

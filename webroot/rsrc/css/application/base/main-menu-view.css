@@ -14,7 +14,6 @@
   background: #33393d;
   position: relative;
   box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.25);
-  overflow: hidden;
   height: 44px;
 }
 
@@ -49,19 +48,25 @@
 
 */
 
+.phabricator-main-menu-group {
+  height: 44px;
+  position: relative;
+}
+
 .device-desktop .phabricator-main-menu-group {
   display: inline-block;
   text-align: left;
-  height: 44px;
 }
 
 .device-tablet .phabricator-main-menu-group,
 .device-phone .phabricator-main-menu-group {
-  clear: both;
   width: 100%;
-  overflow: hidden;
-  border-bottom: 1px solid #33393d;
   display: block;
+}
+
+.device-tablet .phabricator-main-menu-group + .phabricator-main-menu-group,
+.device-phone .phabricator-main-menu-group + .phabricator-main-menu-group {
+  margin-top: 1px;
 }
 
 
@@ -72,7 +77,7 @@
 
 */
 
-.phabricator-main-menu-group-logo {
+.device-desktop .phabricator-main-menu-group-logo {
   float: left;
 }
 
@@ -144,8 +149,6 @@
   margin: 9px;
   display: inline-block;
   background-repeat: no-repeat;
-  position: relative;
-  overflow: hidden;
 }
 
 .device-desktop .phabricator-main-menu-icon-label {
@@ -156,18 +159,17 @@
 .device-phone .phabricator-main-menu-icon-label {
   font-weight: bold;
   color: #ffffff;
-  margin-left: 40px;
-  height: 26px;
-  margin: 15px 9px 3px 60px;
+  position: absolute;
   display: block;
+  height: 26px;
+  padding: 15px 0 3px;
+  left: 60px;
+  right: 0px;
+  top: 0px;
 }
 
 .device-tablet .phabricator-main-menu-icon,
 .device-phone .phabricator-main-menu-icon {
-  font-weight: bold;
-  color: white;
-  text-decoration: none;
-  border: 0;
   margin-left: 24px;
   position: absolute;
 }
@@ -187,6 +189,23 @@
   padding: 10px 0;
   position: relative;
   height: 24px;
+}
+
+.phabricator-main-menu-search-target {
+  position: absolute;
+  top: 46px;
+}
+
+.device-desktop .phabricator-main-menu-search-target {
+  width: 320px;
+  margin-left: -150px;
+}
+
+.device-tablet .phabricator-main-menu-search-target,
+.device-phone .phabricator-main-menu-search-target {
+  width: 100%;
+  margin-left: -25px;
+
 }
 
 .device-desktop .phabricator-main-menu-search-container {
@@ -236,6 +255,50 @@
   top: 11px;
   right: 6px;
 }
+
+.phabricator-main-menu-search-target div.jx-typeahead-results {
+  border-radius: 4px;
+  box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.35);
+  border: 1px solid #33393d;
+}
+
+.phabricator-main-menu-search-target div.jx-typeahead-results a.jx-result {
+  border: 0;
+}
+
+.phabricator-main-menu-search-target div.jx-typeahead-results a.focused,
+.phabricator-main-menu-search-target div.jx-typeahead-results a:hover {
+  background: #3875d7;
+}
+
+.phabricator-main-search-typeahead-result {
+  display: block;
+  padding: 4px 4px 4px 38px;
+  background-position: 4px 4px;
+  background-size: 25px 25px;
+  background-repeat: no-repeat;
+}
+
+.phabricator-main-search-typeahead-result .result-name {
+  display: block;
+  font-weight: bold;
+  color: #444444;
+}
+
+.focused .phabricator-main-search-typeahead-result .result-name,
+a:hover .phabricator-main-search-typeahead-result .result-name {
+  color: #eeeeee;
+}
+
+.phabricator-main-search-typeahead-result .result-type {
+  color: #888888;
+}
+
+.focused .phabricator-main-search-typeahead-result .result-type,
+a:hover .phabricator-main-search-typeahead-result .result-type {
+  color: #dddddd;
+}
+
 
 
 /* - Collapsible ---------------------------------------------------------------

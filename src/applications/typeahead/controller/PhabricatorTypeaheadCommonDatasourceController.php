@@ -28,7 +28,10 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $request = $this->getRequest();
     $query = $request->getStr('q');
 
+    $need_rich_data = false;
+
     $need_users = false;
+    $need_applications = false;
     $need_all_users = false;
     $need_lists = false;
     $need_projs = false;
@@ -38,6 +41,11 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $need_arcanist_projects = false;
     $need_noproject = false;
     switch ($this->type) {
+      case 'mainsearch':
+        $need_users = true;
+        $need_applications = true;
+        $need_rich_data = true;
+        break;
       case 'searchowner':
         $need_users = true;
         $need_upforgrabs = true;
@@ -78,8 +86,19 @@ final class PhabricatorTypeaheadCommonDatasourceController
       case 'arcanistprojects':
         $need_arcanist_projects = true;
         break;
-
     }
+
+    // TODO: We transfer these fields without keys as an opitimization, but this
+    // function is hard to read as a result. Until we can sort it out, here's
+    // what the position arguments mean:
+    //
+    //   0: (required) name to match against what the user types
+    //   1: (optional) URI
+    //   2: (required) PHID
+    //   3: (optional) priority matching string
+    //   4: (optional) display name [overrides position 0]
+    //   5: (optional) display type
+    //   6: (optional) image URI
 
     $data = array();
 
@@ -106,11 +125,16 @@ final class PhabricatorTypeaheadCommonDatasourceController
         'userName',
         'realName',
         'phid');
+
+      if ($need_rich_data) {
+        $columns[] = 'profileImagePHID';
+      }
+
       if ($query) {
         $conn_r = id(new PhabricatorUser())->establishConnection('r');
         $ids = queryfx_all(
           $conn_r,
-          'SELECT DISTINCT userID FROM %T WHERE token LIKE %>',
+          'SELECT DISTINCT userID FROM %T WHERE token LIKE %> OR 1 = 1',
           PhabricatorUser::NAMETOKEN_TABLE,
           $query);
         $ids = ipull($ids, 'userID');
@@ -125,6 +149,12 @@ final class PhabricatorTypeaheadCommonDatasourceController
       } else {
         $users = id(new PhabricatorUser())->loadColumns($columns);
       }
+
+      if ($need_rich_data) {
+        $phids = mpull($users, 'getPHID');
+        $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+      }
+
       foreach ($users as $user) {
         if (!$need_all_users) {
           if ($user->getIsSystemAgent()) {
@@ -134,12 +164,18 @@ final class PhabricatorTypeaheadCommonDatasourceController
             continue;
           }
         }
-        $data[] = array(
+        $spec = array(
           $user->getUsername().' ('.$user->getRealName().')',
           '/p/'.$user->getUsername(),
           $user->getPHID(),
           $user->getUsername(),
+          null,
+          'User',
         );
+        if ($need_rich_data) {
+          $spec[] = $handles[$user->getPHID()]->getImageURI();
+        }
+        $data[] = $spec;
       }
     }
 
@@ -198,6 +234,33 @@ final class PhabricatorTypeaheadCommonDatasourceController
           null,
           $proj->getPHID(),
         );
+      }
+    }
+
+    if ($need_applications) {
+      $applications = PhabricatorApplication::getAllInstalledApplications();
+      foreach ($applications as $application) {
+        $uri = $application->getTypeaheadURI();
+        if (!$uri) {
+          continue;
+        }
+        $data[] = array(
+          $application->getName().' '.$application->getShortDescription(),
+          $uri,
+          $application->getPHID(),
+          $application->getName(),
+          $application->getName(),
+          $application->getShortDescription(),
+          $application->getIconURI(),
+        );
+      }
+    }
+
+    if (!$need_rich_data) {
+      foreach ($data as $key => $info) {
+        unset($data[$key][4]);
+        unset($data[$key][5]);
+        unset($data[$key][6]);
       }
     }
 
