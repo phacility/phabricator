@@ -114,13 +114,48 @@ final class PhabricatorTypeaheadCommonDatasourceController
         'phid');
 
       if ($query) {
-        $conn_r = id(new PhabricatorUser())->establishConnection('r');
+        // This is an arbitrary limit which is just larger than any limit we
+        // actually use in the application.
+
+        // TODO: The datasource should pass this in the query.
+        $limit = 15;
+
+        $user_table = new PhabricatorUser();
+        $conn_r = $user_table->establishConnection('r');
         $ids = queryfx_all(
           $conn_r,
-          'SELECT DISTINCT userID FROM %T WHERE token LIKE %>',
-          PhabricatorUser::NAMETOKEN_TABLE,
-          $query);
-        $ids = ipull($ids, 'userID');
+          'SELECT id FROM %T WHERE username LIKE %>
+            ORDER BY username ASC LIMIT %d',
+          $user_table->getTableName(),
+          $query,
+          $limit);
+        $ids = ipull($ids, 'id');
+
+        if (count($ids) < $limit) {
+          // If we didn't find enough username hits, look for real name hits.
+          // We need to pull the entire pagesize so that we end up with the
+          // right number of items if this query returns many duplicate IDs
+          // that we've already selected.
+
+          $realname_ids = queryfx_all(
+            $conn_r,
+            'SELECT DISTINCT userID FROM %T WHERE token LIKE %>
+              ORDER BY token ASC LIMIT %d',
+            PhabricatorUser::NAMETOKEN_TABLE,
+            $query,
+            $limit);
+          $realname_ids = ipull($realname_ids, 'userID');
+          $ids = array_merge($ids, $realname_ids);
+
+          $ids = array_unique($ids);
+          $ids = array_slice($ids, 0, $limit);
+        }
+
+        // Always add the logged-in user because some tokenizers autosort them
+        // first. They'll be filtered out on the client side if they don't
+        // match the query.
+        $ids[] = $request->getUser()->getID();
+
         if ($ids) {
           $users = id(new PhabricatorUser())->loadColumnsWhere(
             $columns,
