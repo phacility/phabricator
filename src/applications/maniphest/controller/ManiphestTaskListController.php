@@ -228,7 +228,7 @@ final class ManiphestTaskListController extends ManiphestController {
 
       $form->appendChild(
           id(new AphrontFormSelectControl())
-            ->setLabel('From Priority')
+            ->setLabel('Min Priority')
             ->setName('set_lpriority')
             ->setValue($priority)
             ->setOptions(array_reverse(
@@ -241,7 +241,7 @@ final class ManiphestTaskListController extends ManiphestController {
 
       $form->appendChild(
           id(new AphrontFormSelectControl())
-            ->setLabel('To Priority')
+            ->setLabel('Max Priority')
             ->setName('set_hpriority')
             ->setValue($priority)
             ->setOptions(ManiphestTaskPriority::getTaskPriorityMap()));
