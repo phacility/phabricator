@@ -35,6 +35,13 @@ celerity_register_resource_map(array(
     'disk' => '/rsrc/image/credit_cards.png',
     'type' => 'png',
   ),
+  '/rsrc/image/divot.png' =>
+  array(
+    'hash' => '3be267bd11ea375bf68e808893718e0e',
+    'uri' => '/res/3be267bd/rsrc/image/divot.png',
+    'disk' => '/rsrc/image/divot.png',
+    'type' => 'png',
+  ),
   '/rsrc/image/glyph_sprite.png' =>
   array(
     'hash' => '0a1ea7c048be9f0b76ab2c807a9a1c0d',
@@ -1402,6 +1409,20 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/core/behavior-keyboard-shortcuts.js',
   ),
+  'javelin-behavior-phabricator-nav' =>
+  array(
+    'uri' => '/res/adaae8ae/rsrc/js/application/core/behavior-phabricator-nav.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-dom',
+      3 => 'javelin-magical-init',
+      4 => 'javelin-vector',
+    ),
+    'disk' => '/rsrc/js/application/core/behavior-phabricator-nav.js',
+  ),
   'javelin-behavior-phabricator-notification-example' =>
   array(
     'uri' => '/res/df97e4b3/rsrc/js/application/uiexample/notification-example.js',
@@ -2284,6 +2305,15 @@ celerity_register_resource_map(array(
       1 => 'javelin-dom',
     ),
     'disk' => '/rsrc/js/application/core/DropdownMenuItem.js',
+  ),
+  'phabricator-nav-view-css' =>
+  array(
+    'uri' => '/res/3443576d/rsrc/css/aphront/phabricator-nav-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/aphront/phabricator-nav-view.css',
   ),
   'phabricator-notification' =>
   array(
