@@ -1462,7 +1462,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-phabricator-search-typeahead' =>
   array(
-    'uri' => '/res/9ceffb09/rsrc/js/application/core/behavior-search-typeahead.js',
+    'uri' => '/res/f552b264/rsrc/js/application/core/behavior-search-typeahead.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1471,7 +1471,8 @@ celerity_register_resource_map(array(
       2 => 'javelin-typeahead',
       3 => 'javelin-dom',
       4 => 'javelin-uri',
-      5 => 'javelin-stratcom',
+      5 => 'javelin-util',
+      6 => 'javelin-stratcom',
     ),
     'disk' => '/rsrc/js/application/core/behavior-search-typeahead.js',
   ),
