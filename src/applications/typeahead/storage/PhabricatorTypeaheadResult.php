@@ -70,7 +70,7 @@ final class PhabricatorTypeaheadResult {
   public function getWireFormat() {
     $data = array(
       $this->name,
-      $this->uri,
+      $this->uri ? (string)$this->uri : null,
       $this->phid,
       $this->priorityString,
       $this->displayName,
