@@ -88,47 +88,28 @@ final class PhabricatorTypeaheadCommonDatasourceController
         break;
     }
 
-    // TODO: We transfer these fields without keys as an opitimization, but this
-    // function is hard to read as a result. Until we can sort it out, here's
-    // what the position arguments mean:
-    //
-    //   0: (required) name to match against what the user types
-    //   1: (optional) URI
-    //   2: (required) PHID
-    //   3: (optional) priority matching string
-    //   4: (optional) display name [overrides position 0]
-    //   5: (optional) display type
-    //   6: (optional) image URI
-
-    $data = array();
+    $results = array();
 
     if ($need_upforgrabs) {
-      $data[] = array(
-        'upforgrabs (Up For Grabs)',
-        null,
-        ManiphestTaskOwner::OWNER_UP_FOR_GRABS,
-      );
+      $results[] = id(new PhabricatorTypeaheadResult())
+        ->setName('upforgrabs (Up For Grabs)')
+        ->setPHID(ManiphestTaskOwner::OWNER_UP_FOR_GRABS);
     }
 
     if ($need_noproject) {
-      $data[] = array(
-        'noproject (No Project)',
-        null,
-        ManiphestTaskOwner::PROJECT_NO_PROJECT,
-      );
+      $results[] = id(new PhabricatorTypeaheadResult())
+        ->setName('noproject (No Project)')
+        ->setPHID(ManiphestTaskOwner::PROJECT_NO_PROJECT);
     }
 
     if ($need_users) {
       $columns = array(
         'isSystemAgent',
+        'isAdmin',
         'isDisabled',
         'userName',
         'realName',
         'phid');
-
-      if ($need_rich_data) {
-        $columns[] = 'profileImagePHID';
-      }
 
       if ($query) {
         $conn_r = id(new PhabricatorUser())->establishConnection('r');
@@ -164,29 +145,33 @@ final class PhabricatorTypeaheadCommonDatasourceController
             continue;
           }
         }
-        $spec = array(
-          $user->getUsername().' ('.$user->getRealName().')',
-          '/p/'.$user->getUsername(),
-          $user->getPHID(),
-          $user->getUsername(),
-          null,
-          'User',
-        );
+
+        $result = id(new PhabricatorTypeaheadResult())
+          ->setName($user->getFullName())
+          ->setURI('/p/'.$user->getUsername())
+          ->setPHID($user->getPHID())
+          ->setPriorityString($user->getUsername());
+
         if ($need_rich_data) {
-          $spec[] = $handles[$user->getPHID()]->getImageURI();
+          $display_type = 'User';
+          if ($user->getIsAdmin()) {
+            $display_type = 'Administrator';
+          }
+          $result->setDisplayType($display_type);
+          $result->setImageURI($handles[$user->getPHID()]->getImageURI());
+          $result->setPriorityType('user');
         }
-        $data[] = $spec;
+        $results[] = $result;
       }
     }
 
     if ($need_lists) {
       $lists = id(new PhabricatorMetaMTAMailingList())->loadAll();
       foreach ($lists as $list) {
-        $data[] = array(
-          $list->getName(),
-          $list->getURI(),
-          $list->getPHID(),
-        );
+        $results[] = id(new PhabricatorTypeaheadResult())
+          ->setName($list->getName())
+          ->setURI($list->getURI())
+          ->setPHID($list->getPHID());
       }
     }
 
@@ -195,45 +180,40 @@ final class PhabricatorTypeaheadCommonDatasourceController
         'status != %d',
         PhabricatorProjectStatus::STATUS_ARCHIVED);
       foreach ($projs as $proj) {
-        $data[] = array(
-          $proj->getName(),
-          '/project/view/'.$proj->getID().'/',
-          $proj->getPHID(),
-        );
+        $results[] = id(new PhabricatorTypeaheadResult())
+          ->setName($proj->getName())
+          ->setURI('/project/view/'.$proj->getID().'/')
+          ->setPHID($proj->getPHID());
       }
     }
 
     if ($need_repos) {
       $repos = id(new PhabricatorRepository())->loadAll();
       foreach ($repos as $repo) {
-        $data[] = array(
-          'r'.$repo->getCallsign().' ('.$repo->getName().')',
-          '/diffusion/'.$repo->getCallsign().'/',
-          $repo->getPHID(),
-          'r'.$repo->getCallsign(),
-        );
+        $results[] = id(new PhabricatorTypeaheadResult())
+          ->setName('r'.$repo->getCallsign().' ('.$repo->getName().')')
+          ->setURI('/diffusion/'.$repo->getCallsign().'/')
+          ->setPHID($repo->getPHID())
+          ->setPriorityString('r'.$repo->getCallsign());
       }
     }
 
     if ($need_packages) {
       $packages = id(new PhabricatorOwnersPackage())->loadAll();
       foreach ($packages as $package) {
-        $data[] = array(
-          $package->getName(),
-          '/owners/package/'.$package->getID().'/',
-          $package->getPHID(),
-        );
+        $results[] = id(new PhabricatorTypeaheadResult())
+          ->setName($package->getName())
+          ->setURI('/owners/package/'.$package->getID().'/')
+          ->setPHID($package->getPHID());
       }
     }
 
     if ($need_arcanist_projects) {
       $arcprojs = id(new PhabricatorRepositoryArcanistProject())->loadAll();
       foreach ($arcprojs as $proj) {
-        $data[] = array(
-          $proj->getName(),
-          null,
-          $proj->getPHID(),
-        );
+        $results[] = id(new PhabricatorTypeaheadResult())
+          ->setName($proj->getName())
+          ->setPHID($proj->getPHID());
       }
     }
 
@@ -244,28 +224,23 @@ final class PhabricatorTypeaheadCommonDatasourceController
         if (!$uri) {
           continue;
         }
-        $data[] = array(
-          $application->getName().' '.$application->getShortDescription(),
-          $uri,
-          $application->getPHID(),
-          $application->getName(),
-          $application->getName(),
-          $application->getShortDescription(),
-          $application->getIconURI(),
-        );
+        $name = $application->getName().' '.$application->getShortDescription();
+
+        $results[] = id(new PhabricatorTypeaheadResult())
+          ->setName($name)
+          ->setURI($uri)
+          ->setPHID($application->getPHID())
+          ->setPriorityString($application->getName())
+          ->setDisplayName($application->getName())
+          ->setDisplayType($application->getShortDescription())
+          ->setImageuRI($application->getIconURI())
+          ->setPriorityType('apps');
       }
     }
 
-    if (!$need_rich_data) {
-      foreach ($data as $key => $info) {
-        unset($data[$key][4]);
-        unset($data[$key][5]);
-        unset($data[$key][6]);
-      }
-    }
+    $content = mpull($results, 'getWireFormat');
 
-    return id(new AphrontAjaxResponse())
-      ->setContent($data);
+    return id(new AphrontAjaxResponse())->setContent($content);
   }
 
 }

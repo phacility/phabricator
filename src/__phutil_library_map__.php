@@ -1013,6 +1013,7 @@ phutil_register_library_map(array(
     'PhabricatorTrivialTestCase' => 'infrastructure/testing/__tests__/PhabricatorTrivialTestCase.php',
     'PhabricatorTypeaheadCommonDatasourceController' => 'applications/typeahead/controller/PhabricatorTypeaheadCommonDatasourceController.php',
     'PhabricatorTypeaheadDatasourceController' => 'applications/typeahead/controller/PhabricatorTypeaheadDatasourceController.php',
+    'PhabricatorTypeaheadResult' => 'applications/typeahead/storage/PhabricatorTypeaheadResult.php',
     'PhabricatorUIExample' => 'applications/uiexample/examples/PhabricatorUIExample.php',
     'PhabricatorUIExampleController' => 'applications/uiexample/controller/PhabricatorUIExampleController.php',
     'PhabricatorUIExampleRenderController' => 'applications/uiexample/controller/PhabricatorUIExampleRenderController.php',
