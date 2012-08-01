@@ -19,17 +19,21 @@ JX.behavior('repository-crossreference', function(config) {
     function(e) {
       var target = e.getTarget();
       var map = {nc : 'class', nf : 'function'};
-      if (JX.DOM.isNode(target, 'span') && (target.className in map)) {
-        var symbol = target.textContent || target.innerText;
-        var uri = JX.$U('/diffusion/symbol/' + symbol + '/');
-        uri.addQueryParams({
-          type : map[target.className],
-          lang : config.lang,
-          projects : config.projects.join(','),
-          jump : true
-        });
-        window.open(uri);
-        e.kill();
+      while (target !== document.body) {
+        if (JX.DOM.isNode(target, 'span') && (target.className in map)) {
+          var symbol = target.textContent || target.innerText;
+          var uri = JX.$U('/diffusion/symbol/' + symbol + '/');
+          uri.addQueryParams({
+            type : map[target.className],
+            lang : config.lang,
+            projects : config.projects.join(','),
+            jump : true
+          });
+          window.open(uri);
+          e.kill();
+          break;
+        }
+        target = target.parentNode;
       }
     });
 
