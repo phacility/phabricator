@@ -51,6 +51,20 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
       throw new Exception("No data to show!");
     }
 
+    // Limit amount of data passed to browser.
+    $count = count($points);
+    $limit = 2000;
+    if ($count > $limit) {
+      $i = 0;
+      $every = ceil($count / $limit);
+      foreach ($points as $epoch => $sum) {
+        $i++;
+        if ($i % $every && $i != $count) {
+          unset($points[$epoch]);
+        }
+      }
+    }
+
     $x = array_keys($points);
     $y = array_values($points);
 
