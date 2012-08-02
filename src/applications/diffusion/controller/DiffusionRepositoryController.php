@@ -93,6 +93,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $browse_table->setDiffusionRequest($drequest);
     $browse_table->setHandles($handles);
     $browse_table->setPaths($browse_results);
+    $browse_table->setUser($this->getRequest()->getUser());
 
     $browse_panel = new AphrontPanelView();
     $browse_panel->setHeader('Browse Repository');
