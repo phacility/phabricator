@@ -53,6 +53,12 @@ final class PhabricatorDaemonControl {
     foreach ($daemons as $daemon) {
       $name = $daemon->getName();
       if (!$daemon->isRunning()) {
+        $daemon_log = $daemon->loadDaemonLog();
+        if ($daemon_log) {
+          $daemon_log->setStatus(PhabricatorDaemonLog::STATUS_DEAD);
+          $daemon_log->save();
+        }
+
         $status = 2;
         $name = '<DEAD> '.$name;
       }
@@ -110,6 +116,11 @@ final class PhabricatorDaemonControl {
       if (!$daemon->isRunning()) {
         echo "Daemon is not running.\n";
         unset($running[$key]);
+        $daemon_log = $daemon->loadDaemonLog();
+        if ($daemon_log) {
+          $daemon_log->setStatus(PhabricatorDaemonLog::STATUS_EXITED);
+          $daemon_log->save();
+        }
       } else {
         posix_kill($pid, SIGINT);
       }

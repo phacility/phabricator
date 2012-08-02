@@ -19,7 +19,7 @@
 /**
  * @group conduit
  */
-final class ConduitAPI_daemon_launched_Method extends ConduitAPIMethod {
+final class ConduitAPI_daemon_setstatus_Method extends ConduitAPIMethod {
 
   public function shouldRequireAuthentication() {
     // TODO: Lock this down once we build phantoms.
@@ -31,39 +31,36 @@ final class ConduitAPI_daemon_launched_Method extends ConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return "Used by daemons to log run status.";
+    return "Used by daemons to update their status.";
   }
 
   public function defineParamTypes() {
     return array(
-      'daemon'    => 'required string',
-      'host'      => 'required string',
-      'pid'       => 'required int',
-      'argv'      => 'required string',
+      'daemonLogID' => 'required string',
+      'status'      => 'required enum<unknown, run, timeout, dead, exit>',
     );
   }
 
   public function defineReturnType() {
-    return 'string';
+    return 'void';
   }
 
   public function defineErrorTypes() {
     return array(
+      'ERR-INVALID-ID' => 'An invalid daemonLogID was provided.',
     );
   }
 
   protected function execute(ConduitAPIRequest $request) {
 
-    $daemon_log = new PhabricatorDaemonLog();
-    $daemon_log->setDaemon($request->getValue('daemon'));
-    $daemon_log->setHost($request->getValue('host'));
-    $daemon_log->setPID($request->getValue('pid'));
-    $daemon_log->setStatus(PhabricatorDaemonLog::STATUS_RUNNING);
-    $daemon_log->setArgv(json_decode($request->getValue('argv')));
+    $daemon_log = id(new PhabricatorDaemonLog())
+      ->load($request->getValue('daemonLogID'));
+    if (!$daemon_log) {
+      throw new ConduitException('ERR-INVALID-ID');
+    }
+    $daemon_log->setStatus($request->getValue('status'));
 
     $daemon_log->save();
-
-    return $daemon_log->getID();
   }
 
 }
