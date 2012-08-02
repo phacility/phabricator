@@ -134,6 +134,10 @@ JX.install('DifferentialInlineCommentEditor', {
       var remove_old = (op == 'edit' || op == 'delete');
       if (remove_old) {
         JX.DOM.remove(this.getRow());
+        var other_rows = this.getOtherRows();
+        for(var i = 0; i < other_rows.length; ++i) {
+          JX.DOM.remove(other_rows[i]);
+        }
       }
 
       // Once the user saves something, get rid of the 'undo' option. A
@@ -251,6 +255,7 @@ JX.install('DifferentialInlineCommentEditor', {
   properties : {
     operation : null,
     row : null,
+    otherRows: [],
     table : null,
     onRight : null,
     ID : null,
