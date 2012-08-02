@@ -165,8 +165,21 @@ final class DifferentialCommentMail extends DifferentialMail {
         } else {
           $range = $start;
         }
-        $content = $inline->getContent();
-        $body[] = $this->formatText("{$file}:{$range} {$content}");
+
+        if (!PhabricatorEnv::getEnvConfig(
+              'metamta.differential.unified-comment-context', false)) {
+          $body[] = $this->formatText("{$file}:{$range} {$content}");
+        } else {
+          $body[] = "Comment at: " . $file . ":" . $range;
+
+          $changeset->attachHunks($changeset->loadHunks());
+          $body[] = $changeset->makeContextDiff($inline, 1);
+          $body[] = null;
+
+          $content = $inline->getContent();
+          $body[] = $content;
+          $body[] = null;
+        }
       }
       $body[] = null;
     }
