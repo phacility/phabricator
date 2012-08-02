@@ -57,6 +57,10 @@ abstract class PhabricatorApplication {
     return PhabricatorUser::getDefaultProfileImageURI();
   }
 
+  public function shouldAppearInLaunchView() {
+    return true;
+  }
+
 
 /* -(  URI Routing  )-------------------------------------------------------- */
 
@@ -70,6 +74,14 @@ abstract class PhabricatorApplication {
 
 
   public function getFactObjectsForAnalysis() {
+    return array();
+  }
+
+
+/* -(  Launch Integration  )------------------------------------------------- */
+
+
+  public function loadStatus(PhabricatorUser $user) {
     return array();
   }
 

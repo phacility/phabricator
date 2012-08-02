@@ -1,0 +1,131 @@
+/**
+ * @provides phabricator-application-launch-view-css
+ */
+
+
+/* - Application List ----------------------------------------------------------
+
+  Spacing container for the list of large application buttons.
+
+*/
+
+/* On desktops, put some space around the whole grid. */
+.device-desktop .phabricator-application-list {
+  padding: .5em;
+}
+
+/* On tablets, show two columns in the center. */
+.device-tablet .phabricator-application-list {
+  width: 660px;
+  margin: auto;
+  padding: .5em 0;
+}
+
+
+/* - Application Launch Button -------------------------------------------------
+
+  Spacing container for the list of large application buttons.
+
+*/
+
+a.phabricator-application-launch-container {
+  display: inline-block;
+  width: 210px;
+  min-height: 90px;
+  background-repeat: no-repeat;
+  padding: 5px 15px 5px 80px;
+  background-position: 15px 10px;
+  margin: 3px 6px;
+  overflow: hidden;
+  position: relative;
+
+  text-decoration: none;
+  border: 1px solid #737373;
+  background-color: #f3f3f3;
+
+  border-radius: 4px;
+  box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.10),
+              inset -1px -1px 2px rgba(0, 0, 0, 0.15);
+}
+
+a.phabricator-application-launch-container:hover {
+  text-decoration: none;
+}
+
+/* The hover effect looks awful on phones/tablets when scrolling. */
+.device-desktop a.phabricator-application-launch-container:hover {
+  background-color: #3875d7;
+  border-color: #223366;
+  color: #eeeeee;
+}
+
+.phabricator-application-launch-name,
+.phabricator-application-launch-description,
+.phabricator-application-launch-status {
+  display: block;
+}
+
+.phabricator-application-launch-name {
+  font-weight: bold;
+}
+
+.phabricator-application-launch-description {
+  color: #666666;
+}
+
+.device-desktop a.phabricator-application-launch-container:hover
+  .phabricator-application-launch-description {
+  color: #dddddd;
+}
+
+.phabricator-application-launch-attention {
+  position: absolute;
+  left: 45px;
+  top: 10px;
+  background: red;
+  border-radius: 10px;
+  color: white;
+  font-weight: normal;
+  padding: 2px 6px;
+  border: 1px solid #aa0000;
+  box-shadow: 0px 0px 3px rgba(255, 255, 255, 0.5),
+              inset 0 0 3px #aa0000;
+}
+
+.phabricator-application-status-block {
+  margin-top: 0.5em;
+  padding-top: 0.5em;
+  border-top: 1px solid #dfdfdf;
+  display: block;
+}
+
+.phabricator-application-status {
+  float: left;
+  display: block;
+  position: relative;
+  font-size: 11px;
+  height: 20px;
+  padding-left: 22px;
+  color: #666666;
+
+  background-repeat: no-repeat;
+  background-size: 16px auto;
+  padding-top: 1px;
+}
+
+.device-desktop a.phabricator-application-launch-container:hover
+  .phabricator-application-status {
+    color: #eeeeee;
+}
+
+.phabricator-application-status-type-needs {
+  background-image: url(/rsrc/image/appstatus_needs.png);
+}
+
+.phabricator-application-status-type-empty {
+  background-image: url(/rsrc/image/appstatus_empty.png);
+}
+
+.phabricator-application-status-type-info {
+  background-image: url(/rsrc/image/appstatus_info.png);
+}

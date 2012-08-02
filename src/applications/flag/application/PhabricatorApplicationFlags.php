@@ -16,27 +16,38 @@
  * limitations under the License.
  */
 
-final class PhabricatorApplicationFact extends PhabricatorApplication {
+final class PhabricatorApplicationFlags extends PhabricatorApplication {
 
   public function getShortDescription() {
-    return 'Analyze Data';
+    return 'Reminders';
   }
 
   public function getBaseURI() {
-    return '/fact/';
+    return '/flag/';
   }
 
   public function getIconURI() {
-    return celerity_get_resource_uri('/rsrc/image/app/app_fact.png');
+    return celerity_get_resource_uri('/rsrc/image/app/app_flags.png');
   }
 
-  public function getRoutes() {
-    return array(
-      '/fact/' => array(
-        '' => 'PhabricatorFactHomeController',
-        'chart/' => 'PhabricatorFactChartController',
-      ),
-    );
+  public function loadStatus(PhabricatorUser $user) {
+    $status = array();
+
+    $flags = id(new PhabricatorFlagQuery())
+      ->withOwnerPHIDs(array($user->getPHID()))
+      ->execute();
+
+    $count = count($flags);
+    $type = $count
+      ? PhabricatorApplicationStatusView::TYPE_INFO
+      : PhabricatorApplicationStatusView::TYPE_EMPTY;
+    $status[] = id(new PhabricatorApplicationStatusView())
+      ->setType($type)
+      ->setText(pht('%d Flagged Object(s)', $count))
+      ->setCount($count);
+
+    return $status;
   }
 
 }
+

@@ -7,11 +7,88 @@
  */
 
 celerity_register_resource_map(array(
+  '/rsrc/image/app/app_audit.png' =>
+  array(
+    'hash' => '5f5b4a7c48fe921532bef4c986328bdc',
+    'uri' => '/res/5f5b4a7c/rsrc/image/app/app_audit.png',
+    'disk' => '/rsrc/image/app/app_audit.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/app/app_differential.png' =>
+  array(
+    'hash' => 'b2e42893b64791f8382f7f5a0350b44d',
+    'uri' => '/res/b2e42893/rsrc/image/app/app_differential.png',
+    'disk' => '/rsrc/image/app/app_differential.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/app/app_diffusion.png' =>
+  array(
+    'hash' => 'e9e4b1c380e19a2908730ad397ae5eca',
+    'uri' => '/res/e9e4b1c3/rsrc/image/app/app_diffusion.png',
+    'disk' => '/rsrc/image/app/app_diffusion.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/app/app_fact.png' =>
+  array(
+    'hash' => '8b4da94b07e2aad9f741beca9519df98',
+    'uri' => '/res/8b4da94b/rsrc/image/app/app_fact.png',
+    'disk' => '/rsrc/image/app/app_fact.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/app/app_flags.png' =>
+  array(
+    'hash' => 'e75e1047a6bc2ff428161d2130526367',
+    'uri' => '/res/e75e1047/rsrc/image/app/app_flags.png',
+    'disk' => '/rsrc/image/app/app_flags.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/app/app_maniphest.png' =>
+  array(
+    'hash' => '88b6a06029b1ce38d5e7a70c1d2ebd97',
+    'uri' => '/res/88b6a060/rsrc/image/app/app_maniphest.png',
+    'disk' => '/rsrc/image/app/app_maniphest.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/app/app_phriction.png' =>
+  array(
+    'hash' => '68f2387363a26c15653a39bd847157f3',
+    'uri' => '/res/68f23873/rsrc/image/app/app_phriction.png',
+    'disk' => '/rsrc/image/app/app_phriction.png',
+    'type' => 'png',
+  ),
   '/rsrc/image/apps.png' =>
   array(
     'hash' => 'f7cb4abeb73245fea4098a02fd784653',
     'uri' => '/res/f7cb4abe/rsrc/image/apps.png',
     'disk' => '/rsrc/image/apps.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/appstatus_empty.png' =>
+  array(
+    'hash' => '2f8102e0a0f5a0980d87d4ab4ba8c8fd',
+    'uri' => '/res/2f8102e0/rsrc/image/appstatus_empty.png',
+    'disk' => '/rsrc/image/appstatus_empty.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/appstatus_info.png' =>
+  array(
+    'hash' => '407de6daf2edc4a8b68e2e369f4fc8cb',
+    'uri' => '/res/407de6da/rsrc/image/appstatus_info.png',
+    'disk' => '/rsrc/image/appstatus_info.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/appstatus_needs.png' =>
+  array(
+    'hash' => '2c1e193bc786ca4fca0b851ed9cd3d92',
+    'uri' => '/res/2c1e193b/rsrc/image/appstatus_needs.png',
+    'disk' => '/rsrc/image/appstatus_needs.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/appstatus_okay.png' =>
+  array(
+    'hash' => 'd00e683ee1c61d0ccced1200775cdbb5',
+    'uri' => '/res/d00e683e/rsrc/image/appstatus_okay.png',
+    'disk' => '/rsrc/image/appstatus_okay.png',
     'type' => 'png',
   ),
   '/rsrc/image/avatar.png' =>
@@ -2141,6 +2218,15 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/application/directory/phabricator-app-buttons.css',
+  ),
+  'phabricator-application-launch-view-css' =>
+  array(
+    'uri' => '/res/e157830a/rsrc/css/application/base/phabricator-application-launch-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/base/phabricator-application-launch-view.css',
   ),
   'phabricator-chatlog-css' =>
   array(

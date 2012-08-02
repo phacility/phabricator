@@ -16,27 +16,27 @@
  * limitations under the License.
  */
 
-final class PhabricatorApplicationFact extends PhabricatorApplication {
-
-  public function getShortDescription() {
-    return 'Analyze Data';
-  }
+final class PhabricatorApplicationApplications extends PhabricatorApplication {
 
   public function getBaseURI() {
-    return '/fact/';
+    return '/applications/';
   }
 
-  public function getIconURI() {
-    return celerity_get_resource_uri('/rsrc/image/app/app_fact.png');
+  public function getShortDescription() {
+    return 'Manage Applications';
   }
 
   public function getRoutes() {
     return array(
-      '/fact/' => array(
-        '' => 'PhabricatorFactHomeController',
-        'chart/' => 'PhabricatorFactChartController',
+      '/applications/' => array(
+        '' => 'PhabricatorApplicationsListController'
       ),
     );
   }
 
+  public function shouldAppearInLaunchView() {
+    return false;
+  }
+
 }
+

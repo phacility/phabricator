@@ -16,27 +16,20 @@
  * limitations under the License.
  */
 
-final class PhabricatorApplicationFact extends PhabricatorApplication {
+abstract class PhabricatorApplicationsController extends PhabricatorController {
 
-  public function getShortDescription() {
-    return 'Analyze Data';
+  public function buildStandardPageResponse($view, array $data) {
+
+    $page = $this->buildStandardPageView();
+
+    $page->setApplicationName('Applications');
+    $page->setBaseURI('/applications/');
+    $page->setTitle(idx($data, 'title'));
+    $page->setGlyph("\xE0\xBC\x84");
+    $page->appendChild($view);
+
+    $response = new AphrontWebpageResponse();
+    return $response->setContent($page->render());
+
   }
-
-  public function getBaseURI() {
-    return '/fact/';
-  }
-
-  public function getIconURI() {
-    return celerity_get_resource_uri('/rsrc/image/app/app_fact.png');
-  }
-
-  public function getRoutes() {
-    return array(
-      '/fact/' => array(
-        '' => 'PhabricatorFactHomeController',
-        'chart/' => 'PhabricatorFactChartController',
-      ),
-    );
-  }
-
 }

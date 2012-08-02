@@ -18,18 +18,54 @@
 
 final class PhabricatorApplicationDifferential extends PhabricatorApplication {
 
+  public function getBaseURI() {
+    return '/differential/';
+  }
+
+  public function getShortDescription() {
+    return 'Review Code';
+  }
+
+  public function getIconURI() {
+    return celerity_get_resource_uri('/rsrc/image/app/app_differential.png');
+  }
+
   public function getFactObjectsForAnalysis() {
     return array(
       new DifferentialRevision(),
     );
   }
 
-  public function getBaseURI() {
-    return '/differential/';
-  }
+  public function loadStatus(PhabricatorUser $user) {
+    $revisions = id(new DifferentialRevisionQuery())
+      ->withResponsibleUsers(array($user->getPHID()))
+      ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
+      ->execute();
 
-  public function getShortDescription() {
-    return 'Code Review Application';
+    list($active, $waiting) = DifferentialRevisionQuery::splitResponsible(
+      $revisions,
+      $user->getPHID());
+
+    $status = array();
+
+    $active = count($active);
+    $type = $active
+      ? PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION
+      : PhabricatorApplicationStatusView::TYPE_EMPTY;
+    $status[] = id(new PhabricatorApplicationStatusView())
+      ->setType($type)
+      ->setText(pht('%d Review(s) Need Attention', $active))
+      ->setCount($active);
+
+    $waiting = count($waiting);
+    $type = $waiting
+      ? PhabricatorApplicationStatusView::TYPE_INFO
+      : PhabricatorApplicationStatusView::TYPE_EMPTY;
+    $status[] = id(new PhabricatorApplicationStatusView())
+      ->setType($type)
+      ->setText(pht('%d Review(s) Waiting on Others', $waiting));
+
+    return $status;
   }
 
 }

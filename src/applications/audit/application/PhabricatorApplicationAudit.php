@@ -16,63 +16,55 @@
  * limitations under the License.
  */
 
-final class PhabricatorApplicationManiphest extends PhabricatorApplication {
+final class PhabricatorApplicationAudit extends PhabricatorApplication {
 
   public function getShortDescription() {
-    return 'Tasks and Bugs';
+    return 'Audit Code';
   }
 
   public function getBaseURI() {
-    return '/maniphest/';
+    return '/audit/';
   }
 
-  public function isEnabled() {
-    return PhabricatorEnv::getEnvConfig('maniphest.enabled');
-  }
 
   public function getIconURI() {
-    return celerity_get_resource_uri('/rsrc/image/app/app_maniphest.png');
-  }
-
-  public function getFactObjectsForAnalysis() {
-    return array(
-      new ManiphestTask(),
-    );
+    return celerity_get_resource_uri('/rsrc/image/app/app_audit.png');
   }
 
   public function loadStatus(PhabricatorUser $user) {
     $status = array();
 
-    $query = id(new ManiphestTaskQuery())
-      ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
-      ->withPriority(ManiphestTaskPriority::PRIORITY_UNBREAK_NOW)
-      ->setLimit(1)
-      ->setCalculateRows(true);
-    $query->execute();
+    $phids = PhabricatorAuditCommentEditor::loadAuditPHIDsForUser($user);
 
-    $count = $query->getRowCount();
-    $type = $count
-      ? PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION
-      : PhabricatorApplicationStatusView::TYPE_EMPTY;
-    $status[] = id(new PhabricatorApplicationStatusView())
-      ->setType($type)
-      ->setText(pht('%d Unbreak Now Task(s)!', $count))
-      ->setCount($count);
+    $audits = id(new PhabricatorAuditQuery())
+      ->withAuditorPHIDs($phids)
+      ->withStatus(PhabricatorAuditQuery::STATUS_OPEN)
+      ->withAwaitingUser($user)
+      ->execute();
 
-    $query = id(new ManiphestTaskQuery())
-      ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
-      ->withOwners(array($user->getPHID()))
-      ->setLimit(1)
-      ->setCalculateRows(true);
-    $query->execute();
-
-    $count = $query->getRowCount();
+    $count = count($audits);
     $type = $count
       ? PhabricatorApplicationStatusView::TYPE_INFO
       : PhabricatorApplicationStatusView::TYPE_EMPTY;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
-      ->setText(pht('%d Assigned Task(s)', $count));
+      ->setText(pht('%d Commit(s) Awaiting Audit', $count))
+      ->setCount($count);
+
+
+    $commits = id(new PhabricatorAuditCommitQuery())
+      ->withAuthorPHIDs($phids)
+      ->withStatus(PhabricatorAuditQuery::STATUS_OPEN)
+      ->execute();
+
+    $count = count($commits);
+    $type = $count
+      ? PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION
+      : PhabricatorApplicationStatusView::TYPE_EMPTY;
+    $status[] = id(new PhabricatorApplicationStatusView())
+      ->setType($type)
+      ->setText(pht('%d Problem Commit(s)', $count))
+      ->setCount($count);
 
     return $status;
   }
