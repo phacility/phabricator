@@ -437,6 +437,7 @@ final class ManiphestTaskListController extends ManiphestController {
     $order_map = array(
       'priority'  => ManiphestTaskQuery::ORDER_PRIORITY,
       'created'   => ManiphestTaskQuery::ORDER_CREATED,
+      'title'     => ManiphestTaskQuery::ORDER_TITLE,
     );
     $query->setOrderBy(
       idx(
@@ -796,6 +797,7 @@ final class ManiphestTaskListController extends ManiphestController {
       'p' => 'priority',
       'u' => 'updated',
       'c' => 'created',
+      't' => 'title',
     );
   }
 
@@ -822,6 +824,7 @@ final class ManiphestTaskListController extends ManiphestController {
       'p' => 'Priority',
       'u' => 'Updated',
       'c' => 'Created',
+      't' => 'Title',
     );
   }
 
