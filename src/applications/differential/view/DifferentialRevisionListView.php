@@ -68,6 +68,7 @@ final class DifferentialRevisionListView extends AphrontView {
     }
 
     $flags = id(new PhabricatorFlagQuery())
+      ->withOwnerPHIDs(array($user->getPHID()))
       ->withObjectPHIDs(mpull($this->revisions, 'getPHID'))
       ->execute();
     $flagged = mpull($flags, null, 'getObjectPHID');
