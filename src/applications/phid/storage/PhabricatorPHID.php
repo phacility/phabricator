@@ -56,7 +56,7 @@ final class PhabricatorPHID {
               $repository->getID(),
               $match[2]);
           } catch (AphrontQueryCountException $ex) {
-            // Ambiguous, no jump.
+            // Ambiguous; return nothing.
           }
         }
       }
