@@ -362,6 +362,10 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
             'href' => $file_uri,
           ),
           phutil_escape_html($paste->getFilePHID())),
+
+        phabricator_datetime(
+          $paste->getDateCreated(),
+          $this->getRequest()->getUser()),
       );
     }
 
@@ -374,6 +378,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
         'Language',
         'Title',
         'File',
+        'Created',
       ));
 
     $table->setColumnClasses(
@@ -383,6 +388,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
         null,
         'wide pri',
         null,
+        'right',
       ));
 
     $panel = new AphrontPanelView();
