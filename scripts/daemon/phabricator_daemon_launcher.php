@@ -225,7 +225,7 @@ function will_launch($control, $with_logs = true) {
   echo "Staging launch...\n";
   $control->pingConduit();
   if ($with_logs) {
-    $log_dir = $control->getControlDirectory('log').'/daemons.log';
+    $log_dir = $control->getLogDirectory().'/daemons.log';
     echo "NOTE: Logs will appear in '{$log_dir}'.\n\n";
   }
 }

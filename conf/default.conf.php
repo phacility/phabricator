@@ -1095,7 +1095,10 @@ return array(
 
   // Directory that phd (the Phabricator daemon control script) should use to
   // track running daemons.
-  'phd.pid-directory' => '/var/tmp/phd',
+  'phd.pid-directory' => '/var/tmp/phd/pid',
+
+  // Directory that the Phabricator daemons should use to store the log file
+  'phd.log-directory' => '/var/tmp/phd/log',
 
   // Number of "TaskMaster" daemons that "phd start" should start. You can
   // raise this if you have a task backlog, or explicitly launch more with
