@@ -778,7 +778,7 @@ celerity_register_resource_map(array(
   ),
   'diffusion-source-css' =>
   array(
-    'uri' => '/res/501fcd3a/rsrc/css/application/diffusion/diffusion-source.css',
+    'uri' => '/res/0ffedfa2/rsrc/css/application/diffusion/diffusion-source.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1251,6 +1251,19 @@ celerity_register_resource_map(array(
       3 => 'javelin-dom',
     ),
     'disk' => '/rsrc/js/application/diffusion/behavior-jump-to.js',
+  ),
+  'javelin-behavior-diffusion-line-linker' =>
+  array(
+    'uri' => '/res/d3cf5499/rsrc/js/application/diffusion/behavior-line-linker.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+      2 => 'javelin-dom',
+      3 => 'javelin-uri',
+    ),
+    'disk' => '/rsrc/js/application/diffusion/behavior-line-linker.js',
   ),
   'javelin-behavior-diffusion-pull-lastmodified' =>
   array(

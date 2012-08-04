@@ -244,10 +244,11 @@ final class DiffusionBrowseFileController extends DiffusionController {
             ));
         }
 
-        $corpus_table = phutil_render_tag(
+        $corpus_table = javelin_render_tag(
           'table',
           array(
             'class' => "diffusion-source remarkup-code PhabricatorMonospaced",
+            'sigil' => 'diffusion-source',
           ),
           implode("\n", $rows));
         $corpus = phutil_render_tag(
@@ -592,13 +593,16 @@ final class DiffusionBrowseFileController extends DiffusionController {
         ),
         phutil_escape_html($line['line']));
 
-      $blame[] = phutil_render_tag(
+      $blame[] = javelin_render_tag(
         'th',
         array(
           'class' => 'diffusion-line-link',
+          'sigil' => 'diffusion-line-link',
           'style' => isset($color) ? 'background: '.$color : null,
         ),
         $line_link);
+
+      Javelin::initBehavior('diffusion-line-linker');
 
       $blame = implode('', $blame);
 
@@ -624,7 +628,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
       $rows[] = phutil_render_tag(
         'tr',
         array(
-          'style' => ($line['highlighted'] ? 'background: #ffff00;' : null),
+          'class' => ($line['highlighted'] ? 'highlighted' : null),
         ),
         $blame.
         $line_text);
