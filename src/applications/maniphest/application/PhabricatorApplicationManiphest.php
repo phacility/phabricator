@@ -40,6 +40,37 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
     );
   }
 
+  public function getRoutes() {
+    return array(
+      '/T(?P<id>\d+)' => 'ManiphestTaskDetailController',
+      '/maniphest/' => array(
+        '' => 'ManiphestTaskListController',
+        'view/(?P<view>\w+)/' => 'ManiphestTaskListController',
+        'report/(?:(?P<view>\w+)/)?' => 'ManiphestReportController',
+        'batch/' => 'ManiphestBatchEditController',
+        'task/' => array(
+          'create/' => 'ManiphestTaskEditController',
+          'edit/(?P<id>\d+)/' => 'ManiphestTaskEditController',
+          'descriptionchange/(?:(?P<id>\d+)/)?' =>
+            'ManiphestTaskDescriptionChangeController',
+          'descriptionpreview/' =>
+            'ManiphestTaskDescriptionPreviewController',
+        ),
+        'transaction/' => array(
+          'save/' => 'ManiphestTransactionSaveController',
+          'preview/(?P<id>\d+)/' => 'ManiphestTransactionPreviewController',
+        ),
+        'export/(?P<key>[^/]+)/' => 'ManiphestExportController',
+        'subpriority/' => 'ManiphestSubpriorityController',
+        'custom/' => array(
+          '' => 'ManiphestSavedQueryListController',
+          'edit/(?:(?P<id>\d+)/)?' => 'ManiphestSavedQueryEditController',
+          'delete/(?P<id>\d+)/'   => 'ManiphestSavedQueryDeleteController',
+        ),
+      ),
+    );
+  }
+
   public function loadStatus(PhabricatorUser $user) {
     $status = array();
 

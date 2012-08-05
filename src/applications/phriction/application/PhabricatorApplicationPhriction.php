@@ -30,6 +30,28 @@ final class PhabricatorApplicationPhriction extends PhabricatorApplication {
     return celerity_get_resource_uri('/rsrc/image/app/app_phriction.png');
   }
 
+  public function getRoutes() {
+    return array(
+      // Match "/w/" with slug "/".
+      '/w(?P<slug>/)'    => 'PhrictionDocumentController',
+      // Match "/w/x/y/z/" with slug "x/y/z/".
+      '/w/(?P<slug>.+/)' => 'PhrictionDocumentController',
+
+      '/phriction/' => array(
+        ''                       => 'PhrictionListController',
+        'list/(?P<view>[^/]+)/'  => 'PhrictionListController',
+
+        'history(?P<slug>/)'     => 'PhrictionHistoryController',
+        'history/(?P<slug>.+/)'  => 'PhrictionHistoryController',
+
+        'edit/(?:(?P<id>\d+)/)?' => 'PhrictionEditController',
+        'delete/(?P<id>\d+)/'    => 'PhrictionDeleteController',
+
+        'preview/' => 'PhrictionDocumentPreviewController',
+        'diff/(?P<id>\d+)/' => 'PhrictionDiffController',
+      ),
+    );
+  }
 
 }
 

@@ -26,9 +26,20 @@ final class PhabricatorApplicationAudit extends PhabricatorApplication {
     return '/audit/';
   }
 
-
   public function getIconURI() {
     return celerity_get_resource_uri('/rsrc/image/app/app_audit.png');
+  }
+
+  public function getRoutes() {
+    return array(
+      '/audit/' => array(
+        '' => 'PhabricatorAuditListController',
+        'view/(?P<filter>[^/]+)/(?:(?P<name>[^/]+)/)?'
+          => 'PhabricatorAuditListController',
+        'addcomment/' => 'PhabricatorAuditAddCommentController',
+        'preview/(?P<id>\d+)/' => 'PhabricatorAuditPreviewController',
+      ),
+    );
   }
 
   public function loadStatus(PhabricatorUser $user) {

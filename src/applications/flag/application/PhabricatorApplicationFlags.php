@@ -49,5 +49,16 @@ final class PhabricatorApplicationFlags extends PhabricatorApplication {
     return $status;
   }
 
+  public function getRoutes() {
+    return array(
+      '/flag/' => array(
+        '' => 'PhabricatorFlagListController',
+        'view/(?P<view>[^/]+)/' => 'PhabricatorFlagListController',
+        'edit/(?P<phid>[^/]+)/' => 'PhabricatorFlagEditController',
+        'delete/(?P<id>\d+)/' => 'PhabricatorFlagDeleteController',
+      ),
+    );
+  }
+
 }
 

@@ -30,5 +30,45 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
     return celerity_get_resource_uri('/rsrc/image/app/app_diffusion.png');
   }
 
+  public function getRoutes() {
+    return array(
+      '/r(?P<callsign>[A-Z]+)(?P<commit>[a-z0-9]+)'
+        => 'DiffusionCommitController',
+      '/diffusion/' => array(
+        '' => 'DiffusionHomeController',
+        '(?P<callsign>[A-Z]+)/' => array(
+          '' => 'DiffusionRepositoryController',
+
+          'repository/(?P<dblob>.*)'    => 'DiffusionRepositoryController',
+          'change/(?P<dblob>.*)'        => 'DiffusionChangeController',
+          'history/(?P<dblob>.*)'       => 'DiffusionHistoryController',
+          'browse/(?P<dblob>.*)'        => 'DiffusionBrowseController',
+          'lastmodified/(?P<dblob>.*)'  => 'DiffusionLastModifiedController',
+          'diff/'                       => 'DiffusionDiffController',
+          'tags/(?P<dblob>.*)'          => 'DiffusionTagListController',
+          'branches/(?P<dblob>.*)'      => 'DiffusionBranchTableController',
+
+          'commit/(?P<commit>[a-z0-9]+)/branches/'
+            => 'DiffusionCommitBranchesController',
+          'commit/(?P<commit>[a-z0-9]+)/tags/'
+            => 'DiffusionCommitTagsController',
+        ),
+        'inline/' => array(
+          'edit/(?P<phid>[^/]+)/'    => 'DiffusionInlineCommentController',
+          'preview/(?P<phid>[^/]+)/' =>
+            'DiffusionInlineCommentPreviewController',
+        ),
+        'services/' => array(
+          'path/' => array(
+            'complete/' => 'DiffusionPathCompleteController',
+            'validate/' => 'DiffusionPathValidateController',
+          ),
+        ),
+        'symbol/(?P<name>[^/]+)/' => 'DiffusionSymbolController',
+        'external/' => 'DiffusionExternalController',
+      ),
+    );
+  }
+
 }
 

@@ -85,32 +85,6 @@ class AphrontDefaultApplicationConfiguration
       ),
       '/api/(?P<method>[^/]+)' => 'PhabricatorConduitAPIController',
 
-      '/D(?P<id>\d+)' => 'DifferentialRevisionViewController',
-      '/differential/' => array(
-        '' => 'DifferentialRevisionListController',
-        'filter/(?P<filter>\w+)/(?:(?P<username>\w+)/)?' =>
-          'DifferentialRevisionListController',
-        'stats/(?P<filter>\w+)/' => 'DifferentialRevisionStatsController',
-        'diff/' => array(
-          '(?P<id>\d+)/' => 'DifferentialDiffViewController',
-          'create/' => 'DifferentialDiffCreateController',
-        ),
-        'changeset/' => 'DifferentialChangesetViewController',
-        'revision/edit/(?:(?P<id>\d+)/)?'
-          => 'DifferentialRevisionEditController',
-        'comment/' => array(
-          'preview/(?P<id>\d+)/' => 'DifferentialCommentPreviewController',
-          'save/' => 'DifferentialCommentSaveController',
-          'inline/' => array(
-            'preview/(?P<id>\d+)/' =>
-              'DifferentialInlineCommentPreviewController',
-            'edit/(?P<id>\d+)/' => 'DifferentialInlineCommentEditController',
-          ),
-        ),
-        'subscribe/(?P<action>add|rem)/(?P<id>\d+)/'
-          => 'DifferentialSubscribeController',
-      ),
-
       '/typeahead/' => array(
         'common/(?P<type>\w+)/'
           => 'PhabricatorTypeaheadCommonDatasourceController',
@@ -182,34 +156,6 @@ class AphrontDefaultApplicationConfiguration
         '(?:page/(?P<page>[^/]+)/)?' => 'PhabricatorUserSettingsController',
       ),
 
-      '/maniphest/' => array(
-        '' => 'ManiphestTaskListController',
-        'view/(?P<view>\w+)/' => 'ManiphestTaskListController',
-        'report/(?:(?P<view>\w+)/)?' => 'ManiphestReportController',
-        'batch/' => 'ManiphestBatchEditController',
-        'task/' => array(
-          'create/' => 'ManiphestTaskEditController',
-          'edit/(?P<id>\d+)/' => 'ManiphestTaskEditController',
-          'descriptionchange/(?:(?P<id>\d+)/)?' =>
-            'ManiphestTaskDescriptionChangeController',
-          'descriptionpreview/' =>
-            'ManiphestTaskDescriptionPreviewController',
-        ),
-        'transaction/' => array(
-          'save/' => 'ManiphestTransactionSaveController',
-          'preview/(?P<id>\d+)/' => 'ManiphestTransactionPreviewController',
-        ),
-        'export/(?P<key>[^/]+)/' => 'ManiphestExportController',
-        'subpriority/' => 'ManiphestSubpriorityController',
-        'custom/' => array(
-          '' => 'ManiphestSavedQueryListController',
-          'edit/(?:(?P<id>\d+)/)?' => 'ManiphestSavedQueryEditController',
-          'delete/(?P<id>\d+)/'   => 'ManiphestSavedQueryDeleteController',
-        ),
-      ),
-
-      '/T(?P<id>\d+)' => 'ManiphestTaskDetailController',
-
       '/repository/' => array(
         ''                     => 'PhabricatorRepositoryListController',
         'create/'              => 'PhabricatorRepositoryCreateController',
@@ -241,41 +187,6 @@ class AphrontDefaultApplicationConfiguration
           => 'PhabricatorProjectUpdateController',
       ),
 
-      '/r(?P<callsign>[A-Z]+)(?P<commit>[a-z0-9]+)'
-        => 'DiffusionCommitController',
-      '/diffusion/' => array(
-        '' => 'DiffusionHomeController',
-        '(?P<callsign>[A-Z]+)/' => array(
-          '' => 'DiffusionRepositoryController',
-
-          'repository/(?P<dblob>.*)'    => 'DiffusionRepositoryController',
-          'change/(?P<dblob>.*)'        => 'DiffusionChangeController',
-          'history/(?P<dblob>.*)'       => 'DiffusionHistoryController',
-          'browse/(?P<dblob>.*)'        => 'DiffusionBrowseController',
-          'lastmodified/(?P<dblob>.*)'  => 'DiffusionLastModifiedController',
-          'diff/'                       => 'DiffusionDiffController',
-          'tags/(?P<dblob>.*)'          => 'DiffusionTagListController',
-          'branches/(?P<dblob>.*)'      => 'DiffusionBranchTableController',
-
-          'commit/(?P<commit>[a-z0-9]+)/branches/'
-            => 'DiffusionCommitBranchesController',
-          'commit/(?P<commit>[a-z0-9]+)/tags/'
-            => 'DiffusionCommitTagsController',
-        ),
-        'inline/' => array(
-          'edit/(?P<phid>[^/]+)/'    => 'DiffusionInlineCommentController',
-          'preview/(?P<phid>[^/]+)/' =>
-            'DiffusionInlineCommentPreviewController',
-        ),
-        'services/' => array(
-          'path/' => array(
-            'complete/' => 'DiffusionPathCompleteController',
-            'validate/' => 'DiffusionPathValidateController',
-          ),
-        ),
-        'symbol/(?P<name>[^/]+)/' => 'DiffusionSymbolController',
-        'external/' => 'DiffusionExternalController',
-      ),
 
       '/daemon/' => array(
         'task/(?P<id>\d+)/' => 'PhabricatorWorkerTaskDetailController',
@@ -320,14 +231,6 @@ class AphrontDefaultApplicationConfiguration
         'delete/(?P<id>\d+)/' => 'PhabricatorOwnersDeleteController',
       ),
 
-      '/audit/' => array(
-        '' => 'PhabricatorAuditListController',
-        'view/(?P<filter>[^/]+)/(?:(?P<name>[^/]+)/)?'
-          => 'PhabricatorAuditListController',
-        'addcomment/' => 'PhabricatorAuditAddCommentController',
-        'preview/(?P<id>\d+)/' => 'PhabricatorAuditPreviewController',
-      ),
-
       '/xhpast/' => array(
         '' => 'PhabricatorXHPASTViewRunController',
         'view/(?P<id>\d+)/'
@@ -369,25 +272,6 @@ class AphrontDefaultApplicationConfiguration
       '/vote/' => array(
         '(?:view/(?P<view>\w+)/)?' => 'PhabricatorSlowvoteListController',
         'create/' => 'PhabricatorSlowvoteCreateController',
-      ),
-
-      // Match "/w/" with slug "/".
-      '/w(?P<slug>/)'    => 'PhrictionDocumentController',
-      // Match "/w/x/y/z/" with slug "x/y/z/".
-      '/w/(?P<slug>.+/)' => 'PhrictionDocumentController',
-
-      '/phriction/' => array(
-        ''                       => 'PhrictionListController',
-        'list/(?P<view>[^/]+)/'  => 'PhrictionListController',
-
-        'history(?P<slug>/)'     => 'PhrictionHistoryController',
-        'history/(?P<slug>.+/)'  => 'PhrictionHistoryController',
-
-        'edit/(?:(?P<id>\d+)/)?' => 'PhrictionEditController',
-        'delete/(?P<id>\d+)/'    => 'PhrictionDeleteController',
-
-        'preview/' => 'PhrictionDocumentPreviewController',
-        'diff/(?P<id>\d+)/' => 'PhrictionDiffController',
       ),
 
       '/phame/' => array(
@@ -453,13 +337,6 @@ class AphrontDefaultApplicationConfiguration
         'clear/' => 'PhabricatorNotificationClearController',
       ),
 
-      '/flag/' => array(
-        '' => 'PhabricatorFlagListController',
-        'view/(?P<view>[^/]+)/' => 'PhabricatorFlagListController',
-        'edit/(?P<phid>[^/]+)/' => 'PhabricatorFlagEditController',
-        'delete/(?P<id>\d+)/' => 'PhabricatorFlagDeleteController',
-      ),
-
       '/phortune/' => array(
         'stripe/' => array(
           'testpaymentform/' => 'PhortuneStripeTestPaymentFormController',
@@ -469,7 +346,7 @@ class AphrontDefaultApplicationConfiguration
       '/emailverify/(?P<code>[^/]+)/' =>
         'PhabricatorEmailVerificationController',
 
-    ) + $this->getApplicationRoutes();
+    );
   }
 
   protected function getResourceURIMapRules() {
@@ -481,15 +358,6 @@ class AphrontDefaultApplicationConfiguration
           => 'CelerityResourceController',
       ),
     );
-  }
-
-  private function getApplicationRoutes() {
-    $applications = PhabricatorApplication::getAllInstalledApplications();
-    $routes = array();
-    foreach ($applications as $application) {
-      $routes += $application->getRoutes();
-    }
-    return $routes;
   }
 
   public function buildRequest() {

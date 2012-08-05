@@ -51,11 +51,31 @@ abstract class AphrontApplicationConfiguration {
   }
 
   final public function buildController() {
-    $map = $this->getURIMap();
-    $mapper = new AphrontURIMapper($map);
     $request = $this->getRequest();
     $path = $request->getPath();
-    list($controller_class, $uri_data) = $mapper->mapPath($path);
+
+    $maps = array();
+    $maps[] = array(null, $this->getURIMap());
+
+    $applications = PhabricatorApplication::getAllInstalledApplications();
+    foreach ($applications as $application) {
+      $maps[] = array($application, $application->getRoutes());
+    }
+
+    $current_application = null;
+    foreach ($maps as $map_info) {
+      list($application, $map) = $map_info;
+
+      $mapper = new AphrontURIMapper($map);
+      list($controller_class, $uri_data) = $mapper->mapPath($path);
+
+      if ($controller_class) {
+        if ($application) {
+          $current_application = $application;
+        }
+        break;
+      }
+    }
 
     if (!$controller_class) {
       if (!preg_match('@/$@', $path)) {
@@ -75,6 +95,9 @@ abstract class AphrontApplicationConfiguration {
     }
 
     $controller = newv($controller_class, array($request));
+    if ($current_application) {
+      $controller->setCurrentApplication($current_application);
+    }
 
     return array($controller, $uri_data);
   }

@@ -36,6 +36,36 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
     );
   }
 
+  public function getRoutes() {
+    return array(
+      '/D(?P<id>\d+)' => 'DifferentialRevisionViewController',
+      '/differential/' => array(
+        '' => 'DifferentialRevisionListController',
+        'filter/(?P<filter>\w+)/(?:(?P<username>\w+)/)?' =>
+          'DifferentialRevisionListController',
+        'stats/(?P<filter>\w+)/' => 'DifferentialRevisionStatsController',
+        'diff/' => array(
+          '(?P<id>\d+)/' => 'DifferentialDiffViewController',
+          'create/' => 'DifferentialDiffCreateController',
+        ),
+        'changeset/' => 'DifferentialChangesetViewController',
+        'revision/edit/(?:(?P<id>\d+)/)?'
+          => 'DifferentialRevisionEditController',
+        'comment/' => array(
+          'preview/(?P<id>\d+)/' => 'DifferentialCommentPreviewController',
+          'save/' => 'DifferentialCommentSaveController',
+          'inline/' => array(
+            'preview/(?P<id>\d+)/' =>
+              'DifferentialInlineCommentPreviewController',
+            'edit/(?P<id>\d+)/' => 'DifferentialInlineCommentEditController',
+          ),
+        ),
+        'subscribe/(?P<action>add|rem)/(?P<id>\d+)/'
+          => 'DifferentialSubscribeController',
+      ),
+    );
+  }
+
   public function loadStatus(PhabricatorUser $user) {
     $revisions = id(new DifferentialRevisionQuery())
       ->withResponsibleUsers(array($user->getPHID()))
