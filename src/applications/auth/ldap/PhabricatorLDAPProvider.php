@@ -42,6 +42,10 @@ final class PhabricatorLDAPProvider {
     return PhabricatorEnv::getEnvConfig('ldap.hostname');
   }
 
+  public function getPort() {
+    return PhabricatorEnv::getEnvConfig('ldap.port');
+  }
+
   public function getBaseDN() {
     return PhabricatorEnv::getEnvConfig('ldap.base_dn');
   }
@@ -57,7 +61,7 @@ final class PhabricatorLDAPProvider {
   public function getLDAPVersion() {
     return PhabricatorEnv::getEnvConfig('ldap.version');
   }
-  
+
   public function getLDAPReferrals() {
     return PhabricatorEnv::getEnvConfig('ldap.referrals');
   }
@@ -78,7 +82,7 @@ final class PhabricatorLDAPProvider {
     if (is_array($name_attributes)) {
       foreach ($name_attributes AS $attribute) {
         if (isset($data[$attribute][0])) {
-          $real_name .= $data[$attribute][0] . ' ';
+          $real_name .= $data[$attribute][0].' ';
         }
       }
 
@@ -100,16 +104,16 @@ final class PhabricatorLDAPProvider {
 
   public function getConnection() {
     if (!isset($this->connection)) {
-      $this->connection = ldap_connect($this->getHostname());
+      $this->connection = ldap_connect($this->getHostname(), $this->getPort());
 
       if (!$this->connection) {
-        throw new Exception('Could not connect to LDAP host at ' .
-          $this->getHostname());
+        throw new Exception('Could not connect to LDAP host at '.
+          $this->getHostname().':'.$this->getPort());
       }
 
       ldap_set_option($this->connection, LDAP_OPT_PROTOCOL_VERSION,
         $this->getLDAPVersion());
-      ldap_set_option($this->connection, LDAP_OPT_REFERRALS, 
+      ldap_set_option($this->connection, LDAP_OPT_REFERRALS,
        $this->getLDAPReferrals());
     }
 
@@ -150,7 +154,7 @@ final class PhabricatorLDAPProvider {
       PhabricatorEnv::getEnvConfig('ldap.activedirectory_domain');
 
     if ($activeDirectoryDomain) {
-      $dn = $username . '@' . $activeDirectoryDomain;
+      $dn = $username.'@'.$activeDirectoryDomain;
     } else {
       $dn = ldap_sprintf(
         '%Q=%s,%Q',
@@ -198,7 +202,7 @@ final class PhabricatorLDAPProvider {
     }
 
     if ($entries['count'] > 1) {
-      throw new Exception('Found more then one user with this ' .
+      throw new Exception('Found more then one user with this '.
         $attribute);
     }
 

@@ -627,6 +627,9 @@ return array(
   // The LDAP server hostname
   'ldap.hostname' => '',
 
+  // The LDAP server port
+  'ldap.port' => 389,
+
   // The LDAP base domain name
   'ldap.base_dn' => '',
 
