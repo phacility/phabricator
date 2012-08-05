@@ -42,6 +42,10 @@ final class PhabricatorLDAPProvider {
     return PhabricatorEnv::getEnvConfig('ldap.hostname');
   }
 
+  public function getPort() {
+    return PhabricatorEnv::getEnvConfig('ldap.port');
+  }
+
   public function getBaseDN() {
     return PhabricatorEnv::getEnvConfig('ldap.base_dn');
   }
@@ -100,11 +104,11 @@ final class PhabricatorLDAPProvider {
 
   public function getConnection() {
     if (!isset($this->connection)) {
-      $this->connection = ldap_connect($this->getHostname());
+      $this->connection = ldap_connect($this->getHostname(), $this->getPort());
 
       if (!$this->connection) {
         throw new Exception('Could not connect to LDAP host at ' .
-          $this->getHostname());
+          $this->getHostname() . ':' . $this->getPort());
       }
 
       ldap_set_option($this->connection, LDAP_OPT_PROTOCOL_VERSION,
