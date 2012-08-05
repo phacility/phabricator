@@ -3,71 +3,48 @@
  */
 
 .glyph {
-  background-size: 260px auto;
+  background-size: 26px auto;
   background-image: url(/rsrc/image/glyph_sprite.png);
 }
 
+@media only screen and (min-device-pixel-ratio: 2.0) {
+  .glyph {
+    background-image: url(/rsrc/image/glyph_sprite2x.png);
+  }
+}
 
 .glyph-profile {
   background-position: 0 0;
 }
 
 .glyph-profile-active {
-  background-position: 0 -28px;
+  background-position: 0 -26px;
 }
 
 .glyph-profile:hover {
-  background-position: 0 -56px;
+  background-position: 0 -130px;
 }
 
-
 .glyph-settings {
-  background-position: -28px 0;
+  background-position: 0px -26px;
 }
 
 .glyph-settings-active {
-  background-position: -28px -28px;
+  background-position: 0 0;
 }
 
 .glyph-settings:hover {
-  background-position: -28px -56px;
+  background-position: 0 -156px;
 }
 
-
 .glyph-logout {
-  background-position: -56px 0;
+  background-position: 0 -52px;
 }
 
 .glyph-logout-active {
-  background-position: -56px -28px;
+  background-position: 0 -52px;
 }
 
 .glyph-logout:hover {
-  background-position: -56px -56px;
-}
-
-
-.glyph-notification {
-  background-position: -84px 0;
-}
-
-.glyph-notification-active {
-  background-position: -84px -28px;
-}
-
-.glyph-notification:hover {
-  background-position: -84px -56px;
-}
-
-
-.glyph-menu {
-  background-position: -112px 0;
-}
-
-.glyph-menu-active {
-  background-position: -112px -28px;
-}
-
-.glyph-menu:hover {
-  background-position: -112px -56px;
+  background-position: 0 -182px;
 }
