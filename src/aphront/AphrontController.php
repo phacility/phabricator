@@ -32,6 +32,10 @@ abstract class AphrontController {
     return;
   }
 
+  public function didProcessRequest($response) {
+    return $response;
+  }
+
   abstract public function processRequest();
 
   final public function __construct(AphrontRequest $request) {

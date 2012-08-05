@@ -67,15 +67,6 @@ class AphrontDefaultApplicationConfiguration
       '/phid/' => array(
         '' => 'PhabricatorPHIDLookupController',
       ),
-      '/people/' => array(
-        '' => 'PhabricatorPeopleListController',
-        'logs/' => 'PhabricatorPeopleLogsController',
-        'edit/(?:(?P<id>\d+)/(?:(?P<view>\w+)/)?)?'
-          => 'PhabricatorPeopleEditController',
-        'ldap/' => 'PhabricatorPeopleLdapController',
-      ),
-      '/p/(?P<username>[\w._-]+)/(?:(?P<page>\w+)/)?'
-        => 'PhabricatorPeopleProfileController',
       '/conduit/' => array(
         '' => 'PhabricatorConduitListController',
         'method/(?P<method>[^/]+)/' => 'PhabricatorConduitConsoleController',
@@ -151,10 +142,6 @@ class AphrontDefaultApplicationConfiguration
       ),
 
       '/~/' => 'DarkConsoleController',
-
-      '/settings/' => array(
-        '(?:page/(?P<page>[^/]+)/)?' => 'PhabricatorUserSettingsController',
-      ),
 
       '/repository/' => array(
         ''                     => 'PhabricatorRepositoryListController',
@@ -486,35 +473,6 @@ class AphrontDefaultApplicationConfiguration
   }
 
   public function willSendResponse(AphrontResponse $response) {
-    $request = $this->getRequest();
-    $response->setRequest($request);
-    if ($response instanceof AphrontDialogResponse) {
-      if (!$request->isAjax()) {
-        $view = new PhabricatorStandardPageView();
-        $view->setRequest($request);
-        $view->appendChild(
-          '<div style="padding: 2em 0;">'.
-            $response->buildResponseString().
-          '</div>');
-        $response = new AphrontWebpageResponse();
-        $response->setContent($view->render());
-        return $response;
-      } else {
-        return id(new AphrontAjaxResponse())
-          ->setContent(array(
-            'dialog' => $response->buildResponseString(),
-          ));
-      }
-    } else if ($response instanceof AphrontRedirectResponse) {
-      if ($request->isAjax()) {
-        return id(new AphrontAjaxResponse())
-          ->setContent(
-            array(
-              'redirect' => $response->getURI(),
-            ));
-      }
-    }
-
     return $response;
   }
 

@@ -85,6 +85,12 @@ abstract class PhabricatorApplication {
     return array();
   }
 
+  public function buildMainMenuItems(
+    PhabricatorUser $user,
+    PhabricatorController $controller) {
+    return array();
+  }
+
 
 /* -(  Application Management  )--------------------------------------------- */
 

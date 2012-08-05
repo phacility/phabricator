@@ -21,6 +21,7 @@ final class PhabricatorMainMenuIconView extends AphrontView {
   private $classes = array();
   private $href;
   private $name;
+  private $sortOrder = 0.5;
 
   public function setName($name) {
     $this->name = $name;
@@ -45,6 +46,21 @@ final class PhabricatorMainMenuIconView extends AphrontView {
     return $this;
   }
 
+  /**
+   * Provide a float, where 0.0 is the profile item and 1.0 is the logout
+   * item. Normally you should pick something between the two.
+   *
+   * @param float Sort order.
+   * @return this
+   */
+  public function setSortOrder($sort_order) {
+    $this->sortOrder = $sort_order;
+    return $this;
+  }
+
+  public function getSortOrder() {
+    return $this->sortOrder;
+  }
 
   public function render() {
     $name = $this->getName();

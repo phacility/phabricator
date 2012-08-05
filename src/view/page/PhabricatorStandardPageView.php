@@ -32,6 +32,16 @@ final class PhabricatorStandardPageView extends AphrontPageView {
   private $disableConsole;
   private $searchDefaultScope;
   private $pageObjects = array();
+  private $controller;
+
+  public function setController(AphrontController $controller) {
+    $this->controller = $controller;
+    return $this;
+  }
+
+  public function getController() {
+    return $this->controller;
+  }
 
   public function setIsAdminInterface($is_admin_interface) {
     $this->isAdminInterface = $is_admin_interface;
@@ -505,27 +515,17 @@ final class PhabricatorStandardPageView extends AphrontPageView {
 
     Javelin::initBehavior('phabricator-keyboard-shortcuts', $keyboard_config);
 
-    if ($user->isLoggedIn()) {
-      require_celerity_resource('phabricator-glyph-css');
-
-      $item = new PhabricatorMainMenuIconView();
-      $item->setName($user->getUsername());
-      $item->addClass('glyph glyph-profile');
-      $item->setHref('/p/'.$user->getUsername().'/');
-      $menu->appendChild($item);
-
-      $item = new PhabricatorMainMenuIconView();
-      $item->setName(pht('Settings'));
-      $item->addClass('glyph glyph-settings');
-      $item->setHref('/settings/');
-      $menu->appendChild($item);
-
-      $item = new PhabricatorMainMenuIconView();
-      $item->setName(pht('Log Out'));
-      $item->addClass('glyph glyph-logout');
-      $item->setHref('/logout/');
-      $menu->appendChild($item);
+    $applications = PhabricatorApplication::getAllInstalledApplications();
+    $icon_views = array();
+    foreach ($applications as $application) {
+      $icon_views[] = $application->buildMainMenuItems(
+        $this->getRequest()->getUser(),
+        $this->getController());
     }
+    $icon_views = array_mergev($icon_views);
+    $icon_views = msort($icon_views, 'getSortOrder');
+
+    $menu->appendChild($icon_views);
 
     return $menu->render();
   }
