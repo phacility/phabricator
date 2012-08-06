@@ -9,64 +9,64 @@
 celerity_register_resource_map(array(
   '/rsrc/image/app/app_audit.png' =>
   array(
-    'hash' => '5f5b4a7c48fe921532bef4c986328bdc',
-    'uri' => '/res/5f5b4a7c/rsrc/image/app/app_audit.png',
+    'hash' => '53340003d1daf306b64ed5ebb08bc204',
+    'uri' => '/res/53340003/rsrc/image/app/app_audit.png',
     'disk' => '/rsrc/image/app/app_audit.png',
     'type' => 'png',
   ),
   '/rsrc/image/app/app_differential.png' =>
   array(
-    'hash' => 'b2e42893b64791f8382f7f5a0350b44d',
-    'uri' => '/res/b2e42893/rsrc/image/app/app_differential.png',
+    'hash' => 'ac7f3cd87dde332b283ff83c3c7198a8',
+    'uri' => '/res/ac7f3cd8/rsrc/image/app/app_differential.png',
     'disk' => '/rsrc/image/app/app_differential.png',
     'type' => 'png',
   ),
   '/rsrc/image/app/app_diffusion.png' =>
   array(
-    'hash' => 'e9e4b1c380e19a2908730ad397ae5eca',
-    'uri' => '/res/e9e4b1c3/rsrc/image/app/app_diffusion.png',
+    'hash' => 'd06f3b996adfe38f233851125471f43f',
+    'uri' => '/res/d06f3b99/rsrc/image/app/app_diffusion.png',
     'disk' => '/rsrc/image/app/app_diffusion.png',
     'type' => 'png',
   ),
   '/rsrc/image/app/app_fact.png' =>
   array(
-    'hash' => '8b4da94b07e2aad9f741beca9519df98',
-    'uri' => '/res/8b4da94b/rsrc/image/app/app_fact.png',
+    'hash' => 'c0bd5443c552e8d76c2adf05986c9ef6',
+    'uri' => '/res/c0bd5443/rsrc/image/app/app_fact.png',
     'disk' => '/rsrc/image/app/app_fact.png',
     'type' => 'png',
   ),
   '/rsrc/image/app/app_flags.png' =>
   array(
-    'hash' => 'e75e1047a6bc2ff428161d2130526367',
-    'uri' => '/res/e75e1047/rsrc/image/app/app_flags.png',
+    'hash' => '574ea87812d3ebd15252889d74f39dd0',
+    'uri' => '/res/574ea878/rsrc/image/app/app_flags.png',
     'disk' => '/rsrc/image/app/app_flags.png',
     'type' => 'png',
   ),
   '/rsrc/image/app/app_maniphest.png' =>
   array(
-    'hash' => '88b6a06029b1ce38d5e7a70c1d2ebd97',
-    'uri' => '/res/88b6a060/rsrc/image/app/app_maniphest.png',
+    'hash' => '6f62e17097399a687892dc2e3f9abeb9',
+    'uri' => '/res/6f62e170/rsrc/image/app/app_maniphest.png',
     'disk' => '/rsrc/image/app/app_maniphest.png',
     'type' => 'png',
   ),
   '/rsrc/image/app/app_people.png' =>
   array(
-    'hash' => '5289700c7d871baa72e54115db7199da',
-    'uri' => '/res/5289700c/rsrc/image/app/app_people.png',
+    'hash' => 'b6c6fd4bc8b831dfd0e680f303f20d5f',
+    'uri' => '/res/b6c6fd4b/rsrc/image/app/app_people.png',
     'disk' => '/rsrc/image/app/app_people.png',
     'type' => 'png',
   ),
   '/rsrc/image/app/app_phriction.png' =>
   array(
-    'hash' => '68f2387363a26c15653a39bd847157f3',
-    'uri' => '/res/68f23873/rsrc/image/app/app_phriction.png',
+    'hash' => 'f8c16c533b38b081486be48c4f1cf5bd',
+    'uri' => '/res/f8c16c53/rsrc/image/app/app_phriction.png',
     'disk' => '/rsrc/image/app/app_phriction.png',
     'type' => 'png',
   ),
   '/rsrc/image/app/app_settings.png' =>
   array(
-    'hash' => '36ce89516c828b0d31ebb84301a801d0',
-    'uri' => '/res/36ce8951/rsrc/image/app/app_settings.png',
+    'hash' => '095fa0e61ec11d3f7e543ba48f5a5adb',
+    'uri' => '/res/095fa0e6/rsrc/image/app/app_settings.png',
     'disk' => '/rsrc/image/app/app_settings.png',
     'type' => 'png',
   ),
