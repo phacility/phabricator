@@ -1722,32 +1722,6 @@ final class DifferentialChangesetParser {
   }
 
   protected function renderChangeTypeHeader($changeset, $force) {
-
-    static $articles = array(
-      DifferentialChangeType::FILE_IMAGE      => 'an',
-    );
-
-    static $files = array(
-      DifferentialChangeType::FILE_TEXT       => 'file',
-      DifferentialChangeType::FILE_IMAGE      => 'image',
-      DifferentialChangeType::FILE_DIRECTORY  => 'directory',
-      DifferentialChangeType::FILE_BINARY     => 'binary file',
-      DifferentialChangeType::FILE_SYMLINK    => 'symlink',
-      DifferentialChangeType::FILE_SUBMODULE  => 'submodule',
-    );
-
-    static $changes = array(
-      DifferentialChangeType::TYPE_ADD        => 'added',
-      DifferentialChangeType::TYPE_CHANGE     => 'changed',
-      DifferentialChangeType::TYPE_DELETE     => 'deleted',
-      DifferentialChangeType::TYPE_MOVE_HERE  => 'moved from',
-      DifferentialChangeType::TYPE_COPY_HERE  => 'copied from',
-      DifferentialChangeType::TYPE_MOVE_AWAY  => 'moved to',
-      DifferentialChangeType::TYPE_COPY_AWAY  => 'copied to',
-      DifferentialChangeType::TYPE_MULTICOPY
-        => 'deleted after being copied to',
-    );
-
     $change = $changeset->getChangeType();
     $file = $changeset->getFileType();
 
@@ -1757,41 +1731,227 @@ final class DifferentialChangesetParser {
       if ($force) {
         // We have to force something to render because there were no changes
         // of other kinds.
-        $message = "This {$files[$file]} was not modified.";
+        $message = pht('This file was not modified.');
       } else {
         // Default case of changes to a text file, no metadata.
         return null;
       }
     } else {
-      $verb = idx($changes, $change, 'changed');
       switch ($change) {
-        default:
-          $message = "This {$files[$file]} was <strong>{$verb}</strong>.";
-          break;
-        case DifferentialChangeType::TYPE_MOVE_HERE:
-        case DifferentialChangeType::TYPE_COPY_HERE:
-          $message =
-            "This {$files[$file]} was {$verb} ".
-            "<strong>".
-              phutil_escape_html($changeset->getOldFile()).
-            "</strong>.";
-          break;
-        case DifferentialChangeType::TYPE_MOVE_AWAY:
-        case DifferentialChangeType::TYPE_COPY_AWAY:
-        case DifferentialChangeType::TYPE_MULTICOPY:
-          $paths = $changeset->getAwayPaths();
-          if (count($paths) > 1) {
-            $message =
-              "This {$files[$file]} was {$verb}: ".
-              "<strong>".phutil_escape_html(implode(', ', $paths))."</strong>.";
-          } else {
-            $message =
-              "This {$files[$file]} was {$verb} ".
-              "<strong>".phutil_escape_html(reset($paths))."</strong>.";
+
+        case DifferentialChangeType::TYPE_ADD:
+          switch ($file) {
+            case DifferentialChangeType::FILE_TEXT:
+              $message = pht('This file was <strong>added</strong>.');
+              break;
+            case DifferentialChangeType::FILE_IMAGE:
+              $message = pht('This image was <strong>added</strong>.');
+              break;
+            case DifferentialChangeType::FILE_DIRECTORY:
+              $message = pht('This directory was <strong>added</strong>.');
+              break;
+            case DifferentialChangeType::FILE_BINARY:
+              $message = pht('This binary file was <strong>added</strong>.');
+              break;
+            case DifferentialChangeType::FILE_SYMLINK:
+              $message = pht('This symlink was <strong>added</strong>.');
+              break;
+            case DifferentialChangeType::FILE_SUBMODULE:
+              $message = pht('This submodule was <strong>added</strong>.');
+              break;
           }
           break;
-        case DifferentialChangeType::TYPE_CHANGE:
-          $message = "This is ".idx($articles, $file, 'a')." {$files[$file]}.";
+
+        case DifferentialChangeType::TYPE_DELETE:
+          switch ($file) {
+            case DifferentialChangeType::FILE_TEXT:
+              $message = pht('This file was <strong>deleted</strong>.');
+              break;
+            case DifferentialChangeType::FILE_IMAGE:
+              $message = pht('This image was <strong>deleted</strong>.');
+              break;
+            case DifferentialChangeType::FILE_DIRECTORY:
+              $message = pht('This directory was <strong>deleted</strong>.');
+              break;
+            case DifferentialChangeType::FILE_BINARY:
+              $message = pht('This binary file was <strong>deleted</strong>.');
+              break;
+            case DifferentialChangeType::FILE_SYMLINK:
+              $message = pht('This symlink was <strong>deleted</strong>.');
+              break;
+            case DifferentialChangeType::FILE_SUBMODULE:
+              $message = pht('This submodule was <strong>deleted</strong>.');
+              break;
+          }
+          break;
+
+        case DifferentialChangeType::TYPE_MOVE_HERE:
+          $from =
+            "<strong>".
+              phutil_escape_html($changeset->getOldFile()).
+            "</strong>";
+          switch ($file) {
+            case DifferentialChangeType::FILE_TEXT:
+              $message = pht('This file was moved from %s.', $from);
+              break;
+            case DifferentialChangeType::FILE_IMAGE:
+              $message = pht('This image was moved from %s.', $from);
+              break;
+            case DifferentialChangeType::FILE_DIRECTORY:
+              $message = pht('This directory was moved from %s.', $from);
+              break;
+            case DifferentialChangeType::FILE_BINARY:
+              $message = pht('This binary file was moved from %s.', $from);
+              break;
+            case DifferentialChangeType::FILE_SYMLINK:
+              $message = pht('This symlink was moved from %s.', $from);
+              break;
+            case DifferentialChangeType::FILE_SUBMODULE:
+              $message = pht('This submodule was moved from %s.', $from);
+              break;
+          }
+
+        case DifferentialChangeType::TYPE_COPY_HERE:
+          $from =
+            "<strong>".
+              phutil_escape_html($changeset->getOldFile()).
+            "</strong>";
+          switch ($file) {
+            case DifferentialChangeType::FILE_TEXT:
+              $message = pht('This file was copied from %s.', $from);
+              break;
+            case DifferentialChangeType::FILE_IMAGE:
+              $message = pht('This image was copied from %s.', $from);
+              break;
+            case DifferentialChangeType::FILE_DIRECTORY:
+              $message = pht('This directory was copied from %s.', $from);
+              break;
+            case DifferentialChangeType::FILE_BINARY:
+              $message = pht('This binary file was copied from %s.', $from);
+              break;
+            case DifferentialChangeType::FILE_SYMLINK:
+              $message = pht('This symlink was copied from %s.', $from);
+              break;
+            case DifferentialChangeType::FILE_SUBMODULE:
+              $message = pht('This submodule was copied from %s.', $from);
+              break;
+          }
+          break;
+
+        case DifferentialChangeType::TYPE_MOVE_AWAY:
+          $paths =
+            "<strong>".
+              phutil_escape_html(implode(', ', $changeset->getAwayPaths())).
+            "</strong>";
+          switch ($file) {
+            case DifferentialChangeType::FILE_TEXT:
+              $message = pht('This file was moved to %s.', $paths);
+              break;
+            case DifferentialChangeType::FILE_IMAGE:
+              $message = pht('This image was moved to %s.', $paths);
+              break;
+            case DifferentialChangeType::FILE_DIRECTORY:
+              $message = pht('This directory was moved to %s.', $paths);
+              break;
+            case DifferentialChangeType::FILE_BINARY:
+              $message = pht('This binary file was moved to %s.', $paths);
+              break;
+            case DifferentialChangeType::FILE_SYMLINK:
+              $message = pht('This symlink was moved to %s.', $paths);
+              break;
+            case DifferentialChangeType::FILE_SUBMODULE:
+              $message = pht('This submodule was moved to %s.', $paths);
+              break;
+          }
+          break;
+
+        case DifferentialChangeType::TYPE_COPY_AWAY:
+          $paths =
+            "<strong>".
+              phutil_escape_html(implode(', ', $changeset->getAwayPaths())).
+            "</strong>";
+          switch ($file) {
+            case DifferentialChangeType::FILE_TEXT:
+              $message = pht('This file was copied to %s.', $paths);
+              break;
+            case DifferentialChangeType::FILE_IMAGE:
+              $message = pht('This image was copied to %s.', $paths);
+              break;
+            case DifferentialChangeType::FILE_DIRECTORY:
+              $message = pht('This directory was copied to %s.', $paths);
+              break;
+            case DifferentialChangeType::FILE_BINARY:
+              $message = pht('This binary file was copied to %s.', $paths);
+              break;
+            case DifferentialChangeType::FILE_SYMLINK:
+              $message = pht('This symlink was copied to %s.', $paths);
+              break;
+            case DifferentialChangeType::FILE_SUBMODULE:
+              $message = pht('This submodule was copied to %s.', $paths);
+              break;
+          }
+          break;
+
+        case DifferentialChangeType::TYPE_MULTICOPY:
+          $paths =
+            "<strong>".
+              phutil_escape_html(implode(', ', $changeset->getAwayPaths())).
+            "</strong>";
+          switch ($file) {
+            case DifferentialChangeType::FILE_TEXT:
+              $message = pht(
+                'This file was deleted after being copied to %s.',
+                $paths);
+              break;
+            case DifferentialChangeType::FILE_IMAGE:
+              $message = pht(
+                'This image was deleted after being copied to %s.',
+                $paths);
+              break;
+            case DifferentialChangeType::FILE_DIRECTORY:
+              $message = pht(
+                'This directory was deleted after being copied to %s.',
+                $paths);
+              break;
+            case DifferentialChangeType::FILE_BINARY:
+              $message = pht(
+                'This binary file was deleted after being copied to %s.',
+                $paths);
+              break;
+            case DifferentialChangeType::FILE_SYMLINK:
+              $message = pht(
+                'This symlink was deleted after being copied to %s.',
+                $paths);
+              break;
+            case DifferentialChangeType::FILE_SUBMODULE:
+              $message = pht(
+                'This submodule was deleted after being copied to %s.',
+                $paths);
+              break;
+          }
+          break;
+
+        default:
+          switch ($file) {
+            case DifferentialChangeType::FILE_TEXT:
+              $message = pht('This is a file.');
+              break;
+            case DifferentialChangeType::FILE_IMAGE:
+              $message = pht('This is an image.');
+              break;
+            case DifferentialChangeType::FILE_DIRECTORY:
+              $message = pht('This is a directory.');
+              break;
+            case DifferentialChangeType::FILE_BINARY:
+              $message = pht('This is a binary file.');
+              break;
+            case DifferentialChangeType::FILE_SYMLINK:
+              $message = pht('This is a symlink.');
+              break;
+            case DifferentialChangeType::FILE_SUBMODULE:
+              $message = pht('This is a submodule.');
+              break;
+          }
           break;
       }
     }
