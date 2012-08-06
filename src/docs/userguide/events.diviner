@@ -17,7 +17,7 @@ powerful way to respond to events.
 
 To install event listeners, follow these steps:
 
-  - Write a listener class which extends @{class:PhutilEventListener}.
+  - Write a listener class which extends @{class@libphutil:PhutilEventListener}.
   - Add it to a libphutil library, or create a new library (for instructions,
     see @{article:libphutil Libraries User Guide}.
   - Configure Phabricator to load the library by adding it to `load-libraries`
@@ -165,7 +165,7 @@ Data available on this event:
     with a different result, replace this with the correct PHID in your event
     listener.
 
-Using @{class:PhutilEmailAddress} may be helpful in parsing the query.
+Using @{class@libphutil:PhutilEmailAddress} may be helpful in parsing the query.
 
 == Edge: Will Edit Edges ==
 

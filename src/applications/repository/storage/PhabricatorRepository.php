@@ -446,10 +446,11 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
 
   /**
    * Get a parsed object representation of the repository's remote URI. This
-   * may be a normal URI (returned as a @{class:PhutilURI}) or a git URI
-   * (returned as a @{class:PhutilGitURI}).
+   * may be a normal URI (returned as a @{class@libphutil:PhutilURI}) or a git
+   * URI (returned as a @{class@libphutil:PhutilGitURI}).
    *
-   * @return wild A @{class:PhutilURI} or @{class:PhutilGitURI}.
+   * @return wild A @{class@libphutil:PhutilURI} or
+   *              @{class@libphutil:PhutilGitURI}.
    * @task uri
    */
   private function getRemoteURIObject() {
