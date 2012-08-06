@@ -46,7 +46,7 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
 
   public function buildMainMenuItems(
     PhabricatorUser $user,
-    PhabricatorController $controller) {
+    PhabricatorController $controller = null) {
 
     $items = array();
 

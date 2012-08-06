@@ -18,6 +18,7 @@
 
 /**
  * @task  info  Application Information
+ * @task  ui    UI Integration
  * @task  uri   URI Routing
  * @task  fact  Fact Integration
  * @task  meta  Application Management
@@ -78,16 +79,26 @@ abstract class PhabricatorApplication {
   }
 
 
-/* -(  Launch Integration  )------------------------------------------------- */
+/* -(  UI Integration  )----------------------------------------------------- */
 
 
   public function loadStatus(PhabricatorUser $user) {
     return array();
   }
 
+
+  /**
+   * Build items for the main menu.
+   *
+   * @param  PhabricatorUser    The viewing user.
+   * @param  AphrontController  The current controller. May be null for special
+   *                            pages like 404, exception handlers, etc.
+   * @return list<PhabricatorMainMenuIconView> List of menu items.
+   * @task UI
+   */
   public function buildMainMenuItems(
     PhabricatorUser $user,
-    PhabricatorController $controller) {
+    PhabricatorController $controller = null) {
     return array();
   }
 
