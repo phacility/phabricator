@@ -936,6 +936,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('daemonstatus.sql'),
       ),
+      'symbolcontexts.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('symbolcontexts.sql'),
+      ),
     );
   }
 

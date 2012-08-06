@@ -27,6 +27,7 @@
 final class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
 
   protected $arcanistProjectID;
+  protected $symbolContext;
   protected $symbolName;
   protected $symbolType;
   protected $symbolLanguage;
