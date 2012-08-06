@@ -287,6 +287,7 @@ final class ManiphestTaskEditController extends ManiphestController {
             $task->setCCPHIDs($template_task->getCCPHIDs());
             $task->setProjectPHIDs($template_task->getProjectPHIDs());
             $task->setOwnerPHID($template_task->getOwnerPHID());
+            $task->setPriority($template_task->getPriority());
 
             if ($aux_fields) {
               $template_task->loadAndAttachAuxiliaryAttributes();
