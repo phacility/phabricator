@@ -80,6 +80,7 @@ JX.behavior('differential-populate', function(config) {
         var msg;
         var align = 'E';
         var sibling = 'previousSibling';
+        var width = 120;
         if (t.className.match(/cov-C/)) {
           msg = 'Covered';
           highlight_class = 'source-cov-C';
@@ -94,13 +95,14 @@ JX.behavior('differential-populate', function(config) {
           if (match) {
             align = 'N'; // TODO: 'W'
             sibling = 'nextSibling';
+            width = 500;
             msg = JX.Stratcom.getData(t).msg;
             highlight_class = match[0];
           }
         }
 
         if (msg) {
-          JX.Tooltip.show(t, 120, align, msg);
+          JX.Tooltip.show(t, width, align, msg);
         }
 
         if (highlight_class) {
