@@ -38,16 +38,21 @@ script which can export them (for example, maybe by parsing a ##ctags## file).
 
 The output format of the script should be one symbol per line:
 
-  <name> <type> <lang> <line> <path>
+  <context> <name> <type> <lang> <line> <path>
 
 For example:
 
-  ExampleClass class php 13 /src/classes/ExampleClass.php
+  ExampleClass exampleMethod function php 13 /src/classes/ExampleClass.php
+
+Context is, broadly speaking, the scope or namespace where the symbol is
+defined. For object-oriented languages, this is probably a class name. The
+symbols with that context are class constants, methods, properties, nested
+classes, etc. When printing symbols without a context (those that are defined
+globally, for instance), the ##<context>## field should be empty (that is, the
+line should start with a space).
 
 Your script should enumerate all the symbols in your project, and provide paths
-from the project root (where ".arcconfig" is) beginning with a "/". If there are
-any duplicate symbols, it should include logic to pick the "best" one -- symbol
-names must be unique within a project, type and language.
+from the project root (where ".arcconfig" is) beginning with a "/".
 
 You can look at ##generate_php_symbols.php## for an example of how you might
 write such a script, and run this command to see its output:
@@ -87,4 +92,4 @@ automatically link symbols in Differential.
 
 NOTE: Because this feature depends on the syntax highlighter, it will work
 better for some languages than others. It currently works fairly well for PHP,
-but your milage may vary for other languages.
+but your mileage may vary for other languages.
