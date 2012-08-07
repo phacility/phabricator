@@ -31,6 +31,10 @@ final class DiffusionSymbolController extends DiffusionController {
     $query = new DiffusionSymbolQuery();
     $query->setName($this->name);
 
+    if ($request->getStr('context') !== null) {
+      $query->setContext($request->getStr('context'));
+    }
+
     if ($request->getStr('type')) {
       $query->setType($request->getStr('type'));
     }
@@ -122,6 +126,7 @@ final class DiffusionSymbolController extends DiffusionController {
 
       $rows[] = array(
         phutil_escape_html($symbol->getSymbolType()),
+        phutil_escape_html($symbol->getSymbolContext()),
         phutil_escape_html($symbol->getSymbolName()),
         phutil_escape_html($symbol->getSymbolLanguage()),
         phutil_escape_html($project_name),
@@ -133,6 +138,7 @@ final class DiffusionSymbolController extends DiffusionController {
     $table->setHeaders(
       array(
         'Type',
+        'Context',
         'Name',
         'Language',
         'Project',
@@ -140,6 +146,7 @@ final class DiffusionSymbolController extends DiffusionController {
       ));
     $table->setColumnClasses(
       array(
+        '',
         '',
         'pri',
         '',

@@ -29,6 +29,7 @@
  */
 final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
 
+  private $context;
   private $namePrefix;
   private $name;
 
@@ -42,6 +43,15 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
 
 
 /* -(  Configuring the Query  )---------------------------------------------- */
+
+
+  /**
+   * @task config
+   */
+  public function setContext($context) {
+    $this->context = $context;
+    return $this;
+  }
 
 
   /**
@@ -179,6 +189,13 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
    */
   private function buildWhereClause($conn_r) {
     $where = array();
+
+    if (isset($this->context)) {
+      $where[] = qsprintf(
+        $conn_r,
+        'symbolContext = %s',
+        $this->context);
+    }
 
     if ($this->name) {
       $where[] = qsprintf(
