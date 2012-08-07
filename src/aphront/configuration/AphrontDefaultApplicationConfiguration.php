@@ -163,18 +163,6 @@ class AphrontDefaultApplicationConfiguration
         'index/(?P<phid>[^/]+)/' => 'PhabricatorSearchIndexController',
       ),
 
-      '/project/' => array(
-        '' => 'PhabricatorProjectListController',
-        'filter/(?P<filter>[^/]+)/' => 'PhabricatorProjectListController',
-        'edit/(?P<id>\d+)/' => 'PhabricatorProjectProfileEditController',
-        'view/(?P<id>\d+)/(?:(?P<page>\w+)/)?'
-          => 'PhabricatorProjectProfileController',
-        'create/' => 'PhabricatorProjectCreateController',
-        'update/(?P<id>\d+)/(?P<action>[^/]+)/'
-          => 'PhabricatorProjectUpdateController',
-      ),
-
-
       '/daemon/' => array(
         'task/(?P<id>\d+)/' => 'PhabricatorWorkerTaskDetailController',
         'task/(?P<id>\d+)/(?P<action>[^/]+)/'
