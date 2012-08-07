@@ -114,12 +114,6 @@ final class DiffusionCommitController extends DiffusionController {
 
     $content[] = $this->buildMergesTable($commit);
 
-    $original_changes_count = count($changes);
-    if ($request->getStr('show_all') !== 'true' &&
-        $original_changes_count > self::CHANGES_LIMIT) {
-      $changes = array_slice($changes, 0, self::CHANGES_LIMIT);
-    }
-
     $owners_paths = array();
     if ($this->highlightedAudits) {
       $packages = id(new PhabricatorOwnersPackage())->loadAllWhere(
@@ -180,7 +174,7 @@ final class DiffusionCommitController extends DiffusionController {
       $change_panel->setHeader("Changes (".number_format($count).")");
       $change_panel->setID('differential-review-toc');
 
-      if ($count !== $original_changes_count) {
+      if ($count > self::CHANGES_LIMIT) {
         $show_all_button = phutil_render_tag(
           'a',
           array(
@@ -190,10 +184,9 @@ final class DiffusionCommitController extends DiffusionController {
           phutil_escape_html('Show All Changes'));
         $warning_view = id(new AphrontErrorView())
           ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
-          ->setTitle(sprintf(
-                       "Showing only the first %d changes out of %s!",
-                       self::CHANGES_LIMIT,
-                       number_format($original_changes_count)));
+          ->setTitle('Very Large Commit')
+          ->appendChild(
+            "<p>This commit is very large. Load each file individually.</p>");
 
         $change_panel->appendChild($warning_view);
         $change_panel->addButton($show_all_button);
@@ -240,16 +233,31 @@ final class DiffusionCommitController extends DiffusionController {
       // DifferentialChangeset. Make the objects ephemeral to make sure we don't
       // accidentally save them, and then set their ID to the appropriate ID for
       // this application (the path IDs).
-      $pquery = new DiffusionPathIDQuery(mpull($changesets, 'getFilename'));
-      $path_ids = $pquery->loadPathIDs();
+      $path_ids = array_flip(mpull($changes, 'getPath'));
       foreach ($changesets as $changeset) {
         $changeset->makeEphemeral();
         $changeset->setID($path_ids[$changeset->getFilename()]);
       }
 
+      if ($count <= self::CHANGES_LIMIT) {
+        $visible_changesets = $changesets;
+      } else {
+        $visible_changesets = array();
+        $inlines = id(new PhabricatorAuditInlineComment())->loadAllWhere(
+          'commitPHID = %s AND (auditCommentID IS NOT NULL OR authorPHID = %s)',
+          $commit->getPHID(),
+          $user->getPHID());
+        $path_ids = mpull($inlines, null, 'getPathID');
+        foreach ($changesets as $key => $changeset) {
+          if (array_key_exists($changeset->getID(), $path_ids)) {
+            $visible_changesets[$key] = $changeset;
+          }
+        }
+      }
+
       $change_list = new DifferentialChangesetListView();
       $change_list->setChangesets($changesets);
-      $change_list->setVisibleChangesets($changesets);
+      $change_list->setVisibleChangesets($visible_changesets);
       $change_list->setRenderingReferences($references);
       $change_list->setRenderURI('/diffusion/'.$callsign.'/diff/');
       $change_list->setRepository($repository);
@@ -265,6 +273,12 @@ final class DiffusionCommitController extends DiffusionController {
 
       $change_list->setInlineCommentControllerURI(
         '/diffusion/inline/edit/'.phutil_escape_uri($commit->getPHID()).'/');
+
+      $change_references = array();
+      foreach ($changesets as $key => $changeset) {
+        $change_references[$changeset->getID()] = $references[$key];
+      }
+      $change_table->setRenderingReferences($change_references);
 
       // TODO: This is pretty awkward, unify the CSS between Diffusion and
       // Differential better.

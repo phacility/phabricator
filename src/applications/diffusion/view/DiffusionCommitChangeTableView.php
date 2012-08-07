@@ -20,6 +20,7 @@ final class DiffusionCommitChangeTableView extends DiffusionView {
 
   private $pathChanges;
   private $ownersPaths = array();
+  private $renderingReferences;
 
   public function setPathChanges(array $path_changes) {
     assert_instances_of($path_changes, 'DiffusionPathChange');
@@ -33,6 +34,11 @@ final class DiffusionCommitChangeTableView extends DiffusionView {
     return $this;
   }
 
+  public function setRenderingReferences(array $value) {
+    $this->renderingReferences = $value;
+    return $this;
+  }
+
   public function render() {
     $rows = array();
     $rowc = array();
@@ -41,17 +47,22 @@ final class DiffusionCommitChangeTableView extends DiffusionView {
 
     // TODO: Copy Away and Move Away are rendered junkily still.
 
-    foreach ($this->pathChanges as $change) {
+    foreach ($this->pathChanges as $id => $change) {
       $path = $change->getPath();
       $hash = substr(md5($path), 0, 8);
       if ($change->getFileType() == DifferentialChangeType::FILE_DIRECTORY) {
         $path .= '/';
       }
 
-      $path_column = phutil_render_tag(
+      $path_column = javelin_render_tag(
         'a',
         array(
           'href' => '#'.$hash,
+          'meta' => array(
+            'id' => 'diff-'.$hash,
+            'ref' => $this->renderingReferences[$id],
+          ),
+          'sigil' => 'differential-load',
         ),
         phutil_escape_html($path));
 

@@ -42,16 +42,24 @@ JX.behavior('differential-populate', function(config) {
     'differential-load',
     function(e) {
       var meta = e.getNodeData('differential-load');
-      JX.DOM.setContent(
-        JX.$(meta.id),
-        JX.$H('<div class="differential-loading">Loading...</div>'));
-      var data = {
-        ref : meta.ref,
-        whitespace : config.whitespace
-      };
-      new JX.Workflow(config.uri, data)
-        .setHandler(JX.bind(null, onresponse, meta.id))
-        .start();
+      var diff;
+      try {
+        diff = JX.$(meta.id);
+      } catch (e) {
+        // Already loaded.
+      }
+      if (diff) {
+        JX.DOM.setContent(
+          diff,
+          JX.$H('<div class="differential-loading">Loading...</div>'));
+        var data = {
+          ref : meta.ref,
+          whitespace : config.whitespace
+        };
+        new JX.Workflow(config.uri, data)
+          .setHandler(JX.bind(null, onresponse, meta.id))
+          .start();
+      }
       if (meta.kill) {
         e.kill();
       }
