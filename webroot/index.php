@@ -192,7 +192,6 @@ try {
   if (!$response) {
     $controller->willProcessRequest($uri_data);
     $response = $controller->processRequest();
-    $response = $controller->didProcessRequest($response);
   }
 } catch (AphrontRedirectException $ex) {
   $response = id(new AphrontRedirectResponse())
@@ -203,6 +202,7 @@ try {
 }
 
 try {
+  $response = $controller->didProcessRequest($response);
   $response = $application->willSendResponse($response, $controller);
   $response->setRequest($request);
   $response_string = $response->buildResponseString();
