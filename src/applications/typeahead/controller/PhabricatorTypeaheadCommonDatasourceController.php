@@ -28,7 +28,10 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $request = $this->getRequest();
     $query = $request->getStr('q');
 
+    $need_rich_data = false;
+
     $need_users = false;
+    $need_applications = false;
     $need_all_users = false;
     $need_lists = false;
     $need_projs = false;
@@ -37,7 +40,14 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $need_upforgrabs = false;
     $need_arcanist_projects = false;
     $need_noproject = false;
+    $need_symbols = false;
     switch ($this->type) {
+      case 'mainsearch':
+        $need_users = true;
+        $need_applications = true;
+        $need_rich_data = true;
+        $need_symbols = true;
+        break;
       case 'searchowner':
         $need_users = true;
         $need_upforgrabs = true;
@@ -78,42 +88,74 @@ final class PhabricatorTypeaheadCommonDatasourceController
       case 'arcanistprojects':
         $need_arcanist_projects = true;
         break;
-
     }
 
-    $data = array();
+    $results = array();
 
     if ($need_upforgrabs) {
-      $data[] = array(
-        'upforgrabs (Up For Grabs)',
-        null,
-        ManiphestTaskOwner::OWNER_UP_FOR_GRABS,
-      );
+      $results[] = id(new PhabricatorTypeaheadResult())
+        ->setName('upforgrabs (Up For Grabs)')
+        ->setPHID(ManiphestTaskOwner::OWNER_UP_FOR_GRABS);
     }
 
     if ($need_noproject) {
-      $data[] = array(
-        'noproject (No Project)',
-        null,
-        ManiphestTaskOwner::PROJECT_NO_PROJECT,
-      );
+      $results[] = id(new PhabricatorTypeaheadResult())
+        ->setName('noproject (No Project)')
+        ->setPHID(ManiphestTaskOwner::PROJECT_NO_PROJECT);
     }
 
     if ($need_users) {
       $columns = array(
         'isSystemAgent',
+        'isAdmin',
         'isDisabled',
         'userName',
         'realName',
         'phid');
+
       if ($query) {
-        $conn_r = id(new PhabricatorUser())->establishConnection('r');
+        // This is an arbitrary limit which is just larger than any limit we
+        // actually use in the application.
+
+        // TODO: The datasource should pass this in the query.
+        $limit = 15;
+
+        $user_table = new PhabricatorUser();
+        $conn_r = $user_table->establishConnection('r');
         $ids = queryfx_all(
           $conn_r,
-          'SELECT DISTINCT userID FROM %T WHERE token LIKE %>',
-          PhabricatorUser::NAMETOKEN_TABLE,
-          $query);
-        $ids = ipull($ids, 'userID');
+          'SELECT id FROM %T WHERE username LIKE %>
+            ORDER BY username ASC LIMIT %d',
+          $user_table->getTableName(),
+          $query,
+          $limit);
+        $ids = ipull($ids, 'id');
+
+        if (count($ids) < $limit) {
+          // If we didn't find enough username hits, look for real name hits.
+          // We need to pull the entire pagesize so that we end up with the
+          // right number of items if this query returns many duplicate IDs
+          // that we've already selected.
+
+          $realname_ids = queryfx_all(
+            $conn_r,
+            'SELECT DISTINCT userID FROM %T WHERE token LIKE %>
+              ORDER BY token ASC LIMIT %d',
+            PhabricatorUser::NAMETOKEN_TABLE,
+            $query,
+            $limit);
+          $realname_ids = ipull($realname_ids, 'userID');
+          $ids = array_merge($ids, $realname_ids);
+
+          $ids = array_unique($ids);
+          $ids = array_slice($ids, 0, $limit);
+        }
+
+        // Always add the logged-in user because some tokenizers autosort them
+        // first. They'll be filtered out on the client side if they don't
+        // match the query.
+        $ids[] = $request->getUser()->getID();
+
         if ($ids) {
           $users = id(new PhabricatorUser())->loadColumnsWhere(
             $columns,
@@ -125,6 +167,12 @@ final class PhabricatorTypeaheadCommonDatasourceController
       } else {
         $users = id(new PhabricatorUser())->loadColumns($columns);
       }
+
+      if ($need_rich_data) {
+        $phids = mpull($users, 'getPHID');
+        $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+      }
+
       foreach ($users as $user) {
         if (!$need_all_users) {
           if ($user->getIsSystemAgent()) {
@@ -134,23 +182,33 @@ final class PhabricatorTypeaheadCommonDatasourceController
             continue;
           }
         }
-        $data[] = array(
-          $user->getUsername().' ('.$user->getRealName().')',
-          '/p/'.$user->getUsername(),
-          $user->getPHID(),
-          $user->getUsername(),
-        );
+
+        $result = id(new PhabricatorTypeaheadResult())
+          ->setName($user->getFullName())
+          ->setURI('/p/'.$user->getUsername())
+          ->setPHID($user->getPHID())
+          ->setPriorityString($user->getUsername());
+
+        if ($need_rich_data) {
+          $display_type = 'User';
+          if ($user->getIsAdmin()) {
+            $display_type = 'Administrator';
+          }
+          $result->setDisplayType($display_type);
+          $result->setImageURI($handles[$user->getPHID()]->getImageURI());
+          $result->setPriorityType('user');
+        }
+        $results[] = $result;
       }
     }
 
     if ($need_lists) {
       $lists = id(new PhabricatorMetaMTAMailingList())->loadAll();
       foreach ($lists as $list) {
-        $data[] = array(
-          $list->getName(),
-          $list->getURI(),
-          $list->getPHID(),
-        );
+        $results[] = id(new PhabricatorTypeaheadResult())
+          ->setName($list->getName())
+          ->setURI($list->getURI())
+          ->setPHID($list->getPHID());
       }
     }
 
@@ -159,50 +217,128 @@ final class PhabricatorTypeaheadCommonDatasourceController
         'status != %d',
         PhabricatorProjectStatus::STATUS_ARCHIVED);
       foreach ($projs as $proj) {
-        $data[] = array(
-          $proj->getName(),
-          '/project/view/'.$proj->getID().'/',
-          $proj->getPHID(),
-        );
+        $results[] = id(new PhabricatorTypeaheadResult())
+          ->setName($proj->getName())
+          ->setURI('/project/view/'.$proj->getID().'/')
+          ->setPHID($proj->getPHID());
       }
     }
 
     if ($need_repos) {
       $repos = id(new PhabricatorRepository())->loadAll();
       foreach ($repos as $repo) {
-        $data[] = array(
-          'r'.$repo->getCallsign().' ('.$repo->getName().')',
-          '/diffusion/'.$repo->getCallsign().'/',
-          $repo->getPHID(),
-          'r'.$repo->getCallsign(),
-        );
+        $results[] = id(new PhabricatorTypeaheadResult())
+          ->setName('r'.$repo->getCallsign().' ('.$repo->getName().')')
+          ->setURI('/diffusion/'.$repo->getCallsign().'/')
+          ->setPHID($repo->getPHID())
+          ->setPriorityString('r'.$repo->getCallsign());
       }
     }
 
     if ($need_packages) {
       $packages = id(new PhabricatorOwnersPackage())->loadAll();
       foreach ($packages as $package) {
-        $data[] = array(
-          $package->getName(),
-          '/owners/package/'.$package->getID().'/',
-          $package->getPHID(),
-        );
+        $results[] = id(new PhabricatorTypeaheadResult())
+          ->setName($package->getName())
+          ->setURI('/owners/package/'.$package->getID().'/')
+          ->setPHID($package->getPHID());
       }
     }
 
     if ($need_arcanist_projects) {
       $arcprojs = id(new PhabricatorRepositoryArcanistProject())->loadAll();
       foreach ($arcprojs as $proj) {
-        $data[] = array(
-          $proj->getName(),
-          null,
-          $proj->getPHID(),
-        );
+        $results[] = id(new PhabricatorTypeaheadResult())
+          ->setName($proj->getName())
+          ->setPHID($proj->getPHID());
       }
     }
 
-    return id(new AphrontAjaxResponse())
-      ->setContent($data);
+    if ($need_applications) {
+      $applications = PhabricatorApplication::getAllInstalledApplications();
+      foreach ($applications as $application) {
+        $uri = $application->getTypeaheadURI();
+        if (!$uri) {
+          continue;
+        }
+        $name = $application->getName().' '.$application->getShortDescription();
+
+        $results[] = id(new PhabricatorTypeaheadResult())
+          ->setName($name)
+          ->setURI($uri)
+          ->setPHID($application->getPHID())
+          ->setPriorityString($application->getName())
+          ->setDisplayName($application->getName())
+          ->setDisplayType($application->getShortDescription())
+          ->setImageuRI($application->getIconURI())
+          ->setPriorityType('apps');
+      }
+    }
+
+    if ($need_symbols) {
+      $symbols = id(new DiffusionSymbolQuery())
+        ->setNamePrefix($query)
+        ->setLimit(15)
+        ->needArcanistProjects(true)
+        ->needRepositories(true)
+        ->needPaths(true)
+        ->execute();
+      foreach ($symbols as $symbol) {
+        $lang = $symbol->getSymbolLanguage();
+        $name = $symbol->getSymbolName();
+        $type = $symbol->getSymbolType();
+        $proj = $symbol->getArcanistProject()->getName();
+
+        $results[] = id(new PhabricatorTypeaheadResult())
+          ->setName($name)
+          ->setURI($symbol->getURI())
+          ->setPHID(md5($symbol->getURI())) // Just needs to be unique.
+          ->setDisplayName($symbol->getName())
+          ->setDisplayType(strtoupper($lang).' '.ucwords($type).' ('.$proj.')')
+          ->setPriorityType('symb');
+      }
+    }
+
+    $content = mpull($results, 'getWireFormat');
+
+    if ($request->isAjax()) {
+      return id(new AphrontAjaxResponse())->setContent($content);
+    }
+
+    // If there's a non-Ajax request to this endpoint, show results in a tabular
+    // format to make it easier to debug typeahead output.
+
+    $rows = array();
+    foreach ($results as $result) {
+      $wire = $result->getWireFormat();
+      foreach ($wire as $k => $v) {
+        $wire[$k] = phutil_escape_html($v);
+      }
+      $rows[] = $wire;
+    }
+
+    $table = new AphrontTableView($rows);
+    $table->setHeaders(
+      array(
+        'Name',
+        'URI',
+        'PHID',
+        'Priority',
+        'Display Name',
+        'Display Type',
+        'Image URI',
+        'Priority Type',
+      ));
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader('Typeahead Results');
+    $panel->appendChild($table);
+
+    return $this->buildStandardPageResponse(
+      $panel,
+      array(
+        'title' => 'Typeahead Results',
+      ));
   }
 
 }

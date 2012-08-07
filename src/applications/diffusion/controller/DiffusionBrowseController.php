@@ -85,6 +85,7 @@ final class DiffusionBrowseController extends DiffusionController {
       $browse_table->setDiffusionRequest($drequest);
       $browse_table->setHandles($handles);
       $browse_table->setPaths($results);
+      $browse_table->setUser($this->getRequest()->getUser());
 
       $browse_panel = new AphrontPanelView();
       $browse_panel->appendChild($browse_table);

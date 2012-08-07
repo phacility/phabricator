@@ -38,6 +38,8 @@ final class ManiphestAction extends ManiphestConstants {
   const ACTION_DESCRIPTION = ManiphestTransactionType::TYPE_DESCRIPTION;
   const ACTION_REASSIGN    = ManiphestTransactionType::TYPE_OWNER;
   const ACTION_ATTACH      = ManiphestTransactionType::TYPE_ATTACH;
+  const ACTION_EDGE        = ManiphestTransactionType::TYPE_EDGE;
+  const ACTION_AUXILIARY   = ManiphestTransactionType::TYPE_AUXILIARY;
 
   public static function getActionPastTenseVerb($action) {
     static $map = array(
@@ -45,7 +47,7 @@ final class ManiphestAction extends ManiphestConstants {
       self::ACTION_CLOSE       => 'closed',
       self::ACTION_UPDATE      => 'updated',
       self::ACTION_ASSIGN      => 'assigned',
-      self::ACTION_REASSIGN      => 'reassigned',
+      self::ACTION_REASSIGN    => 'reassigned',
       self::ACTION_COMMENT     => 'commented on',
       self::ACTION_CC          => 'updated cc\'s of',
       self::ACTION_PRIORITY    => 'changed the priority of',
@@ -53,7 +55,9 @@ final class ManiphestAction extends ManiphestConstants {
       self::ACTION_TITLE       => 'updated title of',
       self::ACTION_DESCRIPTION => 'updated description of',
       self::ACTION_ATTACH      => 'attached something to',
+      self::ACTION_EDGE        => 'changed related objects of',
       self::ACTION_REOPEN      => 'reopened',
+      self::ACTION_AUXILIARY   => 'updated an auxiliary field of',
     );
 
     return idx($map, $action, "brazenly {$action}'d");
@@ -67,12 +71,14 @@ final class ManiphestAction extends ManiphestConstants {
    */
   public static function selectStrongestAction(array $actions) {
     static $strengths = array(
+      self::ACTION_AUXILIARY   => -1,
       self::ACTION_UPDATE      => 0,
       self::ACTION_CC          => 1,
       self::ACTION_PROJECT     => 2,
       self::ACTION_DESCRIPTION => 3,
       self::ACTION_TITLE       => 4,
       self::ACTION_ATTACH      => 5,
+      self::ACTION_EDGE        => 5,
       self::ACTION_COMMENT     => 6,
       self::ACTION_PRIORITY    => 7,
       self::ACTION_REASSIGN    => 8,

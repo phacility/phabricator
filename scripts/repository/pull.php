@@ -17,35 +17,8 @@
  * limitations under the License.
  */
 
-$root = dirname(dirname(dirname(__FILE__)));
-require_once $root.'/scripts/__init_script__.php';
-
-$args = new PhutilArgumentParser($argv);
-$args->setTagline('manually pull working copies');
-$args->setSynopsis(<<<EOHELP
-**pull.php** [__options__] __repository-callsign-or-phid ...__
-    Manually pull/fetch working copies for the named repositories.
-EOHELP
-);
-$args->parseStandardArguments();
-$args->parse(
-  array(
-    array(
-      'name'      => 'repositories',
-      'wildcard'  => true,
-    ),
-  ));
-
-$repo_names = $args->getArg('repositories');
-if (!$repo_names) {
-  echo "Specify one or more repositories to pull, by callsign or PHID.\n";
-  exit(1);
-}
-
-$repos = PhabricatorRepository::loadAllByPHIDOrCallsign($repo_names);
-foreach ($repos as $repo) {
-  $callsign = $repo->getCallsign();
-  echo "Pulling '{$callsign}'...\n";
-  PhabricatorRepositoryPullLocalDaemon::pullRepository($repo);
-}
-echo "Done.\n";
+echo
+  "This script has moved. All repository management is now performed through ".
+  "'bin/repository'. Use this command instead:\n\n".
+  "    phabricator/ $ ./bin/repository pull ...\n";
+exit(1);

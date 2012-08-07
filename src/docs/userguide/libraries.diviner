@@ -37,6 +37,7 @@ To **create a new libphutil library**:
 
 Now you'll get a prompt like this:
 
+  lang=txt
   No library currently exists at that path...
   The directory '/some/path/libcustom/src' does not exist.
 
@@ -49,6 +50,7 @@ Now you'll get a prompt like this:
 Choose a library name (in this case, "libcustom" would be appropriate) and it
 you should get some details about the library initialization:
 
+  lang=txt
   Writing '__phutil_library_init__.php' to
     '/some/path/libcustom/src/__phutil_library_init__.php'...
   Using library root at 'src'...
@@ -82,9 +84,9 @@ Phabricator. For example, you might write this file to
 
   {
     "project_id" : "libcustom",
-    "phutil_libraries" : {
-      "phabricator" : "phabricator/src/"
-    }
+    "load" : [
+      "phabricator/src/"
+    ]
   }
 
 For details on creating a ##.arcconfig##, see

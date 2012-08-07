@@ -38,7 +38,7 @@ then make the library loadable by adding it to your ##.arcconfig## like this:
 
   {
     // ...
-    "phutil_libraries" : [
+    "load" : [
       // ...
       "/path/to/my/library", // Absolute path
       "support/arcanist",    // Relative path in this project

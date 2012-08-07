@@ -20,3 +20,28 @@
 .phabricator-ui-example-description {
   margin: 1em 0;
 }
+
+.jxui-example-container {
+  padding: 2em;
+  margin: 4em auto;
+  border: 4px solid black;
+  background: #dfdfdf;
+  text-align: center;
+  width: 50%;
+}
+
+.jxui-example-container a {
+  margin: 1em;
+}
+
+.jxui-example-container a.jxui-active {
+  box-shadow: 0 0 30px #ffff00;
+}
+
+.jxui-blue-background {
+  background: blue;
+}
+
+.jxui-red-border {
+  border-color: red;
+}

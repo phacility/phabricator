@@ -26,7 +26,7 @@ final class DiffusionGitDiffQuery extends DiffusionDiffQuery {
     if (!$effective_commit) {
       return null;
     }
-    // TODO: This side effect is kind of skethcy.
+    // TODO: This side effect is kind of sketchy.
     $drequest->setCommit($effective_commit);
 
     $raw_query = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest);

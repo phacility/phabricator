@@ -160,6 +160,11 @@ final class ManiphestBatchEditController extends ManiphestController {
       'remove_project'  => ManiphestTransactionType::TYPE_PROJECTS,
     );
 
+    $edge_edit_types = array(
+      'add_project'    => true,
+      'remove_project' => true,
+    );
+
     $xactions = array();
     foreach ($actions as $action) {
       if (empty($type_map[$action['action']])) {
@@ -223,10 +228,15 @@ final class ManiphestBatchEditController extends ManiphestController {
           break;
       }
 
-      // If the edit doesn't change anything, go to the next action.
+      // If the edit doesn't change anything, go to the next action. This
+      // check is only valid for changes like "owner", "status", etc, not
+      // for edge edits, because we should still apply an edit like
+      // "Remove Projects: A, B" to a task with projects "A, B".
 
-      if ($value == $current) {
-        continue;
+      if (empty($edge_edit_types[$action['action']])) {
+        if ($value == $current) {
+          continue;
+        }
       }
 
       // Apply the value change; for most edits this is just replacement, but

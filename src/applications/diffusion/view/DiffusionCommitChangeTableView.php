@@ -19,6 +19,8 @@
 final class DiffusionCommitChangeTableView extends DiffusionView {
 
   private $pathChanges;
+  private $ownersPaths = array();
+  private $renderingReferences;
 
   public function setPathChanges(array $path_changes) {
     assert_instances_of($path_changes, 'DiffusionPathChange');
@@ -26,24 +28,41 @@ final class DiffusionCommitChangeTableView extends DiffusionView {
     return $this;
   }
 
+  public function setOwnersPaths(array $owners_paths) {
+    assert_instances_of($owners_paths, 'PhabricatorOwnersPath');
+    $this->ownersPaths = $owners_paths;
+    return $this;
+  }
+
+  public function setRenderingReferences(array $value) {
+    $this->renderingReferences = $value;
+    return $this;
+  }
+
   public function render() {
     $rows = array();
+    $rowc = array();
 
     // TODO: Experiment with path stack rendering.
 
     // TODO: Copy Away and Move Away are rendered junkily still.
 
-    foreach ($this->pathChanges as $change) {
+    foreach ($this->pathChanges as $id => $change) {
       $path = $change->getPath();
       $hash = substr(md5($path), 0, 8);
       if ($change->getFileType() == DifferentialChangeType::FILE_DIRECTORY) {
         $path .= '/';
       }
 
-      $path_column = phutil_render_tag(
+      $path_column = javelin_render_tag(
         'a',
         array(
           'href' => '#'.$hash,
+          'meta' => array(
+            'id' => 'diff-'.$hash,
+            'ref' => $this->renderingReferences[$id],
+          ),
+          'sigil' => 'differential-load',
         ),
         phutil_escape_html($path));
 
@@ -56,6 +75,16 @@ final class DiffusionCommitChangeTableView extends DiffusionView {
           $change->getPath()),
         $path_column,
       );
+
+      $row_class = null;
+      foreach ($this->ownersPaths as $owners_path) {
+        $owners_path = $owners_path->getPath();
+        if (strncmp('/'.$path, $owners_path, strlen($owners_path)) == 0) {
+          $row_class = 'highlighted';
+          break;
+        }
+      }
+      $rowc[] = $row_class;
     }
 
     $view = new AphrontTableView($rows);
@@ -73,6 +102,7 @@ final class DiffusionCommitChangeTableView extends DiffusionView {
         '',
         'wide',
       ));
+    $view->setRowClasses($rowc);
     $view->setNoDataString('This change has not been fully parsed yet.');
 
     return $view->render();

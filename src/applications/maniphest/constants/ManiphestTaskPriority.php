@@ -28,6 +28,11 @@ final class ManiphestTaskPriority extends ManiphestConstants {
   const PRIORITY_LOW          = 25;
   const PRIORITY_WISH         = 0;
 
+  /**
+   * Get the priorities and their full descriptions.
+   *
+   * @return  map Priorities to descriptions.
+   */
   public static function getTaskPriorityMap() {
     return array(
       self::PRIORITY_UNBREAK_NOW  => 'Unbreak Now!',
@@ -39,6 +44,11 @@ final class ManiphestTaskPriority extends ManiphestConstants {
     );
   }
 
+  /**
+   * Get the priorities and their related short (one-word) descriptions.
+   *
+   * @return  map Priorities to brief descriptions.
+   */
   public static function getTaskBriefPriorityMap() {
     return array(
       self::PRIORITY_UNBREAK_NOW  => 'Unbreak!',
@@ -50,7 +60,11 @@ final class ManiphestTaskPriority extends ManiphestConstants {
     );
   }
 
-
+  /**
+   * Get the priorities and some bits for bitwise fun.
+   *
+   * @return  map Priorities to bits.
+   */
   public static function getLoadMap() {
     return array(
       self::PRIORITY_UNBREAK_NOW  => 16,
@@ -62,6 +76,31 @@ final class ManiphestTaskPriority extends ManiphestConstants {
     );
   }
 
+  /**
+   * Get the lowest defined priority.
+   *
+   * @return  int The value of the lowest priority constant.
+   */
+  public static function getLowestPriority() {
+    return self::PRIORITY_WISH;
+  }
+
+  /**
+   * Get the highest defined priority.
+   *
+   * @return  int The value of the highest priority constant.
+   */
+  public static function getHighestPriority() {
+    return self::PRIORITY_UNBREAK_NOW;
+  }
+
+  /**
+   * Retrieve the full name of the priority level provided.
+   *
+   * @param   int     A priority level.
+   * @return  string  The priority name if the level is a valid one,
+   *                  or `???` if it is not.
+   */
   public static function getTaskPriorityName($priority) {
     return idx(self::getTaskPriorityMap(), $priority, '???');
   }

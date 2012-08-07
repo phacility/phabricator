@@ -86,35 +86,35 @@ Other options include:
   - **arcanist_configuration**: the name of a subclass of
     @{class@arcanist:ArcanistConfiguration} which can add new command flags for
     this project or provide entirely new commands.
-  - **copyright_holder**: used by @{class@arcanist:ArcanistLicenseLinter} to
-    apply license notices to source files.
-  - **immutable_history**: controls how `arc diff` behaves in Git. See below.
-  - **phutil_libraries**: map of additional Phutil libraries to load at startup.
+  - **history.immutable**: controls how `arc diff` and some other commands
+    behave in Git and Mercurial. See below.
+  - **load**: list of additional Phutil libraries to load at startup.
     See below for details about path resolution, or see
     @{article:libphutil Libraries User Guide} for a general introduction to
     libphutil libraries.
 
-= Immutable History =
+= History Mutability =
 
-There are a lot of ways to use git, and Arcanist is flexible enough to handle
-several of them. Git workflows divide into two major groups based on your
-**doctrine of history mutability**.
+Arcanist workflows run in two broad modes: either history is //mutable// or
+//immutable//. Under a //mutable// history, `arc` commands may rewrite the
+working copy history; under an //immutable// history, they may not.
 
-Choose a **history mutability doctrine** by setting ##"immutable_history"## in
-your ##.arcconfig##. Valid values are ##true## to enforce a **conservative
-history mutability doctrine** or ##false## to enforce a **liberal history
-mutability doctrine**. The default is ##false##.
+You control history mutability by setting `history.immutable` to `true` or
+`false` in your configuration. By default, it is `false` in Git (i.e.,
+//mutable//) and `true` in Mercurial (i.e., //immutable//). The sections below
+explain how these settings affect workflows.
 
-A **liberal history mutability doctrine** means you rewrite local history. You
-develop in feature branches, but squash or amend before pushing by using ##git
-commit --amend## or ##git rebase -i##. Generally, one idea in the remote is
-represented by one commit.
+== History Mutability: Git ==
 
-A **conservative history mutability doctrine** means that you do not rewrite
-local history. This is similar to how Mercurial works. You develop in feature
-branches and push them without squashing commits. You do not use ##git commit
---amend## or ##git rebase -i##. Generally, one idea in the remote is represented
-by many commits.
+In a workflow with //mutable// history, you rewrite local history. You develop
+in feature branches, but squash or amend before pushing by using ##git commit
+--amend##, ##git rebase -i##, or `git merge --squash`. Generally, one idea in
+the remote is represented by one commit.
+
+In a workflow with //immutable// history, you do not rewrite local history. You
+develop in feature branches and push them without squashing commits. You do not
+use ##git commit --amend## or ##git rebase -i##. Generally, one idea in the
+remote is represented by many commits.
 
 Practically, these are the differences you'll see based on your setting:
 
@@ -123,11 +123,30 @@ Practically, these are the differences you'll see based on your setting:
     - `arc diff` will amend the commit message in HEAD after creating a
       revision.
     - `arc land` will default to the `--squash` strategy.
+    - `arc amend` will amend the commit message in HEAD with information from
+      the corresponding or specified Differential revision.
   - **Immutable**
     - `arc diff` will abort if it makes lint changes.
     - `arc diff` will not amend the commit message in HEAD after creating a
       revision.
     - `arc land` will default to the `--merge` strategy.
+    - `arc amend` will exit with an error message.
+
+== History Mutability: Mercurial ==
+
+Before version 2.2, stock Mercurial has no history mutation commands, so
+this setting has no effect. With Mercurial 2.2. or newer, making history
+//mutable// means:
+
+  - **Mutable** (versions 2.2 and newer)
+    - `arc diff` will amend the commit message in `.` after creating a
+      revision.
+    - `arc amend` will amend the commit message in `.` with information from
+      the corresponding or specified Differential revision.
+  - **Immutable** (or versions prior to 2.2)
+    - `arc diff` will not amend the commit message in `.` after creating a
+      revision.
+    - `arc amend` will exit with an error message.
 
 = How Libraries Are Located =
 
@@ -136,9 +155,9 @@ relative path like this:
 
   {
     ...
-    "load_libraries": {
-      "examplelib" : "examplelib/src"
-    },
+    "load": [
+      "examplelib/src"
+    ],
     ...
   }
 

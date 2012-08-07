@@ -21,6 +21,7 @@ final class DiffusionCommitController extends DiffusionController {
   const CHANGES_LIMIT = 100;
 
   private $auditAuthorityPHIDs;
+  private $highlightedAudits;
 
   public function willProcessRequest(array $data) {
     // This controller doesn't use blob/path stuff, just pass the dictionary
@@ -113,15 +114,23 @@ final class DiffusionCommitController extends DiffusionController {
 
     $content[] = $this->buildMergesTable($commit);
 
-    $original_changes_count = count($changes);
-    if ($request->getStr('show_all') !== 'true' &&
-        $original_changes_count > self::CHANGES_LIMIT) {
-      $changes = array_slice($changes, 0, self::CHANGES_LIMIT);
+    $owners_paths = array();
+    if ($this->highlightedAudits) {
+      $packages = id(new PhabricatorOwnersPackage())->loadAllWhere(
+        'phid IN (%Ls)',
+        mpull($this->highlightedAudits, 'getAuditorPHID'));
+      if ($packages) {
+        $owners_paths = id(new PhabricatorOwnersPath())->loadAllWhere(
+          'repositoryPHID = %s AND packageID IN (%Ld)',
+          $repository->getPHID(),
+          mpull($packages, 'getID'));
+      }
     }
 
     $change_table = new DiffusionCommitChangeTableView();
     $change_table->setDiffusionRequest($drequest);
     $change_table->setPathChanges($changes);
+    $change_table->setOwnersPaths($owners_paths);
 
     $count = count($changes);
 
@@ -134,6 +143,7 @@ final class DiffusionCommitController extends DiffusionController {
         'r'.$callsign.$commit->getCommitIdentifier());
     }
 
+    $pane_id = null;
     if ($bad_commit) {
       $error_panel = new AphrontErrorView();
       $error_panel->setWidth(AphrontErrorView::WIDTH_WIDE);
@@ -164,7 +174,7 @@ final class DiffusionCommitController extends DiffusionController {
       $change_panel->setHeader("Changes (".number_format($count).")");
       $change_panel->setID('differential-review-toc');
 
-      if ($count !== $original_changes_count) {
+      if ($count > self::CHANGES_LIMIT) {
         $show_all_button = phutil_render_tag(
           'a',
           array(
@@ -174,10 +184,9 @@ final class DiffusionCommitController extends DiffusionController {
           phutil_escape_html('Show All Changes'));
         $warning_view = id(new AphrontErrorView())
           ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
-          ->setTitle(sprintf(
-                       "Showing only the first %d changes out of %s!",
-                       self::CHANGES_LIMIT,
-                       number_format($original_changes_count)));
+          ->setTitle('Very Large Commit')
+          ->appendChild(
+            "<p>This commit is very large. Load each file individually.</p>");
 
         $change_panel->appendChild($warning_view);
         $change_panel->addButton($show_all_button);
@@ -224,16 +233,31 @@ final class DiffusionCommitController extends DiffusionController {
       // DifferentialChangeset. Make the objects ephemeral to make sure we don't
       // accidentally save them, and then set their ID to the appropriate ID for
       // this application (the path IDs).
-      $pquery = new DiffusionPathIDQuery(mpull($changesets, 'getFilename'));
-      $path_ids = $pquery->loadPathIDs();
+      $path_ids = array_flip(mpull($changes, 'getPath'));
       foreach ($changesets as $changeset) {
         $changeset->makeEphemeral();
         $changeset->setID($path_ids[$changeset->getFilename()]);
       }
 
+      if ($count <= self::CHANGES_LIMIT) {
+        $visible_changesets = $changesets;
+      } else {
+        $visible_changesets = array();
+        $inlines = id(new PhabricatorAuditInlineComment())->loadAllWhere(
+          'commitPHID = %s AND (auditCommentID IS NOT NULL OR authorPHID = %s)',
+          $commit->getPHID(),
+          $user->getPHID());
+        $path_ids = mpull($inlines, null, 'getPathID');
+        foreach ($changesets as $key => $changeset) {
+          if (array_key_exists($changeset->getID(), $path_ids)) {
+            $visible_changesets[$key] = $changeset;
+          }
+        }
+      }
+
       $change_list = new DifferentialChangesetListView();
       $change_list->setChangesets($changesets);
-      $change_list->setVisibleChangesets($changesets);
+      $change_list->setVisibleChangesets($visible_changesets);
       $change_list->setRenderingReferences($references);
       $change_list->setRenderURI('/diffusion/'.$callsign.'/diff/');
       $change_list->setRepository($repository);
@@ -248,20 +272,32 @@ final class DiffusionCommitController extends DiffusionController {
         '/diffusion/'.$callsign.'/diff/?view=r');
 
       $change_list->setInlineCommentControllerURI(
-        '/diffusion/inline/'.phutil_escape_uri($commit->getPHID()).'/');
+        '/diffusion/inline/edit/'.phutil_escape_uri($commit->getPHID()).'/');
+
+      $change_references = array();
+      foreach ($changesets as $key => $changeset) {
+        $change_references[$changeset->getID()] = $references[$key];
+      }
+      $change_table->setRenderingReferences($change_references);
 
       // TODO: This is pretty awkward, unify the CSS between Diffusion and
       // Differential better.
       require_celerity_resource('differential-core-view-css');
-      $change_list =
-        '<div class="differential-primary-pane">'.
-          $change_list->render().
-        '</div>';
+      $pane_id = celerity_generate_unique_node_id();
+      $add_comment_view = $this->renderAddCommentPanel($commit,
+                                                       $audit_requests,
+                                                       $pane_id);
+      $main_pane = phutil_render_tag(
+        'div',
+        array(
+          'class' => 'differential-primary-pane',
+          'id'    => $pane_id
+        ),
+        $change_list->render().
+        $add_comment_view);
 
-      $content[] = $change_list;
+      $content[] = $main_pane;
     }
-
-    $content[] = $this->buildAddCommentView($commit, $audit_requests);
 
     return $this->buildStandardPageResponse(
       $content,
@@ -361,25 +397,21 @@ final class DiffusionCommitController extends DiffusionController {
 
     $request = $this->getDiffusionRequest();
 
-    $contains = DiffusionContainsQuery::newFromDiffusionRequest($request);
-    $branches = $contains->loadContainingBranches();
+    $props['Branches'] = '<span id="commit-branches">Unknown</span>';
+    $props['Tags'] = '<span id="commit-tags">Unknown</span>';
 
-    if ($branches) {
-      // TODO: Separate these into 'tracked' and other; link tracked branches.
-      $branches = implode(', ', array_keys($branches));
-      $branches = phutil_escape_html($branches);
-      $props['Branches'] = $branches;
-    }
-
-
-    $tags = $this->buildTags($request);
-    if ($tags) {
-      $props['Tags'] = $tags;
-    }
+    $callsign = $request->getRepository()->getCallsign();
+    $root = '/diffusion/'.$callsign.'/commit/'.$commit->getCommitIdentifier();
+    Javelin::initBehavior(
+      'diffusion-commit-branches',
+      array(
+        $root.'/branches/' => 'commit-branches',
+        $root.'/tags/' => 'commit-tags',
+      ));
 
     $refs = $this->buildRefs($request);
     if ($refs) {
-      $props['Refs'] = $refs;
+      $props['References'] = $refs;
     }
 
     if ($task_phids) {
@@ -410,6 +442,7 @@ final class DiffusionCommitController extends DiffusionController {
     $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
     $view->setHandles($handles);
     $view->setAuthorityPHIDs($this->auditAuthorityPHIDs);
+    $this->highlightedAudits = $view->getHighlightedAudits();
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Audits');
@@ -452,9 +485,10 @@ final class DiffusionCommitController extends DiffusionController {
     return $view;
   }
 
-  private function buildAddCommentView(
+  private function renderAddCommentPanel(
     PhabricatorRepositoryCommit $commit,
-    array $audit_requests) {
+    array $audit_requests,
+    $pane_id = null) {
     assert_instances_of($audit_requests, 'PhabricatorRepositoryAuditRequest');
     $user = $this->getRequest()->getUser();
 
@@ -463,8 +497,7 @@ final class DiffusionCommitController extends DiffusionController {
     Javelin::initBehavior(
       'differential-keyboard-navigation',
       array(
-        // TODO: Make this comment panel hauntable
-        'haunt' => null,
+        'haunt' => $pane_id,
       ));
 
     $draft = id(new PhabricatorDraft())->loadOneWhere(
@@ -527,6 +560,8 @@ final class DiffusionCommitController extends DiffusionController {
     $panel = new AphrontPanelView();
     $panel->setHeader($is_serious ? 'Audit Commit' : 'Creative Accounting');
     $panel->appendChild($form);
+    $panel->addClass('aphront-panel-accent');
+    $panel->addClass('aphront-panel-flush');
 
     require_celerity_resource('phabricator-transaction-view-css');
 
@@ -561,23 +596,30 @@ final class DiffusionCommitController extends DiffusionController {
         'auditors' => 'add-auditors-tokenizer',
         'ccs'      => 'add-ccs-tokenizer',
       ),
+      'inline'     => 'inline-comment-preview',
+      'inlineuri'  => '/diffusion/inline/preview/'.$commit->getPHID().'/',
     ));
 
     $preview_panel =
-      '<div class="aphront-panel-preview">
+      '<div class="aphront-panel-preview aphront-panel-flush">
         <div id="audit-preview">
           <div class="aphront-panel-preview-loading-text">
             Loading preview...
           </div>
         </div>
+        <div id="inline-comment-preview">
+        </div>
       </div>';
 
-    $view = new AphrontNullView();
-    $view->appendChild($panel);
-    $view->appendChild($preview_panel);
-    return $view;
+    return
+      phutil_render_tag(
+        'div',
+        array(
+          'class' => 'differential-add-comment-panel',
+        ),
+        $panel->render().
+        $preview_panel);
   }
-
 
   /**
    * Return a map of available audit actions for rendering into a <select />.
@@ -761,51 +803,6 @@ final class DiffusionCommitController extends DiffusionController {
     return $action_list;
   }
 
-  private function buildTags(DiffusionRequest $request) {
-    $tag_limit = 10;
-
-    $tag_query = DiffusionCommitTagsQuery::newFromDiffusionRequest($request);
-    $tag_query->setLimit($tag_limit + 1);
-    $tags = $tag_query->loadTags();
-
-    if (!$tags) {
-      return null;
-    }
-
-    $has_more_tags = (count($tags) > $tag_limit);
-    $tags = array_slice($tags, 0, $tag_limit);
-
-    $tag_links = array();
-    foreach ($tags as $tag) {
-      $tag_links[] = phutil_render_tag(
-        'a',
-        array(
-          'href' => $request->generateURI(
-            array(
-              'action'  => 'browse',
-              'commit'  => $tag->getName(),
-            )),
-        ),
-        phutil_escape_html($tag->getName()));
-    }
-
-    if ($has_more_tags) {
-      $tag_links[] = phutil_render_tag(
-        'a',
-        array(
-          'href' => $request->generateURI(
-            array(
-              'action'  => 'tags',
-            )),
-        ),
-        "More tags\xE2\x80\xA6");
-    }
-
-    $tag_links = implode(', ', $tag_links);
-
-    return $tag_links;
-  }
-
   private function buildRefs(DiffusionRequest $request) {
     // Not turning this into a proper Query class since it's pretty simple,
     // one-off, and Git-specific.
@@ -822,30 +819,41 @@ final class DiffusionCommitController extends DiffusionController {
       '%d',
       $request->getCommit());
 
-    return trim($stdout, "() \n");
+    // %d, gives a weird output format
+    // similar to (remote/one, remote/two, remote/three)
+    $refs = trim($stdout, "() \n");
+    if (!$refs) {
+        return null;
+    }
+    $refs = explode(',', $refs);
+    $refs = array_map('trim', $refs);
+
+    $ref_links = array();
+    foreach ($refs as $ref) {
+      $ref_links[] = phutil_render_tag(
+        'a',
+        array(
+          'href' => $request->generateURI(
+            array(
+              'action'  => 'browse',
+              'branch'  => $ref,
+            )),
+        ),
+        phutil_escape_html($ref));
+    }
+    $ref_links = implode(', ', $ref_links);
+    return $ref_links;
   }
 
   private function buildRawDiffResponse(DiffusionRequest $drequest) {
     $raw_query = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest);
     $raw_diff  = $raw_query->loadRawDiff();
 
-    $hash = PhabricatorHash::digest($raw_diff);
-
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'contentHash = %s LIMIT 1',
-      $hash);
-    if (!$file) {
-      // We're just caching the data; this is always safe.
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-
-      $file = PhabricatorFile::newFromFileData(
-        $raw_diff,
-        array(
-          'name' => $drequest->getCommit().'.diff',
-        ));
-
-      unset($unguarded);
-    }
+    $file = PhabricatorFile::buildFromFileDataOrHash(
+      $raw_diff,
+      array(
+        'name' => $drequest->getCommit().'.diff',
+      ));
 
     return id(new AphrontRedirectResponse())->setURI($file->getBestURI());
   }

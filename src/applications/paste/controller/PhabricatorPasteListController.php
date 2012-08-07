@@ -73,7 +73,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $pager = new AphrontIDPagerView();
+    $pager = new AphrontCursorPagerView();
     $pager->readFromRequest($request);
 
     $query = new PhabricatorPasteQuery();
@@ -95,10 +95,10 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
         break;
       case 'my':
         $query->withAuthorPHIDs(array($user->getPHID()));
-        $paste_list = $query->executeWithPager($pager);
+        $paste_list = $query->executeWithCursorPager($pager);
         break;
       case 'all':
-        $paste_list = $query->executeWithPager($pager);
+        $paste_list = $query->executeWithCursorPager($pager);
         break;
     }
 
@@ -362,6 +362,10 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
             'href' => $file_uri,
           ),
           phutil_escape_html($paste->getFilePHID())),
+
+        phabricator_datetime(
+          $paste->getDateCreated(),
+          $this->getRequest()->getUser()),
       );
     }
 
@@ -374,6 +378,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
         'Language',
         'Title',
         'File',
+        'Created',
       ));
 
     $table->setColumnClasses(
@@ -383,6 +388,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
         null,
         'wide pri',
         null,
+        'right',
       ));
 
     $panel = new AphrontPanelView();

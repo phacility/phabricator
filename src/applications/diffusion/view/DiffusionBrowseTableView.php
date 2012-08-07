@@ -20,6 +20,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
 
   private $paths;
   private $handles = array();
+  private $user;
 
   public function setPaths(array $paths) {
     assert_instances_of($paths, 'DiffusionRepositoryPath');
@@ -30,6 +31,24 @@ final class DiffusionBrowseTableView extends DiffusionView {
   public function setHandles(array $handles) {
     assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
+    return $this;
+  }
+
+  private static function renderName($name) {
+    $email = new PhutilEmailAddress($name);
+    if ($email->getDisplayName() || $email->getDomainName()) {
+      return phutil_render_tag(
+        'span',
+        array(
+          'title' => $email->getAddress(),
+        ),
+        phutil_escape_html($email->getDisplayName()));
+    }
+    return phutil_escape_html($name);
+  }
+
+  public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
     return $this;
   }
 
@@ -58,7 +77,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
       if ($author_phid && isset($handles[$author_phid])) {
         $author = $handles[$author_phid]->renderLink();
       } else {
-        $author = phutil_escape_html($data->getAuthorName());
+        $author = self::renderName($data->getAuthorName());
       }
 
       $committer = $data->getCommitDetail('committer');
@@ -67,7 +86,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         if ($committer_phid && isset($handles[$committer_phid])) {
           $committer = $handles[$committer_phid]->renderLink();
         } else {
-          $committer = phutil_escape_html($data->getCommitDetail('committer'));
+          $committer = self::renderName($data->getCommitDetail('committer'));
         }
       } else {
         $committer = $author;
@@ -102,6 +121,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
 
     $need_pull = array();
     $rows = array();
+    $show_edit = false;
     foreach ($this->paths as $path) {
 
       $dir_slash = null;
@@ -171,8 +191,26 @@ final class DiffusionBrowseTableView extends DiffusionView {
         }
       }
 
+      $editor_button = '';
+      if ($this->user) {
+        $editor_link = $this->user->loadEditorLink(
+          $base_path.$path->getPath(),
+          1,
+          $request->getRepository()->getCallsign());
+        if ($editor_link) {
+          $show_edit = true;
+          $editor_button = phutil_render_tag(
+            'a',
+            array(
+              'href' => $editor_link,
+            ),
+            'Edit');
+        }
+      }
+
       $rows[] = array(
         $this->linkHistory($base_path.$path->getPath().$dir_slash),
+        $editor_button,
         $browse_link,
         $dict['commit'],
         $dict['date'],
@@ -191,6 +229,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
     $view->setHeaders(
       array(
         'History',
+        'Edit',
         'Path',
         'Modified',
         'Date',
@@ -205,10 +244,23 @@ final class DiffusionBrowseTableView extends DiffusionView {
         '',
         '',
         '',
+        '',
         'right',
         '',
         '',
         'wide',
+      ));
+    $view->setColumnVisibility(
+      array(
+        true,
+        $show_edit,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
       ));
     return $view->render();
   }

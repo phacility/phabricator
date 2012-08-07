@@ -38,7 +38,6 @@ $args->parseStandardArguments();
 $conf = PhabricatorEnv::newObjectFromConfig('mysql.configuration-provider');
 
 $default_user       = $conf->getUser();
-$default_password   = $conf->getPassword();
 $default_host       = $conf->getHost();
 $default_namespace  = PhabricatorLiskDAO::getDefaultStorageNamespace();
 
@@ -62,7 +61,6 @@ try {
         'name'    => 'password',
         'short'   => 'p',
         'param'   => 'password',
-        'default' => $default_password,
         'help'    => 'Use __password__ instead of the configured default.',
       ),
       array(
@@ -85,10 +83,18 @@ try {
   exit(77);
 }
 
+if ($args->getArg('password') === null) {
+  // This is already a PhutilOpaqueEnvelope.
+  $password = $conf->getPassword();
+} else {
+  // Put this in a PhutilOpaqueEnvelope.
+  $password = new PhutilOpaqueEnvelope($args->getArg('password'));
+}
+
 $api = new PhabricatorStorageManagementAPI();
 $api->setUser($args->getArg('user'));
 $api->setHost($default_host);
-$api->setPassword($args->getArg('password'));
+$api->setPassword($password);
 $api->setNamespace($args->getArg('namespace'));
 
 try {

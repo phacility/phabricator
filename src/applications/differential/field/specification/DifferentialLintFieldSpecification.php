@@ -28,11 +28,15 @@ final class DifferentialLintFieldSpecification
   }
 
   public function getRequiredDiffProperties() {
-    return array('arc:lint', 'arc:lint-excuse');
+    return array('arc:lint', 'arc:lint-excuse', 'arc:lint-postponed');
   }
 
   private function getLintExcuse() {
     return $this->getDiffProperty('arc:lint-excuse');
+  }
+
+  private function getPostponedLinters() {
+    return $this->getDiffProperty('arc:lint-postponed');
   }
 
   public function renderValueForRevisionView() {
@@ -132,6 +136,22 @@ final class DifferentialLintFieldSpecification
       }
     }
 
+    $postponed = $this->getPostponedLinters();
+    if ($postponed) {
+      foreach ($postponed as $linter) {
+        $rows[] = array(
+          'style' => $this->getPostponedStyle(),
+          'name' => 'Postponed',
+          'value' => phutil_escape_html($linter),
+          'show'  => false,
+          );
+        if (empty($hidden['postponed'])) {
+          $hidden['postponed'] = 0;
+        }
+        $hidden['postponed']++;
+      }
+    }
+
     $show_string = $this->renderShowString($hidden);
 
     $view = new DifferentialResultsTableView();
@@ -151,6 +171,10 @@ final class DifferentialLintFieldSpecification
     return idx($map, $severity);
   }
 
+  private function getPostponedStyle() {
+    return 'blue';
+  }
+
   private function renderShowString(array $hidden) {
     if (!$hidden) {
       return null;
@@ -165,6 +189,7 @@ final class DifferentialLintFieldSpecification
         ArcanistLintSeverity::SEVERITY_AUTOFIX,
         ArcanistLintSeverity::SEVERITY_ADVICE,
         'details',
+        'postponed',
       )) + $hidden;
 
     $show = array();
@@ -184,6 +209,9 @@ final class DifferentialLintFieldSpecification
           break;
         case 'details':
           $show[] = pht('%d Detail(s)', $value);
+          break;
+        case 'postponed':
+          $show[] = pht('%d Postponed', $value);
           break;
         default:
           $show[] = $value;

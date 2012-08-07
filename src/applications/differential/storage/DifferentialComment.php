@@ -18,9 +18,10 @@
 
 final class DifferentialComment extends DifferentialDAO {
 
-  const METADATA_ADDED_REVIEWERS  = 'added-reviewers';
-  const METADATA_ADDED_CCS        = 'added-ccs';
-  const METADATA_DIFF_ID          = 'diff-id';
+  const METADATA_ADDED_REVIEWERS   = 'added-reviewers';
+  const METADATA_REMOVED_REVIEWERS = 'removed-reviewers';
+  const METADATA_ADDED_CCS         = 'added-ccs';
+  const METADATA_DIFF_ID           = 'diff-id';
 
   protected $authorPHID;
   protected $revisionID;

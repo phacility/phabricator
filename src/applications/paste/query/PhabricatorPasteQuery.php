@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-final class PhabricatorPasteQuery extends PhabricatorIDPagedPolicyQuery {
+final class PhabricatorPasteQuery extends PhabricatorCursorPagedPolicyQuery {
 
   private $pasteIDs;
   private $authorPHIDs;

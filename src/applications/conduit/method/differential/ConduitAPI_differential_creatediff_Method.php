@@ -31,6 +31,7 @@ final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
       'sourceMachine'             => 'required string',
       'sourcePath'                => 'required string',
       'branch'                    => 'required string',
+      'bookmark'                  => 'optional string',
       'sourceControlSystem'       => 'required enum<svn, git>',
       'sourceControlPath'         => 'required string',
       'sourceControlBaseRevision' => 'required string',
@@ -40,9 +41,9 @@ final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
       'arcanistProject'           => 'optional string',
       'repositoryUUID'            => 'optional string',
       'lintStatus'                =>
-        'required enum<none, skip, okay, warn, fail>',
+        'required enum<none, skip, okay, warn, fail, postponed>',
       'unitStatus'                =>
-        'required enum<none, skip, okay, warn, fail>',
+        'required enum<none, skip, okay, warn, fail, postponed>',
     );
   }
 
@@ -70,6 +71,7 @@ final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
     $diff->setBranch($request->getValue('branch'));
     $diff->setCreationMethod($request->getValue('creationMethod'));
     $diff->setAuthorPHID($request->getValue('authorPHID'));
+    $diff->setBookmark($request->getValue('bookmark'));
 
     $parent_id = $request->getValue('parentRevisionID');
     if ($parent_id) {
@@ -118,6 +120,9 @@ final class ConduitAPI_differential_creatediff_Method extends ConduitAPIMethod {
         break;
       case 'fail':
         $diff->setLintStatus(DifferentialLintStatus::LINT_FAIL);
+        break;
+      case 'postponed':
+        $diff->setLintStatus(DifferentialLintStatus::LINT_POSTPONED);
         break;
       case 'none':
       default:

@@ -78,12 +78,16 @@ abstract class PhabricatorMailReplyHandler {
     assert_instances_of($cc_handles, 'PhabricatorObjectHandle');
 
     $body = '';
-    if ($to_handles) {
-      $body .= "To: ".implode(', ', mpull($to_handles, 'getName'))."\n";
+
+    if (PhabricatorEnv::getEnvConfig('metamta.recipients.show-hints')) {
+      if ($to_handles) {
+        $body .= "To: ".implode(', ', mpull($to_handles, 'getName'))."\n";
+      }
+      if ($cc_handles) {
+        $body .= "Cc: ".implode(', ', mpull($cc_handles, 'getName'))."\n";
+      }
     }
-    if ($cc_handles) {
-      $body .= "Cc: ".implode(', ', mpull($cc_handles, 'getName'))."\n";
-    }
+
     return $body;
   }
 
@@ -138,9 +142,16 @@ abstract class PhabricatorMailReplyHandler {
     $body .= "\n";
     $body .= $this->getRecipientsSummary($to_handles, $cc_handles);
 
-    foreach ($recipients as $recipient) {
+    foreach ($recipients as $phid => $recipient) {
       $mail = clone $mail_template;
-      $mail->addTos(array($recipient->getPHID()));
+      if (isset($to_handles[$phid])) {
+        $mail->addTos(array($phid));
+      } else if (isset($cc_handles[$phid])) {
+        $mail->addCCs(array($phid));
+      } else {
+        // not good - they should be a to or a cc
+        continue;
+      }
 
       $mail->setBody($body);
 

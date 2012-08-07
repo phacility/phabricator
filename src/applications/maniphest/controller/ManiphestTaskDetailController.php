@@ -51,11 +51,31 @@ final class ManiphestTaskDetailController extends ManiphestController {
       'taskID = %d ORDER BY id ASC',
       $task->getID());
 
-    $commit_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $task->getPHID(),
-      PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT);
+    $e_commit = PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT;
+    $e_dep_on = PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK;
+    $e_dep_by = PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK;
+    $e_rev    = PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV;
 
-    $phids = array_fill_keys($commit_phids, true);
+    $phid = $task->getPHID();
+
+    $query = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs(array($phid))
+      ->withEdgeTypes(
+        array(
+          $e_commit,
+          $e_dep_on,
+          $e_dep_by,
+          $e_rev,
+        ));
+    $edges = $query->execute();
+
+    $commit_phids = array_keys($edges[$phid][$e_commit]);
+    $dep_on_tasks = array_keys($edges[$phid][$e_dep_on]);
+    $dep_by_tasks = array_keys($edges[$phid][$e_dep_by]);
+    $revs         = array_keys($edges[$phid][$e_rev]);
+
+    $phids = array_fill_keys($query->getDestinationPHIDs(), true);
+
     foreach ($transactions as $transaction) {
       foreach ($transaction->extractPHIDs() as $phid) {
         $phids[$phid] = true;
@@ -87,8 +107,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $handles = id(new PhabricatorObjectHandleData($phids))
       ->loadHandles();
-
-    $engine = PhabricatorMarkupEngine::newManiphestMarkupEngine();
 
     $dict = array();
     $dict['Status'] =
@@ -152,33 +170,24 @@ final class ManiphestTaskDetailController extends ManiphestController {
       }
     }
 
-    $dtasks = idx($attached, PhabricatorPHIDConstants::PHID_TYPE_TASK);
-    if ($dtasks) {
-      $dtask_links = array();
-      foreach ($dtasks as $dtask => $info) {
-        $dtask_links[] = $handles[$dtask]->renderLink();
-      }
-      $dtask_links = implode('<br />', $dtask_links);
-      $dict['Depends On'] = $dtask_links;
+    if ($dep_by_tasks) {
+      $dict['Dependent Tasks'] = $this->renderHandleList(
+        array_select_keys($handles, $dep_by_tasks));
     }
 
-    $revs = idx($attached, PhabricatorPHIDConstants::PHID_TYPE_DREV);
+    if ($dep_on_tasks) {
+      $dict['Depends On'] = $this->renderHandleList(
+        array_select_keys($handles, $dep_on_tasks));
+    }
+
     if ($revs) {
-      $rev_links = array();
-      foreach ($revs as $rev => $info) {
-        $rev_links[] = $handles[$rev]->renderLink();
-      }
-      $rev_links = implode('<br />', $rev_links);
-      $dict['Revisions'] = $rev_links;
+      $dict['Revisions'] = $this->renderHandleList(
+        array_select_keys($handles, $revs));
     }
 
     if ($commit_phids) {
-      $commit_links = array();
-      foreach ($commit_phids as $phid) {
-        $commit_links[] = $handles[$phid]->renderLink();
-      }
-      $commit_links = implode('<br />', $commit_links);
-      $dict['Commits'] = $commit_links;
+      $dict['Commits'] = $this->renderHandleList(
+        array_select_keys($handles, $commit_phids));
     }
 
     $file_infos = idx($attached, PhabricatorPHIDConstants::PHID_TYPE_FILE);
@@ -305,9 +314,18 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $headsup_panel->setActionList($action_list);
     $headsup_panel->setProperties($dict);
 
+    $engine = new PhabricatorMarkupEngine();
+    $engine->addObject($task, ManiphestTask::MARKUP_FIELD_DESCRIPTION);
+    foreach ($transactions as $xaction) {
+      if ($xaction->hasComments()) {
+        $engine->addObject($xaction, ManiphestTransaction::MARKUP_FIELD_BODY);
+      }
+    }
+    $engine->process();
+
     $headsup_panel->appendChild(
       '<div class="phabricator-remarkup">'.
-        $engine->markupText($task->getDescription()).
+        $engine->getOutput($task, ManiphestTask::MARKUP_FIELD_DESCRIPTION).
       '</div>');
 
     $transaction_types = ManiphestTransactionType::getTransactionTypeMap();
@@ -525,6 +543,14 @@ final class ManiphestTaskDetailController extends ManiphestController {
         'title' => 'T'.$task->getID().' '.$task->getTitle(),
         'pageObjects' => array($task->getPHID()),
       ));
+  }
+
+  private function renderHandleList(array $handles) {
+    $links = array();
+    foreach ($handles as $handle) {
+      $links[] = $handle->renderLink();
+    }
+    return implode('<br />', $links);
   }
 
 }

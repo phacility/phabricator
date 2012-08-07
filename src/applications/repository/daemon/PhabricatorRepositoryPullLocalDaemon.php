@@ -45,7 +45,13 @@
 final class PhabricatorRepositoryPullLocalDaemon
   extends PhabricatorDaemon {
 
-  private static $commitCache = array();
+  private $commitCache = array();
+  private $repair;
+
+  public function setRepair($repair) {
+    $this->repair = $repair;
+    return $this;
+  }
 
 
 /* -(  Pulling Repositories  )----------------------------------------------- */
@@ -127,16 +133,34 @@ final class PhabricatorRepositoryPullLocalDaemon
         }
 
         try {
-          self::pullRepository($repository);
+          $callsign = $repository->getCallsign();
+          $this->log("Updating repository '{$callsign}'.");
+
+          $this->pullRepository($repository);
 
           if (!$no_discovery) {
             // TODO: It would be nice to discover only if we pulled something,
             // but this isn't totally trivial.
-            self::discoverRepository($repository);
+
+            $lock_name = get_class($this).':'.$callsign;
+            $lock = PhabricatorGlobalLock::newLock($lock_name);
+            $lock->lock();
+
+            try {
+              $this->discoverRepository($repository);
+            } catch (Exception $ex) {
+              $lock->unlock();
+              throw $ex;
+            }
+
+            $lock->unlock();
           }
 
           $sleep_for = $repository->getDetail('pull-frequency', $min_sleep);
           $retry_after[$id] = time() + $sleep_for;
+        } catch (PhutilLockException $ex) {
+          $retry_after[$id] = time() + $min_sleep;
+          $this->log("Failed to acquire lock.");
         } catch (Exception $ex) {
           $retry_after[$id] = time() + $min_sleep;
           phlog($ex);
@@ -171,7 +195,7 @@ final class PhabricatorRepositoryPullLocalDaemon
   /**
    * @task pull
    */
-  public static function pullRepository(PhabricatorRepository $repository) {
+  public function pullRepository(PhabricatorRepository $repository) {
     $vcs = $repository->getVersionControlSystem();
 
     $is_svn = ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_SVN);
@@ -202,40 +226,47 @@ final class PhabricatorRepositoryPullLocalDaemon
       }
 
       if ($is_git) {
-        return self::executeGitCreate($repository, $local_path);
+        return $this->executeGitCreate($repository, $local_path);
       } else if ($is_hg) {
-        return self::executeHgCreate($repository, $local_path);
+        return $this->executeHgCreate($repository, $local_path);
       }
     } else {
       if ($is_git) {
-        return self::executeGitUpdate($repository, $local_path);
+        return $this->executeGitUpdate($repository, $local_path);
       } else if ($is_hg) {
-        return self::executeHgUpdate($repository, $local_path);
+        return $this->executeHgUpdate($repository, $local_path);
       }
     }
   }
 
-  public static function discoverRepository(PhabricatorRepository $repository) {
+  public function discoverRepository(PhabricatorRepository $repository) {
     $vcs = $repository->getVersionControlSystem();
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        return self::executeGitDiscover($repository);
+        return $this->executeGitDiscover($repository);
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        return self::executeSvnDiscover($repository);
+        return $this->executeSvnDiscover($repository);
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        return self::executeHgDiscover($repository);
+        return $this->executeHgDiscover($repository);
       default:
         throw new Exception("Unknown VCS '{$vcs}'!");
     }
   }
 
 
-  private static function isKnownCommit(
+  private function isKnownCommit(
     PhabricatorRepository $repository,
     $target) {
 
-    if (self::getCache($repository, $target)) {
+    if ($this->getCache($repository, $target)) {
       return true;
+    }
+
+    if ($this->repair) {
+      // In repair mode, rediscover the entire repository, ignoring the
+      // database state. We can hit the local cache above, but if we miss it
+      // stop the script from going to the database cache.
+      return false;
     }
 
     $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
@@ -247,15 +278,15 @@ final class PhabricatorRepositoryPullLocalDaemon
       return false;
     }
 
-    self::setCache($repository, $target);
-    while (count(self::$commitCache) > 2048) {
-      array_shift(self::$commitCache);
+    $this->setCache($repository, $target);
+    while (count($this->commitCache) > 2048) {
+      array_shift($this->commitCache);
     }
 
     return true;
   }
 
-  private static function isKnownCommitOnAnyAutocloseBranch(
+  private function isKnownCommitOnAnyAutocloseBranch(
     PhabricatorRepository $repository,
     $target) {
 
@@ -265,6 +296,16 @@ final class PhabricatorRepositoryPullLocalDaemon
       $target);
 
     if (!$commit) {
+      $callsign = $repository->getCallsign();
+
+      $console = PhutilConsole::getConsole();
+      $console->writeErr(
+        "WARNING: Repository '%s' is missing commits ('%s' is missing from ".
+        "history). Run '%s' to repair the repository.\n",
+        $callsign,
+        $target,
+        "bin/repository discover --repair {$callsign}");
+
       return false;
     }
 
@@ -280,18 +321,28 @@ final class PhabricatorRepositoryPullLocalDaemon
     return false;
   }
 
-  private static function recordCommit(
+  private function recordCommit(
     PhabricatorRepository $repository,
     $commit_identifier,
-    $epoch) {
+    $epoch,
+    $branch = null) {
 
     $commit = new PhabricatorRepositoryCommit();
     $commit->setRepositoryID($repository->getID());
     $commit->setCommitIdentifier($commit_identifier);
     $commit->setEpoch($epoch);
 
+    $data = new PhabricatorRepositoryCommitData();
+    if ($branch) {
+      $data->setCommitDetail('seenOnBranches', array($branch));
+    }
+
     try {
-      $commit->save();
+      $commit->openTransaction();
+        $commit->save();
+        $data->setCommitID($commit->getID());
+        $data->save();
+      $commit->saveTransaction();
 
       $event = new PhabricatorTimelineEvent(
         'cmit',
@@ -300,7 +351,7 @@ final class PhabricatorRepositoryPullLocalDaemon
         ));
       $event->recordEvent();
 
-      self::insertTask($repository, $commit);
+      $this->insertTask($repository, $commit);
 
       queryfx(
         $repository->establishConnection('w'),
@@ -316,17 +367,33 @@ final class PhabricatorRepositoryPullLocalDaemon
         $commit->getID(),
         $epoch);
 
-      self::setCache($repository, $commit_identifier);
+      if ($this->repair) {
+        // Normally, the query should throw a duplicate key exception. If we
+        // reach this in repair mode, we've actually performed a repair.
+        $this->log("Repaired commit '{$commit_identifier}'.");
+      }
+
+      $this->setCache($repository, $commit_identifier);
+
+      PhutilEventEngine::dispatchEvent(
+        new PhabricatorEvent(
+          PhabricatorEventType::TYPE_DIFFUSION_DIDDISCOVERCOMMIT,
+          array(
+            'repository'  => $repository,
+            'commit'      => $commit,
+          )));
+
     } catch (AphrontQueryDuplicateKeyException $ex) {
+      $commit->killTransaction();
       // Ignore. This can happen because we discover the same new commit
       // more than once when looking at history, or because of races or
       // data inconsistency or cosmic radiation; in any case, we're still
       // in a good state if we ignore the failure.
-      self::setCache($repository, $commit_identifier);
+      $this->setCache($repository, $commit_identifier);
     }
   }
 
-  private static function updateCommit(
+  private function updateCommit(
     PhabricatorRepository $repository,
     $commit_identifier,
     $branch) {
@@ -335,6 +402,13 @@ final class PhabricatorRepositoryPullLocalDaemon
       'repositoryID = %s AND commitIdentifier = %s',
       $repository->getID(),
       $commit_identifier);
+
+    if (!$commit) {
+      // This can happen if the phabricator DB doesn't have the commit info,
+      // or the commit is so big that phabricator couldn't parse it. In this
+      // case we just ignore it.
+      return;
+    }
 
     $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
       'commitID = %d',
@@ -348,7 +422,7 @@ final class PhabricatorRepositoryPullLocalDaemon
     $data->setCommitDetail('seenOnBranches', $branches);
     $data->save();
 
-    self::insertTask(
+    $this->insertTask(
       $repository,
       $commit,
       array(
@@ -356,7 +430,7 @@ final class PhabricatorRepositoryPullLocalDaemon
       ));
   }
 
-  private static function insertTask(
+  private function insertTask(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit,
     $data = array()) {
@@ -385,23 +459,23 @@ final class PhabricatorRepositoryPullLocalDaemon
   }
 
 
-  private static function setCache(
+  private function setCache(
     PhabricatorRepository $repository,
     $commit_identifier) {
 
-    $key = self::getCacheKey($repository, $commit_identifier);
-    self::$commitCache[$key] = true;
+    $key = $this->getCacheKey($repository, $commit_identifier);
+    $this->commitCache[$key] = true;
   }
 
-  private static function getCache(
+  private function getCache(
     PhabricatorRepository $repository,
     $commit_identifier) {
 
-    $key = self::getCacheKey($repository, $commit_identifier);
-    return idx(self::$commitCache, $key, false);
+    $key = $this->getCacheKey($repository, $commit_identifier);
+    return idx($this->commitCache, $key, false);
   }
 
-  private static function getCacheKey(
+  private function getCacheKey(
     PhabricatorRepository $repository,
     $commit_identifier) {
 
@@ -416,7 +490,7 @@ final class PhabricatorRepositoryPullLocalDaemon
   /**
    * @task git
    */
-  private static function executeGitCreate(
+  private function executeGitCreate(
     PhabricatorRepository $repository,
     $path) {
 
@@ -430,7 +504,7 @@ final class PhabricatorRepositoryPullLocalDaemon
   /**
    * @task git
    */
-  private static function executeGitUpdate(
+  private function executeGitUpdate(
     PhabricatorRepository $repository,
     $path) {
 
@@ -495,7 +569,7 @@ final class PhabricatorRepositoryPullLocalDaemon
   /**
    * @task git
    */
-  private static function executeGitDiscover(
+  private function executeGitDiscover(
     PhabricatorRepository $repository) {
 
     list($remotes) = $repository->execxLocalCommand(
@@ -507,7 +581,7 @@ final class PhabricatorRepositoryPullLocalDaemon
         "Expected 'Fetch URL' in 'git remote show -n origin'.");
     }
 
-    self::executeGitverifySameOrigin(
+    self::executeGitVerifySameOrigin(
       $matches[1],
       $repository->getRemoteURI(),
       $repository->getLocalPath());
@@ -519,19 +593,27 @@ final class PhabricatorRepositoryPullLocalDaemon
       $stdout,
       $only_this_remote = DiffusionBranchInformation::DEFAULT_GIT_REMOTE);
 
+    $callsign = $repository->getCallsign();
+
     $tracked_something = false;
+
+    $this->log("Discovering commits in repository '{$callsign}'...");
     foreach ($branches as $name => $commit) {
+      $this->log("Examining branch '{$name}', at {$commit}.");
       if (!$repository->shouldTrackBranch($name)) {
+        $this->log("Skipping, branch is untracked.");
         continue;
       }
 
       $tracked_something = true;
 
-      if (self::isKnownCommit($repository, $commit)) {
+      if ($this->isKnownCommit($repository, $commit)) {
+        $this->log("Skipping, HEAD is known.");
         continue;
-      } else {
-        self::executeGitDiscoverCommit($repository, $commit);
       }
+
+      $this->log("Looking for new commits.");
+      $this->executeGitDiscoverCommit($repository, $commit, $name, false);
     }
 
     if (!$tracked_something) {
@@ -542,20 +624,27 @@ final class PhabricatorRepositoryPullLocalDaemon
         "Verify that your branch filtering settings are correct.");
     }
 
+
+    $this->log("Discovering commits on autoclose branches...");
     foreach ($branches as $name => $commit) {
+      $this->log("Examining branch '{$name}', at {$commit}'.");
       if (!$repository->shouldTrackBranch($name)) {
+        $this->log("Skipping, branch is untracked.");
         continue;
       }
 
       if (!$repository->shouldAutocloseBranch($name)) {
+        $this->log("Skipping, branch is not autoclose.");
         continue;
       }
 
-      if (self::isKnownCommitOnAnyAutocloseBranch($repository, $commit)) {
+      if ($this->isKnownCommitOnAnyAutocloseBranch($repository, $commit)) {
+        $this->log("Skipping, commit is known on an autoclose branch.");
         continue;
       }
 
-      self::executeGitDiscoverCommit($repository, $commit, $name);
+      $this->log("Looking for new autoclose commits.");
+      $this->executeGitDiscoverCommit($repository, $commit, $name, true);
     }
   }
 
@@ -563,22 +652,22 @@ final class PhabricatorRepositoryPullLocalDaemon
   /**
    * @task git
    */
-  private static function executeGitDiscoverCommit(
+  private function executeGitDiscoverCommit(
     PhabricatorRepository $repository,
     $commit,
-    $branch = null) {
+    $branch,
+    $autoclose) {
 
     $discover = array($commit);
     $insert = array($commit);
 
     $seen_parent = array();
 
+    $stream = new PhabricatorGitGraphStream($repository, $commit);
+
     while (true) {
       $target = array_pop($discover);
-      list($parents) = $repository->execxLocalCommand(
-        'log -n1 --pretty="%%P" %s',
-        $target);
-      $parents = array_filter(explode(' ', trim($parents)));
+      $parents = $stream->getParents($target);
       foreach ($parents as $parent) {
         if (isset($seen_parent[$parent])) {
           // We end up in a loop here somehow when we parse Arcanist if we
@@ -588,14 +677,15 @@ final class PhabricatorRepositoryPullLocalDaemon
           continue;
         }
         $seen_parent[$parent] = true;
-        if ($branch !== null) {
-          $known = self::isKnownCommitOnAnyAutocloseBranch(
+        if ($autoclose) {
+          $known = $this->isKnownCommitOnAnyAutocloseBranch(
             $repository,
             $parent);
         } else {
-          $known = self::isKnownCommit($repository, $parent);
+          $known = $this->isKnownCommit($repository, $parent);
         }
         if (!$known) {
+          $this->log("Discovered commit '{$parent}'.");
           $discover[] = $parent;
           $insert[] = $parent;
         }
@@ -605,17 +695,22 @@ final class PhabricatorRepositoryPullLocalDaemon
       }
     }
 
+    $n = count($insert);
+    if ($autoclose) {
+      $this->log("Found {$n} new autoclose commits on branch '{$branch}'.");
+    } else {
+      $this->log("Found {$n} new commits on branch '{$branch}'.");
+    }
+
     while (true) {
       $target = array_pop($insert);
-      list($epoch) = $repository->execxLocalCommand(
-        'log -n1 --pretty="%%ct" %s',
-        $target);
+      $epoch = $stream->getCommitDate($target);
       $epoch = trim($epoch);
 
-      if ($branch !== null) {
-        self::updateCommit($repository, $target, $branch);
+      if ($autoclose) {
+        $this->updateCommit($repository, $target, $branch);
       } else {
-        self::recordCommit($repository, $target, $epoch);
+        $this->recordCommit($repository, $target, $epoch, $branch);
       }
 
       if (empty($insert)) {
@@ -629,11 +724,8 @@ final class PhabricatorRepositoryPullLocalDaemon
    * @task git
    */
   public static function executeGitVerifySameOrigin($remote, $expect, $where) {
-    $remote_uri = PhabricatorRepository::newPhutilURIFromGitURI($remote);
-    $expect_uri = PhabricatorRepository::newPhutilURIFromGitURI($expect);
-
-    $remote_path = $remote_uri->getPath();
-    $expect_path = $expect_uri->getPath();
+    $remote_path = self::getPathFromGitURI($remote);
+    $expect_path = self::getPathFromGitURI($expect);
 
     $remote_match = self::executeGitNormalizePath($remote_path);
     $expect_match = self::executeGitNormalizePath($expect_path);
@@ -648,14 +740,28 @@ final class PhabricatorRepositoryPullLocalDaemon
     }
   }
 
+  private static function getPathFromGitURI($raw_uri) {
+    $uri = new PhutilURI($raw_uri);
+    if ($uri->getProtocol()) {
+      return $uri->getPath();
+    }
+
+    $uri = new PhutilGitURI($raw_uri);
+    if ($uri->getDomain()) {
+      return $uri->getPath();
+    }
+
+    return $raw_uri;
+  }
+
 
   /**
    * @task git
    */
   private static function executeGitNormalizePath($path) {
-    // Strip away trailing "/" and ".git", so similar paths correctly match.
+    // Strip away "/" and ".git", so similar paths correctly match.
 
-    $path = rtrim($path, '/');
+    $path = trim($path, '/');
     $path = preg_replace('/\.git$/', '', $path);
     return $path;
   }
@@ -667,7 +773,7 @@ final class PhabricatorRepositoryPullLocalDaemon
   /**
    * @task hg
    */
-  private static function executeHgCreate(
+  private function executeHgCreate(
     PhabricatorRepository $repository,
     $path) {
 
@@ -681,7 +787,7 @@ final class PhabricatorRepositoryPullLocalDaemon
   /**
    * @task hg
    */
-  private static function executeHgUpdate(
+  private function executeHgUpdate(
     PhabricatorRepository $repository,
     $path) {
 
@@ -718,7 +824,7 @@ final class PhabricatorRepositoryPullLocalDaemon
     }
   }
 
-  private static function executeHgDiscover(PhabricatorRepository $repository) {
+  private function executeHgDiscover(PhabricatorRepository $repository) {
     // NOTE: "--debug" gives us 40-character hashes.
     list($stdout) = $repository->execxLocalCommand('--debug branches');
 
@@ -726,10 +832,10 @@ final class PhabricatorRepositoryPullLocalDaemon
     $got_something = false;
     foreach ($branches as $name => $branch) {
       $commit = $branch['rev'];
-      if (self::isKnownCommit($repository, $commit)) {
+      if ($this->isKnownCommit($repository, $commit)) {
         continue;
       } else {
-        self::executeHgDiscoverCommit($repository, $commit);
+        $this->executeHgDiscoverCommit($repository, $commit);
         $got_something = true;
       }
     }
@@ -737,7 +843,7 @@ final class PhabricatorRepositoryPullLocalDaemon
     return $got_something;
   }
 
-  private static function executeHgDiscoverCommit(
+  private function executeHgDiscoverCommit(
     PhabricatorRepository $repository,
     $commit) {
 
@@ -760,7 +866,7 @@ final class PhabricatorRepositoryPullLocalDaemon
           continue;
         }
         $seen_parent[$parent] = true;
-        if (!self::isKnownCommit($repository, $parent)) {
+        if (!$this->isKnownCommit($repository, $parent)) {
           $discover[] = $parent;
           $insert[] = $parent;
         }
@@ -769,7 +875,7 @@ final class PhabricatorRepositoryPullLocalDaemon
 
     foreach ($insert as $target) {
       $epoch = $stream->getCommitDate($target);
-      self::recordCommit($repository, $target, $epoch);
+      $this->recordCommit($repository, $target, $epoch);
     }
   }
 
@@ -777,33 +883,33 @@ final class PhabricatorRepositoryPullLocalDaemon
 /* -(  Subversion Implementation  )------------------------------------------ */
 
 
-  private static function executeSvnDiscover(
+  private function executeSvnDiscover(
     PhabricatorRepository $repository) {
 
-    $uri = self::executeSvnGetBaseSVNLogURI($repository);
+    $uri = $this->executeSvnGetBaseSVNLogURI($repository);
 
     list($xml) = $repository->execxRemoteCommand(
       'log --xml --quiet --limit 1 %s@HEAD',
       $uri);
 
-    $results = self::executeSvnParseLogXML($xml);
+    $results = $this->executeSvnParseLogXML($xml);
     $commit = head_key($results);
     $epoch  = head($results);
 
-    if (self::isKnownCommit($repository, $commit)) {
+    if ($this->isKnownCommit($repository, $commit)) {
       return false;
     }
 
-    self::executeSvnDiscoverCommit($repository, $commit, $epoch);
+    $this->executeSvnDiscoverCommit($repository, $commit, $epoch);
     return true;
   }
 
-  private static function executeSvnDiscoverCommit(
+  private function executeSvnDiscoverCommit(
     PhabricatorRepository $repository,
     $commit,
     $epoch) {
 
-    $uri = self::executeSvnGetBaseSVNLogURI($repository);
+    $uri = $this->executeSvnGetBaseSVNLogURI($repository);
 
     $discover = array(
       $commit => $epoch,
@@ -812,7 +918,7 @@ final class PhabricatorRepositoryPullLocalDaemon
 
     $limit = 1;
     while ($upper_bound > 1 &&
-           !self::isKnownCommit($repository, $upper_bound)) {
+           !$this->isKnownCommit($repository, $upper_bound)) {
       // Find all the unknown commits on this path. Note that we permit
       // importing an SVN subdirectory rather than the entire repository, so
       // commits may be nonsequential.
@@ -830,7 +936,7 @@ final class PhabricatorRepositoryPullLocalDaemon
           throw new Exception("svn log error #{$err}: {$stderr}");
         }
       }
-      $discover += self::executeSvnParseLogXML($xml);
+      $discover += $this->executeSvnParseLogXML($xml);
 
       $upper_bound = min(array_keys($discover));
 
@@ -849,11 +955,11 @@ final class PhabricatorRepositoryPullLocalDaemon
 
     ksort($discover);
     foreach ($discover as $commit => $epoch) {
-      self::recordCommit($repository, $commit, $epoch);
+      $this->recordCommit($repository, $commit, $epoch);
     }
   }
 
-  private static function executeSvnParseLogXML($xml) {
+  private function executeSvnParseLogXML($xml) {
     $xml = phutil_utf8ize($xml);
 
     $result = array();
@@ -869,7 +975,7 @@ final class PhabricatorRepositoryPullLocalDaemon
   }
 
 
-  private static function executeSvnGetBaseSVNLogURI(
+  private function executeSvnGetBaseSVNLogURI(
     PhabricatorRepository $repository) {
 
     $uri = $repository->getDetail('remote-uri');

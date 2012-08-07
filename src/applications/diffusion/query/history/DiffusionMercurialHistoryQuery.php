@@ -26,20 +26,36 @@ final class DiffusionMercurialHistoryQuery extends DiffusionHistoryQuery {
     $commit_hash = $drequest->getStableCommitName();
 
     $path = DiffusionPathIDQuery::normalizePath($path);
+    $path = ltrim($path, '/');
 
-    // NOTE: Using '' as a default path produces the correct behavior if HEAD
-    // is a merge commit; using '.' does not (the merge commit is not included
-    // in the log).
-    $default_path = '';
+    // NOTE: Older versions of Mercurial give different results for these
+    // commands (see T1268):
+    //
+    //   $ hg log -- ''
+    //   $ hg log
+    //
+    // All versions of Mercurial give different results for these commands
+    // (merge commits are excluded with the "." version):
+    //
+    //   $ hg log -- .
+    //   $ hg log
+    //
+    // If we don't have a path component in the query, omit it from the command
+    // entirely to avoid these inconsistencies.
+
+    $path_arg = '';
+    if (strlen($path)) {
+      $path_arg = csprintf('-- %s', $path);
+    }
 
     // NOTE: --branch used to be called --only-branch; use -b for compatibility.
     list($stdout) = $repository->execxLocalCommand(
-      'log --debug --template %s --limit %d -b %s --rev %s:0 -- %s',
+      'log --debug --template %s --limit %d -b %s --rev %s:0 %C',
       '{node};{parents}\\n',
       ($this->getOffset() + $this->getLimit()), // No '--skip' in Mercurial.
       $drequest->getBranch(),
       $commit_hash,
-      nonempty(ltrim($path, '/'), $default_path));
+      $path_arg);
 
     $lines = explode("\n", trim($stdout));
     $lines = array_slice($lines, $this->getOffset());

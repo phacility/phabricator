@@ -75,8 +75,15 @@ final class PhabricatorJumpNavHandler {
               }
               break;
             case 'find-symbol':
+              $context = '';
+              $symbol = $matches[1];
+              $parts = array();
+              if (preg_match('/(.*)(?:\\.|::|->)(.*)/', $symbol, $parts)) {
+                $context = '&context='.phutil_escape_uri($parts[1]);
+                $symbol = $parts[2];
+              }
               return id(new AphrontRedirectResponse())
-                ->setURI('/diffusion/symbol/'.$matches[1].'/?jump=true');
+                ->setURI("/diffusion/symbol/$symbol/?jump=true$context");
             case 'create-task':
               return id(new AphrontRedirectResponse())
                 ->setURI('/maniphest/task/create/?title='

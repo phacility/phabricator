@@ -40,8 +40,16 @@ final class ManiphestTaskQuery {
   const STATUS_ANY          = 'status-any';
   const STATUS_OPEN         = 'status-open';
   const STATUS_CLOSED       = 'status-closed';
+  const STATUS_RESOLVED     = 'status-resolved';
+  const STATUS_WONTFIX      = 'status-wontfix';
+  const STATUS_INVALID      = 'status-invalid';
+  const STATUS_SPITE        = 'status-spite';
+  const STATUS_DUPLICATE    = 'status-duplicate';
 
   private $priority         = null;
+
+  private $minPriority      = null;
+  private $maxPriority      = null;
 
   private $groupBy          = 'group-none';
   const GROUP_NONE          = 'group-none';
@@ -54,6 +62,7 @@ final class ManiphestTaskQuery {
   const ORDER_PRIORITY      = 'order-priority';
   const ORDER_CREATED       = 'order-created';
   const ORDER_MODIFIED      = 'order-modified';
+  const ORDER_TITLE         = 'order-title';
 
   private $limit            = null;
   const DEFAULT_PAGE_SIZE   = 1000;
@@ -111,6 +120,12 @@ final class ManiphestTaskQuery {
 
   public function withPriority($priority) {
     $this->priority = $priority;
+    return $this;
+  }
+
+  public function withPrioritiesBetween($min, $max) {
+    $this->minPriority = $min;
+    $this->maxPriority = $max;
     return $this;
   }
 
@@ -282,6 +297,15 @@ final class ManiphestTaskQuery {
   }
 
   private function buildStatusWhereClause($conn) {
+
+    static $map = array(
+      self::STATUS_RESOLVED   => ManiphestTaskStatus::STATUS_CLOSED_RESOLVED,
+      self::STATUS_WONTFIX    => ManiphestTaskStatus::STATUS_CLOSED_WONTFIX,
+      self::STATUS_INVALID    => ManiphestTaskStatus::STATUS_CLOSED_INVALID,
+      self::STATUS_SPITE      => ManiphestTaskStatus::STATUS_CLOSED_SPITE,
+      self::STATUS_DUPLICATE  => ManiphestTaskStatus::STATUS_CLOSED_DUPLICATE,
+    );
+
     switch ($this->status) {
       case self::STATUS_ANY:
         return null;
@@ -290,19 +314,32 @@ final class ManiphestTaskQuery {
       case self::STATUS_CLOSED:
         return 'status > 0';
       default:
-        throw new Exception("Unknown status query '{$this->status}'!");
+        $constant = idx($map, $this->status);
+        if (!$constant) {
+          throw new Exception("Unknown status query '{$this->status}'!");
+        }
+        return qsprintf(
+          $conn,
+          'status = %d',
+          $constant);
     }
   }
 
   private function buildPriorityWhereClause($conn) {
-    if ($this->priority === null) {
-      return null;
+    if ($this->priority !== null) {
+      return qsprintf(
+        $conn,
+        'priority = %d',
+        $this->priority);
+    } elseif ($this->minPriority !== null && $this->maxPriority !== null) {
+      return qsprintf(
+        $conn,
+        'priority >= %d AND priority <= %d',
+        $this->minPriority,
+        $this->maxPriority);
     }
 
-    return qsprintf(
-      $conn,
-      'priority = %d',
-      $this->priority);
+    return null;
   }
 
   private function buildAuthorWhereClause($conn) {
@@ -484,6 +521,9 @@ final class ManiphestTaskQuery {
       case self::ORDER_MODIFIED:
         $order[] = 'dateModified';
         break;
+      case self::ORDER_TITLE:
+        $order[] = 'title';
+        break;
       default:
         throw new Exception("Unknown order query '{$this->orderBy}'!");
     }
@@ -498,6 +538,7 @@ final class ManiphestTaskQuery {
       switch ($column) {
         case 'subpriority':
         case 'ownerOrdering':
+        case 'title':
           $order[$k] = "task.{$column} ASC";
           break;
         default:

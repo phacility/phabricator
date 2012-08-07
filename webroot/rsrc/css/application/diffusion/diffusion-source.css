@@ -9,6 +9,10 @@
   font-size: 10px;
 }
 
+.diffusion-source tr.highlighted {
+  background: #ffff00;
+}
+
 .diffusion-source th {
   text-align:         right;
   vertical-align:     top;

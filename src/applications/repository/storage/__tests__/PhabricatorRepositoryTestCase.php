@@ -19,38 +19,27 @@
 final class PhabricatorRepositoryTestCase
   extends PhabricatorTestCase {
 
-  public function testParseGitURI() {
-    static $map = array(
-      'ssh://user@domain.com/path.git'  => 'ssh://user@domain.com/path.git',
-      'user@domain.com:path.git'        => 'ssh://user@domain.com/path.git',
-      '/path/to/local/repo.git'         => 'file:///path/to/local/repo.git',
+  public function testRepositoryURIProtocols() {
+    $tests = array(
+      '/path/to/repo'               => 'file',
+      'file:///path/to/repo'        => 'file',
+      'ssh://user@domain.com/path'  => 'ssh',
+      'git@example.com:path'        => 'ssh',
+      'git://git@example.com/path'  => 'git',
+      'svn+ssh://example.com/path'  => 'svn+ssh',
+      'https://example.com/repo/'   => 'https',
+      'http://example.com/'         => 'http',
+      'https://user@example.com/'   => 'https',
     );
 
-    foreach ($map as $raw => $expect) {
-      $uri = PhabricatorRepository::newPhutilURIFromGitURI($raw);
+    foreach ($tests as $uri => $expect) {
+      $repository = new PhabricatorRepository();
+      $repository->setDetail('remote-uri', $uri);
+
       $this->assertEqual(
         $expect,
-        (string)$uri,
-        "Normalized Git URI '{$raw}'");
-    }
-  }
-
-  public function testParseBadGitURI() {
-    $junk = array(
-      'herp derp moon balloon',
-    );
-
-    foreach ($junk as $garbage) {
-      $ex = null;
-      try {
-        $uri = PhabricatorRepository::newPhutilURIFromGitURI($garbage);
-      } catch (Exception $caught) {
-        $ex = $caught;
-      }
-      $this->assertEqual(
-        true,
-        (bool)$ex,
-        'Expect exception when parsing garbage.');
+        $repository->getRemoteProtocol(),
+        "Protocol for '{$uri}'.");
     }
   }
 

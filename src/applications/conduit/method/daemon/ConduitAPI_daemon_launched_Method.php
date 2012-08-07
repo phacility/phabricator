@@ -58,6 +58,7 @@ final class ConduitAPI_daemon_launched_Method extends ConduitAPIMethod {
     $daemon_log->setDaemon($request->getValue('daemon'));
     $daemon_log->setHost($request->getValue('host'));
     $daemon_log->setPID($request->getValue('pid'));
+    $daemon_log->setStatus(PhabricatorDaemonLog::STATUS_RUNNING);
     $daemon_log->setArgv(json_decode($request->getValue('argv')));
 
     $daemon_log->save();

@@ -31,18 +31,11 @@ $args->parseStandardArguments();
 $args->parse(
   array(
     array(
-      'name'      => 'ignore-duplicates',
-      'help'      => 'Ignore duplicate symbols, choosing one at random. By '.
-                     'default, this script throws if given duplicate '.
-                     'symbols.',
-    ),
-    array(
       'name'      => 'more',
       'wildcard'  => true,
     ),
   ));
 
-$ignore_duplicates = $args->getArg('ignore-duplicates');
 $more = $args->getArg('more');
 if (count($more) !== 1) {
   $args->printHelpAndExit();
@@ -66,42 +59,39 @@ $input = file_get_contents('php://stdin');
 $input = trim($input);
 $input = explode("\n", $input);
 
-$map = array();
 $symbols = array();
 foreach ($input as $key => $line) {
   $line_no = $key + 1;
   $matches = null;
-  $ok = preg_match('/^([^ ]+) ([^ ]+) ([^ ]+) (\d+) (.*)$/', $line, $matches);
+  $ok = preg_match(
+    '/^((?P<context>[^ ]+)? )?(?P<name>[^ ]+) (?P<type>[^ ]+) '.
+    '(?P<lang>[^ ]+) (?P<line>\d+) (?P<path>.*)$/',
+    $line,
+    $matches);
   if (!$ok) {
     throw new Exception(
-      "Line #{$line_no} of input is invalid. Expected five space-delimited ".
-      "fields: symbol name, symbol type, symbol language, line number, path. ".
+      "Line #{$line_no} of input is invalid. Expected five or six ".
+      "space-delimited fields: maybe symbol context, symbol name, symbol ".
+      "type, symbol language, line number, path. ".
       "For example:\n\n".
       "idx function php 13 /path/to/some/file.php\n\n".
       "Actual line was:\n\n".
       "{$line}");
   }
-  list($all, $name, $type, $lang, $line_number, $path) = $matches;
+  if (empty($matches['context'])) {
+    $matches['context'] = '';
+  }
+  $context     = $matches['context'];
+  $name        = $matches['name'];
+  $type        = $matches['type'];
+  $lang        = $matches['lang'];
+  $line_number = $matches['line'];
+  $path        = $matches['path'];
 
-  if (isset($map[$name][$type][$lang])) {
-    if ($ignore_duplicates) {
-      echo "Ignoring duplicate definition of '{$name}' on line {$line_no}.\n";
-    } else {
-      $previous = $map[$name][$type][$lang] + 1;
-      throw new Exception(
-        "Line #{$line_no} of input is invalid. It specifies a duplicate ".
-        "symbol (same name, language, and type) which has already been ".
-        "defined elsewhere. You must preprocess the symbol list to remove ".
-        "duplicates and choose exactly one master definition for each ".
-        "symbol, or specify --ignore-duplicates. This symbol was previously ".
-        "defined on line #{$previous}.\n\n".
-        "Line #{$line_no}:\n".
-        $line."\n\n".
-        "Line #{$previous}:\n".
-        $input[$previous - 1]);
-    }
-  } else {
-    $map[$name][$type][$lang] = $key;
+  if (strlen($context) > 128) {
+    throw new Exception(
+      "Symbol context '{$context}' defined on line #{$line_no} is too long, ".
+      "maximum symbol context length is 128 characters.");
   }
 
   if (strlen($name) > 128) {
@@ -130,6 +120,7 @@ foreach ($input as $key => $line) {
   }
 
   $symbols[] = array(
+    'ctxt' => $context,
     'name' => $name,
     'type' => $type,
     'lang' => $lang,
@@ -150,8 +141,9 @@ $sql = array();
 foreach ($symbols as $dict) {
   $sql[] = qsprintf(
     $conn_w,
-    '(%d, %s, %s, %s, %d, %d)',
+    '(%d, %s, %s, %s, %s, %d, %d)',
     $project->getID(),
+    $dict['ctxt'],
     $dict['name'],
     $dict['type'],
     $dict['lang'],
@@ -171,8 +163,8 @@ foreach (array_chunk($sql, 128) as $chunk) {
   queryfx(
     $conn_w,
     'INSERT INTO %T
-      (arcanistProjectID, symbolName, symbolType, symbolLanguage, lineNumber,
-        pathID) VALUES %Q',
+      (arcanistProjectID, symbolContext, symbolName, symbolType,
+        symbolLanguage, lineNumber, pathID) VALUES %Q',
     $symbol->getTableName(),
     implode(', ', $chunk));
 }

@@ -21,16 +21,55 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TABLE_NAME_EDGE       = 'edge';
   const TABLE_NAME_EDGEDATA   = 'edgedata';
 
-  const TYPE_TASK_HAS_COMMIT  = 1;
-  const TYPE_COMMIT_HAS_TASK  = 2;
+  const TYPE_TASK_HAS_COMMIT            = 1;
+  const TYPE_COMMIT_HAS_TASK            = 2;
+
+  const TYPE_TASK_DEPENDS_ON_TASK       = 3;
+  const TYPE_TASK_DEPENDED_ON_BY_TASK   = 4;
+
+  const TYPE_DREV_DEPENDS_ON_DREV       = 5;
+  const TYPE_DREV_DEPENDED_ON_BY_DREV   = 6;
+
+  const TYPE_BLOG_HAS_POST              = 7;
+  const TYPE_POST_HAS_BLOG              = 8;
+  const TYPE_BLOG_HAS_BLOGGER           = 9;
+  const TYPE_BLOGGER_HAS_BLOG           = 10;
+
+  const TYPE_TASK_HAS_RELATED_DREV      = 11;
+  const TYPE_DREV_HAS_RELATED_TASK      = 12;
+
+  const TYPE_TEST_NO_CYCLE              = 9000;
 
   public static function getInverse($edge_type) {
     static $map = array(
       self::TYPE_TASK_HAS_COMMIT => self::TYPE_COMMIT_HAS_TASK,
       self::TYPE_COMMIT_HAS_TASK => self::TYPE_TASK_HAS_COMMIT,
+
+      self::TYPE_TASK_DEPENDS_ON_TASK => self::TYPE_TASK_DEPENDED_ON_BY_TASK,
+      self::TYPE_TASK_DEPENDED_ON_BY_TASK => self::TYPE_TASK_DEPENDS_ON_TASK,
+
+      self::TYPE_DREV_DEPENDS_ON_DREV => self::TYPE_DREV_DEPENDED_ON_BY_DREV,
+      self::TYPE_DREV_DEPENDED_ON_BY_DREV => self::TYPE_DREV_DEPENDS_ON_DREV,
+
+      self::TYPE_BLOG_HAS_POST    => self::TYPE_POST_HAS_BLOG,
+      self::TYPE_POST_HAS_BLOG    => self::TYPE_BLOG_HAS_POST,
+      self::TYPE_BLOG_HAS_BLOGGER => self::TYPE_BLOGGER_HAS_BLOG,
+      self::TYPE_BLOGGER_HAS_BLOG => self::TYPE_BLOG_HAS_BLOGGER,
+
+      self::TYPE_TASK_HAS_RELATED_DREV => self::TYPE_DREV_HAS_RELATED_TASK,
+      self::TYPE_DREV_HAS_RELATED_TASK => self::TYPE_TASK_HAS_RELATED_DREV,
     );
 
     return idx($map, $edge_type);
+  }
+
+  public static function shouldPreventCycles($edge_type) {
+    static $map = array(
+      self::TYPE_TEST_NO_CYCLE          => true,
+      self::TYPE_TASK_DEPENDS_ON_TASK   => true,
+      self::TYPE_DREV_DEPENDS_ON_DREV   => true,
+    );
+    return isset($map[$edge_type]);
   }
 
   public static function establishConnection($phid_type, $conn_type) {
@@ -43,6 +82,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       PhabricatorPHIDConstants::PHID_TYPE_PROJ  => 'PhabricatorProject',
       PhabricatorPHIDConstants::PHID_TYPE_MLST  =>
         'PhabricatorMetaMTAMailingList',
+      PhabricatorPHIDConstants::PHID_TYPE_TOBJ  => 'HarbormasterObject',
+      PhabricatorPHIDConstants::PHID_TYPE_BLOG  => 'PhameBlog',
+      PhabricatorPHIDConstants::PHID_TYPE_POST  => 'PhamePost',
     );
 
     $class = idx($class_map, $phid_type);
@@ -54,6 +96,5 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
     return newv($class, array())->establishConnection($conn_type);
   }
-
 
 }

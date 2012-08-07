@@ -25,7 +25,6 @@ final class PhabricatorProject extends PhabricatorProjectDAO {
   protected $subprojectPHIDs = array();
   protected $phrictionSlug;
 
-  private $subprojectsNeedUpdate;
   private $affiliations;
 
   public function getConfiguration() {
@@ -42,17 +41,19 @@ final class PhabricatorProject extends PhabricatorProjectDAO {
       PhabricatorPHIDConstants::PHID_TYPE_PROJ);
   }
 
-  public function setSubprojectPHIDs(array $phids) {
-    $this->subprojectPHIDs = $phids;
-    $this->subprojectsNeedUpdate = true;
-    return $this;
-  }
-
   public function loadProfile() {
     $profile = id(new PhabricatorProjectProfile())->loadOneWhere(
       'projectPHID = %s',
       $this->getPHID());
     return $profile;
+  }
+
+  public function getMemberPHIDs() {
+    return mpull($this->getAffiliations(), 'getUserPHID');
+  }
+
+  public function loadMemberPHIDs() {
+    return mpull($this->loadAffiliations(), 'getUserPHID');
   }
 
   public function getAffiliations() {
@@ -85,19 +86,6 @@ final class PhabricatorProject extends PhabricatorProjectDAO {
     $slug = PhabricatorSlug::normalize($slug);
     $this->phrictionSlug = $slug;
     return $this;
-  }
-
-  public function save() {
-    $result = parent::save();
-
-    if ($this->subprojectsNeedUpdate) {
-      // If we've changed the project PHIDs for this task, update the link
-      // table.
-      PhabricatorProjectSubproject::updateProjectSubproject($this);
-      $this->subprojectsNeedUpdate = false;
-    }
-
-    return $result;
   }
 
 }

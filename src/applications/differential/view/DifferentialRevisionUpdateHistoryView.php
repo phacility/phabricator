@@ -252,6 +252,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       DifferentialLintStatus::LINT_WARN => self::STAR_WARN,
       DifferentialLintStatus::LINT_FAIL => self::STAR_FAIL,
       DifferentialLintStatus::LINT_SKIP => self::STAR_SKIP,
+      DifferentialLintStatus::LINT_POSTPONED => self::STAR_SKIP
     );
 
     $star = idx($map, $diff->getLintStatus(), self::STAR_FAIL);
@@ -286,6 +287,8 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
         return 'Lint Errors';
       case DifferentialLintStatus::LINT_SKIP:
         return 'Lint Skipped';
+      case DifferentialLintStatus::LINT_POSTPONED:
+        return 'Lint Postponed';
     }
     return '???';
   }

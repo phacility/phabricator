@@ -389,6 +389,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     $view = new PhabricatorAuditListView();
     $view->setAudits($audits);
     $view->setCommits($query->getCommits());
+    $view->setUser($request->getUser());
     $view->setNoDataString($nodata);
 
     $phids = $view->getRequiredHandlePHIDs();

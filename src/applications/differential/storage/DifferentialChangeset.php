@@ -126,19 +126,25 @@ final class DifferentialChangeset extends DifferentialDAO {
   }
 
   public function makeNewFile() {
-    $file = array();
-    foreach ($this->getHunks() as $hunk) {
-      $file[] = $hunk->makeNewFile();
-    }
-    return implode("\n", $file);
+    $file = mpull($this->getHunks(), 'makeNewFile');
+    return implode('', $file);
   }
 
   public function makeOldFile() {
-    $file = array();
+    $file = mpull($this->getHunks(), 'makeOldFile');
+    return implode('', $file);
+  }
+
+  public function computeOffsets() {
+    $offsets = array();
+    $n = 1;
     foreach ($this->getHunks() as $hunk) {
-      $file[] = $hunk->makeOldFile();
+      for ($i = 0; $i < $hunk->getNewLen(); $i++) {
+        $offsets[$n] = $hunk->getNewOffset() + $i;
+        $n++;
+      }
     }
-    return implode("\n", $file);
+    return $offsets;
   }
 
   public function makeChangesWithContext($num_lines = 3) {

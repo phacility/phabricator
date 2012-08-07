@@ -120,13 +120,30 @@ a large number of relatively inactive repositories, but might benefit from
 tuning in some cases. The daemon makes a rough effort to respect pull
 frequencies defined in repository configuration, but may not be able to import
 new commits very quickly if you have a large number of repositories (as it is
-blocked waiting on I/O from other repositories). If you want to provide lower
-commit import latency for some repositories, you can launch additional
-dedicated daemons:
+blocked waiting on I/O from other repositories).
 
-For example, if you want low latency on the repositories with callsigns
-`A` and `B`, but don't care about latency for the other repositories, you could
-launch two daemons like this:
+If you want to provide lower commit import latency for some repositories, you
+can either launch **more daemons** (which will generally lower latency for all
+repositories) or launch additional **dedicated daemons** (which will give you
+very fine-grained control over import latency).
+
+=== More Daemons ===
+
+The coarse approach to reducing import latency is to simply launch more daemons,
+using `phd`:
+
+  phabricator/bin $ ./phd launch RepositoryPullLocal
+
+This will launch another copy of the daemon. The daemons acquire a global lock
+before pulling a repository, so you can launch additional daemons without
+causing contention or race conditions.
+
+=== Dedicated Daemons ===
+
+You can take a more fine-grained approach and launch dedicated daemons for
+specific repositories or groups of repositories. For example, if you want low
+latency on the repositories with callsigns `A` and `B`, but don't care about
+latency for the other repositories, you could launch two daemons like this:
 
   phabricator/bin $ ./phd launch RepositoryPullLocal -- A B
   phabricator/bin $ ./phd launch RepositoryPullLocal -- --not A --not B

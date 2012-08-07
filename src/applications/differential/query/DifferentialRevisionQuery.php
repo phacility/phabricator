@@ -34,13 +34,14 @@ final class DifferentialRevisionQuery {
 
   private $pathIDs = array();
 
-  private $status         = 'status-any';
-  const STATUS_ANY        = 'status-any';
-  const STATUS_OPEN       = 'status-open';
-  const STATUS_ACCEPTED   = 'status-accepted';
-  const STATUS_CLOSED     = 'status-closed';    // NOTE: Same as 'committed'.
-  const STATUS_COMMITTED  = 'status-committed'; // TODO: Remove.
-  const STATUS_ABANDONED  = 'status-abandoned';
+  private $status           = 'status-any';
+  const STATUS_ANY          = 'status-any';
+  const STATUS_OPEN         = 'status-open';
+  const STATUS_ACCEPTED     = 'status-accepted';
+  const STATUS_NEEDS_REVIEW = 'status-needs-review';
+  const STATUS_CLOSED       = 'status-closed';    // NOTE: Same as 'committed'.
+  const STATUS_COMMITTED    = 'status-committed'; // TODO: Remove.
+  const STATUS_ABANDONED    = 'status-abandoned';
 
   private $authors = array();
   private $draftAuthors = array();
@@ -73,6 +74,7 @@ final class DifferentialRevisionQuery {
   private $needActiveDiffs    = false;
   private $needDiffIDs        = false;
   private $needCommitPHIDs    = false;
+  private $needHashes         = false;
 
 
 /* -(  Query Configuration  )------------------------------------------------ */
@@ -353,6 +355,20 @@ final class DifferentialRevisionQuery {
   }
 
 
+  /**
+   * Set whether or not the query should load associated commit hashes for each
+   * revision.
+   *
+   * @param bool True to load and attach commit hashes.
+   * @return this
+   * @task config
+   */
+  public function needHashes($need_hashes) {
+    $this->needHashes = $need_hashes;
+    return $this;
+  }
+
+
 /* -(  Query Execution  )---------------------------------------------------- */
 
 
@@ -394,6 +410,10 @@ final class DifferentialRevisionQuery {
 
       if ($need_active) {
         $this->loadActiveDiffs($conn_r, $revisions);
+      }
+
+      if ($this->needHashes) {
+        $this->loadHashes($conn_r, $revisions);
       }
     }
 
@@ -673,6 +693,14 @@ final class DifferentialRevisionQuery {
             ArcanistDifferentialRevisionStatus::ACCEPTED,
           ));
         break;
+      case self::STATUS_NEEDS_REVIEW:
+        $where[] = qsprintf(
+          $conn_r,
+          'status IN (%Ld)',
+          array(
+               ArcanistDifferentialRevisionStatus::NEEDS_REVIEW,
+          ));
+        break;
       case self::STATUS_ACCEPTED:
         $where[] = qsprintf(
           $conn_r,
@@ -834,6 +862,28 @@ final class DifferentialRevisionQuery {
     $active_diffs = mpull($active_diffs, null, 'getRevisionID');
     foreach ($revisions as $revision) {
       $revision->attachActiveDiff(idx($active_diffs, $revision->getID()));
+    }
+  }
+
+  private function loadHashes(
+    AphrontDatabaseConnection $conn_r,
+    array $revisions) {
+    assert_instances_of($revisions, 'DifferentialRevision');
+
+    $data = queryfx_all(
+      $conn_r,
+      'SELECT * FROM %T WHERE revisionID IN (%Ld)',
+      'differential_revisionhash',
+      mpull($revisions, 'getID'));
+
+    $data = igroup($data, 'revisionID');
+    foreach ($revisions as $revision) {
+      $hashes = idx($data, $revision->getID(), array());
+      $list = array();
+      foreach ($hashes as $hash) {
+        $list[] = array($hash['type'], $hash['hash']);
+      }
+      $revision->attachHashes($list);
     }
   }
 

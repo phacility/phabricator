@@ -124,7 +124,6 @@ abstract class DifferentialMail {
           '<'.implode('>, <', $reviewer_phids).'>');
       }
 
-      $cc_phids = $revision->getCCPHIDs();
       if ($cc_phids) {
         $template->addPHIDHeaders('X-Differential-CC', $cc_phids);
         $template->addHeader(
@@ -261,34 +260,21 @@ abstract class DifferentialMail {
   }
 
   protected function buildBody() {
+    $main_body = $this->renderBody();
 
-    $body = $this->renderBody();
+    $body = new PhabricatorMetaMTAMailBody();
+    $body->addRawSection($main_body);
 
     $reply_handler = $this->getReplyHandler();
-    $reply_instructions = $reply_handler->getReplyHandlerInstructions();
-    if ($reply_instructions) {
-      $body .=
-        "\nREPLY HANDLER ACTIONS\n".
-        "  {$reply_instructions}\n";
-    }
+    $body->addReplySection($reply_handler->getReplyHandlerInstructions());
 
     if ($this->getHeraldTranscriptURI() && $this->isFirstMailToRecipients()) {
-      $manage_uri = PhabricatorEnv::getProductionURI(
-        '/herald/view/differential/');
-
+      $manage_uri = '/herald/view/differential/';
       $xscript_uri = $this->getHeraldTranscriptURI();
-      $body .= <<<EOTEXT
-
-MANAGE HERALD DIFFERENTIAL RULES
-  {$manage_uri}
-
-WHY DID I GET THIS EMAIL?
-  {$xscript_uri}
-
-EOTEXT;
+      $body->addHeraldSection($manage_uri, $xscript_uri);
     }
 
-    return $body;
+    return $body->render();
   }
 
   /**

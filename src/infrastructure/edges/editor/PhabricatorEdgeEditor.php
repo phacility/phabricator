@@ -28,9 +28,11 @@
  *
  *    id(new PhabricatorEdgeEditor())
  *      ->addEdge($src, $type, $dst)
+ *      ->setUser($user)
  *      ->save();
  *
  * @task edit     Editing Edges
+ * @task cycles   Cycle Prevention
  * @task internal Internals
  */
 final class PhabricatorEdgeEditor {
@@ -38,6 +40,13 @@ final class PhabricatorEdgeEditor {
   private $addEdges = array();
   private $remEdges = array();
   private $openTransactions = array();
+  private $user;
+  private $suppressEvents;
+
+  public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
+    return $this;
+  }
 
 
 /* -(  Editing Edges  )------------------------------------------------------ */
@@ -45,7 +54,7 @@ final class PhabricatorEdgeEditor {
 
   /**
    * Add a new edge (possibly also adding its inverse). Changes take effect when
-   * you call @{method:save()}. If the edge already exists, it will not be
+   * you call @{method:save}. If the edge already exists, it will not be
    * overwritten. Removals queued with @{method:removeEdge} are executed before
    * adds, so the effect of removing and adding the same edge is to overwrite
    * any existing edge.
@@ -74,7 +83,7 @@ final class PhabricatorEdgeEditor {
 
   /**
    * Remove an edge (possibly also removing its inverse). Changes take effect
-   * when you call @{method:save()}. If an edge does not exist, the removal
+   * when you call @{method:save}. If an edge does not exist, the removal
    * will be ignored. Edges are added after edges are removed, so the effect of
    * a remove plus an add is to overwrite.
    *
@@ -106,18 +115,61 @@ final class PhabricatorEdgeEditor {
    */
   public function save() {
 
-    // NOTE: We write edge data first, before doing any transactions, since
-    // it's OK if we just leave it hanging out in space unattached to anything.
+    $cycle_types = $this->getPreventCyclesEdgeTypes();
 
-    $this->writeEdgeData();
+    $locks = array();
+    $caught = null;
+    try {
 
-    // NOTE: Removes first, then adds, so that "remove + add" is a useful
-    // operation meaning "overwrite".
+      // NOTE: We write edge data first, before doing any transactions, since
+      // it's OK if we just leave it hanging out in space unattached to
+      // anything.
+      $this->writeEdgeData();
 
-    $this->executeRemoves();
-    $this->executeAdds();
+      // If we're going to perform cycle detection, lock the edge type before
+      // doing edits.
+      if ($cycle_types) {
+        $src_phids = ipull($this->addEdges, 'src');
+        foreach ($cycle_types as $cycle_type) {
+          $key = 'edge.cycle:'.$cycle_type;
+          $locks[] = PhabricatorGlobalLock::newLock($key)->lock(15);
+        }
+      }
 
-    $this->saveTransactions();
+      static $id = 0;
+      $id++;
+
+      $this->sendEvent($id, PhabricatorEventType::TYPE_EDGE_WILLEDITEDGES);
+
+      // NOTE: Removes first, then adds, so that "remove + add" is a useful
+      // operation meaning "overwrite".
+
+      $this->executeRemoves();
+      $this->executeAdds();
+
+      foreach ($cycle_types as $cycle_type) {
+        $this->detectCycles($src_phids, $cycle_type);
+      }
+
+      $this->sendEvent($id, PhabricatorEventType::TYPE_EDGE_DIDEDITEDGES);
+
+      $this->saveTransactions();
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
+
+
+    if ($caught) {
+      $this->killTransactions();
+    }
+
+    foreach ($locks as $lock) {
+      $lock->unlock();
+    }
+
+    if ($caught) {
+      throw $caught;
+    }
   }
 
 
@@ -136,11 +188,15 @@ final class PhabricatorEdgeEditor {
       $data['data'] = $options['data'];
     }
 
+    $src_type = phid_get_type($src);
+    $dst_type = phid_get_type($dst);
+
     $specs = array();
     $specs[] = array(
       'src'       => $src,
-      'src_type'  => phid_get_type($src),
+      'src_type'  => $src_type,
       'dst'       => $dst,
+      'dst_type'  => $dst_type,
       'type'      => $type,
       'data'      => $data,
     );
@@ -156,8 +212,9 @@ final class PhabricatorEdgeEditor {
 
       $specs[] = array(
         'src'       => $dst,
-        'src_type'  => phid_get_type($dst),
+        'src_type'  => $dst_type,
         'dst'       => $src,
+        'dst_type'  => $src_type,
         'type'      => $inverse,
         'data'      => $data,
       );
@@ -306,5 +363,98 @@ final class PhabricatorEdgeEditor {
       unset($this->openTransactions[$key]);
     }
   }
+
+  private function killTransactions() {
+    foreach ($this->openTransactions as $key => $conn_w) {
+      $conn_w->killTransaction();
+      unset($this->openTransactions[$key]);
+    }
+  }
+
+  /**
+   * Suppress edge edit events. This prevents listeners from making updates in
+   * response to edits, and is primarily useful when performing migrations. You
+   * should not normally need to use it.
+   *
+   * @param bool True to supress events related to edits.
+   * @return this
+   * @task internal
+   */
+  public function setSuppressEvents($suppress) {
+    $this->suppressEvents = $suppress;
+    return $this;
+  }
+
+
+  private function sendEvent($edit_id, $event_type) {
+    if ($this->suppressEvents) {
+      return;
+    }
+
+    $event = new PhabricatorEvent(
+      $event_type,
+      array(
+        'id'    => $edit_id,
+        'add'   => $this->addEdges,
+        'rem'   => $this->remEdges,
+      ));
+    $event->setUser($this->user);
+    PhutilEventEngine::dispatchEvent($event);
+  }
+
+
+/* -(  Cycle Prevention  )--------------------------------------------------- */
+
+
+  /**
+   * Get a list of all edge types which are being added, and which we should
+   * prevent cycles on.
+   *
+   * @return list<const> List of edge types which should have cycles prevented.
+   * @task cycle
+   */
+  private function getPreventCyclesEdgeTypes() {
+    $edge_types = array();
+    foreach ($this->addEdges as $edge) {
+      $edge_types[$edge['type']] = true;
+    }
+    foreach ($edge_types as $type => $ignored) {
+      if (!PhabricatorEdgeConfig::shouldPreventCycles($type)) {
+        unset($edge_types[$type]);
+      }
+    }
+    return array_keys($edge_types);
+  }
+
+
+  /**
+   * Detect graph cycles of a given edge type. If the edit introduces a cycle,
+   * a @{class:PhabricatorEdgeCycleException} is thrown with details.
+   *
+   * @return void
+   * @task cycle
+   */
+  private function detectCycles(array $phids, $edge_type) {
+    // For simplicity, we just seed the graph with the affected nodes rather
+    // than seeding it with their edges. To do this, we just add synthetic
+    // edges from an imaginary '<seed>' node to the known edges.
+
+
+    $graph = id(new PhabricatorEdgeGraph())
+      ->setEdgeType($edge_type)
+      ->addNodes(
+        array(
+          '<seed>' => $phids,
+        ))
+      ->loadGraph();
+
+    foreach ($phids as $phid) {
+      $cycle = $graph->detectCycles($phid);
+      if ($cycle) {
+        throw new PhabricatorEdgeCycleException($edge_type, $cycle);
+      }
+    }
+  }
+
 
 }

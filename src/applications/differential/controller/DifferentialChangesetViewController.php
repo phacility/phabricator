@@ -122,7 +122,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
         $left_data,
         $right_data);
 
-      $choice = nonempty($left, $right);
+      $choice = clone nonempty($left, $right);
       $choice->attachHunks($synthetic->getHunks());
 
       $changeset = $choice;
@@ -165,6 +165,10 @@ final class DifferentialChangesetViewController extends DifferentialController {
     $parser->setRightSideCommentMapping($right_source, $right_new);
     $parser->setLeftSideCommentMapping($left_source, $left_new);
     $parser->setWhitespaceMode($request->getStr('whitespace'));
+
+    if ($left && $right) {
+      $parser->setOriginals($left, $right);
+    }
 
     // Load both left-side and right-side inline comments.
     $inlines = $this->loadInlineComments(

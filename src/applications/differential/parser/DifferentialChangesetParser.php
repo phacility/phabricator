@@ -48,6 +48,9 @@ final class DifferentialChangesetParser {
   private $rightSideChangesetID;
   private $rightSideAttachesToNewFile;
 
+  private $originalLeft;
+  private $originalRight;
+
   private $renderingReference;
   private $isSubparser;
 
@@ -106,6 +109,77 @@ final class DifferentialChangesetParser {
     $this->leftSideChangesetID = $id;
     $this->leftSideAttachesToNewFile = $is_new;
     return $this;
+  }
+
+  public function setOriginals(
+    DifferentialChangeset $left,
+    DifferentialChangeset $right) {
+
+    $this->originalLeft = $left;
+    $this->originalRight = $right;
+  }
+
+  public function diffOriginals() {
+    $engine = new PhabricatorDifferenceEngine();
+    $changeset = $engine->generateChangesetFromFileContent(
+      implode('', mpull($this->originalLeft->getHunks(), 'getChanges')),
+      implode('', mpull($this->originalRight->getHunks(), 'getChanges')));
+
+    // Put changes side by side.
+    $olds = array();
+    $news = array();
+    foreach ($changeset->getHunks() as $hunk) {
+      $n_old = $hunk->getOldOffset();
+      $n_new = $hunk->getNewOffset();
+      $changes = rtrim($hunk->getChanges(), "\n");
+      foreach (explode("\n", $changes) as $line) {
+        $diff_type = $line[0]; // Change type in diff of diffs.
+        $orig_type = $line[1]; // Change type in the original diff.
+        if ($diff_type == ' ') {
+          // Use the same key for lines that are next to each other.
+          $key = max(last_key($olds), last_key($news)) + 1;
+          $olds[$key] = null;
+          $news[$key] = null;
+        } else if ($diff_type == '-') {
+          $olds[] = array($n_old, $orig_type);
+        } else if ($diff_type == '+') {
+          $news[] = array($n_new, $orig_type);
+        }
+        if (($diff_type == '-' || $diff_type == ' ') && $orig_type != '-') {
+          $n_old++;
+        }
+        if (($diff_type == '+' || $diff_type == ' ') && $orig_type != '-') {
+          $n_new++;
+        }
+      }
+    }
+
+    $offsets_old = $this->originalLeft->computeOffsets();
+    $offsets_new = $this->originalRight->computeOffsets();
+
+    // Highlight lines that were added on each side or removed on the other
+    // side.
+    $highlight_old = array();
+    $highlight_new = array();
+    $last = max(last_key($olds), last_key($news));
+    for ($i = 0; $i <= $last; $i++) {
+      if (isset($olds[$i])) {
+        list($n, $type) = $olds[$i];
+        if ($type == '+' ||
+            ($type == ' ' && isset($news[$i]) && $news[$i][1] != ' ')) {
+          $highlight_old[] = $offsets_old[$n];
+        }
+      }
+      if (isset($news[$i])) {
+        list($n, $type) = $news[$i];
+        if ($type == '+' ||
+            ($type == ' ' && isset($olds[$i]) && $olds[$i][1] != ' ')) {
+          $highlight_new[] = $offsets_new[$n];
+        }
+      }
+    }
+
+    return array($highlight_old, $highlight_new);
   }
 
   /**
@@ -269,8 +343,6 @@ final class DifferentialChangesetParser {
 
     $old = array();
     $new = array();
-
-    $n = 0;
 
     $this->old = array_reverse($this->old);
     $this->new = array_reverse($this->new);
@@ -869,40 +941,35 @@ final class DifferentialChangesetParser {
 
     $this->highlightEngine = PhabricatorSyntaxHighlighter::newEngine();
 
+    $this->tryCacheStuff();
+
     $shield = null;
-    if ($this->isTopLevel && !$this->comments &&
-        !($this->isGenerated() || $this->isUnchanged() || $this->isDeleted()) &&
-        $this->changeset->getAffectedLineCount() > 2500) {
-      $lines = number_format($this->changeset->getAffectedLineCount());
-      $shield = $this->renderShield(
-        "This file has a very large number of changes ({$lines} lines).",
-        true);
-    } else {
-
-      $this->tryCacheStuff();
-
-      if ($this->isTopLevel && !$this->comments) {
-        if ($this->isGenerated()) {
+    if ($this->isTopLevel && !$this->comments) {
+      if ($this->isGenerated()) {
+        $shield = $this->renderShield(
+          "This file contains generated code, which does not normally need ".
+          "to be reviewed.",
+          true);
+      } else if ($this->isUnchanged()) {
+        if ($this->isWhitespaceOnly()) {
           $shield = $this->renderShield(
-            "This file contains generated code, which does not normally need ".
-            "to be reviewed.",
-            true);
-        } else if ($this->isUnchanged()) {
-          if ($this->isWhitespaceOnly()) {
-            $shield = $this->renderShield(
-              "This file was changed only by adding or removing trailing ".
-              "whitespace.",
-              false);
-          } else {
-            $shield = $this->renderShield(
-              "The contents of this file were not changed.",
-              false);
-          }
-        } else if ($this->isDeleted()) {
+            "This file was changed only by adding or removing trailing ".
+            "whitespace.",
+            false);
+        } else {
           $shield = $this->renderShield(
-            "This file was completely deleted.",
-            true);
+            "The contents of this file were not changed.",
+            false);
         }
+      } else if ($this->isDeleted()) {
+        $shield = $this->renderShield(
+          "This file was completely deleted.",
+          true);
+      } else if ($this->changeset->getAffectedLineCount() > 2500) {
+        $lines = number_format($this->changeset->getAffectedLineCount());
+        $shield = $this->renderShield(
+          "This file has a very large number of changes ({$lines} lines).",
+          true);
       }
     }
 
@@ -1290,6 +1357,12 @@ final class DifferentialChangesetParser {
 
     $copy_lines = idx($this->changeset->getMetadata(), 'copy:lines', array());
 
+    if ($this->originalLeft && $this->originalRight) {
+      list($highlight_old, $highlight_new) = $this->diffOriginals();
+      $highlight_old = array_flip($highlight_old);
+      $highlight_new = array_flip($highlight_new);
+    }
+
     for ($ii = $range_start; $ii < $range_start + $range_len; $ii++) {
       if (empty($mask[$ii])) {
         // If we aren't going to show this line, we've just entered a gap.
@@ -1386,6 +1459,8 @@ final class DifferentialChangesetParser {
           if ($this->old[$ii]['type'] == '\\') {
             $o_text = $this->old[$ii]['text'];
             $o_attr = ' class="comment"';
+          } else if ($this->originalLeft && !isset($highlight_old[$o_num])) {
+            $o_attr = ' class="old-rebase"';
           } else if (empty($this->new[$ii])) {
             $o_attr = ' class="old old-full"';
           } else {
@@ -1421,6 +1496,8 @@ final class DifferentialChangesetParser {
           if ($this->new[$ii]['type'] == '\\') {
             $n_text = $this->new[$ii]['text'];
             $n_class = 'comment';
+          } else if ($this->originalRight && !isset($highlight_new[$n_num])) {
+            $n_class = 'new-rebase';
           } else if (empty($this->old[$ii])) {
             $n_class = 'new new-full';
           } else {
@@ -1645,32 +1722,6 @@ final class DifferentialChangesetParser {
   }
 
   protected function renderChangeTypeHeader($changeset, $force) {
-
-    static $articles = array(
-      DifferentialChangeType::FILE_IMAGE      => 'an',
-    );
-
-    static $files = array(
-      DifferentialChangeType::FILE_TEXT       => 'file',
-      DifferentialChangeType::FILE_IMAGE      => 'image',
-      DifferentialChangeType::FILE_DIRECTORY  => 'directory',
-      DifferentialChangeType::FILE_BINARY     => 'binary file',
-      DifferentialChangeType::FILE_SYMLINK    => 'symlink',
-      DifferentialChangeType::FILE_SUBMODULE  => 'submodule',
-    );
-
-    static $changes = array(
-      DifferentialChangeType::TYPE_ADD        => 'added',
-      DifferentialChangeType::TYPE_CHANGE     => 'changed',
-      DifferentialChangeType::TYPE_DELETE     => 'deleted',
-      DifferentialChangeType::TYPE_MOVE_HERE  => 'moved from',
-      DifferentialChangeType::TYPE_COPY_HERE  => 'copied from',
-      DifferentialChangeType::TYPE_MOVE_AWAY  => 'moved to',
-      DifferentialChangeType::TYPE_COPY_AWAY  => 'copied to',
-      DifferentialChangeType::TYPE_MULTICOPY
-        => 'deleted after being copied to',
-    );
-
     $change = $changeset->getChangeType();
     $file = $changeset->getFileType();
 
@@ -1680,41 +1731,227 @@ final class DifferentialChangesetParser {
       if ($force) {
         // We have to force something to render because there were no changes
         // of other kinds.
-        $message = "This {$files[$file]} was not modified.";
+        $message = pht('This file was not modified.');
       } else {
         // Default case of changes to a text file, no metadata.
         return null;
       }
     } else {
-      $verb = idx($changes, $change, 'changed');
       switch ($change) {
-        default:
-          $message = "This {$files[$file]} was <strong>{$verb}</strong>.";
-          break;
-        case DifferentialChangeType::TYPE_MOVE_HERE:
-        case DifferentialChangeType::TYPE_COPY_HERE:
-          $message =
-            "This {$files[$file]} was {$verb} ".
-            "<strong>".
-              phutil_escape_html($changeset->getOldFile()).
-            "</strong>.";
-          break;
-        case DifferentialChangeType::TYPE_MOVE_AWAY:
-        case DifferentialChangeType::TYPE_COPY_AWAY:
-        case DifferentialChangeType::TYPE_MULTICOPY:
-          $paths = $changeset->getAwayPaths();
-          if (count($paths) > 1) {
-            $message =
-              "This {$files[$file]} was {$verb}: ".
-              "<strong>".phutil_escape_html(implode(', ', $paths))."</strong>.";
-          } else {
-            $message =
-              "This {$files[$file]} was {$verb} ".
-              "<strong>".phutil_escape_html(reset($paths))."</strong>.";
+
+        case DifferentialChangeType::TYPE_ADD:
+          switch ($file) {
+            case DifferentialChangeType::FILE_TEXT:
+              $message = pht('This file was <strong>added</strong>.');
+              break;
+            case DifferentialChangeType::FILE_IMAGE:
+              $message = pht('This image was <strong>added</strong>.');
+              break;
+            case DifferentialChangeType::FILE_DIRECTORY:
+              $message = pht('This directory was <strong>added</strong>.');
+              break;
+            case DifferentialChangeType::FILE_BINARY:
+              $message = pht('This binary file was <strong>added</strong>.');
+              break;
+            case DifferentialChangeType::FILE_SYMLINK:
+              $message = pht('This symlink was <strong>added</strong>.');
+              break;
+            case DifferentialChangeType::FILE_SUBMODULE:
+              $message = pht('This submodule was <strong>added</strong>.');
+              break;
           }
           break;
-        case DifferentialChangeType::TYPE_CHANGE:
-          $message = "This is ".idx($articles, $file, 'a')." {$files[$file]}.";
+
+        case DifferentialChangeType::TYPE_DELETE:
+          switch ($file) {
+            case DifferentialChangeType::FILE_TEXT:
+              $message = pht('This file was <strong>deleted</strong>.');
+              break;
+            case DifferentialChangeType::FILE_IMAGE:
+              $message = pht('This image was <strong>deleted</strong>.');
+              break;
+            case DifferentialChangeType::FILE_DIRECTORY:
+              $message = pht('This directory was <strong>deleted</strong>.');
+              break;
+            case DifferentialChangeType::FILE_BINARY:
+              $message = pht('This binary file was <strong>deleted</strong>.');
+              break;
+            case DifferentialChangeType::FILE_SYMLINK:
+              $message = pht('This symlink was <strong>deleted</strong>.');
+              break;
+            case DifferentialChangeType::FILE_SUBMODULE:
+              $message = pht('This submodule was <strong>deleted</strong>.');
+              break;
+          }
+          break;
+
+        case DifferentialChangeType::TYPE_MOVE_HERE:
+          $from =
+            "<strong>".
+              phutil_escape_html($changeset->getOldFile()).
+            "</strong>";
+          switch ($file) {
+            case DifferentialChangeType::FILE_TEXT:
+              $message = pht('This file was moved from %s.', $from);
+              break;
+            case DifferentialChangeType::FILE_IMAGE:
+              $message = pht('This image was moved from %s.', $from);
+              break;
+            case DifferentialChangeType::FILE_DIRECTORY:
+              $message = pht('This directory was moved from %s.', $from);
+              break;
+            case DifferentialChangeType::FILE_BINARY:
+              $message = pht('This binary file was moved from %s.', $from);
+              break;
+            case DifferentialChangeType::FILE_SYMLINK:
+              $message = pht('This symlink was moved from %s.', $from);
+              break;
+            case DifferentialChangeType::FILE_SUBMODULE:
+              $message = pht('This submodule was moved from %s.', $from);
+              break;
+          }
+
+        case DifferentialChangeType::TYPE_COPY_HERE:
+          $from =
+            "<strong>".
+              phutil_escape_html($changeset->getOldFile()).
+            "</strong>";
+          switch ($file) {
+            case DifferentialChangeType::FILE_TEXT:
+              $message = pht('This file was copied from %s.', $from);
+              break;
+            case DifferentialChangeType::FILE_IMAGE:
+              $message = pht('This image was copied from %s.', $from);
+              break;
+            case DifferentialChangeType::FILE_DIRECTORY:
+              $message = pht('This directory was copied from %s.', $from);
+              break;
+            case DifferentialChangeType::FILE_BINARY:
+              $message = pht('This binary file was copied from %s.', $from);
+              break;
+            case DifferentialChangeType::FILE_SYMLINK:
+              $message = pht('This symlink was copied from %s.', $from);
+              break;
+            case DifferentialChangeType::FILE_SUBMODULE:
+              $message = pht('This submodule was copied from %s.', $from);
+              break;
+          }
+          break;
+
+        case DifferentialChangeType::TYPE_MOVE_AWAY:
+          $paths =
+            "<strong>".
+              phutil_escape_html(implode(', ', $changeset->getAwayPaths())).
+            "</strong>";
+          switch ($file) {
+            case DifferentialChangeType::FILE_TEXT:
+              $message = pht('This file was moved to %s.', $paths);
+              break;
+            case DifferentialChangeType::FILE_IMAGE:
+              $message = pht('This image was moved to %s.', $paths);
+              break;
+            case DifferentialChangeType::FILE_DIRECTORY:
+              $message = pht('This directory was moved to %s.', $paths);
+              break;
+            case DifferentialChangeType::FILE_BINARY:
+              $message = pht('This binary file was moved to %s.', $paths);
+              break;
+            case DifferentialChangeType::FILE_SYMLINK:
+              $message = pht('This symlink was moved to %s.', $paths);
+              break;
+            case DifferentialChangeType::FILE_SUBMODULE:
+              $message = pht('This submodule was moved to %s.', $paths);
+              break;
+          }
+          break;
+
+        case DifferentialChangeType::TYPE_COPY_AWAY:
+          $paths =
+            "<strong>".
+              phutil_escape_html(implode(', ', $changeset->getAwayPaths())).
+            "</strong>";
+          switch ($file) {
+            case DifferentialChangeType::FILE_TEXT:
+              $message = pht('This file was copied to %s.', $paths);
+              break;
+            case DifferentialChangeType::FILE_IMAGE:
+              $message = pht('This image was copied to %s.', $paths);
+              break;
+            case DifferentialChangeType::FILE_DIRECTORY:
+              $message = pht('This directory was copied to %s.', $paths);
+              break;
+            case DifferentialChangeType::FILE_BINARY:
+              $message = pht('This binary file was copied to %s.', $paths);
+              break;
+            case DifferentialChangeType::FILE_SYMLINK:
+              $message = pht('This symlink was copied to %s.', $paths);
+              break;
+            case DifferentialChangeType::FILE_SUBMODULE:
+              $message = pht('This submodule was copied to %s.', $paths);
+              break;
+          }
+          break;
+
+        case DifferentialChangeType::TYPE_MULTICOPY:
+          $paths =
+            "<strong>".
+              phutil_escape_html(implode(', ', $changeset->getAwayPaths())).
+            "</strong>";
+          switch ($file) {
+            case DifferentialChangeType::FILE_TEXT:
+              $message = pht(
+                'This file was deleted after being copied to %s.',
+                $paths);
+              break;
+            case DifferentialChangeType::FILE_IMAGE:
+              $message = pht(
+                'This image was deleted after being copied to %s.',
+                $paths);
+              break;
+            case DifferentialChangeType::FILE_DIRECTORY:
+              $message = pht(
+                'This directory was deleted after being copied to %s.',
+                $paths);
+              break;
+            case DifferentialChangeType::FILE_BINARY:
+              $message = pht(
+                'This binary file was deleted after being copied to %s.',
+                $paths);
+              break;
+            case DifferentialChangeType::FILE_SYMLINK:
+              $message = pht(
+                'This symlink was deleted after being copied to %s.',
+                $paths);
+              break;
+            case DifferentialChangeType::FILE_SUBMODULE:
+              $message = pht(
+                'This submodule was deleted after being copied to %s.',
+                $paths);
+              break;
+          }
+          break;
+
+        default:
+          switch ($file) {
+            case DifferentialChangeType::FILE_TEXT:
+              $message = pht('This is a file.');
+              break;
+            case DifferentialChangeType::FILE_IMAGE:
+              $message = pht('This is an image.');
+              break;
+            case DifferentialChangeType::FILE_DIRECTORY:
+              $message = pht('This is a directory.');
+              break;
+            case DifferentialChangeType::FILE_BINARY:
+              $message = pht('This is a binary file.');
+              break;
+            case DifferentialChangeType::FILE_SYMLINK:
+              $message = pht('This is a symlink.');
+              break;
+            case DifferentialChangeType::FILE_SUBMODULE:
+              $message = pht('This is a submodule.');
+              break;
+          }
           break;
       }
     }

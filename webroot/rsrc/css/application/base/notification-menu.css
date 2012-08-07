@@ -1,0 +1,52 @@
+/**
+ * @provides phabricator-notification-menu-css
+ */
+
+.phabricator-notification-menu {
+  background: #ffffff;
+  font-size: 11px;
+  word-wrap: break-word;
+  overflow-y: auto;
+}
+
+.device-desktop .phabricator-notification-menu {
+  position: fixed;
+  width: 360px;
+  top: 42px;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.5);
+  z-index: 9;
+
+  border: 1px solid #33393d;
+  border-top-width: 0;
+}
+
+.device-tablet .phabricator-notification-menu,
+.device-phone .phabricator-notification-menu {
+  border-bottom: 1px solid #222222;
+}
+
+
+.phabricator-notification {
+  padding: 6px 6px;
+  margin: 1px 0;
+}
+
+.no-notifications {
+  color: #999999;
+}
+
+.phabricator-notification-list {
+  font-size: 11px;
+}
+
+.phabricator-notification-list .phabricator-notification-unread,
+.phabricator-notification-menu .phabricator-notification-unread {
+  background: #aacfef;
+}
+
+.view-all-notifications {
+  text-align: center;
+  font-weight: bold;
+  background: #eeeeee;
+  border-top: 1px solid #dddddd;
+}

@@ -17,35 +17,8 @@
  * limitations under the License.
  */
 
-$root = dirname(dirname(dirname(__FILE__)));
-require_once $root.'/scripts/__init_script__.php';
-
-$args = new PhutilArgumentParser($argv);
-$args->setTagline('manually discover working copies');
-$args->setSynopsis(<<<EOHELP
-**discover.php** [__options__] __repository-callsign-or-phid ...__
-    Manually discover commits in working copies for the named repositories.
-EOHELP
-);
-$args->parseStandardArguments();
-$args->parse(
-  array(
-    array(
-      'name'      => 'repositories',
-      'wildcard'  => true,
-    ),
-  ));
-
-$repo_names = $args->getArg('repositories');
-if (!$repo_names) {
-  echo "Specify one or more repositories to pull, by callsign or PHID.\n";
-  exit(1);
-}
-
-$repos = PhabricatorRepository::loadAllByPHIDOrCallsign($repo_names);
-foreach ($repos as $repo) {
-  $callsign = $repo->getCallsign();
-  echo "Discovering '{$callsign}'...\n";
-  PhabricatorRepositoryPullLocalDaemon::discoverRepository($repo);
-}
-echo "Done.\n";
+echo
+  "This script has moved. All repository management is now performed through ".
+  "'bin/repository'. Use this command instead:\n\n".
+  "    phabricator/ $ ./bin/repository discover ...\n";
+exit(1);

@@ -42,16 +42,24 @@ JX.behavior('differential-populate', function(config) {
     'differential-load',
     function(e) {
       var meta = e.getNodeData('differential-load');
-      JX.DOM.setContent(
-        JX.$(meta.id),
-        JX.$H('<div class="differential-loading">Loading...</div>'));
-      var data = {
-        ref : meta.ref,
-        whitespace : config.whitespace
-      };
-      new JX.Workflow(config.uri, data)
-        .setHandler(JX.bind(null, onresponse, meta.id))
-        .start();
+      var diff;
+      try {
+        diff = JX.$(meta.id);
+      } catch (e) {
+        // Already loaded.
+      }
+      if (diff) {
+        JX.DOM.setContent(
+          diff,
+          JX.$H('<div class="differential-loading">Loading...</div>'));
+        var data = {
+          ref : meta.ref,
+          whitespace : config.whitespace
+        };
+        new JX.Workflow(config.uri, data)
+          .setHandler(JX.bind(null, onresponse, meta.id))
+          .start();
+      }
       if (meta.kill) {
         e.kill();
       }
@@ -80,6 +88,7 @@ JX.behavior('differential-populate', function(config) {
         var msg;
         var align = 'E';
         var sibling = 'previousSibling';
+        var width = 120;
         if (t.className.match(/cov-C/)) {
           msg = 'Covered';
           highlight_class = 'source-cov-C';
@@ -94,13 +103,14 @@ JX.behavior('differential-populate', function(config) {
           if (match) {
             align = 'N'; // TODO: 'W'
             sibling = 'nextSibling';
+            width = 500;
             msg = JX.Stratcom.getData(t).msg;
             highlight_class = match[0];
           }
         }
 
         if (msg) {
-          JX.Tooltip.show(t, 120, align, msg);
+          JX.Tooltip.show(t, width, align, msg);
         }
 
         if (highlight_class) {

@@ -29,7 +29,8 @@ final class ConduitAPI_differential_createcomment_Method
   public function defineParamTypes() {
     return array(
       'revision_id' => 'required revisionid',
-      'message'     => 'required string',
+      'message'     => 'optional string',
+      'action'      => 'optional string',
     );
   }
 
@@ -54,10 +55,15 @@ final class ConduitAPI_differential_createcomment_Method
       PhabricatorContentSource::SOURCE_CONDUIT,
       array());
 
+    $action = $request->getValue('action');
+    if (!$action) {
+      $action = 'none';
+    }
+
     $editor = new DifferentialCommentEditor(
       $revision,
       $request->getUser()->getPHID(),
-      DifferentialAction::ACTION_COMMENT);
+      $action);
     $editor->setContentSource($content_source);
     $editor->setMessage($request->getValue('message'));
     $editor->save();

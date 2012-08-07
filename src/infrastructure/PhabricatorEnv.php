@@ -316,6 +316,7 @@ final class PhabricatorEnv {
       'mysql.implementation' => 'AphrontMySQLDatabaseConnectionBase',
       'differential.attach-task-class' => 'DifferentialTasksAttacher',
       'mysql.configuration-provider' => 'DatabaseConfigurationProvider',
+      'syntax-highlighter.engine' => 'PhutilSyntaxHighlighterEngine',
     );
   }
 

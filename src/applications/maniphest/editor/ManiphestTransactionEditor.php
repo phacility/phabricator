@@ -69,6 +69,9 @@ final class ManiphestTransactionEditor {
         case ManiphestTransactionType::TYPE_PRIORITY:
           $old = $task->getPriority();
           break;
+        case ManiphestTransactionType::TYPE_EDGE:
+          $old = $transaction->getOldValue();
+          break;
         case ManiphestTransactionType::TYPE_ATTACH:
           $old = $task->getAttached();
           break;
@@ -173,6 +176,10 @@ final class ManiphestTransactionEditor {
             $aux_key = $transaction->getMetadataValue('aux:key');
             $task->setAuxiliaryAttribute($aux_key, $new);
             break;
+          case ManiphestTransactionType::TYPE_EDGE:
+            // Edge edits are accomplished through PhabricatorEdgeEditor, which
+            // has authority.
+            break;
           default:
             throw new Exception('Unknown action type.');
         }
@@ -238,7 +245,7 @@ final class ManiphestTransactionEditor {
     $view->setTransactionGroup($transactions);
     $view->setHandles($handles);
     $view->setAuxiliaryFields($this->auxiliaryFields);
-    list($action, $body) = $view->renderForEmail($with_date = false);
+    list($action, $main_body) = $view->renderForEmail($with_date = false);
 
     $is_create = $this->isCreate($transactions);
 
@@ -246,25 +253,13 @@ final class ManiphestTransactionEditor {
 
     $reply_handler = $this->buildReplyHandler($task);
 
+    $body = new PhabricatorMetaMTAMailBody();
+    $body->addRawSection($main_body);
     if ($is_create) {
-      $body .=
-        "\n\n".
-        "TASK DESCRIPTION\n".
-        "  ".$task->getDescription();
+      $body->addTextSection(pht('TASK DESCRIPTION'), $task->getDescription());
     }
-
-    $body .=
-      "\n\n".
-      "TASK DETAIL\n".
-      "  ".$task_uri."\n";
-
-    $reply_instructions = $reply_handler->getReplyHandlerInstructions();
-    if ($reply_instructions) {
-      $body .=
-        "\n".
-        "REPLY HANDLER ACTIONS\n".
-        "  ".$reply_instructions."\n";
-    }
+    $body->addTextSection(pht('TASK DETAIL'), $task_uri);
+    $body->addReplySection($reply_handler->getReplyHandlerInstructions());
 
     $thread_id = 'maniphest-task-'.$task->getPHID();
     $task_id = $task->getID();
@@ -283,7 +278,7 @@ final class ManiphestTransactionEditor {
       ->setRelatedPHID($task->getPHID())
       ->setIsBulk(true)
       ->setMailTags($mailtags)
-      ->setBody($body);
+      ->setBody($body->render());
 
     $mails = $reply_handler->multiplexMail(
       $template,

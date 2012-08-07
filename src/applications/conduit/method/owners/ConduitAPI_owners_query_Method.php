@@ -54,6 +54,10 @@ final class ConduitAPI_owners_query_Method
     );
   }
 
+  protected static function queryAll() {
+    return id(new PhabricatorOwnersPackage())->loadAll();
+  }
+
   protected static function queryByOwner($owner) {
     $is_valid_phid =
       phid_get_type($owner) == PhabricatorPHIDConstants::PHID_TYPE_USER ||
@@ -152,8 +156,11 @@ final class ConduitAPI_owners_query_Method
     $path = $request->getValue('path');
     $is_path_query = ($repo && $path) ? 1 : 0;
 
-    // exactly one of these should be provided
-    if ($is_owner_query + $is_path_query + $is_affiliated_query !== 1) {
+    if ($is_owner_query + $is_path_query + $is_affiliated_query === 0) {
+      // if no search terms are provided, return everything
+      $packages = self::queryAll();
+    } else if ($is_owner_query + $is_path_query + $is_affiliated_query > 1) {
+      // otherwise, exactly one of these should be provided
       throw new ConduitException('ERR-INVALID-USAGE');
     }
 
@@ -168,7 +175,7 @@ final class ConduitAPI_owners_query_Method
 
       $packages = self::queryByOwner($owner);
 
-    } else {
+    } else if ($is_path_query) {
       $packages = self::queryByPath($repo, $path);
     }
 

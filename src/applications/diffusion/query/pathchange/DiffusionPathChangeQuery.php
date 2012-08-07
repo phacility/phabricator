@@ -80,7 +80,8 @@ final class DiffusionPathChangeQuery {
       $change->setTargetPath(ltrim($raw_change['targetPathName'], '/'));
       $change->setTargetCommitIdentifier($raw_change['targetCommitIdentifier']);
 
-      $changes[] = $change;
+      $id = $raw_change['pathID'];
+      $changes[$id] = $change;
     }
 
     // Deduce the away paths by examining all the changes.

@@ -50,12 +50,25 @@ final class PhamePost extends PhameDAO {
   public function getDeleteURI() {
     return $this->getActionURI('delete');
   }
+  public function getChangeVisibilityURI() {
+    return $this->getActionURI('changevisibility');
+  }
   private function getActionURI($action) {
     return '/phame/post/'.$action.'/'.$this->getPHID().'/';
   }
 
   public function isDraft() {
     return $this->getVisibility() == self::VISIBILITY_DRAFT;
+  }
+
+  public function getHumanName() {
+    if ($this->isDraft()) {
+      $name = 'draft';
+    } else {
+      $name = 'post';
+    }
+
+    return $name;
   }
 
   public function getCommentsWidget() {

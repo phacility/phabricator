@@ -36,7 +36,7 @@ final class HeraldRuleEditHistoryController extends HeraldController {
     $pager->setURI($request->getRequestURI(), 'offset');
     $pager->setOffset($request->getStr('offset'));
 
-    $edits = $edit_query->executeWithPager($pager);
+    $edits = $edit_query->executeWithOffsetPager($pager);
 
     $need_phids = mpull($edits, 'getEditorPHID');
     $handles = id(new PhabricatorObjectHandleData($need_phids))

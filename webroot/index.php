@@ -55,8 +55,14 @@ if (!$env) {
 }
 
 if (!isset($_REQUEST['__path__'])) {
-  phabricator_fatal_config_error(
-    "__path__ is not set. Your rewrite rules are not configured correctly.");
+  if (php_sapi_name() == 'cli-server') {
+    // Compatibility with PHP 5.4+ built-in web server.
+    $url = parse_url($_SERVER['REQUEST_URI']);
+    $_REQUEST['__path__'] = $url['path'];
+  } else {
+    phabricator_fatal_config_error(
+      "__path__ is not set. Your rewrite rules are not configured correctly.");
+  }
 }
 
 if (get_magic_quotes_gpc()) {
@@ -78,6 +84,21 @@ try {
 
   PhabricatorEnv::setEnvConfig($conf);
 
+  // This needs to be done before we create the log, because
+  // PhabricatorAccessLog::getLog() calls date()
+  $tz = PhabricatorEnv::getEnvConfig('phabricator.timezone');
+  if ($tz) {
+    date_default_timezone_set($tz);
+  }
+
+  // Append any paths to $PATH if we need to.
+  $paths = PhabricatorEnv::getEnvConfig('environment.append-paths');
+  if (!empty($paths)) {
+    $current_env_path = getenv('PATH');
+    $new_env_paths = implode(':', $paths);
+    putenv('PATH='.$current_env_path.':'.$new_env_paths);
+  }
+
   // This is the earliest we can get away with this, we need env config first.
   PhabricatorAccessLog::init();
   $access_log = PhabricatorAccessLog::getLog();
@@ -96,11 +117,6 @@ try {
 
 } catch (Exception $ex) {
   phabricator_fatal("[Initialization Exception] ".$ex->getMessage());
-}
-
-$tz = PhabricatorEnv::getEnvConfig('phabricator.timezone');
-if ($tz) {
-  date_default_timezone_set($tz);
 }
 
 PhutilErrorHandler::setErrorListener(
@@ -143,7 +159,7 @@ $application->setPath($path);
 $application->willBuildRequest();
 $request = $application->buildRequest();
 
-$write_guard = new AphrontWriteGuard($request);
+$write_guard = new AphrontWriteGuard(array($request, 'validateCSRF'));
 PhabricatorEventEngine::initialize();
 
 $application->setRequest($request);
@@ -186,7 +202,8 @@ try {
 }
 
 try {
-  $response = $application->willSendResponse($response);
+  $response = $controller->didProcessRequest($response);
+  $response = $application->willSendResponse($response, $controller);
   $response->setRequest($request);
   $response_string = $response->buildResponseString();
 } catch (Exception $ex) {
@@ -218,8 +235,8 @@ $headers = array_merge($headers, $response->getHeaders());
 $sink->writeHeaders($headers);
 
 // TODO: This shouldn't be possible in a production-configured environment.
-if (isset($_REQUEST['__profile__']) &&
-    ($_REQUEST['__profile__'] == 'all')) {
+if (DarkConsoleXHProfPluginAPI::isProfilerRequested() &&
+    DarkConsoleXHProfPluginAPI::isProfilerRequested() === 'all') {
   $profile = DarkConsoleXHProfPluginAPI::stopProfiler();
   $profile =
     '<div style="text-align: center; background: #ff00ff; padding: 1em;

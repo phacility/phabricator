@@ -16,117 +16,74 @@
  * limitations under the License.
  */
 
-final class PhabricatorFeedQuery {
+final class PhabricatorFeedQuery extends PhabricatorCursorPagedPolicyQuery {
 
   private $filterPHIDs;
-  private $limit = 100;
-  private $after;
-  private $before;
 
   public function setFilterPHIDs(array $phids) {
     $this->filterPHIDs = $phids;
     return $this;
   }
 
-  public function setLimit($limit) {
-    $this->limit = $limit;
-    return $this;
-  }
+  public function loadPage() {
 
-  public function setAfter($after) {
-    $this->after = $after;
-    return $this;
-  }
-
-  public function setBefore($before) {
-    $this->before = $before;
-    return $this;
-  }
-
-  public function execute() {
-
-    $ref_table = new PhabricatorFeedStoryReference();
     $story_table = new PhabricatorFeedStoryData();
-
     $conn = $story_table->establishConnection('r');
 
+    $data = queryfx_all(
+      $conn,
+      'SELECT story.* FROM %T story %Q %Q %Q %Q %Q',
+      $story_table->getTableName(),
+      $this->buildJoinClause($conn),
+      $this->buildWhereClause($conn),
+      $this->buildGroupClause($conn),
+      $this->buildOrderClause($conn),
+      $this->buildLimitClause($conn));
+
+    $results = PhabricatorFeedStory::loadAllFromRows($data);
+
+    return $this->processResults($results);
+  }
+
+  private function buildJoinClause(AphrontDatabaseConnection $conn_r) {
+    // NOTE: We perform this join unconditionally (even if we have no filter
+    // PHIDs) to omit rows which have no story references. These story data
+    // rows are notifications or realtime alerts.
+
+    $ref_table = new PhabricatorFeedStoryReference();
+    return qsprintf(
+      $conn_r,
+      'JOIN %T ref ON ref.chronologicalKey = story.chronologicalKey',
+      $ref_table->getTableName());
+  }
+
+  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
+
     if ($this->filterPHIDs) {
       $where[] = qsprintf(
-        $conn,
+        $conn_r,
         'ref.objectPHID IN (%Ls)',
         $this->filterPHIDs);
     }
 
-    // For "before" queries, we can just add a constraint to the WHERE clause.
-    // For "after" queries, we must also reverse the result ordering, since
-    // otherwise we'll always grab the first page of results if there's a limit.
-    // After MySQL applies the limit, we reverse the page in PHP (below) to
-    // ensure consistent ordering.
+    $where[] = $this->buildPagingClause($conn_r);
 
-    $order = 'DESC';
-
-    if ($this->after) {
-      $where[] = qsprintf(
-        $conn,
-        'ref.chronologicalKey > %s',
-        $this->after);
-      $order = 'ASC';
-    }
-
-    if ($this->before) {
-      $where[] = qsprintf(
-        $conn,
-        'ref.chronologicalKey < %s',
-        $this->before);
-    }
-
-    if ($where) {
-      $where = 'WHERE ('.implode(') AND (', $where).')';
-    } else {
-      $where = '';
-    }
-
-    $data = queryfx_all(
-      $conn,
-      'SELECT story.* FROM %T ref
-        JOIN %T story ON ref.chronologicalKey = story.chronologicalKey
-        %Q
-        GROUP BY ref.chronologicalKey
-        ORDER BY ref.chronologicalKey %Q
-        LIMIT %d',
-      $ref_table->getTableName(),
-      $story_table->getTableName(),
-      $where,
-      $order,
-      $this->limit);
-
-    if ($order != 'DESC') {
-      // If we did order ASC to pull 'after' data, reverse the result set so
-      // that stories are returned in a consistent (descending) order.
-      $data = array_reverse($data);
-    }
-
-    $data = $story_table->loadAllFromArray($data);
-
-    $stories = array();
-    foreach ($data as $story_data) {
-      $class = $story_data->getStoryType();
-
-      try {
-        if (!class_exists($class) ||
-            !is_subclass_of($class, 'PhabricatorFeedStory')) {
-          $class = 'PhabricatorFeedStoryUnknown';
-        }
-      } catch (PhutilMissingSymbolException $ex) {
-        // If the class can't be loaded, libphutil will throw an exception.
-        // Render the story using the unknown story view.
-        $class = 'PhabricatorFeedStoryUnknown';
-      }
-
-      $stories[] = newv($class, array($story_data));
-    }
-
-    return $stories;
+    return $this->formatWhereClause($where);
   }
+
+  private function buildGroupClause(AphrontDatabaseConnection $conn_r) {
+    return qsprintf(
+      $conn_r,
+      'GROUP BY ref.chronologicalKey');
+  }
+
+  protected function getPagingColumn() {
+    return 'ref.chronologicalKey';
+  }
+
+  protected function getPagingValue($item) {
+    return $item->getChronologicalKey();
+  }
+
 }

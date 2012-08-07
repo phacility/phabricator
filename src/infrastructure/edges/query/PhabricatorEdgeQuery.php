@@ -39,6 +39,7 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
 
   private $sourcePHIDs;
   private $edgeTypes;
+  private $resultSet;
 
   private $needEdgeData;
 
@@ -174,7 +175,67 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
       }
     }
 
+    $this->resultSet = $result;
     return $result;
+  }
+
+
+  /**
+   * Convenience function for selecting edge destination PHIDs after calling
+   * execute().
+   *
+   * Returns a flat list of PHIDs matching the provided source PHID and type
+   * filters. By default, the filters are empty so all PHIDs will be returned.
+   * For example, if you're doing a batch query from several sources, you might
+   * write code like this:
+   *
+   *   $query = new PhabricatorEdgeQuery();
+   *   $query->withSourcePHIDs(mpull($objects, 'getPHID'));
+   *   $query->withEdgeTypes(array($some_type));
+   *   $query->execute();
+   *
+   *   // Gets all of the destinations.
+   *   $all_phids = $query->getDestinationPHIDs();
+   *   $handles = id(new PhabricatorObjectHandleData($all_phids))
+   *     ->loadHandles();
+   *
+   *   foreach ($objects as $object) {
+   *     // Get all of the destinations for the given object.
+   *     $dst_phids = $query->getDestinationPHIDs(array($object->getPHID()));
+   *     $object->attachHandles(array_select_keys($handles, $dst_phids));
+   *   }
+   *
+   * @param list? List of PHIDs to select, or empty to select all.
+   * @param list? List of edge types to select, or empty to select all.
+   * @return list<phid> List of matching destination PHIDs.
+   */
+  public function getDestinationPHIDs(
+    array $src_phids = array(),
+    array $types = array()) {
+    if ($this->resultSet === null) {
+      throw new Exception(
+        "You must execute() a query before you you can getDestinationPHIDs().");
+    }
+
+    $src_phids = array_fill_keys($src_phids, true);
+    $types = array_fill_keys($types, true);
+
+    $result_phids = array();
+    foreach ($this->resultSet as $src => $edges_by_type) {
+      if ($src_phids && empty($src_phids[$src])) {
+        continue;
+      }
+      foreach ($edges_by_type as $type => $edges_by_dst) {
+        if ($types && empty($types[$type])) {
+          continue;
+        }
+        foreach ($edges_by_dst as $dst => $edge) {
+          $result_phids[$dst] = true;
+        }
+      }
+    }
+
+    return array_keys($result_phids);
   }
 
 

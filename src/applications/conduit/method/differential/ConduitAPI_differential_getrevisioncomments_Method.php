@@ -20,7 +20,7 @@
  * @group conduit
  */
 final class ConduitAPI_differential_getrevisioncomments_Method
-  extends ConduitAPIMethod {
+  extends ConduitAPI_differential_Method {
 
   public function getMethodDescription() {
     return "Retrieve Differential Revision Comments.";
@@ -29,6 +29,7 @@ final class ConduitAPI_differential_getrevisioncomments_Method
   public function defineParamTypes() {
     return array(
       'ids' => 'required list<int>',
+      'inlines' => 'optional bool',
     );
   }
 
@@ -53,18 +54,42 @@ final class ConduitAPI_differential_getrevisioncomments_Method
       'revisionID IN (%Ld)',
       $revision_ids);
 
+    $with_inlines = $request->getValue('inlines');
+    if ($with_inlines) {
+      $inlines = id(new DifferentialInlineComment())->loadAllWhere(
+        'revisionID IN (%Ld)',
+        $revision_ids);
+      $changesets = array();
+      if ($inlines) {
+        $changesets = id(new DifferentialChangeset())->loadAllWhere(
+          'id IN (%Ld)',
+          array_unique(mpull($inlines, 'getChangesetID')));
+        $inlines = mgroup($inlines, 'getCommentID');
+      }
+    }
+
     foreach ($comments as $comment) {
       $revision_id = $comment->getRevisionID();
-      if (!array_key_exists($revision_id, $results)) {
-        $results[$revision_id] = array();
-      }
-      $results[$revision_id][] = array(
+      $result = array(
         'revisionID'  => $revision_id,
         'action'      => $comment->getAction(),
         'authorPHID'  => $comment->getAuthorPHID(),
         'dateCreated' => $comment->getDateCreated(),
         'content'     => $comment->getContent(),
       );
+
+      if ($with_inlines) {
+        $result['inlines'] = array();
+        foreach (idx($inlines, $comment->getID(), array()) as $inline) {
+          $changeset = idx($changesets, $inline->getChangesetID());
+          $result['inlines'][] = $this->buildInlineInfoDictionary(
+            $inline,
+            $changeset);
+        }
+        // TODO: Put synthetic inlines without an attached comment somewhere.
+      }
+
+      $results[$revision_id][] = $result;
     }
 
     return $results;

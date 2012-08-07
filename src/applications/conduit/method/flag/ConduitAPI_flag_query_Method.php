@@ -73,25 +73,7 @@ final class ConduitAPI_flag_query_Method extends ConduitAPI_flag_Method {
 
     $results = array();
     foreach ($flags as $flag) {
-      $color = $flag->getColor();
-      $uri = PhabricatorEnv::getProductionURI($flag->getHandle()->getURI());
-
-      $results[] = array(
-        'id'            => $flag->getID(),
-        'ownerPHID'     => $flag->getOwnerPHID(),
-        'type'          => $flag->getType(),
-        'objectPHID'    => $flag->getObjectPHID(),
-        'reasonPHID'    => $flag->getReasonPHID(),
-        'color'         => $color,
-        'colorName'     => PhabricatorFlagColor::getColorName($color),
-        'note'          => $flag->getNote(),
-        'handle'        => array(
-          'uri'         => $uri,
-          'name'        => $flag->getHandle()->getName(),
-        ),
-        'dateCreated'   => $flag->getDateCreated(),
-        'dateModified'  => $flag->getDateModified(),
-      );
+      $results[] = $this->buildFlagInfoDictionary($flag);
     }
 
     return $results;

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,98 +18,22 @@
 
 /**
  * @group conduit
+ *
+ * @concrete-extensible
  */
 final class ConduitAPI_maniphest_find_Method
-  extends ConduitAPI_maniphest_Method {
+  extends ConduitAPI_maniphest_query_Method {
+
+  public function getMethodStatus() {
+    return self::METHOD_STATUS_DEPRECATED;
+  }
+
+  public function getMethodStatusDescription() {
+    return "Renamed to 'maniphest.query'.";
+  }
 
   public function getMethodDescription() {
-    return "Execute complex searches for Maniphest tasks.";
-  }
-
-  public function defineParamTypes() {
-
-    $orders = array(
-      ManiphestTaskQuery::ORDER_PRIORITY,
-      ManiphestTaskQuery::ORDER_CREATED,
-      ManiphestTaskQuery::ORDER_MODIFIED,
-    );
-    $orders = implode(', ', $orders);
-
-    $statuses = array(
-      ManiphestTaskQuery::STATUS_ANY,
-      ManiphestTaskQuery::STATUS_OPEN,
-      ManiphestTaskQuery::STATUS_CLOSED,
-    );
-    $statuses = implode(', ', $statuses);
-
-    return array(
-      'ownerPHIDs'        => 'optional list',
-      'authorPHIDs'       => 'optional list',
-      'projectPHIDs'      => 'optional list',
-      'ccPHIDs'           => 'optional list',
-
-      'order'             => 'optional enum<'.$orders.'>',
-      'status'            => 'optional enum<'.$statuses.'>',
-
-      'limit'             => 'optional int',
-      'offset'            => 'optional int',
-    );
-  }
-
-  public function defineReturnType() {
-    return 'list';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
-  }
-
-  protected function execute(ConduitAPIRequest $request) {
-    $query = new ManiphestTaskQuery();
-
-    $owners = $request->getValue('ownerPHIDs');
-    if ($owners) {
-      $query->withOwners($owners);
-    }
-
-    $authors = $request->getValue('authorPHIDs');
-    if ($authors) {
-      $query->withAuthors($authors);
-    }
-
-    $projects = $request->getValue('projectPHIDs');
-    if ($projects) {
-      $query->withProjects($projects);
-    }
-
-    $ccs = $request->getValue('ccPHIDs');
-    if ($ccs) {
-      $query->withSubscribers($ccs);
-    }
-
-    $order = $request->getValue('order');
-    if ($order) {
-      $query->setOrderBy($order);
-    }
-
-    $status = $request->getValue('status');
-    if ($status) {
-      $query->withStatus($status);
-    }
-
-    $limit = $request->getValue('limit');
-    if ($limit) {
-      $query->setLimit($limit);
-    }
-
-    $offset = $request->getValue('offset');
-    if ($offset) {
-      $query->setOffset($offset);
-    }
-
-    $results = $query->execute();
-    return $this->buildTaskInfoDictionaries($results);
+    return "Deprecated alias of maniphest.query";
   }
 
 }

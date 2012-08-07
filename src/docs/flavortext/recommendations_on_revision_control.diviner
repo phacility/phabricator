@@ -5,7 +5,7 @@ Project recommendations on how to organize revision control.
 
 This document is purely advisory. Phabricator works with a variety of revision
 control strategies, and diverging from the recommendations in this document
-will not impact your ability to use it for code review and management.
+will not impact your ability to use it for code review and source management.
 
 This is my (epriestley's) personal take on the issue and not necessarily
 representative of the views of the Phabricator team as a whole.
@@ -27,17 +27,19 @@ exactly one commit (in some form), not a sequence of checkpoint commits.
   - In SVN, this means don't ##commit## until after an idea has been completely
     written. All reasonable SVN workflows naturally enforce this.
   - In Git, this means squashing checkpoint commits as you go (with ##git commit
-    --amend##) or before pushing (with ##git rebase -i##), or having a strict
-    policy where your master/trunk contains only merge commits and each is a
-    merge between the old master and a branch which represents a single idea.
-    Although this preserves the checkpoint commits along the branches, you can
-    view master alone as a series of single-idea commits.
-  - In Mercurial, it is not generally possible to avoid having ideas spread
-    across multiple commits. Mercurial does not support liberal mutability
-    doctrines (so you can't squash commits) and does not let you build a default
+    --amend##) or before pushing (with ##git rebase -i## or `git merge
+    --squash`), or having a strict policy where your master/trunk contains only
+    merge commits and each is a merge between the old master and a branch which
+    represents a single idea. Although this preserves the checkpoint commits
+    along the branches, you can view master alone as a series of single-idea
+    commits.
+  - In Mercurial, you can use the "queues" extension before 2.2 or `--amend`
+    after Mercurial 2.2, or wait to commit until a change is complete (like
+    SVN), although the latter is not recommended. Without extensions, older
+    versions of Mercurial do not support liberal mutability doctrines (so you
+    can't ever combine checkpoint commits) and do not let you build a default
     out of only merge commits, so it is not possible to have an authoritative
-    repository where one commit represents one idea in any real sense. Thus,
-    Mercurial is not recommended for projects which may ever need to scale.
+    repository where one commit represents one idea in any real sense.
 
 = Why This Matters =
 
@@ -71,12 +73,20 @@ particular:
     commit for every keystroke. This VCS would obviously be unusable. But many
     checkpoint commits aren't much different, and conceptually represent some
     relatively arbitrary point in the sequence of keystrokes that went into
-    writing a larger idea. Get rid of them
-    or create an abstraction layer (merge commits) which allows you to ignore
-    them when you are trying to understand the repository in terms of ideas
-    (which is almost always).
+    writing a larger idea. Get rid of them or create an abstraction layer (merge
+    commits) which allows you to ignore them when you are trying to understand
+    the repository in terms of ideas (which is almost always).
 
 All of these become problems only at scale. Facebook pushes dozens of ideas
 every day and thousands on a weekly basis, and could not do this (at least, not
 without more people or more errors) without choosing a repository strategy where
 **one idea is one commit**.
+
+= Next Steps =
+
+Continue by:
+
+  - reading recommendations on structuring branches with
+    @{article:Recommendations on Branching}; or
+  - reading recommendations on structuring changes with
+    @{article:Writing Reviewable Code}.

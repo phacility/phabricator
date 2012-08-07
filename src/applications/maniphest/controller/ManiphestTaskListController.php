@@ -49,12 +49,20 @@ final class ManiphestTaskListController extends ManiphestController {
       $search_text = $request->getStr('set_search');
       $search_text = nonempty($search_text, null);
 
+      $min_priority = $request->getInt('set_lpriority');
+      $min_priority = nonempty($min_priority, null);
+
+      $max_priority = $request->getInt('set_hpriority');
+      $max_priority = nonempty($max_priority, null);
+
       $uri = $request->getRequestURI()
         ->alter('users',      $this->getArrToStrList('set_users'))
         ->alter('projects',   $this->getArrToStrList('set_projects'))
         ->alter('xprojects',  $this->getArrToStrList('set_xprojects'))
         ->alter('owners',     $this->getArrToStrList('set_owners'))
         ->alter('authors',    $this->getArrToStrList('set_authors'))
+        ->alter('lpriority', $min_priority)
+        ->alter('hpriority', $max_priority)
         ->alter('tasks', $task_ids)
         ->alter('search', $search_text);
 
@@ -113,6 +121,9 @@ final class ManiphestTaskListController extends ManiphestController {
     $exclude_project_phids = $query->getParameter(
       'excludeProjectPHIDs',
       array());
+    $low_priority   = $query->getParameter('lowPriority');
+    $high_priority  = $query->getParameter('highPriority');
+
     $page_size = $query->getParameter('limit');
     $page = $query->getParameter('offset');
 
@@ -209,6 +220,32 @@ final class ManiphestTaskListController extends ManiphestController {
           ->setName('set_xprojects')
           ->setLabel('Exclude Projects')
           ->setValue($tokens));
+
+      $priority = ManiphestTaskPriority::getLowestPriority();
+      if ($low_priority) {
+        $priority = $low_priority;
+      }
+
+      $form->appendChild(
+          id(new AphrontFormSelectControl())
+            ->setLabel('Min Priority')
+            ->setName('set_lpriority')
+            ->setValue($priority)
+            ->setOptions(array_reverse(
+                ManiphestTaskPriority::getTaskPriorityMap(), true)));
+
+      $priority = ManiphestTaskPriority::getHighestPriority();
+      if ($high_priority) {
+        $priority = $high_priority;
+      }
+
+      $form->appendChild(
+          id(new AphrontFormSelectControl())
+            ->setLabel('Max Priority')
+            ->setName('set_hpriority')
+            ->setValue($priority)
+            ->setOptions(ManiphestTaskPriority::getTaskPriorityMap()));
+
     }
 
     $form
@@ -377,6 +414,13 @@ final class ManiphestTaskListController extends ManiphestController {
     $owner_phids = $search_query->getParameter('ownerPHIDs', array());
     $author_phids = $search_query->getParameter('authorPHIDs', array());
 
+    $low_priority = $search_query->getParameter('lowPriority');
+    $low_priority = nonempty($low_priority,
+        ManiphestTaskPriority::getLowestPriority());
+    $high_priority = $search_query->getParameter('highPriority');
+    $high_priority = nonempty($high_priority,
+      ManiphestTaskPriority::getHighestPriority());
+
     $query = new ManiphestTaskQuery();
     $query->withProjects($project_phids);
     $query->withTaskIDs($task_ids);
@@ -428,6 +472,9 @@ final class ManiphestTaskListController extends ManiphestController {
       case 'projectall':
         $any_project = true;
         break;
+      case 'custom':
+        $query->withPrioritiesBetween($low_priority, $high_priority);
+        break;
     }
 
     $query->withAnyProject($any_project);
@@ -437,6 +484,7 @@ final class ManiphestTaskListController extends ManiphestController {
     $order_map = array(
       'priority'  => ManiphestTaskQuery::ORDER_PRIORITY,
       'created'   => ManiphestTaskQuery::ORDER_CREATED,
+      'title'     => ManiphestTaskQuery::ORDER_TITLE,
     );
     $query->setOrderBy(
       idx(
@@ -639,8 +687,8 @@ final class ManiphestTaskListController extends ManiphestController {
   }
 
   private function buildQueryFromRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+    $request  = $this->getRequest();
+    $user     = $request->getUser();
 
     $status   = $this->getStatusValueFromRequest();
     $group    = $this->getGroupValueFromRequest();
@@ -652,7 +700,7 @@ final class ManiphestTaskListController extends ManiphestController {
 
     if ($this->view == 'projecttriage' || $this->view == 'projectall') {
       $project_query = new PhabricatorProjectQuery();
-      $project_query->setMembers($user_phids);
+      $project_query->withMemberPHIDs($user_phids);
       $projects = $project_query->execute();
       $project_phids = mpull($projects, 'getPHID');
     } else {
@@ -681,10 +729,13 @@ final class ManiphestTaskListController extends ManiphestController {
       $task_ids = $numeric_task_ids;
     }
 
-    $owner_phids = $request->getStrList('owners');
-    $author_phids = $request->getStrList('authors');
+    $owner_phids    = $request->getStrList('owners');
+    $author_phids   = $request->getStrList('authors');
 
-    $search_string = $request->getStr('search');
+    $search_string  = $request->getStr('search');
+
+    $low_priority   = $request->getInt('lpriority');
+    $high_priority  = $request->getInt('hpriority');
 
     $page = $request->getInt('offset');
     $page_size = self::DEFAULT_PAGE_SIZE;
@@ -701,6 +752,8 @@ final class ManiphestTaskListController extends ManiphestController {
         'ownerPHIDs'          => $owner_phids,
         'authorPHIDs'         => $author_phids,
         'taskIDs'             => $task_ids,
+        'lowPriority'         => $low_priority,
+        'highPriority'        => $high_priority,
         'group'               => $group,
         'order'               => $order,
         'offset'              => $page,
@@ -796,6 +849,7 @@ final class ManiphestTaskListController extends ManiphestController {
       'p' => 'priority',
       'u' => 'updated',
       'c' => 'created',
+      't' => 'title',
     );
   }
 
@@ -822,6 +876,7 @@ final class ManiphestTaskListController extends ManiphestController {
       'p' => 'Priority',
       'u' => 'Updated',
       'c' => 'Created',
+      't' => 'Title',
     );
   }
 

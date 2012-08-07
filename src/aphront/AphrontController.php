@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@
 abstract class AphrontController {
 
   private $request;
+  private $currentApplication;
 
   public function willBeginExecution() {
     return;
@@ -29,6 +30,10 @@ abstract class AphrontController {
 
   public function willProcessRequest(array $uri_data) {
     return;
+  }
+
+  public function didProcessRequest($response) {
+    return $response;
   }
 
   abstract public function processRequest();
@@ -43,6 +48,18 @@ abstract class AphrontController {
 
   final public function delegateToController(AphrontController $controller) {
     return $controller->processRequest();
+  }
+
+
+  final public function setCurrentApplication(
+    PhabricatorApplication $current_application) {
+
+    $this->currentApplication = $current_application;
+    return $this;
+  }
+
+  final public function getCurrentApplication() {
+    return $this->currentApplication;
   }
 
 }

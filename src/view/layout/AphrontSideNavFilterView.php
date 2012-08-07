@@ -40,6 +40,18 @@ final class AphrontSideNavFilterView extends AphrontView {
   private $items = array();
   private $baseURI;
   private $selectedFilter = false;
+  private $flexNav;
+  private $flexible;
+
+  public function setFlexNav($flex_nav) {
+    $this->flexNav = $flex_nav;
+    return $this;
+  }
+
+  public function setFlexible($flexible) {
+    $this->flexible = $flexible;
+    return $this;
+  }
 
   public function addFilter($key, $name, $uri = null, $relative = false) {
     $this->items[] = array(
@@ -102,6 +114,8 @@ final class AphrontSideNavFilterView extends AphrontView {
     }
 
     $view = new AphrontSideNavView();
+    $view->setFlexNav($this->flexNav);
+    $view->setFlexible($this->flexible);
     foreach ($this->items as $item) {
       list($type, $key, $name) = $item;
       switch ($type) {

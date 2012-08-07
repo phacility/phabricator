@@ -67,14 +67,6 @@ class AphrontDefaultApplicationConfiguration
       '/phid/' => array(
         '' => 'PhabricatorPHIDLookupController',
       ),
-      '/people/' => array(
-        '' => 'PhabricatorPeopleListController',
-        'logs/' => 'PhabricatorPeopleLogsController',
-        'edit/(?:(?P<id>\d+)/(?:(?P<view>\w+)/)?)?'
-          => 'PhabricatorPeopleEditController',
-      ),
-      '/p/(?P<username>[\w._-]+)/(?:(?P<page>\w+)/)?'
-        => 'PhabricatorPeopleProfileController',
       '/conduit/' => array(
         '' => 'PhabricatorConduitListController',
         'method/(?P<method>[^/]+)/' => 'PhabricatorConduitConsoleController',
@@ -83,32 +75,6 @@ class AphrontDefaultApplicationConfiguration
         'token/' => 'PhabricatorConduitTokenController',
       ),
       '/api/(?P<method>[^/]+)' => 'PhabricatorConduitAPIController',
-
-      '/D(?P<id>\d+)' => 'DifferentialRevisionViewController',
-      '/differential/' => array(
-        '' => 'DifferentialRevisionListController',
-        'filter/(?P<filter>\w+)/(?:(?P<username>\w+)/)?' =>
-          'DifferentialRevisionListController',
-        'stats/(?P<filter>\w+)/' => 'DifferentialRevisionStatsController',
-        'diff/' => array(
-          '(?P<id>\d+)/' => 'DifferentialDiffViewController',
-          'create/' => 'DifferentialDiffCreateController',
-        ),
-        'changeset/' => 'DifferentialChangesetViewController',
-        'revision/edit/(?:(?P<id>\d+)/)?'
-          => 'DifferentialRevisionEditController',
-        'comment/' => array(
-          'preview/(?P<id>\d+)/' => 'DifferentialCommentPreviewController',
-          'save/' => 'DifferentialCommentSaveController',
-          'inline/' => array(
-            'preview/(?P<id>\d+)/' =>
-              'DifferentialInlineCommentPreviewController',
-            'edit/(?P<id>\d+)/' => 'DifferentialInlineCommentEditController',
-          ),
-        ),
-        'subscribe/(?P<action>add|rem)/(?P<id>\d+)/'
-          => 'DifferentialSubscribeController',
-      ),
 
       '/typeahead/' => array(
         'common/(?P<type>\w+)/'
@@ -177,38 +143,6 @@ class AphrontDefaultApplicationConfiguration
 
       '/~/' => 'DarkConsoleController',
 
-      '/settings/' => array(
-        '(?:page/(?P<page>[^/]+)/)?' => 'PhabricatorUserSettingsController',
-      ),
-
-      '/maniphest/' => array(
-        '' => 'ManiphestTaskListController',
-        'view/(?P<view>\w+)/' => 'ManiphestTaskListController',
-        'report/(?:(?P<view>\w+)/)?' => 'ManiphestReportController',
-        'batch/' => 'ManiphestBatchEditController',
-        'task/' => array(
-          'create/' => 'ManiphestTaskEditController',
-          'edit/(?P<id>\d+)/' => 'ManiphestTaskEditController',
-          'descriptionchange/(?:(?P<id>\d+)/)?' =>
-            'ManiphestTaskDescriptionChangeController',
-          'descriptionpreview/' =>
-            'ManiphestTaskDescriptionPreviewController',
-        ),
-        'transaction/' => array(
-          'save/' => 'ManiphestTransactionSaveController',
-          'preview/(?P<id>\d+)/' => 'ManiphestTransactionPreviewController',
-        ),
-        'export/(?P<key>[^/]+)/' => 'ManiphestExportController',
-        'subpriority/' => 'ManiphestSubpriorityController',
-        'custom/' => array(
-          '' => 'ManiphestSavedQueryListController',
-          'edit/(?:(?P<id>\d+)/)?' => 'ManiphestSavedQueryEditController',
-          'delete/(?P<id>\d+)/'   => 'ManiphestSavedQueryDeleteController',
-        ),
-      ),
-
-      '/T(?P<id>\d+)' => 'ManiphestTaskDetailController',
-
       '/repository/' => array(
         ''                     => 'PhabricatorRepositoryListController',
         'create/'              => 'PhabricatorRepositoryCreateController',
@@ -227,44 +161,6 @@ class AphrontDefaultApplicationConfiguration
         'select/(?P<type>\w+)/'
           => 'PhabricatorSearchSelectController',
         'index/(?P<phid>[^/]+)/' => 'PhabricatorSearchIndexController',
-      ),
-
-      '/project/' => array(
-        '' => 'PhabricatorProjectListController',
-        'filter/(?P<filter>[^/]+)/' => 'PhabricatorProjectListController',
-        'edit/(?P<id>\d+)/' => 'PhabricatorProjectProfileEditController',
-        'view/(?P<id>\d+)/(?:(?P<page>\w+)/)?'
-          => 'PhabricatorProjectProfileController',
-        'create/' => 'PhabricatorProjectCreateController',
-        'update/(?P<id>\d+)/(?P<action>[^/]+)/'
-          => 'PhabricatorProjectUpdateController',
-      ),
-
-      '/r(?P<callsign>[A-Z]+)(?P<commit>[a-z0-9]+)'
-        => 'DiffusionCommitController',
-      '/diffusion/' => array(
-        '' => 'DiffusionHomeController',
-        '(?P<callsign>[A-Z]+)/' => array(
-          '' => 'DiffusionRepositoryController',
-
-          'repository/(?P<dblob>.*)'    => 'DiffusionRepositoryController',
-          'change/(?P<dblob>.*)'        => 'DiffusionChangeController',
-          'history/(?P<dblob>.*)'       => 'DiffusionHistoryController',
-          'browse/(?P<dblob>.*)'        => 'DiffusionBrowseController',
-          'lastmodified/(?P<dblob>.*)'  => 'DiffusionLastModifiedController',
-          'diff/'                       => 'DiffusionDiffController',
-          'tags/(?P<dblob>.*)'          => 'DiffusionTagListController',
-          'branches/(?P<dblob>.*)'      => 'DiffusionBranchTableController',
-        ),
-        'inline/(?P<phid>[^/]+)/' => 'DiffusionInlineCommentController',
-        'services/' => array(
-          'path/' => array(
-            'complete/' => 'DiffusionPathCompleteController',
-            'validate/' => 'DiffusionPathValidateController',
-          ),
-        ),
-        'symbol/(?P<name>[^/]+)/' => 'DiffusionSymbolController',
-        'external/' => 'DiffusionExternalController',
       ),
 
       '/daemon/' => array(
@@ -310,14 +206,6 @@ class AphrontDefaultApplicationConfiguration
         'delete/(?P<id>\d+)/' => 'PhabricatorOwnersDeleteController',
       ),
 
-      '/audit/' => array(
-        '' => 'PhabricatorAuditListController',
-        'view/(?P<filter>[^/]+)/(?:(?P<name>[^/]+)/)?'
-          => 'PhabricatorAuditListController',
-        'addcomment/' => 'PhabricatorAuditAddCommentController',
-        'preview/(?P<id>\d+)/' => 'PhabricatorAuditPreviewController',
-      ),
-
       '/xhpast/' => array(
         '' => 'PhabricatorXHPASTViewRunController',
         'view/(?P<id>\d+)/'
@@ -361,29 +249,10 @@ class AphrontDefaultApplicationConfiguration
         'create/' => 'PhabricatorSlowvoteCreateController',
       ),
 
-      // Match "/w/" with slug "/".
-      '/w(?P<slug>/)'    => 'PhrictionDocumentController',
-      // Match "/w/x/y/z/" with slug "x/y/z/".
-      '/w/(?P<slug>.+/)' => 'PhrictionDocumentController',
-
-      '/phriction/' => array(
-        ''                       => 'PhrictionListController',
-        'list/(?P<view>[^/]+)/'  => 'PhrictionListController',
-
-        'history(?P<slug>/)'     => 'PhrictionHistoryController',
-        'history/(?P<slug>.+/)'  => 'PhrictionHistoryController',
-
-        'edit/(?:(?P<id>\d+)/)?' => 'PhrictionEditController',
-        'delete/(?P<id>\d+)/'    => 'PhrictionDeleteController',
-
-        'preview/' => 'PhrictionDocumentPreviewController',
-        'diff/(?P<id>\d+)/' => 'PhrictionDiffController',
-      ),
-
       '/phame/' => array(
-        ''                          => 'PhamePostListController',
+        ''                          => 'PhameAllPostListController',
         'post/' => array(
-          ''                        => 'PhamePostListController',
+          ''                        => 'PhameUserPostListController',
           'delete/(?P<phid>[^/]+)/' => 'PhamePostDeleteController',
           'edit/(?P<phid>[^/]+)/'   => 'PhamePostEditController',
           'new/'                    => 'PhamePostEditController',
@@ -394,9 +263,17 @@ class AphrontDefaultApplicationConfiguration
           ''                        => 'PhameDraftListController',
           'new/'                    => 'PhamePostEditController',
         ),
+        'blog/' => array(
+          ''                         => 'PhameUserBlogListController',
+          'all/'                     => 'PhameAllBlogListController',
+          'new/'                     => 'PhameBlogEditController',
+          'delete/(?P<phid>[^/]+)/'  => 'PhameBlogDeleteController',
+          'edit/(?P<phid>[^/]+)/'    => 'PhameBlogEditController',
+          'view/(?P<phid>[^/]+)/'    => 'PhameBlogViewController',
+        ),
         'posts/' => array(
-          ''                        => 'PhamePostListController',
-          '(?P<bloggername>\w+)/'   => 'PhamePostListController',
+          ''                        => 'PhameUserPostListController',
+          '(?P<bloggername>\w+)/'   => 'PhameBloggerPostListController',
           '(?P<bloggername>\w+)/(?P<phametitle>.+/)'
                                     => 'PhamePostViewController',
         ),
@@ -427,18 +304,12 @@ class AphrontDefaultApplicationConfiguration
       ),
 
       '/notification/' => array(
-        '' => 'PhabricatorNotificationListController',
+        '(?:(?P<filter>all|unread)/)?'
+          => 'PhabricatorNotificationListController',
         'panel/' => 'PhabricatorNotificationPanelController',
         'individual/' => 'PhabricatorNotificationIndividualController',
         'status/' => 'PhabricatorNotificationStatusController',
         'clear/' => 'PhabricatorNotificationClearController',
-      ),
-
-      '/flag/' => array(
-        '' => 'PhabricatorFlagListController',
-        'view/(?P<view>[^/]+)/' => 'PhabricatorFlagListController',
-        'edit/(?P<phid>[^/]+)/' => 'PhabricatorFlagEditController',
-        'delete/(?P<id>\d+)/' => 'PhabricatorFlagDeleteController',
       ),
 
       '/phortune/' => array(
@@ -449,6 +320,7 @@ class AphrontDefaultApplicationConfiguration
 
       '/emailverify/(?P<code>[^/]+)/' =>
         'PhabricatorEmailVerificationController',
+
     );
   }
 
@@ -551,6 +423,14 @@ class AphrontDefaultApplicationConfiguration
     $class    = phutil_escape_html(get_class($ex));
     $message  = phutil_escape_html($ex->getMessage());
 
+    if ($ex instanceof AphrontQuerySchemaException) {
+      $message .=
+        "\n\n".
+        "NOTE: This usually indicates that the MySQL schema has not been ".
+        "properly upgraded. Run 'bin/storage upgrade' to ensure your ".
+        "schema is up to date.";
+    }
+
     if (PhabricatorEnv::getEnvConfig('phabricator.show-stack-traces')) {
       $trace = $this->renderStackTrace($ex->getTrace(), $user);
     } else {
@@ -581,35 +461,6 @@ class AphrontDefaultApplicationConfiguration
   }
 
   public function willSendResponse(AphrontResponse $response) {
-    $request = $this->getRequest();
-    $response->setRequest($request);
-    if ($response instanceof AphrontDialogResponse) {
-      if (!$request->isAjax()) {
-        $view = new PhabricatorStandardPageView();
-        $view->setRequest($request);
-        $view->appendChild(
-          '<div style="padding: 2em 0;">'.
-            $response->buildResponseString().
-          '</div>');
-        $response = new AphrontWebpageResponse();
-        $response->setContent($view->render());
-        return $response;
-      } else {
-        return id(new AphrontAjaxResponse())
-          ->setContent(array(
-            'dialog' => $response->buildResponseString(),
-          ));
-      }
-    } else if ($response instanceof AphrontRedirectResponse) {
-      if ($request->isAjax()) {
-        return id(new AphrontAjaxResponse())
-          ->setContent(
-            array(
-              'redirect' => $response->getURI(),
-            ));
-      }
-    }
-
     return $response;
   }
 
@@ -628,6 +479,11 @@ class AphrontDefaultApplicationConfiguration
   private function renderStackTrace($trace, PhabricatorUser $user) {
 
     $libraries = PhutilBootloader::getInstance()->getAllLibraries();
+
+    $version = PhabricatorEnv::getEnvConfig('phabricator.version');
+    if (preg_match('/[^a-f0-9]/i', $version)) {
+      $version = '';
+    }
 
     // TODO: Make this configurable?
     $path = 'https://secure.phabricator.com/diffusion/%s/browse/master/src/';
@@ -675,6 +531,7 @@ class AphrontDefaultApplicationConfiguration
           if (empty($attrs['href'])) {
             $attrs['href'] = sprintf($path, $callsigns[$lib]).
               str_replace(DIRECTORY_SEPARATOR, '/', $relative).
+              ($version && $lib == 'phabricator' ? ';'.$version : '').
               '$'.$part['line'];
             $attrs['target'] = '_blank';
           }

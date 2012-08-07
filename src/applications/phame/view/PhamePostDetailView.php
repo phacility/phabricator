@@ -79,7 +79,7 @@ final class PhamePostDetailView extends AphrontView {
       $uri   = '/phame/draft/';
       $label = 'Back to Your Drafts';
     } else {
-      $uri   = '/phame/posts/'.$blogger->getUsername();
+      $uri   = '/phame/posts/'.$blogger->getUsername().'/';
       $label = 'More Posts by '.phutil_escape_html($blogger->getUsername());
     }
     $button  = phutil_render_tag(
@@ -101,6 +101,14 @@ final class PhamePostDetailView extends AphrontView {
         phabricator_datetime($post->getDateModified(),
                              $user);
     }
+    $caption .= ' by '.phutil_render_tag(
+      'a',
+      array(
+        'href' => new PhutilURI('/p/'.$blogger->getUsername().'/'),
+      ),
+      phutil_escape_html($blogger->getUsername())
+    ).'.';
+
     if ($this->isPreview()) {
       $width = AphrontPanelView::WIDTH_FULL;
     } else {

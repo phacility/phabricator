@@ -30,6 +30,7 @@ final class ConduitAPI_diffusion_findsymbols_Method
     return array(
       'name'        => 'optional string',
       'namePrefix'  => 'optional string',
+      'context'     => 'optional string',
       'language'    => 'optional string',
       'type'        => 'optional string',
     );
@@ -47,6 +48,7 @@ final class ConduitAPI_diffusion_findsymbols_Method
   protected function execute(ConduitAPIRequest $request) {
     $name = $request->getValue('name');
     $name_prefix = $request->getValue('namePrefix');
+    $context = $request->getValue('context');
     $language = $request->getValue('language');
     $type = $request->getValue('type');
 
@@ -56,6 +58,9 @@ final class ConduitAPI_diffusion_findsymbols_Method
     }
     if ($name_prefix !== null) {
       $query->setNamePrefix($name_prefix);
+    }
+    if ($context !== null) {
+      $query->setContext($context);
     }
     if ($language !== null) {
       $query->setLanguage($language);
@@ -70,15 +75,22 @@ final class ConduitAPI_diffusion_findsymbols_Method
 
     $results = $query->execute();
 
+
     $response = array();
     foreach ($results as $result) {
+      $uri = $result->getURI();
+      if ($uri) {
+        $uri = PhabricatorEnv::getProductionURI($uri);
+      }
+
       $response[] = array(
         'name'        => $result->getSymbolName(),
+        'context'     => $result->getSymbolContext(),
         'type'        => $result->getSymbolType(),
         'language'    => $result->getSymbolLanguage(),
         'path'        => $result->getPath(),
         'line'        => $result->getLineNumber(),
-        'uri'         => PhabricatorEnv::getProductionURI($result->getURI()),
+        'uri'         => $uri,
       );
     }
 

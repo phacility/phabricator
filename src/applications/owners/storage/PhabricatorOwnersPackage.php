@@ -142,40 +142,51 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO {
     $path = new PhabricatorOwnersPath();
     $conn = $package->establishConnection('r');
 
-    $repository_clause = qsprintf($conn, 'AND p.repositoryPHID = %s',
+    $repository_clause = qsprintf(
+      $conn,
+      'AND p.repositoryPHID = %s',
       $repository->getPHID());
 
-    $limit_clause = '';
-    if (!empty($limit)) {
-      $limit_clause = qsprintf($conn, 'LIMIT %d', $limit);
-    }
+    // NOTE: The list of $paths may be very large if we're coming from
+    // the OwnersWorker and processing, e.g., an SVN commit which created a new
+    // branch. Break it apart so that it will fit within 'max_allowed_packet',
+    // and then merge results in PHP.
 
-    $data = queryfx_all(
-      $conn,
-      'SELECT pkg.id FROM %T pkg JOIN %T p ON p.packageID = pkg.id
-        WHERE p.path IN (%Ls) %Q ORDER BY LENGTH(p.path) DESC %Q',
-      $package->getTableName(),
-      $path->getTableName(),
-      $paths,
-      $repository_clause,
-      $limit_clause);
+    $ids = array();
+    foreach (array_chunk($paths, 128) as $chunk) {
+      $rows = queryfx_all(
+        $conn,
+        'SELECT pkg.id id, LENGTH(p.path) len
+          FROM %T pkg JOIN %T p ON p.packageID = pkg.id
+          WHERE p.path IN (%Ls) %Q',
+        $package->getTableName(),
+        $path->getTableName(),
+        $chunk,
+        $repository_clause);
 
-    $ids = ipull($data, 'id');
-
-    if (empty($ids)) {
-      return array();
-    }
-
-    $order = array();
-    foreach ($ids as $id) {
-      if (empty($order[$id])) {
-        $order[$id] = true;
+      foreach ($rows as $row) {
+        $id = (int)$row['id'];
+        $len = (int)$row['len'];
+        if (isset($ids[$id])) {
+          $ids[$id] = max($len, $ids[$id]);
+        } else {
+          $ids[$id] = $len;
+        }
       }
     }
 
-    $packages = $package->loadAllWhere('id in (%Ld)', array_keys($order));
+    if (!$ids) {
+      return array();
+    }
 
-    $packages = array_select_keys($packages, array_keys($order));
+    arsort($ids);
+    if ($limit) {
+      $ids = array_slice($ids, 0, $limit, $preserve_keys = true);
+    }
+    $ids = array_keys($ids);
+
+    $packages = $package->loadAllWhere('id in (%Ld)', $ids);
+    $packages = array_select_keys($packages, $ids);
 
     return $packages;
   }

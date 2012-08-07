@@ -35,7 +35,7 @@ abstract class ConduitAPI_project_Method extends ConduitAPIMethod {
     $result = array();
     foreach ($projects as $project) {
 
-      $member_phids = mpull($project->getAffiliations(), 'getUserPHID');
+      $member_phids = $project->getMemberPHIDs();
       $member_phids = array_values($member_phids);
 
       $result[$project->getPHID()] = array(

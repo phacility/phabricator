@@ -190,7 +190,11 @@ final class PhabricatorRepositoryGitCommitChangeParserWorker
         unset($move_away[$change_path]);
       } else {
         $change_type = DifferentialChangeType::TYPE_COPY_AWAY;
-        $is_direct = false;
+
+        // This change is direct if we picked up a modification above (i.e.,
+        // the original copy source was also edited). Otherwise the original
+        // wasn't touched, so leave it as an indirect change.
+        $is_direct = isset($changes[$change_path]);
       }
 
       $reference = $changes[reset($destinations)];

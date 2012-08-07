@@ -77,7 +77,7 @@ final class ConduitAPI_project_query_Method extends ConduitAPI_project_Method {
 
     $members = $request->getValue('members');
     if ($members) {
-      $query->setMembers($members);
+      $query->withMemberPHIDs($members);
     }
 
     $limit = $request->getValue('limit');

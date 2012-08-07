@@ -57,7 +57,7 @@ final class ManiphestTransactionDetailView extends ManiphestView {
     return $this;
   }
 
-  public function setMarkupEngine(PhutilMarkupEngine $engine) {
+  public function setMarkupEngine(PhabricatorMarkupEngine $engine) {
     $this->markupEngine = $engine;
     return $this;
   }
@@ -199,22 +199,12 @@ final class ManiphestTransactionDetailView extends ManiphestView {
     }
 
     if ($comment_transaction && $comment_transaction->hasComments()) {
-      $comments = $comment_transaction->getCache();
-      if (!strlen($comments)) {
-        $comments = $comment_transaction->getComments();
-        if (strlen($comments)) {
-          $comments = $this->markupEngine->markupText($comments);
-          $comment_transaction->setCache($comments);
-          if ($comment_transaction->getID() && !$this->preview) {
-            $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-            $comment_transaction->save();
-            unset($unguarded);
-          }
-        }
-      }
+      $comment_block = $this->markupEngine->getOutput(
+        $comment_transaction,
+        ManiphestTransaction::MARKUP_FIELD_BODY);
       $comment_block =
         '<div class="maniphest-transaction-comments phabricator-remarkup">'.
-          $comments.
+          $comment_block.
         '</div>';
     } else {
       $comment_block = null;
@@ -296,6 +286,23 @@ final class ManiphestTransactionDetailView extends ManiphestView {
             $title = 'ATTACHED FILES';
             break;
         }
+
+        return $title."\n".$links;
+      case ManiphestTransactionType::TYPE_EDGE:
+        $add = array_diff_key($new, $old);
+        if (!$add) {
+          break;
+        }
+
+        $links = array();
+        foreach ($add as $phid => $ignored) {
+          $handle = $handles[$phid];
+          $links[] = '  '.PhabricatorEnv::getProductionURI($handle->getURI());
+        }
+        $links = implode("\n", $links);
+
+        $edge_type = $transaction->getMetadataValue('edge:type');
+        $title = $this->getEdgeEmailTitle($edge_type, $add);
 
         return $title."\n".$links;
       default:
@@ -384,6 +391,23 @@ final class ManiphestTransactionDetailView extends ManiphestView {
           $verb = 'Changed CC';
           $desc = 'changed CCs, added: '.$this->renderHandles($added).'; '.
                              'removed: '.$this->renderHandles($removed);
+        }
+        break;
+      case ManiphestTransactionType::TYPE_EDGE:
+        $edge_type = $transaction->getMetadataValue('edge:type');
+
+        $add = array_diff_key($new, $old);
+        $rem = array_diff_key($old, $new);
+
+        if ($add && !$rem) {
+          $verb = $this->getEdgeAddVerb($edge_type);
+          $desc = $this->getEdgeAddList($edge_type, $add);
+        } else if ($rem && !$add) {
+          $verb = $this->getEdgeRemVerb($edge_type);
+          $desc = $this->getEdgeRemList($edge_type, $rem);
+        } else {
+          $verb = $this->getEdgeEditVerb($edge_type);
+          $desc = $this->getEdgeEditList($edge_type, $add, $rem);
         }
         break;
       case ManiphestTransactionType::TYPE_PROJECTS:
@@ -550,17 +574,6 @@ final class ManiphestTransactionDetailView extends ManiphestView {
     return array($verb, $desc, $classes);
   }
 
-  private function getAttachName($attach_type, $count) {
-    switch ($attach_type) {
-      case PhabricatorPHIDConstants::PHID_TYPE_DREV:
-        return pht('Differential Revision(s)', $count);
-      case PhabricatorPHIDConstants::PHID_TYPE_FILE:
-        return pht('file(s)', $count);
-      case PhabricatorPHIDConstants::PHID_TYPE_TASK:
-        return pht('Maniphest Task(s)', $count);
-    }
-  }
-
   private function renderFullSummary($transaction) {
     switch ($transaction->getTransactionType()) {
       case ManiphestTransactionType::TYPE_DESCRIPTION:
@@ -606,11 +619,15 @@ final class ManiphestTransactionDetailView extends ManiphestView {
       'show details');
   }
 
-  private function renderHandles($phids) {
+  private function renderHandles($phids, $full = false) {
     $links = array();
     foreach ($phids as $phid) {
       if ($this->forEmail) {
-        $links[] = $this->handles[$phid]->getName();
+        if ($full) {
+          $links[] = $this->handles[$phid]->getFullName();
+        } else {
+          $links[] = $this->handles[$phid]->getName();
+        }
       } else {
         $links[] = $this->handles[$phid]->renderLink();
       }
@@ -623,6 +640,199 @@ final class ManiphestTransactionDetailView extends ManiphestView {
       return '"'.$string.'"';
     } else {
       return '"'.phutil_escape_html($string).'"';
+    }
+  }
+
+
+/* -(  Strings  )------------------------------------------------------------ */
+
+
+  /**
+   * @task strings
+   */
+  private function getAttachName($attach_type, $count) {
+    switch ($attach_type) {
+      case PhabricatorPHIDConstants::PHID_TYPE_DREV:
+        return pht('Differential Revision(s)', $count);
+      case PhabricatorPHIDConstants::PHID_TYPE_FILE:
+        return pht('file(s)', $count);
+      case PhabricatorPHIDConstants::PHID_TYPE_TASK:
+        return pht('Maniphest Task(s)', $count);
+    }
+  }
+
+
+  /**
+   * @task strings
+   */
+  private function getEdgeEmailTitle($type, array $list) {
+    $count = count($list);
+    switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV:
+        return pht('DIFFERENTIAL %d REVISION(S)', $count);
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
+        return pht('DEPENDS ON %d TASK(S)', $count);
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK:
+        return pht('DEPENDENT %d TASK(s)', $count);
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
+        return pht('ATTACHED %d COMMIT(S)', $count);
+      default:
+        return pht('ATTACHED %d OBJECT(S)', $count);
+    }
+  }
+
+
+  /**
+   * @task strings
+   */
+  private function getEdgeAddVerb($type) {
+    switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV:
+        return pht('Added Revision');
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
+        return pht('Added Dependency');
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK:
+        return pht('Added Dependent Task');
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
+        return pht('Added Commit');
+      default:
+        return pht('Added Object');
+    }
+  }
+
+
+  /**
+   * @task strings
+   */
+  private function getEdgeRemVerb($type) {
+    switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV:
+        return pht('Removed Revision');
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
+        return pht('Removed Dependency');
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK:
+        return pht('Removed Dependent Task');
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
+        return pht('Removed Commit');
+      default:
+        return pht('Removed Object');
+    }
+  }
+
+
+  /**
+   * @task strings
+   */
+  private function getEdgeEditVerb($type) {
+    switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV:
+        return pht('Changed Revisions');
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
+        return pht('Changed Dependencies');
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK:
+        return pht('Changed Dependent Tasks');
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
+        return pht('Changed Commits');
+      default:
+        return pht('Changed Objects');
+    }
+  }
+
+
+  /**
+   * @task strings
+   */
+  private function getEdgeAddList($type, array $add) {
+    $list = $this->renderHandles(array_keys($add), $full = true);
+    $count = count($add);
+
+    switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV:
+        return pht('added %d revision(s): %s', $count, $list);
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
+        return pht('added %d dependencie(s): %s', $count, $list);
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK:
+        return pht('added %d dependent task(s): %s', $count, $list);
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
+        return pht('added %d commit(s): %s', $count, $list);
+      default:
+        return pht('added %d object(s): %s', $count, $list);
+    }
+  }
+
+
+  /**
+   * @task strings
+   */
+  private function getEdgeRemList($type, array $rem) {
+    $list = $this->renderHandles(array_keys($rem), $full = true);
+    $count = count($rem);
+
+    switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV:
+        return pht('removed %d revision(s): %s', $count, $list);
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
+        return pht('removed %d dependencie(s): %s', $count, $list);
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK:
+        return pht('removed %d dependent task(s): %s', $count, $list);
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
+        return pht('removed %d commit(s): %s', $count, $list);
+      default:
+        return pht('removed %d object(s): %s', $count, $list);
+    }
+  }
+
+
+  /**
+   * @task strings
+   */
+  private function getEdgeEditList($type, array $add, array $rem) {
+    $add_list = $this->renderHandles(array_keys($add), $full = true);
+    $rem_list = $this->renderHandles(array_keys($rem), $full = true);
+    $add_count = count($add_list);
+    $rem_count = count($rem_list);
+
+    switch ($type) {
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV:
+        return pht(
+          'changed %d revision(s), added %d: %s; removed %d: %s',
+          $add_count + $rem_count,
+          $add_count,
+          $add_list,
+          $rem_count,
+          $rem_list);
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK:
+        return pht(
+          'changed %d dependencie(s), added %d: %s; removed %d: %s',
+          $add_count + $rem_count,
+          $add_count,
+          $add_list,
+          $rem_count,
+          $rem_list);
+      case PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK:
+        return pht(
+          'changed %d dependent task(s), added %d: %s; removed %d: %s',
+          $add_count + $rem_count,
+          $add_count,
+          $add_list,
+          $rem_count,
+          $rem_list);
+      case PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT:
+        return pht(
+          'changed %d commit(s), added %d: %s; removed %d: %s',
+          $add_count + $rem_count,
+          $add_count,
+          $add_list,
+          $rem_count,
+          $rem_list);
+      default:
+        return pht(
+          'changed %d object(s), added %d: %s; removed %d: %s',
+          $add_count + $rem_count,
+          $add_count,
+          $add_list,
+          $rem_count,
+          $rem_list);
     }
   }
 

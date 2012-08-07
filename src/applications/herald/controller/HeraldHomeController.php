@@ -93,7 +93,7 @@ final class HeraldHomeController extends HeraldController {
     $pager->setURI($request->getRequestURI(), 'offset');
     $pager->setOffset($request->getStr('offset'));
 
-    $rules = $query->executeWithPager($pager);
+    $rules = $query->executeWithOffsetPager($pager);
 
     $need_phids = mpull($rules, 'getAuthorPHID');
     $handles = id(new PhabricatorObjectHandleData($need_phids))
