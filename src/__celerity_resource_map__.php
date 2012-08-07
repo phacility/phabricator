@@ -1621,24 +1621,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/phriction/phriction-document-preview.js',
   ),
-  'javelin-behavior-projects-resource-editor' =>
-  array(
-    'uri' => '/res/ffdde7d9/rsrc/js/application/projects/projects-resource-editor.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'phabricator-prefab',
-      2 => 'multirow-row-manager',
-      3 => 'javelin-tokenizer',
-      4 => 'javelin-typeahead-preloaded-source',
-      5 => 'javelin-typeahead',
-      6 => 'javelin-dom',
-      7 => 'javelin-json',
-      8 => 'javelin-util',
-    ),
-    'disk' => '/rsrc/js/application/projects/projects-resource-editor.js',
-  ),
   'javelin-behavior-refresh-csrf' =>
   array(
     'uri' => '/res/88beba4c/rsrc/js/application/core/behavior-refresh-csrf.js',
@@ -2439,6 +2421,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/base/notification-menu.css',
   ),
+  'phabricator-object-list-view-css' =>
+  array(
+    'uri' => '/res/4e060838/rsrc/css/application/projects/phabricator-object-list-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/projects/phabricator-object-list-view.css',
+  ),
   'phabricator-object-selector-css' =>
   array(
     'uri' => '/res/7eb4c705/rsrc/css/application/objectselector/object-selector.css',
@@ -2738,15 +2729,6 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/application/phriction/phriction-document-css.css',
-  ),
-  'project-edit-css' =>
-  array(
-    'uri' => '/res/c192b5f9/rsrc/css/application/projects/project-edit.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/application/projects/project-edit.css',
   ),
   'raphael-core' =>
   array(
