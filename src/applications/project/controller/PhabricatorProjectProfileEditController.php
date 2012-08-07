@@ -39,15 +39,6 @@ final class PhabricatorProjectProfileEditController
 
     $img_src = $profile->loadProfileImageURI();
 
-    if ($project->getSubprojectPHIDs()) {
-      $phids = $project->getSubprojectPHIDs();
-      $handles = id(new PhabricatorObjectHandleData($phids))
-        ->loadHandles();
-      $subprojects = mpull($handles, 'getFullName', 'getPHID');
-    } else {
-      $subprojects = array();
-    }
-
     $options = PhabricatorProjectStatus::getStatusMap();
 
     $affiliations = $project->loadAffiliations();
@@ -84,7 +75,6 @@ final class PhabricatorProjectProfileEditController
         $errors[] = $ex->getMessage();
       }
 
-      $project->setSubprojectPHIDs($request->getArr('set_subprojects'));
       $profile->setBlurb($request->getStr('blurb'));
 
       if (!strlen($project->getName())) {
@@ -249,12 +239,6 @@ final class PhabricatorProjectProfileEditController
           ->setLabel('Blurb')
           ->setName('blurb')
           ->setValue($profile->getBlurb()))
-      ->appendChild(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/projects/')
-          ->setLabel('Subprojects')
-          ->setName('set_subprojects')
-          ->setValue($subprojects))
       ->appendChild(
         id(new AphrontFormMarkupControl())
           ->setLabel('Profile Image')

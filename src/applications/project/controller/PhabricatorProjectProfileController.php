@@ -152,10 +152,7 @@ final class PhabricatorProjectProfileController
     $blurb = phutil_escape_html($blurb);
     $blurb = str_replace("\n", '<br />', $blurb);
 
-    $phids = array_merge(
-      array($project->getAuthorPHID()),
-      $project->getSubprojectPHIDs()
-    );
+    $phids = array($project->getAuthorPHID());
     $phids = array_unique($phids);
     $handles = id(new PhabricatorObjectHandleData($phids))
       ->loadHandles();
@@ -186,23 +183,6 @@ final class PhabricatorProjectProfileController
           </table>
         </div>
       </div>';
-
-    if ($project->getSubprojectPHIDs()) {
-      $table = $this->renderSubprojectTable(
-        $handles,
-        $project->getSubprojectPHIDs());
-      $subproject_list = $table->render();
-    } else {
-      $subproject_list = '<p><em>No subprojects.</em></p>';
-    }
-
-    $about .=
-      '<div class="phabricator-profile-info-group">'.
-        '<h1 class="phabricator-profile-info-header">Subprojects</h1>'.
-        '<div class="phabricator-profile-info-pane">'.
-          $subproject_list.
-        '</div>'.
-      '</div>';
 
     return $about;
   }
@@ -327,39 +307,4 @@ final class PhabricatorProjectProfileController
     return $content;
   }
 
-  private function renderSubprojectTable(
-    array $handles,
-    array $subprojects_phids) {
-    assert_instances_of($handles, 'PhabricatorObjectHandle');
-
-    $rows = array();
-    foreach ($subprojects_phids as $subproject_phid) {
-      $phid = $handles[$subproject_phid]->getPHID();
-
-      $rows[] = array(
-        phutil_escape_html($handles[$phid]->getFullName()),
-        phutil_render_tag(
-          'a',
-          array(
-            'class' => 'small grey button',
-            'href' => $handles[$phid]->getURI(),
-          ),
-          'View Project Profile'),
-      );
-    }
-
-    $table = new AphrontTableView($rows);
-     $table->setHeaders(
-       array(
-         'Name',
-         '',
-       ));
-     $table->setColumnClasses(
-       array(
-         'pri',
-         'action right',
-       ));
-
-    return $table;
-  }
 }
