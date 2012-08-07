@@ -55,7 +55,7 @@ final class PhabricatorProjectListController
     switch ($this->filter) {
       case 'active':
         $table_header = 'Your Projects';
-        $query->setMembers(array($view_phid));
+        $query->withMemberPHIDs(array($view_phid));
         $query->withStatus(PhabricatorProjectQuery::STATUS_ACTIVE);
         break;
       case 'allactive':

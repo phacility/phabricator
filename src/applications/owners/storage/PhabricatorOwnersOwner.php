@@ -73,14 +73,13 @@ final class PhabricatorOwnersOwner extends PhabricatorOwnersDAO {
   // any project the user is a member of.
   public static function loadAffiliatedPackages($user_phid) {
     $query = new PhabricatorProjectQuery();
-    $query->setMembers(array($user_phid));
+    $query->withMemberPHIDs(array($user_phid));
     $query->withStatus(PhabricatorProjectQuery::STATUS_ACTIVE);
     $projects = $query->execute();
 
     $phids = mpull($projects, 'getPHID') + array($user_phid);
-    return
-      id(new PhabricatorOwnersOwner())->loadAllWhere(
-        'userPHID in (%Ls)',
-        $phids);
+    return id(new PhabricatorOwnersOwner())->loadAllWhere(
+      'userPHID in (%Ls)',
+      $phids);
   }
 }

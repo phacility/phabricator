@@ -40,7 +40,7 @@ final class PhabricatorDirectoryMainController
       case 'home':
       case 'feed':
         $project_query = new PhabricatorProjectQuery();
-        $project_query->setMembers(array($user->getPHID()));
+        $project_query->withMemberPHIDs(array($user->getPHID()));
         $projects = $project_query->execute();
         break;
       default:

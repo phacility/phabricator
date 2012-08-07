@@ -20,7 +20,7 @@ final class PhabricatorProjectQuery {
 
   private $ids;
   private $phids;
-  private $members;
+  private $memberPHIDs;
 
   private $status       = 'status-any';
   const STATUS_ANY      = 'status-any';
@@ -59,8 +59,8 @@ final class PhabricatorProjectQuery {
     return $this;
   }
 
-  public function setMembers(array $members) {
-    $this->members = $members;
+  public function withMemberPHIDs(array $member_phids) {
+    $this->memberPHIDs = $member_phids;
     return $this;
   }
 
@@ -182,13 +182,13 @@ final class PhabricatorProjectQuery {
     $affil_table = new PhabricatorProjectAffiliation();
 
     $joins = array();
-    if ($this->members) {
+    if ($this->memberPHIDs) {
       $joins[] = qsprintf(
         $conn_r,
         'JOIN %T member ON member.projectPHID = p.phid
           AND member.userPHID in (%Ls)',
         $affil_table->getTableName(),
-        $this->members);
+        $this->memberPHIDs);
     }
 
     return implode(' ', $joins);
