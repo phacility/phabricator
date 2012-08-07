@@ -40,7 +40,7 @@ extends PhabricatorOAuthClientAuthorizationBaseController {
 
     $query = new PhabricatorOAuthClientAuthorizationQuery();
     $query->withUserPHIDs(array($current_user->getPHID()));
-    $authorizations = $query->executeWithPager($pager);
+    $authorizations = $query->executeWithOffsetPager($pager);
 
     $client_authorizations = mpull($authorizations, null, 'getClientPHID');
     $client_phids          = array_keys($client_authorizations);

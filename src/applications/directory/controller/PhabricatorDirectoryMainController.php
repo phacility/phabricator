@@ -402,11 +402,11 @@ final class PhabricatorDirectoryMainController
       $feed_query->setFilterPHIDs($phids);
     }
 
-    $pager = new AphrontIDPagerView();
+    $pager = new AphrontCursorPagerView();
     $pager->readFromRequest($request);
     $pager->setPageSize(200);
 
-    $feed = $feed_query->executeWithPager($pager);
+    $feed = $feed_query->executeWithCursorPager($pager);
 
     $builder = new PhabricatorFeedBuilder($feed);
     $builder->setUser($user);

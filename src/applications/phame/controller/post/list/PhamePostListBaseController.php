@@ -73,7 +73,7 @@ abstract class PhamePostListBaseController
   protected function buildPostListPageResponse() {
     $pager = $this->getPager();
     $query = $this->getPhamePostQuery();
-    $posts = $query->executeWithPager($pager);
+    $posts = $query->executeWithOffsetPager($pager);
 
     $bloggers =  $this->loadBloggersFromPosts($posts);
 

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-final class PhabricatorFeedQuery extends PhabricatorIDPagedPolicyQuery {
+final class PhabricatorFeedQuery extends PhabricatorCursorPagedPolicyQuery {
 
   private $filterPHIDs;
 

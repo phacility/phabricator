@@ -54,7 +54,7 @@ final class PhabricatorNotificationListController
         break;
     }
 
-    $notifications = $query->executeWithPager($pager);
+    $notifications = $query->executeWithOffsetPager($pager);
 
     if ($notifications) {
       $builder = new PhabricatorNotificationBuilder($notifications);

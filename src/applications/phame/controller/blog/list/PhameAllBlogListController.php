@@ -31,7 +31,7 @@ final class PhameAllBlogListController
 
     $blogs = id(new PhameBlogQuery())
       ->needBloggers(true)
-      ->executeWithPager($this->getPager());
+      ->executeWithOffsetPager($this->getPager());
     $this->setBlogs($blogs);
 
     $page_title = 'All Blogs';

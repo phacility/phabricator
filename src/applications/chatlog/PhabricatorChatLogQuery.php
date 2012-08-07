@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-final class PhabricatorChatLogQuery extends PhabricatorIDPagedPolicyQuery {
+final class PhabricatorChatLogQuery extends PhabricatorCursorPagedPolicyQuery {
 
   private $channels;
   private $maximumEpoch;

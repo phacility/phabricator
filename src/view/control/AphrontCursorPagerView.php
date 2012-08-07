@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-final class AphrontIDPagerView extends AphrontView {
+final class AphrontCursorPagerView extends AphrontView {
 
   private $afterID;
   private $beforeID;

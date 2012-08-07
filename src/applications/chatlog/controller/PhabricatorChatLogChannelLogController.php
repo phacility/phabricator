@@ -32,7 +32,7 @@ final class PhabricatorChatLogChannelLogController
     $uri = clone $request->getRequestURI();
     $uri->setQueryParams(array());
 
-    $pager = new AphrontIDPagerView();
+    $pager = new AphrontCursorPagerView();
     $pager->setURI($uri);
     $pager->setPageSize(250);
 
@@ -46,7 +46,7 @@ final class PhabricatorChatLogChannelLogController
     $pager->setAfterID($after);
     $pager->setBeforeID($before);
 
-    $logs = $query->executeWithPager($pager);
+    $logs = $query->executeWithCursorPager($pager);
 
     // Show chat logs oldest-first.
     $logs = array_reverse($logs);

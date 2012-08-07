@@ -51,7 +51,7 @@ final class PhameUserBlogListController
     $blogs = id(new PhameBlogQuery())
       ->withPHIDs($blog_phids)
       ->needBloggers(true)
-      ->executeWithPager($this->getPager());
+      ->executeWithOffsetPager($this->getPager());
 
     $this->setBlogs($blogs);
 

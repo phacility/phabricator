@@ -17,10 +17,11 @@
  */
 
 /**
- * A query class which uses ID-based paging. This paging is much more performant
- * than offset-based paging in the presence of policy filtering.
+ * A query class which uses cursor-based paging. This paging is much more
+ * performant than offset-based paging in the presence of policy filtering.
  */
-abstract class PhabricatorIDPagedPolicyQuery extends PhabricatorPolicyQuery {
+abstract class PhabricatorCursorPagedPolicyQuery
+  extends PhabricatorPolicyQuery {
 
   private $afterID;
   private $beforeID;
@@ -101,7 +102,7 @@ abstract class PhabricatorIDPagedPolicyQuery extends PhabricatorPolicyQuery {
   }
 
 
-  final public function executeWithPager(AphrontIDPagerView $pager) {
+  final public function executeWithCursorPager(AphrontCursorPagerView $pager) {
     $this->setLimit($pager->getPageSize() + 1);
 
     if ($pager->getAfterID()) {

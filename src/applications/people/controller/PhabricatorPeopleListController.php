@@ -39,7 +39,7 @@ final class PhabricatorPeopleListController
 
     $users = id(new PhabricatorPeopleQuery())
       ->needPrimaryEmail(true)
-      ->executeWithPager($pager);
+      ->executeWithOffsetPager($pager);
 
     $rows = array();
     foreach ($users as $user) {
