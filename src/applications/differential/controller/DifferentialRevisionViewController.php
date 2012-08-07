@@ -200,8 +200,15 @@ final class DifferentialRevisionViewController extends DifferentialController {
         "</strong>");
       $warning = $warning->render();
 
+      $my_inlines = id(new DifferentialInlineComment())->loadAllWhere(
+        'revisionID = %d AND commentID IS NULL AND authorPHID = %s AND '.
+          'changesetID IN (%Ld)',
+        $this->revisionID,
+        $user->getPHID(),
+        mpull($changesets, 'getID'));
+
       $visible_changesets = array();
-      foreach ($inlines as $inline) {
+      foreach ($inlines + $my_inlines as $inline) {
         $changeset_id = $inline->getChangesetID();
         if (isset($changesets[$changeset_id])) {
           $visible_changesets[$changeset_id] = $changesets[$changeset_id];
