@@ -55,6 +55,14 @@ final class PhabricatorProject extends PhabricatorProjectDAO {
     return $profile;
   }
 
+  public function getMemberPHIDs() {
+    return mpull($this->getAffiliations(), 'getUserPHID');
+  }
+
+  public function loadMemberPHIDs() {
+    return mpull($this->loadAffiliations(), 'getUserPHID');
+  }
+
   public function getAffiliations() {
     if ($this->affiliations === null) {
       throw new Exception('Attach affiliations first!');

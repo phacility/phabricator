@@ -41,8 +41,8 @@ final class PhabricatorProjectProfileController
     }
 
     $picture = $profile->loadProfileImageURI();
-
-    $members = mpull($project->loadAffiliations(), null, 'getUserPHID');
+    $members = $project->loadMemberPHIDs();
+    $member_map = array_fill_keys($members, true);
 
     $nav_view = new AphrontSideNavFilterView();
     $uri = new PhutilURI('/project/view/'.$project->getID().'/');
@@ -107,7 +107,7 @@ final class PhabricatorProjectProfileController
     $header->setProfilePicture($picture);
 
     $action = null;
-    if (empty($members[$user->getPHID()])) {
+    if (empty($member_map[$user->getPHID()])) {
       $action = phabricator_render_form(
         $user,
         array(
@@ -211,17 +211,13 @@ final class PhabricatorProjectProfileController
     PhabricatorProject $project,
     PhabricatorProjectProfile $profile) {
 
-    $affiliations = $project->loadAffiliations();
-
-    $phids = mpull($affiliations, 'getUserPHID');
-    $handles = id(new PhabricatorObjectHandleData($phids))
+    $member_phids = $project->loadMemberPHIDs();
+    $handles = id(new PhabricatorObjectHandleData($member_phids))
       ->loadHandles();
 
     $affiliated = array();
-    foreach ($affiliations as $affiliation) {
-      $user = $handles[$affiliation->getUserPHID()]->renderLink();
-      $role = phutil_escape_html($affiliation->getRole());
-      $affiliated[] = '<li>'.$user.' &mdash; '.$role.'</li>';
+    foreach ($handles as $phids => $handle) {
+      $affiliated[] = '<li>'.$handle->renderLink().'</li>';
     }
 
     if ($affiliated) {
