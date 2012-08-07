@@ -33,7 +33,6 @@ final class PhabricatorProjectListController
       ->setBaseURI(new PhutilURI('/project/filter/'))
       ->addLabel('User')
       ->addFilter('active',   'Active')
-      ->addFilter('owned',    'Owned')
       ->addSpacer()
       ->addLabel('All')
       ->addFilter('all',      'All Projects')
@@ -58,11 +57,6 @@ final class PhabricatorProjectListController
         $table_header = 'Your Projects';
         $query->setMembers(array($view_phid));
         $query->withStatus(PhabricatorProjectQuery::STATUS_ACTIVE);
-        break;
-      case 'owned':
-        $table_header = 'Owned Projects';
-        $query->setOwners(array($view_phid));
-        $query->withStatus($status_filter);
         break;
       case 'allactive':
         $status_filter = PhabricatorProjectQuery::STATUS_ACTIVE;

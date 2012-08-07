@@ -20,7 +20,6 @@ final class PhabricatorProjectQuery {
 
   private $ids;
   private $phids;
-  private $owners;
   private $members;
 
   private $status       = 'status-any';
@@ -57,11 +56,6 @@ final class PhabricatorProjectQuery {
 
   public function setOffset($offset) {
     $this->offset = $offset;
-    return $this;
-  }
-
-  public function setOwners(array $owners) {
-    $this->owners = $owners;
     return $this;
   }
 
@@ -188,15 +182,6 @@ final class PhabricatorProjectQuery {
     $affil_table = new PhabricatorProjectAffiliation();
 
     $joins = array();
-    if ($this->owners) {
-      $joins[] = qsprintf(
-        $conn_r,
-        'JOIN %T owner ON owner.projectPHID = p.phid AND owner.isOwner = 1
-          AND owner.userPHID in (%Ls)',
-        $affil_table->getTableName(),
-        $this->owners);
-    }
-
     if ($this->members) {
       $joins[] = qsprintf(
         $conn_r,
