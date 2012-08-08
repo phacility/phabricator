@@ -53,8 +53,8 @@ abstract class PhabricatorCursorPagedPolicyQuery
   }
 
   final protected function buildLimitClause(AphrontDatabaseConnection $conn_r) {
-    if ($this->getLimit()) {
-      return qsprintf($conn_r, 'LIMIT %d', $this->getLimit());
+    if ($this->getRawResultLimit()) {
+      return qsprintf($conn_r, 'LIMIT %d', $this->getRawResultLimit());
     } else {
       return '';
     }
