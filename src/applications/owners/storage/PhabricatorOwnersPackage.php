@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO {
+final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
+  implements PhabricatorPolicyInterface {
 
   protected $phid;
   protected $name;
@@ -30,6 +31,20 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO {
   private $actorPHID;
   private $oldPrimaryOwnerPHID;
   private $oldAuditingEnabled;
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::POLICY_USER;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
+  }
 
   public function getConfiguration() {
     return array(
