@@ -35,10 +35,17 @@ final class PhabricatorProjectCreateController
 
       try {
         $xactions = array();
+
         $xaction = new PhabricatorProjectTransaction();
         $xaction->setTransactionType(
           PhabricatorProjectTransactionType::TYPE_NAME);
         $xaction->setNewValue($request->getStr('name'));
+        $xactions[] = $xaction;
+
+        $xaction = new PhabricatorProjectTransaction();
+        $xaction->setTransactionType(
+          PhabricatorProjectTransactionType::TYPE_MEMBERS);
+        $xaction->setNewValue(array($user->getPHID()));
         $xactions[] = $xaction;
 
         $editor = new PhabricatorProjectEditor($project);
@@ -55,13 +62,6 @@ final class PhabricatorProjectCreateController
         $project->save();
         $profile->setProjectPHID($project->getPHID());
         $profile->save();
-
-        id(new PhabricatorProjectAffiliation())
-          ->setUserPHID($user->getPHID())
-          ->setProjectPHID($project->getPHID())
-          ->setRole('Owner')
-          ->setIsOwner(true)
-          ->save();
 
         if ($request->isAjax()) {
           return id(new AphrontAjaxResponse())

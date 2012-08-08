@@ -383,6 +383,8 @@ final class PhabricatorMarkupEngine {
       }
     }
 
+    $rules[] = new PhutilRemarkupRuleDocumentLink();
+
     if ($options['fileproxy']) {
       $rules[] = new PhabricatorRemarkupRuleProxyImage();
     }

@@ -22,8 +22,8 @@ final class PhabricatorProjectEditor {
   private $user;
   private $projectName;
 
-  private $addAffiliations;
-  private $remAffiliations;
+  private $addEdges = array();
+  private $remEdges = array();
 
   public function __construct(PhabricatorProject $project) {
     $this->project = $project;
@@ -67,22 +67,26 @@ final class PhabricatorProjectEditor {
     }
 
     try {
-      $project->save();
+      $project->openTransaction();
+        $project->save();
 
-      foreach ($transactions as $xaction) {
-        $xaction->setAuthorPHID($user->getPHID());
-        $xaction->setProjectID($project->getID());
-        $xaction->save();
-      }
+        $edge_type = PhabricatorEdgeConfig::TYPE_PROJ_MEMBER;
+        $editor = new PhabricatorEdgeEditor();
+        $editor->setUser($this->user);
+        foreach ($this->remEdges as $phid) {
+          $editor->removeEdge($project->getPHID(), $edge_type, $phid);
+        }
+        foreach ($this->addEdges as $phid) {
+          $editor->addEdge($project->getPHID(), $edge_type, $phid);
+        }
+        $editor->save();
 
-      foreach ($this->remAffiliations as $affil) {
-        $affil->delete();
-      }
-
-      foreach ($this->addAffiliations as $affil) {
-        $affil->setProjectPHID($project->getPHID());
-        $affil->save();
-      }
+        foreach ($transactions as $xaction) {
+          $xaction->setAuthorPHID($user->getPHID());
+          $xaction->setProjectID($project->getID());
+          $xaction->save();
+        }
+      $project->saveTransaction();
 
       foreach ($transactions as $xaction) {
         $this->publishTransactionStory($project, $xaction);
@@ -142,11 +146,10 @@ final class PhabricatorProjectEditor {
         $xaction->setOldValue($project->getStatus());
         break;
       case PhabricatorProjectTransactionType::TYPE_MEMBERS:
-        $affils = $project->loadAffiliations();
-        $project->attachAffiliations($affils);
+        $member_phids = $project->loadMemberPHIDs();
+        $project->attachMemberPHIDs($member_phids);
 
-        $old_value = mpull($affils, 'getUserPHID');
-        $old_value = array_values($old_value);
+        $old_value = array_values($member_phids);
         $xaction->setOldValue($old_value);
 
         $new_value = $xaction->getNewValue();
@@ -178,27 +181,8 @@ final class PhabricatorProjectEditor {
       case PhabricatorProjectTransactionType::TYPE_MEMBERS:
         $old = array_fill_keys($xaction->getOldValue(), true);
         $new = array_fill_keys($xaction->getNewValue(), true);
-
-        $add = array();
-        $rem = array();
-
-        foreach ($project->getAffiliations() as $affil) {
-          if (empty($new[$affil->getUserPHID()])) {
-            $rem[] = $affil;
-          }
-        }
-
-        foreach ($new as $phid => $ignored) {
-          if (empty($old[$phid])) {
-            $affil = new PhabricatorProjectAffiliation();
-            $affil->setRole('');
-            $affil->setUserPHID($phid);
-            $add[] = $affil;
-          }
-        }
-
-        $this->addAffiliations = $add;
-        $this->remAffiliations = $rem;
+        $this->addEdges = array_keys(array_diff_key($new, $old));
+        $this->remEdges = array_keys(array_diff_key($old, $new));
         break;
       default:
         throw new Exception("Unknown transaction type '{$type}'!");

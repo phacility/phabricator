@@ -582,20 +582,10 @@ final class ManiphestTaskListController extends ManiphestController {
         break;
       case 'project':
         $grouped = array();
-        foreach ($data as $task) {
-          $phids = $task->getProjectPHIDs();
-          if ($project_phids && $any_project !== true) {
-            // If the user is filtering on "Bugs", don't show a "Bugs" group
-            // with every result since that's silly (the query also does this
-            // on the backend).
-            $phids = array_diff($phids, $project_phids);
-          }
-          if ($phids) {
-            foreach ($phids as $phid) {
-              $grouped[$handles[$phid]->getName()][$task->getID()] = $task;
-            }
-          } else {
-            $grouped['No Project'][$task->getID()] = $task;
+        foreach ($query->getGroupByProjectResults() as $project => $tasks) {
+          foreach ($tasks as $task) {
+            $group = $project ? $handles[$project]->getName() : 'No Project';
+            $grouped[$group][$task->getID()] = $task;
           }
         }
         $data = $grouped;

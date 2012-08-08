@@ -1376,19 +1376,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/maniphest/behavior-task-preview.js',
   ),
-  'javelin-behavior-maniphest-project-create' =>
-  array(
-    'uri' => '/res/85a0eaf9/rsrc/js/application/maniphest/behavior-project-create.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-      2 => 'javelin-stratcom',
-      3 => 'javelin-workflow',
-    ),
-    'disk' => '/rsrc/js/application/maniphest/behavior-project-create.js',
-  ),
   'javelin-behavior-maniphest-subpriority-editor' =>
   array(
     'uri' => '/res/5e02f19a/rsrc/js/application/maniphest/behavior-subpriorityeditor.js',
@@ -1620,6 +1607,19 @@ celerity_register_resource_map(array(
       3 => 'phabricator-shaped-request',
     ),
     'disk' => '/rsrc/js/application/phriction/phriction-document-preview.js',
+  ),
+  'javelin-behavior-project-create' =>
+  array(
+    'uri' => '/res/e91f3f8f/rsrc/js/application/projects/behavior-project-create.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-dom',
+      2 => 'javelin-stratcom',
+      3 => 'javelin-workflow',
+    ),
+    'disk' => '/rsrc/js/application/projects/behavior-project-create.js',
   ),
   'javelin-behavior-refresh-csrf' =>
   array(
@@ -2423,7 +2423,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-object-list-view-css' =>
   array(
-    'uri' => '/res/4e060838/rsrc/css/application/projects/phabricator-object-list-view.css',
+    'uri' => '/res/4f183668/rsrc/css/application/projects/phabricator-object-list-view.css',
     'type' => 'css',
     'requires' =>
     array(

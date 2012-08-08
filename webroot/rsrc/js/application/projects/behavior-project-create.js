@@ -1,12 +1,12 @@
 /**
- * @provides javelin-behavior-maniphest-project-create
+ * @provides javelin-behavior-project-create
  * @requires javelin-behavior
  *           javelin-dom
  *           javelin-stratcom
  *           javelin-workflow
  */
 
-JX.behavior('maniphest-project-create', function(config) {
+JX.behavior('project-create', function(config) {
 
   JX.Stratcom.listen(
     'click',

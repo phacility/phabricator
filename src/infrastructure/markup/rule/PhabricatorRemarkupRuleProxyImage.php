@@ -24,7 +24,7 @@ final class PhabricatorRemarkupRuleProxyImage
 
   public function apply($text) {
 
-    $filetypes = '(?:\.jpe?g|.png|.gif)';
+    $filetypes = '\.(?:jpe?g|png|gif)';
 
     $text = preg_replace_callback(
       '@[<](\w{3,}://.+?'.$filetypes.')[>]@',

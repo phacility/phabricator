@@ -145,7 +145,21 @@ final class DifferentialReviewersFieldSpecification
       $other_reviewers = array_flip($revision->getReviewers());
       unset($other_reviewers[$primary_reviewer]);
       if ($other_reviewers) {
-        $suffix = ' (+'.(count($other_reviewers)).')';
+        $names = array();
+        foreach ($other_reviewers as $reviewer => $_) {
+          $names[] = phutil_escape_html(
+            $this->getHandle($reviewer)->getLinkName());
+        }
+        $suffix = ' '.javelin_render_tag(
+          'abbr',
+          array(
+            'sigil' => 'has-tooltip',
+            'meta'  => array(
+              'tip'   => implode(', ', $names),
+              'align' => 'E',
+            ),
+          ),
+          '(+'.(count($names)).')');
       } else {
         $suffix = null;
       }
@@ -157,11 +171,7 @@ final class DifferentialReviewersFieldSpecification
 
   public function getRequiredHandlePHIDsForRevisionList(
     DifferentialRevision $revision) {
-    $primary_reviewer = $revision->getPrimaryReviewer();
-    if ($primary_reviewer) {
-      return array($primary_reviewer);
-    }
-    return array();
+    return $revision->getReviewers();
   }
 
   public function renderValueForMail($phase) {

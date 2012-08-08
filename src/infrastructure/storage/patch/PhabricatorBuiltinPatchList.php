@@ -940,6 +940,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('symbolcontexts.sql'),
       ),
+      'migrate-project-edges.php' => array(
+        'type'    => 'php',
+        'name'    => $this->getPatchPath('migrate-project-edges.php'),
+      ),
     );
   }
 

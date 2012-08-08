@@ -252,23 +252,6 @@ final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
       'repository',
       PhabricatorSearchRelationship::RELATIONSHIP_REPOSITORY);
 
-/*
-    $join[] = $this->joinRelationship(
-      $conn_r,
-      $query,
-      'reviewer',
-      AdjutantRelationship::RELATIONSHIP_REVIEWER);
-    $join[] = $this->joinRelationship(
-      $conn_r,
-      $query,
-      'subscriber',
-      AdjutantRelationship::RELATIONSHIP_SUBSCRIBER);
-    $join[] = $this->joinRelationship(
-      $conn_r,
-      $query,
-      'repository',
-      AdjutantRelationship::RELATIONSHIP_REPOSITORY);
-*/
     $join = array_filter($join);
 
     foreach ($join as $key => $clause) {
@@ -288,7 +271,7 @@ final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
     $hits = queryfx_all(
       $conn_r,
       'SELECT
-          document.phid
+        document.phid
         FROM %T document
           %Q
           %Q
