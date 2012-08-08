@@ -50,8 +50,15 @@ final class DiffusionCommitController extends DiffusionController {
     $commit = $drequest->loadCommit();
 
     if (!$commit) {
-      // TODO: Make more user-friendly.
-      throw new Exception('This commit has not parsed yet.');
+      // TODO -- T1624 -- detect if this has actually not been parsed yet
+      // and show this UI if so, else 404
+      return $this->buildStandardPageResponse(
+        id(new AphrontErrorView())
+        ->setTitle('Error displaying commit.')
+        ->appendChild('Failed to load the commit. The commit has not been '.
+                      'parsed yet.'),
+          array('title' => 'Commit Still Parsing')
+        );
     }
 
     $commit_data = $drequest->loadCommitData();
@@ -83,7 +90,7 @@ final class DiffusionCommitController extends DiffusionController {
       $headsup_panel = new AphrontHeadsupView();
       $headsup_panel->setHeader('Commit Detail');
       $headsup_panel->setActionList(
-        $this->renderHeadsupActionList($commit));
+        $this->renderHeadsupActionList($commit, $repository));
       $headsup_panel->setProperties(
         $this->getCommitProperties(
           $commit,
@@ -310,14 +317,27 @@ final class DiffusionCommitController extends DiffusionController {
     PhabricatorRepositoryCommit $commit,
     PhabricatorRepositoryCommitData $data,
     array $parents) {
+
     assert_instances_of($parents, 'PhabricatorRepositoryCommit');
     $user = $this->getRequest()->getUser();
+    $commit_phid = $commit->getPHID();
 
-    $task_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $commit->getPHID(),
-      PhabricatorEdgeConfig::TYPE_COMMIT_HAS_TASK);
+    $edges = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs(array($commit_phid))
+      ->withEdgeTypes(array(
+        PhabricatorEdgeConfig::TYPE_COMMIT_HAS_TASK,
+        PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT
+      ))
+      ->execute();
 
-    $phids = $task_phids;
+    $task_phids = array_keys(
+      $edges[$commit_phid][PhabricatorEdgeConfig::TYPE_COMMIT_HAS_TASK]
+    );
+    $proj_phids = array_keys(
+      $edges[$commit_phid][PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT]
+    );
+
+    $phids = array_merge($task_phids, $proj_phids);
     if ($data->getCommitDetail('authorPHID')) {
       $phids[] = $data->getCommitDetail('authorPHID');
     }
@@ -380,7 +400,6 @@ final class DiffusionCommitController extends DiffusionController {
       }
     }
 
-
     $revision_phid = $data->getCommitDetail('differential.revisionPHID');
     if ($revision_phid) {
       $props['Differential Revision'] = $handles[$revision_phid]->renderLink();
@@ -393,7 +412,6 @@ final class DiffusionCommitController extends DiffusionController {
       }
       $props['Parents'] = implode(' &middot; ', $parent_links);
     }
-
 
     $request = $this->getDiffusionRequest();
 
@@ -421,6 +439,15 @@ final class DiffusionCommitController extends DiffusionController {
       }
       $task_list = implode('<br />', $task_list);
       $props['Tasks'] = $task_list;
+    }
+
+    if ($proj_phids) {
+      $proj_list = array();
+      foreach ($proj_phids as $phid) {
+        $proj_list[] = $handles[$phid]->renderLink();
+      }
+      $proj_list = implode('<br />', $proj_list);
+      $props['Projects'] = $proj_list;
     }
 
     return $props;
@@ -739,12 +766,23 @@ final class DiffusionCommitController extends DiffusionController {
   }
 
   private function renderHeadsupActionList(
-    PhabricatorRepositoryCommit $commit) {
+    PhabricatorRepositoryCommit $commit,
+    PhabricatorRepository $repository) {
 
     $request = $this->getRequest();
     $user = $request->getUser();
 
     $actions = array();
+
+    // TODO -- integrate permissions into whether or not this action is shown
+    $uri = '/diffusion/'.$repository->getCallSign().'/commit/'.
+           $commit->getCommitIdentifier().'/edit/';
+    $action = new AphrontHeadsupActionView();
+    $action->setClass('action-edit');
+    $action->setURI($uri);
+    $action->setName('Edit Commit');
+    $action->setWorkflow(false);
+    $actions[] = $action;
 
     require_celerity_resource('phabricator-flag-css');
     $flag = PhabricatorFlagQuery::loadUserFlag($user, $commit->getPHID());

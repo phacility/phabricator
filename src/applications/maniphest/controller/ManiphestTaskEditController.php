@@ -466,7 +466,7 @@ final class ManiphestTaskEditController extends ManiphestController {
 
     require_celerity_resource('aphront-error-view-css');
 
-    Javelin::initBehavior('maniphest-project-create', array(
+    Javelin::initBehavior('project-create', array(
       'tokenizerID' => $project_tokenizer_id,
     ));
 
