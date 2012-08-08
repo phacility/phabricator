@@ -81,10 +81,12 @@ final class PhabricatorProjectListController
       $profiles = mpull($profiles, null, 'getProjectPHID');
     }
 
-    $affil_groups = array();
+    $edge_query = new PhabricatorEdgeQuery();
     if ($projects) {
-      $affil_groups = PhabricatorProjectAffiliation::loadAllForProjectPHIDs(
-        $project_phids);
+      $edge_query
+        ->withSourcePHIDs($project_phids)
+        ->withEdgeTypes(array(PhabricatorEdgeConfig::TYPE_PROJ_MEMBER))
+        ->execute();
     }
 
     $tasks = array();
@@ -104,18 +106,17 @@ final class PhabricatorProjectListController
       }
     }
 
-
     $rows = array();
     foreach ($projects as $project) {
       $phid = $project->getPHID();
 
       $profile = idx($profiles, $phid);
-      $affiliations = $affil_groups[$phid];
+      $members = $edge_query->getDestinationPHIDs(array($phid));
 
       $group = idx($groups, $phid, array());
       $task_count = count($group);
 
-      $population = count($affiliations);
+      $population = count($members);
 
       if ($profile) {
         $blurb = $profile->getBlurb();

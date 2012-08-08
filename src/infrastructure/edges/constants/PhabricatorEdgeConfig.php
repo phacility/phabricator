@@ -38,6 +38,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_TASK_HAS_RELATED_DREV      = 11;
   const TYPE_DREV_HAS_RELATED_TASK      = 12;
 
+  const TYPE_PROJ_MEMBER                = 13;
+  const TYPE_MEMBER_OF_PROJ             = 14;
+
   const TYPE_TEST_NO_CYCLE              = 9000;
 
   public static function getInverse($edge_type) {
@@ -58,6 +61,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
       self::TYPE_TASK_HAS_RELATED_DREV => self::TYPE_DREV_HAS_RELATED_TASK,
       self::TYPE_DREV_HAS_RELATED_TASK => self::TYPE_TASK_HAS_RELATED_DREV,
+
+      self::TYPE_PROJ_MEMBER => self::TYPE_MEMBER_OF_PROJ,
+      self::TYPE_MEMBER_OF_PROJ => self::TYPE_PROJ_MEMBER,
     );
 
     return idx($map, $edge_type);

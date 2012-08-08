@@ -58,12 +58,13 @@ final class PhabricatorOwnersOwner extends PhabricatorOwnersDAO {
       array());
 
     $users_in_project_phids = array();
-    if (idx($all_phids, PhabricatorPHIDConstants::PHID_TYPE_PROJ)) {
-      $users_in_project_phids = mpull(
-        id(new PhabricatorProjectAffiliation())->loadAllWhere(
-          'projectPHID IN (%Ls)',
-          idx($all_phids, PhabricatorPHIDConstants::PHID_TYPE_PROJ, array())),
-        'getUserPHID');
+    $project_phids = idx($all_phids, PhabricatorPHIDConstants::PHID_TYPE_PROJ);
+    if ($project_phids) {
+      $query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs($project_phids)
+        ->withEdgeTypes(array(PhabricatorEdgeConfig::TYPE_PROJ_MEMBER));
+      $query->execute();
+      $users_in_project_phids = $query->getDestinationPHIDs();
     }
 
     return array_unique(array_merge($users_in_project_phids, $user_phids));

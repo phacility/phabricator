@@ -60,27 +60,26 @@ final class PhabricatorProjectQuery extends PhabricatorOffsetPagedQuery {
     $table = new PhabricatorProject();
     $conn_r = $table->establishConnection('r');
 
-    $where = $this->buildWhereClause($conn_r);
-    $joins = $this->buildJoinsClause($conn_r);
-    $order = 'ORDER BY name';
-
     $data = queryfx_all(
       $conn_r,
-      'SELECT p.* FROM %T p %Q %Q %Q %Q',
+      'SELECT p.* FROM %T p %Q %Q %Q %Q %Q',
       $table->getTableName(),
-      $joins,
-      $where,
-      $order,
+      $this->buildJoinClause($conn_r),
+      $this->buildWhereClause($conn_r),
+      $this->buildGroupClause($conn_r),
+      'ORDER BY name',
       $this->buildLimitClause($conn_r));
 
     $projects = $table->loadAllFromArray($data);
 
     if ($projects && $this->needMembers) {
-      $members = PhabricatorProjectAffiliation::loadAllForProjectPHIDs(
-        mpull($projects, 'getPHID'));
+      $members = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(mpull($projects, 'getPHID'))
+        ->withTypes(array(PhabricatorEdgeConfig::TYPE_PROJ_MEMBER))
+        ->execute();
       foreach ($projects as $project) {
-        $project->attachAffiliations(
-          array_values(idx($members, $project->getPHID(), array())));
+        $phid = $project->getPHID();
+        $project->attachMemberPHIDs(array_keys($members[$phid]));
       }
     }
 
@@ -93,37 +92,25 @@ final class PhabricatorProjectQuery extends PhabricatorOffsetPagedQuery {
     if ($this->status != self::STATUS_ANY) {
       switch ($this->status) {
         case self::STATUS_OPEN:
-          $where[] = qsprintf(
-            $conn_r,
-            'status IN (%Ld)',
-            array(
-              PhabricatorProjectStatus::STATUS_ACTIVE,
-            ));
+        case self::STATUS_ACTIVE:
+          $filter = array(
+            PhabricatorProjectStatus::STATUS_ACTIVE,
+          );
           break;
         case self::STATUS_CLOSED:
-          $where[] = qsprintf(
-            $conn_r,
-            'status IN (%Ld)',
-            array(
-              PhabricatorProjectStatus::STATUS_ARCHIVED,
-            ));
-          break;
-        case self::STATUS_ACTIVE:
-          $where[] = qsprintf(
-            $conn_r,
-            'status = %d',
-            PhabricatorProjectStatus::STATUS_ACTIVE);
-          break;
         case self::STATUS_ARCHIVED:
-          $where[] = qsprintf(
-            $conn_r,
-            'status = %d',
-            PhabricatorProjectStatus::STATUS_ARCHIVED);
+          $filter = array(
+            PhabricatorProjectStatus::STATUS_ARCHIVED,
+          );
           break;
         default:
           throw new Exception(
             "Unknown project status '{$this->status}'!");
       }
+      $where[] = qsprintf(
+        $conn_r,
+        'status IN (%Ld)',
+        $filter);
     }
 
     if ($this->ids) {
@@ -140,20 +127,33 @@ final class PhabricatorProjectQuery extends PhabricatorOffsetPagedQuery {
         $this->phids);
     }
 
+    if ($this->memberPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'e.type = %s AND e.dst IN (%Ls)',
+        PhabricatorEdgeConfig::TYPE_PROJ_MEMBER,
+        $this->memberPHIDs);
+    }
+
     return $this->formatWhereClause($where);
   }
 
-  private function buildJoinsClause($conn_r) {
-    $affil_table = new PhabricatorProjectAffiliation();
+  private function buildGroupClause($conn_r) {
+    if ($this->memberPHIDs) {
+      return 'GROUP BY p.id';
+    } else {
+      return '';
+    }
+  }
 
+  private function buildJoinClause($conn_r) {
     $joins = array();
+
     if ($this->memberPHIDs) {
       $joins[] = qsprintf(
         $conn_r,
-        'JOIN %T member ON member.projectPHID = p.phid
-          AND member.userPHID in (%Ls)',
-        $affil_table->getTableName(),
-        $this->memberPHIDs);
+        'JOIN %T e ON e.src = p.phid',
+        PhabricatorEdgeConfig::TABLE_NAME_EDGE);
     }
 
     return implode(' ', $joins);

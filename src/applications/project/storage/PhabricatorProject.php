@@ -25,7 +25,8 @@ final class PhabricatorProject extends PhabricatorProjectDAO {
   protected $subprojectPHIDs = array();
   protected $phrictionSlug;
 
-  private $affiliations;
+  private $subprojectsNeedUpdate;
+  private $memberPHIDs;
 
   public function getConfiguration() {
     return array(
@@ -48,31 +49,25 @@ final class PhabricatorProject extends PhabricatorProjectDAO {
     return $profile;
   }
 
-  public function getMemberPHIDs() {
-    return mpull($this->getAffiliations(), 'getUserPHID');
-  }
-
-  public function loadMemberPHIDs() {
-    return mpull($this->loadAffiliations(), 'getUserPHID');
-  }
-
-  public function getAffiliations() {
-    if ($this->affiliations === null) {
-      throw new Exception('Attach affiliations first!');
-    }
-    return $this->affiliations;
-  }
-
-  public function attachAffiliations(array $affiliations) {
-    assert_instances_of($affiliations, 'PhabricatorProjectAffiliation');
-    $this->affiliations = $affiliations;
+  public function attachMemberPHIDs(array $phids) {
+    $this->memberPHIDs = $phids;
     return $this;
   }
 
-  public function loadAffiliations() {
-    $affils = PhabricatorProjectAffiliation::loadAllForProjectPHIDs(
-      array($this->getPHID()));
-    return $affils[$this->getPHID()];
+  public function getMemberPHIDs() {
+    if ($this->memberPHIDs === null) {
+      throw new Exception("Call attachMemberPHIDs() first!");
+    }
+    return $this->memberPHIDs;
+  }
+
+  public function loadMemberPHIDs() {
+    if (!$this->getPHID()) {
+      return array();
+    }
+    return PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $this->getPHID(),
+      PhabricatorEdgeConfig::TYPE_PROJ_MEMBER);
   }
 
   public function setPhrictionSlug($slug) {
