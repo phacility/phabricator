@@ -67,6 +67,9 @@ final class DifferentialRevisionListView extends AphrontView {
       throw new Exception("Call setUser() before render()!");
     }
 
+    Javelin::initBehavior('phabricator-tooltips', array());
+    require_celerity_resource('aphront-tooltip-css');
+
     $flags = id(new PhabricatorFlagQuery())
       ->withOwnerPHIDs(array($user->getPHID()))
       ->withObjectPHIDs(mpull($this->revisions, 'getPHID'))
@@ -85,11 +88,18 @@ final class DifferentialRevisionListView extends AphrontView {
       if (isset($flagged[$phid])) {
         $class = PhabricatorFlagColor::getCSSClass($flagged[$phid]->getColor());
         $note = $flagged[$phid]->getNote();
-        $flag = phutil_render_tag(
+        $flag = javelin_render_tag(
           'div',
-          array(
+          $note ? array(
             'class' => 'phabricator-flag-icon '.$class,
-            'title' => $note,
+            'sigil' => 'has-tooltip',
+            'meta'  => array(
+              'tip'   => $note,
+              'align' => 'N',
+              'size'  => 240,
+            ),
+          ) : array(
+            'class' => 'phabricator-flag-icon '.$class,
           ),
           '');
       }
