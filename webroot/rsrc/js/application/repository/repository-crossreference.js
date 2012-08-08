@@ -17,6 +17,9 @@ JX.behavior('repository-crossreference', function(config) {
     'click',
     'tag:span',
     function(e) {
+      if (window.getSelection && !window.getSelection().isCollapsed) {
+        return;
+      }
       var target = e.getTarget();
       var map = {nc : 'class', nf : 'function'};
       while (target !== document.body) {
