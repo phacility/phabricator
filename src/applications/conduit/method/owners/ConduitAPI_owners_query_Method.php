@@ -81,26 +81,6 @@ final class ConduitAPI_owners_query_Method
     return $packages;
   }
 
-  protected static function queryByAffiliatedUser($owner) {
-    $is_valid_phid =
-      phid_get_type($owner) == PhabricatorPHIDConstants::PHID_TYPE_USER;
-
-    if (!$is_valid_phid) {
-      throw id(new ConduitException('ERR-INVALID-PARAMETER'))
-        ->setErrorDescription(
-          'Expected user PHID for affiliation, got '.$owner);
-    }
-
-    $owners = PhabricatorOwnersOwner::loadAffiliatedPackages($owner);
-
-    $package_ids = mpull($owners, 'getPackageID');
-    $packages = array();
-    foreach ($package_ids as $id) {
-      $packages[] = id(new PhabricatorOwnersPackage())->load($id);
-    }
-    return $packages;
-  }
-
   public static function queryByPath($repo_callsign, $path) {
     // note: we call this from the deprecated path.getowners conduit call.
 
@@ -165,9 +145,12 @@ final class ConduitAPI_owners_query_Method
     }
 
     if ($is_affiliated_query) {
-      $packages = self::queryByAffiliatedUser(
-        $request->getValue('userAffiliated'));
+      $query = id(new PhabricatorOwnersPackageQuery())
+        ->setViewer($request->getUser());
 
+      $query->withOwnerPHIDs(array($request->getValue('userAffiliated')));
+
+      $packages = $query->execute();
     } else if ($is_owner_query) {
       $owner = nonempty(
         $request->getValue('userOwner'),
