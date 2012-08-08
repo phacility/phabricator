@@ -55,6 +55,13 @@ final class DifferentialChangesetViewController extends DifferentialController {
         case 'new':
           return $this->buildRawFileResponse($changeset, $is_new = true);
         case 'old':
+          if ($vs && ($vs != -1)) {
+            $vs_changeset = id(new DifferentialChangeset())->load($vs);
+            if ($vs_changeset) {
+              $vs_changeset->attachHunks($vs_changeset->loadHunks());
+              return $this->buildRawFileResponse($vs_changeset, $is_new = true);
+            }
+          }
           return $this->buildRawFileResponse($changeset, $is_new = false);
         default:
           return new Aphront400Response();
