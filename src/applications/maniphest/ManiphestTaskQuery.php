@@ -72,6 +72,8 @@ final class ManiphestTaskQuery {
 
   private $rowCount         = null;
 
+  private $groupByProjectResults = null; // See comment at bottom for details
+
 
   public function withAuthors(array $authors) {
     $this->authorPHIDs = $authors;
@@ -171,6 +173,10 @@ final class ManiphestTaskQuery {
         "retrieve a row count.");
     }
     return $this->rowCount;
+  }
+
+  public function getGroupByProjectResults() {
+    return $this->groupByProjectResults;
   }
 
   public function withAnyProject($any_project) {
@@ -556,6 +562,12 @@ final class ManiphestTaskQuery {
    * server-side magic since there's currently no way to sort by project name on
    * the database.
    *
+   * As a consequence of this, moreover, because the list we return from here
+   * may include a single task multiple times (once for each project it's in),
+   * sorting gets screwed up in the controller unless we tell it which project
+   * to put the task in each time it appears. Hence the magic field
+   * groupByProjectResults.
+   *
    * TODO: Move this all to the database.
    */
   private function applyGroupByProject(array $tasks) {
@@ -586,9 +598,10 @@ final class ManiphestTaskQuery {
       if ($phids) {
         foreach ($phids as $phid) {
           $items[] = array(
-            'key' => $key,
-            'seq' => sprintf(
-              '%'.$max.'s%d',
+            'key'  => $key,
+            'proj' => $phid,
+            'seq'  => sprintf(
+              '%'.$max.'s%09d',
               $handles[$phid]->getName(),
               $ii),
           );
@@ -596,8 +609,12 @@ final class ManiphestTaskQuery {
       } else {
         // Sort "no project" tasks first.
         $items[] = array(
-          'key' => $key,
-          'seq' => '',
+          'key'  => $key,
+          'proj' => null,
+          'seq'  => sprintf(
+            '%'.$max.'s%09d',
+            '',
+            $ii),
         );
       }
       ++$ii;
@@ -610,9 +627,11 @@ final class ManiphestTaskQuery {
       nonempty($this->limit, self::DEFAULT_PAGE_SIZE));
 
     $result = array();
+    $projects = array();
     foreach ($items as $item) {
-      $result[] = $tasks[$item['key']];
+      $result[] = $projects[$item['proj']][] = $tasks[$item['key']];
     }
+    $this->groupByProjectResults = $projects;
 
     return $result;
   }
