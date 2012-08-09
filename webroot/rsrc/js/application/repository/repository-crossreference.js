@@ -25,7 +25,6 @@ JX.behavior('repository-crossreference', function(config) {
       while (target !== document.body) {
         if (JX.DOM.isNode(target, 'span') && (target.className in map)) {
           var symbol = target.textContent || target.innerText;
-          var uri = JX.$U('/diffusion/symbol/' + symbol + '/');
           var query = {
             lang : config.lang,
             projects : config.projects.join(','),
@@ -37,6 +36,10 @@ JX.behavior('repository-crossreference', function(config) {
           if (target.hasAttribute('data-symbol-context')) {
             query.context = target.getAttribute('data-symbol-context');
           }
+          if (target.hasAttribute('data-symbol-name')) {
+            symbol = target.getAttribute('data-symbol-name');
+          }
+          var uri = JX.$U('/diffusion/symbol/' + symbol + '/');
           uri.addQueryParams(query);
           window.open(uri);
           e.kill();
