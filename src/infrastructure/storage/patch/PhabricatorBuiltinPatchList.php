@@ -159,6 +159,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'  => 'db',
         'name'  => 'cache',
       ),
+      'db.fact' => array(
+        'type'  => 'db',
+        'name'  => 'fact',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
@@ -943,6 +947,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       'migrate-project-edges.php' => array(
         'type'    => 'php',
         'name'    => $this->getPatchPath('migrate-project-edges.php'),
+      ),
+      'fact-raw.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('fact-raw.sql'),
       ),
     );
   }
