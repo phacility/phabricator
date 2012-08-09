@@ -50,13 +50,16 @@ final class DiffusionCommitController extends DiffusionController {
     $commit = $drequest->loadCommit();
 
     if (!$commit) {
-      // TODO -- T1624 -- detect if this has actually not been parsed yet
-      // and show this UI if so, else 404
+      $query = DiffusionExistsQuery::newFromDiffusionRequest($drequest);
+      $exists = $query->loadExistentialData();
+      if (!$exists) {
+        return new Aphront404Response();
+      }
       return $this->buildStandardPageResponse(
         id(new AphrontErrorView())
         ->setTitle('Error displaying commit.')
-        ->appendChild('Failed to load the commit. The commit has not been '.
-                      'parsed yet.'),
+        ->appendChild('Failed to load the commit because the commit has not '.
+                      'been parsed yet.'),
           array('title' => 'Commit Still Parsing')
         );
     }
