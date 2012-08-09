@@ -58,6 +58,7 @@ final class ConduitAPI_project_query_Method extends ConduitAPI_project_Method {
 
   protected function execute(ConduitAPIRequest $request) {
     $query = new PhabricatorProjectQuery();
+    $query->setViewer($request->getUser());
     $query->needMembers(true);
 
     $ids = $request->getValue('ids');

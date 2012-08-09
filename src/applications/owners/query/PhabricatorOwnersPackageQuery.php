@@ -65,6 +65,7 @@ final class PhabricatorOwnersPackageQuery
       $base_phids = $this->ownerPHIDs;
 
       $query = new PhabricatorProjectQuery();
+      $query->setViewer($this->getViewer());
       $query->withMemberPHIDs($base_phids);
       $projects = $query->execute();
       $project_phids = mpull($projects, 'getPHID');

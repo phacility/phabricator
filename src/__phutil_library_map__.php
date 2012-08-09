@@ -1949,7 +1949,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectProfile' => 'PhabricatorProjectDAO',
     'PhabricatorProjectProfileController' => 'PhabricatorProjectController',
     'PhabricatorProjectProfileEditController' => 'PhabricatorProjectController',
-    'PhabricatorProjectQuery' => 'PhabricatorOffsetPagedQuery',
+    'PhabricatorProjectQuery' => 'PhabricatorCursorPagedPolicyQuery',
     'PhabricatorProjectTransaction' => 'PhabricatorProjectDAO',
     'PhabricatorProjectTransactionType' => 'PhabricatorProjectConstants',
     'PhabricatorProjectUpdateController' => 'PhabricatorProjectController',

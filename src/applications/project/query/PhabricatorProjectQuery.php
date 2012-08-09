@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-final class PhabricatorProjectQuery extends PhabricatorOffsetPagedQuery {
+final class PhabricatorProjectQuery extends PhabricatorCursorPagedPolicyQuery {
 
   private $ids;
   private $phids;
@@ -56,7 +56,15 @@ final class PhabricatorProjectQuery extends PhabricatorOffsetPagedQuery {
     return $this;
   }
 
-  public function execute() {
+  protected function getPagingColumn() {
+    return 'name';
+  }
+
+  protected function getPagingValue($result) {
+    return $result->getName();
+  }
+
+  public function loadPage() {
     $table = new PhabricatorProject();
     $conn_r = $table->establishConnection('r');
 
@@ -73,13 +81,14 @@ final class PhabricatorProjectQuery extends PhabricatorOffsetPagedQuery {
     $projects = $table->loadAllFromArray($data);
 
     if ($projects && $this->needMembers) {
+      $etype = PhabricatorEdgeConfig::TYPE_PROJ_MEMBER;
       $members = id(new PhabricatorEdgeQuery())
         ->withSourcePHIDs(mpull($projects, 'getPHID'))
-        ->withTypes(array(PhabricatorEdgeConfig::TYPE_PROJ_MEMBER))
+        ->withEdgeTypes(array($etype))
         ->execute();
       foreach ($projects as $project) {
         $phid = $project->getPHID();
-        $project->attachMemberPHIDs(array_keys($members[$phid]));
+        $project->attachMemberPHIDs(array_keys($members[$phid][$etype]));
       }
     }
 
@@ -134,6 +143,8 @@ final class PhabricatorProjectQuery extends PhabricatorOffsetPagedQuery {
         PhabricatorEdgeConfig::TYPE_PROJ_MEMBER,
         $this->memberPHIDs);
     }
+
+    $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
   }

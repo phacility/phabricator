@@ -45,6 +45,7 @@ final class PhabricatorProjectListController
     $pager->setOffset($request->getInt('page'));
 
     $query = new PhabricatorProjectQuery();
+    $query->setViewer($request->getUser());
     $query->setOffset($pager->getOffset());
     $query->setLimit($pager->getPageSize() + 1);
 
