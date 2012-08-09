@@ -68,8 +68,10 @@ foreach (Futures($futures)->limit(8) as $file => $future) {
       continue;
     }
 
+    // default $context to empty
+    $extension_fields[] = '';
     list($token, $file_path, $line_num) = $tag_info;
-    list($type, $language) = $extension_fields;
+    list($type, $language, $context) = $extension_fields;
 
     // strip "language:"
     $language = substr($language, 9);
@@ -82,20 +84,22 @@ foreach (Futures($futures)->limit(8) as $file => $future) {
     $language = str_ireplace("c++", "cpp", $language);
     $language = str_ireplace("c#", "csharp", $language);
 
-    switch ($type) {
-    case 'class':
-      print_symbol($file_path, $line_num, 'class', $token, $language);
-      break;
-    case 'function':
-      print_symbol($file_path, $line_num, 'function', $token, $language);
-      break;
-    default:
+    // Ruby has "singleton method", for example
+    $type = substr(str_replace(' ', '_', $type), 0, 12);
+    // class:foo, struct:foo, union:foo, enum:foo, ...
+    $context = last(explode(':', $context, 2));
+
+    $ignore = array(
+      'variable' => true,
+    );
+    if (empty($ignore[$type])) {
+      print_symbol($file_path, $line_num, $type, $token, $context, $language);
     }
   }
 }
 
 function ctags_get_parser_future($file_path) {
-  $future = new ExecFuture('ctags -n --fields=Kl -o - %s',
+  $future = new ExecFuture('ctags -n --fields=Kls -o - %s',
                            $file_path);
   return $future;
 }
@@ -111,7 +115,7 @@ function ctags_check_executable() {
   return true;
 }
 
-function print_symbol($file, $line_num, $type, $token, $language) {
+function print_symbol($file, $line_num, $type, $token, $context, $language) {
   // get rid of relative path
   $file = explode('/', $file);
   if ($file[0] == '.' || $file[0] == "..") {
@@ -120,6 +124,7 @@ function print_symbol($file, $line_num, $type, $token, $language) {
   $file = '/' . implode('/', $file);
 
   $parts = array(
+    $context,
     $token,
     $type,
     strtolower($language),
