@@ -153,34 +153,16 @@ abstract class PhabricatorPolicyQuery extends PhabricatorOffsetPagedQuery {
     $limit  = (int)$this->getLimit();
     $count  = 0;
 
-    $need = null;
-    if ($offset) {
-      $need = $offset + $limit;
-    }
+    $need = $offset + $limit;
 
     $this->willExecute();
 
     do {
-
-      // Figure out how many results to load. "0" means "all results".
-      $load = 0;
-      if ($need && ($count < $offset)) {
-        // This cap is just an arbitrary limit to keep memory usage from going
-        // crazy for large offsets; we can't execute them efficiently, but
-        // it should be possible to execute them without crashing.
-        $load = min($need, 1024);
-      } else if ($limit) {
-        // Otherwise, just load the number of rows we're after. Note that it
-        // might be more efficient to load more rows than this (if we expect
-        // about 5% of objects to be filtered, loading 105% of the limit might
-        // be better) or fewer rows than this (if we already have 95 rows and
-        // only need 100, loading only 5 rows might be better), but we currently
-        // just use the simplest heuristic since we don't have enough data
-        // about policy queries in the real world to tweak it.
-        $load = $limit;
+      if ($need) {
+        $this->rawResultLimit = min($need - $count, 1024);
+      } else {
+        $this->rawResultLimit = 0;
       }
-      $this->rawResultLimit = $load;
-
 
       $page = $this->loadPage();
 
@@ -202,13 +184,13 @@ abstract class PhabricatorPolicyQuery extends PhabricatorOffsetPagedQuery {
         }
       }
 
-      if (!$load) {
+      if (!$this->rawResultLimit) {
         // If we don't have a load count, we loaded all the results. We do
         // not need to load another page.
         break;
       }
 
-      if (count($page) < $load) {
+      if (count($page) < $this->rawResultLimit) {
         // If we have a load count but the unfiltered results contained fewer
         // objects, we know this was the last page of objects; we do not need
         // to load another page because we can deduce it would be empty.
