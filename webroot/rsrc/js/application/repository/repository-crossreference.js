@@ -21,17 +21,23 @@ JX.behavior('repository-crossreference', function(config) {
         return;
       }
       var target = e.getTarget();
-      var map = {nc : 'class', nf : 'function'};
+      var map = {nc : 'class', nf : 'function', na : null};
       while (target !== document.body) {
         if (JX.DOM.isNode(target, 'span') && (target.className in map)) {
           var symbol = target.textContent || target.innerText;
           var uri = JX.$U('/diffusion/symbol/' + symbol + '/');
-          uri.addQueryParams({
-            type : map[target.className],
+          var query = {
             lang : config.lang,
             projects : config.projects.join(','),
             jump : true
-          });
+          };
+          if (map[target.className]) {
+            query.type = map[target.className];
+          }
+          if (target.hasAttribute('data-symbol-context')) {
+            query.context = target.getAttribute('data-symbol-context');
+          }
+          uri.addQueryParams(query);
           window.open(uri);
           e.kill();
           break;

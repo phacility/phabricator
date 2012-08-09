@@ -131,6 +131,7 @@
 .remarkup-code .rbw_v { color: violet; }
 
 .repository-crossreference .remarkup-code .nc,
+.repository-crossreference .remarkup-code .na,
 .repository-crossreference .remarkup-code .nf {
   cursor: help;
   border-bottom: 1px dotted #bbddbb;
