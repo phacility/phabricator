@@ -133,6 +133,11 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
       2,
       count($query->setLimit(3)->setOffset(1)->execute()),
       'Offsets work correctly.');
+
+    $this->assertEqual(
+      2,
+      count($query->setLimit(0)->setOffset(1)->execute()),
+      'Offset with no limit works.');
   }
 
 
@@ -163,7 +168,6 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
       count($query->setLimit(3)->setOffset(4)->execute()),
       'Limit + offset work.');
   }
-
 
 
   /**

@@ -153,7 +153,11 @@ abstract class PhabricatorPolicyQuery extends PhabricatorOffsetPagedQuery {
     $limit  = (int)$this->getLimit();
     $count  = 0;
 
-    $need = $offset + $limit;
+    if ($limit) {
+      $need = $offset + $limit;
+    } else {
+      $need = 0;
+    }
 
     $this->willExecute();
 
