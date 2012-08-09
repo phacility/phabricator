@@ -147,4 +147,24 @@ abstract class DiffusionView extends AphrontView {
       "D{$id}");
   }
 
+  final protected static function renderName($name) {
+    $email = new PhutilEmailAddress($name);
+    if ($email->getDisplayName() || $email->getDomainName()) {
+      Javelin::initBehavior('phabricator-tooltips', array());
+      require_celerity_resource('aphront-tooltip-css');
+      return javelin_render_tag(
+        'span',
+        array(
+          'sigil' => 'has-tooltip',
+          'meta'  => array(
+            'tip'   => $email->getAddress(),
+            'align' => 'E',
+            'size'  => 'auto',
+          ),
+        ),
+        phutil_escape_html($email->getDisplayName()));
+    }
+    return phutil_escape_html($name);
+  }
+
 }

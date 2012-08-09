@@ -34,19 +34,6 @@ final class DiffusionBrowseTableView extends DiffusionView {
     return $this;
   }
 
-  private static function renderName($name) {
-    $email = new PhutilEmailAddress($name);
-    if ($email->getDisplayName() || $email->getDomainName()) {
-      return phutil_render_tag(
-        'span',
-        array(
-          'title' => $email->getAddress(),
-        ),
-        phutil_escape_html($email->getDisplayName()));
-    }
-    return phutil_escape_html($name);
-  }
-
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
     return $this;
