@@ -33,6 +33,14 @@ final class PhabricatorSearchUserIndexer
     // TODO: Index the blurbs from their profile or something? Probably not
     // actually useful...
 
+    if (!$user->getIsDisabled()) {
+      $doc->addRelationship(
+        PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
+        $user->getPHID(),
+        PhabricatorPHIDConstants::PHID_TYPE_USER,
+        time());
+    }
+
     self::reindexAbstractDocument($doc);
   }
 }
