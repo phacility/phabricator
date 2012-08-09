@@ -1947,7 +1947,11 @@ phutil_register_library_map(array(
     'PhabricatorPolicyTestObject' => 'PhabricatorPolicyInterface',
     'PhabricatorPolicyTestQuery' => 'PhabricatorPolicyQuery',
     'PhabricatorProfileHeaderView' => 'AphrontView',
-    'PhabricatorProject' => 'PhabricatorProjectDAO',
+    'PhabricatorProject' =>
+    array(
+      0 => 'PhabricatorProjectDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
     'PhabricatorProjectController' => 'PhabricatorController',
     'PhabricatorProjectCreateController' => 'PhabricatorProjectController',
     'PhabricatorProjectDAO' => 'PhabricatorLiskDAO',
