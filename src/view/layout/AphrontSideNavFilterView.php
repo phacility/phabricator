@@ -53,9 +53,22 @@ final class AphrontSideNavFilterView extends AphrontView {
     return $this;
   }
 
-  public function addFilter($key, $name, $uri = null, $relative = false) {
+  public function addFilter(
+    $key,
+    $name,
+    $uri = null,
+    $relative = false,
+    $class = null) {
+
     $this->items[] = array(
-      'filter', $key, $name, 'uri' => $uri, 'relative' => $relative);
+      'filter',
+      $key,
+      $name,
+      'uri' => $uri,
+      'relative' => $relative,
+      'class' => $class,
+    );
+
     return $this;
   }
 
@@ -133,6 +146,8 @@ final class AphrontSideNavFilterView extends AphrontView {
           $class = ($key == $this->selectedFilter)
             ? 'aphront-side-nav-selected'
             : null;
+
+          $class = trim($class.' '.idx($item, 'class', ''));
 
           if (empty($item['uri'])) {
             $href = clone $this->baseURI;
