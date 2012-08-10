@@ -73,10 +73,11 @@ final class DiffusionBrowseTableView extends DiffusionView {
         if ($committer_phid && isset($handles[$committer_phid])) {
           $committer = $handles[$committer_phid]->renderLink();
         } else {
-          $committer = self::renderName($data->getCommitDetail('committer'));
+          $committer = self::renderName($committer);
         }
-      } else {
-        $committer = $author;
+        if ($author != $committer) {
+          $author .= '/'.$committer;
+        }
       }
 
       $details = AphrontTableView::renderSingleDisplayLine(
@@ -84,7 +85,6 @@ final class DiffusionBrowseTableView extends DiffusionView {
     } else {
       $author = '';
       $details = '';
-      $committer = '';
     }
 
     return array(
@@ -92,7 +92,6 @@ final class DiffusionBrowseTableView extends DiffusionView {
       'date'      => $date,
       'time'      => $time,
       'author'    => $author,
-      'committer' => $committer,
       'details'   => $details,
     );
   }
@@ -162,7 +161,6 @@ final class DiffusionBrowseTableView extends DiffusionView {
           'date'      => celerity_generate_unique_node_id(),
           'time'      => celerity_generate_unique_node_id(),
           'author'    => celerity_generate_unique_node_id(),
-          'committer' => celerity_generate_unique_node_id(),
           'details'   => celerity_generate_unique_node_id(),
         );
 
@@ -203,7 +201,6 @@ final class DiffusionBrowseTableView extends DiffusionView {
         $dict['date'],
         $dict['time'],
         $dict['author'],
-        $dict['committer'],
         $dict['details'],
       );
     }
@@ -221,8 +218,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         'Modified',
         'Date',
         'Time',
-        'Author',
-        'Committer',
+        'Author/Committer',
         'Details',
       ));
     $view->setColumnClasses(
@@ -234,14 +230,12 @@ final class DiffusionBrowseTableView extends DiffusionView {
         '',
         'right',
         '',
-        '',
         'wide',
       ));
     $view->setColumnVisibility(
       array(
         true,
         $show_edit,
-        true,
         true,
         true,
         true,
