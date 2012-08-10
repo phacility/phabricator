@@ -47,6 +47,8 @@ final class PhabricatorGlobalLock extends PhutilLock {
   private $lockname;
   private $conn;
 
+  private static $pool = array();
+
 
 /* -(  Constructing Locks  )------------------------------------------------- */
 
@@ -70,6 +72,12 @@ final class PhabricatorGlobalLock extends PhutilLock {
 
   protected function doLock($wait) {
     $conn = $this->conn;
+
+    if (!$conn) {
+      // Try to reuse a connection from the connection pool.
+      $conn = array_pop(self::$pool);
+    }
+
     if (!$conn) {
       // NOTE: Using the 'repository' database somewhat arbitrarily, mostly
       // because the first client of locks is the repository daemons. We must
@@ -111,6 +119,7 @@ final class PhabricatorGlobalLock extends PhutilLock {
       'phabricator:'.$this->lockname);
 
     $this->conn->close();
+    self::$pool[] = $this->conn;
     $this->conn = null;
   }
 
