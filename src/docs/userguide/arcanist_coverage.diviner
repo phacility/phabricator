@@ -3,6 +3,15 @@
 
 Explains code coverage features in Arcanist and Phabricator.
 
+This is a configuration guide that helps you set up advanced features. If you're
+just getting started, you don't need to look at this yet. Instead, start with
+the @{article:Arcanist User Guide}.
+
+Before you can configure coverage features, you must set up unit test
+integration. For instructions, see @{article:Arcanist User Guide: Configuring
+a New Project} and @{article:Arcanist User Guide: Customizing
+Lint, Unit Tests and Workflows}.
+
 = Using Coverage Features =
 
 If your project has unit tests with coverage integration (see below for

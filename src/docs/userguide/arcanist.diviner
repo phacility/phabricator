@@ -9,10 +9,17 @@ unit tests, and manages common workflows like getting changes into Differential
 for review.
 
 A detailed command reference is available by running ##arc help##. This
-document provides a high level overview of common workflows.
+document provides an overview of common workflows and installation.
 
 Arcanist has technical, contributor-focused documentation here:
 <http://www.phabricator.com/docs/arcanist/>
+
+= Quick Start =
+
+A quick start guide is available at @{article:Arcanist Quick Start}. It provides
+a much more compact summary of how to get `arc` set up and running for a new
+project. You may want to start there, and return here if you need more
+information.
 
 = Overview =
 
@@ -21,10 +28,19 @@ Differential, linters, unit test frameworks, git, Mercurial, and SVN) and
 provides a simple command-line API to manage code review and some related
 revision control operations.
 
+For a detailed list of all available commands, run:
+
+  $ arc help
+
+For detailed information about a specific command, run:
+
+  $ arc help <command>
+
 Arcanist allows you to do things like:
 
   - get detailed help about available commands with ##arc help##
-  - send your code to Differential for review with ##arc diff##
+  - send your code to Differential for review with ##arc diff## (for detailed
+    instructions, see @{article:Arcanist User Guide: arc diff})
   - show pending revision information with ##arc list##
   - find likely reviewers for a change with ##arc cover##
   - apply changes in a revision to the working copy with ##arc patch##
@@ -37,6 +53,7 @@ Arcanist allows you to do things like:
 Once you've configured lint and unit test integration, you can also:
 
   - check your code for syntax and style errors with ##arc lint##
+    (see @{article:Arcanist User Guide: Lint})
   - run unit tests that cover your changes with ##arc unit##
 
 Arcanist integrates with other tools:
@@ -60,7 +77,8 @@ SVN repositories.
 = Installing Arcanist =
 
 Arcanist is meant to be installed on your local machine or development server --
-whatever machine you're editing code on. It runs on Linux, Mac OS X, and
+whatever machine you're editing code on. It runs on Linux,
+Mac OS X (see @{article:Arcanist User Guide: Mac OS X}), and
 Windows (see @{article:Arcanist User Guide: Windows}).
 
 Arcanist is written in PHP, so you need to install the PHP CLI first if you
@@ -96,9 +114,9 @@ You can later upgrade Arcanist and libphutil to the latest versions with
 
 == Installing Arcanist for a Team ==
 
-Arcanist changes quickly and doesn't currently have an auto-update mechanism,
-so it can be something of a headache to get it installed and keep people up to
-date. Here are some approaches you might be able to use:
+Arcanist changes quickly, so it can be something of a headache to get it
+installed and keep people up to date. Here are some approaches you might be
+able to use:
 
   - Facebook does most development on development servers, which have a standard
     environment and NFS mounts. Arcanist and libphutil themselves live on an
@@ -125,5 +143,18 @@ to your ##.bashrc##, ##.profile## or similar:
 
 Continue by:
 
+  - setting up a new project for use with `arc`, with
+    @{article:Arcanist User Guide: Configuring a New Project}; or
   - learning how to use `arc` to send changes for review with
     @{article:Arcanist User Guide: arc diff}.
+
+Advanced topics are also available. These are detailed guides to configuring
+technical features of `arc` that refine its behavior. You do not need to read
+them to get it working.
+
+ - @{article:Arcanist User Guide: Commit Ranges}
+ - @{article:Arcanist User Guide: Lint}
+ - @{article:Arcanist User Guide: Customizing Existing Linters}
+ - @{article:Arcanist User Guide: Customizing Lint, Unit Tests and Workflows}
+ - @{article:Arcanist User Guide: Code Coverage}
+ - @{article:Arcanist User Guide: Repository Hooks}
