@@ -149,7 +149,7 @@ abstract class AphrontApplicationConfiguration {
    *                                      parameters.
    * @task routing
    */
-  private function buildControllerForPath($path) {
+  final public function buildControllerForPath($path) {
     $maps = array();
     $maps[] = array(null, $this->getURIMap());
 
