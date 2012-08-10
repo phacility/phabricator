@@ -439,6 +439,27 @@ final class PhabricatorObjectHandleData {
             $handles[$phid] = $handle;
           }
           break;
+        case PhabricatorPHIDConstants::PHID_TYPE_QUES:
+          $questions = id(new PonderQuestionQuery())
+            ->withPHIDs($phids)
+            ->execute();
+          $questions = mpull($questions, 'getPHID');
+
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            $handle->setType($type);
+            if (empty($questions[$phid])) {
+              $handle->setName('Unknown Ponder Question');
+            } else {
+              $question = $questions[$phid];
+              $handle->setName(phutil_utf8_shorten($question->getTitle(), 60));
+              $handle->setURI(new PhutilURI('Q' . $question->getID()));
+              $handle->setComplete(true);
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
         default:
           $loader = null;
           if (isset($external_loaders[$type])) {

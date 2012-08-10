@@ -163,6 +163,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'  => 'db',
         'name'  => 'fact',
       ),
+      'db.ponder' => array(
+        'type'    => 'db',
+        'name'    => 'ponder',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
@@ -951,6 +955,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       'fact-raw.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('fact-raw.sql'),
+      ),
+      'ponder.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('ponder.sql')
       ),
     );
   }

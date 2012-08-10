@@ -1,0 +1,25 @@
+/**
+ * @provides ponder-core-view-css
+ */
+
+.ponder-primary-pane {
+  margin:           0 0 0 2em;
+  padding-bottom:   2em;
+  max-width:        800px;
+}
+
+.ponder-panel {
+  max-width:    800px;
+  font-family : antiqua, verdana, arial;
+}
+
+.ponder-panel h1 {
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  font-size : 1.5em;
+}
+
+.ponder-panel .aphront-form-view {
+  border : none;
+  background : none;
+}

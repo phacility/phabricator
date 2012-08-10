@@ -26,6 +26,7 @@ final class PhabricatorSearchScope {
   const SCOPE_OPEN_TASKS        = 'open-tasks';
   const SCOPE_COMMITS           = 'commits';
   const SCOPE_WIKI              = 'wiki';
+  const SCOPE_QUESTIONS         = 'questions';
 
   public static function getScopeOptions() {
     return array(
@@ -34,6 +35,7 @@ final class PhabricatorSearchScope {
       self::SCOPE_WIKI              => 'Wiki Documents',
       self::SCOPE_OPEN_REVISIONS    => 'Open Revisions',
       self::SCOPE_COMMITS           => 'Commits',
+      self::SCOPE_QUESTIONS         => 'Ponder Questions',
     );
   }
 

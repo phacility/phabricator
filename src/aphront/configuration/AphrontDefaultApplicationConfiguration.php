@@ -320,7 +320,6 @@ class AphrontDefaultApplicationConfiguration
 
       '/emailverify/(?P<code>[^/]+)/' =>
         'PhabricatorEmailVerificationController',
-
     );
   }
 
