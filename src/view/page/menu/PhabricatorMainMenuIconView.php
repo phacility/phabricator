@@ -22,9 +22,16 @@ final class PhabricatorMainMenuIconView extends AphrontView {
   private $href;
   private $name;
   private $sortOrder = 0.5;
+  private $workflow;
+  private $style;
 
   public function setName($name) {
     $this->name = $name;
+    return $this;
+  }
+
+  public function setWorkflow($workflow) {
+    $this->workflow = $workflow;
     return $this;
   }
 
@@ -43,6 +50,11 @@ final class PhabricatorMainMenuIconView extends AphrontView {
 
   public function addClass($class) {
     $this->classes[] = $class;
+    return $this;
+  }
+
+  public function addStyle($style) {
+    $this->style = $style;
     return $this;
   }
 
@@ -82,6 +94,8 @@ final class PhabricatorMainMenuIconView extends AphrontView {
       array(
         'href' => $href,
         'class' => implode(' ', $classes),
+        'style' => $this->style,
+        'sigil' => $this->workflow ? 'workflow' : null,
       ),
       '');
 

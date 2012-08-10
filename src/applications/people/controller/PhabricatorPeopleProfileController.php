@@ -21,10 +21,15 @@ final class PhabricatorPeopleProfileController
 
   private $username;
   private $page;
+  private $profileUser;
 
   public function willProcessRequest(array $data) {
     $this->username = idx($data, 'username');
     $this->page = idx($data, 'page');
+  }
+
+  public function getProfileUser() {
+    return $this->profileUser;
   }
 
   public function processRequest() {
@@ -37,6 +42,8 @@ final class PhabricatorPeopleProfileController
     if (!$user) {
       return new Aphront404Response();
     }
+
+    $this->profileUser = $user;
 
     require_celerity_resource('phabricator-profile-css');
 
