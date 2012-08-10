@@ -67,7 +67,7 @@ Additionally, Arcanist ships with some general purpose linters:
     mistakes.
   - @{class@arcanist:ArcanistFilenameLinter}, which can enforce generally
     sensible rules about not giving files nonsense names.
-  - @{class@arcanist:ArcanistLicenseLinter.php}, which can make sure license
+  - @{class@arcanist:ArcanistLicenseLinter}, which can make sure license
     headers are applied to all source files.
   - @{class@arcanist:ArcanistNoLintLinter}, which can disable lint for files
     marked unlintable.

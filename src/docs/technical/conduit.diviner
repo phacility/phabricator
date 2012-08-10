@@ -47,7 +47,7 @@ Console", implemented by @{class:PhabricatorConduitConsoleController} at
 ##/conduit/##.
 
 A log of connections and calls is stored by
-@{class:PhabriatorConduitConnectionLog} and
+@{class:PhabricatorConduitConnectionLog} and
 @{class:PhabricatorConduitMethodCallLog}, and can be accessed on the web via
 @{class:PhabricatorConduitLogController} at ##/conduit/log/##.
 

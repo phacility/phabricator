@@ -135,7 +135,8 @@ handling and makes it easier to get right than wrong:
   Filesystem::writeFile('file.bak', $data);         //  Best
   do_something_dangerous();
 
-See @{article:System Commands} for details on the APIs used in this example.
+See @{article@libphutil:Command Execution} for details on the APIs used in this
+example.
 
 = Documentation, Comments and Formatting =
 

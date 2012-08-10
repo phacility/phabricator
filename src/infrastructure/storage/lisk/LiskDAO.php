@@ -132,9 +132,9 @@
  *   $pugs = $dog->loadAllWhere('breed = %s', 'Pug');
  *   $sawyer = $dog->loadOneWhere('name = %s', 'Sawyer');
  *
- * These methods work like @{function:queryfx}, but only take half of a query
- * (the part after the WHERE keyword). Lisk will handle the connection, columns,
- * and object construction; you are responsible for the rest of it.
+ * These methods work like @{function@libphutil:queryfx}, but only take half of
+ * a query (the part after the WHERE keyword). Lisk will handle the connection,
+ * columns, and object construction; you are responsible for the rest of it.
  * @{method:loadAllWhere} returns a list of objects, while
  * @{method:loadOneWhere} returns a single object (or `null`).
  *
