@@ -225,6 +225,13 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
         $this->language);
     }
 
+    if ($this->type) {
+      $where[] = qsprintf(
+        $conn_r,
+        'symbolType = %s',
+        $this->type);
+    }
+
     return $this->formatWhereClause($where);
   }
 
