@@ -101,6 +101,8 @@ JX.behavior('differential-dropdown-menus', function(config) {
           reveal_item.setName('Entire File Shown');
         }
 
+        visible_item.setDisabled(true);
+        visible_item.setName("Can't Toggle Unloaded File");
         var diffs = JX.DOM.scry(JX.$(data.containerID),
                                'table', 'differential-diff');
         if (diffs.length > 1) {
@@ -109,6 +111,7 @@ JX.behavior('differential-dropdown-menus', function(config) {
             data.containerID+'."');
         } else if (diffs.length == 1) {
           diff = diffs[0];
+          visible_item.setDisabled(false);
           if (JX.Stratcom.getData(diff).hidden) {
             visible_item.setName('Expand File');
           } else {

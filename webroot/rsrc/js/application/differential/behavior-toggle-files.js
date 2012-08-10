@@ -33,11 +33,15 @@ JX.behavior('differential-toggle-files', function(config) {
     function(e) {
       var elt = e.getData().element;
       while (elt !== document.body) {
-        if (JX.Stratcom.hasSigil(elt, 'differential-diff') &&
-            JX.Stratcom.getData(elt).hidden) {
-          JX.Stratcom.invoke('differential-toggle-file', null, {
-            diff: [ elt ],
-          });
+        if (JX.Stratcom.hasSigil(elt, 'differential-changeset')) {
+          var diffs = JX.DOM.scry(elt, 'table', 'differential-diff');
+          for (var i = 0; i < diffs.length; ++i) {
+            if (JX.Stratcom.getData(diffs[i]).hidden) {
+              JX.Stratcom.invoke('differential-toggle-file', null, {
+                diff: [ diffs[i] ],
+              });
+            }
+          }
           return;
         }
         elt = elt.parentNode;
@@ -45,18 +49,37 @@ JX.behavior('differential-toggle-files', function(config) {
     });
 
   JX.Stratcom.listen(
-    'hashchange',
-    null,
+    'click',
+    'tag:a',
     function(e) {
-      var id = window.location.hash;
-      if (!id.match(/^#/)) {
+      var link = e.getNode('tag:a');
+      var id = link.getAttribute('href');
+      if (!id.match(/^#.+/)) {
         return;
       }
+      // The target may have either a matching name or a matching id.
+      var target;
+      try {
+        target = JX.$(id.substr(1));
+      } catch(err) {
+        var named = document.getElementsByName(id.substr(1));
+        var matches = [];
+        for (var i = 0; i < named.length; ++i) {
+          if (named[i].tagName.toLowerCase() == 'a') {
+            matches.push(named[i]);
+          }
+        }
+        if (matches.length == 1) {
+          target = matches[0];
+        } else {
+          return;
+        }
+      }
       JX.Stratcom.invoke('differential-toggle-file-request', null, {
-        element: JX.$(id.substr(1)),
+        element: target,
       });
       // This event is processed after the hash has changed, so it doesn't
       // automatically jump there like we want.
-      JX.DOM.scrollTo(JX.$(id.substr(1)));
+      JX.DOM.scrollTo(target);
     });
 });
