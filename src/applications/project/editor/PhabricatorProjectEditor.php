@@ -25,6 +25,51 @@ final class PhabricatorProjectEditor {
   private $addEdges = array();
   private $remEdges = array();
 
+  public static function applyJoinProject(
+    PhabricatorProject $project,
+    PhabricatorUser $user) {
+
+    $members = $project->getMemberPHIDs();
+    $members[] = $user->getPHID();
+
+    self::applyOneTransaction(
+      $project,
+      $user,
+      PhabricatorProjectTransactionType::TYPE_MEMBERS,
+      $members);
+  }
+
+  public static function applyLeaveProject(
+    PhabricatorProject $project,
+    PhabricatorUser $user) {
+
+    $members = array_fill_keys($project->getMemberPHIDs(), true);
+    unset($members[$user->getPHID()]);
+    $members = array_keys($members);
+
+    self::applyOneTransaction(
+      $project,
+      $user,
+      PhabricatorProjectTransactionType::TYPE_MEMBERS,
+      $members);
+  }
+
+  private static function applyOneTransaction(
+    PhabricatorProject $project,
+    PhabricatorUser $user,
+    $type,
+    $new_value) {
+
+    $xaction = new PhabricatorProjectTransaction();
+    $xaction->setTransactionType($type);
+    $xaction->setNewValue($new_value);
+
+    $editor = new PhabricatorProjectEditor($project);
+    $editor->setUser($user);
+    $editor->applyTransactions(array($xaction));
+  }
+
+
   public function __construct(PhabricatorProject $project) {
     $this->project = $project;
   }

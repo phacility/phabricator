@@ -31,7 +31,11 @@ final class PhabricatorProjectUpdateController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $project = id(new PhabricatorProject())->load($this->id);
+    $project = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->needMembers(true)
+      ->withIDs(array($this->id))
+      ->executeOne();
     if (!$project) {
       return new Aphront404Response();
     }
@@ -51,44 +55,14 @@ final class PhabricatorProjectUpdateController
     $project_uri = '/project/view/'.$project->getID().'/';
 
     if ($process_action) {
-      $xactions = array();
-
-
       switch ($this->action) {
         case 'join':
-          $member_phids = $project->loadMemberPHIDs();
-          $member_map = array_fill_keys($member_phids, true);
-          if (empty($member_map[$user->getPHID()])) {
-            $member_map[$user->getPHID()] = true;
-
-            $xaction = new PhabricatorProjectTransaction();
-            $xaction->setTransactionType(
-              PhabricatorProjectTransactionType::TYPE_MEMBERS);
-            $xaction->setNewValue(array_keys($member_map));
-            $xactions[] = $xaction;
-          }
+          PhabricatorProjectEditor::applyJoinProject($project, $user);
           break;
         case 'leave':
-          $member_phids = $project->loadMemberPHIDs();
-          $member_map = array_fill_keys($member_phids, true);
-          if (isset($member_map[$user->getPHID()])) {
-            unset($member_map[$user->getPHID()]);
-
-            $xaction = new PhabricatorProjectTransaction();
-            $xaction->setTransactionType(
-              PhabricatorProjectTransactionType::TYPE_MEMBERS);
-            $xaction->setNewValue(array_keys($member_map));
-            $xactions[] = $xaction;
-          }
+          PhabricatorProjectEditor::applyLeaveProject($project, $user);
           break;
       }
-
-      if ($xactions) {
-        $editor = new PhabricatorProjectEditor($project);
-        $editor->setUser($user);
-        $editor->applyTransactions($xactions);
-      }
-
       return id(new AphrontRedirectResponse())->setURI($project_uri);
     }
 
