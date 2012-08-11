@@ -42,6 +42,24 @@ final class AphrontSideNavFilterView extends AphrontView {
   private $selectedFilter = false;
   private $flexNav;
   private $flexible;
+  private $showApplicationMenu;
+  private $user;
+  private $currentApplication;
+
+  public function setCurrentApplication(PhabricatorApplication $current) {
+    $this->currentApplication = $current;
+    return $this;
+  }
+
+  public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
+    return $this;
+  }
+
+  public function setShowApplicationMenu($show_application_menu) {
+    $this->showApplicationMenu = $show_application_menu;
+    return $this;
+  }
 
   public function setFlexNav($flex_nav) {
     $this->flexNav = $flex_nav;
@@ -129,6 +147,13 @@ final class AphrontSideNavFilterView extends AphrontView {
     $view = new AphrontSideNavView();
     $view->setFlexNav($this->flexNav);
     $view->setFlexible($this->flexible);
+    $view->setShowApplicationMenu($this->showApplicationMenu);
+    if ($this->user) {
+      $view->setUser($this->user);
+    }
+    if ($this->currentApplication) {
+      $view->setCurrentApplication($this->currentApplication);
+    }
     foreach ($this->items as $item) {
       list($type, $key, $name) = $item;
       switch ($type) {

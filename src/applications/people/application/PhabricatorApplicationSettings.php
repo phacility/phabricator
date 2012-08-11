@@ -34,6 +34,7 @@ final class PhabricatorApplicationSettings extends PhabricatorApplication {
     return array(
       '/settings/' => array(
         '(?:page/(?P<page>[^/]+)/)?' => 'PhabricatorUserSettingsController',
+        'adjust/' => 'PhabricatorPeopleAdjustSettingController',
       ),
     );
   }

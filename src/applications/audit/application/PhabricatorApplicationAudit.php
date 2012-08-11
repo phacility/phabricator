@@ -42,6 +42,10 @@ final class PhabricatorApplicationAudit extends PhabricatorApplication {
     );
   }
 
+  public function getCoreApplicationOrder() {
+    return 0.130;
+  }
+
   public function loadStatus(PhabricatorUser $user) {
     $status = array();
 

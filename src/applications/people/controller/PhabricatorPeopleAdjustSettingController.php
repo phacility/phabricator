@@ -16,31 +16,19 @@
  * limitations under the License.
  */
 
-final class PhabricatorApplicationApplications extends PhabricatorApplication {
+final class PhabricatorPeopleAdjustSettingController
+  extends PhabricatorPeopleController {
 
-  public function getBaseURI() {
-    return '/applications/';
+  public function processRequest() {
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $prefs = $user->loadPreferences();
+    $prefs->setPreference(
+      $request->getStr('key'),
+      $request->getStr('value'));
+    $prefs->save();
+
+    return id(new AphrontAjaxResponse())->setContent(array());
   }
-
-  public function getShortDescription() {
-    return 'Manage Applications';
-  }
-
-  public function getIconURI() {
-    return celerity_get_resource_uri('/rsrc/image/app/app_applications.png');
-  }
-
-  public function getRoutes() {
-    return array(
-      '/applications/' => array(
-        '' => 'PhabricatorApplicationsListController'
-      ),
-    );
-  }
-
-  public function shouldAppearInLaunchView() {
-    return false;
-  }
-
 }
-

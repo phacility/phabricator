@@ -34,6 +34,10 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
     return celerity_get_resource_uri('/rsrc/image/app/app_maniphest.png');
   }
 
+  public function getCoreApplicationOrder() {
+    return 0.110;
+  }
+
   public function getFactObjectsForAnalysis() {
     return array(
       new ManiphestTask(),

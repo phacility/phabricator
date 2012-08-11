@@ -84,6 +84,11 @@ abstract class ManiphestController extends PhabricatorController {
     $nav->addLabel('Reports');
     $nav->addFilter('report',       'Reports', '/maniphest/report/');
 
+    $nav->setFlexNav(true);
+    $nav->setShowApplicationMenu(true);
+    $nav->setCurrentApplication($this->getCurrentApplication());
+    $nav->setUser($this->getRequest()->getUser());
+
     return $nav;
   }
 

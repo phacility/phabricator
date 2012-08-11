@@ -7,6 +7,13 @@
  */
 
 celerity_register_resource_map(array(
+  '/rsrc/image/app/app_applications.png' =>
+  array(
+    'hash' => '0e83b7bea93bf92777e546ae6c7ac1cb',
+    'uri' => '/res/0e83b7be/rsrc/image/app/app_applications.png',
+    'disk' => '/rsrc/image/app/app_applications.png',
+    'type' => 'png',
+  ),
   '/rsrc/image/app/app_audit.png' =>
   array(
     'hash' => '53340003d1daf306b64ed5ebb08bc204',
@@ -138,6 +145,27 @@ celerity_register_resource_map(array(
     'hash' => 'f8c30376f30cf5a8675a5e683400684a',
     'uri' => '/res/f8c30376/rsrc/image/bolt.png',
     'disk' => '/rsrc/image/bolt.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/button_apps.png' =>
+  array(
+    'hash' => 'cc29f793afd01b15af613562225118f3',
+    'uri' => '/res/cc29f793/rsrc/image/button_apps.png',
+    'disk' => '/rsrc/image/button_apps.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/button_content.png' =>
+  array(
+    'hash' => '87cc5797352097b4b3d7541e6c46f032',
+    'uri' => '/res/87cc5797/rsrc/image/button_content.png',
+    'disk' => '/rsrc/image/button_content.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/button_menu.png' =>
+  array(
+    'hash' => '5742857c7734d9d25be1125f5737fe0e',
+    'uri' => '/res/5742857c/rsrc/image/button_menu.png',
+    'disk' => '/rsrc/image/button_menu.png',
     'type' => 'png',
   ),
   '/rsrc/image/credit_cards.png' =>
@@ -1153,7 +1181,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-device' =>
   array(
-    'uri' => '/res/bec84986/rsrc/js/application/core/behavior-device.js',
+    'uri' => '/res/37669d1a/rsrc/js/application/core/behavior-device.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1614,7 +1642,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-phabricator-nav' =>
   array(
-    'uri' => '/res/adaae8ae/rsrc/js/application/core/behavior-phabricator-nav.js',
+    'uri' => '/res/cb8979b2/rsrc/js/application/core/behavior-phabricator-nav.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1623,6 +1651,9 @@ celerity_register_resource_map(array(
       2 => 'javelin-dom',
       3 => 'javelin-magical-init',
       4 => 'javelin-vector',
+      5 => 'javelin-request',
+      6 => 'javelin-util',
+      7 => 'javelin-fx',
     ),
     'disk' => '/rsrc/js/application/core/behavior-phabricator-nav.js',
   ),
@@ -1819,7 +1850,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-toggle-class' =>
   array(
-    'uri' => '/res/35b86b96/rsrc/js/application/core/behavior-toggle-class.js',
+    'uri' => '/res/fa818e0f/rsrc/js/application/core/behavior-toggle-class.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2533,7 +2564,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-nav-view-css' =>
   array(
-    'uri' => '/res/3443576d/rsrc/css/aphront/phabricator-nav-view.css',
+    'uri' => '/res/82636b80/rsrc/css/aphront/phabricator-nav-view.css',
     'type' => 'css',
     'requires' =>
     array(
