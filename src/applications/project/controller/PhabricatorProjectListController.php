@@ -46,8 +46,7 @@ final class PhabricatorProjectListController
 
     $query = new PhabricatorProjectQuery();
     $query->setViewer($request->getUser());
-    $query->setOffset($pager->getOffset());
-    $query->setLimit($pager->getPageSize() + 1);
+    $query->needMembers(true);
 
     $view_phid = $request->getUser()->getPHID();
 
@@ -69,8 +68,7 @@ final class PhabricatorProjectListController
         break;
     }
 
-    $projects = $query->execute();
-    $projects = $pager->sliceResults($projects);
+    $projects = $query->executeWithOffsetPager($pager);
 
     $project_phids = mpull($projects, 'getPHID');
 
@@ -80,14 +78,6 @@ final class PhabricatorProjectListController
         'projectPHID in (%Ls)',
         $project_phids);
       $profiles = mpull($profiles, null, 'getProjectPHID');
-    }
-
-    $edge_query = new PhabricatorEdgeQuery();
-    if ($projects) {
-      $edge_query
-        ->withSourcePHIDs($project_phids)
-        ->withEdgeTypes(array(PhabricatorEdgeConfig::TYPE_PROJ_MEMBER))
-        ->execute();
     }
 
     $tasks = array();
@@ -112,7 +102,7 @@ final class PhabricatorProjectListController
       $phid = $project->getPHID();
 
       $profile = idx($profiles, $phid);
-      $members = $edge_query->getDestinationPHIDs(array($phid));
+      $members = $project->getMemberPHIDs();
 
       $group = idx($groups, $phid, array());
       $task_count = count($group);

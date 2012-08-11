@@ -64,6 +64,10 @@ final class PhabricatorProjectQuery extends PhabricatorCursorPagedPolicyQuery {
     return $result->getName();
   }
 
+  protected function getReversePaging() {
+    return true;
+  }
+
   public function loadPage() {
     $table = new PhabricatorProject();
     $conn_r = $table->establishConnection('r');

@@ -34,6 +34,10 @@ abstract class PhabricatorCursorPagedPolicyQuery
     return $result->getID();
   }
 
+  protected function getReversePaging() {
+    return false;
+  }
+
   protected function nextPage(array $page) {
     if ($this->beforeID) {
       $this->beforeID = $this->getPagingValue(head($page));
@@ -66,14 +70,16 @@ abstract class PhabricatorCursorPagedPolicyQuery
     if ($this->beforeID) {
       return qsprintf(
         $conn_r,
-        '%Q > %s',
+        '%Q %Q %s',
         $this->getPagingColumn(),
+        $this->getReversePaging() ? '<' : '>',
         $this->beforeID);
     } else if ($this->afterID) {
       return qsprintf(
         $conn_r,
-        '%Q < %s',
+        '%Q %Q %s',
         $this->getPagingColumn(),
+        $this->getReversePaging() ? '>' : '<',
         $this->afterID);
     }
 
@@ -84,13 +90,15 @@ abstract class PhabricatorCursorPagedPolicyQuery
     if ($this->beforeID) {
       return qsprintf(
         $conn_r,
-        'ORDER BY %Q ASC',
-        $this->getPagingColumn());
+        'ORDER BY %Q %Q',
+        $this->getPagingColumn(),
+        $this->getReversePaging() ? 'DESC' : 'ASC');
     } else {
       return qsprintf(
         $conn_r,
-        'ORDER BY %Q DESC',
-        $this->getPagingColumn());
+        'ORDER BY %Q %Q',
+        $this->getPagingColumn(),
+        $this->getReversePaging() ? 'ASC' : 'DESC');
     }
   }
 
