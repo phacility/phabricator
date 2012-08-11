@@ -46,6 +46,7 @@ abstract class PhabricatorPolicyQuery extends PhabricatorOffsetPagedQuery {
   private $viewer;
   private $raisePolicyExceptions;
   private $rawResultLimit;
+  private $capabilities;
 
 
 /* -(  Query Configuration  )------------------------------------------------ */
@@ -74,6 +75,15 @@ abstract class PhabricatorPolicyQuery extends PhabricatorOffsetPagedQuery {
    */
   final public function getViewer() {
     return $this->viewer;
+  }
+
+
+  /**
+   * @task config
+   */
+  final public function requireCapabilities(array $capabilities) {
+    $this->capabilities = $capabilities;
+    return $this;
   }
 
 
@@ -145,8 +155,15 @@ abstract class PhabricatorPolicyQuery extends PhabricatorOffsetPagedQuery {
 
     $filter = new PhabricatorPolicyFilter();
     $filter->setViewer($this->viewer);
-    $filter->setCapability(PhabricatorPolicyCapability::CAN_VIEW);
 
+    if (!$this->capabilities) {
+      $capabilities = array(
+        PhabricatorPolicyCapability::CAN_VIEW,
+      );
+    } else {
+      $capabilities = $this->capabilities;
+    }
+    $filter->requireCapabilities($capabilities);
     $filter->raisePolicyExceptions($this->raisePolicyExceptions);
 
     $offset = (int)$this->getOffset();
