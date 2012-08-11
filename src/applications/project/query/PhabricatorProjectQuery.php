@@ -68,27 +68,50 @@ final class PhabricatorProjectQuery extends PhabricatorCursorPagedPolicyQuery {
     $table = new PhabricatorProject();
     $conn_r = $table->establishConnection('r');
 
+    // NOTE: Because visibility checks for projects depend on whether or not
+    // the user is a project member, we always load their membership. If we're
+    // loading all members anyway we can piggyback on that; otherwise we
+    // do an explicit join.
+
+    $select_clause = '';
+    if (!$this->needMembers) {
+      $select_clause = ', vm.dst viewerIsMember';
+    }
+
     $data = queryfx_all(
       $conn_r,
-      'SELECT p.* FROM %T p %Q %Q %Q %Q %Q',
+      'SELECT p.* %Q FROM %T p %Q %Q %Q %Q %Q',
+      $select_clause,
       $table->getTableName(),
       $this->buildJoinClause($conn_r),
       $this->buildWhereClause($conn_r),
       $this->buildGroupClause($conn_r),
-      'ORDER BY name',
+      $this->buildOrderClause($conn_r),
       $this->buildLimitClause($conn_r));
 
     $projects = $table->loadAllFromArray($data);
 
-    if ($projects && $this->needMembers) {
-      $etype = PhabricatorEdgeConfig::TYPE_PROJ_MEMBER;
-      $members = id(new PhabricatorEdgeQuery())
-        ->withSourcePHIDs(mpull($projects, 'getPHID'))
-        ->withEdgeTypes(array($etype))
-        ->execute();
-      foreach ($projects as $project) {
-        $phid = $project->getPHID();
-        $project->attachMemberPHIDs(array_keys($members[$phid][$etype]));
+    if ($projects) {
+      $viewer_phid = $this->getViewer()->getPHID();
+      if ($this->needMembers) {
+        $etype = PhabricatorEdgeConfig::TYPE_PROJ_MEMBER;
+        $members = id(new PhabricatorEdgeQuery())
+          ->withSourcePHIDs(mpull($projects, 'getPHID'))
+          ->withEdgeTypes(array($etype))
+          ->execute();
+        foreach ($projects as $project) {
+          $phid = $project->getPHID();
+          $project->attachMemberPHIDs(array_keys($members[$phid][$etype]));
+          $project->setIsUserMember(
+            $viewer_phid,
+            isset($members[$phid][$etype][$viewer_phid]));
+        }
+      } else {
+        foreach ($data as $row) {
+          $projects[$row['id']]->setIsUserMember(
+            $viewer_phid,
+            ($row['viewerIsMember'] !== null));
+        }
       }
     }
 
@@ -139,8 +162,7 @@ final class PhabricatorProjectQuery extends PhabricatorCursorPagedPolicyQuery {
     if ($this->memberPHIDs) {
       $where[] = qsprintf(
         $conn_r,
-        'e.type = %s AND e.dst IN (%Ls)',
-        PhabricatorEdgeConfig::TYPE_PROJ_MEMBER,
+        'e.dst IN (%Ls)',
         $this->memberPHIDs);
     }
 
@@ -160,11 +182,21 @@ final class PhabricatorProjectQuery extends PhabricatorCursorPagedPolicyQuery {
   private function buildJoinClause($conn_r) {
     $joins = array();
 
+    if (!$this->needMembers) {
+      $joins[] = qsprintf(
+        $conn_r,
+        'LEFT JOIN %T vm ON vm.src = p.phid AND vm.type = %d AND vm.dst = %s',
+        PhabricatorEdgeConfig::TABLE_NAME_EDGE,
+        PhabricatorEdgeConfig::TYPE_PROJ_MEMBER,
+        $this->getViewer()->getPHID());
+    }
+
     if ($this->memberPHIDs) {
       $joins[] = qsprintf(
         $conn_r,
-        'JOIN %T e ON e.src = p.phid',
-        PhabricatorEdgeConfig::TABLE_NAME_EDGE);
+        'JOIN %T e ON e.src = p.phid AND e.type = %d',
+        PhabricatorEdgeConfig::TABLE_NAME_EDGE,
+        PhabricatorEdgeConfig::TYPE_PROJ_MEMBER);
     }
 
     return implode(' ', $joins);

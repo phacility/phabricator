@@ -960,6 +960,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('ponder.sql')
       ),
+      'policy-project.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('policy-project.sql'),
+      ),
     );
   }
 
