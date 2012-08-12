@@ -27,7 +27,17 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
   }
 
   final public function loadFileContent() {
-    return $this->fileContent = $this->executeQuery();
+    $this->fileContent = $this->executeQuery();
+
+    $repository = $this->getRequest()->getRepository();
+    $try_encoding = $repository->getDetail('encoding');
+    if ($try_encoding) {
+        $this->fileContent->setCorpus(
+          phutil_utf8_convert(
+            $this->fileContent->getCorpus(), "UTF-8", $try_encoding));
+    }
+
+    return $this->fileContent;
   }
 
   final public function getRawData() {
