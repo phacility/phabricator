@@ -151,20 +151,6 @@ class AphrontDefaultApplicationConfiguration
         'index/(?P<phid>[^/]+)/' => 'PhabricatorSearchIndexController',
       ),
 
-      '/daemon/' => array(
-        'task/(?P<id>\d+)/' => 'PhabricatorWorkerTaskDetailController',
-        'task/(?P<id>\d+)/(?P<action>[^/]+)/'
-          => 'PhabricatorWorkerTaskUpdateController',
-        'log/' => array(
-          '' => 'PhabricatorDaemonLogListController',
-          'combined/' => 'PhabricatorDaemonCombinedLogController',
-          '(?P<id>\d+)/' => 'PhabricatorDaemonLogViewController',
-        ),
-        'timeline/' => 'PhabricatorDaemonTimelineConsoleController',
-        'timeline/(?P<id>\d+)/' => 'PhabricatorDaemonTimelineEventController',
-        '' => 'PhabricatorDaemonConsoleController',
-      ),
-
       '/herald/' => array(
         '' => 'HeraldHomeController',
         'view/(?P<content_type>[^/]+)/(?:(?P<rule_type>[^/]+)/)?'

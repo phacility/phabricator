@@ -73,7 +73,6 @@ final class PhabricatorWorkerTaskUpdateController
         return new Aphront404Response();
     }
 
-
     $dialog->addCancelButton('/daemon/');
 
     return id(new AphrontDialogResponse())->setDialog($dialog);

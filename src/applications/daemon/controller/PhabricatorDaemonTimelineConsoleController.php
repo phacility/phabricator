@@ -57,10 +57,12 @@ final class PhabricatorDaemonTimelineConsoleController
     $event_panel->setHeader('Timeline Events');
     $event_panel->appendChild($event_table);
 
-    return $this->buildStandardPageResponse(
-      array(
-        $event_panel,
-      ),
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter('timeline');
+    $nav->appendChild($event_panel);
+
+    return $this->buildApplicationPage(
+      $nav,
       array(
         'title' => 'Timeline',
         'tab'   => 'timeline',

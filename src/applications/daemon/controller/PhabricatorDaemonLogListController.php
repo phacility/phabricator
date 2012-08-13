@@ -42,8 +42,12 @@ final class PhabricatorDaemonLogListController
     $daemon_panel->appendChild($daemon_table);
     $daemon_panel->appendChild($pager);
 
-    return $this->buildStandardPageResponse(
-      $daemon_panel,
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter('log');
+    $nav->appendChild($daemon_panel);
+
+    return $this->buildApplicationPage(
+      $nav,
       array(
         'title' => 'All Daemons',
       ));

@@ -155,16 +155,20 @@ final class PhabricatorDaemonConsoleController
     $cursor_panel->setHeader('Timeline Cursors');
     $cursor_panel->appendChild($cursor_table);
 
-    return $this->buildStandardPageResponse(
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter('');
+    $nav->appendChild(
       array(
         $daemon_panel,
         $cursor_panel,
         $queued_panel,
         $leased_panel,
-      ),
+      ));
+
+    return $this->buildApplicationPage(
+      $nav,
       array(
         'title' => 'Console',
-        'tab'   => 'console',
       ));
   }
 
