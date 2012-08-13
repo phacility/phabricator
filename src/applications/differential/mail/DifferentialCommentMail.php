@@ -170,11 +170,12 @@ final class DifferentialCommentMail extends DifferentialMail {
               'metamta.differential.unified-comment-context', false)) {
           $body[] = $this->formatText("{$file}:{$range} {$content}");
         } else {
+          $body[] = "================";
           $body[] = "Comment at: " . $file . ":" . $range;
 
           $changeset->attachHunks($changeset->loadHunks());
           $body[] = $changeset->makeContextDiff($inline, 1);
-          $body[] = null;
+          $body[] = "----------------";
 
           $content = $inline->getContent();
           $body[] = $content;
