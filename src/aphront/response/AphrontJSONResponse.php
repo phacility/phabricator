@@ -44,7 +44,7 @@ final class AphrontJSONResponse extends AphrontResponse {
   public function buildResponseString() {
     $response = $this->encodeJSONForHTTPResponse($this->content);
     if ($this->shouldAddJSONShield()) {
-      $response = $this->addJSONShield($response, $use_javelin_shield = false);
+      $response = $this->addJSONShield($response);
     }
     return $response;
   }

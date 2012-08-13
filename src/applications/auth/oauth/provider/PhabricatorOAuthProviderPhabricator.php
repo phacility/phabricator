@@ -104,6 +104,10 @@ extends PhabricatorOAuthProvider {
   }
 
   public function setUserData($data) {
+    // legacy conditionally strip shield. see D3265 for discussion.
+    if (strpos($data, 'for(;;);') === 0) {
+      $data = substr($data, 8);
+    }
     $data = idx(json_decode($data, true), 'result');
     $this->validateUserData($data);
     $this->userData = $data;
