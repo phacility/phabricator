@@ -26,12 +26,20 @@ final class PhabricatorApplicationApplications extends PhabricatorApplication {
     return 'Manage Applications';
   }
 
+  public function getIconURI() {
+    return celerity_get_resource_uri('/rsrc/image/app/app_applications.png');
+  }
+
   public function getRoutes() {
     return array(
       '/applications/' => array(
         '' => 'PhabricatorApplicationsListController'
       ),
     );
+  }
+
+  public function getTitleGlyph() {
+    return "\xE0\xBC\x84";
   }
 
   public function shouldAppearInLaunchView() {

@@ -53,5 +53,9 @@ final class PhabricatorApplicationPhriction extends PhabricatorApplication {
     );
   }
 
+  public function getCoreApplicationOrder() {
+    return 0.140;
+  }
+
 }
 

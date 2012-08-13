@@ -37,17 +37,9 @@ final class PhabricatorRepositoryGitCommitMessageParserWorker
     $parts = explode("\0", $info);
     $encoding = array_shift($parts);
 
-    // See note above - git doesn't always convert the encoding correctly.
-    $do_convert = false;
-    if (strlen($encoding) && strtoupper($encoding) != 'UTF-8') {
-      if (function_exists('mb_convert_encoding')) {
-        $do_convert = true;
-      }
-    }
-
     foreach ($parts as $key => $part) {
-      if ($do_convert) {
-        $parts[$key] = mb_convert_encoding($part, 'UTF-8', $encoding);
+      if ($encoding) {
+        $part = phutil_utf8_convert($part, 'UTF-8', $encoding);
       }
       $parts[$key] = phutil_utf8ize($part);
     }

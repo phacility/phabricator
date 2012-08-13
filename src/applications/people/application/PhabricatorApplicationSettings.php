@@ -34,6 +34,7 @@ final class PhabricatorApplicationSettings extends PhabricatorApplication {
     return array(
       '/settings/' => array(
         '(?:page/(?P<page>[^/]+)/)?' => 'PhabricatorUserSettingsController',
+        'adjust/' => 'PhabricatorPeopleAdjustSettingController',
       ),
     );
   }
@@ -44,12 +45,16 @@ final class PhabricatorApplicationSettings extends PhabricatorApplication {
 
     $items = array();
 
-    if ($user->isLoggedIn()) {
-      require_celerity_resource('phabricator-glyph-css');
+    if ($controller instanceof PhabricatorUserSettingsController) {
+      $class = 'main-menu-item-icon-settings-selected';
+    } else {
+      $class = 'main-menu-item-icon-settings';
+    }
 
+    if ($user->isLoggedIn()) {
       $item = new PhabricatorMainMenuIconView();
       $item->setName(pht('Settings'));
-      $item->addClass('glyph glyph-settings');
+      $item->addClass('main-menu-item-icon '.$class);
       $item->setHref('/settings/');
       $item->setSortOrder(0.90);
       $items[] = $item;

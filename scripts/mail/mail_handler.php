@@ -34,9 +34,10 @@ $text_body_headers = $parser->getMessageBodyHeaders('text');
 $content_type = idx($text_body_headers, 'content-type');
 if (
   !phutil_is_utf8($text_body) &&
-  preg_match('/charset="(.*?)"/', $content_type, $matches)
+  (preg_match('/charset="(.*?)"/', $content_type, $matches) ||
+   preg_match('/charset=(\S+)/', $content_type, $matches))
 ) {
-  $text_body = mb_convert_encoding($text_body, "UTF-8", $matches[1]);
+  $text_body = phutil_utf8_convert($text_body, "UTF-8", $matches[1]);
 }
 
 $headers = $parser->getHeaders();

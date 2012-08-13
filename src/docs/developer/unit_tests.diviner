@@ -60,7 +60,7 @@ You can see this class at @{class:PhabricatorTrivialTestCase} and run it with:
    PASS   <1ms*  testAllIsRightWithTheWorld
 
 For more information on writing tests, see
-@{class@arcnaist:ArcanistPhutilTestCase} and @{class:PhabricatorTestCase}.
+@{class@arcanist:ArcanistPhutilTestCase} and @{class:PhabricatorTestCase}.
 
 = Database Isolation =
 

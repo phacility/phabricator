@@ -69,18 +69,4 @@ final class PhabricatorOwnersOwner extends PhabricatorOwnersDAO {
 
     return array_unique(array_merge($users_in_project_phids, $user_phids));
   }
-
-  // Loads all affiliated packages for a user. This includes packages owned by
-  // any project the user is a member of.
-  public static function loadAffiliatedPackages($user_phid) {
-    $query = new PhabricatorProjectQuery();
-    $query->withMemberPHIDs(array($user_phid));
-    $query->withStatus(PhabricatorProjectQuery::STATUS_ACTIVE);
-    $projects = $query->execute();
-
-    $phids = mpull($projects, 'getPHID') + array($user_phid);
-    return id(new PhabricatorOwnersOwner())->loadAllWhere(
-      'userPHID in (%Ls)',
-      $phids);
-  }
 }

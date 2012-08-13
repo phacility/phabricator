@@ -318,7 +318,7 @@ final class PhabricatorRepositoryCommitHeraldWorker
       return;
     }
 
-    $encoding = $repository->getDetail('encoding', 'utf-8');
+    $encoding = $repository->getDetail('encoding', 'UTF-8');
 
     $result = null;
     $patch_error = null;
@@ -347,9 +347,8 @@ final class PhabricatorRepositoryCommitHeraldWorker
       if ($len <= $inline_patches) {
         // We send email as utf8, so we need to convert the text to utf8 if
         // we can.
-        if (strtolower($encoding) != 'utf-8' &&
-            function_exists('mb_convert_encoding')) {
-          $raw_patch = mb_convert_encoding($raw_patch, 'utf-8', $encoding);
+        if ($encoding) {
+          $raw_patch = phutil_utf8_convert($raw_patch, 'UTF-8', $encoding);
         }
         $result = phutil_utf8ize($raw_patch);
       }

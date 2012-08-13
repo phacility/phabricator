@@ -1,0 +1,74 @@
+/**
+ * @provides ponder-vote-css
+ */
+
+.ponder-votable {
+  min-height : 120px;
+}
+
+.ponder-votable .phabricator-transaction-detail {
+  min-height : 90px;
+}
+
+.ponder-votebox {
+  float  : left;
+  width  : 32px;
+  height : 60px;
+  margin-top : 56px;
+  margin-left : 10px;
+}
+
+.ponder-upbutton {
+  border : none;
+  padding : 0;
+  margin : 0;
+  width : 32px;
+  height : 13px;
+}
+
+.ponder-downbutton {
+  border : none;
+  padding : 0;
+  margin : 0;
+  width : 32px;
+  height : 13px;
+}
+
+.ponder-votecount {
+  width : 32px;
+  height : 22pt;
+  padding : 0;
+  margin : 0;
+  overflow : visible;
+  text-align : center;
+  font-size : 15pt;
+}
+
+.ponder-upbutton:hover {
+  cursor : pointer;
+}
+
+.ponder-downbutton:hover {
+  cursor : pointer;
+}
+
+.ponder-votable-bottom {
+  clear : both;
+}
+
+.ponder-upbutton {
+  background : url(/rsrc/image/application/ponder/upvote.png) 0 -13px no-repeat;
+}
+
+.ponder-upbutton.ponder-vote-up {
+  background : url(/rsrc/image/application/ponder/upvote.png) 0 0 no-repeat;
+}
+
+.ponder-downbutton {
+  background : url(/rsrc/image/application/ponder/downvote.png)
+    0 -13px no-repeat;
+}
+
+.ponder-downbutton.ponder-vote-down {
+  background : url(/rsrc/image/application/ponder/downvote.png) 0 0 no-repeat;
+}

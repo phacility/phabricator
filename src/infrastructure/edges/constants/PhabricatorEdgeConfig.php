@@ -44,6 +44,11 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_COMMIT_HAS_PROJECT         = 15;
   const TYPE_PROJECT_HAS_COMMIT         = 16;
 
+  const TYPE_QUESTION_HAS_VOTING_USER   = 17;
+  const TYPE_VOTING_USER_HAS_QUESTION   = 18;
+  const TYPE_ANSWER_HAS_VOTING_USER     = 19;
+  CONST TYPE_VOTING_USER_HAS_ANSWER     = 20;
+
   const TYPE_TEST_NO_CYCLE              = 9000;
 
   public static function getInverse($edge_type) {
@@ -71,6 +76,12 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       self::TYPE_COMMIT_HAS_PROJECT => self::TYPE_PROJECT_HAS_COMMIT,
       self::TYPE_PROJECT_HAS_COMMIT => self::TYPE_COMMIT_HAS_PROJECT,
 
+      self::TYPE_QUESTION_HAS_VOTING_USER =>
+        self::TYPE_VOTING_USER_HAS_QUESTION,
+      self::TYPE_VOTING_USER_HAS_QUESTION =>
+        self::TYPE_QUESTION_HAS_VOTING_USER,
+      self::TYPE_ANSWER_HAS_VOTING_USER => self::TYPE_VOTING_USER_HAS_ANSWER,
+      self::TYPE_VOTING_USER_HAS_ANSWER => self::TYPE_ANSWER_HAS_VOTING_USER,
     );
 
     return idx($map, $edge_type);
@@ -98,6 +109,8 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       PhabricatorPHIDConstants::PHID_TYPE_TOBJ  => 'HarbormasterObject',
       PhabricatorPHIDConstants::PHID_TYPE_BLOG  => 'PhameBlog',
       PhabricatorPHIDConstants::PHID_TYPE_POST  => 'PhamePost',
+      PhabricatorPHIDConstants::PHID_TYPE_QUES  => 'PonderQuestion',
+      PhabricatorPHIDConstants::PHID_TYPE_ANSW  => 'PonderAnswer',
     );
 
     $class = idx($class_map, $phid_type);

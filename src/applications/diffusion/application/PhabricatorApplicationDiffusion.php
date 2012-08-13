@@ -72,5 +72,9 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
     );
   }
 
+  public function getCoreApplicationOrder() {
+    return 0.120;
+  }
+
 }
 

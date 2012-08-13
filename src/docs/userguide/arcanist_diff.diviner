@@ -1,17 +1,17 @@
 @title Arcanist User Guide: arc diff
 @group userguide
 
-Guide to running `arc diff`.
-
-= Overview =
+Guide to running `arc diff`, to send changes to Differential for review.
 
 This article assumes you have `arc` installed and running; if not, see
 @{article:Arcanist User Guide} for help getting it set up.
 
-This document is intended for users of `arc diff`, and is a practical
-guide to using it to send changes for review. If you are installing and
-configuring Phabricator, make sure to read the more comprehensive information in
-@{article:Arcanist User Guide: Configuring a New Project}.
+Before running `arc diff`, you should create a `.arcconfig` file. If someone
+set things up for you, they may already have done this. See
+@{article:Arcanist User Guide: Configuring a New Project} for instructions and
+information.
+
+= Overview =
 
 While `arc` has a large number of commands that interface with various
 Phabricator applications, the primary use of `arc` is to send changes for

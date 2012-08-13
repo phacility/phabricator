@@ -24,3 +24,8 @@ You can edit your `~/.profile` to permanently configure environmental variables.
 
 Now you should be able to run `arc` like a normal command.
 
+= Next Steps =
+
+Continue by:
+
+  - returning to @{article:Arcanist User Guide}.

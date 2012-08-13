@@ -18,6 +18,10 @@
 
 final class AphrontFormPolicyControl extends AphrontFormControl {
 
+  private $user;
+  private $object;
+  private $capability;
+
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
     return $this;
@@ -27,12 +31,36 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
     return $this->user;
   }
 
+  public function setPolicyObject(PhabricatorPolicyInterface $object) {
+    $this->object = $object;
+    return $this;
+  }
+
+  public function setCapability($capability) {
+    $this->capability = $capability;
+
+    $labels = array(
+      PhabricatorPolicyCapability::CAN_VIEW => 'Visible To',
+      PhabricatorPolicyCapability::CAN_EDIT => 'Editable By',
+      PhabricatorPolicyCapability::CAN_JOIN => 'Joinable By',
+    );
+
+    $this->setLabel(idx($labels, $this->capability, 'Unknown Policy'));
+
+    return $this;
+  }
+
   protected function getCustomControlClass() {
     return 'aphront-form-control-policy';
   }
 
   private function getOptions() {
     $show_public = PhabricatorEnv::getEnvConfig('policy.allow-public');
+
+    if ($this->capability != PhabricatorPolicyCapability::CAN_VIEW) {
+      // We don't generally permit 'public' for anything except viewing.
+      $show_public = false;
+    }
 
     if ($this->getValue() == PhabricatorPolicies::POLICY_PUBLIC) {
       // If the object already has a "public" policy, show the option in
@@ -59,6 +87,20 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
   }
 
   protected function renderInput() {
+    if (!$this->object) {
+      throw new Exception("Call setPolicyObject() before rendering!");
+    }
+    if (!$this->capability) {
+      throw new Exception("Call setCapability() before rendering!");
+    }
+
+    $policy = $this->object->getPolicy($this->capability);
+    if (!$policy) {
+      // TODO: Make this configurable.
+      $policy = PhabricatorPolicies::POLICY_USER;
+    }
+    $this->setValue($policy);
+
     return AphrontFormSelectControl::renderSelectTag(
       $this->getValue(),
       $this->getOptions(),

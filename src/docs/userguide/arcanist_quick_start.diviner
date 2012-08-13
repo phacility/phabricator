@@ -1,0 +1,100 @@
+@title Arcanist Quick Start
+@group userguide
+
+Quick guide to getting Arcanist working for a new project.
+
+This is a summary of steps to install Arcanist, configure a project for use with
+it, and run `arc` to send changes for review.
+
+= Install Arcanist =
+
+For detailed instructions on installing Arcanist, see
+@{article:Arcanist User Guide}.
+
+  - For Mac OS X, see @{article:Arcanist User Guide: Mac OS X}.
+  - For Windows, see @{article:Arcanist User Guide: Windows}.
+
+First, install dependencies:
+
+  - Install PHP.
+  - Install Git.
+
+Then install Arcanist itself:
+
+  $ mkdir somewhere/
+  $ cd somewhere/
+  somewhere/ $ git clone git://github.com/facebook/libphutil.git
+  somewhere/ $ git clone git://github.com/facebook/arcanist.git
+
+Add `arc` to your path:
+
+  $ export PATH="$PATH:/somewhere/arcanist/bin/"
+
+This won't work for Windows, see @{article:Arcanist User Guide: Windows} for
+instructions.
+
+= Configure Your Project =
+
+For detailed instructions on project configuration, see
+@{article:Arcanist User Guide: Configuring a New Project}.
+
+Create a `.arcconfig` file in your project's working copy:
+
+  $ cd yourproject/
+  yourproject/ $ $EDITOR .arcconfig
+  yourproject/ $ cat .arcconfig
+  {
+    "project_id" : "yourprojectname",
+    "conduit_uri" : "https://phabricator.example.com/"
+  }
+
+Set `project_id` to a string that identifies the project.
+
+Set `conduit_uri` to the URI for your Phabricator install (where `arc`
+should send changes to).
+
+NOTE: You should **commit this file** to the repository.
+
+= Install Arcanist Credentials =
+
+Credentials allow you to authenticate. You must have an account on Phabricator
+before you can perform this step.
+
+  $ cd yourproject/
+  yourproject/ $ arc install-certificate
+  ...
+
+Follow the instructions. This will link your user account on your local machine
+to your Phabricator account.
+
+= Send Changes For Review =
+
+For detailed instructions on using `arc diff`, see
+@{article:Arcanist User Guide: arc diff}.
+
+Subversion:
+
+  $ $EDITOR file.c
+  $ arc diff
+
+Git:
+
+  $ $EDITOR file.c
+  $ git commit -a -m '...'
+  $ arc diff HEAD^
+
+Mercurial:
+
+  $ $EDITOR file.c
+  $ hg commit -m '...'
+  $ arc diff tip^
+
+= Next Steps =
+
+Continue by:
+
+  - learning more about project configuration with
+    @{article:Arcanist User Guide: Configuring a New Project}; or
+  - learning more about `arc diff` with
+    @{article:Arcanist User Guide: arc diff}; or
+  - returning to @{article:Arcanist User Guide}.

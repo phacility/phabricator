@@ -690,6 +690,7 @@ final class ManiphestTaskListController extends ManiphestController {
 
     if ($this->view == 'projecttriage' || $this->view == 'projectall') {
       $project_query = new PhabricatorProjectQuery();
+      $project_query->setViewer($user);
       $project_query->withMemberPHIDs($user_phids);
       $projects = $project_query->execute();
       $project_phids = mpull($projects, 'getPHID');

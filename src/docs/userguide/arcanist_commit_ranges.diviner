@@ -3,6 +3,10 @@
 
 Explains how commit ranges work in Arcanist.
 
+This is an advanced user guide which covers a complicated topic in detail. If
+you're just getting started, you don't need to look at this yet. Instead, start
+with the @{article:Arcanist User Guide}.
+
 = Overview =
 
 //In Subversion, `arc` commands always operate on the uncommitted changes in the

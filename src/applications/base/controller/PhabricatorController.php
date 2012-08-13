@@ -128,6 +128,44 @@ abstract class PhabricatorController extends AphrontController {
     return $response;
   }
 
+  public function getApplicationURI($path = '') {
+    if (!$this->getCurrentApplication()) {
+      throw new Exception("No application!");
+    }
+    return $this->getCurrentApplication()->getBaseURI().ltrim($path, '/');
+  }
+
+  public function buildApplicationPage($view, array $options) {
+    $page = $this->buildStandardPageView();
+
+    $application = $this->getCurrentApplication();
+    if ($application) {
+      $page->setApplicationName($application->getName());
+      $page->setTitle(idx($options, 'title'));
+      if ($application->getTitleGlyph()) {
+        $page->setGlyph($application->getTitleGlyph());
+      }
+    }
+
+    if (!($view instanceof AphrontSideNavFilterView)) {
+      $nav = new AphrontSideNavFilterView();
+      if ($application) {
+        $nav->setCurrentApplication($application);
+      }
+      $nav->setUser($this->getRequest()->getUser());
+      $nav->setFlexNav(true);
+      $nav->setShowApplicationMenu(true);
+      $nav->appendChild($view);
+
+      $view = $nav;
+    }
+
+    $page->appendChild($view);
+
+    $response = new AphrontWebpageResponse();
+    return $response->setContent($page->render());
+  }
+
   public function didProcessRequest($response) {
     $request = $this->getRequest();
     $response->setRequest($request);

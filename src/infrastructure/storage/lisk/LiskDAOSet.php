@@ -39,12 +39,27 @@
 final class LiskDAOSet {
   private $daos = array();
   private $relatives = array();
+  private $subsets = array();
 
   public function addToSet(LiskDAO $dao) {
     $this->daos[] = $dao;
     $dao->putInSet($this);
     return $this;
   }
+
+  /**
+   * The main purpose of this method is to break cyclic dependency.
+   * It removes all objects from this set and all subsets created by it.
+   */
+  final public function clearSet() {
+    $this->daos = array();
+    $this->relatives = array();
+    foreach ($this->subsets as $set) {
+      $set->clearSet();
+    }
+    return $this;
+  }
+
 
   /**
    * See @{method:LiskDAO::loadRelatives}.
@@ -70,6 +85,7 @@ final class LiskDAOSet {
         $relatives = array();
       } else {
         $set = new LiskDAOSet();
+        $this->subsets[] = $set;
         $relatives = $object->putInSet($set)->loadAllWhere(
           '%C IN (%Ls) %Q',
           $foreign_column,

@@ -146,7 +146,7 @@
 .phabricator-main-menu-icon {
   width: 26px;
   height: 26px;
-  margin: 9px 4px;
+  margin: 9px 6px;
   display: inline-block;
   background-repeat: no-repeat;
 }
@@ -173,6 +173,57 @@
   position: absolute;
 }
 
+.main-menu-item-icon {
+  background-repeat: no-repeat;
+  background-size: 26px 26px;
+}
+
+.main-menu-item-icon-settings {
+  background-image: url(/rsrc/image/menu/icon_settings.png);
+}
+
+.main-menu-item-icon-settings:hover {
+  background-image: url(/rsrc/image/menu/icon_settings_hover.png);
+}
+
+.main-menu-item-icon-settings-selected {
+  background-image: url(/rsrc/image/menu/icon_settings_selected.png);
+}
+
+.main-menu-item-icon-logout {
+  background-image: url(/rsrc/image/menu/icon_logout.png);
+}
+
+.main-menu-item-icon-logout:hover {
+  background-image: url(/rsrc/image/menu/icon_logout_hover.png);
+}
+
+.main-menu-item-icon-logout-selected {
+  background-image: url(/rsrc/image/menu/icon_logout_selected.png);
+}
+
+.main-menu-item-icon-profile {
+  background-repeat: no-repeat;
+  background-size: 26px 26px;
+}
+
+.device-desktop .main-menu-item-icon-profile {
+  background-position: 12px 9px;
+  margin: 0 6px;
+  padding: 0 12px;
+  height: 44px;
+  border-width: 0 1px;
+  border-style: solid;
+  border-color: #44494d;
+}
+
+.main-menu-item-icon-profile-not-selected:hover {
+  background-color: #44494d;
+}
+
+.main-menu-item-icon-profile-selected {
+  background-color: #44494d;
+}
 
 /* - Search --------------------------------------------------------------------
 

@@ -31,12 +31,12 @@ $path = '/'.(isset($url['path']) ? ltrim($url['path'], '/') : '');
 
 $config_key = 'aphront.default-application-configuration-class';
 $application = PhabricatorEnv::newObjectFromConfig($config_key);
-$mapper = new AphrontURIMapper($application->getURIMap());
+$application->setRequest(new AphrontRequest('', $path));
 
-list($controller) = $mapper->mapPath($path);
-if (!$controller && $path[strlen($path) - 1] !== '/') {
-  list($controller) = $mapper->mapPath($path.'/');
+list($controller) = $application->buildControllerForPath($path);
+if (!$controller && substr($path, -1) !== '/') {
+  list($controller) = $application->buildControllerForPath($path.'/');
 }
 if ($controller) {
-  echo "$controller\n";
+  echo get_class($controller) . "\n";
 }

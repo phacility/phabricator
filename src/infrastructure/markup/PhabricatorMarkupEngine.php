@@ -330,6 +330,11 @@ final class PhabricatorMarkupEngine {
   }
 
 
+  public static function newPonderMarkupEngine(array $options = array()) {
+    return self::newMarkupEngine($options);
+  }
+
+
   /**
    * @task engine
    */
@@ -405,6 +410,8 @@ final class PhabricatorMarkupEngine {
     $rules[] = new PhabricatorRemarkupRuleDiffusion();
     $rules[] = new PhabricatorRemarkupRuleManiphest();
     $rules[] = new PhabricatorRemarkupRulePaste();
+
+    $rules[] = new PonderRuleQuestion();
 
     if ($options['macros']) {
       $rules[] = new PhabricatorRemarkupRuleImageMacro();

@@ -28,12 +28,17 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
 
     $items = array();
 
-    if ($user->isLoggedIn()) {
-      require_celerity_resource('phabricator-glyph-css');
+    if ($controller instanceof PhabricatorLogoutController) {
+      $class = 'main-menu-item-icon-logout-selected';
+    } else {
+      $class = 'main-menu-item-icon-logout';
+    }
 
+    if ($user->isLoggedIn()) {
       $item = new PhabricatorMainMenuIconView();
       $item->setName(pht('Log Out'));
-      $item->addClass('glyph glyph-logout');
+      $item->addClass('main-menu-item-icon '.$class);
+      $item->setWorkflow(true);
       $item->setHref('/logout/');
       $item->setSortOrder(1.0);
       $items[] = $item;

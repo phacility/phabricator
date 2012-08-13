@@ -18,7 +18,7 @@
  */
 JX.behavior('toggle-class', function() {
   JX.Stratcom.listen(
-    'click',
+    ['touchstart', 'mousedown'],
     'jx-toggle-class',
     function(e) {
       e.kill();

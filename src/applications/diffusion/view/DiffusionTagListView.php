@@ -84,9 +84,9 @@ final class DiffusionTagListView extends DiffusionView {
       if ($commit && $commit->getAuthorPHID()) {
         $author = $this->handles[$commit->getAuthorPHID()]->renderLink();
       } else if ($commit && $commit->getCommitData()) {
-        $author = phutil_escape_html($commit->getCommitData()->getAuthorName());
+        $author = self::renderName($commit->getCommitData()->getAuthorName());
       } else {
-        $author = phutil_escape_html($tag->getAuthor());
+        $author = self::renderName($tag->getAuthor());
       }
 
       $description = null;

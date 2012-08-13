@@ -28,8 +28,11 @@ final class PhabricatorFactUpdateIterator extends PhutilBufferedIterator {
   private $position;
   private $ignoreUpdatesDuration = 15;
 
+  private $set;
+
   public function __construct(LiskDAO $object) {
-    $this->object = $object;
+    $this->set = new LiskDAOSet();
+    $this->object = $object->putInSet($this->set);
     $this->position = '0:0';
   }
 
@@ -52,6 +55,8 @@ final class PhabricatorFactUpdateIterator extends PhutilBufferedIterator {
 
   protected function loadPage() {
     list($after_epoch, $after_id) = explode(':', $this->cursor);
+
+    $this->set->clearSet();
 
     // NOTE: We ignore recent updates because once we process an update we'll
     // never process rows behind it again. We need to read only rows which

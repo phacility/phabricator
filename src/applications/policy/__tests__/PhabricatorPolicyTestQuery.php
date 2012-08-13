@@ -23,18 +23,30 @@ final class PhabricatorPolicyTestQuery
   extends PhabricatorPolicyQuery {
 
   private $results;
+  private $offset = 0;
 
   public function setResults(array $results) {
     $this->results = $results;
     return $this;
   }
 
+  protected function willExecute() {
+    $this->offset = 0;
+  }
+
   public function loadPage() {
-    return $this->results;
+    if ($this->getRawResultLimit()) {
+      return array_slice(
+        $this->results,
+        $this->offset,
+        $this->getRawResultLimit());
+    } else {
+      return array_slice($this->results, $this->offset);
+    }
   }
 
   public function nextPage(array $page) {
-    return null;
+    $this->offset += count($page);
   }
 
 }

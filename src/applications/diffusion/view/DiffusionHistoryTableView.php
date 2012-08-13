@@ -108,7 +108,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
       if ($author_phid && isset($handles[$author_phid])) {
         $author = $handles[$author_phid]->renderLink();
       } else {
-        $author = phutil_escape_html($history->getAuthorName());
+        $author = self::renderName($history->getAuthorName());
       }
 
       $different_committer = false;
@@ -121,7 +121,7 @@ final class DiffusionHistoryTableView extends DiffusionView {
         if ($committer_phid && isset($handles[$committer_phid])) {
           $committer = $handles[$committer_phid]->renderLink();
         } else {
-          $committer = phutil_escape_html($committer);
+          $committer = self::renderName($committer);
         }
         $author .= '/'.$committer;
       }

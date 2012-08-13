@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-final class PhabricatorMetaMTAMailingListEditController
-  extends PhabricatorMetaMTAController {
+final class PhabricatorMailingListsEditController
+  extends PhabricatorController {
 
   private $id;
 
@@ -74,7 +74,7 @@ final class PhabricatorMetaMTAMailingListEditController
         try {
           $list->save();
           return id(new AphrontRedirectResponse())
-            ->setURI('/mail/lists/');
+            ->setURI($this->getApplicationURI());
         } catch (AphrontQueryDuplicateKeyException $ex) {
           $e_email = 'Duplicate';
           $errors[] = 'Another mailing list already uses that address.';
@@ -92,9 +92,9 @@ final class PhabricatorMetaMTAMailingListEditController
     $form = new AphrontFormView();
     $form->setUser($request->getUser());
     if ($list->getID()) {
-      $form->setAction('/mail/lists/edit/'.$list->getID().'/');
+      $form->setAction($this->getApplicationURI('/edit/'.$list->getID().'/'));
     } else {
-      $form->setAction('/mail/lists/edit/');
+      $form->setAction($this->getApplicationURI('/edit/'));
     }
 
     $form
@@ -121,16 +121,12 @@ final class PhabricatorMetaMTAMailingListEditController
           ->setValue($list->getURI()))
       ->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel('ID')
-          ->setValue(nonempty($list->getID(), '-')))
-      ->appendChild(
-        id(new AphrontFormStaticControl())
           ->setLabel('PHID')
           ->setValue(nonempty($list->getPHID(), '-')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Save')
-          ->addCancelButton('/mail/lists/'));
+          ->addCancelButton($this->getApplicationURI()));
 
     $panel = new AphrontPanelView();
     if ($list->getID()) {
@@ -142,8 +138,11 @@ final class PhabricatorMetaMTAMailingListEditController
     $panel->appendChild($form);
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
 
-    return $this->buildStandardPageResponse(
-      array($error_view, $panel),
+    return $this->buildApplicationPage(
+      array(
+        $error_view,
+        $panel,
+      ),
       array(
         'title' => 'Edit Mailing List',
       ));

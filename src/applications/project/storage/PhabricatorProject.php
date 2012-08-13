@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-final class PhabricatorProject extends PhabricatorProjectDAO {
+final class PhabricatorProject extends PhabricatorProjectDAO
+  implements PhabricatorPolicyInterface {
 
   protected $name;
   protected $phid;
@@ -25,8 +26,68 @@ final class PhabricatorProject extends PhabricatorProjectDAO {
   protected $subprojectPHIDs = array();
   protected $phrictionSlug;
 
+  protected $viewPolicy;
+  protected $editPolicy;
+  protected $joinPolicy;
+
   private $subprojectsNeedUpdate;
   private $memberPHIDs;
+  private $sparseMembers = array();
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+      PhabricatorPolicyCapability::CAN_JOIN,
+    );
+  }
+
+  public function getPolicy($capability) {
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return $this->getViewPolicy();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return $this->getEditPolicy();
+      case PhabricatorPolicyCapability::CAN_JOIN:
+        return $this->getJoinPolicy();
+    }
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        if ($this->isUserMember($viewer->getPHID())) {
+          // Project members can always view a project.
+          return true;
+        }
+        break;
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        break;
+      case PhabricatorPolicyCapability::CAN_JOIN:
+        $can_edit = PhabricatorPolicyCapability::CAN_EDIT;
+        if (PhabricatorPolicyFilter::hasCapability($viewer, $this, $can_edit)) {
+          // Project editors can always join a project.
+          return true;
+        }
+        break;
+    }
+
+    return false;
+  }
+
+  public function isUserMember($user_phid) {
+    if (!isset($this->sparseMembers[$user_phid])) {
+      throw new Exception(
+        "Call setIsUserMember() before isUserMember()!");
+    }
+    return $this->sparseMembers[$user_phid];
+  }
+
+  public function setIsUserMember($user_phid, $is_member) {
+    $this->sparseMembers[$user_phid] = $is_member;
+    return $this;
+  }
 
   public function getConfiguration() {
     return array(

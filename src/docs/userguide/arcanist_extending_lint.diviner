@@ -3,6 +3,14 @@
 
 Explains how to customize existing linters.
 
+This is a configuration guide that helps you set up advanced features. If you're
+just getting started, you don't need to look at this yet. Instead, start with
+the @{article:Arcanist User Guide}.
+
+This guide explains how to refine lint behavior. To configure lint in the first
+place, see @{article:Arcanist User Guide: Configuring a New Project} and
+@{article:Arcanist User Guide: Lint}.
+
 = Overview =
 
 Arcanist ships with a number of linters which you may want to reuse in whole

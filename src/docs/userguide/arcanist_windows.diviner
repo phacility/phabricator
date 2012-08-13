@@ -77,3 +77,8 @@ And this for GitPad (you may need to adjust the path):
   name=GitPad
   $ arc set-config editor "\"C:\Users\yourusername\AppData\Roaming\GitPad\GitPad.exe\""
 
+= Next Steps =
+
+Continue by:
+
+  - returning to @{article:Arcanist User Guide}.

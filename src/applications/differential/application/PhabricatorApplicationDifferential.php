@@ -66,6 +66,10 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
     );
   }
 
+  public function getCoreApplicationOrder() {
+    return 0.100;
+  }
+
   public function loadStatus(PhabricatorUser $user) {
     $revisions = id(new DifferentialRevisionQuery())
       ->withResponsibleUsers(array($user->getPHID()))

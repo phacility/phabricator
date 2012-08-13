@@ -305,24 +305,28 @@ final class PhabricatorAuditCommentEditor {
   public static function loadAuditPHIDsForUser(PhabricatorUser $user) {
     $phids = array();
 
+    // TODO: This method doesn't really use the right viewer, but in practice we
+    // never issue this query of this type on behalf of another user and are
+    // unlikely to do so in the future. This entire method should be refactored
+    // into a Query class, however, and then we should use a proper viewer.
+
     // The user can audit on their own behalf.
     $phids[$user->getPHID()] = true;
 
-    // The user can audit on behalf of all packages they own.
-    $owned_packages = PhabricatorOwnersOwner::loadAffiliatedPackages(
-      $user->getPHID());
-
-    if ($owned_packages) {
-      $packages = id(new PhabricatorOwnersPackage())->loadAllWhere(
-        'id IN (%Ld)',
-        mpull($owned_packages, 'getPackageID'));
-      foreach (mpull($packages, 'getPHID') as $phid) {
-        $phids[$phid] = true;
-      }
+    $owned_packages = id(new PhabricatorOwnersPackageQuery())
+      ->setViewer($user)
+      ->withOwnerPHIDs(array($user->getPHID()))
+      ->execute();
+    foreach ($owned_packages as $package) {
+      $phids[$package->getPHID()] = true;
     }
 
     // The user can audit on behalf of all projects they are a member of.
     $query = new PhabricatorProjectQuery();
+
+    // TODO: As above.
+    $query->setViewer($user);
+
     $query->withMemberPHIDs(array($user->getPHID()));
     $projects = $query->execute();
     foreach ($projects as $project) {

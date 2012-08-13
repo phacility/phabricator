@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-final class PhabricatorMetaMTAMailingListsController
-  extends PhabricatorMetaMTAController {
+final class PhabricatorMailingListsListController
+  extends PhabricatorController {
 
   public function processRequest() {
     $request = $this->getRequest();
@@ -25,7 +25,7 @@ final class PhabricatorMetaMTAMailingListsController
     $offset = $request->getInt('offset', 0);
 
     $pager = new AphrontPagerView();
-    $pager->setPageSize(1000);
+    $pager->setPageSize(250);
     $pager->setOffset($offset);
     $pager->setURI($request->getRequestURI(), 'offset');
 
@@ -45,14 +45,13 @@ final class PhabricatorMetaMTAMailingListsController
     $rows = array();
     foreach ($lists as $list) {
       $rows[] = array(
-        phutil_escape_html($list->getPHID()),
-        phutil_escape_html($list->getEmail()),
         phutil_escape_html($list->getName()),
+        phutil_escape_html($list->getEmail()),
         phutil_render_tag(
           'a',
           array(
             'class' => 'button grey small',
-            'href'  => '/mail/lists/edit/'.$list->getID().'/',
+            'href'  => $this->getApplicationURI('/edit/'.$list->getID().'/'),
           ),
           'Edit'),
       );
@@ -61,14 +60,12 @@ final class PhabricatorMetaMTAMailingListsController
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'PHID',
-        'Email',
         'Name',
+        'Email',
         '',
       ));
     $table->setColumnClasses(
       array(
-        null,
         null,
         'wide',
         'action',
@@ -77,10 +74,10 @@ final class PhabricatorMetaMTAMailingListsController
     $panel = new AphrontPanelView();
     $panel->appendChild($table);
     $panel->setHeader('Mailing Lists');
-    $panel->setCreateButton('Add New List', '/mail/lists/edit/');
+    $panel->setCreateButton('Add New List', $this->getApplicationURI('/edit/'));
     $panel->appendChild($pager);
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $panel,
       array(
         'title' => 'Mailing Lists',

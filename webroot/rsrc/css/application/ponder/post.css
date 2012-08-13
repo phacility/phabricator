@@ -1,0 +1,34 @@
+/**
+ * @provides ponder-post-css
+ */
+
+.ponder-post-list {
+  max-width: 1162px;
+}
+
+.ponder-add-answer-panel {
+  max-width: 1162px;
+}
+
+.ponder-post-list .anchor-target {
+  background-color: #ffffdd;
+  border-color: #ffff00;
+}
+
+.ponder-post-core .phabricator-remarkup .remarkup-code-block {
+   width: 88ex;
+   width: 81ch;
+}
+
+.phabricator-transaction-view .ponder-question {
+  border-color: #777;
+}
+
+.phabricator-transaction-detail .ponder-question {
+  border-color: #777;
+}
+
+
+.phabricator-transaction-view .ponder-answer {
+/*  border-color: #203791; */
+}

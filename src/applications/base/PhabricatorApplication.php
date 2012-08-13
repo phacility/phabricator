@@ -62,6 +62,14 @@ abstract class PhabricatorApplication {
     return true;
   }
 
+  public function getCoreApplicationOrder() {
+    return null;
+  }
+
+  public function getTitleGlyph() {
+    return null;
+  }
+
 
 /* -(  URI Routing  )-------------------------------------------------------- */
 

@@ -3,6 +3,10 @@
 
 Explains how to build new classes to control how Arcanist behaves.
 
+This is a configuration guide that helps you set up advanced features. If you're
+just getting started, you don't need to look at this yet. Instead, start with
+the @{article:Arcanist User Guide}.
+
 = Overview =
 
 Arcanist has some basic configuration options available in the `.arcconfig`

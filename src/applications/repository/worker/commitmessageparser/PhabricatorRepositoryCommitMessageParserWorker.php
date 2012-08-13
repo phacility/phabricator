@@ -106,7 +106,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
           DifferentialRevision::TABLE_COMMIT,
           $revision->getID(),
           $commit->getPHID());
-        $commit_is_new = $conn_w->getAffectedRows();
 
         $committer_phid = $data->getCommitDetail('committerPHID');
         if ($committer_phid) {
@@ -142,8 +141,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
           $revision->getAuthorPHID());
 
         $status_closed = ArcanistDifferentialRevisionStatus::CLOSED;
-        $should_close = $commit_is_new &&
-                        ($revision->getStatus() != $status_closed) &&
+        $should_close = ($revision->getStatus() != $status_closed) &&
                         $repository->shouldAutocloseCommit($commit, $data);
 
         if ($should_close) {

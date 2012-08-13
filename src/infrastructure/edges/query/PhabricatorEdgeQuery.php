@@ -38,6 +38,7 @@
 final class PhabricatorEdgeQuery extends PhabricatorQuery {
 
   private $sourcePHIDs;
+  private $destPHIDs;
   private $edgeTypes;
   private $resultSet;
 
@@ -58,6 +59,19 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
    */
   public function withSourcePHIDs(array $source_phids) {
     $this->sourcePHIDs = $source_phids;
+    return $this;
+  }
+
+
+  /**
+   * Find edges terminating at one or more destination PHIDs.
+   *
+   * @param list List of destination PHIDs.
+   * @return this
+   *
+   */
+  public function withDestinationPHIDs(array $dest_phids) {
+    $this->destPHIDs = $dest_phids;
     return $this;
   }
 
@@ -108,6 +122,31 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
       ->withEdgeTypes(array($edge_type))
       ->execute();
     return array_keys($edges[$src_phid][$edge_type]);
+  }
+
+  /**
+   * Convenience method for loading a single edge's metadata for
+   * a given source, destination, and edge type. Returns null
+   * if the edge does not exist or does not have metadata. Builds
+   * and immediately executes a full query.
+   *
+   * @param phid  Source PHID.
+   * @param const Edge type.
+   * @param phid  Destination PHID.
+   * @return wild Edge annotation (or null).
+   */
+  public static function loadSingleEdgeData($src_phid, $edge_type, $dest_phid) {
+    $edges = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs(array($src_phid))
+      ->withEdgeTypes(array($edge_type))
+      ->withDestinationPHIDs(array($dest_phid))
+      ->needEdgeData(true)
+      ->execute();
+
+    if (isset($edges[$src_phid][$edge_type][$dest_phid]['data'])) {
+      return $edges[$src_phid][$edge_type][$dest_phid]['data'];
+    }
+    return null;
   }
 
 
@@ -260,6 +299,14 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
         $conn_r,
         'edge.type IN (%Ls)',
         $this->edgeTypes);
+    }
+
+    if ($this->destPHIDs) {
+      // potentially complain if $this->edgeType was not set
+      $where[] = qsprintf(
+        $conn_r,
+        'edge.dst IN (%Ls)',
+        $this->destPHIDs);
     }
 
     return $this->formatWhereClause($where);

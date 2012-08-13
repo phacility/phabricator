@@ -103,6 +103,74 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
 
 
   /**
+   * Test offset-based filtering.
+   */
+  public function testOffsets() {
+    $results = array(
+      $this->buildObject(PhabricatorPolicies::POLICY_NOONE),
+      $this->buildObject(PhabricatorPolicies::POLICY_NOONE),
+      $this->buildObject(PhabricatorPolicies::POLICY_NOONE),
+      $this->buildObject(PhabricatorPolicies::POLICY_USER),
+      $this->buildObject(PhabricatorPolicies::POLICY_USER),
+      $this->buildObject(PhabricatorPolicies::POLICY_USER),
+    );
+
+    $query = new PhabricatorPolicyTestQuery();
+    $query->setResults($results);
+    $query->setViewer($this->buildUser('user'));
+
+    $this->assertEqual(
+      3,
+      count($query->setLimit(3)->setOffset(0)->execute()),
+      'Invisible objects are ignored.');
+
+    $this->assertEqual(
+      0,
+      count($query->setLimit(3)->setOffset(3)->execute()),
+      'Offset pages through visible objects only.');
+
+    $this->assertEqual(
+      2,
+      count($query->setLimit(3)->setOffset(1)->execute()),
+      'Offsets work correctly.');
+
+    $this->assertEqual(
+      2,
+      count($query->setLimit(0)->setOffset(1)->execute()),
+      'Offset with no limit works.');
+  }
+
+
+  /**
+   * Test limits.
+   */
+  public function testLimits() {
+    $results = array(
+      $this->buildObject(PhabricatorPolicies::POLICY_USER),
+      $this->buildObject(PhabricatorPolicies::POLICY_USER),
+      $this->buildObject(PhabricatorPolicies::POLICY_USER),
+      $this->buildObject(PhabricatorPolicies::POLICY_USER),
+      $this->buildObject(PhabricatorPolicies::POLICY_USER),
+      $this->buildObject(PhabricatorPolicies::POLICY_USER),
+    );
+
+    $query = new PhabricatorPolicyTestQuery();
+    $query->setResults($results);
+    $query->setViewer($this->buildUser('user'));
+
+    $this->assertEqual(
+      3,
+      count($query->setLimit(3)->setOffset(0)->execute()),
+      'Limits work.');
+
+    $this->assertEqual(
+      2,
+      count($query->setLimit(3)->setOffset(4)->execute()),
+      'Limit + offset work.');
+  }
+
+
+  /**
    * Test an object for visibility across multiple user specifications.
    */
   private function expectVisibility(

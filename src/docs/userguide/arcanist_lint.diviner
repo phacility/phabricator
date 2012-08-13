@@ -3,6 +3,14 @@
 
 Guide to lint, linters, and linter configuration.
 
+This is a configuration guide that helps you set up advanced features. If you're
+just getting started, you don't need to look at this yet. Instead, start with
+the @{article:Arcanist User Guide}.
+
+This guide explains how lint works when configured in an `arc` project. If
+you haven't set up a project yet, do that first. For instructions, see
+@{article:Arcanist User Guide: Configuring a New Project}.
+
 = Overview =
 
 "Lint" refers to a general class of programming tools which analyze source code
@@ -59,7 +67,7 @@ Additionally, Arcanist ships with some general purpose linters:
     mistakes.
   - @{class@arcanist:ArcanistFilenameLinter}, which can enforce generally
     sensible rules about not giving files nonsense names.
-  - @{class@arcanist:ArcanistLicenseLinter.php}, which can make sure license
+  - @{class@arcanist:ArcanistLicenseLinter}, which can make sure license
     headers are applied to all source files.
   - @{class@arcanist:ArcanistNoLintLinter}, which can disable lint for files
     marked unlintable.

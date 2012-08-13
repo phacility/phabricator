@@ -50,11 +50,21 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
 
     $items = array();
 
+    if (($controller instanceof PhabricatorPeopleProfileController) &&
+        ($controller->getProfileUser()) &&
+        ($controller->getProfileUser()->getPHID() == $user->getPHID())) {
+      $class = 'main-menu-item-icon-profile-selected';
+    } else {
+      $class = 'main-menu-item-icon-profile-not-selected';
+    }
+
     if ($user->isLoggedIn()) {
-      require_celerity_resource('phabricator-glyph-css');
+      $image = $user->loadProfileImageURI();
+
       $item = new PhabricatorMainMenuIconView();
       $item->setName($user->getUsername());
-      $item->addClass('glyph glyph-profile');
+      $item->addClass('main-menu-item-icon-profile '.$class);
+      $item->addStyle('background-image: url('.$image.')');
       $item->setHref('/p/'.$user->getUsername().'/');
       $item->setSortOrder(0.0);
       $items[] = $item;
