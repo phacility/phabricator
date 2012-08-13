@@ -30,6 +30,10 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
     return celerity_get_resource_uri('/rsrc/image/app/app_diffusion.png');
   }
 
+  public function getHelpURI() {
+    return PhabricatorEnv::getDoclink('article/Diffusion_User_Guide.html');
+  }
+
   public function getRoutes() {
     return array(
       '/r(?P<callsign>[A-Z]+)(?P<commit>[a-z0-9]+)'

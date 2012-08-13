@@ -30,14 +30,6 @@ abstract class PhrictionController extends PhabricatorController {
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x9A\xA1");
 
-    $tabs = array(
-      'help' => array(
-        'name' => 'Help',
-        'href' =>
-          PhabricatorEnv::getDoclink('article/Phriction_User_Guide.html'),
-      ),
-    );
-    $page->setTabs($tabs, idx($data, 'tab'));
     $page->appendChild($view);
     $page->setSearchDefaultScope(PhabricatorSearchScope::SCOPE_WIKI);
 

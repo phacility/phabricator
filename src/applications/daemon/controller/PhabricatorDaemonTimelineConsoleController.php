@@ -65,7 +65,6 @@ final class PhabricatorDaemonTimelineConsoleController
       $nav,
       array(
         'title' => 'Timeline',
-        'tab'   => 'timeline',
       ));
   }
 

@@ -29,15 +29,6 @@ abstract class DrydockController extends PhabricatorController {
 
     $page->appendChild($view);
 
-    $help_uri = PhabricatorEnv::getDoclink('article/Drydock_User_Guide.html');
-    $page->setTabs(
-      array(
-        'help' => array(
-          'name' => 'Help',
-          'href'  => $help_uri,
-        ),
-      ), null);
-
     $response = new AphrontWebpageResponse();
     return $response->setContent($page->render());
   }

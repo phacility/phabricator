@@ -177,7 +177,6 @@ final class PhabricatorFileListController extends PhabricatorFileController {
       $side_nav,
       array(
         'title' => 'Files',
-        'tab'   => 'files',
       ));
   }
 

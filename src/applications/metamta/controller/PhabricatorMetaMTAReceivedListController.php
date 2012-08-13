@@ -91,7 +91,6 @@ final class PhabricatorMetaMTAReceivedListController
       $nav,
       array(
         'title' => 'Received Mail',
-        'tab'   => 'received',
       ));
   }
 }

@@ -158,7 +158,6 @@ final class PhabricatorFileMacroListController
       $side_nav,
       array(
         'title' => 'Image Macros',
-        'tab'   => 'macros',
       ));
   }
 }

@@ -26,16 +26,6 @@ abstract class HeraldController extends PhabricatorController {
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x98\xBF");
 
-    $doclink = PhabricatorEnv::getDoclink('article/Herald_User_Guide.html');
-
-    $tabs = array(
-      'help' => array(
-        'href' => $doclink,
-        'name' => 'Help',
-      ),
-    );
-    $page->setTabs($tabs, null);
-
     $page->appendChild($view);
     $page->setIsAdminInterface(idx($data, 'admin'));
 

@@ -122,7 +122,6 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ),
       array(
         'title' => 'Paste: '.nonempty($paste->getTitle(), 'P'.$paste->getID()),
-        'tab' => 'view',
       ));
   }
 

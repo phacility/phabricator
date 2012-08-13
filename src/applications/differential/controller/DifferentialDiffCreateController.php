@@ -84,7 +84,6 @@ final class DifferentialDiffCreateController extends DifferentialController {
       $panel,
       array(
         'title' => 'Create Diff',
-        'tab' => 'create',
       ));
   }
 

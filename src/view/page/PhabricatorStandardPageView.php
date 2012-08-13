@@ -20,8 +20,6 @@ final class PhabricatorStandardPageView extends AphrontPageView {
 
   private $baseURI;
   private $applicationName;
-  private $tabs = array();
-  private $selectedTab;
   private $glyph;
   private $bodyContent;
   private $menuContent;
@@ -45,18 +43,6 @@ final class PhabricatorStandardPageView extends AphrontPageView {
 
   public function setIsAdminInterface($is_admin_interface) {
     $this->isAdminInterface = $is_admin_interface;
-    return $this;
-  }
-
-  public function setIsLoggedOut($is_logged_out) {
-    if ($is_logged_out) {
-      $this->tabs = array_merge($this->tabs, array(
-        'login' => array(
-          'name' => 'Login',
-          'href' => '/login/'
-        )
-      ));
-    }
     return $this;
   }
 
@@ -99,12 +85,6 @@ final class PhabricatorStandardPageView extends AphrontPageView {
 
   public function getBaseURI() {
     return $this->baseURI;
-  }
-
-  public function setTabs(array $tabs, $selected_tab) {
-    $this->tabs = $tabs;
-    $this->selectedTab = $selected_tab;
-    return $this;
   }
 
   public function setShowChrome($show_chrome) {
@@ -268,26 +248,6 @@ final class PhabricatorStandardPageView extends AphrontPageView {
 
   protected function getBody() {
     $console = $this->getConsole();
-
-    $tabs = array();
-    foreach ($this->tabs as $name => $tab) {
-      $tab_markup = phutil_render_tag(
-        'a',
-        array(
-          'href'  => idx($tab, 'href'),
-        ),
-        phutil_escape_html(idx($tab, 'name')));
-      $tab_markup = phutil_render_tag(
-        'td',
-        array(
-          'class' => ($name == $this->selectedTab)
-            ? 'phabricator-selected-tab'
-            : null,
-        ),
-        $tab_markup);
-      $tabs[] = $tab_markup;
-    }
-    $tabs = implode('', $tabs);
 
     $login_stuff = null;
     $request = $this->getRequest();

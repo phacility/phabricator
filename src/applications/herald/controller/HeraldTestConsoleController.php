@@ -144,7 +144,6 @@ final class HeraldTestConsoleController extends HeraldController {
       $nav,
       array(
         'title' => 'Test Console',
-        'tab' => 'test',
       ));
   }
 
