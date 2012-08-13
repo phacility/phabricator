@@ -217,7 +217,7 @@ final class DifferentialChangeset extends DifferentialDAO {
 
   public function makeContextDiff($inline, $add_context) {
     $context = array();
-    $debug = False;
+    $debug = false;
     if ($debug) {
       $context[] = 'Inline: '.$inline->getIsNewFile().' '.
         $inline->getLineNumber().' '.$inline->getLineLength();
@@ -254,31 +254,33 @@ final class DifferentialChangeset extends DifferentialDAO {
         $hunk_offset = array( "-" => NULL, "+" => NULL );
         $hunk_last = array( "-" => NULL, "+" => NULL );
         foreach (explode("\n", $hunk->getChanges()) as $line) {
-          $inCommon = strncmp($line, " ", 1) === 0;
-          $inOld = strncmp($line, "-", 1) === 0 || $inCommon;
-          $inNew = strncmp($line, "+", 1) === 0 || $inCommon;
-          $inSelected = strncmp($line, $prefix, 1) === 0;
-          $skip = !$inSelected && !$inCommon;
+          $in_common = strncmp($line, " ", 1) === 0;
+          $in_old = strncmp($line, "-", 1) === 0 || $in_common;
+          $in_new = strncmp($line, "+", 1) === 0 || $in_common;
+          $in_selected = strncmp($line, $prefix, 1) === 0;
+          $skip = !$in_selected && !$in_common;
           if ($hunk_pos[$prefix] <= $end) {
             if ($start <= $hunk_pos[$prefix]) {
               if (!$skip || ($hunk_pos[$prefix] != $start &&
                              $hunk_pos[$prefix] != $end)) {
-                if ($inOld) {
-                  if ($hunk_offset["-"] === NULL)
+                if ($in_old) {
+                  if ($hunk_offset["-"] === NULL) {
                     $hunk_offset["-"] = $hunk_pos["-"];
+                  }
                   $hunk_last["-"] = $hunk_pos["-"];
                 }
-                if ($inNew) {
-                  if ($hunk_offset["+"] === NULL)
+                if ($in_new) {
+                  if ($hunk_offset["+"] === NULL) {
                     $hunk_offset["+"] = $hunk_pos["+"];
+                  }
                   $hunk_last["+"] = $hunk_pos["+"];
                 }
 
                 $hunk_content[] = $line;
               }
             }
-            if ($inOld) ++$hunk_pos["-"];
-            if ($inNew) ++$hunk_pos["+"];
+            if ($in_old) { ++$hunk_pos["-"]; }
+            if ($in_new) { ++$hunk_pos["+"]; }
           }
         }
         if ($hunk_offset["-"] !== NULL || $hunk_offset["+"] !== NULL) {
