@@ -49,16 +49,20 @@ final class PhabricatorPeopleEditController
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($base_uri));
+    $nav->addLabel('User Information');
     $nav->addFilter('basic', 'Basic Information');
     $nav->addFilter('role',  'Edit Roles');
     $nav->addFilter('cert',  'Conduit Certificate');
+    $nav->addFilter('profile', 'View Profile', '/p/'.$user->getUsername().'/');
     $nav->addSpacer();
+    $nav->addLabel('Special');
     $nav->addFilter('rename', 'Change Username');
     $nav->addFilter('delete', 'Delete User');
 
     if (!$user->getID()) {
       $this->view = 'basic';
     }
+
     $view = $nav->selectFilter($this->view, 'basic');
 
     $content = array();
@@ -99,11 +103,14 @@ final class PhabricatorPeopleEditController
 
     if ($user->getID()) {
       $nav->appendChild($content);
-      $content = $nav;
+    } else {
+      $nav = $this->buildSideNavView();
+      $nav->selectFilter('edit');
+      $nav->appendChild($content);
     }
 
-    return $this->buildStandardPageResponse(
-      $content,
+    return $this->buildApplicationPage(
+      $nav,
       array(
         'title' => 'Edit User',
       ));

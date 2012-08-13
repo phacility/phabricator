@@ -232,14 +232,19 @@ final class PhabricatorPeopleLogsController
     $filter = new AphrontListFilterView();
     $filter->appendChild($form);
 
-    return $this->buildStandardPageResponse(
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter('logs');
+    $nav->appendChild(
       array(
         $filter,
         $panel,
-      ),
+      ));
+
+
+    return $this->buildApplicationPage(
+      $nav,
       array(
         'title' => 'Activity Logs',
-        'tab'   => 'logs',
       ));
   }
 }

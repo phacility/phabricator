@@ -305,9 +305,6 @@ class AphrontDefaultApplicationConfiguration
           'testpaymentform/' => 'PhortuneStripeTestPaymentFormController',
         ),
       ),
-
-      '/emailverify/(?P<code>[^/]+)/' =>
-        'PhabricatorEmailVerificationController',
     );
   }
 

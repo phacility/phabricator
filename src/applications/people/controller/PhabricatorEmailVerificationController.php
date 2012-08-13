@@ -87,7 +87,7 @@ final class PhabricatorEmailVerificationController
           $settings_link);
     }
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $content,
       array(
         'title' => 'Verify Email',

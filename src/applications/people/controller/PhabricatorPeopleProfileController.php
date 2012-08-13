@@ -158,7 +158,7 @@ final class PhabricatorPeopleProfileController
         '/people/edit/'.$user->getID().'/');
     }
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $header,
       array(
         'title' => $user->getUsername(),
