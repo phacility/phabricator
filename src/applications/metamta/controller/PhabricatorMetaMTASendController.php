@@ -92,6 +92,17 @@ final class PhabricatorMetaMTASendController
 
     $panel_id = celerity_generate_unique_node_id();
 
+    $phdlink_href = PhabricatorEnv::getDoclink(
+      'article/Managing_Daemons_with_phd.html');
+
+    $phdlink = phutil_render_tag(
+      'a',
+      array(
+        'href' => $phdlink_href,
+        'target' => '_blank',
+      ),
+      '"phd start"');
+
     $form = new AphrontFormView();
     $form->setUser($request->getUser());
     $form
@@ -149,7 +160,10 @@ final class PhabricatorMetaMTASendController
           ->addCheckbox(
             'immediately',
             '1',
-            'Send immediately, not via MetaMTA background script.'))
+            'Send immediately. (Do not enqueue for daemons.)',
+            PhabricatorEnv::getEnvConfig('metamta.send-immediately'))
+          ->setCaption('Daemons can be started with '.$phdlink.'.')
+          )
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Send Mail'));
