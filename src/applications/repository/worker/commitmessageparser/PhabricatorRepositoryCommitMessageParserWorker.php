@@ -217,6 +217,8 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
     // TODO: Attach binary files.
 
+    $revision->setLineCount($diff->getLineCount());
+
     return $diff->save();
   }
 
