@@ -16,35 +16,31 @@
  * limitations under the License.
  */
 
-final class PhabricatorApplicationApplications extends PhabricatorApplication {
+final class PhabricatorApplicationMailingLists extends PhabricatorApplication {
+
+  public function getName() {
+    return 'Mailing Lists';
+  }
 
   public function getBaseURI() {
-    return '/applications/';
+    return '/mailinglists/';
   }
 
   public function getShortDescription() {
-    return 'Manage Applications';
-  }
-
-  public function getIconURI() {
-    return celerity_get_resource_uri('/rsrc/image/app/app_applications.png');
+    return 'Manage External Lists';
   }
 
   public function getRoutes() {
     return array(
-      '/applications/' => array(
-        '' => 'PhabricatorApplicationsListController'
+      '/mailinglists/' => array(
+        '' => 'PhabricatorMailingListsListController',
+        'edit/(?:(?P<id>\d+)/)?' => 'PhabricatorMailingListsEditController',
       ),
     );
   }
 
   public function getTitleGlyph() {
-    return "\xE0\xBC\x84";
-  }
-
-  public function shouldAppearInLaunchView() {
-    return false;
+    return '@';
   }
 
 }
-

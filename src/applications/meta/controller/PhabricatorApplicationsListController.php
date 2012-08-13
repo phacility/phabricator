@@ -17,7 +17,7 @@
  */
 
 final class PhabricatorApplicationsListController
-  extends PhabricatorApplicationsController {
+  extends PhabricatorController {
 
   public function processRequest() {
     $request = $this->getRequest();
@@ -52,7 +52,7 @@ final class PhabricatorApplicationsListController
       ),
       id(new AphrontNullView())->appendChild($views)->render());
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $view,
       array(
         'title' => 'Applications',

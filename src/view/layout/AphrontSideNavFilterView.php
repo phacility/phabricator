@@ -137,11 +137,13 @@ final class AphrontSideNavFilterView extends AphrontView {
   }
 
   public function render() {
-    if (!$this->baseURI) {
-      throw new Exception("Call setBaseURI() before render()!");
-    }
-    if ($this->selectedFilter === false) {
-      throw new Exception("Call selectFilter() before render()!");
+    if ($this->items) {
+      if (!$this->baseURI) {
+        throw new Exception("Call setBaseURI() before render()!");
+      }
+      if ($this->selectedFilter === false) {
+        throw new Exception("Call selectFilter() before render()!");
+      }
     }
 
     $view = new AphrontSideNavView();

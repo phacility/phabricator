@@ -85,9 +85,6 @@ class AphrontDefaultApplicationConfiguration
         '' => 'PhabricatorMetaMTAListController',
         'send/' => 'PhabricatorMetaMTASendController',
         'view/(?P<id>\d+)/' => 'PhabricatorMetaMTAViewController',
-        'lists/' => 'PhabricatorMetaMTAMailingListsController',
-        'lists/edit/(?:(?P<id>\d+)/)?'
-          => 'PhabricatorMetaMTAMailingListEditController',
         'receive/' => 'PhabricatorMetaMTAReceiveController',
         'received/' => 'PhabricatorMetaMTAReceivedListController',
         'sendgrid/' => 'PhabricatorMetaMTASendGridReceiveController',

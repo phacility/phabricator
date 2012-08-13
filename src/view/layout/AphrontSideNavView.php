@@ -73,6 +73,8 @@ final class AphrontSideNavView extends AphrontView {
       $content_id = celerity_generate_unique_node_id();
       $collapse_id = null;
       $expand_id = null;
+      $local_id = null;
+      $local_menu = null;
       $main_id = celerity_generate_unique_node_id();
 
       $apps = $this->renderApplications();
@@ -227,7 +229,7 @@ final class AphrontSideNavView extends AphrontView {
     $core = mpull($core, null, 'getPHID');
 
     if ($current && empty($core[$current->getPHID()])) {
-      array_unshift($core, $this->current);
+      array_unshift($core, $current);
     }
 
     $apps = array();

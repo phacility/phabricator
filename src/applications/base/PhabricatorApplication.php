@@ -66,6 +66,10 @@ abstract class PhabricatorApplication {
     return null;
   }
 
+  public function getTitleGlyph() {
+    return null;
+  }
+
 
 /* -(  URI Routing  )-------------------------------------------------------- */
 
