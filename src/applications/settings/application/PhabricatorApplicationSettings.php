@@ -33,8 +33,8 @@ final class PhabricatorApplicationSettings extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/settings/' => array(
-        '(?:page/(?P<page>[^/]+)/)?' => 'PhabricatorUserSettingsController',
-        'adjust/' => 'PhabricatorPeopleAdjustSettingController',
+        '(?:page/(?P<page>[^/]+)/)?' => 'PhabricatorSettingsMainController',
+        'adjust/' => 'PhabricatorSettingsAdjustController',
       ),
     );
   }

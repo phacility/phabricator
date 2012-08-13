@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-final class PhabricatorPeopleAdjustSettingController
-  extends PhabricatorPeopleController {
+final class PhabricatorSettingsAdjustController
+  extends PhabricatorController {
 
   public function processRequest() {
     $request = $this->getRequest();
