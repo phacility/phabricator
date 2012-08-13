@@ -19,128 +19,87 @@
 final class PhabricatorSettingsMainController
   extends PhabricatorController {
 
-  private $page;
-  private $pages;
+  private $key;
 
   public function willProcessRequest(array $data) {
-    $this->page = idx($data, 'page');
+    $this->key = idx($data, 'key');
   }
 
   public function processRequest() {
-
     $request = $this->getRequest();
 
-    $oauth_providers = PhabricatorOAuthProvider::getAllProviders();
-    $sidenav = $this->renderSideNav($oauth_providers);
-    $this->page = $sidenav->selectFilter($this->page, 'account');
+    $panels = $this->buildPanels();
+    $nav = $this->renderSideNav($panels);
 
-    switch ($this->page) {
-      case 'account':
-        $delegate = new PhabricatorUserAccountSettingsPanelController($request);
-        break;
-      case 'profile':
-        $delegate = new PhabricatorUserProfileSettingsPanelController($request);
-        break;
-      case 'email':
-        $delegate = new PhabricatorUserEmailSettingsPanelController($request);
-        break;
-      case 'emailpref':
-        $delegate = new PhabricatorUserEmailPreferenceSettingsPanelController(
-          $request);
-        break;
-      case 'password':
-        $delegate = new PhabricatorUserPasswordSettingsPanelController(
-          $request);
-        break;
-      case 'conduit':
-        $delegate = new PhabricatorUserConduitSettingsPanelController($request);
-        break;
-      case 'sshkeys':
-        $delegate = new PhabricatorUserSSHKeysSettingsPanelController($request);
-        break;
-      case 'preferences':
-        $delegate = new PhabricatorUserPreferenceSettingsPanelController(
-          $request);
-        break;
-      case 'search':
-        $delegate = new PhabricatorUserSearchSettingsPanelController($request);
-        break;
-      case 'ldap':
-        $delegate = new PhabricatorUserLDAPSettingsPanelController($request);
-        break;
-      default:
-        $delegate = new PhabricatorUserOAuthSettingsPanelController($request);
-        $delegate->setOAuthProvider($oauth_providers[$this->page]);
-        break;
-    }
+    $key = $nav->selectFilter($this->key, head($panels)->getPanelKey());
 
-    $response = $this->delegateToController($delegate);
 
-    if ($response instanceof AphrontView) {
-      $sidenav->appendChild($response);
-      return $this->buildStandardPageResponse(
-        $sidenav,
-        array(
-          'title' => 'Account Settings',
-        ));
-    } else {
+    $panel = $panels[$key];
+
+    $response = $panel->processRequest($request);
+    if ($response instanceof AphrontResponse) {
       return $response;
     }
+
+    $nav->appendChild($response);
+    return $this->buildApplicationPage(
+      $nav,
+      array(
+        'title' => $panel->getPanelName(),
+      ));
   }
 
-  private function renderSideNav($oauth_providers) {
-    $sidenav = new AphrontSideNavFilterView();
-    $sidenav
-      ->setBaseURI(new PhutilURI('/settings/page/'))
-      ->addLabel('Account Information')
-      ->addFilter('account', 'Account')
-      ->addFilter('profile', 'Profile')
-      ->addSpacer()
-      ->addLabel('Email')
-      ->addFilter('email', 'Email Addresses')
-      ->addFilter('emailpref', 'Email Preferences')
-      ->addSpacer()
-      ->addLabel('Authentication');
+  private function buildPanels() {
+    $panel_specs = id(new PhutilSymbolLoader())
+      ->setAncestorClass('PhabricatorSettingsPanel')
+      ->setConcreteOnly(true)
+      ->selectAndLoadSymbols();
 
-    if (PhabricatorEnv::getEnvConfig('account.editable') &&
-        PhabricatorEnv::getEnvConfig('auth.password-auth-enabled')) {
-      $sidenav->addFilter('password', 'Password');
+    $panels = array();
+    foreach ($panel_specs as $spec) {
+      $class = newv($spec['name'], array());
+      $panels[] = $class->buildPanels();
     }
 
-    $sidenav->addFilter('conduit', 'Conduit Certificate');
+    $panels = array_mergev($panels);
+    $panels = mpull($panels, null, 'getPanelKey');
 
-    if (PhabricatorUserSSHKeysSettingsPanelController::isEnabled()) {
-      $sidenav->addFilter('sshkeys', 'SSH Public Keys');
-    }
-
-    $sidenav->addSpacer();
-    $sidenav->addLabel('Application Settings');
-    $sidenav->addFilter('preferences', 'Display Preferences');
-    $sidenav->addFilter('search', 'Search Preferences');
-
-    $items = array();
-    foreach ($oauth_providers as $provider) {
-      if (!$provider->isProviderEnabled()) {
+    $result = array();
+    foreach ($panels as $key => $panel) {
+      if (!$panel->isEnabled()) {
         continue;
       }
-      $key = $provider->getProviderKey();
-      $name = $provider->getProviderName();
-      $items[$key] = $name.' Account';
-    }
-
-    $ldap_provider = new PhabricatorLDAPProvider();
-    if ($ldap_provider->isProviderEnabled()) {
-      $items['ldap'] = 'LDAP Account';
-    }
-
-    if ($items) {
-      $sidenav->addSpacer();
-      $sidenav->addLabel('Linked Accounts');
-      foreach ($items as $key => $name) {
-        $sidenav->addFilter($key, $name);
+      if (!empty($result[$key])) {
+        throw new Exception(
+          "Two settings panels share the same panel key ('{$key}'): ".
+          get_class($panel).', '.get_class($result[$key]).'.');
       }
+      $result[$key] = $panel;
     }
 
-    return $sidenav;
+    $result = msort($result, 'getPanelSortKey');
+
+    return $result;
   }
+
+  private function renderSideNav(array $panels) {
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI('/panel/')));
+
+    $group = null;
+    foreach ($panels as $panel) {
+      if ($panel->getPanelGroup() != $group) {
+        if ($group !== null) {
+          $nav->addSpacer();
+        }
+        $group = $panel->getPanelGroup();
+        $nav->addLabel($group);
+      }
+
+      $nav->addFilter($panel->getPanelKey(), $panel->getPanelName());
+    }
+
+    return $nav;
+  }
+
 }

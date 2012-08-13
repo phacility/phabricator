@@ -38,6 +38,12 @@ abstract class PhabricatorOAuthProvider {
   abstract public function getAuthURI();
   abstract public function getTestURIs();
 
+  public function getSettingsPanelURI() {
+    $panel = new PhabricatorSettingsPanelOAuth();
+    $panel->setOAuthProvider($this);
+    return $panel->getPanelURI();
+  }
+
   /**
    * If the provider needs extra stuff in the auth request, return it here.
    * For example, Google needs a response_type parameter.

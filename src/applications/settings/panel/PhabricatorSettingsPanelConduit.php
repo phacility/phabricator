@@ -16,12 +16,22 @@
  * limitations under the License.
  */
 
-final class PhabricatorUserConduitSettingsPanelController
-  extends PhabricatorUserSettingsPanelController {
+final class PhabricatorSettingsPanelConduit
+  extends PhabricatorSettingsPanel {
 
-  public function processRequest() {
+  public function getPanelKey() {
+    return 'conduit';
+  }
 
-    $request = $this->getRequest();
+  public function getPanelName() {
+    return pht('Conduit');
+  }
+
+  public function getPanelGroup() {
+    return pht('Authentication');
+  }
+
+  public function processRequest(AphrontRequest $request) {
     $user = $request->getUser();
 
     if ($request->isFormPost()) {
@@ -29,9 +39,9 @@ final class PhabricatorUserConduitSettingsPanelController
         $dialog = new AphrontDialogView();
         $dialog->setUser($user);
         $dialog->setTitle('Really regenerate session?');
-        $dialog->setSubmitURI('/settings/page/conduit/');
+        $dialog->setSubmitURI($this->getPanelURI());
         $dialog->addSubmitButton('Regenerate');
-        $dialog->addCancelbutton('/settings/page/conduit/');
+        $dialog->addCancelbutton($this->getPanelURI());
         $dialog->appendChild(
           '<p>Really destroy the old certificate? Any established '.
           'sessions will be terminated.');
@@ -52,7 +62,7 @@ final class PhabricatorUserConduitSettingsPanelController
       $user->setConduitCertificate(null);
       $user->save();
       return id(new AphrontRedirectResponse())
-        ->setURI('/settings/page/conduit/?regenerated=true');
+        ->setURI($this->getPanelURI('?regenerated=true'));
     }
 
     if ($request->getStr('regenerated')) {
@@ -89,7 +99,8 @@ final class PhabricatorUserConduitSettingsPanelController
     $regen_form = new AphrontFormView();
     $regen_form
       ->setUser($user)
-      ->setAction('/settings/page/conduit/')
+      ->setAction($this->getPanelURI())
+      ->setWorkflow(true)
       ->appendChild(
         '<p class="aphront-form-instructions">You can regenerate this '.
         'certificate, which will invalidate the old certificate and create '.
@@ -103,12 +114,10 @@ final class PhabricatorUserConduitSettingsPanelController
     $regen->appendChild($regen_form);
     $regen->setWidth(AphrontPanelView::WIDTH_FORM);
 
-    return id(new AphrontNullView())
-      ->appendChild(
-        array(
-          $notice,
-          $cert,
-          $regen,
-        ));
+    return array(
+      $notice,
+      $cert,
+      $regen,
+    );
   }
 }

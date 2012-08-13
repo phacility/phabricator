@@ -64,12 +64,12 @@ final class PhabricatorLDAPLoginController extends PhabricatorAuthController {
                 'another Phabricator account. Before you can link it to a '.
                 'different LDAP account, you must unlink the old account.</p>'
               );
-              $dialog->addCancelButton('/settings/page/ldap/');
+              $dialog->addCancelButton('/settings/panel/ldap/');
 
               return id(new AphrontDialogResponse())->setDialog($dialog);
             } else {
               return id(new AphrontRedirectResponse())
-                ->setURI('/settings/page/ldap/');
+                ->setURI('/settings/panel/ldap/');
             }
           }
 
@@ -82,7 +82,7 @@ final class PhabricatorLDAPLoginController extends PhabricatorAuthController {
             $dialog->addHiddenInput('username', $request->getStr('username'));
             $dialog->addHiddenInput('password', $request->getStr('password'));
             $dialog->addSubmitButton('Link Accounts');
-            $dialog->addCancelButton('/settings/page/ldap/');
+            $dialog->addCancelButton('/settings/panel/ldap/');
 
             return id(new AphrontDialogResponse())->setDialog($dialog);
           }
@@ -92,7 +92,7 @@ final class PhabricatorLDAPLoginController extends PhabricatorAuthController {
           $this->saveLDAPInfo($ldap_info);
 
           return id(new AphrontRedirectResponse())
-            ->setURI('/settings/page/ldap/');
+            ->setURI('/settings/panel/ldap/');
         }
 
         if ($ldap_info->getID()) {

@@ -38,7 +38,7 @@ final class PhabricatorLDAPUnlinkController extends PhabricatorAuthController {
         '<p><strong>You will not be able to login</strong> using this account '.
         'once you unlink it. Continue?</p>');
       $dialog->addSubmitButton('Unlink Account');
-      $dialog->addCancelButton('/settings/page/ldap/');
+      $dialog->addCancelButton('/settings/panel/ldap/');
 
       return id(new AphrontDialogResponse())->setDialog($dialog);
     }
@@ -46,7 +46,7 @@ final class PhabricatorLDAPUnlinkController extends PhabricatorAuthController {
     $ldap_info->delete();
 
     return id(new AphrontRedirectResponse())
-      ->setURI('/settings/page/ldap/');
+      ->setURI('/settings/panel/ldap/');
   }
 
 }

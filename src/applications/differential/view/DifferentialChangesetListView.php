@@ -293,7 +293,7 @@ final class DifferentialChangesetListView extends AphrontView {
       if ($editor_link) {
         $meta['editor'] = $editor_link;
       } else {
-        $meta['editorConfigure'] = '/settings/page/preferences/';
+        $meta['editorConfigure'] = '/settings/panel/display/';
       }
     }
 

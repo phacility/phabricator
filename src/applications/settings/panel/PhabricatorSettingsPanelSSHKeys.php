@@ -16,24 +16,33 @@
  * limitations under the License.
  */
 
-final class PhabricatorUserSSHKeysSettingsPanelController
-  extends PhabricatorUserSettingsPanelController {
+final class PhabricatorSettingsPanelSSHKeys
+  extends PhabricatorSettingsPanel {
 
-  const PANEL_BASE_URI = '/settings/page/sshkeys/';
+  public function getPanelKey() {
+    return 'ssh';
+  }
 
-  public static function isEnabled() {
+  public function getPanelName() {
+    return pht('SSH Public Keys');
+  }
+
+  public function getPanelGroup() {
+    return pht('Authentication');
+  }
+
+  public function isEnabled() {
     return PhabricatorEnv::getEnvConfig('auth.sshkeys.enabled');
   }
 
-  public function processRequest() {
+  public function processRequest(AphrontRequest $request) {
 
-    $request = $this->getRequest();
     $user = $request->getUser();
 
     $edit = $request->getStr('edit');
     $delete = $request->getStr('delete');
     if (!$edit && !$delete) {
-      return $this->renderKeyListView();
+      return $this->renderKeyListView($request);
     }
 
     $id = nonempty($edit, $delete);
@@ -43,7 +52,7 @@ final class PhabricatorUserSSHKeysSettingsPanelController
       $key = id(new PhabricatorUserSSHKey())->loadOneWhere(
         'userPHID = %s AND id = %d',
         $user->getPHID(),
-        $id);
+        (int)$id);
       if (!$key) {
         return new Aphront404Response();
       }
@@ -53,7 +62,7 @@ final class PhabricatorUserSSHKeysSettingsPanelController
     }
 
     if ($delete) {
-      return $this->processDelete($key);
+      return $this->processDelete($request, $key);
     }
 
     $e_name = true;
@@ -113,7 +122,7 @@ final class PhabricatorUserSSHKeysSettingsPanelController
         try {
           $key->save();
           return id(new AphrontRedirectResponse())
-            ->setURI(self::PANEL_BASE_URI);
+            ->setURI($this->getPanelURI());
         } catch (AphrontQueryDuplicateKeyException $ex) {
           $e_key = 'Duplicate';
           $errors[] = 'This public key is already associated with a user '.
@@ -156,7 +165,7 @@ final class PhabricatorUserSSHKeysSettingsPanelController
           ->setError($e_key))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->addCancelButton(self::PANEL_BASE_URI)
+          ->addCancelButton($this->getPanelURI())
           ->setValue($save));
 
     $panel = new AphrontPanelView();
@@ -172,8 +181,8 @@ final class PhabricatorUserSSHKeysSettingsPanelController
         ));
   }
 
-  private function renderKeyListView() {
-    $request = $this->getRequest();
+  private function renderKeyListView(AphrontRequest $request) {
+
     $user = $request->getUser();
 
     $keys = id(new PhabricatorUserSSHKey())->loadAllWhere(
@@ -186,7 +195,7 @@ final class PhabricatorUserSSHKeysSettingsPanelController
         phutil_render_tag(
           'a',
           array(
-            'href' => '/settings/page/sshkeys/?edit='.$key->getID(),
+            'href' => $this->getPanelURI('?edit='.$key->getID()),
           ),
           phutil_escape_html($key->getName())),
         phutil_escape_html($key->getKeyComment()),
@@ -196,7 +205,7 @@ final class PhabricatorUserSSHKeysSettingsPanelController
         javelin_render_tag(
           'a',
           array(
-            'href' => '/settings/page/sshkeys/?delete='.$key->getID(),
+            'href' => $this->getPanelURI('?delete='.$key->getID()),
             'class' => 'small grey button',
             'sigil' => 'workflow',
           ),
@@ -230,7 +239,7 @@ final class PhabricatorUserSSHKeysSettingsPanelController
       phutil_render_tag(
         'a',
         array(
-          'href' => '/settings/page/sshkeys/?edit=true',
+          'href' => $this->getPanelURI('?edit=true'),
           'class' => 'green button',
         ),
         'Add New Public Key'));
@@ -240,8 +249,10 @@ final class PhabricatorUserSSHKeysSettingsPanelController
     return $panel;
   }
 
-  private function processDelete(PhabricatorUserSSHKey $key) {
-    $request = $this->getRequest();
+  private function processDelete(
+    AphrontRequest $request,
+    PhabricatorUserSSHKey $key) {
+
     $user = $request->getUser();
 
     $name = phutil_escape_html($key->getName());
@@ -249,7 +260,7 @@ final class PhabricatorUserSSHKeysSettingsPanelController
     if ($request->isDialogFormPost()) {
       $key->delete();
       return id(new AphrontReloadResponse())
-        ->setURI(self::PANEL_BASE_URI);
+        ->setURI($this->getPanelURI());
     }
 
     $dialog = id(new AphrontDialogView())
@@ -261,7 +272,7 @@ final class PhabricatorUserSSHKeysSettingsPanelController
         'and you will not longer be able to use the corresponding private key '.
         'to authenticate.</p>')
       ->addSubmitButton('Delete Public Key')
-      ->addCancelButton(self::PANEL_BASE_URI);
+      ->addCancelButton($this->getPanelURI());
 
     return id(new AphrontDialogResponse())
       ->setDialog($dialog);

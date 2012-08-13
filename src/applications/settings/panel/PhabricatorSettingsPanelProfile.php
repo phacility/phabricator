@@ -16,12 +16,22 @@
  * limitations under the License.
  */
 
-final class PhabricatorUserProfileSettingsPanelController
-  extends PhabricatorUserSettingsPanelController {
+final class PhabricatorSettingsPanelProfile
+  extends PhabricatorSettingsPanel {
 
-  public function processRequest() {
+  public function getPanelKey() {
+    return 'profile';
+  }
 
-    $request = $this->getRequest();
+  public function getPanelName() {
+    return pht('Profile');
+  }
+
+  public function getPanelGroup() {
+    return pht('Account Information');
+  }
+
+  public function processRequest(AphrontRequest $request) {
     $user = $request->getUser();
 
     $profile = id(new PhabricatorUserProfile())->loadOneWhere(
@@ -95,7 +105,7 @@ final class PhabricatorUserProfileSettingsPanelController
         $user->save();
         $profile->save();
         $response = id(new AphrontRedirectResponse())
-          ->setURI('/settings/page/profile/?saved=true');
+          ->setURI($this->getPanelURI('?saved=true'));
         return $response;
       }
     }
@@ -143,7 +153,6 @@ final class PhabricatorUserProfileSettingsPanelController
     $form = new AphrontFormView();
     $form
       ->setUser($request->getUser())
-      ->setAction('/settings/page/profile/')
       ->setEncType('multipart/form-data')
       ->appendChild(
         id(new AphrontFormTextControl())
@@ -176,7 +185,7 @@ final class PhabricatorUserProfileSettingsPanelController
       ->appendChild(
         '<p class="aphront-form-instructions">Write something about yourself! '.
         'Make sure to include <strong>important information</strong> like '.
-        'your favorite pokemon and which Starcraft race you play.</p>')
+        'your favorite Pokemon and which Starcraft race you play.</p>')
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel('Blurb')
@@ -207,12 +216,10 @@ final class PhabricatorUserProfileSettingsPanelController
     $panel->appendChild($form);
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
 
-    return id(new AphrontNullView())
-      ->appendChild(
-        array(
-          $error_view,
-          $panel,
-        ));
+    return array(
+      $error_view,
+      $panel,
+    );
   }
 
 }

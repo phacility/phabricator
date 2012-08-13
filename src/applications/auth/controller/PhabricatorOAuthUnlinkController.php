@@ -54,7 +54,7 @@ final class PhabricatorOAuthUnlinkController extends PhabricatorAuthController {
         '<p><strong>You will not be able to login</strong> using this account '.
         'once you unlink it. Continue?</p>');
       $dialog->addSubmitButton('Unlink Account');
-      $dialog->addCancelButton('/settings/page/'.$provider_key.'/');
+      $dialog->addCancelButton($provider->getSettingsPanelURI());
 
       return id(new AphrontDialogResponse())->setDialog($dialog);
     }
@@ -62,7 +62,7 @@ final class PhabricatorOAuthUnlinkController extends PhabricatorAuthController {
     $oauth_info->delete();
 
     return id(new AphrontRedirectResponse())
-      ->setURI('/settings/page/'.$provider_key.'/');
+      ->setURI($provider->getSettingsPanelURI());
   }
 
 }

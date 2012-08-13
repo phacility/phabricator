@@ -16,14 +16,24 @@
  * limitations under the License.
  */
 
-final class PhabricatorUserEmailSettingsPanelController
-  extends PhabricatorUserSettingsPanelController {
+final class PhabricatorSettingsPanelEmailAddresses
+  extends PhabricatorSettingsPanel {
 
-  public function processRequest() {
+  public function getPanelKey() {
+    return 'email';
+  }
 
-    $request = $this->getRequest();
+  public function getPanelName() {
+    return pht('Email Addresses');
+  }
+
+  public function getPanelGroup() {
+    return pht('Email');
+  }
+
+  public function processRequest(AphrontRequest $request) {
     $user = $request->getUser();
-    $editable = $this->getAccountEditable();
+    $editable = PhabricatorEnv::getEnvConfig('account.editable');
 
     $uri = $request->getRequestURI();
     $uri->setQueryParams(array());
@@ -31,23 +41,23 @@ final class PhabricatorUserEmailSettingsPanelController
     if ($editable) {
       $new = $request->getStr('new');
       if ($new) {
-        return $this->returnNewAddressResponse($uri, $new);
+        return $this->returnNewAddressResponse($request, $uri, $new);
       }
 
       $delete = $request->getInt('delete');
       if ($delete) {
-        return $this->returnDeleteAddressResponse($uri, $delete);
+        return $this->returnDeleteAddressResponse($request, $uri, $delete);
       }
     }
 
     $verify = $request->getInt('verify');
     if ($verify) {
-      return $this->returnVerifyAddressResponse($uri, $verify);
+      return $this->returnVerifyAddressResponse($request, $uri, $verify);
     }
 
     $primary = $request->getInt('primary');
     if ($primary) {
-      return $this->returnPrimaryAddressResponse($uri, $primary);
+      return $this->returnPrimaryAddressResponse($request, $uri, $primary);
     }
 
     $emails = id(new PhabricatorUserEmail())->loadAllWhere(
@@ -154,8 +164,11 @@ final class PhabricatorUserEmailSettingsPanelController
     return $view;
   }
 
-  private function returnNewAddressResponse(PhutilURI $uri, $new) {
-    $request = $this->getRequest();
+  private function returnNewAddressResponse(
+    AphrontRequest $request,
+    PhutilURI $uri,
+    $new) {
+
     $user = $request->getUser();
 
     $e_email = true;
@@ -234,8 +247,11 @@ final class PhabricatorUserEmailSettingsPanelController
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
-  private function returnDeleteAddressResponse(PhutilURI $uri, $email_id) {
-    $request = $this->getRequest();
+  private function returnDeleteAddressResponse(
+    AphrontRequest $request,
+    PhutilURI $uri,
+    $email_id) {
+
     $user = $request->getUser();
 
     // NOTE: You can only delete your own email addresses, and you can not
@@ -273,8 +289,11 @@ final class PhabricatorUserEmailSettingsPanelController
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
-  private function returnVerifyAddressResponse(PhutilURI $uri, $email_id) {
-    $request = $this->getRequest();
+  private function returnVerifyAddressResponse(
+    AphrontRequest $request,
+    PhutilURI $uri,
+    $email_id) {
+
     $user = $request->getUser();
 
     // NOTE: You can only send more email for your unverified addresses.
@@ -307,8 +326,11 @@ final class PhabricatorUserEmailSettingsPanelController
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
-  private function returnPrimaryAddressResponse(PhutilURI $uri, $email_id) {
-    $request = $this->getRequest();
+  private function returnPrimaryAddressResponse(
+    AphrontRequest $request,
+    PhutilURI $uri,
+    $email_id) {
+
     $user = $request->getUser();
 
     // NOTE: You can only make your own verified addresses primary.

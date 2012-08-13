@@ -16,14 +16,24 @@
  * limitations under the License.
  */
 
-final class PhabricatorUserAccountSettingsPanelController
-  extends PhabricatorUserSettingsPanelController {
+final class PhabricatorSettingsPanelAccount
+  extends PhabricatorSettingsPanel {
 
-  public function processRequest() {
+  public function getPanelKey() {
+    return 'account';
+  }
 
-    $request = $this->getRequest();
+  public function getPanelName() {
+    return pht('Account');
+  }
+
+  public function getPanelGroup() {
+    return pht('Account Information');
+  }
+
+  public function processRequest(AphrontRequest $request) {
     $user = $request->getUser();
-    $editable = $this->getAccountEditable();
+    $editable = PhabricatorEnv::getEnvConfig('account.editable');
 
     $e_realname = $editable ? true : null;
     $errors = array();
@@ -47,7 +57,7 @@ final class PhabricatorUserAccountSettingsPanelController
       if (!$errors) {
         $user->save();
         return id(new AphrontRedirectResponse())
-            ->setURI('/settings/page/account/?saved=true');
+          ->setURI($this->getPanelURI('?saved=true'));
       }
     }
 
@@ -73,7 +83,6 @@ final class PhabricatorUserAccountSettingsPanelController
     $form = new AphrontFormView();
     $form
       ->setUser($user)
-      ->setEncType('multipart/form-data')
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel('Username')
@@ -100,11 +109,9 @@ final class PhabricatorUserAccountSettingsPanelController
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
     $panel->appendChild($form);
 
-    return id(new AphrontNullView())
-      ->appendChild(
-        array(
-          $notice,
-          $panel,
-        ));
+    return array(
+      $notice,
+      $panel,
+    );
   }
 }

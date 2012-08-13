@@ -16,12 +16,22 @@
  * limitations under the License.
  */
 
-final class PhabricatorUserSearchSettingsPanelController
-  extends PhabricatorUserSettingsPanelController {
+final class PhabricatorSettingsPanelSearchPreferences
+  extends PhabricatorSettingsPanel {
 
-  public function processRequest() {
+  public function getPanelKey() {
+    return 'search';
+  }
 
-    $request = $this->getRequest();
+  public function getPanelName() {
+    return pht('Search Preferences');
+  }
+
+  public function getPanelGroup() {
+    return pht('Application Settings');
+  }
+
+  public function processRequest(AphrontRequest $request) {
     $user = $request->getUser();
     $preferences = $user->loadPreferences();
 
@@ -37,12 +47,11 @@ final class PhabricatorUserSearchSettingsPanelController
 
       $preferences->save();
       return id(new AphrontRedirectResponse())
-        ->setURI('/settings/page/search/?saved=true');
+        ->setURI($this->getPanelURI('?saved=true'));
     }
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->setAction('/settings/page/search/')
       ->appendChild(
         id(new AphrontFormCheckboxControl())
           ->addCheckbox($pref_jump,
@@ -51,7 +60,7 @@ final class PhabricatorUserSearchSettingsPanelController
             $preferences->getPreference($pref_jump, 1))
           ->addCheckbox($pref_shortcut,
             1,
-            '\'/\' focuses search box.',
+            "Press '/' to focus the search input.",
             $preferences->getPreference($pref_shortcut, 1))
             )
       ->appendChild(
@@ -71,12 +80,10 @@ final class PhabricatorUserSearchSettingsPanelController
         ->setErrors(array('Your preferences have been saved.'));
     }
 
-    return id(new AphrontNullView())
-      ->appendChild(
-        array(
-          $error_view,
-          $panel,
-        ));
+    return array(
+      $error_view,
+      $panel,
+    );
   }
 }
 

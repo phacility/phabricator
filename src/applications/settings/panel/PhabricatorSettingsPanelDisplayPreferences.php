@@ -16,12 +16,22 @@
  * limitations under the License.
  */
 
-final class PhabricatorUserPreferenceSettingsPanelController
-  extends PhabricatorUserSettingsPanelController {
+final class PhabricatorSettingsPanelDisplayPreferences
+  extends PhabricatorSettingsPanel {
 
-  public function processRequest() {
+  public function getPanelKey() {
+    return 'display';
+  }
 
-    $request = $this->getRequest();
+  public function getPanelName() {
+    return pht('Display Preferences');
+  }
+
+  public function getPanelGroup() {
+    return pht('Application Settings');
+  }
+
+  public function processRequest(AphrontRequest $request) {
     $user = $request->getUser();
     $preferences = $user->loadPreferences();
 
@@ -44,7 +54,7 @@ final class PhabricatorUserPreferenceSettingsPanelController
 
       $preferences->save();
       return id(new AphrontRedirectResponse())
-        ->setURI('/settings/page/preferences/?saved=true');
+        ->setURI($this->getPanelURI('?saved=true'));
     }
 
     $example_string = <<<EXAMPLE
@@ -67,7 +77,6 @@ EXAMPLE;
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->setAction('/settings/page/preferences/')
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel('Page Titles')
@@ -95,7 +104,7 @@ EXAMPLE;
         ->setLabel('Monospaced Font')
         ->setName($pref_monospaced)
         ->setCaption(
-          'Overrides default fonts in tools like Differential. '.
+          'Overrides default fonts in tools like Differential.<br />'.
           '(Default: '.$font_default.')')
         ->setValue($preferences->getPreference($pref_monospaced)))
       ->appendChild(
@@ -130,12 +139,10 @@ EXAMPLE;
         ->setErrors(array('Your preferences have been saved.'));
     }
 
-    return id(new AphrontNullView())
-      ->appendChild(
-        array(
-          $error_view,
-          $panel,
-        ));
+    return array(
+      $error_view,
+      $panel,
+    );
   }
 }
 

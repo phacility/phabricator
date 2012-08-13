@@ -16,21 +16,40 @@
  * limitations under the License.
  */
 
-final class PhabricatorUserPasswordSettingsPanelController
-  extends PhabricatorUserSettingsPanelController {
+final class PhabricatorSettingsPanelPassword
+  extends PhabricatorSettingsPanel {
 
-  public function processRequest() {
+  public function getPanelKey() {
+    return 'password';
+  }
 
-    $request = $this->getRequest();
-    $user = $request->getUser();
-    $editable = $this->getAccountEditable();
+  public function getPanelName() {
+    return pht('Password');
+  }
 
+  public function getPanelGroup() {
+    return pht('Authentication');
+  }
+
+  public function isEnabled() {
     // There's no sense in showing a change password panel if the user
-    // can't change their password
-    if (!$editable ||
-        !PhabricatorEnv::getEnvConfig('auth.password-auth-enabled')) {
-      return new Aphront400Response();
+    // can't change their password...
+
+    if (!PhabricatorEnv::getEnvConfig('account.editable')) {
+      return false;
     }
+
+    // ...or this install doesn't support password authentication at all.
+
+    if (!PhabricatorEnv::getEnvConfig('auth.password-auth-enabled')) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public function processRequest(AphrontRequest $request) {
+    $user = $request->getUser();
 
     $min_len = PhabricatorEnv::getEnvConfig('account.minimum-password-length');
     $min_len = (int)$min_len;
@@ -98,7 +117,7 @@ final class PhabricatorUserPasswordSettingsPanelController
           // after we update their account.
           $next = '/';
         } else {
-          $next = '/settings/page/password/?saved=true';
+          $next = $this->getPanelURI('?saved=true');
         }
 
         return id(new AphrontRedirectResponse())->setURI($next);
@@ -160,11 +179,9 @@ final class PhabricatorUserPasswordSettingsPanelController
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
     $panel->appendChild($form);
 
-    return id(new AphrontNullView())
-      ->appendChild(
-        array(
-          $notice,
-          $panel,
-        ));
+    return array(
+      $notice,
+      $panel,
+    );
   }
 }

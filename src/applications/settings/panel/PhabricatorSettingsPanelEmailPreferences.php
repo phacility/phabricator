@@ -16,11 +16,22 @@
  * limitations under the License.
  */
 
-final class PhabricatorUserEmailPreferenceSettingsPanelController
-  extends PhabricatorUserSettingsPanelController {
+final class PhabricatorSettingsPanelEmailPreferences
+  extends PhabricatorSettingsPanel {
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function getPanelKey() {
+    return 'emailpreferences';
+  }
+
+  public function getPanelName() {
+    return pht('Email Preferences');
+  }
+
+  public function getPanelGroup() {
+    return pht('Email');
+  }
+
+  public function processRequest(AphrontRequest $request) {
     $user = $request->getUser();
 
     $preferences = $user->loadPreferences();
@@ -64,7 +75,7 @@ final class PhabricatorUserEmailPreferenceSettingsPanelController
       $preferences->save();
 
       return id(new AphrontRedirectResponse())
-        ->setURI('/settings/page/emailpref/?saved=true');
+        ->setURI($this->getPanelURI('?saved=true'));
     }
 
     $notice = null;

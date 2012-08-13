@@ -16,12 +16,28 @@
  * limitations under the License.
  */
 
-final class PhabricatorUserLDAPSettingsPanelController
-  extends PhabricatorUserSettingsPanelController {
+final class PhabricatorSettingsPanelLDAP
+  extends PhabricatorSettingsPanel {
 
-  public function processRequest() {
-    $request       = $this->getRequest();
-    $user          = $request->getUser();
+  public function getPanelKey() {
+    return 'ldap';
+  }
+
+  public function getPanelName() {
+    return pht('LDAP');
+  }
+
+  public function getPanelGroup() {
+    return pht('Linked Accounts');
+  }
+
+  public function isEnabled() {
+    $ldap_provider = new PhabricatorLDAPProvider();
+    return $ldap_provider->isProviderEnabled();
+  }
+
+  public function processRequest(AphrontRequest $request) {
+    $user = $request->getUser();
 
     $ldap_info = id(new PhabricatorUserLDAPInfo())->loadOneWhere(
       'userID = %d',
@@ -78,10 +94,8 @@ final class PhabricatorUserLDAPSettingsPanelController
       $panel->appendChild($form);
     }
 
-    return id(new AphrontNullView())
-      ->appendChild(
-        array(
-          $panel,
-        ));
+    return array(
+      $panel,
+    );
   }
 }

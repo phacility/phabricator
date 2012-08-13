@@ -97,7 +97,7 @@ final class PhabricatorEmailTokenController
     $request->setCookie('phsid', $session_key);
 
     if (PhabricatorEnv::getEnvConfig('account.editable')) {
-      $next = (string)id(new PhutilURI('/settings/page/password/'))
+      $next = (string)id(new PhutilURI('/settings/panel/password/'))
         ->setQueryParams(
           array(
             'token' => $token,

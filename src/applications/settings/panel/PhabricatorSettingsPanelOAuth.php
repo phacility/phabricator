@@ -16,8 +16,37 @@
  * limitations under the License.
  */
 
-final class PhabricatorUserOAuthSettingsPanelController
-  extends PhabricatorUserSettingsPanelController {
+final class PhabricatorSettingsPanelOAuth
+  extends PhabricatorSettingsPanel {
+
+  public function getPanelKey() {
+    return 'oauth-'.$this->provider->getProviderKey();
+  }
+
+  public function getPanelName() {
+    return $this->provider->getProviderName();
+  }
+
+  public function getPanelGroup() {
+    return pht('Linked Accounts');
+  }
+
+  public function buildPanels() {
+    $panels = array();
+
+    $providers = PhabricatorOAuthProvider::getAllProviders();
+    foreach ($providers as $provider) {
+      $panel = clone $this;
+      $panel->setOAuthProvider($provider);
+      $panels[] = $panel;
+    }
+
+    return $panels;
+  }
+
+  public function isEnabled() {
+    return $this->provider->isProviderEnabled();
+  }
 
   private $provider;
 
@@ -48,8 +77,7 @@ final class PhabricatorUserOAuthSettingsPanelController
     return $form;
   }
 
-  public function processRequest() {
-    $request       = $this->getRequest();
+  public function processRequest(AphrontRequest $request) {
     $user          = $request->getUser();
     $provider      = $this->provider;
     $notice        = null;
@@ -62,7 +90,7 @@ final class PhabricatorUserOAuthSettingsPanelController
       $provider->getProviderKey());
 
     if ($request->isFormPost() && $oauth_info) {
-      $notice = $this->refreshProfileImage($oauth_info);
+      $notice = $this->refreshProfileImage($request, $oauth_info);
     }
 
     $form = new AphrontFormView();
@@ -198,8 +226,11 @@ final class PhabricatorUserOAuthSettingsPanelController
         ));
   }
 
-  private function refreshProfileImage(PhabricatorUserOAuthInfo $oauth_info) {
-    $user         = $this->getRequest()->getUser();
+  private function refreshProfileImage(
+    AphrontRequest $request,
+    PhabricatorUserOAuthInfo $oauth_info) {
+
+    $user         = $request->getUser();
     $provider     = $this->provider;
     $error        = false;
     $userinfo_uri = new PhutilURI($provider->getUserInfoURI());
