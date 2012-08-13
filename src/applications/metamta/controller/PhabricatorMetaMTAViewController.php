@@ -39,7 +39,6 @@ final class PhabricatorMetaMTAViewController
 
     $form = new AphrontFormView();
     $form->setUser($request->getUser());
-    $form->setAction('/mail/send/');
     $form
       ->appendChild(
         id(new AphrontFormStaticControl())
@@ -67,14 +66,14 @@ final class PhabricatorMetaMTAViewController
           ->setValue($mail->getRelatedPHID()))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->addCancelButton('/mail/', 'Done'));
+          ->addCancelButton($this->getApplicationURI(), 'Done'));
 
     $panel = new AphrontPanelView();
     $panel->setHeader('View Email');
     $panel->appendChild($form);
     $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $panel,
       array(
         'title' => 'View Mail',

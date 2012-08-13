@@ -81,15 +81,6 @@ class AphrontDefaultApplicationConfiguration
           => 'PhabricatorTypeaheadCommonDatasourceController',
       ),
 
-      '/mail/' => array(
-        '' => 'PhabricatorMetaMTAListController',
-        'send/' => 'PhabricatorMetaMTASendController',
-        'view/(?P<id>\d+)/' => 'PhabricatorMetaMTAViewController',
-        'receive/' => 'PhabricatorMetaMTAReceiveController',
-        'received/' => 'PhabricatorMetaMTAReceivedListController',
-        'sendgrid/' => 'PhabricatorMetaMTASendGridReceiveController',
-      ),
-
       '/login/' => array(
         '' => 'PhabricatorLoginController',
         'email/' => 'PhabricatorEmailLoginController',

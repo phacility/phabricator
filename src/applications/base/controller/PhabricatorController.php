@@ -149,16 +149,17 @@ abstract class PhabricatorController extends AphrontController {
 
     if (!($view instanceof AphrontSideNavFilterView)) {
       $nav = new AphrontSideNavFilterView();
-      if ($application) {
-        $nav->setCurrentApplication($application);
-      }
-      $nav->setUser($this->getRequest()->getUser());
-      $nav->setFlexNav(true);
-      $nav->setShowApplicationMenu(true);
       $nav->appendChild($view);
-
       $view = $nav;
     }
+
+    if ($application) {
+      $view->setCurrentApplication($application);
+    }
+
+    $view->setUser($this->getRequest()->getUser());
+    $view->setFlexNav(true);
+    $view->setShowApplicationMenu(true);
 
     $page->appendChild($view);
 

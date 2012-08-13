@@ -54,7 +54,7 @@ final class PhabricatorMetaMTASendController
       }
 
       return id(new AphrontRedirectResponse())
-        ->setURI('/mail/view/'.$mail->getID().'/');
+        ->setURI($this->getApplicationURI('/view/'.$mail->getID().'/'));
     }
 
     $failure_caption =
@@ -94,12 +94,11 @@ final class PhabricatorMetaMTASendController
 
     $form = new AphrontFormView();
     $form->setUser($request->getUser());
-    $form->setAction('/mail/send/');
     $form
       ->appendChild($instructions)
       ->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel('Configured Adapter')
+          ->setLabel('Adapter')
           ->setValue($adapter))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
@@ -159,15 +158,20 @@ final class PhabricatorMetaMTASendController
     $panel->setHeader('Send Email');
     $panel->appendChild($form);
     $panel->setID($panel_id);
-    $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
+    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
 
-    return $this->buildStandardPageResponse(
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter('send');
+    $nav->appendChild(
       array(
         $warning,
         $panel,
-      ),
+      ));
+
+    return $this->buildApplicationPage(
+      $nav,
       array(
-        'title' => 'Send Mail',
+        'title' => 'Send Test',
       ));
   }
 
