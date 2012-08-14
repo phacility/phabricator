@@ -27,7 +27,12 @@ final class PhabricatorApplicationDiviner extends PhabricatorApplication {
     PhabricatorController $controller = null) {
 
     $items = array();
-    $application = $controller->getCurrentApplication();
+
+    $application = null;
+    if ($controller) {
+      $application = $controller->getCurrentApplication();
+    }
+
     if ($application && $application->getHelpURI()) {
       $class = 'main-menu-item-icon-help';
       $item = new PhabricatorMainMenuIconView();
