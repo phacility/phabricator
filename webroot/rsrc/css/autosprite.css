@@ -1,0 +1,236 @@
+/**
+ * @provides autosprite-css
+ */
+
+.autosprite {
+  background-image: url(/rsrc/image/autosprite.png);
+  background-repeat: no-repeat;
+}
+
+.main-menu-item-icon-help {
+  background-position: 0px 0px;
+}
+
+.main-menu-item-icon-settings {
+  background-position: 0px -26px;
+}
+
+.main-menu-item-icon-logout {
+  background-position: 0px -52px;
+}
+
+.main-menu-item-icon-notifications {
+  background-position: 0px -78px;
+}
+
+.main-menu-item-icon-task {
+  background-position: 0px -104px;
+}
+
+.main-menu-item-icon-help-selected {
+  background-position: 0px -130px;
+}
+
+.main-menu-item-icon-settings-selected {
+  background-position: 0px -156px;
+}
+
+.main-menu-item-icon-logout-selected {
+  background-position: 0px -182px;
+}
+
+.main-menu-item-icon-notifications-selected {
+  background-position: 0px -208px;
+}
+
+.main-menu-item-icon-task-selected {
+  background-position: 0px -234px;
+}
+
+.main-menu-item-icon-help:hover {
+  background-position: 0px -260px;
+}
+
+.main-menu-item-icon-settings:hover {
+  background-position: 0px -286px;
+}
+
+.main-menu-item-icon-logout:hover {
+  background-position: 0px -312px;
+}
+
+.main-menu-item-icon-notifications:hover {
+  background-position: 0px -338px;
+}
+
+.main-menu-item-icon-task:hover {
+  background-position: 0px -364px;
+}
+
+.app-differential-full {
+  background-position: 0px -390px;
+}
+
+.app-fact-full {
+  background-position: 0px -450px;
+}
+
+.app-mail-full {
+  background-position: 0px -510px;
+}
+
+.app-diffusion-full {
+  background-position: 0px -570px;
+}
+
+.app-slowvote-full {
+  background-position: 0px -630px;
+}
+
+.app-phriction-full {
+  background-position: 0px -690px;
+}
+
+.app-maniphest-full {
+  background-position: 0px -750px;
+}
+
+.app-flags-full {
+  background-position: 0px -810px;
+}
+
+.app-settings-full {
+  background-position: 0px -870px;
+}
+
+.app-applications-full {
+  background-position: 0px -930px;
+}
+
+.app-default-full {
+  background-position: 0px -990px;
+}
+
+.app-people-full {
+  background-position: 0px -1050px;
+}
+
+.app-ponder-full {
+  background-position: 0px -1110px;
+}
+
+.app-calendar-full {
+  background-position: 0px -1170px;
+}
+
+.app-files-full {
+  background-position: 0px -1230px;
+}
+
+.app-projects-full {
+  background-position: 0px -1290px;
+}
+
+.app-daemons-full {
+  background-position: 0px -1350px;
+}
+
+.app-herald-full {
+  background-position: 0px -1410px;
+}
+
+.app-countdown-full {
+  background-position: 0px -1470px;
+}
+
+.app-conduit-full {
+  background-position: 0px -1530px;
+}
+
+.app-feed-full {
+  background-position: 0px -1590px;
+}
+
+.app-differential {
+  background-position: 0px -1650px;
+}
+
+.app-fact {
+  background-position: 0px -1676px;
+}
+
+.app-mail {
+  background-position: 0px -1702px;
+}
+
+.app-diffusion {
+  background-position: 0px -1728px;
+}
+
+.app-slowvote {
+  background-position: 0px -1754px;
+}
+
+.app-phriction {
+  background-position: 0px -1780px;
+}
+
+.app-maniphest {
+  background-position: 0px -1806px;
+}
+
+.app-flags {
+  background-position: 0px -1832px;
+}
+
+.app-settings {
+  background-position: 0px -1858px;
+}
+
+.app-applications {
+  background-position: 0px -1884px;
+}
+
+.app-default {
+  background-position: 0px -1910px;
+}
+
+.app-people {
+  background-position: 0px -1936px;
+}
+
+.app-ponder {
+  background-position: 0px -1962px;
+}
+
+.app-calendar {
+  background-position: 0px -1988px;
+}
+
+.app-files {
+  background-position: 0px -2014px;
+}
+
+.app-projects {
+  background-position: 0px -2040px;
+}
+
+.app-daemons {
+  background-position: 0px -2066px;
+}
+
+.app-herald {
+  background-position: 0px -2092px;
+}
+
+.app-countdown {
+  background-position: 0px -2118px;
+}
+
+.app-conduit {
+  background-position: 0px -2144px;
+}
+
+.app-feed {
+  background-position: 0px -2170px;
+}
