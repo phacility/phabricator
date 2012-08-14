@@ -27,7 +27,9 @@ abstract class PhabricatorPeopleController extends PhabricatorController {
     if ($is_admin) {
       $nav->addLabel('Create Users');
       $nav->addFilter('edit', 'Create New User');
-      $nav->addFilter('ldap', 'Import from LDAP');
+      if (PhabricatorEnv::getEnvConfig('ldap.auth-enabled') === true) {
+        $nav->addFilter('ldap', 'Import from LDAP');
+      }
       $nav->addSpacer();
     }
 
