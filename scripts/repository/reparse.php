@@ -20,60 +20,88 @@
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
-$is_all = false;
-$reparse_message = false;
-$reparse_change = false;
-$reparse_herald = false;
-$reparse_owners = false;
-$reparse_what = false;
-$force = false;
+$args = new PhutilArgumentParser($argv);
+$args->setSynopsis(<<<EOHELP
+**reparse.php** __what__ __which_parts__ [--trace] [--force]
 
-$args = array_slice($argv, 1);
-foreach ($args as $arg) {
-  if (!strncmp($arg, '--', 2)) {
-    $flag = substr($arg, 2);
-    switch ($flag) {
-      case 'all':
-        $is_all = true;
-        break;
-      case 'message':
-      case 'messages':
-        $reparse_message = true;
-        break;
-      case 'change':
-      case 'changes':
-        $reparse_change = true;
-        break;
-      case 'herald':
-        $reparse_herald = true;
-        break;
-      case 'owners':
-        $reparse_owners = true;
-        break;
-      case 'force':
-        $force = true;
-        break;
-      case 'trace':
-        PhutilServiceProfiler::installEchoListener();
-        break;
-      case 'help':
-        help();
-        break;
-      default:
-        usage("Unknown flag '{$arg}'.");
-        break;
-    }
-  } else {
-    if ($reparse_what) {
-      usage("Specify exactly one thing to reparse.");
-    }
-    $reparse_what = $arg;
-  }
-}
+Rerun the Diffusion parser on specific commits and repositories. Mostly
+useful for debugging changes to Diffusion.
+EOHELP
+);
 
-if (!$reparse_what) {
+$args->parseStandardArguments();
+$args->parse(
+  array(
+    // what
+    array(
+      'name'     => 'revision',
+      'wildcard' => true,
+    ),
+    array(
+      'name'     => 'all',
+      'param'    => 'callsign or phid',
+      'help'     => 'Reparse all commits in the specified repository. This '.
+                    'mode queues parsers into the task queue; you must run '.
+                    'taskmasters to actually do the parses. Use with '.
+                    '__--force-local__ to run the tasks locally instead of '.
+                    'with taskmasters.',
+    ),
+    array(
+      'name'     => 'min-date',
+      'param'    => 'date',
+      'help'     => 'When used with __--all__, this will restrict to '.
+                    'reparsing only the commits that are newer than __date__.',
+    ),
+    // which parts
+    array(
+      'name'     => 'message',
+      'help'     => 'Reparse commit messages.',
+    ),
+    array(
+      'name'     => 'change',
+      'help'     => 'Reparse changes.',
+    ),
+    array(
+      'name'     => 'herald',
+      'help'     => 'Reevaluate Herald rules (may send huge amounts of email!)',
+    ),
+    array(
+      'name'     => 'owners',
+      'help'     => 'Reevaluate related commits for owners packages (may '.
+                    'delete existing relationship entries between your '.
+                    'package and some old commits!)',
+    ),
+    // misc options
+    array(
+      'name'     => 'force',
+      'short'    => 'f',
+      'help'     => 'Act noninteractively, without prompting.',
+    ),
+    array(
+      'name'     => 'force-local',
+      'help'     => 'Only used with __--all__, use this to run the tasks '.
+                    'locally instead of deferring them to taskmaster daemons.',
+    ),
+  ));
+
+$all_from_repo = $args->getArg('all');
+$reparse_message = $args->getArg('message');
+$reparse_change = $args->getArg('change');
+$reparse_herald = $args->getArg('herald');
+$reparse_owners = $args->getArg('owners');
+$reparse_what = $args->getArg('revision');
+$force = $args->getArg('force');
+$force_local = $args->getArg('force-local');
+$min_date = $args->getArg('min-date');
+
+if (count($reparse_what) > 1 || !($all_from_repo xor count($reparse_what))) {
   usage("Specify a commit or repository to reparse.");
 }
+
+if ($args->getArg('trace')) {
+  PhutilServiceProfiler::installEchoListener();
+}
+
 if (!$reparse_message && !$reparse_change && !$reparse_herald &&
     !$reparse_owners) {
   usage("Specify what information to reparse with --message, --change,  ".
@@ -92,17 +120,27 @@ if ($reparse_owners && !$force) {
 }
 
 $commits = array();
-if ($is_all) {
+if ($all_from_repo) {
   $repository = id(new PhabricatorRepository())->loadOneWhere(
     'callsign = %s OR phid = %s',
-    $reparse_what,
-    $reparse_what);
+    $all_from_repo,
+    $all_from_repo);
   if (!$repository) {
-    throw new Exception("Unknown repository '{$reparse_what}'!");
+    throw new Exception("Unknown repository {$all_from_repo}!");
+  }
+  $constraint = '';
+  if ($min_date) {
+    $table = new PhabricatorRepositoryCommit();
+    $conn_r = $table->establishConnection('r');
+    $constraint = qsprintf(
+      $conn_r,
+      'AND epoch > unix_timestamp(%s)',
+      $min_date);
   }
   $commits = id(new PhabricatorRepositoryCommit())->loadAllWhere(
-    'repositoryID = %d',
-    $repository->getID());
+    'repositoryID = %d %Q',
+    $repository->getID(),
+    $constraint);
   if (!$commits) {
     throw new Exception("No commits have been discovered in that repository!");
   }
@@ -133,7 +171,7 @@ if ($is_all) {
   $commits = array($commit);
 }
 
-if ($is_all) {
+if ($all_from_repo && !$force_local) {
   echo phutil_console_format(
     '**NOTE**: This script will queue tasks to reparse the data. Once the '.
     'tasks have been queued, you need to run Taskmaster daemons to execute '.
@@ -185,7 +223,7 @@ foreach ($commits as $commit) {
     'only'      => true,
   );
 
-  if ($is_all) {
+  if ($all_from_repo && !$force_local) {
     foreach ($classes as $class) {
       $task = new PhabricatorWorkerTask();
       $task->setTaskClass($class);
@@ -207,57 +245,7 @@ foreach ($commits as $commit) {
 echo "\nDone.\n";
 
 function usage($message) {
-  echo "Usage Error: {$message}";
-  echo "\n\n";
-  echo "Run 'reparse.php --help' for detailed help.\n";
-  exit(1);
-}
-
-function help() {
-  $help = <<<EOHELP
-**SUMMARY**
-
-    **reparse.php** __what__ __which_parts__ [--trace] [--force]
-
-    Rerun the Diffusion parser on specific commits and repositories. Mostly
-    useful for debugging changes to Diffusion.
-
-    __what__: what to reparse
-
-        __commit__
-            Reparse one commit. This mode will reparse the commit in-process.
-
-        --all __repository_callsign__
-        --all __repository_phid__
-            Reparse all commits in the specified repository. These modes queue
-            parsers into the task queue, you must run taskmasters to actually
-            do the parses.
-
-    __which_parts__: which parts of the thing to reparse
-
-        __--message__
-            Reparse commit messages.
-
-        __--change__
-            Reparse changes.
-
-        __--herald__
-            Reevaluate Herald rules (may send huge amounts of email!)
-
-        __--owners__
-            Reevaluate related commits for owners packages (may delete existing
-            relationship entries between your package and some old commits!)
-
-    __--force__: act noninteractively, without prompting
-    __--trace__: run with debug tracing
-    __--help__: show this help
-
-**EXAMPLES**
-
-  reparse.php rX123 --change       # Reparse change for "rX123".
-  reparse.php --all E --message    # Reparse all messages in "E" repository.
-
-EOHELP;
-  echo phutil_console_format($help);
+  echo phutil_console_format(
+    '**Usage Exception:** '.$message."\n");
   exit(1);
 }
