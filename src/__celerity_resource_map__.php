@@ -133,6 +133,13 @@ celerity_register_resource_map(array(
     'disk' => '/rsrc/image/appstatus_okay.png',
     'type' => 'png',
   ),
+  '/rsrc/image/autosprite.png' =>
+  array(
+    'hash' => 'd02cc399dc950cd70006ef2374a6da4a',
+    'uri' => '/res/d02cc399/rsrc/image/autosprite.png',
+    'disk' => '/rsrc/image/autosprite.png',
+    'type' => 'png',
+  ),
   '/rsrc/image/avatar.png' =>
   array(
     'hash' => '1c5f255071537f05406adee86717ff27',
@@ -518,153 +525,6 @@ celerity_register_resource_map(array(
     'disk' => '/rsrc/image/logo_grey.png',
     'type' => 'png',
   ),
-  '/rsrc/image/menu/icon_help.png' =>
-  array(
-    'hash' => '874d2355508e8eafa052a1051c640880',
-    'uri' => '/res/874d2355/rsrc/image/menu/icon_help.png',
-    'disk' => '/rsrc/image/menu/icon_help.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/menu/icon_help_hover.png' =>
-  array(
-    'hash' => 'cf247b654052ebce0af28f03fd22c3ee',
-    'uri' => '/res/cf247b65/rsrc/image/menu/icon_help_hover.png',
-    'disk' => '/rsrc/image/menu/icon_help_hover.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/menu/icon_help_selected.png' =>
-  array(
-    'hash' => '59d79d47d28b87ca9a411a6c9617b038',
-    'uri' => '/res/59d79d47/rsrc/image/menu/icon_help_selected.png',
-    'disk' => '/rsrc/image/menu/icon_help_selected.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/menu/icon_logout.png' =>
-  array(
-    'hash' => '084d2bda82d5b996698a538b5ccdb46a',
-    'uri' => '/res/084d2bda/rsrc/image/menu/icon_logout.png',
-    'disk' => '/rsrc/image/menu/icon_logout.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/menu/icon_logout2x.png' =>
-  array(
-    'hash' => '5d11a6d23ad61f55b5793432df5acb0a',
-    'uri' => '/res/5d11a6d2/rsrc/image/menu/icon_logout2x.png',
-    'disk' => '/rsrc/image/menu/icon_logout2x.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/menu/icon_logout2x_hover.png' =>
-  array(
-    'hash' => '80e306c4d8f501da839ce4c80996d9fc',
-    'uri' => '/res/80e306c4/rsrc/image/menu/icon_logout2x_hover.png',
-    'disk' => '/rsrc/image/menu/icon_logout2x_hover.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/menu/icon_logout2x_selected.png' =>
-  array(
-    'hash' => 'aa2e3c875fcad31348df5c9fdccf7159',
-    'uri' => '/res/aa2e3c87/rsrc/image/menu/icon_logout2x_selected.png',
-    'disk' => '/rsrc/image/menu/icon_logout2x_selected.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/menu/icon_logout_hover.png' =>
-  array(
-    'hash' => 'e10818e44bb80106f9d2865de9dc5502',
-    'uri' => '/res/e10818e4/rsrc/image/menu/icon_logout_hover.png',
-    'disk' => '/rsrc/image/menu/icon_logout_hover.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/menu/icon_logout_selected.png' =>
-  array(
-    'hash' => '71129452753f4b079b03c67eb11dabc2',
-    'uri' => '/res/71129452/rsrc/image/menu/icon_logout_selected.png',
-    'disk' => '/rsrc/image/menu/icon_logout_selected.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/menu/icon_settings.png' =>
-  array(
-    'hash' => '247b9e58e0ee2b0e3c2d85eec0fb56de',
-    'uri' => '/res/247b9e58/rsrc/image/menu/icon_settings.png',
-    'disk' => '/rsrc/image/menu/icon_settings.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/menu/icon_settings2x.png' =>
-  array(
-    'hash' => 'f2c6723a9fed69c760a8dbbb4a28878c',
-    'uri' => '/res/f2c6723a/rsrc/image/menu/icon_settings2x.png',
-    'disk' => '/rsrc/image/menu/icon_settings2x.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/menu/icon_settings2x_hover.png' =>
-  array(
-    'hash' => 'dcd473539fe94fb79335c895a7dbe873',
-    'uri' => '/res/dcd47353/rsrc/image/menu/icon_settings2x_hover.png',
-    'disk' => '/rsrc/image/menu/icon_settings2x_hover.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/menu/icon_settings2x_selected.png' =>
-  array(
-    'hash' => '5fac19e4b0c18426c264a5915ba36ce7',
-    'uri' => '/res/5fac19e4/rsrc/image/menu/icon_settings2x_selected.png',
-    'disk' => '/rsrc/image/menu/icon_settings2x_selected.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/menu/icon_settings_hover.png' =>
-  array(
-    'hash' => '1ba90f62880d57ef04b6c3bc3450f9e1',
-    'uri' => '/res/1ba90f62/rsrc/image/menu/icon_settings_hover.png',
-    'disk' => '/rsrc/image/menu/icon_settings_hover.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/menu/icon_settings_selected.png' =>
-  array(
-    'hash' => '52274d9a722786b1110afef9e6055c79',
-    'uri' => '/res/52274d9a/rsrc/image/menu/icon_settings_selected.png',
-    'disk' => '/rsrc/image/menu/icon_settings_selected.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/menu/icon_task.png' =>
-  array(
-    'hash' => 'cb6706766e6587c98fe68431e2d6653c',
-    'uri' => '/res/cb670676/rsrc/image/menu/icon_task.png',
-    'disk' => '/rsrc/image/menu/icon_task.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/menu/icon_task2x.png' =>
-  array(
-    'hash' => '884c90a8d97eebf34457a1d0f68d53b5',
-    'uri' => '/res/884c90a8/rsrc/image/menu/icon_task2x.png',
-    'disk' => '/rsrc/image/menu/icon_task2x.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/menu/icon_task2x_hover.png' =>
-  array(
-    'hash' => 'a9875f3572c50cafe048b95608b5c63e',
-    'uri' => '/res/a9875f35/rsrc/image/menu/icon_task2x_hover.png',
-    'disk' => '/rsrc/image/menu/icon_task2x_hover.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/menu/icon_task2x_selected.png' =>
-  array(
-    'hash' => 'ea8a192e3396468079564bcdeeeae434',
-    'uri' => '/res/ea8a192e/rsrc/image/menu/icon_task2x_selected.png',
-    'disk' => '/rsrc/image/menu/icon_task2x_selected.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/menu/icon_task_hover.png' =>
-  array(
-    'hash' => '97af34be5cfd65a58040ad123e12b596',
-    'uri' => '/res/97af34be/rsrc/image/menu/icon_task_hover.png',
-    'disk' => '/rsrc/image/menu/icon_task_hover.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/menu/icon_task_selected.png' =>
-  array(
-    'hash' => '9d3dfdb15fd43ec784271758c5bc10bc',
-    'uri' => '/res/9d3dfdb1/rsrc/image/menu/icon_task_selected.png',
-    'disk' => '/rsrc/image/menu/icon_task_selected.png',
-    'type' => 'png',
-  ),
   '/rsrc/image/search.png' =>
   array(
     'hash' => 'ff7da044e6f923b8f569dec11f97e5e5',
@@ -857,6 +717,15 @@ celerity_register_resource_map(array(
     array(
     ),
     'disk' => '/rsrc/css/aphront/typeahead.css',
+  ),
+  'autosprite-css' =>
+  array(
+    'uri' => '/res/ef26301d/rsrc/css/autosprite.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/autosprite.css',
   ),
   'differential-changeset-view-css' =>
   array(
@@ -2579,7 +2448,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-main-menu-view' =>
   array(
-    'uri' => '/res/a768260e/rsrc/css/application/base/main-menu-view.css',
+    'uri' => '/res/a51c5f64/rsrc/css/application/base/main-menu-view.css',
     'type' => 'css',
     'requires' =>
     array(

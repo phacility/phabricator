@@ -148,7 +148,6 @@
   height: 26px;
   margin: 9px 6px;
   display: inline-block;
-  background-repeat: no-repeat;
 }
 
 .device-desktop .phabricator-main-menu-icon-label {
@@ -171,47 +170,6 @@
 .device-phone .phabricator-main-menu-icon {
   margin-left: 20px;
   position: absolute;
-}
-
-.main-menu-item-icon {
-  background-repeat: no-repeat;
-  background-size: 26px 26px;
-}
-
-.main-menu-item-icon-settings {
-  background-image: url(/rsrc/image/menu/icon_settings.png);
-}
-
-.main-menu-item-icon-settings:hover {
-  background-image: url(/rsrc/image/menu/icon_settings_hover.png);
-}
-
-.main-menu-item-icon-settings-selected {
-  background-image: url(/rsrc/image/menu/icon_settings_selected.png);
-}
-
-.main-menu-item-icon-logout {
-  background-image: url(/rsrc/image/menu/icon_logout.png);
-}
-
-.main-menu-item-icon-logout:hover {
-  background-image: url(/rsrc/image/menu/icon_logout_hover.png);
-}
-
-.main-menu-item-icon-logout-selected {
-  background-image: url(/rsrc/image/menu/icon_logout_selected.png);
-}
-
-.main-menu-item-icon-help {
-  background-image: url(/rsrc/image/menu/icon_help.png);
-}
-
-.main-menu-item-icon-help:hover {
-  background-image: url(/rsrc/image/menu/icon_help_hover.png);
-}
-
-.main-menu-item-icon-help-selected {
-  background-image: url(/rsrc/image/menu/icon_help_selected.png);
 }
 
 .main-menu-item-icon-profile {
@@ -425,8 +383,4 @@ a:hover .phabricator-main-search-typeahead-result .result-type {
   border-radius: 6px;
   font-weight: bold;
   color: #ffffff;
-}
-
-.phabricator-main-menu-alert-item-notification {
-  background: url(/rsrc/image/bolt.png) no-repeat;
 }

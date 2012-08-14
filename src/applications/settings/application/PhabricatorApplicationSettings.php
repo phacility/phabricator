@@ -45,7 +45,7 @@ final class PhabricatorApplicationSettings extends PhabricatorApplication {
 
     $items = array();
 
-    if ($controller instanceof PhabricatorUserSettingsController) {
+    if ($controller instanceof PhabricatorSettingsMainController) {
       $class = 'main-menu-item-icon-settings-selected';
     } else {
       $class = 'main-menu-item-icon-settings';
@@ -54,7 +54,7 @@ final class PhabricatorApplicationSettings extends PhabricatorApplication {
     if ($user->isLoggedIn()) {
       $item = new PhabricatorMainMenuIconView();
       $item->setName(pht('Settings'));
-      $item->addClass('main-menu-item-icon '.$class);
+      $item->addClass('autosprite main-menu-item-icon '.$class);
       $item->setHref('/settings/');
       $item->setSortOrder(0.90);
       $items[] = $item;

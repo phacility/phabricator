@@ -37,7 +37,7 @@ final class PhabricatorApplicationDiviner extends PhabricatorApplication {
       $class = 'main-menu-item-icon-help';
       $item = new PhabricatorMainMenuIconView();
       $item->setName(pht('%s Help', $application->getName()));
-      $item->addClass('main-menu-item-icon '.$class);
+      $item->addClass('autosprite main-menu-item-icon '.$class);
       $item->setHref($application->getHelpURI());
       $item->setSortOrder(0.1);
       $items[] = $item;

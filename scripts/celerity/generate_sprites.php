@@ -61,7 +61,7 @@ $sheet->addCSSHeader(<<<EOCSS
  */
 
 .autosprite {
-  background-image: url(/rsrc/image/autosprite.png);
+  background-image: url(/rsrc/images/autosprite.png);
   background-repeat: no-repeat;
 }
 EOCSS

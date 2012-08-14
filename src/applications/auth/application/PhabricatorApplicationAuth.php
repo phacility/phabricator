@@ -37,7 +37,7 @@ final class PhabricatorApplicationAuth extends PhabricatorApplication {
     if ($user->isLoggedIn()) {
       $item = new PhabricatorMainMenuIconView();
       $item->setName(pht('Log Out'));
-      $item->addClass('main-menu-item-icon '.$class);
+      $item->addClass('autosprite main-menu-item-icon '.$class);
       $item->setWorkflow(true);
       $item->setHref('/logout/');
       $item->setSortOrder(1.0);
