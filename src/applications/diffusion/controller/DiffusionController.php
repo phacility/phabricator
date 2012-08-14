@@ -144,6 +144,7 @@ abstract class DiffusionController extends PhabricatorController {
     $view->setHandles($handles);
 
     $panel = new AphrontPanelView();
+    $panel->setId('pending-differential-revisions');
     $panel->setHeader('Pending Differential Revisions');
     $panel->appendChild($view);
 
