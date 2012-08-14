@@ -26,6 +26,10 @@ final class PhabricatorApplicationMetaMTA extends PhabricatorApplication {
     return 'View Mail Logs';
   }
 
+  public function getAutospriteName() {
+    return 'mail';
+  }
+
   public function getRoutes() {
     return array(
       $this->getBaseURI() => array(

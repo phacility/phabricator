@@ -32,9 +32,7 @@ a.phabricator-application-launch-container {
   display: inline-block;
   width: 210px;
   min-height: 90px;
-  background-repeat: no-repeat;
   padding: 5px 15px 5px 80px;
-  background-position: 15px 10px;
   margin: 3px 6px;
   overflow: hidden;
   position: relative;
@@ -65,6 +63,16 @@ a.phabricator-application-launch-container:hover {
   display: block;
 }
 
+.phabricator-application-launch-icon {
+  display: block;
+  position: absolute;
+  left: 15px;
+  top: 10px;
+  width: 60px;
+  height: 60px;
+  background-repeat: no-repeat;
+}
+
 .phabricator-application-launch-name {
   font-weight: bold;
 }
@@ -82,7 +90,7 @@ a.phabricator-application-launch-container:hover {
   position: absolute;
   left: 45px;
   top: 10px;
-  background: red;
+  background: #ff0000;
   border-radius: 10px;
   color: white;
   font-weight: normal;

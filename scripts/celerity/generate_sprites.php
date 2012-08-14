@@ -55,13 +55,13 @@ function gly($y) {
 }
 
 $sheet = new PhutilSpriteSheet();
-$sheet->addCSSHeader(<<<EOCSS
+$sheet->setCSSHeader(<<<EOCSS
 /**
  * @provides autosprite-css
  */
 
 .autosprite {
-  background-image: url(/rsrc/images/autosprite.png);
+  background-image: url(/rsrc/image/autosprite.png);
   background-repeat: no-repeat;
 }
 EOCSS
@@ -109,7 +109,7 @@ $app_template_full = id(new PhutilSprite())
 
 $app_template_mini = id(new PhutilSprite())
   ->setSourceFile($srcroot.'/application_normal_1x.png')
-  ->setSourceSize(26, 26);
+  ->setSourceSize(30, 30);
 
 $app_source_map = array(
   '-full' => array($app_template_full, 2),
@@ -140,13 +140,14 @@ $app_map = array(
   'feed'            => array(3, 11),
 );
 
+$xadj = -1;
 foreach ($app_map as $icon => $coords) {
   list($x, $y) = $coords;
   foreach ($app_source_map as $suffix => $spec) {
     list($template, $scale) = $spec;
     $sheet->addSprite(
       id(clone $template)
-        ->setSourcePosition(glx($x) * $scale, gly($y) * $scale)
+        ->setSourcePosition(($xadj + glx($x)) * $scale, gly($y) * $scale)
         ->setTargetCSS('.app-'.$icon.$suffix));
   }
 }

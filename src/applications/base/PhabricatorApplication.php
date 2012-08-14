@@ -55,7 +55,11 @@ abstract class PhabricatorApplication {
   }
 
   public function getIconURI() {
-    return PhabricatorUser::getDefaultProfileImageURI();
+    return null;
+  }
+
+  public function getAutospriteName() {
+    return 'default';
   }
 
   public function shouldAppearInLaunchView() {

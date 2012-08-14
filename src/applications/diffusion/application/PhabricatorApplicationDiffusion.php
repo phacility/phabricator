@@ -26,8 +26,8 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
     return '/diffusion/';
   }
 
-  public function getIconURI() {
-    return celerity_get_resource_uri('/rsrc/image/app/app_diffusion.png');
+  public function getAutospriteName() {
+    return 'diffusion';
   }
 
   public function getHelpURI() {

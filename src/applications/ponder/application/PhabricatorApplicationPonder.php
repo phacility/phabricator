@@ -26,8 +26,8 @@ final class PhabricatorApplicationPonder extends PhabricatorApplication {
     return 'Find Answers';
   }
 
-  public function getIconURI() {
-    return celerity_get_resource_uri('/rsrc/image/app/app_ponder.png');
+  public function getAutospriteName() {
+    return 'ponder';
   }
 
   public function getFactObjectsForAnalysis() {

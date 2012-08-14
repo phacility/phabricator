@@ -240,13 +240,32 @@ final class AphrontSideNavView extends AphrontView {
         $classes[] = 'phabricator-nav-app-item-selected';
       }
 
+      $iclasses = array();
+      $iclasses[] = 'phabricator-nav-app-item-icon';
+      $style = null;
+      if ($application->getIconURI()) {
+        $style = 'background-image: url('.$application->getIconURI().'); '.
+                 'background-size: 30px auto;';
+      } else {
+        $iclasses[] = 'autosprite';
+        $iclasses[] = 'app-'.$application->getAutospriteName();
+      }
+
+      $icon = phutil_render_tag(
+        'span',
+        array(
+          'class' => implode(' ', $iclasses),
+          'style' => $style,
+        ),
+        '');
+
       $apps[] = phutil_render_tag(
         'a',
         array(
           'class' => implode(' ', $classes),
           'href' => $application->getBaseURI(),
-          'style' => 'background-image: url('.$application->getIconURI().')',
         ),
+        $icon.
         phutil_escape_html($application->getName()));
     }
 

@@ -30,8 +30,8 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
     return "\xE2\x99\x9F";
   }
 
-  public function getIconURI() {
-    return celerity_get_resource_uri('/rsrc/image/app/app_people.png');
+  public function getAutospriteName() {
+    return 'people';
   }
 
   public function getRoutes() {

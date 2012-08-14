@@ -11,226 +11,226 @@
   background-position: 0px 0px;
 }
 
-.main-menu-item-icon-settings {
-  background-position: 0px -26px;
-}
-
-.main-menu-item-icon-logout {
-  background-position: 0px -52px;
-}
-
-.main-menu-item-icon-notifications {
-  background-position: 0px -78px;
-}
-
-.main-menu-item-icon-task {
-  background-position: 0px -104px;
-}
-
 .main-menu-item-icon-help-selected {
-  background-position: 0px -130px;
-}
-
-.main-menu-item-icon-settings-selected {
-  background-position: 0px -156px;
-}
-
-.main-menu-item-icon-logout-selected {
-  background-position: 0px -182px;
-}
-
-.main-menu-item-icon-notifications-selected {
-  background-position: 0px -208px;
-}
-
-.main-menu-item-icon-task-selected {
-  background-position: 0px -234px;
+  background-position: 0px -27px;
 }
 
 .main-menu-item-icon-help:hover {
-  background-position: 0px -260px;
+  background-position: 0px -54px;
+}
+
+.main-menu-item-icon-settings {
+  background-position: 0px -81px;
+}
+
+.main-menu-item-icon-settings-selected {
+  background-position: 0px -108px;
 }
 
 .main-menu-item-icon-settings:hover {
-  background-position: 0px -286px;
+  background-position: 0px -135px;
+}
+
+.main-menu-item-icon-logout {
+  background-position: 0px -162px;
+}
+
+.main-menu-item-icon-logout-selected {
+  background-position: 0px -189px;
 }
 
 .main-menu-item-icon-logout:hover {
-  background-position: 0px -312px;
+  background-position: 0px -216px;
+}
+
+.main-menu-item-icon-notifications {
+  background-position: 0px -243px;
+}
+
+.main-menu-item-icon-notifications-selected {
+  background-position: 0px -270px;
 }
 
 .main-menu-item-icon-notifications:hover {
-  background-position: 0px -338px;
+  background-position: 0px -297px;
+}
+
+.main-menu-item-icon-task {
+  background-position: 0px -324px;
+}
+
+.main-menu-item-icon-task-selected {
+  background-position: 0px -351px;
 }
 
 .main-menu-item-icon-task:hover {
-  background-position: 0px -364px;
+  background-position: 0px -378px;
 }
 
 .app-differential-full {
-  background-position: 0px -390px;
-}
-
-.app-fact-full {
-  background-position: 0px -450px;
-}
-
-.app-mail-full {
-  background-position: 0px -510px;
-}
-
-.app-diffusion-full {
-  background-position: 0px -570px;
-}
-
-.app-slowvote-full {
-  background-position: 0px -630px;
-}
-
-.app-phriction-full {
-  background-position: 0px -690px;
-}
-
-.app-maniphest-full {
-  background-position: 0px -750px;
-}
-
-.app-flags-full {
-  background-position: 0px -810px;
-}
-
-.app-settings-full {
-  background-position: 0px -870px;
-}
-
-.app-applications-full {
-  background-position: 0px -930px;
-}
-
-.app-default-full {
-  background-position: 0px -990px;
-}
-
-.app-people-full {
-  background-position: 0px -1050px;
-}
-
-.app-ponder-full {
-  background-position: 0px -1110px;
-}
-
-.app-calendar-full {
-  background-position: 0px -1170px;
-}
-
-.app-files-full {
-  background-position: 0px -1230px;
-}
-
-.app-projects-full {
-  background-position: 0px -1290px;
-}
-
-.app-daemons-full {
-  background-position: 0px -1350px;
-}
-
-.app-herald-full {
-  background-position: 0px -1410px;
-}
-
-.app-countdown-full {
-  background-position: 0px -1470px;
-}
-
-.app-conduit-full {
-  background-position: 0px -1530px;
-}
-
-.app-feed-full {
-  background-position: 0px -1590px;
+  background-position: 0px -405px;
 }
 
 .app-differential {
-  background-position: 0px -1650px;
+  background-position: 0px -466px;
+}
+
+.app-fact-full {
+  background-position: 0px -497px;
 }
 
 .app-fact {
-  background-position: 0px -1676px;
+  background-position: 0px -558px;
+}
+
+.app-mail-full {
+  background-position: 0px -589px;
 }
 
 .app-mail {
-  background-position: 0px -1702px;
+  background-position: 0px -650px;
+}
+
+.app-diffusion-full {
+  background-position: 0px -681px;
 }
 
 .app-diffusion {
-  background-position: 0px -1728px;
+  background-position: 0px -742px;
+}
+
+.app-slowvote-full {
+  background-position: 0px -773px;
 }
 
 .app-slowvote {
-  background-position: 0px -1754px;
+  background-position: 0px -834px;
+}
+
+.app-phriction-full {
+  background-position: 0px -865px;
 }
 
 .app-phriction {
-  background-position: 0px -1780px;
+  background-position: 0px -926px;
+}
+
+.app-maniphest-full {
+  background-position: 0px -957px;
 }
 
 .app-maniphest {
-  background-position: 0px -1806px;
+  background-position: 0px -1018px;
+}
+
+.app-flags-full {
+  background-position: 0px -1049px;
 }
 
 .app-flags {
-  background-position: 0px -1832px;
+  background-position: 0px -1110px;
+}
+
+.app-settings-full {
+  background-position: 0px -1141px;
 }
 
 .app-settings {
-  background-position: 0px -1858px;
+  background-position: 0px -1202px;
+}
+
+.app-applications-full {
+  background-position: 0px -1233px;
 }
 
 .app-applications {
-  background-position: 0px -1884px;
+  background-position: 0px -1294px;
+}
+
+.app-default-full {
+  background-position: 0px -1325px;
 }
 
 .app-default {
-  background-position: 0px -1910px;
+  background-position: 0px -1386px;
+}
+
+.app-people-full {
+  background-position: 0px -1417px;
 }
 
 .app-people {
-  background-position: 0px -1936px;
+  background-position: 0px -1478px;
+}
+
+.app-ponder-full {
+  background-position: 0px -1509px;
 }
 
 .app-ponder {
-  background-position: 0px -1962px;
+  background-position: 0px -1570px;
+}
+
+.app-calendar-full {
+  background-position: 0px -1601px;
 }
 
 .app-calendar {
-  background-position: 0px -1988px;
+  background-position: 0px -1662px;
+}
+
+.app-files-full {
+  background-position: 0px -1693px;
 }
 
 .app-files {
-  background-position: 0px -2014px;
+  background-position: 0px -1754px;
+}
+
+.app-projects-full {
+  background-position: 0px -1785px;
 }
 
 .app-projects {
-  background-position: 0px -2040px;
+  background-position: 0px -1846px;
+}
+
+.app-daemons-full {
+  background-position: 0px -1877px;
 }
 
 .app-daemons {
-  background-position: 0px -2066px;
+  background-position: 0px -1938px;
+}
+
+.app-herald-full {
+  background-position: 0px -1969px;
 }
 
 .app-herald {
-  background-position: 0px -2092px;
+  background-position: 0px -2030px;
+}
+
+.app-countdown-full {
+  background-position: 0px -2061px;
 }
 
 .app-countdown {
-  background-position: 0px -2118px;
+  background-position: 0px -2122px;
+}
+
+.app-conduit-full {
+  background-position: 0px -2153px;
 }
 
 .app-conduit {
-  background-position: 0px -2144px;
+  background-position: 0px -2214px;
+}
+
+.app-feed-full {
+  background-position: 0px -2245px;
 }
 
 .app-feed {
-  background-position: 0px -2170px;
+  background-position: 0px -2306px;
 }

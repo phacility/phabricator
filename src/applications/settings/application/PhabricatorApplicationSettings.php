@@ -26,8 +26,8 @@ final class PhabricatorApplicationSettings extends PhabricatorApplication {
     return 'User Preferences';
   }
 
-  public function getIconURI() {
-    return celerity_get_resource_uri('/rsrc/image/app/app_settings.png');
+  public function getAutospriteName() {
+    return 'settings';
   }
 
   public function getRoutes() {
