@@ -168,6 +168,20 @@ celerity_register_resource_map(array(
     'disk' => '/rsrc/image/button_menu.png',
     'type' => 'png',
   ),
+  '/rsrc/image/checker_dark.png' =>
+  array(
+    'hash' => '640f795343df76ebe5409aae6187e57f',
+    'uri' => '/res/640f7953/rsrc/image/checker_dark.png',
+    'disk' => '/rsrc/image/checker_dark.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/checker_light.png' =>
+  array(
+    'hash' => '7f8f3ef8beb0f2cc4cc69efb9e1c3308',
+    'uri' => '/res/7f8f3ef8/rsrc/image/checker_light.png',
+    'disk' => '/rsrc/image/checker_light.png',
+    'type' => 'png',
+  ),
   '/rsrc/image/credit_cards.png' =>
   array(
     'hash' => '681448de424ea159b6ea68af04c046ae',
@@ -846,7 +860,7 @@ celerity_register_resource_map(array(
   ),
   'differential-changeset-view-css' =>
   array(
-    'uri' => '/res/c9706669/rsrc/css/application/differential/changeset-view.css',
+    'uri' => '/res/28449eff/rsrc/css/application/differential/changeset-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3083,7 +3097,7 @@ celerity_register_resource_map(array(
       'uri' => '/res/pkg/971b021e/core.pkg.js',
       'type' => 'js',
     ),
-    '96bc37d6' =>
+    '19ebcc79' =>
     array(
       'name' => 'differential.pkg.css',
       'symbols' =>
@@ -3102,7 +3116,7 @@ celerity_register_resource_map(array(
         11 => 'differential-local-commits-view-css',
         12 => 'inline-comment-summary-css',
       ),
-      'uri' => '/res/pkg/96bc37d6/differential.pkg.css',
+      'uri' => '/res/pkg/19ebcc79/differential.pkg.css',
       'type' => 'css',
     ),
     29296904 =>
@@ -3225,7 +3239,7 @@ celerity_register_resource_map(array(
     'aphront-dialog-view-css' => 'edf6b149',
     'aphront-error-view-css' => 'edf6b149',
     'aphront-form-view-css' => 'edf6b149',
-    'aphront-headsup-action-list-view-css' => '96bc37d6',
+    'aphront-headsup-action-list-view-css' => '19ebcc79',
     'aphront-headsup-view-css' => 'edf6b149',
     'aphront-list-filter-view-css' => 'edf6b149',
     'aphront-pager-view-css' => 'edf6b149',
@@ -3235,19 +3249,19 @@ celerity_register_resource_map(array(
     'aphront-tokenizer-control-css' => 'edf6b149',
     'aphront-tooltip-css' => 'edf6b149',
     'aphront-typeahead-control-css' => 'edf6b149',
-    'differential-changeset-view-css' => '96bc37d6',
-    'differential-core-view-css' => '96bc37d6',
+    'differential-changeset-view-css' => '19ebcc79',
+    'differential-core-view-css' => '19ebcc79',
     'differential-inline-comment-editor' => '29296904',
-    'differential-local-commits-view-css' => '96bc37d6',
-    'differential-results-table-css' => '96bc37d6',
-    'differential-revision-add-comment-css' => '96bc37d6',
-    'differential-revision-comment-css' => '96bc37d6',
-    'differential-revision-comment-list-css' => '96bc37d6',
-    'differential-revision-history-css' => '96bc37d6',
-    'differential-table-of-contents-css' => '96bc37d6',
+    'differential-local-commits-view-css' => '19ebcc79',
+    'differential-results-table-css' => '19ebcc79',
+    'differential-revision-add-comment-css' => '19ebcc79',
+    'differential-revision-comment-css' => '19ebcc79',
+    'differential-revision-comment-list-css' => '19ebcc79',
+    'differential-revision-history-css' => '19ebcc79',
+    'differential-table-of-contents-css' => '19ebcc79',
     'diffusion-commit-view-css' => 'c8ce2d88',
     'diffusion-icons-css' => 'c8ce2d88',
-    'inline-comment-summary-css' => '96bc37d6',
+    'inline-comment-summary-css' => '19ebcc79',
     'javelin-behavior' => '6fb20113',
     'javelin-behavior-aphront-basic-tokenizer' => '97f65640',
     'javelin-behavior-aphront-drag-and-drop' => '29296904',
@@ -3301,7 +3315,7 @@ celerity_register_resource_map(array(
     'maniphest-task-summary-css' => '7839ae2d',
     'maniphest-transaction-detail-css' => '7839ae2d',
     'phabricator-app-buttons-css' => 'edf6b149',
-    'phabricator-content-source-view-css' => '96bc37d6',
+    'phabricator-content-source-view-css' => '19ebcc79',
     'phabricator-core-buttons-css' => 'edf6b149',
     'phabricator-core-css' => 'edf6b149',
     'phabricator-directory-css' => 'edf6b149',
@@ -3312,7 +3326,7 @@ celerity_register_resource_map(array(
     'phabricator-keyboard-shortcut' => '971b021e',
     'phabricator-keyboard-shortcut-manager' => '971b021e',
     'phabricator-menu-item' => '971b021e',
-    'phabricator-object-selector-css' => '96bc37d6',
+    'phabricator-object-selector-css' => '19ebcc79',
     'phabricator-paste-file-upload' => '971b021e',
     'phabricator-prefab' => '971b021e',
     'phabricator-project-tag-css' => '7839ae2d',

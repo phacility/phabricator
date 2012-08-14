@@ -172,6 +172,14 @@ td.cov-X {
   font-weight: bold;
 }
 
+.differential-diff .differential-image-diff {
+  background-image: url(/rsrc/image/checker_light.png);
+}
+
+.differential-diff .differential-image-diff:hover {
+  background-image: url(/rsrc/image/checker_dark.png);
+}
+
 .differential-meta-notice {
   border:           1px solid #ffdd99;
   background:       #ffeeaa;
