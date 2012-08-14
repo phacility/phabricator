@@ -387,7 +387,7 @@ return array(
   // will give enough context for people who are only viewing the
   // reviews in email to understand what is going on. The context will
   // be created based on the range of the comment.
-  'metamta.differential.unified-comment-context' => true,
+  'metamta.differential.unified-comment-context' => false,
 
   // Prefix prepended to mail sent by Diffusion.
   'metamta.diffusion.subject-prefix' => '[Diffusion]',
