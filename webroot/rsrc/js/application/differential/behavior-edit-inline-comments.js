@@ -169,20 +169,22 @@ JX.behavior('differential-edit-inline-comments', function(config) {
         hideReticle();
       } else {
         root = e.getNode('differential-changeset');
+        if (root) {
 
-        var data = e.getNodeData('differential-inline-comment');
-        var change = e.getNodeData('differential-changeset');
+          var data = e.getNodeData('differential-inline-comment');
+          var change = e.getNodeData('differential-changeset');
 
-        var id_part  = data.on_right ? change.right : change.left;
-        var th = e.getNode('tag:td').previousSibling;
-        var new_part = isNewFile(th) ? 'N' : 'O';
-        var prefix = 'C' + id_part + new_part + 'L';
+          var id_part  = data.on_right ? change.right : change.left;
+          var th = e.getNode('tag:td').previousSibling;
+          var new_part = isNewFile(th) ? 'N' : 'O';
+          var prefix = 'C' + id_part + new_part + 'L';
 
-        origin = JX.$(prefix + data.number);
-        target = JX.$(prefix + (parseInt(data.number, 10) +
-                                parseInt(data.length, 10)));
+          origin = JX.$(prefix + data.number);
+          target = JX.$(prefix + (parseInt(data.number, 10) +
+                                  parseInt(data.length, 10)));
 
-        updateReticle();
+          updateReticle();
+        }
       }
     });
 
