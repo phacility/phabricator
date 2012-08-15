@@ -89,7 +89,7 @@ final class AphrontHTTPSinkTestCase extends PhabricatorTestCase {
     $sink->writeResponse($response);
 
     $this->assertEqual(
-      'for(;;);{"x":"\u003ciframe\u003e"}',
+      'for (;;);{"x":"\u003ciframe\u003e"}',
       $sink->getEmittedData(),
       "JSONResponse should prevent content-sniffing attacks.");
   }
