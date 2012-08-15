@@ -45,7 +45,7 @@ final class PhabricatorApplicationDaemons extends PhabricatorApplication {
         'task/(?P<id>\d+)/(?P<action>[^/]+)/'
           => 'PhabricatorWorkerTaskUpdateController',
         'log/' => array(
-          '' => 'PhabricatorDaemonLogListController',
+          '(?P<running>running/)?' => 'PhabricatorDaemonLogListController',
           'combined/' => 'PhabricatorDaemonCombinedLogController',
           '(?P<id>\d+)/' => 'PhabricatorDaemonLogViewController',
         ),

@@ -19,6 +19,12 @@
 final class PhabricatorDaemonLogListController
   extends PhabricatorDaemonController {
 
+  private $running;
+
+  public function willProcessRequest(array $data) {
+    $this->running = !empty($data['running']);
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
 
@@ -26,7 +32,7 @@ final class PhabricatorDaemonLogListController
     $pager->setOffset($request->getInt('page'));
 
     $clause = '1 = 1';
-    if ($request->getStr('show') == 'running') {
+    if ($this->running) {
       $clause = "`status` != 'exit'";
     }
 
@@ -49,13 +55,13 @@ final class PhabricatorDaemonLogListController
     $daemon_panel->appendChild($pager);
 
     $nav = $this->buildSideNavView();
-    $nav->selectFilter('log');
+    $nav->selectFilter($this->running ? 'log/running' : 'log');
     $nav->appendChild($daemon_panel);
 
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'All Daemons',
+        'title' => $this->running ? 'Running Daemons' : 'All Daemons',
       ));
   }
 
