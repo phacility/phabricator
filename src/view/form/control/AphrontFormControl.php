@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,7 +127,6 @@ abstract class AphrontFormControl extends AphrontView {
       $label =
         '<label class="aphront-form-label">'.
           phutil_escape_html($this->getLabel()).
-          ':'.
         '</label>';
     } else {
       $label = null;
@@ -142,14 +141,16 @@ abstract class AphrontFormControl extends AphrontView {
     if (strlen($this->getError())) {
       $error = $this->getError();
       if ($error === true) {
-        $error = '*';
+        $error =
+          '<div class="aphront-form-error aphront-form-required">'.
+            'Required'.
+          '</div>';
       } else {
-        $error = "\xC2\xAB ".$error;
+        $error =
+          '<div class="aphront-form-error">'.
+            phutil_escape_html($error).
+          '</div>';
       }
-      $error =
-        '<div class="aphront-form-error">'.
-          phutil_escape_html($error).
-        '</div>';
     } else {
       $error = null;
     }
@@ -170,10 +171,12 @@ abstract class AphrontFormControl extends AphrontView {
         'id' => $this->controlID,
         'style' => $this->controlStyle,
       ),
-      $error.
       $label.
+      $error.
       $input.
       $caption.
+
+      // TODO: Remove this once the redesign finishes up.
       '<div style="clear: both;"></div>');
   }
 }

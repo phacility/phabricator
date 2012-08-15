@@ -238,6 +238,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     $new_paste = $this->getPaste();
 
     $form = new AphrontFormView();
+    $form->setFlexible(true);
 
     $available_languages = PhabricatorEnv::getEnvConfig(
       'pygments.dropdown-choices');
@@ -281,12 +282,10 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
           ->addCancelButton('/paste/')
           ->setValue('Create Paste'));
 
-    $create_panel = new AphrontPanelView();
-    $create_panel->setWidth(AphrontPanelView::WIDTH_FULL);
-    $create_panel->setHeader('Create a Paste');
-    $create_panel->appendChild($form);
-
-    return $create_panel;
+    return array(
+      id(new PhabricatorHeaderView())->setHeader('Create Paste'),
+      $form,
+    );
   }
 
   private function buildPasteList(array $pastes) {

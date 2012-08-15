@@ -1,0 +1,56 @@
+/**
+ * @provides phabricator-form-view-css
+ */
+
+.phabricator-form-view {
+  padding: .75em;
+  overflow: hidden;
+
+  background: #f9f9f9;
+
+  border-width: 1px 0;
+  border-style: solid;
+  border-color: #dbdbdb;
+}
+
+
+.device-tablet .phabricator-form-view .aphront-form-control .aphront-form-label,
+.device-phone .phabricator-form-view .aphront-form-control .aphront-form-label {
+  display: block;
+  float: none;
+  text-align: left;
+  margin: 0;
+  padding: 0;
+}
+
+.device-tablet .phabricator-form-view .aphront-form-control
+  .aphront-form-caption,
+.device-phone .phabricator-form-view .aphront-form-control
+  .aphront-form-caption {
+  display: block;
+  float: none;
+  text-align: left;
+  margin: 0;
+  padding: 0;
+}
+
+.device-tablet .phabricator-form-view .aphront-form-control
+  .aphront-form-input,
+.device-phone .phabricator-form-view .aphront-form-control
+  .aphront-form-input {
+  float: none;
+  display: block;
+  text-align: left;
+  margin: .25em 0 0 0;
+  width: 99%;
+  padding: 0;
+}
+
+.device-tablet .phabricator-form-view .aphront-form-control .aphront-form-error,
+.device-phone .phabricator-form-view .aphront-form-control .aphront-form-error {
+  float: none;
+  text-align: left;
+  display: block;
+  margin: 0;
+  padding: 0;
+}

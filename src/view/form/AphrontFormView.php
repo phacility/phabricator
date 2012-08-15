@@ -26,6 +26,12 @@ final class AphrontFormView extends AphrontView {
   private $user;
   private $workflow;
   private $id;
+  private $flexible;
+
+  public function setFlexible($flexible) {
+    $this->flexible = $flexible;
+    return $this;
+  }
 
   public function setID($id) {
     $this->id = $id;
@@ -63,13 +69,22 @@ final class AphrontFormView extends AphrontView {
   }
 
   public function render() {
+    if ($this->flexible) {
+      require_celerity_resource('phabricator-form-view-css');
+    }
     require_celerity_resource('aphront-form-view-css');
 
     Javelin::initBehavior('aphront-form-disable-on-submit');
 
-    $layout = id(new AphrontFormLayoutView())
-      ->setBackgroundShading(true)
-      ->setPadded(true)
+    $layout = new AphrontFormLayoutView();
+
+    if (!$this->flexible) {
+      $layout
+        ->setBackgroundShading(true)
+        ->setPadded(true);
+    }
+
+    $layout
       ->appendChild($this->renderDataInputs())
       ->appendChild($this->renderChildren());
 
@@ -80,6 +95,7 @@ final class AphrontFormView extends AphrontView {
     return phabricator_render_form(
       $this->user,
       array(
+        'class'   => $this->flexible ? 'phabricator-form-view' : null,
         'action'  => $this->action,
         'method'  => $this->method,
         'enctype' => $this->encType,
