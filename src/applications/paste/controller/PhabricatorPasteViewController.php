@@ -129,7 +129,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
     if ($child_phids) {
       $properties->addProperty(
         pht('Forks'),
-        $this->renderHandleList($child_phids));
+        $this->renderHandlesForPHIDs($child_phids));
     }
 
     return $properties;
