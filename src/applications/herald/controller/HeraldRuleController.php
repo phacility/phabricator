@@ -100,7 +100,7 @@ final class HeraldRuleController extends HeraldController {
     $must_match_selector = $this->renderMustMatchSelector($rule);
     $repetition_selector = $this->renderRepetitionSelector($rule);
 
-    $handles = $this->loadHandles($rule);
+    $handles = $this->loadHandlesForRule($rule);
 
     require_celerity_resource('herald-css');
 
@@ -448,7 +448,7 @@ final class HeraldRuleController extends HeraldController {
       ));
   }
 
-  private function loadHandles($rule) {
+  private function loadHandlesForRule($rule) {
     $phids = array();
 
     foreach ($rule->getActions() as $action) {
