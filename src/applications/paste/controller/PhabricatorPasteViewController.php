@@ -44,32 +44,40 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       return new Aphront400Response();
     }
 
+    $forks = id(new PhabricatorPasteQuery())
+      ->setViewer($user)
+      ->withParentPHIDs(array($paste->getPHID()))
+      ->execute();
+    $fork_phids = mpull($forks, 'getPHID');
+
     $this->loadHandles(
-      array(
-        $paste->getAuthorPHID(),
-        $paste->getParentPHID(),
-      ));
+      array_merge(
+        array(
+          $paste->getAuthorPHID(),
+          $paste->getParentPHID(),
+        ),
+        $fork_phids));
 
     $header = $this->buildHeaderView($paste);
     $actions = $this->buildActionView($paste, $file);
-    $properties = $this->buildPropertyView($paste);
+    $properties = $this->buildPropertyView($paste, $fork_phids);
     $source_code = $this->buildSourceCodeView($paste, $file);
 
     $nav = $this->buildSideNavView($paste);
     $nav->selectFilter('paste');
+
     $nav->appendChild(
       array(
         $header,
         $actions,
         $properties,
         $source_code,
-//        $forks_panel,
       ));
 
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'P'.$paste->getID().' '.$paste->getTitle(),
+        'title' => $paste->getFullName(),
         'device' => true,
       ));
   }
@@ -97,7 +105,10 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
           ->setHref($file->getBestURI()));
   }
 
-  private function buildPropertyView(PhabricatorPaste $paste) {
+  private function buildPropertyView(
+    PhabricatorPaste $paste,
+    array $child_phids) {
+
     $user = $this->getRequest()->getUser();
     $properties = new PhabricatorPropertyListView();
 
@@ -113,6 +124,12 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       $properties->addProperty(
         pht('Forked From'),
         $this->getHandle($paste->getParentPHID())->renderLink());
+    }
+
+    if ($child_phids) {
+      $properties->addProperty(
+        pht('Forks'),
+        $this->renderHandleList($child_phids));
     }
 
     return $properties;

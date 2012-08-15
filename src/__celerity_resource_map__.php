@@ -2537,7 +2537,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-property-list-view-css' =>
   array(
-    'uri' => '/res/4a2b2d85/rsrc/css/layout/phabricator-property-list-view.css',
+    'uri' => '/res/598fccad/rsrc/css/layout/phabricator-property-list-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -2585,7 +2585,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-source-code-view-css' =>
   array(
-    'uri' => '/res/631aa90a/rsrc/css/layout/phabricator-source-code-view.css',
+    'uri' => '/res/cf0c566c/rsrc/css/layout/phabricator-source-code-view.css',
     'type' => 'css',
     'requires' =>
     array(

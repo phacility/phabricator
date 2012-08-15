@@ -11,12 +11,11 @@
   overflow: hidden;
 }
 
-.device-desktop .phabricator-property-list-view,
-.device-tablet .phabricator-property-list-view {
+.device-desktop .phabricator-property-list-view {
   padding: 1em 0 0.75em;
 }
 
-
+.device-tablet .phabricator-property-list-view,
 .device-phone .phabricator-property-list-view {
   padding: .5em;
 }
@@ -50,7 +49,6 @@
   float: left;
   margin-bottom: .5em;
 }
-
 
 .device-tablet .phabricator-property-value,
 .device-phone .phabricator-property-value {

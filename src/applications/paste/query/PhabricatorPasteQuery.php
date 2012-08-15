@@ -21,6 +21,7 @@ final class PhabricatorPasteQuery extends PhabricatorCursorPagedPolicyQuery {
   private $ids;
   private $phids;
   private $authorPHIDs;
+  private $parentPHIDs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -34,6 +35,11 @@ final class PhabricatorPasteQuery extends PhabricatorCursorPagedPolicyQuery {
 
   public function withAuthorPHIDs(array $phids) {
     $this->authorPHIDs = $phids;
+    return $this;
+  }
+
+  public function withParentPHIDs(array $phids) {
+    $this->parentPHIDs = $phids;
     return $this;
   }
 
@@ -78,6 +84,13 @@ final class PhabricatorPasteQuery extends PhabricatorCursorPagedPolicyQuery {
         $conn_r,
         'authorPHID IN (%Ls)',
         $this->authorPHIDs);
+    }
+
+    if ($this->parentPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'parentPHID IN (%Ls)',
+        $this->parentPHIDs);
     }
 
     return $this->formatWhereClause($where);

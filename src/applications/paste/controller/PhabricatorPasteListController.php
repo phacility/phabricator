@@ -105,7 +105,6 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     $side_nav = $this->buildSideNavView();
     $side_nav->selectFilter($this->getFilter());
 
-
     if ($this->getErrorView()) {
       $side_nav->appendChild($this->getErrorView());
     }
@@ -132,9 +131,11 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
 
     $this->loadHandles(mpull($paste_list, 'getAuthorPHID'));
 
-    $side_nav->appendChild(
-      $this->renderPasteList($paste_list, $header, $pager));
+    $list = $this->buildPasteList($paste_list);
+    $list->setHeader($header);
+    $list->setPager($pager);
 
+    $side_nav->appendChild($list);
 
     return $this->buildApplicationPage(
       $side_nav,
@@ -288,18 +289,17 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     return $create_panel;
   }
 
-  private function renderPasteList(array $pastes, $header, $pager) {
+  private function buildPasteList(array $pastes) {
     assert_instances_of($pastes, 'PhabricatorPaste');
 
     $user = $this->getRequest()->getUser();
 
     $list = new PhabricatorObjectItemListView();
-    $list->setHeader($header);
     foreach ($pastes as $paste) {
       $created = phabricator_datetime($paste->getDateCreated(), $user);
 
       $item = id(new PhabricatorObjectItemView())
-        ->setHeader('P'.$paste->getID().' '.$paste->getTitle())
+        ->setHeader($paste->getFullName())
         ->setHref('/P'.$paste->getID())
         ->addDetail(
           pht('Author'),
@@ -309,8 +309,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
       $list->addItem($item);
     }
 
-    $list->setPager($pager);
-
     return $list;
   }
+
 }

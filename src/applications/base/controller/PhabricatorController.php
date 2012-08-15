@@ -222,4 +222,13 @@ abstract class PhabricatorController extends AphrontController {
       ->loadHandles();
     return $this;
   }
+
+  protected function renderHandleList(array $phids) {
+    $items = array();
+    foreach ($phids as $phid) {
+      $items[] = $this->getHandle($phid)->renderLink();
+    }
+    return implode('<br />', $items);
+  }
+
 }

@@ -38,18 +38,4 @@ abstract class PhabricatorPasteController extends PhabricatorController {
     return $nav;
   }
 
-  public function buildStandardPageResponse($view, array $data) {
-
-    $page = $this->buildStandardPageView();
-
-    $page->setApplicationName('Paste');
-    $page->setBaseURI('/paste/');
-    $page->setTitle(idx($data, 'title'));
-    $page->setGlyph("\xE2\x9C\x8E");
-    $page->appendChild($view);
-
-    $response = new AphrontWebpageResponse();
-    return $response->setContent($page->render());
-
-  }
 }
