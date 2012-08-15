@@ -554,6 +554,11 @@ return array(
   // but rejects "joe@mail.yourcompany.com".
   'auth.email-domains' => array(),
 
+  // You can provide an arbitrary block of HTML here, which will appear on the
+  // login screen. Normally, you'd use this to provide login or registration
+  // instructions to users.
+  'auth.login-message' => null,
+
 
 // -- Accounts -------------------------------------------------------------- //
 
