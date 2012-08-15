@@ -42,8 +42,11 @@ final class ConduitAPI_phpast_getast_Method extends ConduitAPIMethod {
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    return json_decode(
-      xhpast_get_parser_future($request->getValue('code'))->resolvex()[0]);
+    $source = $request->getValue('code');
+    $future = xhpast_get_parser_future($source);
+    list($stdout) = $future->resolvex();
+
+    return json_decode($stdout, true);
   }
 
 }
