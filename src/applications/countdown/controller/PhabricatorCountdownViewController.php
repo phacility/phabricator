@@ -47,8 +47,9 @@ final class PhabricatorCountdownViewController
       ),
       $chrome_visible ? 'Disable Chrome' : 'Enable Chrome');
 
+    $container = celerity_generate_unique_node_id();
     $content =
-      '<div class="phabricator-timer">
+      '<div class="phabricator-timer" id="'.$container.'">
         <h1 class="phabricator-timer-header">'.
           phutil_escape_html($timer->getTitle()).' &middot; '.
           phabricator_datetime($timer->getDatePoint(), $user).
@@ -61,18 +62,24 @@ final class PhabricatorCountdownViewController
               <th>Minutes</th>
               <th>Seconds</th>
             </tr>
-            <tr>
-              <td id="phabricator-timer-days"></td>
-              <td id="phabricator-timer-hours"></td>
-              <td id="phabricator-timer-minutes"></td>
-              <td id="phabricator-timer-seconds"></td>
+            <tr>'.
+              javelin_render_tag('td',
+                array('sigil' => 'phabricator-timer-days'), '').
+              javelin_render_tag('td',
+                array('sigil' => 'phabricator-timer-hours'), '').
+              javelin_render_tag('td',
+                array('sigil' => 'phabricator-timer-minutes'), '').
+              javelin_render_tag('td',
+                array('sigil' => 'phabricator-timer-seconds'), '').
+            '</tr>
           </table>
         </div>'.
         $chrome_link.
       '</div>';
 
     Javelin::initBehavior('countdown-timer', array(
-      'timestamp' => $timer->getDatepoint()
+      'timestamp' => $timer->getDatepoint(),
+      'container' => $container,
     ));
 
     $panel = $content;

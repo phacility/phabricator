@@ -969,7 +969,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-countdown-timer' =>
   array(
-    'uri' => '/res/5ee9cb13/rsrc/js/application/countdown/timer.js',
+    'uri' => '/res/7468acb7/rsrc/js/application/countdown/timer.js',
     'type' => 'js',
     'requires' =>
     array(

@@ -411,6 +411,8 @@ final class PhabricatorMarkupEngine {
     $rules[] = new PhabricatorRemarkupRuleManiphest();
     $rules[] = new PhabricatorRemarkupRulePaste();
 
+    $rules[] = new PhabricatorRemarkupRuleCountdown();
+
     $rules[] = new PonderRuleQuestion();
 
     if ($options['macros']) {
