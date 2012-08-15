@@ -19,21 +19,20 @@
 final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
   private $id;
+  private $handles;
 
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
   }
 
   public function processRequest() {
-
     $request = $this->getRequest();
     $user = $request->getUser();
 
     $paste = id(new PhabricatorPasteQuery())
       ->setViewer($user)
-      ->withPasteIDs(array($this->id))
+      ->withIDs(array($this->id))
       ->executeOne();
-
     if (!$paste) {
       return new Aphront404Response();
     }
@@ -45,94 +44,87 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       return new Aphront400Response();
     }
 
-    $corpus = $this->buildCorpus($paste, $file);
-    $paste_panel = new AphrontPanelView();
-
-    $author_phid = $paste->getAuthorPHID();
-    $header = 'Viewing Paste '.$paste->getID().' by '.
-      PhabricatorObjectHandleData::loadOneHandle($author_phid)->renderLink();
-    if (strlen($paste->getTitle())) {
-      $header .= ' - '.phutil_escape_html($paste->getTitle());
-    }
-    $paste_panel->setHeader($header);
-
-    $paste_panel->setWidth(AphrontPanelView::WIDTH_FULL);
-    $paste_panel->addButton(
-      phutil_render_tag(
-        'a',
-        array(
-          'href' => '/paste/?fork='.$paste->getID(),
-          'class' => 'green button',
-        ),
-        'Fork This'));
-
-    $raw_uri = $file->getBestURI();
-    $paste_panel->addButton(
-      phutil_render_tag(
-        'a',
-        array(
-          'href'  => $raw_uri,
-          'class' => 'button',
-        ),
-        'View Raw Text'));
-
-    $paste_panel->appendChild($corpus);
-
-    $forks_panel = null;
-    $forks_of_this_paste = id(new PhabricatorPaste())->loadAllWhere(
-      'parentPHID = %s',
-      $paste->getPHID());
-
-    if ($forks_of_this_paste) {
-      $forks_panel = new AphrontPanelView();
-      $forks_panel->setHeader("Forks of this paste");
-      $forks = array();
-      foreach ($forks_of_this_paste as $fork) {
-        $forks[] = array(
-          $fork->getID(),
-          phutil_render_tag(
-            'a',
-            array(
-              'href' => '/P'.$fork->getID(),
-            ),
-            phutil_escape_html($fork->getTitle())
-          )
-        );
-      }
-      $forks_table = new AphrontTableView($forks);
-      $forks_table->setHeaders(
-        array(
-          'Paste ID',
-          'Title',
-        )
-      );
-      $forks_table->setColumnClasses(
-        array(
-          null,
-          'wide pri',
-        )
-      );
-      $forks_panel->appendChild($forks_table);
-    }
-
-    return $this->buildStandardPageResponse(
+    $this->loadHandles(
       array(
-        $paste_panel,
-        $forks_panel,
-      ),
+        $paste->getAuthorPHID(),
+        $paste->getParentPHID(),
+      ));
+
+    $header = $this->buildHeaderView($paste);
+    $actions = $this->buildActionView($paste, $file);
+    $properties = $this->buildPropertyView($paste);
+    $source_code = $this->buildSourceCodeView($paste, $file);
+
+    $nav = $this->buildSideNavView($paste);
+    $nav->selectFilter('paste');
+    $nav->appendChild(
       array(
-        'title' => 'Paste: '.nonempty($paste->getTitle(), 'P'.$paste->getID()),
+        $header,
+        $actions,
+        $properties,
+        $source_code,
+//        $forks_panel,
+      ));
+
+    return $this->buildApplicationPage(
+      $nav,
+      array(
+        'title' => 'P'.$paste->getID().' '.$paste->getTitle(),
+        'device' => true,
       ));
   }
 
-  private function buildCorpus($paste, $file) {
-    // Blantently copied from DiffusionBrowseFileController
+  private function buildHeaderView(PhabricatorPaste $paste) {
+    return id(new PhabricatorHeaderView())
+      ->setObjectName('P'.$paste->getID())
+      ->setHeader($paste->getTitle());
+  }
 
-    require_celerity_resource('diffusion-source-css');
-    require_celerity_resource('syntax-highlighting-css');
+  private function buildActionView(
+    PhabricatorPaste $paste,
+    PhabricatorFile $file) {
+
+    return id(new PhabricatorActionListView())
+      ->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Fork This Paste'))
+          ->setIcon('fork')
+          ->setHref($this->getApplicationURI('?fork='.$paste->getID())))
+      ->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('View Raw File'))
+          ->setIcon('file')
+          ->setHref($file->getBestURI()));
+  }
+
+  private function buildPropertyView(PhabricatorPaste $paste) {
+    $user = $this->getRequest()->getUser();
+    $properties = new PhabricatorPropertyListView();
+
+    $properties->addProperty(
+      pht('Author'),
+      $this->getHandle($paste->getAuthorPHID())->renderLink());
+
+    $properties->addProperty(
+      pht('Created'),
+      phabricator_datetime($paste->getDateCreated(), $user));
+
+    if ($paste->getParentPHID()) {
+      $properties->addProperty(
+        pht('Forked From'),
+        $this->getHandle($paste->getParentPHID())->renderLink());
+    }
+
+    return $properties;
+  }
+
+  private function buildSourceCodeView(
+    PhabricatorPaste $paste,
+    PhabricatorFile $file) {
 
     $language = $paste->getLanguage();
     $source = $file->loadFileData();
+
     if (empty($language)) {
       $source = PhabricatorSyntaxHighlighter::highlightWithFilename(
         $paste->getTitle(),
@@ -143,63 +135,10 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
         $source);
     }
 
-    $text_list = explode("\n", $source);
+    $lines = explode("\n", $source);
 
-    Javelin::initBehavior('phabricator-oncopy', array());
-    $rows = $this->buildDisplayRows($text_list);
-
-    // TODO: Split the "one-up source listing" view into its own class and
-    // share it properly between Paste and Diffusion.
-
-    $corpus_table = phutil_render_tag(
-      'table',
-      array(
-        'class' => 'diffusion-source remarkup-code PhabricatorMonospaced',
-      ),
-      implode("\n", $rows));
-
-    $corpus = phutil_render_tag(
-      'div',
-      array(
-        'style' => 'padding: 0pt 2em;',
-      ),
-      $corpus_table);
-
-    return $corpus;
-  }
-
-  private function buildDisplayRows($text_list) {
-    $rows = array();
-    $n = 1;
-
-    foreach ($text_list as $k => $line) {
-      // Pardon the ugly for the time being.
-      // And eventually this will highlight a line that you click
-      // like diffusion does. Or maybe allow for line comments
-      // like differential. Either way it will be better than it is now.
-      $anchor = 'L'.$n;
-      $link = phutil_render_tag(
-        'a',
-        array(
-          'name' => $anchor,
-          'href' => '#'.$anchor,
-        ),
-        $n);
-      $link = phutil_render_tag(
-        'th',
-        array(
-          'class' => 'diffusion-line-link',
-        ),
-        $link);
-      $rows[] = '<tr id="'.$anchor.'">'.$link.
-        '<td style="white-space: pre-wrap;">'.
-        // NOTE: See the 'phabricator-oncopy' behavior.
-        "\xE2\x80\x8B".
-        $line.'</td></tr>';
-      ++$n;
-    }
-
-    return $rows;
+    return id(new PhabricatorSourceCodeView())
+      ->setLines($lines);
   }
 
 }

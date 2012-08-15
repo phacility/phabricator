@@ -31,6 +31,12 @@ final class PhabricatorStandardPageView extends AphrontPageView {
   private $searchDefaultScope;
   private $pageObjects = array();
   private $controller;
+  private $deviceReady;
+
+  public function setDeviceReady($device_ready) {
+    $this->deviceReady = $device_ready;
+    return $this;
+  }
 
   public function setController(AphrontController $controller) {
     $this->controller = $controller;
@@ -203,12 +209,15 @@ final class PhabricatorStandardPageView extends AphrontPageView {
     }
 
     $viewport_tag = null;
-    if (PhabricatorEnv::getEnvConfig('preview.viewport-meta-tag')) {
+    if (PhabricatorEnv::getEnvConfig('preview.viewport-meta-tag') ||
+        $this->deviceReady) {
       $viewport_tag = phutil_render_tag(
         'meta',
         array(
           'name' => 'viewport',
-          'content' => 'width=device-width, initial-scale=1, maximum-scale=1',
+          'content' => 'width=device-width, '.
+                       'initial-scale=1, '.
+                       'maximum-scale=1',
         ));
     }
 
@@ -293,40 +302,6 @@ final class PhabricatorStandardPageView extends AphrontPageView {
       }
     }
 
-    $foot_links = array();
-
-    $version = PhabricatorEnv::getEnvConfig('phabricator.version');
-    $foot_links[] = phutil_escape_html('Phabricator '.$version);
-
-    $foot_links[] =
-      '<a href="https://secure.phabricator.com/maniphest/task/create/">'.
-        'Report a Bug'.
-      '</a>';
-
-    if (PhabricatorEnv::getEnvConfig('darkconsole.enabled') &&
-       !PhabricatorEnv::getEnvConfig('darkconsole.always-on')) {
-      if ($console) {
-        $link = javelin_render_tag(
-          'a',
-          array(
-            'href' => '/~/',
-            'sigil' => 'workflow',
-          ),
-          'Disable DarkConsole');
-      } else {
-        $link = javelin_render_tag(
-          'a',
-          array(
-            'href' => '/~/',
-            'sigil' => 'workflow',
-          ),
-          'Enable DarkConsole');
-      }
-      $foot_links[] = $link;
-    }
-
-    $foot_links = implode(' &middot; ', $foot_links);
-
     $admin_class = null;
     if ($this->getIsAdminInterface()) {
       $admin_class = 'phabricator-admin-page-view';
@@ -336,10 +311,10 @@ final class PhabricatorStandardPageView extends AphrontPageView {
     $footer_chrome = null;
     if ($this->getShowChrome()) {
       $header_chrome = $this->menuContent;
-      $footer_chrome =
-        '<div class="phabricator-page-foot">'.
-          $foot_links.
-        '</div>';
+
+      if (!$this->deviceReady) {
+        $footer_chrome = $this->renderFooter();
+      }
     }
 
     $developer_warning = null;
@@ -489,6 +464,49 @@ final class PhabricatorStandardPageView extends AphrontPageView {
     $menu->appendChild($icon_views);
 
     return $menu->render();
+  }
+
+  public function renderFooter() {
+    $console = $this->getConsole();
+
+    $foot_links = array();
+
+    $version = PhabricatorEnv::getEnvConfig('phabricator.version');
+    $foot_links[] = phutil_escape_html('Phabricator '.$version);
+
+    $foot_links[] =
+      '<a href="https://secure.phabricator.com/maniphest/task/create/">'.
+        'Report a Bug'.
+      '</a>';
+
+    if (PhabricatorEnv::getEnvConfig('darkconsole.enabled') &&
+       !PhabricatorEnv::getEnvConfig('darkconsole.always-on')) {
+      if ($console) {
+        $link = javelin_render_tag(
+          'a',
+          array(
+            'href' => '/~/',
+            'sigil' => 'workflow',
+          ),
+          'Disable DarkConsole');
+      } else {
+        $link = javelin_render_tag(
+          'a',
+          array(
+            'href' => '/~/',
+            'sigil' => 'workflow',
+          ),
+          'Enable DarkConsole');
+      }
+      $foot_links[] = $link;
+    }
+
+    $foot_links = implode(' &middot; ', $foot_links);
+
+    return
+      '<div class="phabricator-page-foot">'.
+        $foot_links.
+      '</div>';
   }
 
 }

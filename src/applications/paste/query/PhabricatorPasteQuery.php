@@ -18,11 +18,17 @@
 
 final class PhabricatorPasteQuery extends PhabricatorCursorPagedPolicyQuery {
 
-  private $pasteIDs;
+  private $ids;
+  private $phids;
   private $authorPHIDs;
 
-  public function withPasteIDs(array $ids) {
-    $this->pasteIDs = $ids;
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
+    return $this;
+  }
+
+  public function withPHIDs(array $phids) {
+    $this->phids = $phids;
     return $this;
   }
 
@@ -53,11 +59,18 @@ final class PhabricatorPasteQuery extends PhabricatorCursorPagedPolicyQuery {
 
     $where[] = $this->buildPagingClause($conn_r);
 
-    if ($this->pasteIDs) {
+    if ($this->ids) {
       $where[] = qsprintf(
         $conn_r,
-        'id IN (%Ls)',
-        $this->pasteIDs);
+        'id IN (%Ld)',
+        $this->ids);
+    }
+
+    if ($this->phids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'phid IN (%Ls)',
+        $this->phids);
     }
 
     if ($this->authorPHIDs) {

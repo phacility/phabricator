@@ -196,11 +196,6 @@ class AphrontDefaultApplicationConfiguration
 
       '/status/' => 'PhabricatorStatusController',
 
-      '/paste/' => array(
-        '' => 'PhabricatorPasteListController',
-        'filter/(?P<filter>\w+)/' => 'PhabricatorPasteListController',
-      ),
-      '/P(?P<id>\d+)' => 'PhabricatorPasteViewController',
 
       '/help/' => array(
         'keyboardshortcut/' => 'PhabricatorHelpKeyboardShortcutController',

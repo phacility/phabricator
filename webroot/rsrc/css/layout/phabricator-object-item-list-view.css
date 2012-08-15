@@ -1,0 +1,103 @@
+/**
+ * @provides phabricator-object-item-list-view-css
+ */
+
+.phabricator-object-item-list-view {
+  padding: 0 2%;
+  margin: 1em 0;
+}
+
+.phabricator-object-item-list-header {
+  font-weight: normal;
+  color: #333333;
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+
+
+.phabricator-object-item {
+  background: #f9f9f9;
+  border: 1px solid #dbdbdb;
+  border-radius: 2px;
+  margin: 6px 0;
+
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10);
+}
+
+.phabricator-object-item-name {
+  display: block;
+  background: #e9e9e9;
+  padding: 2px 1em;
+  font-weight: bold;
+}
+
+.device-desktop .phabricator-object-item-name {
+
+  border: solid #dbdbdb;
+  border-width: 0 0 1px 0;
+}
+
+/* - Detail List ------------------------------------------------------------
+
+  Object details, used to render things like authors, reviewers, etc.
+
+*/
+
+
+.phabricator-object-detail-list {
+  font-size: 11px;
+  width: 55%;
+  padding: 2px 1%;
+}
+
+.device-desktop .phabricator-object-detail-list,
+.device-tablet .phabricator-object-detail-list {
+  float: left;
+}
+
+.phabricator-object-detail-key {
+  color: #555555;
+  float: left;
+  clear: left;
+  width: 20%;
+  text-align: right;
+  padding: 2px 6px;
+  overflow: hidden;
+}
+
+.phabricator-object-detail-value {
+  color: #444444;
+  float: left;
+
+  padding: 2px 6px;
+}
+
+
+/* - Attribute List ------------------------------------------------------------
+
+  Object attributes, commonly used to render created date, etc.
+
+*/
+
+.phabricator-object-item-attributes {
+  color: #555555;
+  text-align: right;
+  font-size: 11px;
+
+  padding: 2px 1%;
+}
+
+.device-desktop .phabricator-object-item-attributes,
+.device-tablet .phabricator-object-item-attributes {
+  width: 40%;
+  float: right;
+}
+
+.device-phone .phabricator-object-item-attributes {
+  clear: both;
+}
+
+.phabricator-object-item-attributes li {
+  padding: 2px 1%;
+}

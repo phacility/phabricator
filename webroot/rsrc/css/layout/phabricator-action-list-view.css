@@ -1,0 +1,54 @@
+/**
+ * @provides phabricator-action-list-view-css
+ */
+
+.phabricator-action-list-view {
+  background: #ffffff;
+}
+
+.device-desktop .phabricator-action-list-view {
+  border: 1px solid #dcdcdc;
+  padding: .5em 0;
+
+  position: absolute;
+  margin-top: -30px;
+  right: 1%;
+  width: 20%;
+  border-radius: 2px;
+  font-size: 12px;
+
+  box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.10);
+}
+
+.device-tablet .phabricator-action-list-view,
+.device-phone .phabricator-action-list-view {
+  background: #f3f3f3;
+  border-top: 1px solid #dcdcdc;
+  padding: .5em 0;
+}
+
+.phabricator-action-view {
+  padding: 2px 0;
+  position: relative;
+}
+
+.phabricator-action-view-item {
+  line-height: 20px;
+  padding-left: 34px;
+  display: block;
+  font-size: 12px;
+}
+
+.phabricator-action-view-icon {
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  top: 4px;
+  left: 12px;
+}
+
+.device-desktop .phabricator-action-view-item:hover {
+  background-color: #3875d7;
+  color: #ffffff;
+  text-decoration: none;
+}

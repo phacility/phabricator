@@ -102,31 +102,9 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
         break;
     }
 
-    $filters = array(
-      'create' => array(
-        'name' => 'Create Paste',
-      ),
-      'my' => array(
-        'name' => 'My Pastes',
-      ),
-      'all' => array(
-        'name' => 'All Pastes',
-      ),
-    );
+    $side_nav = $this->buildSideNavView();
+    $side_nav->selectFilter($this->getFilter());
 
-    $side_nav = new AphrontSideNavView();
-    foreach ($filters as $filter_key => $filter) {
-      $selected = $filter_key == $this->getFilter();
-      $side_nav->addNavItem(
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => '/paste/filter/'.$filter_key.'/',
-            'class' => $selected ? 'aphront-side-nav-selected': null,
-          ),
-          $filter['name'])
-      );
-    }
 
     if ($this->getErrorView()) {
       $side_nav->appendChild($this->getErrorView());
@@ -142,7 +120,7 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
             'href' => '/paste/filter/all',
           ),
           'See all Pastes');
-        $header = "Recent Pastes &middot; {$see_all}";
+        $header = "Recent Pastes";
         break;
       case 'my':
         $header = 'Your Pastes';
@@ -152,14 +130,17 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
         break;
     }
 
+    $this->loadHandles(mpull($paste_list, 'getAuthorPHID'));
+
     $side_nav->appendChild(
       $this->renderPasteList($paste_list, $header, $pager));
 
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $side_nav,
       array(
         'title' => 'Paste',
+        'device' => true,
       )
     );
   }
@@ -310,95 +291,26 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
   private function renderPasteList(array $pastes, $header, $pager) {
     assert_instances_of($pastes, 'PhabricatorPaste');
 
-    $phids = mpull($pastes, 'getAuthorPHID');
-    $handles = array();
-    if ($phids) {
-      $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
-    }
+    $user = $this->getRequest()->getUser();
 
-    $phids = mpull($pastes, 'getFilePHID');
-    $file_uris = array();
-    if ($phids) {
-      $files = id(new PhabricatorFile())->loadAllWhere(
-        'phid in (%Ls)',
-        $phids);
-      if ($files) {
-        $file_uris = mpull($files, 'getBestURI', 'getPHID');
-      }
-    }
-
-    $paste_list_rows = array();
+    $list = new PhabricatorObjectItemListView();
+    $list->setHeader($header);
     foreach ($pastes as $paste) {
+      $created = phabricator_datetime($paste->getDateCreated(), $user);
 
-      $handle = $handles[$paste->getAuthorPHID()];
-      $file_uri = $file_uris[$paste->getFilePHID()];
+      $item = id(new PhabricatorObjectItemView())
+        ->setHeader('P'.$paste->getID().' '.$paste->getTitle())
+        ->setHref('/P'.$paste->getID())
+        ->addDetail(
+          pht('Author'),
+          $this->getHandle($paste->getAuthorPHID())->renderLink())
+        ->addAttribute(pht('Created %s', $created));
 
-      $paste_list_rows[] = array(
-        phutil_escape_html('P'.$paste->getID()),
-
-        // TODO: Make this filter by user instead of going to their profile.
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => '/p/'.$handle->getName().'/',
-          ),
-          phutil_escape_html($handle->getName())),
-
-        phutil_escape_html($paste->getLanguage()),
-
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => '/P'.$paste->getID(),
-          ),
-          phutil_escape_html(
-            nonempty(
-              $paste->getTitle(),
-              'Untitled Masterwork P'.$paste->getID()))),
-
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => $file_uri,
-          ),
-          phutil_escape_html($paste->getFilePHID())),
-
-        phabricator_datetime(
-          $paste->getDateCreated(),
-          $this->getRequest()->getUser()),
-      );
+      $list->addItem($item);
     }
 
+    $list->setPager($pager);
 
-    $table = new AphrontTableView($paste_list_rows);
-    $table->setHeaders(
-      array(
-        'Paste ID',
-        'Author',
-        'Language',
-        'Title',
-        'File',
-        'Created',
-      ));
-
-    $table->setColumnClasses(
-      array(
-        null,
-        null,
-        null,
-        'wide pri',
-        null,
-        'right',
-      ));
-
-    $panel = new AphrontPanelView();
-    $panel->setWidth(AphrontPanelView::WIDTH_FULL);
-    $panel->setHeader($header);
-    $panel->appendChild($table);
-    if ($pager) {
-      $panel->appendChild($pager);
-    }
-
-    return $panel;
+    return $list;
   }
 }

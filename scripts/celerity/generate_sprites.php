@@ -138,6 +138,7 @@ $app_map = array(
   'countdown'       => array(7, 5),
   'conduit'         => array(7, 30),
   'feed'            => array(3, 11),
+  'paste'           => array(9, 2),
 );
 
 $xadj = -1;
@@ -150,6 +151,22 @@ foreach ($app_map as $icon => $coords) {
         ->setSourcePosition(($xadj + glx($x)) * $scale, gly($y) * $scale)
         ->setTargetCSS('.app-'.$icon.$suffix));
   }
+}
+
+$action_template = id(new PhutilSprite())
+  ->setSourcePosition(0, 0)
+  ->setSourceSize(16, 16);
+
+$action_map = array(
+  'file'  => 'icon/page_white_text.png',
+  'fork'  => 'icon/arrow_branch.png',
+);
+
+foreach ($action_map as $icon => $source) {
+  $sheet->addSprite(
+    id(clone $action_template)
+      ->setSourceFile($srcroot.$source)
+      ->setTargetCSS('.action-'.$icon));
 }
 
 $sheet->generateImage($webroot.'/image/autosprite.png');
