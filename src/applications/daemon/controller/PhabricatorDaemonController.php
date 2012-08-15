@@ -24,6 +24,7 @@ abstract class PhabricatorDaemonController extends PhabricatorController {
 
     $nav->addLabel('Daemons');
     $nav->addFilter('', 'Console', $this->getApplicationURI());
+    $nav->addFilter('log?show=running', 'Running Daemons');
     $nav->addFilter('log', 'All Daemons');
     $nav->addFilter('log/combined', 'Combined Log');
 

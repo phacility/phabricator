@@ -25,8 +25,14 @@ final class PhabricatorDaemonLogListController
     $pager = new AphrontPagerView();
     $pager->setOffset($request->getInt('page'));
 
+    $clause = '1 = 1';
+    if ($request->getStr('show') == 'running') {
+      $clause = "`status` != 'exit'";
+    }
+
     $logs = id(new PhabricatorDaemonLog())->loadAllWhere(
-      '1 = 1 ORDER BY id DESC LIMIT %d, %d',
+      '%Q ORDER BY id DESC LIMIT %d, %d',
+      $clause,
       $pager->getOffset(),
       $pager->getPageSize() + 1);
 
