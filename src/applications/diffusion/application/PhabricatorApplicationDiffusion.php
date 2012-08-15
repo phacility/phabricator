@@ -34,6 +34,12 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
     return PhabricatorEnv::getDoclink('article/Diffusion_User_Guide.html');
   }
 
+  public function getFactObjectsForAnalysis() {
+    return array(
+      new PhabricatorRepositoryCommit(),
+    );
+  }
+
   public function getRoutes() {
     return array(
       '/r(?P<callsign>[A-Z]+)(?P<commit>[a-z0-9]+)'
