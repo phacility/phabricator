@@ -95,20 +95,52 @@ final class PhabricatorProjectEditor {
     }
 
     foreach ($transactions as $key => $xaction) {
-      $type = $xaction->getTransactionType();
-
       $this->setTransactionOldValue($project, $xaction);
-
       if (!$this->transactionHasEffect($xaction)) {
         unset($transactions[$key]);
         continue;
       }
+    }
 
-      $this->applyTransactionEffect($project, $xaction);
+    if (!$is_new) {
+      // You must be able to view a project in order to edit it in any capacity.
+      PhabricatorPolicyFilter::requireCapability(
+        $user,
+        $project,
+        PhabricatorPolicyCapability::CAN_VIEW);
+
+      $need_edit = false;
+      $need_join = false;
+      foreach ($transactions as $key => $xaction) {
+        if ($this->getTransactionRequiresEditCapability($xaction)) {
+          $need_edit = true;
+        }
+        if ($this->getTransactionRequiresJoinCapability($xaction)) {
+          $need_join = true;
+        }
+      }
+
+      if ($need_edit) {
+        PhabricatorPolicyFilter::requireCapability(
+          $user,
+          $project,
+          PhabricatorPolicyCapability::CAN_EDIT);
+      }
+
+      if ($need_join) {
+        PhabricatorPolicyFilter::requireCapability(
+          $user,
+          $project,
+          PhabricatorPolicyCapability::CAN_JOIN);
+      }
     }
 
     if (!$transactions) {
       return $this;
+    }
+
+    foreach ($transactions as $xaction) {
+      $this->applyTransactionEffect($project, $xaction);
     }
 
     try {
@@ -203,6 +235,15 @@ final class PhabricatorProjectEditor {
         $new_value = array_values($new_value);
         $xaction->setNewValue($new_value);
         break;
+      case PhabricatorProjectTransactionType::TYPE_CAN_VIEW:
+        $xaction->setOldValue($project->getViewPolicy());
+        break;
+      case PhabricatorProjectTransactionType::TYPE_CAN_EDIT:
+        $xaction->setOldValue($project->getEditPolicy());
+        break;
+      case PhabricatorProjectTransactionType::TYPE_CAN_JOIN:
+        $xaction->setOldValue($project->getJoinPolicy());
+        break;
       default:
         throw new Exception("Unknown transaction type '{$type}'!");
     }
@@ -228,6 +269,21 @@ final class PhabricatorProjectEditor {
         $new = array_fill_keys($xaction->getNewValue(), true);
         $this->addEdges = array_keys(array_diff_key($new, $old));
         $this->remEdges = array_keys(array_diff_key($old, $new));
+        break;
+      case PhabricatorProjectTransactionType::TYPE_CAN_VIEW:
+        $project->setViewPolicy($xaction->getNewValue());
+        break;
+      case PhabricatorProjectTransactionType::TYPE_CAN_EDIT:
+        $project->setEditPolicy($xaction->getNewValue());
+
+        // You can't edit away your ability to edit the project.
+        PhabricatorPolicyFilter::mustRetainCapability(
+          $this->user,
+          $project,
+          PhabricatorPolicyCapability::CAN_EDIT);
+        break;
+      case PhabricatorProjectTransactionType::TYPE_CAN_JOIN:
+        $project->setJoinPolicy($xaction->getNewValue());
         break;
       default:
         throw new Exception("Unknown transaction type '{$type}'!");
@@ -262,6 +318,77 @@ final class PhabricatorProjectEditor {
   private function transactionHasEffect(
     PhabricatorProjectTransaction $xaction) {
     return ($xaction->getOldValue() !== $xaction->getNewValue());
+  }
+
+
+  /**
+   * All transactions except joining or leaving a project require edit
+   * capability.
+   */
+  private function getTransactionRequiresEditCapability(
+    PhabricatorProjectTransaction $xaction) {
+    return ($this->isJoinOrLeaveTransaction($xaction) === null);
+  }
+
+
+  /**
+   * Joining a project requires the join capability. Anyone leave a project.
+   */
+  private function getTransactionRequiresJoinCapability(
+    PhabricatorProjectTransaction $xaction) {
+    $type = $this->isJoinOrLeaveTransaction($xaction);
+    return ($type == 'join');
+  }
+
+
+  /**
+   * Returns 'join' if this transaction causes the acting user ONLY to join the
+   * project.
+   *
+   * Returns 'leave' if this transaction causes the acting user ONLY to leave
+   * the project.
+   *
+   * Returns null in all other cases.
+   */
+  private function isJoinOrLeaveTransaction(
+    PhabricatorProjectTransaction $xaction) {
+
+    $type = $xaction->getTransactionType();
+    if ($type != PhabricatorProjectTransactionType::TYPE_MEMBERS) {
+      return null;
+    }
+
+    switch ($type) {
+      case PhabricatorProjectTransactionType::TYPE_MEMBERS:
+        $old = $xaction->getOldValue();
+        $new = $xaction->getNewValue();
+
+        $add = array_diff($new, $old);
+        $rem = array_diff($old, $new);
+
+        if (count($add) > 1) {
+          return null;
+        } else if (count($add) == 1) {
+          if (reset($add) != $this->user->getPHID()) {
+            return null;
+          } else {
+            return 'join';
+          }
+        }
+
+        if (count($rem) > 1) {
+          return null;
+        } else if (count($rem) == 1) {
+          if (reset($rem) != $this->user->getPHID()) {
+            return null;
+          } else {
+            return 'leave';
+          }
+        }
+        break;
+    }
+
+    return true;
   }
 
 }

@@ -31,23 +31,29 @@ final class PhabricatorProjectProfileController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $project = id(new PhabricatorProject())->load($this->id);
+    $query = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id));
+
+    if ($this->page == 'people') {
+      $query->needMembers(true);
+    }
+
+    $project = $query->executeOne();
     if (!$project) {
       return new Aphront404Response();
     }
+
     $profile = $project->loadProfile();
     if (!$profile) {
       $profile = new PhabricatorProjectProfile();
     }
 
     $picture = $profile->loadProfileImageURI();
-    $members = $project->loadMemberPHIDs();
-    $member_map = array_fill_keys($members, true);
 
     $nav_view = $this->buildLocalNavigation($project);
 
     $this->page = $nav_view->selectFilter($this->page, 'dashboard');
-
 
     require_celerity_resource('phabricator-profile-css');
     switch ($this->page) {
@@ -88,7 +94,15 @@ final class PhabricatorProjectProfileController
     $header->setProfilePicture($picture);
 
     $action = null;
-    if (empty($member_map[$user->getPHID()])) {
+    if (!$project->isUserMember($user->getPHID())) {
+      $can_join = PhabricatorPolicyCapability::CAN_JOIN;
+
+      if (PhabricatorPolicyFilter::hasCapability($user, $project, $can_join)) {
+        $class = 'green';
+      } else {
+        $class = 'grey disabled';
+      }
+
       $action = phabricator_render_form(
         $user,
         array(
@@ -98,7 +112,7 @@ final class PhabricatorProjectProfileController
         phutil_render_tag(
           'button',
           array(
-            'class' => 'green',
+            'class' => $class,
           ),
           'Join Project'));
     } else {
@@ -172,7 +186,7 @@ final class PhabricatorProjectProfileController
     PhabricatorProject $project,
     PhabricatorProjectProfile $profile) {
 
-    $member_phids = $project->loadMemberPHIDs();
+    $member_phids = $project->getMemberPHIDs();
     $handles = id(new PhabricatorObjectHandleData($member_phids))
       ->loadHandles();
 

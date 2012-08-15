@@ -31,18 +31,14 @@ final class PhabricatorProjectUpdateController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $project = id(new PhabricatorProjectQuery())
-      ->setViewer($user)
-      ->needMembers(true)
-      ->withIDs(array($this->id))
-      ->executeOne();
-    if (!$project) {
-      return new Aphront404Response();
-    }
+    $capabilities = array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
 
     $process_action = false;
     switch ($this->action) {
       case 'join':
+        $capabilities[] = PhabricatorPolicyCapability::CAN_JOIN;
         $process_action = $request->isFormPost();
         break;
       case 'leave':
@@ -50,6 +46,16 @@ final class PhabricatorProjectUpdateController
         break;
       default:
         return new Aphront404Response();
+    }
+
+    $project = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->needMembers(true)
+      ->requireCapabilities($capabilities)
+      ->executeOne();
+    if (!$project) {
+      return new Aphront404Response();
     }
 
     $project_uri = '/project/view/'.$project->getID().'/';

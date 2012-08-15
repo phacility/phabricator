@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,9 +53,28 @@ abstract class PhabricatorProjectController extends PhabricatorController {
     $nav_view->addFilter(null, 'Wiki '.$external_arrow, $phriction_uri);
     $nav_view->addFilter('people', 'People');
     $nav_view->addFilter('about', 'About');
+
+    $user = $this->getRequest()->getUser();
+    $can_edit = PhabricatorPolicyCapability::CAN_EDIT;
+
     $nav_view->addSpacer();
-    $nav_view->addFilter('edit', "Edit Project\xE2\x80\xA6", $edit_uri);
-    $nav_view->addFilter('members', "Edit Members\xE2\x80\xA6", $members_uri);
+    if (PhabricatorPolicyFilter::hasCapability($user, $project, $can_edit)) {
+      $nav_view->addFilter('edit', "Edit Project\xE2\x80\xA6", $edit_uri);
+      $nav_view->addFilter('members', "Edit Members\xE2\x80\xA6", $members_uri);
+    } else {
+      $nav_view->addFilter(
+        'edit',
+        "Edit Project\xE2\x80\xA6",
+        $edit_uri,
+        $relative = false,
+        'disabled');
+      $nav_view->addFilter(
+        'members',
+        "Edit Members\xE2\x80\xA6",
+        $members_uri,
+        $relative = false,
+        'disabled');
+    }
 
     return $nav_view;
   }

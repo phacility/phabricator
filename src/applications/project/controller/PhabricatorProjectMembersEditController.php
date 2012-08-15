@@ -27,7 +27,15 @@ final class PhabricatorProjectMembersEditController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $project = id(new PhabricatorProject())->load($this->id);
+    $project = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
     if (!$project) {
       return new Aphront404Response();
     }
