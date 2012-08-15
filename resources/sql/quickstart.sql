@@ -1406,8 +1406,8 @@ CREATE TABLE `user_nametoken` (
 CREATE TABLE `user_oauthinfo` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `userID` int(10) unsigned NOT NULL,
-  `oauthProvider` varchar(255) NOT NULL,
-  `oauthUID` varchar(255) NOT NULL,
+  `oauthProvider` varchar(255) CHARACTER SET latin1 NOT NULL,
+  `oauthUID` varchar(255) CHARACTER SET latin1 NOT NULL,
   `dateCreated` int(10) unsigned NOT NULL,
   `dateModified` int(10) unsigned NOT NULL,
   `accountURI` varchar(255) DEFAULT NULL,
