@@ -968,6 +968,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('daemonstatuskey.sql'),
       ),
+      'edgetype.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('edgetype.sql'),
+      ),
     );
   }
 
