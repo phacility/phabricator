@@ -31,6 +31,11 @@ $args->parseStandardArguments();
 $args->parse(
   array(
     array(
+      'name'      => 'no-purge',
+      'help'      => 'Do not clear all symbols for this project before '.
+                     'uploading new symbols. Useful for incremental updating.',
+    ),
+    array(
       'name'      => 'more',
       'wildcard'  => true,
     ),
@@ -151,12 +156,14 @@ foreach ($symbols as $dict) {
     $path_map[$dict['path']]);
 }
 
-echo "Purging old symbols...\n";
-queryfx(
-  $conn_w,
-  'DELETE FROM %T WHERE arcanistProjectID = %d',
-  $symbol->getTableName(),
-  $project->getID());
+if (!$args->getArg('no-purge')) {
+  echo "Purging old symbols...\n";
+  queryfx(
+    $conn_w,
+    'DELETE FROM %T WHERE arcanistProjectID = %d',
+    $symbol->getTableName(),
+    $project->getID());
+}
 
 echo "Loading ".number_format(count($sql))." symbols...\n";
 foreach (array_chunk($sql, 128) as $chunk) {
