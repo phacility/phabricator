@@ -20,7 +20,7 @@ final class DifferentialPathFieldSpecification
   extends DifferentialFieldSpecification {
 
   public function shouldAppearOnRevisionView() {
-    return true;
+    return PhabricatorEnv::getEnvConfig('differential.show-host-field');
   }
 
   public function renderLabelForRevisionView() {

@@ -23,44 +23,28 @@ final class DifferentialDefaultFieldSelector
     $fields = array(
       new DifferentialTitleFieldSpecification(),
       new DifferentialSummaryFieldSpecification(),
+      new DifferentialTestPlanFieldSpecification(),
+      new DifferentialRevisionStatusFieldSpecification(),
+      new DifferentialAuthorFieldSpecification(),
+      new DifferentialReviewersFieldSpecification(),
+      new DifferentialReviewedByFieldSpecification(),
+      new DifferentialCCsFieldSpecification(),
+      new DifferentialLintFieldSpecification(),
+      new DifferentialUnitFieldSpecification(),
+      new DifferentialCommitsFieldSpecification(),
+      new DifferentialDependenciesFieldSpecification(),
+      new DifferentialManiphestTasksFieldSpecification(),
+      new DifferentialHostFieldSpecification(),
+      new DifferentialPathFieldSpecification(),
+      new DifferentialBranchFieldSpecification(),
+      new DifferentialArcanistProjectFieldSpecification(),
+      new DifferentialApplyPatchFieldSpecification(),
+      new DifferentialRevisionIDFieldSpecification(),
+      new DifferentialGitSVNIDFieldSpecification(),
+      new DifferentialDateModifiedFieldSpecification(),
+      new DifferentialDateCreatedFieldSpecification(),
+      new DifferentialAuditorsFieldSpecification(),
     );
-
-    if (PhabricatorEnv::getEnvConfig('differential.show-test-plan-field')) {
-      $fields[] = new DifferentialTestPlanFieldSpecification();
-    }
-
-    $fields = array_merge(
-      $fields,
-      array(
-        new DifferentialRevisionStatusFieldSpecification(),
-        new DifferentialAuthorFieldSpecification(),
-        new DifferentialReviewersFieldSpecification(),
-        new DifferentialReviewedByFieldSpecification(),
-        new DifferentialCCsFieldSpecification(),
-        new DifferentialLintFieldSpecification(),
-        new DifferentialUnitFieldSpecification(),
-        new DifferentialCommitsFieldSpecification(),
-        new DifferentialDependenciesFieldSpecification(),
-        new DifferentialManiphestTasksFieldSpecification(),
-      ));
-
-    if (PhabricatorEnv::getEnvConfig('differential.show-host-field')) {
-      $fields[] = new DifferentialHostFieldSpecification();
-      $fields[] = new DifferentialPathFieldSpecification();
-    }
-
-    $fields = array_merge(
-      $fields,
-      array(
-        new DifferentialBranchFieldSpecification(),
-        new DifferentialArcanistProjectFieldSpecification(),
-        new DifferentialApplyPatchFieldSpecification(),
-        new DifferentialRevisionIDFieldSpecification(),
-        new DifferentialGitSVNIDFieldSpecification(),
-        new DifferentialDateModifiedFieldSpecification(),
-        new DifferentialDateCreatedFieldSpecification(),
-        new DifferentialAuditorsFieldSpecification(),
-      ));
 
     return $fields;
   }
