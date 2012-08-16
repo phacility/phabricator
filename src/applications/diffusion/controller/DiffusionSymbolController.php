@@ -68,24 +68,22 @@ final class DiffusionSymbolController extends DiffusionController {
 
     // For PHP builtins, jump to php.net documentation.
     if ($request->getBool('jump') && count($symbols) == 0) {
-      if ($request->getStr('lang') == 'php') {
-        switch ($request->getStr('type')) {
-          case 'function':
-            $functions = get_defined_functions();
-            if (in_array($this->name, $functions['internal'])) {
+      if ($request->getStr('lang', 'php') == 'php') {
+        if ($request->getStr('type', 'function') == 'function') {
+          $functions = get_defined_functions();
+          if (in_array($this->name, $functions['internal'])) {
+            return id(new AphrontRedirectResponse())
+              ->setURI('http://www.php.net/function.'.$this->name);
+          }
+        }
+        if ($request->getStr('type', 'class') == 'class') {
+          if (class_exists($this->name, false) ||
+              interface_exists($this->name, false)) {
+            if (id(new ReflectionClass($this->name))->isInternal()) {
               return id(new AphrontRedirectResponse())
-                ->setURI('http://www.php.net/function.'.$this->name);
+                ->setURI('http://www.php.net/class.'.$this->name);
             }
-            break;
-          case 'class':
-            if (class_exists($this->name, false) ||
-                interface_exists($this->name, false)) {
-              if (id(new ReflectionClass($this->name))->isInternal()) {
-                return id(new AphrontRedirectResponse())
-                  ->setURI('http://www.php.net/class.'.$this->name);
-              }
-            }
-            break;
+          }
         }
       }
     }
