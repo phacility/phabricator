@@ -95,7 +95,15 @@ abstract class DiffusionBrowseQuery {
 
     $readme = null;
     foreach ($results as $result) {
+      $file_type = $result->getFileType();
+      if (($file_type != ArcanistDiffChangeType::FILE_NORMAL) &&
+          ($file_type != ArcanistDiffChangeType::FILE_TEXT)) {
+        // Skip directories, etc.
+        continue;
+      }
+
       $path = $result->getPath();
+
       if (preg_match('/^readme(|\.txt|\.remarkup|\.rainbow)$/i', $path)) {
         $readme = $result;
         break;
@@ -117,7 +125,6 @@ abstract class DiffusionBrowseQuery {
       $readme_request);
     $content_query->loadFileContent();
     $readme_content = $content_query->getRawData();
-
 
     if (preg_match('/\\.txt$/', $readme->getPath())) {
       $readme_content = phutil_escape_html($readme_content);
