@@ -610,7 +610,7 @@ final class DifferentialRevisionQuery {
       foreach ($repo_info as $repository_id => $paths) {
         $path_clauses[] = qsprintf(
           $conn_r,
-          '(repositoryID = %d AND pathID IN (%Ld))',
+          '(p.repositoryID = %d AND p.pathID IN (%Ld))',
           $repository_id,
           ipull($paths, 'pathID'));
       }
@@ -621,7 +621,7 @@ final class DifferentialRevisionQuery {
     if ($this->authors) {
       $where[] = qsprintf(
         $conn_r,
-        'authorPHID IN (%Ls)',
+        'r.authorPHID IN (%Ls)',
         $this->authors);
     }
 
@@ -634,7 +634,7 @@ final class DifferentialRevisionQuery {
     if ($this->revIDs) {
       $where[] = qsprintf(
         $conn_r,
-        'id IN (%Ld)',
+        'r.id IN (%Ld)',
         $this->revIDs);
     }
 
@@ -655,7 +655,7 @@ final class DifferentialRevisionQuery {
     if ($this->phids) {
       $where[] = qsprintf(
         $conn_r,
-        'phid IN (%Ls)',
+        'r.phid IN (%Ls)',
         $this->phids);
     }
 
@@ -686,7 +686,7 @@ final class DifferentialRevisionQuery {
       case self::STATUS_OPEN:
         $where[] = qsprintf(
           $conn_r,
-          'status IN (%Ld)',
+          'r.status IN (%Ld)',
           array(
             ArcanistDifferentialRevisionStatus::NEEDS_REVIEW,
             ArcanistDifferentialRevisionStatus::NEEDS_REVISION,
@@ -696,7 +696,7 @@ final class DifferentialRevisionQuery {
       case self::STATUS_NEEDS_REVIEW:
         $where[] = qsprintf(
           $conn_r,
-          'status IN (%Ld)',
+          'r.status IN (%Ld)',
           array(
                ArcanistDifferentialRevisionStatus::NEEDS_REVIEW,
           ));
@@ -704,7 +704,7 @@ final class DifferentialRevisionQuery {
       case self::STATUS_ACCEPTED:
         $where[] = qsprintf(
           $conn_r,
-          'status IN (%Ld)',
+          'r.status IN (%Ld)',
           array(
             ArcanistDifferentialRevisionStatus::ACCEPTED,
           ));
@@ -718,7 +718,7 @@ final class DifferentialRevisionQuery {
       case self::STATUS_CLOSED:
         $where[] = qsprintf(
           $conn_r,
-          'status IN (%Ld)',
+          'r.status IN (%Ld)',
           array(
             ArcanistDifferentialRevisionStatus::CLOSED,
           ));
@@ -726,7 +726,7 @@ final class DifferentialRevisionQuery {
       case self::STATUS_ABANDONED:
         $where[] = qsprintf(
           $conn_r,
-          'status IN (%Ld)',
+          'r.status IN (%Ld)',
           array(
             ArcanistDifferentialRevisionStatus::ABANDONED,
           ));
