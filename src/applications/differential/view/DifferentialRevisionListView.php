@@ -23,6 +23,7 @@ final class DifferentialRevisionListView extends AphrontView {
 
   private $revisions;
   private $flags = array();
+  private $drafts = array();
   private $handles;
   private $user;
   private $fields;
@@ -84,6 +85,11 @@ final class DifferentialRevisionListView extends AphrontView {
       ->withObjectPHIDs(mpull($this->revisions, 'getPHID'))
       ->execute();
 
+    $this->drafts = id(new DifferentialRevisionQuery())
+      ->withIDs(mpull($this->revisions, 'getID'))
+      ->withDraftRepliesByAuthors(array($user->getPHID()))
+      ->execute();
+
     return $this;
   }
 
@@ -135,7 +141,23 @@ final class DifferentialRevisionListView extends AphrontView {
             'class' => 'phabricator-flag-icon '.$class,
           ),
           '');
+
+      } else if (array_key_exists($revision->getID(), $this->drafts)) {
+        $src = '/rsrc/image/icon/fatcow/page_white_edit.png';
+        $flag =
+          '<a href="/D'.$revision->getID().'#comment-preview">'.
+            phutil_render_tag(
+              'img',
+              array(
+                'src' => celerity_get_resource_uri($src),
+                'width' => 16,
+                'height' => 16,
+                'alt' => 'Draft',
+                'title' => 'Draft Comment',
+              )).
+            '</a>';
       }
+
       $row = array($flag);
 
       $modified = $revision->getDateModified();
