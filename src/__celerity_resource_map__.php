@@ -1179,14 +1179,13 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-differential-toggle-files' =>
   array(
-    'uri' => '/res/431b4915/rsrc/js/application/differential/behavior-toggle-files.js',
+    'uri' => '/res/fb94e3f5/rsrc/js/application/differential/behavior-toggle-files.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-behavior',
       1 => 'javelin-dom',
       2 => 'javelin-stratcom',
-      3 => 'phabricator-keyboard-shortcut',
     ),
     'disk' => '/rsrc/js/application/differential/behavior-toggle-files.js',
   ),
