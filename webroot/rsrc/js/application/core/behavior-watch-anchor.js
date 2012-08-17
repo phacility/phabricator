@@ -27,10 +27,13 @@ JX.behavior('phabricator-watch-anchor', function() {
 
   // In some cases, we link to an anchor but the anchor target ajaxes in
   // later. If it pops in within the first few seconds, jump to it.
-  function try_anchor(anchor) {
+  function try_anchor() {
+    var anchor = window.location.hash.replace('#', '');
     try {
       // If the anchor exists, assume the browser handled the jump.
-      JX.$(anchor);
+      if (anchor) {
+        JX.$(anchor);
+      }
       defer_highlight();
     } catch (e) {
       var n = 50;
@@ -49,10 +52,6 @@ JX.behavior('phabricator-watch-anchor', function() {
   }
 
   JX.Stratcom.listen('hashchange', null, try_anchor);
-
-  var anchor = window.location.hash.replace('#', '');
-  if (anchor) {
-    try_anchor(anchor);
-  }
+  try_anchor();
 
 });
