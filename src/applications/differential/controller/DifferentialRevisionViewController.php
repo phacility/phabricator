@@ -243,6 +243,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       // TODO: build a better version of the action links and deprecate the
       // whole DifferentialRevisionDetailRenderer class.
       $custom_renderer = newv($custom_renderer_class, array());
+      $custom_renderer->setDiff($target);
       if ($diff_vs) {
         $custom_renderer->setVSDiff($diffs[$diff_vs]);
       }
@@ -256,11 +257,12 @@ final class DifferentialRevisionViewController extends DifferentialController {
       DifferentialChangesetParser::WHITESPACE_IGNORE_ALL);
 
     if ($arc_project) {
-      $symbol_indexes = $this->buildSymbolIndexes(
+      list($symbol_indexes, $project_phids) = $this->buildSymbolIndexes(
         $arc_project,
         $visible_changesets);
     } else {
       $symbol_indexes = array();
+      $project_phids = null;
     }
 
     $revision_detail->setActions($actions);
@@ -274,6 +276,15 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $comment_view->setUser($user);
     $comment_view->setTargetDiff($target);
     $comment_view->setVersusDiffID($diff_vs);
+
+    if ($arc_project) {
+      Javelin::initBehavior(
+        'repository-crossreference',
+        array(
+          'section' => $comment_view->getID(),
+          'projects' => $project_phids,
+        ));
+    }
 
     $changeset_view = new DifferentialChangesetListView();
     $changeset_view->setChangesets($changesets);
@@ -777,7 +788,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $langs = $arc_project->getSymbolIndexLanguages();
     if (!$langs) {
-      return array();
+      return array(array(), array());
     }
 
     $symbol_indexes = array();
@@ -797,7 +808,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       }
     }
 
-    return $symbol_indexes;
+    return array($symbol_indexes, $project_phids);
   }
 
   private function loadOtherRevisions(

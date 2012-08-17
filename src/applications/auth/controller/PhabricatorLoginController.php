@@ -283,9 +283,12 @@ final class PhabricatorLoginController
       $panel->appendChild('<br />');
     }
 
+    $login_message = PhabricatorEnv::getEnvConfig('auth.login-message');
+
     return $this->buildStandardPageResponse(
       array(
         $error_view,
+        $login_message,
         $panel,
       ),
       array(

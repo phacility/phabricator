@@ -35,15 +35,33 @@ final class PhabricatorDaemonReference {
     return $ref;
   }
 
-  public function loadDaemonLog() {
-    if (!$this->daemonLog) {
-      $this->daemonLog = id(new PhabricatorDaemonLog())->loadOneWhere(
-        'daemon = %s AND pid = %d AND dateCreated = %d',
-        $this->name,
-        $this->pid,
-        $this->start);
+  public function updateStatus($new_status) {
+    try {
+      if (!$this->daemonLog) {
+        $this->daemonLog = id(new PhabricatorDaemonLog())->loadOneWhere(
+          'daemon = %s AND pid = %d AND dateCreated = %d',
+          $this->name,
+          $this->pid,
+          $this->start);
+      }
+
+      if ($this->daemonLog) {
+        $this->daemonLog
+          ->setStatus($new_status)
+          ->save();
+      }
+    } catch (AphrontQueryException $ex) {
+      // Ignore anything that goes wrong here. We anticipate at least two
+      // specific failure modes:
+      //
+      //   - Upgrade scripts which run `git pull`, then `phd stop`, then
+      //     `bin/storage upgrade` will fail when trying to update the `status`
+      //     column, as it does not exist yet.
+      //   - Daemons running on machines which do not have access to MySQL
+      //     (like an IRC bot) will not be able to load or save the log.
+      //
+      //
     }
-    return $this->daemonLog;
   }
 
   public function getPID() {

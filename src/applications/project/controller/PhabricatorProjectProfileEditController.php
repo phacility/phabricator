@@ -28,10 +28,19 @@ final class PhabricatorProjectProfileEditController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $project = id(new PhabricatorProject())->load($this->id);
+    $project = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
     if (!$project) {
       return new Aphront404Response();
     }
+
     $profile = $project->loadProfile();
     if (empty($profile)) {
       $profile = new PhabricatorProjectProfile();
@@ -60,6 +69,24 @@ final class PhabricatorProjectProfileEditController
         $xaction->setTransactionType(
           PhabricatorProjectTransactionType::TYPE_STATUS);
         $xaction->setNewValue($request->getStr('status'));
+        $xactions[] = $xaction;
+
+        $xaction = new PhabricatorProjectTransaction();
+        $xaction->setTransactionType(
+          PhabricatorProjectTransactionType::TYPE_CAN_VIEW);
+        $xaction->setNewValue($request->getStr('can_view'));
+        $xactions[] = $xaction;
+
+        $xaction = new PhabricatorProjectTransaction();
+        $xaction->setTransactionType(
+          PhabricatorProjectTransactionType::TYPE_CAN_EDIT);
+        $xaction->setNewValue($request->getStr('can_edit'));
+        $xactions[] = $xaction;
+
+        $xaction = new PhabricatorProjectTransaction();
+        $xaction->setTransactionType(
+          PhabricatorProjectTransactionType::TYPE_CAN_JOIN);
+        $xaction->setNewValue($request->getStr('can_join'));
         $xactions[] = $xaction;
 
         $editor = new PhabricatorProjectEditor($project);
@@ -150,6 +177,31 @@ final class PhabricatorProjectProfileEditController
           ->setLabel('Blurb')
           ->setName('blurb')
           ->setValue($profile->getBlurb()))
+      ->appendChild(
+        '<p class="aphront-form-instructions">NOTE: Policy settings are not '.
+        'yet fully implemented. Some interfaces still ignore these settings, '.
+        'particularly "Visible To".</p>')
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setUser($user)
+          ->setName('can_view')
+          ->setCaption('Members can always view a project.')
+          ->setPolicyObject($project)
+          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setUser($user)
+          ->setName('can_edit')
+          ->setPolicyObject($project)
+          ->setCapability(PhabricatorPolicyCapability::CAN_EDIT))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setUser($user)
+          ->setName('can_join')
+          ->setCaption(
+            'Users who can edit a project can always join a project.')
+          ->setPolicyObject($project)
+          ->setCapability(PhabricatorPolicyCapability::CAN_JOIN))
       ->appendChild(
         id(new AphrontFormMarkupControl())
           ->setLabel('Profile Image')

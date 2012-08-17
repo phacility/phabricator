@@ -58,7 +58,7 @@ final class PhabricatorMetaMTAReceiveController
 
     $form = new AphrontFormView();
     $form->setUser($request->getUser());
-    $form->setAction('/mail/receive/');
+    $form->setAction($this->getApplicationURI('/receive/'));
     $form
       ->appendChild(
         '<p class="aphront-form-instructions">This form will simulate '.
@@ -79,12 +79,16 @@ final class PhabricatorMetaMTAReceiveController
     $panel = new AphrontPanelView();
     $panel->setHeader('Receive Email');
     $panel->appendChild($form);
-    $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
+    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
 
-    return $this->buildStandardPageResponse(
-      $panel,
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter('receive');
+    $nav->appendChild($panel);
+
+    return $this->buildApplicationPage(
+      $nav,
       array(
-        'title' => 'Receive Mail',
+        'title' => 'Receive Test',
       ));
   }
 

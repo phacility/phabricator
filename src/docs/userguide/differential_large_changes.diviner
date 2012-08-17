@@ -16,7 +16,7 @@ Differential:
     you can fork it or link against it.
   - Committing an enormous text datafile, like a list of every English word or a
     dump of a database.
-  - Making a trivial (e.g., find/replace) edit to 10,000 files.
+  - Making a trivial (e.g., find/replace or codemod) edit to 10,000 files.
 
 You can still try submitting these kinds of changes, but you may encounter
 problems getting them to work (database or connection timeouts, for example).
@@ -36,18 +36,18 @@ work better than trying to get the entire change into Differential:
     name on the review?". This is best for straightforward changes. The reviewer
     is not going to review MySQL's source itself, instead they are reviewing the
     change metadata: which version are you checking in, why are you checking it
-    in, and where are you putting it?
+    in, and where are you putting it? You won't be able to use "arc commit" or
+    "arc amend" to actually push the change. Just use "svn" or "git" and
+    manually edit the commit message instead. (It is normally sufficient to add
+    a "Reviewed By: <username>" field.)
   - Create a Differential revision with only the metadata, like the script you
     used to make automated changes or a text file explaining what you're doing,
     and maybe a sample of some of the changes if they were automated. Include a
     link to where the changes are staged so reviewers can look at the actual
     changeset if they want to. This is best for more complicated changes, since
     Differential can still be used for discussion and provide a permanent record
-    others can refer to.
-
-In both cases, you won't be able to use "arc commit" or "arc amend" to actually
-push the change. Just use "svn" or "git" and manually edit the commit message
-instead. (It is normally sufficient to add a "Reviewed By: <username>" field.)
+    others can refer to. Once the revision is accepted, amend your local commit
+    (e.g. by `git commit --amend`) with the real change and push as usual.
 
 These kinds of changes are generally rare and don't have much in common, which
 is why there's no explicit support for them in Differential. If you frequently

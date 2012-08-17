@@ -81,15 +81,6 @@ class AphrontDefaultApplicationConfiguration
           => 'PhabricatorTypeaheadCommonDatasourceController',
       ),
 
-      '/mail/' => array(
-        '' => 'PhabricatorMetaMTAListController',
-        'send/' => 'PhabricatorMetaMTASendController',
-        'view/(?P<id>\d+)/' => 'PhabricatorMetaMTAViewController',
-        'receive/' => 'PhabricatorMetaMTAReceiveController',
-        'received/' => 'PhabricatorMetaMTAReceivedListController',
-        'sendgrid/' => 'PhabricatorMetaMTASendGridReceiveController',
-      ),
-
       '/login/' => array(
         '' => 'PhabricatorLoginController',
         'email/' => 'PhabricatorEmailLoginController',
@@ -160,20 +151,6 @@ class AphrontDefaultApplicationConfiguration
         'index/(?P<phid>[^/]+)/' => 'PhabricatorSearchIndexController',
       ),
 
-      '/daemon/' => array(
-        'task/(?P<id>\d+)/' => 'PhabricatorWorkerTaskDetailController',
-        'task/(?P<id>\d+)/(?P<action>[^/]+)/'
-          => 'PhabricatorWorkerTaskUpdateController',
-        'log/' => array(
-          '' => 'PhabricatorDaemonLogListController',
-          'combined/' => 'PhabricatorDaemonCombinedLogController',
-          '(?P<id>\d+)/' => 'PhabricatorDaemonLogViewController',
-        ),
-        'timeline/' => 'PhabricatorDaemonTimelineConsoleController',
-        'timeline/(?P<id>\d+)/' => 'PhabricatorDaemonTimelineEventController',
-        '' => 'PhabricatorDaemonConsoleController',
-      ),
-
       '/herald/' => array(
         '' => 'HeraldHomeController',
         'view/(?P<content_type>[^/]+)/(?:(?P<rule_type>[^/]+)/)?'
@@ -219,11 +196,6 @@ class AphrontDefaultApplicationConfiguration
 
       '/status/' => 'PhabricatorStatusController',
 
-      '/paste/' => array(
-        '' => 'PhabricatorPasteListController',
-        'filter/(?P<filter>\w+)/' => 'PhabricatorPasteListController',
-      ),
-      '/P(?P<id>\d+)' => 'PhabricatorPasteViewController',
 
       '/help/' => array(
         'keyboardshortcut/' => 'PhabricatorHelpKeyboardShortcutController',
@@ -314,9 +286,6 @@ class AphrontDefaultApplicationConfiguration
           'testpaymentform/' => 'PhortuneStripeTestPaymentFormController',
         ),
       ),
-
-      '/emailverify/(?P<code>[^/]+)/' =>
-        'PhabricatorEmailVerificationController',
     );
   }
 

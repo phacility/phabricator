@@ -76,13 +76,34 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
         phutil_escape_html($count));
     }
 
+
+    $classes = array();
+    $classes[] = 'phabricator-application-launch-icon';
+    $styles = array();
+
+    if ($application->getIconURI()) {
+      $styles[] = 'background-image: url('.$application->getIconURI().')';
+    } else {
+      $autosprite = $application->getAutospriteName();
+      $classes[] = 'autosprite';
+      $classes[] = 'app-'.$autosprite.'-full';
+    }
+
+    $icon = phutil_render_tag(
+      'span',
+      array(
+        'class' => implode(' ', $classes),
+        'style' => nonempty(implode('; ', $styles), null),
+      ),
+      '');
+
     return phutil_render_tag(
       'a',
       array(
         'class' => 'phabricator-application-launch-container',
-        'style' => 'background-image: url('.$application->getIconURI().')',
         'href'  => $application->getBaseURI(),
       ),
+      $icon.
       $this->renderSingleView($content));
   }
 }

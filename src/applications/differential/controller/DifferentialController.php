@@ -34,7 +34,6 @@ abstract class DifferentialController extends PhabricatorController {
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x9A\x99");
     $page->appendChild($view);
-    $page->setIsLoggedOut($viewer_is_anonymous);
     $page->setSearchDefaultScope(PhabricatorSearchScope::SCOPE_OPEN_REVISIONS);
 
     $response = new AphrontWebpageResponse();

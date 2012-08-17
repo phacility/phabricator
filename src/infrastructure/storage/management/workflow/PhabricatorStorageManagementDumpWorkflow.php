@@ -45,9 +45,15 @@ final class PhabricatorStorageManagementDumpWorkflow
 
     list($host, $port) = $this->getBareHostAndPort($api->getHost());
 
-    $flag_password = $api->getPassword()
-      ? csprintf('-p %s', $api->getPassword())
-      : '';
+    $flag_password = '';
+
+    $password = $api->getPassword();
+    if ($password) {
+      $password = $password->openEnvelope();
+      if (strlen($password)) {
+        $flag_password = csprintf('-p%s', $password);
+      }
+    }
 
     $flag_port = $port
       ? csprintf('--port %d', $port)

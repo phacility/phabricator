@@ -30,6 +30,10 @@ final class PhabricatorApplicationProject extends PhabricatorApplication {
     return '/project/';
   }
 
+  public function getAutospriteName() {
+    return 'projects';
+  }
+
   public function getRoutes() {
     return array(
       '/project/' => array(

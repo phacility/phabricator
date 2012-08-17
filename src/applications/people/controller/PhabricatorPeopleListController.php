@@ -138,13 +138,18 @@ final class PhabricatorPeopleListController
               'href' => '/people/ldap/',
               'class' => 'button green'
             ),
-            'Import from Ldap'));
+            'Import from LDAP'));
       }
     }
 
-    return $this->buildStandardPageResponse($panel, array(
-      'title' => 'People',
-      'tab'   => 'directory',
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter('people');
+    $nav->appendChild($panel);
+
+    return $this->buildApplicationPage(
+      $nav,
+      array(
+        'title' => 'People',
       ));
   }
 }

@@ -1090,7 +1090,7 @@ final class DifferentialChangesetParser {
 
         $output = $this->renderChangesetTable(
           $this->changeset,
-          '<tr>'.
+          '<tr class="differential-image-diff">'.
             $th_old.
             '<td class="differential-old-image">'.
               '<div class="differential-image-stage">'.

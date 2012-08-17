@@ -54,7 +54,7 @@ final class PhabricatorMetaMTASendController
       }
 
       return id(new AphrontRedirectResponse())
-        ->setURI('/mail/view/'.$mail->getID().'/');
+        ->setURI($this->getApplicationURI('/view/'.$mail->getID().'/'));
     }
 
     $failure_caption =
@@ -92,14 +92,24 @@ final class PhabricatorMetaMTASendController
 
     $panel_id = celerity_generate_unique_node_id();
 
+    $phdlink_href = PhabricatorEnv::getDoclink(
+      'article/Managing_Daemons_with_phd.html');
+
+    $phdlink = phutil_render_tag(
+      'a',
+      array(
+        'href' => $phdlink_href,
+        'target' => '_blank',
+      ),
+      '"phd start"');
+
     $form = new AphrontFormView();
     $form->setUser($request->getUser());
-    $form->setAction('/mail/send/');
     $form
       ->appendChild($instructions)
       ->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel('Configured Adapter')
+          ->setLabel('Adapter')
           ->setValue($adapter))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
@@ -150,7 +160,10 @@ final class PhabricatorMetaMTASendController
           ->addCheckbox(
             'immediately',
             '1',
-            'Send immediately, not via MetaMTA background script.'))
+            'Send immediately. (Do not enqueue for daemons.)',
+            PhabricatorEnv::getEnvConfig('metamta.send-immediately'))
+          ->setCaption('Daemons can be started with '.$phdlink.'.')
+          )
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Send Mail'));
@@ -159,15 +172,20 @@ final class PhabricatorMetaMTASendController
     $panel->setHeader('Send Email');
     $panel->appendChild($form);
     $panel->setID($panel_id);
-    $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
+    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
 
-    return $this->buildStandardPageResponse(
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter('send');
+    $nav->appendChild(
       array(
         $warning,
         $panel,
-      ),
+      ));
+
+    return $this->buildApplicationPage(
+      $nav,
       array(
-        'title' => 'Send Mail',
+        'title' => 'Send Test',
       ));
   }
 

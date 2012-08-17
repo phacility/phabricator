@@ -164,6 +164,7 @@ final class PhabricatorConduitAPIController
       case 'json':
       default:
         return id(new AphrontJSONResponse())
+          ->setAddJSONShield(false)
           ->setContent($response->toDictionary());
     }
   }
@@ -218,8 +219,6 @@ final class PhabricatorConduitAPIController
     }
 
     // handle oauth
-    // TODO - T897 (make error codes for OAuth more correct to spec)
-    // and T891 (strip shield from Conduit response)
     $access_token = $request->getStr('access_token');
     $method_scope = $metadata['scope'];
     if ($access_token &&

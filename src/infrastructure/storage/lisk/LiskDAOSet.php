@@ -57,6 +57,7 @@ final class LiskDAOSet {
     foreach ($this->subsets as $set) {
       $set->clearSet();
     }
+    $this->subsets = array();
     return $this;
   }
 

@@ -26,8 +26,12 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
     return '/people/';
   }
 
-  public function getIconURI() {
-    return celerity_get_resource_uri('/rsrc/image/app/app_people.png');
+  public function getTitleGlyph() {
+    return "\xE2\x99\x9F";
+  }
+
+  public function getAutospriteName() {
+    return 'people';
   }
 
   public function getRoutes() {
@@ -41,6 +45,8 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
       ),
       '/p/(?P<username>[\w._-]+)/(?:(?P<page>\w+)/)?'
         => 'PhabricatorPeopleProfileController',
+      '/emailverify/(?P<code>[^/]+)/' =>
+        'PhabricatorEmailVerificationController',
     );
   }
 

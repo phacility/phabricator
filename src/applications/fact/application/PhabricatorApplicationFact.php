@@ -26,8 +26,8 @@ final class PhabricatorApplicationFact extends PhabricatorApplication {
     return '/fact/';
   }
 
-  public function getIconURI() {
-    return celerity_get_resource_uri('/rsrc/image/app/app_fact.png');
+  public function getAutospriteName() {
+    return 'fact';
   }
 
   public function getRoutes() {

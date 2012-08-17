@@ -55,7 +55,11 @@ abstract class PhabricatorApplication {
   }
 
   public function getIconURI() {
-    return PhabricatorUser::getDefaultProfileImageURI();
+    return null;
+  }
+
+  public function getAutospriteName() {
+    return 'default';
   }
 
   public function shouldAppearInLaunchView() {
@@ -67,6 +71,21 @@ abstract class PhabricatorApplication {
   }
 
   public function getTitleGlyph() {
+    return null;
+  }
+
+  public function getHelpURI() {
+    // TODO: When these applications get created, link to their docs:
+    //
+    //  - Conduit
+    //  - Drydock
+    //  - Herald
+    //  - OAuth Server
+    //  - Owners
+    //  - Phame
+    //  - Slowvote
+
+
     return null;
   }
 

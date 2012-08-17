@@ -80,15 +80,17 @@ final class PhabricatorMetaMTAReceivedListController
 
     $panel = new AphrontPanelView();
     $panel->setHeader('Received Mail');
-    $panel->setCreateButton('Test Receiver', '/mail/receive/');
     $panel->appendChild($table);
     $panel->appendChild($pager);
 
-    return $this->buildStandardPageResponse(
-      $panel,
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter('received');
+    $nav->appendChild($panel);
+
+    return $this->buildApplicationPage(
+      $nav,
       array(
         'title' => 'Received Mail',
-        'tab'   => 'received',
       ));
   }
 }

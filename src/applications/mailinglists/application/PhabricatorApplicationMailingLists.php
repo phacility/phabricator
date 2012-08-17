@@ -30,6 +30,10 @@ final class PhabricatorApplicationMailingLists extends PhabricatorApplication {
     return 'Manage External Lists';
   }
 
+  public function getAutospriteName() {
+    return 'mail';
+  }
+
   public function getRoutes() {
     return array(
       '/mailinglists/' => array(

@@ -19,7 +19,11 @@ JX.behavior('differential-feedback-preview', function(config) {
   }
 
   var callback = function(r) {
-    JX.DOM.setContent(JX.$(config.preview), JX.$H(r));
+    var preview = JX.$(config.preview);
+    JX.DOM.setContent(preview, JX.$H(r));
+    JX.Stratcom.invoke('differential-preview-update', null, {
+      container: preview
+    });
   };
 
   var getdata = function() {
@@ -50,6 +54,9 @@ JX.behavior('differential-feedback-preview', function(config) {
         var inline = JX.$(config.inline);
 
         JX.DOM.setContent(inline, JX.$H(r));
+        JX.Stratcom.invoke('differential-preview-update', null, {
+          container: inline
+        });
 
         // Go through the previews and activate any "View" links where the
         // actual comment appears in the document.

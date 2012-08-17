@@ -70,8 +70,12 @@ final class PhabricatorDaemonTimelineEventController
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
     $panel->appendChild($form);
 
-    return $this->buildStandardPageResponse(
-      $panel,
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter('timeline');
+    $nav->appendChild($panel);
+
+    return $this->buildApplicationPage(
+      $nav,
       array(
         'title' => 'Timeline Event',
       ));

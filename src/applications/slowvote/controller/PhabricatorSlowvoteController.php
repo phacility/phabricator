@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,16 +28,6 @@ abstract class PhabricatorSlowvoteController extends PhabricatorController {
     $page->setBaseURI('/vote/');
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x9C\x94");
-
-    $doc_href = PhabricatorEnv::getDoclink('article/Slowvote_User_Guide.html');
-    $page->setTabs(
-      array(
-        'help' => array(
-          'name' => 'Help',
-          'href' => $doc_href,
-        ),
-      ),
-      null);
 
     $page->appendChild($view);
 

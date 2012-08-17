@@ -50,7 +50,7 @@ abstract class PhabricatorIRCHandler {
   }
 
   final protected function isChannelName($name) {
-    return (strpos($name, '#') === 0);
+    return (strncmp($name, '#', 1) === 0);
   }
 
   abstract public function receiveMessage(PhabricatorIRCMessage $message);

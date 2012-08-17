@@ -228,7 +228,6 @@ final class DifferentialRevisionListController extends DifferentialController {
       $side_nav,
       array(
         'title' => 'Differential Home',
-        'tab' => 'revisions',
       ));
   }
 

@@ -18,7 +18,7 @@ If you merge a list of arrays like this:
 intermediate arrays and copies every element it has previously seen each time
 you iterate.
 
-In a libphutil environment, you can use ##array_mergev($list_of_lists)##
+In a libphutil environment, you can use @{function@libphutil:array_mergev}
 instead.
 
 = var_export() Hates Baby Animals =
@@ -140,8 +140,8 @@ keys that are naturally sortable with a function that uses native comparison
 (e.g., sort(), asort(), ksort(), or natcasesort()). Sort this array instead, and
 use it to reorder the original array.
 
-In a libphutil environment, you can often do this easily with isort() or
-msort().
+In a libphutil environment, you can often do this easily with
+@{function@libphutil:isort} or @{function@libphutil:msort}.
 
 = array_intersect() and array_diff() are Also Slow =
 
@@ -249,8 +249,8 @@ arguments and you want to do this:
   new $class_name($argv[0], $argv[1], ...);
 
 ...you'll probably invent a very interesting, very novel solution that is very
-wrong. In a libphutil environment, solve this problem with newv(). Elsewhere,
-copy newv()'s implementation.
+wrong. In a libphutil environment, solve this problem with
+@{function@libphutil:newv}. Elsewhere, copy newv()'s implementation.
 
 = Equality is not Transitive =
 
@@ -276,7 +276,7 @@ This doesn't do what you'd expect it to do in C:
 
 This is because the successor to 'z' is 'aa', which is "less than" 'z'. The
 loop will run for ~700 iterations until it reaches 'zz' and terminates. That is,
-##$c<## will take on these values:
+##$c## will take on these values:
 
   a
   b

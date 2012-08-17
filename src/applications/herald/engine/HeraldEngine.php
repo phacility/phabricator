@@ -350,7 +350,10 @@ final class HeraldEngine {
         break;
       case HeraldConditionConfig::CONDITION_REGEXP:
         foreach ((array)$object_value as $value) {
-          $result = @preg_match($test_value, $value);
+          // We add the 'S' flag because we use the regexp multiple times.
+          // It shouldn't cause any troubles if the flag is already there
+          // - /.*/S is evaluated same as /.*/SS.
+          $result = @preg_match($test_value . 'S', $value);
           if ($result === false) {
             $transcript->setNote(
               "Regular expression is not valid!");

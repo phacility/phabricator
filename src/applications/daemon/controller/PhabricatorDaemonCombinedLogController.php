@@ -45,8 +45,12 @@ final class PhabricatorDaemonCombinedLogController
     $log_panel->appendChild($event_view);
     $log_panel->appendChild($pager);
 
-    return $this->buildStandardPageResponse(
-      $log_panel,
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter('log/combined');
+    $nav->appendChild($log_panel);
+
+    return $this->buildApplicationPage(
+      $nav,
       array(
         'title' => 'Combined Daemon Log',
       ));

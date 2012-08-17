@@ -51,7 +51,7 @@ final class PhabricatorEmailVerificationController
     $settings_link = phutil_render_tag(
       'a',
       array(
-        'href' => '/settings/page/email/',
+        'href' => '/settings/panel/email/',
       ),
       'Return to Email Settings');
     $settings_link = '<br /><p><strong>'.$settings_link.'</strong></p>';
@@ -87,7 +87,7 @@ final class PhabricatorEmailVerificationController
           $settings_link);
     }
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $content,
       array(
         'title' => 'Verify Email',

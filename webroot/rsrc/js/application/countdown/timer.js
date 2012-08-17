@@ -7,7 +7,13 @@
 
 JX.behavior('countdown-timer', function(config) {
 
+  var container = JX.$(config.container);
   calculateTimeLeft();
+
+  function setComponent(which, content) {
+    var component = JX.DOM.find(container, '*', 'phabricator-timer-' + which);
+    JX.DOM.setContent(component, content);
+  }
 
   function calculateTimeLeft() {
     var days = 0;
@@ -18,31 +24,25 @@ JX.behavior('countdown-timer', function(config) {
     var current_timestamp = Math.round(new Date() / 1000);
     var delta = config.timestamp - current_timestamp;
 
-    if (delta <= 0) {
-      JX.DOM.setContent(JX.$('phabricator-timer-days'), days);
-      JX.DOM.setContent(JX.$('phabricator-timer-hours'), hours);
-      JX.DOM.setContent(JX.$('phabricator-timer-minutes'), minutes);
-      JX.DOM.setContent(JX.$('phabricator-timer-seconds'), seconds);
-      return;
+    if (delta > 0) {
+      days = Math.floor(delta/86400);
+      delta -= days * 86400;
+
+      hours = Math.floor(delta/3600);
+      delta -= hours * 3600;
+
+      minutes = Math.floor(delta / 60);
+      delta -= minutes * 60;
+
+      seconds = delta;
+
+      setTimeout(calculateTimeLeft, 1000);
     }
 
-    days = Math.floor(delta/86400);
-    delta -= days * 86400;
-
-    hours = Math.floor(delta/3600);
-    delta -= hours * 3600;
-
-    minutes = Math.floor(delta / 60);
-    delta -= minutes * 60;
-
-    seconds = delta;
-
-    JX.DOM.setContent(JX.$('phabricator-timer-days'), days);
-    JX.DOM.setContent(JX.$('phabricator-timer-hours'), hours);
-    JX.DOM.setContent(JX.$('phabricator-timer-minutes'), minutes);
-    JX.DOM.setContent(JX.$('phabricator-timer-seconds'), seconds);
-
-    setTimeout(calculateTimeLeft, 1000);
+    setComponent('days', days);
+    setComponent('hours', hours);
+    setComponent('minutes', minutes);
+    setComponent('seconds', seconds);
   }
 });
 

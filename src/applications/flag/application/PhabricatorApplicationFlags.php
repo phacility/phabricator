@@ -26,8 +26,8 @@ final class PhabricatorApplicationFlags extends PhabricatorApplication {
     return '/flag/';
   }
 
-  public function getIconURI() {
-    return celerity_get_resource_uri('/rsrc/image/app/app_flags.png');
+  public function getAutospriteName() {
+    return 'flags';
   }
 
   public function loadStatus(PhabricatorUser $user) {

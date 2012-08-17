@@ -47,7 +47,7 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_QUESTION_HAS_VOTING_USER   = 17;
   const TYPE_VOTING_USER_HAS_QUESTION   = 18;
   const TYPE_ANSWER_HAS_VOTING_USER     = 19;
-  CONST TYPE_VOTING_USER_HAS_ANSWER     = 20;
+  const TYPE_VOTING_USER_HAS_ANSWER     = 20;
 
   const TYPE_TEST_NO_CYCLE              = 9000;
 

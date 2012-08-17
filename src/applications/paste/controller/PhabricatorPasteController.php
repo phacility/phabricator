@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,24 @@
 
 abstract class PhabricatorPasteController extends PhabricatorController {
 
-  public function buildStandardPageResponse($view, array $data) {
+  public function buildSideNavView(PhabricatorPaste $paste = null) {
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI('filter/')));
 
-    $page = $this->buildStandardPageView();
+    if ($paste) {
+      $nav->addFilter('paste', 'P'.$paste->getID(), '/P'.$paste->getID());
+      $nav->addSpacer();
+    }
 
-    $page->setApplicationName('Paste');
-    $page->setBaseURI('/paste/');
-    $page->setTitle(idx($data, 'title'));
-    $page->setGlyph("\xE2\x9C\x8E");
-    $page->appendChild($view);
+    $nav->addLabel('Create');
+    $nav->addFilter('create', 'New Paste');
 
-    $response = new AphrontWebpageResponse();
-    return $response->setContent($page->render());
+    $nav->addSpacer();
+    $nav->addLabel('Pastes');
+    $nav->addFilter('my', 'My Pastes');
+    $nav->addFilter('all', 'All Pastes');
 
+    return $nav;
   }
+
 }

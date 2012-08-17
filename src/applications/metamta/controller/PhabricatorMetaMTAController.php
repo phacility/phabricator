@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,33 +22,23 @@ abstract class PhabricatorMetaMTAController extends PhabricatorController {
     return true;
   }
 
-  public function buildStandardPageResponse($view, array $data) {
-    $page = $this->buildStandardPageView();
+  public function buildSideNavView() {
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    $page->setApplicationName('MetaMTA');
-    $page->setBaseURI('/mail/');
-    $page->setTitle(idx($data, 'title'));
-    $page->setTabs(
-      array(
-        'queue' => array(
-          'name' => 'Mail Queue',
-          'href' => '/mail/',
-        ),
-        'lists' => array(
-          'name' => 'Mailing Lists',
-          'href' => '/mail/lists/',
-        ),
-        'received' => array(
-          'name' => 'Received',
-          'href' => '/mail/received/',
-        ),
-      ),
-      idx($data, 'tab'));
-    $page->setGlyph("@");
-    $page->appendChild($view);
+    $nav->addLabel('Mail Logs');
+    $nav->addFilter('sent', 'Sent Mail', $this->getApplicationURI());
+    $nav->addFilter('received', 'Received Mail');
 
-    $response = new AphrontWebpageResponse();
-    return $response->setContent($page->render());
+    $nav->addSpacer();
+
+    if ($this->getRequest()->getUser()->getIsAdmin()) {
+      $nav->addLabel('Diagnostics');
+      $nav->addFilter('send', 'Send Test');
+      $nav->addFilter('receive', 'Receive Test');
+    }
+
+    return $nav;
   }
 
 }

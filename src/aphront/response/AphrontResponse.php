@@ -85,7 +85,7 @@ abstract class AphrontResponse {
     return $response;
   }
 
-  protected function addJSONShield($json_response, $use_javelin_shield) {
+  protected function addJSONShield($json_response) {
 
     // Add a shield to prevent "JSON Hijacking" attacks where an attacker
     // requests a JSON response using a normal <script /> tag and then uses
@@ -93,11 +93,7 @@ abstract class AphrontResponse {
     // This header causes the browser to loop infinitely instead of handing over
     // sensitive data.
 
-    // TODO: This is massively stupid: Javelin and Conduit use different
-    // shields.
-    $shield = $use_javelin_shield
-      ? 'for (;;);'
-      : 'for(;;);';
+    $shield = 'for (;;);';
 
     $response = $shield.$json_response;
 

@@ -30,8 +30,8 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
     return PhabricatorEnv::getEnvConfig('maniphest.enabled');
   }
 
-  public function getIconURI() {
-    return celerity_get_resource_uri('/rsrc/image/app/app_maniphest.png');
+  public function getAutospriteName() {
+    return 'maniphest';
   }
 
   public function getCoreApplicationOrder() {

@@ -108,6 +108,8 @@ final class PhabricatorMainMenuView extends AphrontView {
     $classes = array();
     $classes[] = 'phabricator-main-menu-alert-item';
     $classes[] = 'phabricator-main-menu-alert-item-notification';
+    $classes[] = 'autosprite';
+    $classes[] = 'main-menu-item-icon-notifications';
 
     $notification_icon = javelin_render_tag(
       'a',

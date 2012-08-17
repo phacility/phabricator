@@ -1,0 +1,26 @@
+/**
+ * @provides phabricator-source-code-view-css
+ */
+
+.phabricator-source-code {
+  white-space: pre-wrap;
+  padding: 2px 8px 1px;
+}
+
+.phabricator-source-line {
+  text-align: right;
+  padding: 2px 6px 1px 12px;
+
+  border-right: 1px solid #dbdbdb;
+  font-weight: bold;
+  color: #555555;
+
+  /* When the user selects rows of source, don't visibly select the line
+     numbers beside them. We use JS to strip the line numbers out when the user
+     copies the text. */
+  -moz-user-select: -moz-none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}

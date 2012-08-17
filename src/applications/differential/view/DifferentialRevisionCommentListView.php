@@ -25,6 +25,7 @@ final class DifferentialRevisionCommentListView extends AphrontView {
   private $user;
   private $target;
   private $versusDiffID;
+  private $id;
 
   public function setComments(array $comments) {
     assert_instances_of($comments, 'DifferentialComment');
@@ -63,6 +64,13 @@ final class DifferentialRevisionCommentListView extends AphrontView {
   public function setVersusDiffID($diff_vs) {
     $this->versusDiffID = $diff_vs;
     return $this;
+  }
+
+  public function getID() {
+    if (!$this->id) {
+      $this->id = celerity_generate_unique_node_id();
+    }
+    return $this->id;
   }
 
   public function render() {
@@ -179,11 +187,14 @@ final class DifferentialRevisionCommentListView extends AphrontView {
       $hidden = null;
     }
 
-    return
-      '<div class="differential-comment-list">'.
-        implode("\n", $header).
-        $hidden.
-        implode("\n", $visible).
-      '</div>';
+    return javelin_render_tag(
+      'div',
+      array(
+        'class' => 'differential-comment-list',
+        'id' => $this->getID(),
+      ),
+      implode("\n", $header).
+      $hidden.
+      implode("\n", $visible));
   }
 }

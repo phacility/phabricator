@@ -19,9 +19,15 @@
 final class PhabricatorObjectHandleData {
 
   private $phids;
+  private $viewer;
 
   public function __construct(array $phids) {
     $this->phids = array_unique($phids);
+  }
+
+  public function setViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
+    return $this;
   }
 
   public static function loadOneHandle($phid) {
@@ -443,7 +449,7 @@ final class PhabricatorObjectHandleData {
           $questions = id(new PonderQuestionQuery())
             ->withPHIDs($phids)
             ->execute();
-          $questions = mpull($questions, 'getPHID');
+          $questions = mpull($questions, null, 'getPHID');
 
           foreach ($phids as $phid) {
             $handle = new PhabricatorObjectHandle();
@@ -455,6 +461,29 @@ final class PhabricatorObjectHandleData {
               $question = $questions[$phid];
               $handle->setName(phutil_utf8_shorten($question->getTitle(), 60));
               $handle->setURI(new PhutilURI('Q' . $question->getID()));
+              $handle->setComplete(true);
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
+        case PhabricatorPHIDConstants::PHID_TYPE_PSTE:
+          $pastes = id(new PhabricatorPasteQuery())
+            ->withPHIDs($phids)
+            ->setViewer($this->viewer)
+            ->execute();
+          $pastes = mpull($pastes, null, 'getPHID');
+
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            $handle->setType($type);
+            if (empty($pastes[$phid])) {
+              $handle->setName('Unknown Paste');
+            } else {
+              $paste = $pastes[$phid];
+              $handle->setName($paste->getTitle());
+              $handle->setFullName('P'.$paste->getID().': '.$paste->getTitle());
+              $handle->setURI('/P'.$paste->getID());
               $handle->setComplete(true);
             }
             $handles[$phid] = $handle;

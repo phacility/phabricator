@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,38 +18,31 @@
 
 abstract class PhabricatorPeopleController extends PhabricatorController {
 
-  public function buildStandardPageResponse($view, array $data) {
-    $page = $this->buildStandardPageView();
+  public function buildSideNavView() {
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    $page->setApplicationName('People');
-    $page->setBaseURI('/people/');
-    $page->setTitle(idx($data, 'title'));
+    $is_admin = $this->getRequest()->getUser()->getIsAdmin();
 
-    $tabs = array(
-      'directory' => array(
-        'name' => 'User Directory',
-        'href' => '/people/',
-      ),
-    );
-
-    if ($this->getRequest()->getUser()->getIsAdmin()) {
-      $tabs = array_merge(
-        $tabs,
-        array(
-          'logs' => array(
-            'name' => 'Activity Logs',
-            'href' => '/people/logs/',
-          ),
-        ));
+    if ($is_admin) {
+      $nav->addLabel('Create Users');
+      $nav->addFilter('edit', 'Create New User');
+      if (PhabricatorEnv::getEnvConfig('ldap.auth-enabled') === true) {
+        $nav->addFilter('ldap', 'Import from LDAP');
+      }
+      $nav->addSpacer();
     }
 
-    $page->setTabs($tabs, idx($data, 'tab'));
+    $nav->addLabel('Directory');
+    $nav->addFilter('people', 'User Directory', $this->getApplicationURI());
 
-    $page->setGlyph("\xE2\x99\x9F");
-    $page->appendChild($view);
+    if ($is_admin) {
+      $nav->addSpacer();
+      $nav->addLabel('Logs');
+      $nav->addFilter('logs', 'Activity Logs');
+    }
 
-    $response = new AphrontWebpageResponse();
-    return $response->setContent($page->render());
+    return $nav;
   }
 
 }

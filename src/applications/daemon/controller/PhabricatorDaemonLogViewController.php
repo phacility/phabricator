@@ -84,8 +84,12 @@ final class PhabricatorDaemonLogViewController
 
     $content[] = $log_panel;
 
-    return $this->buildStandardPageResponse(
-      $content,
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter('log');
+    $nav->appendChild($content);
+
+    return $this->buildApplicationPage(
+      $nav,
       array(
         'title' => 'Daemon Log',
       ));

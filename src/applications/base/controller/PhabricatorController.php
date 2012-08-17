@@ -18,6 +18,8 @@
 
 abstract class PhabricatorController extends AphrontController {
 
+  private $handles;
+
   public function shouldRequireLogin() {
     return true;
   }
@@ -149,18 +151,24 @@ abstract class PhabricatorController extends AphrontController {
 
     if (!($view instanceof AphrontSideNavFilterView)) {
       $nav = new AphrontSideNavFilterView();
-      if ($application) {
-        $nav->setCurrentApplication($application);
-      }
-      $nav->setUser($this->getRequest()->getUser());
-      $nav->setFlexNav(true);
-      $nav->setShowApplicationMenu(true);
       $nav->appendChild($view);
-
       $view = $nav;
     }
 
+    if ($application) {
+      $view->setCurrentApplication($application);
+    }
+
+    $view->setUser($this->getRequest()->getUser());
+    $view->setFlexNav(true);
+    $view->setShowApplicationMenu(true);
+
     $page->appendChild($view);
+
+    if (idx($options, 'device')) {
+      $page->setDeviceReady(true);
+      $view->appendChild($page->renderFooter());
+    }
 
     $response = new AphrontWebpageResponse();
     return $response->setContent($page->render());
@@ -197,6 +205,30 @@ abstract class PhabricatorController extends AphrontController {
       }
     }
     return $response;
+  }
+
+  protected function getHandle($phid) {
+    if (empty($this->handles[$phid])) {
+      throw new Exception(
+        "Attempting to access handle which wasn't loaded: {$phid}");
+    }
+    return $this->handles[$phid];
+  }
+
+  protected function loadHandles(array $phids) {
+    $phids = array_filter($phids);
+    $this->handles = id(new PhabricatorObjectHandleData($phids))
+      ->setViewer($this->getRequest()->getUser())
+      ->loadHandles();
+    return $this;
+  }
+
+  protected function renderHandlesForPHIDs(array $phids) {
+    $items = array();
+    foreach ($phids as $phid) {
+      $items[] = $this->getHandle($phid)->renderLink();
+    }
+    return implode('<br />', $items);
   }
 
 }

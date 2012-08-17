@@ -81,7 +81,6 @@ final class PhabricatorMailingListsListController
       $panel,
       array(
         'title' => 'Mailing Lists',
-        'tab'   => 'lists',
       ));
   }
 }

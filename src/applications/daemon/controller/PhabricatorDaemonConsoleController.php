@@ -21,7 +21,7 @@ final class PhabricatorDaemonConsoleController
 
   public function processRequest() {
     $logs = id(new PhabricatorDaemonLog())->loadAllWhere(
-      '1 = 1 ORDER BY id DESC LIMIT 15');
+      '`status` != %s ORDER BY id DESC LIMIT 15', 'exit');
 
     $request = $this->getRequest();
     $user = $request->getUser();
@@ -31,22 +31,7 @@ final class PhabricatorDaemonConsoleController
     $daemon_table->setDaemonLogs($logs);
 
     $daemon_panel = new AphrontPanelView();
-    $daemon_panel->setHeader(
-      'Recently Launched Daemons'.
-      ' &middot; '.
-      phutil_render_tag(
-        'a',
-        array(
-          'href' => '/daemon/log/',
-        ),
-        'View All Daemons').
-      ' &middot; '.
-      phutil_render_tag(
-        'a',
-        array(
-          'href' => '/daemon/log/combined/',
-        ),
-        'View Combined Log'));
+    $daemon_panel->setHeader('Recently Launched Daemons');
     $daemon_panel->appendChild($daemon_table);
 
     $tasks = id(new PhabricatorWorkerTask())->loadAllWhere(
@@ -155,16 +140,20 @@ final class PhabricatorDaemonConsoleController
     $cursor_panel->setHeader('Timeline Cursors');
     $cursor_panel->appendChild($cursor_table);
 
-    return $this->buildStandardPageResponse(
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter('');
+    $nav->appendChild(
       array(
         $daemon_panel,
         $cursor_panel,
         $queued_panel,
         $leased_panel,
-      ),
+      ));
+
+    return $this->buildApplicationPage(
+      $nav,
       array(
         'title' => 'Console',
-        'tab'   => 'console',
       ));
   }
 

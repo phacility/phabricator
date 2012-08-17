@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-function phabricator_date($epoch, $user) {
+function phabricator_date($epoch, PhabricatorUser $user) {
   return phabricator_format_local_time(
     $epoch,
     $user,

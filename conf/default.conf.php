@@ -382,6 +382,13 @@ return array(
   // patches are sent in. Valid options are 'unified' (like diff -u) or 'git'.
   'metamta.differential.patch-format'   => 'unified',
 
+  // Enables a different format for comments in differential emails.
+  // Differential will create unified diffs around the comment, which
+  // will give enough context for people who are only viewing the
+  // reviews in email to understand what is going on. The context will
+  // be created based on the range of the comment.
+  'metamta.differential.unified-comment-context' => false,
+
   // Prefix prepended to mail sent by Diffusion.
   'metamta.diffusion.subject-prefix' => '[Diffusion]',
 
@@ -546,6 +553,11 @@ return array(
   // exactly. If you allow "yourcompany.com", that permits "joe@yourcompany.com"
   // but rejects "joe@mail.yourcompany.com".
   'auth.email-domains' => array(),
+
+  // You can provide an arbitrary block of HTML here, which will appear on the
+  // login screen. Normally, you'd use this to provide login or registration
+  // instructions to users.
+  'auth.login-message' => null,
 
 
 // -- Accounts -------------------------------------------------------------- //

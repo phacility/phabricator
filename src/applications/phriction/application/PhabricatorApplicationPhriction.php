@@ -26,8 +26,12 @@ final class PhabricatorApplicationPhriction extends PhabricatorApplication {
     return '/w/';
   }
 
-  public function getIconURI() {
-    return celerity_get_resource_uri('/rsrc/image/app/app_phriction.png');
+  public function getAutospriteName() {
+    return 'phriction';
+  }
+
+  public function getHelpURI() {
+    return PhabricatorEnv::getDoclink('article/Phriction_User_Guide.html');
   }
 
   public function getRoutes() {

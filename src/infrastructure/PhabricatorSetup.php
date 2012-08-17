@@ -512,9 +512,11 @@ final class PhabricatorSetup {
       self::write(" okay  InnoDB is available.\n");
     }
 
+    $namespace = PhabricatorEnv::getEnvConfig('storage.default-namespace');
+
     $databases = queryfx_all($conn_raw, 'SHOW DATABASES');
     $databases = ipull($databases, 'Database', 'Database');
-    if (empty($databases['phabricator_meta_data'])) {
+    if (empty($databases[$namespace.'_meta_data'])) {
       self::writeFailure();
       self::write(
         "Setup failure! You haven't run 'bin/storage upgrade'. See this ".
@@ -541,7 +543,7 @@ final class PhabricatorSetup {
         "\n".
         "Then optionally run:\n".
         "\n".
-        "    REPAIR TABLE phabricator_search.search_documentfield QUICK;\n".
+        "    REPAIR TABLE {$namespace}_search.search_documentfield QUICK;\n".
         "\n".
         "...to reindex existing documents.");
     }

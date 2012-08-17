@@ -93,13 +93,13 @@ final class PhabricatorOAuthLoginController
               'the Phabricator account it is currently linked to.</p>',
               $provider_name,
               $provider_name));
-          $dialog->addCancelButton('/settings/page/'.$provider_key.'/');
+          $dialog->addCancelButton($provider->getSettingsPanelURI());
 
           return id(new AphrontDialogResponse())->setDialog($dialog);
         } else {
           $this->saveOAuthInfo($oauth_info); // Refresh token.
           return id(new AphrontRedirectResponse())
-            ->setURI('/settings/page/'.$provider_key.'/');
+            ->setURI($provider->getSettingsPanelURI());
         }
       }
 
@@ -119,7 +119,7 @@ final class PhabricatorOAuthLoginController
             'must unlink the old account.</p>',
             $provider_name,
             $provider_name));
-        $dialog->addCancelButton('/settings/page/'.$provider_key.'/');
+        $dialog->addCancelButton($provider->getSettingsPanelURI());
         return id(new AphrontDialogResponse())->setDialog($dialog);
       }
 
@@ -136,7 +136,7 @@ final class PhabricatorOAuthLoginController
         $dialog->addHiddenInput('state', $this->oauthState);
         $dialog->addHiddenInput('scope', $oauth_info->getTokenScope());
         $dialog->addSubmitButton('Link Accounts');
-        $dialog->addCancelButton('/settings/page/'.$provider_key.'/');
+        $dialog->addCancelButton($provider->getSettingsPanelURI());
 
         return id(new AphrontDialogResponse())->setDialog($dialog);
       }
@@ -146,7 +146,7 @@ final class PhabricatorOAuthLoginController
       $this->saveOAuthInfo($oauth_info);
 
       return id(new AphrontRedirectResponse())
-        ->setURI('/settings/page/'.$provider_key.'/');
+        ->setURI($provider->getSettingsPanelURI());
     }
 
     // Login with known auth.

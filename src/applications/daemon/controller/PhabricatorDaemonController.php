@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,29 +18,21 @@
 
 abstract class PhabricatorDaemonController extends PhabricatorController {
 
-  public function buildStandardPageResponse($view, array $data) {
-    $page = $this->buildStandardPageView();
+  protected function buildSideNavView() {
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    $page->setApplicationName('Daemon Console');
-    $page->setBaseURI('/daemon/');
-    $page->setTitle(idx($data, 'title'));
-    $page->setTabs(
-      array(
-        'console' => array(
-          'href' => '/daemon/',
-          'name' => 'Console',
-        ),
-        'timeline' => array(
-          'href' => '/daemon/timeline/',
-          'name' => 'Timeline',
-        ),
-      ),
-      idx($data, 'tab'));
-    $page->setGlyph("\xE2\x98\xAF");
-    $page->appendChild($view);
+    $nav->addLabel('Daemons');
+    $nav->addFilter('', 'Console', $this->getApplicationURI());
+    $nav->addFilter('log/running', 'Running Daemons');
+    $nav->addFilter('log', 'All Daemons');
+    $nav->addFilter('log/combined', 'Combined Log');
 
-    $response = new AphrontWebpageResponse();
-    return $response->setContent($page->render());
+    $nav->addSpacer();
+    $nav->addLabel('Event Timeline');
+    $nav->addFilter('timeline', 'Timeline');
+
+    return $nav;
   }
 
 }

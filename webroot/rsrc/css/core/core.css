@@ -4,7 +4,18 @@
 
 
 html {
+  /* Always show the vertical scrollbar so that going from a page without a
+     scrollbar to a page with a scrollbar doesn't make content jump a few
+     pixels left when the viewport narrows. */
   overflow-y: scroll;
+}
+
+.device-phone {
+  /* By default, the iPhone zooms all text on the page by some percentage when
+     you rotate from portrait mode to landscape mode. Disable this, since it
+     breaks lots of things and prevents you from using landscape to see more
+     columns in source code views. */
+  -webkit-text-size-adjust: none;
 }
 
 body, div, dl, dt, dd, ul, ol, li,

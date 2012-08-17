@@ -119,7 +119,6 @@ final class HeraldTranscriptListController extends HeraldController {
       $nav,
       array(
         'title' => 'Herald Transcripts',
-        'tab' => 'transcripts',
       ));
   }
 

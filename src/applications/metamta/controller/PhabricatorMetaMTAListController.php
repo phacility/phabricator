@@ -88,7 +88,7 @@ final class PhabricatorMetaMTAListController
           'a',
           array(
             'class' => 'button small grey',
-            'href'  => '/mail/view/'.$mail->getID().'/',
+            'href'  => $this->getApplicationURI('/view/'.$mail->getID().'/'),
           ),
           'View'),
       );
@@ -120,16 +120,16 @@ final class PhabricatorMetaMTAListController
     $panel = new AphrontPanelView();
     $panel->appendChild($table);
     $panel->setHeader('MetaMTA Messages');
-    if ($user->getIsAdmin()) {
-      $panel->setCreateButton('Send New Test Message', '/mail/send/');
-    }
     $panel->appendChild($pager);
 
-    return $this->buildStandardPageResponse(
-      $panel,
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter('sent');
+    $nav->appendChild($panel);
+
+    return $this->buildApplicationPage(
+      $nav,
       array(
-        'title' => 'MetaMTA',
-        'tab'   => 'queue',
+        'title' => 'Sent Mail',
       ));
   }
 }

@@ -145,8 +145,12 @@ final class PhabricatorWorkerTaskDetailController
         ),
         'Free Lease'));
 
-    return $this->buildStandardPageResponse(
-      $panel,
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter('');
+    $nav->appendChild($panel);
+
+    return $this->buildApplicationPage(
+      $nav,
       array(
         'title' => 'Task',
       ));

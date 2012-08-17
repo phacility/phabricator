@@ -25,21 +25,12 @@ abstract class PhabricatorConduitController extends PhabricatorController {
   protected $showSideNav;
 
   public function buildStandardPageResponse($view, array $data) {
-    $doclink = PhabricatorEnv::getDoclink(
-      'article/Conduit_Technical_Documentation.html'
-      );
-
     $page = $this->buildStandardPageView();
 
     $page->setApplicationName('Conduit');
     $page->setBaseURI('/conduit/');
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x87\xB5");
-    $page->setTabs(array(
-      'help' => array(
-        'href' => $doclink,
-        'name' => 'Help')
-      ), null);
 
     if ($this->showSideNav()) {
 

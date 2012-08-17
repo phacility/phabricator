@@ -39,14 +39,6 @@ abstract class PhameController extends PhabricatorController {
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xe2\x9c\xa9");
 
-    $tabs = array(
-      'help' => array(
-        'name' => 'Help',
-        'href' =>
-          PhabricatorEnv::getDoclink('article/Phame_User_Guide.html'),
-      ),
-    );
-    $page->setTabs($tabs, idx($data, 'tab'));
     if ($this->showSideNav()) {
       $nav = $this->renderSideNavFilterView($this->getSideNavFilter());
       $nav->appendChild($view);

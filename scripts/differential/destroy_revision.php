@@ -53,7 +53,7 @@ if (count($revisions) != 1) {
 $id = trim(strtolower(head($revisions)), 'd ');
 $revision = id(new DifferentialRevision())->load($id);
 
-if (!$id) {
+if (!$revision) {
   throw new Exception("No revision '{$id}' exists!");
 }
 

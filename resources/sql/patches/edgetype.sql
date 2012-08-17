@@ -1,0 +1,10 @@
+ALTER TABLE {$NAMESPACE}_phame.edge MODIFY type int unsigned NOT NULL;
+ALTER TABLE {$NAMESPACE}_maniphest.edge MODIFY type int unsigned NOT NULL;
+ALTER TABLE {$NAMESPACE}_repository.edge MODIFY type int unsigned NOT NULL;
+ALTER TABLE {$NAMESPACE}_differential.edge MODIFY type int unsigned NOT NULL;
+ALTER TABLE {$NAMESPACE}_file.edge MODIFY type int unsigned NOT NULL;
+ALTER TABLE {$NAMESPACE}_user.edge MODIFY type int unsigned NOT NULL;
+ALTER TABLE {$NAMESPACE}_project.edge MODIFY type int unsigned NOT NULL;
+ALTER TABLE {$NAMESPACE}_metamta.edge MODIFY type int unsigned NOT NULL;
+ALTER TABLE {$NAMESPACE}_harbormaster.edge MODIFY type int unsigned NOT NULL;
+ALTER TABLE {$NAMESPACE}_ponder.edge MODIFY type int unsigned NOT NULL;

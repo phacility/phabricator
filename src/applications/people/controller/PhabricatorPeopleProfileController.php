@@ -147,7 +147,7 @@ final class PhabricatorPeopleProfileController
 
     if ($user->getPHID() == $viewer->getPHID()) {
       $nav->addSpacer();
-      $nav->addFilter(null, 'Edit Profile...', '/settings/page/profile/');
+      $nav->addFilter(null, 'Edit Profile...', '/settings/panel/profile/');
     }
 
     if ($viewer->getIsAdmin()) {
@@ -158,7 +158,7 @@ final class PhabricatorPeopleProfileController
         '/people/edit/'.$user->getID().'/');
     }
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $header,
       array(
         'title' => $user->getUsername(),

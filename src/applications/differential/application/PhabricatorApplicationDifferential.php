@@ -26,8 +26,8 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
     return 'Review Code';
   }
 
-  public function getIconURI() {
-    return celerity_get_resource_uri('/rsrc/image/app/app_differential.png');
+  public function getAutospriteName() {
+    return 'differential';
   }
 
   public function getFactObjectsForAnalysis() {
@@ -41,7 +41,7 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
       '/D(?P<id>\d+)' => 'DifferentialRevisionViewController',
       '/differential/' => array(
         '' => 'DifferentialRevisionListController',
-        'filter/(?P<filter>\w+)/(?:(?P<username>\w+)/)?' =>
+        'filter/(?P<filter>\w+)/(?:(?P<username>[\w\.-_]+)/)?' =>
           'DifferentialRevisionListController',
         'stats/(?P<filter>\w+)/' => 'DifferentialRevisionStatsController',
         'diff/' => array(

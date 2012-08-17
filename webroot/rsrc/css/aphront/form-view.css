@@ -40,6 +40,12 @@
   padding-top: 4px;
 }
 
+.aphront-form-required {
+  font-weight: normal;
+  color: #888888;
+  font-size: 11px;
+}
+
 .aphront-form-input input,
 .aphront-form-input textarea {
   font-size: 12px;
@@ -78,7 +84,6 @@
   font-size: 11px;
   color: #444444;
   text-align: right;
-  clear: both;
   margin-right: 25%;
   margin-left: 20%;
 }

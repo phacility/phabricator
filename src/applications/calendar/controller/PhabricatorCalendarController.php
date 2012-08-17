@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,6 @@ abstract class PhabricatorCalendarController extends PhabricatorController {
     // Unicode has a calendar character but it's in some distant code plane,
     // use "keyboard" since it looks vaguely similar.
     $page->setGlyph("\xE2\x8C\xA8");
-
-    $page->appendChild($view);
-    $page->setTabs(
-      array(
-      ),
-      idx($data, 'tab'));
 
     $response = new AphrontWebpageResponse();
     return $response->setContent($page->render());

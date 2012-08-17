@@ -68,8 +68,12 @@ final class PhabricatorPeopleLdapController
       $content[] = $this->processSearchRequest($request);
     }
 
-    return $this->buildStandardPageResponse(
-      $content,
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter('ldap');
+    $nav->appendChild($content);
+
+    return $this->buildApplicationPage(
+      $nav,
       array(
         'title' => 'Import Ldap Users',
       ));

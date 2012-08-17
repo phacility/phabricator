@@ -26,8 +26,8 @@ final class PhabricatorApplicationApplications extends PhabricatorApplication {
     return 'Manage Applications';
   }
 
-  public function getIconURI() {
-    return celerity_get_resource_uri('/rsrc/image/app/app_applications.png');
+  public function getAutospriteName() {
+    return 'applications';
   }
 
   public function getRoutes() {

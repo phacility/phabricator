@@ -51,4 +51,12 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
     return ($user->getPHID() == $this->getAuthorPHID());
   }
 
+  public function getFullName() {
+    $title = $this->getTitle();
+    if (!$title) {
+      $title = 'Untitled Masterwork';
+    }
+    return 'P'.$this->getID().' '.$title;
+  }
+
 }

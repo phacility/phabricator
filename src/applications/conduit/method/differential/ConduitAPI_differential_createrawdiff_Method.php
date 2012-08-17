@@ -49,7 +49,7 @@ final class ConduitAPI_differential_createrawdiff_Method
     $diff = DifferentialDiff::newFromRawChanges($changes);
 
     $diff->setLintStatus(DifferentialLintStatus::LINT_SKIP);
-    $diff->setUnitStatus(DifferentialLintStatus::LINT_SKIP);
+    $diff->setUnitStatus(DifferentialUnitStatus::UNIT_SKIP);
 
     $diff->setAuthorPHID($request->getUser()->getPHID());
     $diff->setCreationMethod('web');

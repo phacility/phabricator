@@ -1,0 +1,13 @@
+/**
+ * @provides phabricator-header-view-css
+ */
+
+.phabricator-header-view {
+  padding: 1em 2%;
+  font-size: 15px;
+  color: #333333;
+}
+
+.device-desktop .phabricator-header-view {
+  width: 66%;
+}

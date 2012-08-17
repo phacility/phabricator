@@ -1,0 +1,57 @@
+/**
+ * @provides phabricator-property-list-view-css
+ */
+
+.phabricator-property-list-view {
+  border-color: #dbdbdb;
+  border-style: solid;
+  border-width: 1px 0;
+  background-color: #f9f9f9;
+
+  overflow: hidden;
+}
+
+.device-desktop .phabricator-property-list-view {
+  padding: 1em 0 0.75em;
+}
+
+.device-tablet .phabricator-property-list-view,
+.device-phone .phabricator-property-list-view {
+  padding: .5em;
+}
+
+.phabricator-property-key {
+  color: #333333;
+  font-weight: bold;
+}
+
+.device-desktop .phabricator-property-key {
+  width: 12%;
+  margin-left: 1%;
+  text-align: right;
+  float: left;
+  clear: left;
+  margin-bottom: .5em;
+}
+
+.device-tablet .phabricator-property-key,
+.device-phone .phabricator-property-key {
+  padding-left: .5em;
+}
+
+.phabricator-property-value {
+  color: #333333;
+}
+
+.device-desktop .phabricator-property-value {
+  width: 53%;
+  margin-left: 1%;
+  float: left;
+  margin-bottom: .5em;
+}
+
+.device-tablet .phabricator-property-value,
+.device-phone .phabricator-property-value {
+  padding-left: 1.5em;
+  margin-bottom: .5em;
+}

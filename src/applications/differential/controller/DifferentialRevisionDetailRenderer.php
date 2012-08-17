@@ -17,7 +17,17 @@
  */
 
 abstract class DifferentialRevisionDetailRenderer {
+  private $diff;
   private $vsDiff;
+
+  final public function setDiff(DifferentialDiff $diff) {
+    $this->diff = $diff;
+    return $this;
+  }
+
+  final protected function getDiff() {
+    return $this->diff;
+  }
 
   final public function setVSDiff(DifferentialDiff $diff) {
     $this->vsDiff = $diff;
