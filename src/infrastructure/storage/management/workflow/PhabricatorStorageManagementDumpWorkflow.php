@@ -51,7 +51,7 @@ final class PhabricatorStorageManagementDumpWorkflow
     if ($password) {
       $password = $password->openEnvelope();
       if (strlen($password)) {
-        $flag_password = csprintf('-p %s', $password);
+        $flag_password = csprintf('-p%s', $password);
       }
     }
 
