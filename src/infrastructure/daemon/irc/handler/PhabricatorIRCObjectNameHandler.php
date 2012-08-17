@@ -229,7 +229,7 @@ final class PhabricatorIRCObjectNameHandler extends PhabricatorIRCHandler {
     $text = $message->getMessageText();
 
     $matches = null;
-    if (!preg_match('/where is (\S+?)\?/i', $text, $matches)) {
+    if (!preg_match('/where(?: in the world) is (\S+?)\?/i', $text, $matches)) {
       return;
     }
 
