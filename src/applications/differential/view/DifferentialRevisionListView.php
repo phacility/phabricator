@@ -22,6 +22,7 @@
 final class DifferentialRevisionListView extends AphrontView {
 
   private $revisions;
+  private $flags = array();
   private $handles;
   private $user;
   private $fields;
@@ -69,6 +70,23 @@ final class DifferentialRevisionListView extends AphrontView {
     return $this;
   }
 
+  public function loadAssets() {
+    $user = $this->user;
+    if (!$user) {
+      throw new Exception("Call setUser() before loadAssets()!");
+    }
+    if ($this->revisions === null) {
+      throw new Exception("Call setRevisions() before loadAssets()!");
+    }
+
+    $this->flags = id(new PhabricatorFlagQuery())
+      ->withOwnerPHIDs(array($user->getPHID()))
+      ->withObjectPHIDs(mpull($this->revisions, 'getPHID'))
+      ->execute();
+
+    return $this;
+  }
+
   public function render() {
 
     $user = $this->user;
@@ -88,11 +106,7 @@ final class DifferentialRevisionListView extends AphrontView {
     Javelin::initBehavior('phabricator-tooltips', array());
     require_celerity_resource('aphront-tooltip-css');
 
-    $flags = id(new PhabricatorFlagQuery())
-      ->withOwnerPHIDs(array($user->getPHID()))
-      ->withObjectPHIDs(mpull($this->revisions, 'getPHID'))
-      ->execute();
-    $flagged = mpull($flags, null, 'getObjectPHID');
+    $flagged = mpull($this->flags, null, 'getObjectPHID');
 
     foreach ($this->fields as $field) {
       $field->setUser($this->user);

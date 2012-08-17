@@ -326,7 +326,8 @@ final class PhabricatorDirectoryMainController
       ->setHighlightAge(true)
       ->setRevisions($active)
       ->setFields(DifferentialRevisionListView::getDefaultFields())
-      ->setUser($user);
+      ->setUser($user)
+      ->loadAssets();
     $phids = array_merge(
       array($user_phid),
       $revision_view->getRequiredHandlePHIDs());
