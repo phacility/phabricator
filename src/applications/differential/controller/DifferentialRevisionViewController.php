@@ -915,16 +915,19 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $generated_changesets = array();
     foreach ($changesets as $changeset) {
       $changeset->attachHunks($changeset->loadHunks());
+      $right = $changeset->makeNewFile();
+      $choice = $changeset;
       $vs = idx($vs_map, $changeset->getID());
-      if ($vs) {
+      if ($vs == -1) {
+        $left = $right;
+        $right = $changeset->makeOldFile();
+      } else if ($vs) {
         $choice = $vs_changeset = $vs_changesets[$vs];
         $vs_changeset->attachHunks($vs_changeset->loadHunks());
-        $right = $vs_changeset->makeNewFile();
+        $left = $vs_changeset->makeNewFile();
       } else {
-        $choice = $changeset;
-        $right = $changeset->makeOldFile();
+        $left = $changeset->makeOldFile();
       }
-      $left = $changeset->makeNewFile();
 
       $synthetic = $engine->generateChangesetFromFileContent(
         $left,
