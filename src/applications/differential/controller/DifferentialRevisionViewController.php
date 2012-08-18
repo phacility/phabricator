@@ -84,6 +84,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     list($aux_fields, $props) = $this->loadAuxiliaryFieldsAndProperties(
       $revision,
+      $target,
       $target_manual,
       array(
         'local:commits',
@@ -736,6 +737,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
   private function loadAuxiliaryFieldsAndProperties(
     DifferentialRevision $revision,
     DifferentialDiff $diff,
+    DifferentialDiff $manual_diff,
     array $special_properties) {
 
     $aux_fields = DifferentialFieldSelector::newSelector()
@@ -755,6 +757,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $aux_props = array();
     foreach ($aux_fields as $key => $aux_field) {
       $aux_field->setDiff($diff);
+      $aux_field->setManualDiff($manual_diff);
       $aux_props[$key] = $aux_field->getRequiredDiffProperties();
     }
 
@@ -767,7 +770,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     if ($required_properties) {
       $properties = id(new DifferentialDiffProperty())->loadAllWhere(
         'diffID = %d AND name IN (%Ls)',
-        $diff->getID(),
+        $manual_diff->getID(),
         $required_properties);
       $property_map = mpull($properties, 'getData', 'getName');
     }

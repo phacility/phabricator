@@ -28,7 +28,7 @@ final class DifferentialHostFieldSpecification
   }
 
   public function renderValueForRevisionView() {
-    $diff = $this->getDiff();
+    $diff = $this->getManualDiff();
     $host = $diff->getSourceMachine();
     if (!$host) {
       return null;

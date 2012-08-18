@@ -38,6 +38,7 @@ abstract class DifferentialFieldSpecification {
 
   private $revision;
   private $diff;
+  private $manualDiff;
   private $handles;
   private $diffProperties;
   private $user;
@@ -791,6 +792,14 @@ abstract class DifferentialFieldSpecification {
   /**
    * @task context
    */
+  final public function setManualDiff(DifferentialDiff $diff) {
+    $this->manualDiff = $diff;
+    return $this;
+  }
+
+  /**
+   * @task context
+   */
   final public function setHandles(array $handles) {
     assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
@@ -831,6 +840,16 @@ abstract class DifferentialFieldSpecification {
       throw new DifferentialFieldDataNotAvailableException($this);
     }
     return $this->diff;
+  }
+
+  /**
+   * @task context
+   */
+  final protected function getManualDiff() {
+    if (!$this->manualDiff) {
+      return $this->getDiff();
+    }
+    return $this->manualDiff;
   }
 
   /**
