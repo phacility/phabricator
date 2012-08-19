@@ -472,7 +472,9 @@ final class PhabricatorStandardPageView extends AphrontPageView {
     $foot_links = array();
 
     $version = PhabricatorEnv::getEnvConfig('phabricator.version');
-    $foot_links[] = phutil_escape_html('Phabricator '.$version);
+    $foot_links[] =
+      '<a href="http://phabricator.org/">Phabricator</a> '.
+      phutil_escape_html($version);
 
     $foot_links[] =
       '<a href="https://secure.phabricator.com/maniphest/task/create/">'.
