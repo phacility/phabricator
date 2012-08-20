@@ -59,7 +59,7 @@ JX.behavior('differential-toggle-files', function(config) {
     function(e) {
       var link = e.getNode('tag:a');
       var id = link.getAttribute('href');
-      if (!id.match(/^#.+/)) {
+      if (!id || !id.match(/^#.+/)) {
         return;
       }
       // The target may have either a matching name or a matching id.

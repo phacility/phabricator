@@ -1186,7 +1186,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-differential-toggle-files' =>
   array(
-    'uri' => '/res/fb94e3f5/rsrc/js/application/differential/behavior-toggle-files.js',
+    'uri' => '/res/983960b4/rsrc/js/application/differential/behavior-toggle-files.js',
     'type' => 'js',
     'requires' =>
     array(
