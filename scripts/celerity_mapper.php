@@ -90,6 +90,7 @@ $package_spec = array(
     'differential-changeset-view-css',
     'differential-results-table-css',
     'differential-revision-history-css',
+    'differential-revision-list-css',
     'differential-table-of-contents-css',
     'differential-revision-comment-css',
     'differential-revision-add-comment-css',

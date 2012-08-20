@@ -25,7 +25,11 @@ final class DifferentialRevisionListView extends AphrontView {
   private $handles;
   private $user;
   private $fields;
+  private $highlightAge;
   const NO_DATA_STRING = 'No revisions found.';
+
+  const DAYS_FRESH = 1;
+  const DAYS_STALE = 3;
 
   public function setFields(array $fields) {
     assert_instances_of($fields, 'DifferentialFieldSpecification');
@@ -36,6 +40,11 @@ final class DifferentialRevisionListView extends AphrontView {
   public function setRevisions(array $revisions) {
     assert_instances_of($revisions, 'DifferentialRevision');
     $this->revisions = $revisions;
+    return $this;
+  }
+
+  public function setHighlightAge($bool) {
+    $this->highlightAge = $bool;
     return $this;
   }
 
@@ -67,6 +76,15 @@ final class DifferentialRevisionListView extends AphrontView {
       throw new Exception("Call setUser() before render()!");
     }
 
+    if ($this->highlightAge) {
+      $fresh = PhabricatorCalendarHoliday::getNthBusinessDay(
+        time(),
+        -self::DAYS_FRESH);
+      $stale = PhabricatorCalendarHoliday::getNthBusinessDay(
+        time(),
+        -self::DAYS_STALE);
+    }
+
     Javelin::initBehavior('phabricator-tooltips', array());
     require_celerity_resource('aphront-tooltip-css');
 
@@ -81,6 +99,7 @@ final class DifferentialRevisionListView extends AphrontView {
       $field->setHandles($this->handles);
     }
 
+    $cell_classes = array();
     $rows = array();
     foreach ($this->revisions as $revision) {
       $phid = $revision->getPHID();
@@ -104,9 +123,25 @@ final class DifferentialRevisionListView extends AphrontView {
           '');
       }
       $row = array($flag);
+
+      $modified = $revision->getDateModified();
+
       foreach ($this->fields as $field) {
+        if ($this->highlightAge &&
+            $field instanceof DifferentialDateModifiedFieldSpecification) {
+          if ($modified < $stale) {
+            $class = 'revision-age-old';
+          } else if ($modified < $fresh) {
+            $class = 'revision-age-stale';
+          } else {
+            $class = 'revision-age-fresh';
+          }
+          $cell_classes[count($rows)][count($row)] = $class;
+        }
+
         $row[] = $field->renderValueForRevisionList($revision);
       }
+
       $rows[] = $row;
     }
 
@@ -120,8 +155,11 @@ final class DifferentialRevisionListView extends AphrontView {
     $table = new AphrontTableView($rows);
     $table->setHeaders($headers);
     $table->setColumnClasses($classes);
+    $table->setCellClasses($cell_classes);
 
     $table->setNoDataString(DifferentialRevisionListView::NO_DATA_STRING);
+
+    require_celerity_resource('differential-revision-history-css');
 
     return $table->render();
   }

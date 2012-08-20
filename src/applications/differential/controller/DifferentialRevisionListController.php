@@ -438,6 +438,7 @@ final class DifferentialRevisionListController extends DifferentialController {
           $user_phid);
 
         $view = id(clone $template)
+          ->setHighlightAge(true)
           ->setRevisions($active);
         $views[] = array(
           'title' => 'Action Required',
