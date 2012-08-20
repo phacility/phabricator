@@ -443,9 +443,16 @@ celerity_register_resource_map(array(
   ),
   '/rsrc/image/logo_grey.png' =>
   array(
-    'hash' => '6cff2a21538eeae471f0ea00cb7bc15d',
-    'uri' => '/res/6cff2a21/rsrc/image/logo_grey.png',
+    'hash' => 'da055af1f6f80ea9d7d13ae1d59ca3cd',
+    'uri' => '/res/da055af1/rsrc/image/logo_grey.png',
     'disk' => '/rsrc/image/logo_grey.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/main_texture.png' =>
+  array(
+    'hash' => 'e34d8143384721be73ec9b7532a977ab',
+    'uri' => '/res/e34d8143/rsrc/image/main_texture.png',
+    'disk' => '/rsrc/image/main_texture.png',
     'type' => 'png',
   ),
   '/rsrc/image/menu_texture.png' =>
@@ -2404,7 +2411,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-main-menu-view' =>
   array(
-    'uri' => '/res/cb2796ae/rsrc/css/application/base/main-menu-view.css',
+    'uri' => '/res/bfd05b66/rsrc/css/application/base/main-menu-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -2424,7 +2431,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-nav-view-css' =>
   array(
-    'uri' => '/res/3ee38144/rsrc/css/aphront/phabricator-nav-view.css',
+    'uri' => '/res/dfe48943/rsrc/css/aphront/phabricator-nav-view.css',
     'type' => 'css',
     'requires' =>
     array(

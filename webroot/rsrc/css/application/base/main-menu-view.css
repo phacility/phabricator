@@ -11,7 +11,8 @@
 */
 
 .phabricator-main-menu {
-  background: #33393d;
+  background: #2d3236;
+  background-image: url(/rsrc/image/main_texture.png);
   position: relative;
   box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.25);
   height: 44px;
@@ -84,9 +85,9 @@
 .phabricator-main-menu-logo {
   display: inline-block;
   height: 44px;
-  width: 180px;
+  width: 170px;
   margin-right: 12px;
-  background: 12px 9px url(/rsrc/image/logo_grey.png) no-repeat;
+  background: 6px 9px url(/rsrc/image/logo_grey.png) no-repeat;
 }
 
 .phabricator-main-menu-logo span {
@@ -247,7 +248,7 @@
 
   border: 1px solid #333333;
   border-radius: 12px;
-  background: #727272;
+  background: #555555;
   height: 12px;
   line-height: 12px;
   box-shadow: 0px 1px 1px rgba(128, 128, 128, 0.25);
@@ -259,7 +260,7 @@
 }
 
 .phabricator-main-menu-search input.jx-typeahead-placeholder {
-  color: #aaaaaa;
+  color: #999999;
 }
 
 .phabricator-main-menu-search button {
