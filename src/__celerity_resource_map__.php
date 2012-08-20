@@ -65,8 +65,8 @@ celerity_register_resource_map(array(
   ),
   '/rsrc/image/autosprite.png' =>
   array(
-    'hash' => '5df245706c30b098cc45a5dc05775a65',
-    'uri' => '/res/5df24570/rsrc/image/autosprite.png',
+    'hash' => '4a85e6c178f7dbdf1dc4f59f47a5e56b',
+    'uri' => '/res/4a85e6c1/rsrc/image/autosprite.png',
     'disk' => '/rsrc/image/autosprite.png',
     'type' => 'png',
   ),
@@ -124,13 +124,6 @@ celerity_register_resource_map(array(
     'hash' => '3be267bd11ea375bf68e808893718e0e',
     'uri' => '/res/3be267bd/rsrc/image/divot.png',
     'disk' => '/rsrc/image/divot.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/glyphicons.png' =>
-  array(
-    'hash' => '564fc282dac06bf8bb839457adaa3718',
-    'uri' => '/res/564fc282/rsrc/image/glyphicons.png',
-    'disk' => '/rsrc/image/glyphicons.png',
     'type' => 'png',
   ),
   '/rsrc/image/grippy_texture.png' =>
@@ -657,7 +650,7 @@ celerity_register_resource_map(array(
   ),
   'autosprite-css' =>
   array(
-    'uri' => '/res/27f100be/rsrc/css/autosprite.css',
+    'uri' => '/res/9ed6c0e6/rsrc/css/autosprite.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1482,7 +1475,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-phabricator-nav' =>
   array(
-    'uri' => '/res/2217e1e9/rsrc/js/application/core/behavior-phabricator-nav.js',
+    'uri' => '/res/15ceb59f/rsrc/js/application/core/behavior-phabricator-nav.js',
     'type' => 'js',
     'requires' =>
     array(
