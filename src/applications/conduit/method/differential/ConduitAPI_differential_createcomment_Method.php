@@ -31,6 +31,7 @@ final class ConduitAPI_differential_createcomment_Method
       'revision_id' => 'required revisionid',
       'message'     => 'optional string',
       'action'      => 'optional string',
+      'silent'      => 'optional bool',
     );
   }
 
@@ -66,6 +67,7 @@ final class ConduitAPI_differential_createcomment_Method
       $action);
     $editor->setContentSource($content_source);
     $editor->setMessage($request->getValue('message'));
+    $editor->setNoEmail($request->getValue('silent'));
     $editor->save();
 
     return array(
