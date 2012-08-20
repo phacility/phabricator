@@ -108,7 +108,7 @@ $app_template_full = id(new PhutilSprite())
   ->setSourceSize(60, 60);
 
 $app_template_mini = id(new PhutilSprite())
-  ->setSourceFile($srcroot.'/application_normal_1x.png')
+  ->setSourceFile($srcroot.'/menu_normal_1x.png')
   ->setSourceSize(30, 30);
 
 $app_source_map = array(
@@ -139,6 +139,7 @@ $app_map = array(
   'conduit'         => array(7, 30),
   'feed'            => array(3, 11),
   'paste'           => array(9, 2),
+  'audit'           => array(8, 19),
 );
 
 $xadj = -1;

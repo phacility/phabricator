@@ -243,10 +243,18 @@
   background-position: 0px -2398px;
 }
 
-.action-file {
+.app-audit-full {
   background-position: 0px -2429px;
 }
 
+.app-audit {
+  background-position: 0px -2490px;
+}
+
+.action-file {
+  background-position: 0px -2521px;
+}
+
 .action-fork {
-  background-position: 0px -2446px;
+  background-position: 0px -2538px;
 }

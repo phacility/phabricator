@@ -65,8 +65,8 @@ celerity_register_resource_map(array(
   ),
   '/rsrc/image/autosprite.png' =>
   array(
-    'hash' => '08fb34fc4ce0cd3be882a3177423ad49',
-    'uri' => '/res/08fb34fc/rsrc/image/autosprite.png',
+    'hash' => '5df245706c30b098cc45a5dc05775a65',
+    'uri' => '/res/5df24570/rsrc/image/autosprite.png',
     'disk' => '/rsrc/image/autosprite.png',
     'type' => 'png',
   ),
@@ -124,6 +124,13 @@ celerity_register_resource_map(array(
     'hash' => '3be267bd11ea375bf68e808893718e0e',
     'uri' => '/res/3be267bd/rsrc/image/divot.png',
     'disk' => '/rsrc/image/divot.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/glyphicons.png' =>
+  array(
+    'hash' => '564fc282dac06bf8bb839457adaa3718',
+    'uri' => '/res/564fc282/rsrc/image/glyphicons.png',
+    'disk' => '/rsrc/image/glyphicons.png',
     'type' => 'png',
   ),
   '/rsrc/image/grippy_texture.png' =>
@@ -448,6 +455,13 @@ celerity_register_resource_map(array(
     'disk' => '/rsrc/image/logo_grey.png',
     'type' => 'png',
   ),
+  '/rsrc/image/menu_texture.png' =>
+  array(
+    'hash' => '42193f24a52bd94be596c442d59a68ce',
+    'uri' => '/res/42193f24/rsrc/image/menu_texture.png',
+    'disk' => '/rsrc/image/menu_texture.png',
+    'type' => 'png',
+  ),
   '/rsrc/image/search.png' =>
   array(
     'hash' => 'ff7da044e6f923b8f569dec11f97e5e5',
@@ -643,7 +657,7 @@ celerity_register_resource_map(array(
   ),
   'autosprite-css' =>
   array(
-    'uri' => '/res/07043fce/rsrc/css/autosprite.css',
+    'uri' => '/res/27f100be/rsrc/css/autosprite.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1468,7 +1482,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-phabricator-nav' =>
   array(
-    'uri' => '/res/cb8979b2/rsrc/js/application/core/behavior-phabricator-nav.js',
+    'uri' => '/res/2217e1e9/rsrc/js/application/core/behavior-phabricator-nav.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2417,7 +2431,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-nav-view-css' =>
   array(
-    'uri' => '/res/ca2744bd/rsrc/css/aphront/phabricator-nav-view.css',
+    'uri' => '/res/3ee38144/rsrc/css/aphront/phabricator-nav-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -2457,7 +2471,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-object-item-list-view-css' =>
   array(
-    'uri' => '/res/7a31c016/rsrc/css/layout/phabricator-object-item-list-view.css',
+    'uri' => '/res/945fabe9/rsrc/css/layout/phabricator-object-item-list-view.css',
     'type' => 'css',
     'requires' =>
     array(

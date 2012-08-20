@@ -26,8 +26,8 @@ final class PhabricatorApplicationAudit extends PhabricatorApplication {
     return '/audit/';
   }
 
-  public function getIconURI() {
-    return celerity_get_resource_uri('/rsrc/image/app/app_audit.png');
+  public function getAutospriteName() {
+    return 'audit';
   }
 
   public function getRoutes() {

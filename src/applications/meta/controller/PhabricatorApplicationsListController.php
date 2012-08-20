@@ -56,6 +56,7 @@ final class PhabricatorApplicationsListController
       $view,
       array(
         'title' => 'Applications',
+        'device' => true,
       ));
   }
 
