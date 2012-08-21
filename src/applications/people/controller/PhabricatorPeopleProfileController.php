@@ -240,7 +240,7 @@ final class PhabricatorPeopleProfileController
         'style' => 'border: 1px solid #6f6f6f; '.
                    'margin: 1em 2em; '.
                    'height: 280px; '.
-                   'width: 640px; ',
+                   'width: 700px; ',
       ),
       '');
 
