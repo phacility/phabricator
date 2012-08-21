@@ -121,7 +121,6 @@ $package_spec = array(
 
     'differential-inline-comment-editor',
     'javelin-behavior-differential-dropdown-menus',
-    'javelin-behavior-buoyant',
   ),
   'diffusion.pkg.css' => array(
     'diffusion-commit-view-css',

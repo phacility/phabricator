@@ -162,7 +162,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
               '/D'.$revision->getID().
               '?vs='.$vs_diff->getID().
               '&id='.$diff->getID().
-              '#differential-review-toc');
+              '#toc');
             $editor->setChangedByCommit($changed_by_commit);
           }
 

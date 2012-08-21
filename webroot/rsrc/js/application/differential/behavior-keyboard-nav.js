@@ -219,7 +219,7 @@ JX.behavior('differential-keyboard-navigation', function(config) {
 
   new JX.KeyboardShortcut('t', 'Jump to the table of contents.')
     .setHandler(function(manager) {
-      var toc = JX.$('differential-review-toc');
+      var toc = JX.$('toc');
       manager.scrollTo(toc);
     })
     .register();
@@ -231,7 +231,7 @@ JX.behavior('differential-keyboard-navigation', function(config) {
         return;
       }
       JX.Stratcom.invoke('differential-toggle-file', null, {
-        diff: JX.DOM.scry(changesets[cursor], 'table', 'differential-diff'),
+        diff: JX.DOM.scry(changesets[cursor], 'table', 'differential-diff')
       });
     })
     .register();

@@ -1,0 +1,67 @@
+/**
+ * @provides phabricator-filetree-view-css
+ */
+
+.phabricator-filetree {
+  background: #fcfcfc;
+  border-style: solid;
+  border-width: 1px 0;
+  border-color: #a0a0a0;
+  padding: 4px 0;
+}
+
+/* NOTE: Until the whole side nav situation gets cleaned up, we need to be
+   highly specific in specifying selectors here, to override side nav styles.
+*/
+
+.phabricator-filetree .phabricator-filetree-item {
+  margin: 0;
+  padding: 0;
+}
+
+.phabricator-filetree span.phabricator-filetree-icon {
+  background-repeat: no-repeat;
+  background-position: 0 2px;
+  width: 16px;
+  height: 20px;
+  padding: 0;
+  float: left;
+}
+
+.phabricator-filetree span.phabricator-filetree-name {
+  padding: 0;
+  margin-left: 20px;
+  font-size: 11px;
+  font-weight: normal;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+.phabricator-filetree span.phabricator-filetree-item
+  .phabricator-filetree-name {
+  color: #666666;
+}
+
+.phabricator-filetree a.phabricator-filetree-item
+  .phabricator-filetree-name {
+  color: #3b5998;
+}
+
+.phabricator-filetree a.phabricator-filetree-item:hover
+  .phabricator-filetree-name {
+  color: #f9f9f9;
+}
+
+
+.phabricator-filetree-icon-file {
+  background-image: url(/rsrc/image/icon/fatcow/page_white_text.png);
+}
+
+.phabricator-filetree-icon-dir {
+  background-image: url(/rsrc/image/icon/fatcow/folder.png);
+}
+
+.phabricator-nav-local
+  a.phabricator-active-nav-focus {
+  background: #9caccf;
+}

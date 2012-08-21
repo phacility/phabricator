@@ -122,11 +122,14 @@ final class PhabricatorTransactionView extends AphrontView {
 
     if ($this->anchorName) {
       Javelin::initBehavior('phabricator-watch-anchor');
-      $info[] = phutil_render_tag(
+
+      $anchor = id(new PhabricatorAnchorView())
+        ->setAnchorName($this->anchorName)
+        ->render();
+
+      $info[] = $anchor.phutil_render_tag(
         'a',
         array(
-          'name'  => $this->anchorName,
-          'id'    => $this->anchorName,
           'href'  => '#'.$this->anchorName,
         ),
         phutil_escape_html($this->anchorText));

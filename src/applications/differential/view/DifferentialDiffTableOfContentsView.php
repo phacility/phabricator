@@ -222,8 +222,11 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
     );
 
     return
-      '<div id="differential-review-toc" '.
-        'class="differential-toc differential-panel">'.
+      id(new PhabricatorAnchorView())
+        ->setAnchorName('toc')
+        ->setNavigationMarker(true)
+        ->render().
+      '<div class="differential-toc differential-panel">'.
         $editor_link.
         $reveal_link.
         '<h1>Table of Contents</h1>'.
