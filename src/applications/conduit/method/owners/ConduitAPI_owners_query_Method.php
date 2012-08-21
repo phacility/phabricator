@@ -81,9 +81,7 @@ final class ConduitAPI_owners_query_Method
     return $packages;
   }
 
-  public static function queryByPath($repo_callsign, $path) {
-    // note: we call this from the deprecated path.getowners conduit call.
-
+  private static function queryByPath($repo_callsign, $path) {
     $repository = id(new PhabricatorRepository())->loadOneWhere('callsign = %s',
       $repo_callsign);
 
