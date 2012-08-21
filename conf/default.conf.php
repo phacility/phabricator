@@ -1021,6 +1021,15 @@ return array(
   // use of all of differential's features.
   'differential.allow-self-accept' => false,
 
+  // Revisions newer than this number of days are marked as fresh in Action
+  // Required and Revisions Waiting on You views. Only work days (not weekends
+  // and holidays) are included. Set to 0 to disable this feature.
+  'differential.days-fresh' => 1,
+
+  // Similar to 'differential.days-fresh' but marks stale revisions. If the
+  // revision is even older than it is marked as old.
+  'differential.days-stale' => 3,
+
 // -- Maniphest ------------------------------------------------------------- //
 
   'maniphest.enabled' => true,

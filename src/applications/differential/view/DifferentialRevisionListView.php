@@ -30,9 +30,6 @@ final class DifferentialRevisionListView extends AphrontView {
   private $highlightAge;
   const NO_DATA_STRING = 'No revisions found.';
 
-  const DAYS_FRESH = 1;
-  const DAYS_STALE = 3;
-
   public function setFields(array $fields) {
     assert_instances_of($fields, 'DifferentialFieldSpecification');
     $this->fields = $fields;
@@ -100,13 +97,23 @@ final class DifferentialRevisionListView extends AphrontView {
       throw new Exception("Call setUser() before render()!");
     }
 
+    $fresh = null;
+    $stale = null;
+
     if ($this->highlightAge) {
-      $fresh = PhabricatorCalendarHoliday::getNthBusinessDay(
-        time(),
-        -self::DAYS_FRESH);
-      $stale = PhabricatorCalendarHoliday::getNthBusinessDay(
-        time(),
-        -self::DAYS_STALE);
+      $fresh = PhabricatorEnv::getEnvConfig('differential.days-fresh');
+      if ($fresh) {
+        $fresh = PhabricatorCalendarHoliday::getNthBusinessDay(
+          time(),
+          -$fresh);
+      }
+
+      $stale = PhabricatorEnv::getEnvConfig('differential.days-stale');
+      if ($stale) {
+        $stale = PhabricatorCalendarHoliday::getNthBusinessDay(
+          time(),
+          -$stale);
+      }
     }
 
     Javelin::initBehavior('phabricator-tooltips', array());
@@ -163,11 +170,11 @@ final class DifferentialRevisionListView extends AphrontView {
       $modified = $revision->getDateModified();
 
       foreach ($this->fields as $field) {
-        if ($this->highlightAge &&
+        if (($fresh || $stale) &&
             $field instanceof DifferentialDateModifiedFieldSpecification) {
-          if ($modified < $stale) {
+          if ($stale && $modified < $stale) {
             $class = 'revision-age-old';
-          } else if ($modified < $fresh) {
+          } else if ($fresh && $modified < $fresh) {
             $class = 'revision-age-stale';
           } else {
             $class = 'revision-age-fresh';
