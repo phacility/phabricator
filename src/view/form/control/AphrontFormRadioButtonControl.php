@@ -20,11 +20,12 @@ final class AphrontFormRadioButtonControl extends AphrontFormControl {
 
   private $buttons = array();
 
-  public function addButton($value, $label, $caption) {
+  public function addButton($value, $label, $caption, $class = null) {
     $this->buttons[] = array(
       'value'   => $value,
       'label'   => $label,
       'caption' => $caption,
+      'class' => $class,
     );
     return $this;
   }
@@ -53,6 +54,7 @@ final class AphrontFormRadioButtonControl extends AphrontFormControl {
         'label',
         array(
           'for' => $id,
+          'class' => $button['class'],
         ),
         phutil_escape_html($button['label']));
 

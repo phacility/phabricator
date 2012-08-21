@@ -7,6 +7,12 @@
   background: transparent 0 0 no-repeat;
 }
 
+.phabricator-flag-radio {
+  padding-left: 18px;
+  margin: 1px;
+  background: transparent 0 0 no-repeat;
+}
+
 .phabricator-flag-color-0 {
   background-image: url(/rsrc/image/icon/fatcow/flag_red.png);
 }
