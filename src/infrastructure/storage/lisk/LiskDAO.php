@@ -873,6 +873,10 @@ abstract class LiskDAO {
     return $this;
   }
 
+  final protected function getInSet() {
+    return $this->inSet;
+  }
+
 
 /* -(  Examining Objects  )-------------------------------------------------- */
 
