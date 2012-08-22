@@ -1038,9 +1038,11 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $href = null;
       if ($data) {
         $href = '#'.$data->getAnchorName();
+        $title = $name;
         $icon = 'phabricator-filetree-icon-file';
       } else {
         $name .= '/';
+        $title = $path->getFullPath().'/';
         $icon = 'phabricator-filetree-icon-dir';
       }
 
@@ -1063,7 +1065,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
         array(
           'href' => $href,
           'style' => $style,
-          'title' => $name,
+          'title' => $title,
           'class' => 'phabricator-filetree-item',
         ),
         $icon.$name_element);
