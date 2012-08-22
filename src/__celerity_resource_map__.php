@@ -469,6 +469,13 @@ celerity_register_resource_map(array(
     'disk' => '/rsrc/image/menu_texture.png',
     'type' => 'png',
   ),
+  '/rsrc/image/nyan.gif' =>
+  array(
+    'hash' => '03c40be4e004e6468d62b503756a587e',
+    'uri' => '/res/03c40be4/rsrc/image/nyan.gif',
+    'disk' => '/rsrc/image/nyan.gif',
+    'type' => 'gif',
+  ),
   '/rsrc/image/search.png' =>
   array(
     'hash' => 'ff7da044e6f923b8f569dec11f97e5e5',
@@ -1327,6 +1334,17 @@ celerity_register_resource_map(array(
       1 => 'javelin-behavior',
     ),
     'disk' => '/rsrc/js/application/herald/herald-rule-editor.js',
+  ),
+  'javelin-behavior-konami' =>
+  array(
+    'uri' => '/res/4f9442c2/rsrc/js/application/core/behavior-konami.js',
+    'type' => 'js',
+    'requires' =>
+    array(
+      0 => 'javelin-behavior',
+      1 => 'javelin-stratcom',
+    ),
+    'disk' => '/rsrc/js/application/core/behavior-konami.js',
   ),
   'javelin-behavior-line-chart' =>
   array(

@@ -159,6 +159,7 @@ final class PhabricatorStandardPageView extends AphrontPageView {
 
     Javelin::initBehavior('workflow', array());
     Javelin::initBehavior('toggle-class', array());
+    Javelin::initBehavior('konami', array());
     Javelin::initBehavior(
       'refresh-csrf',
       array(
