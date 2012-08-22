@@ -2457,7 +2457,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-nav-view-css' =>
   array(
-    'uri' => '/res/dfe48943/rsrc/css/aphront/phabricator-nav-view.css',
+    'uri' => '/res/075830ac/rsrc/css/aphront/phabricator-nav-view.css',
     'type' => 'css',
     'requires' =>
     array(
