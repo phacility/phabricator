@@ -103,7 +103,12 @@ final class PhabricatorFeedStoryPublisher {
 
 
   private function insertNotifications($chrono_key) {
-    if (!$this->subscribedPHIDs) {
+    $subscribed_phids = $this->subscribedPHIDs;
+    $subscribed_phids = array_diff(
+      $subscribed_phids,
+      array($this->storyAuthorPHID));
+
+    if (!$subscribed_phids) {
       return;
     }
 
@@ -116,7 +121,7 @@ final class PhabricatorFeedStoryPublisher {
     $sql = array();
     $conn = $notif->establishConnection('w');
 
-    foreach (array_unique($this->subscribedPHIDs) as $user_phid) {
+    foreach (array_unique($subscribed_phids) as $user_phid) {
       $sql[] = qsprintf(
         $conn,
         '(%s, %s, %s, %d)',
