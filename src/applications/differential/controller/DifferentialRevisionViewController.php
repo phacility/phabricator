@@ -1021,7 +1021,31 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $tree = new PhutilFileTree();
     foreach ($changesets as $changeset) {
-      $tree->addPath($changeset->getFilename(), $changeset);
+      try {
+        $tree->addPath($changeset->getFilename(), $changeset);
+      } catch (Exception $ex) {
+        // TODO: See T1702. When viewing the versus diff of diffs, we may
+        // have files with the same filename. For example, if you have a setup
+        // like this in SVN:
+        //
+        //  a/
+        //    README
+        //  b/
+        //    README
+        //
+        // ...and you run "arc diff" once from a/, and again from b/, you'll
+        // get two diffs with path README. However, in the versus diff view we
+        // will compute their absolute repository paths and detect that they
+        // aren't really the same file. This is correct, but causes us to
+        // throw when inserting them.
+        //
+        // We should probably compute the smallest unique path for each file
+        // and show these as "a/README" and "b/README" when diffed against
+        // one another. However, we get this wrong in a lot of places (the
+        // other TOC shows two "README" files, and we generate the same anchor
+        // hash for both) so I'm just stopping the bleeding until we can get
+        // a proper fix in place.
+      }
     }
 
     require_celerity_resource('phabricator-filetree-view-css');
