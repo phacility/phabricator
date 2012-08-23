@@ -62,6 +62,10 @@ JX.behavior('differential-toggle-files', function(config) {
       if (!id || !id.match(/^#.+/)) {
         return;
       }
+      var raw = e.getRawEvent();
+      if (raw.altKey || raw.ctrlKey || raw.metaKey || raw.shiftKey) {
+        return;
+      }
       // The target may have either a matching name or a matching id.
       var target;
       try {
