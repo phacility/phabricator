@@ -1434,7 +1434,7 @@ final class DifferentialChangesetParser {
             $is_last_block
               ? "Show Last 20 Lines"
               : "\xE2\x96\xBC Show 20 Lines");
-        };
+        }
 
         $container = javelin_render_tag(
           'tr',
