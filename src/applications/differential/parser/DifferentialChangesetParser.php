@@ -60,7 +60,7 @@ final class DifferentialChangesetParser {
   private $markupEngine;
   private $highlightErrors;
 
-  const CACHE_VERSION = 5;
+  const CACHE_VERSION = 6;
 
   const ATTR_GENERATED  = 'attr:generated';
   const ATTR_DELETED    = 'attr:deleted';
