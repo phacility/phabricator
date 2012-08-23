@@ -1363,6 +1363,28 @@ final class DifferentialChangesetParser {
       $highlight_new = array_flip($highlight_new);
     }
 
+    // We need to go backwards to properly indent whitespace in this code:
+    //
+    //   0: class C {
+    //   1:
+    //   1:   function f() {
+    //   2:
+    //   2:     return;
+    //
+    $depths = array();
+    $last_depth = 0;
+    for ($ii = $range_start + $range_len - 1; $ii >= $range_start; $ii--) {
+      // We need to expand tabs to process mixed indenting and to round
+      // correctly later.
+      $line = str_replace("\t", "  ", $this->new[$ii]['text']);
+      $trimmed = ltrim($line);
+      if ($trimmed != '') {
+        // We round down to flatten "/**" and " *".
+        $last_depth = floor((strlen($line) - strlen($trimmed)) / 2);
+      }
+      $depths[$ii] = $last_depth;
+    }
+
     for ($ii = $range_start; $ii < $range_start + $range_len; $ii++) {
       if (empty($mask[$ii])) {
         // If we aren't going to show this line, we've just entered a gap.
@@ -1414,12 +1436,12 @@ final class DifferentialChangesetParser {
           ),
           'Show All '.$len.' Lines');
 
-        if ($len > 40) {
-          $is_last_block = false;
-          if ($ii + $len >= $rows) {
-            $is_last_block = true;
-          }
+        $is_last_block = false;
+        if ($ii + $len >= $rows) {
+          $is_last_block = true;
+        }
 
+        if ($len > 40) {
           $contents[] = javelin_render_tag(
             'a',
             array(
@@ -1434,6 +1456,17 @@ final class DifferentialChangesetParser {
             $is_last_block
               ? "Show Last 20 Lines"
               : "\xE2\x96\xBC Show 20 Lines");
+        }
+
+        if (!$is_last_block && $depths[$ii + $len]) {
+          for ($l = $ii + $len - 1; $l >= $ii; $l--) {
+            $line = $this->new[$l]['text'];
+            if ($depths[$l] < $depths[$ii + $len] && trim($line) != '') {
+              $contents[] = '<code>'.$this->newRender[$l].'</code>';
+              break;
+            }
+          }
+
         }
 
         $container = javelin_render_tag(
