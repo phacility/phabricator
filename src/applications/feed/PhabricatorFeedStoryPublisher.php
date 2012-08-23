@@ -24,7 +24,7 @@ final class PhabricatorFeedStoryPublisher {
   private $storyTime;
   private $storyAuthorPHID;
   private $primaryObjectPHID;
-  private $subscribedPHIDs;
+  private $subscribedPHIDs = array();
 
   public function setRelatedPHIDs(array $phids) {
     $this->relatedPHIDs = $phids;
