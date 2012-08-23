@@ -45,6 +45,12 @@ final class AphrontSideNavFilterView extends AphrontView {
   private $showApplicationMenu;
   private $user;
   private $currentApplication;
+  private $active;
+
+  public function setActive($active) {
+    $this->active = $active;
+    return $this;
+  }
 
   public function setCurrentApplication(PhabricatorApplication $current) {
     $this->currentApplication = $current;
@@ -102,6 +108,11 @@ final class AphrontSideNavFilterView extends AphrontView {
     }
   }
 
+  public function addCustomBlock($block) {
+    $this->items[] = array('custom', null, $block);
+    return $this;
+  }
+
   public function addLabel($name) {
     $this->items[] = array('label', null, $name);
     return $this;
@@ -150,6 +161,7 @@ final class AphrontSideNavFilterView extends AphrontView {
     $view->setFlexNav($this->flexNav);
     $view->setFlexible($this->flexible);
     $view->setShowApplicationMenu($this->showApplicationMenu);
+    $view->setActive($this->active);
     if ($this->user) {
       $view->setUser($this->user);
     }
@@ -159,6 +171,9 @@ final class AphrontSideNavFilterView extends AphrontView {
     foreach ($this->items as $item) {
       list($type, $key, $name) = $item;
       switch ($type) {
+        case 'custom':
+          $view->addNavItem($name);
+          break;
         case 'spacer':
           $view->addNavItem('<br />');
           break;

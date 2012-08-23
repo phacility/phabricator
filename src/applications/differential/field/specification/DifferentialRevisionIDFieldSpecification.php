@@ -118,7 +118,7 @@ final class DifferentialRevisionIDFieldSpecification
         $body[] = null;
         $body[] = 'CHANGE SINCE LAST DIFF';
         $body[] = '  '.PhabricatorEnv::getProductionURI(
-          "/D{$this->id}?vs={$old}&id={$new}#differential-review-toc");
+          "/D{$this->id}?vs={$old}&id={$new}#toc");
       }
     }
 

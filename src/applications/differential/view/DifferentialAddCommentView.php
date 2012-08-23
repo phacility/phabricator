@@ -203,6 +203,10 @@ final class DifferentialAddCommentView extends AphrontView {
     $panel_view->addClass('aphront-panel-flush');
 
     return
+      id(new PhabricatorAnchorView())
+        ->setAnchorName('comment')
+        ->setNavigationMarker(true)
+        ->render().
       '<div class="differential-add-comment-panel">'.
         $panel_view->render().
         '<div class="aphront-panel-preview aphront-panel-flush">'.

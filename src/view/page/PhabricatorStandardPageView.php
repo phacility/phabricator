@@ -159,6 +159,7 @@ final class PhabricatorStandardPageView extends AphrontPageView {
 
     Javelin::initBehavior('workflow', array());
     Javelin::initBehavior('toggle-class', array());
+    Javelin::initBehavior('konami', array());
     Javelin::initBehavior(
       'refresh-csrf',
       array(
@@ -472,7 +473,9 @@ final class PhabricatorStandardPageView extends AphrontPageView {
     $foot_links = array();
 
     $version = PhabricatorEnv::getEnvConfig('phabricator.version');
-    $foot_links[] = phutil_escape_html('Phabricator '.$version);
+    $foot_links[] =
+      '<a href="http://phabricator.org/">Phabricator</a> '.
+      phutil_escape_html($version);
 
     $foot_links[] =
       '<a href="https://secure.phabricator.com/maniphest/task/create/">'.

@@ -1,0 +1,23 @@
+/**
+ * @provides differential-revision-list-css
+ */
+
+
+.revision-age-fresh,
+.revision-age-stale,
+.revision-age-old {
+  margin: -4px -8px;
+  padding: 4px 8px;
+}
+
+.revision-age-fresh {
+  background: #b4e3b2;
+}
+
+.revision-age-stale {
+  background: #f3e782;
+}
+
+.revision-age-old {
+  background: #f0acac;
+}

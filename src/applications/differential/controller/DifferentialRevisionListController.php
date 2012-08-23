@@ -438,7 +438,9 @@ final class DifferentialRevisionListController extends DifferentialController {
           $user_phid);
 
         $view = id(clone $template)
-          ->setRevisions($active);
+          ->setHighlightAge(true)
+          ->setRevisions($active)
+          ->loadAssets();
         $views[] = array(
           'title' => 'Action Required',
           'view'  => $view,
@@ -467,7 +469,8 @@ final class DifferentialRevisionListController extends DifferentialController {
         }
 
         $view = id(clone $template)
-          ->setRevisions($waiting);
+          ->setRevisions($waiting)
+          ->loadAssets();
         $views[] = array(
           'title' => 'Waiting On Others',
           'view'  => $view,
@@ -485,7 +488,8 @@ final class DifferentialRevisionListController extends DifferentialController {
           'all'         => 'Revisions',
         );
         $view = id(clone $template)
-          ->setRevisions($revisions);
+          ->setRevisions($revisions)
+          ->loadAssets();
         $views[] = array(
           'title' => idx($titles, $filter),
           'view'  => $view,

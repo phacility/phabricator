@@ -31,6 +31,11 @@ class PhabricatorMailImplementationPHPMailerLiteAdapter
     require_once $root.'/externals/phpmailer/class.phpmailer-lite.php';
     $this->mailer = new PHPMailerLite($use_exceptions = true);
     $this->mailer->CharSet = 'utf-8';
+
+    // By default, PHPMailerLite sends one mail per recipient. We handle
+    // multiplexing higher in the stack, so tell it to send mail exactly
+    // like we ask.
+    $this->mailer->SingleTo = false;
   }
 
   public function supportsMessageIDHeader() {

@@ -616,22 +616,6 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         $add_cc = array_diff_key($add_cc, $exclude);
       }
 
-
-      $empty_to =
-        PhabricatorEnv::getEnvConfig('metamta.placeholder-to-recipient');
-      if ($empty_to !== null && !$add_to) {
-        $mailer->addTos(array($empty_to));
-      }
-      if ($add_to) {
-        $mailer->addTos($add_to);
-      }
-      if ($add_cc) {
-        if ($empty_to !== null) {
-          $mailer->addCCs($add_cc);
-        } else {
-          $mailer->addTos($add_cc);
-        }
-      }
       if (!$add_to && !$add_cc) {
         $this->setStatus(self::STATUS_VOID);
         $this->setMessage(
@@ -640,6 +624,24 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         return $this->save();
       }
 
+      // Some mailers require a valid "To:" in order to deliver mail. If we
+      // don't have any "To:", try to fill it in with a placeholder "To:".
+      // If that also fails, move the "Cc:" line to "To:".
+      if (!$add_to) {
+        $placeholder_key = 'metamta.placeholder-to-recipient';
+        $placeholder = PhabricatorEnv::getEnvConfig($placeholder_key);
+        if ($placeholder !== null) {
+          $add_to = array($placeholder);
+        } else {
+          $add_to = $add_cc;
+          $add_cc = array();
+        }
+      }
+
+      $mailer->addTos($add_to);
+      if ($add_cc) {
+        $mailer->addCCs($add_cc);
+      }
     } catch (Exception $ex) {
       $this->setStatus(self::STATUS_FAIL);
       $this->setMessage($ex->getMessage());

@@ -194,7 +194,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
             array(
               'href' => $request_uri
                 ->alter('large', 'true')
-                ->setFragment('differential-review-toc'),
+                ->setFragment('toc'),
             ),
             'Show All Files Inline').
         "</strong>");
@@ -395,12 +395,22 @@ final class DifferentialRevisionViewController extends DifferentialController {
     PhabricatorFeedStoryNotification::updateObjectNotificationViews(
       $user, $revision->getPHID());
 
-    return $this->buildStandardPageResponse(
+    $top_anchor = id(new PhabricatorAnchorView())
+      ->setAnchorName('top')
+      ->setNavigationMarker(true);
+
+    $nav = $this->buildSideNavView($revision, $changesets);
+    $nav->selectFilter('');
+    $nav->appendChild(
       array(
         $reviewer_warning,
+        $top_anchor,
         $revision_detail,
         $page_pane,
-      ),
+      ));
+
+    return $this->buildApplicationPage(
+      $nav,
       array(
         'title' => 'D'.$revision->getID().' '.$revision->getTitle(),
       ));
@@ -862,7 +872,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $view = id(new DifferentialRevisionListView())
       ->setRevisions($revisions)
       ->setFields(DifferentialRevisionListView::getDefaultFields())
-      ->setUser($this->getRequest()->getUser());
+      ->setUser($this->getRequest()->getUser())
+      ->loadAssets();
 
     $phids = $view->getRequiredHandlePHIDs();
     $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
@@ -915,16 +926,19 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $generated_changesets = array();
     foreach ($changesets as $changeset) {
       $changeset->attachHunks($changeset->loadHunks());
+      $right = $changeset->makeNewFile();
+      $choice = $changeset;
       $vs = idx($vs_map, $changeset->getID());
-      if ($vs) {
+      if ($vs == -1) {
+        $left = $right;
+        $right = $changeset->makeOldFile();
+      } else if ($vs) {
         $choice = $vs_changeset = $vs_changesets[$vs];
         $vs_changeset->attachHunks($vs_changeset->loadHunks());
-        $right = $vs_changeset->makeNewFile();
+        $left = $vs_changeset->makeNewFile();
       } else {
-        $choice = $changeset;
-        $right = $changeset->makeOldFile();
+        $left = $changeset->makeOldFile();
       }
-      $left = $changeset->makeNewFile();
 
       $synthetic = $engine->generateChangesetFromFileContent(
         $left,
@@ -991,5 +1005,106 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     return id(new AphrontRedirectResponse())->setURI($file->getBestURI());
 
+  }
+
+  private function buildSideNavView(
+    DifferentialRevision $revision,
+    array $changesets) {
+
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI('/D'.$revision->getID()));
+    $nav->setFlexible(true);
+
+    $nav->addFilter('top', 'D'.$revision->getID(), '#top',
+      $relative = false,
+      'phabricator-active-nav-focus');
+
+    $tree = new PhutilFileTree();
+    foreach ($changesets as $changeset) {
+      try {
+        $tree->addPath($changeset->getFilename(), $changeset);
+      } catch (Exception $ex) {
+        // TODO: See T1702. When viewing the versus diff of diffs, we may
+        // have files with the same filename. For example, if you have a setup
+        // like this in SVN:
+        //
+        //  a/
+        //    README
+        //  b/
+        //    README
+        //
+        // ...and you run "arc diff" once from a/, and again from b/, you'll
+        // get two diffs with path README. However, in the versus diff view we
+        // will compute their absolute repository paths and detect that they
+        // aren't really the same file. This is correct, but causes us to
+        // throw when inserting them.
+        //
+        // We should probably compute the smallest unique path for each file
+        // and show these as "a/README" and "b/README" when diffed against
+        // one another. However, we get this wrong in a lot of places (the
+        // other TOC shows two "README" files, and we generate the same anchor
+        // hash for both) so I'm just stopping the bleeding until we can get
+        // a proper fix in place.
+      }
+    }
+
+    require_celerity_resource('phabricator-filetree-view-css');
+
+    $filetree = array();
+
+    $path = $tree;
+    while (($path = $path->getNextNode())) {
+      $data = $path->getData();
+
+      $name = $path->getName();
+      $style = 'padding-left: '.(2 + (3 * $path->getDepth())).'px';
+
+      $href = null;
+      if ($data) {
+        $href = '#'.$data->getAnchorName();
+        $title = $name;
+        $icon = 'phabricator-filetree-icon-file';
+      } else {
+        $name .= '/';
+        $title = $path->getFullPath().'/';
+        $icon = 'phabricator-filetree-icon-dir';
+      }
+
+      $icon = phutil_render_tag(
+        'span',
+        array(
+          'class' => 'phabricator-filetree-icon '.$icon,
+        ),
+        '');
+
+      $name_element = phutil_render_tag(
+        'span',
+        array(
+          'class' => 'phabricator-filetree-name',
+        ),
+        phutil_escape_html($name));
+
+      $filetree[] = javelin_render_tag(
+        $href ? 'a' : 'span',
+        array(
+          'href' => $href,
+          'style' => $style,
+          'title' => $title,
+          'class' => 'phabricator-filetree-item',
+        ),
+        $icon.$name_element);
+    }
+    $tree->destroy();
+
+    $filetree =
+      '<div class="phabricator-filetree">'.
+        implode("\n", $filetree).
+      '</div>';
+    $nav->addFilter('toc', 'Table of Contents', '#toc');
+    $nav->addCustomBlock($filetree);
+    $nav->addFilter('comment', 'Add Comment', '#comment');
+    $nav->setActive(true);
+
+    return $nav;
   }
 }

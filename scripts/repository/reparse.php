@@ -94,12 +94,8 @@ $force = $args->getArg('force');
 $force_local = $args->getArg('force-local');
 $min_date = $args->getArg('min-date');
 
-if (count($reparse_what) > 1 || !($all_from_repo xor count($reparse_what))) {
+if (!$all_from_repo && !$reparse_what) {
   usage("Specify a commit or repository to reparse.");
-}
-
-if ($args->getArg('trace')) {
-  PhutilServiceProfiler::installEchoListener();
 }
 
 if (!$reparse_message && !$reparse_change && !$reparse_herald &&
@@ -146,29 +142,32 @@ if ($all_from_repo) {
   }
   $callsign = $repository->getCallsign();
 } else {
-  $matches = null;
-  if (!preg_match('/r([A-Z]+)([a-z0-9]+)/', $reparse_what, $matches)) {
-    throw new Exception("Can't parse commit identifier!");
+  $commits = array();
+  foreach ($reparse_what as $identifier) {
+    $matches = null;
+    if (!preg_match('/r([A-Z]+)([a-z0-9]+)/', $identifier, $matches)) {
+      throw new Exception("Can't parse commit identifier!");
+    }
+    $callsign = $matches[1];
+    $commit_identifier = $matches[2];
+    $repository = id(new PhabricatorRepository())->loadOneWhere(
+      'callsign = %s',
+      $callsign);
+    if (!$repository) {
+      throw new Exception("No repository with callsign '{$callsign}'!");
+    }
+    $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
+      'repositoryID = %d AND commitIdentifier = %s',
+      $repository->getID(),
+      $commit_identifier);
+    if (!$commit) {
+      throw new Exception(
+        "No matching commit '{$commit_identifier}' in repository ".
+        "'{$callsign}'. (For git and mercurial repositories, you must specify ".
+        "the entire commit hash.)");
+    }
+    $commits[] = $commit;
   }
-  $callsign = $matches[1];
-  $commit_identifier = $matches[2];
-  $repository = id(new PhabricatorRepository())->loadOneWhere(
-    'callsign = %s',
-    $callsign);
-  if (!$repository) {
-    throw new Exception("No repository with callsign '{$callsign}'!");
-  }
-  $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-    'repositoryID = %d AND commitIdentifier = %s',
-    $repository->getID(),
-    $commit_identifier);
-  if (!$commit) {
-    throw new Exception(
-      "No matching commit '{$commit_identifier}' in repository '{$callsign}'. ".
-      "(For git and mercurial repositories, you must specify the entire ".
-      "commit hash.)");
-  }
-  $commits = array($commit);
 }
 
 if ($all_from_repo && !$force_local) {

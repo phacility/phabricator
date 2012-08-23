@@ -6,6 +6,22 @@
   background: #ffffff;
 }
 
+.phabricator-anchor-view,
+.phabricator-anchor-navigation-marker {
+  position: absolute;
+  margin-top: -15px;
+}
+
+
+
+.device-desktop .phabricator-anchor-view,
+.device-desktop .phabricator-anchor-navigation-marker {
+  /* On desktops, move the anchor up more so the menu bar doesn't obscure the
+     content. This is the menu bar height (44px) plus the anchor adjustment
+     (15px). */
+  margin-top: -59px;
+}
+
 .phabricator-chromeless-page .phabricator-standard-page {
   background:           transparent;
   border-width:         0px;
@@ -100,22 +116,4 @@ a.handle-disabled {
   text-align: center;
   font-size: 11px;
   font-family: "Verdana";
-}
-
-.buoyant {
-  position: fixed;
-  top: 0px;
-  left: 0px;
-  z-index: 8;
-
-  padding: 6px;
-  color: #dddddd;
-  font-size: 11px;
-  opacity: 0.90;
-  width: 100%;
-
-  background: #222222;
-  border-bottom: 1px solid #dfdfdf;
-  cursor: pointer;
-
 }

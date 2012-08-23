@@ -323,9 +323,11 @@ final class PhabricatorDirectoryMainController
         "View Active Revisions \xC2\xBB"));
 
     $revision_view = id(new DifferentialRevisionListView())
+      ->setHighlightAge(true)
       ->setRevisions($active)
       ->setFields(DifferentialRevisionListView::getDefaultFields())
-      ->setUser($user);
+      ->setUser($user)
+      ->loadAssets();
     $phids = array_merge(
       array($user_phid),
       $revision_view->getRequiredHandlePHIDs());

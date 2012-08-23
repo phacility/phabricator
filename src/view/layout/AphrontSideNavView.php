@@ -24,6 +24,7 @@ final class AphrontSideNavView extends AphrontView {
   private $showApplicationMenu;
   private $user;
   private $currentApplication;
+  private $active;
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
@@ -52,6 +53,11 @@ final class AphrontSideNavView extends AphrontView {
 
   public function setFlexible($flexible) {
     $this->flexible = $flexible;
+    return $this;
+  }
+
+  public function setActive($active) {
+    $this->active = $active;
     return $this;
   }
 
@@ -152,6 +158,14 @@ final class AphrontSideNavView extends AphrontView {
           'expandID'    => $expand_id,
           'collapseKey' => $key,
         ));
+
+      if ($this->active && $local_id) {
+        Javelin::initBehavior(
+          'phabricator-active-nav',
+          array(
+            'localID' => $local_id,
+          ));
+      }
 
       $header_part =
         '<div class="phabricator-nav-head">'.

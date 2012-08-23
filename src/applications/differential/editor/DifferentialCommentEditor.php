@@ -31,6 +31,7 @@ final class DifferentialCommentEditor {
 
   private $parentMessageID;
   private $contentSource;
+  private $noEmail;
 
   private $isDaemonWorkflow;
 
@@ -102,6 +103,11 @@ final class DifferentialCommentEditor {
 
   public function setIsDaemonWorkflow($is_daemon) {
     $this->isDaemonWorkflow = $is_daemon;
+    return $this;
+  }
+
+  public function setNoEmail($no_email) {
+    $this->noEmail = $no_email;
     return $this;
   }
 
@@ -553,21 +559,23 @@ final class DifferentialCommentEditor {
     $xherald_header = HeraldTranscript::loadXHeraldRulesHeader(
       $revision->getPHID());
 
-    id(new DifferentialCommentMail(
-      $revision,
-      $actor_handle,
-      $comment,
-      $changesets,
-      $inline_comments))
-      ->setToPHIDs(
-        array_merge(
-          $revision->getReviewers(),
-          array($revision->getAuthorPHID())))
-      ->setCCPHIDs($revision->getCCPHIDs())
-      ->setChangedByCommit($this->getChangedByCommit())
-      ->setXHeraldRulesHeader($xherald_header)
-      ->setParentMessageID($this->parentMessageID)
-      ->send();
+    if (!$this->noEmail) {
+      id(new DifferentialCommentMail(
+        $revision,
+        $actor_handle,
+        $comment,
+        $changesets,
+        $inline_comments))
+        ->setToPHIDs(
+          array_merge(
+            $revision->getReviewers(),
+            array($revision->getAuthorPHID())))
+        ->setCCPHIDs($revision->getCCPHIDs())
+        ->setChangedByCommit($this->getChangedByCommit())
+        ->setXHeraldRulesHeader($xherald_header)
+        ->setParentMessageID($this->parentMessageID)
+        ->send();
+    }
 
     $event_data = array(
       'revision_id'          => $revision->getID(),

@@ -3,7 +3,6 @@
  * @requires javelin-behavior
  *           javelin-dom
  *           javelin-stratcom
- *           phabricator-keyboard-shortcut
  */
 
 JX.behavior('differential-toggle-files', function(config) {
@@ -35,17 +34,23 @@ JX.behavior('differential-toggle-files', function(config) {
       while (elt !== document.body) {
         if (JX.Stratcom.hasSigil(elt, 'differential-changeset')) {
           var diffs = JX.DOM.scry(elt, 'table', 'differential-diff');
+          var invoked = false;
           for (var i = 0; i < diffs.length; ++i) {
             if (JX.Stratcom.getData(diffs[i]).hidden) {
               JX.Stratcom.invoke('differential-toggle-file', null, {
-                diff: [ diffs[i] ],
+                diff: [ diffs[i] ]
               });
+              invoked = true;
             }
+          }
+          if (!invoked) {
+            e.prevent();
           }
           return;
         }
         elt = elt.parentNode;
       }
+      e.prevent();
     });
 
   JX.Stratcom.listen(
@@ -54,7 +59,11 @@ JX.behavior('differential-toggle-files', function(config) {
     function(e) {
       var link = e.getNode('tag:a');
       var id = link.getAttribute('href');
-      if (!id.match(/^#.+/)) {
+      if (!id || !id.match(/^#.+/)) {
+        return;
+      }
+      var raw = e.getRawEvent();
+      if (raw.altKey || raw.ctrlKey || raw.metaKey || raw.shiftKey) {
         return;
       }
       // The target may have either a matching name or a matching id.
@@ -63,23 +72,25 @@ JX.behavior('differential-toggle-files', function(config) {
         target = JX.$(id.substr(1));
       } catch(err) {
         var named = document.getElementsByName(id.substr(1));
-        var matches = [];
         for (var i = 0; i < named.length; ++i) {
           if (named[i].tagName.toLowerCase() == 'a') {
-            matches.push(named[i]);
+            if (target) {
+              return;
+            }
+            target = named[i];
           }
         }
-        if (matches.length == 1) {
-          target = matches[0];
-        } else {
+        if (!target) {
           return;
         }
       }
-      JX.Stratcom.invoke('differential-toggle-file-request', null, {
-        element: target,
+      var event = JX.Stratcom.invoke('differential-toggle-file-request', null, {
+        element: target
       });
-      // This event is processed after the hash has changed, so it doesn't
-      // automatically jump there like we want.
-      JX.DOM.scrollTo(target);
+      if (!event.getPrevented()) {
+        // This event is processed after the hash has changed, so it doesn't
+        // automatically jump there like we want.
+        JX.DOM.scrollTo(target);
+      }
     });
 });

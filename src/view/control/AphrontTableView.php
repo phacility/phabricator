@@ -22,6 +22,7 @@ final class AphrontTableView extends AphrontView {
   protected $headers;
   protected $rowClasses = array();
   protected $columnClasses = array();
+  protected $cellClasses = array();
   protected $zebraStripes = true;
   protected $noDataString;
   protected $className;
@@ -49,6 +50,11 @@ final class AphrontTableView extends AphrontView {
 
   public function setRowClasses(array $row_classes) {
     $this->rowClasses = $row_classes;
+    return $this;
+  }
+
+  public function setCellClasses(array $cell_classes) {
+    $this->cellClasses = $cell_classes;
     return $this;
   }
 
@@ -191,7 +197,7 @@ final class AphrontTableView extends AphrontView {
       }
 
       if ($value !== null) {
-        $col_classes[$key] = ' class="'.$value.'"';
+        $col_classes[$key] = $value;
       }
     }
 
@@ -226,8 +232,11 @@ final class AphrontTableView extends AphrontView {
             continue;
           }
           $class = $col_classes[$col_num];
+          if (!empty($this->cellClasses[$row_num][$col_num])) {
+            $class = trim($class.' '.$this->cellClasses[$row_num][$col_num]);
+          }
           if ($class !== null) {
-            $table[] = '<td'.$class.'>';
+            $table[] = '<td class="'.$class.'">';
           } else {
             $table[] = '<td>';
           }

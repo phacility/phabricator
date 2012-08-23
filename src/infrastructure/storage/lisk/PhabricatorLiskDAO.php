@@ -55,6 +55,18 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
   /**
    * @task edges
    */
+  public function loadRelativeEdges($type) {
+    if (!$this->getInSet()) {
+      id(new LiskDAOSet())->addToSet($this);
+    }
+    $this->getInSet()->loadRelativeEdges($type);
+    return $this->getEdges($type);
+  }
+
+
+  /**
+   * @task edges
+   */
   public function getEdgePHIDs($type) {
     return ipull($this->getEdges($type), 'dst');
   }

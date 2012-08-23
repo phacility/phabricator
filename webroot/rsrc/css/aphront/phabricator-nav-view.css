@@ -12,23 +12,32 @@
   left: 0;
   bottom: 0;
 
-  border-right: 1px solid #999c9e;
-  box-shadow: inset -3px 0 4px rgba(0, 0, 0, 0.05);
-
   overflow-y: auto;
   overflow-x: hidden;
 
   white-space: nowrap;
+  z-index: 3;
 }
 
 .phabricator-nav-app {
   width: 149px;
-  background: #d2d2d2;
+  background: #262b2e;
+  border-right: 1px solid #222222;
+  box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.25);
+}
+
+.device-desktop .phabricator-nav-app {
+  top: 43px;
+  padding-top: 2px;
 }
 
 .phabricator-nav-local {
   width: 179px;
   background: #ececec;
+
+  border-right: 1px solid #999c9e;
+  box-shadow: inset -3px 0 4px rgba(0, 0, 0, 0.05);
+  background-image: url(/rsrc/image/menu_texture.png);
 }
 
 .device-tablet .phabricator-nav-local,
@@ -39,10 +48,10 @@
 .phabricator-nav-drag {
   position: fixed;
   top: 44px;
-  left: 177px;
+  left: 327px;
   width: 7px;
   bottom: 0;
-  z-index: 5;
+  z-index: 4;
 
   cursor: col-resize;
   background: #f5f5f5;
@@ -62,6 +71,10 @@
   display: none;
 }
 
+.device-desktop .phabricator-nav-app-collapsed .phabricator-nav-drag {
+  left: 215px;
+}
+
 .phabricator-nav-col a,
 .phabricator-nav-col span {
   display: block;
@@ -72,7 +85,7 @@
 }
 
 .device-desktop .phabricator-nav-app-collapsed .phabricator-nav-local {
-  left: 34px;
+  left: 38px;
 }
 
 .phabricator-nav-content {
@@ -84,12 +97,12 @@
 }
 
 .device-desktop .phabricator-nav-app-collapsed .phabricator-nav-content {
-  margin-left: 32px;
+  margin-left: 36px;
 }
 
 .device-desktop .has-local-nav.phabricator-nav-app-collapsed
   .phabricator-nav-content {
-  margin-left: 212px;
+  margin-left: 216px;
 }
 
 .phabricator-nav-col span {
@@ -116,7 +129,7 @@
 }
 
 a.phabricator-nav-app-item {
-  color: #222222;
+  color: #e9e9e9;
   font-weight: normal;
   padding: 4px;
   padding-left: 40px;
@@ -124,17 +137,11 @@ a.phabricator-nav-app-item {
   line-height: 30px;
   height: 30px;
 
-  border-width: 1px 0px;
-  border-style: solid;
-  border-color: transparent;
-
   position: relative;
 }
 
 a.phabricator-nav-app-item-selected {
-  background-color: #f3f3f3;
-  box-shadow: inset -1px 0 3px rgba(0, 0, 0, 0.15);
-  border-color: #b0b0b0;
+  background-color: #55595d;
 }
 
 span.phabricator-nav-app-item-icon {
@@ -158,14 +165,14 @@ a.phabricator-nav-app-button-collapse {
   left: 0;
   bottom: 0;
   padding: 4px;
-  z-index: 2;
-  background: #d9d9d9;
+  z-index: 4;
+  background: #44494d;
   line-height: 14px;
-  border-top: 1px solid #a9a9a9;
+  border-top: 1px solid #222222;
   text-align: center;
   font-size: 11px;
   box-shadow: inset -1px -1px 3px rgba(0, 0, 0, 0.1);
-  color: #696969;
+  color: #c0c0c0;
   text-decoration: none;
 }
 
@@ -174,7 +181,7 @@ a.phabricator-nav-app-button-collapse {
 }
 
 .phabricator-nav-app-button-expand {
-  width: 25px;
+  width: 29px;
   display: none;
 }
 
@@ -184,7 +191,7 @@ a.phabricator-nav-app-button-collapse {
 }
 
 .device-desktop .phabricator-nav-app-collapsed .phabricator-nav-app {
-  width: 33px;
+  width: 37px;
 }
 
 .phabricator-nav-app-collapsed .phabricator-nav-app-button-collapse {
@@ -245,13 +252,12 @@ a.phabricator-nav-app-button-collapse {
   display: block;
   position: relative;
   height: 43px;
-  background: #e6e6e6;
+  background: #fafafa;
   overflow: hidden;
-  border-bottom: 1px solid #9d9d9d;
+  border-bottom: 1px solid #5d5d5d;
   text-align: center;
-  box-shadow: inset 0 0px 3px rgba(0, 0, 0, 0.30),
+  box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.10),
               0px 1px 2px rgba(0, 0, 0, 0.10);
-  z-index: 3;
 }
 
 .nav-button {

@@ -21,13 +21,6 @@ $access_log = null;
 
 error_reporting(E_ALL | E_STRICT);
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && !$_POST &&
-    isset($_REQUEST['__file__'])) {
-  $size = ini_get('post_max_size');
-  phabricator_fatal(
-    "Request size exceeds PHP 'post_max_size' ('{$size}').");
-}
-
 $required_version = '5.2.3';
 if (version_compare(PHP_VERSION, $required_version) < 0) {
   phabricator_fatal_config_error(
@@ -76,6 +69,9 @@ require_once dirname(dirname(__FILE__)).'/conf/__init_conf__.php';
 
 try {
   setup_aphront_basics();
+
+  $overseer = new PhabricatorRequestOverseer();
+  $overseer->didStartup();
 
   $conf = phabricator_read_config_file($env);
   $conf['phabricator.env'] = $env;

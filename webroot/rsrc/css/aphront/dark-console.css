@@ -9,7 +9,7 @@
   font-family:    "Verdana";
   font-size:      11px;
   position:       relative;
-  z-index:        1;
+  z-index:        5;
 }
 
 .dark-console a:link {

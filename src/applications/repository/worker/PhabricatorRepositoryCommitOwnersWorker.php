@@ -106,7 +106,6 @@ final class PhabricatorRepositoryCommitOwnersWorker
 
     $revision_author_phid = null;
     $commit_reviewedby_phid = null;
-    $commit_author_phid = null;
 
     if ($revision_id) {
       $revision = id(new DifferentialRevision())->load($revision_id);
@@ -115,7 +114,6 @@ final class PhabricatorRepositoryCommitOwnersWorker
         $revision_author_phid = $revision->getAuthorPHID();
         $revision_reviewedby_phid = $revision->loadReviewedBy();
         $commit_reviewedby_phid = $data->getCommitDetail('reviewerPHID');
-        $commit_author_phid = $data->getCommitDetail('authorPHID');
         if ($revision_author_phid !== $commit_author_phid) {
           $reasons[] = "Author Not Matching with Revision";
         }

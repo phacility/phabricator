@@ -92,4 +92,18 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
 
     return $one_line;
   }
+
+  public function getNotificationAggregations() {
+    $class = get_class($this);
+    $phid  = $this->getStoryData()->getValue('revision_phid');
+    $read  = (int)$this->getHasViewed();
+
+    // Don't aggregate updates separated by more than 2 hours.
+    $block = (int)($this->getEpoch() / (60 * 60 * 2));
+
+    return array(
+      "{$class}:{$phid}:{$read}:{$block}"
+        => 'PhabricatorFeedStoryDifferentialAggregate',
+    );
+  }
 }
