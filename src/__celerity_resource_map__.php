@@ -1203,7 +1203,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-differential-toggle-files' =>
   array(
-    'uri' => '/res/983960b4/rsrc/js/application/differential/behavior-toggle-files.js',
+    'uri' => '/res/ae937207/rsrc/js/application/differential/behavior-toggle-files.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1337,7 +1337,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-konami' =>
   array(
-    'uri' => '/res/4f9442c2/rsrc/js/application/core/behavior-konami.js',
+    'uri' => '/res/5f4b32fe/rsrc/js/application/core/behavior-konami.js',
     'type' => 'js',
     'requires' =>
     array(

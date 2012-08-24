@@ -82,7 +82,8 @@ JX.behavior('konami', function() {
     element.textContent = text;
     modifyCSS(element.style, 'left',
       Math.random() * document.body.clientWidth + 'px');
-    modifyAllCSS(element.style, 'transform', 'translateZ(' + z + 'px)');
+    modifyAllCSS(element.style, 'transform',
+      'translateZ(' + z + 'px) rotateY(180deg)');
     document.body.appendChild(element);
 
     var height = element.clientHeight;
