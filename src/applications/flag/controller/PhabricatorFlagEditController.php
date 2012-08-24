@@ -29,7 +29,7 @@ final class PhabricatorFlagEditController extends PhabricatorFlagController {
     $user = $request->getUser();
 
     $phid = $this->phid;
-    $handle = PhabricatorObjectHandleData::loadOneHandle($phid);
+    $handle = PhabricatorObjectHandleData::loadOneHandle($phid, $user);
 
     if (!$handle->isComplete()) {
       return new Aphront404Response();

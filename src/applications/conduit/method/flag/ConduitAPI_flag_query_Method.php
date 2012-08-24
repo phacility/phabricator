@@ -48,6 +48,7 @@ final class ConduitAPI_flag_query_Method extends ConduitAPI_flag_Method {
   protected function execute(ConduitAPIRequest $request) {
 
     $query = new PhabricatorFlagQuery();
+    $query->setViewer($request->getUser());
 
     $owner_phids = $request->getValue('ownerPHIDs', array());
     if ($owner_phids) {

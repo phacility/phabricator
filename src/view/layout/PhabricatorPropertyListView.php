@@ -55,7 +55,12 @@ final class PhabricatorPropertyListView extends AphrontView {
       array(
         'class' => 'phabricator-property-list-view',
       ),
-      $list);
+      $list.
+      // NOTE: We need this (which is basically a "clear: both;" div) to make
+      // sure the property list is taller than the action list for objects with
+      // few properties but many actions. Otherwise, the action list may
+      // obscure the document content.
+      '<div class="phabriator-property-list-view-end"></div>');
   }
 
 

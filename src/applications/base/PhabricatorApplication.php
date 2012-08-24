@@ -89,6 +89,10 @@ abstract class PhabricatorApplication {
     return null;
   }
 
+  public function getEventListeners() {
+    return array();
+  }
+
 
 /* -(  URI Routing  )-------------------------------------------------------- */
 

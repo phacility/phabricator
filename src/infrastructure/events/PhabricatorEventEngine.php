@@ -31,6 +31,14 @@ final class PhabricatorEventEngine {
     id(new DarkConsoleEventPluginAPI())->register();
     id(new ManiphestEdgeEventListener())->register();
 
+    $applications = PhabricatorApplication::getAllInstalledApplications();
+    foreach ($applications as $application) {
+      $listeners = $application->getEventListeners();
+      foreach ($listeners as $listener) {
+        $listener->register();
+      }
+    }
+
   }
 
 }

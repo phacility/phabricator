@@ -99,6 +99,8 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       PhabricatorPolicyCapability::CAN_EDIT);
 
     return id(new PhabricatorActionListView())
+      ->setUser($user)
+      ->setObject($paste)
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Fork This Paste'))

@@ -38,4 +38,10 @@ final class PhabricatorEventType extends PhutilEventType {
 
   const TYPE_TEST_DIDRUNTEST                = 'test.didRunTest';
 
+  const TYPE_UI_DIDRENDERACTIONS            = 'ui.didRenderActions';
+
+  const TYPE_UI_WILLRENDEROBJECTS           = 'ui.willRenderObjects';
+  const TYPE_UI_DDIDRENDEROBJECT            = 'ui.didRenderObject';
+  const TYPE_UI_DIDRENDEROBJECTS            = 'ui.didRenderObjects';
+
 }

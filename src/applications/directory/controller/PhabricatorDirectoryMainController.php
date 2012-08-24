@@ -206,6 +206,7 @@ final class PhabricatorDirectoryMainController
     $user = $this->getRequest()->getUser();
 
     $flag_query = id(new PhabricatorFlagQuery())
+      ->setViewer($user)
       ->withOwnerPHIDs(array($user->getPHID()))
       ->needHandles(true)
       ->setLimit(10);

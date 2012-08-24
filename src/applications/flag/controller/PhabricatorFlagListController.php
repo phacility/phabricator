@@ -29,6 +29,7 @@ final class PhabricatorFlagListController extends PhabricatorFlagController {
 
     $query = new PhabricatorFlagQuery();
     $query->withOwnerPHIDs(array($user->getPHID()));
+    $query->setViewer($user);
     $query->needHandles(true);
 
     $flags = $query->execute();

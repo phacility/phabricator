@@ -30,8 +30,14 @@ final class PhabricatorObjectHandleData {
     return $this;
   }
 
-  public static function loadOneHandle($phid) {
-    $handles = id(new PhabricatorObjectHandleData(array($phid)))->loadHandles();
+  public static function loadOneHandle($phid, $viewer = null) {
+    $query = new PhabricatorObjectHandleData(array($phid));
+
+    if ($viewer) {
+      $query->setViewer($viewer);
+    }
+
+    $handles = $query->loadHandles();
     return $handles[$phid];
   }
 
