@@ -43,6 +43,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
         $parent = id(new PhabricatorPasteQuery())
           ->setViewer($user)
           ->withIDs(array($parent_id))
+          ->needContent(true)
           ->execute();
         $parent = head($parent);
 
@@ -105,11 +106,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
       if ($is_create && $parent) {
         $paste->setTitle('Fork of '.$parent->getFullName());
         $paste->setLanguage($parent->getLanguage());
-
-        $parent_file = id(new PhabricatorFile())->loadOneWhere(
-          'phid = %s',
-          $parent->getFilePHID());
-        $text = $parent_file->loadFileData();
+        $text = $parent->getContent();
       }
     }
 

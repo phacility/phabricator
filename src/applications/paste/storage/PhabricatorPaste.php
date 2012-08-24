@@ -26,6 +26,8 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   protected $language;
   protected $parentPHID;
 
+  private $content;
+
   public function getURI() {
     return '/P'.$this->getID();
   }
@@ -65,6 +67,18 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
       $title = '(An Untitled Masterwork)';
     }
     return 'P'.$this->getID().' '.$title;
+  }
+
+  public function getContent() {
+    if ($this->content === null) {
+      throw new Exception("Call attachContent() before getContent()!");
+    }
+    return $this->content;
+  }
+
+  public function attachContent($content) {
+    $this->content = $content;
+    return $this;
   }
 
 }

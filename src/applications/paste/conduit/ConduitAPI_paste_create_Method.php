@@ -72,6 +72,8 @@ final class ConduitAPI_paste_create_Method extends ConduitAPI_paste_Method {
     $paste->setAuthorPHID($user->getPHID());
     $paste->save();
 
+    $paste->attachContent($content);
+
     return $this->buildPasteInfoDictionary($paste);
   }
 

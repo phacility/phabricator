@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,15 +22,6 @@
 abstract class ConduitAPI_paste_Method extends ConduitAPIMethod {
 
   protected function buildPasteInfoDictionary(PhabricatorPaste $paste) {
-
-    $content = null;
-    $file = id(new PhabricatorFile())->loadOneWhere(
-      'phid = %s',
-      $paste->getFilePHID());
-    if ($file) {
-      $content = $file->loadFileData();
-    }
-
     return array(
       'id'          => $paste->getID(),
       'objectName'  => 'P'.$paste->getID(),
@@ -42,7 +33,7 @@ abstract class ConduitAPI_paste_Method extends ConduitAPIMethod {
       'language'    => $paste->getLanguage(),
       'uri'         => PhabricatorEnv::getProductionURI('/P'.$paste->getID()),
       'parentPHID'  => $paste->getParentPHID(),
-      'content'     => $content,
+      'content'     => $paste->getContent(),
     );
   }
 
