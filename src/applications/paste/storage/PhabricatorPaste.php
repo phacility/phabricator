@@ -26,6 +26,10 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   protected $language;
   protected $parentPHID;
 
+  public function getURI() {
+    return '/P'.$this->getID();
+  }
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -54,7 +58,7 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   public function getFullName() {
     $title = $this->getTitle();
     if (!$title) {
-      $title = 'Untitled Masterwork';
+      $title = '(An Untitled Masterwork)';
     }
     return 'P'.$this->getID().' '.$title;
   }

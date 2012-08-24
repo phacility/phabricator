@@ -97,7 +97,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
         id(new PhabricatorActionView())
           ->setName(pht('Fork This Paste'))
           ->setIcon('fork')
-          ->setHref($this->getApplicationURI('?fork='.$paste->getID())))
+          ->setHref($this->getApplicationURI('?parent='.$paste->getID())))
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('View Raw File'))

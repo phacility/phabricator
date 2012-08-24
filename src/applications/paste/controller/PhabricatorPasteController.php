@@ -28,7 +28,7 @@ abstract class PhabricatorPasteController extends PhabricatorController {
     }
 
     $nav->addLabel('Create');
-    $nav->addFilter('create', 'New Paste');
+    $nav->addFilter('edit', 'New Paste', $this->getApplicationURI());
 
     $nav->addSpacer();
     $nav->addLabel('Pastes');

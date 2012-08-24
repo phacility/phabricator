@@ -482,7 +482,7 @@ final class PhabricatorObjectHandleData {
             } else {
               $paste = $pastes[$phid];
               $handle->setName($paste->getTitle());
-              $handle->setFullName('P'.$paste->getID().': '.$paste->getTitle());
+              $handle->setFullName($paste->getFullName());
               $handle->setURI('/P'.$paste->getID());
               $handle->setComplete(true);
             }
