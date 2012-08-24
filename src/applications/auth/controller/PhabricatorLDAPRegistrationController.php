@@ -50,7 +50,7 @@ extends PhabricatorAuthController {
     $e_realname = true;
 
     $user = new PhabricatorUser();
-    $user->setUsername();
+    $user->setUsername($provider->retrieveUsername());
     $user->setRealname($provider->retrieveUserRealName());
 
     $new_email = $provider->retrieveUserEmail();

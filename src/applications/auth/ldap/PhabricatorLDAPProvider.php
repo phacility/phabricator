@@ -99,7 +99,7 @@ final class PhabricatorLDAPProvider {
   }
 
   public function retrieveUsername() {
-    return $this->userData[$this->getSearchAttribute()][0];
+    return $this->userData[$this->getUsernameAttribute()][0];
   }
 
   public function getConnection() {
