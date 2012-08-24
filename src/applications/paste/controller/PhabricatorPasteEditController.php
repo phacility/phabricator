@@ -18,26 +18,54 @@
 
 final class PhabricatorPasteEditController extends PhabricatorPasteController {
 
+  private $id;
+
+  public function willProcessRequest(array $data) {
+    $this->id = idx($data, 'id');
+  }
+
+
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $paste = new PhabricatorPaste();
-    $title = 'Create Paste';
-
-    $parent_id = $request->getStr('parent');
     $parent = null;
-    if ($parent_id) {
-      // NOTE: If the Paste is forked from a paste which the user no longer
-      // has permission to see, we still let them edit it.
-      $parent = id(new PhabricatorPasteQuery())
-        ->setViewer($user)
-        ->withIDs(array($parent_id))
-        ->execute();
-      $parent = head($parent);
+    $parent_id = null;
+    if (!$this->id) {
+      $is_create = true;
 
-      if ($parent) {
-        $paste->setParentPHID($parent->getPHID());
+      $paste = new PhabricatorPaste();
+
+      $parent_id = $request->getStr('parent');
+      if ($parent_id) {
+        // NOTE: If the Paste is forked from a paste which the user no longer
+        // has permission to see, we still let them edit it.
+        $parent = id(new PhabricatorPasteQuery())
+          ->setViewer($user)
+          ->withIDs(array($parent_id))
+          ->execute();
+        $parent = head($parent);
+
+        if ($parent) {
+          $paste->setParentPHID($parent->getPHID());
+        }
+      }
+
+      $paste->setAuthorPHID($user->getPHID());
+    } else {
+      $is_create = false;
+
+      $paste = id(new PhabricatorPasteQuery())
+        ->setViewer($user)
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->withIDs(array($this->id))
+        ->executeOne();
+      if (!$paste) {
+        return new Aphront404Response();
       }
     }
 
@@ -45,33 +73,36 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
     $e_text = true;
     $errors = array();
     if ($request->isFormPost()) {
-      $text = $request->getStr('text');
-      if (!strlen($text)) {
-        $e_text = 'Required';
-        $errors[] = 'The paste may not be blank.';
-      } else {
-        $e_text = null;
+
+      if ($is_create) {
+        $text = $request->getStr('text');
+        if (!strlen($text)) {
+          $e_text = 'Required';
+          $errors[] = 'The paste may not be blank.';
+        } else {
+          $e_text = null;
+        }
       }
 
       $paste->setTitle($request->getStr('title'));
       $paste->setLanguage($request->getStr('language'));
 
       if (!$errors) {
-        $paste_file = PhabricatorFile::newFromFileData(
-          $text,
-          array(
-            'name' => $title,
-            'mime-type' => 'text/plain; charset=utf-8',
-            'authorPHID' => $user->getPHID(),
-          ));
-        $paste->setFilePHID($paste_file->getPHID());
-        $paste->setAuthorPHID($user->getPHID());
+        if ($is_create) {
+          $paste_file = PhabricatorFile::newFromFileData(
+            $text,
+            array(
+              'name' => $paste->getTitle(),
+              'mime-type' => 'text/plain; charset=utf-8',
+              'authorPHID' => $user->getPHID(),
+            ));
+          $paste->setFilePHID($paste_file->getPHID());
+        }
         $paste->save();
-
         return id(new AphrontRedirectResponse())->setURI($paste->getURI());
       }
     } else {
-      if ($parent) {
+      if ($is_create && $parent) {
         $paste->setTitle('Fork of '.$parent->getFullName());
         $paste->setLanguage($parent->getLanguage());
 
@@ -96,9 +127,6 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
       '' => '(Detect With Wizardly Powers)',
     ) + PhabricatorEnv::getEnvConfig('pygments.dropdown-choices');
 
-    $submit = id(new AphrontFormSubmitControl())
-      ->setValue('Create Paste');
-
     $form
       ->setUser($user)
       ->addHiddenInput('parent', $parent_id)
@@ -112,15 +140,19 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
           ->setLabel('Language')
           ->setName('language')
           ->setValue($paste->getLanguage())
-          ->setOptions($langs))
-      ->appendChild(
-        id(new AphrontFormTextAreaControl())
-          ->setLabel('Text')
-          ->setError($e_text)
-          ->setValue($text)
-          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
-          ->setCustomClass('PhabricatorMonospaced')
-          ->setName('text'))
+          ->setOptions($langs));
+
+    if ($is_create) {
+      $form
+        ->appendChild(
+          id(new AphrontFormTextAreaControl())
+            ->setLabel('Text')
+            ->setError($e_text)
+            ->setValue($text)
+            ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
+            ->setCustomClass('PhabricatorMonospaced')
+            ->setName('text'));
+    }
 
     /* TODO: Doesn't have any useful options yet.
       ->appendChild(
@@ -132,13 +164,25 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
           ->setName('policy'))
     */
 
+    $submit = new AphrontFormSubmitControl();
+
+    if (!$is_create) {
+      $submit->addCancelButton($paste->getURI());
+      $submit->setValue('Save Paste');
+      $title = 'Edit '.$paste->getFullName();
+    } else {
+      $submit->setValue('Create Paste');
+      $title = 'Create Paste';
+    }
+
+    $form
       ->appendChild($submit);
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('edit');
     $nav->appendChild(
       array(
-        id(new PhabricatorHeaderView())->setHeader('Create Paste'),
+        id(new PhabricatorHeaderView())->setHeader($title),
         $error_view,
         $form,
       ));

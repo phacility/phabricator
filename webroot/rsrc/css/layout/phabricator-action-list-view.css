@@ -52,3 +52,12 @@
   color: #ffffff;
   text-decoration: none;
 }
+
+.phabricator-action-view-disabled .phabricator-action-view-item {
+  color: #888888;
+}
+
+.phabricator-action-view-disabled .phabricator-action-view-item:hover {
+  background-color: #dfdfdf;
+  color: #888888;
+}

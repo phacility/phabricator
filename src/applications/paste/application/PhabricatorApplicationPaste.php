@@ -35,6 +35,7 @@ final class PhabricatorApplicationPaste extends PhabricatorApplication {
       '/P(?P<id>\d+)' => 'PhabricatorPasteViewController',
       '/paste/' => array(
         '' => 'PhabricatorPasteEditController',
+        'edit/(?P<id>\d+)/' => 'PhabricatorPasteEditController',
         'filter/(?P<filter>\w+)/' => 'PhabricatorPasteListController',
       ),
     );

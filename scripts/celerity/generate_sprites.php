@@ -161,6 +161,7 @@ $action_template = id(new PhutilSprite())
 $action_map = array(
   'file'  => 'icon/page_white_text.png',
   'fork'  => 'icon/arrow_branch.png',
+  'edit'  => 'icon/page_white_edit.png',
 );
 
 foreach ($action_map as $icon => $source) {

@@ -44,11 +44,15 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
   public function getPolicy($capability) {
-    return PhabricatorPolicies::POLICY_USER;
+    if ($capability == PhabricatorPolicyCapability::CAN_VIEW) {
+      return PhabricatorPolicies::POLICY_USER;
+    }
+    return PhabricatorPolicies::POLICY_NOONE;
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $user) {
