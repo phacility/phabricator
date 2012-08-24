@@ -63,7 +63,8 @@ foreach (Futures($futures)->limit(8) as $file => $future) {
   $interfaces = $root->selectDescendantsOfType('n_INTERFACE_DECLARATION');
   foreach ($interfaces as $interface) {
     $interface_name = $interface->getChildByIndex(1);
-    print_symbol($file, 'interface', $interface_name);
+    // We don't differentiate classes and interfaces in highlighters.
+    print_symbol($file, 'class', $interface_name);
     $scopes[] = array($interface, $interface_name);
   }
 
