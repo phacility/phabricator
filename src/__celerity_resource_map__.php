@@ -1032,7 +1032,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-device' =>
   array(
-    'uri' => '/res/37669d1a/rsrc/js/application/core/behavior-device.js',
+    'uri' => '/res/7f09d952/rsrc/js/application/core/behavior-device.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1517,7 +1517,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-phabricator-nav' =>
   array(
-    'uri' => '/res/15ceb59f/rsrc/js/application/core/behavior-phabricator-nav.js',
+    'uri' => '/res/575be3cd/rsrc/js/application/core/behavior-phabricator-nav.js',
     'type' => 'js',
     'requires' =>
     array(
