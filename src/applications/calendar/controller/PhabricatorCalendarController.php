@@ -29,6 +29,7 @@ abstract class PhabricatorCalendarController extends PhabricatorController {
     // Unicode has a calendar character but it's in some distant code plane,
     // use "keyboard" since it looks vaguely similar.
     $page->setGlyph("\xE2\x8C\xA8");
+    $page->appendChild($view);
 
     $response = new AphrontWebpageResponse();
     return $response->setContent($page->render());
