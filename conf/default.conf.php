@@ -873,10 +873,8 @@ return array(
 
   // The largest filesize Phabricator will store in the MySQL BLOB storage
   // engine, which just uses a database table to store files. While this isn't a
-  // best practice, it's really easy to set up. This is hard-limited by the
-  // value of 'max_allowed_packet' in MySQL (since this often defaults to 1MB,
-  // the default here is slightly smaller than 1MB). Set this to 0 to disable
-  // use of the MySQL blob engine.
+  // best practice, it's really easy to set up. Set this to 0 to disable use of
+  // the MySQL blob engine.
   'storage.mysql-engine.max-size' => 1000000,
 
   // Phabricator provides a local disk storage engine, which just writes files

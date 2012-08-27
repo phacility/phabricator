@@ -41,8 +41,7 @@ limit uploads are:
     configured storage engine which can accept it. Phabricator should give you
     useful errors if any of these fail.
     - **MySQL Engine**: Upload size is limited by the Phabricator setting
-      `storage.mysql-engine.max-size`, which is in turn limited by the MySQL
-      setting `max_allowed_packet`. This often defaults to `1M`.
+      `storage.mysql-engine.max-size`.
     - **Amazon S3**: Upload size is limited by Phabricator's implementation to
       `5G`.
     - **Local Disk**: Upload size is limited only by free disk space.

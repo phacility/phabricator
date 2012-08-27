@@ -41,8 +41,7 @@ Builtin storage engines and information on how to configure them.
 MySQL storage is configured by default, for files up to (just under) 1MB. You
 can configure it with these keys:
 
-  - ##storage.mysql-engine.max-size##: Change the filesize limit. Note that
-    this must be smaller than 'max_allowed_packet' on the server. Set to 0
+  - ##storage.mysql-engine.max-size##: Change the filesize limit. Set to 0
     to disable.
 
 For most installs, it is recommended you configure local disk storage below,

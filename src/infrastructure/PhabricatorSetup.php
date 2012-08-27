@@ -564,25 +564,6 @@ final class PhabricatorSetup {
       self::write(" okay  max_allowed_packet = {$max_allowed_packet}.\n");
     }
 
-    $mysql_key = 'storage.mysql-engine.max-size';
-    $mysql_limit = PhabricatorEnv::getEnvConfig($mysql_key);
-
-    if ($mysql_limit && ($mysql_limit + 8192) > $max_allowed_packet) {
-      self::writeFailure();
-      self::write(
-        "Setup failure! Your Phabricator 'storage.mysql-engine.max-size' ".
-        "configuration ('{$mysql_limit}') must be at least 8KB smaller ".
-        "than your MySQL 'max_allowed_packet' configuration ".
-        "('{$max_allowed_packet}'). Raise the 'max_allowed_packet' in your ".
-        "MySQL configuration, or reduce the maximum file size allowed by ".
-        "the Phabricator configuration.\n");
-      return;
-    } else if (!$mysql_limit) {
-      self::write(" skip  MySQL file storage engine not configured.\n");
-    } else {
-      self::write(" okay  MySQL file storage engine configuration okay.\n");
-    }
-
     $local_key = 'storage.local-disk.path';
     $local_path = PhabricatorEnv::getEnvConfig($local_key);
     if ($local_path) {
