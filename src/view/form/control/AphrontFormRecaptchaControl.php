@@ -65,10 +65,14 @@ final class AphrontFormRecaptchaControl extends AphrontFormControl {
   protected function renderInput() {
     self::requireLib();
 
+    $uri = new PhutilURI(PhabricatorEnv::getEnvConfig('phabricator.base-uri'));
+    $protocol = $uri->getProtocol();
+    $use_ssl = ($protocol == 'https');
+
     return recaptcha_get_html(
       PhabricatorEnv::getEnvConfig('recaptcha.public-key'),
       $error = null,
-      $use_ssl = false);
+      $use_ssl);
   }
 
 }
