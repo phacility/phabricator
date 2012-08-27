@@ -53,7 +53,7 @@ final class ConduitAPI_paste_info_Method extends ConduitAPI_paste_Method {
     $paste_id = $request->getValue('paste_id');
     $paste = id(new PhabricatorPasteQuery())
       ->setViewer($request->getUser())
-      ->withObjectIDs(array($paste_id))
+      ->withIDs(array($paste_id))
       ->needContent(true)
       ->executeOne();
     if (!$paste) {
