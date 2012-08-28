@@ -1019,6 +1019,13 @@ return array(
   // use of all of differential's features.
   'differential.allow-self-accept' => false,
 
+  // If you set this to true, any user can close any revision so long as it has
+  // been accepted. This can be useful depending on your development model. For
+  // example, github-style pull requests where the reviewer is often the
+  // actual committer can benefit from turning this option to true. If false,
+  // only the submitter can close a revision.
+  'differential.always-allow-close' => false,
+
   // Revisions newer than this number of days are marked as fresh in Action
   // Required and Revisions Waiting on You views. Only work days (not weekends
   // and holidays) are included. Set to 0 to disable this feature.
