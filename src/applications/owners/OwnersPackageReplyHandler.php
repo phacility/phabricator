@@ -40,7 +40,7 @@ final class OwnersPackageReplyHandler extends PhabricatorMailReplyHandler {
     return null;
   }
 
-  public function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
+  protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
     return;
   }
 }

@@ -45,7 +45,82 @@ abstract class PhabricatorMailReplyHandler {
     PhabricatorObjectHandle $handle);
   abstract public function getReplyHandlerDomain();
   abstract public function getReplyHandlerInstructions();
-  abstract public function receiveEmail(PhabricatorMetaMTAReceivedMail $mail);
+  abstract protected function receiveEmail(
+    PhabricatorMetaMTAReceivedMail $mail);
+
+  public function processEmail(PhabricatorMetaMTAReceivedMail $mail) {
+    $error = $this->sanityCheckEmail($mail);
+
+    if ($error) {
+      if ($this->shouldSendErrorEmail($mail)) {
+        $this->sendErrorEmail($error, $mail);
+      }
+      return null;
+    }
+
+    return $this->receiveEmail($mail);
+  }
+
+  private function sanityCheckEmail(PhabricatorMetaMTAReceivedMail $mail) {
+    $body = $mail->getCleanTextBody();
+    if (empty($body)) {
+      return 'Empty email body. Email should begin with an !action and / or '.
+             'text to comment. Inline replies and signatures are ignored.';
+    }
+
+    return null;
+  }
+
+  /**
+   * Only send an error email if the user is talking to just Phabricator. We
+   * can assume if there is only one To address it is a Phabricator address
+   * since this code is running and everything.
+   */
+  private function shouldSendErrorEmail(PhabricatorMetaMTAReceivedMail $mail) {
+    return count($mail->getToAddresses() == 1) &&
+           count($mail->getCCAddresses() == 0);
+  }
+
+  private function sendErrorEmail($error,
+                                  PhabricatorMetaMTAReceivedMail $mail) {
+    $template = new PhabricatorMetaMTAMail();
+    $template->setSubject('Exception: unable to process your mail request');
+    $template->setBody($this->buildErrorMailBody($error, $mail));
+    $template->setRelatedPHID($mail->getRelatedPHID());
+    $phid = $this->getActor()->getPHID();
+    $tos = array(
+      $phid => PhabricatorObjectHandleData::loadOneHandle($phid)
+    );
+    $mails = $this->multiplexMail($template, $tos, array());
+
+    foreach ($mails as $email) {
+      $email->saveAndSend();
+    }
+
+    return true;
+  }
+
+  private function buildErrorMailBody($error,
+                                      PhabricatorMetaMTAReceivedMail $mail) {
+    $original_body = $mail->getRawTextBody();
+
+    $main_body = <<<EOBODY
+Your request failed because an error was encoutered while processing it:
+
+  ERROR: {$error}
+
+  -- Original Body -------------------------------------------------------------
+
+  {$original_body}
+
+EOBODY;
+
+    $body = new PhabricatorMetaMTAMailBody();
+    $body->addRawSection($main_body);
+    $body->addReplySection($this->getReplyHandlerInstructions());
+
+    return $body->render();
+  }
 
   public function supportsPrivateReplies() {
     return (bool)$this->getReplyHandlerDomain() &&

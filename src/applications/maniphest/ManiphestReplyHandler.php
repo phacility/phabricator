@@ -50,7 +50,7 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
     }
   }
 
-  public function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
+  protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
 
     // NOTE: We'll drop in here on both the "reply to a task" and "create a
     // new task" workflows! Make sure you test both if you make changes!
