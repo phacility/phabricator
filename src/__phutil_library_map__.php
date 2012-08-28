@@ -1289,7 +1289,7 @@ phutil_register_library_map(array(
     'AphrontTypeaheadTemplateView' => 'AphrontView',
     'AphrontUsageException' => 'AphrontException',
     'AphrontWebpageResponse' => 'AphrontResponse',
-    'CelerityResourceController' => 'AphrontController',
+    'CelerityResourceController' => 'PhabricatorController',
     'CelerityResourceGraph' => 'AbstractDirectedGraph',
     'CelerityResourceTransformerTestCase' => 'PhabricatorTestCase',
     'ConduitAPI_arcanist_Method' => 'ConduitAPIMethod',
