@@ -466,7 +466,7 @@ final class PhabricatorObjectHandleData {
             } else {
               $question = $questions[$phid];
               $handle->setName(phutil_utf8_shorten($question->getTitle(), 60));
-              $handle->setURI(new PhutilURI('Q' . $question->getID()));
+              $handle->setURI(new PhutilURI('/Q' . $question->getID()));
               $handle->setComplete(true);
             }
             $handles[$phid] = $handle;
