@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-final class DifferentialDependenciesFieldSpecification
+final class DifferentialDependsOnFieldSpecification
   extends DifferentialFieldSpecification {
 
   public function shouldAppearOnRevisionView() {
@@ -28,7 +28,7 @@ final class DifferentialDependenciesFieldSpecification
   }
 
   public function renderLabelForRevisionView() {
-    return 'Dependents:';
+    return 'Depends On:';
   }
 
   public function renderValueForRevisionView() {
@@ -48,7 +48,7 @@ final class DifferentialDependenciesFieldSpecification
   private function getDependentRevisionPHIDs() {
     return PhabricatorEdgeQuery::loadDestinationPHIDs(
       $this->getRevision()->getPHID(),
-      PhabricatorEdgeConfig::TYPE_DREV_DEPENDED_ON_BY_DREV);
+      PhabricatorEdgeConfig::TYPE_DREV_DEPENDS_ON_DREV);
   }
 
 }
