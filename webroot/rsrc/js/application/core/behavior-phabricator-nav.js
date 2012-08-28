@@ -151,7 +151,7 @@ JX.behavior('phabricator-nav', function(config) {
           scale: 1,
 
           width: JX.Vector.getDim(local).x,
-          minWidth: 38,
+          minWidth: 1,
           minScale: 1
         },
         {
@@ -213,10 +213,16 @@ JX.behavior('phabricator-nav', function(config) {
 
 // - Navigation Reset ----------------------------------------------------------
 
-  JX.Stratcom.listen('phabricator-device-change', null, function(device) {
+  JX.Stratcom.listen('phabricator-device-change', null, function(event) {
     app.style.left = '';
-    local && (local.style.left = '');
-    content.style.left = '';
+    if (local) {
+      local.style.left = '';
+      local.style.width = '';
+    }
+    if (drag) {
+      drag.style.left = '';
+    }
+    content.style.marginLeft = '';
 
     select_button(2);
   });

@@ -25,7 +25,7 @@ final class AphrontFormTextAreaControl extends AphrontFormControl {
   private $height;
   private $readOnly;
   private $enableDragAndDropFileUploads;
-
+  private $customClass;
 
   public function setHeight($height) {
     $this->height = $height;
@@ -50,6 +50,11 @@ final class AphrontFormTextAreaControl extends AphrontFormControl {
     return $this;
   }
 
+  public function setCustomClass($custom_class) {
+    $this->customClass = $custom_class;
+    return $this;
+  }
+
   protected function renderInput() {
 
     $height_class = null;
@@ -60,6 +65,11 @@ final class AphrontFormTextAreaControl extends AphrontFormControl {
         $height_class = 'aphront-textarea-'.$this->height;
         break;
     }
+
+    $classes = array();
+    $classes[] = $height_class;
+    $classes[] = $this->customClass;
+    $classes = trim(implode(' ', $classes));
 
     $id = $this->getID();
     if ($this->enableDragAndDropFileUploads) {
@@ -81,7 +91,7 @@ final class AphrontFormTextAreaControl extends AphrontFormControl {
         'name'      => $this->getName(),
         'disabled'  => $this->getDisabled() ? 'disabled' : null,
         'readonly'  => $this->getReadonly() ? 'readonly' : null,
-        'class'     => $height_class,
+        'class'     => $classes,
         'style'     => $this->getControlStyle(),
         'id'        => $id,
       ),

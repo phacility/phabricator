@@ -118,7 +118,9 @@ final class DifferentialCommentEditor {
     $actor = id(new PhabricatorUser())->loadOneWhere('PHID = %s', $actor_phid);
     $actor_is_author = ($actor_phid == $revision->getAuthorPHID());
     $allow_self_accept = PhabricatorEnv::getEnvConfig(
-        'differential.allow-self-accept', false);
+      'differential.allow-self-accept', false);
+    $always_allow_close = PhabricatorEnv::getEnvConfig(
+      'differential.always-allow-close', false);
     $revision_status = $revision->getStatus();
 
     $revision->loadRelationships();
@@ -349,7 +351,7 @@ final class DifferentialCommentEditor {
         // them as completely authoritative.
 
         if (!$this->isDaemonWorkflow) {
-          if (!$actor_is_author) {
+          if (!$actor_is_author && !$always_allow_close) {
             throw new Exception(
               "You can not mark a revision you don't own as closed.");
           }

@@ -159,8 +159,18 @@ $action_template = id(new PhutilSprite())
   ->setSourceSize(16, 16);
 
 $action_map = array(
-  'file'  => 'icon/page_white_text.png',
-  'fork'  => 'icon/arrow_branch.png',
+  'file'        => 'icon/page_white_text.png',
+  'fork'        => 'icon/arrow_branch.png',
+  'edit'        => 'icon/page_white_edit.png',
+  'flag-0'      => 'icon/flag-0.png',
+  'flag-1'      => 'icon/flag-1.png',
+  'flag-2'      => 'icon/flag-2.png',
+  'flag-3'      => 'icon/flag-3.png',
+  'flag-4'      => 'icon/flag-4.png',
+  'flag-5'      => 'icon/flag-5.png',
+  'flag-6'      => 'icon/flag-6.png',
+  'flag-7'      => 'icon/flag-7.png',
+  'flag-ghost'  => 'icon/flag-ghost.png',
 );
 
 foreach ($action_map as $icon => $source) {

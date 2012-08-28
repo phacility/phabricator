@@ -60,7 +60,8 @@ final class DifferentialChangesetParser {
   private $markupEngine;
   private $highlightErrors;
 
-  const CACHE_VERSION = 5;
+  const CACHE_VERSION = 6;
+  const CACHE_MAX_SIZE = 8e6;
 
   const ATTR_GENERATED  = 'attr:generated';
   const ATTR_DELETED    = 'attr:deleted';
@@ -745,6 +746,11 @@ final class DifferentialChangesetParser {
       }
     }
     $cache = json_encode($cache);
+
+    // We don't want to waste too much space by a single changeset.
+    if (strlen($cache) > self::CACHE_MAX_SIZE) {
+      return;
+    }
 
     try {
       $changeset = new DifferentialChangeset();

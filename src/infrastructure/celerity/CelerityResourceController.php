@@ -23,11 +23,19 @@
  *
  * @group celerity
  */
-final class CelerityResourceController extends AphrontController {
+final class CelerityResourceController extends PhabricatorController {
 
   private $path;
   private $hash;
   private $package;
+
+  public function shouldRequireLogin() {
+    return false;
+  }
+
+  public function shouldRequireEnabledUser() {
+    return false;
+  }
 
   public function willProcessRequest(array $data) {
     $this->path = $data['path'];

@@ -27,6 +27,12 @@ final class PhabricatorFlagQuery {
 
   private $needHandles;
   private $needObjects;
+  private $viewer;
+
+  public function setViewer($viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
 
   public function withOwnerPHIDs(array $owner_phids) {
     $this->ownerPHIDs = $owner_phids;
@@ -94,6 +100,9 @@ final class PhabricatorFlagQuery {
     if ($this->needHandles || $this->needObjects) {
       $phids = ipull($data, 'objectPHID');
       $query = new PhabricatorObjectHandleData($phids);
+      if ($this->viewer) {
+        $query->setViewer($this->viewer);
+      }
 
       if ($this->needHandles) {
         $handles = $query->loadHandles();

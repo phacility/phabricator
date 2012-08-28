@@ -65,8 +65,8 @@ celerity_register_resource_map(array(
   ),
   '/rsrc/image/autosprite.png' =>
   array(
-    'hash' => '4a85e6c178f7dbdf1dc4f59f47a5e56b',
-    'uri' => '/res/4a85e6c1/rsrc/image/autosprite.png',
+    'hash' => 'bd70ca6308d6f80a87a10068a04867f8',
+    'uri' => '/res/bd70ca63/rsrc/image/autosprite.png',
     'disk' => '/rsrc/image/autosprite.png',
     'type' => 'png',
   ),
@@ -671,7 +671,7 @@ celerity_register_resource_map(array(
   ),
   'autosprite-css' =>
   array(
-    'uri' => '/res/9ed6c0e6/rsrc/css/autosprite.css',
+    'uri' => '/res/114f6e40/rsrc/css/autosprite.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1032,7 +1032,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-device' =>
   array(
-    'uri' => '/res/37669d1a/rsrc/js/application/core/behavior-device.js',
+    'uri' => '/res/7f09d952/rsrc/js/application/core/behavior-device.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1203,7 +1203,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-differential-toggle-files' =>
   array(
-    'uri' => '/res/983960b4/rsrc/js/application/differential/behavior-toggle-files.js',
+    'uri' => '/res/ae937207/rsrc/js/application/differential/behavior-toggle-files.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1337,7 +1337,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-konami' =>
   array(
-    'uri' => '/res/4f9442c2/rsrc/js/application/core/behavior-konami.js',
+    'uri' => '/res/5f4b32fe/rsrc/js/application/core/behavior-konami.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1517,7 +1517,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-phabricator-nav' =>
   array(
-    'uri' => '/res/15ceb59f/rsrc/js/application/core/behavior-phabricator-nav.js',
+    'uri' => '/res/575be3cd/rsrc/js/application/core/behavior-phabricator-nav.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2265,7 +2265,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-action-list-view-css' =>
   array(
-    'uri' => '/res/f70fbcd4/rsrc/css/layout/phabricator-action-list-view.css',
+    'uri' => '/res/1b4eef71/rsrc/css/layout/phabricator-action-list-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -2603,7 +2603,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-property-list-view-css' =>
   array(
-    'uri' => '/res/598fccad/rsrc/css/layout/phabricator-property-list-view.css',
+    'uri' => '/res/ff5d093d/rsrc/css/layout/phabricator-property-list-view.css',
     'type' => 'css',
     'requires' =>
     array(

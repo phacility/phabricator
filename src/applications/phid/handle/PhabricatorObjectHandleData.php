@@ -30,8 +30,14 @@ final class PhabricatorObjectHandleData {
     return $this;
   }
 
-  public static function loadOneHandle($phid) {
-    $handles = id(new PhabricatorObjectHandleData(array($phid)))->loadHandles();
+  public static function loadOneHandle($phid, $viewer = null) {
+    $query = new PhabricatorObjectHandleData(array($phid));
+
+    if ($viewer) {
+      $query->setViewer($viewer);
+    }
+
+    $handles = $query->loadHandles();
     return $handles[$phid];
   }
 
@@ -460,7 +466,7 @@ final class PhabricatorObjectHandleData {
             } else {
               $question = $questions[$phid];
               $handle->setName(phutil_utf8_shorten($question->getTitle(), 60));
-              $handle->setURI(new PhutilURI('Q' . $question->getID()));
+              $handle->setURI(new PhutilURI('/Q' . $question->getID()));
               $handle->setComplete(true);
             }
             $handles[$phid] = $handle;
@@ -482,7 +488,7 @@ final class PhabricatorObjectHandleData {
             } else {
               $paste = $pastes[$phid];
               $handle->setName($paste->getTitle());
-              $handle->setFullName('P'.$paste->getID().': '.$paste->getTitle());
+              $handle->setFullName($paste->getFullName());
               $handle->setURI('/P'.$paste->getID());
               $handle->setComplete(true);
             }

@@ -105,7 +105,7 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
     return $actions;
   }
 
-  public function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
+  protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
     $this->receivedMail = $mail;
     $this->handleAction($mail->getCleanTextBody());
   }

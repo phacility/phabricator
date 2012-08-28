@@ -565,7 +565,9 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $status = $revision->getStatus();
 
     $allow_self_accept = PhabricatorEnv::getEnvConfig(
-        'differential.allow-self-accept', false);
+      'differential.allow-self-accept', false);
+    $always_allow_close = PhabricatorEnv::getEnvConfig(
+      'differential.always-allow-close', false);
 
     if ($viewer_is_owner) {
       switch ($status) {
@@ -613,6 +615,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       }
       if ($status != ArcanistDifferentialRevisionStatus::CLOSED) {
         $actions[DifferentialAction::ACTION_CLAIM] = true;
+        $actions[DifferentialAction::ACTION_CLOSE] = $always_allow_close;
       }
     }
 

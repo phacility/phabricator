@@ -59,7 +59,7 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
         $fork_phids));
 
     $header = $this->buildHeaderView($paste);
-    $actions = $this->buildActionView($paste, $file);
+    $actions = $this->buildActionView($user, $paste, $file);
     $properties = $this->buildPropertyView($paste, $fork_phids);
     $source_code = $this->buildSourceCodeView($paste, $file);
 
@@ -89,20 +89,35 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
   }
 
   private function buildActionView(
+    PhabricatorUser $user,
     PhabricatorPaste $paste,
     PhabricatorFile $file) {
 
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $user,
+      $paste,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
     return id(new PhabricatorActionListView())
+      ->setUser($user)
+      ->setObject($paste)
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Fork This Paste'))
           ->setIcon('fork')
-          ->setHref($this->getApplicationURI('?fork='.$paste->getID())))
+          ->setHref($this->getApplicationURI('?parent='.$paste->getID())))
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('View Raw File'))
           ->setIcon('file')
-          ->setHref($file->getBestURI()));
+          ->setHref($file->getBestURI()))
+      ->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Edit Paste'))
+          ->setIcon('edit')
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(!$can_edit)
+          ->setHref($this->getApplicationURI('/edit/'.$paste->getID().'/')));
   }
 
   private function buildPropertyView(

@@ -34,9 +34,11 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     $request = $this->getRequest();
 
     $alt = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
-    $alt_domain = id(new PhutilURI($alt))->getDomain();
+    $uri = new PhutilURI($alt);
+    $alt_domain = $uri->getDomain();
     if ($alt_domain && ($alt_domain != $request->getHost())) {
-      return new Aphront400Response();
+      return id(new AphrontRedirectResponse())
+        ->setURI($uri->setPath($request->getPath()));
     }
 
     $file = id(new PhabricatorFile())->loadOneWhere(

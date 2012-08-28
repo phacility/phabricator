@@ -10,9 +10,9 @@
   border: 1px solid #dcdcdc;
   padding: .5em 0;
 
-  position: absolute;
+  float: right;
   margin-top: -30px;
-  right: 1%;
+  margin-right: 1%;
   width: 20%;
   border-radius: 2px;
   font-size: 12px;
@@ -51,4 +51,13 @@
   background-color: #3875d7;
   color: #ffffff;
   text-decoration: none;
+}
+
+.phabricator-action-view-disabled .phabricator-action-view-item {
+  color: #888888;
+}
+
+.phabricator-action-view-disabled .phabricator-action-view-item:hover {
+  background-color: #dfdfdf;
+  color: #888888;
 }

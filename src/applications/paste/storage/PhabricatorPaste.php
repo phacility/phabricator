@@ -26,6 +26,12 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   protected $language;
   protected $parentPHID;
 
+  private $content;
+
+  public function getURI() {
+    return '/P'.$this->getID();
+  }
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -40,11 +46,15 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
   public function getPolicy($capability) {
-    return PhabricatorPolicies::POLICY_USER;
+    if ($capability == PhabricatorPolicyCapability::CAN_VIEW) {
+      return PhabricatorPolicies::POLICY_USER;
+    }
+    return PhabricatorPolicies::POLICY_NOONE;
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $user) {
@@ -54,9 +64,21 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   public function getFullName() {
     $title = $this->getTitle();
     if (!$title) {
-      $title = 'Untitled Masterwork';
+      $title = '(An Untitled Masterwork)';
     }
     return 'P'.$this->getID().' '.$title;
+  }
+
+  public function getContent() {
+    if ($this->content === null) {
+      throw new Exception("Call attachContent() before getContent()!");
+    }
+    return $this->content;
+  }
+
+  public function attachContent($content) {
+    $this->content = $content;
+    return $this;
   }
 
 }

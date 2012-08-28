@@ -54,6 +54,71 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     return idx($this->headers, 'subject');
   }
 
+  public function getCCAddresses() {
+    return $this->getRawEmailAddresses(idx($this->headers, 'cc'));
+  }
+
+  public function getToAddresses() {
+    return $this->getRawEmailAddresses(idx($this->headers, 'to'));
+  }
+
+  /**
+   * Parses "to" addresses, looking for a public create email address
+   * first and if not found parsing the "to" address for reply handler
+   * information: receiver name, user id, and hash.
+   */
+  private function getPhabricatorToInformation() {
+    // Only one "public" create address so far
+    $create_task = PhabricatorEnv::getEnvConfig(
+      'metamta.maniphest.public-create-email');
+
+    // For replies, look for an object address with a format like:
+    // D291+291+b0a41ca848d66dcc@example.com
+    $single_handle_prefix = PhabricatorEnv::getEnvConfig(
+      'metamta.single-reply-handler-prefix');
+
+    $prefixPattern = ($single_handle_prefix)
+      ? preg_quote($single_handle_prefix, '/') . '\+'
+      : '';
+    $pattern = "/^{$prefixPattern}((?:D|T|C)\d+)\+([\w]+)\+([a-f0-9]{16})@/U";
+
+    $phabricator_address = null;
+    $receiver_name       = null;
+    $user_id             = null;
+    $hash                = null;
+    foreach ($this->getToAddresses() as $address) {
+      if ($address == $create_task) {
+        $phabricator_address = $address;
+        // it's okay to stop here because we just need to map a create
+        // address to an application and don't need / won't have more
+        // information in these cases.
+        break;
+      }
+
+      $matches = null;
+      $ok = preg_match(
+        $pattern,
+        $address,
+        $matches);
+
+      if ($ok) {
+        $phabricator_address = $address;
+        $receiver_name       = $matches[1];
+        $user_id             = $matches[2];
+        $hash                = $matches[3];
+        break;
+      }
+    }
+
+    return array(
+      $phabricator_address,
+      $receiver_name,
+      $user_id,
+      $hash
+    );
+  }
+
+
   public function processReceivedMail() {
 
     // If Phabricator sent the mail, always drop it immediately. This prevents
@@ -68,11 +133,19 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       return $this->setMessage($message)->save();
     }
 
-    $to = idx($this->headers, 'to');
-    $to = $this->getRawEmailAddress($to);
+    list($to,
+         $receiver_name,
+         $user_id,
+         $hash) = $this->getPhabricatorToInformation();
+    if (!$to) {
+      $raw_to = idx($this->headers, 'to');
+      return $this->setMessage("Unrecognized 'to' format: {$raw_to}")->save();
+    }
 
     $from = idx($this->headers, 'from');
 
+    // TODO -- make this a switch statement / better if / when we add more
+    // public create email addresses!
     $create_task = PhabricatorEnv::getEnvConfig(
       'metamta.maniphest.public-create-email');
 
@@ -112,37 +185,13 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       $handler = $editor->buildReplyHandler($receiver);
 
       $handler->setActor($user);
-      $handler->receiveEmail($this);
+      $handler->processEmail($this);
 
       $this->setRelatedPHID($receiver->getPHID());
       $this->setMessage('OK');
 
       return $this->save();
     }
-
-    // We've already stripped this, so look for an object address which has
-    // a format like: D291+291+b0a41ca848d66dcc@example.com
-    $matches = null;
-    $single_handle_prefix = PhabricatorEnv::getEnvConfig(
-      'metamta.single-reply-handler-prefix');
-
-    $prefixPattern = ($single_handle_prefix)
-      ? preg_quote($single_handle_prefix, '/') . '\+'
-      : '';
-    $pattern = "/^{$prefixPattern}((?:D|T|C)\d+)\+([\w]+)\+([a-f0-9]{16})@/U";
-
-    $ok = preg_match(
-      $pattern,
-      $to,
-      $matches);
-
-    if (!$ok) {
-      return $this->setMessage("Unrecognized 'to' format: {$to}")->save();
-    }
-
-    $receiver_name = $matches[1];
-    $user_id = $matches[2];
-    $hash = $matches[3];
 
     if ($user_id == 'public') {
       if (!PhabricatorEnv::getEnvConfig('metamta.public-replies')) {
@@ -208,7 +257,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     }
 
     $handler->setActor($user);
-    $handler->receiveEmail($this);
+    $handler->processEmail($this);
 
     $this->setMessage('OK');
 
@@ -285,6 +334,14 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       $address = $matches[1];
     }
     return $address;
+  }
+
+  private function getRawEmailAddresses($addresses) {
+    $raw_addresses = array();
+    foreach (explode(',', $addresses) as $address) {
+      $raw_addresses[] = $this->getRawEmailAddress($address);
+    }
+    return $raw_addresses;
   }
 
   private function lookupPublicUser() {

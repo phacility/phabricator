@@ -23,6 +23,8 @@ final class PhabricatorPasteQuery extends PhabricatorCursorPagedPolicyQuery {
   private $authorPHIDs;
   private $parentPHIDs;
 
+  private $needContent;
+
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
@@ -43,6 +45,11 @@ final class PhabricatorPasteQuery extends PhabricatorCursorPagedPolicyQuery {
     return $this;
   }
 
+  public function needContent($need_content) {
+    $this->needContent = $need_content;
+    return $this;
+  }
+
   public function loadPage() {
     $table = new PhabricatorPaste();
     $conn_r = $table->establishConnection('r');
@@ -55,9 +62,25 @@ final class PhabricatorPasteQuery extends PhabricatorCursorPagedPolicyQuery {
       $this->buildOrderClause($conn_r),
       $this->buildLimitClause($conn_r));
 
-    $results = $table->loadAllFromArray($data);
+    $pastes = $table->loadAllFromArray($data);
 
-    return $this->processResults($results);
+    if ($pastes && $this->needContent) {
+      $file_phids = mpull($pastes, 'getFilePHID');
+      $files = id(new PhabricatorFile())->loadAllWhere(
+        'phid IN (%Ls)',
+        $file_phids);
+      $files = mpull($files, null, 'getPHID');
+      foreach ($pastes as $paste) {
+        $file = idx($files, $paste->getFilePHID());
+        if ($file) {
+          $paste->attachContent($file->loadFileData());
+        } else {
+          $paste->attachContent('');
+        }
+      }
+    }
+
+    return $this->processResults($pastes);
   }
 
   protected function buildWhereClause($conn_r) {

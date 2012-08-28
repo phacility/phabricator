@@ -49,7 +49,7 @@ final class PhabricatorAuditReplyHandler extends PhabricatorMailReplyHandler {
     }
   }
 
-  public function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
+  protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
     $commit = $this->getMailReceiver();
     $actor = $this->getActor();
 

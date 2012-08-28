@@ -7,8 +7,10 @@
   border-style: solid;
   border-width: 1px 0;
   background-color: #f9f9f9;
+}
 
-  overflow: hidden;
+.phabriator-property-list-view-end {
+  clear: both;
 }
 
 .device-desktop .phabricator-property-list-view {

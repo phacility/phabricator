@@ -30,6 +30,12 @@ final class PhabricatorApplicationFlags extends PhabricatorApplication {
     return 'flags';
   }
 
+  public function getEventListeners() {
+    return array(
+      new PhabricatorFlagsUIEventListener(),
+    );
+  }
+
   public function loadStatus(PhabricatorUser $user) {
     $status = array();
 

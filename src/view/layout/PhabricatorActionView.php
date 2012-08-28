@@ -21,6 +21,8 @@ final class PhabricatorActionView extends AphrontView {
   private $name;
   private $icon;
   private $href;
+  private $disabled;
+  private $workflow;
 
   public function setHref($href) {
     $this->href = $href;
@@ -34,6 +36,16 @@ final class PhabricatorActionView extends AphrontView {
 
   public function setName($name) {
     $this->name = $name;
+    return $this;
+  }
+
+  public function setDisabled($disabled) {
+    $this->disabled = $disabled;
+    return $this;
+  }
+
+  public function setWorkflow($workflow) {
+    $this->workflow = $workflow;
     return $this;
   }
 
@@ -51,11 +63,12 @@ final class PhabricatorActionView extends AphrontView {
     }
 
     if ($this->href) {
-      $item = phutil_render_tag(
+      $item = javelin_render_tag(
         'a',
         array(
           'href' => $this->href,
           'class' => 'phabricator-action-view-item',
+          'sigil' => $this->workflow ? 'workflow' : null,
         ),
         phutil_escape_html($this->name));
     } else {
@@ -67,10 +80,16 @@ final class PhabricatorActionView extends AphrontView {
         phutil_escape_html($this->name));
     }
 
+    $classes = array();
+    $classes[] = 'phabricator-action-view';
+    if ($this->disabled) {
+      $classes[] = 'phabricator-action-view-disabled';
+    }
+
     return phutil_render_tag(
       'li',
       array(
-        'class' => 'phabricator-action-view',
+        'class' => implode(' ', $classes),
       ),
       $icon.$item);
   }

@@ -32,7 +32,7 @@ JX.behavior('device', function(config) {
     JX.DOM.alterClass(e, 'device-tablet', (device == 'tablet'));
     JX.DOM.alterClass(e, 'device-desktop', (device == 'desktop'));
 
-    JX.Stratcom.invoke('phabricator-device-change', device);
+    JX.Stratcom.invoke('phabricator-device-change', null, device);
   }
 
   JX.Stratcom.listen('resize', null, onresize);
