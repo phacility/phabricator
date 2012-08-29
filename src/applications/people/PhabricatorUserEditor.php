@@ -103,7 +103,9 @@ final class PhabricatorUserEditor {
   /**
    * @task edit
    */
-  public function updateUser(PhabricatorUser $user) {
+  public function updateUser(
+    PhabricatorUser $user,
+    PhabricatorUserEmail $email = null) {
     if (!$user->getID()) {
       throw new Exception("User has not been created yet!");
     }
@@ -111,6 +113,9 @@ final class PhabricatorUserEditor {
     $actor = $this->requireActor();
     $user->openTransaction();
       $user->save();
+      if ($email) {
+        $email->save();
+      }
 
       $log = PhabricatorUserLog::newLog(
         $actor,
@@ -234,6 +239,45 @@ final class PhabricatorUserEditor {
 
     return $this;
   }
+
+  /**
+   * @task role
+   */
+  public function makeSystemAgentUser(PhabricatorUser $user, $system_agent) {
+    $actor = $this->requireActor();
+
+    if (!$user->getID()) {
+      throw new Exception("User has not been created yet!");
+    }
+
+    $user->openTransaction();
+      $user->beginWriteLocking();
+
+        $user->reload();
+        if ($user->getIsSystemAgent() == $system_agent) {
+          $user->endWriteLocking();
+          $user->killTransaction();
+          return $this;
+        }
+
+        $log = PhabricatorUserLog::newLog(
+          $actor,
+          $user,
+          PhabricatorUserLog::ACTION_SYSTEM_AGENT);
+        $log->setOldValue($user->getIsSystemAgent());
+        $log->setNewValue($system_agent);
+
+        $user->setIsSystemAgent($system_agent);
+        $user->save();
+
+        $log->save();
+
+      $user->endWriteLocking();
+    $user->saveTransaction();
+
+    return $this;
+  }
+
 
   /**
    * @task role

@@ -132,8 +132,9 @@ final class PhabricatorPeopleEditController
     $request = $this->getRequest();
     if ($request->isFormPost()) {
       $welcome_checked = $request->getInt('welcome');
+      $is_new = !$user->getID();
 
-      if (!$user->getID()) {
+      if ($is_new) {
         $user->setUsername($request->getStr('username'));
 
         $new_email = $request->getStr('email');
@@ -147,9 +148,6 @@ final class PhabricatorPeopleEditController
           $e_email = null;
         }
 
-        if ($request->getStr('role') == 'agent') {
-          $user->setIsSystemAgent(true);
-        }
       }
       $user->setRealName($request->getStr('realname'));
 
@@ -172,7 +170,6 @@ final class PhabricatorPeopleEditController
 
       if (!$errors) {
         try {
-          $is_new = !$user->getID();
 
           if (!$is_new) {
             id(new PhabricatorUserEditor())
@@ -186,6 +183,13 @@ final class PhabricatorPeopleEditController
             id(new PhabricatorUserEditor())
               ->setActor($admin)
               ->createNewUser($user, $email);
+
+            if ($request->getStr('role') == 'agent') {
+              id(new PhabricatorUserEditor())
+                ->setActor($admin)
+                ->makeSystemAgentUser($user, true);
+            }
+
           }
 
           if ($welcome_checked) {
