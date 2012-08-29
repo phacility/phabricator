@@ -36,7 +36,7 @@ JX.behavior('differential-show-more', function(config) {
       var context = e.getData().context;
       var data = JX.Stratcom.getData(e.getData().show);
 
-      var container = JX.DOM.find(context, 'td');
+      var container = JX.DOM.scry(context, 'td')[0];
       JX.DOM.setContent(container, 'Loading...');
       JX.DOM.alterClass(context, 'differential-show-more-loading', true);
       data['whitespace'] = config.whitespace;
