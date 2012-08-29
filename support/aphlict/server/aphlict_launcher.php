@@ -50,6 +50,14 @@ if (posix_getuid() != 0) {
     "privileged ports.");
 }
 
+// Append any paths to $PATH if we need to.
+$paths = PhabricatorEnv::getEnvConfig('environment.append-paths');
+if (!empty($paths)) {
+  $current_env_path = getenv('PATH');
+  $new_env_paths = implode(':', $paths);
+  putenv('PATH='.$current_env_path.':'.$new_env_paths);
+}
+
 list($err) = exec_manual('node -v');
 if ($err) {
   throw new Exception(
