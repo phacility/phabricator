@@ -117,10 +117,6 @@ final class PhabricatorIRCBot extends PhabricatorDaemon {
       $this->writeCommand('PASS', "{$pass}");
     }
 
-    if ($nickpass) {
-      $this->writeCommand("NickServ IDENTIFY ", "{$nickpass}");
-    }
-
     $this->writeCommand('NICK', "{$nick}");
     $this->runSelectLoop();
   }
