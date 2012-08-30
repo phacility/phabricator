@@ -67,6 +67,44 @@ events. Normally, you want to listen only to specific events, but if you're
 writing a generic handler you can listen to all events with this constant
 rather than by enumerating each event.
 
+== Arcanist: Commit: Will Commit SVN ==
+
+The constant for this event is `ArcanistEventType::TYPE_COMMIT_WILLCOMMITSVN`.
+
+This event is dispatched before an `svn commit` occurs and allows you to
+modify the commit message. Data available on this event:
+
+  - `message` The text of the message.
+  - `workflow` The active @{class:ArcanistBaseWorkflow}.
+
+== Arcanist: Diff: Will Build Message ==
+
+The constant for this event is `ArcanistEventType::TYPE_DIFF_WILLBUILDMESSAGE`.
+
+This event is dispatched before an editable message is presented to the user,
+and allows you to, e.g., fill in default values for fields. Data available
+on this event:
+
+  - `fields` A map of field values to be compiled into a message.
+
+== Arcanist: Diff: Was Created ==
+
+The constant for this event is `ArcanistEventType::TYPE_DIFF_WASCREATED`.
+
+This event is dispatched after a diff is created. It is currently only useful
+for collecting timing information. No data is available on this event.
+
+== Arcanist: Revision: Will Create Revision ==
+
+The constant for this event is
+`ArcanistEventType::TYPE_REVISION_WILLCREATEREVISION`.
+
+This event is dispatched before a revision is created. It allows you to modify
+fields to, e.g., edit revision titles. Data available on this event:
+
+  - `specification` Parameters that will be used to invoke the
+    `differential.createrevision` Conduit call.
+
 == Maniphest: Will Edit Task ==
 
 The constant for this event is
@@ -207,6 +245,20 @@ The constant for this event is
 `PhabricatorEventType::TYPE_TEST_DIDRUNTEST`.
 
 This is a test event for testing event listeners. See above for details.
+
+== UI: Did Render Actions ==
+
+The constant for this event is
+`PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS`.
+
+This event is dispatched after a @{class:PhabricatorActionListView} is built by
+the UI. It allows you to add new actions that your application may provide, like
+"Fax this Object". Data available on this event:
+
+  - `object` The object which actions are being rendered for.
+  - `actions` The current list of available actions.
+
+NOTE: This event is unstable and subject to change.
 
 = Debugging Listeners =
 
