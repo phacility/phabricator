@@ -278,25 +278,10 @@ abstract class DifferentialFieldSpecification {
       return '<em>None</em>';
     }
 
-    $statuses = id(new PhabricatorUserStatus())->loadCurrentStatuses(
-      $user_phids);
-
     $links = array();
     foreach ($user_phids as $user_phid) {
       $handle = $this->getHandle($user_phid);
-      $extra = null;
-      $status = idx($statuses, $handle->getPHID());
-      if ($handle->isDisabled()) {
-        $extra = ' <strong>(disabled)</strong>';
-      } else if ($status) {
-        $until = phabricator_date($status->getDateTo(), $this->getUser());
-        if ($status->getStatus() == PhabricatorUserStatus::STATUS_SPORADIC) {
-          $extra = ' <strong title="until '.$until.'">(sporadic)</strong>';
-        } else {
-          $extra = ' <strong title="until '.$until.'">(away)</strong>';
-        }
-      }
-      $links[] = $handle->renderLink().$extra;
+      $links[] = $handle->renderLink();
     }
 
     return implode(', ', $links);

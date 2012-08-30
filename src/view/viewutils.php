@@ -65,10 +65,12 @@ function phabricator_datetime($epoch, $user) {
 }
 
 function _phabricator_date_format($epoch) {
-  $format = pht('M j Y');
   $now = time();
-  if ($epoch <= $now && $epoch > $now - 30 * 24 * 60 * 60) {
+  $shift = 30 * 24 * 60 * 60;
+  if ($epoch < $now + $shift && $epoch > $now - $shift) {
     $format = pht('D, M j');
+  } else {
+    $format = pht('M j Y');
   }
   return $format;
 }

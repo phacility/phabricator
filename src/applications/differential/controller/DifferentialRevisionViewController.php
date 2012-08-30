@@ -144,6 +144,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $object_phids = array_unique($object_phids);
 
     $handles = id(new PhabricatorObjectHandleData($object_phids))
+      ->setViewer($this->getRequest()->getUser())
       ->loadHandles();
 
     foreach ($aux_fields as $key => $aux_field) {
@@ -879,7 +880,9 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->loadAssets();
 
     $phids = $view->getRequiredHandlePHIDs();
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = id(new PhabricatorObjectHandleData($phids))
+      ->setViewer($this->getRequest()->getUser())
+      ->loadHandles();
     $view->setHandles($handles);
 
     return

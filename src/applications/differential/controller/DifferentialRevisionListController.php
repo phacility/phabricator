@@ -172,7 +172,9 @@ final class DifferentialRevisionListController extends DifferentialController {
       }
       $phids = array_mergev(mpull($view_objects, 'getRequiredHandlePHIDs'));
       $phids[] = $params['phid'];
-      $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+      $handles = id(new PhabricatorObjectHandleData($phids))
+        ->setViewer($this->getRequest()->getUser())
+        ->loadHandles();
 
       foreach ($views as $view) {
         if (empty($view['special'])) {
