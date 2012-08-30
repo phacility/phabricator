@@ -119,6 +119,14 @@ abstract class AphrontApplicationConfiguration {
     $request = $this->getRequest();
     $path = $request->getPath();
 
+    // Check if we should do an HTTP -> HTTPS redirect
+    $base_uri = new PhutilURI(
+      PhabricatorEnv::getEnvConfig('phabricator.base-uri'));
+    if ($base_uri->getProtocol() === 'https' && !$_SERVER['HTTPS']) {
+      $base_uri->setPath($path);
+      return $this->buildRedirectController($base_uri);
+    }
+
     list($controller, $uri_data) = $this->buildControllerForPath($path);
     if (!$controller) {
       if (!preg_match('@/$@', $path)) {
