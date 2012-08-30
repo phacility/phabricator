@@ -17,7 +17,7 @@ into issues.
 You need to install:
 
   - Arcanist itself, see @{article:Arcanist User Guide}.
-  - PHP
+  - PHP (see "Detailed PHP Install Instructions" below).
   - SVN, Git, or Mercurial.
 
 Then, configure:
@@ -76,6 +76,25 @@ And this for GitPad (you may need to adjust the path):
 
   name=GitPad
   $ arc set-config editor "\"C:\Users\yourusername\AppData\Roaming\GitPad\GitPad.exe\""
+
+= Detailed PHP Install Instructions =
+
+While multiple versions of PHP should work, you can follow these specific
+instructions if you're having trouble.
+
+  - Download the latest stable PHP binary release from:
+    <http://windows.php.net/download/>. When this document was last
+    updated, this was PHP 5.4.6, but newer versions should also work. The
+    "VC9 x86 Non Thread Safe" build should work correctly. (Other versions newer
+    than PHP 5.3 should work, and thread-safe versions should also work.)
+  - Unzip the PHP directory.
+  - Copy `php.ini-development` to `php.ini` in that same directory.
+  - Open `php.ini` and locate the line `;extension=php_curl.dll`. Remove the
+    `;` to activate this extension. Locate the line `; extension_dir = "ext"`
+    and change it to `; extension_dir = "C:\PHP\ext"`, where `C:\PHP` is
+    the directory where you installed PHP.
+  - Verify that things work by running `php -i` from your commandline and
+    looking for `curl` in the output.
 
 = Next Steps =
 
