@@ -1,6 +1,7 @@
 /**
  * @provides javelin-behavior-phabricator-nav
  * @requires javelin-behavior
+ *           javelin-behavior-device
  *           javelin-stratcom
  *           javelin-dom
  *           javelin-magical-init
@@ -211,13 +212,33 @@ JX.behavior('phabricator-nav', function(config) {
   }
 
 
+// - Scroll --------------------------------------------------------------------
+
+  // When the user scrolls down on the desktop, we move the application and
+  // local navs up until they hit the top of the page.
+
+  JX.Stratcom.listen(['scroll', 'resize'], null, function(e) {
+    if (JX.Device.getDevice() != 'desktop') {
+      return;
+    }
+
+    var y = Math.max(0, 44 - JX.Vector.getScroll().y);
+    app.style.top = y + 'px';
+    if (local) {
+      local.style.top = y + 'px';
+    }
+  });
+
+
 // - Navigation Reset ----------------------------------------------------------
 
   JX.Stratcom.listen('phabricator-device-change', null, function(event) {
     app.style.left = '';
+    app.style.top = '';
     if (local) {
       local.style.left = '';
       local.style.width = '';
+      local.style.top = '';
     }
     if (drag) {
       drag.style.left = '';

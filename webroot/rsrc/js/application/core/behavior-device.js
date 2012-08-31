@@ -4,11 +4,19 @@
  *           javelin-stratcom
  *           javelin-dom
  *           javelin-vector
+ *           javelin-install
  */
 
-JX.behavior('device', function(config) {
+JX.install('Device', {
+  statics : {
+    _device : null,
+    getDevice : function() {
+      return JX.Device._device;
+    }
+  }
+});
 
-  var current;
+JX.behavior('device', function(config) {
 
   function onresize() {
     var v = JX.Vector.getViewport();
@@ -21,11 +29,11 @@ JX.behavior('device', function(config) {
       device = 'phone';
     }
 
-    if (device == current) {
+    if (device == JX.Device.getDevice()) {
       return;
     }
 
-    current = device;
+    JX.Device._device = device;
 
     var e = JX.$(config.id);
     JX.DOM.alterClass(e, 'device-phone', (device == 'phone'));

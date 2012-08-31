@@ -1032,7 +1032,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-device' =>
   array(
-    'uri' => '/res/7f09d952/rsrc/js/application/core/behavior-device.js',
+    'uri' => '/res/b6bd0c33/rsrc/js/application/core/behavior-device.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1040,6 +1040,7 @@ celerity_register_resource_map(array(
       1 => 'javelin-stratcom',
       2 => 'javelin-dom',
       3 => 'javelin-vector',
+      4 => 'javelin-install',
     ),
     'disk' => '/rsrc/js/application/core/behavior-device.js',
   ),
@@ -1517,18 +1518,19 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-phabricator-nav' =>
   array(
-    'uri' => '/res/575be3cd/rsrc/js/application/core/behavior-phabricator-nav.js',
+    'uri' => '/res/dc349915/rsrc/js/application/core/behavior-phabricator-nav.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-behavior',
-      1 => 'javelin-stratcom',
-      2 => 'javelin-dom',
-      3 => 'javelin-magical-init',
-      4 => 'javelin-vector',
-      5 => 'javelin-request',
-      6 => 'javelin-util',
-      7 => 'javelin-fx',
+      1 => 'javelin-behavior-device',
+      2 => 'javelin-stratcom',
+      3 => 'javelin-dom',
+      4 => 'javelin-magical-init',
+      5 => 'javelin-vector',
+      6 => 'javelin-request',
+      7 => 'javelin-util',
+      8 => 'javelin-fx',
     ),
     'disk' => '/rsrc/js/application/core/behavior-phabricator-nav.js',
   ),
@@ -2455,7 +2457,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-main-menu-view' =>
   array(
-    'uri' => '/res/bfd05b66/rsrc/css/application/base/main-menu-view.css',
+    'uri' => '/res/9fd2cece/rsrc/css/application/base/main-menu-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -2475,7 +2477,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-nav-view-css' =>
   array(
-    'uri' => '/res/075830ac/rsrc/css/aphront/phabricator-nav-view.css',
+    'uri' => '/res/289a0aed/rsrc/css/aphront/phabricator-nav-view.css',
     'type' => 'css',
     'requires' =>
     array(

@@ -354,7 +354,6 @@ final class PhabricatorStandardPageView extends AphrontPageView {
           'class' => $classes,
         ),
         $header_chrome.
-        '<div class="phabricator-main-menu-spacer"></div>'.
         '<div class="phabricator-standard-page-body">'.
           ($console ? '<darkconsole />' : null).
           $developer_warning.
