@@ -353,6 +353,8 @@ final class PhrictionDocumentController
       }
     }
 
+    $children = isort($children, 'title');
+
     $list = array();
     $list[] = '<ul>';
     foreach ($children as $child) {
