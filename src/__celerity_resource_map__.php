@@ -1518,7 +1518,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-phabricator-nav' =>
   array(
-    'uri' => '/res/dc349915/rsrc/js/application/core/behavior-phabricator-nav.js',
+    'uri' => '/res/6e550189/rsrc/js/application/core/behavior-phabricator-nav.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1528,9 +1528,8 @@ celerity_register_resource_map(array(
       3 => 'javelin-dom',
       4 => 'javelin-magical-init',
       5 => 'javelin-vector',
-      6 => 'javelin-request',
-      7 => 'javelin-util',
-      8 => 'javelin-fx',
+      6 => 'javelin-util',
+      7 => 'javelin-fx',
     ),
     'disk' => '/rsrc/js/application/core/behavior-phabricator-nav.js',
   ),
@@ -2477,7 +2476,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-nav-view-css' =>
   array(
-    'uri' => '/res/289a0aed/rsrc/css/aphront/phabricator-nav-view.css',
+    'uri' => '/res/1d3e1353/rsrc/css/aphront/phabricator-nav-view.css',
     'type' => 'css',
     'requires' =>
     array(

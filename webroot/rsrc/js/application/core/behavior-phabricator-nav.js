@@ -6,7 +6,6 @@
  *           javelin-dom
  *           javelin-magical-init
  *           javelin-vector
- *           javelin-request
  *           javelin-util
  *           javelin-fx
  * @javelin
@@ -83,48 +82,6 @@ JX.behavior('phabricator-nav', function(config) {
       }
     }
   }
-
-
-// - Application Menu Collapse/Expand ------------------------------------------
-
-  function collapse(state, skip_save) {
-    // As necessary, adjust the drag bar and content positioning. Do this first,
-    // so we don't end up measuring things after the collapse takes effect.
-
-    // This is the difference between the widths of the uncollapsed application
-    // nav (150px) and the collapsed one (38px).
-    var delta = 112;
-    delta = state ? -delta : delta;
-    if (config.dragID) {
-      var drag = JX.$(config.dragID);
-      var p = JX.$V(drag);
-      p.x += delta;
-      p.y = null;
-      p.setPos(drag);
-    }
-
-    var c = parseInt(getComputedStyle(content).marginLeft, 10);
-    content.style.marginLeft = (c + delta) + 'px';
-
-    JX.DOM.alterClass(
-      JX.$(config.mainID),
-      'phabricator-nav-app-collapsed',
-      state);
-
-    if (!skip_save) {
-      new JX.Request('/settings/adjust/', JX.bag)
-        .setData({key: config.collapseKey, value: state ? 1 : ''})
-        .send();
-    }
-  }
-
-  JX.DOM.listen(JX.$(config.collapseID), 'click', null, function(e) {
-    collapse(true);
-  });
-
-  JX.DOM.listen(JX.$(config.expandID), 'click', null, function(e) {
-    collapse(false);
-  });
 
 
 // - Flexible Navigation Column ------------------------------------------------

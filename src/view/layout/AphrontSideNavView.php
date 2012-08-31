@@ -77,38 +77,11 @@ final class AphrontSideNavView extends AphrontView {
       $nav_id = null;
       $drag_id = null;
       $content_id = celerity_generate_unique_node_id();
-      $collapse_id = null;
-      $expand_id = null;
       $local_id = null;
       $local_menu = null;
       $main_id = celerity_generate_unique_node_id();
 
       $apps = $this->renderApplications();
-
-      $key = PhabricatorUserPreferences::PREFERENCE_NAV_COLLAPSED;
-      if ($user->loadPreferences()->getPreference($key)) {
-        $nav_classes[] = 'phabricator-nav-app-collapsed';
-      }
-
-      $collapse_id = celerity_generate_unique_node_id();
-      $expand_id = celerity_generate_unique_node_id();
-
-      $collapse_button = phutil_render_tag(
-        'a',
-        array(
-          'href' => '#',
-          'class' => 'phabricator-nav-app-button-collapse',
-          'id' => $collapse_id,
-        ),
-        '&laquo; Collapse');
-      $expand_button = phutil_render_tag(
-        'a',
-        array(
-          'href' => '#',
-          'class' => 'phabricator-nav-app-button-expand',
-          'id' => $expand_id,
-        ),
-        '&raquo;');
 
       $app_menu = phutil_render_tag(
         'div',
@@ -116,9 +89,7 @@ final class AphrontSideNavView extends AphrontView {
           'class' => 'phabricator-nav-col phabricator-nav-app',
           'id'    => $app_id,
         ),
-        $apps->render()).
-        $expand_button.
-        $collapse_button;
+        $apps->render());
 
       if ($this->flexible) {
         $drag_id = celerity_generate_unique_node_id();
@@ -154,9 +125,6 @@ final class AphrontSideNavView extends AphrontView {
           'localID'     => $local_id,
           'dragID'      => $drag_id,
           'contentID'   => $content_id,
-          'collapseID'  => $collapse_id,
-          'expandID'    => $expand_id,
-          'collapseKey' => $key,
         ));
 
       if ($this->active && $local_id) {
