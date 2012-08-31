@@ -206,22 +206,107 @@ final class PhabricatorPeopleProfileController
           </table>
         </div>
       </div>';
+    $content .= $this->renderActivityAnalysis($user);
 
     return $content;
   }
 
-  private function renderUserFeed(PhabricatorUser $user) {
-    $viewer = $this->getRequest()->getUser();
+  private function renderActivityAnalysis(PhabricatorUser $user) {
 
-    $query = new PhabricatorFeedQuery();
-    $query->setFilterPHIDs(
+    $stories = $this->getStories($user, 500);
+    $counts = $this->countStories($stories);
+    
+    $behavior = $this->analyzeActivity($counts);
+    switch ($behavior) {
+    case self::DIURNAL:
+      $behavior_str = "//This creature appears to be diurnal.//";
+      break;
+    case self::NOCTURNAL;
+      $behavior_str = "//This creature appears to be nocturnal.//";
+      break;
+    case self::CATHEMERAL;
+      $behavior_str = "//This creature appears to be " .
+        "[[http://en.wikipedia.org/wiki/Cathemeral | cathemeral]].//";
+      break;
+    }
+    $engine = PhabricatorMarkupEngine::newProfileMarkupEngine();
+    $behavior_str = $engine->markupText($behavior_str);
+    
+    $id = celerity_generate_unique_node_id();
+    $punchcard_node = phutil_render_tag(
+      'div',
       array(
-        $user->getPHID(),
-      ));
-    $query->setLimit(100);
-    $query->setViewer($viewer);
-    $stories = $query->execute();
+        'id' => $id,
+        'style' => 'border: 1px solid #6f6f6f; '.
+                   'margin: 1em 2em; '.
+                   'height: 280px; '.
+                   'width: 700px; ',
+      ),
+      '');
 
+    require_celerity_resource('javelin-behavior-punchcard');
+
+    Javelin::initBehavior('punchcard', array(
+      'hardpoint' => $id,
+      'counts' => $counts,
+    ));
+
+    return
+      '<div class="phabricator-profile-info-group">
+        <h1 class="phabricator-profile-info-header">Sightings In The Wild</h1>
+        <div class="phabricator-profile-info-pane">
+          <table class="phabricator-profile-info-table">
+            <tr>
+              <th>Behavior Pattern</th>
+              <td>'.$behavior_str.'</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      '.$punchcard_node;
+  }
+
+  // Tabulate stories by day of week and hour of day.
+  private function countStories($stories) {
+
+    $counts = array_fill(1, 7, array_fill(0, 24, 0));
+    foreach ($stories as $story) {
+      $epoch = $story->getEpoch();
+      ++$counts[intval(date('N', $epoch))][intval(date('G', $epoch))];
+    }
+    return $counts;
+  }
+
+  const DIURNAL = 1;
+  const NOCTURNAL = 2;
+  const CATHEMERAL = 3;
+
+  private function analyzeActivity($counts) {
+    $day_count = 0;
+    $night_count = 0;
+    foreach ($counts as $day) {
+      foreach ($day as $hour => $count) {
+        if (($hour >= 8) && ($hour < 20)) {
+          $day_count += $count;
+        } else {
+          $night_count += $count;
+        }
+      }
+    }
+    
+    if ($day_count / ($day_count + $night_count) > 0.66) {
+      return self::DIURNAL;
+    } else if ($day_count / ($day_count + $night_count) < 0.66) {
+      return self::NOCTURNAL;
+    } else {
+      return self::CATHEMERAL;
+    }
+  }
+
+  private function renderUserFeed(PhabricatorUser $user) {
+
+    $viewer = $this->getRequest()->getUser();
+    $stories = $this->getStories($user, 100);
     $builder = new PhabricatorFeedBuilder($stories);
     $builder->setUser($viewer);
     $view = $builder->buildView();
@@ -233,5 +318,18 @@ final class PhabricatorPeopleProfileController
           '.$view->render().'
         </div>
       </div>';
+  }
+
+  private function getStories(PhabricatorUser $user, $limit) {
+    $viewer = $this->getRequest()->getUser();
+
+    $query = new PhabricatorFeedQuery();
+    $query->setFilterPHIDs(
+      array(
+        $user->getPHID(),
+      ));
+    $query->setLimit($limit);
+    $query->setViewer($viewer);
+    return $query->execute();
   }
 }
