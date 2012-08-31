@@ -222,7 +222,9 @@ final class PhabricatorOwnersListController
         $phids[$owner->getUserPHID()] = true;
       }
       $phids = array_keys($phids);
-      $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+      $handles = id(new PhabricatorObjectHandleData($phids))
+        ->setViewer($this->getRequest()->getUser())
+        ->loadHandles();
 
       $repository_phids = array();
       foreach ($paths as $path) {
