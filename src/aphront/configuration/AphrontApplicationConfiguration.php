@@ -69,7 +69,7 @@ abstract class AphrontApplicationConfiguration {
     return $this->path;
   }
 
-  final public function willBuildRequest() {
+  public function willBuildRequest() {
   }
 
   /**

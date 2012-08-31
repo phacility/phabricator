@@ -36,7 +36,7 @@ final class DifferentialUnitFieldSpecification
   }
 
   public function renderValueForRevisionView() {
-    $diff = $this->getDiff();
+    $diff = $this->getManualDiff();
 
     $ustar = DifferentialRevisionUpdateHistoryView::renderDiffUnitStar($diff);
     $umsg = DifferentialRevisionUpdateHistoryView::getDiffUnitMessage($diff);

@@ -28,7 +28,7 @@ final class DifferentialDependenciesFieldSpecification
   }
 
   public function renderLabelForRevisionView() {
-    return 'Depends On:';
+    return 'Dependents:';
   }
 
   public function renderValueForRevisionView() {
@@ -48,7 +48,7 @@ final class DifferentialDependenciesFieldSpecification
   private function getDependentRevisionPHIDs() {
     return PhabricatorEdgeQuery::loadDestinationPHIDs(
       $this->getRevision()->getPHID(),
-      PhabricatorEdgeConfig::TYPE_DREV_DEPENDS_ON_DREV);
+      PhabricatorEdgeConfig::TYPE_DREV_DEPENDED_ON_BY_DREV);
   }
 
 }

@@ -24,23 +24,9 @@
 
 .device-desktop .phabricator-main-menu {
   text-align: right;
-  position: fixed;
   width: 100%;
   z-index: 6;
-  top: 0;
-  padding-right: 44px;
 }
-
-.phabricator-main-menu-spacer {
-  display: none;
-}
-
-.device-desktop .phabricator-main-menu-spacer {
-  height: 44px;
-  position: relative;
-  display: block;
-}
-
 
 /* - Main Menu Group -----------------------------------------------------------
 

@@ -26,11 +26,6 @@
   box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.25);
 }
 
-.device-desktop .phabricator-nav-app {
-  top: 43px;
-  padding-top: 2px;
-}
-
 .phabricator-nav-local {
   width: 179px;
   background: #ececec;
@@ -47,8 +42,8 @@
 
 .phabricator-nav-drag {
   position: fixed;
-  top: 44px;
-  left: 327px;
+  top: 0;
+  left: 217px;
   width: 7px;
   bottom: 0;
   z-index: 4;
@@ -71,10 +66,6 @@
   display: none;
 }
 
-.device-desktop .phabricator-nav-app-collapsed .phabricator-nav-drag {
-  left: 215px;
-}
-
 .phabricator-nav-col a,
 .phabricator-nav-col span {
   display: block;
@@ -84,7 +75,7 @@
   left: 150px;
 }
 
-.device-desktop .phabricator-nav-app-collapsed .phabricator-nav-local {
+.device-desktop .phabricator-nav-local {
   left: 38px;
 }
 
@@ -96,12 +87,11 @@
   margin-left: 330px;
 }
 
-.device-desktop .phabricator-nav-app-collapsed .phabricator-nav-content {
-  margin-left: 36px;
+.device-desktop .phabricator-nav-content {
+  margin-left: 38px;
 }
 
-.device-desktop .has-local-nav.phabricator-nav-app-collapsed
-  .phabricator-nav-content {
+.device-desktop .has-local-nav .phabricator-nav-content {
   margin-left: 216px;
 }
 
@@ -140,6 +130,15 @@ a.phabricator-nav-app-item {
   position: relative;
 }
 
+/**
+ * On the desktop, constrain the size of the <a /> so that the tooltip is
+ * positioned correctly. Without this rule, it ends up too far to the right.
+ */
+.device-desktop a.phabricator-nav-app-item {
+  padding-left: 38px;
+  padding-right: 0px;
+}
+
 a.phabricator-nav-app-item-selected {
   background-color: #55595d;
 }
@@ -158,49 +157,8 @@ span.phabricator-nav-app-item-icon {
   margin: 0;
 }
 
-a.phabricator-nav-app-button-expand,
-a.phabricator-nav-app-button-collapse {
-  position: fixed;
-  display: none;
-  left: 0;
-  bottom: 0;
-  padding: 4px;
-  z-index: 4;
-  background: #44494d;
-  line-height: 14px;
-  border-top: 1px solid #222222;
-  text-align: center;
-  font-size: 11px;
-  box-shadow: inset -1px -1px 3px rgba(0, 0, 0, 0.1);
-  color: #c0c0c0;
-  text-decoration: none;
-}
-
-.phabricator-nav-app-button-collapse {
-  width: 141px;
-}
-
-.phabricator-nav-app-button-expand {
-  width: 29px;
-  display: none;
-}
-
-.device-desktop .phabricator-nav-app-button-expand,
-.device-desktop .phabricator-nav-app-button-collapse {
-  display: block;
-}
-
-.device-desktop .phabricator-nav-app-collapsed .phabricator-nav-app {
+.device-desktop .phabricator-nav-app {
   width: 37px;
-}
-
-.phabricator-nav-app-collapsed .phabricator-nav-app-button-collapse {
-  display: none;
-}
-
-.device-desktop .phabricator-nav-app-collapsed
-  .phabricator-nav-app-button-expand {
-  display: block;
 }
 
 .device-desktop .phabricator-nav-head {

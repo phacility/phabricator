@@ -1464,15 +1464,17 @@ final class DifferentialChangesetParser {
               : "\xE2\x96\xBC Show 20 Lines");
         }
 
+        $context = null;
+        $context_line = null;
         if (!$is_last_block && $depths[$ii + $len]) {
           for ($l = $ii + $len - 1; $l >= $ii; $l--) {
             $line = $this->new[$l]['text'];
             if ($depths[$l] < $depths[$ii + $len] && trim($line) != '') {
-              $contents[] = '<code>'.$this->newRender[$l].'</code>';
+              $context = $this->newRender[$l];
+              $context_line = $this->new[$l]['line'];
               break;
             }
           }
-
         }
 
         $container = javelin_render_tag(
@@ -1480,9 +1482,11 @@ final class DifferentialChangesetParser {
           array(
             'sigil' => 'context-target',
           ),
-          '<td colspan="6" class="show-more">'.
+          '<td colspan="2" class="show-more">'.
             implode(' &bull; ', $contents).
-          '</td>');
+          '</td>'.
+          '<th class="show-context-line">'.$context_line.'</td>'.
+          '<td colspan="2" class="show-context">'.$context.'</td>');
 
         $html[] = $container;
 

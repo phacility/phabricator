@@ -177,7 +177,12 @@ final class PhabricatorObjectHandleData {
               $handle->setAlternateID($user->getID());
               $handle->setComplete(true);
               if (isset($statuses[$phid])) {
-                $handle->setStatus($statuses[$phid]->getTextStatus());
+                $status = $statuses[$phid]->getTextStatus();
+                if ($this->viewer) {
+                  $date = $statuses[$phid]->getDateTo();
+                  $status .= ' until '.phabricator_date($date, $this->viewer);
+                }
+                $handle->setStatus($status);
               }
               $handle->setDisabled($user->getIsDisabled());
 

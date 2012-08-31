@@ -28,7 +28,7 @@ final class DifferentialBranchFieldSpecification
   }
 
   public function renderValueForRevisionView() {
-    $diff = $this->getDiff();
+    $diff = $this->getManualDiff();
 
     $branch = $diff->getBranch();
     $bookmark = $diff->getBookmark();

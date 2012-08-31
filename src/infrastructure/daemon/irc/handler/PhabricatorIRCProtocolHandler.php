@@ -27,6 +27,10 @@ final class PhabricatorIRCProtocolHandler extends PhabricatorIRCHandler {
     switch ($message->getCommand()) {
       case '422': // Error - no MOTD
       case '376': // End of MOTD
+        $nickpass = $this->getConfig('nickpass');
+        if ($nickpass) {
+          $this->write('PRIVMSG', "nickserv :IDENTIFY {$nickpass}");
+        }
         $join = $this->getConfig('join');
         if (!$join) {
           throw new Exception("Not configured to join any channels!");

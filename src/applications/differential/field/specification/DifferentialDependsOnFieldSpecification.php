@@ -16,24 +16,39 @@
  * limitations under the License.
  */
 
-final class DifferentialHostFieldSpecification
+final class DifferentialDependsOnFieldSpecification
   extends DifferentialFieldSpecification {
 
   public function shouldAppearOnRevisionView() {
-    return PhabricatorEnv::getEnvConfig('differential.show-host-field');
+    return true;
+  }
+
+  public function getRequiredHandlePHIDsForRevisionView() {
+    return $this->getDependentRevisionPHIDs();
   }
 
   public function renderLabelForRevisionView() {
-    return 'Host:';
+    return 'Depends On:';
   }
 
   public function renderValueForRevisionView() {
-    $diff = $this->getManualDiff();
-    $host = $diff->getSourceMachine();
-    if (!$host) {
+    $revision_phids = $this->getDependentRevisionPHIDs();
+    if (!$revision_phids) {
       return null;
     }
-    return phutil_escape_html($host);
+
+    $links = array();
+    foreach ($revision_phids as $revision_phids) {
+      $links[] = $this->getHandle($revision_phids)->renderLink();
+    }
+
+    return implode('<br />', $links);
+  }
+
+  private function getDependentRevisionPHIDs() {
+    return PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $this->getRevision()->getPHID(),
+      PhabricatorEdgeConfig::TYPE_DREV_DEPENDS_ON_DREV);
   }
 
 }

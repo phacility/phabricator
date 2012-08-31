@@ -27,6 +27,7 @@ final class PhabricatorUserLog extends PhabricatorUserDAO {
   const ACTION_EDIT           = 'edit';
 
   const ACTION_ADMIN          = 'admin';
+  const ACTION_SYSTEM_AGENT   = 'system-agent';
   const ACTION_DISABLE        = 'disable';
   const ACTION_DELETE         = 'delete';
 

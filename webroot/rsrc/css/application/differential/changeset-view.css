@@ -149,23 +149,37 @@ td.cov-X {
 }
 
 .differential-diff td.show-more,
+.differential-diff th.show-context-line,
+.differential-diff td.show-context,
 .differential-diff td.differential-shield {
   background: #ffffee;
   padding: 1em;
-  text-align: center;
+  border: 1px solid #ccccaa;
+}
+
+.differential-diff td.show-more,
+.differential-diff td.differential-shield {
   font-family: "Verdana";
   font-size:   11px;
-  border: 1px solid #ccccaa;
   white-space: normal;
 }
 
 .differential-diff td.show-more {
+  text-align: center;
   color:  #999966;
 }
 
+.differential-diff th.show-context-line {
+  padding-right: 6px;
+}
+
+.differential-diff td.show-context {
+  padding-left: 14px; /* td.copy + .differential-diff td */
+}
+
 .differential-diff td.differential-shield {
-  text-align: center;
   max-width: 1160px;
+  text-align: center;
 }
 
 .differential-diff td.differential-shield a {

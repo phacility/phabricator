@@ -32,6 +32,7 @@ final class DifferentialDefaultFieldSelector
       new DifferentialLintFieldSpecification(),
       new DifferentialUnitFieldSpecification(),
       new DifferentialCommitsFieldSpecification(),
+      new DifferentialDependsOnFieldSpecification(),
       new DifferentialDependenciesFieldSpecification(),
       new DifferentialManiphestTasksFieldSpecification(),
       new DifferentialHostFieldSpecification(),

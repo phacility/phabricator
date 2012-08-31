@@ -28,7 +28,7 @@ final class DifferentialPathFieldSpecification
   }
 
   public function renderValueForRevisionView() {
-    $diff = $this->getDiff();
+    $diff = $this->getManualDiff();
 
     $path = $diff->getSourcePath();
     if (!$path) {
