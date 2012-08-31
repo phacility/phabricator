@@ -214,6 +214,9 @@ final class AphrontSideNavView extends AphrontView {
       array_unshift($core, $current);
     }
 
+    Javelin::initBehavior('phabricator-tooltips', array());
+    require_celerity_resource('aphront-tooltip-css');
+
     $apps = array();
     foreach ($core as $phid => $application) {
       $classes = array();
@@ -241,11 +244,16 @@ final class AphrontSideNavView extends AphrontView {
         ),
         '');
 
-      $apps[] = phutil_render_tag(
+      $apps[] = javelin_render_tag(
         'a',
         array(
           'class' => implode(' ', $classes),
           'href' => $application->getBaseURI(),
+          'sigil' => 'has-tooltip',
+          'meta' => array(
+            'tip' => $application->getName(),
+            'align' => 'E',
+          ),
         ),
         $icon.
         phutil_escape_html($application->getName()));

@@ -9,11 +9,13 @@
 
 .jx-tooltip {
   background: #222222;
-  color: #e8e8e8;
-  font-size: 11px;
-  padding: 4px;
+  color: #f9f9f9;
+  padding: 6px 8px;
   overflow: hidden;
   white-space: pre-wrap;
+  opacity: 0.9;
+
+  box-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
 }
 
 .jx-tooltip-align-E {

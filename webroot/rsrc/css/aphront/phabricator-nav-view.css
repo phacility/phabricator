@@ -130,6 +130,15 @@ a.phabricator-nav-app-item {
   position: relative;
 }
 
+/**
+ * On the desktop, constrain the size of the <a /> so that the tooltip is
+ * positioned correctly. Without this rule, it ends up too far to the right.
+ */
+.device-desktop a.phabricator-nav-app-item {
+  padding-left: 38px;
+  padding-right: 0px;
+}
+
 a.phabricator-nav-app-item-selected {
   background-color: #55595d;
 }
