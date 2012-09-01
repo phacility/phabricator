@@ -146,7 +146,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
             'csprintf',
             array_merge(
               array(
-                "(ssh-add %s && git {$pattern})",
+                "(ssh-add %s && unset GIT_DIR && git {$pattern})",
                 $this->getSSHKeyfile(),
               ),
               $args));
@@ -235,7 +235,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
         array_unshift($args, $this->getLocalPath());
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        $pattern = "(cd %s && git {$pattern})";
+        $pattern = "(cd %s && unset GIT_DIR && git {$pattern})";
         array_unshift($args, $this->getLocalPath());
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:

@@ -260,7 +260,7 @@ final class PhabricatorSetup {
       self::write(" skip  Not a git clone.\n\n");
     } else {
       list($info) = execx(
-        '(cd %s && git submodule status)',
+        '(cd %s && unset GIT_DIR && git submodule status)',
         $root);
       foreach (explode("\n", rtrim($info)) as $line) {
         $matches = null;
@@ -283,7 +283,7 @@ final class PhabricatorSetup {
             self::write(
               "Setup failure! Git submodule '{$module}' is not up to date. ".
               "Run:\n\n".
-              "  cd {$root} && git submodule update --init\n\n".
+              "  cd {$root} && unset GIT_DIR && git submodule update --init\n\n".
               "...to update submodules.");
             return;
           case ' ':
