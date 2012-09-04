@@ -327,4 +327,14 @@ final class AphrontRequest {
     return $_SERVER['REMOTE_ADDR'];
   }
 
+  public function isHTTPS() {
+    if (empty($_SERVER['HTTPS'])) {
+      return false;
+    }
+    if (!strcasecmp($_SERVER["HTTPS"], "off")) {
+      return false;
+    }
+    return true;
+  }
+
 }
