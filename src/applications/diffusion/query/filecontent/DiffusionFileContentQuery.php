@@ -20,6 +20,7 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
 
   private $needsBlame;
   private $fileContent;
+  private $viewer;
 
   final public static function newFromDiffusionRequest(
     DiffusionRequest $request) {
@@ -99,8 +100,11 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
         $phids[] = $data->getCommitDetail('authorPHID');
       }
 
-      $handles = id(new PhabricatorObjectHandleData(array_unique($phids)))
-        ->loadHandles();
+      $loader = new PhabricatorObjectHandleData(array_unique($phids));
+      if ($this->viewer) {
+        $loader->setViewer($this->viewer);
+      }
+      $handles = $loader->loadHandles();
 
       foreach ($commits_data as $data) {
         if ($data->getCommitDetail('authorPHID')) {
@@ -124,6 +128,11 @@ abstract class DiffusionFileContentQuery extends DiffusionQuery {
 
   public function getNeedsBlame() {
     return $this->needsBlame;
+  }
+
+  public function setViewer(PhabricatorUser $user) {
+    $this->viewer = $user;
+    return $this;
   }
 
   protected function processRevList(array $rev_list) {
