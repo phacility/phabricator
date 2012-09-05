@@ -97,11 +97,11 @@ abstract class PhabricatorRepositoryCommitMessageDetailParser {
   private function findUserByRealName($real_name) {
     // Note, real names are not guaranteed unique, which is why we do it this
     // way.
-    $by_realname = id(new PhabricatorUser())->loadOneWhere(
-      'realName = %s LIMIT 1',
+    $by_realname = id(new PhabricatorUser())->loadAllWhere(
+      'realName = %s',
       $real_name);
-    if ($by_realname) {
-      return $by_realname->getPHID();
+    if (count($by_realname) == 1) {
+      return reset($by_realname)->getPHID();
     }
     return null;
   }
