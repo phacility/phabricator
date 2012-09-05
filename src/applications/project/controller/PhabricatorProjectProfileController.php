@@ -149,8 +149,7 @@ final class PhabricatorProjectProfileController
 
     $phids = array($project->getAuthorPHID());
     $phids = array_unique($phids);
-    $handles = id(new PhabricatorObjectHandleData($phids))
-      ->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $timestamp = phabricator_datetime($project->getDateCreated(), $viewer);
 
@@ -187,8 +186,7 @@ final class PhabricatorProjectProfileController
     PhabricatorProjectProfile $profile) {
 
     $member_phids = $project->getMemberPHIDs();
-    $handles = id(new PhabricatorObjectHandleData($member_phids))
-      ->loadHandles();
+    $handles = $this->loadViewerHandles($member_phids);
 
     $affiliated = array();
     foreach ($handles as $phids => $handle) {
@@ -259,8 +257,7 @@ final class PhabricatorProjectProfileController
 
     $phids = mpull($tasks, 'getOwnerPHID');
     $phids = array_filter($phids);
-    $handles = id(new PhabricatorObjectHandleData($phids))
-      ->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $task_views = array();
     foreach ($tasks as $task) {

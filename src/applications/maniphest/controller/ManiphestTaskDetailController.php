@@ -105,8 +105,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $phids = array_keys($phids);
 
-    $handles = id(new PhabricatorObjectHandleData($phids))
-      ->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $dict = array();
     $dict['Status'] =

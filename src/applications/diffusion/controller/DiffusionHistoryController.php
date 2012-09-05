@@ -84,7 +84,7 @@ final class DiffusionHistoryController extends DiffusionController {
     $history_table->loadRevisions();
 
     $phids = $history_table->getRequiredHandlePHIDs();
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
     $history_table->setHandles($handles);
 
     if ($show_graph) {

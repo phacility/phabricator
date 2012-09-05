@@ -361,8 +361,7 @@ final class DiffusionCommitController extends DiffusionController {
 
     $handles = array();
     if ($phids) {
-      $handles = id(new PhabricatorObjectHandleData($phids))
-        ->loadHandles();
+      $handles = $this->loadViewerHandles($phids);
     }
 
     $props = array();
@@ -469,7 +468,7 @@ final class DiffusionCommitController extends DiffusionController {
     $view->setShowDescriptions(false);
 
     $phids = $view->getRequiredHandlePHIDs();
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
     $view->setAuthorityPHIDs($this->auditAuthorityPHIDs);
     $this->highlightedAudits = $view->getHighlightedAudits();
@@ -509,7 +508,7 @@ final class DiffusionCommitController extends DiffusionController {
     $view->setPathMap($path_map);
 
     $phids = $view->getRequiredHandlePHIDs();
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
     return $view;
@@ -757,7 +756,7 @@ final class DiffusionCommitController extends DiffusionController {
     $history_table->loadRevisions();
 
     $phids = $history_table->getRequiredHandlePHIDs();
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
     $history_table->setHandles($handles);
 
     $panel = new AphrontPanelView();

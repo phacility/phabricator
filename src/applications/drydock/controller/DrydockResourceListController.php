@@ -34,7 +34,7 @@ final class DrydockResourceListController extends DrydockController {
     $data = $pager->sliceResults($data);
 
     $phids = mpull($data, 'getOwnerPHID');
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $rows = array();
     foreach ($data as $resource) {

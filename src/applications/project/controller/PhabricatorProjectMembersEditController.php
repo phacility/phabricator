@@ -87,8 +87,7 @@ final class PhabricatorProjectMembersEditController
     }
 
     $member_phids = array_reverse($member_phids);
-    $handles = id(new PhabricatorObjectHandleData($member_phids))
-      ->loadHandles();
+    $handles = $this->loadViewerHandles($member_phids);
 
     $state = array();
     foreach ($handles as $handle) {

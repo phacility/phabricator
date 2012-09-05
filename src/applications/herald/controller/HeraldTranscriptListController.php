@@ -63,8 +63,7 @@ final class HeraldTranscriptListController extends HeraldController {
     $handles = array();
     if ($data) {
       $phids = ipull($data, 'objectPHID', 'objectPHID');
-      $handles = id(new PhabricatorObjectHandleData($phids))
-        ->loadHandles();
+      $handles = $this->loadViewerHandles($phids);
     }
 
     $rows = array();

@@ -64,8 +64,7 @@ final class PhabricatorSearchSelectController
     $phids += $this->queryObjectNames($query_str);
 
     $phids = array_keys($phids);
-    $handles = id(new PhabricatorObjectHandleData($phids))
-      ->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $data = array();
     foreach ($handles as $handle) {

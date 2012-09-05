@@ -170,7 +170,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
 
       if ($need_rich_data) {
         $phids = mpull($users, 'getPHID');
-        $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+        $handles = $this->loadViewerHandles($phids);
       }
 
       foreach ($users as $user) {

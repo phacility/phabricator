@@ -203,8 +203,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
     }
     $phids = array_keys($phids);
 
-    $handles = id(new PhabricatorObjectHandleData($phids))
-      ->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
     $parser->setHandles($handles);
 
     $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();

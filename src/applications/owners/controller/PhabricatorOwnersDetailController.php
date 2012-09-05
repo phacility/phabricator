@@ -59,7 +59,7 @@ final class PhabricatorOwnersDetailController
     }
     $phids = array_keys($phids);
 
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $rows = array();
 
@@ -214,7 +214,7 @@ final class PhabricatorOwnersDetailController
       $phids[] = $commit_view['view']->getRequiredHandlePHIDs();
     }
     $phids = array_mergev($phids);
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $commit_panels = array();
     foreach ($commit_views as $commit_view) {

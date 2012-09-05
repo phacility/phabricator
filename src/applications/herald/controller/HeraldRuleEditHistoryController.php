@@ -39,8 +39,7 @@ final class HeraldRuleEditHistoryController extends HeraldController {
     $edits = $edit_query->executeWithOffsetPager($pager);
 
     $need_phids = mpull($edits, 'getEditorPHID');
-    $handles = id(new PhabricatorObjectHandleData($need_phids))
-      ->loadHandles();
+    $handles = $this->loadViewerHandles($need_phids);
 
     $list_view = id(new HeraldRuleEditHistoryView())
       ->setEdits($edits)

@@ -67,7 +67,7 @@ abstract class PhamePostListBaseController
     $blogger_phids = mpull($posts, 'getBloggerPHID', 'getBloggerPHID');
 
     return
-      id(new PhabricatorObjectHandleData($blogger_phids))->loadHandles();
+      $this->loadViewerHandles($blogger_phids);
   }
 
   protected function buildPostListPageResponse() {

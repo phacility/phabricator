@@ -103,7 +103,7 @@ final class PhabricatorSearchIndexController
     $relationships = $document->getRelationshipData();
 
     $phids = ipull($relationships, 1);
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $rows = array();
     foreach ($relationships as $relationship) {

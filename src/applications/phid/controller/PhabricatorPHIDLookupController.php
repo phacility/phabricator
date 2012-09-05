@@ -24,8 +24,7 @@ final class PhabricatorPHIDLookupController
     $request = $this->getRequest();
     $phids = $request->getStrList('phids');
     if ($phids) {
-      $handles = id(new PhabricatorObjectHandleData($phids))
-        ->loadHandles();
+      $handles = $this->loadViewerHandles($phids);
 
       $rows = array();
       foreach ($handles as $handle) {

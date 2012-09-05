@@ -141,7 +141,7 @@ abstract class DiffusionController extends PhabricatorController {
       ->loadAssets();
 
     $phids = $view->getRequiredHandlePHIDs();
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
     $panel = new AphrontPanelView();

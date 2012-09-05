@@ -96,8 +96,7 @@ final class HeraldHomeController extends HeraldController {
     $rules = $query->executeWithOffsetPager($pager);
 
     $need_phids = mpull($rules, 'getAuthorPHID');
-    $handles = id(new PhabricatorObjectHandleData($need_phids))
-      ->loadHandles();
+    $handles = $this->loadViewerHandles($need_phids);
 
     $list_view = id(new HeraldRuleListView())
       ->setRules($rules)

@@ -64,7 +64,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     }
 
     $phids = array_keys($phids);
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $history_table = new DiffusionHistoryTableView();
     $history_table->setDiffusionRequest($drequest);
@@ -240,7 +240,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $view->setCommits($commits);
 
     $phids = $view->getRequiredHandlePHIDs();
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
     $panel = new AphrontPanelView();

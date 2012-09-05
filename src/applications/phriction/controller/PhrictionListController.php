@@ -65,7 +65,7 @@ final class PhrictionListController
     $content = mpull($documents, 'getContent');
     $phids = mpull($content, 'getAuthorPHID');
 
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
 
     $rows = array();

@@ -125,7 +125,7 @@ final class PhrictionDocumentController
           $content->getAuthorPHID(),
           $project_phid,
         ));
-      $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+      $handles = $this->loadViewerHandles($phids);
 
       $age = time() - $content->getDateCreated();
       $age = floor($age / (60 * 60 * 24));
@@ -234,8 +234,7 @@ final class PhrictionDocumentController
       $ancestor_phids = mpull($ancestors, 'getPHID');
       $handles = array();
       if ($ancestor_phids) {
-        $handles = id(new PhabricatorObjectHandleData($ancestor_phids))
-          ->loadHandles();
+        $handles = $this->loadViewerHandles($ancestor_phids);
       }
 
       $ancestor_handles = array();
@@ -352,6 +351,8 @@ final class PhrictionDocumentController
         );
       }
     }
+
+    $children = isort($children, 'title');
 
     $list = array();
     $list[] = '<ul>';

@@ -32,8 +32,7 @@ final class PonderAnswerPreviewController
 
     $author_phid = $user->getPHID();
     $object_phids = array($author_phid);
-    $handles = id(new PhabricatorObjectHandleData($object_phids))
-      ->loadHandles();
+    $handles = $this->loadViewerHandles($object_phids);
 
     $answer = new PonderAnswer();
     $answer->setContent($request->getStr('content'));

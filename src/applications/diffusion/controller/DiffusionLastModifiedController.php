@@ -37,7 +37,7 @@ final class DiffusionLastModifiedController extends DiffusionController {
     }
 
     $phids = array_keys($phids);
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $output = DiffusionBrowseTableView::renderLastModifiedColumns(
       $drequest->getRepository(),

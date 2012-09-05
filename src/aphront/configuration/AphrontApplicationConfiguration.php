@@ -119,6 +119,15 @@ abstract class AphrontApplicationConfiguration {
     $request = $this->getRequest();
     $path = $request->getPath();
 
+    if (PhabricatorEnv::getEnvConfig('security.require-https')) {
+      if (!$request->isHTTPS()) {
+        $uri = $request->getRequestURI();
+        $uri->setDomain($request->getHost());
+        $uri->setProtocol('https');
+        return $this->buildRedirectController($uri);
+      }
+    }
+
     list($controller, $uri_data) = $this->buildControllerForPath($path);
     if (!$controller) {
       if (!preg_match('@/$@', $path)) {

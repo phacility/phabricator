@@ -238,7 +238,7 @@ final class PhrictionDiffController
     $user = $this->getRequest()->getUser();
 
     $phids = mpull($content, 'getAuthorPHID');
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $rows = array();
     foreach ($content as $c) {

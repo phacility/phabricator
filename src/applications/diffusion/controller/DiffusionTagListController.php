@@ -72,7 +72,7 @@ final class DiffusionTagListController extends DiffusionController {
         ->setDiffusionRequest($drequest);
 
       $phids = $view->getRequiredHandlePHIDs();
-      $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+      $handles = $this->loadViewerHandles($phids);
       $view->setHandles($handles);
 
       $panel = id(new AphrontPanelView())

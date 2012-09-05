@@ -92,7 +92,7 @@ final class ManiphestReportController extends ManiphestController {
     $project_phid = $request->getStr('project');
     if ($project_phid) {
       $phids = array($project_phid);
-      $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+      $handles = $this->loadViewerHandles($phids);
       $handle = $handles[$project_phid];
     }
 
@@ -403,7 +403,7 @@ final class ManiphestReportController extends ManiphestController {
     $project_handle = null;
     if ($project_phid) {
       $phids = array($project_phid);
-      $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+      $handles = $this->loadViewerHandles($phids);
       $project_handle = $handles[$project_phid];
 
       $query->withProjects($phids);
@@ -475,7 +475,7 @@ final class ManiphestReportController extends ManiphestController {
     }
 
     $phids = array_keys($result);
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
     $handles = msort($handles, 'getName');
 
     $order = $request->getStr('order', 'name');

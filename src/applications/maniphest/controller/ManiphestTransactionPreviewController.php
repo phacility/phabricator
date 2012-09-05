@@ -113,8 +113,7 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
     }
     $phids[] = $user->getPHID();
 
-    $handles = id(new PhabricatorObjectHandleData($phids))
-      ->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $transactions   = array();
     $transactions[] = $transaction;

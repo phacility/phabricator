@@ -40,7 +40,7 @@ final class PhabricatorMetaMTAReceivedListController
     );
     $phids = array_unique(array_filter($phids));
 
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $rows = array();
     foreach ($mails as $mail) {

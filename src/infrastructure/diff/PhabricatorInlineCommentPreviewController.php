@@ -30,8 +30,7 @@ abstract class PhabricatorInlineCommentPreviewController
     $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
 
     $phids = array($user->getPHID());
-    $handles = id(new PhabricatorObjectHandleData($phids))
-      ->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $views = array();
     foreach ($inlines as $inline) {

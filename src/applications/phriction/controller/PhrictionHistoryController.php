@@ -55,8 +55,7 @@ final class PhrictionHistoryController
     $history = $pager->sliceResults($history);
 
     $author_phids = mpull($history, 'getAuthorPHID');
-    $handles = id(new PhabricatorObjectHandleData($author_phids))
-      ->loadHandles();
+    $handles = $this->loadViewerHandles($author_phids);
 
     $rows = array();
     foreach ($history as $content) {

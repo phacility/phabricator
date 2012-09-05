@@ -52,6 +52,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
     $file_query = DiffusionFileContentQuery::newFromDiffusionRequest(
       $this->diffusionRequest);
+    $file_query->setViewer($request->getUser());
     $file_query->setNeedsBlame($needs_blame);
     $file_query->loadFileContent();
     $data = $file_query->getRawData();

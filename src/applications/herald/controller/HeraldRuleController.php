@@ -474,7 +474,7 @@ final class HeraldRuleController extends HeraldController {
 
     $phids[] = $rule->getAuthorPHID();
 
-    return id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    return $this->loadViewerHandles($phids);
   }
 
 

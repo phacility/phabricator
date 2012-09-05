@@ -54,7 +54,7 @@ final class PhabricatorAuditAddCommentController
       ->addCCs($ccs)
       ->addComment($comment);
 
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
     $uri = $handles[$commit_phid]->getURI();
 
     $draft = id(new PhabricatorDraft())->loadOneWhere(

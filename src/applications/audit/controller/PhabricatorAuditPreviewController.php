@@ -68,7 +68,7 @@ final class PhabricatorAuditPreviewController
 
     $phids = array_merge($phids, $view->getRequiredHandlePHIDs());
 
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
     id(new PhabricatorDraft())

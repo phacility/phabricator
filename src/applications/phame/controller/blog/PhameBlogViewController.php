@@ -84,8 +84,7 @@ final class PhameBlogViewController
 
     $blogger_phids = $this->getBloggerPHIDs();
     if ($blogger_phids) {
-      $bloggers = id(new PhabricatorObjectHandleData($blogger_phids))
-        ->loadHandles();
+      $bloggers = $this->loadViewerHandles($blogger_phids);
     } else {
       $bloggers = array();
     }
