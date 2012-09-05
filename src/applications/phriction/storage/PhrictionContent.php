@@ -39,10 +39,11 @@ final class PhrictionContent extends PhrictionDAO
   protected $changeType;
   protected $changeRef;
 
-  public function renderContent() {
+  public function renderContent(PhabricatorUser $viewer) {
     return PhabricatorMarkupEngine::renderOneObject(
       $this,
-      self::MARKUP_FIELD_BODY);
+      self::MARKUP_FIELD_BODY,
+      $viewer);
   }
 
 

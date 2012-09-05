@@ -42,9 +42,7 @@ final class PhrictionDocumentPreviewController
 
     $content_obj = new PhrictionContent();
     $content_obj->setContent($document);
-
-    $engine = PhabricatorMarkupEngine::newPhrictionMarkupEngine();
-    $content = $content_obj->renderContent();
+    $content = $content_obj->renderContent($request->getUser());
 
     return id(new AphrontAjaxResponse())->setContent($content);
   }

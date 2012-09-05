@@ -158,7 +158,7 @@ final class PhrictionDocumentController
 
       $doc_status = $document->getStatus();
       if ($doc_status == PhrictionDocumentStatus::STATUS_EXISTS) {
-        $core_content = $content->renderContent();
+        $core_content = $content->renderContent($user);
       } else if ($doc_status == PhrictionDocumentStatus::STATUS_DELETED) {
         $notice = new AphrontErrorView();
         $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);

@@ -75,7 +75,8 @@ final class PonderCommentBodyView extends AphrontView {
 
     $content = PhabricatorMarkupEngine::renderOneObject(
       $target,
-      $target->getMarkupField());
+      $target->getMarkupField(),
+      $this->user);
 
     $content =
       '<div class="phabricator-remarkup">'.

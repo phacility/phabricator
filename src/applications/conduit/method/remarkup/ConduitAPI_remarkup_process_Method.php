@@ -57,6 +57,7 @@ final class ConduitAPI_remarkup_process_Method extends ConduitAPIMethod {
     }
 
     $engine = PhabricatorMarkupEngine::$engine_class();
+    $engine->setConfig('viewer', $request->getUser());
 
     $result = array(
       'content' => $engine->markupText($content),
