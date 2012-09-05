@@ -31,6 +31,7 @@ final class ConduitAPI_differential_updateunitresults_Method
       'diff_id'   => 'required diff_id',
       'file'      => 'required string',
       'name'      => 'required string',
+      'link'      => 'optional string',
       'result'    => 'required string',
       'message'   => 'required string',
       'coverage'  => 'optional map<string, string>',
@@ -57,6 +58,7 @@ final class ConduitAPI_differential_updateunitresults_Method
 
     $file = $request->getValue('file');
     $name = $request->getValue('name');
+    $link = $request->getValue('link');
     $message = $request->getValue('message');
     $result = $request->getValue('result');
     $coverage = $request->getValue('coverage', array());
@@ -83,6 +85,7 @@ final class ConduitAPI_differential_updateunitresults_Method
           $unit_result['name'] === $file ||
           $unit_result['name'] === $diff->getSourcePath().$file) {
         $unit_result['name'] = $name;
+        $unit_result['link'] = $link;
         $unit_result['file'] = $file;
         $unit_result['result'] = $result;
         $unit_result['userdata'] = $message;
@@ -98,6 +101,7 @@ final class ConduitAPI_differential_updateunitresults_Method
       $unit_result = array();
       $unit_result['file'] = $file;
       $unit_result['name'] = $name;
+      $unit_result['link'] = $link;
       $unit_result['result'] = $result;
       $unit_result['userdata'] = $message;
       $unit_result['coverage'] = $coverage;
