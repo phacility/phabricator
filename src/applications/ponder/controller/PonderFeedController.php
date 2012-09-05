@@ -22,31 +22,13 @@ final class PonderFeedController extends PonderController {
   private $questionOffset;
   private $answerOffset;
 
-  const PAGE_FEED = "feed";
-  const PAGE_PROFILE = "profile";
-
   const FEED_PAGE_SIZE = 20;
   const PROFILE_QUESTION_PAGE_SIZE = 10;
   const PROFILE_ANSWER_PAGE_SIZE = 10;
 
-  static $pages = array(
-    self::PAGE_FEED => "Popular Questions",
-    self::PAGE_PROFILE => "User Profile"
-  );
-
   public function willProcessRequest(array $data) {
-    if (isset($data['page'])) {
-      $this->page = $data['page'];
-    }
-
-    if (!isset(self::$pages[$this->page])) {
-      $this->page = self::PAGE_FEED;
-    }
-
-    $this->feedOffset = 0;
-    if (isset($data['feedoffset'])) {
-      $this->feedOffset = $data['feedoffset'];
-    }
+    $this->page = idx($data, 'page');
+    $this->feedOffset = idx($data, 'feedoffset');
   }
 
   public function processRequest() {
@@ -56,27 +38,21 @@ final class PonderFeedController extends PonderController {
     $this->questionOffset = $request->getInt('qoff');
     $this->answerOffset = $request->getInt('aoff');
 
-    $side_nav = new AphrontSideNavView();
-    foreach (self::$pages as $pagename => $pagetitle) {
-      $class = "";
-      if ($pagename == $this->page) {
-        $class = 'aphront-side-nav-selected';
-      }
+    $pages = array(
+      'feed'    => 'Popular Questions',
+      'profile' => 'User Profile',
+    );
 
-      $linky = phutil_render_tag(
-        'a',
-        array(
-          'href' => '/ponder/'.$pagename .'/',
-          'class' => $class
-        ),
-        phutil_escape_html($pagetitle)
-      );
-
-      $side_nav->addNavItem($linky);
+    $side_nav = new AphrontSideNavFilterView();
+    $side_nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
+    foreach ($pages as $name => $title) {
+      $side_nav->addFilter($name, $title);
     }
 
+    $this->page = $side_nav->selectFilter($this->page, 'feed');
+
     switch ($this->page) {
-      case self::PAGE_FEED:
+      case 'feed':
         $data = PonderQuestionQuery::loadHottest(
           $user,
           $this->feedOffset,
@@ -98,7 +74,7 @@ final class PonderFeedController extends PonderController {
           ->setURI(new PhutilURI("/ponder/feed/"), "off")
         );
         break;
-      case self::PAGE_PROFILE:
+      case 'profile':
         $questions = PonderQuestionQuery::loadByAuthor(
           $user,
           $user->getPHID(),
@@ -134,7 +110,7 @@ final class PonderFeedController extends PonderController {
     return $this->buildStandardPageResponse(
       $side_nav,
       array(
-        'title' => self::$pages[$this->page]
+        'title' => $pages[$this->page]
       ));
   }
 
