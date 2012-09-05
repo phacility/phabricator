@@ -228,7 +228,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     }
 
     $phids = array($phid);
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
     $handle = $handles[$phid];
 
     $this->validateHandle($handle);
@@ -393,7 +393,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     $view->setNoDataString($nodata);
 
     $phids = $view->getRequiredHandlePHIDs();
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
     $panel = new AphrontPanelView();
@@ -485,7 +485,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
     $view->setNoDataString($nodata);
 
     $phids = $view->getRequiredHandlePHIDs();
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
     $panel = new AphrontPanelView();

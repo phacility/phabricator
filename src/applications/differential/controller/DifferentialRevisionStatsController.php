@@ -125,8 +125,7 @@ final class DifferentialRevisionStatsController extends DifferentialController {
                               DifferentialAction::ACTION_CLOSE);
 
     $panels = array();
-    $handles = id(new PhabricatorObjectHandleData(array($params['phid'])))
-                  ->loadHandles();
+    $handles = $this->loadViewerHandles(array($params['phid']));
 
     $filter_form = id(new AphrontFormView())
       ->setAction('/differential/stats/'.$this->filter.'/')

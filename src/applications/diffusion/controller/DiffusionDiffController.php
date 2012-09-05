@@ -94,7 +94,7 @@ final class DiffusionDiffController extends DiffusionController {
       }
 
       $phids = mpull($inlines, 'getAuthorPHID');
-      $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+      $handles = $this->loadViewerHandles($phids);
       $parser->setHandles($handles);
     }
 

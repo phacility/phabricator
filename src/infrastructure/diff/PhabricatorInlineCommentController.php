@@ -226,8 +226,7 @@ abstract class PhabricatorInlineCommentController
 
     $phids = array($user->getPHID());
 
-    $handles = id(new PhabricatorObjectHandleData($phids))
-      ->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $view = new DifferentialInlineCommentView();
     $view->setInlineComment($inline);

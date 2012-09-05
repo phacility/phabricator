@@ -209,7 +209,7 @@ final class PhabricatorFileListController extends PhabricatorFileController {
     $this->setListPager($pager);
 
     $phids = mpull($files, 'getAuthorPHID');
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $highlighted = $request->getStr('h');
     $highlighted = explode('-', $highlighted);

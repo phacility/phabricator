@@ -43,7 +43,7 @@ final class PhabricatorCalendarBrowseController
     $month_view->setHolidays($holidays);
 
     $phids = mpull($statuses, 'getUserPHID');
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     foreach ($statuses as $status) {
       $event = new AphrontCalendarEventView();

@@ -56,7 +56,7 @@ final class PhabricatorSlowvoteListController
     $polls = $this->loadPolls($pager, $view);
 
     $phids = mpull($polls, 'getAuthorPHID');
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $rows = array();
     foreach ($polls as $poll) {

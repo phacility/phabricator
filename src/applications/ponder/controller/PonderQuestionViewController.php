@@ -41,8 +41,7 @@ final class PonderQuestionViewController extends PonderController {
       $object_phids[] = $answer->getAuthorPHID();
     }
 
-    $handles = id(new PhabricatorObjectHandleData($object_phids))
-      ->loadHandles();
+    $handles = $this->loadViewerHandles($object_phids);
 
     $detail_panel = new PonderQuestionDetailView();
     $detail_panel

@@ -109,8 +109,7 @@ final class PhabricatorSearchAttachController
 
     $strings = $this->getStrings();
 
-    $handles = id(new PhabricatorObjectHandleData($phids))
-      ->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $obj_dialog = new PhabricatorObjectSelectorDialog();
     $obj_dialog
@@ -279,8 +278,7 @@ final class PhabricatorSearchAttachController
   private function raiseGraphCycleException(PhabricatorEdgeCycleException $ex) {
     $cycle = $ex->getCycle();
 
-    $handles = id(new PhabricatorObjectHandleData($cycle))
-      ->loadHandles();
+    $handles = $this->loadViewerHandles($cycle);
     $names = array();
     foreach ($cycle as $cycle_phid) {
       $names[] = $handles[$cycle_phid]->getFullName();

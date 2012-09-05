@@ -29,8 +29,7 @@ final class PonderQuestionPreviewController
     $author_phid = $user->getPHID();
 
     $object_phids = array($author_phid);
-    $handles = id(new PhabricatorObjectHandleData($object_phids))
-      ->loadHandles();
+    $handles = $this->loadViewerHandles($object_phids);
 
     $question = new PonderQuestion();
     $question->setContent($request->getStr('content'));

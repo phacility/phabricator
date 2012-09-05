@@ -92,8 +92,7 @@ final class DifferentialRevisionEditController extends DifferentialController {
     }
     $phids = array_mergev($aux_phids);
     $phids = array_unique($phids);
-    $handles = id(new PhabricatorObjectHandleData($phids))
-      ->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
     foreach ($aux_fields as $key => $aux_field) {
       $aux_field->setHandles(array_select_keys($handles, $aux_phids[$key]));
     }

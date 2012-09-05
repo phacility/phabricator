@@ -49,8 +49,7 @@ final class PhabricatorMetaMTAReceiveController
       $received->processReceivedMail();
 
       $phid = $receiver->getPHID();
-      $handles = id(new PhabricatorObjectHandleData(array($phid)))
-        ->loadHandles();
+      $handles = $this->loadViewerHandles(array($phid));
       $uri = $handles[$phid]->getURI();
 
       return id(new AphrontRedirectResponse())->setURI($uri);

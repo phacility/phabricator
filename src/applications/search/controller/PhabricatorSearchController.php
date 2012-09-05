@@ -128,8 +128,7 @@ final class PhabricatorSearchController
       $query->getParameter('project', array())
     );
 
-    $handles = id(new PhabricatorObjectHandleData($phids))
-      ->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $author_value = array_select_keys(
       $handles,

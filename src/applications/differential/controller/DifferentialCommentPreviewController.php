@@ -59,9 +59,7 @@ final class DifferentialCommentPreviewController
       $handles = array_merge($handles, $ccs);
     }
 
-    $handles = id(new PhabricatorObjectHandleData($handles))
-      ->setViewer($request->getUser())
-      ->loadHandles();
+    $handles = $this->loadViewerHandles($handles);
 
     $view = new DifferentialRevisionCommentView();
     $view->setUser($request->getUser());

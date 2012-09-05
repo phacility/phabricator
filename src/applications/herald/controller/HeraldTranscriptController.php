@@ -61,8 +61,7 @@ final class HeraldTranscriptController extends HeraldController {
       $phids = array_unique($phids);
       $phids = array_filter($phids);
 
-      $handles = id(new PhabricatorObjectHandleData($phids))
-        ->loadHandles();
+      $handles = $this->loadViewerHandles($phids);
       $this->handles = $handles;
 
       if ($xscript->getDryRun()) {
@@ -473,8 +472,7 @@ final class HeraldTranscriptController extends HeraldController {
     $data = array();
     if ($object_xscript) {
       $phid = $object_xscript->getPHID();
-      $handles = id(new PhabricatorObjectHandleData(array($phid)))
-        ->loadHandles();
+      $handles = $this->loadViewerHandles(array($phid));
 
       $data += array(
         'Object Name' => $object_xscript->getName(),

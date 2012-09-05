@@ -36,7 +36,7 @@ final class PhabricatorCountdownListController
     $timers = $pager->sliceResults($timers);
 
     $phids = mpull($timers, 'getAuthorPHID');
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $rows = array();
     foreach ($timers as $timer) {

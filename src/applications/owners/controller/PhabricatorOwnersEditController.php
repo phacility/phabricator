@@ -129,8 +129,7 @@ final class PhabricatorOwnersEditController
       $error_view->setErrors($errors);
     }
 
-    $handles = id(new PhabricatorObjectHandleData($owners))
-      ->loadHandles();
+    $handles = $this->loadViewerHandles($owners);
 
     $primary = $package->getPrimaryOwnerPHID();
     if ($primary && isset($handles[$primary])) {

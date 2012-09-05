@@ -217,10 +217,14 @@ abstract class PhabricatorController extends AphrontController {
 
   protected function loadHandles(array $phids) {
     $phids = array_filter($phids);
-    $this->handles = id(new PhabricatorObjectHandleData($phids))
+    $this->handles = $this->loadViewerHandles($phids);
+    return $this;
+  }
+
+  protected function loadViewerHandles(array $phids) {
+    return id(new PhabricatorObjectHandleData($phids))
       ->setViewer($this->getRequest()->getUser())
       ->loadHandles();
-    return $this;
   }
 
   protected function renderHandlesForPHIDs(array $phids) {

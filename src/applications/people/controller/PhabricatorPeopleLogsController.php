@@ -39,7 +39,7 @@ final class PhabricatorPeopleLogsController
 
     $phids = array_merge($filter_user, $filter_actor);
     if ($phids) {
-      $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+      $handles = $this->loadViewerHandles($phids);
       if ($filter_user) {
         $filter_user = reset($filter_user);
         $user_value = array(
@@ -165,7 +165,7 @@ final class PhabricatorPeopleLogsController
       $phids[$log->getUserPHID()] = true;
     }
     $phids = array_keys($phids);
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $rows = array();
     foreach ($logs as $log) {

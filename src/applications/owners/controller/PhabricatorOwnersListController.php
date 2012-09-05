@@ -145,8 +145,7 @@ final class PhabricatorOwnersListController
     if ($request->getArr('owner')) {
       $phids = $request->getArr('owner');
       $phid = reset($phids);
-      $handles = id(new PhabricatorObjectHandleData(array($phid)))
-        ->loadHandles();
+      $handles = $this->loadViewerHandles(array($phid));
       $owners_search_value = array(
         $phid => $handles[$phid]->getFullName(),
       );
@@ -222,9 +221,7 @@ final class PhabricatorOwnersListController
         $phids[$owner->getUserPHID()] = true;
       }
       $phids = array_keys($phids);
-      $handles = id(new PhabricatorObjectHandleData($phids))
-        ->setViewer($this->getRequest()->getUser())
-        ->loadHandles();
+      $handles = $this->loadViewerHandles($phids);
 
       $repository_phids = array();
       foreach ($paths as $path) {

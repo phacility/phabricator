@@ -57,8 +57,7 @@ final class PhabricatorFileMacroListController
         "phid IN (%Ls)",
         $file_phids);
       $author_phids = mpull($files, 'getAuthorPHID', 'getPHID');
-      $handles = id(new PhabricatorObjectHandleData($author_phids))
-        ->loadHandles();
+      $handles = $this->loadViewerHandles($author_phids);
     }
     $files_map = mpull($files, null, 'getPHID');
 

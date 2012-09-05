@@ -79,7 +79,7 @@ final class DiffusionBrowseController extends DiffusionController {
       }
 
       $phids = array_keys($phids);
-      $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+      $handles = $this->loadViewerHandles($phids);
 
       $browse_table = new DiffusionBrowseTableView();
       $browse_table->setDiffusionRequest($drequest);

@@ -86,8 +86,7 @@ final class PonderFeedController extends PonderController {
         foreach ($data as $question) {
           $phids[] = $question->getAuthorPHID();
         }
-        $handles = id(new PhabricatorObjectHandleData($phids))
-          ->loadHandles();
+        $handles = $this->loadViewerHandles($phids);
 
         $side_nav->appendChild(
           id(new PonderQuestionFeedView())
@@ -115,8 +114,7 @@ final class PonderFeedController extends PonderController {
         );
 
         $phids = array($user->getPHID());
-        $handles = id(new PhabricatorObjectHandleData($phids))
-          ->loadHandles();
+        $handles = $this->loadViewerHandles($phids);
 
         $side_nav->appendChild(
           id(new PonderUserProfileView())

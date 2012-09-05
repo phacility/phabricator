@@ -61,7 +61,7 @@ final class ManiphestTaskDescriptionChangeController
         $phids[$phid] = $phid;
       }
     }
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $engine = new PhabricatorMarkupEngine();
     $engine->addObject($transaction, ManiphestTransaction::MARKUP_FIELD_BODY);

@@ -90,8 +90,7 @@ final class ManiphestExportController extends ManiphestController {
     $tasks = array_mergev($tasks);
 
     $all_projects = array_mergev(mpull($tasks, 'getProjectPHIDs'));
-    $project_handles = id(new PhabricatorObjectHandleData($all_projects))
-      ->loadHandles();
+    $project_handles = $this->loadViewerHandles($all_projects);
     $handles += $project_handles;
 
     $workbook = new PHPExcel();

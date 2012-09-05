@@ -332,7 +332,7 @@ final class PhabricatorDirectoryMainController
     $phids = array_merge(
       array($user_phid),
       $revision_view->getRequiredHandlePHIDs());
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $revision_view->setHandles($handles);
 
@@ -385,7 +385,7 @@ final class PhabricatorDirectoryMainController
       array_filter(mpull($tasks, 'getOwnerPHID')),
       array_mergev(mpull($tasks, 'getProjectPHIDs')));
 
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
 
     $view = new ManiphestTaskListView();
     $view->setTasks($tasks);
@@ -623,7 +623,7 @@ final class PhabricatorDirectoryMainController
     $view->setUser($user);
 
     $phids = $view->getRequiredHandlePHIDs();
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
     $panel = new AphrontPanelView();
@@ -667,7 +667,7 @@ final class PhabricatorDirectoryMainController
     $view->setUser($user);
 
     $phids = $view->getRequiredHandlePHIDs();
-    $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
+    $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
     $panel = new AphrontPanelView();

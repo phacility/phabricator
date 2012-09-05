@@ -42,8 +42,7 @@ final class DiffusionCommitEditController extends DiffusionController {
       $commit_phid,
       $edge_type
     );
-    $handles = id(new PhabricatorObjectHandleData($current_proj_phids))
-      ->loadHandles();
+    $handles = $this->loadViewerHandles($current_proj_phids);
     $proj_t_values = mpull($handles, 'getFullName', 'getPHID');
 
     if ($request->isFormPost()) {
