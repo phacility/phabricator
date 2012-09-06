@@ -569,6 +569,25 @@ abstract class DifferentialFieldSpecification {
   }
 
 
+  /**
+   * This method allows you to take action when a commit appears in a tracked
+   * branch (for example, by closing tasks associated with the commit).
+   *
+   * @param PhabricatorRepository The repository the commit appeared in.
+   * @param PhabricatorRepositoryCommit The commit itself.
+   * @param PhabricatorRepostioryCommitData Commit data.
+   * @return void
+   *
+   * @task commit
+   */
+  public function didParseCommit(
+    PhabricatorRepository $repo,
+    PhabricatorRepositoryCommit $commit,
+    PhabricatorRepositoryCommitData $data) {
+    return;
+  }
+
+
 /* -(  Loading Additional Data  )-------------------------------------------- */
 
 
