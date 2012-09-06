@@ -1853,6 +1853,7 @@ final class DifferentialChangesetParser {
               $message = pht('This submodule was moved from %s.', $from);
               break;
           }
+          break;
 
         case DifferentialChangeType::TYPE_COPY_HERE:
           $from =
