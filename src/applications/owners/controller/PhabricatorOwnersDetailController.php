@@ -98,13 +98,10 @@ final class PhabricatorOwnersDetailController
     $path_links = array();
     foreach ($paths as $path) {
       $repo = $repositories[$path->getRepositoryPHID()];
-      $drequest = DiffusionRequest::newFromDictionary(
+      $href = DiffusionRequest::generateDiffusionURI(
         array(
-          'repository' => $repo,
+          'callsign' => $repo->getCallsign(),
           'path'       => $path->getPath(),
-      ));
-      $href = $drequest->generateURI(
-        array(
           'action' => 'browse'
         ));
       $repo_name = '<strong>'.phutil_escape_html($repo->getName()).
