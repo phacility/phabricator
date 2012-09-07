@@ -469,7 +469,6 @@ final class DiffusionBrowseFileController extends DiffusionController {
           'action'  => 'browse',
           'line'    => $line['line'],
           'stable'  => true,
-          'params'  => array('view' => $selected),
         ));
 
       $blame = array();
