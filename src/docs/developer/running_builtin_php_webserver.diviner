@@ -1,0 +1,9 @@
+@title Running built-in PHP webserver
+@group developer
+
+As of version 5.4.0, the PHP command line interface provides a built-in web
+server. This web server is designed for developmental purposes only, and should
+not be used in production. Phabricator can be executed under it with the
+command:
+
+  $ php -S localhost:8000 -t path/to/phabricator/webroot/ path/to/phabricator/webroot/index.php
