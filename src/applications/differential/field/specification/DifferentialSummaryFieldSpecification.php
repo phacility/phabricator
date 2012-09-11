@@ -17,7 +17,7 @@
  */
 
 final class DifferentialSummaryFieldSpecification
-  extends DifferentialFieldSpecification {
+  extends DifferentialFreeformFieldSpecification {
 
   private $summary = '';
 
