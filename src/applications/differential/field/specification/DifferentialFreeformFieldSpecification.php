@@ -72,7 +72,7 @@ abstract class DifferentialFreeformFieldSpecification
 
     $matches = null;
     $ok = preg_match_all(
-      "/({$prefix_regex})\s+T(\d+)\s+({$suffix_regex})/i",
+      "/({$prefix_regex})\s+T(\d+)\s*({$suffix_regex})/i",
       $this->renderValueForCommitMessage($is_edit = false),
       $matches,
       PREG_SET_ORDER);
