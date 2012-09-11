@@ -23,7 +23,6 @@ final class ManiphestTaskDescriptionPreviewController
   extends ManiphestController {
 
   public function processRequest() {
-
     $request = $this->getRequest();
     $description = $request->getStr('description');
 
@@ -32,7 +31,8 @@ final class ManiphestTaskDescriptionPreviewController
 
     $output = PhabricatorMarkupEngine::renderOneObject(
       $task,
-      ManiphestTask::MARKUP_FIELD_DESCRIPTION);
+      ManiphestTask::MARKUP_FIELD_DESCRIPTION,
+      $request->getUser());
 
     $content =
       '<div class="phabricator-remarkup">'.

@@ -5,17 +5,19 @@ Using Phabricator event listeners to customize behavior.
 
 = Overview =
 
-Phabricator allows you to install custom runtime event listeners which can react
-to certain things happening (like a Maniphest Task being edited) and run custom
-code to perform logging, synchronize with other systems, or modify workflows.
+Phabricator and Arcanist allow you to install custom runtime event listeners
+which can react to certain things happening (like a Maniphest Task being edited
+or a user creating a new Differential Revision) and run custom code to perform
+logging, synchronize with other systems, or modify workflows.
 
-These listeners are PHP classes which you install beside Phabricator, and which
-Phabricator loads at runtime and runs in-process. They are the most direct and
-powerful way to respond to events.
+These listeners are PHP classes which you install beside Phabricator or
+Arcanist, and which Phabricator loads at runtime and runs in-process. They
+require somewhat more effort upfront than simple configuration switches, but are
+the most direct and powerful way to respond to events.
 
-= Installing Event Listeners =
+= Installing Event Listeners (Phabicator) =
 
-To install event listeners, follow these steps:
+To install event listeners in Phabricator, follow these steps:
 
   - Write a listener class which extends @{class@libphutil:PhutilEventListener}.
   - Add it to a libphutil library, or create a new library (for instructions,
@@ -29,6 +31,22 @@ You can verify your listener is registered in the "Events" tab of DarkConsole.
 It should appear at the top under "Registered Event Listeners". You can also
 see any events the page emitted there. For details on DarkConsole, see
 @{article:Using DarkConsole}.
+
+= Installing Event Listeners (Arcanist) =
+
+To install event listeners in Arcanist, follow these steps:
+
+  - Write a listener class which extends @{class@libphutil:PhutilEventListener}.
+  - Add it to a libphutil library, or create a new library (for instructions,
+    see @{article:libphutil Libraries User Guide}.
+  - Configure Phabricator to load the library by adding it to `load`
+    in the Arcanist config (e.g., `.arcconfig`, or user/global config).
+  - Configure Arcanist to install the event listener by adding the class
+    name to `events.listeners` in the Arcanist config.
+
+You can verify your listener is registered by running any `arc` command with
+`--trace`. You should see output indicating your class was registered as an
+event listener.
 
 = Example Listener =
 
@@ -67,6 +85,14 @@ events. Normally, you want to listen only to specific events, but if you're
 writing a generic handler you can listen to all events with this constant
 rather than by enumerating each event.
 
+== Arcanist Events ==
+
+Arcanist event constants are listed in @{class@arcanist:ArcanistEventType}.
+
+All Arcanist events have this data available:
+
+  - `workflow` The active @{class@arcanist:ArcanistBaseWorkflow}.
+
 == Arcanist: Commit: Will Commit SVN ==
 
 The constant for this event is `ArcanistEventType::TYPE_COMMIT_WILLCOMMITSVN`.
@@ -75,7 +101,6 @@ This event is dispatched before an `svn commit` occurs and allows you to
 modify the commit message. Data available on this event:
 
   - `message` The text of the message.
-  - `workflow` The active @{class:ArcanistBaseWorkflow}.
 
 == Arcanist: Diff: Will Build Message ==
 

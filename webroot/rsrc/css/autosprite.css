@@ -251,50 +251,58 @@
   background-position: 0px -2490px;
 }
 
-.action-file {
+.app-uiexample-full {
   background-position: 0px -2521px;
 }
 
+.app-uiexample {
+  background-position: 0px -2582px;
+}
+
+.action-file {
+  background-position: 0px -2613px;
+}
+
 .action-fork {
-  background-position: 0px -2538px;
+  background-position: 0px -2630px;
 }
 
 .action-edit {
-  background-position: 0px -2555px;
+  background-position: 0px -2647px;
 }
 
 .action-flag-0 {
-  background-position: 0px -2572px;
+  background-position: 0px -2664px;
 }
 
 .action-flag-1 {
-  background-position: 0px -2589px;
+  background-position: 0px -2681px;
 }
 
 .action-flag-2 {
-  background-position: 0px -2606px;
+  background-position: 0px -2698px;
 }
 
 .action-flag-3 {
-  background-position: 0px -2623px;
+  background-position: 0px -2715px;
 }
 
 .action-flag-4 {
-  background-position: 0px -2640px;
+  background-position: 0px -2732px;
 }
 
 .action-flag-5 {
-  background-position: 0px -2657px;
+  background-position: 0px -2749px;
 }
 
 .action-flag-6 {
-  background-position: 0px -2674px;
+  background-position: 0px -2766px;
 }
 
 .action-flag-7 {
-  background-position: 0px -2691px;
+  background-position: 0px -2783px;
 }
 
 .action-flag-ghost {
-  background-position: 0px -2708px;
+  background-position: 0px -2800px;
 }

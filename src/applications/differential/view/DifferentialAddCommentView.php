@@ -64,7 +64,6 @@ final class DifferentialAddCommentView extends AphrontView {
 
     $warning = new AphrontErrorView();
     $warning->setSeverity(AphrontErrorView::SEVERITY_ERROR);
-    $warning->setWidth(AphrontErrorView::WIDTH_WIDE);
     $warning->setID($id);
     $warning->appendChild($content);
     $warning->setTitle(idx($titles, $status, 'Warning'));

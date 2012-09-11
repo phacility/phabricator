@@ -222,7 +222,6 @@ final class PhabricatorSettingsPanelEmailAddresses
 
     if ($errors) {
       $errors = id(new AphrontErrorView())
-        ->setWidth(AphrontErrorView::WIDTH_DIALOG)
         ->setErrors($errors);
     }
 

@@ -22,6 +22,8 @@
 final class ConduitAPI_differential_parsecommitmessage_Method
   extends ConduitAPIMethod {
 
+  private $errors;
+
   public function getMethodDescription() {
     return "Parse commit messages for Differential fields.";
   }
@@ -58,13 +60,14 @@ final class ConduitAPI_differential_parsecommitmessage_Method
 
     $aux_fields = mpull($aux_fields, null, 'getCommitMessageKey');
 
+    $this->errors = array();
+
     // Build a map from labels (like "Test Plan") to field keys
     // (like "testPlan").
     $label_map = $this->buildLabelMap($aux_fields);
     $field_map = $this->parseCommitMessage($corpus, $label_map);
 
     $fields = array();
-    $errors = array();
     foreach ($field_map as $field_key => $field_value) {
       $field = $aux_fields[$field_key];
       try {
@@ -72,7 +75,8 @@ final class ConduitAPI_differential_parsecommitmessage_Method
         $field->setValueFromParsedCommitMessage($fields[$field_key]);
       } catch (DifferentialFieldParseException $ex) {
         $field_label = $field->renderLabelForCommitMessage();
-        $errors[] = "Error parsing field '{$field_label}': ".$ex->getMessage();
+        $this->errors[] =
+          "Error parsing field '{$field_label}': ".$ex->getMessage();
       }
     }
 
@@ -82,7 +86,7 @@ final class ConduitAPI_differential_parsecommitmessage_Method
           $aux_field->validateField();
         } catch (DifferentialFieldValidationException $ex) {
           $field_label = $aux_field->renderLabelForCommitMessage();
-          $errors[] =
+          $this->errors[] =
             "Invalid or missing field '{$field_label}': ".
             $ex->getMessage();
         }
@@ -90,7 +94,7 @@ final class ConduitAPI_differential_parsecommitmessage_Method
     }
 
     return array(
-      'errors' => $errors,
+      'errors' => $this->errors,
       'fields' => $fields,
     );
   }
@@ -144,8 +148,7 @@ final class ConduitAPI_differential_parsecommitmessage_Method
         $lines[$key] = trim($match['text']);
         $field = $label_map[strtolower($match['field'])];
         if (!empty($seen[$field])) {
-          throw new Exception(
-            "Field '{$field}' occurs twice in commit message!");
+          $this->errors[] = "Field '{$field}' occurs twice in commit message!";
         }
         $seen[$field] = true;
       }

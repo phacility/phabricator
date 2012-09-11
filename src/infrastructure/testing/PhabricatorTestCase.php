@@ -136,4 +136,12 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
     return new PhabricatorStorageFixtureScopeGuard($name);
   }
 
+  protected function getLink($method) {
+    $phabricator_project = 'PHID-APRJ-3f1fc779edeab89b2171';
+    return
+      'https://secure.phabricator.com/diffusion/symbol/'.$method.
+      '/?lang=php&projects='.$phabricator_project.
+      '&jump=true&context='.get_class($this);
+  }
+
 }

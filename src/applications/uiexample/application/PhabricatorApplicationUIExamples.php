@@ -16,24 +16,31 @@
  * limitations under the License.
  */
 
-final class PhabricatorRedirectController extends PhabricatorController {
+final class PhabricatorApplicationUIExamples extends PhabricatorApplication {
 
-  private $uri;
-
-  public function shouldRequireLogin() {
-    return false;
+  public function getBaseURI() {
+    return '/uiexample/';
   }
 
-  public function shouldRequireEnabledUser() {
-    return false;
+  public function getShortDescription() {
+    return 'Developer UI Examples';
   }
 
-  public function willProcessRequest(array $data) {
-    $this->uri = $data['uri'];
+  public function getAutospriteName() {
+    return 'uiexample';
   }
 
-  public function processRequest() {
-    return id(new AphrontRedirectResponse())->setURI($this->uri);
+  public function getTitleGlyph() {
+    return "\xE2\x8F\x9A";
+  }
+
+  public function getRoutes() {
+    return array(
+      '/uiexample/' => array(
+        '' => 'PhabricatorUIExampleRenderController',
+        'view/(?P<class>[^/]+)/' => 'PhabricatorUIExampleRenderController',
+      ),
+    );
   }
 
 }

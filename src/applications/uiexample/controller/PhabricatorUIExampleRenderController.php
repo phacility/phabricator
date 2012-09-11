@@ -16,8 +16,7 @@
  * limitations under the License.
  */
 
-final class PhabricatorUIExampleRenderController
-  extends PhabricatorUIExampleController {
+final class PhabricatorUIExampleRenderController extends PhabricatorController {
 
   private $class;
 
@@ -29,43 +28,30 @@ final class PhabricatorUIExampleRenderController
 
     $classes = id(new PhutilSymbolLoader())
       ->setAncestorClass('PhabricatorUIExample')
+      ->setConcreteOnly(true)
       ->selectAndLoadSymbols();
     $classes = ipull($classes, 'name', 'name');
 
-    $selected = null;
     foreach ($classes as $class => $ignored) {
       $classes[$class] = newv($class, array());
-      if ($this->class == $classes[$class]->getName()) {
-        $selected = $class;
-      }
     }
 
-    if (!$selected) {
-      $selected = head_key($classes);
-    }
+    $classes = msort($classes, 'getName');
 
-    $nav = new AphrontSideNavView();
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI('view/')));
 
     foreach ($classes as $class => $obj) {
       $name = $obj->getName();
-
-      $nav->addNavItem(
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => '/uiexample/view/'.$name.'/',
-            'class' => ($selected == $class)
-              ? 'aphront-side-nav-selected'
-              : null,
-          ),
-          phutil_escape_html($obj->getName())));
+      $nav->addFilter($class, $name);
     }
+
+    $selected = $nav->selectFilter($this->class, head_key($classes));
 
     require_celerity_resource('phabricator-ui-example-css');
 
     $example = $classes[$selected];
     $example->setRequest($this->getRequest());
-
 
     $nav->appendChild(
       '<div class="phabricator-ui-example-header">'.
@@ -80,10 +66,11 @@ final class PhabricatorUIExampleRenderController
 
     $nav->appendChild($example->renderExample());
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'UI Example',
+        'title'   => 'UI Example',
+        'device'  => true,
       ));
   }
 

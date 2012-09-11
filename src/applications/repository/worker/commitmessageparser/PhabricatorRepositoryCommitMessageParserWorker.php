@@ -79,6 +79,8 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     // revisit this and do something differently. (If we match several revisions
     // someone probably did something very silly, though.)
 
+    $revision = null;
+    $should_autoclose = $repository->shouldAutocloseCommit($commit, $data);
     $revision_id = $data->getCommitDetail('differential.revisionID');
     if (!$revision_id) {
       $hashes = $this->getCommitHashes(
@@ -100,6 +102,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     if ($revision_id) {
       $revision = id(new DifferentialRevision())->load($revision_id);
       if ($revision) {
+        $revision->loadRelationships();
         queryfx(
           $conn_w,
           'INSERT IGNORE INTO %T (revisionID, commitPHID) VALUES (%d, %s)',
@@ -142,7 +145,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
         $status_closed = ArcanistDifferentialRevisionStatus::CLOSED;
         $should_close = ($revision->getStatus() != $status_closed) &&
-                        $repository->shouldAutocloseCommit($commit, $data);
+                        $should_autoclose;
 
         if ($should_close) {
           $diff = $this->attachToRevision($revision, $actor_phid);
@@ -169,6 +172,38 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
           $editor->setMessage($message)->save();
         }
 
+      }
+    }
+
+    if ($should_autoclose && $author_phid) {
+      $user = id(new PhabricatorUser())->loadOneWhere(
+        'phid = %s',
+        $author_phid);
+
+      $call = new ConduitCall(
+        'differential.parsecommitmessage',
+        array(
+          'corpus' => $message,
+          'partial' => true,
+        ));
+      $call->setUser($user);
+      $result = $call->execute();
+
+      $field_values = $result['fields'];
+
+      $fields = DifferentialFieldSelector::newSelector()
+        ->getFieldSpecifications();
+      foreach ($fields as $key => $field) {
+        if (!$field->shouldAppearOnCommitMessage()) {
+          continue;
+        }
+        $field->setUser($user);
+        $value = idx($field_values, $field->getCommitMessageKey());
+        $field->setValueFromParsedCommitMessage($value);
+        if ($revision) {
+          $field->setRevision($revision);
+        }
+        $field->didParseCommit($repository, $commit, $data);
       }
     }
 

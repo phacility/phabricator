@@ -23,14 +23,9 @@ final class AphrontErrorView extends AphrontView {
   const SEVERITY_NOTICE = 'notice';
   const SEVERITY_NODATA = 'nodata';
 
-  const WIDTH_DEFAULT = 'default';
-  const WIDTH_WIDE = 'wide';
-  const WIDTH_DIALOG = 'dialog';
-
   private $title;
   private $errors;
   private $severity;
-  private $width;
   private $id;
 
   public function setTitle($title) {
@@ -45,11 +40,6 @@ final class AphrontErrorView extends AphrontView {
 
   public function setErrors(array $errors) {
     $this->errors = $errors;
-    return $this;
-  }
-
-  public function setWidth($width) {
-    $this->width = $width;
     return $this;
   }
 
@@ -71,24 +61,32 @@ final class AphrontErrorView extends AphrontView {
           array(),
           phutil_escape_html($error));
       }
-      $list = '<ul>'.implode("\n", $list).'</ul>';
+      $list = phutil_render_tag(
+        'ul',
+        array(
+          'class' => 'aphront-error-view-list',
+        ),
+        implode("\n", $list));
     } else {
       $list = null;
     }
 
     $title = $this->title;
     if (strlen($title)) {
-      $title = '<h1>'.phutil_escape_html($title).'</h1>';
+      $title = phutil_render_tag(
+        'h1',
+        array(
+          'class' => 'aphront-error-view-head',
+        ),
+        phutil_escape_html($title));
     } else {
       $title = null;
     }
 
     $this->severity = nonempty($this->severity, self::SEVERITY_ERROR);
-    $this->width = nonempty($this->width, self::WIDTH_DEFAULT);
 
     $more_classes = array();
     $more_classes[] = 'aphront-error-severity-'.$this->severity;
-    $more_classes[] = 'aphront-error-width-'.$this->width;
     $more_classes = implode(' ', $more_classes);
 
     return

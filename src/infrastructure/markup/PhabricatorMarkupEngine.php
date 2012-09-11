@@ -56,6 +56,7 @@
 final class PhabricatorMarkupEngine {
 
   private $objects = array();
+  private $viewer;
 
 
 /* -(  Markup Pipeline  )---------------------------------------------------- */
@@ -67,13 +68,16 @@ final class PhabricatorMarkupEngine {
    *
    * @param PhabricatorMarkupInterface  The object to render.
    * @param string                      The field to render.
+   * @param PhabricatorUser             User viewing the markup.
    * @return string                     Marked up output.
    * @task markup
    */
   public static function renderOneObject(
     PhabricatorMarkupInterface $object,
-    $field) {
+    $field,
+    PhabricatorUser $viewer) {
     return id(new PhabricatorMarkupEngine())
+      ->setViewer($viewer)
       ->addObject($object, $field)
       ->process()
       ->getOutput($object, $field);
@@ -126,6 +130,7 @@ final class PhabricatorMarkupEngine {
     $engines = array();
     foreach ($objects as $key => $info) {
       $engines[$key] = $info['object']->newMarkupEngine($info['field']);
+      $engines[$key]->setConfig('viewer', $this->viewer);
     }
 
     // Load or build the preprocessor caches.
@@ -243,7 +248,21 @@ final class PhabricatorMarkupEngine {
   }
 
 
+  /**
+   * Set the viewing user. Used to implement object permissions.
+   *
+   * @param PhabricatorUser The viewing user.
+   * @return this
+   * @task markup
+   */
+  public function setViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
+
+
 /* -(  Engine Construction  )------------------------------------------------ */
+
 
 
   /**

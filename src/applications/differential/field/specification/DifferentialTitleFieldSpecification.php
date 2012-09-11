@@ -17,7 +17,7 @@
  */
 
 final class DifferentialTitleFieldSpecification
-  extends DifferentialFieldSpecification {
+  extends DifferentialFreeformFieldSpecification {
 
   private $title;
   private $error = true;

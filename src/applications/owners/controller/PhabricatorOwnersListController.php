@@ -262,14 +262,11 @@ final class PhabricatorOwnersListController
       foreach ($pkg_paths as $key => $path) {
         $repo = $repositories[$path->getRepositoryPHID()];
         if ($repo) {
-          $drequest = DiffusionRequest::newFromDictionary(
+          $href = DiffusionRequest::generateDiffusionURI(
             array(
-              'repository' => $repo,
-              'path'       => $path->getPath(),
-            ));
-          $href = $drequest->generateURI(
-            array(
-              'action' => 'browse',
+              'callsign' => $repo->getCallsign(),
+              'path'     => $path->getPath(),
+              'action'   => 'browse',
             ));
           $pkg_paths[$key] =
             '<strong>'.phutil_escape_html($repo->getName()).'</strong> '.
