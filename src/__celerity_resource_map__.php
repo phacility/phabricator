@@ -2851,9 +2851,18 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/phriction/phriction-document-css.css',
   ),
+  'ponder-comment-table-css' =>
+  array(
+    'uri' => '/res/a1bb9056/rsrc/css/application/ponder/comments.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/application/ponder/comments.css',
+  ),
   'ponder-core-view-css' =>
   array(
-    'uri' => '/res/4a6e2fc7/rsrc/css/application/ponder/core.css',
+    'uri' => '/res/3a2d5e18/rsrc/css/application/ponder/core.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -2871,7 +2880,7 @@ celerity_register_resource_map(array(
   ),
   'ponder-post-css' =>
   array(
-    'uri' => '/res/32c960df/rsrc/css/application/ponder/post.css',
+    'uri' => '/res/013b9e2c/rsrc/css/application/ponder/post.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -2880,7 +2889,7 @@ celerity_register_resource_map(array(
   ),
   'ponder-vote-css' =>
   array(
-    'uri' => '/res/923bcf97/rsrc/css/application/ponder/vote.css',
+    'uri' => '/res/d4dff9ba/rsrc/css/application/ponder/vote.css',
     'type' => 'css',
     'requires' =>
     array(

@@ -2,8 +2,11 @@
  * @provides ponder-vote-css
  */
 
-.ponder-votable {
-  min-height : 120px;
+
+
+.ponder-votable .phabricator-transaction-view {
+  margin : 0;
+  padding : 0;
 }
 
 .ponder-votable .phabricator-transaction-detail {

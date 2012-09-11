@@ -34,6 +34,7 @@ final class PonderQuestion extends PonderDAO
 
   private $answers;
   private $vote;
+  private $comments;
 
   public function getConfiguration() {
     return array(
@@ -76,10 +77,23 @@ final class PonderQuestion extends PonderDAO
       $edges[$user_phid][PhabricatorEdgeConfig::TYPE_VOTING_USER_HAS_ANSWER];
     $edges = null;
 
+    if ($qa_phids) {
+      $comments = id(new PonderCommentQuery())
+        ->withTargetPHIDs($qa_phids)
+        ->execute();
+
+      $comments = mgroup($comments, 'getTargetPHID');
+    }
+    else {
+      $comments = array();
+    }
+
     $this->setUserVote(idx($question_edge, $this->getPHID()));
+    $this->setComments(idx($comments, $this->getPHID(), array()));
     foreach ($this->answers as $answer) {
       $answer->setQuestion($this);
       $answer->setUserVote(idx($answer_edges, $answer->getPHID()));
+      $answer->setComments(idx($comments, $answer->getPHID(), array()));
     }
   }
 
@@ -93,6 +107,15 @@ final class PonderQuestion extends PonderDAO
 
   public function getUserVote() {
     return $this->vote;
+  }
+
+  public function setComments($comments) {
+    $this->comments = $comments;
+    return $this;
+  }
+
+  public function getComments() {
+    return $this->comments;
   }
 
   public function getAnswers() {

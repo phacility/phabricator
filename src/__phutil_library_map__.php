@@ -1164,6 +1164,7 @@ phutil_register_library_map(array(
     'PhrictionHistoryController' => 'applications/phriction/controller/PhrictionHistoryController.php',
     'PhrictionListController' => 'applications/phriction/controller/PhrictionListController.php',
     'PonderAddAnswerView' => 'applications/ponder/view/PonderAddAnswerView.php',
+    'PonderAddCommentView' => 'applications/ponder/view/PonderAddCommentView.php',
     'PonderAnswer' => 'applications/ponder/storage/PonderAnswer.php',
     'PonderAnswerEditor' => 'applications/ponder/editor/PonderAnswerEditor.php',
     'PonderAnswerListView' => 'applications/ponder/view/PonderAnswerListView.php',
@@ -1172,11 +1173,15 @@ phutil_register_library_map(array(
     'PonderAnswerSaveController' => 'applications/ponder/controller/PonderAnswerSaveController.php',
     'PonderAnswerSummaryView' => 'applications/ponder/view/PonderAnswerSummaryView.php',
     'PonderAnswerViewController' => 'applications/ponder/controller/PonderAnswerViewController.php',
-    'PonderCommentBodyView' => 'applications/ponder/view/PonderCommentBodyView.php',
+    'PonderComment' => 'applications/ponder/storage/PonderComment.php',
+    'PonderCommentListView' => 'applications/ponder/view/PonderCommentListView.php',
+    'PonderCommentQuery' => 'applications/ponder/query/PonderCommentQuery.php',
+    'PonderCommentSaveController' => 'applications/ponder/controller/PonderCommentSaveController.php',
     'PonderConstants' => 'applications/ponder/PonderConstants.php',
     'PonderController' => 'applications/ponder/controller/PonderController.php',
     'PonderDAO' => 'applications/ponder/storage/PonderDAO.php',
     'PonderFeedController' => 'applications/ponder/controller/PonderFeedController.php',
+    'PonderPostBodyView' => 'applications/ponder/view/PonderPostBodyView.php',
     'PonderQuestion' => 'applications/ponder/storage/PonderQuestion.php',
     'PonderQuestionAskController' => 'applications/ponder/controller/PonderQuestionAskController.php',
     'PonderQuestionDetailView' => 'applications/ponder/view/PonderQuestionDetailView.php',
@@ -2248,6 +2253,7 @@ phutil_register_library_map(array(
     'PhrictionHistoryController' => 'PhrictionController',
     'PhrictionListController' => 'PhrictionController',
     'PonderAddAnswerView' => 'AphrontView',
+    'PonderAddCommentView' => 'AphrontView',
     'PonderAnswer' =>
     array(
       0 => 'PonderDAO',
@@ -2260,10 +2266,18 @@ phutil_register_library_map(array(
     'PonderAnswerSaveController' => 'PonderController',
     'PonderAnswerSummaryView' => 'AphrontView',
     'PonderAnswerViewController' => 'PonderController',
-    'PonderCommentBodyView' => 'AphrontView',
+    'PonderComment' =>
+    array(
+      0 => 'PonderDAO',
+      1 => 'PhabricatorMarkupInterface',
+    ),
+    'PonderCommentListView' => 'AphrontView',
+    'PonderCommentQuery' => 'PhabricatorQuery',
+    'PonderCommentSaveController' => 'PonderController',
     'PonderController' => 'PhabricatorController',
     'PonderDAO' => 'PhabricatorLiskDAO',
     'PonderFeedController' => 'PonderController',
+    'PonderPostBodyView' => 'AphrontView',
     'PonderQuestion' =>
     array(
       0 => 'PonderDAO',

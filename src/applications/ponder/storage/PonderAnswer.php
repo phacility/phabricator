@@ -31,6 +31,7 @@ final class PonderAnswer extends PonderDAO
   protected $voteCount;
   private $vote;
   private $question = null;
+  private $comments;
 
   public function setQuestion($question) {
     $this->question = $question;
@@ -51,6 +52,15 @@ final class PonderAnswer extends PonderDAO
 
   public function getUserVote() {
     return $this->vote;
+  }
+
+  public function setComments($comments) {
+    $this->comments = $comments;
+    return $this;
+  }
+
+  public function getComments() {
+    return $this->comments;
   }
 
   public function getConfiguration() {

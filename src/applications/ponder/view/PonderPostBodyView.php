@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-final class PonderCommentBodyView extends AphrontView {
+final class PonderPostBodyView extends AphrontView {
 
   private $target;
   private $question;

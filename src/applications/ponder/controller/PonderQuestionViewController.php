@@ -34,11 +34,21 @@ final class PonderQuestionViewController extends PonderController {
       return new Aphront404Response();
     }
     $question->attachRelated($user->getPHID());
-    $answers = $question->getAnswers();
-
     $object_phids = array($user->getPHID(), $question->getAuthorPHID());
+
+    $answers = $question->getAnswers();
+    $comments = $question->getComments();
+    foreach ($comments as $comment) {
+      $object_phids[] = $comment->getAuthorPHID();
+    }
+
     foreach ($answers as $answer) {
       $object_phids[] = $answer->getAuthorPHID();
+
+      $comments = $answer->getComments();
+      foreach ($comments as $comment) {
+        $object_phids[] = $comment->getAuthorPHID();
+      }
     }
 
     $handles = $this->loadViewerHandles($object_phids);

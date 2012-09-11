@@ -61,7 +61,6 @@ final class PonderVotableView extends AphrontView {
         '<div id="'.phutil_escape_html($this->phid).'" class="ponder-votebox">
          </div>'.
         $this->renderChildren().
-        '<div class="ponder-votable-bottom"></div>'.
       '</div>';
 
     return $content;

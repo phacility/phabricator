@@ -1,0 +1,104 @@
+/**
+ * @provides ponder-comment-table-css
+ */
+
+
+.ponder-comments {
+  width: 600px;
+  margin : 0;
+  margin-left : 120px;
+}
+
+.ponder-comments th {
+  width : 0px;
+  height : 0px;
+}
+
+.ponder-comments td {
+  vertical-align: top;
+  padding: 6px 2px;
+  border-bottom: 1px dotted #d0d0d0;
+  background : #FFF;
+}
+
+.ponder-datestamp {
+  font-size: 9px;
+  font-family: "Verdana";
+  color: #666666;
+}
+
+.ponder-label {
+  display: block;
+  width: 100%;
+  font-size: 14px;
+  font-weight: bold;
+  color: #222222;
+  text-align: left;
+  margin: 0px 0px 6px;
+  padding: 6px 4px;
+  background: #cccccc;
+  border-bottom: 1px solid #aaaaaa;
+  cursor: pointer;
+}
+
+td .aphront-form-control {
+  padding : 0;
+}
+
+td .aphront-form-control-submit {
+  float : right;
+  margin : 0;
+  padding : 0;
+}
+
+.aphront-form-control-submit button {
+  margin : 0;
+}
+
+
+td .aphront-form-input {
+  margin : 0;
+  width : 100%;
+}
+
+td .aphront-form-control textarea {
+  height : 40px;
+  width : 560px;
+  padding : 0;
+  margin : 0;
+  background : #EEE;
+  border : 1px solid #CCC;
+}
+
+div.ponder-comment-markup {
+  padding-left : 5px;
+}
+
+
+.ponder-comment-markup p {
+  margin : 0;
+}
+
+.ponder-comment-markup h2 {
+  margin : 0;
+  font-size : inherit;
+  font-weight : normal;
+}
+
+.ponder-comment-markup h3 {
+  margin : 0;
+  font-size : inherit;
+  font-weight : normal;
+}
+
+.ponder-comment-markup h4 {
+  margin : 0;
+  font-size : inherit;
+  font-weight : normal;
+}
+
+.ponder-comment-markup h5 {
+  margin : 0;
+  font-size : inherit;
+  font-weight : normal;
+}

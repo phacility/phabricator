@@ -20,15 +20,24 @@
    width: 81ch;
 }
 
+.ponder-question {
+   background : white;
+}
+
 .phabricator-transaction-view .ponder-question {
-  border-color: #777;
+    background : white;
 }
 
 .phabricator-transaction-detail .ponder-question {
-  border-color: #777;
+    border : none;
 }
 
 
 .phabricator-transaction-view .ponder-answer {
-/*  border-color: #203791; */
+    background : white;
+    margin-bottom : 0;
+}
+
+.phabricator-transaction-content {
+    background : white;
 }

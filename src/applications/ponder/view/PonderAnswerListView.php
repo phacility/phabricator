@@ -73,7 +73,7 @@ final class PonderAnswerListView extends AphrontView {
       ->setHeader("Responses:");
 
     foreach ($this->answers as $cur_answer) {
-      $view = new PonderCommentBodyView();
+      $view = new PonderPostBodyView();
       $view
         ->setQuestion($question)
         ->setTarget($cur_answer)
@@ -81,7 +81,19 @@ final class PonderAnswerListView extends AphrontView {
         ->setHandles($handles)
         ->setUser($user);
 
+      $commentview = new PonderCommentListView();
+      $commentview
+        ->setUser($user)
+        ->setHandles($handles)
+        ->setComments($cur_answer->getComments())
+        ->setTarget($cur_answer->getPHID())
+        ->setQuestionID($question->getID())
+        ->setActionURI(new PhutilURI('/ponder/comment/add/'));
+
       $panel->appendChild($view);
+      $panel->appendChild($commentview);
+      $panel->appendChild('<div style="height: 40px; clear : both"></div>');
+
     }
 
     return $panel->render();

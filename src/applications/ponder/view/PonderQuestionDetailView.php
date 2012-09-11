@@ -48,7 +48,7 @@ final class PonderQuestionDetailView extends AphrontView {
       ->addClass("ponder-panel")
       ->setHeader($this->renderObjectLink().' '.$question->getTitle());
 
-    $contentview = new PonderCommentBodyView();
+    $contentview = new PonderPostBodyView();
     $contentview
       ->setTarget($question)
       ->setQuestion($question)
@@ -56,7 +56,17 @@ final class PonderQuestionDetailView extends AphrontView {
       ->setHandles($handles)
       ->setAction(PonderConstants::ASKED_LITERAL);
 
+    $commentview = new PonderCommentListView();
+    $commentview
+      ->setUser($user)
+      ->setHandles($handles)
+      ->setComments($question->getComments())
+      ->setTarget($question->getPHID())
+      ->setQuestionID($question->getID())
+      ->setActionURI(new PhutilURI('/ponder/comment/add/'));
+
     $panel->appendChild($contentview);
+    $panel->appendChild($commentview);
 
     return $panel->render();
   }

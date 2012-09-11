@@ -16,39 +16,43 @@
  * limitations under the License.
  */
 
-final class PonderAnswerPreviewController
-  extends PonderController {
+final class PonderCommentSaveController extends PonderController {
 
   public function processRequest() {
-
     $request = $this->getRequest();
+    if (!$request->isFormPost()) {
+      return new Aphront400Response();
+    }
+
     $user = $request->getUser();
     $question_id = $request->getInt('question_id');
-
     $question = PonderQuestionQuery::loadSingle($user, $question_id);
+
     if (!$question) {
       return new Aphront404Response();
     }
 
-    $author_phid = $user->getPHID();
-    $object_phids = array($author_phid);
-    $handles = $this->loadViewerHandles($object_phids);
+    $target = $request->getStr('target');
+    $objects = id(new PhabricatorObjectHandleData(array($target)))
+      ->loadHandles();
+    if (!$objects) {
+      return new Aphront404Response();
+    }
+    $content = $request->getStr('content');
 
-    $answer = new PonderAnswer();
-    $answer->setContent($request->getStr('content'));
-    $answer->setAuthorPHID($author_phid);
+    $res = new PonderComment();
+    $res
+      ->setContent($content)
+      ->setAuthorPHID($user->getPHID())
+      ->setTargetPHID($target)
+      ->save();
 
-    $view = new PonderPostBodyView();
-    $view
-      ->setQuestion($question)
-      ->setTarget($answer)
-      ->setPreview(true)
-      ->setUser($user)
-      ->setHandles($handles)
-      ->setAction(PonderConstants::ANSWERED_LITERAL);
+    PhabricatorSearchPonderIndexer::indexQuestion($question);
 
-    return id(new AphrontAjaxResponse())
-      ->setContent($view->render());
+    return id(new AphrontRedirectResponse())
+      ->setURI(
+        id(new PhutilURI('/Q'. $question->getID()))
+        ->setFragment('comment-' . $res->getID()));
   }
 
 }

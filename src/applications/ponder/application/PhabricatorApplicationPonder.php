@@ -53,6 +53,7 @@ final class PhabricatorApplicationPonder extends PhabricatorApplication {
         'answer/preview/' => 'PonderAnswerPreviewController',
         'question/ask/' => 'PonderQuestionAskController',
         'question/preview/' => 'PonderQuestionPreviewController',
+        'comment/add/' => 'PonderCommentSaveController',
         '(?P<kind>question)/vote/' => 'PonderVoteSaveController',
         '(?P<kind>answer)/vote/' => 'PonderVoteSaveController'
       ));
