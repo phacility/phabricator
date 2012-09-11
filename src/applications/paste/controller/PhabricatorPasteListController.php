@@ -37,10 +37,12 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     switch ($filter) {
       case 'my':
         $query->withAuthorPHIDs(array($user->getPHID()));
-        $title = 'My Pastes';
+        $title = pht('My Pastes');
+        $nodata = pht("You haven't created any Pastes yet.");
         break;
       case 'all':
-        $title = 'All Pastes';
+        $title = pht('All Pastes');
+        $nodata = pht("There are no Pastes yet.");
         break;
     }
 
@@ -48,10 +50,10 @@ final class PhabricatorPasteListController extends PhabricatorPasteController {
     $pager->readFromRequest($request);
     $pastes = $query->executeWithCursorPager($pager);
 
-
     $list = $this->buildPasteList($pastes);
     $list->setHeader($title);
     $list->setPager($pager);
+    $list->setNoDataString($nodata);
 
     $nav->appendChild($list);
 

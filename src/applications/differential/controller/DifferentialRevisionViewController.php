@@ -184,7 +184,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $warning = new AphrontErrorView();
       $warning->setTitle('Very Large Diff');
       $warning->setSeverity(AphrontErrorView::SEVERITY_WARNING);
-      $warning->setWidth(AphrontErrorView::WIDTH_WIDE);
       $warning->appendChild(
         "<p>This diff is very large and affects {$count} files. Load ".
         "each file individually. ".

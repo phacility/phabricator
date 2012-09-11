@@ -222,7 +222,6 @@ final class DifferentialUnitFieldSpecification
       }
       $unit_warning = id(new AphrontErrorView())
         ->setSeverity(AphrontErrorView::SEVERITY_ERROR)
-        ->setWidth(AphrontErrorView::WIDTH_WIDE)
         ->appendChild($content)
         ->setTitle(idx($titles, $diff->getUnitStatus(), 'Warning'));
     }

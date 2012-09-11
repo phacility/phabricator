@@ -21,6 +21,7 @@ final class PhabricatorObjectItemListView extends AphrontView {
   private $header;
   private $items;
   private $pager;
+  private $noDataString;
 
   public function setHeader($header) {
     $this->header = $header;
@@ -29,6 +30,11 @@ final class PhabricatorObjectItemListView extends AphrontView {
 
   public function setPager($pager) {
     $this->pager = $pager;
+    return $this;
+  }
+
+  public function setNoDataString($no_data_string) {
+    $this->noDataString = $no_data_string;
     return $this;
   }
 
@@ -46,7 +52,16 @@ final class PhabricatorObjectItemListView extends AphrontView {
         'class' => 'phabricator-object-item-list-header',
       ),
       phutil_escape_html($this->header));
-    $items = $this->renderSingleView($this->items);
+
+    if ($this->items) {
+      $items = $this->renderSingleView($this->items);
+    } else {
+      $string = nonempty($this->noDataString, pht('No data.'));
+      $items = id(new AphrontErrorView())
+        ->setSeverity(AphrontErrorView::SEVERITY_NODATA)
+        ->appendChild(phutil_escape_html($string))
+        ->render();
+    }
 
     $pager = null;
     if ($this->pager) {

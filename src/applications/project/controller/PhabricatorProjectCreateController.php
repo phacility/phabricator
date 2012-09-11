@@ -105,11 +105,6 @@ final class PhabricatorProjectCreateController
           ->setValue($profile->getBlurb()));
 
     if ($request->isAjax()) {
-
-      if ($error_view) {
-        $error_view->setWidth(AphrontErrorView::WIDTH_DIALOG);
-      }
-
       $dialog = id(new AphrontDialogView())
         ->setUser($user)
         ->setWidth(AphrontDialogView::WIDTH_FORM)
