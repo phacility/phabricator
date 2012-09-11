@@ -140,6 +140,7 @@ $app_map = array(
   'feed'            => array(3, 11),
   'paste'           => array(9, 2),
   'audit'           => array(8, 19),
+  'uiexample'       => array(7, 28),
 );
 
 $xadj = -1;

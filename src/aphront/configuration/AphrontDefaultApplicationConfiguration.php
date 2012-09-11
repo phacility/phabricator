@@ -166,11 +166,6 @@ class AphrontDefaultApplicationConfiguration
           => 'HeraldTranscriptController',
       ),
 
-      '/uiexample/' => array(
-        '' => 'PhabricatorUIExampleRenderController',
-        'view/(?P<class>[^/]+)/' => 'PhabricatorUIExampleRenderController',
-      ),
-
       '/owners/' => array(
         '' => 'PhabricatorOwnersListController',
         'view/(?P<view>[^/]+)/' => 'PhabricatorOwnersListController',

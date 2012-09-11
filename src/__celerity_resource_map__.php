@@ -65,8 +65,8 @@ celerity_register_resource_map(array(
   ),
   '/rsrc/image/autosprite.png' =>
   array(
-    'hash' => 'bd70ca6308d6f80a87a10068a04867f8',
-    'uri' => '/res/bd70ca63/rsrc/image/autosprite.png',
+    'hash' => '0b78a23fb4cec90e3a35ba1b9ce20f0c',
+    'uri' => '/res/0b78a23f/rsrc/image/autosprite.png',
     'disk' => '/rsrc/image/autosprite.png',
     'type' => 'png',
   ),
@@ -671,7 +671,7 @@ celerity_register_resource_map(array(
   ),
   'autosprite-css' =>
   array(
-    'uri' => '/res/114f6e40/rsrc/css/autosprite.css',
+    'uri' => '/res/cb9c82fd/rsrc/css/autosprite.css',
     'type' => 'css',
     'requires' =>
     array(

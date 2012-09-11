@@ -138,21 +138,26 @@ abstract class PhabricatorApplication {
 
 
   public static function getAllInstalledApplications() {
-    $classes = id(new PhutilSymbolLoader())
-      ->setAncestorClass(__CLASS__)
-      ->setConcreteOnly(true)
-      ->selectAndLoadSymbols();
+    static $applications;
 
-    $apps = array();
-    foreach ($classes as $class) {
-      $app = newv($class['name'], array());
-      if (!$app->isEnabled()) {
-        continue;
+    if (empty($applications)) {
+      $classes = id(new PhutilSymbolLoader())
+        ->setAncestorClass(__CLASS__)
+        ->setConcreteOnly(true)
+        ->selectAndLoadSymbols();
+
+      $apps = array();
+      foreach ($classes as $class) {
+        $app = newv($class['name'], array());
+        if (!$app->isEnabled()) {
+          continue;
+        }
+        $apps[] = $app;
       }
-      $apps[] = $app;
+      $applications = $apps;
     }
 
-    return $apps;
+    return $applications;
   }
 
 

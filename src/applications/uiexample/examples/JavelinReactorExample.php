@@ -17,8 +17,9 @@
  */
 
 final class JavelinReactorExample extends PhabricatorUIExample {
+
   public function getName() {
-    return 'Javelin Reactor Examples';
+    return 'Javelin Reactor';
   }
 
   public function getDescription() {
