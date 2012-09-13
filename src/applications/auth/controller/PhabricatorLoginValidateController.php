@@ -28,7 +28,7 @@ final class PhabricatorLoginValidateController
 
     $failures = array();
 
-    if (!$request->getStr('phusr')) {
+    if (!strlen($request->getStr('phusr'))) {
       throw new Exception(
         "Login validation is missing expected parameters!");
     }
