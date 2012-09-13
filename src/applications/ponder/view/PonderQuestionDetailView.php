@@ -46,7 +46,9 @@ final class PonderQuestionDetailView extends AphrontView {
 
     $panel = id(new AphrontPanelView())
       ->addClass("ponder-panel")
-      ->setHeader($this->renderObjectLink().' '.$question->getTitle());
+      ->setHeader(
+        $this->renderObjectLink().' '.
+        phutil_escape_html($question->getTitle()));
 
     $contentview = new PonderPostBodyView();
     $contentview
