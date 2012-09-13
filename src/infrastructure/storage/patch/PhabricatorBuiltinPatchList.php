@@ -976,6 +976,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('ponder-comments.sql'),
       ),
+      'pastepolicy.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('pastepolicy.sql'),
+      ),
     );
   }
 
