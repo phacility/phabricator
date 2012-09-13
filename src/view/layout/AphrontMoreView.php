@@ -40,7 +40,10 @@ final class AphrontMoreView extends AphrontView {
   public function render() {
     $some = $this->some;
 
-    $text = $this->expandtext === null ?: "(Show More\xE2\x80\xA6)";
+    $text = "(Show More\xE2\x80\xA6)";
+    if ($this->expandtext !== null) {
+      $text = $this->expandtext;
+    }
 
     $link = null;
     if ($this->more && $this->more != $this->some) {
