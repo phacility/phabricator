@@ -26,22 +26,23 @@
  *     ->withConstraint($example)
  *     ->execute();
  *
- * Normally, you should extend @{class:PhabricatorCursorPagedPolicyQuery}, not
- * this class. @{class:PhabricatorCursorPagedPolicyQuery} provides a more
- * practical interface for building usable queries against most object types.
+ * Normally, you should extend @{class:PhabricatorCursorPagedPolicyAwareQuery},
+ * not this class. @{class:PhabricatorCursorPagedPolicyAwareQuery} provides a
+ * more practical interface for building usable queries against most object
+ * types.
  *
  * NOTE: Although this class extends @{class:PhabricatorOffsetPagedQuery},
  * offset paging with policy filtering is not efficient. All results must be
  * loaded into the application and filtered here: skipping `N` rows via offset
  * is an `O(N)` operation with a large constant. Prefer cursor-based paging
- * with @{class:PhabricatorCursorPagedPolicyQuery}, which can filter far more
- * efficiently in MySQL.
+ * with @{class:PhabricatorCursorPagedPolicyAwareQuery}, which can filter far
+ * more efficiently in MySQL.
  *
  * @task config     Query Configuration
  * @task exec       Executing Queries
  * @task policyimpl Policy Query Implementation
  */
-abstract class PhabricatorPolicyQuery extends PhabricatorOffsetPagedQuery {
+abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
 
   private $viewer;
   private $raisePolicyExceptions;

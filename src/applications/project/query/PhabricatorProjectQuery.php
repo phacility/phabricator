@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-final class PhabricatorProjectQuery extends PhabricatorCursorPagedPolicyQuery {
+final class PhabricatorProjectQuery
+  extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
   private $phids;

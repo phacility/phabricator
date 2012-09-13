@@ -345,7 +345,15 @@ final class PhabricatorObjectHandleData {
         case PhabricatorPHIDConstants::PHID_TYPE_PROJ:
           $object = new PhabricatorProject();
 
-          $projects = $object->loadAllWhere('phid IN (%Ls)', $phids);
+          if ($this->viewer) {
+            $projects = id(new PhabricatorProjectQuery())
+              ->setViewer($this->viewer)
+              ->withPHIDs($phids)
+              ->execute();
+          } else {
+            $projects = $object->loadAllWhere('phid IN (%Ls)', $phids);
+          }
+
           $projects = mpull($projects, null, 'getPHID');
 
           foreach ($phids as $phid) {

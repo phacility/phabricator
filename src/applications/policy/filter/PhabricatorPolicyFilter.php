@@ -22,6 +22,7 @@ final class PhabricatorPolicyFilter {
   private $objects;
   private $capabilities;
   private $raisePolicyExceptions;
+  private $userProjects;
 
   public static function mustRetainCapability(
     PhabricatorUser $user,
@@ -87,6 +88,7 @@ final class PhabricatorPolicyFilter {
 
     $filtered = array();
 
+    $need_projects = array();
     foreach ($objects as $key => $object) {
       $object_capabilities = $object->getCapabilities();
       foreach ($capabilities as $capability) {
@@ -96,14 +98,65 @@ final class PhabricatorPolicyFilter {
             "not have that capability!");
         }
 
+        $policy = $object->getPolicy($capability);
+        $type = phid_get_type($policy);
+        if ($type == PhabricatorPHIDConstants::PHID_TYPE_PROJ) {
+          $need_projects[] = $policy;
+        }
+      }
+    }
+
+    if ($need_projects) {
+      $need_projects = array_unique($need_projects);
+
+      // If projects have recursive policies, automatically fail them rather
+      // than looping. This will fall back to automatic capabilities and
+      // resolve the policies in a sensible way.
+      static $querying_projects = array();
+      foreach ($need_projects as $key => $project) {
+        if (empty($querying_projects[$project])) {
+          $querying_projects[$project] = true;
+          continue;
+        }
+        unset($need_projects[$key]);
+      }
+
+      if ($need_projects) {
+        $caught = null;
+        try {
+          $projects = id(new PhabricatorProjectQuery())
+            ->setViewer($viewer)
+            ->withMemberPHIDs(array($viewer->getPHID()))
+            ->withPHIDs($need_projects)
+            ->execute();
+        } catch (Exception $ex) {
+          $caught = $ex;
+        }
+
+        foreach ($need_projects as $key => $project) {
+          unset($querying_projects[$project]);
+        }
+
+        if ($caught) {
+          throw $caught;
+        }
+
+        $projects = mpull($projects, null, 'getPHID');
+        $this->userProjects[$viewer->getPHID()] = $projects;
+      }
+    }
+
+    foreach ($objects as $key => $object) {
+      $object_capabilities = $object->getCapabilities();
+      foreach ($capabilities as $capability) {
         if (!$this->checkCapability($object, $capability)) {
           // If we're missing any capability, move on to the next object.
           continue 2;
         }
-      }
 
-      // If we make it here, we have all of the required capabilities.
-      $filtered[$key] = $object;
+        // If we make it here, we have all of the required capabilities.
+        $filtered[$key] = $object;
+      }
     }
 
     return $filtered;
@@ -161,10 +214,35 @@ final class PhabricatorPolicyFilter {
         $this->rejectObject($object, $policy, $capability);
         break;
       default:
-        throw new Exception("Object has unknown policy '{$policy}'!");
+        $type = phid_get_type($policy);
+        if ($type == PhabricatorPHIDConstants::PHID_TYPE_PROJ) {
+          if (isset($this->userProjects[$viewer->getPHID()][$policy])) {
+            return true;
+          } else {
+            $this->rejectObject($object, $policy, $capability);
+          }
+        } else {
+          throw new Exception("Object has unknown policy '{$policy}'!");
+        }
     }
 
     return false;
+  }
+
+  private function rejectImpossiblePolicy(
+    PhabricatorPolicyInterface $object,
+    $policy,
+    $capability) {
+
+    if (!$this->raisePolicyExceptions) {
+      return;
+    }
+
+    // TODO: clean this up
+    $verb = $capability;
+
+    throw new PhabricatorPolicyException(
+      "This object has an impossible {$verb} policy.");
   }
 
   private function rejectObject($object, $policy, $capability) {
@@ -191,7 +269,16 @@ final class PhabricatorPolicyFilter {
         $who = "No one can {$verb} this object.";
         break;
       default:
-        $who = "It is unclear who can {$verb} this object.";
+        $type = phid_get_type($policy);
+        if ($type == PhabricatorPHIDConstants::PHID_TYPE_PROJ) {
+          $handle = PhabricatorObjectHandleData::loadOneHandle(
+            $policy,
+            $this->viewer);
+          $who = "To {$verb} this object, you must be a member of project ".
+                 "'".$handle->getFullName()."'.";
+        } else {
+          $who = "It is unclear who can {$verb} this object.";
+        }
         break;
     }
 

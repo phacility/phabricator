@@ -21,6 +21,7 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
   private $user;
   private $object;
   private $capability;
+  private $policies;
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
@@ -33,6 +34,12 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
 
   public function setPolicyObject(PhabricatorPolicyInterface $object) {
     $this->object = $object;
+    return $this;
+  }
+
+  public function setPolicies(array $policies) {
+    assert_instances_of($policies, 'PhabricatorPolicy');
+    $this->policies = $policies;
     return $this;
   }
 
@@ -54,35 +61,18 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
     return 'aphront-form-control-policy';
   }
 
-  private function getOptions() {
-    $show_public = PhabricatorEnv::getEnvConfig('policy.allow-public');
-
-    if ($this->capability != PhabricatorPolicyCapability::CAN_VIEW) {
-      // We don't generally permit 'public' for anything except viewing.
-      $show_public = false;
-    }
-
-    if ($this->getValue() == PhabricatorPolicies::POLICY_PUBLIC) {
-      // If the object already has a "public" policy, show the option in
-      // the dropdown even if it will be enforced as "users", so we don't
-      // change the policy just because the config is changing.
-      $show_public = true;
-    }
-
+  protected function getOptions() {
     $options = array();
+    foreach ($this->policies as $policy) {
+      if (($policy->getPHID() == PhabricatorPolicies::POLICY_PUBLIC) &&
+          ($this->capability != PhabricatorPolicyCapability::CAN_VIEW)) {
+        // Never expose "Public" for anything except "Can View".
+        continue;
+      }
 
-    if ($show_public) {
-      $options[PhabricatorPolicies::POLICY_PUBLIC] = 'Public';
+      $type_name = PhabricatorPolicyType::getPolicyTypeName($policy->getType());
+      $options[$type_name][$policy->getPHID()] = $policy->getFullName();
     }
-
-    $options[PhabricatorPolicies::POLICY_USER] = 'All Users';
-
-    if ($this->user->getIsAdmin()) {
-      $options[PhabricatorPolicies::POLICY_ADMIN] = 'Administrators';
-    }
-
-    $options[PhabricatorPolicies::POLICY_NOONE] = 'No One';
-
     return $options;
   }
 

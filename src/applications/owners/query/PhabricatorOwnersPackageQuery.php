@@ -17,7 +17,7 @@
  */
 
 final class PhabricatorOwnersPackageQuery
-  extends PhabricatorCursorPagedPolicyQuery {
+  extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ownerPHIDs;
 

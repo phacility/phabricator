@@ -147,6 +147,14 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
         $this->renderHandlesForPHIDs($child_phids));
     }
 
+    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
+      $user,
+      $paste);
+
+    $properties->addProperty(
+      pht('Visible To'),
+      $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
+
     return $properties;
   }
 

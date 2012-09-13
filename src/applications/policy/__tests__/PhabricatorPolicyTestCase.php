@@ -115,7 +115,7 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
       $this->buildObject(PhabricatorPolicies::POLICY_USER),
     );
 
-    $query = new PhabricatorPolicyTestQuery();
+    $query = new PhabricatorPolicyAwareTestQuery();
     $query->setResults($results);
     $query->setViewer($this->buildUser('user'));
 
@@ -154,7 +154,7 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
       $this->buildObject(PhabricatorPolicies::POLICY_USER),
     );
 
-    $query = new PhabricatorPolicyTestQuery();
+    $query = new PhabricatorPolicyAwareTestQuery();
     $query->setResults($results);
     $query->setViewer($this->buildUser('user'));
 
@@ -181,7 +181,7 @@ final class PhabricatorPolicyTestCase extends PhabricatorTestCase {
     foreach ($map as $spec => $expect) {
       $viewer = $this->buildUser($spec);
 
-      $query = new PhabricatorPolicyTestQuery();
+      $query = new PhabricatorPolicyAwareTestQuery();
       $query->setResults(array($object));
       $query->setViewer($viewer);
 
