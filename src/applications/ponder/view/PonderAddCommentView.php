@@ -65,6 +65,11 @@ final class PonderAddCommentView extends AphrontView {
         id(new AphrontFormSubmitControl())
           ->setValue($is_serious ? 'Submit' : 'Editorialize'));
 
-    return $form->render();
+    $view = id(new AphrontMoreView())
+      ->setSome(id(new AphrontNullView())->render())
+      ->setMore($form->render())
+      ->setExpandText('Add Comment');
+
+    return $view->render();
   }
 }

@@ -20,6 +20,7 @@ final class AphrontMoreView extends AphrontView {
 
   private $some;
   private $more;
+  private $expandtext;
 
   public function setSome($some) {
     $this->some = $some;
@@ -31,8 +32,15 @@ final class AphrontMoreView extends AphrontView {
     return $this;
   }
 
+  public function setExpandText($text) {
+    $this->expandtext = $text;
+    return $this;
+  }
+
   public function render() {
     $some = $this->some;
+
+    $text = $this->expandtext === null ?: "(Show More\xE2\x80\xA6)";
 
     $link = null;
     if ($this->more && $this->more != $this->some) {
@@ -47,7 +55,7 @@ final class AphrontMoreView extends AphrontView {
             'more' => $this->more,
           ),
         ),
-        "(Show More\xE2\x80\xA6)");
+        $text);
     }
 
     return javelin_render_tag(
@@ -57,6 +65,4 @@ final class AphrontMoreView extends AphrontView {
       ),
       $some.$link);
   }
-
-
 }

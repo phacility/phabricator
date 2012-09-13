@@ -57,7 +57,6 @@ final class PonderAnswerSaveController extends PonderController {
 
     return id(new AphrontRedirectResponse())
       ->setURI(id(new PhutilURI('/Q'. $question->getID()))
-        ->setFragment('A'.$res->getID()));
+      ->setFragment('A'.$res->getID()));
   }
-
 }
