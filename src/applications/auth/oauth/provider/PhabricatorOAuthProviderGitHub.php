@@ -112,7 +112,7 @@ final class PhabricatorOAuthProviderGitHub extends PhabricatorOAuthProvider {
 
   public function retrieveUserAccountURI() {
     $username = $this->retrieveUserAccountName();
-    if ($username) {
+    if (strlen($username)) {
       return 'https://github.com/'.$username;
     }
     return null;
