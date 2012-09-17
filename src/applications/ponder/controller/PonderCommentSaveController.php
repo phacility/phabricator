@@ -40,6 +40,16 @@ final class PonderCommentSaveController extends PonderController {
     }
     $content = $request->getStr('content');
 
+    if (!strlen(trim($content))) {
+      $dialog = new AphrontDialogView();
+      $dialog->setUser($request->getUser());
+      $dialog->setTitle('Empty comment');
+      $dialog->appendChild('<p>Your comment must not be empty.</p>');
+      $dialog->addCancelButton('/Q'.$question_id);
+
+      return id(new AphrontDialogResponse())->setDialog($dialog);
+    }
+
     $res = new PonderComment();
     $res
       ->setContent($content)
@@ -51,8 +61,7 @@ final class PonderCommentSaveController extends PonderController {
 
     return id(new AphrontRedirectResponse())
       ->setURI(
-        id(new PhutilURI('/Q'. $question->getID()))
-        ->setFragment('comment-' . $res->getID()));
+        id(new PhutilURI('/Q'. $question->getID())));
   }
 
 }

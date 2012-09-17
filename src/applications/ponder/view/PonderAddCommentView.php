@@ -55,6 +55,7 @@ final class PonderAddCommentView extends AphrontView {
     $form
       ->setUser($this->user)
       ->setAction($this->actionURI)
+      ->setWorkflow(true)
       ->addHiddenInput('target', $target)
       ->addHiddenInput('question_id', $questionID)
       ->appendChild(
