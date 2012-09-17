@@ -75,6 +75,8 @@ EXAMPLE;
     $font_default = PhabricatorEnv::getEnvConfig('style.monospace');
     $font_default = phutil_escape_html($font_default);
 
+    $pref_symbols_value = $preferences->getPreference($pref_symbols);
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->appendChild(
@@ -117,7 +119,7 @@ EXAMPLE;
         id(new AphrontFormRadioButtonControl())
         ->setLabel('Symbol Links')
         ->setName($pref_symbols)
-        ->setValue($preferences->getPreference($pref_symbols) ?: 'enabled')
+        ->setValue($pref_symbols_value ? $pref_symbols_value : 'enabled')
         ->addButton('enabled', 'Enabled (default)',
           'Use this setting to disable linking symbol names in Differential '.
           'and Diffusion to their definitions. This is enabled by default.')
