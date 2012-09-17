@@ -153,7 +153,7 @@ final class PhabricatorPolicyQuery extends PhabricatorQuery {
   private static function getGlobalPolicyName($policy) {
     switch ($policy) {
       case PhabricatorPolicies::POLICY_PUBLIC:
-        return pht('Public');
+        return pht('Public (No Login Required)');
       case PhabricatorPolicies::POLICY_USER:
         return pht('All Users');
       case PhabricatorPolicies::POLICY_ADMIN:
