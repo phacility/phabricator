@@ -979,6 +979,7 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       'pastepolicy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('pastepolicy.sql'),
+      ),
       'xhprof.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('xhprof.sql'),
