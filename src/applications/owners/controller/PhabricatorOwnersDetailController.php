@@ -101,8 +101,9 @@ final class PhabricatorOwnersDetailController
       $href = DiffusionRequest::generateDiffusionURI(
         array(
           'callsign' => $repo->getCallsign(),
-          'path'       => $path->getPath(),
-          'action' => 'browse'
+          'branch'   => $repo->getDefaultBranch(),
+          'path'     => $path->getPath(),
+          'action'   => 'browse'
         ));
       $repo_name = '<strong>'.phutil_escape_html($repo->getName()).
                    '</strong>';

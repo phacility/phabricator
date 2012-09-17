@@ -60,6 +60,7 @@ final class DiffusionExternalController extends DiffusionController {
           array(
             'action'    => 'browse',
             'callsign'  => $repository->getCallsign(),
+            'branch'    => $repository->getDefaultBranch(),
             'commit'    => $id,
           ));
         return id(new AphrontRedirectResponse())->setURI($redirect);
@@ -88,11 +89,12 @@ final class DiffusionExternalController extends DiffusionController {
           "Diffusion does not know about.</p>");
     } else if (count($commits) == 1) {
       $commit = head($commits);
+      $repo = $repositories[$commit->getRepositoryID()];
       $redirect = DiffusionRequest::generateDiffusionURI(
         array(
           'action'    => 'browse',
-          'callsign'  => $repositories[$commit->getRepositoryID()]
-                          ->getCallsign(),
+          'callsign'  => $repo->getCallsign(),
+          'branch'    => $repo->getDefaultBranch(),
           'commit'    => $commit->getCommitIdentifier(),
         ));
       return id(new AphrontRedirectResponse())->setURI($redirect);
@@ -105,6 +107,7 @@ final class DiffusionExternalController extends DiffusionController {
           array(
             'action'    => 'browse',
             'callsign'  => $repo->getCallsign(),
+            'branch'    => $repo->getDefaultBranch(),
             'commit'    => $commit->getCommitIdentifier(),
           ));
         $rows[] = array(

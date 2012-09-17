@@ -265,6 +265,7 @@ final class PhabricatorOwnersListController
           $href = DiffusionRequest::generateDiffusionURI(
             array(
               'callsign' => $repo->getCallsign(),
+              'branch'   => $repo->getDefaultBranch(),
               'path'     => $path->getPath(),
               'action'   => 'browse',
             ));
