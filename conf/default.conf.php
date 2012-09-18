@@ -1215,6 +1215,7 @@ return array(
     'c' => 'C',
     'cpp' => 'C++',
     'css' => 'CSS',
+    'd' => 'D',
     'diff' => 'Diff',
     'django' => 'Django Templating',
     'erb' => 'Embedded Ruby/ERB',
@@ -1227,6 +1228,7 @@ return array(
     'objc' => 'Objective-C',
     'perl' => 'Perl',
     'php' => 'PHP',
+    'rest' => 'reStructuredText'
     'text' => 'Plain Text',
     'python' => 'Python',
     'rainbow' => 'Rainbow',
