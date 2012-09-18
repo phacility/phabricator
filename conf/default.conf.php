@@ -1228,7 +1228,7 @@ return array(
     'objc' => 'Objective-C',
     'perl' => 'Perl',
     'php' => 'PHP',
-    'rest' => 'reStructuredText'
+    'rest' => 'reStructuredText',
     'text' => 'Plain Text',
     'python' => 'Python',
     'rainbow' => 'Rainbow',
