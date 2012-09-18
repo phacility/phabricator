@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 
+/**
+ * @group search
+ */
 final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
   private $uri;
   private $timeout;
@@ -175,6 +178,12 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
       } else {
         $spec = $filter;
       }
+    }
+
+    if (!$query->getQuery()) {
+      $spec['sort'] = array(
+        array('dateCreated' => 'desc'),
+      );
     }
 
     $spec['from'] = (int)$query->getParameter('offset', 0);
