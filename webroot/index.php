@@ -228,27 +228,6 @@ $headers = array_merge($headers, $response->getHeaders());
 
 $sink->writeHeaders($headers);
 
-// TODO: This shouldn't be possible in a production-configured environment.
-if (DarkConsoleXHProfPluginAPI::isProfilerRequested() &&
-    DarkConsoleXHProfPluginAPI::isProfilerRequested() === 'all') {
-  $profile = DarkConsoleXHProfPluginAPI::stopProfiler();
-  $profile =
-    '<div style="text-align: center; background: #ff00ff; padding: 1em;
-                 font-size: 24px; font-weight: bold;">'.
-      '<a href="/xhprof/profile/'.$profile.'/">'.
-        '&gt;&gt;&gt; View Profile &lt;&lt;&lt;'.
-      '</a>'.
-    '</div>';
-  if (strpos($response_string, '<body>') !== false) {
-    $response_string = str_replace(
-      '<body>',
-      '<body>'.$profile,
-      $response_string);
-  } else {
-    $sink->writeData($profile);
-  }
-}
-
 $sink->writeData($response_string);
 
 if ($access_log) {
@@ -258,6 +237,26 @@ if ($access_log) {
       'T' => (int)(1000000 * (microtime(true) - $__start__)),
     ));
   $access_log->write();
+}
+
+if (DarkConsoleXHProfPluginAPI::isProfilerRequested()) {
+  $profile = DarkConsoleXHProfPluginAPI::stopProfiler();
+  $profile_sample = id(new PhabricatorXHProfSample())
+    ->setFilePHID($profile);
+  if (empty($_REQUEST['__profile__'])) {
+    $sample_rate = PhabricatorEnv::getEnvConfig('debug.profile-rate');
+  } else {
+    $sample_rate = 0;
+  }
+  $profile_sample->setSampleRate($sample_rate);
+  if ($access_log) {
+    $profile_sample->setUsTotal($access_log->getData('T'))
+      ->setHostname($access_log->getData('h'))
+      ->setRequestPath($access_log->getData('U'))
+      ->setController($access_log->getData('C'))
+      ->setUserPHID($request->getUser()->getPHID());
+  }
+  $profile_sample->save();
 }
 
 /**

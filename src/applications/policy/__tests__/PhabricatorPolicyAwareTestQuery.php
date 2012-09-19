@@ -19,8 +19,8 @@
 /**
  * Configurable test query for implementing Policy unit tests.
  */
-final class PhabricatorPolicyTestQuery
-  extends PhabricatorPolicyQuery {
+final class PhabricatorPolicyAwareTestQuery
+  extends PhabricatorPolicyAwareQuery {
 
   private $results;
   private $offset = 0;

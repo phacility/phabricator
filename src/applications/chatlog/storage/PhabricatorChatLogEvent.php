@@ -35,7 +35,7 @@ final class PhabricatorChatLogEvent
 
   public function getPolicy($capability) {
     // TODO: This is sort of silly and mostly just so that we can use
-    // CursorPagedPolicyQuery; once we implement Channel objects we should
+    // CursorPagedPolicyAwareQuery; once we implement Channel objects we should
     // just delegate policy to them.
     return PhabricatorPolicies::POLICY_PUBLIC;
   }

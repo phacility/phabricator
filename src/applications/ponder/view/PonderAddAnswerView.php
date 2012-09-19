@@ -53,6 +53,7 @@ final class PonderAddAnswerView extends AphrontView {
     $form
       ->setUser($this->user)
       ->setAction($this->actionURI)
+      ->setWorkflow(true)
       ->addHiddenInput('question_id', $question->getID())
       ->appendChild(
         id(new AphrontFormTextAreaControl())

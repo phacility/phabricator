@@ -48,7 +48,7 @@ abstract class PhabricatorController extends AphrontController {
     $phusr = $request->getCookie('phusr');
     $phsid = $request->getCookie('phsid');
 
-    if ($phusr && $phsid) {
+    if (strlen($phusr) && $phsid) {
       $info = queryfx_one(
         $user->establishConnection('r'),
         'SELECT u.* FROM %T u JOIN %T s ON u.phid = s.userPHID

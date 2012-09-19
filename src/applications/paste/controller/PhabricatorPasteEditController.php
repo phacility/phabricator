@@ -87,6 +87,10 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
 
       $paste->setTitle($request->getStr('title'));
       $paste->setLanguage($request->getStr('language'));
+      $paste->setViewPolicy($request->getStr('can_view'));
+
+      // NOTE: The author is the only editor and can always view the paste,
+      // so it's impossible for them to choose an invalid policy.
 
       if (!$errors) {
         if ($is_create) {
@@ -139,6 +143,19 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
           ->setValue($paste->getLanguage())
           ->setOptions($langs));
 
+    $policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($user)
+      ->setObject($paste)
+      ->execute();
+
+    $form->appendChild(
+      id(new AphrontFormPolicyControl())
+        ->setUser($user)
+        ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
+        ->setPolicyObject($paste)
+        ->setPolicies($policies)
+        ->setName('can_view'));
+
     if ($is_create) {
       $form
         ->appendChild(
@@ -150,16 +167,6 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
             ->setCustomClass('PhabricatorMonospaced')
             ->setName('text'));
     }
-
-    /* TODO: Doesn't have any useful options yet.
-      ->appendChild(
-        id(new AphrontFormPolicyControl())
-          ->setLabel('Visible To')
-          ->setUser($user)
-          ->setValue(
-            $new_paste->getPolicy(PhabricatorPolicyCapability::CAN_VIEW))
-          ->setName('policy'))
-    */
 
     $submit = new AphrontFormSubmitControl();
 

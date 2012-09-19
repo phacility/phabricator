@@ -2,7 +2,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,34 +23,28 @@ require_once $root.'/scripts/__init_script__.php';
 // TODO: Get rid of this script eventually, once this stuff is better-formalized
 // in Timeline consumers.
 
-echo "Loading revisions...\n";
-$revs = id(new DifferentialRevision())->loadAll();
-$count = count($revs);
-echo "Reindexing {$count} revisions";
+echo "Reindexing revisions...\n";
+$revs = new LiskMigrationIterator(new DifferentialRevision());
 foreach ($revs as $rev) {
   PhabricatorSearchDifferentialIndexer::indexRevision($rev);
   echo '.';
 }
 echo "\n";
 
-echo "Loading commits...\n";
-$commits = id(new PhabricatorRepositoryCommit())->loadAll();
-$count = count($commits);
-echo "Reindexing {$count} commits";
+echo "Reindexing commits...\n";
+$commits = new LiskMigrationIterator(new PhabricatorRepositoryCommit());
 foreach ($commits as $commit) {
   PhabricatorSearchCommitIndexer::indexCommit($commit);
   echo '.';
 }
 echo "\n";
 
-echo "Loading tasks...\n";
-$tasks = id(new ManiphestTask())->loadAll();
-$count = count($tasks);
-echo "Reindexing {$count} tasks";
+echo "Reindexing tasks...\n";
+$tasks = new LiskMigrationIterator(new ManiphestTask());
 foreach ($tasks as $task) {
   PhabricatorSearchManiphestIndexer::indexTask($task);
   echo '.';
 }
 echo "\n";
-echo "Done.\n";
 
+include dirname(__FILE__).'/reindex_all_users.php';

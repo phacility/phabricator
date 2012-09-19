@@ -34,11 +34,20 @@ final class DarkConsoleXHProfPluginAPI {
       return $_REQUEST['__profile__'];
     }
 
-    if (PhabricatorEnv::getEnvConfig('debug.profile-every-request')) {
-      return PhabricatorEnv::getEnvConfig('debug.profile-every-request');
+    static $profilerRequested = null;
+
+    if (!isset($profilerRequested)) {
+      if (PhabricatorEnv::getEnvConfig('debug.profile-rate')) {
+        $rate = PhabricatorEnv::getEnvConfig('debug.profile-rate');
+        if (mt_rand(1, $rate) == 1) {
+          $profilerRequested = true;
+        } else {
+          $profilerRequested = false;
+        }
+      }
     }
 
-    return false;
+    return $profilerRequested;
   }
 
   public static function includeXHProfLib() {
@@ -73,9 +82,7 @@ final class DarkConsoleXHProfPluginAPI {
 
   public static function startProfiler() {
     self::includeXHProfLib();
-    // Note: HPHP's implementation of XHProf currently requires an argument
-    // to xhprof_enable() -- see Facebook Task #531011.
-    xhprof_enable(0);
+    xhprof_enable();
   }
 
   public static function stopProfiler() {

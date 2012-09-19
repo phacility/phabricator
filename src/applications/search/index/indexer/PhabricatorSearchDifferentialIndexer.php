@@ -52,13 +52,13 @@ final class PhabricatorSearchDifferentialIndexer
         time());
     }
 
-    $comments = id(new DifferentialComment())->loadAllWhere(
-      'revisionID = %d',
-      $rev->getID());
+    $comments = $rev->loadRelatives(new DifferentialComment(), 'revisionID');
 
-    $inlines = id(new DifferentialInlineComment())->loadAllWhere(
-      'revisionID = %d AND commentID IS NOT NULL',
-      $rev->getID());
+    $inlines = $rev->loadRelatives(
+      new DifferentialInlineComment(),
+      'revisionID',
+      'getID',
+      '(commentID IS NOT NULL)');
 
     $touches = array();
 

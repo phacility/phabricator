@@ -20,8 +20,8 @@
  * A query class which uses cursor-based paging. This paging is much more
  * performant than offset-based paging in the presence of policy filtering.
  */
-abstract class PhabricatorCursorPagedPolicyQuery
-  extends PhabricatorPolicyQuery {
+abstract class PhabricatorCursorPagedPolicyAwareQuery
+  extends PhabricatorPolicyAwareQuery {
 
   private $afterID;
   private $beforeID;

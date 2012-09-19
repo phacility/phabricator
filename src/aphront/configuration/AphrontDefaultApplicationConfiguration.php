@@ -126,6 +126,7 @@ class AphrontDefaultApplicationConfiguration
       ),
 
       '/xhprof/' => array(
+        'list/(?P<view>[^/]+)/' => 'PhabricatorXHProfSampleListController',
         'profile/(?P<phid>[^/]+)/' => 'PhabricatorXHProfProfileController',
       ),
 

@@ -309,7 +309,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
     $repository = $drequest->getRepository();
     $path = $drequest->getPath();
-    $line = 1;
+    $line = nonempty((int)$drequest->getLine(), 1);
 
     $callsign = $repository->getCallsign();
     $editor_link = $user->loadEditorLink($path, $line, $callsign);
@@ -469,6 +469,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
           'action'  => 'browse',
           'line'    => $line['line'],
           'stable'  => true,
+          'params'  => array('view' => 'blame'),
         ));
 
       $blame = array();

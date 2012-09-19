@@ -35,7 +35,7 @@ final class PonderQuestionPreviewController
     $question->setContent($request->getStr('content'));
     $question->setAuthorPHID($author_phid);
 
-    $view = new PonderCommentBodyView();
+    $view = new PonderPostBodyView();
     $view
       ->setQuestion($question)
       ->setTarget($question)

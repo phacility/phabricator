@@ -25,6 +25,7 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   protected $filePHID;
   protected $language;
   protected $parentPHID;
+  protected $viewPolicy;
 
   private $content;
 
@@ -52,7 +53,7 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
 
   public function getPolicy($capability) {
     if ($capability == PhabricatorPolicyCapability::CAN_VIEW) {
-      return PhabricatorPolicies::POLICY_USER;
+      return $this->viewPolicy;
     }
     return PhabricatorPolicies::POLICY_NOONE;
   }

@@ -1215,16 +1215,20 @@ return array(
     'c' => 'C',
     'cpp' => 'C++',
     'css' => 'CSS',
+    'd' => 'D',
     'diff' => 'Diff',
     'django' => 'Django Templating',
     'erb' => 'Embedded Ruby/ERB',
     'erlang' => 'Erlang',
+    'haskell' => 'Haskell',
     'html' => 'HTML',
     'java' => 'Java',
     'js' => 'Javascript',
     'mysql' => 'MySQL',
+    'objc' => 'Objective-C',
     'perl' => 'Perl',
     'php' => 'PHP',
+    'rest' => 'reStructuredText',
     'text' => 'Plain Text',
     'python' => 'Python',
     'rainbow' => 'Rainbow',
@@ -1273,9 +1277,12 @@ return array(
   // since the redirect happens in Javascript.
   'debug.stop-on-redirect'    => false,
 
-  // Enable this to always profile every page. This is very slow! You should
-  // only enable it when debugging.
-  'debug.profile-every-request'  => false,
+  // Set the rate for how often to do sampled profiling. On average, one
+  // request for every number of requests specified here will be sampled.
+  // Set this value to 0 to completely disable profiling. In a production
+  // environment, this value should either be set to 0 (to disable) or to
+  // a large number (to sample only a few requests).
+  'debug.profile-rate' => 0,
 
 
 // -- Previews  ------------------------------------------------------------- //

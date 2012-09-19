@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-final class PonderAnswerSaveController extends PonderController {
+final class PonderCommentSaveController extends PonderController {
 
   public function processRequest() {
     $request = $this->getRequest();
@@ -32,41 +32,36 @@ final class PonderAnswerSaveController extends PonderController {
       return new Aphront404Response();
     }
 
-    $answer = $request->getStr('answer');
+    $target = $request->getStr('target');
+    $objects = id(new PhabricatorObjectHandleData(array($target)))
+      ->loadHandles();
+    if (!$objects) {
+      return new Aphront404Response();
+    }
+    $content = $request->getStr('content');
 
-    // Only want answers with some non whitespace content
-    if (!strlen(trim($answer))) {
+    if (!strlen(trim($content))) {
       $dialog = new AphrontDialogView();
       $dialog->setUser($request->getUser());
-      $dialog->setTitle('Empty answer');
-      $dialog->appendChild('<p>Your answer must not be empty.</p>');
+      $dialog->setTitle('Empty comment');
+      $dialog->appendChild('<p>Your comment must not be empty.</p>');
       $dialog->addCancelButton('/Q'.$question_id);
 
       return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_WEB,
-      array(
-        'ip' => $request->getRemoteAddr(),
-      ));
-
-    $res = new PonderAnswer();
+    $res = new PonderComment();
     $res
-      ->setContent($answer)
+      ->setContent($content)
       ->setAuthorPHID($user->getPHID())
-      ->setVoteCount(0)
-      ->setQuestionID($question_id)
-      ->setContentSource($content_source);
-
-    id(new PonderAnswerEditor())
-      ->setQuestion($question)
-      ->setAnswer($res)
-      ->saveAnswer();
+      ->setTargetPHID($target)
+      ->save();
 
     PhabricatorSearchPonderIndexer::indexQuestion($question);
 
-    return id(new AphrontRedirectResponse())->setURI(
-      id(new PhutilURI('/Q'. $question->getID())));
+    return id(new AphrontRedirectResponse())
+      ->setURI(
+        id(new PhutilURI('/Q'. $question->getID())));
   }
+
 }

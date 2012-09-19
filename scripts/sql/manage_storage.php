@@ -35,7 +35,9 @@ EOHELP
 );
 $args->parseStandardArguments();
 
-$conf = PhabricatorEnv::newObjectFromConfig('mysql.configuration-provider');
+$conf = PhabricatorEnv::newObjectFromConfig(
+  'mysql.configuration-provider',
+  array($dao = null, 'w'));
 
 $default_user       = $conf->getUser();
 $default_host       = $conf->getHost();
