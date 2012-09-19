@@ -100,20 +100,11 @@ final class PonderQuestionAskController extends PonderController {
           ->setName('title')
           ->setValue($title))
       ->appendChild(
-        id(new AphrontFormTextAreaControl())
+        id(new PhabricatorRemarkupControl())
           ->setName('content')
           ->setID('content')
           ->setValue($content)
-          ->setLabel("Question")
-          ->setCaption(phutil_render_tag(
-            'a',
-            array(
-              'href' => PhabricatorEnv::getDoclink(
-                'article/Remarkup_Reference.html'),
-              'tabindex' => '-1',
-              'target' => '_blank',
-            ),
-            "Formatting Reference")))
+          ->setLabel("Question"))
       ->appendChild(
         id(new AphrontFormSubmitControl())
         ->setValue('Ask Away!'));

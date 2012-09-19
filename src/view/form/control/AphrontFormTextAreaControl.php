@@ -16,7 +16,10 @@
  * limitations under the License.
  */
 
-final class AphrontFormTextAreaControl extends AphrontFormControl {
+/**
+ * @concrete-extensible
+ */
+class AphrontFormTextAreaControl extends AphrontFormControl {
 
   const HEIGHT_VERY_SHORT = 'very-short';
   const HEIGHT_SHORT      = 'short';

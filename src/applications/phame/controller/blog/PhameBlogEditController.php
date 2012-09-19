@@ -181,16 +181,6 @@ final class PhameBlogEditController
       $panel->addButton($delete_button);
     }
 
-    $remarkup_reference = phutil_render_tag(
-      'a',
-      array(
-        'href' =>
-          PhabricatorEnv::getDoclink('article/Remarkup_Reference.html'),
-        'tabindex' => '-1',
-        'target' => '_blank',
-      ),
-      'Formatting Reference');
-
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->appendChild(
@@ -202,13 +192,12 @@ final class PhameBlogEditController
         ->setError($e_name)
       )
       ->appendChild(
-        id(new AphrontFormTextAreaControl())
+        id(new PhabricatorRemarkupControl())
         ->setLabel('Description')
         ->setName('description')
         ->setValue($blog->getDescription())
         ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
         ->setID('blog-description')
-        ->setCaption($remarkup_reference)
       )
       ->appendChild(
         id(new AphrontFormTokenizerControl())

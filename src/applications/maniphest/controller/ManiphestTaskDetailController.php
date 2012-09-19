@@ -374,9 +374,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
       unset($resolution_types[ManiphestTaskStatus::STATUS_CLOSED_SPITE]);
     }
 
-    $remarkup_href = PhabricatorEnv::getDoclink(
-      'article/Remarkup_Reference.html');
-
     $comment_form = new AphrontFormView();
     $comment_form
       ->setUser($user)
@@ -435,19 +432,10 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setControlID('file')
           ->setControlStyle('display: none'))
       ->appendChild(
-        id(new AphrontFormTextAreaControl())
+        id(new PhabricatorRemarkupControl())
           ->setLabel('Comments')
           ->setName('comments')
           ->setValue($draft_text)
-          ->setCaption(
-            phutil_render_tag(
-              'a',
-              array(
-                'href' => $remarkup_href,
-                'tabindex' => '-1',
-                'target' => '_blank',
-              ),
-              'Formatting Reference'))
           ->setID('transaction-comments'))
       ->appendChild(
         id(new AphrontFormDragAndDropUploadControl())
