@@ -222,6 +222,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     $raw_diff = DiffusionRawDiffQuery::newFromDiffusionRequest($drequest)
       ->loadRawDiff();
 
+    // TODO: Support adds, deletes and moves under SVN.
     $changes = id(new ArcanistDiffParser())->parseDiff($raw_diff);
     $diff = DifferentialDiff::newFromRawChanges($changes)
       ->setRevisionID($revision->getID())
