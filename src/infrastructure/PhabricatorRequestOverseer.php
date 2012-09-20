@@ -57,6 +57,7 @@ final class PhabricatorRequestOverseer {
     //
     // NOTE: We use strncmp() because the actual content type may be something
     // like "multipart/form-data; boundary=...".
+    if (empty($_SERVER['CONTENT_TYPE'])) return;
     $content_type = $_SERVER['CONTENT_TYPE'];
 
     $parsed_types = array(
