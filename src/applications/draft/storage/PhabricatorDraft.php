@@ -21,5 +21,14 @@ final class PhabricatorDraft extends PhabricatorDraftDAO {
   protected $authorPHID;
   protected $draftKey;
   protected $draft;
+  protected $metadata = array();
+
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_SERIALIZATION => array(
+        'metadata' => self::SERIALIZATION_JSON,
+      ),
+    ) + parent::getConfiguration();
+  }
 
 }

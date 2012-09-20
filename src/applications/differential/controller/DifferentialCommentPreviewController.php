@@ -42,18 +42,15 @@ final class DifferentialCommentPreviewController
 
     $handles = array($author_phid);
 
-    $reviewers = $request->getStr('reviewers');
-    if (($action == DifferentialAction::ACTION_ADDREVIEWERS
-        || $action == DifferentialAction::ACTION_REQUEST) && $reviewers) {
-      $reviewers = explode(',', $reviewers);
+    $reviewers = $request->getStrList('reviewers');
+    if (DifferentialAction::allowReviewers($action) && $reviewers) {
       $comment->setMetadata(array(
         DifferentialComment::METADATA_ADDED_REVIEWERS => $reviewers));
       $handles = array_merge($handles, $reviewers);
     }
 
-    $ccs = $request->getStr('ccs');
+    $ccs = $request->getStrList('ccs');
     if ($action == DifferentialAction::ACTION_ADDCCS && $ccs) {
-      $ccs = explode(',', $ccs);
       $comment->setMetadata(array(
         DifferentialComment::METADATA_ADDED_CCS => $ccs));
       $handles = array_merge($handles, $ccs);
@@ -74,6 +71,11 @@ final class DifferentialCommentPreviewController
       ->setAuthorPHID($author_phid)
       ->setDraftKey('differential-comment-'.$this->id)
       ->setDraft($comment->getContent())
+      ->setMetadata(array(
+        'action' => $action,
+        'reviewers' => $reviewers,
+        'ccs' => $ccs,
+      ))
       ->replace();
 
     return id(new AphrontAjaxResponse())
