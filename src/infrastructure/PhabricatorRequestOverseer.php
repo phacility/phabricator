@@ -57,7 +57,10 @@ final class PhabricatorRequestOverseer {
     //
     // NOTE: We use strncmp() because the actual content type may be something
     // like "multipart/form-data; boundary=...".
-    $content_type = $_SERVER['CONTENT_TYPE'];
+    //
+    // NOTE: Chrome sometimes omits this header, see some discussion in T1762
+    // and http://code.google.com/p/chromium/issues/detail?id=6800
+    $content_type = idx($_SERVER, 'CONTENT_TYPE', '');
 
     $parsed_types = array(
       'application/x-www-form-urlencoded',
