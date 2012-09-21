@@ -16,10 +16,12 @@
  * limitations under the License.
  */
 
-final class PhabricatorLintEngine extends PhutilLintEngine {
+final class PhabricatorLintEngine extends ArcanistLintEngine {
 
   public function buildLinters() {
-    $linters = parent::buildLinters();
+    $linters = id(new PhutilLintEngine())
+      ->setLintEngine($this)
+      ->buildLinters();
 
     $paths = $this->getPaths();
 
