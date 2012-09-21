@@ -243,9 +243,12 @@ final class DifferentialDiff extends DifferentialDAO {
           }
         }
       }
-      $metadata = $changeset->getMetadata();
-      $metadata['copy:lines'] = array_filter($copies);
-      $changeset->setMetadata($metadata);
+      $copies = array_filter($copies);
+      if ($copies) {
+        $metadata = $changeset->getMetadata();
+        $metadata['copy:lines'] = $copies;
+        $changeset->setMetadata($metadata);
+      }
     }
   }
 
