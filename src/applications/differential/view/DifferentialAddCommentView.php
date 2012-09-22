@@ -134,7 +134,7 @@ final class DifferentialAddCommentView extends AphrontView {
           ->setID('comment-content')
           ->setLabel('Comment')
           ->setEnableDragAndDropFileUploads(true)
-          ->setValue($this->draft->getDraft()))
+          ->setValue($this->draft ? $this->draft->getDraft() : null))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($is_serious ? 'Submit' : 'Clowncopterize'));
