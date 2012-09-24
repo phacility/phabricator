@@ -70,6 +70,7 @@ final class ConduitAPI_paste_create_Method extends ConduitAPI_paste_Method {
     $paste->setLanguage($language);
     $paste->setFilePHID($paste_file->getPHID());
     $paste->setAuthorPHID($user->getPHID());
+    $paste->setViewPolicy(PhabricatorPolicies::POLICY_USER);
     $paste->save();
 
     $paste->attachContent($content);
