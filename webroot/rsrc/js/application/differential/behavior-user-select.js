@@ -10,7 +10,8 @@ JX.behavior('differential-user-select', function() {
   var unselectable;
 
   function isOnRight(node) {
-    return node.parentNode.firstChild != node.previousSibling;
+    return node.previousSibling &&
+      node.parentNode.firstChild != node.previousSibling;
   }
 
   JX.Stratcom.listen(

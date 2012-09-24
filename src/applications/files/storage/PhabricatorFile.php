@@ -127,7 +127,8 @@ final class PhabricatorFile extends PhabricatorFileDAO {
     array $params = array()) {
 
     $file = id(new PhabricatorFile())->loadOneWhere(
-      'contentHash = %s LIMIT 1',
+      'name = %s AND contentHash = %s LIMIT 1',
+      self::normalizeFileName(idx($params, 'name')),
       PhabricatorHash::digest($data));
 
     if (!$file) {

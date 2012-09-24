@@ -24,6 +24,8 @@ final class DifferentialAddCommentView extends AphrontView {
   private $user;
   private $draft;
   private $auxFields;
+  private $reviewers = array();
+  private $ccs = array();
 
   public function setRevision($revision) {
     $this->revision = $revision;
@@ -51,8 +53,18 @@ final class DifferentialAddCommentView extends AphrontView {
     return $this;
   }
 
-  public function setDraft($draft) {
+  public function setDraft(PhabricatorDraft $draft = null) {
     $this->draft = $draft;
+    return $this;
+  }
+
+  public function setReviewers(array $names) {
+    $this->reviewers = $names;
+    return $this;
+  }
+
+  public function setCCs(array $names) {
+    $this->ccs = $names;
     return $this;
   }
 
@@ -79,6 +91,14 @@ final class DifferentialAddCommentView extends AphrontView {
 
     $revision = $this->revision;
 
+    $action = null;
+    if ($this->draft) {
+      $action = idx($this->draft->getMetadata(), 'action');
+    }
+
+    $enable_reviewers = DifferentialAction::allowReviewers($action);
+    $enable_ccs = ($action == DifferentialAction::ACTION_ADDCCS);
+
     $form = new AphrontFormView();
     $form
       ->setWorkflow(true)
@@ -89,6 +109,7 @@ final class DifferentialAddCommentView extends AphrontView {
         id(new AphrontFormSelectControl())
           ->setLabel('Action')
           ->setName('action')
+          ->setValue($action)
           ->setID('comment-action')
           ->setOptions($this->actions))
       ->appendChild(
@@ -96,7 +117,7 @@ final class DifferentialAddCommentView extends AphrontView {
           ->setLabel('Add Reviewers')
           ->setName('reviewers')
           ->setControlID('add-reviewers')
-          ->setControlStyle('display: none')
+          ->setControlStyle($enable_reviewers ? null : 'display: none')
           ->setID('add-reviewers-tokenizer')
           ->setDisableBehavior(true))
       ->appendChild(
@@ -104,25 +125,16 @@ final class DifferentialAddCommentView extends AphrontView {
           ->setLabel('Add CCs')
           ->setName('ccs')
           ->setControlID('add-ccs')
-          ->setControlStyle('display: none')
+          ->setControlStyle($enable_ccs ? null : 'display: none')
           ->setID('add-ccs-tokenizer')
           ->setDisableBehavior(true))
       ->appendChild(
-        id(new AphrontFormTextAreaControl())
+        id(new PhabricatorRemarkupControl())
           ->setName('comment')
           ->setID('comment-content')
           ->setLabel('Comment')
           ->setEnableDragAndDropFileUploads(true)
-          ->setValue($this->draft)
-          ->setCaption(phutil_render_tag(
-            'a',
-            array(
-              'href' => PhabricatorEnv::getDoclink(
-                'article/Remarkup_Reference.html'),
-              'tabindex' => '-1',
-              'target' => '_blank',
-            ),
-            'Formatting Reference')))
+          ->setValue($this->draft ? $this->draft->getDraft() : null))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($is_serious ? 'Submit' : 'Clowncopterize'));
@@ -134,6 +146,7 @@ final class DifferentialAddCommentView extends AphrontView {
           'add-reviewers-tokenizer' => array(
             'actions' => array('request_review' => 1, 'add_reviewers' => 1),
             'src' => '/typeahead/common/users/',
+            'value' => $this->reviewers,
             'row' => 'add-reviewers',
             'ondemand' => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
             'placeholder' => 'Type a user name...',
@@ -141,6 +154,7 @@ final class DifferentialAddCommentView extends AphrontView {
           'add-ccs-tokenizer' => array(
             'actions' => array('add_ccs' => 1),
             'src' => '/typeahead/common/mailable/',
+            'value' => $this->ccs,
             'row' => 'add-ccs',
             'ondemand' => PhabricatorEnv::getEnvConfig('tokenizer.ondemand'),
             'placeholder' => 'Type a user or mailing list...',

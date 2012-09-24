@@ -565,20 +565,11 @@ final class DiffusionCommitController extends DiffusionController {
           ->setID('add-ccs-tokenizer')
           ->setDisableBehavior(true))
       ->appendChild(
-        id(new AphrontFormTextAreaControl())
+        id(new PhabricatorRemarkupControl())
           ->setLabel('Comments')
           ->setName('content')
           ->setValue($draft)
-          ->setID('audit-content')
-          ->setCaption(phutil_render_tag(
-            'a',
-            array(
-              'href' => PhabricatorEnv::getDoclink(
-                'article/Remarkup_Reference.html'),
-              'tabindex' => '-1',
-              'target' => '_blank',
-            ),
-            'Formatting Reference')))
+          ->setID('audit-content'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($is_serious ? 'Submit' : 'Cook the Books'));

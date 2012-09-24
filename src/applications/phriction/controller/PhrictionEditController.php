@@ -177,15 +177,6 @@ final class PhrictionEditController
     $uri = PhrictionDocument::getSlugURI($uri);
     $uri = PhabricatorEnv::getProductionURI($uri);
 
-    $remarkup_reference = phutil_render_tag(
-      'a',
-      array(
-        'href' => PhabricatorEnv::getDoclink('article/Remarkup_Reference.html'),
-        'tabindex' => '-1',
-        'target' => '_blank',
-      ),
-      'Formatting Reference');
-
     $cancel_uri = PhrictionDocument::getSlugURI($document->getSlug());
 
     if ($draft &&
@@ -227,14 +218,13 @@ final class PhrictionEditController
           ->setLabel('URI')
           ->setValue($uri))
       ->appendChild(
-        id(new AphrontFormTextAreaControl())
+        id(new PhabricatorRemarkupControl())
           ->setLabel('Content')
           ->setValue($content_text)
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
           ->setName('content')
           ->setID('document-textarea')
-          ->setEnableDragAndDropFileUploads(true)
-          ->setCaption($remarkup_reference))
+          ->setEnableDragAndDropFileUploads(true))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Edit Notes')

@@ -56,19 +56,10 @@ final class PonderAddAnswerView extends AphrontView {
       ->setWorkflow(true)
       ->addHiddenInput('question_id', $question->getID())
       ->appendChild(
-        id(new AphrontFormTextAreaControl())
+        id(new PhabricatorRemarkupControl())
           ->setName('answer')
           ->setID('answer-content')
-          ->setEnableDragAndDropFileUploads(true)
-          ->setCaption(phutil_render_tag(
-            'a',
-            array(
-              'href' => PhabricatorEnv::getDoclink(
-                'article/Remarkup_Reference.html'),
-              'tabindex' => '-1',
-              'target' => '_blank',
-            ),
-            'Formatting Reference')))
+          ->setEnableDragAndDropFileUploads(true))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($is_serious ? 'Submit' : 'Make it so.'));

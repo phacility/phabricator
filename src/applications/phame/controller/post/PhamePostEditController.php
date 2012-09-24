@@ -232,16 +232,6 @@ final class PhamePostEditController
       $panel->addButton($delete_button);
     }
 
-    $remarkup_reference = phutil_render_tag(
-      'a',
-      array(
-        'href' =>
-          PhabricatorEnv::getDoclink('article/Remarkup_Reference.html'),
-        'tabindex' => '-1',
-        'target' => '_blank',
-      ),
-      'Formatting Reference');
-
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->appendChild(
@@ -264,14 +254,13 @@ final class PhamePostEditController
         ->setError($e_phame_title)
       )
       ->appendChild(
-        id(new AphrontFormTextAreaControl())
+        id(new PhabricatorRemarkupControl())
         ->setLabel('Body')
         ->setName('body')
         ->setValue($post->getBody())
         ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
         ->setEnableDragAndDropFileUploads(true)
         ->setID('post-body')
-        ->setCaption($remarkup_reference)
       )
       ->appendChild(
         id(new AphrontFormSelectControl())

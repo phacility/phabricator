@@ -136,6 +136,7 @@ final class DifferentialDiff extends DifferentialDAO {
       $changeset = new DifferentialChangeset();
       $add_lines = 0;
       $del_lines = 0;
+      $first_line = PHP_INT_MAX;
       $hunks = $change->getHunks();
       if ($hunks) {
         foreach ($hunks as $hunk) {
@@ -148,6 +149,10 @@ final class DifferentialDiff extends DifferentialDAO {
           $changeset->addUnsavedHunk($dhunk);
           $add_lines += $hunk->getAddLines();
           $del_lines += $hunk->getDelLines();
+          $added_lines = $hunk->getChangedLines('new');
+          if ($added_lines) {
+            $first_line = min($first_line, head_key($added_lines));
+          }
         }
         $lines += $add_lines + $del_lines;
       } else {
@@ -155,12 +160,17 @@ final class DifferentialDiff extends DifferentialDAO {
         $changeset->attachHunks(array());
       }
 
+      $metadata = $change->getAllMetadata();
+      if ($first_line != PHP_INT_MAX) {
+        $metadata['line:first'] = $first_line;
+      }
+
       $changeset->setOldFile($change->getOldPath());
       $changeset->setFilename($change->getCurrentPath());
       $changeset->setChangeType($change->getType());
 
       $changeset->setFileType($change->getFileType());
-      $changeset->setMetadata($change->getAllMetadata());
+      $changeset->setMetadata($metadata);
       $changeset->setOldProperties($change->getOldProperties());
       $changeset->setNewProperties($change->getNewProperties());
       $changeset->setAwayPaths($change->getAwayPaths());
@@ -243,9 +253,12 @@ final class DifferentialDiff extends DifferentialDAO {
           }
         }
       }
-      $metadata = $changeset->getMetadata();
-      $metadata['copy:lines'] = array_filter($copies);
-      $changeset->setMetadata($metadata);
+      $copies = array_filter($copies);
+      if ($copies) {
+        $metadata = $changeset->getMetadata();
+        $metadata['copy:lines'] = $copies;
+        $changeset->setMetadata($metadata);
+      }
     }
   }
 

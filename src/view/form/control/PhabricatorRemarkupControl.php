@@ -16,19 +16,27 @@
  * limitations under the License.
  */
 
-final class PhabricatorDraft extends PhabricatorDraftDAO {
+final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
 
-  protected $authorPHID;
-  protected $draftKey;
-  protected $draft;
-  protected $metadata = array();
+  public function getCaption() {
 
-  public function getConfiguration() {
-    return array(
-      self::CONFIG_SERIALIZATION => array(
-        'metadata' => self::SERIALIZATION_JSON,
+    $caption = parent::getCaption();
+    if ($caption) {
+      $caption_suffix = '<br />'.$caption;
+    } else {
+      $caption_suffix = '';
+    }
+
+    return phutil_render_tag(
+      'a',
+      array(
+        'href' => PhabricatorEnv::getDoclink(
+          'article/Remarkup_Reference.html'),
+        'tabindex' => '-1',
+        'target' => '_blank',
       ),
-    ) + parent::getConfiguration();
+      'Formatting Reference') .
+      $caption_suffix;
   }
 
 }

@@ -85,4 +85,12 @@ final class DifferentialAction {
     }
   }
 
+  public static function allowReviewers($action) {
+    if ($action == DifferentialAction::ACTION_ADDREVIEWERS ||
+        $action == DifferentialAction::ACTION_REQUEST) {
+      return true;
+    }
+    return false;
+  }
+
 }

@@ -163,6 +163,9 @@ a.toggle {
   padding: 2px 6px 3px;
   font-weight: bold;
   margin-right: 4px;
+  margin-bottom: 5px;
+  display: block;
+  float: left;
   color: #777777;
   border-radius: 8px;
   -moz-border-radius: 8px;

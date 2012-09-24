@@ -984,6 +984,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('xhprof.sql'),
       ),
+      'draft-metadata.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('draft-metadata.sql'),
+      ),
     );
   }
 

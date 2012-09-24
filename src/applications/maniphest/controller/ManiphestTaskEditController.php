@@ -486,24 +486,28 @@ final class ManiphestTaskEditController extends ManiphestController {
       }
     }
 
+
+    $description_control = new PhabricatorRemarkupControl();
+    // "Upsell" creating tasks via email in create flows if the instance is
+    // configured for this awesomeness.
     $email_create = PhabricatorEnv::getEnvConfig(
       'metamta.maniphest.public-create-email');
-    $email_hint = null;
     if (!$task->getID() && $email_create) {
       $email_hint = 'You can also create tasks by sending an email to: '.
                     '<tt>'.phutil_escape_html($email_create).'</tt>';
+      $description_control->setCaption($email_hint);
     }
 
-    $panel_id = celerity_generate_unique_node_id();
+    $description_control
+      ->setLabel('Description')
+      ->setName('description')
+      ->setID('description-textarea')
+      ->setValue($task->getDescription());
 
     $form
-      ->appendChild(
-        id(new AphrontFormTextAreaControl())
-          ->setLabel('Description')
-          ->setName('description')
-          ->setID('description-textarea')
-          ->setCaption($email_hint)
-          ->setValue($task->getDescription()));
+      ->appendChild($description_control);
+
+    $panel_id = celerity_generate_unique_node_id();
 
     if (!$task->getID()) {
       $form
