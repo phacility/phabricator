@@ -28,11 +28,8 @@ JX.behavior('phabricator-active-nav', function(config) {
         link,
         'phabricator-active-nav-focus',
         selected);
-      if (selected && link.scrollIntoView) {
-        link.scrollIntoView(false);
-      }
     }
-  };
+  }
 
 
   /**
@@ -75,24 +72,15 @@ JX.behavior('phabricator-active-nav', function(config) {
 
     // If we get above the first marker, select it.
     selectnav(active && JX.Stratcom.getData(active).anchor);
-  };
+  }
 
   var pending = null;
   var onviewportchange = function(e) {
     pending && clearTimeout(pending);
     pending = setTimeout(updateposition, 100);
-  };
+  }
 
-  var onscroll = function(e) {
-    if (e.getNode('tag:body')) {
-      // If we are inside <body> then it means we just scrolled some <textarea>
-      // or <div style="overflow: scroll;">. We are interested only in window.
-      return;
-    }
-    onviewportchange(e);
-  };
-
-  JX.Stratcom.listen('scroll', null, onscroll);
+  JX.Stratcom.listen('scroll', null, onviewportchange);
   JX.Stratcom.listen('resize', null, onviewportchange);
   JX.Stratcom.listen('hashchange', null, onviewportchange);
 });

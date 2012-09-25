@@ -108,17 +108,12 @@ final class ConduitAPI_differential_updateunitresults_Method
       $unit_status = $result;
       $unit_results[] = $unit_result;
     }
+    unset($unit_result);
 
     $diff_property->setData($unit_results);
     $diff_property->save();
 
-    foreach ($unit_results as $unit_result) {
-      if ($unit_result['result'] ==
-          DifferentialUnitTestResult::RESULT_POSTPONED) {
-        $postponed_count++;
-      }
-    }
-
+    // Map external unit test status to internal overall diff status
     $status_codes =
       array(
         DifferentialUnitTestResult::RESULT_PASS =>
@@ -127,22 +122,43 @@ final class ConduitAPI_differential_updateunitresults_Method
           DifferentialUnitStatus::UNIT_WARN,
         DifferentialUnitTestResult::RESULT_FAIL =>
           DifferentialUnitStatus::UNIT_FAIL,
+        DifferentialUnitTestResult::RESULT_BROKEN =>
+          DifferentialUnitStatus::UNIT_FAIL,
         DifferentialUnitTestResult::RESULT_SKIP =>
           DifferentialUnitStatus::UNIT_OKAY,
         DifferentialUnitTestResult::RESULT_POSTPONED =>
           DifferentialUnitStatus::UNIT_POSTPONED);
 
-    if ($diff->getUnitStatus() == DifferentialUnitStatus::UNIT_POSTPONED) {
-      $status_code =
-        idx($status_codes, $unit_status, DifferentialUnitStatus::UNIT_NONE);
-      if ($postponed_count == 0 ||
-          $status_code != DifferentialUnitStatus::UNIT_OKAY) {
-        $diff->setUnitStatus($status_code);
-        $diff->save();
+    // These are the relative priorities for the unit test results
+    $status_codes_priority =
+      array(
+        DifferentialUnitStatus::UNIT_OKAY => 1,
+        DifferentialUnitStatus::UNIT_WARN => 2,
+        DifferentialUnitStatus::UNIT_POSTPONED => 3,
+        DifferentialUnitStatus::UNIT_FAIL => 4);
+
+    // Walk the now-current list of status codes to find the overall diff
+    // status
+    $final_diff_status = DifferentialUnitStatus::UNIT_NONE;
+    foreach ($unit_results as $unit_result) {
+      // Convert the text result into a diff unit status value
+      $status_code = idx($status_codes,
+                         $unit_result['result'],
+                         DifferentialUnitStatus::UNIT_NONE);
+
+      // Convert the unit status into a relative value
+      $diff_status_priority = idx($status_codes_priority, $status_code, 0);
+
+      // If the relative value of this result is "more bad" than previous
+      // results, use it as the new final diff status
+      if ($diff_status_priority > idx($status_codes_priority,
+                                      $final_diff_status, 0)) {
+        $final_diff_status = $status_code;
       }
     }
 
-    return;
+    // Update our unit test result status with the final value
+    $diff->setUnitStatus($final_diff_status);
+    $diff->save();
   }
-
 }
