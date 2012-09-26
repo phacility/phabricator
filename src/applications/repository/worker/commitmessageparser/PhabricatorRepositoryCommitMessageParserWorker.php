@@ -169,7 +169,11 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
             $editor->setChangedByCommit($changed_by_commit);
           }
 
-          $editor->setMessage($message)->save();
+          // Reload revision to check if someone already didn't close it.
+          $current = id(new DifferentialRevision())->load($revision_id);
+          if ($current->getStatus() != $status_closed) {
+            $editor->setMessage($message)->save();
+          }
         }
 
       }
