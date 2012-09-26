@@ -79,6 +79,19 @@ abstract class PhabricatorController extends AphrontController {
       return $this->delegateToController($disabled_user_controller);
     }
 
+    $event = new PhabricatorEvent(
+      PhabricatorEventType::TYPE_CONTROLLER_CHECKREQUEST,
+      array(
+        'request' => $request,
+        'controller' => get_class($this),
+      ));
+    $event->setUser($user);
+    PhutilEventEngine::dispatchEvent($event);
+    $checker_controller = $event->getValue('controller');
+    if ($checker_controller != get_class($this)) {
+      return $this->delegateToController($checker_controller);
+    }
+
     if (PhabricatorEnv::getEnvConfig('darkconsole.enabled')) {
       if ($user->getConsoleEnabled() ||
           PhabricatorEnv::getEnvConfig('darkconsole.always-on')) {

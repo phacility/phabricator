@@ -24,6 +24,8 @@
  */
 final class PhabricatorEventType extends PhutilEventType {
 
+  const TYPE_CONTROLLER_CHECKREQUEST        = 'controller.checkRequest';
+
   const TYPE_MANIPHEST_WILLEDITTASK         = 'maniphest.willEditTask';
   const TYPE_MANIPHEST_DIDEDITTASK          = 'maniphest.didEditTask';
 

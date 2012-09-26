@@ -130,6 +130,22 @@ fields to, e.g., edit revision titles. Data available on this event:
   - `specification` Parameters that will be used to invoke the
     `differential.createrevision` Conduit call.
 
+== Controller: Check Request ==
+
+The constant for this event is
+`PhabricatorEventType::TYPE_CONTROLLER_CHECKREQUEST`.
+
+This event is dispatched when controller is about to begin execution. It is
+meant for checking if the user is allowed to use the application at the moment.
+It can check if the user has performed too many operations recently, if his IP
+address is allowed or if the servers are overloaded to process the request.
+Data available on this event:
+
+- `request` Object of class @{class:AphrontRequest}.
+- `controller` Class name of the current controller.
+
+You can delegate the execution to another controller by modifying `controller`.
+
 == Maniphest: Will Edit Task ==
 
 The constant for this event is
