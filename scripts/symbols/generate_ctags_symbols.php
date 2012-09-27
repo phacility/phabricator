@@ -73,6 +73,11 @@ foreach (Futures($futures)->limit(8) as $file => $future) {
     list($token, $file_path, $line_num) = $tag_info;
     list($type, $language, $context) = $extension_fields;
 
+    // skip lines with tokens containing a space
+    if (strpos($token, ' ') !== false) {
+      continue;
+    }
+
     // strip "language:"
     $language = substr($language, 9);
 
