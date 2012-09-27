@@ -98,7 +98,6 @@ final class PackageModifyMail extends PackageMail {
       $handles[$old_primary_owner_phid]->getName();
     $section[] = '  New owner: ' .
       $handles[$primary_owner_phid]->getName();
-    $section[] = '';
 
     return implode("\n", $section);
   }

@@ -160,7 +160,7 @@ abstract class PackageMail {
     $body[] = $this->renderAuditingEnabledSection();
     $body[] = $this->renderPathsSection();
     $body = array_filter($body);
-    return implode("\n\n", $body);
+    return implode("\n\n", $body)."\n";
   }
 
   final public function send() {
