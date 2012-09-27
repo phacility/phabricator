@@ -37,12 +37,15 @@ abstract class PhabricatorRepositoryController extends PhabricatorController {
     return $response->setContent($page->render());
   }
 
-  private function isPullDaemonRunningOnThisMachine() {
-
-    // This is sort of hacky, but should probably work.
-
-    list($stdout) = execx('ps auxwww');
-    return preg_match('/PhabricatorRepositoryPullLocalDaemon/', $stdout);
+  private function isPullDaemonRunning() {
+    $control = new PhabricatorDaemonControl();
+    $daemons = $control->loadRunningDaemons();
+    foreach ($daemons as $daemon) {
+      if ($daemon->isRunning() &&
+          $daemon->getName() == 'PhabricatorRepositoryPullLocalDaemon')
+        return true;
+    }
+    return false;
   }
 
   protected function renderDaemonNotice() {
@@ -60,7 +63,7 @@ abstract class PhabricatorRepositoryController extends PhabricatorController {
       "<strong>{$documentation}</strong>.";
 
     try {
-      $daemon_running = $this->isPullDaemonRunningOnThisMachine();
+      $daemon_running = $this->isPullDaemonRunning();
       if ($daemon_running) {
         return null;
       }
