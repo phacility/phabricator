@@ -37,7 +37,7 @@ abstract class PhabricatorRepositoryController extends PhabricatorController {
     return $response->setContent($page->render());
   }
 
-  private function isPullDaemonRunningOnThisMachine() {
+  private function isPullDaemonRunning() {
     $control = new PhabricatorDaemonControl();
     $daemons = $control->loadRunningDaemons();
     foreach ($daemons as $daemon) {
@@ -63,7 +63,7 @@ abstract class PhabricatorRepositoryController extends PhabricatorController {
       "<strong>{$documentation}</strong>.";
 
     try {
-      $daemon_running = $this->isPullDaemonRunningOnThisMachine();
+      $daemon_running = $this->isPullDaemonRunning();
       if ($daemon_running) {
         return null;
       }
