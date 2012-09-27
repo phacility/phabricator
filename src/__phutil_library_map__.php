@@ -1909,7 +1909,7 @@ phutil_register_library_map(array(
     'PhabricatorLDAPRegistrationController' => 'PhabricatorAuthController',
     'PhabricatorLDAPUnknownUserException' => 'Exception',
     'PhabricatorLDAPUnlinkController' => 'PhabricatorAuthController',
-    'PhabricatorLintEngine' => 'PhutilLintEngine',
+    'PhabricatorLintEngine' => 'ArcanistLintEngine',
     'PhabricatorLiskDAO' => 'LiskDAO',
     'PhabricatorLocalDiskFileStorageEngine' => 'PhabricatorFileStorageEngine',
     'PhabricatorLocalTimeTestCase' => 'PhabricatorTestCase',
