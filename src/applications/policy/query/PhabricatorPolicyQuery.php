@@ -42,6 +42,9 @@ final class PhabricatorPolicyQuery extends PhabricatorQuery {
     $capabilities = $object->getCapabilities();
     foreach ($capabilities as $capability) {
       $policy = $object->getPolicy($capability);
+      if (!$policy) {
+        continue;
+      }
 
       if (isset($global[$policy])) {
         $results[$capability] = $global[$policy]->renderDescription();
