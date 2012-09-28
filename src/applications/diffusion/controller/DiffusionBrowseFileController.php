@@ -469,7 +469,6 @@ final class DiffusionBrowseFileController extends DiffusionController {
           'action'  => 'browse',
           'line'    => $line['line'],
           'stable'  => true,
-          'params'  => array('view' => 'blame'),
         ));
 
       $blame = array();
@@ -540,10 +539,11 @@ final class DiffusionBrowseFileController extends DiffusionController {
               'D'.$revision_id);
           }
 
+          $uri = $line_href->alter('before', $commit);
           $before_link = javelin_render_tag(
             'a',
             array(
-              'href'  => $line_href->alter('before', $commit),
+              'href'  => $uri->setQueryParam('view', 'blame'),
               'sigil' => 'has-tooltip',
               'meta'  => array(
                 'tip'     => 'Skip Past This Commit',
