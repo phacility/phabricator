@@ -908,7 +908,7 @@ abstract class DifferentialFieldSpecification {
    * the key from @{method:getRequiredDiffProperties}.
    *
    * @param  string      Diff property key.
-   * @return string|null Diff property, or null if the property does not have
+   * @return mixed|null  Diff property, or null if the property does not have
    *                     a value.
    * @task context
    */
