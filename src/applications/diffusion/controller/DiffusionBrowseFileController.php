@@ -754,8 +754,8 @@ final class DiffusionBrowseFileController extends DiffusionController {
         $parent->getCommitIdentifier());
 
       if ($grandparent) {
-        $rename_query = DiffusionRenameHistoryQuery::newFromDiffusionRequest(
-          $drequest);
+        $rename_query = new DiffusionRenameHistoryQuery();
+        $rename_query->setRequest($drequest);
         $rename_query->setOldCommit($grandparent->getCommitIdentifier());
         $old_filename = $rename_query->loadOldFilename();
         $was_created = $rename_query->getWasCreated();
@@ -783,7 +783,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
     $path = $drequest->getPath();
     $renamed = null;
     if ($old_filename !== null &&
-        $old_filename !== $path) {
+        $old_filename !== '/'.$path) {
       $renamed = $path;
       $path = $old_filename;
     }
