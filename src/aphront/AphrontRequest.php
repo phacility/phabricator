@@ -60,7 +60,10 @@ final class AphrontRequest {
   }
 
   final public function getHost() {
-    return $this->host;
+    // The "Host" header may include a port number; if so, ignore it. We can't
+    // use PhutilURI since there's no URI scheme.
+    list($actual_host) = explode(':', $this->host, 2);
+    return $actual_host;
   }
 
 
@@ -272,13 +275,12 @@ final class AphrontRequest {
     $base_domain = $base_uri->getDomain();
     $base_protocol = $base_uri->getProtocol();
 
-    // The "Host" header may include a port number; if so, ignore it. We can't
-    // use PhutilURI since there's no URI scheme.
-    list($actual_host) = explode(':', $this->getHost(), 2);
-    if ($base_domain != $actual_host) {
+    $host = $this->getHost();
+
+    if ($base_domain != $host) {
       throw new Exception(
         "This install of Phabricator is configured as '{$base_domain}' but ".
-        "you are accessing it via '{$actual_host}'. Access Phabricator via ".
+        "you are accessing it via '{$host}'. Access Phabricator via ".
         "the primary configured domain.");
     }
 
