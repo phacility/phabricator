@@ -39,40 +39,29 @@ final class PonderFeedController extends PonderController {
     $this->answerOffset = $request->getInt('aoff');
 
     $pages = array(
-      'feed'    => 'Popular Questions',
+      'feed'    => 'All Questions',
       'profile' => 'User Profile',
     );
 
-    $side_nav = new AphrontSideNavFilterView();
-    $side_nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
-    foreach ($pages as $name => $title) {
-      $side_nav->addFilter($name, $title);
-    }
+    $side_nav = $this->buildSideNavView();
 
     $this->page = $side_nav->selectFilter($this->page, 'feed');
 
+    $title = $pages[$this->page];
+
     switch ($this->page) {
       case 'feed':
-        $data = PonderQuestionQuery::loadHottest(
+        $questions = PonderQuestionQuery::loadHottest(
           $user,
           $this->feedOffset,
           self::FEED_PAGE_SIZE + 1);
 
-        $phids = array();
-        foreach ($data as $question) {
-          $phids[] = $question->getAuthorPHID();
-        }
-        $handles = $this->loadViewerHandles($phids);
+        $this->loadHandles(mpull($questions, 'getAuthorPHID'));
 
+        $view = $this->buildQuestionListView($questions);
         $side_nav->appendChild(
-          id(new PonderQuestionFeedView())
-          ->setUser($user)
-          ->setData($data)
-          ->setHandles($handles)
-          ->setOffset($this->feedOffset)
-          ->setPageSize(self::FEED_PAGE_SIZE)
-          ->setURI(new PhutilURI("/ponder/feed/"), "off")
-        );
+          id(new PhabricatorHeaderView())->setHeader($title));
+        $side_nav->appendChild($view);
         break;
       case 'profile':
         $questions = PonderQuestionQuery::loadByAuthor(
@@ -107,11 +96,53 @@ final class PonderFeedController extends PonderController {
     }
 
 
-    return $this->buildStandardPageResponse(
+    return $this->buildApplicationPage(
       $side_nav,
       array(
-        'title' => $pages[$this->page]
+        'device'  => true,
+        'title'   => $title,
       ));
+  }
+
+  private function buildQuestionListView(array $questions) {
+    assert_instances_of($questions, 'PonderQuestion');
+    $user = $this->getRequest()->getUser();
+
+    $view = new PhabricatorObjectItemListView();
+    $view->setNoDataString(pht('No matching questions.'));
+    foreach ($questions as $question) {
+      $item = new PhabricatorObjectItemView();
+      $item->setHeader('Q'.$question->getID().' '.$question->getTitle());
+      $item->setHref('/Q'.$question->getID());
+
+      $desc = $question->getContent();
+      if ($desc) {
+        $item->addDetail(
+          pht('Description'),
+          phutil_escape_html(phutil_utf8_shorten($desc, 128)));
+      }
+
+      $item->addDetail(
+        pht('Author'),
+        $this->getHandle($question->getAuthorPHID())->renderLink());
+
+      $item->addDetail(
+        pht('Votes'),
+        $question->getVoteCount());
+
+      $item->addDetail(
+        pht('Answers'),
+        $question->getAnswerCount());
+
+      $created = pht(
+        'Created %s',
+        phabricator_date($question->getDateCreated(), $user));
+      $item->addAttribute($created);
+
+      $view->addItem($item);
+    }
+
+    return $view;
   }
 
 }

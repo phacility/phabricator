@@ -63,6 +63,7 @@ final class PonderQuestionQuery extends PhabricatorOffsetPagedQuery {
       ->setOffset($offset)
       ->setLimit($count)
       ->orderByHottest(true)
+      ->orderByNewest(true)
       ->execute();
   }
 
