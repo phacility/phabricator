@@ -197,23 +197,6 @@ class AphrontDefaultApplicationConfiguration
         'keyboardshortcut/' => 'PhabricatorHelpKeyboardShortcutController',
       ),
 
-      '/countdown/' => array(
-        ''
-          => 'PhabricatorCountdownListController',
-        '(?P<id>\d+)/'
-          => 'PhabricatorCountdownViewController',
-        'edit/(?:(?P<id>\d+)/)?'
-          => 'PhabricatorCountdownEditController',
-        'delete/(?P<id>\d+)/'
-          => 'PhabricatorCountdownDeleteController'
-      ),
-
-      '/V(?P<id>\d+)' => 'PhabricatorSlowvotePollController',
-      '/vote/' => array(
-        '(?:view/(?P<view>\w+)/)?' => 'PhabricatorSlowvoteListController',
-        'create/' => 'PhabricatorSlowvoteCreateController',
-      ),
-
       '/phame/' => array(
         ''                          => 'PhameAllPostListController',
         'post/' => array(
