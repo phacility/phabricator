@@ -67,14 +67,6 @@ class AphrontDefaultApplicationConfiguration
       '/phid/' => array(
         '' => 'PhabricatorPHIDLookupController',
       ),
-      '/conduit/' => array(
-        '' => 'PhabricatorConduitListController',
-        'method/(?P<method>[^/]+)/' => 'PhabricatorConduitConsoleController',
-        'log/' => 'PhabricatorConduitLogController',
-        'log/view/(?P<view>[^/]+)/' => 'PhabricatorConduitLogController',
-        'token/' => 'PhabricatorConduitTokenController',
-      ),
-      '/api/(?P<method>[^/]+)' => 'PhabricatorConduitAPIController',
 
       '/typeahead/' => array(
         'common/(?P<type>\w+)/'
@@ -150,21 +142,6 @@ class AphrontDefaultApplicationConfiguration
         'select/(?P<type>\w+)/'
           => 'PhabricatorSearchSelectController',
         'index/(?P<phid>[^/]+)/' => 'PhabricatorSearchIndexController',
-      ),
-
-      '/herald/' => array(
-        '' => 'HeraldHomeController',
-        'view/(?P<content_type>[^/]+)/(?:(?P<rule_type>[^/]+)/)?'
-          => 'HeraldHomeController',
-        'new/(?:(?P<type>[^/]+)/(?:(?P<rule_type>[^/]+)/)?)?'
-          => 'HeraldNewController',
-        'rule/(?:(?P<id>\d+)/)?' => 'HeraldRuleController',
-        'history/(?:(?P<id>\d+)/)?' => 'HeraldRuleEditHistoryController',
-        'delete/(?P<id>\d+)/' => 'HeraldDeleteController',
-        'test/' => 'HeraldTestConsoleController',
-        'transcript/' => 'HeraldTranscriptListController',
-        'transcript/(?P<id>\d+)/(?:(?P<filter>\w+)/)?'
-          => 'HeraldTranscriptController',
       ),
 
       '/owners/' => array(
