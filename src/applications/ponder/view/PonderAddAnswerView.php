@@ -45,12 +45,12 @@ final class PonderAddAnswerView extends AphrontView {
 
     $question = $this->question;
 
-    $panel = id(new AphrontPanelView())
-      ->addClass("ponder-panel")
-      ->setHeader("Your Answer:");
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader('Add Answer');
 
     $form = new AphrontFormView();
     $form
+      ->setFlexible(true)
       ->setUser($this->user)
       ->setAction($this->actionURI)
       ->setWorkflow(true)
@@ -58,22 +58,22 @@ final class PonderAddAnswerView extends AphrontView {
       ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setName('answer')
+          ->setLabel('Answer')
+          ->setError(true)
           ->setID('answer-content')
           ->setEnableDragAndDropFileUploads(true))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($is_serious ? 'Submit' : 'Make it so.'));
 
-    $panel->appendChild($form);
-    $panel->appendChild(
+    $preview =
       '<div class="aphront-panel-flush">'.
         '<div id="answer-preview">'.
           '<span class="aphront-panel-preview-loading-text">'.
             'Loading answer preview...'.
           '</span>'.
         '</div>'.
-      '</div>'
-    );
+      '</div>';
 
     Javelin::initBehavior(
       'ponder-feedback-preview',
@@ -84,6 +84,13 @@ final class PonderAddAnswerView extends AphrontView {
         'question_id' => $question->getID()
       ));
 
-    return $panel->render();
+    return id(new AphrontNullView())
+      ->appendChild(
+        array(
+          $header,
+          $form,
+          $preview,
+        ))
+      ->render();
   }
 }

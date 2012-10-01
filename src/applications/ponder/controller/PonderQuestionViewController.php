@@ -72,13 +72,20 @@ final class PonderQuestionViewController extends PonderController {
       ->setUser($user)
       ->setActionURI("/ponder/answer/add/");
 
-    return $this->buildStandardPageResponse(
+    $nav = $this->buildSideNavView($question);
+    $nav->appendChild(
       array(
         $detail_panel,
         $responses_panel,
         $answer_add_panel
-      ),
+      ));
+    $nav->selectFilter(null);
+
+
+    return $this->buildApplicationPage(
+      $nav,
       array(
+        'device' => true,
         'title' => 'Q'.$question->getID().' '.$question->getTitle()
       ));
   }

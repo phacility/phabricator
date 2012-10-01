@@ -36,6 +36,14 @@ abstract class PonderController extends PhabricatorController {
     $side_nav = new AphrontSideNavFilterView();
     $side_nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
+    if ($question && $question->getID()) {
+      $side_nav->addFilter(
+        null,
+        'Q'.$question->getID(),
+        'Q'.$question->getID());
+      $side_nav->addSpacer();
+    }
+
     $side_nav->addLabel('Create');
     $side_nav->addFilter('question/ask', 'Ask a Question');
 
