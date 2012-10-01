@@ -25,10 +25,31 @@ final class PhabricatorLoginController
 
   public function processRequest() {
     $request = $this->getRequest();
+    $user = $request->getUser();
 
-    if ($request->getUser()->getPHID()) {
+    if ($user->isLoggedIn()) {
       // Kick the user out if they're already logged in.
       return id(new AphrontRedirectResponse())->setURI('/');
+    }
+
+    if ($request->isAjax()) {
+
+      // We end up here if the user clicks a workflow link that they need to
+      // login to use. We give them a dialog saying "You need to login..".
+
+      if ($request->isDialogFormPost()) {
+        return id(new AphrontRedirectResponse())->setURI(
+          $request->getRequestURI());
+      }
+
+      $dialog = new AphrontDialogView();
+      $dialog->setUser($user);
+      $dialog->setTitle('Login Required');
+      $dialog->appendChild('<p>You must login to continue.</p>');
+      $dialog->addSubmitButton('Login');
+      $dialog->addCancelButton('/', 'Cancel');
+
+      return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
     if ($request->isConduit()) {

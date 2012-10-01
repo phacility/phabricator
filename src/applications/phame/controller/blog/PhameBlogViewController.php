@@ -111,6 +111,10 @@ final class PhameBlogViewController
       $notice = $this->buildNoticeView()
         ->setTitle('Successfully created your blog.')
         ->appendChild('Time to write some posts.');
+    } else if ($request->getExists('edit')) {
+      $notice = $this->buildNoticeView()
+        ->setTitle('Successfully edited your blog.')
+        ->appendChild('Time to write some posts.');
     } else {
       $notice = null;
     }

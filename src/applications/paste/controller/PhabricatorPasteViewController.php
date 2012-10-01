@@ -18,6 +18,10 @@
 
 final class PhabricatorPasteViewController extends PhabricatorPasteController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   private $id;
   private $handles;
 
@@ -98,6 +102,8 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       $paste,
       PhabricatorPolicyCapability::CAN_EDIT);
 
+    $can_fork = $user->isLoggedIn();
+
     return id(new PhabricatorActionListView())
       ->setUser($user)
       ->setObject($paste)
@@ -105,6 +111,8 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
         id(new PhabricatorActionView())
           ->setName(pht('Fork This Paste'))
           ->setIcon('fork')
+          ->setDisabled(!$can_fork)
+          ->setWorkflow(!$can_fork)
           ->setHref($this->getApplicationURI('?parent='.$paste->getID())))
       ->addAction(
         id(new PhabricatorActionView())

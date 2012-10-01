@@ -47,23 +47,60 @@ final class PonderVotableView extends AphrontView {
     require_celerity_resource('ponder-vote-css');
     require_celerity_resource('javelin-behavior-ponder-votebox');
 
-    Javelin::initBehavior(
-      'ponder-votebox',
+    Javelin::initBehavior('ponder-votebox', array());
+
+    $uri = id(new PhutilURI($this->uri))->alter('phid', $this->phid);
+
+    $up = javelin_render_tag(
+      'a',
       array(
-        'nodeid' => $this->phid,
-        'vote' => $this->vote,
-        'count' => $this->count,
-        'uri' => $this->uri
-      ));
+        'href'        => (string)$uri,
+        'sigil'       => 'upvote',
+        'mustcapture' => true,
+        'class'       => ($this->vote > 0) ? 'ponder-vote-active' : null,
+      ),
+      "\xE2\x96\xB2");
 
-    $content =
-      '<div class="ponder-votable">'.
-        '<div id="'.phutil_escape_html($this->phid).'" class="ponder-votebox">
-         </div>'.
-        $this->renderChildren().
-      '</div>';
+    $down = javelin_render_tag(
+      'a',
+      array(
+        'href'        => (string)$uri,
+        'sigil'       => 'downvote',
+        'mustcapture' => true,
+        'class'       => ($this->vote < 0) ? 'ponder-vote-active' : null,
+      ),
+      "\xE2\x96\xBC");
 
-    return $content;
+    $count = javelin_render_tag(
+      'div',
+      array(
+        'class'       => 'ponder-vote-count',
+        'sigil'       => 'ponder-vote-count',
+      ),
+      phutil_escape_html($this->count));
+
+    return javelin_render_tag(
+      'div',
+      array(
+        'class' => 'ponder-votable',
+        'sigil' => 'ponder-votable',
+        'meta' => array(
+          'count' => (int)$this->count,
+          'vote'  => (int)$this->vote,
+        ),
+      ),
+      javelin_render_tag(
+        'div',
+        array(
+          'class' => 'ponder-votebox',
+        ),
+        $up.$count.$down).
+      phutil_render_tag(
+        'div',
+        array(
+          'class' => 'ponder-votebox-content',
+        ),
+        $this->renderChildren()));
   }
 
 }

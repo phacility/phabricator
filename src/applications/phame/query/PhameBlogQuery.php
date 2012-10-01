@@ -22,10 +22,16 @@
 final class PhameBlogQuery extends PhabricatorOffsetPagedQuery {
 
   private $phids;
+  private $domain;
   private $needBloggers;
 
   public function withPHIDs($phids) {
     $this->phids = $phids;
+    return $this;
+  }
+
+  public function withDomain($domain) {
+    $this->domain = $domain;
     return $this;
   }
 
@@ -96,7 +102,16 @@ final class PhameBlogQuery extends PhabricatorOffsetPagedQuery {
       $where[] = qsprintf(
         $conn_r,
         'phid IN (%Ls)',
-        $this->phids);
+        $this->phids
+      );
+    }
+
+    if ($this->domain) {
+      $where[] = qsprintf(
+        $conn_r,
+        'domain = %s',
+        $this->domain
+      );
     }
 
     return $this->formatWhereClause($where);

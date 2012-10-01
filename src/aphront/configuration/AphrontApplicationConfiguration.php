@@ -91,9 +91,11 @@ abstract class AphrontApplicationConfiguration {
   /**
    * Using builtin and application routes, build the appropriate
    * @{class:AphrontController} class for the request. To route a request, we
-   * test the URI against all builtin routes from @{method:getURIMap}, then
-   * against all application routes from installed
-   * @{class:PhabricatorApplication}s.
+   * first test if the HTTP_HOST is configured as a valid Phabricator URI. If
+   * it isn't, we do a special check to see if it's a custom domain for a blog
+   * in the Phame application and if that fails we error. Otherwise, we test
+   * the URI against all builtin routes from @{method:getURIMap}, then against
+   * all application routes from installed @{class:PhabricatorApplication}s.
    *
    * If we match a route, we construct the controller it points at, build it,
    * and return it.
@@ -117,7 +119,6 @@ abstract class AphrontApplicationConfiguration {
    */
   final public function buildController() {
     $request = $this->getRequest();
-    $path = $request->getPath();
 
     if (PhabricatorEnv::getEnvConfig('security.require-https')) {
       if (!$request->isHTTPS()) {
@@ -126,6 +127,41 @@ abstract class AphrontApplicationConfiguration {
         $uri->setProtocol('https');
         return $this->buildRedirectController($uri);
       }
+    }
+
+    $path     = $request->getPath();
+    $host     = $request->getHost();
+    $base_uri = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
+    $prod_uri = PhabricatorEnv::getEnvConfig('phabricator.production-uri');
+    $file_uri = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
+    if ($host != id(new PhutilURI($base_uri))->getDomain() &&
+        $host != id(new PhutilURI($prod_uri))->getDomain() &&
+        $host != id(new PhutilURI($file_uri))->getDomain()) {
+      $blogs = id(new PhameBlogQuery())->withDomain($host)->execute();
+      $blog = reset($blogs);
+      if (!$blog) {
+        if ($prod_uri) {
+          $prod_str = ' or '.$prod_uri;
+        } else {
+          $prod_str = '';
+        }
+        throw new Exception(
+          'Specified domain '.$host.' is not configured for Phabricator '.
+          'requests. Please use '.$base_uri.$prod_str.' to visit this instance.'
+        );
+      }
+
+      // 2 basic cases
+      // -- looking at a list of blog posts, path is nothing or '/'
+      // -- looking at an actual blog post, path is like /btrahan/post_title
+      if (!$path || $path == '/') {
+        $path = $blog->getViewURI();
+      } else {
+        $path = '/phame/posts/'.trim($path, '/').'/';
+      }
+
+      // TODO - now we need to tell Celerity to render static resources with
+      // full URIs like secure.phabricator.org/rsrc/blahblah
     }
 
     list($controller, $uri_data) = $this->buildControllerForPath($path);

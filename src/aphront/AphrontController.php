@@ -50,7 +50,6 @@ abstract class AphrontController {
     return $controller->processRequest();
   }
 
-
   final public function setCurrentApplication(
     PhabricatorApplication $current_application) {
 

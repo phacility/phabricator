@@ -336,6 +336,18 @@ class AphrontDefaultApplicationConfiguration
     }
 
     if ($ex instanceof PhabricatorPolicyException) {
+
+      if (!$user->isLoggedIn()) {
+        // If the user isn't logged in, just give them a login form. This is
+        // probably a generally more useful response than a policy dialog that
+        // they have to click through to get a login form.
+        //
+        // Possibly we should add a header here like "you need to login to see
+        // the thing you are trying to look at".
+        $login_controller = new PhabricatorLoginController($request);
+        return $login_controller->processRequest();
+      }
+
       $content =
         '<div class="aphront-policy-exception">'.
           phutil_escape_html($ex->getMessage()).

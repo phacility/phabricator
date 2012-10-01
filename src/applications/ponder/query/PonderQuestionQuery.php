@@ -18,65 +18,32 @@
 
 final class PonderQuestionQuery extends PhabricatorOffsetPagedQuery {
 
-  private $id;
+  const ORDER_CREATED = 'order-created';
+  const ORDER_HOTTEST = 'order-hottest';
+
+  private $ids;
   private $phids;
-  private $authorPHID;
-  private $orderHottest;
-  private $orderNewest;
+  private $authorPHIDs;
+  private $order = self::ORDER_CREATED;
 
-  public function withID($qid) {
-    $this->id = $qid;
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
     return $this;
   }
 
-  public function withPHID($phid) {
-    $this->phids = array($phid);
-    return $this;
-  }
-
-  public function withPHIDs($phids) {
+  public function withPHIDs(array $phids) {
     $this->phids = $phids;
     return $this;
   }
 
-  public function withAuthorPHID($phid) {
-    $this->authorPHID = $phid;
+  public function withAuthorPHIDs(array $phids) {
+    $this->authorPHIDs = $phids;
     return $this;
   }
 
-  public function orderByHottest($usethis) {
-    $this->orderHottest = $usethis;
+  public function setOrder($order) {
+    $this->order = $order;
     return $this;
-  }
-
-  public function orderByNewest($usethis) {
-    $this->orderNewest = $usethis;
-    return $this;
-  }
-
-  public static function loadHottest($viewer, $offset, $count) {
-    if (!$viewer) {
-      throw new Exception("Must set viewer when calling loadHottest");
-    }
-
-    return id(new PonderQuestionQuery())
-      ->setOffset($offset)
-      ->setLimit($count)
-      ->orderByHottest(true)
-      ->execute();
-  }
-
-  public static function loadByAuthor($viewer, $author_phid, $offset, $count) {
-    if (!$viewer) {
-      throw new Exception("Must set viewer when calling loadByAuthor");
-    }
-
-    return id(new PonderQuestionQuery())
-      ->withAuthorPHID($author_phid)
-      ->setOffset($offset)
-      ->setLimit($count)
-      ->orderByNewest(true)
-      ->execute();
   }
 
   public static function loadSingle($viewer, $id) {
@@ -85,8 +52,8 @@ final class PonderQuestionQuery extends PhabricatorOffsetPagedQuery {
     }
 
     return idx(id(new PonderQuestionQuery())
-               ->withID($id)
-               ->execute(), $id);
+      ->withIDs(array($id))
+      ->execute(), $id);
   }
 
   public static function loadSingleByPHID($viewer, $phid) {
@@ -95,49 +62,42 @@ final class PonderQuestionQuery extends PhabricatorOffsetPagedQuery {
     }
 
     return array_shift(id(new PonderQuestionQuery())
-      ->withPHID($phid)
+      ->withPHIDs(array($phid))
       ->execute());
   }
 
-  private function buildWhereClause($conn_r) {
+  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
-    if ($this->id) {
-      $where[] = qsprintf($conn_r, '(id = %d)', $this->id);
-    }
-    if ($this->phids) {
-      $where[] = qsprintf($conn_r, '(phid in (%Ls))', $this->phids);
-    }
-    if ($this->authorPHID) {
-      $where[] = qsprintf($conn_r, '(authorPHID = %s)', $this->authorPHID);
+
+    if ($this->ids) {
+      $where[] = qsprintf($conn_r, 'q.id IN (%Ld)', $this->ids);
     }
 
-    return ($where ? 'WHERE ' . implode(' AND ', $where) : '');
+    if ($this->phids) {
+      $where[] = qsprintf($conn_r, 'q.phid IN (%Ls)', $this->phids);
+    }
+
+    if ($this->authorPHIDs) {
+      $where[] = qsprintf($conn_r, 'q.authorPHID IN (%Ls)', $this->authorPHIDs);
+    }
+
+    return $this->formatWhereClause($where);
   }
 
-  private function buildOrderByClause($conn_r) {
-    $order = array();
-    if ($this->orderHottest) {
-      $order[] = qsprintf($conn_r, 'heat DESC');
+  private function buildOrderByClause(AphrontDatabaseConnection $conn_r) {
+    switch ($this->order) {
+      case self::ORDER_HOTTEST:
+        return qsprintf($conn_r, 'ORDER BY q.heat DESC, q.id DESC');
+      case self::ORDER_CREATED:
+        return qsprintf($conn_r, 'ORDER BY q.id DESC');
+      default:
+        throw new Exception("Unknown order '{$this->order}'!");
     }
-    if ($this->orderNewest) {
-      $order[] = qsprintf($conn_r, 'id DESC');
-    }
-
-    if (count($order) == 0) {
-      $order[] = qsprintf($conn_r, 'id ASC');
-    }
-
-    return ($order ? 'ORDER BY ' . implode(', ', $order) : '');
   }
 
   public function execute() {
     $question = new PonderQuestion();
     $conn_r = $question->establishConnection('r');
-
-    $select = qsprintf(
-      $conn_r,
-      'SELECT r.* FROM %T r',
-      $question->getTableName());
 
     $where = $this->buildWhereClause($conn_r);
     $order_by = $this->buildOrderByClause($conn_r);
@@ -146,8 +106,8 @@ final class PonderQuestionQuery extends PhabricatorOffsetPagedQuery {
     return $question->loadAllFromArray(
       queryfx_all(
         $conn_r,
-        '%Q %Q %Q %Q',
-        $select,
+        'SELECT q.* FROM %T q %Q %Q %Q',
+        $question->getTableName(),
         $where,
         $order_by,
         $limit));

@@ -22,108 +22,79 @@ final class PonderQuestionAskController extends PonderController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    if ($request->isFormPost()) {
-      return $this->handlePost();
-    }
-
-    return $this->showForm();
-  }
-
-  private function handlePost() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $errors = array();
-    $title = $request->getStr('title');
-    $content = $request->getStr('content');
-
-    // form validation
-    if (phutil_utf8_strlen($title) < 1 || phutil_utf8_strlen($title) > 255) {
-      $errors[] = "Please enter a title (1-255 characters)";
-    }
-
-    if ($errors) {
-      return $this->showForm($errors, $title, $content);
-    }
-
-    // no validation errors -> save it
-
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_WEB,
-      array(
-        'ip' => $request->getRemoteAddr(),
-      ));
-
     $question = id(new PonderQuestion())
-      ->setTitle($title)
-      ->setContent($content)
       ->setAuthorPHID($user->getPHID())
-      ->setContentSource($content_source)
       ->setVoteCount(0)
       ->setAnswerCount(0)
-      ->setHeat(0.0)
-      ->save();
+      ->setHeat(0.0);
 
-    PhabricatorSearchPonderIndexer::indexQuestion($question);
+    $errors = array();
+    $e_title = true;
+    if ($request->isFormPost()) {
+      $question->setTitle($request->getStr('title'));
+      $question->setContent($request->getStr('content'));
 
-    return id(new AphrontRedirectResponse())
-      ->setURI('/Q'.$question->getID());
-  }
+      $len = phutil_utf8_strlen($question->getTitle());
+      if ($len < 1) {
+        $errors[] = pht('Title must not be empty.');
+        $e_title = pht('Required');
+      } else if ($len > 255) {
+        $errors[] = pht('Title is too long.');
+        $e_title = pht('Too Long');
+      }
 
-  private function showForm(
-      $errors = null,
-      $title = "",
-      $content = "",
-      $id = null) {
+      if (!$errors) {
+        $content_source = PhabricatorContentSource::newForSource(
+          PhabricatorContentSource::SOURCE_WEB,
+          array(
+            'ip' => $request->getRemoteAddr(),
+          ));
+        $question->setContentSource($content_source);
+        $question->save();
 
-    require_celerity_resource('ponder-core-view-css');
-    require_celerity_resource('phabricator-remarkup-css');
-    require_celerity_resource('ponder-post-css');
+        PhabricatorSearchPonderIndexer::indexQuestion($question);
 
-    $request = $this->getRequest();
-    $user = $request->getUser();
+        return id(new AphrontRedirectResponse())
+          ->setURI('/Q'.$question->getID());
+      }
+    }
+
     $error_view = null;
-
     if ($errors) {
       $error_view = id(new AphrontErrorView())
         ->setTitle('Form Errors')
         ->setErrors($errors);
     }
 
-    $form = new AphrontFormView();
-    $form->setUser($user);
-    $form->setAction('/ponder/question/ask/');
-    $form
+    $header = id(new PhabricatorHeaderView())->setHeader(pht('Ask Question'));
+
+    $form = id(new AphrontFormView())
+      ->setUser($user)
+      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Title')
+          ->setLabel(pht('Question'))
           ->setName('title')
-          ->setValue($title))
+          ->setValue($question->getTitle())
+          ->setError($e_title))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setName('content')
           ->setID('content')
-          ->setValue($content)
-          ->setLabel("Question"))
+          ->setValue($question->getContent())
+          ->setLabel(pht('Description')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
         ->setValue('Ask Away!'));
 
-    $panel = id(new AphrontPanelView())
-      ->addClass("ponder-panel")
-      ->setHeader("Your Question:")
-      ->appendChild($error_view)
-      ->appendChild($form);
-
-    $panel->appendChild(
+    $preview =
       '<div class="aphront-panel-flush">'.
         '<div id="question-preview">'.
           '<span class="aphront-panel-preview-loading-text">'.
-            'Loading question preview...'.
+            pht('Loading question preview...').
           '</span>'.
         '</div>'.
-      '</div>'
-    );
+      '</div>';
 
     Javelin::initBehavior(
       'ponder-feedback-preview',
@@ -134,9 +105,23 @@ final class PonderQuestionAskController extends PonderController {
         'question_id' => null
       ));
 
-    return $this->buildStandardPageResponse(
-      array($panel),
-      array('title' => 'Ask a Question')
+    $nav = $this->buildSideNavView($question);
+    $nav->selectFilter($question->getID() ? null : 'question/ask');
+
+    $nav->appendChild(
+      array(
+        $header,
+        $error_view,
+        $form,
+        $preview,
+      ));
+
+    return $this->buildApplicationPage(
+      $nav,
+      array(
+        'device' => true,
+        'title'  => 'Ask a Question',
+      )
     );
   }
 

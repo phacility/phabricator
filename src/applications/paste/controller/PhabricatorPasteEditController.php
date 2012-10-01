@@ -49,6 +49,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
 
         if ($parent) {
           $paste->setParentPHID($parent->getPHID());
+          $paste->setViewPolicy($parent->getViewPolicy());
         }
       }
 

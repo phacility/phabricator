@@ -20,6 +20,7 @@ final class PhabricatorObjectItemView extends AphrontView {
 
   private $header;
   private $href;
+  private $attributes = array();
   private $details = array();
   private $dates = array();
 
