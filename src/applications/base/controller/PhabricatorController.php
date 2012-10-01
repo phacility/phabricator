@@ -21,6 +21,14 @@ abstract class PhabricatorController extends AphrontController {
   private $handles;
 
   public function shouldRequireLogin() {
+
+    // If this install is configured to allow public resources and the
+    // controller works in public mode, allow the request through.
+    $is_public_allowed = PhabricatorEnv::getEnvConfig('policy.allow-public');
+    if ($is_public_allowed && $this->shouldAllowPublic()) {
+      return false;
+    }
+
     return true;
   }
 
@@ -30,6 +38,10 @@ abstract class PhabricatorController extends AphrontController {
 
   public function shouldRequireEnabledUser() {
     return true;
+  }
+
+  public function shouldAllowPublic() {
+    return false;
   }
 
   public function shouldRequireEmailVerification() {

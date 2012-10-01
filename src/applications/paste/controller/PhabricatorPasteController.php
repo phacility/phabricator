@@ -19,6 +19,8 @@
 abstract class PhabricatorPasteController extends PhabricatorController {
 
   public function buildSideNavView(PhabricatorPaste $paste = null) {
+    $user = $this->getRequest()->getUser();
+
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI('filter/')));
 
@@ -28,11 +30,18 @@ abstract class PhabricatorPasteController extends PhabricatorController {
     }
 
     $nav->addLabel('Create');
-    $nav->addFilter('edit', 'New Paste', $this->getApplicationURI());
+    $nav->addFilter(
+      'edit',
+      'New Paste',
+      $this->getApplicationURI(),
+      $relative = false,
+      $class = ($user->isLoggedIn() ? null : 'disabled'));
 
     $nav->addSpacer();
     $nav->addLabel('Pastes');
-    $nav->addFilter('my', 'My Pastes');
+    if ($user->isLoggedIn()) {
+      $nav->addFilter('my', 'My Pastes');
+    }
     $nav->addFilter('all', 'All Pastes');
 
     return $nav;

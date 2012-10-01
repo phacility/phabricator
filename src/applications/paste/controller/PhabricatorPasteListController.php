@@ -18,6 +18,10 @@
 
 final class PhabricatorPasteListController extends PhabricatorPasteController {
 
+  public function shouldRequireLogin() {
+    return false;
+  }
+
   private $filter;
 
   public function willProcessRequest(array $data) {
