@@ -22,12 +22,19 @@ final class PhabricatorMacroListController
   public function processRequest() {
 
     $request = $this->getRequest();
+    $viewer = $request->getUser();
 
     $macro_table = new PhabricatorFileImageMacro();
-    if ($request->getStr('name') !== null) {
+
+    $filter = $request->getStr('name');
+    if (strlen($filter)) {
       $macros = $macro_table->loadAllWhere(
         'name LIKE %~',
-        $request->getStr('name'));
+        $filter);
+
+      $nodata = pht(
+        'There are no macros matching the filter "%s".',
+        phutil_escape_html($filter));
     } else {
       $pager = new AphrontPagerView();
       $pager->setOffset($request->getInt('page'));
@@ -47,6 +54,8 @@ final class PhabricatorMacroListController
 
       $pager->setCount($count);
       $pager->setURI($request->getRequestURI(), 'page');
+
+      $nodata = pht('There are no image macros yet.');
     }
 
     $file_phids = mpull($macros, 'getFilePHID');
@@ -57,65 +66,10 @@ final class PhabricatorMacroListController
         "phid IN (%Ls)",
         $file_phids);
       $author_phids = mpull($files, 'getAuthorPHID', 'getPHID');
-      $handles = $this->loadViewerHandles($author_phids);
+
+      $this->loadHandles($author_phids);
     }
     $files_map = mpull($files, null, 'getPHID');
-
-    $rows = array();
-    foreach ($macros as $macro) {
-      $file_phid = $macro->getFilePHID();
-      $file = idx($files_map, $file_phid);
-
-      $author_link = isset($author_phids[$file_phid])
-        ? $handles[$author_phids[$file_phid]]->renderLink()
-        : null;
-
-      $rows[] = array(
-        phutil_render_tag(
-          'a',
-          array(
-            'href' => $this->getApplicationURI('/edit/'.$macro->getID().'/'),
-          ),
-          phutil_escape_html($macro->getName())),
-
-        $author_link,
-        phutil_render_tag(
-          'a',
-          array(
-            'href'    => $file ? $file->getBestURI() : null,
-            'target'  => '_blank',
-          ),
-          phutil_render_tag(
-            'img',
-            array(
-              'src' => $file ? $file->getBestURI() : null,
-            ))),
-        javelin_render_tag(
-          'a',
-          array(
-            'href' => $this->getApplicationURI('/delete/'.$macro->getID().'/'),
-            'sigil' => 'workflow',
-            'class' => 'grey small button',
-          ),
-          'Delete'),
-      );
-    }
-
-    $table = new AphrontTableView($rows);
-    $table->setHeaders(
-      array(
-        'Name',
-        'Author',
-        'Image',
-        '',
-      ));
-    $table->setColumnClasses(
-      array(
-        'pri',
-        '',
-        'wide thumb',
-        'action',
-      ));
 
     $filter_form = id(new AphrontFormView())
       ->setMethod('GET')
@@ -124,7 +78,7 @@ final class PhabricatorMacroListController
         id(new AphrontFormTextControl())
           ->setName('name')
           ->setLabel('Name')
-          ->setValue($request->getStr('name')))
+          ->setValue($filter))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue('Filter Image Macros'));
@@ -132,22 +86,55 @@ final class PhabricatorMacroListController
     $filter_view = new AphrontListFilterView();
     $filter_view->appendChild($filter_form);
 
-    $panel = new AphrontPanelView();
-    $panel->appendChild($table);
-    $panel->setHeader('Image Macros');
-    if ($request->getStr('name') === null) {
-      $panel->appendChild($pager);
-    }
-
     $nav = $this->buildSideNavView();
     $nav->selectFilter('/');
 
     $nav->appendChild($filter_view);
-    $nav->appendChild($panel);
+
+
+    if ($macros) {
+      $pinboard = new PhabricatorPinboardView();
+      foreach ($macros as $macro) {
+        $file_phid = $macro->getFilePHID();
+        $file = idx($files_map, $file_phid);
+
+        $item = new PhabricatorPinboardItemView();
+        $item->setImageURI($file->getThumb160x120URI());
+        $item->setImageSize(160, 120);
+        $item->setURI($this->getApplicationURI('/edit/'.$macro->getID().'/'));
+        $item->setHeader($macro->getName());
+
+        if ($file->getAuthorPHID()) {
+          $author_handle = $this->getHandle($file->getAuthorPHID());
+          $item->appendChild(
+            'Created by '.$author_handle->renderLink());
+        }
+
+        $datetime = phabricator_date($file->getDateCreated(), $viewer);
+        $item->appendChild(
+          phutil_render_tag(
+            'div',
+            array(),
+            'Created on '.$datetime));
+
+        $pinboard->addItem($item);
+      }
+      $nav->appendChild($pinboard);
+    } else {
+      $list = new PhabricatorObjectItemListView();
+      $list->setNoDataString($nodata);
+      $nav->appendChild($list);
+    }
+
+
+    if ($filter === null) {
+      $nav->appendChild($pager);
+    }
 
     return $this->buildApplicationPage(
       $nav,
       array(
+        'device' => true,
         'title' => 'Image Macros',
       ));
   }

@@ -1,0 +1,53 @@
+/**
+ * @provides phabricator-pinboard-view-css
+ */
+
+.phabricator-pinboard-view {
+  padding: 0 2%;
+  overflow: hidden;
+}
+
+.device-phone .phabricator-pinboard-view {
+  padding: 0;
+}
+
+.phabricator-pinboard-item-view {
+  margin: 0 10px 20px;
+  border: 1px solid #aaaaaa;
+  background: #ffffff;
+
+  display: block;
+  float: left;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.15);
+  text-align: left;
+}
+
+
+/* On phones, show a single column of items. */
+.device-phone .phabricator-pinboard-item-view {
+  float: none;
+  margin: 0 auto 20px;
+
+  /* NOTE: This needs to be changed if we use images other than 160px wide. */
+  width: 200px;
+}
+
+.phabricator-pinboard-item-header {
+  padding: 5px 20px;
+  display: block;
+  background: #f3f3f3;
+  font-weight: bold;
+}
+
+.phabricator-pinboard-item-image-link {
+  padding: 20px;
+  display: block;
+}
+
+.phabricator-pinboard-item-content {
+  padding: 5px 20px;
+  overflow: hidden;
+  background: #f3f3f3;
+  color: #666666;
+  font-size: smaller;
+}
