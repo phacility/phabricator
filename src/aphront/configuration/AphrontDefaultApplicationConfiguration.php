@@ -39,26 +39,6 @@ class AphrontDefaultApplicationConfiguration
         '(?:(?P<subfilter>[^/]+)/)?' =>
           'PhabricatorDirectoryMainController',
       ),
-      '/F(?P<id>\d+)' => 'PhabricatorFileShortcutController',
-      '/file/' => array(
-        '' => 'PhabricatorFileListController',
-        'filter/(?P<filter>\w+)/' => 'PhabricatorFileListController',
-        'upload/' => 'PhabricatorFileUploadController',
-        'dropupload/' => 'PhabricatorFileDropUploadController',
-        'delete/(?P<id>\d+)/' => 'PhabricatorFileDeleteController',
-        'info/(?P<phid>[^/]+)/' => 'PhabricatorFileInfoController',
-
-        'data/(?P<key>[^/]+)/(?P<phid>[^/]+)/.*'
-          => 'PhabricatorFileDataController',
-        // TODO: This is a deprecated version of /data/. Remove it after
-        // old links have had a chance to rot.
-        'alt/(?P<key>[^/]+)/(?P<phid>[^/]+)/'
-          => 'PhabricatorFileDataController',
-
-        'proxy/' => 'PhabricatorFileProxyController',
-        'xform/(?P<transform>[^/]+)/(?P<phid>[^/]+)/'
-          => 'PhabricatorFileTransformController',
-      ),
 
       '/typeahead/' => array(
         'common/(?P<type>\w+)/'
