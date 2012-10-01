@@ -18,12 +18,8 @@
 
 final class PonderFeedController extends PonderController {
   private $page;
-  private $feedOffset;
-  private $questionOffset;
   private $answerOffset;
 
-  const FEED_PAGE_SIZE = 20;
-  const PROFILE_QUESTION_PAGE_SIZE = 10;
   const PROFILE_ANSWER_PAGE_SIZE = 10;
 
   public function willProcessRequest(array $data) {
@@ -34,8 +30,6 @@ final class PonderFeedController extends PonderController {
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
-    $this->feedOffset = $request->getInt('off');
-    $this->questionOffset = $request->getInt('qoff');
     $this->answerOffset = $request->getInt('aoff');
 
     $pages = array(
@@ -53,24 +47,28 @@ final class PonderFeedController extends PonderController {
     switch ($this->page) {
       case 'feed':
       case 'questions':
+        $pager = new AphrontPagerView();
+        $pager->setOffset($request->getStr('offset'));
+        $pager->setURI($request->getRequestURI(), 'offset');
+
+        $query = new PonderQuestionQuery();
 
         if ($this->page == 'feed') {
-          $questions = PonderQuestionQuery::loadHottest(
-            $user,
-            $this->feedOffset,
-            self::FEED_PAGE_SIZE + 1);
+          $query
+            ->setOrder(PonderQuestionQuery::ORDER_HOTTEST);
         } else {
-          $questions = PonderQuestionQuery::loadByAuthor(
-            $user,
-            $user->getPHID(),
-            $this->questionOffset,
-            self::PROFILE_QUESTION_PAGE_SIZE + 1
-          );
+          $query
+            ->setOrder(PonderQuestionQuery::ORDER_CREATED)
+            ->withAuthorPHIDs(array($user->getPHID()));
         }
+
+        $questions = $query->executeWithOffsetPager($pager);
 
         $this->loadHandles(mpull($questions, 'getAuthorPHID'));
 
         $view = $this->buildQuestionListView($questions);
+        $view->setPager($pager);
+
         $side_nav->appendChild(
           id(new PhabricatorHeaderView())->setHeader($title));
         $side_nav->appendChild($view);
@@ -92,7 +90,7 @@ final class PonderFeedController extends PonderController {
           ->setAnswers($answers)
           ->setHandles($handles)
           ->setAnswerOffset($this->answerOffset)
-          ->setPageSize(self::PROFILE_QUESTION_PAGE_SIZE)
+          ->setPageSize(self::PROFILE_ANSWER_PAGE_SIZE)
           ->setURI(new PhutilURI("/ponder/profile/"), "aoff")
         );
         break;
