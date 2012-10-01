@@ -63,6 +63,7 @@ final class PhameBlogDetailView extends AphrontView {
 
   public function render() {
     require_celerity_resource('phabricator-remarkup-css');
+    require_celerity_resource('phame-blog-detail-css');
 
     $user         = $this->getUser();
     $blog         = $this->getBlog();
@@ -71,6 +72,7 @@ final class PhameBlogDetailView extends AphrontView {
     $description  = phutil_escape_html($blog->getDescription());
     $bloggers_txt = implode(' &middot; ', mpull($bloggers, 'renderLink'));
     $panel = id(new AphrontPanelView())
+      ->addClass('blog-detail')
       ->setHeader($name)
       ->setCaption($description)
       ->setWidth(AphrontPanelView::WIDTH_FORM)

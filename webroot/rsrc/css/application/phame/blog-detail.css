@@ -1,0 +1,18 @@
+/**
+ * @provides phame-blog-detail-css
+ */
+
+.blog-detail {
+  clear: right;
+  float: right;
+  width: 20%;
+  margin: 16px 16px 16px 0px;
+  padding: 12px 8px 12px 8px;
+}
+
+.device-tablet .blog-detail,
+.device-phone .blog-detail {
+  float: none;
+  margin: 16px auto;
+  width: 90%;
+}

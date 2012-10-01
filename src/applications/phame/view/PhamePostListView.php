@@ -26,6 +26,7 @@ final class PhamePostListView extends AphrontView {
   private $bloggers;
   private $actions;
   private $draftList;
+  private $blogStyle;
 
   public function setDraftList($draft_list) {
     $this->draftList = $draft_list;
@@ -77,11 +78,22 @@ final class PhamePostListView extends AphrontView {
     return array();
   }
 
+  public function setBlogStyle($style) {
+    $this->blogStyle = $style;
+    return $this;
+  }
+  private function getBlogStyle() {
+    return $this->blogStyle;
+  }
+
   public function render() {
-    $user     = $this->getUser();
-    $posts    = $this->getPosts();
-    $bloggers = $this->getBloggers();
-    $noun     = $this->getPostNoun();
+    $user       = $this->getUser();
+    $posts      = $this->getPosts();
+    $bloggers   = $this->getBloggers();
+    $noun       = $this->getPostNoun();
+    // TODO -- change this from a boolean to a string
+    // this string will represent a more specific "style" below
+    $blog_style = $this->getBlogStyle();
 
     if (empty($posts)) {
       $panel = id(new AphrontPanelView())
@@ -92,6 +104,9 @@ final class PhamePostListView extends AphrontView {
       return $panel->render();
     }
     require_celerity_resource('phabricator-remarkup-css');
+    if ($blog_style) {
+      require_celerity_resource('phame-blog-post-list-css');
+    }
 
     $engine  = PhabricatorMarkupEngine::newPhameMarkupEngine();
     $html    = array();
@@ -107,6 +122,9 @@ final class PhamePostListView extends AphrontView {
         ->setHeader(phutil_escape_html($post->getTitle()))
         ->setCaption('Last updated '.$updated.' by '.$blogger_link.'.')
         ->appendChild('<div class="phabricator-remarkup">'.$body.'</div>');
+      if ($blog_style) {
+        $panel->addClass('blog-post-list');
+      }
       foreach ($actions as $action) {
         switch ($action) {
           case 'view':

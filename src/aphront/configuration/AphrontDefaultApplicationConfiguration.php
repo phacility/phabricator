@@ -113,37 +113,7 @@ class AphrontDefaultApplicationConfiguration
         'keyboardshortcut/' => 'PhabricatorHelpKeyboardShortcutController',
       ),
 
-      '/phame/' => array(
-        ''                          => 'PhameAllPostListController',
-        'post/' => array(
-          ''                        => 'PhameUserPostListController',
-          'delete/(?P<phid>[^/]+)/' => 'PhamePostDeleteController',
-          'edit/(?P<phid>[^/]+)/'   => 'PhamePostEditController',
-          'new/'                    => 'PhamePostEditController',
-          'preview/'                => 'PhamePostPreviewController',
-          'view/(?P<phid>[^/]+)/'   => 'PhamePostViewController',
-        ),
-        'draft/' => array(
-          ''                        => 'PhameDraftListController',
-          'new/'                    => 'PhamePostEditController',
-        ),
-        'blog/' => array(
-          ''                         => 'PhameUserBlogListController',
-          'all/'                     => 'PhameAllBlogListController',
-          'new/'                     => 'PhameBlogEditController',
-          'delete/(?P<phid>[^/]+)/'  => 'PhameBlogDeleteController',
-          'edit/(?P<phid>[^/]+)/'    => 'PhameBlogEditController',
-          'view/(?P<phid>[^/]+)/'    => 'PhameBlogViewController',
-        ),
-        'posts/' => array(
-          ''                        => 'PhameUserPostListController',
-          '(?P<bloggername>\w+)/'   => 'PhameBloggerPostListController',
-          '(?P<bloggername>\w+)/(?P<phametitle>.+/)'
-                                    => 'PhamePostViewController',
-        ),
-      ),
-
-      '/calendar/' => array(
+       '/calendar/' => array(
         '' => 'PhabricatorCalendarBrowseController',
       ),
 
