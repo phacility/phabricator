@@ -42,7 +42,7 @@ abstract class PhabricatorDirectoryController extends PhabricatorController {
     $nav->addFilter('jump', 'Jump Nav');
     $nav->addFilter('feed', 'Feed');
     $nav->addSpacer();
-    $nav->addFilter('apps', 'More Stuff');
+    $nav->addFilter('applications', 'More Stuff');
 
     return $nav;
   }
