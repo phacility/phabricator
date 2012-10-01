@@ -44,8 +44,21 @@ final class PhabricatorAuditAddCommentController
       ->setAction($action)
       ->setContent($request->getStr('content'));
 
-    $auditors = $request->getArr('auditors');
-    $ccs = $request->getArr('ccs');
+    // make sure we only add auditors or ccs if the action matches
+    switch ($action) {
+      case 'add_auditors':
+        $auditors = $request->getArr('auditors');
+        $ccs = array();
+        break;
+      case 'add_ccs':
+        $auditors = array();
+        $ccs = $request->getArr('ccs');
+        break;
+      default:
+        $auditors = array();
+        $ccs = array();
+        break;
+    }
 
     id(new PhabricatorAuditCommentEditor($commit))
       ->setUser($user)
