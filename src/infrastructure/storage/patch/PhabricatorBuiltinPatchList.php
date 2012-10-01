@@ -988,6 +988,11 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('draft-metadata.sql'),
       ),
+      'phamedomain.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('phamedomain.sql'),
+      ),
+
     );
   }
 

@@ -74,11 +74,12 @@ final class PhameBlogEditController
   }
 
   public function processRequest() {
-    $request    = $this->getRequest();
-    $user       = $request->getUser();
-    $e_name     = null;
-    $e_bloggers = null;
-    $errors     = array();
+    $request         = $this->getRequest();
+    $user            = $request->getUser();
+    $e_name          = null;
+    $e_bloggers      = null;
+    $e_custom_domain = null;
+    $errors          = array();
 
     if ($this->isBlogEdit()) {
       $blogs = id(new PhameBlogQuery())
@@ -117,10 +118,11 @@ final class PhameBlogEditController
     }
 
     if ($request->isFormPost()) {
-      $saved       = true;
-      $name        = $request->getStr('name');
-      $description = $request->getStr('description');
-      $blogger_arr = $request->getArr('bloggers');
+      $saved         = true;
+      $name          = $request->getStr('name');
+      $description   = $request->getStr('description');
+      $blogger_arr   = $request->getArr('bloggers');
+      $custom_domain = $request->getStr('custom_domain');
 
       if (empty($blogger_arr)) {
         $error = 'Bloggers must be nonempty.';
@@ -145,6 +147,14 @@ final class PhameBlogEditController
       }
       $blog->setName($name);
       $blog->setDescription($description);
+      if (!empty($custom_domain)) {
+        $error = $blog->validateCustomDomain($custom_domain);
+        if ($error) {
+          $errors[] = $error;
+          $e_custom_domain = 'Invalid';
+        }
+        $blog->setDomain($custom_domain);
+      }
 
       if (empty($errors)) {
         $blog->save();
@@ -168,7 +178,11 @@ final class PhameBlogEditController
 
       if ($saved) {
         $uri = new PhutilURI($blog->getViewURI());
-        $uri->setQueryParam('new', true);
+        if ($this->isBlogEdit()) {
+          $uri->setQueryParam('edit', true);
+        } else {
+          $uri->setQueryParam('new', true);
+        }
         return id(new AphrontRedirectResponse())
           ->setURI($uri);
       }
@@ -208,8 +222,17 @@ final class PhameBlogEditController
         ->setDatasource('/typeahead/common/users/')
         ->setError($e_bloggers)
       )
-        ->appendChild(
-          id(new AphrontFormSubmitControl())
+      ->appendChild(
+        id(new AphrontFormTextControl())
+        ->setLabel('Custom Domain')
+        ->setName('custom_domain')
+        ->setValue($blog->getDomain())
+        ->setCaption('Must include at least one dot (.), e.g. '.
+        'blog.example.com')
+        ->setError($e_custom_domain)
+      )
+      ->appendChild(
+        id(new AphrontFormSubmitControl())
         ->addCancelButton('/phame/blog/')
         ->setValue($submit_button)
       );
