@@ -148,6 +148,7 @@ $app_map = array(
   'phid'            => array(9, 25),
   'diviner'         => array(1, 35),
   'repositories'    => array(8, 13),
+  'phame'           => array(8, 4),
 );
 
 $xadj = -1;
