@@ -55,11 +55,6 @@ class AphrontDefaultApplicationConfiguration
         'alt/(?P<key>[^/]+)/(?P<phid>[^/]+)/'
           => 'PhabricatorFileDataController',
 
-        'macro/' => array(
-          '' => 'PhabricatorFileMacroListController',
-          'edit/(?:(?P<id>\d+)/)?' => 'PhabricatorFileMacroEditController',
-          'delete/(?P<id>\d+)/' => 'PhabricatorFileMacroDeleteController',
-        ),
         'proxy/' => 'PhabricatorFileProxyController',
         'xform/(?P<transform>[^/]+)/(?P<phid>[^/]+)/'
           => 'PhabricatorFileTransformController',

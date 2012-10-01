@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-final class PhabricatorFileMacroListController
-  extends PhabricatorFileController {
+final class PhabricatorMacroListController
+  extends PhabricatorMacroController {
 
   public function processRequest() {
 
@@ -74,7 +74,7 @@ final class PhabricatorFileMacroListController
         phutil_render_tag(
           'a',
           array(
-            'href' => '/file/macro/edit/'.$macro->getID().'/',
+            'href' => $this->getApplicationURI('/edit/'.$macro->getID().'/'),
           ),
           phutil_escape_html($macro->getName())),
 
@@ -93,7 +93,7 @@ final class PhabricatorFileMacroListController
         javelin_render_tag(
           'a',
           array(
-            'href' => '/file/macro/delete/'.$macro->getID().'/',
+            'href' => $this->getApplicationURI('/delete/'.$macro->getID().'/'),
             'sigil' => 'workflow',
             'class' => 'grey small button',
           ),
@@ -119,7 +119,6 @@ final class PhabricatorFileMacroListController
 
     $filter_form = id(new AphrontFormView())
       ->setMethod('GET')
-      ->setAction('/file/macro/')
       ->setUser($request->getUser())
       ->appendChild(
         id(new AphrontFormTextControl())
@@ -132,14 +131,6 @@ final class PhabricatorFileMacroListController
 
     $filter_view = new AphrontListFilterView();
     $filter_view->appendChild($filter_form);
-    $filter_view->addButton(
-      phutil_render_tag(
-        'a',
-        array(
-          'href'  => '/file/macro/edit/',
-          'class' => 'green button',
-        ),
-        'New Image Macro'));
 
     $panel = new AphrontPanelView();
     $panel->appendChild($table);
@@ -148,13 +139,14 @@ final class PhabricatorFileMacroListController
       $panel->appendChild($pager);
     }
 
-    $side_nav = new PhabricatorFileSideNavView();
-    $side_nav->setSelectedFilter('all_macros');
-    $side_nav->appendChild($filter_view);
-    $side_nav->appendChild($panel);
+    $nav = $this->buildSideNavView();
+    $nav->selectFilter('/');
 
-    return $this->buildStandardPageResponse(
-      $side_nav,
+    $nav->appendChild($filter_view);
+    $nav->appendChild($panel);
+
+    return $this->buildApplicationPage(
+      $nav,
       array(
         'title' => 'Image Macros',
       ));

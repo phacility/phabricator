@@ -149,6 +149,7 @@ $app_map = array(
   'diviner'         => array(1, 35),
   'repositories'    => array(8, 13),
   'phame'           => array(8, 4),
+  'macro'           => array(0, 31),
 );
 
 $xadj = -1;

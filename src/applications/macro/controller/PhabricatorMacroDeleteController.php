@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-final class PhabricatorFileMacroDeleteController
-  extends PhabricatorFileController {
+final class PhabricatorMacroDeleteController
+  extends PhabricatorMacroController {
 
   private $id;
 
@@ -36,7 +36,8 @@ final class PhabricatorFileMacroDeleteController
 
     if ($request->isDialogFormPost()) {
       $macro->delete();
-      return id(new AphrontRedirectResponse())->setURI('/file/macro/');
+      return id(new AphrontRedirectResponse())->setURI(
+        $this->getApplicationURI());
     }
 
     $dialog = new AphrontDialogView();
@@ -47,9 +48,9 @@ final class PhabricatorFileMacroDeleteController
         '<p>Really delete the much-beloved image macro "'.
         phutil_escape_html($macro->getName()).'"? It will be sorely missed.'.
         '</p>')
-      ->setSubmitURI('/file/macro/delete/'.$this->id.'/')
+      ->setSubmitURI($this->getApplicationURI('/delete/'.$this->id.'/'))
       ->addSubmitButton('Delete')
-      ->addCancelButton('/file/macro/');
+      ->addCancelButton($this->getApplicationURI());
 
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
