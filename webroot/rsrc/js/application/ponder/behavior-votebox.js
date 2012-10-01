@@ -3,74 +3,53 @@
  * @requires javelin-behavior
  *           javelin-dom
  *           javelin-util
- *           phabricator-shaped-request
+ *           javelin-stratcom
+ *           javelin-request
  */
 
 JX.behavior('ponder-votebox', function(config) {
 
-  var node = JX.$(config.nodeid);
-  var vote = config.vote;
-  var count = config.count | 0;
-  var targetURI = config.targetURI;
+  function handle_vote(e, vote) {
+    e.kill();
 
-  var upnode, countnode, downnode;
+    var root = e.getNode('ponder-votable');
+    var data = e.getNodeData('ponder-votable');
 
-  // this defines the behavior of the up/downvote
-  // buttons, e.g. clicking 'up' transitions from
-  // an 'up' vote to a 'none' vote
-  var votecycle = {
-    "1"  : { up : "0", down : "-1" },
-    "0"  : { up : "1", down : "-1" },
-    "-1" : { up : "1",  down : "0" }
-  };
+    if (data.vote != vote) {
+      data.vote = vote;
+      data.count += vote;
+    } else {
+      // User is undoing their vote.
+      data.vote = 0;
+      data.count -= vote;
+    }
 
-  var voteclass = {
-    "0"  : "ponder-vote-none",
-    "-1" : "ponder-vote-down",
-    "1"  : "ponder-vote-up"
-  };
+    var upv = JX.DOM.find(root, 'a', 'upvote');
+    JX.DOM.alterClass(upv, 'ponder-vote-active', (data.vote > 0));
 
-  function decorate() {
-    upnode = JX.$N('div');
-    countnode = JX.$N('div');
-    downnode = JX.$N('div');
-    node.appendChild(upnode);
-    node.appendChild(countnode);
-    node.appendChild(downnode);
-    JX.DOM.alterClass(upnode, "ponder-upbutton " + voteclass[vote], true);
-    JX.DOM.alterClass(downnode, "ponder-downbutton " + voteclass[vote], true);
-    JX.DOM.alterClass(countnode, "ponder-votecount", true);
+    var downv = JX.DOM.find(root, 'a', 'downvote');
+    JX.DOM.alterClass(downv, 'ponder-vote-active', (data.vote < 0))
+
+    JX.DOM.setContent(
+      JX.DOM.find(root, 'div', 'ponder-vote-count'),
+      data.count);
+
+    new JX.Request(e.getTarget().href, JX.bag)
+      .setData({vote: data.vote})
+      .send()
   }
 
-  function update_state() {
-    upnode.className = "ponder-upbutton " + voteclass[vote];
-    downnode.className = "ponder-downbutton " + voteclass[vote];
-    JX.DOM.setContent(countnode, JX.$H(count.toString()));
-  }
+  JX.Stratcom.listen(
+    'click',
+    'downvote',
+    function(e) {
+      handle_vote(e, -1);
+    });
 
-  function getdata() {
-    return { phid : config.nodeid, vote : vote };
-  }
-
-  var request = new JX.PhabricatorShapedRequest(config.uri, JX.id, getdata);
-  var trigger = JX.bind(request, request.trigger);
-
-  function handle_upvote(e) {
-    count += votecycle[vote].up - vote;
-    vote = votecycle[vote].up;
-    trigger();
-    update_state();
-  }
-
-  function handle_downvote(e) {
-    count += votecycle[vote].down - vote;
-    vote = votecycle[vote].down;
-    trigger();
-    update_state();
-  }
-
-  decorate();
-  update_state();
-  JX.DOM.listen(upnode, 'click', null, handle_upvote);
-  JX.DOM.listen(downnode, 'click', null, handle_downvote);
+  JX.Stratcom.listen(
+    'click',
+    'upvote',
+    function(e) {
+      handle_vote(e, 1);
+    });
 });

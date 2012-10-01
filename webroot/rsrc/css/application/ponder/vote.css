@@ -2,16 +2,44 @@
  * @provides ponder-vote-css
  */
 
-
-
-.ponder-votable .phabricator-transaction-view {
-  margin : 0;
-  padding : 0;
+.ponder-votebox {
+  text-align: center;
 }
 
-.ponder-votable .phabricator-transaction-detail {
-  min-height : 90px;
+.ponder-votebox a {
+  font-size: 20px;
+  line-height: 20px;
+  display: block;
+
+  text-decoration: none;
+  color: #999999;
+  font-weight: normal;
+
+  /* Our default fonts have weirdly different up/down arrow sizes. */
+  font-family: Arial;
 }
+
+.ponder-votebox a:hover {
+  color: #606060;
+}
+
+.ponder-votebox a.ponder-vote-active {
+  color: #3b5998;
+}
+
+.ponder-votebox a.ponder-vote-active:hover {
+  color: #a1bbe5;
+}
+
+.ponder-vote-count {
+  color: #888888;
+  font-size: 14px;
+  line-height: 14px;
+  font-weight: bold;
+}
+
+
+
 
 .ponder-votebox {
   float  : left;
@@ -21,57 +49,11 @@
   margin-left : 10px;
 }
 
-.ponder-upbutton {
-  border : none;
-  padding : 0;
+.ponder-votable .phabricator-transaction-view {
   margin : 0;
-  width : 32px;
-  height : 13px;
-}
-
-.ponder-downbutton {
-  border : none;
   padding : 0;
-  margin : 0;
-  width : 32px;
-  height : 13px;
 }
 
-.ponder-votecount {
-  width : 32px;
-  height : 22pt;
-  padding : 0;
-  margin : 0;
-  overflow : visible;
-  text-align : center;
-  font-size : 15pt;
-}
-
-.ponder-upbutton:hover {
-  cursor : pointer;
-}
-
-.ponder-downbutton:hover {
-  cursor : pointer;
-}
-
-.ponder-votable-bottom {
-  clear : both;
-}
-
-.ponder-upbutton {
-  background : url(/rsrc/image/application/ponder/upvote.png) 0 -13px no-repeat;
-}
-
-.ponder-upbutton.ponder-vote-up {
-  background : url(/rsrc/image/application/ponder/upvote.png) 0 0 no-repeat;
-}
-
-.ponder-downbutton {
-  background : url(/rsrc/image/application/ponder/downvote.png)
-    0 -13px no-repeat;
-}
-
-.ponder-downbutton.ponder-vote-down {
-  background : url(/rsrc/image/application/ponder/downvote.png) 0 0 no-repeat;
+.ponder-votable .phabricator-transaction-detail {
+  min-height : 90px;
 }
