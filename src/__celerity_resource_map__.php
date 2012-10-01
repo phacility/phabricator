@@ -14,20 +14,6 @@ celerity_register_resource_map(array(
     'disk' => '/rsrc/image/app/app_audit.png',
     'type' => 'png',
   ),
-  '/rsrc/image/application/ponder/downvote.png' =>
-  array(
-    'hash' => '46c5644a0fccb9e237a3363e07f50487',
-    'uri' => '/res/46c5644a/rsrc/image/application/ponder/downvote.png',
-    'disk' => '/rsrc/image/application/ponder/downvote.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/application/ponder/upvote.png' =>
-  array(
-    'hash' => 'edd58ed3a09f3017c78601b1a5d0e7a7',
-    'uri' => '/res/edd58ed3/rsrc/image/application/ponder/upvote.png',
-    'disk' => '/rsrc/image/application/ponder/upvote.png',
-    'type' => 'png',
-  ),
   '/rsrc/image/apps.png' =>
   array(
     'hash' => 'f7cb4abeb73245fea4098a02fd784653',
@@ -1664,14 +1650,15 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-ponder-votebox' =>
   array(
-    'uri' => '/res/6517d3f5/rsrc/js/application/ponder/behavior-votebox.js',
+    'uri' => '/res/9d091af3/rsrc/js/application/ponder/behavior-votebox.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-behavior',
       1 => 'javelin-dom',
       2 => 'javelin-util',
-      3 => 'phabricator-shaped-request',
+      3 => 'javelin-stratcom',
+      4 => 'javelin-request',
     ),
     'disk' => '/rsrc/js/application/ponder/behavior-votebox.js',
   ),
@@ -2901,7 +2888,7 @@ celerity_register_resource_map(array(
   ),
   'ponder-vote-css' =>
   array(
-    'uri' => '/res/d4dff9ba/rsrc/css/application/ponder/vote.css',
+    'uri' => '/res/ea8316c2/rsrc/css/application/ponder/vote.css',
     'type' => 'css',
     'requires' =>
     array(

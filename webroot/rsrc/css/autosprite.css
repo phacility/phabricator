@@ -259,50 +259,90 @@
   background-position: 0px -2582px;
 }
 
-.action-file {
+.app-phpast-full {
   background-position: 0px -2613px;
 }
 
-.action-fork {
-  background-position: 0px -2630px;
+.app-phpast {
+  background-position: 0px -2674px;
 }
 
-.action-edit {
-  background-position: 0px -2647px;
+.app-owners-full {
+  background-position: 0px -2705px;
 }
 
-.action-flag-0 {
-  background-position: 0px -2664px;
-}
-
-.action-flag-1 {
-  background-position: 0px -2681px;
-}
-
-.action-flag-2 {
-  background-position: 0px -2698px;
-}
-
-.action-flag-3 {
-  background-position: 0px -2715px;
-}
-
-.action-flag-4 {
-  background-position: 0px -2732px;
-}
-
-.action-flag-5 {
-  background-position: 0px -2749px;
-}
-
-.action-flag-6 {
+.app-owners {
   background-position: 0px -2766px;
 }
 
+.app-phid-full {
+  background-position: 0px -2797px;
+}
+
+.app-phid {
+  background-position: 0px -2858px;
+}
+
+.app-diviner-full {
+  background-position: 0px -2889px;
+}
+
+.app-diviner {
+  background-position: 0px -2950px;
+}
+
+.app-repositories-full {
+  background-position: 0px -2981px;
+}
+
+.app-repositories {
+  background-position: 0px -3042px;
+}
+
+.action-file {
+  background-position: 0px -3073px;
+}
+
+.action-fork {
+  background-position: 0px -3090px;
+}
+
+.action-edit {
+  background-position: 0px -3107px;
+}
+
+.action-flag-0 {
+  background-position: 0px -3124px;
+}
+
+.action-flag-1 {
+  background-position: 0px -3141px;
+}
+
+.action-flag-2 {
+  background-position: 0px -3158px;
+}
+
+.action-flag-3 {
+  background-position: 0px -3175px;
+}
+
+.action-flag-4 {
+  background-position: 0px -3192px;
+}
+
+.action-flag-5 {
+  background-position: 0px -3209px;
+}
+
+.action-flag-6 {
+  background-position: 0px -3226px;
+}
+
 .action-flag-7 {
-  background-position: 0px -2783px;
+  background-position: 0px -3243px;
 }
 
 .action-flag-ghost {
-  background-position: 0px -2800px;
+  background-position: 0px -3260px;
 }

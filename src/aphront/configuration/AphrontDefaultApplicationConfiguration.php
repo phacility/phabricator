@@ -64,9 +64,6 @@ class AphrontDefaultApplicationConfiguration
         'xform/(?P<transform>[^/]+)/(?P<phid>[^/]+)/'
           => 'PhabricatorFileTransformController',
       ),
-      '/phid/' => array(
-        '' => 'PhabricatorPHIDLookupController',
-      ),
 
       '/typeahead/' => array(
         'common/(?P<type>\w+)/'
@@ -124,16 +121,6 @@ class AphrontDefaultApplicationConfiguration
 
       '/~/' => 'DarkConsoleController',
 
-      '/repository/' => array(
-        ''                     => 'PhabricatorRepositoryListController',
-        'create/'              => 'PhabricatorRepositoryCreateController',
-        'edit/(?P<id>\d+)/(?:(?P<view>\w+)?/)?' =>
-          'PhabricatorRepositoryEditController',
-        'delete/(?P<id>\d+)/'  => 'PhabricatorRepositoryDeleteController',
-        'project/(?P<id>\d+)/' =>
-          'PhabricatorRepositoryArcanistProjectEditController',
-      ),
-
       '/search/' => array(
         '' => 'PhabricatorSearchController',
         '(?P<key>[^/]+)/' => 'PhabricatorSearchController',
@@ -142,29 +129,6 @@ class AphrontDefaultApplicationConfiguration
         'select/(?P<type>\w+)/'
           => 'PhabricatorSearchSelectController',
         'index/(?P<phid>[^/]+)/' => 'PhabricatorSearchIndexController',
-      ),
-
-      '/owners/' => array(
-        '' => 'PhabricatorOwnersListController',
-        'view/(?P<view>[^/]+)/' => 'PhabricatorOwnersListController',
-        'edit/(?P<id>\d+)/' => 'PhabricatorOwnersEditController',
-        'new/' => 'PhabricatorOwnersEditController',
-        'package/(?P<id>\d+)/' => 'PhabricatorOwnersDetailController',
-        'delete/(?P<id>\d+)/' => 'PhabricatorOwnersDeleteController',
-      ),
-
-      '/xhpast/' => array(
-        '' => 'PhabricatorXHPASTViewRunController',
-        'view/(?P<id>\d+)/'
-          => 'PhabricatorXHPASTViewFrameController',
-        'frameset/(?P<id>\d+)/'
-          => 'PhabricatorXHPASTViewFramesetController',
-        'input/(?P<id>\d+)/'
-          => 'PhabricatorXHPASTViewInputController',
-        'tree/(?P<id>\d+)/'
-          => 'PhabricatorXHPASTViewTreeController',
-        'stream/(?P<id>\d+)/'
-          => 'PhabricatorXHPASTViewStreamController',
       ),
 
       '/status/' => 'PhabricatorStatusController',
