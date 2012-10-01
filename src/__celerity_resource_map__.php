@@ -2556,6 +2556,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/core/PasteFileUpload.js',
   ),
+  'phabricator-pinboard-view-css' =>
+  array(
+    'uri' => '/res/3a24d210/rsrc/css/layout/phabricator-pinboard-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/layout/phabricator-pinboard-view.css',
+  ),
   'phabricator-prefab' =>
   array(
     'uri' => '/res/2734e45f/rsrc/js/application/core/Prefab.js',
