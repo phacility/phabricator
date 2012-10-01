@@ -46,8 +46,9 @@ abstract class PonderController extends PhabricatorController {
 
     $side_nav->addSpacer();
 
-    $side_nav->addLabel('Profile');
-    $side_nav->addFilter('profile', 'User Profile');
+    $side_nav->addLabel('User');
+    $side_nav->addFilter('questions', 'Your Questions');
+    $side_nav->addFilter('answers', 'Your Answers');
 
     return $side_nav;
   }

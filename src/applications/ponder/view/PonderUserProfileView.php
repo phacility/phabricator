@@ -20,11 +20,9 @@ final class PonderUserProfileView extends AphrontView {
   private $user;
   private $questionoffset;
   private $answeroffset;
-  private $questions;
   private $answers;
   private $pagesize;
   private $uri;
-  private $qparam;
   private $aparam;
 
   public function setUser(PhabricatorUser $user) {
@@ -39,11 +37,6 @@ final class PonderUserProfileView extends AphrontView {
 
   public function setAnswerOffset($offset) {
     $this->answeroffset = $offset;
-    return $this;
-  }
-
-  public function setQuestions($data) {
-    $this->questions = $data;
     return $this;
   }
 
@@ -62,9 +55,8 @@ final class PonderUserProfileView extends AphrontView {
     return $this;
   }
 
-  public function setURI($uri, $qparam, $aparam) {
+  public function setURI($uri, $aparam) {
     $this->uri = $uri;
-    $this->qparam = $qparam;
     $this->aparam = $aparam;
     return $this;
   }
@@ -74,51 +66,12 @@ final class PonderUserProfileView extends AphrontView {
     require_celerity_resource('ponder-feed-view-css');
 
     $user = $this->user;
-    $qoffset = $this->questionoffset;
     $aoffset = $this->answeroffset;
-    $questions = $this->questions;
     $answers = $this->answers;
     $handles = $this->handles;
     $uri = $this->uri;
-    $qparam = $this->qparam;
     $aparam = $this->aparam;
     $pagesize = $this->pagesize;
-
-
-    // display questions
-    $question_panel = id(new AphrontPanelView())
-      ->setHeader("Your Questions")
-      ->addClass("ponder-panel");
-
-    $question_panel->addButton(
-      phutil_render_tag(
-        'a',
-        array(
-          'href' => "/ponder/question/ask/",
-          'class' => 'green button',
-        ),
-        "Ask a question"));
-
-    $qpagebuttons = id(new AphrontPagerView())
-      ->setPageSize($pagesize)
-      ->setOffset($qoffset)
-      ->setURI(
-        $uri->alter(
-          $aparam,
-          $aoffset),
-        $qparam);
-
-    $questions = $qpagebuttons->sliceResults($questions);
-
-    foreach ($questions as $question) {
-      $cur = id(new PonderQuestionSummaryView())
-        ->setUser($user)
-        ->setQuestion($question)
-        ->setHandles($handles);
-      $question_panel->appendChild($cur);
-    }
-
-    $question_panel->appendChild($qpagebuttons);
 
     // display answers
     $answer_panel = id(new AphrontPanelView())
@@ -136,9 +89,6 @@ final class PonderUserProfileView extends AphrontView {
       ->setOffset($aoffset)
       ->setURI(
         $uri
-          ->alter(
-            $qparam,
-            $qoffset)
           ->setFragment("answers"),
         $aparam);
 
@@ -154,6 +104,6 @@ final class PonderUserProfileView extends AphrontView {
 
     $answer_panel->appendChild($apagebuttons);
 
-    return $question_panel->render() . $answer_panel->render();
+    return $answer_panel->render();
   }
 }

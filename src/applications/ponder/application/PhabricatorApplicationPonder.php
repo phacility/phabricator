@@ -48,7 +48,8 @@ final class PhabricatorApplicationPonder extends PhabricatorApplication {
       '/Q(?P<id>\d+)' => 'PonderQuestionViewController',
       '/ponder/' => array(
         '(?P<page>feed/)?' => 'PonderFeedController',
-        '(?P<page>profile)/' => 'PonderFeedController',
+        '(?P<page>questions)/' => 'PonderFeedController',
+        '(?P<page>answers)/' => 'PonderFeedController',
         'answer/add/' => 'PonderAnswerSaveController',
         'answer/preview/' => 'PonderAnswerPreviewController',
         'question/ask/' => 'PonderQuestionAskController',

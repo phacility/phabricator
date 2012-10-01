@@ -39,8 +39,9 @@ final class PonderFeedController extends PonderController {
     $this->answerOffset = $request->getInt('aoff');
 
     $pages = array(
-      'feed'    => 'All Questions',
-      'profile' => 'User Profile',
+      'feed'      => 'All Questions',
+      'questions' => 'Your Questions',
+      'answers'   => 'Your Answers',
     );
 
     $side_nav = $this->buildSideNavView();
@@ -51,10 +52,21 @@ final class PonderFeedController extends PonderController {
 
     switch ($this->page) {
       case 'feed':
-        $questions = PonderQuestionQuery::loadHottest(
-          $user,
-          $this->feedOffset,
-          self::FEED_PAGE_SIZE + 1);
+      case 'questions':
+
+        if ($this->page == 'feed') {
+          $questions = PonderQuestionQuery::loadHottest(
+            $user,
+            $this->feedOffset,
+            self::FEED_PAGE_SIZE + 1);
+        } else {
+          $questions = PonderQuestionQuery::loadByAuthor(
+            $user,
+            $user->getPHID(),
+            $this->questionOffset,
+            self::PROFILE_QUESTION_PAGE_SIZE + 1
+          );
+        }
 
         $this->loadHandles(mpull($questions, 'getAuthorPHID'));
 
@@ -63,14 +75,7 @@ final class PonderFeedController extends PonderController {
           id(new PhabricatorHeaderView())->setHeader($title));
         $side_nav->appendChild($view);
         break;
-      case 'profile':
-        $questions = PonderQuestionQuery::loadByAuthor(
-          $user,
-          $user->getPHID(),
-          $this->questionOffset,
-          self::PROFILE_QUESTION_PAGE_SIZE + 1
-        );
-
+      case 'answers':
         $answers = PonderAnswerQuery::loadByAuthorWithQuestions(
           $user,
           $user->getPHID(),
@@ -84,13 +89,11 @@ final class PonderFeedController extends PonderController {
         $side_nav->appendChild(
           id(new PonderUserProfileView())
           ->setUser($user)
-          ->setQuestions($questions)
           ->setAnswers($answers)
           ->setHandles($handles)
-          ->setQuestionOffset($this->questionOffset)
           ->setAnswerOffset($this->answerOffset)
           ->setPageSize(self::PROFILE_QUESTION_PAGE_SIZE)
-          ->setURI(new PhutilURI("/ponder/profile/"), "qoff", "aoff")
+          ->setURI(new PhutilURI("/ponder/profile/"), "aoff")
         );
         break;
     }
