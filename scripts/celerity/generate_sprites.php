@@ -55,9 +55,11 @@ function gly($y) {
 }
 
 $sheet = new PhutilSpriteSheet();
+$at = '@';
 $sheet->setCSSHeader(<<<EOCSS
 /**
  * @provides autosprite-css
+ * {$at}generated
  */
 
 .autosprite {
