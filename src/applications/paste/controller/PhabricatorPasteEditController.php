@@ -126,7 +126,7 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
     $form->setFlexible(true);
 
     $langs = array(
-      '' => '(Detect With Wizardly Powers)',
+      '' => '(Detect From Filename in Title)',
     ) + PhabricatorEnv::getEnvConfig('pygments.dropdown-choices');
 
     $form
