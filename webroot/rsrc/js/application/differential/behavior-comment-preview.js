@@ -38,6 +38,10 @@ JX.behavior('differential-feedback-preview', function(config) {
   };
 
   var request = new JX.PhabricatorShapedRequest(config.uri, callback, getdata);
+  request.listen('error', function (error) {
+    JX.DOM.setContent(JX.$(config.preview), JX.$H('ERROR: ' + error.info));
+  });
+
   var trigger = JX.bind(request, request.trigger);
 
   JX.DOM.listen(content, 'keydown', null, trigger);

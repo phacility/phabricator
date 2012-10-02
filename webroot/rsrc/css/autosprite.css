@@ -1,5 +1,6 @@
 /**
  * @provides autosprite-css
+ * @generated
  */
 
 .autosprite {
@@ -259,50 +260,106 @@
   background-position: 0px -2582px;
 }
 
-.action-file {
+.app-phpast-full {
   background-position: 0px -2613px;
 }
 
-.action-fork {
-  background-position: 0px -2630px;
+.app-phpast {
+  background-position: 0px -2674px;
 }
 
-.action-edit {
-  background-position: 0px -2647px;
+.app-owners-full {
+  background-position: 0px -2705px;
 }
 
-.action-flag-0 {
-  background-position: 0px -2664px;
-}
-
-.action-flag-1 {
-  background-position: 0px -2681px;
-}
-
-.action-flag-2 {
-  background-position: 0px -2698px;
-}
-
-.action-flag-3 {
-  background-position: 0px -2715px;
-}
-
-.action-flag-4 {
-  background-position: 0px -2732px;
-}
-
-.action-flag-5 {
-  background-position: 0px -2749px;
-}
-
-.action-flag-6 {
+.app-owners {
   background-position: 0px -2766px;
 }
 
+.app-phid-full {
+  background-position: 0px -2797px;
+}
+
+.app-phid {
+  background-position: 0px -2858px;
+}
+
+.app-diviner-full {
+  background-position: 0px -2889px;
+}
+
+.app-diviner {
+  background-position: 0px -2950px;
+}
+
+.app-repositories-full {
+  background-position: 0px -2981px;
+}
+
+.app-repositories {
+  background-position: 0px -3042px;
+}
+
+.app-phame-full {
+  background-position: 0px -3073px;
+}
+
+.app-phame {
+  background-position: 0px -3134px;
+}
+
+.app-macro-full {
+  background-position: 0px -3165px;
+}
+
+.app-macro {
+  background-position: 0px -3226px;
+}
+
+.action-file {
+  background-position: 0px -3257px;
+}
+
+.action-fork {
+  background-position: 0px -3274px;
+}
+
+.action-edit {
+  background-position: 0px -3291px;
+}
+
+.action-flag-0 {
+  background-position: 0px -3308px;
+}
+
+.action-flag-1 {
+  background-position: 0px -3325px;
+}
+
+.action-flag-2 {
+  background-position: 0px -3342px;
+}
+
+.action-flag-3 {
+  background-position: 0px -3359px;
+}
+
+.action-flag-4 {
+  background-position: 0px -3376px;
+}
+
+.action-flag-5 {
+  background-position: 0px -3393px;
+}
+
+.action-flag-6 {
+  background-position: 0px -3410px;
+}
+
 .action-flag-7 {
-  background-position: 0px -2783px;
+  background-position: 0px -3427px;
 }
 
 .action-flag-ghost {
-  background-position: 0px -2800px;
+  background-position: 0px -3444px;
 }

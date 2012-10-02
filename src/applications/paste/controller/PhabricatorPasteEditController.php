@@ -167,6 +167,22 @@ final class PhabricatorPasteEditController extends PhabricatorPasteController {
             ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
             ->setCustomClass('PhabricatorMonospaced')
             ->setName('text'));
+    } else {
+      $fork_link = phutil_render_tag(
+        'a',
+        array(
+          'href' => $this->getApplicationURI('?parent='.$paste->getID())
+        ),
+        'Fork'
+      );
+      $form
+        ->appendChild(
+          id(new AphrontFormMarkupControl())
+          ->setLabel('Text')
+          ->setValue(
+            'Paste text can not be edited. '.
+            $fork_link.' to create a new paste.'
+          ));
     }
 
     $submit = new AphrontFormSubmitControl();

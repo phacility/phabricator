@@ -246,3 +246,64 @@ img.phabricator-remarkup-embed-image {
   background: #ffffff;
   padding: 3px 6px;
 }
+
+.remarkup-assist-bar {
+  padding: 2px 0;
+}
+
+a.remarkup-assist-button {
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-bottom: 4px;
+  margin-bottom: 3px;
+
+  position: relative;
+  overflow: hidden;
+  height: 16px;
+  width: 16px;
+}
+
+a.remarkup-assist-button + a.remarkup-assist-button {
+  border-left-width: 0px;
+}
+
+.remarkup-assist {
+  float: left;
+  height: 16px;
+  width: 16px;
+  font-weight: normal;
+}
+
+.remarkup-assist-right {
+  float: right;
+}
+
+.remarkup-assist-b {
+  font-family: "Georgia", serif;
+  font-weight: bold;
+}
+
+.remarkup-assist-i {
+  font-family: "Georgia", serif;
+  font-style: italic;
+}
+
+.remarkup-assist-code,
+.remarkup-assist-tt {
+  text-align: center;
+  font-family: monospace;
+}
+
+.remarkup-assist-s {
+  font-family: "Georgia", serif;
+  text-decoration: line-through;
+}
+
+.remarkup-assist-ol {
+  font-family: "Georgia", serif;
+}
+
+.remarkup-assist-h1 {
+  font-family: "Georgia", serif;
+  font-weight: bold;
+}

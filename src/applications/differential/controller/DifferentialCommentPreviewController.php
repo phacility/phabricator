@@ -66,17 +66,20 @@ final class DifferentialCommentPreviewController
     $view->setPreview(true);
     $view->setTargetDiff(null);
 
-    $draft = new PhabricatorDraft();
-    $draft
+    $metadata = array(
+      'reviewers' => $reviewers,
+      'ccs' => $ccs,
+    );
+    if ($action != DifferentialAction::ACTION_COMMENT) {
+      $metadata['action'] = $action;
+    }
+
+    id(new PhabricatorDraft())
       ->setAuthorPHID($author_phid)
       ->setDraftKey('differential-comment-'.$this->id)
       ->setDraft($comment->getContent())
-      ->setMetadata(array(
-        'action' => $action,
-        'reviewers' => $reviewers,
-        'ccs' => $ccs,
-      ))
-      ->replace();
+      ->setMetadata($metadata)
+      ->replaceOrDelete();
 
     return id(new AphrontAjaxResponse())
       ->setContent($view->render());

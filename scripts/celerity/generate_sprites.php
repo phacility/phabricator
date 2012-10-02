@@ -55,9 +55,11 @@ function gly($y) {
 }
 
 $sheet = new PhutilSpriteSheet();
+$at = '@';
 $sheet->setCSSHeader(<<<EOCSS
 /**
  * @provides autosprite-css
+ * {$at}generated
  */
 
 .autosprite {
@@ -141,6 +143,13 @@ $app_map = array(
   'paste'           => array(9, 2),
   'audit'           => array(8, 19),
   'uiexample'       => array(7, 28),
+  'phpast'          => array(6, 31),
+  'owners'          => array(5, 32),
+  'phid'            => array(9, 25),
+  'diviner'         => array(1, 35),
+  'repositories'    => array(8, 13),
+  'phame'           => array(8, 4),
+  'macro'           => array(0, 31),
 );
 
 $xadj = -1;

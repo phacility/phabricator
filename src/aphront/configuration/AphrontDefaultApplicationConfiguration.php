@@ -32,49 +32,13 @@ class AphrontDefaultApplicationConfiguration
 
   public function getURIMap() {
     return $this->getResourceURIMapRules() + array(
-      '/(?:(?P<filter>(?:jump|apps))/)?' =>
+      '/(?:(?P<filter>(?:jump))/)?' =>
         'PhabricatorDirectoryMainController',
       '/(?:(?P<filter>feed)/)' => array(
         'public/' => 'PhabricatorFeedPublicStreamController',
         '(?:(?P<subfilter>[^/]+)/)?' =>
           'PhabricatorDirectoryMainController',
       ),
-      '/F(?P<id>\d+)' => 'PhabricatorFileShortcutController',
-      '/file/' => array(
-        '' => 'PhabricatorFileListController',
-        'filter/(?P<filter>\w+)/' => 'PhabricatorFileListController',
-        'upload/' => 'PhabricatorFileUploadController',
-        'dropupload/' => 'PhabricatorFileDropUploadController',
-        'delete/(?P<id>\d+)/' => 'PhabricatorFileDeleteController',
-        'info/(?P<phid>[^/]+)/' => 'PhabricatorFileInfoController',
-
-        'data/(?P<key>[^/]+)/(?P<phid>[^/]+)/.*'
-          => 'PhabricatorFileDataController',
-        // TODO: This is a deprecated version of /data/. Remove it after
-        // old links have had a chance to rot.
-        'alt/(?P<key>[^/]+)/(?P<phid>[^/]+)/'
-          => 'PhabricatorFileDataController',
-
-        'macro/' => array(
-          '' => 'PhabricatorFileMacroListController',
-          'edit/(?:(?P<id>\d+)/)?' => 'PhabricatorFileMacroEditController',
-          'delete/(?P<id>\d+)/' => 'PhabricatorFileMacroDeleteController',
-        ),
-        'proxy/' => 'PhabricatorFileProxyController',
-        'xform/(?P<transform>[^/]+)/(?P<phid>[^/]+)/'
-          => 'PhabricatorFileTransformController',
-      ),
-      '/phid/' => array(
-        '' => 'PhabricatorPHIDLookupController',
-      ),
-      '/conduit/' => array(
-        '' => 'PhabricatorConduitListController',
-        'method/(?P<method>[^/]+)/' => 'PhabricatorConduitConsoleController',
-        'log/' => 'PhabricatorConduitLogController',
-        'log/view/(?P<view>[^/]+)/' => 'PhabricatorConduitLogController',
-        'token/' => 'PhabricatorConduitTokenController',
-      ),
-      '/api/(?P<method>[^/]+)' => 'PhabricatorConduitAPIController',
 
       '/typeahead/' => array(
         'common/(?P<type>\w+)/'
@@ -132,16 +96,6 @@ class AphrontDefaultApplicationConfiguration
 
       '/~/' => 'DarkConsoleController',
 
-      '/repository/' => array(
-        ''                     => 'PhabricatorRepositoryListController',
-        'create/'              => 'PhabricatorRepositoryCreateController',
-        'edit/(?P<id>\d+)/(?:(?P<view>\w+)?/)?' =>
-          'PhabricatorRepositoryEditController',
-        'delete/(?P<id>\d+)/'  => 'PhabricatorRepositoryDeleteController',
-        'project/(?P<id>\d+)/' =>
-          'PhabricatorRepositoryArcanistProjectEditController',
-      ),
-
       '/search/' => array(
         '' => 'PhabricatorSearchController',
         '(?P<key>[^/]+)/' => 'PhabricatorSearchController',
@@ -152,44 +106,6 @@ class AphrontDefaultApplicationConfiguration
         'index/(?P<phid>[^/]+)/' => 'PhabricatorSearchIndexController',
       ),
 
-      '/herald/' => array(
-        '' => 'HeraldHomeController',
-        'view/(?P<content_type>[^/]+)/(?:(?P<rule_type>[^/]+)/)?'
-          => 'HeraldHomeController',
-        'new/(?:(?P<type>[^/]+)/(?:(?P<rule_type>[^/]+)/)?)?'
-          => 'HeraldNewController',
-        'rule/(?:(?P<id>\d+)/)?' => 'HeraldRuleController',
-        'history/(?:(?P<id>\d+)/)?' => 'HeraldRuleEditHistoryController',
-        'delete/(?P<id>\d+)/' => 'HeraldDeleteController',
-        'test/' => 'HeraldTestConsoleController',
-        'transcript/' => 'HeraldTranscriptListController',
-        'transcript/(?P<id>\d+)/(?:(?P<filter>\w+)/)?'
-          => 'HeraldTranscriptController',
-      ),
-
-      '/owners/' => array(
-        '' => 'PhabricatorOwnersListController',
-        'view/(?P<view>[^/]+)/' => 'PhabricatorOwnersListController',
-        'edit/(?P<id>\d+)/' => 'PhabricatorOwnersEditController',
-        'new/' => 'PhabricatorOwnersEditController',
-        'package/(?P<id>\d+)/' => 'PhabricatorOwnersDetailController',
-        'delete/(?P<id>\d+)/' => 'PhabricatorOwnersDeleteController',
-      ),
-
-      '/xhpast/' => array(
-        '' => 'PhabricatorXHPASTViewRunController',
-        'view/(?P<id>\d+)/'
-          => 'PhabricatorXHPASTViewFrameController',
-        'frameset/(?P<id>\d+)/'
-          => 'PhabricatorXHPASTViewFramesetController',
-        'input/(?P<id>\d+)/'
-          => 'PhabricatorXHPASTViewInputController',
-        'tree/(?P<id>\d+)/'
-          => 'PhabricatorXHPASTViewTreeController',
-        'stream/(?P<id>\d+)/'
-          => 'PhabricatorXHPASTViewStreamController',
-      ),
-
       '/status/' => 'PhabricatorStatusController',
 
 
@@ -197,54 +113,7 @@ class AphrontDefaultApplicationConfiguration
         'keyboardshortcut/' => 'PhabricatorHelpKeyboardShortcutController',
       ),
 
-      '/countdown/' => array(
-        ''
-          => 'PhabricatorCountdownListController',
-        '(?P<id>\d+)/'
-          => 'PhabricatorCountdownViewController',
-        'edit/(?:(?P<id>\d+)/)?'
-          => 'PhabricatorCountdownEditController',
-        'delete/(?P<id>\d+)/'
-          => 'PhabricatorCountdownDeleteController'
-      ),
-
-      '/V(?P<id>\d+)' => 'PhabricatorSlowvotePollController',
-      '/vote/' => array(
-        '(?:view/(?P<view>\w+)/)?' => 'PhabricatorSlowvoteListController',
-        'create/' => 'PhabricatorSlowvoteCreateController',
-      ),
-
-      '/phame/' => array(
-        ''                          => 'PhameAllPostListController',
-        'post/' => array(
-          ''                        => 'PhameUserPostListController',
-          'delete/(?P<phid>[^/]+)/' => 'PhamePostDeleteController',
-          'edit/(?P<phid>[^/]+)/'   => 'PhamePostEditController',
-          'new/'                    => 'PhamePostEditController',
-          'preview/'                => 'PhamePostPreviewController',
-          'view/(?P<phid>[^/]+)/'   => 'PhamePostViewController',
-        ),
-        'draft/' => array(
-          ''                        => 'PhameDraftListController',
-          'new/'                    => 'PhamePostEditController',
-        ),
-        'blog/' => array(
-          ''                         => 'PhameUserBlogListController',
-          'all/'                     => 'PhameAllBlogListController',
-          'new/'                     => 'PhameBlogEditController',
-          'delete/(?P<phid>[^/]+)/'  => 'PhameBlogDeleteController',
-          'edit/(?P<phid>[^/]+)/'    => 'PhameBlogEditController',
-          'view/(?P<phid>[^/]+)/'    => 'PhameBlogViewController',
-        ),
-        'posts/' => array(
-          ''                        => 'PhameUserPostListController',
-          '(?P<bloggername>\w+)/'   => 'PhameBloggerPostListController',
-          '(?P<bloggername>\w+)/(?P<phametitle>.+/)'
-                                    => 'PhamePostViewController',
-        ),
-      ),
-
-      '/calendar/' => array(
+       '/calendar/' => array(
         '' => 'PhabricatorCalendarBrowseController',
       ),
 

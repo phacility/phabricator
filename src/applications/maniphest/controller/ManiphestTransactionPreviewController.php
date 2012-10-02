@@ -39,18 +39,11 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
       return new Aphront404Response();
     }
 
-    $draft = id(new PhabricatorDraft())->loadOneWhere(
-      'authorPHID = %s AND draftKey = %s',
-      $user->getPHID(),
-      $task->getPHID());
-    if (!$draft) {
-      $draft = new PhabricatorDraft();
-      $draft->setAuthorPHID($user->getPHID());
-      $draft->setDraftKey($task->getPHID());
-    }
-    $draft->setDraft($comments);
-    $draft->save();
-
+    id(new PhabricatorDraft())
+      ->setAuthorPHID($user->getPHID())
+      ->setDraftKey($task->getPHID())
+      ->setDraft($comments)
+      ->replaceOrDelete();
 
     $action = $request->getStr('action');
 

@@ -19,6 +19,8 @@ JX.install('PhabricatorShapedRequest', {
     this._dataCallback = data_callback;
   },
 
+  events : ['error'],
+
   members : {
     _callback : null,
     _dataCallback : null,
@@ -52,6 +54,9 @@ JX.install('PhabricatorShapedRequest', {
             JX.bind(this, this.trigger),
             this.getRateLimit()
           );
+        }));
+        this._request.listen('error', JX.bind(this, function(error) {
+          this.invoke('error', error, this);
         }));
         this._request.listen('finally', JX.bind(this, function() {
           this._request = null;

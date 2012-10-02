@@ -31,4 +31,17 @@ final class PhabricatorDraft extends PhabricatorDraftDAO {
     ) + parent::getConfiguration();
   }
 
+  public function replaceOrDelete() {
+    if ($this->draft == '' && !array_filter($this->metadata)) {
+      queryfx(
+        $this->establishConnection('w'),
+        'DELETE FROM %T WHERE authorPHID = %s AND draftKey = %s',
+        $this->getTableName(),
+        $this->authorPHID,
+        $this->draftKey);
+      return $this;
+    }
+    return parent::replace();
+  }
+
 }

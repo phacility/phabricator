@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2011 Facebook, Inc.
+ * Copyright 2012 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,16 +47,12 @@ final class PhabricatorFileSideNavView extends AphrontView {
         'name' => 'All Files',
         'href' => '/file/filter/all/'
       ),
-      '<hr />' => array(),
-      'Image Macros' => array(),
-      'create_macro' => array(
-        'name' => 'Create Image Macro',
-        'href' => '/file/macro/edit/'
-      ),
-      'all_macros' => array(
-        'name' => 'All Image Macros',
-        'href' => '/file/macro/'
-      ),
+      // TODO: Remove this fairly soon.
+      '<br />' => null,
+      '<div style="font-weight: normal; font-size: smaller; '.
+      'white-space: normal;">NOTE: Macros have moved to a separate '.
+      'application. Use the "Search" field to jump to it or choose '.
+      'More Stuff &raquo; Macros from the home page.</span>' => null,
     );
 
     $side_nav = new AphrontSideNavView();

@@ -75,7 +75,7 @@ final class PhabricatorAuditPreviewController
       ->setAuthorPHID($comment->getActorPHID())
       ->setDraftKey('diffusion-audit-'.$this->id)
       ->setDraft($comment->getContent())
-      ->replace();
+      ->replaceOrDelete();
 
     return id(new AphrontAjaxResponse())
       ->setContent($view->render());

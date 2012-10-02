@@ -16,12 +16,24 @@
  * limitations under the License.
  */
 
-final class DiffusionMercurialRenameHistoryQuery
-  extends DiffusionRenameHistoryQuery {
+final class PhabricatorPinboardView extends AphrontView {
 
-  protected function executeQuery() {
-    // TODO: Implement.
-    return null;
+  private $items = array();
+
+  public function addItem(PhabricatorPinBoardItemView $item) {
+    $this->items[] = $item;
+    return $this;
+  }
+
+  public function render() {
+    require_celerity_resource('phabricator-pinboard-view-css');
+
+    return phutil_render_tag(
+      'div',
+      array(
+        'class' => 'phabricator-pinboard-view',
+      ),
+      $this->renderSingleView($this->items));
   }
 
 }

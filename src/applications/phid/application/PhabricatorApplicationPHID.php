@@ -16,12 +16,34 @@
  * limitations under the License.
  */
 
-final class DiffusionSvnRenameHistoryQuery
-  extends DiffusionRenameHistoryQuery {
+final class PhabricatorApplicationPHID extends PhabricatorApplication {
 
-  protected function executeQuery() {
-    // TODO: Implement.
-    return null;
+  public function getName() {
+    return 'PHID Manager';
+  }
+
+  public function getBaseURI() {
+    return '/phid/';
+  }
+
+  public function getAutospriteName() {
+    return 'phid';
+  }
+
+  public function getShortDescription() {
+    return 'Lookup PHIDs';
+  }
+
+  public function getTitleGlyph() {
+    return "#";
+  }
+
+  public function getRoutes() {
+    return array(
+      '/phid/' => array(
+        '' => 'PhabricatorPHIDLookupController',
+      ),
+    );
   }
 
 }

@@ -83,6 +83,6 @@ PhutilTranslator::getInstance()
 $paths = PhabricatorEnv::getEnvConfig('environment.append-paths');
 if (!empty($paths)) {
   $current_env_path = getenv('PATH');
-  $new_env_paths = implode(':', $paths);
-  putenv('PATH='.$current_env_path.':'.$new_env_paths);
+  $new_env_paths = implode(PATH_SEPARATOR, $paths);
+  putenv('PATH='.$current_env_path.PATH_SEPARATOR.$new_env_paths);
 }

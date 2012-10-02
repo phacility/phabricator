@@ -119,18 +119,19 @@ final class PhameBlogViewController
       $notice = null;
     }
 
-    $details = id(new PhameBlogDetailView())
-      ->setUser($user)
-      ->setBloggers($bloggers)
-      ->setBlog($blog)
-      ->setIsAdmin($is_admin);
-
     $panel = id(new PhamePostListView())
+      ->setBlogStyle(true)
       ->setUser($this->getRequest()->getUser())
       ->setBloggers($bloggers)
       ->setPosts($posts)
       ->setActions($actions)
       ->setDraftList(false);
+
+    $details = id(new PhameBlogDetailView())
+      ->setUser($user)
+      ->setBloggers($bloggers)
+      ->setBlog($blog)
+      ->setIsAdmin($is_admin);
 
     $this->setShowSideNav(false);
 
