@@ -18,25 +18,112 @@
 
 final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
 
-  public function getCaption() {
+  protected function renderInput() {
 
-    $caption = parent::getCaption();
-    if ($caption) {
-      $caption_suffix = '<br />'.$caption;
-    } else {
-      $caption_suffix = '';
+    Javelin::initBehavior('phabricator-remarkup-assist', array());
+
+    $actions = array(
+      'b'     => array(
+        'text' => 'B',
+      ),
+      'i'     => array(
+        'text' => 'I',
+      ),
+      'tt'    => array(
+        'text' => 'T',
+      ),
+      's' => array(
+        'text' => 'S',
+      ),
+      array(
+        'spacer' => true,
+      ),
+      'ul' => array(
+        'text' => "\xE2\x80\xA2",
+      ),
+      'ol' => array(
+        'text' => '1.',
+      ),
+      'code' => array(
+        'text' => '{}',
+      ),
+      array(
+        'spacer' => true,
+      ),
+      'mention' => array(
+        'text' => '@',
+      ),
+      array(
+        'spacer' => true,
+      ),
+      'h1' => array(
+        'text' => 'H',
+      ),
+      array(
+        'spacer' => true,
+      ),
+      'help'  => array(
+        'align' => 'right',
+        'text'  => '?',
+        'href'  => PhabricatorEnv::getDoclink(
+          'article/Remarkup_Reference.html'),
+      ),
+    );
+
+    $buttons = array();
+    foreach ($actions as $action => $spec) {
+      if (idx($spec, 'spacer')) {
+        $buttons[] = '<span> </span>';
+        continue;
+      }
+
+      $classes = array();
+      $classes[] = 'button';
+      $classes[] = 'grey';
+      $classes[] = 'remarkup-assist-button';
+      if (idx($spec, 'align') == 'right') {
+        $classes[] = 'remarkup-assist-right';
+      }
+
+      $href = idx($spec, 'href', '#');
+      if ($href == '#') {
+        $meta = array('action' => $action);
+        $mustcapture = true;
+        $target = null;
+      } else {
+        $meta = null;
+        $mustcapture = null;
+        $target = '_blank';
+      }
+
+      $buttons[] = javelin_render_tag(
+        'a',
+        array(
+          'class'       => implode(' ', $classes),
+          'href'        => $href,
+          'sigil'       => 'remarkup-assist',
+          'meta'        => $meta,
+          'mustcapture' => $mustcapture,
+          'target'      => $target,
+          'tabindex'    => -1,
+        ),
+        phutil_render_tag(
+          'div',
+          array(
+            'class' => 'remarkup-assist remarkup-assist-'.$action,
+          ),
+          idx($spec, 'text', '')));
     }
 
-    return phutil_render_tag(
-      'a',
+    $buttons = implode('', $buttons);
+
+    return javelin_render_tag(
+      'div',
       array(
-        'href' => PhabricatorEnv::getDoclink(
-          'article/Remarkup_Reference.html'),
-        'tabindex' => '-1',
-        'target' => '_blank',
+        'sigil' => 'remarkup-assist-control',
       ),
-      'Formatting Reference') .
-      $caption_suffix;
+      $buttons.
+      parent::renderInput());
   }
 
 }
