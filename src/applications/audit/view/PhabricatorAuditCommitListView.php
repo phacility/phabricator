@@ -57,6 +57,11 @@ final class PhabricatorAuditCommitListView extends AphrontView {
         $phids[$commit->getAuthorPHID()] = true;
       }
       $phids[$commit->getPHID()] = true;
+      if ($commit->getAudits()) {
+        foreach ($commit->getAudits() as $audit) {
+          $phids[$audit->getActorPHID()] = true;
+        }
+      }
     }
     return array_keys($phids);
   }
@@ -77,12 +82,20 @@ final class PhabricatorAuditCommitListView extends AphrontView {
       if ($commit->getAuthorPHID()) {
         $author_name = $this->getHandle($commit->getAuthorPHID())->renderLink();
       }
+      $auditors = array();
+      if ($commit->getAudits()) {
+        foreach ($commit->getAudits() as $audit) {
+          $actor_phid = $audit->getActorPHID();
+          $auditors[$actor_phid] = $this->getHandle($actor_phid)->renderLink();
+        }
+      }
       $rows[] = array(
         $commit_name,
         $author_name,
         phutil_escape_html($commit->getCommitData()->getSummary()),
         PhabricatorAuditCommitStatusConstants::getStatusName(
           $commit->getAuditStatus()),
+        implode(', ', $auditors),
         phabricator_datetime($commit->getEpoch(), $this->user),
       );
     }
@@ -94,6 +107,7 @@ final class PhabricatorAuditCommitListView extends AphrontView {
         'Author',
         'Summary',
         'Audit Status',
+        'Auditors',
         'Date',
       ));
     $table->setColumnClasses(
@@ -103,7 +117,20 @@ final class PhabricatorAuditCommitListView extends AphrontView {
         'wide',
         '',
         '',
+        '',
       ));
+
+    if ($this->commits && reset($this->commits)->getAudits() === null) {
+      $table->setColumnVisibility(
+        array(
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+        ));
+    }
 
     if ($this->noDataString) {
       $table->setNoDataString($this->noDataString);

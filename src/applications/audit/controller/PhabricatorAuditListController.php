@@ -412,6 +412,7 @@ final class PhabricatorAuditListController extends PhabricatorAuditController {
 
     $query = new PhabricatorAuditCommitQuery();
     $query->needCommitData(true);
+    $query->needAudits(true);
 
     $use_pager = ($this->filter != 'active');
 
