@@ -52,7 +52,7 @@ final class AphrontSideNavView extends AphrontView {
   }
 
   public function setFlexible($flexible) {
-    $this->flexible = $flexible;
+    $this->isFlexible = $flexible;
     return $this;
   }
 
@@ -91,7 +91,7 @@ final class AphrontSideNavView extends AphrontView {
         ),
         $apps->render());
 
-      if ($this->flexible) {
+      if ($this->isFlexible) {
         $drag_id = celerity_generate_unique_node_id();
         $flex_bar = phutil_render_tag(
           'div',
