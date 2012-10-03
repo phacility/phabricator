@@ -22,6 +22,7 @@ final class DiffusionCommentListView extends AphrontView {
   private $comments;
   private $inlineComments = array();
   private $pathMap = array();
+  private $handles = array();
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
