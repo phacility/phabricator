@@ -34,6 +34,12 @@ final class PhabricatorFlagsUIEventListener extends PhutilEventListener {
     $user = $event->getUser();
     $object = $event->getValue('object');
 
+    if (!$object || !$object->getPHID()) {
+      // If we have no object, or the object doesn't have a PHID yet, we can't
+      // flag it.
+      return;
+    }
+
     $flag = PhabricatorFlagQuery::loadUserFlag($user, $object->getPHID());
 
     if ($flag) {

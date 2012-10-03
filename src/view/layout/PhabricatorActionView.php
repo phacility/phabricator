@@ -19,10 +19,12 @@
 final class PhabricatorActionView extends AphrontView {
 
   private $name;
+  private $user;
   private $icon;
   private $href;
   private $disabled;
   private $workflow;
+  private $renderAsForm;
 
   public function setHref($href) {
     $this->href = $href;
@@ -49,6 +51,16 @@ final class PhabricatorActionView extends AphrontView {
     return $this;
   }
 
+  public function setRenderAsForm($form) {
+    $this->renderAsForm = $form;
+    return $this;
+  }
+
+  public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
+    return $this;
+  }
+
   public function render() {
 
     $icon = null;
@@ -63,14 +75,37 @@ final class PhabricatorActionView extends AphrontView {
     }
 
     if ($this->href) {
-      $item = javelin_render_tag(
-        'a',
-        array(
-          'href' => $this->href,
-          'class' => 'phabricator-action-view-item',
-          'sigil' => $this->workflow ? 'workflow' : null,
-        ),
-        phutil_escape_html($this->name));
+      if ($this->renderAsForm) {
+        if (!$this->user) {
+          throw new Exception(
+            'Call setUser() when rendering an action as a form.');
+        }
+
+        $item = javelin_render_tag(
+          'button',
+          array(
+            'class' => 'phabricator-action-view-item',
+          ),
+          phutil_escape_html($this->name));
+
+        $item = phabricator_render_form(
+          $this->user,
+          array(
+            'action'    => $this->href,
+            'method'    => 'POST',
+            'sigil'     => $this->workflow ? 'workflow' : null,
+          ),
+          $item);
+      } else {
+        $item = javelin_render_tag(
+          'a',
+          array(
+            'href'  => $this->href,
+            'class' => 'phabricator-action-view-item',
+            'sigil' => $this->workflow ? 'workflow' : null,
+          ),
+          phutil_escape_html($this->name));
+      }
     } else {
       $item = phutil_render_tag(
         'span',
