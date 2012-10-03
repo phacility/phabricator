@@ -226,12 +226,14 @@ final class DifferentialRevision extends DifferentialDAO {
         $field->delete();
       }
 
-      $paths = id(new DifferentialAffectedPath())->loadAllWhere(
-        'revisionID = %d',
+      // we have to do paths a little differentally as they do not have
+      // an id or phid column for delete() to act on
+      $dummy_path = new DifferentialAffectedPath();
+      queryfx(
+        $conn_w,
+        'DELETE FROM %T WHERE revisionID = %d',
+        $dummy_path->getTableName(),
         $this->getID());
-      foreach ($paths as $path) {
-        $path->delete();
-      }
 
       $result = parent::delete();
     $this->saveTransaction();
