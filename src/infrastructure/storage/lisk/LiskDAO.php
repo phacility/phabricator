@@ -656,11 +656,33 @@ abstract class LiskDAO {
    * @task   load
    */
   public function loadFromArray(array $row) {
-
-    // TODO: We should load only valid properties.
+    static $valid_properties = array();
 
     $map = array();
     foreach ($row as $k => $v) {
+      // We permit (but ignore) extra properties in the array because a
+      // common approach to building the array is to issue a raw SELECT query
+      // which may include extra explicit columns or joins.
+
+      // This pathway is very hot on some pages, so we're inlining a cache
+      // and doing some microoptimization to avoid a strtolower() call for each
+      // assignment. The common path (assigning a valid property which we've
+      // already seen) always incurs only one empty(). The second most common
+      // path (assigning an invalid property which we've already seen) costs
+      // an empty() plus an isset().
+
+      if (empty($valid_properties[$k])) {
+        if (isset($valid_properties[$k])) {
+          // The value is set but empty, which means it's false, so we've
+          // already determined it's not valid. We don't need to check again.
+          continue;
+        }
+        $valid_properties[$k] = (bool)$this->checkProperty($k);
+        if (!$valid_properties[$k]) {
+          continue;
+        }
+      }
+
       $map[$k] = $v;
     }
 
