@@ -34,6 +34,10 @@ final class PhabricatorApplicationHerald extends PhabricatorApplication {
     return "\xE2\x98\xBF";
   }
 
+  public function getHelpURI() {
+    return PhabricatorEnv::getDoclink('article/Herald_User_Guide.html');
+  }
+
   public function getRoutes() {
     return array(
       '/herald/' => array(
