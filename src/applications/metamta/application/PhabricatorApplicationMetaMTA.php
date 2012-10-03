@@ -30,6 +30,10 @@ final class PhabricatorApplicationMetaMTA extends PhabricatorApplication {
     return 'mail';
   }
 
+  public function getFlavorText() {
+    return pht('Yo dawg, we heard you like MTAs.');
+  }
+
   public function getRoutes() {
     return array(
       $this->getBaseURI() => array(

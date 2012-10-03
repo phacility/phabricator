@@ -38,6 +38,9 @@ final class PhabricatorApplicationSlowvote extends PhabricatorApplication {
     return PhabricatorEnv::getDoclink('article/Slowvote_User_Guide.html');
   }
 
+  public function getFlavorText() {
+    return pht('Design by committee.');
+  }
 
   public function getRoutes() {
     return array(

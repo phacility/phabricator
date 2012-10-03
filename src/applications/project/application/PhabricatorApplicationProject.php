@@ -34,6 +34,10 @@ final class PhabricatorApplicationProject extends PhabricatorApplication {
     return 'projects';
   }
 
+  public function getFlavorText() {
+    return pht('Group stuff into big piles.');
+  }
+
   public function getRoutes() {
     return array(
       '/project/' => array(

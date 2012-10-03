@@ -30,9 +30,9 @@
 
 a.phabricator-application-launch-container {
   display: inline-block;
-  width: 210px;
+  width: 200px;
   min-height: 90px;
-  padding: 5px 15px 5px 80px;
+  padding: 5px 15px 5px 90px;
   margin: 3px 6px;
   overflow: hidden;
   position: relative;
@@ -107,14 +107,18 @@ a.phabricator-application-launch-container:hover {
   display: block;
 }
 
+.phabricator-application-flavor-text,
 .phabricator-application-status {
   float: left;
   display: block;
   position: relative;
   font-size: 11px;
+  color: #666666;
+}
+
+.phabricator-application-status {
   height: 20px;
   padding-left: 22px;
-  color: #666666;
 
   background-repeat: no-repeat;
   background-size: 16px auto;

@@ -38,6 +38,10 @@ final class PhabricatorApplicationHerald extends PhabricatorApplication {
     return PhabricatorEnv::getDoclink('article/Herald_User_Guide.html');
   }
 
+  public function getFlavorText() {
+    return pht('Watch for danger!');
+  }
+
   public function getRoutes() {
     return array(
       '/herald/' => array(

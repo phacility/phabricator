@@ -34,6 +34,10 @@ final class PhabricatorApplicationFiles extends PhabricatorApplication {
     return "\xE2\x87\xAA";
   }
 
+  public function getFlavorText() {
+    return pht('Blob store for Pokemon pictures.');
+  }
+
   public function getRoutes() {
     return array(
       '/F(?P<id>\d+)' => 'PhabricatorFileShortcutController',

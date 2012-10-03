@@ -108,8 +108,30 @@ abstract class PhabricatorApplication {
 /* -(  UI Integration  )----------------------------------------------------- */
 
 
+  /**
+   * Render status elements (like "3 Waiting Reviews") for application list
+   * views. These provide a way to alert users to new or pending action items
+   * in applications.
+   *
+   * @param PhabricatorUser Viewing user.
+   * @return list<PhabricatorApplicationStatusView> Application status elements.
+   * @task ui
+   */
   public function loadStatus(PhabricatorUser $user) {
     return array();
+  }
+
+
+  /**
+   * You can provide an optional piece of flavor text for the application. This
+   * is currently rendered in application launch views if the application has no
+   * status elements.
+   *
+   * @return string|null Flavor text.
+   * @task ui
+   */
+  public function getFlavorText() {
+    return null;
   }
 
 
@@ -120,7 +142,7 @@ abstract class PhabricatorApplication {
    * @param  AphrontController  The current controller. May be null for special
    *                            pages like 404, exception handlers, etc.
    * @return list<PhabricatorMainMenuIconView> List of menu items.
-   * @task UI
+   * @task ui
    */
   public function buildMainMenuItems(
     PhabricatorUser $user,

@@ -34,6 +34,10 @@ final class PhabricatorApplicationCountdown extends PhabricatorApplication {
     return "\xE2\x9A\xB2";
   }
 
+  public function getFlavorText() {
+    return pht('Utilize the full capabilities of your ALU.');
+  }
+
   public function getRoutes() {
     return array(
       '/countdown/' => array(

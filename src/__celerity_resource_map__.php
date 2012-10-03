@@ -2298,7 +2298,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-application-launch-view-css' =>
   array(
-    'uri' => '/res/effb87ee/rsrc/css/application/base/phabricator-application-launch-view.css',
+    'uri' => '/res/51aa93f4/rsrc/css/application/base/phabricator-application-launch-view.css',
     'type' => 'css',
     'requires' =>
     array(

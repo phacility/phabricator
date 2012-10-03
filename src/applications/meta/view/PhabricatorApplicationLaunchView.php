@@ -58,14 +58,26 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
 
 
     $count = 0;
+    $content[] = '<span class="phabricator-application-status-block">';
+
     if ($this->status) {
-      $content[] = '<span class="phabricator-application-status-block">';
       foreach ($this->status as $status) {
         $count += $status->getCount();
         $content[] = $status;
       }
-      $content[] = '</span>';
+    } else {
+      $flavor = $application->getFlavorText();
+      if ($flavor !== null) {
+        $content[] = phutil_render_tag(
+          'span',
+          array(
+            'class' => 'phabricator-application-flavor-text',
+          ),
+          phutil_escape_html($flavor));
+      }
     }
+
+    $content[] = '</span>';
 
     if ($count) {
       $content[] = phutil_render_tag(
@@ -75,7 +87,6 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
         ),
         phutil_escape_html($count));
     }
-
 
     $classes = array();
     $classes[] = 'phabricator-application-launch-icon';
