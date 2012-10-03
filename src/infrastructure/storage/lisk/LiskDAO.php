@@ -1796,4 +1796,15 @@ abstract class LiskDAO {
 
     throw new Exception("Unable to resolve method '{$method}'.");
   }
+
+  /**
+   * Warns against writing to undeclared property.
+   *
+   * @task   util
+   */
+  public function __set($name, $value) {
+    phlog('Wrote to undeclared property '.get_class($this).'::$'.$name.'.');
+    $this->$name = $value;
+  }
+
 }
