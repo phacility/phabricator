@@ -42,6 +42,10 @@ final class PhabricatorApplicationSlowvote extends PhabricatorApplication {
     return pht('Design by committee.');
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_UTILITIES;
+  }
+
   public function getRoutes() {
     return array(
       '/V(?P<id>\d+)' => 'PhabricatorSlowvotePollController',

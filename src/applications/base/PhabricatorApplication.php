@@ -26,6 +26,26 @@
  */
 abstract class PhabricatorApplication {
 
+  const GROUP_CORE            = 'core';
+  const GROUP_COMMUNICATION   = 'communication';
+  const GROUP_ORGANIZATION    = 'organization';
+  const GROUP_UTILITIES       = 'util';
+  const GROUP_ADMIN           = 'admin';
+  const GROUP_DEVELOPER       = 'developer';
+  const GROUP_MISC            = 'misc';
+
+  public static function getApplicationGroups() {
+    return array(
+      self::GROUP_CORE          => pht('Core Applications'),
+      self::GROUP_COMMUNICATION => pht('Communication'),
+      self::GROUP_ORGANIZATION  => pht('Organization'),
+      self::GROUP_UTILITIES     => pht('Utilities'),
+      self::GROUP_ADMIN         => pht('Administration'),
+      self::GROUP_DEVELOPER     => pht('Developer Tools'),
+      self::GROUP_MISC          => pht('Miscellaneous Applications'),
+    );
+  }
+
 
 /* -(  Application Information  )-------------------------------------------- */
 
@@ -66,8 +86,12 @@ abstract class PhabricatorApplication {
     return true;
   }
 
-  public function getCoreApplicationOrder() {
-    return null;
+  public function getApplicationOrder() {
+    return PHP_INT_MAX;
+  }
+
+  public function getApplicationGroup() {
+    return self::GROUP_MISC;
   }
 
   public function getTitleGlyph() {

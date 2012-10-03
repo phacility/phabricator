@@ -34,6 +34,10 @@ final class PhabricatorApplicationRepositories extends PhabricatorApplication {
     return "rX";
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_ADMIN;
+  }
+
   public function getRoutes() {
     return array(
       '/repository/' => array(

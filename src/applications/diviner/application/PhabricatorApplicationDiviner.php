@@ -40,6 +40,10 @@ final class PhabricatorApplicationDiviner extends PhabricatorApplication {
     );
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_COMMUNICATION;
+  }
+
   public function buildMainMenuItems(
     PhabricatorUser $user,
     PhabricatorController $controller = null) {

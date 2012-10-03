@@ -34,6 +34,10 @@ final class PhabricatorApplicationPHPAST extends PhabricatorApplication {
     return "\xE2\x96\xA0";
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_DEVELOPER;
+  }
+
   public function getRoutes() {
     return array(
       '/xhpast/' => array(

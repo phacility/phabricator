@@ -38,6 +38,14 @@ final class PhabricatorApplicationUIExamples extends PhabricatorApplication {
     return pht('A gallery of modern art.');
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_DEVELOPER;
+  }
+
+  public function getApplicationOrder() {
+    return 0.110;
+  }
+
   public function getRoutes() {
     return array(
       '/uiexample/' => array(

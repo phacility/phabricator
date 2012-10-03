@@ -38,6 +38,10 @@ final class PhabricatorApplicationFiles extends PhabricatorApplication {
     return pht('Blob store for Pokemon pictures.');
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_UTILITIES;
+  }
+
   public function getRoutes() {
     return array(
       '/F(?P<id>\d+)' => 'PhabricatorFileShortcutController',

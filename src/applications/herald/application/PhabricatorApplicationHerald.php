@@ -42,6 +42,10 @@ final class PhabricatorApplicationHerald extends PhabricatorApplication {
     return pht('Watch for danger!');
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_ORGANIZATION;
+  }
+
   public function getRoutes() {
     return array(
       '/herald/' => array(

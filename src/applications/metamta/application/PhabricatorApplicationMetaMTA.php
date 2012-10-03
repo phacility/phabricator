@@ -34,6 +34,10 @@ final class PhabricatorApplicationMetaMTA extends PhabricatorApplication {
     return pht('Yo dawg, we heard you like MTAs.');
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_ADMIN;
+  }
+
   public function getRoutes() {
     return array(
       $this->getBaseURI() => array(

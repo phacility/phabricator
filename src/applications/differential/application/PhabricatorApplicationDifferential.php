@@ -66,7 +66,11 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
     );
   }
 
-  public function getCoreApplicationOrder() {
+  public function getApplicationGroup() {
+    return self::GROUP_CORE;
+  }
+
+  public function getApplicationOrder() {
     return 0.100;
   }
 

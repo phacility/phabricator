@@ -42,6 +42,10 @@ final class PhabricatorApplicationOwners extends PhabricatorApplication {
     return pht('Adopt today!');
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_ORGANIZATION;
+  }
+
   public function getRoutes() {
     return array(
       '/owners/' => array(

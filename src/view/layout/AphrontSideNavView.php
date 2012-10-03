@@ -193,18 +193,23 @@ final class AphrontSideNavView extends AphrontView {
 
     $meta = null;
 
+    $group_core = PhabricatorApplication::GROUP_CORE;
+
     $applications = PhabricatorApplication::getAllInstalledApplications();
     foreach ($applications as $application) {
       if ($application instanceof PhabricatorApplicationApplications) {
         $meta = $application;
         continue;
       }
-      if ($application->getCoreApplicationOrder() !== null) {
+      if ($application->getApplicationGroup() != $group_core) {
+        continue;
+      }
+      if ($application->getApplicationOrder() !== null) {
         $core[] = $application;
       }
     }
 
-    $core = msort($core, 'getCoreApplicationOrder');
+    $core = msort($core, 'getApplicationOrder');
     if ($meta) {
       $core[] = $meta;
     }

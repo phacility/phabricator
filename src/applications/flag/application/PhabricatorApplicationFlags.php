@@ -36,6 +36,10 @@ final class PhabricatorApplicationFlags extends PhabricatorApplication {
     );
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_ORGANIZATION;
+  }
+
   public function loadStatus(PhabricatorUser $user) {
     $status = array();
 

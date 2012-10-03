@@ -38,6 +38,10 @@ final class PhabricatorApplicationPhame extends PhabricatorApplication {
     return PhabricatorEnv::getDoclink('article/Phame_User_Guide.html');
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_COMMUNICATION;
+  }
+
   public function getRoutes() {
     return array(
      '/phame/' => array(

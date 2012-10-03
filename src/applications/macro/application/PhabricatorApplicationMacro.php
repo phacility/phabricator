@@ -34,6 +34,10 @@ final class PhabricatorApplicationMacro extends PhabricatorApplication {
     return "\xE2\x9A\x98";
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_UTILITIES;
+  }
+
   public function getRoutes() {
     return array(
       '/macro/' => array(

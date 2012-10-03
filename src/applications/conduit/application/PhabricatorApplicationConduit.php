@@ -39,6 +39,14 @@ final class PhabricatorApplicationConduit extends PhabricatorApplication {
     return "\xE2\x87\xB5";
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_DEVELOPER;
+  }
+
+  public function getApplicationOrder() {
+    return 0.100;
+  }
+
   public function getRoutes() {
     return array(
       '/conduit/' => array(

@@ -39,6 +39,10 @@ final class PhabricatorApplicationSettings extends PhabricatorApplication {
     );
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_UTILITIES;
+  }
+
   public function buildMainMenuItems(
     PhabricatorUser $user,
     PhabricatorController $controller = null) {

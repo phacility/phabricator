@@ -30,6 +30,10 @@ final class PhabricatorApplicationPaste extends PhabricatorApplication {
     return "\xE2\x9C\x8E";
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_UTILITIES;
+  }
+
   public function getRoutes() {
     return array(
       '/P(?P<id>\d+)' => 'PhabricatorPasteViewController',

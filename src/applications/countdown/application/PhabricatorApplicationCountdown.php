@@ -38,6 +38,10 @@ final class PhabricatorApplicationCountdown extends PhabricatorApplication {
     return pht('Utilize the full capabilities of your ALU.');
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_UTILITIES;
+  }
+
   public function getRoutes() {
     return array(
       '/countdown/' => array(
