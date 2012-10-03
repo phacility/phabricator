@@ -65,45 +65,61 @@ final class PonderUserProfileView extends AphrontView {
     require_celerity_resource('ponder-core-view-css');
     require_celerity_resource('ponder-feed-view-css');
 
-    $user = $this->user;
-    $aoffset = $this->answeroffset;
-    $answers = $this->answers;
-    $handles = $this->handles;
-    $uri = $this->uri;
-    $aparam = $this->aparam;
+    $user     = $this->user;
+    $aoffset  = $this->answeroffset;
+    $answers  = $this->answers;
+    $handles  = $this->handles;
+    $uri      = $this->uri;
+    $aparam   = $this->aparam;
     $pagesize = $this->pagesize;
-
-    // display answers
-    $answer_panel = id(new AphrontPanelView())
-      ->setHeader("Your Answers")
-      ->addClass("ponder-panel")
-      ->appendChild(
-        phutil_render_tag(
-          'a',
-          array('id' => 'answers'),
-          "")
-      );
 
     $apagebuttons = id(new AphrontPagerView())
       ->setPageSize($pagesize)
       ->setOffset($aoffset)
       ->setURI(
         $uri
-          ->setFragment("answers"),
+          ->setFragment('answers'),
         $aparam);
-
     $answers = $apagebuttons->sliceResults($answers);
 
+    $view = new PhabricatorObjectItemListView();
+    $view->setNoDataString(pht('No matching answers.'));
+
     foreach ($answers as $answer) {
-      $cur = id(new PonderAnswerSummaryView())
-        ->setUser($user)
-        ->setAnswer($answer)
-        ->setHandles($handles);
-      $answer_panel->appendChild($cur);
+      $question    = $answer->getQuestion();
+      $author_phid = $question->getAuthorPHID();
+
+      $item = new PhabricatorObjectItemView();
+      $href = id(new PhutilURI('/Q' . $question->getID()))
+        ->setFragment('A' . $answer->getID());
+      $item->setHeader(
+        'A'.$answer->getID().' '.self::abbreviate($answer->getContent())
+      );
+      $item->setHref($href);
+
+      $item->addDetail(
+        pht('Votes'),
+        $answer->getVoteCount()
+      );
+
+      $item->addDetail(
+        pht('Question'),
+        self::abbreviate($question->getTitle())
+      );
+
+      $item->addAttribute(
+        pht('Created %s', phabricator_date($answer->getDateCreated(), $user))
+      );
+
+      $view->addItem($item);
     }
 
-    $answer_panel->appendChild($apagebuttons);
+    $view->appendChild($apagebuttons);
 
-    return $answer_panel->render();
+    return $view->render();
+  }
+
+  private function abbreviate($w) {
+    return phutil_utf8_shorten($w, 60);
   }
 }
