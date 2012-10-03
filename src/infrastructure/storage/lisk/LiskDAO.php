@@ -209,6 +209,12 @@ abstract class LiskDAO {
 
   private $inSet = null;
 
+  protected $id;
+  protected $phid;
+  protected $version;
+  protected $dateCreated;
+  protected $dateModified;
+
   /**
    *  Build an empty object.
    *
@@ -920,24 +926,21 @@ abstract class LiskDAO {
       }
 
       $id_key = $this->getIDKey();
-      if ($id_key) {
-        if (!isset($properties[strtolower($id_key)])) {
-          $properties[strtolower($id_key)] = $id_key;
-        }
+      if ($id_key != 'id') {
+        unset($properties['id']);
       }
 
-      if ($this->getConfigOption(self::CONFIG_OPTIMISTIC_LOCKS)) {
-        $properties['version'] = 'version';
+      if (!$this->getConfigOption(self::CONFIG_OPTIMISTIC_LOCKS)) {
+        unset($properties['version']);
       }
 
-      if ($this->getConfigOption(self::CONFIG_TIMESTAMPS)) {
-        $properties['datecreated'] = 'dateCreated';
-        $properties['datemodified'] = 'dateModified';
+      if (!$this->getConfigOption(self::CONFIG_TIMESTAMPS)) {
+        unset($properties['datecreated']);
+        unset($properties['datemodified']);
       }
 
-      if (!$this->isPHIDPrimaryID() &&
-          $this->getConfigOption(self::CONFIG_AUX_PHID)) {
-        $properties['phid'] = 'phid';
+      if ($id_key != 'phid' && !$this->getConfigOption(self::CONFIG_AUX_PHID)) {
+        unset($properties['phid']);
       }
     }
     return $properties;
