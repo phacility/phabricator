@@ -58,6 +58,7 @@ final class ManiphestTaskListController extends ManiphestController {
       $uri = $request->getRequestURI()
         ->alter('users',      $this->getArrToStrList('set_users'))
         ->alter('projects',   $this->getArrToStrList('set_projects'))
+        ->alter('aprojects',  $this->getArrToStrList('set_aprojects'))
         ->alter('xprojects',  $this->getArrToStrList('set_xprojects'))
         ->alter('owners',     $this->getArrToStrList('set_owners'))
         ->alter('authors',    $this->getArrToStrList('set_authors'))
@@ -118,6 +119,9 @@ final class ManiphestTaskListController extends ManiphestController {
     $owner_phids    = $query->getParameter('ownerPHIDs', array());
     $author_phids   = $query->getParameter('authorPHIDs', array());
     $project_phids  = $query->getParameter('projectPHIDs', array());
+    $any_project_phids = $query->getParameter(
+      'anyProjectPHIDs',
+      array());
     $exclude_project_phids = $query->getParameter(
       'excludeProjectPHIDs',
       array());
@@ -201,15 +205,34 @@ final class ManiphestTaskListController extends ManiphestController {
       $tokens[$phid] = $handles[$phid]->getFullName();
     }
     if ($this->view != 'projectall' && $this->view != 'projecttriage') {
+
+      $caption = null;
+      if ($this->view == 'custom') {
+        $caption = 'Find tasks in ALL of these projects ("AND" query).';
+      }
+
       $form->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setDatasource('/typeahead/common/searchproject/')
           ->setName('set_projects')
           ->setLabel('Projects')
+          ->setCaption($caption)
           ->setValue($tokens));
     }
 
     if ($this->view == 'custom') {
+      $atokens = array();
+      foreach ($any_project_phids as $phid) {
+        $atokens[$phid] = $handles[$phid]->getFullName();
+      }
+      $form->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource('/typeahead/common/projects/')
+          ->setName('set_aprojects')
+          ->setLabel('Any Projects')
+          ->setCaption('Find tasks in ANY of these projects ("OR" query).')
+          ->setValue($atokens));
+
       $tokens = array();
       foreach ($exclude_project_phids as $phid) {
         $tokens[$phid] = $handles[$phid]->getFullName();
@@ -219,6 +242,7 @@ final class ManiphestTaskListController extends ManiphestController {
           ->setDatasource('/typeahead/common/projects/')
           ->setName('set_xprojects')
           ->setLabel('Exclude Projects')
+          ->setCaption('Find tasks NOT in any of these projects.')
           ->setValue($tokens));
 
       $priority = ManiphestTaskPriority::getLowestPriority();
@@ -435,6 +459,10 @@ final class ManiphestTaskListController extends ManiphestController {
       $query->withoutProjects($xproject_phids);
     }
 
+    if ($any_project_phids) {
+      $query->withAnyProjects($any_project_phids);
+    }
+
     if ($owner_phids) {
       $query->withOwners($owner_phids);
     }
@@ -473,10 +501,8 @@ final class ManiphestTaskListController extends ManiphestController {
         break;
       case 'projecttriage':
         $query->withPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
-        $query->withAnyProjects($any_project_phids);
         break;
       case 'projectall':
-        $query->withAnyProjects($any_project_phids);
         break;
       case 'custom':
         $query->withPrioritiesBetween($low_priority, $high_priority);
