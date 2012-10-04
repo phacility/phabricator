@@ -48,4 +48,21 @@ final class PhabricatorRepositoryArcanistProject
     return id(new PhabricatorRepository())->load($this->getRepositoryID());
   }
 
+  public function delete() {
+    $this->openTransaction();
+      $conn_w = $this->establishConnection('w');
+
+      $symbols = id(new PhabricatorRepositorySymbol())->loadAllWhere(
+        'arcanistProjectID = %d',
+        $this->getID()
+      );
+      foreach ($symbols as $symbol) {
+        $symbol->delete();
+      }
+
+      $result = parent::delete();
+    $this->saveTransaction();
+    return $result;
+  }
+
 }
