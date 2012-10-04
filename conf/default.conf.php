@@ -1057,6 +1057,11 @@ return array(
   // Adding Custom Fields" in the documentation for more information.
   'maniphest.custom-task-extensions-class' => 'ManiphestDefaultTaskExtensions',
 
+  // What should the default task priority be in create flows?
+  // See the constants in @{class:ManiphestTaskPriority} for valid values.
+  // Defaults to "needs triage".
+  'maniphest.default-priority' => 90,
+
 // -- Phriction ------------------------------------------------------------- //
 
   'phriction.enabled' => true,

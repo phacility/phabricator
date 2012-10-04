@@ -87,6 +87,7 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
       $task->setAuthorPHID($user->getPHID());
       $task->setTitle(nonempty($mail->getSubject(), 'Untitled Task'));
       $task->setDescription($body);
+      $task->setPriority(ManiphestTaskPriority::getDefaultPriority());
 
     } else {
       $lines = explode("\n", trim($body));

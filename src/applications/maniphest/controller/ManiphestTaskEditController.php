@@ -43,7 +43,7 @@ final class ManiphestTaskEditController extends ManiphestController {
       }
     } else {
       $task = new ManiphestTask();
-      $task->setPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
+      $task->setPriority(ManiphestTaskPriority::getDefaultPriority());
       $task->setAuthorPHID($user->getPHID());
 
       // These allow task creation with defaults.
