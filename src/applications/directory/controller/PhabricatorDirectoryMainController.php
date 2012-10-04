@@ -139,6 +139,7 @@ final class PhabricatorDirectoryMainController
 
     $filter = $subnav->selectFilter($this->subfilter, 'all');
 
+    $view = null;
     switch ($filter) {
       case 'all':
         $view = $this->buildFeedView(array());
