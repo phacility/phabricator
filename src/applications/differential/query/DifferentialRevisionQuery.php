@@ -54,6 +54,7 @@ final class DifferentialRevisionQuery {
   private $responsibles = array();
   private $branches = array();
   private $arcanistProjectPHIDs = array();
+  private $draftRevisions = array();
 
   private $order            = 'order-modified';
   const ORDER_MODIFIED      = 'order-modified';
@@ -483,6 +484,20 @@ final class DifferentialRevisionQuery {
     $table = new DifferentialRevision();
     $conn_r = $table->establishConnection('r');
 
+    if ($this->draftAuthors) {
+      $draft_key = 'differential-comment-';
+      $drafts = id(new PhabricatorDraft())->loadAllWhere(
+        'authorPHID IN (%Ls) AND draftKey LIKE %> AND draft != %s',
+        $this->draftAuthors,
+        $draft_key,
+        '');
+      $this->draftRevisions = array();
+      $len = strlen($draft_key);
+      foreach ($drafts as $draft) {
+        $this->draftRevisions[] = substr($draft->getDraftKey(), $len);
+      }
+    }
+
     $select = qsprintf(
       $conn_r,
       'SELECT r.* FROM %T r',
@@ -587,9 +602,11 @@ final class DifferentialRevisionQuery {
     if ($this->draftAuthors) {
       $joins[] = qsprintf(
         $conn_r,
-        'JOIN %T inline_comment ON inline_comment.revisionID = r.id '.
-        'AND inline_comment.commentID is NULL',
-        id(new DifferentialInlineComment())->getTableName());
+        'LEFT JOIN %T inline_comment ON inline_comment.revisionID = r.id '.
+        'AND inline_comment.commentID IS NULL '.
+        'AND inline_comment.authorPHID IN (%Ls)',
+        id(new DifferentialInlineComment())->getTableName(),
+        $this->draftAuthors);
     }
 
     $joins = implode(' ', $joins);
@@ -626,10 +643,15 @@ final class DifferentialRevisionQuery {
     }
 
     if ($this->draftAuthors) {
-      $where[] = qsprintf(
-        $conn_r,
-        'inline_comment.authorPHID IN (%Ls)',
-        $this->draftAuthors);
+      $condition = 'inline_comment.id IS NOT NULL';
+      if ($this->draftRevisions) {
+        $condition = qsprintf(
+          $conn_r,
+          '(%Q OR r.id IN (%Ld))',
+          $condition,
+          $this->draftRevisions);
+      }
+      $where[] = $condition;
     }
     if ($this->revIDs) {
       $where[] = qsprintf(
