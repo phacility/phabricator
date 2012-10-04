@@ -1192,7 +1192,6 @@ phutil_register_library_map(array(
     'PonderAnswerPreviewController' => 'applications/ponder/controller/PonderAnswerPreviewController.php',
     'PonderAnswerQuery' => 'applications/ponder/query/PonderAnswerQuery.php',
     'PonderAnswerSaveController' => 'applications/ponder/controller/PonderAnswerSaveController.php',
-    'PonderAnswerSummaryView' => 'applications/ponder/view/PonderAnswerSummaryView.php',
     'PonderAnswerViewController' => 'applications/ponder/controller/PonderAnswerViewController.php',
     'PonderComment' => 'applications/ponder/storage/PonderComment.php',
     'PonderCommentListView' => 'applications/ponder/view/PonderCommentListView.php',
@@ -2303,7 +2302,6 @@ phutil_register_library_map(array(
     'PonderAnswerPreviewController' => 'PonderController',
     'PonderAnswerQuery' => 'PhabricatorOffsetPagedQuery',
     'PonderAnswerSaveController' => 'PonderController',
-    'PonderAnswerSummaryView' => 'AphrontView',
     'PonderAnswerViewController' => 'PonderController',
     'PonderComment' =>
     array(
