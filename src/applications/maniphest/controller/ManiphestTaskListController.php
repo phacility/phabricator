@@ -406,8 +406,11 @@ final class ManiphestTaskListController extends ManiphestController {
     $any_project = false;
     $search_text = $search_query->getParameter('fullTextSearch');
     $user_phids = $search_query->getParameter('userPHIDs', array());
-    $project_phids = $search_query->getParameter('projectPHIDs', array());
     $task_ids = $search_query->getParameter('taskIDs', array());
+    $project_phids = $search_query->getParameter('projectPHIDs', array());
+    $any_project_phids = $search_query->getParameter(
+      'anyProjectPHIDs',
+      array());
     $xproject_phids = $search_query->getParameter(
       'excludeProjectPHIDs',
       array());
@@ -467,17 +470,15 @@ final class ManiphestTaskListController extends ManiphestController {
         break;
       case 'projecttriage':
         $query->withPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
-        $any_project = true;
+        $query->withAnyProjects($any_project_phids);
         break;
       case 'projectall':
-        $any_project = true;
+        $query->withAnyProjects($any_project_phids);
         break;
       case 'custom':
         $query->withPrioritiesBetween($low_priority, $high_priority);
         break;
     }
-
-    $query->withAnyProject($any_project);
 
     $query->withFullTextSearch($search_text);
 
@@ -689,15 +690,16 @@ final class ManiphestTaskListController extends ManiphestController {
       array($user->getPHID()));
 
     if ($this->view == 'projecttriage' || $this->view == 'projectall') {
-      $project_query = new PhabricatorProjectQuery();
-      $project_query->setViewer($user);
-      $project_query->withMemberPHIDs($user_phids);
-      $projects = $project_query->execute();
-      $project_phids = mpull($projects, 'getPHID');
+      $projects = id(new PhabricatorProjectQuery())
+        ->setViewer($user)
+        ->withMemberPHIDs($user_phids)
+        ->execute();
+      $any_project_phids = mpull($projects, 'getPHID');
     } else {
-      $project_phids = $request->getStrList('projects');
+      $any_project_phids = $request->getStrList('aprojects');
     }
 
+    $project_phids = $request->getStrList('projects');
     $exclude_project_phids = $request->getStrList('xprojects');
     $task_ids = $request->getStrList('tasks');
 
@@ -739,6 +741,7 @@ final class ManiphestTaskListController extends ManiphestController {
         'view'                => $this->view,
         'userPHIDs'           => $user_phids,
         'projectPHIDs'        => $project_phids,
+        'anyProjectPHIDs'     => $any_project_phids,
         'excludeProjectPHIDs' => $exclude_project_phids,
         'ownerPHIDs'          => $owner_phids,
         'authorPHIDs'         => $author_phids,
