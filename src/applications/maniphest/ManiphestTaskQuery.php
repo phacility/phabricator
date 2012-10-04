@@ -98,7 +98,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
     return $this;
   }
 
-  public function withProjects(array $projects) {
+  public function withAllProjects(array $projects) {
     $this->includeNoProject = false;
     foreach ($projects as $k => $phid) {
       if ($phid == ManiphestTaskOwner::PROJECT_NO_PROJECT) {
@@ -472,7 +472,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
     $project_dao = new ManiphestTaskProject();
     return qsprintf(
       $conn,
-      'LEFT JOIN %T anyproject ON anyproject.taskPHID = task.phid',
+      'JOIN %T anyproject ON anyproject.taskPHID = task.phid',
       $project_dao->getTableName());
   }
 
