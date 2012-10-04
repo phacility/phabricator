@@ -43,7 +43,7 @@ final class PhabricatorApplicationRepositories extends PhabricatorApplication {
       '/repository/' => array(
         ''                     => 'PhabricatorRepositoryListController',
         'create/'              => 'PhabricatorRepositoryCreateController',
-        'edit/(?P<id>\d+)/(?:(?P<view>\w+)?/)?' =>
+        'edit/(?P<id>\d+)/(?:(?P<view>\w+)/)?' =>
           'PhabricatorRepositoryEditController',
         'delete/(?P<id>\d+)/'  => 'PhabricatorRepositoryDeleteController',
         'project/edit/(?P<id>\d+)/' =>
