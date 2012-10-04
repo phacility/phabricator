@@ -202,7 +202,7 @@ final class DarkConsoleCore {
             javelin_render_tag(
               'div',
               array(
-                'class' => 'dark-console-panel',
+                'class' => 'dark-console-panel dark-console-panel-RequestLog',
               ),
               $request_table).
           '</td>'.

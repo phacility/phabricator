@@ -100,6 +100,9 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     }
 
     if ($revision_id) {
+      $lock = PhabricatorGlobalLock::newLock(get_class($this).':'.$revision_id);
+      $lock->lock(5 * 60);
+
       $revision = id(new DifferentialRevision())->load($revision_id);
       if ($revision) {
         $revision->loadRelationships();
@@ -110,44 +113,16 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
           $revision->getID(),
           $commit->getPHID());
 
-        $committer_phid = $data->getCommitDetail('committerPHID');
-        if ($committer_phid) {
-          $handle = PhabricatorObjectHandleData::loadOneHandle($committer_phid);
-          $committer_name = '@'.$handle->getName();
-        } else {
-          $committer_name = $data->getCommitDetail('committer');
-        }
-
-        $author_phid = $data->getCommitDetail('authorPHID');
-        if ($author_phid) {
-          $handle = PhabricatorObjectHandleData::loadOneHandle($author_phid);
-          $author_name = '@'.$handle->getName();
-        } else {
-          $author_name = $data->getAuthorName();
-        }
-
-        $commit_name = $repository->formatCommitName(
-          $commit->getCommitIdentifier());
-
-        $info = array();
-        $info[] = "authored by {$author_name}";
-        if ($committer_name && ($committer_name != $author_name)) {
-          $info[] = "committed by {$committer_name}";
-        }
-        $info = implode(', ', $info);
-
-        $message = "Closed by commit {$commit_name} ({$info}).";
-
-        $actor_phid = nonempty(
-          $committer_phid,
-          $author_phid,
-          $revision->getAuthorPHID());
-
         $status_closed = ArcanistDifferentialRevisionStatus::CLOSED;
         $should_close = ($revision->getStatus() != $status_closed) &&
                         $should_autoclose;
 
         if ($should_close) {
+          $actor_phid = nonempty(
+            $committer_phid,
+            $author_phid,
+            $revision->getAuthorPHID());
+
           $diff = $this->attachToRevision($revision, $actor_phid);
 
           $revision->setDateCommitted($commit->getEpoch());
@@ -169,14 +144,32 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
             $editor->setChangedByCommit($changed_by_commit);
           }
 
-          // Reload revision to check if someone already didn't close it.
-          $current = id(new DifferentialRevision())->load($revision_id);
-          if ($current->getStatus() != $status_closed) {
-            $editor->setMessage($message)->save();
+          $commit_name = $repository->formatCommitName(
+            $commit->getCommitIdentifier());
+
+          $committer_name = $this->loadUserName(
+            $committer_phid,
+            $data->getCommitDetail('committer'));
+
+          $author_name = $this->loadUserName(
+            $author_phid,
+            $data->getAuthorName());
+
+          $info = array();
+          $info[] = "authored by {$author_name}";
+          if ($committer_name && ($committer_name != $author_name)) {
+            $info[] = "committed by {$committer_name}";
           }
+          $info = implode(', ', $info);
+
+          $editor
+            ->setMessage("Closed by commit {$commit_name} ({$info}).")
+            ->save();
         }
 
       }
+
+      $lock->unlock();
     }
 
     if ($should_autoclose && $author_phid) {
@@ -212,6 +205,14 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     }
 
     $data->save();
+  }
+
+  private function loadUserName($user_phid, $default) {
+    if (!$user_phid) {
+      return $default;
+    }
+    $handle = PhabricatorObjectHandleData::loadOneHandle($user_phid);
+    return '@'.$handle->getName();
   }
 
   private function attachToRevision(

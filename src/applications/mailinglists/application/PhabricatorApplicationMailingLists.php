@@ -34,6 +34,10 @@ final class PhabricatorApplicationMailingLists extends PhabricatorApplication {
     return 'mail';
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_ADMIN;
+  }
+
   public function getRoutes() {
     return array(
       '/mailinglists/' => array(

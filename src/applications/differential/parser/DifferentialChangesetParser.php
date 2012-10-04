@@ -1386,7 +1386,11 @@ final class DifferentialChangesetParser {
     //
     $depths = array();
     $last_depth = 0;
-    for ($ii = $range_start + $range_len - 1; $ii >= $range_start; $ii--) {
+    $range_end = $range_start + $range_len;
+    if (!isset($this->new[$range_end])) {
+      $range_end--;
+    }
+    for ($ii = $range_end; $ii >= $range_start; $ii--) {
       // We need to expand tabs to process mixed indenting and to round
       // correctly later.
       $line = str_replace("\t", "  ", $this->new[$ii]['text']);

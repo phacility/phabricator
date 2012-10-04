@@ -267,41 +267,80 @@ final class DiffusionBrowseFileController extends DiffusionController {
   }
 
   private function renderViewSelectPanel($selected) {
+    $toggle_blame = array(
+      'highlighted'   => 'blame',
+      'blame'         => 'highlighted',
+      'plain'         => 'plainblame',
+      'plainblame'    => 'plain',
+      'raw'           => 'raw',  // not a real case.
+    );
+    $toggle_highlight = array(
+      'highlighted'   => 'plain',
+      'blame'         => 'plainblame',
+      'plain'         => 'highlighted',
+      'plainblame'    => 'blame',
+      'raw'           => 'raw',  // not a real case.
+    );
 
-    $request = $this->getRequest();
+    $user = $this->getRequest()->getUser();
 
-    $select = AphrontFormSelectControl::renderSelectTag(
-      $selected,
-      array(
-        'highlighted'   => 'View as Highlighted Text',
-        'blame'         => 'View as Highlighted Text with Blame',
-        'plain'         => 'View as Plain Text',
-        'plainblame'    => 'View as Plain Text with Blame',
-        'raw'           => 'View as raw document',
-      ),
-      array(
-        'name' => 'view',
-      ));
+    $blame_on = ($selected == 'blame' || $selected == 'plainblame');
+    if ($blame_on) {
+      $blame_text = pht('Disable Blame');
+    } else {
+      $blame_text = pht('Enable Blame');
+    }
 
-    $view_select_panel = new AphrontPanelView();
-    $view_select_form = phabricator_render_form(
-      $request->getUser(),
-      array(
-        'action' => $request->getRequestURI()->alter('view', null),
-        'method' => 'post',
-        'class'  => 'diffusion-browse-type-form',
-      ),
-      $select.
-      ' <button>View</button> '.
-      $this->renderEditButton());
+    $blame_button = $this->createViewAction(
+      $blame_text,
+      $toggle_blame[$selected],
+      $user);
 
-    $view_select_panel->appendChild($view_select_form);
-    $view_select_panel->appendChild('<div style="clear: both;"></div>');
 
-    return $view_select_panel;
+    $highlight_on = ($selected == 'blame' || $selected == 'highlighted');
+    if ($highlight_on) {
+      $highlight_text = pht('Disable Highlighting');
+    } else {
+      $highlight_text = pht('Enable Highlighting');
+    }
+    $highlight_button = $this->createViewAction(
+      $highlight_text,
+      $toggle_highlight[$selected],
+      $user);
+
+
+    $raw_button = $this->createViewAction(
+      pht('View Raw File'),
+      'raw',
+      $user,
+      'file');
+
+    $edit_button = $this->createEditAction();
+
+    return id(new PhabricatorActionListView())
+      ->setUser($user)
+      ->addAction($blame_button)
+      ->addAction($highlight_button)
+      ->addAction($raw_button)
+      ->addAction($edit_button);
   }
 
-  private function renderEditButton() {
+  private function createViewAction(
+    $localized_text,
+    $view_mode,
+    $user,
+    $icon = null) {
+
+    $base_uri = $this->getRequest()->getRequestURI();
+    return id(new PhabricatorActionView())
+          ->setName($localized_text)
+          ->setIcon($icon)
+          ->setUser($user)
+          ->setRenderAsForm(true)
+          ->setHref($base_uri->alter('view', $view_mode));
+  }
+
+  private function createEditAction() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
@@ -313,17 +352,15 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
     $callsign = $repository->getCallsign();
     $editor_link = $user->loadEditorLink($path, $line, $callsign);
-    if (!$editor_link) {
-      return null;
-    }
 
-    return phutil_render_tag(
-      'a',
-      array(
-        'href' => $editor_link,
-        'class' => 'button',
-      ),
-      'Edit');
+    $action = id(new PhabricatorActionView())
+      ->setName(pht('Open in Editor'))
+      ->setIcon('edit');
+
+    $action->setHref($editor_link);
+    $action->setDisabled(!$editor_link);
+
+    return $action;
   }
 
   private function buildDisplayRows(

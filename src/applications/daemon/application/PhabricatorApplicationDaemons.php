@@ -38,6 +38,10 @@ final class PhabricatorApplicationDaemons extends PhabricatorApplication {
     return 'daemons';
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_ADMIN;
+  }
+
   public function getRoutes() {
     return array(
       '/daemon/' => array(

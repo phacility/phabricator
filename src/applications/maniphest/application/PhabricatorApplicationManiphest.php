@@ -34,7 +34,11 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
     return 'maniphest';
   }
 
-  public function getCoreApplicationOrder() {
+  public function getApplicationGroup() {
+    return self::GROUP_CORE;
+  }
+
+  public function getApplicationOrder() {
     return 0.110;
   }
 

@@ -34,6 +34,18 @@ final class PhabricatorApplicationOwners extends PhabricatorApplication {
     return "\xE2\x98\x81";
   }
 
+  public function getHelpURI() {
+    return PhabricatorEnv::getDoclink('article/Owners_Tool_User_Guide.html');
+  }
+
+  public function getFlavorText() {
+    return pht('Adopt today!');
+  }
+
+  public function getApplicationGroup() {
+    return self::GROUP_ORGANIZATION;
+  }
+
   public function getRoutes() {
     return array(
       '/owners/' => array(

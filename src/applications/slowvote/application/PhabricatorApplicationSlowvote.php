@@ -34,6 +34,18 @@ final class PhabricatorApplicationSlowvote extends PhabricatorApplication {
     return "\xE2\x9C\x94";
   }
 
+  public function getHelpURI() {
+    return PhabricatorEnv::getDoclink('article/Slowvote_User_Guide.html');
+  }
+
+  public function getFlavorText() {
+    return pht('Design by committee.');
+  }
+
+  public function getApplicationGroup() {
+    return self::GROUP_UTILITIES;
+  }
+
   public function getRoutes() {
     return array(
       '/V(?P<id>\d+)' => 'PhabricatorSlowvotePollController',

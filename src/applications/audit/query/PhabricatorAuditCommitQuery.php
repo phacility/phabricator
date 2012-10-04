@@ -27,6 +27,7 @@ final class PhabricatorAuditCommitQuery {
   private $identifiers = array();
 
   private $needCommitData;
+  private $needAudits;
 
   private $status     = 'status-any';
   const STATUS_ANY    = 'status-any';
@@ -59,6 +60,11 @@ final class PhabricatorAuditCommitQuery {
 
   public function needCommitData($need) {
     $this->needCommitData = $need;
+    return $this;
+  }
+
+  public function needAudits($need) {
+    $this->needAudits = $need;
     return $this;
   }
 
@@ -104,6 +110,16 @@ final class PhabricatorAuditCommitQuery {
         } else {
           $commit->attachCommitData(new PhabricatorRepositoryCommitData());
         }
+      }
+    }
+
+    if ($this->needAudits && $commits) {
+      $audits = id(new PhabricatorAuditComment())->loadAllWhere(
+        'targetPHID in (%Ls)',
+        mpull($commits, 'getPHID'));
+      $audits = mgroup($audits, 'getTargetPHID');
+      foreach ($commits as $commit) {
+        $commit->attachAudits(idx($audits, $commit->getPHID(), array()));
       }
     }
 

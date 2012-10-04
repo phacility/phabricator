@@ -27,6 +27,7 @@ final class PhabricatorRepositoryCommit extends PhabricatorRepositoryDAO {
   protected $auditStatus = PhabricatorAuditCommitStatusConstants::NONE;
 
   private $commitData;
+  private $audits;
   private $isUnparsed;
 
   public function setIsUnparsed($is_unparsed) {
@@ -69,6 +70,16 @@ final class PhabricatorRepositoryCommit extends PhabricatorRepositoryDAO {
       throw new Exception("Attach commit data with attachCommitData() first!");
     }
     return $this->commitData;
+  }
+
+  public function attachAudits(array $audits) {
+    assert_instances_of($audits, 'PhabricatorAuditComment');
+    $this->audits = $audits;
+    return $this;
+  }
+
+  public function getAudits() {
+    return $this->audits;
   }
 
   public function save() {

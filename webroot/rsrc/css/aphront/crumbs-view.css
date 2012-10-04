@@ -16,3 +16,7 @@
   padding: 0 .35em;
   color: #888888;
 }
+
+.device-desktop .aphront-crumbs-view {
+  width: 66%;
+}

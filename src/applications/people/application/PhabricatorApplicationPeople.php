@@ -34,6 +34,14 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
     return 'people';
   }
 
+  public function getFlavorText() {
+    return pht('Sort of a social utility.');
+  }
+
+  public function getApplicationGroup() {
+    return self::GROUP_ADMIN;
+  }
+
   public function getRoutes() {
     return array(
       '/people/' => array(

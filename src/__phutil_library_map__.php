@@ -545,6 +545,7 @@ phutil_register_library_map(array(
     'PackageModifyMail' => 'applications/owners/mail/PackageModifyMail.php',
     'Phabricator404Controller' => 'applications/base/controller/Phabricator404Controller.php',
     'PhabricatorAccessLog' => 'infrastructure/PhabricatorAccessLog.php',
+    'PhabricatorActionListExample' => 'applications/uiexample/examples/PhabricatorActionListExample.php',
     'PhabricatorActionListView' => 'view/layout/PhabricatorActionListView.php',
     'PhabricatorActionView' => 'view/layout/PhabricatorActionView.php',
     'PhabricatorAnchorView' => 'view/layout/PhabricatorAnchorView.php',
@@ -1191,7 +1192,6 @@ phutil_register_library_map(array(
     'PonderAnswerPreviewController' => 'applications/ponder/controller/PonderAnswerPreviewController.php',
     'PonderAnswerQuery' => 'applications/ponder/query/PonderAnswerQuery.php',
     'PonderAnswerSaveController' => 'applications/ponder/controller/PonderAnswerSaveController.php',
-    'PonderAnswerSummaryView' => 'applications/ponder/view/PonderAnswerSummaryView.php',
     'PonderAnswerViewController' => 'applications/ponder/controller/PonderAnswerViewController.php',
     'PonderComment' => 'applications/ponder/storage/PonderComment.php',
     'PonderCommentListView' => 'applications/ponder/view/PonderCommentListView.php',
@@ -1710,6 +1710,7 @@ phutil_register_library_map(array(
     'PackageDeleteMail' => 'PackageMail',
     'PackageModifyMail' => 'PackageMail',
     'Phabricator404Controller' => 'PhabricatorController',
+    'PhabricatorActionListExample' => 'PhabricatorUIExample',
     'PhabricatorActionListView' => 'AphrontView',
     'PhabricatorActionView' => 'AphrontView',
     'PhabricatorAnchorView' => 'AphrontView',
@@ -2301,7 +2302,6 @@ phutil_register_library_map(array(
     'PonderAnswerPreviewController' => 'PonderController',
     'PonderAnswerQuery' => 'PhabricatorOffsetPagedQuery',
     'PonderAnswerSaveController' => 'PonderController',
-    'PonderAnswerSummaryView' => 'AphrontView',
     'PonderAnswerViewController' => 'PonderController',
     'PonderComment' =>
     array(

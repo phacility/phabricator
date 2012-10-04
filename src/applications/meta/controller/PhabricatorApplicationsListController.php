@@ -24,7 +24,6 @@ final class PhabricatorApplicationsListController
     $user = $request->getUser();
 
     $applications = PhabricatorApplication::getAllInstalledApplications();
-    $applications = msort($applications, 'getName');
 
     foreach ($applications as $key => $application) {
       if (!$application->shouldAppearInLaunchView()) {
@@ -32,25 +31,37 @@ final class PhabricatorApplicationsListController
       }
     }
 
-    $status = array();
-    foreach ($applications as $key => $application) {
-      $status[$key] = $application->loadStatus($user);
-    }
+    $groups = PhabricatorApplication::getApplicationGroups();
 
-    $views = array();
-    foreach ($applications as $key => $application) {
-      $views[] = id(new PhabricatorApplicationLaunchView())
-        ->setApplication($application)
-        ->setApplicationStatus(idx($status, $key, array()))
-        ->setUser($user);
-    }
+    $applications = msort($applications, 'getApplicationOrder');
+    $applications = mgroup($applications, 'getApplicationGroup');
+    $applications = array_select_keys($applications, array_keys($groups));
 
-    $view = phutil_render_tag(
-      'div',
-      array(
-        'class' => 'phabricator-application-list',
-      ),
-      id(new AphrontNullView())->appendChild($views)->render());
+    $view = array();
+    foreach ($applications as $group => $application_list) {
+      $status = array();
+      foreach ($application_list as $key => $application) {
+        $status[$key] = $application->loadStatus($user);
+      }
+
+      $views = array();
+      foreach ($application_list as $key => $application) {
+        $views[] = id(new PhabricatorApplicationLaunchView())
+          ->setApplication($application)
+          ->setApplicationStatus(idx($status, $key, array()))
+          ->setUser($user);
+      }
+
+      $view[] = id(new PhabricatorHeaderView())
+        ->setHeader($groups[$group]);
+
+      $view[] = phutil_render_tag(
+        'div',
+        array(
+          'class' => 'phabricator-application-list',
+        ),
+        id(new AphrontNullView())->appendChild($views)->render());
+    }
 
     return $this->buildApplicationPage(
       $view,

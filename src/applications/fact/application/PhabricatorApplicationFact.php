@@ -30,6 +30,10 @@ final class PhabricatorApplicationFact extends PhabricatorApplication {
     return 'fact';
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_UTILITIES;
+  }
+
   public function getRoutes() {
     return array(
       '/fact/' => array(

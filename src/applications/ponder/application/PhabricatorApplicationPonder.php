@@ -43,6 +43,10 @@ final class PhabricatorApplicationPonder extends PhabricatorApplication {
     return $status;
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_COMMUNICATION;
+  }
+
   public function getroutes() {
     return array(
       '/Q(?P<id>\d+)' => 'PonderQuestionViewController',

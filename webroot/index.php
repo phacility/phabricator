@@ -109,155 +109,156 @@ try {
 
   PhutilErrorHandler::initialize();
 
-} catch (Exception $ex) {
-  phabricator_fatal("[Initialization Exception] ".$ex->getMessage());
-}
+  PhutilErrorHandler::setErrorListener(
+    array('DarkConsoleErrorLogPluginAPI', 'handleErrors'));
 
-PhutilErrorHandler::setErrorListener(
-  array('DarkConsoleErrorLogPluginAPI', 'handleErrors'));
-
-foreach (PhabricatorEnv::getEnvConfig('load-libraries') as $library) {
-  phutil_load_library($library);
-}
-
-if (PhabricatorEnv::getEnvConfig('phabricator.setup')) {
-  try {
-    PhabricatorSetup::runSetup();
-  } catch (Exception $ex) {
-    echo "EXCEPTION!\n";
-    echo $ex;
+  foreach (PhabricatorEnv::getEnvConfig('load-libraries') as $library) {
+    phutil_load_library($library);
   }
-  return;
-}
 
-phabricator_detect_bad_base_uri();
-
-$translation = PhabricatorEnv::newObjectFromConfig('translation.provider');
-PhutilTranslator::getInstance()
-  ->setLanguage($translation->getLanguage())
-  ->addTranslations($translation->getTranslations());
-
-$host = $_SERVER['HTTP_HOST'];
-$path = $_REQUEST['__path__'];
-
-switch ($host) {
-  default:
-    $config_key = 'aphront.default-application-configuration-class';
-    $application = PhabricatorEnv::newObjectFromConfig($config_key);
-    break;
-}
-
-
-$application->setHost($host);
-$application->setPath($path);
-$application->willBuildRequest();
-$request = $application->buildRequest();
-
-$write_guard = new AphrontWriteGuard(array($request, 'validateCSRF'));
-PhabricatorEventEngine::initialize();
-
-$application->setRequest($request);
-list($controller, $uri_data) = $application->buildController();
-
-if ($access_log) {
-  $access_log->setData(
-    array(
-      'U' => (string)$request->getRequestURI()->getPath(),
-      'C' => get_class($controller),
-    ));
-}
-
-// If execution throws an exception and then trying to render that exception
-// throws another exception, we want to show the original exception, as it is
-// likely the root cause of the rendering exception.
-$original_exception = null;
-try {
-  $response = $controller->willBeginExecution();
-
-  if ($access_log) {
-    if ($request->getUser() && $request->getUser()->getPHID()) {
-      $access_log->setData(
-        array(
-          'u' => $request->getUser()->getUserName(),
-        ));
+  if (PhabricatorEnv::getEnvConfig('phabricator.setup')) {
+    try {
+      PhabricatorSetup::runSetup();
+    } catch (Exception $ex) {
+      echo "EXCEPTION!\n";
+      echo $ex;
     }
+    return;
   }
 
-  if (!$response) {
-    $controller->willProcessRequest($uri_data);
-    $response = $controller->processRequest();
-  }
-} catch (AphrontRedirectException $ex) {
-  $response = id(new AphrontRedirectResponse())
-    ->setURI($ex->getURI());
-} catch (Exception $ex) {
-  $original_exception = $ex;
-  $response = $application->handleException($ex);
-}
+  phabricator_detect_bad_base_uri();
 
-try {
-  $response = $controller->didProcessRequest($response);
-  $response = $application->willSendResponse($response, $controller);
-  $response->setRequest($request);
-  $response_string = $response->buildResponseString();
-} catch (Exception $ex) {
-  $write_guard->dispose();
+  $translation = PhabricatorEnv::newObjectFromConfig('translation.provider');
+  PhutilTranslator::getInstance()
+    ->setLanguage($translation->getLanguage())
+    ->addTranslations($translation->getTranslations());
+
+  $host = $_SERVER['HTTP_HOST'];
+  $path = $_REQUEST['__path__'];
+
+  switch ($host) {
+    default:
+      $config_key = 'aphront.default-application-configuration-class';
+      $application = PhabricatorEnv::newObjectFromConfig($config_key);
+      break;
+  }
+
+
+  $application->setHost($host);
+  $application->setPath($path);
+  $application->willBuildRequest();
+  $request = $application->buildRequest();
+
+  $write_guard = new AphrontWriteGuard(array($request, 'validateCSRF'));
+  PhabricatorEventEngine::initialize();
+
+  $application->setRequest($request);
+  list($controller, $uri_data) = $application->buildController();
+
   if ($access_log) {
-    $access_log->write();
-  }
-  if ($original_exception) {
-    $ex = new PhutilAggregateException(
-      "Multiple exceptions during processing and rendering.",
+    $access_log->setData(
       array(
-        $original_exception,
-        $ex,
+        'U' => (string)$request->getRequestURI()->getPath(),
+        'C' => get_class($controller),
       ));
   }
-  phabricator_fatal('[Rendering Exception] '.$ex->getMessage());
-}
 
-$write_guard->dispose();
+  // If execution throws an exception and then trying to render that exception
+  // throws another exception, we want to show the original exception, as it is
+  // likely the root cause of the rendering exception.
+  $original_exception = null;
+  try {
+    $response = $controller->willBeginExecution();
 
-// TODO: Share the $sink->writeResponse() pathway here?
+    if ($access_log) {
+      if ($request->getUser() && $request->getUser()->getPHID()) {
+        $access_log->setData(
+          array(
+            'u' => $request->getUser()->getUserName(),
+          ));
+      }
+    }
 
-$sink = new AphrontPHPHTTPSink();
-$sink->writeHTTPStatus($response->getHTTPResponseCode());
-
-$headers = $response->getCacheHeaders();
-$headers = array_merge($headers, $response->getHeaders());
-
-$sink->writeHeaders($headers);
-
-$sink->writeData($response_string);
-
-if ($access_log) {
-  $access_log->setData(
-    array(
-      'c' => $response->getHTTPResponseCode(),
-      'T' => (int)(1000000 * (microtime(true) - $__start__)),
-    ));
-  $access_log->write();
-}
-
-if (DarkConsoleXHProfPluginAPI::isProfilerRequested()) {
-  $profile = DarkConsoleXHProfPluginAPI::stopProfiler();
-  $profile_sample = id(new PhabricatorXHProfSample())
-    ->setFilePHID($profile);
-  if (empty($_REQUEST['__profile__'])) {
-    $sample_rate = PhabricatorEnv::getEnvConfig('debug.profile-rate');
-  } else {
-    $sample_rate = 0;
+    if (!$response) {
+      $controller->willProcessRequest($uri_data);
+      $response = $controller->processRequest();
+    }
+  } catch (AphrontRedirectException $ex) {
+    $response = id(new AphrontRedirectResponse())
+      ->setURI($ex->getURI());
+  } catch (Exception $ex) {
+    $original_exception = $ex;
+    $response = $application->handleException($ex);
   }
-  $profile_sample->setSampleRate($sample_rate);
+
+  try {
+    $response = $controller->didProcessRequest($response);
+    $response = $application->willSendResponse($response, $controller);
+    $response->setRequest($request);
+    $response_string = $response->buildResponseString();
+  } catch (Exception $ex) {
+    $write_guard->dispose();
+    if ($access_log) {
+      $access_log->write();
+    }
+    if ($original_exception) {
+      $ex = new PhutilAggregateException(
+        "Multiple exceptions during processing and rendering.",
+        array(
+          $original_exception,
+          $ex,
+        ));
+    }
+    phabricator_fatal('[Rendering Exception] '.$ex->getMessage());
+  }
+
+  $write_guard->dispose();
+
+  // TODO: Share the $sink->writeResponse() pathway here?
+
+  $sink = new AphrontPHPHTTPSink();
+  $sink->writeHTTPStatus($response->getHTTPResponseCode());
+
+  $headers = $response->getCacheHeaders();
+  $headers = array_merge($headers, $response->getHeaders());
+
+  $sink->writeHeaders($headers);
+
+  $sink->writeData($response_string);
+
   if ($access_log) {
-    $profile_sample->setUsTotal($access_log->getData('T'))
-      ->setHostname($access_log->getData('h'))
-      ->setRequestPath($access_log->getData('U'))
-      ->setController($access_log->getData('C'))
-      ->setUserPHID($request->getUser()->getPHID());
+    $access_log->setData(
+      array(
+        'c' => $response->getHTTPResponseCode(),
+        'T' => (int)(1000000 * (microtime(true) - $__start__)),
+      ));
+    $access_log->write();
   }
-  $profile_sample->save();
+
+  if (DarkConsoleXHProfPluginAPI::isProfilerRequested()) {
+    $profile = DarkConsoleXHProfPluginAPI::stopProfiler();
+    $profile_sample = id(new PhabricatorXHProfSample())
+      ->setFilePHID($profile);
+    if (empty($_REQUEST['__profile__'])) {
+      $sample_rate = PhabricatorEnv::getEnvConfig('debug.profile-rate');
+    } else {
+      $sample_rate = 0;
+    }
+    $profile_sample->setSampleRate($sample_rate);
+    if ($access_log) {
+      $profile_sample->setUsTotal($access_log->getData('T'))
+        ->setHostname($access_log->getData('h'))
+        ->setRequestPath($access_log->getData('U'))
+        ->setController($access_log->getData('C'))
+        ->setUserPHID($request->getUser()->getPHID());
+    }
+    $profile_sample->save();
+  }
+
+} catch (Exception $ex) {
+  phabricator_fatal("[Exception] ".$ex->getMessage());
 }
+
 
 /**
  * @group aphront
@@ -352,11 +353,15 @@ function phabricator_fatal($msg) {
 
   global $access_log;
   if ($access_log) {
-    $access_log->setData(
-      array(
-        'c' => 500,
-      ));
-    $access_log->write();
+    try {
+      $access_log->setData(
+        array(
+          'c' => 500,
+        ));
+      $access_log->write();
+    } catch (Exception $ex) {
+      $msg .= "\nMoreover unable to write to access log.";
+    }
   }
 
   header(

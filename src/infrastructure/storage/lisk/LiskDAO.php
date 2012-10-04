@@ -209,6 +209,12 @@ abstract class LiskDAO {
 
   private $inSet = null;
 
+  protected $id;
+  protected $phid;
+  protected $version;
+  protected $dateCreated;
+  protected $dateModified;
+
   /**
    *  Build an empty object.
    *
@@ -650,11 +656,33 @@ abstract class LiskDAO {
    * @task   load
    */
   public function loadFromArray(array $row) {
-
-    // TODO: We should load only valid properties.
+    static $valid_properties = array();
 
     $map = array();
     foreach ($row as $k => $v) {
+      // We permit (but ignore) extra properties in the array because a
+      // common approach to building the array is to issue a raw SELECT query
+      // which may include extra explicit columns or joins.
+
+      // This pathway is very hot on some pages, so we're inlining a cache
+      // and doing some microoptimization to avoid a strtolower() call for each
+      // assignment. The common path (assigning a valid property which we've
+      // already seen) always incurs only one empty(). The second most common
+      // path (assigning an invalid property which we've already seen) costs
+      // an empty() plus an isset().
+
+      if (empty($valid_properties[$k])) {
+        if (isset($valid_properties[$k])) {
+          // The value is set but empty, which means it's false, so we've
+          // already determined it's not valid. We don't need to check again.
+          continue;
+        }
+        $valid_properties[$k] = (bool)$this->checkProperty($k);
+        if (!$valid_properties[$k]) {
+          continue;
+        }
+      }
+
       $map[$k] = $v;
     }
 
@@ -920,24 +948,21 @@ abstract class LiskDAO {
       }
 
       $id_key = $this->getIDKey();
-      if ($id_key) {
-        if (!isset($properties[strtolower($id_key)])) {
-          $properties[strtolower($id_key)] = $id_key;
-        }
+      if ($id_key != 'id') {
+        unset($properties['id']);
       }
 
-      if ($this->getConfigOption(self::CONFIG_OPTIMISTIC_LOCKS)) {
-        $properties['version'] = 'version';
+      if (!$this->getConfigOption(self::CONFIG_OPTIMISTIC_LOCKS)) {
+        unset($properties['version']);
       }
 
-      if ($this->getConfigOption(self::CONFIG_TIMESTAMPS)) {
-        $properties['datecreated'] = 'dateCreated';
-        $properties['datemodified'] = 'dateModified';
+      if (!$this->getConfigOption(self::CONFIG_TIMESTAMPS)) {
+        unset($properties['datecreated']);
+        unset($properties['datemodified']);
       }
 
-      if (!$this->isPHIDPrimaryID() &&
-          $this->getConfigOption(self::CONFIG_AUX_PHID)) {
-        $properties['phid'] = 'phid';
+      if ($id_key != 'phid' && !$this->getConfigOption(self::CONFIG_AUX_PHID)) {
+        unset($properties['phid']);
       }
     }
     return $properties;
@@ -1793,4 +1818,15 @@ abstract class LiskDAO {
 
     throw new Exception("Unable to resolve method '{$method}'.");
   }
+
+  /**
+   * Warns against writing to undeclared property.
+   *
+   * @task   util
+   */
+  public function __set($name, $value) {
+    phlog('Wrote to undeclared property '.get_class($this).'::$'.$name.'.');
+    $this->$name = $value;
+  }
+
 }

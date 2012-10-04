@@ -38,6 +38,10 @@ final class PhabricatorApplicationPHID extends PhabricatorApplication {
     return "#";
   }
 
+  public function getApplicationGroup() {
+    return self::GROUP_DEVELOPER;
+  }
+
   public function getRoutes() {
     return array(
       '/phid/' => array(

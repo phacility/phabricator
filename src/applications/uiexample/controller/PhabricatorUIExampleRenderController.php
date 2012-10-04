@@ -53,6 +53,12 @@ final class PhabricatorUIExampleRenderController extends PhabricatorController {
     $example = $classes[$selected];
     $example->setRequest($this->getRequest());
 
+    $result = $example->renderExample();
+    if ($result instanceof AphrontResponse) {
+      // This allows examples to generate dialogs, etc., for demonstration.
+      return $result;
+    }
+
     $nav->appendChild(
       '<div class="phabricator-ui-example-header">'.
         '<h1 class="phabricator-ui-example-name">'.
@@ -64,7 +70,7 @@ final class PhabricatorUIExampleRenderController extends PhabricatorController {
         '</p>'.
       '</div>');
 
-    $nav->appendChild($example->renderExample());
+    $nav->appendChild($result);
 
     return $this->buildApplicationPage(
       $nav,

@@ -26,12 +26,25 @@ final class PhabricatorApplicationConduit extends PhabricatorApplication {
     return 'conduit';
   }
 
+  public function getHelpURI() {
+    return PhabricatorEnv::getDoclink(
+      'article/Conduit_Technical_Documentation.html');
+  }
+
   public function getShortDescription() {
     return 'Conduit API Console';
   }
 
   public function getTitleGlyph() {
     return "\xE2\x87\xB5";
+  }
+
+  public function getApplicationGroup() {
+    return self::GROUP_DEVELOPER;
+  }
+
+  public function getApplicationOrder() {
+    return 0.100;
   }
 
   public function getRoutes() {

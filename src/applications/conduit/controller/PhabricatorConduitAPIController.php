@@ -47,7 +47,7 @@ final class PhabricatorConduitAPIController
 
     try {
 
-      $params = $this->decodeConduitParams($request);
+      $params = $this->decodeConduitParams($request, $method);
       $metadata = idx($params, '__conduit__', array());
       unset($params['__conduit__']);
 
@@ -420,7 +420,9 @@ final class PhabricatorConduitAPIController
     return $value;
   }
 
-  private function decodeConduitParams(AphrontRequest $request) {
+  private function decodeConduitParams(
+    AphrontRequest $request,
+    $method) {
 
     // Look for parameters from the Conduit API Console, which are encoded
     // as HTTP POST parameters in an array, e.g.:
@@ -471,7 +473,8 @@ final class PhabricatorConduitAPIController
       if (!is_array($params)) {
         throw new Exception(
           "Invalid parameter information was passed to method ".
-          "'{$method}', could not decode JSON serialization.");
+          "'{$method}', could not decode JSON serialization. Data: ".
+          $params_json);
       }
     }
 

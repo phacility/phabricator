@@ -42,10 +42,6 @@ final class PhabricatorActionListView extends AphrontView {
       throw new Exception("Call setUser() before render()!");
     }
 
-    if (!$this->object) {
-      throw new Exception("Call setObject() before render()!");
-    }
-
     $event = new PhabricatorEvent(
       PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS,
       array(

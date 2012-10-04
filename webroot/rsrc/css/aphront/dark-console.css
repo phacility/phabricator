@@ -157,6 +157,11 @@ a.dark-console-tab-selected {
   border-bottom:  2px solid #000000;
 }
 
+.dark-console-panel-RequestLog {
+  max-height: 10em;
+  overflow: auto;
+}
+
 .dark-console-panel-request-log-separator {
     background-color: #e8e8e8;
     border-bottom: 1px solid #b7b7b7;

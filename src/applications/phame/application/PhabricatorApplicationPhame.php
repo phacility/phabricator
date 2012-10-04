@@ -34,6 +34,14 @@ final class PhabricatorApplicationPhame extends PhabricatorApplication {
     return "\xe2\x9c\xa9";
   }
 
+  public function getHelpURI() {
+    return PhabricatorEnv::getDoclink('article/Phame_User_Guide.html');
+  }
+
+  public function getApplicationGroup() {
+    return self::GROUP_COMMUNICATION;
+  }
+
   public function getRoutes() {
     return array(
      '/phame/' => array(
