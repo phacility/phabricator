@@ -140,7 +140,7 @@ abstract class AphrontApplicationConfiguration {
       $blogs = id(new PhameBlogQuery())->withDomain($host)->execute();
       $blog = reset($blogs);
       if (!$blog) {
-        if ($prod_uri) {
+        if ($prod_uri && $prod_uri != $base_uri) {
           $prod_str = ' or '.$prod_uri;
         } else {
           $prod_str = '';
