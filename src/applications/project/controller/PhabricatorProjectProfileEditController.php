@@ -19,6 +19,8 @@
 final class PhabricatorProjectProfileEditController
   extends PhabricatorProjectController {
 
+  private $id;
+
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
   }

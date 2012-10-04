@@ -121,11 +121,6 @@ class AphrontDefaultApplicationConfiguration
         '' => 'DrydockResourceListController',
         'resource/' => 'DrydockResourceListController',
         'resource/allocate/' => 'DrydockResourceAllocateController',
-        'host/' => array(
-          '' => 'DrydockHostListController',
-          'edit/' => 'DrydockHostEditController',
-          'edit/(?P<id>\d+)/' => 'DrydockhostEditController',
-        ),
         'lease/' => 'DrydockLeaseListController',
         'log/' => 'DrydockLogController',
       ),

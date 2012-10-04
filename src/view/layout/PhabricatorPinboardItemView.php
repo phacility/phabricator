@@ -22,6 +22,8 @@ final class PhabricatorPinboardItemView extends AphrontView {
   private $uri;
   private $header;
 
+  private $imageWidth;
+  private $imageHeight;
 
   public function setHeader($header) {
     $this->header = $header;
