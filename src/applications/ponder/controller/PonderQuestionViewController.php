@@ -52,6 +52,7 @@ final class PonderQuestionViewController extends PonderController {
     }
 
     $handles = $this->loadViewerHandles($object_phids);
+    $this->loadHandles($object_phids);
 
     $detail_panel = new PonderQuestionDetailView();
     $detail_panel
@@ -72,9 +73,19 @@ final class PonderQuestionViewController extends PonderController {
       ->setUser($user)
       ->setActionURI("/ponder/answer/add/");
 
+    $header = id(new PhabricatorHeaderView())
+      ->setObjectName('Q'.$question->getID())
+      ->setHeader($question->getTitle());
+
+    $actions = $this->buildActionListView($question);
+    $properties = $this->buildPropertyListView($question);
+
     $nav = $this->buildSideNavView($question);
     $nav->appendChild(
       array(
+        $header,
+        $actions,
+        $properties,
         $detail_panel,
         $responses_panel,
         $answer_add_panel
@@ -88,5 +99,30 @@ final class PonderQuestionViewController extends PonderController {
         'device' => true,
         'title' => 'Q'.$question->getID().' '.$question->getTitle()
       ));
+  }
+
+  private function buildActionListView(PonderQuestion $question) {
+    $viewer = $this->getRequest()->getUser();
+    $view = new PhabricatorActionListView();
+
+    $view->setUser($viewer);
+    $view->setObject($question);
+
+    return $view;
+  }
+
+  private function buildPropertyListView(PonderQuestion $question) {
+    $viewer = $this->getRequest()->getUser();
+    $view = new PhabricatorPropertyListView();
+
+    $view->addProperty(
+      pht('Author'),
+      $this->getHandle($question->getAuthorPHID())->renderLink());
+
+    $view->addProperty(
+      pht('Created'),
+      phabricator_datetime($question->getDateCreated(), $viewer));
+
+    return $view;
   }
 }

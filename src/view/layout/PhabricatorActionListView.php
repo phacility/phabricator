@@ -53,6 +53,10 @@ final class PhabricatorActionListView extends AphrontView {
 
     $actions = $event->getValue('actions');
 
+    if (!$actions) {
+      return null;
+    }
+
     require_celerity_resource('phabricator-action-list-view-css');
     return phutil_render_tag(
       'ul',
