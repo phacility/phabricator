@@ -363,3 +363,15 @@
 .action-flag-ghost {
   background-position: 0px -3444px;
 }
+
+.action-subscribe-auto {
+  background-position: 0px -3461px;
+}
+
+.action-subscribe-add {
+  background-position: 0px -3478px;
+}
+
+.action-subscribe-delete {
+  background-position: 0px -3495px;
+}
