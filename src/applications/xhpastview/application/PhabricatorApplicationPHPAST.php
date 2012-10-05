@@ -42,15 +42,15 @@ final class PhabricatorApplicationPHPAST extends PhabricatorApplication {
     return array(
       '/xhpast/' => array(
         '' => 'PhabricatorXHPASTViewRunController',
-        'view/(?P<id>\d+)/'
+        'view/(?P<id>[1-9]\d*)/'
           => 'PhabricatorXHPASTViewFrameController',
-        'frameset/(?P<id>\d+)/'
+        'frameset/(?P<id>[1-9]\d*)/'
           => 'PhabricatorXHPASTViewFramesetController',
-        'input/(?P<id>\d+)/'
+        'input/(?P<id>[1-9]\d*)/'
           => 'PhabricatorXHPASTViewInputController',
-        'tree/(?P<id>\d+)/'
+        'tree/(?P<id>[1-9]\d*)/'
           => 'PhabricatorXHPASTViewTreeController',
-        'stream/(?P<id>\d+)/'
+        'stream/(?P<id>[1-9]\d*)/'
           => 'PhabricatorXHPASTViewStreamController',
       ),
     );

@@ -42,7 +42,8 @@ final class PhabricatorApplicationMailingLists extends PhabricatorApplication {
     return array(
       '/mailinglists/' => array(
         '' => 'PhabricatorMailingListsListController',
-        'edit/(?:(?P<id>\d+)/)?' => 'PhabricatorMailingListsEditController',
+        'edit/(?:(?P<id>[1-9]\d*)/)?'
+          => 'PhabricatorMailingListsEditController',
       ),
     );
   }

@@ -43,7 +43,7 @@ final class PhabricatorApplicationMetaMTA extends PhabricatorApplication {
       $this->getBaseURI() => array(
         '' => 'PhabricatorMetaMTAListController',
         'send/' => 'PhabricatorMetaMTASendController',
-        'view/(?P<id>\d+)/' => 'PhabricatorMetaMTAViewController',
+        'view/(?P<id>[1-9]\d*)/' => 'PhabricatorMetaMTAViewController',
         'receive/' => 'PhabricatorMetaMTAReceiveController',
         'received/' => 'PhabricatorMetaMTAReceivedListController',
         'sendgrid/' => 'PhabricatorMetaMTASendGridReceiveController',

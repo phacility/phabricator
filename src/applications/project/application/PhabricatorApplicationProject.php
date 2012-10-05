@@ -47,12 +47,13 @@ final class PhabricatorApplicationProject extends PhabricatorApplication {
       '/project/' => array(
         '' => 'PhabricatorProjectListController',
         'filter/(?P<filter>[^/]+)/' => 'PhabricatorProjectListController',
-        'edit/(?P<id>\d+)/' => 'PhabricatorProjectProfileEditController',
-        'members/(?P<id>\d+)/' => 'PhabricatorProjectMembersEditController',
-        'view/(?P<id>\d+)/(?:(?P<page>\w+)/)?'
+        'edit/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectProfileEditController',
+        'members/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorProjectMembersEditController',
+        'view/(?P<id>[1-9]\d*)/(?:(?P<page>\w+)/)?'
           => 'PhabricatorProjectProfileController',
         'create/' => 'PhabricatorProjectCreateController',
-        'update/(?P<id>\d+)/(?P<action>[^/]+)/'
+        'update/(?P<id>[1-9]\d*)/(?P<action>[^/]+)/'
           => 'PhabricatorProjectUpdateController',
       ),
     );

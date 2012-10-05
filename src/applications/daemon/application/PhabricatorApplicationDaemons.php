@@ -45,16 +45,17 @@ final class PhabricatorApplicationDaemons extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/daemon/' => array(
-        'task/(?P<id>\d+)/' => 'PhabricatorWorkerTaskDetailController',
-        'task/(?P<id>\d+)/(?P<action>[^/]+)/'
+        'task/(?P<id>[1-9]\d*)/' => 'PhabricatorWorkerTaskDetailController',
+        'task/(?P<id>[1-9]\d*)/(?P<action>[^/]+)/'
           => 'PhabricatorWorkerTaskUpdateController',
         'log/' => array(
           '(?P<running>running/)?' => 'PhabricatorDaemonLogListController',
           'combined/' => 'PhabricatorDaemonCombinedLogController',
-          '(?P<id>\d+)/' => 'PhabricatorDaemonLogViewController',
+          '(?P<id>[1-9]\d*)/' => 'PhabricatorDaemonLogViewController',
         ),
         'timeline/' => 'PhabricatorDaemonTimelineConsoleController',
-        'timeline/(?P<id>\d+)/' => 'PhabricatorDaemonTimelineEventController',
+        'timeline/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorDaemonTimelineEventController',
         '' => 'PhabricatorDaemonConsoleController',
       ),
     );

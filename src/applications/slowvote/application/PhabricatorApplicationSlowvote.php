@@ -48,7 +48,7 @@ final class PhabricatorApplicationSlowvote extends PhabricatorApplication {
 
   public function getRoutes() {
     return array(
-      '/V(?P<id>\d+)' => 'PhabricatorSlowvotePollController',
+      '/V(?P<id>[1-9]\d*)' => 'PhabricatorSlowvotePollController',
       '/vote/' => array(
         '(?:view/(?P<view>\w+)/)?' => 'PhabricatorSlowvoteListController',
         'create/' => 'PhabricatorSlowvoteCreateController',
