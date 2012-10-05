@@ -320,6 +320,14 @@ return array(
   // configuration a little easier.
   'metamta.send-immediately'    => true,
 
+  // When email is sent, what format should Phabricator use for user's
+  // email addresses? Valid values are:
+  //  - 'short' - 'gwashington <gwashington@example.com>'
+  //  - 'real'  - 'George Washington <gwashington@example.com>'
+  //  - 'full' - 'gwashington (George Washington) <gwashington@example.com>'
+  // The default is 'full'.
+  'metamta.user-address-format' => 'full',
+
   // If you're using Amazon SES to send email, provide your AWS access key
   // and AWS secret key here. To set up Amazon SES with Phabricator, you need
   // to:
