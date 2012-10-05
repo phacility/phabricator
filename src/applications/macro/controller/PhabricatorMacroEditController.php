@@ -99,7 +99,6 @@ final class PhabricatorMacroEditController
     }
 
     $form = new AphrontFormView();
-    $form->setAction($this->getApplicationURI('/edit/'));
     $form->setUser($request->getUser());
 
     $form
