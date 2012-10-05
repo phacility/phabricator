@@ -41,7 +41,7 @@ final class PhabricatorDaemonLogViewController
     $content = array();
 
     $argv = $log->getArgv();
-    if ($argv) {
+    if (is_array($argv)) {
       $argv = implode("\n", $argv);
     }
 
