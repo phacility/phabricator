@@ -64,7 +64,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
     'remarkup-assist',
     function(e) {
       var data = e.getNodeData('remarkup-assist');
-      if (!data) {
+      if (!data.action) {
         return;
       }
 

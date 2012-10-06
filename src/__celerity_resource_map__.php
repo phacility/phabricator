@@ -1559,7 +1559,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-phabricator-remarkup-assist' =>
   array(
-    'uri' => '/res/d3b53e76/rsrc/js/application/core/behavior-phabricator-remarkup-assist.js',
+    'uri' => '/res/7cb3a2ff/rsrc/js/application/core/behavior-phabricator-remarkup-assist.js',
     'type' => 'js',
     'requires' =>
     array(
