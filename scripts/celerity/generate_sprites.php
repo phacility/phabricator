@@ -227,6 +227,31 @@ foreach ($action_map as $icon => $source) {
       ->setTargetCSS('.action-'.$icon));
 }
 
+
+$remarkup_template = id(new PhutilSprite())
+  ->setSourcePosition(0, 0)
+  ->setSourceSize(14, 14);
+
+$remarkup_icons = array(
+  'b',
+  'code',
+  'i',
+  'image',
+  'ol',
+  'tag',
+  'tt',
+  'ul',
+  'help',
+);
+
+foreach ($remarkup_icons as $icon) {
+  $sheet->addSprite(
+    id(clone $remarkup_template)
+      ->setSourceFile($srcroot.'remarkup/text_'.$icon.'.png')
+      ->setTargetCSS('.remarkup-assist-'.$icon));
+}
+
+
 $sheet->generateImage($webroot.'/image/autosprite.png');
 $sheet->generateCSS($webroot.'/css/autosprite.css');
 

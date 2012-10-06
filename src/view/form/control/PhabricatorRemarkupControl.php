@@ -21,50 +21,33 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
   protected function renderInput() {
 
     Javelin::initBehavior('phabricator-remarkup-assist', array());
+    Javelin::initBehavior('phabricator-tooltips', array());
 
     $actions = array(
       'b'     => array(
-        'text' => 'B',
+        'tip' => pht('Bold'),
       ),
       'i'     => array(
-        'text' => 'I',
+        'tip' => pht('Italics'),
       ),
       'tt'    => array(
-        'text' => 'T',
-      ),
-      's' => array(
-        'text' => 'S',
+        'tip' => pht('Monospaced'),
       ),
       array(
         'spacer' => true,
       ),
       'ul' => array(
-        'text' => "\xE2\x80\xA2",
+        'tip' => pht('Bulleted List'),
       ),
       'ol' => array(
-        'text' => '1.',
+        'tip' => pht('Numbered List'),
       ),
       'code' => array(
-        'text' => '{}',
-      ),
-      array(
-        'spacer' => true,
-      ),
-      'mention' => array(
-        'text' => '@',
-      ),
-      array(
-        'spacer' => true,
-      ),
-      'h1' => array(
-        'text' => 'H',
-      ),
-      array(
-        'spacer' => true,
+        'tip' => pht('Code Block'),
       ),
       'help'  => array(
+        'tip' => pht('Help'),
         'align' => 'right',
-        'text'  => '?',
         'href'  => PhabricatorEnv::getDoclink(
           'article/Remarkup_Reference.html'),
       ),
@@ -73,13 +56,16 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
     $buttons = array();
     foreach ($actions as $action => $spec) {
       if (idx($spec, 'spacer')) {
-        $buttons[] = '<span> </span>';
+        $buttons[] = phutil_render_tag(
+          'span',
+          array(
+            'class' => 'remarkup-assist-separator',
+          ),
+          '');
         continue;
       }
 
       $classes = array();
-      $classes[] = 'button';
-      $classes[] = 'grey';
       $classes[] = 'remarkup-assist-button';
       if (idx($spec, 'align') == 'right') {
         $classes[] = 'remarkup-assist-right';
@@ -91,9 +77,14 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
         $mustcapture = true;
         $target = null;
       } else {
-        $meta = null;
+        $meta = array();
         $mustcapture = null;
         $target = '_blank';
+      }
+
+      $tip = idx($spec, 'tip');
+      if ($tip) {
+        $meta['tip'] = $tip;
       }
 
       $buttons[] = javelin_render_tag(
@@ -101,7 +92,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
         array(
           'class'       => implode(' ', $classes),
           'href'        => $href,
-          'sigil'       => 'remarkup-assist',
+          'sigil'       => 'remarkup-assist has-tooltip',
           'meta'        => $meta,
           'mustcapture' => $mustcapture,
           'target'      => $target,
@@ -110,12 +101,19 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
         phutil_render_tag(
           'div',
           array(
-            'class' => 'remarkup-assist remarkup-assist-'.$action,
+            'class' => 'remarkup-assist autosprite remarkup-assist-'.$action,
           ),
-          idx($spec, 'text', '')));
+          ''));
     }
 
-    $buttons = implode('', $buttons);
+    $buttons = phutil_render_tag(
+      'div',
+      array(
+        'class' => 'remarkup-assist-bar',
+      ),
+      implode('', $buttons));
+
+    $this->setCustomClass('remarkup-assist-textarea');
 
     return javelin_render_tag(
       'div',
