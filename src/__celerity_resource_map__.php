@@ -51,8 +51,8 @@ celerity_register_resource_map(array(
   ),
   '/rsrc/image/autosprite.png' =>
   array(
-    'hash' => '10b50d4636be52a6f36fb28b3a05f90e',
-    'uri' => '/res/10b50d46/rsrc/image/autosprite.png',
+    'hash' => 'c7f9d2dd752a24c518c0eb426a4853a5',
+    'uri' => '/res/c7f9d2dd/rsrc/image/autosprite.png',
     'disk' => '/rsrc/image/autosprite.png',
     'type' => 'png',
   ),
@@ -657,7 +657,7 @@ celerity_register_resource_map(array(
   ),
   'autosprite-css' =>
   array(
-    'uri' => '/res/5de6fe77/rsrc/css/autosprite.css',
+    'uri' => '/res/947e1dcf/rsrc/css/autosprite.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -2298,7 +2298,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-application-launch-view-css' =>
   array(
-    'uri' => '/res/51aa93f4/rsrc/css/application/base/phabricator-application-launch-view.css',
+    'uri' => '/res/cd9e0fcb/rsrc/css/application/base/phabricator-application-launch-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -2490,7 +2490,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-nav-view-css' =>
   array(
-    'uri' => '/res/bdb3b66e/rsrc/css/aphront/phabricator-nav-view.css',
+    'uri' => '/res/cda35516/rsrc/css/aphront/phabricator-nav-view.css',
     'type' => 'css',
     'requires' =>
     array(

@@ -97,7 +97,7 @@ final class PhabricatorApplicationLaunchView extends AphrontView {
     } else {
       $autosprite = $application->getAutospriteName();
       $classes[] = 'autosprite';
-      $classes[] = 'app-'.$autosprite.'-full';
+      $classes[] = 'app-'.$autosprite.'-large';
     }
 
     $icon = phutil_render_tag(

@@ -126,7 +126,9 @@ a.phabricator-application-launch-container:hover {
 }
 
 .device-desktop a.phabricator-application-launch-container:hover
-  .phabricator-application-status {
+  .phabricator-application-status,
+.device-desktop a.phabricator-application-launch-container:hover
+  .phabricator-application-flavor-text {
     color: #eeeeee;
 }
 

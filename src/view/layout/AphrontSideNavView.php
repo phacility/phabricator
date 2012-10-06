@@ -226,8 +226,11 @@ final class AphrontSideNavView extends AphrontView {
     foreach ($core as $phid => $application) {
       $classes = array();
       $classes[] = 'phabricator-nav-app-item';
+
       if ($current && $phid == $current->getPHID()) {
-        $classes[] = 'phabricator-nav-app-item-selected';
+        $selected = true;
+      } else {
+        $selected = false;
       }
 
       $iclasses = array();
@@ -238,7 +241,11 @@ final class AphrontSideNavView extends AphrontView {
                  'background-size: 30px auto;';
       } else {
         $iclasses[] = 'autosprite';
-        $iclasses[] = 'app-'.$application->getAutospriteName();
+        $sprite = $application->getAutospriteName();
+        if ($selected) {
+          $sprite .= '-selected';
+        }
+        $iclasses[] = 'app-'.$sprite;
       }
 
       $icon = phutil_render_tag(
