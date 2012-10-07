@@ -20,6 +20,7 @@ final class PhabricatorSearchPonderIndexer
   extends PhabricatorSearchDocumentIndexer {
 
   public static function indexQuestion(PonderQuestion $question) {
+    // note: we assume someone's already called attachrelated on $question
 
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($question->getPHID());
@@ -38,17 +39,29 @@ final class PhabricatorSearchPonderIndexer
       PhabricatorPHIDConstants::PHID_TYPE_USER,
       $question->getDateCreated());
 
+    $comments = $question->getComments();
+    foreach ($comments as $curcomment) {
+      $doc->addField(
+        PhabricatorSearchField::FIELD_COMMENT,
+        $curcomment->getContent()
+      );
+    }
+
     $answers = $question->getAnswers();
-    $touches = array();
-    foreach ($answers as $comment) {
-      if (strlen($comment->getContent())) {
-        $doc->addField(
+    foreach ($answers as $curanswer) {
+      if (strlen($curanswer->getContent())) {
+          $doc->addField(
           PhabricatorSearchField::FIELD_COMMENT,
-          $comment->getContent());
+          $curanswer->getContent());
       }
 
-      $author = $comment->getAuthorPHID();
-      $touches[$author] = $comment->getDateCreated();
+      $answer_comments = $curanswer->getComments();
+      foreach ($answer_comments as $curcomment) {
+        $doc->addField(
+          PhabricatorSearchField::FIELD_COMMENT,
+          $curcomment->getContent()
+        );
+      }
     }
 
     self::reindexAbstractDocument($doc);

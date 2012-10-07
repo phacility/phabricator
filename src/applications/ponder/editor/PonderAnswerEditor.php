@@ -34,10 +34,10 @@ final class PonderAnswerEditor {
 
   public function saveAnswer() {
     if (!$this->question) {
-      throw new Exception("Must set question before saving vote");
+      throw new Exception("Must set question before saving answer");
     }
     if (!$this->answer) {
-      throw new Exception("Must set answer before saving vote");
+      throw new Exception("Must set answer before saving it");
     }
 
     $question = $this->question;
@@ -60,5 +60,8 @@ final class PonderAnswerEditor {
 
     $trans->endReadLocking();
     $trans->saveTransaction();
+
+    $question->attachRelated();
+    PhabricatorSearchPonderIndexer::indexQuestion($question);
   }
 }

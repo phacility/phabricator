@@ -50,9 +50,10 @@ final class PonderQuestionAskController extends PonderController {
             'ip' => $request->getRemoteAddr(),
           ));
         $question->setContentSource($content_source);
-        $question->save();
 
-        PhabricatorSearchPonderIndexer::indexQuestion($question);
+        id(new PonderQuestionEditor())
+          ->setQuestion($question)
+          ->save();
 
         return id(new AphrontRedirectResponse())
           ->setURI('/Q'.$question->getID());

@@ -54,10 +54,12 @@ final class PonderCommentSaveController extends PonderController {
     $res
       ->setContent($content)
       ->setAuthorPHID($user->getPHID())
-      ->setTargetPHID($target)
-      ->save();
+      ->setTargetPHID($target);
 
-    PhabricatorSearchPonderIndexer::indexQuestion($question);
+    id(new PonderCommentEditor())
+      ->setQuestion($question)
+      ->setComment($res)
+      ->save();
 
     return id(new AphrontRedirectResponse())
       ->setURI(

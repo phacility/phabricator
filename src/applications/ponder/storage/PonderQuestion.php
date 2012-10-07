@@ -56,8 +56,29 @@ final class PonderQuestion extends PonderDAO
     return PhabricatorContentSource::newFromSerialized($this->contentSource);
   }
 
-  public function attachRelated($user_phid) {
+  public function attachRelated() {
     $this->answers = $this->loadRelatives(new PonderAnswer(), "questionID");
+    $qa_phids = mpull($this->answers, 'getPHID') + array($this->getPHID());
+
+    if ($qa_phids) {
+      $comments = id(new PonderCommentQuery())
+        ->withTargetPHIDs($qa_phids)
+        ->execute();
+
+      $comments = mgroup($comments, 'getTargetPHID');
+    }
+    else {
+      $comments = array();
+    }
+
+    $this->setComments(idx($comments, $this->getPHID(), array()));
+    foreach ($this->answers as $answer) {
+      $answer->setQuestion($this);
+      $answer->setComments(idx($comments, $answer->getPHID(), array()));
+    }
+  }
+
+  public function attachVotes($user_phid) {
     $qa_phids = mpull($this->answers, 'getPHID') + array($this->getPHID());
 
     $edges = id(new PhabricatorEdgeQuery())
@@ -77,23 +98,9 @@ final class PonderQuestion extends PonderDAO
       $edges[$user_phid][PhabricatorEdgeConfig::TYPE_VOTING_USER_HAS_ANSWER];
     $edges = null;
 
-    if ($qa_phids) {
-      $comments = id(new PonderCommentQuery())
-        ->withTargetPHIDs($qa_phids)
-        ->execute();
-
-      $comments = mgroup($comments, 'getTargetPHID');
-    }
-    else {
-      $comments = array();
-    }
-
     $this->setUserVote(idx($question_edge, $this->getPHID()));
-    $this->setComments(idx($comments, $this->getPHID(), array()));
     foreach ($this->answers as $answer) {
-      $answer->setQuestion($this);
       $answer->setUserVote(idx($answer_edges, $answer->getPHID()));
-      $answer->setComments(idx($comments, $answer->getPHID(), array()));
     }
   }
 

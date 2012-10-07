@@ -64,8 +64,6 @@ final class PonderAnswerSaveController extends PonderController {
       ->setAnswer($res)
       ->saveAnswer();
 
-    PhabricatorSearchPonderIndexer::indexQuestion($question);
-
     return id(new AphrontRedirectResponse())->setURI(
       id(new PhutilURI('/Q'. $question->getID())));
   }

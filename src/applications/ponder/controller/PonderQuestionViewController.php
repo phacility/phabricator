@@ -33,7 +33,8 @@ final class PonderQuestionViewController extends PonderController {
     if (!$question) {
       return new Aphront404Response();
     }
-    $question->attachRelated($user->getPHID());
+    $question->attachRelated();
+    $question->attachVotes($user->getPHID());
     $object_phids = array($user->getPHID(), $question->getAuthorPHID());
 
     $answers = $question->getAnswers();
