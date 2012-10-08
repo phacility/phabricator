@@ -18,7 +18,6 @@
 
 final class AphrontFormDragAndDropUploadControl extends AphrontFormControl {
 
-  private $dragAndDropTarget;
   private $activatedClass;
 
   public function __construct() {
@@ -30,11 +29,6 @@ final class AphrontFormDragAndDropUploadControl extends AphrontFormControl {
     return 'aphront-form-drag-and-drop-upload';
   }
 
-  public function setDragAndDropTarget($id) {
-    $this->dragAndDropTarget = $id;
-    return $this;
-  }
-
   public function setActivatedClass($class) {
     $this->activatedClass = $class;
     return $this;
@@ -42,7 +36,6 @@ final class AphrontFormDragAndDropUploadControl extends AphrontFormControl {
 
   protected function renderInput() {
     require_celerity_resource('aphront-attached-file-view-css');
-
     $list_id = celerity_generate_unique_node_id();
 
     $files = $this->getValue();
@@ -66,7 +59,6 @@ final class AphrontFormDragAndDropUploadControl extends AphrontFormControl {
         'value'           => nonempty($value, null),
         'list'            => $list_id,
         'uri'             => '/file/dropupload/',
-        'target'          => $this->dragAndDropTarget,
         'activatedClass'  => $this->activatedClass,
       ));
 

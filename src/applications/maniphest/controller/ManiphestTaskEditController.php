@@ -507,15 +507,12 @@ final class ManiphestTaskEditController extends ManiphestController {
     $form
       ->appendChild($description_control);
 
-    $panel_id = celerity_generate_unique_node_id();
-
     if (!$task->getID()) {
       $form
         ->appendChild(
           id(new AphrontFormDragAndDropUploadControl())
             ->setLabel('Attached Files')
             ->setName('files')
-            ->setDragAndDropTarget($panel_id)
             ->setActivatedClass('aphront-panel-view-drag-and-drop'));
     }
 
@@ -528,7 +525,6 @@ final class ManiphestTaskEditController extends ManiphestController {
     $panel = new AphrontPanelView();
     $panel->setWidth(AphrontPanelView::WIDTH_FULL);
     $panel->setHeader($header_name);
-    $panel->setID($panel_id);
     $panel->appendChild($form);
 
     $description_preview_panel =

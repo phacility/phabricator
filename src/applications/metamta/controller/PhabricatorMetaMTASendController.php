@@ -90,8 +90,6 @@ final class PhabricatorMetaMTASendController
         'configure a real adapter.</p>');
     }
 
-    $panel_id = celerity_generate_unique_node_id();
-
     $phdlink_href = PhabricatorEnv::getDoclink(
       'article/Managing_Daemons_with_phd.html');
 
@@ -139,7 +137,6 @@ final class PhabricatorMetaMTASendController
         id(new AphrontFormDragAndDropUploadControl())
           ->setLabel('Attach Files')
           ->setName('files')
-          ->setDragAndDropTarget($panel_id)
           ->setActivatedClass('aphront-panel-view-drag-and-drop'))
       ->appendChild(
         id(new AphrontFormTextControl())
@@ -171,7 +168,6 @@ final class PhabricatorMetaMTASendController
     $panel = new AphrontPanelView();
     $panel->setHeader('Send Email');
     $panel->appendChild($form);
-    $panel->setID($panel_id);
     $panel->setWidth(AphrontPanelView::WIDTH_FORM);
 
     $nav = $this->buildSideNavView();
