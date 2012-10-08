@@ -16,6 +16,7 @@ JX.behavior('files-drag-and-drop', function(config) {
 
   var pending = 0;
   var files = [];
+  var errors = false;
 
   var control = JX.$(config.control);
   // Show the control, since we have browser support.
@@ -34,14 +35,14 @@ JX.behavior('files-drag-and-drop', function(config) {
     files.push(f);
 
     pending--;
-    if (pending == 0) {
+    if (pending == 0 && !errors) {
       // If whatever the user dropped in has finished uploading, send them to
       // their uploads.
       var uri;
       uri = JX.$U(config.browseURI);
       var ids = [];
       for (var ii = 0; ii < files.length; ii++) {
-        ids.push(files[ii].id);
+        ids.push(files[ii].getID());
       }
       uri.setQueryParam('h', ids.join('-'));
 
@@ -54,6 +55,12 @@ JX.behavior('files-drag-and-drop', function(config) {
     } else {
       redraw();
     }
+  });
+
+  drop.listen('didError', function(f) {
+    pending--;
+    errors = true;
+    redraw();
   });
 
   drop.start();

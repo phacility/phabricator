@@ -32,7 +32,7 @@ JX.behavior('aphront-drag-and-drop', function(config) {
   });
 
   drop.listen('didUpload', function(f) {
-    files[f.phid] = f;
+    files[f.getPHID()] = f;
 
     // This redraws "Upload complete!"
     pending--;
@@ -59,13 +59,13 @@ JX.behavior('aphront-drag-and-drop', function(config) {
     var items = [];
     for (var k in files) {
       var file = files[k];
-      items.push(JX.$N('div', {}, JX.$H(file.html)));
+      items.push(JX.$N('div', {}, JX.$H(file.getMarkup())));
       items.push(JX.$N(
         'input',
         {
           type: "hidden",
-          name: config.name + "[" + file.phid + "]",
-          value: file.phid
+          name: config.name + "[" + file.getPHID() + "]",
+          value: file.getPHID()
         }));
     }
 
