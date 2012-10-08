@@ -99,8 +99,8 @@ final class PhabricatorMacroListController
 
         $item = new PhabricatorPinboardItemView();
         if ($file) {
-          $item->setImageURI($file->getThumb160x120URI());
-          $item->setImageSize(160, 120);
+          $item->setImageURI($file->getThumb220x165URI());
+          $item->setImageSize(220, 165);
           if ($file->getAuthorPHID()) {
             $author_handle = $this->getHandle($file->getAuthorPHID());
             $item->appendChild(
@@ -112,7 +112,6 @@ final class PhabricatorMacroListController
               'div',
               array(),
               'Created on '.$datetime));
-
         }
         $item->setURI($this->getApplicationURI('/edit/'.$macro->getID().'/'));
         $item->setHeader($macro->getName());

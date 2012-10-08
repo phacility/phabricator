@@ -68,9 +68,7 @@ final class PhabricatorRemarkupRuleEmbedFile
       return $this->getEngine()->storeText($link);
     }
 
-    $attrs = array(
-      'class' => 'phabricator-remarkup-embed-image',
-    );
+    $attrs = array();
 
     switch ($options['size']) {
       case 'full':
@@ -79,9 +77,7 @@ final class PhabricatorRemarkupRuleEmbedFile
         break;
       case 'thumb':
       default:
-        $attrs['src'] = $file->getThumb160x120URI();
-        $attrs['width'] = 160;
-        $attrs['height'] = 120;
+        $attrs['src'] = $file->getPreview220URI();
         $link = $file->getBestURI();
         break;
     }
@@ -92,8 +88,9 @@ final class PhabricatorRemarkupRuleEmbedFile
       $embed = phutil_render_tag(
         'a',
         array(
-          'href' => $link,
-          'target' => '_blank',
+          'href'    => $link,
+          'class'   => 'phabricator-remarkup-embed-image',
+          'target'  => '_blank',
         ),
         $embed);
     }
