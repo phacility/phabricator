@@ -19,6 +19,27 @@
 final class DiffusionMercurialRawDiffQuery extends DiffusionRawDiffQuery {
 
   protected function executeQuery() {
+    $raw_diff = $this->executeRawDiffCommand();
+
+    // the only legitimate case here is if we are looking at the first commit
+    // in the repository. no parents means first commit.
+    if (!$raw_diff) {
+      $drequest = $this->getRequest();
+      $parent_query =
+        DiffusionCommitParentsQuery::newFromDiffusionRequest($drequest);
+      $parents = $parent_query->loadParents();
+      if ($parents === array()) {
+        // mercurial likes the string null here
+        $this->setAgainstCommit('null');
+        $raw_diff = $this->executeRawDiffCommand();
+      }
+    }
+
+    return $raw_diff;
+  }
+
+
+  protected function executeRawDiffCommand() {
     $drequest = $this->getRequest();
     $repository = $drequest->getRepository();
 
