@@ -647,7 +647,7 @@ abstract class LiskDAO {
           // already determined it's not valid. We don't need to check again.
           continue;
         }
-        $valid_properties[$k] = (bool)$this->checkProperty($k);
+        $valid_properties[$k] = $this->hasProperty($k);
         if (!$valid_properties[$k]) {
           continue;
         }
@@ -893,6 +893,18 @@ abstract class LiskDAO {
       $id_key = $this->getIDKeyForUse();
     }
     return $this->$id_key;
+  }
+
+
+  /**
+   * Test if a property exists.
+   *
+   * @param   string    Property name.
+   * @return  bool      True if the property exists.
+   * @task info
+   */
+  public function hasProperty($property) {
+    return (bool)$this->checkProperty($property);
   }
 
 
