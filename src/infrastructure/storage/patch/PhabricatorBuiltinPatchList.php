@@ -167,6 +167,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'db',
         'name'    => 'ponder',
       ),
+      'db.xhpast' => array(
+        'type'    => 'db',
+        'name'    => 'xhpast',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
