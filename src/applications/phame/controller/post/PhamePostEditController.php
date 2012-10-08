@@ -259,7 +259,6 @@ final class PhamePostEditController
         ->setName('body')
         ->setValue($post->getBody())
         ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
-        ->setEnableDragAndDropFileUploads(true)
         ->setID('post-body')
       )
       ->appendChild(

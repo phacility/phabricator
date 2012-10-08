@@ -60,8 +60,7 @@ final class PonderAddCommentView extends AphrontView {
       ->addHiddenInput('question_id', $questionID)
       ->appendChild(
         id(new AphrontFormTextAreaControl())
-          ->setName('content')
-        ->setEnableDragAndDropFileUploads(false))
+          ->setName('content'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($is_serious ? 'Submit' : 'Editorialize'));

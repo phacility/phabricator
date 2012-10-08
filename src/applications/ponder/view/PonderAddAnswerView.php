@@ -60,8 +60,7 @@ final class PonderAddAnswerView extends AphrontView {
           ->setName('answer')
           ->setLabel('Answer')
           ->setError(true)
-          ->setID('answer-content')
-          ->setEnableDragAndDropFileUploads(true))
+          ->setID('answer-content'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($is_serious ? 'Submit' : 'Make it so.'));

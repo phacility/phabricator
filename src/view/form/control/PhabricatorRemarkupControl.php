@@ -19,6 +19,19 @@
 final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
 
   protected function renderInput() {
+    $id = $this->getID();
+    if (!$id) {
+      $id = celerity_generate_unique_node_id();
+      $this->setID($id);
+    }
+
+    Javelin::initBehavior(
+      'aphront-drag-and-drop-textarea',
+      array(
+        'target'          => $id,
+        'activatedClass'  => 'aphront-textarea-drag-and-drop',
+        'uri'             => '/file/dropupload/',
+      ));
 
     Javelin::initBehavior('phabricator-remarkup-assist', array());
     Javelin::initBehavior('phabricator-tooltips', array());
