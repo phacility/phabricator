@@ -52,6 +52,11 @@ final class PonderQuestionViewController extends PonderController {
       }
     }
 
+    $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+      $question->getPHID());
+
+    $object_phids = array_merge($object_phids, $subscribers);
+
     $handles = $this->loadViewerHandles($object_phids);
     $this->loadHandles($object_phids);
 
@@ -79,7 +84,7 @@ final class PonderQuestionViewController extends PonderController {
       ->setHeader($question->getTitle());
 
     $actions = $this->buildActionListView($question);
-    $properties = $this->buildPropertyListView($question);
+    $properties = $this->buildPropertyListView($question, $subscribers);
 
     $nav = $this->buildSideNavView($question);
     $nav->appendChild(
@@ -112,7 +117,10 @@ final class PonderQuestionViewController extends PonderController {
     return $view;
   }
 
-  private function buildPropertyListView(PonderQuestion $question) {
+  private function buildPropertyListView(
+    PonderQuestion $question,
+    array $subscribers) {
+
     $viewer = $this->getRequest()->getUser();
     $view = new PhabricatorPropertyListView();
 
@@ -123,6 +131,17 @@ final class PonderQuestionViewController extends PonderController {
     $view->addProperty(
       pht('Created'),
       phabricator_datetime($question->getDateCreated(), $viewer));
+
+    if ($subscribers) {
+      foreach ($subscribers as $key => $subscriber) {
+        $subscribers[$key] = $this->getHandle($subscriber)->renderLink();
+      }
+      $subscribers = implode(', ', $subscribers);
+    }
+
+    $view->addProperty(
+      pht('Subscribers'),
+      nonempty($subscribers, '<em>'.pht('None').'</em>'));
 
     return $view;
   }

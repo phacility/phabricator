@@ -17,7 +17,10 @@
  */
 
 final class PonderQuestion extends PonderDAO
-  implements PhabricatorMarkupInterface, PonderVotableInterface {
+  implements
+    PhabricatorMarkupInterface,
+    PonderVotableInterface,
+    PhabricatorSubscribableInterface {
 
   const MARKUP_FIELD_CONTENT = 'markup:content';
 
@@ -167,5 +170,9 @@ final class PonderQuestion extends PonderDAO
 
   public function getVotablePHID() {
     return $this->getPHID();
+  }
+
+  public function isAutomaticallySubscribed($phid) {
+    return false;
   }
 }
