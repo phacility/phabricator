@@ -7,6 +7,9 @@
  */
 
 JX.behavior('phabricator-notification-example', function(config) {
+
+  var sequence = 0;
+
   JX.Stratcom.listen(
     'click',
     'notification-example',
@@ -14,29 +17,51 @@ JX.behavior('phabricator-notification-example', function(config) {
       e.kill();
 
       var notification = new JX.Notification();
-      if (Math.random() > 0.1) {
-        notification.setContent('It is ' + new Date().toString());
+      switch (sequence % 4) {
+        case 0:
+          var update = function() {
+            notification.setContent('It is ' + new Date().toString());
+          };
 
-        notification.listen(
-          'activate',
-          function(e) {
-            if (!confirm("Close notification?")) {
-              e.kill();
-            }
-          });
-      } else {
-        notification
-          .setContent('Alert! Click to reload!')
-          .setDuration(0)
-          .setClassName('jx-notification-alert');
+          update();
+          setInterval(update, 1000);
 
-        notification.listen(
-          'activate',
-          function(e) {
-            new JX.$U().go();
-          });
+          break;
+        case 1:
+          notification
+            .setContent('Permanent alert notification (until clicked).')
+            .setDuration(0)
+            .alterClassName('jx-notification-alert', true);
+          break;
+        case 2:
+          notification
+            .setContent('This notification reacts when you click it.');
+
+          notification.listen(
+            'activate',
+            function() {
+              if (!confirm("Close notification?")) {
+                JX.Stratcom.context().kill();
+              }
+            });
+          break;
+        case 3:
+          notification
+            .setDuration(2000)
+            .setContent('This notification will close after 2 seconds ' +
+                        'unless you keep clicking it!');
+
+          notification.listen(
+            'activate',
+            function() {
+              notification.setDuration(2000);
+              JX.Stratcom.context().kill();
+            });
+          break;
       }
-      notification.show()
+
+      notification.show();
+      sequence++;
     });
 
 });

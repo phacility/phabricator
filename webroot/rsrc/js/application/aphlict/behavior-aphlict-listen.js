@@ -35,7 +35,7 @@ JX.behavior('aphlict-listen', function(config) {
 
         new JX.Notification()
           .setContent('(Aphlict) [' + type + '] ' + details)
-          .setClassName('jx-notification-debug')
+          .alterClassName('jx-notification-debug', true)
           .setDuration(0)
           .show();
       }
@@ -63,7 +63,7 @@ JX.behavior('aphlict-listen', function(config) {
         !showing_reload) {
       var reload = new JX.Notification()
         .setContent('Page updated, click to reload.')
-        .setClassName('jx-notification-alert')
+        .alterClassName('jx-notification-alert', true)
         .setDuration(0);
       reload.listen('activate', function(e) { JX.$U().go(); })
       reload.show();

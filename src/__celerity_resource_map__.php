@@ -888,7 +888,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-aphlict-listen' =>
   array(
-    'uri' => '/res/0743d3f3/rsrc/js/application/aphlict/behavior-aphlict-listen.js',
+    'uri' => '/res/6dde3f43/rsrc/js/application/aphlict/behavior-aphlict-listen.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -1522,7 +1522,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-phabricator-notification-example' =>
   array(
-    'uri' => '/res/df97e4b3/rsrc/js/application/uiexample/notification-example.js',
+    'uri' => '/res/a6d51998/rsrc/js/application/uiexample/notification-example.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2499,7 +2499,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-notification' =>
   array(
-    'uri' => '/res/cacd79f1/rsrc/js/application/core/Notification.js',
+    'uri' => '/res/c604fbbe/rsrc/js/application/core/Notification.js',
     'type' => 'js',
     'requires' =>
     array(
