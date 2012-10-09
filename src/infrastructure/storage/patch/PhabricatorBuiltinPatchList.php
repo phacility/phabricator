@@ -996,7 +996,14 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('phamedomain.sql'),
       ),
-
+      'ponder-mailkey.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('ponder-mailkey.sql'),
+      ),
+      'ponder-mailkey-populate.php' => array(
+        'type'    => 'php',
+        'name'    => $this->getPatchPath('ponder-mailkey-populate.php'),
+      ),
     );
   }
 

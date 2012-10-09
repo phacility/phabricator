@@ -106,6 +106,7 @@ abstract class PonderMail {
       ->loadHandles();
 
     $reply_handler = new PonderReplyHandler();
+    $reply_handler->setMailReceiver($question);
 
     $body = new PhabricatorMetaMTAMailBody();
     $body->addRawSection($this->renderBody());

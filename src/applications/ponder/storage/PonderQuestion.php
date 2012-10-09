@@ -34,6 +34,7 @@ final class PonderQuestion extends PonderDAO
   protected $voteCount;
   protected $answerCount;
   protected $heat;
+  protected $mailKey;
 
   private $answers;
   private $vote;
@@ -175,4 +176,12 @@ final class PonderQuestion extends PonderDAO
   public function isAutomaticallySubscribed($phid) {
     return false;
   }
+
+  public function save() {
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
+    return parent::save();
+  }
+
 }
