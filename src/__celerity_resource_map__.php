@@ -2400,11 +2400,13 @@ celerity_register_resource_map(array(
   ),
   'phabricator-file-upload' =>
   array(
-    'uri' => '/res/98503231/rsrc/js/application/core/FileUpload.js',
+    'uri' => '/res/2de10295/rsrc/js/application/core/FileUpload.js',
     'type' => 'js',
     'requires' =>
     array(
       0 => 'javelin-install',
+      1 => 'javelin-dom',
+      2 => 'phabricator-notification',
     ),
     'disk' => '/rsrc/js/application/core/FileUpload.js',
   ),
@@ -2510,7 +2512,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-notification' =>
   array(
-    'uri' => '/res/c604fbbe/rsrc/js/application/core/Notification.js',
+    'uri' => '/res/ad727561/rsrc/js/application/core/Notification.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2518,6 +2520,7 @@ celerity_register_resource_map(array(
       1 => 'javelin-dom',
       2 => 'javelin-stratcom',
       3 => 'javelin-util',
+      4 => 'phabricator-notification-css',
     ),
     'disk' => '/rsrc/js/application/core/Notification.js',
   ),

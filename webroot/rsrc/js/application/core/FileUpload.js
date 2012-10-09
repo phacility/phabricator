@@ -1,5 +1,7 @@
 /**
  * @requires javelin-install
+ *           javelin-dom
+ *           phabricator-notification
  * @provides phabricator-file-upload
  * @javelin
  */
