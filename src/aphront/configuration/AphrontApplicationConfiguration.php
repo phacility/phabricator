@@ -160,8 +160,8 @@ abstract class AphrontApplicationConfiguration {
         $path = '/phame/posts/'.trim($path, '/').'/';
       }
 
-      // TODO - now we need to tell Celerity to render static resources with
-      // full URIs like secure.phabricator.org/rsrc/blahblah
+      $celerity = CelerityAPI::getStaticResourceResponse();
+      $celerity->setUseFullURI(true);
     }
 
     list($controller, $uri_data) = $this->buildControllerForPath($path);
