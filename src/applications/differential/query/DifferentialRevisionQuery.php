@@ -485,16 +485,28 @@ final class DifferentialRevisionQuery {
     $conn_r = $table->establishConnection('r');
 
     if ($this->draftAuthors) {
+      $this->draftRevisions = array();
+
       $draft_key = 'differential-comment-';
       $drafts = id(new PhabricatorDraft())->loadAllWhere(
         'authorPHID IN (%Ls) AND draftKey LIKE %> AND draft != %s',
         $this->draftAuthors,
         $draft_key,
         '');
-      $this->draftRevisions = array();
       $len = strlen($draft_key);
       foreach ($drafts as $draft) {
         $this->draftRevisions[] = substr($draft->getDraftKey(), $len);
+      }
+
+      $inlines = id(new DifferentialInlineComment())->loadAllWhere(
+        'commentID IS NULL AND authorPHID IN (%Ls)',
+        $this->draftAuthors);
+      foreach ($inlines as $inline) {
+        $this->draftRevisions[] = $inline->getRevisionID();
+      }
+
+      if (!$this->draftRevisions) {
+        return array();
       }
     }
 
@@ -599,16 +611,6 @@ final class DifferentialRevisionQuery {
         $this->responsibles);
     }
 
-    if ($this->draftAuthors) {
-      $joins[] = qsprintf(
-        $conn_r,
-        'LEFT JOIN %T inline_comment ON inline_comment.revisionID = r.id '.
-        'AND inline_comment.commentID IS NULL '.
-        'AND inline_comment.authorPHID IN (%Ls)',
-        id(new DifferentialInlineComment())->getTableName(),
-        $this->draftAuthors);
-    }
-
     $joins = implode(' ', $joins);
 
     return $joins;
@@ -642,17 +644,13 @@ final class DifferentialRevisionQuery {
         $this->authors);
     }
 
-    if ($this->draftAuthors) {
-      $condition = 'inline_comment.id IS NOT NULL';
-      if ($this->draftRevisions) {
-        $condition = qsprintf(
-          $conn_r,
-          '(%Q OR r.id IN (%Ld))',
-          $condition,
-          $this->draftRevisions);
-      }
-      $where[] = $condition;
+    if ($this->draftRevisions) {
+      $where[] = qsprintf(
+        $conn_r,
+        'r.id IN (%Ld)',
+        $this->draftRevisions);
     }
+
     if ($this->revIDs) {
       $where[] = qsprintf(
         $conn_r,
