@@ -167,9 +167,9 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'db',
         'name'    => 'ponder',
       ),
-      'db.xhpast' => array(
+      'db.xhprof' => array(
         'type'    => 'db',
-        'name'    => 'xhpast',
+        'name'    => 'xhprof',
       ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
