@@ -894,6 +894,22 @@ abstract class DifferentialFieldSpecification {
   }
 
   /**
+   * Get the list of properties for a diff set by @{method:setManualDiff}.
+   *
+   * @return array Array of all Diff properties.
+   * @task context
+   */
+  final public function getDiffProperties() {
+    if ($this->diffProperties === null) {
+      // This will be set to some (possibly empty) array if we've loaded
+      // properties, so null means diff properties aren't available in this
+      // context.
+      throw new DifferentialFieldDataNotAvailableException($this);
+    }
+    return $this->diffProperties;
+  }
+
+  /**
    * Get a property of a diff set by @{method:setManualDiff}.
    *
    * @param  string      Diff property key.
@@ -902,13 +918,7 @@ abstract class DifferentialFieldSpecification {
    * @task context
    */
   final public function getDiffProperty($key) {
-    if ($this->diffProperties === null) {
-      // This will be set to some (possibly empty) array if we've loaded
-      // properties, so null means diff properties aren't available in this
-      // context.
-      throw new DifferentialFieldDataNotAvailableException($this);
-    }
-    return idx($this->diffProperties, $key);
+    return idx($this->getDiffProperties(), $key);
   }
 
 }
