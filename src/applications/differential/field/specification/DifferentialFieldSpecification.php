@@ -677,16 +677,6 @@ abstract class DifferentialFieldSpecification {
   }
 
   /**
-   * Specify which diff properties this field needs to load.
-   *
-   * @return list List of diff property keys this field requires.
-   * @task load
-   */
-  public function getRequiredDiffProperties() {
-    return array();
-  }
-
-  /**
    * Parse a list of users into a canonical PHID list.
    *
    * @param string Raw list of comma-separated user names.
@@ -904,8 +894,7 @@ abstract class DifferentialFieldSpecification {
   }
 
   /**
-   * Get a diff property which this field previously requested by returning
-   * the key from @{method:getRequiredDiffProperties}.
+   * Get a property of a diff set by @{method:setManualDiff}.
    *
    * @param  string      Diff property key.
    * @return mixed|null  Diff property, or null if the property does not have
@@ -919,14 +908,7 @@ abstract class DifferentialFieldSpecification {
       // context.
       throw new DifferentialFieldDataNotAvailableException($this);
     }
-    if (!array_key_exists($key, $this->diffProperties)) {
-      $class = get_class($this);
-      throw new Exception(
-        "A differential field (of class '{$class}') is attempting to retrieve ".
-        "a diff property ('{$key}') which it did not request. Return all ".
-        "diff property keys you need from getRequiredDiffProperties().");
-    }
-    return $this->diffProperties[$key];
+    return idx($this->diffProperties, $key);
   }
 
 }

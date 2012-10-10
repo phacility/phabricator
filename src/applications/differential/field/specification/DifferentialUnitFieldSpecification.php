@@ -27,10 +27,6 @@ final class DifferentialUnitFieldSpecification
     return 'Unit:';
   }
 
-  public function getRequiredDiffProperties() {
-    return array('arc:unit', 'arc:unit-excuse');
-  }
-
   private function getUnitExcuse() {
     return $this->getDiffProperty('arc:unit-excuse');
   }

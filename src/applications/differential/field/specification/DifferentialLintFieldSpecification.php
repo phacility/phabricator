@@ -27,10 +27,6 @@ final class DifferentialLintFieldSpecification
     return 'Lint:';
   }
 
-  public function getRequiredDiffProperties() {
-    return array('arc:lint', 'arc:lint-excuse', 'arc:lint-postponed');
-  }
-
   private function getLintExcuse() {
     return $this->getDiffProperty('arc:lint-excuse');
   }
