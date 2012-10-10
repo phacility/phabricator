@@ -247,7 +247,7 @@ final class PhabricatorProjectProfileController
     PhabricatorProjectProfile $profile) {
 
     $query = id(new ManiphestTaskQuery())
-      ->withProjects(array($project->getPHID()))
+      ->withAnyProjects(array($project->getPHID()))
       ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
       ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
       ->setLimit(10)

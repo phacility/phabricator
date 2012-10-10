@@ -38,6 +38,7 @@ final class PhabricatorMacroEditController
 
     $errors = array();
     $e_name = true;
+    $file = null;
 
     $request = $this->getRequest();
     $user = $request->getUser();
@@ -75,6 +76,18 @@ final class PhabricatorMacroEditController
           $e_name = 'Duplicate';
         }
       }
+    } else if ($this->id) {
+      $file = id(new PhabricatorFile())
+        ->loadOneWhere('phid = %s', $macro->getFilePHID());
+    }
+
+    $caption = null;
+    if ($file) {
+      $caption = phutil_render_tag(
+        'img',
+        array(
+          'src' => $file->getViewURI(),
+        ));
     }
 
     if ($errors) {
@@ -86,7 +99,6 @@ final class PhabricatorMacroEditController
     }
 
     $form = new AphrontFormView();
-    $form->setAction($this->getApplicationURI('/edit/'));
     $form->setUser($request->getUser());
 
     $form
@@ -102,6 +114,7 @@ final class PhabricatorMacroEditController
         id(new AphrontFormFileControl())
           ->setLabel('File')
           ->setName('file')
+          ->setCaption($caption)
           ->setError(true))
       ->appendChild(
         id(new AphrontFormSubmitControl())

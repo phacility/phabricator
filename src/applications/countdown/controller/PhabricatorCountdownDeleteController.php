@@ -19,6 +19,8 @@
 final class PhabricatorCountdownDeleteController
   extends PhabricatorCountdownController {
 
+  private $id;
+
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
   }

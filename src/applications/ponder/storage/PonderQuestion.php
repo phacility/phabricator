@@ -17,7 +17,10 @@
  */
 
 final class PonderQuestion extends PonderDAO
-  implements PhabricatorMarkupInterface, PonderVotableInterface {
+  implements
+    PhabricatorMarkupInterface,
+    PonderVotableInterface,
+    PhabricatorSubscribableInterface {
 
   const MARKUP_FIELD_CONTENT = 'markup:content';
 
@@ -31,6 +34,7 @@ final class PonderQuestion extends PonderDAO
   protected $voteCount;
   protected $answerCount;
   protected $heat;
+  protected $mailKey;
 
   private $answers;
   private $vote;
@@ -56,8 +60,29 @@ final class PonderQuestion extends PonderDAO
     return PhabricatorContentSource::newFromSerialized($this->contentSource);
   }
 
-  public function attachRelated($user_phid) {
+  public function attachRelated() {
     $this->answers = $this->loadRelatives(new PonderAnswer(), "questionID");
+    $qa_phids = mpull($this->answers, 'getPHID') + array($this->getPHID());
+
+    if ($qa_phids) {
+      $comments = id(new PonderCommentQuery())
+        ->withTargetPHIDs($qa_phids)
+        ->execute();
+
+      $comments = mgroup($comments, 'getTargetPHID');
+    }
+    else {
+      $comments = array();
+    }
+
+    $this->setComments(idx($comments, $this->getPHID(), array()));
+    foreach ($this->answers as $answer) {
+      $answer->setQuestion($this);
+      $answer->setComments(idx($comments, $answer->getPHID(), array()));
+    }
+  }
+
+  public function attachVotes($user_phid) {
     $qa_phids = mpull($this->answers, 'getPHID') + array($this->getPHID());
 
     $edges = id(new PhabricatorEdgeQuery())
@@ -77,23 +102,9 @@ final class PonderQuestion extends PonderDAO
       $edges[$user_phid][PhabricatorEdgeConfig::TYPE_VOTING_USER_HAS_ANSWER];
     $edges = null;
 
-    if ($qa_phids) {
-      $comments = id(new PonderCommentQuery())
-        ->withTargetPHIDs($qa_phids)
-        ->execute();
-
-      $comments = mgroup($comments, 'getTargetPHID');
-    }
-    else {
-      $comments = array();
-    }
-
     $this->setUserVote(idx($question_edge, $this->getPHID()));
-    $this->setComments(idx($comments, $this->getPHID(), array()));
     foreach ($this->answers as $answer) {
-      $answer->setQuestion($this);
       $answer->setUserVote(idx($answer_edges, $answer->getPHID()));
-      $answer->setComments(idx($comments, $answer->getPHID(), array()));
     }
   }
 
@@ -161,4 +172,16 @@ final class PonderQuestion extends PonderDAO
   public function getVotablePHID() {
     return $this->getPHID();
   }
+
+  public function isAutomaticallySubscribed($phid) {
+    return false;
+  }
+
+  public function save() {
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
+    return parent::save();
+  }
+
 }

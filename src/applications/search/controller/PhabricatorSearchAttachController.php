@@ -78,7 +78,7 @@ final class PhabricatorSearchAttachController
         $rem_phids = array_diff($old_phids, $add_phids);
 
         $editor = id(new PhabricatorEdgeEditor());
-        $editor->setUser($user);
+        $editor->setActor($user);
         foreach ($add_phids as $phid) {
           $editor->addEdge($this->phid, $edge_type, $phid);
         }
@@ -159,6 +159,7 @@ final class PhabricatorSearchAttachController
     }
 
     $editor = new ManiphestTransactionEditor();
+    $editor->setActor($user);
 
     $task_names = array();
 

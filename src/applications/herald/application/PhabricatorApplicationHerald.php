@@ -54,12 +54,12 @@ final class PhabricatorApplicationHerald extends PhabricatorApplication {
           => 'HeraldHomeController',
         'new/(?:(?P<type>[^/]+)/(?:(?P<rule_type>[^/]+)/)?)?'
           => 'HeraldNewController',
-        'rule/(?:(?P<id>\d+)/)?' => 'HeraldRuleController',
-        'history/(?:(?P<id>\d+)/)?' => 'HeraldRuleEditHistoryController',
-        'delete/(?P<id>\d+)/' => 'HeraldDeleteController',
+        'rule/(?:(?P<id>[1-9]\d*)/)?' => 'HeraldRuleController',
+        'history/(?:(?P<id>[1-9]\d*)/)?' => 'HeraldRuleEditHistoryController',
+        'delete/(?P<id>[1-9]\d*)/' => 'HeraldDeleteController',
         'test/' => 'HeraldTestConsoleController',
         'transcript/' => 'HeraldTranscriptListController',
-        'transcript/(?P<id>\d+)/(?:(?P<filter>\w+)/)?'
+        'transcript/(?P<id>[1-9]\d*)/(?:(?P<filter>\w+)/)?'
           => 'HeraldTranscriptController',
       ),
     );

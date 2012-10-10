@@ -49,7 +49,7 @@ final class PhabricatorApplicationPonder extends PhabricatorApplication {
 
   public function getroutes() {
     return array(
-      '/Q(?P<id>\d+)' => 'PonderQuestionViewController',
+      '/Q(?P<id>[1-9]\d*)' => 'PonderQuestionViewController',
       '/ponder/' => array(
         '(?P<page>feed/)?' => 'PonderFeedController',
         '(?P<page>questions)/' => 'PonderFeedController',

@@ -59,6 +59,7 @@ final class ManiphestSubpriorityController extends ManiphestController {
       $xaction->setNewValue($after_pri);
 
       $editor = new ManiphestTransactionEditor();
+      $editor->setActor($request->getUser());
       $editor->applyTransactions($task, array($xaction));
     }
 

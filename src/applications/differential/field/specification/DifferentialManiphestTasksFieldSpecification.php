@@ -74,7 +74,7 @@ final class DifferentialManiphestTasksFieldSpecification
     $rem_phids = array_diff($old_phids, $add_phids);
 
     $edge_editor = id(new PhabricatorEdgeEditor())
-      ->setUser($this->getUser());
+      ->setActor($this->getUser());
 
     foreach ($add_phids as $phid) {
       $edge_editor->addEdge($revision_phid, $edge_type, $phid);

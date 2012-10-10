@@ -134,7 +134,7 @@ final class PhrictionEditController
 
       if (!count($errors)) {
         $editor = id(PhrictionDocumentEditor::newForSlug($document->getSlug()))
-          ->setUser($user)
+          ->setActor($user)
           ->setTitle($title)
           ->setContent($request->getStr('content'))
           ->setDescription($notes);
@@ -223,8 +223,7 @@ final class PhrictionEditController
           ->setValue($content_text)
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
           ->setName('content')
-          ->setID('document-textarea')
-          ->setEnableDragAndDropFileUploads(true))
+          ->setID('document-textarea'))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Edit Notes')

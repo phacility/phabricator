@@ -93,6 +93,17 @@ final class ManiphestTaskPriority extends ManiphestConstants {
   public static function getHighestPriority() {
     return self::PRIORITY_UNBREAK_NOW;
   }
+  /**
+   * Return the default priority for this instance of Phabricator.
+   *
+   * @return int The value of the default priority constant.
+   */
+  public static function getDefaultPriority() {
+    return PhabricatorEnv::getEnvConfig(
+      'maniphest.default-priority',
+      self::PRIORITY_TRIAGE
+    );
+  }
 
   /**
    * Retrieve the full name of the priority level provided.
@@ -104,4 +115,5 @@ final class ManiphestTaskPriority extends ManiphestConstants {
   public static function getTaskPriorityName($priority) {
     return idx(self::getTaskPriorityMap(), $priority, '???');
   }
+
 }

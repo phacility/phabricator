@@ -54,7 +54,7 @@ final class ConduitAPI_differential_createrevision_Method
     $revision = DifferentialRevisionEditor::newRevisionFromConduitWithDiff(
       $fields,
       $diff,
-      $request->getUser()->getPHID());
+      $request->getUser());
 
     return array(
       'revisionid'  => $revision->getID(),

@@ -84,8 +84,7 @@ final class PhabricatorProjectListController
     $groups = array();
     if ($project_phids) {
       $query = id(new ManiphestTaskQuery())
-        ->withProjects($project_phids)
-        ->withAnyProject(true)
+        ->withAnyProjects($project_phids)
         ->withStatus(ManiphestTaskQuery::STATUS_OPEN)
         ->setLimit(PHP_INT_MAX);
 

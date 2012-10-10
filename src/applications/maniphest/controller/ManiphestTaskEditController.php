@@ -43,7 +43,7 @@ final class ManiphestTaskEditController extends ManiphestController {
       }
     } else {
       $task = new ManiphestTask();
-      $task->setPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
+      $task->setPriority(ManiphestTaskPriority::getDefaultPriority());
       $task->setAuthorPHID($user->getPHID());
 
       // These allow task creation with defaults.
@@ -231,6 +231,7 @@ final class ManiphestTaskEditController extends ManiphestController {
           $transactions = $event->getValue('transactions');
 
           $editor = new ManiphestTransactionEditor();
+          $editor->setActor($user);
           $editor->setAuxiliaryFields($aux_fields);
           $editor->applyTransactions($task, $transactions);
 
@@ -507,15 +508,12 @@ final class ManiphestTaskEditController extends ManiphestController {
     $form
       ->appendChild($description_control);
 
-    $panel_id = celerity_generate_unique_node_id();
-
     if (!$task->getID()) {
       $form
         ->appendChild(
           id(new AphrontFormDragAndDropUploadControl())
             ->setLabel('Attached Files')
             ->setName('files')
-            ->setDragAndDropTarget($panel_id)
             ->setActivatedClass('aphront-panel-view-drag-and-drop'));
     }
 
@@ -528,7 +526,6 @@ final class ManiphestTaskEditController extends ManiphestController {
     $panel = new AphrontPanelView();
     $panel->setWidth(AphrontPanelView::WIDTH_FULL);
     $panel->setHeader($header_name);
-    $panel->setID($panel_id);
     $panel->appendChild($form);
 
     $description_preview_panel =

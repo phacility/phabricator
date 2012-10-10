@@ -16,10 +16,9 @@
  * limitations under the License.
  */
 
-final class PhabricatorProjectEditor {
+final class PhabricatorProjectEditor extends PhabricatorEditor {
 
   private $project;
-  private $user;
   private $projectName;
 
   private $addEdges = array();
@@ -65,7 +64,7 @@ final class PhabricatorProjectEditor {
     $xaction->setNewValue($new_value);
 
     $editor = new PhabricatorProjectEditor($project);
-    $editor->setUser($user);
+    $editor->setActor($user);
     $editor->applyTransactions(array($xaction));
   }
 
@@ -74,24 +73,16 @@ final class PhabricatorProjectEditor {
     $this->project = $project;
   }
 
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
-    return $this;
-  }
-
   public function applyTransactions(array $transactions) {
     assert_instances_of($transactions, 'PhabricatorProjectTransaction');
-    if (!$this->user) {
-      throw new Exception('Call setUser() before save()!');
-    }
-    $user = $this->user;
+    $actor = $this->requireActor();
 
     $project = $this->project;
 
     $is_new = !$project->getID();
 
     if ($is_new) {
-      $project->setAuthorPHID($user->getPHID());
+      $project->setAuthorPHID($actor->getPHID());
     }
 
     foreach ($transactions as $key => $xaction) {
@@ -105,7 +96,7 @@ final class PhabricatorProjectEditor {
     if (!$is_new) {
       // You must be able to view a project in order to edit it in any capacity.
       PhabricatorPolicyFilter::requireCapability(
-        $user,
+        $actor,
         $project,
         PhabricatorPolicyCapability::CAN_VIEW);
 
@@ -122,14 +113,14 @@ final class PhabricatorProjectEditor {
 
       if ($need_edit) {
         PhabricatorPolicyFilter::requireCapability(
-          $user,
+          $actor,
           $project,
           PhabricatorPolicyCapability::CAN_EDIT);
       }
 
       if ($need_join) {
         PhabricatorPolicyFilter::requireCapability(
-          $user,
+          $actor,
           $project,
           PhabricatorPolicyCapability::CAN_JOIN);
       }
@@ -149,7 +140,7 @@ final class PhabricatorProjectEditor {
 
         $edge_type = PhabricatorEdgeConfig::TYPE_PROJ_MEMBER;
         $editor = new PhabricatorEdgeEditor();
-        $editor->setUser($this->user);
+        $editor->setActor($actor);
         foreach ($this->remEdges as $phid) {
           $editor->removeEdge($project->getPHID(), $edge_type, $phid);
         }
@@ -159,7 +150,7 @@ final class PhabricatorProjectEditor {
         $editor->save();
 
         foreach ($transactions as $xaction) {
-          $xaction->setAuthorPHID($user->getPHID());
+          $xaction->setAuthorPHID($actor->getPHID());
           $xaction->setProjectID($project->getID());
           $xaction->save();
         }
@@ -278,7 +269,7 @@ final class PhabricatorProjectEditor {
 
         // You can't edit away your ability to edit the project.
         PhabricatorPolicyFilter::mustRetainCapability(
-          $this->user,
+          $this->getActor(),
           $project,
           PhabricatorPolicyCapability::CAN_EDIT);
         break;
@@ -369,7 +360,7 @@ final class PhabricatorProjectEditor {
         if (count($add) > 1) {
           return null;
         } else if (count($add) == 1) {
-          if (reset($add) != $this->user->getPHID()) {
+          if (reset($add) != $this->getActor()->getPHID()) {
             return null;
           } else {
             return 'join';
@@ -379,7 +370,7 @@ final class PhabricatorProjectEditor {
         if (count($rem) > 1) {
           return null;
         } else if (count($rem) == 1) {
-          if (reset($rem) != $this->user->getPHID()) {
+          if (reset($rem) != $this->getActor()->getPHID()) {
             return null;
           } else {
             return 'leave';

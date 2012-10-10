@@ -167,6 +167,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'db',
         'name'    => 'ponder',
       ),
+      'db.xhprof' => array(
+        'type'    => 'db',
+        'name'    => 'xhprof',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
@@ -992,7 +996,14 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('phamedomain.sql'),
       ),
-
+      'ponder-mailkey.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('ponder-mailkey.sql'),
+      ),
+      'ponder-mailkey-populate.php' => array(
+        'type'    => 'php',
+        'name'    => $this->getPatchPath('ponder-mailkey-populate.php'),
+      ),
     );
   }
 

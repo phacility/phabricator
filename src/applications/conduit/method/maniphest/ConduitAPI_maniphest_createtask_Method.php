@@ -42,7 +42,7 @@ final class ConduitAPI_maniphest_createtask_Method
 
   protected function execute(ConduitAPIRequest $request) {
     $task = new ManiphestTask();
-    $task->setPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
+    $task->setPriority(ManiphestTaskPriority::getDefaultPriority());
     $task->setAuthorPHID($request->getUser()->getPHID());
 
     $this->applyRequest($task, $request, $is_new = true);

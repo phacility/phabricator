@@ -406,7 +406,7 @@ final class ManiphestReportController extends ManiphestController {
       $handles = $this->loadViewerHandles($phids);
       $project_handle = $handles[$project_phid];
 
-      $query->withProjects($phids);
+      $query->withAnyProjects($phids);
     }
 
     $tasks = $query->execute();

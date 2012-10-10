@@ -55,6 +55,12 @@ final class PhabricatorFileTransformController
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
 
     switch ($this->transform) {
+      case 'thumb-220x165':
+        $xformed_file = $this->executeThumbTransform($file, 220, 165);
+        break;
+      case 'preview-220':
+        $xformed_file = $this->executePreviewTransform($file, 220);
+        break;
       case 'thumb-160x120':
         $xformed_file = $this->executeThumbTransform($file, 160, 120);
         break;
@@ -131,6 +137,11 @@ final class PhabricatorFileTransformController
     // TODO: We could just delegate to the file view controller instead,
     // which would save the client a roundtrip, but is slightly more complex.
     return id(new AphrontRedirectResponse())->setURI($uri);
+  }
+
+  private function executePreviewTransform(PhabricatorFile $file, $size) {
+    $xformer = new PhabricatorImageTransformer();
+    return $xformer->executePreviewTransform($file, $size);
   }
 
   private function executeThumbTransform(PhabricatorFile $file, $x, $y) {

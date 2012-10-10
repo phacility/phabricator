@@ -123,11 +123,20 @@ final class PhabricatorRepositoryListController
         phutil_render_tag(
           'a',
           array(
-            'href' => '/repository/project/'.$project->getID().'/',
+            'href' => '/repository/project/edit/'.$project->getID().'/',
             'class' => 'button grey small',
           ),
           'Edit'),
+        javelin_render_tag(
+          'a',
+          array(
+            'href' => '/repository/project/delete/'.$project->getID().'/',
+            'class' => 'button grey small',
+            'sigil' => 'workflow',
+          ),
+          'Delete'),
       );
+
     }
 
     $project_table = new AphrontTableView($rows);
@@ -136,11 +145,13 @@ final class PhabricatorRepositoryListController
         'Project ID',
         'Repository',
         '',
+        '',
       ));
     $project_table->setColumnClasses(
       array(
         '',
         'wide',
+        'action',
         'action',
       ));
 
@@ -148,6 +159,7 @@ final class PhabricatorRepositoryListController
       array(
         true,
         true,
+        $is_admin,
         $is_admin,
       ));
 

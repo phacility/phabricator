@@ -24,7 +24,6 @@ final class PonderFeedController extends PonderController {
 
   public function willProcessRequest(array $data) {
     $this->page = idx($data, 'page');
-    $this->feedOffset = idx($data, 'feedoffset');
   }
 
   public function processRequest() {
@@ -81,14 +80,10 @@ final class PonderFeedController extends PonderController {
           self::PROFILE_ANSWER_PAGE_SIZE + 1
         );
 
-        $phids = array($user->getPHID());
-        $handles = $this->loadViewerHandles($phids);
-
         $side_nav->appendChild(
           id(new PonderUserProfileView())
           ->setUser($user)
           ->setAnswers($answers)
-          ->setHandles($handles)
           ->setAnswerOffset($this->answerOffset)
           ->setPageSize(self::PROFILE_ANSWER_PAGE_SIZE)
           ->setURI(new PhutilURI("/ponder/profile/"), "aoff")

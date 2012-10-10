@@ -320,6 +320,14 @@ return array(
   // configuration a little easier.
   'metamta.send-immediately'    => true,
 
+  // When email is sent, what format should Phabricator use for user's
+  // email addresses? Valid values are:
+  //  - 'short' - 'gwashington <gwashington@example.com>'
+  //  - 'real'  - 'George Washington <gwashington@example.com>'
+  //  - 'full' - 'gwashington (George Washington) <gwashington@example.com>'
+  // The default is 'full'.
+  'metamta.user-address-format' => 'full',
+
   // If you're using Amazon SES to send email, provide your AWS access key
   // and AWS secret key here. To set up Amazon SES with Phabricator, you need
   // to:
@@ -1056,6 +1064,11 @@ return array(
   // Class which drives custom field construction. See "Maniphest User Guide:
   // Adding Custom Fields" in the documentation for more information.
   'maniphest.custom-task-extensions-class' => 'ManiphestDefaultTaskExtensions',
+
+  // What should the default task priority be in create flows?
+  // See the constants in @{class:ManiphestTaskPriority} for valid values.
+  // Defaults to "needs triage".
+  'maniphest.default-priority' => 90,
 
 // -- Phriction ------------------------------------------------------------- //
 

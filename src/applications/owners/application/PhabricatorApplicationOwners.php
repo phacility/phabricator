@@ -51,10 +51,10 @@ final class PhabricatorApplicationOwners extends PhabricatorApplication {
       '/owners/' => array(
         '' => 'PhabricatorOwnersListController',
         'view/(?P<view>[^/]+)/' => 'PhabricatorOwnersListController',
-        'edit/(?P<id>\d+)/' => 'PhabricatorOwnersEditController',
+        'edit/(?P<id>[1-9]\d*)/' => 'PhabricatorOwnersEditController',
         'new/' => 'PhabricatorOwnersEditController',
-        'package/(?P<id>\d+)/' => 'PhabricatorOwnersDetailController',
-        'delete/(?P<id>\d+)/' => 'PhabricatorOwnersDeleteController',
+        'package/(?P<id>[1-9]\d*)/' => 'PhabricatorOwnersDetailController',
+        'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorOwnersDeleteController',
       ),
     );
   }

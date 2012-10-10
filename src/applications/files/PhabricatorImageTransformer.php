@@ -47,6 +47,20 @@ final class PhabricatorImageTransformer {
       ));
   }
 
+  public function executePreviewTransform(
+    PhabricatorFile $file,
+    $size) {
+
+    $image = $this->generatePreview($file, $size);
+
+    return PhabricatorFile::newFromFileData(
+      $image,
+      array(
+        'name' => 'preview-'.$file->getName(),
+      ));
+  }
+
+
   private function crudelyCropTo(PhabricatorFile $file, $x, $min_y, $max_y) {
     $data = $file->loadFileData();
     $img = imagecreatefromstring($data);
@@ -86,25 +100,54 @@ final class PhabricatorImageTransformer {
     $x = imagesx($src);
     $y = imagesy($src);
 
-    $scale = min($x / $dx, $y / $dy);
+    $scale = min(($dx / $x), ($dy / $y), 1);
+
     $dst = imagecreatetruecolor($dx, $dy);
     imagesavealpha($dst, true);
-    imagefill($dst, 0, 0, imagecolorallocatealpha($dst, 0, 0, 0, 127));
+    imagefill($dst, 0, 0, imagecolorallocatealpha($dst, 255, 255, 255, 127));
 
-    // If we need to chop off some pixels, chop them off from the sides instead
-    // of scaling in on <0, 0>.
-    $sdx = $scale * $dx;
-    $sdy = $scale * $dy;
+    $sdx = $scale * $x;
+    $sdy = $scale * $y;
 
     imagecopyresampled(
       $dst,
       $src,
+      ($dx - $sdx) / 2,  ($dy - $sdy) / 2,
       0, 0,
-      ($x - $sdx) / 2,  ($y - $sdy) / 2,
-      $dx, $dy,
-      $sdx, $sdy);
+      $sdx, $sdy,
+      $x, $y);
 
     return $dst;
+  }
+
+  private function generatePreview(PhabricatorFile $file, $size) {
+    $data = $file->loadFileData();
+    $src = imagecreatefromstring($data);
+
+    $x = imagesx($src);
+    $y = imagesy($src);
+
+    $scale = min($size / $x, $size / $y, 1);
+
+    $dx = max($size / 4, $scale * $x);
+    $dy = max($size / 4, $scale * $y);
+
+    $dst = imagecreatetruecolor($dx, $dy);
+    imagesavealpha($dst, true);
+    imagefill($dst, 0, 0, imagecolorallocatealpha($dst, 255, 255, 255, 127));
+
+    $sdx = $scale * $x;
+    $sdy = $scale * $y;
+
+    imagecopyresampled(
+      $dst,
+      $src,
+      ($dx - $sdx) / 2, ($dy - $sdy) / 2,
+      0, 0,
+      $sdx, $sdy,
+      $x, $y);
+
+    return $this->saveImageDataInAnyFormat($dst, $file->getMimeType());
   }
 
   private function saveImageDataInAnyFormat($data, $preferred_mime = '') {

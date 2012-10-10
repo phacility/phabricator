@@ -50,7 +50,7 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
 
   public function getRoutes() {
     return array(
-      '/T(?P<id>\d+)' => 'ManiphestTaskDetailController',
+      '/T(?P<id>[1-9]\d*)' => 'ManiphestTaskDetailController',
       '/maniphest/' => array(
         '' => 'ManiphestTaskListController',
         'view/(?P<view>\w+)/' => 'ManiphestTaskListController',
@@ -58,22 +58,23 @@ final class PhabricatorApplicationManiphest extends PhabricatorApplication {
         'batch/' => 'ManiphestBatchEditController',
         'task/' => array(
           'create/' => 'ManiphestTaskEditController',
-          'edit/(?P<id>\d+)/' => 'ManiphestTaskEditController',
-          'descriptionchange/(?:(?P<id>\d+)/)?' =>
+          'edit/(?P<id>[1-9]\d*)/' => 'ManiphestTaskEditController',
+          'descriptionchange/(?:(?P<id>[1-9]\d*)/)?' =>
             'ManiphestTaskDescriptionChangeController',
           'descriptionpreview/' =>
             'ManiphestTaskDescriptionPreviewController',
         ),
         'transaction/' => array(
           'save/' => 'ManiphestTransactionSaveController',
-          'preview/(?P<id>\d+)/' => 'ManiphestTransactionPreviewController',
+          'preview/(?P<id>[1-9]\d*)/'
+            => 'ManiphestTransactionPreviewController',
         ),
         'export/(?P<key>[^/]+)/' => 'ManiphestExportController',
         'subpriority/' => 'ManiphestSubpriorityController',
         'custom/' => array(
           '' => 'ManiphestSavedQueryListController',
-          'edit/(?:(?P<id>\d+)/)?' => 'ManiphestSavedQueryEditController',
-          'delete/(?P<id>\d+)/'   => 'ManiphestSavedQueryDeleteController',
+          'edit/(?:(?P<id>[1-9]\d*)/)?' => 'ManiphestSavedQueryEditController',
+          'delete/(?P<id>[1-9]\d*)/'   => 'ManiphestSavedQueryDeleteController',
         ),
       ),
     );

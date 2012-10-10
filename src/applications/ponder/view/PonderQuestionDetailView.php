@@ -45,10 +45,7 @@ final class PonderQuestionDetailView extends AphrontView {
     $user = $this->user;
 
     $panel = id(new AphrontPanelView())
-      ->addClass("ponder-panel")
-      ->setHeader(
-        $this->renderObjectLink().' '.
-        phutil_escape_html($question->getTitle()));
+      ->addClass("ponder-panel");
 
     $contentview = new PonderPostBodyView();
     $contentview
@@ -71,14 +68,6 @@ final class PonderQuestionDetailView extends AphrontView {
     $panel->appendChild($commentview);
 
     return $panel->render();
-  }
-
-  private function renderObjectLink() {
-    return phutil_render_tag(
-        'a',
-        array('href' => '/Q' . $this->question->getID()),
-        "Q". phutil_escape_html($this->question->getID())
-      );
   }
 
 }

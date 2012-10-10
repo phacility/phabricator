@@ -364,8 +364,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $draft_text = null;
     }
 
-    $panel_id = celerity_generate_unique_node_id();
-
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 
     if ($is_serious) {
@@ -441,7 +439,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
         id(new AphrontFormDragAndDropUploadControl())
           ->setLabel('Attached Files')
           ->setName('files')
-          ->setDragAndDropTarget($panel_id)
           ->setActivatedClass('aphront-panel-view-drag-and-drop'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
@@ -496,7 +493,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $comment_panel = new AphrontPanelView();
     $comment_panel->appendChild($comment_form);
-    $comment_panel->setID($panel_id);
     $comment_panel->addClass('aphront-panel-accent');
     $comment_panel->setHeader($is_serious ? 'Add Comment' : 'Weigh In');
 

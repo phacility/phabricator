@@ -63,8 +63,8 @@ final class ConduitAPI_differential_close_Method
 
     $editor = new DifferentialCommentEditor(
       $revision,
-      $request->getUser()->getPHID(),
       DifferentialAction::ACTION_CLOSE);
+    $editor->setActor($request->getUser());
     $editor->save();
 
     $revision->setStatus(ArcanistDifferentialRevisionStatus::CLOSED);

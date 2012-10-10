@@ -22,7 +22,7 @@ JX.behavior('aphront-drag-and-drop', function(config) {
 
   var list = JX.$(config.list);
 
-  var drop = new JX.PhabricatorDragAndDropFileUpload(JX.$(config.target))
+  var drop = new JX.PhabricatorDragAndDropFileUpload(JX.$(config.list))
     .setActivatedClass(config.activatedClass)
     .setURI(config.uri);
 
@@ -32,7 +32,7 @@ JX.behavior('aphront-drag-and-drop', function(config) {
   });
 
   drop.listen('didUpload', function(f) {
-    files[f.phid] = f;
+    files[f.getPHID()] = f;
 
     // This redraws "Upload complete!"
     pending--;
@@ -59,17 +59,18 @@ JX.behavior('aphront-drag-and-drop', function(config) {
     var items = [];
     for (var k in files) {
       var file = files[k];
-      items.push(JX.$N('div', {}, JX.$H(file.html)));
+      items.push(JX.$N('div', {}, JX.$H(file.getMarkup())));
       items.push(JX.$N(
         'input',
         {
           type: "hidden",
-          name: config.name + "[" + file.phid + "]",
-          value: file.phid
+          name: config.name + "[" + file.getPHID() + "]",
+          value: file.getPHID()
         }));
     }
 
     var status;
+    var extra = '';
     if (!pending) {
       if (completed) {
         status = JX.$H('<strong>Upload complete!</strong>');
@@ -77,12 +78,16 @@ JX.behavior('aphront-drag-and-drop', function(config) {
         arrow = String.fromCharCode(0x21EA);
         status = JX.$H(
           arrow + ' <strong>Drag and Drop</strong> files here to upload them.');
+        extra = ' drag-and-drop-file-target';
       }
     } else {
       status = JX.$H(
         'Uploading <strong>' + parseInt(pending, 10) + '<strong> files...');
     }
-    status = JX.$N('div', {className: 'drag-and-drop-instructions'}, status);
+    status = JX.$N(
+      'div',
+      {className: 'drag-and-drop-instructions' + extra},
+      status);
 
     items.push(status);
     JX.DOM.setContent(list, items);

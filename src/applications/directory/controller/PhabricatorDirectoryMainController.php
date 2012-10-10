@@ -139,6 +139,7 @@ final class PhabricatorDirectoryMainController
 
     $filter = $subnav->selectFilter($this->subfilter, 'all');
 
+    $view = null;
     switch ($filter) {
       case 'all':
         $view = $this->buildFeedView(array());
@@ -247,8 +248,7 @@ final class PhabricatorDirectoryMainController
       $task_query = new ManiphestTaskQuery();
       $task_query->withStatus(ManiphestTaskQuery::STATUS_OPEN);
       $task_query->withPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
-      $task_query->withProjects(mpull($projects, 'getPHID'));
-      $task_query->withAnyProject(true);
+      $task_query->withAnyProjects(mpull($projects, 'getPHID'));
       $task_query->setLimit(10);
       $tasks = $task_query->execute();
     } else {

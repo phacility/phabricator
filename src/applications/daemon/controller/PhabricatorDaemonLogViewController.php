@@ -41,7 +41,9 @@ final class PhabricatorDaemonLogViewController
     $content = array();
 
     $argv = $log->getArgv();
-    $argv = implode("\n", $argv);
+    if (is_array($argv)) {
+      $argv = implode("\n", $argv);
+    }
 
     $form = id(new AphrontFormView())
       ->setUser($user)

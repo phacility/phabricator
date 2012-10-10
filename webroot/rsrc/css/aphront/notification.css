@@ -38,3 +38,13 @@
   background: #ffa0ff;
   border: 1px solid #aa60aa;
 }
+
+.jx-notification-done {
+  background: #d0ffd0;
+  border: 1px solid #60aa60;
+}
+
+.jx-notification-error {
+  background: #ffd0d0;
+  border: 1px solid #aa6060;
+}

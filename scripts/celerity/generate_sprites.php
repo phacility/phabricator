@@ -105,17 +105,46 @@ foreach ($icon_map as $icon => $coords) {
   }
 }
 
-$app_template_full = id(new PhutilSprite())
-  ->setSourceFile($srcroot.'/application_normal_2x.png')
+$app_template_large = id(new PhutilSprite())
+  ->setSourceFile($srcroot.'/application_large_1x.png')
   ->setSourceSize(60, 60);
 
-$app_template_mini = id(new PhutilSprite())
+$app_template_large_hover = id(new PhutilSprite())
+  ->setSourceFile($srcroot.'/application_large_hover_1x.png')
+  ->setSourceSize(60, 60);
+
+$app_template_small = id(new PhutilSprite())
   ->setSourceFile($srcroot.'/menu_normal_1x.png')
   ->setSourceSize(30, 30);
 
+$app_template_small_hover = id(new PhutilSprite())
+  ->setSourceFile($srcroot.'/menu_hover_1x.png')
+  ->setSourceSize(30, 30);
+
+$app_template_small_selected = id(new PhutilSprite())
+  ->setSourceFile($srcroot.'/menu_selected_1x.png')
+  ->setSourceSize(30, 30);
+
 $app_source_map = array(
-  '-full' => array($app_template_full, 2),
-  ''      => array($app_template_mini, 1),
+  '-large'          => array($app_template_large, 2),
+
+  // For the application launch view, we only show hover state on the desktop
+  // because it looks glitchy on touch devices. We show the hover state when
+  // the surrounding <a> is hovered, not the icon itself.
+  '-large /* hover */'    => array(
+    $app_template_large_hover,
+    2,
+    '.device-desktop .phabricator-application-launch-container:hover '),
+
+  ''                => array($app_template_small, 1),
+
+  // Show hover state only for the desktop.
+  ':hover'          => array(
+    $app_template_small_hover,
+    1,
+    '.device-desktop  ',
+  ),
+  '-selected'       => array($app_template_small_selected, 1),
 );
 
 $app_map = array(
@@ -157,10 +186,15 @@ foreach ($app_map as $icon => $coords) {
   list($x, $y) = $coords;
   foreach ($app_source_map as $suffix => $spec) {
     list($template, $scale) = $spec;
+    if (isset($spec[2])) {
+      $prefix = $spec[2];
+    } else {
+      $prefix = '';
+    }
     $sheet->addSprite(
       id(clone $template)
         ->setSourcePosition(($xadj + glx($x)) * $scale, gly($y) * $scale)
-        ->setTargetCSS('.app-'.$icon.$suffix));
+        ->setTargetCSS($prefix.'.app-'.$icon.$suffix));
   }
 }
 
@@ -169,18 +203,21 @@ $action_template = id(new PhutilSprite())
   ->setSourceSize(16, 16);
 
 $action_map = array(
-  'file'        => 'icon/page_white_text.png',
-  'fork'        => 'icon/arrow_branch.png',
-  'edit'        => 'icon/page_white_edit.png',
-  'flag-0'      => 'icon/flag-0.png',
-  'flag-1'      => 'icon/flag-1.png',
-  'flag-2'      => 'icon/flag-2.png',
-  'flag-3'      => 'icon/flag-3.png',
-  'flag-4'      => 'icon/flag-4.png',
-  'flag-5'      => 'icon/flag-5.png',
-  'flag-6'      => 'icon/flag-6.png',
-  'flag-7'      => 'icon/flag-7.png',
-  'flag-ghost'  => 'icon/flag-ghost.png',
+  'file'              => 'icon/page_white_text.png',
+  'fork'              => 'icon/arrow_branch.png',
+  'edit'              => 'icon/page_white_edit.png',
+  'flag-0'            => 'icon/flag-0.png',
+  'flag-1'            => 'icon/flag-1.png',
+  'flag-2'            => 'icon/flag-2.png',
+  'flag-3'            => 'icon/flag-3.png',
+  'flag-4'            => 'icon/flag-4.png',
+  'flag-5'            => 'icon/flag-5.png',
+  'flag-6'            => 'icon/flag-6.png',
+  'flag-7'            => 'icon/flag-7.png',
+  'flag-ghost'        => 'icon/flag-ghost.png',
+  'subscribe-auto'    => 'icon/unsubscribe.png',
+  'subscribe-add'     => 'icon/subscribe.png',
+  'subscribe-delete'  => 'icon/unsubscribe.png',
 );
 
 foreach ($action_map as $icon => $source) {
@@ -189,6 +226,31 @@ foreach ($action_map as $icon => $source) {
       ->setSourceFile($srcroot.$source)
       ->setTargetCSS('.action-'.$icon));
 }
+
+
+$remarkup_template = id(new PhutilSprite())
+  ->setSourcePosition(0, 0)
+  ->setSourceSize(14, 14);
+
+$remarkup_icons = array(
+  'b',
+  'code',
+  'i',
+  'image',
+  'ol',
+  'tag',
+  'tt',
+  'ul',
+  'help',
+);
+
+foreach ($remarkup_icons as $icon) {
+  $sheet->addSprite(
+    id(clone $remarkup_template)
+      ->setSourceFile($srcroot.'remarkup/text_'.$icon.'.png')
+      ->setTargetCSS('.remarkup-assist-'.$icon));
+}
+
 
 $sheet->generateImage($webroot.'/image/autosprite.png');
 $sheet->generateCSS($webroot.'/css/autosprite.css');

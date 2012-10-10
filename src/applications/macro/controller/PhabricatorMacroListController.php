@@ -91,7 +91,6 @@ final class PhabricatorMacroListController
 
     $nav->appendChild($filter_view);
 
-
     if ($macros) {
       $pinboard = new PhabricatorPinboardView();
       foreach ($macros as $macro) {
@@ -99,23 +98,23 @@ final class PhabricatorMacroListController
         $file = idx($files_map, $file_phid);
 
         $item = new PhabricatorPinboardItemView();
-        $item->setImageURI($file->getThumb160x120URI());
-        $item->setImageSize(160, 120);
+        if ($file) {
+          $item->setImageURI($file->getThumb220x165URI());
+          $item->setImageSize(220, 165);
+          if ($file->getAuthorPHID()) {
+            $author_handle = $this->getHandle($file->getAuthorPHID());
+            $item->appendChild(
+              'Created by '.$author_handle->renderLink());
+          }
+          $datetime = phabricator_date($file->getDateCreated(), $viewer);
+          $item->appendChild(
+            phutil_render_tag(
+              'div',
+              array(),
+              'Created on '.$datetime));
+        }
         $item->setURI($this->getApplicationURI('/edit/'.$macro->getID().'/'));
         $item->setHeader($macro->getName());
-
-        if ($file->getAuthorPHID()) {
-          $author_handle = $this->getHandle($file->getAuthorPHID());
-          $item->appendChild(
-            'Created by '.$author_handle->renderLink());
-        }
-
-        $datetime = phabricator_date($file->getDateCreated(), $viewer);
-        $item->appendChild(
-          phutil_render_tag(
-            'div',
-            array(),
-            'Created on '.$datetime));
 
         $pinboard->addItem($item);
       }

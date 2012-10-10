@@ -19,6 +19,8 @@
 final class PhabricatorProjectMembersEditController
   extends PhabricatorProjectController {
 
+  private $id;
+
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
   }
@@ -78,7 +80,7 @@ final class PhabricatorProjectMembersEditController
 
       if ($xactions) {
         $editor = new PhabricatorProjectEditor($project);
-        $editor->setUser($user);
+        $editor->setActor($user);
         $editor->applyTransactions($xactions);
       }
 

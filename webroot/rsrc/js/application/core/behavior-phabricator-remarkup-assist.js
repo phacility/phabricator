@@ -39,9 +39,6 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
       case 'tt':
         update(area, '`', sel || 'monospaced text', '`');
         break;
-      case 's':
-        update(area, '~~', sel || 'strikethrough text', '~~');
-        break;
       case 'ul':
       case 'ol':
         var ch = (action == 'ol') ? '  # ' : '  - ';
@@ -59,13 +56,6 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
         sel = "  " + sel.join("\n  ");
         update(area, ((r.start == 0) ? "" : "\n\n"), sel, "\n\n");
         break;
-      case 'mention':
-        update(area, '@', sel || 'username', '');
-        break;
-      case 'h1':
-        sel = sel || 'Header';
-        update(area, ((r.start == 0) ? "" : "\n\n") + "= ", sel, " =\n\n");
-        break;
     }
   }
 
@@ -74,7 +64,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
     'remarkup-assist',
     function(e) {
       var data = e.getNodeData('remarkup-assist');
-      if (!data) {
+      if (!data.action) {
         return;
       }
 

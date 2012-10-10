@@ -32,6 +32,8 @@ final class HeraldRule extends HeraldDAO {
 
   private $ruleApplied = array(); // phids for which this rule has been applied
   private $invalidOwner = false;
+  private $conditions;
+  private $actions;
 
   public static function loadAllByContentTypeWithFullData(
     $content_type,

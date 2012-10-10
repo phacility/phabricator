@@ -91,7 +91,7 @@ class ConduitAPI_maniphest_query_Method
 
     $projects = $request->getValue('projectPHIDs');
     if ($projects) {
-      $query->withProjects($projects);
+      $query->withAllProjects($projects);
     }
 
     $ccs = $request->getValue('ccPHIDs');

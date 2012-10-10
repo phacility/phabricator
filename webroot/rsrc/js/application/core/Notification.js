@@ -3,12 +3,13 @@
  *           javelin-dom
  *           javelin-stratcom
  *           javelin-util
+ *           phabricator-notification-css
  * @provides phabricator-notification
  * @javelin
  */
 
 /**
- * Show a notification. Usage:
+ * Show a notification popup on screen. Usage:
  *
  *   var n = new JX.Notification()
  *     .setContent('click me!');
@@ -21,49 +22,78 @@ JX.install('Notification', {
   events : ['activate', 'close'],
 
   members : {
+    _container : null,
+    _visible : false,
+    _hideTimer : null,
+    _duration : 12000,
+
     show : function() {
-      var self = JX.Notification;
-      self._show(this);
+      if (!this._visible) {
+        this._visible = true;
 
-      if (this.getDuration()) {
-        setTimeout(JX.bind(self, self._hide, this), this.getDuration());
+        var self = JX.Notification;
+        self._show(this);
+        this._updateTimer();
       }
+      return this;
     },
-    _render : function() {
-      return JX.$N(
-        'div',
-        {
-          className: 'jx-notification ' + this.getClassName(),
-          sigil: 'jx-notification'
-        },
-        this.getContent());
-    }
-  },
 
-  properties : {
+    hide : function() {
+      if (this._visible) {
+        this._visible = false;
 
-    /**
-     * Optional class name(s) to add to the rendered notification.
-     *
-     * @param string Class name(s).
-     */
-    className : null,
+        var self = JX.Notification;
+        self._hide(this);
+        this._updateTimer();
+      }
+      return this;
+    },
 
-    /**
-     * Notification content.
-     *
-     * @param mixed Content.
-     */
-    content : null,
+    alterClassName : function(name, enable) {
+      JX.DOM.alterClass(this._getContainer(), name, enable);
+      return this;
+    },
+
+    setContent : function(content) {
+      JX.DOM.setContent(this._getContainer(), content);
+      return this;
+    },
 
     /**
-     * Duration before the notification fades away, in milliseconds. If set to
-     * 0, the notification persists until dismissed.
+     * Set duration before the notification fades away, in milliseconds. If set
+     * to 0, the notification persists until dismissed.
      *
      * @param int Notification duration, in milliseconds.
+     * @return this
      */
-    duration : 12000
+    setDuration : function(milliseconds) {
+      this._duration = milliseconds;
+      this._updateTimer(false);
+      return this;
+    },
 
+    _updateTimer : function() {
+      if (this._hideTimer) {
+        clearTimeout(this._hideTimer);
+        this._hideTimer = null;
+      }
+
+      if (this._visible && this._duration) {
+        this._hideTimer = setTimeout(JX.bind(this, this.hide), this._duration);
+      }
+    },
+
+    _getContainer : function() {
+      if (!this._container) {
+        this._container = JX.$N(
+          'div',
+          {
+            className: 'jx-notification',
+            sigil: 'jx-notification'
+          });
+      }
+      return this._container;
+    }
   },
 
   statics : {
@@ -74,23 +104,14 @@ JX.install('Notification', {
       var self = JX.Notification;
 
       self._installListener();
-      self._active.push({
-        object: notification,
-        render: notification._render()
-      });
-
-      // Don't show more than a few notifications at once because it's silly.
-      while (self._active.length > 5) {
-        self._hide(self._active[0].object);
-      }
-
+      self._active.push(notification);
       self._redraw();
     },
     _hide : function(notification) {
       var self = JX.Notification;
 
       for (var ii = 0; ii < self._active.length; ii++) {
-        if (self._active[ii].object === notification) {
+        if (self._active[ii] === notification) {
           notification.invoke('close');
           self._active.splice(ii, 1);
           break;
@@ -113,17 +134,17 @@ JX.install('Notification', {
         'jx-notification',
         function(e) {
           // NOTE: Don't kill the event since the user might have clicked a
-          // link, and we want to follow the link if they did. Istead, invoke
+          // link, and we want to follow the link if they did. Instead, invoke
           // the activate event for the active notification and dismiss it if it
           // isn't handled.
 
           var target = e.getNode('jx-notification');
           for (var ii = 0; ii < self._active.length; ii++) {
             var n = self._active[ii];
-            if (n.render === target) {
-              var activation = n.object.invoke('activate');
+            if (n._getContainer() === target) {
+              var activation = n.invoke('activate');
               if (!activation.getPrevented()) {
-                self._hide(n.object);
+                n.hide();
               }
               return;
             }
@@ -151,9 +172,15 @@ JX.install('Notification', {
         document.body.appendChild(self._container);
       }
 
+      // Show only a limited number of notifications at once.
+      var limit = 5;
+
       var notifications = [];
       for (var ii = 0; ii < self._active.length; ii++) {
-        notifications.push(self._active[ii].render);
+        notifications.push(self._active[ii]._getContainer());
+        if (!(--limit)) {
+          break;
+        }
       }
 
       JX.DOM.setContent(self._container, notifications);

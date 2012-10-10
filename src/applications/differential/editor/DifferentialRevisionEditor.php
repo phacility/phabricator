@@ -21,10 +21,9 @@
  * reviewers, diffs, and CCs. Unlike simple edits, these changes trigger
  * complicated email workflows.
  */
-final class DifferentialRevisionEditor {
+final class DifferentialRevisionEditor extends PhabricatorEditor {
 
   protected $revision;
-  protected $actorPHID;
 
   protected $cc         = null;
   protected $reviewers  = null;
@@ -35,24 +34,22 @@ final class DifferentialRevisionEditor {
   private $auxiliaryFields = array();
   private $contentSource;
 
-  public function __construct(DifferentialRevision $revision, $actor_phid) {
+  public function __construct(DifferentialRevision $revision) {
     $this->revision = $revision;
-    $this->actorPHID = $actor_phid;
   }
 
   public static function newRevisionFromConduitWithDiff(
     array $fields,
     DifferentialDiff $diff,
-    $user_phid) {
+    PhabricatorUser $actor) {
 
     $revision = new DifferentialRevision();
     $revision->setPHID($revision->generatePHID());
-
-    $revision->setAuthorPHID($user_phid);
+    $revision->setAuthorPHID($actor->getPHID());
     $revision->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
 
-    $editor = new DifferentialRevisionEditor($revision, $user_phid);
-
+    $editor = new DifferentialRevisionEditor($revision);
+    $editor->setActor($actor);
     $editor->copyFieldsFromConduit($fields);
 
     $editor->addDiff($diff, null);
@@ -63,19 +60,16 @@ final class DifferentialRevisionEditor {
 
   public function copyFieldsFromConduit(array $fields) {
 
+    $actor = $this->getActor();
     $revision = $this->revision;
     $revision->loadRelationships();
 
     $aux_fields = DifferentialFieldSelector::newSelector()
       ->getFieldSpecifications();
 
-    $user = id(new PhabricatorUser())->loadOneWhere(
-      'phid = %s',
-      $this->actorPHID);
-
     foreach ($aux_fields as $key => $aux_field) {
       $aux_field->setRevision($revision);
-      $aux_field->setUser($user);
+      $aux_field->setUser($actor);
       if (!$aux_field->shouldAppearOnCommitMessage()) {
         unset($aux_fields[$key]);
       }

@@ -63,8 +63,8 @@ final class ConduitAPI_differential_createcomment_Method
 
     $editor = new DifferentialCommentEditor(
       $revision,
-      $request->getUser()->getPHID(),
       $action);
+    $editor->setActor($request->getUser());
     $editor->setContentSource($content_source);
     $editor->setMessage($request->getValue('message'));
     $editor->setNoEmail($request->getValue('silent'));

@@ -26,22 +26,9 @@
  * @task email      Adding, Removing and Changing Email
  * @task internal   Internals
  */
-final class PhabricatorUserEditor {
+final class PhabricatorUserEditor extends PhabricatorEditor {
 
-  private $actor;
   private $logs = array();
-
-
-/* -(  Configuration  )------------------------------------------------------ */
-
-
-  /**
-   * @task config
-   */
-  public function setActor(PhabricatorUser $actor) {
-    $this->actor = $actor;
-    return $this;
-  }
 
 
 /* -(  Creating and Editing Users  )----------------------------------------- */
@@ -88,7 +75,7 @@ final class PhabricatorUserEditor {
       }
 
       $log = PhabricatorUserLog::newLog(
-        $this->actor,
+        $this->getActor(),
         $user,
         PhabricatorUserLog::ACTION_CREATE);
       $log->setNewValue($email->getAddress());
@@ -147,7 +134,7 @@ final class PhabricatorUserEditor {
       $user->save();
 
       $log = PhabricatorUserLog::newLog(
-        $this->actor,
+        $this->getActor(),
         $user,
         PhabricatorUserLog::ACTION_CHANGE_PASSWORD);
       $log->save();
@@ -186,7 +173,7 @@ final class PhabricatorUserEditor {
       }
 
       $log = PhabricatorUserLog::newLog(
-        $this->actor,
+        $actor,
         $user,
         PhabricatorUserLog::ACTION_CHANGE_USERNAME);
       $log->setOldValue($old_username);
@@ -429,7 +416,7 @@ final class PhabricatorUserEditor {
         }
 
         $log = PhabricatorUserLog::newLog(
-          $this->actor,
+          $actor,
           $user,
           PhabricatorUserLog::ACTION_EMAIL_ADD);
         $log->setNewValue($email->getAddress());
@@ -474,7 +461,7 @@ final class PhabricatorUserEditor {
         $email->delete();
 
         $log = PhabricatorUserLog::newLog(
-          $this->actor,
+          $actor,
           $user,
           PhabricatorUserLog::ACTION_EMAIL_REMOVE);
         $log->setOldValue($email->getAddress());
@@ -551,17 +538,6 @@ final class PhabricatorUserEditor {
 
 
 /* -(  Internals  )---------------------------------------------------------- */
-
-
-  /**
-   * @task internal
-   */
-  private function requireActor() {
-    if (!$this->actor) {
-      throw new Exception("User edit requires actor!");
-    }
-    return $this->actor;
-  }
 
 
   /**

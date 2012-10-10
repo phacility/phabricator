@@ -65,7 +65,7 @@ final class PhabricatorApplicationFlags extends PhabricatorApplication {
         '' => 'PhabricatorFlagListController',
         'view/(?P<view>[^/]+)/' => 'PhabricatorFlagListController',
         'edit/(?P<phid>[^/]+)/' => 'PhabricatorFlagEditController',
-        'delete/(?P<id>\d+)/' => 'PhabricatorFlagDeleteController',
+        'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorFlagDeleteController',
       ),
     );
   }

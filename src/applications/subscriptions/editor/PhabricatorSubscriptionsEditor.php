@@ -1,0 +1,119 @@
+<?php
+
+/*
+ * Copyright 2012 Facebook, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+final class PhabricatorSubscriptionsEditor extends PhabricatorEditor {
+
+  private $object;
+
+  private $explicitSubscribePHIDs = array();
+  private $implicitSubscribePHIDs = array();
+  private $unsubscribePHIDs       = array();
+
+  public function setObject(PhabricatorSubscribableInterface $object) {
+    $this->object = $object;
+    return $this;
+  }
+
+  /**
+   * Add explicit subscribers. These subscribers have explicitly subscribed
+   * (or been subscribed) to the object, and will be added even if they
+   * had previously unsubscribed.
+   *
+   * @param list<phid>  List of PHIDs to explicitly subscribe.
+   * @return this
+   */
+  public function subscribeExplicit(array $phids) {
+    $this->explicitSubscribePHIDs += array_fill_keys($phids, true);
+    return $this;
+  }
+
+
+  /**
+   * Add implicit subscribers. These subscribers have taken some action which
+   * implicitly subscribes them (e.g., adding a comment) but it will be
+   * suppressed if they've previously unsubscribed from the object.
+   *
+   * @param list<phid>  List of PHIDs to implicitly subscribe.
+   * @return this
+   */
+  public function subscribeImplicit(array $phids) {
+    $this->implicitSubscribePHIDs += array_fill_keys($phids, true);
+    return $this;
+  }
+
+
+  /**
+   * Unsubscribe PHIDs and mark them as unsubscribed, so implicit subscriptions
+   * will not resubscribe them.
+   *
+   * @param list<phid>  List of PHIDs to unsubscribe.
+   * @return this
+   */
+  public function unsubscribe(array $phids) {
+    $this->unsubscribePHIDs += array_fill_keys($phids, true);
+    return $this;
+  }
+
+
+  public function save() {
+    if (!$this->object) {
+      throw new Exception('Call setObject() before save()!');
+    }
+    $actor = $this->requireActor();
+
+    $src = $this->object->getPHID();
+
+    if ($this->implicitSubscribePHIDs) {
+      $unsub = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $src,
+        PhabricatorEdgeConfig::TYPE_OBJECT_HAS_UNSUBSCRIBER);
+      $unsub = array_fill_keys($unsub, true);
+      $this->implicitSubscribePHIDs = array_diff_key(
+        $this->implicitSubscribePHIDs,
+        $unsub);
+    }
+
+    $add = $this->implicitSubscribePHIDs + $this->explicitSubscribePHIDs;
+    $del = $this->unsubscribePHIDs;
+
+    // If a PHID is marked for both subscription and unsubscription, treat
+    // unsubscription as the stronger action.
+    $add = array_diff_key($add, $del);
+
+    if ($add || $del) {
+      $u_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_UNSUBSCRIBER;
+      $s_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_SUBSCRIBER;
+
+      $editor = id(new PhabricatorEdgeEditor())
+        ->setActor($actor);
+
+      foreach ($add as $phid => $ignored) {
+        $editor->removeEdge($src, $u_type, $phid);
+        $editor->addEdge($src, $s_type, $phid);
+      }
+
+      foreach ($del as $phid => $ignored) {
+        $editor->removeEdge($src, $s_type, $phid);
+        $editor->addEdge($src, $u_type, $phid);
+      }
+
+      $editor->save();
+    }
+  }
+
+}

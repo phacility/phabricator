@@ -244,6 +244,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
     $transactions = $event->getValue('transactions');
 
     $editor = new ManiphestTransactionEditor();
+    $editor->setActor($user);
     $editor->applyTransactions($task, $transactions);
 
     $draft = id(new PhabricatorDraft())->loadOneWhere(

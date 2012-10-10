@@ -49,6 +49,12 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_ANSWER_HAS_VOTING_USER     = 19;
   const TYPE_VOTING_USER_HAS_ANSWER     = 20;
 
+  const TYPE_OBJECT_HAS_SUBSCRIBER      = 21;
+  const TYPE_SUBSCRIBED_TO_OBJECT       = 22;
+
+  const TYPE_OBJECT_HAS_UNSUBSCRIBER    = 23;
+  const TYPE_UNSUBSCRIBED_FROM_OBJECT   = 24;
+
   const TYPE_TEST_NO_CYCLE              = 9000;
 
   public static function getInverse($edge_type) {
@@ -82,6 +88,12 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         self::TYPE_QUESTION_HAS_VOTING_USER,
       self::TYPE_ANSWER_HAS_VOTING_USER => self::TYPE_VOTING_USER_HAS_ANSWER,
       self::TYPE_VOTING_USER_HAS_ANSWER => self::TYPE_ANSWER_HAS_VOTING_USER,
+
+      self::TYPE_OBJECT_HAS_SUBSCRIBER => self::TYPE_SUBSCRIBED_TO_OBJECT,
+      self::TYPE_SUBSCRIBED_TO_OBJECT => self::TYPE_OBJECT_HAS_SUBSCRIBER,
+
+      self::TYPE_OBJECT_HAS_UNSUBSCRIBER => self::TYPE_UNSUBSCRIBED_FROM_OBJECT,
+      self::TYPE_UNSUBSCRIBED_FROM_OBJECT => self::TYPE_OBJECT_HAS_UNSUBSCRIBER,
     );
 
     return idx($map, $edge_type);

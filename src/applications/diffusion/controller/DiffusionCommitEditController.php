@@ -51,7 +51,7 @@ final class DiffusionCommitEditController extends DiffusionController {
       $rem_proj_phids = array_diff($current_proj_phids,
                                    $new_proj_phids);
       $editor         = id(new PhabricatorEdgeEditor());
-      $editor->setUser($user);
+      $editor->setActor($user);
       foreach ($rem_proj_phids as $phid) {
         $editor->removeEdge($commit_phid, $edge_type, $phid);
       }

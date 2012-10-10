@@ -12,7 +12,7 @@ JX.behavior('aphront-drag-and-drop-textarea', function(config) {
   var target = JX.$(config.target);
 
   function onupload(f) {
-    JX.TextAreaUtils.setSelectionText(target, '{F' + f.id + '}');
+    JX.TextAreaUtils.setSelectionText(target, '{F' + f.getID() + '}');
   }
 
   if (JX.PhabricatorDragAndDropFileUpload.isSupported()) {

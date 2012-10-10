@@ -102,6 +102,14 @@ final class PhabricatorObjectHandleData {
             $objects[$revision->getPHID()] = $revision;
           }
           break;
+        case PhabricatorPHIDConstants::PHID_TYPE_QUES:
+          $questions = id(new PonderQuestionQuery())
+            ->withPHIDs($phids)
+            ->execute();
+          foreach ($questions as $question) {
+            $objects[$question->getPHID()] = $question;
+          }
+          break;
       }
     }
 

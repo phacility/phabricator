@@ -62,6 +62,23 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     return $this->getRawEmailAddresses(idx($this->headers, 'to'));
   }
 
+  private function loadExcludeMailRecipientPHIDs() {
+    $addresses = array_merge(
+      $this->getToAddresses(),
+      $this->getCCAddresses()
+    );
+
+    $users = id(new PhabricatorUserEmail())
+      ->loadAllWhere('address IN (%Ls)', $addresses);
+    $user_phids = mpull($users, 'getUserPHID');
+
+    $mailing_lists = id(new PhabricatorMetaMTAMailingList())
+      ->loadAllWhere('email in (%Ls)', $addresses);
+    $mailing_list_phids = mpull($mailing_lists, 'getPHID');
+
+    return array_merge($user_phids,  $mailing_list_phids);
+  }
+
   /**
    * Parses "to" addresses, looking for a public create email address
    * first and if not found parsing the "to" address for reply handler
@@ -182,9 +199,12 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
       $receiver->setPriority(ManiphestTaskPriority::PRIORITY_TRIAGE);
 
       $editor = new ManiphestTransactionEditor();
+      $editor->setActor($user);
       $handler = $editor->buildReplyHandler($receiver);
 
       $handler->setActor($user);
+      $handler->setExcludeMailRecipientPHIDs(
+        $this->loadExcludeMailRecipientPHIDs());
       $handler->processEmail($this);
 
       $this->setRelatedPHID($receiver->getPHID());
@@ -248,6 +268,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
 
     if ($receiver instanceof ManiphestTask) {
       $editor = new ManiphestTransactionEditor();
+      $editor->setActor($user);
       $handler = $editor->buildReplyHandler($receiver);
     } else if ($receiver instanceof DifferentialRevision) {
       $handler = DifferentialMail::newReplyHandlerForRevision($receiver);
@@ -257,6 +278,8 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     }
 
     $handler->setActor($user);
+    $handler->setExcludeMailRecipientPHIDs(
+      $this->loadExcludeMailRecipientPHIDs());
     $handler->processEmail($this);
 
     $this->setMessage('OK');

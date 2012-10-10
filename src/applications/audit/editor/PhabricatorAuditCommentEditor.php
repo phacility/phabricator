@@ -16,10 +16,9 @@
  * limitations under the License.
  */
 
-final class PhabricatorAuditCommentEditor {
+final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
 
   private $commit;
-  private $user;
 
   private $attachInlineComments;
   private $auditors = array();
@@ -27,11 +26,6 @@ final class PhabricatorAuditCommentEditor {
 
   public function __construct(PhabricatorRepositoryCommit $commit) {
     $this->commit = $commit;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
     return $this;
   }
 
@@ -53,7 +47,7 @@ final class PhabricatorAuditCommentEditor {
   public function addComment(PhabricatorAuditComment $comment) {
 
     $commit = $this->commit;
-    $user = $this->user;
+    $actor = $this->getActor();
 
     $other_comments = id(new PhabricatorAuditComment())->loadAllWhere(
       'targetPHID = %s',
@@ -64,12 +58,12 @@ final class PhabricatorAuditCommentEditor {
       $inline_comments = id(new PhabricatorAuditInlineComment())->loadAllWhere(
         'authorPHID = %s AND commitPHID = %s
           AND auditCommentID IS NULL',
-        $user->getPHID(),
+        $actor->getPHID(),
         $commit->getPHID());
     }
 
     $comment
-      ->setActorPHID($user->getPHID())
+      ->setActorPHID($actor->getPHID())
       ->setTargetPHID($commit->getPHID())
       ->save();
 
@@ -106,13 +100,13 @@ final class PhabricatorAuditCommentEditor {
       $ccs = array_merge($ccs, $metacc);
     }
 
-    // When a user submits an audit comment, we update all the audit requests
+    // When an actor submits an audit comment, we update all the audit requests
     // they have authority over to reflect the most recent status. The general
     // idea here is that if audit has triggered for, e.g., several packages, but
     // a user owns all of them, they can clear the audit requirement in one go
     // without auditing the commit for each trigger.
 
-    $audit_phids = self::loadAuditPHIDsForUser($this->user);
+    $audit_phids = self::loadAuditPHIDsForUser($actor);
     $audit_phids = array_fill_keys($audit_phids, true);
 
     $requests = id(new PhabricatorRepositoryAuditRequest())
@@ -128,7 +122,7 @@ final class PhabricatorAuditCommentEditor {
     // and handle the no-effect cases (e.g., closing and already-closed audit).
 
 
-    $user_is_author = ($user->getPHID() == $commit->getAuthorPHID());
+    $actor_is_author = ($actor->getPHID() == $commit->getAuthorPHID());
 
     if ($action == PhabricatorAuditActionConstants::CLOSE) {
       // "Close" means wipe out all the concerns.
@@ -144,25 +138,25 @@ final class PhabricatorAuditCommentEditor {
       // user row (never package/project rows), and always affects the user
       // row (other actions don't, if they were able to affect a package/project
       // row).
-      $user_request = null;
+      $actor_request = null;
       foreach ($requests as $request) {
-        if ($request->getAuditorPHID() == $user->getPHID()) {
-          $user_request = $request;
+        if ($request->getAuditorPHID() == $actor->getPHID()) {
+          $actor_request = $request;
           break;
         }
       }
-      if (!$user_request) {
-        $user_request = id(new PhabricatorRepositoryAuditRequest())
+      if (!$actor_request) {
+        $actor_request = id(new PhabricatorRepositoryAuditRequest())
           ->setCommitPHID($commit->getPHID())
-          ->setAuditorPHID($user->getPHID())
+          ->setAuditorPHID($actor->getPHID())
           ->setAuditReasons(array("Resigned"));
       }
 
-      $user_request
+      $actor_request
         ->setAuditStatus(PhabricatorAuditStatusConstants::RESIGNED)
         ->save();
 
-      $requests[] = $user_request;
+      $requests[] = $actor_request;
     } else {
       $have_any_requests = false;
       foreach ($requests as $request) {
@@ -170,7 +164,8 @@ final class PhabricatorAuditCommentEditor {
           continue;
         }
 
-        $request_is_for_user = ($request->getAuditorPHID() == $user->getPHID());
+        $request_is_for_actor =
+          ($request->getAuditorPHID() == $actor->getPHID());
 
         $have_any_requests = true;
         $new_status = null;
@@ -181,7 +176,7 @@ final class PhabricatorAuditCommentEditor {
             // Commenting or adding cc's/auditors doesn't change status.
             break;
           case PhabricatorAuditActionConstants::ACCEPT:
-            if (!$user_is_author || $request_is_for_user) {
+            if (!$actor_is_author || $request_is_for_actor) {
               // When modifying your own commits, you act only on behalf of
               // yourself, not your packages/projects -- the idea being that
               // you can't accept your own commits.
@@ -189,7 +184,7 @@ final class PhabricatorAuditCommentEditor {
             }
             break;
           case PhabricatorAuditActionConstants::CONCERN:
-            if (!$user_is_author || $request_is_for_user) {
+            if (!$actor_is_author || $request_is_for_actor) {
               // See above.
               $new_status = PhabricatorAuditStatusConstants::CONCERNED;
             }
@@ -203,7 +198,7 @@ final class PhabricatorAuditCommentEditor {
         }
       }
 
-      // If the user has no current authority over any audit trigger, make a
+      // If the actor has no current authority over any audit trigger, make a
       // new one to represent their audit state.
       if (!$have_any_requests) {
         $new_status = null;
@@ -227,7 +222,7 @@ final class PhabricatorAuditCommentEditor {
 
         $request = id(new PhabricatorRepositoryAuditRequest())
           ->setCommitPHID($commit->getPHID())
-          ->setAuditorPHID($user->getPHID())
+          ->setAuditorPHID($actor->getPHID())
           ->setAuditStatus($new_status)
           ->setAuditReasons(array("Voluntary Participant"))
           ->save();
@@ -270,7 +265,7 @@ final class PhabricatorAuditCommentEditor {
           ->setAuditorPHID($auditor_phid)
           ->setAuditStatus($audit_requested)
           ->setAuditReasons(
-            array('Added by ' . $user->getUsername()))
+            array('Added by ' . $actor->getUsername()))
           ->save();
       }
     }
@@ -283,7 +278,7 @@ final class PhabricatorAuditCommentEditor {
           ->setAuditorPHID($cc_phid)
           ->setAuditStatus($audit_cc)
           ->setAuditReasons(
-            array('Added by ' . $user->getUsername()))
+            array('Added by ' . $actor->getUsername()))
           ->save();
       }
     }
@@ -322,13 +317,10 @@ final class PhabricatorAuditCommentEditor {
     }
 
     // The user can audit on behalf of all projects they are a member of.
-    $query = new PhabricatorProjectQuery();
-
-    // TODO: As above.
-    $query->setViewer($user);
-
-    $query->withMemberPHIDs(array($user->getPHID()));
-    $projects = $query->execute();
+    $projects = id(new PhabricatorProjectQuery())
+      ->setViewer($user)
+      ->withMemberPHIDs(array($user->getPHID()))
+      ->execute();
     foreach ($projects as $project) {
       $phids[$project->getPHID()] = true;
     }
@@ -341,18 +333,18 @@ final class PhabricatorAuditCommentEditor {
     array $more_phids) {
 
     $commit = $this->commit;
-    $user = $this->user;
+    $actor = $this->getActor();
 
     $related_phids = array_merge(
       array(
-        $user->getPHID(),
+        $actor->getPHID(),
         $commit->getPHID(),
       ),
       $more_phids);
 
     id(new PhabricatorFeedStoryPublisher())
       ->setRelatedPHIDs($related_phids)
-      ->setStoryAuthorPHID($user->getPHID())
+      ->setStoryAuthorPHID($actor->getPHID())
       ->setStoryTime(time())
       ->setStoryType(PhabricatorFeedStoryTypeConstants::STORY_AUDIT)
       ->setStoryData(
@@ -445,6 +437,7 @@ final class PhabricatorAuditCommentEditor {
       ->setThreadID($thread_id, $is_new)
       ->addHeader('Thread-Topic', $thread_topic)
       ->setRelatedPHID($commit->getPHID())
+      ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
       ->setIsBulk(true)
       ->setBody($body);
 
@@ -484,8 +477,8 @@ final class PhabricatorAuditCommentEditor {
     assert_instances_of($inline_comments, 'PhabricatorInlineCommentInterface');
 
     $commit = $this->commit;
-    $user = $this->user;
-    $name = $user->getUsername();
+    $actor = $this->getActor();
+    $name = $actor->getUsername();
 
     $verb = PhabricatorAuditActionConstants::getActionPastTenseVerb(
       $comment->getAction());

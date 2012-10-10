@@ -102,6 +102,11 @@ final class PhabricatorRepositoryCommit extends PhabricatorRepositoryDAO {
     return $result;
   }
 
+  public function getDateCreated() {
+    // This is primarily to make analysis of commits with the Fact engine work.
+    return $this->getEpoch();
+  }
+
   /**
    * Synchronize a commit's overall audit status with the individual audit
    * triggers.
@@ -143,7 +148,5 @@ final class PhabricatorRepositoryCommit extends PhabricatorRepositoryDAO {
 
     return $this->setAuditStatus($status);
   }
-
-
 
 }

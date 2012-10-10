@@ -48,11 +48,6 @@ class AphrontFormTextAreaControl extends AphrontFormControl {
     return 'aphront-form-control-textarea';
   }
 
-  public function setEnableDragAndDropFileUploads($enable) {
-    $this->enableDragAndDropFileUploads = $enable;
-    return $this;
-  }
-
   public function setCustomClass($custom_class) {
     $this->customClass = $custom_class;
     return $this;
@@ -74,20 +69,6 @@ class AphrontFormTextAreaControl extends AphrontFormControl {
     $classes[] = $this->customClass;
     $classes = trim(implode(' ', $classes));
 
-    $id = $this->getID();
-    if ($this->enableDragAndDropFileUploads) {
-      if (!$id) {
-        $id = celerity_generate_unique_node_id();
-      }
-      Javelin::initBehavior(
-        'aphront-drag-and-drop-textarea',
-        array(
-          'target'          => $id,
-          'activatedClass'  => 'aphront-textarea-drag-and-drop',
-          'uri'             => '/file/dropupload/',
-        ));
-    }
-
     return phutil_render_tag(
       'textarea',
       array(
@@ -96,7 +77,7 @@ class AphrontFormTextAreaControl extends AphrontFormControl {
         'readonly'  => $this->getReadonly() ? 'readonly' : null,
         'class'     => $classes,
         'style'     => $this->getControlStyle(),
-        'id'        => $id,
+        'id'        => $this->getID(),
       ),
       phutil_escape_html($this->getValue()));
   }

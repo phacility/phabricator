@@ -54,17 +54,21 @@ final class DiffusionCommitChangeTableView extends DiffusionView {
         $path .= '/';
       }
 
-      $path_column = javelin_render_tag(
-        'a',
-        array(
-          'href' => '#'.$hash,
-          'meta' => array(
-            'id' => 'diff-'.$hash,
-            'ref' => $this->renderingReferences[$id],
+      if (isset($this->renderingReferences[$id])) {
+        $path_column = javelin_render_tag(
+          'a',
+          array(
+            'href' => '#'.$hash,
+            'meta' => array(
+              'id' => 'diff-'.$hash,
+              'ref' => $this->renderingReferences[$id],
+            ),
+            'sigil' => 'differential-load',
           ),
-          'sigil' => 'differential-load',
-        ),
-        phutil_escape_html($path));
+          phutil_escape_html($path));
+      } else {
+        $path_column = phutil_escape_html($path);
+      }
 
       $rows[] = array(
         $this->linkHistory($change->getPath()),

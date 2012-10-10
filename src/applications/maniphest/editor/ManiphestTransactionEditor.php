@@ -19,9 +19,10 @@
 /**
  * @group maniphest
  */
-final class ManiphestTransactionEditor {
+final class ManiphestTransactionEditor extends PhabricatorEditor {
 
   private $parentMessageID;
+  private $excludePHIDs = array();
   private $auxiliaryFields = array();
 
   public function setAuxiliaryFields(array $fields) {
@@ -33,6 +34,15 @@ final class ManiphestTransactionEditor {
   public function setParentMessageID($parent_message_id) {
     $this->parentMessageID = $parent_message_id;
     return $this;
+  }
+
+  public function setExcludePHIDs(array $exclude) {
+    $this->excludePHIDs = $exclude;
+    return $this;
+  }
+
+  public function getExcludePHIDs() {
+    return $this->excludePHIDs;
   }
 
   public function applyTransactions(ManiphestTask $task, array $transactions) {
@@ -221,6 +231,7 @@ final class ManiphestTransactionEditor {
   }
 
   private function sendEmail($task, $transactions, $email_to, $email_cc) {
+    $exclude  = $this->getExcludePHIDs();
     $email_to = array_filter(array_unique($email_to));
     $email_cc = array_filter(array_unique($email_cc));
 
@@ -276,6 +287,7 @@ final class ManiphestTransactionEditor {
       ->addHeader('Thread-Topic', "T{$task_id}: ".$task->getOriginalTitle())
       ->setThreadID($thread_id, $is_create)
       ->setRelatedPHID($task->getPHID())
+      ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
       ->setIsBulk(true)
       ->setMailTags($mailtags)
       ->setBody($body->render());

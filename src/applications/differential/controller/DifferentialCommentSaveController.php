@@ -37,7 +37,6 @@ final class DifferentialCommentSaveController extends DifferentialController {
 
     $editor = new DifferentialCommentEditor(
       $revision,
-      $request->getUser()->getPHID(),
       $action);
 
     $content_source = PhabricatorContentSource::newForSource(
@@ -48,6 +47,7 @@ final class DifferentialCommentSaveController extends DifferentialController {
 
     try {
       $editor
+        ->setActor($request->getUser())
         ->setMessage($comment)
         ->setContentSource($content_source)
         ->setAttachInlineComments(true)

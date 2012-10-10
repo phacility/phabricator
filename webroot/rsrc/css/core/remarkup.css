@@ -219,14 +219,10 @@
   margin: .5em 1em 0;
 }
 
-img.phabricator-remarkup-embed-image {
-  display: inline;
-  border: 2px solid white;
-  background: white;
-
-  box-shadow: 1px 1px 6px rgba(0,0,0,.5);
-  -moz-box-shadow: 1px 1px 6px rgba(0,0,0,.5);
-  -webkit-box-shadow: 1px 1px 6px rgba(0,0,0,.5);
+.phabricator-remarkup-embed-image {
+  display: inline-block;
+  border: 3px solid white;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.20);
 }
 
 .phabricator-remarkup table.remarkup-table {
@@ -247,63 +243,72 @@ img.phabricator-remarkup-embed-image {
   padding: 3px 6px;
 }
 
+
+.remarkup-assist-textarea {
+  border-width: 1px;
+  border-color: #e5e5e5 #999999 #999999;
+
+  /* Prevent Safari and Chrome users from dragging the textarea any wider,
+     because the top bar won't resize along with it. */
+  resize: vertical;
+}
+
 .remarkup-assist-bar {
-  padding: 2px 0;
-}
+  height: 27px;
+  padding: 0 2px;
 
-a.remarkup-assist-button {
-  padding-left: 4px;
-  padding-right: 4px;
-  padding-bottom: 4px;
-  margin-bottom: 3px;
+  border-width: 1px 1px 0;
+  border-style: solid;
+  border-color: #737373 #999999;
 
-  position: relative;
+  background: #f5f5f5;
   overflow: hidden;
-  height: 16px;
-  width: 16px;
 }
 
-a.remarkup-assist-button + a.remarkup-assist-button {
-  border-left-width: 0px;
+.remarkup-assist-button {
+  display: block;
+  padding: 3px;
+  margin: 2px 1px;
+  float: left;
+
+  border: 1px solid transparent;
+  border-radius: 2px;
+}
+
+.remarkup-assist-button:hover {
+  background: #f7f7f7;
+  border-color: #c6c6c6;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.10);
+}
+
+.remarkup-assist-button:active {
+  outline: none;
+  background: #f3f3f3;
+  box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.10);
+}
+
+.remarkup-assist-button:focus {
+  outline: none;
+}
+
+.remarkup-assist-separator {
+  display: block;
+  float: left;
+
+  margin: 7px 4px;
+  height: 14px;
+
+  width: 0px;
+  border-right: 1px solid #cccccc;
 }
 
 .remarkup-assist {
-  float: left;
-  height: 16px;
-  width: 16px;
-  font-weight: normal;
+  display: block;
+  width: 14px;
+  height: 14px;
+  overflow: hidden;
 }
 
 .remarkup-assist-right {
   float: right;
-}
-
-.remarkup-assist-b {
-  font-family: "Georgia", serif;
-  font-weight: bold;
-}
-
-.remarkup-assist-i {
-  font-family: "Georgia", serif;
-  font-style: italic;
-}
-
-.remarkup-assist-code,
-.remarkup-assist-tt {
-  text-align: center;
-  font-family: monospace;
-}
-
-.remarkup-assist-s {
-  font-family: "Georgia", serif;
-  text-decoration: line-through;
-}
-
-.remarkup-assist-ol {
-  font-family: "Georgia", serif;
-}
-
-.remarkup-assist-h1 {
-  font-family: "Georgia", serif;
-  font-weight: bold;
 }

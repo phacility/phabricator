@@ -73,6 +73,7 @@ final class ManiphestEdgeEventListener extends PhutilEventListener {
 
     $new_edges = $this->loadAllEdges($event);
     $editor = new ManiphestTransactionEditor();
+    $editor->setActor($event->getUser());
 
     foreach ($tasks as $phid => $task) {
       $xactions = array();

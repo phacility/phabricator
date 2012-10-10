@@ -182,6 +182,12 @@ table.aphront-form-control-checkbox-layout th {
   padding: 6px 8px;
 }
 
+.drag-and-drop-file-target {
+  border: 1px dashed #bfbfbf;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
 .aphront-textarea-drag-and-drop {
   background: #99ff99;
   border-color: #669966;

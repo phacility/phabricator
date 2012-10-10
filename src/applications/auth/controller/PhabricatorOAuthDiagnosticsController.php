@@ -19,6 +19,8 @@
 final class PhabricatorOAuthDiagnosticsController
   extends PhabricatorAuthController {
 
+  private $provider;
+
   public function shouldRequireLogin() {
     return false;
   }

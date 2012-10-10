@@ -113,11 +113,6 @@
   background-color: #a1bbe5;
 }
 
-.device-desktop .phabricator-nav-col a:hover {
-  background-color: #3875d7;
-  color: #ffffff;
-}
-
 a.phabricator-nav-app-item {
   color: #e9e9e9;
   font-weight: normal;
@@ -137,10 +132,6 @@ a.phabricator-nav-app-item {
 .device-desktop a.phabricator-nav-app-item {
   padding-left: 38px;
   padding-right: 0px;
-}
-
-a.phabricator-nav-app-item-selected {
-  background-color: #55595d;
 }
 
 span.phabricator-nav-app-item-icon {

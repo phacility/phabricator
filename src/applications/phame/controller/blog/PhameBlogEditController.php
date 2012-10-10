@@ -163,7 +163,7 @@ final class PhameBlogEditController
         $rem_phids = array_diff($old_bloggers, $new_bloggers);
         $editor    = new PhabricatorEdgeEditor();
         $edge_type = PhabricatorEdgeConfig::TYPE_BLOG_HAS_BLOGGER;
-        $editor->setUser($user);
+        $editor->setActor($user);
         foreach ($add_phids as $phid) {
           $editor->addEdge($blog->getPHID(), $edge_type, $phid);
         }

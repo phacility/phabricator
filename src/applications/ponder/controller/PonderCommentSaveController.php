@@ -38,6 +38,7 @@ final class PonderCommentSaveController extends PonderController {
     if (!$objects) {
       return new Aphront404Response();
     }
+
     $content = $request->getStr('content');
 
     if (!strlen(trim($content))) {
@@ -54,10 +55,14 @@ final class PonderCommentSaveController extends PonderController {
     $res
       ->setContent($content)
       ->setAuthorPHID($user->getPHID())
-      ->setTargetPHID($target)
-      ->save();
+      ->setTargetPHID($target);
 
-    PhabricatorSearchPonderIndexer::indexQuestion($question);
+    id(new PonderCommentEditor())
+      ->setQuestion($question)
+      ->setComment($res)
+      ->setTargetPHID($target)
+      ->setActor($user)
+      ->save();
 
     return id(new AphrontRedirectResponse())
       ->setURI(

@@ -50,11 +50,6 @@ final class PonderUserProfileView extends AphrontView {
     return $this;
   }
 
-  public function setHandles($handles) {
-    $this->handles = $handles;
-    return $this;
-  }
-
   public function setURI($uri, $aparam) {
     $this->uri = $uri;
     $this->aparam = $aparam;
@@ -68,7 +63,6 @@ final class PonderUserProfileView extends AphrontView {
     $user     = $this->user;
     $aoffset  = $this->answeroffset;
     $answers  = $this->answers;
-    $handles  = $this->handles;
     $uri      = $this->uri;
     $aparam   = $this->aparam;
     $pagesize = $this->pagesize;

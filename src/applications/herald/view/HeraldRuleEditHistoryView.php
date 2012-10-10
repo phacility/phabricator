@@ -20,6 +20,7 @@ final class HeraldRuleEditHistoryView extends AphrontView {
 
   private $edits;
   private $handles;
+  private $user;
 
   public function setEdits(array $edits) {
     $this->edits = $edits;

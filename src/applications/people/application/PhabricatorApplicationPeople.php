@@ -47,7 +47,7 @@ final class PhabricatorApplicationPeople extends PhabricatorApplication {
       '/people/' => array(
         '' => 'PhabricatorPeopleListController',
         'logs/' => 'PhabricatorPeopleLogsController',
-        'edit/(?:(?P<id>\d+)/(?:(?P<view>\w+)/)?)?'
+        'edit/(?:(?P<id>[1-9]\d*)/(?:(?P<view>\w+)/)?)?'
           => 'PhabricatorPeopleEditController',
         'ldap/' => 'PhabricatorPeopleLdapController',
       ),
