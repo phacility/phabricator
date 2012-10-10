@@ -62,8 +62,8 @@ extends PhameController {
 
       $blog_edges = $edges[$post_phid][$edge_type];
       $blog_phids = array_keys($blog_edges);
-      $editor     = id(new PhabricatorEdgeEditor());
-      $editor->setUser($user);
+      $editor     = id(new PhabricatorEdgeEditor())
+        ->setActor($user);
       foreach ($blog_phids as $phid) {
         $editor->removeEdge($post_phid, $edge_type, $phid);
       }

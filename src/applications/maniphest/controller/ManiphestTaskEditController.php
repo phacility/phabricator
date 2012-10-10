@@ -231,6 +231,7 @@ final class ManiphestTaskEditController extends ManiphestController {
           $transactions = $event->getValue('transactions');
 
           $editor = new ManiphestTransactionEditor();
+          $editor->setActor($user);
           $editor->setAuxiliaryFields($aux_fields);
           $editor->applyTransactions($task, $transactions);
 

@@ -16,10 +16,10 @@
  * limitations under the License.
  */
 
-final class PonderAnswerEditor {
+final class PonderAnswerEditor extends PhabricatorEditor {
+
   private $question;
   private $answer;
-  private $viewer;
   private $shouldEmail = true;
 
   public function setQuestion($question) {
@@ -32,15 +32,8 @@ final class PonderAnswerEditor {
     return $this;
   }
 
-  public function setUser(PhabricatorUser $user) {
-    $this->viewer = $user;
-    return $this;
-  }
-
   public function saveAnswer() {
-    if (!$this->viewer) {
-      throw new Exception("Must set user before saving question");
-    }
+    $actor = $this->requireActor();
     if (!$this->question) {
       throw new Exception("Must set question before saving answer");
     }
@@ -50,7 +43,6 @@ final class PonderAnswerEditor {
 
     $question = $this->question;
     $answer = $this->answer;
-    $viewer = $this->viewer;
     $conn = $answer->establishConnection('w');
     $trans = $conn->openTransaction();
     $trans->beginReadLocking();
@@ -76,7 +68,7 @@ final class PonderAnswerEditor {
     // subscribe author and @mentions
     $subeditor = id(new PhabricatorSubscriptionsEditor())
       ->setObject($question)
-      ->setUser($viewer);
+      ->setActor($actor);
 
     $subeditor->subscribeExplicit(array($answer->getAuthorPHID()));
 
@@ -98,7 +90,7 @@ final class PonderAnswerEditor {
         id(new PonderMentionMail(
           $question,
           $answer,
-          $viewer))
+          $actor))
           ->setToPHIDs($at_mention_phids)
           ->send();
       }
@@ -115,7 +107,7 @@ final class PonderAnswerEditor {
         id(new PonderAnsweredMail(
           $question,
           $answer,
-          $viewer))
+          $actor))
           ->setToPHIDs($other_subs)
           ->send();
       }

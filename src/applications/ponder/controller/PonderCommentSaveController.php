@@ -61,7 +61,7 @@ final class PonderCommentSaveController extends PonderController {
       ->setQuestion($question)
       ->setComment($res)
       ->setTargetPHID($target)
-      ->setUser($user)
+      ->setActor($user)
       ->save();
 
     return id(new AphrontRedirectResponse())

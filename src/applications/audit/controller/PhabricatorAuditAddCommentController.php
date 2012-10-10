@@ -61,7 +61,7 @@ final class PhabricatorAuditAddCommentController
     }
 
     id(new PhabricatorAuditCommentEditor($commit))
-      ->setUser($user)
+      ->setActor($user)
       ->setAttachInlineComments(true)
       ->addAuditors($auditors)
       ->addCCs($ccs)

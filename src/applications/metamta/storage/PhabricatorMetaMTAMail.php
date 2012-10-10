@@ -36,6 +36,8 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   protected $nextRetry;
   protected $relatedPHID;
 
+  private $excludePHIDs = array();
+
   public function __construct() {
 
     $this->status     = self::STATUS_QUEUE;
@@ -117,6 +119,14 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     $phids = array_unique($phids);
     $this->setParam('cc', $phids);
     return $this;
+  }
+
+  public function setExcludeMailRecipientPHIDs($exclude) {
+    $this->excludePHIDs = $exclude;
+    return $this;
+  }
+  private function getExcludeMailRecipientPHIDs() {
+    return $this->excludePHIDs;
   }
 
   public function getTranslation(array $objects) {
@@ -349,7 +359,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
       $this->loadEmailAndNameDataFromPHIDs($phids);
 
-      $exclude = array();
+      $exclude = array_fill_keys($this->getExcludeMailRecipientPHIDs(), true);
 
       $params = $this->parameters;
       $default = PhabricatorEnv::getEnvConfig('metamta.default-address');

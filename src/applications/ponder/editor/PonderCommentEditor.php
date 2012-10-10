@@ -16,13 +16,11 @@
  * limitations under the License.
  */
 
-
-final class PonderCommentEditor {
+final class PonderCommentEditor extends PhabricatorEditor {
 
   private $question;
   private $comment;
   private $targetPHID;
-  private $viewer;
   private $shouldEmail = true;
 
   public function setComment(PonderComment $comment) {
@@ -40,12 +38,8 @@ final class PonderCommentEditor {
     return $this;
   }
 
-  public function setUser(PhabricatorUser $user) {
-    $this->viewer = $user;
-    return $this;
-  }
-
   public function save() {
+    $actor = $this->requireActor();
     if (!$this->comment) {
       throw new Exception("Must set comment before saving it");
     }
@@ -55,14 +49,10 @@ final class PonderCommentEditor {
     if (!$this->targetPHID) {
       throw new Exception("Must set target before saving comment");
     }
-    if (!$this->viewer) {
-      throw new Exception("Must set viewer before saving comment");
-    }
 
     $comment  = $this->comment;
     $question = $this->question;
     $target   = $this->targetPHID;
-    $viewer   = $this->viewer;
     $comment->save();
 
     $question->attachRelated();
@@ -71,7 +61,7 @@ final class PonderCommentEditor {
     // subscribe author and @mentions
     $subeditor = id(new PhabricatorSubscriptionsEditor())
       ->setObject($question)
-      ->setUser($viewer);
+      ->setActor($actor);
 
     $subeditor->subscribeExplicit(array($comment->getAuthorPHID()));
 
@@ -92,7 +82,7 @@ final class PonderCommentEditor {
         id(new PonderMentionMail(
           $question,
           $comment,
-          $viewer))
+          $actor))
           ->setToPHIDs($at_mention_phids)
           ->send();
       }
@@ -124,7 +114,7 @@ final class PonderCommentEditor {
         id(new PonderCommentMail(
           $question,
           $comment,
-          $viewer))
+          $actor))
           ->setToPHIDs($other_subs)
           ->send();
       }

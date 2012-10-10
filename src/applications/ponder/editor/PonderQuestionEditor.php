@@ -16,20 +16,13 @@
  * limitations under the License.
  */
 
-
-final class PonderQuestionEditor {
+final class PonderQuestionEditor extends PhabricatorEditor {
 
   private $question;
-  private $viewer;
   private $shouldEmail = true;
 
   public function setQuestion(PonderQuestion $question) {
     $this->question = $question;
-    return $this;
-  }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->viewer = $user;
     return $this;
   }
 
@@ -39,14 +32,11 @@ final class PonderQuestionEditor {
   }
 
   public function save() {
-    if (!$this->viewer) {
-      throw new Exception("Must set user before saving question");
-    }
+    $actor = $this->requireActor();
     if (!$this->question) {
       throw new Exception("Must set question before saving it");
     }
 
-    $viewer = $this->viewer;
     $question = $this->question;
     $question->save();
 
@@ -57,7 +47,7 @@ final class PonderQuestionEditor {
     // subscribe author and @mentions
     $subeditor = id(new PhabricatorSubscriptionsEditor())
       ->setObject($question)
-      ->setUser($viewer);
+      ->setActor($actor);
 
     $subeditor->subscribeExplicit(array($question->getAuthorPHID()));
 
@@ -72,7 +62,7 @@ final class PonderQuestionEditor {
       id(new PonderMentionMail(
          $question,
          $question,
-         $viewer))
+         $actor))
         ->setToPHIDs($at_mention_phids)
         ->send();
     }

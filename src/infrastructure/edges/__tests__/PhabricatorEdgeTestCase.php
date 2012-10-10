@@ -37,7 +37,7 @@ final class PhabricatorEdgeTestCase extends PhabricatorTestCase {
     $phid2 = $obj2->getPHID();
 
     $editor = id(new PhabricatorEdgeEditor())
-      ->setUser($user)
+      ->setActor($user)
       ->addEdge($phid1, PhabricatorEdgeConfig::TYPE_TEST_NO_CYCLE, $phid2)
       ->addEdge($phid2, PhabricatorEdgeConfig::TYPE_TEST_NO_CYCLE, $phid1);
 
@@ -57,12 +57,12 @@ final class PhabricatorEdgeTestCase extends PhabricatorTestCase {
     // fail (it introduces a cycle).
 
     $editor = id(new PhabricatorEdgeEditor())
-      ->setUser($user)
+      ->setActor($user)
       ->addEdge($phid1, PhabricatorEdgeConfig::TYPE_TEST_NO_CYCLE, $phid2)
       ->save();
 
     $editor = id(new PhabricatorEdgeEditor())
-      ->setUser($user)
+      ->setActor($user)
       ->addEdge($phid2, PhabricatorEdgeConfig::TYPE_TEST_NO_CYCLE, $phid1);
 
     $caught = null;

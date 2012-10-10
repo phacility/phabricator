@@ -122,14 +122,16 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
             $committer_phid,
             $author_phid,
             $revision->getAuthorPHID());
+          $actor = id(new PhabricatorUser())
+            ->loadOneWhere('phid = %s', $actor_phid);
 
           $diff = $this->attachToRevision($revision, $actor_phid);
 
           $revision->setDateCommitted($commit->getEpoch());
           $editor = new DifferentialCommentEditor(
             $revision,
-            $actor_phid,
             DifferentialAction::ACTION_CLOSE);
+          $editor->setActor($actor);
           $editor->setIsDaemonWorkflow(true);
 
           $vs_diff = $this->loadChangedByCommit($diff);

@@ -102,7 +102,7 @@ abstract class DifferentialFreeformFieldSpecification
       }
 
       id(new PhabricatorEdgeEditor())
-        ->setUser($user)
+        ->setActor($user)
         ->addEdge(
           $task->getPHID(),
           PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT,

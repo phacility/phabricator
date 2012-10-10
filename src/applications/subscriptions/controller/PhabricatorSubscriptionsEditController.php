@@ -74,7 +74,7 @@ final class PhabricatorSubscriptionsEditController
     }
 
     $editor = id(new PhabricatorSubscriptionsEditor())
-      ->setUser($user)
+      ->setActor($user)
       ->setObject($object);
 
     if ($is_add) {

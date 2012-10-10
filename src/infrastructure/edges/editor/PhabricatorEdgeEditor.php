@@ -28,25 +28,19 @@
  *
  *    id(new PhabricatorEdgeEditor())
  *      ->addEdge($src, $type, $dst)
- *      ->setUser($user)
+ *      ->setActor($user)
  *      ->save();
  *
  * @task edit     Editing Edges
  * @task cycles   Cycle Prevention
  * @task internal Internals
  */
-final class PhabricatorEdgeEditor {
+final class PhabricatorEdgeEditor extends PhabricatorEditor {
 
   private $addEdges = array();
   private $remEdges = array();
   private $openTransactions = array();
-  private $user;
   private $suppressEvents;
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
-    return $this;
-  }
 
 
 /* -(  Editing Edges  )------------------------------------------------------ */
@@ -398,7 +392,7 @@ final class PhabricatorEdgeEditor {
         'add'   => $this->addEdges,
         'rem'   => $this->remEdges,
       ));
-    $event->setUser($this->user);
+    $event->setUser($this->getActor());
     PhutilEventEngine::dispatchEvent($event);
   }
 

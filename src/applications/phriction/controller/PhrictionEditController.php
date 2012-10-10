@@ -134,7 +134,7 @@ final class PhrictionEditController
 
       if (!count($errors)) {
         $editor = id(PhrictionDocumentEditor::newForSlug($document->getSlug()))
-          ->setUser($user)
+          ->setActor($user)
           ->setTitle($title)
           ->setContent($request->getStr('content'))
           ->setDescription($notes);

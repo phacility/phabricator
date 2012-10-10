@@ -16,13 +16,11 @@
  * limitations under the License.
  */
 
-
-final class PonderVoteEditor {
+final class PonderVoteEditor extends PhabricatorEditor {
 
   private $answer;
   private $votable;
   private $anwer;
-  private $user;
   private $vote;
 
   public function setAnswer($answer) {
@@ -35,39 +33,31 @@ final class PonderVoteEditor {
     return $this;
   }
 
-  public function setUser($user) {
-    $this->user = $user;
-    return $this;
-  }
-
   public function setVote($vote) {
     $this->vote = $vote;
     return $this;
   }
 
   public function saveVote() {
+    $actor = $this->requireActor();
     if (!$this->votable) {
       throw new Exception("Must set votable before saving vote");
     }
-    if (!$this->user) {
-      throw new Exception("Must set user before saving vote");
-    }
 
-    $user = $this->user;
     $votable = $this->votable;
     $newvote = $this->vote;
 
     // prepare vote add, or update if this user is amending an
     // earlier vote
     $editor = id(new PhabricatorEdgeEditor())
-      ->setUser($user)
+      ->setActor($actor)
       ->addEdge(
-        $user->getPHID(),
+        $actor->getPHID(),
         $votable->getUserVoteEdgeType(),
         $votable->getVotablePHID(),
         array('data' => $newvote))
       ->removeEdge(
-        $user->getPHID(),
+        $actor->getPHID(),
         $votable->getUserVoteEdgeType(),
         $votable->getVotablePHID());
 
@@ -77,7 +67,7 @@ final class PonderVoteEditor {
 
       $votable->reload();
       $curvote = (int)PhabricatorEdgeQuery::loadSingleEdgeData(
-        $user->getPHID(),
+        $actor->getPHID(),
         $votable->getUserVoteEdgeType(),
         $votable->getVotablePHID());
 

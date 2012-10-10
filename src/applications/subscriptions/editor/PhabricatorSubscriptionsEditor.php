@@ -16,10 +16,9 @@
  * limitations under the License.
  */
 
-final class PhabricatorSubscriptionsEditor {
+final class PhabricatorSubscriptionsEditor extends PhabricatorEditor {
 
   private $object;
-  private $user;
 
   private $explicitSubscribePHIDs = array();
   private $implicitSubscribePHIDs = array();
@@ -29,12 +28,6 @@ final class PhabricatorSubscriptionsEditor {
     $this->object = $object;
     return $this;
   }
-
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
-    return $this;
-  }
-
 
   /**
    * Add explicit subscribers. These subscribers have explicitly subscribed
@@ -81,9 +74,7 @@ final class PhabricatorSubscriptionsEditor {
     if (!$this->object) {
       throw new Exception('Call setObject() before save()!');
     }
-    if (!$this->user) {
-      throw new Exception('Call setUser() before save()!');
-    }
+    $actor = $this->requireActor();
 
     $src = $this->object->getPHID();
 
@@ -109,7 +100,7 @@ final class PhabricatorSubscriptionsEditor {
       $s_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_SUBSCRIBER;
 
       $editor = id(new PhabricatorEdgeEditor())
-        ->setUser($this->user);
+        ->setActor($actor);
 
       foreach ($add as $phid => $ignored) {
         $editor->removeEdge($src, $u_type, $phid);

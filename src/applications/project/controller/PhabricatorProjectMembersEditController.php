@@ -80,7 +80,7 @@ final class PhabricatorProjectMembersEditController
 
       if ($xactions) {
         $editor = new PhabricatorProjectEditor($project);
-        $editor->setUser($user);
+        $editor->setActor($user);
         $editor->applyTransactions($xactions);
       }
 

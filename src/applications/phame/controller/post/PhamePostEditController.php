@@ -198,7 +198,7 @@ final class PhamePostEditController
 
           $editor    = new PhabricatorEdgeEditor();
           $edge_type = PhabricatorEdgeConfig::TYPE_POST_HAS_BLOG;
-          $editor->setUser($user);
+          $editor->setActor($user);
           foreach ($blogs_to_publish as $phid) {
             $editor->addEdge($post->getPHID(), $edge_type, $phid);
           }

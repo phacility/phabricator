@@ -72,8 +72,8 @@ final class ConduitAPI_differential_updaterevision_Method
       array());
 
     $editor = new DifferentialRevisionEditor(
-      $revision,
-      $revision->getAuthorPHID());
+      $revision);
+    $editor->setActor($request->getUser());
     $editor->setContentSource($content_source);
     $fields = $request->getValue('fields');
     $editor->copyFieldsFromConduit($fields);

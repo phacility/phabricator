@@ -49,7 +49,7 @@ final class PhabricatorProjectCreateController
         $xactions[] = $xaction;
 
         $editor = new PhabricatorProjectEditor($project);
-        $editor->setUser($user);
+        $editor->setActor($user);
         $editor->applyTransactions($xactions);
       } catch (PhabricatorProjectNameCollisionException $ex) {
         $e_name = 'Not Unique';

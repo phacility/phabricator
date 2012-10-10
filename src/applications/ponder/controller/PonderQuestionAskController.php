@@ -53,7 +53,7 @@ final class PonderQuestionAskController extends PonderController {
 
         id(new PonderQuestionEditor())
           ->setQuestion($question)
-          ->setUser($user)
+          ->setActor($user)
           ->save();
 
         return id(new AphrontRedirectResponse())

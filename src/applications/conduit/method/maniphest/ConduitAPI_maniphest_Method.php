@@ -196,6 +196,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
     $transactions = $event->getValue('transactions');
 
     $editor = new ManiphestTransactionEditor();
+    $editor->setActor($request->getUser());
     $editor->applyTransactions($task, $transactions);
 
     $event = new PhabricatorEvent(

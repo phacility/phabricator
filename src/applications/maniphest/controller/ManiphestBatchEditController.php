@@ -41,6 +41,7 @@ final class ManiphestBatchEditController extends ManiphestController {
         $xactions = $this->buildTransactions($actions, $task);
         if ($xactions) {
           $editor = new ManiphestTransactionEditor();
+          $editor->setActor($user);
           $editor->applyTransactions($task, $xactions);
         }
       }

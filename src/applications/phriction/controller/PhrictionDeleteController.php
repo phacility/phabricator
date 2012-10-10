@@ -41,7 +41,7 @@ final class PhrictionDeleteController extends PhrictionController {
 
     if ($request->isFormPost()) {
         $editor = id(PhrictionDocumentEditor::newForSlug($document->getSlug()))
-          ->setUser($user)
+          ->setActor($user)
           ->delete();
         return id(new AphrontRedirectResponse())->setURI($document_uri);
     }

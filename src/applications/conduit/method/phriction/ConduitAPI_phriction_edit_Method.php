@@ -48,7 +48,7 @@ final class ConduitAPI_phriction_edit_Method
     $slug = $request->getValue('slug');
 
     $editor = id(PhrictionDocumentEditor::newForSlug($slug))
-      ->setUser($request->getUser())
+      ->setActor($request->getUser())
       ->setTitle($request->getValue('title'))
       ->setContent($request->getValue('content'))
       ->setDescription($request->getvalue('description'))

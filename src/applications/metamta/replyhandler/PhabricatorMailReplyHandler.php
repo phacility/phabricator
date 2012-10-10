@@ -20,6 +20,7 @@ abstract class PhabricatorMailReplyHandler {
 
   private $mailReceiver;
   private $actor;
+  private $excludePHIDs = array();
 
   final public function setMailReceiver($mail_receiver) {
     $this->validateMailReceiver($mail_receiver);
@@ -38,6 +39,15 @@ abstract class PhabricatorMailReplyHandler {
 
   final public function getActor() {
     return $this->actor;
+  }
+
+  final public function setExcludeMailRecipientPHIDs(array $exclude) {
+    $this->excludePHIDs = $exclude;
+    return $this;
+  }
+
+  final public function getExcludeMailRecipientPHIDs() {
+    return $this->excludePHIDs;
   }
 
   abstract public function validateMailReceiver($mail_receiver);

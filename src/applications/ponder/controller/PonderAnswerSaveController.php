@@ -60,7 +60,7 @@ final class PonderAnswerSaveController extends PonderController {
       ->setContentSource($content_source);
 
     id(new PonderAnswerEditor())
-      ->setUser($user)
+      ->setActor($user)
       ->setQuestion($question)
       ->setAnswer($res)
       ->saveAnswer();

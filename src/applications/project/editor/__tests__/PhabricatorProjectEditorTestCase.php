@@ -114,7 +114,7 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $xaction->setNewValue($new_name);
 
     $editor = new PhabricatorProjectEditor($proj);
-    $editor->setUser($user);
+    $editor->setActor($user);
     $editor->applyTransactions(array($xaction));
 
     return true;

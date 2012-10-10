@@ -20,6 +20,7 @@ abstract class DifferentialMail {
 
   protected $to = array();
   protected $cc = array();
+  protected $excludePHIDs = array();
 
   protected $actorHandle;
 
@@ -91,6 +92,7 @@ abstract class DifferentialMail {
     $template
       ->setIsHTML($this->shouldMarkMailAsHTML())
       ->setParentMessageID($this->parentMessageID)
+      ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
       ->addHeader('Thread-Topic', $this->getThreadTopic());
 
     $template->setAttachments($attachments);
@@ -315,35 +317,23 @@ abstract class DifferentialMail {
     return implode("\n", $text);
   }
 
+  public function setExcludeMailRecipientPHIDs(array $exclude) {
+    $this->excludePHIDs = $exclude;
+    return $this;
+  }
+
+  public function getExcludeMailRecipientPHIDs() {
+    return $this->excludePHIDs;
+  }
+
   public function setToPHIDs(array $to) {
-    $this->to = $this->filterContactPHIDs($to);
+    $this->to = $to;
     return $this;
   }
 
   public function setCCPHIDs(array $cc) {
-    $this->cc = $this->filterContactPHIDs($cc);
+    $this->cc = $cc;
     return $this;
-  }
-
-  protected function filterContactPHIDs(array $phids) {
-    return $phids;
-
-    // TODO: actually do this?
-
-    // Differential revisions use Subscriptions for CCs, so any arbitrary
-    // PHID can end up CC'd to them. Only try to actually send email PHIDs
-    // which have ToolsHandle types that are marked emailable. If we don't
-    // filter here, sending the email will fail.
-/*
-    $handles = array();
-    prep(new ToolsHandleData($phids, $handles));
-    foreach ($handles as $phid => $handle) {
-      if (!$handle->isEmailable()) {
-        unset($handles[$phid]);
-      }
-    }
-    return array_keys($handles);
-*/
   }
 
   protected function getToPHIDs() {

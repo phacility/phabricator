@@ -138,8 +138,10 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
     try {
       $editor = new DifferentialCommentEditor(
         $this->getMailReceiver(),
-        $actor->getPHID(),
         $command);
+      $editor->setActor($actor);
+      $editor->setExcludeMailRecipientPHIDs(
+        $this->getExcludeMailRecipientPHIDs());
 
       // NOTE: We have to be careful about this because Facebook's
       // implementation jumps straight into handleAction() and will not have

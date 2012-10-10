@@ -21,12 +21,10 @@
  *
  * @group phriction
  */
-final class PhrictionDocumentEditor {
+final class PhrictionDocumentEditor extends PhabricatorEditor {
 
   private $document;
   private $content;
-
-  private $user;
 
   private $newTitle;
   private $newContent;
@@ -65,11 +63,6 @@ final class PhrictionDocumentEditor {
     return $obj;
   }
 
-  public function setUser(PhabricatorUser $user) {
-    $this->user = $user;
-    return $this;
-  }
-
   public function setTitle($title) {
     $this->newTitle = $title;
     return $this;
@@ -90,9 +83,7 @@ final class PhrictionDocumentEditor {
   }
 
   public function delete() {
-    if (!$this->user) {
-      throw new Exception("Call setUser() before deleting a document!");
-    }
+    $actor = $this->requireActor();
 
     // TODO: Should we do anything about deleting an already-deleted document?
     // We currently allow it.
@@ -109,9 +100,7 @@ final class PhrictionDocumentEditor {
   }
 
   public function save() {
-    if (!$this->user) {
-      throw new Exception("Call setUser() before updating a document!");
-    }
+    $actor = $this->requireActor();
 
     if ($this->newContent === '') {
       // If this is an edit which deletes all the content, just treat it as
@@ -134,7 +123,7 @@ final class PhrictionDocumentEditor {
 
     $new_content = new PhrictionContent();
     $new_content->setSlug($document->getSlug());
-    $new_content->setAuthorPHID($this->user->getPHID());
+    $new_content->setAuthorPHID($this->getActor()->getPHID());
     $new_content->setChangeType(PhrictionChangeType::CHANGE_EDIT);
 
     $new_content->setTitle(
@@ -214,7 +203,7 @@ final class PhrictionDocumentEditor {
 
     $related_phids = array(
       $document->getPHID(),
-      $this->user->getPHID(),
+      $this->getActor()->getPHID(),
     );
 
     if ($project_phid) {
@@ -223,7 +212,7 @@ final class PhrictionDocumentEditor {
 
     id(new PhabricatorFeedStoryPublisher())
       ->setRelatedPHIDs($related_phids)
-      ->setStoryAuthorPHID($this->user->getPHID())
+      ->setStoryAuthorPHID($this->getActor()->getPHID())
       ->setStoryTime(time())
       ->setStoryType(PhabricatorFeedStoryTypeConstants::STORY_PHRICTION)
       ->setStoryData(

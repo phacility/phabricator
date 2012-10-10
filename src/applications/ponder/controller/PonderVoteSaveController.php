@@ -49,7 +49,7 @@ final class PonderVoteSaveController extends PonderController {
 
     $editor = id(new PonderVoteEditor())
       ->setVotable($target)
-      ->setUser($user)
+      ->setActor($user)
       ->setVote($newvote)
       ->saveVote();
 
