@@ -57,7 +57,8 @@ final class PhabricatorIRCDifferentialNotificationHandler
       $actor_name = $handles[$actor_phid]->getName();
       $message = "{$actor_name} {$verb} revision D".$data['revision_id'].".";
 
-      foreach ($this->getConfig('notification.channels') as $channel) {
+      $channels = $this->getConfig('notification.channels', array());
+      foreach ($channels as $channel) {
         $this->write('PRIVMSG', "{$channel} :{$message}");
       }
     }
