@@ -193,7 +193,7 @@ final class AphrontSideNavFilterView extends AphrontView {
 
           if (empty($item['uri'])) {
             $href = clone $this->baseURI;
-            $href->setPath($href->getPath().$key.'/');
+            $href->setPath(rtrim($href->getPath().$key, '/').'/');
             $href = (string)$href;
           } else {
             if (empty($item['relative'])) {
