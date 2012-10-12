@@ -61,7 +61,10 @@ final class DifferentialReviewersFieldSpecification
   }
 
   public function validateField() {
-    if (in_array($this->getUser()->getPHID(), $this->reviewers)) {
+    $allow_self_accept = PhabricatorEnv::getEnvConfig(
+       'differential.allow-self-accept', false);
+    if (!$allow_self_accept
+        && in_array($this->getUser()->getPHID(), $this->reviewers)) {
       $this->error = 'Invalid';
       throw new DifferentialFieldValidationException(
         "You may not review your own revision!");
