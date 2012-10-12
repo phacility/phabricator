@@ -645,10 +645,12 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
     $added_reviewers   = $this->getAddedReviewers();
     $removed_reviewers = $this->getRemovedReviewers();
     $reviewer_phids    = $revision->getReviewers();
+    $allow_self_accept = PhabricatorEnv::getEnvConfig(
+      'differential.allow-self-accept', false);
 
     $reviewer_phids_map = array_fill_keys($reviewer_phids, true);
     foreach ($added_reviewers as $k => $user_phid) {
-      if ($user_phid == $revision->getAuthorPHID()) {
+      if (!$allow_self_accept && $user_phid == $revision->getAuthorPHID()) {
         unset($added_reviewers[$k]);
       }
       if (isset($reviewer_phids_map[$user_phid])) {

@@ -142,7 +142,7 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
   }
 
   protected function getActorPHID() {
-    return $this->actorPHID;
+    return $this->getActor()->getPHID();
   }
 
   public function isNewRevision() {
@@ -293,7 +293,7 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
       $this->reviewers,
       array_keys($rem['rev']),
       array_keys($add['rev']),
-      $this->actorPHID);
+      $this->getActorPHID());
 
     // We want to attribute new CCs to a "reasonPHID", representing the reason
     // they were added. This is either a user (if some user explicitly CCs
@@ -306,18 +306,18 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
         if (empty($new['ccs'][$phid])) {
           $reasons[$phid] = $xscript_phid;
         } else {
-          $reasons[$phid] = $this->actorPHID;
+          $reasons[$phid] = $this->getActorPHID();
         }
       }
       foreach ($rem['ccs'] as $phid => $ignored) {
         if (empty($new['ccs'][$phid])) {
-          $reasons[$phid] = $this->actorPHID;
+          $reasons[$phid] = $this->getActorPHID();
         } else {
           $reasons[$phid] = $xscript_phid;
         }
       }
     } else {
-      $reasons = $this->actorPHID;
+      $reasons = $this->getActorPHID();
     }
 
     self::alterCCs(

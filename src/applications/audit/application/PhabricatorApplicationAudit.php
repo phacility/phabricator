@@ -30,6 +30,10 @@ final class PhabricatorApplicationAudit extends PhabricatorApplication {
     return 'audit';
   }
 
+  public function getHelpURI() {
+    return PhabricatorEnv::getDoclink('article/Audit_User_Guide.html');
+  }
+
   public function getRoutes() {
     return array(
       '/audit/' => array(

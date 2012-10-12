@@ -30,6 +30,10 @@ final class PhabricatorApplicationDifferential extends PhabricatorApplication {
     return 'differential';
   }
 
+  public function getHelpURI() {
+    return PhabricatorEnv::getDoclink('article/Differential_User_Guide.html');
+  }
+
   public function getFactObjectsForAnalysis() {
     return array(
       new DifferentialRevision(),

@@ -19,6 +19,8 @@
 final class PhabricatorTypeaheadCommonDatasourceController
   extends PhabricatorTypeaheadDatasourceController {
 
+  private $type;
+
   public function willProcessRequest(array $data) {
     $this->type = $data['type'];
   }
