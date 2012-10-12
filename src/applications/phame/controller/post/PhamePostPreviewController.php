@@ -39,9 +39,11 @@ extends PhameController {
       ->setPhameTitle($phame_title)
       ->setDateModified(time());
 
+    $blogger = PhabricatorObjectHandleData::loadOneHandle($user->getPHID());
+
     $post_html = id(new PhamePostDetailView())
       ->setUser($user)
-      ->setBlogger($user)
+      ->setBlogger($blogger)
       ->setPost($post)
       ->setIsPreview(true)
       ->render();

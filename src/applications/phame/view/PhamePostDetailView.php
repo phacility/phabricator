@@ -20,18 +20,23 @@
  * @group phame
  */
 final class PhamePostDetailView extends AphrontView {
-  private $post;
-  private $blogger;
-  private $requestURI;
-  private $user;
-  private $isPreview;
 
-  public function setIsPreview($is_preview) {
-    $this->isPreview = $is_preview;
+  private $user;
+  private $post;
+  private $blog;
+  private $blogger;
+  private $actions = array();
+  private $requestURI;
+  private $isPreview;
+  private $showComments;
+  private $shouldShorten;
+
+  public function setShouldShorten($should_shorten) {
+    $this->shouldShorten = $should_shorten;
     return $this;
   }
-  private function isPreview() {
-    return $this->isPreview;
+  public function getShouldShorten() {
+    return $this->shouldShorten;
   }
 
   public function setUser(PhabricatorUser $user) {
@@ -40,6 +45,41 @@ final class PhamePostDetailView extends AphrontView {
   }
   public function getUser() {
     return $this->user;
+  }
+
+  public function setPost(PhamePost $post) {
+    $this->post = $post;
+    return $this;
+  }
+  private function getPost() {
+    return $this->post;
+  }
+
+  public function setBlog(PhameBlog $blog) {
+    $this->blog = $blog;
+    return $this;
+  }
+  private function getBlog() {
+    return $this->blog;
+  }
+
+  public function setBlogger(PhabricatorObjectHandle $blogger) {
+    $this->blogger = $blogger;
+    return $this;
+  }
+  private function getBlogger() {
+    return $this->blogger;
+  }
+
+  public function setActions(array $actions) {
+    $this->actions = $actions;
+    return $this;
+  }
+  private function getActions() {
+    if ($this->actions) {
+      return $this->actions;
+    }
+    return array();
   }
 
   public function setRequestURI(PhutilURI $uri) {
@@ -51,45 +91,75 @@ final class PhamePostDetailView extends AphrontView {
     return $this->requestURI;
   }
 
-  public function setBlogger(PhabricatorUser $blogger) {
-    $this->blogger = $blogger;
+  public function setIsPreview($is_preview) {
+    $this->isPreview = $is_preview;
     return $this;
   }
-  private function getBlogger() {
-    return $this->blogger;
+  private function isPreview() {
+    return $this->isPreview;
   }
 
-  public function setPost(PhamePost $post) {
-    $this->post = $post;
+  public function setShowComments($show_comments) {
+    $this->showComments = $show_comments;
     return $this;
   }
-  private function getPost() {
-    return $this->post;
+  private function getShowComments() {
+    return $this->showComments;
   }
 
   public function render() {
     require_celerity_resource('phabricator-remarkup-css');
+    require_celerity_resource('phame-css');
 
     $user    = $this->getUser();
     $blogger = $this->getBlogger();
     $post    = $this->getPost();
-    $engine  = PhabricatorMarkupEngine::newPhameMarkupEngine();
-    $body    = $engine->markupText($post->getBody());
-    if ($post->isDraft()) {
-      $uri   = '/phame/draft/';
-      $label = 'Back to Your Drafts';
-    } else {
-      $uri   = '/phame/posts/'.$blogger->getUsername().'/';
-      $label = 'More Posts by '.phutil_escape_html($blogger->getUsername());
+    $actions = $this->getActions();
+    $noun    = $post->isDraft() ? 'Draft' : 'Post';
+    $buttons = array();
+
+    foreach ($actions as $action) {
+      switch ($action) {
+        case 'view':
+          $uri   = $post->getViewURI($blogger->getName());
+          $label = 'View '.$noun;
+          break;
+        case 'edit':
+          $uri   = $post->getEditURI();
+          $label = 'Edit '.$noun;
+          break;
+        case 'more':
+          if ($post->isDraft()) {
+            $uri   = '/phame/draft/';
+            $label = 'Back to Your Drafts';
+          } else {
+            $uri   = '/phame/posts/'.$blogger->getName().'/';
+            $label = 'More Posts by '.phutil_escape_html($blogger->getName());
+          }
+          break;
+        default:
+          break;
+      }
+      $button = phutil_render_tag(
+        'a',
+        array(
+          'href'  => $uri,
+          'class' => 'grey button',
+        ),
+        $label);
+      $buttons[] = $button;
     }
-    $button  = phutil_render_tag(
-      'a',
-      array(
-        'href'  => $uri,
-        'class' => 'grey button',
-      ),
-      $label
-    );
+
+    $button_html = '';
+    if ($buttons) {
+      $button_html = phutil_render_tag(
+        'div',
+        array(
+          'class' => 'buttons'
+        ),
+        implode('', $buttons)
+      );
+    }
 
     $publish_date = $post->getDatePublished();
     if ($publish_date) {
@@ -101,55 +171,114 @@ final class PhamePostDetailView extends AphrontView {
         phabricator_datetime($post->getDateModified(),
                              $user);
     }
-    $caption .= ' by '.phutil_render_tag(
-      'a',
-      array(
-        'href' => new PhutilURI('/p/'.$blogger->getUsername().'/'),
-      ),
-      phutil_escape_html($blogger->getUsername())
-    ).'.';
+    $caption .= ' by <b>'.
+      phutil_escape_html($blogger->getName()).'</b>.';
 
-    if ($this->isPreview()) {
-      $width = AphrontPanelView::WIDTH_FULL;
-    } else {
-      $width = AphrontPanelView::WIDTH_WIDE;
+    $shortened = false;
+    $body_text = $post->getBody();
+    if ($this->getShouldShorten()) {
+      $body_length = phutil_utf8_strlen($body_text);
+      $body_text   = phutil_utf8_shorten($body_text, 5000);
+      $shortened   = $body_length > phutil_utf8_strlen($body_text);
     }
-    $panel = id(new AphrontPanelView())
-      ->setHeader(phutil_escape_html($post->getTitle()))
-      ->appendChild('<div class="phabricator-remarkup">'.$body.'</div>')
-      ->setWidth($width)
-      ->addButton($button)
-      ->setCaption($caption);
-    if ($user->getPHID() == $post->getBloggerPHID()) {
-      if ($post->isDraft()) {
-        $label = 'Edit Draft';
-      } else {
-        $label = 'Edit Post';
+    $engine = PhabricatorMarkupEngine::newPhameMarkupEngine();
+    $body   = $engine->markupText($body_text);
+
+    $comments = null;
+    if ($this->getShowComments()) {
+      switch ($post->getCommentsWidget()) {
+        case 'facebook':
+          $comments = $this->renderFacebookComments();
+          break;
+        case 'disqus':
+          $comments = $this->renderDisqusComments();
+          break;
+        case 'none':
+        default:
+          $comments = null;
+          break;
       }
-      $button = phutil_render_tag(
-        'a',
-        array(
-          'href'  => $post->getEditURI(),
-          'class' => 'grey button',
-        ),
-        $label);
-      $panel->addButton($button);
     }
-    switch ($post->getCommentsWidget()) {
-      case 'facebook':
-        $comments = $this->renderFacebookComments();
-        break;
-      case 'disqus':
-        $comments = $this->renderDisqusComments();
-        break;
-      case 'none':
-      default:
-        $comments = null;
-        break;
-    }
-    $panel->appendChild($comments);
 
-    return $panel->render();
+    $more_to_do = null;
+    if (!$comments) {
+
+      if ($shortened) {
+        $more_to_do =
+          phutil_render_tag(
+            'div',
+            array(
+              'class' => 'more-and-comments'
+            ),
+            phutil_render_tag(
+              'a',
+              array(
+              'href' => $post->getViewURI()
+            ),
+            '&#8594; Read More'
+          )
+        );
+
+      } else if ($post->getCommentsWidget() &&
+                 $post->getCommentsWidget() != 'none') {
+         $more_to_do =
+          phutil_render_tag(
+            'div',
+            array(
+              'class' => 'more-and-comments'
+            ),
+            phutil_render_tag(
+              'a',
+              array(
+              'href' => $post->getViewURI()
+            ),
+            '&#8594; Comment'
+          )
+        );
+      }
+    }
+
+    $post_html =
+      phutil_render_tag(
+        'div',
+        array(
+          'class' => 'blog-post'
+        ),
+        phutil_render_tag(
+          'div',
+          array(
+            'class' => 'header',
+          ),
+          $button_html .
+          phutil_render_tag(
+            'h1',
+            array(),
+            phutil_render_tag('a',
+              array(
+                'href' => $post->getViewURI($blogger->getName())
+              ),
+              phutil_escape_html($post->getTitle())
+            )
+          ).
+          phutil_render_tag(
+            'div',
+            array(
+              'class' => 'last-updated'
+            ),
+            $caption
+          )
+        ).
+        phutil_render_tag(
+          'div',
+          array(
+            'class' => 'phabricator-remarkup'
+          ),
+          $body
+        ).
+        $comments.$more_to_do
+      );
+
+    return $post_html;
   }
 
   private function renderFacebookComments() {
@@ -161,7 +290,8 @@ final class PhamePostDetailView extends AphrontView {
     $fb_root = phutil_render_tag('div',
       array(
         'id' => 'fb-root',
-      )
+      ),
+      ''
     );
 
     $c_uri = '//connect.facebook.net/en_US/all.js#xfbml=1&appId='.$fb_id;
@@ -181,9 +311,10 @@ final class PhamePostDetailView extends AphrontView {
         'class'            => 'fb-comments',
         'data-href'        => $this->getRequestURI(),
         'data-num-posts'   => 5,
-        'data-width'       => 1080,
+        'data-width'       => 1080,  // we hack this to fluid in css
         'data-colorscheme' => 'dark',
-      )
+      ),
+      ''
     );
 
     return '<hr />' . $fb_root . $fb_js . $fb_comments;

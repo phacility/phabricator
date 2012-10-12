@@ -21,6 +21,8 @@
  */
 abstract class PhameController extends PhabricatorController {
   private $showSideNav;
+  private $showChrome = true;
+  private $deviceReady = false;
 
   protected function setShowSideNav($value) {
     $this->showSideNav = (bool) $value;
@@ -28,6 +30,22 @@ abstract class PhameController extends PhabricatorController {
   }
   private function showSideNav() {
     return $this->showSideNav;
+  }
+
+  protected function setShowChrome($show_chrome) {
+    $this->showChrome = $show_chrome;
+    return $this;
+  }
+  private function getShowChrome() {
+    return $this->showChrome;
+  }
+
+  public function setDeviceReady($device_ready) {
+    $this->deviceReady = $device_ready;
+    return $this;
+  }
+  public function getDeviceReady() {
+    return $this->deviceReady;
   }
 
   public function buildStandardPageResponse($view, array $data) {
@@ -38,6 +56,8 @@ abstract class PhameController extends PhabricatorController {
     $page->setBaseURI('/phame/');
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xe2\x9c\xa9");
+    $page->setShowChrome($this->getShowChrome());
+    $page->setDeviceReady($this->getDeviceReady());
 
     if ($this->showSideNav()) {
       $nav = $this->renderSideNavFilterView($this->getSideNavFilter());

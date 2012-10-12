@@ -24,9 +24,26 @@ final class PhamePostListView extends AphrontView {
   private $user;
   private $posts;
   private $bloggers;
-  private $actions;
+  private $actions = array();
   private $draftList;
-  private $blogStyle;
+  private $requestURI;
+  private $showPostComments;
+
+  public function setShowPostComments($show_post_comments) {
+    $this->showPostComments = $show_post_comments;
+    return $this;
+  }
+  private function getShowPostComments() {
+    return $this->showPostComments;
+  }
+
+  public function setRequestURI($request_uri) {
+    $this->requestURI = $request_uri;
+    return $this;
+  }
+  public function getRequestURI() {
+    return $this->requestURI;
+  }
 
   public function setDraftList($draft_list) {
     $this->draftList = $draft_list;
@@ -72,28 +89,14 @@ final class PhamePostListView extends AphrontView {
     return $this;
   }
   private function getActions() {
-    if ($this->actions) {
-      return $this->actions;
-    }
-    return array();
-  }
-
-  public function setBlogStyle($style) {
-    $this->blogStyle = $style;
-    return $this;
-  }
-  private function getBlogStyle() {
-    return $this->blogStyle;
+    return $this->actions;
   }
 
   public function render() {
-    $user       = $this->getUser();
-    $posts      = $this->getPosts();
-    $bloggers   = $this->getBloggers();
-    $noun       = $this->getPostNoun();
-    // TODO -- change this from a boolean to a string
-    // this string will represent a more specific "style" below
-    $blog_style = $this->getBlogStyle();
+    $user      = $this->getUser();
+    $posts     = $this->getPosts();
+    $bloggers  = $this->getBloggers();
+    $noun      = $this->getPostNoun();
 
     if (empty($posts)) {
       $panel = id(new AphrontPanelView())
@@ -103,10 +106,9 @@ final class PhamePostListView extends AphrontView {
                           sprintf('/phame/%s/new', strtolower($noun)));
       return $panel->render();
     }
+
     require_celerity_resource('phabricator-remarkup-css');
-    if ($blog_style) {
-      require_celerity_resource('phame-blog-post-list-css');
-    }
+    require_celerity_resource('phame-css');
 
     $engine  = PhabricatorMarkupEngine::newPhameMarkupEngine();
     $html    = array();
@@ -114,43 +116,23 @@ final class PhamePostListView extends AphrontView {
     foreach ($posts as $post) {
       $blogger_phid = $post->getBloggerPHID();
       $blogger      = $bloggers[$blogger_phid];
-      $blogger_link = $blogger->renderLink();
-      $updated      = phabricator_datetime($post->getDateModified(),
-                                           $user);
-      $body         = $engine->markupText($post->getBody());
-      $panel        = id(new AphrontPanelView())
-        ->setHeader(phutil_escape_html($post->getTitle()))
-        ->setCaption('Last updated '.$updated.' by '.$blogger_link.'.')
-        ->appendChild('<div class="phabricator-remarkup">'.$body.'</div>');
-      if ($blog_style) {
-        $panel->addClass('blog-post-list');
-      }
-      foreach ($actions as $action) {
-        switch ($action) {
-          case 'view':
-            $uri   = $post->getViewURI($blogger->getName());
-            $label = 'View '.$noun;
-            break;
-          case 'edit':
-            $uri   = $post->getEditURI();
-            $label = 'Edit '.$noun;
-            break;
-          default:
-            break;
-        }
-        $button = phutil_render_tag(
-          'a',
-          array(
-            'href'  => $uri,
-            'class' => 'grey button',
-          ),
-          $label);
-        $panel->addButton($button);
-      }
+      $detail = id(new PhamePostDetailView())
+        ->setUser($user)
+        ->setPost($post)
+        ->setBlogger($blogger)
+        ->setActions($actions)
+        ->setRequestURI($this->getRequestURI())
+        ->setShowComments($this->getShowPostComments());
 
-      $html[] = $panel->render();
+      $html[] = $detail->render();
     }
 
-    return implode('', $html);
+    return phutil_render_tag(
+      'div',
+      array(
+        'class' => 'blog-post-list'
+      ),
+      implode('', $html)
+    );
   }
 }

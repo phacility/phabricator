@@ -90,8 +90,9 @@ extends PhameController {
 
       if ($post) {
         $this->setPhameTitle($post->getPhameTitle());
-        $blogger = id(new PhabricatorUser())->loadOneWhere(
-          'phid = %s', $post->getBloggerPHID());
+        $blogger = PhabricatorObjectHandleData::loadOneHandle(
+          $post->getBloggerPHID(),
+          $user);
         if (!$blogger) {
           return new Aphront404Response();
         }
@@ -100,9 +101,15 @@ extends PhameController {
     } else if ($this->getBloggerName() && $this->getPhameTitle()) {
       $phame_title = $this->getPhameTitle();
       $phame_title = PhabricatorSlug::normalize($phame_title);
-      $blogger = id(new PhabricatorUser())->loadOneWhere(
+      $blogger_user = id(new PhabricatorUser())->loadOneWhere(
         'username = %s',
         $this->getBloggerName());
+      if (!$blogger_user) {
+        return new Aphront404Response();
+      }
+      $blogger = PhabricatorObjectHandleData::loadOneHandle(
+        $blogger_user->getPHID(),
+        $user);
       if (!$blogger) {
         return new Aphront404Response();
       }
@@ -128,12 +135,12 @@ extends PhameController {
     }
 
     if ($post->isDraft()) {
-      $notice = $this->buildNoticeView()
-        ->setTitle('You are previewing a draft.')
-        ->setErrors(array(
-          'Only you can see this draft until you publish it.',
-          'If you chose a comment widget it will show up when you publish.',
-        ));
+      $notice = array(
+        'title' => 'You are previewing a draft.',
+        'body'  => 'Only you can see this draft until you publish it. '.
+                   'If you chose a comment widget it will show up when '.
+                   'you publish.'
+      );
     } else if ($request->getExists('saved')) {
       $new_link = phutil_render_tag(
         'a',
@@ -143,24 +150,43 @@ extends PhameController {
         ),
         'write another blog post'
       );
-      $notice = $this->buildNoticeView()
-        ->appendChild('<p>Saved post successfully.</p>')
-        ->appendChild('Seek even more phame and '.$new_link);
+      $notice = array(
+        'title' => 'Saved post successfully.',
+        'body'  => 'Seek even more phame and '.$new_link.'.'
+      );
     } else {
-      $notice = null;
+      $notice = array();
     }
 
-    $page = id(new PhamePostDetailView())
+    $actions = array('more');
+    if ($post->getBloggerPHID() == $user->getPHID()) {
+      $actions[] = 'edit';
+    }
+
+    $blog = PhameBlog::getRequestBlog();
+    if ($blog) {
+      $skin = $blog->getSkinRenderer();
+      $skin->setBlog($blog);
+      $skin->setIsExternalDomain(true);
+    } else {
+      $skin = new PhabricatorBlogSkin();
+    }
+    $skin
       ->setUser($user)
       ->setRequestURI($request->getRequestURI())
-      ->setBlogger($blogger)
-      ->setPost($post);
+      ->setBloggers(array($blogger->getPHID() => $blogger))
+      ->setPosts(array($post))
+      ->setNotice($notice)
+      ->setShowPostComments(true)
+      ->setActions($actions);
 
     $this->setShowSideNav(false);
+    $this->setShowChrome($skin->getShowChrome());
+    $this->setDeviceReady($skin->getDeviceReady());
+
     return $this->buildStandardPageResponse(
       array(
-        $notice,
-        $page,
+        $skin
       ),
       array(
         'title'   => $post->getTitle(),

@@ -80,7 +80,7 @@ final class PhameAllPostListController
     $query->withVisibility(PhamePost::VISIBILITY_PUBLISHED);
     $this->setPhamePostQuery($query);
 
-    $this->setActions(array('view'));
+    $this->setActions(array());
 
     $page_title = 'All Posts';
     $this->setPageTitle($page_title);

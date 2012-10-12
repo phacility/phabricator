@@ -1,0 +1,114 @@
+/**
+ * @provides phame-css
+ */
+
+.notice {
+  background: #F3F3FF;
+  border: 1px solid #008;
+  margin: 16px 16px 4px 26px;
+}
+.notice h3 {
+  background: #E3E3FF;
+  padding: 8px;
+}
+
+.notice h4 {
+  font-weight: normal;
+  padding: 8px;
+}
+
+.phame-post-preview-header {
+  margin: 0px 0px 16px 0px;
+}
+
+.blog-post-list {
+  clear: left;
+  float: left;
+  width: 70%;
+  margin: 16px 0px 16px 16px;
+  padding: 0px 8px 12px 8px;
+}
+
+.device-tablet .blog-post-list,
+.device-phone .blog-post-list {
+  float: none;
+  width: 90%;
+  margin: 16px auto;
+}
+
+.blog-post-list-full {
+  clear: left;
+  float: left;
+  margin: 16px 0px 0px 0px;
+  padding: 0px 16px 0px 16px;
+}
+
+.device-tablet .blog-post-list-full,
+.device-phone .blog-post-list-full {
+  float: none;
+  margin: 16px auto;
+}
+
+.blog-detail {
+  float: right;
+  clear: right;
+  width: 20%;
+  margin: 16px 16px 16px 0px;
+}
+
+.device-tablet .blog-detail,
+.device-phone .blog-detail {
+  float: none;
+  margin: 16px auto;
+  width: 90%;
+}
+
+.blog-detail .description {
+  margin: 16px 0px 16px 0px;
+}
+
+.blog-detail .bloggers {
+  font-size: 11px;
+}
+
+.blog-post,
+.blog-detail {
+  border: 1px solid #DBDBDB;
+  background: #F9F9F9;
+  padding: 20px;
+}
+
+.blog-post {
+  margin: 0px 0px 20px 0px;
+}
+
+.blog-post .header {
+  padding: 0px 0px 16px 0px;
+}
+
+.blog-post .header h1 {
+  clear: none;
+}
+
+.blog-post .header .last-updated {
+  color: #666;
+  clear: none;
+  font-size: 11px;
+}
+
+.blog-post .header .buttons {
+  float: right;
+}
+.blog-post .header .buttons a {
+  margin: 0px 0px 0px 12px;
+}
+
+.more-and-comments {
+  padding: 12px 0px 12px 0px;
+}
+
+.fb-comments,
+.fb-comments span,
+.fb-comments iframe[style] {
+  width: 100% !important;
+}

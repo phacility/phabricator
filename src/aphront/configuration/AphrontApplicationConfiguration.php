@@ -153,12 +153,16 @@ abstract class AphrontApplicationConfiguration {
 
       // 2 basic cases
       // -- looking at a list of blog posts, path is nothing or '/'
-      // -- looking at an actual blog post, path is like /btrahan/post_title
+      //    -- we have to fudge the URI in this case
+      // -- looking at an actual blog post, path is like
+      // /phame/posts/<author>/post_title
+      // NOTE: it is possible to get other phame pages, we just do
+      // not link to them at this time.
       if (!$path || $path == '/') {
         $path = $blog->getViewURI();
-      } else {
-        $path = '/phame/posts/'.trim($path, '/').'/';
       }
+
+      PhameBlog::setRequestBlog($blog);
 
       $celerity = CelerityAPI::getStaticResourceResponse();
       $celerity->setUseFullURI(true);

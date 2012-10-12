@@ -22,18 +22,8 @@
 final class PhameBlogDetailView extends AphrontView {
 
   private $user;
-
-  private $isAdmin;
   private $blog;
   private $bloggers;
-
-  public function setIsAdmin($is_admin) {
-    $this->isAdmin = $is_admin;
-    return $this;
-  }
-  private function getIsAdmin() {
-    return $this->isAdmin;
-  }
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
@@ -60,38 +50,58 @@ final class PhameBlogDetailView extends AphrontView {
     return $this->blog;
   }
 
-
   public function render() {
     require_celerity_resource('phabricator-remarkup-css');
-    require_celerity_resource('phame-blog-detail-css');
 
     $user         = $this->getUser();
     $blog         = $this->getBlog();
     $bloggers     = $this->getBloggers();
     $name         = phutil_escape_html($blog->getName());
     $description  = phutil_escape_html($blog->getDescription());
-    $bloggers_txt = implode(' &middot; ', mpull($bloggers, 'renderLink'));
-    $panel = id(new AphrontPanelView())
-      ->addClass('blog-detail')
-      ->setHeader($name)
-      ->setCaption($description)
-      ->setWidth(AphrontPanelView::WIDTH_FORM)
-      ->appendChild('Current bloggers: '.$bloggers_txt);
 
-    if ($this->getIsAdmin()) {
-      $panel->addButton(
+    $detail = phutil_render_tag(
+      'div',
+      array(
+        'class' => 'blog-detail'
+      ),
+      phutil_render_tag(
+        'div',
+        array(
+          'class' => 'header',
+        ),
         phutil_render_tag(
-          'a',
-          array(
-            'href'  => $blog->getEditURI(),
-            'class' => 'button grey',
-          ),
-          'Edit Blog')
-      );
+          'h1',
+          array(),
+          $name
+        )
+      ).
+      phutil_render_tag(
+        'div',
+        array(
+          'class' => 'description'
+        ),
+        $description
+      ).
+      phutil_render_tag(
+        'div',
+        array(
+          'class' => 'bloggers'
+        ),
+        'Current bloggers: '.$this->getBloggersHTML($bloggers)
+      )
+    );
 
-    }
-
-    return $panel->render();
+    return $detail;
   }
 
+  private function getBloggersHTML(array $bloggers) {
+    assert_instances_of($bloggers, 'PhabricatorObjectHandle');
+
+    $arr = array();
+    foreach ($bloggers as $blogger) {
+      $arr[] = '<strong>'.phutil_escape_html($blogger->getName()).'</strong>';
+    }
+
+    return implode(' &middot; ', $arr);
+  }
 }

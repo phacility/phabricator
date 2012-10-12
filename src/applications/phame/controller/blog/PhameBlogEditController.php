@@ -123,6 +123,7 @@ final class PhameBlogEditController
       $description   = $request->getStr('description');
       $blogger_arr   = $request->getArr('bloggers');
       $custom_domain = $request->getStr('custom_domain');
+      $skin          = $request->getStr('skin');
 
       if (empty($blogger_arr)) {
         $error = 'Bloggers must be nonempty.';
@@ -155,6 +156,7 @@ final class PhameBlogEditController
         }
         $blog->setDomain($custom_domain);
       }
+      $blog->setSkin($skin);
 
       if (empty($errors)) {
         $blog->save();
@@ -230,6 +232,13 @@ final class PhameBlogEditController
         ->setCaption('Must include at least one dot (.), e.g. '.
         'blog.example.com')
         ->setError($e_custom_domain)
+      )
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+        ->setLabel('Skin')
+        ->setName('skin')
+        ->setValue($blog->getSkin())
+        ->setOptions(PhameBlog::getSkinOptionsForSelect())
       )
       ->appendChild(
         id(new AphrontFormSubmitControl())

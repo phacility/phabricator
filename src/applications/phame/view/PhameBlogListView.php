@@ -64,61 +64,37 @@ final class PhameBlogListView extends AphrontView {
       return $panel->render();
     }
 
-    $table_data = array();
+    $view = new PhabricatorObjectItemListView();
     foreach ($blogs as $blog) {
-      $view_link = phutil_render_tag(
-        'a',
-        array(
-          'href' => $blog->getViewURI(),
-        ),
-        phutil_escape_html($blog->getName()));
       $bloggers = $blog->getBloggers();
-      if (isset($bloggers[$user->getPHID()])) {
-        $edit = phutil_render_tag(
-          'a',
-          array(
-            'class' => 'button small grey',
-            'href'  => $blog->getEditURI(),
-          ),
-          'Edit');
-      } else {
-        $edit = null;
-      }
-      $view = phutil_render_tag(
-          'a',
-          array(
-            'class' => 'button small grey',
-            'href'  => $blog->getViewURI(),
-          ),
-          'View');
-      $table_data[] =
-        array(
-          $view_link,
-          implode(', ', mpull($blog->getBloggers(), 'renderLink')),
-          $view,
-          $edit,
-        );
-    }
 
-    $table = new AphrontTableView($table_data);
-    $table->setHeaders(
-      array(
-        'Name',
-        'Bloggers',
-        '',
-        '',
-      ));
-    $table->setColumnClasses(
-      array(
-        null,
-        null,
-        'action',
-        'action',
-      ));
+      $item = id(new PhabricatorObjectItemView())
+        ->setHeader($blog->getName())
+        ->setHref($blog->getViewURI())
+        ->addDetail(
+          'Bloggers',
+          implode(', ', mpull($bloggers, 'renderLink')))
+        ->addDetail(
+          'Custom Domain',
+          $blog->getDomain());
+
+      if (isset($bloggers[$user->getPHID()])) {
+        $item->addAttribute(
+          phutil_render_tag(
+            'a',
+            array(
+              'class' => 'button small grey',
+              'href'  => $blog->getEditURI(),
+            ),
+            'Edit'));
+      }
+
+      $view->addItem($item);
+    }
 
     $panel->setCreateButton('Create a Blog', '/phame/blog/new/');
     $panel->setHeader($this->getHeader());
-    $panel->appendChild($table);
+    $panel->appendChild($view);
 
     return $panel->render();
   }

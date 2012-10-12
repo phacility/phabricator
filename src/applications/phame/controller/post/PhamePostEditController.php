@@ -299,6 +299,7 @@ final class PhamePostEditController
          </div>
        </div>';
 
+    require_celerity_resource('phame-css');
     Javelin::initBehavior(
       'phame-post-preview',
       array(

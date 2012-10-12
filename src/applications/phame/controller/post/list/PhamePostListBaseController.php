@@ -71,9 +71,10 @@ abstract class PhamePostListBaseController
   }
 
   protected function buildPostListPageResponse() {
-    $pager = $this->getPager();
-    $query = $this->getPhamePostQuery();
-    $posts = $query->executeWithOffsetPager($pager);
+    $request = $this->getRequest();
+    $pager   = $this->getPager();
+    $query   = $this->getPhamePostQuery();
+    $posts   = $query->executeWithOffsetPager($pager);
 
     $bloggers =  $this->loadBloggersFromPosts($posts);
 
@@ -82,6 +83,7 @@ abstract class PhamePostListBaseController
       ->setBloggers($bloggers)
       ->setPosts($posts)
       ->setActions($this->getActions())
+      ->setRequestURI($request->getRequestURI())
       ->setDraftList($this->isDraft());
 
     return $this->buildStandardPageResponse(

@@ -21,6 +21,8 @@
  */
 final class PhameBlog extends PhameDAO {
 
+  const SKIN_DEFAULT = 'PhabricatorBlogSkin';
+
   protected $id;
   protected $phid;
   protected $name;
@@ -29,8 +31,12 @@ final class PhameBlog extends PhameDAO {
   protected $configData;
   protected $creatorPHID;
 
+  private $skin;
+
   private $bloggerPHIDs;
   private $bloggers;
+
+  static private $requestBlog;
 
   public function getConfiguration() {
     return array(
@@ -44,6 +50,12 @@ final class PhameBlog extends PhameDAO {
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorPHIDConstants::PHID_TYPE_BLOG);
+  }
+
+  public function getSkinRenderer() {
+    $skin = $this->getSkin();
+
+    return new $skin();
   }
 
   /**
@@ -142,6 +154,27 @@ final class PhameBlog extends PhameDAO {
     return $this->bloggers;
   }
 
+  public function getSkin() {
+    $config = coalesce($this->getConfigData(), array());
+    return idx($config, 'skin', self::SKIN_DEFAULT);
+  }
+
+  public function setSkin($skin) {
+    $config = coalesce($this->getConfigData(), array());
+    $config['skin'] = $skin;
+    return $this->setConfigData($config);
+  }
+
+  static public function getSkinOptionsForSelect() {
+    $classes = id(new PhutilSymbolLoader())
+      ->setAncestorClass('PhameBlogSkin')
+      ->setType('class')
+      ->setConcreteOnly(true)
+      ->selectSymbolsWithoutLoading();
+
+    return ipull($classes, 'name', 'name');
+  }
+
   public function getPostListURI() {
     return $this->getActionURI('posts');
   }
@@ -164,5 +197,13 @@ final class PhameBlog extends PhameDAO {
 
   private function getActionURI($action) {
     return '/phame/blog/'.$action.'/'.$this->getPHID().'/';
+  }
+
+  public static function setRequestBlog(PhameBlog $blog) {
+    self::$requestBlog = $blog;
+  }
+
+  public static function getRequestBlog() {
+    return self::$requestBlog;
   }
 }
