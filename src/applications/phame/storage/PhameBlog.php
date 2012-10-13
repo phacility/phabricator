@@ -53,9 +53,15 @@ final class PhameBlog extends PhameDAO {
   }
 
   public function getSkinRenderer() {
-    $skin = $this->getSkin();
+    try {
+      $skin = newv($this->getSkin(), array());
+    } catch (PhutilMissingSymbolException $ex) {
+      // If this blog has a skin but it's no longer available (for example,
+      // it was uninstalled) just return the default skin.
+      $skin = newv(self::SKIN_DEFAULT, array());
+    }
 
-    return new $skin();
+    return $skin;
   }
 
   /**
