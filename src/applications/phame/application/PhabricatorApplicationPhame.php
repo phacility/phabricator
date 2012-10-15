@@ -45,21 +45,18 @@ final class PhabricatorApplicationPhame extends PhabricatorApplication {
   public function getRoutes() {
     return array(
      '/phame/' => array(
-        ''                          => 'PhameAllPostListController',
+        '' => 'PhamePostListController',
         'post/' => array(
-          ''                        => 'PhameUserPostListController',
-          'delete/(?P<phid>[^/]+)/' => 'PhamePostDeleteController',
-          'edit/(?P<phid>[^/]+)/'   => 'PhamePostEditController',
-          'new/'                    => 'PhamePostEditController',
-          'preview/'                => 'PhamePostPreviewController',
-          'view/(?P<phid>[^/]+)/'   => 'PhamePostViewController',
+          '(?:(?P<filter>draft|all)/)?'     => 'PhamePostListController',
+          'blogger/(?P<bloggername>[\w\.-_]+)/' => 'PhamePostListController',
+          'delete/(?P<phid>[^/]+)/'         => 'PhamePostDeleteController',
+          'edit/(?P<phid>[^/]+)/'           => 'PhamePostEditController',
+          'new/'                            => 'PhamePostEditController',
+          'preview/'                        => 'PhamePostPreviewController',
+          'view/(?P<phid>[^/]+)/'           => 'PhamePostViewController',
         ),
-        'draft/' => array(
-          ''                        => 'PhameDraftListController',
-          'new/'                    => 'PhamePostEditController',
-        ),
-        'blog/(?:(?P<filter>user|all)/)?' => 'PhameBlogListController',
         'blog/' => array(
+          '(?:(?P<filter>user|all)/)?'      => 'PhameBlogListController',
           'delete/(?P<id>[^/]+)/'           => 'PhameBlogDeleteController',
           'edit/(?P<id>[^/]+)/'             => 'PhameBlogEditController',
           'view/(?P<id>[^/]+)/'             => 'PhameBlogViewController',
@@ -67,8 +64,6 @@ final class PhabricatorApplicationPhame extends PhabricatorApplication {
           'new/'                            => 'PhameBlogEditController',
         ),
         'posts/' => array(
-          ''                        => 'PhameUserPostListController',
-          '(?P<bloggername>\w+)/'   => 'PhameBloggerPostListController',
           '(?P<bloggername>\w+)/(?P<phametitle>.+/)'
                                     => 'PhamePostViewController',
         ),

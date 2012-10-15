@@ -65,6 +65,11 @@ final class PhameBlogViewController extends PhameController {
     $header = id(new PhabricatorHeaderView())
       ->setHeader($blog->getName());
 
+    $handle_phids = array_merge(
+      mpull($posts, 'getBloggerPHID'),
+      mpull($posts, 'getBlogPHID'));
+    $this->loadHandles($handle_phids);
+
     $actions = $this->renderActions($blog, $user);
     $properties = $this->renderProperties($blog, $user);
     $post_list = $this->renderPostList(

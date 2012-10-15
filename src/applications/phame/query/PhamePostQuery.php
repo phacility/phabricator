@@ -77,7 +77,7 @@ final class PhamePostQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         ->setViewer($this->getViewer())
         ->withPHIDs($blog_phids)
         ->execute();
-      $blogs = mpull($blogs, 'getPHID');
+      $blogs = mpull($blogs, null, 'getPHID');
       foreach ($posts as $post) {
         if (isset($blogs[$post->getBlogPHID()])) {
           $post->setBlog($blogs[$post->getBlogPHID()]);

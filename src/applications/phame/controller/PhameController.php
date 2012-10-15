@@ -81,18 +81,15 @@ abstract class PhameController extends PhabricatorController {
 
     $nav->addSpacer();
     $nav->addLabel('Posts');
-    $nav->addFilter('draft',
+    $nav->addFilter('post/draft',
                     'My Drafts');
     foreach ($this->getSideNavExtraDraftFilters() as $draft_filter) {
       $nav->addFilter($draft_filter['key'],
                       $draft_filter['name'],
                       idx($draft_filter, 'uri'));
     }
-    $nav->addFilter('post',
-                    'My Posts');
-    $nav->addFilter('post/all',
-                    'All Posts',
-                    $base_uri);
+    $nav->addFilter('post/', 'My Posts');
+    $nav->addFilter('post/all', 'All Posts');
     foreach ($this->getSideNavExtraPostFilters() as $post_filter) {
       $nav->addFilter($post_filter['key'],
                       $post_filter['name'],
@@ -167,7 +164,24 @@ abstract class PhameController extends PhabricatorController {
     foreach ($posts as $post) {
       $item = id(new PhabricatorObjectItemView())
         ->setHeader($post->getTitle())
-        ->setHref($this->getApplicationURI('post/view/'.$post->getPHID()));
+        ->setHref($this->getApplicationURI('post/view/'.$post->getPHID()))
+        ->addDetail(
+          pht('Blogger'),
+          $this->getHandle($post->getBloggerPHID())->renderLink())
+        ->addDetail(
+          pht('Blog'),
+          $post->getBlog()
+            ? $this->getHandle($post->getBlog()->getPHID())->renderLink()
+            : '-');
+
+      if ($post->isDraft()) {
+        $item->addAttribute(pht('Draft'));
+      } else {
+        $date_published = phabricator_datetime(
+          $post->getDatePublished(),
+          $user);
+        $item->addAttribute(pht('Published on %s', $date_published));
+      }
 
       $list->addItem($item);
     }
