@@ -24,7 +24,6 @@ final class PhameBlog extends PhameDAO
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:description';
 
-
   const SKIN_DEFAULT = 'PhabricatorBlogSkin';
 
   protected $id;

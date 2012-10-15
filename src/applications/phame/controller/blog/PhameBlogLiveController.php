@@ -22,6 +22,7 @@
 final class PhameBlogLiveController extends PhameController {
 
   private $id;
+  private $more;
 
   public function shouldAllowPublic() {
     return true;
@@ -29,71 +30,50 @@ final class PhameBlogLiveController extends PhameController {
 
   public function willProcessRequest(array $data) {
     $this->id = idx($data, 'id');
+    $this->more = idx($data, 'more', '');
   }
 
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    // NOTE: We're loading with the logged-out user so we can raise the right
-    // error if the blog permissions aren't set correctly.
-
-    $blog = null;
-    $policy_exception = null;
-
-    try {
-      $blog = id(new PhameBlogQuery())
-        ->setViewer(new PhabricatorUser())
-        ->withIDs(array($this->id))
-        ->executeOne();
-    } catch (PhabricatorPolicyException $ex) {
-      $policy_exception = $ex;
-    }
-
-    if (!$blog && !$policy_exception) {
+    $blog = id(new PhameBlogQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->executeOne();
+    if (!$blog) {
       return new Aphront404Response();
     }
 
-    $errors = array();
-    if ($policy_exception) {
-      $errors[] = pht('"Visible To" must be set to "Public".');
-    }
-
-    if ($blog && !$blog->getDomain()) {
-      $errors[] = pht('You must configure a custom domain.');
-    }
-
-    if ($errors) {
-      if ($blog) {
-        $cancel_uri = $this->getApplicationURI('/blog/view/'.$blog->getID());
-      } else {
-        $cancel_uri = $this->getApplicationURI();
-      }
-
-      $dialog = id(new AphrontDialogView())
-        ->setUser($user)
-        ->addCancelButton($cancel_uri)
-        ->setTitle(pht('Live Blog Unavailable'));
-
-      foreach ($errors as $error) {
-        $dialog->appendChild('<p>'.$error.'</p>');
-      }
-
-      return id(new AphrontDialogResponse())->setDialog($dialog);
-    }
-
-    if ($request->getHost() != $blog->getDomain()) {
-      $uri = 'http://'.$blog->getDomain().'/';
-      return id(new AphrontRedirectResponse())->setURI($uri);
+    if ($blog->getDomain() && ($request->getHost() != $blog->getDomain())) {
+      return id(new AphrontRedirectResponse())
+        ->setURI('http://'.$blog->getDomain().'/'.$this->more);
     }
 
     $pager = id(new AphrontCursorPagerView())
       ->readFromRequest($request);
 
-    $posts = id(new PhamePostQuery())
+    $query = id(new PhamePostQuery())
       ->setViewer($user)
-      ->withBlogPHIDs(array($blog->getPHID()))
-      ->executeWithCursorPager($pager);
+      ->withBlogPHIDs(array($blog->getPHID()));
+
+    $matches = null;
+    $path = $this->more;
+    if (preg_match('@^/(?P<view>[^/]+)/(?P<name>.*)$@', $path, $matches)) {
+      $view = $matches['view'];
+      $name = $matches['name'];
+    } else {
+      $view = '';
+      $name = '';
+    }
+
+    switch ($view) {
+      case 'post':
+        $query->withPhameTitles(array($name));
+        break;
+    }
+
+    $posts = $query->executeWithCursorPager($pager);
 
     $skin = $blog->getSkinRenderer();
     $skin

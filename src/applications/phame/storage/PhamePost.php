@@ -182,7 +182,8 @@ final class PhamePost extends PhameDAO
 
 
   public function getMarkupFieldKey($field) {
-    return $this->getPHID().':'.$field;
+    $hash = PhabricatorHash::digest($this->getMarkupText($field));
+    return $this->getPHID().':'.$field.':'.$hash;
   }
 
 

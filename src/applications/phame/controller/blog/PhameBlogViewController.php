@@ -144,14 +144,11 @@ final class PhameBlogViewController extends PhameController {
         ->setDisabled(!$can_join)
         ->setWorkflow(!$can_join));
 
-    $has_domain = $blog->getDomain();
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setIcon('world')
-        ->setHref($this->getApplicationURI('blog/live/'.$blog->getID().'/'))
-        ->setName(pht('View Live'))
-        ->setDisabled(!$has_domain)
-        ->setWorkflow(true));
+        ->setHref($this->getApplicationURI('live/'.$blog->getID().'/'))
+        ->setName(pht('View Live')));
 
     $actions->addAction(
       id(new PhabricatorActionView())

@@ -164,7 +164,7 @@ abstract class AphrontApplicationConfiguration {
       // TODO: Make this more flexible and modular so any application can
       // do crazy stuff here if it wants.
 
-      $path = '/phame/blog/live/'.$blog->getID().'/'.$path;
+      $path = '/phame/live/'.$blog->getID().'/'.$path;
 
       $celerity = CelerityAPI::getStaticResourceResponse();
       $celerity->setUseFullURI(true);

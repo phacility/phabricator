@@ -1167,6 +1167,7 @@ phutil_register_library_map(array(
     'PhamePostListController' => 'applications/phame/controller/post/PhamePostListController.php',
     'PhamePostListView' => 'applications/phame/view/PhamePostListView.php',
     'PhamePostNewController' => 'applications/phame/controller/post/PhamePostNewController.php',
+    'PhamePostNotLiveController' => 'applications/phame/controller/post/PhamePostNotLiveController.php',
     'PhamePostPreviewController' => 'applications/phame/controller/post/PhamePostPreviewController.php',
     'PhamePostPublishController' => 'applications/phame/controller/post/PhamePostPublishController.php',
     'PhamePostQuery' => 'applications/phame/query/PhamePostQuery.php',
@@ -2278,6 +2279,7 @@ phutil_register_library_map(array(
     array(
       0 => 'PhameDAO',
       1 => 'PhabricatorPolicyInterface',
+      2 => 'PhabricatorMarkupInterface',
     ),
     'PhameBlogDeleteController' => 'PhameController',
     'PhameBlogDetailView' => 'AphrontView',
@@ -2293,6 +2295,7 @@ phutil_register_library_map(array(
     array(
       0 => 'PhameDAO',
       1 => 'PhabricatorPolicyInterface',
+      2 => 'PhabricatorMarkupInterface',
     ),
     'PhamePostDeleteController' => 'PhameController',
     'PhamePostDetailView' => 'AphrontView',
@@ -2301,6 +2304,7 @@ phutil_register_library_map(array(
     'PhamePostListController' => 'PhameController',
     'PhamePostListView' => 'AphrontView',
     'PhamePostNewController' => 'PhameController',
+    'PhamePostNotLiveController' => 'PhameController',
     'PhamePostPreviewController' => 'PhameController',
     'PhamePostPublishController' => 'PhameController',
     'PhamePostQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
