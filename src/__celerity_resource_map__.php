@@ -51,8 +51,8 @@ celerity_register_resource_map(array(
   ),
   '/rsrc/image/autosprite.png' =>
   array(
-    'hash' => '005c7630a31cb2ef6b1782d4eca08cd7',
-    'uri' => '/res/005c7630/rsrc/image/autosprite.png',
+    'hash' => 'b1a2597ab1d245a52e5c8783dffa5e26',
+    'uri' => '/res/b1a2597a/rsrc/image/autosprite.png',
     'disk' => '/rsrc/image/autosprite.png',
     'type' => 'png',
   ),
@@ -462,27 +462,6 @@ celerity_register_resource_map(array(
     'disk' => '/rsrc/image/nyan.gif',
     'type' => 'gif',
   ),
-  '/rsrc/image/phacility/phacility_logo.jpg' =>
-  array(
-    'hash' => '88000de28b8741acc584b24560bd3d4f',
-    'uri' => '/res/88000de2/rsrc/image/phacility/phacility_logo.jpg',
-    'disk' => '/rsrc/image/phacility/phacility_logo.jpg',
-    'type' => 'jpg',
-  ),
-  '/rsrc/image/phacility/sprites.png' =>
-  array(
-    'hash' => 'b018a070d120f689a2beb8ece67e1b1e',
-    'uri' => '/res/b018a070/rsrc/image/phacility/sprites.png',
-    'disk' => '/rsrc/image/phacility/sprites.png',
-    'type' => 'png',
-  ),
-  '/rsrc/image/phacility/tactile_noise.png' =>
-  array(
-    'hash' => '7fb4ca90b8b0919153770b6badb982f0',
-    'uri' => '/res/7fb4ca90/rsrc/image/phacility/tactile_noise.png',
-    'disk' => '/rsrc/image/phacility/tactile_noise.png',
-    'type' => 'png',
-  ),
   '/rsrc/image/search.png' =>
   array(
     'hash' => 'ff7da044e6f923b8f569dec11f97e5e5',
@@ -678,7 +657,7 @@ celerity_register_resource_map(array(
   ),
   'autosprite-css' =>
   array(
-    'uri' => '/res/6c0c2948/rsrc/css/autosprite.css',
+    'uri' => '/res/95e8f847/rsrc/css/autosprite.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -1633,17 +1612,6 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/core/behavior-watch-anchor.js',
   ),
-  'javelin-behavior-phame-post-blogs' =>
-  array(
-    'uri' => '/res/a7f7756c/rsrc/js/application/phame/phame-post-blogs.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'javelin-behavior',
-      1 => 'javelin-dom',
-    ),
-    'disk' => '/rsrc/js/application/phame/phame-post-blogs.js',
-  ),
   'javelin-behavior-phame-post-preview' =>
   array(
     'uri' => '/res/ac4c503a/rsrc/js/application/phame/phame-post-preview.js',
@@ -2202,15 +2170,6 @@ celerity_register_resource_map(array(
       7 => 'javelin-uri',
     ),
     'disk' => '/rsrc/js/javelin/lib/Workflow.js',
-  ),
-  'jquery-js' =>
-  array(
-    'uri' => '/res/7f0dd213/rsrc/js/application/phame/skins/phacility/jquery/jquery.min.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/js/application/phame/skins/phacility/jquery/jquery.min.js',
   ),
   'maniphest-batch-editor' =>
   array(
@@ -2918,38 +2877,9 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/js/application/uiexample/ReactorSendPropertiesExample.js',
   ),
-  'phacility-bootstrap-css' =>
-  array(
-    'uri' => '/res/28f0ad0e/rsrc/css/application/phame/skins/phacility/bootstrap/bootstrap.min.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-    ),
-    'disk' => '/rsrc/css/application/phame/skins/phacility/bootstrap/bootstrap.min.css',
-  ),
-  'phacility-css' =>
-  array(
-    'uri' => '/res/f55275c2/rsrc/css/application/phame/skins/phacility/phacility.css',
-    'type' => 'css',
-    'requires' =>
-    array(
-      0 => 'phacility-bootstrap-css',
-    ),
-    'disk' => '/rsrc/css/application/phame/skins/phacility/phacility.css',
-  ),
-  'phacility-js' =>
-  array(
-    'uri' => '/res/f441bc88/rsrc/js/application/phame/skins/phacility/bootstrap/bootstrap.min.js',
-    'type' => 'js',
-    'requires' =>
-    array(
-      0 => 'jquery-js',
-    ),
-    'disk' => '/rsrc/js/application/phame/skins/phacility/bootstrap/bootstrap.min.js',
-  ),
   'phame-css' =>
   array(
-    'uri' => '/res/2d18adca/rsrc/css/application/phame/phame.css',
+    'uri' => '/res/2e4c86eb/rsrc/css/application/phame/phame.css',
     'type' => 'css',
     'requires' =>
     array(

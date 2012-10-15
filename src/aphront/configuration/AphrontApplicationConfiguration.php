@@ -140,7 +140,7 @@ abstract class AphrontApplicationConfiguration {
 
       try {
         $blog = id(new PhameBlogQuery())
-          ->setViewer($request->getUser())
+          ->setViewer(new PhabricatorUser())
           ->withDomain($host)
           ->executeOne();
       } catch (PhabricatorPolicyException $ex) {
@@ -161,18 +161,10 @@ abstract class AphrontApplicationConfiguration {
         );
       }
 
-      // 2 basic cases
-      // -- looking at a list of blog posts, path is nothing or '/'
-      //    -- we have to fudge the URI in this case
-      // -- looking at an actual blog post, path is like
-      // /phame/posts/<author>/post_title
-      // NOTE: it is possible to get other phame pages, we just do
-      // not link to them at this time.
-      if (!$path || $path == '/') {
-        $path = $blog->getViewURI();
-      }
+      // TODO: Make this more flexible and modular so any application can
+      // do crazy stuff here if it wants.
 
-      PhameBlog::setRequestBlog($blog);
+      $path = '/phame/blog/live/'.$blog->getID().'/'.$path;
 
       $celerity = CelerityAPI::getStaticResourceResponse();
       $celerity->setUseFullURI(true);

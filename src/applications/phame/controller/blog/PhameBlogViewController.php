@@ -21,15 +21,7 @@
  */
 final class PhameBlogViewController extends PhameController {
 
-  private $blogPHID;
-
-  private function setBlogPHID($blog_phid) {
-    $this->blogPHID = $blog_phid;
-    return $this;
-  }
-  private function getBlogPHID() {
-    return $this->blogPHID;
-  }
+  private $id;
 
   protected function getSideNavFilter() {
     $filter = 'blog/view/'.$this->getBlogPHID();
@@ -45,7 +37,7 @@ final class PhameBlogViewController extends PhameController {
   }
 
   public function willProcessRequest(array $data) {
-    $this->setBlogPHID(idx($data, 'phid'));
+    $this->id = $data['id'];
   }
 
   public function processRequest() {
@@ -54,36 +46,128 @@ final class PhameBlogViewController extends PhameController {
 
     $blog = id(new PhameBlogQuery())
       ->setViewer($user)
-      ->withPHIDs(array($this->getBlogPHID()))
+      ->withIDs(array($this->id))
       ->executeOne();
     if (!$blog) {
       return new Aphront404Response();
     }
 
+    $pager = id(new AphrontCursorPagerView())
+      ->readFromRequest($request);
+
     $posts = id(new PhamePostQuery())
       ->setViewer($user)
       ->withBlogPHIDs(array($blog->getPHID()))
-      ->execute();
+      ->executeWithCursorPager($pager);
 
-    $skin = $blog->getSkinRenderer();
-    $skin
-      ->setUser($this->getRequest()->getUser())
-      ->setBloggers($this->loadViewerHandles(mpull($posts, 'getBloggerPHID')))
-      ->setPosts($posts)
-      ->setBlog($blog)
-      ->setRequestURI($this->getRequest()->getRequestURI());
+    $nav = $this->renderSideNavFilterView(null);
 
-    $this->setShowSideNav(false);
-    $this->setShowChrome($skin->getShowChrome());
-    $this->setDeviceReady($skin->getDeviceReady());
-    $skin->setIsExternalDomain($blog->getDomain() == $request->getHost());
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($blog->getName());
 
-    return $this->buildStandardPageResponse(
+    $actions = $this->renderActions($blog, $user);
+    $properties = $this->renderProperties($blog, $user);
+    $post_list = $this->renderPostList(
+      $posts,
+      $user,
+      pht('This blog has no visible posts.'));
+
+    $nav->appendChild(
       array(
-        $skin
-      ),
+        $header,
+        $actions,
+        $properties,
+        $post_list,
+      ));
+
+    return $this->buildApplicationPage(
+      $nav,
       array(
-        'title' => $blog->getName(),
+        'device'  => true,
+        'title'   => $blog->getName(),
       ));
   }
+
+  private function renderProperties(PhameBlog $blog, PhabricatorUser $user) {
+    $properties = new PhabricatorPropertyListView();
+
+    $properties->addProperty(
+      pht('Skin'),
+      phutil_escape_html($blog->getSkin()));
+
+    $properties->addProperty(
+      pht('Domain'),
+      phutil_escape_html($blog->getDomain()));
+
+    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
+      $user,
+      $blog);
+
+    $properties->addProperty(
+      pht('Visible To'),
+      $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
+
+    $properties->addProperty(
+      pht('Editable By'),
+      $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
+
+    $properties->addProperty(
+      pht('Joinable By'),
+      $descriptions[PhabricatorPolicyCapability::CAN_JOIN]);
+
+    return $properties;
+  }
+
+  private function renderActions(PhameBlog $blog, PhabricatorUser $user) {
+
+    $actions = id(new PhabricatorActionListView())
+      ->setObject($blog)
+      ->setUser($user);
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $user,
+      $blog,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $can_join = PhabricatorPolicyFilter::hasCapability(
+      $user,
+      $blog,
+      PhabricatorPolicyCapability::CAN_JOIN);
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('new')
+        ->setHref($this->getApplicationURI('post/new/?blog='.$blog->getID()))
+        ->setName(pht('Write Post'))
+        ->setDisabled(!$can_join)
+        ->setWorkflow(!$can_join));
+
+    $has_domain = $blog->getDomain();
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('world')
+        ->setHref($this->getApplicationURI('blog/live/'.$blog->getID().'/'))
+        ->setName(pht('View Live'))
+        ->setDisabled(!$has_domain)
+        ->setWorkflow(true));
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('edit')
+        ->setHref($this->getApplicationURI('blog/edit/'.$blog->getID().'/'))
+        ->setName('Edit Blog')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('delete')
+        ->setHref($this->getApplicationURI('blog/delete/'.$blog->getID().'/'))
+        ->setName('Delete Blog')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true));
+
+    return $actions;
+  }
+
 }

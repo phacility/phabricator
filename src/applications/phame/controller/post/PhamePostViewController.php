@@ -155,14 +155,8 @@ final class PhamePostViewController extends PhameController {
       $actions[] = 'edit';
     }
 
-    $blog = PhameBlog::getRequestBlog();
-    if ($blog) {
-      $skin = $blog->getSkinRenderer();
-      $skin->setBlog($blog);
-      $skin->setIsExternalDomain(true);
-    } else {
-      $skin = new PhabricatorBlogSkin();
-    }
+    $skin = new PhabricatorBlogSkin();
+
     $skin
       ->setUser($user)
       ->setRequestURI($request->getRequestURI())

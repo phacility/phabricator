@@ -19,18 +19,10 @@
 /**
  * @group phame
  */
-final class PhameBlogDeleteController
-extends PhameController {
+final class PhameBlogDeleteController extends PhameController {
 
-  private $phid;
+  private $id;
 
-  private function setBlogPHID($phid) {
-    $this->phid = $phid;
-    return $this;
-  }
-  private function getBlogPHID() {
-    return $this->phid;
-  }
 
   protected function getSideNavFilter() {
     return 'blog/delete/'.$this->getBlogPHID();
@@ -46,8 +38,7 @@ extends PhameController {
   }
 
   public function willProcessRequest(array $data) {
-    $phid = $data['phid'];
-    $this->setBlogPHID($phid);
+    $this->id = $data['id'];
   }
 
   public function processRequest() {
@@ -56,13 +47,12 @@ extends PhameController {
 
     $blog = id(new PhameBlogQuery())
       ->setViewer($user)
-      ->withPHIDs(array($this->getBlogPHID()))
+      ->withIDs(array($this->id))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
       ->executeOne();
-
     if (!$blog) {
       return new Aphront404Response();
     }
@@ -70,15 +60,20 @@ extends PhameController {
     if ($request->isFormPost()) {
       $blog->delete();
       return id(new AphrontRedirectResponse())
-        ->setURI('/phame/blog/?deleted');
+        ->setURI($this->getApplicationURI());
     }
+
+    $cancel_uri = $this->getApplicationURI('/blog/view/'.$blog->getID().'/');
 
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
-      ->setTitle('Delete blog?')
-      ->appendChild('Really delete this blog? It will be gone forever.')
-      ->addSubmitButton('Delete')
-      ->addCancelButton($blog->getEditURI());
+      ->setTitle(pht('Delete blog?'))
+      ->appendChild(
+        pht(
+          'Really delete the blog "%s"? It will be gone forever.',
+          $blog->getName()))
+      ->addSubmitButton(pht('Delete'))
+      ->addCancelButton($cancel_uri);
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }

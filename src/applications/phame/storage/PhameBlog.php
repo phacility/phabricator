@@ -186,10 +186,6 @@ final class PhameBlog extends PhameDAO implements PhabricatorPolicyInterface {
     return $this->getActionURI('posts');
   }
 
-  public function getViewURI() {
-    return $this->getActionURI('view');
-  }
-
   public function getEditURI() {
     return $this->getActionURI('edit');
   }

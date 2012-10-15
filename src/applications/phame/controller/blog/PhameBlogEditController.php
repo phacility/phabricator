@@ -22,69 +22,25 @@
 final class PhameBlogEditController
   extends PhameController {
 
-  private $phid;
-  private $isBlogEdit;
-
-  private function setBlogPHID($phid) {
-    $this->phid = $phid;
-    return $this;
-  }
-  private function getBlogPHID() {
-    return $this->phid;
-  }
-  private function setIsBlogEdit($is_blog_edit) {
-    $this->isBlogEdit = $is_blog_edit;
-    return $this;
-  }
-  private function isBlogEdit() {
-    return $this->isBlogEdit;
-  }
+  private $id;
 
   protected function getSideNavFilter() {
-    if ($this->isBlogEdit()) {
-      $filter = 'blog/edit/'.$this->getBlogPHID();
-    } else {
-      $filter = 'blog/new';
-    }
-    return $filter;
+    return 'blog/edit/'.$this->id;
   }
 
-  protected function getSideNavBlogFilters() {
-    $filters = parent::getSideNavBlogFilters();
-
-    if ($this->isBlogEdit()) {
-      $filter =
-        array('key'  => 'blog/edit/'.$this->getBlogPHID(),
-              'name' => 'Edit Blog');
-      $filters[] = $filter;
-    } else {
-      $filter =
-        array('key'  => 'blog/new',
-              'name' => 'New Blog');
-      array_unshift($filters, $filter);
-    }
-
-    return $filters;
-  }
 
   public function willProcessRequest(array $data) {
-    $phid = idx($data, 'phid');
-    $this->setBlogPHID($phid);
-    $this->setIsBlogEdit((bool)$phid);
+    $this->id = idx($data, 'id');
   }
 
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $e_name          = true;
-    $e_custom_domain = null;
-    $errors          = array();
-
-    if ($this->isBlogEdit()) {
+    if ($this->id) {
       $blog = id(new PhameBlogQuery())
         ->setViewer($user)
-        ->withPHIDs(array($this->getBlogPHID()))
+        ->withIDs(array($this->id))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_EDIT
@@ -94,24 +50,25 @@ final class PhameBlogEditController
         return new Aphront404Response();
       }
 
-      $submit_button  = 'Save Changes';
-      $delete_button  = javelin_render_tag(
-        'a',
-        array(
-          'href'  => $blog->getDeleteURI(),
-          'class' => 'grey button',
-          'sigil' => 'workflow',
-        ),
-        'Delete Blog');
-      $page_title     = 'Edit Blog';
+      $submit_button = pht('Save Changes');
+      $page_title = pht('Edit Blog');
+      $cancel_uri = $this->getApplicationURI('blog/view/'.$blog->getID().'/');
     } else {
       $blog = id(new PhameBlog())
         ->setCreatorPHID($user->getPHID());
-      $blogger_tokens = array($user->getPHID() => $user->getFullName());
-      $submit_button  = 'Create Blog';
-      $delete_button  = null;
-      $page_title     = 'Create Blog';
+
+      $blog->setViewPolicy(PhabricatorPolicies::POLICY_USER);
+      $blog->setEditPolicy(PhabricatorPolicies::POLICY_USER);
+      $blog->setJoinPolicy(PhabricatorPolicies::POLICY_USER);
+
+      $submit_button = pht('Create Blog');
+      $page_title = pht('Create Blog');
+      $cancel_uri = $this->getApplicationURI();
     }
+
+    $e_name          = true;
+    $e_custom_domain = null;
+    $errors          = array();
 
     if ($request->isFormPost()) {
       $name          = $request->getStr('name');
@@ -121,10 +78,14 @@ final class PhameBlogEditController
 
       if (empty($name)) {
         $errors[] = 'You must give the blog a name.';
-        $e_name   = 'Required';
+        $e_name = 'Required';
+      } else {
+        $e_name = null;
       }
+
       $blog->setName($name);
       $blog->setDescription($description);
+
       if (!empty($custom_domain)) {
         $error = $blog->validateCustomDomain($custom_domain);
         if ($error) {
@@ -147,23 +108,9 @@ final class PhameBlogEditController
 
       if (!$errors) {
         $blog->save();
-
-        $uri = new PhutilURI($blog->getViewURI());
-        if ($this->isBlogEdit()) {
-          $uri->setQueryParam('edit', true);
-        } else {
-          $uri->setQueryParam('new', true);
-        }
         return id(new AphrontRedirectResponse())
-          ->setURI($uri);
+          ->setURI($this->getApplicationURI('blog/view/'.$blog->getID().'/'));
       }
-    }
-
-    $panel = new AphrontPanelView();
-    $panel->setHeader($page_title);
-    $panel->setWidth(AphrontPanelView::WIDTH_FULL);
-    if ($delete_button) {
-      $panel->addButton($delete_button);
     }
 
     $policies = id(new PhabricatorPolicyQuery())
@@ -173,6 +120,7 @@ final class PhameBlogEditController
 
     $form = id(new AphrontFormView())
       ->setUser($user)
+      ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormTextControl())
         ->setLabel('Name')
@@ -227,11 +175,9 @@ final class PhameBlogEditController
       )
       ->appendChild(
         id(new AphrontFormSubmitControl())
-        ->addCancelButton('/phame/blog/')
+        ->addCancelButton($cancel_uri)
         ->setValue($submit_button)
       );
-
-    $panel->appendChild($form);
 
     if ($errors) {
       $error_view = id(new AphrontErrorView())
@@ -241,12 +187,15 @@ final class PhameBlogEditController
       $error_view = null;
     }
 
-    $this->setShowSideNav(true);
-    return $this->buildStandardPageResponse(
+    $nav = $this->renderSideNavFilterView(null);
+    $nav->appendChild(
       array(
         $error_view,
-        $panel,
-      ),
+        $form,
+      ));
+
+    return $this->buildApplicationPage(
+      $nav,
       array(
         'title'   => $page_title,
       ));

@@ -218,6 +218,9 @@ $action_map = array(
   'subscribe-auto'    => 'icon/unsubscribe.png',
   'subscribe-add'     => 'icon/subscribe.png',
   'subscribe-delete'  => 'icon/unsubscribe.png',
+  'new'               => 'icon/page_white_put.png',
+  'world'             => 'icon/world.png',
+  'delete'            => 'icon/delete.png',
 );
 
 foreach ($action_map as $icon => $source) {

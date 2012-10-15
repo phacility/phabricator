@@ -71,13 +71,16 @@ abstract class PhameController extends PhabricatorController {
     return $response->setContent($page->render());
   }
 
-  private function renderSideNavFilterView($filter) {
+  protected function renderSideNavFilterView($filter) {
     $base_uri = new PhutilURI('/phame/');
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI($base_uri);
-    $nav->addLabel('Drafts');
-    $nav->addFilter('post/new',
-                    'New Draft');
+    $nav->addLabel('Create');
+    $nav->addFilter('post/new', 'New Draft');
+    $nav->addFilter('blog/new', 'New Blog');
+
+    $nav->addSpacer();
+    $nav->addLabel('Posts');
     $nav->addFilter('draft',
                     'My Drafts');
     foreach ($this->getSideNavExtraDraftFilters() as $draft_filter) {
@@ -85,9 +88,6 @@ abstract class PhameController extends PhabricatorController {
                       $draft_filter['name'],
                       idx($draft_filter, 'uri'));
     }
-
-    $nav->addSpacer();
-    $nav->addLabel('Posts');
     $nav->addFilter('post',
                     'My Posts');
     $nav->addFilter('post/all',
@@ -123,7 +123,7 @@ abstract class PhameController extends PhabricatorController {
   protected function getSideNavBlogFilters() {
     return array(
       array(
-        'key'  => 'blog',
+        'key'  => 'blog/user',
         'name' => 'My Blogs',
       ),
       array(
@@ -153,5 +153,25 @@ abstract class PhameController extends PhabricatorController {
       ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
       ->setTitle('Meta thoughts and feelings');
     return $notice_view;
+  }
+
+  protected function renderPostList(
+    array $posts,
+    PhabricatorUser $user,
+    $nodata) {
+    assert_instances_of($posts, 'PhamePost');
+
+    $list = id(new PhabricatorObjectItemListView())
+      ->setNoDataString($nodata);
+
+    foreach ($posts as $post) {
+      $item = id(new PhabricatorObjectItemView())
+        ->setHeader($post->getTitle())
+        ->setHref($this->getApplicationURI('post/view/'.$post->getPHID()));
+
+      $list->addItem($item);
+    }
+
+    return $list;
   }
 }

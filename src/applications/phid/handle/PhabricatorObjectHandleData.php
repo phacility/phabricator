@@ -516,6 +516,29 @@ final class PhabricatorObjectHandleData {
             $handles[$phid] = $handle;
           }
           break;
+        case PhabricatorPHIDConstants::PHID_TYPE_BLOG:
+          $blogs = id(new PhameBlogQuery())
+            ->withPHIDs($phids)
+            ->setViewer($this->viewer)
+            ->execute();
+          $blogs = mpull($blogs, null, 'getPHID');
+
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            $handle->setType($type);
+            if (empty($blogs[$phid])) {
+              $handle->setName('Unknown Blog');
+            } else {
+              $blog = $blogs[$phid];
+              $handle->setName($blog->getName());
+              $handle->setFullName($blog->getName());
+              $handle->setURI('/phame/blog/view/'.$blog->getID().'/');
+              $handle->setComplete(true);
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
         default:
           $loader = null;
           if (isset($external_loaders[$type])) {
