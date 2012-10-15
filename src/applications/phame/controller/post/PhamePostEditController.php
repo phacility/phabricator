@@ -400,6 +400,7 @@ final class PhamePostEditController
     }
 
     $blogs = id(new PhameBlogQuery())
+      ->setViewer($this->getRequest()->getUser())
       ->withPHIDs(array_keys($all_blogs_assoc))
       ->execute();
     $blogs = mpull($blogs, null, 'getPHID');

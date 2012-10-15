@@ -19,7 +19,7 @@
 /**
  * @group phame
  */
-final class PhameBlogQuery extends PhabricatorOffsetPagedQuery {
+final class PhameBlogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $phids;
   private $domain;
@@ -40,7 +40,7 @@ final class PhameBlogQuery extends PhabricatorOffsetPagedQuery {
     return $this;
   }
 
-  public function execute() {
+  public function loadPage() {
     $table  = new PhameBlog();
     $conn_r = $table->establishConnection('r');
 
@@ -102,22 +102,19 @@ final class PhameBlogQuery extends PhabricatorOffsetPagedQuery {
       $where[] = qsprintf(
         $conn_r,
         'phid IN (%Ls)',
-        $this->phids
-      );
+        $this->phids);
     }
 
     if ($this->domain) {
       $where[] = qsprintf(
         $conn_r,
         'domain = %s',
-        $this->domain
-      );
+        $this->domain);
     }
+
+    $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
   }
 
-  private function buildOrderClause($conn_r) {
-    return 'ORDER BY id DESC';
-  }
 }

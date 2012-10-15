@@ -137,8 +137,18 @@ abstract class AphrontApplicationConfiguration {
     if ($host != id(new PhutilURI($base_uri))->getDomain() &&
         $host != id(new PhutilURI($prod_uri))->getDomain() &&
         $host != id(new PhutilURI($file_uri))->getDomain()) {
-      $blogs = id(new PhameBlogQuery())->withDomain($host)->execute();
-      $blog = reset($blogs);
+
+      try {
+        $blog = id(new PhameBlogQuery())
+          ->setViewer($request->getUser())
+          ->withDomain($host)
+          ->executeOne();
+      } catch (PhabricatorPolicyException $ex) {
+        throw new Exception(
+          "This blog is not visible to logged out users, so it can not be ".
+          "visited from a custom domain.");
+      }
+
       if (!$blog) {
         if ($prod_uri && $prod_uri != $base_uri) {
           $prod_str = ' or '.$prod_uri;

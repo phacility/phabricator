@@ -74,30 +74,26 @@ final class PhameBlogEditController
   }
 
   public function processRequest() {
-    $request         = $this->getRequest();
-    $user            = $request->getUser();
-    $e_name          = null;
-    $e_bloggers      = null;
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $e_name          = true;
     $e_custom_domain = null;
     $errors          = array();
 
     if ($this->isBlogEdit()) {
-      $blogs = id(new PhameBlogQuery())
+      $blog = id(new PhameBlogQuery())
+        ->setViewer($user)
         ->withPHIDs(array($this->getBlogPHID()))
-        ->execute();
-      $blog = reset($blogs);
-      if (empty($blog)) {
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_EDIT
+          ))
+        ->executeOne();
+      if (!$blog) {
         return new Aphront404Response();
       }
 
-      $bloggers = $blog->loadBloggers()->getBloggers();
-
-      // TODO -- make this check use a policy
-      if (!isset($bloggers[$user->getPHID()]) &&
-          !$user->isAdmin()) {
-        return new Aphront403Response();
-      }
-      $blogger_tokens = mpull($bloggers, 'getFullName', 'getPHID');
       $submit_button  = 'Save Changes';
       $delete_button  = javelin_render_tag(
         'a',
@@ -118,32 +114,13 @@ final class PhameBlogEditController
     }
 
     if ($request->isFormPost()) {
-      $saved         = true;
       $name          = $request->getStr('name');
       $description   = $request->getStr('description');
-      $blogger_arr   = $request->getArr('bloggers');
       $custom_domain = $request->getStr('custom_domain');
       $skin          = $request->getStr('skin');
 
-      if (empty($blogger_arr)) {
-        $error = 'Bloggers must be nonempty.';
-        if ($this->isBlogEdit()) {
-          $error .= ' To delete the blog, use the delete button.';
-        } else {
-          $error .= ' A blog cannot exist without bloggers.';
-        }
-        $e_bloggers = 'Required';
-        $errors[] = $error;
-      }
-      $new_bloggers = array_values($blogger_arr);
-      if ($this->isBlogEdit()) {
-        $old_bloggers = array_keys($blogger_tokens);
-      } else {
-        $old_bloggers = array();
-      }
-
       if (empty($name)) {
-        $errors[] = 'Name must be nonempty.';
+        $errors[] = 'You must give the blog a name.';
         $e_name   = 'Required';
       }
       $blog->setName($name);
@@ -158,27 +135,19 @@ final class PhameBlogEditController
       }
       $blog->setSkin($skin);
 
-      if (empty($errors)) {
+      $blog->setViewPolicy($request->getStr('can_view'));
+      $blog->setEditPolicy($request->getStr('can_edit'));
+      $blog->setJoinPolicy($request->getStr('can_join'));
+
+      // Don't let users remove their ability to edit blogs.
+      PhabricatorPolicyFilter::mustRetainCapability(
+        $user,
+        $blog,
+        PhabricatorPolicyCapability::CAN_EDIT);
+
+      if (!$errors) {
         $blog->save();
 
-        $add_phids = $new_bloggers;
-        $rem_phids = array_diff($old_bloggers, $new_bloggers);
-        $editor    = new PhabricatorEdgeEditor();
-        $edge_type = PhabricatorEdgeConfig::TYPE_BLOG_HAS_BLOGGER;
-        $editor->setActor($user);
-        foreach ($add_phids as $phid) {
-          $editor->addEdge($blog->getPHID(), $edge_type, $phid);
-        }
-        foreach ($rem_phids as $phid) {
-          $editor->removeEdge($blog->getPHID(), $edge_type, $phid);
-        }
-        $editor->save();
-
-      } else {
-        $saved = false;
-      }
-
-      if ($saved) {
         $uri = new PhutilURI($blog->getViewURI());
         if ($this->isBlogEdit()) {
           $uri->setQueryParam('edit', true);
@@ -197,6 +166,11 @@ final class PhameBlogEditController
       $panel->addButton($delete_button);
     }
 
+    $policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($user)
+      ->setObject($blog)
+      ->execute();
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->appendChild(
@@ -212,18 +186,29 @@ final class PhameBlogEditController
         ->setLabel('Description')
         ->setName('description')
         ->setValue($blog->getDescription())
-        ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
         ->setID('blog-description')
       )
       ->appendChild(
-        id(new AphrontFormTokenizerControl())
-        ->setLabel('Bloggers')
-        ->setName('bloggers')
-        ->setValue($blogger_tokens)
-        ->setUser($user)
-        ->setDatasource('/typeahead/common/users/')
-        ->setError($e_bloggers)
-      )
+        id(new AphrontFormPolicyControl())
+          ->setUser($user)
+          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
+          ->setPolicyObject($blog)
+          ->setPolicies($policies)
+          ->setName('can_view'))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setUser($user)
+          ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
+          ->setPolicyObject($blog)
+          ->setPolicies($policies)
+          ->setName('can_edit'))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setUser($user)
+          ->setCapability(PhabricatorPolicyCapability::CAN_JOIN)
+          ->setPolicyObject($blog)
+          ->setPolicies($policies)
+          ->setName('can_join'))
       ->appendChild(
         id(new AphrontFormTextControl())
         ->setLabel('Custom Domain')
@@ -250,7 +235,7 @@ final class PhameBlogEditController
 
     if ($errors) {
       $error_view = id(new AphrontErrorView())
-        ->setTitle('Errors saving blog.')
+        ->setTitle('Form Errors')
         ->setErrors($errors);
     } else {
       $error_view = null;

@@ -71,11 +71,10 @@ final class PhameBlogViewController
     $user      = $request->getUser();
     $blog_phid = $this->getBlogPHID();
 
-    $blogs = id(new PhameBlogQuery())
+    $blog = id(new PhameBlogQuery())
+      ->setViewer($user)
       ->withPHIDs(array($blog_phid))
-      ->execute();
-    $blog = reset($blogs);
-
+      ->executeOne();
     if (!$blog) {
       return new Aphront404Response();
     }

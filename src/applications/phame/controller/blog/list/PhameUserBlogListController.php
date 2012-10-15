@@ -48,10 +48,14 @@ final class PhameUserBlogListController
       PhabricatorEdgeConfig::TYPE_BLOGGER_HAS_BLOG
     );
 
+    $pager = id(new AphrontCursorPagerView())
+      ->readFromRequest($this->getRequest());
+
     $blogs = id(new PhameBlogQuery())
+      ->setViewer($user)
       ->withPHIDs($blog_phids)
       ->needBloggers(true)
-      ->executeWithOffsetPager($this->getPager());
+      ->executeWithCursorPager($pager);
 
     $this->setBlogs($blogs);
 

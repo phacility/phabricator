@@ -78,7 +78,12 @@ final class PhameBlogListView extends AphrontView {
           'Custom Domain',
           $blog->getDomain());
 
-      if (isset($bloggers[$user->getPHID()])) {
+      $can_edit = PhabricatorPolicyFilter::hasCapability(
+        $user,
+        $blog,
+        PhabricatorPolicyCapability::CAN_EDIT);
+
+      if ($can_edit) {
         $item->addAttribute(
           phutil_render_tag(
             'a',

@@ -29,9 +29,13 @@ final class PhameAllBlogListController
   public function processRequest() {
     $user = $this->getRequest()->getUser();
 
+    $pager = id(new AphrontCursorPagerView())
+      ->readFromRequest($this->getRequest());
+
     $blogs = id(new PhameBlogQuery())
+      ->setViewer($user)
       ->needBloggers(true)
-      ->executeWithOffsetPager($this->getPager());
+      ->executeWithCursorPager($pager);
     $this->setBlogs($blogs);
 
     $page_title = 'All Blogs';
