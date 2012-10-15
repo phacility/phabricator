@@ -57,3 +57,12 @@
   padding-left: 1.5em;
   margin-bottom: .5em;
 }
+
+.phabricator-property-list-content {
+  background: #fdfdfd;
+  border-bottom: 1px solid #dbdbdb;
+}
+
+.phabricator-property-list-text-content {
+  padding: 12px 18px;
+}
