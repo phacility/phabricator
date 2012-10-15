@@ -21,11 +21,17 @@
  */
 final class PhamePostQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
+  private $ids;
   private $blogPHIDs;
   private $bloggerPHIDs;
   private $phameTitles;
   private $visibility;
   private $phids;
+
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
+    return $this;
+  }
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
@@ -90,6 +96,13 @@ final class PhamePostQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
+
+    if ($this->ids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'p.id IN (%Ld)',
+        $this->ids);
+    }
 
     if ($this->phids) {
       $where[] = qsprintf(

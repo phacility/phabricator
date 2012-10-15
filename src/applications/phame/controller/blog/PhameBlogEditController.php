@@ -24,11 +24,6 @@ final class PhameBlogEditController
 
   private $id;
 
-  protected function getSideNavFilter() {
-    return 'blog/edit/'.$this->id;
-  }
-
-
   public function willProcessRequest(array $data) {
     $this->id = idx($data, 'id');
   }

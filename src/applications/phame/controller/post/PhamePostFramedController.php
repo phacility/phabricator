@@ -19,7 +19,7 @@
 /**
  * @group phame
  */
-final class PhameBlogDeleteController extends PhameController {
+final class PhamePostFramedController extends PhameController {
 
   private $id;
 
@@ -31,7 +31,7 @@ final class PhameBlogDeleteController extends PhameController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $blog = id(new PhameBlogQuery())
+    $post = id(new PhamePostQuery())
       ->setViewer($user)
       ->withIDs(array($this->id))
       ->requireCapabilities(
@@ -39,28 +39,33 @@ final class PhameBlogDeleteController extends PhameController {
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
       ->executeOne();
-    if (!$blog) {
+    if (!$post) {
       return new Aphront404Response();
     }
 
-    if ($request->isFormPost()) {
-      $blog->delete();
-      return id(new AphrontRedirectResponse())
-        ->setURI($this->getApplicationURI());
-    }
+    $skin = $post->getBlog()->getSkinRenderer();
 
-    $cancel_uri = $this->getApplicationURI('/blog/view/'.$blog->getID().'/');
+    $handles = $this->loadViewerHandles(
+      array(
+        $post->getBloggerPHID(),
+      ));
 
-    $dialog = id(new AphrontDialogView())
+    $skin
       ->setUser($user)
-      ->setTitle(pht('Delete Blog?'))
-      ->appendChild(
-        pht(
-          'Really delete the blog "%s"? It will be gone forever.',
-          phutil_escape_html($blog->getName())))
-      ->addSubmitButton(pht('Delete'))
-      ->addCancelButton($cancel_uri);
+      ->setBlog($post->getBlog())
+      ->setPosts(array($post))
+      ->setBloggers($handles)
+      ->setRequestURI($this->getRequest()->getRequestURI());
 
-    return id(new AphrontDialogResponse())->setDialog($dialog);
+    $page = $this->buildStandardPageView();
+    $page->setFrameable(true);
+    $page->setShowChrome(false);
+    $page->appendChild($skin);
+
+    $response = new AphrontWebpageResponse();
+    $response->setFrameable(true);
+    $response->setContent($page->render());
+    return $response;
+
   }
 }

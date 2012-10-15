@@ -76,7 +76,7 @@ abstract class PhameController extends PhabricatorController {
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI($base_uri);
     $nav->addLabel('Create');
-    $nav->addFilter('post/new', 'New Draft');
+    $nav->addFilter('post/new', 'New Post');
     $nav->addFilter('blog/new', 'New Blog');
 
     $nav->addSpacer();
@@ -164,7 +164,7 @@ abstract class PhameController extends PhabricatorController {
     foreach ($posts as $post) {
       $item = id(new PhabricatorObjectItemView())
         ->setHeader($post->getTitle())
-        ->setHref($this->getApplicationURI('post/view/'.$post->getPHID()))
+        ->setHref($this->getApplicationURI('post/view/'.$post->getID().'/'))
         ->addDetail(
           pht('Blogger'),
           $this->getHandle($post->getBloggerPHID())->renderLink())

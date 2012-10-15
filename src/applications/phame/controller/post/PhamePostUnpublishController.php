@@ -19,7 +19,7 @@
 /**
  * @group phame
  */
-final class PhameBlogDeleteController extends PhameController {
+final class PhamePostUnpublishController extends PhameController {
 
   private $id;
 
@@ -31,7 +31,7 @@ final class PhameBlogDeleteController extends PhameController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $blog = id(new PhameBlogQuery())
+    $post = id(new PhamePostQuery())
       ->setViewer($user)
       ->withIDs(array($this->id))
       ->requireCapabilities(
@@ -39,26 +39,30 @@ final class PhameBlogDeleteController extends PhameController {
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
       ->executeOne();
-    if (!$blog) {
+    if (!$post) {
       return new Aphront404Response();
     }
 
     if ($request->isFormPost()) {
-      $blog->delete();
+      $post->setVisibility(PhamePost::VISIBILITY_DRAFT);
+      $post->setDatePublished(0);
+      $post->save();
+
       return id(new AphrontRedirectResponse())
-        ->setURI($this->getApplicationURI());
+        ->setURI($this->getApplicationURI('/post/view/'.$post->getID().'/'));
     }
 
-    $cancel_uri = $this->getApplicationURI('/blog/view/'.$blog->getID().'/');
+    $cancel_uri = $this->getApplicationURI('/post/view/'.$post->getID().'/');
 
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
-      ->setTitle(pht('Delete Blog?'))
+      ->setTitle(pht('Unpublish Post?'))
       ->appendChild(
         pht(
-          'Really delete the blog "%s"? It will be gone forever.',
-          phutil_escape_html($blog->getName())))
-      ->addSubmitButton(pht('Delete'))
+          'The post "%s" will no longer be visible to other users until you '.
+          'republish it.',
+          phutil_escape_html($post->getTitle())))
+      ->addSubmitButton(pht('Unpublish'))
       ->addCancelButton($cancel_uri);
 
     return id(new AphrontDialogResponse())->setDialog($dialog);

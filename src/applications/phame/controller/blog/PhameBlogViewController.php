@@ -23,19 +23,6 @@ final class PhameBlogViewController extends PhameController {
 
   private $id;
 
-  protected function getSideNavFilter() {
-    $filter = 'blog/view/'.$this->getBlogPHID();
-    return $filter;
-  }
-
-  protected function getSideNavExtraBlogFilters() {
-      $filters =  array(
-        array('key'  => $this->getSideNavFilter(),
-              'name' => $this->getPhameTitle())
-      );
-      return $filters;
-  }
-
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
   }
