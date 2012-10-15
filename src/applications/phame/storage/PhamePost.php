@@ -19,7 +19,10 @@
 /**
  * @group phame
  */
-final class PhamePost extends PhameDAO implements PhabricatorPolicyInterface {
+final class PhamePost extends PhameDAO
+  implements PhabricatorPolicyInterface, PhabricatorMarkupInterface {
+
+  const MARKUP_FIELD_BODY    = 'markup:body';
 
   const VISIBILITY_DRAFT     = 0;
   const VISIBILITY_PUBLISHED = 1;
@@ -172,6 +175,37 @@ final class PhamePost extends PhameDAO implements PhabricatorPolicyInterface {
       case PhabricatorPolicyCapability::CAN_EDIT:
         return ($user->getPHID() == $this->getBloggerPHID());
     }
+  }
+
+
+/* -(  PhabricatorMarkupInterface Implementation  )-------------------------- */
+
+
+  public function getMarkupFieldKey($field) {
+    return $this->getPHID().':'.$field;
+  }
+
+
+  public function newMarkupEngine($field) {
+    return PhabricatorMarkupEngine::newPhameMarkupEngine();
+  }
+
+
+  public function getMarkupText($field) {
+    return $this->getBody();
+  }
+
+
+  public function didMarkupText(
+    $field,
+    $output,
+    PhutilMarkupEngine $engine) {
+    return $output;
+  }
+
+
+  public function shouldUseMarkupCache($field) {
+    return (bool)$this->getPHID();
   }
 
 }

@@ -107,6 +107,16 @@ final class PhameBlogViewController extends PhameController {
       pht('Joinable By'),
       $descriptions[PhabricatorPolicyCapability::CAN_JOIN]);
 
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($user)
+      ->addObject($blog, PhameBlog::MARKUP_FIELD_DESCRIPTION)
+      ->process();
+
+    $properties->addTextContent(
+      '<div class="phabricator-remarkup">'.
+        $engine->getOutput($blog, PhameBlog::MARKUP_FIELD_DESCRIPTION).
+      '</div>');
+
     return $properties;
   }
 

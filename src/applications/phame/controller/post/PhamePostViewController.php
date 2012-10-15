@@ -181,6 +181,16 @@ final class PhamePostViewController extends PhameController {
         ? pht('Draft')
         : phabricator_datetime($post->getDatePublished(), $user));
 
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($user)
+      ->addObject($post, PhamePost::MARKUP_FIELD_BODY)
+      ->process();
+
+    $properties->addTextContent(
+      '<div class="phabricator-remarkup">'.
+        $engine->getOutput($post, PhamePost::MARKUP_FIELD_BODY).
+      '</div>');
+
     return $properties;
   }
 }
