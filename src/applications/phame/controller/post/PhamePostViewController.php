@@ -19,8 +19,7 @@
 /**
  * @group phame
  */
-final class PhamePostViewController
-extends PhameController {
+final class PhamePostViewController extends PhameController {
 
   private $postPHID;
   private $phameTitle;
@@ -75,29 +74,21 @@ extends PhameController {
   public function processRequest() {
     $request   = $this->getRequest();
     $user      = $request->getUser();
-    $post_phid = null;
 
     if ($this->getPostPHID()) {
-      $post_phid = $this->getPostPHID();
-      if (!$post_phid) {
+      $post = id(new PhamePostQuery())
+        ->setViewer($user)
+        ->withPHIDs(array($this->getPostPHID()))
+        ->executeOne();
+
+      if (!$post) {
         return new Aphront404Response();
       }
 
-      $posts = id(new PhamePostQuery())
-        ->withPHIDs(array($post_phid))
-        ->execute();
-      $post = reset($posts);
-
-      if ($post) {
-        $this->setPhameTitle($post->getPhameTitle());
-        $blogger = PhabricatorObjectHandleData::loadOneHandle(
-          $post->getBloggerPHID(),
-          $user);
-        if (!$blogger) {
-          return new Aphront404Response();
-        }
-      }
-
+      $this->setPhameTitle($post->getPhameTitle());
+      $blogger = PhabricatorObjectHandleData::loadOneHandle(
+        $post->getBloggerPHID(),
+        $user);
     } else if ($this->getBloggerName() && $this->getPhameTitle()) {
       $phame_title = $this->getPhameTitle();
       $phame_title = PhabricatorSlug::normalize($phame_title);
@@ -114,8 +105,9 @@ extends PhameController {
         return new Aphront404Response();
       }
       $posts = id(new PhamePostQuery())
-        ->withBloggerPHID($blogger->getPHID())
-        ->withPhameTitle($phame_title)
+        ->setViewer($user)
+        ->withBloggerPHIDs(array($blogger->getPHID()))
+        ->withPhameTitles(array($phame_title))
         ->execute();
       $post = reset($posts);
 

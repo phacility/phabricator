@@ -59,9 +59,10 @@ final class PhameBloggerPostListController
     }
     $this->setActions($actions);
 
-    $query = new PhamePostQuery();
-    $query->withBloggerPHID($blogger_phid);
-    $query->withVisibility(PhamePost::VISIBILITY_PUBLISHED);
+    $query = id(new PhamePostQuery())
+      ->setViewer($user)
+      ->withBloggerPHIDs(array($blogger_phid));
+
     $this->setPhamePostQuery($query);
 
     $page_title = 'Posts by '.$this->getBloggerName();

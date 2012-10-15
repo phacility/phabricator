@@ -72,11 +72,8 @@ final class PhameBlogListView extends AphrontView {
         ->setHeader($blog->getName())
         ->setHref($blog->getViewURI())
         ->addDetail(
-          'Bloggers',
-          implode(', ', mpull($bloggers, 'renderLink')))
-        ->addDetail(
           'Custom Domain',
-          $blog->getDomain());
+          phutil_escape_html($blog->getDomain()));
 
       $can_edit = PhabricatorPolicyFilter::hasCapability(
         $user,

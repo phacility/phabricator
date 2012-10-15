@@ -19,28 +19,9 @@
 /**
  * @group phame
  */
-final class PhameBlogViewController
-  extends PhameController {
+final class PhameBlogViewController extends PhameController {
 
   private $blogPHID;
-  private $bloggerPHIDs;
-  private $postPHIDs;
-
-  private function setPostPHIDs($post_phids) {
-    $this->postPHIDs = $post_phids;
-    return $this;
-  }
-  private function getPostPHIDs() {
-    return $this->postPHIDs;
-  }
-
-  private function setBloggerPHIDs($blogger_phids) {
-    $this->bloggerPHIDs = $blogger_phids;
-    return $this;
-  }
-  private function getBloggerPHIDs() {
-    return $this->bloggerPHIDs;
-  }
 
   private function setBlogPHID($blog_phid) {
     $this->blogPHID = $blog_phid;
@@ -54,6 +35,7 @@ final class PhameBlogViewController
     $filter = 'blog/view/'.$this->getBlogPHID();
     return $filter;
   }
+
   protected function getSideNavExtraBlogFilters() {
       $filters =  array(
         array('key'  => $this->getSideNavFilter(),
@@ -67,57 +49,26 @@ final class PhameBlogViewController
   }
 
   public function processRequest() {
-    $request   = $this->getRequest();
-    $user      = $request->getUser();
-    $blog_phid = $this->getBlogPHID();
+    $request = $this->getRequest();
+    $user = $request->getUser();
 
     $blog = id(new PhameBlogQuery())
       ->setViewer($user)
-      ->withPHIDs(array($blog_phid))
+      ->withPHIDs(array($this->getBlogPHID()))
       ->executeOne();
     if (!$blog) {
       return new Aphront404Response();
     }
 
-    $this->loadEdges();
-
-    $blogger_phids = $this->getBloggerPHIDs();
-    if ($blogger_phids) {
-      $bloggers = $this->loadViewerHandles($blogger_phids);
-    } else {
-      $bloggers = array();
-    }
-
-    $post_phids = $this->getPostPHIDs();
-    if ($post_phids) {
-      $posts = id(new PhamePostQuery())
-        ->withPHIDs($post_phids)
-        ->withVisibility(PhamePost::VISIBILITY_PUBLISHED)
-        ->execute();
-    } else {
-      $posts = array();
-    }
-
-    $notice = array();
-    if ($request->getExists('new')) {
-      $notice =
-        array(
-          'title' => 'Successfully created your blog.',
-          'body'  => 'Time to write some posts.'
-        );
-    } else if ($request->getExists('edit')) {
-      $notice =
-        array(
-          'title' => 'Successfully edited your blog.',
-          'body'  => 'Time to write some posts.'
-        );
-    }
+    $posts = id(new PhamePostQuery())
+      ->setViewer($user)
+      ->withBlogPHIDs(array($blog->getPHID()))
+      ->execute();
 
     $skin = $blog->getSkinRenderer();
     $skin
       ->setUser($this->getRequest()->getUser())
-      ->setNotice($notice)
-      ->setBloggers($bloggers)
+      ->setBloggers($this->loadViewerHandles(mpull($posts, 'getBloggerPHID')))
       ->setPosts($posts)
       ->setBlog($blog)
       ->setRequestURI($this->getRequest()->getRequestURI());
@@ -134,31 +85,5 @@ final class PhameBlogViewController
       array(
         'title' => $blog->getName(),
       ));
-  }
-
-  private function loadEdges() {
-
-    $edge_types = array(
-      PhabricatorEdgeConfig::TYPE_BLOG_HAS_BLOGGER,
-      PhabricatorEdgeConfig::TYPE_BLOG_HAS_POST,
-    );
-    $blog_phid = $this->getBlogPHID();
-    $phids = array($blog_phid);
-
-    $edges = id(new PhabricatorEdgeQuery())
-      ->withSourcePHIDs($phids)
-      ->withEdgeTypes($edge_types)
-      ->execute();
-
-    $blogger_phids = array_keys(
-      $edges[$blog_phid][PhabricatorEdgeConfig::TYPE_BLOG_HAS_BLOGGER]
-    );
-    $this->setBloggerPHIDs($blogger_phids);
-
-    $post_phids = array_keys(
-      $edges[$blog_phid][PhabricatorEdgeConfig::TYPE_BLOG_HAS_POST]
-    );
-    $this->setPostPHIDs($post_phids);
-
   }
 }

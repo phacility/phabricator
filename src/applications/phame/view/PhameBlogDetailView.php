@@ -81,13 +81,6 @@ final class PhameBlogDetailView extends AphrontView {
           'class' => 'description'
         ),
         $description
-      ).
-      phutil_render_tag(
-        'div',
-        array(
-          'class' => 'bloggers'
-        ),
-        'Current bloggers: '.$this->getBloggersHTML($bloggers)
       )
     );
 

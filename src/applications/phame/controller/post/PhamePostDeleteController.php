@@ -40,32 +40,33 @@ extends PhameController {
   public function processRequest() {
     $request   = $this->getRequest();
     $user      = $request->getUser();
-    $post_phid = $this->getPostPHID();
-    $posts     = id(new PhamePostQuery())
-      ->withPHIDs(array($post_phid))
-      ->execute();
-    $post      = reset($posts);
-    if (empty($post)) {
+
+    $post = id(new PhamePostQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($this->getPostPHID()))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
+    if (!$post) {
       return new Aphront404Response();
-    }
-    if ($post->getBloggerPHID() != $user->getPHID()) {
-      return new Aphront403Response();
     }
     $post_noun = $post->getHumanName();
 
     if ($request->isFormPost()) {
       $edge_type = PhabricatorEdgeConfig::TYPE_POST_HAS_BLOG;
       $edges     = id(new PhabricatorEdgeQuery())
-        ->withSourcePHIDs(array($post_phid))
+        ->withSourcePHIDs(array($post->getPHID()))
         ->withEdgeTypes(array($edge_type))
         ->execute();
 
-      $blog_edges = $edges[$post_phid][$edge_type];
+      $blog_edges = $edges[$post->getPHID()][$edge_type];
       $blog_phids = array_keys($blog_edges);
       $editor     = id(new PhabricatorEdgeEditor())
         ->setActor($user);
       foreach ($blog_phids as $phid) {
-        $editor->removeEdge($post_phid, $edge_type, $phid);
+        $editor->removeEdge($post->getPHID(), $edge_type, $phid);
       }
       $editor->save();
 

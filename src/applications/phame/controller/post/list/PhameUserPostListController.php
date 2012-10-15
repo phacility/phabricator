@@ -47,9 +47,10 @@ final class PhameUserPostListController
     $user = $this->getRequest()->getUser();
     $phid = $user->getPHID();
 
-    $query = new PhamePostQuery();
-    $query->withBloggerPHID($phid);
-    $query->withVisibility(PhamePost::VISIBILITY_PUBLISHED);
+    $query = id(new PhamePostQuery())
+      ->setViewer($user)
+      ->withBloggerPHIDs(array($phid));
+
     $this->setPhamePostQuery($query);
 
     $actions = array('view', 'edit');

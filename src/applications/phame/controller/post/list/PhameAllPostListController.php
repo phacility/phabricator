@@ -76,8 +76,8 @@ final class PhameAllPostListController
   public function processRequest() {
     $user = $this->getRequest()->getUser();
 
-    $query = new PhamePostQuery();
-    $query->withVisibility(PhamePost::VISIBILITY_PUBLISHED);
+    $query = id(new PhamePostQuery())
+      ->setViewer($user);
     $this->setPhamePostQuery($query);
 
     $this->setActions(array());

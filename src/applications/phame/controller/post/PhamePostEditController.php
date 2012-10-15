@@ -115,16 +115,18 @@ final class PhamePostEditController
     $errors        = array();
 
     if ($this->isPostEdit()) {
-      $posts = id(new PhamePostQuery())
+      $post = id(new PhamePostQuery())
+        ->setViewer($user)
         ->withPHIDs(array($this->getPostPHID()))
-        ->execute();
-      $post  = reset($posts);
-      if (empty($post)) {
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
+      if (!$post) {
         return new Aphront404Response();
       }
-      if ($post->getBloggerPHID() != $user->getPHID()) {
-        return new Aphront403Response();
-      }
+
       $post_noun     = ucfirst($post->getHumanName());
       $cancel_uri    = $post->getViewURI($user->getUsername());
       $submit_button = 'Save Changes';
