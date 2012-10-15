@@ -80,6 +80,8 @@ final class PhameBlogEditController
 
       $blog->setName($name);
       $blog->setDescription($description);
+      $blog->setDomain($custom_domain);
+      $blog->setSkin($skin);
 
       if (!empty($custom_domain)) {
         $error = $blog->validateCustomDomain($custom_domain);
@@ -87,9 +89,7 @@ final class PhameBlogEditController
           $errors[] = $error;
           $e_custom_domain = 'Invalid';
         }
-        $blog->setDomain($custom_domain);
       }
-      $blog->setSkin($skin);
 
       $blog->setViewPolicy($request->getStr('can_view'));
       $blog->setEditPolicy($request->getStr('can_edit'));
@@ -102,9 +102,14 @@ final class PhameBlogEditController
         PhabricatorPolicyCapability::CAN_EDIT);
 
       if (!$errors) {
-        $blog->save();
-        return id(new AphrontRedirectResponse())
-          ->setURI($this->getApplicationURI('blog/view/'.$blog->getID().'/'));
+        try {
+          $blog->save();
+          return id(new AphrontRedirectResponse())
+            ->setURI($this->getApplicationURI('blog/view/'.$blog->getID().'/'));
+        } catch (AphrontQueryDuplicateKeyException $ex) {
+          $errors[] = 'Domain must be unique.';
+          $e_custom_domain = 'Not Unique';
+        }
       }
     }
 
