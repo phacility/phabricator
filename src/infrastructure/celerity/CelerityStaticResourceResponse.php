@@ -33,7 +33,6 @@ final class CelerityStaticResourceResponse {
   private $metadataBlock = 0;
   private $behaviors = array();
   private $hasRendered = array();
-  private $useFullURI = false;
 
   public function __construct() {
     if (isset($_REQUEST['__metablock__'])) {
@@ -86,19 +85,6 @@ final class CelerityStaticResourceResponse {
     return $this;
   }
 
-  /**
-   * If set to true, Celerity will print full URIs (including the domain)
-   * for static resources.
-   */
-  public function setUseFullURI($should) {
-    $this->useFullURI = $should;
-    return $this;
-  }
-
-  private function shouldUseFullURI() {
-    return $this->useFullURI;
-  }
-
   public function renderSingleResource($symbol) {
     $map = CelerityResourceMap::getInstance();
     $resolved = $map->resolveResources(array($symbol));
@@ -129,29 +115,30 @@ final class CelerityStaticResourceResponse {
 
       $output[] = $this->renderResource($resource);
     }
-    return implode("\n", $output);
+    return implode("\n", $output)."\n";
   }
 
   private function renderResource(array $resource) {
-    $uri = $this->getURI($resource['uri']);
+    $uri = PhabricatorEnv::getCDNURI($resource['uri']);
     switch ($resource['type']) {
       case 'css':
-        return '<link rel="stylesheet" type="text/css" href="'.$uri.'" />';
+        return phutil_render_tag(
+          'link',
+          array(
+            'rel'   => 'stylesheet',
+            'type'  => 'text/css',
+            'href'  => $uri,
+          ));
       case 'js':
-        return '<script type="text/javascript" src="'.$uri.'">'.
-               '</script>';
+        return phutil_render_tag(
+          'script',
+          array(
+            'type'  => 'text/javascript',
+            'src'   => $uri,
+          ),
+          '');
     }
     throw new Exception("Unable to render resource.");
-  }
-
-  private function getURI($path) {
-    $path = phutil_escape_html($path);
-    if ($this->shouldUseFullURI()) {
-      $uri = PhabricatorEnv::getCDNURI($path);
-    } else {
-      $uri = $path;
-    }
-    return $uri;
   }
 
   public function renderHTMLFooter() {

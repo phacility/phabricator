@@ -165,9 +165,6 @@ abstract class AphrontApplicationConfiguration {
       // do crazy stuff here if it wants.
 
       $path = '/phame/live/'.$blog->getID().'/'.$path;
-
-      $celerity = CelerityAPI::getStaticResourceResponse();
-      $celerity->setUseFullURI(true);
     }
 
     list($controller, $uri_data) = $this->buildControllerForPath($path);
