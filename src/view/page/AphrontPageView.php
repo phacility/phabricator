@@ -68,6 +68,13 @@ abstract class AphrontPageView extends AphrontView {
 
     $body_classes = $this->getBodyClasses();
 
+    $body = phutil_render_tag(
+      'body',
+      array(
+        'class' => nonempty($body_classes, null),
+      ),
+      $body.$tail);
+
     $response = <<<EOHTML
 <!DOCTYPE html>
 <html>
@@ -76,10 +83,7 @@ abstract class AphrontPageView extends AphrontView {
     <title>{$title}</title>
     {$head}
   </head>
-  <body class="{$body_classes}">
-    {$body}
-    {$tail}
-  </body>
+  {$body}
 </html>
 
 EOHTML;
