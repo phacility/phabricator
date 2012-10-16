@@ -20,136 +20,34 @@
  * @group phame
  */
 abstract class PhameController extends PhabricatorController {
-  private $showSideNav;
-  private $showChrome = true;
-  private $deviceReady = false;
 
-  protected function setShowSideNav($value) {
-    $this->showSideNav = (bool) $value;
-    return $this;
-  }
-  private function showSideNav() {
-    return $this->showSideNav;
-  }
+  protected function renderSideNavFilterView() {
 
-  protected function setShowChrome($show_chrome) {
-    $this->showChrome = $show_chrome;
-    return $this;
-  }
-  private function getShowChrome() {
-    return $this->showChrome;
-  }
+    $base_uri = new PhutilURI($this->getApplicationURI());
 
-  public function setDeviceReady($device_ready) {
-    $this->deviceReady = $device_ready;
-    return $this;
-  }
-  public function getDeviceReady() {
-    return $this->deviceReady;
-  }
-
-  public function buildStandardPageResponse($view, array $data) {
-
-    $page = $this->buildStandardPageView();
-
-    $page->setApplicationName('Phame');
-    $page->setBaseURI('/phame/');
-    $page->setTitle(idx($data, 'title'));
-    $page->setGlyph("\xe2\x9c\xa9");
-    $page->setShowChrome($this->getShowChrome());
-    $page->setDeviceReady($this->getDeviceReady());
-
-    if ($this->showSideNav()) {
-      $nav = $this->renderSideNavFilterView($this->getSideNavFilter());
-      $nav->appendChild($view);
-      $page->appendChild($nav);
-    } else {
-      $page->appendChild($view);
-    }
-
-    $response = new AphrontWebpageResponse();
-    return $response->setContent($page->render());
-  }
-
-  protected function renderSideNavFilterView($filter) {
-    $base_uri = new PhutilURI('/phame/');
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI($base_uri);
+
     $nav->addLabel('Create');
-    $nav->addFilter('post/new', 'New Post');
-    $nav->addFilter('blog/new', 'New Blog');
+    $nav->addFilter('post/new',   'New Post');
+    $nav->addFilter('blog/new',   'New Blog');
 
     $nav->addSpacer();
+
     $nav->addLabel('Posts');
-    $nav->addFilter('post/draft',
-                    'My Drafts');
-    foreach ($this->getSideNavExtraDraftFilters() as $draft_filter) {
-      $nav->addFilter($draft_filter['key'],
-                      $draft_filter['name'],
-                      idx($draft_filter, 'uri'));
-    }
-    $nav->addFilter('post/', 'My Posts');
-    $nav->addFilter('post/all', 'All Posts');
-    foreach ($this->getSideNavExtraPostFilters() as $post_filter) {
-      $nav->addFilter($post_filter['key'],
-                      $post_filter['name'],
-                      idx($post_filter, 'uri'));
-    }
+    $nav->addFilter('post/draft', 'My Drafts');
+    $nav->addFilter('post',       'My Posts');
+    $nav->addFilter('post/all',   'All Posts');
 
     $nav->addSpacer();
-    $nav->addLabel('Blogs');
-    foreach ($this->getSideNavBlogFilters() as $blog_filter) {
-      $nav->addFilter($blog_filter['key'],
-                      $blog_filter['name'],
-                      idx($blog_filter, 'uri'));
-    }
 
-    $nav->selectFilter($filter);
+    $nav->addLabel('Blogs');
+    $nav->addFilter('blog/user',  'Joinable Blogs');
+    $nav->addFilter('blog/all',   'All Blogs');
+
+    $nav->selectFilter(null);
 
     return $nav;
-  }
-
-  protected function getSideNavExtraDraftFilters() {
-    return array();
-  }
-
-  protected function getSideNavExtraPostFilters() {
-    return array();
-  }
-
-  protected function getSideNavBlogFilters() {
-    return array(
-      array(
-        'key'  => 'blog/user',
-        'name' => 'My Blogs',
-      ),
-      array(
-        'key'  => 'blog/all',
-        'name' => 'All Blogs',
-      ),
-    );
-  }
-
-  protected function getSideNavFilter() {
-    return 'post';
-  }
-
-  protected function getPager() {
-    $request   = $this->getRequest();
-    $pager     = new AphrontPagerView();
-    $page_size = 50;
-    $pager->setURI($request->getRequestURI(), 'offset');
-    $pager->setPageSize($page_size);
-    $pager->setOffset($request->getInt('offset'));
-
-    return $pager;
-  }
-
-  protected function buildNoticeView() {
-    $notice_view = id(new AphrontErrorView())
-      ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-      ->setTitle('Meta thoughts and feelings');
-    return $notice_view;
   }
 
   protected function renderPostList(

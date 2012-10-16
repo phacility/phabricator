@@ -36,12 +36,15 @@ final class PhamePostListController extends PhameController {
     $query = id(new PhamePostQuery())
       ->setViewer($user);
 
+    $nav = $this->renderSideNavFilterView();
+
     switch ($this->filter) {
       case 'draft':
         $query->withBloggerPHIDs(array($user->getPHID()));
         $query->withVisibility(PhamePost::VISIBILITY_DRAFT);
         $nodata = pht('You have no unpublished drafts.');
         $title = pht('Unpublished Drafts');
+        $nav->selectFilter('post/draft');
         break;
       case 'blogger':
         if ($this->bloggername) {
@@ -57,6 +60,7 @@ final class PhamePostListController extends PhameController {
 
         $query->withBloggerPHIDs(array($blogger->getPHID()));
         if ($blogger->getPHID() == $user->getPHID()) {
+          $nav->selectFilter('post');
           $nodata = pht('You have not written any posts.');
         } else {
           $nodata = pht('%s has not written any posts.', $blogger);
@@ -66,6 +70,7 @@ final class PhamePostListController extends PhameController {
       case 'all':
         $nodata = pht('There are no visible posts.');
         $title = pht('Posts');
+        $nav->selectFilter('post/all');
         break;
       default:
         throw new Exception("Unknown filter '{$this->filter}'!");
@@ -86,7 +91,6 @@ final class PhamePostListController extends PhameController {
       ->setHeader($title);
     $post_list = $this->renderPostList($posts, $user, $nodata);
 
-    $nav = $this->renderSideNavFilterView(null);
     $nav->appendChild(
       array(
         $header,

@@ -39,12 +39,12 @@ final class PhameBlogListController extends PhameController {
 
     switch ($filter) {
       case 'blog/all':
-        $title = 'All Blogs';
-        $nodata = 'No blogs have been created.';
+        $title = pht('All Blogs');
+        $nodata = pht('No blogs have been created.');
         break;
       case 'blog/user':
-        $title = 'My Blogs';
-        $nodata = 'There are no blogs you can contribute to.';
+        $title = pht('Joinable Blogs');
+        $nodata = pht('There are no blogs you can contribute to.');
         $query->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_JOIN,
@@ -93,7 +93,7 @@ final class PhameBlogListController extends PhameController {
         ->setHeader($blog->getName())
         ->setHref($this->getApplicationURI('blog/view/'.$blog->getID().'/'))
         ->addDetail(
-          'Custom Domain',
+          pht('Custom Domain'),
           phutil_escape_html($blog->getDomain()));
 
       $view->addItem($item);

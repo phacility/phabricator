@@ -187,9 +187,14 @@ final class PhameBlogEditController
       $error_view = null;
     }
 
-    $nav = $this->renderSideNavFilterView(null);
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($page_title);
+
+    $nav = $this->renderSideNavFilterView();
+    $nav->selectFilter($this->id ? null : 'blog/new');
     $nav->appendChild(
       array(
+        $header,
         $error_view,
         $form,
       ));

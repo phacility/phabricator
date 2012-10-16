@@ -33,13 +33,20 @@ final class PhamePostNewController extends PhameController {
         ))
       ->execute();
 
-    $nav = $this->renderSideNavFilterView(null);
+    $nav = $this->renderSideNavFilterView();
+    $nav->selectFilter('post/new');
     $nav->appendChild(
       id(new PhabricatorHeaderView())->setHeader(
         pht('Create Post')));
 
     if (!$blogs) {
+      $notification = id(new AphrontErrorView())
+        ->setSeverity(AphrontErrorView::SEVERITY_NODATA)
+        ->appendChild(
+          pht('You do not have permission to join any blogs. Create a blog '.
+              'first, then you can post to it.'));
 
+      $nav->appendChild($notification);
     } else {
       $options = mpull($blogs, 'getName', 'getID');
 
