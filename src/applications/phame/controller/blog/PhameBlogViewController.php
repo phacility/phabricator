@@ -139,7 +139,7 @@ final class PhameBlogViewController extends PhameController {
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setIcon('new')
-        ->setHref($this->getApplicationURI('post/new/?blog='.$blog->getID()))
+        ->setHref($this->getApplicationURI('post/edit/?blog='.$blog->getID()))
         ->setName(pht('Write Post'))
         ->setDisabled(!$can_join)
         ->setWorkflow(!$can_join));

@@ -21,9 +21,56 @@
  */
 final class PhamePostNewController extends PhameController {
 
+  private $id;
+
+  public function willProcessRequest(array $data) {
+    $this->id = idx($data, 'id');
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
+
+    $post = null;
+    $view_uri = null;
+    if ($this->id) {
+      $post = id(new PhamePostQuery())
+        ->setViewer($user)
+        ->withIDs(array($this->id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
+      if (!$post) {
+        return new Aphront404Response();
+      }
+
+      $view_uri = '/post/view/'.$post->getID().'/';
+      $view_uri = $this->getApplicationURI($view_uri);
+
+      if ($request->isFormPost()) {
+        $blog = id(new PhameBlogQuery())
+          ->setViewer($user)
+          ->withIDs(array($request->getInt('blog')))
+          ->requireCapabilities(
+            array(
+              PhabricatorPolicyCapability::CAN_JOIN,
+            ))
+          ->executeOne();
+
+        if ($blog) {
+          $post->setBlogPHID($blog->getPHID());
+          $post->save();
+
+          return id(new AphrontRedirectResponse())->setURI($view_uri);
+        }
+      }
+
+      $title = pht('Move Post');
+    } else {
+      $title = pht('Create Post');
+    }
 
     $blogs = id(new PhameBlogQuery())
       ->setViewer($user)
@@ -36,8 +83,7 @@ final class PhamePostNewController extends PhameController {
     $nav = $this->renderSideNavFilterView();
     $nav->selectFilter('post/new');
     $nav->appendChild(
-      id(new PhabricatorHeaderView())->setHeader(
-        pht('Create Post')));
+      id(new PhabricatorHeaderView())->setHeader($title));
 
     if (!$blogs) {
       $notification = id(new AphrontErrorView())
@@ -49,20 +95,37 @@ final class PhamePostNewController extends PhameController {
       $nav->appendChild($notification);
     } else {
       $options = mpull($blogs, 'getName', 'getID');
+      asort($options);
+
+      $selected_value = null;
+      if ($post && $post->getBlog()) {
+        $selected_value = $post->getBlog()->getID();
+      }
 
       $form = id(new AphrontFormView())
         ->setUser($user)
-        ->setMethod('GET')
         ->setFlexible(true)
-        ->setAction($this->getApplicationURI('post/edit/'))
         ->appendChild(
           id(new AphrontFormSelectControl())
             ->setLabel('Blog')
             ->setName('blog')
-            ->setOptions($options))
-        ->appendChild(
-          id(new AphrontFormSubmitControl())
-            ->setValue('Continue'));
+            ->setOptions($options)
+            ->setValue($selected_value));
+
+      if ($post) {
+        $form
+          ->appendChild(
+            id(new AphrontFormSubmitControl())
+              ->setValue(pht('Move Post'))
+              ->addCancelButton($view_uri));
+      } else {
+        $form
+          ->setAction($this->getApplicationURI('post/edit/'))
+          ->setMethod('GET')
+          ->appendChild(
+            id(new AphrontFormSubmitControl())
+              ->setValue(pht('Continue')));
+      }
 
       $nav->appendChild($form);
     }
@@ -70,7 +133,7 @@ final class PhamePostNewController extends PhameController {
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title'   => 'Create Post',
+        'title'   => $title,
         'device'  => true,
       ));
   }

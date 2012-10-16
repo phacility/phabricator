@@ -43,8 +43,8 @@ final class PhamePostNotLiveController extends PhameController {
     if (!$post->getBlog()) {
       $reasons[] =
         '<p>'.pht('You can not view the live version of this post because it '.
-        'is not associated with a blog. Edit the post and choose a blog to '.
-        'publish it to.').'</p>';
+        'is not associated with a blog. Move the post to a blog in order to '.
+        'view it live.').'</p>';
     }
 
     if ($post->isDraft()) {

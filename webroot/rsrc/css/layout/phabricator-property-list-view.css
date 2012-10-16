@@ -66,3 +66,27 @@
 .phabricator-property-list-text-content {
   padding: 12px 18px;
 }
+
+/* When we follow an action list view on the Desktop, move down 30px so the
+   action list can start slightly above the property list. This is an unusual
+   case where we have something between the header and the action/property
+   lists and we want to give it space. */
+.device-desktop .phabricator-action-list-view +
+  .phabricator-property-list-view {
+  clear: left;
+  margin-top: 30px;
+}
+
+
+/* In the common case where we immediately follow a header, move back up 30px
+   so we snuggle next to the header. */
+.device-desktop .phabricator-header-view
+  + .phabricator-action-list-view {
+  margin-top: -30px;
+}
+
+.device-desktop .phabricator-header-view
+  + .phabricator-action-list-view
+  + .phabricator-property-list-view {
+  margin-top: 0px;
+}

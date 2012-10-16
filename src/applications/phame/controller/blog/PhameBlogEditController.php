@@ -80,7 +80,7 @@ final class PhameBlogEditController
 
       $blog->setName($name);
       $blog->setDescription($description);
-      $blog->setDomain($custom_domain);
+      $blog->setDomain(nonempty($custom_domain, null));
       $blog->setSkin($skin);
 
       if (!empty($custom_domain)) {

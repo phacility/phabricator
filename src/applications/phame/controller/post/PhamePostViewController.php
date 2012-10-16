@@ -40,28 +40,30 @@ final class PhamePostViewController extends PhameController {
       return new Aphront404Response();
     }
 
+    $nav = $this->renderSideNavFilterView();
+
+    $nav->appendChild(
+      id(new PhabricatorHeaderView())
+        ->setHeader($post->getTitle()));
+
     if ($post->isDraft()) {
-      $notice = array(
-        'title' => 'You are previewing a draft.',
-        'body'  => 'Only you can see this draft until you publish it. '.
-                   'If you chose a comment widget it will show up when '.
-                   'you publish.'
-      );
-    } else if ($request->getExists('saved')) {
-      $new_link = phutil_render_tag(
-        'a',
-        array(
-          'href' => '/phame/post/new/',
-          'class' => 'button green',
-        ),
-        'write another blog post'
-      );
-      $notice = array(
-        'title' => 'Saved post successfully.',
-        'body'  => 'Seek even more phame and '.$new_link.'.'
-      );
-    } else {
-      $notice = array();
+      $nav->appendChild(
+        id(new AphrontErrorView())
+          ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+          ->setTitle(pht('Draft Post'))
+          ->appendChild(
+            pht('Only you can see this draft until you publish it. '.
+                'Use "Preview / Publish" to publish this post.')));
+    }
+
+    if (!$post->getBlog()) {
+      $nav->appendChild(
+        id(new AphrontErrorView())
+          ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+          ->setTitle(pht('Not On A Blog'))
+          ->appendChild(
+            pht('This post is not associated with a blog (the blog may have '.
+                'been deleted). Use "Move Post" to move it to a new blog.')));
     }
 
     $this->loadHandles(
@@ -70,16 +72,11 @@ final class PhamePostViewController extends PhameController {
         $post->getBloggerPHID(),
       ));
 
-    $nav = $this->renderSideNavFilterView(null);
-
-    $header = id(new PhabricatorHeaderView())->setHeader($post->getTitle());
-
     $actions = $this->renderActions($post, $user);
     $properties = $this->renderProperties($post, $user);
 
     $nav->appendChild(
       array(
-        $header,
         $actions,
         $properties,
       ));
@@ -115,6 +112,37 @@ final class PhamePostViewController extends PhameController {
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('move')
+        ->setHref($this->getApplicationURI('post/move/'.$id.'/'))
+        ->setName('Move Post')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+    if ($post->isDraft()) {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon('preview')
+          ->setHref($this->getApplicationURI('post/publish/'.$id.'/'))
+          ->setName(pht('Preview / Publish')));
+    } else {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon('unpublish')
+          ->setHref($this->getApplicationURI('post/unpublish/'.$id.'/'))
+          ->setName(pht('Unpublish'))
+          ->setWorkflow(true));
+    }
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('delete')
+        ->setHref($this->getApplicationURI('post/delete/'.$id.'/'))
+        ->setName('Delete Post')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true));
+
     $blog = $post->getBlog();
     $can_view_live = $blog && !$post->isDraft();
 
@@ -132,29 +160,6 @@ final class PhamePostViewController extends PhameController {
         ->setName(pht('View Live'))
         ->setDisabled(!$can_view_live)
         ->setWorkflow(!$can_view_live));
-
-    if ($post->isDraft()) {
-      $actions->addAction(
-        id(new PhabricatorActionView())
-          ->setIcon('world')
-          ->setHref($this->getApplicationURI('post/publish/'.$id.'/'))
-          ->setName(pht('Preview / Publish')));
-    } else {
-      $actions->addAction(
-        id(new PhabricatorActionView())
-          ->setIcon('delete')
-          ->setHref($this->getApplicationURI('post/unpublish/'.$id.'/'))
-          ->setName(pht('Unpublish'))
-          ->setWorkflow(true));
-    }
-
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setIcon('delete')
-        ->setHref($this->getApplicationURI('post/delete/'.$id.'/'))
-        ->setName('Delete Post')
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(true));
 
     return $actions;
   }

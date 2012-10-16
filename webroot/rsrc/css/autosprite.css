@@ -760,38 +760,50 @@
   background-position: 0px -7359px;
 }
 
-.remarkup-assist-b {
+.action-move {
   background-position: 0px -7376px;
 }
 
+.action-preview {
+  background-position: 0px -7393px;
+}
+
+.action-unpublish {
+  background-position: 0px -7410px;
+}
+
+.remarkup-assist-b {
+  background-position: 0px -7427px;
+}
+
 .remarkup-assist-code {
-  background-position: 0px -7391px;
+  background-position: 0px -7442px;
 }
 
 .remarkup-assist-i {
-  background-position: 0px -7406px;
+  background-position: 0px -7457px;
 }
 
 .remarkup-assist-image {
-  background-position: 0px -7421px;
+  background-position: 0px -7472px;
 }
 
 .remarkup-assist-ol {
-  background-position: 0px -7436px;
+  background-position: 0px -7487px;
 }
 
 .remarkup-assist-tag {
-  background-position: 0px -7451px;
+  background-position: 0px -7502px;
 }
 
 .remarkup-assist-tt {
-  background-position: 0px -7466px;
+  background-position: 0px -7517px;
 }
 
 .remarkup-assist-ul {
-  background-position: 0px -7481px;
+  background-position: 0px -7532px;
 }
 
 .remarkup-assist-help {
-  background-position: 0px -7496px;
+  background-position: 0px -7547px;
 }
