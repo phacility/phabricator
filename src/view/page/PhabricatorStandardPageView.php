@@ -24,19 +24,13 @@ final class PhabricatorStandardPageView extends AphrontPageView {
   private $bodyContent;
   private $menuContent;
   private $request;
-  private $isAdminInterface;
   private $showChrome = true;
   private $isFrameable = false;
   private $disableConsole;
   private $searchDefaultScope;
   private $pageObjects = array();
   private $controller;
-  private $deviceReady;
 
-  public function setDeviceReady($device_ready) {
-    $this->deviceReady = $device_ready;
-    return $this;
-  }
 
   public function setController(AphrontController $controller) {
     $this->controller = $controller;
@@ -45,15 +39,6 @@ final class PhabricatorStandardPageView extends AphrontPageView {
 
   public function getController() {
     return $this->controller;
-  }
-
-  public function setIsAdminInterface($is_admin_interface) {
-    $this->isAdminInterface = $is_admin_interface;
-    return $this;
-  }
-
-  public function getIsAdminInterface() {
-    return $this->isAdminInterface;
   }
 
   public function setRequest($request) {
@@ -303,11 +288,6 @@ final class PhabricatorStandardPageView extends AphrontPageView {
       }
     }
 
-    $admin_class = null;
-    if ($this->getIsAdminInterface()) {
-      $admin_class = 'phabricator-admin-page-view';
-    }
-
     $header_chrome = null;
     $footer_chrome = null;
     if ($this->getShowChrome()) {
@@ -341,7 +321,6 @@ final class PhabricatorStandardPageView extends AphrontPageView {
 
     $classes = array(
       'phabricator-standard-page',
-      $admin_class,
       $device_guess,
     );
     $classes = implode(' ', $classes);

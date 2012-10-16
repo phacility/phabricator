@@ -139,11 +139,6 @@ abstract class PhabricatorController extends AphrontController {
     $view = new PhabricatorStandardPageView();
     $view->setRequest($this->getRequest());
     $view->setController($this);
-
-    if ($this->shouldRequireAdmin()) {
-      $view->setIsAdminInterface(true);
-    }
-
     return $view;
   }
 
