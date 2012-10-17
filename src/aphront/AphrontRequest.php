@@ -55,6 +55,11 @@ final class AphrontRequest {
     return $this->applicationConfiguration;
   }
 
+  final public function setPath($path) {
+    $this->path = $path;
+    return $this;
+  }
+
   final public function getPath() {
     return $this->path;
   }

@@ -19,26 +19,36 @@
 /**
  * @group phame
  */
-final class PhabricatorBlogSkin extends PhameBlogSkin {
+final class PhameBlogSkinTenEleven extends PhameBasicBlogSkin {
 
-  public function __construct() {
-    $this->setShowChrome(true);
+  public function getName() {
+    return 'Ten Eleven (Default)';
   }
 
   protected function renderHeader() {
-    return '';
+    $blog_name = $this->getBlog()->getName();
+    $about = $this->getBlog()->getDescription();
+
+    $about = phutil_escape_html($about);
+
+    return <<<EOHTML
+<div class="main-panel">
+  <div class="header">
+    <h1>{$blog_name}</h1>
+    <div class="about">{$about}</div>
+  </div>
+  <div class="splash">
+
+  </div>
+  <div class="content">
+EOHTML;
   }
 
   protected function renderFooter() {
-    return '';
+    return <<<EOHTML
+  </div>
+</div>
+EOHTML;
   }
 
-  protected function renderBody() {
-    require_celerity_resource('phame-css');
-
-    return
-      $this->renderNotice() .
-      $this->renderPosts() .
-      $this->renderBlogDetails();
-  }
 }

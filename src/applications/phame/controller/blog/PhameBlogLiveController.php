@@ -50,46 +50,21 @@ final class PhameBlogLiveController extends PhameController {
         ->setURI('http://'.$blog->getDomain().'/'.$this->more);
     }
 
-    $pager = id(new AphrontCursorPagerView())
-      ->readFromRequest($request);
-
-    $query = id(new PhamePostQuery())
-      ->setViewer($user)
-      ->withBlogPHIDs(array($blog->getPHID()));
-
-    $matches = null;
-    $path = $this->more;
-    if (preg_match('@^/(?P<view>[^/]+)/(?P<name>.*)$@', $path, $matches)) {
-      $view = $matches['view'];
-      $name = $matches['name'];
+    if ($blog->getDomain()) {
+      $base_path = '/';
     } else {
-      $view = '';
-      $name = '';
+      $base_path = '/phame/live/'.$blog->getID().'/';
     }
 
-    switch ($view) {
-      case 'post':
-        $query->withPhameTitles(array($name));
-        break;
-    }
+    $phame_request = clone $request;
+    $phame_request->setPath('/'.ltrim($this->more, '/'));
 
-    $posts = $query->executeWithCursorPager($pager);
-
-    $skin = $blog->getSkinRenderer();
+    $skin = $blog->getSkinRenderer($phame_request);
     $skin
-      ->setUser($user)
-      ->setPosts($posts)
-      ->setBloggers($this->loadViewerHandles(mpull($posts, 'getBloggerPHID')))
       ->setBlog($blog)
-      ->setRequestURI($this->getRequest()->getRequestURI());
+      ->setBaseURI($request->getRequestURI()->setPath($base_path));
 
-    $page = $this->buildStandardPageView();
-    $page->appendChild($skin);
-    $page->setShowChrome(false);
-
-    $response = new AphrontWebpageResponse();
-    $response->setContent($page->render());
-    return $response;
+    return $skin->processRequest();
   }
 
 }

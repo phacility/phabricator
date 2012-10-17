@@ -43,29 +43,21 @@ final class PhamePostFramedController extends PhameController {
       return new Aphront404Response();
     }
 
-    $skin = $post->getBlog()->getSkinRenderer();
+    $blog = $post->getBlog();
 
-    $handles = $this->loadViewerHandles(
-      array(
-        $post->getBloggerPHID(),
-      ));
+    $phame_request = $request->setPath('/post/'.$post->getPhameTitle());
+    $skin = $post->getBlog()->getSkinRenderer($phame_request);
+
+    $uri = clone $request->getRequestURI();
+    $uri->setPath('/phame/live/'.$blog->getID().'/');
 
     $skin
-      ->setUser($user)
+      ->setPreview(true)
       ->setBlog($post->getBlog())
-      ->setPosts(array($post))
-      ->setBloggers($handles)
-      ->setRequestURI($this->getRequest()->getRequestURI());
+      ->setBaseURI((string)$uri);
 
-    $page = $this->buildStandardPageView();
-    $page->setFrameable(true);
-    $page->setShowChrome(false);
-    $page->appendChild($skin);
-
-    $response = new AphrontWebpageResponse();
+    $response = $skin->processRequest();
     $response->setFrameable(true);
-    $response->setContent($page->render());
     return $response;
-
   }
 }

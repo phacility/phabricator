@@ -19,26 +19,37 @@
 /**
  * @group phame
  */
-final class PhamePostPreviewController
-extends PhameController {
+abstract class PhameBlogSkin extends PhabricatorController {
 
-  protected function getSideNavFilter() {
-    return null;
+  private $blog;
+  private $baseURI;
+  private $preview;
+
+  public function setPreview($preview) {
+    $this->preview = $preview;
+    return $this;
   }
 
-  public function processRequest() {
-    $request     = $this->getRequest();
-    $user        = $request->getUser();
-    $body        = $request->getStr('body');
-
-    $post = id(new PhamePost())
-      ->setBody($body);
-
-    $content = PhabricatorMarkupEngine::renderOneObject(
-      $post,
-      PhamePost::MARKUP_FIELD_BODY,
-      $user);
-
-    return id(new AphrontAjaxResponse())->setContent($content);
+  public function getPreview() {
+    return $this->preview;
   }
+
+  final public function setBaseURI($base_uri) {
+    $this->baseURI = $base_uri;
+    return $this;
+  }
+
+  final public function getURI($path) {
+    return $this->baseURI.$path;
+  }
+
+  final public function setBlog(PhameBlog $blog) {
+    $this->blog = $blog;
+    return $this;
+  }
+
+  final public function getBlog() {
+    return $this->blog;
+  }
+
 }
