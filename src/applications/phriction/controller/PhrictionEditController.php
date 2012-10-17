@@ -130,6 +130,19 @@ final class PhrictionEditController
 
           return id(new AphrontDialogResponse())->setDialog($dialog);
         }
+      } else if (!strlen($request->getStr('content'))) {
+
+        // We trigger this only for new pages. For existing pages, deleting
+        // all the content counts as deleting the page.
+
+        $dialog = new AphrontDialogView();
+        $dialog->setUser($user);
+        $dialog->setTitle('Empty Page');
+        $dialog->appendChild(
+          '<p>You can not create an empty document.</p>');
+        $dialog->addCancelButton($request->getRequestURI());
+
+        return id(new AphrontDialogResponse())->setDialog($dialog);
       }
 
       if (!count($errors)) {
