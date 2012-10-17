@@ -69,12 +69,17 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
   }
 
   protected function renderPostList(array $posts) {
+    $summaries = array();
+    foreach ($posts as $post) {
+      $summaries[] = $post->renderWithSummary();
+    }
+
     $list = phutil_render_tag(
       'div',
       array(
         'class' => 'phame-post-list',
       ),
-      id(new AphrontNullView())->appendChild($posts)->render());
+      id(new AphrontNullView())->appendChild($summaries)->render());
 
     $pager = $this->renderOlderPageLink().$this->renderNewerPageLink();
     if ($pager) {
@@ -224,6 +229,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
     $phids = array();
     foreach ($posts as $post) {
       $engine->addObject($post, PhamePost::MARKUP_FIELD_BODY);
+      $engine->addObject($post, PhamePost::MARKUP_FIELD_SUMMARY);
 
       $phids[] = $post->getBloggerPHID();
     }
@@ -240,6 +246,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
         ->setSkin($this)
         ->setPost($post)
         ->setBody($engine->getOutput($post, PhamePost::MARKUP_FIELD_BODY))
+        ->setSummary($engine->getOutput($post, PhamePost::MARKUP_FIELD_SUMMARY))
         ->setAuthor($handles[$post->getBloggerPHID()]);
 
       $post->makeEphemeral();

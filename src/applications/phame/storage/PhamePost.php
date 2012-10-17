@@ -23,6 +23,7 @@ final class PhamePost extends PhameDAO
   implements PhabricatorPolicyInterface, PhabricatorMarkupInterface {
 
   const MARKUP_FIELD_BODY    = 'markup:body';
+  const MARKUP_FIELD_SUMMARY = 'markup:summary';
 
   const VISIBILITY_DRAFT     = 0;
   const VISIBILITY_PUBLISHED = 1;
@@ -193,9 +194,13 @@ final class PhamePost extends PhameDAO
 
 
   public function getMarkupText($field) {
-    return $this->getBody();
+    switch ($field) {
+      case self::MARKUP_FIELD_BODY:
+        return $this->getBody();
+      case self::MARKUP_FIELD_SUMMARY:
+        return PhabricatorMarkupEngine::summarize($this->getBody());
+    }
   }
-
 
   public function didMarkupText(
     $field,

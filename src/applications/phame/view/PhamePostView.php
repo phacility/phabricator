@@ -26,6 +26,8 @@ final class PhamePostView extends AphrontView {
   private $viewer;
   private $body;
   private $skin;
+  private $summary;
+
 
   public function setSkin(PhameBlogSkin $skin) {
     $this->skin = $skin;
@@ -72,6 +74,15 @@ final class PhamePostView extends AphrontView {
     return $this->body;
   }
 
+  public function setSummary($summary) {
+    $this->summary = $summary;
+    return $this;
+  }
+
+  public function getSummary() {
+    return $this->summary;
+  }
+
   public function renderTitle() {
     $href = $this->getSkin()->getURI('post/'.$this->getPost()->getPhameTitle());
     return phutil_render_tag(
@@ -111,6 +122,15 @@ final class PhamePostView extends AphrontView {
       $this->getBody());
   }
 
+  public function renderSummary() {
+    return phutil_render_tag(
+      'div',
+      array(
+        'class' => 'phame-post-body',
+      ),
+      $this->getSummary());
+  }
+
   public function renderComments() {
     $post = $this->getPost();
 
@@ -138,6 +158,18 @@ final class PhamePostView extends AphrontView {
       $this->renderTitle().
       $this->renderDatePublished().
       $this->renderBody().
+      $this->renderComments());
+  }
+
+  public function renderWithSummary() {
+    return phutil_render_tag(
+      'div',
+      array(
+        'class' => 'phame-post',
+      ),
+      $this->renderTitle().
+      $this->renderDatePublished().
+      $this->renderSummary().
       $this->renderComments());
   }
 
