@@ -37,7 +37,11 @@ function javelin_render_tag(
           unset($attributes[$k]);
           break;
         case 'mustcapture':
-          $attributes['data-mustcapture'] = '1';
+          if ($v) {
+            $attributes['data-mustcapture'] = '1';
+          } else {
+            unset($attributes['data-mustcapture']);
+          }
           unset($attributes[$k]);
           break;
       }
