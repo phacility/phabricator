@@ -50,19 +50,20 @@ final class PhameBlogLiveController extends PhameController {
         ->setURI('http://'.$blog->getDomain().'/'.$this->more);
     }
 
-    if ($blog->getDomain()) {
-      $base_path = '/';
-    } else {
-      $base_path = '/phame/live/'.$blog->getID().'/';
-    }
-
     $phame_request = clone $request;
     $phame_request->setPath('/'.ltrim($this->more, '/'));
+
+    if ($blog->getDomain()) {
+      $uri = new PhutilURI('http://'.$blog->getDomain().'/');
+    } else {
+      $uri = '/phame/live/'.$blog->getID().'/';
+      $uri = PhabricatorEnv::getURI($uri);
+    }
 
     $skin = $blog->getSkinRenderer($phame_request);
     $skin
       ->setBlog($blog)
-      ->setBaseURI($request->getRequestURI()->setPath($base_path));
+      ->setBaseURI((string)$uri);
 
     $skin->willProcessRequest(array());
     return $skin->processRequest();

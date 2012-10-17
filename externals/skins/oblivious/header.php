@@ -2,6 +2,9 @@
 <html>
   <head>
     <title><?php echo _e($title); ?></title>
+
+    <?php echo $skin->getCSSResources(); ?>
+
   </head>
   <body>
     <div class="oblivious-info">

@@ -25,7 +25,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
 
   private $pager;
 
-  final public function processRequest() {
+  public function processRequest() {
     $request = $this->getRequest();
 
     $content = $this->renderContent($request);
@@ -96,6 +96,21 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
 
   protected function render404Page() {
     return '<h2>404 Not Found</h2>';
+  }
+
+  final public function getResourceURI($resource) {
+    $root = $this->getSpecification()->getRootDirectory();
+    $path = $root.DIRECTORY_SEPARATOR.$resource;
+
+    $data = Filesystem::readFile($path);
+    $hash = PhabricatorHash::digest($data);
+    $hash = substr($hash, 0, 6);
+    $id = $this->getBlog()->getID();
+
+    $uri = '/phame/r/'.$id.'/'.$hash.'/'.$resource;
+    $uri = PhabricatorEnv::getCDNURI($uri);
+
+    return $uri;
   }
 
 /* -(  Paging  )------------------------------------------------------------- */
@@ -179,7 +194,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
   /**
    * @task internal
    */
-  private function renderContent(AphrontRequest $request) {
+  protected function renderContent(AphrontRequest $request) {
     $user = $request->getUser();
 
     $matches = null;

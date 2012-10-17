@@ -1086,7 +1086,7 @@ return array(
 
   // Directories to look for Phame skins inside of.
   'phame.skins' => array(
-    'externals/skin/',
+    'externals/skins/',
   ),
 
 // -- Remarkup -------------------------------------------------------------- //

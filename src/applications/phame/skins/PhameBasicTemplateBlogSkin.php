@@ -21,11 +21,51 @@
  */
 final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
 
-  public function willProcessRequest(array $data) {
+  private $cssResources;
+
+  public function processRequest() {
     $root = dirname(phutil_get_library_root('phabricator'));
     require_once $root.'/support/phame/libskin.php';
 
-    parent::willProcessRequest($data);
+    $css = $this->getPath('css/');
+    if (Filesystem::pathExists($css)) {
+      $this->cssResources = array();
+      foreach (Filesystem::listDirectory($css) as $path) {
+        if (!preg_match('/.css$/', $path)) {
+          continue;
+        }
+        $this->cssResources[] = phutil_render_tag(
+          'link',
+          array(
+            'rel'   => 'stylesheet',
+            'type'  => 'text/css',
+            'href'  => $this->getResourceURI('css/'.$path),
+          ));
+      }
+      $this->cssResources = implode("\n", $this->cssResources);
+    }
+
+    $request = $this->getRequest();
+    $content = $this->renderContent($request);
+
+    if (!$content) {
+      $content = $this->render404Page();
+    }
+
+    $content = array(
+      $this->renderHeader(),
+      $content,
+      $this->renderFooter(),
+    );
+
+    $response = new AphrontWebpageResponse();
+    $response->setContent(implode("\n", $content));
+
+    return $response;
+  }
+
+  public function getCSSResources() {
+    return $this->cssResources;
   }
 
   public function getName() {
@@ -45,7 +85,9 @@ final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
     ob_start();
 
     if (Filesystem::pathExists($this->getPath($__template__))) {
-      extract($__scope__ + $this->getDefaultScope());
+      // Fool lint.
+      $__evil__ = 'extract';
+      $__evil__($__scope__ + $this->getDefaultScope());
       require $this->getPath($__template__);
     }
 

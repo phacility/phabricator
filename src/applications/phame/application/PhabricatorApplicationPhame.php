@@ -46,6 +46,9 @@ final class PhabricatorApplicationPhame extends PhabricatorApplication {
     return array(
      '/phame/' => array(
         '' => 'PhamePostListController',
+        'r/(?P<id>\d+)/(?P<hash>[^/]+)/(?P<name>.*)'
+                                          => 'PhameResourceController',
+
         'live/(?P<id>[^/]+)/(?P<more>.*)' => 'PhameBlogLiveController',
         'post/' => array(
           '(?:(?P<filter>draft|all)/)?'     => 'PhamePostListController',

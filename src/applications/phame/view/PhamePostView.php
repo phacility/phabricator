@@ -169,8 +169,7 @@ final class PhamePostView extends AphrontView {
       ),
       $this->renderTitle().
       $this->renderDatePublished().
-      $this->renderSummary().
-      $this->renderComments());
+      $this->renderSummary());
   }
 
   private function renderFacebookComments() {
@@ -198,13 +197,14 @@ final class PhamePostView extends AphrontView {
       $c_uri
     );
 
+
+    $uri = $this->getSkin()->getURI('post/'.$this->getPost()->getPhameTitle());
+
     $fb_comments = phutil_render_tag('div',
       array(
         'class'            => 'fb-comments',
-        'data-href'        => $this->getRequestURI(),
+        'data-href'        => $uri,
         'data-num-posts'   => 5,
-        'data-width'       => 1080,  // we hack this to fluid in css
-        'data-colorscheme' => 'dark',
       ),
       ''
     );
@@ -249,7 +249,7 @@ final class PhamePostView extends AphrontView {
       ' document.getElementsByTagName("body")[0]).appendChild(dsq);'.
       '})(); </script>',
       $post->getPHID(),
-      $this->getRequestURI(),
+      $this->getSkin()->getURI('post/'.$this->getPost()->getPhameTitle()),
       $post->getTitle()
     );
 

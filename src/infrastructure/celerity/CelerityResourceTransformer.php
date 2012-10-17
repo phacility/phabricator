@@ -24,6 +24,12 @@ final class CelerityResourceTransformer {
   private $minify;
   private $rawResourceMap;
   private $celerityMap;
+  private $translateURICallback;
+
+  public function setTranslateURICallback($translate_uricallback) {
+    $this->translateURICallback = $translate_uricallback;
+    return $this;
+  }
 
   public function setMinify($minify) {
     $this->minify = $minify;
@@ -46,8 +52,10 @@ final class CelerityResourceTransformer {
     switch ($type) {
       case 'css':
         $data = preg_replace_callback(
-          '@url\s*\((\s*[\'"]?/rsrc/.*?)\)@s',
-          array($this, 'translateResourceURI'),
+          '@url\s*\((\s*[\'"]?.*?)\)@s',
+          nonempty(
+            $this->translateURICallback,
+            array($this, 'translateResourceURI')),
           $data);
         break;
     }
