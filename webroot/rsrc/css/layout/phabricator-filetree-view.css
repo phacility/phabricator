@@ -47,12 +47,6 @@
   color: #3b5998;
 }
 
-.phabricator-filetree a.phabricator-filetree-item:hover
-  .phabricator-filetree-name {
-  color: #f9f9f9;
-}
-
-
 .phabricator-filetree-icon-file {
   background-image: url(/rsrc/image/icon/fatcow/page_white_text.png);
 }
