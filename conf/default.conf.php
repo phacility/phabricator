@@ -1084,6 +1084,11 @@ return array(
   // Information on shortnames - http://docs.disqus.com/help/68/
   'disqus.shortname'            => null,
 
+  // Directories to look for Phame skins inside of.
+  'phame.skins' => array(
+    'externals/skin/',
+  ),
+
 // -- Remarkup -------------------------------------------------------------- //
 
   // If you enable this, linked YouTube videos will be embeded inline. This has

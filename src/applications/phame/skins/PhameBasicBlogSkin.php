@@ -54,6 +54,7 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
 
     $response = new AphrontWebpageResponse();
     $response->setContent($view->render());
+
     return $response;
   }
 
@@ -127,6 +128,9 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
    */
   protected function renderOlderPageLink() {
     $uri = $this->getOlderPageURI();
+    if (!$uri) {
+      return null;
+    }
     return phutil_render_tag(
       'a',
       array(
@@ -156,6 +160,9 @@ abstract class PhameBasicBlogSkin extends PhameBlogSkin {
    */
   protected function renderNewerPageLink() {
     $uri = $this->getNewerPageURI();
+    if (!$uri) {
+      return null;
+    }
     return phutil_render_tag(
       'a',
       array(

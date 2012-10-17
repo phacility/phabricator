@@ -64,6 +64,7 @@ final class PhameBlogLiveController extends PhameController {
       ->setBlog($blog)
       ->setBaseURI($request->getRequestURI()->setPath($base_path));
 
+    $skin->willProcessRequest(array());
     return $skin->processRequest();
   }
 

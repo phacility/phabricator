@@ -24,7 +24,7 @@ final class PhameBlog extends PhameDAO
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:description';
 
-  const SKIN_DEFAULT = 'PhameBlogSkinTenEleven';
+  const SKIN_DEFAULT = 'oblivious';
 
   protected $id;
   protected $phid;
@@ -57,13 +57,16 @@ final class PhameBlog extends PhameDAO
   }
 
   public function getSkinRenderer(AphrontRequest $request) {
-    try {
-      $skin = newv($this->getSkin(), array($request));
-    } catch (PhutilMissingSymbolException $ex) {
-      // If this blog has a skin but it's no longer available (for example,
-      // it was uninstalled) just return the default skin.
-      $skin = newv(self::SKIN_DEFAULT, array($request));
+    $spec = PhameSkinSpecification::loadOneSkinSpecification(
+      $this->getSkin());
+
+    if (!$spec) {
+      $spec = PhameSkinSpecification::loadOneSkinSpecification(
+        self::SKIN_DEFAULT);
     }
+
+    $skin = newv($spec->getSkinClass(), array($request));
+    $skin->setSpecification($spec);
 
     return $skin;
   }

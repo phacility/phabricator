@@ -118,6 +118,9 @@ final class PhameBlogEditController
       ->setObject($blog)
       ->execute();
 
+    $skins = PhameSkinSpecification::loadAllSkinSpecifications();
+    $skins = mpull($skins, 'getName');
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setFlexible(true)
@@ -171,7 +174,7 @@ final class PhameBlogEditController
         ->setLabel('Skin')
         ->setName('skin')
         ->setValue($blog->getSkin())
-        ->setOptions(PhameBlog::getSkinOptionsForSelect())
+        ->setOptions($skins)
       )
       ->appendChild(
         id(new AphrontFormSubmitControl())

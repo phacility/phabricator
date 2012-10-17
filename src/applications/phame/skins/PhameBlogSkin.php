@@ -24,6 +24,16 @@ abstract class PhameBlogSkin extends PhabricatorController {
   private $blog;
   private $baseURI;
   private $preview;
+  private $specification;
+
+  public function setSpecification(PhameSkinSpecification $specification) {
+    $this->specification = $specification;
+    return $this;
+  }
+
+  public function getSpecification() {
+    return $this->specification;
+  }
 
   public function setPreview($preview) {
     $this->preview = $preview;
