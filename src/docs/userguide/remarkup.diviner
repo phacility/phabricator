@@ -38,7 +38,7 @@ empty lines:
   Use "- " or "* " for bulleted lists, and "# " for numbered lists.
   Use ``` or indent two spaces for code.
   Use %%% for a literal block.
-  Use <table>...</table> for tables.
+  Use | ... | ... for tables.
 
 = Basic Styling =
 
@@ -359,7 +359,21 @@ escape HTML and preserve line breaks).
 
 = Tables =
 
-Remarkup supports a simplified HTML table syntax. For example, this:
+Remarkup supports simple table syntax. For example, this:
+
+  | Fruit  | Color  | Price   | Peel?
+  | -----  | -----  | -----   | -----
+  | Apple  | red    | `$0.93` | no
+  | Banana | yellow | `$0.19` | **YES**
+
+...produces this:
+
+| Fruit  | Color  | Price   | Peel?
+| -----  | -----  | -----   | -----
+| Apple  | red    | `$0.93` | no
+| Banana | yellow | `$0.19` | **YES**
+
+Remarkup also supports a simplified HTML table syntax. For example, this:
 
   <table>
     <tr>
