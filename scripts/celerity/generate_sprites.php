@@ -248,6 +248,7 @@ $remarkup_icons = array(
   'tt',
   'ul',
   'help',
+  'table',
 );
 
 foreach ($remarkup_icons as $icon) {
