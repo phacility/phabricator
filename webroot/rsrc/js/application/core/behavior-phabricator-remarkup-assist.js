@@ -56,6 +56,9 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
         sel = "  " + sel.join("\n  ");
         update(area, ((r.start == 0) ? "" : "\n\n"), sel, "\n\n");
         break;
+      case 'table':
+        update(area, (r.start == 0 ? '' : '\n\n') + '| ', sel || 'data', ' |');
+        break;
     }
   }
 
