@@ -1695,6 +1695,16 @@ abstract class LiskDAO {
    */
   public function __call($method, $args) {
 
+    // NOTE: PHP has a bug that static variables defined in __call() are shared
+    // across all children classes. Call a different method to work around this
+    // bug.
+    return $this->call($method, $args);
+  }
+
+  /**
+   * @task   util
+   */
+  final protected function call($method, $args) {
     // NOTE: This method is very performance-sensitive (many thousands of calls
     // per page on some pages), and thus has some silliness in the name of
     // optimizations.
