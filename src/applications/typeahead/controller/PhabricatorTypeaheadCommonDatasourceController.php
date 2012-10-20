@@ -295,7 +295,7 @@ final class PhabricatorTypeaheadCommonDatasourceController
           ->setName($name)
           ->setURI($symbol->getURI())
           ->setPHID(md5($symbol->getURI())) // Just needs to be unique.
-          ->setDisplayName($symbol->getName())
+          ->setDisplayName($name)
           ->setDisplayType(strtoupper($lang).' '.ucwords($type).' ('.$proj.')')
           ->setPriorityType('symb');
       }
