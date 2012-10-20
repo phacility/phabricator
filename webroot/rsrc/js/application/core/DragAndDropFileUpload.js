@@ -161,7 +161,7 @@ JX.install('PhabricatorDragAndDropFileUpload', {
       req.listen('uploadprogress', onprogress);
 
       req
-        .setFile(spec)
+        .setRawData(spec)
         .send();
     }
   },

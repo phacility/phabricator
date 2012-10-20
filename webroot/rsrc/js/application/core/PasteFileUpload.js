@@ -50,7 +50,7 @@ JX.install('PhabricatorPasteFileUpload', {
               new JX.Request(up_uri, JX.bind(this, function(r) {
                   this.invoke('didUpload', r);
                 }))
-                .setFile(file)
+                .setRawData(file)
                 .send();
 
               e.kill();
