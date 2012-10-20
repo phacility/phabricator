@@ -70,26 +70,14 @@ widths on different languages:
 
   $linters = array();
 
-  $text_80col_linter = new ArcanistTextLinter();
-  $linters[] = $text_80col_linter;
+	// Warn on JS/CSS lines longer than 80 columns.
+  $linters['TextLinter80Col'] = id(new ArcanistTextLinter())
+		->setPaths(preg_grep('/\.(js|css)$/', $paths));
 
-  $text_120col_linter = new ArcanistTextLinter();
-  $text_120col_linter->setMaxLineLength(120);
-  $linters[] = $text_120col_linter;
-
-  foreach ($paths as $path) {
-
-    // Warn on JS/CSS lines longer than 80 columns.
-    if (preg_match('/\.(js|css)$/', $path)) {
-      $text_80col_linter->addPath($path);
-    }
-
-    // Warn on Java lines longer than 120 columns.
-    if (preg_match('/\.java$/', $path)) {
-      $text_120col_linter->addPath($path);
-    }
-
-  }
+	// Warn on Java lines longer than 120 columns.
+  $linters['TextLinter120Col'] = id(new ArcanistTextLinter())
+		->setMaxLineLength(120)
+		->setPaths(preg_grep('/\.(java)$/', $paths));
 
   // ...
 

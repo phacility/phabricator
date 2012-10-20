@@ -176,18 +176,18 @@ final class PhabricatorFile extends PhabricatorFileDAO {
         // We stored the file somewhere so stop trying to write it to other
         // places.
         break;
-      } catch (Exception $ex) {
-        if ($ex instanceof PhabricatorFileStorageConfigurationException) {
-          // If an engine is outright misconfigured (or misimplemented), raise
-          // that immediately since it probably needs attention.
-          throw $ex;
-        }
 
+      } catch (PhabricatorFileStorageConfigurationException $ex) {
+        // If an engine is outright misconfigured (or misimplemented), raise
+        // that immediately since it probably needs attention.
+        throw $ex;
+
+      } catch (Exception $ex) {
         // If an engine doesn't work, keep trying all the other valid engines
         // in case something else works.
         phlog($ex);
 
-        $exceptions[] = $ex;
+        $exceptions[$engine_class] = $ex;
       }
     }
 
