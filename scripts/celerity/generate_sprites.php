@@ -179,6 +179,7 @@ $app_map = array(
   'repositories'    => array(8, 13),
   'phame'           => array(8, 4),
   'macro'           => array(0, 31),
+  'releeph'         => array(5, 18),
 );
 
 $xadj = -1;

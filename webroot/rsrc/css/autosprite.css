@@ -688,126 +688,146 @@
   background-position: 0px -7039px;
 }
 
-.action-file {
+.app-releeph-large {
   background-position: 0px -7070px;
 }
 
-.action-fork {
-  background-position: 0px -7087px;
+.device-desktop .phabricator-application-launch-container:hover .app-releeph-large /* hover */ {
+  background-position: 0px -7131px;
 }
 
-.action-edit {
-  background-position: 0px -7104px;
+.app-releeph {
+  background-position: 0px -7192px;
 }
 
-.action-flag-0 {
-  background-position: 0px -7121px;
-}
-
-.action-flag-1 {
-  background-position: 0px -7138px;
-}
-
-.action-flag-2 {
-  background-position: 0px -7155px;
-}
-
-.action-flag-3 {
-  background-position: 0px -7172px;
-}
-
-.action-flag-4 {
-  background-position: 0px -7189px;
-}
-
-.action-flag-5 {
-  background-position: 0px -7206px;
-}
-
-.action-flag-6 {
+.device-desktop  .app-releeph:hover {
   background-position: 0px -7223px;
 }
 
+.app-releeph-selected {
+  background-position: 0px -7254px;
+}
+
+.action-file {
+  background-position: 0px -7285px;
+}
+
+.action-fork {
+  background-position: 0px -7302px;
+}
+
+.action-edit {
+  background-position: 0px -7319px;
+}
+
+.action-flag-0 {
+  background-position: 0px -7336px;
+}
+
+.action-flag-1 {
+  background-position: 0px -7353px;
+}
+
+.action-flag-2 {
+  background-position: 0px -7370px;
+}
+
+.action-flag-3 {
+  background-position: 0px -7387px;
+}
+
+.action-flag-4 {
+  background-position: 0px -7404px;
+}
+
+.action-flag-5 {
+  background-position: 0px -7421px;
+}
+
+.action-flag-6 {
+  background-position: 0px -7438px;
+}
+
 .action-flag-7 {
-  background-position: 0px -7240px;
+  background-position: 0px -7455px;
 }
 
 .action-flag-ghost {
-  background-position: 0px -7257px;
-}
-
-.action-subscribe-auto {
-  background-position: 0px -7274px;
-}
-
-.action-subscribe-add {
-  background-position: 0px -7291px;
-}
-
-.action-subscribe-delete {
-  background-position: 0px -7308px;
-}
-
-.action-new {
-  background-position: 0px -7325px;
-}
-
-.action-world {
-  background-position: 0px -7342px;
-}
-
-.action-delete {
-  background-position: 0px -7359px;
-}
-
-.action-move {
-  background-position: 0px -7376px;
-}
-
-.action-preview {
-  background-position: 0px -7393px;
-}
-
-.action-unpublish {
-  background-position: 0px -7410px;
-}
-
-.remarkup-assist-b {
-  background-position: 0px -7427px;
-}
-
-.remarkup-assist-code {
-  background-position: 0px -7442px;
-}
-
-.remarkup-assist-i {
-  background-position: 0px -7457px;
-}
-
-.remarkup-assist-image {
   background-position: 0px -7472px;
 }
 
+.action-subscribe-auto {
+  background-position: 0px -7489px;
+}
+
+.action-subscribe-add {
+  background-position: 0px -7506px;
+}
+
+.action-subscribe-delete {
+  background-position: 0px -7523px;
+}
+
+.action-new {
+  background-position: 0px -7540px;
+}
+
+.action-world {
+  background-position: 0px -7557px;
+}
+
+.action-delete {
+  background-position: 0px -7574px;
+}
+
+.action-move {
+  background-position: 0px -7591px;
+}
+
+.action-preview {
+  background-position: 0px -7608px;
+}
+
+.action-unpublish {
+  background-position: 0px -7625px;
+}
+
+.remarkup-assist-b {
+  background-position: 0px -7642px;
+}
+
+.remarkup-assist-code {
+  background-position: 0px -7657px;
+}
+
+.remarkup-assist-i {
+  background-position: 0px -7672px;
+}
+
+.remarkup-assist-image {
+  background-position: 0px -7687px;
+}
+
 .remarkup-assist-ol {
-  background-position: 0px -7487px;
+  background-position: 0px -7702px;
 }
 
 .remarkup-assist-tag {
-  background-position: 0px -7502px;
+  background-position: 0px -7717px;
 }
 
 .remarkup-assist-tt {
-  background-position: 0px -7517px;
+  background-position: 0px -7732px;
 }
 
 .remarkup-assist-ul {
-  background-position: 0px -7532px;
+  background-position: 0px -7747px;
 }
 
 .remarkup-assist-help {
-  background-position: 0px -7547px;
+  background-position: 0px -7762px;
 }
 
 .remarkup-assist-table {
-  background-position: 0px -7562px;
+  background-position: 0px -7777px;
 }
