@@ -818,7 +818,9 @@ final class DifferentialChangesetParser {
           $text,
           $intra[$key]);
       }
-      if (isset($corpus[$key]) && strlen($corpus[$key]) > $this->lineWidth) {
+      if (isset($corpus[$key]) &&
+          strlen($corpus[$key]) > $this->lineWidth &&
+          strlen(rtrim($corpus[$key], "\r\n")) > $this->lineWidth) {
         $lines = phutil_utf8_hard_wrap_html($render[$key], $this->lineWidth);
         $render[$key] = implode($line_break, $lines);
       }
