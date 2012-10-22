@@ -313,7 +313,7 @@ final class PhabricatorObjectHandleData {
             $handle->setPHID($phid);
             $handle->setType($type);
             if (empty($tasks[$phid])) {
-              $handle->setName('Unknown Revision');
+              $handle->setName('Unknown Task');
             } else {
               $task = $tasks[$phid];
               $handle->setName($task->getTitle());
