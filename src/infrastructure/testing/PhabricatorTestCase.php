@@ -51,6 +51,7 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
 
   private static $storageFixtureReferences = 0;
   private static $storageFixture;
+  private static $storageFixtureObjectSeed = 0;
 
   protected function getPhabricatorTestCaseConfiguration() {
     return array();
@@ -142,6 +143,36 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
       'https://secure.phabricator.com/diffusion/symbol/'.$method.
       '/?lang=php&projects='.$phabricator_project.
       '&jump=true&context='.get_class($this);
+  }
+
+  /**
+   * Returns an integer seed to use when building unique identifiers (e.g.,
+   * non-colliding usernames). The seed is unstable and its value will change
+   * between test runs, so your tests must not rely on it.
+   *
+   * @return int A unique integer.
+   */
+  protected function getNextObjectSeed() {
+    self::$storageFixtureObjectSeed += mt_rand(1, 100);
+    return self::$storageFixtureObjectSeed;
+  }
+
+  protected function generateNewTestUser() {
+    $seed = $this->getNextObjectSeed();
+
+    $user = id(new PhabricatorUser())
+      ->setRealName("Test User {$seed}}")
+      ->setUserName("test{$seed}");
+
+    $email = id(new PhabricatorUserEmail())
+      ->setAddress("testuser{$seed}@example.com")
+      ->setIsVerified(1);
+
+    $editor = new PhabricatorUserEditor();
+    $editor->setActor($user);
+    $editor->createNewUser($user, $email);
+
+    return $user;
   }
 
 }
