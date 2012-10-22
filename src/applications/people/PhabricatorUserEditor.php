@@ -75,7 +75,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
       }
 
       $log = PhabricatorUserLog::newLog(
-        $this->getActor(),
+        $this->requireActor(),
         $user,
         PhabricatorUserLog::ACTION_CREATE);
       $log->setNewValue($email->getAddress());
@@ -97,7 +97,6 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
       throw new Exception("User has not been created yet!");
     }
 
-    $actor = $this->requireActor();
     $user->openTransaction();
       $user->save();
       if ($email) {
@@ -105,7 +104,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
       }
 
       $log = PhabricatorUserLog::newLog(
-        $actor,
+        $this->requireActor(),
         $user,
         PhabricatorUserLog::ACTION_EDIT);
       $log->save();
@@ -134,7 +133,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
       $user->save();
 
       $log = PhabricatorUserLog::newLog(
-        $this->getActor(),
+        $this->requireActor(),
         $user,
         PhabricatorUserLog::ACTION_CHANGE_PASSWORD);
       $log->save();
