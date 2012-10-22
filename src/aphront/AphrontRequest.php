@@ -65,10 +65,14 @@ final class AphrontRequest {
   }
 
   final public function getHost() {
-    // The "Host" header may include a port number; if so, ignore it. We can't
-    // use PhutilURI since there's no URI scheme.
-    list($actual_host) = explode(':', $this->host, 2);
-    return $actual_host;
+    // The "Host" header may include a port number, or may be a malicious
+    // header in the form "realdomain.com:ignored@evil.com". Invoke the full
+    // parser to extract the real domain correctly. See here for coverage of
+    // a similar issue in Django:
+    //
+    //  https://www.djangoproject.com/weblog/2012/oct/17/security/
+    $uri = new PhutilURI('http://'.$this->host);
+    return $uri->getDomain();
   }
 
 
