@@ -45,6 +45,7 @@ JX.install('PhabricatorPasteFileUpload', {
 
               var up_uri = JX.$U(this.getURI())
                 .setQueryParam('name', 'clipboard.png')
+                .setQueryParam('__upload__', 1)
                 .toString();
 
               new JX.Request(up_uri, JX.bind(this, function(r) {

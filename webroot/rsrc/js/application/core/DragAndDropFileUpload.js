@@ -107,6 +107,7 @@ JX.install('PhabricatorDragAndDropFileUpload', {
 
       var up_uri = JX.$U(this.getURI())
         .setQueryParam('name', file.getName())
+        .setQueryParam('__upload__', 1)
         .toString();
 
       var onupload = JX.bind(this, function(r) {
