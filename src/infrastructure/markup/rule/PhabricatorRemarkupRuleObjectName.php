@@ -27,18 +27,17 @@ abstract class PhabricatorRemarkupRuleObjectName
   public function apply($text) {
     $prefix = $this->getObjectNamePrefix();
     return preg_replace_callback(
-      "@\b{$prefix}(\d+)(?:#([-\w\d]+))?\b@",
+      "@\b({$prefix})([1-9]\d*)(?:#([-\w\d]+))?\b@",
       array($this, 'markupObjectNameLink'),
       $text);
   }
 
   public function markupObjectNameLink($matches) {
-    $prefix = $this->getObjectNamePrefix();
-    $id = $matches[1];
+    list(, $prefix, $id) = $matches;
 
-    if (isset($matches[2])) {
-      $href = $matches[2];
-      $text = $matches[2];
+    if (isset($matches[3])) {
+      $href = $matches[3];
+      $text = $matches[3];
       if (preg_match('@^(?:comment-)?(\d{1,7})$@', $href, $matches)) {
         // Maximum length is 7 because 12345678 could be a file hash.
         $href = "comment-{$matches[1]}";
