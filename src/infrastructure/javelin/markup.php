@@ -55,23 +55,26 @@ function javelin_render_tag(
 function phabricator_render_form(PhabricatorUser $user, $attributes, $content) {
   if (strcasecmp(idx($attributes, 'method'), 'POST') == 0 &&
       !preg_match('#^(https?:|//)#', idx($attributes, 'action'))) {
-    $content =
-      phutil_render_tag(
-        'input',
-        array(
-          'type' => 'hidden',
-          'name' => AphrontRequest::getCSRFTokenName(),
-          'value' => $user->getCSRFToken(),
-        )).
-      phutil_render_tag(
-        'input',
-        array(
-          'type' => 'hidden',
-          'name' => '__form__',
-          'value' => true,
-        )).
-      $content;
+    $content = phabricator_render_form_magic($user).$content;
   }
   return javelin_render_tag('form', $attributes, $content);
+}
+
+function phabricator_render_form_magic(PhabricatorUser $user) {
+  return
+    phutil_render_tag(
+      'input',
+      array(
+        'type' => 'hidden',
+        'name' => AphrontRequest::getCSRFTokenName(),
+        'value' => $user->getCSRFToken(),
+      )).
+    phutil_render_tag(
+      'input',
+      array(
+        'type' => 'hidden',
+        'name' => '__form__',
+        'value' => true,
+      ));
 }
 

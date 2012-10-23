@@ -121,6 +121,16 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     }
 
     Javelin::initBehavior('workflow', array());
+    $download_form = phabricator_render_form_magic($user);
+    $default_img_uri =
+      PhabricatorEnv::getCDNURI('/rsrc/image/icon/fatcow/document_black.png');
+
+    Javelin::initBehavior(
+      'lightbox-attachments',
+      array(
+        'defaultImageUri' => $default_img_uri,
+        'downloadForm'    => $download_form,
+      ));
     Javelin::initBehavior('toggle-class', array());
     Javelin::initBehavior('konami', array());
     Javelin::initBehavior(

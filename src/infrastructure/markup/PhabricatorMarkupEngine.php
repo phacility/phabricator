@@ -57,6 +57,7 @@ final class PhabricatorMarkupEngine {
 
   private $objects = array();
   private $viewer;
+  private $version = 0;
 
 
 /* -(  Markup Pipeline  )---------------------------------------------------- */
@@ -185,7 +186,7 @@ final class PhabricatorMarkupEngine {
   private function getMarkupFieldKey(
     PhabricatorMarkupInterface $object,
     $field) {
-    return $object->getMarkupFieldKey($field);
+    return $object->getMarkupFieldKey($field).'@'.$this->version;
   }
 
 

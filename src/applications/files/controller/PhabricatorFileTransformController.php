@@ -24,10 +24,24 @@ final class PhabricatorFileTransformController
 
   public function willProcessRequest(array $data) {
     $this->transform = $data['transform'];
-    $this->phid = $data['phid'];
+    $this->phid      = $data['phid'];
+    $this->key       = $data['key'];
+  }
+
+  public function shouldRequireLogin() {
+    return false;
   }
 
   public function processRequest() {
+
+    $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $this->phid);
+    if (!$file) {
+      return new Aphront404Response();
+    }
+
+    if (!$file->validateSecretKey($this->key)) {
+      return new Aphront403Response();
+    }
 
     $xform = id(new PhabricatorTransformedFile())
       ->loadOneWhere(
@@ -37,11 +51,6 @@ final class PhabricatorFileTransformController
 
     if ($xform) {
       return $this->buildTransformedFileResponse($xform);
-    }
-
-    $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $this->phid);
-    if (!$file) {
-      return new Aphront404Response();
     }
 
     $type = $file->getMimeType();
