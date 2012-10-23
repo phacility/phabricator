@@ -4,7 +4,6 @@
  *           javelin-stratcom
  *           javelin-dom
  *           javelin-mask
- *           javelin-vector
  *           javelin-util
  */
 
@@ -233,49 +232,13 @@ JX.behavior('lightbox-attachments', function (config) {
       return;
     }
     var img = JX.DOM.find(lightbox, 'img');
-    var d   = JX.Vector.getDim(img);
-    JX.Stratcom.addData(img, { x : d.x, y : d.y } );
-
-    return resizeLightBox(e);
-  }
-
-  function resizeLightBox(e) {
-    if (!lightbox) {
-      return;
-    }
-    var img = JX.DOM.find(lightbox, 'img');
-    var v   = JX.Vector.getViewport();
-    var d   = JX.Stratcom.getData(img);
-
-    var w = d.x;
-    var h = d.y;
-    var scale = 0;
-    if (w > (v.x - x_margin)) {
-      scale = (v.x - x_margin) / w;
-      w = w * scale;
-      h = h * scale;
-    }
-    if (h > (v.y - y_margin)) {
-      scale = (v.y - y_margin) / h;
-      w = w * scale;
-      h = h * scale;
-    }
-
     JX.DOM.alterClass(img, 'loading', false);
-    JX.$V(w, h).setDim(img);
-    JX.Vector.getViewport().setDim(lightbox);
   }
 
   JX.Stratcom.listen(
     'click',
     ['lightboxable', 'tag:a'],
     loadLightBox
-  );
-
-  JX.Stratcom.listen(
-    'resize',
-    null,
-    resizeLightBox
   );
 
   JX.Stratcom.listen(
