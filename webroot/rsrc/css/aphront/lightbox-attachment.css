@@ -2,21 +2,24 @@
  * @provides lightbox-attachment-css
  */
 
+
 .lightbox-attached {
-  height: 100%;
-  overflow-y: hidden;
+  overflow: hidden;
+
 }
 
 .lightbox-attachment {
   position: fixed;
-  top: 44px;
+  top: 0;
   left: 0;
+  bottom: 0;
+  right: 0;
   z-index: 12;
-  width: 100%;
+  overflow-y: auto;
 }
 
 .lightbox-attachment img {
-  margin: 12px auto 0px auto;
+  margin: 50px auto 0;
 }
 
 .lightbox-attachment .loading {

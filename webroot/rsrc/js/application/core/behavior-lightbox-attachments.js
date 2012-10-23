@@ -15,7 +15,6 @@ JX.behavior('lightbox-attachments', function (config) {
   var next         = null;
   var x_margin     = 40;
   var y_margin     = 100;
-  var onscroll     = window.onscroll;
   var downloadForm = JX.$H(config.downloadForm);
 
   function loadLightBox(e) {
@@ -88,21 +87,13 @@ JX.behavior('lightbox-attachments', function (config) {
                     );
     JX.DOM.appendContent(lightbox, name_element);
 
-    var s   = JX.Vector.getScroll();
-    var closeIcon = '';
-    // Don't show the close icon if the beautiful header is
-    // still mostly present. Optimizes for common case of
-    // clicking on an attachment in object detail view without
-    // scrolling.
-    if (s.y >= 22) {
-      closeIcon = JX.$N('a',
+    var closeIcon = JX.$N('a',
                          {
                            className : 'lightbox-close',
                            href : '#'
                          }
                         );
-      JX.DOM.listen(closeIcon, 'click', null, closeLightBox);
-    }
+    JX.DOM.listen(closeIcon, 'click', null, closeLightBox);
     JX.DOM.appendContent(lightbox, closeIcon);
     var leftIcon = '';
     if (next) {
@@ -225,7 +216,6 @@ JX.behavior('lightbox-attachments', function (config) {
     lightbox = null;
     prev     = null;
     next     = null;
-    window.onscroll = onscroll;
   }
 
   function loadAnotherLightBox(el, e) {
@@ -243,12 +233,7 @@ JX.behavior('lightbox-attachments', function (config) {
     }
     var img = JX.DOM.find(lightbox, 'img');
     var d   = JX.Vector.getDim(img);
-    var s   = JX.Vector.getScroll();
     JX.Stratcom.addData(img, { x : d.x, y : d.y } );
-
-    window.onscroll = function() {
-      window.scrollTo(s.x, s.y);
-    };
 
     return resizeLightBox(e);
   }
@@ -259,7 +244,6 @@ JX.behavior('lightbox-attachments', function (config) {
     }
     var img = JX.DOM.find(lightbox, 'img');
     var v   = JX.Vector.getViewport();
-    var s   = JX.Vector.getScroll();
     var d   = JX.Stratcom.getData(img);
 
     var w = d.x;

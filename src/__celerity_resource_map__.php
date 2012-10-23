@@ -1385,7 +1385,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-lightbox-attachments' =>
   array(
-    'uri' => '/res/0cfebd8a/rsrc/js/application/core/behavior-lightbox-attachments.js',
+    'uri' => '/res/6ddb05f8/rsrc/js/application/core/behavior-lightbox-attachments.js',
     'type' => 'js',
     'requires' =>
     array(
@@ -2237,7 +2237,7 @@ celerity_register_resource_map(array(
   ),
   'lightbox-attachment-css' =>
   array(
-    'uri' => '/res/136d479b/rsrc/css/aphront/lightbox-attachment.css',
+    'uri' => '/res/b931ca15/rsrc/css/aphront/lightbox-attachment.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -2396,7 +2396,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-core-css' =>
   array(
-    'uri' => '/res/6710c9ba/rsrc/css/core/core.css',
+    'uri' => '/res/768cc6eb/rsrc/css/core/core.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -3070,7 +3070,7 @@ celerity_register_resource_map(array(
 ), array(
   'packages' =>
   array(
-    '4322f368' =>
+    'a4d32081' =>
     array(
       'name' => 'core.pkg.css',
       'symbols' =>
@@ -3099,7 +3099,7 @@ celerity_register_resource_map(array(
         21 => 'phabricator-flag-css',
         22 => 'aphront-error-view-css',
       ),
-      'uri' => '/res/pkg/4322f368/core.pkg.css',
+      'uri' => '/res/pkg/a4d32081/core.pkg.css',
       'type' => 'css',
     ),
     'f5ccc73b' =>
@@ -3266,20 +3266,20 @@ celerity_register_resource_map(array(
   'reverse' =>
   array(
     'aphront-attached-file-view-css' => '7839ae2d',
-    'aphront-crumbs-view-css' => '4322f368',
-    'aphront-dialog-view-css' => '4322f368',
-    'aphront-error-view-css' => '4322f368',
-    'aphront-form-view-css' => '4322f368',
+    'aphront-crumbs-view-css' => 'a4d32081',
+    'aphront-dialog-view-css' => 'a4d32081',
+    'aphront-error-view-css' => 'a4d32081',
+    'aphront-form-view-css' => 'a4d32081',
     'aphront-headsup-action-list-view-css' => '2ba14b3d',
-    'aphront-headsup-view-css' => '4322f368',
-    'aphront-list-filter-view-css' => '4322f368',
-    'aphront-pager-view-css' => '4322f368',
-    'aphront-panel-view-css' => '4322f368',
-    'aphront-side-nav-view-css' => '4322f368',
-    'aphront-table-view-css' => '4322f368',
-    'aphront-tokenizer-control-css' => '4322f368',
-    'aphront-tooltip-css' => '4322f368',
-    'aphront-typeahead-control-css' => '4322f368',
+    'aphront-headsup-view-css' => 'a4d32081',
+    'aphront-list-filter-view-css' => 'a4d32081',
+    'aphront-pager-view-css' => 'a4d32081',
+    'aphront-panel-view-css' => 'a4d32081',
+    'aphront-side-nav-view-css' => 'a4d32081',
+    'aphront-table-view-css' => 'a4d32081',
+    'aphront-tokenizer-control-css' => 'a4d32081',
+    'aphront-tooltip-css' => 'a4d32081',
+    'aphront-typeahead-control-css' => 'a4d32081',
     'differential-changeset-view-css' => '2ba14b3d',
     'differential-core-view-css' => '2ba14b3d',
     'differential-inline-comment-editor' => '8136e4a6',
@@ -3345,15 +3345,15 @@ celerity_register_resource_map(array(
     'javelin-workflow' => 'f5ccc73b',
     'maniphest-task-summary-css' => '7839ae2d',
     'maniphest-transaction-detail-css' => '7839ae2d',
-    'phabricator-app-buttons-css' => '4322f368',
+    'phabricator-app-buttons-css' => 'a4d32081',
     'phabricator-content-source-view-css' => '2ba14b3d',
-    'phabricator-core-buttons-css' => '4322f368',
-    'phabricator-core-css' => '4322f368',
-    'phabricator-directory-css' => '4322f368',
+    'phabricator-core-buttons-css' => 'a4d32081',
+    'phabricator-core-css' => 'a4d32081',
+    'phabricator-directory-css' => 'a4d32081',
     'phabricator-drag-and-drop-file-upload' => '8136e4a6',
     'phabricator-dropdown-menu' => 'f5ccc73b',
-    'phabricator-flag-css' => '4322f368',
-    'phabricator-jump-nav' => '4322f368',
+    'phabricator-flag-css' => 'a4d32081',
+    'phabricator-jump-nav' => 'a4d32081',
     'phabricator-keyboard-shortcut' => 'f5ccc73b',
     'phabricator-keyboard-shortcut-manager' => 'f5ccc73b',
     'phabricator-menu-item' => 'f5ccc73b',
@@ -3361,11 +3361,11 @@ celerity_register_resource_map(array(
     'phabricator-paste-file-upload' => 'f5ccc73b',
     'phabricator-prefab' => 'f5ccc73b',
     'phabricator-project-tag-css' => '7839ae2d',
-    'phabricator-remarkup-css' => '4322f368',
+    'phabricator-remarkup-css' => 'a4d32081',
     'phabricator-shaped-request' => '8136e4a6',
-    'phabricator-standard-page-view' => '4322f368',
+    'phabricator-standard-page-view' => 'a4d32081',
     'phabricator-tooltip' => 'f5ccc73b',
-    'phabricator-transaction-view-css' => '4322f368',
-    'syntax-highlighting-css' => '4322f368',
+    'phabricator-transaction-view-css' => 'a4d32081',
+    'syntax-highlighting-css' => 'a4d32081',
   ),
 ));
