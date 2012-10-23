@@ -708,15 +708,15 @@
   background-position: 0px -7254px;
 }
 
-.action-file {
+.action-delete {
   background-position: 0px -7285px;
 }
 
-.action-fork {
+.action-edit {
   background-position: 0px -7302px;
 }
 
-.action-edit {
+.action-file {
   background-position: 0px -7319px;
 }
 
@@ -756,39 +756,39 @@
   background-position: 0px -7472px;
 }
 
-.action-subscribe-auto {
+.action-fork {
   background-position: 0px -7489px;
 }
 
-.action-subscribe-add {
+.action-move {
   background-position: 0px -7506px;
 }
 
-.action-subscribe-delete {
+.action-new {
   background-position: 0px -7523px;
 }
 
-.action-new {
+.action-preview {
   background-position: 0px -7540px;
 }
 
-.action-world {
+.action-subscribe-add {
   background-position: 0px -7557px;
 }
 
-.action-delete {
+.action-subscribe-auto {
   background-position: 0px -7574px;
 }
 
-.action-move {
+.action-subscribe-delete {
   background-position: 0px -7591px;
 }
 
-.action-preview {
+.action-unpublish {
   background-position: 0px -7608px;
 }
 
-.action-unpublish {
+.action-world {
   background-position: 0px -7625px;
 }
 

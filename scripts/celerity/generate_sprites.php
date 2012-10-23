@@ -203,29 +203,10 @@ $action_template = id(new PhutilSprite())
   ->setSourcePosition(0, 0)
   ->setSourceSize(16, 16);
 
-$action_map = array(
-  'file'              => 'icon/page_white_text.png',
-  'fork'              => 'icon/arrow_branch.png',
-  'edit'              => 'icon/page_white_edit.png',
-  'flag-0'            => 'icon/flag-0.png',
-  'flag-1'            => 'icon/flag-1.png',
-  'flag-2'            => 'icon/flag-2.png',
-  'flag-3'            => 'icon/flag-3.png',
-  'flag-4'            => 'icon/flag-4.png',
-  'flag-5'            => 'icon/flag-5.png',
-  'flag-6'            => 'icon/flag-6.png',
-  'flag-7'            => 'icon/flag-7.png',
-  'flag-ghost'        => 'icon/flag-ghost.png',
-  'subscribe-auto'    => 'icon/unsubscribe.png',
-  'subscribe-add'     => 'icon/subscribe.png',
-  'subscribe-delete'  => 'icon/unsubscribe.png',
-  'new'               => 'icon/page_white_put.png',
-  'world'             => 'icon/world.png',
-  'delete'            => 'icon/page_delete.png',
-  'move'              => 'icon/page_go.png',
-  'preview'           => 'icon/page_world.png',
-  'unpublish'         => 'icon/page_error.png',
-);
+$action_icons = PhabricatorActionView::getAvailableIcons();
+foreach ($action_icons as $icon) {
+  $action_map[$icon] = 'icon/'.$icon.'.png';
+}
 
 foreach ($action_map as $icon => $source) {
   $sheet->addSprite(
