@@ -136,19 +136,9 @@ final class PhabricatorNotificationBuilder {
     $stories = mpull($stories, null, 'getChronologicalKey');
     krsort($stories);
 
-    $handles = array();
-    $objects = array();
-
-    if ($stories) {
-      $handle_phids = array_mergev(mpull($stories, 'getRequiredHandlePHIDs'));
-      $handles = id(new PhabricatorObjectHandleData($handle_phids))
-        ->loadHandles();
-    }
-
     $null_view = new AphrontNullView();
 
     foreach ($stories as $story) {
-      $story->setHandles($handles);
       $view = $story->renderNotificationView();
       $null_view->appendChild($view);
     }

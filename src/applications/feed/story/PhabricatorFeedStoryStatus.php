@@ -18,16 +18,8 @@
 
 final class PhabricatorFeedStoryStatus extends PhabricatorFeedStory {
 
-  public function getRequiredHandlePHIDs() {
-    return array(
-      $this->getStoryData()->getAuthorPHID(),
-    );
-  }
-
-  public function getRequiredObjectPHIDs() {
-    return array(
-      $this->getStoryData()->getAuthorPHID(),
-    );
+  public function getPrimaryObjectPHID() {
+    return $this->getAuthorPHID();
   }
 
   public function renderView() {

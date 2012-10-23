@@ -40,6 +40,7 @@ final class PhabricatorNotificationListController
     $pager->setOffset($request->getInt('offset'));
 
     $query = new PhabricatorNotificationQuery();
+    $query->setViewer($user);
     $query->setUserPHID($user->getPHID());
 
     switch ($filter) {

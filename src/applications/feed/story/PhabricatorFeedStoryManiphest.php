@@ -19,19 +19,13 @@
 final class PhabricatorFeedStoryManiphest
   extends PhabricatorFeedStory {
 
-  public function getRequiredHandlePHIDs() {
-    $data = $this->getStoryData();
-    return array_filter(
-      array(
-        $this->getStoryData()->getAuthorPHID(),
-        $data->getValue('taskPHID'),
-        $data->getValue('ownerPHID'),
-      ));
+  public function getPrimaryObjectPHID() {
+    return $this->getValue('taskPHID');
   }
 
-  public function getRequiredObjectPHIDs() {
+  public function getRequiredHandlePHIDs() {
     return array(
-      $this->getStoryData()->getAuthorPHID(),
+      $this->getValue('ownerPHID'),
     );
   }
 

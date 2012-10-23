@@ -24,6 +24,10 @@ abstract class PhabricatorFeedStoryAggregate extends PhabricatorFeedStory {
     return head($this->getAggregateStories())->getHasViewed();
   }
 
+  public function getPrimaryObjectPHID() {
+    return head($this->getAggregateStories())->getPrimaryObjectPHID();
+  }
+
   public function getRequiredHandlePHIDs() {
     $phids = array();
     foreach ($this->getAggregateStories() as $story) {
@@ -59,6 +63,18 @@ abstract class PhabricatorFeedStoryAggregate extends PhabricatorFeedStory {
   final public function setAggregateStories(array $aggregate_stories) {
     assert_instances_of($aggregate_stories, 'PhabricatorFeedStory');
     $this->aggregateStories = $aggregate_stories;
+
+    $objects = array();
+    $handles = array();
+
+    foreach ($this->aggregateStories as $story) {
+      $objects += $story->getObjects();
+      $handles += $story->getHandles();
+    }
+
+    $this->setObjects($objects);
+    $this->setHandles($handles);
+
     return $this;
   }
 

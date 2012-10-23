@@ -44,21 +44,12 @@ final class PhabricatorFeedBuilder {
     $user = $this->user;
     $stories = $this->stories;
 
-    $handles = array();
-    if ($stories) {
-      $handle_phids = array_mergev(mpull($stories, 'getRequiredHandlePHIDs'));
-      $object_phids = array_mergev(mpull($stories, 'getRequiredObjectPHIDs'));
-      $handles = id(new PhabricatorObjectHandleData($handle_phids))
-        ->loadHandles();
-    }
-
     $null_view = new AphrontNullView();
 
     require_celerity_resource('phabricator-feed-css');
 
     $last_date = null;
     foreach ($stories as $story) {
-      $story->setHandles($handles);
       $story->setFramed($this->framed);
 
       $date = ucfirst(phabricator_relative_date($story->getEpoch(), $user));

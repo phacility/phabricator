@@ -18,15 +18,14 @@
 
 final class PhabricatorFeedStoryCommit extends PhabricatorFeedStory {
 
-  public function getRequiredHandlePHIDs() {
-    $data = $this->getStoryData();
+  public function getPrimaryObjectPHID() {
+    return $this->getValue('commitPHID');
+  }
 
-    return array_filter(
-      array(
-        $data->getValue('commitPHID'),
-        $data->getValue('authorPHID'),
-        $data->getValue('committerPHID'),
-      ));
+  public function getRequiredHandlePHIDs() {
+    return array(
+      $this->getValue('committerPHID'),
+    );
   }
 
   public function renderView() {

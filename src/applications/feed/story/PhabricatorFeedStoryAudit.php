@@ -18,26 +18,17 @@
 
 final class PhabricatorFeedStoryAudit extends PhabricatorFeedStory {
 
-  public function getRequiredHandlePHIDs() {
-    return array(
-      $this->getStoryData()->getAuthorPHID(),
-      $this->getStoryData()->getValue('commitPHID'),
-    );
-  }
-
-  public function getRequiredObjectPHIDs() {
-    return array();
+  public function getPrimaryObjectPHID() {
+    return $this->getStoryData()->getValue('commitPHID');
   }
 
   public function renderView() {
-    $data = $this->getStoryData();
-
-    $author_phid = $data->getAuthorPHID();
-    $commit_phid = $data->getValue('commitPHID');
+    $author_phid = $this->getAuthorPHID();
+    $commit_phid = $this->getPrimaryObjectPHID();
 
     $view = new PhabricatorFeedStoryView();
 
-    $action = $data->getValue('action');
+    $action = $this->getValue('action');
     $verb = PhabricatorAuditActionConstants::getActionPastTenseVerb($action);
 
     $view->setTitle(
@@ -46,9 +37,9 @@ final class PhabricatorFeedStoryAudit extends PhabricatorFeedStory {
       $this->linkTo($commit_phid).
       ".");
 
-    $view->setEpoch($data->getEpoch());
+    $view->setEpoch($this->getEpoch());
 
-    $comments = $data->getValue('content');
+    $comments = $this->getValue('content');
     if ($comments) {
       $full_size = true;
     } else {
@@ -57,7 +48,7 @@ final class PhabricatorFeedStoryAudit extends PhabricatorFeedStory {
 
     if ($full_size) {
       $view->setImage($this->getHandle($author_phid)->getImageURI());
-      $content = $this->renderSummary($data->getValue('content'));
+      $content = $this->renderSummary($this->getValue('content'));
       $view->appendChild($content);
     } else {
       $view->setOneLineStory(true);

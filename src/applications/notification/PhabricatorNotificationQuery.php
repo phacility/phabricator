@@ -20,7 +20,8 @@
  * @task config Configuring the Query
  * @task exec   Query Execution
  */
-final class PhabricatorNotificationQuery extends PhabricatorOffsetPagedQuery {
+final class PhabricatorNotificationQuery
+  extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $userPHID;
   private $keys;
@@ -60,7 +61,7 @@ final class PhabricatorNotificationQuery extends PhabricatorOffsetPagedQuery {
 /* -(  Query Execution  )---------------------------------------------------- */
 
 
-  public function execute() {
+  public function loadPage() {
     if (!$this->userPHID) {
       throw new Exception("Call setUser() before executing the query");
     }
@@ -72,7 +73,7 @@ final class PhabricatorNotificationQuery extends PhabricatorOffsetPagedQuery {
 
     $data = queryfx_all(
       $conn,
-      "SELECT story.*, notif.primaryObjectPHID, notif.hasViewed FROM %T notif
+      "SELECT story.*, notif.hasViewed FROM %T notif
          JOIN %T story ON notif.chronologicalKey = story.chronologicalKey
          %Q
          ORDER BY notif.chronologicalKey DESC
@@ -83,12 +84,13 @@ final class PhabricatorNotificationQuery extends PhabricatorOffsetPagedQuery {
       $this->buildLimitClause($conn));
 
     $viewed_map = ipull($data, 'hasViewed', 'chronologicalKey');
-    $primary_map = ipull($data, 'primaryObjectPHID', 'chronologicalKey');
 
-    $stories = PhabricatorFeedStory::loadAllFromRows($data);
+    $stories = PhabricatorFeedStory::loadAllFromRows(
+      $data,
+      $this->getViewer());
+
     foreach ($stories as $key => $story) {
       $story->setHasViewed($viewed_map[$key]);
-      $story->setPrimaryObjectPHID($primary_map[$key]);
     }
 
     return $stories;
