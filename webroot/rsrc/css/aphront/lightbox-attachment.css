@@ -7,19 +7,11 @@
   overflow-y: hidden;
 }
 
-.lightbox-attached .jx-mask {
-  opacity: 0.76;
-  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=76)";
-  filter: alpha(opacity=76);
-  /* jx-mask behavior sets this dynamically so !important to win */
-  width: 100% !important;
-}
-
 .lightbox-attachment {
   position: fixed;
   top: 44px;
   left: 0;
-  z-index: 6;
+  z-index: 12;
   width: 100%;
 }
 

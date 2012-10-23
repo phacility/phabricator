@@ -171,7 +171,7 @@ JX.behavior('lightbox-attachments', function (config) {
                           );
     JX.DOM.appendContent(lightbox, statusHTML);
     JX.DOM.alterClass(document.body, 'lightbox-attached', true);
-    JX.Mask.show();
+    JX.Mask.show('jx-dark-mask');
     document.body.appendChild(lightbox);
     img.src = img_uri;
   }
