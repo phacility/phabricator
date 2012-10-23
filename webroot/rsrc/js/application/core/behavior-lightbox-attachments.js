@@ -81,7 +81,8 @@ JX.behavior('lightbox-attachments', function (config) {
 
     lightbox = JX.$N('div',
                      {
-                       className : 'lightbox-attachment'
+                       className : 'lightbox-attachment',
+                       sigil: 'lightbox-attachment'
                      },
                      img
                     );
@@ -282,5 +283,23 @@ JX.behavior('lightbox-attachments', function (config) {
     null,
     lightBoxHandleKeyDown
   );
+
+
+  // When the user clicks the background, close the lightbox.
+  JX.Stratcom.listen(
+    'click',
+    'lightbox-attachment',
+    function (e) {
+      if (!lightbox) {
+        return;
+      }
+      if (e.getTarget() != e.getNode('lightbox-attachment')) {
+        // Don't close if they clicked some other element, like the image
+        // itself or the next/previous arrows.
+        return;
+      }
+      closeLightBox(e);
+      e.kill();
+    });
 
 });

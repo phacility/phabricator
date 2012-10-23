@@ -1385,7 +1385,7 @@ celerity_register_resource_map(array(
   ),
   'javelin-behavior-lightbox-attachments' =>
   array(
-    'uri' => '/res/6ddb05f8/rsrc/js/application/core/behavior-lightbox-attachments.js',
+    'uri' => '/res/dfc1743a/rsrc/js/application/core/behavior-lightbox-attachments.js',
     'type' => 'js',
     'requires' =>
     array(
