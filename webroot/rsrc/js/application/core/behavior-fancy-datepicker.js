@@ -3,11 +3,15 @@
  * @requires javelin-behavior
  *           javelin-util
  *           javelin-dom
+ *           javelin-stratcom
+ *           javelin-vector
  */
 
 JX.behavior('fancy-datepicker', function(config) {
 
   var picker;
+  var button;
+  var root;
 
   var value_y;
   var value_m;
@@ -20,15 +24,32 @@ JX.behavior('fancy-datepicker', function(config) {
     // without writing the change.
 
     if (picker) {
-      onclose(e);
-      return;
+      if (root == e.getNode('phabricator-date-control')) {
+        // If the user clicked the same control, just close it.
+        onclose(e);
+        return;
+      } else {
+        // If the user clicked a different control, close the old one but then
+        // open the new one.
+        onclose(e);
+      }
     }
+
+
+    root = e.getNode('phabricator-date-control');
 
     picker = JX.$N(
       'div',
-      {className: 'fancy-datepicker'},
+      {className: 'fancy-datepicker', sigil: 'phabricator-datepicker'},
       JX.$N('div', {className: 'fancy-datepicker-core'}));
-    root.appendChild(picker);
+    document.body.appendChild(picker);
+
+    var button = e.getNode('calendar-button');
+    var p = JX.$V(button);
+    var d = JX.Vector.getDim(picker);
+
+    picker.style.left = (p.x - d.x + 2) + 'px';
+    picker.style.top = (p.y - 10) + 'px';
 
     JX.DOM.alterClass(root, 'picker-open', true);
 
@@ -45,6 +66,8 @@ JX.behavior('fancy-datepicker', function(config) {
     picker = null;
     JX.DOM.alterClass(root, 'picker-open', false);
     e.kill();
+
+    root = null;
   };
 
   var get_inputs = function() {
@@ -176,18 +199,11 @@ JX.behavior('fancy-datepicker', function(config) {
   };
 
 
-  var root = JX.$(config.root);
+  JX.Stratcom.listen('click', 'calendar-button', onopen);
 
-  JX.DOM.listen(
-    root,
+  JX.Stratcom.listen(
     'click',
-    'calendar-button',
-    onopen);
-
-  JX.DOM.listen(
-    root,
-    'click',
-    'tag:td',
+    ['phabricator-datepicker', 'tag:td'],
     function(e) {
       e.kill();
 
