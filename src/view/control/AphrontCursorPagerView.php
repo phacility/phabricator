@@ -25,6 +25,7 @@ final class AphrontCursorPagerView extends AphrontView {
 
   private $nextPageID;
   private $prevPageID;
+  private $moreResults;
 
   private $uri;
 
@@ -89,6 +90,7 @@ final class AphrontCursorPagerView extends AphrontView {
     if (count($results) > $this->getPageSize()) {
       $offset = ($this->beforeID ? count($results) - $this->getPageSize() : 0);
       $results = array_slice($results, $offset, $this->getPageSize(), true);
+      $this->moreResults = true;
     }
     return $results;
   }
@@ -101,7 +103,7 @@ final class AphrontCursorPagerView extends AphrontView {
 
     $links = array();
 
-    if ($this->beforeID || $this->afterID) {
+    if ($this->afterID || ($this->beforeID && $this->moreResults)) {
       $links[] = phutil_render_tag(
         'a',
         array(
