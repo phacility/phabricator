@@ -154,7 +154,12 @@ JX.behavior('lightbox-attachments', function (config) {
                   'click',
                   null,
                   function (e) {
-                    e.prevent(); closeLightBox(e); form.submit();
+                    e.prevent();
+                    form.submit();
+                    // Firefox and probably IE need this trick to work.
+                    // Removing a form from the DOM while its submitting is
+                    // tricky business.
+                    setTimeout(JX.bind(null, closeLightBox, e), 0);
                   }
                  );
     var downloadSpan = JX.$N('span',
