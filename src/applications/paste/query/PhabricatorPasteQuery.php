@@ -81,7 +81,7 @@ final class PhabricatorPasteQuery
       }
     }
 
-    return $this->processResults($pastes);
+    return $pastes;
   }
 
   protected function buildWhereClause($conn_r) {

@@ -27,7 +27,6 @@ abstract class HeraldController extends PhabricatorController {
     $page->setGlyph("\xE2\x98\xBF");
 
     $page->appendChild($view);
-    $page->setIsAdminInterface(idx($data, 'admin'));
 
     $response = new AphrontWebpageResponse();
     return $response->setContent($page->render());

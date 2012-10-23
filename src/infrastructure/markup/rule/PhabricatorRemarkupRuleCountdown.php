@@ -54,6 +54,10 @@ final class PhabricatorRemarkupRuleCountdown extends PhutilRemarkupRule {
     $metadata_key = self::KEY_RULE_COUNTDOWN;
     $metadata = $engine->getTextMetadata($metadata_key, array());
 
+    if (!$metadata) {
+      return;
+    }
+
     require_celerity_resource('javelin-behavior-countdown-timer');
 
     foreach ($metadata as $id => $info) {

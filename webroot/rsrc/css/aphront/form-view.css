@@ -194,14 +194,13 @@ table.aphront-form-control-checkbox-layout th {
 }
 
 .calendar-button {
-  padding: 11px;
-  right: -30px;
-  top: -3px;
-
+  display: inline;
   background: url(/rsrc/image/icon/fatcow/calendar_edit.png)
     no-repeat center center;
-  z-index: 2;
-  position: absolute;
+  padding: 8px 12px;
+  margin: 2px 8px 2px 2px;
+  position: relative;
+  z-index: 8;
   border: 1px solid transparent;
 }
 
@@ -210,16 +209,20 @@ table.aphront-form-control-checkbox-layout th {
   display: inline;
 }
 
-.aphront-form-date-container select{
+.aphront-form-date-container select {
   margin: 2px;
+  display: inline;
+}
+
+.aphront-form-date-container input.aphront-form-date-time-input {
+  width: 7em;
+  display: inline;
 }
 
 .fancy-datepicker {
   position: absolute;
-  top: -10px;
-  right: -8px;
   width: 240px;
-  padding-bottom: 6em;
+  z-index: 7;
 }
 
 .fancy-datepicker-core {

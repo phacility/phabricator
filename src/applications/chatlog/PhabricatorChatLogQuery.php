@@ -46,7 +46,7 @@ final class PhabricatorChatLogQuery
 
     $logs = $table->loadAllFromArray($data);
 
-    return $this->processResults($logs);
+    return $logs;
   }
 
   private function buildWhereClause($conn_r) {

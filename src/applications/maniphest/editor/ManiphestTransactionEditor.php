@@ -218,12 +218,16 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
       $email_cc,
       $task->getCCPHIDs());
 
-    $this->publishFeedStory($task, $transactions);
+    $mail = $this->sendEmail($task, $transactions, $email_to, $email_cc);
 
-    // TODO: Do this offline via timeline
+    $this->publishFeedStory(
+      $task,
+      $transactions,
+      $mail->buildRecipientList());
+
+    // TODO: Do this offline via workers
     PhabricatorSearchManiphestIndexer::indexTask($task);
 
-    $this->sendEmail($task, $transactions, $email_to, $email_cc);
   }
 
   protected function getSubjectPrefix() {
@@ -300,6 +304,10 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
     foreach ($mails as $mail) {
       $mail->saveAndSend();
     }
+
+    $template->addTos($email_to);
+    $template->addCCs($email_cc);
+    return $template;
   }
 
   public function buildReplyHandler(ManiphestTask $task) {
@@ -310,7 +318,10 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
     return $handler_object;
   }
 
-  private function publishFeedStory(ManiphestTask $task, array $transactions) {
+  private function publishFeedStory(
+    ManiphestTask $task,
+    array $transactions,
+    array $mailed_phids) {
     assert_instances_of($transactions, 'ManiphestTransaction');
 
     $actions = array(ManiphestAction::ACTION_UPDATE);
@@ -344,9 +355,8 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
     $actor_phid = head($transactions)->getAuthorPHID();
     $author_phid = $task->getAuthorPHID();
 
-
     id(new PhabricatorFeedStoryPublisher())
-      ->setStoryType(PhabricatorFeedStoryTypeConstants::STORY_MANIPHEST)
+      ->setStoryType('PhabricatorFeedStoryManiphest')
       ->setStoryData(array(
         'taskPHID'        => $task->getPHID(),
         'transactionIDs'  => mpull($transactions, 'getID'),
@@ -376,6 +386,7 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
               $owner_phid,
               $actor_phid)),
           $task->getCCPHIDs()))
+      ->setMailRecipientPHIDs($mailed_phids)
       ->publish();
   }
 

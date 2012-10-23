@@ -16,18 +16,20 @@
  * limitations under the License.
  */
 
-abstract class PhabricatorEditor {
+abstract class PhabricatorEditor extends Phobject {
 
   private $actor;
   private $excludeMailRecipientPHIDs = array();
 
-  final public function setActor(PhabricatorUser $user) {
-    $this->user = $user;
+  final public function setActor(PhabricatorUser $actor) {
+    $this->actor = $actor;
     return $this;
   }
+
   final protected function getActor() {
-    return $this->user;
+    return $this->actor;
   }
+
   final protected function requireActor() {
     $actor = $this->getActor();
     if (!$actor) {
@@ -40,6 +42,7 @@ abstract class PhabricatorEditor {
     $this->excludeMailRecipientPHIDs = $phids;
     return $this;
   }
+
   final protected function getExcludeMailRecipientPHIDs() {
     return $this->excludeMailRecipientPHIDs;
   }

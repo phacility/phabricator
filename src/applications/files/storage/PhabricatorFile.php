@@ -176,18 +176,18 @@ final class PhabricatorFile extends PhabricatorFileDAO {
         // We stored the file somewhere so stop trying to write it to other
         // places.
         break;
-      } catch (Exception $ex) {
-        if ($ex instanceof PhabricatorFileStorageConfigurationException) {
-          // If an engine is outright misconfigured (or misimplemented), raise
-          // that immediately since it probably needs attention.
-          throw $ex;
-        }
 
+      } catch (PhabricatorFileStorageConfigurationException $ex) {
+        // If an engine is outright misconfigured (or misimplemented), raise
+        // that immediately since it probably needs attention.
+        throw $ex;
+
+      } catch (Exception $ex) {
         // If an engine doesn't work, keep trying all the other valid engines
         // in case something else works.
         phlog($ex);
 
-        $exceptions[] = $ex;
+        $exceptions[$engine_class] = $ex;
       }
     }
 
@@ -307,20 +307,34 @@ final class PhabricatorFile extends PhabricatorFileDAO {
     }
   }
 
+  public function getDownloadURI() {
+    $uri = id(new PhutilURI($this->getViewURI()))
+      ->setQueryParam('download', true);
+    return (string) $uri;
+  }
+
   public function getThumb60x45URI() {
-    return '/file/xform/thumb-60x45/'.$this->getPHID().'/';
+    $path = '/file/xform/thumb-60x45/'.$this->getPHID().'/'
+      .$this->getSecretKey().'/';
+    return PhabricatorEnv::getCDNURI($path);
   }
 
   public function getThumb160x120URI() {
-    return '/file/xform/thumb-160x120/'.$this->getPHID().'/';
+    $path = '/file/xform/thumb-160x120/'.$this->getPHID().'/'
+      .$this->getSecretKey().'/';
+    return PhabricatorEnv::getCDNURI($path);
   }
 
   public function getPreview220URI() {
-    return '/file/xform/preview-220/'.$this->getPHID().'/';
+    $path = '/file/xform/preview-220/'.$this->getPHID().'/'
+      .$this->getSecretKey().'/';
+    return PhabricatorEnv::getCDNURI($path);
   }
 
   public function getThumb220x165URI() {
-    return '/file/xform/thumb-220x165/'.$this->getPHID().'/';
+    $path = '/file/xform/thumb-220x165/'.$this->getPHID().'/'
+      .$this->getSecretKey().'/';
+    return PhabricatorEnv::getCDNURI($path);
   }
 
   public function isViewableInBrowser() {

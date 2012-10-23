@@ -34,6 +34,10 @@ final class PhabricatorApplicationPhriction extends PhabricatorApplication {
     return PhabricatorEnv::getDoclink('article/Phriction_User_Guide.html');
   }
 
+  public function isEnabled() {
+    return PhabricatorEnv::getEnvConfig('phriction.enabled');
+  }
+
   public function getRoutes() {
     return array(
       // Match "/w/" with slug "/".

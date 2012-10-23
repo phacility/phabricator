@@ -89,20 +89,19 @@ final class AphrontErrorView extends AphrontView {
     $more_classes[] = 'aphront-error-severity-'.$this->severity;
     $more_classes = implode(' ', $more_classes);
 
-    return
+    return phutil_render_tag(
+      'div',
+      array(
+        'id' => $this->id,
+        'class' => 'aphront-error-view '.$more_classes,
+      ),
+      $title.
       phutil_render_tag(
         'div',
         array(
-          'id' => $this->id,
-          'class' => 'aphront-error-view '.$more_classes,
+          'class' => 'aphront-error-view-body',
         ),
-        $title.
-        phutil_render_tag(
-          'div',
-          array(
-            'class' => 'aphront-error-view-body',
-          ),
-          $this->renderChildren().
-          $list));
+        $this->renderChildren().
+        $list));
   }
 }

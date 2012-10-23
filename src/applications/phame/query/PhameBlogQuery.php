@@ -19,13 +19,19 @@
 /**
  * @group phame
  */
-final class PhameBlogQuery extends PhabricatorOffsetPagedQuery {
+final class PhameBlogQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
+  private $ids;
   private $phids;
   private $domain;
   private $needBloggers;
 
-  public function withPHIDs($phids) {
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
+    return $this;
+  }
+
+  public function withPHIDs(array $phids) {
     $this->phids = $phids;
     return $this;
   }
@@ -35,12 +41,7 @@ final class PhameBlogQuery extends PhabricatorOffsetPagedQuery {
     return $this;
   }
 
-  public function needBloggers($need_bloggers) {
-    $this->needBloggers = $need_bloggers;
-    return $this;
-  }
-
-  public function execute() {
+  public function loadPage() {
     $table  = new PhameBlog();
     $conn_r = $table->establishConnection('r');
 
@@ -58,66 +59,36 @@ final class PhameBlogQuery extends PhabricatorOffsetPagedQuery {
 
     $blogs = $table->loadAllFromArray($data);
 
-    if ($blogs) {
-      if ($this->needBloggers) {
-        $this->loadBloggers($blogs);
-      }
-    }
-
     return $blogs;
-  }
-
-  private function loadBloggers(array $blogs) {
-    assert_instances_of($blogs, 'PhameBlog');
-    $blog_phids = mpull($blogs, 'getPHID');
-
-    $edge_types = array(PhabricatorEdgeConfig::TYPE_BLOG_HAS_BLOGGER);
-
-    $query = new PhabricatorEdgeQuery();
-    $query->withSourcePHIDs($blog_phids)
-          ->withEdgeTypes($edge_types)
-          ->execute();
-
-    $all_blogger_phids = $query->getDestinationPHIDs(
-      $blog_phids,
-      $edge_types
-    );
-
-    $handles = id(new PhabricatorObjectHandleData($all_blogger_phids))
-      ->loadHandles();
-
-    foreach ($blogs as $blog) {
-      $blogger_phids = $query->getDestinationPHIDs(
-        array($blog->getPHID()),
-        $edge_types
-      );
-      $blog->attachBloggers(array_select_keys($handles, $blogger_phids));
-    }
   }
 
   private function buildWhereClause($conn_r) {
     $where = array();
 
+    if ($this->ids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'id IN (%Ls)',
+        $this->ids);
+    }
+
     if ($this->phids) {
       $where[] = qsprintf(
         $conn_r,
         'phid IN (%Ls)',
-        $this->phids
-      );
+        $this->phids);
     }
 
     if ($this->domain) {
       $where[] = qsprintf(
         $conn_r,
         'domain = %s',
-        $this->domain
-      );
+        $this->domain);
     }
+
+    $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
   }
 
-  private function buildOrderClause($conn_r) {
-    return 'ORDER BY id DESC';
-  }
 }

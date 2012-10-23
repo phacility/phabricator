@@ -16,62 +16,24 @@
  * limitations under the License.
  */
 
-final class PhabricatorStandardPageView extends AphrontPageView {
+/**
+ * This is a standard Phabricator page with menus, Javelin, DarkConsole, and
+ * basic styles.
+ *
+ */
+final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
   private $baseURI;
   private $applicationName;
   private $glyph;
-  private $bodyContent;
   private $menuContent;
-  private $request;
-  private $isAdminInterface;
   private $showChrome = true;
-  private $isFrameable = false;
   private $disableConsole;
   private $searchDefaultScope;
   private $pageObjects = array();
-  private $controller;
-  private $deviceReady;
-
-  public function setDeviceReady($device_ready) {
-    $this->deviceReady = $device_ready;
-    return $this;
-  }
-
-  public function setController(AphrontController $controller) {
-    $this->controller = $controller;
-    return $this;
-  }
-
-  public function getController() {
-    return $this->controller;
-  }
-
-  public function setIsAdminInterface($is_admin_interface) {
-    $this->isAdminInterface = $is_admin_interface;
-    return $this;
-  }
-
-  public function getIsAdminInterface() {
-    return $this->isAdminInterface;
-  }
-
-  public function setRequest($request) {
-    $this->request = $request;
-    return $this;
-  }
-
-  public function getRequest() {
-    return $this->request;
-  }
 
   public function setApplicationName($application_name) {
     $this->applicationName = $application_name;
-    return $this;
-  }
-
-  public function setFrameable($frameable) {
-    $this->isFrameable = $frameable;
     return $this;
   }
 
@@ -135,6 +97,7 @@ final class PhabricatorStandardPageView extends AphrontPageView {
 
 
   protected function willRenderPage() {
+    parent::willRenderPage();
 
     if (!$this->getRequest()) {
       throw new Exception(
@@ -158,6 +121,16 @@ final class PhabricatorStandardPageView extends AphrontPageView {
     }
 
     Javelin::initBehavior('workflow', array());
+    $download_form = phabricator_render_form_magic($user);
+    $default_img_uri =
+      PhabricatorEnv::getCDNURI('/rsrc/image/icon/fatcow/document_black.png');
+
+    Javelin::initBehavior(
+      'lightbox-attachments',
+      array(
+        'defaultImageUri' => $default_img_uri,
+        'downloadForm'    => $download_form,
+      ));
     Javelin::initBehavior('toggle-class', array());
     Javelin::initBehavior('konami', array());
     Javelin::initBehavior(
@@ -183,19 +156,10 @@ final class PhabricatorStandardPageView extends AphrontPageView {
     }
 
     $this->menuContent = $this->renderMainMenu();
-    $this->bodyContent = $this->renderChildren();
   }
 
 
   protected function getHead() {
-
-    $framebust = null;
-    if (!$this->isFrameable) {
-      $framebust = '(top != self) && top.location.replace(self.location.href);';
-    }
-
-    $response = CelerityAPI::getStaticResourceResponse();
-
     $monospaced = PhabricatorEnv::getEnvConfig('style.monospace');
 
     $request = $this->getRequest();
@@ -209,32 +173,17 @@ final class PhabricatorStandardPageView extends AphrontPageView {
       }
     }
 
-    $viewport_tag = null;
-    if (PhabricatorEnv::getEnvConfig('preview.viewport-meta-tag') ||
-        $this->deviceReady) {
-      $viewport_tag = phutil_render_tag(
-        'meta',
-        array(
-          'name' => 'viewport',
-          'content' => 'width=device-width, '.
-                       'initial-scale=1, '.
-                       'maximum-scale=1',
-        ));
-    }
+    $response = CelerityAPI::getStaticResourceResponse();
 
-    $head =
-      $viewport_tag.
-      '<script type="text/javascript">'.
-        $framebust.
-        'window.__DEV__=1;'.
-      '</script>'.
-      $response->renderResourcesOfType('css').
+    $head = array(
+      parent::getHead(),
       '<style type="text/css">'.
         '.PhabricatorMonospaced { font: '.$monospaced.'; }'.
-      '</style>'.
-      $response->renderSingleResource('javelin-magical-init');
+      '</style>',
+      $response->renderSingleResource('javelin-magical-init'),
+    );
 
-    return $head;
+    return implode("\n", $head);
   }
 
   public function setGlyph($glyph) {
@@ -247,6 +196,8 @@ final class PhabricatorStandardPageView extends AphrontPageView {
   }
 
   protected function willSendResponse($response) {
+    $response = parent::willSendResponse($response);
+
     $console = $this->getRequest()->getApplicationConfiguration()->getConsole();
     if ($console) {
       $response = str_replace(
@@ -254,6 +205,7 @@ final class PhabricatorStandardPageView extends AphrontPageView {
         $console->render($this->getRequest()),
         $response);
     }
+
     return $response;
   }
 
@@ -303,17 +255,12 @@ final class PhabricatorStandardPageView extends AphrontPageView {
       }
     }
 
-    $admin_class = null;
-    if ($this->getIsAdminInterface()) {
-      $admin_class = 'phabricator-admin-page-view';
-    }
-
     $header_chrome = null;
     $footer_chrome = null;
     if ($this->getShowChrome()) {
       $header_chrome = $this->menuContent;
 
-      if (!$this->deviceReady) {
+      if (!$this->getDeviceReady()) {
         $footer_chrome = $this->renderFooter();
       }
     }
@@ -341,7 +288,6 @@ final class PhabricatorStandardPageView extends AphrontPageView {
 
     $classes = array(
       'phabricator-standard-page',
-      $admin_class,
       $device_guess,
     );
     $classes = implode(' ', $classes);
@@ -357,7 +303,7 @@ final class PhabricatorStandardPageView extends AphrontPageView {
         '<div class="phabricator-standard-page-body">'.
           ($console ? '<darkconsole />' : null).
           $developer_warning.
-          $this->bodyContent.
+          parent::getBody().
           '<div style="clear: both;"></div>'.
         '</div>').
       $footer_chrome;
@@ -403,10 +349,14 @@ final class PhabricatorStandardPageView extends AphrontPageView {
     }
 
     $response = CelerityAPI::getStaticResourceResponse();
-    return
-      $response->renderResourcesOfType('js').
-      $container.
-      $response->renderHTMLFooter();
+
+    $tail = array(
+      parent::getTail(),
+      $container,
+      $response->renderHTMLFooter(),
+    );
+
+    return implode("\n", $tail);
   }
 
   protected function getBodyClasses() {

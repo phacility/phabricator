@@ -129,5 +129,30 @@ final class PhabricatorActionView extends AphrontView {
       $icon.$item);
   }
 
+  public static function getAvailableIcons() {
+    return array(
+      'delete',
+      'edit',
+      'file',
+      'flag-0',
+      'flag-1',
+      'flag-2',
+      'flag-3',
+      'flag-4',
+      'flag-5',
+      'flag-6',
+      'flag-7',
+      'flag-ghost',
+      'fork',
+      'move',
+      'new',
+      'preview',
+      'subscribe-add',
+      'subscribe-auto',
+      'subscribe-delete',
+      'unpublish',
+      'world',
+    );
+  }
 
 }

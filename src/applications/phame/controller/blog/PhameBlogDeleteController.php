@@ -19,96 +19,47 @@
 /**
  * @group phame
  */
-final class PhameBlogDeleteController
-extends PhameController {
+final class PhameBlogDeleteController extends PhameController {
 
-  private $phid;
-
-  private function setBlogPHID($phid) {
-    $this->phid = $phid;
-    return $this;
-  }
-  private function getBlogPHID() {
-    return $this->phid;
-  }
-
-  protected function getSideNavFilter() {
-    return 'blog/delete/'.$this->getBlogPHID();
-  }
-
-  protected function getSideNavExtraBlogFilters() {
-    $filters = array(
-      array('key'  => $this->getSideNavFilter(),
-            'name' => 'Delete Blog')
-    );
-
-    return $filters;
-  }
+  private $id;
 
   public function willProcessRequest(array $data) {
-    $phid = $data['phid'];
-    $this->setBlogPHID($phid);
+    $this->id = $data['id'];
   }
 
   public function processRequest() {
-    $blogger_edge_type = PhabricatorEdgeConfig::TYPE_BLOG_HAS_BLOGGER;
-    $post_edge_type    = PhabricatorEdgeConfig::TYPE_BLOG_HAS_POST;
-    $request           = $this->getRequest();
-    $user              = $request->getUser();
-    $blog_phid         = $this->getBlogPHID();
-    $blogs             = id(new PhameBlogQuery())
-                           ->withPHIDs(array($blog_phid))
-                           ->execute();
-    $blog              = reset($blogs);
-    if (empty($blog)) {
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $blog = id(new PhameBlogQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
+    if (!$blog) {
       return new Aphront404Response();
     }
 
-    $phids      = array($blog_phid);
-    $edge_types = array(
-      PhabricatorEdgeConfig::TYPE_BLOG_HAS_BLOGGER,
-      PhabricatorEdgeConfig::TYPE_BLOG_HAS_POST,
-    );
-
-    $edges = id(new PhabricatorEdgeQuery())
-      ->withSourcePHIDs($phids)
-      ->withEdgeTypes($edge_types)
-      ->execute();
-
-    $blogger_edges = $edges[$blog_phid][$blogger_edge_type];
-    // TODO -- make this check use a policy
-    if (!isset($blogger_edges[$user->getPHID()]) &&
-        !$user->isAdmin()) {
-      return new Aphront403Response();
-    }
-
-    $edit_uri = $blog->getEditURI();
-
     if ($request->isFormPost()) {
-      $blogger_phids = array_keys($blogger_edges);
-      $post_edges    = $edges[$blog_phid][$post_edge_type];
-      $post_phids    = array_keys($post_edges);
-      $editor        = id(new PhabricatorEdgeEditor())
-        ->setActor($user);
-      foreach ($blogger_phids as $phid) {
-        $editor->removeEdge($blog_phid, $blogger_edge_type, $phid);
-      }
-      foreach ($post_phids as $phid) {
-        $editor->removeEdge($blog_phid, $post_edge_type, $phid);
-      }
-      $editor->save();
-
       $blog->delete();
       return id(new AphrontRedirectResponse())
-        ->setURI('/phame/blog/?deleted');
+        ->setURI($this->getApplicationURI());
     }
+
+    $cancel_uri = $this->getApplicationURI('/blog/view/'.$blog->getID().'/');
 
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
-      ->setTitle('Delete blog?')
-      ->appendChild('Really delete this blog? It will be gone forever.')
-      ->addSubmitButton('Delete')
-      ->addCancelButton($edit_uri);
+      ->setTitle(pht('Delete Blog?'))
+      ->appendChild(
+        pht(
+          'Really delete the blog "%s"? It will be gone forever.',
+          phutil_escape_html($blog->getName())))
+      ->addSubmitButton(pht('Delete'))
+      ->addCancelButton($cancel_uri);
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }

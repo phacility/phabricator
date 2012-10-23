@@ -16,18 +16,13 @@
  * limitations under the License.
  */
 
-/**
- * Delivers CSS and JS resources to the browser. This controller handles all
- * ##/res/## requests, and manages caching, package construction, and resource
- * preprocessing.
- *
- * @group celerity
- */
-final class CelerityResourceController extends PhabricatorController {
+abstract class CelerityResourceController extends PhabricatorController {
 
-  private $path;
-  private $hash;
-  private $package;
+  abstract protected function getRootDirectory();
+
+  protected function buildResourceTransformer() {
+    return null;
+  }
 
   public function shouldRequireLogin() {
     return false;
@@ -37,15 +32,11 @@ final class CelerityResourceController extends PhabricatorController {
     return false;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->path = $data['path'];
-    $this->hash = $data['hash'];
-    $this->package = !empty($data['package']);
+  private function getDiskPath($to_resource = null) {
+    return $this->getRootDirectory().$to_resource;
   }
 
-  public function processRequest() {
-    $path = $this->path;
-
+  protected function serveResource($path, $package_hash = null) {
     // Sanity checking to keep this from exposing anything sensitive, since it
     // ultimately boils down to disk reads.
     if (preg_match('@(//|\.\.)@', $path)) {
@@ -66,11 +57,9 @@ final class CelerityResourceController extends PhabricatorController {
       return $this->makeResponseCacheable(new Aphront304Response());
     }
 
-    $root = dirname(phutil_get_library_root('phabricator'));
-
-    if ($this->package) {
+    if ($package_hash) {
       $map = CelerityResourceMap::getInstance();
-      $paths = $map->resolvePackage($this->hash);
+      $paths = $map->resolvePackage($package_hash);
       if (!$paths) {
         return new Aphront404Response();
       }
@@ -78,7 +67,8 @@ final class CelerityResourceController extends PhabricatorController {
       try {
         $data = array();
         foreach ($paths as $package_path) {
-          $data[] = Filesystem::readFile($root.'/webroot/'.$package_path);
+          $disk_path = $this->getDiskPath($package_path);
+          $data[] = Filesystem::readFile($disk_path);
         }
         $data = implode("\n\n", $data);
       } catch (Exception $ex) {
@@ -86,17 +76,17 @@ final class CelerityResourceController extends PhabricatorController {
       }
     } else {
       try {
-        $data = Filesystem::readFile($root.'/webroot/'.$path);
+        $disk_path = $this->getDiskPath($path);
+        $data = Filesystem::readFile($disk_path);
       } catch (Exception $ex) {
         return new Aphront404Response();
       }
     }
 
-    $xformer = new CelerityResourceTransformer();
-    $xformer->setMinify(PhabricatorEnv::getEnvConfig('celerity.minify'));
-    $xformer->setCelerityMap(CelerityResourceMap::getInstance());
-
-    $data = $xformer->transformResource($path, $data);
+    $xformer = $this->buildResourceTransformer();
+    if ($xformer) {
+      $data = $xformer->transformResource($path, $data);
+    }
 
     $response = new AphrontFileResponse();
     $response->setContent($data);
@@ -104,7 +94,7 @@ final class CelerityResourceController extends PhabricatorController {
     return $this->makeResponseCacheable($response);
   }
 
-  private function getSupportedResourceTypes() {
+  protected function getSupportedResourceTypes() {
     return array(
       'css' => 'text/css; charset=utf-8',
       'js'  => 'text/javascript; charset=utf-8',

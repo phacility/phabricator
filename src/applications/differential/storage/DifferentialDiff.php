@@ -133,6 +133,13 @@ final class DifferentialDiff extends DifferentialDAO {
 
     $lines = 0;
     foreach ($changes as $change) {
+      if ($change->getType() == ArcanistDiffChangeType::TYPE_MESSAGE) {
+        // If a user pastes a diff into Differential which includes a commit
+        // message (e.g., they ran `git show` to generate it), discard that
+        // change when constructing a DifferentialDiff.
+        continue;
+      }
+
       $changeset = new DifferentialChangeset();
       $add_lines = 0;
       $del_lines = 0;

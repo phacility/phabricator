@@ -41,9 +41,11 @@ final class PhabricatorFeedQuery
       $this->buildOrderClause($conn),
       $this->buildLimitClause($conn));
 
-    $results = PhabricatorFeedStory::loadAllFromRows($data);
+    return $data;
+  }
 
-    return $this->processResults($results);
+  protected function willFilterPage(array $data) {
+    return PhabricatorFeedStory::loadAllFromRows($data, $this->getViewer());
   }
 
   private function buildJoinClause(AphrontDatabaseConnection $conn_r) {
@@ -88,7 +90,10 @@ final class PhabricatorFeedQuery
   }
 
   protected function getPagingValue($item) {
-    return $item->getChronologicalKey();
+    if ($item instanceof PhabricatorFeedStory) {
+      return $item->getChronologicalKey();
+    }
+    return $item['chronologicalKey'];
   }
 
 }

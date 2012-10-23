@@ -357,6 +357,21 @@ final class PhabricatorSetup {
           "'http://example.com/'.");
         return;
       }
+
+      $host_path = $host_uri->getPath();
+      if ($host_path == '/') {
+        self::write(" okay  phabricator.base-uri path\n");
+      } else {
+        self::writeFailure();
+        self::write(
+          "Your 'phabricator.base-uri' setting includes a path, but should ".
+          "not (e.g., 'http://phabricator.example.com/' is OK, but ".
+          "'http://example.com/phabricator/' is not). Phabricator must be ".
+          "installed on an entire domain, it can not be installed on a ".
+          "path alongside other applications. Consult the documentation ".
+          "for more details.");
+        return;
+      }
     }
 
     $timezone = nonempty(

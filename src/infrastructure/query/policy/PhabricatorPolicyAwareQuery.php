@@ -188,7 +188,8 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
 
       $page = $this->loadPage();
 
-      $visible = $filter->apply($page);
+      $visible = $this->willFilterPage($page);
+      $visible = $filter->apply($visible);
       foreach ($visible as $key => $result) {
         ++$count;
 
@@ -221,6 +222,8 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
 
       $this->nextPage($page);
     } while (true);
+
+    $results = $this->didLoadResults($results);
 
     return $results;
   }
@@ -274,5 +277,33 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    * @task policyimpl
    */
   abstract protected function nextPage(array $page);
+
+
+  /**
+   * Hook for applying a page filter prior to the privacy filter. This allows
+   * you to drop some items from the result set without creating problems with
+   * pagination or cursor updates.
+   *
+   * @param   list<wild>  Results from `loadPage()`.
+   * @return  list<PhabricatorPolicyInterface> Objects for policy filtering.
+   * @task policyimpl
+   */
+  protected function willFilterPage(array $page) {
+    return $page;
+  }
+
+
+  /**
+   * Hook for applying final adjustments before results are returned. This is
+   * used by @{class:PhabricatorCursorPagedPolicyAwareQuery} to reverse results
+   * that are queried during reverse paging.
+   *
+   * @param   list<PhabricatorPolicyInterface> Query results.
+   * @return  list<PhabricatorPolicyInterface> Final results.
+   * @task policyimpl
+   */
+  protected function didLoadResults(array $results) {
+    return $results;
+  }
 
 }

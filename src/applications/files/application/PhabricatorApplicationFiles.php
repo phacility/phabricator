@@ -55,7 +55,7 @@ final class PhabricatorApplicationFiles extends PhabricatorApplication {
         'data/(?P<key>[^/]+)/(?P<phid>[^/]+)/.*'
           => 'PhabricatorFileDataController',
         'proxy/' => 'PhabricatorFileProxyController',
-        'xform/(?P<transform>[^/]+)/(?P<phid>[^/]+)/'
+        'xform/(?P<transform>[^/]+)/(?P<phid>[^/]+)/(?P<key>[^/]+)/'
           => 'PhabricatorFileTransformController',
       ),
     );

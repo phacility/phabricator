@@ -57,9 +57,10 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     $response->setContent($data);
     $response->setCacheDurationInSeconds(60 * 60 * 24 * 30);
 
-    $is_view = $file->isViewableInBrowser();
+    $is_viewable = $file->isViewableInBrowser();
+    $force_download = $request->getExists('download');
 
-    if ($is_view) {
+    if ($is_viewable && !$force_download) {
       $response->setMimeType($file->getViewableMimeType());
     } else {
       if (!$request->isHTTPPost()) {

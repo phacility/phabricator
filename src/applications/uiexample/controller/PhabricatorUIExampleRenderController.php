@@ -48,8 +48,6 @@ final class PhabricatorUIExampleRenderController extends PhabricatorController {
 
     $selected = $nav->selectFilter($this->class, head_key($classes));
 
-    require_celerity_resource('phabricator-ui-example-css');
-
     $example = $classes[$selected];
     $example->setRequest($this->getRequest());
 
@@ -58,6 +56,8 @@ final class PhabricatorUIExampleRenderController extends PhabricatorController {
       // This allows examples to generate dialogs, etc., for demonstration.
       return $result;
     }
+
+    require_celerity_resource('phabricator-ui-example-css');
 
     $nav->appendChild(
       '<div class="phabricator-ui-example-header">'.

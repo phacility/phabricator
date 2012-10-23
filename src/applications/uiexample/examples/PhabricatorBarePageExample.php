@@ -16,30 +16,26 @@
  * limitations under the License.
  */
 
-/**
- * @group phame
- */
-final class PhameAllBlogListController
-  extends PhameBlogListBaseController {
+final class PhabricatorBarePageExample extends PhabricatorUIExample {
 
-  protected function getSideNavFilter() {
-    return 'blog/all';
+  public function getName() {
+    return 'Bare Page';
   }
 
-  public function processRequest() {
-    $user = $this->getRequest()->getUser();
-
-    $blogs = id(new PhameBlogQuery())
-      ->needBloggers(true)
-      ->executeWithOffsetPager($this->getPager());
-    $this->setBlogs($blogs);
-
-    $page_title = 'All Blogs';
-    $this->setPageTitle($page_title);
-
-    $this->setShowSideNav(true);
-
-    return $this->buildBlogListPageResponse();
+  public function getDescription() {
+    return 'This is a bare page.';
   }
 
+  public function renderExample() {
+    $view = new PhabricatorBarePageView();
+    $view->appendChild(
+      phutil_render_tag(
+        'h1',
+        array(),
+        phutil_escape_html($this->getDescription())));
+
+    $response = new AphrontWebpageResponse();
+    $response->setContent($view->render());
+    return $response;
+  }
 }

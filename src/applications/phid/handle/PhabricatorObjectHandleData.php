@@ -313,7 +313,7 @@ final class PhabricatorObjectHandleData {
             $handle->setPHID($phid);
             $handle->setType($type);
             if (empty($tasks[$phid])) {
-              $handle->setName('Unknown Revision');
+              $handle->setName('Unknown Task');
             } else {
               $task = $tasks[$phid];
               $handle->setName($task->getTitle());
@@ -511,6 +511,52 @@ final class PhabricatorObjectHandleData {
               $handle->setName($paste->getTitle());
               $handle->setFullName($paste->getFullName());
               $handle->setURI('/P'.$paste->getID());
+              $handle->setComplete(true);
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
+        case PhabricatorPHIDConstants::PHID_TYPE_BLOG:
+          $blogs = id(new PhameBlogQuery())
+            ->withPHIDs($phids)
+            ->setViewer($this->viewer)
+            ->execute();
+          $blogs = mpull($blogs, null, 'getPHID');
+
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            $handle->setType($type);
+            if (empty($blogs[$phid])) {
+              $handle->setName('Unknown Blog');
+            } else {
+              $blog = $blogs[$phid];
+              $handle->setName($blog->getName());
+              $handle->setFullName($blog->getName());
+              $handle->setURI('/phame/blog/view/'.$blog->getID().'/');
+              $handle->setComplete(true);
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
+        case PhabricatorPHIDConstants::PHID_TYPE_POST:
+          $posts = id(new PhamePostQuery())
+            ->withPHIDs($phids)
+            ->setViewer($this->viewer)
+            ->execute();
+          $posts = mpull($posts, null, 'getPHID');
+
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            $handle->setType($type);
+            if (empty($posts[$phid])) {
+              $handle->setName('Unknown Post');
+            } else {
+              $post = $posts[$phid];
+              $handle->setName($post->getTitle());
+              $handle->setFullName($post->getTitle());
+              $handle->setURI('/phame/post/view/'.$post->getID().'/');
               $handle->setComplete(true);
             }
             $handles[$phid] = $handle;

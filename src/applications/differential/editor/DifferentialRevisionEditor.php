@@ -420,8 +420,62 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
     id(new PhabricatorTimelineEvent('difx', $event_data))
       ->recordEvent();
 
+    $mailed_phids = array();
+    if (!$this->silentUpdate) {
+      $revision->loadRelationships();
+
+      if ($add['rev']) {
+        $message = id(new DifferentialNewDiffMail(
+            $revision,
+            $actor_handle,
+            $changesets))
+          ->setIsFirstMailAboutRevision($is_new)
+          ->setIsFirstMailToRecipients(true)
+          ->setToPHIDs(array_keys($add['rev']));
+
+        if ($is_new) {
+          // The first time we send an email about a revision, put the CCs in
+          // the "CC:" field of the same "Review Requested" email that reviewers
+          // get, so you don't get two initial emails if you're on a list that
+          // is CC'd.
+          $message->setCCPHIDs(array_keys($add['ccs']));
+        }
+
+        $mail[] = $message;
+      }
+
+      // If we added CCs, we want to send them an email, but only if they were
+      // not already a reviewer and were not added as one (in these cases, they
+      // got a "NewDiff" mail, either in the past or just a moment ago). You can
+      // still get two emails, but only if a revision is updated and you are
+      // added as a reviewer at the same time a list you are on is added as a
+      // CC, which is rare and reasonable.
+
+      $implied_ccs = self::getImpliedCCs($revision);
+      $implied_ccs = array_fill_keys($implied_ccs, true);
+      $add['ccs'] = array_diff_key($add['ccs'], $implied_ccs);
+
+      if (!$is_new && $add['ccs']) {
+        $mail[] = id(new DifferentialCCWelcomeMail(
+            $revision,
+            $actor_handle,
+            $changesets))
+          ->setIsFirstMailToRecipients(true)
+          ->setToPHIDs(array_keys($add['ccs']));
+      }
+
+      foreach ($mail as $message) {
+        $message->setHeraldTranscriptURI($xscript_uri);
+        $message->setXHeraldRulesHeader($xscript_header);
+        $message->send();
+
+        $mailed_phids[] = $message->getRawMail()->buildRecipientList();
+      }
+      $mailed_phids = array_mergev($mailed_phids);
+    }
+
     id(new PhabricatorFeedStoryPublisher())
-      ->setStoryType(PhabricatorFeedStoryTypeConstants::STORY_DIFFERENTIAL)
+      ->setStoryType('PhabricatorFeedStoryDifferential')
       ->setStoryData($event_data)
       ->setStoryTime(time())
       ->setStoryAuthorPHID($revision->getAuthorPHID())
@@ -436,62 +490,11 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
           array($revision->getAuthorPHID()),
           $revision->getReviewers(),
           $revision->getCCPHIDs()))
+      ->setMailRecipientPHIDs($mailed_phids)
       ->publish();
 
-//  TODO: Move this into a worker task thing.
+    //  TODO: Move this into a worker task thing.
     PhabricatorSearchDifferentialIndexer::indexRevision($revision);
-
-    if ($this->silentUpdate) {
-      return;
-    }
-
-    $revision->loadRelationships();
-
-    if ($add['rev']) {
-      $message = id(new DifferentialNewDiffMail(
-          $revision,
-          $actor_handle,
-          $changesets))
-        ->setIsFirstMailAboutRevision($is_new)
-        ->setIsFirstMailToRecipients(true)
-        ->setToPHIDs(array_keys($add['rev']));
-
-      if ($is_new) {
-        // The first time we send an email about a revision, put the CCs in
-        // the "CC:" field of the same "Review Requested" email that reviewers
-        // get, so you don't get two initial emails if you're on a list that
-        // is CC'd.
-        $message->setCCPHIDs(array_keys($add['ccs']));
-      }
-
-      $mail[] = $message;
-    }
-
-    // If we added CCs, we want to send them an email, but only if they were not
-    // already a reviewer and were not added as one (in these cases, they got
-    // a "NewDiff" mail, either in the past or just a moment ago). You can still
-    // get two emails, but only if a revision is updated and you are added as a
-    // reviewer at the same time a list you are on is added as a CC, which is
-    // rare and reasonable.
-
-    $implied_ccs = self::getImpliedCCs($revision);
-    $implied_ccs = array_fill_keys($implied_ccs, true);
-    $add['ccs'] = array_diff_key($add['ccs'], $implied_ccs);
-
-    if (!$is_new && $add['ccs']) {
-      $mail[] = id(new DifferentialCCWelcomeMail(
-          $revision,
-          $actor_handle,
-          $changesets))
-        ->setIsFirstMailToRecipients(true)
-        ->setToPHIDs(array_keys($add['ccs']));
-    }
-
-    foreach ($mail as $message) {
-      $message->setHeraldTranscriptURI($xscript_uri);
-      $message->setXHeraldRulesHeader($xscript_header);
-      $message->send();
-    }
   }
 
   public static function addCCAndUpdateRevision(

@@ -25,6 +25,7 @@ final class PhabricatorNotificationPanelController
     $user = $request->getUser();
 
     $query = new PhabricatorNotificationQuery();
+    $query->setViewer($user);
     $query->setUserPHID($user->getPHID());
     $query->setLimit(15);
 

@@ -137,8 +137,18 @@ abstract class AphrontApplicationConfiguration {
     if ($host != id(new PhutilURI($base_uri))->getDomain() &&
         $host != id(new PhutilURI($prod_uri))->getDomain() &&
         $host != id(new PhutilURI($file_uri))->getDomain()) {
-      $blogs = id(new PhameBlogQuery())->withDomain($host)->execute();
-      $blog = reset($blogs);
+
+      try {
+        $blog = id(new PhameBlogQuery())
+          ->setViewer(new PhabricatorUser())
+          ->withDomain($host)
+          ->executeOne();
+      } catch (PhabricatorPolicyException $ex) {
+        throw new Exception(
+          "This blog is not visible to logged out users, so it can not be ".
+          "visited from a custom domain.");
+      }
+
       if (!$blog) {
         if ($prod_uri && $prod_uri != $base_uri) {
           $prod_str = ' or '.$prod_uri;
@@ -151,17 +161,10 @@ abstract class AphrontApplicationConfiguration {
         );
       }
 
-      // 2 basic cases
-      // -- looking at a list of blog posts, path is nothing or '/'
-      // -- looking at an actual blog post, path is like /btrahan/post_title
-      if (!$path || $path == '/') {
-        $path = $blog->getViewURI();
-      } else {
-        $path = '/phame/posts/'.trim($path, '/').'/';
-      }
+      // TODO: Make this more flexible and modular so any application can
+      // do crazy stuff here if it wants.
 
-      $celerity = CelerityAPI::getStaticResourceResponse();
-      $celerity->setUseFullURI(true);
+      $path = '/phame/live/'.$blog->getID().'/'.$path;
     }
 
     list($controller, $uri_data) = $this->buildControllerForPath($path);

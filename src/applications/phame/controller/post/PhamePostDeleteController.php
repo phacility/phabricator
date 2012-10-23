@@ -19,69 +19,47 @@
 /**
  * @group phame
  */
-final class PhamePostDeleteController
-extends PhameController {
+final class PhamePostDeleteController extends PhameController {
 
-  private $phid;
-
-  private function setPostPHID($phid) {
-    $this->phid = $phid;
-    return $this;
-  }
-  private function getPostPHID() {
-    return $this->phid;
-  }
+  private $id;
 
   public function willProcessRequest(array $data) {
-    $phid = $data['phid'];
-    $this->setPostPHID($phid);
+    $this->id = $data['id'];
   }
 
   public function processRequest() {
-    $request   = $this->getRequest();
-    $user      = $request->getUser();
-    $post_phid = $this->getPostPHID();
-    $posts     = id(new PhamePostQuery())
-      ->withPHIDs(array($post_phid))
-      ->execute();
-    $post      = reset($posts);
-    if (empty($post)) {
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $post = id(new PhamePostQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
+    if (!$post) {
       return new Aphront404Response();
     }
-    if ($post->getBloggerPHID() != $user->getPHID()) {
-      return new Aphront403Response();
-    }
-    $post_noun = $post->getHumanName();
 
     if ($request->isFormPost()) {
-      $edge_type = PhabricatorEdgeConfig::TYPE_POST_HAS_BLOG;
-      $edges     = id(new PhabricatorEdgeQuery())
-        ->withSourcePHIDs(array($post_phid))
-        ->withEdgeTypes(array($edge_type))
-        ->execute();
-
-      $blog_edges = $edges[$post_phid][$edge_type];
-      $blog_phids = array_keys($blog_edges);
-      $editor     = id(new PhabricatorEdgeEditor())
-        ->setActor($user);
-      foreach ($blog_phids as $phid) {
-        $editor->removeEdge($post_phid, $edge_type, $phid);
-      }
-      $editor->save();
-
       $post->delete();
       return id(new AphrontRedirectResponse())
-        ->setURI('/phame/'.$post_noun.'/?deleted');
+        ->setURI('/phame/post/');
     }
 
-    $edit_uri = $post->getEditURI();
-    $dialog   = id(new AphrontDialogView())
+    $cancel_uri = $this->getApplicationURI('/post/view/'.$post->getID().'/');
+
+    $dialog = id(new AphrontDialogView())
       ->setUser($user)
-      ->setTitle('Delete '.$post_noun.'?')
-      ->appendChild('Really delete this '.$post_noun.'? '.
-                    'It will be gone forever.')
-      ->addSubmitButton('Delete')
-      ->addCancelButton($edit_uri);
+      ->setTitle(pht('Delete Post?'))
+      ->appendChild(
+        pht(
+          'Really delete the post "%s"? It will be gone forever.',
+          phutil_escape_html($post->getTitle())))
+      ->addSubmitButton(pht('Delete'))
+      ->addCancelButton($cancel_uri);
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }

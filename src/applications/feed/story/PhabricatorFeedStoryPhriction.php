@@ -18,17 +18,8 @@
 
 final class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
 
-  public function getRequiredHandlePHIDs() {
-    return array(
-      $this->getStoryData()->getAuthorPHID(),
-      $this->getStoryData()->getValue('phid'),
-    );
-  }
-
-  public function getRequiredObjectPHIDs() {
-    return array(
-      $this->getStoryData()->getAuthorPHID(),
-    );
+  public function getPrimaryObjectPHID() {
+    return $this->getValue('phid');
   }
 
   public function renderView() {

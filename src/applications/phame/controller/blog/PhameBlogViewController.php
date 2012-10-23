@@ -19,156 +19,154 @@
 /**
  * @group phame
  */
-final class PhameBlogViewController
-  extends PhameController {
+final class PhameBlogViewController extends PhameController {
 
-  private $blogPHID;
-  private $bloggerPHIDs;
-  private $postPHIDs;
-
-  private function setPostPHIDs($post_phids) {
-    $this->postPHIDs = $post_phids;
-    return $this;
-  }
-  private function getPostPHIDs() {
-    return $this->postPHIDs;
-  }
-
-  private function setBloggerPHIDs($blogger_phids) {
-    $this->bloggerPHIDs = $blogger_phids;
-    return $this;
-  }
-  private function getBloggerPHIDs() {
-    return $this->bloggerPHIDs;
-  }
-
-  private function setBlogPHID($blog_phid) {
-    $this->blogPHID = $blog_phid;
-    return $this;
-  }
-  private function getBlogPHID() {
-    return $this->blogPHID;
-  }
-
-  protected function getSideNavFilter() {
-    $filter = 'blog/view/'.$this->getBlogPHID();
-    return $filter;
-  }
-  protected function getSideNavExtraBlogFilters() {
-      $filters =  array(
-        array('key'  => $this->getSideNavFilter(),
-              'name' => $this->getPhameTitle())
-      );
-      return $filters;
-  }
+  private $id;
 
   public function willProcessRequest(array $data) {
-    $this->setBlogPHID(idx($data, 'phid'));
+    $this->id = $data['id'];
   }
 
   public function processRequest() {
-    $request   = $this->getRequest();
-    $user      = $request->getUser();
-    $blog_phid = $this->getBlogPHID();
+    $request = $this->getRequest();
+    $user = $request->getUser();
 
-    $blogs = id(new PhameBlogQuery())
-      ->withPHIDs(array($blog_phid))
-      ->execute();
-    $blog = reset($blogs);
-
+    $blog = id(new PhameBlogQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->executeOne();
     if (!$blog) {
       return new Aphront404Response();
     }
 
-    $this->loadEdges();
+    $pager = id(new AphrontCursorPagerView())
+      ->readFromRequest($request);
 
-    $blogger_phids = $this->getBloggerPHIDs();
-    if ($blogger_phids) {
-      $bloggers = $this->loadViewerHandles($blogger_phids);
-    } else {
-      $bloggers = array();
-    }
+    $posts = id(new PhamePostQuery())
+      ->setViewer($user)
+      ->withBlogPHIDs(array($blog->getPHID()))
+      ->executeWithCursorPager($pager);
 
-    $post_phids = $this->getPostPHIDs();
-    if ($post_phids) {
-      $posts = id(new PhamePostQuery())
-        ->withPHIDs($post_phids)
-        ->withVisibility(PhamePost::VISIBILITY_PUBLISHED)
-        ->execute();
-    } else {
-      $posts = array();
-    }
+    $nav = $this->renderSideNavFilterView(null);
 
-    $actions  = array('view');
-    $is_admin = false;
-    // TODO -- make this check use a policy
-    if (isset($bloggers[$user->getPHID()])) {
-      $actions[] = 'edit';
-      $is_admin  = true;
-    }
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($blog->getName());
 
-    if ($request->getExists('new')) {
-      $notice = $this->buildNoticeView()
-        ->setTitle('Successfully created your blog.')
-        ->appendChild('Time to write some posts.');
-    } else if ($request->getExists('edit')) {
-      $notice = $this->buildNoticeView()
-        ->setTitle('Successfully edited your blog.')
-        ->appendChild('Time to write some posts.');
-    } else {
-      $notice = null;
-    }
+    $handle_phids = array_merge(
+      mpull($posts, 'getBloggerPHID'),
+      mpull($posts, 'getBlogPHID'));
+    $this->loadHandles($handle_phids);
 
-    $panel = id(new PhamePostListView())
-      ->setBlogStyle(true)
-      ->setUser($this->getRequest()->getUser())
-      ->setBloggers($bloggers)
-      ->setPosts($posts)
-      ->setActions($actions)
-      ->setDraftList(false);
+    $actions = $this->renderActions($blog, $user);
+    $properties = $this->renderProperties($blog, $user);
+    $post_list = $this->renderPostList(
+      $posts,
+      $user,
+      pht('This blog has no visible posts.'));
 
-    $details = id(new PhameBlogDetailView())
-      ->setUser($user)
-      ->setBloggers($bloggers)
-      ->setBlog($blog)
-      ->setIsAdmin($is_admin);
-
-    $this->setShowSideNav(false);
-
-    return $this->buildStandardPageResponse(
+    $nav->appendChild(
       array(
-        $notice,
-        $details,
-        $panel,
-      ),
+        $header,
+        $actions,
+        $properties,
+        $post_list,
+      ));
+
+    return $this->buildApplicationPage(
+      $nav,
       array(
-        'title' => $blog->getName(),
+        'device'  => true,
+        'title'   => $blog->getName(),
       ));
   }
 
-  private function loadEdges() {
+  private function renderProperties(PhameBlog $blog, PhabricatorUser $user) {
+    $properties = new PhabricatorPropertyListView();
 
-    $edge_types = array(
-      PhabricatorEdgeConfig::TYPE_BLOG_HAS_BLOGGER,
-      PhabricatorEdgeConfig::TYPE_BLOG_HAS_POST,
-    );
-    $blog_phid = $this->getBlogPHID();
-    $phids = array($blog_phid);
+    $properties->addProperty(
+      pht('Skin'),
+      phutil_escape_html($blog->getSkin()));
 
-    $edges = id(new PhabricatorEdgeQuery())
-      ->withSourcePHIDs($phids)
-      ->withEdgeTypes($edge_types)
-      ->execute();
+    $properties->addProperty(
+      pht('Domain'),
+      phutil_escape_html($blog->getDomain()));
 
-    $blogger_phids = array_keys(
-      $edges[$blog_phid][PhabricatorEdgeConfig::TYPE_BLOG_HAS_BLOGGER]
-    );
-    $this->setBloggerPHIDs($blogger_phids);
+    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
+      $user,
+      $blog);
 
-    $post_phids = array_keys(
-      $edges[$blog_phid][PhabricatorEdgeConfig::TYPE_BLOG_HAS_POST]
-    );
-    $this->setPostPHIDs($post_phids);
+    $properties->addProperty(
+      pht('Visible To'),
+      $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
 
+    $properties->addProperty(
+      pht('Editable By'),
+      $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
+
+    $properties->addProperty(
+      pht('Joinable By'),
+      $descriptions[PhabricatorPolicyCapability::CAN_JOIN]);
+
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($user)
+      ->addObject($blog, PhameBlog::MARKUP_FIELD_DESCRIPTION)
+      ->process();
+
+    $properties->addTextContent(
+      '<div class="phabricator-remarkup">'.
+        $engine->getOutput($blog, PhameBlog::MARKUP_FIELD_DESCRIPTION).
+      '</div>');
+
+    return $properties;
   }
+
+  private function renderActions(PhameBlog $blog, PhabricatorUser $user) {
+
+    $actions = id(new PhabricatorActionListView())
+      ->setObject($blog)
+      ->setUser($user);
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $user,
+      $blog,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $can_join = PhabricatorPolicyFilter::hasCapability(
+      $user,
+      $blog,
+      PhabricatorPolicyCapability::CAN_JOIN);
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('new')
+        ->setHref($this->getApplicationURI('post/edit/?blog='.$blog->getID()))
+        ->setName(pht('Write Post'))
+        ->setDisabled(!$can_join)
+        ->setWorkflow(!$can_join));
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('world')
+        ->setHref($this->getApplicationURI('live/'.$blog->getID().'/'))
+        ->setName(pht('View Live')));
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('edit')
+        ->setHref($this->getApplicationURI('blog/edit/'.$blog->getID().'/'))
+        ->setName('Edit Blog')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('delete')
+        ->setHref($this->getApplicationURI('blog/delete/'.$blog->getID().'/'))
+        ->setName('Delete Blog')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true));
+
+    return $actions;
+  }
+
 }

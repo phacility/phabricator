@@ -19,31 +19,37 @@
 /**
  * @group phame
  */
-final class PhamePostQuery extends PhabricatorOffsetPagedQuery {
+final class PhamePostQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
-  private $bloggerPHID;
-  private $withoutBloggerPHID;
-  private $phameTitle;
+  private $ids;
+  private $blogPHIDs;
+  private $bloggerPHIDs;
+  private $phameTitles;
   private $visibility;
   private $phids;
 
-  /**
-   * Mutually exlusive with @{method:withoutBloggerPHID}.
-   *
-   * @{method:withBloggerPHID} wins because being positive and inclusive is
-   * cool.
-   */
-  public function withBloggerPHID($blogger_phid) {
-    $this->bloggerPHID = $blogger_phid;
-    return $this;
-  }
-  public function withoutBloggerPHID($blogger_phid) {
-    $this->withoutBloggerPHID = $blogger_phid;
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
     return $this;
   }
 
-  public function withPhameTitle($phame_title) {
-    $this->phameTitle = $phame_title;
+  public function withPHIDs(array $phids) {
+    $this->phids = $phids;
+    return $this;
+  }
+
+  public function withBloggerPHIDs(array $blogger_phids) {
+    $this->bloggerPHIDs = $blogger_phids;
+    return $this;
+  }
+
+  public function withBlogPHIDs(array $blog_phids) {
+    $this->blogPHIDs = $blog_phids;
+    return $this;
+  }
+
+  public function withPhameTitles(array $phame_titles) {
+    $this->phameTitles = $phame_titles;
     return $this;
   }
 
@@ -52,12 +58,7 @@ final class PhamePostQuery extends PhabricatorOffsetPagedQuery {
     return $this;
   }
 
-  public function withPHIDs($phids) {
-    $this->phids = $phids;
-    return $this;
-  }
-
-  public function execute() {
+  protected function loadPage() {
     $table  = new PhamePost();
     $conn_r = $table->establishConnection('r');
 
@@ -75,54 +76,72 @@ final class PhamePostQuery extends PhabricatorOffsetPagedQuery {
 
     $posts = $table->loadAllFromArray($data);
 
+    if ($posts) {
+      // We require these to do visibility checks, so load them unconditionally.
+      $blog_phids = mpull($posts, 'getBlogPHID');
+      $blogs = id(new PhameBlogQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs($blog_phids)
+        ->execute();
+      $blogs = mpull($blogs, null, 'getPHID');
+      foreach ($posts as $post) {
+        if (isset($blogs[$post->getBlogPHID()])) {
+          $post->setBlog($blogs[$post->getBlogPHID()]);
+        }
+      }
+    }
+
     return $posts;
   }
 
-  private function buildWhereClause($conn_r) {
+  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
+
+    if ($this->ids) {
+      $where[] = qsprintf(
+        $conn_r,
+        'p.id IN (%Ld)',
+        $this->ids);
+    }
 
     if ($this->phids) {
       $where[] = qsprintf(
         $conn_r,
-        'phid IN (%Ls)',
-        $this->phids
-      );
+        'p.phid IN (%Ls)',
+        $this->phids);
     }
 
-    if ($this->bloggerPHID) {
+    if ($this->bloggerPHIDs) {
       $where[] = qsprintf(
         $conn_r,
-        'bloggerPHID = %s',
-        $this->bloggerPHID
-      );
-    } else if ($this->withoutBloggerPHID) {
-      $where[] = qsprintf(
-        $conn_r,
-        'bloggerPHID != %s',
-        $this->withoutBloggerPHID
-      );
+        'p.bloggerPHID IN (%Ls)',
+        $this->bloggerPHIDs);
     }
 
-    if ($this->phameTitle) {
+    if ($this->phameTitles) {
       $where[] = qsprintf(
         $conn_r,
-        'phameTitle = %s',
-        $this->phameTitle
-      );
+        'p.phameTitle IN (%Ls)',
+        $this->phameTitles);
     }
 
     if ($this->visibility !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'visibility = %d',
-        $this->visibility
-      );
+        'p.visibility = %d',
+        $this->visibility);
     }
+
+    if ($this->blogPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'p.blogPHID in (%Ls)',
+        $this->blogPHIDs);
+    }
+
+    $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
   }
 
-  private function buildOrderClause($conn_r) {
-    return 'ORDER BY datePublished DESC, id DESC';
-  }
 }

@@ -19,151 +19,191 @@
 /**
  * @group phame
  */
-final class PhamePostViewController
-extends PhameController {
+final class PhamePostViewController extends PhameController {
 
-  private $postPHID;
-  private $phameTitle;
-  private $bloggerName;
-
-  private function setPostPHID($post_phid) {
-    $this->postPHID = $post_phid;
-    return $this;
-  }
-  private function getPostPHID() {
-    return $this->postPHID;
-  }
-  private function setPhameTitle($phame_title) {
-    $this->phameTitle = $phame_title;
-    return $this;
-  }
-  private function getPhameTitle() {
-    return $this->phameTitle;
-  }
-  private function setBloggerName($blogger_name) {
-    $this->bloggerName = $blogger_name;
-    return $this;
-  }
-  private function getBloggerName() {
-    return $this->bloggerName;
-  }
-
-  protected function getSideNavFilter() {
-    $filter = 'post/view/'.$this->getPostPHID();
-    return $filter;
-  }
-  protected function getSideNavExtraPostFilters() {
-      $filters =  array(
-        array('key'  => $this->getSideNavFilter(),
-              'name' => $this->getPhameTitle())
-      );
-      return $filters;
-  }
-
-  public function shouldRequireLogin() {
-    // TODO -- get policy logic going
-    // return PhabricatorEnv::getEnvConfig('policy.allow-public');
-    return true;
-  }
+  private $id;
 
   public function willProcessRequest(array $data) {
-    $this->setPostPHID(idx($data, 'phid'));
-    $this->setPhameTitle(idx($data, 'phametitle'));
-    $this->setBloggerName(idx($data, 'bloggername'));
+    $this->id = $data['id'];
   }
 
   public function processRequest() {
-    $request   = $this->getRequest();
-    $user      = $request->getUser();
-    $post_phid = null;
+    $request = $this->getRequest();
+    $user = $request->getUser();
 
-    if ($this->getPostPHID()) {
-      $post_phid = $this->getPostPHID();
-      if (!$post_phid) {
-        return new Aphront404Response();
-      }
-
-      $posts = id(new PhamePostQuery())
-        ->withPHIDs(array($post_phid))
-        ->execute();
-      $post = reset($posts);
-
-      if ($post) {
-        $this->setPhameTitle($post->getPhameTitle());
-        $blogger = id(new PhabricatorUser())->loadOneWhere(
-          'phid = %s', $post->getBloggerPHID());
-        if (!$blogger) {
-          return new Aphront404Response();
-        }
-      }
-
-    } else if ($this->getBloggerName() && $this->getPhameTitle()) {
-      $phame_title = $this->getPhameTitle();
-      $phame_title = PhabricatorSlug::normalize($phame_title);
-      $blogger = id(new PhabricatorUser())->loadOneWhere(
-        'username = %s',
-        $this->getBloggerName());
-      if (!$blogger) {
-        return new Aphront404Response();
-      }
-      $posts = id(new PhamePostQuery())
-        ->withBloggerPHID($blogger->getPHID())
-        ->withPhameTitle($phame_title)
-        ->execute();
-      $post = reset($posts);
-
-      if ($post && $phame_title != $this->getPhameTitle()) {
-        $uri = $post->getViewURI($this->getBloggerName());
-        return id(new AphrontRedirectResponse())->setURI($uri);
-      }
-    }
+    $post = id(new PhamePostQuery())
+      ->setViewer($user)
+      ->withIDs(array($this->id))
+      ->executeOne();
 
     if (!$post) {
       return new Aphront404Response();
     }
 
-    if ($post->isDraft() &&
-        $post->getBloggerPHID() != $user->getPHID()) {
-      return new Aphront404Response();
-    }
+    $nav = $this->renderSideNavFilterView();
+
+    $nav->appendChild(
+      id(new PhabricatorHeaderView())
+        ->setHeader($post->getTitle()));
 
     if ($post->isDraft()) {
-      $notice = $this->buildNoticeView()
-        ->setTitle('You are previewing a draft.')
-        ->setErrors(array(
-          'Only you can see this draft until you publish it.',
-          'If you chose a comment widget it will show up when you publish.',
-        ));
-    } else if ($request->getExists('saved')) {
-      $new_link = phutil_render_tag(
-        'a',
-        array(
-          'href' => '/phame/post/new/',
-          'class' => 'button green',
-        ),
-        'write another blog post'
-      );
-      $notice = $this->buildNoticeView()
-        ->appendChild('<p>Saved post successfully.</p>')
-        ->appendChild('Seek even more phame and '.$new_link);
-    } else {
-      $notice = null;
+      $nav->appendChild(
+        id(new AphrontErrorView())
+          ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+          ->setTitle(pht('Draft Post'))
+          ->appendChild(
+            pht('Only you can see this draft until you publish it. '.
+                'Use "Preview / Publish" to publish this post.')));
     }
 
-    $page = id(new PhamePostDetailView())
-      ->setUser($user)
-      ->setRequestURI($request->getRequestURI())
-      ->setBlogger($blogger)
-      ->setPost($post);
+    if (!$post->getBlog()) {
+      $nav->appendChild(
+        id(new AphrontErrorView())
+          ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+          ->setTitle(pht('Not On A Blog'))
+          ->appendChild(
+            pht('This post is not associated with a blog (the blog may have '.
+                'been deleted). Use "Move Post" to move it to a new blog.')));
+    }
 
-    $this->setShowSideNav(false);
-    return $this->buildStandardPageResponse(
+    $this->loadHandles(
       array(
-        $notice,
-        $page,
-      ),
+        $post->getBlogPHID(),
+        $post->getBloggerPHID(),
+      ));
+
+    $actions = $this->renderActions($post, $user);
+    $properties = $this->renderProperties($post, $user);
+
+    $nav->appendChild(
+      array(
+        $actions,
+        $properties,
+      ));
+
+    return $this->buildApplicationPage(
+      $nav,
       array(
         'title'   => $post->getTitle(),
+        'device'  => true,
       ));
+  }
+
+  private function renderActions(
+    PhamePost $post,
+    PhabricatorUser $user) {
+
+    $actions = id(new PhabricatorActionListView())
+      ->setObject($post)
+      ->setUser($user);
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $user,
+      $post,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $id = $post->getID();
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('edit')
+        ->setHref($this->getApplicationURI('post/edit/'.$id.'/'))
+        ->setName('Edit Post')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('move')
+        ->setHref($this->getApplicationURI('post/move/'.$id.'/'))
+        ->setName('Move Post')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
+    if ($post->isDraft()) {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon('preview')
+          ->setHref($this->getApplicationURI('post/publish/'.$id.'/'))
+          ->setName(pht('Preview / Publish')));
+    } else {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setIcon('unpublish')
+          ->setHref($this->getApplicationURI('post/unpublish/'.$id.'/'))
+          ->setName(pht('Unpublish'))
+          ->setWorkflow(true));
+    }
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('delete')
+        ->setHref($this->getApplicationURI('post/delete/'.$id.'/'))
+        ->setName('Delete Post')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true));
+
+    $blog = $post->getBlog();
+    $can_view_live = $blog && !$post->isDraft();
+
+    if ($can_view_live) {
+      $live_uri = 'live/'.$blog->getID().'/post/'.$post->getPhameTitle();
+    } else {
+      $live_uri = 'post/notlive/'.$post->getID().'/';
+    }
+    $live_uri = $this->getApplicationURI($live_uri);
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('world')
+        ->setHref($live_uri)
+        ->setName(pht('View Live'))
+        ->setDisabled(!$can_view_live)
+        ->setWorkflow(!$can_view_live));
+
+    return $actions;
+  }
+
+  private function renderProperties(
+    PhamePost $post,
+    PhabricatorUser $user) {
+
+    $properties = new PhabricatorPropertyListView();
+
+    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
+      $user,
+      $post);
+
+    $properties->addProperty(
+      pht('Blog'),
+      $post->getBlogPHID()
+        ? $this->getHandle($post->getBlogPHID())->renderLink()
+        : null);
+
+    $properties->addProperty(
+      pht('Blogger'),
+      $this->getHandle($post->getBloggerPHID())->renderLink());
+
+    $properties->addProperty(
+      pht('Visible To'),
+      $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
+
+    $properties->addProperty(
+      pht('Published'),
+      $post->isDraft()
+        ? pht('Draft')
+        : phabricator_datetime($post->getDatePublished(), $user));
+
+    $engine = id(new PhabricatorMarkupEngine())
+      ->setViewer($user)
+      ->addObject($post, PhamePost::MARKUP_FIELD_BODY)
+      ->process();
+
+    $properties->addTextContent(
+      '<div class="phabricator-remarkup">'.
+        $engine->getOutput($post, PhamePost::MARKUP_FIELD_BODY).
+      '</div>');
+
+    return $properties;
   }
 }

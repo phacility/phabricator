@@ -3,6 +3,7 @@
  * @requires javelin-behavior
  *           javelin-stratcom
  *           javelin-workflow
+ *           javelin-dom
  */
 
 JX.behavior('workflow', function() {
@@ -13,11 +14,9 @@ JX.behavior('workflow', function() {
       if (JX.Stratcom.pass()) {
         return;
       }
-      if (e.getNode('workflow') !== e.getTarget()) {
-        return;
-      }
+      var target = e.getNode('workflow');
       e.prevent();
-      JX.Workflow.newFromForm(e.getTarget()).start();
+      JX.Workflow.newFromForm(target).start();
     });
   JX.Stratcom.listen(
     'click',
@@ -26,14 +25,18 @@ JX.behavior('workflow', function() {
       if (JX.Stratcom.pass()) {
         return;
       }
-      if (e.getNode('workflow') !== e.getTarget()) {
+      var target = e.getNode('workflow');
+      if (!JX.DOM.isType(target, 'a')) {
+        // This covers the case of an <a /> without workflow inside a <form />
+        // with workflow.
         return;
       }
+
       var raw = e.getRawEvent();
       if (raw.altKey || raw.ctrlKey || raw.metaKey || raw.shiftKey) {
         return;
       }
       e.prevent();
-      JX.Workflow.newFromLink(e.getTarget()).start();
+      JX.Workflow.newFromLink(target).start();
     });
 });

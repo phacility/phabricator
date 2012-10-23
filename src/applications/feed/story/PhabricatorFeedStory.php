@@ -21,15 +21,17 @@
  * user adding a comment) which may be represented in different forms on
  * different channels (like feed, notifications and realtime alerts).
  *
- * @task load Loading Stories
+ * @task load     Loading Stories
+ * @task policy   Policy Implementation
  */
 abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
 
   private $data;
   private $hasViewed;
-  private $handles;
   private $framed;
-  private $primaryObjectPHID;
+
+  private $handles  = array();
+  private $objects  = array();
 
 
 /* -(  Loading Stories  )---------------------------------------------------- */
@@ -46,7 +48,7 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
    *                                      objects.
    * @task load
    */
-  public static function loadAllFromRows(array $rows) {
+  public static function loadAllFromRows(array $rows, PhabricatorUser $viewer) {
     $stories = array();
 
     $data = id(new PhabricatorFeedStoryData())->loadAllFromArray($rows);
@@ -62,42 +64,99 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
       }
 
       // If the story type isn't a valid class or isn't a subclass of
-      // PhabricatorFeedStory, load it as PhabricatorFeedStoryUnknown.
-
+      // PhabricatorFeedStory, decline to load it.
       if (!$ok) {
-        $class = 'PhabricatorFeedStoryUnknown';
+        continue;
       }
 
       $key = $story_data->getChronologicalKey();
       $stories[$key] = newv($class, array($story_data));
     }
 
+    $object_phids = array();
+    $key_phids = array();
+    foreach ($stories as $key => $story) {
+      $phids = array();
+      foreach ($story->getRequiredObjectPHIDs() as $phid) {
+        $phids[$phid] = true;
+      }
+      if ($story->getPrimaryObjectPHID()) {
+        $phids[$story->getPrimaryObjectPHID()] = true;
+      }
+      $key_phids[$key] = $phids;
+      $object_phids += $phids;
+    }
+
+    $objects = id(new PhabricatorObjectHandleData(array_keys($object_phids)))
+      ->setViewer($viewer)
+      ->loadObjects();
+
+    foreach ($key_phids as $key => $phids) {
+      if (!$phids) {
+        continue;
+      }
+      $story_objects = array_select_keys($objects, array_keys($phids));
+      if (count($story_objects) != count($phids)) {
+        // An object this story requires either does not exist or is not visible
+        // to the user. Decline to render the story.
+        unset($stories[$key]);
+        unset($key_phids[$key]);
+        continue;
+      }
+
+      $stories[$key]->setObjects($story_objects);
+    }
+
+    $handle_phids = array();
+    foreach ($stories as $key => $story) {
+      foreach ($story->getRequiredHandlePHIDs() as $phid) {
+        $key_phids[$key][$phid] = true;
+      }
+      if ($story->getAuthorPHID()) {
+        $key_phids[$key][$story->getAuthorPHID()] = true;
+      }
+      $handle_phids += $key_phids[$key];
+    }
+
+    $handles = id(new PhabricatorObjectHandleData(array_keys($handle_phids)))
+      ->setViewer($viewer)
+      ->loadHandles();
+
+    foreach ($key_phids as $key => $phids) {
+      if (!$phids) {
+        continue;
+      }
+      $story_handles = array_select_keys($handles, array_keys($phids));
+      $stories[$key]->setHandles($story_handles);
+    }
+
     return $stories;
   }
 
-  public function getCapabilities() {
-    return array(
-      PhabricatorPolicyCapability::CAN_VIEW,
-    );
-  }
-
-  public function getPolicy($capability) {
-    return PhabricatorEnv::getEnvConfig('feed.public')
-      ? PhabricatorPolicies::POLICY_PUBLIC
-      : PhabricatorPolicies::POLICY_USER;
-  }
-
-  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return false;
-  }
-
-  public function setPrimaryObjectPHID($primary_object_phid) {
-    $this->primaryObjectPHID = $primary_object_phid;
+  public function setObjects(array $objects) {
+    $this->objects = $objects;
     return $this;
   }
 
+  public function getObject($phid) {
+    $object = idx($this->objects, $phid);
+    if (!$object) {
+      throw new Exception(
+        "Story is asking for an object it did not request ('{$phid}')!");
+    }
+    return $object;
+  }
+
+  public function getPrimaryObject() {
+    $phid = $this->getPrimaryObjectPHID();
+    if (!$phid) {
+      throw new Exception("Story has no primary object!");
+    }
+    return $this->getObject($phid);
+  }
+
   public function getPrimaryObjectPHID() {
-    return $this->primaryObjectPHID;
+    return null;
   }
 
   final public function __construct(PhabricatorFeedStoryData $data) {
@@ -116,6 +175,10 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
     return array();
   }
 
+  public function getRequiredObjectPHIDs() {
+    return array();
+  }
+
   public function setHasViewed($has_viewed) {
     $this->hasViewed = $has_viewed;
     return $this;
@@ -123,10 +186,6 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
 
   public function getHasViewed() {
     return $this->hasViewed;
-  }
-
-  public function getRequiredObjectPHIDs() {
-    return array();
   }
 
   final public function setFramed($framed) {
@@ -138,6 +197,10 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
     assert_instances_of($handles, 'PhabricatorObjectHandle');
     $this->handles = $handles;
     return $this;
+  }
+
+  final protected function getObjects() {
+    return $this->objects;
   }
 
   final protected function getHandles() {
@@ -168,6 +231,14 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
 
   final public function getChronologicalKey() {
     return $this->getStoryData()->getChronologicalKey();
+  }
+
+  final public function getValue($key, $default = null) {
+    return $this->getStoryData()->getValue($key, $default);
+  }
+
+  final public function getAuthorPHID() {
+    return $this->getStoryData()->getAuthorPHID();
   }
 
   final protected function renderHandleList(array $phids) {
@@ -208,6 +279,50 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
 
   public function getNotificationAggregations() {
     return array();
+  }
+
+
+/* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
+
+
+  /**
+   * @task policy
+   */
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+
+  /**
+   * @task policy
+   */
+  public function getPolicy($capability) {
+    // If this story's primary object is a policy-aware object, use its policy
+    // to control story visiblity.
+
+    $primary_phid = $this->getPrimaryObjectPHID();
+    if (isset($this->objects[$primary_phid])) {
+      $object = $this->objects[$primary_phid];
+      if ($object instanceof PhabricatorPolicyInterface) {
+        return $object->getPolicy($capability);
+      }
+    }
+
+    // TODO: Remove this once all objects are policy-aware. For now, keep
+    // respecting the `feed.public` setting.
+    return PhabricatorEnv::getEnvConfig('feed.public')
+      ? PhabricatorPolicies::POLICY_PUBLIC
+      : PhabricatorPolicies::POLICY_USER;
+  }
+
+
+  /**
+   * @task policy
+   */
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
   }
 
 }

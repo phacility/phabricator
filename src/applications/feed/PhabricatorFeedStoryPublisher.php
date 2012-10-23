@@ -25,6 +25,7 @@ final class PhabricatorFeedStoryPublisher {
   private $storyAuthorPHID;
   private $primaryObjectPHID;
   private $subscribedPHIDs = array();
+  private $mailRecipientPHIDs = array();
 
   public function setRelatedPHIDs(array $phids) {
     $this->relatedPHIDs = $phids;
@@ -60,9 +61,29 @@ final class PhabricatorFeedStoryPublisher {
     return $this;
   }
 
+  public function setMailRecipientPHIDs(array $phids) {
+    $this->mailRecipientPHIDs = $phids;
+    return $this;
+  }
+
   public function publish() {
-    if (!$this->storyType) {
+    $class = $this->storyType;
+    if (!$class) {
       throw new Exception("Call setStoryType() before publishing!");
+    }
+
+    if (!class_exists($class)) {
+      throw new Exception(
+        "Story type must be a valid class name and must subclass ".
+        "PhabricatorFeedStory. ".
+        "'{$class}' is not a loadable class.");
+    }
+
+    if (!is_subclass_of($class, 'PhabricatorFeedStory')) {
+      throw new Exception(
+        "Story type must be a valid class name and must subclass ".
+        "PhabricatorFeedStory. ".
+        "'{$class}' is not a subclass of PhabricatorFeedStory.");
     }
 
     $chrono_key = $this->generateChronologicalKey();
@@ -121,14 +142,22 @@ final class PhabricatorFeedStoryPublisher {
     $sql = array();
     $conn = $notif->establishConnection('w');
 
+    $will_receive_mail = array_fill_keys($this->mailRecipientPHIDs, true);
+
     foreach (array_unique($subscribed_phids) as $user_phid) {
+      if (isset($will_receive_mail[$user_phid])) {
+        $mark_read = 1;
+      } else {
+        $mark_read = 0;
+      }
+
       $sql[] = qsprintf(
         $conn,
         '(%s, %s, %s, %d)',
         $this->primaryObjectPHID,
         $user_phid,
         $chrono_key,
-        0);
+        $mark_read);
     }
 
     queryfx(

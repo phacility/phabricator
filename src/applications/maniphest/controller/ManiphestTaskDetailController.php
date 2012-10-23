@@ -197,13 +197,10 @@ final class ManiphestTaskDetailController extends ManiphestController {
         'phid IN (%Ls)',
         $file_phids);
 
-      $views = array();
-      foreach ($files as $file) {
-        $view = new AphrontFilePreviewView();
-        $view->setFile($file);
-        $views[] = $view->render();
-      }
-      $dict['Files'] = implode('', $views);
+      $view = new PhabricatorFileLinkListView();
+      $view->setFiles($files);
+
+      $dict['Files'] = $view->render();
     }
 
     $context_bar = null;

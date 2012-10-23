@@ -57,6 +57,7 @@ final class PhabricatorMarkupEngine {
 
   private $objects = array();
   private $viewer;
+  private $version = 0;
 
 
 /* -(  Markup Pipeline  )---------------------------------------------------- */
@@ -185,7 +186,7 @@ final class PhabricatorMarkupEngine {
   private function getMarkupFieldKey(
     PhabricatorMarkupInterface $object,
     $field) {
-    return $object->getMarkupFieldKey($field);
+    return $object->getMarkupFieldKey($field).'@'.$this->version;
   }
 
 
@@ -453,6 +454,7 @@ final class PhabricatorMarkupEngine {
     $blocks[] = new PhutilRemarkupEngineRemarkupCodeBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupNoteBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupTableBlockRule();
+    $blocks[] = new PhutilRemarkupEngineRemarkupSimpleTableBlockRule();
     $blocks[] = new PhutilRemarkupEngineRemarkupDefaultBlockRule();
 
     $custom_block_rule_classes = $options['custom-block'];
@@ -493,6 +495,56 @@ final class PhabricatorMarkupEngine {
     }
 
     return $mentions;
+  }
+
+
+  /**
+   * Produce a corpus summary, in a way that shortens the underlying text
+   * without truncating it somewhere awkward.
+   *
+   * TODO: We could do a better job of this.
+   *
+   * @param string  Remarkup corpus to summarize.
+   * @return string Summarized corpus.
+   */
+  public static function summarize($corpus) {
+
+    // Major goals here are:
+    //  - Don't split in the middle of a character (utf-8).
+    //  - Don't split in the middle of, e.g., **bold** text, since
+    //    we end up with hanging '**' in the summary.
+    //  - Try not to pick an image macro, header, embedded file, etc.
+    //  - Hopefully don't return too much text. We don't explicitly limit
+    //    this right now.
+
+    $blocks = preg_split("/\n *\n\s*/", trim($corpus));
+
+    $best = null;
+    foreach ($blocks as $block) {
+      // This is a test for normal spaces in the block, i.e. a heuristic to
+      // distinguish standard paragraphs from things like image macros. It may
+      // not work well for non-latin text. We prefer to summarize with a
+      // paragraph of normal words over an image macro, if possible.
+      $has_space = preg_match('/\w\s\w/', $block);
+
+      // This is a test to find embedded images and headers. We prefer to
+      // summarize with a normal paragraph over a header or an embedded object,
+      // if possible.
+      $has_embed = preg_match('/^[{=]/', $block);
+
+      if ($has_space && !$has_embed) {
+        // This seems like a good summary, so return it.
+        return $block;
+      }
+
+      if (!$best) {
+        // This is the first block we found; if everything is garbage just
+        // use the first block.
+        $best = $block;
+      }
+    }
+
+    return $best;
   }
 
 }

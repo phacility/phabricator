@@ -18,11 +18,21 @@
 
 final class PhabricatorPropertyListView extends AphrontView {
 
-  private $properties;
+  private $properties = array();
 
   public function addProperty($key, $value) {
     $this->properties[$key] = $value;
     return $this;
+  }
+
+  public function addTextContent($content) {
+    return $this->appendChild(
+      phutil_render_tag(
+        'div',
+        array(
+          'class' => 'phabricator-property-list-text-content',
+        ),
+        $content));
   }
 
   public function render() {
@@ -50,6 +60,16 @@ final class PhabricatorPropertyListView extends AphrontView {
       ),
       $this->renderSingleView($items));
 
+    $content = $this->renderChildren();
+    if (strlen($content)) {
+      $content = phutil_render_tag(
+        'div',
+        array(
+          'class' => 'phabricator-property-list-content',
+        ),
+        $content);
+    }
+
     return phutil_render_tag(
       'div',
       array(
@@ -60,7 +80,8 @@ final class PhabricatorPropertyListView extends AphrontView {
       // sure the property list is taller than the action list for objects with
       // few properties but many actions. Otherwise, the action list may
       // obscure the document content.
-      '<div class="phabriator-property-list-view-end"></div>');
+      '<div class="phabriator-property-list-view-end"></div>').
+      $content;
   }
 
 

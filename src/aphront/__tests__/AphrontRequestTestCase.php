@@ -19,7 +19,7 @@
 final class AphrontRequestTestCase extends PhabricatorTestCase {
 
   public function testRequestDataAccess() {
-    $r = new AphrontRequest('http://example.com/', '/');
+    $r = new AphrontRequest('example.com', '/');
     $r->setRequestData(
       array(
         'str_empty' => '',
@@ -76,6 +76,23 @@ final class AphrontRequestTestCase extends PhabricatorTestCase {
 
     $this->assertEqual(true, $r->getExists('str'));
     $this->assertEqual(false, $r->getExists('does-not-exist'));
+  }
+
+  public function testHostAttacks() {
+    static $tests = array(
+      'domain.com'                    => 'domain.com',
+      'domain.com:80'                 => 'domain.com',
+      'evil.com:evil.com@real.com'    => 'real.com',
+      'evil.com:evil.com@real.com:80' => 'real.com',
+    );
+
+    foreach ($tests as $input => $expect) {
+      $r = new AphrontRequest($input, '/');
+      $this->assertEqual(
+        $expect,
+        $r->getHost(),
+        'Host: '.$input);
+    }
   }
 
 }

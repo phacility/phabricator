@@ -106,7 +106,6 @@
   display: block;
   padding: 3px 6px 3px 24px;
   font-weight: bold;
-  text-decoration: none;
 }
 
 .phabricator-nav-col a.aphront-side-nav-selected {

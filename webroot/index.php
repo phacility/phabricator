@@ -327,8 +327,13 @@ function phabricator_shutdown() {
     return;
   }
 
-  if ($event['type'] != E_ERROR && $event['type'] != E_PARSE) {
-    return;
+  switch ($event['type']) {
+    case E_ERROR:
+    case E_PARSE:
+    case E_COMPILE_ERROR:
+      break;
+    default:
+      return;
   }
 
   $msg = ">>> UNRECOVERABLE FATAL ERROR <<<\n\n";

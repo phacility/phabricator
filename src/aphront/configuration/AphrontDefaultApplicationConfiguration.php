@@ -155,7 +155,7 @@ class AphrontDefaultApplicationConfiguration
         '(?P<package>pkg/)?'.
         '(?P<hash>[a-f0-9]{8})/'.
         '(?P<path>.+\.(?:css|js|jpg|png|swf|gif))'
-          => 'CelerityResourceController',
+          => 'CelerityPhabricatorResourceController',
       ),
     );
   }

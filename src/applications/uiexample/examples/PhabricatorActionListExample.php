@@ -108,6 +108,16 @@ final class PhabricatorActionListExample extends PhabricatorUIExample {
         ->setName('Form + Workflow Action')
         ->setIcon('file'));
 
+    foreach (PhabricatorActionView::getAvailableIcons() as $icon) {
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setUser($user)
+          ->setHref('#')
+          ->setDisabled(true)
+          ->setName('Icon "'.$icon.'"')
+          ->setIcon($icon));
+    }
+
     return array(
       $view,
       '<div style="clear: both;"></div>',

@@ -40,7 +40,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
   protected function nextPage(array $page) {
     if ($this->beforeID) {
-      $this->beforeID = $this->getPagingValue(head($page));
+      $this->beforeID = $this->getPagingValue(last($page));
     } else {
       $this->afterID = $this->getPagingValue(last($page));
     }
@@ -102,13 +102,12 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
   }
 
-  final protected function processResults(array $results) {
+  final protected function didLoadResults(array $results) {
     if ($this->beforeID) {
       $results = array_reverse($results, $preserve_keys = true);
     }
     return $results;
   }
-
 
   final public function executeWithCursorPager(AphrontCursorPagerView $pager) {
     $this->setLimit($pager->getPageSize() + 1);
@@ -123,12 +122,12 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
     $sliced_results = $pager->sliceResults($results);
 
-    if ($this->beforeID || (count($results) > $pager->getPageSize())) {
+    if ($pager->getBeforeID() || (count($results) > $pager->getPageSize())) {
       $pager->setNextPageID($this->getPagingValue(last($sliced_results)));
     }
 
-    if ($this->afterID ||
-       ($this->beforeID && (count($results) > $pager->getPageSize()))) {
+    if ($pager->getAfterID() ||
+       ($pager->getBeforeID() && (count($results) > $pager->getPageSize()))) {
       $pager->setPrevPageID($this->getPagingValue(head($sliced_results)));
     }
 
