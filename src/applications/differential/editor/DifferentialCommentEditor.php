@@ -558,8 +558,9 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
     $xherald_header = HeraldTranscript::loadXHeraldRulesHeader(
       $revision->getPHID());
 
+    $mailed_phids = array();
     if (!$this->noEmail) {
-      id(new DifferentialCommentMail(
+      $mail = id(new DifferentialCommentMail(
         $revision,
         $actor_handle,
         $comment,
@@ -575,6 +576,8 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
         ->setXHeraldRulesHeader($xherald_header)
         ->setParentMessageID($this->parentMessageID)
         ->send();
+
+      $mailed_phids = $mail->getRawMail()->buildRecipientList();
     }
 
     $event_data = array(
@@ -586,12 +589,13 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
       'feedback_content'     => $comment->getContent(),
       'actor_phid'           => $actor_phid,
     );
+
+    // TODO: Get rid of this
     id(new PhabricatorTimelineEvent('difx', $event_data))
       ->recordEvent();
 
-    // TODO: Move to a daemon?
     id(new PhabricatorFeedStoryPublisher())
-      ->setStoryType(PhabricatorFeedStoryTypeConstants::STORY_DIFFERENTIAL)
+      ->setStoryType('PhabricatorFeedStoryDifferential')
       ->setStoryData($event_data)
       ->setStoryTime(time())
       ->setStoryAuthorPHID($actor_phid)
@@ -607,9 +611,10 @@ final class DifferentialCommentEditor extends PhabricatorEditor {
           array($revision->getAuthorPHID()),
           $revision->getReviewers(),
           $revision->getCCPHIDs()))
+      ->setMailRecipientPHIDs($mailed_phids)
       ->publish();
 
-    // TODO: Move to a daemon?
+    // TODO: Move to workers
     PhabricatorSearchDifferentialIndexer::indexRevision($revision);
 
     return $comment;
