@@ -342,21 +342,21 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     }
 
     try {
-      $parameters = $this->parameters;
+      $params = $this->parameters;
       $phids = array();
 
-      foreach ($parameters as $key => $value) {
+      foreach ($params as $key => $value) {
         switch ($key) {
           case 'to':
-            $parameters[$key] = $this->buildToList();
+            $params[$key] = $this->buildToList();
             break;
           case 'cc':
-            $parameters[$key] = $this->buildCCList();
+            $params[$key] = $this->buildCCList();
             break;
         }
       }
 
-      foreach ($parameters as $key => $value) {
+      foreach ($params as $key => $value) {
         switch ($key) {
           case 'from':
             $value = array($value);
@@ -373,7 +373,6 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
       $this->loadEmailAndNameDataFromPHIDs($phids);
 
-      $params = $this->parameters;
       $default = PhabricatorEnv::getEnvConfig('metamta.default-address');
       if (empty($params['from'])) {
         $mailer->setFrom($default);
