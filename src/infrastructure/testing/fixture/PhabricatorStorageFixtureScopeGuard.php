@@ -27,7 +27,7 @@ final class PhabricatorStorageFixtureScopeGuard {
     $this->name = $name;
 
     execx(
-      '%s upgrade --force --namespace %s',
+      'php %s upgrade --force --namespace %s',
       $this->getStorageBinPath(),
       $this->name);
 
@@ -41,14 +41,14 @@ final class PhabricatorStorageFixtureScopeGuard {
     PhabricatorLiskDAO::popStorageNamespace();
 
     execx(
-      '%s destroy --force --namespace %s',
+      'php %s destroy --force --namespace %s',
       $this->getStorageBinPath(),
       $this->name);
   }
 
   private function getStorageBinPath() {
     $root = dirname(phutil_get_library_root('phabricator'));
-    return $root.'/bin/storage';
+    return $root.'/scripts/sql/manage_storage.php';
   }
 
 }
