@@ -64,12 +64,11 @@ final class DiffusionDiffController extends DiffusionController {
       return new Aphront404Response();
     }
 
+
     $parser = new DifferentialChangesetParser();
     $parser->setUser($user);
     $parser->setChangeset($changeset);
     $parser->setRenderingReference($diff_query->getRenderingReference());
-    $parser->setMarkupEngine(
-      PhabricatorMarkupEngine::newDiffusionMarkupEngine());
 
     $pquery = new DiffusionPathIDQuery(array($changeset->getFilename()));
     $ids = $pquery->loadPathIDs();
@@ -97,6 +96,19 @@ final class DiffusionDiffController extends DiffusionController {
       $handles = $this->loadViewerHandles($phids);
       $parser->setHandles($handles);
     }
+
+    $engine = new PhabricatorMarkupEngine();
+    $engine->setViewer($user);
+
+    foreach ($inlines as $inline) {
+      $engine->addObject(
+        $inline,
+        PhabricatorInlineCommentInterface::MARKUP_FIELD_BODY);
+    }
+
+    $engine->process();
+
+    $parser->setMarkupEngine($engine);
 
     $spec = $request->getStr('range');
     list($range_s, $range_e, $mask) =

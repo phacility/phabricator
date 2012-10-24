@@ -27,7 +27,15 @@ abstract class PhabricatorInlineCommentPreviewController
 
     $inlines = $this->loadInlineComments();
     assert_instances_of($inlines, 'PhabricatorInlineCommentInterface');
-    $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
+
+    $engine = new PhabricatorMarkupEngine();
+    $engine->setViewer($user);
+    foreach ($inlines as $inline) {
+      $engine->addObject(
+        $inline,
+        PhabricatorInlineCommentInterface::MARKUP_FIELD_BODY);
+    }
+    $engine->process();
 
     $phids = array($user->getPHID());
     $handles = $this->loadViewerHandles($phids);

@@ -222,7 +222,12 @@ abstract class PhabricatorInlineCommentController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
+    $engine = new PhabricatorMarkupEngine();
+    $engine->setViewer($user);
+    $engine->addObject(
+      $inline,
+      PhabricatorInlineCommentInterface::MARKUP_FIELD_BODY);
+    $engine->process();
 
     $phids = array($user->getPHID());
 

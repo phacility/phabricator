@@ -33,7 +33,6 @@ final class DifferentialCommentPreviewController
 
     $action = $request->getStr('action');
 
-    $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
 
     $comment = new DifferentialComment();
     $comment->setContent($request->getStr('content'));
@@ -57,6 +56,11 @@ final class DifferentialCommentPreviewController
     }
 
     $handles = $this->loadViewerHandles($handles);
+
+    $engine = new PhabricatorMarkupEngine();
+    $engine->setViewer($request->getUser());
+    $engine->addObject($comment, DifferentialComment::MARKUP_FIELD_BODY);
+    $engine->process();
 
     $view = new DifferentialRevisionCommentView();
     $view->setUser($request->getUser());

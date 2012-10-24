@@ -19,7 +19,9 @@
 /**
  * Shared interface used by Differential and Diffusion inline comments.
  */
-interface PhabricatorInlineCommentInterface {
+interface PhabricatorInlineCommentInterface extends PhabricatorMarkupInterface {
+
+  const MARKUP_FIELD_BODY = 'markup:body';
 
   public function setChangesetID($id);
   public function getChangesetID();

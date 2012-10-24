@@ -48,7 +48,7 @@ final class DifferentialInlineCommentView extends AphrontView {
     return $this;
   }
 
-  public function setMarkupEngine(PhutilMarkupEngine $engine) {
+  public function setMarkupEngine(PhabricatorMarkupEngine $engine) {
     $this->markupEngine = $engine;
     return $this;
   }
@@ -199,19 +199,9 @@ final class DifferentialInlineCommentView extends AphrontView {
       $links = null;
     }
 
-    $cache = $inline->getCache();
-    if (strlen($cache)) {
-      $content = $cache;
-    } else {
-      $content = $this->markupEngine->markupText($content);
-      if ($inline->getID()) {
-        $inline->setCache($content);
-
-        $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-        $inline->save();
-        unset($unguarded);
-      }
-    }
+    $content = $this->markupEngine->getOutput(
+      $inline,
+      PhabricatorInlineCommentInterface::MARKUP_FIELD_BODY);
 
     if ($this->preview) {
       $anchor = null;

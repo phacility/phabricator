@@ -120,4 +120,28 @@ final class PhabricatorAuditInlineComment
     return $this->readField('authorPHID');
   }
 
+/* -(  PhabricatorMarkupInterface Implementation  )-------------------------- */
+
+
+  public function getMarkupFieldKey($field) {
+    return 'AI:'.$this->getID();
+  }
+
+  public function newMarkupEngine($field) {
+    return PhabricatorMarkupEngine::newDifferentialMarkupEngine();
+  }
+
+  public function getMarkupText($field) {
+    return $this->getContent();
+  }
+
+  public function didMarkupText($field, $output, PhutilMarkupEngine $engine) {
+    return $output;
+  }
+
+  public function shouldUseMarkupCache($field) {
+    // Only cache submitted comments.
+    return ($this->getID() && $this->getAuditCommentID());
+  }
+
 }

@@ -250,7 +250,7 @@ final class DifferentialChangesetParser {
     return $this;
   }
 
-  public function setMarkupEngine(PhutilMarkupEngine $engine) {
+  public function setMarkupEngine(PhabricatorMarkupEngine $engine) {
     $this->markupEngine = $engine;
     return $this;
   }
