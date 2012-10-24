@@ -52,7 +52,7 @@ JX.behavior('phabricator-active-nav', function(config) {
     for (var ii = 0; ii < markers.length; ii++) {
       markinfo.push({
         marker: markers[ii],
-        position: JX.$V(markers[ii]).y
+        position: JX.$V(markers[ii]).y - 15
       });
     }
     markinfo.sort(function(u, v) { return (v.position - u.position); });
