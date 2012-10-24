@@ -5,6 +5,7 @@
  *           javelin-dom
  *           javelin-mask
  *           javelin-util
+ *           phabricator-busy
  */
 
 JX.behavior('lightbox-attachments', function (config) {
@@ -73,10 +74,6 @@ JX.behavior('lightbox-attachments', function (config) {
                       title     : target_data.name
                     }
                    );
-    // Evil hack - onload events don't work through Stratcom to prevent
-    // the inevitable systematic abuse if it was possible. This is a
-    // weird case so just hack it...!
-    img.onload = lightBoxOnload;
 
     lightbox = JX.$N('div',
                      {
@@ -169,6 +166,13 @@ JX.behavior('lightbox-attachments', function (config) {
     JX.DOM.alterClass(document.body, 'lightbox-attached', true);
     JX.Mask.show('jx-dark-mask');
     document.body.appendChild(lightbox);
+
+    JX.Busy.start();
+    img.onload = function() {
+      JX.DOM.alterClass(img, 'loading', false);
+      JX.Busy.done();
+    }
+
     img.src = img_uri;
   }
 
@@ -225,14 +229,6 @@ JX.behavior('lightbox-attachments', function (config) {
     e.prevent();
     closeLightBox(e);
     el.click();
-  }
-
-  function lightBoxOnload(e) {
-    if (!lightbox) {
-      return;
-    }
-    var img = JX.DOM.find(lightbox, 'img');
-    JX.DOM.alterClass(img, 'loading', false);
   }
 
   JX.Stratcom.listen(

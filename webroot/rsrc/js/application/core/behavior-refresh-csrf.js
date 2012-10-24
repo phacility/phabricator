@@ -3,6 +3,7 @@
  * @requires javelin-request
  *           javelin-behavior
  *           javelin-dom
+ *           phabricator-busy
  */
 
 /**
@@ -48,5 +49,10 @@ JX.behavior('refresh-csrf', function(config) {
   // Additionally, add the CSRF token as an HTTP header to every AJAX request.
   JX.Request.listen('open', function(r) {
     r.getTransport().setRequestHeader(config.header, current_token);
+    JX.Busy.start();
   });
+
+  JX.Request.listen('finally', function(r) {
+    JX.Busy.done();
+  })
 });
