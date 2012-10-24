@@ -23,6 +23,7 @@ final class DiffusionCommentListView extends AphrontView {
   private $inlineComments = array();
   private $pathMap = array();
   private $handles = array();
+  private $markupEngine;
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
@@ -44,6 +45,15 @@ final class DiffusionCommentListView extends AphrontView {
   public function setPathMap(array $path_map) {
     $this->pathMap = $path_map;
     return $this;
+  }
+
+  public function setMarkupEngine(PhabricatorMarkupEngine $markup_engine) {
+    $this->markupEngine = $markup_engine;
+    return $this;
+  }
+
+  public function getMarkupEngine() {
+    return $this->markupEngine;
   }
 
   public function getRequiredHandlePHIDs() {
@@ -87,6 +97,7 @@ final class DiffusionCommentListView extends AphrontView {
       $inlines = idx($inline_comments, $comment->getID(), array());
 
       $view = id(new DiffusionCommentView())
+        ->setMarkupEngine($this->getMarkupEngine())
         ->setComment($comment)
         ->setInlineComments($inlines)
         ->setCommentNumber($num)

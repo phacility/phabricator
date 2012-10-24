@@ -12,16 +12,6 @@
   margin-top: -15px;
 }
 
-
-
-.device-desktop .phabricator-anchor-view,
-.device-desktop .phabricator-anchor-navigation-marker {
-  /* On desktops, move the anchor up more so the menu bar doesn't obscure the
-     content. This is the menu bar height (44px) plus the anchor adjustment
-     (15px). */
-  margin-top: -59px;
-}
-
 .phabricator-chromeless-page .phabricator-standard-page {
   background:           transparent;
   border-width:         0px;

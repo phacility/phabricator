@@ -114,3 +114,18 @@ a:hover {
 img {
   display: block;
 }
+
+.busy {
+  position: fixed;
+  bottom: 8px;
+  right: 8px;
+
+  background: #ffffff url(/rsrc/image/loading.gif) center no-repeat;
+  width: 64px;
+  height: 64px;
+  opacity: 0.5;
+  z-index: 40;
+
+  border: 1px solid #444444;
+  border-radius: 8px;
+}

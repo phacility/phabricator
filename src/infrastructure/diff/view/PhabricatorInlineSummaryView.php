@@ -29,29 +29,6 @@ final class PhabricatorInlineSummaryView extends AphrontView {
     return $this;
   }
 
-  public static function renderCommentContent(
-    PhabricatorInlineCommentInterface $inline,
-    PhutilMarkupEngine $engine) {
-
-    $inline_content = $inline->getContent();
-    if (strlen($inline_content)) {
-      $inline_cache = $inline->getCache();
-      if ($inline_cache) {
-        $inline_content = $inline_cache;
-      } else {
-        $inline_content = $engine->markupText($inline_content);
-        if ($inline->getID()) {
-          $inline->setCache($inline_content);
-          $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-          $inline->save();
-          unset($unguarded);
-        }
-      }
-    }
-
-    return $inline_content;
-  }
-
   public function render() {
     require_celerity_resource('inline-comment-summary-css');
     return $this->renderHeader().$this->renderTable();

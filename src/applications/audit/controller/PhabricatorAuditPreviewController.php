@@ -61,7 +61,15 @@ final class PhabricatorAuditPreviewController
       $phids = array_merge($phids, $ccs);
     }
 
+    $engine = new PhabricatorMarkupEngine();
+    $engine->setViewer($user);
+    $engine->addObject(
+      $comment,
+      PhabricatorAuditComment::MARKUP_FIELD_BODY);
+    $engine->process();
+
     $view = id(new DiffusionCommentView())
+      ->setMarkupEngine($engine)
       ->setUser($user)
       ->setComment($comment)
       ->setIsPreview(true);

@@ -40,7 +40,7 @@ final class DifferentialRevisionCommentView extends AphrontView {
     return $this;
   }
 
-  public function setMarkupEngine($markup_engine) {
+  public function setMarkupEngine(PhabricatorMarkupEngine $markup_engine) {
     $this->markupEngine = $markup_engine;
     return $this;
   }
@@ -104,19 +104,11 @@ final class DifferentialRevisionCommentView extends AphrontView {
     $hide_comments = true;
     if (strlen(rtrim($content))) {
       $hide_comments = false;
-      $cache = $comment->getCache();
-      if (strlen($cache)) {
-        $content = $cache;
-      } else {
-        $content = $this->markupEngine->markupText($content);
-        if ($comment->getID()) {
-          $comment->setCache($content);
 
-          $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-          $comment->save();
-          unset($unguarded);
-        }
-      }
+      $content = $this->markupEngine->getOutput(
+        $comment,
+        PhabricatorInlineCommentInterface::MARKUP_FIELD_BODY);
+
       $content =
         '<div class="phabricator-remarkup">'.
           $content.
@@ -292,9 +284,9 @@ final class DifferentialRevisionCommentView extends AphrontView {
           'id'      => $inline->getID(),
           'line'    => $inline->getLineNumber(),
           'length'  => $inline->getLineLength(),
-          'content' => PhabricatorInlineSummaryView::renderCommentContent(
+          'content' => $this->markupEngine->getOutput(
             $inline,
-            $this->markupEngine),
+            DifferentialInlineComment::MARKUP_FIELD_BODY),
         );
 
         if (!$is_visible) {
@@ -313,6 +305,5 @@ final class DifferentialRevisionCommentView extends AphrontView {
 
     return $view;
   }
-
 
 }

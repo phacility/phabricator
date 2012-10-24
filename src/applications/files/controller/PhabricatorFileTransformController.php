@@ -21,6 +21,7 @@ final class PhabricatorFileTransformController
 
   private $transform;
   private $phid;
+  private $key;
 
   public function willProcessRequest(array $data) {
     $this->transform = $data['transform'];

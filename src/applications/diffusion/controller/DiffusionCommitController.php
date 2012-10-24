@@ -498,7 +498,25 @@ final class DiffusionCommitController extends DiffusionController {
       $path_map = ipull($path_map, 'path', 'id');
     }
 
+    $engine = new PhabricatorMarkupEngine();
+    $engine->setViewer($user);
+
+    foreach ($comments as $comment) {
+      $engine->addObject(
+        $comment,
+        PhabricatorAuditComment::MARKUP_FIELD_BODY);
+    }
+
+    foreach ($inlines as $inline) {
+      $engine->addObject(
+        $inline,
+        PhabricatorInlineCommentInterface::MARKUP_FIELD_BODY);
+    }
+
+    $engine->process();
+
     $view = new DiffusionCommentListView();
+    $view->setMarkupEngine($engine);
     $view->setUser($user);
     $view->setComments($comments);
     $view->setInlineComments($inlines);

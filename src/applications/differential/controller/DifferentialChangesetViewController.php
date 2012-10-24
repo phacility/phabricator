@@ -206,7 +206,16 @@ final class DifferentialChangesetViewController extends DifferentialController {
     $handles = $this->loadViewerHandles($phids);
     $parser->setHandles($handles);
 
-    $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
+    $engine = new PhabricatorMarkupEngine();
+    $engine->setViewer($request->getUser());
+
+    foreach ($inlines as $inline) {
+      $engine->addObject(
+        $inline,
+        PhabricatorInlineCommentInterface::MARKUP_FIELD_BODY);
+    }
+
+    $engine->process();
     $parser->setMarkupEngine($engine);
 
     if ($request->isAjax()) {
