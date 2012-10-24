@@ -1012,6 +1012,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('phameoneblog.sql'),
       ),
+      'statustxt.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('statustxt.sql'),
+      ),
     );
   }
 

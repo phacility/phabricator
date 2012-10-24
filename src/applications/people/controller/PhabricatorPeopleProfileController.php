@@ -137,7 +137,7 @@ final class PhabricatorPeopleProfileController
       $statuses = id(new PhabricatorUserStatus())->loadCurrentStatuses(
         array($user->getPHID()));
       if ($statuses) {
-        $header->setStatus(reset($statuses)->getStatusDescription($viewer));
+        $header->setStatus(reset($statuses)->getTerseSummary($viewer));
       }
     }
 

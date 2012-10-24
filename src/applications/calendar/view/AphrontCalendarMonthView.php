@@ -23,6 +23,15 @@ final class AphrontCalendarMonthView extends AphrontView {
   private $year;
   private $holidays = array();
   private $events   = array();
+  private $browseURI;
+
+  public function setBrowseURI($browse_uri) {
+    $this->browseURI = $browse_uri;
+    return $this;
+  }
+  private function getBrowseURI() {
+    return $this->browseURI;
+  }
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
@@ -144,10 +153,8 @@ final class AphrontCalendarMonthView extends AphrontView {
     }
     $table =
       '<table class="aphront-calendar-view">'.
-        '<tr class="aphront-calendar-month-year-header">'.
-          '<th colspan="7">'.$first->format('F Y').'</th>'.
-        '</tr>'.
-        '<tr class="aphront-calendar-day-of-week-header">'.
+        $this->renderCalendarHeader($first).
+       '<tr class="aphront-calendar-day-of-week-header">'.
           '<th>Sun</th>'.
           '<th>Mon</th>'.
           '<th>Tue</th>'.
@@ -160,6 +167,72 @@ final class AphrontCalendarMonthView extends AphrontView {
       '</table>';
 
     return $table;
+  }
+
+  private function renderCalendarHeader(DateTime $date) {
+    $colspan = 7;
+    $left_th = '';
+    $right_th = '';
+
+    // check for a browseURI, which means we need "fancy" prev / next UI
+    $uri = $this->getBrowseURI();
+    if ($uri) {
+      $colspan = 5;
+      $uri = new PhutilURI($uri);
+      list($prev_year, $prev_month) = $this->getPrevYearAndMonth();
+      $query = array('year' => $prev_year, 'month' => $prev_month);
+      $prev_link = phutil_render_tag(
+        'a',
+        array('href' => (string) $uri->setQueryParams($query)),
+        '&larr;'
+      );
+
+      list($next_year, $next_month) = $this->getNextYearAndMonth();
+      $query = array('year' => $next_year, 'month' => $next_month);
+      $next_link = phutil_render_tag(
+        'a',
+        array('href' => (string) $uri->setQueryParams($query)),
+        '&rarr;'
+      );
+
+      $left_th = '<th>'.$prev_link.'</th>';
+      $right_th = '<th>'.$next_link.'</th>';
+    }
+
+    return
+      '<tr class="aphront-calendar-month-year-header">'.
+        $left_th.
+        '<th colspan="'.$colspan.'">'.$date->format('F Y').'</th>'.
+        $right_th.
+      '</tr>';
+  }
+
+  private function getNextYearAndMonth() {
+    $month = $this->month;
+    $year = $this->year;
+
+    $next_year = $year;
+    $next_month = $month + 1;
+    if ($next_month == 13) {
+      $next_year = $year + 1;
+      $next_month = 1;
+    }
+
+    return array($next_year, $next_month);
+  }
+
+  private function getPrevYearAndMonth() {
+    $month = $this->month;
+    $year = $this->year;
+
+    $prev_year = $year;
+    $prev_month = $month - 1;
+    if ($prev_month == 0) {
+      $prev_year = $year - 1;
+      $prev_month = 12;
+    }
+
+    return array($prev_year, $prev_month);
   }
 
   /**
@@ -176,14 +249,9 @@ final class AphrontCalendarMonthView extends AphrontView {
     $month = $this->month;
     $year = $this->year;
 
-    // Find the year and month numbers of the following month, so we can
+    // Get the year and month numbers of the following month, so we can
     // determine when this month ends.
-    $next_year = $year;
-    $next_month = $month + 1;
-    if ($next_month == 13) {
-      $next_year = $year + 1;
-      $next_month = 1;
-    }
+    list($next_year, $next_month) = $this->getNextYearAndMonth();
 
     $end_date = new DateTime("{$next_year}-{$next_month}-01", $timezone);
     $end_epoch = $end_date->format('U');
