@@ -26,8 +26,7 @@ final class DiffusionCommentView extends AphrontView {
   private $pathMap;
 
   private $inlineComments;
-
-  private $engine;
+  private $markupEngine;
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
@@ -64,6 +63,15 @@ final class DiffusionCommentView extends AphrontView {
   public function setPathMap(array $path_map) {
     $this->pathMap = $path_map;
     return $this;
+  }
+
+  public function setMarkupEngine(PhabricatorMarkupEngine $markup_engine) {
+    $this->markupEngine = $markup_engine;
+    return $this;
+  }
+
+  public function getMarkupEngine() {
+    return $this->markupEngine;
   }
 
   public function getRequiredHandlePHIDs() {
@@ -146,14 +154,16 @@ final class DiffusionCommentView extends AphrontView {
 
   private function renderContent() {
     $comment = $this->comment;
-    $engine = $this->getEngine();
+    $engine = $this->getMarkupEngine();
 
     if (!strlen($comment->getContent()) && empty($this->inlineComments)) {
       return null;
     } else {
       return
         '<div class="phabricator-remarkup">'.
-          $engine->markupText($comment->getContent()).
+          $engine->getOutput(
+            $comment,
+            PhabricatorAuditComment::MARKUP_FIELD_BODY).
           $this->renderSingleView($this->renderInlines()).
         '</div>';
     }
@@ -163,6 +173,8 @@ final class DiffusionCommentView extends AphrontView {
     if (!$this->inlineComments) {
       return null;
     }
+
+    $engine = $this->getMarkupEngine();
 
     $inlines_by_path = mgroup($this->inlineComments, 'getPathID');
 
@@ -179,9 +191,9 @@ final class DiffusionCommentView extends AphrontView {
           'id'      => $inline->getID(),
           'line'    => $inline->getLineNumber(),
           'length'  => $inline->getLineLength(),
-          'content' => PhabricatorInlineSummaryView::renderCommentContent(
+          'content' => $engine->getOutput(
             $inline,
-            $this->getEngine()),
+            PhabricatorInlineCommentInterface::MARKUP_FIELD_BODY),
         );
       }
 
@@ -189,13 +201,6 @@ final class DiffusionCommentView extends AphrontView {
     }
 
     return $view;
-  }
-
-  private function getEngine() {
-    if (!$this->engine) {
-      $this->engine = PhabricatorMarkupEngine::newDiffusionMarkupEngine();
-    }
-    return $this->engine;
   }
 
   private function renderHandleList(array $phids) {
