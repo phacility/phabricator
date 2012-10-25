@@ -560,7 +560,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
       $projects = id(new PhabricatorRepositoryArcanistProject())
         ->loadAllWhere('repositoryID = %d', $this->getID());
       foreach ($projects as $project) {
-        /// note each project deletes its PhabricatorRepositorySymbols
+        // note each project deletes its PhabricatorRepositorySymbols
         $project->delete();
       }
 
