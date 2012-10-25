@@ -80,7 +80,7 @@ Technical Documentation}.
 You can test that things are correctly configured by going to the Files
 application (##/file/##) and uploading files.
 
-= Migrating Files Beteeen Engines =
+= Migrating Files Between Engines =
 
 If you want to move files between storage engines, you can use the `bin/files`
 script to perform migrations. For example, suppose you previously used MySQL but
