@@ -841,6 +841,17 @@ abstract class DifferentialFieldSpecification {
     return $this->revision;
   }
 
+
+  /**
+   * Determine if revision context is currently available.
+   *
+   * @task context
+   */
+  final protected function hasRevision() {
+    return (bool)$this->revision;
+  }
+
+
   /**
    * @task context
    */
