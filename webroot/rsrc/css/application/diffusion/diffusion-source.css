@@ -49,21 +49,19 @@
 .diffusion-rev-link a,
 .diffusion-author-link a,
 .diffusion-line-link a {
-  padding:      2px 8px;
   font-weight:  bold;
 }
 
+.diffusion-rev-link a,
+.diffusion-author-link span,
 .diffusion-author-link a {
-  padding-left: 12px;
+  margin:       0 8px;
 }
 
 .diffusion-blame-link a,
 .diffusion-line-link a {
   /* Give the user a larger click target. */
   display:      block;
-}
-
-.diffusion-author-link span {
   padding:      2px 8px;
 }
 

@@ -61,14 +61,23 @@ final class DifferentialReviewersFieldSpecification
   }
 
   public function validateField() {
-    $allow_self_accept = PhabricatorEnv::getEnvConfig(
-       'differential.allow-self-accept', false);
-    if (!$allow_self_accept
-        && in_array($this->getUser()->getPHID(), $this->reviewers)) {
-      $this->error = 'Invalid';
-      throw new DifferentialFieldValidationException(
-        "You may not review your own revision!");
+    if (!$this->hasRevision()) {
+      return;
     }
+
+    $self = PhabricatorEnv::getEnvConfig('differential.allow-self-accept');
+    if ($self) {
+      return;
+    }
+
+    $author_phid = $this->getRevision()->getAuthorPHID();
+    if (!in_array($author_phid, $this->reviewers)) {
+      return;
+    }
+
+    $this->error = 'Invalid';
+    throw new DifferentialFieldValidationException(
+      "The owner of a revision may not be a reviewer.");
   }
 
   public function renderEditControl() {

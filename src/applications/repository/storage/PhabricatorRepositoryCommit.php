@@ -91,10 +91,15 @@ final class PhabricatorRepositoryCommit extends PhabricatorRepositoryDAO {
 
   public function delete() {
     $data = $this->loadCommitData();
+    $audits = id(new PhabricatorRepositoryAuditRequest())
+      ->loadAllWhere('commitPHID = %s', $this->getPHID());
     $this->openTransaction();
 
       if ($data) {
         $data->delete();
+      }
+      foreach ($audits as $audit) {
+        $audit->delete();
       }
       $result = parent::delete();
 

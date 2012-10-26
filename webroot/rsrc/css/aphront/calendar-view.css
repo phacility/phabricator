@@ -18,6 +18,12 @@ tr.aphront-calendar-month-year-header th {
   background: #003366;
 }
 
+tr.aphront-calendar-month-year-header th a {
+  color: white;
+  font-weight: bold;
+  text-decoration: none;
+}
+
 tr.aphront-calendar-day-of-week-header th {
   text-align: center;
   font-size: 11px;

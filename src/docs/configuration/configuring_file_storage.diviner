@@ -80,6 +80,22 @@ Technical Documentation}.
 You can test that things are correctly configured by going to the Files
 application (##/file/##) and uploading files.
 
+= Migrating Files Between Engines =
+
+If you want to move files between storage engines, you can use the `bin/files`
+script to perform migrations. For example, suppose you previously used MySQL but
+recently set up S3 and want to migrate all your files there. First, migrate one
+file to make sure things work:
+
+  phabricator/ $ ./bin/files migrate --engine amazon-s3 F12345
+
+If that works properly, you can then migrate everything:
+
+  phabricator/ $ ./bin/files migrate --engine amazon-s3 --all
+
+You can use `--dry-run` to show which migrations would be performed without
+taking any action. Run `bin/files help` for more options and information.
+
 = Next Steps =
 
 Continue by:

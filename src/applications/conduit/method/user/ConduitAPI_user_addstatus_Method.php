@@ -31,9 +31,10 @@ final class ConduitAPI_user_addstatus_Method extends ConduitAPI_user_Method {
 
   public function defineParamTypes() {
     return array(
-      'fromEpoch' => 'required int',
-      'toEpoch' => 'required int',
-      'status' => 'required enum<away, sporadic>',
+      'fromEpoch'   => 'required int',
+      'toEpoch'     => 'required int',
+      'status'      => 'required enum<away, sporadic>',
+      'description' => 'optional string',
     );
   }
 
@@ -44,44 +45,31 @@ final class ConduitAPI_user_addstatus_Method extends ConduitAPI_user_Method {
   public function defineErrorTypes() {
     return array(
       'ERR-BAD-EPOCH' => "'toEpoch' must be bigger than 'fromEpoch'.",
-      'ERR-OVERLAP' =>
+      'ERR-OVERLAP'   =>
         'There must be no status in any part of the specified epoch.',
     );
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $user_phid = $request->getUser()->getPHID();
-    $from = $request->getValue('fromEpoch');
-    $to = $request->getValue('toEpoch');
+    $user_phid   = $request->getUser()->getPHID();
+    $from        = $request->getValue('fromEpoch');
+    $to          = $request->getValue('toEpoch');
+    $status      = ucfirst($request->getValue('status'));
+    $description = $request->getValue('description');
 
-    if ($to <= $from) {
+    try {
+      id(new PhabricatorUserStatus())
+        ->setUserPHID($user_phid)
+        ->setDateFrom($from)
+        ->setDateTo($to)
+        ->setTextStatus($status)
+        ->setDescription($description)
+        ->save();
+    } catch (PhabricatorUserStatusInvalidEpochException $e) {
       throw new ConduitException('ERR-BAD-EPOCH');
-    }
-
-    $table = new PhabricatorUserStatus();
-    $table->openTransaction();
-    $table->beginWriteLocking();
-
-    $overlap = $table->loadAllWhere(
-      'userPHID = %s AND dateFrom < %d AND dateTo > %d',
-      $user_phid,
-      $to,
-      $from);
-    if ($overlap) {
-      $table->endWriteLocking();
-      $table->killTransaction();
+    } catch (PhabricatorUserStatusOverlapException $e) {
       throw new ConduitException('ERR-OVERLAP');
     }
-
-    id(new PhabricatorUserStatus())
-      ->setUserPHID($user_phid)
-      ->setDateFrom($from)
-      ->setDateTo($to)
-      ->setTextStatus($request->getValue('status'))
-      ->save();
-
-    $table->endWriteLocking();
-    $table->saveTransaction();
   }
 
 }

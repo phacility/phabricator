@@ -548,4 +548,53 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
     return ($protocol == 'ssh' || $protocol == 'svn+ssh');
   }
 
+  public function delete() {
+    $this->openTransaction();
+
+      $paths = id(new PhabricatorOwnersPath())
+        ->loadAllWhere('repositoryPHID = %s', $this->getPHID());
+      foreach ($paths as $path) {
+        $path->delete();
+      }
+
+      $projects = id(new PhabricatorRepositoryArcanistProject())
+        ->loadAllWhere('repositoryID = %d', $this->getID());
+      foreach ($projects as $project) {
+        // note each project deletes its PhabricatorRepositorySymbols
+        $project->delete();
+      }
+
+      $commits = id(new PhabricatorRepositoryCommit())
+        ->loadAllWhere('repositoryID = %d', $this->getID());
+      foreach ($commits as $commit) {
+        // note PhabricatorRepositoryAuditRequests and
+        // PhabricatorRepositoryCommitData are deleted here too.
+        $commit->delete();
+      }
+
+      $conn_w = $this->establishConnection('w');
+
+      queryfx(
+        $conn_w,
+        'DELETE FROM %T WHERE repositoryID = %d',
+        self::TABLE_FILESYSTEM,
+        $this->getID());
+
+      queryfx(
+        $conn_w,
+        'DELETE FROM %T WHERE repositoryID = %d',
+        self::TABLE_PATHCHANGE,
+        $this->getID());
+
+      queryfx(
+        $conn_w,
+        'DELETE FROM %T WHERE repositoryID = %d',
+        self::TABLE_SUMMARY,
+        $this->getID());
+
+      $result = parent::delete();
+
+    $this->saveTransaction();
+    return $result;
+  }
 }

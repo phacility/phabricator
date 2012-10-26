@@ -73,6 +73,7 @@ final class ConduitAPI_user_removestatus_Method extends ConduitAPI_user_Method {
             ->setDateFrom($to)
             ->setDateTo($status->getDateTo())
             ->setStatus($status->getStatus())
+            ->setDescription($status->getDescription())
             ->save();
         }
         $status->setDateTo($from);

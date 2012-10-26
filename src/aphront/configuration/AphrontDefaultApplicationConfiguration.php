@@ -113,10 +113,6 @@ class AphrontDefaultApplicationConfiguration
         'keyboardshortcut/' => 'PhabricatorHelpKeyboardShortcutController',
       ),
 
-       '/calendar/' => array(
-        '' => 'PhabricatorCalendarBrowseController',
-      ),
-
       '/drydock/' => array(
         '' => 'DrydockResourceListController',
         'resource/' => 'DrydockResourceListController',

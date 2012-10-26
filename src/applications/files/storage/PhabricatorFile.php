@@ -149,44 +149,31 @@ final class PhabricatorFile extends PhabricatorFileDAO {
       throw new Exception("No valid storage engines are available!");
     }
 
+    $file = new PhabricatorFile();
+
     $data_handle = null;
     $engine_identifier = null;
     $exceptions = array();
     foreach ($engines as $engine) {
       $engine_class = get_class($engine);
       try {
-        // Perform the actual write.
-        $data_handle = $engine->writeFile($data, $params);
-        if (!$data_handle || strlen($data_handle) > 255) {
-          // This indicates an improperly implemented storage engine.
-          throw new PhabricatorFileStorageConfigurationException(
-            "Storage engine '{$engine_class}' executed writeFile() but did ".
-            "not return a valid handle ('{$data_handle}') to the data: it ".
-            "must be nonempty and no longer than 255 characters.");
-        }
-
-        $engine_identifier = $engine->getEngineIdentifier();
-        if (!$engine_identifier || strlen($engine_identifier) > 32) {
-          throw new PhabricatorFileStorageConfigurationException(
-            "Storage engine '{$engine_class}' returned an improper engine ".
-            "identifier '{$engine_identifier}': it must be nonempty ".
-            "and no longer than 32 characters.");
-        }
+        list($engine_identifier, $data_handle) = $file->writeToEngine(
+          $engine,
+          $data,
+          $params);
 
         // We stored the file somewhere so stop trying to write it to other
         // places.
         break;
-
       } catch (PhabricatorFileStorageConfigurationException $ex) {
         // If an engine is outright misconfigured (or misimplemented), raise
         // that immediately since it probably needs attention.
         throw $ex;
-
       } catch (Exception $ex) {
-        // If an engine doesn't work, keep trying all the other valid engines
-        // in case something else works.
         phlog($ex);
 
+        // If an engine doesn't work, keep trying all the other valid engines
+        // in case something else works.
         $exceptions[$engine_class] = $ex;
       }
     }
@@ -204,7 +191,6 @@ final class PhabricatorFile extends PhabricatorFileDAO {
     // (always the case with newFromFileDownload()), store a ''
     $authorPHID = idx($params, 'authorPHID');
 
-    $file = new PhabricatorFile();
     $file->setName($file_name);
     $file->setByteSize(strlen($data));
     $file->setAuthorPHID($authorPHID);
@@ -229,6 +215,63 @@ final class PhabricatorFile extends PhabricatorFileDAO {
 
     return $file;
   }
+
+  public function migrateToEngine(PhabricatorFileStorageEngine $engine) {
+    if (!$this->getID() || !$this->getStorageHandle()) {
+      throw new Exception(
+        "You can not migrate a file which hasn't yet been saved.");
+    }
+
+    $data = $this->loadFileData();
+    $params = array(
+      'name' => $this->getName(),
+    );
+
+    list($new_identifier, $new_handle) = $this->writeToEngine(
+      $engine,
+      $data,
+      $params);
+
+    $old_engine = $this->instantiateStorageEngine();
+    $old_handle = $this->getStorageHandle();
+
+    $this->setStorageEngine($new_identifier);
+    $this->setStorageHandle($new_handle);
+    $this->save();
+
+    $old_engine->deleteFile($old_handle);
+
+    return $this;
+  }
+
+  private function writeToEngine(
+    PhabricatorFileStorageEngine $engine,
+    $data,
+    array $params) {
+
+    $engine_class = get_class($engine);
+
+    $data_handle = $engine->writeFile($data, $params);
+
+    if (!$data_handle || strlen($data_handle) > 255) {
+      // This indicates an improperly implemented storage engine.
+      throw new PhabricatorFileStorageConfigurationException(
+        "Storage engine '{$engine_class}' executed writeFile() but did ".
+        "not return a valid handle ('{$data_handle}') to the data: it ".
+        "must be nonempty and no longer than 255 characters.");
+    }
+
+    $engine_identifier = $engine->getEngineIdentifier();
+    if (!$engine_identifier || strlen($engine_identifier) > 32) {
+      throw new PhabricatorFileStorageConfigurationException(
+        "Storage engine '{$engine_class}' returned an improper engine ".
+        "identifier '{$engine_identifier}': it must be nonempty ".
+        "and no longer than 32 characters.");
+    }
+
+    return array($engine_identifier, $data_handle);
+  }
+
 
   public static function newFromFileDownload($uri, $name) {
     $uri = new PhutilURI($uri);
@@ -402,19 +445,34 @@ final class PhabricatorFile extends PhabricatorFileDAO {
   }
 
   protected function instantiateStorageEngine() {
-    $engines = id(new PhutilSymbolLoader())
-      ->setType('class')
-      ->setAncestorClass('PhabricatorFileStorageEngine')
-      ->selectAndLoadSymbols();
+    return self::buildEngine($this->getStorageEngine());
+  }
 
-    foreach ($engines as $engine_class) {
-      $engine = newv($engine_class['name'], array());
-      if ($engine->getEngineIdentifier() == $this->getStorageEngine()) {
+  public static function buildEngine($engine_identifier) {
+    $engines = self::buildAllEngines();
+    foreach ($engines as $engine) {
+      if ($engine->getEngineIdentifier() == $engine_identifier) {
         return $engine;
       }
     }
 
-    throw new Exception("File's storage engine could be located!");
+    throw new Exception(
+      "Storage engine '{$engine_identifier}' could not be located!");
+  }
+
+  public static function buildAllEngines() {
+    $engines = id(new PhutilSymbolLoader())
+      ->setType('class')
+      ->setConcreteOnly(true)
+      ->setAncestorClass('PhabricatorFileStorageEngine')
+      ->selectAndLoadSymbols();
+
+    $results = array();
+    foreach ($engines as $engine_class) {
+      $results[] = newv($engine_class['name'], array());
+    }
+
+    return $results;
   }
 
   public function getViewableMimeType() {

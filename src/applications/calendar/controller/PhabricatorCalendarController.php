@@ -18,21 +18,26 @@
 
 abstract class PhabricatorCalendarController extends PhabricatorController {
 
-  public function buildStandardPageResponse($view, array $data) {
 
-    $page = $this->buildStandardPageView();
+  protected function buildSideNavView(PhabricatorUserStatus $status = null) {
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    $page->setApplicationName('Calendar');
-    $page->setBaseURI('/calendar/');
-    $page->setTitle(idx($data, 'title'));
+    $nav->addFilter('', pht('Calendar'), $this->getApplicationURI());
 
-    // Unicode has a calendar character but it's in some distant code plane,
-    // use "keyboard" since it looks vaguely similar.
-    $page->setGlyph("\xE2\x8C\xA8");
-    $page->appendChild($view);
+    $nav->addSpacer();
 
-    $response = new AphrontWebpageResponse();
-    return $response->setContent($page->render());
+    $nav->addLabel(pht('Create Events'));
+    $nav->addFilter('status/create/', pht('New Status'));
+
+    $nav->addSpacer();
+    $nav->addLabel(pht('Your Events'));
+    if ($status && $status->getID()) {
+      $nav->addFilter('status/edit/'.$status->getID().'/', pht('Edit Status'));
+    }
+    $nav->addFilter('status/', pht('Upcoming Statuses'));
+
+    return $nav;
   }
 
 }
