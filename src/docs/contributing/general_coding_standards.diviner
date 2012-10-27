@@ -9,7 +9,7 @@ Arcanist, libphutil and Diviner.
 This document contains practices and guidelines which apply across languages.
 Contributors should follow these guidelines. These guidelines are not
 hard-and-fast but should be followed unless there is a compelling reason to
-deviated from them.
+deviate from them.
 
 = Code Complexity =
 
