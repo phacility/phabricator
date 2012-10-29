@@ -126,7 +126,8 @@ final class DifferentialInlineComment
 
 
   public function getMarkupFieldKey($field) {
-    return 'DI:'.$this->getID();
+    // We can't use ID because synthetic comments don't have it.
+    return 'DI:'.PhabricatorHash::digest($this->getContent());
   }
 
   public function newMarkupEngine($field) {
