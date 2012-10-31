@@ -137,7 +137,6 @@ EOBODY;
       ->addRawTos(array($address))
       ->setSubject('[Phabricator] Email Verification')
       ->setBody($body)
-      ->setFrom($user->getPHID())
       ->setRelatedPHID($user->getPHID())
       ->saveAndSend();
 
