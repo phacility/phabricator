@@ -1,0 +1,98 @@
+@title Configuring Backups
+@group config
+
+Advice for backing up Phabricator.
+
+= Overview =
+
+Phabricator does not currently have a comprehensive backup system, but creating
+backups is not particularly difficult and Phabricator does have a few basic
+tools which can help you set up a reasonable process. In particular, the things
+which needs to be backed up are:
+
+  - the MySQL databases;
+  - uploaded files; and
+  - your Phabricator configuration files.
+
+This document discusses approaches for backing up this data.
+
+= Backup: MySQL Databases =
+
+Most of Phabricator's data is stored in MySQL, and it's the most important thing
+to back up. You can run `bin/storage dump` to get a dump of all the MySQL
+databases. This is a convenience script which just runs a normal `mysqldump`
+of every database Phabricator owns.
+
+Since most of this data is compressible, it may be helpful to run it through
+gzip prior to storage. For example:
+
+  phabricator/ $ ./bin/storage dump | gzip > backup.sql.gz
+
+Then store the backup somewhere safe, like in a box buried under an old tree
+stump. No one will ever think to look for it there.
+
+= Restore: MySQL =
+
+To restore a MySQL dump, just pipe it to `mysql` on a clean host. (You may need
+to uncompress it first, if you compressed it prior to storage.)
+
+  $ gunzip -c backup.sql.gz | mysql
+
+= Backup: Uploaded Files =
+
+Uploaded files may be stored in several different locations. The backup
+procedure depends on where files are stored:
+
+**Default / MySQL**: Under the default configuration, uploaded files are stored
+in MySQL, so the MySQL backup will include all files. In this case, you don't
+need to do any additional work.
+
+**Amazon S3**: If you use Amazon S3, redundancy and backups are built in to the
+service. This is probably sufficient for most installs. If you trust Amazon with
+your data //except not really//, you can backup your S3 bucket outside of
+Phabricator.
+
+**Local Disk**: If you use the local disk storage engine, you'll need to back up
+files manually. You can do this by creating a copy of the root directory where
+you told Phabricator to put files (the `storage.local-disk.path` configuration
+setting).
+
+For more information about configuring how files are stored, see
+@{article:Configuring File Storage}.
+
+= Restore: Uploaded Files =
+
+To restore a backup of local disk storage, just copy the backup into place.
+
+= Backup: Configuration Files =
+
+You should also backup your configuration files, and any scripts you use to
+deploy or administrate Phabricator (like a customized upgrade script). The best
+way to do this is to check them into a private repository somewhere and just use
+whatever backup process you already have in place for repositories. Just copying
+them somewhere will work fine too, of course.
+
+= Restore: Configuration Files =
+
+To restore configuration files, just copy them into the right locations.
+
+= Security =
+
+MySQL dumps have no builtin encryption and most data in Phabricator is stored in
+a raw, accessible form, so giving a user access to backups is a lot like giving
+them shell access to the machine Phabricator runs on. In particular, a user who
+has the backups can:
+
+  - read data that policies do not permit them to see;
+  - read email addresses and object secret keys; and
+  - read other users' session and conduit tokens and impersonate them.
+
+Some of this information is durable, so disclosure of even a very old backup may
+present a risk. If you restrict access to the Phabricator host or database, you
+should also restrict access to the backups.
+
+= Next Steps =
+
+Continue by:
+
+  - returning to the @{article:Configuration Guide}.

@@ -47,7 +47,7 @@ interface PhabricatorMarkupInterface {
    *   "{$phid}:{$field}"
    *
    * @param string Field name.
-   * @return string Cache key.
+   * @return string Cache key up to 125 characters.
    *
    * @task markup
    */
