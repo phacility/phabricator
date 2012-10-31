@@ -180,6 +180,7 @@ $app_map = array(
   'phame'           => array(8, 4),
   'macro'           => array(0, 31),
   'releeph'         => array(5, 18),
+  'drydock'         => array(5, 25),
 );
 
 $xadj = -1;
