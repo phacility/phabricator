@@ -16,6 +16,7 @@ JX.behavior('phabricator-nav', function(config) {
   var app = JX.$(config.appID);
   var content = JX.$(config.contentID);
   var local = config.localID ? JX.$(config.localID) : null;
+  var main = JX.$(config.mainID);
 
 
 // - Sliding Menu Animations ---------------------------------------------------
@@ -165,6 +166,12 @@ JX.behavior('phabricator-nav', function(config) {
       }
       JX.DOM.alterClass(document.body, 'jx-drag-col', false);
       dragging = false;
+    });
+
+    var collapsed = false;
+    JX.Stratcom.listen('differential-filetree-toggle', null, function(e) {
+      collapsed = !collapsed;
+      JX.DOM.alterClass(main, 'local-nav-collapsed', collapsed);
     });
   }
 

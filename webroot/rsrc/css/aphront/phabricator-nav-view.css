@@ -95,6 +95,18 @@
   margin-left: 216px;
 }
 
+.device-desktop .local-nav-collapsed .phabricator-nav-local {
+  width: 0px !important;
+}
+
+.device-desktop .local-nav-collapsed .phabricator-nav-drag {
+  display: none;
+}
+
+.device-desktop .local-nav-collapsed .phabricator-nav-content {
+  margin-left: 2.5em !important;
+}
+
 .phabricator-nav-col span {
   display: block;
   font-weight: bold;

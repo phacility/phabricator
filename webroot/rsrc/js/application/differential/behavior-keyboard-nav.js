@@ -224,6 +224,11 @@ JX.behavior('differential-keyboard-navigation', function(config) {
     })
     .register();
 
+  new JX.KeyboardShortcut('f', 'Toggle file tree.')
+    .setHandler(function(manager) {
+      JX.Stratcom.invoke('differential-filetree-toggle');
+    })
+    .register();
 
   new JX.KeyboardShortcut('h', 'Collapse or expand the file display.')
     .setHandler(function(manager) {
