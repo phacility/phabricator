@@ -298,10 +298,10 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     parent::didWriteData();
 
     if (!$this->getWorkerTaskID()) {
-      $mailer_task = new PhabricatorWorkerTask();
-      $mailer_task->setTaskClass('PhabricatorMetaMTAWorker');
-      $mailer_task->setData($this->getID());
-      $mailer_task->save();
+      $mailer_task = PhabricatorWorker::scheduleTask(
+        'PhabricatorMetaMTAWorker',
+        $this->getID());
+
       $this->setWorkerTaskID($mailer_task->getID());
       $this->save();
     }

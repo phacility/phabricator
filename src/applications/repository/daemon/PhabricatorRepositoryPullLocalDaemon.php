@@ -450,12 +450,9 @@ final class PhabricatorRepositoryPullLocalDaemon
         throw new Exception("Unknown repository type '{$vcs}'!");
     }
 
-    $task = new PhabricatorWorkerTask();
-    $task->setTaskClass($class);
     $data['commitID'] = $commit->getID();
 
-    $task->setData($data);
-    $task->save();
+    PhabricatorWorker::scheduleTask($class, $data);
   }
 
 

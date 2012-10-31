@@ -33,10 +33,9 @@ $messages = id(new PhabricatorMetaMTAMail())->loadAllWhere(
 
 foreach ($messages as $message) {
   if (!$message->getWorkerTaskID()) {
-    $mailer_task = new PhabricatorWorkerTask();
-    $mailer_task->setTaskClass('PhabricatorMetaMTAWorker');
-    $mailer_task->setData($message->getID());
-    $mailer_task->save();
+    $mailer_task = PhabricatorWorker::scheduleTask(
+      'PhabricatorMetaMTAWorker',
+      $message->getID());
 
     $message->setWorkerTaskID($mailer_task->getID());
     $message->save();

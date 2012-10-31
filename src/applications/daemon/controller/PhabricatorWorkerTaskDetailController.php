@@ -29,7 +29,7 @@ final class PhabricatorWorkerTaskDetailController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $task = id(new PhabricatorWorkerTask())->load($this->id);
+    $task = id(new PhabricatorWorkerActiveTask())->load($this->id);
     if (!$task) {
       $error_view = new AphrontErrorView();
       $error_view->setTitle('No Such Task');

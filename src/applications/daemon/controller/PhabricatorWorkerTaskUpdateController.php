@@ -31,7 +31,7 @@ final class PhabricatorWorkerTaskUpdateController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $task = id(new PhabricatorWorkerTask())->load($this->id);
+    $task = id(new PhabricatorWorkerActiveTask())->load($this->id);
     if (!$task) {
       return new Aphront404Response();
     }

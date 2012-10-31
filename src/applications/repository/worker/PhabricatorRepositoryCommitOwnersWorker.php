@@ -73,13 +73,11 @@ final class PhabricatorRepositoryCommitOwnersWorker
     }
 
     if ($this->shouldQueueFollowupTasks()) {
-      $herald_task = new PhabricatorWorkerTask();
-      $herald_task->setTaskClass('PhabricatorRepositoryCommitHeraldWorker');
-      $herald_task->setData(
+      PhabricatorWorker::scheduleTask(
+        'PhabricatorRepositoryCommitHeraldWorker',
         array(
           'commitID' => $commit->getID(),
         ));
-      $herald_task->save();
     }
   }
 

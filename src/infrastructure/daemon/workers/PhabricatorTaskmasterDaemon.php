@@ -21,11 +21,13 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
   public function run() {
     $lease_ownership_name = $this->getLeaseOwnershipName();
 
-    $task_table = new PhabricatorWorkerTask();
+    $task_table = new PhabricatorWorkerActiveTask();
     $taskdata_table = new PhabricatorWorkerTaskData();
 
     $sleep = 0;
     do {
+      $this->log('Dequeuing a task...');
+
       $conn_w = $task_table->establishConnection('w');
       queryfx(
         $conn_w,
@@ -36,6 +38,7 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
       $rows = $conn_w->getAffectedRows();
 
       if (!$rows) {
+        $this->log('No unleased tasks. Dequeuing an expired lease...');
         queryfx(
           $conn_w,
           'UPDATE %T SET leaseOwner = %s, leaseExpires = UNIX_TIMESTAMP() + 15
@@ -70,6 +73,11 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
         }
 
         foreach ($tasks as $task) {
+          $id = $task->getID();
+          $class = $task->getTaskClass();
+
+          $this->log("Working on task {$id} ({$class})...");
+
           // TODO: We should detect if we acquired a task with an expired lease
           // and log about it / bump up failure count.
 
@@ -77,7 +85,6 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
           // failure count and fail it permanently.
 
           $data = idx($task_data, $task->getID());
-          $class = $task->getTaskClass();
           try {
             if (!class_exists($class) ||
                 !is_subclass_of($class, 'PhabricatorWorker')) {
@@ -91,19 +98,19 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
               $task->setLeaseDuration($lease);
             }
 
+            $t_start = microtime(true);
             $worker->executeTask();
+            $t_end = microtime(true);
 
-            $task->delete();
-            if ($data !== null) {
-              queryfx(
-                $conn_w,
-                'DELETE FROM %T WHERE id = %d',
-                $taskdata_table->getTableName(),
-                $task->getDataID());
-            }
+            $task->archiveTask(
+              PhabricatorWorkerArchiveTask::RESULT_SUCCESS,
+              (int)(1000000 * ($t_end - $t_start)));
+            $this->log("Task {$id} complete! Moved to archive.");
           } catch (Exception $ex) {
             $task->setFailureCount($task->getFailureCount() + 1);
             $task->save();
+
+            $this->log("Task {$id} failed!");
             throw $ex;
           }
         }
