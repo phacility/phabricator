@@ -745,6 +745,7 @@ phutil_register_library_map(array(
     'PhabricatorFileListController' => 'applications/files/controller/PhabricatorFileListController.php',
     'PhabricatorFileProxyController' => 'applications/files/controller/PhabricatorFileProxyController.php',
     'PhabricatorFileProxyImage' => 'applications/files/storage/PhabricatorFileProxyImage.php',
+    'PhabricatorFileQuery' => 'applications/files/query/PhabricatorFileQuery.php',
     'PhabricatorFileShortcutController' => 'applications/files/controller/PhabricatorFileShortcutController.php',
     'PhabricatorFileSideNavView' => 'applications/files/view/PhabricatorFileSideNavView.php',
     'PhabricatorFileStorageBlob' => 'applications/files/storage/PhabricatorFileStorageBlob.php',
@@ -1932,7 +1933,11 @@ phutil_register_library_map(array(
     'PhabricatorFeedStoryUnknown' => 'PhabricatorFeedStory',
     'PhabricatorFeedStoryView' => 'PhabricatorFeedView',
     'PhabricatorFeedView' => 'AphrontView',
-    'PhabricatorFile' => 'PhabricatorFileDAO',
+    'PhabricatorFile' =>
+    array(
+      0 => 'PhabricatorFileDAO',
+      1 => 'PhabricatorPolicyInterface',
+    ),
     'PhabricatorFileController' => 'PhabricatorController',
     'PhabricatorFileDAO' => 'PhabricatorLiskDAO',
     'PhabricatorFileDataController' => 'PhabricatorFileController',
@@ -1945,6 +1950,7 @@ phutil_register_library_map(array(
     'PhabricatorFileListController' => 'PhabricatorFileController',
     'PhabricatorFileProxyController' => 'PhabricatorFileController',
     'PhabricatorFileProxyImage' => 'PhabricatorFileDAO',
+    'PhabricatorFileQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorFileShortcutController' => 'PhabricatorFileController',
     'PhabricatorFileSideNavView' => 'AphrontView',
     'PhabricatorFileStorageBlob' => 'PhabricatorFileDAO',

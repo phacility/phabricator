@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-final class PhabricatorFile extends PhabricatorFileDAO {
+final class PhabricatorFile extends PhabricatorFileDAO
+  implements PhabricatorPolicyInterface {
 
   const STORAGE_FORMAT_RAW  = 'raw';
 
@@ -499,4 +500,24 @@ final class PhabricatorFile extends PhabricatorFileDAO {
   public function generateSecretKey() {
     return Filesystem::readRandomCharacters(20);
   }
+
+
+/* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    // TODO: Implement proper per-object policies.
+    return PhabricatorPolicies::POLICY_USER;
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return false;
+  }
+
 }
