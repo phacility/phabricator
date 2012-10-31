@@ -744,36 +744,41 @@ final class DiffusionBrowseFileController extends DiffusionController {
   }
 
   private function buildImageCorpus($file_uri) {
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Image');
-    $panel->addButton($this->renderEditButton());
-    $panel->appendChild(
+    $properties = new PhabricatorPropertyListView();
+
+    $properties->addProperty(
+      pht('Image'),
       phutil_render_tag(
         'img',
         array(
           'src' => $file_uri,
         )));
-    return $panel;
+
+    $actions = id(new PhabricatorActionListView())
+      ->setUser($this->getRequest()->getUser())
+      ->addAction($this->createEditAction());
+
+    return array($actions, $properties);
   }
 
   private function buildBinaryCorpus($file_uri, $data) {
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Binary File');
-    $panel->addButton($this->renderEditButton());
-    $panel->appendChild(
-      '<p>'.
-        'This is a binary file. '.
-        'It is '.number_format(strlen($data)).' bytes in length.'.
-      '</p>');
-    $panel->addButton(
-      phutil_render_tag(
-        'a',
-        array(
-          'href' => $file_uri,
-          'class' => 'button green',
-        ),
-        'Download Binary File...'));
-    return $panel;
+    $properties = new PhabricatorPropertyListView();
+
+    $properties->addTextContent(
+      pht('This is a binary file. It is %d bytes in length.',
+          number_format(strlen($data)))
+    );
+
+    $actions = id(new PhabricatorActionListView())
+      ->setUser($this->getRequest()->getUser())
+      ->addAction($this->createEditAction())
+      ->addAction(id(new PhabricatorActionView())
+                    ->setName(pht('Download Binary File...'))
+                    ->setIcon('download')
+                    ->setHref($file_uri));
+
+    return array($actions, $properties);
+
   }
 
   private function buildBeforeResponse($before) {
