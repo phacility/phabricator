@@ -51,8 +51,8 @@ celerity_register_resource_map(array(
   ),
   '/rsrc/image/autosprite.png' =>
   array(
-    'hash' => '3b629161ca61ba77683afa327c3b826c',
-    'uri' => '/res/3b629161/rsrc/image/autosprite.png',
+    'hash' => 'e1735b5cadbaf1f70b70a857eab53601',
+    'uri' => '/res/e1735b5c/rsrc/image/autosprite.png',
     'disk' => '/rsrc/image/autosprite.png',
     'type' => 'png',
   ),
@@ -550,7 +550,7 @@ celerity_register_resource_map(array(
   ),
   'aphront-calendar-view-css' =>
   array(
-    'uri' => '/res/b200376d/rsrc/css/aphront/calendar-view.css',
+    'uri' => '/res/31e92d4d/rsrc/css/aphront/calendar-view.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -713,7 +713,7 @@ celerity_register_resource_map(array(
   ),
   'autosprite-css' =>
   array(
-    'uri' => '/res/fe4797e2/rsrc/css/autosprite.css',
+    'uri' => '/res/10fb7fdc/rsrc/css/autosprite.css',
     'type' => 'css',
     'requires' =>
     array(
