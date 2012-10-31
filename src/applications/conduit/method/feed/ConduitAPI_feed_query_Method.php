@@ -79,7 +79,7 @@ final class ConduitAPI_feed_query_Method extends ConduitAPIMethod {
     if (!$limit) {
       $limit = $this->getDefaultLimit();
     }
-    $filter_phids = $request->getValue('filter_phids');
+    $filter_phids = $request->getValue('filterPHIDs');
     if (!$filter_phids) {
       $filter_phids = array();
     }
