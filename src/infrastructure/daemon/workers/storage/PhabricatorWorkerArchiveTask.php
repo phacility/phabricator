@@ -18,8 +18,9 @@
 
 final class PhabricatorWorkerArchiveTask extends PhabricatorWorkerTask {
 
-  const RESULT_SUCCESS = 0;
-  const RESULT_FAILURE = 1;
+  const RESULT_SUCCESS    = 0;
+  const RESULT_FAILURE    = 1;
+  const RESULT_CANCELLED  = 2;
 
   protected $duration;
   protected $result;
@@ -61,6 +62,24 @@ final class PhabricatorWorkerArchiveTask extends PhabricatorWorkerTask {
       $result = parent::delete();
     $this->saveTransaction();
     return $result;
+  }
+
+  public function unarchiveTask() {
+    $this->openTransaction();
+      $active = id(new PhabricatorWorkerActiveTask())
+        ->setID($this->getID())
+        ->setTaskClass($this->getTaskClass())
+        ->setLeaseOwner(null)
+        ->setLeaseExpires(0)
+        ->setFailureCount(0)
+        ->setDataID($this->getDataID())
+        ->insert();
+
+      $this->setDataID(null);
+      $this->delete();
+    $this->saveTransaction();
+
+    return $active;
   }
 
 }

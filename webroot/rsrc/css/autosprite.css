@@ -808,50 +808,58 @@
   background-position: 0px -7823px;
 }
 
-.action-unpublish {
+.action-undo {
   background-position: 0px -7840px;
 }
 
-.action-world {
+.action-unlock {
   background-position: 0px -7857px;
 }
 
-.remarkup-assist-b {
+.action-unpublish {
   background-position: 0px -7874px;
 }
 
+.action-world {
+  background-position: 0px -7891px;
+}
+
+.remarkup-assist-b {
+  background-position: 0px -7908px;
+}
+
 .remarkup-assist-code {
-  background-position: 0px -7889px;
+  background-position: 0px -7923px;
 }
 
 .remarkup-assist-i {
-  background-position: 0px -7904px;
+  background-position: 0px -7938px;
 }
 
 .remarkup-assist-image {
-  background-position: 0px -7919px;
+  background-position: 0px -7953px;
 }
 
 .remarkup-assist-ol {
-  background-position: 0px -7934px;
+  background-position: 0px -7968px;
 }
 
 .remarkup-assist-tag {
-  background-position: 0px -7949px;
+  background-position: 0px -7983px;
 }
 
 .remarkup-assist-tt {
-  background-position: 0px -7964px;
+  background-position: 0px -7998px;
 }
 
 .remarkup-assist-ul {
-  background-position: 0px -7979px;
+  background-position: 0px -8013px;
 }
 
 .remarkup-assist-help {
-  background-position: 0px -7994px;
+  background-position: 0px -8028px;
 }
 
 .remarkup-assist-table {
-  background-position: 0px -8009px;
+  background-position: 0px -8043px;
 }

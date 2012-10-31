@@ -151,6 +151,8 @@ final class PhabricatorActionView extends AphrontView {
       'subscribe-add',
       'subscribe-auto',
       'subscribe-delete',
+      'undo',
+      'unlock',
       'unpublish',
       'world',
     );

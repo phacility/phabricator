@@ -37,4 +37,8 @@ abstract class PhabricatorWorkerTask extends PhabricatorWorkerDAO {
     return $this->data;
   }
 
+  public function isArchived() {
+    return ($this instanceof PhabricatorWorkerArchiveTask);
+  }
+
 }
