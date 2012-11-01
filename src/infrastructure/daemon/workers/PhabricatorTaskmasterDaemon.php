@@ -32,40 +32,13 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
 
           $this->log("Working on task {$id} ({$class})...");
 
-          // TODO: We should detect if we acquired a task with an expired lease
-          // and log about it / bump up failure count.
-
-          // TODO: We should detect if we acquired a task with an excessive
-          // failure count and fail it permanently.
-
-          $data = $task->getData();
-          try {
-            if (!class_exists($class) ||
-                !is_subclass_of($class, 'PhabricatorWorker')) {
-              throw new Exception(
-                "Task class '{$class}' does not extend PhabricatorWorker.");
-            }
-            $worker = newv($class, array($data));
-
-            $lease = $worker->getRequiredLeaseTime();
-            if ($lease !== null) {
-              $task->setLeaseDuration($lease);
-            }
-
-            $t_start = microtime(true);
-            $worker->executeTask();
-            $t_end = microtime(true);
-
-            $task->archiveTask(
-              PhabricatorWorkerArchiveTask::RESULT_SUCCESS,
-              (int)(1000000 * ($t_end - $t_start)));
-            $this->log("Task {$id} complete! Moved to archive.");
-          } catch (Exception $ex) {
-            $task->setFailureCount($task->getFailureCount() + 1);
-            $task->save();
-
+          $task = $task->executeTask();
+          $ex = $task->getExecutionException();
+          if ($ex) {
             $this->log("Task {$id} failed!");
             throw $ex;
+          } else {
+            $this->log("Task {$id} complete! Moved to archive.");
           }
         }
 

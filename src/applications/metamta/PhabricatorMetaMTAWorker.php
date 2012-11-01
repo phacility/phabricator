@@ -21,7 +21,7 @@ final class PhabricatorMetaMTAWorker
 
   private $message;
 
-  public function getRequiredLeaseTime() {
+  public function getWaitBeforeRetry(PhabricatorWorkerTask $task) {
     $message_id = $this->getTaskData();
 
     $this->message = id(new PhabricatorMetaMTAMail())->loadOneWhere(
@@ -30,8 +30,8 @@ final class PhabricatorMetaMTAWorker
       return null;
     }
 
-    $lease_duration = max($this->message->getNextRetry() - time(), 0) + 15;
-    return $lease_duration;
+    $wait = max($this->message->getNextRetry() - time(), 0) + 15;
+    return $wait;
   }
 
   public function doWork() {

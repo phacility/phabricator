@@ -26,6 +26,8 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
   const PHASE_UNLEASED = 'unleased';
   const PHASE_EXPIRED  = 'expired';
 
+  const DEFAULT_LEASE_DURATION = 60; // Seconds
+
   private $ids;
   private $limit;
 
@@ -64,10 +66,11 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
     foreach ($phases as $phase) {
       queryfx(
         $conn_w,
-        'UPDATE %T SET leaseOwner = %s, leaseExpires = UNIX_TIMESTAMP() + 15
+        'UPDATE %T SET leaseOwner = %s, leaseExpires = UNIX_TIMESTAMP() + %d
           %Q %Q %Q',
         $task_table->getTableName(),
         $lease_ownership_name,
+        self::DEFAULT_LEASE_DURATION,
         $this->buildWhereClause($conn_w, $phase),
         $this->buildOrderClause($conn_w),
         $this->buildLimitClause($conn_w, $limit - $leased));
@@ -118,7 +121,7 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
       case self::PHASE_UNLEASED:
         $where[] = 'leaseOwner IS NULL';
         break;
-      case self::PHASE_Expired:
+      case self::PHASE_EXPIRED:
         $where[] = 'leaseExpires < UNIX_TIMESTAMP()';
         break;
       default:
