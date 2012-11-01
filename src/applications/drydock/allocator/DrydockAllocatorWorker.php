@@ -64,11 +64,6 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
       shuffle($blueprints);
 
       $blueprint = head($blueprints);
-
-      if (isset($data['synchronous'])) {
-        $blueprint->makeSynchronous();
-      }
-
       $resource = $blueprint->allocateResource();
     }
 

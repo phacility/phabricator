@@ -20,11 +20,6 @@ abstract class DrydockBlueprint {
 
   private $activeLease;
   private $activeResource;
-  private $synchronous;
-
-  final public function makeSynchronous() {
-    $this->synchronous = true;
-  }
 
   abstract public function getType();
   abstract public function getInterface(
@@ -40,9 +35,6 @@ abstract class DrydockBlueprint {
 
   protected function getAllocator($type) {
     $allocator = new DrydockAllocator();
-    if ($this->synchronous) {
-      $allocator->makeSynchronous();
-    }
     $allocator->setResourceType($type);
 
     return $allocator;

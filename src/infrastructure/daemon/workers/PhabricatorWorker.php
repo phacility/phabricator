@@ -107,4 +107,47 @@ abstract class PhabricatorWorker {
       ->save();
   }
 
+
+  /**
+   * Wait for tasks to complete. If tasks are not leased by other workers, they
+   * will be executed in this process while waiting.
+   *
+   * @param list<int>   List of queued task IDs to wait for.
+   * @return void
+   */
+  final public static function waitForTasks(array $task_ids) {
+    $task_table = new PhabricatorWorkerActiveTask();
+
+    $waiting = array_combine($task_ids, $task_ids);
+    while ($waiting) {
+      $conn_w = $task_table->establishConnection('w');
+
+      // Check if any of the tasks we're waiting on are still queued. If they
+      // are not, we're done waiting.
+      $row = queryfx_one(
+        $conn_w,
+        'SELECT COUNT(*) N FROM %T WHERE id IN (%Ld)',
+        $task_table->getTableName(),
+        $waiting);
+      if (!$row['N']) {
+        // Nothing is queued anymore. Stop waiting.
+        break;
+      }
+
+      $tasks = id(new PhabricatorWorkerLeaseQuery())
+        ->withIDs($waiting)
+        ->setLimit(1)
+        ->execute();
+
+      if (!$tasks) {
+        // We were not successful in leasing anything. Sleep for a bit and
+        // see if we have better luck later.
+        sleep(1);
+        continue;
+      }
+
+      $task = head($tasks)->executeTask();
+    }
+  }
+
 }

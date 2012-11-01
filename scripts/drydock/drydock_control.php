@@ -20,10 +20,11 @@
 $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
-PhutilServiceProfiler::installEchoListener();
+$args = new PhutilArgumentParser($argv);
+$args->parseStandardArguments();
+$args->parse(array());
 
 $allocator = new DrydockAllocator();
-$allocator->makeSynchronous();
 $allocator->setResourceType('webroot');
 $lease = $allocator->allocate();
 
@@ -46,5 +47,5 @@ echo $stdout;
 $lease->release();
 
 
-//$i_http = $lease->getInterface('httpd');
-//echo $i_http->getURI('/index.html')."\n";
+// $i_http = $lease->getInterface('httpd');
+// echo $i_http->getURI('/index.html')."\n";

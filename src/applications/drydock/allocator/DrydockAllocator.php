@@ -20,7 +20,6 @@ final class DrydockAllocator {
 
   private $resourceType;
   private $lease;
-  private $synchronous;
 
   public function setResourceType($resource_type) {
     $this->resourceType = $resource_type;
@@ -29,10 +28,6 @@ final class DrydockAllocator {
 
   public function getResourceType() {
     return $this->resourceType;
-  }
-
-  public function makeSynchronous() {
-    $this->synchronous = true;
   }
 
   public function getPendingLease() {
@@ -54,13 +49,9 @@ final class DrydockAllocator {
       'lease'       => $lease->getID(),
     );
 
-    if ($this->synchronous) {
-      $data['synchronous'] = true;
-      $worker = new DrydockAllocatorWorker($data);
-      $worker->executeTask();
-    } else {
-      PhabricatorWorker::scheduleTask('DrydockAllocatorWorker', $data);
-    }
+    $task = PhabricatorWorker::scheduleTask('DrydockAllocatorWorker', $data);
+
+    $lease->setTaskID($task->getID());
 
     return $lease;
   }

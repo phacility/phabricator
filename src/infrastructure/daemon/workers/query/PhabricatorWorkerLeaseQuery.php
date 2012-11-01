@@ -25,6 +25,7 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
 
   const PHASE_UNLEASED = 'unleased';
   const PHASE_EXPIRED  = 'expired';
+  const PHASE_SELECT   = 'select';
 
   const DEFAULT_LEASE_DURATION = 60; // Seconds
 
@@ -66,7 +67,8 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
     foreach ($phases as $phase) {
       queryfx(
         $conn_w,
-        'UPDATE %T SET leaseOwner = %s, leaseExpires = UNIX_TIMESTAMP() + %d
+        'UPDATE %T task
+          SET leaseOwner = %s, leaseExpires = UNIX_TIMESTAMP() + %d
           %Q %Q %Q',
         $task_table->getTableName(),
         $lease_ownership_name,
@@ -90,11 +92,10 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
       'SELECT task.*, taskdata.data _taskData, UNIX_TIMESTAMP() _serverTime
         FROM %T task LEFT JOIN %T taskdata
           ON taskdata.id = task.dataID
-        WHERE leaseOwner = %s AND leaseExpires > UNIX_TIMESTAMP()
-        %Q %Q',
+        %Q %Q %Q',
       $task_table->getTableName(),
       $taskdata_table->getTableName(),
-      $lease_ownership_name,
+      $this->buildWhereClause($conn_w, self::PHASE_SELECT),
       $this->buildOrderClause($conn_w),
       $this->buildLimitClause($conn_w, $limit));
 
@@ -124,6 +125,13 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
       case self::PHASE_EXPIRED:
         $where[] = 'leaseExpires < UNIX_TIMESTAMP()';
         break;
+      case self::PHASE_SELECT:
+        $where[] = qsprintf(
+          $conn_w,
+          'leaseOwner = %s',
+          $this->getLeaseOwnershipName());
+        $where[] = 'leaseExpires > UNIX_TIMESTAMP()';
+        break;
       default:
         throw new Exception("Unknown phase '{$phase}'!");
     }
@@ -131,7 +139,7 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
     if ($this->ids) {
       $where[] = qsprintf(
         $conn_w,
-        'id IN (%Ld)',
+        'task.id IN (%Ld)',
         $this->ids);
     }
 
