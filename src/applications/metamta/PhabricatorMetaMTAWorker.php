@@ -22,20 +22,17 @@ final class PhabricatorMetaMTAWorker
   private $message;
 
   public function getWaitBeforeRetry(PhabricatorWorkerTask $task) {
-    $message_id = $this->getTaskData();
-
-    $this->message = id(new PhabricatorMetaMTAMail())->loadOneWhere(
-      'id = %d', $this->getTaskData());
-    if (!$this->message) {
+    $message = $this->loadMessage();
+    if (!$message) {
       return null;
     }
 
-    $wait = max($this->message->getNextRetry() - time(), 0) + 15;
+    $wait = max($message->getNextRetry() - time(), 0) + 15;
     return $wait;
   }
 
   public function doWork() {
-    $message = $this->message;
+    $message = $this->loadMessage();
     if (!$message
         || $message->getStatus() != PhabricatorMetaMTAMail::STATUS_QUEUE) {
       return;
@@ -48,4 +45,16 @@ final class PhabricatorMetaMTAWorker
       throw new Exception('Failed to send message');
     }
   }
+
+  private function loadMessage() {
+    if (!$this->message) {
+      $message_id = $this->getTaskData();
+      $this->message = id(new PhabricatorMetaMTAMail())->load($message_id);
+      if (!$this->message) {
+        return null;
+      }
+    }
+    return $this->message;
+  }
+
 }
