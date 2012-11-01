@@ -47,7 +47,7 @@ final class PhabricatorWorkerTestCase extends PhabricatorTestCase {
     $task1 = $this->scheduleTask();
     $task2 = $this->scheduleTask();
 
-    $this->expectNextLease($task1)->executeTask();
+    $this->expectNextLease($task1);
     $this->expectNextLease($task2);
   }
 
@@ -61,7 +61,7 @@ final class PhabricatorWorkerTestCase extends PhabricatorTestCase {
     $task1->setLeaseExpires(time() - 100000);
     $task1->forceSaveWithoutLease();
 
-    $this->expectNextLease($task2)->executeTask();
+    $this->expectNextLease($task2);
     $this->expectNextLease($task1);
   }
 

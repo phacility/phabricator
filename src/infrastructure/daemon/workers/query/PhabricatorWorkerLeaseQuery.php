@@ -25,7 +25,6 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
 
   const PHASE_UNLEASED = 'unleased';
   const PHASE_EXPIRED  = 'expired';
-  const PHASE_SELECT   = 'select';
 
   const DEFAULT_LEASE_DURATION = 60; // Seconds
 
@@ -92,10 +91,11 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
       'SELECT task.*, taskdata.data _taskData, UNIX_TIMESTAMP() _serverTime
         FROM %T task LEFT JOIN %T taskdata
           ON taskdata.id = task.dataID
-        %Q %Q %Q',
+        WHERE leaseOwner = %s AND leaseExpires > UNIX_TIMESTAMP()
+        %Q %Q',
       $task_table->getTableName(),
       $taskdata_table->getTableName(),
-      $this->buildWhereClause($conn_w, self::PHASE_SELECT),
+      $lease_ownership_name,
       $this->buildOrderClause($conn_w),
       $this->buildLimitClause($conn_w, $limit));
 
@@ -116,6 +116,7 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
   }
 
   private function buildWhereClause(AphrontDatabaseConnection $conn_w, $phase) {
+
     $where = array();
 
     switch ($phase) {
@@ -124,13 +125,6 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
         break;
       case self::PHASE_EXPIRED:
         $where[] = 'leaseExpires < UNIX_TIMESTAMP()';
-        break;
-      case self::PHASE_SELECT:
-        $where[] = qsprintf(
-          $conn_w,
-          'leaseOwner = %s',
-          $this->getLeaseOwnershipName());
-        $where[] = 'leaseExpires > UNIX_TIMESTAMP()';
         break;
       default:
         throw new Exception("Unknown phase '{$phase}'!");
@@ -155,11 +149,16 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
   }
 
   private function getLeaseOwnershipName() {
-    static $name = null;
-    if ($name === null) {
-      $name = getmypid().':'.time().':'.php_uname('n');
-    }
-    return $name;
+    static $sequence = 0;
+
+    $parts = array(
+      getmypid(),
+      time(),
+      php_uname('n'),
+      ++$sequence,
+    );
+
+    return implode(':', $parts);
   }
 
 }
