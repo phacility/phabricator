@@ -60,11 +60,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
     return $this;
   }
 
-  public function getDiffusionBrowseURIForPath($path, $line = null) {
+  public function getDiffusionBrowseURIForPath($path,
+                                               $line = null,
+                                               $branch = null) {
     $drequest = DiffusionRequest::newFromDictionary(
       array(
         'repository' => $this,
         'path'       => $path,
+        'branch'     => $branch,
       ));
 
     return $drequest->generateURI(

@@ -224,10 +224,7 @@ foreach ($commits as $commit) {
 
   if ($all_from_repo && !$force_local) {
     foreach ($classes as $class) {
-      $task = new PhabricatorWorkerTask();
-      $task->setTaskClass($class);
-      $task->setData($spec);
-      $task->save();
+      PhabricatorWorker::scheduleTask($class, $spec);
 
       $commit_name = 'r'.$callsign.$commit->getCommitIdentifier();
       echo "  Queued '{$class}' for commit '{$commit_name}'.\n";

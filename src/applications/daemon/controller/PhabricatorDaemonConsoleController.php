@@ -34,7 +34,7 @@ final class PhabricatorDaemonConsoleController
     $daemon_panel->setHeader('Recently Launched Daemons');
     $daemon_panel->appendChild($daemon_table);
 
-    $tasks = id(new PhabricatorWorkerTask())->loadAllWhere(
+    $tasks = id(new PhabricatorWorkerActiveTask())->loadAllWhere(
       'leaseOwner IS NOT NULL');
 
     $rows = array();
@@ -80,7 +80,7 @@ final class PhabricatorDaemonConsoleController
     $leased_panel->setHeader('Leased Tasks');
     $leased_panel->appendChild($leased_table);
 
-    $task_table = new PhabricatorWorkerTask();
+    $task_table = new PhabricatorWorkerActiveTask();
     $queued = queryfx_all(
       $task_table->establishConnection('r'),
       'SELECT taskClass, count(*) N FROM %T GROUP BY taskClass

@@ -23,7 +23,14 @@ final class PhabricatorStorageManagementDestroyWorkflow
     $this
       ->setName('destroy')
       ->setExamples('**destroy** [__options__]')
-      ->setSynopsis('Permanently destroy all storage and data.');
+      ->setSynopsis('Permanently destroy all storage and data.')
+      ->setArguments(
+        array(
+          array(
+            'name'  => 'unittest-fixtures',
+            'help'  => "Restrict **destroy** operations to databases created ".
+                       "by PhabricatorTestCase test fixtures.",
+          )));
   }
 
   public function execute(PhutilArgumentParser $args) {
@@ -50,8 +57,20 @@ final class PhabricatorStorageManagementDestroyWorkflow
     $api = $this->getAPI();
     $patches = $this->getPatches();
 
-    $databases = $api->getDatabaseList($patches);
-    $databases[] = $api->getDatabaseName('meta_data');
+    if ($args->getArg('unittest-fixtures')) {
+      $conn = $api->getConn(null, false);
+      $databases = queryfx_all(
+        $conn,
+        'SELECT DISTINCT(TABLE_SCHEMA) AS db '.
+        'FROM INFORMATION_SCHEMA.TABLES '.
+        'WHERE TABLE_SCHEMA LIKE %>',
+        PhabricatorTestCase::NAMESPACE_PREFIX);
+      $databases = ipull($databases, 'db');
+    } else {
+      $databases = $api->getDatabaseList($patches);
+      $databases[] = $api->getDatabaseName('meta_data');
+    }
+
     foreach ($databases as $database) {
       if ($is_dry) {
         echo "DRYRUN: Would drop database '{$database}'.\n";

@@ -708,126 +708,158 @@
   background-position: 0px -7254px;
 }
 
-.action-delete {
+.app-drydock-large {
   background-position: 0px -7285px;
 }
 
-.action-edit {
-  background-position: 0px -7302px;
+.device-desktop .phabricator-application-launch-container:hover .app-drydock-large /* hover */ {
+  background-position: 0px -7346px;
 }
 
-.action-file {
-  background-position: 0px -7319px;
+.app-drydock {
+  background-position: 0px -7407px;
 }
 
-.action-flag-0 {
-  background-position: 0px -7336px;
-}
-
-.action-flag-1 {
-  background-position: 0px -7353px;
-}
-
-.action-flag-2 {
-  background-position: 0px -7370px;
-}
-
-.action-flag-3 {
-  background-position: 0px -7387px;
-}
-
-.action-flag-4 {
-  background-position: 0px -7404px;
-}
-
-.action-flag-5 {
-  background-position: 0px -7421px;
-}
-
-.action-flag-6 {
+.device-desktop  .app-drydock:hover {
   background-position: 0px -7438px;
 }
 
+.app-drydock-selected {
+  background-position: 0px -7469px;
+}
+
+.action-delete {
+  background-position: 0px -7500px;
+}
+
+.action-download {
+  background-position: 0px -7517px;
+}
+
+.action-edit {
+  background-position: 0px -7534px;
+}
+
+.action-file {
+  background-position: 0px -7551px;
+}
+
+.action-flag-0 {
+  background-position: 0px -7568px;
+}
+
+.action-flag-1 {
+  background-position: 0px -7585px;
+}
+
+.action-flag-2 {
+  background-position: 0px -7602px;
+}
+
+.action-flag-3 {
+  background-position: 0px -7619px;
+}
+
+.action-flag-4 {
+  background-position: 0px -7636px;
+}
+
+.action-flag-5 {
+  background-position: 0px -7653px;
+}
+
+.action-flag-6 {
+  background-position: 0px -7670px;
+}
+
 .action-flag-7 {
-  background-position: 0px -7455px;
-}
-
-.action-flag-ghost {
-  background-position: 0px -7472px;
-}
-
-.action-fork {
-  background-position: 0px -7489px;
-}
-
-.action-move {
-  background-position: 0px -7506px;
-}
-
-.action-new {
-  background-position: 0px -7523px;
-}
-
-.action-preview {
-  background-position: 0px -7540px;
-}
-
-.action-subscribe-add {
-  background-position: 0px -7557px;
-}
-
-.action-subscribe-auto {
-  background-position: 0px -7574px;
-}
-
-.action-subscribe-delete {
-  background-position: 0px -7591px;
-}
-
-.action-unpublish {
-  background-position: 0px -7608px;
-}
-
-.action-world {
-  background-position: 0px -7625px;
-}
-
-.remarkup-assist-b {
-  background-position: 0px -7642px;
-}
-
-.remarkup-assist-code {
-  background-position: 0px -7657px;
-}
-
-.remarkup-assist-i {
-  background-position: 0px -7672px;
-}
-
-.remarkup-assist-image {
   background-position: 0px -7687px;
 }
 
+.action-flag-ghost {
+  background-position: 0px -7704px;
+}
+
+.action-fork {
+  background-position: 0px -7721px;
+}
+
+.action-move {
+  background-position: 0px -7738px;
+}
+
+.action-new {
+  background-position: 0px -7755px;
+}
+
+.action-preview {
+  background-position: 0px -7772px;
+}
+
+.action-subscribe-add {
+  background-position: 0px -7789px;
+}
+
+.action-subscribe-auto {
+  background-position: 0px -7806px;
+}
+
+.action-subscribe-delete {
+  background-position: 0px -7823px;
+}
+
+.action-undo {
+  background-position: 0px -7840px;
+}
+
+.action-unlock {
+  background-position: 0px -7857px;
+}
+
+.action-unpublish {
+  background-position: 0px -7874px;
+}
+
+.action-world {
+  background-position: 0px -7891px;
+}
+
+.remarkup-assist-b {
+  background-position: 0px -7908px;
+}
+
+.remarkup-assist-code {
+  background-position: 0px -7923px;
+}
+
+.remarkup-assist-i {
+  background-position: 0px -7938px;
+}
+
+.remarkup-assist-image {
+  background-position: 0px -7953px;
+}
+
 .remarkup-assist-ol {
-  background-position: 0px -7702px;
+  background-position: 0px -7968px;
 }
 
 .remarkup-assist-tag {
-  background-position: 0px -7717px;
+  background-position: 0px -7983px;
 }
 
 .remarkup-assist-tt {
-  background-position: 0px -7732px;
+  background-position: 0px -7998px;
 }
 
 .remarkup-assist-ul {
-  background-position: 0px -7747px;
+  background-position: 0px -8013px;
 }
 
 .remarkup-assist-help {
-  background-position: 0px -7762px;
+  background-position: 0px -8028px;
 }
 
 .remarkup-assist-table {
-  background-position: 0px -7777px;
+  background-position: 0px -8043px;
 }

@@ -29,131 +29,165 @@ final class PhabricatorWorkerTaskDetailController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $task = id(new PhabricatorWorkerTask())->load($this->id);
+    $task = id(new PhabricatorWorkerActiveTask())->load($this->id);
     if (!$task) {
+      $task = id(new PhabricatorWorkerArchiveTask())->load($this->id);
+    }
+
+    if (!$task) {
+      $title = pht('Task Does Not Exist');
+
       $error_view = new AphrontErrorView();
       $error_view->setTitle('No Such Task');
       $error_view->appendChild(
-        '<p>This task may have recently completed.</p>');
-      $error_view->setSeverity(AphrontErrorView::SEVERITY_WARNING);
-      return $this->buildStandardPageResponse(
-        $error_view,
-        array(
-          'title' => 'Task Does Not Exist',
-        ));
+        '<p>This task may have recently been garbage collected.</p>');
+      $error_view->setSeverity(AphrontErrorView::SEVERITY_NODATA);
+
+      $content = $error_view;
+    } else {
+      $title = 'Task '.$task->getID();
+
+      $header = id(new PhabricatorHeaderView())
+        ->setHeader('Task '.$task->getID().' ('.$task->getTaskClass().')');
+
+      $actions    = $this->buildActionListView($task);
+      $properties = $this->buildPropertyListView($task);
+
+      $content = array(
+        $header,
+        $actions,
+        $properties,
+      );
     }
-
-    $data = id(new PhabricatorWorkerTaskData())->loadOneWhere(
-      'id = %d',
-      $task->getDataID());
-
-    $extra = null;
-    switch ($task->getTaskClass()) {
-      case 'PhabricatorRepositorySvnCommitChangeParserWorker':
-      case 'PhabricatorRepositoryGitCommitChangeParserWorker':
-        $commit_id = idx($data->getData(), 'commitID');
-        if ($commit_id) {
-          $commit = id(new PhabricatorRepositoryCommit())->load($commit_id);
-          if ($commit) {
-            $repository = id(new PhabricatorRepository())->load(
-              $commit->getRepositoryID());
-            if ($repository) {
-              $extra =
-                "<strong>NOTE:</strong> ".
-                "You can manually retry this task by running this script:".
-                "<pre>".
-                  "phabricator/\$ ./scripts/repository/reparse.php ".
-                  "r".
-                  phutil_escape_html($repository->getCallsign()).
-                  phutil_escape_html($commit->getCommitIdentifier()).
-                  " ".
-                  "--change".
-                "</pre>";
-            }
-          }
-        }
-        break;
-      default:
-        break;
-    }
-
-    if ($data) {
-      $data = json_encode($data->getData());
-    }
-
-    $form = id(new AphrontFormView())
-      ->setUser($user)
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel('ID')
-          ->setValue($task->getID()))
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel('Type')
-          ->setValue($task->getTaskClass()))
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel('Lease Owner')
-          ->setValue($task->getLeaseOwner()))
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel('Lease Expires')
-          ->setValue($task->getLeaseExpires() - time()))
-      ->appendChild(
-        id(new AphrontFormStaticControl())
-          ->setLabel('Failure Count')
-          ->setValue($task->getFailureCount()))
-      ->appendChild(
-        id(new AphrontFormTextAreaControl())
-          ->setLabel('Data')
-          ->setValue($data));
-
-    if ($extra) {
-      $form->appendChild(
-        id(new AphrontFormMarkupControl())
-          ->setLabel('More')
-          ->setValue($extra));
-    }
-
-    $form
-      ->appendChild(
-        id(new AphrontFormSubmitControl())
-          ->addCancelButton('/daemon/', 'Back'));
-
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Task Detail');
-    $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
-    $panel->appendChild($form);
-
-    $panel->addButton(
-      javelin_render_tag(
-        'a',
-        array(
-          'href' => '/daemon/task/'.$task->getID().'/delete/',
-          'class' => 'button grey',
-          'sigil' => 'workflow',
-        ),
-        'Delete Task'));
-
-    $panel->addButton(
-      javelin_render_tag(
-        'a',
-        array(
-          'href' => '/daemon/task/'.$task->getID().'/release/',
-          'class' => 'button grey',
-          'sigil' => 'workflow',
-        ),
-        'Free Lease'));
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('');
-    $nav->appendChild($panel);
+    $nav->appendChild($content);
 
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'Task',
+        'title' => $title,
       ));
+  }
+
+  private function buildActionListView(PhabricatorWorkerTask $task) {
+    $user = $this->getRequest()->getUser();
+
+    $view = new PhabricatorActionListView();
+    $view->setUser($user);
+
+    $id = $task->getID();
+
+    if ($task->isArchived()) {
+      $result_success = PhabricatorWorkerArchiveTask::RESULT_SUCCESS;
+      $can_retry = ($task->getResult() != $result_success);
+
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Retry Task'))
+          ->setHref($this->getApplicationURI('/task/'.$id.'/retry/'))
+          ->setIcon('undo')
+          ->setWorkflow(true)
+          ->setDisabled(!$can_retry));
+    } else {
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Cancel Task'))
+          ->setHref($this->getApplicationURI('/task/'.$id.'/cancel/'))
+          ->setIcon('delete')
+          ->setWorkflow(true));
+    }
+
+    $can_release = (!$task->isArchived()) &&
+                   ($task->getLeaseOwner());
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Free Lease'))
+        ->setHref($this->getApplicationURI('/task/'.$id.'/release/'))
+        ->setIcon('unlock')
+        ->setWorkflow(true)
+        ->setDisabled(!$can_release));
+
+    return $view;
+  }
+
+  private function buildPropertyListView(PhabricatorWorkerTask $task) {
+    $view = new PhabricatorPropertyListView();
+
+    if ($task->isArchived()) {
+      switch ($task->getResult()) {
+        case PhabricatorWorkerArchiveTask::RESULT_SUCCESS:
+          $status = pht('Complete');
+          break;
+        case PhabricatorWorkerArchiveTask::RESULT_FAILURE:
+          $status = pht('Failed');
+          break;
+        case PhabricatorWorkerArchiveTask::RESULT_CANCELLED:
+          $status = pht('Cancelled');
+          break;
+        default:
+          throw new Exception("Unknown task status!");
+      }
+    } else {
+      $status = pht('Queued');
+    }
+
+    $view->addProperty(
+      pht('Task Status'),
+      $status);
+
+    $view->addProperty(
+      pht('Task Class'),
+      phutil_escape_html($task->getTaskClass()));
+
+    if ($task->getLeaseExpires()) {
+      if ($task->getLeaseExpires() > time()) {
+        $lease_status = pht('Leased');
+      } else {
+        $lease_status = pht('Lease Expired');
+      }
+    } else {
+      $lease_status = '<em>'.pht('Not Leased').'</em>';
+    }
+
+    $view->addProperty(
+      pht('Lease Status'),
+      $lease_status);
+
+    $view->addProperty(
+      pht('Lease Owner'),
+      $task->getLeaseOwner()
+        ? phutil_escape_html($task->getLeaseOwner())
+        : '<em>'.pht('None').'</em>');
+
+    if ($task->getLeaseExpires() && $task->getLeaseOwner()) {
+      $expires = ($task->getLeaseExpires() - time());
+      $expires = phabricator_format_relative_time_detailed($expires);
+    } else {
+      $expires = '<em>'.pht('None').'</em>';
+    }
+
+    $view->addProperty(
+      pht('Lease Expires'),
+      $expires);
+
+    $view->addProperty(
+      pht('Failure Count'),
+      phutil_escape_html($task->getFailureCount()));
+
+    if ($task->isArchived()) {
+      $duration = phutil_escape_html(number_format($task->getDuration()).' us');
+    } else {
+      $duration = '<em>'.pht('Not Completed').'</em>';
+    }
+
+    $view->addProperty(
+      pht('Duration'),
+      $duration);
+
+    return $view;
   }
 
 }

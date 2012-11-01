@@ -1126,6 +1126,7 @@ return array(
   'gcdaemon.ttl.daemon-logs'                =>  7 * (24 * 60 * 60),
   'gcdaemon.ttl.differential-parse-cache'   => 14 * (24 * 60 * 60),
   'gcdaemon.ttl.markup-cache'               => 30 * (24 * 60 * 60),
+  'gcdaemon.ttl.task-archive'               => 14 * (24 * 60 * 60),
 
 
 // -- Feed ------------------------------------------------------------------ //

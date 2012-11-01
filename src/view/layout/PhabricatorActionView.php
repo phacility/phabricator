@@ -132,6 +132,7 @@ final class PhabricatorActionView extends AphrontView {
   public static function getAvailableIcons() {
     return array(
       'delete',
+      'download',
       'edit',
       'file',
       'flag-0',
@@ -150,6 +151,8 @@ final class PhabricatorActionView extends AphrontView {
       'subscribe-add',
       'subscribe-auto',
       'subscribe-delete',
+      'undo',
+      'unlock',
       'unpublish',
       'world',
     );

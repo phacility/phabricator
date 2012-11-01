@@ -64,12 +64,14 @@ final class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
       $n_daemon = $this->collectDaemonLogs();
       $n_parse  = $this->collectParseCaches();
       $n_markup = $this->collectMarkupCaches();
+      $n_tasks  = $this->collectArchivedTasks();
 
       $collected = array(
         'Herald Transcript'           => $n_herald,
         'Daemon Log'                  => $n_daemon,
         'Differential Parse Cache'    => $n_parse,
         'Markup Cache'                => $n_markup,
+        'Archived Tasks'              => $n_tasks,
       );
       $collected = array_filter($collected);
 
@@ -170,6 +172,48 @@ final class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
       time() - $ttl);
 
     return $conn_w->getAffectedRows();
+  }
+
+  private function collectArchivedTasks() {
+    $key = 'gcdaemon.ttl.task-archive';
+    $ttl = PhabricatorEnv::getEnvConfig($key);
+    if ($ttl <= 0) {
+      return 0;
+    }
+
+    $table = new PhabricatorWorkerArchiveTask();
+    $data_table = new PhabricatorWorkerTaskData();
+    $conn_w = $table->establishConnection('w');
+
+    $rows = queryfx_all(
+      $conn_w,
+      'SELECT id, dataID FROM %T WHERE dateCreated < %d LIMIT 100',
+      $table->getTableName(),
+      time() - $ttl);
+
+    if (!$rows) {
+      return 0;
+    }
+
+    $data_ids = array_filter(ipull($rows, 'dataID'));
+    $task_ids = ipull($rows, 'id');
+
+    $table->openTransaction();
+      if ($data_ids) {
+        queryfx(
+          $conn_w,
+          'DELETE FROM %T WHERE id IN (%Ld)',
+          $data_table->getTableName(),
+          $data_ids);
+      }
+      queryfx(
+        $conn_w,
+        'DELETE FROM %T WHERE id IN (%Ld)',
+        $table->getTableName(),
+        $task_ids);
+    $table->saveTransaction();
+
+    return count($task_ids);
   }
 
 }

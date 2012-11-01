@@ -59,10 +59,7 @@ final class DrydockAllocator {
       $worker = new DrydockAllocatorWorker($data);
       $worker->executeTask();
     } else {
-      $task = new PhabricatorWorkerTask();
-      $task->setTaskClass('DrydockAllocatorWorker');
-      $task->setData($data);
-      $task->save();
+      PhabricatorWorker::scheduleTask('DrydockAllocatorWorker', $data);
     }
 
     return $lease;

@@ -1016,6 +1016,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('statustxt.sql'),
       ),
+      'daemontaskarchive.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('daemontaskarchive.sql'),
+      ),
     );
   }
 

@@ -69,13 +69,11 @@ final class PhabricatorRepositoryGitCommitMessageParserWorker
     $this->updateCommitData($author, $message, $committer);
 
     if ($this->shouldQueueFollowupTasks()) {
-      $task = new PhabricatorWorkerTask();
-      $task->setTaskClass('PhabricatorRepositoryGitCommitChangeParserWorker');
-      $task->setData(
+      PhabricatorWorker::scheduleTask(
+        'PhabricatorRepositoryGitCommitChangeParserWorker',
         array(
           'commitID' => $commit->getID(),
         ));
-      $task->save();
     }
   }
 

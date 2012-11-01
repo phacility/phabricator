@@ -18,6 +18,7 @@
 
 abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
 
+  const NAMESPACE_PREFIX = 'phabricator_unittest_';
 
   /**
    * If true, put Lisk in process-isolated mode for the duration of the tests so
@@ -132,7 +133,7 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
 
   protected function newStorageFixture() {
     $bytes = Filesystem::readRandomCharacters(24);
-    $name = 'phabricator_unittest_'.$bytes;
+    $name = self::NAMESPACE_PREFIX.$bytes;
 
     return new PhabricatorStorageFixtureScopeGuard($name);
   }

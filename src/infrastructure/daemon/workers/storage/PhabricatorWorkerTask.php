@@ -16,59 +16,17 @@
  * limitations under the License.
  */
 
-final class PhabricatorWorkerTask extends PhabricatorWorkerDAO {
+abstract class PhabricatorWorkerTask extends PhabricatorWorkerDAO {
 
+  // NOTE: If you provide additional fields here, make sure they are handled
+  // correctly in the archiving process.
   protected $taskClass;
   protected $leaseOwner;
   protected $leaseExpires;
   protected $failureCount;
   protected $dataID;
 
-  private $serverTime;
-  private $localTime;
   private $data;
-
-  public function getConfiguration() {
-    return array(
-      self::CONFIG_TIMESTAMPS => false,
-    ) + parent::getConfiguration();
-  }
-
-  public function setServerTime($server_time) {
-    $this->serverTime = $server_time;
-    $this->localTime = time();
-    return $this;
-  }
-
-  public function setLeaseDuration($lease_duration) {
-    $server_lease_expires = $this->serverTime + $lease_duration;
-    $this->setLeaseExpires($server_lease_expires);
-    return $this->save();
-  }
-
-  public function save() {
-    if ($this->leaseOwner) {
-      $current_server_time = $this->serverTime + (time() - $this->localTime);
-      if ($current_server_time >= $this->leaseExpires) {
-        throw new Exception("Trying to update task after lease expiration!");
-      }
-    }
-
-    $is_new = !$this->getID();
-    if ($is_new) {
-      $this->failureCount = 0;
-    }
-
-    if ($is_new && $this->data) {
-      $data = new PhabricatorWorkerTaskData();
-      $data->setData($this->data);
-      $data->save();
-
-      $this->setDataID($data->getID());
-    }
-
-    return parent::save();
-  }
 
   public function setData($data) {
     $this->data = $data;
@@ -77,6 +35,10 @@ final class PhabricatorWorkerTask extends PhabricatorWorkerDAO {
 
   public function getData() {
     return $this->data;
+  }
+
+  public function isArchived() {
+    return ($this instanceof PhabricatorWorkerArchiveTask);
   }
 
 }

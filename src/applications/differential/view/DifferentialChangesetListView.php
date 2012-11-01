@@ -32,8 +32,17 @@ final class DifferentialChangesetListView extends AphrontView {
   private $user;
   private $symbolIndexes = array();
   private $repository;
+  private $branch;
   private $diff;
   private $vsMap = array();
+
+  public function setBranch($branch) {
+    $this->branch = $branch;
+    return $this;
+  }
+  private function getBranch() {
+    return $this->branch;
+  }
 
   public function setChangesets($changesets) {
     $this->changesets = $changesets;
@@ -257,7 +266,8 @@ final class DifferentialChangesetListView extends AphrontView {
     if ($repository) {
       $meta['diffusionURI'] = (string)$repository->getDiffusionBrowseURIForPath(
         $changeset->getAbsoluteRepositoryPath($repository, $this->diff),
-        idx($changeset->getMetadata(), 'line:first'));
+        idx($changeset->getMetadata(), 'line:first'),
+        $this->getBranch());
     }
 
     $change = $changeset->getChangeType();

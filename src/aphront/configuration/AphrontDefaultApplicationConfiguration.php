@@ -113,14 +113,6 @@ class AphrontDefaultApplicationConfiguration
         'keyboardshortcut/' => 'PhabricatorHelpKeyboardShortcutController',
       ),
 
-      '/drydock/' => array(
-        '' => 'DrydockResourceListController',
-        'resource/' => 'DrydockResourceListController',
-        'resource/allocate/' => 'DrydockResourceAllocateController',
-        'lease/' => 'DrydockLeaseListController',
-        'log/' => 'DrydockLogController',
-      ),
-
       '/chatlog/' => array(
         '' =>
           'PhabricatorChatLogChannelListController',

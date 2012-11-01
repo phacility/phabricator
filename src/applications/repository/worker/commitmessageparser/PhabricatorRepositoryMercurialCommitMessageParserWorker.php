@@ -37,14 +37,11 @@ final class PhabricatorRepositoryMercurialCommitMessageParserWorker
     $this->updateCommitData($author, $message);
 
     if ($this->shouldQueueFollowupTasks()) {
-      $task = new PhabricatorWorkerTask();
-      $task->setTaskClass(
-        'PhabricatorRepositoryMercurialCommitChangeParserWorker');
-      $task->setData(
+      PhabricatorWorker::scheduleTask(
+        'PhabricatorRepositoryMercurialCommitChangeParserWorker',
         array(
           'commitID' => $commit->getID(),
         ));
-      $task->save();
     }
   }
 

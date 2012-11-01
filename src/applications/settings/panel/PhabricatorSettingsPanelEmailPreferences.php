@@ -223,16 +223,36 @@ final class PhabricatorSettingsPanelEmailPreferences
 
   private function getMailTags() {
     return array(
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_CC =>
-        "Send me email when a revision's CCs change.",
+      MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEWERS =>
+        pht("Send me email when a revision's reviewers change."),
       MetaMTANotificationType::TYPE_DIFFERENTIAL_CLOSED =>
-        "Send me email when a revision is closed.",
-      MetaMTANotificationType::TYPE_MANIPHEST_PROJECTS =>
-        "Send me email when a task's associated projects change.",
+        pht("Send me email when a revision is closed."),
+      MetaMTANotificationType::TYPE_DIFFERENTIAL_CC =>
+        pht("Send me email when a revision's CCs change."),
+      MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMENT =>
+        pht("Send me email when a revision is commented on."),
+      MetaMTANotificationType::TYPE_DIFFERENTIAL_UPDATED =>
+        pht("Send me email when a revision is updated."),
+      MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEW_REQUEST =>
+        pht("Send me email when I am requested to review a revision."),
+      MetaMTANotificationType::TYPE_DIFFERENTIAL_OTHER =>
+        pht("Send me email for any other activity not listed above."),
+
+      MetaMTANotificationType::TYPE_MANIPHEST_STATUS =>
+        pht("Send me email when a task's status changes."),
+      MetaMTANotificationType::TYPE_MANIPHEST_OWNER =>
+        pht("Send me email when a task's owner changes."),
       MetaMTANotificationType::TYPE_MANIPHEST_PRIORITY =>
-        "Send me email when a task's priority changes.",
+        pht("Send me email when a task's priority changes."),
       MetaMTANotificationType::TYPE_MANIPHEST_CC =>
-        "Send me email when a task's CCs change.",
+        pht("Send me email when a task's CCs change."),
+      MetaMTANotificationType::TYPE_MANIPHEST_PROJECTS =>
+        pht("Send me email when a task's associated projects change."),
+      MetaMTANotificationType::TYPE_MANIPHEST_COMMENT =>
+        pht("Send me email when a task is commented on."),
+      MetaMTANotificationType::TYPE_MANIPHEST_OTHER =>
+        pht("Send me email for any other activity not listed above."),
+
     );
   }
 
@@ -240,9 +260,13 @@ final class PhabricatorSettingsPanelEmailPreferences
     return array_select_keys(
       $this->getMailTags(),
       array(
-        MetaMTANotificationType::TYPE_MANIPHEST_PROJECTS,
+        MetaMTANotificationType::TYPE_MANIPHEST_STATUS,
+        MetaMTANotificationType::TYPE_MANIPHEST_OWNER,
         MetaMTANotificationType::TYPE_MANIPHEST_PRIORITY,
         MetaMTANotificationType::TYPE_MANIPHEST_CC,
+        MetaMTANotificationType::TYPE_MANIPHEST_PROJECTS,
+        MetaMTANotificationType::TYPE_MANIPHEST_COMMENT,
+        MetaMTANotificationType::TYPE_MANIPHEST_OTHER,
       ));
   }
 
@@ -250,8 +274,13 @@ final class PhabricatorSettingsPanelEmailPreferences
     return array_select_keys(
       $this->getMailTags(),
       array(
-        MetaMTANotificationType::TYPE_DIFFERENTIAL_CC,
+        MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEWERS,
         MetaMTANotificationType::TYPE_DIFFERENTIAL_CLOSED,
+        MetaMTANotificationType::TYPE_DIFFERENTIAL_CC,
+        MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMENT,
+        MetaMTANotificationType::TYPE_DIFFERENTIAL_UPDATED,
+        MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEW_REQUEST,
+        MetaMTANotificationType::TYPE_DIFFERENTIAL_OTHER,
       ));
   }
 
