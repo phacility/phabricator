@@ -285,6 +285,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     $changeset_view = new DifferentialChangesetListView();
+    $changeset_view->setLineWidthFromChangesets($changesets);
     $changeset_view->setChangesets($changesets);
     $changeset_view->setVisibleChangesets($visible_changesets);
 

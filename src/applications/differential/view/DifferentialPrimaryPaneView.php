@@ -16,33 +16,13 @@
  * limitations under the License.
  */
 
-final class DifferentialPrimaryPaneView extends AphrontView {
+final class DifferentialPrimaryPaneView
+  extends DifferentialCodeWidthSensitiveView {
 
-  private $lineWidth = 80;
   private $id;
-
-  public function setLineWidth($width) {
-    $this->lineWidth = $width;
-    return $this;
-  }
 
   public function setID($id) {
     $this->id = $id;
-    return $this;
-  }
-
-  public function setLineWidthFromChangesets(array $changesets) {
-    assert_instances_of($changesets, 'DifferentialChangeset');
-    if (empty($changesets)) {
-      return $this;
-    }
-
-    $max = 1;
-    foreach ($changesets as $changeset) {
-      $max = max($max, $changeset->getWordWrapWidth());
-    }
-    $this->setLineWidth($max);
-
     return $this;
   }
 
@@ -53,15 +33,9 @@ final class DifferentialPrimaryPaneView extends AphrontView {
     // need some tweaking, but when lineWidth = 80, the computed pixel width
     // should be 1162px or something along those lines.
 
-    // Width of the constant-width elements (like line numbers, padding,
-    // and borders).
-    $const = 148;
-    $width = ceil(((1162 - $const) / 80) * $this->lineWidth) + $const;
-    $width = max(1162, $width);
-
     // Override the 'td' width rule with a more specific, inline style tag.
     // TODO: move this to <head> somehow.
-    $td_width = ceil((88 / 80) * $this->lineWidth);
+    $td_width = ceil((88 / 80) * $this->getLineWidth());
     $style_tag = phutil_render_tag(
       'style',
       array(
@@ -73,7 +47,6 @@ final class DifferentialPrimaryPaneView extends AphrontView {
       'div',
       array(
         'class' => 'differential-primary-pane',
-        'style' => "max-width: {$width}px",
         'id'    => $this->id,
       ),
       $style_tag.$this->renderChildren());

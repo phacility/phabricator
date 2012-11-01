@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-final class DifferentialChangesetListView extends AphrontView {
+final class DifferentialChangesetListView
+  extends DifferentialCodeWidthSensitiveView {
 
   private $changesets = array();
   private $visibleChangesets = array();
@@ -209,6 +210,7 @@ final class DifferentialChangesetListView extends AphrontView {
       array(
         'class' => 'differential-review-stage',
         'id'    => 'differential-review-stage',
+        'style' => "max-width: {$this->calculateSideBySideWidth()}px; ",
       ),
       implode("\n", $output));
   }

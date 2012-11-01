@@ -226,6 +226,7 @@ phutil_register_library_map(array(
     'DifferentialChangesetParser' => 'applications/differential/parser/DifferentialChangesetParser.php',
     'DifferentialChangesetParserTestCase' => 'applications/differential/parser/__tests__/DifferentialChangesetParserTestCase.php',
     'DifferentialChangesetViewController' => 'applications/differential/controller/DifferentialChangesetViewController.php',
+    'DifferentialCodeWidthSensitiveView' => 'applications/differential/view/DifferentialCodeWidthSensitiveView.php',
     'DifferentialComment' => 'applications/differential/storage/DifferentialComment.php',
     'DifferentialCommentEditor' => 'applications/differential/editor/DifferentialCommentEditor.php',
     'DifferentialCommentMail' => 'applications/differential/mail/DifferentialCommentMail.php',
@@ -1473,9 +1474,10 @@ phutil_register_library_map(array(
     'DifferentialChangeSetTestCase' => 'PhabricatorTestCase',
     'DifferentialChangeset' => 'DifferentialDAO',
     'DifferentialChangesetDetailView' => 'AphrontView',
-    'DifferentialChangesetListView' => 'AphrontView',
+    'DifferentialChangesetListView' => 'DifferentialCodeWidthSensitiveView',
     'DifferentialChangesetParserTestCase' => 'ArcanistPhutilTestCase',
     'DifferentialChangesetViewController' => 'DifferentialController',
+    'DifferentialCodeWidthSensitiveView' => 'AphrontView',
     'DifferentialComment' =>
     array(
       0 => 'DifferentialDAO',
@@ -1526,7 +1528,7 @@ phutil_register_library_map(array(
     'DifferentialManiphestTasksFieldSpecification' => 'DifferentialFieldSpecification',
     'DifferentialNewDiffMail' => 'DifferentialReviewRequestMail',
     'DifferentialPathFieldSpecification' => 'DifferentialFieldSpecification',
-    'DifferentialPrimaryPaneView' => 'AphrontView',
+    'DifferentialPrimaryPaneView' => 'DifferentialCodeWidthSensitiveView',
     'DifferentialReplyHandler' => 'PhabricatorMailReplyHandler',
     'DifferentialResultsTableView' => 'AphrontView',
     'DifferentialRevertPlanFieldSpecification' => 'DifferentialFieldSpecification',
