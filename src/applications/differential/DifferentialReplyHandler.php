@@ -107,10 +107,10 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
 
   protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
     $this->receivedMail = $mail;
-    $this->handleAction($mail->getCleanTextBody());
+    $this->handleAction($mail->getCleanTextBody(), $mail->getAttachments());
   }
 
-  public function handleAction($body) {
+  public function handleAction($body, array $attachments) {
     // all commands start with a bang and separated from the body by a newline
     // to make sure that actual feedback text couldn't trigger an action.
     // unrecognized commands will be parsed as part of the comment.
@@ -134,6 +134,8 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
         // TODO: Send the user a confirmation email?
         return null;
     }
+
+    $body = $this->enhanceBodyWithAttachments($body, $attachments);
 
     try {
       $editor = new DifferentialCommentEditor(
