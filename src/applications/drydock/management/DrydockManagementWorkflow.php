@@ -1,4 +1,3 @@
-#!/usr/bin/env php
 <?php
 
 /*
@@ -17,23 +16,11 @@
  * limitations under the License.
  */
 
-$root = dirname(dirname(dirname(__FILE__)));
-require_once $root.'/scripts/__init_script__.php';
+abstract class DrydockManagementWorkflow
+  extends PhutilArgumentWorkflow {
 
-$args = new PhutilArgumentParser($argv);
-$args->setTagline('manage drydock software resources');
-$args->setSynopsis(<<<EOSYNOPSIS
-**drydock** __commmand__ [__options__]
-    Manage Drydock stuff. NEW AND EXPERIMENTAL.
+  public function isExecutable() {
+    return true;
+  }
 
-EOSYNOPSIS
-);
-$args->parseStandardArguments();
-
-$workflows = array(
-  new DrydockManagementWaitForLeaseWorkflow(),
-  new DrydockManagementLeaseWorkflow(),
-  new PhutilHelpArgumentWorkflow(),
-);
-
-$args->parseWorkflows($workflows);
+}
