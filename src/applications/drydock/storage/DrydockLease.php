@@ -20,10 +20,11 @@ final class DrydockLease extends DrydockDAO {
 
   protected $phid;
   protected $resourceID;
+  protected $resourceType;
   protected $until;
   protected $ownerPHID;
   protected $attributes = array();
-  protected $status;
+  protected $status = DrydockLeaseStatus::STATUS_PENDING;
   protected $taskID;
 
   private $resource;
@@ -76,10 +77,37 @@ final class DrydockLease extends DrydockDAO {
       $this->getResourceID());
   }
 
+  public function queueForActivation() {
+    if ($this->getID()) {
+      throw new Exception(
+        "Only new leases may be queued for activation!");
+    }
+
+    $this->setStatus(DrydockLeaseStatus::STATUS_PENDING);
+    $this->save();
+
+    // NOTE: Prevent a race where some eager worker quickly grabs the task
+    // before we can save the Task ID.
+
+    $this->openTransaction();
+      $this->beginReadLocking();
+
+        $this->reload();
+
+        $task = PhabricatorWorker::scheduleTask(
+          'DrydockAllocatorWorker',
+          $this->getID());
+
+        $this->setTaskID($task->getID());
+        $this->save();
+
+      $this->endReadLocking();
+    $this->saveTransaction();
+
+    return $this;
+  }
+
   public function release() {
-
-    // TODO: Insert a cleanup task into the taskmaster queue.
-
     $this->setStatus(DrydockLeaseStatus::STATUS_RELEASED);
     $this->save();
 

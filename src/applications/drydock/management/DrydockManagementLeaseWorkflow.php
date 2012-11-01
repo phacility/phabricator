@@ -31,7 +31,7 @@ final class DrydockManagementLeaseWorkflow
             'help'      => 'Resource type.',
           ),
           array(
-            'name'      => 'spec',
+            'name'      => 'attributes',
             'param'     => 'name=value,...',
             'help'      => 'Resource specficiation.',
           ),
@@ -47,19 +47,18 @@ final class DrydockManagementLeaseWorkflow
         "Specify a resource type with `--type`.");
     }
 
-    $spec = $args->getArg('spec');
-    if ($spec) {
+    $attributes = $args->getArg('attributes');
+    if ($attributes) {
       $options = new PhutilSimpleOptions();
-      $spec = $options->parse($spec);
+      $attributes = $options->parse($attributes);
     }
 
-    $allocator = new DrydockAllocator();
-    $allocator->setResourceType($resource_type);
-    if ($spec) {
-      // TODO: Shove this in there.
+    $lease = new DrydockLease();
+    $lease->setResourceType($resource_type);
+    if ($attributes) {
+      $lease->setAttributes($attributes);
     }
-
-    $lease = $allocator->allocate();
+    $lease->queueForActivation();
 
     $root = dirname(phutil_get_library_root('phabricator'));
     $wait = new ExecFuture(
@@ -67,14 +66,25 @@ final class DrydockManagementLeaseWorkflow
       $root.'/scripts/drydock/drydock_control.php',
       $lease->getID());
 
+    $cursor = 0;
     foreach (Futures(array($wait))->setUpdateInterval(1) as $key => $future) {
       if ($future) {
         $future->resolvex();
         break;
       }
 
-      // TODO: Pull logs.
-      $console->writeErr("Working...\n");
+      $logs = id(new DrydockLogQuery())
+        ->withLeaseIDs(array($lease->getID()))
+        ->withAfterID($cursor)
+        ->setOrder(DrydockLogQuery::ORDER_ID)
+        ->execute();
+
+      if ($logs) {
+        foreach ($logs as $log) {
+          $console->writeErr("%s\n", $log->getMessage());
+        }
+        $cursor = max(mpull($logs, 'getID'));
+      }
     }
 
     $console->writeOut("Acquired Lease %s\n", $lease->getID());

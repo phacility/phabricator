@@ -33,13 +33,6 @@ abstract class DrydockBlueprint {
     return;
   }
 
-  protected function getAllocator($type) {
-    $allocator = new DrydockAllocator();
-    $allocator->setResourceType($type);
-
-    return $allocator;
-  }
-
   final public function acquireLease(
     DrydockResource $resource,
     DrydockLease $lease) {
@@ -101,13 +94,18 @@ abstract class DrydockBlueprint {
     return false;
   }
 
-  protected function executeAllocateResource() {
+  protected function executeAllocateResource(DrydockLease $lease) {
     throw new Exception("This blueprint can not allocate resources!");
   }
 
-  final public function allocateResource() {
+  final public function allocateResource(DrydockLease $lease) {
+    $this->activeLease = $lease;
+    $this->activeResource = null;
+
+    $this->log('Allocating Resource');
+
     try {
-      $resource = $this->executeAllocateResource();
+      $resource = $this->executeAllocateResource($lease);
     } catch (Exception $ex) {
       $this->logException($ex);
       $this->activeResource = null;

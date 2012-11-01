@@ -22,7 +22,7 @@ final class DrydockEC2HostBlueprint extends DrydockRemoteHostBlueprint {
     return true;
   }
 
-  public function executeAllocateResource() {
+  public function executeAllocateResource(DrydockLease $lease) {
     $resource = $this->newResourceTemplate('EC2 Host');
 
     $resource->setStatus(DrydockResourceStatus::STATUS_ALLOCATING);
@@ -41,7 +41,7 @@ final class DrydockEC2HostBlueprint extends DrydockRemoteHostBlueprint {
 
     $instance_id = (string)$xml->instancesSet[0]->item[0]->instanceId[0];
 
-    $this->log('Started Instance: {$instance_id}');
+    $this->log("Started Instance: {$instance_id}");
     $resource->setAttribute('instance.id', $instance_id);
     $resource->save();
 
