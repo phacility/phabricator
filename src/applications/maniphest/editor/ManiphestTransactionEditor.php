@@ -410,6 +410,12 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
     $tags = array();
     foreach ($transactions as $xaction) {
       switch ($xaction->getTransactionType()) {
+        case ManiphestTransactionType::TYPE_STATUS:
+          $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_STATUS;
+          break;
+        case ManiphestTransactionType::TYPE_OWNER:
+          $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_OWNER;
+          break;
         case ManiphestTransactionType::TYPE_CCS:
           $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_CC;
           break;
@@ -418,6 +424,10 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
           break;
         case ManiphestTransactionType::TYPE_PRIORITY:
           $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_PRIORITY;
+          break;
+        case ManiphestTransactionType::TYPE_NONE:
+          // this is a comment which we will check separately below for
+          // content
           break;
         default:
           $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_OTHER;
