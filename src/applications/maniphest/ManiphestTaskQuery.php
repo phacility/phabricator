@@ -25,6 +25,7 @@
 final class ManiphestTaskQuery extends PhabricatorQuery {
 
   private $taskIDs          = array();
+  private $taskPHIDs        = array();
   private $authorPHIDs      = array();
   private $ownerPHIDs       = array();
   private $includeUnowned   = null;
@@ -82,6 +83,11 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
 
   public function withTaskIDs(array $ids) {
     $this->taskIDs = $ids;
+    return $this;
+  }
+
+  public function withTaskPHIDs(array $phids) {
+    $this->taskPHIDs = $phids;
     return $this;
   }
 
@@ -197,6 +203,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
 
     $where = array();
     $where[] = $this->buildTaskIDsWhereClause($conn);
+    $where[] = $this->buildTaskPHIDsWhereClause($conn);
     $where[] = $this->buildStatusWhereClause($conn);
     $where[] = $this->buildPriorityWhereClause($conn);
     $where[] = $this->buildAuthorWhereClause($conn);
@@ -288,7 +295,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
     return $tasks;
   }
 
-  private function buildTaskIDsWhereClause($conn) {
+  private function buildTaskIDsWhereClause(AphrontDatabaseConnection $conn) {
     if (!$this->taskIDs) {
       return null;
     }
@@ -299,7 +306,18 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
       $this->taskIDs);
   }
 
-  private function buildStatusWhereClause($conn) {
+  private function buildTaskPHIDsWhereClause(AphrontDatabaseConnection $conn) {
+    if (!$this->taskPHIDs) {
+      return null;
+    }
+
+    return qsprintf(
+      $conn,
+      'phid in (%Ls)',
+      $this->taskPHIDs);
+  }
+
+  private function buildStatusWhereClause(AphrontDatabaseConnection $conn) {
 
     static $map = array(
       self::STATUS_RESOLVED   => ManiphestTaskStatus::STATUS_CLOSED_RESOLVED,
@@ -328,7 +346,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
     }
   }
 
-  private function buildPriorityWhereClause($conn) {
+  private function buildPriorityWhereClause(AphrontDatabaseConnection $conn) {
     if ($this->priority !== null) {
       return qsprintf(
         $conn,
@@ -345,7 +363,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
     return null;
   }
 
-  private function buildAuthorWhereClause($conn) {
+  private function buildAuthorWhereClause(AphrontDatabaseConnection $conn) {
     if (!$this->authorPHIDs) {
       return null;
     }
@@ -356,7 +374,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
       $this->authorPHIDs);
   }
 
-  private function buildOwnerWhereClause($conn) {
+  private function buildOwnerWhereClause(AphrontDatabaseConnection $conn) {
     if (!$this->ownerPHIDs) {
       if ($this->includeUnowned === null) {
         return null;
@@ -384,7 +402,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
     }
   }
 
-  private function buildFullTextWhereClause($conn) {
+  private function buildFullTextWhereClause(AphrontDatabaseConnection $conn) {
     if (!$this->fullTextSearch) {
       return null;
     }
@@ -408,7 +426,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
       $fulltext_results);
   }
 
-  private function buildSubscriberWhereClause($conn) {
+  private function buildSubscriberWhereClause(AphrontDatabaseConnection $conn) {
     if (!$this->subscriberPHIDs) {
       return null;
     }
@@ -419,7 +437,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
       $this->subscriberPHIDs);
   }
 
-  private function buildProjectWhereClause($conn) {
+  private function buildProjectWhereClause(AphrontDatabaseConnection $conn) {
     if (!$this->projectPHIDs && !$this->includeNoProject) {
       return null;
     }
@@ -440,7 +458,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
     return '('.implode(') OR (', $parts).')';
   }
 
-  private function buildProjectJoinClause($conn) {
+  private function buildProjectJoinClause(AphrontDatabaseConnection $conn) {
     if (!$this->projectPHIDs && !$this->includeNoProject) {
       return null;
     }
@@ -453,7 +471,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
       $project_dao->getTableName());
   }
 
-  private function buildAnyProjectWhereClause($conn) {
+  private function buildAnyProjectWhereClause(AphrontDatabaseConnection $conn) {
     if (!$this->anyProjectPHIDs) {
       return null;
     }
@@ -464,7 +482,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
       $this->anyProjectPHIDs);
   }
 
-  private function buildAnyProjectJoinClause($conn) {
+  private function buildAnyProjectJoinClause(AphrontDatabaseConnection $conn) {
     if (!$this->anyProjectPHIDs) {
       return null;
     }
@@ -476,7 +494,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
       $project_dao->getTableName());
   }
 
-  private function buildXProjectWhereClause($conn) {
+  private function buildXProjectWhereClause(AphrontDatabaseConnection $conn) {
     if (!$this->xprojectPHIDs) {
       return null;
     }
@@ -486,7 +504,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
       'xproject.projectPHID IS NULL');
   }
 
-  private function buildXProjectJoinClause($conn) {
+  private function buildXProjectJoinClause(AphrontDatabaseConnection $conn) {
     if (!$this->xprojectPHIDs) {
       return null;
     }
@@ -500,7 +518,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
       $this->xprojectPHIDs);
   }
 
-  private function buildSubscriberJoinClause($conn) {
+  private function buildSubscriberJoinClause(AphrontDatabaseConnection $conn) {
     if (!$this->subscriberPHIDs) {
       return null;
     }
@@ -512,7 +530,7 @@ final class ManiphestTaskQuery extends PhabricatorQuery {
       $subscriber_dao->getTableName());
   }
 
-  private function buildOrderClause($conn) {
+  private function buildOrderClause(AphrontDatabaseConnection $conn) {
     $order = array();
 
     switch ($this->groupBy) {

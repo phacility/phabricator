@@ -76,7 +76,7 @@ EOSETUP
     $lease->save();
   }
 
-  public function executeAllocateResource() {
+  public function executeAllocateResource(DrydockLease $lease) {
 
     $resource = $this->newResourceTemplate('Apache');
 

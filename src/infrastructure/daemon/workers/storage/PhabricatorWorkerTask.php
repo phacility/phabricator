@@ -27,6 +27,16 @@ abstract class PhabricatorWorkerTask extends PhabricatorWorkerDAO {
   protected $dataID;
 
   private $data;
+  private $executionException;
+
+  public function setExecutionException(Exception $execution_exception) {
+    $this->executionException = $execution_exception;
+    return $this;
+  }
+
+  public function getExecutionException() {
+    return $this->executionException;
+  }
 
   public function setData($data) {
     $this->data = $data;

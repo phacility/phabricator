@@ -102,6 +102,7 @@ final class DifferentialAddCommentView extends AphrontView {
     $form = new AphrontFormView();
     $form
       ->setWorkflow(true)
+      ->setFlexible(true)
       ->setUser($this->user)
       ->setAction($this->actionURI)
       ->addHiddenInput('revision_id', $revision->getID())
@@ -164,8 +165,6 @@ final class DifferentialAddCommentView extends AphrontView {
 
     $diff = $revision->loadActiveDiff();
     $warnings = mpull($this->auxFields, 'renderWarningBoxForRevisionAccept');
-    $lint_warning = null;
-    $unit_warning = null;
 
     Javelin::initBehavior(
       'differential-accept-with-errors',
@@ -192,8 +191,6 @@ final class DifferentialAddCommentView extends AphrontView {
         'inline'    => 'inline-comment-preview',
       ));
 
-    $panel_view = new AphrontPanelView();
-    $panel_view->appendChild($form);
     $warning_container = '<div id="warnings">';
     foreach ($warnings as $warning) {
       if ($warning) {
@@ -201,18 +198,9 @@ final class DifferentialAddCommentView extends AphrontView {
       }
     }
     $warning_container .= '</div>';
-    $panel_view->appendChild($warning_container);
-    if ($lint_warning) {
-      $panel_view->appendChild($lint_warning);
-    }
-    if ($unit_warning) {
-      $panel_view->appendChild($unit_warning);
-    }
 
-    $panel_view->setHeader($is_serious ? 'Add Comment' : 'Leap Into Action');
-
-    $panel_view->addClass('aphront-panel-accent');
-    $panel_view->addClass('aphront-panel-flush');
+    $header = id(new PhabricatorHeaderView())
+      ->setHeader($is_serious ? 'Add Comment' : 'Leap Into Action');
 
     return
       id(new PhabricatorAnchorView())
@@ -220,7 +208,9 @@ final class DifferentialAddCommentView extends AphrontView {
         ->setNavigationMarker(true)
         ->render().
       '<div class="differential-add-comment-panel">'.
-        $panel_view->render().
+        $header->render().
+        $form->render().
+        $warning_container.
         '<div class="aphront-panel-preview aphront-panel-flush">'.
           '<div id="comment-preview">'.
             '<span class="aphront-panel-preview-loading-text">'.

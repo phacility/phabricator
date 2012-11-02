@@ -53,10 +53,12 @@ class ConduitAPI_maniphest_query_Method
     $orders = implode(', ', $orders);
 
     return array(
-      'ownerPHIDs'        => 'optional list',
-      'authorPHIDs'       => 'optional list',
-      'projectPHIDs'      => 'optional list',
-      'ccPHIDs'           => 'optional list',
+      'ids'               => 'optional list<uint>',
+      'phids'             => 'optional list<phid>',
+      'ownerPHIDs'        => 'optional list<phid>',
+      'authorPHIDs'       => 'optional list<phid>',
+      'projectPHIDs'      => 'optional list<phid>',
+      'ccPHIDs'           => 'optional list<phid>',
       'fullText'          => 'optional string',
 
       'status'            => 'optional enum<'.$statuses.'>',
@@ -78,6 +80,16 @@ class ConduitAPI_maniphest_query_Method
 
   protected function execute(ConduitAPIRequest $request) {
     $query = new ManiphestTaskQuery();
+
+    $task_ids = $request->getValue('ids');
+    if ($task_ids) {
+      $query->withTaskIDs($task_ids);
+    }
+
+    $task_phids = $request->getValue('phids');
+    if ($task_phids) {
+      $query->withTaskPHIDs($task_phids);
+    }
 
     $owners = $request->getValue('ownerPHIDs');
     if ($owners) {

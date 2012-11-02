@@ -1020,6 +1020,14 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('daemontaskarchive.sql'),
       ),
+      'drydocktaskid.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('drydocktaskid.sql'),
+      ),
+      'drydockresoucetype.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('drydockresourcetype.sql'),
+      ),
     );
   }
 

@@ -72,8 +72,10 @@ abstract class PhabricatorMailReplyHandler {
   }
 
   private function sanityCheckEmail(PhabricatorMetaMTAReceivedMail $mail) {
-    $body = $mail->getCleanTextBody();
-    if (empty($body)) {
+    $body        = $mail->getCleanTextBody();
+    $attachments = $mail->getAttachments();
+
+    if (empty($body) && empty($attachments)) {
       return 'Empty email body. Email should begin with an !action and / or '.
              'text to comment. Inline replies and signatures are ignored.';
     }
@@ -303,6 +305,28 @@ EOBODY;
 
     $address = "{$prefix}{$receiver_id}+{$user_id}+{$hash}@{$domain}";
     return $this->getSingleReplyHandlerPrefix($address);
+  }
+
+  final protected function enhanceBodyWithAttachments($body,
+                                                      array $attachments) {
+    if (!$attachments) {
+      return $body;
+    }
+
+    $files = id(new PhabricatorFile())
+      ->loadAllWhere('phid in (%Ls)', $attachments);
+
+    // if we have some text then double return before adding our file list
+    if ($body) {
+      $body .= "\n\n";
+    }
+
+    foreach ($files as $file) {
+      $file_str = sprintf('- {F%d, layout=link}', $file->getID());
+      $body .= $file_str."\n";
+    }
+
+    return rtrim($body);
   }
 
 }

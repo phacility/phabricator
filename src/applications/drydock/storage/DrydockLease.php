@@ -20,10 +20,12 @@ final class DrydockLease extends DrydockDAO {
 
   protected $phid;
   protected $resourceID;
+  protected $resourceType;
   protected $until;
   protected $ownerPHID;
   protected $attributes = array();
-  protected $status;
+  protected $status = DrydockLeaseStatus::STATUS_PENDING;
+  protected $taskID;
 
   private $resource;
 
@@ -75,10 +77,37 @@ final class DrydockLease extends DrydockDAO {
       $this->getResourceID());
   }
 
+  public function queueForActivation() {
+    if ($this->getID()) {
+      throw new Exception(
+        "Only new leases may be queued for activation!");
+    }
+
+    $this->setStatus(DrydockLeaseStatus::STATUS_PENDING);
+    $this->save();
+
+    // NOTE: Prevent a race where some eager worker quickly grabs the task
+    // before we can save the Task ID.
+
+    $this->openTransaction();
+      $this->beginReadLocking();
+
+        $this->reload();
+
+        $task = PhabricatorWorker::scheduleTask(
+          'DrydockAllocatorWorker',
+          $this->getID());
+
+        $this->setTaskID($task->getID());
+        $this->save();
+
+      $this->endReadLocking();
+    $this->saveTransaction();
+
+    return $this;
+  }
+
   public function release() {
-
-    // TODO: Insert a cleanup task into the taskmaster queue.
-
     $this->setStatus(DrydockLeaseStatus::STATUS_RELEASED);
     $this->save();
 
@@ -95,25 +124,43 @@ final class DrydockLease extends DrydockDAO {
     }
   }
 
-  public function waitUntilActive() {
-    $this->reload();
+  public static function waitForLeases(array $leases) {
+    assert_instances_of($leases, 'DrydockLease');
+
+    $task_ids = array_filter(mpull($leases, 'getTaskID'));
+    PhabricatorWorker::waitForTasks($task_ids);
+
+    $unresolved = $leases;
     while (true) {
-      switch ($this->status) {
-        case DrydockLeaseStatus::STATUS_ACTIVE:
-          break 2;
-        case DrydockLeaseStatus::STATUS_RELEASED:
-        case DrydockLeaseStatus::STATUS_EXPIRED:
-        case DrydockLeaseStatus::STATUS_BROKEN:
-          throw new Exception("Lease will never become active!");
-        case DrydockLeaseStatus::STATUS_PENDING:
-          break;
+      foreach ($unresolved as $key => $lease) {
+        $lease->reload();
+        switch ($lease->getStatus()) {
+          case DrydockLeaseStatus::STATUS_ACTIVE:
+            unset($unresolved[$key]);
+            break;
+          case DrydockLeaseStatus::STATUS_RELEASED:
+          case DrydockLeaseStatus::STATUS_EXPIRED:
+          case DrydockLeaseStatus::STATUS_BROKEN:
+            throw new Exception("Lease will never become active!");
+          case DrydockLeaseStatus::STATUS_PENDING:
+            break;
+        }
       }
-      sleep(2);
-      $this->reload();
+
+      if ($unresolved) {
+        sleep(1);
+      } else {
+        break;
+      }
     }
 
-    $this->attachResource($this->loadResource());
+    foreach ($leases as $lease) {
+      $lease->attachResource($lease->loadResource());
+    }
+  }
 
+  public function waitUntilActive() {
+    self::waitForLeases(array($this));
     return $this;
   }
 

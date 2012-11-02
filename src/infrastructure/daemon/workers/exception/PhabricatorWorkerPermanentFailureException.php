@@ -16,11 +16,6 @@
  * limitations under the License.
  */
 
-/**
- * Trivial example worker; processes tasks which require no work very slowly.
- */
-final class PhabricatorGoodForNothingWorker extends PhabricatorWorker {
-  protected function doWork() {
-    sleep(10);
-  }
+final class PhabricatorWorkerPermanentFailureException extends Exception {
+
 }

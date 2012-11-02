@@ -1521,7 +1521,7 @@ final class DifferentialChangesetParser {
             implode(' &bull; ', $contents).
           '</td>'.
           '<th class="show-context-line">'.$context_line.'</td>'.
-          '<td colspan="2" class="show-context">'.$context.'</td>');
+          '<td colspan="3" class="show-context">'.$context.'</td>');
 
         $html[] = $container;
 

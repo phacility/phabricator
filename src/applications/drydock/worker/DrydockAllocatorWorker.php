@@ -19,20 +19,18 @@
 final class DrydockAllocatorWorker extends PhabricatorWorker {
 
   protected function doWork() {
-    $data = $this->getTaskData();
+    $lease_id = $this->getTaskData();
 
-    $lease = id(new DrydockLease())->loadOneWhere(
-      'id = %d',
-      $data['lease']);
+    $lease = id(new DrydockLease())->load($lease_id);
     if (!$lease) {
       return;
     }
 
-    $type = $data['type'];
+    $type = $lease->getResourceType();
 
     $candidates = id(new DrydockResource())->loadAllWhere(
       'type = %s AND status = %s',
-      $type,
+      $lease->getResourceType(),
       DrydockResourceStatus::STATUS_OPEN);
 
     if ($candidates) {
@@ -64,12 +62,7 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
       shuffle($blueprints);
 
       $blueprint = head($blueprints);
-
-      if (isset($data['synchronous'])) {
-        $blueprint->makeSynchronous();
-      }
-
-      $resource = $blueprint->allocateResource();
+      $resource = $blueprint->allocateResource($lease);
     }
 
     $blueprint = $resource->getBlueprint();

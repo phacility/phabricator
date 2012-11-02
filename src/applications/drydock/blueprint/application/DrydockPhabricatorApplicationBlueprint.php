@@ -27,15 +27,16 @@ abstract class DrydockPhabricatorApplicationBlueprint
     return true;
   }
 
-  public function executeAllocateResource() {
+  public function executeAllocateResource(DrydockLease $lease) {
 
     $resource = $this->newResourceTemplate('Phabricator');
 
     $resource->setStatus(DrydockResourceStatus::STATUS_ALLOCATING);
     $resource->save();
 
-    $allocator = $this->getAllocator('host');
-    $host = $allocator->allocate();
+    $host = id(new DrydockLease())
+      ->setResourceType('host')
+      ->queueForActivation();
 
     $cmd = $host->waitUntilActive()->getInterface('command');
 
