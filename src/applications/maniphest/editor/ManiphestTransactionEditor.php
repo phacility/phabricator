@@ -264,7 +264,7 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
 
     $is_create = $this->isCreate($transactions);
 
-    $task_uri = PhabricatorEnv::getURI('/T'.$task->getID());
+    $task_uri = PhabricatorEnv::getProductionURI('/T'.$task->getID());
 
     $reply_handler = $this->buildReplyHandler($task);
 
