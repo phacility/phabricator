@@ -820,12 +820,14 @@ final class DiffusionCommitController extends DiffusionController {
     require_celerity_resource('phabricator-object-selector-css');
     require_celerity_resource('javelin-behavior-phabricator-object-selector');
 
-    $action = new AphrontHeadsupActionView();
-    $action->setName('Edit Maniphest Tasks');
-    $action->setURI('/search/attach/'.$commit->getPHID().'/TASK/edge/');
-    $action->setWorkflow(true);
-    $action->setClass('attach-maniphest');
-    $actions[] = $action;
+    if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
+      $action = new AphrontHeadsupActionView();
+      $action->setName('Edit Maniphest Tasks');
+      $action->setURI('/search/attach/'.$commit->getPHID().'/TASK/edge/');
+      $action->setWorkflow(true);
+      $action->setClass('attach-maniphest');
+      $actions[] = $action;
+    }
 
     if ($user->getIsAdmin()) {
       $action = new AphrontHeadsupActionView();
