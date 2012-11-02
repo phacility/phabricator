@@ -119,9 +119,17 @@ final class PhabricatorFeedStoryPublisher {
       $this->insertNotifications($chrono_key);
       $this->sendNotification($chrono_key);
     }
+
+    $uris = PhabricatorEnv::getEnvConfig('feed.http-hooks', array());
+    foreach ($uris as $uri) {
+      $task = PhabricatorWorker::scheduleTask(
+        'FeedPublisherWorker',
+        array('chrono_key' => $chrono_key, 'uri' => $uri)
+      );
+    }
+
     return $story;
   }
-
 
   private function insertNotifications($chrono_key) {
     $subscribed_phids = $this->subscribedPHIDs;
