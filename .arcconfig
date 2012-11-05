@@ -3,7 +3,6 @@
   "conduit_uri" : "https://secure.phabricator.com/api/",
   "lint.engine" : "PhabricatorLintEngine",
   "unit.engine" : "PhutilUnitTestEngine",
-  "copyright_holder" : "Facebook, Inc.",
   "phutil_libraries" : {
     "phabricator" : "src/"
   },
