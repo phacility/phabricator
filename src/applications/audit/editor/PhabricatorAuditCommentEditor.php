@@ -395,16 +395,19 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
       $email_to[] = $author_phid;
     }
 
-    $email_cc = array();
     foreach ($other_comments as $other_comment) {
-      $email_cc[] = $other_comment->getActorPHID();
+      $email_cc[$other_comment->getActorPHID()] = true;
     }
 
     foreach ($requests as $request) {
       if ($request->getAuditStatus() == PhabricatorAuditStatusConstants::CC) {
-        $email_cc[] = $request->getAuditorPHID();
+        $email_cc[$request->getAuditorPHID()] = true;
+      } else if ($request->getAuditStatus() ==
+                 PhabricatorAuditStatusConstants::RESIGNED) {
+        unset($email_cc[$request->getAuditorPHID()]);
       }
     }
+    $email_cc = array_keys($email_cc);
 
     $phids = array_merge($email_to, $email_cc);
     $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();
