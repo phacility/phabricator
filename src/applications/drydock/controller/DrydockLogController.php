@@ -27,38 +27,10 @@ final class DrydockLogController extends DrydockController {
 
     $logs = $query->executeWithOffsetPager($pager);
 
-    $rows = array();
-    foreach ($logs as $log) {
-      $rows[] = array(
-        $log->getResourceID(),
-        $log->getLeaseID(),
-        phutil_escape_html($log->getMessage()),
-        phabricator_datetime($log->getEpoch(), $user),
-      );
-    }
+    $table = $this->buildLogTableView($logs);
+    $table->appendChild($pager);
 
-    $table = new AphrontTableView($rows);
-    $table->setHeaders(
-      array(
-        'Resource',
-        'Lease',
-        'Message',
-        'Date',
-      ));
-    $table->setColumnClasses(
-      array(
-        '',
-        '',
-        'wide',
-        '',
-      ));
-
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Drydock Logs');
-    $panel->appendChild($table);
-    $panel->appendChild($pager);
-
-    $nav->appendChild($panel);
+    $nav->appendChild($table);
 
     return $this->buildStandardPageResponse(
       $nav,

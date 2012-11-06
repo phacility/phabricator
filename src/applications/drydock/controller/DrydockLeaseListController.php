@@ -9,7 +9,8 @@ final class DrydockLeaseListController extends DrydockController {
     $nav = $this->buildSideNav('lease');
 
     $pager = new AphrontPagerView();
-    $pager->setURI(new PhutilURI('/drydock/lease/'), 'page');
+    $pager->setURI(new PhutilURI('/drydock/lease/'), 'offset');
+    $pager->setOffset($request->getInt('offset'));
 
     $data = id(new DrydockLease())->loadAllWhere(
       '1 = 1 ORDER BY id DESC LIMIT %d, %d',
@@ -32,8 +33,14 @@ final class DrydockLeaseListController extends DrydockController {
     foreach ($data as $lease) {
       $resource = idx($resources, $lease->getResourceID());
       $rows[] = array(
-        $lease->getID(),
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => $this->getApplicationURI('/lease/'.$lease->getID().'/'),
+          ),
+          $lease->getID()),
         DrydockLeaseStatus::getNameForStatus($lease->getStatus()),
+        phutil_escape_html($lease->getResourceType()),
         ($lease->getOwnerPHID()
           ? $handles[$lease->getOwnerPHID()]->renderLink()
           : null),
@@ -50,13 +57,15 @@ final class DrydockLeaseListController extends DrydockController {
       array(
         'ID',
         'Status',
-        'Owner',
+        'Resource Type',
         'Resource ID',
+        'Owner',
         'Resource',
         'Created',
       ));
     $table->setColumnClasses(
       array(
+        '',
         '',
         '',
         '',
@@ -75,7 +84,8 @@ final class DrydockLeaseListController extends DrydockController {
     return $this->buildStandardPageResponse(
       $nav,
       array(
-        'title' => 'Leases',
+        'device'  => true,
+        'title'   => 'Leases',
       ));
 
   }

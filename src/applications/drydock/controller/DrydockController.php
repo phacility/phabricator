@@ -30,4 +30,44 @@ abstract class DrydockController extends PhabricatorController {
     return $nav;
   }
 
+  protected function buildLogTableView(array $logs) {
+    assert_instances_of($logs, 'DrydockLog');
+
+    $user = $this->getRequest()->getUser();
+
+    // TODO: It's probably a stretch to claim this works on mobile.
+
+    $rows = array();
+    foreach ($logs as $log) {
+      $rows[] = array(
+        $log->getResourceID(),
+        $log->getLeaseID(),
+        phutil_escape_html($log->getMessage()),
+        phabricator_datetime($log->getEpoch(), $user),
+      );
+    }
+
+    $table = new AphrontTableView($rows);
+    $table->setHeaders(
+      array(
+        'Resource',
+        'Lease',
+        'Message',
+        'Date',
+      ));
+    $table->setColumnClasses(
+      array(
+        '',
+        '',
+        'wide',
+        '',
+      ));
+
+    $panel = new AphrontPanelView();
+    $panel->setHeader('Logs');
+    $panel->appendChild($table);
+
+    return $panel;
+  }
+
 }
