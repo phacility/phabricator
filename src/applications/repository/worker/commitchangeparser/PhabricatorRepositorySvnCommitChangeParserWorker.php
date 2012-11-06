@@ -1,6 +1,6 @@
 <?php
 
-class PhabricatorRepositorySvnCommitChangeParserWorker
+final class PhabricatorRepositorySvnCommitChangeParserWorker
   extends PhabricatorRepositoryCommitChangeParserWorker {
 
   protected function parseCommit(
