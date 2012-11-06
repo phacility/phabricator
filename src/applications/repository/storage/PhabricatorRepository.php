@@ -10,6 +10,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
   const TABLE_FILESYSTEM = 'repository_filesystem';
   const TABLE_SUMMARY = 'repository_summary';
   const TABLE_BADCOMMIT = 'repository_badcommit';
+  const TABLE_LINTMESSAGE = 'repository_lintmessage';
 
   protected $phid;
   protected $name;

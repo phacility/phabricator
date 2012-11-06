@@ -1024,6 +1024,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'sql',
         'name'    => $this->getPatchPath('dropfileproxyimage.sql'),
       ),
+      'repository-lint.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('repository-lint.sql'),
+      ),
     );
   }
 
