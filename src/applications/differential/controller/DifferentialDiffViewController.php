@@ -83,14 +83,23 @@ final class DifferentialDiffViewController extends DifferentialController {
       $top_panel = $action_panel;
     }
 
-
+    $arc_unit = id(new DifferentialDiffProperty())->loadOneWhere(
+      'diffID = %d and name = %s',
+      $this->id,
+      'arc:unit');
+    if ($arc_unit) {
+      $test_data = array($arc_unit->getName() => $arc_unit->getData());
+    } else {
+      $test_data = array();
+    }
 
     $changesets = $diff->loadChangesets();
     $changesets = msort($changesets, 'getSortKey');
 
     $table_of_contents = id(new DifferentialDiffTableOfContentsView())
       ->setChangesets($changesets)
-      ->setVisibleChangesets($changesets);
+      ->setVisibleChangesets($changesets)
+      ->setUnitTestData($test_data);
 
     $refs = array();
     foreach ($changesets as $changeset) {
