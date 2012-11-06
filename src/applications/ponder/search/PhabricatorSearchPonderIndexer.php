@@ -48,6 +48,19 @@ final class PhabricatorSearchPonderIndexer
       }
     }
 
+    $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+      $question->getPHID());
+    $handles = id(new PhabricatorObjectHandleData($subscribers))
+      ->loadHandles();
+
+    foreach ($handles as $phid => $handle) {
+      $doc->addRelationship(
+        PhabricatorSearchRelationship::RELATIONSHIP_SUBSCRIBER,
+        $phid,
+        $handle->getType(),
+        $question->getDateModified()); // Bogus timestamp.
+    }
+
     self::reindexAbstractDocument($doc);
   }
 }

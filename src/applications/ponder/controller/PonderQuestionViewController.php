@@ -41,8 +41,8 @@ final class PonderQuestionViewController extends PonderController {
 
     $object_phids = array_merge($object_phids, $subscribers);
 
-    $handles = $this->loadViewerHandles($object_phids);
     $this->loadHandles($object_phids);
+    $handles = $this->getLoadedHandles();
 
     $detail_panel = new PonderQuestionDetailView();
     $detail_panel

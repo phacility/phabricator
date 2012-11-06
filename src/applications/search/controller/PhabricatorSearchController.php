@@ -81,6 +81,11 @@ final class PhabricatorSearchController
               $query->setParameter('owner', $request->getArr('owner'));
             }
 
+            if ($request->getArr('subscribers')) {
+              $query->setParameter('subscribers',
+                                   $request->getArr('subscribers'));
+            }
+
             if ($request->getInt('open')) {
               $query->setParameter('open', $request->getInt('open'));
             }
@@ -109,6 +114,7 @@ final class PhabricatorSearchController
     $phids = array_merge(
       $query->getParameter('author', array()),
       $query->getParameter('owner', array()),
+      $query->getParameter('subscribers', array()),
       $query->getParameter('project', array())
     );
 
@@ -123,6 +129,11 @@ final class PhabricatorSearchController
       $handles,
       $query->getParameter('owner', array()));
     $owner_value = mpull($owner_value, 'getFullName', 'getPHID');
+
+    $subscribers_value = array_select_keys(
+      $handles,
+      $query->getParameter('subscribers', array()));
+    $subscribers_value = mpull($subscribers_value, 'getFullName', 'getPHID');
 
     $project_value = array_select_keys(
       $handles,
@@ -174,6 +185,12 @@ final class PhabricatorSearchController
             'Tip: search for "Up For Grabs" to find unowned documents.'))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
+          ->setName('subscribers')
+          ->setLabel('Subscribers')
+          ->setDatasource('/typeahead/common/users/')
+          ->setValue($subscribers_value))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
           ->setName('project')
           ->setLabel('Project')
           ->setDatasource('/typeahead/common/projects/')
@@ -213,15 +230,16 @@ final class PhabricatorSearchController
 
       if ($results) {
 
-        $loader = new PhabricatorObjectHandleData($results);
+        $loader = id(new PhabricatorObjectHandleData($results))
+          ->setViewer($user);
         $handles = $loader->loadHandles();
         $objects = $loader->loadObjects();
         $results = array();
         foreach ($handles as $phid => $handle) {
-          $view = new PhabricatorSearchResultView();
-          $view->setHandle($handle);
-          $view->setQuery($query);
-          $view->setObject(idx($objects, $phid));
+          $view = id(new PhabricatorSearchResultView())
+            ->setHandle($handle)
+            ->setQuery($query)
+            ->setObject(idx($objects, $phid));
           $results[] = $view->render();
         }
         $results =

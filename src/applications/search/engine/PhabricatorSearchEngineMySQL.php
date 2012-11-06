@@ -227,6 +227,12 @@ final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
     $join[] = $this->joinRelationship(
       $conn_r,
       $query,
+      'subscribers',
+      PhabricatorSearchRelationship::RELATIONSHIP_SUBSCRIBER);
+
+    $join[] = $this->joinRelationship(
+      $conn_r,
+      $query,
       'project',
       PhabricatorSearchRelationship::RELATIONSHIP_PROJECT);
 

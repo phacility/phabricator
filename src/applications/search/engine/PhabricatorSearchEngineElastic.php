@@ -118,6 +118,7 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
       'author' => PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR,
       'open' => PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
       'owner' => PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
+      'subscribers' => PhabricatorSearchRelationship::RELATIONSHIP_SUBSCRIBER,
       'project' => PhabricatorSearchRelationship::RELATIONSHIP_PROJECT,
       'repository' => PhabricatorSearchRelationship::RELATIONSHIP_REPOSITORY,
     );

@@ -26,6 +26,9 @@ final class PhabricatorSearchResultView extends AphrontView {
 
   public function render() {
     $handle = $this->handle;
+    if (!$handle->isComplete()) {
+      return;
+    }
 
     $type_name = nonempty($handle->getTypeName(), 'Document');
 
@@ -66,19 +69,10 @@ final class PhabricatorSearchResultView extends AphrontView {
         break;
     }
 
-    $index_link = phutil_render_tag(
-      'a',
-      array(
-        'href' => '/search/index/'.$handle->getPHID().'/',
-        'style' => 'float: right',
-      ),
-      'Examine Index');
-
     return
       '<div class="phabricator-search-result">'.
         $img.
         '<div class="result-desc">'.
-          $index_link.
           phutil_render_tag(
             'a',
             array(
