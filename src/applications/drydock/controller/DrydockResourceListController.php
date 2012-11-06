@@ -57,15 +57,6 @@ final class DrydockResourceListController extends DrydockController {
     $panel = new AphrontPanelView();
     $panel->setHeader('Drydock Resources');
 
-    $panel->addButton(
-      phutil_render_tag(
-        'a',
-        array(
-          'href' => '/drydock/resource/allocate/',
-          'class' => 'green button',
-        ),
-        'Allocate Resource'));
-
     $panel->appendChild($table);
     $panel->appendChild($pager);
 

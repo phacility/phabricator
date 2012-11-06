@@ -2,7 +2,6 @@
 
 final class DrydockLease extends DrydockDAO {
 
-  protected $phid;
   protected $resourceID;
   protected $resourceType;
   protected $until;
@@ -12,6 +11,10 @@ final class DrydockLease extends DrydockDAO {
   protected $taskID;
 
   private $resource;
+
+  public function getLeaseName() {
+    return pht('Lease %d', $this->getID());
+  }
 
   public function getConfiguration() {
     return array(
@@ -112,6 +115,7 @@ final class DrydockLease extends DrydockDAO {
     assert_instances_of($leases, 'DrydockLease');
 
     $task_ids = array_filter(mpull($leases, 'getTaskID'));
+
     PhabricatorWorker::waitForTasks($task_ids);
 
     $unresolved = $leases;
@@ -123,9 +127,11 @@ final class DrydockLease extends DrydockDAO {
             unset($unresolved[$key]);
             break;
           case DrydockLeaseStatus::STATUS_RELEASED:
+            throw new Exception("Lease has already been released!");
           case DrydockLeaseStatus::STATUS_EXPIRED:
+            throw new Exception("Lease has already expired!");
           case DrydockLeaseStatus::STATUS_BROKEN:
-            throw new Exception("Lease will never become active!");
+            throw new Exception("Lease has been broken!");
           case DrydockLeaseStatus::STATUS_PENDING:
             break;
         }

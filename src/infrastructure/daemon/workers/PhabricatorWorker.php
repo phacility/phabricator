@@ -131,6 +131,21 @@ abstract class PhabricatorWorker {
       }
 
       $task = head($tasks)->executeTask();
+
+      $ex = $task->getExecutionException();
+      if ($ex) {
+        throw $ex;
+      }
+    }
+
+    $tasks = id(new PhabricatorWorkerArchiveTask())->loadAllWhere(
+      'id IN (%Ld)',
+      $task_ids);
+
+    foreach ($tasks as $task) {
+      if ($task->getResult() != PhabricatorWorkerArchiveTask::RESULT_SUCCESS) {
+        throw new Exception("Task ".$task->getID()." failed!");
+      }
     }
   }
 

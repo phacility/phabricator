@@ -1136,6 +1136,22 @@ return array(
 
 // -- Drydock --------------------------------------------------------------- //
 
+  // Drydock is used to allocate various software resources. For example, it
+  // allocates working copies so continuous integration tests can be executed.
+  // It needs at least one host to allocate these resources on.
+  //
+  // Set this option to true to let Drydock use the localhost for allocations.
+  // This is the simplest configuration, but the least scalable. You MUST
+  // disable this if you run daemons on more than one machine -- if you do not,
+  // a daemon on machine A may allocate a resource locally, and then a daemon
+  // on machine B may try to access it.
+  'drydock.localhost.enabled' => true,
+
+  // If the localhost is available to Drydock, specify the path on disk where
+  // Drydock should write files. You should create this directory and make sure
+  // the user that the daemons run as has permission to write to it.
+  'drydock.localhost.path'    => '/var/drydock/',
+
   // If you want to use Drydock's builtin EC2 Blueprints, configure your AWS
   // EC2 credentials here.
   'amazon-ec2.access-key'   => null,

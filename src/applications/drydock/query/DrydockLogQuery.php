@@ -75,7 +75,7 @@ final class DrydockLogQuery extends PhabricatorOffsetPagedQuery {
   private function buildOrderClause(AphrontDatabaseConnection $conn_r) {
     switch ($this->order) {
       case self::ORDER_EPOCH:
-        return 'ORDER BY log.epoch DESC';
+        return 'ORDER BY log.epoch DESC, log.id DESC';
       case self::ORDER_ID:
         return 'ORDER BY id ASC';
       default:
