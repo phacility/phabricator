@@ -856,17 +856,6 @@ return array(
     'image/vnd.microsoft.icon'  => true,
   ),
 
-  // Phabricator can proxy images from other servers so you can paste the URI
-  // to a funny picture of a cat into the comment box and have it show up as an
-  // image. However, this means the webserver Phabricator is running on will
-  // make HTTP requests to arbitrary URIs. If the server has access to internal
-  // resources, this could be a security risk. You should only enable it if you
-  // are installed entirely a VPN and VPN access is required to access
-  // Phabricator, or if the webserver has no special access to anything. If
-  // unsure, it is safer to leave this disabled.
-  'files.enable-proxy' => false,
-
-
 // -- Storage --------------------------------------------------------------- //
 
   // Phabricator allows users to upload files, and can keep them in various

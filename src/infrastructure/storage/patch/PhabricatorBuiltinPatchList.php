@@ -1020,6 +1020,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'php',
         'name'    => $this->getPatchPath('liskcounters.php'),
       ),
+      'dropfileproxyimage.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('dropfileproxyimage.sql'),
+      ),
     );
   }
 
