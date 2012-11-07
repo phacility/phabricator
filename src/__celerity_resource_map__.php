@@ -7,6 +7,13 @@
  */
 
 celerity_register_resource_map(array(
+  '/rsrc/image/2x/header_logo.png' =>
+  array(
+    'hash' => '89ac510efefeffb048a3d7e85161b7b6',
+    'uri' => '/res/89ac510e/rsrc/image/2x/header_logo.png',
+    'disk' => '/rsrc/image/2x/header_logo.png',
+    'type' => 'png',
+  ),
   '/rsrc/image/app/app_audit.png' =>
   array(
     'hash' => '53340003d1daf306b64ed5ebb08bc204',
@@ -117,6 +124,13 @@ celerity_register_resource_map(array(
     'hash' => 'a8945e12ceeaddd5b491a8d81cfa19c1',
     'uri' => '/res/a8945e12/rsrc/image/grippy_texture.png',
     'disk' => '/rsrc/image/grippy_texture.png',
+    'type' => 'png',
+  ),
+  '/rsrc/image/header_logo.png' =>
+  array(
+    'hash' => '96a289484c7a0e2bf1553e422f4d33bd',
+    'uri' => '/res/96a28948/rsrc/image/header_logo.png',
+    'disk' => '/rsrc/image/header_logo.png',
     'type' => 'png',
   ),
   '/rsrc/image/icon/fatcow/arrow_branch.png' =>
@@ -489,13 +503,6 @@ celerity_register_resource_map(array(
     'uri' => '/res/66429767/rsrc/image/loading.gif',
     'disk' => '/rsrc/image/loading.gif',
     'type' => 'gif',
-  ),
-  '/rsrc/image/logo_grey.png' =>
-  array(
-    'hash' => 'da055af1f6f80ea9d7d13ae1d59ca3cd',
-    'uri' => '/res/da055af1/rsrc/image/logo_grey.png',
-    'disk' => '/rsrc/image/logo_grey.png',
-    'type' => 'png',
   ),
   '/rsrc/image/main_texture.png' =>
   array(
@@ -2566,7 +2573,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-main-menu-view' =>
   array(
-    'uri' => '/res/844aa317/rsrc/css/application/base/main-menu-view.css',
+    'uri' => '/res/3280629d/rsrc/css/application/base/main-menu-view.css',
     'type' => 'css',
     'requires' =>
     array(
