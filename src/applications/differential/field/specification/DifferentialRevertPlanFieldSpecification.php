@@ -95,4 +95,16 @@ final class DifferentialRevertPlanFieldSpecification
     return $value;
   }
 
+  public function shouldAddToSearchIndex() {
+    return true;
+  }
+
+  public function getValueForSearchIndex() {
+    return $this->value;
+  }
+
+  public function getKeyForSearchIndex() {
+    return 'rpln';
+  }
+
 }

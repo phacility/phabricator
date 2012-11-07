@@ -383,6 +383,31 @@ abstract class DifferentialFieldSpecification {
     return $key;
   }
 
+/* -(  Extending the Search Interface  )------------------------------------ */
+
+  /**
+   * @task search
+   */
+  public function shouldAddToSearchIndex() {
+    return false;
+  }
+
+  /**
+   * @task search
+   */
+  public function getValueForSearchIndex() {
+    throw new DifferentialFieldSpecificationIncompleteException($this);
+  }
+
+  /**
+   * NOTE: Keys *must be* 4 characters for
+   * @{class:PhabricatorSearchEngineMySQL}.
+   *
+   * @task search
+   */
+  public function getKeyForSearchIndex() {
+    throw new DifferentialFieldSpecificationIncompleteException($this);
+  }
 
 /* -(  Extending Commit Messages  )------------------------------------------ */
 
