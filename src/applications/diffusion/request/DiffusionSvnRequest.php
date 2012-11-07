@@ -18,6 +18,10 @@ final class DiffusionSvnRequest extends DiffusionRequest {
     }
   }
 
+  protected function getArcanistBranch() {
+    return 'svn';
+  }
+
   public function getStableCommitName() {
     if ($this->commit) {
       return $this->commit;

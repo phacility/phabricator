@@ -150,6 +150,16 @@ abstract class PhabricatorBaseEnglishTranslation
         '%d Assigned Tasks',
       ),
 
+      'Show %d Lint Message(s)' => array(
+        'Show %d Lint Message',
+        'Show %d Lint Messages',
+      ),
+
+      'Switch for %d Lint Message(s)' => array(
+        'Switch for %d Lint Message',
+        'Switch for %d Lint Messages',
+      ),
+
     );
   }
 

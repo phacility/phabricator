@@ -203,6 +203,17 @@ abstract class DiffusionRequest {
     return $this->branch;
   }
 
+  protected function getArcanistBranch() {
+    return $this->getBranch();
+  }
+
+  public function loadBranch() {
+    return id(new PhabricatorRepositoryBranch())->loadOneWhere(
+      'repositoryID = %d AND name = %s',
+      $this->getRepository()->getID(),
+      $this->getArcanistBranch());
+  }
+
   public function getTagContent() {
     return $this->tagContent;
   }
