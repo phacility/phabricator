@@ -53,6 +53,11 @@ abstract class DiffusionController extends PhabricatorController {
     }
 
     $drequest = $this->getDiffusionRequest();
+    $branch = $drequest->loadBranch();
+
+    if ($branch && $branch->getLintCommit()) {
+      $navs['lint'] = 'Lint View';
+    }
 
     foreach ($navs as $action => $name) {
       $href = $drequest->generateURI(
@@ -243,6 +248,9 @@ abstract class DiffusionController extends PhabricatorController {
       case 'browse':
         $view_name = 'Browse';
         break;
+      case 'lint':
+        $view_name = 'Lint';
+        break;
       case 'change':
         $view_name = 'Change';
         $crumb_list[] = phutil_escape_html($path).' ('.$commit_link.')';
@@ -306,7 +314,7 @@ abstract class DiffusionController extends PhabricatorController {
         ),
         'Jump to HEAD');
       $last_crumb .= " @ {$commit_link} ({$jump_link})";
-    } else {
+    } else if ($spec['view'] != 'lint') {
       $last_crumb .= " @ HEAD";
     }
 

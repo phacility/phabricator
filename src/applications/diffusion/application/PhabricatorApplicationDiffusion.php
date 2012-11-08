@@ -41,6 +41,7 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
           'diff/'                       => 'DiffusionDiffController',
           'tags/(?P<dblob>.*)'          => 'DiffusionTagListController',
           'branches/(?P<dblob>.*)'      => 'DiffusionBranchTableController',
+          'lint/(?P<dblob>.*)'          => 'DiffusionLintController',
 
           'commit/(?P<commit>[a-z0-9]+)/branches/'
             => 'DiffusionCommitBranchesController',

@@ -98,11 +98,20 @@ final class DiffusionHomeController extends DiffusionController {
           number_format($size));
       }
 
+      $lint_count = '';
       $lint_branches = ipull(idx($lint_messages, $id, array()), 'n', 'name');
       $branch = $repository->getDefaultArcanistBranch();
-
       if (isset($lint_branches[$branch])) {
         $show_lint = true;
+        $lint_count = phutil_render_tag(
+          'a',
+          array(
+            'href' => DiffusionRequest::generateDiffusionURI(array(
+              'callsign' => $repository->getCallsign(),
+              'action' => 'lint',
+            )),
+          ),
+          number_format($lint_branches[$branch]));
       }
 
       $date = '-';
@@ -123,9 +132,7 @@ final class DiffusionHomeController extends DiffusionController {
         PhabricatorRepositoryType::getNameForRepositoryType(
           $repository->getVersionControlSystem()),
         $size,
-        (isset($lint_branches[$branch])
-          ? $lint_branches[$branch]
-          : ''),
+        $lint_count,
         $commit
           ? DiffusionView::linkCommit(
               $repository,
