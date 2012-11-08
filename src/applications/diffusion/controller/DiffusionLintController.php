@@ -4,6 +4,8 @@
 final class DiffusionLintController extends DiffusionController {
 
   public function processRequest() {
+    $drequest = $this->getDiffusionRequest();
+
     $codes = $this->loadLintCodes();
     $codes = array_reverse(isort($codes, 'n'));
 
@@ -11,7 +13,13 @@ final class DiffusionLintController extends DiffusionController {
     foreach ($codes as $code) {
       $rows[] = array(
         $code['n'],
-        $code['files'],
+        hsprintf(
+          '<a href="%s">%s</a>',
+          $drequest->generateURI(array(
+            'action' => 'browse',
+            'lint' => $code['code'],
+          )),
+          $code['files']),
         phutil_escape_html(ArcanistLintSeverity::getStringForSeverity(
           $code['maxSeverity'])),
         phutil_escape_html($code['code']),
@@ -28,6 +36,14 @@ final class DiffusionLintController extends DiffusionController {
         'Code',
         'Name',
         'Example',
+      ))
+      ->setColumnClasses(array(
+        'n',
+        'n',
+        '',
+        'pri',
+        '',
+        '',
       ));
 
     $content = array();
@@ -50,7 +66,7 @@ final class DiffusionLintController extends DiffusionController {
       $nav,
       array('title' => array(
         'Lint',
-        $this->getDiffusionRequest()->getRepository()->getCallsign(),
+        $drequest->getRepository()->getCallsign(),
       )));
   }
 

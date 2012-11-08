@@ -6,7 +6,9 @@ abstract class DiffusionController extends PhabricatorController {
 
   public function willProcessRequest(array $data) {
     if (isset($data['callsign'])) {
-      $drequest = DiffusionRequest::newFromAphrontRequestDictionary($data);
+      $drequest = DiffusionRequest::newFromAphrontRequestDictionary(
+        $data,
+        $this->getRequest());
       $this->diffusionRequest = $drequest;
     }
   }

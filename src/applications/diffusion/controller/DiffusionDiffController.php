@@ -6,7 +6,9 @@ final class DiffusionDiffController extends DiffusionController {
     $data = $data + array(
       'dblob' => $this->getRequest()->getStr('ref'),
     );
-    $drequest = DiffusionRequest::newFromAphrontRequestDictionary($data);
+    $drequest = DiffusionRequest::newFromAphrontRequestDictionary(
+      $data,
+      $this->getRequest());
 
     $this->diffusionRequest = $drequest;
   }

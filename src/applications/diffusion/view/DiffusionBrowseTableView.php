@@ -81,11 +81,12 @@ final class DiffusionBrowseTableView extends DiffusionView {
 
     $lint = self::loadLintMessagesCount($drequest);
     if ($lint !== null) {
-      $return['lint'] = phutil_render_tag(
-        'a',
-        array(
-          'href' => $drequest->generateURI(array('action' => 'lint')),
-        ),
+      $return['lint'] = hsprintf(
+        '<a href="%s">%s</a>',
+        $drequest->generateURI(array(
+          'action' => 'lint',
+          'lint' => '',
+        )),
         number_format($lint));
     }
 
@@ -98,12 +99,23 @@ final class DiffusionBrowseTableView extends DiffusionView {
       return null;
     }
 
+    $conn = $drequest->getRepository()->establishConnection('r');
+
+    $where = '';
+    if ($drequest->getLint()) {
+      $where = qsprintf(
+        $conn,
+        'AND code = %s',
+        $drequest->getLint());
+    }
+
     $like = (substr($drequest->getPath(), -1) == '/' ? 'LIKE %>' : '= %s');
     return head(queryfx_one(
-      $drequest->getRepository()->establishConnection('r'),
-      'SELECT COUNT(*) FROM %T WHERE branchID = %d AND path '.$like,
+      $conn,
+      'SELECT COUNT(*) FROM %T WHERE branchID = %d %Q AND path '.$like,
       PhabricatorRepository::TABLE_LINTMESSAGE,
       $branch->getID(),
+      $where,
       '/'.$drequest->getPath()));
   }
 
@@ -226,6 +238,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
 
     $branch = $this->getDiffusionRequest()->loadBranch();
     $show_lint = ($branch && $branch->getLintCommit());
+    $lint = $request->getLint();
 
     $view = new AphrontTableView($rows);
     $view->setHeaders(
@@ -233,7 +246,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         'History',
         'Edit',
         'Path',
-        'Lint',
+        ($lint ? phutil_escape_html($lint) : 'Lint'),
         'Modified',
         'Date',
         'Time',

@@ -147,11 +147,22 @@ final class DiffusionBrowseFileController extends DiffusionController {
       $this->lintCommit = $branch->getLintCommit();
     }
 
+    $conn = id(new PhabricatorRepository())->establishConnection('r');
+
+    $where = '';
+    if ($drequest->getLint()) {
+      $where = qsprintf(
+        $conn,
+        'AND code = %s',
+        $drequest->getLint());
+    }
+
     $this->lintMessages = queryfx_all(
-      id(new PhabricatorRepository())->establishConnection('r'),
-      'SELECT * FROM %T WHERE branchID = %d AND path = %s',
+      $conn,
+      'SELECT * FROM %T WHERE branchID = %d %Q AND path = %s',
       PhabricatorRepository::TABLE_LINTMESSAGE,
       $branch->getID(),
+      $where,
       '/'.$drequest->getPath());
   }
 
@@ -331,8 +342,8 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
 
     $href = null;
-    if ($this->getRequest()->getBool('lint')) {
-      $lint_text = pht('Hide Lint Messages');
+    if ($this->getRequest()->getStr('lint') !== null) {
+      $lint_text = pht('Hide %d Lint Messages', count($this->lintMessages));
       $href = $base_uri->alter('lint', null);
 
     } else if ($this->lintCommit === null) {
@@ -345,14 +356,14 @@ final class DiffusionBrowseFileController extends DiffusionController {
       $href = $this->getDiffusionRequest()->generateURI(array(
         'action' => 'browse',
         'commit' => $this->lintCommit,
-      ))->alter('lint', true);
+      ))->alter('lint', '');
 
     } else if (!$this->lintMessages) {
       $lint_text = pht('0 Lint Messages');
 
     } else {
       $lint_text = pht('Show %d Lint Message(s)', count($this->lintMessages));
-      $href = $base_uri->alter('lint', true);
+      $href = $base_uri->alter('lint', '');
     }
 
     $lint_button = $this->createViewAction(
@@ -556,7 +567,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
     $engine = null;
     $inlines = array();
-    if ($this->getRequest()->getBool('lint') && $this->lintMessages) {
+    if ($this->getRequest()->getStr('lint') !== null && $this->lintMessages) {
       $engine = new PhabricatorMarkupEngine();
       $engine->setViewer($user);
 
