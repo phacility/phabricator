@@ -11,6 +11,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
 
   public function getConfiguration() {
     return array(
+      self::CONFIG_IDS => self::IDS_COUNTER,
       self::CONFIG_TIMESTAMPS => false,
     ) + parent::getConfiguration();
   }

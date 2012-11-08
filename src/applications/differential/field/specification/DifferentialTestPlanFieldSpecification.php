@@ -103,8 +103,22 @@ final class DifferentialTestPlanFieldSpecification
     return "TEST PLAN\n".preg_replace('/^/m', '  ', $this->plan);
   }
 
+  public function shouldAddToSearchIndex() {
+    return true;
+  }
+
+  public function getValueForSearchIndex() {
+    return $this->plan;
+  }
+
+  public function getKeyForSearchIndex() {
+    return 'tpln';
+  }
+
   private function isRequired() {
     return PhabricatorEnv::getEnvConfig('differential.require-test-plan-field');
   }
+
+
 
 }

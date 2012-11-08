@@ -14,12 +14,23 @@ final class PhabricatorSearchDifferentialIndexer
     $doc->setDocumentCreated($rev->getDateCreated());
     $doc->setDocumentModified($rev->getDateModified());
 
-    $doc->addField(
-      PhabricatorSearchField::FIELD_BODY,
-      $rev->getSummary());
-    $doc->addField(
-      PhabricatorSearchField::FIELD_TEST_PLAN,
-      $rev->getTestPlan());
+    $aux_fields = DifferentialFieldSelector::newSelector()
+      ->getFieldSpecifications();
+    foreach ($aux_fields as $key => $aux_field) {
+      if (!$aux_field->shouldAddToSearchIndex()) {
+        unset($aux_fields[$key]);
+      }
+    }
+
+    $aux_fields = DifferentialAuxiliaryField::loadFromStorage(
+      $rev,
+      $aux_fields);
+    foreach ($aux_fields as $aux_field) {
+      $doc->addField(
+        $aux_field->getKeyForSearchIndex(),
+        $aux_field->getValueForSearchIndex()
+      );
+    }
 
     $doc->addRelationship(
       PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR,

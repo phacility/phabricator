@@ -41,7 +41,7 @@ final class PhabricatorMarkupEngine {
 
   private $objects = array();
   private $viewer;
-  private $version = 0;
+  private $version = 1;
 
 
 /* -(  Markup Pipeline  )---------------------------------------------------- */
@@ -286,7 +286,6 @@ final class PhabricatorMarkupEngine {
     return self::newMarkupEngine(
       array(
         'macros'      => false,
-        'fileproxy'   => false,
         'youtube'     => false,
 
       ));
@@ -345,7 +344,6 @@ final class PhabricatorMarkupEngine {
   private static function getMarkupEngineDefaultConfiguration() {
     return array(
       'pygments'      => PhabricatorEnv::getEnvConfig('pygments.enabled'),
-      'fileproxy'     => PhabricatorEnv::getEnvConfig('files.enable-proxy'),
       'youtube'       => PhabricatorEnv::getEnvConfig(
         'remarkup.enable-embedded-youtube'),
       'custom-inline' => array(),
@@ -393,10 +391,6 @@ final class PhabricatorMarkupEngine {
     }
 
     $rules[] = new PhutilRemarkupRuleDocumentLink();
-
-    if ($options['fileproxy']) {
-      $rules[] = new PhabricatorRemarkupRuleProxyImage();
-    }
 
     if ($options['youtube']) {
       $rules[] = new PhabricatorRemarkupRuleYoutube();
