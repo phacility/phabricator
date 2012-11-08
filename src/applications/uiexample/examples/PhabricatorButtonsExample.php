@@ -14,7 +14,7 @@ final class PhabricatorButtonsExample extends PhabricatorUIExample {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $colors = array('', 'green', 'grey', 'disabled');
+    $colors = array('', 'green', 'grey', 'black', 'disabled');
     $sizes = array('', 'small');
     $tags = array('a', 'button');
 

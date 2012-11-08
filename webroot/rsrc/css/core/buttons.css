@@ -7,34 +7,24 @@ button,
 a.button,
 a.button:visited,
 input.inputsubmit {
-  background: #5e77aa url('/rsrc/image/sprite.png') 0 0 repeat-x;
-  border: 1px solid #29447e;
-  border-bottom-color: #1a356e;
-  color: #fff;
+  background-color: #19558D;
+  background-image: url('/rsrc/image/button_gradients.png');
+  background-position: 0 -26px;
+
+  color: white;
+  min-width: 60px;
+  text-shadow: 0 -1px #19558D;
+  border: 1px solid #19558D;
   cursor: pointer;
   font-weight: bold;
+  display: inline-block;
+  padding: 3px 10px 4px;
   text-align: center;
   white-space: nowrap;
-  display: inline-block;
-  font-size: 13px;
-  overflow: visible;
-  padding: 2px 8px 3px 8px;
-  line-height: 18px;
-  vertical-align: baseline;
-  width: auto;
-  box-shadow: 0px 1px 0px rgba(0,0,0,.12);
-  -moz-box-shadow: 0px 1px 0px rgba(0,0,0,.12);
-  -webkit-box-shadow: 0px 1px 0px rgba(0,0,0,.12);
-}
 
-button {
-  *padding: 2px 4px 1px 8px;
-  _padding-right: 6px;
-}
-
-a.button,
-a.button:visited {
-  *padding: 3px 8px 4px;
+  border-radius: 3px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
 }
 
 /* Buttons with images (full size only) */
@@ -46,33 +36,40 @@ a.icon:visited {
   text-indent: 29px;
 }
 
-/* Fix for IE7 within table cells ? */
-td button {
-  *width: 100%;
-  *padding-right: 8px;
-}
-
 button:active,
 a.button:active {
-  background-color: #4f6aa3;
-  background-position: 0 -100px;
-  border-bottom-color: #29447e;
+  background-color: #19558D;
+  background-position: 0 0;
+}
+
+button.black,
+a.black,
+a.black:visited {
+  background-color: #383838;
+  background-position: 0 -182px;
+  border: 1px solid #333;
+  text-shadow: 0 -1px #000;
+  border-bottom-color: #000;
+}
+
+button.black:active,
+a.black:active {
+  background-position: 0 -156px;
 }
 
 button.green,
 a.green,
 a.green:visited {
-  background-color: #6da952;
-  background-position: 0 -50px;
+  background-color: #006600;
+  background-position: 0 -130px;
   border: 1px solid #3b6e22;
+  text-shadow: 0 -1px #006600;
   border-bottom-color: #2c5a15;
 }
 
 button.green:active,
 a.green:active {
-  background-color: #5e9d43;
-  background-position: 0 -150px;
-  border-bottom-color: #3b6e22;
+  background-position: 0 -104px;
 }
 
 button.grey,
@@ -82,14 +79,13 @@ a.grey:visited,
 a.button.disabled,
 button[disabled], /* Set by JX.Workflow. */
 button.disabled {
-  background-color: #e4e5e5;
-  background-position: 0 -250px;
-  border: 1px solid #999;
-  border-bottom-color: #888;
+  background-color: #f7f7f7;
+  background-image: url('/rsrc/image/button_gradients.png');
+  background-position: 0 -52px;
+  border-color: #aaa;
   color: #333;
-  box-shadow: 0px 1px 0px rgba(0,0,0,.07);
-  -moz-box-shadow: 0px 1px 0px rgba(0,0,0,.07);
-  -webkit-box-shadow: 0px 1px 0px rgba(0,0,0,.07);
+  border-bottom-color: #999;
+  text-shadow: none;
 }
 
 a.disabled,
@@ -104,24 +100,9 @@ button.grey:active,
 a.grey:active,
 button.grey_active,
 a.dropdown-open {
-  background-color: #dddddd;
-  background-position: 0 -200px;
-  border-bottom-color: #999;
-}
-
-button:active::-moz-focus-inner,
-button:focus::-moz-focus-inner {
-  border-color: #405071;
-}
-
-button.green:active::-moz-focus-inner,
-button.green:focus::-moz-focus-inner {
-  border-color: #4c713b;
-}
-
-button.grey:active::-moz-focus-inner,
-button.grey:focus::-moz-focus-inner {
-  border-color: #666;
+  background-color: #7d7d7d;
+  background-position: 0 -78px;
+  color: #777;
 }
 
 a.button:hover {
@@ -147,6 +128,7 @@ button.link {
   font-size: inherit;
   border-bottom: none;
   text-decoration: none;
+  text-shadow: none;
   color: #3b5998;
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
@@ -157,42 +139,6 @@ button.link:hover {
   text-decoration: underline;
 }
 
-a.toggle {
-  background: #d3d3d3;
-  padding: 2px 6px 3px;
-  font-weight: bold;
-  margin-right: 4px;
-  margin-bottom: 5px;
-  display: block;
-  float: left;
-  color: #777777;
-  border-radius: 8px;
-  -moz-border-radius: 8px;
-  -webkit-border-radius: 8px;
-  text-decoration: none;
-}
-
-a.toggle:hover {
-  background: #b0b0b0;
-  color: white;
-}
-
-a.toggle-selected {
-  background: #909090;
-  color: white;
-}
-
-a.toggle-fixed {
-  cursor: default;
-}
-
-a.toggle-fixed:hover {
-  background: #909090;
-}
-
-
-a.dropdown-open {
-}
 
 .dropdown-menu-frame {
   z-index: 32;

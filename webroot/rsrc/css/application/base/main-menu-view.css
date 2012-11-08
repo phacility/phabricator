@@ -256,6 +256,8 @@
   border: none;
   outline: none;
   box-shadow: none;
+  text-shadow: none;
+  min-width: 0;
 
   height: 20px;
   width: 20px;
