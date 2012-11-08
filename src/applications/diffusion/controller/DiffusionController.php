@@ -83,7 +83,7 @@ abstract class DiffusionController extends PhabricatorController {
             '?repository='.phutil_escape_uri($drequest->getCallsign()).
             '&path='.phutil_escape_uri('/'.$drequest->getPath()),
         ),
-        'Search Owners'));
+        "Search Owners \xE2\x86\x97"));
 
     return $nav;
   }
