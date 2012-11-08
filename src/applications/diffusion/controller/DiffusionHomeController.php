@@ -75,7 +75,16 @@ final class DiffusionHomeController extends DiffusionController {
       $id = $repository->getID();
       $commit = idx($commits, $id);
 
-      $size = idx(idx($summaries, $id, array()), 'size', 0);
+      $size = idx(idx($summaries, $id, array()), 'size', '-');
+      if ($size != '-') {
+        $size = hsprintf(
+          '<a href="%s">%s</a>',
+          DiffusionRequest::generateDiffusionURI(array(
+            'callsign' => $repository->getCallsign(),
+            'action' => 'history',
+          )),
+          number_format($size));
+      }
 
       $date = '-';
       $time = '-';
@@ -94,7 +103,7 @@ final class DiffusionHomeController extends DiffusionController {
         phutil_escape_html($repository->getDetail('description')),
         PhabricatorRepositoryType::getNameForRepositoryType(
           $repository->getVersionControlSystem()),
-        $size ? number_format($size) : '-',
+        $size,
         $commit
           ? DiffusionView::linkCommit(
               $repository,
