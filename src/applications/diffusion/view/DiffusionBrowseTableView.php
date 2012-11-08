@@ -24,7 +24,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
   }
 
   public static function renderLastModifiedColumns(
-    PhabricatorRepository $repository,
+    DiffusionRequest $drequest,
     array $handles,
     PhabricatorRepositoryCommit $commit = null,
     PhabricatorRepositoryCommitData $data = null) {
@@ -33,7 +33,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
     if ($commit) {
       $epoch = $commit->getEpoch();
       $modified = DiffusionView::linkCommit(
-        $repository,
+        $drequest->getRepository(),
         $commit->getCommitIdentifier());
       $date = date('M j, Y', $epoch);
       $time = date('g:i A', $epoch);
@@ -71,13 +71,34 @@ final class DiffusionBrowseTableView extends DiffusionView {
       $details = '';
     }
 
-    return array(
+    $return = array(
       'commit'    => $modified,
       'date'      => $date,
       'time'      => $time,
       'author'    => $author,
       'details'   => $details,
     );
+
+    $lint = self::loadLintMessagesCount($drequest);
+    if ($lint !== null) {
+      $return['lint'] = (string)$lint;
+    }
+    return $return;
+  }
+
+  private static function loadLintMessagesCount(DiffusionRequest $drequest) {
+    $branch = $drequest->loadBranch();
+    if (!$branch) {
+      return null;
+    }
+
+    $like = (substr($drequest->getPath(), -1) == '/' ? 'LIKE %>' : '= %s');
+    return head(queryfx_one(
+      $drequest->getRepository()->establishConnection('r'),
+      'SELECT COUNT(*) FROM %T WHERE branchID = %d AND path '.$like,
+      PhabricatorRepository::TABLE_LINTMESSAGE,
+      $branch->getID(),
+      '/'.$drequest->getPath()));
   }
 
   public function render() {
@@ -134,13 +155,16 @@ final class DiffusionBrowseTableView extends DiffusionView {
 
       $commit = $path->getLastModifiedCommit();
       if ($commit) {
+        $drequest = clone $request;
+        $drequest->setPath($path->getPath().$dir_slash);
         $dict = self::renderLastModifiedColumns(
-          $repository,
+          $drequest,
           $this->handles,
           $commit,
           $path->getLastCommitData());
       } else {
         $dict = array(
+          'lint'      => celerity_generate_unique_node_id(),
           'commit'    => celerity_generate_unique_node_id(),
           'date'      => celerity_generate_unique_node_id(),
           'time'      => celerity_generate_unique_node_id(),
@@ -151,7 +175,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         $uri = (string)$request->generateURI(
           array(
             'action' => 'lastmodified',
-            'path'   => $base_path.$path->getPath(),
+            'path'   => $base_path.$path->getPath().$dir_slash,
           ));
 
         $need_pull[$uri] = $dict;
@@ -181,6 +205,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         $this->linkHistory($base_path.$path->getPath().$dir_slash),
         $editor_button,
         $browse_link,
+        $dict['lint'],
         $dict['commit'],
         $dict['date'],
         $dict['time'],
@@ -193,12 +218,16 @@ final class DiffusionBrowseTableView extends DiffusionView {
       Javelin::initBehavior('diffusion-pull-lastmodified', $need_pull);
     }
 
+    $branch = $this->getDiffusionRequest()->loadBranch();
+    $show_lint = ($branch && $branch->getLintCommit());
+
     $view = new AphrontTableView($rows);
     $view->setHeaders(
       array(
         'History',
         'Edit',
         'Path',
+        'Lint',
         'Modified',
         'Date',
         'Time',
@@ -210,6 +239,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         '',
         '',
         '',
+        'n',
         '',
         '',
         'right',
@@ -221,6 +251,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         true,
         $show_edit,
         true,
+        $show_lint,
         true,
         true,
         true,

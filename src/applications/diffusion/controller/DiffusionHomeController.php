@@ -70,7 +70,19 @@ final class DiffusionHomeController extends DiffusionController {
       }
     }
 
+    $branch = new PhabricatorRepositoryBranch();
+    $lint_messages = queryfx_all(
+      $branch->establishConnection('r'),
+      'SELECT b.repositoryID, b.name, COUNT(lm.id) AS n
+        FROM %T b
+        LEFT JOIN %T lm ON b.id = lm.branchID
+        GROUP BY b.id',
+      $branch->getTableName(),
+      PhabricatorRepository::TABLE_LINTMESSAGE);
+    $lint_messages = igroup($lint_messages, 'repositoryID');
+
     $rows = array();
+    $show_lint = false;
     foreach ($repositories as $repository) {
       $id = $repository->getID();
       $commit = idx($commits, $id);
@@ -84,6 +96,13 @@ final class DiffusionHomeController extends DiffusionController {
             'action' => 'history',
           )),
           number_format($size));
+      }
+
+      $lint_branches = ipull(idx($lint_messages, $id, array()), 'n', 'name');
+      $branch = $repository->getDefaultArcanistBranch();
+
+      if (isset($lint_branches[$branch])) {
+        $show_lint = true;
       }
 
       $date = '-';
@@ -104,6 +123,9 @@ final class DiffusionHomeController extends DiffusionController {
         PhabricatorRepositoryType::getNameForRepositoryType(
           $repository->getVersionControlSystem()),
         $size,
+        (isset($lint_branches[$branch])
+          ? $lint_branches[$branch]
+          : ''),
         $commit
           ? DiffusionView::linkCommit(
               $repository,
@@ -138,6 +160,7 @@ final class DiffusionHomeController extends DiffusionController {
         'Description',
         'VCS',
         'Commits',
+        'Lint',
         'Last',
         'Date',
         'Time',
@@ -149,8 +172,20 @@ final class DiffusionHomeController extends DiffusionController {
         '',
         'n',
         'n',
+        'n',
         '',
         'right',
+      ));
+    $table->setColumnVisibility(
+      array(
+        true,
+        true,
+        true,
+        true,
+        $show_lint,
+        true,
+        true,
+        true,
       ));
 
     $panel = new AphrontPanelView();

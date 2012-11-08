@@ -24,7 +24,7 @@ final class DiffusionLastModifiedController extends DiffusionController {
     $handles = $this->loadViewerHandles($phids);
 
     $output = DiffusionBrowseTableView::renderLastModifiedColumns(
-      $drequest->getRepository(),
+      $drequest,
       $handles,
       $commit,
       $commit_data);

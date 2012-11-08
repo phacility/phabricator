@@ -287,6 +287,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO {
     return idx($default_branches, $this->getVersionControlSystem());
   }
 
+  public function getDefaultArcanistBranch() {
+    return coalesce($this->getDefaultBranch(), 'svn');
+  }
+
   private function isBranchInFilter($branch, $filter_key) {
     $vcs = $this->getVersionControlSystem();
 
