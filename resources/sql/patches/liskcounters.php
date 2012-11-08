@@ -29,10 +29,12 @@ $initial_counter = max((int)$active_auto, (int)$active_max, (int)$archive_max);
 
 queryfx(
   $conn_w,
-  'INSERT IGNORE INTO %T (counterName, counterValue)
-    VALUES (%s, %d)',
+  'INSERT INTO %T (counterName, counterValue)
+    VALUES (%s, %d)
+    ON DUPLICATE KEY UPDATE counterValue = %d',
   LiskDAO::COUNTER_TABLE_NAME,
   $active_table->getTableName(),
+  $initial_counter + 1,
   $initial_counter + 1);
 
 // Drop AUTO_INCREMENT from the ID column.
