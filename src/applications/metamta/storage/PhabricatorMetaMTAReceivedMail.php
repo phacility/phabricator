@@ -356,7 +356,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     foreach (explode(',', $addresses) as $address) {
       $raw_addresses[] = $this->getRawEmailAddress($address);
     }
-    return $raw_addresses;
+    return array_filter($raw_addresses);
   }
 
   private function lookupPublicUser() {
