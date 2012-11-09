@@ -44,6 +44,7 @@
   color: #3b5998;
   width: 100%;
   text-align: left;
+  text-shadow: none;
 }
 
 .phabricator-action-view button.phabricator-action-view-item,
