@@ -169,3 +169,39 @@ button.link:hover {
   color: white;
   text-decoration: none;
 }
+
+a.toggle {
+  display: inline-block;
+  padding: 4px 8px;
+  font-weight: bold;
+  line-height: 14px;
+  color: #ffffff;
+  text-shadow: 0 1px 0 #777;
+  text-decoration: none;
+  white-space: nowrap;
+  vertical-align: baseline;
+  background-color: #a7a7a7;
+  font-family: 'Helvetica Neue', Helvetica, Arial;
+  font-size: 12px;
+  margin: 0 5px 2px;
+
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+}
+
+a.toggle:hover {
+  background-color: #bbb;
+}
+
+a.toggle-selected {
+  background-color: #555;
+}
+
+a.toggle-fixed {
+  cursor: default;
+}
+
+a.toggle-fixed:hover {
+  background-color: #555;
+}
