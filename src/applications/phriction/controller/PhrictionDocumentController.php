@@ -159,24 +159,32 @@ final class PhrictionDocumentController
         '<div class="phriction-content">'.
           $byline.
           $core_content.
-        '</div>';
+          '</div>';
 
+      $create_button = javelin_render_tag(
+        'a',
+        array(
+          'href'  => '/phriction/new/',
+          'class' => 'button green',
+          'sigil' => 'workflow',
+        ),
+        pht('New Document'));
       $edit_button = phutil_render_tag(
         'a',
         array(
-          'href' => '/phriction/edit/'.$document->getID().'/',
+          'href'  => '/phriction/edit/'.$document->getID().'/',
           'class' => 'button',
         ),
-        'Edit Document');
+        pht('Edit Document'));
       $history_button = phutil_render_tag(
         'a',
         array(
-          'href' => PhrictionDocument::getSlugURI($slug, 'history'),
+          'href'  => PhrictionDocument::getSlugURI($slug, 'history'),
           'class' => 'button grey',
         ),
-        'View History');
+        pht('View History'));
       // these float right so history_button which is right most goes first
-      $buttons = $history_button.$edit_button;
+      $buttons = $history_button.$edit_button.$create_button;
     }
 
     if ($version_note) {

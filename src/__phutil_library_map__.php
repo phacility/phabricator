@@ -1217,6 +1217,7 @@ phutil_register_library_map(array(
     'PhrictionEditController' => 'applications/phriction/controller/PhrictionEditController.php',
     'PhrictionHistoryController' => 'applications/phriction/controller/PhrictionHistoryController.php',
     'PhrictionListController' => 'applications/phriction/controller/PhrictionListController.php',
+    'PhrictionNewController' => 'applications/phriction/controller/PhrictionNewController.php',
     'PonderAddAnswerView' => 'applications/ponder/view/PonderAddAnswerView.php',
     'PonderAddCommentView' => 'applications/ponder/view/PonderAddCommentView.php',
     'PonderAnswer' => 'applications/ponder/storage/PonderAnswer.php',
@@ -2395,6 +2396,7 @@ phutil_register_library_map(array(
     'PhrictionEditController' => 'PhrictionController',
     'PhrictionHistoryController' => 'PhrictionController',
     'PhrictionListController' => 'PhrictionController',
+    'PhrictionNewController' => 'PhrictionController',
     'PonderAddAnswerView' => 'AphrontView',
     'PonderAddCommentView' => 'AphrontView',
     'PonderAnswer' =>
