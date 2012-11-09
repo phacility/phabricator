@@ -6,13 +6,25 @@ final class DiffusionLintController extends DiffusionController {
   public function processRequest() {
     $drequest = $this->getDiffusionRequest();
 
+    if ($this->getRequest()->getStr('lint')) {
+      $controller = new DiffusionLintDetailsController($this->getRequest());
+      $controller->setDiffusionRequest($drequest);
+      return $this->delegateToController($controller);
+    }
+
     $codes = $this->loadLintCodes();
     $codes = array_reverse(isort($codes, 'n'));
 
     $rows = array();
     foreach ($codes as $code) {
       $rows[] = array(
-        $code['n'],
+        hsprintf(
+          '<a href="%s">%s</a>',
+          $drequest->generateURI(array(
+            'action' => 'lint',
+            'lint' => $code['code'],
+          )),
+          $code['n']),
         hsprintf(
           '<a href="%s">%s</a>',
           $drequest->generateURI(array(
@@ -56,7 +68,7 @@ final class DiffusionLintController extends DiffusionController {
       ));
 
     $content[] = id(new AphrontPanelView())
-      ->setHeader(array_sum(ipull($codes, 'n')).' Lint Messages')
+      ->setHeader(pht('%d Lint Message(s)', array_sum(ipull($codes, 'n'))))
       ->appendChild($table);
 
     $nav = $this->buildSideNav('lint', false);

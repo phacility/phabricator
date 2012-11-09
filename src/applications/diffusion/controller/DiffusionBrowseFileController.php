@@ -343,7 +343,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
     $href = null;
     if ($this->getRequest()->getStr('lint') !== null) {
-      $lint_text = pht('Hide %d Lint Messages', count($this->lintMessages));
+      $lint_text = pht('Hide %d Lint Message(s)', count($this->lintMessages));
       $href = $base_uri->alter('lint', null);
 
     } else if ($this->lintCommit === null) {
@@ -359,7 +359,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
       ))->alter('lint', '');
 
     } else if (!$this->lintMessages) {
-      $lint_text = pht('0 Lint Messages');
+      $lint_text = pht('No Lint Messages');
 
     } else {
       $lint_text = pht('Show %d Lint Message(s)', count($this->lintMessages));
@@ -573,7 +573,9 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
       foreach ($this->lintMessages as $message) {
         $inline = id(new PhabricatorAuditInlineComment())
-          ->setSyntheticAuthor($message['code'].' ('.$message['name'].')')
+          ->setSyntheticAuthor(
+            ArcanistLintSeverity::getStringForSeverity($message['severity']).
+            ' '.$message['code'].' ('.$message['name'].')')
           ->setLineNumber($message['line'])
           ->setContent($message['description']);
         $inlines[$message['line']][] = $inline;

@@ -154,15 +154,17 @@ abstract class PhabricatorBaseEnglishTranslation
         'Show %d Lint Message',
         'Show %d Lint Messages',
       ),
-
       'Hide %d Lint Message(s)' => array(
         'Hide %d Lint Message',
         'Hide %d Lint Messages',
       ),
-
       'Switch for %d Lint Message(s)' => array(
         'Switch for %d Lint Message',
         'Switch for %d Lint Messages',
+      ),
+      '%d Lint Message(s)' => array(
+        '%d Lint Message',
+        '%d Lint Messages',
       ),
 
     );
