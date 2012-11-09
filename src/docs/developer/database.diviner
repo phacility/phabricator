@@ -103,7 +103,7 @@ no inconsistencies can arise. It will just slow us down.
 
 Each globally referencable object in Phabricator has its associated PHID
 (Phabricator ID) which serves as a global identifier. We use PHIDs for
-referencing data in different databases. 
+referencing data in different databases.
 
 We use both autoincrementing IDs and global PHIDs because each is useful in
 different contexts. Autoincrementing IDs are chronologically ordered and allow
@@ -114,7 +114,7 @@ a homogenous way.
 For example, the concept of "subscribers" is more powerfully done with PHIDs
 because we could theoretically have users, projects, teams, and more all
 as "subscribers" of other objects. Using an ID column we would need to add a
-"type" column to avoid ID collision; using PHIDs does not require this 
+"type" column to avoid ID collision; using PHIDs does not require this
 additional column.
 
 = Transactions =
@@ -141,17 +141,20 @@ to avoid it if possible.
 
 There are three simple steps to update the schema:
 
-- Create a `.sql` file in `resources/sql/patches/`. This file should:
+# Create a `.sql` file in `resources/sql/patches/`. This file should:
  - Contain the approprate MySQL commands to update the schema.
- - Use `${NAMESPACE}` rather than `Phabricator` for database and table names.
- - Use `COLLATE utf8_bin` for any columns that are to be used as identifiers, 
+ - Use `${NAMESPACE}` rather than `phabricator` for database names.
+ - Use `COLLATE utf8_bin` for any columns that are to be used as identifiers,
 such as PHID columns. Otherwise, use `COLLATE utf8_general_ci`.
-- Edit `src/infrastructure/storage/patch/PhabricatorBuiltinPatchList.php` and
+ - Name all indexes so it is possible to delete them later.
+# Edit `src/infrastructure/storage/patch/PhabricatorBuiltinPatchList.php` and
 add your patch to @{method@phabricator:PhabricatorBuiltinPatchList::getPatches}.
-- Run `bin/storage/upgrade`.
+# Run `bin/storage/upgrade`.
 
-See the 
-[[https://secure.phabricator.com/rPb39175342dc5bee0c2246b05fa277e76a7e96ed3 
+It is also possible to create more complex patch in PHP.
+
+See the
+[[https://secure.phabricator.com/rPb39175342dc5bee0c2246b05fa277e76a7e96ed3
 | commit adding policy storage for Paste ]] for a reasonable example of the code
 changes.
 
