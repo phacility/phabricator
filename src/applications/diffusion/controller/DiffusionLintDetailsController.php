@@ -118,8 +118,8 @@ final class DiffusionLintDetailsController extends DiffusionController {
         WHERE branchID = %d
         AND code = %s
         %Q
+        ORDER BY path, code, line
         LIMIT %d OFFSET %d',
-      // 'ORDER BY path, code, line' is disabled for performance reasons.
       PhabricatorRepository::TABLE_LINTMESSAGE,
       $branch->getID(),
       $drequest->getLint(),
