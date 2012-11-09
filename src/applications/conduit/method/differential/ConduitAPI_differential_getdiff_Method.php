@@ -64,7 +64,7 @@ final class ConduitAPI_differential_getdiff_Method extends ConduitAPIMethod {
     $basic_dict = $diff->getDiffDict();
 
     // for conduit calls, the basic dict is not enough
-    // we also need to include the arcanist project
+    // we also need to include the arcanist project and author information
     $project = $diff->loadArcanistProject();
     if ($project) {
       $project_name = $project->getName();
@@ -72,6 +72,7 @@ final class ConduitAPI_differential_getdiff_Method extends ConduitAPIMethod {
       $project_name = null;
     }
     $basic_dict['projectName'] = $project_name;
+    $basic_dict['author'] = $diff->loadAuthorInformation();
 
     return $basic_dict;
   }

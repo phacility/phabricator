@@ -312,4 +312,52 @@ final class DifferentialDiff extends DifferentialDAO {
 
     return $dict;
   }
+
+  /**
+   * Figures out the right author information for a given diff based on the
+   * repository and Phabricator configuration settings.
+   *
+   * Git is particularly finicky as it requires author information to be in
+   * the format "George Washington <gwashington@example.com>" to
+   * consistently work. If the Phabricator instance isn't configured to
+   * expose emails prudently, then we are unable to get any author information
+   * for git.
+   */
+  public function loadAuthorInformation() {
+    $author = id(new PhabricatorUser())
+      ->loadOneWhere('phid = %s', $this->getAuthorPHID());
+
+    $use_emails =
+      PhabricatorEnv::getEnvConfig('differential.expose-emails-prudently',
+                                   false);
+
+    switch ($this->getSourceControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        if (!$use_emails) {
+          $author_info = '';
+        } else {
+          $author_info = $this->getFullAuthorInfo($author);
+        }
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        if (!$use_emails) {
+          $author_info = $author->getUsername();
+        } else {
+          $author_info = $this->getFullAuthorInfo($author);
+        }
+       break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+      default:
+        $author_info = $author->getUsername();
+        break;
+    }
+
+    return $author_info;
+  }
+
+  private function getFullAuthorInfo(PhabricatorUser $author) {
+    return sprintf('%s <%s>',
+                   $author->getRealName(),
+                   $author->loadPrimaryEmailAddress());
+  }
 }
