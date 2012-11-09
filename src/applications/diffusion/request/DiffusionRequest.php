@@ -188,6 +188,11 @@ abstract class DiffusionRequest {
     return $this->callsign;
   }
 
+  public function setPath($path) {
+    $this->path = $path;
+    return $this;
+  }
+
   public function getPath() {
     return $this->path;
   }
