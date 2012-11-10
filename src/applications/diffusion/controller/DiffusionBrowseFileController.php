@@ -573,6 +573,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
       foreach ($this->lintMessages as $message) {
         $inline = id(new PhabricatorAuditInlineComment())
+          ->setID($message['id'])
           ->setSyntheticAuthor(
             ArcanistLintSeverity::getStringForSeverity($message['severity']).
             ' '.$message['code'].' ('.$message['name'].')')
