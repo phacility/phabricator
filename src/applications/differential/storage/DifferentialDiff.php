@@ -1,21 +1,5 @@
 <?php
 
-/*
- * Copyright 2012 Facebook, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 final class DifferentialDiff extends DifferentialDAO {
 
   protected $revisionID;
@@ -327,5 +311,53 @@ final class DifferentialDiff extends DifferentialDAO {
     }
 
     return $dict;
+  }
+
+  /**
+   * Figures out the right author information for a given diff based on the
+   * repository and Phabricator configuration settings.
+   *
+   * Git is particularly finicky as it requires author information to be in
+   * the format "George Washington <gwashington@example.com>" to
+   * consistently work. If the Phabricator instance isn't configured to
+   * expose emails prudently, then we are unable to get any author information
+   * for git.
+   */
+  public function loadAuthorInformation() {
+    $author = id(new PhabricatorUser())
+      ->loadOneWhere('phid = %s', $this->getAuthorPHID());
+
+    $use_emails =
+      PhabricatorEnv::getEnvConfig('differential.expose-emails-prudently',
+                                   false);
+
+    switch ($this->getSourceControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        if (!$use_emails) {
+          $author_info = '';
+        } else {
+          $author_info = $this->getFullAuthorInfo($author);
+        }
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        if (!$use_emails) {
+          $author_info = $author->getUsername();
+        } else {
+          $author_info = $this->getFullAuthorInfo($author);
+        }
+       break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+      default:
+        $author_info = $author->getUsername();
+        break;
+    }
+
+    return $author_info;
+  }
+
+  private function getFullAuthorInfo(PhabricatorUser $author) {
+    return sprintf('%s <%s>',
+                   $author->getRealName(),
+                   $author->loadPrimaryEmailAddress());
   }
 }

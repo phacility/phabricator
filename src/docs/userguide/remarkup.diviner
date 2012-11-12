@@ -307,16 +307,14 @@ Valid options are:
 
 = Embedding Media =
 
-If you set configuration flags, you can embed media directly in text:
+If you set a configuration flag, you can embed media directly in text:
 
-  - **files.enable-proxy**: allows you to paste in image URLs and have them
-    render inline.
   - **remarkup.enable-embedded-youtube**: allows you to paste in YouTube videos
     and have them render inline.
 
-These options are disabled by default because they have security and/or
-silliness implications, read their descriptions in ##default.conf.php## before
-enabling them.
+This option is disabled by default because it has security and/or
+silliness implications. Read the description in ##default.conf.php## before
+enabling it.
 
 = Image Macros =
 

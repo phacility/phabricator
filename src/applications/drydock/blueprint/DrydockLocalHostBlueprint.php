@@ -1,22 +1,45 @@
 <?php
 
-/*
- * Copyright 2012 Facebook, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 final class DrydockLocalHostBlueprint extends DrydockBlueprint {
+
+  public function isEnabled() {
+    return PhabricatorEnv::getEnvConfig('drydock.localhost.enabled');
+  }
+
+  public function canAllocateMoreResources(array $pool) {
+    assert_instances_of($pool, 'DrydockResource');
+
+    // The localhost can be allocated only once.
+    foreach ($pool as $resource) {
+      if ($resource->getBlueprintClass() == $this->getBlueprintClass()) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  protected function executeAllocateResource(DrydockLease $lease) {
+    $path = PhabricatorEnv::getEnvConfig('drydock.localhost.path');
+    if (!Filesystem::pathExists($path)) {
+      throw new Exception(
+        "Path '{$path}' does not exist!");
+    }
+    Filesystem::assertIsDirectory($path);
+    Filesystem::assertWritable($path);
+
+    $resource = $this->newResourceTemplate('localhost');
+    $resource->setStatus(DrydockResourceStatus::STATUS_OPEN);
+    $resource->save();
+
+    return $resource;
+  }
+
+  protected function executeAcquireLease(
+    DrydockResource $resource,
+    DrydockLease $lease) {
+    return;
+  }
 
   public function getType() {
     return 'host';

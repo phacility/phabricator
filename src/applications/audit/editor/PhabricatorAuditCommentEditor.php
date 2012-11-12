@@ -1,21 +1,5 @@
 <?php
 
-/*
- * Copyright 2012 Facebook, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
 
   private $commit;
@@ -411,16 +395,19 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
       $email_to[] = $author_phid;
     }
 
-    $email_cc = array();
     foreach ($other_comments as $other_comment) {
-      $email_cc[] = $other_comment->getActorPHID();
+      $email_cc[$other_comment->getActorPHID()] = true;
     }
 
     foreach ($requests as $request) {
       if ($request->getAuditStatus() == PhabricatorAuditStatusConstants::CC) {
-        $email_cc[] = $request->getAuditorPHID();
+        $email_cc[$request->getAuditorPHID()] = true;
+      } else if ($request->getAuditStatus() ==
+                 PhabricatorAuditStatusConstants::RESIGNED) {
+        unset($email_cc[$request->getAuditorPHID()]);
       }
     }
+    $email_cc = array_keys($email_cc);
 
     $phids = array_merge($email_to, $email_cc);
     $handles = id(new PhabricatorObjectHandleData($phids))->loadHandles();

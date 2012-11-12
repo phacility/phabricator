@@ -1,21 +1,5 @@
 <?php
 
-/*
- * Copyright 2012 Facebook, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 final class DiffusionHomeController extends DiffusionController {
 
   public function processRequest() {
@@ -86,12 +70,49 @@ final class DiffusionHomeController extends DiffusionController {
       }
     }
 
+    $branch = new PhabricatorRepositoryBranch();
+    $lint_messages = queryfx_all(
+      $branch->establishConnection('r'),
+      'SELECT b.repositoryID, b.name, COUNT(lm.id) AS n
+        FROM %T b
+        LEFT JOIN %T lm ON b.id = lm.branchID
+        GROUP BY b.id',
+      $branch->getTableName(),
+      PhabricatorRepository::TABLE_LINTMESSAGE);
+    $lint_messages = igroup($lint_messages, 'repositoryID');
+
     $rows = array();
+    $show_lint = false;
     foreach ($repositories as $repository) {
       $id = $repository->getID();
       $commit = idx($commits, $id);
 
-      $size = idx(idx($summaries, $id, array()), 'size', 0);
+      $size = idx(idx($summaries, $id, array()), 'size', '-');
+      if ($size != '-') {
+        $size = hsprintf(
+          '<a href="%s">%s</a>',
+          DiffusionRequest::generateDiffusionURI(array(
+            'callsign' => $repository->getCallsign(),
+            'action' => 'history',
+          )),
+          number_format($size));
+      }
+
+      $lint_count = '';
+      $lint_branches = ipull(idx($lint_messages, $id, array()), 'n', 'name');
+      $branch = $repository->getDefaultArcanistBranch();
+      if (isset($lint_branches[$branch])) {
+        $show_lint = true;
+        $lint_count = phutil_render_tag(
+          'a',
+          array(
+            'href' => DiffusionRequest::generateDiffusionURI(array(
+              'callsign' => $repository->getCallsign(),
+              'action' => 'lint',
+            )),
+          ),
+          number_format($lint_branches[$branch]));
+      }
 
       $date = '-';
       $time = '-';
@@ -110,7 +131,8 @@ final class DiffusionHomeController extends DiffusionController {
         phutil_escape_html($repository->getDetail('description')),
         PhabricatorRepositoryType::getNameForRepositoryType(
           $repository->getVersionControlSystem()),
-        $size ? number_format($size) : '-',
+        $size,
+        $lint_count,
         $commit
           ? DiffusionView::linkCommit(
               $repository,
@@ -145,6 +167,7 @@ final class DiffusionHomeController extends DiffusionController {
         'Description',
         'VCS',
         'Commits',
+        'Lint',
         'Last',
         'Date',
         'Time',
@@ -156,8 +179,20 @@ final class DiffusionHomeController extends DiffusionController {
         '',
         'n',
         'n',
+        'n',
         '',
         'right',
+      ));
+    $table->setColumnVisibility(
+      array(
+        true,
+        true,
+        true,
+        true,
+        $show_lint,
+        true,
+        true,
+        true,
       ));
 
     $panel = new AphrontPanelView();

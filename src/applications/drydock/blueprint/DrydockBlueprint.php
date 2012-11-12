@@ -1,21 +1,5 @@
 <?php
 
-/*
- * Copyright 2012 Facebook, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 abstract class DrydockBlueprint {
 
   private $activeLease;
@@ -27,11 +11,21 @@ abstract class DrydockBlueprint {
     DrydockLease $lease,
     $type);
 
-  protected function executeAcquireLease(
-    DrydockResource $resource,
-    DrydockLease $lease) {
-    return;
+  abstract public function isEnabled();
+
+  public function getBlueprintClass() {
+    return get_class($this);
   }
+
+  public function canAllocateMoreResources(array $pool) {
+    return true;
+  }
+
+  abstract protected function executeAllocateResource(DrydockLease $lease);
+
+  abstract protected function executeAcquireLease(
+    DrydockResource $resource,
+    DrydockLease $lease);
 
   final public function acquireLease(
     DrydockResource $resource,
@@ -90,22 +84,19 @@ abstract class DrydockBlueprint {
     $log->save();
   }
 
-  public function canAllocateResources() {
-    return false;
-  }
-
-  protected function executeAllocateResource(DrydockLease $lease) {
-    throw new Exception("This blueprint can not allocate resources!");
-  }
-
   final public function allocateResource(DrydockLease $lease) {
     $this->activeLease = $lease;
     $this->activeResource = null;
 
-    $this->log('Allocating Resource');
+    $this->log(
+      pht(
+        "Blueprint '%s': Allocating Resource for '%s'",
+        $this->getBlueprintClass(),
+        $lease->getLeaseName()));
 
     try {
       $resource = $this->executeAllocateResource($lease);
+      $this->validateAllocatedResource($resource);
     } catch (Exception $ex) {
       $this->logException($ex);
       $this->activeResource = null;
@@ -144,17 +135,45 @@ abstract class DrydockBlueprint {
 
   protected function newResourceTemplate($name) {
     $resource = new DrydockResource();
-    $resource->setBlueprintClass(get_class($this));
+    $resource->setBlueprintClass($this->getBlueprintClass());
     $resource->setType($this->getType());
     $resource->setStatus(DrydockResourceStatus::STATUS_PENDING);
     $resource->setName($name);
     $resource->save();
 
     $this->activeResource = $resource;
-    $this->log('New Template');
+    $this->log(
+      pht(
+        "Blueprint '%s': Created New Template",
+        $this->getBlueprintClass()));
 
     return $resource;
   }
 
+  /**
+   * Sanity checks that the blueprint is implemented properly.
+   */
+  private function validateAllocatedResource($resource) {
+    $blueprint = $this->getBlueprintClass();
+
+    if (!($resource instanceof DrydockResource)) {
+      throw new Exception(
+        "Blueprint '{$blueprint}' is not properly implemented: ".
+        "executeAllocateResource() must return an object of type ".
+        "DrydockResource or throw, but returned something else.");
+    }
+
+    $current_status = $resource->getStatus();
+    $req_status = DrydockResourceStatus::STATUS_OPEN;
+    if ($current_status != $req_status) {
+      $current_name = DrydockResourceStatus::getNameForStatus($current_status);
+      $req_name = DrydockResourceStatus::getNameForStatus($req_status);
+      throw new Exception(
+        "Blueprint '{$blueprint}' is not properly implemented: ".
+        "executeAllocateResource() must return a DrydockResource with ".
+        "status '{$req_name}', but returned one with status ".
+        "'{$current_name}'.");
+    }
+  }
 
 }

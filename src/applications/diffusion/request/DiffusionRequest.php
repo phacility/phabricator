@@ -1,21 +1,5 @@
 <?php
 
-/*
- * Copyright 2012 Facebook, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /**
  * Contains logic to parse Diffusion requests, which have a complicated URI
  * structure.
@@ -36,6 +20,7 @@ abstract class DiffusionRequest {
   protected $branch;
   protected $commitType = 'commit';
   protected $tagContent;
+  protected $lint;
 
   protected $repository;
   protected $repositoryCommit;
@@ -96,7 +81,10 @@ abstract class DiffusionRequest {
    * @return  DiffusionRequest    New request object.
    * @task new
    */
-  final public static function newFromAphrontRequestDictionary(array $data) {
+  final public static function newFromAphrontRequestDictionary(
+    array $data,
+    AphrontRequest $request) {
+
     $callsign = phutil_unescape_uri_path_component(idx($data, 'callsign'));
     $object = self::newFromCallsign($callsign);
 
@@ -104,6 +92,7 @@ abstract class DiffusionRequest {
     $parsed = self::parseRequestBlob(idx($data, 'dblob'), $use_branches);
 
     $object->initializeFromDictionary($parsed);
+    $object->lint = $request->getStr('lint');
     return $object;
   }
 
@@ -199,6 +188,11 @@ abstract class DiffusionRequest {
     return $this->callsign;
   }
 
+  public function setPath($path) {
+    $this->path = $path;
+    return $this;
+  }
+
   public function getPath() {
     return $this->path;
   }
@@ -217,6 +211,21 @@ abstract class DiffusionRequest {
 
   public function getBranch() {
     return $this->branch;
+  }
+
+  public function getLint() {
+    return $this->lint;
+  }
+
+  protected function getArcanistBranch() {
+    return $this->getBranch();
+  }
+
+  public function loadBranch() {
+    return id(new PhabricatorRepositoryBranch())->loadOneWhere(
+      'repositoryID = %d AND name = %s',
+      $this->getRepository()->getID(),
+      $this->getArcanistBranch());
   }
 
   public function getTagContent() {
@@ -308,6 +317,7 @@ abstract class DiffusionRequest {
       'path'      => $this->getPath(),
       'branch'    => $this->getBranch(),
       'commit'    => $default_commit,
+      'lint'      => $this->getLint(),
     );
     foreach ($defaults as $key => $val) {
       if (!isset($params[$key])) { // Overwrite NULL.
@@ -329,6 +339,7 @@ abstract class DiffusionRequest {
    *   - `path` Optional, path to file.
    *   - `commit` Optional, commit identifier.
    *   - `line` Optional, line range.
+   *   - `lint` Optional, lint code.
    *   - `params` Optional, query parameters.
    *
    * The function generates the specified URI and returns it.
@@ -382,6 +393,7 @@ abstract class DiffusionRequest {
       case 'lastmodified':
       case 'tags':
       case 'branches':
+      case 'lint':
         $req_callsign = true;
         break;
       case 'branch':
@@ -416,6 +428,7 @@ abstract class DiffusionRequest {
       case 'lastmodified':
       case 'tags':
       case 'branches':
+      case 'lint':
         $uri = "/diffusion/{$callsign}{$action}/{$path}{$commit}{$line}";
         break;
       case 'branch':
@@ -445,6 +458,13 @@ abstract class DiffusionRequest {
     }
 
     $uri = new PhutilURI($uri);
+
+    if (isset($params['lint'])) {
+      $params['params'] = idx($params, 'params', array()) + array(
+        'lint' => $params['lint'],
+      );
+    }
+
     if (idx($params, 'params')) {
       $uri->setQueryParams($params['params']);
     }

@@ -1,21 +1,5 @@
 <?php
 
-/*
- * Copyright 2012 Facebook, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 final class LiskFixtureTestCase extends PhabricatorTestCase {
 
   public function getPhabricatorTestCaseConfiguration() {
@@ -111,5 +95,40 @@ final class LiskFixtureTestCase extends PhabricatorTestCase {
     $this->assertEqual(true, (bool)$load->load((string)$id));
   }
 
+  public function testCounters() {
+    $obj = new HarbormasterObject();
+    $conn_w = $obj->establishConnection('w');
+
+    // Test that the counter bascially behaves as expected.
+    $this->assertEqual(1, LiskDAO::loadNextCounterID($conn_w, 'a'));
+    $this->assertEqual(2, LiskDAO::loadNextCounterID($conn_w, 'a'));
+    $this->assertEqual(3, LiskDAO::loadNextCounterID($conn_w, 'a'));
+
+    // This first insert is primarily a test that the previous LAST_INSERT_ID()
+    // value does not bleed into the creation of a new counter.
+    $this->assertEqual(1, LiskDAO::loadNextCounterID($conn_w, 'b'));
+    $this->assertEqual(2, LiskDAO::loadNextCounterID($conn_w, 'b'));
+
+    // These inserts alternate database connections. Since unit tests are
+    // transactional by default, we need to break out of them or we'll deadlock
+    // since the transactions don't normally close until we exit the test.
+    LiskDAO::endIsolateAllLiskEffectsToTransactions();
+    try {
+
+      $conn_1 = $obj->establishConnection('w', $force_new = true);
+      $conn_2 = $obj->establishConnection('w', $force_new = true);
+
+      $this->assertEqual(1, LiskDAO::loadNextCounterID($conn_1, 'z'));
+      $this->assertEqual(2, LiskDAO::loadNextCounterID($conn_2, 'z'));
+      $this->assertEqual(3, LiskDAO::loadNextCounterID($conn_1, 'z'));
+      $this->assertEqual(4, LiskDAO::loadNextCounterID($conn_2, 'z'));
+      $this->assertEqual(5, LiskDAO::loadNextCounterID($conn_1, 'z'));
+
+      LiskDAO::beginIsolateAllLiskEffectsToTransactions();
+    } catch (Exception $ex) {
+      LiskDAO::beginIsolateAllLiskEffectsToTransactions();
+      throw $ex;
+    }
+  }
 
 }

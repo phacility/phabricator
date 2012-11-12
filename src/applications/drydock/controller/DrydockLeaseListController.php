@@ -1,21 +1,5 @@
 <?php
 
-/*
- * Copyright 2012 Facebook, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 final class DrydockLeaseListController extends DrydockController {
 
   public function processRequest() {
@@ -25,7 +9,8 @@ final class DrydockLeaseListController extends DrydockController {
     $nav = $this->buildSideNav('lease');
 
     $pager = new AphrontPagerView();
-    $pager->setURI(new PhutilURI('/drydock/lease/'), 'page');
+    $pager->setURI(new PhutilURI('/drydock/lease/'), 'offset');
+    $pager->setOffset($request->getInt('offset'));
 
     $data = id(new DrydockLease())->loadAllWhere(
       '1 = 1 ORDER BY id DESC LIMIT %d, %d',
@@ -48,8 +33,14 @@ final class DrydockLeaseListController extends DrydockController {
     foreach ($data as $lease) {
       $resource = idx($resources, $lease->getResourceID());
       $rows[] = array(
-        $lease->getID(),
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => $this->getApplicationURI('/lease/'.$lease->getID().'/'),
+          ),
+          $lease->getID()),
         DrydockLeaseStatus::getNameForStatus($lease->getStatus()),
+        phutil_escape_html($lease->getResourceType()),
         ($lease->getOwnerPHID()
           ? $handles[$lease->getOwnerPHID()]->renderLink()
           : null),
@@ -66,13 +57,15 @@ final class DrydockLeaseListController extends DrydockController {
       array(
         'ID',
         'Status',
-        'Owner',
+        'Resource Type',
         'Resource ID',
+        'Owner',
         'Resource',
         'Created',
       ));
     $table->setColumnClasses(
       array(
+        '',
         '',
         '',
         '',
@@ -91,7 +84,8 @@ final class DrydockLeaseListController extends DrydockController {
     return $this->buildStandardPageResponse(
       $nav,
       array(
-        'title' => 'Leases',
+        'device'  => true,
+        'title'   => 'Leases',
       ));
 
   }

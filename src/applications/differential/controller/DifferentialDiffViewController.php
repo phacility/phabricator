@@ -1,21 +1,5 @@
 <?php
 
-/*
- * Copyright 2012 Facebook, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 final class DifferentialDiffViewController extends DifferentialController {
 
   private $id;
@@ -99,14 +83,23 @@ final class DifferentialDiffViewController extends DifferentialController {
       $top_panel = $action_panel;
     }
 
-
+    $arc_unit = id(new DifferentialDiffProperty())->loadOneWhere(
+      'diffID = %d and name = %s',
+      $this->id,
+      'arc:unit');
+    if ($arc_unit) {
+      $test_data = array($arc_unit->getName() => $arc_unit->getData());
+    } else {
+      $test_data = array();
+    }
 
     $changesets = $diff->loadChangesets();
     $changesets = msort($changesets, 'getSortKey');
 
     $table_of_contents = id(new DifferentialDiffTableOfContentsView())
       ->setChangesets($changesets)
-      ->setVisibleChangesets($changesets);
+      ->setVisibleChangesets($changesets)
+      ->setUnitTestData($test_data);
 
     $refs = array();
     foreach ($changesets as $changeset) {

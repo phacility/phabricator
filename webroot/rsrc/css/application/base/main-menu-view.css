@@ -73,7 +73,7 @@
   height: 44px;
   width: 170px;
   margin-right: 12px;
-  background: 6px 9px url(/rsrc/image/logo_grey.png) no-repeat;
+  background: 6px 9px url(/rsrc/image/header_logo.png) no-repeat;
 }
 
 .phabricator-main-menu-logo span {
@@ -256,6 +256,8 @@
   border: none;
   outline: none;
   box-shadow: none;
+  text-shadow: none;
+  min-width: 0;
 
   height: 20px;
   width: 20px;

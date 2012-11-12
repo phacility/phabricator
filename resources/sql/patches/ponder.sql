@@ -14,7 +14,7 @@ CREATE TABLE `{$NAMESPACE}_ponder`.`ponder_question` (
   UNIQUE KEY `phid` (`phid`),
   KEY `authorPHID` (`authorPHID`),
   KEY `heat` (`heat`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=11;
 
 CREATE TABLE `{$NAMESPACE}_ponder`.`ponder_answer` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
