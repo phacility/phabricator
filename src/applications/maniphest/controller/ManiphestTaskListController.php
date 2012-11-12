@@ -31,13 +31,10 @@ final class ManiphestTaskListController extends ManiphestController {
       $task_ids   = nonempty($task_ids, null);
 
       $search_text = $request->getStr('set_search');
-      $search_text = nonempty($search_text, null);
 
       $min_priority = $request->getInt('set_lpriority');
-      $min_priority = nonempty($min_priority, null);
 
       $max_priority = $request->getInt('set_hpriority');
-      $max_priority = nonempty($max_priority, null);
 
       $uri = $request->getRequestURI()
         ->alter('users',      $this->getArrToStrList('set_users'))
@@ -230,7 +227,7 @@ final class ManiphestTaskListController extends ManiphestController {
           ->setValue($tokens));
 
       $priority = ManiphestTaskPriority::getLowestPriority();
-      if ($low_priority) {
+      if ($low_priority !== null) {
         $priority = $low_priority;
       }
 
@@ -243,7 +240,7 @@ final class ManiphestTaskListController extends ManiphestController {
                 ManiphestTaskPriority::getTaskPriorityMap(), true)));
 
       $priority = ManiphestTaskPriority::getHighestPriority();
-      if ($high_priority) {
+      if ($high_priority !== null) {
         $priority = $high_priority;
       }
 
@@ -426,10 +423,10 @@ final class ManiphestTaskListController extends ManiphestController {
     $author_phids = $search_query->getParameter('authorPHIDs', array());
 
     $low_priority = $search_query->getParameter('lowPriority');
-    $low_priority = nonempty($low_priority,
+    $low_priority = coalesce($low_priority,
         ManiphestTaskPriority::getLowestPriority());
     $high_priority = $search_query->getParameter('highPriority');
-    $high_priority = nonempty($high_priority,
+    $high_priority = coalesce($high_priority,
       ManiphestTaskPriority::getHighestPriority());
 
     $query = new ManiphestTaskQuery();
