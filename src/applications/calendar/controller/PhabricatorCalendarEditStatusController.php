@@ -102,6 +102,7 @@ final class PhabricatorCalendarEditStatusController
     $status_select = id(new AphrontFormSelectControl())
       ->setLabel(pht('Status'))
       ->setName('status')
+      ->setValue($status->getStatus())
       ->setOptions($status->getStatusOptions());
 
     $description = id(new AphrontFormTextAreaControl())

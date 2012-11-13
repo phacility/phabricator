@@ -137,24 +137,36 @@ final class DifferentialRevisionViewController extends DifferentialController {
     }
 
     $reviewer_warning = null;
-    $has_live_reviewer = false;
-    foreach ($revision->getReviewers() as $reviewer) {
-      if (!$handles[$reviewer]->isDisabled()) {
-        $has_live_reviewer = true;
+    if ($revision->getStatus() ==
+        ArcanistDifferentialRevisionStatus::NEEDS_REVIEW) {
+      $has_live_reviewer = false;
+      foreach ($revision->getReviewers() as $reviewer) {
+        if (!$handles[$reviewer]->isDisabled()) {
+          $has_live_reviewer = true;
+          break;
+        }
       }
-    }
-    if (!$has_live_reviewer) {
-      $reviewer_warning = new AphrontErrorView();
-      $reviewer_warning->setSeverity(AphrontErrorView::SEVERITY_WARNING);
-      $reviewer_warning->setTitle('No Active Reviewers');
-      if ($revision->getReviewers()) {
-        $reviewer_warning->appendChild(
-          '<p>All specified reviewers are disabled. You may want to add '.
-          'some new reviewers.</p>');
-      } else {
-        $reviewer_warning->appendChild(
-          '<p>This revision has no specified reviewers. You may want to '.
-          'add some.</p>');
+      if (!$has_live_reviewer) {
+        $reviewer_warning = new AphrontErrorView();
+        $reviewer_warning->setSeverity(AphrontErrorView::SEVERITY_WARNING);
+        $reviewer_warning->setTitle('No Active Reviewers');
+        if ($revision->getReviewers()) {
+          $reviewer_warning->appendChild(
+            phutil_render_tag(
+              'p',
+              array(),
+              pht('All specified reviewers are disabled and this revision '.
+                  'needs review. You may want to add some new reviewers.')
+            ));
+        } else {
+          $reviewer_warning->appendChild(
+            phutil_render_tag(
+              'p',
+              array(),
+              pht('This revision has no specified reviewers and needs review.'.
+                  ' You may want to add some reviewers.')
+            ));
+        }
       }
     }
 

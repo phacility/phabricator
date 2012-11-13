@@ -12,9 +12,9 @@ td.aphront-side-nav-content {
 }
 
 th.aphront-side-nav-navigation {
-  border-right: 1px solid #99c4d7;
+  border-right: 1px solid #ccc;
   padding-bottom: 8em;
-  background: #fbfbff;
+  background: #f7f7f7;
 }
 
 th.aphront-side-nav-navigation a,
@@ -31,22 +31,24 @@ th.aphront-side-nav-navigation span {
 th.aphront-side-nav-navigation span {
   padding-left: 12px;
   padding-top: 6px;
-  color: #333333;
+  color: #333;
+  text-transform: uppercase;
+  font-size: 11px;
 }
 
 th.aphront-side-nav-navigation a:hover {
   text-decoration: none;
-  background:     #e9e9f6;
+  background: #e7e7e7;
 }
 
 th.aphront-side-nav-navigation hr {
-  height:         1px;
-  background:     #eeeeee;
-  border:         0px;
-  margin:         12px 0px;
+  height: 1px;
+  background: #eee;
+  border: 0;
+  margin: 12px 0px;
 }
 
 th.aphront-side-nav-navigation a.aphront-side-nav-selected,
 th.aphront-side-nav-navigation a.aphront-side-nav-selected:hover {
-  background:     #d8d8e6;
+  background: #d7d7d7;
 }

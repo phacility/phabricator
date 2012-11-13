@@ -59,25 +59,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 body {
-  font: 13px/1.231 'lucida grande', tahoma, verdana, arial, sans-serif;
+  font: 13px/1.231 'Helvetica Neue', Arial, sans-serif;
   direction: ltr;
   text-align: left;
   unicode-bidi: embed;
-  *font-size: small;
 }
 
 body.phabricator-chromeless-page {
   background: #ffffff;
-}
-
-select, input, button, textarea, button {
-  font: 99% 'lucida grande', tahoma, verdana, arial, clean, sans-serif;
-}
-
-select {
-  /* NOTE: In Safari, specifying a border color makes the browser respect
-     "font-size" settings. */
-  border: 1px solid #999999;
 }
 
 table {
@@ -100,11 +89,11 @@ a {
 }
 
 a:visited {
-  color: #3b5998;
+  color: #18559D;
 }
 
 a:link {
-  color: #3b5998;
+  color: #18559D;
 }
 
 a:hover {
