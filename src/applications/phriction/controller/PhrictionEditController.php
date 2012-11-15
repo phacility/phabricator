@@ -154,20 +154,22 @@ final class PhrictionEditController
         ->setErrors($errors);
     }
 
+    $delete_button = null;
     if ($document->getID()) {
       $panel_header = 'Edit Phriction Document';
       $submit_button = 'Save Changes';
-      $delete_button = phutil_render_tag(
-        'a',
-        array(
-          'href' => '/phriction/delete/'.$document->getID().'/',
-          'class' => 'grey button',
-        ),
-        'Delete Document');
+      if ($document->getStatus() != PhrictionDocumentStatus::STATUS_DELETED) {
+        $delete_button = phutil_render_tag(
+          'a',
+          array(
+            'href' => '/phriction/delete/'.$document->getID().'/',
+            'class' => 'grey button',
+          ),
+          'Delete Document');
+      }
     } else {
       $panel_header = 'Create New Phriction Document';
       $submit_button = 'Create Document';
-      $delete_button = null;
     }
 
     $uri = $document->getSlug();
