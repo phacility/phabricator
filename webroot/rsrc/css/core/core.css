@@ -69,6 +69,10 @@ body.phabricator-chromeless-page {
   background: #ffffff;
 }
 
+textarea {
+  font-family: inherit;
+}
+
 table {
   font-size: inherit;
   font: 100%;

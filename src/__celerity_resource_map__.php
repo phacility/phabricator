@@ -5119,7 +5119,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-core-css' =>
   array(
-    'uri' => '/res/9c1fcdf0/rsrc/css/core/core.css',
+    'uri' => '/res/63d9b2eb/rsrc/css/core/core.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -5793,7 +5793,7 @@ celerity_register_resource_map(array(
 ), array(
   'packages' =>
   array(
-    'ce7ab644' =>
+    '113df95f' =>
     array(
       'name' => 'core.pkg.css',
       'symbols' =>
@@ -5822,7 +5822,7 @@ celerity_register_resource_map(array(
         21 => 'phabricator-flag-css',
         22 => 'aphront-error-view-css',
       ),
-      'uri' => '/res/pkg/ce7ab644/core.pkg.css',
+      'uri' => '/res/pkg/113df95f/core.pkg.css',
       'type' => 'css',
     ),
     '805a58d7' =>
@@ -5989,20 +5989,20 @@ celerity_register_resource_map(array(
   'reverse' =>
   array(
     'aphront-attached-file-view-css' => '7839ae2d',
-    'aphront-crumbs-view-css' => 'ce7ab644',
-    'aphront-dialog-view-css' => 'ce7ab644',
-    'aphront-error-view-css' => 'ce7ab644',
-    'aphront-form-view-css' => 'ce7ab644',
+    'aphront-crumbs-view-css' => '113df95f',
+    'aphront-dialog-view-css' => '113df95f',
+    'aphront-error-view-css' => '113df95f',
+    'aphront-form-view-css' => '113df95f',
     'aphront-headsup-action-list-view-css' => '47549184',
-    'aphront-headsup-view-css' => 'ce7ab644',
-    'aphront-list-filter-view-css' => 'ce7ab644',
-    'aphront-pager-view-css' => 'ce7ab644',
-    'aphront-panel-view-css' => 'ce7ab644',
-    'aphront-side-nav-view-css' => 'ce7ab644',
-    'aphront-table-view-css' => 'ce7ab644',
-    'aphront-tokenizer-control-css' => 'ce7ab644',
-    'aphront-tooltip-css' => 'ce7ab644',
-    'aphront-typeahead-control-css' => 'ce7ab644',
+    'aphront-headsup-view-css' => '113df95f',
+    'aphront-list-filter-view-css' => '113df95f',
+    'aphront-pager-view-css' => '113df95f',
+    'aphront-panel-view-css' => '113df95f',
+    'aphront-side-nav-view-css' => '113df95f',
+    'aphront-table-view-css' => '113df95f',
+    'aphront-tokenizer-control-css' => '113df95f',
+    'aphront-tooltip-css' => '113df95f',
+    'aphront-typeahead-control-css' => '113df95f',
     'differential-changeset-view-css' => '47549184',
     'differential-core-view-css' => '47549184',
     'differential-inline-comment-editor' => 'cab76945',
@@ -6068,15 +6068,15 @@ celerity_register_resource_map(array(
     'javelin-workflow' => '805a58d7',
     'maniphest-task-summary-css' => '7839ae2d',
     'maniphest-transaction-detail-css' => '7839ae2d',
-    'phabricator-app-buttons-css' => 'ce7ab644',
+    'phabricator-app-buttons-css' => '113df95f',
     'phabricator-content-source-view-css' => '47549184',
-    'phabricator-core-buttons-css' => 'ce7ab644',
-    'phabricator-core-css' => 'ce7ab644',
-    'phabricator-directory-css' => 'ce7ab644',
+    'phabricator-core-buttons-css' => '113df95f',
+    'phabricator-core-css' => '113df95f',
+    'phabricator-directory-css' => '113df95f',
     'phabricator-drag-and-drop-file-upload' => 'cab76945',
     'phabricator-dropdown-menu' => '805a58d7',
-    'phabricator-flag-css' => 'ce7ab644',
-    'phabricator-jump-nav' => 'ce7ab644',
+    'phabricator-flag-css' => '113df95f',
+    'phabricator-jump-nav' => '113df95f',
     'phabricator-keyboard-shortcut' => '805a58d7',
     'phabricator-keyboard-shortcut-manager' => '805a58d7',
     'phabricator-menu-item' => '805a58d7',
@@ -6084,11 +6084,11 @@ celerity_register_resource_map(array(
     'phabricator-paste-file-upload' => '805a58d7',
     'phabricator-prefab' => '805a58d7',
     'phabricator-project-tag-css' => '7839ae2d',
-    'phabricator-remarkup-css' => 'ce7ab644',
+    'phabricator-remarkup-css' => '113df95f',
     'phabricator-shaped-request' => 'cab76945',
-    'phabricator-standard-page-view' => 'ce7ab644',
+    'phabricator-standard-page-view' => '113df95f',
     'phabricator-tooltip' => '805a58d7',
-    'phabricator-transaction-view-css' => 'ce7ab644',
-    'syntax-highlighting-css' => 'ce7ab644',
+    'phabricator-transaction-view-css' => '113df95f',
+    'syntax-highlighting-css' => '113df95f',
   ),
 ));
