@@ -5110,7 +5110,7 @@ celerity_register_resource_map(array(
   ),
   'phabricator-core-buttons-css' =>
   array(
-    'uri' => '/res/b04fafac/rsrc/css/core/buttons.css',
+    'uri' => '/res/f03fd11e/rsrc/css/core/buttons.css',
     'type' => 'css',
     'requires' =>
     array(
@@ -5793,7 +5793,7 @@ celerity_register_resource_map(array(
 ), array(
   'packages' =>
   array(
-    '113df95f' =>
+    'ff0f1b15' =>
     array(
       'name' => 'core.pkg.css',
       'symbols' =>
@@ -5822,7 +5822,7 @@ celerity_register_resource_map(array(
         21 => 'phabricator-flag-css',
         22 => 'aphront-error-view-css',
       ),
-      'uri' => '/res/pkg/113df95f/core.pkg.css',
+      'uri' => '/res/pkg/ff0f1b15/core.pkg.css',
       'type' => 'css',
     ),
     '805a58d7' =>
@@ -5989,20 +5989,20 @@ celerity_register_resource_map(array(
   'reverse' =>
   array(
     'aphront-attached-file-view-css' => '7839ae2d',
-    'aphront-crumbs-view-css' => '113df95f',
-    'aphront-dialog-view-css' => '113df95f',
-    'aphront-error-view-css' => '113df95f',
-    'aphront-form-view-css' => '113df95f',
+    'aphront-crumbs-view-css' => 'ff0f1b15',
+    'aphront-dialog-view-css' => 'ff0f1b15',
+    'aphront-error-view-css' => 'ff0f1b15',
+    'aphront-form-view-css' => 'ff0f1b15',
     'aphront-headsup-action-list-view-css' => '47549184',
-    'aphront-headsup-view-css' => '113df95f',
-    'aphront-list-filter-view-css' => '113df95f',
-    'aphront-pager-view-css' => '113df95f',
-    'aphront-panel-view-css' => '113df95f',
-    'aphront-side-nav-view-css' => '113df95f',
-    'aphront-table-view-css' => '113df95f',
-    'aphront-tokenizer-control-css' => '113df95f',
-    'aphront-tooltip-css' => '113df95f',
-    'aphront-typeahead-control-css' => '113df95f',
+    'aphront-headsup-view-css' => 'ff0f1b15',
+    'aphront-list-filter-view-css' => 'ff0f1b15',
+    'aphront-pager-view-css' => 'ff0f1b15',
+    'aphront-panel-view-css' => 'ff0f1b15',
+    'aphront-side-nav-view-css' => 'ff0f1b15',
+    'aphront-table-view-css' => 'ff0f1b15',
+    'aphront-tokenizer-control-css' => 'ff0f1b15',
+    'aphront-tooltip-css' => 'ff0f1b15',
+    'aphront-typeahead-control-css' => 'ff0f1b15',
     'differential-changeset-view-css' => '47549184',
     'differential-core-view-css' => '47549184',
     'differential-inline-comment-editor' => 'cab76945',
@@ -6068,15 +6068,15 @@ celerity_register_resource_map(array(
     'javelin-workflow' => '805a58d7',
     'maniphest-task-summary-css' => '7839ae2d',
     'maniphest-transaction-detail-css' => '7839ae2d',
-    'phabricator-app-buttons-css' => '113df95f',
+    'phabricator-app-buttons-css' => 'ff0f1b15',
     'phabricator-content-source-view-css' => '47549184',
-    'phabricator-core-buttons-css' => '113df95f',
-    'phabricator-core-css' => '113df95f',
-    'phabricator-directory-css' => '113df95f',
+    'phabricator-core-buttons-css' => 'ff0f1b15',
+    'phabricator-core-css' => 'ff0f1b15',
+    'phabricator-directory-css' => 'ff0f1b15',
     'phabricator-drag-and-drop-file-upload' => 'cab76945',
     'phabricator-dropdown-menu' => '805a58d7',
-    'phabricator-flag-css' => '113df95f',
-    'phabricator-jump-nav' => '113df95f',
+    'phabricator-flag-css' => 'ff0f1b15',
+    'phabricator-jump-nav' => 'ff0f1b15',
     'phabricator-keyboard-shortcut' => '805a58d7',
     'phabricator-keyboard-shortcut-manager' => '805a58d7',
     'phabricator-menu-item' => '805a58d7',
@@ -6084,11 +6084,11 @@ celerity_register_resource_map(array(
     'phabricator-paste-file-upload' => '805a58d7',
     'phabricator-prefab' => '805a58d7',
     'phabricator-project-tag-css' => '7839ae2d',
-    'phabricator-remarkup-css' => '113df95f',
+    'phabricator-remarkup-css' => 'ff0f1b15',
     'phabricator-shaped-request' => 'cab76945',
-    'phabricator-standard-page-view' => '113df95f',
+    'phabricator-standard-page-view' => 'ff0f1b15',
     'phabricator-tooltip' => '805a58d7',
-    'phabricator-transaction-view-css' => '113df95f',
-    'syntax-highlighting-css' => '113df95f',
+    'phabricator-transaction-view-css' => 'ff0f1b15',
+    'syntax-highlighting-css' => 'ff0f1b15',
   ),
 ));

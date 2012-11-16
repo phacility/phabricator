@@ -17,6 +17,7 @@ input.inputsubmit {
   border: 1px solid #19558D;
   cursor: pointer;
   font-weight: bold;
+  font-size: 13px;
   display: inline-block;
   padding: 3px 10px 4px;
   text-align: center;
