@@ -18,12 +18,13 @@ final class PhrictionListController
     $user = $request->getUser();
 
     $views = array(
+      'active'  => 'Active Documents',
       'all'     => 'All Documents',
       'updates' => 'Recently Updated',
     );
 
     if (empty($views[$this->view])) {
-      $this->view = 'all';
+      $this->view = 'active';
     }
 
     $nav = new AphrontSideNavView();
@@ -86,6 +87,7 @@ final class PhrictionListController
       ));
 
     $view_headers = array(
+      'active'    => 'Active Documents',
       'all'       => 'All Documents',
       'updates'   => 'Recently Updated Documents',
     );
@@ -113,6 +115,15 @@ final class PhrictionListController
     $conn = $document_dao->establishConnection('r');
 
     switch ($this->view) {
+      case 'active':
+        $data = queryfx_all(
+          $conn,
+          'SELECT * FROM %T WHERE status != %d ORDER BY id DESC LIMIT %d, %d',
+          $document_dao->getTableName(),
+          PhrictionDocumentStatus::STATUS_DELETED,
+          $pager->getOffset(),
+          $pager->getPageSize() + 1);
+        break;
       case 'all':
         $data = queryfx_all(
           $conn,
