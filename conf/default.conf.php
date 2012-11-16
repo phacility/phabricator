@@ -883,6 +883,10 @@ return array(
   'amazon-s3.access-key'          =>  null,
   'amazon-s3.secret-key'          =>  null,
 
+  // To use a custom endpoint, specify it here. Normally, you do not need to
+  // configure this.
+  'amazon-s3.endpoint'            =>  null,
+
   // Set this to a valid Amazon S3 bucket to store files there. You must also
   // configure S3 access keys above.
   'storage.s3.bucket'             => null,
