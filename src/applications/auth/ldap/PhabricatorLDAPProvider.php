@@ -143,11 +143,15 @@ final class PhabricatorLDAPProvider {
     if ($activeDirectoryDomain) {
       $dn = $username.'@'.$activeDirectoryDomain;
     } else {
-      $dn = ldap_sprintf(
-        '%Q=%s,%Q',
-        $this->getSearchAttribute(),
-        $username,
-        $this->getBaseDN());
+      if (isset($user)) {
+        $dn = $user['dn'];
+      } else {
+        $dn = ldap_sprintf(
+          '%Q=%s,%Q',
+          $this->getSearchAttribute(),
+          $username,
+          $this->getBaseDN());
+      }
     }
 
     // NOTE: It is very important we suppress any messages that occur here,
