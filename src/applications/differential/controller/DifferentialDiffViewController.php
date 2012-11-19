@@ -83,10 +83,38 @@ final class DifferentialDiffViewController extends DifferentialController {
       $top_panel = $action_panel;
     }
 
-    $arc_unit = id(new DifferentialDiffProperty())->loadOneWhere(
-      'diffID = %d and name = %s',
-      $this->id,
-      'arc:unit');
+    $props = id(new DifferentialDiffProperty())->loadAllWhere(
+      'diffID = %d',
+      $diff->getID());
+    $props = mpull($props, 'getData', 'getName');
+
+    $aux_fields = DifferentialFieldSelector::newSelector()
+      ->getFieldSpecifications();
+    foreach ($aux_fields as $key => $aux_field) {
+      if (!$aux_field->shouldAppearOnDiffView()) {
+        unset($aux_fields[$key]);
+      } else {
+        $aux_field->setUser($this->getRequest()->getUser());
+      }
+    }
+
+    $dict = array();
+    foreach ($aux_fields as $key => $aux_field) {
+      $aux_field->setDiff($diff);
+      $aux_field->setManualDiff($diff);
+      $aux_field->setDiffProperties($props);
+      $value = $aux_field->renderValueForDiffView();
+      if (strlen($value)) {
+        $label = rtrim($aux_field->renderLabelForDiffView(), ':');
+        $dict[$label] = $value;
+      }
+    }
+
+    $action_panel = new AphrontHeadsupView();
+    $action_panel->setProperties($dict);
+    $action_panel->setHeader(pht('Diff Properties'));
+
+    $arc_unit = idx($props, 'arc:unit');
     if ($arc_unit) {
       $test_data = array($arc_unit->getName() => $arc_unit->getData());
     } else {
@@ -120,6 +148,7 @@ final class DifferentialDiffViewController extends DifferentialController {
         ->appendChild(
           array(
             $top_panel->render(),
+            $action_panel->render(),
             $table_of_contents->render(),
             $details->render(),
           )),

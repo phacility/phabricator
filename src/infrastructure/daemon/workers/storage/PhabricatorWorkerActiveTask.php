@@ -5,10 +5,6 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
   private $serverTime;
   private $localTime;
 
-  public function getTableName() {
-    return 'worker_task';
-  }
-
   public function getConfiguration() {
     return array(
       self::CONFIG_IDS => self::IDS_COUNTER,
@@ -71,7 +67,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
   }
 
   public function archiveTask($result, $duration) {
-    if (!$this->getID()) {
+    if ($this->getID() === null) {
       throw new Exception(
         "Attempting to archive a task which hasn't been save()d!");
     }

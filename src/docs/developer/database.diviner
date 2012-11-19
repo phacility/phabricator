@@ -151,7 +151,11 @@ such as PHID columns. Otherwise, use `COLLATE utf8_general_ci`.
 add your patch to @{method@phabricator:PhabricatorBuiltinPatchList::getPatches}.
 # Run `bin/storage/upgrade`.
 
-It is also possible to create more complex patch in PHP.
+It is also possible to create more complex patches in PHP for data migration
+(due to schema changes or otherwise.) However, the schema changes themselves 
+should be done in separate `.sql` files. Order can be guaranteed by editing
+`src/infrastructure/storage/patch/PhabricatorBuiltinPatchList.php`
+appropriately.
 
 See the
 [[https://secure.phabricator.com/rPb39175342dc5bee0c2246b05fa277e76a7e96ed3

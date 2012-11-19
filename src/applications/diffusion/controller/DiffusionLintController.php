@@ -6,7 +6,7 @@ final class DiffusionLintController extends DiffusionController {
   public function processRequest() {
     $drequest = $this->getDiffusionRequest();
 
-    if ($this->getRequest()->getStr('lint')) {
+    if ($this->getRequest()->getStr('lint') !== null) {
       $controller = new DiffusionLintDetailsController($this->getRequest());
       $controller->setDiffusionRequest($drequest);
       return $this->delegateToController($controller);
@@ -49,14 +49,7 @@ final class DiffusionLintController extends DiffusionController {
         'Name',
         'Example',
       ))
-      ->setColumnClasses(array(
-        'n',
-        'n',
-        '',
-        'pri',
-        '',
-        '',
-      ));
+      ->setColumnClasses(array('n', 'n', '', 'pri', '', ''));
 
     $content = array();
 
@@ -67,8 +60,17 @@ final class DiffusionLintController extends DiffusionController {
         'view'   => 'lint',
       ));
 
+    $link = hsprintf(
+      '<a href="%s">%s</a>',
+      $drequest->generateURI(array(
+        'action' => 'lint',
+        'lint' => '',
+      )),
+      pht('Switch to List View'));
+
     $content[] = id(new AphrontPanelView())
       ->setHeader(pht('%d Lint Message(s)', array_sum(ipull($codes, 'n'))))
+      ->setCaption($link)
       ->appendChild($table);
 
     $nav = $this->buildSideNav('lint', false);

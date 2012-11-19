@@ -155,10 +155,14 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       }
       $last_base = $base;
 
+      $id_link = phutil_render_tag(
+        'a',
+        array('href' => '/differential/diff/'.$id.'/'),
+        phutil_escape_html($id));
       $rows[] =
         '<tr'.$class.'>'.
           '<td class="revhistory-name">'.phutil_escape_html($name).'</td>'.
-          '<td class="revhistory-id">'.phutil_escape_html($id).'</td>'.
+          '<td class="revhistory-id">'.$id_link.'</td>'.
           '<td class="revhistory-base">'.phutil_escape_html($base).'</td>'.
           '<td class="revhistory-desc">'.phutil_escape_html($desc).'</td>'.
           '<td class="revhistory-age">'.$age.'</td>'.

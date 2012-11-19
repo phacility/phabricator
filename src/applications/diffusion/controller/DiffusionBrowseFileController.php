@@ -137,8 +137,13 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
     $lint_request = clone $drequest;
     $lint_request->setCommit($branch->getLintCommit());
-    $lint_history = DiffusionHistoryQuery::newFromDiffusionRequest(
-      $lint_request)->setLimit(1)->loadHistory();
+    try {
+      $lint_history = DiffusionHistoryQuery::newFromDiffusionRequest(
+        $lint_request)->setLimit(1)->loadHistory();
+    } catch (Exception $ex) {
+      // This can happen if lintCommit is invalid.
+      $lint_history = null;
+    }
 
     $this->lintCommit = '';
     if (!$file_history || !$lint_history ||
@@ -573,6 +578,7 @@ final class DiffusionBrowseFileController extends DiffusionController {
 
       foreach ($this->lintMessages as $message) {
         $inline = id(new PhabricatorAuditInlineComment())
+          ->setID($message['id'])
           ->setSyntheticAuthor(
             ArcanistLintSeverity::getStringForSeverity($message['severity']).
             ' '.$message['code'].' ('.$message['name'].')')

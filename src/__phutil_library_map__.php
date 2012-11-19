@@ -362,6 +362,7 @@ phutil_register_library_map(array(
     'DiffusionLastModifiedQuery' => 'applications/diffusion/query/lastmodified/DiffusionLastModifiedQuery.php',
     'DiffusionLintController' => 'applications/diffusion/controller/DiffusionLintController.php',
     'DiffusionLintDetailsController' => 'applications/diffusion/controller/DiffusionLintDetailsController.php',
+    'DiffusionLintSaveRunner' => 'applications/diffusion/DiffusionLintSaveRunner.php',
     'DiffusionMercurialBranchQuery' => 'applications/diffusion/query/branch/DiffusionMercurialBranchQuery.php',
     'DiffusionMercurialBrowseQuery' => 'applications/diffusion/query/browse/DiffusionMercurialBrowseQuery.php',
     'DiffusionMercurialCommitParentsQuery' => 'applications/diffusion/query/parents/DiffusionMercurialCommitParentsQuery.php',
