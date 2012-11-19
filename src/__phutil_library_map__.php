@@ -925,6 +925,7 @@ phutil_register_library_map(array(
     'PhabricatorOwnersListController' => 'applications/owners/controller/PhabricatorOwnersListController.php',
     'PhabricatorOwnersOwner' => 'applications/owners/storage/PhabricatorOwnersOwner.php',
     'PhabricatorOwnersPackage' => 'applications/owners/storage/PhabricatorOwnersPackage.php',
+    'PhabricatorOwnersPackagePathValidator' => 'applications/repository/worker/commitchangeparser/PhabricatorOwnersPackagePathValidator.php',
     'PhabricatorOwnersPackageQuery' => 'applications/owners/query/PhabricatorOwnersPackageQuery.php',
     'PhabricatorOwnersPath' => 'applications/owners/storage/PhabricatorOwnersPath.php',
     'PhabricatorPHID' => 'applications/phid/storage/PhabricatorPHID.php',
