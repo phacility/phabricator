@@ -18,9 +18,6 @@ final class DrydockLeaseListController extends DrydockController {
       $pager->getPageSize() + 1);
     $data = $pager->sliceResults($data);
 
-    $phids = mpull($data, 'getOwnerPHID');
-    $handles = $this->loadViewerHandles($phids);
-
     $resource_ids = mpull($data, 'getResourceID');
     $resources = array();
     if ($resource_ids) {
@@ -32,19 +29,28 @@ final class DrydockLeaseListController extends DrydockController {
     $rows = array();
     foreach ($data as $lease) {
       $resource = idx($resources, $lease->getResourceID());
+
+      $lease_uri = '/lease/'.$lease->getID().'/';
+      $lease_uri = $this->getApplicationURI($lease_uri);
+
+      $resource_uri = '/resource/'.$lease->getResourceID().'/';
+      $resource_uri = $this->getApplicationURI($resource_uri);
+
       $rows[] = array(
         phutil_render_tag(
           'a',
           array(
-            'href' => $this->getApplicationURI('/lease/'.$lease->getID().'/'),
+            'href' => $lease_uri,
           ),
           $lease->getID()),
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => $resource_uri,
+          ),
+          $lease->getResourceID()),
         DrydockLeaseStatus::getNameForStatus($lease->getStatus()),
         phutil_escape_html($lease->getResourceType()),
-        ($lease->getOwnerPHID()
-          ? $handles[$lease->getOwnerPHID()]->renderLink()
-          : null),
-        $lease->getResourceID(),
         ($resource
           ? phutil_escape_html($resource->getName())
           : null),
@@ -56,16 +62,14 @@ final class DrydockLeaseListController extends DrydockController {
     $table->setHeaders(
       array(
         'ID',
+        'Resource ID',
         'Status',
         'Resource Type',
-        'Resource ID',
-        'Owner',
         'Resource',
         'Created',
       ));
     $table->setColumnClasses(
       array(
-        '',
         '',
         '',
         '',

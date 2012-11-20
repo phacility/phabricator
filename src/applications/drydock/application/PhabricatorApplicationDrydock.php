@@ -30,7 +30,10 @@ final class PhabricatorApplicationDrydock extends PhabricatorApplication {
     return array(
       '/drydock/' => array(
         '' => 'DrydockResourceListController',
-        'resource/' => 'DrydockResourceListController',
+        'resource/' => array(
+          '' => 'DrydockResourceListController',
+          '(?P<id>[1-9]\d*)/' => 'DrydockResourceViewController',
+        ),
         'lease/' => array(
           '' => 'DrydockLeaseListController',
           '(?P<id>[1-9]\d*)/' => 'DrydockLeaseViewController',
