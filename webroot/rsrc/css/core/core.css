@@ -70,7 +70,7 @@ body.phabricator-chromeless-page {
 }
 
 textarea {
-  font-family: inherit;
+  font: inherit;
 }
 
 table {
