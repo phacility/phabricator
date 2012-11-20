@@ -95,26 +95,29 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     require_celerity_resource('phabricator-core-buttons-css');
     require_celerity_resource('phabricator-standard-page-view');
 
+    Javelin::initBehavior('workflow', array());
+
     $current_token = null;
     $request = $this->getRequest();
     if ($request) {
       $user = $request->getUser();
       if ($user) {
         $current_token = $user->getCSRFToken();
+        $download_form = phabricator_render_form_magic($user);
+        $default_img_uri =
+          PhabricatorEnv::getCDNURI(
+            '/rsrc/image/icon/fatcow/document_black.png'
+          );
+
+        Javelin::initBehavior(
+          'lightbox-attachments',
+          array(
+            'defaultImageUri' => $default_img_uri,
+            'downloadForm'    => $download_form,
+          ));
       }
     }
 
-    Javelin::initBehavior('workflow', array());
-    $download_form = phabricator_render_form_magic($user);
-    $default_img_uri =
-      PhabricatorEnv::getCDNURI('/rsrc/image/icon/fatcow/document_black.png');
-
-    Javelin::initBehavior(
-      'lightbox-attachments',
-      array(
-        'defaultImageUri' => $default_img_uri,
-        'downloadForm'    => $download_form,
-      ));
     Javelin::initBehavior('toggle-class', array());
     Javelin::initBehavior('konami', array());
     Javelin::initBehavior(
