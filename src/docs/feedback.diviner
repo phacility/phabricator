@@ -50,6 +50,95 @@ questions and get support.
 
 You can email us at `btrahan@phacility.com` and `epriestley@phacility.com`.
 
+= Filing Good Feature Requests =
+
+When filing a feature request, please provide as much information as possible,
+especially about what your use case is and why you want the feature. Explaining
+what your larger goals are is very helpful, and lets us design better features.
+Tell us what your problem is before you tell us your idea to solve it: sometimes
+we can come up with a better approach to the problem, a slightly different
+approach that solves more problems or helps other users, or a way to make the
+problem go away entirely.
+
+= Filing Good Bug Reports =
+
+When filing a bug report, please provide as much information as possible. In
+particular:
+
+  - If you received an error message, please please please provide it! It is
+    often incredibly useful. See @{article:Please Please Please}.
+  - The second most useful thing to us is reproduction steps. If at all
+    possible, provide a brief list of steps required to reproduce the problem.
+  - If something you didn't expect (other than a crash or obvious error)
+    happened, tell us what you expected and what actually happened.
+
+We can fix clearly-described bugs with reproduction steps and error messages
+much more quickly than vague bugs we can't reproduce.
+
+In particular, if you don't include error messages, we need to ask you for error
+messages. We will nearly always need to do this, and nearly always be unable
+to continue until you provide them. You'll save everyone time if you spend a
+few extra seconds copy/pasting them in the first place.
+
+Generally, err on the side of giving us too much information. It's much quicker
+and easier for us to filter out information that isn't relevant than it is to
+go back and forth asking you to provide more details.
+
+Tips:
+
+  - For issues with `arc`, you can get more information by running the command
+    with the `--trace` flag. For instance, run `arc diff --trace` instead of
+    `arc diff`. Including this output in your bug report is often helpful.
+  - For issues with Phabricator, check your webserver error logs for more
+    information. For Apache, this is usually `/var/log/httpd/error.log` or
+    `/var/log/apache2/error.log`.
+  - For issues with the UI, check your Javascript error console in your browser.
+  - Some other things, like daemons, have debug flags or troubleshooting steps
+    covered in their documentation. Enabling these flags may give you more
+    information about the problem.
+
+= Unreproducible Problems =
+
+Before we can fix a bug, we need to reproduce it. If we can't reproduce a
+problem, we can't tell if we've fixed it and often won't be able to figure out
+why it is occurring.
+
+Most problems reproduce easily, but some are more difficult to reproduce. We
+will generally make a reasonable effort to reproduce problems, but sometimes
+we will be unable to reproduce an issue.
+
+Many of these unreproducible issues turn out to be bizarre environmental
+problems that are unique to one user's install, and figuring out what is wrong
+takes a very long time with a lot of back and forth as we ask questions to
+narrow down the cause of the problem. When we eventually figure it out and fix
+it, few others benefit (in some cases, no one else). This sort of fishing
+expedition is not a good use of anyone's time, and it's very hard for us to
+prioritize solving these problems because they represent a huge effort for very
+little benefit. These problems are a tiny fraction of requests (maybe 1-2%) but
+take up the vast majority of our support effort (maybe 80%).
+
+**If you want us to fix a bug we can't reproduce, you need to build us a working
+reproduction case.** Generally, this means a `root` login on a machine where the
+issue occurs. For example:
+
+  - Bring up a new machine (e.g., in EC2), install Phabricator on it, configure
+    it so the problem is reproducible, and then give us access to it.
+  - If the machine Phabricator is running on is nonessential/nonsensitive and
+    you're comfortable with us having root on it, give us credentials.
+  - If the issue is with Git, SVN or Mercurial, create a new empty repository,
+    add a commit or series of commits which replicate the issue, and give us
+    a zip/tarball of the repository as a reproduction case.
+  - If you're in the San Francisco bay area, we can probably swing by and fix
+    the issue onsite.
+
+These are all fairly heavyweight and will take some time, but often //less//
+of your time than a fishing expedition. If you can build a reproduction case,
+there is a very high chance we can resolve your problem quickly.
+
+Alternatively, you can pay us an enormous pile of money for some kind of
+enterprise support thing and we'd be thrilled to go fishing with you for as long
+as you remain solvent. Email us (see above) for specifics.
+
 = Next Steps =
 
 Continue by:
