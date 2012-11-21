@@ -199,6 +199,15 @@ final class CelerityStaticResourceResponse {
       $this->behaviors = array();
     }
 
+    $this->resolveResources();
+    $resources = array();
+    foreach ($this->packaged as $resource) {
+      $resources[] = PhabricatorEnv::getCDNURI($resource['uri']);
+    }
+    if ($resources) {
+      $response['javelin_resources'] = $resources;
+    }
+
     return $response;
   }
 
