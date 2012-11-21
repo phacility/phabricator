@@ -39,9 +39,25 @@ abstract class DrydockController extends PhabricatorController {
 
     $rows = array();
     foreach ($logs as $log) {
+      $resource_uri = '/resource/'.$log->getResourceID().'/';
+      $resource_uri = $this->getApplicationURI($resource_uri);
+
+      $lease_uri = '/lease/'.$log->getLeaseID().'/';
+      $lease_uri = $this->getApplicationURI($lease_uri);
+
       $rows[] = array(
-        $log->getResourceID(),
-        $log->getLeaseID(),
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => $resource_uri,
+          ),
+          phutil_escape_html($log->getResourceID())),
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => $lease_uri,
+          ),
+          phutil_escape_html($log->getLeaseID())),
         phutil_escape_html($log->getMessage()),
         phabricator_datetime($log->getEpoch(), $user),
       );

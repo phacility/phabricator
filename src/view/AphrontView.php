@@ -4,7 +4,16 @@ abstract class AphrontView {
 
   protected $children = array();
 
+  protected function canAppendChild() {
+    return true;
+  }
+
   final public function appendChild($child) {
+    if (!$this->canAppendChild()) {
+      $class = get_class($this);
+      throw new Exception(
+        "View '{$class}' does not support children.");
+    }
     $this->children[] = $child;
     return $this;
   }

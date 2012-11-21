@@ -17,16 +17,18 @@ final class DrydockResourceListController extends DrydockController {
       $pager->getPageSize() + 1);
     $data = $pager->sliceResults($data);
 
-    $phids = mpull($data, 'getOwnerPHID');
-    $handles = $this->loadViewerHandles($phids);
-
     $rows = array();
     foreach ($data as $resource) {
+      $resource_uri = '/resource/'.$resource->getID().'/';
+      $resource_uri = $this->getApplicationURI($resource_uri);
+
       $rows[] = array(
-        $resource->getID(),
-        ($resource->getOwnerPHID()
-          ? $handles[$resource->getOwnerPHID()]->renderLink()
-          : null),
+        phutil_render_tag(
+          'a',
+          array(
+            'href' => $resource_uri,
+          ),
+          $resource->getID()),
         phutil_escape_html($resource->getType()),
         DrydockResourceStatus::getNameForStatus($resource->getStatus()),
         phutil_escape_html(nonempty($resource->getName(), 'Unnamed')),
@@ -38,7 +40,6 @@ final class DrydockResourceListController extends DrydockController {
     $table->setHeaders(
       array(
         'ID',
-        'Owner',
         'Type',
         'Status',
         'Resource',
@@ -46,7 +47,6 @@ final class DrydockResourceListController extends DrydockController {
       ));
     $table->setColumnClasses(
       array(
-        '',
         '',
         '',
         '',
