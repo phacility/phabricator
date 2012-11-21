@@ -83,7 +83,7 @@ final class DiffusionGitBrowseQuery extends DiffusionBrowseQuery {
         }
       }
 
-      $result->setFullPath($path.$name);
+      $result->setFullPath(rtrim($path, '/').'/'.$name);
       $result->setPath($name);
       $result->setHash($hash);
       $result->setFileType($file_type);
