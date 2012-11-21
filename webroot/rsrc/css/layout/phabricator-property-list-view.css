@@ -5,30 +5,34 @@
 .phabricator-property-list-view {
   border-color: #dbdbdb;
   border-style: solid;
-  border-width: 1px 0;
+  border-width: 1px 0 0 0;
+}
+
+.phabricator-property-list-container {
+  border-color: #dbdbdb;
+  border-style: solid;
+  border-width: 0 0 1px;
   background-color: #f9f9f9;
 }
 
-.phabriator-property-list-view-end {
-  clear: both;
+.device-desktop .phabricator-property-list-container {
+  padding: 1em 0 0.5em;
 }
 
-.device-desktop .phabricator-property-list-view {
-  padding: 1em 0 0.75em;
+.device-tablet .phabricator-property-list-container,
+.device-phone .phabricator-property-list-container {
+  padding: .5em 0;
 }
 
-.device-tablet .phabricator-property-list-view,
-.device-phone .phabricator-property-list-view {
-  padding: .5em;
-}
-
-.phabricator-property-key {
+.phabricator-property-list-key {
   color: #333333;
   font-weight: bold;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
-.device-desktop .phabricator-property-key {
-  width: 12%;
+.device-desktop .phabricator-property-list-key {
+  width: 15%;
   margin-left: 1%;
   text-align: right;
   float: left;
@@ -36,35 +40,44 @@
   margin-bottom: .5em;
 }
 
-.device-tablet .phabricator-property-key,
-.device-phone .phabricator-property-key {
+.device-tablet .phabricator-property-list-key,
+.device-phone .phabricator-property-list-key {
   padding-left: .5em;
 }
 
-.phabricator-property-value {
+.phabricator-property-list-value {
   color: #333333;
+  overflow: hidden;
 }
 
-.device-desktop .phabricator-property-value {
-  width: 53%;
+.device-desktop .phabricator-property-list-value {
+  width: 50%;
   margin-left: 1%;
   float: left;
   margin-bottom: .5em;
 }
 
-.device-tablet .phabricator-property-value,
-.device-phone .phabricator-property-value {
+.device-tablet .phabricator-property-list-value,
+.device-phone .phabricator-property-list-value {
   padding-left: 1.5em;
   margin-bottom: .5em;
 }
 
-.phabricator-property-list-content {
-  background: #fdfdfd;
+.phabriator-property-list-view-end {
+  clear: both;
+}
+
+.phabricator-property-list-section-header {
+  background: #f0f0f0;
+  color: #666666;
+  padding: 4px 18px;
   border-bottom: 1px solid #dbdbdb;
 }
 
 .phabricator-property-list-text-content {
   padding: 12px 18px;
+  background: #fdfdfd;
+  border-bottom: 1px solid #dbdbdb;
 }
 
 /* When we follow an action list view on the Desktop, move down 30px so the
