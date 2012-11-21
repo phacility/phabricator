@@ -400,13 +400,17 @@ final class PhabricatorMarkupEngine {
     $rules[] = new PhabricatorRemarkupRulePhriction();
 
     $rules[] = new PhabricatorRemarkupRuleDifferentialHandle();
-    $rules[] = new PhabricatorRemarkupRuleManiphestHandle();
+    if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
+      $rules[] = new PhabricatorRemarkupRuleManiphestHandle();
+    }
 
     $rules[] = new PhabricatorRemarkupRuleEmbedFile();
 
     $rules[] = new PhabricatorRemarkupRuleDifferential();
     $rules[] = new PhabricatorRemarkupRuleDiffusion();
-    $rules[] = new PhabricatorRemarkupRuleManiphest();
+    if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
+      $rules[] = new PhabricatorRemarkupRuleManiphest();
+    }
     $rules[] = new PhabricatorRemarkupRulePaste();
 
     $rules[] = new PhabricatorRemarkupRuleCountdown();
