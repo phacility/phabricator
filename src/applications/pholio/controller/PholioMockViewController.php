@@ -40,14 +40,25 @@ final class PholioMockViewController extends PholioController {
       return new Aphront404Response();
     }
 
+    $xactions = id(new PholioTransactionQuery())
+      ->withMockIDs(array($mock->getID()))
+      ->execute();
+
+
     $phids = array();
     $phids[] = $mock->getAuthorPHID();
+    foreach ($xactions as $xaction) {
+      $phids[] = $xaction->getAuthorPHID();
+    }
     $this->loadHandles($phids);
 
 
     $engine = id(new PhabricatorMarkupEngine())
       ->setViewer($user);
     $engine->addObject($mock, PholioMock::MARKUP_FIELD_DESCRIPTION);
+    foreach ($xactions as $xaction) {
+      $engine->addObject($xaction, PholioTransaction::MARKUP_FIELD_COMMENT);
+    }
     $engine->process();
 
     $title = 'M'.$mock->getID().' '.$mock->getName();
@@ -65,6 +76,9 @@ final class PholioMockViewController extends PholioController {
       '<h1 style="margin: 2em; padding: 1em; border: 1px dashed grey;">'.
         'Comments/Transactions Go Here</h1>';
 
+
+    $xaction_view = $this->buildTransactionView($xactions, $engine);
+
     $add_comment = $this->buildAddCommentView($mock);
 
     $content = array(
@@ -72,7 +86,7 @@ final class PholioMockViewController extends PholioController {
       $actions,
       $properties,
       $carousel,
-      $comments,
+      $xaction_view,
       $add_comment,
     );
 
@@ -155,7 +169,7 @@ final class PholioMockViewController extends PholioController {
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->setAction($this->getApplicationURI('/addcomment/'.$mock->getID().'/'))
+      ->setAction($this->getApplicationURI('/comment/'.$mock->getID().'/'))
       ->setWorkflow(true)
       ->setFlexible(true)
       ->appendChild(
@@ -170,6 +184,29 @@ final class PholioMockViewController extends PholioController {
       $header,
       $form,
     );
+  }
+
+  private function buildTransactionView(
+    array $xactions,
+    PhabricatorMarkupEngine $engine) {
+    assert_instances_of($xactions, 'PholioTransaction');
+
+    $view = new PhabricatorTimelineView();
+
+    foreach ($xactions as $xaction) {
+      $author = $this->getHandle($xaction->getAuthorPHID());
+
+      $view->addEvent(
+        id(new PhabricatorTimelineEventView())
+          ->setUserHandle($author)
+          ->setTitle($author->renderLink().' added a comment.')
+          ->appendChild(
+            $engine->getOutput(
+              $xaction,
+              PholioTransaction::MARKUP_FIELD_COMMENT)));
+    }
+
+    return $view;
   }
 
 }
