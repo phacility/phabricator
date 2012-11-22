@@ -196,14 +196,76 @@ final class PholioMockViewController extends PholioController {
     foreach ($xactions as $xaction) {
       $author = $this->getHandle($xaction->getAuthorPHID());
 
-      $view->addEvent(
-        id(new PhabricatorTimelineEventView())
-          ->setUserHandle($author)
-          ->setTitle($author->renderLink().' added a comment.')
-          ->appendChild(
-            $engine->getOutput(
-              $xaction,
-              PholioTransaction::MARKUP_FIELD_COMMENT)));
+      $old = $xaction->getOldValue();
+      $new = $xaction->getNewValue();
+
+      $xaction_visible = true;
+      $title = null;
+
+      switch ($xaction->getTransactionType()) {
+        case PholioTransactionType::TYPE_NONE:
+          $title = pht(
+            '%s added a comment.',
+            $author->renderLink());
+          break;
+        case PholioTransactionType::TYPE_NAME:
+          if ($old === null) {
+            $xaction_visible = false;
+            break;
+          }
+          $title = pht(
+            '%s renamed this mock from "%s" to "%s".',
+            $author->renderLink(),
+            phutil_escape_html($old),
+            phutil_escape_html($new));
+          break;
+        case PholioTransactionType::TYPE_DESCRIPTION:
+          if ($old === null) {
+            $xaction_visible = false;
+            break;
+          }
+          // TODO: Show diff, like Maniphest.
+          $title = pht(
+            '%s updated the description of this mock. '.
+            'The old description was: %s',
+            $author->renderLink(),
+            phutil_escape_html($old));
+          break;
+        case PholioTransactionType::TYPE_VIEW_POLICY:
+          if ($old === null) {
+            $xaction_visible = false;
+            break;
+          }
+          // TODO: Render human-readable.
+          $title = pht(
+            '%s changed the visibility of this mock from "%s" to "%s".',
+            $author->renderLink(),
+            phutil_escape_html($old),
+            phutil_escape_html($new));
+          break;
+        default:
+          throw new Exception("Unknown transaction type '{$type}'!");
+      }
+
+      if (!$xaction_visible) {
+        // Some transactions aren't useful to human viewers, like
+        // the initial transactions which set the mock's name and description.
+        continue;
+      }
+
+      $event = id(new PhabricatorTimelineEventView())
+        ->setUserHandle($author);
+
+      $event->setTitle($title);
+
+      if (strlen($xaction->getComment())) {
+        $event->appendChild(
+          $engine->getOutput(
+            $xaction,
+            PholioTransaction::MARKUP_FIELD_COMMENT));
+      }
+
+      $view->addEvent($event);
     }
 
     return $view;

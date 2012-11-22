@@ -53,24 +53,20 @@ final class PholioMockCommentController extends PholioController {
       return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
-
     $content_source = PhabricatorContentSource::newForSource(
       PhabricatorContentSource::SOURCE_WEB,
       array(
         'ip' => $request->getRemoteAddr(),
       ));
 
-    // TODO: Move this to an Editor.
-
     $xaction = id(new PholioTransaction())
-      // TODO: Formalize transaction types.
-      ->setTransactionType('none')
-      ->setAuthorPHID($user->getPHID())
-      ->setComment($comment)
-      ->setContentSource($content_source)
-      ->setMockID($mock->getID());
+      ->setTransactionType(PholioTransactionType::TYPE_NONE)
+      ->setComment($comment);
 
-    $xaction->save();
+    id(new PholioMockEditor())
+      ->setActor($user)
+      ->setContentSource($content_source)
+      ->applyTransactions($mock, array($xaction));
 
     return id(new AphrontRedirectResponse())->setURI($mock_uri);
   }

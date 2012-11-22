@@ -26,8 +26,8 @@ final class PholioImage extends PholioDAO
 
   protected $mockID;
   protected $filePHID;
-  protected $name;
-  protected $description;
+  protected $name = '';
+  protected $description = '';
   protected $sequence;
 
 

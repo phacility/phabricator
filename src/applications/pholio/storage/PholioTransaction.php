@@ -29,7 +29,7 @@ final class PholioTransaction extends PholioDAO
   protected $transactionType;
   protected $oldValue;
   protected $newValue;
-  protected $comment;
+  protected $comment = '';
   protected $metadata = array();
   protected $contentSource;
 

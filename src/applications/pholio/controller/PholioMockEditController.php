@@ -33,68 +33,119 @@ final class PholioMockEditController extends PholioController {
 
 
     if ($this->id) {
-      // TODO: Support!
-      throw new Exception("NOT SUPPORTED YET");
+      $mock = id(new PholioMockQuery())
+        ->setViewer($user)
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->withIDs(array($this->id))
+        ->executeOne();
+
+      if (!$mock) {
+        return new Aphront404Response();
+      }
+
+      $title = pht('Edit Mock');
+
+      $is_new = false;
     } else {
       $mock = new PholioMock();
       $mock->setAuthorPHID($user->getPHID());
       $mock->setViewPolicy(PhabricatorPolicies::POLICY_USER);
 
       $title = pht('Create Mock');
+
+      $is_new = true;
     }
 
     $e_name = true;
     $e_images = true;
     $errors = array();
 
-    if ($request->isFormPost()) {
-      $mock->setName($request->getStr('name'));
-      $mock->setDescription($request->getStr('description'));
-      $mock->setViewPolicy($request->getStr('can_view'));
+    $v_name = $mock->getName();
+    $v_desc = $mock->getDescription();
+    $v_view = $mock->getViewPolicy();
 
-      if (!strlen($mock->getName())) {
+    if ($request->isFormPost()) {
+      $xactions = array();
+
+      $type_name = PholioTransactionType::TYPE_NAME;
+      $type_desc = PholioTransactionType::TYPE_DESCRIPTION;
+      $type_view = PholioTransactionType::TYPE_VIEW_POLICY;
+
+      $v_name = $request->getStr('name');
+      $v_desc = $request->getStr('description');
+      $v_view = $request->getStr('can_view');
+
+      $xactions[$type_name] = $v_name;
+      $xactions[$type_desc] = $v_desc;
+      $xactions[$type_view] = $v_view;
+
+      if (!strlen($request->getStr('name'))) {
         $e_name = 'Required';
         $errors[] = pht('You must name the mock.');
       }
 
-      $files = array();
-
-      $file_phids = $request->getArr('file_phids');
-      if ($file_phids) {
-        $files = id(new PhabricatorFileQuery())
-          ->setViewer($user)
-          ->withPHIDs($file_phids)
-          ->execute();
-      }
-
-      if (!$files) {
-        $e_images = 'Required';
-        $errors[] = pht('You must add at least one image to the mock.');
-      } else {
-        $mock->setCoverPHID(head($files)->getPHID());
-      }
-
-      $sequence = 0;
-
       $images = array();
-      foreach ($files as $file) {
-        $image = new PholioImage();
-        $image->setName('');
-        $image->setDescription('');
-        $image->setFilePHID($file->getPHID());
-        $image->setSequence($sequence++);
+      if ($is_new) {
+        // TODO: Make this transactional and allow edits?
 
-        $images[] = $image;
+        $files = array();
+
+        $file_phids = $request->getArr('file_phids');
+        if ($file_phids) {
+          $files = id(new PhabricatorFileQuery())
+            ->setViewer($user)
+            ->withPHIDs($file_phids)
+            ->execute();
+        }
+
+        if (!$files) {
+          $e_images = 'Required';
+          $errors[] = pht('You must add at least one image to the mock.');
+        } else {
+          $mock->setCoverPHID(head($files)->getPHID());
+        }
+
+        $sequence = 0;
+
+        foreach ($files as $file) {
+          $image = new PholioImage();
+          $image->setFilePHID($file->getPHID());
+          $image->setSequence($sequence++);
+
+          $images[] = $image;
+        }
       }
-
 
       if (!$errors) {
-        // TODO: Make transaction-object based and move to editor.
+        $content_source = PhabricatorContentSource::newForSource(
+          PhabricatorContentSource::SOURCE_WEB,
+          array(
+            'ip' => $request->getRemoteAddr(),
+          ));
+
+        foreach ($xactions as $type => $value) {
+          $xactions[$type] = id(new PholioTransaction())
+            ->setTransactionType($type)
+            ->setNewValue($value);
+        }
+
         $mock->openTransaction();
-          $mock->save();
-          foreach ($images as $image) {
-            $image->setMockID($mock->getID());
-            $image->save();
+          $editor = id(new PholioMockEditor())
+            ->setContentSource($content_source)
+            ->setActor($user);
+
+          $editor->applyTransactions($mock, $xactions);
+
+          if ($images) {
+            foreach ($images as $image) {
+              // TODO: Move into editor?
+              $image->setMockID($mock->getID());
+              $image->save();
+            }
           }
         $mock->saveTransaction();
 
@@ -126,19 +177,22 @@ final class PholioMockEditController extends PholioController {
       ->setObject($mock)
       ->execute();
 
+    // NOTE: Make this show up correctly on the rendered form.
+    $mock->setViewPolicy($v_view);
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setFlexible(true)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('name')
-          ->setValue($mock->getName())
+          ->setValue($v_name)
           ->setLabel(pht('Name'))
           ->setError($e_name))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setName('description')
-          ->setValue($mock->getDescription())
+          ->setValue($v_desc)
           ->setLabel(pht('Description')))
       ->appendChild(
         id(new AphrontFormDragAndDropUploadControl($request))
