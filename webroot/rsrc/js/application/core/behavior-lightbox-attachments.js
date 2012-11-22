@@ -18,6 +18,10 @@ JX.behavior('lightbox-attachments', function (config) {
   var downloadForm = JX.$H(config.downloadForm);
 
   function loadLightBox(e) {
+    if (!e.isNormalClick()) {
+      return;
+    }
+
     if (JX.Stratcom.pass()) {
       return;
     }
@@ -234,15 +238,12 @@ JX.behavior('lightbox-attachments', function (config) {
   JX.Stratcom.listen(
     'click',
     ['lightboxable', 'tag:a'],
-    loadLightBox
-  );
+    loadLightBox);
 
   JX.Stratcom.listen(
     'keydown',
     null,
-    lightBoxHandleKeyDown
-  );
-
+    lightBoxHandleKeyDown);
 
   // When the user clicks the background, close the lightbox.
   JX.Stratcom.listen(
