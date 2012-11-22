@@ -52,6 +52,17 @@ final class PholioTransaction extends PholioDAO
     return PhabricatorContentSource::newFromSerialized($this->contentSource);
   }
 
+  public function getRequiredHandlePHIDs() {
+    switch ($this->getTransactionType()) {
+      case PholioTransactionType::TYPE_SUBSCRIBERS:
+        return array_merge(
+          $this->getOldValue(),
+          $this->getNewValue());
+      default:
+        return array();
+    }
+  }
+
 
 /* -(  PhabricatorSubscribableInterface Implementation  )-------------------- */
 

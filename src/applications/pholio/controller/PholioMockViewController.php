@@ -44,11 +44,19 @@ final class PholioMockViewController extends PholioController {
       ->withMockIDs(array($mock->getID()))
       ->execute();
 
+    $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+      $mock->getPHID());
 
     $phids = array();
     $phids[] = $mock->getAuthorPHID();
     foreach ($xactions as $xaction) {
       $phids[] = $xaction->getAuthorPHID();
+      foreach ($xaction->getRequiredHandlePHIDs() as $hphid) {
+        $phids[] = $hphid;
+      }
+    }
+    foreach ($subscribers as $subscriber) {
+      $phids[] = $subscriber;
     }
     $this->loadHandles($phids);
 
@@ -67,15 +75,11 @@ final class PholioMockViewController extends PholioController {
       ->setHeader($title);
 
     $actions = $this->buildActionView($mock);
-    $properties = $this->buildPropertyView($mock, $engine);
+    $properties = $this->buildPropertyView($mock, $engine, $subscribers);
 
     $carousel =
       '<h1 style="margin: 2em; padding: 1em; border: 1px dashed grey;">'.
         'Carousel Goes Here</h1>';
-    $comments =
-      '<h1 style="margin: 2em; padding: 1em; border: 1px dashed grey;">'.
-        'Comments/Transactions Go Here</h1>';
-
 
     $xaction_view = $this->buildTransactionView($xactions, $engine);
 
@@ -123,7 +127,8 @@ final class PholioMockViewController extends PholioController {
 
   private function buildPropertyView(
     PholioMock $mock,
-    PhabricatorMarkupEngine $engine) {
+    PhabricatorMarkupEngine $engine,
+    array $subscribers) {
 
     $user = $this->getRequest()->getUser();
 
@@ -144,6 +149,20 @@ final class PholioMockViewController extends PholioController {
     $properties->addProperty(
       pht('Visible To'),
       $descriptions[PhabricatorPolicyCapability::CAN_VIEW]);
+
+    if ($subscribers) {
+      $sub_view = array();
+      foreach ($subscribers as $subscriber) {
+        $sub_view[] = $this->getHandle($subscriber)->renderLink();
+      }
+      $sub_view = implode(', ', $sub_view);
+    } else {
+      $sub_view = '<em>'.pht('None').'</em>';
+    }
+
+    $properties->addProperty(
+      pht('Subscribers'),
+      $sub_view);
 
     $properties->addTextContent(
       $engine->getOutput($mock, PholioMock::MARKUP_FIELD_DESCRIPTION));
@@ -201,8 +220,9 @@ final class PholioMockViewController extends PholioController {
 
       $xaction_visible = true;
       $title = null;
+      $type = $xaction->getTransactionType();
 
-      switch ($xaction->getTransactionType()) {
+      switch ($type) {
         case PholioTransactionType::TYPE_NONE:
           $title = pht(
             '%s added a comment.',
@@ -242,6 +262,44 @@ final class PholioMockViewController extends PholioController {
             $author->renderLink(),
             phutil_escape_html($old),
             phutil_escape_html($new));
+          break;
+        case PholioTransactionType::TYPE_SUBSCRIBERS:
+          $rem = array_diff($old, $new);
+          $add = array_diff($new, $old);
+
+          $add_l = array();
+          foreach ($add as $phid) {
+            $add_l[] = $this->getHandle($phid)->renderLink();
+          }
+          $add_l = implode(', ', $add_l);
+
+          $rem_l = array();
+          foreach ($rem as $phid) {
+            $rem_l[] = $this->getHandle($phid)->renderLink();
+          }
+          $rem_l = implode(', ', $rem_l);
+
+          if ($add && $rem) {
+            $title = pht(
+              '%s edited subscriber(s), added %d: %s; removed %d: %s.',
+              $author->renderLink(),
+              $add_l,
+              count($add),
+              $rem_l,
+              count($rem));
+          } else if ($add) {
+            $title = pht(
+              '%s added %d subscriber(s): %s.',
+              $author->renderLink(),
+              count($add),
+              $add_l);
+          } else if ($rem) {
+            $title = pht(
+              '%s removed %d subscribers: %s.',
+              $author->renderLink(),
+              count($rem),
+              $rem_l);
+          }
           break;
         default:
           throw new Exception("Unknown transaction type '{$type}'!");
