@@ -362,7 +362,7 @@ final class PhabricatorMarkupEngine {
   /**
    * @task engine
    */
-  private static function newMarkupEngine(array $options) {
+  public static function newMarkupEngine(array $options) {
 
     $options += self::getMarkupEngineDefaultConfiguration();
 
