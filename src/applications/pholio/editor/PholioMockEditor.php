@@ -41,6 +41,8 @@ final class PholioMockEditor extends PhabricatorEditor {
         "Call setContentSource() before applyTransactions()!");
     }
 
+    $is_new = !$mock->getID();
+
     $comments = array();
     foreach ($xactions as $xaction) {
       if (strlen($xaction->getComment())) {
@@ -54,8 +56,12 @@ final class PholioMockEditor extends PhabricatorEditor {
 
     $mentioned_phids = PhabricatorMarkupEngine::extractPHIDsFromMentions(
       $comments);
+    $subscribe_phids = $mentioned_phids;
 
-    if ($mentioned_phids) {
+    // Attempt to subscribe the actor.
+    $subscribe_phids[] = $actor->getPHID();
+
+    if ($subscribe_phids) {
       if ($mock->getID()) {
         $old_subs = PhabricatorSubscribersQuery::loadSubscribersForPHID(
           $mock->getPHID());
@@ -111,9 +117,97 @@ final class PholioMockEditor extends PhabricatorEditor {
 
     $mock->saveTransaction();
 
+    $this->sendMail($mock, $xactions, $is_new, $mentioned_phids);
+
     PholioIndexer::indexMock($mock);
 
     return $this;
+  }
+
+  private function sendMail(
+    PholioMock $mock,
+    array $xactions,
+    $is_new,
+    array $mentioned_phids) {
+
+    $subscribed_phids = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+      $mock->getPHID());
+
+    $email_to = array(
+      $mock->getAuthorPHID(),
+      $this->requireActor()->getPHID(),
+    );
+    $email_cc = $subscribed_phids;
+
+    $phids = array_merge($email_to, $email_cc);
+    $handles = id(new PhabricatorObjectHandleData($phids))
+      ->setViewer($this->requireActor())
+      ->loadHandles();
+
+    $mock_id = $mock->getID();
+    $name = $mock->getName();
+    $original_name = $mock->getOriginalName();
+
+    $thread_id = 'pholio-mock-'.$mock->getPHID();
+
+    $mail_tags = $this->getMailTags($mock, $xactions);
+
+    $body = new PhabricatorMetaMTAMailBody();
+    $body->addRawSection('lorem ipsum');
+
+    $mock_uri = PhabricatorEnv::getProductionURI('/M'.$mock->getID());
+
+    $body->addTextSection(pht('MOCK DETAIL'), $mock_uri);
+
+    $reply_handler = $this->buildReplyHandler($mock);
+
+    $template = id(new PhabricatorMetaMTAMail())
+      ->setSubject("M{$mock_id}: {$name}")
+      ->setSubjectPrefix($this->getMailSubjectPrefix())
+      ->setVarySubjectPrefix('[edit/create?]')
+      ->setFrom($this->requireActor()->getPHID())
+      ->addHeader('Thread-Topic', "M{$mock_id}: {$original_name}")
+      ->setThreadID($thread_id, $is_new)
+      ->setRelatedPHID($mock->getPHID())
+      ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
+      ->setIsBulk(true)
+      ->setMailTags($mail_tags)
+      ->setBody($body->render());
+
+    // TODO
+    //  ->setParentMessageID(...)
+
+    $mails = $reply_handler->multiplexMail(
+      $template,
+      array_select_keys($handles, $email_to),
+      array_select_keys($handles, $email_cc));
+
+    foreach ($mails as $mail) {
+      $mail->saveAndSend();
+    }
+
+    $template->addTos($email_to);
+    $template->addCCs($email_cc);
+
+    return $template;
+  }
+
+  private function getMailTags(PholioMock $mock, array $xactions) {
+    assert_instances_of($xactions, 'PholioTransaction');
+    $tags = array();
+
+    return $tags;
+  }
+
+  public function buildReplyHandler(PholioMock $mock) {
+    $handler_object = new PholioReplyHandler();
+    $handler_object->setMailReceiver($mock);
+
+    return $handler_object;
+  }
+
+  private function getMailSubjectPrefix() {
+    return PhabricatorEnv::getEnvConfig('metamta.pholio.subject-prefix');
   }
 
   private function applyTransaction(
@@ -155,6 +249,9 @@ final class PholioMockEditor extends PhabricatorEditor {
         break;
       case PholioTransactionType::TYPE_NAME:
         $mock->setName($xaction->getNewValue());
+        if ($mock->getOriginalName() === null) {
+          $mock->setOriginalName($xaction->getNewValue());
+        }
         break;
       case PholioTransactionType::TYPE_DESCRIPTION:
         $mock->setDescription($xaction->getNewValue());

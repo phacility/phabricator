@@ -1216,6 +1216,7 @@ phutil_register_library_map(array(
     'PholioMockQuery' => 'applications/pholio/query/PholioMockQuery.php',
     'PholioMockViewController' => 'applications/pholio/controller/PholioMockViewController.php',
     'PholioPixelComment' => 'applications/pholio/storage/PholioPixelComment.php',
+    'PholioReplyHandler' => 'applications/pholio/mail/PholioReplyHandler.php',
     'PholioTransaction' => 'applications/pholio/storage/PholioTransaction.php',
     'PholioTransactionQuery' => 'applications/pholio/query/PholioTransactionQuery.php',
     'PholioTransactionType' => 'applications/pholio/constants/PholioTransactionType.php',
@@ -2427,6 +2428,7 @@ phutil_register_library_map(array(
       0 => 'PholioDAO',
       1 => 'PhabricatorMarkupInterface',
     ),
+    'PholioReplyHandler' => 'PhabricatorMailReplyHandler',
     'PholioTransaction' =>
     array(
       0 => 'PholioDAO',
