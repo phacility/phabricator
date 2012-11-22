@@ -21,6 +21,12 @@
  */
 final class PholioMockListController extends PholioController {
 
+  private $view;
+
+  public function willProcessRequest(array $data) {
+    $this->view = idx($data, 'view');
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
@@ -28,7 +34,15 @@ final class PholioMockListController extends PholioController {
     $query = id(new PholioMockQuery())
       ->setViewer($user);
 
-    $title = 'All Mocks';
+    $nav = $this->buildSideNav();
+    $filter = $nav->selectFilter('view/'.$this->view, 'view/all');
+
+    switch ($filter) {
+      case 'view/all':
+      default:
+        $title = 'All Mocks';
+        break;
+    }
 
     $pager = new AphrontCursorPagerView();
     $pager->readFromRequest($request);
@@ -52,8 +66,10 @@ final class PholioMockListController extends PholioController {
       $pager,
     );
 
+    $nav->appendChild($content);
+
     return $this->buildApplicationPage(
-      $content,
+      $nav,
       array(
         'title' => $title,
       ));

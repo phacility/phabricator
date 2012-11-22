@@ -56,6 +56,9 @@ final class PhabricatorApplicationPholio extends PhabricatorApplication {
       '/M(?P<id>[1-9]\d*)' => 'PholioMockViewController',
       '/pholio/' => array(
         '' => 'PholioMockListController',
+        'view/(?P<view>\w+)/' => 'PholioMockListController',
+        'new/'                => 'PholioMockEditController',
+        'edit/(?P<id>\d+)/'   => 'PholioMockEditController',
       ),
     );
   }
