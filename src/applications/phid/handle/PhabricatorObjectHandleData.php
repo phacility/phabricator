@@ -88,10 +88,20 @@ final class PhabricatorObjectHandleData {
           break;
         case PhabricatorPHIDConstants::PHID_TYPE_QUES:
           $questions = id(new PonderQuestionQuery())
+            ->setViewer($this->viewer)
             ->withPHIDs($phids)
             ->execute();
           foreach ($questions as $question) {
             $objects[$question->getPHID()] = $question;
+          }
+          break;
+        case PhabricatorPHIDConstants::PHID_TYPE_MOCK:
+          $mocks = id(new PholioMockQuery())
+            ->setViewer($this->viewer)
+            ->withPHIDs($phids)
+            ->execute();
+          foreach ($mocks as $mock) {
+            $objects[$mock->getPHID()] = $mock;
           }
           break;
       }
@@ -541,6 +551,29 @@ final class PhabricatorObjectHandleData {
               $handle->setName($post->getTitle());
               $handle->setFullName($post->getTitle());
               $handle->setURI('/phame/post/view/'.$post->getID().'/');
+              $handle->setComplete(true);
+            }
+            $handles[$phid] = $handle;
+          }
+          break;
+        case PhabricatorPHIDConstants::PHID_TYPE_MOCK:
+          $mocks = id(new PholioMockQuery())
+            ->withPHIDs($phids)
+            ->setViewer($this->viewer)
+            ->execute();
+          $mocks = mpull($mocks, null, 'getPHID');
+
+          foreach ($phids as $phid) {
+            $handle = new PhabricatorObjectHandle();
+            $handle->setPHID($phid);
+            $handle->setType($type);
+            if (empty($mocks[$phid])) {
+              $handle->setName('Unknown Mock');
+            } else {
+              $mock = $mocks[$phid];
+              $handle->setName($mock->getName());
+              $handle->setFullName($mock->getName());
+              $handle->setURI('/M'.$mock->getID());
               $handle->setComplete(true);
             }
             $handles[$phid] = $handle;

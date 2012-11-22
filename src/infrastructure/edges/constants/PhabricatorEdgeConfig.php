@@ -107,6 +107,8 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       PhabricatorPHIDConstants::PHID_TYPE_POST  => 'PhamePost',
       PhabricatorPHIDConstants::PHID_TYPE_QUES  => 'PonderQuestion',
       PhabricatorPHIDConstants::PHID_TYPE_ANSW  => 'PonderAnswer',
+      PhabricatorPHIDConstants::PHID_TYPE_MOCK  => 'PholioMock',
+
     );
 
     $class = idx($class_map, $phid_type);

@@ -155,6 +155,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
         'type'    => 'db',
         'name'    => 'xhprof',
       ),
+      'db.pholio' => array(
+        'type'    => 'db',
+        'name'    => 'pholio',
+      ),
       '0000.legacy.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('0000.legacy.sql'),
@@ -1031,6 +1035,10 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
       'liskcounters-task.sql' => array(
         'type'    => 'sql',
         'name'    => $this->getPatchPath('liskcounters-task.sql'),
+      ),
+      'pholio.sql' => array(
+        'type'    => 'sql',
+        'name'    => $this->getPatchPath('pholio.sql'),
       ),
     );
   }
