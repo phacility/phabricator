@@ -2810,6 +2810,15 @@ celerity_register_resource_map(array(
     ),
     'disk' => '/rsrc/css/application/base/standard-page-view.css',
   ),
+  'phabricator-tag-view-css' =>
+  array(
+    'uri' => '/res/e10bf844/rsrc/css/layout/phabricator-tag-view.css',
+    'type' => 'css',
+    'requires' =>
+    array(
+    ),
+    'disk' => '/rsrc/css/layout/phabricator-tag-view.css',
+  ),
   'phabricator-textareautils' =>
   array(
     'uri' => '/res/703614ea/rsrc/js/application/core/TextAreaUtils.js',
