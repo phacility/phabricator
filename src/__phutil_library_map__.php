@@ -96,6 +96,7 @@ phutil_register_library_map(array(
     'CelerityResourceMap' => 'infrastructure/celerity/CelerityResourceMap.php',
     'CelerityResourceTransformer' => 'infrastructure/celerity/CelerityResourceTransformer.php',
     'CelerityResourceTransformerTestCase' => 'infrastructure/celerity/__tests__/CelerityResourceTransformerTestCase.php',
+    'CeleritySpriteGenerator' => 'infrastructure/celerity/CeleritySpriteGenerator.php',
     'CelerityStaticResourceResponse' => 'infrastructure/celerity/CelerityStaticResourceResponse.php',
     'ConduitAPIMethod' => 'applications/conduit/method/ConduitAPIMethod.php',
     'ConduitAPIRequest' => 'applications/conduit/protocol/ConduitAPIRequest.php',

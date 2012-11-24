@@ -55,15 +55,15 @@ EOCSS
 
 $menu_normal_template = id(new PhutilSprite())
   ->setSourceFile($srcroot.'/menu_normal_1x.png')
-  ->setSourceSize(26, 26);
+  ->setSourceSize(30, 30);
 
 $menu_hover_template = id(new PhutilSprite())
   ->setSourceFile($srcroot.'/menu_hover_1x.png')
-  ->setSourceSize(26, 26);
+  ->setSourceSize(30, 30);
 
 $menu_selected_template = id(new PhutilSprite())
   ->setSourceFile($srcroot.'/menu_selected_1x.png')
-  ->setSourceSize(26, 26);
+  ->setSourceSize(30, 30);
 
 $menu_map = array(
   ''          => $menu_normal_template,
@@ -184,49 +184,18 @@ foreach ($app_map as $icon => $coords) {
   }
 }
 
-$action_template = id(new PhutilSprite())
-  ->setSourcePosition(0, 0)
-  ->setSourceSize(16, 16);
-
-$action_icons = PhabricatorActionView::getAvailableIcons();
-foreach ($action_icons as $icon) {
-  $action_map[$icon] = 'icon/'.$icon.'.png';
-}
-
-foreach ($action_map as $icon => $source) {
-  $sheet->addSprite(
-    id(clone $action_template)
-      ->setSourceFile($srcroot.$source)
-      ->setTargetCSS('.action-'.$icon));
-}
-
-
-$remarkup_template = id(new PhutilSprite())
-  ->setSourcePosition(0, 0)
-  ->setSourceSize(14, 14);
-
-$remarkup_icons = array(
-  'b',
-  'code',
-  'i',
-  'image',
-  'ol',
-  'tag',
-  'tt',
-  'ul',
-  'help',
-  'table',
-);
-
-foreach ($remarkup_icons as $icon) {
-  $sheet->addSprite(
-    id(clone $remarkup_template)
-      ->setSourceFile($srcroot.'remarkup/text_'.$icon.'.png')
-      ->setTargetCSS('.remarkup-assist-'.$icon));
-}
-
-
 $sheet->generateImage($webroot.'/image/autosprite.png');
 $sheet->generateCSS($webroot.'/css/autosprite.css');
+
+
+/* -(  Icons Sheet  )-------------------------------------------------------- */
+
+$generator = new CeleritySpriteGenerator();
+
+$icon_sheet = $generator->buildIconSheet();
+$icon_sheet->setScales(array(1, 2));
+$icon_sheet->generateImage($webroot.'/image/sprite-icon.png', 1);
+$icon_sheet->generateImage($webroot.'/image/sprite-icon-X2.png', 2);
+$icon_sheet->generateCSS($webroot.'/css/sprite-icon.css');
 
 echo "Done.\n";
