@@ -27,7 +27,8 @@ if (!$srcroot) {
     "You must specify a source directory with '--source'.");
 }
 
-$webroot = dirname(phutil_get_library_root('phabricator')).'/webroot/rsrc';
+$root = dirname(phutil_get_library_root('phabricator'));
+$webroot = $root.'/webroot/rsrc';
 $webroot = Filesystem::readablePath($webroot);
 
 function glx($x) {
@@ -192,10 +193,12 @@ $sheet->generateCSS($webroot.'/css/autosprite.css');
 
 $generator = new CeleritySpriteGenerator();
 
-$icon_sheet = $generator->buildIconSheet();
-$icon_sheet->setScales(array(1, 2));
-$icon_sheet->generateImage($webroot.'/image/sprite-icon.png', 1);
-$icon_sheet->generateImage($webroot.'/image/sprite-icon-X2.png', 2);
-$icon_sheet->generateCSS($webroot.'/css/sprite-icon.css');
+$generator
+  ->buildIconSheet()
+  ->setScales(array(1, 2))
+  ->generateImage($webroot.'/image/sprite-icon.png', 1)
+  ->generateImage($webroot.'/image/sprite-icon-X2.png', 2)
+  ->generateCSS($webroot.'/css/sprite-icon.css')
+  ->generateManifest($root.'/resources/sprite/manifest/icon.json');
 
 echo "Done.\n";

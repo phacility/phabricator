@@ -28,7 +28,7 @@
 }
 
 .phabricator-action-view {
-  padding: 2px 0;
+  padding: 1px 0;
   position: relative;
 }
 
@@ -37,7 +37,6 @@
   background: transparent;
   box-shadow: none;
   outline: 0;
-  box-shadow: 0;
   padding: 0;
   margin: 0;
   font-weight: normal;
@@ -45,28 +44,35 @@
   width: 100%;
   text-align: left;
   text-shadow: none;
+
+  border-radius: 0;
+  color: #18559D;
+  font: inherit;
+  display: inline;
+  min-width: 0;
 }
 
 .phabricator-action-view button.phabricator-action-view-item,
 .phabricator-action-view-item {
+  padding: 1px 0 1px 34px;
   line-height: 20px;
-  padding-left: 34px;
   display: block;
   font-size: 12px;
+  text-decoration: none;
 }
 
 .phabricator-action-view-icon {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   position: absolute;
-  top: 4px;
-  left: 12px;
+  top: 5px;
+  left: 13px;
 }
 
-.device-desktop .phabricator-action-view-item:hover {
+.device-desktop .phabricator-action-view:hover .phabricator-action-view-item {
+  text-decoration: none;
   background-color: #3875d7;
   color: #ffffff;
-  text-decoration: none;
 }
 
 .phabricator-action-view-disabled .phabricator-action-view-item,
@@ -74,8 +80,10 @@
   color: #888888;
 }
 
-.phabricator-action-view-disabled .phabricator-action-view-item:hover,
-.phabricator-action-view-disabled button.phabricator-action-view-item:hover {
+.device-desktop .phabricator-action-view-disabled:hover
+  .phabricator-action-view-item,
+.device-desktop .phabricator-action-view-disabled:hover
+  button.phabricator-action-view-item {
   background-color: #dfdfdf;
   color: #888888;
 }

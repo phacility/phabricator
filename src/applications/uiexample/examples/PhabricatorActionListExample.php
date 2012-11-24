@@ -97,7 +97,6 @@ final class PhabricatorActionListExample extends PhabricatorUIExample {
         id(new PhabricatorActionView())
           ->setUser($user)
           ->setHref('#')
-          ->setDisabled(true)
           ->setName('Icon "'.$icon.'"')
           ->setIcon($icon));
     }

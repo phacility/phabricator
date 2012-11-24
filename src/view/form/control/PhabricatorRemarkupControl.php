@@ -91,6 +91,8 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
         $meta['tip'] = $tip;
       }
 
+      require_celerity_resource('sprite-icon-css');
+
       $buttons[] = javelin_render_tag(
         'a',
         array(
@@ -105,7 +107,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
         phutil_render_tag(
           'div',
           array(
-            'class' => 'remarkup-assist autosprite remarkup-assist-'.$action,
+            'class' => 'remarkup-assist sprite-icon remarkup-assist-'.$action,
           ),
           ''));
     }
