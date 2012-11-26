@@ -45,8 +45,6 @@ final class DiffusionBrowseController extends DiffusionController {
 
     } else {
 
-      $readme = null;
-
       $phids = array();
       foreach ($results as $result) {
         $data = $result->getLastCommitData();
@@ -54,11 +52,6 @@ final class DiffusionBrowseController extends DiffusionController {
           if ($data->getCommitDetail('authorPHID')) {
             $phids[$data->getCommitDetail('authorPHID')] = true;
           }
-        }
-
-        $path = $result->getPath();
-        if (preg_match('/^readme(|\.txt|\.remarkup)$/i', $path)) {
-          $readme = $result;
         }
       }
 

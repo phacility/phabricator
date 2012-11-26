@@ -40,6 +40,7 @@ final class PhabricatorSubscriptionsEditController
     }
 
     $objects = id(new PhabricatorObjectHandleData(array($phid)))
+      ->setViewer($user)
       ->loadObjects();
     $object = idx($objects, $phid);
 

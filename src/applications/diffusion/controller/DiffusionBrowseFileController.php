@@ -885,9 +885,11 @@ final class DiffusionBrowseFileController extends DiffusionController {
   private function buildBinaryCorpus($file_uri, $data) {
     $properties = new PhabricatorPropertyListView();
 
+    $size = strlen($data);
     $properties->addTextContent(
-      pht('This is a binary file. It is %d bytes in length.',
-          number_format(strlen($data)))
+      pht('This is a binary file. It is %2$s byte(s) in length.',
+          $size,
+          PhutilTranslator::getInstance()->formatNumber($size))
     );
 
     $actions = id(new PhabricatorActionListView())

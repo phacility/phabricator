@@ -349,8 +349,9 @@ return array(
   // class with an implementation of your own. This will allow you to do things
   // like have a single public reply handler or change how private reply
   // handlers are generated and validated.
+  //
   // This key should be set to a loadable subclass of
-  // PhabricatorMailReplyHandler (and possibly of ManiphestReplyHandler).
+  // PhabricatorMailReplyHandler.
   'metamta.maniphest.reply-handler' => 'ManiphestReplyHandler',
 
   // If you don't want phabricator to take up an entire domain
@@ -366,6 +367,13 @@ return array(
   // Prefix prepended to mail sent by Maniphest. You can change this to
   // distinguish between testing and development installs, for example.
   'metamta.maniphest.subject-prefix' => '[Maniphest]',
+
+  // See 'metamta.pholio.reply-handler-domain'. This does the same thing, but
+  // affects Pholio.
+  'metamta.pholio.reply-handler-domain' => null,
+
+  // Prefix prepended to mail sent by Pholio.
+  'metamta.pholio.subject-prefix' => '[Pholio]',
 
   // See 'metamta.maniphest.reply-handler-domain'. This does the same thing,
   // but allows email replies via Differential.

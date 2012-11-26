@@ -60,6 +60,12 @@ final class DiffusionGitBrowseQuery extends DiffusionBrowseQuery {
 
     $submodules = array();
 
+    if (strlen($path)) {
+      $prefix = rtrim($path, '/').'/';
+    } else {
+      $prefix = '';
+    }
+
     $results = array();
     foreach (explode("\0", rtrim($stdout)) as $line) {
 
@@ -83,7 +89,7 @@ final class DiffusionGitBrowseQuery extends DiffusionBrowseQuery {
         }
       }
 
-      $result->setFullPath($path.$name);
+      $result->setFullPath($prefix.$name);
       $result->setPath($name);
       $result->setHash($hash);
       $result->setFileType($file_type);

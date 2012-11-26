@@ -4,7 +4,7 @@ final class PhabricatorPinboardView extends AphrontView {
 
   private $items = array();
 
-  public function addItem(PhabricatorPinBoardItemView $item) {
+  public function addItem(PhabricatorPinboardItemView $item) {
     $this->items[] = $item;
     return $this;
   }

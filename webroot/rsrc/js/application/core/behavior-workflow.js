@@ -22,9 +22,10 @@ JX.behavior('workflow', function() {
     'click',
     ['workflow', 'tag:a'],
     function(e) {
-      if (JX.Stratcom.pass()) {
+      if (!e.isNormalClick()) {
         return;
       }
+
       var target = e.getNode('workflow');
       if (!JX.DOM.isType(target, 'a')) {
         // This covers the case of an <a /> without workflow inside a <form />
@@ -32,10 +33,10 @@ JX.behavior('workflow', function() {
         return;
       }
 
-      var raw = e.getRawEvent();
-      if (raw.altKey || raw.ctrlKey || raw.metaKey || raw.shiftKey) {
+      if (JX.Stratcom.pass()) {
         return;
       }
+
       e.prevent();
       JX.Workflow.newFromLink(target).start();
     });

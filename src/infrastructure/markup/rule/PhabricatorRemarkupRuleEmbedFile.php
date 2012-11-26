@@ -110,7 +110,7 @@ final class PhabricatorRemarkupRuleEmbedFile
         $embed = javelin_render_tag(
           'a',
           array(
-            'href'        => '#',
+            'href'        => $meta['uri'],
             'class'       => $options['image_class'],
             'sigil'       => 'lightboxable',
             'mustcapture' => true,

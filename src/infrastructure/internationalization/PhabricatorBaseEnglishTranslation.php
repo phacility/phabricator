@@ -167,6 +167,11 @@ abstract class PhabricatorBaseEnglishTranslation
         '%d Lint Messages',
       ),
 
+      'This is a binary file. It is %2$s byte(s) in length.' => array(
+        'This is a binary file. It is %2$s byte in length.',
+        'This is a binary file. It is %2$s bytes in length.',
+      ),
+
     );
   }
 

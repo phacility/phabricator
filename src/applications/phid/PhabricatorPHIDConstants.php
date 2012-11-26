@@ -28,4 +28,6 @@ final class PhabricatorPHIDConstants {
   const PHID_TYPE_BLOG    = 'BLOG';
   const PHID_TYPE_QUES    = 'QUES';
   const PHID_TYPE_ANSW    = 'ANSW';
+  const PHID_TYPE_MOCK    = 'MOCK';
+
 }

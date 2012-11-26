@@ -72,22 +72,8 @@ to your Phabricator account.
 For detailed instructions on using `arc diff`, see
 @{article:Arcanist User Guide: arc diff}.
 
-Subversion:
-
   $ $EDITOR file.c
   $ arc diff
-
-Git:
-
-  $ $EDITOR file.c
-  $ git commit -a -m '...'
-  $ arc diff HEAD^
-
-Mercurial:
-
-  $ $EDITOR file.c
-  $ hg commit -m '...'
-  $ arc diff tip^
 
 = Next Steps =
 
