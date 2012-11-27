@@ -66,56 +66,57 @@ final class PhabricatorMainMenuView extends AphrontView {
 
     require_celerity_resource('phabricator-notification-css');
     require_celerity_resource('phabricator-notification-menu-css');
+    require_celerity_resource('sprite-menu-css');
 
-    $indicator_id = celerity_generate_unique_node_id();
+    $count_id = celerity_generate_unique_node_id();
     $dropdown_id = celerity_generate_unique_node_id();
-    $menu_id = celerity_generate_unique_node_id();
+    $bubble_id = celerity_generate_unique_node_id();
 
-    $notification_count = id(new PhabricatorFeedStoryNotification())
+    $count_number = id(new PhabricatorFeedStoryNotification())
       ->countUnread($user);
 
-    $classes = array(
-      'phabricator-main-menu-alert-indicator',
-    );
-    if ($notification_count) {
-      $classes[] = 'phabricator-main-menu-alert-indicator-unread';
+    if ($count_number > 999) {
+      $count_number = "\xE2\x88\x9E";
     }
 
-    $notification_indicator = javelin_render_tag(
+    $count_tag = phutil_render_tag(
       'span',
       array(
-        'id' => $indicator_id,
-        'class' => implode(' ', $classes),
+        'id'    => $count_id,
+        'class' => 'phabricator-main-menu-alert-count'
       ),
-      $notification_count);
+      phutil_escape_html($count_number));
 
-    $classes = array();
-    $classes[] = 'phabricator-main-menu-alert-item';
-    $classes[] = 'phabricator-main-menu-alert-item-notification';
-    $classes[] = 'autosprite';
-    $classes[] = 'main-menu-item-icon-notifications';
+    $icon_tag = phutil_render_tag(
+      'span',
+      array(
+        'class' => 'sprite-menu phabricator-main-menu-alert-icon',
+      ),
+      '');
 
-    $notification_icon = javelin_render_tag(
+    $container_classes = array(
+      'phabricator-main-menu-alert-bubble',
+      'sprite-menu',
+      'alert-notifications',
+    );
+    if ($count_number) {
+      $container_classes[] = 'alert-unread';
+    }
+
+    $bubble_tag = phutil_render_tag(
       'a',
       array(
         'href'  => '/notification/',
-        'class' => implode(' ', $classes),
-        'id'    => $menu_id,
+        'class' => implode(' ', $container_classes),
+        'id'    => $bubble_id,
       ),
-      $notification_indicator);
-
-    $notification_menu = javelin_render_tag(
-      'div',
-      array(
-        'class' => 'phabricator-main-menu-alert',
-      ),
-      $notification_icon);
+      $icon_tag.$count_tag);
 
     Javelin::initBehavior(
       'aphlict-dropdown',
       array(
-        'menuID'      => $menu_id,
-        'indicatorID' => $indicator_id,
+        'bubbleID'    => $bubble_id,
+        'countID'     => $count_id,
         'dropdownID'  => $dropdown_id,
       ));
 
@@ -129,7 +130,7 @@ final class PhabricatorMainMenuView extends AphrontView {
       ),
       '');
 
-    return array($notification_menu, $notification_dropdown);
+    return array($bubble_tag, $notification_dropdown);
   }
 
 }

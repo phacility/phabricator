@@ -18,7 +18,11 @@ $args->parse(
       'name'  => 'source',
       'param' => 'directory',
       'help'  => 'Directory with sprite sources.',
-    )
+    ),
+    array(
+      'name'  => 'force',
+      'help'  => 'Force regeneration even if sources have not changed.',
+    ),
   ));
 
 $srcroot = $args->getArg('source');
@@ -76,7 +80,6 @@ $icon_map = array(
   'help'          => array(4, 19),
   'settings'      => array(0, 28),
   'logout'        => array(3, 6),
-  'notifications' => array(5, 20),
   'task'          => array(1, 15),
 );
 
@@ -193,12 +196,28 @@ $sheet->generateCSS($webroot.'/css/autosprite.css');
 
 $generator = new CeleritySpriteGenerator();
 
-$generator
-  ->buildIconSheet()
-  ->setScales(array(1, 2))
-  ->generateImage($webroot.'/image/sprite-icon.png', 1)
-  ->generateImage($webroot.'/image/sprite-icon-X2.png', 2)
-  ->generateCSS($webroot.'/css/sprite-icon.css')
-  ->generateManifest($root.'/resources/sprite/manifest/icon.json');
+$sheets = array(
+  'icon' => $generator->buildIconSheet(),
+  'menu' => $generator->buildMenuSheet(),
+);
+
+foreach ($sheets as $name => $sheet) {
+  $manifest_path = $root.'/resources/sprite/manifest/'.$name.'.json';
+  if (!$args->getArg('force')) {
+    if (Filesystem::pathExists($manifest_path)) {
+      $data = Filesystem::readFile($manifest_path);
+      $data = json_decode($data, true);
+      if (!$sheet->needsRegeneration($data)) {
+        continue;
+      }
+    }
+  }
+
+  $sheet
+    ->generateImage($webroot."/image/sprite-{$name}.png", 1)
+    ->generateImage($webroot."/image/sprite-{$name}-X2.png", 2)
+    ->generateCSS($webroot."/css/sprite-{$name}.css")
+    ->generateManifest($root."/resources/sprite/manifest/{$name}.json");
+}
 
 echo "Done.\n";
