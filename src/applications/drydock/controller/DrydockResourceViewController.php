@@ -63,6 +63,18 @@ final class DrydockResourceViewController extends DrydockController {
       ->setUser($this->getRequest()->getUser())
       ->setObject($resource);
 
+    $can_close = ($resource->getStatus() == DrydockResourceStatus::STATUS_OPEN);
+    $uri = '/resource/'.$resource->getID().'/close/';
+    $uri = $this->getApplicationURI($uri);
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setHref($uri)
+        ->setName(pht('Close Resource'))
+        ->setIcon('delete')
+        ->setWorkflow(true)
+        ->setDisabled(!$can_close));
+
     return $view;
   }
 
