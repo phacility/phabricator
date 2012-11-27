@@ -26,12 +26,12 @@ final class DrydockLease extends DrydockDAO {
   }
 
   public function setAttribute($key, $value) {
-    $this->attributes[$key] = $value;
+    $this->attributes[strtolower($key)] = $value;
     return $this;
   }
 
   public function getAttribute($key, $default = null) {
-    return idx($this->attributes, $key, $default);
+    return idx($this->attributes, strtolower($key), $default);
   }
 
   public function generatePHID() {
@@ -150,6 +150,10 @@ final class DrydockLease extends DrydockDAO {
   }
 
   public function waitUntilActive() {
+    if (!$this->getID()) {
+      $this->queueForActivation();
+    }
+
     self::waitForLeases(array($this));
     return $this;
   }

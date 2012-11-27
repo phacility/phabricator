@@ -30,6 +30,7 @@ final class DrydockLocalHostBlueprint extends DrydockBlueprint {
 
     $resource = $this->newResourceTemplate('localhost');
     $resource->setStatus(DrydockResourceStatus::STATUS_OPEN);
+    $resource->setAttribute('path', $path);
     $resource->save();
 
     return $resource;
@@ -38,6 +39,15 @@ final class DrydockLocalHostBlueprint extends DrydockBlueprint {
   protected function executeAcquireLease(
     DrydockResource $resource,
     DrydockLease $lease) {
+
+    $lease_id = $lease->getID();
+
+    $cmd = $lease->getInterface('command');
+    $cmd->execx('mkdir %s', $lease_id);
+
+    $lease->setAttribute('path', $resource->getAttribute('path').'/'.$lease_id);
+    $lease->save();
+
     return;
   }
 

@@ -36,6 +36,10 @@ abstract class DrydockBlueprint {
 
     $this->log('Acquiring Lease');
     try {
+      $lease->setStatus(DrydockLeaseStatus::STATUS_ACTIVE);
+      $lease->setResourceID($resource->getID());
+      $lease->attachResource($resource);
+
       $this->executeAcquireLease($resource, $lease);
     } catch (Exception $ex) {
       $this->logException($ex);
@@ -45,8 +49,6 @@ abstract class DrydockBlueprint {
       throw $ex;
     }
 
-    $lease->setResourceID($resource->getID());
-    $lease->setStatus(DrydockLeaseStatus::STATUS_ACTIVE);
     $lease->save();
 
     $this->activeResource   = null;
