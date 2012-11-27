@@ -575,7 +575,8 @@ final class DiffusionCommitController extends DiffusionController {
           ->setLabel('Comments')
           ->setName('content')
           ->setValue($draft)
-          ->setID('audit-content'))
+          ->setID('audit-content')
+          ->setUser($user))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($is_serious ? 'Submit' : 'Cook the Books'));

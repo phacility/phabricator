@@ -222,7 +222,8 @@ final class PhrictionEditController
           ->setValue($content_text)
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
           ->setName('content')
-          ->setID('document-textarea'))
+          ->setID('document-textarea')
+          ->setUser($user))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel('Edit Notes')

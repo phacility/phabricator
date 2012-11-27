@@ -193,7 +193,8 @@ final class PholioMockEditController extends PholioController {
         id(new PhabricatorRemarkupControl())
           ->setName('description')
           ->setValue($v_desc)
-          ->setLabel(pht('Description')))
+          ->setLabel(pht('Description'))
+          ->setUser($user))
       ->appendChild(
         id(new AphrontFormDragAndDropUploadControl($request))
           ->setName('file_phids')

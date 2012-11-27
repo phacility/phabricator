@@ -194,7 +194,8 @@ final class PholioMockViewController extends PholioController {
       ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setName('comment')
-          ->setLabel(pht('Comment')))
+          ->setLabel(pht('Comment'))
+          ->setUser($user))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($action));

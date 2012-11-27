@@ -68,7 +68,8 @@ final class PonderQuestionAskController extends PonderController {
           ->setName('content')
           ->setID('content')
           ->setValue($question->getContent())
-          ->setLabel(pht('Description')))
+          ->setLabel(pht('Description'))
+          ->setUser($user))
       ->appendChild(
         id(new AphrontFormSubmitControl())
         ->setValue('Ask Away!'));
