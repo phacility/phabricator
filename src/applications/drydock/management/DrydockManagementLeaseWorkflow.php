@@ -34,6 +34,7 @@ final class DrydockManagementLeaseWorkflow
     $attributes = $args->getArg('attributes');
     if ($attributes) {
       $options = new PhutilSimpleOptions();
+      $options->setCaseSensitive(true);
       $attributes = $options->parse($attributes);
     }
 
