@@ -162,6 +162,18 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
       $this->cc = $revision->getCCPHIDs();
     }
 
+    if ($is_new) {
+      $content_blocks = array();
+      foreach ($this->auxiliaryFields as $field) {
+        if ($field->shouldExtractMentions()) {
+          $content_blocks[] = $field->renderValueForCommitMessage(false);
+        }
+      }
+      $phids = PhabricatorMarkupEngine::extractPHIDsFromMentions(
+        $content_blocks);
+      $this->cc = array_unique(array_merge($this->cc, $phids));
+    }
+
     $diff = $this->getDiff();
     if ($diff) {
       $revision->setLineCount($diff->getLineCount());

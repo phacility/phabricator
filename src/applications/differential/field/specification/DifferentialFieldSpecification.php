@@ -166,6 +166,20 @@ abstract class DifferentialFieldSpecification {
   }
 
   /**
+   * Determine if user mentions should be extracted from the value and added to
+   * CC when creating revision. Mentions are then extracted from the string
+   * returned by @{method:renderValueForCommitMessage}.
+   *
+   * By default, mentions are not extracted.
+   *
+   * @return bool
+   * @task edit
+   */
+  public function shouldExtractMentions() {
+    return false;
+  }
+
+  /**
    * Hook for applying revision changes via the editor. Normally, you should
    * not implement this, but a number of builtin fields use the revision object
    * itself as storage. If you need to do something similar for whatever reason,

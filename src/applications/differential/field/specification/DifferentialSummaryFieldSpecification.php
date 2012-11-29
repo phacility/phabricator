@@ -25,6 +25,10 @@ final class DifferentialSummaryFieldSpecification
       ->setValue($this->summary);
   }
 
+  public function shouldExtractMentions() {
+    return true;
+  }
+
   public function willWriteRevision(DifferentialRevisionEditor $editor) {
     $this->getRevision()->setSummary($this->summary);
   }
