@@ -111,7 +111,7 @@ final class DiffusionLintSaveRunner {
 
     $this->runArcLint($files);
     $this->saveLintMessages();
-    $this->branch->setLintCommit($api->getWorkingCopyRevision());
+    $this->branch->setLintCommit($api->getUnderlyingWorkingCopyRevision());
     $this->branch->save();
 
     return $count;
