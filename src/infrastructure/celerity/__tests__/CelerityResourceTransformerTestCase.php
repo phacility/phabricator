@@ -15,7 +15,8 @@ final class CelerityResourceTransformerTestCase extends PhabricatorTestCase {
 
       list($options, $in, $expect) = $parts;
 
-      $options = PhutilSimpleOptions::parse($options) + array(
+      $parser = new PhutilSimpleOptions();
+      $options = $parser->parse($options) + array(
         'minify' => false,
         'name'   => $name,
       );

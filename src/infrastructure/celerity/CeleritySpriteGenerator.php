@@ -76,6 +76,70 @@ final class CeleritySpriteGenerator {
     return $sheet;
   }
 
+  public function buildMenuSheet() {
+    $sprites = array();
+
+    $sources = array(
+      'round_bubble' => array(
+        'x' => 26,
+        'y' => 26,
+        'css' => '.phabricator-main-menu-alert-bubble'
+      ),
+      'bubble' => array(
+        'x' => 46,
+        'y' => 26,
+        'css' => '.phabricator-main-menu-alert-bubble.alert-unread'
+      ),
+      'seen_read_all' => array(
+        'x' => 14,
+        'y' => 14,
+        'css' =>
+          '.alert-notifications .phabricator-main-menu-alert-icon',
+      ),
+      'seen_have_unread' => array(
+        'x' => 14,
+        'y' => 14,
+        'css' =>
+          '.alert-notifications:hover .phabricator-main-menu-alert-icon',
+      ),
+      'unseen_any' => array(
+        'x' => 14,
+        'y' => 14,
+        'css' =>
+          '.alert-notifications.alert-unread .phabricator-main-menu-alert-icon',
+      ),
+    );
+
+    $scales = array(
+      '1x' => 1,
+      '2x' => 2,
+    );
+
+    $template = new PhutilSprite();
+    foreach ($sources as $name => $spec) {
+      $sprite = id(clone $template)
+        ->setName($name)
+        ->setSourceSize($spec['x'], $spec['y'])
+        ->setTargetCSS($spec['css']);
+
+      foreach ($scales as $scale_name => $scale) {
+        $path = 'notifications_'.$scale_name.'/'.$name.'.png';
+        $path = $this->getPath($path);
+
+        $sprite->setSourceFile($path, $scale);
+      }
+      $sprites[] = $sprite;
+    }
+
+    $sheet = $this->buildSheet('menu');
+    $sheet->setScales($scales);
+    foreach ($sprites as $sprite) {
+      $sheet->addSprite($sprite);
+    }
+
+    return $sheet;
+  }
+
   private function getPath($to_path = null) {
     $root = dirname(phutil_get_library_root('phabricator'));
     return $root.'/resources/sprite/'.$to_path;

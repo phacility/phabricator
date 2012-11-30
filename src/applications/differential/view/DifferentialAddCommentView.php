@@ -118,7 +118,8 @@ final class DifferentialAddCommentView extends AphrontView {
           ->setName('comment')
           ->setID('comment-content')
           ->setLabel('Comment')
-          ->setValue($this->draft ? $this->draft->getDraft() : null))
+          ->setValue($this->draft ? $this->draft->getDraft() : null)
+          ->setUser($this->user))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($is_serious ? 'Submit' : 'Clowncopterize'));

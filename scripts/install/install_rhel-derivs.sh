@@ -33,7 +33,7 @@ else
   confirm
 fi
 
-if [[ $RHEL_MAJOR_VER < 6 ]]
+if [[ $RHEL_MAJOR_VER < 6 && $RHEL_MAJOR_VER > 0 ]]
 then
   echo "** WARNING **"
   echo "A major version less than 6 was detected. Because of this,"
@@ -63,8 +63,12 @@ if [[ $RHEL_MAJOR_VER == 5 ]]
 then
   # RHEL 5's "php" package is actually 5.1. The "php53" package won't let us install php-pecl-apc.
   # (it tries to pull in php 5.1 stuff) ...
-  echo "Adding EPEL repo, for git."
-  $SUDO rpm -Uvh http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-4.noarch.rpm
+  yum repolist | grep -i epel
+  if [ $? -ne 0 ]; then
+    echo "It doesn't look like you have the EPEL repo enabled. We are to add it"
+    echo "for you, so that we can install git."
+    $SUDO rpm -Uvh http://download.fedoraproject.org/pub/epel/5/i386/epel-release-5-4.noarch.rpm
+  fi
   YUMCOMMAND="$SUDO yum install httpd git php53 php53-cli php53-mysql php53-process php53-devel php53-gd gcc wget make pcre-devel mysql-server"
 else
   # RHEL 6+ defaults with php 5.3
@@ -89,7 +93,6 @@ then
   # set up PEAR, and install apc.
   echo "Attempting to install PEAR"
   wget http://pear.php.net/go-pear.phar
-  echo "Downloading PEAR: $PEARCOMMAND"
   $SUDO php go-pear.phar && $SUDO pecl install apc
 fi
 
@@ -98,14 +101,16 @@ then
   echo "The apc install failed. Continuing without APC, performance may be impacted."
 fi
 
-if [[ "$(pidof httpd)" ]]
+pidof httpd 2>&1 > /dev/null
+if [[ $? -eq 0 ]]
 then
   echo "If php was installed above, please run: /etc/init.d/httpd graceful"
 else
   echo "Please remember to start the httpd with: /etc/init.d/httpd start"
 fi
 
-if [[ ! "$(pidof mysql)" ]]
+pidof mysqld 2>&1 > /dev/null
+if [[ $? -ne 0 ]]
 then
   echo "Please remember to start the mysql server: /etc/init.d/mysqld start"
 fi

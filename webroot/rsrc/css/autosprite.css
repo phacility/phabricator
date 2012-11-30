@@ -44,424 +44,412 @@
   background-position: -248px 0px;
 }
 
-.main-menu-item-icon-notifications {
+.main-menu-item-icon-task {
   background-position: -279px 0px;
 }
 
-.main-menu-item-icon-notifications-selected {
+.main-menu-item-icon-task-selected {
   background-position: -310px 0px;
 }
 
-.main-menu-item-icon-notifications:hover {
+.main-menu-item-icon-task:hover {
   background-position: -341px 0px;
 }
 
-.main-menu-item-icon-task {
+.app-differential {
   background-position: -372px 0px;
 }
 
-.main-menu-item-icon-task-selected {
+.device-desktop  .app-differential:hover {
   background-position: -403px 0px;
 }
 
-.main-menu-item-icon-task:hover {
+.app-differential-selected {
   background-position: -434px 0px;
 }
 
-.app-differential {
+.app-fact {
   background-position: -465px 0px;
 }
 
-.device-desktop  .app-differential:hover {
+.device-desktop  .app-fact:hover {
   background-position: -496px 0px;
 }
 
-.app-differential-selected {
+.app-fact-selected {
   background-position: -527px 0px;
 }
 
-.app-fact {
+.app-mail {
   background-position: -558px 0px;
 }
 
-.device-desktop  .app-fact:hover {
+.device-desktop  .app-mail:hover {
   background-position: 0px -31px;
 }
 
-.app-fact-selected {
+.app-mail-selected {
   background-position: -31px -31px;
 }
 
-.app-mail {
+.app-diffusion {
   background-position: -62px -31px;
 }
 
-.device-desktop  .app-mail:hover {
+.device-desktop  .app-diffusion:hover {
   background-position: -93px -31px;
 }
 
-.app-mail-selected {
+.app-diffusion-selected {
   background-position: -124px -31px;
 }
 
-.app-diffusion {
+.app-slowvote {
   background-position: -155px -31px;
 }
 
-.device-desktop  .app-diffusion:hover {
+.device-desktop  .app-slowvote:hover {
   background-position: -186px -31px;
 }
 
-.app-diffusion-selected {
+.app-slowvote-selected {
   background-position: -217px -31px;
 }
 
-.app-slowvote {
+.app-phriction {
   background-position: -248px -31px;
 }
 
-.device-desktop  .app-slowvote:hover {
+.device-desktop  .app-phriction:hover {
   background-position: -279px -31px;
 }
 
-.app-slowvote-selected {
+.app-phriction-selected {
   background-position: -310px -31px;
 }
 
-.app-phriction {
+.app-maniphest {
   background-position: -341px -31px;
 }
 
-.device-desktop  .app-phriction:hover {
+.device-desktop  .app-maniphest:hover {
   background-position: -372px -31px;
 }
 
-.app-phriction-selected {
+.app-maniphest-selected {
   background-position: -403px -31px;
 }
 
-.app-maniphest {
+.app-flags {
   background-position: -434px -31px;
 }
 
-.device-desktop  .app-maniphest:hover {
+.device-desktop  .app-flags:hover {
   background-position: -465px -31px;
 }
 
-.app-maniphest-selected {
+.app-flags-selected {
   background-position: -496px -31px;
 }
 
-.app-flags {
+.app-settings {
   background-position: -527px -31px;
 }
 
-.device-desktop  .app-flags:hover {
+.device-desktop  .app-settings:hover {
   background-position: -558px -31px;
 }
 
-.app-flags-selected {
+.app-settings-selected {
   background-position: 0px -62px;
 }
 
-.app-settings {
+.app-applications {
   background-position: -31px -62px;
 }
 
-.device-desktop  .app-settings:hover {
+.device-desktop  .app-applications:hover {
   background-position: -62px -62px;
 }
 
-.app-settings-selected {
+.app-applications-selected {
   background-position: -93px -62px;
 }
 
-.app-applications {
+.app-default {
   background-position: -124px -62px;
 }
 
-.device-desktop  .app-applications:hover {
+.device-desktop  .app-default:hover {
   background-position: -155px -62px;
 }
 
-.app-applications-selected {
+.app-default-selected {
   background-position: -186px -62px;
 }
 
-.app-default {
+.app-people {
   background-position: -217px -62px;
 }
 
-.device-desktop  .app-default:hover {
+.device-desktop  .app-people:hover {
   background-position: -248px -62px;
 }
 
-.app-default-selected {
+.app-people-selected {
   background-position: -279px -62px;
 }
 
-.app-people {
+.app-ponder {
   background-position: -310px -62px;
 }
 
-.device-desktop  .app-people:hover {
+.device-desktop  .app-ponder:hover {
   background-position: -341px -62px;
 }
 
-.app-people-selected {
+.app-ponder-selected {
   background-position: -372px -62px;
 }
 
-.app-ponder {
+.app-calendar {
   background-position: -403px -62px;
 }
 
-.device-desktop  .app-ponder:hover {
+.device-desktop  .app-calendar:hover {
   background-position: -434px -62px;
 }
 
-.app-ponder-selected {
+.app-calendar-selected {
   background-position: -465px -62px;
 }
 
-.app-calendar {
+.app-files {
   background-position: -496px -62px;
 }
 
-.device-desktop  .app-calendar:hover {
+.device-desktop  .app-files:hover {
   background-position: -527px -62px;
 }
 
-.app-calendar-selected {
+.app-files-selected {
   background-position: -558px -62px;
 }
 
-.app-files {
+.app-projects {
   background-position: 0px -93px;
 }
 
-.device-desktop  .app-files:hover {
+.device-desktop  .app-projects:hover {
   background-position: -31px -93px;
 }
 
-.app-files-selected {
+.app-projects-selected {
   background-position: -62px -93px;
 }
 
-.app-projects {
+.app-daemons {
   background-position: -93px -93px;
 }
 
-.device-desktop  .app-projects:hover {
+.device-desktop  .app-daemons:hover {
   background-position: -124px -93px;
 }
 
-.app-projects-selected {
+.app-daemons-selected {
   background-position: -155px -93px;
 }
 
-.app-daemons {
+.app-herald {
   background-position: -186px -93px;
 }
 
-.device-desktop  .app-daemons:hover {
+.device-desktop  .app-herald:hover {
   background-position: -217px -93px;
 }
 
-.app-daemons-selected {
+.app-herald-selected {
   background-position: -248px -93px;
 }
 
-.app-herald {
+.app-countdown {
   background-position: -279px -93px;
 }
 
-.device-desktop  .app-herald:hover {
+.device-desktop  .app-countdown:hover {
   background-position: -310px -93px;
 }
 
-.app-herald-selected {
+.app-countdown-selected {
   background-position: -341px -93px;
 }
 
-.app-countdown {
+.app-conduit {
   background-position: -372px -93px;
 }
 
-.device-desktop  .app-countdown:hover {
+.device-desktop  .app-conduit:hover {
   background-position: -403px -93px;
 }
 
-.app-countdown-selected {
+.app-conduit-selected {
   background-position: -434px -93px;
 }
 
-.app-conduit {
+.app-feed {
   background-position: -465px -93px;
 }
 
-.device-desktop  .app-conduit:hover {
+.device-desktop  .app-feed:hover {
   background-position: -496px -93px;
 }
 
-.app-conduit-selected {
+.app-feed-selected {
   background-position: -527px -93px;
 }
 
-.app-feed {
-  background-position: -558px -93px;
-}
-
-.device-desktop  .app-feed:hover {
+.app-paste {
   background-position: 0px -124px;
 }
 
-.app-feed-selected {
+.device-desktop  .app-paste:hover {
   background-position: -31px -124px;
 }
 
-.app-paste {
+.app-paste-selected {
   background-position: -62px -124px;
 }
 
-.device-desktop  .app-paste:hover {
+.app-audit {
   background-position: -93px -124px;
 }
 
-.app-paste-selected {
+.device-desktop  .app-audit:hover {
   background-position: -124px -124px;
 }
 
-.app-audit {
+.app-audit-selected {
   background-position: -155px -124px;
 }
 
-.device-desktop  .app-audit:hover {
+.app-uiexample {
   background-position: -186px -124px;
 }
 
-.app-audit-selected {
+.device-desktop  .app-uiexample:hover {
   background-position: -217px -124px;
 }
 
-.app-uiexample {
+.app-uiexample-selected {
   background-position: -248px -124px;
 }
 
-.device-desktop  .app-uiexample:hover {
+.app-phpast {
   background-position: -279px -124px;
 }
 
-.app-uiexample-selected {
+.device-desktop  .app-phpast:hover {
   background-position: -310px -124px;
 }
 
-.app-phpast {
+.app-phpast-selected {
   background-position: -341px -124px;
 }
 
-.device-desktop  .app-phpast:hover {
+.app-owners {
   background-position: -372px -124px;
 }
 
-.app-phpast-selected {
+.device-desktop  .app-owners:hover {
   background-position: -403px -124px;
 }
 
-.app-owners {
+.app-owners-selected {
   background-position: -434px -124px;
 }
 
-.device-desktop  .app-owners:hover {
+.app-phid {
   background-position: -465px -124px;
 }
 
-.app-owners-selected {
+.device-desktop  .app-phid:hover {
   background-position: -496px -124px;
 }
 
-.app-phid {
+.app-phid-selected {
   background-position: -527px -124px;
 }
 
-.device-desktop  .app-phid:hover {
-  background-position: -558px -124px;
-}
-
-.app-phid-selected {
+.app-diviner {
   background-position: 0px -155px;
 }
 
-.app-diviner {
+.device-desktop  .app-diviner:hover {
   background-position: -31px -155px;
 }
 
-.device-desktop  .app-diviner:hover {
+.app-diviner-selected {
   background-position: -62px -155px;
 }
 
-.app-diviner-selected {
+.app-repositories {
   background-position: -93px -155px;
 }
 
-.app-repositories {
+.device-desktop  .app-repositories:hover {
   background-position: -124px -155px;
 }
 
-.device-desktop  .app-repositories:hover {
+.app-repositories-selected {
   background-position: -155px -155px;
 }
 
-.app-repositories-selected {
+.app-phame {
   background-position: -186px -155px;
 }
 
-.app-phame {
+.device-desktop  .app-phame:hover {
   background-position: -217px -155px;
 }
 
-.device-desktop  .app-phame:hover {
+.app-phame-selected {
   background-position: -248px -155px;
 }
 
-.app-phame-selected {
+.app-macro {
   background-position: -279px -155px;
 }
 
-.app-macro {
+.device-desktop  .app-macro:hover {
   background-position: -310px -155px;
 }
 
-.device-desktop  .app-macro:hover {
+.app-macro-selected {
   background-position: -341px -155px;
 }
 
-.app-macro-selected {
+.app-releeph {
   background-position: -372px -155px;
 }
 
-.app-releeph {
+.device-desktop  .app-releeph:hover {
   background-position: -403px -155px;
 }
 
-.device-desktop  .app-releeph:hover {
+.app-releeph-selected {
   background-position: -434px -155px;
 }
 
-.app-releeph-selected {
+.app-drydock {
   background-position: -465px -155px;
 }
 
-.app-drydock {
+.device-desktop  .app-drydock:hover {
   background-position: -496px -155px;
 }
 
-.device-desktop  .app-drydock:hover {
-  background-position: -527px -155px;
-}
-
 .app-drydock-selected {
-  background-position: -558px -155px;
+  background-position: -527px -155px;
 }
 
 .app-differential-large {

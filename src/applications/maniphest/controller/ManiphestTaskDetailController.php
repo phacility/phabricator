@@ -415,7 +415,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setLabel('Comments')
           ->setName('comments')
           ->setValue($draft_text)
-          ->setID('transaction-comments'))
+          ->setID('transaction-comments')
+          ->setUser($user))
       ->appendChild(
         id(new AphrontFormDragAndDropUploadControl())
           ->setLabel('Attached Files')

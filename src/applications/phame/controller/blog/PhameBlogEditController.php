@@ -122,7 +122,7 @@ final class PhameBlogEditController
         ->setName('description')
         ->setValue($blog->getDescription())
         ->setID('blog-description')
-      )
+        ->setUser($user))
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setUser($user)

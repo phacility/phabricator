@@ -29,6 +29,10 @@ final class DifferentialTitleFieldSpecification
       ->setValue($this->title);
   }
 
+  public function shouldExtractMentions() {
+    return true;
+  }
+
   public function willWriteRevision(DifferentialRevisionEditor $editor) {
     $this->getRevision()->setTitle($this->title);
   }

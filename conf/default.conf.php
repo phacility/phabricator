@@ -159,6 +159,7 @@ return array(
     'disqus.application-secret',
     'phabricator.mail-key',
     'security.hmac-key',
+    'ldap.anonymous-user-password',
   ),
 
 
@@ -691,6 +692,15 @@ return array(
   // Whether referrals should be followed by the client
   // Should be set to 0 if you use Windows 2003 AD
   'ldap.referrals' => 1,
+
+  // The anonymous user name to use before searching a user.
+  // Many LDAP installations require login even before searching a user, set
+  // this option to enable it.
+  'ldap.anonymous-user-name'     => '',
+
+  // The password of the LDAP anonymous user.
+  'ldap.anonymous-user-password' => '',
+
 
 // -- Disqus OAuth ---------------------------------------------------------- //
 

@@ -38,6 +38,10 @@ final class DifferentialTestPlanFieldSpecification
       ->setError($this->error);
   }
 
+  public function shouldExtractMentions() {
+    return true;
+  }
+
   public function willWriteRevision(DifferentialRevisionEditor $editor) {
     $this->getRevision()->setTestPlan($this->plan);
   }

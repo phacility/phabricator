@@ -2,6 +2,17 @@
 
 final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
 
+  private $user;
+
+  public function setUser(PhabricatorUser $user) {
+    $this->user = $user;
+    return $this;
+  }
+
+  public function getUser() {
+    return $this->user;
+  }
+
   protected function renderInput() {
     $id = $this->getID();
     if (!$id) {
@@ -119,7 +130,22 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
       ),
       implode('', $buttons));
 
-    $this->setCustomClass('remarkup-assist-textarea');
+    $monospaced_textareas = null;
+    $monospaced_textareas_class = null;
+    $user = $this->getUser();
+
+    if ($user) {
+      $monospaced_textareas = $user
+        ->loadPreferences()
+        ->getPreference(
+          PhabricatorUserPreferences::PREFERENCE_MONOSPACED_TEXTAREAS);
+      if ($monospaced_textareas == 'enabled') {
+        $monospaced_textareas_class = 'PhabricatorMonospaced';
+      }
+    }
+
+    $this->setCustomClass(
+      'remarkup-assist-textarea '.$monospaced_textareas_class);
 
     return javelin_render_tag(
       'div',

@@ -9,8 +9,8 @@
 
 JX.behavior('aphlict-dropdown', function(config) {
   var dropdown = JX.$(config.dropdownID);
-  var indicator = JX.$(config.indicatorID);
-  var menu = JX.$(config.menuID);
+  var count = JX.$(config.countID);
+  var bubble = JX.$(config.bubbleID);
   var visible = false;
   var request = null;
 
@@ -19,21 +19,21 @@ JX.behavior('aphlict-dropdown', function(config) {
       return;
     }
     request = new JX.Request('/notification/panel/', function(response) {
-      JX.DOM.setContent(indicator, response.number);
+      var display = (response.number > 999)
+        ? "\u221E"
+        : response.number;
+
+      JX.DOM.setContent(count, display);
       if (response.number == 0) {
-        JX.DOM.alterClass(indicator,
-          "phabricator-main-menu-alert-indicator-unread", false);
+        JX.DOM.alterClass(bubble, 'alert-unread', false);
       } else {
-        JX.DOM.alterClass(indicator,
-          "phabricator-main-menu-alert-indicator-unread", true);
+        JX.DOM.alterClass(bubble, 'alert-unread', true);
       }
       JX.DOM.setContent(dropdown, JX.$H(response.content));
       request = null;
     });
     request.send();
   }
-
-  refresh();
 
   JX.Stratcom.listen(
     'click',
@@ -50,14 +50,20 @@ JX.behavior('aphlict-dropdown', function(config) {
 
 
   JX.DOM.listen(
-    menu,
+    bubble,
     'click',
     null,
     function(e) {
+      if (!e.isNormalClick()) {
+        return;
+      }
+
       if (visible) {
         JX.DOM.hide(dropdown);
       } else {
-        var p = JX.$V(menu);
+        refresh();
+
+        var p = JX.$V(bubble);
         p.y = null;
         p.x -= 6;
         p.setPos(dropdown);

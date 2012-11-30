@@ -132,6 +132,7 @@ final class PhamePostEditController
         ->setValue($post->getBody())
         ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
         ->setID('post-body')
+        ->setUser($user)
       )
       ->appendChild(
         id(new AphrontFormSelectControl())

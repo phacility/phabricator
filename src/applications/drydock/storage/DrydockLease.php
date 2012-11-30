@@ -150,6 +150,10 @@ final class DrydockLease extends DrydockDAO {
   }
 
   public function waitUntilActive() {
+    if (!$this->getID()) {
+      $this->queueForActivation();
+    }
+
     self::waitForLeases(array($this));
     return $this;
   }
