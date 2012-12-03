@@ -4,18 +4,31 @@
 final class DiffusionLintController extends DiffusionController {
 
   public function processRequest() {
+    $request = $this->getRequest();
+    $user = $this->getRequest()->getUser();
     $drequest = $this->diffusionRequest;
 
-    if ($this->getRequest()->getStr('lint') !== null) {
-      $controller = new DiffusionLintDetailsController($this->getRequest());
+    if ($request->getStr('lint') !== null) {
+      $controller = new DiffusionLintDetailsController($request);
       $controller->setDiffusionRequest($drequest);
       return $this->delegateToController($controller);
     }
 
-    $codes = $this->loadLintCodes();
-    $codes = array_reverse(isort($codes, 'n'));
-
+    $owners = array();
     if (!$drequest) {
+      if (!$request->getArr('owner')) {
+        $owners[$user->getPHID()] = $user->getFullName();
+      } else {
+        $phids = $request->getArr('owner');
+        $phid = reset($phids);
+        $handles = $this->loadViewerHandles(array($phid));
+        $owners[$phid] = $handles[$phid]->getFullName();
+      }
+    }
+
+    $codes = $this->loadLintCodes(array_keys($owners));
+
+    if ($codes && !$drequest) {
       $branches = id(new PhabricatorRepositoryBranch())->loadAllWhere(
         'id IN (%Ld)',
         array_unique(ipull($codes, 'branchID')));
@@ -88,6 +101,7 @@ final class DiffusionLintController extends DiffusionController {
         'view'   => 'lint',
       ));
 
+
     $link = null;
     if ($this->diffusionRequest) {
       $link = hsprintf(
@@ -97,6 +111,22 @@ final class DiffusionLintController extends DiffusionController {
           'lint' => '',
         )),
         pht('Switch to List View'));
+
+    } else {
+      $form = id(new AphrontFormView())
+        ->setUser($user)
+        ->setMethod('GET')
+        ->appendChild(
+          id(new AphrontFormTokenizerControl())
+            ->setDatasource('/typeahead/common/users/')
+            ->setLimit(1)
+            ->setName('owner')
+            ->setLabel('Owner')
+            ->setValue($owners))
+        ->appendChild(
+          id(new AphrontFormSubmitControl())
+            ->setValue('Filter'));
+      $content[] = id(new AphrontListFilterView())->appendChild($form);
     }
 
     $content[] = id(new AphrontPanelView())
@@ -115,7 +145,7 @@ final class DiffusionLintController extends DiffusionController {
       array('title' => $title));
   }
 
-  private function loadLintCodes() {
+  private function loadLintCodes(array $owner_phids) {
     $drequest = $this->diffusionRequest;
     $conn = id(new PhabricatorRepository())->establishConnection('r');
     $where = array('1 = 1');
@@ -137,6 +167,46 @@ final class DiffusionLintController extends DiffusionController {
       }
     }
 
+    if ($owner_phids) {
+      $packages = id(new PhabricatorOwnersOwner())
+        ->loadAllWhere('userPHID IN (%Ls)', $owner_phids);
+      if (!$packages) {
+        return array();
+      }
+
+      $paths = id(new PhabricatorOwnersPath())
+        ->loadAllWhere('packageID IN (%Ld)', array_keys($packages));
+      if (!$paths) {
+        return array();
+      }
+
+      $repositories = id(new PhabricatorRepository())->loadAllWhere(
+        'phid IN (%Ls)',
+        array_unique(mpull($paths, 'getRepositoryPHID')));
+      $repositories = mpull($repositories, 'getID', 'getPHID');
+
+      $branches = id(new PhabricatorRepositoryBranch())->loadAllWhere(
+        'repositoryID IN (%Ld)',
+        $repositories);
+      $branches = mgroup($branches, 'getRepositoryID');
+
+      $or = array();
+      foreach ($paths as $path) {
+        $branch = idx($branches, $repositories[$path->getRepositoryPHID()]);
+        if ($branch) {
+          $or[] = qsprintf(
+            $conn,
+            '(branchID IN (%Ld) AND path LIKE %>)',
+            array_keys($branch),
+            $path->getPath());
+        }
+      }
+      if (!$or) {
+        return array();
+      }
+      $where[] = '('.implode(' OR ', $or).')';
+    }
+
     return queryfx_all(
       $conn,
       'SELECT
@@ -149,7 +219,8 @@ final class DiffusionLintController extends DiffusionController {
           COUNT(*) AS n
         FROM %T
         WHERE %Q
-        GROUP BY branchID, code',
+        GROUP BY branchID, code
+        ORDER BY n DESC',
       PhabricatorRepository::TABLE_LINTMESSAGE,
       implode(' AND ', $where));
   }

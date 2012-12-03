@@ -63,6 +63,11 @@ final class PhabricatorPeopleProfileController
       "Commits {$external_arrow}",
       '/audit/view/author/'.$username.'/');
 
+    $nav->addFilter(
+      null,
+      "Lint Messages {$external_arrow}",
+      '/diffusion/lint/?owner[0]='.$user->getPHID());
+
     $oauths = id(new PhabricatorUserOAuthInfo())->loadAllWhere(
       'userID = %d',
       $user->getID());
