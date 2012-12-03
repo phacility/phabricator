@@ -129,11 +129,12 @@ final class PhabricatorActionView extends AphrontView {
     $results = array();
     $prefix = 'action-';
     foreach ($manifest['sprites'] as $sprite) {
-      if (preg_match('/-(white|grey)$/', $sprite)) {
+      $name = $sprite['name'];
+      if (preg_match('/-(white|grey)$/', $name)) {
         continue;
       }
-      if (!strncmp($sprite, $prefix, strlen($prefix))) {
-        $results[] = substr($sprite, strlen($prefix));
+      if (!strncmp($name, $prefix, strlen($prefix))) {
+        $results[] = substr($name, strlen($prefix));
       }
     }
 
