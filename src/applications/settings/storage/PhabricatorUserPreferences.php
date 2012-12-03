@@ -4,6 +4,7 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
 
   const PREFERENCE_MONOSPACED           = 'monospaced';
   const PREFERENCE_EDITOR               = 'editor';
+  const PREFERENCE_MULTIEDIT            = 'multiedit';
   const PREFERENCE_TITLES               = 'titles';
   const PREFERENCE_MONOSPACED_TEXTAREAS = 'monospaced-textareas';
 
