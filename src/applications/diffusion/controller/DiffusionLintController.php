@@ -4,7 +4,7 @@
 final class DiffusionLintController extends DiffusionController {
 
   public function processRequest() {
-    $drequest = $this->getDiffusionRequest();
+    $drequest = $this->diffusionRequest;
 
     if ($this->getRequest()->getStr('lint') !== null) {
       $controller = new DiffusionLintDetailsController($this->getRequest());
@@ -15,8 +15,30 @@ final class DiffusionLintController extends DiffusionController {
     $codes = $this->loadLintCodes();
     $codes = array_reverse(isort($codes, 'n'));
 
+    if (!$drequest) {
+      $branches = id(new PhabricatorRepositoryBranch())->loadAllWhere(
+        'id IN (%Ld)',
+        array_unique(ipull($codes, 'branchID')));
+
+      $repositories = id(new PhabricatorRepository())->loadAllWhere(
+        'id IN (%Ld)',
+        array_unique(mpull($branches, 'getRepositoryID')));
+
+      $drequests = array();
+      foreach ($branches as $id => $branch) {
+        $drequests[$id] = DiffusionRequest::newFromDictionary(array(
+          'repository' => $repositories[$branch->getRepositoryID()],
+          'branch' => $branch->getName(),
+        ));
+      }
+    }
+
     $rows = array();
     foreach ($codes as $code) {
+      if (!$this->diffusionRequest) {
+        $drequest = $drequests[$code['branchID']];
+      }
+
       $rows[] = array(
         hsprintf(
           '<a href="%s">%s</a>',
@@ -32,6 +54,10 @@ final class DiffusionLintController extends DiffusionController {
             'lint' => $code['code'],
           )),
           $code['files']),
+        hsprintf(
+          '<a href="%s">%s</a>',
+          $drequest->generateURI(array('action' => 'lint')),
+          $drequest->getCallsign()),
         phutil_escape_html(ArcanistLintSeverity::getStringForSeverity(
           $code['maxSeverity'])),
         phutil_escape_html($code['code']),
@@ -44,12 +70,14 @@ final class DiffusionLintController extends DiffusionController {
       ->setHeaders(array(
         'Problems',
         'Files',
+        'Repository',
         'Severity',
         'Code',
         'Name',
         'Example',
       ))
-      ->setColumnClasses(array('n', 'n', '', 'pri', '', ''));
+      ->setColumnVisibility(array(true, true, !$this->diffusionRequest))
+      ->setColumnClasses(array('n', 'n', '', '', 'pri', '', ''));
 
     $content = array();
 
@@ -60,51 +88,59 @@ final class DiffusionLintController extends DiffusionController {
         'view'   => 'lint',
       ));
 
-    $link = hsprintf(
-      '<a href="%s">%s</a>',
-      $drequest->generateURI(array(
-        'action' => 'lint',
-        'lint' => '',
-      )),
-      pht('Switch to List View'));
+    $link = null;
+    if ($this->diffusionRequest) {
+      $link = hsprintf(
+        '<a href="%s">%s</a>',
+        $drequest->generateURI(array(
+          'action' => 'lint',
+          'lint' => '',
+        )),
+        pht('Switch to List View'));
+    }
 
     $content[] = id(new AphrontPanelView())
       ->setHeader(pht('%d Lint Message(s)', array_sum(ipull($codes, 'n'))))
       ->setCaption($link)
       ->appendChild($table);
 
-    $nav = $this->buildSideNav('lint', false);
-    $nav->appendChild($content);
+    $title = array('Lint');
+    if ($this->diffusionRequest) {
+      $title[] = $drequest->getCallsign();
+      $content = $this->buildSideNav('lint', false)->appendChild($content);
+    }
 
     return $this->buildStandardPageResponse(
-      $nav,
-      array('title' => array(
-        'Lint',
-        $drequest->getRepository()->getCallsign(),
-      )));
+      $content,
+      array('title' => $title));
   }
 
   private function loadLintCodes() {
-    $drequest = $this->getDiffusionRequest();
-    $branch = $drequest->loadBranch();
-    if (!$branch) {
-      return array();
-    }
+    $drequest = $this->diffusionRequest;
+    $conn = id(new PhabricatorRepository())->establishConnection('r');
+    $where = array('1 = 1');
 
-    $conn = $branch->establishConnection('r');
+    if ($drequest) {
+      $branch = $drequest->loadBranch();
+      if (!$branch) {
+        return array();
+      }
 
-    $where = '';
-    if ($drequest->getPath() != '') {
-      $is_dir = (substr($drequest->getPath(), -1) == '/');
-      $where = qsprintf(
-        $conn,
-        'AND path '.($is_dir ? 'LIKE %>' : '= %s'),
-        '/'.$drequest->getPath());
+      $where[] = qsprintf($conn, 'branchID = %d', $branch->getID());
+
+      if ($drequest->getPath() != '') {
+        $is_dir = (substr($drequest->getPath(), -1) == '/');
+        $where[] = qsprintf(
+          $conn,
+          'path '.($is_dir ? 'LIKE %>' : '= %s'),
+          '/'.$drequest->getPath());
+      }
     }
 
     return queryfx_all(
       $conn,
       'SELECT
+          branchID,
           code,
           MAX(severity) AS maxSeverity,
           MAX(name) AS maxName,
@@ -112,12 +148,10 @@ final class DiffusionLintController extends DiffusionController {
           COUNT(DISTINCT path) AS files,
           COUNT(*) AS n
         FROM %T
-        WHERE branchID = %d
-        %Q
-        GROUP BY code',
+        WHERE %Q
+        GROUP BY branchID, code',
       PhabricatorRepository::TABLE_LINTMESSAGE,
-      $branch->getID(),
-      $where);
+      implode(' AND ', $where));
   }
 
 }
