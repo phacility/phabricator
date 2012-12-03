@@ -133,7 +133,7 @@ abstract class DiffusionView extends AphrontView {
 
   final protected static function renderName($name) {
     $email = new PhutilEmailAddress($name);
-    if ($email->getDisplayName() || $email->getDomainName()) {
+    if ($email->getDisplayName() && $email->getDomainName()) {
       Javelin::initBehavior('phabricator-tooltips', array());
       require_celerity_resource('aphront-tooltip-css');
       return javelin_render_tag(

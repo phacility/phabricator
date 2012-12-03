@@ -254,7 +254,7 @@ final class DiffusionCommitController extends DiffusionController {
       $change_list->setRepository($repository);
       $change_list->setUser($user);
       // pick the first branch for "Browse in Diffusion" View Option
-      $branches     = $commit_data->getCommitDetail('seenOnBranches');
+      $branches     = $commit_data->getCommitDetail('seenOnBranches', array());
       $first_branch = reset($branches);
       $change_list->setBranch($first_branch);
 
