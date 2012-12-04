@@ -73,7 +73,7 @@ final class PhabricatorCalendarViewStatusController
         ->setHref($href)
         ->addDetail(
           pht('Description'),
-          $status->getDescription())
+          phutil_escape_html($status->getDescription()))
         ->addAttribute(pht('From %s', $from))
         ->addAttribute(pht('To %s', $to));
 
