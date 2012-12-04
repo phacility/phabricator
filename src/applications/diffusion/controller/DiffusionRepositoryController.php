@@ -62,7 +62,10 @@ final class DiffusionRepositoryController extends DiffusionController {
     $all = phutil_render_tag(
       'a',
       array(
-        'href' => "/diffusion/{$callsign}/history/",
+        'href' => $drequest->generateURI(
+          array(
+            'action' => 'history',
+          )),
       ),
       'View Full Commit History');
 
