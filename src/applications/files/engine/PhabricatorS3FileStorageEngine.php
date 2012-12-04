@@ -98,13 +98,18 @@ final class PhabricatorS3FileStorageEngine
 
     $access_key = PhabricatorEnv::getEnvConfig('amazon-s3.access-key');
     $secret_key = PhabricatorEnv::getEnvConfig('amazon-s3.secret-key');
+    $endpoint = PhabricatorEnv::getEnvConfig('amazon-s3.endpoint');
 
     if (!$access_key || !$secret_key) {
       throw new PhabricatorFileStorageConfigurationException(
         "Specify 'amazon-s3.access-key' and 'amazon-s3.secret-key'!");
     }
 
-    $s3 = new S3($access_key, $secret_key, $use_ssl = true);
+    if ($endpoint !== null) {
+      $s3 = new S3($access_key, $secret_key, $use_ssl = true, $endpoint);
+    } else {
+      $s3 = new S3($access_key, $secret_key, $use_ssl = true);
+    }
 
     $s3->setExceptions(true);
 

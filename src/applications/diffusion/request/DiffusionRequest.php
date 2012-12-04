@@ -317,7 +317,7 @@ abstract class DiffusionRequest {
       'path'      => $this->getPath(),
       'branch'    => $this->getBranch(),
       'commit'    => $default_commit,
-      'lint'      => $this->getLint(),
+      'lint'      => idx($params, 'lint', $this->getLint()),
     );
     foreach ($defaults as $key => $val) {
       if (!isset($params[$key])) { // Overwrite NULL.

@@ -204,7 +204,7 @@ final class DifferentialDiff extends DifferentialDAO {
       $copies = array();
       foreach ($changeset->getHunks() as $hunk) {
         $added = array_map('trim', $hunk->getAddedLines());
-        for (reset($added); list($line, $code) = each($added); next($added)) {
+        for (reset($added); list($line, $code) = each($added); ) {
           if (isset($map[$code])) { // We found a long matching line.
             $best_length = 0;
             foreach ($map[$code] as $val) { // Explore all candidates.

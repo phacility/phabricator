@@ -12,11 +12,11 @@ input.inputsubmit {
   background-position: 0 -26px;
 
   color: white;
-  min-width: 60px;
   text-shadow: 0 -1px #19558D;
   border: 1px solid #19558D;
   cursor: pointer;
   font-weight: bold;
+  font-size: 13px;
   display: inline-block;
   padding: 3px 10px 4px;
   text-align: center;

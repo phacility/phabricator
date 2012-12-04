@@ -6,7 +6,6 @@
 final class ManiphestTransactionEditor extends PhabricatorEditor {
 
   private $parentMessageID;
-  private $excludePHIDs = array();
   private $auxiliaryFields = array();
 
   public function setAuxiliaryFields(array $fields) {
@@ -18,15 +17,6 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
   public function setParentMessageID($parent_message_id) {
     $this->parentMessageID = $parent_message_id;
     return $this;
-  }
-
-  public function setExcludePHIDs(array $exclude) {
-    $this->excludePHIDs = $exclude;
-    return $this;
-  }
-
-  public function getExcludePHIDs() {
-    return $this->excludePHIDs;
   }
 
   public function applyTransactions(ManiphestTask $task, array $transactions) {
@@ -219,7 +209,6 @@ final class ManiphestTransactionEditor extends PhabricatorEditor {
   }
 
   private function sendEmail($task, $transactions, $email_to, $email_cc) {
-    $exclude  = $this->getExcludePHIDs();
     $email_to = array_filter(array_unique($email_to));
     $email_cc = array_filter(array_unique($email_cc));
 

@@ -21,8 +21,11 @@ final class PhabricatorSettingsPanelDisplayPreferences
 
     $pref_monospaced = PhabricatorUserPreferences::PREFERENCE_MONOSPACED;
     $pref_editor     = PhabricatorUserPreferences::PREFERENCE_EDITOR;
+    $pref_multiedit  = PhabricatorUserPreferences::PREFERENCE_MULTIEDIT;
     $pref_titles     = PhabricatorUserPreferences::PREFERENCE_TITLES;
     $pref_symbols    = PhabricatorUserPreferences::PREFERENCE_DIFFUSION_SYMBOLS;
+    $pref_monospaced_textareas =
+      PhabricatorUserPreferences::PREFERENCE_MONOSPACED_TEXTAREAS;
 
     if ($request->isFormPost()) {
       $monospaced = $request->getStr($pref_monospaced);
@@ -32,9 +35,16 @@ final class PhabricatorSettingsPanelDisplayPreferences
 
       $preferences->setPreference($pref_titles, $request->getStr($pref_titles));
       $preferences->setPreference($pref_editor, $request->getStr($pref_editor));
-      $preferences->setPreference($pref_symbols,
+      $preferences->setPreference(
+        $pref_multiedit,
+        $request->getStr($pref_multiedit));
+      $preferences->setPreference(
+        $pref_symbols,
         $request->getStr($pref_symbols));
       $preferences->setPreference($pref_monospaced, $monospaced);
+      $preferences->setPreference(
+        $pref_monospaced_textareas,
+        $request->getStr($pref_monospaced_textareas));
 
       $preferences->save();
       return id(new AphrontRedirectResponse())
@@ -60,6 +70,11 @@ EXAMPLE;
     $font_default = phutil_escape_html($font_default);
 
     $pref_symbols_value = $preferences->getPreference($pref_symbols);
+    $pref_monospaced_textareas_value = $preferences
+      ->getPreference($pref_monospaced_textareas);
+    if (!$pref_monospaced_textareas_value) {
+      $pref_monospaced_textareas_value = 'disabled';
+    }
 
     $form = id(new AphrontFormView())
       ->setUser($user)
@@ -86,6 +101,15 @@ EXAMPLE;
           "For documentation, see {$editor_doc_link}.")
         ->setValue($preferences->getPreference($pref_editor)))
       ->appendChild(
+        id(new AphrontFormSelectControl())
+        ->setLabel('Edit Multiple Files')
+        ->setName($pref_multiedit)
+        ->setOptions(array(
+          '' => 'Supported (paths separated by spaces)',
+          'disable' => 'Not Supported',
+        ))
+        ->setValue($preferences->getPreference($pref_multiedit)))
+      ->appendChild(
         id(new AphrontFormTextControl())
         ->setLabel('Monospaced Font')
         ->setName($pref_monospaced)
@@ -107,6 +131,14 @@ EXAMPLE;
         ->addButton('enabled', 'Enabled (default)',
           'Use this setting to disable linking symbol names in Differential '.
           'and Diffusion to their definitions. This is enabled by default.')
+        ->addButton('disabled', 'Disabled', null))
+      ->appendChild(
+        id(new AphrontFormRadioButtonControl())
+        ->setLabel('Monospaced Textareas')
+        ->setName($pref_monospaced_textareas)
+        ->setValue($pref_monospaced_textareas_value)
+        ->addButton('enabled', 'Enabled',
+          'Show all textareas using the monospaced font defined above.')
         ->addButton('disabled', 'Disabled', null))
       ->appendChild(
         id(new AphrontFormSubmitControl())

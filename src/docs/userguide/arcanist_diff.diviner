@@ -56,9 +56,12 @@ That's a fancy way of saying "all the commits on the current branch that
 you haven't pushed yet". So, to **create a revision** in Git, run:
 
   $ nano source_code.c  # Make changes.
-  $ git commit          # Commit changes.
+  $ git commit -a       # Commit changes.
   $ arc diff            # Creates a new revision out of ALL unpushed commits on
                         # this branch.
+
+The `git commit` step is optional. If there are uncommitted changes in the
+working copy then Arcanist will ask you to create a commit from them.
 
 Since it uses **all** the commits on the branch, you can make several commits
 before sending your changes for review if you prefer.
@@ -77,8 +80,11 @@ if you aren't creating branches-on-branches, juggling remotes, etc.
 To **update a revision**, just do the same thing:
 
   $ nano source_code.c  # Make more changes.
-  $ git commit          # Commit them.
+  $ git commit -a       # Commit them.
   $ arc diff            # This prompts you to update revision information.
+
+The `git commit` step is optional. If there are uncommitted changes in the
+working copy then Arcanist will ask you to amend them to the commit.
 
 When your revision has been accepted, you can usually push it like this:
 
@@ -103,6 +109,9 @@ To **create a revision** in Mercurial, run:
   $ arc diff            # Creates a new revision out of ALL outgoing commits
                         # on this branch since the last merge.
 
+The `hg commit` step is optional. If there are uncommitted changes in the
+working copy then Arcanist will ask you to create a commit from them.
+
 Since it uses **all** the outgoing commits on the branch, you can make several
 commits before sending your changes for review if you prefer.
 
@@ -118,6 +127,10 @@ To **update a revision**, just do the same thing:
   $ nano source_code.c  # Make changes.
   $ hg commit           # Commit changes.
   $ arc diff            # This prompts you to update revision information.
+
+The `hg commit` step is optional. If there are uncommitted changes in the
+working copy then Arcanist will ask you to create a commit from them (or amend
+them to the previous commit if supported).
 
 When your revision has been accepted, push it normally. (`arc` does not have
 push integration in Mercurial because it can't force merges and thus can't
@@ -161,8 +174,8 @@ identifiers in commit messages. (You can disable this feature by disabling
 "Autoclose" in the Repository configuration.)
 
 If you push to an untracked repository (or `arc` can't figure out that it's
-tracked), `arc land`, `arc amend` and `arc commit` will implicitly run `arc
-close-revision`.
+tracked), `arc land`, `arc amend` and `arc commit` will implicitly run
+`arc close-revision`.
 
 = General Information =
 
@@ -192,5 +205,5 @@ revision with:
   $ arc diff --create             # Force "create".
   $ arc diff --update <revision>  # Force "update".
 
-You can figure out what `arc` believes to be in the working copy with `arc
-which`.
+You can figure out what `arc` believes to be in the working copy with
+`arc which`.

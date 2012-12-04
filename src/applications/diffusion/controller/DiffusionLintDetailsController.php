@@ -8,7 +8,8 @@ final class DiffusionLintDetailsController extends DiffusionController {
     $offset = $this->getRequest()->getInt('offset', 0);
 
     $drequest = $this->getDiffusionRequest();
-    $messages = $this->loadLintMessages($limit, $offset);
+    $branch = $drequest->loadBranch();
+    $messages = $this->loadLintMessages($branch, $limit, $offset);
     $is_dir = (substr('/'.$drequest->getPath(), -1) == '/');
 
     $rows = array();
@@ -27,6 +28,7 @@ final class DiffusionLintDetailsController extends DiffusionController {
           'action' => 'browse',
           'path' => $message['path'],
           'line' => $message['line'],
+          'commit' => $branch->getLintCommit(),
         )),
         $message['line']);
 
@@ -35,7 +37,6 @@ final class DiffusionLintDetailsController extends DiffusionController {
         $line,
         phutil_escape_html(ArcanistLintSeverity::getStringForSeverity(
           $message['severity'])),
-        phutil_escape_html($message['code']),
         phutil_escape_html($message['name']),
         phutil_escape_html($message['description']),
       );
@@ -46,21 +47,11 @@ final class DiffusionLintDetailsController extends DiffusionController {
         'Path',
         'Line',
         'Severity',
-        'Code',
         'Name',
-        'Example',
+        'Description',
       ))
-      ->setColumnClasses(array(
-        '',
-        'n',
-        '',
-        'pri',
-        '',
-        '',
-      ))
-    ->setColumnVisibility(array(
-      $is_dir,
-    ));
+      ->setColumnClasses(array('', 'n', '', '', ''))
+      ->setColumnVisibility(array($is_dir));
 
     $content = array();
 
@@ -77,8 +68,20 @@ final class DiffusionLintDetailsController extends DiffusionController {
       ->setHasMorePages(count($messages) >= $limit)
       ->setURI($this->getRequest()->getRequestURI(), 'offset');
 
+    $lint = $drequest->getLint();
+    $link = hsprintf(
+      '<a href="%s">%s</a>',
+      $drequest->generateURI(array(
+        'action' => 'lint',
+        'lint' => null,
+      )),
+      pht('Switch to Grouped View'));
+
     $content[] = id(new AphrontPanelView())
-      ->setHeader(pht('%d Lint Message(s)', count($messages)))
+      ->setHeader(
+        ($lint != '' ? phutil_escape_html($lint)." \xC2\xB7 " : '').
+        pht('%d Lint Message(s)', count($messages)))
+      ->setCaption($link)
       ->appendChild($table)
       ->appendChild($pager);
 
@@ -93,22 +96,32 @@ final class DiffusionLintDetailsController extends DiffusionController {
       )));
   }
 
-  private function loadLintMessages($limit, $offset) {
+  private function loadLintMessages(
+    PhabricatorRepositoryBranch $branch,
+    $limit,
+    $offset) {
+
     $drequest = $this->getDiffusionRequest();
-    $branch = $drequest->loadBranch();
     if (!$branch) {
       return array();
     }
 
     $conn = $branch->establishConnection('r');
 
-    $where = '';
+    $where = array();
     if ($drequest->getPath() != '') {
       $is_dir = (substr($drequest->getPath(), -1) == '/');
-      $where = qsprintf(
+      $where[] = qsprintf(
         $conn,
-        'AND path '.($is_dir ? 'LIKE %>' : '= %s'),
+        'path '.($is_dir ? 'LIKE %>' : '= %s'),
         '/'.$drequest->getPath());
+    }
+
+    if ($drequest->getLint() != '') {
+      $where[] = qsprintf(
+        $conn,
+        'code = %s',
+        $drequest->getLint());
     }
 
     return queryfx_all(
@@ -116,14 +129,12 @@ final class DiffusionLintDetailsController extends DiffusionController {
       'SELECT *
         FROM %T
         WHERE branchID = %d
-        AND code = %s
-        %Q
+        AND %Q
         ORDER BY path, code, line
         LIMIT %d OFFSET %d',
       PhabricatorRepository::TABLE_LINTMESSAGE,
       $branch->getID(),
-      $drequest->getLint(),
-      $where,
+      implode(' AND ', $where),
       $limit,
       $offset);
   }

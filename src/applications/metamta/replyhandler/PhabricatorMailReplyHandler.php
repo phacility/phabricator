@@ -73,8 +73,8 @@ abstract class PhabricatorMailReplyHandler {
    * since this code is running and everything.
    */
   private function shouldSendErrorEmail(PhabricatorMetaMTAReceivedMail $mail) {
-    return count($mail->getToAddresses() == 1) &&
-           count($mail->getCCAddresses() == 0);
+    return (count($mail->getToAddresses()) == 1) &&
+           (count($mail->getCCAddresses()) == 0);
   }
 
   private function sendErrorEmail($error,

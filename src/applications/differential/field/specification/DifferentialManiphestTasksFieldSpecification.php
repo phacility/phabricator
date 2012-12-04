@@ -3,6 +3,7 @@
 final class DifferentialManiphestTasksFieldSpecification
   extends DifferentialFieldSpecification {
 
+  private $oldManiphestTasks = array();
   private $maniphestTasks = array();
 
   public function shouldAppearOnRevisionView() {
@@ -51,9 +52,7 @@ final class DifferentialManiphestTasksFieldSpecification
     $revision_phid = $revision->getPHID();
     $edge_type = PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK;
 
-    $old_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $revision_phid,
-      $edge_type);
+    $old_phids = $this->oldManiphestTasks;
     $add_phids = $this->maniphestTasks;
     $rem_phids = array_diff($old_phids, $add_phids);
 
@@ -73,6 +72,7 @@ final class DifferentialManiphestTasksFieldSpecification
 
   protected function didSetRevision() {
     $this->maniphestTasks = $this->getManiphestTaskPHIDs();
+    $this->oldManiphestTasks = $this->maniphestTasks;
   }
 
   public function getRequiredHandlePHIDsForCommitMessage() {

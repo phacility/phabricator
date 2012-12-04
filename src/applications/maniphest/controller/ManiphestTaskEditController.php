@@ -487,7 +487,8 @@ final class ManiphestTaskEditController extends ManiphestController {
       ->setLabel('Description')
       ->setName('description')
       ->setID('description-textarea')
-      ->setValue($task->getDescription());
+      ->setValue($task->getDescription())
+      ->setUser($user);
 
     $form
       ->appendChild($description_control);

@@ -85,7 +85,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
         '<a href="%s">%s</a>',
         $drequest->generateURI(array(
           'action' => 'lint',
-          'lint' => '',
+          'lint' => null,
         )),
         number_format($lint));
     }
@@ -174,7 +174,7 @@ final class DiffusionBrowseTableView extends DiffusionView {
       $commit = $path->getLastModifiedCommit();
       if ($commit) {
         $drequest = clone $request;
-        $drequest->setPath($path->getPath().$dir_slash);
+        $drequest->setPath($request->getPath().$path->getPath().$dir_slash);
         $dict = self::renderLastModifiedColumns(
           $drequest,
           $this->handles,

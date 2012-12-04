@@ -159,6 +159,7 @@ return array(
     'disqus.application-secret',
     'phabricator.mail-key',
     'security.hmac-key',
+    'ldap.anonymous-user-password',
   ),
 
 
@@ -349,8 +350,9 @@ return array(
   // class with an implementation of your own. This will allow you to do things
   // like have a single public reply handler or change how private reply
   // handlers are generated and validated.
+  //
   // This key should be set to a loadable subclass of
-  // PhabricatorMailReplyHandler (and possibly of ManiphestReplyHandler).
+  // PhabricatorMailReplyHandler.
   'metamta.maniphest.reply-handler' => 'ManiphestReplyHandler',
 
   // If you don't want phabricator to take up an entire domain
@@ -366,6 +368,13 @@ return array(
   // Prefix prepended to mail sent by Maniphest. You can change this to
   // distinguish between testing and development installs, for example.
   'metamta.maniphest.subject-prefix' => '[Maniphest]',
+
+  // See 'metamta.pholio.reply-handler-domain'. This does the same thing, but
+  // affects Pholio.
+  'metamta.pholio.reply-handler-domain' => null,
+
+  // Prefix prepended to mail sent by Pholio.
+  'metamta.pholio.subject-prefix' => '[Pholio]',
 
   // See 'metamta.maniphest.reply-handler-domain'. This does the same thing,
   // but allows email replies via Differential.
@@ -684,6 +693,15 @@ return array(
   // Should be set to 0 if you use Windows 2003 AD
   'ldap.referrals' => 1,
 
+  // The anonymous user name to use before searching a user.
+  // Many LDAP installations require login even before searching a user, set
+  // this option to enable it.
+  'ldap.anonymous-user-name'     => '',
+
+  // The password of the LDAP anonymous user.
+  'ldap.anonymous-user-password' => '',
+
+
 // -- Disqus OAuth ---------------------------------------------------------- //
 
   // Can users use Disqus credentials to login to Phabricator?
@@ -882,6 +900,10 @@ return array(
   // key here and a bucket name below.
   'amazon-s3.access-key'          =>  null,
   'amazon-s3.secret-key'          =>  null,
+
+  // To use a custom endpoint, specify it here. Normally, you do not need to
+  // configure this.
+  'amazon-s3.endpoint'            =>  null,
 
   // Set this to a valid Amazon S3 bucket to store files there. You must also
   // configure S3 access keys above.

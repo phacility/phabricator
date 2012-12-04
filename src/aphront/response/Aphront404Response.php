@@ -3,7 +3,7 @@
 /**
  * @group aphront
  */
-final class Aphront404Response extends AphrontWebpageResponse {
+final class Aphront404Response extends AphrontHTMLResponse {
 
   public function getHTTPResponseCode() {
     return 404;

@@ -270,7 +270,25 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     $commit->updateAuditStatus($requests);
     $commit->save();
 
-    $this->publishFeedStory($comment, array_keys($audit_phids));
+    $feed_dont_publish_phids = array();
+    foreach ($requests as $request) {
+      $status = $request->getAuditStatus();
+      switch ($status) {
+      case PhabricatorAuditStatusConstants::RESIGNED:
+      case PhabricatorAuditStatusConstants::NONE:
+      case PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED:
+      case PhabricatorAuditStatusConstants::CC:
+        $feed_dont_publish_phids[$request->getAuditorPHID()] = 1;
+        break;
+      default:
+        unset($feed_dont_publish_phids[$request->getAuditorPHID()]);
+        break;
+      }
+    }
+    $feed_dont_publish_phids = array_keys($feed_dont_publish_phids);
+
+    $feed_phids = array_diff($requests_phids, $feed_dont_publish_phids);
+    $this->publishFeedStory($comment, $feed_phids);
     PhabricatorSearchCommitIndexer::indexCommit($commit);
     $this->sendMail($comment, $other_comments, $inline_comments, $requests);
   }

@@ -43,7 +43,8 @@ final class PhabricatorRemarkupRuleEmbedFile
 
     if (!empty($matches[2])) {
       $matches[2] = trim($matches[2], ', ');
-      $options = PhutilSimpleOptions::parse($matches[2]) + $options;
+      $parser = new PhutilSimpleOptions();
+      $options = $parser->parse($matches[2]) + $options;
     }
     $file_name = coalesce($options['name'], $file->getName());
     $options['name'] = $file_name;
@@ -110,7 +111,7 @@ final class PhabricatorRemarkupRuleEmbedFile
         $embed = javelin_render_tag(
           'a',
           array(
-            'href'        => '#',
+            'href'        => $meta['uri'],
             'class'       => $options['image_class'],
             'sigil'       => 'lightboxable',
             'mustcapture' => true,

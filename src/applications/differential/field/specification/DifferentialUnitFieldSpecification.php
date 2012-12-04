@@ -3,6 +3,18 @@
 final class DifferentialUnitFieldSpecification
   extends DifferentialFieldSpecification {
 
+  public function shouldAppearOnDiffView() {
+      return true;
+  }
+
+  public function renderLabelForDiffView() {
+    return $this->renderLabelForRevisionView();
+  }
+
+  public function renderValueForDiffView() {
+    return $this->renderValueForRevisionView();
+  }
+
   public function shouldAppearOnRevisionView() {
     return true;
   }

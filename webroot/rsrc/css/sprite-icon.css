@@ -1,0 +1,786 @@
+/**
+ * @provides sprite-icon-css
+ * @generated
+ */
+
+.sprite-icon {
+  background-image: url(/rsrc/image/sprite-icon.png);
+  background-repeat: no-repeat;
+}
+
+@media
+only screen and (min-device-pixel-ratio: 1.5),
+only screen and (-webkit-min-device-pixel-ratio: 1.5) {
+  .sprite-icon {
+    background-image: url(/rsrc/image/sprite-icon-X2.png);
+    background-size: 210px 210px;
+  }
+}
+
+.action-arrow_left {
+  background-position: 0px 0px;
+}
+
+.action-arrow_right {
+  background-position: -15px 0px;
+}
+
+.action-attach {
+  background-position: -30px 0px;
+}
+
+.action-blame {
+  background-position: -45px 0px;
+}
+
+.action-check {
+  background-position: -60px 0px;
+}
+
+.action-comment {
+  background-position: -75px 0px;
+}
+
+.action-computer {
+  background-position: -90px 0px;
+}
+
+.action-create {
+  background-position: -105px 0px;
+}
+
+.action-delete {
+  background-position: -120px 0px;
+}
+
+.action-disable {
+  background-position: -135px 0px;
+}
+
+.action-dislike {
+  background-position: -150px 0px;
+}
+
+.action-download {
+  background-position: -165px 0px;
+}
+
+.action-edit {
+  background-position: -180px 0px;
+}
+
+.action-enable {
+  background-position: -195px 0px;
+}
+
+.action-file {
+  background-position: 0px -15px;
+}
+
+.action-flag-0 {
+  background-position: -15px -15px;
+}
+
+.action-flag-1 {
+  background-position: -30px -15px;
+}
+
+.action-flag-2 {
+  background-position: -45px -15px;
+}
+
+.action-flag-3 {
+  background-position: -60px -15px;
+}
+
+.action-flag-4 {
+  background-position: -75px -15px;
+}
+
+.action-flag-5 {
+  background-position: -90px -15px;
+}
+
+.action-flag-6 {
+  background-position: -105px -15px;
+}
+
+.action-flag-7 {
+  background-position: -120px -15px;
+}
+
+.action-flag-ghost {
+  background-position: -135px -15px;
+}
+
+.action-flag {
+  background-position: -150px -15px;
+}
+
+.action-folder-open {
+  background-position: -165px -15px;
+}
+
+.action-fork {
+  background-position: -180px -15px;
+}
+
+.action-herald {
+  background-position: -195px -15px;
+}
+
+.action-highlight {
+  background-position: 0px -30px;
+}
+
+.action-history {
+  background-position: -15px -30px;
+}
+
+.action-image {
+  background-position: -30px -30px;
+}
+
+.action-like {
+  background-position: -45px -30px;
+}
+
+.action-link {
+  background-position: -60px -30px;
+}
+
+.action-lint-info {
+  background-position: -75px -30px;
+}
+
+.action-lint-ok {
+  background-position: -90px -30px;
+}
+
+.action-lint-warning {
+  background-position: -105px -30px;
+}
+
+.action-lock {
+  background-position: -120px -30px;
+}
+
+.action-love {
+  background-position: -135px -30px;
+}
+
+.action-merge {
+  background-position: -150px -30px;
+}
+
+.action-message {
+  background-position: -165px -30px;
+}
+
+.action-meta-mta {
+  background-position: -180px -30px;
+}
+
+.action-move {
+  background-position: -195px -30px;
+}
+
+.action-new {
+  background-position: 0px -45px;
+}
+
+.action-perflab {
+  background-position: -15px -45px;
+}
+
+.action-preview {
+  background-position: -30px -45px;
+}
+
+.action-refresh {
+  background-position: -45px -45px;
+}
+
+.action-remove {
+  background-position: -60px -45px;
+}
+
+.action-search {
+  background-position: -75px -45px;
+}
+
+.action-start-sandcastle {
+  background-position: -90px -45px;
+}
+
+.action-subscribe-add {
+  background-position: -105px -45px;
+}
+
+.action-subscribe-auto {
+  background-position: -120px -45px;
+}
+
+.action-subscribe-delete {
+  background-position: -135px -45px;
+}
+
+.action-tag {
+  background-position: -150px -45px;
+}
+
+.action-transcript {
+  background-position: -165px -45px;
+}
+
+.action-undo {
+  background-position: -180px -45px;
+}
+
+.action-unlock {
+  background-position: -195px -45px;
+}
+
+.action-unmerge {
+  background-position: 0px -60px;
+}
+
+.action-unpublish {
+  background-position: -15px -60px;
+}
+
+.action-warning {
+  background-position: -30px -60px;
+}
+
+.action-world {
+  background-position: -45px -60px;
+}
+
+.action-arrow_left-grey {
+  background-position: -60px -60px;
+}
+
+.action-arrow_right-grey {
+  background-position: -75px -60px;
+}
+
+.action-attach-grey {
+  background-position: -90px -60px;
+}
+
+.action-blame-grey {
+  background-position: -105px -60px;
+}
+
+.action-check-grey {
+  background-position: -120px -60px;
+}
+
+.action-comment-grey {
+  background-position: -135px -60px;
+}
+
+.action-computer-grey {
+  background-position: -150px -60px;
+}
+
+.action-create-grey {
+  background-position: -165px -60px;
+}
+
+.action-delete-grey {
+  background-position: -180px -60px;
+}
+
+.action-disable-grey {
+  background-position: -195px -60px;
+}
+
+.action-dislike-grey {
+  background-position: 0px -75px;
+}
+
+.action-download-grey {
+  background-position: -15px -75px;
+}
+
+.action-edit-grey {
+  background-position: -30px -75px;
+}
+
+.action-enable-grey {
+  background-position: -45px -75px;
+}
+
+.action-file-grey {
+  background-position: -60px -75px;
+}
+
+.action-flag-0-grey {
+  background-position: -75px -75px;
+}
+
+.action-flag-1-grey {
+  background-position: -90px -75px;
+}
+
+.action-flag-2-grey {
+  background-position: -105px -75px;
+}
+
+.action-flag-3-grey {
+  background-position: -120px -75px;
+}
+
+.action-flag-4-grey {
+  background-position: -135px -75px;
+}
+
+.action-flag-5-grey {
+  background-position: -150px -75px;
+}
+
+.action-flag-6-grey {
+  background-position: -165px -75px;
+}
+
+.action-flag-7-grey {
+  background-position: -180px -75px;
+}
+
+.action-flag-ghost-grey {
+  background-position: -195px -75px;
+}
+
+.action-flag-grey {
+  background-position: 0px -90px;
+}
+
+.action-folder-open-grey {
+  background-position: -15px -90px;
+}
+
+.action-fork-grey {
+  background-position: -30px -90px;
+}
+
+.action-herald-grey {
+  background-position: -45px -90px;
+}
+
+.action-highlight-grey {
+  background-position: -60px -90px;
+}
+
+.action-history-grey {
+  background-position: -75px -90px;
+}
+
+.action-image-grey {
+  background-position: -90px -90px;
+}
+
+.action-like-grey {
+  background-position: -105px -90px;
+}
+
+.action-link-grey {
+  background-position: -120px -90px;
+}
+
+.action-lint-info-grey {
+  background-position: -135px -90px;
+}
+
+.action-lint-ok-grey {
+  background-position: -150px -90px;
+}
+
+.action-lint-warning-grey {
+  background-position: -165px -90px;
+}
+
+.action-lock-grey {
+  background-position: -180px -90px;
+}
+
+.action-love-grey {
+  background-position: -195px -90px;
+}
+
+.action-merge-grey {
+  background-position: 0px -105px;
+}
+
+.action-message-grey {
+  background-position: -15px -105px;
+}
+
+.action-meta-mta-grey {
+  background-position: -30px -105px;
+}
+
+.action-move-grey {
+  background-position: -45px -105px;
+}
+
+.action-new-grey {
+  background-position: -60px -105px;
+}
+
+.action-perflab-grey {
+  background-position: -75px -105px;
+}
+
+.action-preview-grey {
+  background-position: -90px -105px;
+}
+
+.action-refresh-grey {
+  background-position: -105px -105px;
+}
+
+.action-remove-grey {
+  background-position: -120px -105px;
+}
+
+.action-search-grey {
+  background-position: -135px -105px;
+}
+
+.action-start-sandcastle-grey {
+  background-position: -150px -105px;
+}
+
+.action-subscribe-add-grey {
+  background-position: -165px -105px;
+}
+
+.action-subscribe-auto-grey {
+  background-position: -180px -105px;
+}
+
+.action-subscribe-delete-grey {
+  background-position: -195px -105px;
+}
+
+.action-tag-grey {
+  background-position: 0px -120px;
+}
+
+.action-transcript-grey {
+  background-position: -15px -120px;
+}
+
+.action-undo-grey {
+  background-position: -30px -120px;
+}
+
+.action-unlock-grey {
+  background-position: -45px -120px;
+}
+
+.action-unmerge-grey {
+  background-position: -60px -120px;
+}
+
+.action-unpublish-grey {
+  background-position: -75px -120px;
+}
+
+.action-warning-grey {
+  background-position: -90px -120px;
+}
+
+.action-world-grey {
+  background-position: -105px -120px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-arrow_left {
+  background-position: -120px -120px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-arrow_right {
+  background-position: -135px -120px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-attach {
+  background-position: -150px -120px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-blame {
+  background-position: -165px -120px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-check {
+  background-position: -180px -120px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-comment {
+  background-position: -195px -120px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-computer {
+  background-position: 0px -135px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-create {
+  background-position: -15px -135px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-delete {
+  background-position: -30px -135px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-disable {
+  background-position: -45px -135px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-dislike {
+  background-position: -60px -135px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-download {
+  background-position: -75px -135px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-edit {
+  background-position: -90px -135px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-enable {
+  background-position: -105px -135px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-file {
+  background-position: -120px -135px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-flag-0 {
+  background-position: -135px -135px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-flag-1 {
+  background-position: -150px -135px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-flag-2 {
+  background-position: -165px -135px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-flag-3 {
+  background-position: -180px -135px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-flag-4 {
+  background-position: -195px -135px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-flag-5 {
+  background-position: 0px -150px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-flag-6 {
+  background-position: -15px -150px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-flag-7 {
+  background-position: -30px -150px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-flag-ghost {
+  background-position: -45px -150px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-flag {
+  background-position: -60px -150px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-folder-open {
+  background-position: -75px -150px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-fork {
+  background-position: -90px -150px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-herald {
+  background-position: -105px -150px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-highlight {
+  background-position: -120px -150px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-history {
+  background-position: -135px -150px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-image {
+  background-position: -150px -150px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-like {
+  background-position: -165px -150px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-link {
+  background-position: -180px -150px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-lint-info {
+  background-position: 0px -165px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-lint-ok {
+  background-position: -15px -165px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-lint-warning {
+  background-position: -30px -165px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-lock {
+  background-position: -45px -165px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-love {
+  background-position: -60px -165px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-merge {
+  background-position: -75px -165px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-message {
+  background-position: -90px -165px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-meta-mta {
+  background-position: -105px -165px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-move {
+  background-position: -120px -165px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-new {
+  background-position: -135px -165px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-perflab {
+  background-position: -150px -165px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-preview {
+  background-position: -165px -165px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-refresh {
+  background-position: -180px -165px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-remove {
+  background-position: 0px -180px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-search {
+  background-position: -15px -180px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-start-sandcastle {
+  background-position: -30px -180px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-subscribe-add {
+  background-position: -45px -180px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-subscribe-auto {
+  background-position: -60px -180px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-subscribe-delete {
+  background-position: -75px -180px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-tag {
+  background-position: -90px -180px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-transcript {
+  background-position: -105px -180px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-undo {
+  background-position: -120px -180px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-unlock {
+  background-position: -135px -180px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-unmerge {
+  background-position: -150px -180px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-unpublish {
+  background-position: -165px -180px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-warning {
+  background-position: -180px -180px;
+}
+
+.device-desktop .phabricator-action-view:hover .action-world {
+  background-position: 0px -195px;
+}
+
+.remarkup-assist-b {
+  background-position: -15px -195px;
+}
+
+.remarkup-assist-code {
+  background-position: -30px -195px;
+}
+
+.remarkup-assist-help {
+  background-position: -45px -195px;
+}
+
+.remarkup-assist-i {
+  background-position: -60px -195px;
+}
+
+.remarkup-assist-image {
+  background-position: -75px -195px;
+}
+
+.remarkup-assist-larger {
+  background-position: -90px -195px;
+}
+
+.remarkup-assist-meme {
+  background-position: -105px -195px;
+}
+
+.remarkup-assist-ol {
+  background-position: -120px -195px;
+}
+
+.remarkup-assist-table {
+  background-position: -135px -195px;
+}
+
+.remarkup-assist-tag {
+  background-position: -150px -195px;
+}
+
+.remarkup-assist-tt {
+  background-position: -165px -195px;
+}
+
+.remarkup-assist-ul {
+  background-position: -180px -195px;
+}

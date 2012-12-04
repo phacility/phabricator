@@ -162,6 +162,18 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
       $this->cc = $revision->getCCPHIDs();
     }
 
+    if ($is_new) {
+      $content_blocks = array();
+      foreach ($this->auxiliaryFields as $field) {
+        if ($field->shouldExtractMentions()) {
+          $content_blocks[] = $field->renderValueForCommitMessage(false);
+        }
+      }
+      $phids = PhabricatorMarkupEngine::extractPHIDsFromMentions(
+        $content_blocks);
+      $this->cc = array_unique(array_merge($this->cc, $phids));
+    }
+
     $diff = $this->getDiff();
     if ($diff) {
       $revision->setLineCount($diff->getLineCount());
@@ -807,21 +819,15 @@ final class DifferentialRevisionEditor extends PhabricatorEditor {
     }
     $all_paths = array_keys($all_paths);
 
-    $path_map = id(new DiffusionPathIDQuery($all_paths))->loadPathIDs();
+    $path_ids =
+      PhabricatorRepositoryCommitChangeParserWorker::lookupOrCreatePaths(
+        $all_paths);
 
     $table = new DifferentialAffectedPath();
     $conn_w = $table->establishConnection('w');
 
     $sql = array();
-    foreach ($all_paths as $path) {
-      $path_id = idx($path_map, $path);
-      if (!$path_id) {
-        // Don't bother creating these, it probably means we're either adding
-        // a file (in which case having this row is irrelevant since Diffusion
-        // won't be querying for it) or something is misconfigured (in which
-        // case we'd just be writing garbage).
-        continue;
-      }
+    foreach ($path_ids as $path_id) {
       $sql[] = qsprintf(
         $conn_w,
         '(%d, %d, %d, %d)',

@@ -166,6 +166,20 @@ abstract class DifferentialFieldSpecification {
   }
 
   /**
+   * Determine if user mentions should be extracted from the value and added to
+   * CC when creating revision. Mentions are then extracted from the string
+   * returned by @{method:renderValueForCommitMessage}.
+   *
+   * By default, mentions are not extracted.
+   *
+   * @return bool
+   * @task edit
+   */
+  public function shouldExtractMentions() {
+    return false;
+  }
+
+  /**
    * Hook for applying revision changes via the editor. Normally, you should
    * not implement this, but a number of builtin fields use the revision object
    * itself as storage. If you need to do something similar for whatever reason,
@@ -334,6 +348,63 @@ abstract class DifferentialFieldSpecification {
    * @task list
    */
   public function renderValueForRevisionList(DifferentialRevision $revision) {
+    throw new DifferentialFieldSpecificationIncompleteException($this);
+  }
+
+
+/* -(  Extending the Diff View Interface  )------------------------------ */
+
+
+  /**
+   * Determine if this field should appear on the diff detail view
+   * interface. One use of this interface is to add purely informational
+   * fields to the diff view, without any sort of backing storage.
+   *
+   * NOTE: These diffs are not necessarily attached yet to a revision.
+   * As such, a field on the diff view can not rely on the existence of a
+   * revision or use storage attached to the revision.
+   *
+   * If you return true from this method, you must implement the methods
+   * @{method:renderLabelForDiffView} and
+   * @{method:renderValueForDiffView}.
+   *
+   * @return bool True if this field should appear when viewing a diff.
+   * @task view
+   */
+  public function shouldAppearOnDiffView() {
+    return false;
+  }
+
+
+  /**
+   * Return a string field label which will appear in the diff detail
+   * table.
+   *
+   * You must implement this method if you return true from
+   * @{method:shouldAppearOnDiffView}.
+   *
+   * @return string Label for field in revision detail view.
+   * @task view
+   */
+  public function renderLabelForDiffView() {
+    throw new DifferentialFieldSpecificationIncompleteException($this);
+  }
+
+
+  /**
+   * Return a markup block representing the field for the diff detail
+   * view. Note that you can return null to suppress display (for instance,
+   * if the field shows related objects of some type and the revision doesn't
+   * have any related objects).
+   *
+   * You must implement this method if you return true from
+   * @{method:shouldAppearOnDiffView}.
+   *
+   * @return string|null Display markup for field value, or null to suppress
+   *                     field rendering.
+   * @task view
+   */
+  public function renderValueForDiffView() {
     throw new DifferentialFieldSpecificationIncompleteException($this);
   }
 

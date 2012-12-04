@@ -49,11 +49,18 @@ final class PhabricatorActionView extends AphrontView {
 
     $icon = null;
     if ($this->icon) {
+
+      $suffix = '';
+      if ($this->disabled) {
+        $suffix = '-grey';
+      }
+
+      require_celerity_resource('sprite-icon-css');
       $icon = phutil_render_tag(
         'span',
         array(
-          'class' => 'phabricator-action-view-icon autosprite '.
-                       'action-'.$this->icon,
+          'class' => 'phabricator-action-view-icon sprite-icon '.
+                       'action-'.$this->icon.$suffix,
         ),
         '');
     }
@@ -114,32 +121,24 @@ final class PhabricatorActionView extends AphrontView {
   }
 
   public static function getAvailableIcons() {
-    return array(
-      'delete',
-      'download',
-      'edit',
-      'file',
-      'flag-0',
-      'flag-1',
-      'flag-2',
-      'flag-3',
-      'flag-4',
-      'flag-5',
-      'flag-6',
-      'flag-7',
-      'flag-ghost',
-      'fork',
-      'move',
-      'new',
-      'preview',
-      'subscribe-add',
-      'subscribe-auto',
-      'subscribe-delete',
-      'undo',
-      'unlock',
-      'unpublish',
-      'world',
-    );
+    $root = dirname(phutil_get_library_root('phabricator'));
+    $path = $root.'/resources/sprite/manifest/icon.json';
+    $data = Filesystem::readFile($path);
+    $manifest = json_decode($data, true);
+
+    $results = array();
+    $prefix = 'action-';
+    foreach ($manifest['sprites'] as $sprite) {
+      $name = $sprite['name'];
+      if (preg_match('/-(white|grey)$/', $name)) {
+        continue;
+      }
+      if (!strncmp($name, $prefix, strlen($prefix))) {
+        $results[] = substr($name, strlen($prefix));
+      }
+    }
+
+    return $results;
   }
 
 }

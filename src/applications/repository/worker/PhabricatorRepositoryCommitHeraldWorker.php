@@ -3,6 +3,11 @@
 final class PhabricatorRepositoryCommitHeraldWorker
   extends PhabricatorRepositoryCommitParserWorker {
 
+  public function getRequiredLeaseTime() {
+    // Herald rules may take a long time to process.
+    return 4 * 60 * 60;
+  }
+
   public function parseCommit(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {

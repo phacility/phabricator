@@ -1,0 +1,135 @@
+/**
+ * @provides phabricator-tag-view-css
+ */
+
+.phabricator-tag-view {
+  font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
+}
+
+a.phabricator-tag-view:hover {
+  text-decoration: none;
+}
+
+.phabricator-tag-state-closed .phabricator-tag-core {
+  text-decoration: line-through;
+}
+
+.phabricator-tag-core {
+  color: inherit;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  padding: 0 4px;
+}
+
+.phabricator-tag-view-has-bar .phabricator-tag-core {
+  border-radius: 0 3px 3px 0;
+  border-width: 1px 1px 1px 0;
+}
+
+.phabricator-tag-dot {
+  position: relative;
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 3px;
+  top: -1px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  box-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
+}
+
+.phabricator-tag-type-state {
+  color: #ffffff;
+  text-shadow: rgba(0, 0, 0, 0.40) 0px -1px 1px;
+}
+
+.phabricator-tag-type-object,
+a.phabricator-tag-type-object,
+a.phabricator-tag-type-object:link {
+  color: #000000;
+}
+
+.phabricator-tag-type-person {
+  white-space: nowrap;
+  color: #19558d;
+}
+
+.phabricator-tag-color-red {
+  background-color: #e12320;
+  border-color: #e12320;
+}
+
+.phabricator-tag-color-redorange {
+  background-color: #ff6604;
+  border-color: #ff6604;
+}
+
+.phabricator-tag-color-orange {
+  background-color: #fa9400;
+  border-color: #fa9400;
+}
+
+.phabricator-tag-color-yellow {
+  background-color: #f2ed5b;
+  border-color: #f2ed5b;
+}
+
+.phabricator-tag-color-blue {
+  background-color: #0573d2;
+  border-color: #0573d2;
+}
+
+.phabricator-tag-color-magenta {
+  background-color: #ce00ce;
+  border-color: #ce00ce;
+}
+
+.phabricator-tag-color-green {
+  background-color: #438944;
+  border-color: #438944;
+}
+
+.phabricator-tag-color-black {
+  background-color: #333333;
+  border-color: #333333;
+}
+
+.phabricator-tag-color-grey {
+  background-color: #888888;
+  border-color: #888888;
+}
+
+.phabricator-tag-color-white {
+  background-color: #ffffff;
+  border-color: #ffffff;
+}
+
+.phabricator-tag-color-object {
+  background-color: #e7e7e7;
+  border-color: #e7e7e7;
+}
+
+.phabricator-tag-color-person {
+  background-color: #f1f7ff;
+  border-color: #f1f7ff;
+}
+
+a.phabricator-tag-view:hover
+  .phabricator-tag-core.phabricator-tag-color-person {
+  border-color: #d9ebfd;
+}
+
+a.phabricator-tag-view:hover
+  .phabricator-tag-core.phabricator-tag-color-object {
+  border-color: #d7d7d7;
+}
+
+.phabricator-tag-bar {
+  padding-left: 4px;
+  border-width: 1px;
+  border-style: solid;
+  border-right-color: rgba(0, 0, 0, 0.33);
+  border-radius: 2px 0 0 2px;
+}

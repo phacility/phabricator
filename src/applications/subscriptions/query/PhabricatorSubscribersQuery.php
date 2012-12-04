@@ -6,6 +6,10 @@ final class PhabricatorSubscribersQuery extends PhabricatorQuery {
   private $subscriberPHIDs;
 
   public static function loadSubscribersForPHID($phid) {
+    if (!$phid) {
+      return array();
+    }
+
     $subscribers = id(new PhabricatorSubscribersQuery())
       ->withObjectPHIDs(array($phid))
       ->execute();

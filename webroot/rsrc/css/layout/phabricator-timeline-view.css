@@ -1,0 +1,136 @@
+/**
+ * @provides phabricator-timeline-view-css
+ */
+
+.phabricator-timeline-event-view {
+  border-width: 0 0 0 3px;
+  border-style: solid;
+  border-color: #eaeaea;
+}
+
+.device-desktop .phabricator-timeline-event-view {
+  margin-left: 80px;
+  margin-right: 12px;
+  position: relative;
+}
+
+.device-desktop .phabricator-timeline-spacer {
+  min-height: 10px;
+  border-right-width: 0;
+}
+
+.device-desktop .phabricator-timeline-major-event {
+  border-right-width: 3px;
+}
+
+.device-desktop .phabricator-timeline-wedge {
+  border-bottom: 3px solid #eaeaea;
+  position: absolute;
+  width: 10px;
+}
+
+.device-desktop .phabricator-timeline-major-event
+  .phabricator-timeline-content {
+  min-height: 70px;
+}
+
+.phabricator-timeline-major-event .phabricator-timeline-content {
+  border-style: solid;
+  border-color: #eaeaea;
+  border-width: 1px 0;
+}
+
+.device-desktop .phabricator-timeline-minor-event
+  .phabricator-timeline-content {
+  margin-left: 35px;
+  padding: 5px 0;
+  min-height: 25px;
+}
+
+.device-desktop .phabricator-timeline-title {
+  line-height: 25px;
+}
+
+.device-desktop .phabricator-timeline-major-event .phabricator-timeline-wedge {
+  left: -10px;
+  top: 34px;
+}
+
+.device-desktop .phabricator-timeline-minor-event .phabricator-timeline-wedge {
+  left: 0px;
+  top: 17px;
+}
+
+.phabricator-timeline-image {
+  background: #eaeaea;
+  background-repeat: no-repeat;
+  position: absolute;
+}
+
+.device-desktop .phabricator-timeline-major-event .phabricator-timeline-image {
+  width: 50px;
+  height: 50px;
+  top: 10px;
+  left: -60px;
+}
+
+.device-desktop .phabricator-timeline-minor-event .phabricator-timeline-image {
+  width: 25px;
+  height: 25px;
+  background-size: 25px auto;
+  top: 5px;
+  left: 10px;
+}
+
+.device-desktop .phabricator-timeline-major-event
+  .phabricator-timeline-standard-title {
+  background: #f7f7f7;
+}
+
+.device-desktop .phabricator-timeline-standard-title {
+  padding: 0 5px;
+}
+
+.phabricator-timeline-major-event .phabricator-timeline-standard-content
+  .phabricator-timeline-core-content {
+  padding: 5px;
+}
+
+
+.phabricator-timeline-red .phabricator-timeline-border {
+  border-color: #dd0000;
+}
+
+.phabricator-timeline-green .phabricator-timeline-border {
+  border-color: #009966;
+}
+
+.device-tablet .phabricator-timeline-event-view,
+.device-phone .phabricator-timeline-event-view {
+  min-height: 25px;
+  position: relative;
+  margin-left: 3px;
+  margin-right: 3px;
+
+  border-right-width: 3px;
+  border-right-style: solid;
+}
+
+.device-tablet .phabricator-timeline-image,
+.device-phone .phabricator-timeline-image {
+  display: none;
+}
+
+.device-tablet .phabricator-timeline-title,
+.device-phone .phabricator-timeline-title {
+  line-height: 25px;
+  min-height: 25px;
+  background: #f7f7f7;
+  padding: 0 5px;
+}
+
+.device-tablet .phabricator-timeline-spacer,
+.device-phone .phabricator-timeline-spacer {
+  min-height: 8px;
+  border-width: 0;
+}

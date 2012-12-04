@@ -4,6 +4,10 @@ abstract class DifferentialFreeformFieldSpecification
   extends DifferentialFieldSpecification {
 
   private function findMentionedTasks($message) {
+    if (!PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
+      return array();
+    }
+
     $prefixes = array(
       'resolves'      => ManiphestTaskStatus::STATUS_CLOSED_RESOLVED,
       'fixes'         => ManiphestTaskStatus::STATUS_CLOSED_RESOLVED,
@@ -65,6 +69,34 @@ abstract class DifferentialFreeformFieldSpecification
     }
 
     return $tasks_statuses;
+  }
+
+  public function didWriteRevision(DifferentialRevisionEditor $editor) {
+    $message = $this->renderValueForCommitMessage(false);
+    $tasks = $this->findMentionedTasks($message);
+    if (!$tasks) {
+      return;
+    }
+
+    $revision_phid = $editor->getRevision()->getPHID();
+    $edge_type = PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK;
+
+    $add_phids = id(new ManiphestTask())
+      ->loadAllWhere('id IN (%Ld)', array_keys($tasks));
+    $add_phids = mpull($add_phids, 'getPHID');
+
+    $old_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $revision_phid,
+      $edge_type);
+
+    $add_phids = array_diff($add_phids, $old_phids);
+
+    $edge_editor = id(new PhabricatorEdgeEditor())->setActor($this->getUser());
+    foreach ($add_phids as $phid) {
+      $edge_editor->addEdge($revision_phid, $edge_type, $phid);
+    }
+    // NOTE: Deletes only through Maniphest Tasks field.
+    $edge_editor->save();
   }
 
   public function didParseCommit(

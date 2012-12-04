@@ -60,6 +60,9 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
   }
 
   private function loadPHIDsFromAddresses(array $addresses) {
+    if (empty($addresses)) {
+      return array();
+    }
     $users = id(new PhabricatorUserEmail())
       ->loadAllWhere('address IN (%Ls)', $addresses);
     $user_phids = mpull($users, 'getUserPHID');

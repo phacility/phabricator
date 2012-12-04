@@ -6,6 +6,8 @@
 $active_table = new PhabricatorWorkerActiveTask();
 $archive_table = new PhabricatorWorkerArchiveTask();
 
+$old_table = 'worker_task';
+
 $conn_w = $active_table->establishConnection('w');
 
 $active_auto = head(queryfx_one(
@@ -13,12 +15,12 @@ $active_auto = head(queryfx_one(
   'SELECT auto_increment FROM information_schema.tables
     WHERE table_name = %s
     AND table_schema = DATABASE()',
-  $active_table->getTableName()));
+  $old_table));
 
 $active_max = head(queryfx_one(
   $conn_w,
   'SELECT MAX(id) FROM %T',
-  $active_table->getTableName()));
+  $old_table));
 
 $archive_max = head(queryfx_one(
   $conn_w,
@@ -33,12 +35,6 @@ queryfx(
     VALUES (%s, %d)
     ON DUPLICATE KEY UPDATE counterValue = %d',
   LiskDAO::COUNTER_TABLE_NAME,
-  $active_table->getTableName(),
+  $old_table,
   $initial_counter + 1,
   $initial_counter + 1);
-
-// Drop AUTO_INCREMENT from the ID column.
-queryfx(
-  $conn_w,
-  'ALTER TABLE %T CHANGE id id INT UNSIGNED NOT NULL',
-  $active_table->getTableName());

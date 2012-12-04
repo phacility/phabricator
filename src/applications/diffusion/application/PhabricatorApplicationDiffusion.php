@@ -63,6 +63,7 @@ final class PhabricatorApplicationDiffusion extends PhabricatorApplication {
         ),
         'symbol/(?P<name>[^/]+)/' => 'DiffusionSymbolController',
         'external/' => 'DiffusionExternalController',
+        'lint/' => 'DiffusionLintController',
       ),
     );
   }
