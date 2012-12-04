@@ -21,6 +21,7 @@ final class PhabricatorSettingsPanelDisplayPreferences
 
     $pref_monospaced = PhabricatorUserPreferences::PREFERENCE_MONOSPACED;
     $pref_editor     = PhabricatorUserPreferences::PREFERENCE_EDITOR;
+    $pref_multiedit  = PhabricatorUserPreferences::PREFERENCE_MULTIEDIT;
     $pref_titles     = PhabricatorUserPreferences::PREFERENCE_TITLES;
     $pref_symbols    = PhabricatorUserPreferences::PREFERENCE_DIFFUSION_SYMBOLS;
     $pref_monospaced_textareas =
@@ -34,6 +35,9 @@ final class PhabricatorSettingsPanelDisplayPreferences
 
       $preferences->setPreference($pref_titles, $request->getStr($pref_titles));
       $preferences->setPreference($pref_editor, $request->getStr($pref_editor));
+      $preferences->setPreference(
+        $pref_multiedit,
+        $request->getStr($pref_multiedit));
       $preferences->setPreference(
         $pref_symbols,
         $request->getStr($pref_symbols));
@@ -96,6 +100,15 @@ EXAMPLE;
           'callsign, %% by literal %. '.
           "For documentation, see {$editor_doc_link}.")
         ->setValue($preferences->getPreference($pref_editor)))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+        ->setLabel('Edit Multiple Files')
+        ->setName($pref_multiedit)
+        ->setOptions(array(
+          '' => 'Supported (paths separated by spaces)',
+          'disable' => 'Not Supported',
+        ))
+        ->setValue($preferences->getPreference($pref_multiedit)))
       ->appendChild(
         id(new AphrontFormTextControl())
         ->setLabel('Monospaced Font')

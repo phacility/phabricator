@@ -20,6 +20,11 @@ In general, you'll set this field to something like:
   lang=uri
   editor://open/?file=%f
 
+Some editors support opening multiple files at once when filenames are separated
+by spaces. If your editor supports this feature, set "Edit Multiple Files" to
+"Supported". Otherwise, you can set it to "Not Supported" to disable "Open All"
+buttons in the interface.
+
 == Configuring: TextMate on OS X ==
 
 TextMate installs a ##txmt://## handler by default, so it's easy to configure

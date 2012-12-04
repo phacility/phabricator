@@ -450,6 +450,19 @@ final class PhabricatorUser extends PhabricatorUserDAO implements PhutilPerson {
   public function loadEditorLink($path, $line, $callsign) {
     $editor = $this->loadPreferences()->getPreference(
       PhabricatorUserPreferences::PREFERENCE_EDITOR);
+
+    if (is_array($path)) {
+      $multiedit = $this->loadPreferences()->getPreference(
+        PhabricatorUserPreferences::PREFERENCE_MULTIEDIT);
+      switch ($multiedit) {
+        case '':
+          $path = implode(' ', $path);
+          break;
+        case 'disable':
+          return null;
+      }
+    }
+
     if ($editor) {
       return strtr($editor, array(
         '%%' => '%',

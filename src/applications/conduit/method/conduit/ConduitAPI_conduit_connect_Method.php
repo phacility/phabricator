@@ -73,13 +73,13 @@ final class ConduitAPI_conduit_connect_Method extends ConduitAPIMethod {
 
     switch ($client) {
       case 'arc':
-        $server_version = 5;
+        $server_version = 6;
         $supported_versions = array(
           $server_version => true,
-          // NOTE: Version 5 of the server can support either version 4 or
-          // version 5 of the client; the breaking change was the introduction
-          // of a "user.query" call in client version 5.
+          // Client version 5 introduced "user.query" call
           4               => true,
+          // Client version 6 introduced "diffusion.getlintmessages" call
+          5               => true,
         );
 
         if (empty($supported_versions[$client_version])) {
