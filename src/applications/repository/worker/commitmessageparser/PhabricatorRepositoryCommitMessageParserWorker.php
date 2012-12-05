@@ -27,14 +27,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     }
 
     $repository = $this->repository;
-    $detail_parser = $repository->getDetail(
-      'detail-parser',
-      'PhabricatorRepositoryDefaultCommitMessageDetailParser');
-
-    if ($detail_parser) {
-      $parser_obj = newv($detail_parser, array($commit, $data));
-      $parser_obj->parseCommitDetails();
-    }
 
     $author_phid = $this->lookupUser(
       $commit,
