@@ -295,12 +295,6 @@ final class PhabricatorRepositoryEditController
         $repository->setDetail('svn-subpath', $subpath);
       }
 
-      $repository->setDetail(
-        'detail-parser',
-        $request->getStr(
-          'detail-parser',
-          'PhabricatorRepositoryDefaultCommitMessageDetailParser'));
-
       if ($tracking) {
         if (!$repository->getDetail('remote-uri')) {
           $e_uri = 'Required';
@@ -649,28 +643,6 @@ final class PhabricatorRepositoryEditController
             'for this repository. This can be useful when initially importing '.
             'a repository. Feed stories are never published about commits '.
             'that are more than 24 hours old.'));
-
-    $parsers = id(new PhutilSymbolLoader())
-      ->setAncestorClass('PhabricatorRepositoryCommitMessageDetailParser')
-      ->selectSymbolsWithoutLoading();
-    $parsers = ipull($parsers, 'name', 'name');
-
-    $inset
-      ->appendChild(
-        '<p class="aphront-form-instructions">If you extend the commit '.
-        'message format, you can provide a new parser which will extract '.
-        'extra information from it when commits are imported. This is an '.
-        'advanced feature, and using the default parser will be suitable '.
-        'in most cases.</p>')
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setName('detail-parser')
-          ->setLabel('Detail Parser')
-          ->setOptions($parsers)
-          ->setValue(
-            $repository->getDetail(
-              'detail-parser',
-              'PhabricatorRepositoryDefaultCommitMessageDetailParser')));
 
     if ($is_svn) {
       $inset

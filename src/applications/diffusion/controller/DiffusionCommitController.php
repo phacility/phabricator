@@ -370,11 +370,8 @@ final class DiffusionCommitController extends DiffusionController {
     }
 
     $reviewer_phid = $data->getCommitDetail('reviewerPHID');
-    $reviewer_name = $data->getCommitDetail('reviewerName');
     if ($reviewer_phid) {
       $props['Reviewer'] = $handles[$reviewer_phid]->renderLink();
-    } else if ($reviewer_name) {
-      $props['Reviewer'] = phutil_escape_html($reviewer_name);
     }
 
     $committer = $data->getCommitDetail('committer');

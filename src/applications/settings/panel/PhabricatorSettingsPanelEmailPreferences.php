@@ -51,7 +51,11 @@ final class PhabricatorSettingsPanelEmailPreferences
 
       $new_tags = $request->getArr('mailtags');
       $mailtags = $preferences->getPreference('mailtags', array());
-      foreach ($this->getMailTags() as $key => $label) {
+      $all_tags = $this->getMailTags();
+      if (!PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
+        $all_tags = array_diff_key($all_tags, $this->getManiphestMailTags());
+      }
+      foreach ($all_tags as $key => $label) {
         $mailtags[$key] = (bool)idx($new_tags, $key, false);
       }
       $preferences->setPreference('mailtags', $mailtags);
@@ -180,12 +184,15 @@ final class PhabricatorSettingsPanelEmailPreferences
         $this->buildMailTagCheckboxes(
           $this->getDifferentialMailTags(),
           $mailtags)
-          ->setLabel('Differential'))
-      ->appendChild(
+          ->setLabel('Differential'));
+
+    if (PhabricatorEnv::getEnvConfig('maniphest.enabled')) {
+      $form->appendChild(
         $this->buildMailTagCheckboxes(
           $this->getManiphestMailTags(),
           $mailtags)
           ->setLabel('Maniphest'));
+    }
 
     $form
       ->appendChild(

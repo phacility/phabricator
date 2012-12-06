@@ -137,5 +137,4 @@ final class PhabricatorRepositoryCommit extends PhabricatorRepositoryDAO {
 
     return $this->setAuditStatus($status);
   }
-
 }

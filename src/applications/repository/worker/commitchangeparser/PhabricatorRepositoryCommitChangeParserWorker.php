@@ -59,6 +59,7 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
     $commit = $this->commit;
     PhabricatorSearchCommitIndexer::indexCommit($commit);
 
+    PhabricatorOwnersPackagePathValidator::updateOwnersPackagePaths($commit);
     if ($this->shouldQueueFollowupTasks()) {
       PhabricatorWorker::scheduleTask(
         'PhabricatorRepositoryCommitOwnersWorker',

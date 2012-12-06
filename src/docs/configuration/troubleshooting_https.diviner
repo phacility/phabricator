@@ -1,0 +1,74 @@
+@title Troubleshooting HTTPS
+@group config
+
+Detailed instructions for troubleshooting HTTPS connection problems.
+
+= Overview =
+
+If you're having trouble connecting to an HTTPS install of Phabricator, and
+particularly if you're receiving a "There was an error negotiating the SSL
+connection." error, this document may be able to help you diagnose and resolve
+the problem.
+
+Connection negotation can fail for several reasons. The major ones are:
+
+  - You have not added the the Certificate Authority as a trusted authority
+    (this is the most common problem, and usually the issue for self-signed
+    certificates).
+  - The SSL certificate is signed for the wrong domain. For example, a
+    certificate signed for `www.example.com` will not work for
+    `phabricator.example.com`.
+  - The server rejects TLSv1 SNI connections for the domain (this is
+    complicated, see below).
+
+= Certificate Authority Problems =
+
+SSL certificates need to be signed by a trusted authority (called a Certificate
+Authority or "CA") to be accepted. If the CA for a certificate is untrusted, the
+connection will fail (this defends the connection from an eavesdropping attack
+called "man in the middle"). Normally, you purchase a certificate from a known
+authority and clients have a list of trusted authorities.
+
+You can self-sign a certificate by creating your own CA, but clients will not trust it by default. They need to add the CA as a trusted authority.
+
+For instructions on adding CAs, see `libphutil/resources/ssl/README`.
+
+Although it is possible to accept certificates that aren't signed by trusted
+CAs, this is not currently supported because it compromises the ability of SSL
+to protect the connection against eavesdropping.
+
+= Domain Problems =
+
+Verify the domain the certificate was issued for. You can generally do this
+with:
+
+  $ openssl x509 -text -in <certificate>
+
+If the certificate was accidentally generated for, e.g. `www.example.com` but
+you installed Phabricator on `phabricator.example.com`, you need to generate a
+new certificate for the right domain.
+
+= SNI Problems =
+
+Server Name Identification ("SNI") is a feature of TLSv1 which works a bit like
+Apache VirtualHosts, and allows a server to present different certificates to
+clients who are connecting to it using different names.
+
+Servers that are not configured properly may reject TSLv1 SNI requests because
+they do not recognize the name the client is connecting with. This
+topic is complicated, but you can test for it by running:
+
+  $ openssl s_client -connect example.com:443 -servername example.com
+
+Replace **both** instances of "example.com" with your domain. If you receive
+an error in `SSL23_GET_SERVER_HELLO` with `reason(1112)`, like this:
+
+  CONNECTED(00000003)
+  87871:error:14077458:SSL routines:SSL23_GET_SERVER_HELLO:reason(1112):
+    /SourceCache/OpenSSL098/OpenSSL098-44/src/ssl/s23_clnt.c:602:
+
+...it indicates server is misconfigured. The most common cause of this problem
+is an Apache server that does not explicitly name the Phabricator domain as a
+valid VirtualHost.
+
+This error occurs only for some versions of the OpenSSL client library (from v0.9.8r or earlier until 1.0.0), so only some users may experience it.

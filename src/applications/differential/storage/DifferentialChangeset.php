@@ -137,7 +137,8 @@ final class DifferentialChangeset extends DifferentialDAO {
       $context = array();
       $changes = explode("\n", $hunk->getChanges());
       foreach ($changes as $l => $line) {
-        if ($line[0] == '+' || $line[0] == '-') {
+        $type = substr($line, 0, 1);
+        if ($type == '+' || $type == '-') {
           $context += array_fill($l - $num_lines, 2 * $num_lines + 1, true);
         }
       }
