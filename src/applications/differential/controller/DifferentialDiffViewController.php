@@ -130,14 +130,12 @@ final class DifferentialDiffViewController extends DifferentialController {
     $details = id(new DifferentialChangesetListView())
       ->setChangesets($changesets)
       ->setVisibleChangesets($changesets)
-      ->setLineWidthFromChangesets($changesets)
       ->setRenderingReferences($refs)
       ->setStandaloneURI('/differential/changeset/')
       ->setUser($request->getUser());
 
     return $this->buildStandardPageResponse(
       id(new DifferentialPrimaryPaneView())
-        ->setLineWidthFromChangesets($changesets)
         ->appendChild(
           array(
             $top_panel->render(),

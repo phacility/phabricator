@@ -38,7 +38,6 @@ final class DifferentialChangesetParser {
   private $renderingReference;
   private $isSubparser;
 
-  private $lineWidth = 80;
   private $isTopLevel;
   private $coverage;
   private $markupEngine;
@@ -185,17 +184,6 @@ final class DifferentialChangesetParser {
     return $this;
   }
 
-  /**
-   * Set the character width at which lines will be wrapped. Defaults to 80.
-   *
-   * @param   int Hard-wrap line-width for diff display.
-   * @return this
-   */
-  public function setLineWidth($width) {
-    $this->lineWidth = $width;
-    return $this;
-  }
-
   private function getRenderCacheKey() {
     return $this->renderCacheKey;
   }
@@ -204,7 +192,6 @@ final class DifferentialChangesetParser {
     $this->changeset = $changeset;
 
     $this->setFilename($changeset->getFilename());
-    $this->setLineWidth($changeset->getWordWrapWidth());
 
     return $this;
   }
@@ -794,19 +781,11 @@ final class DifferentialChangesetParser {
 
   protected function applyIntraline(&$render, $intra, $corpus) {
 
-    $line_break = "<span class=\"over-the-line\">\xE2\xAC\x85</span><br />";
-
     foreach ($render as $key => $text) {
       if (isset($intra[$key])) {
         $render[$key] = ArcanistDiffUtils::applyIntralineDiff(
           $text,
           $intra[$key]);
-      }
-      if (isset($corpus[$key]) &&
-          strlen($corpus[$key]) > $this->lineWidth &&
-          strlen(rtrim($corpus[$key], "\r\n")) > $this->lineWidth) {
-        $lines = phutil_utf8_hard_wrap_html($render[$key], $this->lineWidth);
-        $render[$key] = implode($line_break, $lines);
       }
     }
   }
@@ -1054,16 +1033,30 @@ final class DifferentialChangesetParser {
             }
             if ($file->getPHID() == $old_phid) {
               $old = phutil_render_tag(
-                'img',
+                'div',
                 array(
-                  'src' => $file->getBestURI(),
-                ));
+                  'class' => 'differential-image-stage'
+                ),
+                phutil_render_tag(
+                  'img',
+                  array(
+                    'src' => $file->getBestURI(),
+                  )
+                )
+              );
             } else {
               $cur = phutil_render_tag(
-                'img',
+                'div',
                 array(
-                  'src' => $file->getBestURI(),
-                ));
+                  'class' => 'differential-image-stage'
+                ),
+                phutil_render_tag(
+                  'img',
+                  array(
+                    'src' => $file->getBestURI(),
+                  )
+                )
+              );
             }
           }
         }
@@ -1084,28 +1077,33 @@ final class DifferentialChangesetParser {
         foreach ($old_comments as $comment) {
           $xhp = $this->renderInlineComment($comment);
           $html_old[] =
-            '<tr class="inline"><th /><td>'.
-              $xhp.
-            '</td><th /><td colspan="2" /></tr>';
+            '<tr class="inline">'.
+              '<th />'.
+              '<td class="left">'.$xhp.'</td>'.
+              '<th />'.
+              '<td class="right3" colspan="3" />'.
+            '</tr>';
         }
         foreach ($new_comments as $comment) {
           $xhp = $this->renderInlineComment($comment);
           $html_new[] =
-            '<tr class="inline"><th /><td /><th /><td colspan="2">'.
-              $xhp.
-            '</td></tr>';
+            '<tr class="inline">'.
+              '<th />'.
+              '<td class="left" />'.
+              '<th />'.
+              '<td class="right3" colspan="3">'.$xhp.'</td>'.
+            '</tr>';
         }
 
         if (!$old) {
           $th_old = '<th></th>';
-        }
-        else {
+        } else {
           $th_old = '<th id="C'.$vs.'OL1">1</th>';
         }
+
         if (!$cur) {
           $th_new = '<th></th>';
-        }
-        else {
+        } else {
           $th_new = '<th id="C'.$id.'NL1">1</th>';
         }
 
@@ -1113,17 +1111,10 @@ final class DifferentialChangesetParser {
           $this->changeset,
           '<tr class="differential-image-diff">'.
             $th_old.
-            '<td class="differential-old-image">'.
-              '<div class="differential-image-stage">'.
-                $old.
-              '</div>'.
-            '</td>'.
+            '<td class="left differential-old-image">'.$old.'</td>'.
             $th_new.
-            '<td class="copy differential-new-image"></td>'.
-            '<td class="differential-new-image">'.
-              '<div class="differential-image-stage">'.
-                $cur.
-              '</div>'.
+            '<td class="right3 differential-new-image" colspan="3">'.
+              $cur.
             '</td>'.
           '</tr>'.
           implode('', $html_old).
@@ -1302,9 +1293,15 @@ final class DifferentialChangesetParser {
         array(
           'sigil' => 'context-target',
         ),
-        '<td colspan="6" class="show-more">'.
-          'Context not available.'.
-        '</td>');
+        phutil_render_tag(
+          'td',
+          array(
+            'colspan' => 6,
+            'class' => 'show-more'
+          ),
+          pht('Context not available.')
+        )
+      );
     }
 
     $html = array();
@@ -1513,36 +1510,37 @@ final class DifferentialChangesetParser {
         continue;
       }
 
+      $o_num = null;
+      $o_classes = 'left';
+      $o_text = null;
       if (isset($this->old[$ii])) {
         $o_num  = $this->old[$ii]['line'];
         $o_text = isset($this->oldRender[$ii]) ? $this->oldRender[$ii] : null;
-        $o_attr = null;
         if ($this->old[$ii]['type']) {
           if ($this->old[$ii]['type'] == '\\') {
             $o_text = $this->old[$ii]['text'];
-            $o_attr = ' class="comment"';
+            $o_classes .= ' comment';
           } else if ($this->originalLeft && !isset($highlight_old[$o_num])) {
-            $o_attr = ' class="old-rebase"';
+            $o_classes .= ' old-rebase';
           } else if (empty($this->new[$ii])) {
-            $o_attr = ' class="old old-full"';
+            $o_classes .= ' old old-full';
           } else {
-            $o_attr = ' class="old"';
+            $o_classes .= ' old';
           }
         }
-      } else {
-        $o_num  = null;
-        $o_text = null;
-        $o_attr = null;
       }
 
-      $n_copy = '<td class="copy"></td>';
+      $n_copy = null;
+      $n_cov = null;
+      $n_colspan = 3;
+      $n_classes = '';
+      $n_num  = null;
+      $n_text = null;
 
       if (isset($this->new[$ii])) {
         $n_num  = $this->new[$ii]['line'];
         $n_text = isset($this->newRender[$ii]) ? $this->newRender[$ii] : null;
-        $n_attr = null;
 
-        $cov_class = null;
         if ($this->coverage !== null) {
           if (empty($this->coverage[$n_num - 1])) {
             $cov_class = 'N';
@@ -1550,9 +1548,10 @@ final class DifferentialChangesetParser {
             $cov_class = $this->coverage[$n_num - 1];
           }
           $cov_class = 'cov-'.$cov_class;
+          $n_cov = '<td class="cov '.$cov_class.'"></td>';
+          $n_colspan--;
         }
 
-        $n_cov = '<td class="cov '.$cov_class.'"></td>';
 
         if ($this->new[$ii]['type']) {
           if ($this->new[$ii]['type'] == '\\') {
@@ -1565,7 +1564,7 @@ final class DifferentialChangesetParser {
           } else {
             $n_class = 'new';
           }
-          $n_attr = ' class="'.$n_class.'"';
+          $n_classes = $n_class;
 
           if ($this->new[$ii]['type'] == '\\' || !isset($copy_lines[$n_num])) {
             $n_copy = '<td class="copy '.$n_class.'"></td>';
@@ -1592,12 +1591,9 @@ final class DifferentialChangesetParser {
               '');
           }
         }
-      } else {
-        $n_num   = null;
-        $n_text  = null;
-        $n_attr  = null;
-        $n_cov = null;
+        $n_colspan--;
       }
+      $n_classes .= ' right'.$n_colspan;
 
 
       if (($o_num && !empty($this->missingOld[$o_num])) ||
@@ -1619,16 +1615,19 @@ final class DifferentialChangesetParser {
 
       // NOTE: The Javascript is sensitive to whitespace changes in this
       // block!
+
       $html[] =
         '<tr>'.
           '<th'.$o_id.'>'.$o_num.'</th>'.
-          '<td'.$o_attr.'>'.$o_text.'</td>'.
+          '<td class="'.$o_classes.'">'.$o_text.'</td>'.
           '<th'.$n_id.'>'.$n_num.'</th>'.
           $n_copy.
           // NOTE: This is a unicode zero-width space, which we use as a hint
           // when intercepting 'copy' events to make sure sensible text ends
           // up on the clipboard. See the 'phabricator-oncopy' behavior.
-          '<td'.$n_attr.'>'."\xE2\x80\x8B".$n_text.'</td>'.
+          '<td class="'.$n_classes.'" colspan="'.$n_colspan.'">'.
+            "\xE2\x80\x8B".$n_text.
+          '</td>'.
           $n_cov.
         '</tr>';
 
@@ -1649,20 +1648,24 @@ final class DifferentialChangesetParser {
             }
           }
           $html[] =
-            '<tr class="inline"><th /><td>'.
-              $xhp.
-            '</td><th /><td colspan="2">'.
-              $new.
-            '</td><td class="cov" /></tr>';
+            '<tr class="inline">'.
+              '<th />'.
+              '<td class="left">'.$xhp.'</td>'.
+              '<th />'.
+              $this->renderRightCode($new, 3).
+            '</tr>';
         }
       }
       if ($n_num && isset($new_comments[$n_num])) {
         foreach ($new_comments[$n_num] as $comment) {
           $xhp = $this->renderInlineComment($comment);
           $html[] =
-            '<tr class="inline"><th /><td /><th /><td colspan="2">'.
-              $xhp.
-            '</td><td class="cov" /></tr>';
+            '<tr class="inline">'.
+              '<th />'.
+              '<td class="left" />'.
+              '<th />'.
+              $this->renderRightCode($xhp, 3).
+            '</tr>';
         }
       }
     }
