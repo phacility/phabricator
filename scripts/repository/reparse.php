@@ -121,10 +121,11 @@ if ($all_from_repo) {
     'repositoryID = %d %Q',
     $repository->getID(),
     $constraint);
-  if (!$commits) {
-    throw new Exception("No commits have been discovered in that repository!");
-  }
   $callsign = $repository->getCallsign();
+  if (!$commits) {
+    echo "No commits have been discovered in {$callsign} repository!\n";
+    exit;
+  }
 } else {
   $commits = array();
   foreach ($reparse_what as $identifier) {
