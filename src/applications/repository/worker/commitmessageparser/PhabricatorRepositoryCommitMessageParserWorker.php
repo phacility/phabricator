@@ -34,6 +34,34 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       $data->getCommitDetail('authorPHID'));
     $data->setCommitDetail('authorPHID', $author_phid);
 
+    $user = new PhabricatorUser();
+    if ($author_phid) {
+      $user = $user->loadOneWhere(
+        'phid = %s',
+        $author_phid);
+    }
+
+    $call = new ConduitCall(
+      'differential.parsecommitmessage',
+      array(
+        'corpus' => $message,
+        'partial' => true,
+      ));
+    $call->setUser($user);
+    $result = $call->execute();
+
+    $field_values = $result['fields'];
+
+    if (!empty($field_values['reviewedByPHIDs'])) {
+      $data->setCommitDetail(
+        'reviewerPHID',
+        reset($field_values['reviewedByPHIDs']));
+    }
+
+    $data->setCommitDetail(
+      'differential.revisionID',
+      idx($field_values, 'revisionID'));
+
     $committer_phid = $this->lookupUser(
       $commit,
       $data->getCommitDetail('committer'),
@@ -81,6 +109,10 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
       $revision = id(new DifferentialRevision())->load($revision_id);
       if ($revision) {
+        $data->setCommitDetail(
+          'differential.revisionPHID',
+          $revision->getPHID());
+
         $revision->loadRelationships();
         queryfx(
           $conn_w,
@@ -150,22 +182,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       $lock->unlock();
     }
 
-    if ($should_autoclose && $author_phid) {
-      $user = id(new PhabricatorUser())->loadOneWhere(
-        'phid = %s',
-        $author_phid);
-
-      $call = new ConduitCall(
-        'differential.parsecommitmessage',
-        array(
-          'corpus' => $message,
-          'partial' => true,
-        ));
-      $call->setUser($user);
-      $result = $call->execute();
-
-      $field_values = $result['fields'];
-
+    if ($should_autoclose) {
       $fields = DifferentialFieldSelector::newSelector()
         ->getFieldSpecifications();
       foreach ($fields as $key => $field) {
